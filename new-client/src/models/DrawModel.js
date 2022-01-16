@@ -1002,6 +1002,11 @@ class DrawModel {
   // Accepts a RGBA-string and returns an object containing r-, g-, b-, and a-properties.
   parseRGBAString = (s) => {
     try {
+      // First, we make sure we're dealing with a string. If not, return null.
+      if (typeof s !== "string") {
+        return null;
+      }
+      // Otherwise, some regex-magic.
       // 1. RegEx that matches stuff between a set of parentheses
       // 2. Execute that regex on the input string, but first remove any whitespace it may contain
       // 3. RegEx exec returns an array. Grab the second element, which will contain the value.

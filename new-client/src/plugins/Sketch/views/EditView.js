@@ -18,7 +18,7 @@ const EditView = ({ model, editFeature, id }) => {
             Klicka på ett objekt i kartan för att ändra dess utseende.
           </Typography>
         ) : (
-          <FeatureStyleEditor feature={editFeature} />
+          <FeatureStyleEditor feature={editFeature} model={model} />
         )}
       </Grid>
     </Grid>

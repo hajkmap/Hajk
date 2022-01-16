@@ -6,8 +6,9 @@ class SketchModel {
   #geoJSONParser;
   #storageKey;
   #dateTimeOptions;
+  #drawModel;
 
-  constructor() {
+  constructor(settings) {
     this.#geoJSONParser = new GeoJSON();
     this.#storageKey = "sketch";
     this.#dateTimeOptions = {
@@ -18,6 +19,7 @@ class SketchModel {
       minute: "numeric",
       second: "numeric",
     };
+    this.#drawModel = settings.drawModel;
   }
 
   // Updates the removed features in the local-storage
@@ -106,6 +108,34 @@ class SketchModel {
   // Generates a random string that can be used as an ID.
   #generateRandomString = () => {
     return Math.random().toString(36).slice(2, 9);
+  };
+
+  // Returns the feature-style in a form that fits the feature-style-editor
+  getFeatureStyle = (feature) => {
+    try {
+      // We're gonna need the base-style of the feature
+      const featureBaseStyle = this.#extractFeatureStyle(feature);
+      // Then we'll extract the text-settings. (These might be undefined, and
+      // are only set if we are dealing with a text-feature).
+      const featureTextStyle = feature.get("TEXT_SETTINGS");
+      // Then we'll construct the feature-style-object and return it.
+      return {
+        strokeColor: this.#drawModel.parseRGBAString(
+          featureBaseStyle?.strokeStyle.color
+        ),
+        lineDash: featureBaseStyle?.strokeStyle.dash,
+        strokeWidth: featureBaseStyle?.strokeStyle.width,
+        fillColor: this.#drawModel.parseRGBAString(
+          featureBaseStyle?.fillStyle.color
+        ),
+        textForegroundColor: featureTextStyle?.foregroundColor,
+        textBackgroundColor: featureTextStyle?.backgroundColor,
+        textSize: featureTextStyle?.size,
+      };
+    } catch (error) {
+      console.error(`Failed to get feature-style: Error: ${error}`);
+      return null;
+    }
   };
 
   // When a feature is removed, we should usually add it to the list of

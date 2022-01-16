@@ -24,19 +24,6 @@ const Sketch = (props) => {
   // The local observer will handle the communication between models and views.
   const [localObserver] = React.useState(() => Observer());
 
-  // We need a model used to interact with the map etc. We want to
-  // keep the view free from direct interactions.
-  // There's a possibility that this model won't be needed since most
-  // (if not all) of the functionality should exist in the core Draw-model.
-  const [sketchModel] = React.useState(
-    () =>
-      new SketchModel({
-        localObserver: localObserver,
-        app: props.app,
-        options: props.options,
-      })
-  );
-
   // We're also gonna need a drawModel to handle all draw functionality
   const [drawModel] = React.useState(
     () =>
@@ -44,6 +31,17 @@ const Sketch = (props) => {
         layerName: "sketchLayer",
         map: props.map,
         observer: localObserver,
+      })
+  );
+
+  // We need a model used to interact with the map etc. We want to
+  // keep the view free from direct interactions.
+  // There's a possibility that this model won't be needed since most
+  // (if not all) of the functionality should exist in the core Draw-model.
+  const [sketchModel] = React.useState(
+    () =>
+      new SketchModel({
+        drawModel: drawModel,
       })
   );
 
