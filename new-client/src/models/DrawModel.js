@@ -742,11 +742,9 @@ class DrawModel {
   };
 
   // Handler that will fire when features has been modified with the modify-interaction.
-  // Makes sure to update the styling so that eventual measurement-label is up-to-date.
-  #handleModifyEnd = (e) => {
-    e.features.forEach((f) => {
-      f.setStyle(this.#getFeatureStyle(f));
-    });
+  // Makes sure to update the text-styling so that eventual measurement-label is up-to-date.
+  #handleModifyEnd = () => {
+    this.#refreshFeaturesTextStyle();
   };
 
   // Cleans up if the drawing is aborted.
