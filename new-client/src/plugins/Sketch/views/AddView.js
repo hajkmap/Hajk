@@ -3,7 +3,7 @@ import { Grid, Typography } from "@material-ui/core";
 
 import DrawTypeSelector from "../components/DrawTypeSelector";
 import Information from "../components/Information";
-import DrawStyleSelector from "../components/drawStyle/DrawStyleSelector";
+import FeatureStyleSelector from "../components/featureStyle/FeatureStyleSelector";
 import FeatureTextSetter from "../components/FeatureTextSetter";
 
 const AddView = (props) => {
@@ -28,7 +28,7 @@ const AddView = (props) => {
           />
         </Grid>
       </Grid>
-      <DrawStyleSelector
+      <FeatureStyleSelector
         activeDrawType={activeDrawType}
         drawStyle={props.drawStyle}
         drawModel={props.drawModel}

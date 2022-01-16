@@ -2,7 +2,7 @@ import React from "react";
 import { Grid, Typography } from "@material-ui/core";
 
 import Information from "../components/Information";
-import FeatureStyleEditor from "../components/FeatureStyleEditor";
+import FeatureStyleEditor from "../components/featureStyle/FeatureStyleEditor";
 
 const EditView = ({ model, drawModel, editFeature, id }) => {
   // We have to get some information about the current activity (view)

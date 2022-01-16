@@ -124,7 +124,7 @@ const AccordionSummaryContents = (props) => {
 
 // The draw-style-accordion includes a summary showing the current draw-style-settings.
 // It also includes tools to update the current style.
-const DrawStyleAccordion = (props) => {
+const FeatureStyleAccordion = (props) => {
   return (
     <Accordion size="small" style={{ marginBottom: 8 }}>
       <Tooltip title={`Klicka här för att ändra ${props.title.toLowerCase()}.`}>
@@ -182,4 +182,4 @@ const DrawStyleAccordion = (props) => {
   );
 };
 
-export default DrawStyleAccordion;
+export default FeatureStyleAccordion;

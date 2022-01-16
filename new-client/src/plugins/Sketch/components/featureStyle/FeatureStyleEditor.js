@@ -1,5 +1,5 @@
 import React from "react";
-import DrawStyleSelector from "./drawStyle/DrawStyleSelector";
+import FeatureStyleSelector from "./FeatureStyleSelector";
 
 // This is used to update the style on the supplied feature
 const FeatureStyleEditor = ({ feature, model, drawModel }) => {
@@ -13,7 +13,7 @@ const FeatureStyleEditor = ({ feature, model, drawModel }) => {
   }, [feature, model]);
 
   return (
-    <DrawStyleSelector
+    <FeatureStyleSelector
       activeDrawType={feature.get("DRAW_METHOD")}
       drawStyle={featureStyle}
       drawModel={drawModel}

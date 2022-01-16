@@ -2,10 +2,10 @@ import React from "react";
 import { Grid, Typography, TextField } from "@material-ui/core";
 import { STROKE_DASHES } from "plugins/Sketch/constants";
 
-import DrawStyleAccordion from "./DrawStyleAccordion";
+import FeatureStyleAccordion from "./FeatureStyleAccordion";
 import StrokeTypeSelector from "./StrokeTypeSelector";
 
-export default function DrawStyleSelector(props) {
+export default function FeatureStyleSelector(props) {
   // We need a handler that can update the stroke-dash setting
   const handleStrokeTypeChange = (e) => {
     // We are storing both the stroke-type (e.g. "dashed", "dotted", or "solid") as well as
@@ -114,7 +114,7 @@ export default function DrawStyleSelector(props) {
     return (
       <Grid container>
         <Grid item xs={12}>
-          <DrawStyleAccordion
+          <FeatureStyleAccordion
             title="Fyllnad"
             showOpacitySlider
             color={props.drawStyle.fillColor}
@@ -124,7 +124,7 @@ export default function DrawStyleSelector(props) {
           />
         </Grid>
         <Grid item xs={12}>
-          <DrawStyleAccordion
+          <FeatureStyleAccordion
             title="Linje"
             showStrokeWidthSlider
             color={props.drawStyle.strokeColor}
@@ -146,7 +146,7 @@ export default function DrawStyleSelector(props) {
     return (
       <Grid container>
         <Grid item xs={12}>
-          <DrawStyleAccordion
+          <FeatureStyleAccordion
             title="Färg - förgrund"
             color={props.textStyle.foregroundColor}
             handleColorChange={handleForegroundColorChange}
@@ -154,7 +154,7 @@ export default function DrawStyleSelector(props) {
           />
         </Grid>
         <Grid item xs={12}>
-          <DrawStyleAccordion
+          <FeatureStyleAccordion
             title="Färg - bakgrund"
             color={props.textStyle.backgroundColor}
             handleColorChange={handleBackgroundColorChange}
@@ -169,7 +169,7 @@ export default function DrawStyleSelector(props) {
   // when creating arrows, since they should have a standard width.
   const renderArrowStyleSettings = () => {
     return (
-      <DrawStyleAccordion
+      <FeatureStyleAccordion
         title="Färg"
         color={props.drawStyle.strokeColor}
         handleColorChange={handleStrokeColorChange}
@@ -182,7 +182,7 @@ export default function DrawStyleSelector(props) {
   // Why are we grid-ing these? Cause we're gonna be implementing more settings.
   const renderLineStyleSettings = () => {
     return (
-      <DrawStyleAccordion
+      <FeatureStyleAccordion
         title="Bredd och färg"
         showStrokeWidthSlider
         color={props.drawStyle.strokeColor}
