@@ -83,6 +83,13 @@ const Sketch = (props) => {
     }
   }, [activeDrawType, activityId, drawModel, pluginShown]);
 
+  // This effect makes sure to reset the edit-feature if the window is closed,
+  // or if the user changes activity. (We don't want to keep the feature selected
+  // if the user toggles from edit-mode to create mode for example).
+  React.useEffect(() => {
+    setEditFeature(null);
+  }, [activityId, pluginShown]);
+
   // We're gonna need to catch if the user closes the window, and make sure to
   // update the state so that the effect handling the draw-interaction-toggling fires.
   const onWindowHide = () => {
@@ -92,7 +99,6 @@ const Sketch = (props) => {
   // update the state so that the effect handling the draw-interaction-toggling fires.
   const onWindowShow = () => {
     setPluginShown(true);
-    setEditFeature(null);
   };
 
   // We're rendering the view in a BaseWindowPlugin, since this is a
