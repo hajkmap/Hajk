@@ -111,6 +111,16 @@ class SketchModel {
     return Math.random().toString(36).slice(2, 9);
   };
 
+  // Accepts an RGBA-object containing r-, g-, b-, and a-properties and
+  // returns the string representation of the supplied object.
+  #getRGBAString = (o) => {
+    // If nothing was supplied, return an empty string
+    if (!o) {
+      return "";
+    }
+    return typeof o === "object" ? `rgba(${o.r},${o.g},${o.b},${o.a})` : o;
+  };
+
   // Accepts an array containing the line-dash, and returns the line (stroke) type
   // that corresponds to that value.
   #getStrokeType = (lineDash) => {
@@ -164,6 +174,23 @@ class SketchModel {
     } catch (error) {
       console.error(`Failed to get feature-style: Error: ${error}`);
       return null;
+    }
+  };
+
+  // Applies the supplied style on the supplied feature.
+  setFeatureStyle = (feature, styleSettings) => {
+    try {
+      const featureStyle = Array.isArray(feature.getStyle())
+        ? feature.getStyle()[0]
+        : feature.getStyle();
+      const fillStyle = featureStyle.getFill();
+      const strokeStyle = featureStyle.getStroke();
+      fillStyle.setColor(this.#getRGBAString(styleSettings.fillColor));
+      strokeStyle.setColor(this.#getRGBAString(styleSettings.strokeColor));
+      strokeStyle.setWidth(styleSettings.strokeWidth);
+      strokeStyle.setLineDash(styleSettings.lineDash);
+    } catch (error) {
+      console.error(`Failed to apply the supplied style. Error: ${error}`);
     }
   };
 

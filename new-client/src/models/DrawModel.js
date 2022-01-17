@@ -20,6 +20,7 @@ import Overlay from "ol/Overlay.js";
  *
  * Exposes a couple of methods:
  * - refreshFeaturesTextStyle(): Refreshes the text-style on all features in the draw-source.
+ * - refreshDrawLayer(): Redraws all features in the draw-layer.
  * - addFeature(feature): Adds the supplied feature to the draw-source.
  * - removeFeature(feature): Removes the supplied feature from the draw-source.
  * - getCurrentExtent(): Returns the current extent of the current draw-layer.
@@ -751,22 +752,29 @@ class DrawModel {
       // If we're dealing with arrows, we have to make sure to
       // update the whole style, so that the arrow-head is moved.
       if (f.get("DRAW_METHOD") === "Arrow") {
-        try {
-          const strokeStyle = f.getStyle()[0].getStroke();
-          f.setStyle(
-            this.#getArrowStyle(f, {
-              strokeStyle: {
-                color: strokeStyle.getColor(),
-              },
-              fillStyle: {},
-            })
-          );
-        } catch (error) {
-          console.error(`Failed to set arrow style. Error: ${error}`);
-        }
+        this.#refreshArrowStyle(f);
       }
     });
     this.#refreshFeaturesTextStyle();
+  };
+
+  // Re-calculates and re-applies the arrow style. For ordinary features this is
+  // not required, but since the arrows consists of an svg, we have to re-calculate
+  // the style to make sure the svg gets the correct color.
+  #refreshArrowStyle = (f) => {
+    try {
+      const strokeStyle = f.getStyle()[0].getStroke();
+      f.setStyle(
+        this.#getArrowStyle(f, {
+          strokeStyle: {
+            color: strokeStyle.getColor(),
+          },
+          fillStyle: {},
+        })
+      );
+    } catch (error) {
+      console.error(`Failed to set arrow style. Error: ${error}`);
+    }
   };
 
   // Cleans up if the drawing is aborted.
@@ -1270,6 +1278,19 @@ class DrawModel {
     // To make sure the new style is shown in the draw-interaction, we have
     // to refresh the interaction if it is currently active.
     this.#refreshDrawInteraction();
+  };
+
+  // Makes sure all features are re-drawn. (If any feature-style has changed
+  // this might be necessary in some cases to make the change show).
+  // Also making sure to completely re-style arrows so that the arrow head has
+  // the correct color...
+  refreshDrawLayer = () => {
+    this.#drawSource.forEachFeature((f) => {
+      if (f.get("DRAW_METHOD") === "Arrow") {
+        this.#refreshArrowStyle(f);
+      }
+    });
+    this.#drawLayer.changed();
   };
 
   setTextStyleSettings = (newStyleSettings) => {

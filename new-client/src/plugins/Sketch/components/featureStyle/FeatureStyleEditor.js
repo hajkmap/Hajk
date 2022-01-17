@@ -12,6 +12,14 @@ const FeatureStyleEditor = ({ feature, model, drawModel }) => {
     setFeatureStyle(model.getFeatureStyle(feature));
   }, [feature, model]);
 
+  // Effect that makes sure to update the feature style when the style-state changes.
+  React.useEffect(() => {
+    if (feature) {
+      model.setFeatureStyle(feature, featureStyle);
+      drawModel.refreshDrawLayer();
+    }
+  }, [featureStyle, feature, drawModel, model]);
+
   // Since the <FeatureStyleSelector /> expects the draw-style, the text-style,
   // and their set:ers to be separate, we have to create a set:er for the text-style
   // since we'ce chosen to combine the styles in one object here.
