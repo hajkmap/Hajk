@@ -7,6 +7,8 @@ class FirStyles {
       colorResultStroke: "rgba(0,0,0,0.6)",
       colorHighlight: "rgba(255,255,0,0.25)",
       colorHighlightStroke: "rgba(0, 130, 179, 1)",
+      colorResult100: "rgba(255,255,0,1)",
+      colorResultStroke100: "rgba(0,0,0,1)",
     };
     this.model = {};
     this.setResultStyle();
@@ -74,10 +76,10 @@ class FirStyles {
 
   setPointStyle() {
     const fill = new Fill({
-      color: this.getColor("colorResult"),
+      color: this.getColor("colorResult100"),
     });
     const stroke = new Stroke({
-      color: this.getColor("colorResultStroke"),
+      color: this.getColor("colorResultStroke100"),
       width: 2,
     });
 
