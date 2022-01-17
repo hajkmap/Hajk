@@ -1,5 +1,25 @@
 import React from "react";
 import FeatureStyleSelector from "./FeatureStyleSelector";
+import { Grid, TextField, Typography } from "@material-ui/core";
+
+const FeatureTextEditor = ({ text, onChange }) => {
+  return (
+    <Grid item xs={12} style={{ marginTop: 16 }}>
+      <Grid item xs={12} style={{ marginBottom: 4 }}>
+        <Typography align="center">Text</Typography>
+      </Grid>
+      <Grid item xs={12}>
+        <TextField
+          fullWidth
+          value={text}
+          onChange={onChange}
+          variant="outlined"
+          size="small"
+        />
+      </Grid>
+    </Grid>
+  );
+};
 
 // This is used to update the style on the supplied feature
 const FeatureStyleEditor = ({ feature, model, drawModel }) => {
@@ -7,7 +27,11 @@ const FeatureStyleEditor = ({ feature, model, drawModel }) => {
   const [featureStyle, setFeatureStyle] = React.useState(
     model.getFeatureStyle(feature)
   );
-  // An effect to make sure we set the feature-style-state to the actual style.
+  // We're gonna need to keep track of the eventual feature-text.
+  // This only applies to text-features obviously.
+  const [featureText, setFeatureText] = React.useState(null);
+
+  // Effect to make sure we set the feature-style-state to the actual style.
   React.useEffect(() => {
     setFeatureStyle(model.getFeatureStyle(feature));
   }, [feature, model]);
@@ -19,6 +43,25 @@ const FeatureStyleEditor = ({ feature, model, drawModel }) => {
       drawModel.refreshDrawLayer();
     }
   }, [featureStyle, feature, drawModel, model]);
+
+  // Effect making sure the feature-text is set to the actual text of the feature.
+  React.useEffect(() => {
+    // First we'll get the text from the feature
+    const text = feature.get("USER_TEXT");
+    // If the text us null(ish) we set the state to null
+    if (!text) {
+      setFeatureText(null);
+      // Otherwise we set it to the actual value
+    } else {
+      setFeatureText(text);
+    }
+  }, [feature]);
+
+  // Effect making sure the updated feature-text is applied to the feature
+  React.useEffect(() => {
+    feature.set("USER_TEXT", featureText);
+    drawModel.refreshDrawLayer();
+  }, [drawModel, feature, featureText]);
 
   // Since the <FeatureStyleSelector /> expects the draw-style, the text-style,
   // and their set:ers to be separate, we have to create a set:er for the text-style
@@ -41,14 +84,22 @@ const FeatureStyleEditor = ({ feature, model, drawModel }) => {
   };
 
   return (
-    <FeatureStyleSelector
-      activeDrawType={feature.get("DRAW_METHOD")}
-      drawStyle={featureStyle}
-      textStyle={textStyle}
-      drawModel={drawModel}
-      setDrawStyle={setFeatureStyle}
-      setTextStyle={setTextStyle}
-    />
+    <Grid container>
+      {featureText !== null && (
+        <FeatureTextEditor
+          text={featureText}
+          onChange={(e) => setFeatureText(e.target.value)}
+        />
+      )}
+      <FeatureStyleSelector
+        activeDrawType={feature.get("DRAW_METHOD")}
+        drawStyle={featureStyle}
+        textStyle={textStyle}
+        drawModel={drawModel}
+        setDrawStyle={setFeatureStyle}
+        setTextStyle={setTextStyle}
+      />
+    </Grid>
   );
 };
 
