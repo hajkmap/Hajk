@@ -1,6 +1,6 @@
 import React from "react";
 import { createPortal } from "react-dom";
-import { withTheme } from "@material-ui/styles";
+import { withTheme } from "@emotion/react";
 
 import {
   Hidden,
@@ -8,7 +8,7 @@ import {
   ListItem,
   ListItemIcon,
   ListItemText,
-} from "@material-ui/core";
+} from "@mui/material";
 
 import Card from "components/Card";
 import Dialog from "components/Dialog/Dialog";
