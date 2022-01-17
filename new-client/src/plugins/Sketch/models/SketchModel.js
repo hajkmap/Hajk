@@ -111,16 +111,6 @@ class SketchModel {
     return Math.random().toString(36).slice(2, 9);
   };
 
-  // Accepts an RGBA-object containing r-, g-, b-, and a-properties and
-  // returns the string representation of the supplied object.
-  #getRGBAString = (o) => {
-    // If nothing was supplied, return an empty string
-    if (!o) {
-      return "";
-    }
-    return typeof o === "object" ? `rgba(${o.r},${o.g},${o.b},${o.a})` : o;
-  };
-
   // Accepts an array containing the line-dash, and returns the line (stroke) type
   // that corresponds to that value.
   #getStrokeType = (lineDash) => {
@@ -190,16 +180,22 @@ class SketchModel {
       const fillStyle = featureStyle.getFill();
       const strokeStyle = featureStyle.getStroke();
       // Then we'll update the styles.
-      fillStyle.setColor(this.#getRGBAString(styleSettings.fillColor));
-      strokeStyle.setColor(this.#getRGBAString(styleSettings.strokeColor));
+      fillStyle.setColor(
+        this.#drawModel.getRGBAString(styleSettings.fillColor)
+      );
+      strokeStyle.setColor(
+        this.#drawModel.getRGBAString(styleSettings.strokeColor)
+      );
       strokeStyle.setWidth(styleSettings.strokeWidth);
       strokeStyle.setLineDash(styleSettings.lineDash);
-      // The text-style-settings must be updated as well.
-      feature.set("TEXT_SETTINGS", {
-        size: styleSettings.textSize,
-        foregroundColor: styleSettings.textForegroundColor,
-        backgroundColor: styleSettings.textBackgroundColor,
-      });
+      // If we're dealing with a text.feature, the text-style-settings must be updated as well.
+      if (feature.get("DRAW_METHOD") === "Text") {
+        feature.set("TEXT_SETTINGS", {
+          size: styleSettings.textSize,
+          foregroundColor: styleSettings.textForegroundColor,
+          backgroundColor: styleSettings.textBackgroundColor,
+        });
+      }
     } catch (error) {
       console.error(`Failed to apply the supplied style. Error: ${error}`);
     }

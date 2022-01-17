@@ -769,7 +769,7 @@ class DrawModel {
           strokeStyle: {
             color: strokeStyle.getColor(),
           },
-          fillStyle: {},
+          fillStyle: { color: strokeStyle.getColor() },
         })
       );
     } catch (error) {
@@ -1067,7 +1067,11 @@ class DrawModel {
   // Accepts an RGBA-object containing r-, g-, b-, and a-properties and
   // returns the string representation of the supplied object.
   getRGBAString = (o) => {
-    return `rgba(${o.r},${o.g},${o.b},${o.a})`;
+    // If nothing was supplied, return an empty string
+    if (!o) {
+      return "";
+    }
+    return typeof o === "object" ? `rgba(${o.r},${o.g},${o.b},${o.a})` : o;
   };
 
   // Accepts a RGBA-string and returns an object containing r-, g-, b-, and a-properties.

@@ -109,9 +109,11 @@ const AccordionSummaryContents = (props) => {
       <Typography variant="button">{props.title}</Typography>
       <Grid container item xs={4} justify="flex-end" alignItems="center">
         {props.showOpacitySlider && (
-          <Typography variant="caption">{`${Math.floor(
-            props.color.a * 100
-          )}%`}</Typography>
+          <Typography variant="caption">{`${
+            typeof props.color === "string"
+              ? 100
+              : Math.floor(props.color?.a * 100 || 100)
+          }%`}</Typography>
         )}
         {typeof props.strokeWidth === "number" && (
           <Typography variant="caption">{`${props.strokeWidth}px`}</Typography>
@@ -159,7 +161,7 @@ const FeatureStyleAccordion = (props) => {
           {props.showOpacitySlider && (
             <OpacitySlider
               handleOpacityChange={props.handleOpacityChange}
-              opacity={props.color.a}
+              opacity={props.color?.a || 100}
             />
           )}
           {props.showStrokeWidthSlider && (
