@@ -8,7 +8,7 @@ import FeatureStyleEditor from "../components/featureStyle/FeatureStyleEditor";
 const ModifyNodeToggler = ({ modifyEnabled, setModifyEnabled }) => {
   return (
     <Paper style={{ padding: 8, marginTop: 8 }}>
-      <Grid container justify="space-between">
+      <Grid container justify="space-between" alignItems="center">
         <Typography variant="body2">Tillåt redigering av noder</Typography>
         <Tooltip
           title={
