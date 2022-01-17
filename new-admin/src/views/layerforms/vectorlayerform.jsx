@@ -158,7 +158,7 @@ class VectorLayerForm extends React.Component {
       return new Date().getTime().toString();
     }
 
-    function rgba_to_string(c) {
+    function rgbaToString(c) {
       return typeof c === "string" ? c : `rgba(${c.r}, ${c.g}, ${c.b}, ${c.a})`;
     }
 
@@ -173,8 +173,8 @@ class VectorLayerForm extends React.Component {
     if (fieldName === "date") value = create_date();
     if (fieldName === "queryable") value = input.checked;
     if (fieldName === "filterable") value = input.checked;
-    if (fieldName === "fillColor") value = rgba_to_string(this.state.fillColor);
-    if (fieldName === "lineColor") value = rgba_to_string(this.state.lineColor);
+    if (fieldName === "fillColor") value = rgbaToString(this.state.fillColor);
+    if (fieldName === "lineColor") value = rgbaToString(this.state.lineColor);
     if (fieldName === "infoVisible") value = input.checked;
     if (fieldName === "timeSliderVisible") value = input.checked;
     if (fieldName === "hideExpandArrow") value = input.checked;
