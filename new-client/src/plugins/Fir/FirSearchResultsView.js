@@ -267,7 +267,7 @@ class FirSearchResultsView extends React.PureComponent {
 
     this.setState({ currentPage: pageNum });
     this.setState({
-      pageCount: Math.round(this.state.results.list.length / this.itemsPerPage),
+      pageCount: Math.ceil(this.state.results.list.length / this.itemsPerPage),
     });
 
     let start = (pageNum - 1) * this.itemsPerPage;
