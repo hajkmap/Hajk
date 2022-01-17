@@ -115,7 +115,19 @@ class SketchModel {
   // that corresponds to that value.
   #getStrokeType = (lineDash) => {
     for (const [key, value] of STROKE_DASHES.entries()) {
+      // The value and actual line-dash might be null, lets check if they
+      // both are: (If they are, the line-type is "solid").
       if (value === lineDash) {
+        return key;
+      }
+      // The value might also be an array, and "===" will therefore check for reference equality.
+      // Which will obviously not work, since they are not pointing to the same object. Instead,
+      // let's check if the arrays has the same content. (We don't care about the array order).
+      if (
+        Array.isArray(value) &&
+        Array.isArray(lineDash) &&
+        value.every((v) => lineDash.includes(v))
+      ) {
         return key;
       }
     }
