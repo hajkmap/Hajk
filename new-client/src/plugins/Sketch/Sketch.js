@@ -20,7 +20,7 @@ const Sketch = (props) => {
   // We also need to keep track of if we're supposed to be enabling a modify-interaction along with
   // the edit-interaction. (The edit-interaction allows the user to change feature colors etc. and the
   // modify-interaction allows the user to change the features geometries).
-  const [modifyEnabled, setModifyEnabled] = React.useState(true);
+  const [modifyEnabled, setModifyEnabled] = React.useState(false);
   // We're gonna need to keep track of if the actual plugin is shown or not.
   const [pluginShown, setPluginShown] = React.useState(
     props.options.visibleAtStart ?? false
