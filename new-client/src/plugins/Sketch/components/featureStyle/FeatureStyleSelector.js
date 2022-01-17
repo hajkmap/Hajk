@@ -26,7 +26,7 @@ export default function FeatureStyleSelector(props) {
   const handleTextSizeChange = (e) => {
     props.setTextStyle({
       ...props.textStyle,
-      size: e.target.value,
+      size: parseInt(e.target.value),
     });
   };
 
