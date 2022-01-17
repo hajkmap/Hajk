@@ -58,25 +58,32 @@ namespace MapService.Components
                     string[] containerArray = _container.Split(';');
                     for (int i = 0; i < containerArray.Length; i++)
                     {
-                        if (_useSSL)
+                        try
                         {
-                            _context = new PrincipalContext(ContextType.Domain, _domain, containerArray[i], ContextOptions.Negotiate | ContextOptions.SecureSocketLayer, _adUser, _adPassword);
+                            if (_useSSL)
+                            {
+                                _context = new PrincipalContext(ContextType.Domain, _domain, containerArray[i], ContextOptions.Negotiate | ContextOptions.SecureSocketLayer, _adUser, _adPassword);
+                            }
+                            else
+                            {
+                                _context = new PrincipalContext(ContextType.Domain, _domain, containerArray[i], _adUser, _adPassword);
+                            }
+
+                            userPrincipal = UserPrincipal.FindByIdentity(_context, user);
+
+                            if (userPrincipal != null)
+                                break;
                         }
-                        else
+                        catch (Exception e)
                         {
-                            _context = new PrincipalContext(ContextType.Domain, _domain, containerArray[i], _adUser, _adPassword);
+                            _log.ErrorFormat("Could not connect to Active Directory, container '{0}', ERROR: {1}", containerArray[i], e.Message);
                         }
-
-                        userPrincipal = UserPrincipal.FindByIdentity(_context, user);
-
-                        if (userPrincipal != null)
-                            break;
                     }
                 }
             }
             catch (Exception e)
             {
-                _log.ErrorFormat("Kunde inte koppla upp mot Active Directory, kontrollera inloggningsuppgifter: error {0}", e.Message);
+                _log.ErrorFormat("Could not connect to Active Directory, error: {0}", e.Message);
             }
             return userPrincipal;
         }
