@@ -746,7 +746,26 @@ class DrawModel {
 
   // Handler that will fire when features has been modified with the modify-interaction.
   // Makes sure to update the text-styling so that eventual measurement-label is up-to-date.
-  #handleModifyEnd = () => {
+  #handleModifyEnd = (e) => {
+    e.features.forEach((f) => {
+      // If we're dealing with arrows, we have to make sure to
+      // update the whole style, so that the arrow-head is moved.
+      if (f.get("DRAW_METHOD") === "Arrow") {
+        try {
+          const strokeStyle = f.getStyle()[0].getStroke();
+          f.setStyle(
+            this.#getArrowStyle(f, {
+              strokeStyle: {
+                color: strokeStyle.getColor(),
+              },
+              fillStyle: {},
+            })
+          );
+        } catch (error) {
+          console.error(`Failed to set arrow style. Error: ${error}`);
+        }
+      }
+    });
     this.#refreshFeaturesTextStyle();
   };
 

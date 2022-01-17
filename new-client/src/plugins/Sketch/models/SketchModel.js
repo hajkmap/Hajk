@@ -86,7 +86,7 @@ class SketchModel {
       // If no feature was supplied, or if we're unable to extract the style,
       // we return null.
       if (!featureStyle) {
-        return { fillColor: null, strokeStyle: null };
+        return { fillStyle: null, strokeStyle: null };
       }
       // If we were able to extract the style we can continue by extracting
       // the fill- and stroke-style.
@@ -95,8 +95,8 @@ class SketchModel {
       // And return an object containing them
       return { fillStyle, strokeStyle };
     } catch (error) {
-      console.error(error);
-      return { fillColor: null, strokeStyle: null };
+      console.error(`Failed to extract feature-style. Error: ${error}`);
+      return { fillStyle: null, strokeStyle: null };
     }
   };
 
