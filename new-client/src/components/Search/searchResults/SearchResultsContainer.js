@@ -716,12 +716,9 @@ class SearchResultsContainer extends React.PureComponent {
     if (!nextFeature.source) {
       nextFeature.source = nextCollection.source;
     }
-    const featureTitle = this.getFeatureTitle(nextFeature);
-    nextFeature.featureTitle = featureTitle;
 
     return {
       feature: nextFeature,
-      featureTitle: featureTitle,
       sourceId: nextFeature.source ?? nextCollection.source.id,
       initiator: initiator,
     };
@@ -808,7 +805,7 @@ class SearchResultsContainer extends React.PureComponent {
     const { featureCollectionSortingStrategy } = this.state;
 
     const featureCollectionsAtoZSorted = featureCollections.sort((a, b) =>
-      a.source.caption.localeCompare(b.source.caption, "sv")
+      a.source.caption.localeCompare(b.source.caption)
     );
 
     switch (featureCollectionSortingStrategy) {
@@ -824,34 +821,6 @@ class SearchResultsContainer extends React.PureComponent {
     }
   };
 
-  getFeatureTitle = (feature) => {
-    const { activeFeatureCollection } = this.state;
-
-    if (feature.featureTitle) {
-      return feature.featureTitle;
-    }
-
-    const source = feature.source ?? activeFeatureCollection.source;
-
-    return source.displayFields.reduce((featureTitleString, df) => {
-      let displayField = feature.get(df);
-      if (Array.isArray(displayField)) {
-        displayField = displayField.join(", ");
-      }
-
-      if (displayField) {
-        if (featureTitleString.length > 0) {
-          featureTitleString = featureTitleString.concat(` | ${displayField}`);
-        } else {
-          featureTitleString = displayField.toString();
-        }
-      }
-
-      feature.featureTitle = featureTitleString;
-      return featureTitleString;
-    }, "");
-  };
-
   keyPressIsEnter = (event) => {
     return event.which === 13 || event.keyCode === 13;
   };
@@ -863,8 +832,7 @@ class SearchResultsContainer extends React.PureComponent {
         if (activeFeatureCollection) {
           if (fc.source.id === activeFeatureCollection.source.id) {
             return fc.value.features.filter((f) => {
-              const featureTitle = this.getFeatureTitle(f);
-              return featureTitle
+              return f.featureTitle
                 .toLowerCase()
                 .includes(featureFilter.toLowerCase());
             });
@@ -1033,9 +1001,7 @@ class SearchResultsContainer extends React.PureComponent {
     const featureCollectionTitle = activeFeatureCollection
       ? activeFeatureCollection.source.caption
       : "";
-    const featureTitle = activeFeature
-      ? this.getFeatureTitle(activeFeature)
-      : "";
+    const featureTitle = activeFeature ? activeFeature.featureTitle : "";
     const shouldRenderHeaderInfoBar =
       !activeFeature || activeFeature?.onClickName;
 
@@ -1129,7 +1095,6 @@ class SearchResultsContainer extends React.PureComponent {
                   featureSortingStrategy={featureSortingStrategy}
                   enableFeaturePreview={options.enableFeaturePreview ?? true}
                   enableFeatureToggler={options.enableFeatureToggler ?? true}
-                  getFeatureTitle={this.getFeatureTitle}
                   addFeatureToSelected={this.addFeatureToSelected}
                   removeFeatureFromSelected={this.removeFeatureFromSelected}
                   selectedFeatures={this.state.selectedFeatures}

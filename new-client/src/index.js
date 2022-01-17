@@ -19,6 +19,14 @@ import "@fontsource/roboto/400.css";
 import "@fontsource/roboto/500.css";
 import "@fontsource/roboto/700.css";
 
+// We want to support open-sans locally as well (If someone sets open-sans
+// in the customTheme.json, we still want to avoid requests to outside CDN)
+import "@fontsource/open-sans";
+
+// The documentHandler imports icons in a dynamic way. To avoid requests against
+// an outside CDN, we make sure to install the required font for the icons as well.
+import "@fontsource/material-icons";
+
 import "ol/ol.css";
 import "./custom-ol.css";
 

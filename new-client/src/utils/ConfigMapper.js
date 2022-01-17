@@ -124,7 +124,9 @@ export default class ConfigMapper {
       type: "wms",
       options: {
         id: args.id,
-        url: (this.proxy || "") + args.url,
+        url:
+          (this.proxy || "") +
+          (this.getPotentialCustomUrl(args.customGetMapUrl) || args.url),
         name: args.id, // FIXME: Should this be "args.caption"?
         layerType: args.layerType,
         caption: args.caption,
@@ -132,11 +134,12 @@ export default class ConfigMapper {
         opacity: args.opacity || 1,
         maxZoom: args.maxZoom,
         minZoom: args.minZoom,
+        minMaxZoomAlertOnToggleOnly: args.minMaxZoomAlertOnToggleOnly,
         infoClickSortType: args.infoClickSortType,
         infoClickSortDesc: args.infoClickSortDesc,
         infoClickSortProperty: args.infoClickSortProperty,
         information: args.infobox,
-        resolutions: properties.mapConfig.map.resolutions,
+        resolutions: properties.mapConfig.map.allResolutions,
         projection: projection || "EPSG:3006",
         origin: properties.mapConfig.map.origin,
         extent: properties.mapConfig.map.extent,
@@ -153,6 +156,7 @@ export default class ConfigMapper {
         searchUrl: args.searchUrl,
         searchPropertyName: args.searchPropertyName,
         searchDisplayName: args.searchDisplayName,
+        searchShortDisplayName: args.searchShortDisplayName,
         searchOutputFormat: args.searchOutputFormat,
         searchGeometryField: args.searchGeometryField,
         legend: getLegends(),
@@ -197,6 +201,13 @@ export default class ConfigMapper {
     }
 
     return config;
+  }
+
+  // There might be a custom getMap-url provided in the config. If there
+  // is, we have to make sure to override the url-value with the custom getMap-url.
+  // See #345 for more information.
+  getPotentialCustomUrl(customGetMapUrl) {
+    return customGetMapUrl?.trim().length > 0 ? customGetMapUrl : null;
   }
 
   mapWMTSConfig(args, properties) {

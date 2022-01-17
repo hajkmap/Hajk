@@ -229,10 +229,10 @@ class SearchResultsDatasetFeatureDetails extends React.PureComponent {
   };
 
   renderFeatureTitle = () => {
-    const { featureTitle } = this.props;
+    const { feature } = this.props;
     return (
       <HeaderTypography noWrap component="div" variant="button" align="left">
-        {featureTitle}
+        {feature.featureTitle}
       </HeaderTypography>
     );
   };

@@ -6,8 +6,11 @@ import { extend, createEmpty, isEmpty } from "ol/extent";
 import Feature from "ol/Feature";
 import FeatureStyle from "./utils/FeatureStyle";
 import { fromExtent } from "ol/geom/Polygon";
+import TileLayer from "ol/layer/Tile";
+import ImageLayer from "ol/layer/Image";
 import { handleClick } from "../../models/Click";
 import { deepMerge } from "utils/DeepMerge";
+import { isValidLayerId } from "../../utils/Validator";
 
 class MapViewModel {
   constructor(settings) {
@@ -29,6 +32,9 @@ class MapViewModel {
 
   refreshFeatureStyle = (options) => {
     this.featureStyle = new FeatureStyle(deepMerge(this.options, options));
+    // Make sure to set the new style on the results layer. This way
+    // we'll get correct labels (if user wants to show them).
+    this.resultsLayer.setStyle(this.featureStyle.getDefaultSearchResultStyle);
   };
 
   getDrawStyleSettings = () => {
@@ -49,19 +55,53 @@ class MapViewModel {
     });
   };
 
+  getVisibleLayers = () => {
+    return this.map
+      .getLayers()
+      .getArray()
+      .filter((layer) => {
+        return (
+          (layer instanceof TileLayer || layer instanceof ImageLayer) &&
+          layer.layersInfo !== undefined &&
+          // We consider a layer to be visible only if…
+          layer.getVisible() && // …it's visible…
+          layer.getSource().getParams()["LAYERS"] &&
+          layer.getProperties().name &&
+          isValidLayerId(layer.getProperties().name) // …has a specified name property…
+        );
+      })
+      .map((layer) => layer.getSource().getParams()["LAYERS"])
+      .join(",")
+      .split(",");
+  };
+
+  getVisibleSearchLayers = () => {
+    const searchSources = this.options.sources;
+    const visibleLayers = this.getVisibleLayers();
+    const visibleSearchLayers = searchSources.filter((s) => {
+      return visibleLayers.find((l_id) => l_id === s.id);
+    });
+    return visibleSearchLayers;
+  };
+
   initMapLayers = () => {
     this.resultSource = this.getNewVectorSource();
-    const defaultStyle = this.featureStyle.getDefaultSearchResultStyle();
     this.resultsLayer = this.getNewVectorLayer(
       this.resultSource,
-      this.options.showResultFeaturesInMap ?? true ? defaultStyle : null
+      this.options.showResultFeaturesInMap ?? true
+        ? this.featureStyle.getDefaultSearchResultStyle
+        : null
     );
+    // FIXME: Remove "type", use only "name" throughout
+    // the application. Should be done as part of #883.
     this.resultsLayer.set("type", "searchResultLayer");
+    this.resultsLayer.set("name", "pluginSearchResults");
     this.drawSource = this.getNewVectorSource();
     this.drawLayer = this.getNewVectorLayer(
       this.drawSource,
       this.getDrawStyle()
     );
+    this.drawLayer.set("name", "pluginSearchDraw");
     this.map.addLayer(this.drawLayer);
     this.map.addLayer(this.resultsLayer);
   };
@@ -182,12 +222,7 @@ class MapViewModel {
     }
     const mapFeature = this.getFeatureFromResultSourceById(feature.getId());
     return mapFeature?.setStyle(
-      this.featureStyle.getFeatureStyle(
-        mapFeature,
-        feature.featureTitle,
-        [],
-        "highlight"
-      )
+      this.featureStyle.getFeatureStyle(mapFeature, "highlight")
     );
   };
 
@@ -212,26 +247,14 @@ class MapViewModel {
         featureInfo.feature.getId()
       );
       return feature?.setStyle(
-        this.featureStyle.getFeatureStyle(
-          feature,
-          featureInfo.featureTitle,
-          [],
-          "selection"
-        )
+        this.featureStyle.getFeatureStyle(feature, "selection")
       );
     });
   };
 
   addAndHighlightFeatureInSearchResultLayer = (featureInfo) => {
     const feature = featureInfo.feature;
-    feature.setStyle(
-      this.featureStyle.getFeatureStyle(
-        feature,
-        featureInfo.featureTitle,
-        [],
-        "highlight"
-      )
-    );
+    feature.setStyle(this.featureStyle.getFeatureStyle(feature, "highlight"));
     this.resultSource.addFeature(feature);
     this.fitMapToSearchResult();
   };

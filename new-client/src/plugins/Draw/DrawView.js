@@ -14,7 +14,7 @@ import FormControlLabel from "@mui/material/FormControlLabel";
 import Typography from "@mui/material/Typography";
 import Checkbox from "@mui/material/Checkbox";
 import { withSnackbar } from "notistack";
-import Dialog from "../../components/Dialog.js";
+import Dialog from "../../components/Dialog/Dialog";
 import Symbology from "./components/Symbology.js";
 
 // The css-file is only targeting the ol-draw-interaction, and styles the tooltip.

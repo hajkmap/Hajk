@@ -543,7 +543,7 @@
     "center": [576357, 6386049],
     "title": "Hajk 3",
     "projection": "EPSG:3006",
-    "zoom": 1.33,
+    "zoom": 2,
     "maxZoom": 8,
     "minZoom": 0,
     "resolutions": [2048, 1024, 512, 256, 128, 64, 32, 16, 8],

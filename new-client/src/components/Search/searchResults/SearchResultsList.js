@@ -45,7 +45,6 @@ class SearchResultsList extends React.PureComponent {
       activeFeature,
       activeFeatureCollection,
       localObserver,
-      getFeatureTitle,
       addFeatureToSelected,
     } = this.props;
 
@@ -56,14 +55,11 @@ class SearchResultsList extends React.PureComponent {
       );
     } else {
       const source = activeFeatureCollection?.source;
-      const featureTitle = getFeatureTitle(activeFeature, source);
 
       activeFeature.source = source;
-      activeFeature.featureTitle = featureTitle;
       addFeatureToSelected({
         feature: activeFeature,
         sourceId: source?.id,
-        featureTitle: featureTitle,
         initiator: "showDetails",
       });
       if (this.props.isMobile) {
@@ -71,7 +67,6 @@ class SearchResultsList extends React.PureComponent {
       }
       localObserver.publish("map.addAndHighlightFeatureInSearchResultLayer", {
         feature: activeFeature,
-        featureTitle: featureTitle,
       });
     }
   };
@@ -119,7 +114,6 @@ class SearchResultsList extends React.PureComponent {
       featureFilter,
       featureSortingStrategy,
       enableFeaturePreview,
-      getFeatureTitle,
       localObserver,
       enableFeatureToggler,
       selectedFeatures,
@@ -142,7 +136,6 @@ class SearchResultsList extends React.PureComponent {
         featureFilter={featureFilter}
         featureSortingStrategy={featureSortingStrategy}
         enableFeaturePreview={enableFeaturePreview}
-        getFeatureTitle={getFeatureTitle}
         localObserver={localObserver}
         enableFeatureToggler={enableFeatureToggler}
         addFeatureToSelected={addFeatureToSelected}

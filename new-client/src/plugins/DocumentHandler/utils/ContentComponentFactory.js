@@ -13,6 +13,7 @@ import {
   List,
   ListItem,
   Grid,
+  Tooltip,
 } from "@mui/material";
 
 const ELEMENT_NODE = 1;
@@ -46,17 +47,17 @@ const useStyles = makeStyles((theme) => ({
     marginRight: theme.spacing(1),
   },
 
-  pictureRight: {
+  mediaRight: {
     alignItems: "flex-end",
     display: "flex",
     flexDirection: "column",
   },
-  pictureLeft: {
+  mediaLeft: {
     alignItems: "flex-start",
     display: "flex",
     flexDirection: "column",
   },
-  pictureCenter: {
+  mediaCenter: {
     alignItems: "center",
     display: "flex",
     flexDirection: "column",
@@ -126,6 +127,10 @@ const useStyles = makeStyles((theme) => ({
   linkButton: {
     padding: theme.spacing(0),
     color: theme.palette.info.main,
+  },
+  hoverLink: {
+    cursor: "text",
+    textDecoration: "underline dotted",
   },
 }));
 
@@ -278,7 +283,7 @@ export const Figure = ({ figureTag }) => {
  *
  * @memberof Contents
  */
-export const Img = ({ imgTag, localObserver, componentId }) => {
+export const Img = ({ imgTag, localObserver, componentId, baseUrl }) => {
   const classes = useStyles();
   const tagIsPresent = (imgTag, attribute) => {
     return imgTag.attributes.getNamedItem(attribute) == null ? false : true;
@@ -305,15 +310,15 @@ export const Img = ({ imgTag, localObserver, componentId }) => {
 
   const getImagePositionClass = (position) => {
     if (position === "right") {
-      return classes.pictureRight;
+      return classes.mediaRight;
     }
 
     if (position === "left") {
-      return classes.pictureLeft;
+      return classes.mediaLeft;
     }
 
     if (position === "center") {
-      return classes.pictureCenter;
+      return classes.mediaCenter;
     }
 
     if (position === "floatLeft") {
@@ -384,6 +389,11 @@ export const Img = ({ imgTag, localObserver, componentId }) => {
     return describedBy.length > 0 ? describedBy.join(" ") : null;
   };
 
+  let imgUrl = image.url;
+  if (imgUrl.includes("../")) {
+    imgUrl = image.url.replace("../", baseUrl);
+  }
+
   return (
     <Box
       key={`${image.id}`}
@@ -402,11 +412,213 @@ export const Img = ({ imgTag, localObserver, componentId }) => {
             : null
         }
         className={getImageStyle(image)}
-        image={image.url}
+        image={imgUrl}
       />
       {getImageDescription(image)}
     </Box>
   );
+};
+
+/**
+ * The render function for the video-tag as an img-tag.
+ * @param {object} imgTag The video-tag as an img-tag.
+ * @returns React.Fragment
+ */
+export const Video = ({ imgTag, componentId, baseUrl }) => {
+  const videoAttributes = {
+    caption: imgTag.dataset.caption,
+    height: imgTag.dataset.imageHeight,
+    width: imgTag.dataset.imageWidth,
+    position: imgTag.dataset.imagePosition,
+    source: imgTag.dataset.source,
+    url: imgTag.src,
+    id: `video_${componentId}`,
+  };
+
+  const classes = useStyles();
+  const getVideoPositionClass = (position) => {
+    if (position === "right") {
+      return classes.mediaRight;
+    }
+
+    if (position === "left") {
+      return classes.mediaLeft;
+    }
+
+    if (position === "center") {
+      return classes.mediaCenter;
+    }
+
+    if (position === "floatLeft") {
+      return classes.floatLeft;
+    }
+
+    if (position === "floatRight") {
+      return classes.floatRight;
+    }
+
+    return;
+  };
+  const positioningClass = getVideoPositionClass(videoAttributes.position);
+
+  const getVideoDescription = (videoAttributes) => {
+    return (
+      <Box
+        style={{ width: videoAttributes.width }}
+        className={classes.imageInformationWrapper}
+      >
+        {videoAttributes.caption && (
+          <Typography
+            id={`video_${videoAttributes.captionId}`}
+            variant="subtitle2"
+          >
+            {videoAttributes.caption}
+          </Typography>
+        )}
+        {videoAttributes.source && (
+          <Typography
+            id={`video_${videoAttributes.sourceId}`}
+            variant="subtitle2"
+            className={classes.imageText}
+          >
+            {videoAttributes.source}
+          </Typography>
+        )}
+      </Box>
+    );
+  };
+
+  let videoUrl = videoAttributes.url;
+  if (videoUrl.includes("../")) {
+    videoUrl = videoAttributes.url.replace("../", baseUrl);
+  }
+
+  return (
+    <React.Fragment key={videoAttributes.id}>
+      <div className={positioningClass}>
+        <video
+          height={videoAttributes.height}
+          width={videoAttributes.width}
+          controls={"controls"}
+        >
+          <source src={videoUrl} type="video/mp4"></source>
+        </video>
+        {getVideoDescription(videoAttributes)}
+      </div>
+    </React.Fragment>
+  );
+};
+
+/**
+ * The render function for the audio-tag as an img-tag.
+ * @param {object} imgTag The audio-tag as an img-tag.
+ * @returns React.Fragment
+ */
+export const Audio = ({ imgTag, componentId, baseUrl }) => {
+  const audioAttributes = {
+    caption: imgTag.attributes.getNamedItem("data-caption")?.value,
+    position: imgTag.attributes.getNamedItem("data-image-position")?.value,
+    source: imgTag.attributes.getNamedItem("data-source")?.value,
+    url: imgTag.attributes.getNamedItem("src")?.value,
+    width: imgTag.attributes.getNamedItem("data-image-width")?.value,
+    id: `audio_${componentId}`,
+  };
+
+  const classes = useStyles();
+  const getVideoPositionClass = (position) => {
+    if (position === "right") {
+      return classes.mediaRight;
+    }
+
+    if (position === "left") {
+      return classes.mediaLeft;
+    }
+
+    if (position === "center") {
+      return classes.mediaCenter;
+    }
+
+    if (position === "floatLeft") {
+      return classes.floatLeft;
+    }
+
+    if (position === "floatRight") {
+      return classes.floatRight;
+    }
+
+    return;
+  };
+  const positioningClass = getVideoPositionClass(audioAttributes.position);
+
+  const getAudioDescription = (audioAttributes) => {
+    return (
+      <Box
+        style={{ width: audioAttributes.width + "px" }}
+        className={classes.imageInformationWrapper}
+      >
+        {audioAttributes.caption && (
+          <Typography
+            id={`video_${audioAttributes.captionId}`}
+            variant="subtitle2"
+          >
+            {audioAttributes.caption}
+          </Typography>
+        )}
+        {audioAttributes.source && (
+          <Typography
+            id={`video_${audioAttributes.sourceId}`}
+            variant="subtitle2"
+            className={classes.imageText}
+          >
+            {audioAttributes.source}
+          </Typography>
+        )}
+      </Box>
+    );
+  };
+
+  let audioUrl = audioAttributes.url;
+  if (audioUrl.includes("../")) {
+    audioUrl = audioAttributes.url.replace("../", baseUrl);
+  }
+
+  return (
+    <React.Fragment key={audioAttributes.id}>
+      <div className={positioningClass}>
+        <audio controls={"controls"}>
+          <source src={imgTag.src} type="audio/mpeg"></source>
+        </audio>
+        {getAudioDescription(audioAttributes)}
+      </div>
+    </React.Fragment>
+  );
+};
+
+/**
+ * The render function for the source-tag.
+ * @param {object} sourceTag The source-tag.
+ * @returns React.Fragment
+ */
+export const Source = ({ sourceTag }) => {
+  const children = [...sourceTag.childNodes];
+  const src = sourceTag.src;
+  const type = sourceTag.type;
+  let array = [];
+  if (children.length > 0) {
+    children.forEach((child, index) => {
+      array.push(
+        <React.Fragment key={index}>
+          <source src={src} type={type}></source>
+        </React.Fragment>
+      );
+    });
+    return array;
+  }
+  return [
+    <React.Fragment key={0}>
+      <source src={src} type={type}></source>
+    </React.Fragment>,
+  ];
 };
 
 export const Strong = ({ strongTag }) => {
@@ -428,6 +640,7 @@ export const Strong = ({ strongTag }) => {
     </React.Fragment>,
   ];
 };
+
 export const Underline = ({ uTag }) => {
   const children = [...uTag.childNodes];
   let array = [];
@@ -493,16 +706,28 @@ export const CustomLink = ({ aTag, localObserver, bottomMargin }) => {
       1: headerIdentifier,
       2: documentLink,
       3: externalLink,
+      4: hoverLink,
     } = [
       "data-maplink",
       "data-header-identifier",
       "data-document",
       "data-link",
+      "data-hover",
     ].map((attributeKey) => {
       return attributes.getNamedItem(attributeKey)?.value;
     });
 
-    return { mapLink, headerIdentifier, documentLink, externalLink };
+    return { mapLink, headerIdentifier, documentLink, externalLink, hoverLink };
+  };
+
+  const getHoverLink = (hoverLink, tagText) => {
+    return (
+      <React.Fragment>
+        <Tooltip title={hoverLink}>
+          <abbr className={classes.hoverLink}>{tagText}</abbr>
+        </Tooltip>
+      </React.Fragment>
+    );
   };
 
   const getExternalLink = (externalLink) => {
@@ -558,7 +783,7 @@ export const CustomLink = ({ aTag, localObserver, bottomMargin }) => {
       </Button>
     );
   };
-  const getDocumentLink = (headerIdentifier, documentLink) => {
+  const getDocumentLink = (headerIdentifier, documentLink, isPrintMode) => {
     return (
       <Button
         className={clsx(
@@ -573,7 +798,7 @@ export const CustomLink = ({ aTag, localObserver, bottomMargin }) => {
         classes={{ startIcon: classes.startIcon }}
         href="#"
         key="document-link"
-        component="button"
+        component={isPrintMode ? "span" : "button"}
         underline="hover"
         onClick={() => {
           localObserver.publish("document-link-clicked", {
@@ -587,11 +812,12 @@ export const CustomLink = ({ aTag, localObserver, bottomMargin }) => {
     );
   };
 
-  const { mapLink, headerIdentifier, documentLink, externalLink } =
+  const { mapLink, headerIdentifier, documentLink, externalLink, hoverLink } =
     getLinkDataPerType(aTag.attributes);
 
   if (documentLink) {
-    return getDocumentLink(headerIdentifier, documentLink);
+    const isPrintMode = Boolean(aTag.attributes.printMode);
+    return getDocumentLink(headerIdentifier, documentLink, isPrintMode);
   }
 
   if (mapLink) {
@@ -600,6 +826,11 @@ export const CustomLink = ({ aTag, localObserver, bottomMargin }) => {
 
   if (externalLink) {
     return getExternalLink(externalLink);
+  }
+
+  if (hoverLink) {
+    const tagText = aTag.text;
+    return getHoverLink(hoverLink, tagText);
   }
 
   return null;

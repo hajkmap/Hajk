@@ -47,11 +47,13 @@ const defaultState = {
   addedLayers: [],
   id: "",
   caption: "",
+  internalLayerName: "",
   date: "Fylls i per automatik",
   searchFields: "",
   infobox: "",
   aliasDict: "",
   displayFields: "",
+  shortDisplayFields: "",
   geometryField: "",
   url: "",
   outputFormat: undefined,
@@ -93,7 +95,7 @@ class Search extends Component {
   /**
    *
    */
-  UNSAFE_componentWillUnmount() {
+  componentWillUnmount() {
     this.props.model.off("change:layers");
   }
   /**
@@ -134,10 +136,12 @@ class Search extends Component {
       mode: "edit",
       id: layer.id,
       caption: layer.caption,
+      internalLayerName: layer.internalLayerName || layer.caption,
       searchFields: layer.searchFields,
       infobox: layer.infobox,
       aliasDict: layer.aliasDict,
       displayFields: layer.displayFields,
+      shortDisplayFields: layer.shortDisplayFields,
       geometryField: layer.geometryField,
       outputFormat: layer.outputFormat || "GML3",
       serverType: layer.serverType || "geoserver",
@@ -149,6 +153,7 @@ class Search extends Component {
       this.validateField("url", true);
       this.validateField("searchFields", true);
       this.validateField("displayFields", true);
+      this.validateField("shortDisplayFields", true);
       this.validateField("geometryField", true);
       this.validateField("outputFormat", true);
       this.validateField("serverType", true);
@@ -167,7 +172,8 @@ class Search extends Component {
         });
 
         layer.layers.forEach((layer) => {
-          this.refs[layer].checked = true;
+          if (this && this.refs && this.refs[layer])
+            this.refs[layer].checked = true;
         });
       });
     }, 0);
@@ -273,7 +279,14 @@ class Search extends Component {
    */
   getLayersWithFilter(filter) {
     return this.props.model.get("layers").filter((layer) => {
-      return new RegExp(this.state.filter).test(layer.caption.toLowerCase());
+      return (
+        new RegExp(this.state.filter.toLowerCase()).test(
+          layer.caption.toLowerCase()
+        ) ||
+        new RegExp(this.state.filter.toLowerCase()).test(
+          layer.internalLayerName?.toLowerCase()
+        )
+      );
     });
   }
   /**
@@ -289,20 +302,32 @@ class Search extends Component {
 
     if (this.state.filter) {
       layers.forEach((layer) => {
-        layer.caption.toLowerCase().indexOf(this.state.filter) === 0
+        layer.caption.toLowerCase().indexOf(this.state.filter.toLowerCase()) ===
+          0 ||
+        layer.internalLayerName
+          ?.toLowerCase()
+          .indexOf(this.state.filter.toLowerCase()) === 0
           ? startsWith.push(layer)
           : alphabetically.push(layer);
       });
 
       startsWith.sort(function (a, b) {
-        if (a.caption.toLowerCase() < b.caption.toLowerCase()) return -1;
-        if (a.caption.toLowerCase() > b.caption.toLowerCase()) return 1;
+        let aName = a.internalLayerName ? a.internalLayerName : a.caption;
+        aName = aName.toLowerCase();
+        let bName = b.internalLayerName ? b.internalLayerName : b.caption;
+        bName = bName.toLowerCase();
+        if (aName < bName) return -1;
+        if (aName > bName) return 1;
         return 0;
       });
 
       alphabetically.sort(function (a, b) {
-        if (a.caption.toLowerCase() < b.caption.toLowerCase()) return -1;
-        if (a.caption.toLowerCase() > b.caption.toLowerCase()) return 1;
+        let aName = a.internalLayerName ? a.internalLayerName : a.caption;
+        aName = aName.toLowerCase();
+        let bName = b.internalLayerName ? b.internalLayerName : b.caption;
+        bName = bName.toLowerCase();
+        if (aName < bName) return -1;
+        if (aName > bName) return 1;
         return 0;
       });
 
@@ -310,7 +335,11 @@ class Search extends Component {
     }
     return layers.map((layer, i) => (
       <li onClick={(e) => this.loadLayer(e, layer)} key={Math.random()}>
-        <span>{layer.caption}</span>
+        <span>
+          {layer.internalLayerName?.length > 0
+            ? layer.internalLayerName
+            : layer.caption}
+        </span>
         <i
           title="Radera lager"
           onClick={(e) => this.removeLayer(e, layer)}
@@ -332,6 +361,7 @@ class Search extends Component {
 
     switch (fieldName) {
       case "displayFields":
+      case "shortDisplayFields":
       case "searchFields":
         valid = value.every((val) => /^\w+$/.test(val));
         if (value.length === 1 && value[0] === "") {
@@ -397,6 +427,7 @@ class Search extends Component {
     if (fieldName === "layers") value = format_layers(this.state.addedLayers);
     if (fieldName === "searchFields") value = value.split(",");
     if (fieldName === "displayFields") value = value.split(",");
+    if (fieldName === "shortDisplayFields") value = value.split(",");
 
     return value;
   }
@@ -435,6 +466,7 @@ class Search extends Component {
         "layers",
         "searchFields",
         "displayFields",
+        "shortDisplayFields",
         "geometryField",
         "outputFormat",
         "serverType",
@@ -454,12 +486,14 @@ class Search extends Component {
       let layer = {
         id: this.state.id,
         caption: this.getValue("caption"),
+        internalLayerName: this.getValue("internalLayerName"),
         url: this.getValue("url"),
         layers: this.getValue("layers"),
         searchFields: this.getValue("searchFields"),
         infobox: this.getValue("infobox"),
         aliasDict: this.getValue("aliasDict"),
         displayFields: this.getValue("displayFields"),
+        shortDisplayFields: this.getValue("shortDisplayFields"),
         geometryField: this.getValue("geometryField"),
         outputFormat: this.getValue("outputFormat"),
         serverType: this.getValue("serverType"),
@@ -803,7 +837,18 @@ class Search extends Component {
                   className={this.getValidationClass("caption")}
                 />
               </div>
-
+              <div>
+                <label>Visningsnamn Admin</label>
+                <input
+                  type="text"
+                  ref="input_internalLayerName"
+                  value={this.state.internalLayerName || ""}
+                  onChange={(e) => {
+                    this.setState({ internalLayerName: e.target.value });
+                    this.validateField("internalLayerName");
+                  }}
+                />
+              </div>
               <div>
                 <label>Inforuta</label>
                 <textarea
@@ -854,6 +899,23 @@ class Search extends Component {
                   }}
                   value={this.state.displayFields}
                   className={this.getValidationClass("displayFields")}
+                />
+              </div>
+              <div>
+                <label>Kort visningsfält</label>
+                <input
+                  type="text"
+                  ref="input_shortDisplayFields"
+                  onChange={(e) => {
+                    this.setState(
+                      {
+                        shortDisplayFields: e.target.value,
+                      },
+                      () => this.validateField("shortDisplayFields", true)
+                    );
+                  }}
+                  value={this.state.shortDisplayFields}
+                  className={this.getValidationClass("shortDisplayFields")}
                 />
               </div>
               <div>

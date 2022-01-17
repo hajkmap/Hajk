@@ -1,75 +1,13 @@
 import React from "react";
 import ReactMarkdown from "react-markdown";
 import rehypeRaw from "rehype-raw";
-import { styled } from "@mui/material/styles";
 import gfm from "remark-gfm";
 import FeaturePropFilters from "./FeaturePropsFilters";
+
 import {
-  Divider,
-  Link,
-  Paper,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Typography,
-} from "@mui/material";
-
-const Paragraph = styled(Typography)(() => ({
-  marginBottom: "1.1rem",
-}));
-
-// Styled Table Row Component, makes every second row in a Table colored
-const StyledTableRow = styled(TableRow)(({ theme }) => ({
-  "&:nth-of-type(even)": {
-    backgroundColor: theme.palette.action.hover,
-  },
-}));
-
-const StyledTableContainer = styled(TableContainer)(() => ({
-  marginBottom: "1.1rem",
-}));
-
-const StyledPaper = styled(Paper)(({ theme }) => ({
-  padding: theme.spacing(1),
-  marginBottom: "1.1rem",
-  backgroundColor: theme.palette.background.default,
-  "& p": {
-    marginBottom: "0",
-  },
-}));
-
-const StyledTypography = styled(Typography)(({ theme }) => ({
-  h1: {
-    fontSize: "1.6rem",
-    fontWeight: "500",
-    marginBottom: "0.375rem",
-  },
-  h2: {
-    fontSize: "1.4rem",
-    fontWeight: "500",
-    marginBottom: "0.018rem",
-  },
-  h3: {
-    fontSize: "1.2rem",
-    fontWeight: "500",
-  },
-  h4: {
-    fontSize: "1rem",
-    fontWeight: "500",
-  },
-  h5: {
-    fontSize: "0.875rem",
-    fontWeight: "500",
-  },
-  h6: {
-    fontSize: "0.875rem",
-    fontWeight: "400",
-    fontStyle: "italic",
-  },
-}));
+  customComponentsForReactMarkdown,
+  Paragraph,
+} from "utils/customComponentsForReactMarkdown";
 
 export default class FeaturePropsParsing {
   constructor(settings) {
@@ -87,13 +25,18 @@ export default class FeaturePropsParsing {
     this.allowDangerousHtml = this.options.allowDangerousHtml ?? true;
 
     // Here we define the components used by ReactMarkdown, see https://github.com/remarkjs/react-markdown#appendix-b-components
+    // Note that we import customComponentsForReactMarkdown from our shared library, spread those
+    // objects and finally override the definition of "p", as it differs in this case (we want to
+    // import external components in FeatureInfo, while the normal "p" implementation just maps P to
+    // a MUI Typography component).
     this.components = {
-      p: (props) => {
-        if (!props.children) {
+      ...customComponentsForReactMarkdown,
+      p: ({ children }) => {
+        if (!children) {
           return null;
         }
 
-        const r = props.children.map((child, index) => {
+        return children.map((child, index) => {
           // Initiate a holder for external components. If a regex matches below,
           // this variable will be filled with correct value.
           let externalComponent = null;
@@ -113,79 +56,15 @@ export default class FeaturePropsParsing {
             }
           }
           // If externalComponent isn't null anymore, render it. Else, just render the children.
-          return externalComponent || child;
+          return (
+            <Paragraph variant="body2" key={index}>
+              {externalComponent || child}
+            </Paragraph>
+          );
         });
-
-        return <Paragraph variant="body2">{r}</Paragraph>;
-      },
-      hr: () => <Divider />,
-      a: ({ children, href, title }) => {
-        return children ? (
-          <Link href={href} title={title} target="_blank">
-            {children}
-          </Link>
-        ) : null;
-      },
-      h1: this.#markdownHeaderComponent,
-      h2: this.#markdownHeaderComponent,
-      h3: this.#markdownHeaderComponent,
-      h4: this.#markdownHeaderComponent,
-      h5: this.#markdownHeaderComponent,
-      h6: this.#markdownHeaderComponent,
-      table: ({ children, className, style }) => {
-        return (
-          <StyledTableContainer component="div">
-            <Table size="small" className={className} style={style}>
-              {children}
-            </Table>
-          </StyledTableContainer>
-        );
-      },
-      thead: ({ children }) => {
-        return <TableHead>{children}</TableHead>;
-      },
-      tbody: ({ children }) => {
-        return <TableBody>{children}</TableBody>;
-      },
-      tr: ({ children }) => {
-        return <StyledTableRow>{children}</StyledTableRow>;
-      },
-      td: this.#markdownTableCellComponent,
-      th: this.#markdownTableCellComponent,
-      style: ({ children }) => {
-        return <style type="text/css">{children}</style>;
-      },
-      div: ({ children, className, style }) => {
-        return (
-          <div className={className} style={style}>
-            {children}
-          </div>
-        );
-      },
-      blockquote: (props) => {
-        return <StyledPaper variant="outlined">{props.children}</StyledPaper>;
       },
     };
   }
-
-  #markdownTableCellComponent = ({ children, style, isHeader, className }) => {
-    return (
-      <TableCell
-        variant={isHeader ? "head" : "body"}
-        align={style?.textAlign || "inherit"}
-        style={style}
-        className={className}
-      >
-        {children}
-      </TableCell>
-    );
-  };
-
-  #markdownHeaderComponent = ({ level, children }) => {
-    return (
-      <StyledTypography variant={`h${level}`}>{children}</StyledTypography>
-    );
-  };
 
   #valueFromJson = (str) => {
     if (typeof str !== "string") return false;
@@ -260,10 +139,9 @@ export default class FeaturePropsParsing {
         // What you see on the next line is what we call "hängslen och livrem" in Sweden.
         // (The truth is it's all needed - this.properties may not be an Array, it may not have a key named
         // "placeholder", but if it does, we can't be sure that it will have the replace() method (as only Strings have it).)
-        // …unless it's undefined - in that case, return an empty string.
         this.properties?.[placeholder]?.replace?.(/=/g, "&equal;") || // If replace() exists, it's a string, so we can revert our equal signs.
         this.properties[placeholder] || // If not a string, return the value as-is…
-        ""
+        "" // …unless it's undefined - in that case, return an empty string.
       );
     }
   };

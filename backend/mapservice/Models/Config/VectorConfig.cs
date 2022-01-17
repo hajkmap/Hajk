@@ -145,6 +145,7 @@ namespace MapService.Models.Config
         
         public string attribution { get; set; }
         public string caption { get; set; }
+        public string internalLayerName { get; set; }
         public string content { get; set; }
         public string dataFormat { get; set; }
         public string date { get; set; }

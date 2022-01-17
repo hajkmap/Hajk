@@ -23,13 +23,8 @@ const ContentContainer = styled(Grid)(({ theme }) => ({
 
 class SearchResultsPreview extends React.PureComponent {
   renderFeaturePreview = () => {
-    const {
-      activeFeatureCollection,
-      previewFeature,
-      anchorEl,
-      app,
-      getFeatureTitle,
-    } = this.props;
+    const { activeFeatureCollection, previewFeature, anchorEl, app } =
+      this.props;
 
     return (
       <StyledPopover
@@ -53,7 +48,6 @@ class SearchResultsPreview extends React.PureComponent {
           <ContentContainer item xs={12}>
             <SearchResultsDatasetFeatureDetails
               feature={previewFeature}
-              featureTitle={getFeatureTitle(previewFeature)}
               app={app}
               source={activeFeatureCollection.source}
             />

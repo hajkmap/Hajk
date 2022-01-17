@@ -166,7 +166,10 @@ $.fn.editable = function (component) {
       checkbox2.attr("checked", JSON.parse(node.parent().attr("data-toggled")));
     }
     if (node.parent().attr("data-visibleatstart")) {
-      checkbox3.attr("checked", JSON.parse(node.parent().attr("data-visibleatstart")));
+      checkbox3.attr(
+        "checked",
+        JSON.parse(node.parent().attr("data-visibleatstart"))
+      );
     }
     if (node.parent().attr("data-visibleforgroups")) {
       input3.val(node.parent().attr("data-visibleforgroups"));
@@ -407,7 +410,7 @@ class Menu extends Component {
   /**
    *
    */
-  UNSAFE_componentWillUnmount() {
+  componentWillUnmount() {
     this.props.model.off("change:layers");
     this.props.model.off("change:urlMapConfig");
     this.props.model.off("change:layerMenuConfig");
@@ -521,16 +524,33 @@ class Menu extends Component {
    */
   getLayersWithFilter(filter) {
     return this.props.model.get("layers").filter((layer) => {
-      return new RegExp(this.state.filter).test(layer.caption.toLowerCase());
+      return (
+        new RegExp(this.state.filter.toLowerCase()).test(
+          layer.caption.toLowerCase()
+        ) ||
+        new RegExp(this.state.filter.toLowerCase()).test(
+          layer.internalLayerName?.toLowerCase()
+        )
+      );
     });
   }
 
   /**
    *
    */
-  getLayerNameFromId(id) {
+  getLayerNameFromIdForDisplay(id) {
     var layer = this.props.model.get("layers").find((layer) => layer.id === id);
-    return layer ? layer.caption : `---[layer id ${id} not found]---`;
+    let ret = "";
+    if (layer) {
+      if (layer.internalLayerName?.length > 0) {
+        ret = layer.internalLayerName;
+      } else {
+        ret = layer.caption;
+      }
+    } else {
+      ret = `---[layer id ${id} not found]---`;
+    }
+    return ret;
   }
 
   /**
@@ -774,7 +794,7 @@ class Menu extends Component {
   }
 
   createLayer(id) {
-    var layerName = this.getLayerNameFromId(id);
+    var layerName = this.getLayerNameFromIdForDisplay(id);
 
     var layer = $(`
       <li
@@ -841,20 +861,32 @@ class Menu extends Component {
 
     if (this.state.filter) {
       layers.forEach((layer) => {
-        layer.caption.toLowerCase().indexOf(this.state.filter) === 0
+        layer.caption.toLowerCase().indexOf(this.state.filter.toLowerCase()) ===
+          0 ||
+        layer.internalLayerName
+          ?.toLowerCase()
+          .indexOf(this.state.filter.toLowerCase()) === 0
           ? startsWith.push(layer)
           : alphabetically.push(layer);
       });
 
       startsWith.sort(function (a, b) {
-        if (a.caption.toLowerCase() < b.caption.toLowerCase()) return -1;
-        if (a.caption.toLowerCase() > b.caption.toLowerCase()) return 1;
+        let aName = a.internalLayerName ? a.internalLayerName : a.caption;
+        aName = aName.toLowerCase();
+        let bName = b.internalLayerName ? b.internalLayerName : b.caption;
+        bName = bName.toLowerCase();
+        if (aName < bName) return -1;
+        if (aName > bName) return 1;
         return 0;
       });
 
       alphabetically.sort(function (a, b) {
-        if (a.caption.toLowerCase() < b.caption.toLowerCase()) return -1;
-        if (a.caption.toLowerCase() > b.caption.toLowerCase()) return 1;
+        let aName = a.internalLayerName ? a.internalLayerName : a.caption;
+        aName = aName.toLowerCase();
+        let bName = b.internalLayerName ? b.internalLayerName : b.caption;
+        bName = bName.toLowerCase();
+        if (aName < bName) return -1;
+        if (aName > bName) return 1;
         return 0;
       });
 
@@ -897,7 +929,10 @@ class Menu extends Component {
           <span className={cls} />
           &nbsp;
           <span className="main-box">
-            {layer.caption} {displayType}
+            {layer.internalLayerName?.length > 0
+              ? layer.internalLayerName
+              : layer.caption}{" "}
+            {displayType}
           </span>
         </li>
       );
@@ -949,7 +984,7 @@ class Menu extends Component {
                 data-infobox={infobox}
               >
                 <span className="layer-name">
-                  {that.getLayerNameFromId(
+                  {that.getLayerNameFromIdForDisplay(
                     typeof layer === "object" ? layer.id : layer
                   )}
                 </span>
@@ -967,7 +1002,7 @@ class Menu extends Component {
                 data-infobox={infobox}
               >
                 <span className="layer-name">
-                  {that.getLayerNameFromId(
+                  {that.getLayerNameFromIdForDisplay(
                     typeof layer === "object" ? layer.id : layer
                   )}
                 </span>
@@ -975,7 +1010,7 @@ class Menu extends Component {
             );
           }
         });
-        if (group.hasOwnProperty("groups")) {
+        if (group.hasOwnProperty("groups") && group.groups) {
           leafs.push(roots(group.groups));
         }
         return leafs;
@@ -1090,13 +1125,15 @@ class Menu extends Component {
     function flatten(config) {
       var layerList = [];
       function fromGroups(groups) {
-        return groups.reduce((list, n, index, array) => {
-          var g = array[index];
-          if (g.hasOwnProperty("groups")) {
-            list = list.concat(fromGroups(g.groups));
-          }
-          return list.concat(g.layers);
-        }, []);
+        if (groups) {
+          return groups.reduce((list, n, index, array) => {
+            var g = array[index];
+            if (g.hasOwnProperty("groups") && g.groups) {
+              list = list.concat(fromGroups(g.groups));
+            }
+            return list.concat(g.layers);
+          }, []);
+        }
       }
       layerList = layerList.concat(fromGroups(config.groups));
       return layerList;
@@ -1110,7 +1147,7 @@ class Menu extends Component {
     layers = layers.reverse();
 
     return layers.map((layer, i) => {
-      var name = this.getLayerNameFromId(layer.id);
+      var name = this.getLayerNameFromIdForDisplay(layer.id);
       return (
         <li
           className="layer-node"

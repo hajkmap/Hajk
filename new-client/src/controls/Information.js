@@ -6,7 +6,7 @@ import propTypes from "prop-types";
 import { IconButton, Paper, Tooltip } from "@mui/material";
 import InfoIcon from "@mui/icons-material/Info";
 
-import Dialog from "../components/Dialog.js";
+import Dialog from "../components/Dialog/Dialog";
 
 const StyledPaper = styled(Paper)(({ theme }) => ({
   marginBottom: theme.spacing(1),
@@ -74,7 +74,12 @@ class Information extends React.PureComponent {
 
     return createPortal(
       <Dialog
-        options={{ headerText, text, buttonText }}
+        options={{
+          headerText,
+          text,
+          buttonText,
+          useLegacyNonMarkdownRenderer: true, // Preserve backward compatibility with how Dialog used to work prior ReactMarkdown
+        }}
         open={this.state.dialogOpen}
         onClose={this.onClose}
       />,

@@ -9,7 +9,7 @@ import TreeRow from "./treerow.jsx";
 import { withStyles } from "@material-ui/core/styles";
 import { SketchPicker } from "react-color";
 
-import { Typography } from "@material-ui/core";
+import { Typography, RadioGroup, Radio, FormControlLabel } from "@material-ui/core";
 
 import {
   ColorButtonBlue,
@@ -79,6 +79,7 @@ class ToolOptions extends Component {
     tableOfContents: {
       active: false,
       expanded: false,
+      printMode: "none",
       chapterLevelsToShow: 2,
       title: "Innehållsförteckning",
     },
@@ -86,6 +87,7 @@ class ToolOptions extends Component {
       textAreaBackgroundColor: "",
       textAreaDividerColor: "",
     },
+    tree: {},
   };
   treeKeys = [];
   menuConfig = {
@@ -886,6 +888,33 @@ class ToolOptions extends Component {
               }}
               value={this.state.tableOfContents.chapterLevelsToShow}
             />
+          </div>
+          <div>
+            <label htmlFor="tocPrintMode" style={{ width: "400px" }}>
+            Välj hur innehållsförteckningen skall skivas ut{" "}
+                <i
+                  className="fa fa-question-circle"
+                  data-toggle="tooltip"
+                  title="Välj hur innehållsförteckning ska skrivas ut"
+                />
+            </label>
+            <RadioGroup 
+              id="printMode"
+              name="printMode" 
+              value={this.state.tableOfContents.printMode} 
+              onChange={(e) => {
+                const value = e.target.value;
+                this.setState((prevState) => ({
+                  tableOfContents: {
+                    ...prevState.tableOfContents,
+                    printMode: value,
+                  },
+                }));
+              }}>
+            <FormControlLabel value="full" control={<Radio color="primary" />} label="Hela" />
+            <FormControlLabel value="partial" control={<Radio color="primary" />} label="Valda" />
+            <FormControlLabel value="none" control={<Radio color="primary" />} label="Inga" />
+          </RadioGroup>
           </div>
           <div className="separator">Faktaruta</div>
           <div>

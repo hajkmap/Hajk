@@ -45,7 +45,7 @@ class TreeRow extends React.Component {
     return <Icon>{icon.materialUiIconName}</Icon>;
   };
 
-  UNSAFE_componentWillUnmount = () => {
+  componentWillUnmount = () => {
     const { updateMenuItem, treeNodeId } = this.props;
     updateMenuItem(treeNodeId, { title: this.state.menuItemTitle });
   };

@@ -12,7 +12,7 @@ import {
 } from "@mui/material";
 import { visuallyHidden } from "@mui/utils";
 
-import Dialog from "../Dialog.js";
+import Dialog from "../Dialog/Dialog";
 import SearchSettings from "./SearchSettings";
 
 class SearchTools extends React.PureComponent {
@@ -65,6 +65,7 @@ class SearchTools extends React.PureComponent {
             ),
             headerText: "Sökinställningar",
             buttonText: "OK",
+            useLegacyNonMarkdownRenderer: true,
           }}
           open={settingsDialog}
           onClose={() => {

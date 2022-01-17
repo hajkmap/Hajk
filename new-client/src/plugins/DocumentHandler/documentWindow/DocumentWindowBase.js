@@ -149,7 +149,6 @@ class DocumentWindowBase extends React.PureComponent {
   render() {
     const {
       options,
-      chapters,
       localObserver,
       documentWindowMaximized,
       document,
@@ -205,11 +204,11 @@ class DocumentWindowBase extends React.PureComponent {
           ) : (
             <PrintWindow
               customTheme={customTheme}
-              chapters={chapters}
               activeDocument={document}
               documentWindowMaximized={documentWindowMaximized}
               togglePrintWindow={togglePrintWindow}
               localObserver={localObserver}
+              options={this.props.options}
               {...this.props}
             />
           )

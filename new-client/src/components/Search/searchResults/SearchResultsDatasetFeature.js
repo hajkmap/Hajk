@@ -43,7 +43,6 @@ class SearchResultsDatasetFeature extends React.PureComponent {
   handleCheckboxToggle = () => {
     const {
       feature,
-      featureTitle,
       source,
       visibleInMap,
       addFeatureToSelected,
@@ -56,7 +55,6 @@ class SearchResultsDatasetFeature extends React.PureComponent {
       addFeatureToSelected({
         feature: feature,
         sourceId: source?.id,
-        featureTitle: featureTitle,
         initiator: "userSelect",
       });
     }
@@ -68,11 +66,10 @@ class SearchResultsDatasetFeature extends React.PureComponent {
   };
 
   render() {
-    const { feature, featureTitle, shouldRenderSelectedCollection } =
-      this.props;
+    const { feature, shouldRenderSelectedCollection } = this.props;
     const shouldRenderCheckbox =
       feature.getGeometry() && shouldRenderSelectedCollection;
-    if (featureTitle.length > 0) {
+    if (feature.featureTitle.length > 0) {
       return (
         <GridRoot container alignItems="center" hej="hejhej">
           {shouldRenderCheckbox
@@ -80,7 +77,7 @@ class SearchResultsDatasetFeature extends React.PureComponent {
             : this.renderOriginBasedIcon()}
           <Grid item xs={9}>
             <StyledTypography noWrap align="left">
-              {featureTitle}
+              {feature.featureTitle}
             </StyledTypography>
           </Grid>
           <Grid item xs={1}></Grid>

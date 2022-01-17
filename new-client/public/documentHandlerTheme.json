@@ -1,6 +1,11 @@
 {
   "typography": {
     "fontSize": 14,
+    "h1": {
+      "fontSize": "2.0rem",
+      "fontWeight": 800,
+      "margin-bottom": "0.25em"
+    },
     "h2": {
       "fontSize": "1.5rem",
       "fontWeight": 800,

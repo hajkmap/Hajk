@@ -201,13 +201,28 @@ class SearchBar extends React.PureComponent {
     );
   };
 
+  /**
+   * @summary Prepare a label to show as the placeholder in the Search bar
+   * @returns {string} placeholder text
+   */
   getPlaceholder = () => {
-    const { options, searchActive } = this.props;
+    const {
+      options,
+      searchActive,
+      searchOptions: { searchInVisibleLayers },
+    } = this.props;
+
+    const labelPostfix = searchInVisibleLayers
+      ? " (endast i synliga lager)"
+      : "";
+
     return searchActive === "selectSearch" || searchActive === "draw"
-      ? "Söker med objekt..."
+      ? `Söker med objekt${labelPostfix}`
       : searchActive === "extentSearch"
-      ? "Söker i området..."
-      : options.searchBarPlaceholder ?? "Sök...";
+      ? `Söker i området${labelPostfix}`
+      : options.searchBarPlaceholder
+      ? `${options.searchBarPlaceholder}${labelPostfix}`
+      : `Sök${labelPostfix}`;
   };
 
   renderSearchResultList = () => {

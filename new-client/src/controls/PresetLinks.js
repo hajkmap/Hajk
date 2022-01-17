@@ -2,11 +2,12 @@ import React from "react";
 import { createPortal } from "react-dom";
 import { styled } from "@mui/material/styles";
 import propTypes from "prop-types";
+import { withSnackbar } from "notistack";
 
 import { IconButton, Paper, Tooltip, Menu, MenuItem } from "@mui/material";
-import Bookmarks from "@mui/icons-material/Bookmarks";
+import FolderSpecial from "@mui/icons-material/FolderSpecial";
 
-import Dialog from "../components/Dialog.js";
+import Dialog from "../components/Dialog/Dialog";
 
 const StyledPaper = styled(Paper)(({ theme }) => ({
   marginBottom: theme.spacing(1),
@@ -62,7 +63,8 @@ class Preset extends React.PureComponent {
   // checks wether that is true or not.
   isValidMapLink = (mapLink) => {
     return (
-      mapLink.includes("x=") && mapLink.includes("y=") && mapLink.includes("z=")
+      (mapLink.includes("x=") && mapLink.includes("y=")) ||
+      mapLink.includes("l=")
     );
   };
 
@@ -75,8 +77,8 @@ class Preset extends React.PureComponent {
     const z = queryParams.get("z");
     const l = queryParams.get("l");
 
-    const location = [x, y];
-    const zoom = z;
+    const location = x && y ? [x, y] : null;
+    const zoom = location ? z : null; // no need to zoom if we don't have a position.
     return { location, zoom, layers: l };
   };
 
@@ -87,7 +89,8 @@ class Preset extends React.PureComponent {
       this.handleClose(); // Ensure that popup menu is closed
       const { location, zoom, layers } = this.getMapInfoFromMapLink(url);
       this.location = location;
-      this.zoom = zoom;
+      this.zoom = location ? zoom || this.map.getView().getZoom() : null;
+
       this.layers = layers;
 
       // If the link contains layers we open the dialog where the user can choose to
@@ -133,6 +136,9 @@ class Preset extends React.PureComponent {
   };
 
   flyTo(view, location, zoom) {
+    if (!location) {
+      return;
+    }
     const duration = 1500;
     view.animate({
       center: location,
@@ -194,6 +200,7 @@ class Preset extends React.PureComponent {
             headerText: "Visa snabbval",
             buttonText: "OK",
             abortText: "Avbryt",
+            useLegacyNonMarkdownRenderer: true,
           }}
           open={this.state.dialogOpen}
           onClose={this.closeDialog}
@@ -225,7 +232,7 @@ class Preset extends React.PureComponent {
                 aria-label={this.title}
                 onClick={this.handleClick}
               >
-                <Bookmarks />
+                <FolderSpecial />
               </StyledIconButton>
             </StyledPaper>
           </Tooltip>
@@ -244,4 +251,4 @@ class Preset extends React.PureComponent {
   }
 }
 
-export default Preset;
+export default withSnackbar(Preset);
