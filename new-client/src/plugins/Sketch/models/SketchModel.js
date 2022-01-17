@@ -180,15 +180,26 @@ class SketchModel {
   // Applies the supplied style on the supplied feature.
   setFeatureStyle = (feature, styleSettings) => {
     try {
+      // First we'll have to get the base-style. (If we're dealing
+      // with an arrow-feature, the base-style is the first element of the array
+      // returned from the getStyle-method).
       const featureStyle = Array.isArray(feature.getStyle())
         ? feature.getStyle()[0]
         : feature.getStyle();
+      // Then we'll get the stroke and text-style
       const fillStyle = featureStyle.getFill();
       const strokeStyle = featureStyle.getStroke();
+      // Then we'll update the styles.
       fillStyle.setColor(this.#getRGBAString(styleSettings.fillColor));
       strokeStyle.setColor(this.#getRGBAString(styleSettings.strokeColor));
       strokeStyle.setWidth(styleSettings.strokeWidth);
       strokeStyle.setLineDash(styleSettings.lineDash);
+      // The text-style-settings must be updated as well.
+      feature.set("TEXT_SETTINGS", {
+        size: styleSettings.textSize,
+        foregroundColor: styleSettings.textForegroundColor,
+        backgroundColor: styleSettings.textBackgroundColor,
+      });
     } catch (error) {
       console.error(`Failed to apply the supplied style. Error: ${error}`);
     }

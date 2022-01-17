@@ -1282,12 +1282,15 @@ class DrawModel {
 
   // Makes sure all features are re-drawn. (If any feature-style has changed
   // this might be necessary in some cases to make the change show).
-  // Also making sure to completely re-style arrows so that the arrow head has
-  // the correct color...
+  // Also making sure to completely re-style arrow- and text-features so that
+  // the arrow head and texts has the correct color...
   refreshDrawLayer = () => {
     this.#drawSource.forEachFeature((f) => {
       if (f.get("DRAW_METHOD") === "Arrow") {
         this.#refreshArrowStyle(f);
+      }
+      if (f.get("DRAW_METHOD") === "Text") {
+        f.setStyle(this.#getFeatureStyle(f));
       }
     });
     this.#drawLayer.changed();
