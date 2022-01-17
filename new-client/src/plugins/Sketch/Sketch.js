@@ -17,6 +17,10 @@ const Sketch = (props) => {
   const [activeDrawType, setActiveDrawType] = React.useState("Polygon");
   // We have to keep track of the eventual feature that has been selected for modification.
   const [editFeature, setEditFeature] = React.useState(null);
+  // We also need to keep track of if we're supposed to be enabling a modify-interaction along with
+  // the edit-interaction. (The edit-interaction allows the user to change feature colors etc. and the
+  // modify-interaction allows the user to change the features geometries).
+  const [modifyEnabled, setModifyEnabled] = React.useState(true);
   // We're gonna need to keep track of if the actual plugin is shown or not.
   const [pluginShown, setPluginShown] = React.useState(
     props.options.visibleAtStart ?? false
@@ -77,11 +81,13 @@ const Sketch = (props) => {
       case "DELETE":
         return drawModel.toggleDrawInteraction("Delete");
       case "EDIT":
-        return drawModel.toggleDrawInteraction("Edit");
+        return drawModel.toggleDrawInteraction("Edit", {
+          modifyEnabled: modifyEnabled,
+        });
       default:
         return drawModel.toggleDrawInteraction("");
     }
-  }, [activeDrawType, activityId, drawModel, pluginShown]);
+  }, [activeDrawType, activityId, drawModel, pluginShown, modifyEnabled]);
 
   // This effect makes sure to reset the edit-feature if the window is closed,
   // or if the user changes activity. (We don't want to keep the feature selected
@@ -126,6 +132,8 @@ const Sketch = (props) => {
         activityId={activityId}
         setActivityId={setActivityId}
         setActiveDrawType={setActiveDrawType}
+        modifyEnabled={modifyEnabled}
+        setModifyEnabled={setModifyEnabled}
         editFeature={editFeature}
       />
     </BaseWindowPlugin>

@@ -181,6 +181,8 @@ const SketchView = (props) => {
             model={model}
             drawModel={drawModel}
             editFeature={props.editFeature}
+            modifyEnabled={props.modifyEnabled}
+            setModifyEnabled={props.setModifyEnabled}
           />
         );
       case "MOVE":

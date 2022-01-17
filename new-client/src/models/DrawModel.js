@@ -35,6 +35,7 @@ import Overlay from "ol/Overlay.js";
  * - get/set labelFormat(): Sets the format on the labels. ("AUTO", "M2", "KM2", "HECTARE")
  * - get/set showDrawTooltip(): Get or set wether a tooltip should be shown when drawing.
  * - get/set showFeatureMeasurements(): Get or set wether drawn feature measurements should be shown or not.
+ * - getModifyActive(): Returns wether the modify-interaction is active or not.
  */
 class DrawModel {
   #map;
@@ -54,7 +55,8 @@ class DrawModel {
   #textStyleSettings;
   #drawInteraction;
   #removeInteractionActive;
-  #editInteraction;
+  #editInteractionActive;
+  #modifyInteraction;
   #allowedLabelFormats;
   #labelFormat;
   #customHandleDrawStart;
@@ -91,7 +93,8 @@ class DrawModel {
     // We also have to make sure to keep track of if any other interaction is active.
     // E.g. "Remove", or "Edit".
     this.#removeInteractionActive = false;
-    this.#editInteraction = null;
+    this.#editInteractionActive = false;
+    this.#modifyInteraction = null;
     // We're also keeping track of the tooltip-settings
     this.#showDrawTooltip = settings.showDrawTooltip ?? true;
     this.#drawTooltip = null;
@@ -804,7 +807,7 @@ class DrawModel {
     if (this.#removeInteractionActive) {
       return this.#disableRemoveInteraction();
     }
-    if (this.#editInteraction) {
+    if (this.#editInteractionActive) {
       return this.#disableEditInteraction();
     }
     // If there isn't an active draw interaction currently, we just return.
@@ -848,7 +851,7 @@ class DrawModel {
   };
 
   // Publishes a modify-message with the clicked feature in the payload.
-  #modifyClickedFeature = (e) => {
+  #editClickedFeature = (e) => {
     // Get features present at the clicked feature.
     const clickedFeatures = this.#map.getFeaturesAtPixel(e.pixel);
     // We only care about features that have been drawn by a user.
@@ -887,18 +890,18 @@ class DrawModel {
   // Enables an edit-interaction which allows the user to edit the shape of user-drawn
   // features. The draw-model also makes sure to enable an on-click handler that publish
   // an event when a feature is clicked (i.e. chosen for editing).
-  #enableEditInteraction = () => {
-    // We have to make sure to set a field so that the handlers responsible for deleting
-    // all active interactions knows that there is an edit-interaction to delete.
-    this.#editInteraction = new Modify({ source: this.#drawSource });
+  #enableEditInteraction = (settings) => {
+    // Let's set a field so that we know that edit is enabled.
+    this.#editInteractionActive = true;
     // We're gonna need a handler that can update the feature-style when
     // the modification is completed.
-    this.#editInteraction.on("modifyend", this.#handleModifyEnd);
-    this.#map.on("singleclick", this.#modifyClickedFeature);
-    // Then we'll add the interaction to the map.
-    this.#map.addInteraction(this.#editInteraction);
+    this.#map.on("singleclick", this.#editClickedFeature);
     // Let's add the clickLock to avoid the featureInfo etc.
     this.#map.clickLock.add("coreDrawModel");
+    // Usually, the modify interaction is enabled at the same time as the edit-interaction,
+    // allowing the user to change the feature geometry.
+    // If the user has not set "enableModify" to false in the settings, we enable the modify.
+    (settings.modifyEnabled ?? true) && this.#enableModifyInteraction();
   };
 
   // Disables the edit-interaction by removing the event-listener and disabling
@@ -906,13 +909,56 @@ class DrawModel {
   #disableEditInteraction = () => {
     // Remove the click-lock so that the feature-info works again
     this.#map.clickLock.delete("coreDrawModel");
-    // Remove the modify-interaction from the map
-    this.#map.removeInteraction(this.#editInteraction);
-    // Remove the feature-change event-listener.
-    this.#editInteraction.un("modifyend", this.#handleModifyEnd);
-    this.#map.un("singleclick", this.#modifyClickedFeature);
+    // Remove the event-listener
+    this.#map.un("singleclick", this.#editClickedFeature);
+    // Disable the potential modify-interaction (it should only be active when the edit-interaction
+    // is active).
+    this.#disableModifyInteraction();
     // Finally, we reset the field so we know that the interaction is no longer active.
-    this.#editInteraction = null;
+    this.#editInteractionActive = false;
+  };
+
+  #enableModifyInteraction = () => {
+    // If the edit-interaction is not active, we shouldn't enable the modify-interaction.
+    // The modify-interaction is an interaction that should be used on-top of the edit-interaction.
+    // TODO: Haven't really decided the above yet.
+    if (!this.#editInteractionActive) {
+      return {
+        status: "FAILED",
+        message:
+          "Modify-interaction could not be enabled. Edit has to be enabled before enabling.",
+      };
+    }
+    // We have to make sure to set a field so that the handlers responsible for deleting
+    // all active interactions knows that there is an edit-interaction to delete.
+    this.#modifyInteraction = new Modify({ source: this.#drawSource });
+    // We're gonna need a handler that can update the feature-style when
+    // the modification is completed.
+    this.#modifyInteraction.on("modifyend", this.#handleModifyEnd);
+    // Then we'll add the interaction to the map.
+    this.#map.addInteraction(this.#modifyInteraction);
+    // Let's add the clickLock to avoid the featureInfo etc.
+    this.#map.clickLock.add("coreDrawModel");
+    // Finally we return something so that the enabler knows that we've enabled.
+    return {
+      status: "SUCCESS",
+      message: "Modify-interaction enabled.",
+    };
+  };
+
+  #disableModifyInteraction = () => {
+    // If the modify-interaction is not active, we can abort.
+    if (!this.#modifyInteraction) {
+      return;
+    }
+    // Otherwise, let's disable it. First remove the interaction.
+    this.#map.removeInteraction(this.#modifyInteraction);
+    // Then we'll remove the event-listener
+    this.#modifyInteraction.un("modifyend", this.#handleModifyEnd);
+    // Then we'll reset the field referring to the interaction
+    this.#modifyInteraction = null;
+    // Let's add the clickLock to avoid the featureInfo etc.
+    this.#map.clickLock.delete("coreDrawModel");
   };
 
   // Toggles the draw-interaction on and off if it is currently on.
@@ -1038,10 +1084,10 @@ class DrawModel {
     // interaction. Since these are special interactions, (not real ol-draw-interactions)
     // we make sure not to continue executing.
     if (drawMethod === "Delete") {
-      return this.#enableRemoveInteraction();
+      return this.#enableRemoveInteraction(settings);
     }
     if (drawMethod === "Edit") {
-      return this.#enableEditInteraction();
+      return this.#enableEditInteraction(settings);
     }
     // If we've made it this far it's time to enable a new draw interaction!
     // First we must make sure to gather some settings and defaults.
@@ -1229,6 +1275,11 @@ class DrawModel {
   // Get:er returning the current label-format
   getLabelFormat = () => {
     return this.#labelFormat;
+  };
+
+  // Get:er returning if the modify-interaction is active.
+  getModifyActive = () => {
+    return this.#modifyInteraction ? true : false;
   };
 
   // Get:er returning the state of the showDrawTooltip
