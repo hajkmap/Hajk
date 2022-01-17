@@ -142,7 +142,6 @@ class FirToolbarView extends React.PureComponent {
       this.interaction = new Draw({
         source: this.model.layers.draw.getSource(),
         type: type,
-        // style: this.createStyle(),
         geometryFunction: geometryFunction,
         geometryName: type,
       });
@@ -156,8 +155,6 @@ class FirToolbarView extends React.PureComponent {
       this.deactivateDraw();
       if (type === "Delete") {
         this.model.map.on("singleclick", this.handleDeleteClick);
-      } else if (type === "Import") {
-        //nada
       }
     }
   };
@@ -219,7 +216,6 @@ class FirToolbarView extends React.PureComponent {
             Sökområde
           </Typography>
           <ButtonGroup
-            // color="primary"
             className={classes.buttonGroup}
             variant="contained"
             aria-label="outlined button group"

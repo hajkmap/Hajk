@@ -27,25 +27,6 @@ class KirSearchResultItemView extends React.PureComponent {
 
   getTemplate = () => {
     return this.rootModel.config.resultsList.template;
-    // Keep for testing/development
-    // return `<div>
-    //     <table>
-    //       <tbody>
-    //         <tr>
-    //           <td>Namn</td>
-    //           <td>{tillnamn}</td>
-    //         </tr>
-    //         <tr>
-    //           <td>Adress</td>
-    //           <td>{adress}<br/>{postnr}<br/>{ort}</td>
-    //         </tr>
-    //         <tr>
-    //           <td>Födelsedatum</td>
-    //           <td>{fodelsedat|date}</td>
-    //         </tr>
-    //       </tbody>
-    //     </table>
-    //   </div>`;
   };
 
   getHtml = () => {

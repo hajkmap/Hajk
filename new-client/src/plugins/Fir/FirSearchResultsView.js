@@ -288,7 +288,6 @@ class FirSearchResultsView extends React.PureComponent {
   }
 
   handlePageChange = (e, p) => {
-    // this.forceUpdate();
     this.setPage(p);
   };
 

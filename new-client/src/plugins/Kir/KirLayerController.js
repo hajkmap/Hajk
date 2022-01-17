@@ -28,16 +28,16 @@ class KirLayerController {
 
   initLayers() {
     this.model.layers.buffer = new VectorLayer({
-      caption: "FIRBufferLayer",
-      name: "FIRBufferLayer",
+      caption: "KIRBufferLayer",
+      name: "KIRBufferLayer",
       source: new VectorSource(),
       queryable: false,
       visible: true,
     });
 
     this.model.layers.draw = new VectorLayer({
-      caption: "FIRDrawLayer",
-      name: "FIRDrawLayer",
+      caption: "KIRDrawLayer",
+      name: "KIRDrawLayer",
       source: new VectorSource(),
       queryable: false,
       visible: true,
@@ -246,7 +246,6 @@ class KirLayerController {
       }
       const jstsGeom = parser.read(olGeom);
       const bufferedGeom = jstsGeom.buffer(this.bufferValue);
-      // bufferedGeom.union(jstsGeom);
 
       let bufferFeature = new Feature({
         geometry: parser.write(bufferedGeom),

@@ -1,6 +1,4 @@
 import KML from "ol/format/KML.js";
-// This class mostly has code picked from hajk2 kml import and hajk3 draw kml import.
-
 export default class FirImport {
   constructor(options) {
     this.localObserver = options.localObserver;
@@ -56,7 +54,6 @@ export default class FirImport {
   };
 
   translateImportedFeature(feature) {
-    // got this from the Draw plugin...
     var coordinates = feature.getGeometry().getCoordinates(),
       type = feature.getGeometry().getType(),
       newCoordinates = [];
@@ -104,7 +101,6 @@ export default class FirImport {
       .getGeometry()
       .transform("EPSG:4326", this.map.getView().getProjection());
 
-    // this.setStyleFromProperties(feature);
     if (
       feature.getProperties().geometryType === "Circle" &&
       feature.getProperties().style

@@ -424,7 +424,6 @@ class FirLayerController {
       }
       const jstsGeom = parser.read(olGeom);
       const bufferedGeom = jstsGeom.buffer(this.bufferValue);
-      // bufferedGeom.union(jstsGeom);
 
       let bufferFeature = new Feature({
         geometry: parser.write(bufferedGeom),
