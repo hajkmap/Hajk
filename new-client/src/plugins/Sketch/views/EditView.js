@@ -10,7 +10,13 @@ const ModifyNodeToggler = ({ modifyEnabled, setModifyEnabled }) => {
     <Paper style={{ padding: 8, marginTop: 8 }}>
       <Grid container justify="space-between">
         <Typography variant="body2">Tillåt redigering av noder</Typography>
-        <Tooltip title="Tillåt redigering av noder TODO">
+        <Tooltip
+          title={
+            modifyEnabled
+              ? "Avaktivera redigering av noder för att enklare kunna selektera objekt i kartan för redigering av färg etc."
+              : "Aktivera för att kunna redigera objektens utbredning i kartan."
+          }
+        >
           <Switch
             checked={modifyEnabled}
             onChange={() => setModifyEnabled(!modifyEnabled)}
