@@ -15,7 +15,9 @@ import {
 import styles from "./FirStyles";
 import { hfetch } from "utils/FetchWrapper";
 import { GeoJSON } from "ol/format";
-import * as jsts from "jsts";
+// import * as jsts from "jsts";
+// FIXME: Temporary fix for "Module not found: Can't resolve 'jsts'"
+const jsts = {};
 
 class FirLayerController {
   constructor(model, observer) {
