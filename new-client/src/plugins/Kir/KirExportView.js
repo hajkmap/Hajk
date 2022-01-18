@@ -5,6 +5,44 @@ import { withSnackbar } from "notistack";
 
 import FirExportResidentListView from "../Fir/FirExportResidentListView";
 
+const styles = (theme) => ({
+  info: {
+    padding: theme.spacing(2),
+  },
+  num: {
+    fontWeight: 500,
+    fontSize: "1rem",
+  },
+  heading: {
+    fontWeight: 500,
+  },
+  formControl: {
+    marginBottom: theme.spacing(3),
+  },
+  formControlOneMargin: {
+    marginBottom: theme.spacing(1),
+  },
+  checkboxLabel: {
+    fontSize: "0.875rem",
+    fontWeight: "400",
+  },
+  checkbox: {
+    paddingTop: "0.25rem",
+    paddingBottom: "0.25rem",
+  },
+  checkboxGroupContainer: {
+    paddingBottom: theme.spacing(2),
+  },
+  containerTopPadded: {
+    paddingTop: theme.spacing(2),
+  },
+  containerTopDoublePadded: {
+    paddingTop: theme.spacing(4),
+  },
+  textField: {
+    width: "50%",
+  },
+});
 class KirExportView extends React.PureComponent {
   state = {
     results: [],
@@ -56,44 +94,5 @@ class KirExportView extends React.PureComponent {
     );
   }
 }
-
-const styles = (theme) => ({
-  info: {
-    padding: theme.spacing(2),
-  },
-  num: {
-    fontWeight: 500,
-    fontSize: "1rem",
-  },
-  heading: {
-    fontWeight: 500,
-  },
-  formControl: {
-    marginBottom: theme.spacing(3),
-  },
-  formControlOneMargin: {
-    marginBottom: theme.spacing(1),
-  },
-  checkboxLabel: {
-    fontSize: "0.875rem",
-    fontWeight: "400",
-  },
-  checkbox: {
-    paddingTop: "0.25rem",
-    paddingBottom: "0.25rem",
-  },
-  checkboxGroupContainer: {
-    paddingBottom: theme.spacing(2),
-  },
-  containerTopPadded: {
-    paddingTop: theme.spacing(2),
-  },
-  containerTopDoublePadded: {
-    paddingTop: theme.spacing(4),
-  },
-  textField: {
-    width: "50%",
-  },
-});
 
 export default withStyles(styles)(withSnackbar(KirExportView));

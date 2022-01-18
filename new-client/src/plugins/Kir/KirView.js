@@ -9,6 +9,25 @@ import KirSearchView from "./KirSearchView";
 import KirExportView from "./KirExportView";
 import KirSearchResultsView from "./KirSearchResultsView";
 
+const styles = (theme) => ({
+  root: {
+    margin: -10,
+    display: "flex",
+    flexDirection: "column",
+    height: "100%",
+  },
+  stickyAppBar: {
+    top: -10,
+  },
+  tabContent: {
+    display: "flex",
+    flexDirection: "column",
+    padding: theme.spacing(1),
+    width: "100%",
+    height: "100%",
+  },
+  hidden: { display: "none" },
+});
 class KirView extends React.PureComponent {
   state = {
     activeTab: 0,
@@ -91,25 +110,5 @@ class KirView extends React.PureComponent {
     );
   }
 }
-
-const styles = (theme) => ({
-  root: {
-    margin: -10,
-    display: "flex",
-    flexDirection: "column",
-    height: "100%",
-  },
-  stickyAppBar: {
-    top: -10,
-  },
-  tabContent: {
-    display: "flex",
-    flexDirection: "column",
-    padding: theme.spacing(1),
-    width: "100%",
-    height: "100%",
-  },
-  hidden: { display: "none" },
-});
 
 export default withStyles(styles)(withSnackbar(KirView));

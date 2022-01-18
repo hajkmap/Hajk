@@ -20,9 +20,65 @@ import IconButton from "@material-ui/core/IconButton";
 import DeleteIcon from "@material-ui/icons/Delete";
 import AddCircle from "@material-ui/icons/AddCircleOutline";
 import RemoveCircle from "@material-ui/icons/RemoveCircleOutline";
-
 import CircularProgress from "@material-ui/core/CircularProgress";
 
+const styles = (theme) => ({
+  heading: {
+    fontWeight: 500,
+  },
+  badge: {
+    top: "11px",
+    right: "-26px",
+  },
+  spacer: {
+    height: theme.spacing(2),
+  },
+  resultItemData: {
+    padding: theme.spacing(2),
+  },
+  paginationContainer: {
+    display: "flex",
+    justifyContent: "right",
+    paddingRight: theme.spacing(2),
+    paddingBottom: theme.spacing(2),
+  },
+  btnIcon: {
+    right: "6px",
+    padding: "6px",
+    "&:hover svg": {
+      color: theme.palette.error.dark,
+      stoke: theme.palette.error.dark,
+      fill: theme.palette.error.dark,
+    },
+  },
+  paddedBottom: {
+    paddingLeft: theme.spacing(2),
+    paddingRight: theme.spacing(2),
+    paddingBottom: theme.spacing(1),
+  },
+  loaderContainer: {
+    display: "flex",
+    alignItems: "center",
+    "& > span": {
+      paddingLeft: theme.spacing(1),
+    },
+  },
+  extendedAccordionSummary: {
+    display: "flex",
+    width: "100%",
+    "& > div:last-child": {
+      marginLeft: "auto",
+    },
+    "& button": {
+      marginTop: "-6px",
+      marginBottom: "-6px",
+      marginRight: "0",
+    },
+    "& button:first-child": {
+      marginRight: "0",
+    },
+  },
+});
 class FirSearchResultsView extends React.PureComponent {
   state = {
     resultsExpanded: true,
@@ -447,63 +503,5 @@ class FirSearchResultsView extends React.PureComponent {
     );
   }
 }
-
-const styles = (theme) => ({
-  heading: {
-    fontWeight: 500,
-  },
-  badge: {
-    top: "11px",
-    right: "-26px",
-  },
-  spacer: {
-    height: theme.spacing(2),
-  },
-  resultItemData: {
-    padding: theme.spacing(2),
-  },
-  paginationContainer: {
-    display: "flex",
-    justifyContent: "right",
-    paddingRight: theme.spacing(2),
-    paddingBottom: theme.spacing(2),
-  },
-  btnIcon: {
-    right: "6px",
-    padding: "6px",
-    "&:hover svg": {
-      color: theme.palette.error.dark,
-      stoke: theme.palette.error.dark,
-      fill: theme.palette.error.dark,
-    },
-  },
-  paddedBottom: {
-    paddingLeft: theme.spacing(2),
-    paddingRight: theme.spacing(2),
-    paddingBottom: theme.spacing(1),
-  },
-  loaderContainer: {
-    display: "flex",
-    alignItems: "center",
-    "& > span": {
-      paddingLeft: theme.spacing(1),
-    },
-  },
-  extendedAccordionSummary: {
-    display: "flex",
-    width: "100%",
-    "& > div:last-child": {
-      marginLeft: "auto",
-    },
-    "& button": {
-      marginTop: "-6px",
-      marginBottom: "-6px",
-      marginRight: "0",
-    },
-    "& button:first-child": {
-      marginRight: "0",
-    },
-  },
-});
 
 export default withStyles(styles)(withSnackbar(FirSearchResultsView));

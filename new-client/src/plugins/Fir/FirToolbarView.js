@@ -13,6 +13,56 @@ import TextField from "@material-ui/core/TextField";
 import InputAdornment from "@material-ui/core/InputAdornment";
 import Draw, { createBox } from "ol/interaction/Draw.js";
 
+const styles = (theme) => ({
+  containerTopPadded: {
+    paddingTop: theme.spacing(2),
+  },
+  containerTopDoublePadded: {
+    paddingTop: theme.spacing(4),
+  },
+  buttonGroup: {
+    width: "100%",
+    overflow: "hidden",
+    whiteSpace: "nowrap",
+  },
+  iconButton: {
+    margin: theme.spacing(0),
+    paddingLeft: 0,
+    paddingRight: 0,
+    minWidth: "2.875rem",
+    width: "calc(99.9% / 6)",
+  },
+  fileInputContainer: {
+    display: "flex",
+    alignItems: "center",
+    "& > *": {
+      display: "flex",
+    },
+    "& span": {
+      whiteSpace: "nowrap",
+    },
+    "& span.filename": {
+      textOverflow: "ellipsis",
+      whiteSpace: "nowrap",
+      overflow: "hidden",
+      display: "block",
+      paddingLeft: theme.spacing(1),
+      fontWeight: "300",
+    },
+  },
+  fileInput: {
+    display: "none",
+  },
+  svgImg: {
+    height: "24px",
+    width: "24px",
+  },
+  buttonContainedPrimary: {
+    "& img": {
+      filter: "invert(1)", // fixes icon-colors on geometry icons.
+    },
+  },
+});
 class FirToolbarView extends React.PureComponent {
   state = {
     tools: {
@@ -374,56 +424,5 @@ class FirToolbarView extends React.PureComponent {
     );
   }
 }
-
-const styles = (theme) => ({
-  containerTopPadded: {
-    paddingTop: theme.spacing(2),
-  },
-  containerTopDoublePadded: {
-    paddingTop: theme.spacing(4),
-  },
-  buttonGroup: {
-    width: "100%",
-    overflow: "hidden",
-    whiteSpace: "nowrap",
-  },
-  iconButton: {
-    margin: theme.spacing(0),
-    paddingLeft: 0,
-    paddingRight: 0,
-    minWidth: "2.875rem",
-    width: "calc(99.9% / 6)",
-  },
-  fileInputContainer: {
-    display: "flex",
-    alignItems: "center",
-    "& > *": {
-      display: "flex",
-    },
-    "& span": {
-      whiteSpace: "nowrap",
-    },
-    "& span.filename": {
-      textOverflow: "ellipsis",
-      whiteSpace: "nowrap",
-      overflow: "hidden",
-      display: "block",
-      paddingLeft: theme.spacing(1),
-      fontWeight: "300",
-    },
-  },
-  fileInput: {
-    display: "none",
-  },
-  svgImg: {
-    height: "24px",
-    width: "24px",
-  },
-  buttonContainedPrimary: {
-    "& img": {
-      filter: "invert(1)", // fixes icon-colors on geometry icons.
-    },
-  },
-});
 
 export default withStyles(styles)(withSnackbar(FirToolbarView));

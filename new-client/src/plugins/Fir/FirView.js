@@ -10,6 +10,25 @@ import AppBar from "@material-ui/core/AppBar";
 import Tab from "@material-ui/core/Tab";
 import Tabs from "@material-ui/core/Tabs";
 
+const styles = (theme) => ({
+  root: {
+    margin: -10,
+    display: "flex",
+    flexDirection: "column",
+    height: "100%",
+  },
+  stickyAppBar: {
+    top: -10,
+  },
+  tabContent: {
+    display: "flex",
+    flexDirection: "column",
+    padding: theme.spacing(1),
+    width: "100%",
+    height: "100%",
+  },
+  hidden: { display: "none" },
+});
 class FirView extends React.PureComponent {
   state = {
     activeTab: 0,
@@ -107,25 +126,5 @@ class FirView extends React.PureComponent {
     );
   }
 }
-
-const styles = (theme) => ({
-  root: {
-    margin: -10,
-    display: "flex",
-    flexDirection: "column",
-    height: "100%",
-  },
-  stickyAppBar: {
-    top: -10,
-  },
-  tabContent: {
-    display: "flex",
-    flexDirection: "column",
-    padding: theme.spacing(1),
-    width: "100%",
-    height: "100%",
-  },
-  hidden: { display: "none" },
-});
 
 export default withStyles(styles)(withSnackbar(FirView));

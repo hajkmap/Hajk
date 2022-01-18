@@ -27,7 +27,7 @@ class KirWfsService {
     return filters.length === 0 ? null : filters;
   }
 
-  _getFilters(params) {
+  #getFilters(params) {
     let geometryFilters = null;
 
     if (params.features.length > 0) {
@@ -68,7 +68,7 @@ class KirWfsService {
   }
 
   getFeatureRequestObject(params) {
-    let rootFilter = this._getFilters(params);
+    let rootFilter = this.#getFilters(params);
 
     return {
       srsName: this.model.config.srsName,

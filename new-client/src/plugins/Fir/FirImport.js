@@ -37,7 +37,7 @@ export default class FirImport {
   };
 
   parseKML = (str) => {
-    let parser = new KML();
+    const parser = new KML();
     try {
       let features = parser.readFeatures(str);
       features.forEach((feature) => {
@@ -54,7 +54,7 @@ export default class FirImport {
   };
 
   translateImportedFeature(feature) {
-    var coordinates = feature.getGeometry().getCoordinates(),
+    const coordinates = feature.getGeometry().getCoordinates(),
       type = feature.getGeometry().getType(),
       newCoordinates = [];
     feature.setProperties({
@@ -72,7 +72,7 @@ export default class FirImport {
 
     if (type === "LineString") {
       coordinates.forEach((c, i) => {
-        var pairs = [];
+        let pairs = [];
         c.forEach((digit) => {
           if (digit !== 0) {
             pairs.push(digit);
@@ -85,7 +85,7 @@ export default class FirImport {
       coordinates.forEach((polygon, i) => {
         newCoordinates[i] = [];
         polygon.forEach((vertex, j) => {
-          var pairs = [];
+          let pairs = [];
           vertex.forEach((digit) => {
             if (digit !== 0) {
               pairs.push(digit);

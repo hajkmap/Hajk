@@ -4,6 +4,35 @@ import { withStyles } from "@material-ui/core/styles";
 import { withSnackbar } from "notistack";
 import propFilters from "components/FeatureInfo/FeaturePropsFilters";
 
+const styles = (theme) => ({
+  root: {
+    "& table": {
+      borderSpacing: 0,
+      width: "100%",
+      marginBottom: theme.spacing(2),
+      "& tr:nth-child(even) td": {
+        backgroundColor: theme.palette.type === "dark" ? "#565656" : "#ececec",
+      },
+      "& tr td:first-child": {
+        fontWeight: 500,
+      },
+      "& td": {
+        verticalAlign: "top",
+        padding: "2px 6px",
+      },
+    },
+    "& ul": {
+      display: "block",
+      listStyle: "none",
+      paddingLeft: 0,
+      paddingTop: theme.spacing(1),
+      "& a": {
+        display: "inline-block",
+        padding: "2px 0",
+      },
+    },
+  },
+});
 class KirSearchResultItemView extends React.PureComponent {
   state = {};
 
@@ -70,35 +99,5 @@ class KirSearchResultItemView extends React.PureComponent {
     );
   }
 }
-
-const styles = (theme) => ({
-  root: {
-    "& table": {
-      borderSpacing: 0,
-      width: "100%",
-      marginBottom: theme.spacing(2),
-      "& tr:nth-child(even) td": {
-        backgroundColor: theme.palette.type === "dark" ? "#565656" : "#ececec",
-      },
-      "& tr td:first-child": {
-        fontWeight: 500,
-      },
-      "& td": {
-        verticalAlign: "top",
-        padding: "2px 6px",
-      },
-    },
-    "& ul": {
-      display: "block",
-      listStyle: "none",
-      paddingLeft: 0,
-      paddingTop: theme.spacing(1),
-      "& a": {
-        display: "inline-block",
-        padding: "2px 0",
-      },
-    },
-  },
-});
 
 export default withStyles(styles)(withSnackbar(KirSearchResultItemView));

@@ -260,7 +260,7 @@ class KirLayerController {
     targetSource.addFeatures(_bufferFeatures);
   };
 
-  _getZoomOptions = () => {
+  #getZoomOptions = () => {
     return {
       maxZoom: this.model.app.config.mapConfig.map.maxZoom - 2,
       padding: [20, 20, 20, 20],
@@ -270,34 +270,34 @@ class KirLayerController {
   zoomToFeature = (feature) => {
     clearTimeout(this.zoomTimeout);
     this.zoomTimeout = setTimeout(() => {
-      this._zoomToFeature(feature);
+      this.#zoomToFeature(feature);
     }, 500);
   };
 
-  _zoomToFeature = (feature) => {
+  #zoomToFeature = (feature) => {
     if (!feature) {
       return;
     }
 
     const extent = feature.getGeometry().getExtent();
-    this.model.map.getView().fit(extent, this._getZoomOptions());
+    this.model.map.getView().fit(extent, this.#getZoomOptions());
   };
 
   zoomToLayer = (layer) => {
     clearTimeout(this.zoomTimeout);
     this.zoomTimeout = setTimeout(() => {
-      this._zoomToLayer(layer);
+      this.#zoomToLayer(layer);
     }, 500);
   };
 
-  _zoomToLayer = (layer) => {
+  #zoomToLayer = (layer) => {
     const source = layer.getSource();
     if (source.getFeatures().length <= 0) {
       return;
     }
 
     const extent = source.getExtent();
-    this.model.map.getView().fit(extent, this._getZoomOptions());
+    this.model.map.getView().fit(extent, this.#getZoomOptions());
   };
 }
 

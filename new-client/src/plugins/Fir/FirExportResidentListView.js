@@ -23,6 +23,60 @@ import {
   intersects as intersectsFilter,
 } from "ol/format/filter";
 import { hfetch } from "utils/FetchWrapper";
+
+const styles = (theme) => ({
+  info: {
+    padding: theme.spacing(2),
+  },
+  num: {
+    fontWeight: 500,
+    fontSize: "1rem",
+  },
+  heading: {
+    fontWeight: 500,
+  },
+  formControl: {
+    marginBottom: theme.spacing(3),
+  },
+  formControlOneMargin: {
+    marginBottom: theme.spacing(1),
+  },
+  checkboxLabel: {
+    fontSize: "0.875rem",
+    fontWeight: "400",
+  },
+  checkbox: {
+    paddingTop: "0.25rem",
+    paddingBottom: "0.25rem",
+  },
+  checkboxGroupContainer: {
+    paddingBottom: theme.spacing(2),
+  },
+  containerTopPadded: {
+    paddingTop: theme.spacing(2),
+  },
+  containerTopDoublePadded: {
+    paddingTop: theme.spacing(4),
+  },
+  textField: {
+    width: "50%",
+  },
+  downloadContainer: {
+    paddingTop: theme.spacing(2),
+  },
+  buttonLoading: {
+    "& img": {
+      opacity: 0.3,
+    },
+  },
+  buttonProgress: {
+    position: "absolute",
+    top: "50%",
+    left: "50%",
+    marginTop: -12,
+    marginLeft: -12,
+  },
+});
 class FirExportResidentListView extends React.PureComponent {
   state = {
     accordionExpanded: false,
@@ -497,59 +551,5 @@ class FirExportResidentListView extends React.PureComponent {
     );
   }
 }
-
-const styles = (theme) => ({
-  info: {
-    padding: theme.spacing(2),
-  },
-  num: {
-    fontWeight: 500,
-    fontSize: "1rem",
-  },
-  heading: {
-    fontWeight: 500,
-  },
-  formControl: {
-    marginBottom: theme.spacing(3),
-  },
-  formControlOneMargin: {
-    marginBottom: theme.spacing(1),
-  },
-  checkboxLabel: {
-    fontSize: "0.875rem",
-    fontWeight: "400",
-  },
-  checkbox: {
-    paddingTop: "0.25rem",
-    paddingBottom: "0.25rem",
-  },
-  checkboxGroupContainer: {
-    paddingBottom: theme.spacing(2),
-  },
-  containerTopPadded: {
-    paddingTop: theme.spacing(2),
-  },
-  containerTopDoublePadded: {
-    paddingTop: theme.spacing(4),
-  },
-  textField: {
-    width: "50%",
-  },
-  downloadContainer: {
-    paddingTop: theme.spacing(2),
-  },
-  buttonLoading: {
-    "& img": {
-      opacity: 0.3,
-    },
-  },
-  buttonProgress: {
-    position: "absolute",
-    top: "50%",
-    left: "50%",
-    marginTop: -12,
-    marginLeft: -12,
-  },
-});
 
 export default withStyles(styles)(withSnackbar(FirExportResidentListView));
