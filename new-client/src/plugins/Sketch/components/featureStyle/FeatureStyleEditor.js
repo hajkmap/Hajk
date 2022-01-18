@@ -33,7 +33,11 @@ const FeatureStyleEditor = ({ feature, model, drawModel }) => {
 
   // Effect to make sure we set the feature-style-state to the actual style.
   React.useEffect(() => {
-    setFeatureStyle(model.getFeatureStyle(feature));
+    if (feature) {
+      setFeatureStyle(model.getFeatureStyle(feature));
+    } else {
+      setFeatureStyle(null);
+    }
   }, [feature, model]);
 
   // Effect that makes sure to update the feature style when the style-state changes.
