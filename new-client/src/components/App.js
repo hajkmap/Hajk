@@ -783,13 +783,12 @@ class App extends React.PureComponent {
                 currentMap={this.props.config.activeMap}
               />
             )}
-          {clean === false &&
-            this.appModel.cookieManager.showCookieNotice() && (
-              <CookieNotice
-                globalObserver={this.globalObserver}
-                appModel={this.appModel}
-              />
-            )}
+          {clean === false && (
+            <CookieNotice
+              globalObserver={this.globalObserver}
+              appModel={this.appModel}
+            />
+          )}
           )}
           <Alert
             open={this.state.alert}

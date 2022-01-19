@@ -93,10 +93,11 @@ function CookieNotice({ globalObserver, appModel }) {
     globalObserver.subscribe("core.appLoaded", () => {
       setOpen(true);
     });
-    globalObserver.subscribe("core.showCookieBanner", () => {
-      setOpen(true);
-    });
   }
+
+  globalObserver.subscribe("core.showCookieBanner", () => {
+    setOpen(true);
+  });
 
   return (
     <div>
