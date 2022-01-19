@@ -202,7 +202,6 @@ class WFSVectorLayer {
       timeSliderEnd: config?.timeSliderEnd,
     });
     this.layer.setStyle(this.getStyle());
-    console.log("layer: ", this.layer);
 
     // Styling section starts here.
     // First read some values from config
