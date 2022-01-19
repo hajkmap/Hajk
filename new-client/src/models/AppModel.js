@@ -31,6 +31,7 @@ import VectorSource from "ol/source/Vector";
 import { Icon, Fill, Stroke, Style } from "ol/style.js";
 import SnapHelper from "./SnapHelper";
 import { hfetch } from "utils/FetchWrapper";
+import CookieManager from "./Cookie.js";
 
 class AppModel {
   /**
@@ -55,6 +56,7 @@ class AppModel {
     register(this.coordinateSystemLoader.getProj4());
     this.hfetch = hfetch;
     this.refreshMUITheme = refreshMUITheme;
+    this.cookieManager = new CookieManager(config);
   }
 
   decorateConfig() {

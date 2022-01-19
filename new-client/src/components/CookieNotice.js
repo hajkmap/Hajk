@@ -1,21 +1,48 @@
-import React from "react";
-import { object, string } from "prop-types";
-import { Button } from "@material-ui/core";
-import { useSnackbar } from "notistack";
+import React, { useState } from "react";
+import { object } from "prop-types";
+import {
+  Grid,
+  Button,
+  Checkbox,
+  FormControlLabel,
+  Link,
+} from "@material-ui/core";
+import Dialog from "@material-ui/core/Dialog";
+import DialogContent from "@material-ui/core/DialogContent";
+import DialogContentText from "@material-ui/core/DialogContentText";
+import Slide from "@material-ui/core/Slide";
 import { makeStyles } from "@material-ui/styles";
 
 const useStyles = makeStyles((theme) => ({
+  dialogContainer: {
+    "& .MuiDialog-container": {
+      justifyContent: "flex-center",
+      alignItems: "flex-end",
+    },
+  },
+  dialogText: {
+    color: theme.palette.text.primary,
+    paddingBottom: theme.spacing(2),
+  },
   textButton: {
-    color: theme.palette.primary.contrastText,
+    marginLeft: theme.spacing(1),
+  },
+  link: {
+    paddingTop: theme.spacing(1),
+    paddingBottom: theme.spacing(1),
     marginRight: theme.spacing(1),
+    paddingLeft: theme.spacing(1),
   },
 }));
 
 CookieNotice.propTypes = {
-  defaultCookieNoticeMessage: string,
-  defaultCookieNoticeUrl: string,
   globalObserver: object.isRequired,
+  appModel: object.isRequired,
 };
+
+const Transition = React.forwardRef(function Transition(props, ref) {
+  return <Slide direction="up" ref={ref} {...props} />;
+});
 
 /**
  *  *
@@ -23,66 +50,146 @@ CookieNotice.propTypes = {
  * @param {*} props
  * @returns React.Component
  */
-function CookieNotice({
-  defaultCookieNoticeMessage = "Vi använder cookies för att följa upp användandet och ge en bra upplevelse av kartan. Du kan blockera cookies i webbläsaren men då visas detta meddelande igen.",
-  defaultCookieNoticeUrl = "https://pts.se/sv/bransch/regler/lagar/lag-om-elektronisk-kommunikation/kakor-cookies/",
-  globalObserver,
-}) {
+function CookieNotice({ globalObserver, appModel }) {
   const classes = useStyles();
-  const { enqueueSnackbar, closeSnackbar } = useSnackbar();
+  const [open, setOpen] = React.useState(false);
+  const [checkBoxFunctional, setCheckBoxFunctional] = useState(false);
+  const [checkBox3rdPart, setCheckBox3rdPart] = useState(false);
 
-  const action = (key) => (
-    <>
-      <Button
-        onClick={() => {
-          window.open(defaultCookieNoticeUrl);
-        }}
-        variant="text"
-        className={classes.textButton}
-      >
-        {"Mer information"}
-      </Button>
-      <Button
-        color="primary"
-        variant="contained"
-        onClick={() => {
-          // Set a cookie that ensures that this message won't be shown again
-          window.localStorage.setItem("cookieNoticeShown", 1);
-          closeSnackbar(key);
-        }}
-      >
-        {"Jag förstår"}
-      </Button>
-    </>
-  );
+  const defaultCookieNoticeMessage =
+    appModel.config?.mapConfig?.map?.defaultCookieNoticeMessage ??
+    "Vi använder nödvändiga kakor (cookies) för att webbplatsen ska fungera på ett bra sätt för dig. Vi använder också funktionella kakor för att ge dig bästa möjliga funktion om du godkänner användningen av dessa.";
+  const defaultCookieNoticeUrl =
+    appModel.config?.mapConfig?.map?.defaultCookieNoticeUrl ??
+    "https://pts.se/sv/bransch/regler/lagar/lag-om-elektronisk-kommunikation/kakor-cookies/";
 
-  // Display only if "cookie" hasn't been set yet
-  parseInt(window.localStorage.getItem("cookieNoticeShown")) !== 1 &&
+  const use3dPartCookies =
+    appModel.config?.mapConfig?.map?.cookieUse3dPart ?? false;
+  let jsxUse3dPartCheckbox = null;
+  if (use3dPartCookies) {
+    jsxUse3dPartCheckbox = (
+      <>
+        <FormControlLabel
+          control={
+            <Checkbox
+              color="primary"
+              checked={checkBox3rdPart}
+              onChange={(event) => {
+                setCheckBox3rdPart(event.target.checked);
+              }}
+            />
+          }
+          label={"3:e Part"}
+        />
+      </>
+    );
+  }
+
+  const handleClose = () => {
+    //setOpen(false); // Uncomment this to convert this dialog to a "modeless" dialog
+  };
+
+  if (appModel.cookieManager.showCookieNotice() === true) {
     globalObserver.subscribe("core.appLoaded", () => {
-      enqueueSnackbar(defaultCookieNoticeMessage, {
-        persist: true,
-        anchorOrigin: {
-          vertical: "bottom",
-          horizontal: "center",
-        },
-        action: action,
-      });
+      setOpen(true);
     });
-  return null;
+    globalObserver.subscribe("core.showCookieBanner", () => {
+      setOpen(true);
+    });
+  }
+
+  return (
+    <div>
+      <Dialog
+        fullWidth={true}
+        maxWidth={"md"}
+        className={classes.dialogContainer}
+        open={open}
+        TransitionComponent={Transition}
+        keepMounted
+        onClose={handleClose}
+        aria-describedby="cookie-dialog-content-text"
+      >
+        <DialogContent>
+          <DialogContentText
+            className={classes.dialogText}
+            id="cookie-dialog-content-text"
+          >
+            {defaultCookieNoticeMessage}
+
+            <Link
+              href={defaultCookieNoticeUrl}
+              className={classes.link}
+              underline="always"
+              rel="noreferrer"
+              target="_blank"
+            >
+              {"Mer information om kakor"}
+            </Link>
+          </DialogContentText>
+          <Grid></Grid>
+          <Grid container direction="row-reverse">
+            <Grid>
+              <Button
+                color="primary"
+                variant="contained"
+                className={classes.textButton}
+                onClick={() => {
+                  let cookieLevel = 1; // Required
+                  if (checkBoxFunctional) {
+                    cookieLevel = cookieLevel | 2; // Functional
+                  }
+                  if (checkBox3rdPart) {
+                    cookieLevel = cookieLevel | 4; // ThirdParty
+                  }
+                  appModel.cookieManager.setCookieLevels(cookieLevel);
+                  setOpen(false);
+                }}
+              >
+                {"Tillåt valda"}
+              </Button>
+              <Button
+                color="primary"
+                variant="contained"
+                className={classes.textButton}
+                onClick={() => {
+                  let cookieLevel = 3; // Required AND Functional
+                  if (use3dPartCookies) {
+                    cookieLevel = cookieLevel | 4;
+                  }
+                  appModel.cookieManager.setCookieLevels(cookieLevel);
+                  setOpen(false);
+                }}
+              >
+                {"Tillåt Alla"}
+              </Button>
+            </Grid>
+            <Grid>
+              <FormControlLabel
+                control={
+                  <Checkbox color="primary" checked={true} disabled={true} />
+                }
+                label={"Nödvändiga"}
+              />
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    color="primary"
+                    checked={checkBoxFunctional}
+                    onChange={(event) => {
+                      setCheckBoxFunctional(event.target.checked);
+                    }}
+                  />
+                }
+                label={"Funktionella"}
+              />
+              {jsxUse3dPartCheckbox}
+            </Grid>
+          </Grid>
+        </DialogContent>
+      </Dialog>
+    </div>
+  );
 }
 
-/**
- * The arePropsEqual() function is defined with two parameters:
- * prevProps and nextProps respectively.
- * The arePropsEqual() function returns true when the props are
- * compared to be equal, thereby preventing the component from
- * re-rendering, and returns false when the props are not equal.
- * @param {*} prevProps
- * @param {*} nextProps
- */
-function arePropsEqual(prevProps, nextProps) {
-  // This ensures that CookieNotice only initiates once
-  return true;
-}
-
-export default React.memo(CookieNotice, arePropsEqual);
+export default CookieNotice;
