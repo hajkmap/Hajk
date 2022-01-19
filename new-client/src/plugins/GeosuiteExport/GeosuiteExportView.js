@@ -30,7 +30,7 @@ import {
   FormLabel,
 } from "@material-ui/core";
 import ProductList from "./components/ProductList";
-import LinkItem from "./components/LinkItem";
+import { Checkbox } from "@material-ui/core";
 
 const styles = (theme) => ({
   //specific request from SBK to reduce the default MUI stepper padding.
@@ -45,12 +45,16 @@ const styles = (theme) => ({
     padding: theme.spacing(1),
     fontWeight: theme.typography.fontWeightMedium,
   },
-  linkList: {
+  checkBoxList: {
     maxHeight: 200,
     overflowY: "scroll",
     overflowX: "hidden",
     border: `1px solid ${theme.palette.divider}`,
-    marginTop: theme.spacing(2),
+    width: "100%",
+    padding: "0px 0px 0px 10px",
+  },
+  checkBoxItem: {
+    marginBottom: "-10px",
   },
   noResultMessage: {
     display: "flex",
@@ -78,6 +82,7 @@ const defaultState = {
   processComplete: false,
   responsePending: false,
   responseFailed: false,
+  savingFile: false,
 };
 
 class GeosuiteExportView extends React.PureComponent {
@@ -120,6 +125,14 @@ class GeosuiteExportView extends React.PureComponent {
 
     this.localObserver.subscribe("document-selection-failed", () => {
       this.documentSelectionFailed();
+    });
+
+    this.localObserver.subscribe("document-save-done", () => {
+      this.documentSaveDone();
+    });
+
+    this.localObserver.subscribe("document-save-failed", () => {
+      this.documentSaveFailed();
     });
 
     this.localObserver.subscribe("area-selection-removed", () => {
@@ -236,6 +249,7 @@ class GeosuiteExportView extends React.PureComponent {
     this.setState({
       responsePending: false,
       documents: documents,
+      savingFile: true,
     });
   };
 
@@ -243,6 +257,44 @@ class GeosuiteExportView extends React.PureComponent {
     this.setState({
       responsePending: false,
       responseFailed: true,
+      savingFile: false,
+    });
+  };
+
+  documentSaveDone = () => {
+    this.setState({
+      savingFile: false,
+    });
+  };
+
+  documentSaveFailed = () => {
+    this.setState({
+      savingFile: false,
+    });
+    this.props.enqueueSnackbar(this.#getErrorMessage());
+  };
+
+  handleDocumentCheckboxChange = (event) => {
+    let documents = this.props.model.getSelectedDocuments();
+
+    let value = event.target.value;
+
+    let document = documents.find((doc) => doc.id === value);
+    document.selected = event.target.checked;
+
+    this.setState({
+      documents: documents,
+    });
+  };
+
+  handleDocumentSelectAllClear = (event) => {
+    let documents = this.props.model.getSelectedDocuments();
+    let selectAll = event.target.innerText !== "RENSA" ? true : false;
+    documents.forEach((document) => {
+      document.selected = selectAll;
+    });
+    this.setState({
+      documents: documents,
     });
   };
 
@@ -341,7 +393,11 @@ class GeosuiteExportView extends React.PureComponent {
    * projects and/or boreholes. Pre-requisite: state must be updated with projects and contain e-mail.
    */
   handleEnterConfirmationStep = () => {
-    if (this.state.selectedProduct !== "document") {
+    if (this.state.selectedProduct === "document") {
+      let documents = this.props.model.getSelectedDocuments();
+
+      this.props.model.zipDocuments(documents);
+    } else if (this.state.selectedProduct !== "document") {
       const email = this.state.email;
       const boreholeIds = [];
       const projectIds = [];
@@ -393,13 +449,47 @@ class GeosuiteExportView extends React.PureComponent {
             {"Geotekniska utredningar"}
           </Typography>
         </Grid>
-        <Typography>{documentDescription}</Typography>
+        <Typography style={{ marginBottom: "8px" }}>
+          {documentDescription}
+        </Typography>
+        <Grid
+          container
+          direction="row-reverse"
+          spacing={1}
+          alignItems="center"
+          style={{
+            width: "100%",
+            margin: "0px 0px 0px 5px",
+            padding: "0px 0px 0px 0px",
+          }}
+        >
+          <Grid item>
+            <Button
+              variant="text"
+              aria-label="Rensa"
+              color="primary"
+              onClick={this.handleDocumentSelectAllClear}
+            >
+              {"Rensa"}
+            </Button>
+          </Grid>
+          <Grid item>
+            <Button
+              variant="text"
+              aria-label="Välj Alla"
+              color="primary"
+              onClick={this.handleDocumentSelectAllClear}
+            >
+              {"Välj Alla"}
+            </Button>
+          </Grid>
+        </Grid>
         {this.renderDocumentOrderResult()}
         <Grid
           container
           direction="row"
           alignItems="center"
-          style={{ marginTop: "16px", marginBottom: "8px" }}
+          style={{ marginTop: "24px", marginBottom: "24px" }}
         >
           <Link href={termsAndConditionsLink} target="_blank">
             <Box display="flex" alignItems="center" gridColumnGap="4px">
@@ -408,13 +498,13 @@ class GeosuiteExportView extends React.PureComponent {
             </Box>
           </Link>
         </Grid>
-        {this.renderNextAndBackButtons("Beställ", null)}
+        {this.renderNextAndBackButtons("Ladda Ner", null)}
       </>
     );
   }
 
   //render a spinner while the results are pending.
-  renderPending() {
+  renderPending(displayText) {
     return (
       <Grid container direction="row" justify="center">
         <Grid item xs={12}>
@@ -423,7 +513,7 @@ class GeosuiteExportView extends React.PureComponent {
           </Box>
         </Grid>
         <Grid item>
-          <Typography>Hämtar resultat...</Typography>
+          <Typography>{displayText}</Typography>
         </Grid>
       </Grid>
     );
@@ -442,7 +532,7 @@ class GeosuiteExportView extends React.PureComponent {
     const { responsePending, responseFailed, projects } = this.state;
 
     if (responsePending) {
-      return this.renderPending();
+      return this.renderPending("Hämtar resultat...");
     }
 
     if (responseFailed) {
@@ -469,7 +559,7 @@ class GeosuiteExportView extends React.PureComponent {
     const { responsePending, responseFailed, documents } = this.state;
 
     if (responsePending) {
-      return this.renderPending();
+      return this.renderPending("Hämtar resultat...");
     }
 
     if (responseFailed) {
@@ -477,11 +567,27 @@ class GeosuiteExportView extends React.PureComponent {
     }
 
     return documents.length > 0 ? (
-      <div className={classes.linkList}>
-        {this.state.documents.map((document) => {
-          return <LinkItem key={document.id} link={document} />;
-        })}
-      </div>
+      <Grid container columns={1}>
+        <div className={classes.checkBoxList}>
+          {this.state.documents.map((document) => {
+            return (
+              <Grid item key={document.id} className={classes.checkBoxItem}>
+                <FormControlLabel
+                  control={
+                    <Checkbox
+                      color="primary"
+                      checked={document.selected}
+                      onChange={this.handleDocumentCheckboxChange}
+                      value={document.id}
+                    />
+                  }
+                  label={document.title}
+                />
+              </Grid>
+            );
+          })}
+        </div>
+      </Grid>
     ) : (
       <div className={classes.noResultMessage}>
         <Typography className={classes.noResultMessage}>
@@ -664,6 +770,72 @@ class GeosuiteExportView extends React.PureComponent {
     );
   };
 
+  renderConfirmStepDocument = () => {
+    const { classes, options } = this.props;
+    const deliveryConfirmationHeader =
+      options.view?.projects?.confirmation?.header ??
+      "Tack för din beställning!";
+    const confirmDeliveryInformationText =
+      options.view?.projects?.confirmation?.informationText ?? "";
+    const whereNextText =
+      options.view?.projects?.confirmation?.whereNextText ??
+      "Klicka på VÄLJ MER för att hämta mer data för ditt markerade område eller gå vidare med KLAR.";
+
+    const { savingFile, step } = this.state;
+
+    if (savingFile) {
+      return this.renderPending("Skapar ZIP-fil...");
+    }
+
+    let jsxConfirmDeliveryInformationText = null;
+    if (confirmDeliveryInformationText.length > 0) {
+      jsxConfirmDeliveryInformationText = (
+        <>
+          <Typography variant="body1">
+            {confirmDeliveryInformationText}
+          </Typography>
+          <br />
+        </>
+      );
+    }
+
+    return (
+      <>
+        <Typography className={classes.bold}>
+          {" "}
+          {deliveryConfirmationHeader}
+        </Typography>
+        <br />
+        {jsxConfirmDeliveryInformationText}
+        <Typography variant="body1">{whereNextText}</Typography>
+        <br />
+        <div>
+          <Button
+            disabled={step === 0}
+            onClick={() => {
+              this.setState({ activeStep: 100 });
+            }}
+            variant="contained"
+            color="primary"
+            aria-label="Klar"
+          >
+            Klar
+          </Button>
+          <Button
+            onClick={() => {
+              this.setState({ activeStep: 1 });
+            }}
+            aria-label="Välj mer produkter"
+            disabled={false}
+            color="primary"
+          >
+            Välj mer
+          </Button>
+        </div>
+      </>
+    );
+  };
+
   renderStepperButtons() {
     return (
       <div style={{ width: "80%", margin: "0 auto" }}>
@@ -774,6 +946,16 @@ class GeosuiteExportView extends React.PureComponent {
       this.setState({ steps: updatedSteps });
     }
 
+    // When the documents update. Toggle availability of the 'Beställ' button.
+    if (prevState.documents !== this.state.documents) {
+      if (this.state.selectedProduct === "document") {
+        const selectedForOrder = this.state.documents.filter(
+          (doc) => doc.selected
+        );
+        this.toggleStepEnabled(3, selectedForOrder.length > 0);
+      }
+    }
+
     //When the projects update or the email validity updates. Toggle availability of the 'Beställ' button.
     if (
       prevState.projects !== this.state.projects ||
@@ -853,7 +1035,11 @@ class GeosuiteExportView extends React.PureComponent {
             </Step>
             <Step key="confirmation" completed={false}>
               <StepLabel>Bekräftelse</StepLabel>
-              <StepContent>{this.renderConfirmationStep()}</StepContent>
+              <StepContent>
+                {this.state.selectedProduct === "document"
+                  ? this.renderConfirmStepDocument()
+                  : this.renderConfirmationStep()}
+              </StepContent>
             </Step>
           </Stepper>
         </div>

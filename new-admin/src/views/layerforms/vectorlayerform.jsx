@@ -7,6 +7,7 @@ class VectorLayerForm extends React.Component {
     addedLayers: [],
     attribution: "",
     caption: "",
+    internalLayerName: "",
     content: "",
     dataFormat: "WFS",
     date: "Fylls i per automatik",
@@ -109,6 +110,7 @@ class VectorLayerForm extends React.Component {
     return {
       attribution: this.getValue("attribution"),
       caption: this.getValue("caption"),
+      internalLayerName: this.getValue("internalLayerName"),
       content: this.getValue("content"),
       dataFormat: this.getValue("dataFormat"),
       date: this.getValue("date"),
@@ -619,6 +621,18 @@ class VectorLayerForm extends React.Component {
               this.setState({ caption: v }, () =>
                 this.validateField("caption")
               );
+            }}
+          />
+        </div>
+        <div>
+          <label>Visningsnamn Admin</label>
+          <input
+            type="text"
+            ref="input_internalLayerName"
+            value={this.state.internalLayerName || ""}
+            onChange={(e) => {
+              this.setState({ internalLayerName: e.target.value });
+              this.validateField("internalLayerName");
             }}
           />
         </div>

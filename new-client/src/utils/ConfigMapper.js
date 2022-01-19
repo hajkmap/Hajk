@@ -124,7 +124,9 @@ export default class ConfigMapper {
       type: "wms",
       options: {
         id: args.id,
-        url: (this.proxy || "") + args.url,
+        url:
+          (this.proxy || "") +
+          (this.getPotentialCustomUrl(args.customGetMapUrl) || args.url),
         name: args.id, // FIXME: Should this be "args.caption"?
         layerType: args.layerType,
         caption: args.caption,
@@ -199,6 +201,13 @@ export default class ConfigMapper {
     }
 
     return config;
+  }
+
+  // There might be a custom getMap-url provided in the config. If there
+  // is, we have to make sure to override the url-value with the custom getMap-url.
+  // See #345 for more information.
+  getPotentialCustomUrl(customGetMapUrl) {
+    return customGetMapUrl?.trim().length > 0 ? customGetMapUrl : null;
   }
 
   mapWMTSConfig(args, properties) {
