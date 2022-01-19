@@ -428,11 +428,10 @@ class DrawModel {
       image: new Circle({
         radius: 5,
         fill: new Fill({
-          color: "orange",
+          color: "grey",
         }),
       }),
       geometry: (feature) => {
-        // return the coordinates of the first ring of the polygon
         const coordinates = feature.getGeometry().getCoordinates()[0];
         return new MultiPoint(coordinates);
       },
@@ -869,8 +868,9 @@ class DrawModel {
     this.#removeEventListeners();
     // We're also making sure to set the private field to null
     this.#drawInteraction = null;
-    // And remove the click-lock!
+    // And remove the click-lock and the snap-helper
     this.#map.clickLock.delete("coreDrawModel");
+    this.#map.snapHelper.delete("coreDrawModel");
   };
 
   // Creates an object that can be returned to the initiator of a
@@ -977,7 +977,7 @@ class DrawModel {
   // Disables the edit-interaction by removing the event-listener and disabling
   // the click-lock.
   #disableEditInteraction = () => {
-    // Remove the click-lock so that the feature-info works again
+    // Remove the click-lock so that the feature-info works again,
     this.#map.clickLock.delete("coreDrawModel");
     // Remove the event-listener
     this.#map.un("singleclick", this.#editClickedFeature);
@@ -1013,8 +1013,10 @@ class DrawModel {
     this.#modifyInteraction.on("modifyend", this.#handleModifyEnd);
     // Then we'll add the interaction to the map.
     this.#map.addInteraction(this.#modifyInteraction);
-    // Let's add the clickLock to avoid the featureInfo etc.
+    // Let's add the clickLock to avoid the featureInfo etc...
     this.#map.clickLock.add("coreDrawModel");
+    //  ...and snap-helper for the snap-functionality.
+    this.#map.snapHelper.add("coreDrawModel");
     // Finally we return something so that the enabler knows that we've enabled.
     return {
       status: "SUCCESS",
@@ -1031,47 +1033,48 @@ class DrawModel {
     this.#map.removeInteraction(this.#modifyInteraction);
     // Then we'll remove the event-listener
     this.#modifyInteraction.un("modifyend", this.#handleModifyEnd);
+    // And remove the snap-helper.
+    this.#map.snapHelper.delete("coreDrawModel");
     // Then we'll reset the field referring to the interaction
     this.#modifyInteraction = null;
-    // Let's add the clickLock to avoid the featureInfo etc.
-    this.#map.clickLock.delete("coreDrawModel");
   };
 
   // Binds a listener to each feature which fires on property-change
   #bindFeaturePropertyListener = () => {
-    this.#drawSource.forEachFeature((f) => {
-      f.on("propertychange", this.#handleFeaturePropertyChange);
-    });
+    // this.#drawSource.forEachFeature((f) => {
+    //   f.on("propertychange", this.#handleFeaturePropertyChange);
+    // });
   };
 
   // Un-binds the property-change-listeners
   #unBindFeaturePropertyListener = () => {
-    this.#drawSource.forEachFeature((f) => {
-      f.un("propertychange", this.#handleFeaturePropertyChange);
-    });
+    // this.#drawSource.forEachFeature((f) => {
+    //   f.un("propertychange", this.#handleFeaturePropertyChange);
+    // });
   };
 
-  #handleFeaturePropertyChange = (e) => {
-    const { key, target: feature } = e;
-    if (key === "EDIT_ACTIVE") {
-      if (feature.get("EDIT_ACTIVE")) {
-        const featureStyle = feature.getStyle();
-        const newStyle = Array.isArray(featureStyle)
-          ? featureStyle.push(this.#getNodeHighlightStyle(feature))
-          : [featureStyle, this.#getNodeHighlightStyle(feature)];
-        feature.setStyle(newStyle);
-      } else {
-        const featureStyle = feature.getStyle();
-        featureStyle.pop();
-        if (featureStyle.length === 1) {
-          feature.setStyle(...featureStyle);
-        } else {
-          feature.setStyle(featureStyle);
-        }
-      }
-      this.refreshDrawLayer();
-    }
-  };
+  // #handleFeaturePropertyChange = (e) => {
+  //   const { key, target: feature } = e;
+  //   if (key === "EDIT_ACTIVE") {
+  //     const featureStyle = feature.getStyle();
+  //     if (feature.get("EDIT_ACTIVE")) {
+  //       const highlightStyle = this.#getNodeHighlightStyle(feature);
+  //       if (Array.isArray(featureStyle)) {
+  //         feature.setStyle([...featureStyle, highlightStyle]);
+  //       } else {
+  //         feature.setStyle([featureStyle, highlightStyle]);
+  //       }
+  //     } else {
+  //       featureStyle.pop();
+  //       if (featureStyle.length === 1) {
+  //         feature.setStyle(...featureStyle);
+  //       } else {
+  //         feature.setStyle(featureStyle);
+  //       }
+  //     }
+  //     this.refreshDrawLayer();
+  //   }
+  // };
 
   // Sets the "EDIT_ACTIVE" prop to false on all features in the draw-source.
   // Used when disabling the edit-interaction, since we don't want any features
@@ -1233,12 +1236,14 @@ class DrawModel {
     // Let's set the supplied draw-method as a property on the draw-interaction
     // so that we can keep track of if we're creating special features (arrows etc).
     this.#drawInteraction.set("DRAW_METHOD", drawMethod);
-    // Let's add the clickLock to avoid the featureInfo etc.
-    this.#map.clickLock.add("coreDrawModel");
     // Then we'll add all draw listeners
     this.#addEventListeners(settings);
     // Then we'll add the interaction to the map!
     this.#map.addInteraction(this.#drawInteraction);
+    // Finally we'll add the clickLock to avoid the featureInfo etc...
+    this.#map.clickLock.add("coreDrawModel");
+    //  ...and snap-helper for the snap-functionality.
+    this.#map.snapHelper.add("coreDrawModel");
   };
 
   // Fits the map to the extent of the drawn features in the draw-source
