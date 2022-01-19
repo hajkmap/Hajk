@@ -3,7 +3,8 @@ import { createBox } from "ol/interaction/Draw";
 import { Vector as VectorLayer } from "ol/layer";
 import VectorSource from "ol/source/Vector";
 import { Icon, Stroke, Style, Circle, Fill, Text } from "ol/style";
-import { Circle as CircleGeometry, LineString, Point } from "ol/geom.js";
+import { Circle as CircleGeometry, LineString } from "ol/geom";
+import { MultiPoint, Point } from "ol/geom";
 import Overlay from "ol/Overlay.js";
 
 /*
@@ -17,6 +18,7 @@ import Overlay from "ol/Overlay.js";
  * Optional settings:
  * - observer: (Observer): An observer on which the drawModel can publish events, for example when a geometry has been deleted.
  * - observerPrefix (String): A string acting as a prefix on all messages published on the observer.
+ * - modifyDefaultEnabled: (Boolean): States if the Modify-interaction be enabled when the Edit-interaction is enabled.
  *
  * Exposes a couple of methods:
  * - refreshFeaturesTextStyle(): Refreshes the text-style on all features in the draw-source.
@@ -36,7 +38,7 @@ import Overlay from "ol/Overlay.js";
  * - get/set labelFormat(): Sets the format on the labels. ("AUTO", "M2", "KM2", "HECTARE")
  * - get/set showDrawTooltip(): Get or set wether a tooltip should be shown when drawing.
  * - get/set showFeatureMeasurements(): Get or set wether drawn feature measurements should be shown or not.
- * - getModifyActive(): Returns wether the modify-interaction is active or not.
+ * - get/set ModifyActive(): Get or set wether the modify-interaction should be active or not.
  */
 class DrawModel {
   #map;
@@ -57,7 +59,9 @@ class DrawModel {
   #drawInteraction;
   #removeInteractionActive;
   #editInteractionActive;
+  #featureChosenForEdit;
   #modifyInteraction;
+  #keepModifyActive;
   #allowedLabelFormats;
   #labelFormat;
   #customHandleDrawStart;
@@ -96,6 +100,8 @@ class DrawModel {
     this.#removeInteractionActive = false;
     this.#editInteractionActive = false;
     this.#modifyInteraction = null;
+    this.#keepModifyActive = settings.modifyDefaultEnabled ?? false;
+    this.#featureChosenForEdit = null;
     // We're also keeping track of the tooltip-settings
     this.#showDrawTooltip = settings.showDrawTooltip ?? true;
     this.#drawTooltip = null;
@@ -417,6 +423,22 @@ class DrawModel {
     return styles;
   };
 
+  #getNodeHighlightStyle = () => {
+    return new Style({
+      image: new Circle({
+        radius: 5,
+        fill: new Fill({
+          color: "orange",
+        }),
+      }),
+      geometry: (feature) => {
+        // return the coordinates of the first ring of the polygon
+        const coordinates = feature.getGeometry().getCoordinates()[0];
+        return new MultiPoint(coordinates);
+      },
+    });
+  };
+
   // Returns the area of the supplied feature in a readable format.
   #getFeatureMeasurementLabel = (feature) => {
     // First we must get the feature area, length, or placement.
@@ -606,7 +628,9 @@ class DrawModel {
       // Get an updated text-style (which depends on #showFeatureMeasurements).
       const textStyle = this.#getFeatureTextStyle(feature);
       // Set the updated text-style on the base-style.
-      featureStyle.setText(textStyle);
+      Array.isArray(featureStyle)
+        ? featureStyle[0].setText(textStyle)
+        : featureStyle.setText(textStyle);
       // Then update the feature style.
       feature.setStyle(featureStyle);
     });
@@ -887,11 +911,24 @@ class DrawModel {
     );
     // Let's get the (potential) first user-drawn feature, otherwise null.
     const feature = userDrawnFeatures.length > 0 ? userDrawnFeatures[0] : null;
+    // Then we'll update the private field holding the feature currently chosen for editing.
+    this.#updateChosenEditFeature(feature);
     // Then we'll publish a modify-message with the clicked feature in the payload (or null).
     this.#publishInformation({
       subject: "drawModel.modify.mapClick",
       payLoad: feature,
     });
+  };
+
+  // Updates the private field holding the feature which is currently chosen
+  // for edit. Also makes sure to set the "EDIT_ACTIVE" prop to false on the
+  // feature that is no longer chosen, and to true on the chosen feature.
+  // The "EDIT_ACTIVE" prop is used to style the chosen feature.
+  #updateChosenEditFeature = (feature) => {
+    this.#featureChosenForEdit &&
+      this.#featureChosenForEdit.set("EDIT_ACTIVE", false);
+    feature && feature.set("EDIT_ACTIVE", true);
+    this.#featureChosenForEdit = feature;
   };
 
   // Enables a remove-interaction which allows the user to remove drawn features by clicking on them.
@@ -923,12 +960,18 @@ class DrawModel {
     // We're gonna need a handler that can update the feature-style when
     // the modification is completed.
     this.#map.on("singleclick", this.#editClickedFeature);
+    // We also need a listener which listens for property-changes on the features.
+    // (We use a property on the feature to show that it is currently being edited).
+    this.#bindFeaturePropertyListener();
     // Let's add the clickLock to avoid the featureInfo etc.
     this.#map.clickLock.add("coreDrawModel");
     // Usually, the modify interaction is enabled at the same time as the edit-interaction,
     // allowing the user to change the feature geometry.
-    // If the user has not set "enableModify" to false in the settings, we enable the modify.
-    (settings.modifyEnabled ?? true) && this.#enableModifyInteraction();
+    // The user might pass "modifyEnabled: false" in the toggle-draw-settings, and in that case
+    // we do not enable the modify-interaction. Otherwise we check the "keepModifyActive" field,
+    // which keeps track of if the user had modify enabled the last time they enabled the edit-interaction.
+    (settings.modifyEnabled ?? this.#keepModifyActive) &&
+      this.#enableModifyInteraction();
   };
 
   // Disables the edit-interaction by removing the event-listener and disabling
@@ -938,6 +981,10 @@ class DrawModel {
     this.#map.clickLock.delete("coreDrawModel");
     // Remove the event-listener
     this.#map.un("singleclick", this.#editClickedFeature);
+    // We also have to make sure to de-select the eventual features which might be selected for editing.
+    this.#removeFeatureEditSelection();
+    // Remove the feature-property-change-listener
+    this.#unBindFeaturePropertyListener();
     // Disable the potential modify-interaction (it should only be active when the edit-interaction
     // is active).
     this.#disableModifyInteraction();
@@ -956,6 +1003,8 @@ class DrawModel {
           "Modify-interaction could not be enabled. Edit has to be enabled before enabling.",
       };
     }
+    // Let's disable potential interaction that might be enabled already
+    this.#disableModifyInteraction();
     // We have to make sure to set a field so that the handlers responsible for deleting
     // all active interactions knows that there is an edit-interaction to delete.
     this.#modifyInteraction = new Modify({ source: this.#drawSource });
@@ -986,6 +1035,53 @@ class DrawModel {
     this.#modifyInteraction = null;
     // Let's add the clickLock to avoid the featureInfo etc.
     this.#map.clickLock.delete("coreDrawModel");
+  };
+
+  // Binds a listener to each feature which fires on property-change
+  #bindFeaturePropertyListener = () => {
+    this.#drawSource.forEachFeature((f) => {
+      f.on("propertychange", this.#handleFeaturePropertyChange);
+    });
+  };
+
+  // Un-binds the property-change-listeners
+  #unBindFeaturePropertyListener = () => {
+    this.#drawSource.forEachFeature((f) => {
+      f.un("propertychange", this.#handleFeaturePropertyChange);
+    });
+  };
+
+  #handleFeaturePropertyChange = (e) => {
+    const { key, target: feature } = e;
+    if (key === "EDIT_ACTIVE") {
+      if (feature.get("EDIT_ACTIVE")) {
+        const featureStyle = feature.getStyle();
+        const newStyle = Array.isArray(featureStyle)
+          ? featureStyle.push(this.#getNodeHighlightStyle(feature))
+          : [featureStyle, this.#getNodeHighlightStyle(feature)];
+        feature.setStyle(newStyle);
+      } else {
+        const featureStyle = feature.getStyle();
+        featureStyle.pop();
+        if (featureStyle.length === 1) {
+          feature.setStyle(...featureStyle);
+        } else {
+          feature.setStyle(featureStyle);
+        }
+      }
+      this.refreshDrawLayer();
+    }
+  };
+
+  // Sets the "EDIT_ACTIVE" prop to false on all features in the draw-source.
+  // Used when disabling the edit-interaction, since we don't want any features
+  // selected for editing after the edit-interaction is removed.
+  #removeFeatureEditSelection = () => {
+    this.#drawSource.forEachFeature((f) => {
+      if (f.get("EDIT_ACTIVE")) {
+        f.set("EDIT_ACTIVE", false);
+      }
+    });
   };
 
   // Toggles the draw-interaction on and off if it is currently on.
@@ -1302,6 +1398,11 @@ class DrawModel {
 
   setTextStyleSettings = (newStyleSettings) => {
     this.#textStyleSettings = newStyleSettings;
+  };
+
+  setModifyActive = (active) => {
+    this.#keepModifyActive = active;
+    active ? this.#enableModifyInteraction() : this.#disableModifyInteraction();
   };
 
   // Get:er returning the name of the draw-layer.

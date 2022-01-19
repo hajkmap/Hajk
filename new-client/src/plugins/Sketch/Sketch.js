@@ -46,6 +46,7 @@ const Sketch = (props) => {
     () =>
       new SketchModel({
         drawModel: drawModel,
+        modifyDefaultEnabled: modifyEnabled,
       })
   );
 
@@ -81,13 +82,11 @@ const Sketch = (props) => {
       case "DELETE":
         return drawModel.toggleDrawInteraction("Delete");
       case "EDIT":
-        return drawModel.toggleDrawInteraction("Edit", {
-          modifyEnabled: modifyEnabled,
-        });
+        return drawModel.toggleDrawInteraction("Edit");
       default:
         return drawModel.toggleDrawInteraction("");
     }
-  }, [activeDrawType, activityId, drawModel, pluginShown, modifyEnabled]);
+  }, [activeDrawType, activityId, drawModel, pluginShown]);
 
   // This effect makes sure to reset the edit-feature if the window is closed,
   // or if the user changes activity. (We don't want to keep the feature selected
@@ -96,11 +95,18 @@ const Sketch = (props) => {
     setEditFeature(null);
   }, [activityId, pluginShown]);
 
+  // An effect that makes sure to set the modify-interaction in the model
+  // when the modify-state changes.
+  React.useEffect(() => {
+    drawModel.setModifyActive(modifyEnabled);
+  }, [drawModel, modifyEnabled]);
+
   // We're gonna need to catch if the user closes the window, and make sure to
   // update the state so that the effect handling the draw-interaction-toggling fires.
   const onWindowHide = () => {
     setPluginShown(false);
   };
+
   // We're gonna need to catch if the user opens the window, and make sure to
   // update the state so that the effect handling the draw-interaction-toggling fires.
   const onWindowShow = () => {
