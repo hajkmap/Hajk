@@ -4,6 +4,7 @@ import { Vector as VectorLayer } from "ol/layer";
 import VectorSource from "ol/source/Vector";
 import { Icon, Stroke, Style, Circle, Fill, Text } from "ol/style";
 import { Circle as CircleGeometry, LineString } from "ol/geom";
+import { fromCircle } from "ol/geom/Polygon";
 import { MultiPoint, Point } from "ol/geom";
 import Overlay from "ol/Overlay.js";
 
@@ -423,19 +424,58 @@ class DrawModel {
     return styles;
   };
 
+  // Creates a highlight style (a style marking the coordinates of the
+  // supplied feature).
   #getNodeHighlightStyle = () => {
-    return new Style({
-      image: new Circle({
-        radius: 5,
-        fill: new Fill({
-          color: "grey",
+    try {
+      const style = new Style({
+        image: new Circle({
+          radius: 5,
+          fill: new Fill({
+            color: "grey",
+          }),
         }),
-      }),
-      geometry: (feature) => {
-        const coordinates = feature.getGeometry().getCoordinates()[0];
-        return new MultiPoint(coordinates);
-      },
-    });
+        geometry: (feature) => {
+          const coordinates = this.#getFeatureCoordinates(feature);
+          return new MultiPoint(coordinates);
+        },
+      });
+      return style;
+    } catch (error) {
+      console.error(`Could not create highlight style. Error: ${error}`);
+      return null;
+    }
+  };
+
+  // Returns an array of arrays with the coordinates of the supplied feature
+  #getFeatureCoordinates = (feature) => {
+    // First, we have to extract the feature geometry
+    const geometry = feature.getGeometry();
+    // Then we'll have to extract the feature type, since we have to extract the
+    // coordinates in different ways, depending on the geometry type.
+    const geometryType = geometry.getType();
+    // Then we'll use a switch-case to make sure we return the coordinates in
+    // the correct format.
+    switch (geometryType) {
+      case "Circle":
+        // If we're dealing with a circle, we'll create a simplified geometry
+        // with 8 points, which we can use to highlight some of the "nodes" of
+        // the circle. GetCoordinates returns the coordinates in an extra wrapping
+        // array (for polygons), so let's return the first element.
+        return fromCircle(geometry, 8).getCoordinates()[0];
+      case "LineString":
+        // GetCoordinates returns an array of arrays with coordinates for LineStrings,
+        // so we can return it as-is.
+        return geometry.getCoordinates();
+      case "Point":
+        // GetCoordinates returns an array with the coordinates for points,
+        // so we have to wrap that array in an array before returning.
+        return [geometry.getCoordinates()];
+      default:
+        // The default catches Polygons, which are wrapped in an "extra" array, so let's
+        // return the first element.
+        return geometry.getCoordinates()[0];
+    }
   };
 
   // Returns the area of the supplied feature in a readable format.
@@ -1041,40 +1081,71 @@ class DrawModel {
 
   // Binds a listener to each feature which fires on property-change
   #bindFeaturePropertyListener = () => {
-    // this.#drawSource.forEachFeature((f) => {
-    //   f.on("propertychange", this.#handleFeaturePropertyChange);
-    // });
+    this.#drawSource.forEachFeature((f) => {
+      f.on("propertychange", this.#handleFeaturePropertyChange);
+    });
   };
 
   // Un-binds the property-change-listeners
   #unBindFeaturePropertyListener = () => {
-    // this.#drawSource.forEachFeature((f) => {
-    //   f.un("propertychange", this.#handleFeaturePropertyChange);
-    // });
+    this.#drawSource.forEachFeature((f) => {
+      f.un("propertychange", this.#handleFeaturePropertyChange);
+    });
   };
 
-  // #handleFeaturePropertyChange = (e) => {
-  //   const { key, target: feature } = e;
-  //   if (key === "EDIT_ACTIVE") {
-  //     const featureStyle = feature.getStyle();
-  //     if (feature.get("EDIT_ACTIVE")) {
-  //       const highlightStyle = this.#getNodeHighlightStyle(feature);
-  //       if (Array.isArray(featureStyle)) {
-  //         feature.setStyle([...featureStyle, highlightStyle]);
-  //       } else {
-  //         feature.setStyle([featureStyle, highlightStyle]);
-  //       }
-  //     } else {
-  //       featureStyle.pop();
-  //       if (featureStyle.length === 1) {
-  //         feature.setStyle(...featureStyle);
-  //       } else {
-  //         feature.setStyle(featureStyle);
-  //       }
-  //     }
-  //     this.refreshDrawLayer();
-  //   }
-  // };
+  // Handler targeted when any feature property has changed. Only checks
+  // if the "EDIT_ACTIVE" property has changed, and if it has, it makes sure
+  // to toggle the highlight-style of the feature accordingly.
+  // TODO: Handle two clicks on same feature!
+  #handleFeaturePropertyChange = (e) => {
+    // First, we'll extract the key and the target (the target will be the feature clicked).
+    const { key, target: feature } = e;
+    // Then we'll check if it was the "EDIT_ACTIVE" property that was changed.
+    if (key === "EDIT_ACTIVE") {
+      // If the "EDIT_ACTIVE" was changed to true, we add the highlight-style.
+      if (feature.get("EDIT_ACTIVE")) {
+        this.#setHighlightStyle(feature);
+      } else {
+        // Otherwise, we remove the highlight-style.
+        this.#removeHighlightStyle(feature);
+      }
+    }
+  };
+
+  // Adds a highlight-style to the supplied feature.
+  #setHighlightStyle = (feature) => {
+    // First we'll get the current style of the feature.
+    const featureStyle = feature.getStyle();
+    // Then we'll create the highlight-style.
+    const highlightStyle = this.#getNodeHighlightStyle(feature);
+    // If the current style of the feature is an array of styles,
+    // we merge the original style array with the highligh-style and apply
+    // it to the feature.
+    if (Array.isArray(featureStyle)) {
+      feature.setStyle([...featureStyle, highlightStyle]);
+    } else {
+      // Otherwise we create an array with the current style and the
+      // highlight-style.
+      feature.setStyle([featureStyle, highlightStyle]);
+    }
+  };
+
+  // Removes the highlight-style from the supplied feature.
+  #removeHighlightStyle = (feature) => {
+    // First we'll get the feature style-
+    const featureStyle = feature.getStyle();
+    // Then we'll remove the last style from the style array (the
+    // last style will be the highlight-style).
+    featureStyle.pop();
+    // If the result is an array containing only one style-object,
+    // well apply that style-object on the feature.
+    if (featureStyle.length === 1) {
+      feature.setStyle(...featureStyle);
+    } else {
+      // Otherwise, we'll apply the feature-style-array to the feature.
+      feature.setStyle(featureStyle);
+    }
+  };
 
   // Sets the "EDIT_ACTIVE" prop to false on all features in the draw-source.
   // Used when disabling the edit-interaction, since we don't want any features
