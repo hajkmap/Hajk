@@ -7,11 +7,9 @@
     "Coordinates",
     "DocumentHandler",
     "Draw",
-    "Dummy",
     "Edit",
     "Export",
     "FmeServer",
-    "GeosuiteExport",
     "InfoDialog",
     "Informative",
     "LayerSwitcher",
@@ -21,7 +19,6 @@
     "Routing",
     "Search",
     "StreetView",
-    "Suggest",
     "TimeSlider"
   ],
   "allTools": [
@@ -35,6 +32,8 @@
     "Dummy",
     "Edit",
     "Export",
+    "Fir",
+    "Fme",
     "FmeServer",
     "GeosuiteExport",
     "InfoDialog",
@@ -46,7 +45,6 @@
     "Routing",
     "Search",
     "StreetView",
-    "Suggest",
     "TimeSlider",
     "vtsearch"
   ]
