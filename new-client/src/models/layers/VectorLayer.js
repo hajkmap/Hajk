@@ -29,14 +29,14 @@ const vectorLayerProperties = {
 };
 
 function createStyle(feature, forcedPointRadius) {
-  const icon = this.config.icon;
+  const icon = this.config.icon || "";
   //const icon = this.config.legendIcon;
-  const fillColor = this.config.fillColor;
-  const lineColor = this.config.lineColor;
-  const lineStyle = this.config.lineStyle;
-  const lineWidth = this.config.lineWidth;
-  const symbolXOffset = this.config.symbolXOffset;
-  const symbolYOffset = this.config.symbolYOffset;
+  const fillColor = this.config.fillColor || "";
+  const lineColor = this.config.lineColor || "";
+  const lineStyle = this.config.lineStyle || "";
+  const lineWidth = this.config.lineWidth || "";
+  const symbolXOffset = this.config.symbolXOffset || "";
+  const symbolYOffset = this.config.symbolYOffset || "";
   const rotation = 0.0;
   const align = this.config.labelAlign;
   const baseline = this.config.labelBaseline;
@@ -51,7 +51,6 @@ function createStyle(feature, forcedPointRadius) {
   const labelAttribute = this.config.labelAttribute;
   const showLabels = this.config.showLabels;
   const pointSize = forcedPointRadius || this.config.pointSize;
-  //const pointSize = this.config.pointSize;
 
   feature = arguments[1] instanceof Feature ? arguments[1] : undefined;
 
