@@ -148,7 +148,16 @@ class WFSVectorLayer {
     };
     this.proxyUrl = proxyUrl;
     this.map = map;
-    this.style = createStyle.apply(this);
+    // If OpenLayers styles are configured, apply the style.
+    if (
+      config.icon ||
+      config.lineColor ||
+      config.lineWidth ||
+      config.fillColor ||
+      config.lineStyle
+    ) {
+      this.style = createStyle.apply(this);
+    }
 
     this.type = "vector"; // We're dealing with a vector layer
 
@@ -200,7 +209,16 @@ class WFSVectorLayer {
       timeSliderStart: config?.timeSliderStart,
       timeSliderEnd: config?.timeSliderEnd,
     });
-    this.layer.setStyle(this.getStyle());
+    // If OpenLayers styles are configured, set the style
+    if (
+      config.icon ||
+      config.lineColor ||
+      config.lineWidth ||
+      config.fillColor ||
+      config.lineStyle
+    ) {
+      this.layer.setStyle(this.getStyle());
+    }
 
     // Styling section starts here.
     // First read some values from config
