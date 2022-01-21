@@ -1,10 +1,10 @@
 // IE 11 starts here.
 // If you don't need IE 11, comment out those lines line.
 // Also, change 'browserslist' in package.json to exclude ie11.
-import "react-app-polyfill/ie11";
+// import "react-app-polyfill/ie11";
 import "react-app-polyfill/stable";
-import "abortcontroller-polyfill/dist/polyfill-patch-fetch";
-import "allsettled-polyfill";
+// import "abortcontroller-polyfill/dist/polyfill-patch-fetch";
+// import "allsettled-polyfill";
 // IE 11 ends here.
 
 // iOS 12 and other older touch devices need this polyfill to
