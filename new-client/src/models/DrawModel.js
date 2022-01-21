@@ -967,7 +967,10 @@ class DrawModel {
   #updateChosenEditFeature = (feature) => {
     this.#featureChosenForEdit &&
       this.#featureChosenForEdit.set("EDIT_ACTIVE", false);
-    feature && feature.set("EDIT_ACTIVE", true);
+    // If we have a new feature clicked, and if the feature is not already
+    // marked as "EDIT_ACTIVE" (selected for edit), we set "EDIT_ACTIVE" to true.
+    feature && !feature.get("EDIT_ACTIVE") && feature.set("EDIT_ACTIVE", true);
+    // Let's update the chosen feature with whatever was clicked (might be null).
     this.#featureChosenForEdit = feature;
   };
 
