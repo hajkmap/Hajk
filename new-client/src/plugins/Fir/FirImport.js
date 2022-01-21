@@ -1,13 +1,15 @@
 import KML from "ol/format/KML.js";
-// This class mostly has code picked from hajk2 kml import and hajk3 draw kml import.
-
 export default class FirImport {
   constructor(options) {
     this.localObserver = options.localObserver;
     this.layerController = options.layerController;
     this.map = options.map;
+    const eventPrefix = options.eventPrefix || "fir";
 
-    this.localObserver.subscribe("fir.file.import", this.handleFileImport);
+    this.localObserver.subscribe(
+      `${eventPrefix}.file.import`,
+      this.handleFileImport
+    );
   }
 
   handleFileImport = (file) => {
@@ -35,7 +37,7 @@ export default class FirImport {
   };
 
   parseKML = (str) => {
-    let parser = new KML();
+    const parser = new KML();
     try {
       let features = parser.readFeatures(str);
       features.forEach((feature) => {
@@ -52,8 +54,7 @@ export default class FirImport {
   };
 
   translateImportedFeature(feature) {
-    // got this from the Draw plugin...
-    var coordinates = feature.getGeometry().getCoordinates(),
+    const coordinates = feature.getGeometry().getCoordinates(),
       type = feature.getGeometry().getType(),
       newCoordinates = [];
     feature.setProperties({
@@ -71,7 +72,7 @@ export default class FirImport {
 
     if (type === "LineString") {
       coordinates.forEach((c, i) => {
-        var pairs = [];
+        let pairs = [];
         c.forEach((digit) => {
           if (digit !== 0) {
             pairs.push(digit);
@@ -84,7 +85,7 @@ export default class FirImport {
       coordinates.forEach((polygon, i) => {
         newCoordinates[i] = [];
         polygon.forEach((vertex, j) => {
-          var pairs = [];
+          let pairs = [];
           vertex.forEach((digit) => {
             if (digit !== 0) {
               pairs.push(digit);
@@ -100,7 +101,6 @@ export default class FirImport {
       .getGeometry()
       .transform("EPSG:4326", this.map.getView().getProjection());
 
-    // this.setStyleFromProperties(feature);
     if (
       feature.getProperties().geometryType === "Circle" &&
       feature.getProperties().style
