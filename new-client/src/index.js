@@ -35,7 +35,6 @@ import ReactDOM from "react-dom";
 import buildConfig from "./buildConfig.json";
 import ErrorIcon from "@mui/icons-material/Error";
 import HajkThemeProvider from "./components/HajkThemeProvider";
-import reportWebVitals from "./reportWebVitals";
 import { initHFetch, hfetch, initFetchWrapper } from "utils/FetchWrapper";
 import LocalStorageHelper from "utils/LocalStorageHelper";
 
@@ -245,8 +244,3 @@ hfetch("appConfig.json", { cacheBuster: true })
   .catch((err) => {
     renderError(networkErrorMessage, err);
   });
-
-// If you want to start measuring performance in your app, pass a function
-// to log results (for example: reportWebVitals(console.log))
-// or send to an analytics endpoint. Learn more: https://bit.ly/CRA-vitals
-reportWebVitals();
