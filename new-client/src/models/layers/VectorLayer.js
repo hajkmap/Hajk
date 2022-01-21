@@ -27,119 +27,6 @@ const vectorLayerProperties = {
   },
   showLabels: true,
 };
-
-function createStyle(feature, forcedPointRadius) {
-  const icon = this.config.icon || "";
-  //const icon = this.config.legendIcon;
-  const fillColor = this.config.fillColor || "";
-  const lineColor = this.config.lineColor || "";
-  const lineStyle = this.config.lineStyle || "";
-  const lineWidth = this.config.lineWidth || "";
-  const symbolXOffset = this.config.symbolXOffset || "";
-  const symbolYOffset = this.config.symbolYOffset || "";
-  const rotation = 0.0;
-  const align = this.config.labelAlign;
-  const baseline = this.config.labelBaseline;
-  const size = this.config.labelSize;
-  const offsetX = this.config.labelOffsetX;
-  const offsetY = this.config.labelOffsetY;
-  const weight = this.config.labelWeight;
-  const font = weight + " " + size + " " + this.config.labelFont;
-  const labelFillColor = this.config.labelFillColor;
-  const outlineColor = this.config.labelOutlineColor;
-  const outlineWidth = this.config.labelOutlineWidth;
-  const labelAttribute = this.config.labelAttribute;
-  const showLabels = this.config.showLabels;
-  const pointSize = forcedPointRadius || this.config.pointSize;
-
-  feature = arguments[1] instanceof Feature ? arguments[1] : undefined;
-
-  function getLineDash() {
-    var scale = (a, f) => a.map((b) => f * b),
-      width = lineWidth,
-      style = lineStyle,
-      dash = [12, 7],
-      dot = [2, 7];
-    switch (style) {
-      case "dash":
-        return width > 3 ? scale(dash, 2) : dash;
-      case "dot":
-        return width > 3 ? scale(dot, 2) : dot;
-      default:
-        return undefined;
-    }
-  }
-
-  function getFill() {
-    return new Fill({
-      color: fillColor,
-    });
-  }
-
-  function getText() {
-    return new Text({
-      textAlign: align,
-      textBaseline: baseline,
-      font: font,
-      text: feature ? feature.getProperties()[labelAttribute] : "",
-      fill: new Fill({
-        color: labelFillColor,
-      }),
-      stroke: new Stroke({
-        color: outlineColor,
-        width: outlineWidth,
-      }),
-      offsetX: offsetX,
-      offsetY: offsetY,
-      rotation: rotation,
-    });
-  }
-
-  function getImage() {
-    return icon === "" ? getPoint() : getIcon();
-  }
-
-  function getIcon() {
-    return new Icon({
-      src: icon,
-      scale: 1,
-      anchorXUnits: "pixels",
-      anchorYUnits: "pixels",
-      anchor: [symbolXOffset, symbolYOffset],
-    });
-  }
-
-  function getPoint() {
-    return new Circle({
-      fill: getFill(),
-      stroke: getStroke(),
-      radius: parseInt(pointSize, 10) || 4,
-    });
-  }
-
-  function getStroke() {
-    return new Stroke({
-      color: lineColor,
-      width: lineWidth,
-      lineDash: getLineDash(),
-    });
-  }
-
-  function getStyleObj() {
-    var obj = {
-      fill: getFill(),
-      image: getImage(),
-      stroke: getStroke(),
-    };
-    if (showLabels) {
-      obj.text = getText();
-    }
-
-    return obj;
-  }
-
-  return [new Style(getStyleObj())];
-}
 class WFSVectorLayer {
   constructor(config, proxyUrl, map) {
     this.config = {
@@ -148,19 +35,7 @@ class WFSVectorLayer {
     };
     this.proxyUrl = proxyUrl;
     this.map = map;
-    // If OpenLayers styles are configured, apply the style.
-    if (
-      config.icon ||
-      config.lineColor ||
-      config.lineWidth ||
-      config.fillColor ||
-      config.lineStyle
-    ) {
-      this.style = createStyle.apply(this);
-    }
-
     this.type = "vector"; // We're dealing with a vector layer
-
     this.allFeatures = [];
 
     // Read the three filter properties from config to allow filter on load
@@ -209,16 +84,6 @@ class WFSVectorLayer {
       timeSliderStart: config?.timeSliderStart,
       timeSliderEnd: config?.timeSliderEnd,
     });
-    // If OpenLayers styles are configured, set the style
-    if (
-      config.icon ||
-      config.lineColor ||
-      config.lineWidth ||
-      config.fillColor ||
-      config.lineStyle
-    ) {
-      this.layer.setStyle(this.getStyle());
-    }
 
     // Styling section starts here.
     // First read some values from config
@@ -232,13 +97,25 @@ class WFSVectorLayer {
         .then((response) => response.text())
         .then((text) => this.applySldTextOnLayer(text));
     }
-    // …else used supplied SLD text to style
+    // …else use supplied SLD text to style
     else if (
       typeof this.sldText === "string" &&
       this.sldText.trim().length > 10
     ) {
       this.applySldTextOnLayer(this.sldText);
-    } // …or just fall back to OpenLayer's default styling if no SLD/SLD URL was specified.
+    }
+    // ...else use OpenLayer's style if specified in config
+    else if (
+      config.icon ||
+      config.lineColor ||
+      config.lineWidth ||
+      config.fillColor ||
+      config.lineStyle
+    ) {
+      this.style = this.createStyle.apply(this);
+      this.layer.setStyle(this.getStyle());
+    }
+    // …or just fall back to OpenLayer's default styling if no SLD/SLD URL or OpenLayers style was specified.
   }
 
   applySldTextOnLayer = (text) => {
@@ -429,9 +306,121 @@ class WFSVectorLayer {
 
   getStyle(forcedPointRadius) {
     if (forcedPointRadius) {
-      return createStyle.call(this, undefined, forcedPointRadius);
+      return this.createStyle.call(this, undefined, forcedPointRadius);
     }
     return this.style;
+  }
+
+  createStyle(feature, forcedPointRadius) {
+    const icon = this.config.icon || "";
+    const fillColor = this.config.fillColor || "";
+    const lineColor = this.config.lineColor || "";
+    const lineStyle = this.config.lineStyle || "";
+    const lineWidth = this.config.lineWidth || "";
+    const symbolXOffset = this.config.symbolXOffset || "";
+    const symbolYOffset = this.config.symbolYOffset || "";
+    const rotation = 0.0;
+    const align = this.config.labelAlign;
+    const baseline = this.config.labelBaseline;
+    const size = this.config.labelSize;
+    const offsetX = this.config.labelOffsetX;
+    const offsetY = this.config.labelOffsetY;
+    const weight = this.config.labelWeight;
+    const font = weight + " " + size + " " + this.config.labelFont;
+    const labelFillColor = this.config.labelFillColor;
+    const outlineColor = this.config.labelOutlineColor;
+    const outlineWidth = this.config.labelOutlineWidth;
+    const labelAttribute = this.config.labelAttribute;
+    const showLabels = this.config.showLabels;
+    const pointSize = forcedPointRadius || this.config.pointSize;
+
+    feature = arguments[1] instanceof Feature ? arguments[1] : undefined;
+
+    function getLineDash() {
+      var scale = (a, f) => a.map((b) => f * b),
+        width = lineWidth,
+        style = lineStyle,
+        dash = [12, 7],
+        dot = [2, 7];
+      switch (style) {
+        case "dash":
+          return width > 3 ? scale(dash, 2) : dash;
+        case "dot":
+          return width > 3 ? scale(dot, 2) : dot;
+        default:
+          return undefined;
+      }
+    }
+
+    function getFill() {
+      return new Fill({
+        color: fillColor,
+      });
+    }
+
+    function getText() {
+      return new Text({
+        textAlign: align,
+        textBaseline: baseline,
+        font: font,
+        text: feature ? feature.getProperties()[labelAttribute] : "",
+        fill: new Fill({
+          color: labelFillColor,
+        }),
+        stroke: new Stroke({
+          color: outlineColor,
+          width: outlineWidth,
+        }),
+        offsetX: offsetX,
+        offsetY: offsetY,
+        rotation: rotation,
+      });
+    }
+
+    function getImage() {
+      return icon === "" ? getPoint() : getIcon();
+    }
+
+    function getIcon() {
+      return new Icon({
+        src: icon,
+        scale: 1,
+        anchorXUnits: "pixels",
+        anchorYUnits: "pixels",
+        anchor: [symbolXOffset, symbolYOffset],
+      });
+    }
+
+    function getPoint() {
+      return new Circle({
+        fill: getFill(),
+        stroke: getStroke(),
+        radius: parseInt(pointSize, 10) || 4,
+      });
+    }
+
+    function getStroke() {
+      return new Stroke({
+        color: lineColor,
+        width: lineWidth,
+        lineDash: getLineDash(),
+      });
+    }
+
+    function getStyleObj() {
+      var obj = {
+        fill: getFill(),
+        image: getImage(),
+        stroke: getStroke(),
+      };
+      if (showLabels) {
+        obj.text = getText();
+      }
+
+      return obj;
+    }
+
+    return [new Style(getStyleObj())];
   }
 
   // generateLegend(callback) {
