@@ -1104,7 +1104,8 @@ class DrawModel {
     // First, we'll extract the key and the target (the target will be the feature clicked).
     const { key, target: feature } = e;
     // Then we'll check if it was the "EDIT_ACTIVE" property that was changed.
-    if (key === "EDIT_ACTIVE") {
+    // Let's ignore arrow-highlight for now...
+    if (key === "EDIT_ACTIVE" && feature.get("DRAW_METHOD") !== "Arrow") {
       // If the "EDIT_ACTIVE" was changed to true, we add the highlight-style.
       if (feature.get("EDIT_ACTIVE")) {
         this.#setHighlightStyle(feature);
