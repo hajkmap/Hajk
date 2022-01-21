@@ -2,8 +2,6 @@ import { delay } from "../../utils/Delay";
 import { getPointResolution } from "ol/proj";
 import { getCenter } from "ol/extent";
 import jsPDF from "jspdf";
-import * as PDFjs from "pdfjs-dist";
-import pdfjsWorker from "pdfjs-dist/build/pdf.worker.entry";
 
 import Vector from "ol/layer/Vector.js";
 import View from "ol/View";
@@ -13,7 +11,6 @@ import Feature from "ol/Feature.js";
 import { Translate } from "ol/interaction.js";
 import Collection from "ol/Collection";
 import { Style, Stroke, Fill } from "ol/style.js";
-import { saveAs } from "file-saver";
 
 export default class PrintModel {
   constructor(settings) {
@@ -734,47 +731,97 @@ export default class PrintModel {
     this.map.setView(this.originalView);
   };
 
-  saveToFile = (pdf, width, type) => {
-    const fileName = `Hajk - ${new Date().toLocaleString()}`;
-    return new Promise((resolve, reject) => {
-      try {
-        if (type === "PDF") {
-          pdf.save(`${fileName}.pdf`);
-          resolve();
-        } else {
-          const ab = pdf.output("arraybuffer");
-          PDFjs.GlobalWorkerOptions.workerSrc = pdfjsWorker;
-          PDFjs.getDocument({ data: ab }).promise.then((pdf) => {
-            pdf.getPage(1).then((page) => {
-              let canvas = document.createElement("canvas");
-              let ctx = canvas.getContext("2d");
+  // Imports and returns the dependencies required to create a PNG-print-export.
+  #getPngDependencies = async () => {
+    try {
+      const pdfjs = await import("pdfjs-dist/build/pdf");
+      const pdfjsWorker = await import("pdfjs-dist/build/pdf.worker.entry");
+      const { saveAs } = await import("file-saver");
+      return { pdfjs, pdfjsWorker, saveAs };
+    } catch (error) {
+      throw new Error(
+        `Failed to import required dependencies. Error: ${error}`
+      );
+    }
+  };
 
-              //Scale viewport to match current resolution
-              const viewport = page.getViewport({ scale: 1 });
-              const scale = width / viewport.width;
-              const scaledViewport = page.getViewport({ scale: scale });
+  // Saves the supplied PDF with the supplied file-name.
+  #saveToPdf = async (pdf, fileName) => {
+    try {
+      pdf.save(`${fileName}.pdf`);
+    } catch (error) {
+      throw new Error(`Failed to save PDF. Error: ${error}`);
+    }
+  };
 
-              const renderContext = {
-                canvasContext: ctx,
-                viewport: scaledViewport,
-              };
-
-              canvas.height = scaledViewport.height;
-              canvas.width = scaledViewport.width;
-
-              page.render(renderContext).promise.then(() => {
-                canvas.toBlob((blob) => {
-                  saveAs(blob, `${fileName}.png`);
-                  resolve();
-                });
-              });
+  // Saves the supplied PDF *as a PNG* with the supplied file-name.
+  // The width of the document has to be supplied since some calculations
+  // must be done in order to create a PNG with the correct resolution etc.
+  #saveToPng = async (pdf, fileName, width) => {
+    try {
+      // First we'll dynamically import the required dependencies.
+      const { pdfjs, pdfjsWorker, saveAs } = await this.#getPngDependencies();
+      // Then we'll set up the pdfJS-worker.
+      pdfjs.GlobalWorkerOptions.workerSrc = pdfjsWorker;
+      // We'll output the PDF as an array-buffer that can be used to create the PNG.
+      const ab = pdf.output("arraybuffer");
+      // We'll use the PDF-JS library to create a new "PDF-JS-PDF". (Wasteful? Yes very, but the JS-PDF-library
+      // does not support export to any other format than PDF, and the PDF-JS-library does.) Notice that
+      // JS-PDF and PDF-JS are two different libraries, both with their pros and cons.
+      // - PDF-JS: Pro => Can export to PNG, Con: Cannot create as nice of an image as JS-PDF.
+      // - JS-PDF: Pro => Creates good-looking PDFs, Con: Cannot export to PNG.
+      // - Conclusion: We use both...
+      pdfjs.getDocument({ data: ab }).promise.then((pdf) => {
+        // So, when the PDF-JS-PDF is created, we get the first page, and then render
+        // it on a canvas so that we can export it as a PNG.
+        pdf.getPage(1).then((page) => {
+          // We're gonna need a canvas and its context.
+          let canvas = document.createElement("canvas");
+          let ctx = canvas.getContext("2d");
+          // Scale the viewport to match current resolution
+          const viewport = page.getViewport({ scale: 1 });
+          const scale = width / viewport.width;
+          const scaledViewport = page.getViewport({ scale: scale });
+          // Create the render-context-object.
+          const renderContext = {
+            canvasContext: ctx,
+            viewport: scaledViewport,
+          };
+          // Set the canvas dimensions to the correct width and height.
+          canvas.height = scaledViewport.height;
+          canvas.width = scaledViewport.width;
+          // Then we'll render and save!
+          page.render(renderContext).promise.then(() => {
+            canvas.toBlob((blob) => {
+              saveAs(blob, `${fileName}.png`);
             });
           });
-        }
-      } catch (error) {
-        reject(`Failed to save file... ${error}`);
+        });
+      });
+    } catch (error) {
+      throw new Error(`Failed to save PNG. Error: ${error}`);
+    }
+  };
+
+  // Saves the print-contents to file, either PDF, or PNG (depending on supplied type).
+  saveToFile = async (pdf, width, type) => {
+    // We're gonna need to create a file-name.
+    const fileName = `Hajk - ${new Date().toLocaleString()}`;
+    // Then we'll try to save the contents in the format the user requested.
+    try {
+      switch (type) {
+        case "PDF":
+          return this.#saveToPdf(pdf, fileName);
+        case "PNG":
+          return this.#saveToPng(pdf, fileName, width);
+        default:
+          throw new Error(
+            `Supplied type could not be handled. The supplied type was ${type} and currently only PDF and PNG is supported.`
+          );
       }
-    });
+    } catch (error) {
+      throw new Error(`Failed to save file... ${error}`);
+    }
   };
 
   cancelPrint = () => {
