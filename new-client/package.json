@@ -70,7 +70,7 @@
     "jsts": "^2.8.1",
     "jszip": "^3.7.1",
     "load-google-maps-api": "^2.0.2",
-    "notistack": "^1.0.10",
+    "notistack": "^2.0.3",
     "ol": "^6.12.0",
     "pdfjs-dist": "^2.12.313",
     "prettier": "^2.5.1",
