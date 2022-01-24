@@ -8,6 +8,7 @@ namespace MapService.Attributes
 {
 	public class CORSActionFilter : ActionFilterAttribute
 	{
+#if !DISABLE_CORS_IN_CODE
 		public override void OnActionExecuting(ActionExecutingContext filterContext)
 		{
             filterContext.RequestContext.HttpContext.Response.AddHeader("Access-Control-Allow-Origin", "*");
@@ -24,4 +25,5 @@ namespace MapService.Attributes
 			}
 		}
 	}
+#endif
 }
