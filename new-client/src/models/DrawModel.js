@@ -1239,11 +1239,8 @@ class DrawModel {
   // will be offset just a tad to the east of the supplied feature).
   duplicateFeature = (feature) => {
     try {
-      // First we'll have to clone the supplied feature
-      const duplicate = feature.clone();
-      // Then we'll have to create a new feature-style for the clone.
-      // Otherwise, the clone and the original feature will have connecting styles.
-      duplicate.setStyle(this.#getFeatureStyle(duplicate));
+      // First we'll have to get a clone of the supplied feature
+      const duplicate = this.#createDuplicateFeature(feature);
       // Then we'll have to create a GeoJSON-feature from the ol-feature (since
       // turf only accepts geoJSON).
       const gjFeature = this.#geoJSONParser.writeFeatureObject(duplicate);
@@ -1266,6 +1263,24 @@ class DrawModel {
         `Could not duplicate the supplied feature. Error: ${error}`
       );
     }
+  };
+
+  // Returns a clone of the supplied feature. Makes sure to clone both
+  // the feature and its style.
+  #createDuplicateFeature = (feature) => {
+    // First we'll clone the supplied feature.
+    const duplicate = feature.clone();
+    // Then we'll have to clone the style (so that the feature-styles are not connected).
+    // We only want the first style-object from the style array (since the rest are highlight-styles).
+    // The above applied to all features except for Arrows, which aren't highlighted.
+    const style =
+      feature.get("DRAW_METHOD") === "Arrow"
+        ? feature.getStyle().map((style) => style.clone())
+        : feature.getStyle()[0].clone();
+    // Then we'll apply the cloned-style.
+    duplicate.setStyle(style);
+    // Finally we'll return the cloned feature.
+    return duplicate;
   };
 
   // Cloned features are going to be placed offset from the original feature when
