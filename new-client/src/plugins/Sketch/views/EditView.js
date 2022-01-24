@@ -74,7 +74,7 @@ const EditView = (props) => {
                 props.drawModel.duplicateFeature(props.editFeature)
               }
             >
-              Duplicera geometri
+              Duplicera objekt
             </Button>
           </Tooltip>
         </Grid>
