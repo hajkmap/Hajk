@@ -10,7 +10,7 @@
   "license": "MIT",
   "scripts": {
     "analyze": "source-map-explorer 'build/static/js/*.js'",
-    "start": "react-scripts start",
+    "start": "react-app-rewired start",
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
@@ -78,6 +78,7 @@
     "proj4": "^2.7.5",
     "react": "^17.0.2",
     "react-app-polyfill": "^3.0.0",
+    "react-app-rewired": "^2.1.11",
     "react-color": "^2.19.3",
     "react-dom": "^17.0.2",
     "react-event-observer": "^0.5.11",
