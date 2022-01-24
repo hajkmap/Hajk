@@ -1,5 +1,4 @@
 // Generic imports – all plugins need these
-import foo from "./bar";
 import React from "react";
 import PropTypes from "prop-types";
 import BaseWindowPlugin from "../BaseWindowPlugin";
