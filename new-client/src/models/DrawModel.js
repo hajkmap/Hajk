@@ -1,5 +1,5 @@
 import { Draw, Modify } from "ol/interaction";
-import { createBox } from "ol/interaction/Draw";
+import { createBox, createRegularPolygon } from "ol/interaction/Draw";
 import { Vector as VectorLayer } from "ol/layer";
 import VectorSource from "ol/source/Vector";
 import { Icon, Stroke, Style, Circle, Fill, Text } from "ol/style";
@@ -7,6 +7,9 @@ import { Circle as CircleGeometry, LineString } from "ol/geom";
 import { fromCircle } from "ol/geom/Polygon";
 import { MultiPoint, Point } from "ol/geom";
 import Overlay from "ol/Overlay.js";
+import GeoJSON from "ol/format/GeoJSON";
+import transformTranslate from "@turf/transform-translate";
+import { getArea as getExtentArea } from "ol/extent";
 
 /*
  * A model supplying useful Draw-functionality.
@@ -25,6 +28,7 @@ import Overlay from "ol/Overlay.js";
  * - refreshFeaturesTextStyle(): Refreshes the text-style on all features in the draw-source.
  * - refreshDrawLayer(): Redraws all features in the draw-layer.
  * - addFeature(feature): Adds the supplied feature to the draw-source.
+ * - duplicateFeature(feature): Duplicates the supplied feature and adds it to the draw-source.
  * - removeFeature(feature): Removes the supplied feature from the draw-source.
  * - getCurrentExtent(): Returns the current extent of the current draw-layer.
  * - getCurrentLayerName(): Returns the name of the layer currently connected to the draw-model.
@@ -44,6 +48,7 @@ import Overlay from "ol/Overlay.js";
 class DrawModel {
   #map;
   #layerName;
+  #geoJSONParser;
   #observer;
   #observerPrefix;
   #drawSource;
@@ -79,6 +84,10 @@ class DrawModel {
     // Make sure that we keep track of the supplied settings.
     this.#map = settings.map;
     this.#layerName = settings.layerName;
+    // We're gonna need a GeoJSON-parser with the maps projection set.
+    this.#geoJSONParser = new GeoJSON({
+      featureProjection: this.#map.getView().getProjection(),
+    });
     // An observer might be supplied. If it is, the drawModel will publish messages when features are deleted etc.
     this.#observer = settings.observer || null;
     // There might be an "observerPrefix" (string) passed. States a string
@@ -1226,6 +1235,54 @@ class DrawModel {
     }
   };
 
+  // Clones the supplied ol-feature and adds it to the map (the added clone
+  // will be offset just a tad to the east of the supplied feature).
+  duplicateFeature = (feature) => {
+    try {
+      // First we'll have to clone the supplied feature
+      const duplicate = feature.clone();
+      // Then we'll have to create a new feature-style for the clone.
+      // Otherwise, the clone and the original feature will have connecting styles.
+      duplicate.setStyle(this.#getFeatureStyle(duplicate));
+      // Then we'll have to create a GeoJSON-feature from the ol-feature (since
+      // turf only accepts geoJSON).
+      const gjFeature = this.#geoJSONParser.writeFeatureObject(duplicate);
+      // We want to add the cloned feature with an offset to the east. First, we'll
+      // have to get the offset-amount.
+      const offset = this.#getDuplicateOffsetAmount();
+      // Then we'll translate (move) the geoJSON-feature slightly to the east.
+      const translated = transformTranslate(gjFeature, offset, 140);
+      // When thats done, we'll update the duplicates geometry.
+      duplicate.setGeometry(
+        this.#geoJSONParser.readGeometry(translated.geometry)
+      );
+      // Then we'll add the cloned feature to the map!
+      this.addFeature(duplicate);
+      // Finally, we'll refresh the draw-layer so that the feature styles are
+      // up to date.
+      this.refreshDrawLayer();
+    } catch (error) {
+      console.error(
+        `Could not duplicate the supplied feature. Error: ${error}`
+      );
+    }
+  };
+
+  // Cloned features are going to be placed offset from the original feature when
+  // added to the map. This function returns an offset-amount that depends on the current
+  // zoom-level. This is done by calculating the area of the current map-extent, and then
+  // take a fraction of that number. (The returned number is the offset from the feature in
+  // kilometers).
+  #getDuplicateOffsetAmount = () => {
+    // First we'll get the current map-extent.
+    const mapExtent = this.#map.getView().calculateExtent(this.#map.getSize());
+    // Then we'll:
+    // 1: Get the extent-area
+    // 2: Take the square-root of the area (to get approximately the length of one map-side).
+    // 3: Take a fraction of one side of the map, and return that as the offset-amount.
+    return Math.sqrt(getExtentArea(mapExtent)) * 0.00005;
+  };
+
   // CUSTOM REMOVER: Removes the supplied feature from the draw-source
   // TODO: Explain!
   removeFeature = (feature) => {
@@ -1305,7 +1362,12 @@ class DrawModel {
       type: type,
       freehand: freehand,
       stopClick: true,
-      geometryFunction: drawMethod === "Rectangle" ? createBox() : null,
+      geometryFunction:
+        drawMethod === "Rectangle"
+          ? createBox()
+          : drawMethod === "Circle"
+          ? createRegularPolygon()
+          : null,
       style: this.#getDrawStyle(),
     });
     // Let's set the supplied draw-method as a property on the draw-interaction
