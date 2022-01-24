@@ -33,7 +33,7 @@
     "express-openapi-validator": "^4.13.2",
     "helmet": "^4.6.0",
     "http-proxy-middleware": "^2.0.1",
-    "log4js": "^6.3.0",
+    "log4js": "^6.4.0",
     "node-windows": "^1.0.0-beta.6"
   },
   "devDependencies": {
