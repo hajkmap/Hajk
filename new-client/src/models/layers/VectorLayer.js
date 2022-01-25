@@ -112,8 +112,7 @@ class WFSVectorLayer {
       config.fillColor ||
       config.lineStyle
     ) {
-      this.style = this.createStyle.apply(this);
-      this.layer.setStyle(this.getStyle());
+      this.layer.setStyle(this.createStyle());
     }
     // …or just fall back to OpenLayer's default styling if no SLD/SLD URL or OpenLayers style was specified.
   }
@@ -302,13 +301,6 @@ class WFSVectorLayer {
         );
       });
     });
-  }
-
-  getStyle(forcedPointRadius) {
-    if (forcedPointRadius) {
-      return this.createStyle.call(this, undefined, forcedPointRadius);
-    }
-    return this.style;
   }
 
   createStyle(feature, forcedPointRadius) {
