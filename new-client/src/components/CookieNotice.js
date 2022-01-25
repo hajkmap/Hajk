@@ -1,16 +1,16 @@
 import React, { useState } from "react";
 import { object } from "prop-types";
 import {
-  Grid,
   Button,
   Checkbox,
+  Dialog,
+  DialogContent,
+  DialogContentText,
   FormControlLabel,
+  Grid,
   Link,
+  Slide,
 } from "@material-ui/core";
-import Dialog from "@material-ui/core/Dialog";
-import DialogContent from "@material-ui/core/DialogContent";
-import DialogContentText from "@material-ui/core/DialogContentText";
-import Slide from "@material-ui/core/Slide";
 import { makeStyles } from "@material-ui/styles";
 
 const useStyles = makeStyles((theme) => ({
