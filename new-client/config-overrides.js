@@ -19,7 +19,7 @@ const getIgnoredPlugins = () => {
   // remove it from the bundle.
   for (const plugin of allTools) {
     if (!activeTools.includes(plugin)) {
-      ignoredPlugins.push(`plugins/${plugin}`);
+      ignoredPlugins.push(`src/plugins/${plugin}/`);
     }
   }
   // Then we return the array of plugins to ignore!
