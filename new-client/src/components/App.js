@@ -46,7 +46,6 @@ import LockIcon from "@material-ui/icons/Lock";
 import LockOpenIcon from "@material-ui/icons/LockOpen";
 import MapIcon from "@material-ui/icons/Map";
 import ThemeToggler from "../controls/ThemeToggler";
-import { CookieLevel } from "../models/Cookie.js";
 
 // A global that holds our windows, for use see components/Window.js
 document.windows = [];
@@ -788,7 +787,6 @@ class App extends React.PureComponent {
               globalObserver={this.globalObserver}
               appModel={this.appModel}
             />
-          )}
           )}
           <Alert
             open={this.state.alert}
