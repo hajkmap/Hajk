@@ -352,11 +352,11 @@ class FirToolbarView extends React.PureComponent {
                 <input
                   accept=".kml"
                   className={classes.fileInput}
-                  id="firFileInput"
+                  id={`${this.prefix}FileInput`}
                   type="file"
                   onChange={this.handleFileSelection}
                 />
-                <label htmlFor="firFileInput">
+                <label htmlFor={`${this.prefix}FileInput`}>
                   <Button
                     variant="contained"
                     color="secondary"

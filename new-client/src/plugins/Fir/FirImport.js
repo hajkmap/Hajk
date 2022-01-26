@@ -70,6 +70,15 @@ export default class FirImport {
       });
     }
 
+    if (
+      feature.getProperties().geometryType &&
+      feature.getProperties().geometryType === "Point"
+    ) {
+      feature.setProperties({
+        name: "",
+      });
+    }
+
     if (type === "LineString") {
       coordinates.forEach((c, i) => {
         let pairs = [];

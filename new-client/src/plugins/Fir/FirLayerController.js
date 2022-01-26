@@ -76,6 +76,7 @@ class FirLayerController {
 
     this.model.layers.draw.getSource().on("addfeature", (e) => {
       e.feature.set("fir_type", "draw");
+      e.feature.setStyle(null); // use default style for now
       this.bufferFeatures(this.bufferValue);
     });
 
