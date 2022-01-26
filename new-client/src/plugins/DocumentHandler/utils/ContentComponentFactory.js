@@ -6,6 +6,8 @@ import clsx from "clsx";
 import Box from "@mui/material/Box";
 import TextArea from "../documentWindow/TextArea";
 import makeStyles from "@mui/styles/makeStyles";
+import { styled } from "@mui/material/styles";
+
 import {
   Button,
   Typography,
@@ -170,70 +172,98 @@ export const Paragraph = ({ pTag }) => {
   );
 };
 
+const ListUlList = styled(List)(({ theme }) => ({
+  listStyle: "initial",
+  listStylePosition: "inside",
+  overflowWrap: "break-word",
+  wordBreak: "break-word",
+  marginBottom: theme.spacing(1),
+  padding: theme.spacing(0),
+  paddingLeft: getIndentationValue(theme.typography.body1.fontSize, 1.375),
+  textIndent: getIndentationValue(theme.typography.body1.fontSize, 1.375, true),
+}));
+
+const ListItemOlListItem = styled(ListItem)(({ theme }) => ({
+  padding: theme.spacing(0),
+}));
+
+const TypographyOlListItem = styled(Typography)(({ theme }) => ({
+  padding: theme.spacing(0),
+}));
+
+const ListOlList = styled(List)(({ theme }) => ({
+  padding: theme.spacing(0),
+  marginBottom: theme.spacing(1),
+}));
+
+const TypographyHeading = styled(Typography)(({ theme }) => ({
+  marginBottom: theme.spacing(1),
+}));
+
+const TypographyImageText = styled(Typography)(({ theme }) => ({
+  marginBottom: theme.spacing(1),
+}));
+
+const BoxImageInformationWrapper = styled(Box)(({ theme }) => ({
+  marginBottom: theme.spacing(1),
+  maxWidth: "100%",
+}));
+
 export const ULComponent = ({ ulComponent }) => {
   let children = [...ulComponent.children];
-  const classes = useStyles();
   return (
-    <List className={classes.ulList} component="ul">
+    <ListUlList component="ul">
       {children.map((listItem, index) => {
         return (
-          <Typography
-            key={index}
-            component="li"
-            className={classes.typography}
-            variant="body1"
-          >
+          <Typography key={index} component="li" variant="body1">
             {getFormattedComponentFromTag(listItem)}{" "}
           </Typography>
         );
       })}
-    </List>
+    </ListUlList>
   );
 };
 
 export const OLComponent = ({ olComponent }) => {
   let children = [...olComponent.children];
-  const classes = useStyles();
   return (
-    <List className={classes.olList} component="ol">
+    <ListOlList component="ol">
       {children.map((listItem, index) => {
         return (
-          <ListItem className={classes.olListItem} disableGutters key={index}>
+          <ListItemOlListItem disableGutters key={index}>
             <Grid wrap="nowrap" container>
               <Grid
-                className={clsx(
-                  index < 9
-                    ? classes.listItemOneDigit
-                    : classes.listItemTwoDigit
-                )}
                 item
+                sx={{
+                  marginRight: (theme) =>
+                    getIndentationValue(
+                      theme.typography.body1.fontSize,
+                      index < 9 ? 1 : 0.5
+                    ),
+                  padding: 0,
+                  marginBottom: index < 9 ? 1 : "inherit",
+                }}
               >
                 <Typography variant="body1">{`${index + 1}.`}</Typography>
               </Grid>
               <Grid item>
-                <Typography className={classes.olListItem} variant="body1">
+                <TypographyOlListItem variant="body1">
                   {getFormattedComponentFromTag(listItem)}
-                </Typography>
+                </TypographyOlListItem>
               </Grid>
             </Grid>
-          </ListItem>
+          </ListItemOlListItem>
         );
       })}
-    </List>
+    </ListOlList>
   );
 };
 
 export const Heading = ({ headingTag }) => {
-  const classes = useStyles();
   return (
-    <>
-      <Typography
-        className={classes.heading}
-        variant={headingTag.tagName.toLowerCase()}
-      >
-        {getFormattedComponentFromTag(headingTag)}
-      </Typography>
-    </>
+    <TypographyHeading variant={headingTag.tagName.toLowerCase()}>
+      {getFormattedComponentFromTag(headingTag)}
+    </TypographyHeading>
   );
 };
 
@@ -308,51 +338,58 @@ export const Img = ({ imgTag, localObserver, componentId, baseUrl }) => {
     return className;
   };
 
-  const getImagePositionClass = (position) => {
-    if (position === "right") {
-      return classes.mediaRight;
+  const getMediaPositionStyle = (position) => {
+    switch (position) {
+      case "right":
+        return {
+          alignItems: "flex-end",
+          display: "flex",
+          flexDirection: "column",
+        };
+      case "floatRight":
+        return {
+          float: "right",
+          marginLeft: 1,
+        };
+      case "left":
+        return {
+          alignItems: "flex-start",
+          display: "flex",
+          flexDirection: "column",
+        };
+      case "floatLeft":
+        return {
+          float: "left",
+          marginRight: 1,
+        };
+      case "center":
+        return {
+          alignItems: "center",
+          display: "flex",
+          flexDirection: "column",
+        };
+      default:
+        return {};
     }
-
-    if (position === "left") {
-      return classes.mediaLeft;
-    }
-
-    if (position === "center") {
-      return classes.mediaCenter;
-    }
-
-    if (position === "floatLeft") {
-      return classes.floatLeft;
-    }
-
-    if (position === "floatRight") {
-      return classes.floatRight;
-    }
-
-    return;
   };
 
   const getImageDescription = (image) => {
     return (
-      <Box
-        style={{ width: image.width }}
-        className={classes.imageInformationWrapper}
-      >
+      <BoxImageInformationWrapper sx={{ width: image.width }}>
         {image.caption && (
           <Typography id={`image_${image.captionId}`} variant="subtitle2">
             {image.caption}
           </Typography>
         )}
         {image.source && (
-          <Typography
+          <TypographyImageText
             id={`image_${image.sourceId}`}
             variant="subtitle2"
-            className={classes.imageText}
           >
             {image.source}
-          </Typography>
+          </TypographyImageText>
         )}
-      </Box>
+      </BoxImageInformationWrapper>
     );
   };
 
@@ -376,8 +413,6 @@ export const Img = ({ imgTag, localObserver, componentId, baseUrl }) => {
       }
     : null;
 
-  const positioningClass = getImagePositionClass(image.position);
-
   const getDescribedByAttribute = () => {
     let describedBy = [];
     if (image.caption) {
@@ -398,7 +433,7 @@ export const Img = ({ imgTag, localObserver, componentId, baseUrl }) => {
     <Box
       key={`${image.id}`}
       data-position={image.position}
-      className={positioningClass}
+      sx={getMediaPositionStyle(image.position)}
     >
       <CardMedia
         onClick={onClickCallback}
@@ -436,30 +471,6 @@ export const Video = ({ imgTag, componentId, baseUrl }) => {
   };
 
   const classes = useStyles();
-  const getVideoPositionClass = (position) => {
-    if (position === "right") {
-      return classes.mediaRight;
-    }
-
-    if (position === "left") {
-      return classes.mediaLeft;
-    }
-
-    if (position === "center") {
-      return classes.mediaCenter;
-    }
-
-    if (position === "floatLeft") {
-      return classes.floatLeft;
-    }
-
-    if (position === "floatRight") {
-      return classes.floatRight;
-    }
-
-    return;
-  };
-  const positioningClass = getVideoPositionClass(videoAttributes.position);
 
   const getVideoDescription = (videoAttributes) => {
     return (
@@ -495,7 +506,7 @@ export const Video = ({ imgTag, componentId, baseUrl }) => {
 
   return (
     <React.Fragment key={videoAttributes.id}>
-      <div className={positioningClass}>
+      <Box sx={this.getMediaPositionStyle(videoAttributes.position)}>
         <video
           height={videoAttributes.height}
           width={videoAttributes.width}
@@ -504,7 +515,7 @@ export const Video = ({ imgTag, componentId, baseUrl }) => {
           <source src={videoUrl} type="video/mp4"></source>
         </video>
         {getVideoDescription(videoAttributes)}
-      </div>
+      </Box>
     </React.Fragment>
   );
 };
@@ -525,30 +536,6 @@ export const Audio = ({ imgTag, componentId, baseUrl }) => {
   };
 
   const classes = useStyles();
-  const getVideoPositionClass = (position) => {
-    if (position === "right") {
-      return classes.mediaRight;
-    }
-
-    if (position === "left") {
-      return classes.mediaLeft;
-    }
-
-    if (position === "center") {
-      return classes.mediaCenter;
-    }
-
-    if (position === "floatLeft") {
-      return classes.floatLeft;
-    }
-
-    if (position === "floatRight") {
-      return classes.floatRight;
-    }
-
-    return;
-  };
-  const positioningClass = getVideoPositionClass(audioAttributes.position);
 
   const getAudioDescription = (audioAttributes) => {
     return (
@@ -583,14 +570,15 @@ export const Audio = ({ imgTag, componentId, baseUrl }) => {
   }
 
   return (
-    <React.Fragment key={audioAttributes.id}>
-      <div className={positioningClass}>
-        <audio controls={"controls"}>
-          <source src={imgTag.src} type="audio/mpeg"></source>
-        </audio>
-        {getAudioDescription(audioAttributes)}
-      </div>
-    </React.Fragment>
+    <Box
+      key={audioAttributes.id}
+      sx={this.getMediaPositionStyle(audioAttributes.position)}
+    >
+      <audio controls={"controls"}>
+        <source src={imgTag.src} type="audio/mpeg"></source>
+      </audio>
+      {getAudioDescription(audioAttributes)}
+    </Box>
   );
 };
 
