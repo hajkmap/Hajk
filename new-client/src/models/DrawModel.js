@@ -1206,6 +1206,14 @@ class DrawModel {
       : settings.freehand ?? false;
   };
 
+  // Removes the property-change-listeners from all features and then adds
+  // them again. Useful if a new feature is added to the draw-source, and you
+  // have to make sure the new feature has a listener.
+  reBindFeaturePropertyListener = () => {
+    this.#unBindFeaturePropertyListener();
+    this.#bindFeaturePropertyListener();
+  };
+
   // Refreshes the text-style on the features in the draw-source. Useful for when a feature-prop
   // has been changed and the text-style has to be updated.
   refreshFeaturesTextStyle = () => {
@@ -1256,6 +1264,9 @@ class DrawModel {
       duplicate.setGeometry(
         this.#geoJSONParser.readGeometry(translated.geometry)
       );
+      // Since the feature we are duplicating is probably selected for edit, we have to
+      // make sure to toggle the edit-flag on the new feature to false.
+      duplicate.set("EDIT_ACTIVE", false);
       // Then we'll add the cloned feature to the map!
       this.addFeature(duplicate);
       // Finally, we'll refresh the draw-layer so that the feature styles are

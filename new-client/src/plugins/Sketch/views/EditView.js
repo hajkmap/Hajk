@@ -70,9 +70,10 @@ const EditView = (props) => {
             <Button
               variant="contained"
               fullWidth
-              onClick={() =>
-                props.drawModel.duplicateFeature(props.editFeature)
-              }
+              onClick={() => {
+                props.drawModel.duplicateFeature(props.editFeature);
+                props.drawModel.reBindFeaturePropertyListener();
+              }}
             >
               Duplicera objekt
             </Button>
