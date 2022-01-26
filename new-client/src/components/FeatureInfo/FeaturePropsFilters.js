@@ -90,6 +90,13 @@ class PropFilters {
   }
 }
 
+function fixDate(value) {
+  if (value.indexOf("-") <= -1) {
+    value = `${value.substr(0, 4)}-${value.substr(4, 2)}-${value.substr(6, 2)}`;
+  }
+  return value;
+}
+
 const filters = new PropFilters();
 
 // ---- Add filters below -----------------------------------------------------
@@ -129,6 +136,33 @@ filters.add("default", function (value, defaultValue) {
 filters.addAlias("fallback", "default");
 
 /*
+  lt - lessThan
+  If lessValue or greaterValue is an empty string the original value will be returned
+  Example:
+  {10.3|lt(11, 'LessThan', 'GreaterThan')}
+  outputs: 'LessThan'
+  {10.3|lt(11, '', 'GreaterThan')}
+  outputs: 10.3
+*/
+filters.add("lt", function (value, test, lessValue, greaterValue) {
+  if (isNaN(value) || isNaN(test)) {
+    return value;
+  }
+  const val = typeof value === "string" ? parseFloat(value) : value;
+  const t = typeof test === "string" ? parseFloat(test) : test;
+
+  if (val < t) {
+    return typeof lessValue === "string" && lessValue.length === 0
+      ? value
+      : lessValue;
+  } else {
+    return typeof greaterValue === "string" && greaterValue.length === 0
+      ? value
+      : greaterValue;
+  }
+});
+
+/*
   equals
   Example:
   {'true'|equals('true', 'yes', 'no')}
@@ -166,6 +200,7 @@ filters.add("datetime", function (value) {
   outputs: 2021-06-03
 */
 filters.add("date", function (value) {
+  value = fixDate(value);
   const date = typeof value === "string" ? new Date(value) : value;
   return date.toLocaleDateString();
 });
@@ -189,6 +224,7 @@ filters.add("time", function (value) {
   Note: negative value will substract days
 */
 filters.add("dateAddDays", function (value, days) {
+  value = fixDate(value);
   const date = typeof value === "string" ? new Date(value) : value;
   date.setDate(date.getDate() + parseFloat(days));
   return date;
@@ -202,6 +238,7 @@ filters.add("dateAddDays", function (value, days) {
   Note: negative value will substract hours
 */
 filters.add("dateAddHours", function (value, hours) {
+  value = fixDate(value);
   const date = typeof value === "string" ? new Date(value) : value;
   date.setTime(date.getTime() + parseFloat(hours) * 60 * 60 * 1000);
   return date;
