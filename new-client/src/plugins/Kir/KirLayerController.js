@@ -45,6 +45,7 @@ class KirLayerController {
 
     this.model.layers.draw.getSource().on("addfeature", (e) => {
       e.feature.set("kir_type", "draw");
+      e.feature.setStyle(null); // use default style for now
       this.bufferFeatures(this.bufferValue);
     });
 
