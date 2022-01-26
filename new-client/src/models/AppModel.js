@@ -252,6 +252,7 @@ class AppModel {
       }),
     };
 
+    console.log(config.map.constrainResolutionMobile);
     this.map = new Map({
       controls: [
         // new FullScreen({ target: document.getElementById("controls-column") }),
@@ -274,7 +275,10 @@ class AppModel {
         center: config.map.center,
         extent: config.map.extent.length > 0 ? config.map.extent : undefined, // backend will always write extent as an Array, so basic "config.map.extent || undefined" wouldn't work here
         constrainOnlyCenter: config.map.constrainOnlyCenter, // If true, the extent constraint will only apply to the view center and not the whole extent.
-        constrainResolution: config.map.constrainResolution, // If true, the view will always animate to the closest zoom level after an interaction; false means intermediary zoom levels are allowed.
+        constrainResolution:
+          isMobile && config.map.constrainResolutionMobile !== undefined
+            ? config.map.constrainResolutionMobile
+            : config.map.constrainResolution, // If true, the view will always animate to the closest zoom level after an interaction; false means intermediary zoom levels are allowed.
         maxZoom: config.map.maxZoom || 24,
         minZoom: config.map.minZoom || 0,
         projection: config.map.projection,
