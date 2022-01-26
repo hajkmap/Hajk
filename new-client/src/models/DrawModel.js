@@ -309,6 +309,8 @@ class DrawModel {
     // Let's grab the standard draw style as a baseline.
     // The standard style can be overridden if the override is supplied.
     const baseLineStyle = this.#getDrawStyle(settingsOverride);
+    // If we're dealing with a text-feature, we don't want an image-style.
+    feature.get("DRAW_METHOD") === "Text" && baseLineStyle.setImage(null);
     // If showFeatureMeasurements is set to true, we create a text-style which
     // will allow us to show the measurements of the drawn feature.
     const textStyle = this.#showFeatureMeasurements
@@ -1116,14 +1118,22 @@ class DrawModel {
     // Let's ignore text- and arrow-highlight for now...
     if (
       key === "EDIT_ACTIVE" &&
-      !["Text", "Arrow"].includes(feature.get("DRAW_METHOD"))
+      !["Text", "Arrow", "Point"].includes(feature.get("DRAW_METHOD"))
     ) {
       // If the "EDIT_ACTIVE" was changed to true, we add the highlight-style.
       if (feature.get("EDIT_ACTIVE")) {
-        this.#setHighlightStyle(feature);
+        try {
+          this.#setHighlightStyle(feature);
+        } catch (error) {
+          console.error(`Failed to apply highlight-style. Error: ${error}`);
+        }
       } else {
         // Otherwise, we remove the highlight-style.
-        this.#removeHighlightStyle(feature);
+        try {
+          this.#removeHighlightStyle(feature);
+        } catch (error) {
+          console.error(`Failed to remove highlight-style. Error: ${error}`);
+        }
       }
     }
   };
@@ -1290,7 +1300,9 @@ class DrawModel {
     const style =
       feature.get("DRAW_METHOD") === "Arrow"
         ? feature.getStyle().map((style) => style.clone())
-        : feature.getStyle()[0].clone();
+        : Array.isArray(feature.getStyle())
+        ? feature.getStyle()[0].clone()
+        : feature.getStyle().clone();
     // Then we'll apply the cloned-style.
     duplicate.setStyle(style);
     // Finally we'll return the cloned feature.
@@ -1560,7 +1572,7 @@ class DrawModel {
       if (f.get("DRAW_METHOD") === "Arrow") {
         this.#refreshArrowStyle(f);
       }
-      if (f.get("DRAW_METHOD") === "Text") {
+      if (["Text", "Point"].includes(f.get("DRAW_METHOD"))) {
         f.setStyle(this.#getFeatureStyle(f));
       }
     });
