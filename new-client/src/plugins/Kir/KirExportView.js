@@ -2,9 +2,8 @@ import React from "react";
 import PropTypes from "prop-types";
 import { withStyles } from "@material-ui/core/styles";
 import { withSnackbar } from "notistack";
-import FirExportEdpView from "./FirExportEdpView";
-import FirExportPropertyListView from "./FirExportPropertyListView";
-import FirExportResidentListView from "./FirExportResidentListView";
+
+import FirExportResidentListView from "../Fir/FirExportResidentListView";
 
 const styles = (theme) => ({
   info: {
@@ -44,7 +43,7 @@ const styles = (theme) => ({
     width: "50%",
   },
 });
-class FirExportView extends React.PureComponent {
+class KirExportView extends React.PureComponent {
   state = {
     results: [],
   };
@@ -64,7 +63,7 @@ class FirExportView extends React.PureComponent {
     this.localObserver = this.props.localObserver;
     this.globalObserver = this.props.app.globalObserver;
 
-    this.localObserver.subscribe("fir.results.filtered", (list) => {
+    this.localObserver.subscribe("kir.results.filtered", (list) => {
       this.setState({ results: [...list] });
       this.forceUpdate();
     });
@@ -79,34 +78,13 @@ class FirExportView extends React.PureComponent {
             <span className={classes.num}>{this.state.results.length}</span>{" "}
             objekt finns tillgängliga för export.
           </div>
-          {this.model.config.propertyList ? (
-            <FirExportPropertyListView
+          {this.model.app.plugins.fir.options.residentList ? (
+            <FirExportResidentListView
               results={this.state.results}
               model={this.model}
               app={this.props.app}
               localObserver={this.localObserver}
-            />
-          ) : (
-            ""
-          )}
-
-          {this.model.config.residentList ? (
-            <FirExportResidentListView
-              results={this.state.results}
-              model={this.model}
-              app={this.app}
-              localObserver={this.localObserver}
-            />
-          ) : (
-            ""
-          )}
-
-          {this.model.config.edp ? (
-            <FirExportEdpView
-              results={this.state.results}
-              model={this.model}
-              app={this.app}
-              localObserver={this.localObserver}
+              type={"kir"}
             />
           ) : (
             ""
@@ -117,4 +95,4 @@ class FirExportView extends React.PureComponent {
   }
 }
 
-export default withStyles(styles)(withSnackbar(FirExportView));
+export default withStyles(styles)(withSnackbar(KirExportView));

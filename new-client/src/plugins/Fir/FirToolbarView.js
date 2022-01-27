@@ -13,6 +13,56 @@ import TextField from "@material-ui/core/TextField";
 import InputAdornment from "@material-ui/core/InputAdornment";
 import Draw, { createBox } from "ol/interaction/Draw.js";
 
+const styles = (theme) => ({
+  containerTopPadded: {
+    paddingTop: theme.spacing(2),
+  },
+  containerTopDoublePadded: {
+    paddingTop: theme.spacing(4),
+  },
+  buttonGroup: {
+    width: "100%",
+    overflow: "hidden",
+    whiteSpace: "nowrap",
+  },
+  iconButton: {
+    margin: theme.spacing(0),
+    paddingLeft: 0,
+    paddingRight: 0,
+    minWidth: "2.875rem",
+    width: "calc(99.9% / 6)",
+  },
+  fileInputContainer: {
+    display: "flex",
+    alignItems: "center",
+    "& > *": {
+      display: "flex",
+    },
+    "& span": {
+      whiteSpace: "nowrap",
+    },
+    "& span.filename": {
+      textOverflow: "ellipsis",
+      whiteSpace: "nowrap",
+      overflow: "hidden",
+      display: "block",
+      paddingLeft: theme.spacing(1),
+      fontWeight: "300",
+    },
+  },
+  fileInput: {
+    display: "none",
+  },
+  svgImg: {
+    height: "24px",
+    width: "24px",
+  },
+  buttonContainedPrimary: {
+    "& img": {
+      filter: "invert(1)", // fixes icon-colors on geometry icons.
+    },
+  },
+});
 class FirToolbarView extends React.PureComponent {
   state = {
     tools: {
@@ -30,6 +80,7 @@ class FirToolbarView extends React.PureComponent {
 
   static propTypes = {
     model: PropTypes.object.isRequired,
+    prefix: PropTypes.string,
     app: PropTypes.object.isRequired,
     localObserver: PropTypes.object.isRequired,
     classes: PropTypes.object.isRequired,
@@ -42,11 +93,12 @@ class FirToolbarView extends React.PureComponent {
     this.model = this.props.model;
     this.localObserver = this.props.localObserver;
     this.globalObserver = this.props.app.globalObserver;
+    this.prefix = this.props.prefix || "fir";
     this.initListeners();
   }
 
   initListeners = () => {
-    this.localObserver.subscribe("fir.search.clear", () => {
+    this.localObserver.subscribe(`${this.prefix}.search.clear`, () => {
       this.deactivateDraw();
       this.setState({ files: { list: [] } });
       this.deselectButtonItems();
@@ -91,22 +143,22 @@ class FirToolbarView extends React.PureComponent {
     this.model.map.forEachFeatureAtPixel(e.pixel, (feature, layer) => {
       // Handles both drawn features and buffer features. Remove them at the same time as they are linked.
 
-      const firType = feature.get("fir_type");
-      if (firType && (firType === "draw" || firType === "buffer") && first) {
+      const type = feature.get(`${this.prefix}_type`);
+      if (type && (type === "draw" || type === "buffer") && first) {
         let findFn = null;
 
-        if (firType === "draw") {
+        if (type === "draw") {
           findFn = (f) => {
             return feature.ol_uid === f.get("owner_ol_uid");
           };
-        } else if (firType === "buffer") {
+        } else if (type === "buffer") {
           findFn = (f) => {
             return feature.get("owner_ol_uid") === f.ol_uid;
           };
         }
 
-        this.model.layers[firType].getSource().removeFeature(feature);
-        const layerName = firType === "draw" ? "buffer" : "draw";
+        this.model.layers[type].getSource().removeFeature(feature);
+        const layerName = type === "draw" ? "buffer" : "draw";
         let secondaryLayer = this.model.layers[layerName];
         let secondaryFeature = secondaryLayer
           .getSource()
@@ -140,7 +192,6 @@ class FirToolbarView extends React.PureComponent {
       this.interaction = new Draw({
         source: this.model.layers.draw.getSource(),
         type: type,
-        // style: this.createStyle(),
         geometryFunction: geometryFunction,
         geometryName: type,
       });
@@ -154,8 +205,6 @@ class FirToolbarView extends React.PureComponent {
       this.deactivateDraw();
       if (type === "Delete") {
         this.model.map.on("singleclick", this.handleDeleteClick);
-      } else if (type === "Import") {
-        //nada
       }
     }
   };
@@ -165,7 +214,7 @@ class FirToolbarView extends React.PureComponent {
     if (this.interaction) {
       this.interaction.abortDrawing();
       this.model.map.removeInteraction(this.interaction);
-      this.model.map.clickLock.delete("fir-draw");
+      this.model.map.clickLock.delete(`${this.prefix}-draw`);
       window.removeEventListener("keydown", this.handleKeyDown);
     }
     this.updateNumberOfObjects();
@@ -173,7 +222,7 @@ class FirToolbarView extends React.PureComponent {
 
   activateDraw = () => {
     this.model.map.addInteraction(this.interaction);
-    this.model.map.clickLock.add("fir-draw");
+    this.model.map.clickLock.add(`${this.prefix}-draw`);
     window.addEventListener("keydown", this.handleKeyDown);
     this.updateNumberOfObjects();
   };
@@ -197,7 +246,10 @@ class FirToolbarView extends React.PureComponent {
     if (e && e.target) {
       this.setState({ files: { list: e.target.files || [] } });
       if (e.target.files.length > 0) {
-        this.localObserver.publish("fir.file.import", e.target.files[0]);
+        this.localObserver.publish(
+          `${this.prefix}.file.import`,
+          e.target.files[0]
+        );
         setTimeout(() => {
           e.target.value = "";
         }, 500);
@@ -214,7 +266,6 @@ class FirToolbarView extends React.PureComponent {
             Sökområde
           </Typography>
           <ButtonGroup
-            // color="primary"
             className={classes.buttonGroup}
             variant="contained"
             aria-label="outlined button group"
@@ -301,11 +352,11 @@ class FirToolbarView extends React.PureComponent {
                 <input
                   accept=".kml"
                   className={classes.fileInput}
-                  id="firFileInput"
+                  id={`${this.prefix}FileInput`}
                   type="file"
                   onChange={this.handleFileSelection}
                 />
-                <label htmlFor="firFileInput">
+                <label htmlFor={`${this.prefix}FileInput`}>
                   <Button
                     variant="contained"
                     color="secondary"
@@ -342,9 +393,12 @@ class FirToolbarView extends React.PureComponent {
                 const bufferValue = parseInt(v);
                 this.setState({ buffer: bufferValue });
 
-                this.localObserver.publish("fir.layers.bufferValueChanged", {
-                  value: bufferValue,
-                });
+                this.localObserver.publish(
+                  `${this.prefix}.layers.bufferValueChanged`,
+                  {
+                    value: bufferValue,
+                  }
+                );
               }}
               onFocus={(e) => {
                 if (this.state.buffer === 0) {
@@ -370,56 +424,5 @@ class FirToolbarView extends React.PureComponent {
     );
   }
 }
-
-const styles = (theme) => ({
-  containerTopPadded: {
-    paddingTop: theme.spacing(2),
-  },
-  containerTopDoublePadded: {
-    paddingTop: theme.spacing(4),
-  },
-  buttonGroup: {
-    width: "100%",
-    overflow: "hidden",
-    whiteSpace: "nowrap",
-  },
-  iconButton: {
-    margin: theme.spacing(0),
-    paddingLeft: 0,
-    paddingRight: 0,
-    minWidth: "2.875rem",
-    width: "calc(99.9% / 6)",
-  },
-  fileInputContainer: {
-    display: "flex",
-    alignItems: "center",
-    "& > *": {
-      display: "flex",
-    },
-    "& span": {
-      whiteSpace: "nowrap",
-    },
-    "& span.filename": {
-      textOverflow: "ellipsis",
-      whiteSpace: "nowrap",
-      overflow: "hidden",
-      display: "block",
-      paddingLeft: theme.spacing(1),
-      fontWeight: "300",
-    },
-  },
-  fileInput: {
-    display: "none",
-  },
-  svgImg: {
-    height: "24px",
-    width: "24px",
-  },
-  buttonContainedPrimary: {
-    "& img": {
-      filter: "invert(1)", // fixes icon-colors on geometry icons.
-    },
-  },
-});
 
 export default withStyles(styles)(withSnackbar(FirToolbarView));

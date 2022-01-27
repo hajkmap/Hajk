@@ -28,7 +28,7 @@ class FirWfsService {
     return filters.length === 0 ? null : filters;
   }
 
-  _getFiltersForStringAndGeometrySearch(params) {
+  #getFiltersForStringAndGeometrySearch(params) {
     let rootFilter = null;
     let geometryFilters = null;
     let stringFilter = null;
@@ -69,7 +69,7 @@ class FirWfsService {
     return rootFilter;
   }
 
-  _getFiltersForDesignations(params) {
+  #getFiltersForDesignations(params) {
     let rootFilter = null;
     let designations = params.designations || [];
 
@@ -98,9 +98,9 @@ class FirWfsService {
 
     if (designations.length === 0) {
       // zero designations
-      rootFilter = this._getFiltersForStringAndGeometrySearch(params);
+      rootFilter = this.#getFiltersForStringAndGeometrySearch(params);
     } else if (designations.length >= 1) {
-      rootFilter = this._getFiltersForDesignations(params);
+      rootFilter = this.#getFiltersForDesignations(params);
     }
 
     return {
