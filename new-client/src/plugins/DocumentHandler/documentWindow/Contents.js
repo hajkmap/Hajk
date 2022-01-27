@@ -96,17 +96,10 @@ class Contents extends React.PureComponent {
   };
 
   createGroupHeadingTag = (title, id) => {
-    const { classes } = this.props;
     return (
-      <React.Fragment key={id}>
-        <Typography
-          className={classes.typography}
-          data-type="chapter-header"
-          variant={"h1"}
-        >
-          {title}
-        </Typography>
-      </React.Fragment>
+      <Typography key={id} data-type="chapter-header" variant="h1">
+        {title}
+      </Typography>
     );
   };
 
