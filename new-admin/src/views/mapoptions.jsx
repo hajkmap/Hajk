@@ -81,6 +81,8 @@ class MapOptions extends Component {
           config.showCookieNotice !== undefined
             ? config.showCookieNotice
             : true,
+        cookieUse3dPart:
+          config.cookieUse3dPart !== undefined ? config.cookieUse3dPart : false,
       });
       this.validate();
     });
@@ -155,6 +157,10 @@ class MapOptions extends Component {
         mapConfig.showCookieNotice !== undefined
           ? mapConfig.showCookieNotice
           : true,
+      cookieUse3dPart:
+        mapConfig.cookieUse3dPart !== undefined
+          ? mapConfig.cookieUse3dPart
+          : false,
     });
   }
 
@@ -391,6 +397,7 @@ class MapOptions extends Component {
         config.defaultCookieNoticeUrl = this.getValue("defaultCookieNoticeUrl");
         config.crossOrigin = this.getValue("crossOrigin");
         config.showCookieNotice = this.getValue("showCookieNotice");
+        config.cookieUse3dPart = this.getValue("cookieUse3dPart");
         this.props.model.updateMapConfig(config, (success) => {
           var msg = success
             ? "Uppdateringen lyckades."
@@ -1036,6 +1043,26 @@ class MapOptions extends Component {
                   className="fa fa-question-circle"
                   data-toggle="tooltip"
                   title="Om aktiv kommer ett meddelande angående hantering av cookies visas för nya användare."
+                />
+              </label>
+            </div>
+            <div>
+              <input
+                id="input_cookieUse3dPart"
+                type="checkbox"
+                ref="input_cookieUse3dPart"
+                onChange={(e) => {
+                  this.setState({ cookieUse3dPart: e.target.checked });
+                }}
+                checked={this.state.cookieUse3dPart}
+              />
+              &nbsp;
+              <label className="long-label" htmlFor="input_cookieUse3dPart">
+                Visa alternativ för 3:e part cookies{" "}
+                <i
+                  className="fa fa-question-circle"
+                  data-toggle="tooltip"
+                  title="Om aktiv kommer en checkbox angående 3:e part cookies visas för nya användare."
                 />
               </label>
             </div>

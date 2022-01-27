@@ -75,6 +75,8 @@ namespace MapService.Models
 
         public bool showCookieNotice { get; set; }
 
+        public bool cookieUse3dPart { get; set; }
+
         public bool showThemeToggler { get; set; }
     }
 }
