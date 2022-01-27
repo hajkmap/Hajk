@@ -40,7 +40,9 @@ namespace MapService.Models
         public bool constrainOnlyCenter { get; set; }
 
         public bool constrainResolution { get; set; }
-        
+
+        public bool constrainResolutionMobile { get; set; }
+
         public bool enableDownloadLink { get; set; }
 
         public string logo { get; set; }
@@ -72,6 +74,8 @@ namespace MapService.Models
         public string crossOrigin { get; set; }
 
         public bool showCookieNotice { get; set; }
+
+        public bool cookieUse3dPart { get; set; }
 
         public bool showThemeToggler { get; set; }
     }
