@@ -8,6 +8,7 @@ import Observer from "react-event-observer";
 import { isMobile } from "../utils/IsMobile";
 import SrShortcuts from "../components/SrShortcuts/SrShortcuts";
 import AppModel from "../models/AppModel.js";
+import { setConfig as setCookieConfig } from "models/Cookie";
 
 import Window from "./Window.js";
 import CookieNotice from "./CookieNotice";
@@ -343,6 +344,16 @@ class App extends React.PureComponent {
     }
 
     this.globalObserver = new Observer();
+
+    // We have to initialize the cookie-manager so we know how cookies should be managed.
+    // The manager should ideally only be initialized once, since the initialization determines
+    // wether the cookie-notice has to be shown or not. Running setConfig() again will not lead
+    // to a new prompt.
+    setCookieConfig({
+      showCookieNotice: props.config.mapConfig.map.showCookieNotice,
+      globalObserver: this.globalObserver,
+    });
+
     this.appModel = new AppModel({
       config: props.config,
       globalObserver: this.globalObserver,

@@ -11,6 +11,7 @@ import {
   Slide,
 } from "@material-ui/core";
 import { makeStyles } from "@material-ui/styles";
+import { setLevel, shouldShowNotice } from "models/Cookie";
 
 // Default settings for the cookie-notice text and url if none is supplied from the configuration.
 const DEFAULT_MESSAGE =
@@ -52,10 +53,10 @@ const Transition = React.forwardRef(function Transition(props, ref) {
 
 function CookieNotice({ globalObserver, appModel }) {
   const classes = useStyles();
-  const { cookieManager, config } = appModel;
+  const { config } = appModel;
 
   // We should initialize the dialog:s open-state to whatever the manager states.
-  const [open, setOpen] = React.useState(cookieManager.showCookieNotice());
+  const [open, setOpen] = React.useState(shouldShowNotice());
   const [functionalChecked, setFunctionalChecked] = React.useState(false);
   const [thirdPartChecked, setThirdPartChecked] = React.useState(false);
 
@@ -94,10 +95,10 @@ function CookieNotice({ globalObserver, appModel }) {
       cookieLevel = cookieLevel | 4;
     }
     // Then we'll set the cookie-level in the manager.
-    cookieManager.setCookieLevels(cookieLevel);
+    setLevel(cookieLevel);
     // Make sure to close the dialog when the user has made the choice.
     setOpen(false);
-  }, [functionalChecked, cookieManager, thirdPartChecked]);
+  }, [functionalChecked, thirdPartChecked]);
 
   // Handler for when the user clicks "Allow all", i.e. we should
   // ignore which boxes are ticked, and set the cookie-level to allow all.
@@ -111,10 +112,10 @@ function CookieNotice({ globalObserver, appModel }) {
       cookieLevel = cookieLevel | 4;
     }
     // Then we'll set the cookie-level in the manager.
-    cookieManager.setCookieLevels(cookieLevel);
+    setLevel(cookieLevel);
     // Make sure to close the dialog when the user has made the choice.
     setOpen(false);
-  }, [cookieManager, showThirdPartCheckbox]);
+  }, [showThirdPartCheckbox]);
 
   return (
     <Dialog
