@@ -252,7 +252,6 @@ class AppModel {
       }),
     };
 
-    console.log(config.map.constrainResolutionMobile);
     this.map = new Map({
       controls: [
         // new FullScreen({ target: document.getElementById("controls-column") }),
