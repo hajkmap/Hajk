@@ -8,6 +8,8 @@ import InfoIcon from "@material-ui/icons/Info";
 
 import Dialog from "../components/Dialog/Dialog";
 
+import { functionalOk as functionalCookieOk } from "models/Cookie";
+
 const styles = (theme) => {
   return {
     paper: {
@@ -47,7 +49,7 @@ class Information extends React.PureComponent {
       ) {
         dialogOpen = false;
       } else {
-        if (this.options.showInfoOnce === true) {
+        if (this.options.showInfoOnce === true && functionalCookieOk()) {
           window.localStorage.setItem("pluginInformationMessageShown", 1);
         }
         dialogOpen = true;

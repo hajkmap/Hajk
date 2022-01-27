@@ -5,6 +5,8 @@ import PropTypes from "prop-types";
 import "intro.js/introjs.css";
 import "intro.js/themes/introjs-modern.css";
 
+import { functionalOk as functionalCookieOk } from "models/Cookie";
+
 /**
  * @summary Renders a guide that introduces new users to features present in Hajk.
  * @description The introduction will only be rendered once. This is achieved by setting
@@ -116,7 +118,9 @@ class Introduction extends React.PureComponent {
 
   disableSteps = () => {
     // Upon completion/closing, set a flag that won't show this guide again
-    window.localStorage.setItem("introductionShown", 1);
+    if (functionalCookieOk()) {
+      window.localStorage.setItem("introductionShown", 1);
+    }
   };
 
   render() {

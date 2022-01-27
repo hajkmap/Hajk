@@ -8,7 +8,10 @@ import Observer from "react-event-observer";
 import { isMobile } from "../utils/IsMobile";
 import SrShortcuts from "../components/SrShortcuts/SrShortcuts";
 import AppModel from "../models/AppModel.js";
-import { setConfig as setCookieConfig } from "models/Cookie";
+import {
+  setConfig as setCookieConfig,
+  functionalOk as functionalCookieOk,
+} from "models/Cookie";
 
 import Window from "./Window.js";
 import CookieNotice from "./CookieNotice";
@@ -337,10 +340,12 @@ class App extends React.PureComponent {
 
     //if drawer is visible at start - ensure the activeDrawerContent is set to current content
     if (drawerVisible && drawerPermanent && activeDrawerContentState !== null) {
-      window.localStorage.setItem(
-        "activeDrawerContent",
-        activeDrawerContentState
-      );
+      if (functionalCookieOk()) {
+        window.localStorage.setItem(
+          "activeDrawerContent",
+          activeDrawerContentState
+        );
+      }
     }
 
     this.globalObserver = new Observer();
@@ -601,10 +606,12 @@ class App extends React.PureComponent {
       this.globalObserver.publish("core.drawerToggled");
 
       // Save current state of drawerPermanent to LocalStorage, so app reloads to same state
-      window.localStorage.setItem(
-        "drawerPermanent",
-        this.state.drawerPermanent
-      );
+      if (functionalCookieOk()) {
+        window.localStorage.setItem(
+          "drawerPermanent",
+          this.state.drawerPermanent
+        );
+      }
 
       // If user clicked on Toggle Permanent and the result is,
       // that this.state.drawerPermanent===false, this means that we
