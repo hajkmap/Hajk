@@ -24,6 +24,6 @@ namespace MapService.Attributes
 				base.OnActionExecuting(filterContext);
 			}
 		}
-	}
 #endif
+	}
 }
