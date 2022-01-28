@@ -145,7 +145,7 @@ export default class ConfigMapper {
         extent: properties.mapConfig.map.extent,
         singleTile: args.singleTile || false,
         hidpi: args.hidpi,
-        useCustomHdpi: args.useCustomHdpi,
+        useCustomHiDpi: args.useCustomHiDpi,
         customRatio: args.customRatio,
         imageFormat: args.imageFormat || "image/png",
         serverType:
