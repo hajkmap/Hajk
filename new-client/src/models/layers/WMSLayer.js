@@ -90,8 +90,8 @@ class WMSLayer {
           config.minMaxZoomAlertOnToggleOnly || false,
       });
 
-      if (config.useCustomHdpi) {
-        this.applyHdpiTileLoader(config.serverType, this.layer.getSource());
+      if (config.useCustomHiDpi) {
+        this.applyHiDpiTileLoader(config.serverType, this.layer.getSource());
       }
     }
 
@@ -103,7 +103,7 @@ class WMSLayer {
     this.bindHandlers();
   }
 
-  applyHdpiTileLoader(serverType, source) {
+  applyHiDpiTileLoader(serverType, source) {
     // Experimental
     //
     // This tileLoader makes it possible to use specific dpi:s for specific ratios.
@@ -164,7 +164,7 @@ class WMSLayer {
       } else {
         // Something is wrong in config, let the developer know this.
         console.warn(
-          `applyHdpiTileLoader: Server type: '${serverType}' is not supported, check your settings.`
+          `applyHiDpiTileLoader: Server type: '${serverType}' is not supported, check your settings.`
         );
       }
     })();
