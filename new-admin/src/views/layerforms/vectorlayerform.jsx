@@ -33,10 +33,10 @@ class VectorLayerForm extends React.Component {
     layerType: "Vector",
     legend: "",
     legendIcon: "",
-    lineColor: "rgba(0, 0, 0, 0.5)",
-    lineWidth: "3",
-    lineStyle: "solid",
-    fillColor: "rgba(255, 255, 255, 0.5)",
+    lineColor: "",
+    lineWidth: "",
+    lineStyle: "",
+    fillColor: "",
     load: false,
     maxZoom: -1,
     minZoom: -1,
@@ -897,6 +897,7 @@ class VectorLayerForm extends React.Component {
               this.setPointSize(e);
             }}
           >
+            <option value=""></option>
             <option value="4">Liten</option>
             <option value="8">Medium</option>
             <option value="16">Stor</option>
@@ -914,6 +915,7 @@ class VectorLayerForm extends React.Component {
               this.setLineWidth(e);
             }}
           >
+            <option value=""></option>
             <option value="1">Tunn</option>
             <option value="3">Normal</option>
             <option value="5">Tjock</option>
@@ -930,6 +932,7 @@ class VectorLayerForm extends React.Component {
               this.setLineStyle(e);
             }}
           >
+            <option value=""></option>
             <option value="solid">Heldragen</option>
             <option value="dash">Streckad</option>
             <option value="dot">Punktad</option>
