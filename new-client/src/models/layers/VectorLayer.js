@@ -4,7 +4,6 @@ import GeoJSON from "ol/format/GeoJSON";
 import GML2 from "ol/format/GML2";
 import GML3 from "ol/format/GML3";
 import WFS from "ol/format/WFS";
-import Feature from "ol/Feature";
 import { Fill, Text, Stroke, Icon, Circle, Style } from "ol/style";
 import { all as strategyAll, bbox as bboxStrategy } from "ol/loadingstrategy";
 import { getPointResolution, transform } from "ol/proj";
@@ -303,10 +302,10 @@ class WFSVectorLayer {
     });
   }
 
-  createStyle(feature, forcedPointRadius) {
+  createStyle() {
     const icon = this.config.icon || "";
-    const fillColor = this.config.fillColor || "";
-    const lineColor = this.config.lineColor || "";
+    const fillColor = this.config.fillColor || "rgba(255,255,255,0.4)"; // OpenLayers default
+    const lineColor = this.config.lineColor || "#3399CC"; // OpenLayers default
     const lineStyle = this.config.lineStyle || "";
     const lineWidth = this.config.lineWidth || "";
     const symbolXOffset = this.config.symbolXOffset || "";
@@ -322,11 +321,9 @@ class WFSVectorLayer {
     const labelFillColor = this.config.labelFillColor;
     const outlineColor = this.config.labelOutlineColor;
     const outlineWidth = this.config.labelOutlineWidth;
-    const labelAttribute = this.config.labelAttribute;
     const showLabels = this.config.showLabels;
-    const pointSize = forcedPointRadius || this.config.pointSize;
-
-    feature = arguments[1] instanceof Feature ? arguments[1] : undefined;
+    const pointSize = this.config.pointSize || 4; // OpenLayers default Circle use point size
+    const iconScale = pointSize / 8; // OpenLayers icon use scale. Medium size (8) => icon scale 1
 
     function getLineDash() {
       var scale = (a, f) => a.map((b) => f * b),
@@ -355,7 +352,7 @@ class WFSVectorLayer {
         textAlign: align,
         textBaseline: baseline,
         font: font,
-        text: feature ? feature.getProperties()[labelAttribute] : "",
+        text: "",
         fill: new Fill({
           color: labelFillColor,
         }),
@@ -376,7 +373,7 @@ class WFSVectorLayer {
     function getIcon() {
       return new Icon({
         src: icon,
-        scale: 1,
+        scale: iconScale,
         anchorXUnits: "pixels",
         anchorYUnits: "pixels",
         anchor: [symbolXOffset, symbolYOffset],
@@ -414,65 +411,6 @@ class WFSVectorLayer {
 
     return [new Style(getStyleObj())];
   }
-
-  // generateLegend(callback) {
-  //   var url = this.proxyUrl + this.createUrl();
-  //   fetch(url).then((response) => {
-  //     response.text().then((gmlText) => {
-  //       const parser = new GML2();
-  //       const features = parser.readFeatures(gmlText);
-  //       const canvas = document.createElement("canvas");
-
-  //       const scale = 120;
-  //       const padding = 1 / 5;
-  //       const pointRadius = 15;
-
-  //       const vectorContext = toContext(canvas.getContext("2d"), {
-  //         size: [scale, scale],
-  //       });
-  //       const style = this.getStyle(pointRadius)[0];
-  //       vectorContext.setStyle(style);
-
-  //       var featureType = "Point";
-  //       if (features.length > 0) {
-  //         featureType = features[0].getGeometry().getType();
-  //       }
-
-  //       switch (featureType) {
-  //         case "Point":
-  //         case "MultiPoint":
-  //           vectorContext.drawGeometry(new Point([scale / 2, scale / 2]));
-  //           break;
-  //         case "Polygon":
-  //         case "MultiPolygon":
-  //           vectorContext.drawGeometry(
-  //             new Polygon([
-  //               [
-  //                 [scale * padding, scale * padding],
-  //                 [scale * padding, scale - scale * padding],
-  //                 [scale - scale * padding, scale - scale * padding],
-  //                 [scale - scale * padding, scale * padding],
-  //                 [scale * padding, scale * padding],
-  //               ],
-  //             ])
-  //           );
-  //           break;
-  //         case "LineString":
-  //         case "MultiLineString":
-  //           vectorContext.drawGeometry(
-  //             new LineString([
-  //               [scale * padding, scale - scale * padding],
-  //               [scale - scale * padding, scale * padding],
-  //             ])
-  //           );
-  //           break;
-  //         default:
-  //           break;
-  //       }
-  //       callback(canvas.toDataURL());
-  //     });
-  //   });
-  // }
 }
 
 export default WFSVectorLayer;
