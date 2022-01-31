@@ -186,7 +186,15 @@ const SketchView = (props) => {
           />
         );
       case "MOVE":
-        return <MoveView id={activityId} model={model} drawModel={drawModel} />;
+        return (
+          <MoveView
+            id={activityId}
+            model={model}
+            drawModel={drawModel}
+            translateEnabled={props.translateEnabled}
+            setTranslateEnabled={props.setTranslateEnabled}
+          />
+        );
       case "SAVE":
         return (
           <SaveUploadView id={activityId} model={model} drawModel={drawModel} />
