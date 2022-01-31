@@ -1415,6 +1415,25 @@ class DrawModel {
     }
   };
 
+  // Moves the features currently selected via the Move-interaction.
+  // The features are moved the supplied length (in meters) in the supplied
+  // direction (in degrees, where north is 0 and east is 90 and so on).
+  translateSelectedFeatures = (length, angle) => {
+    this.#selectInteraction.getFeatures().forEach((f) => {
+      try {
+        // We'll have to create a GeoJSON-feature from the ol-feature (since
+        // turf only accepts geoJSON).
+        const gjFeature = this.#geoJSONParser.writeFeatureObject(f);
+        // Then we'll translate the feature according to the supplied parameters
+        const translated = transformTranslate(gjFeature, length / 1000, angle);
+        // When thats done, we'll update the duplicates geometry.
+        f.setGeometry(this.#geoJSONParser.readGeometry(translated.geometry));
+      } catch (error) {
+        console.error(`Failed to translate selected features. Error: ${error}`);
+      }
+    });
+  };
+
   // Returns a clone of the supplied feature. Makes sure to clone both
   // the feature and its style.
   #createDuplicateFeature = (feature) => {

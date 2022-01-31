@@ -85,7 +85,17 @@ const FeatureMoveSelector = (props) => {
             </Button>
           </Grid>
           <Grid item xs={6}>
-            <Button variant="contained" fullWidth size="small">
+            <Button
+              variant="contained"
+              fullWidth
+              size="small"
+              onClick={() =>
+                props.drawModel.translateSelectedFeatures(
+                  props.movementLength,
+                  props.movementAngle
+                )
+              }
+            >
               Ok
             </Button>
           </Grid>
@@ -112,6 +122,7 @@ const MoveView = (props) => {
         />
         {props.moveFeatures.length > 0 && (
           <FeatureMoveSelector
+            drawModel={props.drawModel}
             movementLength={movementLength}
             setMovementLength={setMovementLength}
             movementAngle={movementAngle}
