@@ -27,7 +27,23 @@ const TranslateToggler = ({ translateEnabled, setTranslateEnabled }) => {
   );
 };
 
-const FeatureMoveSelector = () => {
+const FeatureMoveSelector = (props) => {
+  // Handles change on the movement-length input. Makes sure that we're
+  // dealing with integers and updates the state.
+  const handleMovementLengthChange = (e) => {
+    const length = Math.floor(e.target.value);
+    props.setMovementLength(length);
+  };
+
+  // Handles change on the movement-angle input. Makes sure the angle is
+  // always between 0 and 360 and updates the state.
+  const handleMovementAngleChange = (e) => {
+    const angle = Math.floor(e.target.value);
+    const justifiedAngle =
+      angle >= 360 ? angle - 360 : angle < 0 ? 360 + angle : angle;
+    props.setMovementAngle(justifiedAngle);
+  };
+
   return (
     <Paper style={{ padding: 8, marginTop: 8 }}>
       <Grid container item justify="center" alignItems="center">
@@ -44,7 +60,8 @@ const FeatureMoveSelector = () => {
               fullWidth
               type="number"
               size="small"
-              value={1}
+              value={props.movementLength}
+              onChange={handleMovementLengthChange}
             />
           </Tooltip>
         </Grid>
@@ -56,7 +73,8 @@ const FeatureMoveSelector = () => {
               fullWidth
               type="number"
               size="small"
-              value={1}
+              value={props.movementAngle}
+              onChange={handleMovementAngleChange}
             />
           </Tooltip>
         </Grid>
@@ -78,6 +96,8 @@ const FeatureMoveSelector = () => {
 };
 
 const MoveView = (props) => {
+  const [movementLength, setMovementLength] = React.useState(100);
+  const [movementAngle, setMovementAngle] = React.useState(90);
   // We have to get some information about the current activity (view)
   const activity = props.model.getActivityFromId(props.id);
   return (
@@ -90,7 +110,14 @@ const MoveView = (props) => {
           translateEnabled={props.translateEnabled}
           setTranslateEnabled={props.setTranslateEnabled}
         />
-        {props.moveFeatures.length > 0 && <FeatureMoveSelector />}
+        {props.moveFeatures.length > 0 && (
+          <FeatureMoveSelector
+            movementLength={movementLength}
+            setMovementLength={setMovementLength}
+            movementAngle={movementAngle}
+            setMovementAngle={setMovementAngle}
+          />
+        )}
       </Grid>
     </Grid>
   );
