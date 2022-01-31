@@ -3,7 +3,7 @@ import { Grid, Paper } from "@material-ui/core";
 import { Tooltip, Typography, Switch } from "@material-ui/core";
 import Information from "../components/Information";
 
-const ModifyNodeToggler = ({ translateEnabled, setTranslateEnabled }) => {
+const TranslateToggler = ({ translateEnabled, setTranslateEnabled }) => {
   return (
     <Paper style={{ padding: 8, marginTop: 8 }}>
       <Grid container justify="space-between" alignItems="center">
@@ -36,7 +36,7 @@ const MoveView = (props) => {
         <Information text={activity.information} />
       </Grid>
       <Grid item xs={12}>
-        <ModifyNodeToggler
+        <TranslateToggler
           translateEnabled={props.translateEnabled}
           setTranslateEnabled={props.setTranslateEnabled}
         />
