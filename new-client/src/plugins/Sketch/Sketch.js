@@ -21,6 +21,10 @@ const Sketch = (props) => {
   // the edit-interaction. (The edit-interaction allows the user to change feature colors etc. and the
   // modify-interaction allows the user to change the features geometries).
   const [modifyEnabled, setModifyEnabled] = React.useState(false);
+  // We also have to keep track of if free-hand-translation should be enabled or not.
+  // Free-hand-translate is a part of the move-interaction allowing the user to move features
+  // by dragging them in the map.
+  const [translateEnabled, setTranslateEnabled] = React.useState(true);
   // We're gonna need to keep track of if the actual plugin is shown or not.
   const [pluginShown, setPluginShown] = React.useState(
     props.options.visibleAtStart ?? false
@@ -47,6 +51,7 @@ const Sketch = (props) => {
       new SketchModel({
         drawModel: drawModel,
         modifyDefaultEnabled: modifyEnabled,
+        translateDefaultEnabled: translateEnabled,
       })
   );
 
@@ -83,6 +88,8 @@ const Sketch = (props) => {
         return drawModel.toggleDrawInteraction("Delete");
       case "EDIT":
         return drawModel.toggleDrawInteraction("Edit");
+      case "MOVE":
+        return drawModel.toggleDrawInteraction("Move");
       default:
         return drawModel.toggleDrawInteraction("");
     }
@@ -100,6 +107,12 @@ const Sketch = (props) => {
   React.useEffect(() => {
     drawModel.setModifyActive(modifyEnabled);
   }, [drawModel, modifyEnabled]);
+
+  // An effect that makes sure to set the translate-interaction in the model
+  // when the translate-state changes.
+  React.useEffect(() => {
+    drawModel.setTranslateActive(translateEnabled);
+  }, [drawModel, translateEnabled]);
 
   // We're gonna need to catch if the user closes the window, and make sure to
   // update the state so that the effect handling the draw-interaction-toggling fires.
@@ -140,6 +153,8 @@ const Sketch = (props) => {
         setActiveDrawType={setActiveDrawType}
         modifyEnabled={modifyEnabled}
         setModifyEnabled={setModifyEnabled}
+        translateEnabled={translateEnabled}
+        setTranslateEnabled={setTranslateEnabled}
         editFeature={editFeature}
       />
     </BaseWindowPlugin>

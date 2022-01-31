@@ -1,4 +1,4 @@
-import { Draw, Modify } from "ol/interaction";
+import { Draw, Modify, Select, Translate } from "ol/interaction";
 import { createBox, createRegularPolygon } from "ol/interaction/Draw";
 import { Vector as VectorLayer } from "ol/layer";
 import VectorSource from "ol/source/Vector";
@@ -23,6 +23,7 @@ import { getArea as getExtentArea } from "ol/extent";
  * - observer: (Observer): An observer on which the drawModel can publish events, for example when a geometry has been deleted.
  * - observerPrefix (String): A string acting as a prefix on all messages published on the observer.
  * - modifyDefaultEnabled: (Boolean): States if the Modify-interaction be enabled when the Edit-interaction is enabled.
+ * - translateDefaultEnabled: (Boolean): States if the Translate-interaction should be enabled when the Move-interaction is enabled.
  *
  * Exposes a couple of methods:
  * - refreshFeaturesTextStyle(): Refreshes the text-style on all features in the draw-source.
@@ -43,7 +44,8 @@ import { getArea as getExtentArea } from "ol/extent";
  * - get/set labelFormat(): Sets the format on the labels. ("AUTO", "M2", "KM2", "HECTARE")
  * - get/set showDrawTooltip(): Get or set wether a tooltip should be shown when drawing.
  * - get/set showFeatureMeasurements(): Get or set wether drawn feature measurements should be shown or not.
- * - get/set ModifyActive(): Get or set wether the modify-interaction should be active or not.
+ * - get/set modifyActive(): Get or set wether the Modify-interaction should be active or not.
+ * - get/set translateActive(): Get or set wether the Translate-interaction should be active or not.
  */
 class DrawModel {
   #map;
@@ -66,8 +68,12 @@ class DrawModel {
   #removeInteractionActive;
   #editInteractionActive;
   #featureChosenForEdit;
+  #moveInteractionActive;
+  #selectInteraction;
+  #translateInteraction;
   #modifyInteraction;
   #keepModifyActive;
+  #keepTranslateActive;
   #allowedLabelFormats;
   #labelFormat;
   #customHandleDrawStart;
@@ -109,8 +115,12 @@ class DrawModel {
     // E.g. "Remove", or "Edit".
     this.#removeInteractionActive = false;
     this.#editInteractionActive = false;
+    this.#moveInteractionActive = false;
     this.#modifyInteraction = null;
     this.#keepModifyActive = settings.modifyDefaultEnabled ?? false;
+    this.#translateInteraction = null;
+    this.#keepTranslateActive = settings.translateDefaultEnabled ?? true;
+    this.#selectInteraction = null;
     this.#featureChosenForEdit = null;
     // We're also keeping track of the tooltip-settings
     this.#showDrawTooltip = settings.showDrawTooltip ?? true;
@@ -911,6 +921,9 @@ class DrawModel {
     if (this.#editInteractionActive) {
       return this.#disableEditInteraction();
     }
+    if (this.#moveInteractionActive) {
+      return this.#disableMoveInteraction();
+    }
     // If there isn't an active draw interaction currently, we just return.
     if (!this.#drawInteraction) return;
     // Otherwise, we remove the interaction from the map.
@@ -1091,6 +1104,55 @@ class DrawModel {
     this.#map.snapHelper.delete("coreDrawModel");
     // Then we'll reset the field referring to the interaction
     this.#modifyInteraction = null;
+  };
+
+  #enableMoveInteraction = (settings) => {
+    this.#selectInteraction = new Select();
+    this.#selectInteraction.on("select", this.#handleFeatureSelect);
+    this.#map.addInteraction(this.#selectInteraction);
+    this.#map.clickLock.add("coreDrawModel");
+    this.#map.snapHelper.add("coreDrawModel");
+    this.#moveInteractionActive = true;
+    (settings.translateEnabled ?? this.#keepTranslateActive) &&
+      this.#enableTranslateInteraction();
+  };
+
+  #enableTranslateInteraction = () => {
+    if (!this.#moveInteractionActive) {
+      return {
+        status: "FAILED",
+        message:
+          "Translate-interaction could not be enabled. Move has to be enabled before enabling.",
+      };
+    }
+    this.#translateInteraction = new Translate({
+      features: this.#selectInteraction.getFeatures(),
+    });
+    this.#map.addInteraction(this.#translateInteraction);
+  };
+
+  #disableMoveInteraction = () => {
+    this.#map.removeInteraction(this.#selectInteraction);
+    this.#selectInteraction.un("select", this.#handleFeatureSelect);
+    this.#selectInteraction = null;
+    this.#disableTranslateInteraction();
+    this.#moveInteractionActive = false;
+    this.#map.clickLock.delete("coreDrawModel");
+    this.#map.snapHelper.delete("coreDrawModel");
+  };
+
+  #disableTranslateInteraction = () => {
+    if (this.#translateInteraction) {
+      this.#map.removeInteraction(this.#translateInteraction);
+      this.#translateInteraction = null;
+    }
+  };
+
+  #handleFeatureSelect = (e) => {
+    this.#publishInformation({
+      subject: "drawModel.moveFeaturesChanged",
+      payLoad: e.selected,
+    });
   };
 
   // Binds a listener to each feature which fires on property-change
@@ -1383,14 +1445,16 @@ class DrawModel {
     if (!drawMethod || drawMethod === "") {
       return;
     }
-    // Check if the supplied method is set to "Delete" or "Edit", if it is, we activate the remove or edit
-    // interaction. Since these are special interactions, (not real ol-draw-interactions)
-    // we make sure not to continue executing.
+    // Check if the supplied method is set to "Delete", "Edit", or "Move", if it is, we activate the remove, edit, or move
+    // interaction. Since these are special interactions, (not real ol-draw-interactions) we make sure not to continue executing.
     if (drawMethod === "Delete") {
       return this.#enableRemoveInteraction(settings);
     }
     if (drawMethod === "Edit") {
       return this.#enableEditInteraction(settings);
+    }
+    if (drawMethod === "Move") {
+      return this.#enableMoveInteraction(settings);
     }
     // If we've made it this far it's time to enable a new draw interaction!
     // First we must make sure to gather some settings and defaults.
@@ -1579,13 +1643,23 @@ class DrawModel {
     this.#drawLayer.changed();
   };
 
+  // Updates the Text-style-settings.
   setTextStyleSettings = (newStyleSettings) => {
     this.#textStyleSettings = newStyleSettings;
   };
 
+  // Enabled the Modify-interaction
   setModifyActive = (active) => {
     this.#keepModifyActive = active;
     active ? this.#enableModifyInteraction() : this.#disableModifyInteraction();
+  };
+
+  // Enabled the Translate-interaction
+  setTranslateActive = (active) => {
+    this.#keepTranslateActive = active;
+    active
+      ? this.#enableTranslateInteraction()
+      : this.#disableTranslateInteraction();
   };
 
   // Get:er returning the name of the draw-layer.
@@ -1611,6 +1685,11 @@ class DrawModel {
   // Get:er returning if the modify-interaction is active.
   getModifyActive = () => {
     return this.#modifyInteraction ? true : false;
+  };
+
+  // Get:er returning if the modify-interaction is active.
+  getTranslateActive = () => {
+    return this.#translateInteraction ? true : false;
   };
 
   // Get:er returning the state of the showDrawTooltip
