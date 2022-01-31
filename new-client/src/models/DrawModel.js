@@ -316,9 +316,19 @@ class DrawModel {
     if (feature?.get("DRAW_METHOD") === "Arrow") {
       return this.#getArrowStyle(feature, settingsOverride);
     }
-    // Let's grab the standard draw style as a baseline.
-    // The standard style can be overridden if the override is supplied.
-    const baseLineStyle = this.#getDrawStyle(settingsOverride);
+    // Otherwise we'll grab the current style
+    const currentStyle = feature.getStyle();
+    // Let's grab the standard draw (or the currently set) style as a baseline.
+    // The standard style can be overridden if the override is supplied. This is a real mess,
+    // since OL might decide to apply a style-array sometimes (in that case we want the fist style
+    // from the style-array) and sometimes its not an array.
+    const baseLineStyle = settingsOverride
+      ? this.#getDrawStyle(settingsOverride)
+      : currentStyle
+      ? Array.isArray(currentStyle)
+        ? currentStyle[0]
+        : currentStyle
+      : this.#getDrawStyle();
     // If we're dealing with a text-feature, we don't want an image-style.
     feature.get("DRAW_METHOD") === "Text" && baseLineStyle.setImage(null);
     // If showFeatureMeasurements is set to true, we create a text-style which
@@ -413,8 +423,21 @@ class DrawModel {
   // Returns a style array that is used to style arrow features.
   // (All other features consist of a single style-object).
   #getArrowStyle = (feature, settings) => {
-    // First we'll grab the arrow base-style
-    const baseStyle = this.#getArrowBaseStyle(settings);
+    // First we'll extract the current style. We only want the current style if it is
+    // an array! Otherwise we're not dealing with an arrow-style... (Arrow-style should always be an array).
+    const currentStyle = Array.isArray(feature.getStyle())
+      ? feature.getStyle()
+      : null;
+    // Then we'll grab the arrow base-style, which should be the first style in the current
+    // style-array. If that style is missing, we'll create a new one.
+    const baseStyle = settings
+      ? this.#getArrowBaseStyle(settings)
+      : currentStyle
+      ? currentStyle[0]
+      : this.#getArrowBaseStyle();
+    // We have to extract the base-color as well, so that we can create an arrow-head with
+    // the correct color.
+    const baseColor = baseStyle.getStroke()?.getColor() ?? null;
     // Then we'll add the base-style to the styles-array
     const styles = [baseStyle];
     // Then we'll add the arrow-head at the end of every line-segment.
@@ -432,6 +455,8 @@ class DrawModel {
             src: this.#createArrowSvg(
               settings
                 ? settings.strokeStyle.color
+                : baseColor
+                ? baseColor
                 : this.#drawStyleSettings.strokeColor
             ),
             anchor: [0.38, 0.53],
@@ -1185,6 +1210,12 @@ class DrawModel {
     this.#publishInformation({
       subject: "drawModel.move.select",
       payLoad: e.selected,
+    });
+    // We also has to refresh the draw-layer to make sure all the styling is updated.
+    // For example: If an arrow is moved, we have to refresh the style so that the arrow
+    // head is in the correct location.
+    e.deselected.forEach((f) => {
+      f.setStyle(this.#getFeatureStyle(f));
     });
   };
 
