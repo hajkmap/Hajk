@@ -1091,6 +1091,7 @@ class DrawModel {
     };
   };
 
+  // Disables and removes the Modify-interaction if there is one active currently.
   #disableModifyInteraction = () => {
     // If the modify-interaction is not active, we can abort.
     if (!this.#modifyInteraction) {
@@ -1106,18 +1107,36 @@ class DrawModel {
     this.#modifyInteraction = null;
   };
 
+  // Enables the Move-interaction (An interaction allowing the user to move features by selecting
+  // amount of meters and degrees the selected features should be moved). It is also possible to
+  // add a Translate-interaction on top, allowing the user to move features in the map by dragging them.
+  // The Translate-interaction is added by default if the draw-model is initiated with keepTranslateActive: true,
+  // and can be added afterwards calling setTranslateActive or by providing translateEnabled: true when enabling the
+  // Move-interaction.
   #enableMoveInteraction = (settings) => {
+    // The Move-interaction will obviously need a Select-interaction so that the features to
+    // move can be selected.
     this.#selectInteraction = new Select();
+    // We need a handler catching the "select"-events so that we can keep track of if any
+    // features has been selected or not.
     this.#selectInteraction.on("select", this.#handleFeatureSelect);
+    // Then we'll add the interaction to the map...
     this.#map.addInteraction(this.#selectInteraction);
+    // ...and add the snap- and clickLock-helpers.
     this.#map.clickLock.add("coreDrawModel");
     this.#map.snapHelper.add("coreDrawModel");
+    // When this is done, we can set the private field keeping track of
+    // if the Move-interaction is active or not.
     this.#moveInteractionActive = true;
+    // If we should enable the Translate-interaction, we do that as well.
     (settings.translateEnabled ?? this.#keepTranslateActive) &&
       this.#enableTranslateInteraction();
   };
 
+  // Enables a Translate-interaction, allowing users to move features by dragging them
+  // in the map.
   #enableTranslateInteraction = () => {
+    // If the base Move-interaction is not active, the Translate-interaction cannot be enabled.
     if (!this.#moveInteractionActive) {
       return {
         status: "FAILED",
@@ -1125,22 +1144,32 @@ class DrawModel {
           "Translate-interaction could not be enabled. Move has to be enabled before enabling.",
       };
     }
+    // Otherwise, we can create a new Translate-interaction...
     this.#translateInteraction = new Translate({
       features: this.#selectInteraction.getFeatures(),
     });
+    // ...and add it to the map!
     this.#map.addInteraction(this.#translateInteraction);
   };
 
+  // Disabled the Move-interaction and removed it from the map.
   #disableMoveInteraction = () => {
+    // First, we'll remove the Move-interaction from the map
     this.#map.removeInteraction(this.#selectInteraction);
+    // Then we'll remove the "select"-event-listener
     this.#selectInteraction.un("select", this.#handleFeatureSelect);
-    this.#selectInteraction = null;
+    // Then we'll remove (potentially, there might not be any) the Translate-interaction.
     this.#disableTranslateInteraction();
+    // Let's update the private fields so that we know that the Select- and Move-interactions
+    // are disabled.
+    this.#selectInteraction = null;
     this.#moveInteractionActive = false;
+    // And remove the clickLock- and snap-helpers.
     this.#map.clickLock.delete("coreDrawModel");
     this.#map.snapHelper.delete("coreDrawModel");
   };
 
+  // Disabled the Translate-interaction if there is one active.
   #disableTranslateInteraction = () => {
     if (this.#translateInteraction) {
       this.#map.removeInteraction(this.#translateInteraction);
@@ -1148,7 +1177,11 @@ class DrawModel {
     }
   };
 
+  // Handles the "select"-event that fires from the event-listener added when adding
+  // the Move-interaction.
   #handleFeatureSelect = (e) => {
+    // Let's just publish the currently selected features on the observer so that
+    // the views can keep track of them if they want to.
     this.#publishInformation({
       subject: "drawModel.moveFeaturesChanged",
       payLoad: e.selected,
