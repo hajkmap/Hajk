@@ -33,8 +33,7 @@ const styles = (theme) => ({
     },
   },
 });
-
-class FirSearchResultItemView extends React.PureComponent {
+class KirSearchResultItemView extends React.PureComponent {
   state = {};
 
   static propTypes = {
@@ -101,4 +100,4 @@ class FirSearchResultItemView extends React.PureComponent {
   }
 }
 
-export default withStyles(styles)(withSnackbar(FirSearchResultItemView));
+export default withStyles(styles)(withSnackbar(KirSearchResultItemView));

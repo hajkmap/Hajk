@@ -2,13 +2,12 @@ import React from "react";
 import PropTypes from "prop-types";
 import { withStyles } from "@material-ui/core/styles";
 import { withSnackbar } from "notistack";
-import FirSearchView from "./FirSearchView";
-import FirExportView from "./FirExportView";
-import FirSearchNeighborView from "./FirSearchNeighborView";
-import FirSearchResultsView from "./FirSearchResultsView";
 import AppBar from "@material-ui/core/AppBar";
 import Tab from "@material-ui/core/Tab";
 import Tabs from "@material-ui/core/Tabs";
+import KirSearchView from "./KirSearchView";
+import KirExportView from "./KirExportView";
+import KirSearchResultsView from "./KirSearchResultsView";
 
 const styles = (theme) => ({
   root: {
@@ -29,7 +28,7 @@ const styles = (theme) => ({
   },
   hidden: { display: "none" },
 });
-class FirView extends React.PureComponent {
+class KirView extends React.PureComponent {
   state = {
     activeTab: 0,
   };
@@ -45,20 +44,10 @@ class FirView extends React.PureComponent {
 
   constructor(props) {
     super(props);
+
     this.model = this.props.model;
     this.localObserver = this.props.localObserver;
     this.globalObserver = this.props.app.globalObserver;
-
-    this.localObserver.subscribe("fir.search.error", (err) => {
-      this.props.closeSnackbar(this.snackBar);
-      this.snackBar = this.props.enqueueSnackbar(
-        `Ett fel inträffade vid sökningen.\n ${err.name}: ${err.message}`,
-        {
-          variant: "error",
-          style: { whiteSpace: "pre-line" },
-        }
-      );
-    });
   }
 
   handleChangeTabs = (event, activeTab) => {
@@ -95,17 +84,12 @@ class FirView extends React.PureComponent {
             className={classes.tabContent}
             style={this.state.activeTab === 0 ? {} : { display: "none" }}
           >
-            <FirSearchView
+            <KirSearchView
               model={this.props.model}
               app={this.props.app}
               localObserver={this.localObserver}
             />
-            <FirSearchNeighborView
-              model={this.props.model}
-              app={this.props.app}
-              localObserver={this.localObserver}
-            />
-            <FirSearchResultsView
+            <KirSearchResultsView
               model={this.props.model}
               app={this.props.app}
               localObserver={this.localObserver}
@@ -115,7 +99,7 @@ class FirView extends React.PureComponent {
             className={classes.tabContent}
             style={this.state.activeTab === 1 ? {} : { display: "none" }}
           >
-            <FirExportView
+            <KirExportView
               model={this.props.model}
               app={this.props.app}
               localObserver={this.localObserver}
@@ -127,4 +111,4 @@ class FirView extends React.PureComponent {
   }
 }
 
-export default withStyles(styles)(withSnackbar(FirView));
+export default withStyles(styles)(withSnackbar(KirView));

@@ -92,6 +92,7 @@ class WMTSLayer {
         center: view.getCenter(),
         resolutions: this.resolutions,
         projection: this.projection,
+        constrainResolution: view.getConstrainResolution(),
       })
     );
   }
