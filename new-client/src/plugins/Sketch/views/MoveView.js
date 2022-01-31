@@ -40,11 +40,13 @@ const MoveView = (props) => {
           translateEnabled={props.translateEnabled}
           setTranslateEnabled={props.setTranslateEnabled}
         />
-        <Grid item xs={12}>
-          <Typography>
-            Här ska vi ha förflyttning med meter och grader
-          </Typography>
-        </Grid>
+        {props.moveFeatures.length > 0 && (
+          <Grid item xs={12}>
+            <Typography>
+              Här ska vi ha förflyttning med meter och grader
+            </Typography>
+          </Grid>
+        )}
       </Grid>
     </Grid>
   );

@@ -25,6 +25,8 @@ const Sketch = (props) => {
   // Free-hand-translate is a part of the move-interaction allowing the user to move features
   // by dragging them in the map.
   const [translateEnabled, setTranslateEnabled] = React.useState(true);
+  // We need to keep track of features that has been selected while in move-mode.
+  const [moveFeatures, setMoveFeatures] = React.useState([]);
   // We're gonna need to keep track of if the actual plugin is shown or not.
   const [pluginShown, setPluginShown] = React.useState(
     props.options.visibleAtStart ?? false
@@ -63,14 +65,23 @@ const Sketch = (props) => {
     setEditFeature(clickedFeature);
   }, []);
 
+  // This functions handles events from the draw-model that are sent
+  // when we are in move-mode and the map is clicked. The payload will contain
+  // all features currently selected in the map.
+  const handleMoveFeatureSelected = React.useCallback((selectedFeatures) => {
+    setMoveFeatures(selectedFeatures);
+  }, []);
+
   // This effect makes sure to subscribe (and un-subscribe) to all observer-events
   // we are interested in in this view.
   React.useEffect(() => {
     localObserver.subscribe("drawModel.modify.mapClick", handleModifyMapClick);
+    localObserver.subscribe("drawModel.move.select", handleMoveFeatureSelected);
     return () => {
       localObserver.unsubscribe("drawModel.modify.mapClick");
+      localObserver.unsubscribe("drawModel.move.select");
     };
-  }, [localObserver, handleModifyMapClick]);
+  }, [localObserver, handleModifyMapClick, handleMoveFeatureSelected]);
 
   // This effect makes sure that we activate the proper draw-interaction when the draw-type,
   // activity-id, or plugin-visibility changes. (This includes activating the first draw-interaction on first render).
@@ -95,11 +106,12 @@ const Sketch = (props) => {
     }
   }, [activeDrawType, activityId, drawModel, pluginShown]);
 
-  // This effect makes sure to reset the edit-feature if the window is closed,
-  // or if the user changes activity. (We don't want to keep the feature selected
-  // if the user toggles from edit-mode to create mode for example).
+  // This effect makes sure to reset the edit- and move-feature if the window is closed,
+  // or if the user changes activity. (We don't want to keep the features selected
+  // if the user toggles from edit- or move-mode to create mode for example).
   React.useEffect(() => {
     setEditFeature(null);
+    setMoveFeatures([]);
   }, [activityId, pluginShown]);
 
   // An effect that makes sure to set the modify-interaction in the model
@@ -156,6 +168,7 @@ const Sketch = (props) => {
         translateEnabled={translateEnabled}
         setTranslateEnabled={setTranslateEnabled}
         editFeature={editFeature}
+        moveFeatures={moveFeatures}
       />
     </BaseWindowPlugin>
   );

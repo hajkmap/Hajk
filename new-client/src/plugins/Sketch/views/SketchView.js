@@ -193,6 +193,7 @@ const SketchView = (props) => {
             drawModel={drawModel}
             translateEnabled={props.translateEnabled}
             setTranslateEnabled={props.setTranslateEnabled}
+            moveFeatures={props.moveFeatures}
           />
         );
       case "SAVE":

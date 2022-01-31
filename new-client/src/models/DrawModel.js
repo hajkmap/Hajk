@@ -1183,7 +1183,7 @@ class DrawModel {
     // Let's just publish the currently selected features on the observer so that
     // the views can keep track of them if they want to.
     this.#publishInformation({
-      subject: "drawModel.moveFeaturesChanged",
+      subject: "drawModel.move.select",
       payLoad: e.selected,
     });
   };
