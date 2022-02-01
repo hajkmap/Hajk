@@ -76,12 +76,12 @@ class PrintListItem extends React.PureComponent {
     const hasSubMenu = this.#hasSubMenu();
     return colored
       ? {
-          paddingLeft: theme.spacing(1) + theme.spacing(level * 3),
-          borderLeft: `${theme.spacing(1)}px solid ${color}`,
+          paddingLeft: theme.spacing(1 + level * 3),
+          borderLeft: `${theme.spacing(0.5)} solid ${color}`,
           paddingRight: hasSubMenu ? 0 : theme.spacing(1),
         }
       : {
-          paddingLeft: theme.spacing(1) + theme.spacing(level * 3),
+          paddingLeft: theme.spacing(1 + level * 3),
           paddingRight: hasSubMenu ? 0 : theme.spacing(1),
         };
   };

@@ -3,8 +3,11 @@ import ReactDOM from "react-dom";
 import { createPortal } from "react-dom";
 import { withSnackbar } from "notistack";
 
-import { styled } from "@mui/styles";
-import { StyledEngineProvider, ThemeProvider } from "@mui/material/styles";
+import {
+  styled,
+  StyledEngineProvider,
+  ThemeProvider,
+} from "@mui/material/styles";
 
 import {
   Button,
