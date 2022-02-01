@@ -52,7 +52,7 @@ class PrintList extends React.Component {
   render() {
     const { documentMenu, level } = this.props;
     return (
-      <List style={{ width: "100%" }} disablePadding>
+      <List sx={{ width: "100%" }} disablePadding>
         {Object.values(documentMenu)
           .filter((item) => {
             return item.level === level;

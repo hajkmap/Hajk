@@ -1,50 +1,54 @@
 import React from "react";
-import { createPortal } from "react-dom";
-import withStyles from "@mui/styles/withStyles";
-import { withSnackbar } from "notistack";
-import Grid from "@mui/material/Grid";
-import { Typography } from "@mui/material";
 import ReactDOM from "react-dom";
-import Button from "@mui/material/Button";
-import ArrowBackIcon from "@mui/icons-material/ArrowBack";
-import Checkbox from "@mui/material/Checkbox";
-import FormControlLabel from "@mui/material/FormControlLabel";
-import OpenInNewIcon from "@mui/icons-material/OpenInNew";
-import PrintList from "./PrintList";
-import TableOfContents from "./TableOfContents";
+import { createPortal } from "react-dom";
+import { withSnackbar } from "notistack";
+
+import { styled, ThemeProvider } from "@mui/styles";
 import { StyledEngineProvider } from "@mui/material/styles";
-import { ThemeProvider } from "@mui/styles";
-import { getNormalizedMenuState } from "../utils/stateConverter";
-import { hasSubMenu } from "../utils/helpers";
 
 import {
-  LinearProgress,
+  Button,
+  Checkbox,
   Dialog,
   DialogTitle,
   DialogContent,
   DialogContentText,
+  FormControlLabel,
+  Grid,
+  LinearProgress,
+  Typography,
 } from "@mui/material";
 
-const styles = (theme) => ({
-  gridContainer: {
-    padding: theme.spacing(4),
-    height: "100%",
-  },
-  middleContainer: {
-    overflowX: "auto",
-    flexBasis: "100%",
-    marginTop: theme.spacing(2),
-  },
-  headerContainer: {
-    marginBottom: theme.spacing(2),
-  },
-  settingsContainer: {
-    marginBottom: theme.spacing(2),
-  },
-  footerContainer: {
-    flexBasis: "10%",
-  },
-});
+import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+import OpenInNewIcon from "@mui/icons-material/OpenInNew";
+
+import PrintList from "./PrintList";
+import TableOfContents from "./TableOfContents";
+import { getNormalizedMenuState } from "../utils/stateConverter";
+import { hasSubMenu } from "../utils/helpers";
+
+const GridGridContainer = styled(Grid)(({ theme }) => ({
+  padding: theme.spacing(4),
+  height: "100%",
+}));
+
+const GridMiddleContainer = styled(Grid)(({ theme }) => ({
+  overflowX: "auto",
+  flexBasis: "100%",
+  marginTop: theme.spacing(2),
+}));
+
+const GridHeaderContainer = styled(Grid)(({ theme }) => ({
+  marginBottom: theme.spacing(2),
+}));
+
+const GridSettingsContainer = styled(Grid)(({ theme }) => ({
+  marginBottom: theme.spacing(2),
+}));
+
+const GridFooterContainer = styled(Grid)(({ theme }) => ({
+  flexBasis: "10%",
+}));
 
 const maxHeight = 950;
 const imageResizeRatio = 0.7;
@@ -718,11 +722,9 @@ class PrintWindow extends React.PureComponent {
   };
 
   renderCreatePDFButton() {
-    const { classes } = this.props;
     return (
-      <Grid
+      <GridFooterContainer
         item
-        className={classes.footerContainer}
         container
         alignContent="center"
         alignItems="center"
@@ -742,7 +744,7 @@ class PrintWindow extends React.PureComponent {
             Skriv ut
           </Typography>
         </Button>
-      </Grid>
+      </GridFooterContainer>
     );
   }
 
@@ -769,26 +771,12 @@ class PrintWindow extends React.PureComponent {
   };
 
   render() {
-    const {
-      classes,
-      togglePrintWindow,
-      localObserver,
-      documentWindowMaximized,
-    } = this.props;
+    const { togglePrintWindow, localObserver, documentWindowMaximized } =
+      this.props;
     const { menuInformation } = this.state;
     return (
-      <Grid
-        container
-        className={classes.gridContainer}
-        wrap="nowrap"
-        direction="column"
-      >
-        <Grid
-          className={classes.headerContainer}
-          alignItems="center"
-          item
-          container
-        >
+      <GridGridContainer container wrap="nowrap" direction="column">
+        <GridHeaderContainer alignItems="center" item container>
           <Grid item xs={4}>
             <Button
               color="primary"
@@ -804,9 +792,9 @@ class PrintWindow extends React.PureComponent {
               Skapa PDF
             </Typography>
           </Grid>
-        </Grid>
+        </GridHeaderContainer>
 
-        <Grid container item className={classes.settingsContainer}>
+        <GridSettingsContainer container item>
           <Typography variant="h6">Inställningar</Typography>
 
           <Grid xs={12} item>
@@ -825,24 +813,24 @@ class PrintWindow extends React.PureComponent {
               labelPlacement="end"
             />
           </Grid>
-        </Grid>
+        </GridSettingsContainer>
 
         <Typography variant="h6">Valt innehåll</Typography>
 
-        <Grid className={classes.middleContainer} item container>
+        <GridMiddleContainer item container>
           <PrintList
             localObserver={localObserver}
             documentMenu={menuInformation}
             level={0}
             handleTogglePrint={this.toggleChosenForPrint}
           />
-        </Grid>
+        </GridMiddleContainer>
 
         {documentWindowMaximized && this.renderCreatePDFButton()}
         {this.renderLoadingDialog()}
-      </Grid>
+      </GridGridContainer>
     );
   }
 }
 
-export default withStyles(styles)(withSnackbar(PrintWindow));
+export default withSnackbar(PrintWindow);

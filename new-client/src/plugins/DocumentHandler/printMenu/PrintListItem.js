@@ -1,5 +1,7 @@
 import React from "react";
-import withStyles from "@mui/styles/withStyles";
+import { styled } from "@mui/material/styles";
+import { visuallyHidden } from "@mui/utils";
+
 import { withTheme } from "@emotion/react";
 import {
   Checkbox,
@@ -7,18 +9,24 @@ import {
   ListItem,
   ListItemIcon,
   ListItemText,
-  Typography,
 } from "@mui/material";
 import ExpandLess from "@mui/icons-material/ExpandLess";
 import ExpandMore from "@mui/icons-material/ExpandMore";
 import PrintList from "./PrintList";
 
-const styles = (theme) => ({
-  listItem: { overflowWrap: "break-word" },
-  listItemIcon: { minWidth: theme.spacing(3) },
-  collapseIconRoot: { minWidth: theme.spacing(4) },
-  root: {
-    borderLeft: `${theme.spacing(1)}px solid ${theme.palette.background.paper}`,
+const StyledListItemIcon = styled(ListItemIcon)(({ theme }) => ({
+  minWidth: theme.spacing(3),
+}));
+
+const StyledCollapseIcon = styled(ListItemIcon)(({ theme }) => ({
+  ".MuiListItemIcon-root": {
+    minWidth: theme.spacing(4),
+  },
+}));
+const StyledListItem = styled(ListItem)(({ theme }) => ({
+  overflowWrap: "break-word",
+  ".MuiListItem-root": {
+    borderLeft: `${theme.spacing(1)} solid ${theme.palette.background.paper}`,
     "&.Mui-selected": {
       borderLeftColor: theme.palette.action.selected,
     },
@@ -29,7 +37,7 @@ const styles = (theme) => ({
       borderColor: theme.palette.action.hover,
     },
   },
-});
+}));
 
 class PrintListItem extends React.PureComponent {
   #getListTitle = () => {
@@ -38,18 +46,18 @@ class PrintListItem extends React.PureComponent {
   };
 
   #getCollapseIcon = () => {
-    const { classes, title, expanded } = this.props;
+    const { title, expanded } = this.props;
 
     return expanded ? (
-      <ListItemIcon classes={{ root: classes.collapseIconRoot }}>
-        {!title && <Typography variant="srOnly">Minimera submeny</Typography>}
+      <StyledCollapseIcon>
+        {!title && <span style={visuallyHidden}>Minimera submeny</span>}
         <ExpandLess />
-      </ListItemIcon>
+      </StyledCollapseIcon>
     ) : (
-      <ListItemIcon classes={{ root: classes.collapseIconRoot }}>
-        {!title && <Typography variant="srOnly">Maximera submeny</Typography>}
+      <StyledCollapseIcon>
+        {!title && <span style={visuallyHidden}>Maximera submeny</span>}
         <ExpandMore />
-      </ListItemIcon>
+      </StyledCollapseIcon>
     );
   };
 
@@ -80,7 +88,6 @@ class PrintListItem extends React.PureComponent {
 
   render() {
     const {
-      classes,
       type,
       selected,
       subMenuItems,
@@ -93,25 +100,21 @@ class PrintListItem extends React.PureComponent {
     const hasSubMenu = this.#hasSubMenu();
     return (
       <>
-        <ListItem
+        <StyledListItem
           divider
           selected={selected}
           button
           ref={this.props.itemRef}
           size="small"
-          classes={{
-            root: classes.root,
-          }}
           disableGutters
           aria-controls={hasSubMenu ? `submenu_${id}` : null}
           aria-expanded={expanded}
           onClick={() => {
             this.#handleMenuButtonClick(type, id);
           }}
-          className={classes.listItem}
-          style={this.#getMenuItemStyle()}
+          sx={this.#getMenuItemStyle()}
         >
-          <ListItemIcon className={classes.listItemIcon}>
+          <StyledListItemIcon>
             <Checkbox
               color="primary"
               checked={chosenForPrint}
@@ -123,10 +126,10 @@ class PrintListItem extends React.PureComponent {
               tabIndex={-1}
               disableRipple
             />
-          </ListItemIcon>
+          </StyledListItemIcon>
           {title && this.#getListTitle()}
           {hasSubMenu && this.#getCollapseIcon()}
-        </ListItem>
+        </StyledListItem>
         {hasSubMenu && (
           <Collapse id={`submenu_${id}`} in={expanded} timeout={200}>
             <PrintList
@@ -142,4 +145,4 @@ class PrintListItem extends React.PureComponent {
   }
 }
 
-export default withStyles(styles)(withTheme(PrintListItem));
+export default withTheme(PrintListItem);
