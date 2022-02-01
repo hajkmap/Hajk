@@ -44,6 +44,32 @@ const FeatureMoveSelector = (props) => {
     props.setMovementAngle(justifiedAngle);
   };
 
+  // Handles user click on move-feature. Makes sure to trigger the move
+  // action and push the move-information onto the last-move-array so that
+  // the user can "remove" that action if it turned out wrong.
+  const handleMoveClick = () => {
+    // Let's get the values
+    const length = props.movementLength;
+    const angle = props.movementAngle;
+    // Then we trigger the action in the draw-model
+    props.drawModel.translateSelectedFeatures(
+      props.movementLength,
+      props.movementAngle
+    );
+    // Then we'll update the last-moves-state.
+    props.setLastMoves([...props.lastMoves, { length, angle }]);
+  };
+
+  // Handles user click on undo. Gets the last move from the move-state
+  // and triggers a move in the opposite direction. Also removes that move
+  // from the state.
+  const handleUndoClick = () => {
+    const moves = [...props.lastMoves];
+    const { length, angle } = moves.pop();
+    props.drawModel.translateSelectedFeatures(length, angle - 180);
+    props.setLastMoves(moves);
+  };
+
   return (
     <Paper style={{ padding: 8, marginTop: 8 }}>
       <Grid container item justify="center" alignItems="center">
@@ -80,7 +106,13 @@ const FeatureMoveSelector = (props) => {
         </Grid>
         <Grid container spacing={1} style={{ marginTop: 8 }}>
           <Grid item xs={6}>
-            <Button variant="contained" fullWidth size="small" disabled={true}>
+            <Button
+              variant="contained"
+              fullWidth
+              size="small"
+              onClick={handleUndoClick}
+              disabled={props.lastMoves.length === 0}
+            >
               Ångra
             </Button>
           </Grid>
@@ -89,12 +121,7 @@ const FeatureMoveSelector = (props) => {
               variant="contained"
               fullWidth
               size="small"
-              onClick={() =>
-                props.drawModel.translateSelectedFeatures(
-                  props.movementLength,
-                  props.movementAngle
-                )
-              }
+              onClick={handleMoveClick}
             >
               Ok
             </Button>
@@ -106,8 +133,23 @@ const FeatureMoveSelector = (props) => {
 };
 
 const MoveView = (props) => {
+  // We're gonna need to keep track of the movement length and angle
   const [movementLength, setMovementLength] = React.useState(100);
   const [movementAngle, setMovementAngle] = React.useState(90);
+  // We also need to keep track of the last moves that has been done. These
+  // can be used so that the user can disregard moves if they happened to move
+  // something in the wrong direction.
+  const [lastMoves, setLastMoves] = React.useState([]);
+  // Let's destruct some props
+  const { drawModel, moveFeatures, translateEnabled, setTranslateEnabled } =
+    props;
+
+  // Let's use an effect that can reset the last moves when the current
+  // feature/features selected for movement changes.
+  React.useEffect(() => {
+    setLastMoves([]);
+  }, [moveFeatures]);
+
   // We have to get some information about the current activity (view)
   const activity = props.model.getActivityFromId(props.id);
   return (
@@ -117,12 +159,14 @@ const MoveView = (props) => {
       </Grid>
       <Grid item xs={12}>
         <TranslateToggler
-          translateEnabled={props.translateEnabled}
-          setTranslateEnabled={props.setTranslateEnabled}
+          translateEnabled={translateEnabled}
+          setTranslateEnabled={setTranslateEnabled}
         />
-        {props.moveFeatures.length > 0 && (
+        {moveFeatures.length > 0 && (
           <FeatureMoveSelector
-            drawModel={props.drawModel}
+            drawModel={drawModel}
+            lastMoves={lastMoves}
+            setLastMoves={setLastMoves}
             movementLength={movementLength}
             setMovementLength={setMovementLength}
             movementAngle={movementAngle}
