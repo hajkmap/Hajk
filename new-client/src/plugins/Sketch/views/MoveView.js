@@ -123,7 +123,7 @@ const FeatureMoveSelector = (props) => {
               size="small"
               onClick={handleMoveClick}
             >
-              Ok
+              Flytta
             </Button>
           </Grid>
         </Grid>
