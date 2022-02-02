@@ -338,7 +338,8 @@ class App extends React.PureComponent {
       drawerMouseOverLock: false,
     };
 
-    //if drawer is visible at start - ensure the activeDrawerContent is set to current content
+    // If the drawer is set to be visible at start - ensure the activeDrawerContent
+    // is set to current content. If we don't allow functional cookies, we cannot do that obviously.
     if (drawerVisible && drawerPermanent && activeDrawerContentState !== null) {
       if (functionalCookieOk()) {
         window.localStorage.setItem(
@@ -605,7 +606,8 @@ class App extends React.PureComponent {
       // event that all Windows subscribe to.
       this.globalObserver.publish("core.drawerToggled");
 
-      // Save current state of drawerPermanent to LocalStorage, so app reloads to same state
+      // If we allow functional cookies, let's save the current state of drawerPermanent
+      // to LocalStorage, so that the application can reload to the same state.
       if (functionalCookieOk()) {
         window.localStorage.setItem(
           "drawerPermanent",

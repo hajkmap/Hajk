@@ -439,8 +439,8 @@ class Search extends React.PureComponent {
         enableLabelOnHighlight: searchOptions.enableLabelOnHighlight,
       });
 
-    // Always save the current settings to local storage, so it can be
-    // retrieved on app reload.
+    // If functional cookies are allowed, we'll save the current settings
+    // to local storage, so it can be retrieved on app reload.
     if (functionalCookieOk()) {
       LocalStorageHelper.set("searchOptions", searchOptions);
     }

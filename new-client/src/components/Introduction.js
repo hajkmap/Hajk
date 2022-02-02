@@ -117,7 +117,10 @@ class Introduction extends React.PureComponent {
   }
 
   disableSteps = () => {
-    // Upon completion/closing, set a flag that won't show this guide again
+    // Upon completion/closing, set a flag that won't show this guide again.
+    // Remember that the user must allow for functional cookies for this to be possible.
+    // If the user has chosen to allow only the required cookies, the introduction will
+    // show on every page load.
     if (functionalCookieOk()) {
       window.localStorage.setItem("introductionShown", 1);
     }
