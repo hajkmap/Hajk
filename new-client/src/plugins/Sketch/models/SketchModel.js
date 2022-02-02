@@ -1,5 +1,6 @@
 import { ACTIVITIES, MAX_REMOVED_FEATURES } from "../constants";
 import LocalStorageHelper from "../../../utils/LocalStorageHelper";
+import { Circle, Fill, Stroke } from "ol/style";
 import GeoJSON from "ol/format/GeoJSON";
 import { STROKE_DASHES } from "../constants";
 
@@ -77,7 +78,7 @@ class SketchModel {
     }
   };
 
-  // Extracts the image-style from the supplied feature-style TODO: REALLY??
+  // Extracts the image-style from the supplied feature-style
   #getImageStyle = (featureStyle) => {
     // Since we might be dealing with a style-array instead of a style-object
     // (in case of the special Arrow feature-type) we have to make sure to get
@@ -180,6 +181,21 @@ class SketchModel {
     };
   };
 
+  // Creates a circle-style that can be used within an image-style.
+  #createImageStyle = (settings) => {
+    return new Circle({
+      radius: 6,
+      stroke: new Stroke({
+        color: settings.strokeColor,
+        width: settings.strokeWidth,
+        lineDash: settings.lineDash,
+      }),
+      fill: new Fill({
+        color: settings.fillColor,
+      }),
+    });
+  };
+
   // Returns the feature-style in a form that fits the feature-style-editor
   getFeatureStyle = (feature) => {
     try {
@@ -226,14 +242,22 @@ class SketchModel {
       const { fillColor, strokeColor, strokeWidth, lineDash } =
         this.#extractStyleSettings(styleSettings);
 
-      // Then we'll update the styles. TODO: REALLY??
       fillStyle.setColor(fillColor);
       strokeStyle.setColor(strokeColor);
       strokeStyle.setWidth(strokeWidth);
       strokeStyle.setLineDash(lineDash);
-      imageStyle?.getStroke()?.setColor(strokeColor);
-      imageStyle?.getStroke()?.setWidth(strokeWidth);
-      imageStyle?.getFill()?.setColor(fillColor);
+      // Unfortunately, the feature-image-style does not update by re-setting the
+      // stroke- and fill-settings within the image-style. Instead, a new image-style
+      // has to be created.
+      imageStyle &&
+        featureStyle.setImage(
+          this.#createImageStyle({
+            fillColor,
+            strokeColor,
+            strokeWidth,
+            lineDash,
+          })
+        );
 
       // If we're dealing with a text.feature, the text-style-settings must be updated as well.
       if (feature.get("DRAW_METHOD") === "Text") {

@@ -689,6 +689,9 @@ class DrawModel {
         width: settings
           ? settings.strokeStyle.width
           : this.#drawStyleSettings.strokeWidth,
+        lineDash: settings
+          ? settings.strokeStyle.dash
+          : this.#drawStyleSettings.lineDash,
       }),
       fill: new Fill({
         color: settings
