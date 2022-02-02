@@ -77,6 +77,33 @@ class SketchModel {
     }
   };
 
+  // Extracts the image-style from the supplied feature-style TODO: REALLY??
+  #getImageStyle = (featureStyle) => {
+    // Since we might be dealing with a style-array instead of a style-object
+    // (in case of the special Arrow feature-type) we have to make sure to get
+    // the actual base-style (which is located at position 0 in the style-array).
+    const s = Array.isArray(featureStyle)
+      ? featureStyle[0]?.getImage()
+      : featureStyle?.getImage();
+    // Let's extract the fill- and stroke-style from the image-style.
+    const fillStyle = s?.getFill();
+    const strokeStyle = s?.getStroke();
+    // Let's make sure the image-style has fill- and stroke-style before moving on
+    if (!fillStyle || !strokeStyle) {
+      return {
+        fillColor: null,
+        strokeColor: null,
+        strokeWidth: null,
+        dash: null,
+      };
+    }
+    const fillColor = fillStyle.getColor();
+    const strokeColor = strokeStyle.getColor();
+    const strokeWidth = strokeStyle.getWidth();
+    const dash = strokeStyle.getLineDash();
+    return { fillColor, strokeColor, strokeWidth, dash };
+  };
+
   // Extracts and returns information about the feature style.
   #extractFeatureStyle = (feature) => {
     // Let's run this in a try-catch since we cannot be sure that a
@@ -86,17 +113,18 @@ class SketchModel {
       // If no feature was supplied, or if we're unable to extract the style,
       // we return null.
       if (!featureStyle) {
-        return { fillStyle: null, strokeStyle: null };
+        return { fillStyle: null, strokeStyle: null, imageStyle: null };
       }
       // If we were able to extract the style we can continue by extracting
       // the fill- and stroke-style.
       const fillStyle = this.#getFillStyle(featureStyle);
       const strokeStyle = this.#getStrokeStyle(featureStyle);
+      const imageStyle = this.#getImageStyle(featureStyle);
       // And return an object containing them
-      return { fillStyle, strokeStyle };
+      return { fillStyle, strokeStyle, imageStyle };
     } catch (error) {
       console.error(`Failed to extract feature-style. Error: ${error}`);
-      return { fillStyle: null, strokeStyle: null };
+      return { fillStyle: null, strokeStyle: null, imageStyle: null };
     }
   };
 
@@ -136,6 +164,20 @@ class SketchModel {
       `Could not find corresponding stroke-type from supplied line-dash. The supplied line-dash was: ${lineDash}`
     );
     return null;
+  };
+
+  // Extract the style settings from the supplied object and returns an object
+  // with the color settings converted to string to comply with OL.
+  #extractStyleSettings = (settings) => {
+    const { strokeColor, fillColor, strokeWidth, lineDash } = settings;
+    const strokeColorString = this.#drawModel.getRGBAString(strokeColor);
+    const fillColorString = this.#drawModel.getRGBAString(fillColor);
+    return {
+      strokeColor: strokeColorString,
+      fillColor: fillColorString,
+      strokeWidth,
+      lineDash,
+    };
   };
 
   // Returns the feature-style in a form that fits the feature-style-editor
@@ -179,15 +221,20 @@ class SketchModel {
       // Then we'll get the stroke and text-style
       const fillStyle = featureStyle.getFill();
       const strokeStyle = featureStyle.getStroke();
-      // Then we'll update the styles.
-      fillStyle.setColor(
-        this.#drawModel.getRGBAString(styleSettings.fillColor)
-      );
-      strokeStyle.setColor(
-        this.#drawModel.getRGBAString(styleSettings.strokeColor)
-      );
-      strokeStyle.setWidth(styleSettings.strokeWidth);
-      strokeStyle.setLineDash(styleSettings.lineDash);
+      const imageStyle = featureStyle.getImage();
+
+      const { fillColor, strokeColor, strokeWidth, lineDash } =
+        this.#extractStyleSettings(styleSettings);
+
+      // Then we'll update the styles. TODO: REALLY??
+      fillStyle.setColor(fillColor);
+      strokeStyle.setColor(strokeColor);
+      strokeStyle.setWidth(strokeWidth);
+      strokeStyle.setLineDash(lineDash);
+      imageStyle?.getStroke()?.setColor(strokeColor);
+      imageStyle?.getStroke()?.setWidth(strokeWidth);
+      imageStyle?.getFill()?.setColor(fillColor);
+
       // If we're dealing with a text.feature, the text-style-settings must be updated as well.
       if (feature.get("DRAW_METHOD") === "Text") {
         feature.set("TEXT_SETTINGS", {
