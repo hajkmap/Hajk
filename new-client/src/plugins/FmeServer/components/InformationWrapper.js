@@ -7,14 +7,14 @@ import { styled } from "@mui/material/styles";
 const StyledGrid = styled(Grid)(({ type, theme }) => ({
   background:
     type === "error"
-      ? theme.palette.type === "dark"
+      ? theme.palette.mode === "dark"
         ? theme.palette.error.dark
         : theme.palette.error.main
       : type === "warning"
-      ? theme.palette.type === "dark"
+      ? theme.palette.mode === "dark"
         ? theme.palette.warning.dark
         : theme.palette.warning.main
-      : theme.palette.type === "dark"
+      : theme.palette.mode === "dark"
       ? theme.palette.info.dark
       : theme.palette.info.main,
   color: theme.palette.error.contrastText,
