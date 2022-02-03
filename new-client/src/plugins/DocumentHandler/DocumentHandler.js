@@ -76,7 +76,7 @@ class DocumentHandler extends React.PureComponent {
             ...prevState.customTheme,
             palette: {
               ...prevState.customTheme.palette,
-              type: theme.palette.mode,
+              mode: theme.palette.mode,
             },
           },
         };
