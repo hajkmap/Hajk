@@ -12,6 +12,7 @@ import KmlExport from "./utils/KmlExport";
 import XLSXExport from "./utils/XLSXExport";
 import { encodeCommas, decodeCommas } from "../../utils/StringCommaCoder";
 import LocalStorageHelper from "../../utils/LocalStorageHelper";
+import { functionalOk as functionalCookieOk } from "models/Cookie";
 
 class Search extends React.PureComponent {
   defaultSearchOptions = {
@@ -431,9 +432,11 @@ class Search extends React.PureComponent {
         enableLabelOnHighlight: searchOptions.enableLabelOnHighlight,
       });
 
-    // Always save the current settings to local storage, so it can be
-    // retrieved on app reload.
-    LocalStorageHelper.set("searchOptions", searchOptions);
+    // If functional cookies are allowed, we'll save the current settings
+    // to local storage, so it can be retrieved on app reload.
+    if (functionalCookieOk()) {
+      LocalStorageHelper.set("searchOptions", searchOptions);
+    }
   };
 
   handleOnClickOrKeyboardSearch = () => {

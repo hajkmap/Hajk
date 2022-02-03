@@ -7,6 +7,7 @@ import { IconButton, Paper, Tooltip } from "@mui/material";
 import InfoIcon from "@mui/icons-material/Info";
 
 import Dialog from "../components/Dialog/Dialog";
+import { functionalOk as functionalCookieOk } from "models/Cookie";
 
 const StyledPaper = styled(Paper)(({ theme }) => ({
   marginBottom: theme.spacing(1),
@@ -43,7 +44,7 @@ class Information extends React.PureComponent {
       ) {
         dialogOpen = false;
       } else {
-        if (this.options.showInfoOnce === true) {
+        if (this.options.showInfoOnce === true && functionalCookieOk()) {
           window.localStorage.setItem("pluginInformationMessageShown", 1);
         }
         dialogOpen = true;

@@ -7,6 +7,7 @@ import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";
 
 import CloseIcon from "@mui/icons-material/Close";
 import { Paper, Hidden } from "@mui/material";
+import { functionalOk as functionalCookieOk } from "models/Cookie";
 
 const StyledPaper = styled(Paper)(({ theme }) => ({
   marginRight: theme.spacing(1),
@@ -63,7 +64,9 @@ function DrawerToggleButtons({
     if (v === null) {
       window.localStorage.removeItem("activeDrawerContent");
     } else {
-      window.localStorage.setItem("activeDrawerContent", v);
+      if (functionalCookieOk()) {
+        window.localStorage.setItem("activeDrawerContent", v);
+      }
     }
 
     // Let the outside world know that a button has been pressed.
