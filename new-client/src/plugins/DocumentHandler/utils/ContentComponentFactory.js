@@ -2,10 +2,8 @@ import React from "react";
 import MapIcon from "@mui/icons-material/Map";
 import DescriptionIcon from "@mui/icons-material/Description";
 import OpenInNewIcon from "@mui/icons-material/OpenInNew";
-import clsx from "clsx";
 import Box from "@mui/material/Box";
 import TextArea from "../documentWindow/TextArea";
-import makeStyles from "@mui/styles/makeStyles";
 import { styled } from "@mui/material/styles";
 
 import {
@@ -28,113 +26,6 @@ const getIndentationValue = (fontSize, multiplier, negative) => {
   let value = multiplier * fontSize.substring(0, fontSize.length - 3);
   return negative ? `${value * -1}rem` : `${value}rem`;
 };
-
-const useStyles = makeStyles((theme) => ({
-  documentImage: {
-    objectFit: "contain",
-    objectPosition: "left",
-  },
-  customLabel: {
-    textAlign: "left",
-  },
-  pictureRightFloatingText: {},
-  pictureLeftFloatingText: {},
-
-  floatRight: {
-    float: "right",
-    marginLeft: theme.spacing(1),
-  },
-  floatLeft: {
-    float: "left",
-    marginRight: theme.spacing(1),
-  },
-
-  mediaRight: {
-    alignItems: "flex-end",
-    display: "flex",
-    flexDirection: "column",
-  },
-  mediaLeft: {
-    alignItems: "flex-start",
-    display: "flex",
-    flexDirection: "column",
-  },
-  mediaCenter: {
-    alignItems: "center",
-    display: "flex",
-    flexDirection: "column",
-  },
-
-  popupActivatedImage: {
-    marginBottom: theme.spacing(1),
-    cursor: "pointer",
-  },
-  naturalDocumentImageProportions: {
-    marginTop: theme.spacing(1),
-    width: "100%",
-  },
-  imageText: {
-    marginBottom: theme.spacing(1),
-  },
-  imageInformationWrapper: {
-    marginBottom: theme.spacing(1),
-    maxWidth: "100%",
-  },
-  startIcon: {
-    marginLeft: theme.spacing(0),
-  },
-  linkIcon: {
-    verticalAlign: "middle",
-  },
-  heading: {
-    marginBottom: theme.spacing(1),
-  },
-  media: {
-    width: "auto",
-    maxWidth: "100%",
-  },
-  listItemOneDigit: {
-    marginRight: getIndentationValue(theme.typography.body1.fontSize, 1), //MAGIC
-    padding: theme.spacing(0),
-  },
-  listItemTwoDigit: {
-    marginBottom: theme.spacing(1),
-    padding: theme.spacing(0),
-    marginRight: getIndentationValue(theme.typography.body1.fontSize, 0.5), //MAGIC
-  },
-  olListItem: {
-    padding: theme.spacing(0),
-  },
-  ulList: {
-    listStyle: "initial",
-    listStylePosition: "inside",
-    overflowWrap: "break-word",
-    wordBreak: "break-word",
-    marginBottom: theme.spacing(1),
-    paddingLeft: getIndentationValue(theme.typography.body1.fontSize, 1.375), //MAGIC
-    textIndent: getIndentationValue(
-      theme.typography.body1.fontSize,
-      1.375,
-      true
-    ), //MAGIC
-    padding: theme.spacing(0),
-  },
-  olList: {
-    padding: theme.spacing(0),
-    marginBottom: theme.spacing(1),
-  },
-  bottomMargin: {
-    marginBottom: theme.spacing(1),
-  },
-  linkButton: {
-    padding: theme.spacing(0),
-    color: theme.palette.info.main,
-  },
-  hoverLink: {
-    cursor: "text",
-    textDecoration: "underline dotted",
-  },
-}));
 
 const renderChild = (child) => {
   if (child.nodeType === TEXT_NODE) {
@@ -314,28 +205,26 @@ export const Figure = ({ figureTag }) => {
  * @memberof Contents
  */
 export const Img = ({ imgTag, localObserver, componentId, baseUrl }) => {
-  const classes = useStyles();
   const tagIsPresent = (imgTag, attribute) => {
     return imgTag.attributes.getNamedItem(attribute) == null ? false : true;
   };
 
   const getImageStyle = (image) => {
-    let className = image.popup
-      ? clsx(
-          classes.documentImage,
-          classes.naturalDocumentImageProportions,
-          classes.popupActivatedImage
-        )
-      : clsx(classes.documentImage, classes.naturalDocumentImageProportions);
-
     if (image.height && image.width) {
-      if (image.popup) {
-        className = clsx(classes.documentImage, classes.popupActivatedImage);
-      } else {
-        className = clsx(classes.documentImage);
-      }
+      return {
+        objectFit: "contain",
+        objectPosition: "left",
+        ...(image.popup && { marginBottom: 1, cursor: "pointer" }),
+      };
+    } else {
+      return {
+        objectFit: "contain",
+        objectPosition: "left",
+        marginTop: 1,
+        width: "100%",
+        ...(image.popup && { marginBottom: 1, cursor: "pointer" }),
+      };
     }
-    return className;
   };
 
   const getMediaPositionStyle = (position) => {
@@ -438,16 +327,21 @@ export const Img = ({ imgTag, localObserver, componentId, baseUrl }) => {
       <CardMedia
         onClick={onClickCallback}
         alt={image.altValue || ""}
-        classes={{ media: classes.media }}
         aria-describedby={getDescribedByAttribute()}
         component="img"
-        style={
-          image.height && image.width
-            ? { height: image.height, width: image.width }
-            : null
-        }
-        className={getImageStyle(image)}
         image={imgUrl}
+        sx={{
+          ...getImageStyle(image),
+          ...(image.height &&
+            image.width && {
+              height: `${image.height}px`,
+              width: `${image.width}px`,
+            }),
+          ".MuiCardMedia-media": {
+            width: "auto",
+            maxWidth: "100%",
+          },
+        }}
       />
       {getImageDescription(image)}
     </Box>
@@ -470,13 +364,14 @@ export const Video = ({ imgTag, componentId, baseUrl }) => {
     id: `video_${componentId}`,
   };
 
-  const classes = useStyles();
-
   const getVideoDescription = (videoAttributes) => {
     return (
       <Box
-        style={{ width: videoAttributes.width }}
-        className={classes.imageInformationWrapper}
+        sx={{
+          width: `${videoAttributes.width}px`,
+          marginBottom: 1,
+          maxWidth: "100%",
+        }}
       >
         {videoAttributes.caption && (
           <Typography
@@ -490,7 +385,7 @@ export const Video = ({ imgTag, componentId, baseUrl }) => {
           <Typography
             id={`video_${videoAttributes.sourceId}`}
             variant="subtitle2"
-            className={classes.imageText}
+            sx={{ marginBottom: 1 }}
           >
             {videoAttributes.source}
           </Typography>
@@ -535,13 +430,14 @@ export const Audio = ({ imgTag, componentId, baseUrl }) => {
     id: `audio_${componentId}`,
   };
 
-  const classes = useStyles();
-
   const getAudioDescription = (audioAttributes) => {
     return (
       <Box
-        style={{ width: audioAttributes.width + "px" }}
-        className={classes.imageInformationWrapper}
+        sx={{
+          width: audioAttributes.width + "px",
+          marginBottom: 1,
+          maxWidth: "100%",
+        }}
       >
         {audioAttributes.caption && (
           <Typography
@@ -555,7 +451,7 @@ export const Audio = ({ imgTag, componentId, baseUrl }) => {
           <Typography
             id={`video_${audioAttributes.sourceId}`}
             variant="subtitle2"
-            className={classes.imageText}
+            sx={{ marginBottom: 1 }}
           >
             {audioAttributes.source}
           </Typography>
@@ -686,8 +582,6 @@ export const LineBreak = () => {
  * @memberof Contents
  */
 export const CustomLink = ({ aTag, localObserver, bottomMargin }) => {
-  const classes = useStyles();
-
   const getLinkDataPerType = (attributes) => {
     const {
       0: mapLink,
@@ -710,26 +604,39 @@ export const CustomLink = ({ aTag, localObserver, bottomMargin }) => {
 
   const getHoverLink = (hoverLink, tagText) => {
     return (
-      <React.Fragment>
-        <Tooltip title={hoverLink}>
-          <abbr className={classes.hoverLink}>{tagText}</abbr>
-        </Tooltip>
-      </React.Fragment>
+      <Tooltip title={hoverLink}>
+        <abbr
+          style={{
+            cursor: "text",
+            textDecoration: "underline dotted",
+          }}
+        >
+          {tagText}
+        </abbr>
+      </Tooltip>
     );
   };
 
   const getExternalLink = (externalLink) => {
     return (
       <Button
-        startIcon={<OpenInNewIcon className={classes.linkIcon}></OpenInNewIcon>}
-        classes={{ startIcon: classes.startIcon }}
+        startIcon={
+          <OpenInNewIcon
+            sx={{
+              verticalAlign: "middle",
+            }}
+          />
+        }
+        sx={{
+          padding: 0,
+          color: "info.main",
+          ".MuiButton-startIcon": {
+            marginLeft: 0,
+          },
+          ...(bottomMargin && { marginBottom: 1 }),
+        }}
         target="_blank"
         component="a"
-        className={clsx(
-          bottomMargin
-            ? [classes.bottomMargin, classes.linkButton]
-            : classes.linkButton
-        )}
         key="external-link"
         href={externalLink}
       >
@@ -737,6 +644,7 @@ export const CustomLink = ({ aTag, localObserver, bottomMargin }) => {
       </Button>
     );
   };
+
   const getMapLink = (aTag, mapLinkOrg) => {
     // Attempt to safely URI Decode the supplied string. If
     // it fails, use it as-is.
@@ -752,13 +660,21 @@ export const CustomLink = ({ aTag, localObserver, bottomMargin }) => {
 
     return (
       <Button
-        className={clsx(
-          bottomMargin
-            ? [classes.bottomMargin, classes.linkButton]
-            : classes.linkButton
-        )}
-        startIcon={<MapIcon className={classes.linkIcon}></MapIcon>}
-        classes={{ startIcon: classes.startIcon, label: classes.customLabel }}
+        startIcon={
+          <MapIcon
+            sx={{
+              verticalAlign: "middle",
+            }}
+          />
+        }
+        sx={{
+          padding: 0,
+          color: "info.main",
+          ...(bottomMargin && { marginBottom: 1 }),
+          ".MuiButton-startIcon": {
+            marginLeft: 0,
+          },
+        }}
         target="_blank"
         href={externalLink}
         key="map-link"
@@ -771,19 +687,25 @@ export const CustomLink = ({ aTag, localObserver, bottomMargin }) => {
       </Button>
     );
   };
+
   const getDocumentLink = (headerIdentifier, documentLink, isPrintMode) => {
     return (
       <Button
-        className={clsx(
-          bottomMargin
-            ? [classes.bottomMargin, classes.linkButton]
-            : classes.linkButton
-        )}
         startIcon={
-          <DescriptionIcon className={classes.linkIcon}></DescriptionIcon>
+          <DescriptionIcon
+            sx={{
+              verticalAlign: "middle",
+            }}
+          />
         }
-        style={{ padding: 0 }}
-        classes={{ startIcon: classes.startIcon }}
+        sx={{
+          padding: 0,
+          color: "info.main",
+          ".MuiButton-startIcon": {
+            marginLeft: 0,
+          },
+          ...(bottomMargin && { marginBottom: 1 }),
+        }}
         href="#"
         key="document-link"
         component={isPrintMode ? "span" : "button"}
