@@ -234,7 +234,7 @@ class DocumentHandler extends React.PureComponent {
           chapters={this.state.chapters}
           model={this.state.model}
           localObserver={this.localObserver}
-        ></DocumentWindowBase>
+        />
       </>
     );
   }
