@@ -5,6 +5,7 @@ import OpenInNewIcon from "@mui/icons-material/OpenInNew";
 import Box from "@mui/material/Box";
 import TextArea from "../documentWindow/TextArea";
 import { styled } from "@mui/material/styles";
+import { useTheme } from "@mui/material";
 
 import {
   Button,
@@ -177,13 +178,18 @@ const getTextArea = (tag, defaultColors) => {
       backgroundColor={backgroundColor}
       dividerColor={dividerColor}
       textAreaContentArray={textAreaContentArray}
-    ></TextArea>
+    />
   );
 };
 
 export const BlockQuote = ({ blockQuoteTag, defaultColors }) => {
+  // Grab the theme to determine current light/dark mode
+  const theme = useTheme();
   if (blockQuoteTag.attributes.getNamedItem("data-text-section")) {
-    return getTextArea(blockQuoteTag, defaultColors);
+    return getTextArea(
+      blockQuoteTag,
+      theme.palette.mode === "light" && defaultColors // Only supply defaultColors if we're in light mode
+    );
   } else {
     return null;
   }
