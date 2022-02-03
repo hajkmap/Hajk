@@ -1,5 +1,5 @@
 import React from "react";
-import withStyles from "@mui/styles/withStyles";
+import { styled } from "@mui/material/styles";
 import ExpandLessIcon from "@mui/icons-material/ExpandLess";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import { withTheme } from "@emotion/react";
@@ -11,38 +11,6 @@ import {
   Button,
   Collapse,
 } from "@mui/material";
-
-const styles = (theme) => {
-  return {
-    tableOfContents: {
-      //Need to manually change color when switching between dark/light-mode
-      backgroundColor:
-        theme.palette.mode === "dark"
-          ? theme.palette.grey[700]
-          : theme.palette.grey[200],
-      tapHighlightColor: "transparent",
-
-      cursor: "pointer",
-      paddingLeft: theme.spacing(2),
-      paddingRight: theme.spacing(2),
-      paddingTop: theme.spacing(1),
-      paddingBottom: theme.spacing(1),
-    },
-
-    focusBackground: {
-      backgroundColor: theme.palette.action.selected,
-    },
-
-    collapseContainer: {
-      width: "100%",
-    },
-
-    root: {
-      width: "100%",
-      padding: theme.spacing(0),
-    },
-  };
-};
 
 function NestedListItemRaw(props) {
   return (
@@ -63,7 +31,40 @@ function NestedListItemRaw(props) {
   );
 }
 
-const NestedListItem = withStyles(styles)(withTheme(NestedListItemRaw));
+const NestedListItem = withTheme(NestedListItemRaw);
+
+const ListRoot = styled(List)(({ theme }) => ({
+  width: "100%",
+  padding: theme.spacing(0),
+}));
+
+const StyledButton = styled(Button)(({ theme }) => ({
+  paddingLeft: "0px",
+  display: "flex",
+  justifyContent: "space-between",
+  "&:focus-visible": {
+    backgroundColor: theme.palette.action.selected,
+  },
+}));
+
+const GridTableOfContents = styled(Grid)(({ theme }) => ({
+  //Need to manually change color when switching between dark/light-mode
+  backgroundColor:
+    theme.palette.mode === "dark"
+      ? theme.palette.grey[700]
+      : theme.palette.grey[200],
+
+  tapHighlightColor: "transparent",
+  cursor: "pointer",
+  paddingLeft: theme.spacing(2),
+  paddingRight: theme.spacing(2),
+  paddingTop: theme.spacing(1),
+  paddingBottom: theme.spacing(1),
+}));
+
+const CollapseCollapseContainer = styled(Collapse)(({ theme }) => ({
+  width: "100%",
+}));
 
 class TableOfContents extends React.PureComponent {
   state = {
@@ -86,16 +87,15 @@ class TableOfContents extends React.PureComponent {
    * @memberof TableOfContents
    */
   renderChapters = (activeDocument) => {
-    const { classes } = this.props;
     let mainChapter = 0;
     return (
-      <List className={classes.root} aria-labelledby="nested-list-subheader">
+      <ListRoot aria-labelledby="nested-list-subheader">
         {Array.isArray(activeDocument?.chapters)
           ? activeDocument.chapters.map((chapter) =>
               this.renderSubChapters(chapter, 0, (++mainChapter).toString())
             )
           : null}
-      </List>
+      </ListRoot>
     );
   };
 
@@ -146,19 +146,12 @@ class TableOfContents extends React.PureComponent {
   };
 
   render() {
-    const { classes, activeDocument, title, expanded, toggleCollapse } =
-      this.props;
+    const { activeDocument, title, expanded, toggleCollapse } = this.props;
 
     return (
-      <Grid className={classes.tableOfContents} container>
-        <Button
+      <GridTableOfContents container>
+        <StyledButton
           disableRipple
-          focusVisibleClassName={classes.focusBackground}
-          style={{
-            paddingLeft: "0px",
-            display: "flex",
-            justifyContent: "space-between",
-          }}
           color="inherit"
           fullWidth
           endIcon={
@@ -171,9 +164,8 @@ class TableOfContents extends React.PureComponent {
           onClick={toggleCollapse}
         >
           {title}
-        </Button>
-        <Collapse
-          className={classes.collapseContainer}
+        </StyledButton>
+        <CollapseCollapseContainer
           in={expanded}
           id="expansion-panel-content"
           aria-hidden={!expanded}
@@ -181,10 +173,10 @@ class TableOfContents extends React.PureComponent {
           <Grid container spacing={0}>
             {this.renderChapters(activeDocument)}
           </Grid>
-        </Collapse>
-      </Grid>
+        </CollapseCollapseContainer>
+      </GridTableOfContents>
     );
   }
 }
 
-export default withStyles(styles)(TableOfContents);
+export default TableOfContents;
