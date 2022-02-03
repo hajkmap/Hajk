@@ -38,16 +38,16 @@
     ]
   },
   "dependencies": {
-    "@date-io/date-fns": "^2.11.0",
+    "@date-io/date-fns": "^2.13.1",
     "@emotion/react": "^11.7.1",
     "@emotion/styled": "^11.6.0",
-    "@fontsource/material-icons": "^4.5.1",
-    "@fontsource/open-sans": "^4.5.2",
-    "@fontsource/roboto": "^4.5.1",
+    "@fontsource/material-icons": "^4.5.2",
+    "@fontsource/open-sans": "^4.5.3",
+    "@fontsource/roboto": "^4.5.2",
     "@mui/icons-material": "^5.3.1",
     "@mui/lab": "^5.0.0-alpha.67",
     "@mui/material": "^5.4.0",
-    "@nieuwlandgeo/sldreader": "^0.2.12",
+    "@nieuwlandgeo/sldreader": "^0.2.13",
     "@turf/buffer": "^6.5.0",
     "abortcontroller-polyfill": "^1.7.3",
     "allsettled-polyfill": "^1.0.4",
@@ -61,8 +61,7 @@
     "html2json": "^1.0.2",
     "intro.js": "^4.3.0",
     "intro.js-react": "^0.5.0",
-    "jspdf": "^2.5.0",
-    "jsts": "^2.8.1",
+    "jspdf": "^2.5.1",
     "jszip": "^3.7.1",
     "load-google-maps-api": "^2.0.2",
     "notistack": "^2.0.3",
@@ -88,6 +87,6 @@
     "remark-gfm": "^3.0.1",
     "source-map-explorer": "^2.5.2",
     "x2js": "^3.4.3",
-    "xlsx": "^0.17.5"
+    "xlsx": "^0.18.0"
   }
 }
