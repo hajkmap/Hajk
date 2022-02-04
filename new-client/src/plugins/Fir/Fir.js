@@ -58,11 +58,11 @@ class Fir extends React.PureComponent {
   }
 
   onWindowShow = () => {
-    this.localObserver.publish("fir.window", { visible: true });
+    this.model.windowIsVisible = true;
   };
 
   onWindowHide = () => {
-    this.localObserver.publish("fir.window", { visible: false });
+    this.model.windowIsVisible = false;
   };
 
   getService(type) {

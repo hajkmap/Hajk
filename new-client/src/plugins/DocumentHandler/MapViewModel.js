@@ -33,7 +33,7 @@ export default class MapViewModel {
       const { layersToShow, layersToHide } =
         this.getLayersToShowAndHide(visibleLayers);
 
-      this.setMapLayersVisiblity(layersToShow, layersToHide);
+      this.setMapLayersVisibility(layersToShow, layersToHide);
       this.flyTo(this.map.getView(), mapSettings.center, mapSettings.zoom);
     });
   };
@@ -58,7 +58,7 @@ export default class MapViewModel {
     );
   };
 
-  setMapLayersVisiblity(layersToShow, layersToHide) {
+  setMapLayersVisibility(layersToShow, layersToHide) {
     layersToShow.forEach((mapLayerToShow) => {
       if (mapLayerToShow.layerType === "group") {
         this.globalObserver.publish("layerswitcher.showLayer", mapLayerToShow);

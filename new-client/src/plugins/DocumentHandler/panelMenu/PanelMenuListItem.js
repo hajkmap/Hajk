@@ -1,21 +1,29 @@
 import React from "react";
-import { withStyles, withTheme } from "@material-ui/core/styles";
-import Icon from "@material-ui/core/Icon";
-import ListItem from "@material-ui/core/ListItem";
-import Collapse from "@material-ui/core/Collapse";
-import ListItemText from "@material-ui/core/ListItemText";
-import ListItemIcon from "@material-ui/core/ListItemIcon";
-import ExpandLess from "@material-ui/icons/ExpandLess";
+import { styled } from "@mui/material/styles";
+import { withTheme } from "@emotion/react";
+import Icon from "@mui/material/Icon";
+import ListItem from "@mui/material/ListItem";
+import Collapse from "@mui/material/Collapse";
+import ListItemText from "@mui/material/ListItemText";
+import ListItemIcon from "@mui/material/ListItemIcon";
+import ExpandLess from "@mui/icons-material/ExpandLess";
 import PanelList from "./PanelList";
-import ExpandMore from "@material-ui/icons/ExpandMore";
-import { Typography } from "@material-ui/core";
+import ExpandMore from "@mui/icons-material/ExpandMore";
+import { visuallyHidden } from "@mui/utils";
 
-const styles = (theme) => ({
-  listItem: { overflowWrap: "break-word" },
-  listItemIcon: { minWidth: theme.spacing(3) },
-  collapseIconRoot: { minWidth: theme.spacing(4) },
-  root: {
-    borderLeft: `${theme.spacing(1)}px solid ${theme.palette.background.paper}`,
+const StyledListItemIcon = styled(ListItemIcon)(({ theme }) => ({
+  minWidth: theme.spacing(3),
+}));
+
+const StyledCollapseIcon = styled(ListItemIcon)(({ theme }) => ({
+  ".MuiListItemIcon-root": {
+    minWidth: theme.spacing(4),
+  },
+}));
+const StyledListItem = styled(ListItem)(({ theme }) => ({
+  overflowWrap: "break-word",
+  ".MuiListItem-root": {
+    borderLeft: `${theme.spacing(1)} solid ${theme.palette.background.paper}`,
     "&.Mui-selected": {
       borderLeftColor: theme.palette.action.selected,
     },
@@ -26,7 +34,7 @@ const styles = (theme) => ({
       borderColor: theme.palette.action.hover,
     },
   },
-});
+}));
 
 class PanelMenuListItem extends React.PureComponent {
   #getListTitle = () => {
@@ -35,32 +43,30 @@ class PanelMenuListItem extends React.PureComponent {
   };
 
   #getCollapseIcon = () => {
-    const { classes, title, expanded } = this.props;
+    const { title, expanded } = this.props;
 
     return expanded ? (
-      <ListItemIcon classes={{ root: classes.collapseIconRoot }}>
-        {!title && <Typography variant="srOnly">Minimera submeny</Typography>}
+      <StyledCollapseIcon>
+        {!title && <span style={visuallyHidden}>Minimera submeny</span>}
         <ExpandLess />
-      </ListItemIcon>
+      </StyledCollapseIcon>
     ) : (
-      <ListItemIcon classes={{ root: classes.collapseIconRoot }}>
-        {!title && <Typography variant="srOnly">Maximera submeny</Typography>}
+      <StyledCollapseIcon>
+        {!title && <span style={visuallyHidden}>Maximera submeny</span>}
         <ExpandMore />
-      </ListItemIcon>
+      </StyledCollapseIcon>
     );
   };
 
   #getListIcon = () => {
-    const { classes, title, icon } = this.props;
+    const { title, icon } = this.props;
     return (
-      <ListItemIcon className={classes.listItemIcon}>
-        {!title && (
-          <Typography variant="srOnly">{icon.descriptiveText}</Typography>
-        )}
+      <StyledListItemIcon>
+        {!title && <span style={visuallyHidden}>{icon.descriptiveText}</span>}
         <Icon style={{ fontSize: icon.fontSize }}>
           {icon.materialUiIconName}
         </Icon>
-      </ListItemIcon>
+      </StyledListItemIcon>
     );
   };
 
@@ -79,53 +85,40 @@ class PanelMenuListItem extends React.PureComponent {
     const hasSubMenu = this.#hasSubMenu();
     return colored
       ? {
-          paddingLeft: theme.spacing(1) + theme.spacing(level * 3),
-          borderLeft: `${theme.spacing(1)}px solid ${color}`,
+          paddingLeft: theme.spacing(1 + level * 3),
+          borderLeft: `${theme.spacing(1)} solid ${color}`,
           paddingRight: hasSubMenu ? 0 : theme.spacing(1),
         }
       : {
-          paddingLeft: theme.spacing(1) + theme.spacing(level * 3),
+          paddingLeft: theme.spacing(1 + level * 3),
           paddingRight: hasSubMenu ? 0 : theme.spacing(1),
         };
   };
 
   render() {
-    const {
-      classes,
-      type,
-      selected,
-      subMenuItems,
-      expanded,
-      icon,
-      level,
-      title,
-      id,
-    } = this.props;
+    const { type, selected, subMenuItems, expanded, icon, level, title, id } =
+      this.props;
     const hasSubMenu = this.#hasSubMenu();
     return (
       <>
-        <ListItem
+        <StyledListItem
           divider
           selected={selected}
           button
           ref={this.props.itemRef}
           size="small"
-          classes={{
-            root: classes.root,
-          }}
           disableGutters
           aria-controls={hasSubMenu ? `submenu_${id}` : null}
           aria-expanded={expanded}
           onClick={() => {
             this.#handleMenuButtonClick(type, id);
           }}
-          className={classes.listItem}
-          style={this.#getMenuItemStyle()}
+          sx={this.#getMenuItemStyle()}
         >
           {icon ? this.#getListIcon() : null}
           {title && this.#getListTitle()}
           {hasSubMenu && this.#getCollapseIcon()}
-        </ListItem>
+        </StyledListItem>
         {hasSubMenu && (
           <Collapse id={`submenu_${id}`} in={expanded} timeout={200}>
             <PanelList
@@ -140,4 +133,4 @@ class PanelMenuListItem extends React.PureComponent {
   }
 }
 
-export default withStyles(styles)(withTheme(PanelMenuListItem));
+export default withTheme(PanelMenuListItem);

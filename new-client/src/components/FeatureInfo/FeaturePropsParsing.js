@@ -36,32 +36,37 @@ export default class FeaturePropsParsing {
           return null;
         }
 
-        return children.map((child, index) => {
-          // Initiate a holder for external components. If a regex matches below,
-          // this variable will be filled with correct value.
-          let externalComponent = null;
+        return (
+          <Paragraph variant="body2">
+            {children.map((child, index) => {
+              // Initiate a holder for external components. If a regex matches below,
+              // this variable will be filled with correct value.
+              let externalComponent = null;
 
-          if (child && typeof child === "string") {
-            // This helper is passed to ReactMarkdown at render. At this stage,
-            // we expect that the only remaining {stuff} will contain digits, and
-            // that those numbers represent element index in this.resolvedPromisesWithComponents.
-            // Let's try to match the regex for a number within curly brackets.
-            const match = child.match(/{(\d+)}/);
-            if (
-              match &&
-              this.resolvedPromisesWithComponents.hasOwnProperty(match[1])
-            ) {
-              // If matched, replace the placeholder with the corresponding component.
-              externalComponent = this.resolvedPromisesWithComponents[match[1]];
-            }
-          }
-          // If externalComponent isn't null anymore, render it. Else, just render the children.
-          return (
-            <Paragraph variant="body2" key={index}>
-              {externalComponent || child}
-            </Paragraph>
-          );
-        });
+              if (child && typeof child === "string") {
+                // This helper is passed to ReactMarkdown at render. At this stage,
+                // we expect that the only remaining {stuff} will contain digits, and
+                // that those numbers represent element index in this.resolvedPromisesWithComponents.
+                // Let's try to match the regex for a number within curly brackets.
+                const match = child.match(/{(\d+)}/);
+                if (
+                  match &&
+                  this.resolvedPromisesWithComponents.hasOwnProperty(match[1])
+                ) {
+                  // If matched, replace the placeholder with the corresponding component.
+                  externalComponent =
+                    this.resolvedPromisesWithComponents[match[1]];
+                }
+              }
+              // If externalComponent isn't null anymore, render it. Else, just render the children.
+              return (
+                <React.Fragment key={index}>
+                  {externalComponent || child}
+                </React.Fragment>
+              );
+            })}
+          </Paragraph>
+        );
       },
     };
   }

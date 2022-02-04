@@ -1,18 +1,18 @@
 import React from "react";
-import Alert from "@material-ui/lab/Alert";
+import Alert from "@mui/material/Alert";
 import SearchResultsList from "./SearchResultsList";
-import Collapse from "@material-ui/core/Collapse";
-import Breadcrumbs from "@material-ui/core/Breadcrumbs";
-import Link from "@material-ui/core/Link";
-import FilterListIcon from "@material-ui/icons/FilterList";
-import SortIcon from "@material-ui/icons/Sort";
-import MoreVertIcon from "@material-ui/icons/MoreVert";
-import CloseIcon from "@material-ui/icons/Close";
-import DeleteIcon from "@material-ui/icons/Delete";
-import ClearIcon from "@material-ui/icons/Clear";
+import Collapse from "@mui/material/Collapse";
+import Breadcrumbs from "@mui/material/Breadcrumbs";
+import Link from "@mui/material/Link";
+import FilterListIcon from "@mui/icons-material/FilterList";
+import SortIcon from "@mui/icons-material/Sort";
+import MoreVertIcon from "@mui/icons-material/MoreVert";
+import CloseIcon from "@mui/icons-material/Close";
+import DeleteIcon from "@mui/icons-material/Delete";
+import ClearIcon from "@mui/icons-material/Clear";
 import {
   Paper,
-  Button,
+  IconButton,
   Grid,
   TextField,
   Typography,
@@ -21,64 +21,35 @@ import {
   Menu,
   MenuItem,
   Grow,
-  IconButton,
-} from "@material-ui/core";
-import { withStyles } from "@material-ui/core/styles";
+} from "@mui/material";
 import SearchResultsDownloadMenu from "./SearchResultsDownloadMenu";
+import { visuallyHidden } from "@mui/utils";
+import { styled } from "@mui/material/styles";
 
-const styles = (theme) => ({
-  hidden: {
-    display: "none",
+const StyledPaper = styled(Paper)(({ theme }) => ({
+  maxHeight: "80vh",
+  overflow: "auto",
+  minWidth: 200,
+  [theme.breakpoints.up("sm")]: {
+    maxWidth: 520,
   },
-  searchResultListWrapper: {
-    [theme.breakpoints.down("xs")]: {
-      maxHeight: "78vh",
-    },
-    [theme.breakpoints.up("sm")]: {
-      maxHeight: "82vh",
-    },
-  },
-  root: {
-    maxHeight: "80vh",
-    overflow: "auto",
-    minWidth: 200,
-    [theme.breakpoints.up("sm")]: {
-      maxWidth: 520,
-    },
-    [theme.breakpoints.down("xs")]: {
-      minWidth: "100%",
-      maxWidth: "100%",
-      position: "absolute",
-      left: 0,
-      borderTop: `${theme.spacing(0.2)}px solid ${theme.palette.divider}`,
-    },
-  },
-  filterInputFieldContainer: {
-    padding: theme.spacing(1),
-    borderBottom: `${theme.spacing(0.1)}px solid ${theme.palette.divider}`,
-  },
-  headerContainer: {
-    paddingRight: theme.spacing(1),
-    paddingLeft: theme.spacing(1),
-  },
-  tallHeaderContainer: {
-    minHeight: 42,
-    paddingRight: theme.spacing(1),
-    paddingLeft: theme.spacing(1),
-    borderBottom: `${theme.spacing(0.1)}px solid ${theme.palette.divider}`,
-  },
-  headerTypography: {
+  [theme.breakpoints.down("sm")]: {
+    minWidth: "100%",
     maxWidth: "100%",
-    fontSize: 18,
+    position: "absolute",
+    left: 0,
+    borderTop: `${theme.spacing(0.2)} solid ${theme.palette.divider}`,
   },
-  headerButtons: {
-    minWidth: 30,
+}));
+
+const ResultListWrapper = styled(Grid)(({ theme }) => ({
+  [theme.breakpoints.down("sm")]: {
+    maxHeight: "78vh",
   },
-  breadCrumbLinks: {
-    border: "none",
-    cursor: "pointer",
+  [theme.breakpoints.up("sm")]: {
+    maxHeight: "82vh",
   },
-});
+}));
 
 class SearchResultsContainer extends React.PureComponent {
   state = {
@@ -86,9 +57,7 @@ class SearchResultsContainer extends React.PureComponent {
     activeFeatureCollection: null,
     filteredFeatureCollections: null,
     filteredFeatures: null,
-    sumOfResults: this.props.searchResults.featureCollections
-      .map((fc) => fc.value.features.length ?? 0)
-      .reduce((a, b) => a + b, 0),
+    sumOfResults: null,
     filterInputFieldOpen: false,
     featureCollectionFilter: "", // String used to filter featureCollections
     featureFilter: "", // String used to filter features
@@ -163,7 +132,7 @@ class SearchResultsContainer extends React.PureComponent {
         this.showFeatureDetails(featureIds);
       }
     );
-    this.getPotentialSingleHit();
+    this.initializeResultsInformation();
   };
 
   componentWillUnmount = () => {
@@ -210,7 +179,7 @@ class SearchResultsContainer extends React.PureComponent {
     });
   };
 
-  getPotentialSingleHit = () => {
+  initializeResultsInformation = () => {
     const { featureCollections } = this.props;
 
     const activeFeatureCollection =
@@ -220,6 +189,9 @@ class SearchResultsContainer extends React.PureComponent {
         ? activeFeatureCollection.value.features[0]
         : undefined
       : undefined;
+    const sumOfResults = featureCollections
+      .map((fc) => fc.value.features.length ?? 0)
+      .reduce((a, b) => a + b, 0);
 
     // Hack hack.. we shouldn't set active collection and feature if we have a onClickName
     // on the source
@@ -232,6 +204,11 @@ class SearchResultsContainer extends React.PureComponent {
       this.setState({
         activeFeatureCollection: activeFeatureCollection,
         activeFeature: activeFeature,
+        sumOfResults: sumOfResults,
+      });
+    } else {
+      this.setState({
+        sumOfResults: sumOfResults,
       });
     }
   };
@@ -354,16 +331,21 @@ class SearchResultsContainer extends React.PureComponent {
   };
 
   renderFilterInputField = () => {
-    const { classes } = this.props;
     const { activeFeatureCollection, featureFilter, featureCollectionFilter } =
       this.state;
     const showClearFilterButton =
       featureFilter.length > 0 || featureCollectionFilter.length > 0;
     return (
-      <Grid item className={classes.filterInputFieldContainer} xs={12}>
-        <Typography variant="srOnly">
-          Textfält för att filtrera resultatet
-        </Typography>
+      <Grid
+        item
+        sx={{
+          padding: 1,
+          borderBottom: 0.8,
+          borderBottomColor: "divider",
+        }}
+        xs={12}
+      >
+        <span style={visuallyHidden}>Textfält för att filtrera resultatet</span>
         <TextField
           autoFocus
           onChange={this.handleFilterTextFieldInputChange}
@@ -376,9 +358,9 @@ class SearchResultsContainer extends React.PureComponent {
           label="Filtrera sökresultaten"
           InputProps={{
             endAdornment: showClearFilterButton && (
-              <Tooltip title="Rensa filtret">
+              <Tooltip disableInteractive title="Rensa filtret">
                 <IconButton onClick={this.clearViewFilters} size="small">
-                  <Typography variant="srOnly">Rensa filtret</Typography>
+                  <span style={visuallyHidden}>Rensa filtret</span>
                   <ClearIcon />
                 </IconButton>
               </Tooltip>
@@ -511,15 +493,14 @@ class SearchResultsContainer extends React.PureComponent {
   };
 
   renderFilterTool = () => {
-    const { classes } = this.props;
     const filterActive = this.isFilterActive();
     const filterHelpText = filterActive
       ? "Filtret är aktivt"
       : "Filtrera resultatet";
     return (
-      <Tooltip title={filterHelpText}>
-        <Button
-          className={classes.headerButtons}
+      <Tooltip disableInteractive title={filterHelpText}>
+        <IconButton
+          sx={{ minWidth: 30 }}
           onClick={() =>
             this.setState({
               filterInputFieldOpen: !this.state.filterInputFieldOpen,
@@ -534,13 +515,12 @@ class SearchResultsContainer extends React.PureComponent {
           >
             <FilterListIcon />
           </Badge>
-        </Button>
+        </IconButton>
       </Tooltip>
     );
   };
 
   renderSortTool = () => {
-    const { classes } = this.props;
     const {
       activeFeatureCollection,
       featureCollectionSortingStrategy,
@@ -563,29 +543,28 @@ class SearchResultsContainer extends React.PureComponent {
     }`;
 
     return (
-      <Tooltip title={sortHelpText}>
-        <Button
-          className={classes.headerButtons}
+      <Tooltip disableInteractive title={sortHelpText}>
+        <IconButton
+          sx={{ minWidth: 30 }}
           onClick={(e) =>
             this.setState({ sortingMenuAnchorEl: e.currentTarget })
           }
         >
           <SortIcon />
-        </Button>
+        </IconButton>
       </Tooltip>
     );
   };
 
   renderClearTool = () => {
-    const { classes } = this.props;
     return (
-      <Tooltip title="Rensa alla selekterade objekt">
-        <Button
-          className={classes.headerButtons}
+      <Tooltip disableInteractive title="Rensa alla selekterade objekt">
+        <IconButton
+          sx={{ minWidth: 30 }}
           onClick={this.clearAllSelectedFeaturesInView}
         >
           <DeleteIcon />
-        </Button>
+        </IconButton>
       </Tooltip>
     );
   };
@@ -636,17 +615,13 @@ class SearchResultsContainer extends React.PureComponent {
   };
 
   renderSearchResultListTools = () => {
-    const { classes } = this.props;
     if (this.allToolsDisabled()) {
       return null;
     } else {
       return (
-        <Grid item container align="center" justify="flex-end">
+        <Grid item container align="center" justifyContent="flex-end">
           <Grow in={this.state.showTools} timeout={800}>
-            <Grid
-              item
-              className={!this.state.showTools ? classes.hidden : null}
-            >
+            <Grid item sx={!this.state.showTools ? { display: "none" } : null}>
               {this.searchResultTools.map((tool, index) => {
                 return (
                   tool.enabled && (
@@ -658,10 +633,11 @@ class SearchResultsContainer extends React.PureComponent {
           </Grow>
           <Grid item>
             <Tooltip
+              disableInteractive
               title={`${this.state.showTools ? "Dölj" : "Visa"} verktyg`}
             >
-              <Button
-                className={classes.headerButtons}
+              <IconButton
+                sx={{ minWidth: 30 }}
                 onClick={() =>
                   this.setState({
                     showTools: !this.state.showTools,
@@ -670,7 +646,7 @@ class SearchResultsContainer extends React.PureComponent {
                 }
               >
                 {this.state.showTools ? <CloseIcon /> : <MoreVertIcon />}
-              </Button>
+              </IconButton>
             </Tooltip>
           </Grid>
         </Grid>
@@ -902,7 +878,6 @@ class SearchResultsContainer extends React.PureComponent {
   };
 
   renderBreadCrumbs = (featureCollectionTitle, featureTitle) => {
-    const { classes } = this.props;
     const { activeFeatureCollection, activeFeature } = this.state;
     const shouldRenderFeatureCollectionDetails =
       activeFeatureCollection && !activeFeatureCollection.source.onClickName;
@@ -911,10 +886,11 @@ class SearchResultsContainer extends React.PureComponent {
     if (shouldRenderFeatureCollectionDetails) {
       return (
         <Breadcrumbs aria-label="breadcrumb" separator="/">
-          <Tooltip title="Tillbaka till alla sökresultat">
+          <Tooltip disableInteractive title="Tillbaka till alla sökresultat">
             <Link
-              className={classes.breadCrumbLinks}
               tabIndex={0}
+              underline="hover"
+              sx={{ border: "none", cursor: "pointer" }}
               color="textPrimary"
               variant="caption"
               onClick={(e) => {
@@ -931,10 +907,11 @@ class SearchResultsContainer extends React.PureComponent {
               Sökresultat
             </Link>
           </Tooltip>
-          <Tooltip title={featureCollectionTitle}>
+          <Tooltip disableInteractive title={featureCollectionTitle}>
             <Link
-              className={classes.breadCrumbLinks}
               tabIndex={0}
+              underline="hover"
+              sx={{ border: "none", cursor: "pointer" }}
               color="textPrimary"
               variant="caption"
               onClick={(e) => {
@@ -951,10 +928,11 @@ class SearchResultsContainer extends React.PureComponent {
             </Link>
           </Tooltip>
           {shouldRenderFeatureDetails && (
-            <Tooltip title={featureTitle}>
+            <Tooltip disableInteractive title={featureTitle}>
               <Link
                 tabIndex={0}
-                className={classes.breadCrumbLinks}
+                underline="hover"
+                sx={{ border: "none", cursor: "pointer" }}
                 color="textPrimary"
                 variant="caption"
               >
@@ -971,12 +949,11 @@ class SearchResultsContainer extends React.PureComponent {
 
   renderHeaderInfoBar = (featureCollectionTitle) => {
     const { activeFeatureCollection } = this.state;
-    const { classes } = this.props;
     return (
       <Grid
         container
         item
-        justify="space-between"
+        justifyContent="space-between"
         alignItems="center"
         wrap="nowrap"
         xs={12}
@@ -989,6 +966,7 @@ class SearchResultsContainer extends React.PureComponent {
           xs={this.state.showTools ? 5 : 11}
         >
           <Tooltip
+            disableInteractive
             title={
               activeFeatureCollection ? featureCollectionTitle : "Sökresultat"
             }
@@ -997,7 +975,7 @@ class SearchResultsContainer extends React.PureComponent {
               variant="button"
               component="div"
               noWrap
-              className={classes.headerTypography}
+              sx={{ maxWidth: "100%", fontSize: 18 }}
             >
               {`${
                 activeFeatureCollection ? featureCollectionTitle : "Sökresultat"
@@ -1008,7 +986,7 @@ class SearchResultsContainer extends React.PureComponent {
         <Grid
           container
           item
-          justify="flex-end"
+          justifyContent="flex-end"
           xs={this.state.showTools ? 7 : 1}
         >
           {this.renderSearchResultListTools()}
@@ -1018,7 +996,6 @@ class SearchResultsContainer extends React.PureComponent {
   };
 
   renderSearchResultsHeader = () => {
-    const { classes } = this.props;
     const { activeFeatureCollection, activeFeature } = this.state;
 
     const featureCollectionTitle = activeFeatureCollection
@@ -1030,10 +1007,16 @@ class SearchResultsContainer extends React.PureComponent {
 
     return (
       <Grid
-        className={
+        sx={
           shouldRenderHeaderInfoBar
-            ? classes.tallHeaderContainer
-            : classes.headerContainer
+            ? {
+                minHeight: 42,
+                paddingRight: 1,
+                paddingLeft: 1,
+                borderBottom: 0.8,
+                borderBottomColor: "divider",
+              }
+            : { paddingRight: 1, paddingLeft: 1 }
         }
         container
         item
@@ -1049,14 +1032,8 @@ class SearchResultsContainer extends React.PureComponent {
   };
 
   render() {
-    const {
-      classes,
-      app,
-      getOriginBasedIcon,
-      localObserver,
-      panelCollapsed,
-      options,
-    } = this.props;
+    const { app, getOriginBasedIcon, localObserver, panelCollapsed, options } =
+      this.props;
     const {
       sumOfResults,
       activeFeatureCollection,
@@ -1089,13 +1066,13 @@ class SearchResultsContainer extends React.PureComponent {
 
     return (
       <Collapse in={!panelCollapsed}>
-        {sumOfResults === 0 ? (
-          <Paper className={classes.root}>
+        {sumOfResults === null ? null : sumOfResults === 0 ? (
+          <StyledPaper>
             <Alert severity="warning">Sökningen gav inget resultat.</Alert>
-          </Paper>
+          </StyledPaper>
         ) : (
-          <Paper className={classes.root}>
-            <Grid container className={classes.searchResultListWrapper}>
+          <StyledPaper>
+            <ResultListWrapper container>
               {this.renderSearchResultsHeader()}
               {filterInputFieldOpen && this.renderFilterInputField()}
               {this.renderSortingMenu()}
@@ -1127,12 +1104,12 @@ class SearchResultsContainer extends React.PureComponent {
                   options={options}
                 />
               </Grid>
-            </Grid>
-          </Paper>
+            </ResultListWrapper>
+          </StyledPaper>
         )}
       </Collapse>
     );
   }
 }
 
-export default withStyles(styles)(SearchResultsContainer);
+export default SearchResultsContainer;

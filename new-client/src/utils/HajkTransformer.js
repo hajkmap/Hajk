@@ -1,0 +1,51 @@
+import GeoJSON from "ol/format/GeoJSON.js";
+import buffer from "@turf/buffer";
+
+class HajkTransformer {
+  #mapProjection;
+  #geoJson;
+
+  constructor(settings) {
+    const { projection } = settings;
+    if (!projection) {
+      throw new Error("Projection required to initiated HajkTransformer");
+    }
+
+    this.#mapProjection = projection;
+
+    this.#geoJson = new GeoJSON({
+      // Tell GeoJSON that our features will come in the map's projection
+      featureProjection: this.#mapProjection,
+    });
+  }
+
+  getBuffered(feature, distance) {
+    // Create a GeoJSON Feature object by reading our OL Feature.
+    // This object will be in WGS84.
+    const gjFeatureObject = this.#geoJson.writeFeatureObject(feature);
+
+    // Create a buffer around the GeoJSON Feature object using buffer().
+    // The distance we pass comes in meters, but buffer() expects kilometers,
+    // hence the division by 1000.
+    // The created buffered object will be in WGS84.
+    const buffered = buffer(gjFeatureObject, distance / 1000, {
+      units: "kilometers",
+    });
+
+    // buffer() has now created a new GeoJSON Feature Object. Before we
+    // can add it back to the OL map, we must make an OL Feature of it.
+    // In addition, the OL Feature we're about to create must be in the
+    // map's projection (not WGS84 which it is right now).
+    // So we use readFeature and pass the featureProjection as an argument.
+    // This way readFeature will create a Feature in map's projection
+    // and we can return it so it can be added to the map.
+    const olf = this.#geoJson.readFeature(buffered, {
+      // Tell the format reader to return features in our map's projection!
+      featureProjection: this.#mapProjection,
+    });
+    olf.setId(Math.random() * 1e20);
+    return olf;
+  }
+}
+
+export default HajkTransformer;

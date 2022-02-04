@@ -1,23 +1,20 @@
 import { Circle, Stroke, Fill, Style } from "ol/style.js";
 import { Vector as VectorSource } from "ol/source.js";
 import { Vector as VectorLayer } from "ol/layer.js";
-import Feature from "ol/Feature.js";
+
 import GeoJSON from "ol/format/GeoJSON.js";
-import LinearRing from "ol/geom/LinearRing.js";
-import {
-  Point,
-  LineString,
-  Polygon,
-  MultiPoint,
-  MultiLineString,
-  MultiPolygon,
-} from "ol/geom.js";
-import * as jsts from "jsts";
+
+import HajkTransformer from "utils/HajkTransformer";
 import { hfetch } from "utils/FetchWrapper";
 
 class BufferModel {
+  #HT;
+
   constructor(settings) {
     this.map = settings.map;
+    this.#HT = new HajkTransformer({
+      projection: settings.map.getView().getProjection().getCode(),
+    });
 
     // Will contain new features for clicked objects/features
     this.highlightSource = new VectorSource();
@@ -155,31 +152,12 @@ class BufferModel {
 
   bufferFeatures = (distance) => {
     const arr = [];
-    const parser = new jsts.io.OL3Parser();
-    parser.inject(
-      Point,
-      LineString,
-      LinearRing,
-      Polygon,
-      MultiPoint,
-      MultiLineString,
-      MultiPolygon
-    );
 
     // Grab all selected features from highlight source…
     for (const f of this.highlightSource.getFeatures()) {
-      let olGeom = f.getGeometry();
-      if (olGeom instanceof Circle) {
-        olGeom = Polygon.fromCircle(olGeom, 0b10000000);
-      }
-      const jstsGeom = parser.read(olGeom);
-      const buffered = jstsGeom.buffer(distance);
-      // …and create a new feature around it…
-      const olf = new Feature();
-      olf.setGeometry(parser.write(buffered));
-      olf.setId(Math.random() * 1e20);
-      // …and push it to an array…
-      arr.push(olf);
+      // …use HajkTransformer utility to create a buffered feature…
+      const bufferedFeature = this.#HT.getBuffered(f, distance);
+      arr.push(bufferedFeature);
     }
     // …that finally gets added to the buffer zone features source.
     this.bufferSource.addFeatures(arr);

@@ -13,6 +13,27 @@ import CircularProgress from "@material-ui/core/CircularProgress";
 import Collapse from "@material-ui/core/Collapse";
 import { hfetch } from "utils/FetchWrapper";
 
+const styles = (theme) => ({
+  heading: {
+    fontWeight: 500,
+  },
+  buttonLoading: {
+    "& img": {
+      opacity: 0.3,
+    },
+  },
+  buttonProgress: {
+    position: "absolute",
+    top: "50%",
+    left: "50%",
+    marginTop: -12,
+    marginLeft: -12,
+  },
+  bottomContainer: {
+    paddingTop: theme.spacing(2),
+    textAlign: "center",
+  },
+});
 class FirExportEdpView extends React.PureComponent {
   state = {
     accordionExpanded: false,
@@ -142,27 +163,5 @@ class FirExportEdpView extends React.PureComponent {
     );
   }
 }
-
-const styles = (theme) => ({
-  heading: {
-    fontWeight: 500,
-  },
-  buttonLoading: {
-    "& img": {
-      opacity: 0.3,
-    },
-  },
-  buttonProgress: {
-    position: "absolute",
-    top: "50%",
-    left: "50%",
-    marginTop: -12,
-    marginLeft: -12,
-  },
-  bottomContainer: {
-    paddingTop: theme.spacing(2),
-    textAlign: "center",
-  },
-});
 
 export default withStyles(styles)(withSnackbar(FirExportEdpView));

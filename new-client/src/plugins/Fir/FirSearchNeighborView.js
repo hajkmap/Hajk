@@ -29,8 +29,48 @@ import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 import HistoryIcon from "@material-ui/icons/History";
 import { Typography } from "@material-ui/core";
 import CircularProgress from "@material-ui/core/CircularProgress";
-import * as jsts from "jsts";
+// import * as jsts from "jsts";
+// FIXME: Temporary fix for "Module not found: Can't resolve 'jsts'"
+const jsts = {};
 
+const styles = (theme) => ({
+  heading: {
+    fontWeight: 500,
+  },
+  radio: {
+    paddingTop: "0.25rem",
+    paddingBottom: "0.25rem",
+  },
+  radioLabel: {
+    fontSize: "0.875rem",
+    fontWeight: "400",
+  },
+  containerTopPadded: {
+    paddingTop: theme.spacing(2),
+  },
+  containerTopDoublePadded: {
+    paddingTop: theme.spacing(4),
+  },
+  clearButton: {
+    marginRight: theme.spacing(2),
+  },
+  sliderContainer: {
+    display: "flex",
+    paddingRight: theme.spacing(1),
+    alignItems: "center",
+    "& > div:first-child": {
+      flex: "0 0 35%",
+      marginRight: theme.spacing(2),
+    },
+  },
+  buttonProgress: {
+    position: "absolute",
+    top: "50%",
+    left: "50%",
+    marginTop: -12,
+    marginLeft: -12,
+  },
+});
 class FirSearchNeighborView extends React.PureComponent {
   state = {
     accordionExpanded: false,
@@ -95,7 +135,7 @@ class FirSearchNeighborView extends React.PureComponent {
     );
   };
 
-  _handleSearch = () => {
+  #handleSearch = () => {
     const parser = new jsts.io.OL3Parser();
     parser.inject(
       Point,
@@ -143,7 +183,7 @@ class FirSearchNeighborView extends React.PureComponent {
     this.setState({ loading: true });
     clearTimeout(this.buffer_tm);
     this.buffer_tm = setTimeout(() => {
-      this._handleSearch();
+      this.#handleSearch();
     }, 25);
   };
 
@@ -286,44 +326,5 @@ class FirSearchNeighborView extends React.PureComponent {
     );
   }
 }
-
-const styles = (theme) => ({
-  heading: {
-    fontWeight: 500,
-  },
-  radio: {
-    paddingTop: "0.25rem",
-    paddingBottom: "0.25rem",
-  },
-  radioLabel: {
-    fontSize: "0.875rem",
-    fontWeight: "400",
-  },
-  containerTopPadded: {
-    paddingTop: theme.spacing(2),
-  },
-  containerTopDoublePadded: {
-    paddingTop: theme.spacing(4),
-  },
-  clearButton: {
-    marginRight: theme.spacing(2),
-  },
-  sliderContainer: {
-    display: "flex",
-    paddingRight: theme.spacing(1),
-    alignItems: "center",
-    "& > div:first-child": {
-      flex: "0 0 35%",
-      marginRight: theme.spacing(2),
-    },
-  },
-  buttonProgress: {
-    position: "absolute",
-    top: "50%",
-    left: "50%",
-    marginTop: -12,
-    marginLeft: -12,
-  },
-});
 
 export default withStyles(styles)(withSnackbar(FirSearchNeighborView));

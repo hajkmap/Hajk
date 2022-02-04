@@ -1,36 +1,28 @@
 import React from "react";
-import Button from "@material-ui/core/Button";
-import { withStyles } from "@material-ui/core/styles";
-import Table from "@material-ui/core/Table";
-import TableBody from "@material-ui/core/TableBody";
-import TableCell from "@material-ui/core/TableCell";
-import TableHead from "@material-ui/core/TableHead";
-import TableRow from "@material-ui/core/TableRow";
-import Paper from "@material-ui/core/Paper";
+import Button from "@mui/material/Button";
+import { styled } from "@mui/material/styles";
+import Grid from "@mui/material/Grid";
+import Table from "@mui/material/Table";
+import TableBody from "@mui/material/TableBody";
+import TableCell from "@mui/material/TableCell";
+import TableHead from "@mui/material/TableHead";
+import TableRow from "@mui/material/TableRow";
+import Paper from "@mui/material/Paper";
 import CoordinatesTransformRow from "./CoordinatesTransformRow.js";
 
 import { withSnackbar } from "notistack";
 
-const styles = (theme) => ({
-  root: {
-    display: "flex",
-    flexGrow: 1,
-    flexWrap: "wrap",
-  },
-  text: {
-    "& .ol-mouse-position": {
-      top: "unset",
-      right: "unset",
-      position: "unset",
-    },
-  },
-  table: {},
-  textField: {
-    marginLeft: theme.spacing(1),
-    marginRight: theme.spacing(1),
-    marginTop: theme.spacing(2),
-  },
-});
+const StyledPaper = styled(Paper)(() => ({
+  backgroundImage: "none",
+  display: "flex",
+  flexGrow: 1,
+  flexWrap: "wrap",
+}));
+
+const StyledButton = styled(Button)(({ theme }) => ({
+  minWidth: 130,
+  margin: theme.spacing(1),
+}));
 
 class CoordinatesView extends React.PureComponent {
   state = {};
@@ -88,12 +80,10 @@ class CoordinatesView extends React.PureComponent {
   }
 
   render() {
-    const { classes } = this.props;
-
     return (
       <>
-        <Paper className={classes.root}>
-          <Table className={classes.table}>
+        <StyledPaper>
+          <Table>
             <TableHead>
               <TableRow>
                 <TableCell>Projektion</TableCell>
@@ -102,38 +92,44 @@ class CoordinatesView extends React.PureComponent {
             </TableHead>
             <TableBody>{this.renderProjections()}</TableBody>
           </Table>
-          <Button
-            onClick={() => {
-              this.props.model.zoomOnMarker();
-            }}
-          >
-            Zooma
-          </Button>
-          <Button
-            onClick={() => {
-              this.props.model.centerOnMarker();
-            }}
-          >
-            Panorera
-          </Button>
-          <Button
-            onClick={() => {
-              this.props.model.goToUserLocation();
-            }}
-          >
-            Min position
-          </Button>
-          <Button
-            onClick={() => {
-              this.props.model.resetCoords();
-            }}
-          >
-            Rensa fält
-          </Button>
-        </Paper>
+          <Grid container justifyContent="space-between">
+            <StyledButton
+              variant="contained"
+              onClick={() => {
+                this.props.model.zoomOnMarker();
+              }}
+            >
+              Zooma
+            </StyledButton>
+            <StyledButton
+              variant="contained"
+              onClick={() => {
+                this.props.model.centerOnMarker();
+              }}
+            >
+              Panorera
+            </StyledButton>
+            <StyledButton
+              variant="contained"
+              onClick={() => {
+                this.props.model.goToUserLocation();
+              }}
+            >
+              Min position
+            </StyledButton>
+            <StyledButton
+              variant="contained"
+              onClick={() => {
+                this.props.model.resetCoords();
+              }}
+            >
+              Rensa fält
+            </StyledButton>
+          </Grid>
+        </StyledPaper>
       </>
     );
   }
 }
 
-export default withStyles(styles)(withSnackbar(CoordinatesView));
+export default withSnackbar(CoordinatesView);

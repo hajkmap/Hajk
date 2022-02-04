@@ -1,57 +1,36 @@
 import React from "react";
-import { withStyles } from "@material-ui/core/styles";
-import { Grid, Popover, Typography, fade } from "@material-ui/core";
+import { Grid, Popover, Typography, alpha } from "@mui/material";
 import SearchResultsDatasetFeatureDetails from "./SearchResultsDatasetFeatureDetails";
+import { styled } from "@mui/material/styles";
 
-const styles = (theme) => ({
-  datasetContainer: {
-    boxShadow: "none",
-    overflow: "hidden",
-  },
-  divider: {
-    backgroundColor: theme.palette.divider,
-    width: "100%",
-  },
-  datasetDetailsContainer: {
-    padding: 0,
-  },
-  hover: {
-    cursor: "pointer",
-    "&:hover": {
-      backgroundColor: theme.palette.action.hover,
-    },
-  },
-  preview: {
-    pointerEvents: "none",
-  },
-  previewPaper: {
+const StyledPopover = styled(Popover)(({ theme }) => ({
+  pointerEvents: "none",
+  "& .MuiPopover-paper": {
     width: 400,
     maxHeight: 200,
     overflow: "hidden",
-    background: fade(theme.palette.background.paper, 0.8),
+    background: alpha(theme.palette.background.paper, 0.8),
   },
-  previewHeaderContainer: {
-    paddingTop: theme.spacing(0.8),
-  },
-  previewContentContainer: {
-    borderTop: `${theme.spacing(0.2)}px solid ${theme.palette.divider}`,
-  },
-});
+}));
+
+const HeaderContainer = styled(Grid)(({ theme }) => ({
+  paddingTop: theme.spacing(0.8),
+}));
+
+const ContentContainer = styled(Grid)(({ theme }) => ({
+  borderTop: `${theme.spacing(0.2)} solid ${theme.palette.divider}`,
+}));
 
 class SearchResultsPreview extends React.PureComponent {
   renderFeaturePreview = () => {
-    const { classes, activeFeatureCollection, previewFeature, anchorEl, app } =
+    const { activeFeatureCollection, previewFeature, anchorEl, app } =
       this.props;
 
     return (
-      <Popover
+      <StyledPopover
         id="mouse-over-popover"
-        open={anchorEl ? true : false}
+        open={Boolean(anchorEl)}
         anchorEl={anchorEl}
-        classes={{
-          root: classes.preview,
-          paper: classes.previewPaper,
-        }}
         anchorOrigin={{
           vertical: "center",
           horizontal: "left",
@@ -63,23 +42,18 @@ class SearchResultsPreview extends React.PureComponent {
         disableRestoreFocus
       >
         <Grid container>
-          <Grid
-            item
-            align="center"
-            className={classes.previewHeaderContainer}
-            xs={12}
-          >
+          <HeaderContainer item align="center" xs={12}>
             <Typography variant="button">Förhandsvisning</Typography>
-          </Grid>
-          <Grid item className={classes.previewContentContainer} xs={12}>
+          </HeaderContainer>
+          <ContentContainer item xs={12}>
             <SearchResultsDatasetFeatureDetails
               feature={previewFeature}
               app={app}
               source={activeFeatureCollection.source}
             />
-          </Grid>
+          </ContentContainer>
         </Grid>
-      </Popover>
+      </StyledPopover>
     );
   };
 
@@ -89,4 +63,4 @@ class SearchResultsPreview extends React.PureComponent {
   }
 }
 
-export default withStyles(styles)(SearchResultsPreview);
+export default SearchResultsPreview;

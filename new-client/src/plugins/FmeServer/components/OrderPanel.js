@@ -1,6 +1,6 @@
 import React from "react";
-import { Grid, TextField, Typography } from "@material-ui/core";
-import { LinearProgress } from "@material-ui/core";
+import { Grid, TextField, Typography } from "@mui/material";
+import { LinearProgress } from "@mui/material";
 import InformationWrapper from "./InformationWrapper";
 
 // We're gonna be checking the job status against this array of
@@ -57,7 +57,7 @@ const OrderPanel = (props) => {
   function renderOrderNotSentInformation() {
     return (
       <Grid container item xs={12}>
-        <Grid item xs={12} style={{ marginBottom: 8 }}>
+        <Grid item xs={12} sx={{ marginBottom: 1 }}>
           <Typography>{informationText}</Typography>
         </Grid>
         {shouldPromptForEmail && renderEmailTextField()}
@@ -75,7 +75,6 @@ const OrderPanel = (props) => {
           label="Epost"
           onChange={(e) => setUserEmail(e.target.value)}
           fullWidth
-          variant="outlined"
           value={userEmail}
         />
       </Grid>

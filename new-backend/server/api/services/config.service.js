@@ -101,10 +101,11 @@ class ConfigService {
         // If we got this far, it looks as the current user isn't member in any
         // of the required groups - hence no access can be given to the map.
         const e = new Error(
-          `[getMapConfig] ${user} is not member in any of the necessary groups. \nAccess to map restricted.`
+          `[getMapConfig] Access to map "${map}" not allowed for user "${user}"`
         );
 
-        logger.warn(e);
+        // Write a debug message to log telling that user can't access current layer
+        logger.debug(e.message);
 
         throw e;
       } else {

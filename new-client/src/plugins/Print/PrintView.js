@@ -1,44 +1,44 @@
 import React from "react";
 import PropTypes from "prop-types";
-import { withStyles } from "@material-ui/core/styles";
+import { styled } from "@mui/material/styles";
 import { withSnackbar } from "notistack";
 import PrintDialog from "./PrintDialog";
-import { AppBar, Tab, Tabs } from "@material-ui/core";
-import PrintIcon from "@material-ui/icons/Print";
-import SettingsIcon from "@material-ui/icons/Settings";
-import { Tooltip, Button } from "@material-ui/core";
+import { AppBar, Tab, Tabs } from "@mui/material";
+import PrintIcon from "@mui/icons-material/Print";
+import SettingsIcon from "@mui/icons-material/Settings";
+import { Tooltip, Button } from "@mui/material";
 
 import GeneralOptions from "./GeneralOptions";
 import AdvancedOptions from "./AdvancedOptions";
 
-const styles = (theme) => ({
-  root: {
-    margin: -10,
-    display: "flex",
-    flexDirection: "column",
-    height: "100%",
-  },
-  stickyAppBar: {
-    top: -10,
-  },
-  tabContent: {
-    display: "flex",
-    flexDirection: "column",
-    justifyContent: "space-between",
-    padding: theme.spacing(1),
-    width: "100%",
-    height: "100%",
-  },
-  printButtonContainer: {
-    padding: theme.spacing(1),
-  },
-});
+const Root = styled("div")(() => ({
+  margin: -10,
+  display: "flex",
+  flexDirection: "column",
+  height: "100%",
+}));
+
+const StyledAppBar = styled(AppBar)(() => ({
+  top: -10,
+}));
+
+const TabContent = styled("div")(({ theme }) => ({
+  display: "flex",
+  flexDirection: "column",
+  justifyContent: "space-between",
+  padding: theme.spacing(1),
+  width: "100%",
+  height: "100%",
+}));
+
+const PrintButtonContainer = styled("div")(({ theme }) => ({
+  padding: theme.spacing(1),
+}));
 
 class PrintView extends React.PureComponent {
   static propTypes = {
     model: PropTypes.object.isRequired,
     localObserver: PropTypes.object.isRequired,
-    classes: PropTypes.object.isRequired,
     enqueueSnackbar: PropTypes.func.isRequired,
     closeSnackbar: PropTypes.func.isRequired,
   };
@@ -285,8 +285,15 @@ class PrintView extends React.PureComponent {
     );
   };
 
+  a11yProps(index) {
+    return {
+      id: `print-tab-${index}`,
+      "aria-controls": `print-tab-${index}`,
+    };
+  }
+
   render() {
-    const { classes } = this.props;
+    const { windowVisible } = this.props;
     const {
       previewLayerVisible,
       scale,
@@ -308,30 +315,29 @@ class PrintView extends React.PureComponent {
 
     return (
       <>
-        <div className={classes.root}>
-          <AppBar
-            position="sticky"
-            color="default"
-            className={classes.stickyAppBar}
-          >
+        <Root>
+          <StyledAppBar position="sticky" color="default">
             <Tabs
               action={this.handleTabsMounted}
               onChange={this.handleChangeTabs}
-              value={activeTab}
+              value={windowVisible ? activeTab : false} // If the window is not visible,
+              // we cannot send a proper value to the tabs-component. If we do, mui will throw an error.
+              // false is OK though, apparently.
               variant="fullWidth"
+              textColor="inherit"
             >
-              <Tooltip title="Generella inställningar">
-                <Tab icon={<PrintIcon />} />
+              <Tooltip disableInteractive title="Generella inställningar">
+                <Tab icon={<PrintIcon />} {...this.a11yProps(0)} />
               </Tooltip>
-              <Tooltip title="Avancerade inställningar">
-                <Tab icon={<SettingsIcon />} />
+              <Tooltip disableInteractive title="Avancerade inställningar">
+                <Tab icon={<SettingsIcon />} {...this.a11yProps(1)} />
               </Tooltip>
             </Tabs>
-          </AppBar>
-          <div className={classes.tabContent}>
+          </StyledAppBar>
+          <TabContent>
             {activeTab === 0 && this.renderGeneralOptions()}
             {activeTab === 1 && this.renderAdvancedOptions()}
-            <div className={classes.printButtonContainer}>
+            <PrintButtonContainer>
               <Button
                 variant="contained"
                 fullWidth={true}
@@ -341,9 +347,9 @@ class PrintView extends React.PureComponent {
               >
                 Skriv ut
               </Button>
-            </div>
-          </div>
-        </div>
+            </PrintButtonContainer>
+          </TabContent>
+        </Root>
         <PrintDialog
           open={printInProgress}
           saveAsType={saveAsType}
@@ -354,4 +360,4 @@ class PrintView extends React.PureComponent {
   }
 }
 
-export default withStyles(styles)(withSnackbar(PrintView));
+export default withSnackbar(PrintView);
