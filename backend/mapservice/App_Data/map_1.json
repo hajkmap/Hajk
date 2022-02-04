@@ -565,8 +565,9 @@
       "secondaryColor": "#ffa000",
       "preferredColorScheme": "user"
     },
-    "defaultCookieNoticeMessage": "Vi använder cookies för att följa upp användandet och ge en bra upplevelse av kartan. Du kan blockera cookies i webbläsaren men då visas detta meddelande igen.",
+    "defaultCookieNoticeMessage": "Vi använder nödvändiga kakor (cookies) för att webbplatsen ska fungera på ett bra sätt för dig. Vi använder också funktionella kakor för att ge dig bästa möjliga funktion om du som användare har godkänt användningen av dessa.",
     "defaultCookieNoticeUrl": "https://pts.se/sv/bransch/regler/lagar/lag-om-elektronisk-kommunikation/kakor-cookies/",
-    "crossOrigin": "anonymous"
+    "crossOrigin": "anonymous",
+    "cookieUse3dPart": false,
   }
 }

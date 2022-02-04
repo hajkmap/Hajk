@@ -90,6 +90,13 @@ class PropFilters {
   }
 }
 
+function fixDate(value) {
+  if (value.indexOf("-") <= -1) {
+    value = `${value.substr(0, 4)}-${value.substr(4, 2)}-${value.substr(6, 2)}`;
+  }
+  return value;
+}
+
 const filters = new PropFilters();
 
 // ---- Add filters below -----------------------------------------------------
@@ -193,6 +200,7 @@ filters.add("datetime", function (value) {
   outputs: 2021-06-03
 */
 filters.add("date", function (value) {
+  value = fixDate(value);
   const date = typeof value === "string" ? new Date(value) : value;
   return date.toLocaleDateString();
 });
@@ -216,6 +224,7 @@ filters.add("time", function (value) {
   Note: negative value will substract days
 */
 filters.add("dateAddDays", function (value, days) {
+  value = fixDate(value);
   const date = typeof value === "string" ? new Date(value) : value;
   date.setDate(date.getDate() + parseFloat(days));
   return date;
@@ -229,6 +238,7 @@ filters.add("dateAddDays", function (value, days) {
   Note: negative value will substract hours
 */
 filters.add("dateAddHours", function (value, hours) {
+  value = fixDate(value);
   const date = typeof value === "string" ? new Date(value) : value;
   date.setTime(date.getTime() + parseFloat(hours) * 60 * 60 * 1000);
   return date;

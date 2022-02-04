@@ -8,6 +8,10 @@ import Observer from "react-event-observer";
 import { isMobile } from "../utils/IsMobile";
 import SrShortcuts from "../components/SrShortcuts/SrShortcuts";
 import AppModel from "../models/AppModel.js";
+import {
+  setConfig as setCookieConfig,
+  functionalOk as functionalCookieOk,
+} from "models/Cookie";
 
 import Window from "./Window.js";
 import CookieNotice from "./CookieNotice";
@@ -334,15 +338,28 @@ class App extends React.PureComponent {
       drawerMouseOverLock: false,
     };
 
-    //if drawer is visible at start - ensure the activeDrawerContent is set to current content
+    // If the drawer is set to be visible at start - ensure the activeDrawerContent
+    // is set to current content. If we don't allow functional cookies, we cannot do that obviously.
     if (drawerVisible && drawerPermanent && activeDrawerContentState !== null) {
-      window.localStorage.setItem(
-        "activeDrawerContent",
-        activeDrawerContentState
-      );
+      if (functionalCookieOk()) {
+        window.localStorage.setItem(
+          "activeDrawerContent",
+          activeDrawerContentState
+        );
+      }
     }
 
     this.globalObserver = new Observer();
+
+    // We have to initialize the cookie-manager so we know how cookies should be managed.
+    // The manager should ideally only be initialized once, since the initialization determines
+    // wether the cookie-notice has to be shown or not. Running setConfig() again will not lead
+    // to a new prompt.
+    setCookieConfig({
+      showCookieNotice: props.config.mapConfig.map.showCookieNotice,
+      globalObserver: this.globalObserver,
+    });
+
     this.appModel = new AppModel({
       config: props.config,
       globalObserver: this.globalObserver,
@@ -589,11 +606,14 @@ class App extends React.PureComponent {
       // event that all Windows subscribe to.
       this.globalObserver.publish("core.drawerToggled");
 
-      // Save current state of drawerPermanent to LocalStorage, so app reloads to same state
-      window.localStorage.setItem(
-        "drawerPermanent",
-        this.state.drawerPermanent
-      );
+      // If we allow functional cookies, let's save the current state of drawerPermanent
+      // to LocalStorage, so that the application can reload to the same state.
+      if (functionalCookieOk()) {
+        window.localStorage.setItem(
+          "drawerPermanent",
+          this.state.drawerPermanent
+        );
+      }
 
       // If user clicked on Toggle Permanent and the result is,
       // that this.state.drawerPermanent===false, this means that we
@@ -759,22 +779,6 @@ class App extends React.PureComponent {
 
     const showMapSwitcher =
       clean === false && config.activeMap !== "simpleMapConfig";
-    const showCookieNotice =
-      config.mapConfig.map.showCookieNotice !== undefined
-        ? config.mapConfig.map.showCookieNotice
-        : true;
-
-    const defaultCookieNoticeMessage = this.isString(
-      this.props.config.mapConfig.map.defaultCookieNoticeMessage
-    )
-      ? this.props.config.mapConfig.map.defaultCookieNoticeMessage
-      : undefined;
-
-    const defaultCookieNoticeUrl = this.isString(
-      this.props.config.mapConfig.map.defaultCookieNoticeUrl
-    )
-      ? this.props.config.mapConfig.map.defaultCookieNoticeUrl
-      : undefined;
 
     return (
       <SnackbarProvider
@@ -798,11 +802,10 @@ class App extends React.PureComponent {
                 currentMap={this.props.config.activeMap}
               />
             )}
-          {clean === false && showCookieNotice && (
+          {clean === false && (
             <CookieNotice
               globalObserver={this.globalObserver}
-              defaultCookieNoticeMessage={defaultCookieNoticeMessage}
-              defaultCookieNoticeUrl={defaultCookieNoticeUrl}
+              appModel={this.appModel}
             />
           )}
           <Alert

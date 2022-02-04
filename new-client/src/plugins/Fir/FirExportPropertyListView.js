@@ -17,6 +17,59 @@ import Collapse from "@material-ui/core/Collapse";
 import CircularProgress from "@material-ui/core/CircularProgress";
 import { hfetch } from "utils/FetchWrapper";
 
+const styles = (theme) => ({
+  info: {
+    padding: theme.spacing(2),
+  },
+  num: {
+    fontWeight: 500,
+    fontSize: "1rem",
+  },
+  heading: {
+    fontWeight: 500,
+  },
+  formControl: {
+    marginBottom: theme.spacing(3),
+  },
+  formControlOneMargin: {
+    marginBottom: theme.spacing(1),
+  },
+  checkboxLabel: {
+    fontSize: "0.875rem",
+    fontWeight: "400",
+  },
+  checkbox: {
+    paddingTop: "0.25rem",
+    paddingBottom: "0.25rem",
+  },
+  checkboxGroupContainer: {
+    paddingBottom: theme.spacing(2),
+  },
+  containerTopPadded: {
+    paddingTop: theme.spacing(2),
+  },
+  containerTopDoublePadded: {
+    paddingTop: theme.spacing(4),
+  },
+  textField: {
+    width: "50%",
+  },
+  downloadContainer: {
+    paddingTop: theme.spacing(2),
+  },
+  buttonLoading: {
+    "& img": {
+      opacity: 0.3,
+    },
+  },
+  buttonProgress: {
+    position: "absolute",
+    top: "50%",
+    left: "50%",
+    marginTop: -12,
+    marginLeft: -12,
+  },
+});
 class FirExportPropertyListView extends React.PureComponent {
   state = {
     accordionExpanded: false,
@@ -46,7 +99,7 @@ class FirExportPropertyListView extends React.PureComponent {
     this.options = this.model.app.plugins.fir.options;
   }
 
-  _collectAndSendData = () => {
+  #collectAndSendData = () => {
     let fnrList = [];
 
     this.props.results.forEach((feature) => {
@@ -102,7 +155,7 @@ class FirExportPropertyListView extends React.PureComponent {
   handleSendClick = () => {
     this.setState({ downloadUrl: null });
     this.setState({ loading: true });
-    setTimeout(this._collectAndSendData, 25);
+    setTimeout(this.#collectAndSendData, 25);
   };
 
   ExcelLogo() {
@@ -284,59 +337,5 @@ class FirExportPropertyListView extends React.PureComponent {
     );
   }
 }
-
-const styles = (theme) => ({
-  info: {
-    padding: theme.spacing(2),
-  },
-  num: {
-    fontWeight: 500,
-    fontSize: "1rem",
-  },
-  heading: {
-    fontWeight: 500,
-  },
-  formControl: {
-    marginBottom: theme.spacing(3),
-  },
-  formControlOneMargin: {
-    marginBottom: theme.spacing(1),
-  },
-  checkboxLabel: {
-    fontSize: "0.875rem",
-    fontWeight: "400",
-  },
-  checkbox: {
-    paddingTop: "0.25rem",
-    paddingBottom: "0.25rem",
-  },
-  checkboxGroupContainer: {
-    paddingBottom: theme.spacing(2),
-  },
-  containerTopPadded: {
-    paddingTop: theme.spacing(2),
-  },
-  containerTopDoublePadded: {
-    paddingTop: theme.spacing(4),
-  },
-  textField: {
-    width: "50%",
-  },
-  downloadContainer: {
-    paddingTop: theme.spacing(2),
-  },
-  buttonLoading: {
-    "& img": {
-      opacity: 0.3,
-    },
-  },
-  buttonProgress: {
-    position: "absolute",
-    top: "50%",
-    left: "50%",
-    marginTop: -12,
-    marginLeft: -12,
-  },
-});
 
 export default withStyles(styles)(withSnackbar(FirExportPropertyListView));

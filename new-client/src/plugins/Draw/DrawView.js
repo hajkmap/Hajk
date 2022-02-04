@@ -79,9 +79,10 @@ class DrawView extends React.PureComponent {
     mapDiv.addEventListener("drop", this.handleDrop, false);
   };
 
-  handleDragEnter = () => {
+  handleDragEnter = (e) => {
     this.snackbarKey = this.props.enqueueSnackbar(
-      "Släpp en KML-fil i kartan för att importera!"
+      "Släpp en KML-fil i kartan för att importera!",
+      { preventDuplicate: true }
     );
   };
 
