@@ -305,7 +305,7 @@ export default class ConfigMapper {
         layerType: args.layerType,
         legend: [
           {
-            url: args.legend,
+            url: args.icon, //Use specified icon in legend
             description: args.caption,
           },
         ],

@@ -5,6 +5,8 @@ import GML2 from "ol/format/GML2";
 import GML3 from "ol/format/GML3";
 import WFS from "ol/format/WFS";
 import { Fill, Text, Stroke, Icon, Circle, Style } from "ol/style";
+import { toContext } from "ol/render";
+import { Point, Polygon, LineString } from "ol/geom";
 import { all as strategyAll, bbox as bboxStrategy } from "ol/loadingstrategy";
 import { getPointResolution, transform } from "ol/proj";
 
@@ -12,6 +14,10 @@ import * as SLDReader from "@nieuwlandgeo/sldreader";
 
 import LayerInfo from "./LayerInfo.js";
 import { hfetch } from "utils/FetchWrapper";
+
+const fetchConfig = {
+  credentials: "same-origin",
+};
 
 const vectorLayerProperties = {
   url: "",
@@ -56,11 +62,11 @@ class WFSVectorLayer {
         this.config?.loadingStrategy === "all" ? strategyAll : bboxStrategy,
     });
 
-    // if (config.legend[0].url === "") {
-    //   this.generateLegend((imageData) => {
-    //     config.legend[0].url = imageData;
-    //   });
-    // }
+    if (config.legend[0].url === "") {
+      this.generateLegend((imageData) => {
+        config.legend[0].url = imageData;
+      });
+    }
 
     this.layer = new VectorLayer({
       information: config.information,
@@ -138,6 +144,13 @@ class WFSVectorLayer {
     });
     this.layer.setStyle(olFunction);
   };
+
+  getStyle(forcedPointRadius) {
+    if (forcedPointRadius) {
+      return this.createStyle.call(this, undefined, forcedPointRadius);
+    }
+    return this.style;
+  }
 
   reprojectFeatures(features, from, to) {
     if (Array.isArray(features)) {
@@ -302,7 +315,7 @@ class WFSVectorLayer {
     });
   }
 
-  createStyle() {
+  createStyle(forcedPointRadius) {
     const icon = this.config.icon || "";
     const fillColor = this.config.fillColor || "rgba(255,255,255,0.4)"; // OpenLayers default
     const lineColor = this.config.lineColor || "#3399CC"; // OpenLayers default
@@ -322,7 +335,7 @@ class WFSVectorLayer {
     const outlineColor = this.config.labelOutlineColor;
     const outlineWidth = this.config.labelOutlineWidth;
     const showLabels = this.config.showLabels;
-    const pointSize = this.config.pointSize || 4; // OpenLayers default Circle use point size
+    const pointSize = forcedPointRadius || this.config.pointSize || 4; // OpenLayers default Circle use point size
     const iconScale = pointSize / 8; // OpenLayers icon use scale. Medium size (8) => icon scale 1
 
     function getLineDash() {
@@ -410,6 +423,66 @@ class WFSVectorLayer {
     }
 
     return [new Style(getStyleObj())];
+  }
+
+  generateLegend(callback) {
+    var url = this.proxyUrl + this.createUrl();
+    hfetch(url, fetchConfig).then((response) => {
+      response.text().then((wfsText) => {
+        //const parser = new GML2();
+        const parser = new WFS();
+        const features = parser.readFeatures(wfsText);
+        const canvas = document.createElement("canvas");
+
+        const scale = 120;
+        const padding = 1 / 5;
+        const pointRadius = 15;
+
+        const vectorContext = toContext(canvas.getContext("2d"), {
+          size: [scale, scale],
+        });
+        const style = this.getStyle(pointRadius)[0];
+        vectorContext.setStyle(style);
+
+        var featureType = "Point";
+        if (features.length > 0) {
+          featureType = features[0].getGeometry().getType();
+        }
+
+        switch (featureType) {
+          case "Point":
+          case "MultiPoint":
+            vectorContext.drawGeometry(new Point([scale / 2, scale / 2]));
+            break;
+          case "Polygon":
+          case "MultiPolygon":
+            vectorContext.drawGeometry(
+              new Polygon([
+                [
+                  [scale * padding, scale * padding],
+                  [scale * padding, scale - scale * padding],
+                  [scale - scale * padding, scale - scale * padding],
+                  [scale - scale * padding, scale * padding],
+                  [scale * padding, scale * padding],
+                ],
+              ])
+            );
+            break;
+          case "LineString":
+          case "MultiLineString":
+            vectorContext.drawGeometry(
+              new LineString([
+                [scale * padding, scale - scale * padding],
+                [scale - scale * padding, scale * padding],
+              ])
+            );
+            break;
+          default:
+            break;
+        }
+        callback(canvas.toDataURL());
+      });
+    });
   }
 }
 
