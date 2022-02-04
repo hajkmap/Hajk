@@ -92,7 +92,7 @@ class FeatureInfoContainer extends React.PureComponent {
       <Grid
         alignItems="center"
         justifyContent="space-between"
-        sx={{ backgroundColor: (theme) => theme.palette.primary.main }}
+        sx={{ backgroundColor: "primary.main" }}
         container
       >
         <TogglerButtonRightContainer item>
@@ -102,15 +102,15 @@ class FeatureInfoContainer extends React.PureComponent {
             onClick={this.stepLeft}
             aria-label="previous"
             id="step-left"
+            sx={{ color: "text.primary" }}
           >
-            <ArrowLeftIcon color="secondary" />
+            <ArrowLeftIcon />
           </Button>
         </TogglerButtonRightContainer>
         <Grid item>
           <Typography
             variant="button"
-            color="secondary"
-            sx={{ textAlign: "center" }}
+            sx={{ textAlign: "center", color: "text.primary" }}
           >
             {this.state.selectedIndex + 1} av {features.length}
           </Typography>
@@ -122,8 +122,9 @@ class FeatureInfoContainer extends React.PureComponent {
             onClick={this.stepRight}
             aria-label="next"
             id="step-right"
+            sx={{ color: "text.primary" }}
           >
-            <ArrowRightIcon color="secondary" />
+            <ArrowRightIcon />
           </Button>
         </TogglerButtonLeftContainer>
       </Grid>
