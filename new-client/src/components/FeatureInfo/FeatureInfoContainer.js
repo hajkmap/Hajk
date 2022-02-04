@@ -102,7 +102,7 @@ class FeatureInfoContainer extends React.PureComponent {
             onClick={this.stepLeft}
             aria-label="previous"
             id="step-left"
-            sx={{ color: "text.primary" }}
+            sx={{ color: "primary.contrastText" }}
           >
             <ArrowLeftIcon />
           </Button>
@@ -110,7 +110,7 @@ class FeatureInfoContainer extends React.PureComponent {
         <Grid item>
           <Typography
             variant="button"
-            sx={{ textAlign: "center", color: "text.primary" }}
+            sx={{ textAlign: "center", color: "primary.contrastText" }}
           >
             {this.state.selectedIndex + 1} av {features.length}
           </Typography>
@@ -122,7 +122,7 @@ class FeatureInfoContainer extends React.PureComponent {
             onClick={this.stepRight}
             aria-label="next"
             id="step-right"
-            sx={{ color: "text.primary" }}
+            sx={{ color: "primary.contrastText" }}
           >
             <ArrowRightIcon />
           </Button>
