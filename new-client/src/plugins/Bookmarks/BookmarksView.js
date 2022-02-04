@@ -214,6 +214,7 @@ class BookmarksView extends React.PureComponent {
             error={this.state.error}
             helperText={this.state.helperText}
             sx={{ flex: "0 1 100%", height: "0%" }}
+            variant="standard"
           ></TextField>
           <AddButton
             variant="contained"
