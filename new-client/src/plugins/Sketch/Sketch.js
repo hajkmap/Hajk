@@ -159,6 +159,7 @@ const Sketch = (props) => {
         drawModel={drawModel}
         options={props.options}
         localObserver={localObserver}
+        globalObserver={props.app.globalObserver}
         activeDrawType={activeDrawType}
         activityId={activityId}
         setActivityId={setActivityId}

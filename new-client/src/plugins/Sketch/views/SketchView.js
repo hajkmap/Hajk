@@ -198,7 +198,12 @@ const SketchView = (props) => {
         );
       case "SAVE":
         return (
-          <SaveUploadView id={activityId} model={model} drawModel={drawModel} />
+          <SaveUploadView
+            id={activityId}
+            model={model}
+            drawModel={drawModel}
+            globalObserver={props.globalObserver}
+          />
         );
       case "SETTINGS":
         return (

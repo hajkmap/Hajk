@@ -2,9 +2,11 @@ import React from "react";
 import { styled } from "@material-ui/core";
 import { Button, IconButton } from "@material-ui/core";
 import { Grid, Paper, TextField, Tooltip, Typography } from "@material-ui/core";
-import Information from "../components/Information";
 import AddIcon from "@material-ui/icons/Add";
 import DeleteIcon from "@material-ui/icons/Delete";
+
+import { functionalOk } from "models/Cookie";
+import Information from "../components/Information";
 
 const StyledPaper = styled(Paper)(({ theme }) => ({
   width: "100%",
@@ -12,6 +14,37 @@ const StyledPaper = styled(Paper)(({ theme }) => ({
   marginBottom: theme.spacing(1),
   borderLeft: `${theme.spacing(0.5)}px solid ${theme.palette.info.main}`,
 }));
+
+// A view that is rendered if the user has selected not to accept functional
+// cookies. (Functional cookies has to be accepted, otherwise this part of the plugin
+// has no meaning).
+const NotSupportedView = ({ globalObserver }) => {
+  // Handles clicks on the "change-cookie-settings-button". Simply emits an event
+  // on the global-observer, stating that the cookie-banner should be shown again.
+  const handleChangeCookieSettingsClick = () => {
+    globalObserver.publish("core.showCookieBanner");
+  };
+  return (
+    <Grid container spacing={2}>
+      <Grid item xs={12}>
+        <Information
+          text="Det ser ut som att du har valt att inte tillåta funktionella kakor. På grund av
+        detta så kan du inte spara dina rit-objekt. Klicka nedan för att ändra inställningarna."
+        />
+      </Grid>
+      <Grid item xs={12}>
+        <Button
+          fullWidth
+          size="small"
+          variant="contained"
+          onClick={handleChangeCookieSettingsClick}
+        >
+          Ändra cookie-inställningar
+        </Button>
+      </Grid>
+    </Grid>
+  );
+};
 
 // A simple component allowing the user to select a name and save the current
 // sketch to LS under that name.
@@ -88,13 +121,37 @@ const SavedSketch = (props) => {
   );
 };
 
-const SaveUploadView = (props) => {
+const SaveUploadView = ({ globalObserver, model, id }) => {
   // If the user wants to save their work, they'll have to choose a name
   // so that the workspace can be identified in the list of saved workspaces later.
   const [workspaceName, setWorkspaceName] = React.useState("");
+  // We're gonna need to keep track of if functional cookies are allowed or not.
+  // We can check if functional cookies are OK by calling functionalOk(), but we have
+  // to make sure to re-render the component if the cookie-settings were to change (therefore
+  // we'll persist a value in the local state as well).
+  const [functionalCookiesOk, setFunctionalCookiesOk] = React.useState(
+    functionalOk()
+  );
+  // An effect subscribing to an event sent from the cookie-handler when the
+  // cookie-settings change. If the settings change, we make sure to update the
+  // local state with the current settings so that we can render the appropriate component.
+  React.useEffect(() => {
+    globalObserver.subscribe("core.cookieLevelChanged", () =>
+      setFunctionalCookiesOk(functionalOk())
+    );
+    return () => {
+      globalObserver.unsubscribe("core.cookieLevelChanged");
+    };
+  }, [globalObserver]);
+
   // We have to get some information about the current activity (view)
-  const activity = props.model.getActivityFromId(props.id);
-  return (
+  const activity = model.getActivityFromId(id);
+  // Let's make sure we're allowing for functional cookies, and if we aren't
+  // we'll render a view telling the user that the save-view does not work
+  // until they've changed their settings.
+  return !functionalCookiesOk ? (
+    <NotSupportedView globalObserver={globalObserver} />
+  ) : (
     <Grid container spacing={2}>
       <Grid item xs={12}>
         <Information text={activity.information} />
