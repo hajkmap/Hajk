@@ -1,6 +1,16 @@
 import React from "react";
-import { Button, Grid, Paper, TextField, Tooltip } from "@material-ui/core";
+import { styled } from "@material-ui/core";
+import { Button, IconButton } from "@material-ui/core";
+import { Grid, Paper, TextField, Tooltip, Typography } from "@material-ui/core";
 import Information from "../components/Information";
+import AddIcon from "@material-ui/icons/Add";
+
+const StyledPaper = styled(Paper)(({ theme }) => ({
+  width: "100%",
+  padding: theme.spacing(1),
+  marginBottom: theme.spacing(1),
+  borderLeft: `${theme.spacing(0.5)}px solid ${theme.palette.info.main}`,
+}));
 
 // A simple component allowing the user to select a name and save the current
 // sketch to LS under that name.
@@ -50,6 +60,25 @@ const SketchSaver = (props) => {
   );
 };
 
+const SavedSketch = (props) => {
+  return (
+    <StyledPaper>
+      <Grid container justify="space-between" alignItems="center">
+        <Grid item xs={8}>
+          <Typography variant="button">{props.title}</Typography>
+        </Grid>
+        <Grid container item xs={3} justify="flex-end">
+          <Tooltip title="Klicka för att läsa in objekten.">
+            <IconButton size="small" onClick={null}>
+              <AddIcon />
+            </IconButton>
+          </Tooltip>
+        </Grid>
+      </Grid>
+    </StyledPaper>
+  );
+};
+
 const SaveUploadView = (props) => {
   // If the user wants to save their work, they'll have to choose a name
   // so that the workspace can be identified in the list of saved workspaces later.
@@ -68,7 +97,8 @@ const SaveUploadView = (props) => {
         />
       </Grid>
       <Grid item xs={12}>
-        <Information text={"Sparade objekt"} />
+        <SavedSketch title={"Detta är ett testobjekt lalala"} />
+        <SavedSketch title={"Kortare test"} />
       </Grid>
     </Grid>
   );
