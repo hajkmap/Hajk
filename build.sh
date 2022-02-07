@@ -61,12 +61,13 @@ git fetch
 git pull
 
 # BACKEND
+echo "Part 1: Backend"
 echo "Installing backend dependencies..."
 cd $GIT_DIR/new-backend
 # Before we can compile, we need to install NPM deps. 
 # Make sure to get the latest by first removing the dir entirely. 
 rm -rf node_modules/
-npm install --legacy-peer-deps
+npm install
 
 # Build. Will create the dist directory.
 echo "Building backend..."
@@ -87,13 +88,14 @@ npm install
 # functionality in your .env too!
 
 # CLIENT
+echo "Part 2: Client UI"
 echo "Preparing to install client dependencies..."
 cd $GIT_DIR/new-client
 rm -rf node_modules/
 echo "Installing client dependencies..."
-npm install --legacy-peer-deps
+npm install
 
-echo "Building client..."
+echo "Building Client UI..."
 npm run build
 rm -rf $DEST_DIR/static/client/static
 echo "Copying client to destination..."
@@ -104,6 +106,7 @@ cp index.* $DEST_DIR/static/client
 cp manifest.json $DEST_DIR/static/client
 
 # ADMIN
+echo "Part 3: Admin UI"
 echo "Preparing to install admin dependencies..."
 cd $GIT_DIR/new-admin
 rm -rf node_modules/
