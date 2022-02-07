@@ -2,7 +2,9 @@ import React from "react";
 import { Button, Grid, Paper, TextField, Tooltip } from "@material-ui/core";
 import Information from "../components/Information";
 
-const DrawSaver = (props) => {
+// A simple component allowing the user to select a name and save the current
+// sketch to LS under that name.
+const SketchSaver = (props) => {
   const handleInputChange = (e) => {
     props.setWorkspaceName(e.target.value);
   };
@@ -60,7 +62,7 @@ const SaveUploadView = (props) => {
         <Information text={activity.information} />
       </Grid>
       <Grid item xs={12}>
-        <DrawSaver
+        <SketchSaver
           workspaceName={workspaceName}
           setWorkspaceName={setWorkspaceName}
         />
