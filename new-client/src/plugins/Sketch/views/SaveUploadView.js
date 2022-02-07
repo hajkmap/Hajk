@@ -4,6 +4,7 @@ import { Button, IconButton } from "@material-ui/core";
 import { Grid, Paper, TextField, Tooltip, Typography } from "@material-ui/core";
 import Information from "../components/Information";
 import AddIcon from "@material-ui/icons/Add";
+import DeleteIcon from "@material-ui/icons/Delete";
 
 const StyledPaper = styled(Paper)(({ theme }) => ({
   width: "100%",
@@ -60,6 +61,9 @@ const SketchSaver = (props) => {
   );
 };
 
+// A simple component containing information about a saved sketch along
+// with buttons allowing the user to add the sketch to the map, or delete
+// the saved sketch entirely.
 const SavedSketch = (props) => {
   return (
     <StyledPaper>
@@ -67,7 +71,12 @@ const SavedSketch = (props) => {
         <Grid item xs={8}>
           <Typography variant="button">{props.title}</Typography>
         </Grid>
-        <Grid container item xs={3} justify="flex-end">
+        <Grid container item xs={4} justify="flex-end">
+          <Tooltip title="Klicka för att radera arbetsytan.">
+            <IconButton size="small" onClick={null}>
+              <DeleteIcon />
+            </IconButton>
+          </Tooltip>
           <Tooltip title="Klicka för att läsa in objekten.">
             <IconButton size="small" onClick={null}>
               <AddIcon />
