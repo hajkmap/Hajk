@@ -1,6 +1,6 @@
 import React from "react";
 import { styled } from "@material-ui/core";
-import { Button, IconButton } from "@material-ui/core";
+import { Button, IconButton, Zoom } from "@material-ui/core";
 import { Grid, Paper, TextField, Tooltip, Typography } from "@material-ui/core";
 import AddIcon from "@material-ui/icons/Add";
 import DeleteIcon from "@material-ui/icons/Delete";
@@ -99,25 +99,59 @@ const SketchSaver = (props) => {
 // the saved sketch entirely.
 const SavedSketch = (props) => {
   return (
-    <StyledPaper>
-      <Grid container justify="space-between" alignItems="center">
-        <Grid item xs={8}>
-          <Typography variant="button">{props.title}</Typography>
+    <Zoom in appear>
+      <StyledPaper>
+        <Grid container justify="space-between" alignItems="center">
+          <Grid item xs={8}>
+            <Typography variant="button">{props.title}</Typography>
+          </Grid>
+          <Grid container item xs={4} justify="flex-end">
+            <Tooltip title="Klicka för att radera arbetsytan.">
+              <IconButton
+                size="small"
+                onClick={() => props.handleRemoveClick(props.id)}
+              >
+                <DeleteIcon />
+              </IconButton>
+            </Tooltip>
+            <Tooltip title="Klicka för att läsa in objekten.">
+              <IconButton
+                size="small"
+                onClick={() => props.handleAddToMapClick(props.id)}
+              >
+                <AddIcon />
+              </IconButton>
+            </Tooltip>
+          </Grid>
         </Grid>
-        <Grid container item xs={4} justify="flex-end">
-          <Tooltip title="Klicka för att radera arbetsytan.">
-            <IconButton size="small" onClick={null}>
-              <DeleteIcon />
-            </IconButton>
-          </Tooltip>
-          <Tooltip title="Klicka för att läsa in objekten.">
-            <IconButton size="small" onClick={null}>
-              <AddIcon />
-            </IconButton>
-          </Tooltip>
-        </Grid>
-      </Grid>
-    </StyledPaper>
+      </StyledPaper>
+    </Zoom>
+  );
+};
+
+const SavedSketchList = ({ savedSketches, setSavedSketches }) => {
+  const handleAddToMapClick = (id) => {
+    console.log(`Adding sketch with id ${id} to the map!`);
+  };
+
+  const handleRemoveClick = (id) => {
+    setSavedSketches(savedSketches.filter((sketch) => sketch.id !== id));
+  };
+
+  return (
+    <Grid container>
+      {savedSketches.map((sketch) => {
+        return (
+          <SavedSketch
+            key={sketch.id}
+            id={sketch.id}
+            title={sketch.title}
+            handleAddToMapClick={handleAddToMapClick}
+            handleRemoveClick={handleRemoveClick}
+          />
+        );
+      })}
+    </Grid>
   );
 };
 
@@ -132,6 +166,14 @@ const SaveUploadView = ({ globalObserver, model, id }) => {
   const [functionalCookiesOk, setFunctionalCookiesOk] = React.useState(
     functionalOk()
   );
+  // We also have to keep track of all the saved sketches.
+  const [savedSketches, setSavedSketches] = React.useState([
+    { id: "0000", title: "Test 0", savedAt: "2022-02-07" },
+    { id: "0001", title: "Test 1", savedAt: "2022-02-07" },
+    { id: "0002", title: "Test 2", savedAt: "2022-02-07" },
+    { id: "0003", title: "Test 3", savedAt: "2022-02-07" },
+  ]);
+
   // An effect subscribing to an event sent from the cookie-handler when the
   // cookie-settings change. If the settings change, we make sure to update the
   // local state with the current settings so that we can render the appropriate component.
@@ -163,8 +205,10 @@ const SaveUploadView = ({ globalObserver, model, id }) => {
         />
       </Grid>
       <Grid item xs={12}>
-        <SavedSketch title={"Detta är ett testobjekt lalala"} />
-        <SavedSketch title={"Kortare test"} />
+        <SavedSketchList
+          savedSketches={savedSketches}
+          setSavedSketches={setSavedSketches}
+        />
       </Grid>
     </Grid>
   );
