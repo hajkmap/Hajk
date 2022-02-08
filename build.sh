@@ -26,6 +26,17 @@ show_usage() {
 	exit 1
 }
 
+prompt() {
+	read -p "Warning: This will RESET ALL LOCAL CHANGES with those in origin.
+
+Press (y) to continue or any other key to abort." -n 1 -r
+	echo
+	if [[ ! $REPLY =~ ^[Yy]$ ]]
+	then
+			exit 1
+	fi
+}
+
 # Main program starts here
 
 if [ $# -ne 2 ]; then
@@ -55,9 +66,15 @@ echo "Building from git directory: ${GIT_DIR}"
 echo "Deploying build to destination: ${DEST_DIR}"
 
 # Got to our repo dir and grab the latest from Git
+echo "On branch $(git rev-parse --abbrev-ref HEAD)"
+
+# Let's ensure that user wants to overrite local changes
+prompt
 echo "Downloading the latest code..." 
+
 cd $GIT_DIR
-git fetch
+git fetch --all
+git reset --hard
 git pull
 
 # BACKEND
