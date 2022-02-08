@@ -20,8 +20,8 @@ const StyledPaper = styled(Paper)(() => ({
 }));
 
 const StyledButton = styled(Button)(({ theme }) => ({
-  minWidth: 130,
-  margin: theme.spacing(1),
+  minWidth: 64,
+  margin: 0,
 }));
 
 class CoordinatesView extends React.PureComponent {
@@ -94,7 +94,7 @@ class CoordinatesView extends React.PureComponent {
           </Table>
           <Grid container justifyContent="space-between">
             <StyledButton
-              variant="contained"
+              variant="text"
               onClick={() => {
                 this.props.model.zoomOnMarker();
               }}
@@ -102,7 +102,7 @@ class CoordinatesView extends React.PureComponent {
               Zooma
             </StyledButton>
             <StyledButton
-              variant="contained"
+              variant="text"
               onClick={() => {
                 this.props.model.centerOnMarker();
               }}
@@ -110,7 +110,7 @@ class CoordinatesView extends React.PureComponent {
               Panorera
             </StyledButton>
             <StyledButton
-              variant="contained"
+              variant="text"
               onClick={() => {
                 this.props.model.goToUserLocation();
               }}
@@ -118,7 +118,7 @@ class CoordinatesView extends React.PureComponent {
               Min position
             </StyledButton>
             <StyledButton
-              variant="contained"
+              variant="text"
               onClick={() => {
                 this.props.model.resetCoords();
               }}

@@ -1,5 +1,6 @@
 import GeoJSON from "ol/format/GeoJSON.js";
 import buffer from "@turf/buffer";
+import union from "@turf/union";
 
 class HajkTransformer {
   #mapProjection;
@@ -19,13 +20,31 @@ class HajkTransformer {
     });
   }
 
+  getUnion(feature1, feature2) {
+    // Create a GeoJSON Feature object by reading our OL Feature.
+    // This object will be in WGS84.
+    const f1 = this.#geoJson.writeFeatureObject(feature1);
+    const f2 = this.#geoJson.writeFeatureObject(feature2);
+
+    // union the 2 incoming geometries.
+    const unionFeatureObject = union(f1.geometry, f2.geometry);
+
+    // convert GeoJSON feature object back to OpenLayer Feature using the maps projection.
+    const olf = this.#geoJson.readFeature(unionFeatureObject, {
+      // Tell the format reader to return features in our map's projection!
+      featureProjection: this.#mapProjection,
+    });
+    olf.setId(Math.random() * 1e20);
+    return olf;
+  }
+
   getBuffered(feature, distance) {
     // Create a GeoJSON Feature object by reading our OL Feature.
     // This object will be in WGS84.
     const gjFeatureObject = this.#geoJson.writeFeatureObject(feature);
 
     // Create a buffer around the GeoJSON Feature object using buffer().
-    // The distance we pass comes in meters, but buffer() expects kilometers,
+    // The distance we pass counionmes in meters, but buffer() expects kilometers,
     // hence the division by 1000.
     // The created buffered object will be in WGS84.
     const buffered = buffer(gjFeatureObject, distance / 1000, {
