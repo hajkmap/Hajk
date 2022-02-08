@@ -199,6 +199,7 @@ const SaveView = ({ globalObserver, model, id }) => {
     { id: "0001", title: "Test 1", savedAt: "2022-02-07" },
     { id: "0002", title: "Test 2", savedAt: "2022-02-07" },
     { id: "0003", title: "Test 3", savedAt: "2022-02-07" },
+    { id: "0004", title: "Test 4", savedAt: "2022-02-08" },
   ]);
 
   // An effect subscribing to an event sent from the cookie-handler when the
