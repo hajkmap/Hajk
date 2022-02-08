@@ -1,30 +1,36 @@
 import React from "react";
-import Alert from "@mui/material/Alert";
-import SearchResultsList from "./SearchResultsList";
-import Collapse from "@mui/material/Collapse";
-import Breadcrumbs from "@mui/material/Breadcrumbs";
-import Link from "@mui/material/Link";
+import { visuallyHidden } from "@mui/utils";
+import { styled } from "@mui/material/styles";
+
+import {
+  Alert,
+  Badge,
+  Breadcrumbs,
+  Button,
+  Collapse,
+  Divider,
+  Grid,
+  Grow,
+  IconButton,
+  Link,
+  Menu,
+  MenuItem,
+  Paper,
+  TextField,
+  Tooltip,
+  Typography,
+} from "@mui/material";
+
 import FilterListIcon from "@mui/icons-material/FilterList";
 import SortIcon from "@mui/icons-material/Sort";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
 import CloseIcon from "@mui/icons-material/Close";
 import DeleteIcon from "@mui/icons-material/Delete";
 import ClearIcon from "@mui/icons-material/Clear";
-import {
-  Paper,
-  IconButton,
-  Grid,
-  TextField,
-  Typography,
-  Tooltip,
-  Badge,
-  Menu,
-  MenuItem,
-  Grow,
-} from "@mui/material";
+
+import SearchResultsList from "./SearchResultsList";
 import SearchResultsDownloadMenu from "./SearchResultsDownloadMenu";
-import { visuallyHidden } from "@mui/utils";
-import { styled } from "@mui/material/styles";
+import ArrowBack from "@mui/icons-material/ArrowBack";
 
 const StyledPaper = styled(Paper)(({ theme }) => ({
   maxHeight: "80vh",
@@ -885,62 +891,82 @@ class SearchResultsContainer extends React.PureComponent {
       activeFeature && !activeFeature.onClickName;
     if (shouldRenderFeatureCollectionDetails) {
       return (
-        <Breadcrumbs aria-label="breadcrumb" separator="/">
-          <Tooltip disableInteractive title="Tillbaka till alla sökresultat">
-            <Link
-              tabIndex={0}
-              underline="hover"
-              sx={{ border: "none", cursor: "pointer" }}
-              color="textPrimary"
-              variant="caption"
-              onClick={(e) => {
-                e.stopPropagation();
-                this.handleActiveFeatureChange();
-              }}
-              onKeyDown={(event) => {
-                if (this.keyPressIsEnter(event)) {
-                  this.handleActiveFeatureChange();
-                }
-              }}
-              onChange={this.handleActiveFeatureChange}
-            >
-              Sökresultat
-            </Link>
-          </Tooltip>
-          <Tooltip disableInteractive title={featureCollectionTitle}>
-            <Link
-              tabIndex={0}
-              underline="hover"
-              sx={{ border: "none", cursor: "pointer" }}
-              color="textPrimary"
-              variant="caption"
-              onClick={(e) => {
-                e.stopPropagation();
-                this.setActiveFeature(undefined);
-              }}
-              onKeyDown={(event) => {
-                if (this.keyPressIsEnter(event)) {
-                  this.setActiveFeature(undefined);
-                }
-              }}
-            >
-              {featureCollectionTitle}
-            </Link>
-          </Tooltip>
-          {shouldRenderFeatureDetails && (
-            <Tooltip disableInteractive title={featureTitle}>
+        <>
+          <Button
+            startIcon={<ArrowBack />}
+            fullWidth
+            onClick={(e) => {
+              console.log(this.state);
+              e.stopPropagation();
+              this.handleActiveFeatureChange(
+                undefined,
+                this.state.activeFeature
+                  ? this.state.activeFeatureCollection
+                  : undefined // Supplying a value here will go back to step 2. No value will go back to step 1.
+              );
+            }}
+          >
+            Gå till föregående vy
+          </Button>
+          <Divider />
+          <Breadcrumbs aria-label="breadcrumb" separator="/">
+            <Tooltip disableInteractive title="Tillbaka till alla sökresultat">
               <Link
                 tabIndex={0}
                 underline="hover"
                 sx={{ border: "none", cursor: "pointer" }}
                 color="textPrimary"
                 variant="caption"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  this.handleActiveFeatureChange();
+                }}
+                onKeyDown={(event) => {
+                  if (this.keyPressIsEnter(event)) {
+                    this.handleActiveFeatureChange();
+                  }
+                }}
+                onChange={this.handleActiveFeatureChange}
               >
-                {featureTitle}
+                Sökresultat
               </Link>
             </Tooltip>
-          )}
-        </Breadcrumbs>
+            <Tooltip disableInteractive title={featureCollectionTitle}>
+              <Link
+                tabIndex={0}
+                underline="hover"
+                sx={{ border: "none", cursor: "pointer" }}
+                color="textPrimary"
+                variant="caption"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  this.setActiveFeature(undefined);
+                }}
+                onKeyDown={(event) => {
+                  if (this.keyPressIsEnter(event)) {
+                    this.setActiveFeature(undefined);
+                  }
+                }}
+              >
+                {featureCollectionTitle}
+              </Link>
+            </Tooltip>
+            {shouldRenderFeatureDetails && (
+              <Tooltip disableInteractive title={featureTitle}>
+                <Link
+                  tabIndex={0}
+                  underline="hover"
+                  sx={{ border: "none", cursor: "pointer" }}
+                  color="textPrimary"
+                  variant="caption"
+                >
+                  {featureTitle}
+                </Link>
+              </Tooltip>
+            )}
+          </Breadcrumbs>
+          <Divider />
+        </>
       );
     } else {
       return null;

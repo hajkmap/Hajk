@@ -15,23 +15,12 @@ import InputAdornment from "@material-ui/core/InputAdornment";
 import Collapse from "@material-ui/core/Collapse";
 import Button from "@material-ui/core/Button";
 import Feature from "ol/Feature.js";
-import {
-  Point,
-  LineString,
-  Polygon,
-  MultiPoint,
-  MultiLineString,
-  MultiPolygon,
-  LinearRing,
-} from "ol/geom.js";
+import HajkTransformer from "utils/HajkTransformer";
 
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 import HistoryIcon from "@material-ui/icons/History";
 import { Typography } from "@material-ui/core";
 import CircularProgress from "@material-ui/core/CircularProgress";
-// import * as jsts from "jsts";
-// FIXME: Temporary fix for "Module not found: Can't resolve 'jsts'"
-const jsts = {};
 
 const styles = (theme) => ({
   heading: {
@@ -72,6 +61,8 @@ const styles = (theme) => ({
   },
 });
 class FirSearchNeighborView extends React.PureComponent {
+  #HT;
+
   state = {
     accordionExpanded: false,
     radioValue: "delimiting",
@@ -96,6 +87,10 @@ class FirSearchNeighborView extends React.PureComponent {
     this.localObserver = this.props.localObserver;
     this.globalObserver = this.props.app.globalObserver;
     this.update_tm = null;
+
+    this.#HT = new HajkTransformer({
+      projection: this.model.app.map.getView().getProjection().getCode(),
+    });
 
     this.localObserver.subscribe(
       "fir.results.filtered",
@@ -136,19 +131,8 @@ class FirSearchNeighborView extends React.PureComponent {
   };
 
   #handleSearch = () => {
-    const parser = new jsts.io.OL3Parser();
-    parser.inject(
-      Point,
-      LineString,
-      LinearRing,
-      Polygon,
-      MultiPoint,
-      MultiLineString,
-      MultiPolygon
-    );
     const buffer = new Feature();
-    let bufferGeom = null;
-    let jstsGeom = null;
+    let unionFeature = null;
     let buffered = null;
     let bufferValue =
       this.state.radioValue === "delimiting" ? 0.01 : this.state.buffer;
@@ -156,15 +140,16 @@ class FirSearchNeighborView extends React.PureComponent {
     this.state.resultHistory.push(this.state.results);
 
     this.state.results.forEach((feature) => {
-      jstsGeom = parser.read(feature.getGeometry());
-      buffered = jstsGeom.buffer(bufferValue);
-      bufferGeom = !bufferGeom ? buffered : bufferGeom.union(buffered);
+      buffered = this.#HT.getBuffered(feature, bufferValue);
+      unionFeature = !unionFeature
+        ? buffered
+        : this.#HT.getUnion(buffered, unionFeature);
     });
 
-    if (bufferGeom) {
+    if (unionFeature) {
       buffer.set("fir_type", "buffer");
       buffer.set("fir_origin", "neighbor");
-      buffer.setGeometry(parser.write(bufferGeom));
+      buffer.setGeometry(unionFeature.getGeometry());
       this.props.model.layers.buffer.getSource().clear();
       this.props.model.layers.buffer.getSource().addFeature(buffer);
     }

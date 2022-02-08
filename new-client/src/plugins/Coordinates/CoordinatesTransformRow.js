@@ -163,6 +163,7 @@ class CoordinatesTransformRow extends React.PureComponent {
               label={this.props.transformation.xtitle}
               margin="dense"
               variant="outlined"
+              size="small"
               value={xCoord}
               name="numberformatX"
               type="text"
@@ -178,6 +179,7 @@ class CoordinatesTransformRow extends React.PureComponent {
             <StyledNumberFormat
               label={this.props.transformation.ytitle}
               margin="dense"
+              size="small"
               variant="outlined"
               value={yCoord}
               name="numberformatY"

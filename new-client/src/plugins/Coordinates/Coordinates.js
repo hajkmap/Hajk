@@ -39,7 +39,7 @@ class Coordinates extends React.PureComponent {
           title: "Visa koordinat",
           description: "Visa koordinater för given plats",
           height: "dynamic",
-          width: 610,
+          width: 400,
           onWindowShow: this.onWindowShow,
           onWindowHide: this.onWindowHide,
         }}
