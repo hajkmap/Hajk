@@ -167,17 +167,26 @@ const SavedSketchList = ({ savedSketches, setSavedSketches }) => {
 
   return (
     <Grid container>
-      {savedSketches.map((sketch) => {
-        return (
-          <SavedSketch
-            key={sketch.id}
-            id={sketch.id}
-            title={sketch.title}
-            handleAddToMapClick={handleAddToMapClick}
-            handleRemoveClick={handleRemoveClick}
-          />
-        );
-      })}
+      <Grid item xs={12}>
+        <Typography variant="caption">
+          {savedSketches.length === 0
+            ? "Inga sparade arbetsytor hittades."
+            : "Sparade arbetsytor:"}
+        </Typography>
+      </Grid>
+      <Grid item xs={12}>
+        {savedSketches.map((sketch) => {
+          return (
+            <SavedSketch
+              key={sketch.id}
+              id={sketch.id}
+              title={sketch.title}
+              handleAddToMapClick={handleAddToMapClick}
+              handleRemoveClick={handleRemoveClick}
+            />
+          );
+        })}
+      </Grid>
     </Grid>
   );
 };
