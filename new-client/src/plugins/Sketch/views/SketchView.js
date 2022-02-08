@@ -7,7 +7,8 @@ import { PLUGIN_MARGIN, MAX_REMOVED_FEATURES } from "../constants";
 import ActivityMenu from "../components/ActivityMenu";
 // Views
 import AddView from "./AddView";
-import SaveUploadView from "./SaveUploadView";
+import SaveView from "./SaveView";
+import UploadView from "./UploadView";
 import DeleteView from "./DeleteView";
 import MoveView from "./MoveView";
 import EditView from "./EditView";
@@ -198,7 +199,16 @@ const SketchView = (props) => {
         );
       case "SAVE":
         return (
-          <SaveUploadView
+          <SaveView
+            id={activityId}
+            model={model}
+            drawModel={drawModel}
+            globalObserver={props.globalObserver}
+          />
+        );
+      case "UPLOAD":
+        return (
+          <UploadView
             id={activityId}
             model={model}
             drawModel={drawModel}

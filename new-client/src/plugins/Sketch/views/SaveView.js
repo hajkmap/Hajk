@@ -182,7 +182,7 @@ const SavedSketchList = ({ savedSketches, setSavedSketches }) => {
   );
 };
 
-const SaveUploadView = ({ globalObserver, model, id }) => {
+const SaveView = ({ globalObserver, model, id }) => {
   // If the user wants to save their work, they'll have to choose a name
   // so that the workspace can be identified in the list of saved workspaces later.
   const [sketchName, setSketchName] = React.useState("");
@@ -242,4 +242,4 @@ const SaveUploadView = ({ globalObserver, model, id }) => {
   );
 };
 
-export default SaveUploadView;
+export default SaveView;
