@@ -129,17 +129,27 @@ const SavedSketch = (props) => {
     <Zoom in appear>
       <StyledPaper>
         <Grid container justify="space-between" alignItems="center">
-          <Grid
-            item
-            xs={8}
-            style={{ overflow: "hidden", textOverflow: "ellipsis" }}
-          >
+          <Grid item xs={8}>
             <Tooltip title={props.title}>
-              <Typography variant="button" noWrap>
-                {props.title}
-              </Typography>
+              <Grid
+                item
+                xs={12}
+                style={{ overflow: "hidden", textOverflow: "ellipsis" }}
+              >
+                <Typography variant="button" noWrap>
+                  {props.title}
+                </Typography>
+              </Grid>
             </Tooltip>
+            <Grid item xs={12}>
+              <Tooltip title={`Arbetsytan uppdaterades senast ${props.date}`}>
+                <Typography variant="caption">
+                  {`Uppdaterad: ${props.date?.split(" ")[0]}`}
+                </Typography>
+              </Tooltip>
+            </Grid>
           </Grid>
+
           <Grid container item xs={4} justify="flex-end">
             <Tooltip title="Klicka för att radera arbetsytan.">
               <IconButton
@@ -189,6 +199,7 @@ const SavedSketchList = ({ savedSketches, setSavedSketches }) => {
               key={sketch.id}
               id={sketch.id}
               title={sketch.title}
+              date={sketch.date}
               handleAddToMapClick={handleAddToMapClick}
               handleRemoveClick={handleRemoveClick}
             />
@@ -212,11 +223,10 @@ const SaveView = ({ globalObserver, model, id }) => {
   );
   // We also have to keep track of all the saved sketches.
   const [savedSketches, setSavedSketches] = React.useState([
-    { id: "0000", title: "Test 0 heheheheheheeheheh", savedAt: "2022-02-07" },
-    { id: "0001", title: "Test 1", savedAt: "2022-02-07" },
-    { id: "0002", title: "Test 2", savedAt: "2022-02-07" },
-    { id: "0003", title: "Test 3", savedAt: "2022-02-07" },
-    { id: "0004", title: "Test 4", savedAt: "2022-02-08" },
+    { id: "0000", title: "Test 0", date: "2022-02-07 10:07:44" },
+    { id: "0001", title: "Test 1", date: "2022-02-07 10:07:44" },
+    { id: "0002", title: "Test 2", date: "2022-02-07 10:07:44" },
+    { id: "0003", title: "Test 3", date: "2022-02-07 10:07:44" },
   ]);
 
   // An effect subscribing to an event sent from the cookie-handler when the

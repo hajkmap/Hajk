@@ -142,4 +142,4 @@ export const STROKE_DASHES = new Map([
 ]);
 
 // A constant stating how many sketches we're allowed to save in local-storage.
-export const MAX_SKETCHES = 5;
+export const MAX_SKETCHES = 4;
