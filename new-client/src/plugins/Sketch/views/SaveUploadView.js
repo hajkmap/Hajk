@@ -6,6 +6,7 @@ import AddIcon from "@material-ui/icons/Add";
 import DeleteIcon from "@material-ui/icons/Delete";
 
 import { functionalOk } from "models/Cookie";
+import { MAX_SKETCHES } from "../constants";
 import Information from "../components/Information";
 
 const StyledPaper = styled(Paper)(({ theme }) => ({
@@ -50,11 +51,43 @@ const NotSupportedView = ({ globalObserver }) => {
 // sketch to LS under that name.
 const SketchSaver = (props) => {
   const handleInputChange = (e) => {
-    props.setWorkspaceName(e.target.value);
+    props.setSketchName(e.target.value);
+  };
+
+  // Returns an object stating if the save-button should be disabled or not, along
+  // with a tooltip-message.
+  const getSaveButtonState = () => {
+    // If the name consists of less than four characters, the button should be disabled.
+    if (props.sketchName.length < 4) {
+      return {
+        disabled: true,
+        message:
+          "Minst fyra tecken måste anges för att en arbetsyta ska kunna skapas.",
+      };
+    }
+    // Let's check if the name the user has entered already exists
+    const sketchNameExists = props.savedSketches.some(
+      (sketch) => sketch.title.toLowerCase() === props.sketchName.toLowerCase()
+    );
+    // If the name does not exist, and we've already saved the maximum number of sketches,
+    // the button should be disabled. (If the name does exist, it is OK to save since one
+    // will be over-written).
+    if (props.savedSketches.length === MAX_SKETCHES && !sketchNameExists) {
+      return {
+        disabled: true,
+        message:
+          "Maximalt antal arbetsytor har sparats. Ta bort eller skriv över en genom att ange ett av namnen i listan nedan.",
+      };
+    }
+    // If we've made it this far, it is OK to save!
+    return {
+      disabled: false,
+      message: "Klicka för att spara de ritobjekt som finns i kartan.",
+    };
   };
 
   // We only allow workspace-names that consist of three characters or more.
-  const workspaceNameHasEnoughChars = props.workspaceName.length > 2;
+  const saveButtonState = getSaveButtonState();
 
   return (
     <Paper style={{ padding: 8 }}>
@@ -66,23 +99,17 @@ const SketchSaver = (props) => {
               variant="outlined"
               style={{ maxWidth: "100%" }}
               onChange={handleInputChange}
-              value={props.workspaceName}
+              value={props.sketchName}
             />
           </Tooltip>
         </Grid>
         <Grid container item xs={3} justify="flex-end">
-          <Tooltip
-            title={
-              workspaceNameHasEnoughChars
-                ? "Klicka för att spara de ritobjekt som finns i kartan."
-                : "Minst tre tecken måste anges för att ritobjekten ska kunna sparas."
-            }
-          >
+          <Tooltip title={saveButtonState.message}>
             <span>
               <Button
                 size="small"
                 variant="contained"
-                disabled={!workspaceNameHasEnoughChars}
+                disabled={saveButtonState.disabled}
               >
                 Spara
               </Button>
@@ -158,7 +185,7 @@ const SavedSketchList = ({ savedSketches, setSavedSketches }) => {
 const SaveUploadView = ({ globalObserver, model, id }) => {
   // If the user wants to save their work, they'll have to choose a name
   // so that the workspace can be identified in the list of saved workspaces later.
-  const [workspaceName, setWorkspaceName] = React.useState("");
+  const [sketchName, setSketchName] = React.useState("");
   // We're gonna need to keep track of if functional cookies are allowed or not.
   // We can check if functional cookies are OK by calling functionalOk(), but we have
   // to make sure to re-render the component if the cookie-settings were to change (therefore
@@ -200,8 +227,9 @@ const SaveUploadView = ({ globalObserver, model, id }) => {
       </Grid>
       <Grid item xs={12}>
         <SketchSaver
-          workspaceName={workspaceName}
-          setWorkspaceName={setWorkspaceName}
+          sketchName={sketchName}
+          setSketchName={setSketchName}
+          savedSketches={savedSketches}
         />
       </Grid>
       <Grid item xs={12}>
