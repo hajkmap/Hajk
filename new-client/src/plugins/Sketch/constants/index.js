@@ -2,6 +2,7 @@ import AddIcon from "@material-ui/icons/Add";
 import DeleteIcon from "@material-ui/icons/Delete";
 import DirectionsIcon from "@material-ui/icons/Directions";
 import CreateIcon from "@material-ui/icons/Create";
+import SaveIcon from "@material-ui/icons/Save";
 import ImportExportIcon from "@material-ui/icons/ImportExport";
 import SettingsIcon from "@material-ui/icons/Settings";
 
@@ -36,9 +37,15 @@ export const ACTIVITIES = [
   },
   {
     id: "SAVE",
-    tooltip: "Spara eller ladda upp ritade objekt.",
+    tooltip: "Spara ritade objekt.",
     information:
       "Behöver du ta en paus? Spara det du har ritat och fortsätt senare.",
+    icon: <SaveIcon />,
+  },
+  {
+    id: "UPLOAD",
+    tooltip: "Ladda ned eller ladda upp ritade objekt.",
+    information: "Ladda ned eller ladda upp ritobjekt i .kml-format.",
     icon: <ImportExportIcon />,
   },
   {
@@ -133,3 +140,6 @@ export const STROKE_DASHES = new Map([
   ["dotted", [2, 7]],
   ["dashed", [12, 7]],
 ]);
+
+// A constant stating how many sketches we're allowed to save in local-storage.
+export const MAX_SKETCHES = 4;
