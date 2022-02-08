@@ -129,8 +129,16 @@ const SavedSketch = (props) => {
     <Zoom in appear>
       <StyledPaper>
         <Grid container justify="space-between" alignItems="center">
-          <Grid item xs={8}>
-            <Typography variant="button">{props.title}</Typography>
+          <Grid
+            item
+            xs={8}
+            style={{ overflow: "hidden", textOverflow: "ellipsis" }}
+          >
+            <Tooltip title={props.title}>
+              <Typography variant="button" noWrap>
+                {props.title}
+              </Typography>
+            </Tooltip>
           </Grid>
           <Grid container item xs={4} justify="flex-end">
             <Tooltip title="Klicka för att radera arbetsytan.">
@@ -204,7 +212,7 @@ const SaveView = ({ globalObserver, model, id }) => {
   );
   // We also have to keep track of all the saved sketches.
   const [savedSketches, setSavedSketches] = React.useState([
-    { id: "0000", title: "Test 0", savedAt: "2022-02-07" },
+    { id: "0000", title: "Test 0 heheheheheheeheheh", savedAt: "2022-02-07" },
     { id: "0001", title: "Test 1", savedAt: "2022-02-07" },
     { id: "0002", title: "Test 2", savedAt: "2022-02-07" },
     { id: "0003", title: "Test 3", savedAt: "2022-02-07" },
