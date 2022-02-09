@@ -896,7 +896,6 @@ class SearchResultsContainer extends React.PureComponent {
             startIcon={<ArrowBack />}
             fullWidth
             onClick={(e) => {
-              console.log(this.state);
               e.stopPropagation();
               this.handleActiveFeatureChange(
                 undefined,
