@@ -706,7 +706,7 @@ class DrawModel {
   #refreshFeaturesTextStyle = () => {
     // Get all the drawn features (Except for arrows, these doesn't have any text
     // and shouldn't be refreshed)...
-    const drawnFeatures = this.#getAllDrawnFeatures().filter(
+    const drawnFeatures = this.getAllDrawnFeatures().filter(
       (f) => f.get("DRAW_METHOD") !== "Arrow"
     );
     // Iterate the drawn features...
@@ -737,7 +737,7 @@ class DrawModel {
   };
 
   // Returns all user drawn features from the draw-source
-  #getAllDrawnFeatures = () => {
+  getAllDrawnFeatures = () => {
     return this.#drawSource.getFeatures().filter((feature) => {
       return feature.get("USER_DRAWN") === true;
     });
@@ -1593,7 +1593,7 @@ class DrawModel {
   // don't want to remove all search features, only the user drawn ones.
   removeDrawnFeatures = () => {
     // Let's get all the features in the draw-source that have been drawn
-    const drawnFeatures = this.#getAllDrawnFeatures();
+    const drawnFeatures = this.getAllDrawnFeatures();
     // Since OL does not supply a "removeFeatures" method, we have to map
     // over the array, and remove every single feature one by one...
     drawnFeatures.forEach((feature) => {
