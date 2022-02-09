@@ -32,6 +32,36 @@ class SketchModel {
     });
   };
 
+  // Updates the stored sketches in the local-storage
+  #setStoredSketches = (sketches) => {
+    LocalStorageHelper.set(this.#storageKey, {
+      ...LocalStorageHelper.get(this.#storageKey),
+      sketches: sketches,
+    });
+  };
+
+  // Creates an object containing all the supplied properties along with
+  // all the features currently in the sketch-layer.
+  #createSketchObject = (sketchInformation) => {
+    return {
+      ...sketchInformation,
+      features: this.#drawModel
+        .getAllDrawnFeatures()
+        .map((f) => this.#prepareFeatureForStorage(f)),
+    };
+  };
+
+  // Since we cannot save the OL-features directly in local-storage without
+  // loosing some information, we'll have to parse the feature to a geoJSON
+  // before we store it. We also have to decorate the feature with some style-information
+  // so that we can extract the style when adding the feature to the map again;
+  #prepareFeatureForStorage = (f) => {
+    // So first, we'll decorate the feature with its style-information
+    f.set("EXTRACTED_STYLE", this.#extractFeatureStyle(f));
+    // Then we'll create the geoJSON, and return that.
+    return this.#geoJSONParser.writeFeature(f);
+  };
+
   // Returns the activity-object connected to the supplied id
   getActivityFromId = (id) => {
     return ACTIVITIES.find((activity) => {
@@ -305,6 +335,13 @@ class SketchModel {
       : storedFeatures;
   };
 
+  // Returns sketches that has been saved to local-storage.
+  getSketchesFromStorage = () => {
+    const inStorage = LocalStorageHelper.get(this.#storageKey);
+    const storedSketches = inStorage["sketches"] || [];
+    return storedSketches;
+  };
+
   // Updates the local-storage by adding the removed feature and potentially
   // removing old removed features. (We want to keep a maximum of MAX_REMOVED_FEATURES).
   addFeatureToStorage = (feature) => {
@@ -316,12 +353,33 @@ class SketchModel {
     ]);
   };
 
-  // Updates the storage by removing the feature corresponding to the supplied id
+  // Updates the local-storage by adding a new sketch containing all the features currently
+  // in the the sketch-layer. If a sketch with the same id as the one supplied one already exist,
+  // the already stored sketch will be over-written.
+  addCurrentSketchToStorage = (sketchInfo) => {
+    // First we'll make sure to remove any potential sketch (with same id) already in storage.
+    this.removeSketchFromStorage(sketchInfo.id);
+    // Then we'll create a sketch (an object containing the sketch-information along with the
+    // features currently existing in the sketch-layer).
+    const sketch = this.#createSketchObject(sketchInfo);
+    // Then we'll get all the currently stored sketches.
+    const storedSketches = this.getSketchesFromStorage();
+    // Then we'll update the stored sketches with the supplied one.
+    this.#setStoredSketches([...storedSketches, sketch]);
+  };
+
+  // Updates the local-storage by removing the feature corresponding to the supplied id
   removeFeatureFromStorage = (id) => {
     const storedFeatures = this.getRemovedFeaturesFromStorage("STRINGS");
     this.#setStoredRemovedFeatures(
       storedFeatures.filter((f) => !f.includes(id))
     );
+  };
+
+  // Updates the local-storage by removing the sketch corresponding to the supplied id
+  removeSketchFromStorage = (id) => {
+    const storedSketches = this.getSketchesFromStorage();
+    this.#setStoredSketches(storedSketches.filter((f) => !f.includes(id)));
   };
 }
 export default SketchModel;
