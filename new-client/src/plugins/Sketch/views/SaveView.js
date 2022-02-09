@@ -221,13 +221,11 @@ const SaveView = ({ globalObserver, model, id }) => {
   const [functionalCookiesOk, setFunctionalCookiesOk] = React.useState(
     functionalOk()
   );
-  // We also have to keep track of all the saved sketches.
-  const [savedSketches, setSavedSketches] = React.useState([
-    { id: "0000", title: "Test 0", date: "2022-02-07 10:07:44" },
-    { id: "0001", title: "Test 1", date: "2022-02-07 10:07:44" },
-    { id: "0002", title: "Test 2", date: "2022-02-07 10:07:44" },
-    { id: "0003", title: "Test 3", date: "2022-02-07 10:07:44" },
-  ]);
+  // We also have to keep track of all the saved sketches. Initiate the state with the sketches
+  // currently stored in the local-storage.
+  const [savedSketches, setSavedSketches] = React.useState(
+    model.getSketchesFromStorage()
+  );
 
   // An effect subscribing to an event sent from the cookie-handler when the
   // cookie-settings change. If the settings change, we make sure to update the
