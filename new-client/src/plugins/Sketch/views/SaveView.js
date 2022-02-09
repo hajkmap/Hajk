@@ -5,9 +5,9 @@ import { Grid, Paper, TextField, Tooltip, Typography } from "@material-ui/core";
 import AddIcon from "@material-ui/icons/Add";
 import DeleteIcon from "@material-ui/icons/Delete";
 
-import { functionalOk } from "models/Cookie";
 import { MAX_SKETCHES } from "../constants";
 import Information from "../components/Information";
+import useCookieStatus from "hooks/useCookieStatus";
 
 const StyledPaper = styled(Paper)(({ theme }) => ({
   width: "100%",
@@ -214,31 +214,13 @@ const SaveView = ({ globalObserver, model, id }) => {
   // If the user wants to save their work, they'll have to choose a name
   // so that the workspace can be identified in the list of saved workspaces later.
   const [sketchName, setSketchName] = React.useState("");
-  // We're gonna need to keep track of if functional cookies are allowed or not.
-  // We can check if functional cookies are OK by calling functionalOk(), but we have
-  // to make sure to re-render the component if the cookie-settings were to change (therefore
-  // we'll persist a value in the local state as well).
-  const [functionalCookiesOk, setFunctionalCookiesOk] = React.useState(
-    functionalOk()
-  );
   // We also have to keep track of all the saved sketches. Initiate the state with the sketches
   // currently stored in the local-storage.
   const [savedSketches, setSavedSketches] = React.useState(
     model.getSketchesFromStorage()
   );
-
-  // An effect subscribing to an event sent from the cookie-handler when the
-  // cookie-settings change. If the settings change, we make sure to update the
-  // local state with the current settings so that we can render the appropriate component.
-  React.useEffect(() => {
-    globalObserver.subscribe("core.cookieLevelChanged", () =>
-      setFunctionalCookiesOk(functionalOk())
-    );
-    return () => {
-      globalObserver.unsubscribe("core.cookieLevelChanged");
-    };
-  }, [globalObserver]);
-
+  // We're gonna need to keep track of if functional cookies are allowed or not.
+  const { functionalCookiesOk } = useCookieStatus(globalObserver);
   // We have to get some information about the current activity (view)
   const activity = model.getActivityFromId(id);
   // Let's make sure we're allowing for functional cookies, and if we aren't
