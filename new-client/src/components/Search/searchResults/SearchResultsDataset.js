@@ -164,10 +164,35 @@ class SearchResultsDataset extends React.Component {
                   handleOnFeatureClick(f);
                 }}
                 onKeyDown={(event) => handleOnFeatureKeyPress(event, f)}
-                onMouseEnter={
-                  !isMobile ? (e) => this.setPreviewFeature(e, f) : null
-                }
-                onMouseLeave={!isMobile ? this.resetPreview : null}
+                onMouseEnter={(e) => {
+                  if (!isMobile) {
+                    this.props.localObserver.publish(
+                      "map.setHighLightedStyle",
+                      f
+                    );
+                    this.setPreviewFeature(e, f);
+                  }
+                }}
+                onMouseLeave={() => {
+                  if (!isMobile) {
+                    // Create a list of ol_uids of selected features
+                    const selectedOlUids = this.props.selectedFeatures.map(
+                      (f) => f.feature.ol_uid
+                    );
+                    // Check if the current feature is in the list of selected features
+                    if (selectedOlUids.includes(f.ol_uid)) {
+                      // If so, reset the style to "selection" style for that feature…
+                      this.props.localObserver.publish(
+                        "map.setSelectedFeatureStyle",
+                        f
+                      );
+                    } else {
+                      // …else, remove the styling entirely (fallback to default OL)
+                      f.setStyle(null);
+                    }
+                    this.resetPreview();
+                  }
+                }}
               >
                 <SearchResultsDatasetFeature
                   feature={f}
