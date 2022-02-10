@@ -54,6 +54,13 @@ const SketchSaver = (props) => {
     props.setSketchName(e.target.value);
   };
 
+  const handleSaveSketchClick = () => {
+    props.model.addCurrentSketchToStorage({
+      title: props.sketchName,
+    });
+    props.setSavedSketches(props.model.getSketchesFromStorage());
+  };
+
   // Returns an object stating if the save-button should be disabled or not, along
   // with a tooltip-message.
   const getSaveButtonState = () => {
@@ -110,6 +117,7 @@ const SketchSaver = (props) => {
                 size="small"
                 variant="contained"
                 disabled={saveButtonState.disabled}
+                onClick={handleSaveSketchClick}
               >
                 Spara
               </Button>
@@ -174,13 +182,14 @@ const SavedSketch = (props) => {
   );
 };
 
-const SavedSketchList = ({ savedSketches, setSavedSketches }) => {
+const SavedSketchList = ({ model, savedSketches, setSavedSketches }) => {
   const handleAddToMapClick = (id) => {
     console.log(`Adding sketch with id ${id} to the map!`);
   };
 
-  const handleRemoveClick = (id) => {
-    setSavedSketches(savedSketches.filter((sketch) => sketch.id !== id));
+  const handleRemoveClick = (title) => {
+    model.removeSketchFromStorage(title);
+    setSavedSketches(savedSketches.filter((sketch) => sketch.title !== title));
   };
 
   return (
@@ -201,7 +210,7 @@ const SavedSketchList = ({ savedSketches, setSavedSketches }) => {
               title={sketch.title}
               date={sketch.date}
               handleAddToMapClick={handleAddToMapClick}
-              handleRemoveClick={handleRemoveClick}
+              handleRemoveClick={() => handleRemoveClick(sketch.title)}
             />
           );
         })}
@@ -219,6 +228,7 @@ const SaveView = ({ globalObserver, model, id }) => {
   const [savedSketches, setSavedSketches] = React.useState(
     model.getSketchesFromStorage()
   );
+  console.log("savedSketches: ", savedSketches);
   // We're gonna need to keep track of if functional cookies are allowed or not.
   const { functionalCookiesOk } = useCookieStatus(globalObserver);
   // We have to get some information about the current activity (view)
@@ -235,13 +245,16 @@ const SaveView = ({ globalObserver, model, id }) => {
       </Grid>
       <Grid item xs={12}>
         <SketchSaver
+          model={model}
           sketchName={sketchName}
           setSketchName={setSketchName}
           savedSketches={savedSketches}
+          setSavedSketches={setSavedSketches}
         />
       </Grid>
       <Grid item xs={12}>
         <SavedSketchList
+          model={model}
           savedSketches={savedSketches}
           setSavedSketches={setSavedSketches}
         />

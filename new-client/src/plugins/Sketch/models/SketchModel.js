@@ -45,6 +45,8 @@ class SketchModel {
   #createSketchObject = (sketchInformation) => {
     return {
       ...sketchInformation,
+      id: this.#generateRandomString(),
+      date: this.#getDateTimeString(),
       features: this.#drawModel
         .getAllDrawnFeatures()
         .map((f) => this.#prepareFeatureForStorage(f)),
@@ -357,9 +359,9 @@ class SketchModel {
   // in the the sketch-layer. If a sketch with the same id as the one supplied one already exist,
   // the already stored sketch will be over-written.
   addCurrentSketchToStorage = (sketchInfo) => {
-    // First we'll make sure to remove any potential sketch (with same id) already in storage.
-    this.removeSketchFromStorage(sketchInfo.id);
-    // Then we'll create a sketch (an object containing the sketch-information along with the
+    // First we'll make sure to remove any potential sketch (with same title) already in storage.
+    this.removeSketchFromStorage(sketchInfo.title);
+    // Then we'll create a sketch (an object containing the supplied sketch-information along with the
     // features currently existing in the sketch-layer).
     const sketch = this.#createSketchObject(sketchInfo);
     // Then we'll get all the currently stored sketches.
@@ -376,10 +378,12 @@ class SketchModel {
     );
   };
 
-  // Updates the local-storage by removing the sketch corresponding to the supplied id
-  removeSketchFromStorage = (id) => {
+  // Updates the local-storage by removing the sketch corresponding to the supplied title.
+  // Why title and not an id? Since we dont allow for multiple sketches with the same title, we can
+  // use the title as an id.
+  removeSketchFromStorage = (title) => {
     const storedSketches = this.getSketchesFromStorage();
-    this.#setStoredSketches(storedSketches.filter((f) => !f.includes(id)));
+    this.#setStoredSketches(storedSketches.filter((f) => f.title !== title));
   };
 }
 export default SketchModel;
