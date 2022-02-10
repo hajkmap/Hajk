@@ -1494,12 +1494,15 @@ class DrawModel {
     currentInteraction && this.toggleDrawInteraction("");
     features.forEach((f) => {
       // First we'll grab the style- and text-settings. (At this point they will
-      // either be undefined or a string.).
+      // either be undefined or a string.). We also have to grab the userDrawn-prop
+      // (which should be a boolean, but since kml will be a string...).
       const extractedStyle = f.get("EXTRACTED_STYLE");
       const textSettings = f.get("TEXT_SETTINGS");
-      // If the setting exist, we parse it and apply the parsed setting.
+      const userDrawn = f.get("USER_DRAWN");
+      // // If the setting exist, we parse it and apply the parsed setting.
       extractedStyle && f.set("EXTRACTED_STYLE", JSON.parse(extractedStyle));
       textSettings && f.set("TEXT_SETTINGS", JSON.parse(textSettings));
+      userDrawn && f.set("USER_DRAWN", JSON.parse(userDrawn));
       // Then we can add the feature to the map. We'll provide "silent" as well,
       // since we don't want any events to trigger when adding kml-features. (For example
       // when adding a text-feature, normally an event would fire, allowing the user to enter
