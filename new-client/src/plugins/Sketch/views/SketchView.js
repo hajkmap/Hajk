@@ -13,6 +13,8 @@ import DeleteView from "./DeleteView";
 import MoveView from "./MoveView";
 import EditView from "./EditView";
 import SettingsView from "./SettingsView";
+// Hooks
+import useCookieStatus from "hooks/useCookieStatus";
 
 // The SketchView is the main view for the Sketch-plugin.
 const SketchView = (props) => {
@@ -21,8 +23,8 @@ const SketchView = (props) => {
   const { position: pluginPosition } = props.options ?? "left";
   // We are going to be using the sketch-, kml-, and draw-model. Let's destruct them.
   const { model, drawModel, kmlModel } = props;
-  // We are gonna need the localObserver
-  const { localObserver } = props;
+  // We are gonna need the local- and global-observer
+  const { localObserver, globalObserver } = props;
   // The current draw-type is also required, along with it's set:er.
   const { activeDrawType, setActiveDrawType } = props;
   // We're gonna need to keep track of the current chosen activity.
@@ -45,10 +47,17 @@ const SketchView = (props) => {
   const [removedFeatures, setRemovedFeatures] = React.useState(
     model.getRemovedFeaturesFromStorage()
   );
+  // We're gonna need to keep track of if we're allowed to save stuff in LS. Let's use the hook.
+  const { functionalCookiesOk } = useCookieStatus(globalObserver);
 
   // Handler making sure to keep the removed features updated when a new feature is removed.
   const handleFeatureRemoved = React.useCallback(
     (feature) => {
+      // If the user has chosen not to accept functional cookies, we cannot save the recently
+      // removed feature. In that case, let's return right away.
+      if (!functionalCookiesOk) {
+        return;
+      }
       // There are some special cases where the removed feature should not be added
       // to the list of removed features. More information can be found in the method
       // declaration.
@@ -65,12 +74,17 @@ const SketchView = (props) => {
         [feature, ...removedFeatures].slice(0, MAX_REMOVED_FEATURES)
       );
     },
-    [model, removedFeatures]
+    [model, removedFeatures, functionalCookiesOk]
   );
 
   // Handler making sure to keep the removed features updated when the user has pressed "removed all features".
   const handleFeaturesRemoved = React.useCallback(
     (features) => {
+      // If the user has chosen not to accept functional cookies, we cannot save the recently
+      // removed feature. In that case, let's return right away.
+      if (!functionalCookiesOk) {
+        return;
+      }
       // Since we might be dealing with thousands of features removed at the same time, we make sure
       // to grab only the first "MAX_REMOVED_FEATURES" (around 5).
       const lastRemovedFeatures = features.slice(0, MAX_REMOVED_FEATURES);
@@ -92,7 +106,7 @@ const SketchView = (props) => {
       // Then we'll update the state.
       setRemovedFeatures(removedFeaturesToShow);
     },
-    [model, removedFeatures]
+    [model, removedFeatures, functionalCookiesOk]
   );
 
   // Handler for when a feature is added to the draw-source via the addFeature-method
@@ -173,6 +187,7 @@ const SketchView = (props) => {
             model={model}
             drawModel={drawModel}
             removedFeatures={removedFeatures}
+            globalObserver={globalObserver}
           />
         );
       case "EDIT":
@@ -203,7 +218,7 @@ const SketchView = (props) => {
             id={activityId}
             model={model}
             drawModel={drawModel}
-            globalObserver={props.globalObserver}
+            globalObserver={globalObserver}
           />
         );
       case "UPLOAD":
