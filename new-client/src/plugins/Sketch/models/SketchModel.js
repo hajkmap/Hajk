@@ -59,7 +59,7 @@ class SketchModel {
   // so that we can extract the style when adding the feature to the map again;
   #prepareFeatureForStorage = (f) => {
     // So first, we'll decorate the feature with its style-information
-    f.set("EXTRACTED_STYLE", this.#extractFeatureStyle(f));
+    f.set("EXTRACTED_STYLE", this.#drawModel.extractFeatureStyleInfo(f));
     // Then we'll create the geoJSON, and return that.
     return this.#geoJSONParser.writeFeature(f);
   };
@@ -69,96 +69,6 @@ class SketchModel {
     return ACTIVITIES.find((activity) => {
       return activity.id === id;
     });
-  };
-
-  // Extracts the fill-style from the supplied feature-style
-  #getFillStyle = (featureStyle) => {
-    try {
-      // Since we might be dealing with a style-array instead of a style-object
-      // (in case of the special Arrow feature-type) we have to make sure to get
-      // the actual base-style (which is located at position 0 in the style-array).
-      const color = Array.isArray(featureStyle)
-        ? featureStyle[0].getFill().getColor()
-        : featureStyle.getFill().getColor();
-      return { color };
-    } catch (error) {
-      console.error(`Failed to extract fill-style, ${error.message}`);
-      return { color: null };
-    }
-  };
-
-  // Extracts the stroke-style from the supplied feature-style
-  #getStrokeStyle = (featureStyle) => {
-    try {
-      // Since we might be dealing with a style-array instead of a style-object
-      // (in case of the special Arrow feature-type) we have to make sure to get
-      // the actual base-style (which is located at position 0 in the style-array).
-      const s = Array.isArray(featureStyle)
-        ? featureStyle[0].getStroke()
-        : featureStyle.getStroke();
-      const color = s.getColor();
-      const dash = s.getLineDash();
-      const width = s.getWidth();
-      return {
-        color,
-        dash,
-        width,
-      };
-    } catch (error) {
-      console.error(`Failed to extract stroke-style, ${error.message}`);
-      return { color: null, dash: null, width: null };
-    }
-  };
-
-  // Extracts the image-style from the supplied feature-style
-  #getImageStyle = (featureStyle) => {
-    // Since we might be dealing with a style-array instead of a style-object
-    // (in case of the special Arrow feature-type) we have to make sure to get
-    // the actual base-style (which is located at position 0 in the style-array).
-    const s = Array.isArray(featureStyle)
-      ? featureStyle[0]?.getImage()
-      : featureStyle?.getImage();
-    // Let's extract the fill- and stroke-style from the image-style.
-    const fillStyle = s?.getFill();
-    const strokeStyle = s?.getStroke();
-    // Let's make sure the image-style has fill- and stroke-style before moving on
-    if (!fillStyle || !strokeStyle) {
-      return {
-        fillColor: null,
-        strokeColor: null,
-        strokeWidth: null,
-        dash: null,
-      };
-    }
-    const fillColor = fillStyle.getColor();
-    const strokeColor = strokeStyle.getColor();
-    const strokeWidth = strokeStyle.getWidth();
-    const dash = strokeStyle.getLineDash();
-    return { fillColor, strokeColor, strokeWidth, dash };
-  };
-
-  // Extracts and returns information about the feature style.
-  #extractFeatureStyle = (feature) => {
-    // Let's run this in a try-catch since we cannot be sure that a
-    // real feature is supplied. (I.e. getStyle() etc. might not exist).
-    try {
-      const featureStyle = feature?.getStyle();
-      // If no feature was supplied, or if we're unable to extract the style,
-      // we return null.
-      if (!featureStyle) {
-        return { fillStyle: null, strokeStyle: null, imageStyle: null };
-      }
-      // If we were able to extract the style we can continue by extracting
-      // the fill- and stroke-style.
-      const fillStyle = this.#getFillStyle(featureStyle);
-      const strokeStyle = this.#getStrokeStyle(featureStyle);
-      const imageStyle = this.#getImageStyle(featureStyle);
-      // And return an object containing them
-      return { fillStyle, strokeStyle, imageStyle };
-    } catch (error) {
-      console.error(`Failed to extract feature-style. Error: ${error}`);
-      return { fillStyle: null, strokeStyle: null, imageStyle: null };
-    }
   };
 
   // Returns the current date and time on YYYY-MM-DD HH:MM:SS
@@ -232,7 +142,7 @@ class SketchModel {
   getFeatureStyle = (feature) => {
     try {
       // We're gonna need the base-style of the feature
-      const featureBaseStyle = this.#extractFeatureStyle(feature);
+      const featureBaseStyle = this.#drawModel.extractFeatureStyleInfo(feature);
       // Then we'll extract the text-settings. (These might be undefined, and
       // are only set if we are dealing with a text-feature).
       const featureTextStyle = feature.get("TEXT_SETTINGS");
@@ -319,7 +229,10 @@ class SketchModel {
   // track of it. (The "HANDLED_AT" prop will show the user at what time the feature was
   // removed, and the "HANDLED_ID" will be used if the user choses to restore the feature).
   decorateFeature = (feature) => {
-    feature.set("EXTRACTED_STYLE", this.#extractFeatureStyle(feature));
+    feature.set(
+      "EXTRACTED_STYLE",
+      this.#drawModel.extractFeatureStyleInfo(feature)
+    );
     feature.set("HANDLED_AT", this.#getDateTimeString());
     feature.set("HANDLED_ID", this.#generateRandomString());
   };

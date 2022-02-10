@@ -64,6 +64,7 @@ const Sketch = (props) => {
       new KmlModel({
         layerName: "sketchLayer",
         map: props.map,
+        drawModel: drawModel,
         enableDragAndDrop: true,
       })
   );

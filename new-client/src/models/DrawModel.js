@@ -701,6 +701,96 @@ class DrawModel {
     });
   };
 
+  // Extracts the fill-style from the supplied feature-style
+  #getFillStyleInfo = (featureStyle) => {
+    try {
+      // Since we might be dealing with a style-array instead of a style-object
+      // (in case of the special Arrow feature-type) we have to make sure to get
+      // the actual base-style (which is located at position 0 in the style-array).
+      const color = Array.isArray(featureStyle)
+        ? featureStyle[0].getFill().getColor()
+        : featureStyle.getFill().getColor();
+      return { color };
+    } catch (error) {
+      console.error(`Failed to extract fill-style, ${error.message}`);
+      return { color: null };
+    }
+  };
+
+  // Extracts the stroke-style from the supplied feature-style
+  #getStrokeStyleInfo = (featureStyle) => {
+    try {
+      // Since we might be dealing with a style-array instead of a style-object
+      // (in case of the special Arrow feature-type) we have to make sure to get
+      // the actual base-style (which is located at position 0 in the style-array).
+      const s = Array.isArray(featureStyle)
+        ? featureStyle[0].getStroke()
+        : featureStyle.getStroke();
+      const color = s.getColor();
+      const dash = s.getLineDash();
+      const width = s.getWidth();
+      return {
+        color,
+        dash,
+        width,
+      };
+    } catch (error) {
+      console.error(`Failed to extract stroke-style, ${error.message}`);
+      return { color: null, dash: null, width: null };
+    }
+  };
+
+  // Extracts the image-style from the supplied feature-style
+  #getImageStyleInfo = (featureStyle) => {
+    // Since we might be dealing with a style-array instead of a style-object
+    // (in case of the special Arrow feature-type) we have to make sure to get
+    // the actual base-style (which is located at position 0 in the style-array).
+    const s = Array.isArray(featureStyle)
+      ? featureStyle[0]?.getImage()
+      : featureStyle?.getImage();
+    // Let's extract the fill- and stroke-style from the image-style.
+    const fillStyle = s?.getFill();
+    const strokeStyle = s?.getStroke();
+    // Let's make sure the image-style has fill- and stroke-style before moving on
+    if (!fillStyle || !strokeStyle) {
+      return {
+        fillColor: null,
+        strokeColor: null,
+        strokeWidth: null,
+        dash: null,
+      };
+    }
+    const fillColor = fillStyle.getColor();
+    const strokeColor = strokeStyle.getColor();
+    const strokeWidth = strokeStyle.getWidth();
+    const dash = strokeStyle.getLineDash();
+    return { fillColor, strokeColor, strokeWidth, dash };
+  };
+
+  // Extracts and returns information about the feature style.
+  extractFeatureStyleInfo = (feature) => {
+    // Let's run this in a try-catch since we cannot be sure that a
+    // real feature is supplied. (I.e. getStyle() etc. might not exist).
+    try {
+      const featureStyle = feature?.getStyle();
+      // If no feature was supplied, or if we're unable to extract the style,
+      // we return null.
+      if (!featureStyle) {
+        return { fillStyle: null, strokeStyle: null, imageStyle: null };
+      }
+      // If we were able to extract the style we can continue by extracting
+      // the fill- and stroke-style.
+      const fillStyle = this.#getFillStyleInfo(featureStyle);
+      const strokeStyle = this.#getStrokeStyleInfo(featureStyle);
+      const imageStyle = this.#getImageStyleInfo(featureStyle);
+      // And return an object containing them
+      return { fillStyle, strokeStyle, imageStyle };
+    } catch (error) {
+      console.error(`Failed to extract feature-style. Error: ${error}`);
+      return { fillStyle: null, strokeStyle: null, imageStyle: null };
+    }
+  };
+
   // Updates the text-style on all drawn features. Used when toggling
   // if the measurement-label should be shown or not for example.
   #refreshFeaturesTextStyle = () => {
@@ -1361,7 +1451,11 @@ class DrawModel {
 
   // CUSTOM ADDER: Adds the supplied feature to the draw-source
   // TODO: Explain!
-  addFeature = (feature) => {
+  addFeature = (feature, settings) => {
+    // The initiator might have supplied some settings, for example "silent",
+    // which states if we should avoid firing events when adding the feature.
+    // If the silent-property is not supplied, we will fire events.
+    const silent = settings?.silent ?? false;
     try {
       // The supplied feature might contain a property with style-information
       // that has been set in an earlier session. Let's apply that style (if present)
@@ -1371,11 +1465,12 @@ class DrawModel {
         feature.setStyle(this.#getFeatureStyle(feature, extractedStyle));
       // When we're done styling we can add the feature.
       this.#drawSource.addFeature(feature);
-      // Then we'll publish some information about the addition.
-      this.#publishInformation({
-        subject: "drawModel.featureAdded",
-        payLoad: feature,
-      });
+      // Then we'll publish some information about the addition. (If we're not supposed to be silent).
+      !silent &&
+        this.#publishInformation({
+          subject: "drawModel.featureAdded",
+          payLoad: feature,
+        });
     } catch (error) {
       console.error(`Error while adding feature: ${error}`);
       this.#publishInformation({
@@ -1383,6 +1478,36 @@ class DrawModel {
         payLoad: error,
       });
     }
+  };
+
+  // Method used when adding features that has been parsed using the kmlModel-parser.
+  // The method makes sure to extract and parse eventual style- and text-settings that
+  // has been stored in the kml-features.
+  addKmlFeatures = (features) => {
+    // Let's check what the current draw-interaction is. If we have a draw-interaction
+    // active, we have to make sure to disable it so that any active event-listeners doesn't
+    // fire when adding the kml-features.
+    const currentInteraction = this.#drawInteraction
+      ? this.#drawInteraction.get("DRAW_METHOD")
+      : null;
+    // If the interaction isn't null, let's toggle the current interaction off.
+    currentInteraction && this.toggleDrawInteraction("");
+    features.forEach((f) => {
+      // First we'll grab the style- and text-settings. (At this point they will
+      // either be undefined or a string.).
+      const extractedStyle = f.get("EXTRACTED_STYLE");
+      const textSettings = f.get("TEXT_SETTINGS");
+      // If the setting exist, we parse it and apply the parsed setting.
+      extractedStyle && f.set("EXTRACTED_STYLE", JSON.parse(extractedStyle));
+      textSettings && f.set("TEXT_SETTINGS", JSON.parse(textSettings));
+      // Then we can add the feature to the map. We'll provide "silent" as well,
+      // since we don't want any events to trigger when adding kml-features. (For example
+      // when adding a text-feature, normally an event would fire, allowing the user to enter
+      // the text they want. Now we do not want that behavior).
+      this.addFeature(f, { silent: true });
+    });
+    // If we had a draw-interaction active before the kml-import, we have to enable it again.
+    currentInteraction && this.toggleDrawInteraction(currentInteraction);
   };
 
   // Clones the supplied ol-feature and adds it to the map (the added clone

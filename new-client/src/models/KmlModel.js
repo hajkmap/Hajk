@@ -13,6 +13,9 @@ import { Fill, Stroke, Style, Text } from "ol/style.js";
  *   If it already exists a layer in the map with the same name, the model will be connected
  *   to that layer. Otherwise, a new vector-layer will be created and added to the map.
  * - map: (olMap): The current map-object.
+ * Optional settings:
+ * - enableDragAndDrop: (boolean): If true, drag-and-drop of .kml-files will be active.
+ * - drawModel (DrawModel): If supplied, imported features will be drawn using the draw-model.
  *
  * Exposes a couple of methods:
  * - parseFeatures(kmlString, settings): Accepts a KML-string and tries to parse it to OL-features.
@@ -27,6 +30,7 @@ import { Fill, Stroke, Style, Text } from "ol/style.js";
 class KmlModel {
   #map;
   #layerName;
+  #drawModel;
   #kmlSource;
   #kmlLayer;
   #parser;
@@ -41,6 +45,7 @@ class KmlModel {
     // Make sure that we keep track of the supplied settings.
     this.#map = settings.map;
     this.#layerName = settings.layerName;
+    this.#drawModel = settings.drawModel || null;
     // If a setting to enable drag-and-drop has been passes, we have to initiate
     // the listeners for that.
     settings.enableDragAndDrop && this.#addMapDropListeners();
@@ -469,8 +474,14 @@ class KmlModel {
     if (error !== null) {
       return { status: "FAILED", error: error };
     }
-    // Otherwise we add the parsed features to the kml-source.
-    this.#kmlSource.addFeatures(features);
+    // If a draw-model has been supplied, we use that model to add the
+    // features to the map.
+    if (this.#drawModel) {
+      this.#drawModel.addKmlFeatures(features);
+    } else {
+      // Otherwise we add the parsed features directly to the kml-source.
+      this.#kmlSource.addFeatures(features);
+    }
     // We have to make sure to update the current extent when we've added
     // features to the kml-source.
     this.#currentExtent = this.#kmlSource.getExtent();
@@ -541,6 +552,21 @@ class KmlModel {
       const clonedFeature = feature.clone();
       // Let's check if we're dealing with a circle
       const geomIsCircle = clonedFeature.getGeometry() instanceof Circle;
+      // If a drawModel has been supplied, we have to make sure to get and set
+      // the specific style-information used when drawing. We also have to make sure
+      // to stringify the information, since the kml-format does not handle objects.
+      if (this.#drawModel) {
+        clonedFeature.set(
+          "EXTRACTED_STYLE",
+          JSON.stringify(this.#drawModel.extractFeatureStyleInfo(feature))
+        );
+      }
+      // We also have to extract and stringify eventual text-settings. (Used for
+      // the text-features in the sketch-plugin to determine text-size etc.).
+      clonedFeature.set(
+        "TEXT_SETTINGS",
+        JSON.stringify(feature.get("TEXT_SETTINGS"))
+      );
       // If we're dealing with a circle, we have to make sure to simplify
       // the geometry since the kml standard does not like circles.
       if (geomIsCircle) {
