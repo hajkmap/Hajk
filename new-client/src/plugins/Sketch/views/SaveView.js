@@ -54,6 +54,9 @@ const SketchSaver = (props) => {
     props.setSketchName(e.target.value);
   };
 
+  // Handles when the user wants to add (or update an existing) sketch.
+  // The handler makes sure to trigger the model to update the local-storage,
+  // and also update the local state.
   const handleSaveSketchClick = () => {
     props.model.addCurrentSketchToStorage({
       title: props.sketchName,
@@ -132,27 +135,33 @@ const SketchSaver = (props) => {
 // A simple component containing information about a saved sketch along
 // with buttons allowing the user to add the sketch to the map, or delete
 // the saved sketch entirely.
-const SavedSketch = (props) => {
+const SavedSketch = ({
+  sketchInfo,
+  handleRemoveClick,
+  handleAddToMapClick,
+}) => {
   return (
     <Zoom in appear>
       <StyledPaper>
         <Grid container justify="space-between" alignItems="center">
           <Grid item xs={8}>
-            <Tooltip title={props.title}>
+            <Tooltip title={sketchInfo.title}>
               <Grid
                 item
                 xs={12}
                 style={{ overflow: "hidden", textOverflow: "ellipsis" }}
               >
                 <Typography variant="button" noWrap>
-                  {props.title}
+                  {sketchInfo.title}
                 </Typography>
               </Grid>
             </Tooltip>
             <Grid item xs={12}>
-              <Tooltip title={`Arbetsytan uppdaterades senast ${props.date}`}>
+              <Tooltip
+                title={`Arbetsytan uppdaterades senast ${sketchInfo.date}`}
+              >
                 <Typography variant="caption">
-                  {`Uppdaterad: ${props.date?.split(" ")[0]}`}
+                  {`Uppdaterad: ${sketchInfo.date?.split(" ")[0]}`}
                 </Typography>
               </Tooltip>
             </Grid>
@@ -160,18 +169,12 @@ const SavedSketch = (props) => {
 
           <Grid container item xs={4} justify="flex-end">
             <Tooltip title="Klicka för att radera arbetsytan.">
-              <IconButton
-                size="small"
-                onClick={() => props.handleRemoveClick(props.id)}
-              >
+              <IconButton size="small" onClick={handleRemoveClick}>
                 <DeleteIcon />
               </IconButton>
             </Tooltip>
             <Tooltip title="Klicka för att läsa in objekten.">
-              <IconButton
-                size="small"
-                onClick={() => props.handleAddToMapClick(props.id)}
-              >
+              <IconButton size="small" onClick={handleAddToMapClick}>
                 <AddIcon />
               </IconButton>
             </Tooltip>
@@ -183,13 +186,17 @@ const SavedSketch = (props) => {
 };
 
 const SavedSketchList = ({ model, savedSketches, setSavedSketches }) => {
-  const handleAddToMapClick = (id) => {
-    console.log(`Adding sketch with id ${id} to the map!`);
+  const handleAddToMapClick = (sketch) => {
+    model.addSketchToMap(sketch);
   };
 
-  const handleRemoveClick = (title) => {
-    model.removeSketchFromStorage(title);
-    setSavedSketches(savedSketches.filter((sketch) => sketch.title !== title));
+  const handleRemoveClick = (sketch) => {
+    model.removeSketchFromStorage(sketch);
+    setSavedSketches(
+      savedSketches.filter(
+        (s) => !model.equalsIgnoringCase(s.title, sketch.title)
+      )
+    );
   };
 
   return (
@@ -206,11 +213,9 @@ const SavedSketchList = ({ model, savedSketches, setSavedSketches }) => {
           return (
             <SavedSketch
               key={sketch.id}
-              id={sketch.id}
-              title={sketch.title}
-              date={sketch.date}
-              handleAddToMapClick={handleAddToMapClick}
-              handleRemoveClick={() => handleRemoveClick(sketch.title)}
+              sketchInfo={sketch}
+              handleAddToMapClick={() => handleAddToMapClick(sketch)}
+              handleRemoveClick={() => handleRemoveClick(sketch)}
             />
           );
         })}
@@ -228,7 +233,6 @@ const SaveView = ({ globalObserver, model, id }) => {
   const [savedSketches, setSavedSketches] = React.useState(
     model.getSketchesFromStorage()
   );
-  console.log("savedSketches: ", savedSketches);
   // We're gonna need to keep track of if functional cookies are allowed or not.
   const { functionalCookiesOk } = useCookieStatus(globalObserver);
   // We have to get some information about the current activity (view)

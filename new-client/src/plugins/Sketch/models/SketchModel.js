@@ -360,7 +360,8 @@ class SketchModel {
   // the already stored sketch will be over-written.
   addCurrentSketchToStorage = (sketchInfo) => {
     // First we'll make sure to remove any potential sketch (with same title) already in storage.
-    this.removeSketchFromStorage(sketchInfo.title);
+    // We do this since we don't allow for multiple sketches with the same title.
+    this.removeSketchFromStorage(sketchInfo);
     // Then we'll create a sketch (an object containing the supplied sketch-information along with the
     // features currently existing in the sketch-layer).
     const sketch = this.#createSketchObject(sketchInfo);
@@ -368,6 +369,14 @@ class SketchModel {
     const storedSketches = this.getSketchesFromStorage();
     // Then we'll update the stored sketches with the supplied one.
     this.#setStoredSketches([sketch, ...storedSketches]);
+  };
+
+  // Adds the features in the supplied sketch to the map by first parsing them
+  // (they are stored as geoJSON, and we want to add them as OL-features).
+  addSketchToMap = (sketch) => {
+    sketch.features.forEach((f) => {
+      this.#drawModel.addFeature(this.#geoJSONParser.readFeature(f));
+    });
   };
 
   // Updates the local-storage by removing the feature corresponding to the supplied id
@@ -380,10 +389,25 @@ class SketchModel {
 
   // Updates the local-storage by removing the sketch corresponding to the supplied title.
   // Why title and not an id? Since we dont allow for multiple sketches with the same title, we can
-  // use the title as an id.
-  removeSketchFromStorage = (title) => {
+  // use the title as an id. Another reason is that in some cases, we generate an id after we've made sure
+  // to remove potential sketches with the same title.
+  removeSketchFromStorage = (sketch) => {
     const storedSketches = this.getSketchesFromStorage();
-    this.#setStoredSketches(storedSketches.filter((f) => f.title !== title));
+    this.#setStoredSketches(
+      storedSketches.filter(
+        (s) => !this.equalsIgnoringCase(s.title, sketch.title)
+      )
+    );
+  };
+
+  // Checks if two strings are equal, ignoring case.
+  equalsIgnoringCase = (s1, s2) => {
+    // If two strings were not supplied, we'll return false.
+    if (typeof s1 !== "string" || typeof s2 !== "string") {
+      return false;
+    }
+    // Otherwise we'll return the result of a lowercase-compare.
+    return s1.toLowerCase() === s2.toLowerCase();
   };
 }
 export default SketchModel;
