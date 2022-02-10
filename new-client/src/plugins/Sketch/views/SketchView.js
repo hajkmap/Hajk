@@ -19,8 +19,8 @@ const SketchView = (props) => {
   // We want to render the ActivityMenu on the same side as the plugin
   // is rendered (left or right). Let's grab the prop stating where it is rendered!
   const { position: pluginPosition } = props.options ?? "left";
-  // We are going to be using the sketch- and draw-model. Let's destruct them.
-  const { model, drawModel } = props;
+  // We are going to be using the sketch-, kml-, and draw-model. Let's destruct them.
+  const { model, drawModel, kmlModel } = props;
   // We are gonna need the localObserver
   const { localObserver } = props;
   // The current draw-type is also required, along with it's set:er.
@@ -207,14 +207,7 @@ const SketchView = (props) => {
           />
         );
       case "UPLOAD":
-        return (
-          <UploadView
-            id={activityId}
-            model={model}
-            drawModel={drawModel}
-            globalObserver={props.globalObserver}
-          />
-        );
+        return <UploadView id={activityId} model={model} kmlModel={kmlModel} />;
       case "SETTINGS":
         return (
           <SettingsView id={activityId} model={model} drawModel={drawModel} />

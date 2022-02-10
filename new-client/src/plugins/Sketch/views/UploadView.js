@@ -1,5 +1,5 @@
 import React from "react";
-import { Grid } from "@material-ui/core";
+import { Button, Grid } from "@material-ui/core";
 import Information from "../components/Information";
 
 const UploadView = (props) => {
@@ -9,6 +9,11 @@ const UploadView = (props) => {
     <Grid container>
       <Grid item xs={12}>
         <Information text={activity.information} />
+      </Grid>
+      <Grid item xs={12}>
+        <Button fullWidth onClick={() => props.kmlModel.export()}>
+          Exportera
+        </Button>
       </Grid>
     </Grid>
   );

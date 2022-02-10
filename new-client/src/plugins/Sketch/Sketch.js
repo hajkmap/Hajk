@@ -9,6 +9,7 @@ import SketchView from "./views/SketchView";
 // Models
 import SketchModel from "./models/SketchModel";
 import DrawModel from "../../models/DrawModel";
+import KmlModel from "models/KmlModel";
 
 const Sketch = (props) => {
   // We're gonna need to keep track of the current chosen activity. ("ADD", "REMOVE", etc).
@@ -54,6 +55,16 @@ const Sketch = (props) => {
         drawModel: drawModel,
         modifyDefaultEnabled: modifyEnabled,
         translateDefaultEnabled: translateEnabled,
+      })
+  );
+
+  // We'll also need a KML-model so that the user can import and export to/from .kml.
+  const [kmlModel] = React.useState(
+    () =>
+      new KmlModel({
+        layerName: "sketchLayer",
+        map: props.map,
+        enableDragAndDrop: true,
       })
   );
 
@@ -157,6 +168,7 @@ const Sketch = (props) => {
       <SketchView
         model={sketchModel}
         drawModel={drawModel}
+        kmlModel={kmlModel}
         options={props.options}
         localObserver={localObserver}
         globalObserver={props.app.globalObserver}
