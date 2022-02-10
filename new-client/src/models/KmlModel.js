@@ -41,6 +41,9 @@ class KmlModel {
     // Make sure that we keep track of the supplied settings.
     this.#map = settings.map;
     this.#layerName = settings.layerName;
+    // If a setting to enable drag-and-drop has been passes, we have to initiate
+    // the listeners for that.
+    settings.enableDragAndDrop && this.#addMapDropListeners();
     // We are gonna need a kml parser obviously.
     this.#parser = new KML();
     // We are going to be keeping track of the current extent of the kml-source.
@@ -68,6 +71,57 @@ class KmlModel {
       return this.#connectExistingVectorLayer();
     }
     return this.#createNewKmlLayer();
+  };
+
+  // Adds listeners so that .kml-files can be drag-and-dropped into the map,
+  // triggering an import.
+  #addMapDropListeners = () => {
+    const mapDiv = document.getElementById("map");
+    ["drop", "dragover", "dragend", "dragleave", "dragenter"].forEach(
+      (eventName) => {
+        mapDiv.addEventListener(
+          eventName,
+          this.#preventDefaultDropBehavior,
+          false
+        );
+      }
+    );
+    // We're gonna need to add some more listeners (for dragEnter etc.).
+    mapDiv.addEventListener("drop", this.#handleDrop, false);
+  };
+
+  // Prevents the default behaviors connected to drag-and-drop.
+  #preventDefaultDropBehavior = (e) => {
+    e.stopPropagation();
+    e.preventDefault();
+  };
+
+  // Handles the event when a file has been dropped. Tries to import the file as a .kml.
+  #handleDrop = (e) => {
+    try {
+      const file = e.dataTransfer.files[0];
+      if (file) {
+        const fileType = file.type ? file.type : file.name.split(".").pop();
+        //Not sure about filetype for kml... Qgis- and Hajk-generated kml:s does not contain any information about type.
+        //The application/vnd... is a guess.
+        if (
+          fileType === "kml" ||
+          fileType === "application/vnd.google-earth.kml+xml"
+        ) {
+          this.#importDroppedKml(file);
+        }
+      }
+    } catch (error) {
+      console.error(`Error importing KML-file... ${error}`);
+    }
+  };
+
+  #importDroppedKml = (file) => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      this.import(reader.result);
+    };
+    reader.readAsText(file);
   };
 
   // Checks wether the layerName supplied when initiating the KML-model
@@ -500,17 +554,17 @@ class KmlModel {
         .getGeometry()
         .transform(this.#map.getView().getProjection(), "EPSG:4326");
       // Here some styling-magic is happening... TODO: What?!
-      if (clonedFeature.getStyle()[1]) {
-        clonedFeature.setProperties({
-          style: JSON.stringify(
-            this.extractStyle(
-              clonedFeature.getStyle()[1] || clonedFeature.getStyle()[0],
-              geomIsCircle ? clonedFeature.getGeometry().getRadius() : false
-            )
-          ),
-          geometryType: clonedFeature.getGeometry().getType(),
-        });
-      }
+      // if (clonedFeature.getStyle()[1]) {
+      //   clonedFeature.setProperties({
+      //     style: JSON.stringify(
+      //       this.extractStyle(
+      //         clonedFeature.getStyle()[1] || clonedFeature.getStyle()[0],
+      //         geomIsCircle ? clonedFeature.getGeometry().getRadius() : false
+      //       )
+      //     ),
+      //     geometryType: clonedFeature.getGeometry().getType(),
+      //   });
+      // }
       // Finally, we can push the transformed feature to the
       // transformedFeatures-array.
       transformedFeatures.push(clonedFeature);
