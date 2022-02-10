@@ -367,7 +367,7 @@ class SketchModel {
     // Then we'll get all the currently stored sketches.
     const storedSketches = this.getSketchesFromStorage();
     // Then we'll update the stored sketches with the supplied one.
-    this.#setStoredSketches([...storedSketches, sketch]);
+    this.#setStoredSketches([sketch, ...storedSketches]);
   };
 
   // Updates the local-storage by removing the feature corresponding to the supplied id
