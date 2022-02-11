@@ -14,14 +14,17 @@ export default function useCookieStatus(globalObserver) {
   // cookie-settings change. If the settings change, we make sure to update the
   // state with the current cookie-status so that we can render the appropriate components.
   React.useEffect(() => {
-    globalObserver.subscribe("core.cookieLevelChanged", () =>
-      setCookieStatus({
-        functionalCookiesOk: functionalOk(),
-        thirdPartyCookiesOk: thirdPartyOk(),
-      })
+    const cookieListener = globalObserver.subscribe(
+      "core.cookieLevelChanged",
+      () => {
+        setCookieStatus({
+          functionalCookiesOk: functionalOk(),
+          thirdPartyCookiesOk: thirdPartyOk(),
+        });
+      }
     );
     return () => {
-      globalObserver.unsubscribe("core.cookieLevelChanged");
+      cookieListener.unsubscribe();
     };
   }, [globalObserver]);
 
