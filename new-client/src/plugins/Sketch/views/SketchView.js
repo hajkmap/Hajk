@@ -188,6 +188,7 @@ const SketchView = (props) => {
             drawModel={drawModel}
             removedFeatures={removedFeatures}
             globalObserver={globalObserver}
+            functionalCookiesOk={functionalCookiesOk}
           />
         );
       case "EDIT":
@@ -219,6 +220,7 @@ const SketchView = (props) => {
             model={model}
             drawModel={drawModel}
             globalObserver={globalObserver}
+            functionalCookiesOk={functionalCookiesOk}
           />
         );
       case "UPLOAD":

@@ -7,7 +7,6 @@ import DeleteIcon from "@material-ui/icons/Delete";
 
 import { MAX_SKETCHES } from "../constants";
 import Information from "../components/Information";
-import useCookieStatus from "hooks/useCookieStatus";
 
 const StyledPaper = styled(Paper)(({ theme }) => ({
   width: "100%",
@@ -36,11 +35,10 @@ const NotSupportedView = ({ globalObserver }) => {
       <Grid item xs={12}>
         <Button
           fullWidth
-          size="small"
           variant="contained"
           onClick={handleChangeCookieSettingsClick}
         >
-          Ändra cookie-inställningar
+          Cookie-inställningar
         </Button>
       </Grid>
     </Grid>
@@ -224,7 +222,7 @@ const SavedSketchList = ({ model, savedSketches, setSavedSketches }) => {
   );
 };
 
-const SaveView = ({ globalObserver, model, id }) => {
+const SaveView = ({ globalObserver, model, id, functionalCookiesOk }) => {
   // If the user wants to save their work, they'll have to choose a name
   // so that the workspace can be identified in the list of saved workspaces later.
   const [sketchName, setSketchName] = React.useState("");
@@ -233,8 +231,6 @@ const SaveView = ({ globalObserver, model, id }) => {
   const [savedSketches, setSavedSketches] = React.useState(
     model.getSketchesFromStorage()
   );
-  // We're gonna need to keep track of if functional cookies are allowed or not.
-  const { functionalCookiesOk } = useCookieStatus(globalObserver);
   // We have to get some information about the current activity (view)
   const activity = model.getActivityFromId(id);
   // Let's make sure we're allowing for functional cookies, and if we aren't

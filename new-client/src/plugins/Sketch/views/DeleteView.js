@@ -4,7 +4,6 @@ import { Button, IconButton, Zoom } from "@material-ui/core";
 import { Grid, Typography, Tooltip, Paper } from "@material-ui/core";
 import SettingsBackupRestoreIcon from "@material-ui/icons/SettingsBackupRestore";
 
-import useCookieStatus from "hooks/useCookieStatus";
 import Information from "../components/Information";
 
 const StyledPaper = styled(Paper)(({ theme }) => ({
@@ -34,11 +33,10 @@ const RecentlyRemovedNotSupported = ({ globalObserver }) => {
       <Grid item xs={12}>
         <Button
           fullWidth
-          size="small"
           variant="contained"
           onClick={handleChangeCookieSettingsClick}
         >
-          Ändra cookie-inställningar
+          Cookie-inställningar
         </Button>
       </Grid>
     </Grid>
@@ -80,11 +78,8 @@ const DeleteView = ({
   drawModel,
   removedFeatures,
   globalObserver,
+  functionalCookiesOk,
 }) => {
-  // We're gonna need to keep track of if functional cookies are allowed or not
-  // since we are saving the recently removed features in LS.
-  const { functionalCookiesOk } = useCookieStatus(globalObserver);
-
   // We have to get some information about the current activity (view)
   const activity = model.getActivityFromId(id);
 
