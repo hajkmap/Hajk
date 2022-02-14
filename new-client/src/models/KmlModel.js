@@ -389,9 +389,11 @@ class KmlModel {
     if (!features || features?.length === 0) {
       return null;
     }
-    // Otherwise we translate every feature to the map-views coordinate system
-    // and apply the feature style.
+    // Otherwise we check if the features are to be added via the drawModel. If they are, we set
+    // the USER_DRAWN-prop to true since all features in the draw-source _can_ be altered by the user.
+    // We also have to translate every feature to the map-views coordinate system and apply its style.
     features.forEach((feature) => {
+      this.#drawModel && feature.set("USER_DRAWN", true);
       this.#translateFeatureToViewSrs(feature);
       this.#setFeatureStyle(feature);
     });
@@ -553,20 +555,20 @@ class KmlModel {
       // Let's check if we're dealing with a circle
       const geomIsCircle = clonedFeature.getGeometry() instanceof Circle;
       // If a drawModel has been supplied, we have to make sure to get and set
-      // the specific style-information used when drawing. We also have to make sure
+      // the specific style-information used during drawing. We also have to make sure
       // to stringify the information, since the kml-format does not handle objects.
+      // We also have to extract and stringify eventual text-settings used. (Used for
+      // the text-features in the sketch-plugin to determine text-size etc.).
       if (this.#drawModel) {
         clonedFeature.set(
           "EXTRACTED_STYLE",
           JSON.stringify(this.#drawModel.extractFeatureStyleInfo(feature))
         );
+        clonedFeature.set(
+          "TEXT_SETTINGS",
+          JSON.stringify(feature.get("TEXT_SETTINGS"))
+        );
       }
-      // We also have to extract and stringify eventual text-settings. (Used for
-      // the text-features in the sketch-plugin to determine text-size etc.).
-      clonedFeature.set(
-        "TEXT_SETTINGS",
-        JSON.stringify(feature.get("TEXT_SETTINGS"))
-      );
       // If we're dealing with a circle, we have to make sure to simplify
       // the geometry since the kml standard does not like circles.
       if (geomIsCircle) {
