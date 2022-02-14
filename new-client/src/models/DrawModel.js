@@ -1499,6 +1499,11 @@ class DrawModel {
     currentInteraction && this.toggleDrawInteraction("");
     features.forEach((f) => {
       // If a draw-method-property is missing from the imported features, we have to add it.
+      // Why? Well, in the sketch-tool (which is using the draw-model) we rely on the fact that
+      // the draw-method is set so that we can present proper styling menus (polygons and lines have
+      // different menus for example). The imported kml-features might not have been created with
+      // the hajk-drawModel, and therefore lacks this property. We'll set it to the geometry-type
+      // which should be sufficient.
       !f.get("DRAW_METHOD") && f.set("DRAW_METHOD", f.getGeometry().getType());
       // Let's grab the style- and text-settings. (At this point they will
       // can be undefined, a string, or the actual objects). We also have to grab the userDrawn-prop
