@@ -1498,7 +1498,9 @@ class DrawModel {
     // If the interaction isn't null, let's toggle the current interaction off.
     currentInteraction && this.toggleDrawInteraction("");
     features.forEach((f) => {
-      // First we'll grab the style- and text-settings. (At this point they will
+      // If a draw-method-property is missing from the imported features, we have to add it.
+      !f.get("DRAW_METHOD") && f.set("DRAW_METHOD", f.getGeometry().getType());
+      // Let's grab the style- and text-settings. (At this point they will
       // can be undefined, a string, or the actual objects). We also have to grab the userDrawn-prop
       // (which should be a boolean, but since we're dealing with kml, it might be a string...).
       const extractedStyle = f.get("EXTRACTED_STYLE");
