@@ -710,7 +710,7 @@ class DrawModel {
       const color = Array.isArray(featureStyle)
         ? featureStyle[0].getFill().getColor()
         : featureStyle.getFill().getColor();
-      return { color };
+      return { color: this.getRGBAString(color) };
     } catch (error) {
       console.error(`Failed to extract fill-style, ${error.message}`);
       return { color: null };
@@ -730,7 +730,7 @@ class DrawModel {
       const dash = s.getLineDash();
       const width = s.getWidth();
       return {
-        color,
+        color: this.getRGBAString(color),
         dash,
         width,
       };
@@ -749,8 +749,8 @@ class DrawModel {
       ? featureStyle[0]?.getImage()
       : featureStyle?.getImage();
     // Let's extract the fill- and stroke-style from the image-style.
-    const fillStyle = s?.getFill();
-    const strokeStyle = s?.getStroke();
+    const fillStyle = s?.getFill?.();
+    const strokeStyle = s?.getStroke?.();
     // Let's make sure the image-style has fill- and stroke-style before moving on
     if (!fillStyle || !strokeStyle) {
       return {
@@ -764,7 +764,12 @@ class DrawModel {
     const strokeColor = strokeStyle.getColor();
     const strokeWidth = strokeStyle.getWidth();
     const dash = strokeStyle.getLineDash();
-    return { fillColor, strokeColor, strokeWidth, dash };
+    return {
+      fillColor: this.getRGBAString(fillColor),
+      strokeColor: this.getRGBAString(strokeColor),
+      strokeWidth,
+      dash,
+    };
   };
 
   // Extracts and returns information about the feature style.
@@ -1494,15 +1499,18 @@ class DrawModel {
     currentInteraction && this.toggleDrawInteraction("");
     features.forEach((f) => {
       // First we'll grab the style- and text-settings. (At this point they will
-      // either be undefined or a string.). We also have to grab the userDrawn-prop
-      // (which should be a boolean, but since kml will be a string...).
+      // can be undefined, a string, or the actual objects). We also have to grab the userDrawn-prop
+      // (which should be a boolean, but since we're dealing with kml, it might be a string...).
       const extractedStyle = f.get("EXTRACTED_STYLE");
       const textSettings = f.get("TEXT_SETTINGS");
       const userDrawn = f.get("USER_DRAWN");
-      // // If the setting exist, we parse it and apply the parsed setting.
-      extractedStyle && f.set("EXTRACTED_STYLE", JSON.parse(extractedStyle));
-      textSettings && f.set("TEXT_SETTINGS", JSON.parse(textSettings));
-      userDrawn && f.set("USER_DRAWN", JSON.parse(userDrawn));
+      // If the setting exist, and they are strings, we parse them and apply the parsed setting.
+      typeof extractedStyle === "string" &&
+        f.set("EXTRACTED_STYLE", JSON.parse(extractedStyle));
+      typeof textSettings === "string" &&
+        f.set("TEXT_SETTINGS", JSON.parse(textSettings));
+      typeof userDrawn === "string" &&
+        f.set("USER_DRAWN", JSON.parse(userDrawn));
       // Then we can add the feature to the map. We'll provide "silent" as well,
       // since we don't want any events to trigger when adding kml-features. (For example
       // when adding a text-feature, normally an event would fire, allowing the user to enter
@@ -1612,14 +1620,20 @@ class DrawModel {
     });
   };
 
-  // Accepts an RGBA-object containing r-, g-, b-, and a-properties and
-  // returns the string representation of the supplied object.
+  // Accepts an RGBA-object containing r-, g-, b-, and a-properties, or an array
+  // with four elements (r, g, b, and a in that order)...
+  // Returns the string representation of the supplied object (or array).
   getRGBAString = (o) => {
     // If nothing was supplied, return an empty string
     if (!o) {
       return "";
     }
-    return typeof o === "object" ? `rgba(${o.r},${o.g},${o.b},${o.a})` : o;
+    // Otherwise we check the type and return an rgba-string.
+    return Array.isArray(o)
+      ? `rgba(${o[0]},${o[1]},${o[2]},${o[3]})`
+      : typeof o === "object"
+      ? `rgba(${o.r},${o.g},${o.b},${o.a})`
+      : o;
   };
 
   // Accepts a RGBA-string and returns an object containing r-, g-, b-, and a-properties.
@@ -1826,11 +1840,11 @@ class DrawModel {
       ...newStyleSettings,
       //... and the potentially parsed colors.
       fillColor:
-        typeof fillColor === "object"
+        typeof fillColor !== "string"
           ? this.getRGBAString(fillColor)
           : fillColor,
       strokeColor:
-        typeof strokeColor === "object"
+        typeof strokeColor !== "string"
           ? this.getRGBAString(strokeColor)
           : strokeColor,
     };

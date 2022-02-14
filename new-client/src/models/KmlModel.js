@@ -393,9 +393,14 @@ class KmlModel {
     // the USER_DRAWN-prop to true since all features in the draw-source _can_ be altered by the user.
     // We also have to translate every feature to the map-views coordinate system and apply its style.
     features.forEach((feature) => {
-      this.#drawModel && feature.set("USER_DRAWN", true);
       this.#translateFeatureToViewSrs(feature);
       this.#setFeatureStyle(feature);
+      this.#drawModel && feature.set("USER_DRAWN", true);
+      this.#drawModel &&
+        feature.set(
+          "EXTRACTED_STYLE",
+          this.#drawModel.extractFeatureStyleInfo(feature)
+        );
     });
   };
 
