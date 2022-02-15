@@ -472,16 +472,16 @@ class DrawModel {
 
   // Creates a highlight style (a style marking the coordinates of the
   // supplied feature).
-  #getNodeHighlightStyle = () => {
+  #getNodeHighlightStyle = (feature) => {
     try {
       const style = new Style({
         image: new Circle({
           radius: 5,
           fill: new Fill({
-            color: "grey",
+            color: "grey", // TODO: Create highlight-settings
           }),
         }),
-        geometry: (feature) => {
+        geometry: () => {
           const coordinates = this.#getFeatureCoordinates(feature);
           return new MultiPoint(coordinates);
         },
@@ -1342,7 +1342,7 @@ class DrawModel {
     // Let's ignore text- and arrow-highlight for now...
     if (
       key === "EDIT_ACTIVE" &&
-      !["Text", "Arrow", "Point"].includes(feature.get("DRAW_METHOD"))
+      !["Arrow", "Point", "Text"].includes(feature.get("DRAW_METHOD"))
     ) {
       // If the "EDIT_ACTIVE" was changed to true, we add the highlight-style.
       if (feature.get("EDIT_ACTIVE")) {
