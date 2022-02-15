@@ -1385,8 +1385,10 @@ class DrawModel {
     // First we'll get the feature style-
     const featureStyle = feature.getStyle();
     // Then we'll remove the last style from the style array (the
-    // last style will be the highlight-style).
-    featureStyle.pop();
+    // last style will be the highlight-style). This can only be done if
+    // the style is an array obviously (which it should always be), but let's make sure
+    // that it is an array before trying to pop anything.
+    Array.isArray(featureStyle) && featureStyle.pop();
     // If the result is an array containing only one style-object,
     // well apply that style-object on the feature.
     if (featureStyle.length === 1) {
