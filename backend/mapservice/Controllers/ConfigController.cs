@@ -26,6 +26,17 @@ namespace MapService.Controllers
         ILog _log = LogManager.GetLogger(typeof(ConfigController));
 
         private readonly SettingsDbContext settingsDataContext = new SettingsDbContext();
+        private bool disableUpdates = ConfigurationManager.AppSettings["disableUpdates"] == "true" ? true : false;
+
+        /// <summary>
+        /// If update are disabled from config throw 403
+        /// </summary>
+        /// <returns></returns>
+        public void preventUpdates() {
+            if (this.disableUpdates == true) {
+                throw new HttpException(403, "Forbidden");
+            }
+        }
 
         private JToken GetMapConfigurationTitle(JToken mapConfiguration, string mapConfigurationFile)
         {
@@ -479,6 +490,8 @@ namespace MapService.Controllers
 
         public void Delete(string id)
         {
+            this.preventUpdates();
+
             string file = String.Format("{0}App_Data\\{1}.json", HostingEnvironment.ApplicationPhysicalPath, id);
             if (System.IO.File.Exists(file))
             {
@@ -493,6 +506,8 @@ namespace MapService.Controllers
 
         public void Create(string id)
         {
+            this.preventUpdates();
+
             string folder = String.Format("{0}App_Data", HostingEnvironment.ApplicationPhysicalPath);
             string file = String.Format("{0}\\{1}.json", folder, id);
             System.IO.File.Copy(folder + "\\templates\\map.template", file);
