@@ -324,6 +324,15 @@ class FirExportResidentListView extends React.PureComponent {
       .then((data) => {
         if (data.features?.length > 0) {
           this.sendResidentData(new GeoJSON().readFeatures(data));
+        } else {
+          this.setState({ loading: false });
+          this.props.closeSnackbar(this.snackBar);
+          this.snackBar = this.props.enqueueSnackbar(
+            "Kunde ej hitta några boende att exportera.",
+            {
+              variant: "warning",
+            }
+          );
         }
       })
       .catch((err) => {
