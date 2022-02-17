@@ -85,24 +85,41 @@ class CoordinatesTransformRow extends React.PureComponent {
       // infinite loops
       return;
     }
-    // Validate that the changed data is a finite number
-    this.setState({
-      coordinateX: event.value,
-      coordinateXFloat: event.floatValue,
-      wasModified: true,
-    });
+    if (!this.props.inverseAxis) {
+      // Validate that the changed data is a finite number
+      this.setState({
+        coordinateX: event.value,
+        coordinateXFloat: event.floatValue,
+        wasModified: true,
+      });
+    } else {
+      this.setState({
+        coordinateY: event.value,
+        coordinateYFloat: event.floatValue,
+        wasModified: true,
+      });
+    }
     if (isNaN(event.floatValue) || !isFinite(event.floatValue)) {
       this.setState({ errorX: "Ange ett decimaltal" });
     } else {
       this.setState({ errorX: "" });
       const updatedValue = event.floatValue;
 
-      // publish the new value so all other transformations and the marker is updated
-      this.localObserver.publish("newCoordinates", {
-        coordinates: [updatedValue, this.state.coordinateYFloat],
-        proj: this.props.transformation.code,
-        force: false,
-      });
+      if (!this.props.inverseAxis) {
+        // publish the new value so all other transformations and the marker is updated
+        this.localObserver.publish("newCoordinates", {
+          coordinates: [updatedValue, this.state.coordinateYFloat],
+          proj: this.props.transformation.code,
+          force: false,
+        });
+      } else {
+        // publish the new value so all other transformations and the marker is updated
+        this.localObserver.publish("newCoordinates", {
+          coordinates: [this.state.coordinateXFloat, updatedValue],
+          proj: this.props.transformation.code,
+          force: false,
+        });
+      }
     }
   }
 
@@ -116,24 +133,41 @@ class CoordinatesTransformRow extends React.PureComponent {
       // infinite loops
       return;
     }
-    // Validate that the changed data is a finite number7
-    this.setState({
-      coordinateY: event.value,
-      coordinateYFloat: event.floatValue,
-      wasModified: true,
-    });
+    if (!this.props.inverseAxis) {
+      // Validate that the changed data is a finite number
+      this.setState({
+        coordinateY: event.value,
+        coordinateYFloat: event.floatValue,
+        wasModified: true,
+      });
+    } else {
+      this.setState({
+        coordinateX: event.value,
+        coordinateXFloat: event.floatValue,
+        wasModified: true,
+      });
+    }
     if (isNaN(event.floatValue) || !isFinite(event.floatValue)) {
       this.setState({ errorY: "Ange ett decimaltal" });
     } else {
       this.setState({ errorY: "" });
       const updatedValue = event.floatValue;
 
-      // publish the new value so all other transformations and the marker is updated
-      this.localObserver.publish("newCoordinates", {
-        coordinates: [this.state.coordinateXFloat, updatedValue],
-        proj: this.props.transformation.code,
-        force: false,
-      });
+      if (!this.props.inverseAxis) {
+        // publish the new value so all other transformations and the marker is updated
+        this.localObserver.publish("newCoordinates", {
+          coordinates: [this.state.coordinateXFloat, updatedValue],
+          proj: this.props.transformation.code,
+          force: false,
+        });
+      } else {
+        // publish the new value so all other transformations and the marker is updated
+        this.localObserver.publish("newCoordinates", {
+          coordinates: [updatedValue, this.state.coordinateYFloat],
+          proj: this.props.transformation.code,
+          force: false,
+        });
+      }
     }
   }
 

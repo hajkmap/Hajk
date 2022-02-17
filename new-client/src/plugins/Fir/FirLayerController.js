@@ -299,6 +299,11 @@ class FirLayerController {
       .then((data) => {
         try {
           let features = new GeoJSON().readFeatures(data);
+          features = features.filter((feature) => {
+            return feature.get(this.model.config.wmsRealEstateLayer.idField)
+              ? true
+              : false;
+          });
           this.addFeatures(features, { zoomToLayer: false });
           this.observer.publish("fir.search.add", features);
         } catch (err) {

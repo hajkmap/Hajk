@@ -569,23 +569,25 @@ class GeosuiteExportView extends React.PureComponent {
     return documents.length > 0 ? (
       <Grid container columns={1}>
         <div className={classes.checkBoxList}>
-          {this.state.documents.map((document) => {
-            return (
-              <Grid item key={document.id} className={classes.checkBoxItem}>
-                <FormControlLabel
-                  control={
-                    <Checkbox
-                      color="primary"
-                      checked={document.selected}
-                      onChange={this.handleDocumentCheckboxChange}
-                      value={document.id}
-                    />
-                  }
-                  label={document.title}
-                />
-              </Grid>
-            );
-          })}
+          {this.state.documents
+            .sort((a, b) => (a.title > b.title ? 1 : -1))
+            .map((document) => {
+              return (
+                <Grid item key={document.id} className={classes.checkBoxItem}>
+                  <FormControlLabel
+                    control={
+                      <Checkbox
+                        color="primary"
+                        checked={document.selected}
+                        onChange={this.handleDocumentCheckboxChange}
+                        value={document.id}
+                      />
+                    }
+                    label={document.title}
+                  />
+                </Grid>
+              );
+            })}
         </div>
       </Grid>
     ) : (
