@@ -4,6 +4,17 @@ import queryString from "query-string";
 import log4js from "../../api/utils/hajkLogger";
 import WebSocketMessageHandler from "./WebSocketMessageHandler";
 
+// Just a small example of how we can handle sending synchronized
+// messages to all connected clients.
+function broadcastToClients(clients) {
+  let broadcastId = 0;
+  setInterval(() => {
+    for (let c of clients.values()) {
+      c.send(`Broadcast message number ${++broadcastId}`);
+    }
+  }, 3000);
+}
+
 export default async (expressServer) => {
   const logger = log4js.getLogger("websockets");
 
@@ -21,6 +32,10 @@ export default async (expressServer) => {
       websocketServer.emit("connection", websocket, request);
     });
   });
+
+  // Let's setup a broadcast channel, just for fun. Any and all
+  // connected clients will get the same message at the same time.
+  broadcastToClients(websocketServer.clients);
 
   // Handler for established socket connection
   websocketServer.on(
@@ -51,18 +66,21 @@ export default async (expressServer) => {
         )}".`
       );
 
-      // We can send messages to the client. Here's a short demo that
-      // sends a message every 5th second:
+      // Let's be polite:
+      websocketConnection.send(`Hello ${websocketConnection.uuid}!`);
+
+      // We can also setup a health check:
+      let healthCheckId = 0;
       setInterval(() => {
         websocketConnection.send(
-          `Health check from sever for connection ${
+          `Health check ${++healthCheckId} for connection ${
             websocketConnection.uuid
           }. ${new Date().toISOString()}`
         );
-      }, 5000);
+      }, 1000);
 
-      // We can receive messages from the client. To handle them,
-      // we need this listener:
+      // In addition to sending, we can also receive messages from the client.
+      // To handle them, we need this listener:
       websocketConnection.on("message", (message) => {
         const parsedMessage = JSON.parse(message);
         logger.trace(
@@ -89,7 +107,8 @@ export default async (expressServer) => {
       // This will be called when connection is closed. Can be used for
       // various cleanups.
       websocketConnection.on("close", () => {
-        logger.trace(`Goodbye ${websocketConnection.uuid}`);
+        // Can't send a message at this time, but we can at least log
+        logger.trace(`Goodbye ${websocketConnection.uuid}!`);
       });
     }
   );
