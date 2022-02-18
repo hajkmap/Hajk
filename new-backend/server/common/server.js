@@ -11,6 +11,8 @@ import cookieParser from "cookie-parser";
 import log4js from "../api/utils/hajkLogger";
 import clfDate from "clf-date";
 
+import websockets from "./websockets";
+
 import { createProxyMiddleware } from "http-proxy-middleware";
 
 import sokigoFBProxy from "../api/middlewares/sokigo.fb.proxy";
@@ -316,7 +318,11 @@ export default class ExpressServer {
         `Server startup completed. Launched on port ${p}. (http://localhost:${p})`
       );
 
-    http.createServer(app).listen(port, welcome(port));
+    // Grab the Server…
+    const server = http.createServer(app).listen(port, welcome(port));
+
+    // …and supply it to the WebSocket component.
+    websockets(server);
 
     return app;
   }
