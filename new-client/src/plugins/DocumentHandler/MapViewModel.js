@@ -7,20 +7,18 @@ export default class MapViewModel {
   }
 
   convertMapSettingsUrlToOlSettings = (inputUrl) => {
-    let url = inputUrl.toLowerCase();
-    if (url.includes("x=") && url.includes("y=") && url.includes("z=")) {
-      let url = inputUrl.split("&");
-      let x = url[1].substring(2);
-      let y = url[2].substring(2);
-      let z = url[3].substring(2);
-      let l = url[4]?.substring(2);
-      let center = [x, y];
-      let zoom = z;
-      return {
-        center: center,
-        zoom: zoom,
-        layers: l,
-      };
+    try {
+      const params = new URLSearchParams(inputUrl);
+      if (params.has("x") && params.has("y") && params.has("z")) {
+        const center = [params.get("x"), params.get("y")];
+        return {
+          center: center,
+          zoom: params.get("z"),
+          layers: params.get("l"),
+        };
+      }
+    } catch (error) {
+      console.error(error);
     }
   };
 
