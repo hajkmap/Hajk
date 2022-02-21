@@ -69,7 +69,7 @@ export default class MapViewModel {
     );
   };
 
-  setMapLayersVisiblity(layersToShow, layersToHide) {
+  setMapLayersVisibility(layersToShow, layersToHide) {
     layersToShow.forEach((mapLayerToShow) => {
       if (mapLayerToShow.layerType === "group") {
         this.globalObserver.publish("layerswitcher.showLayer", mapLayerToShow);
