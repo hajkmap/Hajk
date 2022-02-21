@@ -9,16 +9,26 @@ export default class MapViewModel {
   convertMapSettingsUrlToOlSettings = (inputUrl) => {
     try {
       const params = new URLSearchParams(inputUrl);
-      if (params.has("x") && params.has("y") && params.has("z")) {
-        const center = [params.get("x"), params.get("y")];
-        return {
-          center: center,
-          zoom: params.get("z"),
-          layers: params.get("l"),
-        };
+      let center;
+      if (!params.has("x") || !params.has("y")) {
+        center = this.map.getView().getCenter();
+      } else {
+        center = [params.get("x"), params.get("y")];
       }
+      return {
+        center: center,
+        zoom: params.get("z") || this.map.getView().getZoom(),
+        layers: params.get("l"), // Allow 'null', we handle it later
+      };
     } catch (error) {
       console.error(error);
+      // In case parsing the params failed, let's ensure we have
+      // a valid return object:
+      return {
+        center: this.map.getView().getCenter(),
+        zoom: this.map.getView().getZoom(),
+        layers: null,
+      };
     }
   };
 
@@ -26,12 +36,15 @@ export default class MapViewModel {
     this.localObserver.subscribe("fly-to", (url) => {
       this.globalObserver.publish("core.minimizeWindow");
       const mapSettings = this.convertMapSettingsUrlToOlSettings(url);
-      const visibleLayers = mapSettings.layers.split(",");
 
-      const { layersToShow, layersToHide } =
-        this.getLayersToShowAndHide(visibleLayers);
+      if (mapSettings.layers !== null) {
+        const visibleLayers = mapSettings.layers.split(",");
+        const { layersToShow, layersToHide } =
+          this.getLayersToShowAndHide(visibleLayers);
 
-      this.setMapLayersVisiblity(layersToShow, layersToHide);
+        this.setMapLayersVisibility(layersToShow, layersToHide);
+      }
+
       this.flyTo(this.map.getView(), mapSettings.center, mapSettings.zoom);
     });
   };
