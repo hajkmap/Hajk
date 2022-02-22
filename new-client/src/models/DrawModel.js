@@ -472,7 +472,7 @@ class DrawModel {
 
   // Creates a highlight style (a style marking the coordinates of the
   // supplied feature).
-  #getNodeHighlightStyle = (feature) => {
+  #getNodeHighlightStyle = () => {
     try {
       const style = new Style({
         image: new Circle({
@@ -481,15 +481,30 @@ class DrawModel {
             color: "grey", // TODO: Create highlight-settings
           }),
         }),
-        geometry: () => {
-          const coordinates = this.#getFeatureCoordinates(feature);
-          return new MultiPoint(coordinates);
-        },
+        // geometry: (feature) => {
+        //   const coordinates = this.#getFeatureCoordinates(feature);
+        //   return new MultiPoint(coordinates);
+        // },
+        geometry: this.#getVertexGeometry,
       });
       return style;
     } catch (error) {
       console.error(`Could not create highlight style. Error: ${error}`);
       return null;
+    }
+  };
+
+  #getVertexGeometry = (feature) => {
+    // First, we have to extract the feature geometry
+    const geometry = feature.getGeometry();
+    // Then we'll have to extract the feature type, since we have to extract the
+    // coordinates in different ways, depending on the geometry type.
+    const geometryType = geometry.getType();
+    switch (geometryType) {
+      case "Point":
+        return new Point(geometry.getCoordinates());
+      default:
+        return new MultiPoint(geometry.getCoordinates()[0]);
     }
   };
 
@@ -1342,7 +1357,7 @@ class DrawModel {
     // Let's ignore text- and arrow-highlight for now...
     if (
       key === "EDIT_ACTIVE" &&
-      !["Arrow", "Point", "Text"].includes(feature.get("DRAW_METHOD"))
+      !["Arrow", "Text"].includes(feature.get("DRAW_METHOD"))
     ) {
       // If the "EDIT_ACTIVE" was changed to true, we add the highlight-style.
       if (feature.get("EDIT_ACTIVE")) {
