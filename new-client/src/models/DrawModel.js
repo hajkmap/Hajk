@@ -472,22 +472,43 @@ class DrawModel {
 
   // Creates a highlight style (a style marking the coordinates of the
   // supplied feature).
-  #getNodeHighlightStyle = () => {
+  #getNodeHighlightStyle = (feature) => {
     try {
-      const style = new Style({
-        image: new Circle({
-          radius: 5,
-          fill: new Fill({
-            color: "grey", // TODO: Create highlight-settings
-          }),
-        }),
-        // geometry: (feature) => {
-        //   const coordinates = this.#getFeatureCoordinates(feature);
-        //   return new MultiPoint(coordinates);
-        // },
-        geometry: this.#getVertexGeometry,
-      });
-      return style;
+      // First, we have to extract the feature geometry
+      const geometry = feature.getGeometry();
+      // Then we'll have to extract the feature type, since we want to highlight the vertexes
+      // in different ways depending on the geometry type.
+      const geometryType = geometry.getType();
+      // Let's use a switch-case on the geometry-type to construct a proper
+      // highligh-style for the feature.
+      switch (geometryType) {
+        case "Point":
+          return new Style({
+            image: new Circle({
+              radius: 5,
+              fill: new Fill({
+                color: "rgba(35,119,252,1)",
+              }),
+              stroke: new Stroke({ color: "rgba(255,255,255,1)", width: 2 }),
+            }),
+          });
+        default:
+          return new Style({
+            fill: new Fill({ color: "rgba(35,119,252,1)" }),
+            stroke: new Stroke({ color: "rgba(255,255,255,1)", width: 2 }),
+            image: new Circle({
+              radius: 5,
+              fill: new Fill({
+                color: "rgba(35,119,252,1)",
+              }),
+              stroke: new Stroke({ color: "rgba(255,255,255,1)", width: 2 }),
+            }),
+            geometry: () => {
+              const coordinates = this.#getFeatureCoordinates(feature);
+              return new MultiPoint(coordinates);
+            },
+          });
+      }
     } catch (error) {
       console.error(`Could not create highlight style. Error: ${error}`);
       return null;
@@ -1393,6 +1414,7 @@ class DrawModel {
       // highlight-style.
       feature.setStyle([featureStyle, highlightStyle]);
     }
+    console.log("featureStyle: ", feature.getStyle());
   };
 
   // Removes the highlight-style from the supplied feature.
