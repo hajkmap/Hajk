@@ -577,8 +577,17 @@ class KmlModel {
       // If we're dealing with a circle, we have to make sure to simplify
       // the geometry since the kml standard does not like circles.
       if (geomIsCircle) {
+        const circleGeometry = clonedFeature.getGeometry();
+        // Let's store the circle-radius and center if the user wants to load the
+        // kml using the sketch-tool later. (The radius and center is required by the draw-model
+        // so that it is able to create a real circle).
+        clonedFeature.set("CIRCLE_RADIUS", circleGeometry.getRadius());
+        clonedFeature.set(
+          "CIRCLE_CENTER",
+          JSON.stringify(circleGeometry.getCenter())
+        );
         // Create the simplified geometry
-        const simplifiedGeometry = fromCircle(clonedFeature.getGeometry(), 96);
+        const simplifiedGeometry = fromCircle(circleGeometry, 96);
         // And then set the cloned feature's geometry to the simplified one.
         clonedFeature.setGeometry(simplifiedGeometry);
       }

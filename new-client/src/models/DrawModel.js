@@ -1389,15 +1389,13 @@ class DrawModel {
       : settings.freehand ?? false;
   };
 
-  // Accepts a feature with a Point-geometry along with a "CIRCLE_RADIUS" property.
-  // Updates the feature-geometry to a Circle-geometry with the supplied radius.
+  // Accepts a feature with "CIRCLE_RADIUS" and "CIRCLE_CENTER" properties.
+  // Updates the feature-geometry to a Circle-geometry with the supplied center and radius.
   #createRealCircleGeometry = (feature) => {
     try {
-      const radius = feature.get("CIRCLE_RADIUS");
-      const geometry = feature.getGeometry();
-      feature.setGeometry(
-        new CircleGeometry(geometry.getCoordinates(), radius)
-      );
+      const center = JSON.parse(feature.get("CIRCLE_CENTER"));
+      const radius = parseFloat(feature.get("CIRCLE_RADIUS"));
+      feature.setGeometry(new CircleGeometry(center, radius));
     } catch (error) {
       console.error(
         `Failed to create 'real' Circle geometry from supplied feature, error: ${error}`

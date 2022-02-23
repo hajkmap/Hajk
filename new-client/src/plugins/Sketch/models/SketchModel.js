@@ -146,8 +146,11 @@ class SketchModel {
   #createFriendlyCircleGeom = (feature) => {
     try {
       const geometry = feature.getGeometry();
-      feature.set("CIRCLE_RADIUS", geometry.getRadius());
-      feature.setGeometry(new Point(geometry.getCenter()));
+      const center = geometry.getCenter();
+      const radius = geometry.getRadius();
+      feature.set("CIRCLE_RADIUS", radius);
+      feature.set("CIRCLE_CENTER", JSON.stringify(center));
+      feature.setGeometry(new Point(center));
     } catch (error) {
       console.error(
         `Could not create a geoJSON-friendly circle-geometry. Error: ${error}`
