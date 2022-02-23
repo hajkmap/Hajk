@@ -60,6 +60,15 @@ const SketchSaver = (props) => {
       title: props.sketchName,
     });
     props.setSavedSketches(props.model.getSketchesFromStorage());
+    props.setSketchName("");
+  };
+
+  // Let's listen for enter-key-down. If the enter-key is pressed and
+  // the save-button isn't disabled we can save the sketch.
+  const handleKeyDown = (e) => {
+    if (e.key === "Enter") {
+      !saveButtonState.disabled && handleSaveSketchClick();
+    }
   };
 
   // Returns an object stating if the save-button should be disabled or not, along
@@ -107,6 +116,7 @@ const SketchSaver = (props) => {
               variant="outlined"
               style={{ maxWidth: "100%" }}
               onChange={handleInputChange}
+              onKeyDown={handleKeyDown}
               value={props.sketchName}
             />
           </Tooltip>
