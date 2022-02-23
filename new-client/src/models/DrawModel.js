@@ -80,6 +80,8 @@ class DrawModel {
   #customHandleDrawEnd;
   #customHandlePointerMove;
   #customHandleAddFeature;
+  #highlightFillColor;
+  #highlightStrokeColor;
 
   constructor(settings) {
     // Let's make sure that we don't allow initiation if required settings
@@ -135,6 +137,8 @@ class DrawModel {
     this.#customHandleDrawEnd = null;
     this.#customHandlePointerMove = null;
     this.#customHandleAddFeature = null;
+    this.#highlightFillColor = "rgba(35,119,252,1)";
+    this.#highlightStrokeColor = "rgba(255,255,255,1)";
 
     // A Draw-model is not really useful without a vector-layer, let's initiate it
     // right away, either by creating a new layer, or connect to an existing layer.
@@ -338,8 +342,14 @@ class DrawModel {
       : null;
     // Apply the text-style to the baseline style...
     baseLineStyle.setText(textStyle);
-    // And return the finished style.
-    return baseLineStyle;
+    // If the "EDIT_ACTIVE"-property is set (meaning that the feature has been selected for
+    // editing of its color etc) we have to return the baseline-style along with a highligh-style.
+    if (feature.get("EDIT_ACTIVE") === true) {
+      return [baseLineStyle, this.#getNodeHighlightStyle(feature)];
+    } else {
+      // If its not set, we just return the baseline style!
+      return baseLineStyle;
+    }
   };
 
   // Method returning if we're supposed to be showing text on the feature
@@ -470,62 +480,25 @@ class DrawModel {
     return styles;
   };
 
-  // Creates a highlight style (a style marking the coordinates of the
-  // supplied feature).
+  // Creates a highlight style (a style marking the coordinates of the supplied feature).
   #getNodeHighlightStyle = (feature) => {
     try {
-      // First, we have to extract the feature geometry
-      const geometry = feature.getGeometry();
-      // Then we'll have to extract the feature type, since we want to highlight the vertexes
-      // in different ways depending on the geometry type.
-      const geometryType = geometry.getType();
-      // Let's use a switch-case on the geometry-type to construct a proper
-      // highligh-style for the feature.
-      switch (geometryType) {
-        case "Point":
-          return new Style({
-            image: new Circle({
-              radius: 5,
-              fill: new Fill({
-                color: "rgba(35,119,252,1)",
-              }),
-              stroke: new Stroke({ color: "rgba(255,255,255,1)", width: 2 }),
-            }),
-          });
-        default:
-          return new Style({
-            fill: new Fill({ color: "rgba(35,119,252,1)" }),
-            stroke: new Stroke({ color: "rgba(255,255,255,1)", width: 2 }),
-            image: new Circle({
-              radius: 5,
-              fill: new Fill({
-                color: "rgba(35,119,252,1)",
-              }),
-              stroke: new Stroke({ color: "rgba(255,255,255,1)", width: 2 }),
-            }),
-            geometry: () => {
-              const coordinates = this.#getFeatureCoordinates(feature);
-              return new MultiPoint(coordinates);
-            },
-          });
-      }
+      return new Style({
+        image: new Circle({
+          radius: 5,
+          fill: new Fill({
+            color: this.#highlightFillColor,
+          }),
+          stroke: new Stroke({ color: this.#highlightStrokeColor, width: 2 }),
+        }),
+        geometry: () => {
+          const coordinates = this.#getFeatureCoordinates(feature);
+          return new MultiPoint(coordinates);
+        },
+      });
     } catch (error) {
       console.error(`Could not create highlight style. Error: ${error}`);
       return null;
-    }
-  };
-
-  #getVertexGeometry = (feature) => {
-    // First, we have to extract the feature geometry
-    const geometry = feature.getGeometry();
-    // Then we'll have to extract the feature type, since we have to extract the
-    // coordinates in different ways, depending on the geometry type.
-    const geometryType = geometry.getType();
-    switch (geometryType) {
-      case "Point":
-        return new Point(geometry.getCoordinates());
-      default:
-        return new MultiPoint(geometry.getCoordinates()[0]);
     }
   };
 
@@ -1367,73 +1340,10 @@ class DrawModel {
     });
   };
 
-  // Handler targeted when any feature property has changed. Only checks
-  // if the "EDIT_ACTIVE" property has changed, and if it has, it makes sure
-  // to toggle the highlight-style of the feature accordingly.
-  // TODO: Handle two clicks on same feature!
+  // Handler targeted when any feature property has changed. If any property change, we have
+  // to make sure to refresh the draw-layer (since some properties affect the feature-styling!)
   #handleFeaturePropertyChange = (e) => {
-    // First, we'll extract the key and the target (the target will be the feature clicked).
-    const { key, target: feature } = e;
-    // Then we'll check if it was the "EDIT_ACTIVE" property that was changed.
-    // Let's ignore text- and arrow-highlight for now...
-    if (
-      key === "EDIT_ACTIVE" &&
-      !["Arrow", "Text"].includes(feature.get("DRAW_METHOD"))
-    ) {
-      // If the "EDIT_ACTIVE" was changed to true, we add the highlight-style.
-      if (feature.get("EDIT_ACTIVE")) {
-        try {
-          this.#setHighlightStyle(feature);
-        } catch (error) {
-          console.error(`Failed to apply highlight-style. Error: ${error}`);
-        }
-      } else {
-        // Otherwise, we remove the highlight-style.
-        try {
-          this.#removeHighlightStyle(feature);
-        } catch (error) {
-          console.error(`Failed to remove highlight-style. Error: ${error}`);
-        }
-      }
-    }
-  };
-
-  // Adds a highlight-style to the supplied feature.
-  #setHighlightStyle = (feature) => {
-    // First we'll get the current style of the feature.
-    const featureStyle = feature.getStyle();
-    // Then we'll create the highlight-style.
-    const highlightStyle = this.#getNodeHighlightStyle(feature);
-    // If the current style of the feature is an array of styles,
-    // we merge the original style array with the highligh-style and apply
-    // it to the feature.
-    if (Array.isArray(featureStyle)) {
-      feature.setStyle([...featureStyle, highlightStyle]);
-    } else {
-      // Otherwise we create an array with the current style and the
-      // highlight-style.
-      feature.setStyle([featureStyle, highlightStyle]);
-    }
-    console.log("featureStyle: ", feature.getStyle());
-  };
-
-  // Removes the highlight-style from the supplied feature.
-  #removeHighlightStyle = (feature) => {
-    // First we'll get the feature style-
-    const featureStyle = feature.getStyle();
-    // Then we'll remove the last style from the style array (the
-    // last style will be the highlight-style). This can only be done if
-    // the style is an array obviously (which it should always be), but let's make sure
-    // that it is an array before trying to pop anything.
-    Array.isArray(featureStyle) && featureStyle.pop();
-    // If the result is an array containing only one style-object,
-    // well apply that style-object on the feature.
-    if (featureStyle.length === 1) {
-      feature.setStyle(...featureStyle);
-    } else {
-      // Otherwise, we'll apply the feature-style-array to the feature.
-      feature.setStyle(featureStyle);
-    }
+    return this.refreshDrawLayer();
   };
 
   // Sets the "EDIT_ACTIVE" prop to false on all features in the draw-source.
@@ -1901,20 +1811,16 @@ class DrawModel {
     this.#refreshDrawInteraction();
   };
 
-  // Makes sure all features are re-drawn. (If any feature-style has changed
-  // this might be necessary in some cases to make the change show).
-  // Also making sure to completely re-style arrow- and text-features so that
-  // the arrow head and texts has the correct color...
+  // Makes sure all features are re-drawn to make sure the latest style is applied.
+  // The arrows are handled separately since they need some special styling...
   refreshDrawLayer = () => {
     this.#drawSource.forEachFeature((f) => {
       if (f.get("DRAW_METHOD") === "Arrow") {
         this.#refreshArrowStyle(f);
-      }
-      if (["Text", "Point"].includes(f.get("DRAW_METHOD"))) {
+      } else {
         f.setStyle(this.#getFeatureStyle(f));
       }
     });
-    this.#drawLayer.changed();
   };
 
   // Updates the Text-style-settings.
