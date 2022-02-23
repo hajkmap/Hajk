@@ -6,7 +6,7 @@ import { Icon, Stroke, Style, Circle, Fill, Text } from "ol/style";
 import { Circle as CircleGeometry, LineString } from "ol/geom";
 import { fromCircle } from "ol/geom/Polygon";
 import { MultiPoint, Point } from "ol/geom";
-import Overlay from "ol/Overlay.js";
+import Overlay from "ol/Overlay";
 import GeoJSON from "ol/format/GeoJSON";
 import transformTranslate from "@turf/transform-translate";
 import { getArea as getExtentArea } from "ol/extent";

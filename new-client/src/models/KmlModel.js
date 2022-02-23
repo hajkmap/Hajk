@@ -1,10 +1,10 @@
 import { Vector as VectorLayer } from "ol/layer";
 import VectorSource from "ol/source/Vector";
-import KML from "ol/format/KML.js";
-import { Circle } from "ol/geom.js";
-import { fromCircle } from "ol/geom/Polygon.js";
+import KML from "ol/format/KML";
+import { Circle } from "ol/geom";
+import { fromCircle } from "ol/geom/Polygon";
 import { saveAs } from "file-saver";
-import { Fill, Stroke, Style, Text } from "ol/style.js";
+import { Fill, Stroke, Style, Text } from "ol/style";
 
 /*
  * A model supplying useful KML-functionality.
