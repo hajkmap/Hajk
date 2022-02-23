@@ -61,6 +61,11 @@ class SketchModel {
   #prepareFeatureForStorage = (f) => {
     // So first, we'll decorate the feature with its style-information
     f.set("EXTRACTED_STYLE", this.#drawModel.extractFeatureStyleInfo(f));
+    // If the feature to be saved consists of a Circle-geometry we have to
+    // update the geometry to something that geoJSON can handle.
+    if (f.getGeometry() instanceof CircleGeometry) {
+      this.#createFriendlyCircleGeom(f);
+    }
     // Then we'll create the geoJSON, and return that.
     return this.#geoJSONParser.writeFeature(f);
   };
