@@ -1,5 +1,5 @@
 import { Draw, Modify, Select, Translate } from "ol/interaction";
-import { createBox, createRegularPolygon } from "ol/interaction/Draw";
+import { createBox } from "ol/interaction/Draw";
 import { Vector as VectorLayer } from "ol/layer";
 import VectorSource from "ol/source/Vector";
 import { Icon, Stroke, Style, Circle, Fill, Text } from "ol/style";
@@ -1389,6 +1389,22 @@ class DrawModel {
       : settings.freehand ?? false;
   };
 
+  // Accepts a feature with a Point-geometry along with a "CIRCLE_RADIUS" property.
+  // Updates the feature-geometry to a Circle-geometry with the supplied radius.
+  #createRealCircleGeometry = (feature) => {
+    try {
+      const radius = feature.get("CIRCLE_RADIUS");
+      const geometry = feature.getGeometry();
+      feature.setGeometry(
+        new CircleGeometry(geometry.getCoordinates(), radius)
+      );
+    } catch (error) {
+      console.error(
+        `Failed to create 'real' Circle geometry from supplied feature, error: ${error}`
+      );
+    }
+  };
+
   // Removes the property-change-listeners from all features and then adds
   // them again. Useful if a new feature is added to the draw-source, and you
   // have to make sure the new feature has a listener.
@@ -1411,6 +1427,11 @@ class DrawModel {
     // If the silent-property is not supplied, we will fire events.
     const silent = settings?.silent ?? false;
     try {
+      // The supplied feature might contain a property with information regarding
+      // circle-radius. If that is the case, we have to replace the Point-geometry
+      // with a Circle-geometry with the supplied radius. This case appears when circles
+      // has been saved in LS, since geoJSON does not support Circles.
+      feature.get("CIRCLE_RADIUS") && this.#createRealCircleGeometry(feature);
       // The supplied feature might contain a property with style-information
       // that has been set in an earlier session. Let's apply that style (if present)
       // before we add the feature to the source.
@@ -1651,12 +1672,7 @@ class DrawModel {
       type: type,
       freehand: freehand,
       stopClick: true,
-      geometryFunction:
-        drawMethod === "Rectangle"
-          ? createBox()
-          : drawMethod === "Circle"
-          ? createRegularPolygon()
-          : null,
+      geometryFunction: drawMethod === "Rectangle" ? createBox() : null,
       style: this.#getDrawStyle(),
     });
     // Let's set the supplied draw-method as a property on the draw-interaction

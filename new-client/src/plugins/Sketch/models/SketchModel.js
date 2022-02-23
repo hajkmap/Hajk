@@ -3,6 +3,7 @@ import LocalStorageHelper from "../../../utils/LocalStorageHelper";
 import { Circle, Fill, Stroke } from "ol/style";
 import GeoJSON from "ol/format/GeoJSON";
 import { STROKE_DASHES } from "../constants";
+import { Circle as CircleGeometry, Point } from "ol/geom";
 
 class SketchModel {
   #geoJSONParser;
@@ -138,6 +139,22 @@ class SketchModel {
     });
   };
 
+  // Accepts a feature with a Circle-geometry and updates the feature-geometry
+  // to a Point-geometry along with an additional property ("CIRCLE_RADIUS") that can
+  // be used to construct a "real" Circle-geometry when the feature is to be added to
+  // a map. This is done since the geoJSON-standard does not accept Circle-geometries.
+  #createFriendlyCircleGeom = (feature) => {
+    try {
+      const geometry = feature.getGeometry();
+      feature.set("CIRCLE_RADIUS", geometry.getRadius());
+      feature.setGeometry(new Point(geometry.getCenter()));
+    } catch (error) {
+      console.error(
+        `Could not create a geoJSON-friendly circle-geometry. Error: ${error}`
+      );
+    }
+  };
+
   // Returns the feature-style in a form that fits the feature-style-editor
   getFeatureStyle = (feature) => {
     try {
@@ -235,6 +252,11 @@ class SketchModel {
     );
     feature.set("HANDLED_AT", this.#getDateTimeString());
     feature.set("HANDLED_ID", this.#generateRandomString());
+    // If the feature to be saved consists of a Circle-geometry we have to
+    // update the geometry to something that geoJSON can handle.
+    if (feature.getGeometry() instanceof CircleGeometry) {
+      this.#createFriendlyCircleGeom(feature);
+    }
   };
 
   // Returns the earlier removed features which are stored in local-storage
