@@ -82,26 +82,34 @@ export default async (expressServer) => {
       // In addition to sending, we can also receive messages from the client.
       // To handle them, we need this listener:
       websocketConnection.on("message", (message) => {
-        const parsedMessage = JSON.parse(message);
-        logger.trace(
-          `Got message from ${websocketConnection.uuid}: "${parsedMessage}"`
-        );
+        try {
+          const parsedMessage = JSON.parse(message);
+          logger.trace(
+            `Got message from ${websocketConnection.uuid}: "${parsedMessage}"`
+          );
 
-        // First let's see if there's a 'type' property on the message…
-        if (!parsedMessage.type) {
-          // … and abort if there isn't.
-          websocketConnection.send("'type' not provided. Aborting.");
+          // First let's see if there's a 'type' property on the message…
+          if (!parsedMessage.type) {
+            // … and abort if there isn't.
+            websocketConnection.send("'type' not provided. Aborting.");
+            return;
+          }
+
+          // If we got here, it looks like we have a 'type' property.
+          // Let's dispatch an event, providing our webSocketConnection, so
+          // that the handler can send a response.
+          // The WebSocketMessageHandler will take care of the details!
+          WebSocketMessageHandler.handleMessage(
+            websocketConnection,
+            parsedMessage
+          );
+        } catch (error) {
+          websocketConnection.send(
+            `Couldn't parse message. Error: ${error.message}`
+          );
+
           return;
         }
-
-        // If we got here, it looks like we have a 'type' property.
-        // Let's dispatch an event, providing our webSocketConnection, so
-        // that the handler can send a response.
-        // The WebSocketMessageHandler will take care of the details!
-        WebSocketMessageHandler.handleMessage(
-          websocketConnection,
-          parsedMessage
-        );
       });
 
       // This will be called when connection is closed. Can be used for
