@@ -7,19 +7,27 @@ export default class MapViewModel {
   }
 
   convertMapSettingsUrlToOlSettings = (inputUrl) => {
-    let url = inputUrl.toLowerCase();
-    if (url.includes("x=") && url.includes("y=") && url.includes("z=")) {
-      let url = inputUrl.split("&");
-      let x = url[1].substring(2);
-      let y = url[2].substring(2);
-      let z = url[3].substring(2);
-      let l = url[4]?.substring(2);
-      let center = [x, y];
-      let zoom = z;
+    try {
+      const params = new URLSearchParams(inputUrl);
+      let center;
+      if (!params.has("x") || !params.has("y")) {
+        center = this.map.getView().getCenter();
+      } else {
+        center = [params.get("x"), params.get("y")];
+      }
       return {
         center: center,
-        zoom: zoom,
-        layers: l,
+        zoom: params.get("z") || this.map.getView().getZoom(),
+        layers: params.get("l"), // Allow 'null', we handle it later
+      };
+    } catch (error) {
+      console.error(error);
+      // In case parsing the params failed, let's ensure we have
+      // a valid return object:
+      return {
+        center: this.map.getView().getCenter(),
+        zoom: this.map.getView().getZoom(),
+        layers: null,
       };
     }
   };
@@ -28,12 +36,15 @@ export default class MapViewModel {
     this.localObserver.subscribe("fly-to", (url) => {
       this.globalObserver.publish("core.minimizeWindow");
       const mapSettings = this.convertMapSettingsUrlToOlSettings(url);
-      const visibleLayers = mapSettings.layers.split(",");
 
-      const { layersToShow, layersToHide } =
-        this.getLayersToShowAndHide(visibleLayers);
+      if (mapSettings.layers !== null) {
+        const visibleLayers = mapSettings.layers.split(",");
+        const { layersToShow, layersToHide } =
+          this.getLayersToShowAndHide(visibleLayers);
 
-      this.setMapLayersVisiblity(layersToShow, layersToHide);
+        this.setMapLayersVisibility(layersToShow, layersToHide);
+      }
+
       this.flyTo(this.map.getView(), mapSettings.center, mapSettings.zoom);
     });
   };
@@ -58,7 +69,7 @@ export default class MapViewModel {
     );
   };
 
-  setMapLayersVisiblity(layersToShow, layersToHide) {
+  setMapLayersVisibility(layersToShow, layersToHide) {
     layersToShow.forEach((mapLayerToShow) => {
       if (mapLayerToShow.layerType === "group") {
         this.globalObserver.publish("layerswitcher.showLayer", mapLayerToShow);
