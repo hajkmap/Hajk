@@ -145,10 +145,6 @@ class DrawModel {
     this.#initiateDrawLayer();
     // We also have to initiate the element for the draw-tooltip
     this.#createDrawTooltip();
-    // Let's display a warning for now, remove once it's properly tested. TODO: @Hallbergs
-    console.info(
-      "Initiation of Draw-model successful. Note that the model has not been properly tested yet and should not be used in critical operation."
-    );
   }
 
   // Returns the supplied observerPrefix from the supplied settings or null if none was supplied.

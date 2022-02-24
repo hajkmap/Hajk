@@ -56,10 +56,6 @@ class KmlModel {
     // A KML-model is not really useful without a vector-layer, let's initiate it
     // right away, either by creating a new layer, or connect to an existing layer.
     this.#initiateKmlLayer();
-    // Let's display a warning for now, remove once it's properly tested. TODO: @Hallbergs
-    console.info(
-      "Initiation of KML-model successful. Note that the model has not been properly tested yet and should not be used in critical operation."
-    );
   }
 
   // If required parameters are missing, we have to make sure we abort the
