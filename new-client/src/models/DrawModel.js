@@ -353,6 +353,11 @@ class DrawModel {
   // or two: if we're supposed to be showing feature measurements. If the feature is
   // of arrow-type, we're never showing text.
   #shouldShowText = (feature) => {
+    // TODO: Allow the user to choose wether text on KML-features
+    // should be shown or not. For now, let's hide all kml-features texts.
+    if (feature.get("KML_IMPORT") === true) {
+      return false;
+    }
     // Let's get the draw-method
     const featureDrawMethod = feature?.get("DRAW_METHOD");
     // And check if we're supposed to be showing text or not.
