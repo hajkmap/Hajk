@@ -1,10 +1,21 @@
 import React from "react";
-import { Button, Grid, Tooltip } from "@material-ui/core";
+import { styled } from "@material-ui/core";
+import { Button, Grid, Tooltip, Typography } from "@material-ui/core";
+import { IconButton, Zoom, Paper } from "@material-ui/core";
+
+import SettingsBackupRestoreIcon from "@material-ui/icons/SettingsBackupRestore";
 import FolderOpenIcon from "@material-ui/icons/FolderOpen";
 import SaveAltIcon from "@material-ui/icons/SaveAlt";
 
 import Information from "../components/Information";
 import UploadDialog from "../components/UploadDialog";
+
+const StyledPaper = styled(Paper)(({ theme }) => ({
+  width: "100%",
+  padding: theme.spacing(1),
+  marginBottom: theme.spacing(1),
+  borderLeft: `${theme.spacing(0.5)}px solid ${theme.palette.success.main}`,
+}));
 
 const ButtonPanel = ({ kmlModel, setDialogOpen }) => {
   return (
@@ -37,6 +48,38 @@ const ButtonPanel = ({ kmlModel, setDialogOpen }) => {
   );
 };
 
+const UploadedFile = ({ onRestoreClick, title }) => {
+  return (
+    <Zoom in appear>
+      <StyledPaper>
+        <Grid container justify="space-between" alignItems="center">
+          <Typography variant="button">{title}</Typography>
+          <Tooltip title="Klicka för att ta bort de importerade objekten.">
+            <IconButton size="small" onClick={onRestoreClick}>
+              <SettingsBackupRestoreIcon />
+            </IconButton>
+          </Tooltip>
+        </Grid>
+      </StyledPaper>
+    </Zoom>
+  );
+};
+
+const UploadedFileList = ({ uploadedFiles }) => {
+  return (
+    <Grid container style={{ maxHeight: 240, overflowY: "auto" }}>
+      <Grid item xs={12}>
+        <Typography variant="caption">Uppladdade filer</Typography>
+      </Grid>
+      <Grid item xs={12}>
+        {uploadedFiles.map((file) => {
+          return <UploadedFile key={file.id} title={file.title} />;
+        })}
+      </Grid>
+    </Grid>
+  );
+};
+
 const UploadView = (props) => {
   // We're gonna need to keep track of if we should show the upload-dialog or not.
   const [dialogOpen, setDialogOpen] = React.useState(false);
@@ -56,7 +99,7 @@ const UploadView = (props) => {
     // of uploaded kml-files.
     const dateTime = props.model.getDateTimeString();
     // Let's create an object with some meta-data and add it to the array.
-    setUploadedFiles(...uploadedFiles, { id, title: dateTime });
+    setUploadedFiles((files) => [...files, { id, title: dateTime }]);
     // Then we can add the features to the map!
     props.kmlModel.import(file, {
       zoomToExtent: true,
@@ -73,6 +116,11 @@ const UploadView = (props) => {
       </Grid>
       <Grid item xs={12}>
         <ButtonPanel kmlModel={props.kmlModel} setDialogOpen={setDialogOpen} />
+      </Grid>
+      <Grid item xs={12}>
+        {uploadedFiles.length > 0 && (
+          <UploadedFileList uploadedFiles={uploadedFiles} />
+        )}
       </Grid>
       <UploadDialog
         open={dialogOpen}
