@@ -2,9 +2,11 @@ import React from "react";
 import { Button, Grid, Tooltip } from "@material-ui/core";
 import FolderOpenIcon from "@material-ui/icons/FolderOpen";
 import SaveAltIcon from "@material-ui/icons/SaveAlt";
-import Information from "../components/Information";
 
-const ButtonPanel = ({ kmlModel }) => {
+import Information from "../components/Information";
+import UploadDialog from "../components/UploadDialog";
+
+const ButtonPanel = ({ kmlModel, setDialogOpen }) => {
   return (
     <Grid container spacing={1}>
       <Grid item xs={12}>
@@ -12,7 +14,7 @@ const ButtonPanel = ({ kmlModel }) => {
           <Button
             fullWidth
             variant="contained"
-            onClick={() => kmlModel.export()}
+            onClick={() => setDialogOpen(true)}
             startIcon={<FolderOpenIcon />}
           >
             Importera ritobjekt
@@ -36,6 +38,7 @@ const ButtonPanel = ({ kmlModel }) => {
 };
 
 const UploadView = (props) => {
+  const [dialogOpen, setDialogOpen] = React.useState(false);
   // We have to get some information about the current activity (view)
   const activity = props.model.getActivityFromId(props.id);
   return (
@@ -44,8 +47,13 @@ const UploadView = (props) => {
         <Information text={activity.information} />
       </Grid>
       <Grid item xs={12}>
-        <ButtonPanel kmlModel={props.kmlModel} />
+        <ButtonPanel kmlModel={props.kmlModel} setDialogOpen={setDialogOpen} />
       </Grid>
+      <UploadDialog
+        open={dialogOpen}
+        setOpen={setDialogOpen}
+        kmlModel={props.kmlModel}
+      />
     </Grid>
   );
 };
