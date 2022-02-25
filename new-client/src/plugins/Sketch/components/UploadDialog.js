@@ -2,7 +2,7 @@ import React from "react";
 import { createPortal } from "react-dom";
 import Dialog from "../../../components/Dialog/Dialog";
 
-const UploadDialog = ({ open, setOpen, kmlModel }) => {
+const UploadDialog = ({ open, setOpen, handleUploadedFile }) => {
   const [filesChosen, setFilesChosen] = React.useState(false);
 
   const handleUploadClick = React.useCallback(async () => {
@@ -13,7 +13,7 @@ const UploadDialog = ({ open, setOpen, kmlModel }) => {
         const reader = new FileReader();
         reader.onload = () => {
           try {
-            kmlModel.import(reader.result);
+            handleUploadedFile(reader.result);
           } catch (error) {
             console.error(`Failed to import kml-file. Error: ${error}`);
           }
@@ -27,7 +27,7 @@ const UploadDialog = ({ open, setOpen, kmlModel }) => {
     // by setting the filesChosen-state to false.
     setOpen(false);
     setFilesChosen(false);
-  }, [setOpen, kmlModel]);
+  }, [setOpen, handleUploadedFile]);
 
   const handleCloseClick = React.useCallback(() => {
     setOpen(false);

@@ -46,8 +46,8 @@ class SketchModel {
   #createSketchObject = (sketchInformation) => {
     return {
       ...sketchInformation,
-      id: this.#generateRandomString(),
-      date: this.#getDateTimeString(),
+      id: this.generateRandomString(),
+      date: this.getDateTimeString(),
       features: this.#drawModel
         .getAllDrawnFeatures()
         .map((f) => this.#prepareFeatureForStorage(f)),
@@ -78,13 +78,13 @@ class SketchModel {
   };
 
   // Returns the current date and time on YYYY-MM-DD HH:MM:SS
-  #getDateTimeString = () => {
+  getDateTimeString = () => {
     const date = new Date();
     return date.toLocaleString("default", this.#dateTimeOptions);
   };
 
   // Generates a random string that can be used as an ID.
-  #generateRandomString = () => {
+  generateRandomString = () => {
     return Math.random().toString(36).slice(2, 9);
   };
 
@@ -258,8 +258,8 @@ class SketchModel {
       "EXTRACTED_STYLE",
       this.#drawModel.extractFeatureStyleInfo(feature)
     );
-    feature.set("HANDLED_AT", this.#getDateTimeString());
-    feature.set("HANDLED_ID", this.#generateRandomString());
+    feature.set("HANDLED_AT", this.getDateTimeString());
+    feature.set("HANDLED_ID", this.generateRandomString());
     // If the feature to be saved consists of a Circle-geometry we have to
     // update the geometry to something that geoJSON can handle.
     if (feature.getGeometry() instanceof CircleGeometry) {

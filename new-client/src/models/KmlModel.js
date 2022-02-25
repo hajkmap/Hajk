@@ -433,6 +433,13 @@ class KmlModel {
     });
   };
 
+  // Sets the supplied properties on the supplied features
+  #setFeatureProperties = (features, properties) => {
+    for (const feature of features) {
+      feature.setProperties(properties);
+    }
+  };
+
   // Tries to parse features from the supplied kml-string.
   // Accepts a kmlString and an optional second parameter stating if
   // the features should be translated to the map-views srs or not.
@@ -477,6 +484,10 @@ class KmlModel {
     if (error !== null) {
       return { status: "FAILED", error: error };
     }
+    // If "setProperties" was supplied in the settings, we have to make sure
+    // to set the supplied properties on all features.
+    settings.setProperties &&
+      this.#setFeatureProperties(features, settings.setProperties);
     // If a draw-model has been supplied, we use that model to add the
     // features to the map.
     if (this.#drawModel) {
