@@ -83,10 +83,6 @@ const UploadedFileList = ({ uploadedFiles }) => {
 const UploadView = (props) => {
   // We're gonna need to keep track of if we should show the upload-dialog or not.
   const [dialogOpen, setDialogOpen] = React.useState(false);
-  // We're gonna keep track of the uploaded kml-files in an array. The array
-  // will contain objects with an id (this id will be present on each feature
-  // from that kml-file as well) along with a title that can be shown in the list.
-  const [uploadedFiles, setUploadedFiles] = React.useState([]);
 
   // Adds the supplied file (kml-string) to the map and updates the list
   // of added kml-files.
@@ -98,8 +94,8 @@ const UploadView = (props) => {
     // We're also gonna need to generate a date-time-string that can be shown in the list
     // of uploaded kml-files.
     const dateTime = props.model.getDateTimeString();
-    // Let's create an object with some meta-data and add it to the array.
-    setUploadedFiles((files) => [...files, { id, title: dateTime }]);
+    // Let's create an object with some meta-data and add it to the list of uploaded files.
+    props.setUploadedFiles((files) => [...files, { id, title: dateTime }]);
     // Then we can add the features to the map!
     props.kmlModel.import(file, {
       zoomToExtent: true,
@@ -118,8 +114,8 @@ const UploadView = (props) => {
         <ButtonPanel kmlModel={props.kmlModel} setDialogOpen={setDialogOpen} />
       </Grid>
       <Grid item xs={12}>
-        {uploadedFiles.length > 0 && (
-          <UploadedFileList uploadedFiles={uploadedFiles} />
+        {props.uploadedFiles.length > 0 && (
+          <UploadedFileList uploadedFiles={props.uploadedFiles} />
         )}
       </Grid>
       <UploadDialog

@@ -47,6 +47,10 @@ const SketchView = (props) => {
   const [removedFeatures, setRemovedFeatures] = React.useState(
     model.getRemovedFeaturesFromStorage()
   );
+  // We want to keep track of the recently imported kml-files so that the user can remove or hide
+  // all features from an imported kml-file.The array will contain objects with an id (this id will
+  // be present on each feature from that kml-file as well) along with a title that can be shown to the user.
+  const [uploadedFiles, setUploadedFiles] = React.useState([]);
   // We're gonna need to keep track of if we're allowed to save stuff in LS. Let's use the hook.
   const { functionalCookiesOk } = useCookieStatus(globalObserver);
 
@@ -224,7 +228,15 @@ const SketchView = (props) => {
           />
         );
       case "UPLOAD":
-        return <UploadView id={activityId} model={model} kmlModel={kmlModel} />;
+        return (
+          <UploadView
+            id={activityId}
+            model={model}
+            kmlModel={kmlModel}
+            uploadedFiles={uploadedFiles}
+            setUploadedFiles={setUploadedFiles}
+          />
+        );
       case "SETTINGS":
         return (
           <SettingsView id={activityId} model={model} drawModel={drawModel} />
