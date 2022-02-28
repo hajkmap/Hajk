@@ -173,13 +173,13 @@ class SketchModel {
       const featureTextStyle = feature.get("TEXT_SETTINGS");
       // Then we'll construct the feature-style-object and return it.
       return {
-        strokeColor: this.#drawModel.parseRGBAString(
+        strokeColor: this.#drawModel.parseColorString(
           featureBaseStyle?.strokeStyle.color
         ),
         lineDash: featureBaseStyle?.strokeStyle.dash,
         strokeWidth: featureBaseStyle?.strokeStyle.width,
         strokeType: this.#getStrokeType(featureBaseStyle?.strokeStyle.dash),
-        fillColor: this.#drawModel.parseRGBAString(
+        fillColor: this.#drawModel.parseColorString(
           featureBaseStyle?.fillStyle.color
         ),
         textForegroundColor: featureTextStyle?.foregroundColor,

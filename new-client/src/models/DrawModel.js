@@ -38,7 +38,7 @@ import { getArea as getExtentArea } from "ol/extent";
  * - toggleDrawInteraction(drawType, settings): Accepts a string with the drawType and an object containing settings.
  * - zoomToCurrentExtent(): Fits the map-view to the current extent of the current draw-source.
  * - getRGBAString(RGBA-object <object>): Accepts an object with r-, g-, b-, and a-properties and returns the string representation.
- * - parseRGBAString(RGBA-string <string>): Accepts a string and returns an object with r-, g-, b-, and a-properties.
+ * - parseColorString(hex/rgba-string <string>): Accepts a string and returns an object with r-, g-, b-, and a-properties.
  * - getCurrentVectorSource(): Returns the vector-source currently connected to the draw-model.
  * - get/set drawStyleSettings(): Get or set the style settings used by the draw-model.
  * - get/set labelFormat(): Sets the format on the labels. ("AUTO", "M2", "KM2", "HECTARE")
@@ -1612,12 +1612,20 @@ class DrawModel {
       : o;
   };
 
-  // Accepts a RGBA-string and returns an object containing r-, g-, b-, and a-properties.
-  parseRGBAString = (s) => {
+  // Accepts a color-string (hex or rgba) and returns an object containing r-, g-, b-, and a-properties.
+  parseColorString = (s) => {
     try {
-      // First, we make sure we're dealing with a string. If not, return null.
+      // First, we make sure we're dealing with a string. If not, return an empty object.
       if (typeof s !== "string") {
-        return null;
+        return {};
+      }
+      // Then we'll check if the supplied string is an hex-string (must start with hash and be 7 chars).
+      // Cannot handle hex-shorthands such as #fff obviously.
+      if (s.length === 7 && s.startsWith("#")) {
+        // If it is, we parse the hex-string and return an object containing the
+        // corresponding values.
+        const [r, g, b] = s.match(/\w\w/g).map((c) => parseInt(c, 16));
+        return { r, g, b, a: 1 };
       }
       // Otherwise, some regex-magic.
       // 1. RegEx that matches stuff between a set of parentheses
@@ -1632,7 +1640,7 @@ class DrawModel {
         a: parseFloat(o[3]),
       };
     } catch (error) {
-      console.error("RGBA parsing failed: " + error.message);
+      console.error(`Color-string parsing failed: ${error}`);
       return null;
     }
   };
