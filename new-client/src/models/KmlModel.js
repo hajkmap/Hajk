@@ -215,13 +215,19 @@ class KmlModel {
 
   // Extracts style from the feature props or style func and applies it.
   #setFeatureStyle = (feature) => {
+    if (!feature) {
+      console.warn(
+        "Cannot apply a style on nothing. (Supplied feature is nullish)."
+      );
+    }
     // First, we try to get the style from the feature props
-    const styleProperty = feature?.getProperties()?.style ?? null;
+    const styleProperty =
+      feature.get("EXTRACTED_STYLE") || feature.get("STYLE") || null;
     // If it exists, we apply the style using this prop.
     if (styleProperty !== null) {
       return this.#setFeatureStyleFromProps(feature, styleProperty);
     }
-    const styleFunc = feature?.getStyleFunction() ?? null;
+    const styleFunc = feature.getStyleFunction() ?? null;
     if (styleFunc !== null) {
       return this.#setStyleFromStyleFunction(feature, styleFunc);
     }
@@ -233,8 +239,10 @@ class KmlModel {
       // Parse the string to a real object
       const parsedStyle = JSON.parse(styleProperty);
       // Get the geometry-type so that we can check if we're
-      // dealing with a text drawn with the draw-plugin
-      const geometryType = feature.getProperties().geometryType;
+      // dealing with a text drawn with the draw-plugin. (The old draw-plugin used 'geometryType'
+      // and the new "Sketch"-plugin uses 'DRAW_METHOD').
+      const geometryType =
+        feature.get("DRAW_METHOD") || feature.get("geometryType") || null;
       // If the type is set to text, we are dealing with a draw-plugin
       // text, and we have to handle it separately. (We don't want to
       // extract information from the point-object which is it built upon).
@@ -387,16 +395,11 @@ class KmlModel {
     }
     // Otherwise we check if the features are to be added via the drawModel. If they are, we set
     // the USER_DRAWN-prop to true since all features in the draw-source _can_ be altered by the user.
-    // We also have to translate every feature to the map-views coordinate system and apply its style.
+    // We also have to translate every feature to the map-views coordinate system.
     features.forEach((feature) => {
       this.#translateFeatureToViewSrs(feature);
       this.#setFeatureStyle(feature);
       this.#drawModel && feature.set("USER_DRAWN", true);
-      this.#drawModel &&
-        feature.set(
-          "EXTRACTED_STYLE",
-          this.#drawModel.extractFeatureStyleInfo(feature)
-        );
     });
   };
 
