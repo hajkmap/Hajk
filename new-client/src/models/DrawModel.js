@@ -1617,7 +1617,7 @@ class DrawModel {
   getRGBAString = (o) => {
     // If nothing was supplied, return an empty string
     if (!o) {
-      return "";
+      return null;
     }
     // Otherwise we check the type and return an rgba-string.
     return Array.isArray(o)
