@@ -1555,6 +1555,15 @@ class DrawModel {
     });
   };
 
+  // Removes all features with the supplied kml-id.
+  removeKmlFeaturesById = (id) => {
+    this.#drawSource.getFeatures().forEach((f) => {
+      if (f.get("KML_ID") === id) {
+        this.#drawSource.removeFeature(f);
+      }
+    });
+  };
+
   // Clones the supplied ol-feature and adds it to the map (the added clone
   // will be offset just a tad to the east of the supplied feature).
   duplicateFeature = (feature) => {

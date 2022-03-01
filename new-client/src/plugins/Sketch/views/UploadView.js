@@ -171,6 +171,7 @@ const UploadView = (props) => {
 
   const onRemoveClick = (id) => {
     const updatedFiles = props.uploadedFiles.filter((file) => file.id !== id);
+    props.drawModel.removeKmlFeaturesById(id);
     props.setUploadedFiles(updatedFiles);
   };
 
