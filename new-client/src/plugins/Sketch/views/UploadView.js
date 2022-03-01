@@ -3,12 +3,13 @@ import { styled } from "@material-ui/core";
 import { Button, Grid, Tooltip, Typography } from "@material-ui/core";
 import { IconButton, Zoom, Paper } from "@material-ui/core";
 
-import SettingsBackupRestoreIcon from "@material-ui/icons/SettingsBackupRestore";
 import FolderOpenIcon from "@material-ui/icons/FolderOpen";
 import SaveAltIcon from "@material-ui/icons/SaveAlt";
 import DeleteIcon from "@material-ui/icons/Delete";
 import VisibilityOffIcon from "@material-ui/icons/VisibilityOff";
 import VisibilityIcon from "@material-ui/icons/Visibility";
+import ChatIcon from "@material-ui/icons/Chat";
+import ChatBubbleIcon from "@material-ui/icons/ChatBubble";
 
 import Information from "../components/Information";
 import UploadDialog from "../components/UploadDialog";
@@ -83,9 +84,13 @@ const UploadedFile = (props) => {
               </Tooltip>
             </Grid>
             <Grid item>
-              <Tooltip title="Klicka för att ta bort de importerade objekten.">
-                <IconButton size="small" onClick={props.onRestoreClick}>
-                  <SettingsBackupRestoreIcon />
+              <Tooltip
+                title={`Klicka här för att ${
+                  props.textShown ? "dölja" : "visa"
+                } objektens etiketter.`}
+              >
+                <IconButton size="small" onClick={props.onToggleShowTextClick}>
+                  {props.textShown ? <ChatBubbleIcon /> : <ChatIcon />}
                 </IconButton>
               </Tooltip>
             </Grid>
@@ -114,6 +119,7 @@ const UploadedFileList = (props) => {
                 props.onVisibilityChangeClick(file.id)
               }
               onRemoveClick={() => props.onRemoveClick(file.id)}
+              onToggleShowTextClick={() => props.onToggleShowTextClick(file.id)}
             />
           );
         })}
@@ -168,6 +174,17 @@ const UploadView = (props) => {
     props.setUploadedFiles(updatedFiles);
   };
 
+  const onToggleShowTextClick = (id) => {
+    const updatedFiles = props.uploadedFiles.map((file) => {
+      if (file.id === id) {
+        return { ...file, textShown: !file.textShown };
+      }
+      return file;
+    });
+    props.drawModel.toggleKmlFeaturesTextVisibility(id);
+    props.setUploadedFiles(updatedFiles);
+  };
+
   // We have to get some information about the current activity (view)
   const activity = props.model.getActivityFromId(props.id);
   return (
@@ -184,6 +201,7 @@ const UploadView = (props) => {
             uploadedFiles={props.uploadedFiles}
             onVisibilityChangeClick={onVisibilityChangeClick}
             onRemoveClick={onRemoveClick}
+            onToggleShowTextClick={onToggleShowTextClick}
           />
         )}
       </Grid>

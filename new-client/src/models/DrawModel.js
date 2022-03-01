@@ -1542,6 +1542,18 @@ class DrawModel {
     });
   };
 
+  // Toggles the show-text-property of all features connected to a kml-import
+  // with the supplied id.
+  toggleKmlFeaturesTextVisibility = (id) => {
+    this.#drawSource.getFeatures().forEach((f) => {
+      if (f.get("KML_ID") === id) {
+        const featureTextShown = f.get("SHOW_TEXT") ?? true;
+        f.set("SHOW_TEXT", !featureTextShown);
+        f.setStyle(this.#getFeatureStyle(f));
+      }
+    });
+  };
+
   // Clones the supplied ol-feature and adds it to the map (the added clone
   // will be offset just a tad to the east of the supplied feature).
   duplicateFeature = (feature) => {
