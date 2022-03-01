@@ -552,8 +552,11 @@ class KmlModel {
 
   // Tries to export all the features in the current kml-layer
   export = () => {
-    // First we need to get all the features from the current kml-source.
-    const features = this.#kmlSource.getFeatures();
+    // First we need to get all the features from the current kml-source
+    // (except for hidden features, the users might be confused if hidden features are exported).
+    const features = this.#kmlSource
+      .getFeatures()
+      .filter((f) => f.get("HIDDEN") !== true);
     // Then we have to make sure that there were some feature there to export.
     if (!features || features?.length === 0) {
       return {

@@ -1633,12 +1633,16 @@ class DrawModel {
   // TODO: Explain!
   removeFeature = (feature) => {
     // Let's start by removing the supplied feature from the draw-source
-    this.#drawSource.removeFeature(feature);
-    // Then we (potentially) publish that we've removed a feature.
-    this.#publishInformation({
-      subject: "drawModel.featureRemoved",
-      payLoad: feature,
-    });
+    // We won't remove if it set as hidden currently (otherwise we might confuse the users
+    // by removing stuff they're not seeing at the time of removal).
+    if (feature.get("HIDDEN") !== true) {
+      this.#drawSource.removeFeature(feature);
+      // Then we (potentially) publish that we've removed a feature.
+      this.#publishInformation({
+        subject: "drawModel.featureRemoved",
+        payLoad: feature,
+      });
+    }
   };
 
   // Accepts an RGBA-object containing r-, g-, b-, and a-properties, or an array
@@ -1761,10 +1765,13 @@ class DrawModel {
     // Let's get all the features in the draw-source that have been drawn
     const drawnFeatures = this.getAllDrawnFeatures();
     // Since OL does not supply a "removeFeatures" method, we have to map
-    // over the array, and remove every single feature one by one...
-    drawnFeatures.forEach((feature) => {
-      this.#drawSource.removeFeature(feature);
-    });
+    // over the array, and remove every single feature one by one... (Remember
+    // that currently hidden features should be ignored).
+    drawnFeatures
+      .filter((f) => f.get("HIDDEN") !== true)
+      .forEach((feature) => {
+        this.#drawSource.removeFeature(feature);
+      });
     // When the drawn features has been removed, we have to make sure
     // to update the current extent.
     this.#currentExtent = this.#drawSource.getExtent();

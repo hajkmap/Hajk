@@ -42,7 +42,7 @@ class SketchModel {
   };
 
   // Creates an object containing all the supplied properties along with
-  // all the features currently in the sketch-layer.
+  // all the (not currently hidden) features currently in the sketch-layer.
   #createSketchObject = (sketchInformation) => {
     return {
       ...sketchInformation,
@@ -50,6 +50,7 @@ class SketchModel {
       date: this.getDateTimeString(),
       features: this.#drawModel
         .getAllDrawnFeatures()
+        .filter((f) => f.get("HIDDEN") !== true)
         .map((f) => this.#prepareFeatureForStorage(f)),
     };
   };
@@ -240,13 +241,15 @@ class SketchModel {
   };
 
   // When a feature is removed, we should usually add it to the list of
-  // removed features. However, there is one case where we should not!
-  // If we've added a text-feature, and the user has chosen to abort the
+  // removed features. However, there are a couple of cases where we should not!
+  // -1: If we've added a text-feature, and the user has chosen to abort the
   // input of text to apply to the feature, we make sure to remove it, and
   // that removed feature should not be shown in the list of removed features.
+  // -2: If the feature is currently hidden, we shouldn't add it to the storage.
   featureShouldBeAddedToStorage = (feature) => {
-    return !(
-      feature.get("DRAW_METHOD") === "Text" && !feature.get("USER_TEXT")
+    return (
+      !(feature.get("DRAW_METHOD") === "Text" && !feature.get("USER_TEXT")) ||
+      feature.get("HIDDEN") === true
     );
   };
 

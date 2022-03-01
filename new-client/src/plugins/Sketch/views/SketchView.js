@@ -90,8 +90,10 @@ const SketchView = (props) => {
         return;
       }
       // Since we might be dealing with thousands of features removed at the same time, we make sure
-      // to grab only the first "MAX_REMOVED_FEATURES" (around 5).
-      const lastRemovedFeatures = features.slice(0, MAX_REMOVED_FEATURES);
+      // to grab only the first "MAX_REMOVED_FEATURES" (around 5). (While also ignoring hidden features).
+      const lastRemovedFeatures = features
+        .filter((f) => f.get("HIDDEN") !== true)
+        .slice(0, MAX_REMOVED_FEATURES);
       // Then we'll loop over these features and decorate them with id:s and dates.
       for (const feature of lastRemovedFeatures) {
         // We're gonna need to decorate the removed feature so that we can keep track of it.
