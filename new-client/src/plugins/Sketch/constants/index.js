@@ -39,7 +39,7 @@ export const ACTIVITIES = [
     id: "SAVE",
     tooltip: "Spara ritade objekt.",
     information:
-      "Behöver du ta en paus? Spara det du har ritat och fortsätt senare.",
+      "Behöver du ta en paus? Spara det du har ritat och fortsätt senare. Tänk på att enbart de objekt som syns i kartan sparas.",
     icon: <SaveIcon />,
   },
   {
