@@ -1140,6 +1140,12 @@ class DrawModel {
     this.#featureChosenForEdit = feature;
   };
 
+  // Refreshes the snap-helper by removing it and then adding it again.
+  #refreshSnapHelper = () => {
+    this.#map.snapHelper.delete("coreDrawModel");
+    this.#map.snapHelper.add("coreDrawModel");
+  };
+
   // Enables a remove-interaction which allows the user to remove drawn features by clicking on them.
   // We're also making sure to enable the click-lock so that the feature-info does not infer.
   #enableRemoveInteraction = () => {
@@ -1264,15 +1270,15 @@ class DrawModel {
     this.#selectInteraction.on("select", this.#handleFeatureSelect);
     // Then we'll add the interaction to the map...
     this.#map.addInteraction(this.#selectInteraction);
-    // ...and add the snap- and clickLock-helpers.
-    this.#map.clickLock.add("coreDrawModel");
-    this.#map.snapHelper.add("coreDrawModel");
     // When this is done, we can set the private field keeping track of
     // if the Move-interaction is active or not.
     this.#moveInteractionActive = true;
     // If we should enable the Translate-interaction, we do that as well.
     (settings.translateEnabled ?? this.#keepTranslateActive) &&
       this.#enableTranslateInteraction();
+    // ...finally we'll add the snap- and clickLock-helpers.
+    this.#map.clickLock.add("coreDrawModel");
+    this.#map.snapHelper.add("coreDrawModel");
   };
 
   // Enables a Translate-interaction, allowing users to move features by dragging them
@@ -1292,6 +1298,9 @@ class DrawModel {
     });
     // ...and add it to the map!
     this.#map.addInteraction(this.#translateInteraction);
+    // We also have to make sure to refresh the snap-helper, otherwise
+    // the snap won't work on the translate-features.
+    this.#refreshSnapHelper();
   };
 
   // Disabled the Move-interaction and removed it from the map.
