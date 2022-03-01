@@ -6,6 +6,9 @@ import { IconButton, Zoom, Paper } from "@material-ui/core";
 import SettingsBackupRestoreIcon from "@material-ui/icons/SettingsBackupRestore";
 import FolderOpenIcon from "@material-ui/icons/FolderOpen";
 import SaveAltIcon from "@material-ui/icons/SaveAlt";
+import DeleteIcon from "@material-ui/icons/Delete";
+import VisibilityOffIcon from "@material-ui/icons/VisibilityOff";
+import VisibilityIcon from "@material-ui/icons/Visibility";
 
 import Information from "../components/Information";
 import UploadDialog from "../components/UploadDialog";
@@ -49,32 +52,39 @@ const ButtonPanel = ({ kmlModel, setDialogOpen }) => {
   );
 };
 
-const UploadedFile = ({ onRestoreClick, title }) => {
+const UploadedFile = (props) => {
   return (
     <Zoom in appear>
       <StyledPaper>
         <Grid container justify="space-between" alignItems="center">
           <Grid item xs={4}>
-            <Typography variant="button">{title}</Typography>
+            <Typography variant="button">{props.title}</Typography>
           </Grid>
           <Grid container item xs={8} justify="flex-end" spacing={1}>
             <Grid item>
               <Tooltip title="Klicka för att ta bort de importerade objekten.">
-                <IconButton size="small" onClick={onRestoreClick}>
-                  <SettingsBackupRestoreIcon />
+                <IconButton size="small" onClick={props.onRemoveClick}>
+                  <DeleteIcon />
+                </IconButton>
+              </Tooltip>
+            </Grid>
+            <Grid item>
+              <Tooltip
+                title={`Klicka för att ${
+                  props.active ? "dölja" : "visa"
+                } objekten ${props.active ? "från" : "i"} kartan.`}
+              >
+                <IconButton
+                  size="small"
+                  onClick={props.onVisibilityChangeClick}
+                >
+                  {props.active ? <VisibilityOffIcon /> : <VisibilityIcon />}
                 </IconButton>
               </Tooltip>
             </Grid>
             <Grid item>
               <Tooltip title="Klicka för att ta bort de importerade objekten.">
-                <IconButton size="small" onClick={onRestoreClick}>
-                  <SettingsBackupRestoreIcon />
-                </IconButton>
-              </Tooltip>
-            </Grid>
-            <Grid item>
-              <Tooltip title="Klicka för att ta bort de importerade objekten.">
-                <IconButton size="small" onClick={onRestoreClick}>
+                <IconButton size="small" onClick={props.onRestoreClick}>
                   <SettingsBackupRestoreIcon />
                 </IconButton>
               </Tooltip>
@@ -86,15 +96,26 @@ const UploadedFile = ({ onRestoreClick, title }) => {
   );
 };
 
-const UploadedFileList = ({ uploadedFiles }) => {
+const UploadedFileList = (props) => {
   return (
     <Grid container style={{ maxHeight: 240, overflowY: "auto" }}>
       <Grid item xs={12}>
         <Typography variant="caption">Uppladdade filer</Typography>
       </Grid>
       <Grid item xs={12}>
-        {uploadedFiles.map((file) => {
-          return <UploadedFile key={file.id} title={file.title} />;
+        {props.uploadedFiles.map((file) => {
+          return (
+            <UploadedFile
+              key={file.id}
+              title={file.title}
+              active={file.active}
+              showText={file.showText}
+              onVisibilityChangeClick={() =>
+                props.onVisibilityChangeClick(file.id)
+              }
+              onRemoveClick={() => props.onRemoveClick(file.id)}
+            />
+          );
         })}
       </Grid>
     </Grid>
@@ -120,12 +141,30 @@ const UploadView = (props) => {
       second: "numeric",
     });
     // Let's create an object with some meta-data and add it to the list of uploaded files.
-    props.setUploadedFiles((files) => [...files, { id, title: dateTime }]);
+    props.setUploadedFiles((files) => [
+      ...files,
+      { id, title: dateTime, active: true, showText: true },
+    ]);
     // Then we can add the features to the map!
     props.kmlModel.import(file, {
       zoomToExtent: true,
       setProperties: { KML_ID: id },
     });
+  };
+
+  const onVisibilityChangeClick = (id) => {
+    const updatedFiles = props.uploadedFiles.map((file) => {
+      if (file.id === id) {
+        return { ...file, active: !file.active };
+      }
+      return file;
+    });
+    props.setUploadedFiles(updatedFiles);
+  };
+
+  const onRemoveClick = (id) => {
+    const updatedFiles = props.uploadedFiles.filter((file) => file.id !== id);
+    props.setUploadedFiles(updatedFiles);
   };
 
   // We have to get some information about the current activity (view)
@@ -140,7 +179,11 @@ const UploadView = (props) => {
       </Grid>
       <Grid item xs={12}>
         {props.uploadedFiles.length > 0 && (
-          <UploadedFileList uploadedFiles={props.uploadedFiles} />
+          <UploadedFileList
+            uploadedFiles={props.uploadedFiles}
+            onVisibilityChangeClick={onVisibilityChangeClick}
+            onRemoveClick={onRemoveClick}
+          />
         )}
       </Grid>
       <UploadDialog
