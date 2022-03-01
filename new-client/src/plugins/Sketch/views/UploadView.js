@@ -14,7 +14,8 @@ const StyledPaper = styled(Paper)(({ theme }) => ({
   width: "100%",
   padding: theme.spacing(1),
   marginBottom: theme.spacing(1),
-  borderLeft: `${theme.spacing(0.5)}px solid ${theme.palette.success.main}`,
+  borderRight: `${theme.spacing(0.5)}px solid ${theme.palette.info.main}`,
+  borderLeft: `${theme.spacing(0.5)}px solid ${theme.palette.info.main}`,
 }));
 
 const ButtonPanel = ({ kmlModel, setDialogOpen }) => {
@@ -53,12 +54,32 @@ const UploadedFile = ({ onRestoreClick, title }) => {
     <Zoom in appear>
       <StyledPaper>
         <Grid container justify="space-between" alignItems="center">
-          <Typography variant="button">{title}</Typography>
-          <Tooltip title="Klicka för att ta bort de importerade objekten.">
-            <IconButton size="small" onClick={onRestoreClick}>
-              <SettingsBackupRestoreIcon />
-            </IconButton>
-          </Tooltip>
+          <Grid item xs={4}>
+            <Typography variant="button">{title}</Typography>
+          </Grid>
+          <Grid container item xs={8} justify="flex-end" spacing={1}>
+            <Grid item>
+              <Tooltip title="Klicka för att ta bort de importerade objekten.">
+                <IconButton size="small" onClick={onRestoreClick}>
+                  <SettingsBackupRestoreIcon />
+                </IconButton>
+              </Tooltip>
+            </Grid>
+            <Grid item>
+              <Tooltip title="Klicka för att ta bort de importerade objekten.">
+                <IconButton size="small" onClick={onRestoreClick}>
+                  <SettingsBackupRestoreIcon />
+                </IconButton>
+              </Tooltip>
+            </Grid>
+            <Grid item>
+              <Tooltip title="Klicka för att ta bort de importerade objekten.">
+                <IconButton size="small" onClick={onRestoreClick}>
+                  <SettingsBackupRestoreIcon />
+                </IconButton>
+              </Tooltip>
+            </Grid>
+          </Grid>
         </Grid>
       </StyledPaper>
     </Zoom>
@@ -93,7 +114,11 @@ const UploadView = (props) => {
     const id = props.model.generateRandomString();
     // We're also gonna need to generate a date-time-string that can be shown in the list
     // of uploaded kml-files.
-    const dateTime = props.model.getDateTimeString();
+    const dateTime = props.model.getDateTimeString({
+      hour: "numeric",
+      minute: "numeric",
+      second: "numeric",
+    });
     // Let's create an object with some meta-data and add it to the list of uploaded files.
     props.setUploadedFiles((files) => [...files, { id, title: dateTime }]);
     // Then we can add the features to the map!

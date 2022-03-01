@@ -11,7 +11,8 @@ const StyledPaper = styled(Paper)(({ theme }) => ({
   width: "100%",
   padding: theme.spacing(1),
   marginBottom: theme.spacing(1),
-  borderLeft: `${theme.spacing(0.5)}px solid ${theme.palette.success.main}`,
+  borderRight: `${theme.spacing(0.5)}px solid ${theme.palette.info.main}`,
+  borderLeft: `${theme.spacing(0.5)}px solid ${theme.palette.info.main}`,
 }));
 
 // A component that is rendered if the user has selected not to accept functional

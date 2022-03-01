@@ -139,7 +139,14 @@ const SketchView = (props) => {
     ({ id }) => {
       setUploadedFiles((files) => [
         ...files,
-        { id, title: model.getDateTimeString() },
+        {
+          id,
+          title: model.getDateTimeString({
+            hour: "numeric",
+            minute: "numeric",
+            second: "numeric",
+          }),
+        },
       ]);
     },
     [model]

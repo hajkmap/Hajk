@@ -78,9 +78,9 @@ class SketchModel {
   };
 
   // Returns the current date and time on YYYY-MM-DD HH:MM:SS
-  getDateTimeString = () => {
+  getDateTimeString = (options) => {
     const date = new Date();
-    return date.toLocaleString("default", this.#dateTimeOptions);
+    return date.toLocaleString("default", options || this.#dateTimeOptions);
   };
 
   // Generates a random string that can be used as an ID.

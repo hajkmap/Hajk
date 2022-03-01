@@ -12,6 +12,7 @@ const StyledPaper = styled(Paper)(({ theme }) => ({
   width: "100%",
   padding: theme.spacing(1),
   marginBottom: theme.spacing(1),
+  borderRight: `${theme.spacing(0.5)}px solid ${theme.palette.info.main}`,
   borderLeft: `${theme.spacing(0.5)}px solid ${theme.palette.info.main}`,
 }));
 
