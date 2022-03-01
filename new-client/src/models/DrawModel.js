@@ -313,7 +313,8 @@ class DrawModel {
   // Returns the style that should be used on the drawn features
   #getFeatureStyle = (feature, settingsOverride) => {
     if (feature.get("HIDDEN") === true) {
-      feature.set("STYLE_BEFORE_HIDE", feature.getStyle());
+      !feature.get("STYLE_BEFORE_HIDE") &&
+        feature.set("STYLE_BEFORE_HIDE", feature.getStyle());
       return new Style({});
     }
     // If we're dealing with "Arrow" we'll return a special style array
