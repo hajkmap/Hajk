@@ -222,11 +222,13 @@ class KmlModel {
     }
     // First, we try to get the style from the feature props
     const styleProperty =
-      feature.get("EXTRACTED_STYLE") || feature.get("STYLE") || null;
+      feature.get("EXTRACTED_STYLE") || feature.get("style") || null;
     // If it exists, we apply the style using this prop.
     if (styleProperty !== null) {
       return this.#setFeatureStyleFromProps(feature, styleProperty);
     }
+    // Otherwise the feature might contain a style-function. If it does, we can use that
+    // to style the feature.
     const styleFunc = feature.getStyleFunction() ?? null;
     if (styleFunc !== null) {
       return this.#setStyleFromStyleFunction(feature, styleFunc);
@@ -247,11 +249,7 @@ class KmlModel {
       // text, and we have to handle it separately. (We don't want to
       // extract information from the point-object which is it built upon).
       if (geometryType === "Text") {
-        this.#setFeatureTextProperty(feature, parsedStyle.text);
-      } else {
-        // If we're not dealing with a text-object from the draw-plugin,
-        // we can extract information from the feature itself.
-        this.#setFeaturePropertiesFromGeometry(feature);
+        this.#setFeatureTextProperties(feature, parsedStyle.text);
       }
       // Then we create a style and apply it on the feature to make
       // sure the import looks like the features drawn in the draw-plugin.
@@ -287,12 +285,18 @@ class KmlModel {
     return style[0] && style[0].getFill && style[0].getFill() === null;
   };
 
-  // Sets the text property on the supplied feature.
-  #setFeatureTextProperty = (feature, text) => {
-    feature.setProperties({
-      type: "Text",
-      text: text,
-    });
+  // Sets the user-text-properties on the supplied feature. This is required
+  // since we want to support text-features from Hajk2, and features drawn there does
+  // not have the same settings as the current draw-model.
+  #setFeatureTextProperties = (feature, text) => {
+    if (!feature.get("USER_TEXT")) {
+      feature.set("USER_TEXT", text);
+      feature.set("TEXT_SETTINGS", {
+        backgroundColor: "#000000",
+        foregroundColor: "#FFFFFF",
+        size: 14,
+      });
+    }
   };
 
   // Creates a style-object from the special settings that are
@@ -344,29 +348,6 @@ class KmlModel {
         width: 3,
       }),
       offsetY: -10,
-    });
-  };
-
-  // Extracts some information from the geometry and sets it as properties on
-  // the feature.
-  #setFeaturePropertiesFromGeometry = (feature) => {
-    // We're gonna need an object to keep track of some extracted settings
-    const extractedSettings = {};
-    // Extracting the geometry and geometry type
-    const featureGeometry = feature.getGeometry();
-    const geometryType = featureGeometry.getType();
-    // Let's extract some information about the geometry
-    extractedSettings.position = this.#getFeaturePointPosition(featureGeometry);
-    extractedSettings.length = featureGeometry.getLength?.() ?? null;
-    extractedSettings.area = featureGeometry.getArea?.() ?? null;
-    extractedSettings.radius = featureGeometry.getRadius?.() ?? null;
-    // And set the information as properties
-    feature.setProperties({
-      type: geometryType,
-      length: extractedSettings.length,
-      area: extractedSettings.area,
-      radius: extractedSettings.radius,
-      position: extractedSettings.position,
     });
   };
 

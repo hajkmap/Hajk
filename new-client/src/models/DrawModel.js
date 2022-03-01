@@ -1624,8 +1624,8 @@ class DrawModel {
   // Accepts a color-string (hex or rgba) and returns an object containing r-, g-, b-, and a-properties.
   parseColorString = (s) => {
     try {
-      // First, we make sure we're dealing with a string. If not, return an empty object.
-      if (typeof s !== "string") {
+      // First, we make sure we're dealing with a string with proper length. If not, return an empty object.
+      if (typeof s !== "string" || s.length < 7) {
         return {};
       }
       // Then we'll check if the supplied string is an hex-string (must start with hash and be 7 chars).
