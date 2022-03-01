@@ -159,6 +159,7 @@ const UploadView = (props) => {
       }
       return file;
     });
+    props.drawModel.toggleKmlFeaturesVisibility(id);
     props.setUploadedFiles(updatedFiles);
   };
 

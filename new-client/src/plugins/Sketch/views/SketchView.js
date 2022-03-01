@@ -256,6 +256,7 @@ const SketchView = (props) => {
           <UploadView
             id={activityId}
             model={model}
+            drawModel={drawModel}
             kmlModel={kmlModel}
             uploadedFiles={uploadedFiles}
             setUploadedFiles={setUploadedFiles}

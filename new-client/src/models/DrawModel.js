@@ -312,12 +312,21 @@ class DrawModel {
 
   // Returns the style that should be used on the drawn features
   #getFeatureStyle = (feature, settingsOverride) => {
+    if (feature.get("HIDDEN") === true) {
+      feature.set("STYLE_BEFORE_HIDE", feature.getStyle());
+      return new Style({});
+    }
     // If we're dealing with "Arrow" we'll return a special style array
     if (feature?.get("DRAW_METHOD") === "Arrow") {
       return this.#getArrowStyle(feature, settingsOverride);
     }
-    // Otherwise we'll grab the current style
-    const currentStyle = feature.getStyle();
+    // Otherwise we'll grab the 'current' style. The 'current' style might be
+    // stored in the 'STYLE_BEFORE_HIDE' property (and feature.getStyle() will
+    // return an empty style). This case happens when the feature has been hid, and
+    // is now to be shown again. For all the 'ordinary' cases, this property will be null
+    // and wont affect the feature-style.
+    const currentStyle = feature.get("STYLE_BEFORE_HIDE") || feature.getStyle();
+    feature.set("STYLE_BEFORE_HIDE", null);
     // Let's grab the standard draw (or the currently set) style as a baseline.
     // The standard style can be overridden if the override is supplied. This is a real mess,
     // since OL might decide to apply a style-array sometimes (in that case we want the fist style
@@ -1519,6 +1528,18 @@ class DrawModel {
     this.#refreshFeaturesTextStyle();
     // If we had a draw-interaction active before the kml-import, we have to enable it again.
     currentInteraction && this.toggleDrawInteraction(currentInteraction);
+  };
+
+  // Toggles the hidden-property of all features connected to a kml-import
+  // with the supplied id.
+  toggleKmlFeaturesVisibility = (id) => {
+    this.#drawSource.getFeatures().forEach((f) => {
+      if (f.get("KML_ID") === id) {
+        const featureHidden = f.get("HIDDEN") ?? false;
+        f.set("HIDDEN", !featureHidden);
+        f.setStyle(this.#getFeatureStyle(f));
+      }
+    });
   };
 
   // Clones the supplied ol-feature and adds it to the map (the added clone
