@@ -3,6 +3,7 @@ import { styled } from "@material-ui/core";
 import { Button, IconButton, Zoom } from "@material-ui/core";
 import { Grid, Typography, Tooltip, Paper } from "@material-ui/core";
 import SettingsBackupRestoreIcon from "@material-ui/icons/SettingsBackupRestore";
+import DeleteIcon from "@material-ui/icons/Delete";
 
 import Information from "../components/Information";
 
@@ -93,6 +94,7 @@ const DeleteView = ({
           fullWidth
           variant="contained"
           onClick={drawModel.removeDrawnFeatures}
+          startIcon={<DeleteIcon />}
         >
           Ta bort alla ritobjekt
         </Button>
