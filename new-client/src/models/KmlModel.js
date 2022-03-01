@@ -254,10 +254,9 @@ class KmlModel {
       // Then we create a style and apply it on the feature to make
       // sure the import looks like the features drawn in the draw-plugin.
       feature.setStyle(this.#createFeatureStyle(parsedStyle));
-    } catch (exception) {
+    } catch (error) {
       console.error(
-        "KML-model: Style attribute could not be parsed.",
-        exception
+        `KML-model: Style attribute could not be parsed. Error: ${error}`
       );
     }
   };
@@ -507,10 +506,10 @@ class KmlModel {
       prepareForMapInjection && this.#prepareForMapInjection(features);
       // Then we can return the features
       return { features: features, error: null };
-    } catch (exception) {
+    } catch (error) {
       // If we happen to hit a mine, we make sure to return the error
       // message and an empty array.
-      return { features: [], error: exception.message };
+      return { features: [], error: error };
     }
   };
 
