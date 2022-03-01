@@ -11,6 +11,8 @@ using log4net;
 using MapService.Models;
 using MapService.Models.Config;
 using MapService.Models.ToolOptions;
+using System.Configuration;
+using System.Web;
 
 namespace MapService.DataAccess
 {      
@@ -19,7 +21,26 @@ namespace MapService.DataAccess
         //private string mapFile = "map_1.json";
         private string layerFile = "layers.json";
 
+        private bool disableUpdates = ConfigurationManager.AppSettings["disableUpdates"] == "true" ? true : false;
+
+
         ILog _log = LogManager.GetLogger(typeof(SettingsDbContext));
+
+
+        /// <summary>
+        /// If update are disabled from config throw 403
+        /// </summary>
+        /// <returns></returns>
+        public void preventUpdates()
+        {
+            if (this.disableUpdates == true)
+            {
+                throw new HttpException(403, "Forbidden");
+            }
+        }
+
+
+
         /// <summary>
         /// Read layer config from JSON-file
         /// </summary>
@@ -67,6 +88,9 @@ namespace MapService.DataAccess
         /// <param name="mapConfig"></param>
         private void saveMapConfigToFile(MapConfig mapConfig, string mapFile)
         {
+
+            this.preventUpdates();
+
             try
             {
                 string file = String.Format("{0}App_Data\\{1}", HostingEnvironment.ApplicationPhysicalPath, mapFile);
@@ -87,6 +111,9 @@ namespace MapService.DataAccess
         /// <param name="layerConfig"></param>
         private void saveLayerConfigToFile(LayerConfig layerConfig) 
         {
+
+            this.preventUpdates();
+
             try
             {
                 string file = String.Format("{0}App_Data\\{1}", HostingEnvironment.ApplicationPhysicalPath, this.layerFile);

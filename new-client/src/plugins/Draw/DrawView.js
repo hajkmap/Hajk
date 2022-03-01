@@ -182,6 +182,7 @@ class DrawView extends React.PureComponent {
             headerText: this.state.dialogHeaderText || "Ange text",
             buttonText: this.state.dialogButtonText || "OK",
             abortText: this.state.dialogAbortText,
+            useLegacyNonMarkdownRenderer: true,
           }}
           open={this.state.dialog}
           onClose={this.state.dialogCloseCallback}
