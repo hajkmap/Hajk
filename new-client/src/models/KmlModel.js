@@ -403,14 +403,26 @@ class KmlModel {
     });
   };
 
+  // Returns wether the supplied feature is of type text or not. "DRAW_METHOD" belongs
+  // to the core draw-model and "geometryType" belongs to the old draw-plugin.
+  #featureIsTextType = (feature) => {
+    const drawMethod =
+      feature.get("DRAW_METHOD") || feature.get("geometryType");
+    return drawMethod === "Text";
+  };
+
   #tagFeaturesAsImported = (features) => {
     // If no features are supplied, we abort!
     if (!features || features?.length === 0) {
       return null;
     }
-    // Otherwise we set the "KML_IMPORT" property to true
+    // Otherwise we set the "KML_IMPORT" property to true. We also want
+    // to set "SHOW_TEXT" to false on all features except text features.
+    // Why? Well, kml's created from dgw:s usually contains a lot of text, and
+    // we do not want to show this immediately. (The text can be turned on later).
     features.forEach((feature) => {
       feature.set("KML_IMPORT", true);
+      feature.set("SHOW_TEXT", this.#featureIsTextType(feature));
     });
   };
 
