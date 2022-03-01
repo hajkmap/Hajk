@@ -1482,7 +1482,11 @@ class DrawModel {
       // different menus for example). The imported kml-features might not have been created with
       // the hajk-drawModel, and therefore lacks this property. We'll set it to the geometry-type
       // which should be sufficient.
-      !f.get("DRAW_METHOD") && f.set("DRAW_METHOD", f.getGeometry().getType());
+      !f.get("DRAW_METHOD") &&
+        f.set(
+          "DRAW_METHOD",
+          f.get("geometryType") || f.getGeometry().getType()
+        );
       // Let's grab the style- and text-settings. (At this point they will
       // can be undefined, a string, or the actual objects). We also have to grab the userDrawn-prop
       // (which should be a boolean, but since we're dealing with kml, it might be a string...).
@@ -1502,6 +1506,8 @@ class DrawModel {
       // the text they want. Now we do not want that behavior).
       this.addFeature(f, { silent: true });
     });
+    // Let's make sure to refresh all features text-style to make sure they are up-to-date
+    this.#refreshFeaturesTextStyle();
     // If we had a draw-interaction active before the kml-import, we have to enable it again.
     currentInteraction && this.toggleDrawInteraction(currentInteraction);
   };
