@@ -71,14 +71,14 @@ const UploadedFile = (props) => {
             <Grid item>
               <Tooltip
                 title={`Klicka för att ${
-                  props.active ? "dölja" : "visa"
-                } objekten ${props.active ? "från" : "i"} kartan.`}
+                  props.hidden ? "visa" : "dölja"
+                } objekten ${props.hidden ? "i" : "från"} kartan.`}
               >
                 <IconButton
                   size="small"
                   onClick={props.onVisibilityChangeClick}
                 >
-                  {props.active ? <VisibilityOffIcon /> : <VisibilityIcon />}
+                  {props.hidden ? <VisibilityIcon /> : <VisibilityOffIcon />}
                 </IconButton>
               </Tooltip>
             </Grid>
@@ -108,8 +108,8 @@ const UploadedFileList = (props) => {
             <UploadedFile
               key={file.id}
               title={file.title}
-              active={file.active}
-              showText={file.showText}
+              hidden={file.hidden}
+              textShown={file.textShown}
               onVisibilityChangeClick={() =>
                 props.onVisibilityChangeClick(file.id)
               }
@@ -143,7 +143,7 @@ const UploadView = (props) => {
     // Let's create an object with some meta-data and add it to the list of uploaded files.
     props.setUploadedFiles((files) => [
       ...files,
-      { id, title: dateTime, active: true, showText: true },
+      { id, title: dateTime, hidden: false, textShown: true },
     ]);
     // Then we can add the features to the map!
     props.kmlModel.import(file, {
@@ -155,7 +155,7 @@ const UploadView = (props) => {
   const onVisibilityChangeClick = (id) => {
     const updatedFiles = props.uploadedFiles.map((file) => {
       if (file.id === id) {
-        return { ...file, active: !file.active };
+        return { ...file, hidden: !file.hidden };
       }
       return file;
     });

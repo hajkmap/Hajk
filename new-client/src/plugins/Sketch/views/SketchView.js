@@ -146,8 +146,8 @@ const SketchView = (props) => {
             minute: "numeric",
             second: "numeric",
           }),
-          active: true,
-          showText: true,
+          hidden: false,
+          textShown: true,
         },
       ]);
     },
