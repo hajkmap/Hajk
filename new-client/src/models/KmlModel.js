@@ -4,7 +4,7 @@ import KML from "ol/format/KML";
 import { Circle } from "ol/geom";
 import { fromCircle } from "ol/geom/Polygon";
 import { saveAs } from "file-saver";
-import { Fill, Stroke, Style, Text } from "ol/style";
+import { Circle as CircleStyle, Fill, Stroke, Style, Text } from "ol/style";
 
 /*
  * A model supplying useful KML-functionality.
@@ -301,35 +301,80 @@ class KmlModel {
 
   // Creates a style-object from the special settings that are
   // added when drawing features in the draw-plugin. E.g. stroke-dash
-  // and so on. TODO: (1) Add image style
-  // TODO: (2) Get rid of this and use standard ol stuff.
+  // and so on.
   #createFeatureStyle = (parsedStyle) => {
-    return [
-      new Style({
-        fill: this.#getFillStyle(parsedStyle),
-        image: this.#getImageStyle(parsedStyle),
-        stroke: this.#getStrokeStyle(parsedStyle),
-        text: this.#getTextStyle(parsedStyle),
-      }),
-    ];
+    return new Style({
+      fill: this.#getFillStyle(parsedStyle),
+      image: this.#getImageStyle(parsedStyle),
+      stroke: this.#getStrokeStyle(parsedStyle),
+      text: this.#getTextStyle(parsedStyle),
+    });
   };
 
-  // Returns a fill-style based on the supplied values
+  // Returns a fill-style based on the supplied settings.
+  // If the feature was created with the new draw-model, the settings
+  // will contain a fillStyle-object, and if it was created with Hajk2 it
+  // will only contain a fillColor-property.
   #getFillStyle = (styleSettings) => {
-    const { fillColor } = styleSettings;
+    const { fillStyle, fillColor } = styleSettings;
+    if (fillStyle) {
+      return new Fill({ color: fillStyle.color });
+    }
     return new Fill({ color: fillColor });
   };
 
-  // Returns an image-style based on the supplied values
+  // Returns an image-style based on the supplied settings.
+  // If the feature was created with the new draw-model, the settings
+  // will contain a imageStyle-object, and if it was created with Hajk2 it
+  // will only contain the pointColor property.
   #getImageStyle = (styleSettings) => {
-    return null;
+    const { imageStyle, pointColor } = styleSettings;
+    // If the settings has the imageStyle-property, we create the style from that one.
+    if (imageStyle) {
+      return new CircleStyle({
+        radius: 6,
+        stroke: new Stroke({
+          color: imageStyle.strokeColor,
+          width: imageStyle.strokeWidth,
+          lineDash: imageStyle.dash,
+        }),
+        fill: new Fill({
+          color: imageStyle.fillColor,
+        }),
+      });
+    }
+    // Otherwise we use the pointColor property and some defaults.
+    return new CircleStyle({
+      radius: 6,
+      stroke: new Stroke({
+        color: "#FFFFFF",
+        width: 2,
+        lineDash: null,
+      }),
+      fill: new Fill({
+        color: pointColor,
+      }),
+    });
   };
 
-  // Returns a stroke-style based on the supplied values
+  // Returns a stroke-style based on the supplied settings.
+  // If the feature was created with the new draw-model, the settings
+  // will contain a strokeStyle-object, and if it was created with Hajk2 it
+  // will only contain the strokeDash, strokeWidth, strokeColor directly.
   #getStrokeStyle = (styleSettings) => {
-    const { lineDash, strokeWidth, strokeColor } = styleSettings;
+    const { strokeStyle } = styleSettings;
+    // If the settings contain a strokeStyle, we use that one.
+    if (strokeStyle) {
+      return new Stroke({
+        lineDash: strokeStyle.dash,
+        color: strokeStyle.color,
+        width: strokeStyle.width,
+      });
+    }
+    // Otherwise we use the 'old' settings (from Hajk2).
+    const { strokeDash, strokeWidth, strokeColor } = styleSettings;
     return new Stroke({
-      lineDash: lineDash,
+      lineDash: strokeDash,
       color: strokeColor,
       width: strokeWidth,
     });
@@ -340,14 +385,15 @@ class KmlModel {
     const { text } = styleSettings;
     return new Text({
       font: "12pt sans-serif",
-      fill: new Fill({ color: "#FFF" }),
+      fill: new Fill({ color: "#FFFFF" }),
       text: text,
       overflow: true,
       stroke: new Stroke({
         color: "rgba(0, 0, 0, 0.5)",
         width: 3,
       }),
-      offsetY: -10,
+      offsetX: 0,
+      offsetY: -15,
     });
   };
 
@@ -598,18 +644,6 @@ class KmlModel {
       clonedFeature
         .getGeometry()
         .transform(this.#map.getView().getProjection(), "EPSG:4326");
-      // Here some styling-magic is happening... TODO: What?!
-      // if (clonedFeature.getStyle()[1]) {
-      //   clonedFeature.setProperties({
-      //     style: JSON.stringify(
-      //       this.extractStyle(
-      //         clonedFeature.getStyle()[1] || clonedFeature.getStyle()[0],
-      //         geomIsCircle ? clonedFeature.getGeometry().getRadius() : false
-      //       )
-      //     ),
-      //     geometryType: clonedFeature.getGeometry().getType(),
-      //   });
-      // }
       // Finally, we can push the transformed feature to the
       // transformedFeatures-array.
       transformedFeatures.push(clonedFeature);
