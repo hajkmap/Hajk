@@ -484,6 +484,15 @@ class KmlModel {
     }
   };
 
+  // Accepts an id and checks if the current source still contains features
+  // with the supplied kml-id.
+  importedKmlStillHasFeatures = (id) => {
+    return (
+      this.#kmlSource.getFeatures().filter((f) => f.get("KML_ID") === id)
+        .length > 0
+    );
+  };
+
   // Tries to parse features from the supplied kml-string.
   // Accepts a kmlString and an optional second parameter stating if
   // the features should be translated to the map-views srs or not.

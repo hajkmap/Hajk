@@ -54,6 +54,15 @@ const SketchView = (props) => {
   // We're gonna need to keep track of if we're allowed to save stuff in LS. Let's use the hook.
   const { functionalCookiesOk } = useCookieStatus(globalObserver);
 
+  // Checks that every entry in the array of uploaded files still
+  // has some features in the map. If it doesn't, the entry is removed.
+  const refreshUploadsList = React.useCallback(() => {
+    const refreshedUploadsList = uploadedFiles.filter((file) => {
+      return kmlModel.importedKmlStillHasFeatures(file.id);
+    });
+    setUploadedFiles(refreshedUploadsList);
+  }, [kmlModel, uploadedFiles]);
+
   // Handler making sure to keep the removed features updated when a new feature is removed.
   const handleFeatureRemoved = React.useCallback(
     (feature) => {
@@ -77,8 +86,12 @@ const SketchView = (props) => {
       setRemovedFeatures(
         [feature, ...removedFeatures].slice(0, MAX_REMOVED_FEATURES)
       );
+      // We also have to make sure to remove eventual uploads where all its features
+      // has been removed. (It does not make sense to have a list of imports where all the
+      // features from the import has been removed).
+      refreshUploadsList();
     },
-    [model, removedFeatures, functionalCookiesOk]
+    [model, removedFeatures, functionalCookiesOk, refreshUploadsList]
   );
 
   // Handler making sure to keep the removed features updated when the user has pressed "removed all features".
@@ -111,8 +124,12 @@ const SketchView = (props) => {
       ].slice(0, MAX_REMOVED_FEATURES);
       // Then we'll update the state.
       setRemovedFeatures(removedFeaturesToShow);
+      // We also have to make sure to remove eventual uploads where all its features
+      // has been removed. (It does not make sense to have a list of imports where all the
+      // features from the import has been removed).
+      refreshUploadsList();
     },
-    [model, removedFeatures, functionalCookiesOk]
+    [model, removedFeatures, functionalCookiesOk, refreshUploadsList]
   );
 
   // Handler for when a feature is added to the draw-source via the addFeature-method
