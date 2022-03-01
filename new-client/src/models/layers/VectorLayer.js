@@ -15,10 +15,6 @@ import * as SLDReader from "@nieuwlandgeo/sldreader";
 import LayerInfo from "./LayerInfo.js";
 import { hfetch } from "utils/FetchWrapper";
 
-const fetchConfig = {
-  credentials: "same-origin",
-};
-
 const vectorLayerProperties = {
   url: "",
   params: {
@@ -96,7 +92,7 @@ class WFSVectorLayer {
     this.sldText = config?.sldText;
     this.sldStyle = config?.sldStyle ?? "Default Styler";
 
-    //Try fetching the URL, if specified, and style with the resulting SLD
+    // Try fetching the URL, if specified, and style with the resulting SLD
     if (typeof this.sldUrl === "string" && this.sldUrl.trim().length > 0) {
       hfetch(this.sldUrl)
         .then((response) => response.text())
@@ -427,9 +423,8 @@ class WFSVectorLayer {
 
   generateLegend(callback) {
     var url = this.proxyUrl + this.createUrl();
-    hfetch(url, fetchConfig).then((response) => {
+    hfetch(url).then((response) => {
       response.text().then((wfsText) => {
-        //const parser = new GML2();
         const parser = new WFS();
         const features = parser.readFeatures(wfsText);
         const canvas = document.createElement("canvas");
