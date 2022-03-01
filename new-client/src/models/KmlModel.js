@@ -31,6 +31,7 @@ class KmlModel {
   #map;
   #layerName;
   #drawModel;
+  #observer;
   #kmlSource;
   #kmlLayer;
   #parser;
@@ -46,6 +47,7 @@ class KmlModel {
     this.#map = settings.map;
     this.#layerName = settings.layerName;
     this.#drawModel = settings.drawModel || null;
+    this.#observer = settings.observer || null;
     // If a setting to enable drag-and-drop has been passes, we have to initiate
     // the listeners for that.
     settings.enableDragAndDrop && this.#addMapDropListeners();
@@ -98,13 +100,12 @@ class KmlModel {
   };
 
   // Handles the event when a file has been dropped. Tries to import the file as a .kml.
-  #handleDrop = (e) => {
+  #handleDrop = async (e) => {
     try {
-      const file = e.dataTransfer.files[0];
-      if (file) {
+      for await (const file of e.dataTransfer.files) {
         const fileType = file.type ? file.type : file.name.split(".").pop();
-        //Not sure about filetype for kml... Qgis- and Hajk-generated kml:s does not contain any information about type.
-        //The application/vnd... is a guess.
+        // Not sure about filetype for kml... Qgis- and Hajk-generated kml:s does not contain any information about type.
+        // The application/vnd is... a guess.
         if (
           fileType === "kml" ||
           fileType === "application/vnd.google-earth.kml+xml"
@@ -119,8 +120,18 @@ class KmlModel {
 
   #importDroppedKml = (file) => {
     const reader = new FileReader();
+    // We're gonna want to set a random id on all features belonging
+    // to the current file. That way we can keep track of which features
+    // belongs to each file.
+    const id = Math.random().toString(36).slice(2, 9);
+    // Let's handle the onload-event and import the features!
     reader.onload = () => {
-      this.import(reader.result);
+      this.import(reader.result, {
+        zoomToExtent: true,
+        setProperties: { KML_ID: id },
+      });
+      // We also want to publish an event on the observer so that we can update potential views.
+      this.#observer && this.#observer.publish("kmlModel.fileImported", { id });
     };
     reader.readAsText(file);
   };

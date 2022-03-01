@@ -133,6 +133,18 @@ const SketchView = (props) => {
     [model, removedFeatures]
   );
 
+  // Handles when a kml-file has been added to the map via the drag-and-drop
+  // functionality. Makes sure to update the state containing the uploaded files.
+  const handleKmlFileImported = React.useCallback(
+    ({ id }) => {
+      setUploadedFiles((files) => [
+        ...files,
+        { id, title: model.getDateTimeString() },
+      ]);
+    },
+    [model]
+  );
+
   // This effect makes sure to update the draw-style-settings in the draw-model when
   // the user changes the style-settings in the view.
   React.useEffect(() => {
@@ -151,10 +163,12 @@ const SketchView = (props) => {
     localObserver.subscribe("drawModel.featureRemoved", handleFeatureRemoved);
     localObserver.subscribe("drawModel.featuresRemoved", handleFeaturesRemoved);
     localObserver.subscribe("drawModel.featureAdded", handleFeatureAdded);
+    localObserver.subscribe("kmlModel.fileImported", handleKmlFileImported);
     return () => {
       localObserver.unsubscribe("drawModel.featureRemoved");
       localObserver.unsubscribe("drawModel.featuresRemoved");
       localObserver.unsubscribe("drawModel.featureAdded");
+      localObserver.unsubscribe("kmlModel.fileImported");
     };
   }, [
     activityId,
@@ -162,6 +176,7 @@ const SketchView = (props) => {
     handleFeatureRemoved,
     handleFeaturesRemoved,
     handleFeatureAdded,
+    handleKmlFileImported,
   ]);
 
   // The current view depends on which tab the user has
