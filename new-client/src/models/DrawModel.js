@@ -1328,6 +1328,9 @@ class DrawModel {
     // And remove the clickLock- and snap-helpers.
     this.#map.clickLock.delete("coreDrawModel");
     this.#map.snapHelper.delete("coreDrawModel");
+    // We also have to make sure to refresh all the feature-styles so that
+    // they are up-to-date with any potential moves.
+    this.refreshDrawLayer();
   };
 
   // Disabled the Translate-interaction if there is one active.
