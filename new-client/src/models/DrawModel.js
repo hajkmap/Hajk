@@ -215,7 +215,7 @@ class DrawModel {
     // Get all the layers from the map
     const allMapLayers = this.#getAllMapLayers();
     // Check wether any of the layers has the same name (type)
-    // as the supplied layerName. TODO: type?!
+    // as the supplied layerName.
     // Also makes sure that the found layer is a vectorLayer. (We cannot
     // add features to an imageLayer...).
     return allMapLayers.some((layer) => {
@@ -262,8 +262,6 @@ class DrawModel {
     // Then we'll create the layer
     this.#drawLayer = this.#getNewVectorLayer(this.#drawSource);
     // Make sure to set the layer type to something understandable.
-    // TODO: Make sure type is the way to go, a bit confusing setting the
-    // layer name on that property. Hmm...
     this.#drawLayer.set("type", this.#layerName);
     // FIXME: Remove "type", use only "name" throughout
     // the application. Should be done as part of #883.
@@ -1108,7 +1106,7 @@ class DrawModel {
       f.get("USER_DRAWN")
     );
     // Let's make sure we found some feature(s) to remove. We're only removing
-    // the first one. TODO: Remove all? No? Yes? Maybe?
+    // the first one.
     if (userDrawnFeatures.length > 0) {
       // Let's get the first user-drawn feature
       const feature = userDrawnFeatures[0];
@@ -1220,7 +1218,6 @@ class DrawModel {
   #enableModifyInteraction = () => {
     // If the edit-interaction is not active, we shouldn't enable the modify-interaction.
     // The modify-interaction is an interaction that should be used on-top of the edit-interaction.
-    // TODO: Haven't really decided the above yet.
     if (!this.#editInteractionActive) {
       return {
         status: "FAILED",
@@ -1450,7 +1447,10 @@ class DrawModel {
   };
 
   // CUSTOM ADDER: Adds the supplied feature to the draw-source
-  // TODO: Explain!
+  // On top of just adding the feature to the draw-source, it makes sure
+  // to create some proper styling and emit events on the observer.
+  // If you want to use the adder without emitting events, you can pass
+  // silent: true in the settings.
   addFeature = (feature, settings) => {
     // The initiator might have supplied some settings, for example "silent",
     // which states if we should avoid firing events when adding the feature.
@@ -1655,7 +1655,7 @@ class DrawModel {
   };
 
   // CUSTOM REMOVER: Removes the supplied feature from the draw-source
-  // TODO: Explain!
+  // Also makes sure to emit an event on the observer.
   removeFeature = (feature) => {
     // Let's start by removing the supplied feature from the draw-source
     // We won't remove if it set as hidden currently (otherwise we might confuse the users
@@ -1841,7 +1841,6 @@ class DrawModel {
   };
 
   // Set:er allowing us to change if a tooltip should be shown when drawing
-  // TODO: Handle side effects
   setShowDrawTooltip = (drawTooltipActive) => {
     // Let's make sure we're provided proper input before we set anything
     if (typeof drawTooltipActive !== "boolean") {
@@ -1885,7 +1884,6 @@ class DrawModel {
   // The fill- and strokeColor passed might be either a string, or an object containing
   // r-, g-, b-, and a-properties. If they are objects, we have to make sure to parse them
   // to strings before setting the new style-settings.
-  // TODO: Handle side effects
   setDrawStyleSettings = (newStyleSettings) => {
     // The fill- and strokeColor might have to be parsed to strings, let's
     // destruct them and parse them if we have to.

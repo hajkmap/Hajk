@@ -142,9 +142,8 @@ class KmlModel {
     // Get all the layers from the map
     const allMapLayers = this.#getAllMapLayers();
     // Check wether any of the layers has the same name (type)
-    // as the supplied layerName. TODO: type?!
-    // Also makes sure that the found layer is a vectorLayer. (We cannot
-    // add features to an imageLayer...).
+    // as the supplied layerName. Also makes sure that the found
+    // layer is a vectorLayer. (We cannot add features to an imageLayer...).
     return allMapLayers.some((layer) => {
       return this.#layerHasCorrectNameAndType(layer);
     });
@@ -189,8 +188,6 @@ class KmlModel {
     // Let's create a layer
     this.#kmlLayer = this.#getNewVectorLayer(this.#kmlSource);
     // Make sure to set the layer type to something understandable.
-    // TODO: Make sure type is the way to go, a bit confusing setting the
-    // layer name on that property. Hmm...
     this.#kmlLayer.set("type", this.#layerName);
     // FIXME: Remove "type", use only "name" throughout
     // the application. Should be done as part of #883.
