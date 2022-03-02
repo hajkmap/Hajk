@@ -2,8 +2,10 @@ import { ACTIVITIES, MAX_REMOVED_FEATURES } from "../constants";
 import LocalStorageHelper from "../../../utils/LocalStorageHelper";
 import { Circle, Fill, Stroke } from "ol/style";
 import GeoJSON from "ol/format/GeoJSON";
-import { STROKE_DASHES } from "../constants";
 import { Circle as CircleGeometry, Point } from "ol/geom";
+
+import { STROKE_DASHES } from "../constants";
+import { DEFAULT_USER_SETTINGS } from "../constants";
 
 class SketchModel {
   #geoJSONParser;
@@ -69,6 +71,14 @@ class SketchModel {
     }
     // Then we'll create the geoJSON, and return that.
     return this.#geoJSONParser.writeFeature(f);
+  };
+
+  // Returns the userSettings-object from LS if it exists, otherwise it returns
+  // the default user-settings. The LS might be empty since the user might have chosen
+  // not to accept functional cookies.
+  getUserSettings = () => {
+    const { userSettings } = LocalStorageHelper.get(this.#storageKey);
+    return userSettings || DEFAULT_USER_SETTINGS;
   };
 
   // Returns the activity-object connected to the supplied id
