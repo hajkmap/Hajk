@@ -583,6 +583,37 @@ paths:
         204:
           description: All good
           content: {}
+  /settings/update/{map}/{tool}:
+    put:
+      tags:
+        - Admin - Maps and layers
+      requestBody:
+        description: Settings for given map's specific tool
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LayerSwitcherBody"
+        required: true
+      parameters:
+        - name: map
+          in: path
+          description: Name of the map
+          required: true
+          schema:
+            type: string
+        - name: tool
+          in: path
+          description: Name of the tool to be edited
+          required: true
+          schema:
+            type: string
+      responses:
+        201:
+          description: Created
+          content: {}
+        204:
+          description: Updated
+          content: {}
   /settings/{layerType}:
     post:
       tags:

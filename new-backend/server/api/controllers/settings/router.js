@@ -11,6 +11,7 @@ export default express
   .put("/layermenu", controller.putSettingsToMapFile)
   .put("/mapsettings", controller.putSettingsToMapFile)
   .put("/toolsettings", controller.putSettingsToMapFile)
+  .put("/update/:map/:tool", controller.updateMapTool)
   .post("/:type", controller.putLayerOfType) // Will add new each time it's called
   .put("/:type", controller.putLayerOfType) // Will overwrite existing and the result is idempotent
   // Handle layer removal

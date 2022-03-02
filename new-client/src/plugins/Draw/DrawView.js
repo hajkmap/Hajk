@@ -79,9 +79,10 @@ class DrawView extends React.PureComponent {
     mapDiv.addEventListener("drop", this.handleDrop, false);
   };
 
-  handleDragEnter = () => {
+  handleDragEnter = (e) => {
     this.snackbarKey = this.props.enqueueSnackbar(
-      "Släpp en KML-fil i kartan för att importera!"
+      "Släpp en KML-fil i kartan för att importera!",
+      { preventDuplicate: true }
     );
   };
 
@@ -181,6 +182,7 @@ class DrawView extends React.PureComponent {
             headerText: this.state.dialogHeaderText || "Ange text",
             buttonText: this.state.dialogButtonText || "OK",
             abortText: this.state.dialogAbortText,
+            useLegacyNonMarkdownRenderer: true,
           }}
           open={this.state.dialog}
           onClose={this.state.dialogCloseCallback}

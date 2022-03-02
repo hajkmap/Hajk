@@ -104,11 +104,11 @@ class FirExportResidentListView extends React.PureComponent {
   constructor(props) {
     super(props);
     this.model = this.props.model;
-    this.type = this.props.type; // kir or fir
+    this.type = this.props.type ?? "fir"; // kir or fir
     this.localObserver = this.props.localObserver;
-    this.options = this.model.app.plugins.fir.options;
+    this.options = this.model.app.plugins[this.type].options;
 
-    this.localObserver.subscribe("kir.results.filtered", (list) => {
+    this.localObserver.subscribe(`${this.type}.results.filtered`, (list) => {
       this.setState({ results: [...list] });
       this.forceUpdate();
     });
@@ -324,6 +324,15 @@ class FirExportResidentListView extends React.PureComponent {
       .then((data) => {
         if (data.features?.length > 0) {
           this.sendResidentData(new GeoJSON().readFeatures(data));
+        } else {
+          this.setState({ loading: false });
+          this.props.closeSnackbar(this.snackBar);
+          this.snackBar = this.props.enqueueSnackbar(
+            "Kunde ej hitta några boende att exportera.",
+            {
+              variant: "warning",
+            }
+          );
         }
       })
       .catch((err) => {

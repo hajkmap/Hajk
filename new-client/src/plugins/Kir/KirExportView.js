@@ -78,17 +78,13 @@ class KirExportView extends React.PureComponent {
             <span className={classes.num}>{this.state.results.length}</span>{" "}
             objekt finns tillgängliga för export.
           </div>
-          {this.model.app.plugins.fir.options.residentList ? (
-            <FirExportResidentListView
-              results={this.state.results}
-              model={this.model}
-              app={this.props.app}
-              localObserver={this.localObserver}
-              type={"kir"}
-            />
-          ) : (
-            ""
-          )}
+          <FirExportResidentListView
+            results={this.state.results}
+            model={this.model}
+            app={this.props.app}
+            localObserver={this.localObserver}
+            type={"kir"}
+          />
         </div>
       </>
     );
