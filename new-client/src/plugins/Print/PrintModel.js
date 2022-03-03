@@ -15,6 +15,7 @@ import Collection from "ol/Collection";
 import { Style, Stroke, Fill } from "ol/style.js";
 import { saveAs } from "file-saver";
 import TileLayer from "ol/layer/Tile";
+import TileWMS from "ol/source/TileWMS";
 
 export default class PrintModel {
   constructor(settings) {
@@ -484,7 +485,11 @@ export default class PrintModel {
       .getLayers()
       .getArray()
       .filter((layer) => {
-        return layer instanceof TileLayer && layer.getVisible();
+        return (
+          layer.getVisible() &&
+          layer instanceof TileLayer &&
+          layer.getSource() instanceof TileWMS
+        );
       });
   };
 
@@ -494,7 +499,8 @@ export default class PrintModel {
   // (If we would print with 300 dpi, and just let OL send an ordinary request, the images returned
   // from the server would not show the correct layout for 300 DPI usage).
   prepareActiveLayersForPrint = (options) => {
-    // First we have to grab all currently visible tile-layers.
+    // First we have to grab all currently visible tile-layers (Remember that this
+    // function call only returns layers that are based on TileWMS)!
     const tileLayers = this.getVisibleTileLayers();
     // We're gonna need to mess with all of those...
     for (const tileLayer of tileLayers) {
