@@ -146,7 +146,7 @@ export const STROKE_DASHES = new Map([
 export const MAX_SKETCHES = 4;
 
 export const DEFAULT_USER_SETTINGS = {
-  showText: true,
+  showText: false,
 };
 
 export const STORAGE_KEY = "sketch";
