@@ -5,7 +5,6 @@ import GeoJSON from "ol/format/GeoJSON";
 import { Circle as CircleGeometry, Point } from "ol/geom";
 
 import { STROKE_DASHES } from "../constants";
-import { DEFAULT_USER_SETTINGS } from "../constants";
 
 class SketchModel {
   #geoJSONParser;
@@ -15,7 +14,7 @@ class SketchModel {
 
   constructor(settings) {
     this.#geoJSONParser = new GeoJSON();
-    this.#storageKey = "sketch";
+    this.#storageKey = settings.storageKey || "sketch";
     this.#dateTimeOptions = {
       day: "numeric",
       month: "numeric",
@@ -71,14 +70,6 @@ class SketchModel {
     }
     // Then we'll create the geoJSON, and return that.
     return this.#geoJSONParser.writeFeature(f);
-  };
-
-  // Returns the userSettings-object from LS if it exists, otherwise it returns
-  // the default user-settings. The LS might be empty since the user might have chosen
-  // not to accept functional cookies.
-  getUserSettings = () => {
-    const { userSettings } = LocalStorageHelper.get(this.#storageKey);
-    return userSettings || DEFAULT_USER_SETTINGS;
   };
 
   // Returns the activity-object connected to the supplied id

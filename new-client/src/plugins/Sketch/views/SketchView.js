@@ -42,10 +42,6 @@ const SketchView = (props) => {
     backgroundColor: "#000000",
     size: 14,
   });
-  // We have to keep track of some settings as-well!
-  const [userSettings, setUserSettings] = React.useState(
-    model.getUserSettings()
-  );
   // We want to keep track of the last removed features so that the user can restore
   // features that they potentially removed by mistake.
   const [removedFeatures, setRemovedFeatures] = React.useState(
@@ -292,8 +288,8 @@ const SketchView = (props) => {
             model={model}
             drawModel={drawModel}
             functionalCookiesOk={functionalCookiesOk}
-            settings={userSettings}
-            setSettings={setUserSettings}
+            settings={props.userSettings}
+            setSettings={props.setUserSettings}
           />
         );
       default:

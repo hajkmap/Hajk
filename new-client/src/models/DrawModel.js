@@ -339,11 +339,9 @@ class DrawModel {
       : this.#getDrawStyle();
     // If we're dealing with a text-feature, we don't want an image-style.
     feature.get("DRAW_METHOD") === "Text" && baseLineStyle.setImage(null);
-    // If showFeatureMeasurements is set to true, we create a text-style which
-    // will allow us to show the measurements of the drawn feature.
-    const textStyle = this.#showFeatureMeasurements
-      ? this.#getFeatureTextStyle(feature)
-      : null;
+    // ILet's create a text-style. (Remember that this might be null, depending
+    // on the feature-text-settings, see more info in the method itself).
+    const textStyle = this.#getFeatureTextStyle(feature);
     // Apply the text-style to the baseline style...
     baseLineStyle.setText(textStyle);
     // If the "EDIT_ACTIVE"-property is set (meaning that the feature has been selected for

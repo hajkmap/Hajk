@@ -2,6 +2,9 @@ import React from "react";
 import Observer from "react-event-observer";
 import GestureIcon from "@material-ui/icons/Gesture";
 
+// Helpers
+import LocalStorageHelper from "utils/LocalStorageHelper";
+
 // Views
 import BaseWindowPlugin from "../BaseWindowPlugin";
 import SketchView from "./views/SketchView";
@@ -10,6 +13,20 @@ import SketchView from "./views/SketchView";
 import SketchModel from "./models/SketchModel";
 import DrawModel from "../../models/DrawModel";
 import KmlModel from "models/KmlModel";
+
+// Constants
+import { STORAGE_KEY, DEFAULT_USER_SETTINGS } from "./constants";
+
+// Hooks
+import useCookieStatus from "hooks/useCookieStatus";
+
+// Returns the userSettings-object from LS if it exists, otherwise it returns
+// the default user-settings. The LS might be empty since the user might have chosen
+// not to accept functional cookies.
+const getUserSettings = () => {
+  const { userSettings } = LocalStorageHelper.get(STORAGE_KEY);
+  return userSettings || DEFAULT_USER_SETTINGS;
+};
 
 const Sketch = (props) => {
   // We're gonna need to keep track of the current chosen activity. ("ADD", "REMOVE", etc).
@@ -32,6 +49,10 @@ const Sketch = (props) => {
   const [pluginShown, setPluginShown] = React.useState(
     props.options.visibleAtStart ?? false
   );
+  // We have to keep track of some user-settings!
+  const [userSettings, setUserSettings] = React.useState(getUserSettings());
+  // We're gonna need to keep track of if we're allowed to save stuff in LS. Let's use the hook.
+  const { functionalCookiesOk } = useCookieStatus(props.app.globalObserver);
   // The local observer will handle the communication between models and views.
   const [localObserver] = React.useState(() => Observer());
 
@@ -42,6 +63,7 @@ const Sketch = (props) => {
         layerName: "sketchLayer",
         map: props.map,
         observer: localObserver,
+        showFeatureMeasurements: userSettings.showText,
       })
   );
 
@@ -55,6 +77,7 @@ const Sketch = (props) => {
         drawModel: drawModel,
         modifyDefaultEnabled: modifyEnabled,
         translateDefaultEnabled: translateEnabled,
+        storageKey: STORAGE_KEY,
       })
   );
 
@@ -139,6 +162,16 @@ const Sketch = (props) => {
     drawModel.setTranslateActive(translateEnabled);
   }, [drawModel, translateEnabled]);
 
+  // An effect that makes sure to sync the user-settings to LS (if we are allowed).
+  React.useEffect(() => {
+    if (functionalCookiesOk) {
+      LocalStorageHelper.set(STORAGE_KEY, {
+        ...LocalStorageHelper.get(STORAGE_KEY),
+        userSettings: { ...userSettings, showText: userSettings.showText },
+      });
+    }
+  }, [userSettings, functionalCookiesOk]);
+
   // We're gonna need to catch if the user closes the window, and make sure to
   // update the state so that the effect handling the draw-interaction-toggling fires.
   const onWindowHide = () => {
@@ -184,6 +217,8 @@ const Sketch = (props) => {
         setTranslateEnabled={setTranslateEnabled}
         editFeature={editFeature}
         moveFeatures={moveFeatures}
+        userSettings={userSettings}
+        setUserSettings={setUserSettings}
       />
     </BaseWindowPlugin>
   );
