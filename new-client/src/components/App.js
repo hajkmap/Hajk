@@ -356,12 +356,42 @@ class App extends React.PureComponent {
     });
   };
 
+  checkConfigForUnsupportedTools = () => {
+    // The plugin names can be fancy, but are always lower case in mapConfig:
+    const lowerCaseActiveTools = this.props.activeTools.map((t) =>
+      t.toLowerCase()
+    );
+
+    // Check which plugins defined in mapConfig don't exist in buildConfig
+    const unsupportedToolsFoundInMapConfig = this.props.config.mapConfig.tools
+      .map((t) => t.type.toLowerCase())
+      .filter((e) => {
+        // Special case: "infoclick" will never exist in activeTools (as it's core)
+        // so we can assume it's supported even if it isn't found in activeTools.
+        if (e === "infoclick") return false;
+
+        // Check if activeTools contain the plugin supplied in this configuration.
+        // If not, leave it in this array.
+        return !lowerCaseActiveTools.includes(e);
+      });
+
+    // Display a silent info message in console
+    console.log(
+      `The map configuration contains unavailable plugins: ${unsupportedToolsFoundInMapConfig.join(
+        ", "
+      )}. Please check your map config and buildConfig.json.  `
+    );
+  };
+
   componentDidMount() {
-    var promises = this.appModel
+    this.checkConfigForUnsupportedTools();
+
+    const promises = this.appModel
       .createMap()
       .addSearchModel()
       .addLayers()
       .loadPlugins(this.props.activeTools);
+
     Promise.all(promises).then(() => {
       this.setState(
         {
