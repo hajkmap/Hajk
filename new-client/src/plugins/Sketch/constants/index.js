@@ -1,10 +1,10 @@
-import AddIcon from "@material-ui/icons/Add";
-import DeleteIcon from "@material-ui/icons/Delete";
-import DirectionsIcon from "@material-ui/icons/Directions";
-import CreateIcon from "@material-ui/icons/Create";
-import SaveIcon from "@material-ui/icons/Save";
-import ImportExportIcon from "@material-ui/icons/ImportExport";
-import SettingsIcon from "@material-ui/icons/Settings";
+import AddIcon from "@mui/icons-material/Add";
+import DeleteIcon from "@mui/icons-material/Delete";
+import DirectionsIcon from "@mui/icons-material/Directions";
+import CreateIcon from "@mui/icons-material/Create";
+import SaveIcon from "@mui/icons-material/Save";
+import ImportExportIcon from "@mui/icons-material/ImportExport";
+import SettingsIcon from "@mui/icons-material/Settings";
 
 export const ACTIVITIES = [
   {

@@ -1,5 +1,5 @@
 import React from "react";
-import { Grid, Typography, TextField } from "@material-ui/core";
+import { Grid, Typography, TextField } from "@mui/material";
 import { STROKE_DASHES } from "plugins/Sketch/constants";
 
 import FeatureStyleAccordion from "./FeatureStyleAccordion";

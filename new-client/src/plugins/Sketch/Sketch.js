@@ -1,6 +1,6 @@
 import React from "react";
 import Observer from "react-event-observer";
-import GestureIcon from "@material-ui/icons/Gesture";
+import GestureIcon from "@mui/icons-material/Gesture";
 
 // Helpers
 import LocalStorageHelper from "utils/LocalStorageHelper";

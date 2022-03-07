@@ -1,6 +1,6 @@
 // Base
 import React from "react";
-import { Grid } from "@material-ui/core";
+import { Grid } from "@mui/material";
 // Constants
 import { PLUGIN_MARGIN, MAX_REMOVED_FEATURES } from "../constants";
 // Components
@@ -322,7 +322,7 @@ const SketchView = (props) => {
       // The base plugin-window (in which we render the plugins) has a padding
       // of 10 set. In this plugin we want to render the <ActivityMenu /> at the
       // border of the window, hence we must set a negative margin-right of 10.
-      <Grid container justify="flex-end">
+      <Grid container justifyContent="flex-end">
         <Grid item xs={9}>
           {renderCurrentView()}
         </Grid>

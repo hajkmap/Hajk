@@ -1,39 +1,35 @@
 import React from "react";
-import { withStyles } from "@material-ui/core/styles";
+//import withStyles from "@mui/styles/withStyles";
 import { TwitterPicker } from "react-color";
 
-import { Box, Grid, Typography, Tooltip } from "@material-ui/core";
-import { Paper, Slider } from "@material-ui/core";
+import { Box, Grid, Typography, Tooltip } from "@mui/material";
+import { Paper, Slider } from "@mui/material";
 
-import {
-  Accordion,
-  AccordionDetails,
-  AccordionSummary,
-} from "@material-ui/core";
+import { Accordion, AccordionDetails, AccordionSummary } from "@mui/material";
 
 import { DRAW_COLORS } from "../../constants";
 import StrokeTypeSelector from "./StrokeTypeSelector";
 
 // We want to use an accordion-summary, but we have to style it a bit so
 // it looks OK. Let's create a styled accordion-summary.
-const StyledAccordionSummary = withStyles({
-  root: {
-    minHeight: 35,
-    "&$expanded": {
-      minHeight: 35,
-    },
-  },
-  content: {
-    transition: "inherit !important",
-    marginTop: "0",
-    marginBottom: "0",
-    "&$expanded": {
-      marginTop: "0",
-      marginBottom: "0",
-    },
-  },
-  expanded: {},
-})(AccordionSummary);
+// const StyledAccordionSummary = withStyles({
+//   root: {
+//     minHeight: 35,
+//     "&$expanded": {
+//       minHeight: 35,
+//     },
+//   },
+//   content: {
+//     transition: "inherit !important",
+//     marginTop: "0",
+//     marginBottom: "0",
+//     "&$expanded": {
+//       marginTop: "0",
+//       marginBottom: "0",
+//     },
+//   },
+//   expanded: {},
+// })(AccordionSummary);
 
 // We want to be able to display the current color. Let's create
 // a color-badge component.
@@ -62,6 +58,7 @@ const OpacitySlider = ({ opacity, handleOpacityChange }) => {
           opacity * 100
         )}%`}</Typography>
         <Slider
+          size="small"
           min={0}
           max={1}
           value={opacity}
@@ -83,6 +80,7 @@ const StrokeWidthSlider = ({ strokeWidth, handleStrokeWidthChange }) => {
       <Paper style={{ padding: 8, marginTop: 8 }}>
         <Typography variant="caption">{`Linjebredd: ${strokeWidth}px`}</Typography>
         <Slider
+          size="small"
           min={1}
           max={5}
           value={strokeWidth}
@@ -105,9 +103,9 @@ const AccordionSummaryContents = (props) => {
       : props.drawModel.getRGBAString(props.color);
   // Then we'll render everything!
   return (
-    <Grid container justify="space-between" alignItems="center">
+    <Grid container justifyContent="space-between" alignItems="center">
       <Typography variant="button">{props.title}</Typography>
-      <Grid container item xs={4} justify="flex-end" alignItems="center">
+      <Grid container item xs={4} justifyContent="flex-end" alignItems="center">
         {props.showOpacitySlider && (
           <Typography variant="caption">{`${
             typeof props.color === "string"
@@ -129,8 +127,11 @@ const AccordionSummaryContents = (props) => {
 const FeatureStyleAccordion = (props) => {
   return (
     <Accordion size="small" style={{ marginBottom: 8 }}>
-      <Tooltip title={`Klicka här för att ändra ${props.title.toLowerCase()}.`}>
-        <StyledAccordionSummary>
+      <Tooltip
+        disableInteractive
+        title={`Klicka här för att ändra ${props.title.toLowerCase()}.`}
+      >
+        <AccordionSummary>
           <AccordionSummaryContents
             title={props.title}
             color={props.color}
@@ -138,7 +139,7 @@ const FeatureStyleAccordion = (props) => {
             strokeWidth={props.strokeWidth}
             drawModel={props.drawModel}
           />
-        </StyledAccordionSummary>
+        </AccordionSummary>
       </Tooltip>
       <AccordionDetails style={{ maxWidth: "100%" }}>
         <Grid container>

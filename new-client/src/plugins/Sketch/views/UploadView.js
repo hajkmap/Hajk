@@ -1,15 +1,15 @@
 import React from "react";
-import { styled } from "@material-ui/core";
-import { Button, Grid, Tooltip, Typography } from "@material-ui/core";
-import { IconButton, Zoom, Paper } from "@material-ui/core";
+import { styled } from "@mui/material";
+import { Button, Grid, Tooltip, Typography } from "@mui/material";
+import { IconButton, Zoom, Paper } from "@mui/material";
 
-import FolderOpenIcon from "@material-ui/icons/FolderOpen";
-import SaveAltIcon from "@material-ui/icons/SaveAlt";
-import DeleteIcon from "@material-ui/icons/Delete";
-import VisibilityOffIcon from "@material-ui/icons/VisibilityOff";
-import VisibilityIcon from "@material-ui/icons/Visibility";
-import ChatIcon from "@material-ui/icons/Chat";
-import ChatBubbleIcon from "@material-ui/icons/ChatBubble";
+import FolderOpenIcon from "@mui/icons-material/FolderOpen";
+import SaveAltIcon from "@mui/icons-material/SaveAlt";
+import DeleteIcon from "@mui/icons-material/Delete";
+import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
+import VisibilityIcon from "@mui/icons-material/Visibility";
+import ChatIcon from "@mui/icons-material/Chat";
+import ChatBubbleIcon from "@mui/icons-material/ChatBubble";
 
 import Information from "../components/Information";
 import UploadDialog from "../components/UploadDialog";
@@ -18,15 +18,18 @@ const StyledPaper = styled(Paper)(({ theme }) => ({
   width: "100%",
   padding: theme.spacing(1),
   marginBottom: theme.spacing(1),
-  borderRight: `${theme.spacing(0.5)}px solid ${theme.palette.info.main}`,
-  borderLeft: `${theme.spacing(0.5)}px solid ${theme.palette.info.main}`,
+  borderRight: `${theme.spacing(0.5)} solid ${theme.palette.info.main}`,
+  borderLeft: `${theme.spacing(0.5)} solid ${theme.palette.info.main}`,
 }));
 
 const ButtonPanel = ({ kmlModel, setDialogOpen }) => {
   return (
     <Grid container spacing={1}>
       <Grid item xs={12}>
-        <Tooltip title="Klicka för att öppna en dialog där du kan välja en .kml-fil från din dator.">
+        <Tooltip
+          disableInteractive
+          title="Klicka för att öppna en dialog där du kan välja en .kml-fil från din dator."
+        >
           <Button
             fullWidth
             variant="contained"
@@ -38,7 +41,10 @@ const ButtonPanel = ({ kmlModel, setDialogOpen }) => {
         </Tooltip>
       </Grid>
       <Grid item xs={12}>
-        <Tooltip title="Klicka för att exportera alla ritobjekt till en .kml-fil.">
+        <Tooltip
+          disableInteractive
+          title="Klicka för att exportera alla ritobjekt till en .kml-fil."
+        >
           <Button
             fullWidth
             variant="contained"
@@ -57,13 +63,16 @@ const UploadedFile = (props) => {
   return (
     <Zoom in appear>
       <StyledPaper>
-        <Grid container justify="space-between" alignItems="center">
+        <Grid container justifyContent="space-between" alignItems="center">
           <Grid item xs={4}>
             <Typography variant="button">{props.title}</Typography>
           </Grid>
-          <Grid container item xs={8} justify="flex-end" spacing={1}>
+          <Grid container item xs={8} justifyContent="flex-end" spacing={1}>
             <Grid item>
-              <Tooltip title="Klicka för att ta bort de importerade objekten.">
+              <Tooltip
+                disableInteractive
+                title="Klicka för att ta bort de importerade objekten."
+              >
                 <IconButton size="small" onClick={props.onRemoveClick}>
                   <DeleteIcon />
                 </IconButton>
@@ -71,6 +80,7 @@ const UploadedFile = (props) => {
             </Grid>
             <Grid item>
               <Tooltip
+                disableInteractive
                 title={`Klicka för att ${
                   props.hidden ? "visa" : "dölja"
                 } objekten ${props.hidden ? "i" : "från"} kartan.`}
@@ -85,6 +95,7 @@ const UploadedFile = (props) => {
             </Grid>
             <Grid item>
               <Tooltip
+                disableInteractive
                 title={`Klicka här för att ${
                   props.textShown ? "dölja" : "visa"
                 } objektens etiketter.`}

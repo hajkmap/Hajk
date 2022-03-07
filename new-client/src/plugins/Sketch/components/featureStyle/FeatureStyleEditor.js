@@ -1,6 +1,6 @@
 import React from "react";
 import FeatureStyleSelector from "./FeatureStyleSelector";
-import { Grid, TextField, Typography } from "@material-ui/core";
+import { Grid, TextField, Typography } from "@mui/material";
 
 const FeatureTextEditor = ({ text, onChange }) => {
   return (
