@@ -1,10 +1,10 @@
 import { Vector as VectorLayer } from "ol/layer";
 import VectorSource from "ol/source/Vector";
-import KML from "ol/format/KML.js";
-import { Circle } from "ol/geom.js";
-import { fromCircle } from "ol/geom/Polygon.js";
+import KML from "ol/format/KML";
+import { Circle } from "ol/geom";
+import { fromCircle } from "ol/geom/Polygon";
 import { saveAs } from "file-saver";
-import { Fill, Stroke, Style, Text } from "ol/style.js";
+import { Circle as CircleStyle, Fill, Stroke, Style, Text } from "ol/style";
 
 /*
  * A model supplying useful KML-functionality.
@@ -13,6 +13,9 @@ import { Fill, Stroke, Style, Text } from "ol/style.js";
  *   If it already exists a layer in the map with the same name, the model will be connected
  *   to that layer. Otherwise, a new vector-layer will be created and added to the map.
  * - map: (olMap): The current map-object.
+ * Optional settings:
+ * - enableDragAndDrop: (boolean): If true, drag-and-drop of .kml-files will be active.
+ * - drawModel (DrawModel): If supplied, imported features will be drawn using the draw-model.
  *
  * Exposes a couple of methods:
  * - parseFeatures(kmlString, settings): Accepts a KML-string and tries to parse it to OL-features.
@@ -27,6 +30,8 @@ import { Fill, Stroke, Style, Text } from "ol/style.js";
 class KmlModel {
   #map;
   #layerName;
+  #drawModel;
+  #observer;
   #kmlSource;
   #kmlLayer;
   #parser;
@@ -41,6 +46,11 @@ class KmlModel {
     // Make sure that we keep track of the supplied settings.
     this.#map = settings.map;
     this.#layerName = settings.layerName;
+    this.#drawModel = settings.drawModel || null;
+    this.#observer = settings.observer || null;
+    // If a setting to enable drag-and-drop has been passes, we have to initiate
+    // the listeners for that.
+    settings.enableDragAndDrop && this.#addMapDropListeners();
     // We are gonna need a kml parser obviously.
     this.#parser = new KML();
     // We are going to be keeping track of the current extent of the kml-source.
@@ -48,10 +58,6 @@ class KmlModel {
     // A KML-model is not really useful without a vector-layer, let's initiate it
     // right away, either by creating a new layer, or connect to an existing layer.
     this.#initiateKmlLayer();
-    // Let's display a warning for now, remove once it's properly tested. TODO: @Hallbergs
-    console.info(
-      "Initiation of KML-model successful. Note that the model has not been properly tested yet and should not be used in critical operation."
-    );
   }
 
   // If required parameters are missing, we have to make sure we abort the
@@ -70,15 +76,74 @@ class KmlModel {
     return this.#createNewKmlLayer();
   };
 
+  // Adds listeners so that .kml-files can be drag-and-dropped into the map,
+  // triggering an import.
+  #addMapDropListeners = () => {
+    const mapDiv = document.getElementById("map");
+    ["drop", "dragover", "dragend", "dragleave", "dragenter"].forEach(
+      (eventName) => {
+        mapDiv.addEventListener(
+          eventName,
+          this.#preventDefaultDropBehavior,
+          false
+        );
+      }
+    );
+    // We're gonna need to add some more listeners (for dragEnter etc.).
+    mapDiv.addEventListener("drop", this.#handleDrop, false);
+  };
+
+  // Prevents the default behaviors connected to drag-and-drop.
+  #preventDefaultDropBehavior = (e) => {
+    e.stopPropagation();
+    e.preventDefault();
+  };
+
+  // Handles the event when a file has been dropped. Tries to import the file as a .kml.
+  #handleDrop = async (e) => {
+    try {
+      for await (const file of e.dataTransfer.files) {
+        const fileType = file.type ? file.type : file.name.split(".").pop();
+        // Not sure about filetype for kml... Qgis- and Hajk-generated kml:s does not contain any information about type.
+        // The application/vnd is... a guess.
+        if (
+          fileType === "kml" ||
+          fileType === "application/vnd.google-earth.kml+xml"
+        ) {
+          this.#importDroppedKml(file);
+        }
+      }
+    } catch (error) {
+      console.error(`Error importing KML-file... ${error}`);
+    }
+  };
+
+  #importDroppedKml = (file) => {
+    const reader = new FileReader();
+    // We're gonna want to set a random id on all features belonging
+    // to the current file. That way we can keep track of which features
+    // belongs to each file.
+    const id = Math.random().toString(36).slice(2, 9);
+    // Let's handle the onload-event and import the features!
+    reader.onload = () => {
+      this.import(reader.result, {
+        zoomToExtent: true,
+        setProperties: { KML_ID: id },
+      });
+      // We also want to publish an event on the observer so that we can update potential views.
+      this.#observer && this.#observer.publish("kmlModel.fileImported", { id });
+    };
+    reader.readAsText(file);
+  };
+
   // Checks wether the layerName supplied when initiating the KML-model
   // corresponds to an already existing vector-layer.
   #vectorLayerExists = () => {
     // Get all the layers from the map
     const allMapLayers = this.#getAllMapLayers();
     // Check wether any of the layers has the same name (type)
-    // as the supplied layerName. TODO: type?!
-    // Also makes sure that the found layer is a vectorLayer. (We cannot
-    // add features to an imageLayer...).
+    // as the supplied layerName. Also makes sure that the found
+    // layer is a vectorLayer. (We cannot add features to an imageLayer...).
     return allMapLayers.some((layer) => {
       return this.#layerHasCorrectNameAndType(layer);
     });
@@ -123,8 +188,6 @@ class KmlModel {
     // Let's create a layer
     this.#kmlLayer = this.#getNewVectorLayer(this.#kmlSource);
     // Make sure to set the layer type to something understandable.
-    // TODO: Make sure type is the way to go, a bit confusing setting the
-    // layer name on that property. Hmm...
     this.#kmlLayer.set("type", this.#layerName);
     // FIXME: Remove "type", use only "name" throughout
     // the application. Should be done as part of #883.
@@ -160,13 +223,21 @@ class KmlModel {
 
   // Extracts style from the feature props or style func and applies it.
   #setFeatureStyle = (feature) => {
+    if (!feature) {
+      console.warn(
+        "Cannot apply a style on nothing. (Supplied feature is nullish)."
+      );
+    }
     // First, we try to get the style from the feature props
-    const styleProperty = feature?.getProperties()?.style ?? null;
+    const styleProperty =
+      feature.get("EXTRACTED_STYLE") || feature.get("style") || null;
     // If it exists, we apply the style using this prop.
     if (styleProperty !== null) {
       return this.#setFeatureStyleFromProps(feature, styleProperty);
     }
-    const styleFunc = feature?.getStyleFunction() ?? null;
+    // Otherwise the feature might contain a style-function. If it does, we can use that
+    // to style the feature.
+    const styleFunc = feature.getStyleFunction() ?? null;
     if (styleFunc !== null) {
       return this.#setStyleFromStyleFunction(feature, styleFunc);
     }
@@ -178,25 +249,22 @@ class KmlModel {
       // Parse the string to a real object
       const parsedStyle = JSON.parse(styleProperty);
       // Get the geometry-type so that we can check if we're
-      // dealing with a text drawn with the draw-plugin
-      const geometryType = feature.getProperties().geometryType;
+      // dealing with a text drawn with the draw-plugin. (The old draw-plugin used 'geometryType'
+      // and the new "Sketch"-plugin uses 'DRAW_METHOD').
+      const geometryType =
+        feature.get("DRAW_METHOD") || feature.get("geometryType") || null;
       // If the type is set to text, we are dealing with a draw-plugin
       // text, and we have to handle it separately. (We don't want to
       // extract information from the point-object which is it built upon).
       if (geometryType === "Text") {
-        this.#setFeatureTextProperty(feature, parsedStyle.text);
-      } else {
-        // If we're not dealing with a text-object from the draw-plugin,
-        // we can extract information from the feature itself.
-        this.#setFeaturePropertiesFromGeometry(feature);
+        this.#setFeatureTextProperties(feature, parsedStyle.text);
       }
       // Then we create a style and apply it on the feature to make
       // sure the import looks like the features drawn in the draw-plugin.
       feature.setStyle(this.#createFeatureStyle(parsedStyle));
-    } catch (exception) {
+    } catch (error) {
       console.error(
-        "KML-model: Style attribute could not be parsed.",
-        exception
+        `KML-model: Style attribute could not be parsed. Error: ${error}`
       );
     }
   };
@@ -224,45 +292,96 @@ class KmlModel {
     return style[0] && style[0].getFill && style[0].getFill() === null;
   };
 
-  // Sets the text property on the supplied feature.
-  #setFeatureTextProperty = (feature, text) => {
-    feature.setProperties({
-      type: "Text",
-      text: text,
-    });
+  // Sets the user-text-properties on the supplied feature. This is required
+  // since we want to support text-features from Hajk2, and features drawn there does
+  // not have the same settings as the current draw-model.
+  #setFeatureTextProperties = (feature, text) => {
+    if (!feature.get("USER_TEXT")) {
+      feature.set("USER_TEXT", text);
+      feature.set("TEXT_SETTINGS", {
+        backgroundColor: "#000000",
+        foregroundColor: "#FFFFFF",
+        size: 14,
+      });
+    }
   };
 
   // Creates a style-object from the special settings that are
   // added when drawing features in the draw-plugin. E.g. stroke-dash
-  // and so on. TODO: (1) Add image style
-  // TODO: (2) Get rid of this and use standard ol stuff.
+  // and so on.
   #createFeatureStyle = (parsedStyle) => {
-    return [
-      new Style({
-        fill: this.#getFillStyle(parsedStyle),
-        image: this.#getImageStyle(parsedStyle),
-        stroke: this.#getStrokeStyle(parsedStyle),
-        text: this.#getTextStyle(parsedStyle),
-      }),
-    ];
+    return new Style({
+      fill: this.#getFillStyle(parsedStyle),
+      image: this.#getImageStyle(parsedStyle),
+      stroke: this.#getStrokeStyle(parsedStyle),
+      text: this.#getTextStyle(parsedStyle),
+    });
   };
 
-  // Returns a fill-style based on the supplied values
+  // Returns a fill-style based on the supplied settings.
+  // If the feature was created with the new draw-model, the settings
+  // will contain a fillStyle-object, and if it was created with Hajk2 it
+  // will only contain a fillColor-property.
   #getFillStyle = (styleSettings) => {
-    const { fillColor } = styleSettings;
+    const { fillStyle, fillColor } = styleSettings;
+    if (fillStyle) {
+      return new Fill({ color: fillStyle.color });
+    }
     return new Fill({ color: fillColor });
   };
 
-  // Returns an image-style based on the supplied values
+  // Returns an image-style based on the supplied settings.
+  // If the feature was created with the new draw-model, the settings
+  // will contain a imageStyle-object, and if it was created with Hajk2 it
+  // will only contain the pointColor property.
   #getImageStyle = (styleSettings) => {
-    return null;
+    const { imageStyle, pointColor } = styleSettings;
+    // If the settings has the imageStyle-property, we create the style from that one.
+    if (imageStyle) {
+      return new CircleStyle({
+        radius: 6,
+        stroke: new Stroke({
+          color: imageStyle.strokeColor,
+          width: imageStyle.strokeWidth,
+          lineDash: imageStyle.dash,
+        }),
+        fill: new Fill({
+          color: imageStyle.fillColor,
+        }),
+      });
+    }
+    // Otherwise we use the pointColor property and some defaults.
+    return new CircleStyle({
+      radius: 6,
+      stroke: new Stroke({
+        color: "#FFFFFF",
+        width: 2,
+        lineDash: null,
+      }),
+      fill: new Fill({
+        color: pointColor,
+      }),
+    });
   };
 
-  // Returns a stroke-style based on the supplied values
+  // Returns a stroke-style based on the supplied settings.
+  // If the feature was created with the new draw-model, the settings
+  // will contain a strokeStyle-object, and if it was created with Hajk2 it
+  // will only contain the strokeDash, strokeWidth, strokeColor directly.
   #getStrokeStyle = (styleSettings) => {
-    const { lineDash, strokeWidth, strokeColor } = styleSettings;
+    const { strokeStyle } = styleSettings;
+    // If the settings contain a strokeStyle, we use that one.
+    if (strokeStyle) {
+      return new Stroke({
+        lineDash: strokeStyle.dash,
+        color: strokeStyle.color,
+        width: strokeStyle.width,
+      });
+    }
+    // Otherwise we use the 'old' settings (from Hajk2).
+    const { strokeDash, strokeWidth, strokeColor } = styleSettings;
     return new Stroke({
-      lineDash: lineDash,
+      lineDash: strokeDash,
       color: strokeColor,
       width: strokeWidth,
     });
@@ -273,37 +392,15 @@ class KmlModel {
     const { text } = styleSettings;
     return new Text({
       font: "12pt sans-serif",
-      fill: new Fill({ color: "#FFF" }),
+      fill: new Fill({ color: "#FFFFF" }),
       text: text,
       overflow: true,
       stroke: new Stroke({
         color: "rgba(0, 0, 0, 0.5)",
         width: 3,
       }),
-      offsetY: -10,
-    });
-  };
-
-  // Extracts some information from the geometry and sets it as properties on
-  // the feature.
-  #setFeaturePropertiesFromGeometry = (feature) => {
-    // We're gonna need an object to keep track of some extracted settings
-    const extractedSettings = {};
-    // Extracting the geometry and geometry type
-    const featureGeometry = feature.getGeometry();
-    const geometryType = featureGeometry.getType();
-    // Let's extract some information about the geometry
-    extractedSettings.position = this.#getFeaturePointPosition(featureGeometry);
-    extractedSettings.length = featureGeometry.getLength?.() ?? null;
-    extractedSettings.area = featureGeometry.getArea?.() ?? null;
-    extractedSettings.radius = featureGeometry.getRadius?.() ?? null;
-    // And set the information as properties
-    feature.setProperties({
-      type: geometryType,
-      length: extractedSettings.length,
-      area: extractedSettings.area,
-      radius: extractedSettings.radius,
-      position: extractedSettings.position,
+      offsetX: 0,
+      offsetY: -15,
     });
   };
 
@@ -330,11 +427,13 @@ class KmlModel {
     if (!features || features?.length === 0) {
       return null;
     }
-    // Otherwise we translate every feature to the map-views coordinate system
-    // and apply the feature style.
+    // Otherwise we check if the features are to be added via the drawModel. If they are, we set
+    // the USER_DRAWN-prop to true since all features in the draw-source _can_ be altered by the user.
+    // We also have to translate every feature to the map-views coordinate system.
     features.forEach((feature) => {
       this.#translateFeatureToViewSrs(feature);
       this.#setFeatureStyle(feature);
+      this.#drawModel && feature.set("USER_DRAWN", true);
     });
   };
 
@@ -343,9 +442,13 @@ class KmlModel {
     if (!features || features?.length === 0) {
       return null;
     }
-    // Otherwise we set the "KML_IMPORT" property to true
+    // Otherwise we set the "KML_IMPORT" property to true. We also want
+    // to set the "SHOW_TEXT" to true on all features.
+    // Why? Well, kml's created from dgw:s usually contains a lot of text, and
+    // we do not want to provide the user with a possibility to turn text off.
     features.forEach((feature) => {
       feature.set("KML_IMPORT", true);
+      feature.set("SHOW_TEXT", true);
     });
   };
 
@@ -369,6 +472,22 @@ class KmlModel {
       padding: [20, 20, 20, 20],
       maxZoom: 7,
     });
+  };
+
+  // Sets the supplied properties on the supplied features
+  #setFeatureProperties = (features, properties) => {
+    for (const feature of features) {
+      feature.setProperties(properties);
+    }
+  };
+
+  // Accepts an id and checks if the current source still contains features
+  // with the supplied kml-id.
+  importedKmlStillHasFeatures = (id) => {
+    return (
+      this.#kmlSource.getFeatures().filter((f) => f.get("KML_ID") === id)
+        .length > 0
+    );
   };
 
   // Tries to parse features from the supplied kml-string.
@@ -396,10 +515,10 @@ class KmlModel {
       prepareForMapInjection && this.#prepareForMapInjection(features);
       // Then we can return the features
       return { features: features, error: null };
-    } catch (exception) {
+    } catch (error) {
       // If we happen to hit a mine, we make sure to return the error
       // message and an empty array.
-      return { features: [], error: exception.message };
+      return { features: [], error: error };
     }
   };
 
@@ -415,8 +534,18 @@ class KmlModel {
     if (error !== null) {
       return { status: "FAILED", error: error };
     }
-    // Otherwise we add the parsed features to the kml-source.
-    this.#kmlSource.addFeatures(features);
+    // If "setProperties" was supplied in the settings, we have to make sure
+    // to set the supplied properties on all features.
+    settings.setProperties &&
+      this.#setFeatureProperties(features, settings.setProperties);
+    // If a draw-model has been supplied, we use that model to add the
+    // features to the map.
+    if (this.#drawModel) {
+      this.#drawModel.addKmlFeatures(features);
+    } else {
+      // Otherwise we add the parsed features directly to the kml-source.
+      this.#kmlSource.addFeatures(features);
+    }
     // We have to make sure to update the current extent when we've added
     // features to the kml-source.
     this.#currentExtent = this.#kmlSource.getExtent();
@@ -429,8 +558,11 @@ class KmlModel {
 
   // Tries to export all the features in the current kml-layer
   export = () => {
-    // First we need to get all the features from the current kml-source.
-    const features = this.#kmlSource.getFeatures();
+    // First we need to get all the features from the current kml-source
+    // (except for hidden features, the users might be confused if hidden features are exported).
+    const features = this.#kmlSource
+      .getFeatures()
+      .filter((f) => f.get("HIDDEN") !== true);
     // Then we have to make sure that there were some feature there to export.
     if (!features || features?.length === 0) {
       return {
@@ -487,11 +619,35 @@ class KmlModel {
       const clonedFeature = feature.clone();
       // Let's check if we're dealing with a circle
       const geomIsCircle = clonedFeature.getGeometry() instanceof Circle;
+      // If a drawModel has been supplied, we have to make sure to get and set
+      // the specific style-information used during drawing. We also have to make sure
+      // to stringify the information, since the kml-format does not handle objects.
+      // We also have to extract and stringify eventual text-settings used. (Used for
+      // the text-features in the sketch-plugin to determine text-size etc.).
+      if (this.#drawModel) {
+        clonedFeature.set(
+          "EXTRACTED_STYLE",
+          JSON.stringify(this.#drawModel.extractFeatureStyleInfo(feature))
+        );
+        clonedFeature.set(
+          "TEXT_SETTINGS",
+          JSON.stringify(feature.get("TEXT_SETTINGS"))
+        );
+      }
       // If we're dealing with a circle, we have to make sure to simplify
       // the geometry since the kml standard does not like circles.
       if (geomIsCircle) {
+        const circleGeometry = clonedFeature.getGeometry();
+        // Let's store the circle-radius and center if the user wants to load the
+        // kml using the sketch-tool later. (The radius and center is required by the draw-model
+        // so that it is able to create a real circle).
+        clonedFeature.set("CIRCLE_RADIUS", circleGeometry.getRadius());
+        clonedFeature.set(
+          "CIRCLE_CENTER",
+          JSON.stringify(circleGeometry.getCenter())
+        );
         // Create the simplified geometry
-        const simplifiedGeometry = fromCircle(clonedFeature.getGeometry(), 96);
+        const simplifiedGeometry = fromCircle(circleGeometry, 96);
         // And then set the cloned feature's geometry to the simplified one.
         clonedFeature.setGeometry(simplifiedGeometry);
       }
@@ -499,18 +655,6 @@ class KmlModel {
       clonedFeature
         .getGeometry()
         .transform(this.#map.getView().getProjection(), "EPSG:4326");
-      // Here some styling-magic is happening... TODO: What?!
-      if (clonedFeature.getStyle()[1]) {
-        clonedFeature.setProperties({
-          style: JSON.stringify(
-            this.extractStyle(
-              clonedFeature.getStyle()[1] || clonedFeature.getStyle()[0],
-              geomIsCircle ? clonedFeature.getGeometry().getRadius() : false
-            )
-          ),
-          geometryType: clonedFeature.getGeometry().getType(),
-        });
-      }
       // Finally, we can push the transformed feature to the
       // transformedFeatures-array.
       transformedFeatures.push(clonedFeature);

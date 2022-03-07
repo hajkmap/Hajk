@@ -17,6 +17,7 @@
     "Print",
     "Routing",
     "Search",
+    "Sketch",
     "StreetView",
     "TimeSlider"
   ],
@@ -44,6 +45,7 @@
     "Print",
     "Routing",
     "Search",
+    "Sketch",
     "StreetView",
     "TimeSlider",
     "vtsearch"
