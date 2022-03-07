@@ -50,6 +50,7 @@
     "@nieuwlandgeo/sldreader": "^0.2.13",
     "@turf/buffer": "^6.5.0",
     "@turf/union": "^6.5.0",
+    "@turf/transform-translate": "^6.5.0",
     "abortcontroller-polyfill": "^1.7.3",
     "allsettled-polyfill": "^1.0.4",
     "date-fns": "^2.28.0",
