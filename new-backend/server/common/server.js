@@ -85,6 +85,9 @@ export default class ExpressServer {
     app.use(
       helmet({
         contentSecurityPolicy: false, // If active, we get errors loading inline <script>
+        crossOriginResourcePolicy: {
+          policy: "cross-origin",
+        },
         frameguard: false, // If active, other pages can't embed our maps
       })
     );
