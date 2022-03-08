@@ -1,5 +1,5 @@
 import React from "react";
-//import withStyles from "@mui/styles/withStyles";
+import { styled } from "@mui/material/styles";
 import { TwitterPicker } from "react-color";
 
 import { Box, Grid, Typography, Tooltip } from "@mui/material";
@@ -10,26 +10,21 @@ import { Accordion, AccordionDetails, AccordionSummary } from "@mui/material";
 import { DRAW_COLORS } from "../../constants";
 import StrokeTypeSelector from "./StrokeTypeSelector";
 
-// We want to use an accordion-summary, but we have to style it a bit so
-// it looks OK. Let's create a styled accordion-summary.
-// const StyledAccordionSummary = withStyles({
-//   root: {
-//     minHeight: 35,
-//     "&$expanded": {
-//       minHeight: 35,
-//     },
-//   },
-//   content: {
-//     transition: "inherit !important",
-//     marginTop: "0",
-//     marginBottom: "0",
-//     "&$expanded": {
-//       marginTop: "0",
-//       marginBottom: "0",
-//     },
-//   },
-//   expanded: {},
-// })(AccordionSummary);
+const StyledAccordionSummary = styled(AccordionSummary)(() => ({
+  minHeight: 35,
+  "&.MuiAccordionSummary-root.Mui-expanded": {
+    minHeight: 35,
+  },
+  "& .MuiAccordionSummary-content": {
+    transition: "inherit !important",
+    marginTop: 0,
+    marginBottom: 0,
+    "&.Mui-expanded": {
+      marginTop: 0,
+      marginBottom: 0,
+    },
+  },
+}));
 
 // We want to be able to display the current color. Let's create
 // a color-badge component.
@@ -131,7 +126,7 @@ const FeatureStyleAccordion = (props) => {
         disableInteractive
         title={`Klicka här för att ändra ${props.title.toLowerCase()}.`}
       >
-        <AccordionSummary>
+        <StyledAccordionSummary>
           <AccordionSummaryContents
             title={props.title}
             color={props.color}
@@ -139,7 +134,7 @@ const FeatureStyleAccordion = (props) => {
             strokeWidth={props.strokeWidth}
             drawModel={props.drawModel}
           />
-        </AccordionSummary>
+        </StyledAccordionSummary>
       </Tooltip>
       <AccordionDetails style={{ maxWidth: "100%" }}>
         <Grid container>
