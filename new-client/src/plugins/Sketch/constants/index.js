@@ -115,7 +115,7 @@ export const DRAW_TYPES = [
   },
 ];
 
-export const MAX_REMOVED_FEATURES = 5;
+export const MAX_REMOVED_FEATURES = 4;
 export const PLUGIN_MARGIN = 10;
 
 export const STROKE_TYPES = [
@@ -143,7 +143,7 @@ export const STROKE_DASHES = new Map([
 ]);
 
 // A constant stating how many sketches we're allowed to save in local-storage.
-export const MAX_SKETCHES = 4;
+export const MAX_SKETCHES = 3;
 
 export const DEFAULT_USER_SETTINGS = {
   showText: false,

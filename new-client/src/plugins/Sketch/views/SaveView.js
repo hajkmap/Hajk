@@ -64,6 +64,13 @@ const SketchSaver = (props) => {
     props.setSketchName("");
   };
 
+  // Checks wether the sketch-name entered by the user is already taken or not.
+  const nameExists = () => {
+    return props.savedSketches.some(
+      (sketch) => sketch.title.toLowerCase() === props.sketchName.toLowerCase()
+    );
+  };
+
   // Let's listen for enter-key-down. If the enter-key is pressed and
   // the save-button isn't disabled we can save the sketch.
   const handleKeyDown = (e) => {
@@ -83,14 +90,10 @@ const SketchSaver = (props) => {
           "Minst fyra tecken måste anges för att en arbetsyta ska kunna skapas.",
       };
     }
-    // Let's check if the name the user has entered already exists
-    const sketchNameExists = props.savedSketches.some(
-      (sketch) => sketch.title.toLowerCase() === props.sketchName.toLowerCase()
-    );
-    // If the name does not exist, and we've already saved the maximum number of sketches,
+    // If the name does not already exist, and we've already saved the maximum number of sketches,
     // the button should be disabled. (If the name does exist, it is OK to save since one
     // will be over-written).
-    if (props.savedSketches.length === MAX_SKETCHES && !sketchNameExists) {
+    if (props.savedSketches.length === MAX_SKETCHES && !nameExists()) {
       return {
         disabled: true,
         message:
@@ -161,7 +164,7 @@ const SavedSketch = ({
               <Grid
                 item
                 xs={12}
-                style={{ overflow: "hidden", textOverflow: "ellipsis" }}
+                sx={{ overflow: "hidden", textOverflow: "ellipsis" }}
               >
                 <Typography variant="button" noWrap>
                   {sketchInfo.title}
