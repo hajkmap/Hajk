@@ -1,4 +1,5 @@
 import React from "react";
+import { SketchPicker } from "react-color";
 import $ from "jquery";
 
 class VectorLayerForm extends React.Component {
@@ -15,6 +16,7 @@ class VectorLayerForm extends React.Component {
     filterComparer: "eq",
     filterValue: "",
     filterable: false,
+    icon: "",
     id: "",
     imageLoad: false,
     infoOwner: "",
@@ -31,16 +33,23 @@ class VectorLayerForm extends React.Component {
     layerType: "Vector",
     legend: "",
     legendIcon: "",
+    lineColor: "",
+    lineWidth: "",
+    lineStyle: "",
+    fillColor: "",
     load: false,
     maxZoom: -1,
     minZoom: -1,
     opacity: 1,
+    pointSize: 6,
     projection: "",
     queryable: true,
     hideExpandArrow: false,
     sldStyle: "Default Styler",
     sldText: "",
     sldUrl: "",
+    symbolXOffset: 0,
+    symbolYOffset: 0,
     url: "",
     validationErrors: [],
     version: "1.1.0",
@@ -61,6 +70,14 @@ class VectorLayerForm extends React.Component {
           legendIcon: this.props.model.get("select-legend-icon"),
         },
         () => this.validateField("select-legend-icon")
+      );
+    });
+    this.props.model.on("change:select-icon", () => {
+      this.setState(
+        {
+          icon: this.props.model.get("select-icon"),
+        },
+        () => this.validateField("select-icon")
       );
     });
   }
@@ -101,6 +118,7 @@ class VectorLayerForm extends React.Component {
       filterComparer: this.getValue("filterComparer"),
       filterValue: this.getValue("filterValue"),
       filterable: this.getValue("filterable"),
+      icon: this.getValue("icon"),
       id: this.state.id,
       infoOwner: this.getValue("infoOwner"),
       infoText: this.getValue("infoText"),
@@ -118,12 +136,19 @@ class VectorLayerForm extends React.Component {
       maxZoom: this.getValue("maxZoom"),
       minZoom: this.getValue("minZoom"),
       opacity: this.getValue("opacity"),
+      pointSize: this.getValue("pointSize"),
+      lineStyle: this.getValue("lineStyle"),
+      lineColor: this.getValue("lineColor"),
+      lineWidth: this.getValue("lineWidth"),
+      fillColor: this.getValue("fillColor"),
       projection: this.getValue("projection"),
       queryable: this.getValue("queryable"),
       hideExpandArrow: this.getValue("hideExpandArrow"),
       sldStyle: this.getValue("sldStyle"),
       sldText: this.getValue("sldText"),
       sldUrl: this.getValue("sldUrl"),
+      symbolXOffset: this.getValue("symbolXOffset"),
+      symbolYOffset: this.getValue("symbolYOffset"),
       url: this.getValue("url"),
       type: this.state.layerType,
       version: this.getValue("version"),
@@ -133,6 +158,10 @@ class VectorLayerForm extends React.Component {
   getValue(fieldName) {
     function create_date() {
       return new Date().getTime().toString();
+    }
+
+    function rgbaToString(c) {
+      return typeof c === "string" ? c : `rgba(${c.r}, ${c.g}, ${c.b}, ${c.a})`;
     }
 
     const input = this.refs["input_" + fieldName];
@@ -146,6 +175,8 @@ class VectorLayerForm extends React.Component {
     if (fieldName === "date") value = create_date();
     if (fieldName === "queryable") value = input.checked;
     if (fieldName === "filterable") value = input.checked;
+    if (fieldName === "fillColor") value = rgbaToString(this.state.fillColor);
+    if (fieldName === "lineColor") value = rgbaToString(this.state.lineColor);
     if (fieldName === "infoVisible") value = input.checked;
     if (fieldName === "timeSliderVisible") value = input.checked;
     if (fieldName === "hideExpandArrow") value = input.checked;
@@ -208,6 +239,8 @@ class VectorLayerForm extends React.Component {
           valid = false;
         }
         break;
+      case "symbolXOffset":
+      case "symbolYOffset":
       case "url":
       case "caption":
       case "legend":
@@ -291,6 +324,11 @@ class VectorLayerForm extends React.Component {
     });
   }
 
+  loadIcon(e) {
+    $("#select-icon").attr("caller", "select-icon");
+    $("#select-icon").trigger("click");
+  }
+
   loadLegend(e) {
     $("#select-image").attr("caller", "select-image");
     $("#select-image").trigger("click");
@@ -301,9 +339,32 @@ class VectorLayerForm extends React.Component {
     $("#select-legend-icon").trigger("click");
   }
 
+  setFillColor(color) {
+    this.setState({
+      fillColor: color,
+    });
+  }
+
+  setLineColor(color) {
+    this.setState({
+      lineColor: color,
+    });
+  }
+  setLineStyle(e) {
+    this.setState({
+      lineStyle: e.target.value,
+    });
+  }
+
   setLineWidth(e) {
     this.setState({
       lineWidth: e.target.value,
+    });
+  }
+
+  setPointSize(e) {
+    this.setState({
+      pointSize: e.target.value,
     });
   }
 
@@ -656,6 +717,107 @@ class VectorLayerForm extends React.Component {
         </div>
         <div>
           <label>
+            Upphovsrätt (
+            <abbr title="Styr OpenLayers 'attributions' för lagret, visas i kartan.">
+              ?
+            </abbr>
+            )
+          </label>
+          <input
+            type="text"
+            ref="input_attribution"
+            onChange={(e) => {
+              this.setState({ attribution: e.target.value });
+              this.validateField("attribution", e);
+            }}
+            value={this.state.attribution}
+            className={this.getValidationClass("attribution")}
+          />
+        </div>
+        <div>
+          <input
+            type="checkbox"
+            ref="input_queryable"
+            id="queryable"
+            onChange={(e) => {
+              this.setState({ queryable: e.target.checked });
+            }}
+            checked={this.state.queryable}
+          />
+          &nbsp;
+          <label htmlFor="queryable">Infoklickbar</label>
+        </div>
+        <div>
+          <label>Inforuta</label>
+          <textarea
+            ref="input_infobox"
+            value={this.state.infobox}
+            onChange={(e) => this.setState({ infobox: e.target.value })}
+          />
+        </div>
+        <div>
+          <label>
+            Teckenförklaring
+            <abbr title="Teckenförklaring (bildfil) som visas i information om lagret.">
+              (?)
+            </abbr>
+          </label>
+          <input
+            type="text"
+            ref="input_legend"
+            value={this.state.legend}
+            className={this.getValidationClass("legend")}
+            onChange={(e) => {
+              this.setState({ legend: e.target.value });
+            }}
+          />
+          <span
+            onClick={(e) => {
+              this.loadLegend(e);
+            }}
+            className="btn btn-default"
+          >
+            Välj fil {imageLoader}
+          </span>
+        </div>
+        <div>
+          <label>
+            Ikon för
+            <br />
+            teckenförklaring
+            <abbr title="En symbol (bildfil) som visas vid lagernamnet.">
+              (?)
+            </abbr>
+          </label>
+          <input
+            type="text"
+            ref="input_legendIcon"
+            value={this.state.legendIcon}
+            onChange={(e) => this.setState({ legendIcon: e.target.value })}
+          />
+          <span
+            onClick={(e) => {
+              this.loadLegendIcon(e);
+            }}
+            className="btn btn-default"
+          >
+            Välj fil {imageLoader}
+          </span>
+        </div>
+        <div className="separator">Stilsättning av objekt</div>
+        <p>
+          Stilen på vektorlagret kan ställas in antingen med SLD eller med
+          OpenLayers stilsättning.
+        </p>
+        <p>
+          Stilen sätts med SLD om det är konfigurerat, annars med OpenLayers
+          stilsättning. Om inget av dessa är konfigurerade används OpenLayers
+          standardstil.
+        </p>
+        <div>
+          &nbsp;
+          <p>Inställning av SLD:</p>
+          <label>
             URL till SLD-filen
             <abbr title="URL till fil som innehåller SLD-data som stilsätter lagret. Antingen detta eller nästa inställning måste anges (se även nästa inställning). Om varken URL eller SLD anges kommer lagret att renderas med OpenLayers default-stil.">
               (?)
@@ -702,44 +864,125 @@ class VectorLayerForm extends React.Component {
           />
         </div>
         <div>
-          <label>
-            Upphovsrätt (
-            <abbr title="Styr OpenLayers 'attributions' för lagret, visas i kartan.">
-              ?
-            </abbr>
-            )
-          </label>
+          &nbsp;
+          <p>Inställning av OpenLayers stil:</p>
+          <label>Ikon</label>
           <input
             type="text"
-            ref="input_attribution"
+            ref="input_icon"
+            value={this.state.icon}
+            //className={this.getValidationClass("icon")}
             onChange={(e) => {
-              this.setState({ attribution: e.target.value });
-              this.validateField("attribution", e);
+              this.setState({ icon: e.target.value });
             }}
-            value={this.state.attribution}
-            className={this.getValidationClass("attribution")}
           />
+          <span
+            onClick={(e) => {
+              this.loadIcon(e);
+            }}
+            className="btn btn-default"
+          >
+            Välj fil {imageLoader}
+          </span>
         </div>
         <div>
+          <label>Ikonförskjutning X</label>
           <input
-            type="checkbox"
-            ref="input_queryable"
-            id="queryable"
+            type="text"
+            ref="input_symbolXOffset"
+            value={this.state.symbolXOffset}
+            className={this.getValidationClass("symbolXOffset")}
             onChange={(e) => {
-              this.setState({ queryable: e.target.checked });
+              const v = e.target.value;
+              this.setState({ symbolXOffset: v }, () =>
+                this.validateField("symbolXOffset")
+              );
             }}
-            checked={this.state.queryable}
           />
-          &nbsp;
-          <label htmlFor="queryable">Infoklickbar</label>
         </div>
         <div>
-          <label>Inforuta</label>
-          <textarea
-            ref="input_infobox"
-            value={this.state.infobox}
-            onChange={(e) => this.setState({ infobox: e.target.value })}
+          <label>Ikonförskjutning Y</label>
+          <input
+            type="text"
+            ref="input_symbolYOffset"
+            value={this.state.symbolYOffset}
+            className={this.getValidationClass("symbolYOffset")}
+            onChange={(e) => {
+              const v = e.target.value;
+              this.setState({ symbolYOffset: v }, () =>
+                this.validateField("symbolYOffset")
+              );
+            }}
           />
+        </div>
+        <div>
+          <label>Ikonstorlek</label>
+          <select
+            ref="input_pointSize"
+            value={this.state.pointSize}
+            className="control-fixed-width"
+            onChange={(e) => {
+              this.setPointSize(e);
+            }}
+          >
+            <option value=""></option>
+            <option value="4">Liten</option>
+            <option value="8">Medium</option>
+            <option value="16">Stor</option>
+            <option value="32">Större</option>
+            <option value="64">Störst</option>
+          </select>
+        </div>
+        <div>
+          <label>Linjetjocklek</label>
+          <select
+            ref="input_lineWidth"
+            value={this.state.lineWidth}
+            className="control-fixed-width"
+            onChange={(e) => {
+              this.setLineWidth(e);
+            }}
+          >
+            <option value=""></option>
+            <option value="1">Tunn</option>
+            <option value="3">Normal</option>
+            <option value="5">Tjock</option>
+            <option value="8">Tjockare</option>
+          </select>
+        </div>
+        <div>
+          <label>Linjestil</label>
+          <select
+            ref="input_lineStyle"
+            value={this.state.lineStyle}
+            className="control-fixed-width"
+            onChange={(e) => {
+              this.setLineStyle(e);
+            }}
+          >
+            <option value=""></option>
+            <option value="solid">Heldragen</option>
+            <option value="dash">Streckad</option>
+            <option value="dot">Punktad</option>
+          </select>
+        </div>
+        <div className="clearfix">
+          <span className="pull-left">
+            <label>Fyllnadsfärg</label>
+            <br />
+            <SketchPicker
+              color={this.state.fillColor}
+              onChangeComplete={(color) => this.setFillColor(color.rgb)}
+            />
+          </span>
+          <span className="pull-left" style={{ marginLeft: "10px" }}>
+            <label>Linjefärg</label>
+            <br />
+            <SketchPicker
+              color={this.state.lineColor}
+              onChangeComplete={(color) => this.setLineColor(color.rgb)}
+            />
+          </span>
         </div>
         <div className="separator">Filtrering</div>
         <div>
@@ -799,48 +1042,6 @@ class VectorLayerForm extends React.Component {
               this.setState({ filterValue: e.target.value });
             }}
           />
-        </div>
-        <div className="separator">Inställningar för objekt</div>
-        <div>
-          <label>Ikon</label>
-          <input
-            type="text"
-            ref="input_legend"
-            value={this.state.legend}
-            className={this.getValidationClass("legend")}
-            onChange={(e) => {
-              this.setState({ legend: e.target.value });
-            }}
-          />
-          <span
-            onClick={(e) => {
-              this.loadLegend(e);
-            }}
-            className="btn btn-default"
-          >
-            Välj fil {imageLoader}
-          </span>
-        </div>
-        <div>
-          <label>
-            Teckenförklar
-            <br />
-            ingsikon
-          </label>
-          <input
-            type="text"
-            ref="input_legendIcon"
-            value={this.state.legendIcon}
-            onChange={(e) => this.setState({ legendIcon: e.target.value })}
-          />
-          <span
-            onClick={(e) => {
-              this.loadLegendIcon(e);
-            }}
-            className="btn btn-default"
-          >
-            Välj fil {imageLoader}
-          </span>
         </div>
         <div className="separator">Metadata</div>
         <div>

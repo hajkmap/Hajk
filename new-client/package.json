@@ -1,6 +1,6 @@
 {
   "name": "hajk-client",
-  "version": "3.8.0",
+  "version": "3.9.0",
   "description": "Hajk Client UI",
   "homepage": ".",
   "repository": {
@@ -52,6 +52,7 @@
     "@testing-library/jest-dom": "^5.14.1",
     "@testing-library/react": "^11.2.7",
     "@testing-library/user-event": "^13.1.9",
+    "@turf/transform-translate": "^6.5.0",
     "abortcontroller-polyfill": "^1.7.3",
     "allsettled-polyfill": "^1.0.4",
     "clsx": "^1.1.1",
