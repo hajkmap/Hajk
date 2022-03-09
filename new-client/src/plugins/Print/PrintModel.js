@@ -584,6 +584,8 @@ export default class PrintModel {
     // Since we're allowing the users to choose which DPI they want to print the map
     // in, we have to make sure to prepare the layers so that they are fetched with
     // the correct DPI-settings!
+    // TODO: Make sure to handle Image-WMS (non-tiled WMS-sources) as well! As of now,
+    // we only handle tiled sources!
     this.prepareActiveLayersForPrint(options);
 
     // Before we're printing we must make sure to change the map-view from the
