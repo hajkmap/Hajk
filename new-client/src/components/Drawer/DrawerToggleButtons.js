@@ -74,7 +74,12 @@ function DrawerToggleButtons({
     globalObserver.publish("core.drawerContentChanged", v);
   };
 
-  const renderToggleButton = ({ ButtonIcon, value, caption }) => {
+  const renderToggleButton = ({
+    ButtonIcon,
+    value,
+    caption,
+    hideOnMdScreensAndAbove = false,
+  }) => {
     // Currently active toggle button should have a "Close" icon
     const icon =
       value === activeButton ? (
@@ -83,10 +88,25 @@ function DrawerToggleButtons({
         <ButtonIcon sx={{ marginRight: { md: 1 } }} />
       );
 
-    // Caption should be hidden on small screens
     return (
-      <StyledToggleButton id={value} key={value} value={value}>
+      <StyledToggleButton
+        id={value}
+        key={value}
+        value={value}
+        sx={{
+          // This sx rule is a special case, used by the
+          // "Plugin Tools" drawer button. There are some
+          // cases where we want to hide it on MD & up screens,
+          // see #1020.
+          ...(hideOnMdScreensAndAbove && {
+            display: {
+              md: "none",
+            },
+          }),
+        }}
+      >
         {icon}
+        {/* Caption should be hidden on small screens*/}
         <Hidden mdDown>{caption}</Hidden>
       </StyledToggleButton>
     );
