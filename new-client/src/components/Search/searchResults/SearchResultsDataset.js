@@ -1,24 +1,23 @@
 import React from "react";
-import { withStyles } from "@material-ui/core/styles";
 import { isMobile } from "../../../utils/IsMobile";
-import { List, ListItem } from "@material-ui/core";
+import { List, ListItem } from "@mui/material";
 import SearchResultsDatasetFeature from "./SearchResultsDatasetFeature";
 import SearchResultsDatasetFeatureDetails from "./SearchResultsDatasetFeatureDetails";
 import SearchResultsPreview from "./SearchResultsPreview";
+import { styled } from "@mui/material/styles";
 
-const styles = () => ({
-  featureList: {
-    padding: 0,
-    width: "100%",
-    transition: "none",
-  },
-  featureListItem: {
-    width: "100%",
-    display: "flex",
-    padding: 0,
-    transition: "none",
-  },
-});
+const StyledList = styled(List)(() => ({
+  padding: 0,
+  width: "100%",
+  transition: "none",
+}));
+
+const StyledListItem = styled(ListItem)(() => ({
+  width: "100%",
+  display: "flex",
+  padding: 0,
+  transition: "none",
+}));
 
 class SearchResultsDataset extends React.Component {
   //Some sources does not return numberMatched and numberReturned, falling back on features.length
@@ -136,7 +135,6 @@ class SearchResultsDataset extends React.Component {
   renderFeatureList = (features) => {
     const {
       featureCollection,
-      classes,
       app,
       selectedFeatures,
       activeFeature,
@@ -151,15 +149,13 @@ class SearchResultsDataset extends React.Component {
     const sortedFeatures = this.getSortedFeatures(features);
     return (
       <>
-        <List
-          className={classes.featureList}
+        <StyledList
           id={`search-result-dataset-details-${featureCollection.source.id}`}
         >
           {sortedFeatures.map((f) => {
             return (
-              <ListItem
+              <StyledListItem
                 disableTouchRipple
-                className={classes.featureListItem}
                 key={f.getId()}
                 divider
                 button
@@ -168,10 +164,35 @@ class SearchResultsDataset extends React.Component {
                   handleOnFeatureClick(f);
                 }}
                 onKeyDown={(event) => handleOnFeatureKeyPress(event, f)}
-                onMouseEnter={
-                  !isMobile ? (e) => this.setPreviewFeature(e, f) : null
-                }
-                onMouseLeave={!isMobile ? this.resetPreview : null}
+                onMouseEnter={(e) => {
+                  if (!isMobile) {
+                    this.props.localObserver.publish(
+                      "map.setHighLightedStyle",
+                      f
+                    );
+                    this.setPreviewFeature(e, f);
+                  }
+                }}
+                onMouseLeave={() => {
+                  if (!isMobile) {
+                    // Create a list of ol_uids of selected features
+                    const selectedOlUids = this.props.selectedFeatures.map(
+                      (f) => f.feature.ol_uid
+                    );
+                    // Check if the current feature is in the list of selected features
+                    if (selectedOlUids.includes(f.ol_uid)) {
+                      // If so, reset the style to "selection" style for that feature…
+                      this.props.localObserver.publish(
+                        "map.setSelectedFeatureStyle",
+                        f
+                      );
+                    } else {
+                      // …else, remove the styling entirely (fallback to default OL)
+                      f.setStyle(null);
+                    }
+                    this.resetPreview();
+                  }
+                }}
               >
                 <SearchResultsDatasetFeature
                   feature={f}
@@ -191,10 +212,10 @@ class SearchResultsDataset extends React.Component {
                     shouldRenderSelectedCollection
                   }
                 />
-              </ListItem>
+              </StyledListItem>
             );
           })}
-        </List>
+        </StyledList>
         {this.renderSearchResultPreview()}
       </>
     );
@@ -243,4 +264,4 @@ class SearchResultsDataset extends React.Component {
   }
 }
 
-export default withStyles(styles)(SearchResultsDataset);
+export default SearchResultsDataset;

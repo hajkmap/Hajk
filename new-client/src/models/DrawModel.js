@@ -1,10 +1,15 @@
-import { Draw } from "ol/interaction";
-import { createBox, createRegularPolygon } from "ol/interaction/Draw";
+import { Draw, Modify, Select, Translate } from "ol/interaction";
+import { createBox } from "ol/interaction/Draw";
 import { Vector as VectorLayer } from "ol/layer";
 import VectorSource from "ol/source/Vector";
-import { Stroke, Style, Circle, Fill, Text } from "ol/style";
-import { Circle as CircleGeometry, LineString, Point } from "ol/geom.js";
-import Overlay from "ol/Overlay.js";
+import { Icon, Stroke, Style, Circle, Fill, Text } from "ol/style";
+import { Circle as CircleGeometry, LineString } from "ol/geom";
+import { fromCircle } from "ol/geom/Polygon";
+import { MultiPoint, Point } from "ol/geom";
+import Overlay from "ol/Overlay";
+import GeoJSON from "ol/format/GeoJSON";
+import transformTranslate from "@turf/transform-translate";
+import { getArea as getExtentArea } from "ol/extent";
 
 /*
  * A model supplying useful Draw-functionality.
@@ -14,21 +19,40 @@ import Overlay from "ol/Overlay.js";
  *   to that layer. Otherwise, a new vector-layer will be created and added to the map.
  * - map: (olMap): The current map-object.
  *
+ * Optional settings:
+ * - observer: (Observer): An observer on which the drawModel can publish events, for example when a geometry has been deleted.
+ * - observerPrefix (String): A string acting as a prefix on all messages published on the observer.
+ * - modifyDefaultEnabled: (Boolean): States if the Modify-interaction be enabled when the Edit-interaction is enabled.
+ * - translateDefaultEnabled: (Boolean): States if the Translate-interaction should be enabled when the Move-interaction is enabled.
+ *
  * Exposes a couple of methods:
+ * - refreshFeaturesTextStyle(): Refreshes the text-style on all features in the draw-source.
+ * - refreshDrawLayer(): Redraws all features in the draw-layer.
+ * - addFeature(feature): Adds the supplied feature to the draw-source.
+ * - duplicateFeature(feature): Duplicates the supplied feature and adds it to the draw-source.
+ * - removeFeature(feature): Removes the supplied feature from the draw-source.
  * - getCurrentExtent(): Returns the current extent of the current draw-layer.
  * - getCurrentLayerName(): Returns the name of the layer currently connected to the draw-model.
  * - removeDrawnFeatures():  Removes all drawn features from the current draw-source.
  * - setLayer(layerName <string>): Sets (or creates) the layer that should be connected to the draw-model.
  * - toggleDrawInteraction(drawType, settings): Accepts a string with the drawType and an object containing settings.
  * - zoomToCurrentExtent(): Fits the map-view to the current extent of the current draw-source.
+ * - getRGBAString(RGBA-object <object>): Accepts an object with r-, g-, b-, and a-properties and returns the string representation.
+ * - parseColorString(hex/rgba-string <string>): Accepts a string and returns an object with r-, g-, b-, and a-properties.
+ * - getCurrentVectorSource(): Returns the vector-source currently connected to the draw-model.
  * - get/set drawStyleSettings(): Get or set the style settings used by the draw-model.
  * - get/set labelFormat(): Sets the format on the labels. ("AUTO", "M2", "KM2", "HECTARE")
  * - get/set showDrawTooltip(): Get or set wether a tooltip should be shown when drawing.
  * - get/set showFeatureMeasurements(): Get or set wether drawn feature measurements should be shown or not.
+ * - get/set modifyActive(): Get or set wether the Modify-interaction should be active or not.
+ * - get/set translateActive(): Get or set wether the Translate-interaction should be active or not.
  */
 class DrawModel {
   #map;
   #layerName;
+  #geoJSONParser;
+  #observer;
+  #observerPrefix;
   #drawSource;
   #drawLayer;
   #currentExtent;
@@ -39,13 +63,25 @@ class DrawModel {
   #showDrawTooltip;
   #showFeatureMeasurements;
   #drawStyleSettings;
+  #textStyleSettings;
   #drawInteraction;
+  #removeInteractionActive;
+  #editInteractionActive;
+  #featureChosenForEdit;
+  #moveInteractionActive;
+  #selectInteraction;
+  #translateInteraction;
+  #modifyInteraction;
+  #keepModifyActive;
+  #keepTranslateActive;
   #allowedLabelFormats;
   #labelFormat;
   #customHandleDrawStart;
   #customHandleDrawEnd;
   #customHandlePointerMove;
   #customHandleAddFeature;
+  #highlightFillColor;
+  #highlightStrokeColor;
 
   constructor(settings) {
     // Let's make sure that we don't allow initiation if required settings
@@ -56,15 +92,38 @@ class DrawModel {
     // Make sure that we keep track of the supplied settings.
     this.#map = settings.map;
     this.#layerName = settings.layerName;
+    // We're gonna need a GeoJSON-parser with the maps projection set.
+    this.#geoJSONParser = new GeoJSON({
+      featureProjection: this.#map.getView().getProjection(),
+    });
+    // An observer might be supplied. If it is, the drawModel will publish messages when features are deleted etc.
+    this.#observer = settings.observer || null;
+    // There might be an "observerPrefix" (string) passed. States a string
+    // which will act as a prefix on all messages published on the
+    // supplied observer.
+    this.#observerPrefix = this.#getObserverPrefix(settings);
     this.#showFeatureMeasurements = settings.showFeatureMeasurements ?? true;
     this.#drawStyleSettings =
       settings.drawStyleSettings ?? this.#getDefaultDrawStyleSettings();
+    this.#textStyleSettings =
+      settings.textStyleSettings ?? this.#getDefaultTextStyleSettings();
     this.#allowedLabelFormats = ["AUTO", "M2", "KM2", "HECTARE"];
     this.#labelFormat = settings.labelFormat ?? "AUTO"; // One of #allowedLabelFormats
     // We are going to be keeping track of the current extent of the draw-source...
     this.#currentExtent = null;
     // And the current draw interaction.
     this.#drawInteraction = null;
+    // We also have to make sure to keep track of if any other interaction is active.
+    // E.g. "Remove", or "Edit".
+    this.#removeInteractionActive = false;
+    this.#editInteractionActive = false;
+    this.#moveInteractionActive = false;
+    this.#modifyInteraction = null;
+    this.#keepModifyActive = settings.modifyDefaultEnabled ?? false;
+    this.#translateInteraction = null;
+    this.#keepTranslateActive = settings.translateDefaultEnabled ?? true;
+    this.#selectInteraction = null;
+    this.#featureChosenForEdit = null;
     // We're also keeping track of the tooltip-settings
     this.#showDrawTooltip = settings.showDrawTooltip ?? true;
     this.#drawTooltip = null;
@@ -78,28 +137,60 @@ class DrawModel {
     this.#customHandleDrawEnd = null;
     this.#customHandlePointerMove = null;
     this.#customHandleAddFeature = null;
+    this.#highlightFillColor = "rgba(35,119,252,1)";
+    this.#highlightStrokeColor = "rgba(255,255,255,1)";
 
     // A Draw-model is not really useful without a vector-layer, let's initiate it
     // right away, either by creating a new layer, or connect to an existing layer.
     this.#initiateDrawLayer();
     // We also have to initiate the element for the draw-tooltip
     this.#createDrawTooltip();
-    // Let's display a warning for now, remove once it's properly tested. TODO: @Hallbergs
-    console.info(
-      "Initiation of Draw-model successful. Note that the model has not been properly tested yet and should not be used in critical operation."
-    );
   }
+
+  // Returns the supplied observerPrefix from the supplied settings or null if none was supplied.
+  #getObserverPrefix = (settings) => {
+    return typeof settings.observerPrefix === "string"
+      ? settings.observerPrefix
+      : null;
+  };
+
+  // Helper function that accepts an object containing two parameters:
+  // - subject: (string): The subject to be published on the observer
+  // - payLoad: (any): The payload to send when publishing.
+  #publishInformation = ({ subject, payLoad }) => {
+    // If no observer has been set-up, or if the subject is missing, we abort
+    if (!this.#observer || !subject) {
+      return;
+    }
+    // Otherwise we create the prefixed-subject to send. (The drawModel might have
+    // been initiated with a prefix that should be added on all subjects).
+    const prefixedSubject = this.#observerPrefix
+      ? `${this.observerPrefix}.${subject}`
+      : subject;
+    // Then we publish the event!
+    this.#observer.publish(prefixedSubject, payLoad);
+  };
 
   // Returns the default style settings used by the draw-model.
   #getDefaultDrawStyleSettings = () => {
     const strokeColor = "rgba(74,74,74,0.5)";
     const strokeDash = null;
+    const strokeWidth = 2;
     const fillColor = "rgba(255,255,255,0.07)";
     return {
       strokeColor: strokeColor,
       lineDash: strokeDash,
+      strokeWidth: strokeWidth,
       fillColor: fillColor,
     };
+  };
+
+  // Returns the default text-style settings used by the draw-model.
+  #getDefaultTextStyleSettings = () => {
+    const foregroundColor = "#FFFFFF";
+    const backgroundColor = "#000000";
+    const size = 14;
+    return { foregroundColor, backgroundColor, size };
   };
 
   // If required parameters are missing, we have to make sure we abort the
@@ -124,7 +215,7 @@ class DrawModel {
     // Get all the layers from the map
     const allMapLayers = this.#getAllMapLayers();
     // Check wether any of the layers has the same name (type)
-    // as the supplied layerName. TODO: type?!
+    // as the supplied layerName.
     // Also makes sure that the found layer is a vectorLayer. (We cannot
     // add features to an imageLayer...).
     return allMapLayers.some((layer) => {
@@ -171,8 +262,6 @@ class DrawModel {
     // Then we'll create the layer
     this.#drawLayer = this.#getNewVectorLayer(this.#drawSource);
     // Make sure to set the layer type to something understandable.
-    // TODO: Make sure type is the way to go, a bit confusing setting the
-    // layer name on that property. Hmm...
     this.#drawLayer.set("type", this.#layerName);
     // FIXME: Remove "type", use only "name" throughout
     // the application. Should be done as part of #883.
@@ -220,42 +309,244 @@ class DrawModel {
   };
 
   // Returns the style that should be used on the drawn features
-  #getFeatureStyle = (feature) => {
-    // Let's start by grabbing the standard draw style as a baseline
-    const baseLineStyle = this.#getDrawStyle();
-    // If showFeatureMeasurements is set to true, we create a text-style which
-    // will allow us to show the measurements of the drawn feature.
-    const textStyle = this.#showFeatureMeasurements
-      ? this.#getFeatureTextStyle(feature)
-      : null;
+  #getFeatureStyle = (feature, settingsOverride) => {
+    if (feature.get("HIDDEN") === true) {
+      !feature.get("STYLE_BEFORE_HIDE") &&
+        feature.set("STYLE_BEFORE_HIDE", feature.getStyle());
+      return new Style({});
+    }
+    // If we're dealing with "Arrow" we'll return a special style array
+    if (feature?.get("DRAW_METHOD") === "Arrow") {
+      return this.#getArrowStyle(feature, settingsOverride);
+    }
+    // Otherwise we'll grab the 'current' style. The 'current' style might be
+    // stored in the 'STYLE_BEFORE_HIDE' property (and feature.getStyle() will
+    // return an empty style). This case happens when the feature has been hid, and
+    // is now to be shown again. For all the 'ordinary' cases, this property will be null
+    // and wont affect the feature-style.
+    const currentStyle = feature.get("STYLE_BEFORE_HIDE") || feature.getStyle();
+    feature.set("STYLE_BEFORE_HIDE", null);
+    // Let's grab the standard draw (or the currently set) style as a baseline.
+    // The standard style can be overridden if the override is supplied. This is a real mess,
+    // since OL might decide to apply a style-array sometimes (in that case we want the fist style
+    // from the style-array) and sometimes its not an array.
+    const baseLineStyle = settingsOverride
+      ? this.#getDrawStyle(settingsOverride)
+      : currentStyle
+      ? Array.isArray(currentStyle)
+        ? currentStyle[0]
+        : currentStyle
+      : this.#getDrawStyle();
+    // If we're dealing with a text-feature, we don't want an image-style.
+    feature.get("DRAW_METHOD") === "Text" && baseLineStyle.setImage(null);
+    // ILet's create a text-style. (Remember that this might be null, depending
+    // on the feature-text-settings, see more info in the method itself).
+    const textStyle = this.#getFeatureTextStyle(feature);
     // Apply the text-style to the baseline style...
     baseLineStyle.setText(textStyle);
-    // And return the finished style.
-    return baseLineStyle;
+    // If the "EDIT_ACTIVE"-property is set (meaning that the feature has been selected for
+    // editing of its color etc) we have to return the baseline-style along with a highligh-style.
+    if (feature.get("EDIT_ACTIVE") === true) {
+      return [baseLineStyle, this.#getNodeHighlightStyle(feature)];
+    } else {
+      // If its not set, we just return the baseline style!
+      return baseLineStyle;
+    }
+  };
+
+  // Method returning if we're supposed to be showing text on the feature
+  // or not. We're showing text in two cases: One: if the feature is of text-type,
+  // or two: if we're supposed to be showing feature measurements. If the feature is
+  // of arrow-type, we're never showing text.
+  #shouldShowText = (feature) => {
+    if (!feature) {
+      console.warn(
+        "Could not evaluate '#shouldShowText' since no feature was supplied."
+      );
+      return false;
+    }
+    // The "SHOW_TEXT" prop can be toggled by the user allowing them to hide all texts.
+    if (feature.get("SHOW_TEXT") === false) {
+      return false;
+    }
+    // Let's get the feature draw-method
+    const featureDrawMethod =
+      feature.get("DRAW_METHOD") || feature.get("geometryType");
+    // And check if we're supposed to be showing text or not.
+    // (We're never showing text on arrow-features, and text-features override
+    // the showFeatureMeasurements-tag, since the text-features would be useless
+    // if the text wasn't shown).
+    return (
+      featureDrawMethod !== "Arrow" &&
+      (this.#showFeatureMeasurements || featureDrawMethod === "Text")
+    );
   };
 
   // Returns a text-style that shows the tooltip-label
   // (i.e. the area of the feature in a readable format).
   // *If the measurement-label is supposed to be shown!*
   #getFeatureTextStyle = (feature) => {
+    // First we have to make sure we're supposed to be showing text on the feature.
+    const shouldShowText = this.#shouldShowText(feature);
+    // If we're not supposed to be showing any text, we can just return null
+    if (!shouldShowText) {
+      return null;
+    }
+    // Before we create the text-style we have to check if we,re dealing with a
+    // point. If we are, we have to make sure to offset the text in the negative y-direction.
+    const featureIsPoint = feature?.getGeometry() instanceof Point;
+    // We also have to check if we're dealing with a text-feature or not
+    const featureIsTextType = feature?.get("DRAW_METHOD") === "Text";
+    // Then we can create and return the style
     return new Text({
       textAlign: "center",
       textBaseline: "middle",
-      font: "12pt sans-serif",
-      fill: new Fill({ color: "#FFF" }),
-      text: this.#showFeatureMeasurements
-        ? this.#getFeatureMeasurementLabel(feature)
-        : "",
+      font: `${
+        featureIsTextType
+          ? feature.get("TEXT_SETTINGS")?.size ?? this.#textStyleSettings.size
+          : 12
+      }pt sans-serif`,
+      fill: new Fill({
+        color: featureIsTextType
+          ? feature.get("TEXT_SETTINGS")?.foregroundColor ??
+            this.#textStyleSettings.foregroundColor
+          : "#FFF",
+      }),
+      text: this.#getFeatureLabelText(feature),
       overflow: true,
       stroke: new Stroke({
-        color: "rgba(0, 0, 0, 0.5)",
+        color: featureIsTextType
+          ? feature.get("TEXT_SETTINGS")?.backgroundColor ??
+            this.#textStyleSettings.backgroundColor
+          : "rgba(0, 0, 0, 0.5)",
         width: 3,
       }),
       offsetX: 0,
-      offsetY: 0,
+      offsetY: featureIsPoint && !featureIsTextType ? -15 : 0,
       rotation: 0,
       scale: 1,
     });
+  };
+
+  #getArrowBaseStyle = (settings) => {
+    // First we'll grab the feature base-style
+    const baseStyle = this.#getDrawStyle(settings);
+    // Then we'll alter the base-style a bit... We don't want to apply
+    // eventual line-dash, and we also want a hard-coded stroke-width.
+    const baseStroke = baseStyle.getStroke();
+    baseStroke.setWidth(5);
+    baseStroke.setLineDash(null);
+    // Then we return the altered base-style
+    return baseStyle;
+  };
+
+  // Returns a svg-string that is used to display arrows in the draw-source.
+  #createArrowSvg = (color) => {
+    const svgString = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="32pt" height="32pt" fill="${color}"><path d="M 1 5 L 1 5 L 1 13 L 1 21 L 1 21 L 12 13"/></svg>`;
+    return `data:image/svg+xml;base64,${window.btoa(svgString)}`; // We need base64 for kml-exports to work.
+  };
+
+  // Returns a style array that is used to style arrow features.
+  // (All other features consist of a single style-object).
+  #getArrowStyle = (feature, settings) => {
+    // First we'll extract the current style. We only want the current style if it is
+    // an array! Otherwise we're not dealing with an arrow-style... (Arrow-style should always be an array).
+    const currentStyle = Array.isArray(feature.getStyle())
+      ? feature.getStyle()
+      : null;
+    // Then we'll grab the arrow base-style, which should be the first style in the current
+    // style-array. If that style is missing, we'll create a new one.
+    const baseStyle = settings
+      ? this.#getArrowBaseStyle(settings)
+      : currentStyle
+      ? currentStyle[0]
+      : this.#getArrowBaseStyle();
+    // We have to extract the base-color as well, so that we can create an arrow-head with
+    // the correct color.
+    const baseColor = baseStyle.getStroke()?.getColor() ?? null;
+    // Then we'll add the base-style to the styles-array
+    const styles = [baseStyle];
+    // Then we'll add the arrow-head at the end of every line-segment.
+    feature?.getGeometry().forEachSegment((start, end) => {
+      // We'll have to rotate the arrow-head, let's calculate the
+      // line-segments rotation.
+      const dx = end[0] - start[0];
+      const dy = end[1] - start[1];
+      const rotation = Math.atan2(dy, dx);
+      // Then we'll push a style for each arrow-head.
+      styles.push(
+        new Style({
+          geometry: new Point(end),
+          image: new Icon({
+            src: this.#createArrowSvg(
+              settings
+                ? settings.strokeStyle.color
+                : baseColor
+                ? baseColor
+                : this.#drawStyleSettings.strokeColor
+            ),
+            anchor: [0.38, 0.53],
+            rotateWithView: true,
+            rotation: -rotation,
+          }),
+        })
+      );
+    });
+    // And finally return the style-array.
+    return styles;
+  };
+
+  // Creates a highlight style (a style marking the coordinates of the supplied feature).
+  #getNodeHighlightStyle = (feature) => {
+    try {
+      return new Style({
+        image: new Circle({
+          radius: 5,
+          fill: new Fill({
+            color: this.#highlightFillColor,
+          }),
+          stroke: new Stroke({ color: this.#highlightStrokeColor, width: 2 }),
+        }),
+        geometry: () => {
+          const coordinates = this.#getFeatureCoordinates(feature);
+          return new MultiPoint(coordinates);
+        },
+      });
+    } catch (error) {
+      console.error(`Could not create highlight style. Error: ${error}`);
+      return null;
+    }
+  };
+
+  // Returns an array of arrays with the coordinates of the supplied feature
+  #getFeatureCoordinates = (feature) => {
+    // First, we have to extract the feature geometry
+    const geometry = feature.getGeometry();
+    // Then we'll have to extract the feature type, since we have to extract the
+    // coordinates in different ways, depending on the geometry type.
+    const geometryType = geometry.getType();
+    // Then we'll use a switch-case to make sure we return the coordinates in
+    // the correct format.
+    switch (geometryType) {
+      case "Circle":
+        // If we're dealing with a circle, we'll create a simplified geometry
+        // with 8 points, which we can use to highlight some of the "nodes" of
+        // the circle. GetCoordinates returns the coordinates in an extra wrapping
+        // array (for polygons), so let's return the first element.
+        return fromCircle(geometry, 8).getCoordinates()[0];
+      case "LineString":
+        // GetCoordinates returns an array of arrays with coordinates for LineStrings,
+        // so we can return it as-is.
+        return geometry.getCoordinates();
+      case "Point":
+        // GetCoordinates returns an array with the coordinates for points,
+        // so we have to wrap that array in an array before returning.
+        return [geometry.getCoordinates()];
+      default:
+        // The default catches Polygons, which are wrapped in an "extra" array, so let's
+        // return the first element.
+        return geometry.getCoordinates()[0];
+    }
   };
 
   // Returns the area of the supplied feature in a readable format.
@@ -315,6 +606,22 @@ class DrawModel {
     }
   };
 
+  // Returns the label text that should be shown on the feature.
+  // Usually the text is constructed by the measurement of the feature,
+  // but if the feature is of text-type, we show the user-added-text.
+  #getFeatureLabelText = (feature) => {
+    // Are we dealing with a text-feature? Let's return the user-
+    // added-text.
+    if (feature.get("DRAW_METHOD") === "Text") {
+      return feature.get("USER_TEXT") ?? "";
+    }
+    // Otherwise we return the measurement-text (If we're supposed to
+    // show it)!
+    return this.#showFeatureMeasurements
+      ? this.#getFeatureMeasurementLabel(feature)
+      : "";
+  };
+
   // Returns the supplied measurement as a kilometer-formatted string.
   // If we're measuring area, km² is returned, otherwise, km is returned.
   #getKilometerMeasurementString = (featureMeasure, measureIsLength) => {
@@ -364,46 +671,164 @@ class DrawModel {
   };
 
   // Returns an OL style to be used in the draw-interaction.
-  #getDrawStyle = () => {
+  #getDrawStyle = (settings) => {
     return new Style({
-      stroke: this.#getDrawStrokeStyle(),
-      fill: this.#getDrawFillStyle(),
-      image: this.#getDrawImageStyle(),
+      stroke: this.#getDrawStrokeStyle(settings),
+      fill: this.#getDrawFillStyle(settings),
+      image: this.#getDrawImageStyle(settings),
     });
   };
 
   // Returns the stroke style (based on the style settings)
-  #getDrawStrokeStyle = () => {
+  #getDrawStrokeStyle = (settings) => {
     return new Stroke({
-      color: this.#drawStyleSettings.strokeColor,
-      lineDash: this.#drawStyleSettings.lineDash,
-      width: 4,
+      color: settings
+        ? settings.strokeStyle.color
+        : this.#drawStyleSettings.strokeColor,
+      lineDash: settings
+        ? settings.strokeStyle.dash
+        : this.#drawStyleSettings.lineDash,
+      width: settings
+        ? settings.strokeStyle.width
+        : this.#drawStyleSettings.strokeWidth,
     });
   };
 
   // Returns the fill style (based on the style settings)
-  #getDrawFillStyle = () => {
+  #getDrawFillStyle = (settings) => {
     return new Fill({
-      color: this.#drawStyleSettings.fillColor,
+      color: settings
+        ? settings.fillStyle.color
+        : this.#drawStyleSettings.fillColor,
     });
   };
 
   // Returns the image style (based on the style settings)
-  #getDrawImageStyle = () => {
+  #getDrawImageStyle = (settings) => {
     return new Circle({
       radius: 6,
       stroke: new Stroke({
-        color: this.#drawStyleSettings.strokeColor,
-        width: 2,
+        color: settings
+          ? settings.strokeStyle.color
+          : this.#drawStyleSettings.strokeColor,
+        width: settings
+          ? settings.strokeStyle.width
+          : this.#drawStyleSettings.strokeWidth,
+        lineDash: settings
+          ? settings.strokeStyle.dash
+          : this.#drawStyleSettings.lineDash,
+      }),
+      fill: new Fill({
+        color: settings
+          ? settings.fillStyle.color
+          : this.#drawStyleSettings.fillColor,
       }),
     });
+  };
+
+  // Extracts the fill-style from the supplied feature-style
+  #getFillStyleInfo = (featureStyle) => {
+    try {
+      // Since we might be dealing with a style-array instead of a style-object
+      // (in case of the special Arrow feature-type) we have to make sure to get
+      // the actual base-style (which is located at position 0 in the style-array).
+      const color = Array.isArray(featureStyle)
+        ? featureStyle[0].getFill().getColor()
+        : featureStyle.getFill().getColor();
+      return { color: this.getRGBAString(color) };
+    } catch (error) {
+      console.error(`Failed to extract fill-style, ${error.message}`);
+      return { color: null };
+    }
+  };
+
+  // Extracts the stroke-style from the supplied feature-style
+  #getStrokeStyleInfo = (featureStyle) => {
+    try {
+      // Since we might be dealing with a style-array instead of a style-object
+      // (in case of the special Arrow feature-type) we have to make sure to get
+      // the actual base-style (which is located at position 0 in the style-array).
+      const s = Array.isArray(featureStyle)
+        ? featureStyle[0].getStroke()
+        : featureStyle.getStroke();
+      const color = s.getColor();
+      const dash = s.getLineDash();
+      const width = s.getWidth();
+      return {
+        color: this.getRGBAString(color),
+        dash,
+        width,
+      };
+    } catch (error) {
+      console.error(`Failed to extract stroke-style, ${error.message}`);
+      return { color: null, dash: null, width: null };
+    }
+  };
+
+  // Extracts the image-style from the supplied feature-style
+  #getImageStyleInfo = (featureStyle) => {
+    // Since we might be dealing with a style-array instead of a style-object
+    // (in case of the special Arrow feature-type) we have to make sure to get
+    // the actual base-style (which is located at position 0 in the style-array).
+    const s = Array.isArray(featureStyle)
+      ? featureStyle[0]?.getImage()
+      : featureStyle?.getImage();
+    // Let's extract the fill- and stroke-style from the image-style.
+    const fillStyle = s?.getFill?.();
+    const strokeStyle = s?.getStroke?.();
+    // Let's make sure the image-style has fill- and stroke-style before moving on
+    if (!fillStyle || !strokeStyle) {
+      return {
+        fillColor: null,
+        strokeColor: null,
+        strokeWidth: null,
+        dash: null,
+      };
+    }
+    const fillColor = fillStyle.getColor();
+    const strokeColor = strokeStyle.getColor();
+    const strokeWidth = strokeStyle.getWidth();
+    const dash = strokeStyle.getLineDash();
+    return {
+      fillColor: this.getRGBAString(fillColor),
+      strokeColor: this.getRGBAString(strokeColor),
+      strokeWidth,
+      dash,
+    };
+  };
+
+  // Extracts and returns information about the feature style.
+  extractFeatureStyleInfo = (feature) => {
+    // Let's run this in a try-catch since we cannot be sure that a
+    // real feature is supplied. (I.e. getStyle() etc. might not exist).
+    try {
+      const featureStyle = feature?.getStyle();
+      // If no feature was supplied, or if we're unable to extract the style,
+      // we return null.
+      if (!featureStyle) {
+        return { fillStyle: null, strokeStyle: null, imageStyle: null };
+      }
+      // If we were able to extract the style we can continue by extracting
+      // the fill- and stroke-style.
+      const fillStyle = this.#getFillStyleInfo(featureStyle);
+      const strokeStyle = this.#getStrokeStyleInfo(featureStyle);
+      const imageStyle = this.#getImageStyleInfo(featureStyle);
+      // And return an object containing them
+      return { fillStyle, strokeStyle, imageStyle };
+    } catch (error) {
+      console.error(`Failed to extract feature-style. Error: ${error}`);
+      return { fillStyle: null, strokeStyle: null, imageStyle: null };
+    }
   };
 
   // Updates the text-style on all drawn features. Used when toggling
   // if the measurement-label should be shown or not for example.
   #refreshFeaturesTextStyle = () => {
-    // Get all the drawn features
-    const drawnFeatures = this.#getAllDrawnFeatures();
+    // Get all the drawn features (Except for arrows, these doesn't have any text
+    // and shouldn't be refreshed)...
+    const drawnFeatures = this.getAllDrawnFeatures().filter(
+      (f) => f.get("DRAW_METHOD") !== "Arrow"
+    );
     // Iterate the drawn features...
     drawnFeatures.forEach((feature) => {
       // Get the current style.
@@ -411,7 +836,9 @@ class DrawModel {
       // Get an updated text-style (which depends on #showFeatureMeasurements).
       const textStyle = this.#getFeatureTextStyle(feature);
       // Set the updated text-style on the base-style.
-      featureStyle.setText(textStyle);
+      Array.isArray(featureStyle)
+        ? featureStyle[0].setText(textStyle)
+        : featureStyle.setText(textStyle);
       // Then update the feature style.
       feature.setStyle(featureStyle);
     });
@@ -430,7 +857,7 @@ class DrawModel {
   };
 
   // Returns all user drawn features from the draw-source
-  #getAllDrawnFeatures = () => {
+  getAllDrawnFeatures = () => {
     return this.#drawSource.getFeatures().filter((feature) => {
       return feature.get("USER_DRAWN") === true;
     });
@@ -527,6 +954,8 @@ class DrawModel {
     // Then we'll add a handler handling feature changes.
     const feature = e.feature;
     feature.on("change", this.#handleFeatureChange);
+    // Finally, we'll make sure the feature being drawn has the correct style:
+    feature.setStyle(this.#getDrawStyle());
   };
 
   // This handler will make sure that the overlay will be removed
@@ -536,13 +965,48 @@ class DrawModel {
     this.#resetDrawTooltip();
     const { feature } = e;
     // We set the USER_DRAWN prop to true so that we can keep track
-    // of the user drawn features.
+    // of the user drawn features. We also set "DRAW_TYPE" so that we can
+    // handle special features, such as arrows.
     feature.set("USER_DRAWN", true);
+    feature.set("DRAW_METHOD", this.#drawInteraction.get("DRAW_METHOD"));
+    feature.set("TEXT_SETTINGS", this.#textStyleSettings);
     // And set a nice style on the feature to be added.
     feature.setStyle(this.#getFeatureStyle(feature));
     // Make sure to remove the event-listener for the pointer-moves.
     // (We don't want the pointer to keep updating while we're not drawing).
     this.#map.un("pointermove", this.#handlePointerMove);
+  };
+
+  // Handler that will fire when features has been modified with the modify-interaction.
+  // Makes sure to update the text-styling so that eventual measurement-label is up-to-date.
+  #handleModifyEnd = (e) => {
+    e.features.forEach((f) => {
+      // If we're dealing with arrows, we have to make sure to
+      // update the whole style, so that the arrow-head is moved.
+      if (f.get("DRAW_METHOD") === "Arrow") {
+        this.#refreshArrowStyle(f);
+      }
+    });
+    this.#refreshFeaturesTextStyle();
+  };
+
+  // Re-calculates and re-applies the arrow style. For ordinary features this is
+  // not required, but since the arrows consists of an svg, we have to re-calculate
+  // the style to make sure the svg gets the correct color.
+  #refreshArrowStyle = (f) => {
+    try {
+      const strokeStyle = f.getStyle()[0].getStroke();
+      f.setStyle(
+        this.#getArrowStyle(f, {
+          strokeStyle: {
+            color: strokeStyle.getColor(),
+          },
+          fillStyle: { color: strokeStyle.getColor() },
+        })
+      );
+    } catch (error) {
+      console.error(`Failed to set arrow style. Error: ${error}`);
+    }
   };
 
   // Cleans up if the drawing is aborted.
@@ -577,9 +1041,13 @@ class DrawModel {
       : null;
   };
 
-  // We're probably going to need a handler for when a feature is added
+  // We're probably going to need a handler for when a feature is added.
+  // For now, let's publish an event on the observer.
   #handleDrawFeatureAdded = (e) => {
-    return;
+    this.#publishInformation({
+      subject: "drawModel.featureAdded",
+      payLoad: e.feature,
+    });
   };
 
   // We want to handle key-up events so that we can let the user
@@ -592,7 +1060,18 @@ class DrawModel {
   };
 
   // Disables the current draw interaction
-  #disableDrawInteraction = () => {
+  #disablePotentialInteraction = () => {
+    // First we check if any of the "special" interactions are active, and if they
+    // are, we disable them.
+    if (this.#removeInteractionActive) {
+      return this.#disableRemoveInteraction();
+    }
+    if (this.#editInteractionActive) {
+      return this.#disableEditInteraction();
+    }
+    if (this.#moveInteractionActive) {
+      return this.#disableMoveInteraction();
+    }
     // If there isn't an active draw interaction currently, we just return.
     if (!this.#drawInteraction) return;
     // Otherwise, we remove the interaction from the map.
@@ -601,8 +1080,9 @@ class DrawModel {
     this.#removeEventListeners();
     // We're also making sure to set the private field to null
     this.#drawInteraction = null;
-    // And remove the click-lock!
+    // And remove the click-lock and the snap-helper
     this.#map.clickLock.delete("coreDrawModel");
+    this.#map.snapHelper.delete("coreDrawModel");
   };
 
   // Creates an object that can be returned to the initiator of a
@@ -614,49 +1094,677 @@ class DrawModel {
     };
   };
 
+  // Removes the first feature that is present at the supplied
+  // pixel from the click-event.
+  #removeClickedFeature = (e) => {
+    // Get features present at the clicked feature.
+    const clickedFeatures = this.#map.getFeaturesAtPixel(e.pixel);
+    // We only care about features that have been drawn by a user.
+    const userDrawnFeatures = clickedFeatures.filter((f) =>
+      f.get("USER_DRAWN")
+    );
+    // Let's make sure we found some feature(s) to remove. We're only removing
+    // the first one.
+    if (userDrawnFeatures.length > 0) {
+      // Let's get the first user-drawn feature
+      const feature = userDrawnFeatures[0];
+      // Then we remove it from the draw-source
+      this.removeFeature(feature);
+    }
+  };
+
+  // Publishes a modify-message with the clicked feature in the payload.
+  #editClickedFeature = (e) => {
+    // Get features present at the clicked feature.
+    const clickedFeatures = this.#map.getFeaturesAtPixel(e.pixel);
+    // We only care about features that have been drawn by a user.
+    const userDrawnFeatures = clickedFeatures.filter((f) =>
+      f.get("USER_DRAWN")
+    );
+    // Let's get the (potential) first user-drawn feature, otherwise null.
+    const feature = userDrawnFeatures.length > 0 ? userDrawnFeatures[0] : null;
+    // Then we'll update the private field holding the feature currently chosen for editing.
+    this.#updateChosenEditFeature(feature);
+    // Then we'll publish a modify-message with the clicked feature in the payload (or null).
+    this.#publishInformation({
+      subject: "drawModel.modify.mapClick",
+      payLoad: feature,
+    });
+  };
+
+  // Updates the private field holding the feature which is currently chosen
+  // for edit. Also makes sure to set the "EDIT_ACTIVE" prop to false on the
+  // feature that is no longer chosen, and to true on the chosen feature.
+  // The "EDIT_ACTIVE" prop is used to style the chosen feature.
+  #updateChosenEditFeature = (feature) => {
+    this.#featureChosenForEdit &&
+      this.#featureChosenForEdit.set("EDIT_ACTIVE", false);
+    // If we have a new feature clicked, and if the feature is not already
+    // marked as "EDIT_ACTIVE" (selected for edit), we set "EDIT_ACTIVE" to true.
+    feature && !feature.get("EDIT_ACTIVE") && feature.set("EDIT_ACTIVE", true);
+    // Let's update the chosen feature with whatever was clicked (might be null).
+    this.#featureChosenForEdit = feature;
+  };
+
+  // Refreshes the snap-helper by removing it and then adding it again.
+  #refreshSnapHelper = () => {
+    this.#map.snapHelper.delete("coreDrawModel");
+    this.#map.snapHelper.add("coreDrawModel");
+  };
+
+  // Enables a remove-interaction which allows the user to remove drawn features by clicking on them.
+  // We're also making sure to enable the click-lock so that the feature-info does not infer.
+  #enableRemoveInteraction = () => {
+    // We have to make sure to set a field so that the handlers responsible for deleting
+    // all active interactions knows that there is a remove-interaction to delete.
+    this.#removeInteractionActive = true;
+    // Let's add the clickLock to avoid the featureInfo etc.
+    this.#map.clickLock.add("coreDrawModel");
+    // Then we'll add the event-handler responsible for removing clicked features.
+    this.#map.on("singleclick", this.#removeClickedFeature);
+  };
+
+  // Disables the remove-interaction by removing the event-listener and disabling
+  // the click-lock.
+  #disableRemoveInteraction = () => {
+    this.#map.clickLock.delete("coreDrawModel");
+    this.#map.un("singleclick", this.#removeClickedFeature);
+    this.#removeInteractionActive = false;
+  };
+
+  // Enables an edit-interaction which allows the user to edit the shape of user-drawn
+  // features. The draw-model also makes sure to enable an on-click handler that publish
+  // an event when a feature is clicked (i.e. chosen for editing).
+  #enableEditInteraction = (settings) => {
+    // Let's set a field so that we know that edit is enabled.
+    this.#editInteractionActive = true;
+    // We're gonna need a handler that can update the feature-style when
+    // the modification is completed.
+    this.#map.on("singleclick", this.#editClickedFeature);
+    // We also need a listener which listens for property-changes on the features.
+    // (We use a property on the feature to show that it is currently being edited).
+    this.#bindFeaturePropertyListener();
+    // Let's add the clickLock to avoid the featureInfo etc.
+    this.#map.clickLock.add("coreDrawModel");
+    // Usually, the modify interaction is enabled at the same time as the edit-interaction,
+    // allowing the user to change the feature geometry.
+    // The user might pass "modifyEnabled: false" in the toggle-draw-settings, and in that case
+    // we do not enable the modify-interaction. Otherwise we check the "keepModifyActive" field,
+    // which keeps track of if the user had modify enabled the last time they enabled the edit-interaction.
+    (settings.modifyEnabled ?? this.#keepModifyActive) &&
+      this.#enableModifyInteraction();
+  };
+
+  // Disables the edit-interaction by removing the event-listener and disabling
+  // the click-lock.
+  #disableEditInteraction = () => {
+    // Remove the click-lock so that the feature-info works again,
+    this.#map.clickLock.delete("coreDrawModel");
+    // Remove the event-listener
+    this.#map.un("singleclick", this.#editClickedFeature);
+    // We also have to make sure to de-select the eventual features which might be selected for editing.
+    this.#removeFeatureEditSelection();
+    // Remove the feature-property-change-listener
+    this.#unBindFeaturePropertyListener();
+    // Disable the potential modify-interaction (it should only be active when the edit-interaction
+    // is active).
+    this.#disableModifyInteraction();
+    // Finally, we reset the field so we know that the interaction is no longer active.
+    this.#editInteractionActive = false;
+  };
+
+  #enableModifyInteraction = () => {
+    // If the edit-interaction is not active, we shouldn't enable the modify-interaction.
+    // The modify-interaction is an interaction that should be used on-top of the edit-interaction.
+    if (!this.#editInteractionActive) {
+      return {
+        status: "FAILED",
+        message:
+          "Modify-interaction could not be enabled. Edit has to be enabled before enabling.",
+      };
+    }
+    // Let's disable potential interaction that might be enabled already
+    this.#disableModifyInteraction();
+    // We have to make sure to set a field so that the handlers responsible for deleting
+    // all active interactions knows that there is an edit-interaction to delete.
+    this.#modifyInteraction = new Modify({ source: this.#drawSource });
+    // We're gonna need a handler that can update the feature-style when
+    // the modification is completed.
+    this.#modifyInteraction.on("modifyend", this.#handleModifyEnd);
+    // Then we'll add the interaction to the map.
+    this.#map.addInteraction(this.#modifyInteraction);
+    // Let's add the clickLock to avoid the featureInfo etc...
+    this.#map.clickLock.add("coreDrawModel");
+    //  ...and snap-helper for the snap-functionality.
+    this.#map.snapHelper.add("coreDrawModel");
+    // Finally we return something so that the enabler knows that we've enabled.
+    return {
+      status: "SUCCESS",
+      message: "Modify-interaction enabled.",
+    };
+  };
+
+  // Disables and removes the Modify-interaction if there is one active currently.
+  #disableModifyInteraction = () => {
+    // If the modify-interaction is not active, we can abort.
+    if (!this.#modifyInteraction) {
+      return;
+    }
+    // Otherwise, let's disable it. First remove the interaction.
+    this.#map.removeInteraction(this.#modifyInteraction);
+    // Then we'll remove the event-listener
+    this.#modifyInteraction.un("modifyend", this.#handleModifyEnd);
+    // And remove the snap-helper.
+    this.#map.snapHelper.delete("coreDrawModel");
+    // Then we'll reset the field referring to the interaction
+    this.#modifyInteraction = null;
+  };
+
+  // Enables the Move-interaction (An interaction allowing the user to move features by selecting
+  // amount of meters and degrees the selected features should be moved). It is also possible to
+  // add a Translate-interaction on top, allowing the user to move features in the map by dragging them.
+  // The Translate-interaction is added by default if the draw-model is initiated with keepTranslateActive: true,
+  // and can be added afterwards calling setTranslateActive or by providing translateEnabled: true when enabling the
+  // Move-interaction.
+  #enableMoveInteraction = (settings) => {
+    // The Move-interaction will obviously need a Select-interaction so that the features to
+    // move can be selected.
+    this.#selectInteraction = new Select();
+    // We need a handler catching the "select"-events so that we can keep track of if any
+    // features has been selected or not.
+    this.#selectInteraction.on("select", this.#handleFeatureSelect);
+    // Then we'll add the interaction to the map...
+    this.#map.addInteraction(this.#selectInteraction);
+    // When this is done, we can set the private field keeping track of
+    // if the Move-interaction is active or not.
+    this.#moveInteractionActive = true;
+    // If we should enable the Translate-interaction, we do that as well.
+    (settings.translateEnabled ?? this.#keepTranslateActive) &&
+      this.#enableTranslateInteraction();
+    // ...finally we'll add the snap- and clickLock-helpers.
+    this.#map.clickLock.add("coreDrawModel");
+    this.#map.snapHelper.add("coreDrawModel");
+  };
+
+  // Enables a Translate-interaction, allowing users to move features by dragging them
+  // in the map.
+  #enableTranslateInteraction = () => {
+    // If the base Move-interaction is not active, the Translate-interaction cannot be enabled.
+    if (!this.#moveInteractionActive) {
+      return {
+        status: "FAILED",
+        message:
+          "Translate-interaction could not be enabled. Move has to be enabled before enabling.",
+      };
+    }
+    // Otherwise, we can create a new Translate-interaction...
+    this.#translateInteraction = new Translate({
+      features: this.#selectInteraction.getFeatures(),
+    });
+    // ...and add it to the map!
+    this.#map.addInteraction(this.#translateInteraction);
+    // We also have to make sure to refresh the snap-helper, otherwise
+    // the snap won't work on the translate-features.
+    this.#refreshSnapHelper();
+  };
+
+  // Disabled the Move-interaction and removed it from the map.
+  #disableMoveInteraction = () => {
+    // First, we'll remove the Move-interaction from the map
+    this.#map.removeInteraction(this.#selectInteraction);
+    // Then we'll remove the "select"-event-listener
+    this.#selectInteraction.un("select", this.#handleFeatureSelect);
+    // Then we'll remove (potentially, there might not be any) the Translate-interaction.
+    this.#disableTranslateInteraction();
+    // Let's update the private fields so that we know that the Select- and Move-interactions
+    // are disabled.
+    this.#selectInteraction = null;
+    this.#moveInteractionActive = false;
+    // And remove the clickLock- and snap-helpers.
+    this.#map.clickLock.delete("coreDrawModel");
+    this.#map.snapHelper.delete("coreDrawModel");
+    // We also have to make sure to refresh all the feature-styles so that
+    // they are up-to-date with any potential moves.
+    this.refreshDrawLayer();
+  };
+
+  // Disabled the Translate-interaction if there is one active.
+  #disableTranslateInteraction = () => {
+    if (this.#translateInteraction) {
+      this.#map.removeInteraction(this.#translateInteraction);
+      this.#translateInteraction = null;
+    }
+  };
+
+  // Handles the "select"-event that fires from the event-listener added when adding
+  // the Move-interaction.
+  #handleFeatureSelect = (e) => {
+    // Let's just publish the currently selected features on the observer so that
+    // the views can keep track of them if they want to.
+    this.#publishInformation({
+      subject: "drawModel.move.select",
+      payLoad: e.selected,
+    });
+    // We also has to refresh the draw-layer to make sure all the styling is updated.
+    // For example: If an arrow is moved, we have to refresh the style so that the arrow
+    // head is in the correct location.
+    e.deselected.forEach((f) => {
+      f.setStyle(this.#getFeatureStyle(f));
+    });
+  };
+
+  // Binds a listener to each feature which fires on property-change
+  #bindFeaturePropertyListener = () => {
+    this.#drawSource.forEachFeature((f) => {
+      f.on("propertychange", this.#handleFeaturePropertyChange);
+    });
+  };
+
+  // Un-binds the property-change-listeners
+  #unBindFeaturePropertyListener = () => {
+    this.#drawSource.forEachFeature((f) => {
+      f.un("propertychange", this.#handleFeaturePropertyChange);
+    });
+  };
+
+  // Handler targeted when any feature property has changed. If any property change, we have
+  // to make sure to refresh the draw-layer (since some properties affect the feature-styling!)
+  #handleFeaturePropertyChange = (e) => {
+    return this.refreshDrawLayer();
+  };
+
+  // Sets the "EDIT_ACTIVE" prop to false on all features in the draw-source.
+  // Used when disabling the edit-interaction, since we don't want any features
+  // selected for editing after the edit-interaction is removed.
+  #removeFeatureEditSelection = () => {
+    this.#drawSource.forEachFeature((f) => {
+      if (f.get("EDIT_ACTIVE")) {
+        f.set("EDIT_ACTIVE", false);
+      }
+    });
+  };
+
+  // Toggles the draw-interaction on and off if it is currently on.
+  // This refresh makes sure new settings are applied.
+  #refreshDrawInteraction = () => {
+    if (this.#drawInteraction) {
+      this.toggleDrawInteraction(this.#drawInteraction.get("DRAW_METHOD"));
+    }
+  };
+
+  // Returns a valid draw-interaction-type from the supplied
+  // draw-method. For example, if the user wants to create a rectangle,
+  // the draw-interaction-type should apparently be "Circle".
+  #getDrawInteractionType = (method) => {
+    switch (method) {
+      case "Arrow":
+        return "LineString";
+      case "Rectangle":
+        return "Circle";
+      case "Text":
+        return "Point";
+      default:
+        return method;
+    }
+  };
+
+  // Returns wether we should be free-hand-drawing or not.
+  // Circles and Rectangles are always drawn with free-hand set to true.
+  #isFreeHandDrawing = (drawMethod, settings) => {
+    return ["Circle", "Rectangle"].includes(drawMethod)
+      ? true
+      : settings.freehand ?? false;
+  };
+
+  // Accepts a feature with "CIRCLE_RADIUS" and "CIRCLE_CENTER" properties.
+  // Updates the feature-geometry to a Circle-geometry with the supplied center and radius.
+  #createRealCircleGeometry = (feature) => {
+    try {
+      const center = JSON.parse(feature.get("CIRCLE_CENTER"));
+      const radius = parseFloat(feature.get("CIRCLE_RADIUS"));
+      feature.setGeometry(new CircleGeometry(center, radius));
+    } catch (error) {
+      console.error(
+        `Failed to create 'real' Circle geometry from supplied feature, error: ${error}`
+      );
+    }
+  };
+
+  // Removes the property-change-listeners from all features and then adds
+  // them again. Useful if a new feature is added to the draw-source, and you
+  // have to make sure the new feature has a listener.
+  reBindFeaturePropertyListener = () => {
+    this.#unBindFeaturePropertyListener();
+    this.#bindFeaturePropertyListener();
+  };
+
+  // Refreshes the text-style on the features in the draw-source. Useful for when a feature-prop
+  // has been changed and the text-style has to be updated.
+  refreshFeaturesTextStyle = () => {
+    this.#refreshFeaturesTextStyle();
+  };
+
+  // CUSTOM ADDER: Adds the supplied feature to the draw-source
+  // On top of just adding the feature to the draw-source, it makes sure
+  // to create some proper styling and emit events on the observer.
+  // If you want to use the adder without emitting events, you can pass
+  // silent: true in the settings.
+  addFeature = (feature, settings) => {
+    // The initiator might have supplied some settings, for example "silent",
+    // which states if we should avoid firing events when adding the feature.
+    // If the silent-property is not supplied, we will fire events.
+    const silent = settings?.silent ?? false;
+    try {
+      // The supplied feature might contain a property with information regarding
+      // circle-radius. If that is the case, we have to replace the Point-geometry
+      // with a Circle-geometry with the supplied radius. This case appears when circles
+      // has been saved in LS, since geoJSON does not support Circles.
+      feature.get("CIRCLE_RADIUS") && this.#createRealCircleGeometry(feature);
+      // The supplied feature might contain a property with style-information
+      // that has been set in an earlier session. Let's apply that style (if present)
+      // before we add the feature to the source.
+      const extractedStyle = feature.get("EXTRACTED_STYLE");
+      extractedStyle &&
+        feature.setStyle(this.#getFeatureStyle(feature, extractedStyle));
+      // When we're done styling we can add the feature.
+      this.#drawSource.addFeature(feature);
+      // Then we'll publish some information about the addition. (If we're not supposed to be silent).
+      !silent &&
+        this.#publishInformation({
+          subject: "drawModel.featureAdded",
+          payLoad: feature,
+        });
+    } catch (error) {
+      console.error(`Error while adding feature: ${error}`);
+      this.#publishInformation({
+        subject: "drawModel.addFeature.error",
+        payLoad: error,
+      });
+    }
+  };
+
+  // Method used when adding features that has been parsed using the kmlModel-parser.
+  // The method makes sure to extract and parse eventual style- and text-settings that
+  // has been stored in the kml-features.
+  addKmlFeatures = (features) => {
+    // Let's check what the current draw-interaction is. If we have a draw-interaction
+    // active, we have to make sure to disable it so that any active event-listeners doesn't
+    // fire when adding the kml-features.
+    const currentInteraction = this.#drawInteraction
+      ? this.#drawInteraction.get("DRAW_METHOD")
+      : null;
+    // If the interaction isn't null, let's toggle the current interaction off.
+    currentInteraction && this.toggleDrawInteraction("");
+    features.forEach((f) => {
+      // If a draw-method-property is missing from the imported features, we have to add it.
+      // Why? Well, in the sketch-tool (which is using the draw-model) we rely on the fact that
+      // the draw-method is set so that we can present proper styling menus (polygons and lines have
+      // different menus for example). The imported kml-features might not have been created with
+      // the hajk-drawModel, and therefore lacks this property. We'll set it to the geometry-type
+      // which should be sufficient.
+      !f.get("DRAW_METHOD") &&
+        f.set(
+          "DRAW_METHOD",
+          f.get("geometryType") || f.getGeometry().getType()
+        );
+      // Let's grab the style- and text-settings. (At this point they will
+      // can be undefined, a string, or the actual objects). We also have to grab the userDrawn-prop
+      // (which should be a boolean, but since we're dealing with kml, it might be a string...).
+      const extractedStyle = f.get("EXTRACTED_STYLE");
+      const textSettings = f.get("TEXT_SETTINGS");
+      const userDrawn = f.get("USER_DRAWN");
+      // If the setting exist, and they are strings, we parse them and apply the parsed setting.
+      typeof extractedStyle === "string" &&
+        f.set("EXTRACTED_STYLE", JSON.parse(extractedStyle));
+      typeof textSettings === "string" &&
+        f.set("TEXT_SETTINGS", JSON.parse(textSettings));
+      typeof userDrawn === "string" &&
+        f.set("USER_DRAWN", JSON.parse(userDrawn));
+      // Then we can add the feature to the map. We'll provide "silent" as well,
+      // since we don't want any events to trigger when adding kml-features. (For example
+      // when adding a text-feature, normally an event would fire, allowing the user to enter
+      // the text they want. Now we do not want that behavior).
+      this.addFeature(f, { silent: true });
+    });
+    // Let's make sure to refresh all features text-style to make sure they are up-to-date
+    this.#refreshFeaturesTextStyle();
+    // If we had a draw-interaction active before the kml-import, we have to enable it again.
+    currentInteraction && this.toggleDrawInteraction(currentInteraction);
+  };
+
+  // Toggles the hidden-property of all features connected to a kml-import
+  // with the supplied id.
+  toggleKmlFeaturesVisibility = (id) => {
+    this.#drawSource.getFeatures().forEach((f) => {
+      if (f.get("KML_ID") === id) {
+        const featureHidden = f.get("HIDDEN") ?? false;
+        f.set("HIDDEN", !featureHidden);
+        f.setStyle(this.#getFeatureStyle(f));
+      }
+    });
+  };
+
+  // Toggles the show-text-property of all features connected to a kml-import
+  // with the supplied id.
+  toggleKmlFeaturesTextVisibility = (id) => {
+    this.#drawSource.getFeatures().forEach((f) => {
+      if (f.get("KML_ID") === id) {
+        const featureTextShown = f.get("SHOW_TEXT") ?? true;
+        f.set("SHOW_TEXT", !featureTextShown);
+        f.setStyle(this.#getFeatureStyle(f));
+      }
+    });
+  };
+
+  // Removes all features with the supplied kml-id.
+  removeKmlFeaturesById = (id) => {
+    this.#drawSource.getFeatures().forEach((f) => {
+      if (f.get("KML_ID") === id) {
+        this.#drawSource.removeFeature(f);
+      }
+    });
+  };
+
+  // Clones the supplied ol-feature and adds it to the map (the added clone
+  // will be offset just a tad to the east of the supplied feature).
+  duplicateFeature = (feature) => {
+    try {
+      // First we'll have to get a clone of the supplied feature
+      const duplicate = this.#createDuplicateFeature(feature);
+      // Then we'll have to create a GeoJSON-feature from the ol-feature (since
+      // turf only accepts geoJSON).
+      const gjFeature = this.#geoJSONParser.writeFeatureObject(duplicate);
+      // We want to add the cloned feature with an offset to the east. First, we'll
+      // have to get the offset-amount.
+      const offset = this.#getDuplicateOffsetAmount();
+      // Then we'll translate (move) the geoJSON-feature slightly to the east.
+      const translated = transformTranslate(gjFeature, offset, 140);
+      // When thats done, we'll update the duplicates geometry.
+      duplicate.setGeometry(
+        this.#geoJSONParser.readGeometry(translated.geometry)
+      );
+      // Since the feature we are duplicating is probably selected for edit, we have to
+      // make sure to toggle the edit-flag on the new feature to false.
+      duplicate.set("EDIT_ACTIVE", false);
+      // Then we'll add the cloned feature to the map!
+      this.addFeature(duplicate);
+      // Finally, we'll refresh the draw-layer so that the feature styles are
+      // up to date.
+      this.refreshDrawLayer();
+    } catch (error) {
+      console.error(
+        `Could not duplicate the supplied feature. Error: ${error}`
+      );
+    }
+  };
+
+  // Moves the features currently selected via the Move-interaction.
+  // The features are moved the supplied length (in meters) in the supplied
+  // direction (in degrees, where north is 0 and east is 90 and so on).
+  translateSelectedFeatures = (length, angle) => {
+    this.#selectInteraction.getFeatures().forEach((f) => {
+      try {
+        // We'll have to create a GeoJSON-feature from the ol-feature (since
+        // turf only accepts geoJSON).
+        const gjFeature = this.#geoJSONParser.writeFeatureObject(f);
+        // Then we'll translate the feature according to the supplied parameters
+        const translated = transformTranslate(gjFeature, length / 1000, angle);
+        // When thats done, we'll update the duplicates geometry.
+        f.setGeometry(this.#geoJSONParser.readGeometry(translated.geometry));
+      } catch (error) {
+        console.error(`Failed to translate selected features. Error: ${error}`);
+      }
+    });
+  };
+
+  // Returns a clone of the supplied feature. Makes sure to clone both
+  // the feature and its style.
+  #createDuplicateFeature = (feature) => {
+    // First we'll clone the supplied feature.
+    const duplicate = feature.clone();
+    // Then we'll have to clone the style (so that the feature-styles are not connected).
+    // We only want the first style-object from the style array (since the rest are highlight-styles).
+    // The above applied to all features except for Arrows, which aren't highlighted.
+    const style =
+      feature.get("DRAW_METHOD") === "Arrow"
+        ? feature.getStyle().map((style) => style.clone())
+        : Array.isArray(feature.getStyle())
+        ? feature.getStyle()[0].clone()
+        : feature.getStyle().clone();
+    // Then we'll apply the cloned-style.
+    duplicate.setStyle(style);
+    // Finally we'll return the cloned feature.
+    return duplicate;
+  };
+
+  // Cloned features are going to be placed offset from the original feature when
+  // added to the map. This function returns an offset-amount that depends on the current
+  // zoom-level. This is done by calculating the area of the current map-extent, and then
+  // take a fraction of that number. (The returned number is the offset from the feature in
+  // kilometers).
+  #getDuplicateOffsetAmount = () => {
+    // First we'll get the current map-extent.
+    const mapExtent = this.#map.getView().calculateExtent(this.#map.getSize());
+    // Then we'll:
+    // 1: Get the extent-area
+    // 2: Take the square-root of the area (to get approximately the length of one map-side).
+    // 3: Take a fraction of one side of the map, and return that as the offset-amount.
+    return Math.sqrt(getExtentArea(mapExtent)) * 0.00005;
+  };
+
+  // CUSTOM REMOVER: Removes the supplied feature from the draw-source
+  // Also makes sure to emit an event on the observer.
+  removeFeature = (feature) => {
+    // Let's start by removing the supplied feature from the draw-source
+    // We won't remove if it set as hidden currently (otherwise we might confuse the users
+    // by removing stuff they're not seeing at the time of removal).
+    if (feature.get("HIDDEN") !== true) {
+      this.#drawSource.removeFeature(feature);
+      // Then we (potentially) publish that we've removed a feature.
+      this.#publishInformation({
+        subject: "drawModel.featureRemoved",
+        payLoad: feature,
+      });
+    }
+  };
+
+  // Accepts an RGBA-object containing r-, g-, b-, and a-properties, or an array
+  // with four elements (r, g, b, and a in that order)...
+  // Returns the string representation of the supplied object (or array).
+  getRGBAString = (o) => {
+    // If nothing was supplied, return an empty string
+    if (!o) {
+      return null;
+    }
+    // Otherwise we check the type and return an rgba-string.
+    return Array.isArray(o)
+      ? `rgba(${o[0]},${o[1]},${o[2]},${o[3]})`
+      : typeof o === "object"
+      ? `rgba(${o.r},${o.g},${o.b},${o.a})`
+      : o;
+  };
+
+  // Accepts a color-string (hex or rgba) and returns an object containing r-, g-, b-, and a-properties.
+  parseColorString = (s) => {
+    try {
+      // First, we make sure we're dealing with a string with proper length. If not, return an empty object.
+      if (typeof s !== "string" || s.length < 7) {
+        return {};
+      }
+      // Then we'll check if the supplied string is an hex-string (must start with hash and be 7 chars).
+      // Cannot handle hex-shorthands such as #fff obviously.
+      if (s.length === 7 && s.startsWith("#")) {
+        // If it is, we parse the hex-string and return an object containing the
+        // corresponding values.
+        const [r, g, b] = s.match(/\w\w/g).map((c) => parseInt(c, 16));
+        return { r, g, b, a: 1 };
+      }
+      // Otherwise, some regex-magic.
+      // 1. RegEx that matches stuff between a set of parentheses
+      // 2. Execute that regex on the input string, but first remove any whitespace it may contain
+      // 3. RegEx exec returns an array. Grab the second element, which will contain the value.
+      // 4. Split the value to extract individual rgba values
+      const o = /\(([^)]+)\)/.exec(s.replace(/\s/g, ""))[1].split(",");
+      return {
+        r: parseFloat(o[0]),
+        g: parseFloat(o[1]),
+        b: parseFloat(o[2]),
+        a: parseFloat(o[3]),
+      };
+    } catch (error) {
+      console.error(`Color-string parsing failed: ${error}`);
+      return null;
+    }
+  };
+
   // Toggles the current draw interaction. To enable the draw interaction,
-  // pass one of the allowed draw-interactions: "Polygon", "Rectangle", or "Circle"
+  // pass one of the allowed draw-interactions: "Polygon", "Rectangle", "Circle", or "Delete"
   // as the first parameter. To disable the draw-interaction, pass nothing, or an empty string.
   toggleDrawInteraction = (drawMethod = "", settings = {}) => {
-    // Check if we are supposed to be toggling the draw interaction off.
+    // If this method is fired, the first thing we have to do is to remove the (potentially)
+    // already active interaction. (We never want two interactions active at the same time...)
+    this.#disablePotentialInteraction();
+    // Check if we are supposed to be toggling the draw interaction off. If we're toggling off,
+    // we make sure to abort so that we're not activating anything.
     if (!drawMethod || drawMethod === "") {
-      return this.#disableDrawInteraction();
+      return;
     }
-    // Check if there is a draw interaction active currently. If there is,
-    // disable it before moving on.
-    if (this.#drawInteraction) {
-      this.#disableDrawInteraction();
+    // Check if the supplied method is set to "Delete", "Edit", or "Move", if it is, we activate the remove, edit, or move
+    // interaction. Since these are special interactions, (not real ol-draw-interactions) we make sure not to continue executing.
+    if (drawMethod === "Delete") {
+      return this.#enableRemoveInteraction(settings);
+    }
+    if (drawMethod === "Edit") {
+      return this.#enableEditInteraction(settings);
+    }
+    if (drawMethod === "Move") {
+      return this.#enableMoveInteraction(settings);
     }
     // If we've made it this far it's time to enable a new draw interaction!
     // First we must make sure to gather some settings and defaults.
-    // Which draw-type should we use? (Rectangles should be created with the
-    // "Circle" method apparently).
-    const type = drawMethod === "Rectangle" ? "Circle" : drawMethod;
-    // Are we going free-hand drawing? (We're always free if we're drawing circles
-    // or rectangles).
-    const freehand = ["Circle", "Rectangle"].includes(drawMethod)
-      ? true
-      : settings.freehand ?? false;
+    const type = this.#getDrawInteractionType(drawMethod);
+    // Are we going to be free-hand drawing?
+    const freehand = this.#isFreeHandDrawing(drawMethod, settings);
     // Then we'll add the interaction!
     this.#drawInteraction = new Draw({
       source: this.#drawSource,
       type: type,
       freehand: freehand,
       stopClick: true,
-      geometryFunction:
-        drawMethod === "Rectangle"
-          ? createBox()
-          : drawMethod === "Circle"
-          ? createRegularPolygon()
-          : null,
+      geometryFunction: drawMethod === "Rectangle" ? createBox() : null,
       style: this.#getDrawStyle(),
     });
-    // Let's add the clickLock to avoid the featureInfo etc.
-    this.#map.clickLock.add("coreDrawModel");
+    // Let's set the supplied draw-method as a property on the draw-interaction
+    // so that we can keep track of if we're creating special features (arrows etc).
+    this.#drawInteraction.set("DRAW_METHOD", drawMethod);
     // Then we'll add all draw listeners
     this.#addEventListeners(settings);
     // Then we'll add the interaction to the map!
     this.#map.addInteraction(this.#drawInteraction);
+    // Finally we'll add the clickLock to avoid the featureInfo etc...
+    this.#map.clickLock.add("coreDrawModel");
+    //  ...and snap-helper for the snap-functionality.
+    this.#map.snapHelper.add("coreDrawModel");
   };
 
   // Fits the map to the extent of the drawn features in the draw-source
@@ -678,15 +1786,24 @@ class DrawModel {
   // don't want to remove all search features, only the user drawn ones.
   removeDrawnFeatures = () => {
     // Let's get all the features in the draw-source that have been drawn
-    const drawnFeatures = this.#getAllDrawnFeatures();
+    const drawnFeatures = this.getAllDrawnFeatures();
     // Since OL does not supply a "removeFeatures" method, we have to map
-    // over the array, and remove every single feature one by one...
-    drawnFeatures.forEach((feature) => {
-      this.#drawSource.removeFeature(feature);
-    });
+    // over the array, and remove every single feature one by one... (Remember
+    // that currently hidden features should be ignored).
+    drawnFeatures
+      .filter((f) => f.get("HIDDEN") !== true)
+      .forEach((feature) => {
+        this.#drawSource.removeFeature(feature);
+      });
     // When the drawn features has been removed, we have to make sure
     // to update the current extent.
     this.#currentExtent = this.#drawSource.getExtent();
+    // Then we (potentially) publish that we've removed a bunch of features.
+    this.#publishInformation({
+      subject: "drawModel.featuresRemoved",
+      payLoad: drawnFeatures,
+    });
+    return { status: "SUCCESS", removedFeatures: drawnFeatures };
   };
 
   setLabelFormat = (format) => {
@@ -722,7 +1839,6 @@ class DrawModel {
   };
 
   // Set:er allowing us to change if a tooltip should be shown when drawing
-  // TODO: Handle side effects
   setShowDrawTooltip = (drawTooltipActive) => {
     // Let's make sure we're provided proper input before we set anything
     if (typeof drawTooltipActive !== "boolean") {
@@ -763,14 +1879,73 @@ class DrawModel {
   };
 
   // Set:er allowing us to change the style settings used in the draw-layer
-  // TODO: Handle side effects
+  // The fill- and strokeColor passed might be either a string, or an object containing
+  // r-, g-, b-, and a-properties. If they are objects, we have to make sure to parse them
+  // to strings before setting the new style-settings.
   setDrawStyleSettings = (newStyleSettings) => {
-    this.#drawStyleSettings = newStyleSettings;
+    // The fill- and strokeColor might have to be parsed to strings, let's
+    // destruct them and parse them if we have to.
+    const { fillColor, strokeColor } = newStyleSettings;
+    // Create a new object containing the potentially parsed objects.
+    const parsedStyle = {
+      // We still want to pass all the other settings...
+      ...newStyleSettings,
+      //... and the potentially parsed colors.
+      fillColor:
+        typeof fillColor !== "string"
+          ? this.getRGBAString(fillColor)
+          : fillColor,
+      strokeColor:
+        typeof strokeColor !== "string"
+          ? this.getRGBAString(strokeColor)
+          : strokeColor,
+    };
+    // Then we'll update the style.
+    this.#drawStyleSettings = parsedStyle;
+    // To make sure the new style is shown in the draw-interaction, we have
+    // to refresh the interaction if it is currently active.
+    this.#refreshDrawInteraction();
+  };
+
+  // Makes sure all features are re-drawn to make sure the latest style is applied.
+  // The arrows are handled separately since they need some special styling...
+  refreshDrawLayer = () => {
+    this.#drawSource.forEachFeature((f) => {
+      if (f.get("DRAW_METHOD") === "Arrow") {
+        this.#refreshArrowStyle(f);
+      } else {
+        f.setStyle(this.#getFeatureStyle(f));
+      }
+    });
+  };
+
+  // Updates the Text-style-settings.
+  setTextStyleSettings = (newStyleSettings) => {
+    this.#textStyleSettings = newStyleSettings;
+  };
+
+  // Enabled the Modify-interaction
+  setModifyActive = (active) => {
+    this.#keepModifyActive = active;
+    active ? this.#enableModifyInteraction() : this.#disableModifyInteraction();
+  };
+
+  // Enabled the Translate-interaction
+  setTranslateActive = (active) => {
+    this.#keepTranslateActive = active;
+    active
+      ? this.#enableTranslateInteraction()
+      : this.#disableTranslateInteraction();
   };
 
   // Get:er returning the name of the draw-layer.
   getCurrentLayerName = () => {
     return this.#layerName;
+  };
+
+  // Get:er returning the currently connected Vector-source
+  getCurrentVectorSource = () => {
+    return this.#drawSource;
   };
 
   // Get:er returning the current extent of the draw-source.
@@ -781,6 +1956,16 @@ class DrawModel {
   // Get:er returning the current label-format
   getLabelFormat = () => {
     return this.#labelFormat;
+  };
+
+  // Get:er returning if the modify-interaction is active.
+  getModifyActive = () => {
+    return this.#modifyInteraction ? true : false;
+  };
+
+  // Get:er returning if the modify-interaction is active.
+  getTranslateActive = () => {
+    return this.#translateInteraction ? true : false;
   };
 
   // Get:er returning the state of the showDrawTooltip
@@ -796,6 +1981,11 @@ class DrawModel {
   // Get:er returning the current draw-style settings
   getDrawStyleSettings = () => {
     return this.#drawStyleSettings;
+  };
+
+  // Get:er returning the current text-style settings
+  getTextStyleSettings = () => {
+    return this.#textStyleSettings;
   };
 }
 export default DrawModel;

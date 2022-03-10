@@ -1,28 +1,24 @@
 import React from "react";
 import { createPortal } from "react-dom";
-import { withStyles } from "@material-ui/core/styles";
+import { styled } from "@mui/material/styles";
 import propTypes from "prop-types";
 import { withSnackbar } from "notistack";
 
-import { Button, Paper, Tooltip, Menu, MenuItem } from "@material-ui/core";
-import FolderSpecial from "@material-ui/icons/FolderSpecial";
+import { IconButton, Paper, Tooltip, Menu, MenuItem } from "@mui/material";
+import FolderSpecial from "@mui/icons-material/FolderSpecial";
 
 import Dialog from "../components/Dialog/Dialog";
 
-const styles = (theme) => {
-  return {
-    paper: {
-      marginBottom: theme.spacing(1),
-    },
-    button: {
-      minWidth: "unset",
-    },
-  };
-};
+const StyledPaper = styled(Paper)(({ theme }) => ({
+  marginBottom: theme.spacing(1),
+}));
+
+const StyledIconButton = styled(IconButton)(({ theme }) => ({
+  minWidth: "unset",
+}));
 
 class Preset extends React.PureComponent {
   static propTypes = {
-    classes: propTypes.object.isRequired,
     appModel: propTypes.object.isRequired,
   };
 
@@ -227,20 +223,18 @@ class Preset extends React.PureComponent {
       return null;
     } else {
       const { anchorEl } = this.state;
-      const { classes } = this.props;
       const open = Boolean(anchorEl);
       return (
         <>
-          <Tooltip title={this.title}>
-            <Paper className={classes.paper}>
-              <Button
+          <Tooltip disableInteractive title={this.title}>
+            <StyledPaper>
+              <StyledIconButton
                 aria-label={this.title}
-                className={classes.button}
                 onClick={this.handleClick}
               >
                 <FolderSpecial />
-              </Button>
-            </Paper>
+              </StyledIconButton>
+            </StyledPaper>
           </Tooltip>
           <Menu
             id="render-props-menu"
@@ -257,4 +251,4 @@ class Preset extends React.PureComponent {
   }
 }
 
-export default withStyles(styles)(withSnackbar(Preset));
+export default withSnackbar(Preset);

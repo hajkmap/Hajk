@@ -3,25 +3,24 @@ import { Vector as VectorSource } from "ol/source";
 import { IconMarker } from "../Fir/FirIcons";
 import { Fill, Stroke, Style, Circle, Icon } from "ol/style";
 import Feature from "ol/Feature.js";
-import LinearRing from "ol/geom/LinearRing.js";
-import {
-  Point,
-  LineString,
-  Polygon,
-  MultiPoint,
-  MultiLineString,
-  MultiPolygon,
-} from "ol/geom.js";
+import HajkTransformer from "utils/HajkTransformer";
+import { Point } from "ol/geom.js";
 import styles from "../Fir/FirStyles";
-import * as jsts from "jsts";
 
 class KirLayerController {
+  #HT;
+
   constructor(model, observer) {
     this.model = model;
     this.observer = observer;
     this.bufferValue = 0;
     this.removeIsActive = false;
     this.ctrlKeyIsDown = false;
+
+    this.#HT = new HajkTransformer({
+      projection: this.model.app.map.getView().getProjection().getCode(),
+    });
+
     this.initLayers();
     this.initListeners();
   }
@@ -221,17 +220,6 @@ class KirLayerController {
       return;
     }
 
-    const parser = new jsts.io.OL3Parser();
-    parser.inject(
-      Point,
-      LineString,
-      LinearRing,
-      Polygon,
-      MultiPoint,
-      MultiLineString,
-      MultiPolygon
-    );
-
     let drawFeatures = this.getLayer("draw").getSource().getFeatures();
 
     if (drawFeatures.length > 0) {
@@ -241,16 +229,8 @@ class KirLayerController {
     let _bufferFeatures = [];
 
     drawFeatures.forEach((feature) => {
-      let olGeom = feature.getGeometry();
-      if (olGeom instanceof Circle) {
-        olGeom = Polygon.fromCircle(olGeom, 0b10000000);
-      }
-      const jstsGeom = parser.read(olGeom);
-      const bufferedGeom = jstsGeom.buffer(this.bufferValue);
+      let bufferFeature = this.#HT.getBuffered(feature, this.bufferValue);
 
-      let bufferFeature = new Feature({
-        geometry: parser.write(bufferedGeom),
-      });
       bufferFeature.set("owner_ol_uid", feature.ol_uid);
       bufferFeature.set("kir_type", "buffer");
 

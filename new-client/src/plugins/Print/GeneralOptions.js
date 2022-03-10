@@ -1,6 +1,6 @@
 import React from "react";
-import Grid from "@material-ui/core/Grid";
-import { withStyles } from "@material-ui/core/styles";
+import Grid from "@mui/material/Grid";
+import { styled } from "@mui/material/styles";
 import { withSnackbar } from "notistack";
 import {
   FormControl,
@@ -8,24 +8,17 @@ import {
   InputLabel,
   MenuItem,
   Select,
-} from "@material-ui/core";
+} from "@mui/material";
 
-const styles = (theme) => ({
-  root: {
-    display: "flex",
-    flexWrap: "wrap",
-  },
-  formControl: {
-    margin: theme.spacing(1),
-    width: "100%",
-  },
-  printButton: {
-    position: "fixed",
-    bottom: theme.spacing(1),
-    margin: theme.spacing(1),
-    width: "90%",
-  },
-});
+const Root = styled(Grid)(() => ({
+  display: "flex",
+  flexWrap: "wrap",
+}));
+
+const StyledFormControl = styled(FormControl)(({ theme }) => ({
+  margin: theme.spacing(1),
+  width: "100%",
+}));
 
 class GeneralOptions extends React.PureComponent {
   state = {
@@ -52,7 +45,6 @@ class GeneralOptions extends React.PureComponent {
 
   render() {
     const {
-      classes,
       useMargin,
       orientation,
       format,
@@ -65,10 +57,13 @@ class GeneralOptions extends React.PureComponent {
     } = this.props;
     return (
       <>
-        <Grid container className={classes.root}>
-          <FormControl className={classes.formControl}>
-            <InputLabel htmlFor="format">Format</InputLabel>
+        <Root>
+          <StyledFormControl>
+            <InputLabel variant="standard" htmlFor="format">
+              Format
+            </InputLabel>
             <Select
+              variant="standard"
               value={format}
               onChange={handleChange}
               inputProps={{
@@ -84,12 +79,13 @@ class GeneralOptions extends React.PureComponent {
                 );
               })}
             </Select>
-          </FormControl>
-          <FormControl className={classes.formControl}>
-            <InputLabel htmlFor="useMargin">
+          </StyledFormControl>
+          <StyledFormControl>
+            <InputLabel variant="standard" htmlFor="useMargin">
               Marginaler runt kartbilden
             </InputLabel>
             <Select
+              variant="standard"
               value={useMargin}
               onChange={handleChange}
               inputProps={{
@@ -100,10 +96,13 @@ class GeneralOptions extends React.PureComponent {
               <MenuItem value={true}>Ja</MenuItem>
               <MenuItem value={false}>Nej</MenuItem>
             </Select>
-          </FormControl>
-          <FormControl className={classes.formControl}>
-            <InputLabel htmlFor="orientation">Orientering</InputLabel>
+          </StyledFormControl>
+          <StyledFormControl>
+            <InputLabel variant="standard" htmlFor="orientation">
+              Orientering
+            </InputLabel>
             <Select
+              variant="standard"
               value={orientation}
               onChange={handleChange}
               inputProps={{
@@ -114,11 +113,14 @@ class GeneralOptions extends React.PureComponent {
               <MenuItem value={"landscape"}>Liggande</MenuItem>
               <MenuItem value={"portrait"}>Stående</MenuItem>
             </Select>
-          </FormControl>
+          </StyledFormControl>
 
-          <FormControl className={classes.formControl} error={!printOptionsOk}>
-            <InputLabel htmlFor="scale">Skala</InputLabel>
+          <StyledFormControl error={!printOptionsOk}>
+            <InputLabel variant="standard" htmlFor="scale">
+              Skala
+            </InputLabel>
             <Select
+              variant="standard"
               value={scale}
               onChange={handleChange}
               inputProps={{
@@ -141,10 +143,13 @@ class GeneralOptions extends React.PureComponent {
                 upplösning eller mindre skala.
               </FormHelperText>
             )}
-          </FormControl>
-          <FormControl className={classes.formControl}>
-            <InputLabel htmlFor="orientation">Spara som</InputLabel>
+          </StyledFormControl>
+          <StyledFormControl>
+            <InputLabel variant="standard" htmlFor="orientation">
+              Spara som
+            </InputLabel>
             <Select
+              variant="standard"
               value={saveAsType}
               onChange={handleChange}
               inputProps={{
@@ -155,11 +160,11 @@ class GeneralOptions extends React.PureComponent {
               <MenuItem value={"PDF"}>PDF</MenuItem>
               <MenuItem value={"PNG"}>PNG</MenuItem>
             </Select>
-          </FormControl>
-        </Grid>
+          </StyledFormControl>
+        </Root>
       </>
     );
   }
 }
 
-export default withStyles(styles)(withSnackbar(GeneralOptions));
+export default withSnackbar(GeneralOptions);

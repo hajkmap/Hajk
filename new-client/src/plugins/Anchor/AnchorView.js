@@ -1,7 +1,7 @@
 import React from "react";
 import PropTypes from "prop-types";
 
-import { withStyles } from "@material-ui/core/styles";
+import { styled } from "@mui/material/styles";
 import { withSnackbar } from "notistack";
 
 import {
@@ -14,27 +14,20 @@ import {
   TextField,
   Tooltip,
   Typography,
-} from "@material-ui/core";
+} from "@mui/material";
 
-import FileCopyIcon from "@material-ui/icons/FileCopy";
-import OpenInNewIcon from "@material-ui/icons/OpenInNew";
+import FileCopyIcon from "@mui/icons-material/FileCopy";
+import OpenInNewIcon from "@mui/icons-material/OpenInNew";
 
-const styles = (theme) => ({
-  input: {
-    "& input": {
-      fontFamily: "monospace",
-    },
+const StyledTextField = styled(TextField)(({ theme }) => ({
+  marginBottom: theme.spacing(2),
+  "& input": {
+    fontFamily: "monospace",
   },
-  margin: {
-    [theme.breakpoints.down("xs")]: {
-      margin: 0,
-    },
-  },
-});
+}));
 
 class AnchorView extends React.PureComponent {
   static propTypes = {
-    classes: PropTypes.object.isRequired,
     cleanUrl: PropTypes.bool.isRequired,
     closeSnackbar: PropTypes.func.isRequired,
     enqueueSnackbar: PropTypes.func.isRequired,
@@ -71,7 +64,6 @@ class AnchorView extends React.PureComponent {
   };
 
   render() {
-    const { classes } = this.props;
     return (
       <Box sx={{ width: "100%" }}>
         <Grid container item spacing={2} columns={12}>
@@ -82,7 +74,7 @@ class AnchorView extends React.PureComponent {
             </Typography>
           </Grid>
         </Grid>
-        <Box ml={3} className={classes.margin}>
+        <Box sx={{ ml: { xs: 0, sm: 3 } }}>
           <Grid container item spacing={2} columns={12}>
             <Grid item xs={12}>
               <RadioGroup
@@ -106,11 +98,10 @@ class AnchorView extends React.PureComponent {
             </Grid>
           </Grid>
         </Box>
-        <Box ml={7} mr={7} className={classes.margin}>
+        <Box sx={{ ml: { xs: 0, sm: 7 }, mr: { xs: 0, sm: 7 } }}>
           <Grid container item spacing={2} columns={12}>
             <Grid item xs={12}>
-              <TextField
-                className={classes.input}
+              <StyledTextField
                 fullWidth={true}
                 id="anchorUrl"
                 InputProps={{
@@ -124,7 +115,7 @@ class AnchorView extends React.PureComponent {
           </Grid>
         </Box>
         {document.queryCommandSupported("copy") && (
-          <Box ml={7} mr={7} className={classes.margin}>
+          <Box sx={{ ml: { xs: 0, sm: 7 }, mr: { xs: 0, sm: 7 } }}>
             <Grid container spacing={2} columns={12}>
               <Grid item xs={6}>
                 <Tooltip title="Kopiera länk till urklipp">
@@ -132,6 +123,7 @@ class AnchorView extends React.PureComponent {
                     fullWidth
                     variant="contained"
                     color="primary"
+                    component="a"
                     endIcon={<FileCopyIcon />}
                     onClick={this.handleClickOnCopyToClipboard}
                   >
@@ -161,4 +153,4 @@ class AnchorView extends React.PureComponent {
   }
 }
 
-export default withStyles(styles)(withSnackbar(AnchorView));
+export default withSnackbar(AnchorView);

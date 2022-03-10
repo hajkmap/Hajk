@@ -1,21 +1,19 @@
 import React from "react";
-import { makeStyles } from "@material-ui/core/styles";
-import { FormControl, InputLabel } from "@material-ui/core";
-import { Grid, Select, Chip, MenuItem } from "@material-ui/core";
+import { FormControl, InputLabel } from "@mui/material";
+import { Grid, Select, Chip, MenuItem } from "@mui/material";
+import { styled } from "@mui/material/styles";
 
-const useStyles = makeStyles(() => ({
-  chips: {
-    display: "flex",
-    flexWrap: "wrap",
-  },
-  chip: {
-    marginRight: 2,
-  },
+const ChipsContainer = styled("div")(() => ({
+  display: "flex",
+  flexWrap: "wrap",
+}));
+
+const StyledChip = styled(Chip)(() => ({
+  marginRight: 2,
 }));
 
 const ListBoxSelector = (props) => {
   const { parameter, index, onChange } = props;
-  const classes = useStyles();
 
   // Returns an array of items currently selected
   function getSelectedItems() {
@@ -47,7 +45,7 @@ const ListBoxSelector = (props) => {
   }
 
   return (
-    <Grid container item xs={12} style={{ padding: 8 }}>
+    <Grid container item xs={12} sx={{ padding: 1 }}>
       <FormControl size="small" fullWidth required={!parameter.optional}>
         <InputLabel variant="outlined" id={`fme-listbox-label-${index}`}>
           {parameter.description}
@@ -64,16 +62,15 @@ const ListBoxSelector = (props) => {
             />
           }
           renderValue={(selected) => (
-            <div className={classes.chips}>
+            <ChipsContainer>
               {selected.map((value, index) => (
-                <Chip
+                <StyledChip
                   key={index}
                   label={getOptionCaption(value)}
                   size="small"
-                  className={classes.chip}
                 />
               ))}
-            </div>
+            </ChipsContainer>
           )}
         >
           {parameter.listOptions.map((option, index) => (

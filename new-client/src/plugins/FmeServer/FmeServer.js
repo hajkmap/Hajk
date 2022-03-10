@@ -1,6 +1,6 @@
 import React from "react";
 import Observer from "react-event-observer";
-import FmeIcon from "@material-ui/icons/BrokenImage";
+import FmeIcon from "@mui/icons-material/BrokenImage";
 
 // Views
 import BaseWindowPlugin from "../BaseWindowPlugin";

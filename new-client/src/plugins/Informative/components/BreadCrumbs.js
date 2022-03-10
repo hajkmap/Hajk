@@ -1,20 +1,12 @@
 import React from "react";
-import { withStyles } from "@material-ui/core/styles";
+import { Typography } from "@mui/material";
+import { styled } from "@mui/material/styles";
 
-const styles = (theme) => ({
-  breadCrumContainer: {
-    display: "inline-block",
-    padding: "3px",
-    cursor: "pointer",
-  },
-  breadCrum: {
-    color: theme.palette.primary.light,
-  },
-  last: {
-    color: theme.palette.primary.dark,
-    cursor: "pointer",
-  },
-});
+const DivBreadCrumContainer = styled("div")(({ theme }) => ({
+  display: "inline-block",
+  padding: "3px",
+  cursor: "pointer",
+}));
 
 class BreadCrumbs extends React.PureComponent {
   state = {};
@@ -50,7 +42,6 @@ class BreadCrumbs extends React.PureComponent {
   };
 
   renderCrums() {
-    const { classes } = this.props;
     var crums = this.generate(this.props.chapter);
     if (crums.length === 1) {
       return null;
@@ -58,17 +49,13 @@ class BreadCrumbs extends React.PureComponent {
     return crums.map((crum, i) => {
       let last = i === crums.length - 1;
       return (
-        <div
-          key={i}
-          onClick={this.onCrumClick(crum.chapter)}
-          className={classes.breadCrumContainer}
-        >
-          <span className={!last ? classes.breadCrum : classes.last}>
+        <DivBreadCrumContainer key={i} onClick={this.onCrumClick(crum.chapter)}>
+          <Typography component={"span"} variant="caption">
             {crum.text}
-          </span>
+          </Typography>
           &nbsp;
           <span>{crum.text && !last ? ">" : ""}</span>
-        </div>
+        </DivBreadCrumContainer>
       );
     });
   }
@@ -78,4 +65,4 @@ class BreadCrumbs extends React.PureComponent {
   }
 }
 
-export default withStyles(styles)(BreadCrumbs);
+export default BreadCrumbs;

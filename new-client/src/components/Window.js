@@ -1,11 +1,44 @@
 import React from "react";
 import propTypes from "prop-types";
-import { withStyles } from "@material-ui/core/styles";
+import { styled } from "@mui/material/styles";
 import PanelHeader from "./PanelHeader";
 import { Rnd } from "react-rnd";
 import { isMobile, getIsMobile } from "../utils/IsMobile.js";
 import FeatureInfoContainer from "./FeatureInfo/FeatureInfoContainer.js";
-import clsx from "clsx";
+
+const StyledRnd = styled(Rnd)(({ theme }) => ({
+  zIndex: zIndexStart + document.windows.length,
+  position: "absolute",
+  background: theme.palette.background.paper,
+  boxShadow: theme.shadows[24],
+  borderRadius: theme.shape.borderRadius,
+  overflow: "hidden",
+  pointerEvents: "all",
+  [theme.breakpoints.down("sm")]: {
+    borderRadius: "0",
+    position: "fixed !important",
+  },
+}));
+
+const PanelContent = styled("div")(({ theme }) => ({
+  display: "flex",
+  position: "absolute",
+  top: 0,
+  left: 0,
+  bottom: 0,
+  right: 0,
+  flexDirection: "column",
+  userSelect: "none",
+  outline: "none",
+  '& a:not([class*="Mui"])': {
+    color: theme.palette.primary.light,
+  },
+}));
+
+const StyledSection = styled("section")(() => ({
+  flex: "1",
+  cursor: "default !important",
+}));
 
 const zIndexStart = 1000;
 // Patch the RND component's onDragStart method with the ability to disable drag by its internal state.
@@ -90,55 +123,9 @@ Rnd.prototype.onDragStart = function (e, data) {
   });
 };
 
-const styles = (theme) => {
-  return {
-    window: {
-      zIndex: zIndexStart + document.windows.length,
-      position: "absolute",
-      background: theme.palette.background.paper,
-      boxShadow: theme.shadows[24],
-      borderRadius: theme.shape.borderRadius,
-      overflow: "hidden",
-      pointerEvents: "all",
-      [theme.breakpoints.down("xs")]: {
-        borderRadius: "0",
-        position: "fixed !important",
-      },
-    },
-    panelContent: {
-      display: "flex",
-      position: "absolute",
-      top: 0,
-      left: 0,
-      bottom: 0,
-      right: 0,
-      flexDirection: "column",
-      userSelect: "none",
-      outline: "none",
-      '& a:not([class*="Mui"])': {
-        color: theme.palette.primary.light,
-      },
-    },
-    panelContentDisplayContents: {
-      display: "contents",
-    },
-    content: {
-      flex: "1",
-      overflowY: "auto",
-      padding: "10px",
-      cursor: "default !important",
-    },
-    nonScrollable: {
-      overflowY: "hidden",
-      padding: "0px",
-    },
-  };
-};
-
 class Window extends React.PureComponent {
   static propTypes = {
     children: propTypes.object,
-    classes: propTypes.object.isRequired,
     color: propTypes.string,
     features: propTypes.array,
     globalObserver: propTypes.object.isRequired,
@@ -425,7 +412,6 @@ class Window extends React.PureComponent {
   render() {
     const {
       children,
-      classes,
       color,
       features,
       open,
@@ -493,7 +479,7 @@ class Window extends React.PureComponent {
 
     this.bringToFront();
     return (
-      <Rnd
+      <StyledRnd
         onMouseDown={(e) => {
           this.bringToFront();
         }}
@@ -537,7 +523,6 @@ class Window extends React.PureComponent {
           topLeft: resizeTopLeft,
           topRight: resizeTopRight,
         }}
-        className={classes.window}
         minWidth={200}
         minHeight={this.state.mode === "minimized" ? 42 : 100}
         size={{
@@ -551,15 +536,12 @@ class Window extends React.PureComponent {
           height: height,
         }}
       >
-        <div
+        <PanelContent
           tabIndex="0"
           ref={this.windowRef}
-          className={clsx(
-            classes.panelContent,
-            this.props.height === "dynamic"
-              ? classes.panelContentDisplayContents
-              : null
-          )}
+          sx={{
+            display: this.props.height === "dynamic" ? "contents" : "flex",
+          }}
         >
           <PanelHeader
             allowMaximizedWindow={allowMaximizedWindow}
@@ -573,13 +555,10 @@ class Window extends React.PureComponent {
             mode={this.state.mode}
             title={title}
           />
-          <section
-            className={clsx(
-              classes.content,
-              this.props.scrollable ? null : classes.nonScrollable
-            )}
-            style={{
-              // Ensure to set maxHeight to ensure that we can scroll inside the container
+          <StyledSection
+            sx={{
+              overflowY: this.props.scrollable ? "auto" : "hidden",
+              padding: this.props.scrollable ? "10px" : "0px",
               maxHeight:
                 this.getMaxWindowHeight() - (isMobile === false ? 50 : -30), // Super-hack special case for small screens
             }}
@@ -600,11 +579,11 @@ class Window extends React.PureComponent {
             ) : (
               children
             )}
-          </section>
-        </div>
-      </Rnd>
+          </StyledSection>
+        </PanelContent>
+      </StyledRnd>
     );
   }
 }
 
-export default withStyles(styles)(Window);
+export default Window;

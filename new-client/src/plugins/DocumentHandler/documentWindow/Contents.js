@@ -1,21 +1,8 @@
 import React from "react";
-import { withStyles } from "@material-ui/core/styles";
-import Typography from "@material-ui/core/Typography";
+import Typography from "@mui/material/Typography";
 import ImagePopupModal from "./ImagePopupModal";
 import { flattenChaptersTree } from "../utils/helpers";
-import { Box } from "@material-ui/core";
-
-const styles = (theme) => {
-  return {
-    typography: {
-      overflowWrap: "break-word",
-    },
-    chapter: {
-      cursor: "text",
-      display: "block",
-    },
-  };
-};
+import { Box } from "@mui/material";
 
 class Contents extends React.PureComponent {
   state = {
@@ -109,17 +96,10 @@ class Contents extends React.PureComponent {
   };
 
   createGroupHeadingTag = (title, id) => {
-    const { classes } = this.props;
     return (
-      <React.Fragment key={id}>
-        <Typography
-          className={classes.typography}
-          data-type="chapter-header"
-          variant={"h1"}
-        >
-          {title}
-        </Typography>
-      </React.Fragment>
+      <Typography key={id} data-type="chapter-header" variant="h1">
+        {title}
+      </Typography>
     );
   };
 
@@ -176,13 +156,11 @@ class Contents extends React.PureComponent {
    * @memberof Contents
    */
   renderHeadline = (chapter, isPrintMode) => {
-    const { classes } = this.props;
-
     return (
       <>
         <Typography
           ref={chapter.scrollRef}
-          className={classes.typography}
+          sx={{ overflowWrap: "break-word" }}
           data-type="chapter-header"
           variant={this.getHeaderVariant(chapter, isPrintMode)}
         >
@@ -206,4 +184,4 @@ class Contents extends React.PureComponent {
   };
 }
 
-export default withStyles(styles)(Contents);
+export default Contents;

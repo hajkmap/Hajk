@@ -1,41 +1,24 @@
 import React from "react";
 import PropTypes from "prop-types";
-import { withStyles } from "@material-ui/core/styles";
 import { withSnackbar } from "notistack";
-import FormControl from "@material-ui/core/FormControl";
-import NativeSelect from "@material-ui/core/NativeSelect";
-import InputLabel from "@material-ui/core/InputLabel";
-import Input from "@material-ui/core/Input";
-import Button from "@material-ui/core/Button";
-import TextField from "@material-ui/core/TextField";
-import FormControlLabel from "@material-ui/core/FormControlLabel";
-import Checkbox from "@material-ui/core/Checkbox";
-import Typography from "@material-ui/core/Typography/Typography";
-import Grid from "@material-ui/core/Grid";
+import { styled } from "@mui/material/styles";
+import FormControl from "@mui/material/FormControl";
+import NativeSelect from "@mui/material/NativeSelect";
+import InputLabel from "@mui/material/InputLabel";
+import Input from "@mui/material/Input";
+import Button from "@mui/material/Button";
+import TextField from "@mui/material/TextField";
+import FormControlLabel from "@mui/material/FormControlLabel";
+import Checkbox from "@mui/material/Checkbox";
+import Typography from "@mui/material/Typography";
+import Grid from "@mui/material/Grid";
+import Paper from "@mui/material/Paper";
+import Box from "@mui/material/Box";
 
-// Define JSS styles that will be used in this component.
-const styles = (theme) => ({
-  buttonWithBottomMargin: {
-    marginBottom: theme.spacing(2),
-  },
-  buttonWithLeftMargin: {
-    marginLeft: theme.spacing(2),
-  },
-  formControl: {
-    margin: theme.spacing(1),
-    minWidth: 120,
-  },
-  toolbar: {
-    padding: "5px",
-    borderRadius: "4px",
-    boxShadow:
-      "0px 1px 3px 0px rgba(0, 0, 0, 0.2), 0px 1px 1px 0px rgba(0, 0, 0, 0.14), 0px 2px 1px -1px rgba(0, 0, 0, 0.12)",
-  },
-  toolbarRow: {},
-  gridParam: {
-    margin: theme.spacing(1),
-  },
-});
+const StyledButton = styled(Button)(({ theme }) => ({
+  width: "100%",
+  marginBottom: theme.spacing(2),
+}));
 
 class FmeView extends React.PureComponent {
   // Initialize state - this is the correct way of doing it nowadays.
@@ -51,7 +34,6 @@ class FmeView extends React.PureComponent {
     model: PropTypes.object.isRequired,
     app: PropTypes.object.isRequired,
     localObserver: PropTypes.object.isRequired,
-    classes: PropTypes.object.isRequired,
     enqueueSnackbar: PropTypes.func.isRequired,
     closeSnackbar: PropTypes.func.isRequired,
   };
@@ -205,87 +187,7 @@ class FmeView extends React.PureComponent {
     }
   };
 
-  render() {
-    const { classes } = this.props;
-
-    return (
-      <>
-        <div className={classes.toolbar}>
-          <Typography variant="caption">Rita område för uttag:</Typography>
-          <div className={classes.toolbarRow}>
-            <Button variant="contained" onClick={this.buttonDrawArea}>
-              Yta
-            </Button>
-            <Button
-              className={classes.buttonWithLeftMargin}
-              variant="contained"
-              onClick={this.buttonDrawRect}
-            >
-              Rektangel
-            </Button>
-          </div>
-        </div>
-        <div className={classes.row}>
-          <FormControl className={classes.formControl}>
-            <InputLabel htmlFor="categoryId">Produktkategori:</InputLabel>
-            <NativeSelect
-              value={this.state.productType}
-              onChange={this.handleProductTypeChange()}
-              input={<Input name="category" id="categoryId" />}
-            >
-              {this.productTypes.map((value, index) => {
-                return (
-                  <option key={index} value={value}>
-                    {value}
-                  </option>
-                );
-              })}
-            </NativeSelect>
-          </FormControl>
-        </div>
-        {this.renderProducts()}
-        {this.renderProductParams()}
-        <div className={classes.row}>
-          <FormControl className={classes.formControl}>
-            <TextField
-              id="mailID"
-              label="E-post"
-              value={this.state.email}
-              onChange={this.handleChange("email")}
-            />
-          </FormControl>
-        </div>
-        <div className={classes.row}>
-          <br></br>
-          <FormControlLabel
-            control={
-              <Checkbox
-                checked={this.state.authorizedForDownload}
-                onChange={this.handleChange("authorizedForDownload")}
-                color="primary"
-              />
-            }
-            label="Jag är behörig att ladda ner geodata via giltigt geodataavtal"
-          />
-        </div>
-        <div className={classes.row}>
-          <br></br>
-        </div>
-        <Button
-          className={classes.buttonWithBottomMargin}
-          variant="contained"
-          disabled={!this.state.authorizedForDownload}
-          onClick={this.buttonDoOrder}
-        >
-          Beställ
-        </Button>
-      </>
-    );
-  }
-
   renderProducts() {
-    const { classes } = this.props;
-
     // Get list of products and set currently selected product (if not already set)
     const products = [];
     this.model.options.products.forEach((element) => {
@@ -295,32 +197,30 @@ class FmeView extends React.PureComponent {
     });
 
     return (
-      <>
-        <div className={classes.row}>
-          <FormControl className={classes.formControl}>
-            <InputLabel htmlFor="productId">Produkt:</InputLabel>
-            <NativeSelect
-              value={this.state.productId}
-              onChange={this.handleProductChange()}
-              input={<Input name="product" id="productId" />}
-            >
-              {products.map((value, index) => {
-                return (
-                  <option key={value.id} value={value.id}>
-                    {value.name}
-                  </option>
-                );
-              })}
-            </NativeSelect>
-          </FormControl>
-        </div>
-      </>
+      <Grid item xs={12}>
+        <FormControl fullWidth>
+          <InputLabel variant="standard" htmlFor="productId">
+            Produkt:
+          </InputLabel>
+          <NativeSelect
+            value={this.state.productId}
+            onChange={this.handleProductChange()}
+            input={<Input name="product" id="productId" />}
+          >
+            {products.map((value, index) => {
+              return (
+                <option key={index} value={value.id}>
+                  {value.name}
+                </option>
+              );
+            })}
+          </NativeSelect>
+        </FormControl>
+      </Grid>
     );
   }
 
   renderProductParams() {
-    const { classes } = this.props;
-
     let params = [];
     if (this.state.productParams) {
       params = this.state.productParams;
@@ -331,125 +231,189 @@ class FmeView extends React.PureComponent {
     ).geoAttribute;
 
     return (
-      <>
-        <div className={classes.root}>
-          <div className={classes.toolbar}>
-            <Grid container spacing={0} className={classes.gridParam}>
-              <Grid item xs>
-                <Typography variant="caption">
-                  Ange val för produkten:
-                </Typography>
+      <Grid container item xs={12}>
+        <Grid item xs={12}>
+          <Typography variant="caption">Ange val för produkten:</Typography>
+        </Grid>
+        {params.map((param, index) => {
+          // TODO: Add more types that FME supports
+          if (param.type === "TEXT" && param.name === geoAttribute) {
+            return null;
+          } else if (param.type === "TEXT") {
+            return (
+              <Grid key={`TEXT_${index}`} item xs={12}>
+                <Grid item xs={12}>
+                  <Typography variant="caption">{param.description}</Typography>
+                </Grid>
+                <Grid item xs={12}>
+                  <TextField
+                    fullWidth
+                    id={param.name}
+                    key={param.value}
+                    value={param.value}
+                    onChange={this.handleParamChange(param, null)}
+                  />
+                </Grid>
+              </Grid>
+            );
+          } else if (param.type === "LOOKUP_LISTBOX") {
+            // More than one value may be selected
+            return (
+              <Grid key={`LOOKUP_LISTBOX_${index}`} container item xs={12}>
+                <Grid item xs={12}>
+                  <Typography variant="caption">{param.description}</Typography>
+                </Grid>
+                {param.listOptions.map((option, index) => {
+                  return (
+                    <Grid key={`LOOKUP_LISTBOX_${index}`} item xs={12}>
+                      <FormControlLabel
+                        control={
+                          <Checkbox
+                            name={option.value}
+                            checked={
+                              param.value[
+                                this.model.prefixOptionValue(option.value)
+                              ]
+                            }
+                            onChange={this.handleParamChange(param, option)}
+                            color="primary"
+                          />
+                        }
+                        label={option.caption}
+                      />
+                    </Grid>
+                  );
+                })}
+              </Grid>
+            );
+          } else if (param.type === "LOOKUP_CHOICE") {
+            // Only  one value may be selected
+            return (
+              <Grid key={`LOOKUP_CHOICE_${index}`} container item xs={12}>
+                <Grid container item xs={12}>
+                  <Typography variant="caption">{param.description}</Typography>
+                </Grid>
+                <Grid container item xs={12}>
+                  <NativeSelect
+                    fullWidth
+                    value={param.value}
+                    onChange={this.handleParamChange(param, null)}
+                    input={<Input name={param.name} />}
+                  >
+                    {param.listOptions.map((option, index) => {
+                      return (
+                        <option
+                          key={`LOOKUP_LISTBOX_${index}`}
+                          value={option.value}
+                        >
+                          {option.caption}
+                        </option>
+                      );
+                    })}
+                  </NativeSelect>
+                </Grid>
+              </Grid>
+            );
+          } else {
+            return "NOT_SUPPORTED";
+          }
+        })}
+      </Grid>
+    );
+  }
+
+  render() {
+    return (
+      <Grid container spacing={1}>
+        <Grid container item xs={12}>
+          <Paper sx={{ padding: 1, width: "100%" }}>
+            <Grid item xs={12}>
+              <Typography variant="caption">Rita område för uttag:</Typography>
+            </Grid>
+            <Grid container item xs={12} spacing={1}>
+              <Grid item>
+                <Button variant="contained" onClick={this.buttonDrawArea}>
+                  Yta
+                </Button>
+              </Grid>
+              <Grid item>
+                <Button variant="contained" onClick={this.buttonDrawRect}>
+                  Rektangel
+                </Button>
               </Grid>
             </Grid>
-            {params.map((param, index) => {
-              // TODO: Add more types that FME supports
-              if (param.type === "TEXT" && param.name === geoAttribute) {
-                return ""; // Do nothing
-              } else if (param.type === "TEXT") {
-                return (
-                  <>
-                    <Grid container spacing={0} className={classes.gridParam}>
-                      <Grid item xs>
-                        <Typography variant="caption">
-                          {param.description}
-                        </Typography>
-                      </Grid>
-                    </Grid>
-                    <Grid container spacing={0} className={classes.gridParam}>
-                      <Grid item xs>
-                        <TextField
-                          id={param.name}
-                          key={param.value}
-                          value={param.value}
-                          onChange={this.handleParamChange(param, null)}
-                        />
-                      </Grid>
-                    </Grid>
-                  </>
-                );
-              } else if (param.type === "LOOKUP_LISTBOX") {
-                // More than one value may be selected
-                return (
-                  <>
-                    <Grid container spacing={0} className={classes.gridParam}>
-                      <Grid item xs>
-                        <Typography variant="caption">
-                          {param.description}
-                        </Typography>
-                      </Grid>
-                    </Grid>
-                    <Grid container spacing={0} className={classes.gridParam}>
-                      {param.listOptions.map((option, ind) => {
-                        return (
-                          <Grid item xs>
-                            <FormControlLabel
-                              control={
-                                <Checkbox
-                                  key={ind}
-                                  name={option.value}
-                                  checked={
-                                    param.value[
-                                      this.model.prefixOptionValue(option.value)
-                                    ]
-                                  }
-                                  onChange={this.handleParamChange(
-                                    param,
-                                    option
-                                  )}
-                                  color="primary"
-                                />
-                              }
-                              label={option.caption}
-                            />
-                          </Grid>
-                        );
-                      })}
-                    </Grid>
-                  </>
-                );
-              } else if (param.type === "LOOKUP_CHOICE") {
-                // Only  one value may be selected
-                return (
-                  <>
-                    <Grid container spacing={0} className={classes.gridParam}>
-                      <Grid item xs>
-                        <Typography variant="caption">
-                          {param.description}
-                        </Typography>
-                      </Grid>
-                    </Grid>
-                    <Grid container spacing={0} className={classes.gridParam}>
-                      <Grid item xs>
-                        <NativeSelect
-                          value={param.value}
-                          onChange={this.handleParamChange(param, null)}
-                          input={<Input name={param.name} />}
-                        >
-                          {param.listOptions.map((option, index) => {
-                            return (
-                              <option key={option.value} value={option.value}>
-                                {option.caption}
-                              </option>
-                            );
-                          })}
-                        </NativeSelect>
-                      </Grid>
-                    </Grid>
-                  </>
-                );
-              } else {
-                return "NOT_SUPPORTED";
-              }
-            })}
-          </div>
-        </div>
-      </>
+          </Paper>
+        </Grid>
+        <Grid container item xs={12}>
+          <Box sx={{ padding: 1, width: "100%" }}>
+            <Grid item xs={12}>
+              <FormControl fullWidth sx={{ marginBottom: 1 }}>
+                <InputLabel variant="standard" htmlFor="categoryId">
+                  Produktkategori:
+                </InputLabel>
+                <NativeSelect
+                  value={this.state.productType}
+                  onChange={this.handleProductTypeChange()}
+                  input={<Input name="category" id="categoryId" />}
+                >
+                  {this.productTypes.map((value, index) => {
+                    return (
+                      <option key={index} value={value}>
+                        {value}
+                      </option>
+                    );
+                  })}
+                </NativeSelect>
+              </FormControl>
+            </Grid>
+            {this.renderProducts()}
+          </Box>
+        </Grid>
+        <Grid item xs={12}>
+          <Box sx={{ padding: 1, width: "100%" }}>
+            {this.renderProductParams()}
+          </Box>
+        </Grid>
+        <Grid item xs={12}>
+          <Box sx={{ padding: 1, width: "100%" }}>
+            <Grid item xs={12}>
+              <FormControl fullWidth>
+                <TextField
+                  id="mailID"
+                  label="E-post"
+                  value={this.state.email}
+                  onChange={this.handleChange("email")}
+                />
+              </FormControl>
+            </Grid>
+            <Grid item xs={12}>
+              <FormControlLabel
+                sx={{ marginTop: 1, marginBottom: 1 }}
+                variant="standard"
+                control={
+                  <Checkbox
+                    checked={this.state.authorizedForDownload}
+                    onChange={this.handleChange("authorizedForDownload")}
+                    color="primary"
+                  />
+                }
+                label="Jag är behörig att ladda ner geodata via giltigt geodataavtal"
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <StyledButton
+                variant="contained"
+                disabled={!this.state.authorizedForDownload}
+                onClick={this.buttonDoOrder}
+              >
+                Beställ
+              </StyledButton>
+            </Grid>
+          </Box>
+        </Grid>
+      </Grid>
     );
   }
 }
 
-// Exporting like this adds some props to FmeView.
-// withStyles will add a 'classes' prop, while withSnackbar
-// adds to functions (enqueueSnackbar() and closeSnackbar())
-// that can be used throughout the Component.
-export default withStyles(styles)(withSnackbar(FmeView));
+export default withSnackbar(FmeView);

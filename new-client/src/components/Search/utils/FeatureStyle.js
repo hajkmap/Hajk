@@ -114,6 +114,7 @@ export default class FeatureStyle {
         scale: (isValidNumber(scale) ? scale : 1) * multiplier,
         src: markerImg?.length > 0 ? markerImg : defaultMarker,
       }),
+      ...(type === "highlight" && { zIndex: 1000 }), // Highlight style should always stay on top of other labels
       ...(this.#enableLabelOnHighlight && {
         text: new Text({
           textAlign: textAlign,

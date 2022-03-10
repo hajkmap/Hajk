@@ -1,33 +1,18 @@
 import React from "react";
-import { withStyles } from "@material-ui/core/styles";
-import TableCell from "@material-ui/core/TableCell";
-import TableRow from "@material-ui/core/TableRow";
-import Typography from "@material-ui/core/Typography";
-import TextField from "@material-ui/core/TextField";
+import { styled } from "@mui/material/styles";
+import TableCell from "@mui/material/TableCell";
+import TableRow from "@mui/material/TableRow";
+import Typography from "@mui/material/Typography";
+import TextField from "@mui/material/TextField";
 import NumberFormat from "react-number-format";
 import { transform } from "ol/proj";
 import { withSnackbar } from "notistack";
 
-const styles = (theme) => ({
-  root: {
-    display: "flex",
-    flexGrow: 1,
-    flexWrap: "wrap",
-  },
-  text: {
-    "& .ol-mouse-position": {
-      top: "unset",
-      right: "unset",
-      position: "unset",
-    },
-  },
-  table: {},
-  textField: {
-    marginLeft: theme.spacing(1),
-    marginRight: theme.spacing(1),
-    marginTop: theme.spacing(2),
-  },
-});
+const StyledNumberFormat = styled(NumberFormat)(({ theme }) => ({
+  marginLeft: theme.spacing(1),
+  marginRight: theme.spacing(1),
+  marginTop: theme.spacing(2),
+}));
 
 class CoordinatesTransformRow extends React.PureComponent {
   state = {
@@ -189,8 +174,6 @@ class CoordinatesTransformRow extends React.PureComponent {
   componentWillUnmount() {}
 
   render() {
-    const { classes } = this.props;
-
     let xCoord = this.props.inverseAxis
       ? this.state.coordinateY
       : this.state.coordinateX;
@@ -210,11 +193,11 @@ class CoordinatesTransformRow extends React.PureComponent {
             </Typography>
           </TableCell>
           <TableCell>
-            <NumberFormat
+            <StyledNumberFormat
               label={this.props.transformation.xtitle}
-              className={classes.textField}
               margin="dense"
               variant="outlined"
+              size="small"
               value={xCoord}
               name="numberformatX"
               type="text"
@@ -227,10 +210,10 @@ class CoordinatesTransformRow extends React.PureComponent {
               thousandSeparator={this.model.thousandSeparator ? " " : false}
               customInput={TextField}
             />
-            <NumberFormat
+            <StyledNumberFormat
               label={this.props.transformation.ytitle}
-              className={classes.textField}
               margin="dense"
+              size="small"
               variant="outlined"
               value={yCoord}
               name="numberformatY"
@@ -253,4 +236,4 @@ class CoordinatesTransformRow extends React.PureComponent {
   }
 }
 
-export default withStyles(styles)(withSnackbar(CoordinatesTransformRow));
+export default withSnackbar(CoordinatesTransformRow);

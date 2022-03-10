@@ -1,6 +1,6 @@
 import React from "react";
 import PropTypes from "prop-types";
-import { withStyles } from "@material-ui/core/styles";
+import withStyles from "@mui/styles/withStyles";
 import {
   TextField,
   Button,
@@ -8,9 +8,9 @@ import {
   Divider,
   Grid,
   FormControl,
-} from "@material-ui/core";
-import Select from "@material-ui/core/Select";
-import MenuItem from "@material-ui/core/MenuItem";
+} from "@mui/material";
+import Select from "@mui/material/Select";
+import MenuItem from "@mui/material/MenuItem";
 import InactivePolygon from "../img/polygonmarkering.png";
 import InactiveRectangle from "../img/rektangelmarkering.png";
 import ActivePolygon from "../img/polygonmarkering-blue.png";
@@ -358,7 +358,7 @@ class Lines extends React.PureComponent {
         <Grid item xs={12}>
           <Typography variant="body2">AVGRÄNSA SÖKOMRÅDE I KARTAN</Typography>
         </Grid>
-        <Grid justify="center" container>
+        <Grid justifyContent="center" container>
           <Grid item xs={4}>
             <div>
               <img
@@ -400,7 +400,7 @@ class Lines extends React.PureComponent {
       <div>
         <Grid
           container
-          justify="center"
+          justifyContent="center"
           spacing={2}
           onKeyPress={this.handleKeyPress}
         >

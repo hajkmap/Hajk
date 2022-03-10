@@ -115,6 +115,15 @@ class MapViewModel {
       this.addFeaturesToResultsLayer
     );
     this.localObserver.subscribe("map.setSelectedStyle", this.setSelectedStyle);
+
+    // Odd naming here, but we can't call it "setSelectedStyleForFeature"
+    // because of the way react-observer works: it would fire even
+    // when "setSelectedStyle" is published (it fires when begging of event
+    // name matches!).
+    this.localObserver.subscribe(
+      "map.setSelectedFeatureStyle",
+      this.setSelectedStyleForFeature
+    );
     this.localObserver.subscribe(
       "map.addAndHighlightFeatureInSearchResultLayer",
       this.addAndHighlightFeatureInSearchResultLayer
@@ -224,6 +233,10 @@ class MapViewModel {
     return mapFeature?.setStyle(
       this.featureStyle.getFeatureStyle(mapFeature, "highlight")
     );
+  };
+
+  setSelectedStyleForFeature = (f) => {
+    return f?.setStyle(this.featureStyle.getFeatureStyle(f, "selection"));
   };
 
   zoomToFeature = (feature) => {

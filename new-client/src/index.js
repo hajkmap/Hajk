@@ -1,10 +1,10 @@
 // IE 11 starts here.
 // If you don't need IE 11, comment out those lines line.
 // Also, change 'browserslist' in package.json to exclude ie11.
-import "react-app-polyfill/ie11";
+// import "react-app-polyfill/ie11";
 import "react-app-polyfill/stable";
-import "abortcontroller-polyfill/dist/polyfill-patch-fetch";
-import "allsettled-polyfill";
+// import "abortcontroller-polyfill/dist/polyfill-patch-fetch";
+// import "allsettled-polyfill";
 // IE 11 ends here.
 
 // iOS 12 and other older touch devices need this polyfill to
@@ -33,9 +33,8 @@ import "./custom-ol.css";
 import React from "react";
 import ReactDOM from "react-dom";
 import buildConfig from "./buildConfig.json";
-import ErrorIcon from "@material-ui/icons/Error";
+import ErrorIcon from "@mui/icons-material/Error";
 import HajkThemeProvider from "./components/HajkThemeProvider";
-import reportWebVitals from "./reportWebVitals";
 import { initHFetch, hfetch, initFetchWrapper } from "utils/FetchWrapper";
 import LocalStorageHelper from "utils/LocalStorageHelper";
 
@@ -245,8 +244,3 @@ hfetch("appConfig.json", { cacheBuster: true })
   .catch((err) => {
     renderError(networkErrorMessage, err);
   });
-
-// If you want to start measuring performance in your app, pass a function
-// to log results (for example: reportWebVitals(console.log))
-// or send to an analytics endpoint. Learn more: https://bit.ly/CRA-vitals
-reportWebVitals();

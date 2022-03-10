@@ -1,105 +1,75 @@
 import React from "react";
 import { withSnackbar } from "notistack";
-import { withStyles } from "@material-ui/core/styles";
-import { Button, Tooltip, Typography, Grid } from "@material-ui/core";
+import { styled } from "@mui/material/styles";
+import { Button, Tooltip, Typography, Grid } from "@mui/material";
 
-import IconWarning from "@material-ui/icons/Warning";
-import CallMadeIcon from "@material-ui/icons/CallMade";
-import InfoIcon from "@material-ui/icons/Info";
-import RemoveCircleIcon from "@material-ui/icons/RemoveCircle";
-import CheckBoxIcon from "@material-ui/icons/CheckBox";
-import RadioButtonChecked from "@material-ui/icons/RadioButtonChecked";
-import RadioButtonUnchecked from "@material-ui/icons/RadioButtonUnchecked";
-import CheckBoxOutlineBlankIcon from "@material-ui/icons/CheckBoxOutlineBlank";
-import MoreHorizIcon from "@material-ui/icons/MoreHoriz";
-import CloseIcon from "@material-ui/icons/Close";
+import IconWarning from "@mui/icons-material/Warning";
+import CallMadeIcon from "@mui/icons-material/CallMade";
+import InfoIcon from "@mui/icons-material/Info";
+import RemoveCircleIcon from "@mui/icons-material/RemoveCircle";
+import CheckBoxIcon from "@mui/icons-material/CheckBox";
+import RadioButtonChecked from "@mui/icons-material/RadioButtonChecked";
+import RadioButtonUnchecked from "@mui/icons-material/RadioButtonUnchecked";
+import CheckBoxOutlineBlankIcon from "@mui/icons-material/CheckBoxOutlineBlank";
+import MoreHorizIcon from "@mui/icons-material/MoreHoriz";
+import CloseIcon from "@mui/icons-material/Close";
 
 import LayerGroupItem from "./LayerGroupItem.js";
 import LayerSettings from "./LayerSettings.js";
 import DownloadLink from "./DownloadLink.js";
 
-const styles = (theme) => ({
-  button: {
-    opacity: "0",
-  },
-  caption: {
-    cursor: "pointer",
-  },
-  captionText: {
-    top: "-6px",
-    cursor: "pointer",
-    fontSize: theme.typography.pxToRem(15),
-  },
-  image: {},
-  links: {
-    padding: 0,
-    margin: 0,
-    listStyle: "none",
-  },
-  layerItem: {
-    display: "flex",
-    justifyContent: "space-between",
-    marginTop: "0",
-    marginBottom: "-5px",
-  },
-  layerItemContainer: {
-    paddingLeft: "0",
-    paddingTop: "5px",
-    paddingBottom: "5px",
-    borderBottom: `${theme.spacing(0.2)}px solid ${theme.palette.divider}`,
-    marginLeft: "45px",
-  },
-  layerItemBackgroundContainer: {
-    paddingLeft: "0",
-    paddingTop: "6px",
-    paddingBottom: "5px",
-    borderBottom: `${theme.spacing(0.2)}px solid ${theme.palette.divider}`,
-    marginLeft: "0px",
-  },
-  layerItemInfo: {
-    display: "flex",
-  },
-  rightIcon: {
-    marginLeft: theme.spacing(1),
-    fontSize: "16px",
-  },
-  layerInfo: {
-    display: "flex",
-    alignItems: "center",
-    padding: "3px",
-    border: `${theme.spacing(0.2)}px solid ${theme.palette.divider}`,
-  },
-  infoContainer: {},
-  infoButton: {},
-  infoTextContainer: {
-    margin: "10px 45px",
-  },
-  settingsButton: {},
-  layerButtons: {
-    display: "flex",
-    alignItems: "center",
-  },
-  layerButton: {
-    cursor: "pointer",
-    fontSize: "15pt",
-    width: "32px",
-  },
-  legendIconContainer: {
-    display: "flex",
-  },
-  legendIcon: {
-    width: theme.typography.pxToRem(18),
-    height: theme.typography.pxToRem(18),
-    marginRight: "5px",
-  },
-  checkBoxIcon: {
-    cursor: "pointer",
-    marginRight: "5px",
-  },
-  checkBoxIconWarning: {
-    fill: theme.palette.warning.dark,
-  },
-});
+const LayerItemContainer = styled("div")(({ theme }) => ({
+  paddingLeft: "0",
+  borderBottom: `${theme.spacing(0.2)} solid ${theme.palette.divider}`,
+}));
+
+const LayerItemWrapper = styled("div")(({ theme }) => ({
+  display: "flex",
+  justifyContent: "space-between",
+  marginTop: "0",
+}));
+
+const LayerTogglerButtonWrapper = styled("div")(() => ({
+  display: "flex",
+  alignItems: "center",
+  cursor: "pointer",
+  float: "left",
+  marginRight: "5px",
+}));
+
+const InfoTextContainer = styled("div")(({ theme }) => ({
+  margin: "10px 45px",
+}));
+
+const Caption = styled(Typography)(({ theme }) => ({
+  cursor: "pointer",
+  fontSize: theme.typography.pxToRem(15),
+}));
+
+const LegendIcon = styled("img")(({ theme }) => ({
+  width: theme.typography.pxToRem(18),
+  height: theme.typography.pxToRem(18),
+  marginRight: "5px",
+}));
+
+const LayerButtonsContainer = styled("div")(() => ({
+  display: "flex",
+  alignItems: "center",
+}));
+
+const LayerButtonWrapper = styled("div")(() => ({
+  display: "flex",
+  alignItems: "center",
+  width: 35,
+  height: 35,
+  cursor: "pointer",
+}));
+
+const StyledList = styled("ul")(() => ({
+  padding: 0,
+  margin: 0,
+  listStyle: "none",
+}));
 
 class LayerItem extends React.PureComponent {
   constructor(props) {
@@ -308,18 +278,52 @@ class LayerItem extends React.PureComponent {
    * @instance
    * @return {external:ReactElement}
    */
-  renderStatus() {
-    const { classes } = this.props;
+  renderStatusButton() {
     return (
       this.state.status === "loaderror" && (
-        <div className={classes.layerButton}>
-          <Tooltip title="Lagret kunde inte laddas in. Kartservern svarar inte.">
+        <Tooltip
+          disableInteractive
+          title="Lagret kunde inte laddas in. Kartservern svarar inte."
+        >
+          <LayerButtonWrapper>
             <IconWarning />
-          </Tooltip>
-        </div>
+          </LayerButtonWrapper>
+        </Tooltip>
       )
     );
   }
+
+  renderInfoButton = () => {
+    return this.isInfoEmpty() ? null : (
+      <LayerButtonWrapper>
+        {this.state.infoVisible ? (
+          <RemoveCircleIcon onClick={this.toggleInfo} />
+        ) : (
+          <InfoIcon
+            onClick={this.toggleInfo}
+            sx={{
+              boxShadow: this.state.infoVisible
+                ? "rgb(204, 204, 204) 2px 3px 1px"
+                : "inherit",
+              borderRadius: "100%",
+            }}
+          />
+        )}
+      </LayerButtonWrapper>
+    );
+  };
+
+  renderMoreButton = () => {
+    return (
+      <LayerButtonWrapper>
+        {this.state.toggleSettings ? (
+          <CloseIcon onClick={this.toggleSettings} />
+        ) : (
+          <MoreHorizIcon onClick={this.toggleSettings} />
+        )}
+      </LayerButtonWrapper>
+    );
+  };
 
   renderLegendImage() {
     const src =
@@ -366,17 +370,16 @@ class LayerItem extends React.PureComponent {
   }
 
   renderChapterLinks(chapters) {
-    const { classes } = this.props;
     if (chapters && chapters.length > 0) {
       let chaptersWithLayer = this.findChapters(this.name, chapters);
       if (chaptersWithLayer.length > 0) {
         return (
-          <div className={classes.infoTextContainer}>
+          <InfoTextContainer>
             <Typography>
               Innehåll från denna kategori finns benämnt i följande kapitel i
               översiktsplanen:
             </Typography>
-            <ul className={classes.links}>
+            <StyledList>
               {chaptersWithLayer.map((chapter, i) => {
                 return (
                   <li key={i}>
@@ -385,13 +388,13 @@ class LayerItem extends React.PureComponent {
                       onClick={this.openInformative(chapter)}
                     >
                       {chapter.header}
-                      <CallMadeIcon className={classes.rightIcon} />
+                      <CallMadeIcon sx={{ marginLeft: 1, fontSize: "16px" }} />
                     </Button>
                   </li>
                 );
               })}
-            </ul>
-          </div>
+            </StyledList>
+          </InfoTextContainer>
         );
       } else {
         return null;
@@ -408,10 +411,9 @@ class LayerItem extends React.PureComponent {
   }
 
   renderInfo() {
-    const { classes } = this.props;
     if (this.infoText) {
       return (
-        <div className={classes.infoTextContainer}>
+        <InfoTextContainer>
           <Typography variant="subtitle2">{this.infoTitle}</Typography>
           <Typography
             variant="body2"
@@ -419,7 +421,7 @@ class LayerItem extends React.PureComponent {
               __html: this.infoText,
             }}
           />
-        </div>
+        </InfoTextContainer>
       );
     } else {
       return null;
@@ -427,14 +429,13 @@ class LayerItem extends React.PureComponent {
   }
 
   renderMetadataLink() {
-    const { classes } = this.props;
     if (this.infoUrl) {
       return (
-        <div className={classes.infoTextContainer}>
+        <InfoTextContainer>
           <a href={this.infoUrl} target="_blank" rel="noopener noreferrer">
             {this.infoUrlText || this.infoUrl}
           </a>
-        </div>
+        </InfoTextContainer>
       );
     } else {
       return null;
@@ -442,15 +443,14 @@ class LayerItem extends React.PureComponent {
   }
 
   renderOwner() {
-    const { classes } = this.props;
     if (this.infoOwner) {
       return (
-        <div className={classes.infoTextContainer}>
+        <InfoTextContainer>
           <Typography
             variant="body2"
             dangerouslySetInnerHTML={{ __html: this.infoOwner }}
           />
-        </div>
+        </InfoTextContainer>
       );
     } else {
       return null;
@@ -483,23 +483,34 @@ class LayerItem extends React.PureComponent {
   };
 
   renderLegendIcon() {
-    const { classes } = this.props;
-    return (
-      <Grid item>
-        <div className={classes.legendIconContainer}>
-          <img
-            alt="Teckenförklaring"
-            src={this.legendIcon}
-            className={classes.legendIcon}
-          />
-        </div>
-      </Grid>
-    );
+    return <LegendIcon alt="Teckenförklaring" src={this.legendIcon} />;
   }
 
-  render() {
-    const { classes, layer, model, app, chapters } = this.props;
+  getLayerToggler = () => {
     const { visible } = this.state;
+    const icon = visible ? (
+      this.isBackgroundLayer ? (
+        <RadioButtonChecked />
+      ) : (
+        <CheckBoxIcon
+          sx={{
+            fill: (theme) =>
+              !this.state.zoomVisible && this.state.visible
+                ? theme.palette.warning.dark
+                : "",
+          }}
+        />
+      )
+    ) : this.isBackgroundLayer ? (
+      <RadioButtonUnchecked />
+    ) : (
+      <CheckBoxOutlineBlankIcon />
+    );
+    return <LayerTogglerButtonWrapper>{icon}</LayerTogglerButtonWrapper>;
+  };
+
+  render() {
+    const { layer, model, app, chapters } = this.props;
 
     const cqlFilterVisible =
       this.props.app.config.mapConfig.map?.cqlFilterVisible || false;
@@ -529,48 +540,22 @@ class LayerItem extends React.PureComponent {
     }
 
     return (
-      <div
-        className={
-          this.isBackgroundLayer
-            ? classes.layerItemBackgroundContainer
-            : classes.layerItemContainer
-        }
+      <LayerItemContainer
+        sx={{ marginLeft: this.isBackgroundLayer ? "0px" : "45px" }}
       >
-        <div className={classes.layerItem}>
-          <div>
-            <Grid
-              wrap="nowrap"
-              alignItems="center"
-              container
-              onClick={this.toggleVisible.bind(this)}
-            >
-              {visible ? (
-                this.isBackgroundLayer ? (
-                  <RadioButtonChecked className={classes.checkBoxIcon} />
-                ) : (
-                  <CheckBoxIcon
-                    className={`${classes.checkBoxIcon} ${
-                      !this.state.zoomVisible && this.state.visible
-                        ? classes.checkBoxIconWarning
-                        : ""
-                    }`}
-                  />
-                )
-              ) : this.isBackgroundLayer ? (
-                <RadioButtonUnchecked className={classes.checkBoxIcon} />
-              ) : (
-                <CheckBoxOutlineBlankIcon className={classes.checkBoxIcon} />
-              )}
-
-              {this.legendIcon && this.renderLegendIcon()}
-              <Grid item>
-                <Typography className={classes.captionText}>
-                  {this.caption}
-                </Typography>
-              </Grid>
-            </Grid>
-          </div>
-          <div className={classes.layerButtons}>
+        <LayerItemWrapper>
+          <Grid
+            wrap="nowrap"
+            alignItems="center"
+            alignContent="center"
+            container
+            onClick={this.toggleVisible.bind(this)}
+          >
+            <Grid item>{this.getLayerToggler()}</Grid>
+            {this.legendIcon && this.renderLegendIcon()}
+            <Caption>{this.caption}</Caption>
+          </Grid>
+          <LayerButtonsContainer>
             {layer.isFakeMapLayer ? null : (
               <DownloadLink
                 layer={this.props.layer}
@@ -579,43 +564,11 @@ class LayerItem extends React.PureComponent {
                 }
               />
             )}
-
-            {this.renderStatus()}
-            {!this.isInfoEmpty() && (
-              <div className={classes.layerButton}>
-                <div className={classes.infoContainer}>
-                  {this.state.infoVisible ? (
-                    <RemoveCircleIcon
-                      className={classes.infoButton}
-                      onClick={this.toggleInfo}
-                    />
-                  ) : (
-                    <InfoIcon
-                      onClick={this.toggleInfo}
-                      className={classes.infoButton}
-                      style={{
-                        boxShadow: this.state.infoVisible
-                          ? "rgb(204, 204, 204) 2px 3px 1px"
-                          : "inherit",
-                        borderRadius: "100%",
-                      }}
-                    />
-                  )}
-                </div>
-              </div>
-            )}
-            <div className={classes.layerButton}>
-              {this.state.toggleSettings ? (
-                <CloseIcon onClick={this.toggleSettings} />
-              ) : (
-                <MoreHorizIcon
-                  onClick={this.toggleSettings}
-                  className={classes.settingsButton}
-                />
-              )}
-            </div>
-          </div>
-        </div>
+            {this.renderStatusButton()}
+            {this.renderInfoButton()}
+            {this.renderMoreButton()}
+          </LayerButtonsContainer>
+        </LayerItemWrapper>
         <div>
           {this.renderDetails()}
           {this.state.toggleSettings &&
@@ -634,9 +587,9 @@ class LayerItem extends React.PureComponent {
             />
           )}
         </div>
-      </div>
+      </LayerItemContainer>
     );
   }
 }
 
-export default withStyles(styles)(withSnackbar(LayerItem));
+export default withSnackbar(LayerItem);

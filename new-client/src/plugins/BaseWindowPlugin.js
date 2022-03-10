@@ -2,31 +2,18 @@ import React from "react";
 import propTypes from "prop-types";
 import { isMobile } from "./../utils/IsMobile";
 import { createPortal } from "react-dom";
-import { withStyles } from "@material-ui/core/styles";
-import { withTheme } from "@material-ui/styles";
-import {
-  Hidden,
-  ListItem,
-  ListItemIcon,
-  ListItemText,
-} from "@material-ui/core";
+import { Hidden, ListItem, ListItemIcon, ListItemText } from "@mui/material";
 import Window from "../components/Window.js";
 import Card from "../components/Card.js";
 import PluginControlButton from "../components/PluginControlButton";
-
-const styles = (theme) => {
-  return {};
-};
 
 class BaseWindowPlugin extends React.PureComponent {
   static propTypes = {
     app: propTypes.object.isRequired,
     children: propTypes.object.isRequired,
-    classes: propTypes.object.isRequired,
     custom: propTypes.object.isRequired,
     map: propTypes.object.isRequired,
     options: propTypes.object.isRequired,
-    theme: propTypes.object.isRequired,
     type: propTypes.string.isRequired,
   };
 
@@ -189,7 +176,13 @@ class BaseWindowPlugin extends React.PureComponent {
             (t) => t.type === "layerswitcher"
           )}
         >
-          {this.props.children}
+          {/* We have to pass windowVisible down to the children so that we can conditionally render
+          the <Tabs /> component, since it does not accept components with display: "none". We use the
+          windowVisible-prop to make sure that we don't render the <Tabs /> when the window
+          is not visible.*/}
+          {React.cloneElement(this.props.children, {
+            windowVisible: this.state.windowVisible,
+          })}
         </Window>
         {/* Drawer buttons and Widget buttons should render a Drawer button. */}
         {(target === "toolbar" || this.pluginIsWidget(target)) &&
@@ -231,7 +224,7 @@ class BaseWindowPlugin extends React.PureComponent {
   renderWidgetButton(id) {
     return createPortal(
       // Hide Widget button on small screens, see renderDrawerButton too
-      <Hidden smDown>
+      <Hidden mdDown>
         <Card
           icon={this.props.custom.icon}
           onClick={this.handleButtonClick}
@@ -264,4 +257,4 @@ class BaseWindowPlugin extends React.PureComponent {
   }
 }
 
-export default withStyles(styles)(withTheme(BaseWindowPlugin));
+export default BaseWindowPlugin;

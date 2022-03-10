@@ -1,25 +1,18 @@
 import React from "react";
 import SearchBar from "./SearchBar";
-import { withStyles } from "@material-ui/core/styles";
 import { withSnackbar } from "notistack";
 import Observer from "react-event-observer";
-import EditIcon from "@material-ui/icons/Edit";
-import Crop54Icon from "@material-ui/icons/Crop54";
-import TouchAppIcon from "@material-ui/icons/TouchApp";
-import RadioButtonUncheckedIcon from "@material-ui/icons/RadioButtonUnchecked";
-import SettingsIcon from "@material-ui/icons/Settings";
+import EditIcon from "@mui/icons-material/Edit";
+import Crop54Icon from "@mui/icons-material/Crop54";
+import TouchAppIcon from "@mui/icons-material/TouchApp";
+import RadioButtonUncheckedIcon from "@mui/icons-material/RadioButtonUnchecked";
+import SettingsIcon from "@mui/icons-material/Settings";
 import MapViewModel from "./MapViewModel";
 import KmlExport from "./utils/KmlExport";
 import XLSXExport from "./utils/XLSXExport";
 import { encodeCommas, decodeCommas } from "../../utils/StringCommaCoder";
 import LocalStorageHelper from "../../utils/LocalStorageHelper";
 import { functionalOk as functionalCookieOk } from "models/Cookie";
-
-const styles = () => ({
-  inputRoot: {
-    width: "100%",
-  },
-});
 
 class Search extends React.PureComponent {
   defaultSearchOptions = {
@@ -992,7 +985,6 @@ class Search extends React.PureComponent {
   };
 
   render() {
-    const { classes } = this.props;
     const {
       searchString,
       searchActive,
@@ -1012,9 +1004,7 @@ class Search extends React.PureComponent {
       this.state.searchImplementedPluginsLoaded &&
       this.props.app.appModel.config.mapConfig.map.clean === false && (
         <SearchBar
-          classes={{
-            root: classes.inputRoot,
-          }}
+          sx={{ width: "100%" }}
           escapeRegExp={this.escapeRegExp}
           localObserver={this.localObserver}
           searchTools={searchTools}
@@ -1045,4 +1035,4 @@ class Search extends React.PureComponent {
     );
   }
 }
-export default withStyles(styles)(withSnackbar(Search));
+export default withSnackbar(Search);

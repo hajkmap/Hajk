@@ -273,17 +273,10 @@
       "index": 2
     },
     {
-      "type": "draw",
+      "type": "sketch",
       "options": {
         "target": "left",
         "position": "left",
-        "height": 650,
-        "exportUrl": "",
-        "importUrl": "",
-        "base64Encode": false,
-        "instruction": "",
-        "icons": "",
-        "proxyUrl": "",
         "visibleForGroups": []
       },
       "index": 3

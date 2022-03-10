@@ -1,12 +1,12 @@
 import React from "react";
 import PropTypes from "prop-types";
 
-import NormalIcon from "@material-ui/icons/FlipToFront";
+import NormalIcon from "@mui/icons-material/FlipToFront";
 
-import CloseIcon from "@material-ui/icons/Close";
-import { withStyles } from "@material-ui/core/styles";
-import IconButton from "@material-ui/core/IconButton";
-import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
+import CloseIcon from "@mui/icons-material/Close";
+import withStyles from "@mui/styles/withStyles";
+import IconButton from "@mui/material/IconButton";
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 
 /**
  * @summary Window size handling
@@ -88,6 +88,7 @@ class PanelToolbox extends React.PureComponent {
       <IconButton
         classes={{ root: classes.iconButtonRoot }}
         onClick={onClickCallback}
+        size="large"
       >
         {iconElement === "minimize" ? (
           <ExpandMoreIcon />

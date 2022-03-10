@@ -1,23 +1,21 @@
 import React from "react";
-import { withStyles } from "@material-ui/core/styles";
-import Grid from "@material-ui/core/Grid";
-import Input from "@material-ui/core/Input";
-import TextField from "@material-ui/core/TextField";
-import Checkbox from "@material-ui/core/Checkbox";
-import NativeSelect from "@material-ui/core/NativeSelect";
-import FormLabel from "@material-ui/core/FormLabel";
-import FormControl from "@material-ui/core/FormControl";
-import FormGroup from "@material-ui/core/FormGroup";
-import FormControlLabel from "@material-ui/core/FormControlLabel";
-import { Button, FormHelperText } from "@material-ui/core";
-import Chip from "@material-ui/core/Chip";
+import { styled } from "@mui/material/styles";
+import Grid from "@mui/material/Grid";
+import Input from "@mui/material/Input";
+import TextField from "@mui/material/TextField";
+import Checkbox from "@mui/material/Checkbox";
+import NativeSelect from "@mui/material/NativeSelect";
+import FormLabel from "@mui/material/FormLabel";
+import FormControl from "@mui/material/FormControl";
+import FormGroup from "@mui/material/FormGroup";
+import FormControlLabel from "@mui/material/FormControlLabel";
+import { Button, FormHelperText } from "@mui/material";
+import Chip from "@mui/material/Chip";
 
-const styles = (theme) => ({
-  centeredContainer: {
-    textAlign: "center",
-    padding: theme.spacing(1),
-  },
-});
+const StyledGrid = styled(Grid)(({ theme }) => ({
+  textAlign: "center",
+  padding: theme.spacing(1),
+}));
 
 class AttributeEditor extends React.Component {
   constructor(props) {
@@ -598,7 +596,7 @@ class AttributeEditor extends React.Component {
 
   render() {
     const { formValues } = this.state;
-    const { classes, model } = this.props;
+    const { model } = this.props;
 
     if (!formValues || this.props.editSource === undefined) return null;
 
@@ -624,30 +622,32 @@ class AttributeEditor extends React.Component {
 
     return (
       <>
-        <Grid item xs={12} className={classes.centeredContainer}>
+        <StyledGrid item xs={12}>
           <Chip
             variant="outlined"
             color="primary"
             label="Ange objektets attribut:"
           />
-        </Grid>
-        <p>Editerbara fält:</p>
-        {markup}
-        {markupNonEdit?.length > 2 ? "Icke-editerbara fält:" : ""}
-        {markupNonEdit}
-        <Grid item xs={12} className={classes.centeredContainer}>
+        </StyledGrid>
+        <StyledGrid item xs={12}>
+          <p>Editerbara fält:</p>
+          {markup}
+          {markupNonEdit?.length > 2 ? "Icke-editerbara fält:" : ""}
+          {markupNonEdit}
+        </StyledGrid>
+        <StyledGrid item xs={12}>
           <Button
             color="primary"
-            style={{ width: 100 }}
+            sx={{ width: "100px" }}
             variant="contained"
             onClick={model.resetEditFeature}
           >
             OK
           </Button>
-        </Grid>
+        </StyledGrid>
       </>
     );
   }
 }
 
-export default withStyles(styles)(AttributeEditor);
+export default AttributeEditor;

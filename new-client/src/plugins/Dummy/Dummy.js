@@ -10,7 +10,7 @@ import DummyView from "./DummyView";
 import Observer from "react-event-observer";
 
 // All plugins will need to display an icon. Make sure to pick a relevant one from Material UI Icons.
-import BugReportIcon from "@material-ui/icons/BugReport";
+import BugReportIcon from "@mui/icons-material/BugReport";
 
 /**
  * @summary Main class for the Dummy plugin.

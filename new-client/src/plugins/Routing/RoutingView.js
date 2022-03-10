@@ -1,29 +1,23 @@
 import React from "react";
-import Button from "@material-ui/core/Button";
-import { withStyles } from "@material-ui/core/styles";
+import Button from "@mui/material/Button";
 import {
+  Box,
   Stepper,
   Step,
   StepLabel,
   StepContent,
   ButtonGroup,
-} from "@material-ui/core";
-import { ToggleButtonGroup, ToggleButton } from "@material-ui/lab/";
-import DirectionsWalkIcon from "@material-ui/icons/DirectionsWalk";
-import DirectionsCarIcon from "@material-ui/icons/DirectionsCar";
-import DirectionsBikeIcon from "@material-ui/icons/DirectionsBike";
-import DirectionsBusIcon from "@material-ui/icons/DirectionsBus";
-import SettingsBackupRestoreIcon from "@material-ui/icons/SettingsBackupRestore";
-import ArrowBackIosIcon from "@material-ui/icons/ArrowBackIos";
+} from "@mui/material";
+import ToggleButton from "@mui/material/ToggleButton";
+import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";
+import DirectionsWalkIcon from "@mui/icons-material/DirectionsWalk";
+import DirectionsCarIcon from "@mui/icons-material/DirectionsCar";
+import DirectionsBikeIcon from "@mui/icons-material/DirectionsBike";
+import DirectionsBusIcon from "@mui/icons-material/DirectionsBus";
+import SettingsBackupRestoreIcon from "@mui/icons-material/SettingsBackupRestore";
+import ArrowBackIosIcon from "@mui/icons-material/ArrowBackIos";
 
 import { withSnackbar } from "notistack";
-import clsx from "clsx";
-
-const styles = (theme) => ({
-  unifiedPadding: {
-    padding: theme.spacing(2),
-  },
-});
 
 class RoutingView extends React.PureComponent {
   state = {
@@ -146,13 +140,12 @@ class RoutingView extends React.PureComponent {
   };
 
   render() {
-    const { classes } = this.props;
     return (
       <>
         <Stepper
           activeStep={this.state.activeStep}
           orientation="vertical"
-          className={clsx(classes.unifiedPadding)}
+          sx={{ padding: 2 }}
         >
           <Step key="pickStart">
             <StepLabel>Välj startpunkt</StepLabel>
@@ -209,17 +202,17 @@ class RoutingView extends React.PureComponent {
           </Step>
         </Stepper>
         {this.renderStepperButtons()}
-        <div id="resultList" className={clsx(classes.unifiedPadding)}></div>
+        <Box id="resultList" sx={{ padding: 2 }}></Box>
       </>
     );
   }
 
   renderStepperButtons() {
-    const { classes } = this.props;
-
     return (
-      <ButtonGroup fullWidth className={clsx(classes.unifiedPadding)}>
+      <ButtonGroup fullWidth sx={{ padding: 2 }}>
         <Button
+          sx={{ marginRight: 1 }}
+          variant="contained"
           disabled={this.state.activeStep === 0}
           startIcon={<ArrowBackIosIcon />}
           onClick={() => {
@@ -229,6 +222,7 @@ class RoutingView extends React.PureComponent {
           Föregående
         </Button>
         <Button
+          variant="contained"
           startIcon={<SettingsBackupRestoreIcon />}
           onClick={() => {
             this.setState({
@@ -246,4 +240,4 @@ class RoutingView extends React.PureComponent {
   }
 }
 
-export default withStyles(styles)(withSnackbar(RoutingView));
+export default withSnackbar(RoutingView);
