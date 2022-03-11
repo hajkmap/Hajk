@@ -567,6 +567,44 @@ class LayerItem extends React.PureComponent {
             {this.renderStatusButton()}
             {this.renderInfoButton()}
             {this.renderMoreButton()}
+            <LayerButtonWrapper>
+              <RemoveCircleIcon
+                onClick={async () => {
+                  try {
+                    const url = this.props.layer
+                      .getSource()
+                      .get("url")
+                      .replace("wms", "wfs");
+                    const { LAYERS } = this.props.layer.getSource().getParams();
+
+                    const getFeatureUrl = `${url}?service=WFS&version=1.0.0&request=GetFeature&typeName=${LAYERS}&maxFeatures=5000&outputFormat=application%2Fjson`;
+                    const describeFeatureTypeUrl = `${url}?service=WFS&version=1.0.0&request=DescribeFeatureType&typeName=${LAYERS}&outputFormat=application%2Fjson`;
+                    const r1 = await fetch(getFeatureUrl);
+                    const features = await r1.json();
+                    const r2 = await fetch(describeFeatureTypeUrl);
+                    const description = await r2.json();
+
+                    const columns = description.featureTypes
+                      .find((f) => f.typeName === LAYERS)
+                      .properties.map((c) => {
+                        return {
+                          field: c.name,
+                          headerName: c.name,
+                          type: c.localType,
+                        };
+                      });
+
+                    const rows = features.features.map((r) => r.properties);
+
+                    // These are now ready for MUI's DataGrid:
+                    console.log("columns: ", columns);
+                    console.log("rows: ", rows);
+                  } catch (error) {
+                    console.error(error);
+                  }
+                }}
+              />
+            </LayerButtonWrapper>
           </LayerButtonsContainer>
         </LayerItemWrapper>
         <div>
