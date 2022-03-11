@@ -238,83 +238,108 @@ export function handleClick(evt, map, callback) {
       }
     });
 
-  Promise.all(promises).then((responses) => {
-    const featurePromises = [];
-    const features = [];
-    responses.forEach((response) => {
-      const type = response.requestResponse.headers
-        .get("Content-Type")
-        .split(";")[0];
-      switch (type) {
-        case "application/geojson":
-        case "application/json":
-          featurePromises.push(
-            response.requestResponse
-              .json()
-              .then((jsonData) => {
-                if (
-                  jsonData !== undefined &&
-                  jsonData &&
-                  jsonData.features &&
-                  jsonData.features.length > 0
-                ) {
-                  features.push(...getFeaturesFromJson(response, jsonData));
-                }
-              })
-              .catch((err) => {
-                console.error(
-                  "GetFeatureInfo couldn't retrieve correct data for the clicked object.",
-                  err
-                );
-              })
-          );
-          break;
-        case "text/xml":
-        case "application/vnd.ogc.gml": {
-          featurePromises.push(
-            response.requestResponse
-              .text()
-              .then((text) => {
-                features.push(...getFeaturesFromGml(response, text));
-              })
-              .catch((err) => {
-                console.error(
-                  "GetFeatureInfo couldn't retrieve correct data for the clicked object. "
-                );
-              })
-          );
-          break;
-        }
-        default:
-          break;
-      }
-    });
-
-    Promise.all(featurePromises).then(() => {
-      map.forEachFeatureAtPixel(
-        evt.pixel,
-        (feature, layer) => {
-          if (
-            layer &&
-            (layer.get("queryable") === true ||
-              layer.get("type") === "searchResultLayer")
-          ) {
-            feature.layer = layer;
-            features.push(feature);
+  Promise.allSettled(promises)
+    .then((responses) => {
+      const featurePromises = [];
+      const features = [];
+      responses.forEach((response) => {
+        // Ensure that the Promise is fulfilled - if not, we won't have any
+        // value to parse!
+        if (response.status === "fulfilled") {
+          const type = response.value.requestResponse.headers
+            .get("Content-Type")
+            ?.split(";")[0]; // If request failed, we might not have the Content-Type header
+          switch (type) {
+            case "application/geojson":
+            case "application/json":
+              featurePromises.push(
+                response.value.requestResponse
+                  .json()
+                  .then((jsonData) => {
+                    if (
+                      jsonData !== undefined &&
+                      jsonData &&
+                      jsonData.features &&
+                      jsonData.features.length > 0
+                    ) {
+                      features.push(
+                        ...getFeaturesFromJson(response.value, jsonData)
+                      );
+                    }
+                  })
+                  .catch((err) => {
+                    console.error(
+                      "GetFeatureInfo couldn't retrieve correct data for the clicked object.",
+                      err
+                    );
+                  })
+              );
+              break;
+            case "text/xml":
+            case "application/vnd.ogc.gml": {
+              featurePromises.push(
+                response.value.requestResponse
+                  .text()
+                  .then((text) => {
+                    features.push(...getFeaturesFromGml(response.value, text));
+                  })
+                  .catch((err) => {
+                    console.error(
+                      "GetFeatureInfo couldn't retrieve correct data for the clicked object. "
+                    );
+                  })
+              );
+              break;
+            }
+            // For any other Content-Type, just ignore - we can't parse any
+            // features if we don't know the data format (or if it's simply missing)
+            default:
+              break;
           }
-        },
-        {
-          hitTolerance: 10,
+        } else {
+          // I'm adding this for pure readability. We don't want to throw any errors
+          // here, even if one of the Promises was rejected. The reason is that throwing
+          // an error here would abort the flow (by taking us straight to the catch() below).
+          // In that case, we'd miss any successfully parsed responses, and we don't want that.
+          // So we just go on, silently.
+          console.error("Couldn't parse GetFeatureInfo.", response.reason);
         }
-      );
-
-      document.querySelector("body").style.cursor = "initial";
-      callback({
-        features: features,
-        evt: evt,
       });
+
+      Promise.all(featurePromises)
+        .then(() => {
+          map.forEachFeatureAtPixel(
+            evt.pixel,
+            (feature, layer) => {
+              if (
+                layer &&
+                (layer.get("queryable") === true ||
+                  layer.get("type") === "searchResultLayer")
+              ) {
+                feature.layer = layer;
+                features.push(feature);
+              }
+            },
+            {
+              hitTolerance: 10,
+            }
+          );
+
+          document.querySelector("body").style.cursor = "initial";
+          callback({
+            features: features,
+            evt: evt,
+          });
+        })
+        .catch((err) => {
+          console.error("FeatureInfo failed:", err);
+          document.querySelector("body").style.cursor = "initial";
+        });
+    })
+    .catch((err) => {
+      console.error("Parsing response failed:", err);
+      document.querySelector("body").style.cursor = "initial";
     });
-  });
 }
 
 export function bindMapClickEvent(map, callback) {

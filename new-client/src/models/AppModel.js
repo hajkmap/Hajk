@@ -159,6 +159,22 @@ class AppModel {
   }
 
   /**
+   * @summary Return all plugins that might render in Drawer.
+   *
+   * @description There reason this functions exists is that we must
+   * have a way to determine whether the Drawer toggle button should be
+   * rendered. It's not as easy as checking for Drawer plugins only (i.e.
+   * those with target=toolbar) - this simple logic gets complicated by
+   * the fact that Widget plugins (target=left|right) also render Drawer
+   * buttons on small screens.
+   */
+  getPluginsThatMightRenderInDrawer() {
+    return this.getPlugins().filter((plugin) => {
+      return ["toolbar", "left", "right"].includes(plugin.options.target);
+    });
+  }
+
+  /**
    * Dynamically load plugins from the configured plugins folder.
    * Assumed that a folder exists with the same name as the requested plugin.
    * There must also be a file present with the same name as well.

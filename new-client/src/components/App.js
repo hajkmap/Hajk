@@ -400,13 +400,19 @@ class App extends React.PureComponent {
         () => {
           // If there's at least one plugin that renders in the Drawer Map Tools List,
           // tell the Drawer to add a toggle button for the map tools
-          this.appModel.getDrawerPlugins().length > 0 &&
+          this.appModel.getPluginsThatMightRenderInDrawer().length > 0 &&
             this.globalObserver.publish("core.addDrawerToggleButton", {
               value: "plugins",
               ButtonIcon: MapIcon,
               caption: "Kartverktyg",
               drawerTitle: "Kartverktyg",
               order: 0,
+              // If no plugins render **directly** in Drawer, but some **might**
+              // render there occasionally, let's ensure to hide the Tools button on
+              // medium screens and above.
+              hideOnMdScreensAndAbove:
+                this.appModel.getDrawerPlugins().length === 0 &&
+                this.appModel.getPluginsThatMightRenderInDrawer().length > 0,
               renderDrawerContent: function () {
                 return null; // Nothing specific should be rendered - this is a special case!
               },
