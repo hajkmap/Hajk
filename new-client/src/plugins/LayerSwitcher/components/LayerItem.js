@@ -13,6 +13,7 @@ import RadioButtonUnchecked from "@mui/icons-material/RadioButtonUnchecked";
 import CheckBoxOutlineBlankIcon from "@mui/icons-material/CheckBoxOutlineBlank";
 import MoreHorizIcon from "@mui/icons-material/MoreHoriz";
 import CloseIcon from "@mui/icons-material/Close";
+import TableViewIcon from "@mui/icons-material/TableView";
 
 import LayerGroupItem from "./LayerGroupItem.js";
 import LayerSettings from "./LayerSettings.js";
@@ -509,6 +510,54 @@ class LayerItem extends React.PureComponent {
     return <LayerTogglerButtonWrapper>{icon}</LayerTogglerButtonWrapper>;
   };
 
+  showAttributeTable = async () => {
+    try {
+      const url = this.props.layer.getSource().get("url").replace("wms", "wfs");
+      const { LAYERS } = this.props.layer.getSource().getParams();
+      const getFeatureUrl = `${url}?service=WFS&version=1.0.0&request=GetFeature&typeName=${LAYERS}&maxFeatures=5000&outputFormat=application%2Fjson`;
+      const describeFeatureTypeUrl = `${url}?service=WFS&version=1.0.0&request=DescribeFeatureType&typeName=${LAYERS}&outputFormat=application%2Fjson`;
+      const r1 = await fetch(getFeatureUrl);
+      const features = await r1.json();
+      const r2 = await fetch(describeFeatureTypeUrl);
+      const description = await r2.json();
+
+      const columns = description.featureTypes
+        .find((f) => f.typeName === LAYERS) // featureTypes contains an object, where typeName will be the same as the layer name we requested
+        .properties.filter((c) => !c.type.toLowerCase().includes("gml")) // Best guess to try to filter out the geometry column, we don't want to show it
+        .map((c) => {
+          // Prepare an object that has the format of 'columns' prop for MUI's DataGrid
+          return {
+            field: c.name,
+            headerName: c.name,
+            type: c.localType === "int" ? "number" : c.localType, // DataGrid wants 'number', not 'int', see https://mui.com/components/data-grid/columns/#column-types
+          };
+        });
+
+      const rows = features.features.map((r) => r.properties);
+
+      // These are now ready for MUI's DataGrid:
+      console.log("columns: ", columns);
+      console.log("rows: ", rows);
+
+      /**
+       * TODO:
+       * Proposed next steps:
+       * Add a AttributeDialog.js component
+       * It should listen for an event on localObserver
+       * From here, we send an event with some payload:
+       *   this.localObserver.publish("showAttributeTable", {columns, rows});
+       *
+       * The Dialog takes care of closing itself, so we don't need to do anything more here.
+       *
+       * That's of course just one way. Another could be showing AttributeTable in
+       * a separate Window, hence allowing for displaying multiple tables next
+       * to each other.
+       */
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
   render() {
     const { layer, model, app, chapters } = this.props;
 
@@ -568,42 +617,7 @@ class LayerItem extends React.PureComponent {
             {this.renderInfoButton()}
             {this.renderMoreButton()}
             <LayerButtonWrapper>
-              <RemoveCircleIcon
-                onClick={async () => {
-                  try {
-                    const url = this.props.layer
-                      .getSource()
-                      .get("url")
-                      .replace("wms", "wfs");
-                    const { LAYERS } = this.props.layer.getSource().getParams();
-
-                    const getFeatureUrl = `${url}?service=WFS&version=1.0.0&request=GetFeature&typeName=${LAYERS}&maxFeatures=5000&outputFormat=application%2Fjson`;
-                    const describeFeatureTypeUrl = `${url}?service=WFS&version=1.0.0&request=DescribeFeatureType&typeName=${LAYERS}&outputFormat=application%2Fjson`;
-                    const r1 = await fetch(getFeatureUrl);
-                    const features = await r1.json();
-                    const r2 = await fetch(describeFeatureTypeUrl);
-                    const description = await r2.json();
-
-                    const columns = description.featureTypes
-                      .find((f) => f.typeName === LAYERS)
-                      .properties.map((c) => {
-                        return {
-                          field: c.name,
-                          headerName: c.name,
-                          type: c.localType,
-                        };
-                      });
-
-                    const rows = features.features.map((r) => r.properties);
-
-                    // These are now ready for MUI's DataGrid:
-                    console.log("columns: ", columns);
-                    console.log("rows: ", rows);
-                  } catch (error) {
-                    console.error(error);
-                  }
-                }}
-              />
+              <TableViewIcon onClick={this.showAttributeTable} />
             </LayerButtonWrapper>
           </LayerButtonsContainer>
         </LayerItemWrapper>
