@@ -238,83 +238,95 @@ export function handleClick(evt, map, callback) {
       }
     });
 
-  Promise.all(promises).then((responses) => {
-    const featurePromises = [];
-    const features = [];
-    responses.forEach((response) => {
-      const type = response.requestResponse.headers
-        .get("Content-Type")
-        .split(";")[0];
-      switch (type) {
-        case "application/geojson":
-        case "application/json":
-          featurePromises.push(
-            response.requestResponse
-              .json()
-              .then((jsonData) => {
-                if (
-                  jsonData !== undefined &&
-                  jsonData &&
-                  jsonData.features &&
-                  jsonData.features.length > 0
-                ) {
-                  features.push(...getFeaturesFromJson(response, jsonData));
-                }
-              })
-              .catch((err) => {
-                console.error(
-                  "GetFeatureInfo couldn't retrieve correct data for the clicked object.",
-                  err
-                );
-              })
-          );
-          break;
-        case "text/xml":
-        case "application/vnd.ogc.gml": {
-          featurePromises.push(
-            response.requestResponse
-              .text()
-              .then((text) => {
-                features.push(...getFeaturesFromGml(response, text));
-              })
-              .catch((err) => {
-                console.error(
-                  "GetFeatureInfo couldn't retrieve correct data for the clicked object. "
-                );
-              })
-          );
-          break;
-        }
-        default:
-          break;
-      }
-    });
-
-    Promise.all(featurePromises).then(() => {
-      map.forEachFeatureAtPixel(
-        evt.pixel,
-        (feature, layer) => {
-          if (
-            layer &&
-            (layer.get("queryable") === true ||
-              layer.get("type") === "searchResultLayer")
-          ) {
-            feature.layer = layer;
-            features.push(feature);
+  Promise.all(promises)
+    .then((responses) => {
+      const featurePromises = [];
+      const features = [];
+      responses.forEach((response) => {
+        const type = response.requestResponse.headers
+          .get("Content-Type")
+          ?.split(";")[0]; // If request failed, we might not have the Content-Type header
+        switch (type) {
+          case "application/geojson":
+          case "application/json":
+            featurePromises.push(
+              response.requestResponse
+                .json()
+                .then((jsonData) => {
+                  if (
+                    jsonData !== undefined &&
+                    jsonData &&
+                    jsonData.features &&
+                    jsonData.features.length > 0
+                  ) {
+                    features.push(...getFeaturesFromJson(response, jsonData));
+                  }
+                })
+                .catch((err) => {
+                  console.error(
+                    "GetFeatureInfo couldn't retrieve correct data for the clicked object.",
+                    err
+                  );
+                })
+            );
+            break;
+          case "text/xml":
+          case "application/vnd.ogc.gml": {
+            featurePromises.push(
+              response.requestResponse
+                .text()
+                .then((text) => {
+                  features.push(...getFeaturesFromGml(response, text));
+                })
+                .catch((err) => {
+                  console.error(
+                    "GetFeatureInfo couldn't retrieve correct data for the clicked object. "
+                  );
+                })
+            );
+            break;
           }
-        },
-        {
-          hitTolerance: 10,
+          // For any other Content-Type, just ignore - we can't parse any
+          // features if we don't know the data format (or if it's simply missing)
+          default:
+            break;
         }
-      );
-
-      document.querySelector("body").style.cursor = "initial";
-      callback({
-        features: features,
-        evt: evt,
       });
+
+      Promise.all(featurePromises)
+        .then(() => {
+          map.forEachFeatureAtPixel(
+            evt.pixel,
+            (feature, layer) => {
+              if (
+                layer &&
+                (layer.get("queryable") === true ||
+                  layer.get("type") === "searchResultLayer")
+              ) {
+                feature.layer = layer;
+                features.push(feature);
+              }
+            },
+            {
+              hitTolerance: 10,
+            }
+          );
+
+          document.querySelector("body").style.cursor = "initial";
+          callback({
+            features: features,
+            evt: evt,
+          });
+        })
+        .catch((err) => {
+          console.error("FeatureInfo failed:", err);
+          document.querySelector("body").style.cursor = "initial";
+        });
+    })
+    .catch((err) => {
+      console.error("Parsing response failed:", err);
+      document.querySelector("body").style.cursor = "initial";
     });
-  });
 }
 
 export function bindMapClickEvent(map, callback) {
