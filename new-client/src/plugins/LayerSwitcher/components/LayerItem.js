@@ -89,6 +89,7 @@ class LayerItem extends React.PureComponent {
     this.infoUrlText = layerInfo.infoUrlText;
     this.infoOwner = layerInfo.infoOwner;
     this.localObserver = layer.localObserver;
+    this.showAttributeTableButton = layer.showAttributeTableButton || false;
     this.usesMinMaxZoom = this.layerUsesMinMaxZoom();
     this.minMaxZoomAlertOnToggleOnly = layer.get("minMaxZoomAlertOnToggleOnly");
 
@@ -296,33 +297,37 @@ class LayerItem extends React.PureComponent {
 
   renderInfoButton = () => {
     return this.isInfoEmpty() ? null : (
-      <LayerButtonWrapper>
-        {this.state.infoVisible ? (
-          <RemoveCircleIcon onClick={this.toggleInfo} />
-        ) : (
-          <InfoIcon
-            onClick={this.toggleInfo}
-            sx={{
-              boxShadow: this.state.infoVisible
-                ? "rgb(204, 204, 204) 2px 3px 1px"
-                : "inherit",
-              borderRadius: "100%",
-            }}
-          />
-        )}
-      </LayerButtonWrapper>
+      <Tooltip title="Mer information om lagret">
+        <LayerButtonWrapper>
+          {this.state.infoVisible ? (
+            <RemoveCircleIcon onClick={this.toggleInfo} />
+          ) : (
+            <InfoIcon
+              onClick={this.toggleInfo}
+              sx={{
+                boxShadow: this.state.infoVisible
+                  ? "rgb(204, 204, 204) 2px 3px 1px"
+                  : "inherit",
+                borderRadius: "100%",
+              }}
+            />
+          )}
+        </LayerButtonWrapper>
+      </Tooltip>
     );
   };
 
   renderMoreButton = () => {
     return (
-      <LayerButtonWrapper>
-        {this.state.toggleSettings ? (
-          <CloseIcon onClick={this.toggleSettings} />
-        ) : (
-          <MoreHorizIcon onClick={this.toggleSettings} />
-        )}
-      </LayerButtonWrapper>
+      <Tooltip title="Fler inställningar">
+        <LayerButtonWrapper>
+          {this.state.toggleSettings ? (
+            <CloseIcon onClick={this.toggleSettings} />
+          ) : (
+            <MoreHorizIcon onClick={this.toggleSettings} />
+          )}
+        </LayerButtonWrapper>
+      </Tooltip>
     );
   };
 
@@ -510,12 +515,18 @@ class LayerItem extends React.PureComponent {
     return <LayerTogglerButtonWrapper>{icon}</LayerTogglerButtonWrapper>;
   };
 
-  showAttributeTable = async () => {
+  #showAttributeTable = async () => {
     try {
       const url = this.props.layer.getSource().get("url").replace("wms", "wfs");
       const { LAYERS } = this.props.layer.getSource().getParams();
-      const getFeatureUrl = `${url}?service=WFS&version=1.0.0&request=GetFeature&typeName=${LAYERS}&maxFeatures=5000&outputFormat=application%2Fjson`;
-      const describeFeatureTypeUrl = `${url}?service=WFS&version=1.0.0&request=DescribeFeatureType&typeName=${LAYERS}&outputFormat=application%2Fjson`;
+      // If URL already contains a query string part, we want to glue them together.
+      const glue = url.includes("?") ? "&" : "?";
+      const getFeatureUrl = `${url}${glue}service=WFS&version=1.0.0&request=GetFeature&typeName=${LAYERS}&maxFeatures=5000&outputFormat=application%2Fjson`;
+      const describeFeatureTypeUrl = `${url}${glue}service=WFS&version=1.0.0&request=DescribeFeatureType&typeName=${LAYERS}&outputFormat=application%2Fjson`;
+      // TODO: QGIS Server doesn't support JSON response for DescribeFeatureType. We must
+      // fetch the result as GML2 and then parse it accordingly. This will require
+      // some more work than the current approach.
+      // const describeFeatureTypeUrl = `${url}${glue}service=WFS&version=1.0.0&request=DescribeFeatureType&typeName=${LAYERS}`;
       const r1 = await fetch(getFeatureUrl);
       const features = await r1.json();
       const r2 = await fetch(describeFeatureTypeUrl);
@@ -530,31 +541,25 @@ class LayerItem extends React.PureComponent {
             field: c.name,
             headerName: c.name,
             type: c.localType === "int" ? "number" : c.localType, // DataGrid wants 'number', not 'int', see https://mui.com/components/data-grid/columns/#column-types
+            flex: 1,
           };
         });
 
-      const rows = features.features.map((r) => r.properties);
+      const rows = features.features.map((r, i) => {
+        return { ...r.properties, id: i };
+      });
 
-      // These are now ready for MUI's DataGrid:
-      console.log("columns: ", columns);
-      console.log("rows: ", rows);
-
-      /**
-       * TODO:
-       * Proposed next steps:
-       * Add a AttributeDialog.js component
-       * It should listen for an event on localObserver
-       * From here, we send an event with some payload:
-       *   this.localObserver.publish("showAttributeTable", {columns, rows});
-       *
-       * The Dialog takes care of closing itself, so we don't need to do anything more here.
-       *
-       * That's of course just one way. Another could be showing AttributeTable in
-       * a separate Window, hence allowing for displaying multiple tables next
-       * to each other.
-       */
+      this.props.app.globalObserver.publish("core.showAttributeTable", {
+        title: `${this.caption} (${LAYERS})`,
+        content: { columns, rows },
+      });
     } catch (error) {
       console.error(error);
+      console.log(this);
+      this.props.enqueueSnackbar(
+        `Serverfel: attributtabellen för lagret "${this.caption}" kunde inte visas`,
+        { variant: "error" }
+      );
     }
   };
 
@@ -615,10 +620,15 @@ class LayerItem extends React.PureComponent {
             )}
             {this.renderStatusButton()}
             {this.renderInfoButton()}
+
+            {this.showAttributeTableButton && (
+              <Tooltip title="Visa lagrets attributtabell">
+                <LayerButtonWrapper>
+                  <TableViewIcon onClick={this.#showAttributeTable} />
+                </LayerButtonWrapper>
+              </Tooltip>
+            )}
             {this.renderMoreButton()}
-            <LayerButtonWrapper>
-              <TableViewIcon onClick={this.showAttributeTable} />
-            </LayerButtonWrapper>
           </LayerButtonsContainer>
         </LayerItemWrapper>
         <div>
