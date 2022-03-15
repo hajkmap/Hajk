@@ -18,6 +18,7 @@ import Introduction from "./Introduction";
 import Announcement from "./Announcement/Announcement";
 import Alert from "./Alert";
 import PluginWindows from "./PluginWindows";
+import SimpleDialog from "./SimpleDialog";
 
 import Search from "./Search/Search.js";
 
@@ -966,6 +967,7 @@ class App extends React.PureComponent {
             <PluginWindows
               plugins={this.appModel.getBothDrawerAndWidgetPlugins()}
             />
+            <SimpleDialog globalObserver={this.globalObserver} />
           </WindowsContainer>
           {clean !== true && ( // NB: Special case here, important with !== true, because there is an edge-case where clean===undefined, and we don't want to match on that!
             <Drawer

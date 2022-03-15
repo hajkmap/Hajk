@@ -153,6 +153,7 @@ export default class ConfigMapper {
             : args.serverType || "geoserver",
         crossOrigin: properties.mapConfig.map.crossOrigin || "anonymous",
         attribution: args.attribution,
+        showAttributeTableButton: args.showAttributeTableButton,
         searchUrl: args.searchUrl,
         searchPropertyName: args.searchPropertyName,
         searchDisplayName: args.searchDisplayName,
