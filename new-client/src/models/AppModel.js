@@ -9,6 +9,7 @@ import WMSLayer from "./layers/WMSLayer.js";
 import WMTSLayer from "./layers/WMTSLayer.js";
 import WFSVectorLayer from "./layers/VectorLayer.js";
 import { bindMapClickEvent } from "./Click.js";
+import MapClickModel from "./MapClickModel";
 import { defaults as defaultInteractions } from "ol/interaction";
 import { Map, View } from "ol";
 // TODO: Uncomment and ensure they show as expected
@@ -329,11 +330,26 @@ class AppModel {
     // So, we create the Set no matter what:
     this.map.clickLock = new Set();
 
+    const useNewInfoclick =
+      config.tools.find((t) => t.type === "infoclick")?.options
+        ?.useNewInfoclick === true;
+    if (useNewInfoclick) {
+      const mapClickModel = new MapClickModel(this.map);
+
+      mapClickModel.bindMapClick((featureCollection) => {
+        console.log("featureCollection: ", featureCollection);
+      });
+    }
+
     // FIXME: Potential miss here: don't we want to register click on search results
     // But we register the Infoclick handler only if the plugin exists in map config:
     // even if Infoclick plugin is inactive? Currently search won't register clicks in
     // map without infoclick, which seems as an unnecessary limitation.
-    if (config.tools.some((tool) => tool.type === "infoclick")) {
+    if (
+      config.tools.some((tool) => tool.type === "infoclick") &&
+      useNewInfoclick === false
+    ) {
+      console.log("Using old infoclick");
       bindMapClickEvent(this.map, (mapClickDataResult) => {
         // We have to separate features coming from the searchResult-layer
         // from the rest, since we want to render this information in the
