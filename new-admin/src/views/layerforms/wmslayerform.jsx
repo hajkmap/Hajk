@@ -28,6 +28,7 @@ const defaultState = {
   minZoom: -1,
   minMaxZoomAlertOnToggleOnly: false,
   tiled: false,
+  showAttributeTableButton: false,
   singleTile: false,
   hidpi: true,
   customRatio: 0,
@@ -1034,6 +1035,7 @@ class WMSLayerForm extends Component {
       displayFields: this.getValue("displayFields"),
       visibleAtStart: this.getValue("visibleAtStart"),
       tiled: this.getValue("tiled"),
+      showAttributeTableButton: this.getValue("showAttributeTableButton"),
       opacity: this.getValue("opacity"),
       maxZoom: this.getValue("maxZoom"),
       minZoom: this.getValue("minZoom"),
@@ -1105,6 +1107,7 @@ class WMSLayerForm extends Component {
     if (fieldName === "customRatio")
       value = parseFloat(Number(value).toFixed(2));
     if (fieldName === "tiled") value = input.checked;
+    if (fieldName === "showAttributeTableButton") value = input.checked;
     if (fieldName === "layers") value = format_layers(this.state.addedLayers);
     if (fieldName === "layersInfo")
       value = format_layers_info(this.state.addedLayersInfo);
@@ -1480,6 +1483,29 @@ class WMSLayerForm extends Component {
           />
           &nbsp;
           <label htmlFor="input_tiled">GeoWebCache</label>
+        </div>
+        <div>
+          <input
+            type="checkbox"
+            ref="input_showAttributeTableButton"
+            id="input_showAttributeTableButton"
+            onChange={(e) => {
+              this.setState({ showAttributeTableButton: e.target.checked });
+            }}
+            checked={this.state.showAttributeTableButton}
+          />
+          &nbsp;
+          <label
+            htmlFor="input_showAttributeTableButton"
+            style={{ width: "auto" }}
+          >
+            Visa knapp för attributtabell{" "}
+            <i
+              className="fa fa-question-circle"
+              data-toggle="tooltip"
+              title="Visar knappen för att visa lagrets attributtabell. Se även GitHub, issue #595."
+            />
+          </label>
         </div>
         <div className="separator">Tillgängliga lager</div>
         <div>

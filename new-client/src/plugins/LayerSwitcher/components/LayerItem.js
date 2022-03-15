@@ -89,7 +89,7 @@ class LayerItem extends React.PureComponent {
     this.infoUrlText = layerInfo.infoUrlText;
     this.infoOwner = layerInfo.infoOwner;
     this.localObserver = layer.localObserver;
-    this.showAttributeTableButton = layer.showAttributeTableButton || false;
+    this.showAttributeTableButton = layerInfo.showAttributeTableButton || false;
     this.usesMinMaxZoom = this.layerUsesMinMaxZoom();
     this.minMaxZoomAlertOnToggleOnly = layer.get("minMaxZoomAlertOnToggleOnly");
 

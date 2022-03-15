@@ -22,5 +22,6 @@ export default class LayerInfo {
     this.searchUrl = properties.searchUrl;
     this.layerType = properties.layerType;
     this.hideExpandArrow = properties.hideExpandArrow;
+    this.showAttributeTableButton = properties.showAttributeTableButton;
   }
 }
