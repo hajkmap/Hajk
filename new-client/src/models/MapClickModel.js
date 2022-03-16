@@ -125,7 +125,8 @@ export default class MapClickModel {
 
             // Prepare the return object
             const r = {
-              type: "GetFeatureInfoResult",
+              layerId: response.value.layer?.ol_uid,
+              type: "GetFeatureInfoResults",
               features: olFeatures,
               numHits: olFeatures.length,
               displayName,
@@ -147,20 +148,66 @@ export default class MapClickModel {
       }
 
       // In addition to WMS GetFeatureInfo, we must also query any local
-      // layers, as we might get results from there too. One example is
-      // the search layer, that will return its features.
+      // layers, as we might get results from there too. We can expect
+      // features from e.g. a vector layer or search results layer, that
+      // do have their own OL Features in map already.
+
+      // Prepare the Arrays
       const searchResultFeatures = [];
-      const otherQueryableFeatures = [];
+      const queryableLayerResults = [];
+
+      // Grab all features at clicked pixel, with 10px tolerance
       this.map.forEachFeatureAtPixel(
         e.pixel,
         (feature, layer) => {
-          if (layer) {
-            if (layer.get("type") === "searchResultLayer") {
-              feature.layer = layer;
-              searchResultFeatures.push(feature);
-            } else if (layer.get("queryable") === true) {
-              feature.layer = layer;
-              otherQueryableFeatures.push(feature);
+          if (layer?.get("type") === "searchResultLayer") {
+            // Super-special case here: we don't follow the new
+            // interface for a return object (see the "r" constant above),
+            // because we want to conform to the old, working search results
+            // code, which expects search results on the following form:
+            feature.layer = layer;
+            searchResultFeatures.push(feature);
+          } else if (layer?.get("queryable") === true) {
+            // If we have any features from vector (WFS) layers, we want
+            // to return them in a way that is similar to how the GetFeatureInfo
+            // features are treated. This will make it easy in the Component,
+            // so we prepare an object that is similar to the "r" constant above.
+
+            // Keep in mind that at this point we loop through _features_, not
+            // layers. But we want to group features from the same layer together.
+            // So the first step is to get a unique ID for the layer that the
+            // current feature belongs to:
+            const layerId = layer?.ol_uid || 0;
+
+            // Next, check if we already have this layer in our collection…
+            const existingLayer = queryableLayerResults.find(
+              (c) => c.layerId === layerId
+            );
+
+            // …if yes…
+            if (existingLayer) {
+              // …just push the new feature to existing Array…
+              existingLayer.features.push(feature);
+              // …and increase the count.
+              existingLayer.numHits++;
+            } else {
+              // Else, create the return object…
+              const r = {
+                layerId: layer.ol_uid, // Unique layer id, used above
+                type: "QueryableLayerResults",
+                features: [feature], // Create a new Array, add the current feature
+                numHits: 1, // Duh…
+                displayName:
+                  layer.get("layerInfo")?.caption ||
+                  layer.get("caption") ||
+                  "Unnamed vector layer",
+                infoclickDefinition:
+                  layer.get("layerInfo")?.information ||
+                  layer.get("information") ||
+                  "",
+              };
+              // …and push to the layers collection.
+              queryableLayerResults.push(r);
             }
           }
         },
@@ -169,20 +216,24 @@ export default class MapClickModel {
         }
       );
 
+      // If the operation above resulted in features that should
+      // be treated by the search component, let's push them to
+      // the array that will be returned.
       if (searchResultFeatures.length > 0) {
         features.push({
-          type: "searchResultsFeatures",
+          type: "SearchResults",
           features: searchResultFeatures,
         });
       }
 
-      if (otherQueryableFeatures.length > 0) {
-        features.push({
-          type: "otherQueryableFeatures",
-          features: otherQueryableFeatures,
-        });
+      // If the operation above resulted in any features from
+      // vector layers, let's _spread_ them onto the features
+      // array.
+      if (queryableLayerResults.length > 0) {
+        features.push(...queryableLayerResults);
       }
 
+      // Reset the UI
       document.querySelector("body").style.cursor = "initial";
 
       // Invoke the callback, supply the results.

@@ -338,15 +338,15 @@ class AppModel {
 
       mapClickModel.bindMapClick((featureCollection) => {
         console.log("featureCollection: ", featureCollection);
-        // TODO: Handle features where featuresCollection.type === "GetFeatureInfoResult"
-        // and featuresCollection.type === "otherQueryableFeatures"
+        // TODO: Handle features where featuresCollection.type === "GetFeatureInfoResults"
+        // and featuresCollection.type === "QueryableLayerResults"
 
         // Next, handle search results features.
         // Check if we've got any features from the search layer,
         // and if we do, announce it to the search component so it can
         // show relevant feature in the search results list.
         const searchResultFeatures = featureCollection.find(
-          (c) => c.type === "searchResultsFeatures"
+          (c) => c.type === "SearchResults"
         )?.features;
 
         if (searchResultFeatures?.length > 0) {
