@@ -338,6 +338,23 @@ class AppModel {
 
       mapClickModel.bindMapClick((featureCollection) => {
         console.log("featureCollection: ", featureCollection);
+        // TODO: Handle features where featuresCollection.type === "GetFeatureInfoResult"
+        // and featuresCollection.type === "otherQueryableFeatures"
+
+        // Next, handle search results features.
+        // Check if we've got any features from the search layer,
+        // and if we do, announce it to the search component so it can
+        // show relevant feature in the search results list.
+        const searchResultFeatures = featureCollection.find(
+          (c) => c.type === "searchResultsFeatures"
+        )?.features;
+
+        if (searchResultFeatures?.length > 0) {
+          this.globalObserver.publish(
+            "infoClick.searchResultLayerClick",
+            searchResultFeatures // Clicked features sent to the search-component for display
+          );
+        }
       });
     }
 

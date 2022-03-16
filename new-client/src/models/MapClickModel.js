@@ -125,6 +125,7 @@ export default class MapClickModel {
 
             // Prepare the return object
             const r = {
+              type: "GetFeatureInfoResult",
               features: olFeatures,
               numHits: olFeatures.length,
               displayName,
@@ -144,6 +145,44 @@ export default class MapClickModel {
           console.error("Couldn't parse GetFeatureInfo.", response.reason);
         }
       }
+
+      // In addition to WMS GetFeatureInfo, we must also query any local
+      // layers, as we might get results from there too. One example is
+      // the search layer, that will return its features.
+      const searchResultFeatures = [];
+      const otherQueryableFeatures = [];
+      this.map.forEachFeatureAtPixel(
+        e.pixel,
+        (feature, layer) => {
+          if (layer) {
+            if (layer.get("type") === "searchResultLayer") {
+              feature.layer = layer;
+              searchResultFeatures.push(feature);
+            } else if (layer.get("queryable") === true) {
+              feature.layer = layer;
+              otherQueryableFeatures.push(feature);
+            }
+          }
+        },
+        {
+          hitTolerance: 10,
+        }
+      );
+
+      if (searchResultFeatures.length > 0) {
+        features.push({
+          type: "searchResultsFeatures",
+          features: searchResultFeatures,
+        });
+      }
+
+      if (otherQueryableFeatures.length > 0) {
+        features.push({
+          type: "otherQueryableFeatures",
+          features: otherQueryableFeatures,
+        });
+      }
+
       document.querySelector("body").style.cursor = "initial";
 
       // Invoke the callback, supply the results.
