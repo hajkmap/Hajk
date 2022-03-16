@@ -30,6 +30,25 @@ export default class MapClickModel {
       (e) => this.map.clickLock.size === 0 && this.#handleClick(e, callback)
     );
   }
+  /**
+   * @summary Determine the sublayer's name by looking at the feature's id
+   * @description We must know which of the queried sublayers a given feature comes
+   * from and the best way to determine that is by looking at the feature ID (FID).
+   * It looks like WMS services set the FID using this formula:
+   * [<workspaceName>:]<layerName>.<numericFeatureId>
+   * where the part inside "[" and "]" is optional (not used by GeoServer nor QGIS,
+   * but other WMSes might use it).
+   * @param {Feature} feature
+   * @param {Layer} layer
+   * @return {string} layerName
+   */
+  #getLayerNameFromFid = (feature, layer) => {
+    return Object.keys(layer.layersInfo).find((id) => {
+      const fid = feature.getId().split(".")[0];
+      const layerId = id.split(":").length === 2 ? id.split(":")[1] : id;
+      return fid === layerId;
+    });
+  };
 
   /**
    * @summary Try to parse the retrieved features and supply them to the callback function.
@@ -42,7 +61,7 @@ export default class MapClickModel {
     document.querySelector("body").style.cursor = "progress";
 
     try {
-      // When all features have settled (either fullfiled or rejected)…
+      // When all features have settled (either fulfilled or rejected)…
       const responses = await Promise.allSettled(this.#getResponsePromises(e));
       const features = [];
 
@@ -50,44 +69,71 @@ export default class MapClickModel {
       for (const response of responses) {
         // If the response succeeded…
         if (response.status === "fulfilled") {
-          // …tryo to read the Content-Type header. We need it for parsing.
+          // …try to read the Content-Type header. We need it for parsing.
           const responseContentType = response.value.requestResponse.headers
             .get("Content-Type")
             ?.split(";")[0];
+
+          // Prepare an object to hold the features to be parsed.
+          let olFeatures = null;
 
           // Depending on the response type, parse accordingly
           switch (responseContentType) {
             case "application/geojson":
             case "application/json": {
-              // Prepare the return object.
-              const r = {
-                // Parse the GeoJSON features from the JSON response…
-                features: this.#parseGeoJsonFeatures(
-                  await response.value.requestResponse.json()
-                ),
-                // …and supply the layer itself. We want to know the dataset.
-                layer: response.value.layer,
-              };
-
-              // Push this response's features to our common return object
-              // that will hold all datasets.
-              features.push(r);
+              olFeatures = this.#parseGeoJsonFeatures(
+                await response.value.requestResponse.json()
+              );
               break;
             }
             case "text/xml":
             case "application/vnd.ogc.gml": {
               // (See comments for GeoJSON parser - this is similar.)
-              const r = {
-                features: this.#parseGMLFeatures(
-                  await response.value.requestResponse.text()
-                ),
-                layer: response.value.layer,
-              };
-              features.push(r);
+              olFeatures = this.#parseGMLFeatures(
+                await response.value.requestResponse.text()
+              );
               break;
             }
             default:
               break;
+          }
+
+          // If parsing resulted in at least one feature, let's go on.
+          if (olFeatures.length > 0) {
+            // First we need the sublayer's name in order to grab
+            // the relevant caption, infobox definition, etc.
+            // The only way to get it now is by looking into
+            // the feature id, because it includes the layer's
+            // name as a part of the id itself.
+            // We can use any returned feature we like, as all
+            // come from the same sublayer - so let's grab the
+            // first one.
+            const layerName = this.#getLayerNameFromFid(
+              olFeatures[0],
+              response.value.layer
+            );
+
+            // Get caption for this dataset
+            const displayName =
+              response.value.layer?.layersInfo?.[layerName]?.caption ||
+              response.value.layer?.get("caption") ||
+              "Unnamed dataset";
+
+            // Get infoclick definition for this dataset
+            const infoclickDefinition =
+              response.value.layer?.layersInfo?.[layerName]?.infobox || "";
+
+            // Prepare the return object
+            const r = {
+              features: olFeatures,
+              numHits: olFeatures.length,
+              displayName,
+              infoclickDefinition,
+            };
+
+            // Push this response's features to our common return object
+            // that will hold all datasets, if we have any features.
+            r.features.length > 0 && features.push(r);
           }
         } else {
           // I'm adding this for pure readability. We don't want to throw any errors
