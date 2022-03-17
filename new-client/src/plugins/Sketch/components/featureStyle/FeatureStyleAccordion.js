@@ -161,7 +161,7 @@ const FeatureStyleAccordion = (props) => {
           {props.showOpacitySlider && (
             <OpacitySlider
               handleOpacityChange={props.handleOpacityChange}
-              opacity={props.color?.a || 100}
+              opacity={isNaN(props.color?.a) ? 1 : props.color.a}
             />
           )}
           {props.showStrokeWidthSlider && (
