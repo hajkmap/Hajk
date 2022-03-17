@@ -1,7 +1,7 @@
-import AddIcon from "@material-ui/icons/Add";
 import DeleteIcon from "@material-ui/icons/Delete";
-import DirectionsIcon from "@material-ui/icons/Directions";
-import CreateIcon from "@material-ui/icons/Create";
+import FormatShapesIcon from "@material-ui/icons/FormatShapes";
+import OpenWithIcon from "@material-ui/icons/OpenWith";
+import EditIcon from "@material-ui/icons/Edit";
 import SaveIcon from "@material-ui/icons/Save";
 import ImportExportIcon from "@material-ui/icons/ImportExport";
 import SettingsIcon from "@material-ui/icons/Settings";
@@ -12,21 +12,21 @@ export const ACTIVITIES = [
     tooltip: "Lägg till nya objekt.",
     information:
       "Lägg till objekt genom att rita i kartan. Börja med att välja vilken typ av objekt du vill rita nedan.",
-    icon: <AddIcon />,
+    icon: <EditIcon />,
   },
   {
     id: "EDIT",
     tooltip: "Redigera existerande objekt.",
     information:
       "Redigera objekt du ritat tidigare genom att flytta noder, eller ändra färg.",
-    icon: <CreateIcon />,
+    icon: <FormatShapesIcon />,
   },
   {
     id: "MOVE",
     tooltip: "Flytta existerande objekt.",
     information:
       'Klicka på det objekt i kartan som du vill flytta för att aktivera "flytt-läge". Dra sedan objektet till rätt plats.',
-    icon: <DirectionsIcon />,
+    icon: <OpenWithIcon />,
   },
   {
     id: "DELETE",

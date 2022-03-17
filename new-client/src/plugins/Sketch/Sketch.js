@@ -1,6 +1,6 @@
 import React from "react";
 import Observer from "react-event-observer";
-import GestureIcon from "@material-ui/icons/Gesture";
+import EditIcon from "@material-ui/icons/Edit";
 
 // Helpers
 import LocalStorageHelper from "utils/LocalStorageHelper";
@@ -191,7 +191,7 @@ const Sketch = (props) => {
       {...props}
       type="Sketch"
       custom={{
-        icon: <GestureIcon />,
+        icon: <EditIcon />,
         title: "Rita",
         description: "Skapa dina helt egna geometrier!",
         height: "dynamic",
