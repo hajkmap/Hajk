@@ -43,9 +43,9 @@ import { getArea as getExtentArea } from "ol/extent";
  * - get/set drawStyleSettings(): Get or set the style settings used by the draw-model.
  * - get/set labelFormat(): Sets the format on the labels. ("AUTO", "M2", "KM2", "HECTARE")
  * - get/set showDrawTooltip(): Get or set wether a tooltip should be shown when drawing.
- * - get/set showFeatureMeasurements(): Get or set wether drawn feature measurements should be shown or not.
  * - get/set modifyActive(): Get or set wether the Modify-interaction should be active or not.
  * - get/set translateActive(): Get or set wether the Translate-interaction should be active or not.
+ * - get/set measurementSettings(): Get or set the measurement-settings (units, show-area etc.)
  */
 class DrawModel {
   #map;
@@ -61,7 +61,7 @@ class DrawModel {
   #drawTooltip;
   #currentPointerCoordinate;
   #showDrawTooltip;
-  #showFeatureMeasurements;
+  #measurementSettings;
   #drawStyleSettings;
   #textStyleSettings;
   #drawInteraction;
@@ -102,7 +102,8 @@ class DrawModel {
     // which will act as a prefix on all messages published on the
     // supplied observer.
     this.#observerPrefix = this.#getObserverPrefix(settings);
-    this.#showFeatureMeasurements = settings.showFeatureMeasurements ?? true;
+    this.measurementSettings =
+      settings.measurementSettings ?? this.#getDefaultMeasurementSettings();
     this.#drawStyleSettings =
       settings.drawStyleSettings ?? this.#getDefaultDrawStyleSettings();
     this.#textStyleSettings =
@@ -182,6 +183,17 @@ class DrawModel {
       lineDash: strokeDash,
       strokeWidth: strokeWidth,
       fillColor: fillColor,
+    };
+  };
+
+  // Returns the default settings used to display measurement-labels
+  #getDefaultMeasurementSettings = () => {
+    return {
+      showText: false,
+      showArea: false,
+      showPerimeter: false,
+      areaUnit: "AUTO",
+      lengthUnit: "AUTO",
     };
   };
 
@@ -374,11 +386,11 @@ class DrawModel {
       feature.get("DRAW_METHOD") || feature.get("geometryType");
     // And check if we're supposed to be showing text or not.
     // (We're never showing text on arrow-features, and text-features override
-    // the showFeatureMeasurements-tag, since the text-features would be useless
+    // the measurement-settings, since the text-features would be useless
     // if the text wasn't shown).
     return (
       featureDrawMethod !== "Arrow" &&
-      (this.#showFeatureMeasurements || featureDrawMethod === "Text")
+      (this.#measurementSettings.showText || featureDrawMethod === "Text")
     );
   };
 
@@ -617,7 +629,7 @@ class DrawModel {
     }
     // Otherwise we return the measurement-text (If we're supposed to
     // show it)!
-    return this.#showFeatureMeasurements
+    return this.#measurementSettings.showText
       ? this.#getFeatureMeasurementLabel(feature)
       : "";
   };
@@ -833,7 +845,7 @@ class DrawModel {
     drawnFeatures.forEach((feature) => {
       // Get the current style.
       const featureStyle = feature.getStyle();
-      // Get an updated text-style (which depends on #showFeatureMeasurements).
+      // Get an updated text-style (which depends on the #measurementSettings).
       const textStyle = this.#getFeatureTextStyle(feature);
       // Set the updated text-style on the base-style.
       Array.isArray(featureStyle)
@@ -1854,30 +1866,6 @@ class DrawModel {
     };
   };
 
-  // Set:er allowing us to change if measurements of the drawn features should
-  // be shown or not. Also makes sure to refresh the current features text-style.
-  setShowFeatureMeasurements = (showFeatureMeasurements) => {
-    // Let's make sure we're provided proper input before we set anything
-    if (typeof showFeatureMeasurements !== "boolean") {
-      // If we were not, let's return a fail message
-      return this.#getSetFailedObject(
-        this.showFeatureMeasurements,
-        showFeatureMeasurements
-      );
-    }
-    // If we've made it this far, we can go ahead and set the internal value.
-    this.#showFeatureMeasurements = showFeatureMeasurements;
-    // Then we have to refresh the style so that the change is shown.
-    this.#refreshFeaturesTextStyle();
-    // And return a success-message
-    return {
-      status: "SUCCESS",
-      message: `Measurement labels are now ${
-        showFeatureMeasurements ? "shown" : "hidden"
-      }`,
-    };
-  };
-
   // Set:er allowing us to change the style settings used in the draw-layer
   // The fill- and strokeColor passed might be either a string, or an object containing
   // r-, g-, b-, and a-properties. If they are objects, we have to make sure to parse them
@@ -1938,6 +1926,17 @@ class DrawModel {
       : this.#disableTranslateInteraction();
   };
 
+  setMeasurementSettings = (settings) => {
+    // First we'll update the private field
+    this.#measurementSettings = settings;
+    // Then we have to refresh the style so that the change is shown.
+    this.#refreshFeaturesTextStyle();
+  };
+
+  getMeasurementSettings = () => {
+    return this.#measurementSettings;
+  };
+
   // Get:er returning the name of the draw-layer.
   getCurrentLayerName = () => {
     return this.#layerName;
@@ -1971,11 +1970,6 @@ class DrawModel {
   // Get:er returning the state of the showDrawTooltip
   getShowDrawTooltip = () => {
     return this.#showDrawTooltip;
-  };
-
-  // Get:er returning the state of the showFeatureMeasurements
-  getShowFeatureMeasurements = () => {
-    return this.#showFeatureMeasurements;
   };
 
   // Get:er returning the current draw-style settings

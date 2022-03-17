@@ -15,17 +15,17 @@ import DrawModel from "../../models/DrawModel";
 import KmlModel from "models/KmlModel";
 
 // Constants
-import { STORAGE_KEY, DEFAULT_USER_SETTINGS } from "./constants";
+import { STORAGE_KEY, DEFAULT_MEASUREMENT_SETTINGS } from "./constants";
 
 // Hooks
 import useCookieStatus from "hooks/useCookieStatus";
 
-// Returns the userSettings-object from LS if it exists, otherwise it returns
-// the default user-settings. The LS might be empty since the user might have chosen
+// Returns the measurement-settings-object from LS if it exists, otherwise it returns
+// the default measurement-settings. The LS might be empty since the user might have chosen
 // not to accept functional cookies.
-const getUserSettings = () => {
-  const { userSettings } = LocalStorageHelper.get(STORAGE_KEY);
-  return userSettings || DEFAULT_USER_SETTINGS;
+const getMeasurementSettings = () => {
+  const { measurementSettings } = LocalStorageHelper.get(STORAGE_KEY);
+  return measurementSettings || DEFAULT_MEASUREMENT_SETTINGS;
 };
 
 const Sketch = (props) => {
@@ -49,8 +49,10 @@ const Sketch = (props) => {
   const [pluginShown, setPluginShown] = React.useState(
     props.options.visibleAtStart ?? false
   );
-  // We have to keep track of some user-settings!
-  const [userSettings, setUserSettings] = React.useState(getUserSettings());
+  // We have to keep track of some measurement-settings
+  const [measurementSettings, setMeasurementSettings] = React.useState(
+    getMeasurementSettings()
+  );
   // We're gonna need to keep track of if we're allowed to save stuff in LS. Let's use the hook.
   const { functionalCookiesOk } = useCookieStatus(props.app.globalObserver);
   // The local observer will handle the communication between models and views.
@@ -63,7 +65,7 @@ const Sketch = (props) => {
         layerName: "sketchLayer",
         map: props.map,
         observer: localObserver,
-        showFeatureMeasurements: userSettings.showText,
+        measurementSettings: measurementSettings,
       })
   );
 
@@ -162,15 +164,17 @@ const Sketch = (props) => {
     drawModel.setTranslateActive(translateEnabled);
   }, [drawModel, translateEnabled]);
 
-  // An effect that makes sure to sync the user-settings to LS (if we are allowed).
+  // An effect making sure to update the measurement-settings in the draw-model
+  // (and in LS if thats OK) when they are changed in the view.
   React.useEffect(() => {
     if (functionalCookiesOk) {
       LocalStorageHelper.set(STORAGE_KEY, {
         ...LocalStorageHelper.get(STORAGE_KEY),
-        userSettings: { ...userSettings, showText: userSettings.showText },
+        measurementSettings: measurementSettings,
       });
     }
-  }, [userSettings, functionalCookiesOk]);
+    drawModel.setMeasurementSettings(measurementSettings);
+  }, [functionalCookiesOk, drawModel, measurementSettings]);
 
   // We're gonna need to catch if the user closes the window, and make sure to
   // update the state so that the effect handling the draw-interaction-toggling fires.
@@ -217,8 +221,8 @@ const Sketch = (props) => {
         setTranslateEnabled={setTranslateEnabled}
         editFeature={editFeature}
         moveFeatures={moveFeatures}
-        userSettings={userSettings}
-        setUserSettings={setUserSettings}
+        measurementSettings={measurementSettings}
+        setMeasurementSettings={setMeasurementSettings}
       />
     </BaseWindowPlugin>
   );
