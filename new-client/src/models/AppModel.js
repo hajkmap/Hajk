@@ -336,16 +336,21 @@ class AppModel {
     if (useNewInfoclick) {
       const mapClickModel = new MapClickModel(this.map);
 
-      mapClickModel.bindMapClick((featureCollection) => {
-        console.log("featureCollection: ", featureCollection);
-        // TODO: Handle features where featuresCollection.type === "GetFeatureInfoResults"
-        // and featuresCollection.type === "QueryableLayerResults"
+      mapClickModel.bindMapClick((featureCollections) => {
+        const featureCollectionsToBeHandledByMapClickViewer =
+          featureCollections.filter((fc) => fc.type !== "SearchResults");
+        if (featureCollectionsToBeHandledByMapClickViewer.length > 0) {
+          this.globalObserver.publish(
+            "mapClick.featureCollections",
+            featureCollectionsToBeHandledByMapClickViewer
+          );
+        }
 
         // Next, handle search results features.
         // Check if we've got any features from the search layer,
         // and if we do, announce it to the search component so it can
         // show relevant feature in the search results list.
-        const searchResultFeatures = featureCollection.find(
+        const searchResultFeatures = featureCollections.find(
           (c) => c.type === "SearchResults"
         )?.features;
 

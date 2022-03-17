@@ -19,6 +19,7 @@ import Announcement from "./Announcement/Announcement";
 import Alert from "./Alert";
 import PluginWindows from "./PluginWindows";
 import SimpleDialog from "./SimpleDialog";
+import MapClickViewer from "./MapClickViewer/MapClickViewer";
 
 import Search from "./Search/Search.js";
 
@@ -810,6 +811,11 @@ class App extends React.PureComponent {
     const showMapSwitcher =
       clean === false && config.activeMap !== "simpleMapConfig";
 
+    const useNewInfoclick =
+      config.mapConfig.tools.find((t) => t.type === "infoclick")?.options
+        ?.useNewInfoclick === true;
+    console.log("useNewInfoclick: ", useNewInfoclick);
+
     return (
       <SnackbarProvider
         maxSnack={3}
@@ -963,7 +969,10 @@ class App extends React.PureComponent {
               },
             }}
           >
-            {this.renderInfoclickWindow()}
+            {useNewInfoclick === false && this.renderInfoclickWindow()}
+            {useNewInfoclick && (
+              <MapClickViewer globalObserver={this.globalObserver} />
+            )}
             <PluginWindows
               plugins={this.appModel.getBothDrawerAndWidgetPlugins()}
             />
