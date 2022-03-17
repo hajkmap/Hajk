@@ -150,3 +150,12 @@ export const DEFAULT_USER_SETTINGS = {
 };
 
 export const STORAGE_KEY = "sketch";
+
+// How many characters we allow the user to save in LS.
+export const MAX_LS_CHARS = 1e6;
+
+export const PROMPT_TEXTS = {
+  saveOverflow: "Objekten kunde inte sparas. Arbetsytan för många objekt.",
+  saveNoFeatures: "Kunde inte skapa arbetsyta, inga ritobjekt hittades.",
+  saveSuccess: "Arbetsytan sparades utan problem.",
+};
