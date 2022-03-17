@@ -733,8 +733,8 @@ class DrawModel {
       // (in case of the special Arrow feature-type) we have to make sure to get
       // the actual base-style (which is located at position 0 in the style-array).
       const color = Array.isArray(featureStyle)
-        ? featureStyle[0].getFill().getColor()
-        : featureStyle.getFill().getColor();
+        ? featureStyle[0]?.getFill()?.getColor()
+        : featureStyle?.getFill()?.getColor();
       return { color: this.getRGBAString(color) };
     } catch (error) {
       console.error(`Failed to extract fill-style, ${error.message}`);
@@ -749,11 +749,11 @@ class DrawModel {
       // (in case of the special Arrow feature-type) we have to make sure to get
       // the actual base-style (which is located at position 0 in the style-array).
       const s = Array.isArray(featureStyle)
-        ? featureStyle[0].getStroke()
-        : featureStyle.getStroke();
-      const color = s.getColor();
-      const dash = s.getLineDash();
-      const width = s.getWidth();
+        ? featureStyle[0]?.getStroke()
+        : featureStyle?.getStroke();
+      const color = s?.getColor();
+      const dash = s?.getLineDash();
+      const width = s?.getWidth();
       return {
         color: this.getRGBAString(color),
         dash,
