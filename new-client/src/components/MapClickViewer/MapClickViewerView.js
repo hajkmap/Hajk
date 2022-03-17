@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 
 import FeatureCollectionsListView from "./views/FeatureCollectionsListView";
+import FeaturesListView from "./views/FeaturesListView";
 
 const MapClickViewerView = (props) => {
   const { featureCollections } = props;
@@ -9,21 +10,30 @@ const MapClickViewerView = (props) => {
     useState(null);
 
   useEffect(() => {
-    console.log(
-      "featureCollection changed, resetting selected feature collection"
-    );
     setSelectedFeatureCollection(null);
   }, [featureCollections]);
 
-  return (
-    selectedFeatureCollection === null && (
-      <FeatureCollectionsListView
-        featureCollections={featureCollections}
-        selectedFeatureCollection={selectedFeatureCollection}
-        setSelectedFeatureCollection={setSelectedFeatureCollection}
-      />
-    )
-  );
+  switch (selectedFeatureCollection) {
+    case null:
+      return (
+        <FeatureCollectionsListView
+          featureCollections={featureCollections}
+          selectedFeatureCollection={selectedFeatureCollection}
+          setSelectedFeatureCollection={setSelectedFeatureCollection}
+        />
+      );
+
+    default:
+      return (
+        <FeaturesListView
+          featureCollection={featureCollections.find(
+            (fc) => fc.layerId === selectedFeatureCollection
+          )}
+          selectedFeatureCollection={selectedFeatureCollection}
+          setSelectedFeatureCollection={setSelectedFeatureCollection}
+        />
+      );
+  }
 };
 
 export default MapClickViewerView;
