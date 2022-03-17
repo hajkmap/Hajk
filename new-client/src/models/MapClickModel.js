@@ -42,12 +42,21 @@ export default class MapClickModel {
    * @param {Layer} layer
    * @return {string} layerName
    */
-  #getLayerNameFromFid = (feature, layer) => {
+  #getLayerNameFromFeatureAndLayer = (feature, layer) => {
     return Object.keys(layer.layersInfo).find((id) => {
       const fid = feature.getId().split(".")[0];
       const layerId = id.split(":").length === 2 ? id.split(":")[1] : id;
       return fid === layerId;
     });
+  };
+  /**
+   * @summary Get the name of a layer by taking a look at the first part of a feature's name.
+   *
+   * @param {Feature} feature
+   * @return {string} layerName
+   */
+  #getLayerNameFromVectorFeature = (feature) => {
+    return feature.getId().split(".")[0];
   };
 
   /**
@@ -65,7 +74,10 @@ export default class MapClickModel {
       const responses = await Promise.allSettled(this.#getResponsePromises(e));
       const features = [];
 
-      // …loop through the responses.
+      // …prepare the Array that will hold our feature collections…
+      const getFeatureInfoResults = [];
+
+      // …and loop through the responses.
       for (const response of responses) {
         // If the response succeeded…
         if (response.status === "fulfilled") {
@@ -98,20 +110,26 @@ export default class MapClickModel {
               break;
           }
 
-          // If parsing resulted in at least one feature, let's go on.
-          if (olFeatures.length > 0) {
+          // Next, loop through the features (if we managed to parse any).
+          for (const feature of olFeatures) {
             // First we need the sublayer's name in order to grab
             // the relevant caption, infobox definition, etc.
             // The only way to get it now is by looking into
             // the feature id, because it includes the layer's
             // name as a part of the id itself.
-            // We can use any returned feature we like, as all
-            // come from the same sublayer - so let's grab the
-            // first one.
-            const layerName = this.#getLayerNameFromFid(
-              olFeatures[0],
+            const layerName = this.#getLayerNameFromFeatureAndLayer(
+              feature,
               response.value.layer
             );
+
+            // Having just the layer's name as an ID is not safe - multiple
+            // WFS's may use the same name for two totally different layers.
+            // So we need something more. Luckily, we can use the UID property
+            // of our OL layer.
+            const layerId =
+              layerName +
+              (response.value.layer?.ol_uid &&
+                "." + response.value.layer?.ol_uid);
 
             // Get caption for this dataset
             const displayName =
@@ -123,19 +141,32 @@ export default class MapClickModel {
             const infoclickDefinition =
               response.value.layer?.layersInfo?.[layerName]?.infobox || "";
 
-            // Prepare the return object
-            const r = {
-              layerId: response.value.layer?.ol_uid,
-              type: "GetFeatureInfoResults",
-              features: olFeatures,
-              numHits: olFeatures.length,
-              displayName,
-              infoclickDefinition,
-            };
+            // Before we create the feature collection, ensure that
+            // it doesn't exist already.
+            const existingLayer = getFeatureInfoResults.find(
+              (f) => f.layerId === layerId
+            );
 
-            // Push this response's features to our common return object
-            // that will hold all datasets, if we have any features.
-            r.features.length > 0 && features.push(r);
+            // If it exists…
+            if (existingLayer) {
+              // …push the current feature…
+              existingLayer.features.push(feature);
+              // …and increase the count.
+              existingLayer.numHits++;
+            } else {
+              // If this is the first feature from this layer…
+              // …prepare the return object…
+              const r = {
+                layerId: layerId,
+                type: "GetFeatureInfoResults",
+                features: [feature],
+                numHits: 1,
+                displayName,
+                infoclickDefinition,
+              };
+              // …and push onto the array.
+              getFeatureInfoResults.push(r);
+            }
           }
         } else {
           // I'm adding this for pure readability. We don't want to throw any errors
@@ -145,6 +176,13 @@ export default class MapClickModel {
           // So we just go on, silently.
           console.error("Couldn't parse GetFeatureInfo.", response.reason);
         }
+      }
+
+      // When we're out of the loop, and if we've got any
+      // feature collections pushed…
+      if (getFeatureInfoResults.length > 0) {
+        // …let's spread them onto our features array.
+        features.push(...getFeatureInfoResults);
       }
 
       // In addition to WMS GetFeatureInfo, we must also query any local
@@ -176,8 +214,16 @@ export default class MapClickModel {
             // Keep in mind that at this point we loop through _features_, not
             // layers. But we want to group features from the same layer together.
             // So the first step is to get a unique ID for the layer that the
-            // current feature belongs to:
-            const layerId = layer?.ol_uid || 0;
+            // current feature belongs to. We create it by combining the layer's name…
+            const layerName = this.#getLayerNameFromVectorFeature(
+              feature,
+              layer
+            );
+
+            // …with the OL layer's UID property.
+            const layerUid = layer?.ol_uid;
+            const layerId =
+              layerName + (layerUid !== undefined && "." + layerUid);
 
             // Next, check if we already have this layer in our collection…
             const existingLayer = queryableLayerResults.find(
@@ -193,7 +239,7 @@ export default class MapClickModel {
             } else {
               // Else, create the return object…
               const r = {
-                layerId: layer.ol_uid, // Unique layer id, used above
+                layerId: layerId, // Unique layer id, used above
                 type: "QueryableLayerResults",
                 features: [feature], // Create a new Array, add the current feature
                 numHits: 1, // Duh…
