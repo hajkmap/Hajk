@@ -219,6 +219,8 @@ class Manager extends Component {
           date: layer.date,
           icon: layer.icon || "",
           infobox: layer.infobox,
+          displayFields: layer.displayFields,
+          shortDisplayFields: layer.shortDisplayFields,
           legend: layer.legend,
           legendIcon: layer.legendIcon,
           owner: layer.owner,
