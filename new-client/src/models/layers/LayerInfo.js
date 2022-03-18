@@ -2,6 +2,8 @@ export default class LayerInfo {
   constructor(properties) {
     this.attribution = properties.attribution;
     this.caption = properties.caption;
+    this.displayFields = properties.displayFields;
+    this.shortDisplayFields = properties.shortDisplayFields;
     this.infoOwner = properties.infoOwner;
     this.infoText = properties.infoText;
     this.infoTitle = properties.infoTitle;

@@ -141,6 +141,21 @@ export default class MapClickModel {
             const infoclickDefinition =
               response.value.layer?.layersInfo?.[layerName]?.infobox || "";
 
+            // Prepare displayFields and shortDisplayFields.
+            // We need them to determine what should be displayed
+            // in the features list view (which properties are interesting
+            // enough to be shown at this stage?).
+            const displayFields =
+              response.value.layer?.layersInfo?.[layerName]?.searchDisplayName
+                ?.split(",")
+                .map((df) => df.trim()) || [];
+            const shortDisplayFields =
+              response.value.layer?.layersInfo?.[
+                layerName
+              ]?.searchShortDisplayName
+                ?.split(",")
+                .map((df) => df.trim()) || [];
+
             // Before we create the feature collection, ensure that
             // it doesn't exist already.
             const existingLayer = getFeatureInfoResults.find(
@@ -163,6 +178,8 @@ export default class MapClickModel {
                 numHits: 1,
                 displayName,
                 infoclickDefinition,
+                displayFields,
+                shortDisplayFields,
               };
               // …and push onto the array.
               getFeatureInfoResults.push(r);
@@ -251,6 +268,16 @@ export default class MapClickModel {
                   layer.get("layerInfo")?.information ||
                   layer.get("information") ||
                   "",
+                displayFields:
+                  layer
+                    .get("layerInfo")
+                    ?.displayFields?.split(",")
+                    .map((df) => df.trim()) || [],
+                shortDisplayFields:
+                  layer
+                    .get("layerInfo")
+                    ?.shortDisplayFields?.split(",")
+                    .map((df) => df.trim()) || [],
               };
               // …and push to the layers collection.
               queryableLayerResults.push(r);

@@ -6,7 +6,7 @@ import ListItemText from "@mui/material/ListItemText";
 import ListItemAvatar from "@mui/material/ListItemAvatar";
 import Avatar from "@mui/material/Avatar";
 import ImageIcon from "@mui/icons-material/MapTwoTone";
-import { Divider, ListSubheader, Typography } from "@mui/material";
+import { Divider, ListSubheader } from "@mui/material";
 
 const FeaturesListView = (props) => {
   const {
@@ -14,40 +14,68 @@ const FeaturesListView = (props) => {
     selectedFeatureCollection,
     setSelectedFeatureCollection,
   } = props;
+  /**
+   * @summary Try to prepare a nice label for the list view.
+   * @description Admin UI can set the displayFields property. If it exists, we want to grab
+   * the specified properties' values for the given feature. If our attempt results in an
+   * empty string, we try with a fallback.
+   *
+   * @param {*} feature
+   * @return {*}
+   */
+  const preparePrimaryLabel = (feature) => {
+    return (
+      featureCollection.displayFields
+        .map((df) => {
+          return feature.get(df);
+        })
+        .join(", ") || tryFallbackIfNoLabelCouldBeCreated(feature)
+    );
+  };
+  /**
+   * @summary If primary label couldn't be created using the primary algorithm,
+   * let's try grabbing the ID itself. Should that fail, fallback to a hard-coded
+   * string.
+   *
+   * @param {*} feature
+   * @return {*}
+   */
+  const tryFallbackIfNoLabelCouldBeCreated = (feature) => {
+    return feature.getId() || "(unknown feature)";
+  };
 
   return (
-    <>
-      <Button onClick={() => setSelectedFeatureCollection(null)} fullWidth>
-        Tillbaka
-      </Button>
-      <Divider />
-      <List
-        subheader={
-          <ListSubheader>{featureCollection.displayName}</ListSubheader>
-        }
-        sx={{ width: "100%", maxWidth: 360, bgcolor: "background.paper" }}
-      >
-        {featureCollection.features.map((f, i) => {
-          return (
-            <ListItemButton
-              key={i}
-              // selected={selectedFeatureCollection === fc.layerId}
-              // onClick={() => setSelectedFeatureCollection(fc.layerId)}
-            >
-              <ListItemAvatar>
-                <Avatar>
-                  <ImageIcon />
-                </Avatar>
-              </ListItemAvatar>
-              <ListItemText
-                primary={f.getId()}
-                // secondary={`${fc.numHits} träffar`}
-              />
-            </ListItemButton>
-          );
-        })}
-      </List>
-    </>
+    featureCollection && (
+      <>
+        <Button onClick={() => setSelectedFeatureCollection(null)} fullWidth>
+          Tillbaka
+        </Button>
+        <Divider />
+        <List
+          subheader={
+            <ListSubheader>{featureCollection.displayName}</ListSubheader>
+          }
+          sx={{ width: "100%", maxWidth: 360, bgcolor: "background.paper" }}
+        >
+          {featureCollection.features.map((f, i) => {
+            return (
+              <ListItemButton
+                key={i}
+                // selected={selectedFeatureCollection === fc.layerId}
+                // onClick={() => setSelectedFeatureCollection(fc.layerId)}
+              >
+                <ListItemAvatar>
+                  <Avatar>
+                    <ImageIcon />
+                  </Avatar>
+                </ListItemAvatar>
+                <ListItemText>{preparePrimaryLabel(f)}</ListItemText>
+              </ListItemButton>
+            );
+          })}
+        </List>
+      </>
+    )
   );
 };
 
