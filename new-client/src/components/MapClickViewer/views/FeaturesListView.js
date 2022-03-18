@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import Button from "@mui/material/Button";
 import List from "@mui/material/List";
 import ListItemButton from "@mui/material/ListItemButton";
@@ -8,12 +8,16 @@ import Avatar from "@mui/material/Avatar";
 import ImageIcon from "@mui/icons-material/MapTwoTone";
 import { Divider, ListSubheader } from "@mui/material";
 
+import FeatureDetailView from "./FeatureDetailView";
+
 const FeaturesListView = (props) => {
   const {
     featureCollection,
     selectedFeatureCollection,
     setSelectedFeatureCollection,
   } = props;
+
+  const [selectedFeature, setSelectedFeature] = useState(null);
   /**
    * @summary Try to prepare a nice label for the list view.
    * @description Admin UI can set the displayFields property. If it exists, we want to grab
@@ -44,11 +48,11 @@ const FeaturesListView = (props) => {
     return feature.getId() || "(unknown feature)";
   };
 
-  return (
-    featureCollection && (
+  return featureCollection ? (
+    selectedFeature === null ? (
       <>
         <Button onClick={() => setSelectedFeatureCollection(null)} fullWidth>
-          Tillbaka
+          Tillbaka till steg 1
         </Button>
         <Divider />
         <List
@@ -61,8 +65,8 @@ const FeaturesListView = (props) => {
             return (
               <ListItemButton
                 key={i}
-                // selected={selectedFeatureCollection === fc.layerId}
-                // onClick={() => setSelectedFeatureCollection(fc.layerId)}
+                // selected={selectedFeature === fc.layerId}
+                onClick={() => setSelectedFeature(f.getId())}
               >
                 <ListItemAvatar>
                   <Avatar>
@@ -75,8 +79,21 @@ const FeaturesListView = (props) => {
           })}
         </List>
       </>
+    ) : (
+      <>
+        <FeatureDetailView
+          feature={featureCollection.features.find(
+            (f) => f.getId() === selectedFeature
+          )}
+          featureCollection={featureCollection}
+          selectedFeature={selectedFeature}
+          setSelectedFeature={setSelectedFeature}
+          selectedFeatureCollection={selectedFeatureCollection}
+          setSelectedFeatureCollection={setSelectedFeatureCollection}
+        />
+      </>
     )
-  );
+  ) : null;
 };
 
 export default FeaturesListView;
