@@ -339,12 +339,14 @@ class AppModel {
       mapClickModel.bindMapClick((featureCollections) => {
         const featureCollectionsToBeHandledByMapClickViewer =
           featureCollections.filter((fc) => fc.type !== "SearchResults");
-        if (featureCollectionsToBeHandledByMapClickViewer.length > 0) {
-          this.globalObserver.publish(
-            "mapClick.featureCollections",
-            featureCollectionsToBeHandledByMapClickViewer
-          );
-        }
+
+        // Publish the retrived collections, even if they're empty. We want the
+        // handling components to know, so they can act accordingly (e.g. close
+        // window if no features are to be shown).
+        this.globalObserver.publish(
+          "mapClick.featureCollections",
+          featureCollectionsToBeHandledByMapClickViewer
+        );
 
         // Next, handle search results features.
         // Check if we've got any features from the search layer,

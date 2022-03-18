@@ -20,10 +20,16 @@ const MapClickViewer = (props) => {
     const mapClickObserver = globalObserver.subscribe(
       "mapClick.featureCollections",
       (fc) => {
+        console.log(
+          "Setting feature collection to this and showing windows (if there are any collections):",
+          fc
+        );
         if (fc.length > 0) {
-          console.log("Setting feature collection and opening window:", fc);
           setFeatureCollections(fc);
           setOpen(true);
+        } else {
+          setFeatureCollections([]);
+          setOpen(false);
         }
       }
     );
