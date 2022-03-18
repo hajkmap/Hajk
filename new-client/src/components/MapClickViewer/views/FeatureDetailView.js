@@ -12,8 +12,10 @@ const FeatureDetailView = (props) => {
     setSelectedFeature,
     setSelectedFeatureCollection,
   } = props;
+  console.log("feature: ", feature);
+  console.log("selectedFeature: ", selectedFeature);
 
-  return selectedFeature ? (
+  return selectedFeature && feature ? (
     <>
       <Button onClick={() => setSelectedFeatureCollection(null)} fullWidth>
         Tillbaka till steg 1
