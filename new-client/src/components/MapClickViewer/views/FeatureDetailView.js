@@ -1,9 +1,8 @@
 import React from "react";
-import Button from "@mui/material/Button";
-import Divider from "@mui/material/Divider";
 
 import Breadcrumbs from "./Breadcrumbs";
 import DefaultTable from "./renderers/DefaultTable";
+import Markdown from "./renderers/Markdown";
 
 const FeatureDetailView = (props) => {
   const {
@@ -15,6 +14,10 @@ const FeatureDetailView = (props) => {
     setSelectedFeatureCollection,
   } = props;
 
+  const shouldRenderMarkdown = () =>
+    typeof featureCollection.infoclickDefinition === "string" &&
+    featureCollection.infoclickDefinition.trim().length > 0;
+
   return selectedFeature && feature ? (
     <>
       <Breadcrumbs
@@ -23,7 +26,11 @@ const FeatureDetailView = (props) => {
         featureCollection={featureCollection}
         feature={feature}
       />
-      <DefaultTable feature={feature} />
+      {shouldRenderMarkdown() === true ? (
+        <Markdown feature={feature} featureCollection={featureCollection} />
+      ) : (
+        <DefaultTable feature={feature} />
+      )}
     </>
   ) : null;
 };
