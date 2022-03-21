@@ -54,8 +54,8 @@ const FeaturesListView = (props) => {
       <>
         <Breadcrumbs
           setSelectedFeatureCollection={setSelectedFeatureCollection}
+          featureCollection={featureCollection}
         />
-        <Divider />
         <List
           subheader={
             <ListSubheader>{featureCollection.displayName}</ListSubheader>

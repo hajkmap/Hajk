@@ -14,14 +14,14 @@ const FeatureDetailView = (props) => {
     setSelectedFeature,
     setSelectedFeatureCollection,
   } = props;
-  console.log("feature: ", feature);
-  console.log("selectedFeature: ", selectedFeature);
 
   return selectedFeature && feature ? (
     <>
       <Breadcrumbs
         setSelectedFeatureCollection={setSelectedFeatureCollection}
         setSelectedFeature={setSelectedFeature}
+        featureCollection={featureCollection}
+        feature={feature}
       />
       <DefaultTable feature={feature} />
     </>
