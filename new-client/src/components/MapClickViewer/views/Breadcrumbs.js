@@ -1,5 +1,6 @@
 import React from "react";
-import Button from "@mui/material/Button";
+
+import { Breadcrumbs as MUIBreadcrumbs, Link, Typography } from "@mui/material";
 
 const Breadcrumbs = (props) => {
   const {
@@ -13,18 +14,35 @@ const Breadcrumbs = (props) => {
   console.log("Breadcrumbs: ", props);
 
   return (
-    <>
+    <MUIBreadcrumbs separator="›" aria-label="breadcrumb" sx={{ p: 1 }}>
       {setSelectedFeatureCollection && (
-        <Button onClick={() => setSelectedFeatureCollection(null)} fullWidth>
-          Tillbaka till steg 1
-        </Button>
+        <Link
+          onClick={() => setSelectedFeatureCollection(null)}
+          underline="hover"
+          color="inherit"
+          href="#"
+        >
+          Översikt
+        </Link>
+      )}
+      {setSelectedFeatureCollection && !setSelectedFeature && (
+        <Typography color="text.primary">Listvy</Typography>
+      )}
+
+      {setSelectedFeature && (
+        <Link
+          onClick={() => setSelectedFeature(null)}
+          underline="hover"
+          color="inherit"
+          href="#"
+        >
+          Listvy
+        </Link>
       )}
       {setSelectedFeature && (
-        <Button onClick={() => setSelectedFeature(null)} fullWidth>
-          Tillbaka till steg 2
-        </Button>
+        <Typography color="text.primary">Detaljvy</Typography>
       )}
-    </>
+    </MUIBreadcrumbs>
   );
 };
 
