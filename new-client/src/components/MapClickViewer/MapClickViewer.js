@@ -7,8 +7,11 @@ import MapClickViewerView from "./MapClickViewerView";
 
 // Models
 
+// Context
+import { MapClickViewerContext } from "./MapClickViewerContext";
+
 const MapClickViewer = (props) => {
-  console.log("Render MapClickViewer");
+  console.log("MapClickViewer props: ", props);
 
   const { globalObserver } = props;
 
@@ -56,7 +59,9 @@ const MapClickViewer = (props) => {
       mode="window"
       onClose={closeWindow}
     >
-      <MapClickViewerView featureCollections={featureCollections} />
+      <MapClickViewerContext.Provider value={{ ...props }}>
+        <MapClickViewerView featureCollections={featureCollections} />
+      </MapClickViewerContext.Provider>
     </Window>
   );
 };
