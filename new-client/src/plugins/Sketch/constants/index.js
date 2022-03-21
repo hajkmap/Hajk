@@ -51,7 +51,7 @@ export const ACTIVITIES = [
   },
   {
     id: "SETTINGS",
-    tooltip: "Ändra färg, linjebredd, etc.",
+    tooltip: "Ändra om objektens mått ska synas etc.",
     information: "Här kan du ändra verktygets inställningar.",
     icon: <SettingsIcon />,
   },
