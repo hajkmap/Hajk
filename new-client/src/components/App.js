@@ -330,6 +330,10 @@ class App extends React.PureComponent {
 
     this.globalObserver = new Observer();
 
+    this.infoclickOptions = this.props.config.mapConfig.tools.find(
+      (t) => t.type === "infoclick"
+    )?.options;
+
     // We have to initialize the cookie-manager so we know how cookies should be managed.
     // The manager should ideally only be initialized once, since the initialization determines
     // wether the cookie-notice has to be shown or not. Running setConfig() again will not lead
@@ -548,9 +552,7 @@ class App extends React.PureComponent {
 
   renderInfoclickWindow() {
     // Check if admin wants Infoclick to be active
-    const infoclickOptions = this.props.config.mapConfig.tools.find(
-      (t) => t.type === "infoclick"
-    )?.options;
+    const { infoclickOptions } = this;
 
     // The 'open' prop, below, will control whether the Window is
     // currently visible or not. The 'open' property itself
@@ -811,9 +813,7 @@ class App extends React.PureComponent {
     const showMapSwitcher =
       clean === false && config.activeMap !== "simpleMapConfig";
 
-    const useNewInfoclick =
-      config.mapConfig.tools.find((t) => t.type === "infoclick")?.options
-        ?.useNewInfoclick === true;
+    const useNewInfoclick = this.infoclickOptions?.useNewInfoclick === true;
     console.log("useNewInfoclick: ", useNewInfoclick);
 
     return (
@@ -971,7 +971,10 @@ class App extends React.PureComponent {
           >
             {useNewInfoclick === false && this.renderInfoclickWindow()}
             {useNewInfoclick && (
-              <MapClickViewer globalObserver={this.globalObserver} />
+              <MapClickViewer
+                globalObserver={this.globalObserver}
+                infoclickOptions={this.infoclickOptions}
+              />
             )}
             <PluginWindows
               plugins={this.appModel.getBothDrawerAndWidgetPlugins()}
