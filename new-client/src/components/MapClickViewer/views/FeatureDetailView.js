@@ -1,6 +1,8 @@
 import React from "react";
 import Button from "@mui/material/Button";
+import Divider from "@mui/material/Divider";
 
+import Breadcrumbs from "./Breadcrumbs";
 import DefaultTable from "./renderers/DefaultTable";
 
 const FeatureDetailView = (props) => {
@@ -17,12 +19,10 @@ const FeatureDetailView = (props) => {
 
   return selectedFeature && feature ? (
     <>
-      <Button onClick={() => setSelectedFeatureCollection(null)} fullWidth>
-        Tillbaka till steg 1
-      </Button>
-      <Button onClick={() => setSelectedFeature(null)} fullWidth>
-        Tillbaka till steg 2
-      </Button>
+      <Breadcrumbs
+        setSelectedFeatureCollection={setSelectedFeatureCollection}
+        setSelectedFeature={setSelectedFeature}
+      />
       <DefaultTable feature={feature} />
     </>
   ) : null;

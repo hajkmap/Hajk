@@ -8,6 +8,7 @@ import Avatar from "@mui/material/Avatar";
 import ImageIcon from "@mui/icons-material/MapTwoTone";
 import { Divider, ListSubheader } from "@mui/material";
 
+import Breadcrumbs from "./Breadcrumbs";
 import FeatureDetailView from "./FeatureDetailView";
 
 const FeaturesListView = (props) => {
@@ -51,9 +52,9 @@ const FeaturesListView = (props) => {
   return featureCollection ? (
     selectedFeature === null ? (
       <>
-        <Button onClick={() => setSelectedFeatureCollection(null)} fullWidth>
-          Tillbaka till steg 1
-        </Button>
+        <Breadcrumbs
+          setSelectedFeatureCollection={setSelectedFeatureCollection}
+        />
         <Divider />
         <List
           subheader={
