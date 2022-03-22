@@ -561,60 +561,79 @@ class DrawModel {
     }
   };
 
-  // Returns the area of the supplied feature in a readable format.
-  #getFeatureMeasurementLabel = (feature) => {
-    // First we must get the feature area, length, or placement.
-    // (Depending on if we're dealing with Point, LineString, or surface).
-    const featureMeasure = this.#getFeatureMeasurement(feature);
-    // Let's grab the geometry so that we can check what we're dealing with.
-    const featureGeometry = feature.getGeometry();
-    // First we'll check if we're dealing with a point. If we are, we return it's
-    // placement right a way. The measurement will be an array containing it's coordinates.
-    if (featureGeometry instanceof Point) {
-      // If we're dealing with a point, the measurement will be an array containing
-      // it's coordinates.
-      return `N: ${Math.round(featureMeasure[1])} E: ${Math.round(
-        featureMeasure[0]
-      )}`;
+  // Returns the area, perimeter, and/or length of the supplied feature in a readable format.
+  #getFeatureMeasurementLabel = (feature, labelType) => {
+    // First we must get the feature measurements (The returned measurements will differ
+    // Depending on if we're dealing with Point, LineString, or surface).
+    const measurements = this.#getFeatureMeasurements(feature);
+    // Then we'll reduce the measurements down to a string that we can show.
+    return measurements.reduce((acc, curr) => {
+      switch (curr.type) {
+        case "COORDINATES":
+          return (acc += `N: ${Math.round(curr.value[1])} E: ${Math.round(
+            curr.value[0]
+          )}`);
+        case "AREA":
+        case "PERIMETER":
+        case "LENGTH":
+          return (acc += this.#getFormattedMeasurementString(curr, labelType));
+        default:
+          return acc;
+      }
+    }, "");
+  };
+
+  #getFormattedMeasurementString = (measurement, labelType) => {
+    // Let's destruct some measurement-information that we can
+    // use to construct the measurement-string.
+    const { type, value, prefix } = measurement;
+    // We have to make sure that we're supposed to show the measurement-text.
+    // This is controlled in the measurement-settings, but is also affected by
+    // the supplied type (if we're creating a tooltip, we're always showing everything!).
+    const showMeasurement =
+      labelType === "TOOLTIP" ||
+      type === "LENGTH" ||
+      (type === "AREA" && this.#measurementSettings.showArea) ||
+      (type === "PERIMETER" && this.#measurementSettings.showPerimeter);
+    // If we're not supposed to be showing the measurement, lets return an empty string.
+    if (!showMeasurement) {
+      return "";
     }
-    // Then we'll check if we're dealing with a length measurement
-    const measureIsLength = featureGeometry instanceof LineString;
-    // Let's check how we're gonna present the label
+    // Otherwise we'll handle the formatting according to the labelFormat set by the user
     switch (this.#labelFormat) {
       case "AUTO":
-        // If the format is AUTO, we're checking if the measurement is large
-        // enough to show it in kilometers or not. First, we need to check
-        // where the cutoff point for the kilometer display is. (It will vary
-        // depending on if we're measuring length or area).
-        const kilometerCutoff = measureIsLength ? 1e3 : 1e6;
-        // If the measurement is larger or equal to the cutoff, we return a string
-        // formatted in kilometers.
-        if (featureMeasure >= kilometerCutoff) {
-          return this.#getKilometerMeasurementString(
-            featureMeasure,
-            measureIsLength
-          );
-        }
-        // Otherwise we return a string formatted in meters.
-        return this.#getMeasurementString(featureMeasure, measureIsLength);
+        const formatted = this.#shouldFormatToKm(value, type)
+          ? this.#getKilometerMeasurementString(value, type)
+          : this.#getMeasurementString(value, type);
+        return `${prefix} ${formatted}`;
       case "KM2":
         // If the format is "KM2", we'll show the measurement in km²
         // (Or km if we're measuring length). Rounded to show 3 decimals.
-        return this.#getKilometerMeasurementString(
-          featureMeasure,
-          measureIsLength
-        );
+        return `${prefix} ${this.#getKilometerMeasurementString(value, type)}`;
       case "HECTARE":
         // If the format is "HECTARE" we will show the measurement in hectare
         // if we're dealing with a surface. If we're dealing with a lineString
         // we will return the measurement with "M2" format.
-        return this.#getHectareMeasurementString(
-          featureMeasure,
-          measureIsLength
-        );
+        return `${prefix} ${this.#getHectareMeasurementString(value, type)}`;
       default:
         // Otherwise m² (or m) will do. (Displayed in local format).
-        return this.#getMeasurementString(featureMeasure, measureIsLength);
+        return `${prefix} ${this.#getMeasurementString(value, type)}`;
+    }
+  };
+
+  // Checks if the supplied value and type should be formatted to km or not.
+  #shouldFormatToKm = (value, type) => {
+    // If the format is AUTO, we're checking if the measurement is large
+    // enough to show it in kilometers or not. First, we need to set
+    // the cutoff points for the kilometer display.
+    const lengthCutOff = 1e3;
+    const areaCutOff = 1e6;
+    switch (type) {
+      case "LENGTH":
+      case "PERIMETER":
+        return value > lengthCutOff;
+      default:
+        return value > areaCutOff;
     }
   };
 
@@ -630,56 +649,118 @@ class DrawModel {
     // Otherwise we return the measurement-text (If we're supposed to
     // show it)!
     return this.#measurementSettings.showText
-      ? this.#getFeatureMeasurementLabel(feature)
+      ? this.#getFeatureMeasurementLabel(feature, "LABEL")
       : "";
   };
 
   // Returns the supplied measurement as a kilometer-formatted string.
   // If we're measuring area, km² is returned, otherwise, km is returned.
-  #getKilometerMeasurementString = (featureMeasure, measureIsLength) => {
-    return `${(featureMeasure / (measureIsLength ? 1e3 : 1e6)).toFixed(3)} ${
-      measureIsLength ? "km" : "km²"
-    }`;
+  #getKilometerMeasurementString = (featureMeasure, type) => {
+    switch (type) {
+      case "LENGTH":
+      case "PERIMETER":
+        return `${(featureMeasure / 1e3).toFixed(3)} km`;
+      default:
+        return `${(featureMeasure / 1e6).toFixed(3)} km²`;
+    }
   };
 
   // Returns the measurement in hectare if we're dealing with a surface, and if
   // we're dealing with a line-string we return the measurement in metres.
-  #getHectareMeasurementString = (featureMeasure, measureIsLength) => {
-    return measureIsLength
-      ? this.#getMeasurementString(featureMeasure, measureIsLength)
-      : `${(featureMeasure / 1e4).toFixed(3)} ha`;
+  #getHectareMeasurementString = (featureMeasure, type) => {
+    switch (type) {
+      case "LENGTH":
+      case "PERIMETER":
+        return this.#getMeasurementString(featureMeasure, type);
+      default:
+        return `${(featureMeasure / 1e4).toFixed(3)} ha`;
+    }
   };
 
   // Returns the supplied measurement as a locally formatted string.
   // If we're measuring area m² is returned, otherwise, m is returned.
-  #getMeasurementString = (featureMeasure, measureIsLength) => {
-    return `${featureMeasure.toLocaleString()} ${measureIsLength ? "m" : "m²"}`;
+  #getMeasurementString = (featureMeasure, type) => {
+    switch (type) {
+      case "LENGTH":
+      case "PERIMETER":
+        return `${featureMeasure.toLocaleString()} m`;
+      default:
+        return `${featureMeasure.toLocaleString()} m²`;
+    }
   };
 
   // Calculates the area, length, or placement of the supplied feature.
   // Accepts an OL-feature, and is tested for Circle, LineString, Point, and Polygon.
-  #getFeatureMeasurement = (feature) => {
+  #getFeatureMeasurements = (feature) => {
     // Let's get the geometry-type to begin with, we are going
     // to be handling points, line-strings, and surfaces differently.
     const geometry = feature.getGeometry();
     // If we're dealing with a point, we simply return the coordinates of the point.
     if (geometry instanceof Point) {
-      return geometry.getCoordinates();
+      return [
+        { type: "COORDINATES", value: geometry.getCoordinates(), prefix: "" },
+      ];
     }
     // Apparently the circle geometry instance does not expose a
     // getArea method. Here's a quick fix. (Remember that this area
     // is only used as an heads-up for the user.)
     if (geometry instanceof CircleGeometry) {
       const radius = geometry.getRadius();
-      return Math.round(Math.pow(radius, 2) * Math.PI);
+      return [
+        {
+          type: "AREA",
+          value: Math.round(Math.pow(radius, 2) * Math.PI),
+          prefix: "Area:",
+        },
+        {
+          type: "PERIMETER",
+          value: 2 * radius * Math.PI,
+          prefix: "\n Omkrets:",
+        },
+      ];
     }
     // If we're dealing with a line we cannot calculate an area,
-    // instead, we return the length.
+    // instead, we only calculate the length.
     if (geometry instanceof LineString) {
-      return Math.round(geometry.getLength());
+      return [
+        { type: "LENGTH", value: Math.round(geometry.getLength()), prefix: "" },
+      ];
     }
-    // If we're not dealing with a circle or a line, we can just return the area.
-    return Math.round(geometry.getArea());
+    // If we're not dealing with a point, circle, or a line, we are probably dealing
+    // with a polygon. For the polygons, we want to return the area and perimeter.
+    return [
+      {
+        type: "AREA",
+        value: Math.round(geometry?.getArea() || 0),
+        prefix: "Area:",
+      },
+      {
+        type: "PERIMETER",
+        value: this.#getPolygonPerimeter(geometry),
+        prefix: "\n Omkrets:",
+      },
+    ];
+  };
+
+  // Returns the perimeter of the supplied polygon-geometry
+  #getPolygonPerimeter = (geometry) => {
+    try {
+      // To get the perimeter, we have to get the coordinates of the
+      // outer (0) linear-ring of the supplied geometry. If we fail to extract these
+      // coordinates, we set the linear-ring-coords to null.
+      const linearRingCoords =
+        geometry?.getLinearRing(0)?.getCoordinates() || null;
+      // If no coords were found, we simply return an area of 0.
+      if (!linearRingCoords) {
+        return 0;
+      }
+      // If some coords were found, we can construct a Line-string, and get the length
+      // of that line-string!
+      return new LineString(linearRingCoords)?.getLength() || 0;
+    } catch (error) {
+      // If we fail somewhere, we return 0. Would be better with more handling here!
+      return 0;
+    }
   };
 
   // Returns an OL style to be used in the draw-interaction.
@@ -1037,7 +1118,7 @@ class DrawModel {
   #handleFeatureChange = (e) => {
     // Make the measurement calculations and update the tooltip
     const feature = e.target;
-    const toolTipText = this.#getFeatureMeasurementLabel(feature);
+    const toolTipText = this.#getFeatureMeasurementLabel(feature, "TOOLTIP");
     this.#drawTooltipElement.innerHTML = this.#showDrawTooltip
       ? toolTipText
       : null;
