@@ -972,6 +972,7 @@ class App extends React.PureComponent {
             {useNewInfoclick === false && this.renderInfoclickWindow()}
             {useNewInfoclick && (
               <MapClickViewer
+                appModel={this.appModel}
                 globalObserver={this.globalObserver}
                 infoclickOptions={this.infoclickOptions}
               />

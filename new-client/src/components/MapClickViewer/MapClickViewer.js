@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 
 import Window from "components/Window";
 import FeaturePropsParsing from "components/FeatureInfo/FeaturePropsParsing";
@@ -7,7 +7,7 @@ import MapClickViewerView from "./MapClickViewerView";
 import { MapClickViewerContext } from "./MapClickViewerContext";
 
 const MapClickViewer = (props) => {
-  const { globalObserver, infoclickOptions } = props;
+  const { appModel, globalObserver, infoclickOptions } = props;
 
   const [open, setOpen] = useState(false);
   const [featureCollections, setFeatureCollections] = useState([]);
@@ -23,6 +23,17 @@ const MapClickViewer = (props) => {
       options: infoclickOptions || [],
     });
   }, [globalObserver, infoclickOptions]);
+
+  const closeWindow = useCallback(() => {
+    // Hide window
+    setOpen(false);
+
+    // Important: reset feature collections to ensure nothing else is rendered
+    setFeatureCollections([]);
+
+    // Remove highlight from any highlighted features in map
+    appModel.highlight(false);
+  }, [appModel]);
 
   // Subscribe to events on global observer
   useEffect(() => {
@@ -43,15 +54,7 @@ const MapClickViewer = (props) => {
       console.log("MapClickViewer unsubscribing from events");
       mapClickObserver.unsubscribe();
     };
-  }, [globalObserver]);
-
-  const closeWindow = () => {
-    // Hide window
-    setOpen(false);
-
-    // Important: reset feature collections to ensure nothing else is rendered
-    setFeatureCollections([]);
-  };
+  }, [closeWindow, globalObserver]);
 
   return (
     <Window
@@ -65,7 +68,10 @@ const MapClickViewer = (props) => {
       onClose={closeWindow}
     >
       <MapClickViewerContext.Provider
-        value={{ featurePropsParsing: featurePropsParsing.current }}
+        value={{
+          appModel: props.appModel,
+          featurePropsParsing: featurePropsParsing.current,
+        }}
       >
         <MapClickViewerView featureCollections={featureCollections} />
       </MapClickViewerContext.Provider>

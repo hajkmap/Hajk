@@ -14,8 +14,6 @@ const Breadcrumbs = (props) => {
   const {
     feature,
     featureCollection,
-    selectedFeature,
-    selectedFeatureCollection,
     setSelectedFeature,
     setSelectedFeatureCollection,
   } = props;
