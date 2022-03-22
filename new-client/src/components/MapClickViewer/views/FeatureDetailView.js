@@ -1,4 +1,5 @@
-import React from "react";
+import AppModel from "models/AppModel";
+import React, { useMemo } from "react";
 
 import Breadcrumbs from "./Breadcrumbs";
 import FeaturePagination from "./FeaturePagination";
@@ -15,11 +16,18 @@ const FeatureDetailView = (props) => {
     setSelectedFeatureCollection,
   } = props;
 
-  const shouldRenderMarkdown = () =>
-    typeof featureCollection.infoclickDefinition === "string" &&
-    featureCollection.infoclickDefinition.trim().length > 0;
+  // Memoize, no need to re-check all the time
+  const shouldRenderMarkdown = useMemo(() => {
+    return (
+      typeof featureCollection.infoclickDefinition === "string" &&
+      featureCollection.infoclickDefinition.trim().length > 0
+    );
+  }, [featureCollection]);
 
-  const paginationCollection = featureCollection.features.map((f) => f.getId());
+  // Memoize, no need to re-map all the time
+  const paginationCollection = useMemo(() => {
+    return featureCollection.features.map((f) => f.getId());
+  }, [featureCollection]);
 
   return selectedFeature && feature ? (
     <>
@@ -34,7 +42,7 @@ const FeatureDetailView = (props) => {
         selectedFeature={selectedFeature}
         setSelectedFeature={setSelectedFeature}
       />
-      {shouldRenderMarkdown() === true ? (
+      {shouldRenderMarkdown === true ? (
         <Markdown feature={feature} featureCollection={featureCollection} />
       ) : (
         <DefaultTable feature={feature} />

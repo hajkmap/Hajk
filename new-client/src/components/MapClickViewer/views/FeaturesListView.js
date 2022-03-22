@@ -65,7 +65,6 @@ const FeaturesListView = (props) => {
             return (
               <ListItemButton
                 key={i}
-                // selected={selectedFeature === fc.layerId}
                 onClick={() => setSelectedFeature(f.getId())}
               >
                 <ListItemAvatar>
