@@ -15,47 +15,48 @@ const MapClickViewer = (props) => {
   // Used to hold the instance of FeaturePropsParsing class
   const featurePropsParsing = useRef();
 
+  // Instantiate the Markdown parser once and for all by
+  // assigning the returned value to a ref.
   useEffect(() => {
-    // Instantiate the Markdown parser once and for all by
-    // assigning the returned value to a ref.
     featurePropsParsing.current = new FeaturePropsParsing({
       globalObserver: globalObserver,
       options: infoclickOptions || [],
     });
   }, [globalObserver, infoclickOptions]);
 
+  // Subscribe to events on global observer
   useEffect(() => {
     console.log("MapClickViewer subscribing to events");
     const mapClickObserver = globalObserver.subscribe(
       "mapClick.featureCollections",
       (fc) => {
-        console.log(
-          "Setting feature collection to this and showing windows (if there are any collections):",
-          fc
-        );
+        console.log("mapClick.featureCollections", fc);
         if (fc.length > 0) {
           setFeatureCollections(fc);
           setOpen(true);
         } else {
-          setFeatureCollections([]);
-          setOpen(false);
+          closeWindow();
         }
       }
     );
     return () => {
-      console.log("Unsubscribing");
+      console.log("MapClickViewer unsubscribing from events");
       mapClickObserver.unsubscribe();
     };
   }, [globalObserver]);
 
   const closeWindow = () => {
+    // Hide window
     setOpen(false);
+
+    // Important: reset feature collections to ensure nothing else is rendered
+    setFeatureCollections([]);
   };
 
   return (
     <Window
       globalObserver={props.globalObserver}
-      title="MapClickViewer"
+      title="Information"
       open={open}
       height="dynamic"
       width={400}

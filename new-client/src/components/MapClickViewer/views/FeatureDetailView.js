@@ -39,11 +39,6 @@ const FeatureDetailView = (props) => {
       ) : (
         <DefaultTable feature={feature} />
       )}
-      <FeaturePagination
-        paginationCollection={paginationCollection}
-        selectedFeature={selectedFeature}
-        setSelectedFeature={setSelectedFeature}
-      />
     </>
   ) : null;
 };
