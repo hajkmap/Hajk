@@ -163,3 +163,16 @@ export const PROMPT_TEXTS = {
   saveNoFeatures: "Kunde inte skapa arbetsyta, inga ritobjekt hittades.",
   saveSuccess: "Arbetsytan sparades utan problem.",
 };
+
+export const AREA_MEASUREMENT_UNITS = [
+  { type: "AUTO", name: "Automatisk" },
+  { type: "M2", name: "m²" },
+  { type: "KM2", name: "km²" },
+  { type: "HECTARE", name: "Hektar" },
+];
+
+export const LENGTH_MEASUREMENT_UNITS = [
+  { type: "AUTO", name: "Automatisk" },
+  { type: "M", name: "m" },
+  { type: "KM", name: "km" },
+];
