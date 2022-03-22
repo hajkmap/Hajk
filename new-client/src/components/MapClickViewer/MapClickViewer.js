@@ -1,14 +1,9 @@
 import React, { useEffect, useRef, useState } from "react";
 
-import Window from "../Window";
-
-// Views
-import MapClickViewerView from "./MapClickViewerView";
-
-// Models
+import Window from "components/Window";
 import FeaturePropsParsing from "components/FeatureInfo/FeaturePropsParsing";
 
-// Context
+import MapClickViewerView from "./MapClickViewerView";
 import { MapClickViewerContext } from "./MapClickViewerContext";
 
 const MapClickViewer = (props) => {
@@ -17,6 +12,7 @@ const MapClickViewer = (props) => {
   const [open, setOpen] = useState(false);
   const [featureCollections, setFeatureCollections] = useState([]);
 
+  // Used to hold the instance of FeaturePropsParsing class
   const featurePropsParsing = useRef();
 
   useEffect(() => {
@@ -24,7 +20,7 @@ const MapClickViewer = (props) => {
     // assigning the returned value to a ref.
     featurePropsParsing.current = new FeaturePropsParsing({
       globalObserver: globalObserver,
-      options: infoclickOptions || [], // featurePropsParsing needs to know if FeatureInfo is configured to allow HTML or not, so we pass on its' options
+      options: infoclickOptions || [],
     });
   }, [globalObserver, infoclickOptions]);
 
@@ -56,8 +52,6 @@ const MapClickViewer = (props) => {
     setOpen(false);
   };
 
-  // We're rendering the view in a BaseWindowPlugin, since this is a
-  // "standard" plugin.
   return (
     <Window
       globalObserver={props.globalObserver}
