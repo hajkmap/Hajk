@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 
 import { useMapClickViewerContext } from "components/MapClickViewer/MapClickViewerContext";
-import FeaturePropsParsing from "components/FeatureInfo/FeaturePropsParsing";
 
 const Markdown = (props) => {
   const { feature, featureCollection } = props;
@@ -10,15 +9,9 @@ const Markdown = (props) => {
   const [reactComponent, setReactComponent] = useState(null);
 
   // Grab useful stuff
-  const { globalObserver, infoclickOptions } = useMapClickViewerContext();
+  const { featurePropsParsing } = useMapClickViewerContext();
 
   useEffect(() => {
-    // Initiate the MD parser
-    const featurePropsParsing = new FeaturePropsParsing({
-      globalObserver: globalObserver,
-      options: infoclickOptions || [], // featurePropsParsing needs to know if FeatureInfo is configured to allow HTML or not, so we pass on its' options
-    });
-
     featurePropsParsing
       .setMarkdownAndProperties({
         markdown: featureCollection.infoclickDefinition,
@@ -33,7 +26,7 @@ const Markdown = (props) => {
       .catch((error) => {
         setReactComponent(null);
       });
-  }, [feature, featureCollection, globalObserver, infoclickOptions]);
+  }, [feature, featureCollection, featurePropsParsing]);
 
   return reactComponent;
 };

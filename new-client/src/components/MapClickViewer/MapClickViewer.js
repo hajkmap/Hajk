@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 
 import Window from "../Window";
 
@@ -6,17 +6,27 @@ import Window from "../Window";
 import MapClickViewerView from "./MapClickViewerView";
 
 // Models
+import FeaturePropsParsing from "components/FeatureInfo/FeaturePropsParsing";
 
 // Context
 import { MapClickViewerContext } from "./MapClickViewerContext";
 
 const MapClickViewer = (props) => {
-  console.log("MapClickViewer props: ", props);
-
-  const { globalObserver } = props;
+  const { globalObserver, infoclickOptions } = props;
 
   const [open, setOpen] = useState(false);
   const [featureCollections, setFeatureCollections] = useState([]);
+
+  const featurePropsParsing = useRef();
+
+  useEffect(() => {
+    // Instantiate the Markdown parser once and for all by
+    // assigning the returned value to a ref.
+    featurePropsParsing.current = new FeaturePropsParsing({
+      globalObserver: globalObserver,
+      options: infoclickOptions || [], // featurePropsParsing needs to know if FeatureInfo is configured to allow HTML or not, so we pass on its' options
+    });
+  }, [globalObserver, infoclickOptions]);
 
   useEffect(() => {
     console.log("MapClickViewer subscribing to events");
@@ -59,7 +69,9 @@ const MapClickViewer = (props) => {
       mode="window"
       onClose={closeWindow}
     >
-      <MapClickViewerContext.Provider value={{ ...props }}>
+      <MapClickViewerContext.Provider
+        value={{ featurePropsParsing: featurePropsParsing.current }}
+      >
         <MapClickViewerView featureCollections={featureCollections} />
       </MapClickViewerContext.Provider>
     </Window>
