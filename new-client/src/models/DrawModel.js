@@ -194,6 +194,7 @@ class DrawModel {
       showPerimeter: false,
       areaUnit: "AUTO",
       lengthUnit: "AUTO",
+      precision: 0,
     };
   };
 
@@ -600,12 +601,13 @@ class DrawModel {
       return "";
     }
     // Otherwise we'll handle the formatting according to the labelFormat set by the user
-    switch (this.#labelFormat) {
+    switch (this.#getLabelFormatFromMeasurementType(type)) {
       case "AUTO":
         const formatted = this.#shouldFormatToKm(value, type)
           ? this.#getKilometerMeasurementString(value, type)
           : this.#getMeasurementString(value, type);
         return `${prefix} ${formatted}`;
+      case "KM":
       case "KM2":
         // If the format is "KM2", we'll show the measurement in km²
         // (Or km if we're measuring length). Rounded to show 3 decimals.
@@ -618,6 +620,16 @@ class DrawModel {
       default:
         // Otherwise m² (or m) will do. (Displayed in local format).
         return `${prefix} ${this.#getMeasurementString(value, type)}`;
+    }
+  };
+
+  #getLabelFormatFromMeasurementType = (type) => {
+    switch (type) {
+      case "LENGTH":
+      case "PERIMETER":
+        return this.#measurementSettings.lengthUnit;
+      default:
+        return this.#measurementSettings.areaUnit;
     }
   };
 
@@ -656,36 +668,52 @@ class DrawModel {
   // Returns the supplied measurement as a kilometer-formatted string.
   // If we're measuring area, km² is returned, otherwise, km is returned.
   #getKilometerMeasurementString = (featureMeasure, type) => {
+    // The precision can be changed by the user and is set in the measurement-settings.
+    const precision = this.#measurementSettings.precision ?? 0;
     switch (type) {
       case "LENGTH":
       case "PERIMETER":
-        return `${(featureMeasure / 1e3).toFixed(3)} km`;
+        return `${Number(
+          (featureMeasure / 1e3).toFixed(precision)
+        ).toLocaleString()} km`;
       default:
-        return `${(featureMeasure / 1e6).toFixed(3)} km²`;
+        return `${Number(
+          (featureMeasure / 1e6).toFixed(precision)
+        ).toLocaleString()} km²`;
     }
   };
 
   // Returns the measurement in hectare if we're dealing with a surface, and if
   // we're dealing with a line-string we return the measurement in metres.
   #getHectareMeasurementString = (featureMeasure, type) => {
+    // The precision can be changed by the user and is set in the measurement-settings.
+    const precision = this.#measurementSettings.precision ?? 0;
     switch (type) {
       case "LENGTH":
       case "PERIMETER":
         return this.#getMeasurementString(featureMeasure, type);
       default:
-        return `${(featureMeasure / 1e4).toFixed(3)} ha`;
+        return `${Number(
+          (featureMeasure / 1e4).toFixed(precision)
+        ).toLocaleString()} ha`;
     }
   };
 
   // Returns the supplied measurement as a locally formatted string.
   // If we're measuring area m² is returned, otherwise, m is returned.
   #getMeasurementString = (featureMeasure, type) => {
+    // The precision can be changed by the user and is set in the measurement-settings.
+    const precision = this.#measurementSettings.precision ?? 0;
     switch (type) {
       case "LENGTH":
       case "PERIMETER":
-        return `${featureMeasure.toLocaleString()} m`;
+        return `${Number(
+          featureMeasure.toFixed(precision)
+        ).toLocaleString()} m`;
       default:
-        return `${featureMeasure.toLocaleString()} m²`;
+        return `${Number(
+          featureMeasure.toFixed(precision)
+        ).toLocaleString()} m²`;
     }
   };
 
@@ -709,7 +737,7 @@ class DrawModel {
       return [
         {
           type: "AREA",
-          value: Math.round(Math.pow(radius, 2) * Math.PI),
+          value: Math.pow(radius, 2) * Math.PI,
           prefix: "Area:",
         },
         {
@@ -722,16 +750,14 @@ class DrawModel {
     // If we're dealing with a line we cannot calculate an area,
     // instead, we only calculate the length.
     if (geometry instanceof LineString) {
-      return [
-        { type: "LENGTH", value: Math.round(geometry.getLength()), prefix: "" },
-      ];
+      return [{ type: "LENGTH", value: geometry.getLength(), prefix: "" }];
     }
     // If we're not dealing with a point, circle, or a line, we are probably dealing
     // with a polygon. For the polygons, we want to return the area and perimeter.
     return [
       {
         type: "AREA",
-        value: Math.round(geometry?.getArea() || 0),
+        value: geometry?.getArea() || 0,
         prefix: "Area:",
       },
       {

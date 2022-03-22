@@ -4,7 +4,11 @@ import { FormControl, FormLabel, FormControlLabel } from "@material-ui/core";
 import { Select, InputLabel, MenuItem } from "@material-ui/core";
 import Information from "../components/Information";
 
-import { AREA_MEASUREMENT_UNITS, LENGTH_MEASUREMENT_UNITS } from "../constants";
+import {
+  AREA_MEASUREMENT_UNITS,
+  LENGTH_MEASUREMENT_UNITS,
+  MEASUREMENT_PRECISIONS,
+} from "../constants";
 
 const SettingsView = (props) => {
   // Let's destruct some props
@@ -127,6 +131,34 @@ const SettingsView = (props) => {
                   return (
                     <MenuItem value={unit.type} key={index}>
                       {unit.name}
+                    </MenuItem>
+                  );
+                })}
+              </Select>
+            </FormControl>
+          </Tooltip>
+          <Tooltip title="Välj med vilken precision mätvärdena ska presenteras.">
+            <FormControl size="small" style={{ marginTop: 16 }}>
+              <InputLabel variant="outlined" id="sketch-select-precision-label">
+                Mätprecision
+              </InputLabel>
+              <Select
+                id="sketch-select-precision"
+                labelId="sketch-select-precision-label"
+                value={measurementSettings.precision ?? 0}
+                label="Mätprecision"
+                variant="outlined"
+                onChange={(e) => {
+                  setMeasurementSettings((settings) => ({
+                    ...settings,
+                    precision: parseInt(e.target.value),
+                  }));
+                }}
+              >
+                {MEASUREMENT_PRECISIONS.map((precision, index) => {
+                  return (
+                    <MenuItem value={precision.value} key={index}>
+                      {precision.name}
                     </MenuItem>
                   );
                 })}

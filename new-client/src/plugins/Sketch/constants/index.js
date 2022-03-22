@@ -151,6 +151,7 @@ export const DEFAULT_MEASUREMENT_SETTINGS = {
   showPerimeter: false,
   areaUnit: "AUTO",
   lengthUnit: "AUTO",
+  precision: 0,
 };
 
 export const STORAGE_KEY = "sketch";
@@ -175,4 +176,11 @@ export const LENGTH_MEASUREMENT_UNITS = [
   { type: "AUTO", name: "Automatisk" },
   { type: "M", name: "m" },
   { type: "KM", name: "km" },
+];
+
+export const MEASUREMENT_PRECISIONS = [
+  { value: 0, name: "0 decimaler" },
+  { value: 1, name: "1 decimal" },
+  { value: 2, name: "2 decimaler" },
+  { value: 3, name: "3 decimaler" },
 ];
