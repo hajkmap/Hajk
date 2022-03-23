@@ -7,6 +7,8 @@ import Avatar from "@mui/material/Avatar";
 import ImageIcon from "@mui/icons-material/MapTwoTone";
 import { ListSubheader } from "@mui/material";
 
+import { useMapClickViewerContext } from "../MapClickViewerContext";
+
 import Breadcrumbs from "./Breadcrumbs";
 import FeatureDetailView from "./FeatureDetailView";
 
@@ -16,6 +18,8 @@ const FeaturesListView = (props) => {
     selectedFeatureCollection,
     setSelectedFeatureCollection,
   } = props;
+
+  const { appModel } = useMapClickViewerContext();
 
   const [selectedFeature, setSelectedFeature] = useState(null);
   /**
@@ -66,6 +70,8 @@ const FeaturesListView = (props) => {
               <ListItemButton
                 key={i}
                 onClick={() => setSelectedFeature(f.getId())}
+                onMouseEnter={() => appModel.highlight(f)}
+                onMouseLeave={() => appModel.highlight(false)}
               >
                 <ListItemAvatar>
                   <Avatar>
