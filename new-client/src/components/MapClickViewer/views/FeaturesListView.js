@@ -58,7 +58,7 @@ const FeaturesListView = (props) => {
         <List
           sx={{ width: "100%", maxWidth: 360, bgcolor: "background.paper" }}
         >
-          {featureCollection.features.map((f, i) => {
+          {featureCollection.features.sort(compare).map((f, i) => {
             return (
               <ListItemButton
                 key={i}
@@ -94,5 +94,8 @@ const FeaturesListView = (props) => {
     )
   ) : null;
 };
+
+// Basic compare function used for alphabetic sorting of features using the primaryLabel property
+const compare = (a, b) => a.primaryLabel.localeCompare(b.primaryLabel);
 
 export default FeaturesListView;
