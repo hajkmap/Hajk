@@ -167,15 +167,15 @@ export const PROMPT_TEXTS = {
 
 export const AREA_MEASUREMENT_UNITS = [
   { type: "AUTO", name: "Automatisk" },
-  { type: "M2", name: "m²" },
-  { type: "KM2", name: "km²" },
-  { type: "HECTARE", name: "Hektar" },
+  { type: "M2", name: "Kvadratmeter (m²)" },
+  { type: "KM2", name: "Kvadratkilometer (km²)" },
+  { type: "HECTARE", name: "Hektar (ha)" },
 ];
 
 export const LENGTH_MEASUREMENT_UNITS = [
   { type: "AUTO", name: "Automatisk" },
-  { type: "M", name: "m" },
-  { type: "KM", name: "km" },
+  { type: "M", name: "Meter (m)" },
+  { type: "KM", name: "Kilometer (km)" },
 ];
 
 export const MEASUREMENT_PRECISIONS = [
