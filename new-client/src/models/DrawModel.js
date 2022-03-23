@@ -41,7 +41,6 @@ import { getArea as getExtentArea } from "ol/extent";
  * - parseColorString(hex/rgba-string <string>): Accepts a string and returns an object with r-, g-, b-, and a-properties.
  * - getCurrentVectorSource(): Returns the vector-source currently connected to the draw-model.
  * - get/set drawStyleSettings(): Get or set the style settings used by the draw-model.
- * - get/set labelFormat(): Sets the format on the labels. ("AUTO", "M2", "KM2", "HECTARE")
  * - get/set showDrawTooltip(): Get or set wether a tooltip should be shown when drawing.
  * - get/set modifyActive(): Get or set wether the Modify-interaction should be active or not.
  * - get/set translateActive(): Get or set wether the Translate-interaction should be active or not.
@@ -75,7 +74,6 @@ class DrawModel {
   #keepModifyActive;
   #keepTranslateActive;
   #allowedLabelFormats;
-  #labelFormat;
   #customHandleDrawStart;
   #customHandleDrawEnd;
   #customHandlePointerMove;
@@ -108,8 +106,6 @@ class DrawModel {
       settings.drawStyleSettings ?? this.#getDefaultDrawStyleSettings();
     this.#textStyleSettings =
       settings.textStyleSettings ?? this.#getDefaultTextStyleSettings();
-    this.#allowedLabelFormats = ["AUTO", "M2", "KM2", "HECTARE"];
-    this.#labelFormat = settings.labelFormat ?? "AUTO"; // One of #allowedLabelFormats
     // We are going to be keeping track of the current extent of the draw-source...
     this.#currentExtent = null;
     // And the current draw interaction.
@@ -1931,18 +1927,6 @@ class DrawModel {
     return { status: "SUCCESS", removedFeatures: drawnFeatures };
   };
 
-  setLabelFormat = (format) => {
-    if (!format || !this.#allowedLabelFormats.includes(format)) {
-      return {
-        status: "FAILED",
-        message: "Provided label-format is not supported.",
-      };
-    }
-    this.#labelFormat = format;
-    this.#refreshFeaturesTextStyle();
-    return { status: "SUCCESS", message: `Label-format changed to ${format}` };
-  };
-
   // Set:er allowing us to change which layer the draw-model will interact with
   setLayer = (layerName) => {
     // We're not allowing the layer to be changed while the draw interaction is active...
@@ -2063,11 +2047,6 @@ class DrawModel {
   // Get:er returning the current extent of the draw-source.
   getCurrentExtent = () => {
     return this.#currentExtent;
-  };
-
-  // Get:er returning the current label-format
-  getLabelFormat = () => {
-    return this.#labelFormat;
   };
 
   // Get:er returning if the modify-interaction is active.
