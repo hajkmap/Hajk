@@ -339,13 +339,10 @@ class KirSearchResultsView extends React.PureComponent {
   };
 
   render() {
-    const { classes } = this.props;
-
     return (
       <>
         <Accordion
           expanded={this.state.resultsExpanded}
-          // className={classes.bottom}
           onChange={() => {
             this.setState({
               resultsExpanded: !this.state.resultsExpanded,
@@ -359,7 +356,6 @@ class KirSearchResultsView extends React.PureComponent {
                   badgeContent={this.state.results.list.length}
                   color="secondary"
                   max={10000}
-                  // classes={{ badge: classes.badge }}
                 >
                   <TypographyHeading>Sökresultat</TypographyHeading>
                 </StyledBadge>
@@ -369,12 +365,7 @@ class KirSearchResultsView extends React.PureComponent {
           </AccordionSummary>
           <AccordionDetails style={{ display: "block", padding: 0 }}>
             <div>
-              <List
-                ref={this.accordionList}
-                dense={true}
-                component="nav"
-                // className={classes.listRoot}
-              >
+              <List ref={this.accordionList} dense={true} component="nav">
                 {this.state.paginatedResults.list.map((data, index) => (
                   <div
                     key={data.ol_uid}
@@ -428,13 +419,8 @@ class KirSearchResultsView extends React.PureComponent {
                   ""
                 )}
                 {this.state.loading === true ? (
-                  <LoaderContainer
-                  // className={`${classes.paddedBottom} ${classes.loaderContainer}`}
-                  >
-                    <CircularProgress
-                      size={24}
-                      // className={classes.buttonProgress}
-                    />
+                  <LoaderContainer>
+                    <CircularProgress size={24} />
                     <span>Söker</span>
                   </LoaderContainer>
                 ) : (

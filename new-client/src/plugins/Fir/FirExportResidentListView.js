@@ -64,7 +64,7 @@ const StyledFormControlLabel = styled(FormControlLabel)(({ theme }) => ({
 
 const ButtonWithLoader = styled(Button)(({ theme, loading }) => ({
   "& img": {
-    opacity: loading === true ? 0.3 : 1.0,
+    opacity: loading === "true" ? 0.3 : 1.0,
   },
 }));
 
@@ -496,7 +496,7 @@ class FirExportResidentListView extends React.PureComponent {
                   fullWidth={true}
                   variant="outlined"
                   color="primary"
-                  loading={this.state.loading}
+                  loading={"" + this.state.loading}
                   startIcon={<this.ExcelLogo />}
                   onClick={this.handleSendClick}
                   disabled={this.state.loading}

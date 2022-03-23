@@ -1,65 +1,107 @@
 import React from "react";
 import PropTypes from "prop-types";
-import { withStyles } from "@material-ui/core/styles";
+import { styled } from "@mui/material/styles";
+
 import { withSnackbar } from "notistack";
-import Accordion from "@material-ui/core/Accordion";
-import AccordionSummary from "@material-ui/core/AccordionSummary";
-import AccordionDetails from "@material-ui/core/AccordionDetails";
-import FormControl from "@material-ui/core/FormControl";
-import RadioGroup from "@material-ui/core/RadioGroup";
-import FormControlLabel from "@material-ui/core/FormControlLabel";
-import Radio from "@material-ui/core/Radio";
-import Slider from "@material-ui/core/Slider";
-import TextField from "@material-ui/core/TextField";
-import InputAdornment from "@material-ui/core/InputAdornment";
-import Collapse from "@material-ui/core/Collapse";
-import Button from "@material-ui/core/Button";
+import Accordion from "@mui/material/Accordion";
+import AccordionSummary from "@mui/material/AccordionSummary";
+import AccordionDetails from "@mui/material/AccordionDetails";
+import FormControl from "@mui/material/FormControl";
+import RadioGroup from "@mui/material/RadioGroup";
+import FormControlLabel from "@mui/material/FormControlLabel";
+import Radio from "@mui/material/Radio";
+import Slider from "@mui/material/Slider";
+import TextField from "@mui/material/TextField";
+import InputAdornment from "@mui/material/InputAdornment";
+import Collapse from "@mui/material/Collapse";
+import Button from "@mui/material/Button";
 import Feature from "ol/Feature.js";
 import HajkTransformer from "utils/HajkTransformer";
 
-import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
-import HistoryIcon from "@material-ui/icons/History";
-import { Typography } from "@material-ui/core";
-import CircularProgress from "@material-ui/core/CircularProgress";
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import HistoryIcon from "@mui/icons-material/History";
+import { Typography } from "@mui/material";
+import CircularProgress from "@mui/material/CircularProgress";
 
-const styles = (theme) => ({
-  heading: {
-    fontWeight: 500,
-  },
-  radio: {
-    paddingTop: "0.25rem",
-    paddingBottom: "0.25rem",
-  },
-  radioLabel: {
-    fontSize: "0.875rem",
-    fontWeight: "400",
-  },
-  containerTopPadded: {
-    paddingTop: theme.spacing(2),
-  },
-  containerTopDoublePadded: {
-    paddingTop: theme.spacing(4),
-  },
-  clearButton: {
+// const styles = (theme) => ({
+//   heading: {
+//     fontWeight: 500,
+//   },
+//   radio: {
+//     paddingTop: "0.25rem",
+//     paddingBottom: "0.25rem",
+//   },
+//   radioLabel: {
+//     fontSize: "0.875rem",
+//     fontWeight: "400",
+//   },
+//   containerTopPadded: {
+//     paddingTop: theme.spacing(2),
+//   },
+//   containerTopDoublePadded: {
+//     paddingTop: theme.spacing(4),
+//   },
+//   clearButton: {
+//     marginRight: theme.spacing(2),
+//   },
+//   sliderContainer: {
+//     display: "flex",
+//     paddingRight: theme.spacing(1),
+//     alignItems: "center",
+//     "& > div:first-child": {
+//       flex: "0 0 35%",
+//       marginRight: theme.spacing(2),
+//     },
+//   },
+//   buttonProgress: {
+//     position: "absolute",
+//     top: "50%",
+//     left: "50%",
+//     marginTop: -12,
+//     marginLeft: -12,
+//   },
+// });
+const TypographyHeading = styled(Typography)(({ theme }) => ({
+  fontWeight: 500,
+}));
+
+const StyledRadio = styled(Radio)(({ theme }) => ({
+  paddingTop: "0.25rem",
+  paddingBottom: "0.25rem",
+}));
+
+const StyledFormControlLabel = styled(FormControlLabel)(({ theme }) => ({
+  fontSize: "0.875rem",
+  fontWeight: "400",
+}));
+
+const ContainerTopPadded = styled("div")(({ theme }) => ({
+  paddingTop: theme.spacing(2),
+}));
+
+const ButtonClear = styled(Button)(({ theme }) => ({
+  marginRight: theme.spacing(2),
+}));
+
+const SliderContainer = styled("div")(({ theme }) => ({
+  display: "flex",
+  paddingRight: theme.spacing(1),
+  alignItems: "center",
+
+  "& > div:first-of-type": {
+    flex: "0 0 35%",
     marginRight: theme.spacing(2),
   },
-  sliderContainer: {
-    display: "flex",
-    paddingRight: theme.spacing(1),
-    alignItems: "center",
-    "& > div:first-child": {
-      flex: "0 0 35%",
-      marginRight: theme.spacing(2),
-    },
-  },
-  buttonProgress: {
-    position: "absolute",
-    top: "50%",
-    left: "50%",
-    marginTop: -12,
-    marginLeft: -12,
-  },
-});
+}));
+
+const CircularProgressButton = styled(CircularProgress)(({ theme }) => ({
+  position: "absolute",
+  top: "50%",
+  left: "50%",
+  marginTop: -12,
+  marginLeft: -12,
+}));
+
 class FirSearchNeighborView extends React.PureComponent {
   #HT;
 
@@ -76,7 +118,6 @@ class FirSearchNeighborView extends React.PureComponent {
     model: PropTypes.object.isRequired,
     app: PropTypes.object.isRequired,
     localObserver: PropTypes.object.isRequired,
-    classes: PropTypes.object.isRequired,
   };
 
   static defaultProps = {};
@@ -173,8 +214,6 @@ class FirSearchNeighborView extends React.PureComponent {
   };
 
   render() {
-    const { classes } = this.props;
-
     return (
       <>
         <Accordion
@@ -189,7 +228,7 @@ class FirSearchNeighborView extends React.PureComponent {
           }}
         >
           <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-            <Typography className={classes.heading}>Hitta grannar</Typography>
+            <TypographyHeading>Hitta grannar</TypographyHeading>
           </AccordionSummary>
           <AccordionDetails style={{ display: "block" }}>
             <FormControl fullWidth={true}>
@@ -199,27 +238,21 @@ class FirSearchNeighborView extends React.PureComponent {
                 value={this.state.radioValue}
                 onChange={this.handleRadioChange}
               >
-                <FormControlLabel
-                  classes={{
-                    label: classes.radioLabel,
-                  }}
+                <StyledFormControlLabel
                   value="delimiting"
-                  control={<Radio className={classes.radio} color="primary" />}
+                  control={<StyledRadio color="primary" />}
                   label="Hitta angränsade grannar"
                 />
-                <FormControlLabel
-                  classes={{
-                    label: classes.radioLabel,
-                  }}
+                <StyledFormControlLabel
                   value="radius"
-                  control={<Radio className={classes.radio} color="primary" />}
+                  control={<StyledRadio color="primary" />}
                   label="Hitta grannar inom X meter"
                 />
               </RadioGroup>
             </FormControl>
             <Collapse in={this.state.radioValue === "radius"}>
-              <div className={classes.containerTopPadded}>
-                <div className={classes.sliderContainer}>
+              <ContainerTopPadded>
+                <SliderContainer>
                   <TextField
                     fullWidth={true}
                     label="Buffer"
@@ -269,25 +302,21 @@ class FirSearchNeighborView extends React.PureComponent {
                     min={1}
                     max={100}
                   />
-                </div>
-              </div>
+                </SliderContainer>
+              </ContainerTopPadded>
             </Collapse>
-            <div
-              className={classes.containerTopPadded}
-              style={{ textAlign: "right" }}
-            >
-              <Button
+            <ContainerTopPadded style={{ textAlign: "right" }}>
+              <ButtonClear
                 disabled={this.state.resultHistory.length === 0}
                 variant="outlined"
                 color="primary"
                 component="span"
                 size="small"
                 onClick={this.handleHistoryBack}
-                className={classes.clearButton}
                 startIcon={<HistoryIcon />}
               >
                 Bakåt
-              </Button>
+              </ButtonClear>
               <Button
                 variant="contained"
                 color="primary"
@@ -297,14 +326,9 @@ class FirSearchNeighborView extends React.PureComponent {
                 disabled={this.state.loading}
               >
                 Sök
-                {this.state.loading && (
-                  <CircularProgress
-                    size={24}
-                    className={classes.buttonProgress}
-                  />
-                )}
+                {this.state.loading && <CircularProgressButton size={24} />}
               </Button>
-            </div>
+            </ContainerTopPadded>
           </AccordionDetails>
         </Accordion>
       </>
@@ -312,4 +336,4 @@ class FirSearchNeighborView extends React.PureComponent {
   }
 }
 
-export default withStyles(styles)(withSnackbar(FirSearchNeighborView));
+export default withSnackbar(FirSearchNeighborView);

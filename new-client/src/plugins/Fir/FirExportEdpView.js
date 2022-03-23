@@ -1,39 +1,63 @@
 import React from "react";
 import { IconEdp } from "./FirIcons";
 import PropTypes from "prop-types";
-import { withStyles } from "@material-ui/core/styles";
+import { styled } from "@mui/material/styles";
 import { withSnackbar } from "notistack";
-import Accordion from "@material-ui/core/Accordion";
-import AccordionSummary from "@material-ui/core/AccordionSummary";
-import AccordionDetails from "@material-ui/core/AccordionDetails";
-import { Typography } from "@material-ui/core";
-import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
-import Button from "@material-ui/core/Button";
-import CircularProgress from "@material-ui/core/CircularProgress";
-import Collapse from "@material-ui/core/Collapse";
+import Accordion from "@mui/material/Accordion";
+import AccordionSummary from "@mui/material/AccordionSummary";
+import AccordionDetails from "@mui/material/AccordionDetails";
+import { Typography } from "@mui/material";
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import Button from "@mui/material/Button";
+import CircularProgress from "@mui/material/CircularProgress";
+import Collapse from "@mui/material/Collapse";
 import { hfetch } from "utils/FetchWrapper";
 
-const styles = (theme) => ({
-  heading: {
-    fontWeight: 500,
+// const styles = (theme) => ({
+//   heading: {
+//     fontWeight: 500,
+//   },
+//   buttonLoading: {
+//     "& img": {
+//       opacity: 0.3,
+//     },
+//   },
+//   buttonProgress: {
+//     position: "absolute",
+//     top: "50%",
+//     left: "50%",
+//     marginTop: -12,
+//     marginLeft: -12,
+//   },
+//   bottomContainer: {
+//     paddingTop: theme.spacing(2),
+//     textAlign: "center",
+//   },
+// });
+
+const ButtonWithLoader = styled(Button)(({ theme, loading }) => ({
+  "& img": {
+    opacity: loading === "true" ? 0.3 : 1.0,
   },
-  buttonLoading: {
-    "& img": {
-      opacity: 0.3,
-    },
-  },
-  buttonProgress: {
-    position: "absolute",
-    top: "50%",
-    left: "50%",
-    marginTop: -12,
-    marginLeft: -12,
-  },
-  bottomContainer: {
-    paddingTop: theme.spacing(2),
-    textAlign: "center",
-  },
-});
+}));
+
+const TypographyHeading = styled(Typography)(({ theme }) => ({
+  fontWeight: 500,
+}));
+
+const CircularProgressButton = styled(CircularProgress)(({ theme }) => ({
+  position: "absolute",
+  top: "50%",
+  left: "50%",
+  marginTop: -12,
+  marginLeft: -12,
+}));
+
+const DivBottomContainer = styled("div")(({ theme }) => ({
+  paddingTop: theme.spacing(2),
+  textAlign: "center",
+}));
+
 class FirExportEdpView extends React.PureComponent {
   state = {
     accordionExpanded: false,
@@ -113,7 +137,6 @@ class FirExportEdpView extends React.PureComponent {
   };
 
   render() {
-    const { classes } = this.props;
     return (
       <>
         <Accordion
@@ -128,33 +151,26 @@ class FirExportEdpView extends React.PureComponent {
           }}
         >
           <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-            <Typography className={classes.heading}>EDP Vision</Typography>
+            <TypographyHeading>EDP Vision</TypographyHeading>
           </AccordionSummary>
           <AccordionDetails style={{ display: "block" }}>
             <div>
-              <Button
+              <ButtonWithLoader
                 fullWidth={true}
                 variant="outlined"
                 color="primary"
-                className={
-                  this.state.loading ? classes.buttonLoading : classes.button
-                }
+                loading={"" + this.state.loading}
                 startIcon={<this.EdpLogo />}
                 onClick={this.handleEdpClick}
                 disabled={this.state.loading}
               >
                 Skicka till EDP
-                {this.state.loading && (
-                  <CircularProgress
-                    size={24}
-                    className={classes.buttonProgress}
-                  />
-                )}
-              </Button>
+                {this.state.loading && <CircularProgressButton size={24} />}
+              </ButtonWithLoader>
               <Collapse in={this.state.dataWasSent}>
-                <div className={classes.bottomContainer}>
+                <DivBottomContainer>
                   <strong>{this.props.results.length}</strong> objekt skickades.
-                </div>
+                </DivBottomContainer>
               </Collapse>
             </div>
           </AccordionDetails>
@@ -164,4 +180,4 @@ class FirExportEdpView extends React.PureComponent {
   }
 }
 
-export default withStyles(styles)(withSnackbar(FirExportEdpView));
+export default withSnackbar(FirExportEdpView);

@@ -1,106 +1,145 @@
 import React from "react";
 import PropTypes from "prop-types";
-import { withStyles } from "@material-ui/core/styles";
+import { styled } from "@mui/material/styles";
 import { withSnackbar } from "notistack";
-import Button from "@material-ui/core/Button";
-import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
-import SearchIcon from "@material-ui/icons/Search";
-import { Typography } from "@material-ui/core";
-import Accordion from "@material-ui/core/Accordion";
-import AccordionSummary from "@material-ui/core/AccordionSummary";
-import AccordionDetails from "@material-ui/core/AccordionDetails";
-import Select from "@material-ui/core/Select";
-import InputLabel from "@material-ui/core/InputLabel";
-import Input from "@material-ui/core/Input";
+import Button from "@mui/material/Button";
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import SearchIcon from "@mui/icons-material/Search";
+import { Typography } from "@mui/material";
+import Accordion from "@mui/material/Accordion";
+import AccordionSummary from "@mui/material/AccordionSummary";
+import AccordionDetails from "@mui/material/AccordionDetails";
+import Select from "@mui/material/Select";
+import InputLabel from "@mui/material/InputLabel";
+import Input from "@mui/material/Input";
 
-import InputAdornment from "@material-ui/core/InputAdornment";
-import MenuItem from "@material-ui/core/MenuItem";
-import FormControl from "@material-ui/core/FormControl";
-import FormControlLabel from "@material-ui/core/FormControlLabel";
-import Checkbox from "@material-ui/core/Checkbox";
-import CircularProgress from "@material-ui/core/CircularProgress";
+import InputAdornment from "@mui/material/InputAdornment";
+import MenuItem from "@mui/material/MenuItem";
+import FormControl from "@mui/material/FormControl";
+import FormControlLabel from "@mui/material/FormControlLabel";
+import Checkbox from "@mui/material/Checkbox";
+import CircularProgress from "@mui/material/CircularProgress";
 import FirToolbarView from "./FirToolbarView";
 
-const styles = (theme) => ({
-  heading: {
-    fontWeight: 500,
-  },
-  formControl: {
-    marginBottom: theme.spacing(3),
-  },
-  formControlOneMargin: {
-    marginBottom: theme.spacing(1),
-  },
-  checkboxLabel: {
-    fontSize: "0.875rem",
-    fontWeight: "400",
-  },
-  checkbox: {
-    paddingTop: "0.25rem",
-    paddingBottom: "0.25rem",
-  },
-  subtitle: {
-    marginBottom: theme.spacing(1) / 2,
-  },
-  buttonGroup: {
-    width: "100%",
-    overflow: "hidden",
-    whiteSpace: "nowrap",
-  },
-  iconButton: {
-    margin: theme.spacing(0),
-    paddingLeft: 0,
-    paddingRight: 0,
-    minWidth: "2.875rem",
-    width: "calc(99.9% / 6)",
-  },
-  clearButton: {
-    marginRight: theme.spacing(2),
-  },
-  containerTopPadded: {
-    paddingTop: theme.spacing(2),
-  },
-  containerTopDoublePadded: {
-    paddingTop: theme.spacing(4),
-  },
-  fileInputContainer: {
-    display: "flex",
-    alignItems: "center",
-    "& > *": {
-      display: "flex",
-    },
-    "& span": {
-      whiteSpace: "nowrap",
-    },
-    "& span.filename": {
-      textOverflow: "ellipsis",
-      whiteSpace: "nowrap",
-      overflow: "hidden",
-      display: "block",
-      paddingLeft: theme.spacing(1),
-      fontWeight: "300",
-    },
-  },
-  fileInput: {
-    display: "none",
-  },
-  svgImg: {
-    height: "24px",
-    width: "24px",
-  },
-  buttonContainedPrimary: {
-    "& img": {
-      filter: "invert(1)", // fixes icon-colors on geometry icons.
-    },
-  },
-  buttonProgress: {
-    position: "absolute",
-    top: "50%",
-    left: "50%",
-    marginTop: -12,
-    marginLeft: -12,
-  },
-});
+// const styles = (theme) => ({
+//   heading: {
+//     fontWeight: 500,
+//   },
+//   formControl: {
+//     marginBottom: theme.spacing(3),
+//   },
+//   formControlOneMargin: {
+//     marginBottom: theme.spacing(1),
+//   },
+//   checkboxLabel: {
+//     fontSize: "0.875rem",
+//     fontWeight: "400",
+//   },
+//   checkbox: {
+//     paddingTop: "0.25rem",
+//     paddingBottom: "0.25rem",
+//   },
+//   subtitle: {
+//     marginBottom: theme.spacing(1) / 2,
+//   },
+//   buttonGroup: {
+//     width: "100%",
+//     overflow: "hidden",
+//     whiteSpace: "nowrap",
+//   },
+//   iconButton: {
+//     margin: theme.spacing(0),
+//     paddingLeft: 0,
+//     paddingRight: 0,
+//     minWidth: "2.875rem",
+//     width: "calc(99.9% / 6)",
+//   },
+//   clearButton: {
+//     marginRight: theme.spacing(2),
+//   },
+//   containerTopPadded: {
+//     paddingTop: theme.spacing(2),
+//   },
+//   containerTopDoublePadded: {
+//     paddingTop: theme.spacing(4),
+//   },
+//   fileInputContainer: {
+//     display: "flex",
+//     alignItems: "center",
+//     "& > *": {
+//       display: "flex",
+//     },
+//     "& span": {
+//       whiteSpace: "nowrap",
+//     },
+//     "& span.filename": {
+//       textOverflow: "ellipsis",
+//       whiteSpace: "nowrap",
+//       overflow: "hidden",
+//       display: "block",
+//       paddingLeft: theme.spacing(1),
+//       fontWeight: "300",
+//     },
+//   },
+//   fileInput: {
+//     display: "none",
+//   },
+//   svgImg: {
+//     height: "24px",
+//     width: "24px",
+//   },
+//   buttonContainedPrimary: {
+//     "& img": {
+//       filter: "invert(1)", // fixes icon-colors on geometry icons.
+//     },
+//   },
+//   buttonProgress: {
+//     position: "absolute",
+//     top: "50%",
+//     left: "50%",
+//     marginTop: -12,
+//     marginLeft: -12,
+//   },
+// });
+
+const StyledFormControlLabel = styled(FormControlLabel)(({ theme }) => ({
+  fontSize: "0.875rem",
+  fontWeight: "400",
+}));
+
+const TypographyHeading = styled(Typography)(({ theme }) => ({
+  fontWeight: 500,
+}));
+
+const StyledFormControl = styled(FormControl)(({ theme }) => ({
+  marginBottom: theme.spacing(3),
+}));
+
+const StyledFormControl2 = styled(FormControl)(({ theme }) => ({
+  marginBottom: theme.spacing(1),
+}));
+
+const StyledCheckbox = styled(Checkbox)(({ theme }) => ({
+  paddingTop: "0.25rem",
+  paddingBottom: "0.25rem",
+}));
+
+const ButtonClear = styled(Button)(({ theme }) => ({
+  marginRight: theme.spacing(2),
+}));
+
+const ContainerTopPadded = styled("div")(({ theme }) => ({
+  paddingTop: theme.spacing(2),
+}));
+
+const CircularProgressButton = styled(CircularProgress)(({ theme }) => ({
+  position: "absolute",
+  top: "50%",
+  left: "50%",
+  marginTop: -12,
+  marginLeft: -12,
+}));
+
 class FirSearchView extends React.PureComponent {
   state = {
     searchText: "",
@@ -119,7 +158,6 @@ class FirSearchView extends React.PureComponent {
     model: PropTypes.object.isRequired,
     app: PropTypes.object.isRequired,
     localObserver: PropTypes.object.isRequired,
-    classes: PropTypes.object.isRequired,
   };
 
   static defaultProps = {};
@@ -184,7 +222,6 @@ class FirSearchView extends React.PureComponent {
   };
 
   render() {
-    const { classes } = this.props;
     return (
       <>
         <Accordion
@@ -196,15 +233,16 @@ class FirSearchView extends React.PureComponent {
           }}
         >
           <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-            <Typography className={classes.heading}>Sök fastigheter</Typography>
+            <TypographyHeading>Sök fastigheter</TypographyHeading>
           </AccordionSummary>
           <AccordionDetails style={{ display: "block" }}>
             <div>
-              <FormControl className={classes.formControl} fullWidth={true}>
-                <InputLabel id="searchType">Sök på</InputLabel>
+              <StyledFormControl fullWidth={true} variant="standard">
+                <InputLabel id="FirSearchType">Sök på</InputLabel>
                 <Select
-                  labelId="searchType"
+                  labelId="FirSearchType"
                   value={this.state.searchTypeId}
+                  variant="standard"
                   onChange={(e) => {
                     this.setState({ searchTypeId: e.target.value });
                   }}
@@ -215,13 +253,10 @@ class FirSearchView extends React.PureComponent {
                     </MenuItem>
                   ))}
                 </Select>
-              </FormControl>
+              </StyledFormControl>
             </div>
             <div>
-              <FormControl
-                className={classes.formControlOneMargin}
-                fullWidth={true}
-              >
+              <StyledFormControl2 fullWidth={true}>
                 <Input
                   id="input-with-icon-adornment"
                   placeholder="Söktext"
@@ -239,17 +274,13 @@ class FirSearchView extends React.PureComponent {
                     </InputAdornment>
                   }
                 />
-              </FormControl>
+              </StyledFormControl2>
             </div>
             <div>
               <FormControl fullWidth={true}>
-                <FormControlLabel
-                  classes={{
-                    label: classes.checkboxLabel,
-                  }}
+                <StyledFormControlLabel
                   control={
-                    <Checkbox
-                      className={classes.checkbox}
+                    <StyledCheckbox
                       checked={this.state.exactMatch}
                       onChange={(e) => {
                         this.setState({ exactMatch: e.target.checked });
@@ -261,17 +292,17 @@ class FirSearchView extends React.PureComponent {
                 />
               </FormControl>
               <FormControl fullWidth={true}>
-                <FormControlLabel
-                  classes={{ label: classes.checkboxLabel }}
+                <StyledFormControlLabel
                   control={
-                    <Checkbox
-                      className={classes.checkbox}
+                    <StyledCheckbox
                       checked={this.state.showDesignation}
                       onChange={(e) => {
                         this.setState({ showDesignation: e.target.checked });
                         this.localObserver.publish(
                           "fir.layers.showDesignation",
-                          { value: e.target.checked }
+                          {
+                            value: e.target.checked,
+                          }
                         );
                       }}
                       color="primary"
@@ -280,18 +311,18 @@ class FirSearchView extends React.PureComponent {
                   label="Visa fastighetsbeteckning"
                 />
               </FormControl>
-              <FormControl className={classes.formControl} fullWidth={true}>
-                <FormControlLabel
-                  classes={{ label: classes.checkboxLabel }}
+              <StyledFormControl fullWidth={true}>
+                <StyledFormControlLabel
                   control={
-                    <Checkbox
-                      className={classes.checkbox}
+                    <StyledCheckbox
                       checked={this.state.showSearchArea}
                       onChange={(e) => {
                         this.setState({ showSearchArea: e.target.checked });
                         this.localObserver.publish(
                           "fir.layers.showSearchArea",
-                          { value: e.target.checked }
+                          {
+                            value: e.target.checked,
+                          }
                         );
                       }}
                       color="primary"
@@ -299,7 +330,7 @@ class FirSearchView extends React.PureComponent {
                   }
                   label="Visa buffer/sökområde"
                 />
-              </FormControl>
+              </StyledFormControl>
             </div>
 
             <FirToolbarView
@@ -308,20 +339,16 @@ class FirSearchView extends React.PureComponent {
               localObserver={this.localObserver}
             />
 
-            <div
-              className={classes.containerTopPadded}
-              style={{ textAlign: "right" }}
-            >
-              <Button
+            <ContainerTopPadded style={{ textAlign: "right" }}>
+              <ButtonClear
                 variant="outlined"
                 color="primary"
                 component="span"
                 size="small"
                 onClick={this.handleClearSearch}
-                className={classes.clearButton}
               >
                 Rensa
-              </Button>
+              </ButtonClear>
               <Button
                 variant="contained"
                 color="primary"
@@ -331,14 +358,9 @@ class FirSearchView extends React.PureComponent {
                 disabled={this.state.loading}
               >
                 Sök
-                {this.state.loading && (
-                  <CircularProgress
-                    size={24}
-                    className={classes.buttonProgress}
-                  />
-                )}
+                {this.state.loading && <CircularProgressButton size={24} />}
               </Button>
-            </div>
+            </ContainerTopPadded>
           </AccordionDetails>
         </Accordion>
       </>
@@ -346,4 +368,4 @@ class FirSearchView extends React.PureComponent {
   }
 }
 
-export default withStyles(styles)(withSnackbar(FirSearchView));
+export default withSnackbar(FirSearchView);
