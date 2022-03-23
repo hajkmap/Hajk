@@ -1,82 +1,101 @@
 import React from "react";
 import PropTypes from "prop-types";
-import { withStyles } from "@material-ui/core/styles";
+import { styled } from "@mui/material/styles";
 import { withSnackbar } from "notistack";
-import Accordion from "@material-ui/core/Accordion";
-import AccordionSummary from "@material-ui/core/AccordionSummary";
-import AccordionDetails from "@material-ui/core/AccordionDetails";
-import Badge from "@material-ui/core/Badge";
-import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
-import { Typography } from "@material-ui/core";
-import List from "@material-ui/core/List";
-import Divider from "@material-ui/core/Divider";
-import ListItem from "@material-ui/core/ListItem";
-import ListItemText from "@material-ui/core/ListItemText";
-import Collapse from "@material-ui/core/Collapse";
+import Accordion from "@mui/material/Accordion";
+import AccordionSummary from "@mui/material/AccordionSummary";
+import AccordionDetails from "@mui/material/AccordionDetails";
+import Badge from "@mui/material/Badge";
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import { Typography } from "@mui/material";
+import List from "@mui/material/List";
+import Divider from "@mui/material/Divider";
+import ListItem from "@mui/material/ListItem";
+import ListItemText from "@mui/material/ListItemText";
+import Collapse from "@mui/material/Collapse";
 import KirSearchResultItemView from "./KirSearchResultItemView";
-import Pagination from "@material-ui/lab/Pagination";
-import ListItemSecondaryAction from "@material-ui/core/ListItemSecondaryAction";
-import IconButton from "@material-ui/core/IconButton";
-import DeleteIcon from "@material-ui/icons/Delete";
-import CircularProgress from "@material-ui/core/CircularProgress";
+import Pagination from "@mui/material/Pagination";
+import ListItemSecondaryAction from "@mui/material/ListItemSecondaryAction";
+import IconButton from "@mui/material/IconButton";
+import DeleteIcon from "@mui/icons-material/Delete";
+import CircularProgress from "@mui/material/CircularProgress";
 
-const styles = (theme) => ({
-  heading: {
-    fontWeight: 500,
+const LoaderContainer = styled("div")(({ theme }) => ({
+  paddingLeft: theme.spacing(2),
+  paddingRight: theme.spacing(2),
+  paddingBottom: theme.spacing(1),
+  display: "flex",
+  alignItems: "center",
+  "& > span:first-of-type": {
+    padding: "1px",
+    marginTop: "-3px",
+    marginRight: theme.spacing(1),
   },
-  badge: {
-    top: "11px",
-    right: "-26px",
+}));
+
+const TypographyHeading = styled(Typography)(({ theme }) => ({
+  fontWeight: 500,
+}));
+
+const StyledBadge = styled(Badge)(({ theme }) => ({
+  "& span": {
+    left: "auto",
+    right: "-31px",
+    top: "12px",
   },
-  spacer: {
-    height: theme.spacing(2),
+}));
+
+const Spacer = styled("div")(({ theme }) => ({
+  height: theme.spacing(2),
+}));
+
+const ResultItemData = styled("div")(({ theme }) => ({
+  padding: theme.spacing(2),
+}));
+
+const PaginationContainer = styled("div")(({ theme }) => ({
+  display: "flex",
+  justifyContent: "right",
+  paddingRight: theme.spacing(2),
+  paddingBottom: theme.spacing(2),
+}));
+
+const StyledIconButton = styled(IconButton)(({ theme }) => ({
+  right: "6px",
+  padding: "6px",
+
+  "&:hover svg": {
+    color: theme.palette.error.dark,
+    stoke: theme.palette.error.dark,
+    fill: theme.palette.error.dark,
   },
-  resultItemData: {
-    padding: theme.spacing(2),
+}));
+
+const DivPaddedBottom = styled("div")(({ theme }) => ({
+  paddingLeft: theme.spacing(2),
+  paddingRight: theme.spacing(2),
+  paddingBottom: theme.spacing(1),
+}));
+
+const ExtendedAccordionSummary = styled("div")(({ theme }) => ({
+  display: "flex",
+  width: "100%",
+
+  "& > div:last-of-type": {
+    marginLeft: "auto",
   },
-  paginationContainer: {
-    display: "flex",
-    justifyContent: "right",
-    paddingRight: theme.spacing(2),
-    paddingBottom: theme.spacing(2),
+
+  "& button": {
+    marginTop: "-6px",
+    marginBottom: "-6px",
+    marginRight: "0",
   },
-  btnIcon: {
-    right: "6px",
-    padding: "6px",
-    "&:hover svg": {
-      color: theme.palette.error.dark,
-      stoke: theme.palette.error.dark,
-      fill: theme.palette.error.dark,
-    },
+
+  "& button:first-of-type": {
+    marginRight: "0",
   },
-  paddedBottom: {
-    paddingLeft: theme.spacing(2),
-    paddingRight: theme.spacing(2),
-    paddingBottom: theme.spacing(1),
-  },
-  loaderContainer: {
-    display: "flex",
-    alignItems: "center",
-    "& > span": {
-      paddingLeft: theme.spacing(1),
-    },
-  },
-  extendedAccordionSummary: {
-    display: "flex",
-    width: "100%",
-    "& > div:last-child": {
-      marginLeft: "auto",
-    },
-    "& button": {
-      marginTop: "-6px",
-      marginBottom: "-6px",
-      marginRight: "0",
-    },
-    "& button:first-child": {
-      marginRight: "0",
-    },
-  },
-});
+}));
+
 class KirSearchResultsView extends React.PureComponent {
   state = {
     resultsExpanded: true,
@@ -94,7 +113,6 @@ class KirSearchResultsView extends React.PureComponent {
     model: PropTypes.object.isRequired,
     app: PropTypes.object.isRequired,
     localObserver: PropTypes.object.isRequired,
-    classes: PropTypes.object.isRequired,
   };
 
   static defaultProps = {};
@@ -327,7 +345,7 @@ class KirSearchResultsView extends React.PureComponent {
       <>
         <Accordion
           expanded={this.state.resultsExpanded}
-          className={classes.bottom}
+          // className={classes.bottom}
           onChange={() => {
             this.setState({
               resultsExpanded: !this.state.resultsExpanded,
@@ -335,21 +353,19 @@ class KirSearchResultsView extends React.PureComponent {
           }}
         >
           <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-            <div className={classes.extendedAccordionSummary}>
+            <ExtendedAccordionSummary>
               <div>
-                <Badge
+                <StyledBadge
                   badgeContent={this.state.results.list.length}
                   color="secondary"
                   max={10000}
-                  classes={{ badge: classes.badge }}
+                  // classes={{ badge: classes.badge }}
                 >
-                  <Typography className={classes.heading}>
-                    Sökresultat
-                  </Typography>
-                </Badge>
+                  <TypographyHeading>Sökresultat</TypographyHeading>
+                </StyledBadge>
               </div>
               <div>&nbsp;</div>
-            </div>
+            </ExtendedAccordionSummary>
           </AccordionSummary>
           <AccordionDetails style={{ display: "block", padding: 0 }}>
             <div>
@@ -357,7 +373,7 @@ class KirSearchResultsView extends React.PureComponent {
                 ref={this.accordionList}
                 dense={true}
                 component="nav"
-                className={classes.listRoot}
+                // className={classes.listRoot}
               >
                 {this.state.paginatedResults.list.map((data, index) => (
                   <div
@@ -381,55 +397,52 @@ class KirSearchResultsView extends React.PureComponent {
                       />
 
                       <ListItemSecondaryAction>
-                        <IconButton
+                        <StyledIconButton
                           edge="end"
                           title="Ta bort"
-                          className={classes.btnIcon}
                           onClick={(e) => {
                             this.handleDeleteClick(e, data);
                           }}
                         >
                           <DeleteIcon />
-                        </IconButton>
+                        </StyledIconButton>
                       </ListItemSecondaryAction>
                     </ListItem>
                     <Collapse in={data.open} timeout="auto" unmountOnExit>
                       <Divider />
-                      <div className={classes.resultItemData}>
+                      <ResultItemData>
                         <KirSearchResultItemView
                           model={data}
                           rootModel={this.model}
                           app={this.props.app}
                           localObserver={this.localObserver}
                         />
-                      </div>
+                      </ResultItemData>
                     </Collapse>
                   </div>
                 ))}
                 {this.state.results.list.length === 0 &&
                 this.state.loading === false ? (
-                  <div className={classes.paddedBottom}>
-                    Inga resultat att visa
-                  </div>
+                  <DivPaddedBottom>Inga resultat att visa</DivPaddedBottom>
                 ) : (
                   ""
                 )}
                 {this.state.loading === true ? (
-                  <div
-                    className={`${classes.paddedBottom} ${classes.loaderContainer}`}
+                  <LoaderContainer
+                  // className={`${classes.paddedBottom} ${classes.loaderContainer}`}
                   >
                     <CircularProgress
                       size={24}
-                      className={classes.buttonProgress}
+                      // className={classes.buttonProgress}
                     />
                     <span>Söker</span>
-                  </div>
+                  </LoaderContainer>
                 ) : (
                   ""
                 )}
               </List>
               {this.state.pageCount > 0 ? (
-                <div className={classes.paginationContainer}>
+                <PaginationContainer>
                   <Pagination
                     ref={this.paginationRef}
                     color="primary"
@@ -439,17 +452,17 @@ class KirSearchResultsView extends React.PureComponent {
                     onChange={this.handlePageChange}
                     size="small"
                   />
-                </div>
+                </PaginationContainer>
               ) : (
                 ""
               )}
             </div>
           </AccordionDetails>
         </Accordion>
-        <div className={classes.spacer}></div>
+        <Spacer></Spacer>
       </>
     );
   }
 }
 
-export default withStyles(styles)(withSnackbar(KirSearchResultsView));
+export default withSnackbar(KirSearchResultsView);
