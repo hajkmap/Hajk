@@ -1,7 +1,7 @@
-import AddIcon from "@material-ui/icons/Add";
 import DeleteIcon from "@material-ui/icons/Delete";
-import DirectionsIcon from "@material-ui/icons/Directions";
-import CreateIcon from "@material-ui/icons/Create";
+import FormatShapesIcon from "@material-ui/icons/FormatShapes";
+import OpenWithIcon from "@material-ui/icons/OpenWith";
+import EditIcon from "@material-ui/icons/Edit";
 import SaveIcon from "@material-ui/icons/Save";
 import ImportExportIcon from "@material-ui/icons/ImportExport";
 import SettingsIcon from "@material-ui/icons/Settings";
@@ -12,21 +12,21 @@ export const ACTIVITIES = [
     tooltip: "Lägg till nya objekt.",
     information:
       "Lägg till objekt genom att rita i kartan. Börja med att välja vilken typ av objekt du vill rita nedan.",
-    icon: <AddIcon />,
+    icon: <EditIcon />,
   },
   {
     id: "EDIT",
     tooltip: "Redigera existerande objekt.",
     information:
       "Redigera objekt du ritat tidigare genom att flytta noder, eller ändra färg.",
-    icon: <CreateIcon />,
+    icon: <FormatShapesIcon />,
   },
   {
     id: "MOVE",
     tooltip: "Flytta existerande objekt.",
     information:
       'Klicka på det objekt i kartan som du vill flytta för att aktivera "flytt-läge". Dra sedan objektet till rätt plats.',
-    icon: <DirectionsIcon />,
+    icon: <OpenWithIcon />,
   },
   {
     id: "DELETE",
@@ -51,7 +51,7 @@ export const ACTIVITIES = [
   },
   {
     id: "SETTINGS",
-    tooltip: "Ändra färg, linjebredd, etc.",
+    tooltip: "Ändra om objektens mått ska synas etc.",
     information: "Här kan du ändra verktygets inställningar.",
     icon: <SettingsIcon />,
   },
@@ -145,8 +145,42 @@ export const STROKE_DASHES = new Map([
 // A constant stating how many sketches we're allowed to save in local-storage.
 export const MAX_SKETCHES = 4;
 
-export const DEFAULT_USER_SETTINGS = {
+export const DEFAULT_MEASUREMENT_SETTINGS = {
   showText: false,
+  showArea: false,
+  showPerimeter: false,
+  areaUnit: "AUTO",
+  lengthUnit: "AUTO",
+  precision: 0,
 };
 
 export const STORAGE_KEY = "sketch";
+
+// How many characters we allow the user to save in LS.
+export const MAX_LS_CHARS = 1e6;
+
+export const PROMPT_TEXTS = {
+  saveOverflow: "Objekten kunde inte sparas. Arbetsytan för många objekt.",
+  saveNoFeatures: "Kunde inte skapa arbetsyta, inga ritobjekt hittades.",
+  saveSuccess: "Arbetsytan sparades utan problem.",
+};
+
+export const AREA_MEASUREMENT_UNITS = [
+  { type: "AUTO", name: "Automatisk" },
+  { type: "M2", name: "Kvadratmeter (m²)" },
+  { type: "KM2", name: "Kvadratkilometer (km²)" },
+  { type: "HECTARE", name: "Hektar (ha)" },
+];
+
+export const LENGTH_MEASUREMENT_UNITS = [
+  { type: "AUTO", name: "Automatisk" },
+  { type: "M", name: "Meter (m)" },
+  { type: "KM", name: "Kilometer (km)" },
+];
+
+export const MEASUREMENT_PRECISIONS = [
+  { value: 0, name: "0 decimaler" },
+  { value: 1, name: "1 decimal" },
+  { value: 2, name: "2 decimaler" },
+  { value: 3, name: "3 decimaler" },
+];

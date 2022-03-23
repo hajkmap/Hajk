@@ -5,6 +5,8 @@ import { Grid, Paper, TextField, Tooltip, Typography } from "@material-ui/core";
 import AddIcon from "@material-ui/icons/Add";
 import DeleteIcon from "@material-ui/icons/Delete";
 
+import { useSnackbar } from "notistack";
+
 import { MAX_SKETCHES } from "../constants";
 import Information from "../components/Information";
 
@@ -49,6 +51,10 @@ const NotSupportedView = ({ globalObserver }) => {
 // A simple component allowing the user to select a name and save the current
 // sketch to LS under that name.
 const SketchSaver = (props) => {
+  // We're gonna want to prompt the user with a snackbar when a sketch is saved.
+  const { enqueueSnackbar } = useSnackbar();
+
+  // Handles text-input on the sketch-name
   const handleInputChange = (e) => {
     props.setSketchName(e.target.value);
   };
@@ -57,11 +63,18 @@ const SketchSaver = (props) => {
   // The handler makes sure to trigger the model to update the local-storage,
   // and also update the local state.
   const handleSaveSketchClick = () => {
-    props.model.addCurrentSketchToStorage({
+    // First we'll try to save the sketch to the local-storage. This method
+    // will return an object stating if it could be saved or not.
+    const { status, message } = props.model.addCurrentSketchToStorage({
       title: props.sketchName,
     });
+    // Then we'll update the state with the new sketches and clear the text-field.
     props.setSavedSketches(props.model.getSketchesFromStorage());
     props.setSketchName("");
+    // And prompt the user.
+    enqueueSnackbar(message, {
+      variant: status === "FAILED" ? "error" : "success",
+    });
   };
 
   // Let's listen for enter-key-down. If the enter-key is pressed and

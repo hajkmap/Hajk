@@ -139,7 +139,7 @@ export const customComponentsForReactMarkdown = {
   hr: () => <Divider />,
   a: ({ children, href, title }) => {
     return children ? (
-      <Link href={href} title={title} target="_blank">
+      <Link color="inherit" href={href} title={title} target="_blank">
         {children}
       </Link>
     ) : null;

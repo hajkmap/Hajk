@@ -286,10 +286,9 @@ const SketchView = (props) => {
           <SettingsView
             id={activityId}
             model={model}
-            drawModel={drawModel}
             functionalCookiesOk={functionalCookiesOk}
-            settings={props.userSettings}
-            setSettings={props.setUserSettings}
+            measurementSettings={props.measurementSettings}
+            setMeasurementSettings={props.setMeasurementSettings}
           />
         );
       default:
