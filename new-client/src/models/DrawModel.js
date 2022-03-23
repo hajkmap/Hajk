@@ -729,6 +729,12 @@ class DrawModel {
         { type: "COORDINATES", value: geometry.getCoordinates(), prefix: "" },
       ];
     }
+    // If the user has chosen to only show the area (and not the perimeter), we don't
+    // need to show the area-prefix. The area-prefix should only be shown if both area and
+    // perimeter is chosen to be shown.
+    const showAreaPrefix =
+      this.#measurementSettings.showArea &&
+      this.#measurementSettings.showPerimeter;
     // Apparently the circle geometry instance does not expose a
     // getArea method. Here's a quick fix. (Remember that this area
     // is only used as an heads-up for the user.)
@@ -738,7 +744,7 @@ class DrawModel {
         {
           type: "AREA",
           value: Math.pow(radius, 2) * Math.PI,
-          prefix: "Area:",
+          prefix: `${showAreaPrefix ? "Area:" : ""}`,
         },
         {
           type: "PERIMETER",
@@ -758,7 +764,7 @@ class DrawModel {
       {
         type: "AREA",
         value: geometry?.getArea() || 0,
-        prefix: "Area:",
+        prefix: `${showAreaPrefix ? "Area:" : ""}`,
       },
       {
         type: "PERIMETER",
