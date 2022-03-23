@@ -5,7 +5,7 @@ import ListItemText from "@mui/material/ListItemText";
 import ListItemAvatar from "@mui/material/ListItemAvatar";
 import Avatar from "@mui/material/Avatar";
 import ImageIcon from "@mui/icons-material/MapTwoTone";
-import { ListSubheader } from "@mui/material";
+import { Divider, Typography } from "@mui/material";
 
 import { useMapClickViewerContext } from "../MapClickViewerContext";
 
@@ -70,10 +70,22 @@ const FeaturesListView = (props) => {
           setSelectedFeatureCollection={setSelectedFeatureCollection}
           featureCollection={featureCollection}
         />
+        <Divider />
+        <Typography
+          variant="button"
+          component="div"
+          noWrap
+          sx={{
+            maxWidth: "100%",
+            fontSize: 18,
+            paddingTop: 1,
+            paddingBottom: 1,
+          }}
+        >
+          {featureCollection.displayName}
+        </Typography>
+        <Divider />
         <List
-          subheader={
-            <ListSubheader>{featureCollection.displayName}</ListSubheader>
-          }
           sx={{ width: "100%", maxWidth: 360, bgcolor: "background.paper" }}
         >
           {featureCollection.features.map((f, i) => {
@@ -83,6 +95,7 @@ const FeaturesListView = (props) => {
                 onClick={() => setSelectedFeature(f.getId())}
                 onMouseEnter={() => appModel.highlight(f)}
                 onMouseLeave={() => appModel.highlight(false)}
+                component="li"
               >
                 <ListItemAvatar>
                   <Avatar>

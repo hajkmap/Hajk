@@ -70,7 +70,6 @@ const Breadcrumbs = (props) => {
           </Typography>
         )}
       </MUIBreadcrumbs>
-      <Divider sx={{ marginBottom: 1 }} />
     </>
   );
 };
