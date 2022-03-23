@@ -309,12 +309,58 @@ export default class MapClickModel {
       // Reset the UI
       document.querySelector("body").style.cursor = "initial";
 
+      // Decorate the features within collections with things like
+      // primary label. We can do it here, once and for all, which
+      // will make life easier down the road (e.g. sorting, where
+      // a generated label will come in handy).
+      const decoratedFeatureCollections =
+        this.#decorateFeaturesInCollections(features);
+
       // Invoke the callback, supply the results.
-      callback(features);
+      callback(decoratedFeatureCollections);
     } catch (error) {
       console.error("Oops: ", error);
       document.querySelector("body").style.cursor = "initial";
     }
+  }
+
+  #decorateFeaturesInCollections(featureCollections) {
+    /**
+     * @summary Try to prepare a nice label for the list view.
+     * @description Admin UI can set the displayFields property. If it exists, we want to grab
+     * the specified properties' values for the given feature. If our attempt results in an
+     * empty string, we try with a fallback.
+     *
+     * @param {Feature} feature
+     * @return {string} Label describing the feature
+     */
+    const preparePrimaryLabel = (feature, displayFields) => {
+      return (
+        displayFields
+          .map((df) => {
+            return feature.get(df);
+          })
+          .join(", ") || // Join values from specified display fields…
+        feature?.getId() || // or (if no display fields), grab the features ID…
+        "(unknown feature)" // or (if no feature - this shouldn't happen), hard-code a value.
+      );
+    };
+
+    // Loop through all collections
+    for (const collection of featureCollections) {
+      // No need to decorate the search results collection
+      if (collection.type !== "SearchResults") {
+        const displayFields = collection.displayFields;
+        collection.features = collection.features.map((f) => {
+          // Generate a primary label using provided display fields from collection
+          // and save the value as a property on current feature.
+          f.primaryLabel = preparePrimaryLabel(f, displayFields);
+          return f;
+        });
+      }
+    }
+
+    return featureCollections;
   }
 
   #getResponsePromises(e) {

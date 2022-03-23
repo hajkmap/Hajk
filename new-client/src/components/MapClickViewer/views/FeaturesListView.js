@@ -33,36 +33,6 @@ const FeaturesListView = (props) => {
     setSelectedFeature(preselectedFeature || null);
   }, [featureCollection]);
 
-  /**
-   * @summary Try to prepare a nice label for the list view.
-   * @description Admin UI can set the displayFields property. If it exists, we want to grab
-   * the specified properties' values for the given feature. If our attempt results in an
-   * empty string, we try with a fallback.
-   *
-   * @param {Feature} feature
-   * @return {string} Label describing the feature
-   */
-  const preparePrimaryLabel = (feature) => {
-    return (
-      featureCollection.displayFields
-        .map((df) => {
-          return feature.get(df);
-        })
-        .join(", ") || tryFallbackIfNoLabelCouldBeCreated(feature)
-    );
-  };
-  /**
-   * @summary If primary label couldn't be created using the primary algorithm,
-   * let's try grabbing the ID itself. Should that fail, fallback to a hard-coded
-   * string.
-   *
-   * @param {Feature} feature
-   * @return {string} Hard-coded value if no ID can be found
-   */
-  const tryFallbackIfNoLabelCouldBeCreated = (feature) => {
-    return feature.getId() || "(unknown feature)";
-  };
-
   return featureCollection ? (
     selectedFeature === null ? (
       <>
@@ -102,7 +72,7 @@ const FeaturesListView = (props) => {
                     <ImageIcon />
                   </Avatar>
                 </ListItemAvatar>
-                <ListItemText>{preparePrimaryLabel(f)}</ListItemText>
+                <ListItemText>{f.primaryLabel}</ListItemText>
               </ListItemButton>
             );
           })}
