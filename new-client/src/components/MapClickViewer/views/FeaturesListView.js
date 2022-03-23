@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import List from "@mui/material/List";
 import ListItemButton from "@mui/material/ListItemButton";
 import ListItemText from "@mui/material/ListItemText";
@@ -22,14 +22,25 @@ const FeaturesListView = (props) => {
   const { appModel } = useMapClickViewerContext();
 
   const [selectedFeature, setSelectedFeature] = useState(null);
+
+  // If there's only ONE feature in the collection, let's pre-select it.
+  // This will ensure that we render the detail view directly.
+  useEffect(() => {
+    const preselectedFeature =
+      featureCollection?.features.length === 1
+        ? featureCollection.features[0].getId()
+        : null;
+    setSelectedFeature(preselectedFeature || null);
+  }, [featureCollection]);
+
   /**
    * @summary Try to prepare a nice label for the list view.
    * @description Admin UI can set the displayFields property. If it exists, we want to grab
    * the specified properties' values for the given feature. If our attempt results in an
    * empty string, we try with a fallback.
    *
-   * @param {*} feature
-   * @return {*}
+   * @param {Feature} feature
+   * @return {string} Label describing the feature
    */
   const preparePrimaryLabel = (feature) => {
     return (
@@ -45,8 +56,8 @@ const FeaturesListView = (props) => {
    * let's try grabbing the ID itself. Should that fail, fallback to a hard-coded
    * string.
    *
-   * @param {*} feature
-   * @return {*}
+   * @param {Feature} feature
+   * @return {string} Hard-coded value if no ID can be found
    */
   const tryFallbackIfNoLabelCouldBeCreated = (feature) => {
     return feature.getId() || "(unknown feature)";

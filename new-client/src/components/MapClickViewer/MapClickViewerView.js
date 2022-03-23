@@ -9,12 +9,11 @@ const MapClickViewerView = (props) => {
   const [selectedFeatureCollection, setSelectedFeatureCollection] =
     useState(null);
 
-  // When new featureCollections arrive (via props), make sure to unset
-  // the previously selectedFeatureCollection. We must do it, because
-  // otherwise we can end up with the selectedFeatureCollection value
-  // not existing in currently available featureCollections.
+  // If exactly ONE feature collection is returned, let's pre-select it.
   useEffect(() => {
-    setSelectedFeatureCollection(null);
+    const preselectedFeatureCollection =
+      featureCollections.length === 1 && featureCollections[0].layerId;
+    setSelectedFeatureCollection(preselectedFeatureCollection || null);
   }, [featureCollections]);
 
   // Conditional render: if none feature collection is selected - render
