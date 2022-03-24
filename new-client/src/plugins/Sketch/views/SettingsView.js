@@ -23,7 +23,9 @@ const SettingsView = (props) => {
       </Grid>
       <Grid item xs={12}>
         <FormControl component="fieldset">
-          <FormLabel component="legend">Generella inställningar</FormLabel>
+          <FormLabel focused={false} component="legend">
+            Generella inställningar
+          </FormLabel>
           <Tooltip title="Slå på om du vill visa objektens mått.">
             <FormControlLabel
               label="Visa mått på objekten"
