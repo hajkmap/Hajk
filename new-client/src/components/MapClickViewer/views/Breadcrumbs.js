@@ -66,7 +66,7 @@ const Breadcrumbs = (props) => {
         )}
         {setSelectedFeature && (
           <Typography color="text.primary" variant="caption">
-            {feature.getId()}
+            {feature.primaryLabel}
           </Typography>
         )}
       </MUIBreadcrumbs>
