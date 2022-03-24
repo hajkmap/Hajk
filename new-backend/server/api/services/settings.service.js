@@ -251,14 +251,18 @@ class SettingsService {
       );
     }
 
-    // If any of the above resulted in modified file, write the changes
+    // If any of the above resulted in modified file, write the changes.
+    // Make sure to first check that we really have new options to write
+    // as we don't want to write an undefined "object".
     if (modified === true) {
       // Use the found index of LayerSwitcher to entirely replace
       // the "options" property on that object
-      json.tools[layerSwitcherToolIndex].options = lsOptions;
+      if (lsOptions !== undefined)
+        json.tools[layerSwitcherToolIndex].options = lsOptions;
 
       // Do the same for the options of Search tool
-      json.tools[searchToolIndex].options = searchOptions;
+      if (searchOptions !== undefined)
+        json.tools[searchToolIndex].options = searchOptions;
 
       // Write changes to file
       await fs.promises.writeFile(

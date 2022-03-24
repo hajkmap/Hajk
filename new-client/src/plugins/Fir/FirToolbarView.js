@@ -1,68 +1,77 @@
 import React from "react";
 import PropTypes from "prop-types";
+import { styled } from "@mui/material/styles";
 import { IconPolygon, IconRect, IconLine, IconPoint } from "./FirIcons";
-import { withStyles } from "@material-ui/core/styles";
-import { withSnackbar } from "notistack";
-import Button from "@material-ui/core/Button";
-import ButtonGroup from "@material-ui/core/ButtonGroup";
+import Button from "@mui/material/Button";
+import ButtonGroup from "@mui/material/ButtonGroup";
 import DeleteIcon from "@material-ui/icons/Delete";
 import InsertDriveFileIcon from "@material-ui/icons/InsertDriveFile";
-import { Typography } from "@material-ui/core";
-import Collapse from "@material-ui/core/Collapse";
-import TextField from "@material-ui/core/TextField";
-import InputAdornment from "@material-ui/core/InputAdornment";
+import { Typography } from "@mui/material";
+import Collapse from "@mui/material/Collapse";
+import TextField from "@mui/material/TextField";
+import InputAdornment from "@mui/material/InputAdornment";
 import Draw, { createBox } from "ol/interaction/Draw.js";
 
-const styles = (theme) => ({
-  containerTopPadded: {
-    paddingTop: theme.spacing(2),
+const ContainerTopPadded = styled("div")(({ theme }) => ({
+  paddingTop: theme.spacing(2),
+}));
+
+const ContainerTopDoublePadded = styled("div")(({ theme }) => ({
+  paddingTop: theme.spacing(4),
+}));
+
+const StyledButtonGroup = styled(ButtonGroup)(({ theme }) => ({
+  width: "100%",
+  overflow: "hidden",
+  whiteSpace: "nowrap",
+}));
+
+const IconButton = styled(Button)(({ theme, on, invert }) => ({
+  ...(on === "false" ? { backgroundColor: "#dcdcdc" } : {}),
+  margin: theme.spacing(0),
+  paddingLeft: 0,
+  paddingRight: 0,
+  borderRightColor: "red",
+  minWidth: "2.875rem",
+  width: "calc(99.9% / 6)",
+  "& img": {
+    filter: on === "true" && invert === "true" ? "invert(1)" : "", // fixes icon-colors on geometry icons.
   },
-  containerTopDoublePadded: {
-    paddingTop: theme.spacing(4),
+}));
+
+const FileInputContainer = styled("div")(({ theme }) => ({
+  position: "relative",
+  display: "flex",
+  alignItems: "center",
+
+  "& > *": {
+    display: "flex",
   },
-  buttonGroup: {
-    width: "100%",
-    overflow: "hidden",
+
+  "& span": {
     whiteSpace: "nowrap",
   },
-  iconButton: {
-    margin: theme.spacing(0),
-    paddingLeft: 0,
-    paddingRight: 0,
-    minWidth: "2.875rem",
-    width: "calc(99.9% / 6)",
+
+  "& span.filename": {
+    textOverflow: "ellipsis",
+    whiteSpace: "nowrap",
+    overflow: "hidden",
+    display: "block",
+    paddingLeft: theme.spacing(1),
+    fontWeight: "300",
   },
-  fileInputContainer: {
-    display: "flex",
-    alignItems: "center",
-    "& > *": {
-      display: "flex",
-    },
-    "& span": {
-      whiteSpace: "nowrap",
-    },
-    "& span.filename": {
-      textOverflow: "ellipsis",
-      whiteSpace: "nowrap",
-      overflow: "hidden",
-      display: "block",
-      paddingLeft: theme.spacing(1),
-      fontWeight: "300",
-    },
-  },
-  fileInput: {
-    display: "none",
-  },
-  svgImg: {
-    height: "24px",
-    width: "24px",
-  },
-  buttonContainedPrimary: {
-    "& img": {
-      filter: "invert(1)", // fixes icon-colors on geometry icons.
-    },
-  },
-});
+}));
+
+const FileInput = styled("input")(({ theme }) => ({
+  visibility: "hidden",
+  position: "absolute",
+}));
+
+const SvgImg = styled("img")(({ theme }) => ({
+  height: "24px",
+  width: "24px",
+}));
+
 class FirToolbarView extends React.PureComponent {
   state = {
     tools: {
@@ -83,7 +92,6 @@ class FirToolbarView extends React.PureComponent {
     prefix: PropTypes.string,
     app: PropTypes.object.isRequired,
     localObserver: PropTypes.object.isRequired,
-    classes: PropTypes.object.isRequired,
   };
 
   static defaultProps = {};
@@ -258,100 +266,93 @@ class FirToolbarView extends React.PureComponent {
   };
 
   render() {
-    const { classes } = this.props;
     return (
       <>
         <div>
-          <Typography variant="subtitle2" className={classes.subtitle}>
-            Sökområde
-          </Typography>
-          <ButtonGroup
-            className={classes.buttonGroup}
+          <Typography variant="subtitle2">Sökområde</Typography>
+          <StyledButtonGroup
             variant="contained"
             aria-label="outlined button group"
           >
-            <Button
+            <IconButton
               title="Polygon"
-              className={classes.iconButton}
-              classes={{
-                containedPrimary: classes.buttonContainedPrimary,
-              }}
-              color={this.state.tools.Polygon.selected ? "primary" : null}
+              on={"" + this.state.tools.Polygon.selected}
+              invert={"" + true}
+              color={
+                this.state.tools.Polygon.selected ? "primary" : "secondary"
+              }
               onClick={() => {
                 this.handleToolbarClick("Polygon");
               }}
             >
-              <img src={IconPolygon()} className={classes.svgImg} alt="" />
-            </Button>
-            <Button
+              <SvgImg src={IconPolygon()} alt="" />
+            </IconButton>
+            <IconButton
               title="Rektangel"
-              className={classes.iconButton}
-              classes={{
-                containedPrimary: classes.buttonContainedPrimary,
-              }}
-              color={this.state.tools.Rectangle.selected ? "primary" : null}
+              on={"" + this.state.tools.Rectangle.selected}
+              invert={"" + true}
+              color={
+                this.state.tools.Rectangle.selected ? "primary" : "secondary"
+              }
               onClick={() => {
                 this.handleToolbarClick("Rectangle");
               }}
             >
-              <img src={IconRect()} className={classes.svgImg} alt="" />
-            </Button>
-            <Button
+              <SvgImg src={IconRect()} alt="" />
+            </IconButton>
+            <IconButton
               title="Linje"
-              className={classes.iconButton}
-              classes={{
-                containedPrimary: classes.buttonContainedPrimary,
-              }}
-              color={this.state.tools.LineString.selected ? "primary" : null}
+              on={"" + this.state.tools.LineString.selected}
+              invert={"" + true}
+              color={
+                this.state.tools.LineString.selected ? "primary" : "secondary"
+              }
               onClick={() => {
                 this.handleToolbarClick("LineString");
               }}
             >
-              <img src={IconLine()} className={classes.svgImg} alt="" />
-            </Button>
-            <Button
+              <SvgImg src={IconLine()} alt="" />
+            </IconButton>
+            <IconButton
               title="Punkt"
-              className={classes.iconButton}
-              classes={{
-                containedPrimary: classes.buttonContainedPrimary,
-              }}
-              color={this.state.tools.Point.selected ? "primary" : null}
+              on={"" + this.state.tools.Point.selected}
+              invert={"" + true}
+              color={this.state.tools.Point.selected ? "primary" : "secondary"}
               onClick={() => {
                 this.handleToolbarClick("Point");
               }}
             >
-              <img src={IconPoint()} className={classes.svgImg} alt="" />
-            </Button>
-            <Button
+              <SvgImg src={IconPoint()} alt="" />
+            </IconButton>
+            <IconButton
               title="Importera KLM-fil"
-              className={classes.iconButton}
-              color={this.state.tools.Import.selected ? "primary" : null}
+              on={"" + this.state.tools.Import.selected}
+              invert={"" + false}
+              color={this.state.tools.Import.selected ? "primary" : "secondary"}
               onClick={() => {
                 this.handleToolbarClick("Import");
               }}
             >
               <InsertDriveFileIcon />
-            </Button>
-            <Button
+            </IconButton>
+            <IconButton
               title="Ta bort objekt"
-              className={classes.iconButton}
-              color={this.state.tools.Delete.selected ? "primary" : null}
+              on={"" + this.state.tools.Delete.selected}
+              invert={"" + false}
+              color={this.state.tools.Delete.selected ? "primary" : "secondary"}
               onClick={() => {
                 this.handleToolbarClick("Delete");
               }}
             >
               <DeleteIcon />
-            </Button>
-          </ButtonGroup>
+            </IconButton>
+          </StyledButtonGroup>
           <Collapse in={this.state.tools.Import.selected === true}>
-            <div className={classes.containerTopPadded}>
-              <Typography variant="subtitle2" className={classes.subtitle}>
-                Importera KML-fil
-              </Typography>
-              <div className={classes.fileInputContainer}>
-                <input
+            <ContainerTopPadded>
+              <Typography variant="subtitle2">Importera KML-fil</Typography>
+              <FileInputContainer>
+                <FileInput
                   accept=".kml"
-                  className={classes.fileInput}
                   id={`${this.prefix}FileInput`}
                   type="file"
                   onChange={this.handleFileSelection}
@@ -359,7 +360,7 @@ class FirToolbarView extends React.PureComponent {
                 <label htmlFor={`${this.prefix}FileInput`}>
                   <Button
                     variant="contained"
-                    color="secondary"
+                    color="primary"
                     component="span"
                     size="small"
                   >
@@ -371,12 +372,12 @@ class FirToolbarView extends React.PureComponent {
                     ? this.state.files.list[0].name
                     : "Ingen fil är vald"}
                 </span>
-              </div>
-            </div>
+              </FileInputContainer>
+            </ContainerTopPadded>
           </Collapse>
         </div>
         <Collapse in={this.state.numberOfObjects > 0}>
-          <div className={classes.containerTopDoublePadded}>
+          <ContainerTopDoublePadded>
             <TextField
               fullWidth={true}
               label="Lägg till buffer på sökområde"
@@ -418,11 +419,11 @@ class FirToolbarView extends React.PureComponent {
               }}
               variant="outlined"
             />
-          </div>
+          </ContainerTopDoublePadded>
         </Collapse>
       </>
     );
   }
 }
 
-export default withStyles(styles)(withSnackbar(FirToolbarView));
+export default FirToolbarView;
