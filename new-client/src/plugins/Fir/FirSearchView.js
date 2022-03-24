@@ -1,7 +1,6 @@
 import React from "react";
 import PropTypes from "prop-types";
 import { styled } from "@mui/material/styles";
-import { withSnackbar } from "notistack";
 import Button from "@mui/material/Button";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import SearchIcon from "@mui/icons-material/Search";
@@ -20,87 +19,6 @@ import FormControlLabel from "@mui/material/FormControlLabel";
 import Checkbox from "@mui/material/Checkbox";
 import CircularProgress from "@mui/material/CircularProgress";
 import FirToolbarView from "./FirToolbarView";
-
-// const styles = (theme) => ({
-//   heading: {
-//     fontWeight: 500,
-//   },
-//   formControl: {
-//     marginBottom: theme.spacing(3),
-//   },
-//   formControlOneMargin: {
-//     marginBottom: theme.spacing(1),
-//   },
-//   checkboxLabel: {
-//     fontSize: "0.875rem",
-//     fontWeight: "400",
-//   },
-//   checkbox: {
-//     paddingTop: "0.25rem",
-//     paddingBottom: "0.25rem",
-//   },
-//   subtitle: {
-//     marginBottom: theme.spacing(1) / 2,
-//   },
-//   buttonGroup: {
-//     width: "100%",
-//     overflow: "hidden",
-//     whiteSpace: "nowrap",
-//   },
-//   iconButton: {
-//     margin: theme.spacing(0),
-//     paddingLeft: 0,
-//     paddingRight: 0,
-//     minWidth: "2.875rem",
-//     width: "calc(99.9% / 6)",
-//   },
-//   clearButton: {
-//     marginRight: theme.spacing(2),
-//   },
-//   containerTopPadded: {
-//     paddingTop: theme.spacing(2),
-//   },
-//   containerTopDoublePadded: {
-//     paddingTop: theme.spacing(4),
-//   },
-//   fileInputContainer: {
-//     display: "flex",
-//     alignItems: "center",
-//     "& > *": {
-//       display: "flex",
-//     },
-//     "& span": {
-//       whiteSpace: "nowrap",
-//     },
-//     "& span.filename": {
-//       textOverflow: "ellipsis",
-//       whiteSpace: "nowrap",
-//       overflow: "hidden",
-//       display: "block",
-//       paddingLeft: theme.spacing(1),
-//       fontWeight: "300",
-//     },
-//   },
-//   fileInput: {
-//     display: "none",
-//   },
-//   svgImg: {
-//     height: "24px",
-//     width: "24px",
-//   },
-//   buttonContainedPrimary: {
-//     "& img": {
-//       filter: "invert(1)", // fixes icon-colors on geometry icons.
-//     },
-//   },
-//   buttonProgress: {
-//     position: "absolute",
-//     top: "50%",
-//     left: "50%",
-//     marginTop: -12,
-//     marginLeft: -12,
-//   },
-// });
 
 const StyledFormControlLabel = styled(FormControlLabel)(({ theme }) => ({
   fontSize: "0.875rem",
@@ -368,4 +286,4 @@ class FirSearchView extends React.PureComponent {
   }
 }
 
-export default withSnackbar(FirSearchView);
+export default FirSearchView;

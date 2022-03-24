@@ -10,26 +10,6 @@ import AppBar from "@mui/material/AppBar";
 import Tab from "@mui/material/Tab";
 import Tabs from "@mui/material/Tabs";
 
-// const styles = (theme) => ({
-//   root: {
-//     margin: -10,
-//     display: "flex",
-//     flexDirection: "column",
-//     height: "100%",
-//   },
-//   stickyAppBar: {
-//     top: -10,
-//   },
-//   tabContent: {
-//     display: "flex",
-//     flexDirection: "column",
-//     padding: theme.spacing(1),
-//     width: "100%",
-//     height: "100%",
-//   },
-//   hidden: { display: "none" },
-// });
-
 const DivRoot = styled("div")(({ theme }) => ({
   margin: -10,
   display: "flex",
@@ -91,6 +71,8 @@ class FirView extends React.PureComponent {
   };
 
   render() {
+    const { windowVisible } = this.props;
+
     return (
       <>
         <DivRoot>
@@ -98,7 +80,8 @@ class FirView extends React.PureComponent {
             <Tabs
               action={this.handleTabsMounted}
               onChange={this.handleChangeTabs}
-              value={this.state.activeTab}
+              // make sure the window is visible, otherwise an error will be thrown.
+              value={windowVisible ? this.state.activeTab : false}
               variant="fullWidth"
             >
               <Tab label="Sök" />

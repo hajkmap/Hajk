@@ -1,7 +1,6 @@
 import React from "react";
 import PropTypes from "prop-types";
 import { styled } from "@mui/material/styles";
-import { withSnackbar } from "notistack";
 import Accordion from "@mui/material/Accordion";
 import AccordionSummary from "@mui/material/AccordionSummary";
 import AccordionDetails from "@mui/material/AccordionDetails";
@@ -21,64 +20,6 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import AddCircle from "@mui/icons-material/AddCircleOutline";
 import RemoveCircle from "@mui/icons-material/RemoveCircleOutline";
 import CircularProgress from "@mui/material/CircularProgress";
-
-// const styles = (theme) => ({
-//   heading: {
-//     fontWeight: 500,
-//   },
-//   badge: {
-//     top: "11px",
-//     right: "-26px",
-//   },
-//   spacer: {
-//     height: theme.spacing(2),
-//   },
-//   resultItemData: {
-//     padding: theme.spacing(2),
-//   },
-//   paginationContainer: {
-//     display: "flex",
-//     justifyContent: "right",
-//     paddingRight: theme.spacing(2),
-//     paddingBottom: theme.spacing(2),
-//   },
-//   btnIcon: {
-//     right: "6px",
-//     padding: "6px",
-//     "&:hover svg": {
-//       color: theme.palette.error.dark,
-//       stoke: theme.palette.error.dark,
-//       fill: theme.palette.error.dark,
-//     },
-//   },
-//   paddedBottom: {
-//     paddingLeft: theme.spacing(2),
-//     paddingRight: theme.spacing(2),
-//     paddingBottom: theme.spacing(1),
-//   },
-//   loaderContainer: {
-//     display: "flex",
-//     alignItems: "center",
-//     "& > span": {
-//       paddingLeft: theme.spacing(1),
-//     },
-//   },
-//   extendedAccordionSummary: {
-//     display: "flex",
-//     width: "100%",
-//     "& > div:last-child": {
-//       marginLeft: "auto",
-//     },
-//     "& button": {
-//       marginTop: "-6px",
-//       marginBottom: "-6px",
-//       marginRight: "0",
-//     },
-//     "& button:first-child": {
-//       marginRight: "0",
-//     },
-//   },
-// });
 
 const LoaderContainer = styled("div")(({ theme }) => ({
   paddingLeft: theme.spacing(2),
@@ -559,4 +500,4 @@ class FirSearchResultsView extends React.PureComponent {
   }
 }
 
-export default withSnackbar(FirSearchResultsView);
+export default FirSearchResultsView;

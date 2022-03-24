@@ -1,7 +1,6 @@
 import React from "react";
 import PropTypes from "prop-types";
 import { styled } from "@mui/material/styles";
-import { withSnackbar } from "notistack";
 import Accordion from "@mui/material/Accordion";
 import AccordionSummary from "@mui/material/AccordionSummary";
 import AccordionDetails from "@mui/material/AccordionDetails";
@@ -451,4 +450,4 @@ class KirSearchResultsView extends React.PureComponent {
   }
 }
 
-export default withSnackbar(KirSearchResultsView);
+export default KirSearchResultsView;

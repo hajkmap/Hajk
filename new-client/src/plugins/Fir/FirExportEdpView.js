@@ -13,28 +13,6 @@ import CircularProgress from "@mui/material/CircularProgress";
 import Collapse from "@mui/material/Collapse";
 import { hfetch } from "utils/FetchWrapper";
 
-// const styles = (theme) => ({
-//   heading: {
-//     fontWeight: 500,
-//   },
-//   buttonLoading: {
-//     "& img": {
-//       opacity: 0.3,
-//     },
-//   },
-//   buttonProgress: {
-//     position: "absolute",
-//     top: "50%",
-//     left: "50%",
-//     marginTop: -12,
-//     marginLeft: -12,
-//   },
-//   bottomContainer: {
-//     paddingTop: theme.spacing(2),
-//     textAlign: "center",
-//   },
-// });
-
 const ButtonWithLoader = styled(Button)(({ theme, loading }) => ({
   "& img": {
     opacity: loading === "true" ? 0.3 : 1.0,
@@ -69,7 +47,6 @@ class FirExportEdpView extends React.PureComponent {
     results: PropTypes.array.isRequired,
     model: PropTypes.object.isRequired,
     localObserver: PropTypes.object.isRequired,
-    classes: PropTypes.object.isRequired,
   };
 
   static defaultProps = {};

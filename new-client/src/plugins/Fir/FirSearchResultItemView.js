@@ -1,7 +1,6 @@
 import React from "react";
 import PropTypes from "prop-types";
 import { styled } from "@mui/material/styles";
-import { withSnackbar } from "notistack";
 import propFilters from "components/FeatureInfo/FeaturePropsFilters";
 
 const Container = styled("div")(({ theme }) => ({
@@ -97,4 +96,4 @@ class FirSearchResultItemView extends React.PureComponent {
   }
 }
 
-export default withSnackbar(FirSearchResultItemView);
+export default FirSearchResultItemView;
