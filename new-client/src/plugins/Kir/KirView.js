@@ -1,7 +1,6 @@
 import React from "react";
 import PropTypes from "prop-types";
 import { styled } from "@mui/material/styles";
-import { withSnackbar } from "notistack";
 import AppBar from "@mui/material/AppBar";
 import Tab from "@mui/material/Tab";
 import Tabs from "@mui/material/Tabs";
@@ -60,17 +59,20 @@ class KirView extends React.PureComponent {
   };
 
   render() {
+    const { windowVisible } = this.props;
+
     return (
       <KirContainer>
         <StickyAppBar position="sticky" color="default">
           <Tabs
             action={this.handleTabsMounted}
             onChange={this.handleChangeTabs}
-            value={this.state.activeTab || 0}
+            // make sure the window is visible, otherwise an error will be thrown.
+            value={windowVisible ? this.state.activeTab : false}
             variant="fullWidth"
           >
-            <Tab label="Sök" value={0} />
-            <Tab label="Exportera" value={1} />
+            <Tab label="Sök" />
+            <Tab label="Exportera" />
           </Tabs>
         </StickyAppBar>
         <TabPanel
@@ -121,4 +123,4 @@ class KirView extends React.PureComponent {
   }
 }
 
-export default withSnackbar(KirView);
+export default KirView;

@@ -1,8 +1,6 @@
 import React from "react";
 import PropTypes from "prop-types";
 import { styled } from "@mui/material/styles";
-
-import { withSnackbar } from "notistack";
 import Accordion from "@mui/material/Accordion";
 import AccordionSummary from "@mui/material/AccordionSummary";
 import AccordionDetails from "@mui/material/AccordionDetails";
@@ -23,44 +21,6 @@ import HistoryIcon from "@mui/icons-material/History";
 import { Typography } from "@mui/material";
 import CircularProgress from "@mui/material/CircularProgress";
 
-// const styles = (theme) => ({
-//   heading: {
-//     fontWeight: 500,
-//   },
-//   radio: {
-//     paddingTop: "0.25rem",
-//     paddingBottom: "0.25rem",
-//   },
-//   radioLabel: {
-//     fontSize: "0.875rem",
-//     fontWeight: "400",
-//   },
-//   containerTopPadded: {
-//     paddingTop: theme.spacing(2),
-//   },
-//   containerTopDoublePadded: {
-//     paddingTop: theme.spacing(4),
-//   },
-//   clearButton: {
-//     marginRight: theme.spacing(2),
-//   },
-//   sliderContainer: {
-//     display: "flex",
-//     paddingRight: theme.spacing(1),
-//     alignItems: "center",
-//     "& > div:first-child": {
-//       flex: "0 0 35%",
-//       marginRight: theme.spacing(2),
-//     },
-//   },
-//   buttonProgress: {
-//     position: "absolute",
-//     top: "50%",
-//     left: "50%",
-//     marginTop: -12,
-//     marginLeft: -12,
-//   },
-// });
 const TypographyHeading = styled(Typography)(({ theme }) => ({
   fontWeight: 500,
 }));
@@ -336,4 +296,4 @@ class FirSearchNeighborView extends React.PureComponent {
   }
 }
 
-export default withSnackbar(FirSearchNeighborView);
+export default FirSearchNeighborView;

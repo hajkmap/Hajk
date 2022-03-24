@@ -2,7 +2,6 @@ import React from "react";
 import PropTypes from "prop-types";
 import { styled } from "@mui/material/styles";
 import { IconPolygon, IconRect, IconLine, IconPoint } from "./FirIcons";
-import { withSnackbar } from "notistack";
 import Button from "@mui/material/Button";
 import ButtonGroup from "@mui/material/ButtonGroup";
 import DeleteIcon from "@material-ui/icons/Delete";
@@ -427,4 +426,4 @@ class FirToolbarView extends React.PureComponent {
   }
 }
 
-export default withSnackbar(FirToolbarView);
+export default FirToolbarView;

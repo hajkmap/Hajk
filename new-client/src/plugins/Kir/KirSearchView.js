@@ -1,7 +1,6 @@
 import React from "react";
 import PropTypes from "prop-types";
 import { styled } from "@mui/material/styles";
-import { withSnackbar } from "notistack";
 import Button from "@mui/material/Button";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import { Typography } from "@mui/material";
@@ -331,4 +330,4 @@ class KirSearchView extends React.PureComponent {
   }
 }
 
-export default withSnackbar(KirSearchView);
+export default KirSearchView;
