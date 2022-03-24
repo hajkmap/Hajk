@@ -346,17 +346,26 @@ export default class MapClickModel {
       );
     };
 
+    // Basic compare function used for alphabetic sorting of features using the primaryLabel property
+    const basicLocaleCompare = (a, b) =>
+      a.primaryLabel.localeCompare(b.primaryLabel);
+
     // Loop through all collections
     for (const collection of featureCollections) {
       // No need to decorate the search results collection
       if (collection.type !== "SearchResults") {
         const displayFields = collection.displayFields;
+
+        // Add the primary label to all features in collection
         collection.features = collection.features.map((f) => {
           // Generate a primary label using provided display fields from collection
           // and save the value as a property on current feature.
           f.primaryLabel = preparePrimaryLabel(f, displayFields);
           return f;
         });
+
+        // Sort features in collection
+        collection.features = collection.features.sort(basicLocaleCompare);
       }
     }
 
