@@ -1,38 +1,38 @@
 import React from "react";
 import PropTypes from "prop-types";
-import { withStyles } from "@material-ui/core/styles";
-import { withSnackbar } from "notistack";
+import { styled } from "@mui/material/styles";
+
 import propFilters from "components/FeatureInfo/FeaturePropsFilters";
 
-const styles = (theme) => ({
-  root: {
-    "& table": {
-      borderSpacing: 0,
-      width: "100%",
-      marginBottom: theme.spacing(2),
-      "& tr:nth-child(even) td": {
-        backgroundColor: theme.palette.type === "dark" ? "#565656" : "#ececec",
-      },
-      "& tr td:first-child": {
-        fontWeight: 500,
-      },
-      "& td": {
-        verticalAlign: "top",
-        padding: "2px 6px",
-      },
+const Container = styled("div")(({ theme }) => ({
+  "& table": {
+    borderSpacing: 0,
+    width: "100%",
+    marginBottom: theme.spacing(2),
+    "& tr:nth-of-type(even) td": {
+      backgroundColor: theme.palette.mode === "dark" ? "#373737" : "#ececec",
     },
-    "& ul": {
-      display: "block",
-      listStyle: "none",
-      paddingLeft: 0,
-      paddingTop: theme.spacing(1),
-      "& a": {
-        display: "inline-block",
-        padding: "2px 0",
-      },
+    "& tr td:first-of-type": {
+      fontWeight: 500,
+    },
+    "& td": {
+      verticalAlign: "top",
+      padding: "2px 6px",
+      fontSize: "0.875rem",
     },
   },
-});
+  "& ul": {
+    display: "block",
+    listStyle: "none",
+    paddingLeft: 0,
+    paddingTop: theme.spacing(1),
+    "& a": {
+      display: "inline-block",
+      padding: "2px 0",
+    },
+  },
+}));
+
 class KirSearchResultItemView extends React.PureComponent {
   state = {};
 
@@ -40,7 +40,6 @@ class KirSearchResultItemView extends React.PureComponent {
     model: PropTypes.object.isRequired,
     app: PropTypes.object.isRequired,
     localObserver: PropTypes.object.isRequired,
-    classes: PropTypes.object.isRequired,
   };
 
   static defaultProps = {};
@@ -87,17 +86,14 @@ class KirSearchResultItemView extends React.PureComponent {
   };
 
   render() {
-    const { classes } = this.props;
-
     return (
       <>
-        <div
-          className={classes.root}
+        <Container
           dangerouslySetInnerHTML={{ __html: this.getHtml() }}
-        ></div>
+        ></Container>
       </>
     );
   }
 }
 
-export default withStyles(styles)(withSnackbar(KirSearchResultItemView));
+export default KirSearchResultItemView;
