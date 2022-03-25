@@ -1,19 +1,37 @@
 import { hfetch } from "utils/FetchWrapper";
+
 import GeoJSON from "ol/format/GeoJSON";
 import WMSGetFeatureInfo from "ol/format/WMSGetFeatureInfo";
-
 import TileLayer from "ol/layer/Tile";
 import ImageLayer from "ol/layer/Image";
 import VectorLayer from "ol/layer/Vector";
+import VectorSource from "ol/source/Vector";
+import { Style, Icon } from "ol/style";
+import Feature from "ol/Feature";
+import Point from "ol/geom/Point";
 
 export default class MapClickModel {
-  constructor(map) {
-    console.log("Creating new MapClickModel");
+  constructor(map, globalObserver) {
     this.map = map;
+    this.globalObserver = globalObserver;
 
     // Setup the parsers once and for all
     this.geoJsonParser = new GeoJSON();
     this.wmsGetFeatureInfoParser = new WMSGetFeatureInfo();
+
+    // Prepare a source and layer so that we can put
+    // a marker in map when user clicks a coordinate
+    this.source = new VectorSource();
+    this.vector = new VectorLayer({
+      source: this.source,
+      name: "MapClickModel", // #883, should we call the layers the same as models that create them?
+      type: "system", // #883: "system" for the core system layers, to differentiate from "normal" WMS/Vector/etc layers?
+      zIndex: "1000", // We want this to stay on top of other layers
+    });
+    this.map.addLayer(this.vector);
+
+    // Register a listener for removing the clicked marker
+    this.globalObserver.subscribe("mapClick.removeMarker", this.#removeMarker);
   }
 
   /**
@@ -24,7 +42,6 @@ export default class MapClickModel {
    * @memberof MapClickModel
    */
   async bindMapClick(callback) {
-    console.log("Registering map.onSingleClick");
     this.map.on(
       "singleclick",
       (e) => this.map.clickLock.size === 0 && this.#handleClick(e, callback)
@@ -318,11 +335,48 @@ export default class MapClickModel {
 
       // Invoke the callback, supply the results.
       callback(decoratedFeatureCollections);
+
+      // If we've got any results, let's highlight the clicked
+      // pixel by placing a marker in that coordinate.
+      decoratedFeatureCollections.length > 0
+        ? this.#addMarker(this.map.getCoordinateFromPixel(e.pixel))
+        : this.#removeMarker();
     } catch (error) {
       console.error("Oops: ", error);
       document.querySelector("body").style.cursor = "initial";
     }
   }
+
+  /**
+   * @summary Removes any previous markers and adds a new one to the given coordinates.
+   * @memberof CoordinatesModel
+   */
+  #addMarker = (coordinates) => {
+    // Prepare the feature
+    const feature = new Feature({
+      geometry: new Point(coordinates),
+    });
+
+    // Style it with a nice icon
+    const styleMarker = new Style({
+      image: new Icon({
+        anchor: [0.5, 1],
+        scale: 0.15,
+        src: "marker.png",
+      }),
+    });
+    feature.setStyle(styleMarker);
+
+    // Remove any previous markers
+    this.#removeMarker();
+
+    // Add the new marker
+    this.source.addFeature(feature);
+  };
+
+  #removeMarker = () => {
+    this.vector.getSource().clear();
+  };
 
   #decorateFeaturesInCollections(featureCollections) {
     /**
