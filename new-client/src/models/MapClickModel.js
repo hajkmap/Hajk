@@ -415,6 +415,7 @@ export default class MapClickModel {
           .map((df) => {
             return feature.get(df);
           })
+          .filter((i) => i) // Get rid of all falsy values like undefined or ""
           .join(", ") || // Join values from specified display fields…
         (defaultValue ?? "[unknown value]") // or use the provided default (?? allows for empty string!), or just use hard-coded default.
       );
