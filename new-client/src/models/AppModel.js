@@ -334,6 +334,7 @@ class AppModel {
       config.tools.find((t) => t.type === "infoclick")?.options
         ?.useNewInfoclick === true;
     if (useNewInfoclick) {
+      console.log("useNewInfoclick: ", useNewInfoclick);
       const mapClickModel = new MapClickModel(this.map, this.globalObserver);
 
       mapClickModel.bindMapClick((featureCollections) => {
@@ -373,7 +374,6 @@ class AppModel {
       config.tools.some((tool) => tool.type === "infoclick") &&
       useNewInfoclick === false
     ) {
-      console.log("Using old infoclick");
       bindMapClickEvent(this.map, (mapClickDataResult) => {
         // We have to separate features coming from the searchResult-layer
         // from the rest, since we want to render this information in the
@@ -797,6 +797,7 @@ class AppModel {
                   ? sl.searchPropertyName.split(",")
                   : [],
               infobox: sl.infobox || "",
+              infoclickIcon: sl.infoclickIcon || "",
               aliasDict: "",
               displayFields:
                 typeof sl.searchDisplayName === "string"

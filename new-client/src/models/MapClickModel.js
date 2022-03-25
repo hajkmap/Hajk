@@ -158,6 +158,11 @@ export default class MapClickModel {
             const infoclickDefinition =
               response.value.layer?.layersInfo?.[layerName]?.infobox || "";
 
+            // Prepare the infoclick icon string
+            const infoclickIcon =
+              response.value.layer?.layersInfo?.[layerName]?.infoclickIcon ||
+              "";
+
             // Prepare displayFields and shortDisplayFields.
             // We need them to determine what should be displayed
             // in the features list view (which properties are interesting
@@ -195,6 +200,7 @@ export default class MapClickModel {
                 numHits: 1,
                 displayName,
                 infoclickDefinition,
+                infoclickIcon,
                 displayFields,
                 shortDisplayFields,
               };
@@ -284,6 +290,10 @@ export default class MapClickModel {
                 infoclickDefinition:
                   layer.get("layerInfo")?.information ||
                   layer.get("information") ||
+                  "",
+                infoclickIcon:
+                  layer.get("layerInfo")?.infoclickIcon ||
+                  layer.get("infoclickIcon") ||
                   "",
                 displayFields:
                   layer
