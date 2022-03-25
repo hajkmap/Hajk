@@ -464,6 +464,9 @@ class WMSLayerForm extends Component {
             {styles}
           </select>
         </div>
+
+        <div className="separator">Infoclick</div>
+
         <div>
           <div>
             <label>Infoklick</label>
@@ -515,6 +518,71 @@ class WMSLayerForm extends Component {
           />
         </div>
 
+        <div className="separator">Infoclick och sökning</div>
+
+        <div>
+          <label>Visningsfält (i resultatlistan)</label>
+          <input
+            style={{ marginRight: "5px" }}
+            type="text"
+            value={layerInfo.searchDisplayName}
+            onChange={(e) => {
+              let addedLayersInfo = this.state.addedLayersInfo;
+              addedLayersInfo[layerInfo.id].searchDisplayName = e.target.value;
+              this.setState(
+                {
+                  addedLayersInfo: addedLayersInfo,
+                },
+                () => {
+                  this.renderLayerInfoDialog(layerInfo);
+                }
+              );
+            }}
+          />
+        </div>
+        <div>
+          <label>Sekundära visningsfält (i resultatlistan)</label>
+          <input
+            style={{ marginRight: "5px" }}
+            type="text"
+            value={layerInfo.secondaryLabelFields}
+            onChange={(e) => {
+              let addedLayersInfo = this.state.addedLayersInfo;
+              addedLayersInfo[layerInfo.id].secondaryLabelFields =
+                e.target.value;
+              this.setState(
+                {
+                  addedLayersInfo: addedLayersInfo,
+                },
+                () => {
+                  this.renderLayerInfoDialog(layerInfo);
+                }
+              );
+            }}
+          />
+        </div>
+        <div>
+          <label>Kort visningsfält (etikett i kartan)</label>
+          <input
+            style={{ marginRight: "5px" }}
+            type="text"
+            value={layerInfo.searchShortDisplayName}
+            onChange={(e) => {
+              let addedLayersInfo = this.state.addedLayersInfo;
+              addedLayersInfo[layerInfo.id].searchShortDisplayName =
+                e.target.value;
+              this.setState(
+                {
+                  addedLayersInfo: addedLayersInfo,
+                },
+                () => {
+                  this.renderLayerInfoDialog(layerInfo);
+                }
+              );
+            }}
+          />
+        </div>
+
         <div className="separator">Sökning</div>
 
         <div>
@@ -557,47 +625,7 @@ class WMSLayerForm extends Component {
             }}
           />
         </div>
-        <div>
-          <label>Visningsfält</label>
-          <input
-            style={{ marginRight: "5px" }}
-            type="text"
-            value={layerInfo.searchDisplayName}
-            onChange={(e) => {
-              let addedLayersInfo = this.state.addedLayersInfo;
-              addedLayersInfo[layerInfo.id].searchDisplayName = e.target.value;
-              this.setState(
-                {
-                  addedLayersInfo: addedLayersInfo,
-                },
-                () => {
-                  this.renderLayerInfoDialog(layerInfo);
-                }
-              );
-            }}
-          />
-        </div>
-        <div>
-          <label>Kort visningsfält</label>
-          <input
-            style={{ marginRight: "5px" }}
-            type="text"
-            value={layerInfo.searchShortDisplayName}
-            onChange={(e) => {
-              let addedLayersInfo = this.state.addedLayersInfo;
-              addedLayersInfo[layerInfo.id].searchShortDisplayName =
-                e.target.value;
-              this.setState(
-                {
-                  addedLayersInfo: addedLayersInfo,
-                },
-                () => {
-                  this.renderLayerInfoDialog(layerInfo);
-                }
-              );
-            }}
-          />
-        </div>
+
         <div>
           <label>Utdataformat</label>
           <input
@@ -1081,6 +1109,7 @@ class WMSLayerForm extends Component {
       searchUrl: this.getValue("searchUrl"),
       searchPropertyName: this.getValue("searchPropertyName"),
       searchDisplayName: this.getValue("searchDisplayName"),
+      secondaryLabelFields: this.getValue("secondaryLabelFields"),
       searchShortDisplayName: this.getValue("searchShortDisplayName"),
       searchOutputFormat: this.getValue("searchOutputFormat"),
       searchGeometryField: this.getValue("searchGeometryField"),
