@@ -163,10 +163,9 @@ export default class MapClickModel {
               response.value.layer?.layersInfo?.[layerName]?.infoclickIcon ||
               "";
 
-            // Prepare displayFields and shortDisplayFields.
+            // Prepare displayFields, shortDisplayFields and secondaryLabelFields.
             // We need them to determine what should be displayed
-            // in the features list view (which properties are interesting
-            // enough to be shown at this stage?).
+            // in the features list view.
             const displayFields =
               response.value.layer?.layersInfo?.[layerName]?.searchDisplayName
                 ?.split(",")
@@ -175,6 +174,12 @@ export default class MapClickModel {
               response.value.layer?.layersInfo?.[
                 layerName
               ]?.searchShortDisplayName
+                ?.split(",")
+                .map((df) => df.trim()) || [];
+            const secondaryLabelFields =
+              response.value.layer?.layersInfo?.[
+                layerName
+              ]?.secondaryLabelFields
                 ?.split(",")
                 .map((df) => df.trim()) || [];
 
@@ -203,6 +208,7 @@ export default class MapClickModel {
                 infoclickIcon,
                 displayFields,
                 shortDisplayFields,
+                secondaryLabelFields,
               };
               // …and push onto the array.
               getFeatureInfoResults.push(r);
@@ -305,6 +311,11 @@ export default class MapClickModel {
                     .get("layerInfo")
                     ?.shortDisplayFields?.split(",")
                     .map((df) => df.trim()) || [],
+                secondaryLabelFields:
+                  layer
+                    .get("layerInfo")
+                    ?.secondaryLabelFields?.split(",")
+                    .map((df) => df.trim()) || [],
               };
               // …and push to the layers collection.
               queryableLayerResults.push(r);
@@ -398,15 +409,14 @@ export default class MapClickModel {
      * @param {Feature} feature
      * @return {string} Label describing the feature
      */
-    const preparePrimaryLabel = (feature, displayFields) => {
+    const prepareLabelFromFields = (feature, fields, defaultValue) => {
       return (
-        displayFields
+        fields
           .map((df) => {
             return feature.get(df);
           })
           .join(", ") || // Join values from specified display fields…
-        feature?.getId() || // or (if no display fields), grab the features ID…
-        "(unknown feature)" // or (if no feature - this shouldn't happen), hard-code a value.
+        (defaultValue ?? "[unknown value]") // or use the provided default (?? allows for empty string!), or just use hard-coded default.
       );
     };
 
@@ -418,13 +428,18 @@ export default class MapClickModel {
     for (const collection of featureCollections) {
       // No need to decorate the search results collection
       if (collection.type !== "SearchResults") {
-        const displayFields = collection.displayFields;
+        const { displayFields, secondaryLabelFields } = collection;
 
         // Add the primary label to all features in collection
         collection.features = collection.features.map((f) => {
           // Generate a primary label using provided display fields from collection
           // and save the value as a property on current feature.
-          f.primaryLabel = preparePrimaryLabel(f, displayFields);
+          f.primaryLabel = prepareLabelFromFields(f, displayFields, f.getId());
+          f.secondaryLabel = prepareLabelFromFields(
+            f,
+            secondaryLabelFields,
+            ""
+          );
           return f;
         });
 
