@@ -54,6 +54,7 @@ const defaultState = {
   infoClickSortProperty: "",
   infoClickSortType: "string",
   infoClickSortDesc: true,
+  infoclickIcon: "",
   hideExpandArrow: false,
   style: [],
   workspaceList: [],
@@ -271,6 +272,7 @@ class WMSLayerForm extends Component {
         infobox: "",
         style: "",
         queryable: "",
+        infoclickIcon: "",
       };
       this.setState(
         {
@@ -482,6 +484,27 @@ class WMSLayerForm extends Component {
                 }
               );
             }}
+          />
+        </div>
+        <div>
+          <div>
+            <label>Infoclick-ikon</label>
+          </div>
+          <input
+            value={layerInfo.infoclickIcon}
+            onChange={(e) => {
+              let addedLayersInfo = this.state.addedLayersInfo;
+              addedLayersInfo[layerInfo.id].infoclickIcon = e.target.value;
+              this.setState(
+                {
+                  addedLayersInfo: addedLayersInfo,
+                },
+                () => {
+                  this.renderLayerInfoDialog(layerInfo);
+                }
+              );
+            }}
+            type="text"
           />
         </div>
 
@@ -777,6 +800,7 @@ class WMSLayerForm extends Component {
             infobox: "",
             style: "",
             queryable: "",
+            infoclickIcon: "",
           };
         });
       }
@@ -1068,6 +1092,7 @@ class WMSLayerForm extends Component {
       infoClickSortProperty: this.getValue("infoClickSortProperty"),
       infoClickSortDesc: this.getValue("infoClickSortDesc"),
       infoClickSortType: this.getValue("infoClickSortType"),
+      // infoclickIcon: this.getValue("infoclickIcon"),
       hideExpandArrow: this.getValue("hideExpandArrow"),
       // style: this.getValue("style"),
 

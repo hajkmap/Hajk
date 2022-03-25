@@ -28,6 +28,7 @@ class VectorLayerForm extends React.Component {
     infobox: "",
     displayFields: "",
     shortDisplayFields: "",
+    infoclickIcon: "",
     timeSliderVisible: false,
     timeSliderStart: "",
     timeSliderEnd: "",
@@ -131,6 +132,7 @@ class VectorLayerForm extends React.Component {
       infobox: this.getValue("infobox"),
       displayFields: this.getValue("displayFields"),
       shortDisplayFields: this.getValue("shortDisplayFields"),
+      infoclickIcon: this.getValue("infoclickIcon"),
       timeSliderVisible: this.getValue("timeSliderVisible"),
       timeSliderStart: this.getValue("timeSliderStart"),
       timeSliderEnd: this.getValue("timeSliderEnd"),
@@ -757,6 +759,22 @@ class VectorLayerForm extends React.Component {
             ref="input_infobox"
             value={this.state.infobox}
             onChange={(e) => this.setState({ infobox: e.target.value })}
+          />
+        </div>
+        <div>
+          <label>
+            Ikon i infoclick-lista (
+            <abbr title="Välj vilken ikon som visas i infoclick-listan. Osäker? Prova 'star'!">
+              ?
+            </abbr>
+            )
+          </label>
+          <input
+            ref="input_infoclickIcon"
+            onChange={(e) => {
+              this.setState({ infoclickIcon: e.target.value });
+            }}
+            value={this.state.infoclickIcon}
           />
         </div>
         <div>
