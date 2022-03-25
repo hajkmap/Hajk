@@ -33,7 +33,10 @@ const MapClickViewer = (props) => {
 
     // Remove highlight from any highlighted features in map
     appModel.highlight(false);
-  }, [appModel]);
+
+    // Tell the MapClickModel to remove the clicked marker
+    globalObserver.publish("mapClick.removeMarker");
+  }, [appModel, globalObserver]);
 
   // Subscribe to events on global observer
   useEffect(() => {

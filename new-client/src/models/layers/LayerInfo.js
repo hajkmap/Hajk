@@ -4,6 +4,7 @@ export default class LayerInfo {
     this.caption = properties.caption;
     this.displayFields = properties.displayFields;
     this.shortDisplayFields = properties.shortDisplayFields;
+    this.infoclickIcon = properties.infoclickIcon;
     this.infoOwner = properties.infoOwner;
     this.infoText = properties.infoText;
     this.infoTitle = properties.infoTitle;

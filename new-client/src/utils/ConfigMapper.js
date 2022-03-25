@@ -297,6 +297,7 @@ export default class ConfigMapper {
         information: args.infobox,
         displayFields: args.displayFields,
         shortDisplayFields: args.shortDisplayFields,
+        infoclickIcon: args.infoclickIcon,
         infoText: args.infoText,
         infoTitle: args.infoTitle,
         infoUrl: args.infoUrl,

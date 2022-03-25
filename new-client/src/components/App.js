@@ -814,7 +814,6 @@ class App extends React.PureComponent {
       clean === false && config.activeMap !== "simpleMapConfig";
 
     const useNewInfoclick = this.infoclickOptions?.useNewInfoclick === true;
-    console.log("useNewInfoclick: ", useNewInfoclick);
 
     return (
       <SnackbarProvider

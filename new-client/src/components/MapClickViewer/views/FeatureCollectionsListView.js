@@ -5,6 +5,7 @@ import ListItemText from "@mui/material/ListItemText";
 import ListItemAvatar from "@mui/material/ListItemAvatar";
 import Avatar from "@mui/material/Avatar";
 import ImageIcon from "@mui/icons-material/MapTwoTone";
+import Icon from "@mui/material/Icon";
 
 const FeatureCollectionsListView = (props) => {
   const {
@@ -24,7 +25,11 @@ const FeatureCollectionsListView = (props) => {
           >
             <ListItemAvatar>
               <Avatar>
-                <ImageIcon />
+                {fc.infoclickIcon.trim().length > 0 ? (
+                  <Icon>{fc.infoclickIcon}</Icon>
+                ) : (
+                  <ImageIcon />
+                )}
               </Avatar>
             </ListItemAvatar>
             <ListItemText
