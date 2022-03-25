@@ -763,7 +763,14 @@ class VectorLayerForm extends React.Component {
         </div>
         <div>
           <label>
-            Ikon i infoclick-lista (
+            Ikon (
+            <a
+              href="https://fonts.google.com/icons?selected=Material+Icons"
+              target="_blank"
+            >
+              lista
+            </a>
+            ) i infoclick-lista (
             <abbr title="Välj vilken ikon som visas i infoclick-listan. Osäker? Prova 'star'!">
               ?
             </abbr>

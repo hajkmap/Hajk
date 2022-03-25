@@ -488,7 +488,14 @@ class WMSLayerForm extends Component {
         </div>
         <div>
           <div>
-            <label>Infoclick-ikon</label>
+            <label>Infoclick-ikon</label> (
+            <a
+              href="https://fonts.google.com/icons?selected=Material+Icons"
+              target="_blank"
+            >
+              lista
+            </a>
+            )
           </div>
           <input
             value={layerInfo.infoclickIcon}
