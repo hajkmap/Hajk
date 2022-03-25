@@ -3,6 +3,7 @@ export default class LayerInfo {
     this.attribution = properties.attribution;
     this.caption = properties.caption;
     this.displayFields = properties.displayFields;
+    this.secondaryLabelFields = properties.secondaryLabelFields;
     this.shortDisplayFields = properties.shortDisplayFields;
     this.infoclickIcon = properties.infoclickIcon;
     this.infoOwner = properties.infoOwner;

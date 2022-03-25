@@ -27,6 +27,7 @@ class VectorLayerForm extends React.Component {
     infoVisible: false,
     infobox: "",
     displayFields: "",
+    secondaryLabelFields: "",
     shortDisplayFields: "",
     infoclickIcon: "",
     timeSliderVisible: false,
@@ -132,6 +133,7 @@ class VectorLayerForm extends React.Component {
       infobox: this.getValue("infobox"),
       displayFields: this.getValue("displayFields"),
       shortDisplayFields: this.getValue("shortDisplayFields"),
+      secondaryLabelFields: this.getValue("secondaryLabelFields"),
       infoclickIcon: this.getValue("infoclickIcon"),
       timeSliderVisible: this.getValue("timeSliderVisible"),
       timeSliderStart: this.getValue("timeSliderStart"),
@@ -786,7 +788,7 @@ class VectorLayerForm extends React.Component {
         </div>
         <div>
           <label>
-            Visningsfält (
+            Huvudvisningsfält (
             <abbr title="Styr vilka attributvärden som visas i listvyn i infoclick">
               ?
             </abbr>
@@ -798,6 +800,22 @@ class VectorLayerForm extends React.Component {
               this.setState({ displayFields: e.target.value });
             }}
             value={this.state.displayFields}
+          />
+        </div>
+        <div>
+          <label>
+            Sekundära visningsfält(
+            <abbr title="Styr vilka attributvärden som visas med något mindre text i listan över träffar">
+              ?
+            </abbr>
+            )
+          </label>
+          <input
+            ref="input_secondaryLabelFields"
+            onChange={(e) => {
+              this.setState({ secondaryLabelFields: e.target.value });
+            }}
+            value={this.state.secondaryLabelFields}
           />
         </div>
         <div>

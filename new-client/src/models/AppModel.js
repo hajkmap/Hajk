@@ -803,6 +803,10 @@ class AppModel {
                 typeof sl.searchDisplayName === "string"
                   ? sl.searchDisplayName.split(",")
                   : [],
+              secondaryLabelFields:
+                typeof sl.secondaryLabelFields === "string"
+                  ? sl.secondaryLabelFields.split(",")
+                  : [],
               shortDisplayFields:
                 typeof sl.searchShortDisplayName === "string"
                   ? sl.searchShortDisplayName.split(",")
