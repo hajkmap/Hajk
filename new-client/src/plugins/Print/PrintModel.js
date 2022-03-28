@@ -14,8 +14,10 @@ import { Translate } from "ol/interaction.js";
 import Collection from "ol/Collection";
 import { Style, Stroke, Fill } from "ol/style.js";
 import { saveAs } from "file-saver";
+import ImageLayer from "ol/layer/Image";
 import TileLayer from "ol/layer/Tile";
 import TileWMS from "ol/source/TileWMS";
+import ImageWMS from "ol/source/ImageWMS";
 
 export default class PrintModel {
   constructor(settings) {
@@ -493,6 +495,126 @@ export default class PrintModel {
       });
   };
 
+  // Returns all currently active image-layers as an array
+  getVisibleImageLayers = () => {
+    return this.map
+      .getLayers()
+      .getArray()
+      .filter((layer) => {
+        return (
+          layer.getVisible() &&
+          layer instanceof ImageLayer &&
+          layer.getSource() instanceof ImageWMS
+        );
+      });
+  };
+
+  // Updates the parameters of the supplied layer to make sure we
+  // request the images in the correct DPI for the print! This function
+  // only handles tile-layers.
+  prepareTileLayer = (layer, options) => {
+    // Let's run this in a try-catch just in case
+    try {
+      // We're gonna need to grab the layer-source
+      const source = layer.getSource();
+      // Let's also grab the layer id, so that we can use that as a key in the map
+      // containing all the original layer parameters. The id is stored in the name-
+      // property, wonderful!
+      const layerId = layer.get("name");
+      // Get the original DPI-source-parameters
+      const { DPI, MAP_RESOLUTION, FORMAT_OPTIONS } = source.getParams();
+      // and store them (so that we can reset the source params when the printing is done).
+      this.originalLayerParams.set(layerId, {
+        DPI,
+        MAP_RESOLUTION,
+        FORMAT_OPTIONS,
+      });
+      // Then we'll update the DPI-parameters to match the user-chosen DPI.
+      // Why three different options? Well, each server-type has chosen a different implementation,
+      // and to make sure we send requests that work for all these servers, we just pile all settings
+      // on each request (this is how Qgis does it as well, so it cant be that bad, right?).
+      source.updateParams({
+        DPI: options.resolution,
+        MAP_RESOLUTION: options.resolution,
+        FORMAT_OPTIONS: `dpi:${options.resolution}`,
+      });
+    } catch (error) {
+      console.error(
+        `Failed to update the DPI-options while creating print-image (Tiled WMS). Error: ${error}`
+      );
+    }
+  };
+
+  // Resets (applies the original parameters on) the supplied tile-layer.
+  resetTileLayer = (layer) => {
+    // Let's run this in a try-catch just in case
+    try {
+      // We're gonna need to grab the layer-source
+      const source = layer.getSource();
+      // We're gonna need the id so that we can grab the original parameters from
+      // the map.
+      const layerId = layer.get("name");
+      // Let's grab the original parameters...
+      const originalParams = this.originalLayerParams.get(layerId);
+      // ...and update the source with them!
+      source.updateParams(originalParams);
+    } catch (error) {
+      console.warn(
+        `Failed to reset a tile-layer after printing. Error: {error}`
+      );
+    }
+  };
+
+  // Updates the parameters of the supplied layer to make sure we
+  // request the images in the correct DPI for the print! This function
+  // only handles image-layers.
+  prepareImageLayer = (layer, options) => {
+    // Let's run this in a try-catch just in case
+    try {
+      // We're gonna need to grab the layer-source
+      const source = layer.getSource();
+      // Let's also grab the layer id, so that we can use that as a key in the map
+      // containing all the original load-functions. The id is stored in the name-
+      // property, wonderful!
+      const layerId = layer.get("name");
+      // Then we'll need to fetch the original image-load-function (so that we can make sure
+      // to re-apply that function when the printing is done).
+      const originalLoadFunction = source.getImageLoadFunction();
+      // Then we'll store the original function
+      this.originalLayerParams.set(layerId, originalLoadFunction);
+      // When the original function is stored, we can create a new load-function
+      // (which takes the current print-DPI into consideration) and update the source function with this one.
+      source.setImageLoadFunction((image, src) => {
+        // TODO: Here we're gonna have some fun with the image-requests.
+        image.getImage().src = src;
+      });
+    } catch (error) {
+      console.error(
+        `Failed to update the DPI-options while creating print-image (Single-tile WMS). Error: ${error}`
+      );
+    }
+  };
+
+  // Resets (applies the original image-load-function on) the supplied image-layer.
+  resetImageLayer = (layer) => {
+    // Let's run this in a try-catch just in case
+    try {
+      // We're gonna need to grab the layer-source
+      const source = layer.getSource();
+      // We're gonna need the id so that we can grab the original parameters from
+      // the map.
+      const layerId = layer.get("name");
+      // Let's grab the original image-load-function
+      const originalLoadFunction = this.originalLayerParams.get(layerId);
+      // ...and update the source-function!
+      source.setImageLoadFunction(originalLoadFunction);
+    } catch (error) {
+      console.warn(
+        `Failed to reset an image-layer after printing. Error: {error}`
+      );
+    }
+  };
+
   // Since we're allowing the user to print the map with different DPI-options,
   // the layers that are about to be printed must be prepared. The preparation consists
   // of settings the DPI-parameters so that we ensure that we are sending proper WMS-requests.
@@ -502,39 +624,19 @@ export default class PrintModel {
     // First we have to grab all currently visible tile-layers (Remember that this
     // function call only returns layers that are based on TileWMS)!
     const tileLayers = this.getVisibleTileLayers();
-    // We're gonna need to mess with all of those...
+    // We're also gonna have to grab all currently visible image-layers. An image-layer
+    // is a layer that has been added by an admin as a "single-tile" layer. (Remember that
+    // this function call only returns layers that are based on ImageWMS)!
+    const imageLayers = this.getVisibleImageLayers();
+    // We're gonna need to mess with all the tile-layers...
     for (const tileLayer of tileLayers) {
-      // Let's run this in a try-catch just in case
-      try {
-        // We're gonna need to grab the layer-source
-        const source = tileLayer.getSource();
-        // Let's also grab the layer id, so that we can use that as a key in the map
-        // containing all the original layer parameters. The id is stored in the name-
-        // property, wonderful!
-        const layerId = tileLayer.get("name");
-        // Get the original DPI-source-parameters
-        const { DPI, MAP_RESOLUTION, FORMAT_OPTIONS } = source.getParams();
-        // and store them (so that we can reset the source params when the printing is done).
-        this.originalLayerParams.set(layerId, {
-          DPI,
-          MAP_RESOLUTION,
-          FORMAT_OPTIONS,
-        });
-        // Then we'll update the DPI-parameters to match the user-chosen DPI.
-        // Why three different options? Well, each server-type has chosen a different implementation,
-        // and to make sure we send requests that work for all these servers, we just pile all settings
-        // on each request (this is how Qgis does it as well, so it cant be that bad, right?).
-        source.updateParams({
-          DPI: options.resolution,
-          MAP_RESOLUTION: options.resolution,
-          FORMAT_OPTIONS: `dpi:${options.resolution}`,
-        });
-      } catch (error) {
-        console.error(
-          `Failed to update the DPI-options while creating print-image. Error: ${error}`
-        );
-      }
+      this.prepareTileLayer(tileLayer, options);
     }
+    // We're also gonna need to mess with all the image-layers...
+    for (const imageLayer of imageLayers) {
+      this.prepareImageLayer(imageLayer, options);
+    }
+    console.log(this.originalLayerParams);
   };
 
   // Since we've been messing with the tile-layers parameters while printing, we have to provide
@@ -542,24 +644,15 @@ export default class PrintModel {
   resetActiveLayers = () => {
     // First we'll have to grab all currently visible tile-layers.
     const tileLayers = this.getVisibleTileLayers();
-    // We're gonna need to reset all of those...
+    // We're also gonna have to grab all currently visible image-layers.
+    const imageLayers = this.getVisibleImageLayers();
+    // We're gonna need to reset all of the tile-layers
     for (const tileLayer of tileLayers) {
-      // Let's run this in a try-catch just in case
-      try {
-        // We're gonna need to grab the layer-source
-        const source = tileLayer.getSource();
-        // We're gonna need the id so that we can grab the original parameters from
-        // the map.
-        const layerId = tileLayer.get("name");
-        // Let's grab the original parameters...
-        const originalParams = this.originalLayerParams.get(layerId);
-        // ...and update the source with them!
-        source.updateParams(originalParams);
-      } catch (error) {
-        console.warn(
-          `Failed to reset a tile-layer after printing. Error: {error}`
-        );
-      }
+      this.resetTileLayer(tileLayer);
+    }
+    // We're also gonna have to reset all the image-layers.
+    for (const imageLayer of imageLayers) {
+      this.resetImageLayer(imageLayer);
     }
     // When all layers has been reset, we'll have to reset the map containing the
     // original settings!
