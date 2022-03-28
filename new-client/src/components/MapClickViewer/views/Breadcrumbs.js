@@ -14,7 +14,7 @@ const Breadcrumbs = (props) => {
   const {
     feature,
     featureCollection,
-    setSelectedFeature,
+    setSelectedFeatureId,
     setSelectedFeatureCollection,
   } = props;
 
@@ -26,9 +26,11 @@ const Breadcrumbs = (props) => {
         sx={{ marginTop: -1 }}
         onClick={(e) => {
           e.stopPropagation();
-
-          setSelectedFeature
-            ? setSelectedFeature(null)
+          // If setSelectedFeatureId is provided, we're in step 3 already and wish to
+          // unset it (so we get back to step 2). If it isn't set, however, we're already
+          // in step 2 (list view) and wish to unset that, so we get back to step 1.
+          setSelectedFeatureId
+            ? setSelectedFeatureId(null)
             : setSelectedFeatureCollection(null);
         }}
       >
@@ -47,15 +49,15 @@ const Breadcrumbs = (props) => {
             Översikt
           </Link>
         )}
-        {setSelectedFeatureCollection && !setSelectedFeature && (
+        {setSelectedFeatureCollection && !setSelectedFeatureId && (
           <Typography color="text.primary" variant="caption">
             {featureCollection.displayName}
           </Typography>
         )}
 
-        {setSelectedFeature && (
+        {setSelectedFeatureId && (
           <Link
-            onClick={() => setSelectedFeature(null)}
+            onClick={() => setSelectedFeatureId(null)}
             underline="hover"
             color="text.primary"
             variant="caption"
@@ -64,7 +66,7 @@ const Breadcrumbs = (props) => {
             {featureCollection.displayName}
           </Link>
         )}
-        {setSelectedFeature && (
+        {setSelectedFeatureId && (
           <Typography color="text.primary" variant="caption">
             {feature.primaryLabel}
           </Typography>

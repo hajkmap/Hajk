@@ -44,7 +44,7 @@ const MapClickViewer = (props) => {
     const mapClickObserver = globalObserver.subscribe(
       "mapClick.featureCollections",
       (fc) => {
-        console.log("mapClick.featureCollections", fc);
+        console.log("Got collections from model:", fc);
         if (fc.length > 0) {
           setFeatureCollections(fc);
           setOpen(true);

@@ -16,7 +16,7 @@ const MapClickViewerView = (props) => {
     setSelectedFeatureCollection(preselectedFeatureCollection || null);
   }, [featureCollections]);
 
-  // Conditional render: if none feature collection is selected - render
+  // Conditional render: if no feature collection is selected - render
   // a list of available collections. Else, render the selected collection's
   // items (i.e. FeatureListView).
   switch (selectedFeatureCollection) {
