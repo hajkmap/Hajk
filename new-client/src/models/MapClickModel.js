@@ -26,7 +26,7 @@ export default class MapClickModel {
       source: this.source,
       name: "MapClickModel", // #883, should we call the layers the same as models that create them?
       type: "system", // #883: "system" for the core system layers, to differentiate from "normal" WMS/Vector/etc layers?
-      zIndex: "1000", // We want this to stay on top of other layers
+      zIndex: 1000, // We want this to stay on top of other layers
     });
     this.map.addLayer(this.vector);
 
@@ -42,10 +42,9 @@ export default class MapClickModel {
    * @memberof MapClickModel
    */
   async bindMapClick(callback) {
-    this.map.on(
-      "singleclick",
-      (e) => this.map.clickLock.size === 0 && this.#handleClick(e, callback)
-    );
+    this.map.on("singleclick", (e) => {
+      this.map.clickLock.size === 0 && this.#handleClick(e, callback);
+    });
   }
   /**
    * @summary Determine the sublayer's name by looking at the feature's id
