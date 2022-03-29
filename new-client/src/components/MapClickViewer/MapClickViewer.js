@@ -40,11 +40,9 @@ const MapClickViewer = (props) => {
 
   // Subscribe to events on global observer
   useEffect(() => {
-    console.log("MapClickViewer subscribing to events");
     const mapClickObserver = globalObserver.subscribe(
       "mapClick.featureCollections",
       (fc) => {
-        console.log("Got collections from model:", fc);
         if (fc.length > 0) {
           setFeatureCollections(fc);
           setOpen(true);
@@ -54,7 +52,6 @@ const MapClickViewer = (props) => {
       }
     );
     return () => {
-      console.log("MapClickViewer unsubscribing from events");
       mapClickObserver.unsubscribe();
     };
   }, [closeWindow, globalObserver]);
