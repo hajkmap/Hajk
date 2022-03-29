@@ -111,8 +111,8 @@ const FeaturePagination = (props) => {
             }
             sx={{ mb: 2 }}
           >
-            Tips: du kan även bläddra bland resultaten genom
-            tangetbordsknapparna &#8592; och &#8594;.
+            Tips: du kan bläddra bland resultaten med knapparna &#8592; och
+            &#8594; på tangentbordet
           </Alert>
         </Collapse>
       )}
