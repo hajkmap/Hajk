@@ -586,7 +586,44 @@ export default class PrintModel {
       // (which takes the current print-DPI into consideration) and update the source function with this one.
       source.setImageLoadFunction((image, src) => {
         // TODO: Here we're gonna have some fun with the image-requests.
-        image.getImage().src = src;
+        const url = new URL(src);
+        const searchParams = url.searchParams;
+        searchParams.set("DPI", options.resolution);
+        searchParams.set("MAP_RESOLUTION", options.resolution);
+        searchParams.set("FORMAT_OPTIONS", `dpi:${options.resolution}`);
+        // We're gonna need to grab the width and height so that we can make sure the
+        // requested image is not too large for the WMS-server to render. (If we're requesting
+        // too many pixels at a high DPI the server will not be able to create the image).
+        const height = searchParams.get("HEIGHT") || 1;
+        const width = searchParams.get("WIDTH") || 1;
+        // What will be too complex for the WMS-servers? Good question. For now,
+        // we say that the image is too complex if either the height or width is larger than
+        // 4096px at the same time as the DPI is set to 300 or more.
+        if (Math.max(height, width) > 4096 && options.resolution >= 150) {
+          try {
+            // If the image is too complex, we scale the image-request to 4096 to make
+            // sure the WMS-server can handle the request.
+            const scaling = 4096 / Math.max(height, width);
+            searchParams.set("HEIGHT", Math.floor(height * scaling));
+            searchParams.set("WIDTH", Math.floor(width * scaling));
+            // Let's create a temp-image that we can stretch out on a canvas with the "real" size.
+            const tempImage = document.createElement("img");
+            tempImage.onload = () => {
+              const canvas = document.createElement("canvas");
+              canvas.width = width;
+              canvas.height = height;
+              const ctx = canvas.getContext("2d");
+              ctx.drawImage(tempImage, 0, 0, width, height);
+              image.getImage().src = canvas.toDataURL();
+            };
+            tempImage.crossOrigin = "anonymous";
+            tempImage.src = url;
+          } catch (error) {
+            console.log(error);
+          }
+        } else {
+          image.getImage().src = url.toString();
+        }
       });
     } catch (error) {
       console.error(
@@ -636,7 +673,6 @@ export default class PrintModel {
     for (const imageLayer of imageLayers) {
       this.prepareImageLayer(imageLayer, options);
     }
-    console.log(this.originalLayerParams);
   };
 
   // Since we've been messing with the tile-layers parameters while printing, we have to provide
