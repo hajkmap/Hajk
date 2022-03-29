@@ -32,10 +32,10 @@ const FeaturePagination = (props) => {
    */
   const handlePaginationChange = useCallback(
     (e, v) => {
-      setSelectedFeatureId(getIdFromPageNumber(page));
+      setSelectedFeatureId(getIdFromPageNumber(v));
       setPage(v);
     },
-    [getIdFromPageNumber, page, setSelectedFeatureId]
+    [getIdFromPageNumber, setSelectedFeatureId]
   );
 
   // Handler for keydown events
