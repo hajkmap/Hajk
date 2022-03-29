@@ -600,27 +600,23 @@ export default class PrintModel {
         // we say that the image is too complex if either the height or width is larger than
         // 4096px at the same time as the DPI is set to 300 or more.
         if (Math.max(height, width) > 4096 && options.resolution >= 150) {
-          try {
-            // If the image is too complex, we scale the image-request to 4096 to make
-            // sure the WMS-server can handle the request.
-            const scaling = 4096 / Math.max(height, width);
-            searchParams.set("HEIGHT", Math.floor(height * scaling));
-            searchParams.set("WIDTH", Math.floor(width * scaling));
-            // Let's create a temp-image that we can stretch out on a canvas with the "real" size.
-            const tempImage = document.createElement("img");
-            tempImage.onload = () => {
-              const canvas = document.createElement("canvas");
-              canvas.width = width;
-              canvas.height = height;
-              const ctx = canvas.getContext("2d");
-              ctx.drawImage(tempImage, 0, 0, width, height);
-              image.getImage().src = canvas.toDataURL();
-            };
-            tempImage.crossOrigin = "anonymous";
-            tempImage.src = url;
-          } catch (error) {
-            console.log(error);
-          }
+          // If the image is too complex, we scale the image-request to 4096 to make
+          // sure the WMS-server can handle the request.
+          const scaling = 4096 / Math.max(height, width);
+          searchParams.set("HEIGHT", Math.floor(height * scaling));
+          searchParams.set("WIDTH", Math.floor(width * scaling));
+          // Let's create a temp-image that we can stretch out on a canvas with the "real" size.
+          const tempImage = document.createElement("img");
+          tempImage.onload = () => {
+            const canvas = document.createElement("canvas");
+            canvas.width = width;
+            canvas.height = height;
+            const ctx = canvas.getContext("2d");
+            ctx.drawImage(tempImage, 0, 0, width, height);
+            image.getImage().src = canvas.toDataURL();
+          };
+          tempImage.crossOrigin = "anonymous";
+          tempImage.src = url;
         } else {
           image.getImage().src = url.toString();
         }
