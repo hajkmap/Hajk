@@ -22,7 +22,7 @@ const FeaturesListView = (props) => {
 
   const { appModel } = useMapClickViewerContext();
 
-  const [selectedFeature, setSelectedFeature] = useState(null);
+  const [selectedFeatureId, setSelectedFeatureId] = useState(null);
 
   // If there's only ONE feature in the collection, let's pre-select it.
   // This will ensure that we render the detail view directly.
@@ -31,11 +31,11 @@ const FeaturesListView = (props) => {
       featureCollection?.features.length === 1
         ? featureCollection.features[0].getId()
         : null;
-    setSelectedFeature(preselectedFeature || null);
+    setSelectedFeatureId(preselectedFeature || null);
   }, [featureCollection]);
 
   return featureCollection ? (
-    selectedFeature === null ? (
+    selectedFeatureId === null ? (
       <>
         <Breadcrumbs
           setSelectedFeatureCollection={setSelectedFeatureCollection}
@@ -63,7 +63,7 @@ const FeaturesListView = (props) => {
             return (
               <ListItemButton
                 key={i}
-                onClick={() => setSelectedFeature(f.getId())}
+                onClick={() => setSelectedFeatureId(f.getId())}
                 onMouseEnter={() => appModel.highlight(f)}
                 onMouseLeave={() => appModel.highlight(false)}
                 component="li"
@@ -90,11 +90,11 @@ const FeaturesListView = (props) => {
       <>
         <FeatureDetailView
           feature={featureCollection.features.find(
-            (f) => f.getId() === selectedFeature
+            (f) => f.getId() === selectedFeatureId
           )}
           featureCollection={featureCollection}
-          selectedFeature={selectedFeature}
-          setSelectedFeature={setSelectedFeature}
+          selectedFeatureId={selectedFeatureId}
+          setSelectedFeatureId={setSelectedFeatureId}
           selectedFeatureCollection={selectedFeatureCollection}
           setSelectedFeatureCollection={setSelectedFeatureCollection}
         />

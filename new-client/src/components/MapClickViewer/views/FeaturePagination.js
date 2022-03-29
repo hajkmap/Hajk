@@ -5,8 +5,8 @@ import { Divider, Pagination, Stack } from "@mui/material";
 const FeaturePagination = (props) => {
   const {
     paginationCollection, // An Array of feature IDs
-    selectedFeature, // ID of currently selected feature
-    setSelectedFeature, // State setter
+    selectedFeatureId, // ID of currently selected feature
+    setSelectedFeatureId, // State setter
   } = props;
 
   // Two helpers to compensate for the fact that the paginationCollection array
@@ -18,7 +18,7 @@ const FeaturePagination = (props) => {
   );
 
   // Set the initial pagination page to the currently selected ID's index+1
-  const [page, setPage] = useState(getPageNumerFromId(selectedFeature));
+  const [page, setPage] = useState(getPageNumerFromId(selectedFeatureId));
 
   // Shorthand for later
   const sumPages = paginationCollection.length;
@@ -32,10 +32,10 @@ const FeaturePagination = (props) => {
    */
   const handlePaginationChange = useCallback(
     (e, v) => {
-      setSelectedFeature(getIdFromPageNumber(page));
+      setSelectedFeatureId(getIdFromPageNumber(v));
       setPage(v);
     },
-    [getIdFromPageNumber, page, setSelectedFeature]
+    [getIdFromPageNumber, setSelectedFeatureId]
   );
 
   // Handler for keydown events
@@ -71,7 +71,7 @@ const FeaturePagination = (props) => {
     return () => {
       document.removeEventListener("keydown", bindArrowKeys);
     };
-  }, [bindArrowKeys, setSelectedFeature, paginationCollection]);
+  }, [bindArrowKeys, setSelectedFeatureId, paginationCollection]);
 
   return (
     <>

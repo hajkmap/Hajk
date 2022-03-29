@@ -769,6 +769,7 @@ class VectorLayerForm extends React.Component {
             <a
               href="https://fonts.google.com/icons?selected=Material+Icons"
               target="_blank"
+              rel="noopener noreferrer"
             >
               lista
             </a>

@@ -10,8 +10,8 @@ const FeatureDetailView = (props) => {
   const {
     feature,
     featureCollection,
-    selectedFeature,
-    setSelectedFeature,
+    selectedFeatureId,
+    setSelectedFeatureId,
     setSelectedFeatureCollection,
   } = props;
 
@@ -34,18 +34,18 @@ const FeatureDetailView = (props) => {
     appModel.highlight(feature || false);
   }, [feature, appModel]);
 
-  return selectedFeature && feature ? (
+  return selectedFeatureId && feature ? (
     <>
       <Breadcrumbs
         setSelectedFeatureCollection={setSelectedFeatureCollection}
-        setSelectedFeature={setSelectedFeature}
+        setSelectedFeatureId={setSelectedFeatureId}
         featureCollection={featureCollection}
         feature={feature}
       />
       <FeaturePagination
         paginationCollection={paginationCollection}
-        selectedFeature={selectedFeature}
-        setSelectedFeature={setSelectedFeature}
+        selectedFeatureId={selectedFeatureId}
+        setSelectedFeatureId={setSelectedFeatureId}
       />
       {shouldRenderMarkdown === true ? (
         <Markdown feature={feature} featureCollection={featureCollection} />
