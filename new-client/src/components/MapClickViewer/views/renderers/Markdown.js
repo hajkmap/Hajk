@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Box } from "@mui/system";
 
 import { useMapClickViewerContext } from "components/MapClickViewer/MapClickViewerContext";
 
@@ -21,14 +22,29 @@ const Markdown = (props) => {
       })
       .mergeFeaturePropsWithMarkdown()
       .then((MarkdownComponent) => {
-        setReactComponent(MarkdownComponent); // Log above runs - but we hit endless loop here, as this leads to re-renders
+        setReactComponent(MarkdownComponent);
       })
       .catch((error) => {
         setReactComponent(null);
       });
   }, [feature, featureCollection, featurePropsParsing]);
 
-  return reactComponent;
+  return (
+    <Box
+      sx={{
+        // Normally, text rendered in Window isn't selectable, as we see
+        // it as an UI element. But MapClickViewer's content is an exception.
+        userSelect: "text",
+        cursor: "auto",
+        // Let's ensure that <summary> elements do have the correct cursor.
+        "& summary": {
+          cursor: "pointer",
+        },
+      }}
+    >
+      {reactComponent}
+    </Box>
+  );
 };
 
 export default Markdown;

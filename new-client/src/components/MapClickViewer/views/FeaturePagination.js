@@ -1,6 +1,16 @@
 import React, { useCallback, useEffect, useState } from "react";
 
-import { Divider, Pagination, Stack } from "@mui/material";
+import {
+  Alert,
+  Collapse,
+  Divider,
+  IconButton,
+  Pagination,
+  Stack,
+} from "@mui/material";
+import CloseIcon from "@mui/icons-material/Close";
+
+import { functionalOk } from "models/Cookie";
 
 const FeaturePagination = (props) => {
   const {
@@ -19,6 +29,13 @@ const FeaturePagination = (props) => {
 
   // Set the initial pagination page to the currently selected ID's index+1
   const [page, setPage] = useState(getPageNumerFromId(selectedFeatureId));
+
+  // Set the initial state for showing an Alert about the keyboard navigation.
+  // If no key exists, null will be returned. In that case, we want to default
+  // to "1", which will show the Alert.
+  const [showKeyboardNavigationHint, setShowKeyboardNavigationHint] = useState(
+    localStorage.getItem("showKeyboardNavigationHint") ?? "1"
+  );
 
   // Shorthand for later
   const sumPages = paginationCollection.length;
@@ -75,6 +92,30 @@ const FeaturePagination = (props) => {
 
   return (
     <>
+      {sumPages > 1 && showKeyboardNavigationHint && (
+        <Collapse in={showKeyboardNavigationHint === "1"}>
+          <Alert
+            action={
+              <IconButton
+                aria-label="close"
+                color="inherit"
+                size="small"
+                onClick={() => {
+                  setShowKeyboardNavigationHint(false);
+                  functionalOk() &&
+                    localStorage.setItem("showKeyboardNavigationHint", "0");
+                }}
+              >
+                <CloseIcon fontSize="inherit" />
+              </IconButton>
+            }
+            sx={{ mb: 2 }}
+          >
+            Tips: du kan även bläddra bland resultaten genom
+            tangetbordsknapparna &#8592; och &#8594;.
+          </Alert>
+        </Collapse>
+      )}
       <Divider />
       <Stack spacing={2} alignItems="center">
         <Pagination
