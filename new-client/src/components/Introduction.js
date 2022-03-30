@@ -27,14 +27,14 @@ class Introduction extends React.PureComponent {
   };
 
   static propTypes = {
-    experimentalIntroductionEnabled: PropTypes.bool.isRequired,
-    experimentalIntroductionSteps: PropTypes.array,
+    introductionEnabled: PropTypes.bool.isRequired,
+    introductionSteps: PropTypes.array,
     globalObserver: PropTypes.object.isRequired,
   };
 
   static defaultProps = {
-    experimentalIntroductionEnabled: false,
-    experimentalIntroductionSteps: [],
+    introductionEnabled: false,
+    introductionSteps: [],
     globalObserver: {},
   };
 
@@ -93,11 +93,11 @@ class Introduction extends React.PureComponent {
       // Allow a short wait so that everything renders first
       setTimeout(() => {
         // First check if we have any steps in our config
-        const { experimentalIntroductionSteps } = this.props;
+        const { introductionSteps } = this.props;
         // We must have at least 2 elements in the array in order to properly show intro guide
         const steps =
-          experimentalIntroductionSteps.length >= 2
-            ? experimentalIntroductionSteps
+          introductionSteps.length >= 2
+            ? this.#tryParsingSteps(introductionSteps)
             : this.predefinedSteps;
 
         const filteredSteps = steps.filter((s) => {
@@ -115,6 +115,22 @@ class Introduction extends React.PureComponent {
       "core.showIntroduction",
       this.showIntroduction
     );
+  }
+
+  #tryParsingSteps(steps) {
+    try {
+      for (const step of steps) {
+        if (!step?.title || !step?.intro) {
+          throw Error(
+            "Introduction steps missing necessary properties. Please ensure that each step contains at least the 'title' and 'intro' property."
+          );
+        }
+      }
+      return steps;
+    } catch (error) {
+      console.error(error.message);
+      return this.predefinedSteps;
+    }
   }
 
   showIntroduction() {
@@ -154,10 +170,10 @@ class Introduction extends React.PureComponent {
   }
 
   render() {
-    const { experimentalIntroductionEnabled } = this.props;
+    const { introductionEnabled } = this.props;
     const { initialStep, steps, stepsEnabled } = this.state;
 
-    return experimentalIntroductionEnabled ? (
+    return introductionEnabled ? (
       <>
         {this.renderControlButton()}
         {
