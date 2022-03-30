@@ -599,7 +599,7 @@ export default class PrintModel {
         // What will be too complex for the WMS-servers? Good question. For now,
         // we say that the image is too complex if either the height or width is larger than
         // 4096px at the same time as the DPI is set to 300 or more.
-        if (Math.max(height, width) > 4096 && options.resolution >= 150) {
+        if (Math.max(height, width) > 4096) {
           // If the image is too complex, we scale the image-request to 4096 to make
           // sure the WMS-server can handle the request.
           const scaling = 4096 / Math.max(height, width);
