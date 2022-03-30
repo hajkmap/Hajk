@@ -161,7 +161,7 @@ function CookieNotice({ globalObserver, appModel }) {
                   setThirdPartChecked(event.target.checked);
                 }}
                 checked={thirdPartChecked}
-                label={"3:e Part"}
+                label={"Tredjepart"}
               />
             )}
           </Grid>
