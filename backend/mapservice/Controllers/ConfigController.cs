@@ -26,14 +26,16 @@ namespace MapService.Controllers
         ILog _log = LogManager.GetLogger(typeof(ConfigController));
 
         private readonly SettingsDbContext settingsDataContext = new SettingsDbContext();
-        private bool disableUpdates = ConfigurationManager.AppSettings["disableUpdates"] == "true" ? true : false;
+        private bool disableUpdates = ConfigurationManager.AppSettings["disableUpdates"] != "true" ? false : true;
 
         /// <summary>
         /// If update are disabled from config throw 403
         /// </summary>
         /// <returns></returns>
-        public void preventUpdates() {
-            if (this.disableUpdates == true) {
+        public void preventUpdates()
+        {
+            if (this.disableUpdates == true)
+            {
                 throw new HttpException(403, "Forbidden");
             }
         }

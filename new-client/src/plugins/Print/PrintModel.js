@@ -608,10 +608,6 @@ export default class PrintModel {
         return false;
       }
 
-      // Since we've been messing with the layer-settings while printing, we have to
-      // make sure to reset these settings.
-      this.resetActiveLayers();
-
       // This is needed to prevent some buggy output from some browsers
       // when a lot of tiles are being rendered (it could result in black
       // canvas PDF)
@@ -796,6 +792,10 @@ export default class PrintModel {
           }
         );
       }
+
+      // Since we've been messing with the layer-settings while printing, we have to
+      // make sure to reset these settings.
+      this.resetActiveLayers();
 
       // Finally, save the PDF (or PNG)
       this.saveToFile(pdf, width, options.saveAsType)

@@ -57,6 +57,8 @@ namespace MapService.Models
 
         public bool mapcleaner { get; set; }
 
+        public bool mapresetter { get; set; }
+
         public bool drawerVisible { get; set; }
 
         public bool drawerVisibleMobile { get; set; }
@@ -78,6 +80,8 @@ namespace MapService.Models
         public bool cookieUse3dPart { get; set; }
 
         public bool showThemeToggler { get; set; }
+
+        public bool showUserAvatar { get; set; }
 
         public bool altShiftDragRotate { get; set; }
 

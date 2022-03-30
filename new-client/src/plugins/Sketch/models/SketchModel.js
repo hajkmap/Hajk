@@ -4,7 +4,7 @@ import { Circle, Fill, Stroke } from "ol/style";
 import GeoJSON from "ol/format/GeoJSON";
 import { Circle as CircleGeometry, Point } from "ol/geom";
 
-import { STROKE_DASHES } from "../constants";
+import { STROKE_DASHES, MAX_LS_CHARS, PROMPT_TEXTS } from "../constants";
 
 class SketchModel {
   #geoJSONParser;
@@ -165,6 +165,22 @@ class SketchModel {
     }
   };
 
+  // Returns wether the supplied sketch is OK to save in LS. There is a possibility
+  // that the supplied sketch is too complex (meaning that the resulting object will
+  // be too large to save).
+  #getSketchOkForLS = (sketch) => {
+    try {
+      // First we'll stringify the supplied sketch (an object).
+      const stringLength = JSON.stringify(sketch).length;
+      // And make sure the resulting string contains less characters
+      // than what is allowed in the LS.
+      return stringLength < MAX_LS_CHARS;
+    } catch (error) {
+      console.error(`Failed to parse supplied sketch. Error: ${error}`);
+      return false;
+    }
+  };
+
   // Returns the feature-style in a form that fits the feature-style-editor
   getFeatureStyle = (feature) => {
     try {
@@ -306,16 +322,36 @@ class SketchModel {
   // in the the sketch-layer. If a sketch with the same id as the one supplied one already exist,
   // the already stored sketch will be over-written.
   addCurrentSketchToStorage = (sketchInfo) => {
-    // First we'll make sure to remove any potential sketch (with same title) already in storage.
-    // We do this since we don't allow for multiple sketches with the same title.
-    this.removeSketchFromStorage(sketchInfo);
-    // Then we'll create a sketch (an object containing the supplied sketch-information along with the
+    // First we'll create a sketch (an object containing the supplied sketch-information along with the
     // features currently existing in the sketch-layer).
     const sketch = this.#createSketchObject(sketchInfo);
+    // Then we'll make sure there are some features to save. (If no features
+    // are present in the sketch, theres no point in saving a sketch).
+    const { features } = sketch;
+    if (!features || features.length === 0) {
+      return {
+        status: "FAILED",
+        message: PROMPT_TEXTS.saveNoFeatures,
+      };
+    }
+    // Then we have to make sure that the sketch is not to big (complex)
+    // for storage in the LS.
+    const sketchOkForLS = this.#getSketchOkForLS(sketch);
+    // If the sketch is not OK to save, we abort.
+    if (!sketchOkForLS) {
+      return {
+        status: "FAILED",
+        message: PROMPT_TEXTS.saveOverflow,
+      };
+    }
+    // Then we'll make sure to remove any potential sketch (with same title) already in storage.
+    // We do this since we don't allow for multiple sketches with the same title.
+    this.removeSketchFromStorage(sketchInfo);
     // Then we'll get all the currently stored sketches.
     const storedSketches = this.getSketchesFromStorage();
     // Then we'll update the stored sketches with the supplied one.
     this.#setStoredSketches([sketch, ...storedSketches]);
+    return { status: "SUCCESS", message: PROMPT_TEXTS.saveSuccess };
   };
 
   // Adds the features in the supplied sketch to the map by first parsing them
