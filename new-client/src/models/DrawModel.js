@@ -41,11 +41,10 @@ import { getArea as getExtentArea } from "ol/extent";
  * - parseColorString(hex/rgba-string <string>): Accepts a string and returns an object with r-, g-, b-, and a-properties.
  * - getCurrentVectorSource(): Returns the vector-source currently connected to the draw-model.
  * - get/set drawStyleSettings(): Get or set the style settings used by the draw-model.
- * - get/set labelFormat(): Sets the format on the labels. ("AUTO", "M2", "KM2", "HECTARE")
  * - get/set showDrawTooltip(): Get or set wether a tooltip should be shown when drawing.
- * - get/set showFeatureMeasurements(): Get or set wether drawn feature measurements should be shown or not.
  * - get/set modifyActive(): Get or set wether the Modify-interaction should be active or not.
  * - get/set translateActive(): Get or set wether the Translate-interaction should be active or not.
+ * - get/set measurementSettings(): Get or set the measurement-settings (units, show-area etc.)
  */
 class DrawModel {
   #map;
@@ -61,7 +60,7 @@ class DrawModel {
   #drawTooltip;
   #currentPointerCoordinate;
   #showDrawTooltip;
-  #showFeatureMeasurements;
+  #measurementSettings;
   #drawStyleSettings;
   #textStyleSettings;
   #drawInteraction;
@@ -75,7 +74,6 @@ class DrawModel {
   #keepModifyActive;
   #keepTranslateActive;
   #allowedLabelFormats;
-  #labelFormat;
   #customHandleDrawStart;
   #customHandleDrawEnd;
   #customHandlePointerMove;
@@ -102,13 +100,12 @@ class DrawModel {
     // which will act as a prefix on all messages published on the
     // supplied observer.
     this.#observerPrefix = this.#getObserverPrefix(settings);
-    this.#showFeatureMeasurements = settings.showFeatureMeasurements ?? true;
+    this.measurementSettings =
+      settings.measurementSettings ?? this.#getDefaultMeasurementSettings();
     this.#drawStyleSettings =
       settings.drawStyleSettings ?? this.#getDefaultDrawStyleSettings();
     this.#textStyleSettings =
       settings.textStyleSettings ?? this.#getDefaultTextStyleSettings();
-    this.#allowedLabelFormats = ["AUTO", "M2", "KM2", "HECTARE"];
-    this.#labelFormat = settings.labelFormat ?? "AUTO"; // One of #allowedLabelFormats
     // We are going to be keeping track of the current extent of the draw-source...
     this.#currentExtent = null;
     // And the current draw interaction.
@@ -182,6 +179,18 @@ class DrawModel {
       lineDash: strokeDash,
       strokeWidth: strokeWidth,
       fillColor: fillColor,
+    };
+  };
+
+  // Returns the default settings used to display measurement-labels
+  #getDefaultMeasurementSettings = () => {
+    return {
+      showText: false,
+      showArea: false,
+      showPerimeter: false,
+      areaUnit: "AUTO",
+      lengthUnit: "AUTO",
+      precision: 0,
     };
   };
 
@@ -374,11 +383,11 @@ class DrawModel {
       feature.get("DRAW_METHOD") || feature.get("geometryType");
     // And check if we're supposed to be showing text or not.
     // (We're never showing text on arrow-features, and text-features override
-    // the showFeatureMeasurements-tag, since the text-features would be useless
+    // the measurement-settings, since the text-features would be useless
     // if the text wasn't shown).
     return (
       featureDrawMethod !== "Arrow" &&
-      (this.#showFeatureMeasurements || featureDrawMethod === "Text")
+      (this.#measurementSettings.showText || featureDrawMethod === "Text")
     );
   };
 
@@ -549,60 +558,90 @@ class DrawModel {
     }
   };
 
-  // Returns the area of the supplied feature in a readable format.
-  #getFeatureMeasurementLabel = (feature) => {
-    // First we must get the feature area, length, or placement.
-    // (Depending on if we're dealing with Point, LineString, or surface).
-    const featureMeasure = this.#getFeatureMeasurement(feature);
-    // Let's grab the geometry so that we can check what we're dealing with.
-    const featureGeometry = feature.getGeometry();
-    // First we'll check if we're dealing with a point. If we are, we return it's
-    // placement right a way. The measurement will be an array containing it's coordinates.
-    if (featureGeometry instanceof Point) {
-      // If we're dealing with a point, the measurement will be an array containing
-      // it's coordinates.
-      return `N: ${Math.round(featureMeasure[1])} E: ${Math.round(
-        featureMeasure[0]
-      )}`;
+  // Returns the area, perimeter, and/or length of the supplied feature in a readable format.
+  #getFeatureMeasurementLabel = (feature, labelType) => {
+    // First we must get the feature measurements (The returned measurements will differ
+    // Depending on if we're dealing with Point, LineString, or surface).
+    const measurements = this.#getFeatureMeasurements(feature);
+    // Then we'll reduce the measurements down to a string that we can show.
+    return measurements.reduce((acc, curr) => {
+      switch (curr.type) {
+        case "COORDINATES":
+          return (acc += `N: ${Math.round(curr.value[1])} E: ${Math.round(
+            curr.value[0]
+          )}`);
+        case "AREA":
+        case "PERIMETER":
+        case "LENGTH":
+          return (acc += this.#getFormattedMeasurementString(curr, labelType));
+        default:
+          return acc;
+      }
+    }, "");
+  };
+
+  #getFormattedMeasurementString = (measurement, labelType) => {
+    // Let's destruct some measurement-information that we can
+    // use to construct the measurement-string.
+    const { type, value, prefix } = measurement;
+    // We have to make sure that we're supposed to show the measurement-text.
+    // This is controlled in the measurement-settings, but is also affected by
+    // the supplied type (if we're creating a tooltip, we're always showing everything!).
+    const showMeasurement =
+      labelType === "TOOLTIP" ||
+      type === "LENGTH" ||
+      (type === "AREA" && this.#measurementSettings.showArea) ||
+      (type === "PERIMETER" && this.#measurementSettings.showPerimeter);
+    // If we're not supposed to be showing the measurement, lets return an empty string.
+    if (!showMeasurement) {
+      return "";
     }
-    // Then we'll check if we're dealing with a length measurement
-    const measureIsLength = featureGeometry instanceof LineString;
-    // Let's check how we're gonna present the label
-    switch (this.#labelFormat) {
+    // Otherwise we'll handle the formatting according to the labelFormat set by the user
+    switch (this.#getLabelFormatFromMeasurementType(type)) {
       case "AUTO":
-        // If the format is AUTO, we're checking if the measurement is large
-        // enough to show it in kilometers or not. First, we need to check
-        // where the cutoff point for the kilometer display is. (It will vary
-        // depending on if we're measuring length or area).
-        const kilometerCutoff = measureIsLength ? 1e3 : 1e6;
-        // If the measurement is larger or equal to the cutoff, we return a string
-        // formatted in kilometers.
-        if (featureMeasure >= kilometerCutoff) {
-          return this.#getKilometerMeasurementString(
-            featureMeasure,
-            measureIsLength
-          );
-        }
-        // Otherwise we return a string formatted in meters.
-        return this.#getMeasurementString(featureMeasure, measureIsLength);
+        const formatted = this.#shouldFormatToKm(value, type)
+          ? this.#getKilometerMeasurementString(value, type)
+          : this.#getMeasurementString(value, type);
+        return `${prefix} ${formatted}`;
+      case "KM":
       case "KM2":
         // If the format is "KM2", we'll show the measurement in km²
         // (Or km if we're measuring length). Rounded to show 3 decimals.
-        return this.#getKilometerMeasurementString(
-          featureMeasure,
-          measureIsLength
-        );
+        return `${prefix} ${this.#getKilometerMeasurementString(value, type)}`;
       case "HECTARE":
         // If the format is "HECTARE" we will show the measurement in hectare
         // if we're dealing with a surface. If we're dealing with a lineString
         // we will return the measurement with "M2" format.
-        return this.#getHectareMeasurementString(
-          featureMeasure,
-          measureIsLength
-        );
+        return `${prefix} ${this.#getHectareMeasurementString(value, type)}`;
       default:
         // Otherwise m² (or m) will do. (Displayed in local format).
-        return this.#getMeasurementString(featureMeasure, measureIsLength);
+        return `${prefix} ${this.#getMeasurementString(value, type)}`;
+    }
+  };
+
+  #getLabelFormatFromMeasurementType = (type) => {
+    switch (type) {
+      case "LENGTH":
+      case "PERIMETER":
+        return this.#measurementSettings.lengthUnit;
+      default:
+        return this.#measurementSettings.areaUnit;
+    }
+  };
+
+  // Checks if the supplied value and type should be formatted to km or not.
+  #shouldFormatToKm = (value, type) => {
+    // If the format is AUTO, we're checking if the measurement is large
+    // enough to show it in kilometers or not. First, we need to set
+    // the cutoff points for the kilometer display.
+    const lengthCutOff = 1e3;
+    const areaCutOff = 1e6;
+    switch (type) {
+      case "LENGTH":
+      case "PERIMETER":
+        return value > lengthCutOff;
+      default:
+        return value > areaCutOff;
     }
   };
 
@@ -617,57 +656,139 @@ class DrawModel {
     }
     // Otherwise we return the measurement-text (If we're supposed to
     // show it)!
-    return this.#showFeatureMeasurements
-      ? this.#getFeatureMeasurementLabel(feature)
+    return this.#measurementSettings.showText
+      ? this.#getFeatureMeasurementLabel(feature, "LABEL")
       : "";
   };
 
   // Returns the supplied measurement as a kilometer-formatted string.
   // If we're measuring area, km² is returned, otherwise, km is returned.
-  #getKilometerMeasurementString = (featureMeasure, measureIsLength) => {
-    return `${(featureMeasure / (measureIsLength ? 1e3 : 1e6)).toFixed(3)} ${
-      measureIsLength ? "km" : "km²"
-    }`;
+  #getKilometerMeasurementString = (featureMeasure, type) => {
+    // The precision can be changed by the user and is set in the measurement-settings.
+    const precision = this.#measurementSettings.precision ?? 0;
+    switch (type) {
+      case "LENGTH":
+      case "PERIMETER":
+        return `${Number(
+          (featureMeasure / 1e3).toFixed(precision)
+        ).toLocaleString()} km`;
+      default:
+        return `${Number(
+          (featureMeasure / 1e6).toFixed(precision)
+        ).toLocaleString()} km²`;
+    }
   };
 
   // Returns the measurement in hectare if we're dealing with a surface, and if
   // we're dealing with a line-string we return the measurement in metres.
-  #getHectareMeasurementString = (featureMeasure, measureIsLength) => {
-    return measureIsLength
-      ? this.#getMeasurementString(featureMeasure, measureIsLength)
-      : `${(featureMeasure / 1e4).toFixed(3)} ha`;
+  #getHectareMeasurementString = (featureMeasure, type) => {
+    // The precision can be changed by the user and is set in the measurement-settings.
+    const precision = this.#measurementSettings.precision ?? 0;
+    switch (type) {
+      case "LENGTH":
+      case "PERIMETER":
+        return this.#getMeasurementString(featureMeasure, type);
+      default:
+        return `${Number(
+          (featureMeasure / 1e4).toFixed(precision)
+        ).toLocaleString()} ha`;
+    }
   };
 
   // Returns the supplied measurement as a locally formatted string.
   // If we're measuring area m² is returned, otherwise, m is returned.
-  #getMeasurementString = (featureMeasure, measureIsLength) => {
-    return `${featureMeasure.toLocaleString()} ${measureIsLength ? "m" : "m²"}`;
+  #getMeasurementString = (featureMeasure, type) => {
+    // The precision can be changed by the user and is set in the measurement-settings.
+    const precision = this.#measurementSettings.precision ?? 0;
+    switch (type) {
+      case "LENGTH":
+      case "PERIMETER":
+        return `${Number(
+          featureMeasure.toFixed(precision)
+        ).toLocaleString()} m`;
+      default:
+        return `${Number(
+          featureMeasure.toFixed(precision)
+        ).toLocaleString()} m²`;
+    }
   };
 
   // Calculates the area, length, or placement of the supplied feature.
   // Accepts an OL-feature, and is tested for Circle, LineString, Point, and Polygon.
-  #getFeatureMeasurement = (feature) => {
+  #getFeatureMeasurements = (feature) => {
     // Let's get the geometry-type to begin with, we are going
     // to be handling points, line-strings, and surfaces differently.
     const geometry = feature.getGeometry();
     // If we're dealing with a point, we simply return the coordinates of the point.
     if (geometry instanceof Point) {
-      return geometry.getCoordinates();
+      return [
+        { type: "COORDINATES", value: geometry.getCoordinates(), prefix: "" },
+      ];
     }
+    // If the user has chosen to only show the area (and not the perimeter), we don't
+    // need to show the area-prefix. The area-prefix should only be shown if both area and
+    // perimeter is chosen to be shown.
+    const showAreaPrefix =
+      this.#measurementSettings.showArea &&
+      this.#measurementSettings.showPerimeter;
     // Apparently the circle geometry instance does not expose a
     // getArea method. Here's a quick fix. (Remember that this area
     // is only used as an heads-up for the user.)
     if (geometry instanceof CircleGeometry) {
       const radius = geometry.getRadius();
-      return Math.round(Math.pow(radius, 2) * Math.PI);
+      return [
+        {
+          type: "AREA",
+          value: Math.pow(radius, 2) * Math.PI,
+          prefix: `${showAreaPrefix ? "Area:" : ""}`,
+        },
+        {
+          type: "PERIMETER",
+          value: 2 * radius * Math.PI,
+          prefix: "\n Omkrets:",
+        },
+      ];
     }
     // If we're dealing with a line we cannot calculate an area,
-    // instead, we return the length.
+    // instead, we only calculate the length.
     if (geometry instanceof LineString) {
-      return Math.round(geometry.getLength());
+      return [{ type: "LENGTH", value: geometry.getLength(), prefix: "" }];
     }
-    // If we're not dealing with a circle or a line, we can just return the area.
-    return Math.round(geometry.getArea());
+    // If we're not dealing with a point, circle, or a line, we are probably dealing
+    // with a polygon. For the polygons, we want to return the area and perimeter.
+    return [
+      {
+        type: "AREA",
+        value: geometry?.getArea() || 0,
+        prefix: `${showAreaPrefix ? "Area:" : ""}`,
+      },
+      {
+        type: "PERIMETER",
+        value: this.#getPolygonPerimeter(geometry),
+        prefix: "\n Omkrets:",
+      },
+    ];
+  };
+
+  // Returns the perimeter of the supplied polygon-geometry
+  #getPolygonPerimeter = (geometry) => {
+    try {
+      // To get the perimeter, we have to get the coordinates of the
+      // outer (0) linear-ring of the supplied geometry. If we fail to extract these
+      // coordinates, we set the linear-ring-coords to null.
+      const linearRingCoords =
+        geometry?.getLinearRing(0)?.getCoordinates() || null;
+      // If no coords were found, we simply return an area of 0.
+      if (!linearRingCoords) {
+        return 0;
+      }
+      // If some coords were found, we can construct a Line-string, and get the length
+      // of that line-string!
+      return new LineString(linearRingCoords)?.getLength() || 0;
+    } catch (error) {
+      // If we fail somewhere, we return 0. Would be better with more handling here!
+      return 0;
+    }
   };
 
   // Returns an OL style to be used in the draw-interaction.
@@ -733,8 +854,8 @@ class DrawModel {
       // (in case of the special Arrow feature-type) we have to make sure to get
       // the actual base-style (which is located at position 0 in the style-array).
       const color = Array.isArray(featureStyle)
-        ? featureStyle[0].getFill().getColor()
-        : featureStyle.getFill().getColor();
+        ? featureStyle[0]?.getFill()?.getColor()
+        : featureStyle?.getFill()?.getColor();
       return { color: this.getRGBAString(color) };
     } catch (error) {
       console.error(`Failed to extract fill-style, ${error.message}`);
@@ -749,11 +870,11 @@ class DrawModel {
       // (in case of the special Arrow feature-type) we have to make sure to get
       // the actual base-style (which is located at position 0 in the style-array).
       const s = Array.isArray(featureStyle)
-        ? featureStyle[0].getStroke()
-        : featureStyle.getStroke();
-      const color = s.getColor();
-      const dash = s.getLineDash();
-      const width = s.getWidth();
+        ? featureStyle[0]?.getStroke()
+        : featureStyle?.getStroke();
+      const color = s?.getColor();
+      const dash = s?.getLineDash();
+      const width = s?.getWidth();
       return {
         color: this.getRGBAString(color),
         dash,
@@ -833,7 +954,7 @@ class DrawModel {
     drawnFeatures.forEach((feature) => {
       // Get the current style.
       const featureStyle = feature.getStyle();
-      // Get an updated text-style (which depends on #showFeatureMeasurements).
+      // Get an updated text-style (which depends on the #measurementSettings).
       const textStyle = this.#getFeatureTextStyle(feature);
       // Set the updated text-style on the base-style.
       Array.isArray(featureStyle)
@@ -1025,7 +1146,7 @@ class DrawModel {
   #handleFeatureChange = (e) => {
     // Make the measurement calculations and update the tooltip
     const feature = e.target;
-    const toolTipText = this.#getFeatureMeasurementLabel(feature);
+    const toolTipText = this.#getFeatureMeasurementLabel(feature, "TOOLTIP");
     this.#drawTooltipElement.innerHTML = this.#showDrawTooltip
       ? toolTipText
       : null;
@@ -1806,18 +1927,6 @@ class DrawModel {
     return { status: "SUCCESS", removedFeatures: drawnFeatures };
   };
 
-  setLabelFormat = (format) => {
-    if (!format || !this.#allowedLabelFormats.includes(format)) {
-      return {
-        status: "FAILED",
-        message: "Provided label-format is not supported.",
-      };
-    }
-    this.#labelFormat = format;
-    this.#refreshFeaturesTextStyle();
-    return { status: "SUCCESS", message: `Label-format changed to ${format}` };
-  };
-
   // Set:er allowing us to change which layer the draw-model will interact with
   setLayer = (layerName) => {
     // We're not allowing the layer to be changed while the draw interaction is active...
@@ -1851,30 +1960,6 @@ class DrawModel {
     return {
       status: "SUCCESS",
       message: `Draw tooltip is now ${drawTooltipActive ? "shown" : "hidden"}`,
-    };
-  };
-
-  // Set:er allowing us to change if measurements of the drawn features should
-  // be shown or not. Also makes sure to refresh the current features text-style.
-  setShowFeatureMeasurements = (showFeatureMeasurements) => {
-    // Let's make sure we're provided proper input before we set anything
-    if (typeof showFeatureMeasurements !== "boolean") {
-      // If we were not, let's return a fail message
-      return this.#getSetFailedObject(
-        this.showFeatureMeasurements,
-        showFeatureMeasurements
-      );
-    }
-    // If we've made it this far, we can go ahead and set the internal value.
-    this.#showFeatureMeasurements = showFeatureMeasurements;
-    // Then we have to refresh the style so that the change is shown.
-    this.#refreshFeaturesTextStyle();
-    // And return a success-message
-    return {
-      status: "SUCCESS",
-      message: `Measurement labels are now ${
-        showFeatureMeasurements ? "shown" : "hidden"
-      }`,
     };
   };
 
@@ -1938,6 +2023,17 @@ class DrawModel {
       : this.#disableTranslateInteraction();
   };
 
+  setMeasurementSettings = (settings) => {
+    // First we'll update the private field
+    this.#measurementSettings = settings;
+    // Then we have to refresh the style so that the change is shown.
+    this.#refreshFeaturesTextStyle();
+  };
+
+  getMeasurementSettings = () => {
+    return this.#measurementSettings;
+  };
+
   // Get:er returning the name of the draw-layer.
   getCurrentLayerName = () => {
     return this.#layerName;
@@ -1953,11 +2049,6 @@ class DrawModel {
     return this.#currentExtent;
   };
 
-  // Get:er returning the current label-format
-  getLabelFormat = () => {
-    return this.#labelFormat;
-  };
-
   // Get:er returning if the modify-interaction is active.
   getModifyActive = () => {
     return this.#modifyInteraction ? true : false;
@@ -1971,11 +2062,6 @@ class DrawModel {
   // Get:er returning the state of the showDrawTooltip
   getShowDrawTooltip = () => {
     return this.#showDrawTooltip;
-  };
-
-  // Get:er returning the state of the showFeatureMeasurements
-  getShowFeatureMeasurements = () => {
-    return this.#showFeatureMeasurements;
   };
 
   // Get:er returning the current draw-style settings

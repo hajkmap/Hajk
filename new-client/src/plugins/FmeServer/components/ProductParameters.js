@@ -188,6 +188,7 @@ const ProductParameters = (props) => {
               return renderListBox(parameter, index);
             case "RANGE_SLIDER":
               return renderRangeSlider(parameter, index);
+            case "STRING":
             case "TEXT":
             case "PASSWORD":
               return renderText(parameter, index);

@@ -5,6 +5,7 @@ export const ALLOWED_FME_PARAMETERS = [
   "LOOKUP_LISTBOX",
   "RANGE_SLIDER",
   "PASSWORD",
+  "STRING",
   "TEXT",
 ];
 export const POLLING_INTERVAL = 5000;

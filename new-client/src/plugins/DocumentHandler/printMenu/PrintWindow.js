@@ -25,6 +25,8 @@ import {
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import OpenInNewIcon from "@mui/icons-material/OpenInNew";
 
+import { deepMerge } from "utils/DeepMerge";
+
 import PrintList from "./PrintList";
 import TableOfContents from "./TableOfContents";
 import { getNormalizedMenuState } from "../utils/stateConverter";
@@ -173,12 +175,17 @@ class PrintWindow extends React.PureComponent {
   };
 
   customRender = (element, container) => {
+    // Since the ThemeProvider seems to cache the theme in some way, we have to make sure to
+    // create a new theme-reference to make sure that the correct theme is used when rendering.
+    // If we don't create a new reference, the custom-theme will be overridden by the standard MUI-theme
+    // since the standard MUI-theme is refreshed (and thereby has the highest css-specificity) sometimes.
+    // This is quite messy, but get's the job done. See issue #999 for more info.
+    const theme = deepMerge(this.props.customTheme || this.props.theme, {});
+    // Make sure to render the components using the custom theme if it exists:
     return new Promise((resolve) => {
       ReactDOM.render(
         <StyledEngineProvider injectFirst>
-          <ThemeProvider theme={this.props.customTheme || this.props.theme}>
-            {element}
-          </ThemeProvider>
+          <ThemeProvider theme={theme}>{element}</ThemeProvider>
         </StyledEngineProvider>,
         container,
         (e) => {

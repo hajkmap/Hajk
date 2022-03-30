@@ -12,7 +12,7 @@ import Button from "@mui/material/Button";
 import FormControl from "@mui/material/FormControl";
 import FormControlLabel from "@mui/material/FormControlLabel";
 import Checkbox from "@mui/material/Checkbox";
-import DownloadIcon from "@material-ui/icons/GetApp";
+import DownloadIcon from "@mui/icons-material/GetApp";
 import Collapse from "@mui/material/Collapse";
 import CircularProgress from "@mui/material/CircularProgress";
 import { hfetch } from "utils/FetchWrapper";

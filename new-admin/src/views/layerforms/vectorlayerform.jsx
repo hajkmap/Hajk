@@ -837,9 +837,37 @@ class VectorLayerForm extends React.Component {
         </div>
         <div>
           <label>
+            Teckenförklaring
+            <abbr title="Teckenförklaring (bildfil) som visas i information om lagret.">
+              (?)
+            </abbr>
+          </label>
+          <input
+            type="text"
+            ref="input_legend"
+            value={this.state.legend}
+            className={this.getValidationClass("legend")}
+            onChange={(e) => {
+              this.setState({ legend: e.target.value });
+            }}
+          />
+          <span
+            onClick={(e) => {
+              this.loadLegend(e);
+            }}
+            className="btn btn-default"
+          >
+            Välj fil {imageLoader}
+          </span>
+        </div>
+        <div>
+          <label>
             Ikon för
             <br />
             teckenförklaring
+            <abbr title="En symbol (bildfil) som visas vid lagernamnet.">
+              (?)
+            </abbr>
           </label>
           <input
             type="text"
