@@ -603,6 +603,20 @@ export default class PrintModel {
     }
   };
 
+  appendBoundingBox = (tiles, bBox, height, width) => {
+    // We have to know how much the northing and easting change per pixel, so that we
+    // can calculate proper bounding-boxes for the new tiles.
+    const northingChangePerPixel = (bBox[3] - bBox[1]) / height;
+    const eastingChangePerPixel = (bBox[2] - bBox[0]) / width;
+    for (const tile of tiles) {
+      tile.bBox = `${bBox[0] + eastingChangePerPixel * tile.x},${
+        bBox[1] + northingChangePerPixel * (height - tile.y)
+      },${bBox[0] + (tile.x + tile.tileWidth) * eastingChangePerPixel},${
+        bBox[1] + (height - tile.y + tile.tileHeight) * northingChangePerPixel
+      }`;
+    }
+  };
+
   // Returns an array of objects containing information regarding the tiles
   // that should be created to comply with the supplied 'MAX_TILE_SIZE' and
   // also 'fill' the image.
@@ -616,22 +630,18 @@ export default class PrintModel {
       .get("BBOX")
       .split(",")
       .map((coord) => parseFloat(coord));
-    // We have to know how much the northing and easting change per pixel, so that we
-    // can calculate proper bounding-boxes for the new tiles.
-    const northingChangePerPixel = (bBox[3] - bBox[1]) / height;
-    const eastingChangePerPixel = (bBox[2] - bBox[0]) / width;
-    console.log("northingChangePerPixel: ", northingChangePerPixel);
-    console.log("eastingChangePerPixel ", eastingChangePerPixel);
     // Then we'll iterate until the accumulated width is equal to
     // the target width.
     let accWidth = 0;
     while (true) {
-      if (accWidth === width) return tiles;
+      if (accWidth === width) break;
       const remainingWidth = width - accWidth;
       const tileWidth = remainingWidth > tileSize ? tileSize : remainingWidth;
       tiles.push(...this.getTileColumn(height, accWidth, tileSize, tileWidth));
       accWidth += tileWidth;
     }
+    this.appendBoundingBox(tiles, bBox, height, width);
+    return tiles;
   };
 
   // Updates the parameters of the supplied layer to make sure we
@@ -666,30 +676,31 @@ export default class PrintModel {
         const height = parseFloat(searchParams.get("HEIGHT")) || 1;
         const width = parseFloat(searchParams.get("WIDTH")) || 1;
         // We're gonna need to state the maximum tile-size allowed. Let's say 4096 for now
-        const tileSize = 4096;
+        const tileSize = 512;
         // What will be too complex for the WMS-servers? Good question. For now,
         // we say that the image is too complex if either the height or width is larger than
         // 4096px at the same time as the DPI is set to 300 or more.
         if (Math.max(height, width) > tileSize) {
           const tiles = this.getTileInformation(height, width, tileSize, url);
-          console.log("tiles: ", tiles);
-          // If the image is too complex, we scale the image-request to 4096 to make
-          // sure the WMS-server can handle the request.
-          const scaling = 4096 / Math.max(height, width);
-          searchParams.set("HEIGHT", Math.floor(height * scaling));
-          searchParams.set("WIDTH", Math.floor(width * scaling));
-          // Let's create a temp-image that we can stretch out on a canvas with the "real" size.
-          const tempImage = document.createElement("img");
-          tempImage.onload = () => {
-            const canvas = document.createElement("canvas");
-            canvas.width = width;
-            canvas.height = height;
-            const ctx = canvas.getContext("2d");
-            ctx.drawImage(tempImage, 0, 0, width, height);
+          const canvas = document.createElement("canvas");
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext("2d");
+          const promises = [];
+          for (const tile of tiles) {
+            const tileUrl = new URL(url.toString());
+            tileUrl.searchParams.set("BBOX", tile.bBox);
+            tileUrl.searchParams.set("HEIGHT", tile.tileHeight);
+            tileUrl.searchParams.set("WIDTH", tile.tileWidth);
+
+            promises.push(
+              this.loadImageTile(ctx, { ...tile, url: tileUrl.toString() })
+            );
+          }
+
+          Promise.allSettled(promises).then(() => {
             image.getImage().src = canvas.toDataURL();
-          };
-          tempImage.crossOrigin = "anonymous";
-          tempImage.src = url;
+          });
         } else {
           image.getImage().src = url.toString();
         }
