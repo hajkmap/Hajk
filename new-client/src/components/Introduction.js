@@ -1,6 +1,10 @@
 import React from "react";
+import { createPortal } from "react-dom";
 import { Steps } from "intro.js-react";
 import PropTypes from "prop-types";
+
+import InsertEmoticonIcon from "@mui/icons-material/InsertEmoticon";
+import PluginControlButton from "../components/PluginControlButton";
 
 import "intro.js/introjs.css";
 import "intro.js/themes/introjs-modern.css";
@@ -23,14 +27,14 @@ class Introduction extends React.PureComponent {
   };
 
   static propTypes = {
-    experimentalIntroductionEnabled: PropTypes.bool.isRequired,
-    experimentalIntroductionSteps: PropTypes.array,
+    introductionEnabled: PropTypes.bool.isRequired,
+    introductionSteps: PropTypes.array,
     globalObserver: PropTypes.object.isRequired,
   };
 
   static defaultProps = {
-    experimentalIntroductionEnabled: false,
-    experimentalIntroductionSteps: [],
+    introductionEnabled: false,
+    introductionSteps: [],
     globalObserver: {},
   };
 
@@ -89,11 +93,11 @@ class Introduction extends React.PureComponent {
       // Allow a short wait so that everything renders first
       setTimeout(() => {
         // First check if we have any steps in our config
-        const { experimentalIntroductionSteps } = this.props;
+        const { introductionSteps } = this.props;
         // We must have at least 2 elements in the array in order to properly show intro guide
         const steps =
-          experimentalIntroductionSteps.length >= 2
-            ? experimentalIntroductionSteps
+          introductionSteps.length >= 2
+            ? this.#tryParsingSteps(introductionSteps)
             : this.predefinedSteps;
 
         const filteredSteps = steps.filter((s) => {
@@ -107,12 +111,33 @@ class Introduction extends React.PureComponent {
       }, 100);
     });
 
-    this.props.globalObserver.subscribe("core.showIntroduction", () => {
-      this.setState({
-        initialStep: 0,
-        stepsEnabled: true,
-        forceShow: true,
-      });
+    this.props.globalObserver.subscribe(
+      "core.showIntroduction",
+      this.showIntroduction
+    );
+  }
+
+  #tryParsingSteps(steps) {
+    try {
+      for (const step of steps) {
+        if (!step?.title || !step?.intro) {
+          throw Error(
+            "Introduction steps missing necessary properties. Please ensure that each step contains at least the 'title' and 'intro' property."
+          );
+        }
+      }
+      return steps;
+    } catch (error) {
+      console.error(error.message);
+      return this.predefinedSteps;
+    }
+  }
+
+  showIntroduction() {
+    this.setState({
+      initialStep: 0,
+      stepsEnabled: true,
+      forceShow: true,
     });
   }
 
@@ -124,34 +149,56 @@ class Introduction extends React.PureComponent {
     if (functionalCookieOk()) {
       window.localStorage.setItem("introductionShown", 1);
     }
+
+    // Reset the state
+    this.setState({ forceShow: false, initialStep: 0 });
   };
 
+  // Render a control button that allows the user to invoke the guide on demand
+  renderControlButton() {
+    return createPortal(
+      <PluginControlButton
+        icon={<InsertEmoticonIcon />}
+        onClick={() => {
+          this.showIntroduction();
+        }}
+        title="Introduktionsguide"
+        abstract="Öppna guidad tour"
+      />,
+      document.getElementById("plugin-control-buttons")
+    );
+  }
+
   render() {
-    const { experimentalIntroductionEnabled } = this.props;
+    const { introductionEnabled } = this.props;
     const { initialStep, steps, stepsEnabled } = this.state;
 
-    return (
-      // TODO: Remove check once the experimental flag is lifted. Remember to remove the unneeded prop from here and App.js too.
-      experimentalIntroductionEnabled &&
-      // Don't show unless we have 2 or more elements in array - too short guides are not meaningful!
-      steps.length >= 2 &&
-      // Show only once per browser, or override if forced by a user action.
-      (parseInt(window.localStorage.getItem("introductionShown")) !== 1 ||
-        this.state.forceShow === true) && (
-        <Steps
-          enabled={stepsEnabled}
-          steps={steps}
-          initialStep={initialStep}
-          onExit={this.disableSteps}
-          options={{
-            exitOnOverlayClick: false,
-            nextLabel: "Nästa",
-            prevLabel: "Föregående",
-            doneLabel: "Klart!",
-          }}
-        />
-      )
-    );
+    return introductionEnabled ? (
+      <>
+        {this.renderControlButton()}
+        {
+          // Don't show unless we have 2 or more elements in array - too short
+          // guides are not meaningful!
+          steps.length >= 2 &&
+            // Show only once per browser, or override if forced by a user action.
+            (parseInt(window.localStorage.getItem("introductionShown")) !== 1 ||
+              this.state.forceShow === true) && (
+              <Steps
+                enabled={stepsEnabled}
+                steps={steps}
+                initialStep={initialStep}
+                onExit={this.disableSteps}
+                options={{
+                  exitOnOverlayClick: false,
+                  nextLabel: "Nästa",
+                  prevLabel: "Föregående",
+                  doneLabel: "Klart!",
+                }}
+              />
+            )
+        }
+      </>
+    ) : null;
   }
 }
 

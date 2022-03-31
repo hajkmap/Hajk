@@ -1012,11 +1012,11 @@ class App extends React.PureComponent {
           )}
           {clean === false && (
             <Introduction
-              experimentalIntroductionEnabled={
-                this.appModel.config.appConfig.experimentalIntroductionEnabled
+              introductionEnabled={
+                this.appModel.config.mapConfig.map.introductionEnabled
               }
-              experimentalIntroductionSteps={
-                this.appModel.config.appConfig.experimentalIntroductionSteps
+              introductionSteps={
+                this.appModel.config.mapConfig.map.introductionSteps
               }
               globalObserver={this.globalObserver}
             />
