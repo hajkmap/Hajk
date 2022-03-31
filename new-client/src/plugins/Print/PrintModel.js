@@ -610,9 +610,9 @@ export default class PrintModel {
     const eastingChangePerPixel = (bBox[2] - bBox[0]) / width;
     for (const tile of tiles) {
       tile.bBox = `${bBox[0] + eastingChangePerPixel * tile.x},${
-        bBox[1] + northingChangePerPixel * (height - tile.y)
+        bBox[1] + northingChangePerPixel * (height - tile.y - tile.tileHeight)
       },${bBox[0] + (tile.x + tile.tileWidth) * eastingChangePerPixel},${
-        bBox[1] + (height - tile.y + tile.tileHeight) * northingChangePerPixel
+        bBox[1] + (height - tile.y) * northingChangePerPixel
       }`;
     }
   };
@@ -676,7 +676,7 @@ export default class PrintModel {
         const height = parseFloat(searchParams.get("HEIGHT")) || 1;
         const width = parseFloat(searchParams.get("WIDTH")) || 1;
         // We're gonna need to state the maximum tile-size allowed. Let's say 4096 for now
-        const tileSize = 512;
+        const tileSize = 4096;
         // What will be too complex for the WMS-servers? Good question. For now,
         // we say that the image is too complex if either the height or width is larger than
         // 4096px at the same time as the DPI is set to 300 or more.
