@@ -163,7 +163,7 @@ class MapOptions extends Component {
       mapresetter: mapConfig.mapresetter,
       showThemeToggler: mapConfig.showThemeToggler,
       showUserAvatar: mapConfig.showUserAvatar,
-      introductionEnabled: mapConfig.introductionEnabled,
+      introductionEnabled: mapConfig.introductionEnabled || false,
       introductionSteps:
         this.tryJsonStringify(mapConfig.introductionSteps) || "[]",
       drawerVisible: mapConfig.drawerVisible,
@@ -1304,7 +1304,7 @@ class MapOptions extends Component {
                 <i
                   className="fa fa-question-circle"
                   data-toggle="tooltip"
-                  title="JSON-objekt som specificerar vilka element som highlightas i introduktionsguiden"
+                  title="JSON-objekt som specificerar vilka element som highlightas i introduktionsguiden. OBS: kan lämnas tomt för att highlighta ett antal standardobjekt (sidopanelen, sökrutan, etc). "
                 />
               </label>
               <textarea
