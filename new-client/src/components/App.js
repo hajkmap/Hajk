@@ -1015,6 +1015,9 @@ class App extends React.PureComponent {
               introductionEnabled={
                 this.appModel.config.mapConfig.map.introductionEnabled
               }
+              introductionShowControlButton={
+                this.appModel.config.mapConfig.map.introductionShowControlButton
+              }
               introductionSteps={
                 this.appModel.config.mapConfig.map.introductionSteps
               }
