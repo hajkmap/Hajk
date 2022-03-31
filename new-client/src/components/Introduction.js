@@ -28,12 +28,14 @@ class Introduction extends React.PureComponent {
 
   static propTypes = {
     introductionEnabled: PropTypes.bool.isRequired,
+    introductionShowControlButton: PropTypes.bool.isRequired,
     introductionSteps: PropTypes.array,
     globalObserver: PropTypes.object.isRequired,
   };
 
   static defaultProps = {
     introductionEnabled: false,
+    introductionShowControlButton: false,
     introductionSteps: [],
     globalObserver: {},
   };
@@ -170,12 +172,12 @@ class Introduction extends React.PureComponent {
   }
 
   render() {
-    const { introductionEnabled } = this.props;
+    const { introductionEnabled, introductionShowControlButton } = this.props;
     const { initialStep, steps, stepsEnabled } = this.state;
 
     return introductionEnabled ? (
       <>
-        {this.renderControlButton()}
+        {introductionShowControlButton && this.renderControlButton()}
         {
           // Don't show unless we have 2 or more elements in array - too short
           // guides are not meaningful!
