@@ -66,6 +66,8 @@ class MapOptions extends Component {
         showThemeToggler: config.showThemeToggler,
         showUserAvatar: config.showUserAvatar,
         introductionEnabled: config.introductionEnabled || false,
+        introductionShowControlButton:
+          config.introductionShowControlButton || false,
         introductionSteps:
           this.tryJsonStringify(config.introductionSteps) || "[]",
         drawerVisible: config.drawerVisible,
@@ -164,6 +166,8 @@ class MapOptions extends Component {
       showThemeToggler: mapConfig.showThemeToggler,
       showUserAvatar: mapConfig.showUserAvatar,
       introductionEnabled: mapConfig.introductionEnabled || false,
+      introductionShowControlButton:
+        mapConfig.introductionShowControlButton || false,
       introductionSteps:
         this.tryJsonStringify(mapConfig.introductionSteps) || "[]",
       drawerVisible: mapConfig.drawerVisible,
@@ -356,6 +360,7 @@ class MapOptions extends Component {
       case "showThemeToggler":
       case "showUserAvatar":
       case "introductionEnabled":
+      case "introductionShowControlButton":
       case "drawerVisible":
       case "drawVisibleMobile":
       case "drawerPermanent":
@@ -423,6 +428,9 @@ class MapOptions extends Component {
         config.showThemeToggler = this.getValue("showThemeToggler");
         config.showUserAvatar = this.getValue("showUserAvatar");
         config.introductionEnabled = this.getValue("introductionEnabled");
+        config.introductionShowControlButton = this.getValue(
+          "introductionShowControlButton"
+        );
         config.introductionSteps = this.getValue("introductionSteps");
         config.drawerVisible = this.getValue("drawerVisible");
         config.drawerVisibleMobile = this.getValue("drawerVisibleMobile");
@@ -1270,7 +1278,7 @@ class MapOptions extends Component {
                 />
               </label>
             </div>
-            <div className="separator">Visa introduktionsguiden</div>
+            <div className="separator">Introduktionsguide</div>
             <div>
               <input
                 id="input_introductionEnabled"
@@ -1283,11 +1291,39 @@ class MapOptions extends Component {
               />
               &nbsp;
               <label className="long-label" htmlFor="input_introductionEnabled">
-                Visa introduktionsguiden första gången användaren besöker kartan{" "}
+                Starta introduktionsguiden automatiskt första gången användaren
+                besöker kartan{" "}
                 <i
                   className="fa fa-question-circle"
                   data-toggle="tooltip"
                   title="Om aktivt kommer en introduktionsguide att visas för användaren vid första besöket"
+                />
+              </label>
+            </div>
+            <div>
+              <input
+                id="input_introductionShowControlButton"
+                type="checkbox"
+                ref="input_introductionShowControlButton"
+                disabled={!this.state.introductionEnabled}
+                onChange={(e) => {
+                  this.setState({
+                    introductionShowControlButton: e.target.checked,
+                  });
+                }}
+                checked={this.state.introductionShowControlButton}
+              />
+              &nbsp;
+              <label
+                className="long-label"
+                htmlFor="input_introductionShowControlButton"
+              >
+                Visa en knapp i kartan som låter användaren att starta guiden
+                manuellt{" "}
+                <i
+                  className="fa fa-question-circle"
+                  data-toggle="tooltip"
+                  title="Om aktivt kommer en knapp att visas intill zoom-knapparna. "
                 />
               </label>
             </div>
