@@ -31,6 +31,9 @@ export default class PrintModel {
     this.disclaimer = settings.options.disclaimer ?? "";
     this.localObserver = settings.localObserver;
     this.mapConfig = settings.mapConfig;
+    // Since the WMS-servers cannot handle enormous requests, we have to
+    // limit Image-WMS requests. The size below is the maximum tile-size allowed.
+    this.maxTileSize = 4096;
 
     // Let's keep track of the original view, since we're gonna change the view
     // under the print-process. (And we want to be able to change back to the original one).
@@ -565,35 +568,63 @@ export default class PrintModel {
     }
   };
 
-  // Loads an image (tile) and draws it on the supplied canvas-context
-  loadImageTile = (ctx, tileOptions) => {
-    const { url, x, y, tileWidth, tileHeight } = tileOptions;
-    return new Promise((resolve, reject) => {
-      const tile = document.createElement("img");
+  // Returns an array of floats representing the bounding box found
+  // in the 'BBOX' query-parameter in the supplied url.
+  getBoundingBoxFromUrl = (url) => {
+    return url.searchParams
+      .get("BBOX")
+      .split(",")
+      .map((coord) => parseFloat(coord));
+  };
 
+  // Loads an image (tile) and draws it on the supplied canvas-context
+  loadImageTile = (canvas, tileOptions) => {
+    // We have to get the context so that we can draw the image
+    const ctx = canvas.getContext("2d");
+    // Then we need some tile-information
+    const { url, x, y, tileWidth, tileHeight } = tileOptions;
+    // Let's return a promise...
+    return new Promise((resolve, reject) => {
+      // Let's create an image-element
+      const tile = document.createElement("img");
       tile.onload = () => {
+        // When the tile has loaded, we can draw the tile on the canvas.
         ctx.drawImage(tile, x, y, tileWidth, tileHeight);
+        // The promise can be resolved when the tile has been fetched and
+        // drawn on the canvas.
         resolve();
       };
-
+      // If the fetch fails, we have to reject the promise.
       tile.onerror = () => {
         reject();
       };
-
+      // Let's set the cross-origin-attribute to prevent cors-problems
       tile.crossOrigin = "anonymous";
+      // Then we'll set the url so that the image can be fetched.
       tile.src = url;
     });
   };
 
-  getTileColumn = (targetHeight, x, maxTileHeight, tileWidth) => {
+  // Creates tile-information-objects for a column (all tiles needed to fill
+  // up to the target-height).
+  getTileColumn = (targetHeight, x, tileWidth) => {
+    // We're gonna need to store the tile-information in an array
     const tiles = [];
+    // We'll iterate (and push tiles to the tile-array) until...
     while (true) {
+      // ... we've reached the target-height. Let's summarize all tile-height
+      // so that we can check if we're done.
       const accHeight = tiles.reduce((acc, curr) => acc + curr.tileHeight, 0);
-      if (accHeight === targetHeight) return tiles;
+      // If we are, we can return the array of tile-information
+      if (accHeight >= targetHeight) return tiles;
+      // Otherwise we'll calculate how many pixels are left...
       const remainingHeight = targetHeight - accHeight;
+      // And either create a tile with that height (or the max-height if the remainder is too large).
       const tileHeight =
-        remainingHeight > maxTileHeight ? maxTileHeight : remainingHeight;
+        remainingHeight > this.maxTileSize ? this.maxTileSize : remainingHeight;
+      // Then we have to calculate where the tile is to be placed on the canvas later.
       const y = targetHeight - accHeight - tileHeight;
+      // And finally we'll push the information to the array.
       tiles.push({
         x,
         y,
@@ -603,44 +634,69 @@ export default class PrintModel {
     }
   };
 
-  appendBoundingBox = (tiles, bBox, height, width) => {
+  // Appends a bounding-box to each tile-information-object.
+  appendBoundingBox = (tiles, bBox, height, width, wmsVersion) => {
     // We have to know how much the northing and easting change per pixel, so that we
     // can calculate proper bounding-boxes for the new tiles.
     const northingChangePerPixel = (bBox[3] - bBox[1]) / height;
     const eastingChangePerPixel = (bBox[2] - bBox[0]) / width;
+    // Then we can calculate the bounding box for each tile. The calculations might seem
+    // a bit messy. One reason for this is that the x- and y-values for the tiles are
+    // set to match how images are added to a canvas, and those coordinates go the opposite
+    // direction compared to the map-coordinate-axels.
+    // See: https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/drawImage
     for (const tile of tiles) {
-      tile.bBox = `${bBox[0] + eastingChangePerPixel * tile.x},${
-        bBox[1] + northingChangePerPixel * (height - tile.y - tile.tileHeight)
-      },${bBox[0] + (tile.x + tile.tileWidth) * eastingChangePerPixel},${
-        bBox[1] + (height - tile.y) * northingChangePerPixel
-      }`;
+      if (typeof wmsVersion === "string" && wmsVersion.includes("3")) {
+        tile.bBox = `${
+          bBox[1] + northingChangePerPixel * (height - tile.y - tile.tileHeight)
+        },${bBox[0] + eastingChangePerPixel * tile.x},${
+          bBox[1] + (height - tile.y) * northingChangePerPixel
+        }, ${bBox[0] + (tile.x + tile.tileWidth) * eastingChangePerPixel}`;
+      } else {
+        tile.bBox = `${bBox[0] + eastingChangePerPixel * tile.x},${
+          bBox[1] + northingChangePerPixel * (height - tile.y - tile.tileHeight)
+        },${bBox[0] + (tile.x + tile.tileWidth) * eastingChangePerPixel},${
+          bBox[1] + (height - tile.y) * northingChangePerPixel
+        }`;
+      }
     }
   };
 
   // Returns an array of objects containing information regarding the tiles
   // that should be created to comply with the supplied 'MAX_TILE_SIZE' and
   // also 'fill' the image.
-  getTileInformation = (height, width, tileSize, url) => {
+  getTileInformation = (height, width, url) => {
     // We're gonna want to return an array containing the tile-objects
     const tiles = [];
-    // We're also gonna need to keep track of the bounding box! Let's get
-    // the original one to begin with: (The original one is a comma-separated string,
-    // we want an array of floats).
-    const bBox = url.searchParams
-      .get("BBOX")
-      .split(",")
-      .map((coord) => parseFloat(coord));
-    // Then we'll iterate until the accumulated width is equal to
-    // the target width.
+    // We're also gonna need to keep track of the original bounding box. This bounding-box
+    // will be used to calculate the new bounding-boxes for each tile that we're about to create.
+    const bBox = this.getBoundingBoxFromUrl(url);
+    // Since the northing and easting axels are flipped in version 1.1.0 vs 1.3.0 we
+    // have to make sure to check which WMS-version we are dealing with.
+    const wmsVersion = url.searchParams.get("VERSION");
+    // To gather all the required tile-information we will work with 'columns'. This means
+    // we will create all necessary images at a fixed width, and then move to the next width.
+    // We'll do this until we've created enough columns to fill the entire width.
     let accWidth = 0;
     while (true) {
-      if (accWidth === width) break;
+      // If we've created enough columns to fill the supplied width, we can break.
+      if (accWidth >= width) break;
+      // Otherwise we'll check how many pixels remain until we do...
       const remainingWidth = width - accWidth;
-      const tileWidth = remainingWidth > tileSize ? tileSize : remainingWidth;
-      tiles.push(...this.getTileColumn(height, accWidth, tileSize, tileWidth));
+      // We'll use a tile-width that is either:
+      // - The remaining amount of pixels
+      // - The max tile-size
+      const tileWidth =
+        remainingWidth > this.maxTileSize ? this.maxTileSize : remainingWidth;
+      // Then we'll create a column of tiles
+      tiles.push(...this.getTileColumn(height, accWidth, tileWidth));
+      // And bump the current width
       accWidth += tileWidth;
     }
-    this.appendBoundingBox(tiles, bBox, height, width);
+    // When the tile-information is created, we can append the bounding-box-information
+    // to each tile. The bounding-box-information will be used to fetch the tiles later.
+    this.appendBoundingBox(tiles, bBox, height, width, wmsVersion);
+    // Finally we can return the tile-information.
     return tiles;
   };
 
@@ -675,33 +731,40 @@ export default class PrintModel {
         // too many pixels at a high DPI the server will not be able to create the image).
         const height = parseFloat(searchParams.get("HEIGHT")) || 1;
         const width = parseFloat(searchParams.get("WIDTH")) || 1;
-        // We're gonna need to state the maximum tile-size allowed. Let's say 4096 for now
-        const tileSize = 4096;
         // What will be too complex for the WMS-servers? Good question. For now,
         // we say that the image is too complex if either the height or width is larger than
-        // 4096px at the same time as the DPI is set to 300 or more.
-        if (Math.max(height, width) > tileSize) {
-          const tiles = this.getTileInformation(height, width, tileSize, url);
+        // 'this.maxTileSize' (around 4096 probably).
+        if (Math.max(height, width) > this.maxTileSize) {
+          // If the image is too complex, we have to create tiles that are no more than 'this.maxTileSize'
+          // wide or high. Let's gather some tile-information to begin with.
+          const tiles = this.getTileInformation(height, width, url);
+          // Then we'll create a canvas that we can use to draw the tile-images on.
           const canvas = document.createElement("canvas");
+          // The canvas must be as big as the originally requested image was.
           canvas.width = width;
           canvas.height = height;
-          const ctx = canvas.getContext("2d");
+          // Let's declare an array that we can use to store all the promises created when
+          // requesting the tile-images.
           const promises = [];
+          // Then, for each tile-information-object, we'll create a request-url containing the
+          // information that we've gathered (such as the size and bounding-box).
           for (const tile of tiles) {
             const tileUrl = new URL(url.toString());
             tileUrl.searchParams.set("BBOX", tile.bBox);
             tileUrl.searchParams.set("HEIGHT", tile.tileHeight);
             tileUrl.searchParams.set("WIDTH", tile.tileWidth);
-
+            // Then we'll fetch the images from the WMS-server
             promises.push(
-              this.loadImageTile(ctx, { ...tile, url: tileUrl.toString() })
+              this.loadImageTile(canvas, { ...tile, url: tileUrl.toString() })
             );
           }
-
+          // When all image-promises has settled, we can set the image to the canvas on which we've
+          // added all the tile-images.
           Promise.allSettled(promises).then(() => {
             image.getImage().src = canvas.toDataURL();
           });
         } else {
+          // If the request is not too complex, we can fetch it right away.
           image.getImage().src = url.toString();
         }
       });
