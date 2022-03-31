@@ -565,6 +565,75 @@ export default class PrintModel {
     }
   };
 
+  // Loads an image (tile) and draws it on the supplied canvas-context
+  loadImageTile = (ctx, tileOptions) => {
+    const { url, x, y, tileWidth, tileHeight } = tileOptions;
+    return new Promise((resolve, reject) => {
+      const tile = document.createElement("img");
+
+      tile.onload = () => {
+        ctx.drawImage(tile, x, y, tileWidth, tileHeight);
+        resolve();
+      };
+
+      tile.onerror = () => {
+        reject();
+      };
+
+      tile.crossOrigin = "anonymous";
+      tile.src = url;
+    });
+  };
+
+  getTileColumn = (targetHeight, x, maxTileHeight, tileWidth) => {
+    const tiles = [];
+    while (true) {
+      const accHeight = tiles.reduce((acc, curr) => acc + curr.tileHeight, 0);
+      if (accHeight === targetHeight) return tiles;
+      const remainingHeight = targetHeight - accHeight;
+      const tileHeight =
+        remainingHeight > maxTileHeight ? maxTileHeight : remainingHeight;
+      const y = targetHeight - accHeight - tileHeight;
+      tiles.push({
+        x,
+        y,
+        tileWidth,
+        tileHeight,
+      });
+    }
+  };
+
+  // Returns an array of objects containing information regarding the tiles
+  // that should be created to comply with the supplied 'MAX_TILE_SIZE' and
+  // also 'fill' the image.
+  getTileInformation = (height, width, tileSize, url) => {
+    // We're gonna want to return an array containing the tile-objects
+    const tiles = [];
+    // We're also gonna need to keep track of the bounding box! Let's get
+    // the original one to begin with: (The original one is a comma-separated string,
+    // we want an array of floats).
+    const bBox = url.searchParams
+      .get("BBOX")
+      .split(",")
+      .map((coord) => parseFloat(coord));
+    // We have to know how much the northing and easting change per pixel, so that we
+    // can calculate proper bounding-boxes for the new tiles.
+    const northingChangePerPixel = (bBox[3] - bBox[1]) / height;
+    const eastingChangePerPixel = (bBox[2] - bBox[0]) / width;
+    console.log("northingChangePerPixel: ", northingChangePerPixel);
+    console.log("eastingChangePerPixel ", eastingChangePerPixel);
+    // Then we'll iterate until the accumulated width is equal to
+    // the target width.
+    let accWidth = 0;
+    while (true) {
+      if (accWidth === width) return tiles;
+      const remainingWidth = width - accWidth;
+      const tileWidth = remainingWidth > tileSize ? tileSize : remainingWidth;
+      tiles.push(...this.getTileColumn(height, accWidth, tileSize, tileWidth));
+      accWidth += tileWidth;
+    }
+  };
+
   // Updates the parameters of the supplied layer to make sure we
   // request the images in the correct DPI for the print! This function
   // only handles image-layers.
@@ -594,12 +663,16 @@ export default class PrintModel {
         // We're gonna need to grab the width and height so that we can make sure the
         // requested image is not too large for the WMS-server to render. (If we're requesting
         // too many pixels at a high DPI the server will not be able to create the image).
-        const height = searchParams.get("HEIGHT") || 1;
-        const width = searchParams.get("WIDTH") || 1;
+        const height = parseFloat(searchParams.get("HEIGHT")) || 1;
+        const width = parseFloat(searchParams.get("WIDTH")) || 1;
+        // We're gonna need to state the maximum tile-size allowed. Let's say 4096 for now
+        const tileSize = 4096;
         // What will be too complex for the WMS-servers? Good question. For now,
         // we say that the image is too complex if either the height or width is larger than
         // 4096px at the same time as the DPI is set to 300 or more.
-        if (Math.max(height, width) > 4096) {
+        if (Math.max(height, width) > tileSize) {
+          const tiles = this.getTileInformation(height, width, tileSize, url);
+          console.log("tiles: ", tiles);
           // If the image is too complex, we scale the image-request to 4096 to make
           // sure the WMS-server can handle the request.
           const scaling = 4096 / Math.max(height, width);
