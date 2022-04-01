@@ -32,7 +32,7 @@ export default class PrintModel {
     this.mapConfig = settings.mapConfig;
     // Since the WMS-servers cannot handle enormous requests, we have to
     // limit Image-WMS requests. The size below is the maximum tile-size allowed.
-    this.maxTileSize = 4096;
+    this.maxTileSize = settings.maxTileSize || 4096;
 
     // Let's keep track of the original view, since we're gonna change the view
     // under the print-process. (And we want to be able to change back to the original one).
@@ -633,30 +633,56 @@ export default class PrintModel {
     }
   };
 
-  // Appends a bounding-box to each tile-information-object.
-  appendBoundingBox = (tiles, bBox, height, width, wmsVersion) => {
+  // Returns a string representing the bounding-box for the supplied tile.
+  // (WMS-version 1.3.0)
+  // If the WMS-version is set to 1.3.0 the axis-orientation should be set by the
+  // definition of the projection. However, in 'ConfigMapper.js' we specify the
+  // axis-direction as 'NEU' (northing, easting, up). This means we can assume
+  // that the axis-direction is 'NEU' when dealing with version 1.3.0.
+  getVersionThreeBoundingBox = (tile, bBox, height, width) => {
+    // We have to know how much the northing and easting change per pixel, so that we
+    // can calculate proper bounding-boxes for the new tiles.
+    const northingChangePerPixel = (bBox[2] - bBox[0]) / height;
+    const eastingChangePerPixel = (bBox[3] - bBox[1]) / width;
+    // Then we can construct the bounding-box-string:
+    return `${
+      bBox[0] + northingChangePerPixel * (height - tile.y - tile.tileHeight)
+    },${bBox[1] + eastingChangePerPixel * tile.x},${
+      bBox[0] + northingChangePerPixel * (height - tile.y)
+    }, ${bBox[1] + eastingChangePerPixel * (tile.x + tile.tileWidth)}`;
+  };
+
+  // Returns a string representing the bounding-box for the supplied tile.
+  // (WMS-version 1.1.1)
+  // In version 1.1.1 the axis orientation is always 'ENU' (easting-northing-up).
+  getVersionOneBoundingBox = (tile, bBox, height, width) => {
     // We have to know how much the northing and easting change per pixel, so that we
     // can calculate proper bounding-boxes for the new tiles.
     const northingChangePerPixel = (bBox[3] - bBox[1]) / height;
     const eastingChangePerPixel = (bBox[2] - bBox[0]) / width;
-    // Then we can calculate the bounding box for each tile. The calculations might seem
-    // a bit messy. One reason for this is that the x- and y-values for the tiles are
-    // set to match how images are added to a canvas, and those coordinates go the opposite
-    // direction compared to the map-coordinate-axels.
-    // See: https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/drawImage
+    // Then we can construct the bounding-box-string:
+    return `${bBox[0] + eastingChangePerPixel * tile.x},${
+      bBox[1] + northingChangePerPixel * (height - tile.y - tile.tileHeight)
+    },${bBox[0] + eastingChangePerPixel * (tile.x + tile.tileWidth)},${
+      bBox[1] + northingChangePerPixel * (height - tile.y)
+    }`;
+  };
+
+  // Appends a bounding-box to each tile-information-object.
+  appendBoundingBox = (tiles, bBox, height, width, wmsVersion) => {
+    // The bounding-box calculations might seem a bit messy... One reason for that
+    // is that the x- and y-values for the tiles are set to match how images are added
+    // to a canvas, and those coordinates go the opposite direction compared to the map-coordinate-axels.
+    // See: https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/drawImage for more info.
+    // Let's calculate and set the bounding-box for each tile-information-object.
     for (const tile of tiles) {
-      if (typeof wmsVersion === "string" && wmsVersion.includes("3")) {
-        tile.bBox = `${
-          bBox[1] + northingChangePerPixel * (height - tile.y - tile.tileHeight)
-        },${bBox[0] + eastingChangePerPixel * tile.x},${
-          bBox[1] + (height - tile.y) * northingChangePerPixel
-        }, ${bBox[0] + (tile.x + tile.tileWidth) * eastingChangePerPixel}`;
+      // We have to make sure to check if we're dealing with version 1.3.0 or 1.1.1
+      // so that we can handle the axis-orientation properly.
+      if (wmsVersion === "1.3.0") {
+        tile.bBox = this.getVersionThreeBoundingBox(tile, bBox, height, width);
       } else {
-        tile.bBox = `${bBox[0] + eastingChangePerPixel * tile.x},${
-          bBox[1] + northingChangePerPixel * (height - tile.y - tile.tileHeight)
-        },${bBox[0] + (tile.x + tile.tileWidth) * eastingChangePerPixel},${
-          bBox[1] + (height - tile.y) * northingChangePerPixel
-        }`;
+        // If we're not dealing with version 1.3.0, we're probably dealing with 1.1.1
+        tile.bBox = this.getVersionOneBoundingBox(tile, bBox, height, width);
       }
     }
   };
