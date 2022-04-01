@@ -33,10 +33,11 @@ export default class PrintModel {
     // If we want the printed tiles to have correct styling, we have to use
     // custom loaders to make sure that the requests has all the required parameters.
     // If for some reason these tile-loaders shouldn't be used, a setting is exposed.
-    this.useCustomTileLoaders = settings.useCustomTileLoaders ?? true;
+    this.useCustomTileLoaders = settings.options.useCustomTileLoaders ?? true;
     // Since the WMS-servers cannot handle enormous requests, we have to
     // limit Image-WMS requests. The size below is the maximum tile-size allowed.
-    this.maxTileSize = settings.maxTileSize || 4096;
+    // This max-size is only used if the custom-tile-loaders are used.
+    this.maxTileSize = settings.options.maxTileSize || 4096;
 
     // Let's keep track of the original view, since we're gonna change the view
     // under the print-process. (And we want to be able to change back to the original one).
