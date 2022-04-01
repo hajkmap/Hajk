@@ -1,6 +1,6 @@
 import React from "react";
 import BaseWindowPlugin from "../BaseWindowPlugin";
-import DirectionsIcon from "@material-ui/icons/Directions";
+import DirectionsIcon from "@mui/icons-material/Directions";
 import RoutingModel from "./RoutingModel";
 import RoutingView from "./RoutingView";
 import Observer from "react-event-observer";

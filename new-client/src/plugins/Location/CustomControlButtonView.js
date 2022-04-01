@@ -1,35 +1,33 @@
 import React, { useEffect } from "react";
 import { useSnackbar } from "notistack";
 
-import { Paper, Tooltip } from "@material-ui/core";
-import { makeStyles } from "@material-ui/styles";
-import ToggleButton from "@material-ui/lab/ToggleButton";
-import CircularProgress from "@material-ui/core/CircularProgress";
-import LocationSearchingIcon from "@material-ui/icons/LocationSearching";
-import LocationDisabledIcon from "@material-ui/icons/LocationDisabled";
-import MyLocationIcon from "@material-ui/icons/MyLocation";
+import { Paper, Tooltip } from "@mui/material";
+import { styled } from "@mui/material/styles";
+import ToggleButton from "@mui/material/ToggleButton";
+import CircularProgress from "@mui/material/CircularProgress";
+import LocationSearchingIcon from "@mui/icons-material/LocationSearching";
+import LocationDisabledIcon from "@mui/icons-material/LocationDisabled";
+import MyLocationIcon from "@mui/icons-material/MyLocation";
 
-const useStyles = makeStyles((theme) => ({
-  paper: {
-    marginBottom: theme.spacing(1),
-  },
-  button: {
-    minWidth: "unset",
-    // ToggleButton have a different color when not selected,
-    // but we want to unset it so it looks just like other Buttons.
-    color: "unset",
-    paddingLeft: 7,
-    paddingRight: 7,
-    paddingTop: 6,
-    paddingBottom: 6,
-  },
+const StyledPaper = styled(Paper)(({ theme }) => ({
+  marginBottom: theme.spacing(1),
+}));
+
+const StyledToggleButton = styled(ToggleButton)(() => ({
+  minWidth: "unset",
+  // ToggleButton have a different color when not selected,
+  // but we want to unset it so it looks just like other Buttons.
+  color: "unset",
+  paddingLeft: 7,
+  paddingRight: 7,
+  paddingTop: 6,
+  paddingBottom: 6,
 }));
 
 const CustomControlButtonView = React.memo((props) => {
   const { onClick, title, abstract, model } = props;
 
   const { enqueueSnackbar } = useSnackbar();
-  const classes = useStyles();
   const [selected, setSelected] = React.useState(false);
   const [currentIcon, setCurrentIcon] = React.useState(
     <LocationSearchingIcon />
@@ -120,11 +118,10 @@ const CustomControlButtonView = React.memo((props) => {
   }, [model, enqueueSnackbar, originalTooltip]);
 
   return (
-    <Tooltip title={tooltip}>
-      <Paper className={classes.paper}>
-        <ToggleButton
+    <Tooltip disableInteractive title={tooltip}>
+      <StyledPaper>
+        <StyledToggleButton
           aria-label={title}
-          className={classes.button}
           onClick={onClick}
           value="check"
           selected={selected}
@@ -134,8 +131,8 @@ const CustomControlButtonView = React.memo((props) => {
           }}
         >
           {currentIcon}
-        </ToggleButton>
-      </Paper>
+        </StyledToggleButton>
+      </StyledPaper>
     </Tooltip>
   );
 });

@@ -1,5 +1,5 @@
 import React from "react";
-import { TextField, MenuItem, Tooltip } from "@material-ui/core";
+import { TextField, MenuItem, Tooltip } from "@mui/material";
 import { DRAW_TYPES } from "../constants";
 
 const DrawTypeSelector = (props) => {
@@ -16,7 +16,7 @@ const DrawTypeSelector = (props) => {
       {DRAW_TYPES.map((option) => (
         <MenuItem key={option.type} value={option.type}>
           {
-            <Tooltip title={option.tooltip}>
+            <Tooltip disableInteractive title={option.tooltip}>
               <span style={{ width: "100%" }}>{option.label}</span>
             </Tooltip>
           }

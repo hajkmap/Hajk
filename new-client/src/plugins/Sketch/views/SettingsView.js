@@ -1,7 +1,16 @@
 import React from "react";
-import { Grid, Tooltip, Switch } from "@material-ui/core";
-import { FormControl, FormLabel, FormControlLabel } from "@material-ui/core";
-import { Select, InputLabel, MenuItem } from "@material-ui/core";
+import {
+  FormControl,
+  FormLabel,
+  FormControlLabel,
+  Grid,
+  InputLabel,
+  MenuItem,
+  Select,
+  Switch,
+  Tooltip,
+} from "@mui/material";
+
 import Information from "../components/Information";
 
 import {
@@ -24,9 +33,12 @@ const SettingsView = (props) => {
       <Grid item xs={12}>
         <FormControl component="fieldset">
           <FormLabel focused={false} component="legend">
-            Generella inställningar
+            Generella ritinställningar
           </FormLabel>
-          <Tooltip title="Slå på om du vill visa objektens mått.">
+          <Tooltip
+            disableInteractive
+            title="Slå på om du vill visa objektens mått."
+          >
             <FormControlLabel
               label="Visa mått på objekten"
               control={

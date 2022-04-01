@@ -28,6 +28,7 @@ const defaultState = {
   minZoom: -1,
   minMaxZoomAlertOnToggleOnly: false,
   tiled: false,
+  showAttributeTableButton: false,
   singleTile: false,
   hidpi: true,
   customRatio: 0,
@@ -53,6 +54,7 @@ const defaultState = {
   infoClickSortProperty: "",
   infoClickSortType: "string",
   infoClickSortDesc: true,
+  infoclickIcon: "",
   hideExpandArrow: false,
   style: [],
   workspaceList: [],
@@ -270,6 +272,7 @@ class WMSLayerForm extends Component {
         infobox: "",
         style: "",
         queryable: "",
+        infoclickIcon: "",
       };
       this.setState(
         {
@@ -461,6 +464,9 @@ class WMSLayerForm extends Component {
             {styles}
           </select>
         </div>
+
+        <div className="separator">Infoclick</div>
+
         <div>
           <div>
             <label>Infoklick</label>
@@ -472,6 +478,100 @@ class WMSLayerForm extends Component {
             onChange={(e) => {
               let addedLayersInfo = this.state.addedLayersInfo;
               addedLayersInfo[layerInfo.id].queryable = e.target.checked;
+              this.setState(
+                {
+                  addedLayersInfo: addedLayersInfo,
+                },
+                () => {
+                  this.renderLayerInfoDialog(layerInfo);
+                }
+              );
+            }}
+          />
+        </div>
+        <div>
+          <div>
+            <label>Infoclick-ikon</label> (
+            <a
+              href="https://fonts.google.com/icons?selected=Material+Icons"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              lista
+            </a>
+            )
+          </div>
+          <input
+            value={layerInfo.infoclickIcon}
+            onChange={(e) => {
+              let addedLayersInfo = this.state.addedLayersInfo;
+              addedLayersInfo[layerInfo.id].infoclickIcon = e.target.value;
+              this.setState(
+                {
+                  addedLayersInfo: addedLayersInfo,
+                },
+                () => {
+                  this.renderLayerInfoDialog(layerInfo);
+                }
+              );
+            }}
+            type="text"
+          />
+        </div>
+
+        <div className="separator">Infoclick och sökning</div>
+
+        <div>
+          <label>Visningsfält (i resultatlistan)</label>
+          <input
+            style={{ marginRight: "5px" }}
+            type="text"
+            value={layerInfo.searchDisplayName}
+            onChange={(e) => {
+              let addedLayersInfo = this.state.addedLayersInfo;
+              addedLayersInfo[layerInfo.id].searchDisplayName = e.target.value;
+              this.setState(
+                {
+                  addedLayersInfo: addedLayersInfo,
+                },
+                () => {
+                  this.renderLayerInfoDialog(layerInfo);
+                }
+              );
+            }}
+          />
+        </div>
+        <div>
+          <label>Sekundära visningsfält (i resultatlistan)</label>
+          <input
+            style={{ marginRight: "5px" }}
+            type="text"
+            value={layerInfo.secondaryLabelFields}
+            onChange={(e) => {
+              let addedLayersInfo = this.state.addedLayersInfo;
+              addedLayersInfo[layerInfo.id].secondaryLabelFields =
+                e.target.value;
+              this.setState(
+                {
+                  addedLayersInfo: addedLayersInfo,
+                },
+                () => {
+                  this.renderLayerInfoDialog(layerInfo);
+                }
+              );
+            }}
+          />
+        </div>
+        <div>
+          <label>Kort visningsfält (etikett i kartan)</label>
+          <input
+            style={{ marginRight: "5px" }}
+            type="text"
+            value={layerInfo.searchShortDisplayName}
+            onChange={(e) => {
+              let addedLayersInfo = this.state.addedLayersInfo;
+              addedLayersInfo[layerInfo.id].searchShortDisplayName =
+                e.target.value;
               this.setState(
                 {
                   addedLayersInfo: addedLayersInfo,
@@ -526,47 +626,7 @@ class WMSLayerForm extends Component {
             }}
           />
         </div>
-        <div>
-          <label>Visningsfält</label>
-          <input
-            style={{ marginRight: "5px" }}
-            type="text"
-            value={layerInfo.searchDisplayName}
-            onChange={(e) => {
-              let addedLayersInfo = this.state.addedLayersInfo;
-              addedLayersInfo[layerInfo.id].searchDisplayName = e.target.value;
-              this.setState(
-                {
-                  addedLayersInfo: addedLayersInfo,
-                },
-                () => {
-                  this.renderLayerInfoDialog(layerInfo);
-                }
-              );
-            }}
-          />
-        </div>
-        <div>
-          <label>Kort visningsfält</label>
-          <input
-            style={{ marginRight: "5px" }}
-            type="text"
-            value={layerInfo.searchShortDisplayName}
-            onChange={(e) => {
-              let addedLayersInfo = this.state.addedLayersInfo;
-              addedLayersInfo[layerInfo.id].searchShortDisplayName =
-                e.target.value;
-              this.setState(
-                {
-                  addedLayersInfo: addedLayersInfo,
-                },
-                () => {
-                  this.renderLayerInfoDialog(layerInfo);
-                }
-              );
-            }}
-          />
-        </div>
+
         <div>
           <label>Utdataformat</label>
           <input
@@ -776,6 +836,7 @@ class WMSLayerForm extends Component {
             infobox: "",
             style: "",
             queryable: "",
+            infoclickIcon: "",
           };
         });
       }
@@ -1034,6 +1095,7 @@ class WMSLayerForm extends Component {
       displayFields: this.getValue("displayFields"),
       visibleAtStart: this.getValue("visibleAtStart"),
       tiled: this.getValue("tiled"),
+      showAttributeTableButton: this.getValue("showAttributeTableButton"),
       opacity: this.getValue("opacity"),
       maxZoom: this.getValue("maxZoom"),
       minZoom: this.getValue("minZoom"),
@@ -1048,6 +1110,7 @@ class WMSLayerForm extends Component {
       searchUrl: this.getValue("searchUrl"),
       searchPropertyName: this.getValue("searchPropertyName"),
       searchDisplayName: this.getValue("searchDisplayName"),
+      secondaryLabelFields: this.getValue("secondaryLabelFields"),
       searchShortDisplayName: this.getValue("searchShortDisplayName"),
       searchOutputFormat: this.getValue("searchOutputFormat"),
       searchGeometryField: this.getValue("searchGeometryField"),
@@ -1066,6 +1129,7 @@ class WMSLayerForm extends Component {
       infoClickSortProperty: this.getValue("infoClickSortProperty"),
       infoClickSortDesc: this.getValue("infoClickSortDesc"),
       infoClickSortType: this.getValue("infoClickSortType"),
+      // infoclickIcon: this.getValue("infoclickIcon"),
       hideExpandArrow: this.getValue("hideExpandArrow"),
       // style: this.getValue("style"),
 
@@ -1105,6 +1169,7 @@ class WMSLayerForm extends Component {
     if (fieldName === "customRatio")
       value = parseFloat(Number(value).toFixed(2));
     if (fieldName === "tiled") value = input.checked;
+    if (fieldName === "showAttributeTableButton") value = input.checked;
     if (fieldName === "layers") value = format_layers(this.state.addedLayers);
     if (fieldName === "layersInfo")
       value = format_layers_info(this.state.addedLayersInfo);
@@ -1480,6 +1545,29 @@ class WMSLayerForm extends Component {
           />
           &nbsp;
           <label htmlFor="input_tiled">GeoWebCache</label>
+        </div>
+        <div>
+          <input
+            type="checkbox"
+            ref="input_showAttributeTableButton"
+            id="input_showAttributeTableButton"
+            onChange={(e) => {
+              this.setState({ showAttributeTableButton: e.target.checked });
+            }}
+            checked={this.state.showAttributeTableButton}
+          />
+          &nbsp;
+          <label
+            htmlFor="input_showAttributeTableButton"
+            style={{ width: "auto" }}
+          >
+            Visa knapp för attributtabell{" "}
+            <i
+              className="fa fa-question-circle"
+              data-toggle="tooltip"
+              title="Visar knappen för att visa lagrets attributtabell. Se även GitHub, issue #595."
+            />
+          </label>
         </div>
         <div className="separator">Tillgängliga lager</div>
         <div>

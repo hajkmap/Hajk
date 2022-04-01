@@ -1,6 +1,6 @@
 // Base
 import React from "react";
-import { Grid } from "@material-ui/core";
+import { Grid } from "@mui/material";
 // Constants
 import { PLUGIN_MARGIN, MAX_REMOVED_FEATURES } from "../constants";
 // Components
@@ -20,7 +20,7 @@ import useCookieStatus from "hooks/useCookieStatus";
 const SketchView = (props) => {
   // We want to render the ActivityMenu on the same side as the plugin
   // is rendered (left or right). Let's grab the prop stating where it is rendered!
-  const { position: pluginPosition } = props.options ?? "left";
+  const pluginPosition = props.options?.position ?? "left";
   // We are going to be using the sketch-, kml-, and draw-model. Let's destruct them.
   const { model, drawModel, kmlModel } = props;
   // We are gonna need the local- and global-observer
@@ -321,7 +321,7 @@ const SketchView = (props) => {
       // The base plugin-window (in which we render the plugins) has a padding
       // of 10 set. In this plugin we want to render the <ActivityMenu /> at the
       // border of the window, hence we must set a negative margin-right of 10.
-      <Grid container justify="flex-end">
+      <Grid container justifyContent="flex-end">
         <Grid item xs={9}>
           {renderCurrentView()}
         </Grid>

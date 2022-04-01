@@ -49,9 +49,9 @@ import {
   TableHead,
   TableRow,
   Typography,
-} from "@material-ui/core";
+} from "@mui/material";
 
-import { styled } from "@material-ui/core/styles";
+import { styled } from "@mui/material/styles";
 
 export const Paragraph = styled(Typography)(() => ({
   marginBottom: "1.1rem",

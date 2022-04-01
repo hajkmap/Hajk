@@ -368,7 +368,7 @@ export default class DocumentHandlerModel {
           <BlockQuote
             blockQuoteTag={e}
             defaultColors={this.options.defaultDocumentColorSettings}
-          ></BlockQuote>
+          />
         );
       },
     });

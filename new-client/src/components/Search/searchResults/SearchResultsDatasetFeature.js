@@ -1,21 +1,23 @@
 import React from "react";
-import { withStyles } from "@material-ui/core/styles";
-import { Checkbox, Typography, Tooltip, Grid } from "@material-ui/core";
-import StarIcon from "@material-ui/icons/Star";
-import StarBorderIcon from "@material-ui/icons/StarBorder";
+import { Checkbox, Typography, Tooltip, Grid } from "@mui/material";
+import StarIcon from "@mui/icons-material/Star";
+import StarBorderIcon from "@mui/icons-material/StarBorder";
+import { styled } from "@mui/material/styles";
 
-const styles = (theme) => ({
-  root: {
-    minHeight: 42,
-    width: "100%",
-  },
-  originIconWrapper: {
-    paddingLeft: theme.spacing(1),
-  },
-  typography: {
-    maxWidth: "100%",
-  },
-});
+const IconWrapper = styled("div")(({ theme }) => ({
+  display: "flex",
+  flexWrap: "wrap",
+  paddingLeft: theme.spacing(1),
+}));
+
+const GridRoot = styled(Grid)(() => ({
+  minHeight: 42,
+  width: "100%",
+}));
+
+const StyledTypography = styled(Typography)(() => ({
+  maxWidth: "100%",
+}));
 
 class SearchResultsDatasetFeature extends React.PureComponent {
   renderShowInMapCheckbox = () => {
@@ -24,7 +26,7 @@ class SearchResultsDatasetFeature extends React.PureComponent {
 
     return (
       <Grid item align="center">
-        <Tooltip title={helpText}>
+        <Tooltip disableInteractive title={helpText}>
           <Checkbox
             color="default"
             checked={visibleInMap}
@@ -59,35 +61,31 @@ class SearchResultsDatasetFeature extends React.PureComponent {
   };
 
   renderOriginBasedIcon = () => {
-    const { getOriginBasedIcon, origin, classes } = this.props;
-    return (
-      <Grid className={classes.originIconWrapper}>
-        {getOriginBasedIcon(origin)}
-      </Grid>
-    );
+    const { getOriginBasedIcon, origin } = this.props;
+    return <IconWrapper>{getOriginBasedIcon(origin)}</IconWrapper>;
   };
 
   render() {
-    const { feature, classes, shouldRenderSelectedCollection } = this.props;
+    const { feature, shouldRenderSelectedCollection } = this.props;
     const shouldRenderCheckbox =
       feature.getGeometry() && shouldRenderSelectedCollection;
     if (feature.featureTitle.length > 0) {
       return (
-        <Grid container alignItems="center" className={classes.root}>
+        <GridRoot container alignItems="center" hej="hejhej">
           {shouldRenderCheckbox
             ? this.renderShowInMapCheckbox()
             : this.renderOriginBasedIcon()}
           <Grid item xs={9}>
-            <Typography noWrap align="left" className={classes.typography}>
+            <StyledTypography noWrap align="left">
               {feature.featureTitle}
-            </Typography>
+            </StyledTypography>
           </Grid>
           <Grid item xs={1}></Grid>
-        </Grid>
+        </GridRoot>
       );
     } else {
       return null;
     }
   }
 }
-export default withStyles(styles)(SearchResultsDatasetFeature);
+export default SearchResultsDatasetFeature;

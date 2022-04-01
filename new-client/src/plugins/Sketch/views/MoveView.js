@@ -1,14 +1,15 @@
 import React from "react";
-import { Button, Grid, Paper, TextField } from "@material-ui/core";
-import { Tooltip, Typography, Switch } from "@material-ui/core";
+import { Button, Grid, Paper, TextField } from "@mui/material";
+import { Tooltip, Typography, Switch } from "@mui/material";
 import Information from "../components/Information";
 
 const TranslateToggler = ({ translateEnabled, setTranslateEnabled }) => {
   return (
     <Paper style={{ padding: 8, marginTop: 8 }}>
-      <Grid container justify="space-between" alignItems="center">
+      <Grid container justifyContent="space-between" alignItems="center">
         <Typography variant="body2">Tillåt fri förflyttning</Typography>
         <Tooltip
+          disableInteractive
           title={
             translateEnabled
               ? "Avaktivera för att inte tillåta förflyttning av objekten i kartan."
@@ -72,14 +73,17 @@ const FeatureMoveSelector = (props) => {
 
   return (
     <Paper style={{ padding: 8, marginTop: 8 }}>
-      <Grid container item justify="center" alignItems="center">
+      <Grid container item justifyContent="center" alignItems="center">
         <Grid item xs={12}>
           <Typography variant="body2" align="center">
             Fast förflyttning
           </Typography>
         </Grid>
         <Grid item xs={12} style={{ marginTop: 16 }}>
-          <Tooltip title="Ange hur många meter du vill flytta objekten.">
+          <Tooltip
+            disableInteractive
+            title="Ange hur många meter du vill flytta objekten."
+          >
             <TextField
               label="Förflyttningsavstånd (meter)"
               variant="outlined"
@@ -92,7 +96,10 @@ const FeatureMoveSelector = (props) => {
           </Tooltip>
         </Grid>
         <Grid item xs={12} style={{ marginTop: 16 }}>
-          <Tooltip title="Ange i vilken riktning du vill flytta objekten. 0 grader är rakt norrut, 90 grader är rakt åt öster, osv.">
+          <Tooltip
+            disableInteractive
+            title="Ange i vilken riktning du vill flytta objekten. 0 grader är rakt norrut, 90 grader är rakt åt öster, osv."
+          >
             <TextField
               label="Förflyttningsriktning (grader)"
               variant="outlined"

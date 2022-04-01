@@ -1,6 +1,6 @@
 import React from "react";
-import { Button, Grid, Paper } from "@material-ui/core";
-import { Tooltip, Typography, Switch } from "@material-ui/core";
+import { Button, Grid, Paper } from "@mui/material";
+import { Tooltip, Typography, Switch } from "@mui/material";
 
 import Information from "../components/Information";
 import FeatureStyleEditor from "../components/featureStyle/FeatureStyleEditor";
@@ -8,9 +8,10 @@ import FeatureStyleEditor from "../components/featureStyle/FeatureStyleEditor";
 const ModifyNodeToggler = ({ modifyEnabled, setModifyEnabled }) => {
   return (
     <Paper style={{ padding: 8, marginTop: 8 }}>
-      <Grid container justify="space-between" alignItems="center">
+      <Grid container justifyContent="space-between" alignItems="center">
         <Typography variant="body2">Tillåt redigering av noder</Typography>
         <Tooltip
+          disableInteractive
           title={
             modifyEnabled
               ? "Avaktivera redigering av noder för att enklare kunna selektera objekt i kartan för redigering av färg etc."
@@ -36,7 +37,7 @@ const EditView = (props) => {
     <Grid
       container
       direction="column"
-      justify="space-between"
+      justifyContent="space-between"
       style={{ height: "100%" }}
     >
       <Grid container>
@@ -66,7 +67,10 @@ const EditView = (props) => {
       </Grid>
       {props.editFeature && (
         <Grid container style={{ marginTop: 8 }}>
-          <Tooltip title="Klicka för att duplicera det markerade objektet.">
+          <Tooltip
+            disableInteractive
+            title="Klicka för att duplicera det markerade objektet."
+          >
             <Button
               variant="contained"
               fullWidth

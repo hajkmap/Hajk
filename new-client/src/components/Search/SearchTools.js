@@ -1,8 +1,7 @@
 import React from "react";
 import { createPortal } from "react-dom";
-import IconButton from "@material-ui/core/IconButton";
-import MoreVertIcon from "@material-ui/icons/MoreVert";
-import { withStyles } from "@material-ui/core/styles";
+import IconButton from "@mui/material/IconButton";
+import MoreVertIcon from "@mui/icons-material/MoreVert";
 import {
   ListItemIcon,
   Menu,
@@ -10,12 +9,11 @@ import {
   Paper,
   Tooltip,
   Typography,
-} from "@material-ui/core";
+} from "@mui/material";
+import { visuallyHidden } from "@mui/utils";
 
 import Dialog from "../Dialog/Dialog";
 import SearchSettings from "./SearchSettings";
-
-const styles = (theme) => ({});
 
 class SearchTools extends React.PureComponent {
   state = {
@@ -89,7 +87,7 @@ class SearchTools extends React.PureComponent {
     return (
       <>
         {this.renderSettingsDialog()}
-        <Tooltip title="Fler sökverktyg och inställningar">
+        <Tooltip disableInteractive title="Fler sökverktyg och inställningar">
           <IconButton
             aria-haspopup="true"
             aria-controls="lock-menu"
@@ -101,9 +99,9 @@ class SearchTools extends React.PureComponent {
               })
             }
           >
-            <Typography variant="srOnly">
+            <span style={visuallyHidden}>
               Öppna dialog med fler inställningar
-            </Typography>
+            </span>
             <MoreVertIcon />
           </IconButton>
         </Tooltip>
@@ -112,7 +110,6 @@ class SearchTools extends React.PureComponent {
             id="lock-menu"
             autoFocus={false}
             anchorEl={anchorEl}
-            getContentAnchorEl={null}
             anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
             transformOrigin={{ vertical: "top", horizontal: "center" }}
             keepMounted
@@ -124,7 +121,11 @@ class SearchTools extends React.PureComponent {
             }
           >
             {enabledTools.map((option, index) => (
-              <Tooltip key={index} title={option.toolTipTitle ?? ""}>
+              <Tooltip
+                disableInteractive
+                key={index}
+                title={option.toolTipTitle ?? ""}
+              >
                 <MenuItem
                   onClick={(event) =>
                     this.handleMenuItemClick(event, index, option)
@@ -133,9 +134,7 @@ class SearchTools extends React.PureComponent {
                   {option.icon ? (
                     <ListItemIcon>{option.icon}</ListItemIcon>
                   ) : null}
-                  <Typography variant="srOnly" noWrap>
-                    {option.name}
-                  </Typography>
+                  <span style={visuallyHidden}>{option.name}</span>
                   <Typography variant="inherit" noWrap>
                     {option.name}
                   </Typography>
@@ -149,4 +148,4 @@ class SearchTools extends React.PureComponent {
   }
 }
 
-export default withStyles(styles)(SearchTools);
+export default SearchTools;

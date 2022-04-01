@@ -2070,7 +2070,7 @@ class DrawModel {
   };
 
   // Get:er returning the current text-style settings
-  getDrawStyleSettings = () => {
+  getTextStyleSettings = () => {
     return this.#textStyleSettings;
   };
 }

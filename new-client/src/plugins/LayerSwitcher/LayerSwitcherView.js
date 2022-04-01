@@ -2,29 +2,32 @@ import React from "react";
 import { createPortal } from "react-dom";
 import propTypes from "prop-types";
 
-import { withStyles } from "@material-ui/core/styles";
-import { AppBar, Tab, Tabs } from "@material-ui/core";
+import { styled } from "@mui/material/styles";
+import { AppBar, Tab, Tabs } from "@mui/material";
 
 import BackgroundSwitcher from "./components/BackgroundSwitcher.js";
 import LayerGroup from "./components/LayerGroup.js";
 import BreadCrumbs from "./components/BreadCrumbs.js";
 
-const styles = (theme) => ({
-  windowContent: {
-    margin: -10, // special case, we need to "unset" the padding for Window content that's set in Window.js
-  },
-  stickyAppBar: {
-    top: -10,
-  },
-  tabContent: {
-    padding: 10,
-  },
-});
+// The styled-component below might seem unnecessary since we are using the sx-prop
+// on it as well. However, since we cannot use the sx-prop on a non-MUI-component
+// (which would force us to change the <div> to a <Box>) this felt OK in this
+// particular occasion.
+const Root = styled("div")(() => ({
+  margin: -10, // special case, we need to "unset" the padding for Window content that's set in Window.js
+}));
+
+const StyledAppBar = styled(AppBar)(() => ({
+  top: -10,
+}));
+
+const ContentWrapper = styled("div")(() => ({
+  padding: 10,
+}));
 
 class LayersSwitcherView extends React.PureComponent {
   static propTypes = {
     app: propTypes.object.isRequired,
-    classes: propTypes.object.isRequired,
     map: propTypes.object.isRequired,
     model: propTypes.object.isRequired,
     observer: propTypes.object.isRequired,
@@ -122,54 +125,59 @@ class LayersSwitcherView extends React.PureComponent {
     return (
       this.options.showBreadcrumbs &&
       createPortal(
-        <BreadCrumbs
-          map={this.props.map}
-          model={this.props.model}
-          app={this.props.app}
-        />,
-        document.getElementById("map")
+        // We must wrap the component in a div, on which we can catch
+        // events. This is done to prevent event bubbling to the
+        // layerSwitcher component.
+        <div onMouseDown={(e) => e.stopPropagation()}>
+          <BreadCrumbs
+            map={this.props.map}
+            model={this.props.model}
+            app={this.props.app}
+          />
+        </div>,
+        document.getElementById("breadcrumbs-container")
       )
     );
   };
 
   render() {
-    const { classes } = this.props;
+    const { windowVisible } = this.props;
     return (
-      <>
-        <div className={classes.windowContent}>
-          <AppBar
-            position="sticky" // Does not work in IE11
-            color="default"
-            className={classes.stickyAppBar}
+      <Root sx={{ display: windowVisible ? "block" : "none" }}>
+        <StyledAppBar
+          position="sticky" // Does not work in IE11
+          color="default"
+        >
+          <Tabs
+            action={this.handleTabsMounted}
+            onChange={this.handleChangeTabs}
+            value={windowVisible ? this.state.activeTab : false} // If the window is not visible,
+            // we cannot send a proper value to the tabs-component. If we do, mui will throw an error.
+            // false is OK though, apparently.
+            variant="fullWidth"
+            textColor="inherit"
           >
-            <Tabs
-              action={this.handleTabsMounted}
-              onChange={this.handleChangeTabs}
-              value={this.state.activeTab}
-              variant="fullWidth"
-            >
-              <Tab label="Kartlager" />
-              <Tab label="Bakgrund" />
-            </Tabs>
-          </AppBar>
-          <div className={classes.tabContent}>
-            {this.renderLayerGroups(this.state.activeTab === 0)}
-            <BackgroundSwitcher
-              display={this.state.activeTab === 1}
-              layers={this.state.baseLayers}
-              layerMap={this.props.model.layerMap}
-              backgroundSwitcherBlack={this.options.backgroundSwitcherBlack}
-              backgroundSwitcherWhite={this.options.backgroundSwitcherWhite}
-              enableOSM={this.options.enableOSM}
-              map={this.props.map}
-              app={this.props.app}
-            />
-          </div>
-        </div>
+            <Tab label="Kartlager" />
+            <Tab label="Bakgrund" />
+          </Tabs>
+        </StyledAppBar>
+        <ContentWrapper>
+          {this.renderLayerGroups(this.state.activeTab === 0)}
+          <BackgroundSwitcher
+            display={this.state.activeTab === 1}
+            layers={this.state.baseLayers}
+            layerMap={this.props.model.layerMap}
+            backgroundSwitcherBlack={this.options.backgroundSwitcherBlack}
+            backgroundSwitcherWhite={this.options.backgroundSwitcherWhite}
+            enableOSM={this.options.enableOSM}
+            map={this.props.map}
+            app={this.props.app}
+          />
+        </ContentWrapper>
         {this.renderBreadCrumbs()}
-      </>
+      </Root>
     );
   }
 }
 
-export default withStyles(styles)(LayersSwitcherView);
+export default LayersSwitcherView;

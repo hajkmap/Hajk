@@ -26,6 +26,10 @@ class VectorLayerForm extends React.Component {
     infoUrlText: "",
     infoVisible: false,
     infobox: "",
+    displayFields: "",
+    secondaryLabelFields: "",
+    shortDisplayFields: "",
+    infoclickIcon: "",
     timeSliderVisible: false,
     timeSliderStart: "",
     timeSliderEnd: "",
@@ -127,6 +131,10 @@ class VectorLayerForm extends React.Component {
       infoUrlText: this.getValue("infoUrlText"),
       infoVisible: this.getValue("infoVisible"),
       infobox: this.getValue("infobox"),
+      displayFields: this.getValue("displayFields"),
+      shortDisplayFields: this.getValue("shortDisplayFields"),
+      secondaryLabelFields: this.getValue("secondaryLabelFields"),
+      infoclickIcon: this.getValue("infoclickIcon"),
       timeSliderVisible: this.getValue("timeSliderVisible"),
       timeSliderStart: this.getValue("timeSliderStart"),
       timeSliderEnd: this.getValue("timeSliderEnd"),
@@ -753,6 +761,78 @@ class VectorLayerForm extends React.Component {
             ref="input_infobox"
             value={this.state.infobox}
             onChange={(e) => this.setState({ infobox: e.target.value })}
+          />
+        </div>
+        <div>
+          <label>
+            Ikon (
+            <a
+              href="https://fonts.google.com/icons?selected=Material+Icons"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              lista
+            </a>
+            ) i infoclick-lista (
+            <abbr title="Välj vilken ikon som visas i infoclick-listan. Osäker? Prova 'star'!">
+              ?
+            </abbr>
+            )
+          </label>
+          <input
+            ref="input_infoclickIcon"
+            onChange={(e) => {
+              this.setState({ infoclickIcon: e.target.value });
+            }}
+            value={this.state.infoclickIcon}
+          />
+        </div>
+        <div>
+          <label>
+            Huvudvisningsfält (
+            <abbr title="Styr vilka attributvärden som visas i listvyn i infoclick">
+              ?
+            </abbr>
+            )
+          </label>
+          <input
+            ref="input_displayFields"
+            onChange={(e) => {
+              this.setState({ displayFields: e.target.value });
+            }}
+            value={this.state.displayFields}
+          />
+        </div>
+        <div>
+          <label>
+            Sekundära visningsfält(
+            <abbr title="Styr vilka attributvärden som visas med något mindre text i listan över träffar">
+              ?
+            </abbr>
+            )
+          </label>
+          <input
+            ref="input_secondaryLabelFields"
+            onChange={(e) => {
+              this.setState({ secondaryLabelFields: e.target.value });
+            }}
+            value={this.state.secondaryLabelFields}
+          />
+        </div>
+        <div>
+          <label>
+            Visningsfält i kartan(
+            <abbr title="Styr vilka attributvärden som visas i kartan vid infoclick">
+              ?
+            </abbr>
+            )
+          </label>
+          <input
+            ref="input_shortDisplayFields"
+            onChange={(e) => {
+              this.setState({ shortDisplayFields: e.target.value });
+            }}
+            value={this.state.shortDisplayFields}
           />
         </div>
         <div>

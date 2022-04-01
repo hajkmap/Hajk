@@ -1,9 +1,9 @@
 import React from "react";
-import { styled } from "@material-ui/core";
-import { Button, IconButton, Zoom } from "@material-ui/core";
-import { Grid, Paper, TextField, Tooltip, Typography } from "@material-ui/core";
-import AddIcon from "@material-ui/icons/Add";
-import DeleteIcon from "@material-ui/icons/Delete";
+import { styled } from "@mui/material";
+import { Button, IconButton, Zoom } from "@mui/material";
+import { Grid, Paper, TextField, Tooltip, Typography } from "@mui/material";
+import AddIcon from "@mui/icons-material/Add";
+import DeleteIcon from "@mui/icons-material/Delete";
 
 import { useSnackbar } from "notistack";
 
@@ -14,8 +14,8 @@ const StyledPaper = styled(Paper)(({ theme }) => ({
   width: "100%",
   padding: theme.spacing(1),
   marginBottom: theme.spacing(1),
-  borderRight: `${theme.spacing(0.5)}px solid ${theme.palette.info.main}`,
-  borderLeft: `${theme.spacing(0.5)}px solid ${theme.palette.info.main}`,
+  borderRight: `${theme.spacing(0.5)} solid ${theme.palette.info.main}`,
+  borderLeft: `${theme.spacing(0.5)} solid ${theme.palette.info.main}`,
 }));
 
 // A view that is rendered if the user has selected not to accept functional
@@ -77,6 +77,13 @@ const SketchSaver = (props) => {
     });
   };
 
+  // Checks wether the sketch-name entered by the user is already taken or not.
+  const nameExists = () => {
+    return props.savedSketches.some(
+      (sketch) => sketch.title.toLowerCase() === props.sketchName.toLowerCase()
+    );
+  };
+
   // Let's listen for enter-key-down. If the enter-key is pressed and
   // the save-button isn't disabled we can save the sketch.
   const handleKeyDown = (e) => {
@@ -96,14 +103,10 @@ const SketchSaver = (props) => {
           "Minst fyra tecken måste anges för att en arbetsyta ska kunna skapas.",
       };
     }
-    // Let's check if the name the user has entered already exists
-    const sketchNameExists = props.savedSketches.some(
-      (sketch) => sketch.title.toLowerCase() === props.sketchName.toLowerCase()
-    );
-    // If the name does not exist, and we've already saved the maximum number of sketches,
+    // If the name does not already exist, and we've already saved the maximum number of sketches,
     // the button should be disabled. (If the name does exist, it is OK to save since one
     // will be over-written).
-    if (props.savedSketches.length === MAX_SKETCHES && !sketchNameExists) {
+    if (props.savedSketches.length === MAX_SKETCHES && !nameExists()) {
       return {
         disabled: true,
         message:
@@ -122,9 +125,12 @@ const SketchSaver = (props) => {
 
   return (
     <Paper style={{ padding: 8 }}>
-      <Grid container alignItems="center" justify="space-between">
+      <Grid container alignItems="center" justifyContent="space-between">
         <Grid item xs={8}>
-          <Tooltip title="Ange att namn så att arbetsytan kan identifieras senare.">
+          <Tooltip
+            disableInteractive
+            title="Ange att namn så att arbetsytan kan identifieras senare."
+          >
             <TextField
               size="small"
               variant="outlined"
@@ -135,8 +141,8 @@ const SketchSaver = (props) => {
             />
           </Tooltip>
         </Grid>
-        <Grid container item xs={3} justify="flex-end">
-          <Tooltip title={saveButtonState.message}>
+        <Grid container item xs={3} justifyContent="flex-end">
+          <Tooltip disableInteractive title={saveButtonState.message}>
             <span>
               <Button
                 size="small"
@@ -165,13 +171,13 @@ const SavedSketch = ({
   return (
     <Zoom in appear>
       <StyledPaper>
-        <Grid container justify="space-between" alignItems="center">
+        <Grid container justifyContent="space-between" alignItems="center">
           <Grid item xs={8}>
-            <Tooltip title={sketchInfo.title}>
+            <Tooltip disableInteractive title={sketchInfo.title}>
               <Grid
                 item
                 xs={12}
-                style={{ overflow: "hidden", textOverflow: "ellipsis" }}
+                sx={{ overflow: "hidden", textOverflow: "ellipsis" }}
               >
                 <Typography variant="button" noWrap>
                   {sketchInfo.title}
@@ -180,6 +186,7 @@ const SavedSketch = ({
             </Tooltip>
             <Grid item xs={12}>
               <Tooltip
+                disableInteractive
                 title={`Arbetsytan uppdaterades senast ${sketchInfo.date}`}
               >
                 <Typography variant="caption">
@@ -189,13 +196,19 @@ const SavedSketch = ({
             </Grid>
           </Grid>
 
-          <Grid container item xs={4} justify="flex-end">
-            <Tooltip title="Klicka för att radera arbetsytan.">
+          <Grid container item xs={4} justifyContent="flex-end">
+            <Tooltip
+              disableInteractive
+              title="Klicka för att radera arbetsytan."
+            >
               <IconButton size="small" onClick={handleRemoveClick}>
                 <DeleteIcon />
               </IconButton>
             </Tooltip>
-            <Tooltip title="Klicka för att läsa in objekten.">
+            <Tooltip
+              disableInteractive
+              title="Klicka för att läsa in objekten."
+            >
               <IconButton size="small" onClick={handleAddToMapClick}>
                 <AddIcon />
               </IconButton>

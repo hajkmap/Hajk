@@ -1,6 +1,6 @@
 import React from "react";
 import Observer from "react-event-observer";
-import EditIcon from "@material-ui/icons/Edit";
+import EditIcon from "@mui/icons-material/Edit";
 
 // Helpers
 import LocalStorageHelper from "utils/LocalStorageHelper";

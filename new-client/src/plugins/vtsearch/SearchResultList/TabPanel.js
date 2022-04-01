@@ -3,7 +3,7 @@ import React from "react";
 import PropTypes from "prop-types";
 import AttributeTable from "./AttributeTable";
 import AdvancedAttributeTable from "./AdvancedAttributeTable";
-import Grid from "@material-ui/core/Grid";
+import Grid from "@mui/material/Grid";
 
 /**
  * @summary Panel for handling multiple search result using tabs

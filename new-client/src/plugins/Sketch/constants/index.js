@@ -1,10 +1,10 @@
-import DeleteIcon from "@material-ui/icons/Delete";
-import FormatShapesIcon from "@material-ui/icons/FormatShapes";
-import OpenWithIcon from "@material-ui/icons/OpenWith";
-import EditIcon from "@material-ui/icons/Edit";
-import SaveIcon from "@material-ui/icons/Save";
-import ImportExportIcon from "@material-ui/icons/ImportExport";
-import SettingsIcon from "@material-ui/icons/Settings";
+import EditIcon from "@mui/icons-material/Edit";
+import DeleteIcon from "@mui/icons-material/Delete";
+import FormatShapesIcon from "@mui/icons-material/FormatShapes";
+import OpenWithIcon from "@mui/icons-material/OpenWith";
+import SaveIcon from "@mui/icons-material/Save";
+import ImportExportIcon from "@mui/icons-material/ImportExport";
+import SettingsIcon from "@mui/icons-material/Settings";
 
 export const ACTIVITIES = [
   {
@@ -115,7 +115,7 @@ export const DRAW_TYPES = [
   },
 ];
 
-export const MAX_REMOVED_FEATURES = 5;
+export const MAX_REMOVED_FEATURES = 4;
 export const PLUGIN_MARGIN = 10;
 
 export const STROKE_TYPES = [
@@ -143,7 +143,7 @@ export const STROKE_DASHES = new Map([
 ]);
 
 // A constant stating how many sketches we're allowed to save in local-storage.
-export const MAX_SKETCHES = 4;
+export const MAX_SKETCHES = 3;
 
 export const DEFAULT_MEASUREMENT_SETTINGS = {
   showText: false,

@@ -1,6 +1,6 @@
 import React from "react";
 import { createPortal } from "react-dom";
-import { withTheme } from "@material-ui/styles";
+import { withTheme } from "@emotion/react";
 
 import {
   Hidden,
@@ -8,7 +8,7 @@ import {
   ListItem,
   ListItemIcon,
   ListItemText,
-} from "@material-ui/core";
+} from "@mui/material";
 
 import Card from "components/Card";
 import Dialog from "components/Dialog/Dialog";
@@ -156,17 +156,20 @@ class DialogWindowPlugin extends React.PureComponent {
   render() {
     const { target } = this.props.options;
     return (
-      <>
-        {this.renderDialog()}
-        {/* Drawer buttons and Widget buttons should render a Drawer button. */}
-        {(target === "toolbar" || this.#pluginIsWidget(target)) &&
-          this.renderDrawerButton()}
-        {/* Widget buttons must also render a Widget */}
-        {this.#pluginIsWidget(target) &&
-          this.renderWidgetButton(`${target}-column`)}
-        {/* Finally, render a Control button if target has that value */}
-        {target === "control" && this.renderControlButton()}
-      </>
+      // Don't render if "clean" query param is specified, otherwise go on
+      this.props.app.config.mapConfig.map.clean !== true && (
+        <>
+          {this.renderDialog()}
+          {/* Drawer buttons and Widget buttons should render a Drawer button. */}
+          {(target === "toolbar" || this.#pluginIsWidget(target)) &&
+            this.renderDrawerButton()}
+          {/* Widget buttons must also render a Widget */}
+          {this.#pluginIsWidget(target) &&
+            this.renderWidgetButton(`${target}-column`)}
+          {/* Finally, render a Control button if target has that value */}
+          {target === "control" && this.renderControlButton()}
+        </>
+      )
     );
   }
 }
