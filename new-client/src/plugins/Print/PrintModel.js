@@ -30,6 +30,10 @@ export default class PrintModel {
     this.disclaimer = settings.options.disclaimer ?? "";
     this.localObserver = settings.localObserver;
     this.mapConfig = settings.mapConfig;
+    // If we want the printed tiles to have correct styling, we have to use
+    // custom loaders to make sure that the requests has all the required parameters.
+    // If for some reason these tile-loaders shouldn't be used, a setting is exposed.
+    this.useCustomTileLoaders = settings.useCustomTileLoaders ?? true;
     // Since the WMS-servers cannot handle enormous requests, we have to
     // limit Image-WMS requests. The size below is the maximum tile-size allowed.
     this.maxTileSize = settings.maxTileSize || 4096;
@@ -880,10 +884,9 @@ export default class PrintModel {
 
     // Since we're allowing the users to choose which DPI they want to print the map
     // in, we have to make sure to prepare the layers so that they are fetched with
-    // the correct DPI-settings!
-    // TODO: Make sure to handle Image-WMS (non-tiled WMS-sources) as well! As of now,
-    // we only handle tiled sources!
-    this.prepareActiveLayersForPrint(options);
+    // the correct DPI-settings! We're only doing this if we're supposed to. An admin
+    // might choose not to use this functionality (useCustomTileLoaders set to false).
+    this.useCustomTileLoaders && this.prepareActiveLayersForPrint(options);
 
     // Before we're printing we must make sure to change the map-view from the
     // original one, to the print-view.
@@ -1093,8 +1096,8 @@ export default class PrintModel {
       }
 
       // Since we've been messing with the layer-settings while printing, we have to
-      // make sure to reset these settings.
-      this.resetActiveLayers();
+      // make sure to reset these settings. (Should only be done if custom loaders has been used).
+      this.useCustomTileLoaders && this.resetActiveLayers();
 
       // Finally, save the PDF (or PNG)
       this.saveToFile(pdf, width, options.saveAsType)
@@ -1233,8 +1236,9 @@ export default class PrintModel {
 
     // Reset map to how it was before print
     this.restoreOriginalView();
-    // Reset the layer-settings to how it was before print
-    this.resetActiveLayers();
+    // Reset the layer-settings to how it was before print.
+    // (Should only be done if custom loaders has been used).
+    this.useCustomTileLoaders && this.resetActiveLayers();
   };
 
   /**
