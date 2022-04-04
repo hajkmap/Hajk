@@ -839,7 +839,7 @@ export default class PrintModel {
   };
 
   saveToFile = (pdf, width, type) => {
-    const fileName = `Utskrift - ${new Date().toLocaleString()}`;
+    const fileName = `Kartexport - ${new Date().toLocaleString()}`;
     return new Promise((resolve, reject) => {
       try {
         if (type === "PDF") {
