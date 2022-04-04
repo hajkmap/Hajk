@@ -610,7 +610,7 @@ class DrawModel {
         new Blob([postData], {
           type: "application/vnd.google-earth.kml+xml;charset=utf-8",
         }),
-        `Hajk - ${new Date().toLocaleString()}.kml`
+        `Ritexport - ${new Date().toLocaleString()}.kml`
       );
     }
   };

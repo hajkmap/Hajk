@@ -839,7 +839,7 @@ export default class PrintModel {
   };
 
   saveToFile = (pdf, width, type) => {
-    const fileName = `Hajk - ${new Date().toLocaleString()}`;
+    const fileName = `Utskrift - ${new Date().toLocaleString()}`;
     return new Promise((resolve, reject) => {
       try {
         if (type === "PDF") {
