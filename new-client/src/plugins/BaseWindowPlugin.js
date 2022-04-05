@@ -1,5 +1,6 @@
 import React from "react";
 import propTypes from "prop-types";
+import { isMobile } from "./../utils/IsMobile";
 import { createPortal } from "react-dom";
 import { withStyles } from "@material-ui/core/styles";
 import { withTheme } from "@material-ui/styles";
@@ -7,20 +8,17 @@ import {
   Hidden,
   ListItem,
   ListItemIcon,
-  ListItemText
+  ListItemText,
 } from "@material-ui/core";
 import Window from "../components/Window.js";
 import Card from "../components/Card.js";
+import PluginControlButton from "../components/PluginControlButton";
 
-const styles = theme => {
+const styles = (theme) => {
   return {};
 };
 
 class BaseWindowPlugin extends React.PureComponent {
-  state = {
-    windowVisible: false
-  };
-
   static propTypes = {
     app: propTypes.object.isRequired,
     children: propTypes.object.isRequired,
@@ -29,15 +27,29 @@ class BaseWindowPlugin extends React.PureComponent {
     map: propTypes.object.isRequired,
     options: propTypes.object.isRequired,
     theme: propTypes.object.isRequired,
-    type: propTypes.string.isRequired
+    type: propTypes.string.isRequired,
   };
 
   constructor(props) {
     super(props);
+    // 'type' is basically a unique identifier for each plugin
     this.type = props.type.toLowerCase() || undefined;
+
     // There will be defaults in props.custom, so that each plugin has own default title/description
-    this.title = props.options.title || props.custom.title;
     this.description = props.options.description || props.custom.description;
+
+    // Title and Color are kept in state and not as class properties. Keeping them in state
+    // ensures re-render when new props arrive and update the state variables (see componentDidUpdate() too).
+    this.state = {
+      title: props.options.title || props.custom.title || "Unnamed plugin",
+      color: props.options.color || props.custom.color || null,
+      windowVisible: false, // Does not have anything to do with color or title, but must also be set initially
+    };
+
+    // Title is a special case: we want to use the state.title and pass on to Window in order
+    // to update Window's title dynamically. At the same time, we want all other occurrences,
+    // e.g. Widget or Drawer button's label to remain the same.
+    this.title = props.options.title || props.custom.title || "Unnamed plugin";
 
     // Try to get values from admin's option. Fallback to customs from Plugin defaults, or finally to hard-coded values.
     this.width = props.options.width || props.custom.width || 400;
@@ -48,35 +60,65 @@ class BaseWindowPlugin extends React.PureComponent {
     props.app.registerWindowPlugin(this);
 
     // Subscribe to a global event that makes it possible to show/hide Windows.
-    // First we prepare a unique event name for each plugin so it looks like 'showSomeplugin'.
-    const eventName = `show${this.type.charAt(0).toUpperCase() +
-      this.type.slice(1)}`;
+    // First we prepare a unique event name for each plugin so it looks like '{pluginName}.showWindow'.
+    const eventName = `${this.type}.showWindow`;
     // Next, subscribe to that event, expect 'opts' array.
     // To find all places where this event is publish, search for 'globalObserver.publish("show'
-    props.app.globalObserver.subscribe(eventName, opts => {
+    props.app.globalObserver.subscribe(eventName, (opts) => {
       this.showWindow(opts);
     });
+
+    // Same as above, but to close the window.
+    const closeEventName = `${this.type}.closeWindow`;
+
+    props.app.globalObserver.subscribe(closeEventName, () => {
+      this.closeWindow();
+    });
   }
 
+  // Runs on initial render.
   componentDidMount() {
-    // visibleAtStart is false by default. Change to true only if option really is 'true'.
-    this.props.options.visibleAtStart === true &&
+    //If on a mobile, and there is a specific visibleAtStart setting for mobile, check the mobile setting.
+    //visibleAtStart is false by default. Change to true only if visibleAtStartMobile really is 'true'.
+    //Otherwise, if not on mobile, or there is no specific mobile setting, change to true only if visibleAtStart option really is 'true'.
+    if (isMobile && this.props.options.visibleAtStartMobile !== undefined) {
+      if (this.props.options.visibleAtStartMobile === true) {
+        this.setState({
+          windowVisible: true,
+        });
+      }
+    } else if (this.props.options.visibleAtStart === true) {
       this.setState({
-        windowVisible: true
+        windowVisible: true,
       });
+    }
   }
 
-  handleButtonClick = e => {
+  // Does not run on initial render, but runs on subsequential re-renders.
+  componentDidUpdate(prevProps) {
+    // Window's title and color can be updated on-the-flight, so we keep them
+    // in state and ensure that state is updated when new props arrive.
+    prevProps.custom.title !== this.props.custom.title &&
+      this.setState({ title: this.props.custom.title });
+
+    prevProps.custom.color !== this.props.custom.color &&
+      this.setState({ color: this.props.custom.color });
+  }
+
+  handleButtonClick = (e) => {
     this.showWindow({
       hideOtherPluginWindows: true,
-      runCallback: true
+      runCallback: true,
     });
-    this.props.app.globalObserver.publish("hideDrawer");
+    this.props.app.globalObserver.publish("core.onlyHideDrawerIfNeeded");
   };
 
-  showWindow = opts => {
+  showWindow = (opts) => {
     const hideOtherPluginWindows = opts.hideOtherPluginWindows || true,
       runCallback = opts.runCallback || true;
+
+    // Let the App know which tool is currently active
+    this.props.app.activeTool = this.type;
 
     // Don't continue if visibility hasn't changed
     if (this.state.windowVisible === true) {
@@ -87,7 +129,7 @@ class BaseWindowPlugin extends React.PureComponent {
 
     this.setState(
       {
-        windowVisible: true
+        windowVisible: true,
       },
       () => {
         // If there's a callback defined in custom, run it
@@ -99,9 +141,14 @@ class BaseWindowPlugin extends React.PureComponent {
   };
 
   closeWindow = () => {
+    // If closeWindow was initiated by the tool that is currently
+    // active, we should unset the activeTool property
+    if (this.type === this.props.app.activeTool)
+      this.props.app.activeTool = undefined;
+
     this.setState(
       {
-        windowVisible: false
+        windowVisible: false,
       },
       () => {
         typeof this.props.custom.onWindowHide === "function" &&
@@ -115,16 +162,24 @@ class BaseWindowPlugin extends React.PureComponent {
       <>
         <Window
           globalObserver={this.props.app.globalObserver}
-          title={this.title}
+          title={this.state.title}
+          color={this.state.color}
           onClose={this.closeWindow}
           open={this.state.windowVisible}
           onResize={this.props.custom.onResize}
+          onMaximize={this.props.custom.onMaximize}
+          onMinimize={this.props.custom.onMinimize}
+          draggingEnabled={this.props.custom.draggingEnabled}
+          customPanelHeaderButtons={this.props.custom.customPanelHeaderButtons}
+          resizingEnabled={this.props.custom.resizingEnabled}
+          scrollable={this.props.custom.scrollable}
+          allowMaximizedWindow={this.props.custom.allowMaximizedWindow}
           width={this.width}
           height={this.height}
           position={this.position}
           mode={mode}
           layerswitcherConfig={this.props.app.config.mapConfig.tools.find(
-            t => t.type === "layerswitcher"
+            (t) => t.type === "layerswitcher"
           )}
         >
           {this.props.children}
@@ -134,6 +189,7 @@ class BaseWindowPlugin extends React.PureComponent {
           this.renderWidgetButton("left-column")}
         {this.props.options.target === "right" &&
           this.renderWidgetButton("right-column")}
+        {this.props.options.target === "control" && this.renderControlButton()}
       </>
     );
   }
@@ -145,22 +201,27 @@ class BaseWindowPlugin extends React.PureComponent {
    *
    * Those special conditions are small screens, were there's no screen
    * estate to render the Widget button in Map Overlay.
+   *
+   * There is another special case needed to be taken care of: the "hidden"
+   * value on target should not render any button at all, but still load the plugin.
    */
   renderDrawerButton() {
-    return createPortal(
-      <Hidden mdUp={this.props.options.target !== "toolbar"}>
-        <ListItem
-          button
-          divider={true}
-          selected={this.state.windowVisible}
-          onClick={this.handleButtonClick}
-        >
-          <ListItemIcon>{this.props.custom.icon}</ListItemIcon>
-          <ListItemText primary={this.title} />
-        </ListItem>
-      </Hidden>,
-      document.getElementById("plugin-buttons")
-    );
+    return this.props.options.target === "hidden"
+      ? null
+      : createPortal(
+          <Hidden mdUp={this.props.options.target !== "toolbar"}>
+            <ListItem
+              button
+              divider={true}
+              selected={this.state.windowVisible}
+              onClick={this.handleButtonClick}
+            >
+              <ListItemIcon>{this.props.custom.icon}</ListItemIcon>
+              <ListItemText primary={this.title} />
+            </ListItem>
+          </Hidden>,
+          document.getElementById("plugin-buttons")
+        );
   }
 
   renderWidgetButton(id) {
@@ -175,6 +236,18 @@ class BaseWindowPlugin extends React.PureComponent {
         />
       </Hidden>,
       document.getElementById(id)
+    );
+  }
+
+  renderControlButton() {
+    return createPortal(
+      <PluginControlButton
+        icon={this.props.custom.icon}
+        onClick={this.handleButtonClick}
+        title={this.title}
+        abstract={this.description}
+      />,
+      document.getElementById("plugin-control-buttons")
     );
   }
 

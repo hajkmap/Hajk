@@ -26,6 +26,46 @@ import ReactModal from "react-modal";
 import RichEditor from "./components/RichEditor.jsx";
 import ChapterAdder from "./components/ChapterAdder.jsx";
 import Map from "./components/Map.jsx";
+import Button from "@material-ui/core/Button";
+import DoneIcon from "@material-ui/icons/Done";
+import RemoveIcon from "@material-ui/icons/Remove";
+import SaveIcon from "@material-ui/icons/SaveSharp";
+import CancelIcon from "@material-ui/icons/Cancel";
+import NoteAddIcon from "@material-ui/icons/NoteAdd";
+import ArrowUpwardIcon from "@material-ui/icons/ArrowUpward";
+import ArrowDownwardIcon from "@material-ui/icons/ArrowDownward";
+import { withStyles } from "@material-ui/core/styles";
+import { red, green, blue } from "@material-ui/core/colors";
+
+const ColorButtonRed = withStyles(theme => ({
+  root: {
+    color: theme.palette.getContrastText(red[500]),
+    backgroundColor: red[500],
+    "&:hover": {
+      backgroundColor: red[700]
+    }
+  }
+}))(Button);
+
+const ColorButtonGreen = withStyles(theme => ({
+  root: {
+    color: theme.palette.getContrastText(green[700]),
+    backgroundColor: green[500],
+    "&:hover": {
+      backgroundColor: green[700]
+    }
+  }
+}))(Button);
+
+const ColorButtonBlue = withStyles(theme => ({
+  root: {
+    color: theme.palette.getContrastText(blue[500]),
+    backgroundColor: blue[500],
+    "&:hover": {
+      backgroundColor: blue[700]
+    }
+  }
+}))(Button);
 
 class Chapter {
   constructor(settings) {
@@ -390,59 +430,68 @@ class InformativeEditor extends Component {
           }}
         />
         &nbsp;
-        <span
+        <Button
+          variant="contained"
           className="btn btn-default"
           onClick={() => {
             this.renderMapDialog(chapter);
           }}
         >
           Kartinställningar
-        </span>
+        </Button>
         &nbsp;
-        <span
+        <Button
+          variant="contained"
           className="btn btn-default"
           onClick={() => {
             this.renderTocDialog(chapter, parentChapters, index);
           }}
         >
           Flytta
-        </span>
+        </Button>
         &nbsp;
-        <span
+        <Button
+          variant="contained"
           className="btn btn-default"
           onClick={() => {
             this.moveChapter("up", parentChapters, index);
           }}
+          startIcon={<ArrowUpwardIcon />}
         >
-          ⇧
-        </span>
+          Upp
+        </Button>
         &nbsp;
-        <span
+        <Button
+          variant="contained"
           className="btn btn-default"
           onClick={() => {
             this.moveChapter("down", parentChapters, index);
           }}
+          startIcon={<ArrowDownwardIcon />}
         >
-          ⇩
-        </span>
+          Ner
+        </Button>
         &nbsp;
-        <span
+        <Button
+          variant="contained"
           className="btn btn-default"
           onClick={() => {
             this.renderChangeNameDialog(chapter);
           }}
         >
           Byt namn
-        </span>
+        </Button>
         &nbsp;
-        <span
-          className="btn btn-danger"
+        <ColorButtonRed
+          variant="contained"
+          className="btn btn-default"
           onClick={() => {
             this.removeChapter(parentChapters, index);
           }}
+          startIcon={<RemoveIcon />}
         >
           Ta bort
-        </span>
+        </ColorButtonRed>
         <RichEditor
           display={chapter.expanded}
           html={chapter.html}
@@ -482,9 +531,14 @@ class InformativeEditor extends Component {
 
   renderModal() {
     var abortButton = this.state.showAbortButton ? (
-      <button className="btn btn-danger" onClick={e => this.hideModal()}>
+      <ColorButtonRed
+        variant="contained"
+        className="btn"
+        onClick={e => this.hideModal()}
+        startIcon={<CancelIcon />}
+      >
         Avbryt
-      </button>
+      </ColorButtonRed>
     ) : (
       ""
     );
@@ -508,17 +562,19 @@ class InformativeEditor extends Component {
           >
             {this.state.modalContent}
           </div>
-          <button
-            className="btn btn-success"
+          <ColorButtonGreen
+            variant="contained"
+            className="btn"
             onClick={e => {
               if (this.state.modalConfirmCallback) {
                 this.state.modalConfirmCallback();
               }
               this.hideModal();
             }}
+            startIcon={<DoneIcon />}
           >
             {this.state.okButtonText || "OK"}
-          </button>
+          </ColorButtonGreen>
           &nbsp;
           {abortButton}
         </div>
@@ -624,17 +680,20 @@ class InformativeEditor extends Component {
     return (
       <div>
         {this.renderModal()}
-        <div>
-          <span
-            className="btn btn-default"
+        <div className="margined">
+          <ColorButtonGreen
+            variant="contained"
+            className="btn"
             onClick={() => this.renderCreateDialog()}
+            startIcon={<NoteAddIcon />}
           >
             Skapa nytt dokument
-          </span>
+          </ColorButtonGreen>
         </div>
         <div className="inset-form">
           <label>Välj dokument:&nbsp;</label>
           <select
+            className="control-fixed-width"
             onChange={e => {
               this.load(e.target.value);
             }}
@@ -644,15 +703,25 @@ class InformativeEditor extends Component {
           </select>
         </div>
         <div className="padded">
-          <span className="btn btn-success" onClick={() => this.save()}>
+          <ColorButtonBlue
+            variant="contained"
+            className="btn"
+            onClick={() => this.save()}
+            startIcon={<SaveIcon />}
+          >
             Spara
-          </span>
+          </ColorButtonBlue>
           &nbsp;
           <ChapterAdder onAddChapter={title => this.addChapter(title)} />
           &nbsp;
-          <span className="btn btn-danger" onClick={() => this.delete()}>
+          <ColorButtonRed
+            variant="contained"
+            className="btn btn-danger"
+            onClick={() => this.delete()}
+            startIcon={<RemoveIcon />}
+          >
             Ta bort
-          </span>
+          </ColorButtonRed>
         </div>
         <div className="chapters">{this.renderData()}</div>
       </div>

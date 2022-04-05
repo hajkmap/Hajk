@@ -6,7 +6,7 @@ import {
   Polygon,
   MultiPolygon,
   LineString,
-  MultiLineString
+  MultiLineString,
 } from "ol/geom.js";
 
 function componentToHex(c) {
@@ -28,7 +28,7 @@ function colorToArray(color, type) {
     res = reg
       .exec(color)[1]
       .split(",")
-      .map(a => parseFloat(a));
+      .map((a) => parseFloat(a));
     if (type === "rgb") {
       res.push(1);
     }
@@ -41,10 +41,14 @@ function toKmlColor(color) {
   var s, r, g, b, o;
   if (color) {
     let res;
-    if (/^rgba/.test(color)) {
-      res = colorToArray(color, "rgba");
-    } else if (/^rgb/.test(color)) {
-      res = colorToArray(color, "rgb");
+    if (Array.isArray(color)) {
+      res = color;
+    } else {
+      if (/^rgba/.test(color)) {
+        res = colorToArray(color, "rgba");
+      } else if (/^rgb/.test(color)) {
+        res = colorToArray(color, "rgb");
+      }
     }
     if (Array.isArray(res)) {
       s = rgbToHex(res[0], res[1], res[2]);
@@ -77,8 +81,6 @@ function toKmlString(str, type) {
     case "line":
       str = str.replace(/^LINESTRING\(/, "").replace(/\)$/, "");
       str = str.replace(/^LINESTRING Z\(/, "").replace(/\)$/, "");
-      str = str.replace(/^MULTILINESTRING\(/, "").replace(/\)$/, "");
-      str = str.replace(/^MULTILINESTRING Z\(/, "").replace(/\)$/, "");
       break;
     case "polygon":
       strs = str.split("),(");
@@ -120,7 +122,7 @@ function toKmlString(str, type) {
           coordinates = coordinates
             .replace(/\)/g, "")
             .split(",")
-            .map(coordString => {
+            .map((coordString) => {
               var coords = coordString.split(" ");
               return coords[0] + " " + coords[1];
             });
@@ -140,6 +142,17 @@ function toKmlString(str, type) {
           }
         });
         str += "</Polygon>";
+      });
+      break;
+    case "multiLine":
+      str = str.replace(/^MULTILINESTRING\(/, "").replace(/\)$/, "");
+      str = str.replace(/^MULTILINESTRING Z\(/, "").replace(/\)$/, "");
+      let lines = str.split("),");
+      lines = lines.map((line) => {
+        return line.replace(/[()]/g, "");
+      });
+      lines.forEach((line) => {
+        str += `<LineString><coordinates>${line}</coordinates></LineString>`;
       });
       break;
     default:
@@ -186,6 +199,14 @@ function multiPolygon(f) {
   return str;
 }
 
+function multiLine(f) {
+  var str = "";
+  str += "<MultiGeometry>";
+  str += toKmlString(f, "multiLine");
+  str += "</MultiGeometry>";
+  return str;
+}
+
 function safeInject(string) {
   string = string.toString();
   return string.replace(/<\/?[^>]+(>|$)|&/g, "");
@@ -193,7 +214,7 @@ function safeInject(string) {
 
 function filterProperties(template, properties) {
   var props = {};
-  Object.keys(properties).forEach(property => {
+  Object.keys(properties).forEach((property) => {
     var regExp = new RegExp(`{export:${property}}`);
     if (regExp.test(template)) {
       props[property] = properties[property];
@@ -203,7 +224,7 @@ function filterProperties(template, properties) {
 }
 
 export function transform(features, from, to) {
-  return features.map(feature => {
+  return features.map((feature) => {
     var c = feature.clone(),
       style = Array.isArray(feature.getStyle())
         ? feature.getStyle()[1]
@@ -237,8 +258,10 @@ export function createXML(features, name) {
 
     doc += '<Style id="' + i + '">';
     if (style.getImage() instanceof Icon) {
+      const scale =
+        style?.getImage()?.getScale() ?? style.getImage().getSize()[0] / 32;
       doc += "<IconStyle>";
-      doc += "<scale>" + style.getImage().getSize()[0] / 32 + "</scale>";
+      doc += "<scale>" + scale + "</scale>";
       doc += "<Icon>";
       doc += "<href>" + style.getImage().getSrc() + "</href>";
       doc += "</Icon>";
@@ -283,7 +306,7 @@ export function createXML(features, name) {
         properties = filterProperties(feature.infobox, properties);
       }
 
-      Object.keys(properties).forEach(property => {
+      Object.keys(properties).forEach((property) => {
         if (
           typeof value === "string" ||
           typeof value === "number" ||
@@ -317,7 +340,7 @@ export function createXML(features, name) {
       doc += line(parser.writeFeature(feature));
     }
     if (feature.getGeometry() instanceof MultiLineString) {
-      doc += line(parser.writeFeature(feature));
+      doc += multiLine(parser.writeFeature(feature));
     }
     if (feature.getGeometry() instanceof Polygon) {
       doc += polygon(parser.writeFeature(feature));

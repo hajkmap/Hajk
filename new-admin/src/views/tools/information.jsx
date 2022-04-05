@@ -22,6 +22,20 @@
 
 import React from "react";
 import { Component } from "react";
+import Button from "@material-ui/core/Button";
+import SaveIcon from "@material-ui/icons/SaveSharp";
+import { withStyles } from "@material-ui/core/styles";
+import { blue } from "@material-ui/core/colors";
+
+const ColorButtonBlue = withStyles(theme => ({
+  root: {
+    color: theme.palette.getContrastText(blue[500]),
+    backgroundColor: blue[500],
+    "&:hover": {
+      backgroundColor: blue[700]
+    }
+  }
+}))(Button);
 
 var defaultState = {
   validationErrors: [],
@@ -218,15 +232,17 @@ class ToolOptions extends Component {
       <div>
         <form>
           <p>
-            <button
-              className="btn btn-primary"
+            <ColorButtonBlue
+              variant="contained"
+              className="btn"
               onClick={e => {
                 e.preventDefault();
                 this.save();
               }}
+              startIcon={<SaveIcon />}
             >
               Spara
-            </button>
+            </ColorButtonBlue>
           </p>
           <div>
             <input
@@ -241,18 +257,22 @@ class ToolOptions extends Component {
             &nbsp;
             <label htmlFor="active">Aktiverad</label>
           </div>
+          <div className="separator">Fönsterinställningar</div>
           <div>
             <label htmlFor="index">Sorteringsordning</label>
             <input
               id="index"
               name="index"
-              type="text"
+              type="number"
+              min="0"
+              className="control-fixed-width"
               onChange={e => {
                 this.handleInputChange(e);
               }}
               value={this.state.index}
             />
           </div>
+          <div className="separator">Övriga inställningar</div>
           <div>
             <input
               id="visibleAtStart"
@@ -277,11 +297,13 @@ class ToolOptions extends Component {
               checked={this.state.showInfoOnce}
             />
             &nbsp;
-            <label htmlFor="showInfoOnce">Visa vid start endast en gång</label>
+            <label className="long-label" htmlFor="showInfoOnce">
+              Visa vid start endast en gång
+            </label>
           </div>
           <div>
             <label htmlFor="title">
-              Text vid mouse-over på informationsknappen
+              Text vid mouse-over på informations-knappen
             </label>
             <input
               value={this.state.title}

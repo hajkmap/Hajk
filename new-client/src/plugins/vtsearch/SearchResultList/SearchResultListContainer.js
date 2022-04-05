@@ -23,31 +23,29 @@ import { Typography } from "@material-ui/core";
  * @extends {React.PureComponent}
  */
 
-const styles = theme => {
+const styles = (theme) => {
   return {
     window: {
       zIndex: theme.zIndex.appBar,
       background: theme.palette.common.white,
       boxShadow: theme.shadows[24],
-      borderRadius: "5px",
       overflow: "hidden",
-      pointerEvents: "all"
+      pointerEvents: "all",
     },
     tabsRoot: {
-      minHeight: 0
+      minHeight: 0,
     },
     tabRoot: {
       minHeight: 0,
       height: theme.spacing(4),
       padding: theme.spacing(0),
-      borderRadius: "5px 5px 0px 0px",
-      margin: theme.spacing(0.3),
-      backgroundColor: theme.palette.primary.light
+      marginLeft: theme.spacing(0.5),
+      backgroundColor: theme.palette.primary.light,
     },
     toolbar: {
       minHeight: 0,
-      backgroundColor: theme.palette.primary.dark
-    }
+      backgroundColor: theme.palette.primary.dark,
+    },
   };
 };
 
@@ -78,7 +76,7 @@ class SearchResultListContainer extends React.Component {
     activeTabId: 0,
     searchResultIds: [],
     maximized: false,
-    minimized: false
+    minimized: false,
   };
 
   searchResults = [];
@@ -87,20 +85,20 @@ class SearchResultListContainer extends React.Component {
 
   static propTypes = {
     options: PropTypes.object.isRequired,
-    model: PropTypes.object.isRequired
+    model: PropTypes.object.isRequired,
   };
 
   static defaultProps = {
-    options: {}
+    options: {},
   };
 
   constructor(props) {
     super(props);
 
-    window.addEventListener("resize", e => {
+    window.addEventListener("resize", (e) => {
       this.setState({
         windowWidth: getWindowContainerWidth(),
-        windowHeight: getWindowContainerHeight()
+        windowHeight: getWindowContainerHeight(),
       });
     });
 
@@ -111,7 +109,7 @@ class SearchResultListContainer extends React.Component {
     localObserver.publish("search-result-list-normal");
   };
 
-  setActiveTabId = searchResultId => {
+  setActiveTabId = (searchResultId) => {
     const { localObserver } = this.props;
     if (searchResultId !== this.state.activeTabId) {
       localObserver.publish("clear-highlight");
@@ -123,12 +121,14 @@ class SearchResultListContainer extends React.Component {
     this.setState({ activeTabId: searchResultId });
   };
 
-  onSearchDone = result => {
+  onSearchDone = (result) => {
     const { localObserver } = this.props;
     var searchResultId = this.addResultToSearchResultList(result);
     localObserver.publish("add-search-result-to-map", {
       searchResultId: searchResultId,
-      olFeatures: this.convertToGeoJson(result.featureCollection)
+      olFeatures: this.convertToGeoJson(
+        result?.featureCollection || result?.value
+      ),
     });
     this.setActiveTabId(searchResultId);
 
@@ -137,17 +137,24 @@ class SearchResultListContainer extends React.Component {
     }
   };
 
-  convertToGeoJson = featureCollectionAsString => {
+  convertToGeoJson = (featureCollectionAsString) => {
     return new GeoJSON().readFeatures(featureCollectionAsString);
   };
 
   bindSubscriptions = () => {
     const { localObserver, app } = this.props;
 
-    app.globalObserver.subscribe("drawerToggled", () => {
+    app.globalObserver.subscribe("core.drawerToggled", () => {
       this.setState({
         windowWidth: getWindowContainerWidth(),
-        windowHeight: getWindowContainerHeight()
+        windowHeight: getWindowContainerHeight(),
+      });
+    });
+
+    app.globalObserver.subscribe("core.hideDrawer", () => {
+      this.setState({
+        windowWidth: getWindowContainerWidth(),
+        windowHeight: getWindowContainerHeight(),
       });
     });
 
@@ -155,39 +162,43 @@ class SearchResultListContainer extends React.Component {
       this.sendToBackSearchResultContainer();
     });
 
-    localObserver.subscribe("vtsearch-result-done", result => {
+    localObserver.subscribe("vtsearch-result-done", (result) => {
       this.bringToFrontSearchResultContainer();
+      this.setState({
+        windowWidth: getWindowContainerWidth(),
+        windowHeight: getWindowContainerHeight(),
+      });
       this.onSearchDone(result);
     });
 
-    localObserver.subscribe("attribute-table-row-clicked", payload => {
+    localObserver.subscribe("attribute-table-row-clicked", (payload) => {
       localObserver.publish("highlight-search-result-feature", payload);
     });
 
-    localObserver.subscribe("set-active-tab", searchResultId => {
+    localObserver.subscribe("set-active-tab", (searchResultId) => {
       this.handleTabChange(null, searchResultId);
     });
 
-    localObserver.subscribe("features-clicked-in-map", features => {
+    localObserver.subscribe("features-clicked-in-map", (features) => {
       this.bringToFrontSearchResultContainer();
       localObserver.publish("highlight-attribute-row", features[0].getId());
     });
 
     localObserver.subscribe("search-result-list-minimized", () => {
-      this.setState(state => {
+      this.setState((state) => {
         return {
           minimized: true,
           maximized: false,
-          resultListHeight: this.appbarHeight
+          resultListHeight: this.appbarHeight,
         };
       });
     });
     localObserver.subscribe("search-result-list-maximized", () => {
-      this.setState(state => {
+      this.setState((state) => {
         return {
           minimized: false,
           maximized: true,
-          resultListHeight: getWindowContainerHeight()
+          resultListHeight: getWindowContainerHeight(),
         };
       });
     });
@@ -196,7 +207,7 @@ class SearchResultListContainer extends React.Component {
       this.setState({
         minimized: false,
         maximized: false,
-        resultListHeight: initialResultListHeight
+        resultListHeight: initialResultListHeight,
       });
     });
 
@@ -210,7 +221,7 @@ class SearchResultListContainer extends React.Component {
         minimized: false,
         maximized: false,
         resultListHeight: 300,
-        searchResultIds: []
+        searchResultIds: [],
       });
     });
   };
@@ -223,7 +234,7 @@ class SearchResultListContainer extends React.Component {
     this.setActiveTabId(newValue);
   };
 
-  getNextTabActive = searchResultId => {
+  getNextTabActive = (searchResultId) => {
     const { searchResultIds } = this.state;
     var index = searchResultIds.indexOf(searchResultId);
     if (searchResultIds[index + 1]) {
@@ -233,7 +244,7 @@ class SearchResultListContainer extends React.Component {
     }
   };
 
-  onTabClose = searchResultId => {
+  onTabClose = (searchResultId) => {
     const { localObserver } = this.props;
     localObserver.publish("hide-all-layers");
     localObserver.publish("clear-highlight");
@@ -245,7 +256,7 @@ class SearchResultListContainer extends React.Component {
     localObserver.publish("resize-map", 0);
   };
 
-  addResultToSearchResultList = result => {
+  addResultToSearchResultList = (result) => {
     var newId = 0;
 
     if (this.state.searchResultIds.length > 0) {
@@ -255,7 +266,7 @@ class SearchResultListContainer extends React.Component {
 
     this.searchResults.push({
       ...result,
-      ...{ id: newId }
+      ...{ id: newId },
     });
 
     var searchResultIds = this.state.searchResultIds.concat(newId);
@@ -263,21 +274,21 @@ class SearchResultListContainer extends React.Component {
     return newId;
   };
 
-  removeSearchResult = searchResultId => {
+  removeSearchResult = (searchResultId) => {
     const { searchResultIds } = this.state;
     const { localObserver } = this.props;
     const newSearchResultIds = searchResultIds.filter(
-      result => result !== searchResultId
+      (result) => result !== searchResultId
     );
     return new Promise((resolve, reject) => {
       this.setState(
         () => {
           return {
-            searchResultIds: newSearchResultIds
+            searchResultIds: newSearchResultIds,
           };
         },
         () => {
-          this.searchResults = this.searchResults.filter(searchResult => {
+          this.searchResults = this.searchResults.filter((searchResult) => {
             return searchResult.id !== searchResultId;
           });
           localObserver.publish("clear-search-result", searchResultId);
@@ -288,14 +299,21 @@ class SearchResultListContainer extends React.Component {
   };
 
   getSearchResults = () => {
-    return this.state.searchResultIds.map(id => {
-      return this.searchResults.find(result => result.id === id);
+    return this.state.searchResultIds.map((id) => {
+      return this.searchResults.find((result) => result.id === id);
     });
   };
 
-  renderTabs = searchResult => {
-    const { classes } = this.props;
+  renderTabs = (searchResult) => {
+    const { classes, toolConfig } = this.props;
     var searchResultId = searchResult.id;
+
+    if (
+      !searchResult?.label &&
+      toolConfig.geoServer[searchResult.type]?.searchLabel
+    )
+      searchResult.label = toolConfig.geoServer[searchResult.type].searchLabel;
+
     return (
       <Tab
         classes={{ root: classes.tabRoot }}
@@ -306,7 +324,7 @@ class SearchResultListContainer extends React.Component {
             </Grid>
             <Grid item xs={2}>
               <ClearIcon
-                onClick={e => {
+                onClick={(e) => {
                   e.stopPropagation();
                   this.onTabClose(searchResultId);
                 }}
@@ -322,30 +340,30 @@ class SearchResultListContainer extends React.Component {
     );
   };
 
-  renderTabsController = searchResults => {
+  renderTabsController = (searchResults) => {
     const { classes } = this.props;
     console.log(this.state.activeTabId, "activeTabId");
     return (
       <Tabs
         classes={{
-          root: classes.tabsRoot
+          root: classes.tabsRoot,
         }}
         value={this.state.activeTabId}
         onChange={this.handleTabChange}
         aria-label="search-result-tabs"
       >
-        {searchResults.map(searchResult => {
+        {searchResults.map((searchResult) => {
           return this.renderTabs(searchResult);
         })}
       </Tabs>
     );
   };
 
-  renderTabsHeader = searchResults => {
+  renderTabsHeader = (searchResults) => {
     const { classes, localObserver } = this.props;
     return (
       <AppBar
-        ref={appbar => {
+        ref={(appbar) => {
           if (this.appbarHeight === null) {
             this.appbarHeight = appbar.offsetHeight;
           }
@@ -368,7 +386,7 @@ class SearchResultListContainer extends React.Component {
     );
   };
 
-  renderSearchResultAsTabContent = searchResult => {
+  renderSearchResultAsTabContent = (searchResult) => {
     const { toolConfig, localObserver } = this.props;
     return (
       <TabPanel
@@ -407,11 +425,10 @@ class SearchResultListContainer extends React.Component {
     const { classes, windowContainerId } = this.props;
     let searchResults = this.getSearchResults();
     this.handleMapResizeWhenRendering();
-
     return (
       <Rnd
         style={{
-          zIndex: this.state.zIndex
+          zIndex: this.state.zIndex,
         }}
         onClick={this.onClickSearchResultContainer}
         className={classes.window}
@@ -421,7 +438,7 @@ class SearchResultListContainer extends React.Component {
             ? this.state.windowHeight
             : this.state.minimized
             ? this.appbarHeight
-            : this.state.resultListHeight
+            : this.state.resultListHeight,
         }}
         position={{
           x: 0,
@@ -429,9 +446,9 @@ class SearchResultListContainer extends React.Component {
             ? 0
             : this.state.minimized
             ? this.state.windowHeight - this.appbarHeight
-            : this.state.windowHeight - this.state.resultListHeight
+            : this.state.windowHeight - this.state.resultListHeight,
         }}
-        ref={container => {
+        ref={(container) => {
           this.rnd = container;
         }}
         onResizeStop={(e, direction, ref, delta, position) => {
@@ -443,7 +460,7 @@ class SearchResultListContainer extends React.Component {
           this.setState({
             resultListHeight: parseInt(height),
             maximized: false,
-            minimized: false
+            minimized: false,
           });
         }}
         bounds={`#${windowContainerId}`}
@@ -456,13 +473,16 @@ class SearchResultListContainer extends React.Component {
           right: false,
           top: true,
           topLeft: false,
-          topRight: false
+          topRight: false,
         }}
       >
-        {this.renderTabsHeader(searchResults)}
-        {searchResults.map(searchResult => {
-          return this.renderSearchResultAsTabContent(searchResult);
-        })}
+        <section>
+          {this.renderTabsHeader(searchResults)}
+          {searchResults.map((searchResult) => {
+            return this.renderSearchResultAsTabContent(searchResult);
+          })}
+        </section>
+
       </Rnd>
     );
   };

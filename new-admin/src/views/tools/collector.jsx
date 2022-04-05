@@ -23,6 +23,10 @@
 import React from "react";
 import { Component } from "react";
 import FieldEditor from "../components/FieldEditor.jsx";
+import Button from "@material-ui/core/Button";
+import { withStyles } from "@material-ui/core/styles";
+import { blue } from "@material-ui/core/colors";
+import SaveIcon from "@material-ui/icons/Save";
 
 class LayerDescription extends Component {
   render() {
@@ -64,6 +68,16 @@ var defaultState = {
   layerDescription: undefined
 };
 
+const ColorButtonBlue = withStyles(theme => ({
+  root: {
+    color: theme.palette.getContrastText(blue[500]),
+    backgroundColor: blue[500],
+    "&:hover": {
+      backgroundColor: blue[700]
+    }
+  }
+}))(Button);
+
 class ToolOptions extends Component {
   /**
    *
@@ -90,6 +104,7 @@ class ToolOptions extends Component {
         featureNS: tool.options.featureNS,
         showThankYou: tool.options.showThankYou,
         thankYou: tool.options.thankYou,
+        collectAgain: tool.options.collectAgain,
         form: tool.options.form || [],
         visibleAtStart: tool.options.visibleAtStart || false,
         visibleForGroups: tool.options.visibleForGroups || [],
@@ -183,6 +198,7 @@ class ToolOptions extends Component {
         abstract: this.state.abstract,
         featureNS: this.state.featureNS,
         showThankYou: this.state.showThankYou,
+        collectAgain: this.state.collectAgain,
         visibleAtStart: this.state.visibleAtStart,
         thankYou: this.state.thankYou,
         visibleForGroups: this.state.visibleForGroups.map(
@@ -286,15 +302,17 @@ class ToolOptions extends Component {
       <div>
         <form>
           <p>
-            <button
-              className="btn btn-primary"
+            <ColorButtonBlue
+              variant="contained"
+              className="btn"
               onClick={e => {
                 e.preventDefault();
                 this.save();
               }}
+              startIcon={<SaveIcon />}
             >
               Spara
-            </button>
+            </ColorButtonBlue>
           </p>
           <div>
             <input
@@ -309,12 +327,15 @@ class ToolOptions extends Component {
             &nbsp;
             <label htmlFor="active">Aktiverad</label>
           </div>
+          <div className="separator">Fönsterinställningar</div>
           <div>
             <label htmlFor="index">Sorteringsordning</label>
             <input
               id="index"
               name="index"
-              type="text"
+              type="number"
+              min="0"
+              className="control-fixed-width"
               onChange={e => {
                 this.handleInputChange(e);
               }}
@@ -323,15 +344,20 @@ class ToolOptions extends Component {
           </div>
           <div>
             <label htmlFor="target">Verktygsplacering</label>
-            <input
+            <select
               id="target"
               name="target"
-              type="text"
+              className="control-fixed-width"
               onChange={e => {
                 this.handleInputChange(e);
               }}
               value={this.state.target}
-            />
+            >
+              <option value="toolbar">Drawer</option>
+              <option value="left">Widget left</option>
+              <option value="right">Widget right</option>
+              <option value="control">Control button</option>
+            </select>
           </div>
           <div>
             <label htmlFor="position">
@@ -342,15 +368,18 @@ class ToolOptions extends Component {
                 title="Placering av verktygets fönster. Anges som antingen 'left' eller 'right'."
               />
             </label>
-            <input
+            <select
               id="position"
               name="position"
-              type="text"
+              className="control-fixed-width"
               onChange={e => {
                 this.handleInputChange(e);
               }}
               value={this.state.position}
-            />
+            >
+              <option value="left">Left</option>
+              <option value="right">Right</option>
+            </select>
           </div>
           <div>
             <label htmlFor="width">
@@ -364,7 +393,9 @@ class ToolOptions extends Component {
             <input
               id="width"
               name="width"
-              type="text"
+              type="number"
+              min="0"
+              className="control-fixed-width"
               onChange={e => {
                 this.handleInputChange(e);
               }}
@@ -383,13 +414,16 @@ class ToolOptions extends Component {
             <input
               id="height"
               name="height"
-              type="text"
+              type="number"
+              min="0"
+              className="control-fixed-width"
               onChange={e => {
                 this.handleInputChange(e);
               }}
               value={this.state.height}
             />
           </div>
+          <div className="separator">Övriga inställningar</div>
           {this.renderVisibleForGroups()}
           <div>
             <label htmlFor="url">Url</label>
@@ -469,6 +503,26 @@ class ToolOptions extends Component {
             />
           </div>
           <div>
+            <input
+              id="collectAgain"
+              name="collectAgain"
+              type="checkbox"
+              onChange={e => {
+                this.handleInputChange(e);
+              }}
+              checked={this.state.collectAgain}
+            />
+            &nbsp;
+            <label htmlFor="collectAgain">
+              Visa "Tyck Till Igen"{" "}
+              <i
+                className="fa fa-question-circle"
+                data-toggle="tooltip"
+                title="'Stäng' och 'Tyck till igen' knappar visas på thank you sidan. 'Stäng' knapp stänger tyck till fönstret och 'tyck till igen' knapp börjar en ny tyck till."
+              />
+            </label>
+          </div>
+          <div>
             <label htmlFor="featureNS">Redigeringstjänst</label>
             <div className="block-row">
               {this.state.editServices.map((service, i) => {
@@ -497,7 +551,7 @@ class ToolOptions extends Component {
                       }}
                     />
                     <label className="full" htmlFor={service.id + "_" + i}>
-                      {service.caption}
+                      &nbsp;{service.caption}
                     </label>
                   </div>
                 );
@@ -515,6 +569,19 @@ class ToolOptions extends Component {
               });
             }}
           />
+          <p>
+            <ColorButtonBlue
+              variant="contained"
+              className="btn"
+              onClick={e => {
+                e.preventDefault();
+                this.save();
+              }}
+              startIcon={<SaveIcon />}
+            >
+              Spara
+            </ColorButtonBlue>
+          </p>
         </form>
       </div>
     );

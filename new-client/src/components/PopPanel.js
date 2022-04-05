@@ -1,26 +1,25 @@
 import React, { Component } from "react";
-import propTypes from "prop-types";
 import { withStyles } from "@material-ui/core/styles";
 import Popper from "@material-ui/core/Popper";
 import Paper from "@material-ui/core/Paper";
 import PanelHeader from "./PanelHeader";
 
-const styles = theme => {
+const styles = (theme) => {
   return {
     popper: {
-      zIndex: 4
+      zIndex: 4,
     },
     content: {
       maxWidth: "400px",
-      background: "white"
+      background: "white",
     },
     hidden: {
-      display: "none"
+      display: "none",
     },
     body: {
       padding: "15px",
-      overflow: "auto"
-    }
+      overflow: "auto",
+    },
   };
 };
 
@@ -33,25 +32,25 @@ const styles = theme => {
 class PopPanel extends Component {
   state = {
     panelPosition: false,
-    placement: "right-start"
+    placement: "right-start",
   };
 
   // TODO: Implement. Add propTypes.
 
-  close = e => {
+  close = (e) => {
     const { onClose } = this.props;
     if (onClose) onClose();
   };
   componentDidMount() {
     if (this.props.globalObserver) {
-      this.props.globalObserver.subscribe("toolbarExpanded", open => {
+      this.props.globalObserver.subscribe("core.toolbarExpanded", (open) => {
         this.setState(
           {
-            placement: "right"
+            placement: "right",
           },
           () => {
             this.setState({
-              placement: "right-start"
+              placement: "right-start",
             });
           }
         );

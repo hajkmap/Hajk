@@ -1,0 +1,321 @@
+{
+  "chapters": [
+    {
+      "header": "GEOGRAFISKA INRIKTNINGAR",
+      "headerIdentifier": "geografiska_inriktningar/GEOGRAFISKA INRIKTNINGAR",
+      "html": "<p><br></p>\n<p><br></p>\n<figure><img data-caption=\"\" data-source=\"\" src=\"/geografiska_inriktningar_start.png\"/></figure>\n<p><br></p>\n<p>De geografiska inriktningarna beskriver hur mark, vatten och bebyggelse ska användas, utvecklas och bevaras. De innehåller dels rekommendationer för de områden som redovisas på markanvändningskartan, dels fördjupade beskrivningar av lokala förutsättningar för stadens utvecklingsmöjligheter.</p>",
+      "mapSettings": {
+        "target": "map",
+        "center": [140700, 6399400],
+        "title": "Översiktsplan Göteborg",
+        "projection": "EPSG:3007",
+        "zoom": 1,
+        "maxZoom": 15,
+        "minZoom": 5,
+        "resolutions": [
+          70.00022,
+          28.00009,
+          14.00004,
+          7.000022,
+          2.800009,
+          1.400004,
+          0.700002,
+          0.280001,
+          0.14,
+          0.07
+        ],
+        "origin": [0, 0],
+        "extent": [110000, 6365000, 185000, 6425000],
+        "constrainOnlyCenter": false,
+        "logo": "/assets/logo.png",
+        "geoserverLegendOptions": "",
+        "mapselector": false,
+        "mapcleaner": true,
+        "drawerVisible": false,
+        "drawerPermanent": false,
+        "colors": { "primaryColor": "#0076bc", "secondaryColor": "#ffffff" },
+        "defaultCookieNoticeMessage": "Vi använder cookies för att följa upp användandet och ge en bra upplevelse av kartan. Du kan blockera cookies i webbläsaren men då visas detta meddelande igen.",
+        "defaultCookieNoticeUrl": "https://pts.se/sv/bransch/regler/lagar/lag-om-elektronisk-kommunikation/kakor-cookies/"
+      },
+      "chapters": [
+        {
+          "header": "MARK- OCH VATTENANVÄNDNING",
+          "headerIdentifier": "{57427123-222222222-4f69-b72f-d5a737e41cc2}",
+          "html": "<p>Rekommendationer för mark- och vattenområden i följande avsnitt ger vägledning för de olika områden som redovisas på markanvändningskartan. Rubrikerna i texten följer markanvändningskartans teckenförklaring och är uppdelade enligt kategorierna användning, utredningsområden samt hänsyn och värden.</p><br><p>Utöver de geografiska rekommendationerna, finns generella rekommendationer som gäller allmänt inom kommunen vid prövning av bygglov och förhandsbesked utanför detaljplan då detaljplaner upprättas. De grundas på kommunala ställningstaganden i olika beslut och på tillämpningar av lagstiftning och rekommendationer från andra myndigheter. Dessa rekommendationer finns redovisade i kapitlet Tematiska inriktningar.</p><br><figure><img data-caption=\"Markanvändningskarta (se bilaga)\" data-source=\"\" src=\"/geografiska_inriktningar_1.png\"/></figure>",
+          "mapSettings": {
+            "center": [135672.89145750582, 6403799.452920079],
+            "zoom": 5,
+            "extent": [
+              134572.4883135058,
+              6403102.950930079,
+              136773.29460150583,
+              6404495.954910079
+            ]
+          },
+          "chapters": [],
+          "expanded": true,
+          "layers": ["4"]
+        },
+        {
+          "header": "DELOMRÅDEN",
+          "html": "<figure><img data-caption=\"\" data-source=\"\" src=\"/geografiska_inriktningar_2.png\"/></figure>",
+          "mapSettings": {
+            "target": "map",
+            "center": [140700, 6399400],
+            "title": "Översiktsplan Göteborg",
+            "projection": "EPSG:3007",
+            "zoom": 1,
+            "maxZoom": 15,
+            "minZoom": 5,
+            "resolutions": [
+              70.00022,
+              28.00009,
+              14.00004,
+              7.000022,
+              2.800009,
+              1.400004,
+              0.700002,
+              0.280001,
+              0.14,
+              0.07
+            ],
+            "origin": [0, 0],
+            "extent": [110000, 6365000, 185000, 6425000],
+            "constrainOnlyCenter": false,
+            "logo": "/assets/logo.png",
+            "geoserverLegendOptions": "",
+            "mapselector": false,
+            "mapcleaner": true,
+            "drawerVisible": false,
+            "drawerPermanent": false,
+            "colors": {
+              "primaryColor": "#0076bc",
+              "secondaryColor": "#ffffff"
+            },
+            "defaultCookieNoticeMessage": "Vi använder cookies för att följa upp användandet och ge en bra upplevelse av kartan. Du kan blockera cookies i webbläsaren men då visas detta meddelande igen.",
+            "defaultCookieNoticeUrl": "https://pts.se/sv/bransch/regler/lagar/lag-om-elektronisk-kommunikation/kakor-cookies/"
+          },
+          "chapters": [],
+          "expanded": true
+        },
+        {
+          "header": "ÖSTRA GÖTEBORG",
+          "headerIdentifier": "{57427123-ef67-4f69-333333-d5a737e41cc2}",
+          "html": "<figure><img data-caption=\"\" data-source=\"\" src=\"/geografiska_inriktningar_3.png\"/></figure>",
+          "mapSettings": {
+            "target": "map",
+            "center": [140700, 6399400],
+            "title": "Översiktsplan Göteborg",
+            "projection": "EPSG:3007",
+            "zoom": 1,
+            "maxZoom": 15,
+            "minZoom": 5,
+            "resolutions": [
+              70.00022,
+              28.00009,
+              14.00004,
+              7.000022,
+              2.800009,
+              1.400004,
+              0.700002,
+              0.280001,
+              0.14,
+              0.07
+            ],
+            "origin": [0, 0],
+            "extent": [110000, 6365000, 185000, 6425000],
+            "constrainOnlyCenter": false,
+            "logo": "/assets/logo.png",
+            "geoserverLegendOptions": "",
+            "mapselector": false,
+            "mapcleaner": true,
+            "drawerVisible": false,
+            "drawerPermanent": false,
+            "colors": {
+              "primaryColor": "#0076bc",
+              "secondaryColor": "#ffffff"
+            },
+            "defaultCookieNoticeMessage": "Vi använder cookies för att följa upp användandet och ge en bra upplevelse av kartan. Du kan blockera cookies i webbläsaren men då visas detta meddelande igen.",
+            "defaultCookieNoticeUrl": "https://pts.se/sv/bransch/regler/lagar/lag-om-elektronisk-kommunikation/kakor-cookies/"
+          },
+          "chapters": [],
+          "expanded": true
+        },
+        {
+          "header": "ÖRGRYTE–HÄRLANDA",
+          "headerIdentifier": "{57427123-ef67-4f69-777777-d5a737e41cc2}",
+          "html": "<figure><img data-caption=\"\" data-source=\"\" src=\"/geografiska_inriktningar_4.png\"/></figure>",
+          "mapSettings": {
+            "target": "map",
+            "center": [140700, 6399400],
+            "title": "Översiktsplan Göteborg",
+            "projection": "EPSG:3007",
+            "zoom": 1,
+            "maxZoom": 15,
+            "minZoom": 5,
+            "resolutions": [
+              70.00022,
+              28.00009,
+              14.00004,
+              7.000022,
+              2.800009,
+              1.400004,
+              0.700002,
+              0.280001,
+              0.14,
+              0.07
+            ],
+            "origin": [0, 0],
+            "extent": [110000, 6365000, 185000, 6425000],
+            "constrainOnlyCenter": false,
+            "logo": "/assets/logo.png",
+            "geoserverLegendOptions": "",
+            "mapselector": false,
+            "mapcleaner": true,
+            "drawerVisible": false,
+            "drawerPermanent": false,
+            "colors": {
+              "primaryColor": "#0076bc",
+              "secondaryColor": "#ffffff"
+            },
+            "defaultCookieNoticeMessage": "Vi använder cookies för att följa upp användandet och ge en bra upplevelse av kartan. Du kan blockera cookies i webbläsaren men då visas detta meddelande igen.",
+            "defaultCookieNoticeUrl": "https://pts.se/sv/bransch/regler/lagar/lag-om-elektronisk-kommunikation/kakor-cookies/"
+          },
+          "chapters": [],
+          "expanded": true
+        },
+        {
+          "header": "CENTRUM",
+          "headerIdentifier": "{57427123-ef67-4f69-b72f-d5a7372323232}",
+          "html": "<figure><img data-caption=\"\" data-source=\"\" src=\"/geografiska_inriktningar_5.png\"/></figure>",
+          "mapSettings": {
+            "target": "map",
+            "center": [140700, 6399400],
+            "title": "Översiktsplan Göteborg",
+            "projection": "EPSG:3007",
+            "zoom": 1,
+            "maxZoom": 15,
+            "minZoom": 5,
+            "resolutions": [
+              70.00022,
+              28.00009,
+              14.00004,
+              7.000022,
+              2.800009,
+              1.400004,
+              0.700002,
+              0.280001,
+              0.14,
+              0.07
+            ],
+            "origin": [0, 0],
+            "extent": [110000, 6365000, 185000, 6425000],
+            "constrainOnlyCenter": false,
+            "logo": "/assets/logo.png",
+            "geoserverLegendOptions": "",
+            "mapselector": false,
+            "mapcleaner": true,
+            "drawerVisible": false,
+            "drawerPermanent": false,
+            "colors": {
+              "primaryColor": "#0076bc",
+              "secondaryColor": "#ffffff"
+            },
+            "defaultCookieNoticeMessage": "Vi använder cookies för att följa upp användandet och ge en bra upplevelse av kartan. Du kan blockera cookies i webbläsaren men då visas detta meddelande igen.",
+            "defaultCookieNoticeUrl": "https://pts.se/sv/bransch/regler/lagar/lag-om-elektronisk-kommunikation/kakor-cookies/"
+          },
+          "chapters": [],
+          "expanded": true
+        },
+        {
+          "header": "MAJORNA-LINNÉ",
+          "headerIdentifier": "{57427123-ef67-4f69-b72f-d5a7321111cc2}",
+          "html": "<figure><img data-caption=\"\" data-source=\"\" src=\"/geografiska_inriktningar_6.png\"/></figure>",
+          "mapSettings": {
+            "target": "map",
+            "center": [140700, 6399400],
+            "title": "Översiktsplan Göteborg",
+            "projection": "EPSG:3007",
+            "zoom": 1,
+            "maxZoom": 15,
+            "minZoom": 5,
+            "resolutions": [
+              70.00022,
+              28.00009,
+              14.00004,
+              7.000022,
+              2.800009,
+              1.400004,
+              0.700002,
+              0.280001,
+              0.14,
+              0.07
+            ],
+            "origin": [0, 0],
+            "extent": [110000, 6365000, 185000, 6425000],
+            "constrainOnlyCenter": false,
+            "logo": "/assets/logo.png",
+            "geoserverLegendOptions": "",
+            "mapselector": false,
+            "mapcleaner": true,
+            "drawerVisible": false,
+            "drawerPermanent": false,
+            "colors": {
+              "primaryColor": "#0076bc",
+              "secondaryColor": "#ffffff"
+            },
+            "defaultCookieNoticeMessage": "Vi använder cookies för att följa upp användandet och ge en bra upplevelse av kartan. Du kan blockera cookies i webbläsaren men då visas detta meddelande igen.",
+            "defaultCookieNoticeUrl": "https://pts.se/sv/bransch/regler/lagar/lag-om-elektronisk-kommunikation/kakor-cookies/"
+          },
+          "chapters": [],
+          "expanded": true
+        },
+        {
+          "header": "LUNDBY",
+          "headerIdentifier": "{5744343433-ef67-4f69-b72f-d5a737e41cc2}",
+          "html": "<figure><img data-caption=\"\" data-source=\"\" src=\"/geografiska_inriktningar_7.png\"/></figure>",
+          "mapSettings": {
+            "target": "map",
+            "center": [140700, 6399400],
+            "title": "Översiktsplan Göteborg",
+            "projection": "EPSG:3007",
+            "zoom": 1,
+            "maxZoom": 15,
+            "minZoom": 5,
+            "resolutions": [
+              70.00022,
+              28.00009,
+              14.00004,
+              7.000022,
+              2.800009,
+              1.400004,
+              0.700002,
+              0.280001,
+              0.14,
+              0.07
+            ],
+            "origin": [0, 0],
+            "extent": [110000, 6365000, 185000, 6425000],
+            "constrainOnlyCenter": false,
+            "logo": "/assets/logo.png",
+            "geoserverLegendOptions": "",
+            "mapselector": false,
+            "mapcleaner": true,
+            "drawerVisible": false,
+            "drawerPermanent": false,
+            "colors": {
+              "primaryColor": "#0076bc",
+              "secondaryColor": "#ffffff"
+            },
+            "defaultCookieNoticeMessage": "Vi använder cookies för att följa upp användandet och ge en bra upplevelse av kartan. Du kan blockera cookies i webbläsaren men då visas detta meddelande igen.",
+            "defaultCookieNoticeUrl": "https://pts.se/sv/bransch/regler/lagar/lag-om-elektronisk-kommunikation/kakor-cookies/"
+          },
+          "chapters": [],
+          "expanded": true
+        }
+      ],
+      "expanded": true
+    }
+  ],
+  "map": "oversiktsplan"
+}

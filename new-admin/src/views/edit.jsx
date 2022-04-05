@@ -23,6 +23,32 @@
 import React from "react";
 import { Component } from "react";
 import Alert from "../views/alert.jsx";
+import Button from "@material-ui/core/Button";
+import SaveIcon from "@material-ui/icons/SaveSharp";
+import AddIcon from "@material-ui/icons/Add";
+import CancelIcon from "@material-ui/icons/Cancel";
+import { withStyles } from "@material-ui/core/styles";
+import { green, blue } from "@material-ui/core/colors";
+
+const ColorButtonGreen = withStyles(theme => ({
+  root: {
+    color: theme.palette.getContrastText(green[700]),
+    backgroundColor: green[500],
+    "&:hover": {
+      backgroundColor: green[700]
+    }
+  }
+}))(Button);
+
+const ColorButtonBlue = withStyles(theme => ({
+  root: {
+    color: theme.palette.getContrastText(blue[500]),
+    backgroundColor: blue[500],
+    "&:hover": {
+      backgroundColor: blue[700]
+    }
+  }
+}))(Button);
 
 const defaultState = {
   load: false,
@@ -293,7 +319,7 @@ class Search extends Component {
    */
   getValue(fieldName) {
     function create_date() {
-      return new Date().getTime();
+      return new Date().getTime().toString();
     }
 
     function format_layers(layers) {
@@ -737,6 +763,7 @@ class Search extends Component {
       <select
         ref="input_projection"
         value={this.state.projection}
+        className="control-fixed-width"
         onChange={e => {
           this.setState({
             projection: e.target.value
@@ -797,9 +824,14 @@ class Search extends Component {
     ) : null;
     var abort =
       this.state.mode === "edit" ? (
-        <span className="btn btn-danger" onClick={e => this.abort(e)}>
+        <ColorButtonBlue
+          variant="contained"
+          className="btn btn-danger"
+          onClick={e => this.abort(e)}
+          startIcon={<CancelIcon />}
+        >
           Avbryt
-        </span>
+        </ColorButtonBlue>
       ) : null;
 
     return (
@@ -823,24 +855,7 @@ class Search extends Component {
           >
             <fieldset>
               <legend>Lägg till WFST-tjänst</legend>
-              <div>
-                <label>Visningsnamn*</label>
-                <input
-                  type="text"
-                  ref="input_caption"
-                  value={this.state.caption}
-                  onChange={e => {
-                    var v = e.target.value;
-                    this.setState(
-                      {
-                        caption: v
-                      },
-                      () => this.validateField("caption")
-                    );
-                  }}
-                  className={this.getValidationClass("caption")}
-                />
-              </div>
+              <div className="separator">Anslutning</div>
               <div>
                 <label>Url*</label>
                 <input
@@ -885,10 +900,12 @@ class Search extends Component {
                   className={this.getValidationClass("uri")}
                 />
               </div>
+              <div className="separator">Tillgängliga lager</div>
               <div>
-                <label>Projektion</label>
-                {this.renderProjections()}
+                <label>Lagerlista</label>
+                {this.renderLayerList()}
               </div>
+              <div className="separator">Hantera valt lager</div>
               <div>
                 <label>Valt lager*</label>
                 <div
@@ -901,12 +918,26 @@ class Search extends Component {
                 </div>
               </div>
               <div>
-                <label>Lagerlista</label>
-                {this.renderLayerList()}
+                <label>Visningsnamn*</label>
+                <input
+                  type="text"
+                  ref="input_caption"
+                  value={this.state.caption}
+                  onChange={e => {
+                    var v = e.target.value;
+                    this.setState(
+                      {
+                        caption: v
+                      },
+                      () => this.validateField("caption")
+                    );
+                  }}
+                  className={this.getValidationClass("caption")}
+                />
               </div>
               <div>
-                <label>Redigerbara fält</label>
-                {this.renderLayerProperties()}
+                <label>Projektion</label>
+                {this.renderProjections()}
               </div>
               <div>
                 <label>Geometrityper</label>
@@ -954,10 +985,30 @@ class Search extends Component {
                   <label htmlFor="polygon">&nbsp;Ytor</label>
                 </div>
               </div>
+              <div>
+                <label>Redigerbara fält</label>
+                {this.renderLayerProperties()}
+              </div>
             </fieldset>
-            <button className="btn btn-primary">
-              {this.state.mode === "edit" ? "Spara" : "Lägg till"}
-            </button>
+            {this.state.mode === "edit" ? (
+              <ColorButtonBlue
+                variant="contained"
+                className="btn"
+                type="submit"
+                startIcon={<SaveIcon />}
+              >
+                Spara
+              </ColorButtonBlue>
+            ) : (
+              <ColorButtonGreen
+                variant="contained"
+                className="btn"
+                type="submit"
+                startIcon={<AddIcon />}
+              >
+                Lägg till
+              </ColorButtonGreen>
+            )}
             &nbsp;
             {abort}
           </form>

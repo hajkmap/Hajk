@@ -1,24 +1,29 @@
 {
   "name": "hajk-admin",
-  "version": "3.2.0",
+  "version": "3.3.0",
   "private": true,
   "homepage": ".",
   "dependencies": {
+    "@material-ui/core": "^4.10.2",
+    "@material-ui/icons": "^4.9.1",
+    "@material-ui/lab": "^4.0.0-alpha.57",
+    "antd": "^4.1.4",
     "backbone": "^1.4.0",
-    "draft-js": "^0.10.5",
+    "draft-js": "^0.11.7",
     "draft-js-export-html": "^1.4.1",
     "draft-js-import-html": "^1.4.1",
-    "jquery": "^3.4.1",
+    "draft-js-plugins-editor": "^3.0.0",
+    "jquery": "^3.5.1",
     "jquery-sortable": "^0.9.13",
     "ol": "^5.3.3",
-    "proj4": "^2.6.0",
-    "react": "^16.12.0",
-    "react-color": "^2.18.0",
-    "react-dom": "^16.12.0",
-    "react-modal": "^3.11.1",
-    "react-scripts": "^3.3.0",
+    "proj4": "^2.6.2",
+    "react": "^16.13.1",
+    "react-color": "^2.18.1",
+    "react-dom": "^16.13.1",
+    "react-modal": "^3.11.2",
+    "react-scripts": "^3.4.3",
     "react-smooth-dnd": "^0.11.1",
-    "typescript": "^3.7.4",
+    "typescript": "^3.9.5",
     "x2js": "^3.4.0"
   },
   "scripts": {
@@ -28,17 +33,19 @@
     "eject": "react-scripts eject"
   },
   "devDependencies": {
-    "draft-convert": "^2.1.8",
+    "draft-convert": "^2.1.10",
     "draft-extend": "^1.6.5",
     "husky": "^3.1.0",
     "prettier": "^1.19.1",
     "pretty-quick": "^1.11.1"
   },
   "browserslist": [
-    ">1% in SE",
+    ">0.5% in SE",
+    "last 2 versions",
+    "Firefox ESR",
     "not dead",
-    "not ie <= 10",
-    "not op_mini all"
+    "ie 11",
+    "last 100 edge versions"
   ],
   "husky": {
     "hooks": {

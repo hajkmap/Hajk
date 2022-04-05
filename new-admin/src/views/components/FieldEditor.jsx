@@ -3,7 +3,31 @@ import { Component } from "react";
 import ReactModal from "react-modal";
 import Page from "./Page.jsx";
 import { Container, Draggable } from "react-smooth-dnd";
+import Button from "@material-ui/core/Button";
+import { withStyles } from "@material-ui/core/styles";
+import { green, red } from "@material-ui/core/colors";
+import AddIcon from "@material-ui/icons/Add";
+import CancelIcon from "@material-ui/icons/Cancel";
 
+const ColorButtonGreen = withStyles(theme => ({
+  root: {
+    color: theme.palette.getContrastText(green[700]),
+    backgroundColor: green[500],
+    "&:hover": {
+      backgroundColor: green[700]
+    }
+  }
+}))(Button);
+
+const ColorButtonRed = withStyles(theme => ({
+  root: {
+    color: theme.palette.getContrastText(red[700]),
+    backgroundColor: red[500],
+    "&:hover": {
+      backgroundColor: red[700]
+    }
+  }
+}))(Button);
 class FieldAdder extends Component {
   state = {
     displayOptions: false,
@@ -148,9 +172,14 @@ class FieldEditor extends Component {
 
   renderModal() {
     var abortButton = this.state.showAbortButton ? (
-      <button className="btn btn-danger" onClick={e => this.hideModal()}>
+      <ColorButtonRed
+        variant="contained"
+        className="btn"
+        onClick={e => this.hideModal()}
+        startIcon={<CancelIcon />}
+      >
         Avbryt
-      </button>
+      </ColorButtonRed>
     ) : (
       ""
     );
@@ -249,9 +278,16 @@ class FieldEditor extends Component {
       <div>
         {this.renderModal()}
         <h3>Formulär</h3>
-        <span className="btn btn-primary" onClick={this.addPage}>
+        <ColorButtonGreen
+          variant="contained"
+          className="btn"
+          color="primary"
+          onClick={this.addPage}
+          startIcon={<AddIcon />}
+        >
           Lägg till ny sida
-        </span>
+        </ColorButtonGreen>
+
         <div className="pages">{this.renderPages()}</div>
       </div>
     );

@@ -1,0 +1,886 @@
+﻿{
+  "version": "1.0.5",
+  "projections": [
+    {
+      "code": "EPSG:3007",
+      "definition": "+proj=tmerc +lat_0=0 +lon_0=12 +k=1 +x_0=150000 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs",
+      "extent": [60436.5084, 6192389.565, 217643.4713, 6682784.4276],
+      "units": "m"
+    },
+    {
+      "code": "http://www.opengis.net/gml/srs/epsg.xml#3007",
+      "definition": "+proj=tmerc +lat_0=0 +lon_0=12 +k=1 +x_0=150000 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs",
+      "extent": [60436.5084, 6192389.565, 217643.4713, 6682784.4276],
+      "units": "m"
+    }
+  ],
+  "tools": [
+    {
+      "type": "layerswitcher",
+      "options": {
+        "baselayers": [
+          {
+            "id": "1",
+            "visibleAtStart": true,
+            "drawOrder": 0,
+            "visibleForGroups": null,
+            "infobox": null
+          },
+          {
+            "id": "2",
+            "visibleAtStart": false,
+            "drawOrder": 0,
+            "visibleForGroups": null,
+            "infobox": null
+          }
+        ],
+        "groups": [
+          {
+            "id": "cbead9d5-6982-ae7c-6163-120e10a26463",
+            "parent": "-1",
+            "name": "Användning",
+            "toggled": true,
+            "expanded": false,
+            "layers": [],
+            "groups": [
+              {
+                "id": "8a4e91a0-249d-6d80-c582-1177bbfac7cf",
+                "parent": "cbead9d5-6982-ae7c-6163-120e10a26463",
+                "name": "Blandad stadsbebyggelse",
+                "toggled": true,
+                "expanded": false,
+                "layers": [
+                  {
+                    "id": "41",
+                    "visibleAtStart": false,
+                    "drawOrder": 61,
+                    "visibleForGroups": null,
+                    "infobox": null
+                  },
+                  {
+                    "id": "27",
+                    "visibleAtStart": false,
+                    "drawOrder": 30,
+                    "visibleForGroups": null,
+                    "infobox": null
+                  },
+                  {
+                    "id": "32",
+                    "visibleAtStart": false,
+                    "drawOrder": 29,
+                    "visibleForGroups": null,
+                    "infobox": null
+                  },
+                  {
+                    "id": "13",
+                    "visibleAtStart": false,
+                    "drawOrder": 28,
+                    "visibleForGroups": null,
+                    "infobox": null
+                  },
+                  {
+                    "id": "19",
+                    "visibleAtStart": false,
+                    "drawOrder": 26,
+                    "visibleForGroups": null,
+                    "infobox": null
+                  },
+                  {
+                    "id": "26",
+                    "visibleAtStart": false,
+                    "drawOrder": 25,
+                    "visibleForGroups": null,
+                    "infobox": null
+                  },
+                  {
+                    "id": "47",
+                    "visibleAtStart": false,
+                    "drawOrder": 24,
+                    "visibleForGroups": null,
+                    "infobox": null
+                  },
+                  {
+                    "id": "31",
+                    "visibleAtStart": false,
+                    "drawOrder": 23,
+                    "visibleForGroups": null,
+                    "infobox": null
+                  },
+                  {
+                    "id": "12",
+                    "visibleAtStart": false,
+                    "drawOrder": 22,
+                    "visibleForGroups": null,
+                    "infobox": null
+                  }
+                ],
+                "groups": []
+              },
+              {
+                "id": "6310b695-457f-9c5a-a86a-dd189910aad9",
+                "parent": "cbead9d5-6982-ae7c-6163-120e10a26463",
+                "name": "Grönstruktur",
+                "toggled": true,
+                "expanded": false,
+                "layers": [
+                  {
+                    "id": "8",
+                    "visibleAtStart": false,
+                    "drawOrder": 57,
+                    "visibleForGroups": null,
+                    "infobox": null
+                  },
+                  {
+                    "id": "29",
+                    "visibleAtStart": false,
+                    "drawOrder": 19,
+                    "visibleForGroups": null,
+                    "infobox": null
+                  },
+                  {
+                    "id": "24",
+                    "visibleAtStart": false,
+                    "drawOrder": 18,
+                    "visibleForGroups": null,
+                    "infobox": null
+                  },
+                  {
+                    "id": "33",
+                    "visibleAtStart": false,
+                    "drawOrder": 17,
+                    "visibleForGroups": null,
+                    "infobox": null
+                  },
+                  {
+                    "id": "7",
+                    "visibleAtStart": false,
+                    "drawOrder": 16,
+                    "visibleForGroups": null,
+                    "infobox": null
+                  },
+                  {
+                    "id": "28",
+                    "visibleAtStart": false,
+                    "drawOrder": 15,
+                    "visibleForGroups": null,
+                    "infobox": null
+                  }
+                ],
+                "groups": []
+              },
+              {
+                "id": "5550a988-db44-edb7-f154-0113e5601023",
+                "parent": "cbead9d5-6982-ae7c-6163-120e10a26463",
+                "name": "Transportsystem",
+                "toggled": true,
+                "expanded": false,
+                "layers": [
+                  {
+                    "id": "39",
+                    "visibleAtStart": false,
+                    "drawOrder": 60,
+                    "visibleForGroups": null,
+                    "infobox": null
+                  },
+                  {
+                    "id": "14",
+                    "visibleAtStart": false,
+                    "drawOrder": 58,
+                    "visibleForGroups": null,
+                    "infobox": null
+                  },
+                  {
+                    "id": "20",
+                    "visibleAtStart": false,
+                    "drawOrder": 56,
+                    "visibleForGroups": null,
+                    "infobox": null
+                  },
+                  {
+                    "id": "16",
+                    "visibleAtStart": false,
+                    "drawOrder": 55,
+                    "visibleForGroups": null,
+                    "infobox": null
+                  },
+                  {
+                    "id": "17",
+                    "visibleAtStart": false,
+                    "drawOrder": 54,
+                    "visibleForGroups": null,
+                    "infobox": null
+                  },
+                  {
+                    "id": "6",
+                    "visibleAtStart": false,
+                    "drawOrder": 53,
+                    "visibleForGroups": null,
+                    "infobox": null
+                  },
+                  {
+                    "id": "48",
+                    "visibleAtStart": false,
+                    "drawOrder": 52,
+                    "visibleForGroups": null,
+                    "infobox": null
+                  },
+                  {
+                    "id": "37",
+                    "visibleAtStart": false,
+                    "drawOrder": 48,
+                    "visibleForGroups": null,
+                    "infobox": null
+                  },
+                  {
+                    "id": "21",
+                    "visibleAtStart": false,
+                    "drawOrder": 38,
+                    "visibleForGroups": null,
+                    "infobox": null
+                  },
+                  {
+                    "id": "35",
+                    "visibleAtStart": false,
+                    "drawOrder": 37,
+                    "visibleForGroups": null,
+                    "infobox": null
+                  },
+                  {
+                    "id": "36",
+                    "visibleAtStart": false,
+                    "drawOrder": 36,
+                    "visibleForGroups": null,
+                    "infobox": null
+                  },
+                  {
+                    "id": "15",
+                    "visibleAtStart": false,
+                    "drawOrder": 35,
+                    "visibleForGroups": null,
+                    "infobox": null
+                  },
+                  {
+                    "id": "5",
+                    "visibleAtStart": false,
+                    "drawOrder": 34,
+                    "visibleForGroups": null,
+                    "infobox": null
+                  },
+                  {
+                    "id": "38",
+                    "visibleAtStart": false,
+                    "drawOrder": 33,
+                    "visibleForGroups": null,
+                    "infobox": null
+                  },
+                  {
+                    "id": "49",
+                    "visibleAtStart": false,
+                    "drawOrder": 32,
+                    "visibleForGroups": null,
+                    "infobox": null
+                  }
+                ],
+                "groups": []
+              },
+              {
+                "id": "d672b312-fe90-b919-be83-ec253828fee0",
+                "parent": "cbead9d5-6982-ae7c-6163-120e10a26463",
+                "name": "Utredningsområden",
+                "toggled": true,
+                "expanded": false,
+                "layers": [
+                  {
+                    "id": "43",
+                    "visibleAtStart": false,
+                    "drawOrder": 62,
+                    "visibleForGroups": null,
+                    "infobox": null
+                  },
+                  {
+                    "id": "44",
+                    "visibleAtStart": false,
+                    "drawOrder": 59,
+                    "visibleForGroups": null,
+                    "infobox": null
+                  },
+                  {
+                    "id": "45",
+                    "visibleAtStart": false,
+                    "drawOrder": 43,
+                    "visibleForGroups": null,
+                    "infobox": null
+                  },
+                  {
+                    "id": "46",
+                    "visibleAtStart": false,
+                    "drawOrder": 42,
+                    "visibleForGroups": null,
+                    "infobox": null
+                  },
+                  {
+                    "id": "42",
+                    "visibleAtStart": false,
+                    "drawOrder": 41,
+                    "visibleForGroups": null,
+                    "infobox": null
+                  }
+                ],
+                "groups": []
+              },
+              {
+                "id": "b655f35e-4e41-fccc-f3b6-2d39461201ab",
+                "parent": "cbead9d5-6982-ae7c-6163-120e10a26463",
+                "name": "Verksamheter",
+                "toggled": true,
+                "expanded": false,
+                "layers": [
+                  {
+                    "id": "52",
+                    "visibleAtStart": false,
+                    "drawOrder": 31,
+                    "visibleForGroups": null,
+                    "infobox": null
+                  },
+                  {
+                    "id": "11",
+                    "visibleAtStart": false,
+                    "drawOrder": 21,
+                    "visibleForGroups": null,
+                    "infobox": null
+                  },
+                  {
+                    "id": "10",
+                    "visibleAtStart": false,
+                    "drawOrder": 20,
+                    "visibleForGroups": null,
+                    "infobox": null
+                  }
+                ],
+                "groups": []
+              }
+            ]
+          },
+          {
+            "id": "cd576119-a09d-eeb1-d90c-5035ae12f870",
+            "parent": "-1",
+            "name": "Värden och hänsyn",
+            "toggled": true,
+            "expanded": false,
+            "layers": [
+              {
+                "id": "34",
+                "visibleAtStart": false,
+                "drawOrder": 51,
+                "visibleForGroups": null,
+                "infobox": null
+              },
+              {
+                "id": "30",
+                "visibleAtStart": false,
+                "drawOrder": 50,
+                "visibleForGroups": null,
+                "infobox": null
+              },
+              {
+                "id": "9",
+                "visibleAtStart": false,
+                "drawOrder": 49,
+                "visibleForGroups": null,
+                "infobox": null
+              },
+              {
+                "id": "25",
+                "visibleAtStart": false,
+                "drawOrder": 47,
+                "visibleForGroups": null,
+                "infobox": null
+              },
+              {
+                "id": "23",
+                "visibleAtStart": false,
+                "drawOrder": 46,
+                "visibleForGroups": null,
+                "infobox": null
+              },
+              {
+                "id": "40",
+                "visibleAtStart": false,
+                "drawOrder": 45,
+                "visibleForGroups": null,
+                "infobox": null
+              },
+              {
+                "id": "22",
+                "visibleAtStart": false,
+                "drawOrder": 44,
+                "visibleForGroups": null,
+                "infobox": null
+              },
+              {
+                "id": "50",
+                "visibleAtStart": false,
+                "drawOrder": 40,
+                "visibleForGroups": null,
+                "infobox": null
+              },
+              {
+                "id": "51",
+                "visibleAtStart": false,
+                "drawOrder": 39,
+                "visibleForGroups": null,
+                "infobox": null
+              },
+              {
+                "id": "18",
+                "visibleAtStart": false,
+                "drawOrder": 27,
+                "visibleForGroups": null,
+                "infobox": null
+              }
+            ],
+            "groups": []
+          },
+          {
+            "id": "80700e5f-f58e-eee4-18e5-98e85a63d7e7",
+            "parent": "-1",
+            "name": "Underlag",
+            "toggled": true,
+            "expanded": false,
+            "layers": [
+              {
+                "id": "82",
+                "visibleAtStart": false,
+                "drawOrder": 13,
+                "visibleForGroups": null,
+                "infobox": null
+              },
+              {
+                "id": "81",
+                "visibleAtStart": false,
+                "drawOrder": 14,
+                "visibleForGroups": null,
+                "infobox": null
+              }
+            ],
+            "groups": [
+              {
+                "id": "7ed1da14-fcba-e4f6-7407-7852c8f61267",
+                "parent": "80700e5f-f58e-eee4-18e5-98e85a63d7e7",
+                "name": "Miljöbalken",
+                "toggled": true,
+                "expanded": false,
+                "layers": [
+                  {
+                    "id": "78",
+                    "visibleAtStart": false,
+                    "drawOrder": 3,
+                    "visibleForGroups": null,
+                    "infobox": null
+                  },
+                  {
+                    "id": "73",
+                    "visibleAtStart": false,
+                    "drawOrder": 4,
+                    "visibleForGroups": null,
+                    "infobox": null
+                  },
+                  {
+                    "id": "80",
+                    "visibleAtStart": false,
+                    "drawOrder": 11,
+                    "visibleForGroups": null,
+                    "infobox": null
+                  },
+                  {
+                    "id": "77",
+                    "visibleAtStart": false,
+                    "drawOrder": 5,
+                    "visibleForGroups": null,
+                    "infobox": null
+                  },
+                  {
+                    "id": "74",
+                    "visibleAtStart": false,
+                    "drawOrder": 6,
+                    "visibleForGroups": null,
+                    "infobox": null
+                  },
+                  {
+                    "id": "71",
+                    "visibleAtStart": false,
+                    "drawOrder": 7,
+                    "visibleForGroups": null,
+                    "infobox": null
+                  },
+                  {
+                    "id": "83",
+                    "visibleAtStart": false,
+                    "drawOrder": 10,
+                    "visibleForGroups": null,
+                    "infobox": null
+                  },
+                  {
+                    "id": "72",
+                    "visibleAtStart": false,
+                    "drawOrder": 8,
+                    "visibleForGroups": null,
+                    "infobox": null
+                  },
+                  {
+                    "id": "76",
+                    "visibleAtStart": false,
+                    "drawOrder": 1,
+                    "visibleForGroups": null,
+                    "infobox": null
+                  },
+                  {
+                    "id": "79",
+                    "visibleAtStart": false,
+                    "drawOrder": 12,
+                    "visibleForGroups": null,
+                    "infobox": null
+                  },
+                  {
+                    "id": "75",
+                    "visibleAtStart": false,
+                    "drawOrder": 2,
+                    "visibleForGroups": null,
+                    "infobox": null
+                  },
+                  {
+                    "id": "70",
+                    "visibleAtStart": false,
+                    "drawOrder": 9,
+                    "visibleForGroups": null,
+                    "infobox": null
+                  }
+                ],
+                "groups": []
+              }
+            ]
+          },
+          {
+            "id": "e77d6df1-49f3-c303-af95-3c84d9880dc2",
+            "parent": "-1",
+            "name": "Adress",
+            "toggled": true,
+            "expanded": false,
+            "layers": [
+              {
+                "id": "3",
+                "visibleAtStart": false,
+                "drawOrder": 64,
+                "visibleForGroups": null,
+                "infobox": null
+              }
+            ],
+            "groups": []
+          }
+        ],
+        "active": true,
+        "visibleAtStart": false,
+        "backgroundSwitcherBlack": false,
+        "backgroundSwitcherWhite": false,
+        "showBreadcrumbs": false,
+        "target": "toolbar",
+        "position": "left",
+        "width": 0,
+        "height": 0,
+        "title": "Lagerhanterare",
+        "description": "",
+        "dropdownThemeMaps": false,
+        "themeMapHeaderCaption": "",
+        "instruction": "",
+        "visibleForGroups": []
+      },
+      "index": 0
+    },
+    {
+      "type": "infoclick",
+      "options": {
+        "title": "Information om lager",
+        "width": "",
+        "height": "",
+        "anchor": [0.5, 1],
+        "scale": 1,
+        "src": "assets/icons/marker.png",
+        "strokeColor": {
+          "r": 0,
+          "g": 118,
+          "b": 188,
+          "a": 0.7
+        },
+        "strokeWidth": 4,
+        "fillColor": {
+          "r": 0,
+          "g": 118,
+          "b": 188,
+          "a": 0.1
+        },
+        "visibleForGroups": []
+      },
+      "index": 0
+    },
+    {
+      "type": "simple_layerswitcher",
+      "options": {
+        "target": "toolbar",
+        "visibleAtStart": false,
+        "visibleForGroups": []
+      },
+      "index": 1
+    },
+    {
+      "type": "documenthandler",
+      "options": {
+        "target": "toolbar",
+        "overlayLogoUrl": "/logo-share.png",
+        "openOverlayButtonColor": "#ffffff",
+        "showScrollButtonLimit": 400,
+        "dynamicImportUrls": {
+          "iconFonts": "https://fonts.googleapis.com/icon?family=Material+Icons",
+          "openSans": "https://fonts.googleapis.com/css?family=Open+Sans"
+        },
+        "iconLibraryLink": "https://material.io/resources/icons/?style=baseline",
+        "width": 600,
+        "height": "90vh",
+        "menuConfig": {
+          "menu": [
+            {
+              "title": "",
+              "document": "start",
+              "color": "#ffffff",
+              "description": "",
+              "icon": {
+                "materialUiIconName": "home",
+                "fontSize": "large"
+              },
+              "maplink": " ",
+              "link": "",
+              "menu": []
+            },
+            {
+              "title": "Utgångspunkter",
+              "document": "utgangspunkter",
+              "color": "#ffffff",
+              "description": "",
+              "icon": {
+                "materialUiIconName": "",
+                "fontSize": ""
+              },
+              "maplink": "",
+              "link": "",
+              "menu": []
+            },
+            {
+              "title": "Utvecklingsstrategi",
+              "document": "utvecklingsstrategi",
+              "color": "#ffffff",
+              "icon": {
+                "materialUiIconName": "home",
+                "fontSize": "large"
+              },
+              "maplink": "",
+              "link": "",
+              "menu": []
+            },
+            {
+              "title": "Geografiska inriktningar",
+              "document": "geografiska_inriktningar",
+              "color": "#ffffff",
+              "icon": {
+                "materialUiIconName": "home",
+                "fontSize": "large"
+              },
+              "maplink": "",
+              "link": "",
+              "menu": []
+            },
+            {
+              "title": "Tematiska inriktningar",
+              "document": "tematiska_inriktningar",
+              "color": "#ffffff",
+              "icon": {
+                "materialUiIconName": "home",
+                "fontSize": "large"
+              },
+              "maplink": "",
+              "link": "",
+              "menu": []
+            },
+            {
+              "title": "Riksintressen",
+              "document": "riksintressen2",
+              "color": "#ffffff",
+              "icon": {
+                "materialUiIconName": "home",
+                "fontSize": "large"
+              },
+              "maplink": "",
+              "link": "",
+              "menu": []
+            },
+            {
+              "title": "Markanvändningskarta",
+              "document": "",
+              "color": "#ffffff",
+              "icon": {
+                "materialUiIconName": "home",
+                "fontSize": "large"
+              },
+              "maplink": "?m=oversiktsplan&x=140700&y=6399400&z=1&l=1,28,7,33,24,29,10,11,12,31,47,26,19,13,32,27,52,49,38,5,15,36,35,21,42,46,45,37,48,6,17,16,20,8,14,44,39,41,43&clean=true",
+              "link": "",
+              "menu": []
+            },
+            {
+              "title": "Fördjupningar",
+              "document": "",
+              "color": "#ffffff",
+              "icon": {
+                "materialUiIconName": "home",
+                "fontSize": "large"
+              },
+              "maplink": "",
+              "link": "",
+              "menu": [
+                {
+                  "title": "Centrala Göteborg",
+                  "document": "centrala_goteborg",
+                  "color": "#ffffff",
+                  "icon": {
+                    "materialUiIconName": "home",
+                    "fontSize": "large"
+                  },
+                  "maplink": "",
+                  "link": "",
+                  "menu": []
+                },
+                {
+                  "title": "Frölunda Högsbo",
+                  "document": "frolunda_hogsbo",
+                  "color": "#ffffff",
+                  "icon": {
+                    "materialUiIconName": "home",
+                    "fontSize": "large"
+                  },
+                  "maplink": "",
+                  "link": "",
+                  "menu": []
+                },
+                {
+                  "title": "Torsviken",
+                  "document": "torsviken",
+                  "color": "#ffffff",
+                  "icon": {
+                    "materialUiIconName": "home",
+                    "fontSize": "large"
+                  },
+                  "maplink": "",
+                  "link": "",
+                  "menu": []
+                },
+                {
+                  "title": "Södra skärgården",
+                  "document": "sodra_skargarden",
+                  "color": "#ffffff",
+                  "icon": {
+                    "materialUiIconName": "home",
+                    "fontSize": "large"
+                  },
+                  "maplink": "",
+                  "link": "",
+                  "menu": []
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "index": 8
+    },
+    {
+      "type": "search",
+      "options": {
+        "anchor": [0.5, 1],
+        "scale": 1,
+        "src": "assets/icons/marker_red.png",
+        "strokeColor": {
+          "r": 253,
+          "g": 101,
+          "b": 88,
+          "a": 1
+        },
+        "strokeWidth": 4,
+        "fillColor": {
+          "r": 253,
+          "g": 101,
+          "b": 88,
+          "a": 0.1
+        },
+        "radiusSearch": true,
+        "tooltip": "Sök...",
+        "searchWithinButtonText": "Markera i kartan",
+        "maxFeatures": 100,
+        "selectedSources": [],
+        "layers": [
+          {
+            "id": "101",
+            "visibleForGroups": []
+          }
+        ],
+        "visibleForGroups": []
+      },
+      "index": 0
+    },
+    {
+      "type": "information",
+      "options": {
+        "headerText": "",
+        "text": "<h1>ÖVERSIKTSPLAN FÖR GÖTEBORG</h1>Samrådshandling december 2018<h3>&Ouml;VERSIKTSPLANENS INNEH&Aring;LL</h3><p>&Ouml;versiktsplanen ska ange&nbsp;</p><p>&bull; grunddragen i fr&aring;ga om den avsedda anv&auml;ndningen av mark- och vatten- omr&aring;den&nbsp;</p><p>&bull; kommunens syn p&aring; hur den byggda milj&ouml;n ska anv&auml;ndas, utvecklas och bevaras&nbsp;</p><p>&bull; hur kommunen avser att tillgodose de redovisade riksintressena och f&ouml;lja g&auml;llande milj&ouml;kvalitetsnormer&nbsp;</p><p>&bull; hur kommunen i den fysiska planeringen avser att ta h&auml;nsyn till och samordna &ouml;versiktsplanen med relevanta nationella och regionala m&aring;l, planer och program av betydelse f&ouml;r en h&aring;llbar utveckling inom kommunen&nbsp;</p><p>&bull; hur kommunen avser att tillgodose det l&aring;ngsiktiga behovet av bost&auml;der.&nbsp;</p><p><h4>&Ouml;versiktsplanens delar&nbsp;</h4></p><p>Samr&aring;dsf&ouml;rslaget till ny &ouml;versiktsplan omfattar en planbeskrivning (denna handling) och markanv&auml;ndningskartan. Planbeskrivningen omfattar en utvecklingsstrategi, inriktningar f&ouml;r mark- och vattenanv&auml;ndning och h&auml;nsyn till allm&auml;nna intressen. Till &ouml;versiktsplanen h&ouml;r &auml;ven en konsekvensbeskrivning.</p><p>Parallellt med med detta f&ouml;rslag till ny kommunomfattande &ouml;versiktsplan tas f&ouml;rslag till f&ouml;rdjupningar av &ouml;versiktsplanen fram f&ouml;r Centrala G&ouml;teborg och H&ouml;gsbo-Fr&ouml;lunda. Arbetet med en f&ouml;rdjupning av &ouml;versiktsplanen p&aring;g&aring;r &auml;ven f&ouml;r V&auml;stra Arendal och Torsviken.&nbsp;</p><p>Till &ouml;versiktsplanen h&ouml;r ytterligare ett antal f&ouml;rdjupningar och tematiska till&auml;gg. I samband med att denna &ouml;versiktsplan antas f&ouml;resl&aring;s att f&ouml;ljande f&ouml;rdjupningar och tematiska till&auml;gg ska vara fortsatt aktuella:&nbsp;</p><p>&bull; M&ouml;lndals&aring;ns dalg&aring;ng (2016, &auml;ven antagen av M&ouml;lndals Stad)&nbsp;</p><p>&bull; S&ouml;dra Askim (2011)&nbsp;</p><p>&bull; F&ouml;rorenade omr&aring;den (2006)&nbsp;</p><p>&bull; &Ouml;versv&auml;mningsrisker (godk&auml;nd i Byggnadsn&auml;mnden 2018)&nbsp;</p><p>&Ouml;vriga nu g&auml;llande f&ouml;rdjupningar och till&auml;gg &auml;r till stora delar antingen genomf&ouml;rda eller p&aring; andra s&auml;tt inaktuella eller otidsenliga. De b&ouml;r d&auml;rf&ouml;r upph&auml;vas i samband med att ny kommunt&auml;ckande &ouml;versiktsplan antas. Fr&aring;gor eller st&auml;llningstaganden som fortfarande &auml;r aktuella kommer att arbetas in i denna kommunomfattande &ouml;versiktsplan.</p>",
+        "buttonText": "",
+        "title": "",
+        "visibleAtStart": false,
+        "showInfoOnce": false,
+        "visibleForGroups": []
+      },
+      "index": 7
+    }
+  ],
+  "map": {
+    "target": "map",
+    "center": [140700, 6399400],
+    "title": "Arbetsmaterial!",
+    "projection": "EPSG:3007",
+    "zoom": 1,
+    "maxZoom": 9,
+    "minZoom": 0,
+    "resolutions": [
+      70.00022,
+      28.00009,
+      14.00004,
+      7.000022,
+      2.800009,
+      1.400004,
+      0.700002,
+      0.280001,
+      0.14,
+      0.07
+    ],
+    "origin": [0.0, 0.0],
+    "extent": [105000.0, 6355000.0, 185000.0, 6435000.0],
+    "constrainOnlyCenter": true,
+    "logo": "/assets/logo.png",
+    "geoserverLegendOptions": "",
+    "mapselector": false,
+    "mapcleaner": true,
+    "drawerVisible": false,
+    "drawerPermanent": false,
+    "colors": {
+      "primaryColor": "#0076bc",
+      "secondaryColor": "#ffffff"
+    },
+    "defaultCookieNoticeMessage": "Vi använder cookies för att följa upp användandet och ge en bra upplevelse av kartan. Du kan blockera cookies i webbläsaren men då visas detta meddelande igen.",
+    "defaultCookieNoticeUrl": "https://pts.se/sv/bransch/regler/lagar/lag-om-elektronisk-kommunikation/kakor-cookies/"
+  }
+}

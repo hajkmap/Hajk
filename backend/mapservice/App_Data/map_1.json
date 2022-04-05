@@ -1,4 +1,19 @@
-{
+﻿{
+  "version": "3.2.0",
+  "projections": [
+    {
+      "code": "EPSG:3006",
+      "definition": "+proj=utm +zone=33 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs",
+      "extent": [181896.33, 6101648.07, 864416.0, 7689478.3],
+      "units": null
+    },
+    {
+      "code": "http://www.opengis.net/gml/srs/epsg.xml#3006",
+      "definition": "+proj=utm +zone=33 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs",
+      "extent": [181896.33, 6101648.07, 864416.0, 7689478.3],
+      "units": null
+    }
+  ],
   "version": null,
   "projections": [
     {
@@ -94,37 +109,6 @@
   ],
   "tools": [
     {
-      "type": "layerswitcher",
-      "options": {
-        "baselayers": [
-          {
-            "id": "36",
-            "visibleAtStart": true,
-            "drawOrder": 0,
-            "visibleForGroups": null,
-            "infobox": null
-          }
-        ],
-        "groups": [],
-        "active": true,
-        "visibleAtStart": false,
-        "backgroundSwitcherBlack": false,
-        "backgroundSwitcherWhite": true,
-        "showBreadcrumbs": false,
-        "target": "toolbar",
-        "position": "left",
-        "width": 0,
-        "height": 0,
-        "title": "",
-        "description": "",
-        "dropdownThemeMaps": true,
-        "themeMapHeaderCaption": "Rubrik temakarta",
-        "instruction": "",
-        "visibleForGroups": ["Office-SEKSD01", "All-SE129"]
-      },
-      "index": 0
-    },
-    {
       "type": "infoclick",
       "options": {
         "anchor": [16, 32],
@@ -147,6 +131,315 @@
       "index": 0
     },
     {
+      "type": "layerswitcher",
+      "options": {
+        "enableOSM": true,
+        "baselayers": [
+          {
+            "id": "49",
+            "visibleAtStart": false,
+            "drawOrder": 0,
+            "visibleForGroups": null,
+            "infobox": null
+          },
+          {
+            "id": "50",
+            "visibleAtStart": false,
+            "drawOrder": 0,
+            "visibleForGroups": null,
+            "infobox": null
+          },
+          {
+            "id": "4",
+            "visibleAtStart": true,
+            "drawOrder": 0,
+            "visibleForGroups": null,
+            "infobox": null
+          },
+          {
+            "id": "51",
+            "visibleAtStart": false,
+            "drawOrder": 0,
+            "visibleForGroups": null,
+            "infobox": null
+          },
+          {
+            "id": "36",
+            "visibleAtStart": false,
+            "drawOrder": 0,
+            "visibleForGroups": null,
+            "infobox": null
+          }
+        ],
+        "groups": [
+          {
+            "id": "041d10b4-445a-b985-b4de-ed11756c4ea3",
+            "parent": "-1",
+            "name": "Etiketter",
+            "toggled": false,
+            "expanded": false,
+            "layers": [
+              {
+                "id": "44",
+                "visibleAtStart": false,
+                "drawOrder": 25,
+                "visibleForGroups": null,
+                "infobox": null
+              },
+              {
+                "id": "53",
+                "visibleAtStart": false,
+                "drawOrder": 24,
+                "visibleForGroups": null,
+                "infobox": null
+              },
+              {
+                "id": "48",
+                "visibleAtStart": false,
+                "drawOrder": 23,
+                "visibleForGroups": null,
+                "infobox": null
+              }
+            ],
+            "groups": []
+          },
+          {
+            "id": "e822ae51-721a-9637-4b4c-6c3a0a12a932",
+            "parent": "-1",
+            "name": "Verksamhetslager",
+            "toggled": false,
+            "expanded": true,
+            "layers": [],
+            "groups": [
+              {
+                "id": "05abd158-b1c6-c8d4-b99e-3ec42209efcc",
+                "parent": "e822ae51-721a-9637-4b4c-6c3a0a12a932",
+                "name": "Hållplatser",
+                "toggled": false,
+                "expanded": false,
+                "layers": [
+                  {
+                    "id": "52",
+                    "visibleAtStart": false,
+                    "drawOrder": 2,
+                    "visibleForGroups": null,
+                    "infobox": null
+                  },
+                  {
+                    "id": "47",
+                    "visibleAtStart": false,
+                    "drawOrder": 3,
+                    "visibleForGroups": null,
+                    "infobox": null
+                  }
+                ],
+                "groups": []
+              },
+              {
+                "id": "48eefc8e-f579-9978-f022-bda58e14056c",
+                "parent": "e822ae51-721a-9637-4b4c-6c3a0a12a932",
+                "name": "Linjer",
+                "toggled": false,
+                "expanded": false,
+                "layers": [
+                  {
+                    "id": "42",
+                    "visibleAtStart": false,
+                    "drawOrder": 4,
+                    "visibleForGroups": null,
+                    "infobox": null
+                  },
+                  {
+                    "id": "43",
+                    "visibleAtStart": false,
+                    "drawOrder": 5,
+                    "visibleForGroups": null,
+                    "infobox": null
+                  }
+                ],
+                "groups": []
+              },
+              {
+                "id": "d53a77d0-3312-8976-8968-7b3e0dc75332",
+                "parent": "e822ae51-721a-9637-4b4c-6c3a0a12a932",
+                "name": "Gränser",
+                "toggled": false,
+                "expanded": false,
+                "layers": [
+                  {
+                    "id": "40",
+                    "visibleAtStart": false,
+                    "drawOrder": 6,
+                    "visibleForGroups": null,
+                    "infobox": null
+                  },
+                  {
+                    "id": "39",
+                    "visibleAtStart": false,
+                    "drawOrder": 7,
+                    "visibleForGroups": null,
+                    "infobox": null
+                  },
+                  {
+                    "id": "41",
+                    "visibleAtStart": false,
+                    "drawOrder": 8,
+                    "visibleForGroups": null,
+                    "infobox": null
+                  },
+                  {
+                    "id": "62",
+                    "visibleAtStart": false,
+                    "drawOrder": 19,
+                    "visibleForGroups": null,
+                    "infobox": null
+                  },
+                  {
+                    "id": "64",
+                    "visibleAtStart": false,
+                    "drawOrder": 20,
+                    "visibleForGroups": null,
+                    "infobox": null
+                  }
+                ],
+                "groups": []
+              },
+              {
+                "id": "994e35b8-4541-1595-725d-3b4a30dca7f7",
+                "parent": "e822ae51-721a-9637-4b4c-6c3a0a12a932",
+                "name": "Adresser",
+                "toggled": false,
+                "expanded": false,
+                "layers": [
+                  {
+                    "id": "46",
+                    "visibleAtStart": false,
+                    "drawOrder": 9,
+                    "visibleForGroups": null,
+                    "infobox": null
+                  }
+                ],
+                "groups": []
+              },
+              {
+                "id": "9fa1ae3a-29a5-92bb-5a41-fa5b02598340",
+                "parent": "e822ae51-721a-9637-4b4c-6c3a0a12a932",
+                "name": "Närtrafik",
+                "toggled": false,
+                "expanded": false,
+                "layers": [
+                  {
+                    "id": "57",
+                    "visibleAtStart": false,
+                    "drawOrder": 21,
+                    "visibleForGroups": null,
+                    "infobox": null
+                  },
+                  {
+                    "id": "59",
+                    "visibleAtStart": false,
+                    "drawOrder": 10,
+                    "visibleForGroups": null,
+                    "infobox": null
+                  },
+                  {
+                    "id": "56",
+                    "visibleAtStart": false,
+                    "drawOrder": 12,
+                    "visibleForGroups": null,
+                    "infobox": null
+                  },
+                  {
+                    "id": "61",
+                    "visibleAtStart": false,
+                    "drawOrder": 11,
+                    "visibleForGroups": null,
+                    "infobox": null
+                  },
+                  {
+                    "id": "60",
+                    "visibleAtStart": false,
+                    "drawOrder": 13,
+                    "visibleForGroups": null,
+                    "infobox": null
+                  },
+                  {
+                    "id": "38",
+                    "visibleAtStart": false,
+                    "drawOrder": 14,
+                    "visibleForGroups": null,
+                    "infobox": null
+                  }
+                ],
+                "groups": []
+              },
+              {
+                "id": "a10ee17e-211c-6245-b9b3-05e44396f16a",
+                "parent": "e822ae51-721a-9637-4b4c-6c3a0a12a932",
+                "name": "Övrig verksamhetsdata",
+                "toggled": false,
+                "expanded": false,
+                "layers": [
+                  {
+                    "id": "54",
+                    "visibleAtStart": false,
+                    "drawOrder": 15,
+                    "visibleForGroups": null,
+                    "infobox": null
+                  },
+                  {
+                    "id": "55",
+                    "visibleAtStart": false,
+                    "drawOrder": 16,
+                    "visibleForGroups": null,
+                    "infobox": null
+                  },
+                  {
+                    "id": "37",
+                    "visibleAtStart": false,
+                    "drawOrder": 1,
+                    "visibleForGroups": null,
+                    "infobox": null
+                  },
+                  {
+                    "id": "45",
+                    "visibleAtStart": false,
+                    "drawOrder": 17,
+                    "visibleForGroups": null,
+                    "infobox": null
+                  },
+                  {
+                    "id": "58",
+                    "visibleAtStart": false,
+                    "drawOrder": 18,
+                    "visibleForGroups": null,
+                    "infobox": null
+                  }
+                ],
+                "groups": []
+              }
+            ]
+          }
+        ],
+        "active": true,
+        "visibleAtStart": true,
+        "backgroundSwitcherBlack": false,
+        "backgroundSwitcherWhite": false,
+        "showBreadcrumbs": false,
+        "target": "toolbar",
+        "position": "right",
+        "width": 0,
+        "height": 0,
+        "title": "",
+        "description": "",
+        "dropdownThemeMaps": true,
+        "themeMapHeaderCaption": "Rubrik temakarta",
+        "instruction": "",
+        "visibleForGroups": ["Office-SEKSD01", "All-SE129"]
+      },
+      "index": 1
+    },
+    {
       "type": "simple_layerswitcher",
       "options": {
         "target": "left",
@@ -155,61 +448,76 @@
         "visibleAtStart": false,
         "visibleForGroups": []
       },
-      "index": 0
+      "index": 1
     },
     {
       "type": "vtsearch",
       "options": {
+        "target": "toolbar",
         "abstract": "VTSEARCH",
-        "title": "VTSEARCH",
+        "title": "Sökverktyg",
+        "position": "left",
+        "visibleAtStart": true,
         "mapColors": {
-          "searchColor": {
-            "fillColorRed": "220",
-            "fillColorGreen": "10",
-            "fillColorBlue": "90",
-            "fillColorOpacity": "0.7",
-            "strokeColorRed": "220",
-            "strokeColorGreen": "10",
-            "strokeColorBlue": "90",
-            "strokeColorOpacity": "0.7",
-            "strokePointWidth": 5,
-            "strokeLineWidth": 2
+          "searchFillColor": {
+            "r": 220,
+            "g": 10,
+            "b": 90,
+            "a": 0.7
           },
-          "highlightColor": {
-            "fillColorRed": "130",
-            "fillColorGreen": "35",
-            "fillColorBlue": "150",
-            "fillColorOpacity": "0.4",
-            "strokeColorRed": "130",
-            "strokeColorGreen": "35",
-            "strokeColorBlue": "150",
-            "strokeColorOpacity": "0.4",
-            "strokePointWidth": 8,
-            "strokeLineWidth": 8
-          }
+          "searchStrokeColor": {
+            "r": 220,
+            "g": 10,
+            "b": 90,
+            "a": 0.7
+          },
+          "searchStrokePointWidth": 5,
+          "searchStrokeLineWidth": 2,
+          "highlightFillColor": {
+            "r": 130,
+            "g": 35,
+            "b": 150,
+            "a": 0.4
+          },
+          "highlightStrokeColor": {
+            "r": 130,
+            "g": 35,
+            "b": 150,
+            "a": 0.4
+          },
+          "highlightStrokePointWidth": 8,
+          "highlightStrokeLineWidth": 8
         },
         "geoServer": {
           "lineNumberAndPublicLineNumbers": {
             "searchLabel": "Linjenummer",
-            "url": "http://sestoas256:8080/geoserver/kartsidan2/wfs?version=1.0.0&request=GetFeature&typeName=LineNumberAndPublicLineNumber&outputFormat=application/json"
+            "url": "http://kartsidan-gs-qa.vt.net/geoserver/vt/wfs?version=1.0.0&request=GetFeature&typeName=LineNumberAndPublicLineNumber&outputFormat=application/json"
           },
           "municipalityZoneNames": {
             "searchLabel": "Kommunnamn",
-            "url": "http://sestoas256:8080/geoserver/kartsidan2/wfs?version=1.0.0&request=GetFeature&typeName=MunicipalityZoneName&outputFormat=application/json"
+            "url": "http://kartsidan-gs-qa.vt.net/geoserver/vt/wfs?version=1.0.0&request=GetFeature&typeName=MunicipalityZoneName&outputFormat=application/json"
           },
           "stopAreaNameAndNumbers": {
             "searchLabel": "Hållplats",
-            "defaultSortAttribute": "StopAreaNumber",
-            "url": "http://sestoas256:8080/geoserver/kartsidan2/wfs?version=1.0.0&request=GetFeature&typeName=StopAreaNameAndNumber&outputFormat=application/json"
+            "defaultSortOrder": ["StopAreaNumber"],
+            "url": "http://kartsidan-gs-qa.vt.net/geoserver/vt/wfs?version=1.0.0&request=GetFeature&typeName=StopAreaNameAndNumber&outputFormat=application/json"
           },
           "transportModeTypeNames": {
             "searchLabel": "Trafikslag",
-            "url": "http://sestoas256:8080/geoserver/kartsidan2/wfs?version=1.0.0&request=GetFeature&typeName=TransportModeTypeName&outputFormat=application/json"
+            "url": "http://kartsidan-gs-qa.vt.net/geoserver/vt/wfs?version=1.0.0&request=GetFeature&typeName=TransportModeTypeName&outputFormat=application/json"
           },
           "journeys": {
             "searchLabel": "Turer",
-            "defaultSortAttribute": "EarliestDepartureTimeAtToStopPoint",
-            "url": "http://sestoas256:8080/geoserver/kartsidan2/wfs?version=1.0.0&request=GetFeature&typeName=GetJourneys&outputFormat=application/json",
+            "defaultSortOrder": [
+              "TransportCompany",
+              "InternalLineNumber",
+              "FromStopPointName",
+              "FromStopPointDesignation",
+              "ToStopPointName",
+              "ToStopPointDesignation",
+              "EarliestDepartureTimeAtToStopPoint"
+            ],
+            "url": "http://kartsidan-gs-qa.vt.net/geoserver/vt/wfs?version=1.0.0&request=GetFeature&typeName=GetJourneys&outputFormat=application/json",
             "attributesToDisplay": [
               {
                 "displayName": "PUBLIK LINJE",
@@ -248,8 +556,12 @@
           },
           "routes": {
             "searchLabel": "Linje",
-            "defaultSortAttribute": "InternalLineNumber",
-            "url": "http://sestoas256:8080/geoserver/kartsidan2/wfs?version=1.1.0&request=GetFeature&typeName=Route&outputFormat=application/json",
+            "defaultSortOrder": [
+              "TransportModeType",
+              "Direction",
+              "InternalLineNumber"
+            ],
+            "url": "http://kartsidan-gs-qa.vt.net/geoserver/vt/wfs?version=1.1.0&request=GetFeature&typeName=Route&outputFormat=application/json",
             "attributesToDisplay": [
               {
                 "displayName": "TEKNISK LINJE",
@@ -279,8 +591,8 @@
           },
           "stopAreas": {
             "searchLabel": "Hållplatsomr",
-            "defaultSortAttribute": "StopAreaNumber",
-            "url": "http://sestoas256:8080/geoserver/kartsidan2/wfs?version=1.0.0&request=GetFeature&typeName=GetStopAreas&outputFormat=application/json",
+            "defaultSortOrder": ["StopAreaNumber"],
+            "url": "http://kartsidan-gs-qa.vt.net/geoserver/vt/wfs?version=1.0.0&request=GetFeature&typeName=GetStopAreas&outputFormat=application/json",
             "attributesToDisplay": [
               {
                 "displayName": "HÅLLPLATSNUMMER",
@@ -314,8 +626,8 @@
           },
           "stopPoints": {
             "searchLabel": "Hållplatslägen",
-            "defaultSortAttribute": "StopAreaNumber",
-            "url": "http://sestoas256:8080/geoserver/kartsidan2/wfs?version=1.0.0&request=GetFeature&typeName=GetStopPoints&outputFormat=application/json",
+            "defaultSortOrder": ["Designation", "StopAreaNumber"],
+            "url": "http://kartsidan-gs-qa.vt.net/geoserver/vt/wfs?version=1.0.0&request=GetFeature&typeName=GetStopPoints&outputFormat=application/json",
             "attributesToDisplay": [
               {
                 "displayName": "HÅLLPLATSNUMMER",
@@ -358,10 +670,121 @@
                 "key": "IsFlexibleTaxiService"
               }
             ]
+          },
+          "Addresses": {
+            "searchLabel": "Addresser",
+            "defaultSortOrder": [
+              "StreetNumber",
+              "PostCode",
+              "PlaceName",
+              "Municipality",
+              "StreetName"
+            ],
+            "attributesToDisplay": [
+              {
+                "displayName": "GATUNAMN",
+                "key": "StreetName"
+              },
+              {
+                "displayName": "GATUNUMMER",
+                "key": "StreetNumber"
+              },
+              {
+                "displayName": "POSTNUMMER",
+                "key": "PostCode"
+              },
+              {
+                "displayName": "ORT",
+                "key": "PlaceName"
+              },
+              {
+                "displayName": "KOMMUN",
+                "key": "Municipality"
+              }
+            ]
+          },
+          "POIs": {
+            "searchLabel": "Platser",
+            "defaultSortOrder": ["Municipality", "Name"],
+            "attributesToDisplay": [
+              {
+                "displayName": "NAMN",
+                "key": "Name"
+              },
+              {
+                "displayName": "KOMMUN",
+                "key": "Municipality"
+              },
+              {
+                "displayName": "KATEGORI 1",
+                "key": "SwedishCategory1"
+              },
+              {
+                "displayName": "KATEGORI 2",
+                "key": "SwedishCategory2"
+              },
+              {
+                "displayName": "KATEGORI 3",
+                "key": "SwedishCategory3"
+              },
+              {
+                "displayName": "BÖRJAR GÄLLA",
+                "key": "AppliesFromDate",
+                "displayFormat": "YYYY-MM-DD"
+              },
+              {
+                "displayName": "SLUTAR GÄLLA",
+                "key": "AppliesUptoDate",
+                "displayFormat": "YYYY-MM-DD"
+              }
+            ]
           }
         }
       },
-      "index": 0
+      "index": 2
+    },
+    {
+      "type": "search",
+      "options": {
+        "layers": [],
+        "visibleForGroups": [],
+        "maxResultsPerDataset": 5000,
+        "anchor": [16, 32],
+        "scale": 0.15,
+        "markerImg": "marker.png",
+        "delayBeforeAutoSearch": 300,
+        "searchBarPlaceholder": "Sök...",
+        "enablePolygonSearch": true,
+        "enableRadiusSearch": true,
+        "enableSelectSearch": true,
+        "enableExtentSearch": true,
+        "enableResultsFiltering": false,
+        "enableResultsSorting": false,
+        "enableResultsSelectionClearing": false,
+        "enableResultsDownloading": false,
+        "enableFeaturePreview": true,
+        "enableLabelOnHighlight": true,
+        "enableSelectedFeaturesCollection": true,
+        "showResultFeaturesInMap": false,
+        "enableFeatureToggler": true,
+        "renderElsewhere": true,
+        "tooltip": "Sök i kartlager",
+        "searchWithinButtonText": "Markera i kartan",
+        "selectedSources": ["8", "7", "30", "27", "32", "34", "33", "14", "18"]
+      },
+      "index": 2
+    },
+    {
+      "type": "buffer",
+      "options": {
+        "target": "toolbar",
+        "instruction": "",
+        "varbergVer": false,
+        "geoserverUrl": "",
+        "notFeatureLayers": [],
+        "visibleForGroups": []
+      },
+      "index": 3
     },
     {
       "type": "draw",
@@ -375,7 +798,7 @@
         "proxyUrl": "",
         "visibleForGroups": []
       },
-      "index": 1
+      "index": 3
     },
     {
       "type": "measure",
@@ -384,61 +807,29 @@
         "instruction": "",
         "icons": ""
       },
-      "index": 3
-    },
-    {
-      "type": "streetview",
-      "options": {
-        "target": "toolbar",
-        "apiKey": "AIzaSyCb-bvLmybNb4QSERR43eGlvvQyUrBAQG4",
-        "instruction": "",
-        "visibleForGroups": []
-      },
       "index": 4
     },
     {
-      "type": "export",
+      "type": "print",
       "options": {
         "target": "toolbar",
-        "exportUrl": "http:///localhost:55630/export/pdf",
-        "exportTiffUrl": "",
-        "pdfActive": true,
-        "tiffActive": false,
-        "base64Encode": false,
-        "autoScale": false,
-        "scales": "5000, 10000, 25000, 50000, 100000, 250000",
-        "proxyUrl": "",
+        "scales": "200, 400, 1000, 2000, 5000, 10000, 25000, 50000, 100000, 200000",
+        "logo": "https://github.com/hajkmap/Hajk/raw/master/design/logo_small.png",
         "instruction": "",
-        "visibleForGroups": []
-      },
-      "index": 6
-    },
-    {
-      "type": "anchor",
-      "options": {
-        "target": "toolbar",
-        "instruction": "",
+        "visibleAtStart": false,
         "visibleForGroups": []
       },
       "index": 5
     },
     {
-      "type": "informative",
+      "type": "anchor",
       "options": {
         "target": "toolbar",
-        "panel": "right",
-        "tocExpanded": false,
-        "title": "Översiktsplan",
-        "caption": "Översiktsplan",
-        "serviceUrl": "http://localhost:55630/informative/load",
-        "exportUrl": "http://localhost:55630/export/document",
-        "abstract": "Läs mer om vad som planeras i kommunen",
-        "html": "<div>HTML som beskriver dokumentets innehåll</div>",
-        "document": "oversiktsplan",
-        "visibleAtStart": false,
+        "position": "left",
+        "instruction": "",
         "visibleForGroups": []
       },
-      "index": 0
+      "index": 6
     }
   ],
   "map": {
@@ -446,9 +837,10 @@
     "center": [319378, 6398504],
     "title": "Hajk 3",
     "projection": "EPSG:3006",
-    "zoom": 10,
-    "maxZoom": 18,
-    "minZoom": 3,
+    "zoom": 7,
+    "maxZoom": 0,
+    "minZoom": 0,
+    "constrainResolution": true,
     "resolutions": [
       4096.0,
       2048.0,
@@ -468,7 +860,7 @@
     "origin": [0.0, 0.0],
     "extent": [0.0, 6000000.0, 1000000.0, 9000000.0],
     "constrainOnlyCenter": false,
-    "logo": "https://github.com/hajkmap/Hajk/raw/master/design/logo_small.png",
+    "logo": "",
     "geoserverLegendOptions": "",
     "mapselector": false,
     "mapcleaner": false,

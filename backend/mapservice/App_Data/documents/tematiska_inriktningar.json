@@ -1,0 +1,365 @@
+{
+  "chapters": [
+    {
+      "header": "TEMATISKA INRIKTNINGAR",
+      "headerIdentifier": "tematiska_inriktningar/TEMATISKA INRIKTNINGAR",
+      "html": "<p><br></p>\n<p><br></p>\n<figure><img data-caption=\"\" data-source=\"\" src=\"/tematiska_inriktningar_start.png\"/></figure>\n<p><br></p>\n<p>En översiktsplan ska redovisa hur kommunen tar hänsyn till allmänna intressen vid beslut om användning av mark- och vattenområden. Mark- och vatten ska användas för det eller de ändamål som områdena är mest lämpade för med hänsyn till beskaffenhet, läge och behov. Allmänna intressen är bland annat natur- och kulturmiljö, miljö- och klimataspekter, utformning av bebyggelse och infrastruktur, hushållning med mark och vatten samt bostadsbyggande.</p><br><p>I detta kapitel beskrivs hur kommunen beaktar berörda allmänna intressen.</p>",
+      "mapSettings": {
+        "target": "map",
+        "center": [140700, 6399400],
+        "title": "Översiktsplan Göteborg",
+        "projection": "EPSG:3007",
+        "zoom": 1,
+        "maxZoom": 15,
+        "minZoom": 5,
+        "resolutions": [
+          70.00022,
+          28.00009,
+          14.00004,
+          7.000022,
+          2.800009,
+          1.400004,
+          0.700002,
+          0.280001,
+          0.14,
+          0.07
+        ],
+        "origin": [0, 0],
+        "extent": [110000, 6365000, 185000, 6425000],
+        "constrainOnlyCenter": false,
+        "logo": "/assets/logo.png",
+        "geoserverLegendOptions": "",
+        "mapselector": false,
+        "mapcleaner": true,
+        "drawerVisible": false,
+        "drawerPermanent": false,
+        "colors": { "primaryColor": "#0076bc", "secondaryColor": "#ffffff" },
+        "defaultCookieNoticeMessage": "Vi använder cookies för att följa upp användandet och ge en bra upplevelse av kartan. Du kan blockera cookies i webbläsaren men då visas detta meddelande igen.",
+        "defaultCookieNoticeUrl": "https://pts.se/sv/bransch/regler/lagar/lag-om-elektronisk-kommunikation/kakor-cookies/"
+      },
+      "chapters": [
+        {
+          "header": "LEVANDE STADSMILJÖ",
+          "headerIdentifier": "{57427123-ef67-4f69-b72f-d5a31312341341c2}",
+          "html": "<p>I staden möts gammal och ny bebyggelse, sida vid sida. Kulturmiljöerna berikar staden och minner bland annat om Göteborgs historia och dess rötter som Sveriges port mot väster och som internationell handelsstad. I takt med att staden förändras läggs nya miljöer till och skapar med tiden ny kulturmiljö. Tillsammans bidrar de nya och de äldre stadsmiljöerna till Göteborgs identitet, till vilka vi är. Därför är det viktigt att vi lyfter fram de befintliga kulturvärdena och ställer höga krav på gestaltning när nya platser och ny bebyggelse läggs till.</p><blockquote>Gestaltad livsmiljö – en ny politik för arkitektur, form och design Gestaltad livsmiljö handlar om hur människans livsmiljö kan formas. Arkitektur, form och design ses som ett sammanhållet område, med människan som utgångspunkt. </blockquote><br><p>Främja god arkitektur</p><p>Arkitektur rör det byggdas form, stadsrummens gestaltning, stadens rörelsestråk och funktion. Arkitektur påverkar alla människor dagligen. Att ha nära till vardagens målpunkter och tillgång till upplevelserika och välkomnande stadsrum påverkar människors livskvalitet och deras känsla av gemenskap. Arkitektur är ett värdeskapande verktyg för goda livsmiljöer. Göteborg står inför en stor omvandling, staden växer och förändras. Nya byggnader, stadsrum, kvarter och hela stadsdelar tillkommer. Staden behöver förändras för att möta utmaningar som till exempel segregation och ett förändrat klimat, vilket ställer nya krav på hur staden planeras, byggs och förvaltas. Arkitekturen har en avgörande roll för hur vi möter dessa stora utmaningar och hur vi formar en gemensam väg framåt. Staden ska ge en god livsmiljö för alla människor, med deras olika behov och möjligheter. Arkitekturen påverkar hur lätt det är att ta sig mellan bostad och arbetsplats, mellan skola och fritidsaktivitet, liksom om det enklaste valet är att gå, cykla eller åka kollektivt för att nå olika målpunkter. Arkitekturen kan bidra till orienterbarhet, igenkänning, upplevelser samt varierade och rika vardagsstråk. Kommunen har ett särskilt ansvar att agera som förebild vid skapandet av allmänna platser och kommunala verksamheter.</p><blockquote>Läs mer - Arkitekturpolicy för Göteborgs Stad, byggnadsnämnden 2018. Kulturprogram, Göteborgs stad, 2013</blockquote><figure><img data-caption=\"Nytt kulturhus i Bergsjön\" data-source=\"Bild: Sweco Architects\" src=\"/tematiska_inriktningar_1.png\"/></figure><figure><img data-caption=\"Nya Hisingsbron\" data-source=\"Bild: Tenjin visual\" src=\"/tematiska_inriktningar_2.png\"/></figure>",
+          "mapSettings": {
+            "center": [135672.89145750582, 6403799.452920079],
+            "zoom": 5,
+            "extent": [
+              134572.4883135058,
+              6403102.950930079,
+              136773.29460150583,
+              6404495.954910079
+            ]
+          },
+          "chapters": [],
+          "expanded": true,
+          "layers": ["4"]
+        },
+        {
+          "header": "TRAFIK OCH INFRASTRUKTUR",
+          "headerIdentifier": "{57427123-ef67-4f69-b72f-d5a75565552}",
+          "html": "<p>Trafikstrukturen bidrar till att hålla ihop stadens olika områden och de människor som lever och verkar här. Genhet, orienterbarhet och närhet ger tillsammans med effektiva transporter förutsättningar för tillgång till arbete, bostad, rekreation och nöjen. Samtidigt medför trafiken och dess infrastruktur negativa effekter i form av barriärer, stora markanspråk, buller, luftföroreningar mm.</p><br><p>Trafiksystemet och våra beteenden behöver förändras när Göteborg förtätas och befolkningen växer. Det är nödvändigt att prioritera yteffektiva sätt att resa. I innerstaden är utrymmet särskilt begränsat och det är angeläget att skapa attraktiva stadsrum. Gatan är ett offentligt rum som både utgör en plats för rörelse och transporter och en plats för vistelse.</p><figure><img data-caption=\"Färdmedelsfördelning 2011 (resvaneundersökning) samt prognos för 2035 och 2050 med utgångspunkt från Göteborgs klimatstrategiska program och trafikstrategi.\" data-source=\"\" src=\"/tematiska_inriktningar_3.png\"/></figure>",
+          "mapSettings": {
+            "target": "map",
+            "center": [140700, 6399400],
+            "title": "Översiktsplan Göteborg",
+            "projection": "EPSG:3007",
+            "zoom": 1,
+            "maxZoom": 15,
+            "minZoom": 5,
+            "resolutions": [
+              70.00022,
+              28.00009,
+              14.00004,
+              7.000022,
+              2.800009,
+              1.400004,
+              0.700002,
+              0.280001,
+              0.14,
+              0.07
+            ],
+            "origin": [0, 0],
+            "extent": [110000, 6365000, 185000, 6425000],
+            "constrainOnlyCenter": false,
+            "logo": "/assets/logo.png",
+            "geoserverLegendOptions": "",
+            "mapselector": false,
+            "mapcleaner": true,
+            "drawerVisible": false,
+            "drawerPermanent": false,
+            "colors": {
+              "primaryColor": "#0076bc",
+              "secondaryColor": "#ffffff"
+            },
+            "defaultCookieNoticeMessage": "Vi använder cookies för att följa upp användandet och ge en bra upplevelse av kartan. Du kan blockera cookies i webbläsaren men då visas detta meddelande igen.",
+            "defaultCookieNoticeUrl": "https://pts.se/sv/bransch/regler/lagar/lag-om-elektronisk-kommunikation/kakor-cookies/"
+          },
+          "chapters": [],
+          "expanded": true
+        },
+        {
+          "header": "GRÖNOMRÅDEN OCH VATTENMILJÖER",
+          "headerIdentifier": "{57421212123-ef67-4f69-b72f-d5a737111122221212}",
+          "html": "<p>Göteborgslandskapets karaktär består av berg, kust, dalar och skog. Grönområden och vattenområden innehåller sociala värden som ger ett upplevelserikt och hälsosamt stadsliv och ekologiska värden som ger ett rikt växt- och djurliv. En variation och spridning av grönområden med god kvalitet för rekreation i närmiljö främjar folkhälsan, bidrar till områdets identitet och karaktär samt ger möjlighet att kunna leva ett enklare vardagsliv. En jämlik tillgång till grönområden och vattenmiljöer kan stärka sammanhållningen i staden.</p><br><p>Göteborg har gröna kilar med större natur- och rekreationsområden och parker i olika storlekar och med olika innehåll över hela staden. Närhet till havet, sjöarna, älven, åarna och kanalerna innebär stora tillgångar för turism och ekosystemtjänster som rekreation och biologisk mångfald.</p>",
+          "mapSettings": {
+            "target": "map",
+            "center": [140700, 6399400],
+            "title": "Översiktsplan Göteborg",
+            "projection": "EPSG:3007",
+            "zoom": 1,
+            "maxZoom": 15,
+            "minZoom": 5,
+            "resolutions": [
+              70.00022,
+              28.00009,
+              14.00004,
+              7.000022,
+              2.800009,
+              1.400004,
+              0.700002,
+              0.280001,
+              0.14,
+              0.07
+            ],
+            "origin": [0, 0],
+            "extent": [110000, 6365000, 185000, 6425000],
+            "constrainOnlyCenter": false,
+            "logo": "/assets/logo.png",
+            "geoserverLegendOptions": "",
+            "mapselector": false,
+            "mapcleaner": true,
+            "drawerVisible": false,
+            "drawerPermanent": false,
+            "colors": {
+              "primaryColor": "#0076bc",
+              "secondaryColor": "#ffffff"
+            },
+            "defaultCookieNoticeMessage": "Vi använder cookies för att följa upp användandet och ge en bra upplevelse av kartan. Du kan blockera cookies i webbläsaren men då visas detta meddelande igen.",
+            "defaultCookieNoticeUrl": "https://pts.se/sv/bransch/regler/lagar/lag-om-elektronisk-kommunikation/kakor-cookies/"
+          },
+          "chapters": [],
+          "expanded": true
+        },
+        {
+          "header": "BOSTÄDER OCH SAMHÄLLSSERVICE",
+          "headerIdentifier": "{57427123-ef67-4f69-44444444-d5a737e41cc2}",
+          "html": "<p>Tillgång till bostad och samhällsservice är grundläggande behov. En bostad är central för en människas trygghet och för möjligheterna att studera eller arbeta. Behovet av samhällsservice varierar under olika skeden i livet. Det är av stor vikt att samhällsservice byggs ut i takt med bostadsbyggandet och befolkningsutvecklingen.</p><br><p>Att skapa förutsättningar för nya bostäder och samhällsservice är en del av kommunens långsiktiga bostadsförsörjningsansvar. Bostadsbeståndet och samhällsservice är viktiga faktorer för att behålla och öka stadens attraktivitet och kommunen måste därför möta behov och efterfrågan hos både dagens och framtidens göteborgare.</p>",
+          "mapSettings": {
+            "target": "map",
+            "center": [140700, 6399400],
+            "title": "Översiktsplan Göteborg",
+            "projection": "EPSG:3007",
+            "zoom": 1,
+            "maxZoom": 15,
+            "minZoom": 5,
+            "resolutions": [
+              70.00022,
+              28.00009,
+              14.00004,
+              7.000022,
+              2.800009,
+              1.400004,
+              0.700002,
+              0.280001,
+              0.14,
+              0.07
+            ],
+            "origin": [0, 0],
+            "extent": [110000, 6365000, 185000, 6425000],
+            "constrainOnlyCenter": false,
+            "logo": "/assets/logo.png",
+            "geoserverLegendOptions": "",
+            "mapselector": false,
+            "mapcleaner": true,
+            "drawerVisible": false,
+            "drawerPermanent": false,
+            "colors": {
+              "primaryColor": "#0076bc",
+              "secondaryColor": "#ffffff"
+            },
+            "defaultCookieNoticeMessage": "Vi använder cookies för att följa upp användandet och ge en bra upplevelse av kartan. Du kan blockera cookies i webbläsaren men då visas detta meddelande igen.",
+            "defaultCookieNoticeUrl": "https://pts.se/sv/bransch/regler/lagar/lag-om-elektronisk-kommunikation/kakor-cookies/"
+          },
+          "chapters": [],
+          "expanded": true
+        },
+        {
+          "header": "HANDEL OCH NÄRINGSLIV",
+          "headerIdentifier": "{57427123-ef67-4f69-b72f-d5a721212121212121cc2}",
+          "html": "<p>Ekonomisk tillväxt och hög sysselsättning har stor betydelse för en stad. Ett starkt och diversifierat näringsliv säkrar arbetstillfällen över tid och bidrar till befolkningens välfärd. Landets tillväxt drivs till stor del av storstadsregionerna som konkurrerar om kompetens och kapital på en global marknad. Göteborgsregionen har därmed ett ansvar att ge näringslivet goda förutsättningar för tillväxt. Göteborg spelar en särskilt stor roll som regionens kärna.</p><br><p>Handeln omvandlas ständigt, ofta genom flera parallella trender. Exempelvis påverkar digitaliseringstrenden konsumenters inköpsvanor. Konsumenter är idag rörliga och väljer den kanal som bäst motsvarar önskemål om utbud och tillgänglighet. Därför behövs olika strategier för olika handelsplatser för att kommunens invånare och besökare ska få tillgång till attraktiv handel med hållbar mobilitet. </p>",
+          "mapSettings": {
+            "target": "map",
+            "center": [140700, 6399400],
+            "title": "Översiktsplan Göteborg",
+            "projection": "EPSG:3007",
+            "zoom": 1,
+            "maxZoom": 15,
+            "minZoom": 5,
+            "resolutions": [
+              70.00022,
+              28.00009,
+              14.00004,
+              7.000022,
+              2.800009,
+              1.400004,
+              0.700002,
+              0.280001,
+              0.14,
+              0.07
+            ],
+            "origin": [0, 0],
+            "extent": [110000, 6365000, 185000, 6425000],
+            "constrainOnlyCenter": false,
+            "logo": "/assets/logo.png",
+            "geoserverLegendOptions": "",
+            "mapselector": false,
+            "mapcleaner": true,
+            "drawerVisible": false,
+            "drawerPermanent": false,
+            "colors": {
+              "primaryColor": "#0076bc",
+              "secondaryColor": "#ffffff"
+            },
+            "defaultCookieNoticeMessage": "Vi använder cookies för att följa upp användandet och ge en bra upplevelse av kartan. Du kan blockera cookies i webbläsaren men då visas detta meddelande igen.",
+            "defaultCookieNoticeUrl": "https://pts.se/sv/bransch/regler/lagar/lag-om-elektronisk-kommunikation/kakor-cookies/"
+          },
+          "chapters": [],
+          "expanded": true
+        },
+        {
+          "header": "HÄLSOSAM LIVSMILJÖ",
+          "headerIdentifier": "{57427123-ef67-211212122112-b72f-d5a737e41cc2}",
+          "html": "<p>Göteborg ska vara en hälsosam stad att vistas i för sina invånare och besökare. Det förutsätter bland annat hälsosam luftkvalitet, goda ljudmiljöer, robust vattenförsörjning, att vi begränsar klimatpåverkan och anpassar oss till ett förändrat klimat. Olika risker i samhället måste hanteras på ett ansvarsfullt sätt i planering och byggande.</p>",
+          "mapSettings": {
+            "target": "map",
+            "center": [140700, 6399400],
+            "title": "Översiktsplan Göteborg",
+            "projection": "EPSG:3007",
+            "zoom": 1,
+            "maxZoom": 15,
+            "minZoom": 5,
+            "resolutions": [
+              70.00022,
+              28.00009,
+              14.00004,
+              7.000022,
+              2.800009,
+              1.400004,
+              0.700002,
+              0.280001,
+              0.14,
+              0.07
+            ],
+            "origin": [0, 0],
+            "extent": [110000, 6365000, 185000, 6425000],
+            "constrainOnlyCenter": false,
+            "logo": "/assets/logo.png",
+            "geoserverLegendOptions": "",
+            "mapselector": false,
+            "mapcleaner": true,
+            "drawerVisible": false,
+            "drawerPermanent": false,
+            "colors": {
+              "primaryColor": "#0076bc",
+              "secondaryColor": "#ffffff"
+            },
+            "defaultCookieNoticeMessage": "Vi använder cookies för att följa upp användandet och ge en bra upplevelse av kartan. Du kan blockera cookies i webbläsaren men då visas detta meddelande igen.",
+            "defaultCookieNoticeUrl": "https://pts.se/sv/bransch/regler/lagar/lag-om-elektronisk-kommunikation/kakor-cookies/"
+          },
+          "chapters": [],
+          "expanded": true
+        },
+        {
+          "header": "TEKNISK FÖRSÖRJNING",
+          "headerIdentifier": "{57427123-ef67-212121212121-d5a737e41cc2}",
+          "html": "<p>Teknisk försörjning med anläggningar för avfall, avlopp, vatten och energi är grundläggande infrastruktur.</p>",
+          "mapSettings": {
+            "target": "map",
+            "center": [140700, 6399400],
+            "title": "Översiktsplan Göteborg",
+            "projection": "EPSG:3007",
+            "zoom": 1,
+            "maxZoom": 15,
+            "minZoom": 5,
+            "resolutions": [
+              70.00022,
+              28.00009,
+              14.00004,
+              7.000022,
+              2.800009,
+              1.400004,
+              0.700002,
+              0.280001,
+              0.14,
+              0.07
+            ],
+            "origin": [0, 0],
+            "extent": [110000, 6365000, 185000, 6425000],
+            "constrainOnlyCenter": false,
+            "logo": "/assets/logo.png",
+            "geoserverLegendOptions": "",
+            "mapselector": false,
+            "mapcleaner": true,
+            "drawerVisible": false,
+            "drawerPermanent": false,
+            "colors": {
+              "primaryColor": "#0076bc",
+              "secondaryColor": "#ffffff"
+            },
+            "defaultCookieNoticeMessage": "Vi använder cookies för att följa upp användandet och ge en bra upplevelse av kartan. Du kan blockera cookies i webbläsaren men då visas detta meddelande igen.",
+            "defaultCookieNoticeUrl": "https://pts.se/sv/bransch/regler/lagar/lag-om-elektronisk-kommunikation/kakor-cookies/"
+          },
+          "chapters": [],
+          "expanded": true
+        },
+        {
+          "header": "MELLANKOMMUNALA OCH REGIONALA FRÅGOR",
+          "headerIdentifier": "{5742712313131313131337e41cc2}",
+          "html": "<p>Göteborg fungerar som motor för hela regionen. Den största delen av regionens arbetsmarknad ligger här. En stark kärna är en förutsättning för att Göteborg och regionen ska fortsätta ha en god tillväxt. Ju starkare den regionala kärnan är, desto bättre blir möjligheterna för tillväxt i orterna runt omkring.</p><br><p>Den ökande befolkningen innebär ökade krav på tillgänglighet inom staden och i regionen. </p><figure><img data-caption=\"Göteborgsregionens strukturbild\" data-source=\"\" src=\"/tematiska_inriktningar_4.png\"/></figure>",
+          "mapSettings": {
+            "target": "map",
+            "center": [140700, 6399400],
+            "title": "Översiktsplan Göteborg",
+            "projection": "EPSG:3007",
+            "zoom": 1,
+            "maxZoom": 15,
+            "minZoom": 5,
+            "resolutions": [
+              70.00022,
+              28.00009,
+              14.00004,
+              7.000022,
+              2.800009,
+              1.400004,
+              0.700002,
+              0.280001,
+              0.14,
+              0.07
+            ],
+            "origin": [0, 0],
+            "extent": [110000, 6365000, 185000, 6425000],
+            "constrainOnlyCenter": false,
+            "logo": "/assets/logo.png",
+            "geoserverLegendOptions": "",
+            "mapselector": false,
+            "mapcleaner": true,
+            "drawerVisible": false,
+            "drawerPermanent": false,
+            "colors": {
+              "primaryColor": "#0076bc",
+              "secondaryColor": "#ffffff"
+            },
+            "defaultCookieNoticeMessage": "Vi använder cookies för att följa upp användandet och ge en bra upplevelse av kartan. Du kan blockera cookies i webbläsaren men då visas detta meddelande igen.",
+            "defaultCookieNoticeUrl": "https://pts.se/sv/bransch/regler/lagar/lag-om-elektronisk-kommunikation/kakor-cookies/"
+          },
+          "chapters": [],
+          "expanded": true
+        }
+      ],
+      "expanded": true
+    }
+  ],
+  "map": "oversiktsplan"
+}

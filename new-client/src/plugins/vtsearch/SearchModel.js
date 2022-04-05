@@ -23,7 +23,7 @@ export default class SearchModel {
     this.mapColors = settings.mapColors;
   }
 
-  encodePercentForUrl = url => {
+  encodePercentForUrl = (url) => {
     return url.replace(/%/g, "%25");
   };
   /**
@@ -33,7 +33,7 @@ export default class SearchModel {
    *
    * @memberof SearchModel
    */
-  encodeCqlForGeoServer = cql => {
+  encodeCqlForGeoServer = (cql) => {
     return cql
       .replace(/\(/g, "%28")
       .replace(/\)/g, "%29")
@@ -49,11 +49,8 @@ export default class SearchModel {
    *
    * @memberof SearchModel
    */
-  encodeWktInCqlForGeoServer = wkt => {
-    return wkt
-      .replace(/\(/g, "%28")
-      .replace(/\)/g, "%29")
-      .replace(/ /g, "%20");
+  encodeWktInCqlForGeoServer = (wkt) => {
+    return wkt.replace(/\(/g, "%28").replace(/\)/g, "%29").replace(/ /g, "%20");
   };
 
   /**
@@ -64,7 +61,7 @@ export default class SearchModel {
    *
    * @memberof SearchModel
    */
-  encodeWktForGeoServer = wkt => {
+  encodeWktForGeoServer = (wkt) => {
     return this.encodeWktInCqlForGeoServer(wkt).replace(/,/g, "%5C,");
   };
 
@@ -75,7 +72,7 @@ export default class SearchModel {
    *
    * @memberof SearchModel
    */
-  encodeUrlForGeoServer = url => {
+  encodeUrlForGeoServer = (url) => {
     return url
       .replace(/å/g, "%C3%A5")
       .replace(/ä/g, "%C3%A4")
@@ -89,8 +86,8 @@ export default class SearchModel {
    *
    * @memberof SearchModel
    */
-  attributesToKeepFromSettings = attributesToDisplay => {
-    return attributesToDisplay.map(attribute => {
+  attributesToKeepFromSettings = (attributesToDisplay) => {
+    return attributesToDisplay.map((attribute) => {
       return attribute.key;
     });
   };
@@ -103,7 +100,7 @@ export default class SearchModel {
    *
    * @memberof SearchModel
    */
-  containsOnlyNumbers = stringValue => {
+  containsOnlyNumbers = (stringValue) => {
     // Checks for only digits.
     if (stringValue.match(/^[0-9]+$/) != null) return true;
 
@@ -119,7 +116,7 @@ export default class SearchModel {
    * @memberof SearchModel
    */
   removeUnnecessaryAttributes = (featureCollection, attributesToKeep) => {
-    featureCollection.features = featureCollection.features.map(feature => {
+    featureCollection.features = featureCollection.features.map((feature) => {
       let names = Object.keys(feature.properties);
       for (let indexName = 0; indexName < names.length; indexName++) {
         if (!attributesToKeep.includes(names[indexName]))
@@ -140,7 +137,7 @@ export default class SearchModel {
    *
    * @memberof SearchModel
    */
-  removeDuplicates = featureCollection => {
+  removeDuplicates = (featureCollection) => {
     let features = featureCollection.features;
     let uniqueArray = this.removeDuplicatedItems(features);
     featureCollection.features = uniqueArray;
@@ -156,7 +153,7 @@ export default class SearchModel {
    *
    * @memberof SearchModel
    */
-  removeDuplicatedItems = features => {
+  removeDuplicatedItems = (features) => {
     let uniqueArray = [];
     for (let indexFeature = 0; indexFeature < features.length; indexFeature++) {
       if (uniqueArray.indexOf(features[indexFeature]) === -1) {
@@ -263,11 +260,11 @@ export default class SearchModel {
       attributesToDisplay
     );
 
-    let fc = this.changeDisplayFormat(
+    let adjustedFeatureCollection = this.changeDisplayFormat(
       featureCollection,
       columnsToChangeDisplayFormat
     );
-    return featureCollection;
+    return adjustedFeatureCollection;
   }
 
   /**
@@ -277,11 +274,13 @@ export default class SearchModel {
    * @memberof SearchModel
    */
   getColumsToChangeDisplayFormatFor(attributesToDisplay) {
-    let columnsToChangeDisplayFormat = attributesToDisplay.filter(attribute => {
-      let attributeProperties = Object.keys(attribute);
-      if (attributeProperties.includes("displayFormat")) return true;
-      return false;
-    });
+    let columnsToChangeDisplayFormat = attributesToDisplay.filter(
+      (attribute) => {
+        let attributeProperties = Object.keys(attribute);
+        if (attributeProperties.includes("displayFormat")) return true;
+        return false;
+      }
+    );
 
     return columnsToChangeDisplayFormat;
   }
@@ -301,8 +300,8 @@ export default class SearchModel {
       columnsDisplayFormat
     );
 
-    featureCollection.features.forEach(feature => {
-      formatChangeNames.forEach(formatChangeName => {
+    featureCollection.features.forEach((feature) => {
+      formatChangeNames.forEach((formatChangeName) => {
         feature.properties[formatChangeName.key] = this.formatDate(
           feature.properties[formatChangeName.key],
           formatChangeName.displayFormat
@@ -324,7 +323,7 @@ export default class SearchModel {
     let firstFeature = featureCollection.features[0];
     let featurePropertyNames = Object.keys(firstFeature.properties);
     let formatChangeNames = columnsDisplayFormat.filter(
-      attributesToDisplayFormat => {
+      (attributesToDisplayFormat) => {
         for (
           let indexPropertyName = 0;
           indexPropertyName < featurePropertyNames.length;
@@ -335,6 +334,7 @@ export default class SearchModel {
             attributesToDisplayFormat.key
           )
             return true;
+        return false;
       }
     );
 
@@ -358,12 +358,12 @@ export default class SearchModel {
 
     let dateParts = dateFormat.split(/[^A-Za-z]/);
     let dateSeparators = dateFormat.split(/[A-Za-z]/);
-    dateSeparators = dateSeparators.filter(x => x);
+    dateSeparators = dateSeparators.filter((x) => x);
     let pointCounter = 0;
     let currentDateSeparator = dateSeparators.shift();
     let newDate = "";
     let answerDatePart;
-    dateParts.forEach(datePart => {
+    dateParts.forEach((datePart) => {
       answerDatePart = this.addDatePart(
         newDate,
         originalDate,
@@ -525,7 +525,7 @@ export default class SearchModel {
       dateUpdated: dateUpdated,
       newDate: newDate,
       pointCounter: pointCounter,
-      addedSeparator: addedSeparator
+      addedSeparator: addedSeparator,
     };
   }
 
@@ -537,7 +537,7 @@ export default class SearchModel {
    *
    * @memberof SearchModel
    */
-  swapWktCoordinatesForSqlServer = polygonAsWkt => {
+  swapWktCoordinatesForSqlServer = (polygonAsWkt) => {
     let { updatedWkt, remainingWkt } = this.removePolygonStartOfWkt(
       polygonAsWkt
     );
@@ -554,7 +554,7 @@ export default class SearchModel {
    *
    * @memberof SearchModel
    */
-  removePolygonStartOfWkt = polygonAsWkt => {
+  removePolygonStartOfWkt = (polygonAsWkt) => {
     let updatedWkt = "";
     const removeWktTypeText = "POLYGON((";
     const indexOfRemoveText = polygonAsWkt.indexOf(removeWktTypeText);
@@ -566,7 +566,7 @@ export default class SearchModel {
 
     const returnObject = {
       updatedWkt: updatedWkt,
-      remainingWkt: polygonAsWkt
+      remainingWkt: polygonAsWkt,
     };
 
     return returnObject;
@@ -579,7 +579,7 @@ export default class SearchModel {
    *
    * @memberof SearchModel
    */
-  addEndOfPolygonWkt = polygonAsWktWithoutEnding => {
+  addEndOfPolygonWkt = (polygonAsWktWithoutEnding) => {
     return polygonAsWktWithoutEnding + "))";
   };
 
@@ -614,7 +614,7 @@ export default class SearchModel {
 
     const returnObject = {
       updatedWkt: updatedWkt,
-      remainingWkt: remainingWkt
+      remainingWkt: remainingWkt,
     };
 
     return returnObject;
@@ -647,7 +647,7 @@ export default class SearchModel {
 
     const returnObject = {
       updatedWkt: updatedWkt,
-      remainingWkt: remainingWkt
+      remainingWkt: remainingWkt,
     };
 
     return returnObject;
@@ -673,9 +673,9 @@ export default class SearchModel {
     url = this.encodeUrlForGeoServer(url);
 
     return fetch(url)
-      .then(res => {
-        return res.json().then(jsonResult => {
-          let lineNumber = jsonResult.features.map(feature => {
+      .then((res) => {
+        return res.json().then((jsonResult) => {
+          let lineNumber = jsonResult.features.map((feature) => {
             return feature.properties.LineNumber;
           });
 
@@ -683,7 +683,7 @@ export default class SearchModel {
           return lineNumber;
         });
       })
-      .catch(err => {
+      .catch((err) => {
         console.log(err);
       });
   }
@@ -708,9 +708,9 @@ export default class SearchModel {
     url = this.encodeUrlForGeoServer(url);
 
     return fetch(url)
-      .then(res => {
-        return res.json().then(jsonResult => {
-          let publicLineNumber = jsonResult.features.map(feature => {
+      .then((res) => {
+        return res.json().then((jsonResult) => {
+          let publicLineNumber = jsonResult.features.map((feature) => {
             return feature.properties.PublicLineNumber;
           });
 
@@ -718,7 +718,7 @@ export default class SearchModel {
           return publicLineNumber;
         });
       })
-      .catch(err => {
+      .catch((err) => {
         console.log(err);
       });
   }
@@ -750,9 +750,9 @@ export default class SearchModel {
     url = this.encodeUrlForGeoServer(url);
 
     return fetch(url)
-      .then(res => {
-        return res.json().then(jsonResult => {
-          let stopAreaNameOrNumber = jsonResult.features.map(feature => {
+      .then((res) => {
+        return res.json().then((jsonResult) => {
+          let stopAreaNameOrNumber = jsonResult.features.map((feature) => {
             if (isStopAreaNumber) return feature.properties.Number;
 
             return feature.properties.Name;
@@ -761,7 +761,7 @@ export default class SearchModel {
           if (isStopAreaNumber) {
             stopAreaNameOrNumber = stopAreaNameOrNumber.sort((a, b) => a - b);
           } else {
-            stopAreaNameOrNumber = stopAreaNameOrNumber.sort(function(a, b) {
+            stopAreaNameOrNumber = stopAreaNameOrNumber.sort(function (a, b) {
               return a.localeCompare(b);
             });
           }
@@ -770,7 +770,7 @@ export default class SearchModel {
           return stopAreaNameOrNumber;
         });
       })
-      .catch(err => {
+      .catch((err) => {
         console.log(err);
       });
   }
@@ -785,16 +785,16 @@ export default class SearchModel {
   fetchAllPossibleMunicipalityZoneNames(addEmptyMunicipality = true) {
     const url = this.geoServer.municipalityZoneNames.url;
     return fetch(url)
-      .then(res => {
-        return res.json().then(jsonResult => {
-          let municipalityNames = jsonResult.features.map(feature => {
+      .then((res) => {
+        return res.json().then((jsonResult) => {
+          let municipalityNames = jsonResult.features.map((feature) => {
             return {
               name: feature.properties.Name,
-              gid: feature.properties.Gid
+              gid: feature.properties.Gid,
             };
           });
 
-          municipalityNames = municipalityNames.sort(function(a, b) {
+          municipalityNames = municipalityNames.sort(function (a, b) {
             return a.name.localeCompare(b.name);
           });
 
@@ -804,7 +804,7 @@ export default class SearchModel {
           return municipalityNames;
         });
       })
-      .catch(err => {
+      .catch((err) => {
         console.log(err);
       });
   }
@@ -818,13 +818,13 @@ export default class SearchModel {
    */
   fetchAllPossibleTransportModeTypeNames(addEmptyTransportMode = true) {
     this.localObserver.publish("transportModeTypeNames-result-begin", {
-      label: this.geoServer.transportModeTypeNames.searchLabel
+      label: this.geoServer.transportModeTypeNames.searchLabel,
     });
 
     const url = this.geoServer.transportModeTypeNames.url;
-    return fetch(url).then(res => {
-      return res.json().then(jsonResult => {
-        let transportModeTypes = jsonResult.features.map(feature => {
+    return fetch(url).then((res) => {
+      return res.json().then((jsonResult) => {
+        let transportModeTypes = jsonResult.features.map((feature) => {
           return feature.properties.Name;
         });
 
@@ -845,7 +845,7 @@ export default class SearchModel {
    */
   getJourneys(filterOnFromDate, filterOnToDate, filterOnWkt) {
     this.localObserver.publish("vtsearch-result-begin", {
-      label: this.geoServer.journeys.searchLabel
+      label: this.geoServer.journeys.searchLabel,
     });
 
     // Fix parentheses and so on, so that the WKT are GeoServer valid.
@@ -864,12 +864,12 @@ export default class SearchModel {
     url = this.encodeUrlForGeoServer(url);
 
     fetch(url)
-      .then(res => {
-        res.json().then(jsonResult => {
+      .then((res) => {
+        res.json().then((jsonResult) => {
           let journeys = {
             featureCollection: jsonResult,
             label: this.geoServer.journeys.searchLabel,
-            type: "journeys"
+            type: "journeys",
           };
 
           journeys.featureCollection = this.removeUnnecessaryAttributes(
@@ -890,7 +890,7 @@ export default class SearchModel {
           this.localObserver.publish("vtsearch-result-done", journeys);
         });
       })
-      .catch(err => {
+      .catch((err) => {
         console.log(err);
       });
   }
@@ -915,7 +915,7 @@ export default class SearchModel {
     polygonAsWkt
   ) {
     this.localObserver.publish("vtsearch-result-begin", {
-      label: this.geoServer.routes.searchLabel
+      label: this.geoServer.routes.searchLabel,
     });
 
     if (polygonAsWkt)
@@ -976,12 +976,12 @@ export default class SearchModel {
     url = this.encodeUrlForGeoServer(url);
 
     fetch(url)
-      .then(res => {
-        res.json().then(jsonResult => {
+      .then((res) => {
+        res.json().then((jsonResult) => {
           const routes = {
             featureCollection: jsonResult,
             label: this.geoServer.routes.searchLabel,
-            type: "routes"
+            type: "routes",
           };
 
           routes.featureCollection = this.removeUnnecessaryAttributes(
@@ -997,7 +997,7 @@ export default class SearchModel {
           this.localObserver.publish("vtsearch-result-done", routes);
         });
       })
-      .catch(err => {
+      .catch((err) => {
         console.log(err);
       });
   }
@@ -1018,7 +1018,7 @@ export default class SearchModel {
     filterOnWkt
   ) {
     this.localObserver.publish("vtsearch-result-begin", {
-      label: this.geoServer.stopAreas.searchLabel
+      label: this.geoServer.stopAreas.searchLabel,
     });
 
     // Fix parentheses and so on, so that the WKT are GeoServer valid.
@@ -1047,14 +1047,14 @@ export default class SearchModel {
       url = url + viewParams;
     url = this.encodeUrlForGeoServer(url);
 
-    fetch(url).then(res => {
+    fetch(url).then((res) => {
       res
         .json()
-        .then(jsonResult => {
+        .then((jsonResult) => {
           let stopAreas = {
             featureCollection: jsonResult,
             label: this.geoServer.stopAreas.searchLabel,
-            type: "stopAreas"
+            type: "stopAreas",
           };
 
           stopAreas.featureCollection = this.removeUnnecessaryAttributes(
@@ -1069,7 +1069,7 @@ export default class SearchModel {
 
           this.localObserver.publish("vtsearch-result-done", stopAreas);
         })
-        .catch(err => {
+        .catch((err) => {
           console.log(err);
         });
     });
@@ -1091,7 +1091,7 @@ export default class SearchModel {
     filterOnWkt
   ) {
     this.localObserver.publish("vtsearch-result-begin", {
-      label: this.geoServer.stopPoints.searchLabel
+      label: this.geoServer.stopPoints.searchLabel,
     });
 
     // Fix parentheses and so on, so that the WKT are GeoServer valid.
@@ -1120,14 +1120,14 @@ export default class SearchModel {
       url = url + viewParams;
     url = this.encodeUrlForGeoServer(url);
 
-    fetch(url).then(res => {
+    fetch(url).then((res) => {
       res
         .json()
-        .then(jsonResult => {
+        .then((jsonResult) => {
           let stopPoints = {
             featureCollection: jsonResult,
             label: this.geoServer.stopPoints.searchLabel,
-            type: "stopPoints"
+            type: "stopPoints",
           };
 
           stopPoints.featureCollection = this.removeUnnecessaryAttributes(
@@ -1142,7 +1142,7 @@ export default class SearchModel {
 
           this.localObserver.publish("vtsearch-result-done", stopPoints);
         })
-        .catch(err => {
+        .catch((err) => {
           console.log(err);
         });
     });

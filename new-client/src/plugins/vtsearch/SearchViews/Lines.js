@@ -7,7 +7,7 @@ import {
   Typography,
   Divider,
   Grid,
-  FormControl
+  FormControl,
 } from "@material-ui/core";
 import Select from "@material-ui/core/Select";
 import MenuItem from "@material-ui/core/MenuItem";
@@ -17,19 +17,19 @@ import ActivePolygon from "../img/polygonmarkering-blue.png";
 import ActiveRectangle from "../img/rektangelmarkering-blue.png";
 
 // Define JSS styles that will be used in this component.
-// Examle below utilizes the very powerful "theme" object
+// Example below utilizes the very powerful "theme" object
 // that gives access to some constants, see: https://material-ui.com/customization/default-theme/
 
-const styles = theme => ({
+const styles = (theme) => ({
   searchButton: { marginTop: 8, borderColor: theme.palette.primary.main },
-  divider: { margin: theme.spacing(3, 3) },
+  divider: { marginTop: theme.spacing(3), marginBottom: theme.spacing(3) },
   textFields: { marginLeft: 10 },
   fontSize: { fontSize: 12 },
   polygonAndRectangle: {
-    marginLeft: 10
+    marginLeft: 10,
   },
   firstMenuItem: { minHeight: 36 },
-  searchButtonText: { color: theme.palette.primary.main }
+  searchButtonText: { color: theme.palette.primary.main },
 });
 
 //TODO - Only mockup //Tobias
@@ -43,7 +43,7 @@ class Lines extends React.PureComponent {
     municipality: "",
     trafficTransports: [],
     trafficTransport: "",
-    throughStopArea: ""
+    throughStopArea: "",
   };
 
   // propTypes and defaultProps are static properties, declared
@@ -54,7 +54,7 @@ class Lines extends React.PureComponent {
     model: PropTypes.object.isRequired,
     app: PropTypes.object.isRequired,
     localObserver: PropTypes.object.isRequired,
-    classes: PropTypes.object.isRequired
+    classes: PropTypes.object.isRequired,
   };
 
   static defaultProps = {};
@@ -67,13 +67,13 @@ class Lines extends React.PureComponent {
     this.localObserver = this.props.localObserver;
     this.globalObserver = this.props.app.globalObserver;
     this.bindSubscriptions();
-    this.model.fetchAllPossibleMunicipalityZoneNames().then(result => {
+    this.model.fetchAllPossibleMunicipalityZoneNames().then((result) => {
       this.setState({
-        municipalities: result.length > 0 ? result : []
+        municipalities: result?.length > 0 ? result : [],
       });
-      this.model.fetchAllPossibleTransportModeTypeNames().then(result => {
+      this.model.fetchAllPossibleTransportModeTypeNames().then((result) => {
         this.setState({
-          trafficTransports: result.length > 0 ? result : []
+          trafficTransports: result.length > 0 ? result : [],
         });
       });
     });
@@ -110,17 +110,17 @@ class Lines extends React.PureComponent {
       internalLineNumber: "",
       municipality: "",
       trafficTransport: "",
-      throughStopArea: ""
+      throughStopArea: "",
     });
   };
 
-  searchButtonClick = () => {
+  doSearch = () => {
     const {
       publicLineName,
       internalLineNumber,
       municipality,
       trafficTransport,
-      throughStopArea
+      throughStopArea,
     } = this.state;
     this.localObserver.publish("routes-search", {
       publicLineName: publicLineName,
@@ -129,7 +129,7 @@ class Lines extends React.PureComponent {
       trafficTransport: trafficTransport,
       throughStopArea: throughStopArea,
       selectedFormType: "",
-      searchCallback: this.clearSearchInputAndButtons
+      searchCallback: this.clearSearchInputAndButtons,
     });
   };
 
@@ -139,12 +139,12 @@ class Lines extends React.PureComponent {
       internalLineNumber,
       municipality,
       trafficTransport,
-      throughStopArea
+      throughStopArea,
     } = this.state;
     if (!this.state.isPolygonActive) {
-      this.localObserver.publish("deactivate-search", () => {});
+      this.localObserver.publish("activate-search", () => {});
     }
-    if (this.state.isPolygonActive && this.state.isRectangleActive) {
+    if (this.state.isPolygonActive || this.state.isRectangleActive) {
       this.localObserver.publish("deactivate-search", () => {});
       this.setState({ isRectangleActive: false });
     }
@@ -156,22 +156,23 @@ class Lines extends React.PureComponent {
         trafficTransport: trafficTransport,
         throughStopArea: throughStopArea,
         selectedFormType: "Polygon",
-        searchCallback: this.inactivateSpatialSearchButtons
+        searchCallback: this.inactivateSpatialSearchButtons,
       });
     }
   };
+
   handleRectangleClick = () => {
     const {
       publicLineName,
       internalLineNumber,
       municipality,
       trafficTransport,
-      throughStopArea
+      throughStopArea,
     } = this.state;
     if (!this.state.isRectangleActive) {
-      this.localObserver.publish("deactivate-search", () => {});
+      this.localObserver.publish("activate-search", () => {});
     }
-    if (this.state.isRectangleActive && this.state.isPolygonActive) {
+    if (this.state.isRectangleActive || this.state.isPolygonActive) {
       this.localObserver.publish("deactivate-search", () => {});
       this.setState({ isPolygonActive: false });
     }
@@ -183,35 +184,45 @@ class Lines extends React.PureComponent {
         trafficTransportName: trafficTransport,
         throughStopArea: throughStopArea,
         selectedFormType: "Box",
-        searchCallback: this.inactivateSpatialSearchButtons
+        searchCallback: this.inactivateSpatialSearchButtons,
       });
     }
   };
 
-  handleInternalLineNrChange = event => {
+  handleInternalLineNrChange = (event) => {
     this.setState({
-      internalLineNumber: event.target.value
+      internalLineNumber: event.target.value,
     });
   };
-  handlePublicLineNameChange = event => {
+
+  handlePublicLineNameChange = (event) => {
     this.setState({
-      publicLineName: event.target.value
+      publicLineName: event.target.value,
     });
   };
-  handleMunicipalChange = e => {
+
+  handleMunicipalChange = (e) => {
     this.setState({
-      municipality: e.target.value
+      municipality: e.target.value,
     });
   };
-  handleTrafficTransportChange = e => {
+
+  handleTrafficTransportChange = (e) => {
     this.setState({
-      trafficTransport: e.target.value
+      trafficTransport: e.target.value,
     });
   };
-  handleThroughStopAreaChange = event => {
+
+  handleThroughStopAreaChange = (event) => {
     this.setState({
-      throughStopArea: event.target.value
+      throughStopArea: event.target.value,
     });
+  };
+
+  handleKeyPress = (event) => {
+    if (event.key === "Enter") {
+      this.doSearch();
+    }
   };
 
   renderPublicAndTechnicalNrSection = () => {
@@ -328,7 +339,7 @@ class Lines extends React.PureComponent {
       <Grid item xs={12}>
         <Button
           className={classes.searchButton}
-          onClick={this.searchButtonClick}
+          onClick={this.doSearch}
           variant="outlined"
         >
           <Typography className={classes.searchButtonText}>SÖK</Typography>
@@ -387,7 +398,12 @@ class Lines extends React.PureComponent {
   render() {
     return (
       <div>
-        <Grid container justify="center" spacing={2}>
+        <Grid
+          container
+          justify="center"
+          spacing={2}
+          onKeyPress={this.handleKeyPress}
+        >
           {this.renderPublicAndTechnicalNrSection()}
           {this.renderInputValueSection()}
           {this.renderTrafficTypeSection()}

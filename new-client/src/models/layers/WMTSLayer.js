@@ -27,20 +27,20 @@ var wmtsLayerProperties = {
     "9",
     "10",
     "11",
-    "12"
+    "12",
   ],
-  attribution: ""
+  attribution: "",
 };
 
 class WMTSLayer {
   constructor(config, proxyUrl, map) {
     config = {
       ...wmtsLayerProperties,
-      ...config
+      ...config,
     };
     this.proxyUrl = proxyUrl;
     this.map = map;
-    this.resolutions = this.resolutions = config.resolutions.map(r =>
+    this.resolutions = this.resolutions = config.resolutions.map((r) =>
       Number(r)
     );
     this.projection = config.projection;
@@ -54,19 +54,20 @@ class WMTSLayer {
         format: "image/png",
         wrapX: false,
         url: config.url,
+        crossOrigin: config.crossOrigin,
         axisMode: config.axisMode,
         layer: config.layer,
         matrixSet: config.matrixSet,
         style: config.style,
         projection: this.projection,
         tileGrid: new WMTSTileGrid({
-          origin: config.origin.map(o => Number(o)),
+          origin: config.origin.map((o) => Number(o)),
           resolutions: this.resolutions,
           matrixIds: config.matrixIds,
-          extent: config.extent
-        })
+          extent: config.extent,
+        }),
       }),
-      layerInfo: new LayerInfo(config)
+      layerInfo: new LayerInfo(config),
     });
     this.updateMapViewResolutions();
     this.type = "wmts";
@@ -78,8 +79,9 @@ class WMTSLayer {
       new View({
         zoom: view.getZoom(),
         center: view.getCenter(),
+        constrainResolution: view.getConstrainResolution(),
         resolutions: this.resolutions,
-        projection: this.projection
+        projection: this.projection,
       })
     );
   }

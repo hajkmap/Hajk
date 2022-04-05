@@ -11,7 +11,43 @@ import {
 //import { Editor } from "draft-extend";
 import { stateToHTML } from "draft-js-export-html";
 import { stateFromHTML } from "draft-js-import-html";
+import Button from "@material-ui/core/Button";
+import DoneIcon from "@material-ui/icons/DoneOutline";
+import AddIcon from "@material-ui/icons/Add";
+import CancelIcon from "@material-ui/icons/Cancel";
+import EditIcon from "@material-ui/icons/Edit";
+import { withStyles } from "@material-ui/core/styles";
+import { red, green, blue } from "@material-ui/core/colors";
 
+const ColorButtonRed = withStyles(theme => ({
+  root: {
+    color: theme.palette.getContrastText(red[500]),
+    backgroundColor: red[500],
+    "&:hover": {
+      backgroundColor: red[700]
+    }
+  }
+}))(Button);
+
+const ColorButtonGreen = withStyles(theme => ({
+  root: {
+    color: theme.palette.getContrastText(green[700]),
+    backgroundColor: green[500],
+    "&:hover": {
+      backgroundColor: green[700]
+    }
+  }
+}))(Button);
+
+const ColorButtonBlue = withStyles(theme => ({
+  root: {
+    color: theme.palette.getContrastText(blue[500]),
+    backgroundColor: blue[500],
+    "&:hover": {
+      backgroundColor: blue[700]
+    }
+  }
+}))(Button);
 class StyleButton extends React.Component {
   constructor() {
     super();
@@ -159,24 +195,21 @@ class ImageButton extends Component {
       color: "black",
       marginBottom: "5px"
     };
-    var styleBtn = {
-      position: "relative",
-      top: "-2px"
-    };
     if (this.state.urlInputVisible) {
       return (
         <div style={style}>
           <input type="text" name="url" onChange={e => this.urlChanged(e)} />
           &nbsp;
-          <span
-            className="btn btn-default"
-            style={styleBtn}
+          <ColorButtonGreen
+            variant="contained"
+            className="btn"
             onClick={() => {
               this.addImage();
             }}
+            startIcon={<AddIcon />}
           >
             Lägg till
-          </span>
+          </ColorButtonGreen>
         </div>
       );
     } else {
@@ -313,7 +346,17 @@ class RichEditor extends Component {
     };
   }
 
-  handlePastedText = (text, html) => {
+  handlePastedText = (text = "", html) => {
+    // If clipboard contains unformatted text, the first parameter
+    // is used, while the second is empty. In the code below, we
+    // only take care for the second parameter. So to handle
+    // those cases where unformatted text is pasted in, we must
+    // ensure that the second paramter always is defined.
+    // That can be done by copying the contents of the first parameter
+    // if the second parameter is empty/undefined.
+    if (html?.trim().length === 0 || html === undefined) {
+      html = text;
+    }
     const { editorState } = this.state;
     const generatedState = stateFromHTML(html);
     const generatedHtml = stateToHTML(generatedState);
@@ -367,32 +410,38 @@ class RichEditor extends Component {
     }
     if (this.state.readonly) {
       return (
-        <div>
-          <div
-            className="btn btn-primary margined"
+        <div className="margined">
+          <ColorButtonBlue
+            variant="contained"
+            className="btn"
             onClick={() => this.toggleReadonly()}
+            startIcon={<EditIcon />}
           >
             Redigera text
-          </div>
+          </ColorButtonBlue>
           <div dangerouslySetInnerHTML={this.createMarkup(this.state.html)} />
         </div>
       );
     } else {
       return (
-        <div>
-          <div
-            className="btn btn-primary margined"
+        <div className="margined">
+          <ColorButtonGreen
+            variant="contained"
+            className="btn"
             onClick={() => this.toggleReadonly()}
+            startIcon={<DoneIcon />}
           >
             Ok
-          </div>
+          </ColorButtonGreen>
           &nbsp;
-          <div
-            className="btn btn-danger margined"
+          <ColorButtonRed
+            variant="contained"
+            className="btn btn-danger"
             onClick={() => this.cancel()}
+            startIcon={<CancelIcon />}
           >
             Avbryt
-          </div>
+          </ColorButtonRed>
           <div className="RichEditor-root">
             <ImageButton addImage={url => this.addImage(url)} />
             <BlockStyleControls

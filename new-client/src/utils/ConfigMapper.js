@@ -19,7 +19,7 @@ export default class ConfigMapper {
         // First get index if we're dealing with array
         let getIndex =
           args.layersInfo !== null
-            ? args.layersInfo.findIndex(l => l.id === layer)
+            ? args.layersInfo.findIndex((l) => l.id === layer)
             : null;
         // Next, use that index to grab correct style and save its name for later use
         let style =
@@ -38,10 +38,7 @@ export default class ConfigMapper {
           ? "LEGEND_OPTIONS=" + properties.mapConfig.map.geoserverLegendOptions
           : "";
 
-        // TODO: Make width and height of WMS legend graphics customizable via admin
-        const w = 30;
-        const h = 30;
-        legendUrl = `${proxy}${args.url}?REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&WIDTH=${w}&HEIGHT=${h}&LAYER=${layer}&STYLE=${style}&${geoserverLegendOptions}`;
+        legendUrl = `${proxy}${args.url}?REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&LAYER=${layer}&STYLE=${style}&${geoserverLegendOptions}`;
       }
       // If there's a legend URL specified in admin, use it as is
       else {
@@ -54,21 +51,25 @@ export default class ConfigMapper {
     }
 
     function getLegends() {
-      return args.layers.map(layer => {
+      return args.layers.map((layer) => {
         return {
           url: getLegendUrl(layer),
-          description: "Teckenförklaring"
+          description: "Teckenförklaring",
         };
       });
     }
 
-    function mapLayersInfo(layersInfo) {
+    function mapLayersInfo(layersInfo, infobox) {
       if (Array.isArray(layersInfo)) {
         return layersInfo.reduce((layersInfoObject, layerInfo) => {
           layersInfoObject[layerInfo.id] = layerInfo;
           if (!layerInfo.legend) {
             layersInfoObject[layerInfo.id].legend = getLegendUrl(layerInfo.id);
           }
+          if (infobox?.length) {
+            layersInfoObject[layerInfo.id].infobox = infobox;
+          }
+
           return layersInfoObject;
         }, {});
       }
@@ -90,7 +91,7 @@ export default class ConfigMapper {
       projection = new Projection({
         code: projCode,
         axisOrientation: "neu",
-        extent: properties.mapConfig.map.extent
+        extent: properties.mapConfig.map.extent,
       });
     }
 
@@ -115,6 +116,7 @@ export default class ConfigMapper {
         singleTile: args.singleTile || false,
         imageFormat: args.imageFormat || "image/png",
         serverType: args.serverType || "geoserver",
+        crossOrigin: properties.mapConfig.map.crossOrigin || "anonymous",
         attribution: args.attribution,
         searchUrl: args.searchUrl,
         searchPropertyName: args.searchPropertyName,
@@ -122,25 +124,28 @@ export default class ConfigMapper {
         searchOutputFormat: args.searchOutputFormat,
         searchGeometryField: args.searchGeometryField,
         legend: getLegends(),
+        legendIcon: args.legendIcon,
         params: {
           LAYERS: args.layers.join(","),
+          ...(args.cqlFilter && { CQL_FILTER: args.cqlFilter }), // nice way to add property only if needed
           FORMAT: args.imageFormat,
           INFO_FORMAT: args.infoFormat,
           VERSION: args.version || "1.1.1",
           [srsOrCrs]: projection || "EPSG:3006",
           TILED: args.tiled,
           STYLES: Array.isArray(args.layersInfo)
-            ? args.layersInfo.map(l => l.style || "").join(",")
-            : null
+            ? args.layersInfo.map((l) => l.style || "").join(",")
+            : null,
         },
-        layersInfo: mapLayersInfo(args.layersInfo),
+        layersInfo: mapLayersInfo(args.layersInfo, args.infobox),
         infoVisible: args.infoVisible || false,
         infoTitle: args.infoTitle,
         infoText: args.infoText,
         infoUrl: args.infoUrl,
         infoUrlText: args.infoUrlText,
-        infoOwner: args.infoOwner
-      }
+        infoOwner: args.infoOwner,
+        hideExpandArrow: args.hideExpandArrow,
+      },
     };
 
     if (args.searchFields && args.searchFields[0]) {
@@ -152,7 +157,7 @@ export default class ConfigMapper {
         displayName: args.displayFields
           ? args.displayFields
           : args.searchFields[0] || "Sökträff",
-        srsName: properties.mapConfig.map.projection || "EPSG:3006"
+        srsName: properties.mapConfig.map.projection || "EPSG:3006",
       };
     }
 
@@ -172,6 +177,7 @@ export default class ConfigMapper {
         queryable: false,
         opacity: args.opacity || 1,
         format: "image/png",
+        crossOrigin: properties.mapConfig.map.crossOrigin || "anonymous",
         wrapX: false,
         url: args.url,
         layer: args.layer,
@@ -183,13 +189,15 @@ export default class ConfigMapper {
         matrixIds: args.matrixIds,
         attribution: args.attribution,
         legend: args.legend,
+        legendIcon: args.legendIcon,
         infoVisible: args.infoVisible || false,
         infoTitle: args.infoTitle,
         infoText: args.infoText,
         infoUrl: args.infoUrl,
         infoUrlText: args.infoUrlText,
-        infoOwner: args.infoOwner
-      }
+        infoOwner: args.infoOwner,
+        hideExpandArrow: args.hideExpandArrow,
+      },
     };
     return config;
   }
@@ -207,8 +215,8 @@ export default class ConfigMapper {
         opacity: 1,
         queryable: args.queryable !== false,
         extent: args.extent,
-        projection: args.projection
-      }
+        projection: args.projection,
+      },
     };
 
     return config;
@@ -218,65 +226,57 @@ export default class ConfigMapper {
     var config = {
       type: "vector",
       options: {
-        id: args.id,
-        dataFormat: args.dataFormat,
-        name: args.id,
-        layerType: args.layerType,
+        attribution: args.attribution,
         caption: args.caption,
-        visible: args.visibleAtStart,
-        opacity: args.opacity,
-        serverType: "arcgis",
-        loadType: "ajax",
-        projection: args.projection,
-        fillColor: args.fillColor,
-        lineColor: args.lineColor,
-        lineStyle: args.lineStyle,
-        lineWidth: args.lineWidth,
-        url: args.url,
-        queryable: args.queryable,
+        content: args.content,
+        dataFormat: args.dataFormat,
         filterable: args.filterable,
-        information: args.infobox,
-        icon: args.legend,
-        symbolXOffset: args.symbolXOffset,
-        symbolYOffset: args.symbolYOffset,
-        pointSize: args.pointSize,
-        filterComparer: args.filterComparer,
         filterAttribute: args.filterAttribute,
+        filterComparer: args.filterComparer,
         filterValue: args.filterValue,
-        labelAlign: args.labelAlign,
-        labelBaseline: args.labelBaseline,
-        labelSize: args.labelSize,
-        labelOffsetX: args.labelOffsetX,
-        labelOffsetY: args.labelOffsetY,
-        labelWeight: args.labelWeight,
-        labelFont: args.labelFont,
-        labelFillColor: args.labelFillColor,
-        labelOutlineColor: args.labelOutlineColor,
-        labelOutlineWidth: args.labelOutlineWidth,
-        labelAttribute: args.labelAttribute,
-        showLabels: args.showLabels,
-        featureId: "FID",
+        icon: args.legend,
+        id: args.id,
+        infoOwner: args.infoOwner,
+        information: args.infobox,
+        infoText: args.infoText,
+        infoTitle: args.infoTitle,
+        infoUrl: args.infoUrl,
+        infoUrlText: args.infoUrlText,
+        infoVisible: args.infoVisible || false,
+        layerType: args.layerType,
         legend: [
           {
             url: args.legend,
-            description: args.caption
-          }
+            description: args.caption,
+          },
         ],
+        legendIcon: args.legendIcon,
+        maxZoom: args.maxZoom,
+        minZoom: args.minZoom,
+        name: args.id,
+        opacity: args.opacity,
         params: {
           service: "WFS",
-          version: "1.1.0",
           request: "GetFeature",
+          version: args.version || "1.1.0",
+          outputFormat:
+            args.dataFormat === "GeoJSON" // If GeoJSON,
+              ? "application/json" // set correct outputFormat (see https://docs.geoserver.org/latest/en/user/services/wfs/outputformats.html)
+              : args.version === "1.0.0" // else (if dataFormat is not GeoJSON), check which WFS version we have and
+              ? "GML2" // use the GML2 parser for WFS 1.0.0, or
+              : "GML3", // GML3 for version > 1.0.0 (again, see above link).
           typename: args.layer,
           srsname: args.projection,
-          bbox: ""
+          bbox: "",
         },
-        infoVisible: args.infoVisible || false,
-        infoTitle: args.infoTitle,
-        infoText: args.infoText,
-        infoUrl: args.infoUrl,
-        infoUrlText: args.infoUrlText,
-        infoOwner: args.infoOwner
-      }
+        projection: args.projection,
+        queryable: args.queryable,
+        sldStyle: args.sldStyle,
+        sldText: args.sldText,
+        sldUrl: args.sldUrl,
+        url: args.url,
+        visible: args.visibleAtStart,
+      },
     };
 
     return config;
@@ -311,21 +311,22 @@ export default class ConfigMapper {
         opacity: args.opacity,
         attribution: args.attribution,
         params: {
-          LAYERS: "show:" + args.layers.join(",")
+          LAYERS: "show:" + args.layers.join(","),
         },
         legend: [
           {
             url: getLegendUrl(args),
-            description: "Teckenförklaring"
-          }
+            description: "Teckenförklaring",
+          },
         ],
         infoVisible: args.infoVisible || false,
         infoTitle: args.infoTitle,
         infoText: args.infoText,
         infoUrl: args.infoUrl,
         infoUrlText: args.infoUrlText,
-        infoOwner: args.infoOwner
-      }
+        infoOwner: args.infoOwner,
+        hideExpandArrow: args.hideExpandArrow,
+      },
     };
 
     return config;

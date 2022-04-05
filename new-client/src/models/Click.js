@@ -5,41 +5,36 @@ import ImageLayer from "ol/layer/Image";
 import WMSGetFeatureInfo from "ol/format/WMSGetFeatureInfo";
 
 const fetchConfig = {
-  credentials: "same-origin"
+  credentials: "same-origin",
 };
 
 function query(map, layer, evt) {
-  let coordinate = evt.coordinate;
-
-  let resolution = map.getView().getResolution();
-
+  const coordinate = evt.coordinate;
+  const resolution = map.getView().getResolution();
+  const referenceSystem = map.getView().getProjection().getCode();
   let subLayersToQuery = [];
-  let referenceSystem = map
-    .getView()
-    .getProjection()
-    .getCode();
 
   if (layer.layersInfo) {
-    let subLayers = Object.values(layer.layersInfo);
-    let visibleSubLayers = layer.getSource().getParams()["LAYERS"];
+    const subLayers = Object.values(layer.layersInfo);
+    const visibleSubLayers = layer.getSource().getParams()["LAYERS"];
     subLayersToQuery = subLayers
       .filter(
-        subLayer =>
+        (subLayer) =>
           subLayer.queryable === true && visibleSubLayers.includes(subLayer.id)
       ) // QUERY_LAYERS must not include anything that's not in LAYERS, see https://github.com/hajkmap/Hajk/issues/211
-      .map(queryableSubLayer => {
+      .map((queryableSubLayer) => {
         return queryableSubLayer.id;
       });
   }
 
   if (subLayersToQuery.length > 0) {
-    let params = {
+    const params = {
       FEATURE_COUNT: 100,
       INFO_FORMAT: layer.getSource().getParams().INFO_FORMAT,
-      QUERY_LAYERS: subLayersToQuery.join(",")
+      QUERY_LAYERS: subLayersToQuery.join(","),
     };
 
-    let url = layer
+    const url = layer
       .getSource()
       .getFeatureInfoUrl(coordinate, resolution, referenceSystem, params);
     return fetch(url, fetchConfig);
@@ -51,7 +46,7 @@ function query(map, layer, evt) {
 function getFeaturesFromJson(response, jsonData) {
   let parsed = new GeoJSON().readFeatures(jsonData);
   if (parsed.length > 0) {
-    parsed.forEach(f => {
+    parsed.forEach((f) => {
       f.layer = response.layer;
     });
     return parsed;
@@ -65,7 +60,7 @@ function getFeaturesFromGml(response, text) {
   //let doc = new DOMParser().parseFromString(text, "text/xml");
   let parsed = wmsGetFeatureInfo.readFeatures(text);
   if (parsed.length > 0) {
-    parsed.forEach(f => {
+    parsed.forEach((f) => {
       f.layer = response.layer;
     });
     return parsed;
@@ -76,46 +71,47 @@ function getFeaturesFromGml(response, text) {
 
 /**
  * Query the map for features when the user clicks the map.
- * The approach is to stack all the queryable WMS-requests and return a promise with a pointer to the reffering layer.
+ * The approach is to stack all the queryable WMS-requests and return a promise with a pointer to the referring layer.
  * When the requests are done the features are parsed and given the original layer reference.
  * Vector layers are added with the features at pixel method and given the original layer reference as well.
  */
 export function handleClick(evt, map, callback) {
-  // TODO: Remove this temporary fix for OL6 beta when no longer necessary
-  // if (evt.originalEvent.target.className !== "ol-unselectable") {
-  //   return;
-  // }
-
   document.querySelector("body").style.cursor = "progress";
-  var promises = [];
+  const promises = [];
   map
     .getLayers()
     .getArray()
-    .filter(layer => {
-      return (
+    // Now we have an array with all layers added to our map, let's narrow down a bit
+    .filter(
+      (layer) =>
+        // Only certain layer types are relevant
         (layer instanceof TileLayer || layer instanceof ImageLayer) &&
+        // And only if they're currently visible (no reason to query hidden layers)
         layer.get("visible") === true
-      );
-    })
-    .forEach(layer => {
-      var promise = query(map, layer, evt);
-      if (promise) {
+    )
+    // For each layer that's left in the array
+    .forEach((layer) => {
+      // Query the layer, will return a Promise (Fetch call)
+      // or false, if there was no need to fetch.
+      const promise = query(map, layer, evt);
+      // If query() didn't return false, we have a real Promise
+      if (promise !== false) {
         promises.push(
-          promise.then(response => {
+          promise.then((response) => {
             return {
               layer: layer,
-              requestResponse: response
+              requestResponse: response,
             };
           })
         );
       }
     });
 
-  Promise.all(promises).then(responses => {
-    var featurePromises = [];
-    var features = [];
-    responses.forEach(response => {
-      var type = response.requestResponse.headers
+  Promise.all(promises).then((responses) => {
+    const featurePromises = [];
+    const features = [];
+    responses.forEach((response) => {
+      const type = response.requestResponse.headers
         .get("Content-Type")
         .split(";")[0];
       switch (type) {
@@ -124,7 +120,7 @@ export function handleClick(evt, map, callback) {
           featurePromises.push(
             response.requestResponse
               .json()
-              .then(jsonData => {
+              .then((jsonData) => {
                 if (
                   jsonData !== undefined &&
                   jsonData &&
@@ -134,9 +130,10 @@ export function handleClick(evt, map, callback) {
                   features.push(...getFeaturesFromJson(response, jsonData));
                 }
               })
-              .catch(err => {
+              .catch((err) => {
                 console.error(
-                  "GetFeatureInfo couldn't retrieve correct data for the clicked object. "
+                  "GetFeatureInfo couldn't retrieve correct data for the clicked object.",
+                  err
                 );
               })
           );
@@ -146,10 +143,10 @@ export function handleClick(evt, map, callback) {
           featurePromises.push(
             response.requestResponse
               .text()
-              .then(text => {
+              .then((text) => {
                 features.push(...getFeaturesFromGml(response, text));
               })
-              .catch(err => {
+              .catch((err) => {
                 console.error(
                   "GetFeatureInfo couldn't retrieve correct data for the clicked object. "
                 );
@@ -167,44 +164,47 @@ export function handleClick(evt, map, callback) {
         evt.pixel,
         (feature, layer) => {
           if (
-            layer.get("queryable") === true ||
-            layer.get("type") === "searchResultLayer"
+            layer?.get("queryable") === true ||
+            layer?.get("type") === "searchResultLayer"
           ) {
             feature.layer = layer;
             features.push(feature);
           }
         },
         {
-          hitTolerance: 10
+          hitTolerance: 10,
         }
       );
 
       document.querySelector("body").style.cursor = "initial";
       callback({
         features: features,
-        evt: evt
+        evt: evt,
       });
     });
   });
 }
 
 export function bindMapClickEvent(map, callback) {
-  map.on("singleclick", evt => {
-    // If Draw, Modify or Snap interaction are currently active, ignore clicks
-    if (
-      map.clicklock ||
-      map
-        .getInteractions()
-        .getArray()
-        .filter(interaction =>
-          ["Draw", "Snap", "Modify", "Select", "Translate"].includes(
-            interaction.constructor.name
-          )
-        ).length > 0
-    ) {
-      return;
-    } else {
-      handleClick(evt, map, callback);
-    }
+  // We must use a custom "clickLock" mechanism, as opposed to the
+  // previous attempts (map.getInteraction().getArray() and looking
+  // for certain values in each Interaction's constructor.name).
+  //
+  // The previous method (checking prototype's name) was
+  // unreliable as Webpack uglifies the class names,
+  // hence the constructors we're comparing against
+  // don't have their usual names.
+  //
+  // Please see issue #591 for more info.
+  //
+  // The 'clickLock' Set is added to Map in appModel.createMap(),
+  // so by the time we bind this handler, we can be sure that
+  // map.clickLock already exists.
+
+  // Bind the "singleclick" event of OL Map
+  map.on("singleclick", (evt) => {
+    // Handle click only if there no plugin wants to lock
+    // the click interaction currently
+    map.clickLock.size === 0 && handleClick(evt, map, callback);
   });
 }

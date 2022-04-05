@@ -22,6 +22,20 @@
 
 import React from "react";
 import { Component } from "react";
+import Button from "@material-ui/core/Button";
+import SaveIcon from "@material-ui/icons/SaveSharp";
+import { withStyles } from "@material-ui/core/styles";
+import { blue } from "@material-ui/core/colors";
+
+const ColorButtonBlue = withStyles(theme => ({
+  root: {
+    color: theme.palette.getContrastText(blue[500]),
+    backgroundColor: blue[500],
+    "&:hover": {
+      backgroundColor: blue[700]
+    }
+  }
+}))(Button);
 
 var defaultState = {
   validationErrors: [],
@@ -88,7 +102,7 @@ class ToolOptions extends Component {
                 exportUrl: tool.options.exportUrl,
                 exportRoot: tool.options.exportRoot,
                 document: tool.options.document || list[0],
-                visibleAtStart: tool.options.visibleAtStart || false,
+                visibleAtStart: tool.options.visibleAtStart,
                 visibleForGroups: tool.options.visibleForGroups
                   ? tool.options.visibleForGroups
                   : []
@@ -267,15 +281,17 @@ class ToolOptions extends Component {
       <div>
         <form>
           <p>
-            <button
-              className="btn btn-primary"
+            <ColorButtonBlue
+              variant="contained"
+              className="btn"
               onClick={e => {
                 e.preventDefault();
                 this.save();
               }}
+              startIcon={<SaveIcon />}
             >
               Spara
-            </button>
+            </ColorButtonBlue>
           </p>
           <div>
             <input
@@ -290,25 +306,15 @@ class ToolOptions extends Component {
             &nbsp;
             <label htmlFor="active">Aktiverad</label>
           </div>
-          <div>
-            <input
-              id="tocExpanded"
-              name="tocExpanded"
-              type="checkbox"
-              onChange={e => {
-                this.handleInputChange(e);
-              }}
-              checked={this.state.tocExpanded}
-            />
-            &nbsp;
-            <label htmlFor="tocExpanded">Expanderad teckenförklaring</label>
-          </div>
+          <div className="separator">Fönsterinställningar</div>
           <div>
             <label htmlFor="index">Sorteringsordning</label>
             <input
               id="index"
               name="index"
-              type="text"
+              type="number"
+              min="0"
+              className="control-fixed-width"
               onChange={e => {
                 this.handleInputChange(e);
               }}
@@ -317,15 +323,20 @@ class ToolOptions extends Component {
           </div>
           <div>
             <label htmlFor="target">Verktygsplacering</label>
-            <input
+            <select
               id="target"
               name="target"
-              type="text"
+              className="control-fixed-width"
               onChange={e => {
                 this.handleInputChange(e);
               }}
               value={this.state.target}
-            />
+            >
+              <option value="toolbar">Drawer</option>
+              <option value="left">Widget left</option>
+              <option value="right">Widget right</option>
+              <option value="control">Control button</option>
+            </select>
           </div>
           <div>
             <label htmlFor="position">
@@ -336,15 +347,18 @@ class ToolOptions extends Component {
                 title="Placering av verktygets fönster. Anges som antingen 'left' eller 'right'."
               />
             </label>
-            <input
+            <select
               id="position"
               name="position"
-              type="text"
+              className="control-fixed-width"
               onChange={e => {
                 this.handleInputChange(e);
               }}
               value={this.state.position}
-            />
+            >
+              <option value="left">Left</option>
+              <option value="right">Right</option>
+            </select>
           </div>
           <div>
             <label htmlFor="width">
@@ -358,7 +372,9 @@ class ToolOptions extends Component {
             <input
               id="width"
               name="width"
-              type="text"
+              type="number"
+              min="0"
+              className="control-fixed-width"
               onChange={e => {
                 this.handleInputChange(e);
               }}
@@ -377,14 +393,45 @@ class ToolOptions extends Component {
             <input
               id="height"
               name="height"
-              type="text"
+              type="number"
+              min="0"
+              className="control-fixed-width"
               onChange={e => {
                 this.handleInputChange(e);
               }}
               value={this.state.height}
             />
           </div>
+          <div className="separator">Övriga inställningar</div>
+          <div>
+            <input
+              id="visibleAtStart"
+              name="visibleAtStart"
+              type="checkbox"
+              onChange={e => {
+                this.handleInputChange(e);
+              }}
+              checked={this.state.visibleAtStart}
+            />
+            &nbsp;
+            <label htmlFor="visibleAtStart">Synlig vid start</label>
+          </div>
           {this.renderVisibleForGroups()}
+          <div>
+            <input
+              id="tocExpanded"
+              name="tocExpanded"
+              type="checkbox"
+              onChange={e => {
+                this.handleInputChange(e);
+              }}
+              checked={this.state.tocExpanded}
+            />
+            &nbsp;
+            <label className="long-label" htmlFor="tocExpanded">
+              Expanderad teckenförklaring
+            </label>
+          </div>
           <div>
             <label htmlFor="abstract">
               Beskrivning{" "}
@@ -393,7 +440,7 @@ class ToolOptions extends Component {
                 data-toggle="tooltip"
                 title="Om verktyget visas som widget (inställningen 'Verktygsplacering' sätts till 'left' eller 'right) så kommer denna beskrivning att visas inne i widget-knappen."
               />
-            </label>{" "}
+            </label>
             <input
               value={this.state.abstract}
               type="text"
@@ -479,6 +526,7 @@ class ToolOptions extends Component {
               id="document"
               name="document"
               value={this.state.document}
+              className="control-fixed-width"
               onChange={e => {
                 this.handleInputChange(e);
               }}

@@ -7,7 +7,9 @@ import { makeStyles } from "@material-ui/styles";
 
 const useStyles = makeStyles(theme => ({
   paper: {
-    marginBottom: theme.spacing(1)
+    marginBottom: theme.spacing(1),
+    display: "flex",
+    flexDirection: "column"
   },
   button: {
     minWidth: "unset"

@@ -2,35 +2,52 @@ import React from "react";
 import { withStyles } from "@material-ui/core/styles";
 import { Attribution } from "ol/control";
 
-const styles = theme => {
+const styles = (theme) => {
   return {
     attributions: {
       "& .ol-control": {
         position: "static",
-        maxWidth: "none"
+        maxWidth: "none",
       },
       "& .ol-attribution": {
         background: theme.palette.background.paper,
         boxShadow: theme.shadows[4],
-        border: "1px solid rgba(255 ,255, 255, 0.5)",
-        borderRadius: "2px"
+        borderRadius: theme.shape.borderRadius,
+        height: "25px",
+        overflow: "auto",
+        whiteSpace: "nowrap",
+        [theme.breakpoints.down("xs")]: {
+          maxWidth: "100px",
+        },
+      },
+      "& .ol-attribution ul": {
+        color: "unset",
+        textShadow: "unset",
       },
       "& button": {
         cursor: "pointer",
         boxShadow: "none",
-        outline: "none"
-      }
-    }
+        outline: "none",
+      },
+    },
   };
 };
 
 class AttributionControl extends React.PureComponent {
+  constructor(props) {
+    super(props);
+    this.ref = React.createRef();
+  }
+
   componentDidUpdate() {
-    if (this.props.map) {
+    // Go on only if map exists AND we haven't done this yet.
+    // Without the children.length part, we'd do this all the
+    // time as we're inside componentDidUpdate.
+    if (this.props.map && this.ref.current.children.length === 0) {
       const attributionControl = new Attribution({
-        target: this.refs.attributions,
+        target: this.ref.current,
         tipLabel: "Visa/dölj copyrightinformation för kartdata",
-        label: "©"
+        label: "©",
       });
       this.props.map.addControl(attributionControl);
     }
@@ -38,7 +55,7 @@ class AttributionControl extends React.PureComponent {
 
   render() {
     const { classes } = this.props;
-    return <div ref="attributions" className={classes.attributions} />;
+    return <div ref={this.ref} className={classes.attributions} />;
   }
 }
 

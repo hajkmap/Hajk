@@ -1,6 +1,19 @@
 import React from "react";
 import { Component } from "react";
+import Button from "@material-ui/core/Button";
+import { withStyles } from "@material-ui/core/styles";
+import { red } from "@material-ui/core/colors";
+import RemoveIcon from "@material-ui/icons/Remove";
 
+const ColorButtonRed = withStyles(theme => ({
+  root: {
+    color: theme.palette.getContrastText(red[500]),
+    backgroundColor: red[500],
+    "&:hover": {
+      backgroundColor: red[700]
+    }
+  }
+}))(Button);
 class Page extends Component {
   constructor(props) {
     super(props);
@@ -31,14 +44,16 @@ class Page extends Component {
             }}
           />
           <div>
-            <span
-              className="btn btn-danger"
+            <ColorButtonRed
+              variant="contained"
+              className="btn"
               onClick={() => {
                 this.props.onRemove(this.props.page.id);
               }}
+              startIcon={<RemoveIcon />}
             >
               Ta bort sida
-            </span>
+            </ColorButtonRed>
           </div>
         </div>
         <div className="page-body">

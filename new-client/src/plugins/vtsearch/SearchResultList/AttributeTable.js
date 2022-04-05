@@ -4,7 +4,7 @@ import VirtualizedTable from "./VirtualizedTable";
 import { withStyles } from "@material-ui/core/styles";
 import { SortDirection } from "react-virtualized";
 
-const styles = theme => ({});
+const styles = (theme) => ({});
 
 /**
  * @summary Attribute table for objects in the map
@@ -19,20 +19,26 @@ class AttributeTable extends React.Component {
   state = {
     selectedRow: {
       index: null,
-      olFeatureId: null
+      olFeatureId: null,
     },
-    sortBy: this.props.toolConfig.geoServer[this.props.searchResult.type]
-      .defaultSortAttribute,
+    sortBy: this.props.toolConfig.geoServer[
+      this.props.searchResult.type
+    ]?.defaultSortOrder.slice(-1)[0],
+    sortOrder: this.props.toolConfig.geoServer[this.props.searchResult.type]
+      ?.defaultSortOrder,
     focusedRow: 0,
-    rows: this.getRows()
+    rows: this.getRows(),
   };
 
   //Most efficient way to do it?
   componentDidMount() {
     if (this.state.rows.length > 0) {
-      this.sort({
-        sortBy: this.state.sortBy,
-        sortDirection: SortDirection.ASC
+      this.state.sortOrder.map((sortAttribute) => {
+        this.sort({
+          sortBy: sortAttribute,
+          sortDirection: SortDirection.ASC,
+        });
+        return null;
       });
     }
   }
@@ -43,12 +49,13 @@ class AttributeTable extends React.Component {
   }
 
   getFeaturePropertiesKeys(searchResult) {
-    return Object.keys(searchResult.featureCollection.features[0].properties);
+    const features = this.getFeaturesFromSearchResult(searchResult);
+    return Object.keys(features[0].properties);
   }
 
-  getRowIndexFromOlFeatureId = olFeatureId => {
+  getRowIndexFromOlFeatureId = (olFeatureId) => {
     return this.state.rows
-      .map(row => {
+      .map((row) => {
         return row.olFeatureId;
       })
       .indexOf(olFeatureId);
@@ -58,24 +65,24 @@ class AttributeTable extends React.Component {
     const { localObserver } = this.props;
     localObserver.subscribe("remove-highlight-attribute-row", () => {
       this.setState({
-        selectedRow: { index: null, olFeatureId: null }
+        selectedRow: { index: null, olFeatureId: null },
       });
     });
-    localObserver.subscribe("highlight-attribute-row", olFeatureId => {
+    localObserver.subscribe("highlight-attribute-row", (olFeatureId) => {
       var foundRowIndex = this.getRowIndexFromOlFeatureId(olFeatureId);
       this.setState({
         selectedRow: { index: foundRowIndex, olFeatureId: olFeatureId },
-        focusedRow: foundRowIndex
+        focusedRow: foundRowIndex,
       });
     });
   };
 
-  getDisplayName = key => {
+  getDisplayName = (key) => {
     const { toolConfig, searchResult } = this.props;
     var attributesMappingArray =
-      toolConfig.geoServer[searchResult.type].attributesToDisplay;
+      toolConfig.geoServer[searchResult.type]?.attributesToDisplay;
 
-    var displayName = attributesMappingArray.find(entry => {
+    var displayName = attributesMappingArray?.find((entry) => {
       return entry.key === key;
     }).displayName;
     return displayName;
@@ -90,7 +97,9 @@ class AttributeTable extends React.Component {
    * @memberof AttributeTable
    */
   reorderPropertyKeys = (attributeDisplayOrder, propertyKeys) => {
-    let newDisplayOrder = attributeDisplayOrder.map(attribute => {
+    if (!attributeDisplayOrder) return propertyKeys;
+
+    let newDisplayOrder = attributeDisplayOrder.map((attribute) => {
       if (propertyKeys.includes(attribute.key)) return attribute.key;
       return null;
     });
@@ -103,25 +112,27 @@ class AttributeTable extends React.Component {
 
     let propertyKeys = this.getFeaturePropertiesKeys(searchResult);
     let attributeDisplayOrder =
-      toolConfig.geoServer[searchResult.type].attributesToDisplay;
+      toolConfig.geoServer[searchResult.type]?.attributesToDisplay;
     propertyKeys = this.reorderPropertyKeys(
       attributeDisplayOrder,
       propertyKeys
     );
 
-    return propertyKeys.map(key => {
+    return propertyKeys.map((key) => {
       var displayName = this.getDisplayName(key);
       console.log(displayName, "displayName");
       return {
         label: displayName || key,
         dataKey: key,
-        width: 300
+        width: 300,
       };
     });
   }
+
   getRows() {
     const { searchResult } = this.props;
-    return searchResult.featureCollection.features.map((feature, index) => {
+    const features = this.getFeaturesFromSearchResult(searchResult);
+    return features.map((feature, index) => {
       return Object.keys(feature.properties).reduce(
         (acc, key) => {
           return { ...acc, [key]: feature.properties[key] };
@@ -129,6 +140,15 @@ class AttributeTable extends React.Component {
         { olFeatureId: feature.id, searchResultId: searchResult.id }
       );
     });
+  }
+
+  /**
+   * Gets all features from a search result. The result will differ if it's from core or from the vtsearch plugin.
+   */
+  getFeaturesFromSearchResult(searchResult) {
+    return (
+      searchResult?.value?.features || searchResult?.featureCollection?.features
+    );
   }
 
   sortNulls = (compareOne, compareTwo) => {
@@ -153,15 +173,9 @@ class AttributeTable extends React.Component {
 
     if (compareOne === compareTwo) return 0;
 
-    compareOneString = compareOne
-      .toString()
-      .toLowerCase()
-      .match(regex);
+    compareOneString = compareOne.toString().toLowerCase().match(regex);
 
-    compareTwoString = compareTwo
-      .toString()
-      .toLowerCase()
-      .match(regex);
+    compareTwoString = compareTwo.toString().toLowerCase().match(regex);
 
     length = compareOneString.length;
 
@@ -211,36 +225,37 @@ class AttributeTable extends React.Component {
         ? rowsToBeSorted.reverse()
         : rowsToBeSorted;
 
-    this.setState(state => {
+    this.setState((state) => {
       return {
         sortBy,
         sortDirection,
         rows: rowsToBeSorted,
         selectedRow: {
           index: this.getRowIndexFromOlFeatureId(state.selectedRow.id),
-          olFeatureId: state.selectedRow.olFeatureId
-        }
+          olFeatureId: state.selectedRow.olFeatureId,
+        },
       };
     });
   };
 
-  onRowClick = row => {
+  onRowClick = (row) => {
     const { localObserver, searchResult } = this.props;
     this.setState({
-      selectedRow: { index: row.index, olFeatureId: row.rowData.olFeatureId }
+      selectedRow: { index: row.index, olFeatureId: row.rowData.olFeatureId },
     });
     localObserver.publish("attribute-table-row-clicked", {
       olFeatureId: row.rowData.olFeatureId,
-      searchResultId: searchResult.id
+      searchResultId: searchResult.id,
     });
   };
 
+  // Lägg in en label från toolconfig i searchresult
   render() {
     const { height, searchResult, rowHeight } = this.props;
-
+    const features = this.getFeaturesFromSearchResult(searchResult);
     return (
       <Paper style={{ height: height }}>
-        {searchResult.featureCollection.features.length > 0 ? (
+        {features.length > 0 ? (
           <VirtualizedTable
             rowCount={this.state.rows.length}
             rowGetter={({ index }) => this.state.rows[index]}

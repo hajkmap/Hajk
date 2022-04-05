@@ -1,6 +1,5 @@
 body {
-  margin: 20px;
-  width: 1400px;
+  padding: 20px;
   font-size: 12pt !important;
   color: #373d3f;
 }
@@ -54,6 +53,10 @@ article label.full {
 
 .layer-menu-label-checkbox {
   width: 300px;
+}
+
+.long-label {
+  white-space: nowrap;
 }
 
 article input[type="text"] {
@@ -227,7 +230,8 @@ article fieldset > span > div {
   padding-right: 5px;
 }
 
-.config-layer-list .options-box {
+.config-layer-list .options-box,
+.map-management {
   display: flex;
 }
 
@@ -324,6 +328,10 @@ body.dragging * {
 
 .nav-tabs {
   overflow: hidden;
+}
+
+.nav-tabs .nav-link.active {
+  background-color: #f8f8f8;
 }
 
 .tab-pane-bar {
@@ -698,6 +706,19 @@ figure img {
   overflow: auto;
 }
 
+.control-fixed {
+  border: 1px solid #ccc;
+  padding: 5px;
+  border-radius: 3px;
+}
+
+.control-fixed-width {
+  border: 1px solid #ccc;
+  padding: 5px;
+  border-radius: 3px;
+  width: 400px;
+}
+
 #map {
   border-bottom: 1px solid;
   margin-left: 250px;
@@ -782,4 +803,232 @@ figure img {
 }
 .separator::after {
   margin-left: 0.25em;
+}
+
+.separator.set-width {
+  width: 930px;
+}
+
+.map-management-margin-left {
+  margin-left: 10px;
+}
+
+.information-box {
+  background-color: #fbe0a4;
+  width: 580px;
+  font-style: italic;
+  color: black;
+  margin-bottom: 5px;
+  border-radius: 4px;
+  padding: 5px;
+}
+
+.document-chapter {
+  background-color: #f1f1f1;
+  margin-bottom: 15px;
+  padding: 4px;
+}
+
+.document-chapter .btn {
+  height: 40px;
+}
+
+.document-chapter-header {
+  float: left;
+  margin: 0;
+  margin-bottom: 5px;
+  cursor: pointer;
+}
+
+.document-menu {
+  font-size: 18pt;
+  margin: 0;
+  padding-bottom: 10px;
+  margin-bottom: 5px;
+  max-width: 1000px;
+  min-height: 60px;
+  cursor: pointer;
+  border-bottom: 3px solid #dedede;
+}
+
+.document-menu-buttons {
+  float: right;
+}
+
+.document-menu-buttons button {
+  margin-left: 10px;
+}
+
+.document-text-editor {
+  min-height: 60px;
+  border: 1px solid rgb(218, 215, 215);
+  margin: 20px;
+  padding: 10px;
+}
+
+.document-text-editor .btn {
+  margin-bottom: 10px;
+}
+
+.document-text-editor p {
+  margin-bottom: 0;
+}
+
+.document-blockquote {
+  background-color: #eeeeee;
+  border-top: 2px solid #786aaf;
+  border-bottom: 2px solid #786aaf;
+  color: #666;
+  font-family: "Hoefler Text", "Georgia", serif;
+  font-style: italic;
+  margin: 16px 0;
+  padding: 8px;
+}
+
+.document-nested-chapter {
+  padding-left: 15px;
+}
+
+.document-edit-menu {
+  min-height: 60px;
+  background-color: #f2f2f2;
+  padding: 10px;
+  text-align: right;
+}
+
+.document-edit-menu button {
+  margin-left: 10px;
+}
+
+.Modal label {
+  margin-bottom: 15px;
+  float: left;
+}
+
+.Modal input {
+  margin-bottom: 15px;
+  float: right;
+}
+
+.document-keywords {
+  margin: 5px;
+}
+
+.document-keywords > * {
+  margin: 5px;
+}
+
+.document-geo-objects {
+  margin: 5px;
+}
+
+.document-geo-objects > * {
+  margin: 5px;
+}
+
+.document-editor-container {
+  background: #fff;
+  border: 1px solid #ddd;
+  font-size: 14px;
+  padding: 15px;
+}
+
+.document-editor-wrapper {
+  font-size: 14px;
+  margin-bottom: 5px;
+  height: 50px;
+}
+
+.document-editor-modal {
+  position: absolute;
+  width: 500px;
+  min-height: 300px;
+  top: 30%;
+  left: 50%;
+  margin-left: -250px;
+}
+
+.document-link-input {
+  width: 100%;
+}
+
+.DocumentTextEditorContainer {
+  position: sticky;
+}
+
+.DocumentTextEditorContainer .RichEditor-blockquote {
+  background-color: #eeeeee;
+  border-top: 2px solid #786aaf;
+  border-bottom: 2px solid #786aaf;
+  color: #666;
+  font-family: "Hoefler Text", "Georgia", serif;
+  font-style: italic;
+  margin: 16px 0;
+  padding: 10px 20px;
+}
+
+.modal-body input {
+  margin-top: 10px;
+}
+
+.modal-body select {
+  width: 100%;
+  border: 1px solid #ccc;
+  padding: 5px;
+  border-radius: 3px;
+}
+
+.image-editor-modal {
+  position: absolute;
+  min-height: 500px;
+  top: 20%;
+  left: 20%;
+  right: 20%;
+}
+
+.image-editor-settings {
+  width: 300px;
+  padding-right: 16px;
+  float: left;
+}
+
+.image-editor-settings input {
+  width: 100%;
+}
+
+.image-editor-preview {
+  min-height: 500px;
+  border-left: 1px solid #e9ecef;
+  padding-left: 16px;
+  float: left;
+}
+
+.DraftEditor-root {
+  font-size: 0.875rem;
+  font-family: "Open Sans", Arial, sans-serif;
+  font-weight: 400;
+  line-height: 1.5;
+  margin-bottom: 0.5em;
+}
+
+.DraftEditor-root figure {
+  width: 100%;
+}
+
+.DraftEditor-root a {
+  color: #0076bc !important;
+}
+
+.public-DraftStyleDefault-block {
+  margin-bottom: 0.5em;
+}
+
+.toc-modal {
+  position: absolute;
+  width: 500px;
+  top: 20%;
+  left: 30%;
+  padding: 1rem;
+  background-color: #fff;
+  border: 2px solid #000;
 }
