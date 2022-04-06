@@ -1213,7 +1213,7 @@ export default class PrintModel {
   // Saves the print-contents to file, either PDF, or PNG (depending on supplied type).
   saveToFile = async (pdf, width, type) => {
     // We're gonna need to create a file-name.
-    const fileName = `Hajk - ${new Date().toLocaleString()}`;
+    const fileName = `Kartexport - ${new Date().toLocaleString()}`;
     // Then we'll try to save the contents in the format the user requested.
     try {
       switch (type) {
