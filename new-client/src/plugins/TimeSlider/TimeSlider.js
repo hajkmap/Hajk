@@ -103,6 +103,7 @@ class TimeSlider extends React.PureComponent {
           localObserver={this.localObserver}
           layers={this.layers} //The layers to be used
           defaultResolution={this.defaultResolution} //"years", "months", or "days"
+          visibleAtStart={this.props.options.visibleAtStart}
         />
       </BaseWindowPlugin>
     );

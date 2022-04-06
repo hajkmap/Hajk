@@ -42,6 +42,12 @@ class TimeSliderView extends React.PureComponent {
     this.bindSubscriptions();
   }
 
+  componentDidMount() {
+    if (this.props.visibleAtStart === true) {
+      this.initiateTimeSliderView();
+    }
+  }
+
   bindSubscriptions = () => {
     this.localObserver.subscribe("initiateTimeSliderView", () => {
       this.initiateTimeSliderView();
