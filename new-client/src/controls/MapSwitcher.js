@@ -4,13 +4,13 @@ import { withStyles } from "@material-ui/core/styles";
 import SwitchCameraIcon from "@material-ui/icons/SwitchCamera";
 import { hfetch } from "utils/FetchWrapper";
 
-const styles = theme => ({
+const styles = (theme) => ({
   paper: {
-    marginBottom: theme.spacing(1)
+    marginBottom: theme.spacing(1),
   },
   button: {
-    minWidth: "unset"
-  }
+    minWidth: "unset",
+  },
 });
 
 class MapSwitcher extends React.PureComponent {
@@ -19,7 +19,7 @@ class MapSwitcher extends React.PureComponent {
 
   state = {
     anchorEl: null,
-    selectedIndex: null
+    selectedIndex: null,
   };
 
   constructor(props) {
@@ -67,7 +67,7 @@ class MapSwitcher extends React.PureComponent {
           key={index}
           // disabled={index === this.state.selectedIndex}
           selected={index === this.state.selectedIndex}
-          onClick={event => this.handleMenuItemClick(event, index)}
+          onClick={(event) => this.handleMenuItemClick(event, index)}
         >
           {item.mapConfigurationTitle}
         </MenuItem>
@@ -77,7 +77,7 @@ class MapSwitcher extends React.PureComponent {
   };
 
   // Show dropdown menu, anchored to the element clicked
-  handleClick = event => {
+  handleClick = (event) => {
     this.setState({ anchorEl: event.currentTarget });
   };
 

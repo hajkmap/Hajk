@@ -4,16 +4,16 @@ import { Button, Paper, Tooltip } from "@material-ui/core";
 import NavigationIcon from "@material-ui/icons/Navigation";
 import { makeStyles } from "@material-ui/styles";
 
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles((theme) => ({
   paper: {
-    marginBottom: theme.spacing(1)
+    marginBottom: theme.spacing(1),
   },
   button: {
-    minWidth: "unset"
-  }
+    minWidth: "unset",
+  },
 }));
 
-const RotateControl = React.memo(props => {
+const RotateControl = React.memo((props) => {
   const classes = useStyles();
   const view = useRef();
   const [rotation, setRotation] = useState(view.current?.getRotation() || 0);
@@ -55,7 +55,7 @@ const RotateControl = React.memo(props => {
         view.current.animate({
           rotation: 0,
           duration: duration,
-          easing: easeOut
+          easing: easeOut,
         });
       } else {
         view.current.setRotation(0);

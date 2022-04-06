@@ -28,7 +28,7 @@ class WMSLayer {
       imageFormat: config.imageFormat,
       attributions: config.attribution,
       cacheSize: this.subLayers.length > 1 ? 32 : 2048,
-      transition: this.subLayers.length > 1 ? 0 : 100
+      transition: this.subLayers.length > 1 ? 0 : 100,
     };
 
     if (config.hidpi !== null) {
@@ -48,7 +48,7 @@ class WMSLayer {
     ) {
       source.tileGrid = new TileGrid({
         resolutions: config.resolutions,
-        origin: config.origin
+        origin: config.origin,
       });
       source.extent = config.extent;
     }
@@ -196,7 +196,7 @@ class WMSLayer {
               this.get("serverType") === "mapserver"
                 ? "application/geojson"
                 : "application/json",
-            feature_count: 100
+            feature_count: 100,
           }
         );
 
@@ -212,7 +212,7 @@ class WMSLayer {
               this.featureInformationCallback(features, this.getLayer());
             });
           })
-          .catch(err => {
+          .catch((err) => {
             params.error(err);
           });
       }

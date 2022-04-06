@@ -5,18 +5,18 @@ import AddIcon from "@material-ui/icons/Add";
 import RemoveIcon from "@material-ui/icons/Remove";
 import { makeStyles } from "@material-ui/styles";
 
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles((theme) => ({
   paper: {
     marginBottom: theme.spacing(1),
     display: "flex",
-    flexDirection: "column"
+    flexDirection: "column",
   },
   button: {
-    minWidth: "unset"
-  }
+    minWidth: "unset",
+  },
 }));
 
-const ZoomControl = React.memo(props => {
+const ZoomControl = React.memo((props) => {
   const classes = useStyles();
 
   function zoomByDelta(delta) {
@@ -38,7 +38,7 @@ const ZoomControl = React.memo(props => {
         view.animate({
           zoom: newZoom,
           duration: duration,
-          easing: easeOut
+          easing: easeOut,
         });
       } else {
         view.setZoom(newZoom);

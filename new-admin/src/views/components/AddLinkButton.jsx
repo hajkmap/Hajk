@@ -13,7 +13,7 @@ import ArrowDropDownIcon from "@material-ui/icons/ArrowDropDown";
 import NativeSelect from "@material-ui/core/NativeSelect";
 import TextField from "@material-ui/core/TextField";
 
-const LinkButton = withStyles(theme => ({
+const LinkButton = withStyles((theme) => ({
   root: {
     color: "#999",
     height: "40px",
@@ -23,9 +23,9 @@ const LinkButton = withStyles(theme => ({
     border: "1px solid #ccc",
     borderRadius: 0,
     "&:hover": {
-      backgroundColor: "#ccc"
-    }
-  }
+      backgroundColor: "#ccc",
+    },
+  },
 }))(Button);
 
 class AddLinkButton extends Component {
@@ -37,7 +37,7 @@ class AddLinkButton extends Component {
       anchorEl: null,
       documentLinkVisible: false,
       mapLinkVisible: false,
-      linkVisible: false
+      linkVisible: false,
     };
   }
 
@@ -45,14 +45,14 @@ class AddLinkButton extends Component {
     var linkType = "document-link";
     var testLink = "/documentsource/";
     this.setState({
-      linkMenuVisible: false
+      linkMenuVisible: false,
     });
     this.props.addLink(linkType, testLink);
   }
 
   urlChanged(e) {
     this.setState({
-      url: e.target.value
+      url: e.target.value,
     });
   }
 
@@ -70,7 +70,7 @@ class AddLinkButton extends Component {
               linkMenuVisible: !this.state.linkMenuVisible,
               documentLinkVisible: !this.state.documentLinkVisible,
               mapLinkVisible: false,
-              linkVisible: false
+              linkVisible: false,
             });
           }}
         >
@@ -85,7 +85,7 @@ class AddLinkButton extends Component {
               linkMenuVisible: !this.state.linkMenuVisible,
               documentLinkVisible: false,
               mapLinkVisible: !this.state.mapLinkVisible,
-              linkVisible: false
+              linkVisible: false,
             });
           }}
         >
@@ -100,7 +100,7 @@ class AddLinkButton extends Component {
               linkMenuVisible: !this.state.linkMenuVisible,
               documentLinkVisible: false,
               mapLinkVisible: false,
-              linkVisible: !this.state.linkVisible
+              linkVisible: !this.state.linkVisible,
             });
           }}
         >
@@ -113,16 +113,16 @@ class AddLinkButton extends Component {
     );
   }
 
-  openLinkMenu = event => {
+  openLinkMenu = (event) => {
     this.setState({
       linkMenuVisible: true,
-      anchorEl: event.currentTarget
+      anchorEl: event.currentTarget,
     });
   };
 
   closeLinkMenu = () => {
     this.setState({
-      linkMenuVisible: false
+      linkMenuVisible: false,
     });
   };
 
@@ -130,7 +130,7 @@ class AddLinkButton extends Component {
     return (
       <ReactModal
         isOpen={this.state.documentLinkVisible}
-        onRequestClose={e => this.closeDocumentLinkDialog()}
+        onRequestClose={(e) => this.closeDocumentLinkDialog()}
         className="modal document-editor-modal"
         overlayClassName="Overlay"
         appElement={document.getElementById("root")}
@@ -144,7 +144,7 @@ class AddLinkButton extends Component {
               className="close"
               data-dismiss="modal"
               aria-label="Close"
-              onClick={e => this.closeDocumentLinkDialog()}
+              onClick={(e) => this.closeDocumentLinkDialog()}
             >
               <span aria-hidden="true">&times;</span>
             </button>
@@ -197,7 +197,7 @@ class AddLinkButton extends Component {
               type="button"
               className="btn btn-secondary"
               data-dismiss="modal"
-              onClick={e => this.closeDocumentLinkDialog()}
+              onClick={(e) => this.closeDocumentLinkDialog()}
             >
               Avbryt
             </button>
@@ -209,7 +209,7 @@ class AddLinkButton extends Component {
 
   closeDocumentLinkDialog() {
     this.setState({
-      documentLinkVisible: false
+      documentLinkVisible: false,
     });
   }
 
@@ -217,7 +217,7 @@ class AddLinkButton extends Component {
     return (
       <ReactModal
         isOpen={this.state.mapLinkVisible}
-        onRequestClose={e => this.closeMapLinkDialog()}
+        onRequestClose={(e) => this.closeMapLinkDialog()}
         className="modal document-editor-modal"
         overlayClassName="Overlay"
         appElement={document.getElementById("root")}
@@ -231,7 +231,7 @@ class AddLinkButton extends Component {
               className="close"
               data-dismiss="modal"
               aria-label="Close"
-              onClick={e => this.closeMapLinkDialog()}
+              onClick={(e) => this.closeMapLinkDialog()}
             >
               <span aria-hidden="true">&times;</span>
             </button>
@@ -259,7 +259,7 @@ class AddLinkButton extends Component {
               type="button"
               className="btn btn-secondary"
               data-dismiss="modal"
-              onClick={e => this.closeMapLinkDialog()}
+              onClick={(e) => this.closeMapLinkDialog()}
             >
               Avbryt
             </button>
@@ -271,7 +271,7 @@ class AddLinkButton extends Component {
 
   closeMapLinkDialog() {
     this.setState({
-      mapLinkVisible: false
+      mapLinkVisible: false,
     });
   }
 
@@ -279,7 +279,7 @@ class AddLinkButton extends Component {
     return (
       <ReactModal
         isOpen={this.state.linkVisible}
-        onRequestClose={e => this.closeLinkDialog()}
+        onRequestClose={(e) => this.closeLinkDialog()}
         className="modal document-editor-modal"
         overlayClassName="Overlay"
         appElement={document.getElementById("root")}
@@ -293,7 +293,7 @@ class AddLinkButton extends Component {
               className="close"
               data-dismiss="modal"
               aria-label="Close"
-              onClick={e => this.closeLinkDialog()}
+              onClick={(e) => this.closeLinkDialog()}
             >
               <span aria-hidden="true">&times;</span>
             </button>
@@ -324,7 +324,7 @@ class AddLinkButton extends Component {
               type="button"
               className="btn btn-secondary"
               data-dismiss="modal"
-              onClick={e => this.closeLinkDialog()}
+              onClick={(e) => this.closeLinkDialog()}
             >
               Avbryt
             </button>
@@ -336,7 +336,7 @@ class AddLinkButton extends Component {
 
   closeLinkDialog() {
     this.setState({
-      linkVisible: false
+      linkVisible: false,
     });
   }
 

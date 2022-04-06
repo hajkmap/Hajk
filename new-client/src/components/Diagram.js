@@ -7,15 +7,15 @@ import {
   YAxis,
   CartesianGrid,
   Tooltip,
-  Legend
+  Legend,
 } from "recharts";
 import { hfetch } from "utils/FetchWrapper";
 
-const styles = theme => ({});
+const styles = (theme) => ({});
 
 class DiagramView extends React.PureComponent {
   state = {
-    data: false
+    data: false,
   };
 
   // TODO: Add propTypes
@@ -28,12 +28,9 @@ class DiagramView extends React.PureComponent {
 
   parse(str, properties) {
     if (str && typeof str === "string") {
-      (str.match(/{(.*?)}/g) || []).forEach(property => {
+      (str.match(/{(.*?)}/g) || []).forEach((property) => {
         function lookup(o, s) {
-          s = s
-            .replace("{", "")
-            .replace("}", "")
-            .split(".");
+          s = s.replace("{", "").replace("}", "").split(".");
           switch (s.length) {
             case 1:
               return o[s[0]] || "";
@@ -58,11 +55,11 @@ class DiagramView extends React.PureComponent {
         const data = rsp.features.map((feature) => {
           return {
             date: feature.properties.datetime.split("T")[0],
-            value: feature.properties.value
+            value: feature.properties.value,
           };
         });
         this.setState({
-          data: data
+          data: data,
         });
       });
     });
@@ -79,7 +76,7 @@ class DiagramView extends React.PureComponent {
             top: 5,
             right: 30,
             left: 20,
-            bottom: 5
+            bottom: 5,
           }}
         >
           <CartesianGrid strokeDasharray="3 3" />

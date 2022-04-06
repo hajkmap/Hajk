@@ -9,24 +9,24 @@ import { withStyles } from "@material-ui/core/styles";
 import { green, blue } from "@material-ui/core/colors";
 import TextArea from "antd/lib/input/TextArea";
 
-const ColorButtonGreen = withStyles(theme => ({
+const ColorButtonGreen = withStyles((theme) => ({
   root: {
     color: theme.palette.getContrastText(green[700]),
     backgroundColor: green[500],
     "&:hover": {
-      backgroundColor: green[700]
-    }
-  }
+      backgroundColor: green[700],
+    },
+  },
 }))(Button);
 
-const ColorButtonBlue = withStyles(theme => ({
+const ColorButtonBlue = withStyles((theme) => ({
   root: {
     color: theme.palette.getContrastText(blue[500]),
     backgroundColor: blue[500],
     "&:hover": {
-      backgroundColor: blue[700]
-    }
-  }
+      backgroundColor: blue[700],
+    },
+  },
 }))(Button);
 
 const defaultState = {
@@ -54,7 +54,7 @@ const defaultState = {
   alertMessage: "",
   content: "",
   confirmAction: () => {},
-  denyAction: () => {}
+  denyAction: () => {},
 };
 /**
  *
@@ -75,7 +75,7 @@ class Edit extends Component {
     this.props.model.getConfig(this.props.config.url_layers);
     this.props.model.on("change:layers", () => {
       this.setState({
-        layers: this.props.model.get("layers")
+        layers: this.props.model.get("layers"),
       });
     });
 
@@ -98,12 +98,12 @@ class Edit extends Component {
       confirm: true,
       alertMessage: "Lagret kommer att tas bort. Är detta ok?",
       confirmAction: () => {
-        this.props.model.removeLayer(layer, success => {
+        this.props.model.removeLayer(layer, (success) => {
           if (success) {
             this.props.model.getConfig(this.props.config.url_layers);
             this.setState({
               alert: true,
-              alertMessage: `Lagret ${layer.caption} togs bort!`
+              alertMessage: `Lagret ${layer.caption} togs bort!`,
             });
             if (this.state.id === layer.id) {
               this.abort();
@@ -111,11 +111,11 @@ class Edit extends Component {
           } else {
             this.setState({
               alert: true,
-              alertMessage: "Lagret kunde inte tas bort. Försök igen senare."
+              alertMessage: "Lagret kunde inte tas bort. Försök igen senare.",
             });
           }
         });
-      }
+      },
     });
     e.stopPropagation();
   }
@@ -146,18 +146,18 @@ class Edit extends Component {
       this.validateField("url", true);
       this.loadWMSCapabilities(undefined, () => {
         this.setState({
-          addedLayers: layer.layers
+          addedLayers: layer.layers,
         });
 
         this.validateField("layers");
 
-        Object.keys(this.refs).forEach(element => {
+        Object.keys(this.refs).forEach((element) => {
           if (this.refs[element].dataset.type === "wms-layer") {
             this.refs[element].checked = false;
           }
         });
 
-        layer.layers.forEach(layer => {
+        layer.layers.forEach((layer) => {
           // Sometimes 'layer' has been removed and the ref is non-exiting, so there's no .checked-property to check.
           // Do a check first, so it doesn't render as error if property isn't found.
           if (this.refs.hasOwnProperty(layer)) {
@@ -182,7 +182,7 @@ class Edit extends Component {
       addedLayers: [],
       capabilities: false,
       layerProperties: undefined,
-      layerPropertiesName: undefined
+      layerPropertiesName: undefined,
     });
 
     if (this.state.capabilities) {
@@ -191,15 +191,15 @@ class Edit extends Component {
       });
     }
 
-    this.props.model.getWMSCapabilities(this.state.url, capabilities => {
+    this.props.model.getWMSCapabilities(this.state.url, (capabilities) => {
       this.setState({
         capabilities: capabilities,
-        load: false
+        load: false,
       });
       if (capabilities === false) {
         this.setState({
           alert: true,
-          alertMessage: "Servern svarar inte. Försök med en annan URL."
+          alertMessage: "Servern svarar inte. Försök med en annan URL.",
         });
       }
       if (callback) {
@@ -213,7 +213,7 @@ class Edit extends Component {
   appendLayer(e, checkedLayer) {
     this.setState(
       {
-        addedLayers: [checkedLayer]
+        addedLayers: [checkedLayer],
       },
       () => this.validateField("layers")
     );
@@ -223,7 +223,7 @@ class Edit extends Component {
    */
   filterLayers(e) {
     this.setState({
-      filter: e.target.value
+      filter: e.target.value,
     });
   }
   /**
@@ -273,13 +273,13 @@ class Edit extends Component {
     if (updateState !== false) {
       if (!valid) {
         this.setState({
-          validationErrors: [...this.state.validationErrors, fieldName]
+          validationErrors: [...this.state.validationErrors, fieldName],
         });
       } else {
         this.setState({
           validationErrors: this.state.validationErrors.filter(
-            v => v !== fieldName
-          )
+            (v) => v !== fieldName
+          ),
         });
       }
     }
@@ -291,7 +291,7 @@ class Edit extends Component {
    */
   getEditableFields() {
     var filter, mapper;
-    mapper = item => {
+    mapper = (item) => {
       return {
         index: item.index,
         name: item.name,
@@ -301,11 +301,11 @@ class Edit extends Component {
         textType: item.textType || null,
         values: item.listValues || null,
         hidden: item.hidden,
-        defaultValue: item.defaultValue
+        defaultValue: item.defaultValue,
       };
     };
 
-    filter = item => item.checked === true;
+    filter = (item) => item.checked === true;
 
     return this.state.layerProperties.filter(filter).map(mapper);
   }
@@ -343,7 +343,7 @@ class Edit extends Component {
     }
 
     function format_layers(layers) {
-      return layers.map(layer => layer);
+      return layers.map((layer) => layer);
     }
 
     var input = this.refs["input_" + fieldName],
@@ -396,7 +396,7 @@ class Edit extends Component {
    *
    */
   getValidationClass(inputName) {
-    return this.state.validationErrors.find(v => v === inputName)
+    return this.state.validationErrors.find((v) => v === inputName)
       ? "validation-error"
       : "";
   }
@@ -441,7 +441,7 @@ class Edit extends Component {
 
         this.setState({
           layerProperties: properties,
-          layerPropertiesName: layerName
+          layerPropertiesName: layerName,
         });
       }
     );
@@ -452,7 +452,7 @@ class Edit extends Component {
   closeDetails() {
     this.setState({
       layerProperties: undefined,
-      layerPropertiesName: undefined
+      layerPropertiesName: undefined,
     });
   }
   /**
@@ -633,7 +633,7 @@ class Edit extends Component {
   submit(e) {
     var validationErrors = [];
     var validations = ["caption", "url", "layers"];
-    validations.forEach(fieldName => {
+    validations.forEach((fieldName) => {
       var valid = this.validateField(fieldName, false);
       if (!valid) {
         validationErrors.push(fieldName);
@@ -669,39 +669,40 @@ class Edit extends Component {
       if (this.state.mode === "add") {
         layer.id = this.createGuid(this.props.model.get("layers"));
 
-        this.props.model.addLayer(layer, success => {
+        this.props.model.addLayer(layer, (success) => {
           if (success) {
             this.props.model.getConfig(this.props.config.url_layers);
             this.abort();
             this.setState({
               alert: true,
               alertMessage:
-                "Lagret har lagt till i listan av tillgängliga lager."
+                "Lagret har lagt till i listan av tillgängliga lager.",
             });
           } else {
             this.setState({
               alert: true,
-              alertMessage: "Lagret kunde inte läggas till. Försök igen senare."
+              alertMessage:
+                "Lagret kunde inte läggas till. Försök igen senare.",
             });
           }
         });
       }
 
       if (this.state.mode === "edit") {
-        this.props.model.updateLayer(layer, success => {
+        this.props.model.updateLayer(layer, (success) => {
           if (success) {
             this.props.model.getConfig(this.props.config.url_layers);
             this.setState({
               alert: true,
-              alertMessage: "Uppdateringen lyckades!"
+              alertMessage: "Uppdateringen lyckades!",
             });
             this.setState({
-              date: layer.date
+              date: layer.date,
             });
           } else {
             this.setState({
               alert: true,
-              alertMessage: "Uppdateringen misslyckades."
+              alertMessage: "Uppdateringen misslyckades.",
             });
           }
         });
@@ -770,7 +771,7 @@ class Edit extends Component {
         </span>
         <i
           title="Radera lager"
-          onClick={e => this.removeLayer(e, layer)}
+          onClick={(e) => this.removeLayer(e, layer)}
           className="fa fa-trash"
         />
       </li>
@@ -785,7 +786,7 @@ class Edit extends Component {
     function uncheck(layer) {
       this.refs[layer].checked = false;
       this.setState({
-        addedLayers: []
+        addedLayers: [],
       });
     }
 
@@ -839,7 +840,7 @@ class Edit extends Component {
     }
 
     var rows = this.state.layerProperties.map((property, i) => {
-      var stringDataTypes = type => {
+      var stringDataTypes = (type) => {
         if (type === "string") {
           if (!property.textType) {
             property.textType = "fritext";
@@ -847,7 +848,7 @@ class Edit extends Component {
           return (
             <select
               defaultValue={property.textType}
-              onChange={e => {
+              onChange={(e) => {
                 property.textType = e.target.value;
               }}
             >
@@ -924,12 +925,12 @@ class Edit extends Component {
         return null;
       };
 
-      var listEditor = type => {
+      var listEditor = (type) => {
         if (type === "string") {
           return (
             <div>
               <input
-                onKeyDown={e => {
+                onKeyDown={(e) => {
                   if (e.keyCode === 13) {
                     e.preventDefault();
                     this.addListValue(i, e);
@@ -1025,7 +1026,7 @@ class Edit extends Component {
             <input
               type="checkbox"
               defaultChecked={property.checked}
-              onChange={e => {
+              onChange={(e) => {
                 property.checked = e.target.checked;
               }}
             />
@@ -1034,7 +1035,7 @@ class Edit extends Component {
             <input
               type="checkbox"
               defaultChecked={property.hidden}
-              onChange={e => {
+              onChange={(e) => {
                 property.hidden = e.target.checked;
               }}
             />
@@ -1085,7 +1086,7 @@ class Edit extends Component {
               type="radio"
               name="featureType"
               data-type="wfs-layer"
-              onChange={e => {
+              onChange={(e) => {
                 this.appendLayer(e, layer.name);
                 this.describeLayer(e, layer.name);
               }}
@@ -1115,9 +1116,9 @@ class Edit extends Component {
         ref="input_projection"
         value={this.state.projection}
         className="control-fixed-width"
-        onChange={e => {
+        onChange={(e) => {
           this.setState({
-            projection: e.target.value
+            projection: e.target.value,
           });
         }}
       >
@@ -1147,7 +1148,7 @@ class Edit extends Component {
         this.setState({
           alert: false,
           confirm: false,
-          alertMessage: ""
+          alertMessage: "",
         });
       },
       denyAction: () => {
@@ -1155,15 +1156,15 @@ class Edit extends Component {
         this.setState({
           alert: false,
           confirm: false,
-          alertMessage: ""
+          alertMessage: "",
         });
       },
       onClick: () => {
         this.setState({
           alert: false,
-          alertMessage: ""
+          alertMessage: "",
         });
-      }
+      },
     };
   }
   /**
@@ -1178,7 +1179,7 @@ class Edit extends Component {
         <ColorButtonBlue
           variant="contained"
           className="btn btn-danger"
-          onClick={e => this.abort(e)}
+          onClick={(e) => this.abort(e)}
           startIcon={<CancelIcon />}
         >
           Avbryt
@@ -1192,7 +1193,7 @@ class Edit extends Component {
           <input
             placeholder="filtrera"
             type="text"
-            onChange={e => this.filterLayers(e)}
+            onChange={(e) => this.filterLayers(e)}
           />
           <ul className="config-layer-list">{this.renderLayersFromConfig()}</ul>
         </aside>
@@ -1200,7 +1201,7 @@ class Edit extends Component {
           <form
             method="post"
             action=""
-            onSubmit={e => {
+            onSubmit={(e) => {
               this.submit(e);
             }}
           >
@@ -1213,11 +1214,11 @@ class Edit extends Component {
                   type="text"
                   ref="input_url"
                   value={this.state.url}
-                  onChange={e => {
+                  onChange={(e) => {
                     var v = e.target.value;
                     this.setState(
                       {
-                        url: v
+                        url: v,
                       },
                       () => this.validateField("url")
                     );
@@ -1225,7 +1226,7 @@ class Edit extends Component {
                   className={this.getValidationClass("url")}
                 />
                 <span
-                  onClick={e => {
+                  onClick={(e) => {
                     this.loadWMSCapabilities(e);
                   }}
                   className="btn btn-default"
@@ -1239,11 +1240,11 @@ class Edit extends Component {
                   type="text"
                   ref="input_uri"
                   value={this.state.uri}
-                  onChange={e => {
+                  onChange={(e) => {
                     var v = e.target.value;
                     this.setState(
                       {
-                        uri: v
+                        uri: v,
                       },
                       () => this.validateField("uri")
                     );
@@ -1274,11 +1275,11 @@ class Edit extends Component {
                   type="text"
                   ref="input_caption"
                   value={this.state.caption}
-                  onChange={e => {
+                  onChange={(e) => {
                     var v = e.target.value;
                     this.setState(
                       {
-                        caption: v
+                        caption: v,
                       },
                       () => this.validateField("caption")
                     );

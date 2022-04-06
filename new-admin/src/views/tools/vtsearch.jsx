@@ -364,8 +364,8 @@ class ToolOptions extends Component {
           highlightStrokeLineWidth: this.state.highlightStrokeLineWidth,
         },
         geoServer: {
-          lineNumberAndPublicLineNumbers: this.state
-            .lineNumberAndPublicLineNumbers,
+          lineNumberAndPublicLineNumbers:
+            this.state.lineNumberAndPublicLineNumbers,
           municipalityZoneNames: this.state.municipalityZoneNames,
           stopAreaNameAndNumbers: this.state.stopAreaNameAndNumbers,
           transportModeTypeNames: this.state.transportModeTypeNames,

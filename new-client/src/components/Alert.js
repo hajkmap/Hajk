@@ -7,7 +7,7 @@ import DialogTitle from "@material-ui/core/DialogTitle";
 import DialogActions from "@material-ui/core/DialogActions";
 import DialogContent from "@material-ui/core/DialogContent";
 
-const styles = theme => {
+const styles = (theme) => {
   return {};
 };
 
@@ -19,17 +19,17 @@ class AlertView extends React.PureComponent {
     message: propTypes.any.isRequired,
     open: propTypes.bool.isRequired,
     parent: propTypes.object.isRequired,
-    title: propTypes.string.isRequired
+    title: propTypes.string.isRequired,
   };
 
   static defaultProps = {
     message: "Meddelande saknas",
-    title: "Titel saknas"
+    title: "Titel saknas",
   };
 
-  handleClose = e => {
+  handleClose = (e) => {
     this.props.parent.setState({
-      alert: false
+      alert: false,
     });
   };
 

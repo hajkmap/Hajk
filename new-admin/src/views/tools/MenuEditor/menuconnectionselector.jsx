@@ -20,7 +20,7 @@ import { Typography } from "@material-ui/core";
 import { withStyles } from "@material-ui/core/styles";
 import { ColorButtonGreen, ColorButtonRed } from "./custombuttons.jsx";
 
-const getPopoverMenuItemTitle = label => {
+const getPopoverMenuItemTitle = (label) => {
   return <Typography variant="h6">{label}: </Typography>;
 };
 
@@ -41,7 +41,7 @@ const MENU_CONNECTION_TYPES = {
   documentConnection: "Koppla dokument",
   mapLink: "Koppla karta och lager",
   link: "Koppla webblänk",
-  none: "Inget valt"
+  none: "Inget valt",
 };
 
 const MAPLINK_TEXT = "Kartlänk";
@@ -49,13 +49,13 @@ const WEBLINK_TEXT = "Webblänk";
 const NONE_TEXT = "Inget valt";
 const MAP_TEXT = "Karta";
 
-const styles = theme => ({
+const styles = (theme) => ({
   menuItem: {
     "&:focus": {
-      backgroundColor: theme.palette.primary.light
-    }
+      backgroundColor: theme.palette.primary.light,
+    },
   },
-  paper: { width: "20%", padding: "20px" }
+  paper: { width: "20%", padding: "20px" },
 });
 
 class MenuConnectionSelector extends React.Component {
@@ -64,12 +64,12 @@ class MenuConnectionSelector extends React.Component {
     mapLinkValue: this.props.menuItem.maplink,
     linkValue: this.props.menuItem.link,
     documentValue: this.props.menuItem.document,
-    activeMenu: ""
+    activeMenu: "",
   };
 
   componentDidMount = () => {
     this.setState({
-      value: this.getInitialValue()
+      value: this.getInitialValue(),
     });
   };
 
@@ -91,9 +91,9 @@ class MenuConnectionSelector extends React.Component {
     return MENU_CONNECTION_TYPES.none;
   };
 
-  openConnectionsMenu = e => {
+  openConnectionsMenu = (e) => {
     this.setState({
-      connectionsMenuAnchorEl: e.currentTarget
+      connectionsMenuAnchorEl: e.currentTarget,
     });
   };
 
@@ -101,7 +101,7 @@ class MenuConnectionSelector extends React.Component {
     this.setState({ connectionsMenuAnchorEl: null, open: false });
   };
 
-  getMenuConnectionTypeIcon = type => {
+  getMenuConnectionTypeIcon = (type) => {
     return type === MENU_CONNECTION_TYPES.link ? (
       <LanguageIcon></LanguageIcon>
     ) : type === MENU_CONNECTION_TYPES.mapLink ? (
@@ -118,7 +118,7 @@ class MenuConnectionSelector extends React.Component {
   renderConnectionMenuSelectOption = (value, index) => {
     return (
       <MenuItem
-        onClick={e => {
+        onClick={(e) => {
           this.handleChange(e.currentTarget, value);
         }}
         key={index}
@@ -143,11 +143,11 @@ class MenuConnectionSelector extends React.Component {
         anchorEl={connectionsMenuAnchorEl}
         anchorOrigin={{
           vertical: "top",
-          horizontal: "right"
+          horizontal: "right",
         }}
         transformOrigin={{
           vertical: "top",
-          horizontal: "left"
+          horizontal: "left",
         }}
       >
         <Grid spacing={2} container>
@@ -188,7 +188,7 @@ class MenuConnectionSelector extends React.Component {
     let newMenuItem = {
       maplink: "",
       link: "",
-      document: ""
+      document: "",
     };
 
     if (activeMenu === MENU_CONNECTION_TYPES.documentConnection) {
@@ -217,11 +217,11 @@ class MenuConnectionSelector extends React.Component {
     this.setState({
       connectionsMenuAnchorEl: null,
       open: false,
-      value: value
+      value: value,
     });
   };
 
-  setSelectedDocument = index => {
+  setSelectedDocument = (index) => {
     const { availableDocuments } = this.props;
     this.setState({ documentValue: availableDocuments[index] });
   };
@@ -262,13 +262,13 @@ class MenuConnectionSelector extends React.Component {
   };
 
   renderMapLink = () => {
-    return this.getLink(MAPLINK_TEXT, this.state.mapLinkValue, e => {
+    return this.getLink(MAPLINK_TEXT, this.state.mapLinkValue, (e) => {
       this.setState({ mapLinkValue: e.target.value });
     });
   };
 
   renderLink = () => {
-    return this.getLink(WEBLINK_TEXT, this.state.linkValue, e => {
+    return this.getLink(WEBLINK_TEXT, this.state.linkValue, (e) => {
       this.setState({ linkValue: e.target.value });
     });
   };
@@ -299,13 +299,13 @@ class MenuConnectionSelector extends React.Component {
       this.setState({
         activeMenu: value,
         connectionsMenuAnchorEl: target,
-        open: true
+        open: true,
       });
     } else {
       this.setState(
         {
           activeMenu: value,
-          value: value
+          value: value,
         },
         () => {
           this.updateSelection();
@@ -314,7 +314,7 @@ class MenuConnectionSelector extends React.Component {
     }
   };
 
-  getDropDownSelectionIcon = icon => {
+  getDropDownSelectionIcon = (icon) => {
     return (
       icon && (
         <Grid xs={2} item>
@@ -400,13 +400,13 @@ class MenuConnectionSelector extends React.Component {
                     disableScrollLock: true,
                     anchorOrigin: {
                       vertical: "bottom",
-                      horizontal: "left"
+                      horizontal: "left",
                     },
                     transformOrigin: {
                       vertical: "top",
-                      horizontal: "left"
+                      horizontal: "left",
                     },
-                    getContentAnchorEl: null
+                    getContentAnchorEl: null,
                   }}
                   onOpen={this.openDropDown}
                   onClose={this.closeDropDown}
