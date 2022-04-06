@@ -6,6 +6,7 @@ import clsx from "clsx";
 import Box from "@material-ui/core/Box";
 import TextArea from "../documentWindow/TextArea";
 import { makeStyles } from "@material-ui/core/styles";
+import Tooltip from "@material-ui/core/Tooltip";
 import {
   Button,
   Typography,
@@ -31,7 +32,9 @@ const useStyles = makeStyles((theme) => ({
     objectFit: "contain",
     objectPosition: "left",
   },
-
+  customLabel: {
+    textAlign: "left",
+  },
   pictureRightFloatingText: {},
   pictureLeftFloatingText: {},
 
@@ -44,17 +47,17 @@ const useStyles = makeStyles((theme) => ({
     marginRight: theme.spacing(1),
   },
 
-  pictureRight: {
+  mediaRight: {
     alignItems: "flex-end",
     display: "flex",
     flexDirection: "column",
   },
-  pictureLeft: {
+  mediaLeft: {
     alignItems: "flex-start",
     display: "flex",
     flexDirection: "column",
   },
-  pictureCenter: {
+  mediaCenter: {
     alignItems: "center",
     display: "flex",
     flexDirection: "column",
@@ -125,6 +128,10 @@ const useStyles = makeStyles((theme) => ({
     padding: theme.spacing(0),
     color: theme.palette.info.main,
   },
+  hoverLink: {
+    cursor: "text",
+    textDecoration: "underline dotted",
+  },
 }));
 
 const renderChild = (child) => {
@@ -133,7 +140,18 @@ const renderChild = (child) => {
   }
 
   if (child.nodeType === ELEMENT_NODE) {
-    return child.callback(child);
+    // Don't assume that callback exits
+    if (typeof child.callback === "function") {
+      return child.callback(child);
+    } else {
+      // If there's no callback, warn and render just
+      // the inner text portion of Element
+      console.warn(
+        "Unsupported DOMElement encountered. Rendering only innerText",
+        child
+      );
+      return child.innerText;
+    }
   }
 };
 
@@ -265,7 +283,7 @@ export const Figure = ({ figureTag }) => {
  *
  * @memberof Contents
  */
-export const Img = ({ imgTag, localObserver, getUniqueIntegerNumber }) => {
+export const Img = ({ imgTag, localObserver, componentId, baseUrl }) => {
   const classes = useStyles();
   const tagIsPresent = (imgTag, attribute) => {
     return imgTag.attributes.getNamedItem(attribute) == null ? false : true;
@@ -292,15 +310,15 @@ export const Img = ({ imgTag, localObserver, getUniqueIntegerNumber }) => {
 
   const getImagePositionClass = (position) => {
     if (position === "right") {
-      return classes.pictureRight;
+      return classes.mediaRight;
     }
 
     if (position === "left") {
-      return classes.pictureLeft;
+      return classes.mediaLeft;
     }
 
     if (position === "center") {
-      return classes.pictureCenter;
+      return classes.mediaCenter;
     }
 
     if (position === "floatLeft") {
@@ -319,7 +337,6 @@ export const Img = ({ imgTag, localObserver, getUniqueIntegerNumber }) => {
       <Box
         style={{ width: image.width }}
         className={classes.imageInformationWrapper}
-        id={image.id}
       >
         {image.caption && (
           <Typography id={`image_${image.captionId}`} variant="subtitle2">
@@ -348,8 +365,9 @@ export const Img = ({ imgTag, localObserver, getUniqueIntegerNumber }) => {
     height: imgTag.attributes.getNamedItem("data-image-height")?.value,
     width: imgTag.attributes.getNamedItem("data-image-width")?.value,
     position: imgTag.attributes.getNamedItem("data-image-position")?.value,
-    captionId: getUniqueIntegerNumber(),
-    sourceId: getUniqueIntegerNumber(),
+    id: `image_${componentId}`,
+    captionId: `imagecaption_${componentId}`,
+    sourceId: `imagesource_${componentId}`,
   };
 
   let onClickCallback = image.popup
@@ -363,19 +381,28 @@ export const Img = ({ imgTag, localObserver, getUniqueIntegerNumber }) => {
   const getDescribedByAttribute = () => {
     let describedBy = [];
     if (image.caption) {
-      describedBy.push(`image_${image.captionId}`);
+      describedBy.push(`${image.captionId}`);
     }
     if (image.source) {
-      describedBy.push(`image_${image.sourceId}`);
+      describedBy.push(`${image.sourceId}`);
     }
     return describedBy.length > 0 ? describedBy.join(" ") : null;
   };
 
+  let imgUrl = image.url;
+  if (imgUrl.includes("../")) {
+    imgUrl = image.url.replace("../", baseUrl);
+  }
+
   return (
-    <Box data-position={image.position} className={positioningClass}>
+    <Box
+      key={`${image.id}`}
+      data-position={image.position}
+      className={positioningClass}
+    >
       <CardMedia
         onClick={onClickCallback}
-        alt={image.altValue}
+        alt={image.altValue || ""}
         classes={{ media: classes.media }}
         aria-describedby={getDescribedByAttribute()}
         component="img"
@@ -385,11 +412,213 @@ export const Img = ({ imgTag, localObserver, getUniqueIntegerNumber }) => {
             : null
         }
         className={getImageStyle(image)}
-        image={image.url}
+        image={imgUrl}
       />
       {getImageDescription(image)}
     </Box>
   );
+};
+
+/**
+ * The render function for the video-tag as an img-tag.
+ * @param {object} imgTag The video-tag as an img-tag.
+ * @returns React.Fragment
+ */
+export const Video = ({ imgTag, componentId, baseUrl }) => {
+  const videoAttributes = {
+    caption: imgTag.dataset.caption,
+    height: imgTag.dataset.imageHeight,
+    width: imgTag.dataset.imageWidth,
+    position: imgTag.dataset.imagePosition,
+    source: imgTag.dataset.source,
+    url: imgTag.src,
+    id: `video_${componentId}`,
+  };
+
+  const classes = useStyles();
+  const getVideoPositionClass = (position) => {
+    if (position === "right") {
+      return classes.mediaRight;
+    }
+
+    if (position === "left") {
+      return classes.mediaLeft;
+    }
+
+    if (position === "center") {
+      return classes.mediaCenter;
+    }
+
+    if (position === "floatLeft") {
+      return classes.floatLeft;
+    }
+
+    if (position === "floatRight") {
+      return classes.floatRight;
+    }
+
+    return;
+  };
+  const positioningClass = getVideoPositionClass(videoAttributes.position);
+
+  const getVideoDescription = (videoAttributes) => {
+    return (
+      <Box
+        style={{ width: videoAttributes.width }}
+        className={classes.imageInformationWrapper}
+      >
+        {videoAttributes.caption && (
+          <Typography
+            id={`video_${videoAttributes.captionId}`}
+            variant="subtitle2"
+          >
+            {videoAttributes.caption}
+          </Typography>
+        )}
+        {videoAttributes.source && (
+          <Typography
+            id={`video_${videoAttributes.sourceId}`}
+            variant="subtitle2"
+            className={classes.imageText}
+          >
+            {videoAttributes.source}
+          </Typography>
+        )}
+      </Box>
+    );
+  };
+
+  let videoUrl = videoAttributes.url;
+  if (videoUrl.includes("../")) {
+    videoUrl = videoAttributes.url.replace("../", baseUrl);
+  }
+
+  return (
+    <React.Fragment key={videoAttributes.id}>
+      <div className={positioningClass}>
+        <video
+          height={videoAttributes.height}
+          width={videoAttributes.width}
+          controls={"controls"}
+        >
+          <source src={videoUrl} type="video/mp4"></source>
+        </video>
+        {getVideoDescription(videoAttributes)}
+      </div>
+    </React.Fragment>
+  );
+};
+
+/**
+ * The render function for the audio-tag as an img-tag.
+ * @param {object} imgTag The audio-tag as an img-tag.
+ * @returns React.Fragment
+ */
+export const Audio = ({ imgTag, componentId, baseUrl }) => {
+  const audioAttributes = {
+    caption: imgTag.attributes.getNamedItem("data-caption")?.value,
+    position: imgTag.attributes.getNamedItem("data-image-position")?.value,
+    source: imgTag.attributes.getNamedItem("data-source")?.value,
+    url: imgTag.attributes.getNamedItem("src")?.value,
+    width: imgTag.attributes.getNamedItem("data-image-width")?.value,
+    id: `audio_${componentId}`,
+  };
+
+  const classes = useStyles();
+  const getVideoPositionClass = (position) => {
+    if (position === "right") {
+      return classes.mediaRight;
+    }
+
+    if (position === "left") {
+      return classes.mediaLeft;
+    }
+
+    if (position === "center") {
+      return classes.mediaCenter;
+    }
+
+    if (position === "floatLeft") {
+      return classes.floatLeft;
+    }
+
+    if (position === "floatRight") {
+      return classes.floatRight;
+    }
+
+    return;
+  };
+  const positioningClass = getVideoPositionClass(audioAttributes.position);
+
+  const getAudioDescription = (audioAttributes) => {
+    return (
+      <Box
+        style={{ width: audioAttributes.width + "px" }}
+        className={classes.imageInformationWrapper}
+      >
+        {audioAttributes.caption && (
+          <Typography
+            id={`video_${audioAttributes.captionId}`}
+            variant="subtitle2"
+          >
+            {audioAttributes.caption}
+          </Typography>
+        )}
+        {audioAttributes.source && (
+          <Typography
+            id={`video_${audioAttributes.sourceId}`}
+            variant="subtitle2"
+            className={classes.imageText}
+          >
+            {audioAttributes.source}
+          </Typography>
+        )}
+      </Box>
+    );
+  };
+
+  let audioUrl = audioAttributes.url;
+  if (audioUrl.includes("../")) {
+    audioUrl = audioAttributes.url.replace("../", baseUrl);
+  }
+
+  return (
+    <React.Fragment key={audioAttributes.id}>
+      <div className={positioningClass}>
+        <audio controls={"controls"}>
+          <source src={imgTag.src} type="audio/mpeg"></source>
+        </audio>
+        {getAudioDescription(audioAttributes)}
+      </div>
+    </React.Fragment>
+  );
+};
+
+/**
+ * The render function for the source-tag.
+ * @param {object} sourceTag The source-tag.
+ * @returns React.Fragment
+ */
+export const Source = ({ sourceTag }) => {
+  const children = [...sourceTag.childNodes];
+  const src = sourceTag.src;
+  const type = sourceTag.type;
+  let array = [];
+  if (children.length > 0) {
+    children.forEach((child, index) => {
+      array.push(
+        <React.Fragment key={index}>
+          <source src={src} type={type}></source>
+        </React.Fragment>
+      );
+    });
+    return array;
+  }
+  return [
+    <React.Fragment key={0}>
+      <source src={src} type={type}></source>
+    </React.Fragment>,
+  ];
 };
 
 export const Strong = ({ strongTag }) => {
@@ -411,6 +640,7 @@ export const Strong = ({ strongTag }) => {
     </React.Fragment>,
   ];
 };
+
 export const Underline = ({ uTag }) => {
   const children = [...uTag.childNodes];
   let array = [];
@@ -476,16 +706,28 @@ export const CustomLink = ({ aTag, localObserver, bottomMargin }) => {
       1: headerIdentifier,
       2: documentLink,
       3: externalLink,
+      4: hoverLink,
     } = [
       "data-maplink",
       "data-header-identifier",
       "data-document",
       "data-link",
+      "data-hover",
     ].map((attributeKey) => {
       return attributes.getNamedItem(attributeKey)?.value;
     });
 
-    return { mapLink, headerIdentifier, documentLink, externalLink };
+    return { mapLink, headerIdentifier, documentLink, externalLink, hoverLink };
+  };
+
+  const getHoverLink = (hoverLink, tagText) => {
+    return (
+      <React.Fragment>
+        <Tooltip title={hoverLink}>
+          <abbr className={classes.hoverLink}>{tagText}</abbr>
+        </Tooltip>
+      </React.Fragment>
+    );
   };
 
   const getExternalLink = (externalLink) => {
@@ -504,11 +746,23 @@ export const CustomLink = ({ aTag, localObserver, bottomMargin }) => {
         key="external-link"
         href={externalLink}
       >
-        {getFormattedComponentFromTag(aTag)}
+        <Box component="span">{getFormattedComponentFromTag(aTag)}</Box>
       </Button>
     );
   };
-  const getMapLink = (aTag, mapLink) => {
+  const getMapLink = (aTag, mapLinkOrg) => {
+    // Attempt to safely URI Decode the supplied string. If
+    // it fails, use it as-is.
+    // The reason we want probably want to decode is that the
+    // link is created using the Anchor plugin, which encodes
+    // the query string properly, see #831 and #838.
+    let mapLink = null;
+    try {
+      mapLink = decodeURIComponent(mapLinkOrg);
+    } catch (error) {
+      mapLink = mapLinkOrg;
+    }
+
     return (
       <Button
         color="default"
@@ -518,20 +772,20 @@ export const CustomLink = ({ aTag, localObserver, bottomMargin }) => {
             : classes.linkButton
         )}
         startIcon={<MapIcon className={classes.linkIcon}></MapIcon>}
-        classes={{ startIcon: classes.startIcon }}
+        classes={{ startIcon: classes.startIcon, label: classes.customLabel }}
         target="_blank"
         href={externalLink}
         key="map-link"
         component="button"
         onClick={() => {
-          localObserver.publish("fly-to", mapLink);
+          localObserver.publish("document-maplink-clicked", mapLink);
         }}
       >
-        {getFormattedComponentFromTag(aTag)}
+        <Box component="span">{getFormattedComponentFromTag(aTag)}</Box>
       </Button>
     );
   };
-  const getDocumentLink = (headerIdentifier, documentLink) => {
+  const getDocumentLink = (headerIdentifier, documentLink, isPrintMode) => {
     return (
       <Button
         color="default"
@@ -547,29 +801,26 @@ export const CustomLink = ({ aTag, localObserver, bottomMargin }) => {
         classes={{ startIcon: classes.startIcon }}
         href="#"
         key="document-link"
-        component="button"
+        component={isPrintMode ? "span" : "button"}
         underline="hover"
         onClick={() => {
-          localObserver.publish("set-active-document", {
+          localObserver.publish("document-link-clicked", {
             documentName: documentLink,
             headerIdentifier: headerIdentifier,
           });
         }}
       >
-        {getFormattedComponentFromTag(aTag)}
+        <Box component="span">{getFormattedComponentFromTag(aTag)}</Box>
       </Button>
     );
   };
 
-  const {
-    mapLink,
-    headerIdentifier,
-    documentLink,
-    externalLink,
-  } = getLinkDataPerType(aTag.attributes);
+  const { mapLink, headerIdentifier, documentLink, externalLink, hoverLink } =
+    getLinkDataPerType(aTag.attributes);
 
   if (documentLink) {
-    return getDocumentLink(headerIdentifier, documentLink);
+    const isPrintMode = Boolean(aTag.attributes.printMode);
+    return getDocumentLink(headerIdentifier, documentLink, isPrintMode);
   }
 
   if (mapLink) {
@@ -578,6 +829,11 @@ export const CustomLink = ({ aTag, localObserver, bottomMargin }) => {
 
   if (externalLink) {
     return getExternalLink(externalLink);
+  }
+
+  if (hoverLink) {
+    const tagText = aTag.text;
+    return getHoverLink(hoverLink, tagText);
   }
 
   return null;

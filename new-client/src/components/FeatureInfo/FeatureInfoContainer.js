@@ -4,8 +4,8 @@ import { withStyles } from "@material-ui/core/styles";
 import ArrowLeftIcon from "@material-ui/icons/ArrowLeft";
 import ArrowRightIcon from "@material-ui/icons/ArrowRight";
 import FeaturePropsParsing from "./FeaturePropsParsing";
-import Diagram from "../Diagram";
-import HajkTable from "../Table";
+// import Diagram from "../Diagram";
+// import HajkTable from "../Table";
 import {
   Table,
   TableContainer,
@@ -65,6 +65,7 @@ class FeatureInfoContainer extends React.PureComponent {
     super(props);
     this.featurePropsParsing = new FeaturePropsParsing({
       globalObserver: props.globalObserver,
+      options: props.options,
     });
   }
 
@@ -167,35 +168,35 @@ class FeatureInfoContainer extends React.PureComponent {
     );
   }
 
-  shortcode(str) {
-    var codes = [];
-    var shortcodes = str.match(/\[(.*?)\]/g);
-    shortcodes = shortcodes === null ? [] : shortcodes;
+  // shortcode(str) {
+  //   const codes = [];
+  //   let shortcodes = str.match(/\[(.*?)\]/g);
+  //   shortcodes = shortcodes === null ? [] : shortcodes;
 
-    if (shortcodes) {
-      shortcodes.forEach((code) => {
-        str = str.replace(code, "");
-        var params = code.replace("[", "").replace("]", "").split(" ");
-        var c = {};
+  //   if (shortcodes) {
+  //     shortcodes.forEach((code) => {
+  //       str = str.replace(code, "");
+  //       var params = code.replace("[", "").replace("]", "").split(" ");
+  //       var c = {};
 
-        params.forEach((param, i) => {
-          if (i === 0) {
-            c.shortcode = param;
-          } else {
-            let parts = param.split("=");
-            c[parts[0]] = param.replace(parts[0] + "=", "").replace(/"/g, "");
-          }
-        });
-        codes.push(c);
-      });
-      return {
-        str: str,
-        codes: codes,
-      };
-    } else {
-      return;
-    }
-  }
+  //       params.forEach((param, i) => {
+  //         if (i === 0) {
+  //           c.shortcode = param;
+  //         } else {
+  //           let parts = param.split("=");
+  //           c[parts[0]] = param.replace(parts[0] + "=", "").replace(/"/g, "");
+  //         }
+  //       });
+  //       codes.push(c);
+  //     });
+  //     return {
+  //       str: str,
+  //       codes: codes,
+  //     };
+  //   } else {
+  //     return;
+  //   }
+  // }
 
   getMarkdownFromLocalInfoBox = (feature, layer, markdown) => {
     // Same goes for infobox, I'm shortening the code significantly using the optional chaining.
@@ -247,13 +248,15 @@ class FeatureInfoContainer extends React.PureComponent {
     caption = feature.layer?.layersInfo?.[layer]?.caption || caption;
     markdown = this.getMarkdownFromLocalInfoBox(feature, layer, markdown);
 
-    if (markdown) {
-      let transformed = this.shortcode(markdown);
-      if (transformed) {
-        shortcodes = transformed.codes;
-        markdown = transformed.str;
-      }
-    }
+    // Disabled shortcodes for now as they mess with Markdown tags
+    // for Links and Imgs that use "[" and "]".
+    // if (markdown) {
+    //   let transformed = this.shortcode(markdown);
+    //   if (transformed) {
+    //     shortcodes = transformed.codes;
+    //     markdown = transformed.str;
+    //   }
+    // }
 
     this.setState({ loading: true });
 
@@ -277,31 +280,30 @@ class FeatureInfoContainer extends React.PureComponent {
 
   getValue = async (markdown, properties, caption) => {
     if (markdown) {
-      return await this.featurePropsParsing.mergeFeaturePropsWithMarkdown(
-        markdown,
-        properties
-      );
+      return await this.featurePropsParsing
+        .setMarkdownAndProperties({ markdown, properties })
+        .mergeFeaturePropsWithMarkdown();
     } else {
       return this.getFeaturesAsDefaultTable(properties, caption);
     }
   };
 
-  renderShortcodes(shortcodes, feature) {
-    return shortcodes.map((shortcode, i) => {
-      switch (shortcode.shortcode) {
-        case "diagram":
-          return (
-            <Diagram key={i} source={shortcode.source} feature={feature} />
-          );
-        case "table":
-          return (
-            <HajkTable key={i} source={shortcode.source} feature={feature} />
-          );
-        default:
-          return null;
-      }
-    });
-  }
+  // renderShortcodes(shortcodes, feature) {
+  //   return shortcodes.map((shortcode, i) => {
+  //     switch (shortcode.shortcode) {
+  //       case "diagram":
+  //         return (
+  //           <Diagram key={i} source={shortcode.source} feature={feature} />
+  //         );
+  //       case "table":
+  //         return (
+  //           <HajkTable key={i} source={shortcode.source} feature={feature} />
+  //         );
+  //       default:
+  //         return null;
+  //     }
+  //   });
+  // }
 
   isReadyToShowInfo = () => {
     const { caption, value, loading, shortcodes } = this.state;
@@ -309,27 +311,16 @@ class FeatureInfoContainer extends React.PureComponent {
   };
 
   renderFeatureInformation = () => {
-    const { caption, value, shortcodes, markdown } = this.state;
+    // const { caption, value, shortcodes, markdown } = this.state;
+    const { caption, value } = this.state;
     const { classes } = this.props;
 
     return (
       <Grid className={classes.featureInfo} item>
-        <Typography variant="button" align="center" component="h6">
+        <Typography variant="button" align="center" component="h6" gutterBottom>
           {caption}
         </Typography>
-        {markdown ? (
-          value.map((element, index) => {
-            return <React.Fragment key={index}>{element}</React.Fragment>;
-          })
-        ) : (
-          <React.Fragment>{value}</React.Fragment>
-        )}
-
-        {shortcodes.length > 0 &&
-          this.renderShortcodes(
-            shortcodes,
-            this.props.features[this.state.selectedIndex - 1]
-          )}
+        {value}
       </Grid>
     );
   };

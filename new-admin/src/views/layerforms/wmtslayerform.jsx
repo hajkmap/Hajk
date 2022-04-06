@@ -1,25 +1,3 @@
-// Copyright (C) 2016 Göteborgs Stad
-//
-// Denna programvara är fri mjukvara: den är tillåten att distribuera och modifiera
-// under villkoren för licensen CC-BY-NC-SA 4.0.
-//
-// This program is free software: you can redistribute it and/or modify
-// it under the terms of the CC-BY-NC-SA 4.0 licence.
-//
-// http://creativecommons.org/licenses/by-nc-sa/4.0/
-//
-// Det är fritt att dela och anpassa programvaran för valfritt syfte
-// med förbehåll att följande villkor följs:
-// * Copyright till upphovsmannen inte modifieras.
-// * Programvaran används i icke-kommersiellt syfte.
-// * Licenstypen inte modifieras.
-//
-// Den här programvaran är öppen i syfte att den skall vara till nytta för andra
-// men UTAN NÅGRA GARANTIER; även utan underförstådd garanti för
-// SÄLJBARHET eller LÄMPLIGHET FÖR ETT VISST SYFTE.
-//
-// https://github.com/hajkmap/Hajk
-
 import React from "react";
 import { Component } from "react";
 import $ from "jquery";
@@ -68,6 +46,11 @@ const defaultState = {
   infoUrl: "",
   infoUrlText: "",
   infoOwner: "",
+  timeSliderVisible: false,
+  timeSliderStart: "",
+  timeSliderEnd: "",
+  maxZoom: -1,
+  minZoom: -1,
 };
 
 /**
@@ -134,6 +117,11 @@ class WMTSLayerForm extends Component {
       infoUrl: this.getValue("infoUrl"),
       infoUrlText: this.getValue("infoUrlText"),
       infoOwner: this.getValue("infoOwner"),
+      timeSliderVisible: this.getValue("timeSliderVisible"),
+      timeSliderStart: this.getValue("timeSliderStart"),
+      timeSliderEnd: this.getValue("timeSliderEnd"),
+      maxZoom: this.getValue("maxZoom"),
+      minZoom: this.getValue("minZoom"),
     };
   }
 
@@ -149,6 +137,12 @@ class WMTSLayerForm extends Component {
     var input = this.refs["input_" + fieldName],
       value = input ? input.value : "";
 
+    // We must cast the following to Number, as String won't be accepted for those:
+    if (["maxZoom", "minZoom"].indexOf(fieldName) > -1) {
+      value = Number(value);
+      return value === 0 ? -1 : value;
+    }
+
     if (fieldName === "date") value = create_date();
     if (fieldName === "layers") value = format_layers(this.state.addedLayers);
     if (fieldName === "singleTile") value = input.checked;
@@ -161,6 +155,7 @@ class WMTSLayerForm extends Component {
     if (fieldName === "resolutions") value = value.split(",");
     if (fieldName === "matrixIds") value = value.split(",");
     if (fieldName === "infoVisible") value = input.checked;
+    if (fieldName === "timeSliderVisible") value = input.checked;
 
     return value;
   }
@@ -197,6 +192,18 @@ class WMTSLayerForm extends Component {
     var value = this.getValue(fieldName),
       valid = true;
 
+    function number(v) {
+      return !empty(v) && !isNaN(Number(v));
+    }
+
+    function empty(v) {
+      return typeof v === "string"
+        ? v.trim() === ""
+        : Array.isArray(v)
+        ? v[0] === ""
+        : false;
+    }
+
     switch (fieldName) {
       case "origin":
       case "resolutions":
@@ -212,6 +219,12 @@ class WMTSLayerForm extends Component {
       case "style":
       case "projection":
         if (value === "") {
+          valid = false;
+        }
+        break;
+      case "minZoom":
+      case "maxZoom":
+        if (!number(value) || empty(value)) {
           valid = false;
         }
         break;
@@ -244,10 +257,13 @@ class WMTSLayerForm extends Component {
   }
 
   render() {
-    var imageLoader = this.state.imageLoad ? (
+    const imageLoader = this.state.imageLoad ? (
       <i className="fa fa-refresh fa-spin" />
     ) : null;
-    var infoClass = this.state.infoVisible ? "tooltip-info" : "hidden";
+    const infoClass = this.state.infoVisible ? "tooltip-info" : "hidden";
+    const timeSliderClass = this.state.timeSliderVisible
+      ? "tooltip-timeSlider"
+      : "hidden";
 
     return (
       <fieldset>
@@ -331,6 +347,54 @@ class WMTSLayerForm extends Component {
           >
             Välj fil {imageLoader}
           </span>
+        </div>
+        <div>
+          <label>
+            Min zoom{" "}
+            <abbr title="Lägsta zoomnivå där lagret visas. OBS! Om man vill att lagret ska visas för skala 1:10 000, 1:5 000, 1:2 000 osv måste man ange den zoomnivå som skalsteget ovanför skala 1:10 000 har (t ex 1:20 000). Om 5 motsvarar 1:10 000 ska man då ange 4. Värdet på zoomnivån beror på aktuella inställningar i map_1.json, avsnitt ”map.resolutions”. '-1' betyder att lagret är synligt hela vägen till den lägsta zoomnivån. Se även inställning för Max zoom.">
+              (?)
+            </abbr>
+          </label>
+          <input
+            type="number"
+            step="1"
+            min="-1"
+            max="100"
+            ref="input_minZoom"
+            value={this.state.minZoom}
+            className={
+              (this.getValidationClass("minZoom"), "control-fixed-width")
+            }
+            onChange={(e) => {
+              const v = e.target.value;
+              this.setState({ minZoom: v });
+            }}
+          />
+        </div>
+        <div>
+          <label>
+            Max zoom{" "}
+            <abbr title="Högsta zoomnivå vid vilket lagret visas. Om man t ex anger 5 för skala 1:10 000 kommer lagret att visas för skala 1:10 000 men inte för skala 1:5000. Värdet på zoomnivån beror på aktuella inställningar i map_1.json, avsnitt ”map.resolutions”. '-1' betyder att lagret är synligt hela vägen till den sista zoomnivån. Se även inställning för Min zoom.">
+              (?)
+            </abbr>
+          </label>
+          <input
+            type="number"
+            step="1"
+            min="-1"
+            max="100"
+            ref="input_maxZoom"
+            value={this.state.maxZoom}
+            className={
+              (this.getValidationClass("minZoom"), "control-fixed-width")
+            }
+            onChange={(e) => {
+              const v = e.target.value;
+              this.setState({ maxZoom: v }, () =>
+                this.validateField("maxZoom")
+              );
+            }}
+          />
         </div>
         <div className="separator">Inställningar för request</div>
         <div>
@@ -541,6 +605,45 @@ class WMTSLayerForm extends Component {
               }}
               value={this.state.infoOwner}
               className={this.getValidationClass("infoOwner")}
+            />
+          </div>
+        </div>
+        <div className="timeSlider-container">
+          <div>
+            <input
+              type="checkbox"
+              ref="input_timeSliderVisible"
+              id="timeSlider"
+              onChange={(e) => {
+                this.setState({ timeSliderVisible: e.target.checked });
+              }}
+              checked={this.state.timeSliderVisible}
+            />
+            &nbsp;
+            <label htmlFor="timeSlider">Tidslinjedatum</label>
+          </div>
+          <div className={timeSliderClass}>
+            <label>Tidslinje start</label>
+            <input
+              type="text"
+              placeholder="ÅÅÅÅMMDD"
+              ref="input_timeSliderStart"
+              onChange={(e) => {
+                this.setState({ timeSliderStart: e.target.value });
+              }}
+              value={this.state.timeSliderStart}
+            />
+          </div>
+          <div className={timeSliderClass}>
+            <label>Tidslinje slut</label>
+            <input
+              type="text"
+              placeholder="ÅÅÅÅMMDD"
+              ref="input_timeSliderEnd"
+              onChange={(e) => {
+                this.setState({ timeSliderEnd: e.target.value });
+              }}
+              value={this.state.timeSliderEnd}
             />
           </div>
         </div>

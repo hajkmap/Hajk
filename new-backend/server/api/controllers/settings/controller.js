@@ -22,6 +22,24 @@ export class Controller {
     );
   }
 
+  updateMapTool(req, res) {
+    SettingsService.updateMapTool(
+      req.params.map,
+      req.params.tool,
+      req.body
+    ).then((data) => {
+      // Can't use handleStandardResponse here because we need to
+      // output only data.mapConfig on success – not the entire data.
+      if (data.error) res.status(500).send(data.error.toString());
+      else {
+        // Send response
+        res.sendStatus(data);
+        // Log admin action
+        ael.info(`${res.locals.authUser} saved map ${req.query.mapFile}`);
+      }
+    });
+  }
+
   putLayerOfType(req, res) {
     SettingsService.createOrUpdateLayer(req.params.type, req.body).then(
       (data) => {

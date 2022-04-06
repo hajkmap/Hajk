@@ -2,22 +2,8 @@ import React from "react";
 import { withStyles } from "@material-ui/core/styles";
 import Typography from "@material-ui/core/Typography";
 import ImagePopupModal from "./ImagePopupModal";
-import htmlToMaterialUiParser from "../utils/htmlToMaterialUiParser";
+import { flattenChaptersTree } from "../utils/helpers";
 import { Box } from "@material-ui/core";
-import {
-  Paragraph,
-  ULComponent,
-  OLComponent,
-  CustomLink,
-  Figure,
-  Heading,
-  Strong,
-  Italic,
-  Underline,
-  Img,
-  BlockQuote,
-  LineBreak,
-} from "../utils/ContentComponentFactory";
 
 const styles = (theme) => {
   return {
@@ -42,224 +28,65 @@ class Contents extends React.PureComponent {
     this.internalIds = [];
   }
 
-  getUniqueIntegerNumber = () => {
-    const id = this.internalIds.length + 1;
-    this.internalIds.push(id);
-    return id;
-  };
+  /* TODO...
+   * This should be refactored in some other way.
+   * right now we are "creating" components for printing here
+   * because we need to use the render in this component
+   */
+  bindPrintSpecificHandlers = () => {
+    const { localObserver, model } = this.props;
+    localObserver.unsubscribe("append-chapter-components");
 
-  flattenChaptersTree = (chapters) => {
-    return chapters.reduce((acc, chapter) => {
-      if (chapter.html && chapter.header) {
-        let chapterStrippedFromSubChapters = { ...chapter };
-        chapterStrippedFromSubChapters.chapters = [];
-        acc = [...acc, chapterStrippedFromSubChapters];
-      }
-      if (chapter.chapters && chapter.chapters.length > 0) {
-        return [...acc, ...this.flattenChaptersTree(chapter.chapters)];
-      }
-      return acc;
-    }, []);
+    localObserver.subscribe("append-document-components", (documents) => {
+      let chapters = [];
+      let headerChapter = [];
+
+      documents.forEach((document) => {
+        /*
+         * add an H1 tag for menu parents when printing.
+         * chapters if a group of documents has a parent document, the header of the parent
+         * is printed if any of the children are printed.
+         */
+        if (document.isGroupHeader) {
+          headerChapter.push(
+            this.createGroupHeadingTag(document.title, document.id)
+          );
+          chapters.push(headerChapter);
+          headerChapter = [];
+        } else {
+          document.chapters.forEach((chapter) => {
+            model.appendComponentsToChapter(chapter);
+          });
+
+          let renderedChapters = [];
+          let flatChaptersTree = flattenChaptersTree(document.chapters);
+          flatChaptersTree = flatChaptersTree.map((item) => {
+            if (item.mustReplace) {
+              let newItem = {};
+              item = newItem;
+            }
+            return item;
+          });
+
+          renderedChapters.push(this.renderChapters(flatChaptersTree, true));
+          chapters.push(renderedChapters);
+        }
+      });
+
+      localObserver.publish("chapter-components-appended", chapters);
+    });
   };
 
   componentDidMount = () => {
     const { localObserver } = this.props;
-    this.appendParsedComponentsToDocument();
-    localObserver.unsubscribe("append-chapter-components");
+    this.bindPrintSpecificHandlers();
     localObserver.subscribe("image-popup", this.showPopupModal);
-    localObserver.subscribe("append-chapter-components", (chapters) => {
-      console.log(chapters, "chapters");
-      chapters.forEach((chapter) => {
-        this.appendComponentsToChapter(chapter);
-      });
-
-      let renderedChapters = this.renderChapters(
-        this.flattenChaptersTree(chapters)
-      );
-      localObserver.publish("chapter-components-appended", renderedChapters);
-    });
   };
 
   componentWillUnmount = () => {
     const { localObserver } = this.props;
     localObserver.unsubscribe("chapter-components-appended");
   };
-
-  getCustomLink = (e) => {
-    return (
-      <CustomLink
-        aTag={e}
-        localObserver={this.props.localObserver}
-        bottomMargin
-      ></CustomLink>
-    );
-  };
-
-  /**
-   * Private help method that adds all allowed html tags.
-   *
-   * @memberof Contents
-   */
-  getTagSpecificCallbacks = () => {
-    let allowedHtmlTags = [];
-    allowedHtmlTags.push({
-      tagType: "br",
-      callback: () => {
-        return <LineBreak></LineBreak>;
-      },
-    });
-    allowedHtmlTags.push({
-      tagType: "ul",
-      callback: (e) => {
-        return <ULComponent ulComponent={e}></ULComponent>;
-      },
-    });
-    allowedHtmlTags.push({
-      tagType: "ol",
-      callback: (e) => <OLComponent olComponent={e}></OLComponent>,
-    });
-    allowedHtmlTags.push({
-      tagType: "li",
-      callback: () => {},
-    });
-    allowedHtmlTags.push({
-      tagType: "blockquote",
-      callback: (e) => {
-        return (
-          <BlockQuote
-            blockQuoteTag={e}
-            defaultColors={this.props.options.defaultDocumentColorSettings}
-          ></BlockQuote>
-        );
-      },
-    });
-    allowedHtmlTags.push({
-      tagType: "h1",
-      callback: (e) => {
-        return <Heading headingTag={e}></Heading>;
-      },
-    });
-    allowedHtmlTags.push({
-      tagType: "h2",
-      callback: (e) => {
-        return <Heading headingTag={e}></Heading>;
-      },
-    });
-    allowedHtmlTags.push({
-      tagType: "h3",
-      callback: (e) => {
-        return <Heading headingTag={e}></Heading>;
-      },
-    });
-    allowedHtmlTags.push({
-      tagType: "h4",
-      callback: (e) => {
-        return <Heading headingTag={e}></Heading>;
-      },
-    });
-    allowedHtmlTags.push({
-      tagType: "h5",
-      callback: (e) => {
-        return <Heading headingTag={e}></Heading>;
-      },
-    });
-    allowedHtmlTags.push({
-      tagType: "h6",
-      callback: (e) => {
-        return <Heading headingTag={e}></Heading>;
-      },
-    });
-    allowedHtmlTags.push({
-      tagType: "a",
-      callback: this.getCustomLink.bind(this),
-    });
-    allowedHtmlTags.push({
-      tagType: "img",
-      callback: (e) => {
-        return (
-          <Img
-            getUniqueIntegerNumber={this.getUniqueIntegerNumber}
-            imgTag={e}
-            localObserver={this.props.localObserver}
-          ></Img>
-        );
-      },
-    });
-    allowedHtmlTags.push({
-      tagType: "p",
-      callback: (e) => {
-        return <Paragraph pTag={e}></Paragraph>;
-      },
-    });
-    allowedHtmlTags.push({
-      tagType: "figure",
-      callback: (e) => {
-        return <Figure figureTag={e}></Figure>;
-      },
-    });
-    allowedHtmlTags.push({
-      tagType: "strong",
-      callback: (e) => {
-        return <Strong strongTag={e}></Strong>;
-      },
-    });
-    allowedHtmlTags.push({
-      tagType: "u",
-      callback: (e) => {
-        return <Underline uTag={e}></Underline>;
-      },
-    });
-    allowedHtmlTags.push({
-      tagType: "em",
-      callback: (e) => {
-        return <Italic emTag={e}></Italic>;
-      },
-    });
-    return allowedHtmlTags;
-  };
-
-  getMaterialUIComponentsForChapter = (chapter) => {
-    return htmlToMaterialUiParser(
-      chapter.html,
-      this.getTagSpecificCallbacks()
-    ).map((component, index) => {
-      return <React.Fragment key={index}>{component}</React.Fragment>;
-    });
-  };
-
-  hasSubChapters = (chapter) => {
-    return chapter.chapters && chapter.chapters.length > 0;
-  };
-
-  appendComponentsToChapter = (chapter) => {
-    if (this.hasSubChapters(chapter)) {
-      chapter.chapters.forEach((subChapter) => {
-        subChapter.components = this.getMaterialUIComponentsForChapter(
-          subChapter
-        );
-        if (this.hasSubChapters(subChapter)) {
-          this.appendComponentsToChapter(subChapter);
-        }
-      });
-    }
-    chapter.components = this.getMaterialUIComponentsForChapter(chapter);
-  };
-
-  appendParsedComponentsToDocument = () => {
-    const { activeDocument } = this.props;
-    let content = { ...activeDocument };
-    content.chapters.forEach((chapter, index) => {
-      this.appendComponentsToChapter(chapter);
-    });
-    this.setState({ activeContent: content });
-  };
-
-  componentDidUpdate(nextProps) {
-    const { activeDocument } = this.props;
-    if (nextProps.activeDocument !== activeDocument) {
-      this.appendParsedComponentsToDocument();
-    }
-  }
 
   closePopupModal = () => {
     this.setState({ popupImage: null });
@@ -281,15 +108,30 @@ class Contents extends React.PureComponent {
     );
   };
 
+  createGroupHeadingTag = (title, id) => {
+    const { classes } = this.props;
+    return (
+      <React.Fragment key={id}>
+        <Typography
+          className={classes.typography}
+          data-type="chapter-header"
+          variant={"h1"}
+        >
+          {title}
+        </Typography>
+      </React.Fragment>
+    );
+  };
+
   /**
    * Renders the document with all it's chapters and sub chapters.
    * @param {object} document The document that will be rendered.
    *
    * @memberof Contents
    */
-  renderChapters = (chapters) => {
+  renderChapters = (chapters, isPrintMode) => {
     return Array.isArray(chapters)
-      ? chapters.map((chapter) => this.renderChapter(chapter))
+      ? chapters.map((chapter) => this.renderChapter(chapter, isPrintMode))
       : null;
   };
 
@@ -299,10 +141,10 @@ class Contents extends React.PureComponent {
    *
    * @memberof Contents
    */
-  renderChapter = (chapter) => {
+  renderChapter = (chapter, isPrintMode) => {
     return (
       <React.Fragment key={chapter.id}>
-        {this.renderHeadline(chapter)}
+        {this.renderHeadline(chapter, isPrintMode)}
         {chapter.components}
         {Array.isArray(chapter.chapters)
           ? chapter.chapters.map((subChapter) => this.renderChapter(subChapter))
@@ -311,8 +153,15 @@ class Contents extends React.PureComponent {
     );
   };
 
-  getHeaderVariant = (chapter) => {
+  getHeaderVariant = (chapter, isPrintMode) => {
     let headerSize = 2; //Chapters start with h2
+
+    //If we are printing, we have a flattened chapters tree, so use the chapter.level property to set the heading
+    //instead of cycling through the parent chapter objects.
+    if (isPrintMode) {
+      headerSize += chapter.level;
+      return `h${headerSize}`;
+    }
     while (chapter.parent) {
       headerSize++;
       chapter = chapter.parent;
@@ -326,7 +175,7 @@ class Contents extends React.PureComponent {
    *
    * @memberof Contents
    */
-  renderHeadline = (chapter) => {
+  renderHeadline = (chapter, isPrintMode) => {
     const { classes } = this.props;
 
     return (
@@ -334,8 +183,8 @@ class Contents extends React.PureComponent {
         <Typography
           ref={chapter.scrollRef}
           className={classes.typography}
-          id="chapter-header"
-          variant={this.getHeaderVariant(chapter)}
+          data-type="chapter-header"
+          variant={this.getHeaderVariant(chapter, isPrintMode)}
         >
           {chapter.header}
         </Typography>
@@ -344,11 +193,11 @@ class Contents extends React.PureComponent {
   };
 
   render = () => {
-    if (this.state.activeContent) {
+    if (this.props.activeDocument) {
       return (
         <Box style={{ display: "block", maxWidth: "100%" }}>
           {this.renderImageInModal()}
-          {this.renderChapters(this.state.activeContent.chapters)}
+          {this.renderChapters(this.props.activeDocument.chapters)}
         </Box>
       );
     } else {

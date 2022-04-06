@@ -2,7 +2,13 @@ import React from "react";
 import Grid from "@material-ui/core/Grid";
 import { withStyles } from "@material-ui/core/styles";
 import { withSnackbar } from "notistack";
-import { FormControl, InputLabel, MenuItem, Select } from "@material-ui/core";
+import {
+  FormControl,
+  FormHelperText,
+  InputLabel,
+  MenuItem,
+  Select,
+} from "@material-ui/core";
 
 const styles = (theme) => ({
   root: {
@@ -47,6 +53,7 @@ class GeneralOptions extends React.PureComponent {
   render() {
     const {
       classes,
+      useMargin,
       orientation,
       format,
       scale,
@@ -54,6 +61,7 @@ class GeneralOptions extends React.PureComponent {
       handleChange,
       model,
       saveAsType,
+      printOptionsOk,
     } = this.props;
     return (
       <>
@@ -68,10 +76,29 @@ class GeneralOptions extends React.PureComponent {
                 id: "format",
               }}
             >
-              <MenuItem value={"a2"}>A2</MenuItem>
-              <MenuItem value={"a3"}>A3</MenuItem>
-              <MenuItem value={"a4"}>A4</MenuItem>
-              <MenuItem value={"a5"}>A5</MenuItem>
+              {this.props.options.paperFormats.map((value, index) => {
+                return (
+                  <MenuItem key={"paperFormat_" + index} value={value}>
+                    {value.toUpperCase()}
+                  </MenuItem>
+                );
+              })}
+            </Select>
+          </FormControl>
+          <FormControl className={classes.formControl}>
+            <InputLabel htmlFor="useMargin">
+              Marginaler runt kartbilden
+            </InputLabel>
+            <Select
+              value={useMargin}
+              onChange={handleChange}
+              inputProps={{
+                name: "useMargin",
+                id: "useMargin",
+              }}
+            >
+              <MenuItem value={true}>Ja</MenuItem>
+              <MenuItem value={false}>Nej</MenuItem>
             </Select>
           </FormControl>
           <FormControl className={classes.formControl}>
@@ -89,7 +116,7 @@ class GeneralOptions extends React.PureComponent {
             </Select>
           </FormControl>
 
-          <FormControl className={classes.formControl}>
+          <FormControl className={classes.formControl} error={!printOptionsOk}>
             <InputLabel htmlFor="scale">Skala</InputLabel>
             <Select
               value={scale}
@@ -108,6 +135,12 @@ class GeneralOptions extends React.PureComponent {
                 );
               })}
             </Select>
+            {!printOptionsOk && (
+              <FormHelperText>
+                Bilden kommer inte kunna skrivas ut korrekt. Testa med en lägre
+                upplösning eller mindre skala.
+              </FormHelperText>
+            )}
           </FormControl>
           <FormControl className={classes.formControl}>
             <InputLabel htmlFor="orientation">Spara som</InputLabel>

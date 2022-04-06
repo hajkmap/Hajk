@@ -64,8 +64,7 @@ const RotateControl = React.memo(props => {
   }
 
   return (
-    props.map &&
-    rotation !== 0 && (
+    (props.map && rotation !== 0 && (
       <Tooltip title="Återställ rotation">
         <Paper className={classes.paper}>
           <Button
@@ -77,7 +76,8 @@ const RotateControl = React.memo(props => {
           </Button>
         </Paper>
       </Tooltip>
-    )
+    )) ||
+    null
   );
 });
 

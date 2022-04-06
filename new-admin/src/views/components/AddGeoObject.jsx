@@ -5,7 +5,9 @@ import DoneIcon from "@material-ui/icons/DoneOutline";
 import CancelIcon from "@material-ui/icons/Cancel";
 import { withStyles } from "@material-ui/core/styles";
 import { green, blue } from "@material-ui/core/colors";
-import RoomIcon from "@material-ui/icons/Room";
+import AddBoxIcon from "@material-ui/icons/AddBox";
+import IconButton from "@material-ui/core/IconButton";
+import Tooltip from "@material-ui/core/Tooltip";
 
 const ColorButtonGreen = withStyles(theme => ({
   root: {
@@ -118,13 +120,14 @@ class AddGeoObject extends Component {
     } else {
       return (
         <div style={{ display: "inline-block" }}>
-          <Button
-            variant="contained"
-            className="btn btn-default"
-            onClick={() => this.toggleInputVisibility()}
-          >
-            <RoomIcon />
-          </Button>
+          <Tooltip title="Lägg till ett geoobjekt">
+            <IconButton
+              size="small"
+              onClick={() => this.toggleInputVisibility()}
+            >
+              <AddBoxIcon />
+            </IconButton>
+          </Tooltip>
         </div>
       );
     }

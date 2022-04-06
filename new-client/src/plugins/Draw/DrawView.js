@@ -14,7 +14,7 @@ import FormControlLabel from "@material-ui/core/FormControlLabel";
 import Typography from "@material-ui/core/Typography/Typography";
 import Checkbox from "@material-ui/core/Checkbox";
 import { withSnackbar } from "notistack";
-import Dialog from "../../components/Dialog.js";
+import Dialog from "../../components/Dialog/Dialog";
 import Symbology from "./components/Symbology.js";
 
 import "./draw.css";
@@ -79,9 +79,10 @@ class DrawView extends React.PureComponent {
     mapDiv.addEventListener("drop", this.handleDrop, false);
   };
 
-  handleDragEnter = () => {
+  handleDragEnter = (e) => {
     this.snackbarKey = this.props.enqueueSnackbar(
-      "Släpp en KML-fil i kartan för att importera!"
+      "Släpp en KML-fil i kartan för att importera!",
+      { preventDuplicate: true }
     );
   };
 
@@ -181,6 +182,7 @@ class DrawView extends React.PureComponent {
             headerText: this.state.dialogHeaderText || "Ange text",
             buttonText: this.state.dialogButtonText || "OK",
             abortText: this.state.dialogAbortText,
+            useLegacyNonMarkdownRenderer: true,
           }}
           open={this.state.dialog}
           onClose={this.state.dialogCloseCallback}

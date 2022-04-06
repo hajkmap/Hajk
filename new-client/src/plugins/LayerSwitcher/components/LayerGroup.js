@@ -107,19 +107,7 @@ class LayerGroup extends React.PureComponent {
   constructor(props) {
     super(props);
     this.model = this.props.model;
-
-    // Setup a listener on every layer that will force re-render on this component
-    // FIXME: The problem with this approach is that we forceUpdate ONCE PER EVERY LAYERGROUP.
-    this.props.app
-      .getMap()
-      .getLayers()
-      .getArray()
-      .forEach((layer) => {
-        layer.on("change:visible", () => {
-          //
-          this.forceUpdate();
-        });
-      });
+    this.bindVisibleChangeForLayersInGroup();
   }
 
   componentDidMount() {
@@ -127,6 +115,55 @@ class LayerGroup extends React.PureComponent {
       ...this.props.group,
     });
   }
+
+  componentWillUnmount() {
+    //LayerGroup is never unmounted atm but we remove listener in case this changes in the future
+    this.unbindVisibleChangeForLayersInGroup();
+  }
+
+  //We force update when a layer in this group has changed visibility to
+  //be able to sync togglebuttons in GUI
+  layerVisibilityChanged = (e) => {
+    this.forceUpdate();
+  };
+
+  getAllLayersInGroupAndSubGroups = (groups) => {
+    return groups.reduce((layers, group) => {
+      if (this.hasSubGroups(group)) {
+        layers = [
+          ...layers,
+          ...this.getAllLayersInGroupAndSubGroups(group.groups),
+        ];
+      }
+      return [...layers, ...group.layers];
+    }, []);
+  };
+
+  getAllMapLayersReferencedByGroup = () => {
+    const { app, group } = this.props;
+    const allLayersInGroup = this.getAllLayersInGroupAndSubGroups([group]);
+    return app
+      .getMap()
+      .getLayers()
+      .getArray()
+      .filter((mapLayer) => {
+        return allLayersInGroup.find((layer) => {
+          return layer.id === mapLayer.get("name");
+        });
+      });
+  };
+
+  bindVisibleChangeForLayersInGroup = () => {
+    this.getAllMapLayersReferencedByGroup().forEach((layer) => {
+      layer.on("change:visible", this.layerVisibilityChanged);
+    });
+  };
+
+  unbindVisibleChangeForLayersInGroup = () => {
+    this.getAllMapLayersReferencedByGroup().forEach((layer) => {
+      layer.un("change:visible", this.layerVisibilityChanged);
+    });
+  };
 
   handleChange = (panel) => (event, expanded) => {
     this.setState({
@@ -364,7 +401,7 @@ class LayerGroup extends React.PureComponent {
           <AccordionDetails classes={{ root: classes.root }}>
             <div className={classes.Accordion}>
               {this.state.layers.map((layer, i) => {
-                var mapLayer = this.model.layerMap[Number(layer.id)];
+                const mapLayer = this.model.layerMap[layer.id];
 
                 if (mapLayer) {
                   return (

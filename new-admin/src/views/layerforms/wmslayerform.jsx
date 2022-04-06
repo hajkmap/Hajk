@@ -1,28 +1,8 @@
-// Copyright (C) 2016 Göteborgs Stad
-//
-// Denna programvara är fri mjukvara: den är tillåten att distribuera och modifiera
-// under villkoren för licensen CC-BY-NC-SA 4.0.
-//
-// This program is free software: you can redistribute it and/or modify
-// it under the terms of the CC-BY-NC-SA 4.0 licence.
-//
-// http://creativecommons.org/licenses/by-nc-sa/4.0/
-//
-// Det är fritt att dela och anpassa programvaran för valfritt syfte
-// med förbehåll att följande villkor följs:
-// * Copyright till upphovsmannen inte modifieras.
-// * Programvaran används i icke-kommersiellt syfte.
-// * Licenstypen inte modifieras.
-//
-// Den här programvaran är öppen i syfte att den skall vara till nytta för andra
-// men UTAN NÅGRA GARANTIER; även utan underförstådd garanti för
-// SÄLJBARHET eller LÄMPLIGHET FÖR ETT VISST SYFTE.
-//
-// https://github.com/hajkmap/Hajk
-
 import React from "react";
 import { Component } from "react";
 import $ from "jquery";
+import { hfetch } from "utils/FetchWrapper";
+
 var solpop;
 
 const defaultState = {
@@ -35,36 +15,45 @@ const defaultState = {
   addedLayersInfo: {},
   id: "",
   caption: "",
+  internalLayerName: "",
   content: "",
   date: "Fylls i per automatik",
   legend: "",
   legendIcon: "",
   owner: "",
   url: "",
+  customGetMapUrl: "",
   opacity: 1.0,
+  maxZoom: -1,
+  minZoom: -1,
+  minMaxZoomAlertOnToggleOnly: false,
   tiled: false,
   singleTile: false,
+  hidpi: true,
+  customRatio: 0,
   imageFormat: "",
   serverType: "geoserver",
   drawOrder: 1,
   layerType: "WMS",
   attribution: "",
-  searchUrl: "",
-  searchPropertyName: "",
-  searchDisplayName: "",
-  searchOutputFormat: "",
-  searchGeometryField: "",
   infoVisible: false,
   infoTitle: "",
   infoText: "",
   infoUrl: "",
   infoUrlText: "",
   infoOwner: "",
+  timeSliderVisible: false,
+  timeSliderStart: "",
+  timeSliderEnd: "",
   solpopup: solpop,
   capabilitiesList: [],
   version: "1.1.0",
   projection: "",
   infoFormat: "",
+  infoClickSortProperty: "",
+  infoClickSortType: "string",
+  infoClickSortDesc: true,
+  hideExpandArrow: false,
   style: [],
   workspaceList: [],
 };
@@ -98,6 +87,7 @@ const supportedInfoFormats = [
 const supportedImageFormats = [
   "image/png",
   "image/png8",
+  "image/png; mode=8bit",
   "image/jpeg",
   "image/vnd.jpeg-png",
   "image/vnd.jpeg-png8",
@@ -108,8 +98,9 @@ const supportedImageFormats = [
  */
 class WMSLayerForm extends Component {
   componentDidMount() {
-    defaultState.url = this.props.url;
-    this.setState(defaultState);
+    let _state = { ...defaultState };
+    _state.url = this.props.url;
+    this.setState(_state);
     this.props.model.on("change:select-image", () => {
       this.setState({
         legend: this.props.model.get("select-image"),
@@ -131,12 +122,12 @@ class WMSLayerForm extends Component {
 
   constructor() {
     super();
-    this.state = defaultState;
+    this.state = { ...defaultState };
     this.layer = {};
   }
 
   reset() {
-    this.setState(defaultState);
+    this.setState({ ...defaultState });
   }
 
   loadLegend(e) {
@@ -343,8 +334,8 @@ class WMSLayerForm extends Component {
     });
 
     let styles = layerInfo.styles
-      ? layerInfo.styles.map((style) => (
-          <option key={"style_" + style.Name} value={style.Name}>
+      ? layerInfo.styles.map((style, i) => (
+          <option key={`style_${style.Name}_${i}`} value={style.Name}>
             {style.Name}
           </option>
         ))
@@ -423,11 +414,8 @@ class WMSLayerForm extends Component {
                 () => {
                   this.validateField("select-layers-info-legend-icon");
                   let addedLayersInfo = this.state.addedLayersInfo;
-                  addedLayersInfo[
-                    layerInfo.id
-                  ].legendIcon = this.props.model.get(
-                    "select-layers-info-legend-icon"
-                  );
+                  addedLayersInfo[layerInfo.id].legendIcon =
+                    this.props.model.get("select-layers-info-legend-icon");
                   this.setState(
                     {
                       addedLayersInfo: addedLayersInfo,
@@ -484,6 +472,131 @@ class WMSLayerForm extends Component {
             onChange={(e) => {
               let addedLayersInfo = this.state.addedLayersInfo;
               addedLayersInfo[layerInfo.id].queryable = e.target.checked;
+              this.setState(
+                {
+                  addedLayersInfo: addedLayersInfo,
+                },
+                () => {
+                  this.renderLayerInfoDialog(layerInfo);
+                }
+              );
+            }}
+          />
+        </div>
+
+        <div className="separator">Sökning</div>
+
+        <div>
+          <label>Url</label>
+          <input
+            style={{ marginRight: "5px" }}
+            type="text"
+            value={layerInfo.searchUrl}
+            onChange={(e) => {
+              let addedLayersInfo = this.state.addedLayersInfo;
+              addedLayersInfo[layerInfo.id].searchUrl = e.target.value;
+              this.setState(
+                {
+                  addedLayersInfo: addedLayersInfo,
+                },
+                () => {
+                  this.renderLayerInfoDialog(layerInfo);
+                }
+              );
+            }}
+          />
+        </div>
+        <div>
+          <label>Sökfält</label>
+          <input
+            style={{ marginRight: "5px" }}
+            type="text"
+            value={layerInfo.searchPropertyName}
+            onChange={(e) => {
+              let addedLayersInfo = this.state.addedLayersInfo;
+              addedLayersInfo[layerInfo.id].searchPropertyName = e.target.value;
+              this.setState(
+                {
+                  addedLayersInfo: addedLayersInfo,
+                },
+                () => {
+                  this.renderLayerInfoDialog(layerInfo);
+                }
+              );
+            }}
+          />
+        </div>
+        <div>
+          <label>Visningsfält</label>
+          <input
+            style={{ marginRight: "5px" }}
+            type="text"
+            value={layerInfo.searchDisplayName}
+            onChange={(e) => {
+              let addedLayersInfo = this.state.addedLayersInfo;
+              addedLayersInfo[layerInfo.id].searchDisplayName = e.target.value;
+              this.setState(
+                {
+                  addedLayersInfo: addedLayersInfo,
+                },
+                () => {
+                  this.renderLayerInfoDialog(layerInfo);
+                }
+              );
+            }}
+          />
+        </div>
+        <div>
+          <label>Kort visningsfält</label>
+          <input
+            style={{ marginRight: "5px" }}
+            type="text"
+            value={layerInfo.searchShortDisplayName}
+            onChange={(e) => {
+              let addedLayersInfo = this.state.addedLayersInfo;
+              addedLayersInfo[layerInfo.id].searchShortDisplayName =
+                e.target.value;
+              this.setState(
+                {
+                  addedLayersInfo: addedLayersInfo,
+                },
+                () => {
+                  this.renderLayerInfoDialog(layerInfo);
+                }
+              );
+            }}
+          />
+        </div>
+        <div>
+          <label>Utdataformat</label>
+          <input
+            style={{ marginRight: "5px" }}
+            type="text"
+            value={layerInfo.searchOutputFormat}
+            onChange={(e) => {
+              let addedLayersInfo = this.state.addedLayersInfo;
+              addedLayersInfo[layerInfo.id].searchOutputFormat = e.target.value;
+              this.setState(
+                {
+                  addedLayersInfo: addedLayersInfo,
+                },
+                () => {
+                  this.renderLayerInfoDialog(layerInfo);
+                }
+              );
+            }}
+          />
+        </div>
+        <div>
+          <label>Geometrifält</label>
+          <input
+            style={{ marginRight: "5px" }}
+            type="text"
+            value={layerInfo.searchGeometryField}
+            onChange={(e) => {
+              let addedLayersInfo = this.state.addedLayersInfo;
+              addedLayersInfo[layerInfo.id].searchGeometryField =
+                e.target.value;
               this.setState(
                 {
                   addedLayersInfo: addedLayersInfo,
@@ -675,6 +788,11 @@ class WMSLayerForm extends Component {
           projection: layer.projection,
           version: capabilities.version,
           infoFormat: layer.infoFormat,
+          infoClickSortProperty: layer.infoClickSortProperty ?? "",
+          infoClickSortType: layer.infoClickSortType ?? "string",
+          hideExpandArrow: layer.hideExpandArrow ?? false,
+          minMaxZoomAlertOnToggleOnly:
+            layer.minMaxZoomAlertOnToggleOnly ?? false,
         },
         () => {
           this.setServerType();
@@ -796,13 +914,11 @@ class WMSLayerForm extends Component {
       this.state.capabilities.Capability.Request &&
       this.state.capabilities.Capability.Request.GetFeatureInfo
     ) {
-      formats = this.state.capabilities.Capability.Request.GetFeatureInfo
-        .Format;
+      formats =
+        this.state.capabilities.Capability.Request.GetFeatureInfo.Format;
     }
     if (formats && formats.indexOf("application/geojson") > -1) {
       this.setState({ serverType: "arcgis" });
-    } else {
-      this.setState({ serverType: "geoserver" });
     }
   }
 
@@ -838,8 +954,8 @@ class WMSLayerForm extends Component {
       this.state.capabilities.Capability.Request &&
       this.state.capabilities.Capability.Request.GetFeatureInfo
     ) {
-      formats = this.state.capabilities.Capability.Request.GetFeatureInfo
-        .Format;
+      formats =
+        this.state.capabilities.Capability.Request.GetFeatureInfo.Format;
     }
 
     let formatEles = formats
@@ -903,7 +1019,9 @@ class WMSLayerForm extends Component {
       type: this.state.layerType,
       id: this.state.id,
       caption: this.getValue("caption"),
+      internalLayerName: this.getValue("internalLayerName"),
       url: this.getValue("url"),
+      customGetMapUrl: this.getValue("customGetMapUrl"),
       owner: this.getValue("owner"),
       date: this.getValue("date"),
       content: this.getValue("content"),
@@ -917,7 +1035,12 @@ class WMSLayerForm extends Component {
       visibleAtStart: this.getValue("visibleAtStart"),
       tiled: this.getValue("tiled"),
       opacity: this.getValue("opacity"),
+      maxZoom: this.getValue("maxZoom"),
+      minZoom: this.getValue("minZoom"),
+      minMaxZoomAlertOnToggleOnly: this.getValue("minMaxZoomAlertOnToggleOnly"),
       singleTile: this.getValue("singleTile"),
+      hidpi: this.getValue("hidpi"),
+      customRatio: this.getValue("customRatio"),
       imageFormat: this.getValue("imageFormat"),
       serverType: this.getValue("serverType"),
       attribution: this.getValue("attribution"),
@@ -925,6 +1048,7 @@ class WMSLayerForm extends Component {
       searchUrl: this.getValue("searchUrl"),
       searchPropertyName: this.getValue("searchPropertyName"),
       searchDisplayName: this.getValue("searchDisplayName"),
+      searchShortDisplayName: this.getValue("searchShortDisplayName"),
       searchOutputFormat: this.getValue("searchOutputFormat"),
       searchGeometryField: this.getValue("searchGeometryField"),
       infoVisible: this.getValue("infoVisible"),
@@ -933,9 +1057,16 @@ class WMSLayerForm extends Component {
       infoUrl: this.getValue("infoUrl"),
       infoUrlText: this.getValue("infoUrlText"),
       infoOwner: this.getValue("infoOwner"),
+      timeSliderVisible: this.getValue("timeSliderVisible"),
+      timeSliderStart: this.getValue("timeSliderStart"),
+      timeSliderEnd: this.getValue("timeSliderEnd"),
       // solpopup: this.getValue("solpopup"),
       version: this.state.version,
       infoFormat: this.getValue("infoFormat"),
+      infoClickSortProperty: this.getValue("infoClickSortProperty"),
+      infoClickSortDesc: this.getValue("infoClickSortDesc"),
+      infoClickSortType: this.getValue("infoClickSortType"),
+      hideExpandArrow: this.getValue("hideExpandArrow"),
       // style: this.getValue("style"),
 
       zIndex: this.getValue("zIndex"),
@@ -961,19 +1092,32 @@ class WMSLayerForm extends Component {
     const input = this.refs["input_" + fieldName];
     let value = input ? input.value : "";
 
+    // We must cast the following to Number, as String won't be accepted for those:
+    if (["maxZoom", "minZoom"].indexOf(fieldName) > -1) {
+      value = Number(value || -1);
+      return value === 0 ? -1 : value;
+    }
+    if (fieldName === "minMaxZoomAlertOnToggleOnly") value = input.checked;
+
     if (fieldName === "date") value = create_date();
     if (fieldName === "singleTile") value = input.checked;
+    if (fieldName === "hidpi") value = input.checked;
+    if (fieldName === "customRatio")
+      value = parseFloat(Number(value).toFixed(2));
     if (fieldName === "tiled") value = input.checked;
     if (fieldName === "layers") value = format_layers(this.state.addedLayers);
     if (fieldName === "layersInfo")
       value = format_layers_info(this.state.addedLayersInfo);
     if (fieldName === "infoVisible") value = input.checked;
+    if (fieldName === "timeSliderVisible") value = input.checked;
     // if (fieldName === "drawOrder") value = 1000;
     if (fieldName === "visibleAtStart") value = Boolean(value);
     if (fieldName === "searchFields") value = value || null;
     if (fieldName === "displayFields") value = value || null;
     if (fieldName === "zIndex") value = value || null;
     if (fieldName === "opacity") value = parseFloat(Number(value).toFixed(2));
+    if (fieldName === "infoClickSortDesc") value = input.checked;
+    if (fieldName === "hideExpandArrow") value = input.checked;
 
     return value;
   }
@@ -1006,15 +1150,37 @@ class WMSLayerForm extends Component {
     var value = this.getValue(fieldName),
       valid = true;
 
+    function number(v) {
+      return !empty(v) && !isNaN(Number(v));
+    }
+
+    function empty(v) {
+      return typeof v === "string"
+        ? v.trim() === ""
+        : Array.isArray(v)
+        ? v[0] === ""
+        : false;
+    }
+
     switch (fieldName) {
       case "layers":
         if (value.length === 0) {
           valid = false;
         }
         break;
-
+      case "customRatio":
+        if (isNaN(Number(value)) || value < 1 || value > 5) {
+          valid = false;
+        }
+        break;
       case "opacity":
         if (isNaN(Number(value)) || value < 0 || value > 1) {
+          valid = false;
+        }
+        break;
+      case "minZoom":
+      case "maxZoom":
+        if (!number(value) || empty(value)) {
           valid = false;
         }
         break;
@@ -1049,7 +1215,7 @@ class WMSLayerForm extends Component {
     //
     url = url.substring(0, url.lastIndexOf("/")) + "/rest/workspaces";
     //
-    const res = await fetch(url);
+    const res = await hfetch(url);
     //
     const json = await res.json();
     //
@@ -1071,13 +1237,16 @@ class WMSLayerForm extends Component {
   };
 
   render() {
-    var loader = this.state.load ? (
+    const loader = this.state.load ? (
       <i className="fa fa-refresh fa-spin" />
     ) : null;
-    var imageLoader = this.state.imageLoad ? (
+    const imageLoader = this.state.imageLoad ? (
       <i className="fa fa-refresh fa-spin" />
     ) : null;
-    var infoClass = this.state.infoVisible ? "tooltip-info" : "hidden";
+    const infoClass = this.state.infoVisible ? "tooltip-info" : "hidden";
+    const timeSliderClass = this.state.timeSliderVisible
+      ? "tooltip-timeSlider"
+      : "hidden";
 
     const version = this.state.version || "1.1.1";
     const infoFormat = this.state.infoFormat || "";
@@ -1186,7 +1355,24 @@ class WMSLayerForm extends Component {
         </div>
 
         <div className="separator">Inställningar för request</div>
-
+        <div>
+          <label>
+            GetMap-url{" "}
+            <i
+              className="fa fa-question-circle"
+              data-toggle="tooltip"
+              title="OBS: Ange endast om GetMap-url:en skall vara en annan än den url som är angiven ovan. Majoriteten av administratörer lämnar detta fält tomt."
+            />
+          </label>
+          <input
+            type="text"
+            ref="input_customGetMapUrl"
+            value={this.state.customGetMapUrl}
+            onChange={(e) => {
+              this.setState({ customGetMapUrl: e.target.value });
+            }}
+          />
+        </div>
         <div>
           <label>Version</label>
           <select
@@ -1229,6 +1415,24 @@ class WMSLayerForm extends Component {
         <div>
           <input
             type="checkbox"
+            ref="input_hidpi"
+            id="input_hidpi"
+            onChange={(e) => this.setState({ hidpi: e.target.checked })}
+            checked={this.state.hidpi}
+          />
+          &nbsp;
+          <label htmlFor="input_hidpi">
+            Efterfråga hög DPI{" "}
+            <i
+              className="fa fa-question-circle"
+              data-toggle="tooltip"
+              title="Hämta 'kartbilder' med hög upplösning vid skärmar som stödjer detta (Inställning hidpi i OL-klasserna ImageWMS/TileWMS)"
+            />
+          </label>
+        </div>
+        <div>
+          <input
+            type="checkbox"
             ref="input_singleTile"
             id="input_singleTile"
             onChange={(e) => this.setState({ singleTile: e.target.checked })}
@@ -1236,6 +1440,33 @@ class WMSLayerForm extends Component {
           />
           &nbsp;
           <label htmlFor="input_singleTile">Single tile</label>
+          <div
+            style={{
+              paddingLeft: "20px",
+              marginLeft: "4px",
+              borderLeft: "2px double #1f1c1c",
+            }}
+          >
+            <label htmlFor="input_customRatio">
+              Custom ratio (Lämna som 0 för OL-default){" "}
+              <i
+                className="fa fa-question-circle"
+                data-toggle="tooltip"
+                title="Bestämmer storlek på bilden vid varje request där 1 är viewportens storlek och 2 är dubbelt så stor osv (Inställning för ratio i OL-klassen ImageWMS)"
+              />
+            </label>
+            <input
+              type="text"
+              ref="input_customRatio"
+              value={this.state.customRatio}
+              disabled={!this.state.singleTile}
+              onChange={(e) => {
+                this.setState({ customRatio: e.target.value });
+                this.validateField("customRatio");
+              }}
+              className={this.getValidationClass("customRatio")}
+            />
+          </div>
         </div>
         <div>
           <input
@@ -1283,6 +1514,18 @@ class WMSLayerForm extends Component {
           </div>
         </div>
         <div>
+          <label>Stäng av möjlighet att expandera</label>
+          <input
+            type="checkbox"
+            ref="input_hideExpandArrow"
+            id="input_hideExpandArrow"
+            onChange={(e) =>
+              this.setState({ hideExpandArrow: e.target.checked })
+            }
+            checked={this.state.hideExpandArrow}
+          />
+        </div>
+        <div>
           <label>Visningsnamn*</label>
           <input
             type="text"
@@ -1293,6 +1536,18 @@ class WMSLayerForm extends Component {
               this.validateField("caption");
             }}
             className={this.getValidationClass("caption")}
+          />
+        </div>
+        <div>
+          <label>Visningsnamn Admin</label>
+          <input
+            type="text"
+            ref="input_internalLayerName"
+            value={this.state.internalLayerName || ""}
+            onChange={(e) => {
+              this.setState({ internalLayerName: e.target.value });
+              this.validateField("internalLayerName");
+            }}
           />
         </div>
 
@@ -1346,7 +1601,44 @@ class WMSLayerForm extends Component {
             {this.setInfoFormats()}
           </select>
         </div>
-
+        <div>
+          <label>Infoklick sortera på attribut</label>
+          <input
+            type="text"
+            ref="input_infoClickSortProperty"
+            value={this.state.infoClickSortProperty}
+            onChange={(e) =>
+              this.setState({ infoClickSortProperty: e.target.value })
+            }
+          />
+        </div>
+        <div>
+          <label>Infoklick sortera fallande</label>
+          <input
+            type="checkbox"
+            ref="input_infoClickSortDesc"
+            onChange={(e) =>
+              this.setState({ infoClickSortDesc: e.target.checked })
+            }
+            checked={this.state.infoClickSortDesc}
+          />
+        </div>
+        <div>
+          <label>Infoklick sorterings-typ</label>
+          <select
+            name=""
+            id=""
+            ref="input_infoClickSortType"
+            className="control-fixed-width"
+            value={this.state.infoClickSortType}
+            onChange={(e) =>
+              this.setState({ infoClickSortType: e.target.value })
+            }
+          >
+            <option value="string">string</option>
+            <option value="number">number</option>
+          </select>
+        </div>
         <div>
           <label>Opacitet*</label>
           <input
@@ -1363,6 +1655,70 @@ class WMSLayerForm extends Component {
               this.setState({ opacity: e.target.value });
               this.validateField("opacity");
             }}
+          />
+        </div>
+        <div>
+          <label>
+            Min zoom{" "}
+            <abbr title="Lägsta zoomnivå där lagret visas. OBS! Om man vill att lagret ska visas för skala 1:10 000, 1:5 000, 1:2 000 osv måste man ange den zoomnivå som skalsteget ovanför skala 1:10 000 har (t ex 1:20 000). Om 5 motsvarar 1:10 000 ska man då ange 4. Värdet på zoomnivån beror på aktuella inställningar i map_1.json, avsnitt ”map.resolutions”. '-1' betyder att lagret är synligt hela vägen till den lägsta zoomnivån. Se även inställning för Max zoom.">
+              (?)
+            </abbr>
+          </label>
+          <input
+            type="number"
+            step="1"
+            min="-1"
+            max="100"
+            ref="input_minZoom"
+            value={this.state.minZoom}
+            className={
+              (this.getValidationClass("minZoom"), "control-fixed-width")
+            }
+            onChange={(e) => {
+              const v = e.target.value;
+              this.setState({ minZoom: v });
+            }}
+          />
+        </div>
+        <div>
+          <label>
+            Max zoom{" "}
+            <abbr title="Högsta zoomnivå vid vilket lagret visas. Om man t ex anger 5 för skala 1:10 000 kommer lagret att visas för skala 1:10 000 men inte för skala 1:5000. Värdet på zoomnivån beror på aktuella inställningar i map_1.json, avsnitt ”map.resolutions”. '-1' betyder att lagret är synligt hela vägen till den sista zoomnivån. Se även inställning för Min zoom.">
+              (?)
+            </abbr>
+          </label>
+          <input
+            type="number"
+            step="1"
+            min="-1"
+            max="100"
+            ref="input_maxZoom"
+            value={this.state.maxZoom}
+            className={
+              (this.getValidationClass("minZoom"), "control-fixed-width")
+            }
+            onChange={(e) => {
+              const v = e.target.value;
+              this.setState({ maxZoom: v }, () =>
+                this.validateField("maxZoom")
+              );
+            }}
+          />
+        </div>
+        <div>
+          <label>
+            Visa endast Min/Max varningsruta vid klick.
+            <abbr title="Som standard visas även varningsruta vid start samt när lagret blir dolt pga zoombegränsningen (Min zoom och Max zoom).">
+              (?)
+            </abbr>
+          </label>
+          <input
+            type="checkbox"
+            ref="input_minMaxZoomAlertOnToggleOnly"
+            onChange={(e) =>
+              this.setState({ minMaxZoomAlertOnToggleOnly: e.target.checked })
+            }
+            checked={this.state.minMaxZoomAlertOnToggleOnly}
           />
         </div>
         <div className="separator">Metadata</div>
@@ -1477,72 +1833,44 @@ class WMSLayerForm extends Component {
             />
           </div>
         </div>
-        <div className="separator">Sökning</div>
-        {/* <h2>Sökning</h2> */}
-        <div>
-          <label>Url</label>
-          <input
-            type="text"
-            ref="input_searchUrl"
-            onChange={(e) => {
-              this.setState({ searchUrl: e.target.value });
-              this.validateField("searchUrl", e);
-            }}
-            value={this.state.searchUrl}
-            className={this.getValidationClass("searchUrl")}
-          />
-        </div>
-        <div>
-          <label>Sökfält</label>
-          <input
-            type="text"
-            ref="input_searchPropertyName"
-            onChange={(e) => {
-              this.setState({ searchPropertyName: e.target.value });
-              this.validateField("searchPropertyName", e);
-            }}
-            value={this.state.searchPropertyName}
-            className={this.getValidationClass("searchPropertyName")}
-          />
-        </div>
-        <div>
-          <label>Visningsfält</label>
-          <input
-            type="text"
-            ref="input_searchDisplayName"
-            onChange={(e) => {
-              this.setState({ searchDisplayName: e.target.value });
-              this.validateField("searchDisplayName", e);
-            }}
-            value={this.state.searchDisplayName}
-            className={this.getValidationClass("searchDisplayName")}
-          />
-        </div>
-        <div>
-          <label>Utdataformat</label>
-          <input
-            type="text"
-            ref="input_searchOutputFormat"
-            onChange={(e) => {
-              this.setState({ searchOutputFormat: e.target.value });
-              this.validateField("searchOutputFormat", e);
-            }}
-            value={this.state.searchOutputFormat}
-            className={this.getValidationClass("searchOutputFormat")}
-          />
-        </div>
-        <div>
-          <label>Geometrifält</label>
-          <input
-            type="text"
-            ref="input_searchGeometryField"
-            onChange={(e) => {
-              this.setState({ searchGeometryField: e.target.value });
-              this.validateField("searchGeometryField", e);
-            }}
-            value={this.state.searchGeometryField}
-            className={this.getValidationClass("searchGeometryField")}
-          />
+        <div className="timeSlider-container">
+          <div>
+            <input
+              type="checkbox"
+              ref="input_timeSliderVisible"
+              id="timeSlider"
+              onChange={(e) => {
+                this.setState({ timeSliderVisible: e.target.checked });
+              }}
+              checked={this.state.timeSliderVisible}
+            />
+            &nbsp;
+            <label htmlFor="timeSlider">Tidslinjedatum</label>
+          </div>
+          <div className={timeSliderClass}>
+            <label>Tidslinje start</label>
+            <input
+              type="text"
+              placeholder="ÅÅÅÅMMDD"
+              ref="input_timeSliderStart"
+              onChange={(e) => {
+                this.setState({ timeSliderStart: e.target.value });
+              }}
+              value={this.state.timeSliderStart}
+            />
+          </div>
+          <div className={timeSliderClass}>
+            <label>Tidslinje slut</label>
+            <input
+              type="text"
+              placeholder="ÅÅÅÅMMDD"
+              ref="input_timeSliderEnd"
+              onChange={(e) => {
+                this.setState({ timeSliderEnd: e.target.value });
+              }}
+              value={this.state.timeSliderEnd}
+            />
+          </div>
         </div>
       </fieldset>
     );

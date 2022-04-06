@@ -47,12 +47,13 @@ class PrintView extends React.PureComponent {
 
   state = {
     format: "a4", // a0-a5
+    useMargin: this.props.options.useMargin ?? false, // User can choose to have a margin around the map-image
     orientation: "landscape",
     resolution: 150, // 72, 150, 300,
     scale: this.props.scales[Math.round((this.props.scales.length - 1) / 2)], // 10000 means scale of 1:10000
     mapTitle: "", // User can set a title that will get printed on the map
     printComment: "", // User can set a comment that will get printed on the map
-    mapTextColor: "#FFFFFF", // Default color of text printed on the map
+    mapTextColor: this.props.options.mapTextColor ?? "#FFFFFF", // Default color of text printed on the map
     printInProgress: false,
     previewLayerVisible: false,
     activeTab: 0,
@@ -63,6 +64,7 @@ class PrintView extends React.PureComponent {
     includeLogo: this.props.options.includeLogo ?? true,
     logoPlacement: this.props.options.logoPlacement || "topRight",
     saveAsType: "PDF",
+    printOptionsOk: false,
   };
 
   snackbarKey = null;
@@ -115,7 +117,9 @@ class PrintView extends React.PureComponent {
 
     props.localObserver.subscribe("showPrintPreview", () => {
       const scale = this.model.getFittingScale();
-      this.setState({ previewLayerVisible: true, scale: scale });
+      this.setState({ previewLayerVisible: true, scale: scale }, () => {
+        this.handlePotentialPrintOptionError();
+      });
     });
 
     props.localObserver.subscribe("hidePrintPreview", () => {
@@ -140,7 +144,13 @@ class PrintView extends React.PureComponent {
       snackbarKey: this.snackbarKey,
     };
 
-    let printOptions = {
+    const printOptions = this.getPrintOptions();
+    this.model.print(printOptions);
+  };
+
+  getPrintOptions = () => {
+    return {
+      useMargin: this.state.useMargin,
       format: this.state.format,
       orientation: this.state.orientation,
       resolution: this.state.resolution,
@@ -156,8 +166,6 @@ class PrintView extends React.PureComponent {
       northArrowPlacement: this.state.northArrowPlacement,
       saveAsType: this.state.saveAsType,
     };
-
-    this.model.print(printOptions);
   };
 
   /**
@@ -179,9 +187,20 @@ class PrintView extends React.PureComponent {
   };
 
   handleChange = (event) => {
-    this.setState({
-      [event.target.name]: event.target.value,
-    });
+    this.setState(
+      {
+        [event.target.name]: event.target.value,
+      },
+      () => {
+        this.handlePotentialPrintOptionError();
+      }
+    );
+  };
+
+  handlePotentialPrintOptionError = () => {
+    const printOptions = this.getPrintOptions();
+    const printOptionsOk = this.model.desiredPrintOptionsOk(printOptions);
+    this.setState({ printOptionsOk: printOptionsOk });
   };
 
   setMapTextColor = (color) => {
@@ -200,11 +219,20 @@ class PrintView extends React.PureComponent {
 
   renderGeneralOptions = () => {
     const { scales } = this.props;
-    const { scale, format, orientation, resolution, saveAsType } = this.state;
+    const {
+      scale,
+      useMargin,
+      format,
+      orientation,
+      resolution,
+      saveAsType,
+      printOptionsOk,
+    } = this.state;
 
     return (
       <GeneralOptions
         scales={scales}
+        useMargin={useMargin}
         scale={scale}
         format={format}
         resolution={resolution}
@@ -214,6 +242,8 @@ class PrintView extends React.PureComponent {
         }}
         model={this.model}
         saveAsType={saveAsType}
+        printOptionsOk={printOptionsOk}
+        options={this.props.options}
       ></GeneralOptions>
     );
   };
@@ -230,6 +260,7 @@ class PrintView extends React.PureComponent {
       scaleBarPlacement,
       includeLogo,
       logoPlacement,
+      printOptionsOk,
     } = this.state;
 
     return (
@@ -248,6 +279,8 @@ class PrintView extends React.PureComponent {
         scaleBarPlacement={scaleBarPlacement}
         includeLogo={includeLogo}
         logoPlacement={logoPlacement}
+        printOptionsOk={printOptionsOk}
+        options={this.props.options}
       ></AdvancedOptions>
     );
   };
@@ -257,17 +290,20 @@ class PrintView extends React.PureComponent {
     const {
       previewLayerVisible,
       scale,
+      useMargin,
       format,
       orientation,
       printInProgress,
       saveAsType,
       activeTab,
+      printOptionsOk,
     } = this.state;
 
     this.model.renderPreviewFeature(previewLayerVisible, {
       scale: scale,
       format: format,
       orientation: orientation,
+      useMargin: useMargin,
     });
 
     return (
@@ -280,9 +316,7 @@ class PrintView extends React.PureComponent {
           >
             <Tabs
               action={this.handleTabsMounted}
-              indicatorColor="primary"
               onChange={this.handleChangeTabs}
-              textColor="primary"
               value={activeTab}
               variant="fullWidth"
             >
@@ -303,7 +337,7 @@ class PrintView extends React.PureComponent {
                 fullWidth={true}
                 color="primary"
                 onClick={this.initiatePrint}
-                disabled={printInProgress}
+                disabled={printInProgress || !printOptionsOk}
               >
                 Skriv ut
               </Button>

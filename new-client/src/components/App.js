@@ -6,8 +6,12 @@ import cslx from "clsx";
 import { SnackbarProvider } from "notistack";
 import Observer from "react-event-observer";
 import { isMobile } from "../utils/IsMobile";
-
+import SrShortcuts from "../components/SrShortcuts/SrShortcuts";
 import AppModel from "../models/AppModel.js";
+import {
+  setConfig as setCookieConfig,
+  functionalOk as functionalCookieOk,
+} from "models/Cookie";
 
 import Window from "./Window.js";
 import CookieNotice from "./CookieNotice";
@@ -19,6 +23,7 @@ import PluginWindows from "./PluginWindows";
 import Search from "./Search/Search.js";
 
 import Zoom from "../controls/Zoom";
+import User from "../controls/User";
 import Rotate from "../controls/Rotate";
 import ScaleLine from "../controls/ScaleLine";
 import Attribution from "../controls/Attribution.js";
@@ -31,7 +36,6 @@ import PresetLinks from "../controls/PresetLinks";
 import DrawerToggleButtons from "../components/Drawer/DrawerToggleButtons";
 
 import {
-  Backdrop,
   Box,
   Divider,
   Drawer,
@@ -61,6 +65,10 @@ const styles = (theme) => {
       right: 0,
       bottom: 0,
       top: 0,
+      border: "2px solid transparent",
+      "&:focus-visible": {
+        border: "2px solid black",
+      },
     },
     flexBox: {
       position: "absolute",
@@ -84,6 +92,9 @@ const styles = (theme) => {
       "& > *": {
         pointerEvents: "auto",
       },
+    },
+    drawerContent: {
+      height: "inherit",
     },
     header: {
       zIndex: theme.zIndex.appBar,
@@ -144,9 +155,13 @@ const styles = (theme) => {
       justifyContent: "space-between",
       backgroundColor: theme.palette.background.paper,
     },
-    drawerContent: {
+    drawerContentContainer: {
       backgroundColor: theme.palette.background.paper,
+      height: "100%",
       overflow: "auto",
+    },
+    drawerLockButton: {
+      margin: -12,
     },
     logoBox: {
       padding: theme.spacing(1, 2),
@@ -156,18 +171,38 @@ const styles = (theme) => {
       height: theme.spacing(4),
     },
     drawerGrid: {
-      padding: theme.spacing(0, 2),
+      padding: theme.spacing(1, 2),
       backgroundColor: theme.palette.background.paper,
       minHeight: theme.spacing(6),
+    },
+    drawerTitle: {
+      padding: theme.spacing(1, 0),
+      lineHeight: 0,
     },
     drawerLiveContent: {
       backgroundColor: theme.palette.background.default,
     },
-    backdrop: {
-      zIndex: theme.zIndex.drawer - 1, // Carefully selected to be above Window but below Drawer
-    },
     widgetItem: {
       width: "220px",
+    },
+    snackBarContainerRoot: {
+      [theme.breakpoints.down("xs")]: {
+        pointerEvents: "none",
+        // Getting around notistack bug, can't reach snackItem.
+        "& div > div > div > div": {
+          pointerEvents: "auto",
+        },
+      },
+    },
+    snackbarContainerBottom: {
+      [theme.breakpoints.down("xs")]: {
+        bottom: "35px",
+      },
+    },
+    snackbarContainerTop: {
+      [theme.breakpoints.down("xs")]: {
+        top: "18px",
+      },
     },
     // IMPORTANT: shiftedLeft definition must be the last one, as styles are applied in that order via JSS
     shiftedLeft: {
@@ -192,68 +227,157 @@ class App extends React.PureComponent {
     config: PropTypes.object.isRequired,
   };
 
+  canRenderCustomDrawer = (activeDrawerContentFromLocalStorage, tools) => {
+    if (
+      !activeDrawerContentFromLocalStorage ||
+      activeDrawerContentFromLocalStorage === "plugins"
+    ) {
+      // If nothing was found in local storage, fall back to map config setting
+      activeDrawerContentFromLocalStorage =
+        this.props.config.mapConfig.map.activeDrawerOnStart;
+    }
+
+    const localStorageToolFoundInMapConfig = tools.some((tool) => {
+      return (
+        typeof activeDrawerContentFromLocalStorage === "string" &&
+        tool.type.toLowerCase() ===
+          activeDrawerContentFromLocalStorage.toLowerCase()
+      );
+    });
+
+    return (
+      localStorageToolFoundInMapConfig &&
+      activeDrawerContentFromLocalStorage &&
+      activeDrawerContentFromLocalStorage !== "plugins"
+    );
+  };
+
+  getDrawerPermanentFromLocalStorage = () => {
+    return window.localStorage.getItem("drawerPermanent") !== null
+      ? window.localStorage.getItem("drawerPermanent") === "true"
+        ? true
+        : false
+      : null;
+  };
+
+  getActiveDrawerContentFromLocalStorage = () => {
+    return window.localStorage.getItem("activeDrawerContent") !== null
+      ? window.localStorage.getItem("activeDrawerContent")
+      : null;
+  };
+
   constructor(props) {
     super(props);
 
     const drawerPermanentFromLocalStorage =
-      window.localStorage.getItem("drawerPermanent") !== null
-        ? window.localStorage.getItem("drawerPermanent") === "true"
-          ? true
-          : false
-        : null;
-
+      this.getDrawerPermanentFromLocalStorage();
     const activeDrawerContentFromLocalStorage =
-      window.localStorage.getItem("activeDrawerContent") !== null
-        ? window.localStorage.getItem("activeDrawerContent")
-        : null;
+      this.getActiveDrawerContentFromLocalStorage();
+    const canRenderDefaultDrawer = this.hasAnyToolbarTools();
+
+    const canRenderCustomDrawer = this.canRenderCustomDrawer(
+      activeDrawerContentFromLocalStorage,
+      props.config.mapConfig.tools
+    );
+
+    //Check if we have customContent to render in drawer
+    //if we can render customContent, use it set the drawer content.
+    //if we cant render customContent fall back to mapconfig
+    //Finally, fall back to 'plugins', the standard tools panel.
+    //This fall back avoids rendering an empty drawer in the case that draw is set to visible but there is no drawer content in local storage.
+
+    const activeDrawerContentState = canRenderCustomDrawer
+      ? activeDrawerContentFromLocalStorage !== null &&
+        activeDrawerContentFromLocalStorage !== "plugins"
+        ? activeDrawerContentFromLocalStorage
+        : this.props.config.mapConfig.map.activeDrawerOnStart
+      : canRenderDefaultDrawer
+      ? "plugins"
+      : null;
+
+    // First check if we have anything to render at all and in case we haven't -> do not show drawer
+    // If on a mobile device, the drawer should never be permanent.
+    // If not on mobile, if cookie is not null, use it to show/hide Drawer.
+    // If cookie is not null, use it to show/hide Drawer.
+    // If cookie however is null, fall back to the values from config.
+    // Finally, fall back to "false" if no cookie or config is found.
+    const drawerPermanent =
+      activeDrawerContentState === null
+        ? false
+        : isMobile
+        ? false
+        : drawerPermanentFromLocalStorage !== null
+        ? drawerPermanentFromLocalStorage
+        : (props.config.mapConfig.map.drawerVisible &&
+            props.config.mapConfig.map.drawerPermanent) ||
+          false;
+
+    // First check if we have anything to render at all and in case we haven't -> do not show drawer
+    // If on a mobile device, and a config property for if the drawer should initially be open is set, base the drawer state on this.
+    // Otherwise if cookie for "drawerPermanent" is not null, use it to control Drawer visibility,
+    // If there a no cookie settings, use the config drawVisible setting.
+    // Finally, don't show the drawer.
+    const drawerVisible =
+      activeDrawerContentState === null
+        ? false
+        : isMobile &&
+          props.config.mapConfig.map.drawerVisibleMobile !== undefined
+        ? props.config.mapConfig.map.drawerVisibleMobile
+        : drawerPermanentFromLocalStorage !== null
+        ? drawerPermanentFromLocalStorage
+        : props.config.mapConfig.map.drawerVisible || false;
 
     this.state = {
       alert: false,
       drawerButtons: [],
       loading: false,
       mapClickDataResult: {},
-
-      // Drawer-related states
-      //If on a mobile device, and a config property for if the drawer should initially be open is set, base the drawer state on this.
-      //Otherwise if cookie for "drawerPermanent" is not null, use it to control Drawer visibility,
-      //If there a no cookie settings, use the config drawVisible setting.
-      //Finally, don't show the drawer.
-
-      drawerVisible:
-        isMobile && props.config.mapConfig.map.drawerVisibleMobile !== undefined
-          ? props.config.mapConfig.map.drawerVisibleMobile
-          : drawerPermanentFromLocalStorage !== null
-          ? drawerPermanentFromLocalStorage
-          : props.config.mapConfig.map.drawerVisible || false,
-
-      // If on a mobile device, the drawer should never be permanent.
-      // If not on mobile, if cookie is not null, use it to show/hide Drawer.
-      // If cookie is not null, use it to show/hide Drawer.
-      // If cookie however is null, fall back to the values from config.
-      // Finally, fall back to "false" if no cookie or config is found.
-      drawerPermanent: isMobile
-        ? false
-        : drawerPermanentFromLocalStorage !== null
-        ? drawerPermanentFromLocalStorage
-        : (props.config.mapConfig.map.drawerVisible &&
-            props.config.mapConfig.map.drawerPermanent) ||
-          false,
-
-      //First check the cookie for activeDrawerContent
-      //If cookie is not null, use it set the drawer content.
-      //If cookie is null, fall back to the values from config,
-      //Finally, fall back to 'plugins', the standard tools panel.
-      //This fall back avoids rendering an empty drawer in the case that draw is set to visible but there is no drawer content in local storage.
-      activeDrawerContent:
-        activeDrawerContentFromLocalStorage !== null
-          ? activeDrawerContentFromLocalStorage
-          : props.config.mapConfig.map.activeDrawerOnStart || "plugins",
-
+      drawerVisible: drawerVisible,
+      drawerPermanent: drawerPermanent,
+      activeDrawerContent: activeDrawerContentState,
       drawerMouseOverLock: false,
     };
+
+    // If the drawer is set to be visible at start - ensure the activeDrawerContent
+    // is set to current content. If we don't allow functional cookies, we cannot do that obviously.
+    if (drawerVisible && drawerPermanent && activeDrawerContentState !== null) {
+      if (functionalCookieOk()) {
+        window.localStorage.setItem(
+          "activeDrawerContent",
+          activeDrawerContentState
+        );
+      }
+    }
+
     this.globalObserver = new Observer();
-    this.appModel = new AppModel(props.config, this.globalObserver);
+
+    // We have to initialize the cookie-manager so we know how cookies should be managed.
+    // The manager should ideally only be initialized once, since the initialization determines
+    // wether the cookie-notice has to be shown or not. Running setConfig() again will not lead
+    // to a new prompt.
+    setCookieConfig({
+      showCookieNotice: props.config.mapConfig.map.showCookieNotice,
+      globalObserver: this.globalObserver,
+    });
+
+    this.appModel = new AppModel({
+      config: props.config,
+      globalObserver: this.globalObserver,
+      refreshMUITheme: props.refreshMUITheme,
+    });
   }
+
+  hasAnyToolbarTools = () => {
+    const { config, activeTools } = this.props;
+    return config.mapConfig.tools.some((tool) => {
+      return (
+        tool.options.target === "toolbar" &&
+        activeTools
+          .map((activeTool) => activeTool.toLowerCase())
+          .includes(tool.type.toLowerCase())
+      );
+    });
+  };
 
   componentDidMount() {
     var promises = this.appModel
@@ -292,8 +416,26 @@ class App extends React.PureComponent {
   componentDidCatch(error) {}
 
   bindHandlers() {
+    // Register a handle to prevent pinch zoom on mobile devices.
+    document.body.addEventListener(
+      "touchmove",
+      (event) => {
+        // If this event would result in changing scale …
+        // scale is always undefined on Android so we need to handle it, otherwise we loose the ability to scroll.
+        // For the prevention pinch-zoom on Android. Check index.css
+        if (event.scale !== undefined && event.scale !== 1) {
+          // …cancel it.
+          event.preventDefault();
+        }
+        // Else, allow all non-scale-changing touch events, e.g.
+        // we still want scroll to work.
+      },
+      { passive: false } // Explicitly tell the browser that we will preventDefault inside this handler,
+      // which is important for smooth scrolling to work correctly.
+    );
+
+    // Register various global listeners.
     this.globalObserver.subscribe("infoClick.mapClick", (results) => {
-      this.appModel.highlight(false);
       this.setState({
         mapClickDataResult: results,
       });
@@ -426,6 +568,11 @@ class App extends React.PureComponent {
           width={infoclickOptions.width || 400}
           height={infoclickOptions.height || 300}
           features={this.state.mapClickDataResult?.features}
+          options={
+            this.appModel.config.mapConfig.tools.find(
+              (t) => t.type === "infoclick"
+            )?.options
+          }
           map={this.appModel.getMap()}
           onDisplay={(feature) => {
             this.appModel.highlight(feature);
@@ -459,11 +606,14 @@ class App extends React.PureComponent {
       // event that all Windows subscribe to.
       this.globalObserver.publish("core.drawerToggled");
 
-      // Save current state of drawerPermanent to LocalStorage, so app reloads to same state
-      window.localStorage.setItem(
-        "drawerPermanent",
-        this.state.drawerPermanent
-      );
+      // If we allow functional cookies, let's save the current state of drawerPermanent
+      // to LocalStorage, so that the application can reload to the same state.
+      if (functionalCookieOk()) {
+        window.localStorage.setItem(
+          "drawerPermanent",
+          this.state.drawerPermanent
+        );
+      }
 
       // If user clicked on Toggle Permanent and the result is,
       // that this.state.drawerPermanent===false, this means that we
@@ -485,9 +635,10 @@ class App extends React.PureComponent {
 
   renderSearchComponent() {
     // FIXME: We should get config from somewhere else now when Search is part of Core
-    const renderSearchComponent = !this.appModel.plugins.search.options
-      .renderElsewhere;
-    if (renderSearchComponent && this.appModel.plugins.search) {
+    if (
+      this.appModel.plugins.search &&
+      this.appModel.plugins.search.options.renderElsewhere !== true
+    ) {
       return (
         <Search
           map={this.appModel.getMap()}
@@ -521,26 +672,34 @@ class App extends React.PureComponent {
       (db) => db.value === this.state.activeDrawerContent
     )?.drawerTitle;
 
+    // We need to be able to grab different logos depending
+    // on light/dark mode theme
+    const logoUrl =
+      (this.props.theme.palette.type === "light" // If light theme active…
+        ? config.mapConfig.map.logoLight // …grab light logo,
+        : config.mapConfig.map.logoDark) || // …else grab dark logo.
+      config.mapConfig.map.logo || // If neither was set, try to see if we have the legacy admin parameter.
+      "logo.png"; // If we didn't have this either, fallback to hard-coded value.
+
     return (
       <>
         <Box className={classes.logoBox}>
-          <img
-            alt="Logo"
-            src={config.mapConfig.map.logo}
-            className={classes.logo}
-          />
+          <img alt="" src={logoUrl} className={classes.logo} />
         </Box>
         <Divider />
         <Grid
           className={classes.drawerGrid}
           item
           container
+          wrap="nowrap"
           direction="row"
           justify="space-between"
           alignItems="center"
         >
           <Grid item>
-            <Typography variant="button">{drawerTitle}</Typography>
+            <Typography variant="button" className={classes.drawerTitle}>
+              {drawerTitle}
+            </Typography>
           </Grid>
           {/** Hide Lock button in mobile mode - there's not screen estate to permanently lock Drawer on mobile viewports*/}
           <Grid item>
@@ -552,7 +711,7 @@ class App extends React.PureComponent {
                 }
               >
                 <IconButton
-                  aria-label="pin"
+                  className={classes.drawerLockButton}
                   onClick={this.togglePermanent}
                   onMouseEnter={this.handleMouseEnter}
                   onMouseLeave={this.handleMouseLeave}
@@ -581,19 +740,21 @@ class App extends React.PureComponent {
     const { classes } = this.props;
 
     return (
-      <div id="drawer-content" className={classes.drawerContent}>
+      <div id="drawer-content" className={classes.drawerContentContainer}>
         <Box
           key="plugins"
+          className={classes.drawerContent}
           display={
             this.state.activeDrawerContent === "plugins" ? "unset" : "none"
           }
         >
-          <div id="plugin-buttons" />
+          <nav role="navigation" id="plugin-buttons" />
         </Box>
         {this.state.drawerButtons.map((db) => {
           return (
             <Box
               key={db.value}
+              className={classes.drawerContent}
               display={
                 this.state.activeDrawerContent === db.value ? "unset" : "none"
               }
@@ -611,26 +772,22 @@ class App extends React.PureComponent {
 
     // If clean===true, some components won't be rendered below
     const clean = config.mapConfig.map.clean;
-    const showCookieNotice =
-      config.mapConfig.map.showCookieNotice !== undefined
-        ? config.mapConfig.map.showCookieNotice
-        : true;
 
-    const defaultCookieNoticeMessage = this.isString(
-      this.props.config.mapConfig.map.defaultCookieNoticeMessage
-    )
-      ? this.props.config.mapConfig.map.defaultCookieNoticeMessage
-      : undefined;
+    // Let admin decide whether MapResetter should be shown, but show it
+    // always on clean mode maps.
+    const showMapResetter = clean === true || config.mapConfig.map.mapresetter;
 
-    const defaultCookieNoticeUrl = this.isString(
-      this.props.config.mapConfig.map.defaultCookieNoticeUrl
-    )
-      ? this.props.config.mapConfig.map.defaultCookieNoticeUrl
-      : undefined;
+    const showMapSwitcher =
+      clean === false && config.activeMap !== "simpleMapConfig";
 
     return (
       <SnackbarProvider
         maxSnack={3}
+        classes={{
+          anchorOriginBottomCenter: classes.snackbarContainerBottom,
+          anchorOriginTopCenter: classes.snackbarContainerTop,
+          containerRoot: classes.snackBarContainerRoot,
+        }}
         anchorOrigin={{
           vertical: "top",
           horizontal: "center",
@@ -645,11 +802,10 @@ class App extends React.PureComponent {
                 currentMap={this.props.config.activeMap}
               />
             )}
-          {clean === false && showCookieNotice && (
+          {clean === false && (
             <CookieNotice
               globalObserver={this.globalObserver}
-              defaultCookieNoticeMessage={defaultCookieNoticeMessage}
-              defaultCookieNoticeUrl={defaultCookieNoticeUrl}
+              appModel={this.appModel}
             />
           )}
           <Alert
@@ -658,6 +814,7 @@ class App extends React.PureComponent {
             parent={this}
             title="Meddelande"
           />
+          <SrShortcuts globalObserver={this.globalObserver}></SrShortcuts>
           <div
             id="appBox"
             className={cslx(classes.flexBox, {
@@ -680,7 +837,8 @@ class App extends React.PureComponent {
                   }
                 />
               )}
-              {clean === false && this.renderSearchComponent()}
+              {/* Render Search even if clean === false: Search contains logic to handle clean inside the component. */}
+              {this.renderSearchComponent()}
             </header>
             <main className={classes.main}>
               <div
@@ -706,9 +864,20 @@ class App extends React.PureComponent {
                 )}
               >
                 <Zoom map={this.appModel.getMap()} />
+                {clean === false &&
+                  this.appModel.config.mapConfig.map.showUserAvatar ===
+                    true && (
+                    <User userDetails={this.appModel.config.userDetails} />
+                  )}
                 <div id="plugin-control-buttons"></div>
+                {showMapResetter && (
+                  <MapResetter
+                    mapConfig={this.appModel.config.mapConfig}
+                    map={this.appModel.getMap()}
+                  />
+                )}
                 <Rotate map={this.appModel.getMap()} />
-                {clean === false && <MapSwitcher appModel={this.appModel} />}
+                {showMapSwitcher && <MapSwitcher appModel={this.appModel} />}
                 {clean === false && <MapCleaner appModel={this.appModel} />}
                 {clean === false && <PresetLinks appModel={this.appModel} />}
                 {clean === false && (
@@ -720,12 +889,6 @@ class App extends React.PureComponent {
                   />
                 )}
                 {clean === false && this.renderInformationPlugin()}
-                {clean === true && (
-                  <MapResetter
-                    mapConfig={this.appModel.config.mapConfig}
-                    map={this.appModel.getMap()}
-                  />
-                )}
               </div>
             </main>
             <footer
@@ -737,6 +900,8 @@ class App extends React.PureComponent {
           </div>
           <div
             id="map"
+            tabIndex="0"
+            role="application"
             className={cslx(classes.map, {
               [classes.shiftedLeft]:
                 this.state.drawerPermanent && clean === false,
@@ -761,11 +926,22 @@ class App extends React.PureComponent {
           {clean !== true && ( // NB: Special case here, important with !== true, because there is an edge-case where clean===undefined, and we don't want to match on that!
             <Drawer
               open={this.state.drawerVisible}
-              // NB: we can't simply toggle between permanent|temporary,
-              // as the temporary mode unmounts element from DOM and
-              // re-mounts it the next time, so we would re-rendering
-              // our plugins all the time.
-              variant="persistent"
+              ModalProps={{
+                hideBackdrop: this.state.drawerPermanent, //Don't show backdrop if drawer is permanent
+                disableEnforceFocus: true, //Dont enforce focus to be able to handle elements underneath modal
+                onEscapeKeyDown: () => {
+                  this.globalObserver.publish("core.hideDrawer");
+                },
+                style: {
+                  //Needs to be set to be able to handle elements underneath modal
+                  position: this.state.drawerPermanent ? "initial" : "fixed",
+                },
+                keepMounted: true, //Ensure we dont have to render plugins more than once - UnMounting every time is slow
+                onBackdropClick: () => {
+                  this.globalObserver.publish("core.hideDrawer");
+                },
+              }}
+              variant="temporary"
               classes={{
                 paper: classes.drawerBackground,
               }}
@@ -774,15 +950,6 @@ class App extends React.PureComponent {
               <Divider />
               {this.renderAllDrawerContent()}
             </Drawer>
-          )}
-          {clean === false && (
-            <Backdrop
-              open={this.state.drawerVisible && !this.state.drawerPermanent}
-              className={classes.backdrop}
-              onClick={(e) => {
-                this.globalObserver.publish("core.hideDrawer");
-              }}
-            />
           )}
           {clean === false && (
             <Introduction

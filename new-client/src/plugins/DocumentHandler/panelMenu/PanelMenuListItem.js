@@ -29,157 +29,109 @@ const styles = (theme) => ({
 });
 
 class PanelMenuListItem extends React.PureComponent {
-  constructor(props) {
-    super(props);
-    this.#bindSubscriptions();
-  }
-
-  #bindSubscriptions = () => {
-    const { localObserver, item, setActiveMenuItems } = this.props;
-    localObserver.subscribe("set-active-document", ({ documentName }) => {
-      setActiveMenuItems(documentName, item);
-    });
-  };
-
   #getListTitle = () => {
-    const { item } = this.props;
-    return <ListItemText>{item.title}</ListItemText>;
+    const { title } = this.props;
+    return <ListItemText>{title}</ListItemText>;
   };
 
   #getCollapseIcon = () => {
-    const { classes, item } = this.props;
+    const { classes, title, expanded } = this.props;
 
-    return this.#isExpanded() ? (
+    return expanded ? (
       <ListItemIcon classes={{ root: classes.collapseIconRoot }}>
-        {!item.title && (
-          <Typography variant="srOnly">Minimera submeny</Typography>
-        )}
+        {!title && <Typography variant="srOnly">Minimera submeny</Typography>}
         <ExpandLess />
       </ListItemIcon>
     ) : (
       <ListItemIcon classes={{ root: classes.collapseIconRoot }}>
-        {!item.title && (
-          <Typography variant="srOnly">Maximera submeny</Typography>
-        )}
+        {!title && <Typography variant="srOnly">Maximera submeny</Typography>}
         <ExpandMore />
       </ListItemIcon>
     );
   };
 
-  #getListIcon = (item) => {
-    const { classes } = this.props;
+  #getListIcon = () => {
+    const { classes, title, icon } = this.props;
     return (
       <ListItemIcon className={classes.listItemIcon}>
-        {!item.title && (
-          <Typography variant="srOnly">{item.icon.descriptiveText}</Typography>
+        {!title && (
+          <Typography variant="srOnly">{icon.descriptiveText}</Typography>
         )}
-        <Icon style={{ fontSize: item.icon.fontSize }}>
-          {item.icon.materialUiIconName}
+        <Icon style={{ fontSize: icon.fontSize }}>
+          {icon.materialUiIconName}
         </Icon>
       </ListItemIcon>
     );
   };
 
-  #hasSubMenu = (item) => {
-    if (item.menu && item.menu.length > 0) {
-      return true;
-    } else {
-      return false;
-    }
+  #hasSubMenu = () => {
+    const { subMenuItems } = this.props;
+    return subMenuItems && subMenuItems.length > 0;
   };
 
-  #handleMenuButtonClick = (type, item) => {
-    const { localObserver, globalObserver } = this.props;
-    localObserver.publish(`${type}-clicked`, item);
-
-    if (type !== "submenu") {
-      globalObserver.publish("core.onlyHideDrawerIfNeeded");
-    } else {
-      this.props.handleExpandClick(item);
-    }
-  };
-
-  #isExpanded = () => {
-    const { expandedIndex, item } = this.props;
-    return expandedIndex.indexOf(item.id) > -1;
-  };
-
-  #isSelected = () => {
-    const { selectedIndex, item } = this.props;
-    return selectedIndex === item.id;
-  };
-
-  #isColored = () => {
-    const { coloredIndex, item } = this.props;
-    return coloredIndex.indexOf(item.id) > -1;
+  #handleMenuButtonClick = (type, id) => {
+    const { localObserver } = this.props;
+    localObserver.publish(`${type}-clicked`, id);
   };
 
   #getMenuItemStyle = () => {
-    const { theme, item } = this.props;
-
-    return this.#isColored()
+    const { theme, level, color, colored } = this.props;
+    const hasSubMenu = this.#hasSubMenu();
+    return colored
       ? {
-          paddingLeft: theme.spacing(1) + theme.spacing(item.level * 3),
-          borderLeft: `${theme.spacing(1)}px solid ${item.color}`,
+          paddingLeft: theme.spacing(1) + theme.spacing(level * 3),
+          borderLeft: `${theme.spacing(1)}px solid ${color}`,
+          paddingRight: hasSubMenu ? 0 : theme.spacing(1),
         }
       : {
-          paddingLeft: theme.spacing(1) + theme.spacing(item.level * 3),
+          paddingLeft: theme.spacing(1) + theme.spacing(level * 3),
+          paddingRight: hasSubMenu ? 0 : theme.spacing(1),
         };
   };
 
   render() {
     const {
-      item,
       classes,
       type,
-      localObserver,
-      globalObserver,
-      handleExpandClick,
-      expandedIndex,
-      setActiveMenuItems,
-      coloredIndex,
-      selectedIndex,
+      selected,
+      subMenuItems,
+      expanded,
+      icon,
+      level,
+      title,
+      id,
     } = this.props;
-    const hasSubMenu = this.#hasSubMenu(item);
-
+    const hasSubMenu = this.#hasSubMenu();
     return (
       <>
         <ListItem
           divider
-          selected={this.#isSelected()}
+          selected={selected}
           button
+          ref={this.props.itemRef}
           size="small"
           classes={{
             root: classes.root,
           }}
           disableGutters
-          aria-controls={hasSubMenu ? `submenu_${item.id}` : null}
-          aria-expanded={this.#isExpanded()}
+          aria-controls={hasSubMenu ? `submenu_${id}` : null}
+          aria-expanded={expanded}
           onClick={() => {
-            this.#handleMenuButtonClick(type, item);
+            this.#handleMenuButtonClick(type, id);
           }}
           className={classes.listItem}
           style={this.#getMenuItemStyle()}
         >
-          {item.icon ? this.#getListIcon(item) : null}
-          {item.title && this.#getListTitle()}
+          {icon ? this.#getListIcon() : null}
+          {title && this.#getListTitle()}
           {hasSubMenu && this.#getCollapseIcon()}
         </ListItem>
         {hasSubMenu && (
-          <Collapse
-            id={`submenu_${item.id}`}
-            in={this.#isExpanded()}
-            timeout="auto"
-          >
+          <Collapse id={`submenu_${id}`} in={expanded} timeout={200}>
             <PanelList
-              localObserver={localObserver}
-              globalObserver={globalObserver}
-              menu={item.menu}
-              handleExpandClick={handleExpandClick}
-              expandedIndex={expandedIndex}
-              setActiveMenuItems={setActiveMenuItems}
-              coloredIndex={coloredIndex}
-              selectedIndex={selectedIndex}
+              {...this.props}
+              level={level + 1}
+              items={subMenuItems}
             ></PanelList>
           </Collapse>
         )}

@@ -1,11 +1,13 @@
 {
   "activeTools": [
     "Anchor",
+    "Bookmarks",
     "Buffer",
     "Collector",
     "Coordinates",
     "DocumentHandler",
     "Draw",
+    "Dummy",
     "Edit",
     "LayerSwitcher",
     "Location",
@@ -18,6 +20,7 @@
   ],
   "allTools": [
     "Anchor",
+    "Bookmarks",
     "Buffer",
     "Collector",
     "Coordinates",
@@ -25,15 +28,23 @@
     "Draw",
     "Dummy",
     "Edit",
-    "FBService",
+    "Export",
+    "FmeServer",
+    "Fir",
+    "GeosuiteExport",
+    "InfoDialog",
+    "Informative",
+    "Kir",
     "LayerSwitcher",
     "Location",
     "Measure",
     "Print",
     "Routing",
     "Search",
+    "Sketch",
     "StreetView",
     "Suggest",
+    "TimeSlider",
     "vtsearch"
   ]
 }

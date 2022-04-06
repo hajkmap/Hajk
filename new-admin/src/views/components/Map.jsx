@@ -9,7 +9,7 @@ class Map extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      chapter: props.chapter
+      chapter: props.chapter,
     };
   }
 
@@ -24,14 +24,14 @@ class Map extends Component {
       mapSettings: this.props.mapSettings,
       onUpdate: this.props.onMapUpdate,
       wmsUrl: this.props.config.wms_url,
-      wmsLayers: this.props.config.wms_layers
+      wmsLayers: this.props.config.wms_layers,
     });
     this.setState({
-      map: this.map
+      map: this.map,
     });
   }
 
-  update = checkedLayers => {
+  update = (checkedLayers) => {
     if (this.map) {
       this.map.setLayers(checkedLayers);
     }
@@ -52,7 +52,7 @@ class Map extends Component {
           config={this.props.config}
           chapter={this.props.chapter}
           onUpdate={this.update}
-          onLoaded={layersConfig => {
+          onLoaded={(layersConfig) => {
             this.map.setLayersConfig(layersConfig);
             this.map.setLayers(this.props.chapter.layers);
           }}

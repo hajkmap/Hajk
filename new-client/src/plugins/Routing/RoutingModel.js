@@ -200,7 +200,8 @@ class RouteModel {
   };
 
   startPointSelection = (e) => {
-    var startPoint = new Feature(); /* startPoint and point(below) must be the same l.134 */
+    var startPoint =
+      new Feature(); /* startPoint and point(below) must be the same l.134 */
     startPoint.setGeometry(new Point(e.coordinate));
     /* Convert Geometry to Coordinate */
 
@@ -267,7 +268,8 @@ class RouteModel {
     ) {
       this.localObserver.publish("startStopPointsMissing");
     } else {
-      const googleDirectionsService = new this.googleMapsApi.DirectionsService();
+      const googleDirectionsService =
+        new this.googleMapsApi.DirectionsService();
 
       const rp = {
         origin: { lat: pos.latitude, lng: pos.longitude },

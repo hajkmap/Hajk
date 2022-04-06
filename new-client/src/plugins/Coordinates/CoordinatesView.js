@@ -1,4 +1,5 @@
 import React from "react";
+import Button from "@material-ui/core/Button";
 import { withStyles } from "@material-ui/core/styles";
 import Table from "@material-ui/core/Table";
 import TableBody from "@material-ui/core/TableBody";
@@ -6,8 +7,7 @@ import TableCell from "@material-ui/core/TableCell";
 import TableHead from "@material-ui/core/TableHead";
 import TableRow from "@material-ui/core/TableRow";
 import Paper from "@material-ui/core/Paper";
-import Typography from "@material-ui/core/Typography";
-import TextField from "@material-ui/core/TextField";
+import CoordinatesTransformRow from "./CoordinatesTransformRow.js";
 
 import { withSnackbar } from "notistack";
 
@@ -33,24 +33,13 @@ const styles = (theme) => ({
 });
 
 class CoordinatesView extends React.PureComponent {
-  state = {
-    transformedCoordinates: [],
-  };
+  state = {};
 
   constructor(props) {
     super(props);
     this.model = this.props.model;
     this.snackbarKey = null;
     this.localObserver = this.props.localObserver;
-
-    this.localObserver.subscribe(
-      "setTransformedCoordinates",
-      (transformedCoordinates) => {
-        this.setState({
-          transformedCoordinates: transformedCoordinates,
-        });
-      }
-    );
 
     /**
      * Setup listeners that will show/hide snackbar. The Model will publish
@@ -82,46 +71,16 @@ class CoordinatesView extends React.PureComponent {
   }
 
   renderProjections() {
-    const { classes } = this.props;
-
     return (
       <>
-        {this.state.transformedCoordinates.map((transformations, i) => {
+        {this.props.model.transformations.map((transformation, index) => {
           return (
-            <TableRow key={i}>
-              <TableCell>
-                <Typography variant="body1" style={{ display: "flex" }}>
-                  {transformations.title}
-                </Typography>
-                <Typography variant="body2" style={{ display: "flex" }}>
-                  ({transformations.code})
-                </Typography>
-              </TableCell>
-              <TableCell>
-                <TextField
-                  label={transformations.ytitle}
-                  className={classes.textField}
-                  margin="dense"
-                  variant="outlined"
-                  value={
-                    transformations.inverseAxis
-                      ? transformations.coordinates[0]
-                      : transformations.coordinates[1]
-                  }
-                />
-                <TextField
-                  label={transformations.xtitle}
-                  className={classes.textField}
-                  margin="dense"
-                  variant="outlined"
-                  value={
-                    transformations.inverseAxis
-                      ? transformations.coordinates[1]
-                      : transformations.coordinates[0]
-                  }
-                />
-              </TableCell>
-            </TableRow>
+            <CoordinatesTransformRow
+              key={transformation.code + index + "-element"}
+              model={this.model}
+              transformation={transformation}
+              inverseAxis={transformation.inverseAxis}
+            />
           );
         })}
       </>
@@ -143,6 +102,34 @@ class CoordinatesView extends React.PureComponent {
             </TableHead>
             <TableBody>{this.renderProjections()}</TableBody>
           </Table>
+          <Button
+            onClick={() => {
+              this.props.model.zoomOnMarker();
+            }}
+          >
+            Zooma
+          </Button>
+          <Button
+            onClick={() => {
+              this.props.model.centerOnMarker();
+            }}
+          >
+            Panorera
+          </Button>
+          <Button
+            onClick={() => {
+              this.props.model.goToUserLocation();
+            }}
+          >
+            Min position
+          </Button>
+          <Button
+            onClick={() => {
+              this.props.model.resetCoords();
+            }}
+          >
+            Rensa fält
+          </Button>
         </Paper>
       </>
     );

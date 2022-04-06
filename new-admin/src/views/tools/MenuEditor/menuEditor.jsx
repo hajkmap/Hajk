@@ -7,7 +7,9 @@ import Modal from "@material-ui/core/Modal";
 import DragHandle from "@material-ui/icons/DragHandle";
 import TreeRow from "./treerow.jsx";
 import { withStyles } from "@material-ui/core/styles";
-import { Typography } from "@material-ui/core";
+import { SketchPicker } from "react-color";
+
+import { Typography, RadioGroup, Radio, FormControlLabel } from "@material-ui/core";
 
 import {
   ColorButtonBlue,
@@ -28,19 +30,43 @@ const styles = (theme) => ({
     paddingTop: theme.spacing(1),
     paddingBottom: theme.spacing(1),
   },
+  warningText: {
+    color: theme.palette.error.main,
+  },
+  textAreaSettings: {
+    position: "relative",
+  },
+  disabledDiv: {
+    position: "absolute",
+    top: 0,
+    backgroundColor: "white",
+    opacity: 0.5,
+    left: 0,
+    bottom: 0,
+    right: 0,
+    zIndex: 10,
+  },
 });
 
 class ToolOptions extends Component {
   state = {
+    textAreacolorpickerEnabled: false,
     active: false,
     index: 0,
-    title: "Visa informationsruta",
+    title: "Dokumenthanterare",
+    target: "hidden",
     showScrollButtonLimit: 400,
+    dynamicImportUrls: {
+      iconFonts: "https://fonts.googleapis.com/icon?family=Material+Icons",
+      customFont: "https://fonts.googleapis.com/css?family=Open+Sans",
+    },
     width: 600,
-    height: "90vh",
-    menuConfig: {},
+    height: "",
+    menuConfig: {
+      menu: [],
+    },
     iconLibraryLink: "https://material.io/resources/icons/?style=baseline",
-    customThemeUrl: "",
+    customThemeUrl: "/documentHandlerTheme.json",
     openMenuEditor: false,
     validationErrors: [],
     documentOnStart: "",
@@ -49,19 +75,24 @@ class ToolOptions extends Component {
     searchImplemented: true,
     enablePrint: true,
     closePanelOnMapLinkOpen: false,
+    displayLoadingOnMapLinkOpen: false,
     tableOfContents: {
       active: false,
       expanded: false,
+      printMode: "none",
       chapterLevelsToShow: 2,
       title: "Innehållsförteckning",
     },
     defaultDocumentColorSettings: {
-      textAreaBackgroundColor: "#ccc",
-      textAreaDividerColor: "#6A0DAD",
+      textAreaBackgroundColor: "",
+      textAreaDividerColor: "",
     },
+    tree: {},
   };
   treeKeys = [];
-  menuConfig = null;
+  menuConfig = {
+    menu: [],
+  };
   availableDocuments = [];
 
   constructor(props) {
@@ -73,6 +104,15 @@ class ToolOptions extends Component {
       this.availableDocuments = list;
     });
   }
+
+  handleColorChange = (target, color) => {
+    this.setState((prevState) => ({
+      defaultDocumentColorSettings: {
+        ...prevState.defaultDocumentColorSettings,
+        [target]: color,
+      },
+    }));
+  };
 
   getMenuEditorModel = () => {
     return new MenuEditorModel({
@@ -87,6 +127,11 @@ class ToolOptions extends Component {
     var tool = this.getTool();
     if (tool) {
       this.setState({
+        textAreacolorpickerEnabled:
+          tool.options.defaultDocumentColorSettings.textAreaBackgroundColor ||
+          tool.options.defaultDocumentColorSettings.textAreaDividerColor
+            ? true
+            : false,
         active: true,
         index: tool.index,
         target: tool.options.target,
@@ -104,8 +149,14 @@ class ToolOptions extends Component {
         searchImplemented: tool.options.searchImplemented,
         enablePrint: tool.options.enablePrint,
         closePanelOnMapLinkOpen: tool.options.closePanelOnMapLinkOpen,
+        displayLoadingOnMapLinkOpen:
+          tool.options.displayLoadingOnMapLinkOpen || false,
         tableOfContents: tool.options.tableOfContents,
-        defaultDocumentColorSettings: tool.options.defaultDocumentColorSettings,
+        defaultDocumentColorSettings: tool.options
+          .defaultDocumentColorSettings || {
+          textAreaBackgroundColor: "",
+          textAreaDividerColor: "",
+        },
       });
     } else {
       this.setState({
@@ -144,6 +195,19 @@ class ToolOptions extends Component {
     });
   }
 
+  toggleTextAreaColorpickers = () => {
+    //React batches multiple setState in eventhandler so this should be fine
+    this.setState((prevState) => {
+      if (prevState.textAreacolorpickerEnabled) {
+        this.handleColorChange("textAreaBackgroundColor", "");
+        this.handleColorChange("textAreaDividerColor", "");
+      }
+      return {
+        textAreacolorpickerEnabled: !prevState.textAreacolorpickerEnabled,
+      };
+    });
+  };
+
   replace(tool) {
     this.props.model.get("toolConfig").forEach((t) => {
       if (t.type === this.type) {
@@ -153,13 +217,17 @@ class ToolOptions extends Component {
     });
   }
 
-  save(savedFromMenuEditor) {
-    if (savedFromMenuEditor) {
-      this.menuConfig = this.menuEditorModel.exportTreeAsMenuJson(
-        this.state.tree,
-        this.menuConfig
-      );
-    }
+  saveFromMenuEditor() {
+    this.menuConfig = this.menuEditorModel.exportTreeAsMenuJson(
+      this.state.tree,
+      this.menuConfig
+    );
+    this.setState({ menuConfig: this.menuConfig }, () => {
+      this.save();
+    });
+  }
+
+  save() {
     var tool = {
       type: this.type,
       index: this.state.index,
@@ -175,14 +243,13 @@ class ToolOptions extends Component {
         searchImplemented: this.state.searchImplemented,
         enablePrint: this.state.enablePrint,
         closePanelOnMapLinkOpen: this.state.closePanelOnMapLinkOpen,
+        displayLoadingOnMapLinkOpen: this.state.displayLoadingOnMapLinkOpen,
         documentOnStart: this.state.documentOnStart,
         drawerTitle: this.state.drawerTitle,
         drawerButtonTitle: this.state.drawerButtonTitle,
         tableOfContents: this.state.tableOfContents,
         defaultDocumentColorSettings: this.state.defaultDocumentColorSettings,
-        menuConfig: savedFromMenuEditor
-          ? this.menuConfig
-          : this.state.menuConfig,
+        menuConfig: this.state.menuConfig,
       },
     };
 
@@ -236,7 +303,7 @@ class ToolOptions extends Component {
   onSaveMenuEditsClick = (e) => {
     e.preventDefault();
     this.setState({ openMenuEditor: false }, () => {
-      this.save(true);
+      this.saveFromMenuEditor();
     });
   };
 
@@ -326,8 +393,10 @@ class ToolOptions extends Component {
   getTreeView = () => {
     return this.menuEditorModel
       .loadMenuConfigForMap(this.mapSettingsModel.get("mapFile"))
-      .then((menuConfig) => {
-        this.menuConfig = menuConfig.options.menuConfig;
+      .then((toolConfig) => {
+        if (toolConfig && toolConfig?.options?.menuConfig) {
+          this.menuConfig = toolConfig.options.menuConfig;
+        }
         let treeData = this.createTreeStructure(this.menuConfig.menu);
         return treeData;
       });
@@ -529,7 +598,7 @@ class ToolOptions extends Component {
     });
 
     return (
-      <div>
+      <div style={{ marginBottom: "10px" }}>
         <form>
           <p>
             <ColorButtonBlue
@@ -544,7 +613,20 @@ class ToolOptions extends Component {
               Spara
             </ColorButtonBlue>
           </p>
-          <div className="separator">Meny Ändringar</div>
+          <div>
+            <input
+              id="active"
+              name="active"
+              type="checkbox"
+              onChange={(e) => {
+                this.handleInputChange(e);
+              }}
+              checked={this.state.active}
+            />
+            &nbsp;
+            <label htmlFor="active">Aktiverad</label>
+          </div>
+          <div className="separator">Menyinställningar</div>
           <p>
             <ColorButtonBlue
               variant="contained"
@@ -555,7 +637,49 @@ class ToolOptions extends Component {
               <Typography variant="button">Redigera meny</Typography>
             </ColorButtonBlue>
           </p>
-          <div className="separator">Generalla inställningar</div>
+          <div className="separator">Generella inställningar</div>
+          <div>
+            <label htmlFor="width">
+              Fönsterbredd{" "}
+              <i
+                className="fa fa-question-circle"
+                data-toggle="tooltip"
+                title="Bredd i pixlar på verktygets fönster. Anges som ett numeriskt värde. Lämna tomt för att använda standardbredd."
+              />
+            </label>
+            <input
+              id="width"
+              name="width"
+              type="number"
+              min="0"
+              className="control-fixed-width"
+              onChange={(e) => {
+                this.handleInputChange(e);
+              }}
+              value={this.state.width}
+            />
+          </div>
+          <div>
+            <label htmlFor="height">
+              Fönsterhöjd{" "}
+              <i
+                className="fa fa-question-circle"
+                data-toggle="tooltip"
+                title="Höjd i pixlar på verktygets fönster. Anges antingen numeriskt (pixlar), 'dynamic' för att automatiskt anpassa höjden efter innehållet eller 'auto' att använda maximal höjd."
+              />
+            </label>
+            <input
+              id="height"
+              name="height"
+              type="text"
+              className="control-fixed-width"
+              onChange={(e) => {
+                this.handleInputChange(e);
+              }}
+              value={this.state.height}
+            />
+          </div>
+
           <div>
             <label htmlFor="documentOnStart">
               Startdokument{" "}
@@ -594,7 +718,6 @@ class ToolOptions extends Component {
               }}
             />
           </div>
-
           <div>
             <label htmlFor="drawerButtonTitle">
               Knapptitel{" "}
@@ -614,7 +737,6 @@ class ToolOptions extends Component {
               }}
             />
           </div>
-
           <div>
             <input
               id="searchImplemented"
@@ -628,7 +750,6 @@ class ToolOptions extends Component {
             &nbsp;
             <label htmlFor="searchImplemented">Sökning aktiverad</label>
           </div>
-
           <div>
             <input
               id="enablePrint"
@@ -642,7 +763,6 @@ class ToolOptions extends Component {
             &nbsp;
             <label htmlFor="enablePrint">Utskrift aktiverad</label>
           </div>
-
           <div>
             <input
               id="closePanelOnMapLinkOpen"
@@ -658,9 +778,25 @@ class ToolOptions extends Component {
               Stäng dokumentfönster vid klick på kartlänk
             </label>
           </div>
-
-          <div className="separator">Innehållsförteckning inställningar</div>
-
+          <div>
+            <input
+              id="displayLoadingOnMapLinkOpen"
+              name="displayLoadingOnMapLinkOpen"
+              type="checkbox"
+              onChange={(e) => {
+                this.handleInputChange(e);
+              }}
+              checked={this.state.displayLoadingOnMapLinkOpen}
+            />
+            &nbsp;
+            <label
+              style={{ width: "200px" }}
+              htmlFor="displayLoadingOnMapLinkOpen"
+            >
+              Visa 'Kartan laddar' dialog vid klick på kartlänk
+            </label>
+          </div>
+          <div className="separator">Innehållsförteckning</div>
           <div>
             <input
               id="tableOfContentsActive"
@@ -681,7 +817,6 @@ class ToolOptions extends Component {
             &nbsp;
             <label htmlFor="tableOfContentsActive">Aktiverad</label>
           </div>
-
           <div>
             <input
               id="tableOfContentsExpanded"
@@ -702,7 +837,6 @@ class ToolOptions extends Component {
             &nbsp;
             <label htmlFor="tableOfContentsExpanded">Expanderad</label>
           </div>
-
           <div>
             <label htmlFor="tableOfContentsTitle">
               Titel{" "}
@@ -755,63 +889,104 @@ class ToolOptions extends Component {
               value={this.state.tableOfContents.chapterLevelsToShow}
             />
           </div>
-          <div className="separator">Utseende inställningar</div>
           <div>
-            <label htmlFor="textAreaBackgroundColor">
-              Bakgrundsfärg på faktaruta{" "}
-              <i
-                className="fa fa-question-circle"
-                data-toggle="tooltip"
-                title="Färg till textområde bakgrund"
-              />
+            <label htmlFor="tocPrintMode" style={{ width: "400px" }}>
+            Välj hur innehållsförteckningen skall skivas ut{" "}
+                <i
+                  className="fa fa-question-circle"
+                  data-toggle="tooltip"
+                  title="Välj hur innehållsförteckning ska skrivas ut"
+                />
             </label>
-            <input
-              id="textAreaBackgroundColor"
-              value={
-                this.state.defaultDocumentColorSettings.textAreaBackgroundColor
-              }
-              type="text"
-              name="textAreaBackgroundColor"
+            <RadioGroup 
+              id="printMode"
+              name="printMode" 
+              value={this.state.tableOfContents.printMode} 
               onChange={(e) => {
                 const value = e.target.value;
                 this.setState((prevState) => ({
-                  defaultDocumentColorSettings: {
-                    ...prevState.defaultDocumentColorSettings,
-                    textAreaBackgroundColor: value,
+                  tableOfContents: {
+                    ...prevState.tableOfContents,
+                    printMode: value,
                   },
                 }));
-              }}
-            />
+              }}>
+            <FormControlLabel value="full" control={<Radio color="primary" />} label="Hela" />
+            <FormControlLabel value="partial" control={<Radio color="primary" />} label="Valda" />
+            <FormControlLabel value="none" control={<Radio color="primary" />} label="Inga" />
+          </RadioGroup>
           </div>
-
+          <div className="separator">Faktaruta</div>
           <div>
-            <label htmlFor="textAreaDividerColor">
-              Kantfärg på faktaruta{" "}
-              <i
-                className="fa fa-question-circle"
-                data-toggle="tooltip"
-                title="Färg till textområde skiljelinje"
-              />
-            </label>
             <input
-              id="textAreaDividerColor"
-              value={
-                this.state.defaultDocumentColorSettings.textAreaDividerColor
-              }
-              type="text"
-              name="textAreaDividerColor"
-              onChange={(e) => {
-                const value = e.target.value;
-                this.setState((prevState) => ({
-                  defaultDocumentColorSettings: {
-                    ...prevState.defaultDocumentColorSettings,
-                    textAreaDividerColor: value,
-                  },
-                }));
-              }}
+              id="override_textarea_color"
+              name="override_textarea_color"
+              type="checkbox"
+              onChange={this.toggleTextAreaColorpickers}
+              checked={this.state.textAreacolorpickerEnabled}
             />
+            &nbsp;
+            <label htmlFor="override_textarea_color">Aktiverad</label>
           </div>
-
+          <div>
+            <p className={classes.warningText}>
+              <b>
+                Vid användning av dessa inställningar riskeras dark/light-mode
+                sättas ur spel
+              </b>
+            </p>
+          </div>
+          <div className={`${classes.textAreaSettings} clearfix`}>
+            {!this.state.textAreacolorpickerEnabled && (
+              //Add div on top of colorpickers to make them look disabled.
+              <div className={classes.disabledDiv}></div>
+            )}
+            <span className="pull-left">
+              <div>
+                <label className="long-label" htmlFor="textAreaBackgroundColor">
+                  Bakgrundsfärg
+                  <i
+                    className="fa fa-question-circle"
+                    data-toggle="tooltip"
+                    title="Färg till textområdets bakgrund"
+                  />
+                </label>
+              </div>
+              <div>
+                <SketchPicker
+                  color={
+                    this.state.defaultDocumentColorSettings
+                      .textAreaBackgroundColor
+                  }
+                  onChangeComplete={(color) =>
+                    this.handleColorChange("textAreaBackgroundColor", color.hex)
+                  }
+                />
+              </div>
+            </span>
+            <span className="pull-left" style={{ marginLeft: "10px" }}>
+              <div>
+                <label htmlFor="textAreaDividerColor">
+                  Kantfärg{" "}
+                  <i
+                    className="fa fa-question-circle"
+                    data-toggle="tooltip"
+                    title="Färg till textområdets skiljelinje"
+                  />
+                </label>
+              </div>
+              <div>
+                <SketchPicker
+                  color={
+                    this.state.defaultDocumentColorSettings.textAreaDividerColor
+                  }
+                  onChangeComplete={(color) =>
+                    this.handleColorChange("textAreaDividerColor", color.hex)
+                  }
+                />
+              </div>
+            </span>
+          </div>
           <section className="tab-pane active">
             <Modal
               style={{
@@ -827,7 +1002,8 @@ class ToolOptions extends Component {
                   <Grid xs={12} item>
                     <Tree
                       blockNode
-                      height="80vh"
+                      height={window.innerHeight - 200}
+                      virtual={false} //Makes scroll work when drag
                       switcherIcon={<></>}
                       onDrop={this.onDropNode}
                       expandedKeys={expandedKeys}

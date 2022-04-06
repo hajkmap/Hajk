@@ -185,9 +185,8 @@ class VTSearch extends React.PureComponent {
         searchResult.type = searchResult?.source?.onClickName;
 
         const featureCollection = searchResult?.value;
-        const attributesToDisplay = this.searchModel.geoServer[
-          searchResult.type
-        ]?.attributesToDisplay;
+        const attributesToDisplay =
+          this.searchModel.geoServer[searchResult.type]?.attributesToDisplay;
         this.searchModel.updateDisplayFormat(
           featureCollection,
           attributesToDisplay
@@ -197,25 +196,12 @@ class VTSearch extends React.PureComponent {
       }
     );
 
-    this.globalObserver.subscribe("window-minimize", (title) => {
+    this.globalObserver.subscribe("core.minimizeWindow", (title) => {
       if (title === this.props.options.title)
         this.globalObserver.publish("clear-autocomplete");
     });
 
-    this.globalObserver.subscribe("window-close", (title) => {
-      if (title === this.props.options.title)
-        this.globalObserver.publish("clear-autocomplete");
-    });
-
-    this.globalObserver.subscribe("core.drawerContentChanged", () => {
-      this.globalObserver.publish("clear-autocomplete");
-    });
-
-    this.globalObserver.subscribe("core.hideDrawer", () => {
-      this.globalObserver.publish("clear-autocomplete");
-    });
-
-    this.globalObserver.subscribe("windows.onDragStart", (title) => {
+    this.globalObserver.subscribe("core.closeWindow", (title) => {
       if (title === this.props.options.title)
         this.globalObserver.publish("clear-autocomplete");
     });

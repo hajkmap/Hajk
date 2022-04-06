@@ -23,8 +23,8 @@ const styles = (theme) => ({
 class SearchResultsDatasetSummary extends React.PureComponent {
   //Some sources does not return numberMatched and numberReturned, falling back on features.length
   state = {
-    numberOfResultsToDisplay: this.props.featureCollection.value.features
-      .length,
+    numberOfResultsToDisplay:
+      this.props.featureCollection.value.features.length,
   };
 
   shouldDisplayWarning = () => {

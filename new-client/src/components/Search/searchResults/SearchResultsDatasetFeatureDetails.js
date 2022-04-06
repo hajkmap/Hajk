@@ -37,9 +37,6 @@ const styles = (theme) => ({
     minWidth: 26,
     padding: 0,
   },
-  togglerButtonIcon: {
-    color: theme.palette.text.primary,
-  },
 });
 
 class SearchResultsDatasetFeatureDetails extends React.PureComponent {
@@ -52,6 +49,10 @@ class SearchResultsDatasetFeatureDetails extends React.PureComponent {
 
     this.featurePropsParsing = new FeaturePropsParsing({
       globalObserver: props.app.globalObserver,
+      options:
+        props.app.appModel.config.mapConfig.tools.find(
+          (t) => t.type === "infoclick"
+        )?.options || [], // featurePropsParsing needs to know if FeatureInfo is configured to allow HTML or not, so we pass on its' options
     });
   }
 
@@ -84,13 +85,19 @@ class SearchResultsDatasetFeatureDetails extends React.PureComponent {
   getHtmlItemInfoBox = () => {
     const { feature } = this.props;
     const source = feature.source ?? this.props.source;
-    feature.properties = this.featurePropsParsing.extractPropertiesFromJson(
-      feature.properties
+    feature.setProperties(
+      this.featurePropsParsing.extractPropertiesFromJson(
+        feature.getProperties()
+      )
     );
     this.featurePropsParsing
-      .mergeFeaturePropsWithMarkdown(source.infobox, feature.properties)
-      .then((featureInfo) => {
-        this.setState({ infoBox: this.renderCustomInfoBox(featureInfo) });
+      .setMarkdownAndProperties({
+        markdown: source.infobox,
+        properties: feature.getProperties(),
+      })
+      .mergeFeaturePropsWithMarkdown()
+      .then((MarkdownComponent) => {
+        this.setState({ infoBox: MarkdownComponent });
       });
   };
 
@@ -117,28 +124,25 @@ class SearchResultsDatasetFeatureDetails extends React.PureComponent {
     return (
       <TableContainer>
         <Table size="small">
-          {Object.entries(feature.properties).map((row, index) => {
-            return (
-              <TableBody key={index}>
+          <TableBody>
+            {Object.entries(feature.getProperties()).map((row) => {
+              // feature.getProperties() can contain values of any data type
+              // (whatever is set on the current feature). But since we can not
+              // render e.g. Date or Point objects, we must do the following check
+              // and only allow String, Number or Array:
+              return typeof row[1] === "string" ||
+                typeof row[1] === "number" ||
+                Array.isArray(row[1]) ? (
                 <TableRow key={row[0]}>
                   {this.renderTableCell(row[0])}
                   {this.renderTableCell(row[1], "right")}
                 </TableRow>
-              </TableBody>
-            );
-          })}
+              ) : null;
+            })}
+          </TableBody>
         </Table>
       </TableContainer>
     );
-  };
-
-  renderCustomInfoBox = (featureInfo) => {
-    return featureInfo.map((element, index) => {
-      if (typeof element == "string") {
-        return <Typography key={index}>{element}</Typography>;
-      }
-      return <React.Fragment key={index}>{element}</React.Fragment>;
-    });
   };
 
   handleTogglerPressed = (nextFeatureIndex) => {
@@ -150,7 +154,7 @@ class SearchResultsDatasetFeatureDetails extends React.PureComponent {
   getFeatureIndex = (feature, features) => {
     return (
       features?.findIndex((f) => {
-        return f.id === feature.id;
+        return f.getId() === feature.getId();
       }) ?? -1
     );
   };
@@ -188,7 +192,7 @@ class SearchResultsDatasetFeatureDetails extends React.PureComponent {
               >
                 <ArrowLeftIcon
                   fontSize="small"
-                  className={classes.togglerButtonIcon}
+                  color={buttonLeftDisabled ? "disabled" : "action"}
                 />
               </Button>
             </span>
@@ -214,7 +218,7 @@ class SearchResultsDatasetFeatureDetails extends React.PureComponent {
               >
                 <ArrowRightIcon
                   fontSize="small"
-                  className={classes.togglerButtonIcon}
+                  color={buttonRightDisabled ? "disabled" : "action"}
                 />
               </Button>
             </span>
@@ -225,7 +229,7 @@ class SearchResultsDatasetFeatureDetails extends React.PureComponent {
   };
 
   renderFeatureTitle = () => {
-    const { featureTitle, classes } = this.props;
+    const { feature, classes } = this.props;
     return (
       <Typography
         noWrap
@@ -234,7 +238,7 @@ class SearchResultsDatasetFeatureDetails extends React.PureComponent {
         variant="button"
         align="left"
       >
-        {featureTitle}
+        {feature.featureTitle}
       </Typography>
     );
   };

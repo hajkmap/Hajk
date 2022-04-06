@@ -1,26 +1,41 @@
-import GeoJSON from "ol/format/GeoJSON.js";
+import GeoJSON from "ol/format/GeoJSON";
 import TileLayer from "ol/layer/Tile";
 import ImageLayer from "ol/layer/Image";
-//import GML from "ol/format/GML";
 import WMSGetFeatureInfo from "ol/format/WMSGetFeatureInfo";
-
-const fetchConfig = {
-  credentials: "same-origin",
-};
+import { hfetch } from "utils/FetchWrapper";
 
 function query(map, layer, evt) {
   const coordinate = evt.coordinate;
   const resolution = map.getView().getResolution();
+  const currentZoom = map.getView().getZoom();
   const referenceSystem = map.getView().getProjection().getCode();
   let subLayersToQuery = [];
 
-  if (layer.layersInfo) {
+  // Query only those layers that a) have a layersInfo property, and
+  // b) are currently displayed. Please note that checking for visibility
+  // is not enough, we must also respect the min/max zoom level settings, #836.
+  if (
+    layer.layersInfo &&
+    layer.getMinZoom() <= currentZoom &&
+    currentZoom <= layer.getMaxZoom()
+  ) {
     const subLayers = Object.values(layer.layersInfo);
-    const visibleSubLayers = layer.getSource().getParams()["LAYERS"];
+    // First we must get the string containing the active sub-layers in this
+    // group-layer.
+    const visibleSubLayersString =
+      layer.getSource().getParams()["LAYERS"] || "";
+    // The string will contain the layers, separated with a comma. We'll split
+    // the string to get an array.
+    const visibleSubLayersArray = visibleSubLayersString.split(",");
+    // Then we'll create a Set from the array. The Set will allow us to
+    // check wether a sub-layer should be queried or not in a simple manner.
+    const visibleSubLayersSet = new Set(visibleSubLayersArray);
+    // Then we'll loop trough the subLayers that should be queried, and make sure
+    // to remove layers that are 1. Not queryable, or 2. Not visible.
     subLayersToQuery = subLayers
       .filter(
         (subLayer) =>
-          subLayer.queryable === true && visibleSubLayers.includes(subLayer.id)
+          subLayer.queryable === true && visibleSubLayersSet.has(subLayer.id)
       ) // QUERY_LAYERS must not include anything that's not in LAYERS, see https://github.com/hajkmap/Hajk/issues/211
       .map((queryableSubLayer) => {
         return queryableSubLayer.id;
@@ -28,27 +43,140 @@ function query(map, layer, evt) {
   }
 
   if (subLayersToQuery.length > 0) {
-    const params = {
+    let params = {
       FEATURE_COUNT: 100,
       INFO_FORMAT: layer.getSource().getParams().INFO_FORMAT,
       QUERY_LAYERS: subLayersToQuery.join(","),
     };
 
+    // See #852. Without this, it's almost impossible to get a result from QGIS Server.
+    // TODO: This could be expanded and made an admin setting - I'm not sure that 50 px
+    // will work for everyone.
+    // The WITH_GEOMETRY is necessary to make QGIS Server send back the feature's geometry
+    // in the response.
+    // See: https://docs.qgis.org/3.16/en/docs/server_manual/services.html#wms-withgeometry.
+    if (layer.getSource().serverType_ === "qgis") {
+      params = {
+        ...params,
+        FI_POINT_TOLERANCE: 50,
+        FI_LINE_TOLERANCE: 50,
+        FI_POLYGON_TOLERANCE: 50,
+        WITH_GEOMETRY: true,
+      };
+    }
+
     const url = layer
       .getSource()
       .getFeatureInfoUrl(coordinate, resolution, referenceSystem, params);
-    return fetch(url, fetchConfig);
+    return hfetch(url);
   } else {
     return false;
   }
 }
 
+function getSortParser(sortType) {
+  if (sortType === "number") {
+    return parseInt;
+  } else if (sortType === "string") {
+    return (a) => {
+      return a ? a.trim() : "";
+    };
+  } else {
+    return (a) => {
+      return a;
+    };
+  }
+}
+
+function getSortMethod(options) {
+  if (options.type === "number") {
+    return (a, b) => {
+      return (
+        (options.desc ? -1 : 1) *
+        (options.parser(a.getProperties()[options.prop]) -
+          options.parser(b.getProperties()[options.prop]))
+      );
+    };
+  } else {
+    return (a, b) => {
+      return (
+        (options.desc ? -1 : 1) *
+        options
+          .parser(a.getProperties()[options.prop])
+          .localeCompare(options.parser(b.getProperties()[options.prop]))
+      );
+    };
+  }
+}
+
+function sortFeatures(layer, features) {
+  if (!features || features.length <= 1) {
+    return;
+  }
+  const layerInfo = layer.getProperties().layerInfo;
+  if (!layerInfo.infoClickSortProperty) {
+    return;
+  }
+
+  const sortType = layerInfo.infoClickSortType || "string";
+  const sortOptions = {
+    type: sortType,
+    desc: layerInfo.infoClickSortDesc ?? true,
+    prop: layerInfo.infoClickSortProperty.trim(),
+    parser: getSortParser(sortType),
+  };
+
+  features.sort(getSortMethod(sortOptions));
+}
+
+// Function similar to GeoJSON().readFeatures, with the subtle difference that we set an
+// id if it is missing on the parsed feature. The missing id occurs when parsing features from
+// arcGis for some reason.
+function readJsonFeatures(jsonData, layerProjection, viewProjection) {
+  const parser = new GeoJSON();
+
+  // If the response from WMS service contains a CRS (GeoServer), the feature parser
+  // will use it be default to determine the features' projection.
+  // However, if it's empty (QGIS Server), we must tell the parser which projection
+  // should be used for the features and which projection our View is in.
+  const parserOptions = jsonData.crs
+    ? {}
+    : {
+        dataProjection: layerProjection,
+        featureProjection: viewProjection,
+      };
+
+  const parsedFeatures = [];
+  // jsonData will always be a featureCollection, hence we must map over all
+  // features in the collection.
+  jsonData.features.map((jsonFeature) => {
+    // Lets parse the feature...
+    const parsedJsonFeature = parser.readFeature(jsonFeature, parserOptions);
+    // And check if we have an id...
+    if (!parsedJsonFeature.getId()) {
+      // If we don't, we set the id to the layerName, and a random id
+      // so that featureInfo knows when we clicked a new feature in
+      // the same layer.
+      parsedJsonFeature.setId(
+        `${jsonFeature.layerName}.${parsedJsonFeature.ol_uid}`
+      );
+    }
+    // Push the feature to the array of parsed features
+    return parsedFeatures.push(parsedJsonFeature);
+  });
+  // And return it
+  return parsedFeatures;
+}
+
 function getFeaturesFromJson(response, jsonData) {
-  let parsed = new GeoJSON().readFeatures(jsonData);
-  if (parsed.length > 0) {
+  const layerProjection = response.layer.getSource().getProjection();
+  const viewProjection = response.viewProjection;
+  const parsed = readJsonFeatures(jsonData, layerProjection, viewProjection);
+  if (parsed && parsed.length > 0) {
     parsed.forEach((f) => {
       f.layer = response.layer;
     });
+    sortFeatures(response.layer, parsed);
     return parsed;
   } else {
     return [];
@@ -59,10 +187,11 @@ function getFeaturesFromGml(response, text) {
   let wmsGetFeatureInfo = new WMSGetFeatureInfo();
   //let doc = new DOMParser().parseFromString(text, "text/xml");
   let parsed = wmsGetFeatureInfo.readFeatures(text);
-  if (parsed.length > 0) {
+  if (parsed && parsed.length > 0) {
     parsed.forEach((f) => {
       f.layer = response.layer;
     });
+    sortFeatures(response.layer, parsed);
     return parsed;
   } else {
     return [];
@@ -78,6 +207,7 @@ function getFeaturesFromGml(response, text) {
 export function handleClick(evt, map, callback) {
   document.querySelector("body").style.cursor = "progress";
   const promises = [];
+  const viewProjection = map.getView().getProjection().getCode();
   map
     .getLayers()
     .getArray()
@@ -101,6 +231,7 @@ export function handleClick(evt, map, callback) {
             return {
               layer: layer,
               requestResponse: response,
+              viewProjection: viewProjection,
             };
           })
         );
@@ -164,8 +295,9 @@ export function handleClick(evt, map, callback) {
         evt.pixel,
         (feature, layer) => {
           if (
-            layer?.get("queryable") === true ||
-            layer?.get("type") === "searchResultLayer"
+            layer &&
+            (layer.get("queryable") === true ||
+              layer.get("type") === "searchResultLayer")
           ) {
             feature.layer = layer;
             features.push(feature);

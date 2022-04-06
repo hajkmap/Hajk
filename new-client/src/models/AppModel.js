@@ -30,8 +30,42 @@ import VectorLayer from "ol/layer/Vector";
 import VectorSource from "ol/source/Vector";
 import { Icon, Fill, Stroke, Style } from "ol/style.js";
 import SnapHelper from "./SnapHelper";
+import { hfetch } from "utils/FetchWrapper";
 
 class AppModel {
+  /**
+   * Initialize new AddModel
+   * @param object Config
+   * @param Observer observer
+   */
+  constructor(settings) {
+    const { config, globalObserver, refreshMUITheme } = settings;
+    this.map = undefined;
+    this.windows = [];
+    this.plugins = {};
+    this.activeTool = undefined;
+    this.config = config;
+    this.decorateConfig();
+    this.coordinateSystemLoader = new CoordinateSystemLoader(
+      config.mapConfig.projections
+    );
+    this.globalObserver = globalObserver;
+    this.layersFromParams = [];
+    this.cqlFiltersFromParams = {};
+    register(this.coordinateSystemLoader.getProj4());
+    this.hfetch = hfetch;
+    this.refreshMUITheme = refreshMUITheme;
+  }
+
+  decorateConfig() {
+    // .allResolutions should be used when creating layers etc
+    // It will also be used in the print plugin to be able to print in higher resolutions.
+    this.config.mapConfig.map.allResolutions = [
+      ...this.config.mapConfig.map.resolutions,
+      ...(this.config.mapConfig.map.extraPrintResolutions ?? []),
+    ];
+  }
+
   registerWindowPlugin(windowComponent) {
     this.windows.push(windowComponent);
   }
@@ -53,31 +87,13 @@ class AppModel {
   }
 
   /**
-   * Initialize new AddModel
-   * @param object Config
-   * @param Observer observer
-   */
-  constructor(config, globalObserver) {
-    this.map = undefined;
-    this.windows = [];
-    this.plugins = {};
-    this.activeTool = undefined;
-    this.config = config;
-    this.coordinateSystemLoader = new CoordinateSystemLoader(
-      config.mapConfig.projections
-    );
-    this.globalObserver = globalObserver;
-    this.layersFromParams = [];
-    this.cqlFiltersFromParams = {};
-    register(this.coordinateSystemLoader.getProj4());
-  }
-  /**
    * Add plugin to this tools property of loaded plugins.
    * @internal
    */
   addPlugin(plugin) {
     this.plugins[plugin.type] = plugin;
   }
+
   /**
    * Get loaded plugins
    * @returns Array<Plugin>
@@ -87,22 +103,34 @@ class AppModel {
       return [...v, this.plugins[key]];
     }, []);
   }
+
   /**
-   * A plugin may have the 'target' option. Currently we use three
-   * targets: toolbar, left and right. Toolbar means it's a
+   * @summary Helper used by getBothDrawerAndWidgetPlugins(), checks
+   * that the supplied parameter has one of the valid "target" values.
+   *
+   * @param {string} t Target to be tested
+   * @returns {boolean}
+   */
+  #validPluginTarget = (t) => {
+    // FIXME: Why is "hidden" included in this list, anyone?
+    return ["toolbar", "left", "right", "control", "hidden"].includes(t);
+  };
+
+  /**
+   * A plugin may have the 'target' option. Currently we use four
+   * targets: toolbar, control, left and right. Toolbar means it's a
    * plugin that will be visible in Drawer list. Left and right
    * are Widget plugins, that on large displays show on left/right
    * side of the map viewport, while on small screens change its
-   * appearance and end up as Drawer list plugins too.
+   * appearance and end up as Drawer list plugins too. Control buttons
+   * are displayed in the same area as map controls, e.g. zoom buttons.
    *
    * This method filters out those plugins that should go into
-   * the Drawer or Widget list and returns them.
+   * the Drawer, Widget or Control list and returns them.
    *
    * It is used in AppModel to initiate all plugins' Components,
    * so whatever is returned here will result in a render() for
-   * that plugin. That is the reason why 'search' is filtered out
-   * from the results: we render Search plugin separately in App,
-   * and we don't want a second render invoked from here.
+   * that plugin.
    *
    * @returns array of Plugins
    * @memberof AppModel
@@ -110,8 +138,14 @@ class AppModel {
   getBothDrawerAndWidgetPlugins() {
     const r = this.getPlugins()
       .filter((plugin) => {
-        return ["toolbar", "left", "right", "control", "hidden"].includes(
-          plugin.options.target
+        return (
+          // If "options" is an Array (of plugin entities) we must
+          // look for the "target" property inside that array. As soon
+          // as one of the entities has a valid "target" value, we
+          // consider the entire plugin to be valid and included in this list.
+          plugin.options.some?.((p) => this.#validPluginTarget(p.target)) ||
+          // If "options" isn't an array, we can grab the "target" directly.
+          this.#validPluginTarget(plugin.options.target)
         );
       })
       .sort((a, b) => a.sortOrder - b.sortOrder);
@@ -177,6 +211,47 @@ class AppModel {
    */
   createMap() {
     const config = this.translateConfig();
+
+    // Prepare OL interactions options, refer to https://openlayers.org/en/latest/apidoc/module-ol_interaction.html#.defaults.
+    // We use conditional properties to ensure that only existing keys are set. The rest
+    // will fallback to defaults from OL. (The entire interactionsOptions object, as well as all its properties are optional
+    // according to OL documentation, so there's no need to set stuff that won't be needed.)
+    const interactionsOptions = {
+      ...(config.map.hasOwnProperty("altShiftDragRotate") && {
+        altShiftDragRotate: config.map.altShiftDragRotate,
+      }),
+      ...(config.map.hasOwnProperty("onFocusOnly") && {
+        onFocusOnly: config.map.onFocusOnly,
+      }),
+      ...(config.map.hasOwnProperty("doubleClickZoom") && {
+        doubleClickZoom: config.map.doubleClickZoom,
+      }),
+      ...(config.map.hasOwnProperty("keyboard") && {
+        keyboard: config.map.keyboard,
+      }),
+      ...(config.map.hasOwnProperty("mouseWheelZoom") && {
+        mouseWheelZoom: config.map.mouseWheelZoom,
+      }),
+      ...(config.map.hasOwnProperty("shiftDragZoom") && {
+        shiftDragZoom: config.map.shiftDragZoom,
+      }),
+      ...(config.map.hasOwnProperty("dragPan") && {
+        dragPan: config.map.dragPan,
+      }),
+      ...(config.map.hasOwnProperty("pinchRotate") && {
+        pinchRotate: config.map.pinchRotate,
+      }),
+      ...(config.map.hasOwnProperty("pinchZoom") && {
+        pinchZoom: config.map.pinchZoom,
+      }),
+      ...(!Number.isNaN(Number.parseInt(config.map.zoomDelta)) && {
+        zoomDelta: config.map.zoomDelta,
+      }),
+      ...(!Number.isNaN(Number.parseInt(config.map.zoomDuration)) && {
+        zoomDuration: config.map.zoomDuration,
+      }),
+    };
+
     this.map = new Map({
       controls: [
         // new FullScreen({ target: document.getElementById("controls-column") }),
@@ -191,7 +266,7 @@ class AppModel {
         //   })
         // })
       ],
-      interactions: defaultInteractions(),
+      interactions: defaultInteractions(interactionsOptions),
       layers: [],
       target: config.map.target,
       overlays: [],
@@ -199,7 +274,10 @@ class AppModel {
         center: config.map.center,
         extent: config.map.extent.length > 0 ? config.map.extent : undefined, // backend will always write extent as an Array, so basic "config.map.extent || undefined" wouldn't work here
         constrainOnlyCenter: config.map.constrainOnlyCenter, // If true, the extent constraint will only apply to the view center and not the whole extent.
-        constrainResolution: config.map.constrainResolution, // If true, the view will always animate to the closest zoom level after an interaction; false means intermediary zoom levels are allowed.
+        constrainResolution:
+          isMobile && config.map.constrainResolutionMobile !== undefined
+            ? config.map.constrainResolutionMobile
+            : config.map.constrainResolution, // If true, the view will always animate to the closest zoom level after an interaction; false means intermediary zoom levels are allowed.
         maxZoom: config.map.maxZoom || 24,
         minZoom: config.map.minZoom || 0,
         projection: config.map.projection,
@@ -208,9 +286,19 @@ class AppModel {
         zoom: config.map.zoom,
       }),
     });
-    setTimeout(() => {
-      this.map.updateSize();
-    }, 0);
+
+    // Create throttled zoomEnd event
+    let currentZoom = this.map.getView().getZoom();
+
+    this.map.on("moveend", (e) => {
+      // using moveend to create a throttled zoomEnd event
+      // instead of using change:resolution to minimize events being fired.
+      const newZoom = this.map.getView().getZoom();
+      if (currentZoom !== newZoom) {
+        this.globalObserver.publish("core.zoomEnd", { zoom: newZoom });
+        currentZoom = newZoom;
+      }
+    });
 
     // Add Snap Helper to the Map
     this.map.snapHelper = new SnapHelper(this);
@@ -225,7 +313,10 @@ class AppModel {
     // So, we create the Set no matter what:
     this.map.clickLock = new Set();
 
+    // FIXME: Potential miss here: don't we want to register click on search results
     // But we register the Infoclick handler only if the plugin exists in map config:
+    // even if Infoclick plugin is inactive? Currently search won't register clicks in
+    // map without infoclick, which seems as an unnecessary limitation.
     if (config.tools.some((tool) => tool.type === "infoclick")) {
       bindMapClickEvent(this.map, (mapClickDataResult) => {
         // We have to separate features coming from the searchResult-layer
@@ -236,21 +327,27 @@ class AppModel {
             return feature?.layer.get("type") === "searchResultLayer";
           }
         );
+        const infoclickFeatures = mapClickDataResult.features.filter(
+          (feature) => {
+            return feature?.layer.get("type") !== "searchResultLayer";
+          }
+        );
 
-        // If we have features coming from the searchResult-layer, we don't want
-        // to invoke core.mapClick, since this could potentially (say if we have
-        // searchResult-features stacked on wms-features) lead to the user getting
-        // prompted with both the searchResult-featureInfo as well as the "standard"
-        // featureInfo-component.
+        // If there are any results from search layer, send an event about that.
         if (searchResultFeatures.length > 0) {
-          // Clicked features sent to the search-component for display
           this.globalObserver.publish(
             "infoClick.searchResultLayerClick",
-            searchResultFeatures
+            searchResultFeatures // Clicked features sent to the search-component for display
           );
-        } else {
-          // Clicked features sent to the featureInfo-component for display
-          this.globalObserver.publish("infoClick.mapClick", mapClickDataResult);
+        }
+
+        // Do the same for regular infoclick results from WMS layers
+        if (infoclickFeatures.length > 0) {
+          // Note that infoclick.mapClick seems to have a different interface…
+          this.globalObserver.publish("infoClick.mapClick", {
+            ...mapClickDataResult, // as it requires the entire object, not just "features", like infoClick.searchResultLayerClick.
+            features: infoclickFeatures, // Hence, we send everything from mapClickDataResult, but replace the features property.
+          });
         }
       });
     }
@@ -401,6 +498,7 @@ class AppModel {
 
     // Prepare layers
     this.layers = this.flattern(layerSwitcherConfig);
+    // FIXME: Use map instead?
     Object.keys(this.layers)
       .sort((a, b) => this.layers[a].drawOrder - this.layers[b].drawOrder)
       .map((sortedKey) => this.layers[sortedKey])
@@ -414,6 +512,7 @@ class AppModel {
         this.addMapLayer(layer);
       });
 
+    // FIXME: Move to infoClick instead. All other plugins create their own layers.
     if (infoclickConfig !== undefined) {
       this.addHighlightLayer(infoclickConfig.options);
     }
@@ -467,68 +566,55 @@ class AppModel {
         this.highlightSource.addFeature(feature);
         if (window.innerWidth < 600) {
           let geom = feature.getGeometry();
-          this.map.getView().setCenter(this.getCenter(geom.getExtent()));
+          if (geom) {
+            this.map.getView().setCenter(this.getCenter(geom.getExtent()));
+          }
         }
       }
     }
   }
 
   /**
-   * TODO: Obsolete, replaced by new app-wide solution using URL APIs, see #568.
-   * Ensure that this gets removed too.
-   */
-  parseQueryParams() {
-    var o = {};
-    document.location.search
-      .replace(/(^\?)/, "")
-      .split("&")
-      .forEach((param) => {
-        var a = param.split("=");
-        o[a[0]] = a[1];
-      });
-    return o;
-  }
-  /**
    * @summary Merges two objects.
    *
-   * @param {*} a
-   * @param {*} b
-   * @returns {*} a Result of overwritting a with values from b
+   * @param {*} mapConfig
+   * @param {*} urlSearchParams
+   * @returns {*} a Result of overwriting a with values from b
    * @memberof AppModel
    */
-  mergeConfig(a, b) {
+  mergeConfig(mapConfig, urlSearchParams) {
     // clean is used to strip the UI of all elements so we get a super clean viewport back, without any plugins
     const clean =
-      Boolean(b.hasOwnProperty("clean")) &&
-      b.clean !== "false" &&
-      b.clean !== "0";
+      Boolean(urlSearchParams.hasOwnProperty("clean")) &&
+      urlSearchParams.clean !== "false" &&
+      urlSearchParams.clean !== "0";
 
     // f contains our CQL Filters
-    const f = b.f;
+    const f = urlSearchParams.f;
 
     // Merge query params to the map config from JSON
-    let x = parseFloat(b.x),
-      y = parseFloat(b.y),
-      z = parseInt(b.z, 10),
+    let x = parseFloat(urlSearchParams.x),
+      y = parseFloat(urlSearchParams.y),
+      z = parseInt(urlSearchParams.z, 10),
       l = undefined;
-    if (typeof b.l === "string") {
-      l = b.l.split(",");
+    if (typeof urlSearchParams.l === "string") {
+      l = urlSearchParams.l.split(",");
     }
 
     if (Number.isNaN(x)) {
-      x = a.map.center[0];
+      x = mapConfig.map.center[0];
     }
     if (Number.isNaN(y)) {
-      y = a.map.center[1];
+      y = mapConfig.map.center[1];
     }
     if (Number.isNaN(z)) {
-      z = a.map.zoom;
+      z = mapConfig.map.zoom;
     }
 
-    a.map.clean = clean;
-    a.map.center[0] = x;
-    a.map.center[1] = y;
-    a.map.zoom = z;
+    mapConfig.map.clean = clean;
+    mapConfig.map.center[0] = x;
+    mapConfig.map.center[1] = y;
+    mapConfig.map.zoom = z;
 
     if (l) {
       this.layersFromParams = l;
@@ -539,7 +625,7 @@ class AppModel {
       this.cqlFiltersFromParams = JSON.parse(decodeURIComponent(f));
     }
 
-    return a;
+    return mapConfig;
   }
   /**
    * @summary If supplied argument, v, is a string and is longer then 0, return an encoded value of v. Else return undefined.
@@ -552,9 +638,9 @@ class AppModel {
     return typeof v === "string" && v.trim().length > 0 ? v : undefined;
   }
 
-  overrideGlobalSearchConfig(searchTool, data) {
-    var configSpecificSearchLayers = searchTool.options.layers;
-    var searchLayers = data.wfslayers.filter((layer) => {
+  overrideGlobalSearchConfig(searchTool, wfslayers) {
+    const configSpecificSearchLayers = searchTool.options.layers;
+    const searchLayers = wfslayers.filter((layer) => {
       if (configSpecificSearchLayers.find((x) => x.id === layer.id)) {
         return layer;
       } else {
@@ -562,6 +648,18 @@ class AppModel {
       }
     });
     return searchLayers;
+  }
+
+  overrideGlobalEditConfig(editTool, wfstlayers) {
+    const configSpecificEditLayers = editTool.options.activeServices;
+    const editLayers = wfstlayers.filter((layer) => {
+      if (configSpecificEditLayers.find((x) => x.id === layer.id)) {
+        return layer;
+      } else {
+        return undefined;
+      }
+    });
+    return editLayers;
   }
 
   translateConfig() {
@@ -612,27 +710,103 @@ class AppModel {
     }
 
     if (searchTool) {
-      if (searchTool.options.layers === null) {
-        searchTool.options.sources = layers.wfslayers;
+      // Take a look at all available wfslayers in layers repository,
+      // but let the search tool only see those that are specified in searchTool.options
+      const wfslayers = this.overrideGlobalSearchConfig(
+        searchTool,
+        layers.wfslayers
+      );
+
+      // See if admin wants to expose any WMS layers. selectedSources will
+      // in that case be an array that will hold the IDs of corresponding layers
+      // (that can be found in our layers.wmslayers array). In there, a properly
+      // configured WMS layer that is to be searchable will have certain search-related
+      // settings active (such as name of the geometry column or URL to the WFS service).
+      const wmslayers = searchTool.options.selectedSources?.flatMap(
+        (wmslayerId) => {
+          // Find the corresponding layer
+          const layer = layers.wmslayers.find((l) => l.id === wmslayerId);
+
+          // Look into the layersInfo array - it will contain sublayers. We must
+          // expose each one of them as a WFS service.
+          return layer.layersInfo.map((sl) => {
+            return {
+              id: sl.id,
+              pid: layer.id, // Relevant for group layers: will hold the actual OL layer name, not only current sublayer
+              caption: sl.caption,
+              url: sl.searchUrl || layer.url,
+              layers: [sl.id],
+              searchFields:
+                typeof sl.searchPropertyName === "string"
+                  ? sl.searchPropertyName.split(",")
+                  : [],
+              infobox: sl.infobox || "",
+              aliasDict: "",
+              displayFields:
+                typeof sl.searchDisplayName === "string"
+                  ? sl.searchDisplayName.split(",")
+                  : [],
+              shortDisplayFields:
+                typeof sl.searchShortDisplayName === "string"
+                  ? sl.searchShortDisplayName.split(",")
+                  : [],
+              geometryField: sl.searchGeometryField || "geom",
+              outputFormat: sl.searchOutputFormat || "GML3",
+              serverType: layer.serverType || "geoserver",
+            };
+          });
+        }
+      );
+
+      // Spread the WMS search layers onto the array with WFS search sources,
+      // from now on they're equal to our code.
+      Array.isArray(wmslayers) && wfslayers.push(...wmslayers);
+
+      searchTool.options.sources = wfslayers;
+    }
+
+    // This is for backwards compatibility prior to adding locking WFST edit layers with AD.
+    // This code handles if activeServices does not have an object with "id", "visibleForGroups"
+    if (editTool) {
+      if (editTool.options.activeServices === null) {
+        editTool.options.sources = [];
       } else {
         if (
-          searchTool.options.layers &&
-          searchTool.options.layers.length !== 0
+          editTool.options.activeServices &&
+          editTool.options.activeServices.length !== 0
         ) {
-          let wfslayers = this.overrideGlobalSearchConfig(searchTool, layers);
-          searchTool.options.sources = wfslayers;
-          layers.wfslayers = wfslayers;
+          if (
+            typeof editTool.options.activeServices[0].visibleForGroups ===
+            "undefined"
+          ) {
+            // If activeService does not have an object with "id", "visibleForGroups", add it
+            let as = [];
+            for (let i = 0; i < editTool.options.activeServices.length; i++) {
+              let service = {
+                id: editTool.options.activeServices[i],
+                visibleForGroups: [],
+              };
+              as.push(service);
+            }
+            editTool.options.activeServices = as;
+          }
+
+          let wfstlayers = this.overrideGlobalEditConfig(
+            editTool,
+            layers.wfstlayers
+          );
+          editTool.options.sources = wfstlayers;
+          layers.wfstlayers = wfstlayers;
         } else {
-          searchTool.options.sources = layers.wfslayers;
+          editTool.options.sources = [];
         }
       }
     }
 
-    if (editTool) {
-      editTool.options.sources = layers.wfstlayers;
-    }
-
-    return this.mergeConfig(this.config.mapConfig, this.parseQueryParams());
+    return this.mergeConfig(
+      this.config.mapConfig,
+      Object.fromEntries(new URLSearchParams(document.location.search))
+    );
   }
 }
 

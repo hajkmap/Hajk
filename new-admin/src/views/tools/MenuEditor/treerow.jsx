@@ -14,7 +14,6 @@ import WarningModal from "./warningModal.jsx";
 const getTextField = (value, onChangeFunction, variant) => {
   return (
     <TextField
-      id="icon-picker"
       label={""}
       type="icon"
       variant={variant}
@@ -27,14 +26,14 @@ const getTextField = (value, onChangeFunction, variant) => {
 const styles = () => ({
   treeRowRoot: {
     border: "1px solid rgba(153,164,161,0.5)",
-    borderRadius: "8px"
-  }
+    borderRadius: "8px",
+  },
 });
 
 class TreeRow extends React.Component {
   state = {
     menuItemTitle: this.props.menuItem.title,
-    showWarning: false
+    showWarning: false,
   };
 
   dynamicallyImportIconFonts = () => {
@@ -42,7 +41,7 @@ class TreeRow extends React.Component {
     return <link rel="stylesheet" href={dynamicImportUrls.iconFonts} />;
   };
 
-  getIcon = icon => {
+  getIcon = (icon) => {
     return <Icon>{icon.materialUiIconName}</Icon>;
   };
 
@@ -52,13 +51,8 @@ class TreeRow extends React.Component {
   };
 
   renderConnectionSelect = () => {
-    const {
-      model,
-      treeNodeId,
-      updateMenuItem,
-      availableDocuments,
-      menuItem
-    } = this.props;
+    const { model, treeNodeId, updateMenuItem, availableDocuments, menuItem } =
+      this.props;
 
     return (
       <MenuConnectionSelector
@@ -94,9 +88,9 @@ class TreeRow extends React.Component {
     );
   };
 
-  openSettingsMenu = e => {
+  openSettingsMenu = (e) => {
     this.setState({
-      settingsMenuAnchorEl: e.currentTarget
+      settingsMenuAnchorEl: e.currentTarget,
     });
   };
 
@@ -135,7 +129,7 @@ class TreeRow extends React.Component {
   renderMenuTitle = () => {
     return getTextField(
       this.state.menuItemTitle,
-      e => {
+      (e) => {
         this.setState({ menuItemTitle: e.target.value });
       },
       "standard"

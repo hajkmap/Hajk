@@ -7,6 +7,7 @@ import VectorSource from "ol/source/Vector";
 import { all as strategyAll } from "ol/loadingstrategy";
 import { Draw } from "ol/interaction";
 import X2JS from "x2js";
+import { hfetch } from "utils/FetchWrapper";
 
 class CollectorModel {
   constructor(settings) {
@@ -26,6 +27,7 @@ class CollectorModel {
     this.filty = false;
     this.saving = false;
     this.geometryName = "geom";
+    this.wkt = settings.options.wkt ?? false;
     this.serviceConfig = settings.options.serviceConfig;
     if (this.serviceConfig) {
       this.setFormValuesFromConfig();
@@ -135,7 +137,7 @@ class CollectorModel {
 
     if (payload && this.saving === false) {
       this.saving = true;
-      fetch(src.url, {
+      hfetch(src.url, {
         method: "POST",
         body: payload,
         credentials: "same-origin",
@@ -334,6 +336,7 @@ class CollectorModel {
     });
 
     this.layer = new Vector({
+      name: "pluginCollector",
       source: this.vectorSource,
       style: this.getVectorStyle(),
     });
@@ -359,7 +362,11 @@ class CollectorModel {
     });
 
     this.draw.on("drawend", (event) => {
-      this.vectorSource.clear();
+      // WKT supports insertion of multiple features and clear should therefore
+      // not be executed in this case
+      if (!this.wkt) {
+        this.vectorSource.clear();
+      }
       event.feature.modification = "added";
     });
     this.map.addInteraction(this.draw);

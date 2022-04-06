@@ -1,7 +1,8 @@
-﻿// #define USE_REF_TO_EDP // Uncomment to enable EDP integration
+﻿//#define USE_REF_TO_EDP // Uncomment to enable EDP integration
 
 using System;
 using System.Collections.Generic;
+using log4net;
 
 #if USE_REF_TO_EDP
 using EDP.GIS.Kubb.Connector.EDP;
@@ -11,9 +12,11 @@ using EDP.GIS.Kubb.Connector.Common.Entities;
 
 /// <summary>
 /// Denna klass implementerar kommunikationen med EDP. 
-/// Vill man kompilera backend utan några beroenden alls till EDP gör följande:
-/// 1. Kommentera raden #define USE_REF_TO_EDP överst i denna fil
-/// 2. Man kan nu även ta bort referenserna till:
+/// Vill man kompilera backend med kommuniaktion till EDP gör följande:
+/// 1. Ta bort kommentarstecknen på raden //#define USE_REF_TO_EDP överst i denna fil
+/// 
+/// Skulle man ha problem med att NuGet inte kan hämta referenserna, trots att man har kommenterat översta raden,
+/// kan man ta bort referenserna till:
 ///    - EDP.GIS.Kubb.Connector.Common
 ///    - EDP.GIS.Kubb.Connector.EDP
 ///    - Microsoft.AspNet.SignalR.Client
@@ -40,6 +43,10 @@ namespace EdpConn
         {
             _implEdpConnector = new ImplEdpConnector(user, organisation, client, serverUrl);
         }
+        public void Disconnect()
+        {
+            _implEdpConnector.Disconnect();
+        }
 
         public void SetRealEstateIdentifiersToSend(List<RealEstateIdentifierPublic> newList)
         {
@@ -62,10 +69,19 @@ namespace EdpConn
 
     class ImplEdpConnector : EdpConnector
     {
+        ILog _log = LogManager.GetLogger(typeof(ImplEdpConnector));
+        string _user;
+
         public ImplEdpConnector(string user, string organisation, string client, string serverUrl)
             : base(new HubConnectionFactory(), new HubProxyFactory(), user, organisation, client, serverUrl)
         {
+            _user = user;
             OpenConnection();
+        }
+
+        public void Disconnect()
+        {
+            this.HubConnection.Stop();
         }
 
         public List<RealEstateIdentifier> RealEstateIdentifiersToSend = null;
@@ -90,6 +106,7 @@ namespace EdpConn
 
         public override void HandleAskingForRealEstateIdentifiers()
         {
+            _log.DebugFormat("ImplEdpConnector.HandleAskingForRealEstateIdentifiers called for user '{0}'.", _user);
             if (RealEstateIdentifiersToSend != null)
                 SendRealEstateIdentifiers(RealEstateIdentifiersToSend);
         }
@@ -106,6 +123,8 @@ namespace EdpConn
         public ImplEdpConnectorPublic(string user, string organisation, string client, string serverUrl)
         {
         }
+
+        public void Disconnect() { }
 
         public void SetRealEstateIdentifiersToSend(List<RealEstateIdentifierPublic> newList)
         {

@@ -1,39 +1,18 @@
-// Copyright (C) 2016 Göteborgs Stad
-//
-// Denna programvara är fri mjukvara: den är tillåten att distribuera och modifiera
-// under villkoren för licensen CC-BY-NC-SA 4.0.
-//
-// This program is free software: you can redistribute it and/or modify
-// it under the terms of the CC-BY-NC-SA 4.0 licence.
-//
-// http://creativecommons.org/licenses/by-nc-sa/4.0/
-//
-// Det är fritt att dela och anpassa programvaran för valfritt syfte
-// med förbehåll att följande villkor följs:
-// * Copyright till upphovsmannen inte modifieras.
-// * Programvaran används i icke-kommersiellt syfte.
-// * Licenstypen inte modifieras.
-//
-// Den här programvaran är öppen i syfte att den skall vara till nytta för andra
-// men UTAN NÅGRA GARANTIER; även utan underförstådd garanti för
-// SÄLJBARHET eller LÄMPLIGHET FÖR ETT VISST SYFTE.
-//
-// https://github.com/hajkmap/Hajk
-
 import X2JS from "x2js";
 import { Model } from "backbone";
 import WMSCapabilities from "ol/format/WMSCapabilities";
 import $ from "jquery";
 import { prepareProxyUrl } from "../utils/ProxyHelper";
+import { hfetch } from "utils/FetchWrapper";
 
 var manager = Model.extend({
   defaults: {
     layers: [],
     mapConfigs: [],
-    mapsWithLayers: []
+    mapsWithLayers: [],
   },
 
-  fetchAllMapConfigsToModel: function(callback = function devNull() {}) {
+  fetchAllMapConfigsToModel: function (callback = function devNull() {}) {
     $.ajax({
       url: prepareProxyUrl(
         this.get("config").url_map_list,
@@ -41,7 +20,7 @@ var manager = Model.extend({
       ),
       method: "GET",
       contentType: "application/json",
-      success: data => {
+      success: (data) => {
         // Save all mapConfig names returned, we'll need them layer
         this.set({ mapConfigs: data });
 
@@ -51,11 +30,11 @@ var manager = Model.extend({
             this.get("config").url_map + "/" + data[i],
             this.get("config").url_proxy
           );
-          fetch(url).then(res => {
+          hfetch(url).then((res) => {
             // JSONify, filter just for one tool (layerswitcher), and then use first element (it's an array…)
-            res.json().then(d => {
+            res.json().then((d) => {
               let layerswitcherConfig = d.tools.filter(
-                tool => tool.type === "layerswitcher"
+                (tool) => tool.type === "layerswitcher"
               )[0];
 
               // Created washed object that contains map title, baselayers and groups with layers.
@@ -65,8 +44,8 @@ var manager = Model.extend({
                 mapTitle: d.map.title,
                 layers: {
                   baseLayers: layerswitcherConfig.options.baselayers,
-                  groups: layerswitcherConfig.options.groups
-                }
+                  groups: layerswitcherConfig.options.groups,
+                },
               };
 
               // Push into model for later use
@@ -77,10 +56,10 @@ var manager = Model.extend({
 
         callback(data);
       },
-      error: message => {
+      error: (message) => {
         console.error(message);
         callback(message);
-      }
+      },
     });
   },
 
@@ -89,7 +68,7 @@ var manager = Model.extend({
     return isNaN(parsed) ? date : new Date(parsed).toLocaleString();
   },
 
-  getUrl: function(layer) {
+  getUrl: function (layer) {
     var t = layer["type"];
     delete layer["type"];
     switch (t) {
@@ -106,20 +85,20 @@ var manager = Model.extend({
     }
   },
 
-  getConfig: function(url) {
+  getConfig: function (url) {
     $.ajax(prepareProxyUrl(url, this.get("config").url_proxy), {
-      success: data => {
+      success: (data) => {
         var layers = [];
-        data.wmslayers.forEach(l => {
+        data.wmslayers.forEach((l) => {
           l.type = "WMS";
         });
-        data.wmtslayers.forEach(l => {
+        data.wmtslayers.forEach((l) => {
           l.type = "WMTS";
         });
-        data.arcgislayers.forEach(l => {
+        data.arcgislayers.forEach((l) => {
           l.type = "ArcGIS";
         });
-        data.vectorlayers.forEach(l => {
+        data.vectorlayers.forEach((l) => {
           l.type = "Vector";
         });
 
@@ -134,29 +113,27 @@ var manager = Model.extend({
           return d1 === d2 ? 0 : d1 < d2 ? 1 : -1;
         });
         this.set("layers", layers);
-      }
+      },
     });
   },
 
-  getLegend: function(state, callback) {
+  getLegend: function (state, callback) {
     $.ajax({
       url: state.url + "/legend",
       method: "GET",
       dataType: "json",
       data: {
-        f: "json"
+        f: "json",
       },
-      success: rsp => {
+      success: (rsp) => {
         var legends = [],
-          addedLayers = state.addedLayers.map(layer => layer.id);
+          addedLayers = state.addedLayers.map((layer) => layer.id);
 
-        rsp.layers.forEach(legendLayer => {
+        rsp.layers.forEach((legendLayer) => {
           if (addedLayers.indexOf(legendLayer.layerId) !== -1) {
-            legendLayer.legend.forEach(legend => {
+            legendLayer.legend.forEach((legend) => {
               legends.push(
-                `data:${legend.contentType};base64,${legend.imageData}&${
-                  legendLayer.layerName
-                }`
+                `data:${legend.contentType};base64,${legend.imageData}&${legendLayer.layerName}`
               );
             });
           }
@@ -166,31 +143,30 @@ var manager = Model.extend({
       },
       error: () => {
         callback(false);
-      }
+      },
     });
   },
 
-  addLayer: function(layer, callback) {
+  addLayer: function (layer, callback) {
     var url = this.getUrl(layer);
-    fetch(url, {
+    hfetch(url, {
       method: "POST",
       cache: "no-cache",
-      credentials: "same-origin",
       headers: {
         Accept: "application/json",
-        "Content-Type": "application/json"
+        "Content-Type": "application/json",
       },
-      body: JSON.stringify(layer)
+      body: JSON.stringify(layer),
     })
-      .then(response => {
+      .then((response) => {
         callback(true);
       })
-      .catch(error => {
+      .catch((error) => {
         callback(false);
       });
   },
 
-  updateLayer: function(layer, callback) {
+  updateLayer: function (layer, callback) {
     var url = this.getUrl(layer);
     $.ajax({
       url: url,
@@ -202,11 +178,11 @@ var manager = Model.extend({
       },
       error: () => {
         callback(false);
-      }
+      },
     });
   },
 
-  removeLayer: function(layer, callback) {
+  removeLayer: function (layer, callback) {
     var url = this.getUrl(layer);
     $.ajax({
       url: url + "/" + layer.id,
@@ -217,32 +193,36 @@ var manager = Model.extend({
       },
       error: () => {
         callback(false);
-      }
+      },
     });
   },
 
-  getWFSLayerDescription: function(url, layer, callback) {
+  getWFSLayerDescription: function (url, layer, callback) {
     url = prepareProxyUrl(url, this.get("config").url_proxy);
     $.ajax(url, {
       data: {
+        service: "WFS",
         request: "describeFeatureType",
-        typename: layer
+        typename: layer,
       },
-      success: data => {
+      success: (data) => {
         var parser = new X2JS(),
           xmlstr = data.xml
             ? data.xml
             : new XMLSerializer().serializeToString(data),
           apa = parser.xml2js(xmlstr);
         try {
-          var props = apa.schema.complexType.complexContent.extension.sequence.element.map(
-            a => {
-              return {
-                name: a._name,
-                localType: a._type ? a._type.replace(a.__prefix + ":", "") : ""
-              };
-            }
-          );
+          var props =
+            apa.schema.complexType.complexContent.extension.sequence.element.map(
+              (a) => {
+                return {
+                  name: a._name,
+                  localType: a._type
+                    ? a._type.replace(a.__prefix + ":", "")
+                    : "",
+                };
+              }
+            );
           if (props) {
             callback(props);
           } else {
@@ -251,11 +231,11 @@ var manager = Model.extend({
         } catch (e) {
           callback(false);
         }
-      }
+      },
     });
   },
 
-  parseWFSCapabilitesTypes: function(data) {
+  parseWFSCapabilitesTypes: function (data) {
     var types = [],
       typeElements = $(data).find("FeatureType");
 
@@ -270,16 +250,10 @@ var manager = Model.extend({
         crs = "";
 
       if ($(featureType).find("DefaultCRS").length > 0) {
-        crs = $(featureType)
-          .find("DefaultCRS")
-          .first()
-          .get(0).textContent;
+        crs = $(featureType).find("DefaultCRS").first().get(0).textContent;
       }
       if ($(featureType).find("DefaultSRS").length > 0) {
-        crs = $(featureType)
-          .find("DefaultSRS")
-          .first()
-          .get(0).textContent;
+        crs = $(featureType).find("DefaultSRS").first().get(0).textContent;
       }
       if ($(featureType).find("wfs\\:DefaultCRS").length > 0) {
         crs = $(featureType)
@@ -298,7 +272,7 @@ var manager = Model.extend({
       }
 
       if (Array.isArray(crs)) {
-        crs.forEach(part => {
+        crs.forEach((part) => {
           if (/EPSG/.test(part)) {
             projection += part + ":";
           }
@@ -316,46 +290,34 @@ var manager = Model.extend({
       }
 
       if ($(featureType).find("Name").length > 0) {
-        name = $(featureType)
-          .find("Name")
-          .first()
-          .get(0).textContent;
+        name = $(featureType).find("Name").first().get(0).textContent;
       }
       if ($(featureType).find("wfs\\:Name").length > 0) {
-        name = $(featureType)
-          .find("wfs\\:Name")
-          .first()
-          .get(0).textContent;
+        name = $(featureType).find("wfs\\:Name").first().get(0).textContent;
       }
       if ($(featureType).find("Title").length > 0) {
-        title = $(featureType)
-          .find("Title")
-          .first()
-          .get(0).textContent;
+        title = $(featureType).find("Title").first().get(0).textContent;
       }
       if ($(featureType).find("wfs\\:Title").length > 0) {
-        title = $(featureType)
-          .find("wfs\\:Title")
-          .first()
-          .get(0).textContent;
+        title = $(featureType).find("wfs\\:Title").first().get(0).textContent;
       }
 
       types.push({
         name: name,
         title: title,
-        projection: projection
+        projection: projection,
       });
     });
     return types;
   },
 
-  getWFSCapabilities: function(url, callback) {
+  getWFSCapabilities: function (url, callback) {
     $.ajax(prepareProxyUrl(url, this.get("config").url_proxy), {
       data: {
         service: "WFS",
-        request: "GetCapabilities"
+        request: "GetCapabilities",
       },
-      success: data => {
+      success: (data) => {
         var response = this.parseWFSCapabilitesTypes(data);
 
         if (/MapServer\/WFSServer$/.test(url)) {
@@ -364,7 +326,7 @@ var manager = Model.extend({
             .replace("WFSServer", "legend?f=pjson");
           $.ajax(prepareProxyUrl(url, this.get("config").url_proxy), {
             dataType: "json",
-            success: legend => {
+            success: (legend) => {
               if (legend && legend.layers && legend.layers[0]) {
                 if (legend.layers[0].legend[0]) {
                   response.legend =
@@ -376,49 +338,49 @@ var manager = Model.extend({
             },
             error: () => {
               callback(false);
-            }
+            },
           });
         } else {
           callback(response);
         }
       },
-      error: data => {
+      error: (data) => {
         callback(false);
-      }
+      },
     });
   },
 
-  getArcGISLayerDescription: function(url, layer, callback) {
+  getArcGISLayerDescription: function (url, layer, callback) {
     url = prepareProxyUrl(url, this.get("config").url_proxy);
     url += "/" + layer.id;
 
     $.ajax(url, {
       dataType: "json",
       data: {
-        f: "json"
+        f: "json",
       },
-      success: data => {
+      success: (data) => {
         callback(data);
-      }
+      },
     });
   },
 
-  getArcGISCapabilities: function(url, callback) {
+  getArcGISCapabilities: function (url, callback) {
     $.ajax(prepareProxyUrl(url, this.get("config").url_proxy), {
       dataType: "json",
       data: {
-        f: "json"
+        f: "json",
       },
-      success: data => {
+      success: (data) => {
         callback(data);
       },
-      error: data => {
+      error: (data) => {
         callback(false);
-      }
+      },
     });
   },
 
-  getAllWMSCapabilities: function(url) {
+  getAllWMSCapabilities: function (url) {
     var promises = [];
 
     var xmlParser = new X2JS({
@@ -427,27 +389,27 @@ var manager = Model.extend({
         "WMS_Capabilities.Capability.Layer.Layer",
         "WMT_MS_Capabilities.Capability.Layer.Layer",
         "WMS_Capabilities.Capability.Layer.Layer.Style",
-        "WMT_MS_Capabilities.Capability.Layer.Layer.Style"
-      ]
+        "WMT_MS_Capabilities.Capability.Layer.Layer.Style",
+      ],
     });
 
     var versions = ["1.3.0", "1.1.1", "1.1.0", "1.0.0"];
 
-    versions.forEach(version => {
+    versions.forEach((version) => {
       promises.push(
         $.ajax(prepareProxyUrl(url, this.get("config").url_proxy), {
           data: {
             service: "WMS",
             request: "GetCapabilities",
-            version
-          }
+            version,
+          },
         })
       );
     });
 
-    return Promise.all(promises).then(values => {
+    return Promise.all(promises).then((values) => {
       return values
-        .map(value => {
+        .map((value) => {
           /* 
                     Openlayers can not parse all attributes in GetCapabilities response with WMS lower than 1.3.0, see Github issue.
                     https://github.com/openlayers/openlayers/issues/5476
@@ -468,18 +430,19 @@ var manager = Model.extend({
           return json[capabilitiesKey];
         })
         .filter(
-          (wms, i, self) => self.findIndex(w => w.version === wms.version) === i
+          (wms, i, self) =>
+            self.findIndex((w) => w.version === wms.version) === i
         );
     });
   },
 
-  getWMSCapabilities: function(url, callback) {
+  getWMSCapabilities: function (url, callback) {
     $.ajax(prepareProxyUrl(url, this.get("config").url_proxy), {
       data: {
         service: "WMS",
-        request: "GetCapabilities"
+        request: "GetCapabilities",
       },
-      success: data => {
+      success: (data) => {
         try {
           var response = new WMSCapabilities().read(data);
           callback(response);
@@ -488,11 +451,11 @@ var manager = Model.extend({
           callback(false, e);
         }
       },
-      error: data => {
+      error: (data) => {
         callback(false);
-      }
+      },
     });
-  }
+  },
 });
 
 export default manager;

@@ -7,37 +7,37 @@ import CancelIcon from "@material-ui/icons/Cancel";
 import { withStyles } from "@material-ui/core/styles";
 import { green, blue } from "@material-ui/core/colors";
 
-const ColorButtonGreen = withStyles(theme => ({
+const ColorButtonGreen = withStyles((theme) => ({
   root: {
     color: theme.palette.getContrastText(green[700]),
     backgroundColor: green[500],
     "&:hover": {
-      backgroundColor: green[700]
-    }
-  }
+      backgroundColor: green[700],
+    },
+  },
 }))(Button);
 
-const ColorButtonBlue = withStyles(theme => ({
+const ColorButtonBlue = withStyles((theme) => ({
   root: {
     color: theme.palette.getContrastText(blue[500]),
     backgroundColor: blue[500],
     "&:hover": {
-      backgroundColor: blue[700]
-    }
-  }
+      backgroundColor: blue[700],
+    },
+  },
 }))(Button);
 class ChapterAdder extends Component {
   constructor(props) {
     super(props);
     this.state = {
       title: "",
-      inputVisible: false
+      inputVisible: false,
     };
   }
 
   toggleInputVisibility() {
     this.setState({
-      inputVisible: !this.state.inputVisible
+      inputVisible: !this.state.inputVisible,
     });
   }
 
@@ -47,7 +47,7 @@ class ChapterAdder extends Component {
       this.cancel();
     } else {
       this.setState({
-        invalid: true
+        invalid: true,
       });
     }
   }
@@ -56,14 +56,14 @@ class ChapterAdder extends Component {
     this.setState({
       title: "",
       inputVisible: false,
-      invalid: false
+      invalid: false,
     });
   }
 
   setTitle(e) {
     this.setState({
       title: e.target.value,
-      invalid: e.target.value.length === 0
+      invalid: e.target.value.length === 0,
     });
   }
 
@@ -85,12 +85,12 @@ class ChapterAdder extends Component {
             name="chapter-title"
             ref="input"
             style={style}
-            onKeyPress={e => {
+            onKeyPress={(e) => {
               if (e.key === "Enter") {
                 this.addChapter();
               }
             }}
-            onChange={e => {
+            onChange={(e) => {
               this.setTitle(e);
             }}
           />

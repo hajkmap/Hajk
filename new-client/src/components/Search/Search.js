@@ -12,6 +12,8 @@ import MapViewModel from "./MapViewModel";
 import KmlExport from "./utils/KmlExport";
 import XLSXExport from "./utils/XLSXExport";
 import { encodeCommas, decodeCommas } from "../../utils/StringCommaCoder";
+import LocalStorageHelper from "../../utils/LocalStorageHelper";
+import { functionalOk as functionalCookieOk } from "models/Cookie";
 
 const styles = () => ({
   inputRoot: {
@@ -20,6 +22,18 @@ const styles = () => ({
 });
 
 class Search extends React.PureComponent {
+  defaultSearchOptions = {
+    enableLabelOnHighlight: true,
+    searchInVisibleLayers: false,
+    wildcardAtStart: false,
+    wildcardAtEnd: true,
+    matchCase: false,
+    activeSpatialFilter: "intersects",
+    maxResultsPerDataset: !isNaN(this.props.options.maxResultsPerDataset)
+      ? this.props.options.maxResultsPerDataset
+      : 100,
+  };
+
   state = {
     searchImplementedPluginsLoaded: false,
     searchSources: [],
@@ -30,15 +44,10 @@ class Search extends React.PureComponent {
     searchActive: "",
     autoCompleteOpen: false,
     loading: false,
-    searchOptions: {
-      wildcardAtStart: false,
-      wildcardAtEnd: true,
-      matchCase: false,
-      activeSpatialFilter: "intersects",
-      maxResultsPerDataset: !isNaN(this.props.options.maxResultsPerDataset)
-        ? this.props.options.maxResultsPerDataset
-        : 100,
-    },
+    searchOptions: LocalStorageHelper.get(
+      "searchOptions",
+      this.defaultSearchOptions
+    ),
     failedWFSFetchMessage: "",
     resultPanelCollapsed: false,
   };
@@ -86,7 +95,7 @@ class Search extends React.PureComponent {
       onClickEventName: "search.spatialSearchActivated",
     },
     {
-      name: "Sök i området",
+      name: "Sök inom vyn",
       icon: <Crop54Icon />,
       type: "Extent",
       enabled: this.props.options.enableExtentSearch ?? true,
@@ -106,6 +115,7 @@ class Search extends React.PureComponent {
     super(props);
     this.map = props.map;
     this.searchModel = props.app.appModel.searchModel;
+    this.globalObserver = props.app.globalObserver;
     this.initMapViewModel();
     this.initExportHandlers();
     this.bindSubscriptions();
@@ -117,7 +127,12 @@ class Search extends React.PureComponent {
   initMapViewModel = () => {
     const { app } = this.props;
     this.mapViewModel = new MapViewModel({
-      options: this.props.options,
+      // Init the MapViewModel using merged options from both
+      // Admin UI ("options") and user's setting ("this.state.options")
+      options: {
+        ...this.props.options,
+        ...this.state.searchOptions,
+      },
       localObserver: this.localObserver,
       map: this.map,
       app: app,
@@ -158,7 +173,7 @@ class Search extends React.PureComponent {
         );
       } else if (type === "Polygon") {
         this.snackbarKey = this.props.enqueueSnackbar(
-          "Tryck en gång i kartan för varje nod i polygonen.",
+          "Tryck en gång i kartan för varje nod i polygonen. Genomför sökningen genom att trycka på den sista noden en gång till.",
           {
             variant: "information",
             anchorOrigin: { vertical: "bottom", horizontal: "center" },
@@ -263,7 +278,8 @@ class Search extends React.PureComponent {
   //Promise must be resolved into object with two methods getResults and getFunctionality
 
   getSearchImplementedPlugins = () => {
-    const pluginsConfToUseSearchInterface = this.getPluginsConfToUseSearchInterface();
+    const pluginsConfToUseSearchInterface =
+      this.getPluginsConfToUseSearchInterface();
     const searchBoundPlugins = this.tryBindSearchMethods(
       pluginsConfToUseSearchInterface
     );
@@ -294,24 +310,19 @@ class Search extends React.PureComponent {
   };
 
   componentDidMount = () => {
-    const { app } = this.props;
-    app.globalObserver.subscribe("core.appLoaded", () => {
-      this.bindSearchImplementedPlugins();
-    });
-  };
-
-  bindSearchImplementedPlugins = () => {
-    this.getSearchImplementedPlugins().then((searchImplementedPlugins) => {
-      this.setState(
-        {
-          searchImplementedPluginsLoaded: true,
-          searchImplementedPlugins: searchImplementedPlugins,
-          searchTools: this.getSearchTools(searchImplementedPlugins),
-        },
-        () => {
-          this.handlePotentialUrlQuerySearch();
-        }
-      );
+    this.globalObserver.subscribe("core.appLoaded", () => {
+      this.getSearchImplementedPlugins().then((searchImplementedPlugins) => {
+        this.setState(
+          {
+            searchImplementedPluginsLoaded: true,
+            searchImplementedPlugins: searchImplementedPlugins,
+            searchTools: this.getSearchTools(searchImplementedPlugins),
+          },
+          () => {
+            this.handlePotentialUrlQuerySearch();
+          }
+        );
+      });
     });
   };
 
@@ -414,16 +425,41 @@ class Search extends React.PureComponent {
           }
         );
       }, this.delayBeforeAutoSearch);
+
+      // Announce the input change, so other plugins can be notified
+      this.globalObserver.publish("search.searchPhraseChanged", searchString);
     }
   };
 
   updateSearchOptions = (searchOptions) => {
-    this.setState(searchOptions);
+    // Ensure that the latest search options are in state
+    this.setState({ searchOptions });
+
+    // We need to re-initiate the FeatureStyle only if some specific
+    // settings have changed (those that effect the style that renders
+    // result features to the OL searchResults source).
+    const isStyleRefreshNeeded =
+      searchOptions.enableLabelOnHighlight !==
+      this.state.searchOptions.enableLabelOnHighlight;
+
+    // Refresh the Feature Style, if needed
+    isStyleRefreshNeeded &&
+      this.mapViewModel.refreshFeatureStyle({
+        enableLabelOnHighlight: searchOptions.enableLabelOnHighlight,
+      });
+
+    // If functional cookies are allowed, we'll save the current settings
+    // to local storage, so it can be retrieved on app reload.
+    if (functionalCookieOk()) {
+      LocalStorageHelper.set("searchOptions", searchOptions);
+    }
   };
 
   handleOnClickOrKeyboardSearch = () => {
     if (this.hasEnoughCharsForSearch()) {
       this.setState({ searchFromAutoComplete: false }, () => {
+        // Get rid of the on-screen keyboard on mobile devices
+        document.activeElement.blur();
         this.doSearch();
       });
     }
@@ -444,9 +480,11 @@ class Search extends React.PureComponent {
   };
 
   getAutoCompleteFetchSettings = () => {
+    const { options } = this.props;
     let fetchSettings = { ...this.searchModel.getSearchOptions() }; //Getting default-options when fetching auto
     fetchSettings = {
       ...fetchSettings,
+      wildcardAtStart: options.autocompleteWildcardAtStart || false,
       getPossibleCombinations: true,
       initiator: "autocomplete",
     };
@@ -483,10 +521,10 @@ class Search extends React.PureComponent {
           const searchFieldMatch = RegExp(
             `^${this.escapeRegExp(word)}\\W*`,
             "i"
-          ).test(feature.properties[sf] || "");
+          ).test(feature.get(sf) || "");
           // If we find a match, and the matched searchField
           // returns a feature prop which is not undefined...
-          if (feature.properties[sf]) {
+          if (feature.get(sf)) {
             // we add the searchField to the array of matched
             // searchFields.
             if (searchFieldMatch) {
@@ -500,7 +538,7 @@ class Search extends React.PureComponent {
     // they have been matched or not. Therefore we get the searchFields
     // that have not been matched)...
     const unMatchedSearchFields = searchFields.filter(
-      (sf) => !matchedSearchFields.includes(sf) && feature.properties[sf]
+      (sf) => !matchedSearchFields.includes(sf) && feature.get(sf)
     );
     // And concatenate the matched searchFields with the unMatched searchFields.
     return matchedSearchFields.concat(unMatchedSearchFields);
@@ -509,13 +547,18 @@ class Search extends React.PureComponent {
   getSortedAutocompleteEntry = (feature) => {
     let autocompleteEntry = "";
     feature.searchFieldOrder.map((sf, index) => {
+      const featureProperty = feature.get(sf);
+      const propertyAsString =
+        typeof featureProperty === "string"
+          ? featureProperty
+          : featureProperty.toString();
       if (index === feature.searchFieldOrder.length - 1) {
         return (autocompleteEntry = autocompleteEntry.concat(
-          encodeCommas(feature.properties[sf])
+          encodeCommas(propertyAsString)
         ));
       } else {
         return (autocompleteEntry = autocompleteEntry.concat(
-          `${encodeCommas(feature.properties[sf])}, `
+          `${encodeCommas(propertyAsString)}, `
         ));
       }
     });
@@ -530,7 +573,7 @@ class Search extends React.PureComponent {
       return {
         dataset,
         autocompleteEntry,
-        origin: origin,
+        origin,
       };
     });
   };
@@ -553,7 +596,12 @@ class Search extends React.PureComponent {
     const resultsPerDataset = searchResults.featureCollections.map(
       (featureCollection) => {
         this.sortSearchFieldsOnFeatures(featureCollection, wordsInTextField);
-        return this.getAutocompleteDataset(featureCollection);
+        // The final filter is to ensure that we get rid of objects that lack
+        // the 'autocompleteEntry' property, which is necessary for the
+        // MUI Autocomplete component.
+        return this.getAutocompleteDataset(featureCollection).filter(
+          (e) => e.autocompleteEntry
+        );
       }
     );
 
@@ -567,7 +615,8 @@ class Search extends React.PureComponent {
     return flatAutocompleteArray.sort((a, b) =>
       decodeCommas(a.autocompleteEntry).localeCompare(
         decodeCommas(b.autocompleteEntry),
-        "sv"
+        undefined,
+        { numeric: true }
       )
     );
   };
@@ -575,9 +624,10 @@ class Search extends React.PureComponent {
   getMergeResultsFromAllSources = (results) => {
     return results.reduce(
       (searchResults, result) => {
-        searchResults.featureCollections = searchResults.featureCollections.concat(
-          result.value.featureCollections
-        );
+        searchResults.featureCollections =
+          searchResults.featureCollections.concat(
+            result.value.featureCollections
+          );
         searchResults.errors = searchResults.errors.concat(result.value.errors);
         return searchResults;
       },
@@ -586,15 +636,37 @@ class Search extends React.PureComponent {
   };
 
   fetchResultFromSearchModel = async (fetchOptions) => {
+    // Check if the searchString is encapsuled with quotation marks
+    const searchStringIsEncapsuled = this.searchStringEncapsuled();
+
+    // If the searchString is encapsuled with quotation marks (meaning that the user is
+    // searching for an exacts phrase, we want to disable potential wildcards in the
+    // fetchOptions.
+    if (searchStringIsEncapsuled) {
+      fetchOptions = {
+        ...fetchOptions,
+        wildcardAtStart: false,
+        wildcardAtEnd: false,
+      };
+    }
+
+    // Potential quotation marks in the searchString must be removed before
+    // we perform the search.
+    const searchString = this.getCleanedSearchString();
+
     let { searchSources } = this.state;
 
     if (searchSources.length === 0) {
       searchSources = this.searchModel.getSources();
     }
 
+    if (this.state.searchOptions.searchInVisibleLayers) {
+      searchSources = this.mapViewModel.getVisibleSearchLayers();
+    }
+
     let active = true;
     const promise = this.searchModel.getResults(
-      this.state.searchString,
+      searchString,
       searchSources,
       fetchOptions
     );
@@ -610,6 +682,19 @@ class Search extends React.PureComponent {
         // It's possible to handle any errors in the UI by checking if Search Model returned any
         searchResults.errors.length > 0 &&
           console.error("Autocomplete error: ", searchResults.errors);
+
+        // Prepare all features so that they do have titles/short titles
+        searchResults.featureCollections.forEach((fc) => {
+          fc.value.features.forEach((f) => {
+            const { featureTitle, shortFeatureTitle } = this.getFeatureLabels(
+              f,
+              fc.source
+            );
+            f.featureTitle = featureTitle;
+            f.shortFeatureTitle = shortFeatureTitle;
+          });
+        });
+
         return searchResults;
       })
       .catch((error) => {
@@ -623,6 +708,18 @@ class Search extends React.PureComponent {
           });
         }
       });
+  };
+
+  // Returns true if the searchString is encapsuled in quotation marks.
+  searchStringEncapsuled = () => {
+    const { searchString } = this.state;
+    return searchString.startsWith('"') && searchString.endsWith('"');
+  };
+
+  // Removes potential quotation marks from the searchString
+  getCleanedSearchString = () => {
+    const { searchString } = this.state;
+    return searchString.replace(/"/g, "");
   };
 
   getPotentialWFSErrorMessage = (searchResults) => {
@@ -643,9 +740,8 @@ class Search extends React.PureComponent {
     this.setState({ loading: true });
     const fetchOptions = this.getSearchResultsFetchSettings();
     const searchResults = await this.fetchResultFromSearchModel(fetchOptions);
-    const failedWFSFetchMessage = this.getPotentialWFSErrorMessage(
-      searchResults
-    );
+    const failedWFSFetchMessage =
+      this.getPotentialWFSErrorMessage(searchResults);
 
     this.setState({
       searchResults,
@@ -656,28 +752,84 @@ class Search extends React.PureComponent {
       resultPanelCollapsed: false,
     });
 
-    let features = this.extractFeatureWithFromFeatureCollections(
+    let features = this.extractFeaturesFromFeatureCollections(
       searchResults.featureCollections
     );
 
     features = this.filterFeaturesWithGeometry(features);
 
-    // If we get a single search-result, we add it to the map in the searchResultList-component instead.
+    // If we got more than 1 result, publish event below
     if (features.length !== 1) {
       this.localObserver.publish("map.addFeaturesToResultsLayer", features);
     }
+    // If we get a single search-result, we add it to the map in the searchResultList-component instead,
+    // unless clean mode is true. In that case, there's another event we want to publish.
+    else if (this.props.app.appModel.config.mapConfig.map.clean === true) {
+      const feature = features[0];
+
+      this.localObserver.publish(
+        "map.addAndHighlightFeatureInSearchResultLayer",
+        {
+          feature,
+        }
+      );
+    }
   }
+
+  getFeatureLabels = (feature, source) => {
+    if (feature.featureTitle && feature.shortFeatureTitle) {
+      return {
+        featureTitle: feature.featureTitle,
+        shortFeatureTitle: feature.shortFeatureTitle,
+      };
+    }
+
+    const reducerFn = (featureTitleString, df) => {
+      let displayField = feature.get(df);
+      if (Array.isArray(displayField)) {
+        displayField = displayField.join(", ");
+      }
+      if (displayField) {
+        if (featureTitleString.length > 0) {
+          featureTitleString = featureTitleString.concat(` | ${displayField}`);
+        } else {
+          featureTitleString = displayField.toString();
+        }
+      }
+      return featureTitleString;
+    };
+
+    // Prepare the title be using the defined displayFields. Note that this
+    // can not be left empty: it is used as input to the MUI Autocomplete component
+    // and supplying an empty string is not allowed here. See also the
+    // comment on shortFeatureTitle below.
+    const featureTitle =
+      source.displayFields?.reduce(reducerFn, "") || "Visningsfält saknas";
+
+    // Also, try to prepare the short title. It's possible that
+    // this array is not defined though, and in that case, we want
+    // an empty label as shortFeatureTitle.
+    const shortFeatureTitle =
+      source.shortDisplayFields?.reduce(reducerFn, "") || "";
+    return { featureTitle, shortFeatureTitle };
+  };
 
   filterFeaturesWithGeometry = (features) => {
     return features.filter((feature) => {
-      return feature.geometry != null;
+      return feature.getGeometry() != null;
     });
   };
 
-  extractFeatureWithFromFeatureCollections = (featureCollections) => {
+  extractFeaturesFromFeatureCollections = (featureCollections) => {
+    // Let's return an Array of features. While we're on it,
+    // let's also decorate each feature with two properties,
+    // featureTitle and shortFeature title, so they're ready to
+    // use when we're styling the features in the ol.Source.
     return featureCollections
       .map((fc) => {
-        return fc.value.features;
+        return fc.value.features.map((f) => {
+          return f;
+        });
       })
       .flat();
   };
@@ -695,13 +847,6 @@ class Search extends React.PureComponent {
     let autoCompleteResult = await this.fetchResultFromSearchModel(
       fetchOptions
     );
-
-    // If we get zero results we do a new search to try
-    // to fill the autocomplete with wildCardAtStart active.
-    if (this.getNumResults(autoCompleteResult) < 1) {
-      fetchOptions.wildcardAtStart = true;
-      autoCompleteResult = await this.fetchResultFromSearchModel(fetchOptions);
-    }
 
     this.setState({
       autocompleteList: this.prepareAutocompleteList(autoCompleteResult),
@@ -742,7 +887,14 @@ class Search extends React.PureComponent {
 
   hasEnoughCharsForSearch = () => {
     const { searchString } = this.state;
-    return searchString.length >= 3;
+    // It may seem small with 1 character, but we must allow users to force
+    // a search. Please note that this will not be invoked for autocomplete
+    // searches (they still need to be at least 3 characters to start searching).
+    // This will however allow for search terms such as "K4*", which can well
+    // be a valid prefix for some attribute value, and users must be able to
+    // search for that.
+    // However, >=1 means that we don't allow completely empty searches.
+    return searchString.length >= 1;
   };
 
   getSearchResultsFetchSettings = () => {
@@ -764,15 +916,6 @@ class Search extends React.PureComponent {
     });
   };
 
-  #sortAndShortenSearchResults = (featureCollections, maxSlots) => {
-    featureCollections.sort((a, b) => {
-      const sourceNameA = a.source.caption.toUpperCase();
-      const sourceNameB = b.source.caption.toUpperCase();
-      return sourceNameA.localeCompare(sourceNameB, "sv");
-    });
-    return featureCollections.slice(0, maxSlots);
-  };
-
   prepareAutocompleteList = (searchResults) => {
     let maxSlots = 7;
     let numSourcesWithResults = searchResults.featureCollections.length;
@@ -782,10 +925,6 @@ class Search extends React.PureComponent {
         0,
         maxSlots
       );
-      // searchResults.featureCollections = this.#sortAndShortenSearchResults(
-      //   searchResults.featureCollections,
-      //   maxSlots
-      // );
     }
 
     let numResults = 0;
@@ -879,7 +1018,8 @@ class Search extends React.PureComponent {
     } = this.state;
 
     return (
-      this.state.searchImplementedPluginsLoaded && (
+      this.state.searchImplementedPluginsLoaded &&
+      this.props.app.appModel.config.mapConfig.map.clean === false && (
         <SearchBar
           classes={{
             root: classes.inputRoot,

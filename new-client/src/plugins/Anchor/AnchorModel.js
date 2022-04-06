@@ -1,3 +1,4 @@
+import { isValidLayerId } from "../../utils/Validator";
 class AnchorModel {
   constructor(settings) {
     this.app = settings.app;
@@ -6,7 +7,13 @@ class AnchorModel {
     this.map = settings.map;
     this.localObserver = settings.localObserver;
 
+    // Update the URL when map view changes
     this.map.getView().on("change", this.update);
+
+    // Update the URL when search phrase changes
+    this.app.globalObserver.subscribe("search.searchPhraseChanged", () => {
+      this.localObserver.publish("mapUpdated", this.getAnchor());
+    });
 
     this.map
       .getLayers()
@@ -23,8 +30,17 @@ class AnchorModel {
         // Update anchor each time an underlying Source changes in some way (could be new CQL params, for example).
         layer.getSource().on("change", ({ target }) => {
           if (typeof target.getParams !== "function") return;
+
+          // Update CQL filters only if a real value exists
           const cqlFilterForCurrentLayer = target.getParams()?.CQL_FILTER;
-          this.cqlFilters[layerId] = cqlFilterForCurrentLayer;
+          if (
+            cqlFilterForCurrentLayer !== null &&
+            cqlFilterForCurrentLayer !== undefined
+          ) {
+            this.cqlFilters[layerId] = cqlFilterForCurrentLayer;
+          }
+
+          // Publish the event
           this.localObserver.publish("mapUpdated", this.getAnchor());
         });
       });
@@ -40,43 +56,52 @@ class AnchorModel {
     return this.map;
   }
 
-  toParams(obj) {
-    return Object.keys(obj).reduce((paramStr, key, index) => {
-      const prefix = index === 0 ? "?" : "&";
-      return (paramStr += `${prefix}${key}=${obj[key]}`);
-    }, "");
-  }
-
   getVisibleLayers() {
     return this.map
       .getLayers()
       .getArray()
-      .filter(
-        (layer) =>
-          layer.getVisible() &&
+      .filter((layer) => {
+        return (
+          // We consider a layer to be visible only if…
+          layer.getVisible() && // …it's visible…
           layer.getProperties().name &&
-          !Number.isNaN(parseInt(layer.getProperties().name))
-      )
+          isValidLayerId(layer.getProperties().name) // …has a specified name property…
+        );
+      })
       .map((layer) => layer.getProperties().name)
       .join(",");
   }
 
   getAnchor() {
-    const str = this.toParams({
-      m: this.app.config.activeMap,
-      x: this.map.getView().getCenter()[0],
-      y: this.map.getView().getCenter()[1],
-      z: this.map.getView().getZoom(),
-      l: this.getVisibleLayers(),
-      f: encodeURIComponent(JSON.stringify(this.cqlFilters)),
-      clean: this.getCleanUrl(),
-    });
+    // Read some "optional" values so we have them prepared.
+    // If some conditions aren't met, we won't add them to the
+    // anchor string, in order to keep the string short.
+    const q = document.getElementById("searchInputField")?.value.trim() || "";
+    const f = this.cqlFilters;
+    const clean = this.getCleanUrl();
 
-    // Split on "?" and get only the first segment. This prevents
-    // multiple query string situations, such as https://www.foo.com/?a=b?c=d
-    // that can happen if user enters the application using a link that already
-    // contains query parameters.
-    return document.location.href.split("?")[0] + str;
+    // Split current URL on the "?" and just get the first part. This
+    // way we'll get rid of any unwanted search params, without messing
+    // up the remaining portion of URL (protocol, host, path, hash).
+    const url = new URL(document.location.href.split("?")[0]);
+
+    // The following params are always appended
+    url.searchParams.append("m", this.app.config.activeMap);
+    url.searchParams.append("x", this.map.getView().getCenter()[0]);
+    url.searchParams.append("y", this.map.getView().getCenter()[1]);
+    url.searchParams.append("z", this.map.getView().getZoom());
+    url.searchParams.append("l", this.getVisibleLayers());
+
+    // Optionally, append those too:
+    // Only add 'clean' if the value is true
+    clean === true && url.searchParams.append("clean", clean);
+    // Only add 'f' if it isn't an empty object
+    Object.keys(f).length > 0 &&
+      url.searchParams.append("f", JSON.stringify(f));
+    // Only add 'q' if it isn't empty
+    q.length > 0 && url.searchParams.append("q", q);
+
+    return url.toString();
   }
 }
 

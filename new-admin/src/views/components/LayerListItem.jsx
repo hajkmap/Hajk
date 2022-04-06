@@ -5,7 +5,7 @@ class LayerListItem extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      checked: props.checked
+      checked: props.checked,
     };
   }
 

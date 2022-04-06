@@ -1,7 +1,7 @@
 import React, { Component } from "react";
 
 const defaultState = {
-  properties: []
+  properties: [],
 };
 
 export default class ListProperties extends Component {
@@ -19,7 +19,7 @@ export default class ListProperties extends Component {
    * @param {*} properties
    */
   renderProperties() {
-    return this.state.properties.map(name => {
+    return this.state.properties.map((name) => {
       return <li key={name}>{name}</li>;
     });
   }

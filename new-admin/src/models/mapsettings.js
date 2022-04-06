@@ -1,28 +1,7 @@
-// Copyright (C) 2016 Göteborgs Stad
-//
-// Denna programvara är fri mjukvara: den är tillåten att distribuera och modifiera
-// under villkoren för licensen CC-BY-NC-SA 4.0.
-//
-// This program is free software: you can redistribute it and/or modify
-// it under the terms of the CC-BY-NC-SA 4.0 licence.
-//
-// http://creativecommons.org/licenses/by-nc-sa/4.0/
-//
-// Det är fritt att dela och anpassa programvaran för valfritt syfte
-// med förbehåll att följande villkor följs:
-// * Copyright till upphovsmannen inte modifieras.
-// * Programvaran används i icke-kommersiellt syfte.
-// * Licenstypen inte modifieras.
-//
-// Den här programvaran är öppen i syfte att den skall vara till nytta för andra
-// men UTAN NÅGRA GARANTIER; även utan underförstådd garanti för
-// SÄLJBARHET eller LÄMPLIGHET FÖR ETT VISST SYFTE.
-//
-// https://github.com/hajkmap/Hajk
-
 import { Model } from "backbone";
 import { prepareProxyUrl } from "../utils/ProxyHelper";
 import X2JS from "x2js";
+import { hfetch } from "utils/FetchWrapper";
 
 const $ = require("jquery");
 const jQuery = $;
@@ -40,8 +19,8 @@ var menu = Model.extend({
       this.get("config").url_map_list,
       this.get("config").url_proxy
     );
-    fetch(url).then(response => {
-      response.json().then(data => {
+    hfetch(url).then((response) => {
+      response.json().then((data) => {
         var name = data[0];
         if (name === undefined) {
           name = "";
@@ -210,6 +189,7 @@ var menu = Model.extend({
     url = prepareProxyUrl(url, this.get("config").url_proxy);
     $.ajax(url, {
       data: {
+        service: "WFS",
         request: "describeFeatureType",
         typename: layer
       },
@@ -220,14 +200,17 @@ var menu = Model.extend({
             : new XMLSerializer().serializeToString(data),
           apa = parser.xml2js(xmlstr);
         try {
-          var props = apa.schema.complexType.complexContent.extension.sequence.element.map(
-            a => {
-              return {
-                name: a._name,
-                localType: a._type ? a._type.replace(a.__prefix + ":", "") : ""
-              };
-            }
-          );
+          var props =
+            apa.schema.complexType.complexContent.extension.sequence.element.map(
+              (a) => {
+                return {
+                  name: a._name,
+                  localType: a._type
+                    ? a._type.replace(a.__prefix + ":", "")
+                    : "",
+                };
+              }
+            );
           if (props) {
             callback(props);
           } else {

@@ -482,7 +482,6 @@ class SearchResultListContainer extends React.Component {
             return this.renderSearchResultAsTabContent(searchResult);
           })}
         </section>
-
       </Rnd>
     );
   };

@@ -10,36 +10,7 @@ import { withSnackbar } from "notistack";
 import PrintIcon from "@material-ui/icons/Print";
 
 class DocumentWindowBase extends React.PureComponent {
-  //Could be rewritten
-  findMenuItem(menuItem, documentNameToFind) {
-    if (menuItem.document === documentNameToFind) {
-      return menuItem;
-    } else if (this.hasSubMenu(menuItem)) {
-      let i,
-        result = null;
-      for (i = 0; result == null && i < menuItem.menu.length; i++) {
-        result = this.findMenuItem(menuItem.menu[i], documentNameToFind);
-      }
-      return result;
-    }
-    return null;
-  }
-
-  hasSubMenu = (menuItem) => {
-    return menuItem.menu && menuItem.menu.length > 0;
-  };
-
-  findReferringMenuItem = (documentNameToFind) => {
-    const { options } = this.props;
-    let foundMenuItem = null;
-    options.menuConfig.menu.forEach((rootItemToSearch) => {
-      let found = this.findMenuItem(rootItemToSearch, documentNameToFind);
-      if (found != null) {
-        foundMenuItem = found;
-      }
-    });
-    return foundMenuItem;
-  };
+  snackbarKey = null;
 
   shouldShowDocumentOnStart = () => {
     const { options } = this.props;
@@ -82,87 +53,64 @@ class DocumentWindowBase extends React.PureComponent {
     }
   };
 
+  displayMaplinkLoadingBar = () => {
+    const { enqueueSnackbar } = this.props;
+    this.snackbarKey = enqueueSnackbar("Kartan laddar... ", {
+      variant: "information",
+      persist: true,
+      preventDuplicate: true,
+      transitionDuration: { enter: 0, exit: 0 },
+      anchorOrigin: { vertical: "bottom", horizontal: "center" },
+    });
+  };
+
+  closeMaplinkLoadingBar = () => {
+    const { closeSnackbar } = this.props;
+    closeSnackbar(this.snackbarKey);
+  };
+
   togglePrintWindow = () => {
     this.setState({
       showPrintWindow: !this.state.showPrintWindow,
     });
   };
 
-  canHandleInfoClickEvent = (infoClickEvent) => {
-    if (infoClickEvent.payload.type !== "a") {
-      return false;
-    }
-    return Object.keys(infoClickEvent.payload.dataAttributes).every((key) => {
-      return [
-        "data-maplink",
-        "data-document",
-        "data-header-identifier",
-      ].includes(key);
-    });
-  };
-
   handleInfoClickRequest = (infoClickEvent) => {
-    if (this.canHandleInfoClickEvent(infoClickEvent)) {
-      var htmlObject = document.createElement(infoClickEvent.payload.type);
-      htmlObject.innerHTML = infoClickEvent.payload.children[0];
-      Object.entries(infoClickEvent.payload.dataAttributes).forEach(
-        (dataAttributeEntry) => {
-          var att = document.createAttribute(dataAttributeEntry[0]);
-          att.value = dataAttributeEntry[1];
-          htmlObject.setAttributeNode(att);
-        }
-      );
-      let link = (
+    const htmlObject = document.createElement("span");
+    htmlObject.innerHTML = infoClickEvent.payload.replace(/\\/g, "");
+    const aTag = htmlObject.getElementsByTagName("a")[0];
+    if (aTag) {
+      infoClickEvent.resolve(
         <CustomLink
           localObserver={this.props.localObserver}
-          aTag={htmlObject}
+          aTag={aTag}
           bottomMargin={false}
         ></CustomLink>
       );
-      infoClickEvent.resolve(link);
     } else {
-      infoClickEvent.resolve();
+      console.error(
+        "Could not render DocumentHandler link for payload:",
+        infoClickEvent.payload
+      );
+      // Must resolve with a value, even null will do, but something more helpful could be nice.
+      // The reason we must do it is because this value is used in React's render, and undefined will not render.
+      infoClickEvent.resolve(<b>Could not render DocumentHandler link</b>);
     }
   };
 
-  bindListenForSearchResultClick = () => {
-    const { app, localObserver } = this.props;
-
-    // The event published from the search component will be prepended
-    // with "search.featureClicked", therefore we have to subscribe
-    // to search.featureClicked.onClickName to catch the event.
-    app.globalObserver.subscribe(
-      "search.featureClicked.documentHandlerSearchResultClicked",
-      (searchResultClick) => {
-        localObserver.publish("set-active-document", {
-          documentName: searchResultClick.properties.documentFileName,
-          headerIdentifier: searchResultClick.properties.headerIdentifier,
-        });
-      }
-    );
-
+  bindSubscriptions = () => {
+    const { localObserver, app } = this.props;
     app.globalObserver.subscribe(
       "core.info-click-documenthandler",
       this.handleInfoClickRequest
     );
-  };
-
-  bindSubscriptions = () => {
-    const { localObserver } = this.props;
-    this.bindListenForSearchResultClick();
     localObserver.subscribe("set-active-document", this.showHeaderInDocument);
+    localObserver.subscribe("maplink-loading", this.displayMaplinkLoadingBar);
+    localObserver.subscribe(
+      "map-animation-complete",
+      this.closeMaplinkLoadingBar
+    );
   };
-
-  setChapterLevels(chapter, level) {
-    chapter.level = level;
-    if (chapter.chapters && chapter.chapters.length > 0) {
-      level = level + 1;
-      chapter.chapters.forEach((subChapter) => {
-        subChapter = this.setChapterLevels(subChapter, level);
-      });
-    }
-    return chapter;
-  }
 
   isModelReady = () => {
     const { model } = this.props;
@@ -201,7 +149,6 @@ class DocumentWindowBase extends React.PureComponent {
   render() {
     const {
       options,
-      chapters,
       localObserver,
       documentWindowMaximized,
       document,
@@ -255,11 +202,11 @@ class DocumentWindowBase extends React.PureComponent {
           ) : (
             <PrintWindow
               customTheme={customTheme}
-              chapters={chapters}
               activeDocument={document}
               documentWindowMaximized={documentWindowMaximized}
               togglePrintWindow={togglePrintWindow}
               localObserver={localObserver}
+              options={this.props.options}
               {...this.props}
             />
           )

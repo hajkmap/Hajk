@@ -8,6 +8,8 @@ import ToggleButtonGroup from "@material-ui/lab/ToggleButtonGroup";
 import CloseIcon from "@material-ui/icons/Close";
 import { Paper, Hidden } from "@material-ui/core";
 
+import { functionalOk as functionalCookieOk } from "models/Cookie";
+
 const useStyles = makeStyles((theme) => ({
   root: {
     marginRight: theme.spacing(1),
@@ -17,6 +19,10 @@ const useStyles = makeStyles((theme) => ({
   },
   button: {
     border: 0,
+    color:
+      theme.palette.type === "dark"
+        ? theme.palette.common.white
+        : theme.palette.action.active,
   },
   icon: {
     [theme.breakpoints.up("md")]: {
@@ -63,7 +69,9 @@ function DrawerToggleButtons({
     if (v === null) {
       window.localStorage.removeItem("activeDrawerContent");
     } else {
-      window.localStorage.setItem("activeDrawerContent", v);
+      if (functionalCookieOk()) {
+        window.localStorage.setItem("activeDrawerContent", v);
+      }
     }
 
     // Let the outside world know that a button has been pressed.
@@ -82,7 +90,12 @@ function DrawerToggleButtons({
 
     // Caption should be hidden on small screens
     return (
-      <ToggleButton key={value} value={value} className={classes.button}>
+      <ToggleButton
+        id={value}
+        key={value}
+        value={value}
+        className={classes.button}
+      >
         {icon}
         <Hidden smDown>{caption}</Hidden>
       </ToggleButton>

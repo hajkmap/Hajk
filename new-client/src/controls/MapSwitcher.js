@@ -2,6 +2,7 @@ import React from "react";
 import { Button, Menu, MenuItem, Paper, Tooltip } from "@material-ui/core";
 import { withStyles } from "@material-ui/core/styles";
 import SwitchCameraIcon from "@material-ui/icons/SwitchCamera";
+import { hfetch } from "utils/FetchWrapper";
 
 const styles = theme => ({
   paper: {
@@ -11,10 +12,6 @@ const styles = theme => ({
     minWidth: "unset"
   }
 });
-
-const fetchConfig = {
-  credentials: "same-origin"
-};
 
 class MapSwitcher extends React.PureComponent {
   // Will hold map configs
@@ -31,25 +28,35 @@ class MapSwitcher extends React.PureComponent {
     this.map = this.props.appModel.getMap();
   }
 
+  handleLoading(maps) {
+    let { activeMap } = this.appModel.config;
+    // Save fetched map configs to global variable
+    this.maps = maps;
+
+    // Set selectedIndex to currently selected map
+    let selectedIndex = this.maps.findIndex((map) => {
+      return map.mapConfigurationName === activeMap;
+    });
+    this.setState({ selectedIndex });
+  }
+
   componentDidMount() {
     let { proxy, mapserviceBase } = this.appModel.config.appConfig;
-    let { activeMap } = this.appModel.config;
 
-    fetch(`${proxy}${mapserviceBase}/config/userspecificmaps`, fetchConfig)
-      .then(resp => resp.json())
-      .then(maps => {
-        // Save fetched map configs to global variable
-        this.maps = maps;
-
-        // Set selectedIndex to currently selected map
-        let selectedIndex = this.maps.findIndex(map => {
-          return map.mapConfigurationName === activeMap;
+    // If user specific maps is provided by the new API, the key will
+    // already exist in config and there's no need to fetch again.
+    // However, if it's undefined, it looks like we're using the old API
+    // and MapSwitcher must do the fetch by itself.
+    if (this.appModel.config.userSpecificMaps !== undefined) {
+      this.handleLoading(this.appModel.config.userSpecificMaps);
+    } else {
+      hfetch(`${proxy}${mapserviceBase}/config/userspecificmaps`)
+        .then((resp) => resp.json())
+        .then((maps) => this.handleLoading(maps))
+        .catch((err) => {
+          throw new Error(err);
         });
-        this.setState({ selectedIndex });
-      })
-      .catch(err => {
-        throw new Error(err);
-      });
+    }
   }
 
   renderMenuItems = () => {
@@ -111,6 +118,7 @@ class MapSwitcher extends React.PureComponent {
           <Tooltip title={`Nuvarande karta: ${title}`}>
             <Paper className={classes.paper}>
               <Button
+                aria-label="Byt karta"
                 aria-owns={open ? "render-props-menu" : undefined}
                 aria-haspopup="true"
                 className={classes.button}

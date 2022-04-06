@@ -7,10 +7,8 @@ import { all as strategyAll } from "ol/loadingstrategy";
 import { Select, Modify, Draw, Translate } from "ol/interaction";
 import { never } from "ol/events/condition";
 import X2JS from "x2js";
+import { hfetch } from "utils/FetchWrapper";
 
-const fetchConfig = {
-  credentials: "same-origin",
-};
 class EditModel {
   constructor(settings) {
     this.map = settings.map;
@@ -27,12 +25,31 @@ class EditModel {
     this.modify = undefined;
     this.key = undefined;
     this.editFeature = undefined;
+    this.editFeatureBackup = undefined;
     this.editSource = undefined;
     this.removeFeature = undefined;
     this.shell = undefined;
     this.instruction = "";
     this.filty = false;
     this.removalToolMode = "off";
+
+    // Normalize the sources that come from options.
+    this.options.sources = this.options.sources.map((s) => {
+      // Namespace URI is required for insert. QGIS Server tends to accept this value.
+      if (s.uri.trim().length === 0) {
+        s.uri = "http://www.opengis.net/wfs";
+      }
+
+      // Get rid of the SERVICE=WFS attribute if existing: we will add it on the following requests
+      // while QGIS Server's WFS endpoint requires the SERVICE parameter to be preset. We'd
+      // end up with duplicate parameters, so the safest way around is to remove it, in a controlled
+      // manner, without disturbing the URL.
+      const url = new URL(s.url);
+      url.searchParams.delete("service");
+      s.url = url.href;
+
+      return s;
+    });
   }
 
   write(features) {
@@ -106,7 +123,7 @@ class EditModel {
       payload = node ? serializer.serializeToString(node) : undefined;
 
     if (payload) {
-      fetch(src.url, {
+      hfetch(src.url, {
         method: "POST",
         body: payload,
         credentials: "same-origin",
@@ -116,12 +133,18 @@ class EditModel {
       })
         .then((response) => {
           response.text().then((wfsResponseText) => {
-            this.refreshLayer(src.layers[0]);
-            this.vectorSource
-              .getFeatures()
-              .filter((f) => f.modification !== undefined)
-              .forEach((f) => (f.modification = undefined));
-            done(this.parseWFSTresponse(wfsResponseText));
+            const resXml = this.parseWFSTresponse(wfsResponseText);
+            if (resXml.ExceptionReport || !resXml.TransactionResponse) {
+              // do not delete the data so the user can submit it again
+              done(resXml);
+            } else {
+              this.refreshLayer(src.layers[0]);
+              this.vectorSource
+                .getFeatures()
+                .filter((f) => f.modification !== undefined)
+                .forEach((f) => (f.modification = undefined));
+              done(resXml);
+            }
           });
         })
         .catch((response) => {
@@ -330,25 +353,39 @@ class EditModel {
     });
   };
 
-  urlFromObject(url, obj) {
-    return Object.keys(obj).reduce((str, key, i, a) => {
-      str = str + key + "=" + obj[key];
-      if (i < a.length - 1) {
-        str = str + "&";
-      }
-      return str;
-    }, (url += "?"));
-  }
-
   loadData(source, extent, done) {
-    const url = this.urlFromObject(source.url, {
-      service: "WFS",
-      version: "1.1.0",
-      request: "GetFeature",
-      typename: source.layers[0],
-      srsname: source.projection,
-    });
-    fetch(url, fetchConfig)
+    // Prepare the URL for retrieving WFS data. We will want to set
+    // some search params later on, but we want to avoid any duplicates.
+    // The values we will set below should override any existing, if
+    // same key already exists in URL.
+    // To ensure it will happen, we read the possible current params…
+    const url = new URL(source.url);
+
+    // …and make sure that the keys are in UPPER CASE.
+    const existingSearchParams = {};
+    for (const [k, v] of url.searchParams.entries()) {
+      existingSearchParams[k.toUpperCase()] = v;
+    }
+
+    // Now we merge the possible existing params with the rest, defined
+    // below. We can be confident that we won't have duplicates and that
+    // our values "win", as they are defined last.
+    const mergedSearchParams = {
+      ...existingSearchParams,
+      SERVICE: "WFS",
+      VERSION: "1.1.0",
+      REQUEST: "GetFeature",
+      TYPENAME: source.layers[0],
+      SRSNAME: source.projection,
+    };
+
+    // Create a new URLSearchParams object from the merged object…
+    const searchParams = new URLSearchParams(mergedSearchParams);
+    // …and update our URL's search string with the new value
+    url.search = searchParams.toString();
+
+    // Send a String as HFetch doesn't currently accept true URL objects
+    hfetch(url.toString())
       .then((response) => {
         if (response.status !== 200) {
           return done("data-load-error");
@@ -422,6 +459,7 @@ class EditModel {
     });
 
     this.layer = new Vector({
+      name: "pluginEdit",
       source: this.vectorSource,
       style: this.getVectorStyle(),
     });
@@ -461,11 +499,21 @@ class EditModel {
       source: this.vectorSource,
       style: this.getSketchStyle(),
       type: geometryType,
+      stopClick: true,
       geometryName: this.geometryName,
     });
     this.draw.on("drawend", (event) => {
       event.feature.modification = "added";
       this.editAttributes(event.feature);
+      // OpenLayers seems to have a problem stopping the clicks if
+      // the draw interaction is removed too early. This fix is not pretty,
+      // but it gets the job done. It seems to be enough to remove the draw
+      // interaction after one cpu-cycle.
+      // If this is not added, the user will get a zoom-event when closing
+      // a polygon drawing.
+      setTimeout(() => {
+        this.deactivateInteraction();
+      }, 1);
     });
     this.map.addInteraction(this.draw);
     this.map.clickLock.add("edit");
@@ -555,6 +603,7 @@ class EditModel {
   }
 
   resetEditFeature = () => {
+    this.editFeatureBackup = this.editFeature;
     this.editFeature = undefined;
     this.observer.publish("editFeature", this.editFeature);
   };
@@ -567,9 +616,7 @@ class EditModel {
   }
 
   getSources() {
-    return this.sources.filter((source) => {
-      return this.activeServices.some((serviceId) => serviceId === source.id);
-    });
+    return this.options.sources;
   }
 }
 

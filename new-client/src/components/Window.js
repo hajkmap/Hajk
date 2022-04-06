@@ -114,6 +114,13 @@ const styles = (theme) => {
       right: 0,
       flexDirection: "column",
       userSelect: "none",
+      outline: "none",
+      '& a:not([class*="Mui"])': {
+        color: theme.palette.primary.light,
+      },
+    },
+    panelContentDisplayContents: {
+      display: "contents",
     },
     panelContentDisplayContents: {
       display: "contents",
@@ -162,6 +169,7 @@ class Window extends React.PureComponent {
   constructor(props) {
     super(props);
     document.windows.push(this);
+    this.windowRef = React.createRef();
     this.state = {
       left: 0,
       top: 0,
@@ -179,6 +187,16 @@ class Window extends React.PureComponent {
 
     this.localObserver = this.props.localObserver;
   }
+
+  componentDidUpdate = (prevProps, prevState) => {
+    if (prevProps.open === false && this.props.open === true) {
+      //This is ugly but there is a timing problem further down somewhere (i suppose?).
+      //componentDidUpdate is run before the render is actually fully completed and the DOM is ready
+      setTimeout(() => {
+        this.windowRef.current.focus();
+      }, 200);
+    }
+  };
 
   componentDidMount() {
     const { globalObserver } = this.props;
@@ -218,6 +236,19 @@ class Window extends React.PureComponent {
       : false;
   }
 
+  getMaxWindowHeight() {
+    if (this.rnd === undefined) return 400;
+    const parent = this.rnd.getSelfElement().parentElement;
+    const spaceForBreadcrumbs = this.areBreadcrumbsActivated() ? 42 : 0;
+    const h =
+      parent.clientHeight - // Maximum height of parent element
+      16 - // Reduce height with top margin
+      16 - // Reduce height with bottom margin
+      62 - // Reduce with space for Search bar
+      spaceForBreadcrumbs; // If Breadcrumbs are active, make space for them as well
+    return h;
+  }
+
   updatePosition() {
     const { width, height, position } = this.props;
     const parent = this.rnd.getSelfElement().parentElement;
@@ -230,15 +261,7 @@ class Window extends React.PureComponent {
 
     // If "auto" height is set, it means we want the Window to take up maximum space available
     if (this.props.height !== "dynamic" && this.height === "auto") {
-      // If Breadcrumbs are activated (in LayerSwitcher's config), we must make
-      // sure that our Windows leave some space at the bottom for the Breadcrumbs.
-      const spaceForBreadcrumbs = this.areBreadcrumbsActivated() ? 42 : 0;
-      this.height =
-        parent.clientHeight - // Maximum height of parent element
-        16 - // Reduce height with top margin
-        16 - // Reduce height with bottom margin
-        62 - // Reduce with space for Search bar
-        spaceForBreadcrumbs; // If Breadcrumbs are active, make space for them as well
+      this.height = this.getMaxWindowHeight();
     }
 
     // If Window renders on the right, there are some things that we need to compensate for
@@ -278,7 +301,7 @@ class Window extends React.PureComponent {
     this.latestWidth = this.rnd.getSelfElement().clientWidth;
     if (onClose) onClose();
 
-    globalObserver.publish("window-close", title);
+    globalObserver.publish("core.closeWindow", title);
   };
 
   fit = (target) => {
@@ -369,7 +392,7 @@ class Window extends React.PureComponent {
     typeof onMaximize === "function" && onMaximize();
     typeof onResize === "function" && onResize();
 
-    globalObserver.publish("window-maximize", title);
+    globalObserver.publish("core.maximizeWindow", title);
   };
 
   minimize = () => {
@@ -391,7 +414,7 @@ class Window extends React.PureComponent {
     typeof onMinimize === "function" && onMinimize();
     typeof onResize === "function" && onResize();
 
-    globalObserver.publish("window-minimize", title);
+    globalObserver.publish("core.minimizeWindow", title);
   };
 
   bringToFront() {
@@ -430,17 +453,47 @@ class Window extends React.PureComponent {
       resizeTopRight = true;
 
     if (isMobile) {
-      resizeBottom = resizeBottomLeft = resizeBottomRight = resizeRight = resizeTopLeft = resizeTopRight = resizeLeft = false;
+      resizeBottom =
+        resizeBottomLeft =
+        resizeBottomRight =
+        resizeRight =
+        resizeTopLeft =
+        resizeTopRight =
+        resizeLeft =
+          false;
     } else {
       if (this.state.mode === "maximized") {
-        resizeBottom = resizeBottomLeft = resizeBottomRight = resizeRight = resizeTop = resizeTopLeft = resizeTopRight = resizeLeft = false;
+        resizeBottom =
+          resizeBottomLeft =
+          resizeBottomRight =
+          resizeRight =
+          resizeTop =
+          resizeTopLeft =
+          resizeTopRight =
+          resizeLeft =
+            false;
       }
       if (this.state.mode === "minimized") {
-        resizeBottom = resizeBottomLeft = resizeBottomRight = resizeTop = resizeTopLeft = resizeTopRight = resizeLeft = false;
+        resizeBottom =
+          resizeBottomLeft =
+          resizeBottomRight =
+          resizeTop =
+          resizeTopLeft =
+          resizeTopRight =
+          resizeLeft =
+            false;
       }
 
       if (!resizingEnabled) {
-        resizeBottom = resizeBottomLeft = resizeBottomRight = resizeRight = resizeTop = resizeTopLeft = resizeTopRight = resizeLeft = false;
+        resizeBottom =
+          resizeBottomLeft =
+          resizeBottomRight =
+          resizeRight =
+          resizeTop =
+          resizeTopLeft =
+          resizeTopRight =
+          resizeLeft =
+            false;
       }
     }
 
@@ -508,6 +561,8 @@ class Window extends React.PureComponent {
         }}
       >
         <div
+          tabIndex="0"
+          ref={this.windowRef}
           className={clsx(
             classes.panelContent,
             this.props.height === "dynamic"
@@ -532,10 +587,16 @@ class Window extends React.PureComponent {
               classes.content,
               this.props.scrollable ? null : classes.nonScrollable
             )}
+            style={{
+              // Ensure to set maxHeight to ensure that we can scroll inside the container
+              maxHeight:
+                this.getMaxWindowHeight() - (isMobile === false ? 50 : -30), // Super-hack special case for small screens
+            }}
           >
             {features && features.length > 0 ? (
               <FeatureInfoContainer
                 features={this.props.features}
+                options={this.props.options}
                 onDisplay={this.props.onDisplay}
                 globalObserver={this.props.globalObserver}
                 key={

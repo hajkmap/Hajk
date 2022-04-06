@@ -10,10 +10,6 @@ import MapViewModel from "./MapViewModel";
 import { withTheme, createMuiTheme } from "@material-ui/core/styles";
 import { deepMerge } from "../../utils/DeepMerge";
 
-const fetchOpts = {
-  credentials: "same-origin",
-};
-
 class DocumentHandler extends React.PureComponent {
   static propTypes = {
     app: PropTypes.object.isRequired,
@@ -47,20 +43,53 @@ class DocumentHandler extends React.PureComponent {
         map: props.map,
         menu: props.options.menuConfig.menu,
         resolveSearchInterface: resolve,
+        options: props.options,
       })
         .init()
         .then((loadedDocumentModel) => {
-          this.fetchCustomThemeJson().then((customTheme) => {
-            this.setState({
-              model: loadedDocumentModel,
-              customTheme: customTheme,
+          return loadedDocumentModel
+            .fetchCustomThemeJson()
+            .then((customTheme) => {
+              this.setState(
+                {
+                  model: loadedDocumentModel,
+                  customTheme: this.getThemeWithCustomThemeApplied(customTheme),
+                },
+                () => {
+                  this.addDrawerToggleButton();
+                }
+              );
             });
-          });
         });
-
-      this.addDrawerToggleButton();
     });
   }
+
+  componentDidUpdate = (prevProps) => {
+    const { theme } = this.props;
+    //We need to update the palette.type in the nested customTheme with dark/light from the main theme
+    if (prevProps.theme.palette.type !== theme.palette.type) {
+      //Spread to not mutate
+      this.setState((prevState) => {
+        return {
+          customTheme: {
+            ...prevState.customTheme,
+            palette: {
+              ...prevState.customTheme.palette,
+              type: theme.palette.type,
+            },
+          },
+        };
+      });
+    }
+  };
+
+  getThemeWithCustomThemeApplied = (customTheme) => {
+    const { theme } = this.props;
+    if (customTheme.typography) {
+      this.setBottomMarginsForTypographyVariants(customTheme);
+    }
+    return createMuiTheme(deepMerge(theme, customTheme));
+  };
 
   /**
    * @summary Loops customTheme and checks if certain typography-variants have marginBottom set
@@ -81,41 +110,24 @@ class DocumentHandler extends React.PureComponent {
     });
   };
 
-  fetchCustomThemeJson = () => {
-    const { options } = this.props;
-    return fetch(options.customThemeUrl, fetchOpts)
-      .then((res) => {
-        return res.json().then((documentHandlerTheme) => {
-          if (documentHandlerTheme.typography) {
-            this.setBottomMarginsForTypographyVariants(documentHandlerTheme);
-          }
-          return createMuiTheme(
-            deepMerge(this.props.theme, documentHandlerTheme)
-          );
-        });
-      })
-      .catch(() => {
-        console.warn(
-          "Could not find custom theme for documenthandler, check customThemeUrl"
-        );
-        return null;
-      });
-  };
-
-  dynamicallyImportOpenSans = () => {
+  dynamicallyImportCustomFont = () => {
     const { dynamicImportUrls } = this.props.options;
-    return (
-      <link
-        rel="stylesheet"
-        type="text/css"
-        href={dynamicImportUrls.openSans}
-      />
-    );
+    if (dynamicImportUrls.customFont) {
+      return (
+        <link
+          rel="stylesheet"
+          type="text/css"
+          href={dynamicImportUrls.customFont}
+        />
+      );
+    } else return null;
   };
 
   dynamicallyImportIconFonts = () => {
     const { dynamicImportUrls } = this.props.options;
-    return <link rel="stylesheet" href={dynamicImportUrls.iconFonts} />;
+    if (dynamicImportUrls.iconFonts) {
+      return <link rel="stylesheet" href={dynamicImportUrls.iconFonts} />;
+    } else return null;
   };
 
   renderDrawerContent = () => {
@@ -134,8 +146,11 @@ class DocumentHandler extends React.PureComponent {
 
   addDrawerToggleButton = () => {
     const { app, options } = this.props;
+    app.globalObserver.publish("core.addSrShortcuts", [
+      { title: "Till huvudmeny för webbplatsen", link: "#panelmenu" },
+    ]);
     app.globalObserver.publish("core.addDrawerToggleButton", {
-      value: "menu",
+      value: "documenthandler",
       ButtonIcon: MenuIcon,
       caption: options.drawerButtonTitle || "Meny",
       drawerTitle: options.drawerTitle || "Översiktsplan",
@@ -160,6 +175,7 @@ class DocumentHandler extends React.PureComponent {
       documentName: null,
       headerIdentifier: null,
     });
+    this.localObserver.publish("document-window-closed");
     return;
   };
 
@@ -200,7 +216,7 @@ class DocumentHandler extends React.PureComponent {
   render() {
     return (
       <>
-        {this.dynamicallyImportOpenSans()}
+        {this.dynamicallyImportCustomFont()}
         {this.dynamicallyImportIconFonts()}
         <DocumentWindowBase
           {...this.props}

@@ -2,9 +2,10 @@ openapi: 3.0.3
 info:
   title: hajk-backend
   description: Hajk backend
-  version: 1.0.0
+  version: 1.1.0
 servers:
   - url: /api/v1
+  - url: /api/v2
 tags:
   - name: Client-accessible
     description: Resources necessary to load a working map in client
@@ -16,6 +17,8 @@ tags:
     description: Resources for working with ActiveDirectory
   - name: Sokigo FB Proxy
     description: Proxy specified in working with Sokigo's FB API
+  - name: FME-server Proxy
+    description: Proxy for tunneling authenticated requests against FME server
   - name: Specification
     description: The OpenAPI specification
 paths:
@@ -214,6 +217,33 @@ paths:
       responses:
         200:
           description: Available maps were fetched successfully
+          content: {}
+  /mapconfig/listimage:
+    get:
+      tags:
+        - Admin - Maps and layers
+      description: List available images in the upload folder
+      responses:
+        200:
+          description: Available images were fetched successfully
+          content: {}
+  /mapconfig/listvideo:
+    get:
+      tags:
+        - Admin - Maps and layers
+      description: List available videos in the upload folder
+      responses:
+        200:
+          description: Available videos were fetched successfully
+          content: {}
+  /mapconfig/listaudio:
+    get:
+      tags:
+        - Admin - Maps and layers
+      description: List available audio files in the upload folder
+      responses:
+        200:
+          description: Available audio files were fetched successfully
           content: {}
   /mapconfig/{map}:
     get:
@@ -463,6 +493,22 @@ paths:
         200:
           description: Result will vary depending on response from the API
           content: {}
+  /fmeproxy/{query}:
+    get:
+      tags:
+        - FME-server Proxy
+      parameters:
+        - name: query
+          in: path
+          description: Path corresponding to an endpoint on the FME-server REST API.
+          required: true
+          schema:
+            type: string
+      description: Proxy the specified query to FME-server REST API. For information on available endpoints, checkout the [FME-server API documentation](https://docs.safe.com/fme/html/FME_REST/apidoc/v3/#). The proxy will forward all HTTP-methods, not only GET.
+      responses:
+        200:
+          description: Result will vary depending on response from the API.
+          content: {}
   /spec:
     get:
       tags:
@@ -536,6 +582,37 @@ paths:
       responses:
         204:
           description: All good
+          content: {}
+  /settings/update/{map}/{tool}:
+    put:
+      tags:
+        - Admin - Maps and layers
+      requestBody:
+        description: Settings for given map's specific tool
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LayerSwitcherBody"
+        required: true
+      parameters:
+        - name: map
+          in: path
+          description: Name of the map
+          required: true
+          schema:
+            type: string
+        - name: tool
+          in: path
+          description: Name of the tool to be edited
+          required: true
+          schema:
+            type: string
+      responses:
+        201:
+          description: Created
+          content: {}
+        204:
+          description: Updated
           content: {}
   /settings/{layerType}:
     post:

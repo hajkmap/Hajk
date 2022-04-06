@@ -1,25 +1,3 @@
-// Copyright (C) 2016 Göteborgs Stad
-//
-// Denna programvara är fri mjukvara: den är tillåten att distribuera och modifiera
-// under villkoren för licensen CC-BY-NC-SA 4.0.
-//
-// This program is free software: you can redistribute it and/or modify
-// it under the terms of the CC-BY-NC-SA 4.0 licence.
-//
-// http://creativecommons.org/licenses/by-nc-sa/4.0/
-//
-// Det är fritt att dela och anpassa programvaran för valfritt syfte
-// med förbehåll att följande villkor följs:
-// * Copyright till upphovsmannen inte modifieras.
-// * Programvaran används i icke-kommersiellt syfte.
-// * Licenstypen inte modifieras.
-//
-// Den här programvaran är öppen i syfte att den skall vara till nytta för andra
-// men UTAN NÅGRA GARANTIER; även utan underförstådd garanti för
-// SÄLJBARHET eller LÄMPLIGHET FÖR ETT VISST SYFTE.
-//
-// https://github.com/hajkmap/Hajk
-
 import React from "react";
 import { Component } from "react";
 import FieldEditor from "../components/FieldEditor.jsx";
@@ -60,6 +38,7 @@ var defaultState = {
   featureNS: "",
   serviceId: "-1",
   showThankYou: true,
+  wkt: false,
   visibleAtStart: false,
   thankYou: "",
   form: [],
@@ -105,6 +84,7 @@ class ToolOptions extends Component {
         showThankYou: tool.options.showThankYou,
         thankYou: tool.options.thankYou,
         collectAgain: tool.options.collectAgain,
+        wkt: tool.options.wkt,
         form: tool.options.form || [],
         visibleAtStart: tool.options.visibleAtStart || false,
         visibleForGroups: tool.options.visibleForGroups || [],
@@ -138,11 +118,9 @@ class ToolOptions extends Component {
     });
   }
 
-  componentWillUnmount() {}
   /**
    *
    */
-  componentWillMount() {}
 
   handleInputChange(event) {
     const target = event.target;
@@ -199,6 +177,7 @@ class ToolOptions extends Component {
         featureNS: this.state.featureNS,
         showThankYou: this.state.showThankYou,
         collectAgain: this.state.collectAgain,
+        wkt: this.state.wkt,
         visibleAtStart: this.state.visibleAtStart,
         thankYou: this.state.thankYou,
         visibleForGroups: this.state.visibleForGroups.map(
@@ -408,14 +387,13 @@ class ToolOptions extends Component {
               <i
                 className="fa fa-question-circle"
                 data-toggle="tooltip"
-                title="Höjd i pixlar på verktygets fönster. Anges som ett numeriskt värde. Lämna tomt för att använda maximal höjd."
+                title="Höjd i pixlar på verktygets fönster. Anges antingen numeriskt (pixlar), 'dynamic' för att automatiskt anpassa höjden efter innehållet eller 'auto' att använda maximal höjd."
               />
             </label>
             <input
               id="height"
               name="height"
-              type="number"
-              min="0"
+              type="text"
               className="control-fixed-width"
               onChange={e => {
                 this.handleInputChange(e);
@@ -523,6 +501,26 @@ class ToolOptions extends Component {
             </label>
           </div>
           <div>
+            <input
+              id="wkt"
+              name="wkt"
+              type="checkbox"
+              onChange={(e) => {
+                this.handleInputChange(e);
+              }}
+              checked={this.state.wkt}
+            />
+            &nbsp;
+            <label htmlFor="wkt">
+              Aktivera WKT{" "}
+              <i
+                className="fa fa-question-circle"
+                data-toggle="tooltip"
+                title="Aktiverar WKT-läget så att användarna kan fylla i flera olika geometrier för varje fråga samt på flera frågor."
+              />
+            </label>
+          </div>
+          <div>
             <label htmlFor="featureNS">Redigeringstjänst</label>
             <div className="block-row">
               {this.state.editServices.map((service, i) => {
@@ -551,7 +549,10 @@ class ToolOptions extends Component {
                       }}
                     />
                     <label className="full" htmlFor={service.id + "_" + i}>
-                      &nbsp;{service.caption}
+                      &nbsp;
+                      {service.internalLayerName?.length > 0
+                        ? service.internalLayerName
+                        : service.caption}
                     </label>
                   </div>
                 );

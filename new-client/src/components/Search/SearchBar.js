@@ -100,12 +100,6 @@ class SearchBar extends React.PureComponent {
     selectSourcesOpen: false,
   };
 
-  updateSearchOptions = (name, value) => {
-    const { searchOptions } = this.props;
-    searchOptions[name] = value;
-    this.props.updateSearchOptions(searchOptions);
-  };
-
   getOriginBasedIcon = (origin) => {
     const { classes } = this.props;
     let icon;
@@ -209,13 +203,28 @@ class SearchBar extends React.PureComponent {
     );
   };
 
+  /**
+   * @summary Prepare a label to show as the placeholder in the Search bar
+   * @returns {string} placeholder text
+   */
   getPlaceholder = () => {
-    const { options, searchActive } = this.props;
+    const {
+      options,
+      searchActive,
+      searchOptions: { searchInVisibleLayers },
+    } = this.props;
+
+    const labelPostfix = searchInVisibleLayers
+      ? " (endast i synliga lager)"
+      : "";
+
     return searchActive === "selectSearch" || searchActive === "draw"
-      ? "Söker med objekt..."
+      ? `Söker med objekt${labelPostfix}`
       : searchActive === "extentSearch"
-      ? "Söker i området..."
-      : options.searchBarPlaceholder ?? "Sök...";
+      ? `Söker i området${labelPostfix}`
+      : options.searchBarPlaceholder
+      ? `${options.searchBarPlaceholder}${labelPostfix}`
+      : `Sök${labelPostfix}`;
   };
 
   renderSearchResultList = () => {
@@ -274,6 +283,7 @@ class SearchBar extends React.PureComponent {
         autoComplete
         value={decodeCommas(searchString)}
         selectOnFocus
+        blurOnSelect
         open={autoCompleteOpen}
         disableClearable
         onChange={handleSearchInput}
@@ -356,13 +366,18 @@ class SearchBar extends React.PureComponent {
     return (
       <TextField
         {...params}
-        label={undefined}
+        label={
+          <Typography variant="srOnly">Sök i webbplatsens innehåll</Typography>
+        }
         variant={width === "xs" ? "standard" : "outlined"}
         placeholder={placeholder}
         onKeyPress={handleSearchBarKeyPress}
+        InputLabelProps={{ shrink: true }}
         InputProps={{
           ...params.InputProps,
           ...disableUnderline,
+          style: { margin: 0 },
+          notched: width === "xs" ? null : false,
           endAdornment: (
             <>
               {loading ? <CircularProgress color="inherit" size={20} /> : null}

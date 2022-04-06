@@ -3,6 +3,7 @@ import TileLayer from "ol/layer/Tile";
 import WMTS from "ol/source/WMTS";
 import WMTSTileGrid from "ol/tilegrid/WMTS";
 import LayerInfo from "./LayerInfo.js";
+import { overrideLayerSourceParams } from "utils/FetchWrapper";
 
 var wmtsLayerProperties = {
   url: "",
@@ -44,30 +45,40 @@ class WMTSLayer {
       Number(r)
     );
     this.projection = config.projection;
+
+    let source = {
+      attributions: config.attribution,
+      format: "image/png",
+      wrapX: false,
+      url: config.url,
+      crossOrigin: config.crossOrigin,
+      axisMode: config.axisMode,
+      layer: config.layer,
+      matrixSet: config.matrixSet,
+      style: config.style,
+      projection: this.projection,
+      tileGrid: new WMTSTileGrid({
+        origin: config.origin.map((o) => Number(o)),
+        resolutions: this.resolutions,
+        matrixIds: config.matrixIds,
+        extent: config.extent,
+      }),
+    };
+
+    overrideLayerSourceParams(source);
+
+    const minZoom = config?.minZoom >= 0 ? config.minZoom : undefined;
+    const maxZoom = config?.maxZoom >= 0 ? config.maxZoom : undefined;
+
     this.layer = new TileLayer({
       name: config.name,
       visible: config.visible,
       queryable: config.queryable,
       opacity: config.opacity,
-      source: new WMTS({
-        attributions: config.attribution,
-        format: "image/png",
-        wrapX: false,
-        url: config.url,
-        crossOrigin: config.crossOrigin,
-        axisMode: config.axisMode,
-        layer: config.layer,
-        matrixSet: config.matrixSet,
-        style: config.style,
-        projection: this.projection,
-        tileGrid: new WMTSTileGrid({
-          origin: config.origin.map((o) => Number(o)),
-          resolutions: this.resolutions,
-          matrixIds: config.matrixIds,
-          extent: config.extent,
-        }),
-      }),
+      source: new WMTS(source),
       layerInfo: new LayerInfo(config),
+      minZoom: minZoom,
+      maxZoom: maxZoom,
     });
     this.updateMapViewResolutions();
     this.type = "wmts";
@@ -82,6 +93,7 @@ class WMTSLayer {
         constrainResolution: view.getConstrainResolution(),
         resolutions: this.resolutions,
         projection: this.projection,
+        constrainResolution: view.getConstrainResolution(),
       })
     );
   }

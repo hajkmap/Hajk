@@ -47,26 +47,28 @@ const ZoomControl = React.memo(props => {
   }
 
   return (
-    <Paper className={classes.paper}>
-      <Button
-        aria-label="Zooma in"
-        className={classes.button}
-        onClick={() => {
-          zoomByDelta(1);
-        }}
-      >
-        <AddIcon />
-      </Button>
-      <Button
-        aria-label="Zooma ut"
-        className={classes.button}
-        onClick={() => {
-          zoomByDelta(-1);
-        }}
-      >
-        <RemoveIcon />
-      </Button>
-    </Paper>
+    props.map !== undefined && (
+      <Paper className={classes.paper}>
+        <Button
+          aria-label="Zooma in"
+          className={classes.button}
+          onClick={() => {
+            zoomByDelta(1);
+          }}
+        >
+          <AddIcon />
+        </Button>
+        <Button
+          aria-label="Zooma ut"
+          className={classes.button}
+          onClick={() => {
+            zoomByDelta(-1);
+          }}
+        >
+          <RemoveIcon />
+        </Button>
+      </Paper>
+    )
   );
 });
 

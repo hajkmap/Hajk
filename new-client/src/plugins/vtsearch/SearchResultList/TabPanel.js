@@ -18,7 +18,7 @@ const rowHeight = 30;
 class TabPanel extends React.PureComponent {
   static propTypes = {
     activeTabId: PropTypes.number.isRequired,
-    tabId: PropTypes.number.isRequired
+    tabId: PropTypes.number.isRequired,
   };
 
   render() {
@@ -29,7 +29,7 @@ class TabPanel extends React.PureComponent {
       searchResult,
       tabId,
       localObserver,
-      toolConfig
+      toolConfig,
     } = this.props;
 
     var renderSummary = searchResult.type === "journeys" ? true : false;

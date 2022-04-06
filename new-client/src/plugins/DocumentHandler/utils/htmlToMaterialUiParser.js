@@ -1,3 +1,5 @@
+import { v4 as uuidv4 } from "uuid";
+
 /**
  * Default export of function that takes a html-string as input and returns array with MaterialUIComponents
  * @param {string} html String with html that needs to be converted to materialUIComponents
@@ -23,7 +25,13 @@ const parseChild = (child, tagSpecificCallbacks) => {
   let callbackObject = tagSpecificCallbacks.find((object) => {
     return object.tagType.toLowerCase() === child.tagName.toLowerCase();
   });
-  child.callback = callbackObject.callback;
+
+  // We only provide callbacks for a portion of allowed HTML
+  // tags in tagSpecificCallbacks. Only supply a callback
+  // if it was defined.
+  child.callback = callbackObject?.callback;
+
+  child.componentId = uuidv4();
   if (child.children.length > 0) {
     for (const subChild of child.children) {
       parseChild(subChild, tagSpecificCallbacks);

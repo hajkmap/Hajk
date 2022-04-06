@@ -1,12 +1,13 @@
 import React from "react";
 import { withStyles } from "@material-ui/core/styles";
-import Fab from "@material-ui/core/Fab";
-import NavigationIcon from "@material-ui/icons/Navigation";
+
 import Grid from "@material-ui/core/Grid";
 import TableOfContents from "./TableOfContents";
 import clsx from "clsx";
 import Contents from "./Contents";
-import { Typography } from "@material-ui/core";
+import { delay } from "../../../utils/Delay";
+import { animateScroll as scroll } from "react-scroll";
+import ScrollToTop from "./ScrollToTop";
 
 const styles = (theme) => ({
   gridContainer: {
@@ -15,22 +16,17 @@ const styles = (theme) => ({
     overflowX: "hidden",
     userSelect: "text",
     outline: "none",
-    scrollBehavior: "smooth",
   },
-
   contentContainer: {
     paddingBottom: theme.spacing(1),
     paddingLeft: theme.spacing(2),
     paddingRight: theme.spacing(2),
+    outline: "none",
   },
   margin: {
     marginTop: theme.spacing(2),
   },
-  scrollToTopButton: {
-    position: "fixed",
-    bottom: theme.spacing(2),
-    right: theme.spacing(3),
-  },
+
   toc: {
     marginBottom: theme.spacing(2),
   },
@@ -61,7 +57,7 @@ class DocumentViewer extends React.PureComponent {
 
   constructor(props) {
     super(props);
-    this.scrollElementRef = React.createRef();
+    this.documentViewerRef = React.createRef();
     this.setScrollButtonLimit();
     this.bindSubscriptions();
   }
@@ -77,12 +73,12 @@ class DocumentViewer extends React.PureComponent {
 
   bindSubscriptions = () => {
     const { localObserver } = this.props;
-    localObserver.subscribe("scroll-to-chapter", (chapter) => {
+
+    localObserver.subscribe("scroll-to-chapter", async (chapter) => {
       /*scrollIntoView is buggy without dirty fix - 
       tried using react life cycle methods but is, for some reason, not working*/
-      setTimeout(() => {
-        chapter.scrollRef.current.scrollIntoView();
-      }, 100);
+      await delay(100);
+      chapter.scrollRef.current.scrollIntoView();
     });
 
     localObserver.subscribe("scroll-to-top", () => {
@@ -104,37 +100,24 @@ class DocumentViewer extends React.PureComponent {
 
   componentDidUpdate = (prevProps) => {
     if (prevProps.activeDocument !== this.props.activeDocument) {
-      this.scrollToTop();
       this.setState({
         expandedTableOfContents: expandedTocOnStart(this.props),
       });
     }
   };
 
-  scrollToTop = () => {
-    this.scrollElementRef.current.scrollTop = 0;
-  };
-
-  renderScrollToTopButton = () => {
-    const { classes } = this.props;
-    return (
-      <Fab
-        className={classes.scrollToTopButton}
-        size="small"
-        color="primary"
-        onClick={this.scrollToTop}
-      >
-        <Typography variant="srOnly">
-          Scrolla till toppen av dokumentet
-        </Typography>
-        <NavigationIcon />
-      </Fab>
-    );
+  scrollToTop = async () => {
+    scroll.scrollTo(0, {
+      containerId: "documentViewer",
+      smooth: false,
+      duration: 0,
+      delay: 100,
+    });
   };
 
   selectAllText = () => {
     let range = document.createRange();
-    range.selectNode(this.scrollElementRef.current);
+    range.selectNode(this.documentViewerRef.current);
     window.getSelection().removeAllRanges();
     window.getSelection().addRange(range);
   };
@@ -225,16 +208,9 @@ class DocumentViewer extends React.PureComponent {
     return (
       <>
         <Grid
-          tabIndex="0" //Focus grid to be able to use onKeyDown
-          onKeyDown={(e) => {
-            //If ctrl-a or command-a is pressed
-            if ((e.ctrlKey || e.metaKey) && e.keyCode === 65) {
-              this.selectAllText();
-              e.preventDefault();
-            }
-          }}
           onScroll={this.onScroll}
-          ref={this.scrollElementRef}
+          id="documentViewer"
+          ref={this.documentViewerRef}
           className={classes.gridContainer}
           container
         >
@@ -245,6 +221,14 @@ class DocumentViewer extends React.PureComponent {
           )}
 
           <Grid
+            tabIndex="0" //Focus grid to be able to use onKeyDown
+            onKeyDown={(e) => {
+              //If ctrl-a or command-a is pressed
+              if ((e.ctrlKey || e.metaKey) && e.keyCode === 65) {
+                this.selectAllText();
+                e.preventDefault();
+              }
+            }}
             className={clsx(
               showTableOfContents
                 ? classes.contentContainer
@@ -261,9 +245,12 @@ class DocumentViewer extends React.PureComponent {
             />
           </Grid>
         </Grid>
-        {showScrollButton &&
-          documentWindowMaximized &&
-          this.renderScrollToTopButton()}
+        {showScrollButton && documentWindowMaximized && (
+          <ScrollToTop
+            color={activeDocument.documentColor}
+            onClick={this.scrollToTop}
+          ></ScrollToTop>
+        )}
       </>
     );
   }

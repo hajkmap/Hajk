@@ -3,48 +3,24 @@ import CloseIcon from "@material-ui/icons/Close";
 import VisibilityIcon from "@material-ui/icons/Visibility";
 import VisibilityOffIcon from "@material-ui/icons/VisibilityOff";
 import LaunchIcon from "@material-ui/icons/Launch";
-import Button from "@material-ui/core/Button";
+import { Button, IconButton, Grid, Typography, Paper } from "@material-ui/core";
 import CallMadeIcon from "@material-ui/icons/CallMade";
 import { withStyles } from "@material-ui/core/styles";
-import clsx from "clsx";
 import Popover from "@material-ui/core/Popover";
 
 const styles = (theme) => ({
-  breadCrumbFlat: {
-    borderRadius: "0 !important",
-    marginBottom: "5px !important",
+  root: {
+    marginRight: theme.spacing(0.5),
+    border: `${theme.spacing(0.1)}px solid ${theme.palette.divider}`,
   },
-  breadCrumb: {
-    [theme.breakpoints.down("xs")]: {
-      background: "white",
-      display: "flex",
-      justifyContent: "space-between",
-      padding: "10px",
-      border: "1px solid #ccc",
-    },
-    [theme.breakpoints.up("sm")]: {
-      background: "white",
-      borderTopLeftRadius: "5px",
-      borderTopRightRadius: "5px",
-      margin: "0px",
-      marginLeft: "2px",
-      marginRight: "2px",
-      display: "flex",
-      justifyContent: "space-between",
-      padding: "10px",
-      border: "1px solid #ccc",
-      whiteSpace: "nowrap",
-    },
+  gridContainer: {
+    padding: theme.spacing(1),
   },
-  part: {
-    margin: "0 5px",
-    display: "flex",
-  },
-  icon: {
-    cursor: "pointer",
+  titleContainer: {
+    paddingLeft: theme.spacing(0.5),
   },
   links: {
-    padding: "5px",
+    padding: theme.spacing(0.5),
   },
 });
 
@@ -128,7 +104,7 @@ class BreadCrumb extends Component {
     if (this.chapters && this.chapters.length > 0) {
       if (this.chapters.length > 0) {
         return (
-          <div className={classes.infoTextContainer}>
+          <div>
             <div className={classes.links}>
               {this.chapters.map((chapter, i) => {
                 return (
@@ -143,7 +119,7 @@ class BreadCrumb extends Component {
                       }}
                     >
                       {chapter.header}
-                      <CallMadeIcon className={classes.rightIcon} />
+                      <CallMadeIcon />
                     </Button>
                   </div>
                 );
@@ -184,66 +160,61 @@ class BreadCrumb extends Component {
     if (!this.props.chapters) {
       return null;
     }
-    const { classes } = this.props;
     if (this.chapters && this.chapters.length > 0) {
-      if (this.chapters.length === 1) {
-        return (
-          <div className={classes.part}>
-            <LaunchIcon
-              className={classes.icon}
-              onClick={() => this.openInformative(this.chapters[0])}
-            />
-          </div>
-        );
-      } else {
-        return (
-          <div className={classes.part}>
-            <LaunchIcon
-              className={classes.icon}
-              onClick={(e) => {
-                this.renderChaptersPopover(e.target);
-              }}
-            />
-          </div>
-        );
-      }
+      return (
+        <IconButton
+          size="small"
+          onClick={(e) => {
+            this.chapters.length === 1
+              ? this.openInformative(this.chapters[0])
+              : this.renderChaptersPopover(e.target);
+          }}
+        >
+          <LaunchIcon />
+        </IconButton>
+      );
     } else {
       return null;
     }
   }
 
   render() {
-    const { classes } = this.props;
-    var { hidden } = this.state;
-    var cls =
-      this.props.type === "flat"
-        ? clsx(classes.breadCrumb, classes.breadCrumbFlat)
-        : classes.breadCrumb;
+    const { classes, layer, title, type } = this.props;
+    const { hidden } = this.state;
     return (
-      <div className={cls} data-type="bread-crumb">
-        <div className={classes.part}>
-          <div className={classes.part}>
-            {!hidden ? (
-              <VisibilityIcon
-                className={classes.icon}
-                onClick={this.setLayerOpacity(this.props.layer)}
-              />
-            ) : (
-              <VisibilityOffIcon
-                className={classes.icon}
-                onClick={this.setLayerOpacity(this.props.layer)}
-              />
-            )}
-          </div>
+      <Paper className={classes.root} square={type === "flat"} elevation={0}>
+        <Grid
+          container
+          className={classes.gridContainer}
+          data-type="bread-crumb"
+          justify="space-between"
+          alignItems="center"
+        >
+          <Grid item>
+            <IconButton
+              size="small"
+              onClick={this.setLayerOpacity(layer)}
+              aria-label="Visa/dölj lagret tillfälligt"
+            >
+              {!hidden ? <VisibilityIcon /> : <VisibilityOffIcon />}
+            </IconButton>
+          </Grid>
           {this.renderInformativeIcon()}
-          <div className={classes.part}>{this.props.title}</div>
-        </div>
-        <div className={classes.part}>
-          <CloseIcon
-            className={classes.icon}
-            onClick={this.setLayerVisibility(this.props.layer)}
-          />
-        </div>
+          <Grid item className={classes.titleContainer}>
+            <Typography variant="body2" noWrap>
+              {title}
+            </Typography>
+          </Grid>
+          <Grid item>
+            <IconButton
+              size="small"
+              onClick={this.setLayerVisibility(layer)}
+              aria-label="Ta bort lagret från kartan"
+            >
+              <CloseIcon />
+            </IconButton>
+          </Grid>
+        </Grid>
         <Popover
           id="simple-popper"
           open={this.state.popoverOpen}
@@ -260,7 +231,7 @@ class BreadCrumb extends Component {
         >
           {this.renderChapterLinks()}
         </Popover>
-      </div>
+      </Paper>
     );
   }
 }

@@ -11,8 +11,16 @@ import { deepMerge } from "../utils/DeepMerge";
  * @param {*} preferredColorSchemeFromMapConfig
  * @returns {String} "dark" or "light"
  */
-function getColorScheme(preferredColorSchemeFromMapConfig) {
-  // First, check if there already is a user preferred value in local storage
+function getColorScheme(preferredColorSchemeFromMapConfig, customTheme) {
+  // First of all, see if admins have provided a customTheme.json, where
+  // the light/dark mode value is set. If it is, this will override any
+  // other logic, which means we're not interested in user's or OS's preference.
+  if (["light", "dark"].includes(customTheme?.palette?.type)) {
+    return customTheme.palette.type;
+  }
+
+  // If there's no global override, we can go on and
+  // check if there already is a user preferred value in local storage.
   const userPreferredColorScheme = window.localStorage.getItem(
     "userPreferredColorScheme"
   );
@@ -59,10 +67,17 @@ function getColorScheme(preferredColorSchemeFromMapConfig) {
  * @returns {Object} A complete, ready to used theme object
  */
 function getTheme(config, customTheme) {
+  const colorScheme = getColorScheme(
+    config.mapConfig.map.colors?.preferredColorScheme,
+    customTheme
+  );
   // Setup some app-wide defaults that differ from MUI's defaults:
   const hardCodedDefaults = {
     palette: {
-      type: getColorScheme(config.mapConfig.map.colors?.preferredColorScheme),
+      type: colorScheme,
+      action: {
+        active: colorScheme === "dark" ? "#fff" : "rgba(0, 0, 0, 0.87)",
+      },
     },
     shape: {
       borderRadius: 2,
@@ -95,8 +110,17 @@ const HajkThemeProvider = ({ activeTools, config, customTheme }) => {
   // Keep the app's theme in state so it can be changed dynamically.
   const [theme, setTheme] = useState(getTheme(config, customTheme));
 
+  // We need a state-variable so that we are able to re-render the theme-provider
+  // without changing the theme. Why, you might ask? Since we're using a custom theme
+  // when invoking the document-handler-print we must be able to reset the theme back
+  // to the original one (which requires a re-render).
+  const [themeUID, setThemeUID] = useState(Math.random());
+
   // Handles theme toggling
   const toggleMUITheme = () => {
+    // If there's a override in customTheme.json, toggling is not possible.
+    if (customTheme?.palette?.type) return;
+
     // Toggle the current value from theme's palette
     let userPreferredColorScheme =
       theme.palette.type === "light" ? "dark" : "light";
@@ -112,12 +136,27 @@ const HajkThemeProvider = ({ activeTools, config, customTheme }) => {
     const newTheme = deepMerge(theme, {
       palette: {
         type: userPreferredColorScheme,
+        action: {
+          active:
+            userPreferredColorScheme === "dark"
+              ? "#fff"
+              : "rgba(0, 0, 0, 0.87)",
+        },
       },
     });
 
     // Finally, save the new theme object in state. This will cause re-render,
     // and effectively take the new theme type value into action.
     setTheme(newTheme);
+  };
+
+  // This will cause a re-render, allowing for the "standard" theme to be injected
+  // again - which will make sure that the "standard" theme has the highest css-specificity.
+  // Useful for those rare occasions where you might have used a custom theme inside components.
+  // An example of this is in the document-handler print solution, where we're injecting a custom
+  // print theme, which we want to get rid of.
+  const refreshMUITheme = () => {
+    setThemeUID(themeUID + Math.random());
   };
 
   // Take the theme object from state and generate a MUI-theme
@@ -130,8 +169,9 @@ const HajkThemeProvider = ({ activeTools, config, customTheme }) => {
       <App
         activeTools={activeTools}
         config={config}
-        customTheme={customTheme}
-        toggleMUITheme={toggleMUITheme} // Pass the toggle handler, so we can call it from another component later on
+        theme={muiTheme}
+        toggleMUITheme={toggleMUITheme}
+        refreshMUITheme={refreshMUITheme}
       />
     </MuiThemeProvider>
   );

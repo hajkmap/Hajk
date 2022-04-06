@@ -21,11 +21,13 @@ class AttributeTable extends React.Component {
       index: null,
       olFeatureId: null,
     },
-    sortBy: this.props.toolConfig.geoServer[
-      this.props.searchResult.type
-    ]?.defaultSortOrder.slice(-1)[0],
-    sortOrder: this.props.toolConfig.geoServer[this.props.searchResult.type]
-      ?.defaultSortOrder,
+    sortBy:
+      this.props.toolConfig.geoServer[
+        this.props.searchResult.type
+      ]?.defaultSortOrder.slice(-1)[0],
+    sortOrder:
+      this.props.toolConfig.geoServer[this.props.searchResult.type]
+        ?.defaultSortOrder,
     focusedRow: 0,
     rows: this.getRows(),
   };

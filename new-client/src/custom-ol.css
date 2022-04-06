@@ -46,6 +46,10 @@
   right: 8px;
 }
 
+.ol-attribution li:not(:last-child):after {
+  content: ", ";
+}
+
 .ol-overlaycontainer-stopevent {
   z-index: inherit !important;
 }

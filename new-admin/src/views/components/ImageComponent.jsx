@@ -14,8 +14,9 @@ import FormControlLabel from "@material-ui/core/FormControlLabel";
 import FormControl from "@material-ui/core/FormControl";
 import FormLabel from "@material-ui/core/FormLabel";
 import Checkbox from "@material-ui/core/Checkbox";
+import ImageIcon from "@material-ui/icons/Image";
 
-const ImageComponent = props => {
+const ImageComponent = (props) => {
   const classes = useStyles();
 
   const { readOnlyMode } = props.blockProps;
@@ -23,14 +24,17 @@ const ImageComponent = props => {
 
   const { src } = entity.getData();
   const data = entity.getData();
+  const dataSource = data["data-source"];
+  const imageAlt = data.alt;
   const imageWidth = parseInt(data["data-image-width"]) || "";
   const imageHeight = parseInt(data["data-image-height"]) || "";
   const dataCaption = data["data-caption"];
-  const dataSource = data["data-source"];
   const dataPopup = data["data-image-popup"] === undefined ? false : true;
   const dataImagePosition = data["data-image-position"];
 
+  const dataType = data["data-type"] || "image";
   const [open, setOpen] = useState(false);
+  const [alt, setAlt] = useState(imageAlt); //useState(imageAlt === undefined ? "" : imageAlt);
   const [defaultWidth, setDefaultWidth] = useState();
   const [defaultHeight, setDefaultHeight] = useState();
   const [width, setWidth] = useState(imageWidth);
@@ -42,40 +46,66 @@ const ImageComponent = props => {
   const [saveButton, showSaveButton] = useState(true);
 
   useEffect(() => {
-    if (
-      imageWidth !== width ||
-      imageHeight !== height ||
-      dataCaption !== caption ||
-      dataSource !== source ||
-      dataPopup !== popup ||
-      dataImagePosition !== imagePosition
-    ) {
-      showSaveButton(false);
-    } else {
-      showSaveButton(true);
+    if (dataType === "image") {
+      if (
+        dataSource !== source ||
+        imageAlt !== alt ||
+        imageWidth !== width ||
+        imageHeight !== height ||
+        dataCaption !== caption ||
+        dataPopup !== popup ||
+        dataImagePosition !== imagePosition
+      ) {
+        showSaveButton(false);
+      } else {
+        showSaveButton(true);
+      }
+    } else if (dataType === "video") {
+      if (
+        dataSource !== source ||
+        imageAlt !== alt ||
+        imageWidth !== width ||
+        imageHeight !== height ||
+        dataCaption !== caption ||
+        dataImagePosition !== imagePosition
+      )
+        showSaveButton(false);
+      else showSaveButton(true);
+    } else if (dataType === "audio") {
+      if (
+        dataSource !== source ||
+        imageAlt !== alt ||
+        dataCaption !== caption ||
+        dataImagePosition !== imagePosition
+      )
+        showSaveButton(false);
+      else showSaveButton(true);
     }
   }, [
+    dataSource,
+    source,
+    imageAlt,
+    alt,
     imageWidth,
     width,
     imageHeight,
     height,
     dataCaption,
     caption,
-    dataSource,
-    source,
     dataPopup,
     popup,
     dataImagePosition,
-    imagePosition
+    imagePosition,
+    dataType,
   ]);
 
-  const handleOpen = e => {
+  const handleOpen = (e) => {
     e.preventDefault();
     setOpen(true);
     readOnlyMode();
   };
 
-  const handleClose = e => {
+  const handleClose = (e) => {
     //e.preventDefault();
     setOpen(false);
     readOnlyMode();
@@ -85,23 +115,27 @@ const ImageComponent = props => {
     const { imageData } = props.blockProps;
     let data = {
       src: src,
-      "data-image-width": width + "px",
-      "data-image-height": height + "px",
+      alt: alt === undefined ? setAlt("") : alt,
+      "data-image-width": width ? width + "px" : null,
+      "data-image-height": height ? height + "px" : null,
       "data-caption": caption,
       "data-source": source,
-      "data-image-position": imagePosition
+      "data-image-position": imagePosition,
     };
     if (popup) {
       data["data-image-popup"] = "";
     }
+    if (dataType === "video") data["data-type"] = "video";
+    else if (dataType === "audio") data["data-type"] = "audio";
+
     imageData(data);
   };
 
-  const handleChange = event => {
+  const handleChange = (event) => {
     setImagePosition(event.target.value);
   };
 
-  const handlePopupChange = event => {
+  const handlePopupChange = (event) => {
     setPopup(event.target.checked);
   };
 
@@ -111,40 +145,57 @@ const ImageComponent = props => {
 
     setDefaultWidth(defaultWidth);
     setDefaultHeight(defaultHeight);
+  };
 
-    if (width === undefined) {
-      setWidth(defaultWidth);
+  const onVideoLoad = ({ target: video }) => {
+    const defaultWidth = video.offsetWidth;
+    const defaultHeight = video.offsetHeight;
+
+    setDefaultWidth(defaultWidth);
+    setDefaultHeight(defaultHeight);
+  };
+
+  const onAudioLoad = ({ target: audio }) => {
+    setDefaultWidth(300);
+  };
+
+  const calculateHeight = (width) => {
+    if (width) {
+      width = parseInt(width); //Convert string to number
+
+      let aspectRatio = defaultHeight / defaultWidth;
+      let height = width * aspectRatio;
+
+      width = Math.trunc(width);
+      height = Math.trunc(height);
+
+      setWidth(width);
+      setHeight(height);
+    } else {
+      setWidth("");
+      setHeight("");
     }
-    if (height === undefined) {
-      setHeight(defaultHeight);
+  };
+
+  const calculateWidth = (height) => {
+    if (height) {
+      height = parseInt(height); //Convert string to number
+
+      let aspectRatio = defaultWidth / defaultHeight;
+      let width = height * aspectRatio;
+
+      height = Math.trunc(height);
+      width = Math.trunc(width);
+
+      setHeight(height);
+      setWidth(width);
+    } else {
+      setHeight("");
+      setWidth("");
     }
   };
 
-  const calculateHeight = width => {
-    width = parseInt(width); //Convert string to number
-
-    let aspectRatio = defaultHeight / defaultWidth;
-    let height = width * aspectRatio;
-
-    width = Math.trunc(width);
-    height = Math.trunc(height);
-
-    setWidth(width);
-    setHeight(height);
-  };
-
-  const calculateWidth = height => {
-    height = parseInt(height); //Convert string to number
-
-    let aspectRatio = defaultWidth / defaultHeight;
-    let width = height * aspectRatio;
-
-    height = Math.trunc(height);
-    width = Math.trunc(width);
-
-    setHeight(height);
-    setWidth(width);
-  };
+  const popupDisabled = dataType !== "image";
 
   const body = (
     <div className={classes.paper}>
@@ -159,7 +210,7 @@ const ImageComponent = props => {
               <TextField
                 id="image-width"
                 value={width}
-                onChange={e => calculateHeight(e.target.value)}
+                onChange={(e) => calculateHeight(e.target.value)}
                 label="Bredd"
               />
             </Grid>
@@ -172,8 +223,21 @@ const ImageComponent = props => {
               <TextField
                 id="image-height"
                 value={height}
-                onChange={e => calculateWidth(e.target.value)}
+                onChange={(e) => calculateWidth(e.target.value)}
                 label="Höjd"
+              />
+            </Grid>
+          </Grid>
+          <Grid container spacing={1} alignItems="flex-end">
+            <Grid item>
+              <ImageIcon />
+            </Grid>
+            <Grid item>
+              <TextField
+                id="image-alt"
+                value={alt}
+                onChange={(e) => setAlt(e.target.value)}
+                label="Alternativ text"
               />
             </Grid>
           </Grid>
@@ -185,7 +249,7 @@ const ImageComponent = props => {
               <TextField
                 id="image-caption"
                 defaultValue={caption}
-                onChange={e => setCaption(e.target.value)}
+                onChange={(e) => setCaption(e.target.value)}
                 label="Bildtext"
               />
             </Grid>
@@ -198,7 +262,7 @@ const ImageComponent = props => {
               <TextField
                 id="image-source"
                 defaultValue={source}
-                onChange={e => setSource(e.target.value)}
+                onChange={(e) => setSource(e.target.value)}
                 label="Källa"
               />
             </Grid>
@@ -207,6 +271,7 @@ const ImageComponent = props => {
             id="image-popup"
             checked={popup}
             onChange={handlePopupChange}
+            disabled={popupDisabled}
             inputProps={{ "aria-label": "primary checkbox" }}
           />
           <label>Popup</label>
@@ -274,8 +339,8 @@ const ImageComponent = props => {
       id="edit-image-modal"
       aria-labelledby="image-modal-title"
       aria-describedby="image-modal-description"
-      onClick={event => event.stopPropagation()}
-      onMouseDown={event => event.stopPropagation()}
+      onClick={(event) => event.stopPropagation()}
+      onMouseDown={(event) => event.stopPropagation()}
     >
       {body}
     </Modal>
@@ -286,9 +351,9 @@ const ImageComponent = props => {
       <div className={classes.imgContainer}>
         <img
           src={src}
+          alt={alt}
           width={width}
           height={height}
-          alt={caption}
           data-image-width={width}
           data-image-height={height}
           data-caption={caption}
@@ -311,20 +376,83 @@ const ImageComponent = props => {
       </div>
     );
   } else {
+    if (dataType === "image" || data.type === "image") {
+      return (
+        <div className={classes.imgContainer}>
+          <img
+            src={src}
+            alt={alt}
+            width={width}
+            height={height}
+            data-image-width={width}
+            data-image-height={height}
+            data-caption={caption}
+            data-image-position={imagePosition}
+            onClick={handleOpen}
+            onLoad={onImgLoad}
+          />
+          <button
+            type="button"
+            variant="contained"
+            className="btn btn-success"
+            onClick={handleSubmit}
+            hidden={saveButton}
+          >
+            <CheckIcon /> Godkänn ändringar
+          </button>
+          {modal}
+        </div>
+      );
+    }
+  }
+
+  if (dataType === "video" || data.type === "video") {
     return (
       <div className={classes.imgContainer}>
-        <img
-          src={src}
+        <video
+          alt={alt}
           width={width}
           height={height}
-          alt={caption}
           data-image-width={width}
           data-image-height={height}
           data-caption={caption}
           data-image-position={imagePosition}
           onClick={handleOpen}
-          onLoad={onImgLoad}
-        />
+          onLoadStart={onVideoLoad}
+        >
+          <source src={src} type="video/mp4"></source>
+        </video>
+        <button
+          type="button"
+          variant="contained"
+          className="btn btn-success"
+          onClick={handleSubmit}
+          hidden={saveButton}
+        >
+          <CheckIcon /> Godkänn ändringar
+        </button>
+        {modal}
+      </div>
+    );
+  }
+
+  if (dataType === "audio" || data.type === "audio") {
+    return (
+      <div className={classes.imgContainer}>
+        <audio
+          alt={alt}
+          width={width}
+          height={height}
+          data-image-width={width}
+          data-image-height={height}
+          data-caption={caption}
+          data-image-position={imagePosition}
+          onClick={handleOpen}
+          onLoadStart={onAudioLoad}
+          controls
+        >
+          <source src={src} type="audio/mpeg"></source>
+        </audio>
         <button
           type="button"
           variant="contained"
@@ -341,38 +469,38 @@ const ImageComponent = props => {
 };
 
 /* CSS styling */
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles((theme) => ({
   root: {
     fontFamily: "'Georgia', serif",
     padding: 20,
-    width: 1000
+    width: 1000,
   },
   buttons: {
-    marginBottom: 10
+    marginBottom: 10,
   },
   margin: {
-    margin: theme.spacing(1)
+    margin: theme.spacing(1),
   },
   urlInputContainer: {
-    marginBottom: 10
+    marginBottom: 10,
   },
   urlInput: {
     fontFamily: "'Georgia', serif",
     marginRight: 10,
-    padding: 3
+    padding: 3,
   },
   editor: {
     border: "1px solid #ccc",
     cursor: "text",
     minHeight: 80,
-    padding: 10
+    padding: 10,
   },
   button: {
     marginTop: 10,
-    textAlign: "center"
+    textAlign: "center",
   },
   media: {
-    whiteSpace: "initial"
+    whiteSpace: "initial",
   },
   paper: {
     position: "absolute",
@@ -381,7 +509,7 @@ const useStyles = makeStyles(theme => ({
     padding: "1rem",
     backgroundColor: theme.palette.background.paper,
     border: "2px solid #000",
-    boxShadow: theme.shadows[5]
+    boxShadow: theme.shadows[5],
   },
   imgContainer: {
     position: "relative",
@@ -398,16 +526,16 @@ const useStyles = makeStyles(theme => ({
       border: "none",
       cursor: "pointer",
       borderRadius: "5px",
-      textAlign: "center"
+      textAlign: "center",
     },
     "& > .btn:hover": {
-      backgroundColor: "black"
-    }
+      backgroundColor: "black",
+    },
   },
   form: {
     width: 300,
-    float: "left"
-  }
+    float: "left",
+  },
 }));
 
 export default ImageComponent;

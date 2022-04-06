@@ -26,8 +26,6 @@ var defaultState = {
   abstract: "Läs mer om vad som planeras i kommunen",
   caption: "Översiktsplan",
   html: "<div>HTML som beskriver dokumentets innehåll</div>",
-  serviceUrl: "http://localhost:55630/documenthandler/load",
-  exportUrl: "http://localhost:55630/export/document",
   exportRoot: "",
   documentList: [],
   document: "",
@@ -39,7 +37,7 @@ var defaultState = {
   showScrollButtonLimit: 400,
   dynamicImportUrls: {
     iconFonts: "https://fonts.googleapis.com/icon?family=Material+Icons",
-    openSans: "https://fonts.googleapis.com/css?family=Open+Sans"
+    customFont: "https://fonts.googleapis.com/css?family=Open+Sans",
   },
   iconLibraryLink: "https://material.io/resources/icons/?style=baseline",
   width: 600,
@@ -111,11 +109,9 @@ class ToolOptions extends Component {
     });
   }
 
-  componentWillUnmount() {}
   /**
    *
    */
-  componentWillMount() {}
 
   handleInputChange(event) {
     const target = event.target;
@@ -381,14 +377,13 @@ class ToolOptions extends Component {
               <i
                 className="fa fa-question-circle"
                 data-toggle="tooltip"
-                title="Höjd i pixlar på verktygets fönster. Anges som ett numeriskt värde. Lämna tomt för att använda maximal höjd."
+                title="Höjd i pixlar på verktygets fönster. Anges antingen numeriskt (pixlar), 'dynamic' för att automatiskt anpassa höjden efter innehållet eller 'auto' att använda maximal höjd."
               />
             </label>
             <input
               id="height"
               name="height"
-              type="number"
-              min="0"
+              type="text"
               className="control-fixed-width"
               onChange={e => {
                 this.handleInputChange(e);

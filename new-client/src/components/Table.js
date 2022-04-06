@@ -1,5 +1,6 @@
 import React from "react";
 import { withStyles } from "@material-ui/core/styles";
+import { hfetch } from "utils/FetchWrapper";
 
 const styles = theme => ({
   table: {
@@ -27,7 +28,7 @@ class TableView extends React.PureComponent {
 
   componentDidMount() {
     const { source, feature } = this.props;
-    var url = this.parse(source, feature.getProperties());
+    const url = this.parse(source, feature.getProperties());
     this.load(url);
   }
 
@@ -58,9 +59,9 @@ class TableView extends React.PureComponent {
   }
 
   load(url) {
-    fetch(url).then(response => {
-      response.json().then(rsp => {
-        const data = rsp.features.map(feature => {
+    hfetch(url).then((response) => {
+      response.json().then((rsp) => {
+        const data = rsp.features.map((feature) => {
           return {
             date: feature.properties.datetime.split("T")[0],
             value: feature.properties.value

@@ -71,7 +71,7 @@ class SearchResultsDataset extends React.Component {
   };
 
   getFilteredFeatures = () => {
-    const { featureFilter, getFeatureTitle } = this.props;
+    const { featureFilter } = this.props;
     const featureCollection = { ...this.props.featureCollection };
     // If user has a value in the filter input...
     if (featureFilter.length > 0) {
@@ -80,8 +80,7 @@ class SearchResultsDataset extends React.Component {
         (feature) => {
           // Returning the features having a title including
           // the filter string
-          const featureTitle = getFeatureTitle(feature);
-          return featureTitle
+          return feature.featureTitle
             .toLowerCase()
             .includes(featureFilter.toLowerCase());
         }
@@ -93,10 +92,12 @@ class SearchResultsDataset extends React.Component {
   };
 
   getSortedFeatures = (features) => {
-    const { featureSortingStrategy, getFeatureTitle } = this.props;
+    const { featureSortingStrategy } = this.props;
 
     const featuresAtoZSorted = features.sort((a, b) =>
-      getFeatureTitle(a).localeCompare(getFeatureTitle(b), "sv")
+      a.featureTitle.localeCompare(b.featureTitle, undefined, {
+        numeric: true, // Ensure that 1 < 2 < 10
+      })
     );
 
     switch (featureSortingStrategy) {
@@ -114,7 +115,6 @@ class SearchResultsDataset extends React.Component {
       app,
       activeFeatureCollection,
       activeFeature,
-      getFeatureTitle,
       localObserver,
       setActiveFeature,
       enableFeatureToggler,
@@ -124,7 +124,6 @@ class SearchResultsDataset extends React.Component {
         feature={activeFeature}
         features={features}
         setActiveFeature={setActiveFeature}
-        featureTitle={getFeatureTitle(activeFeature)}
         featureCollection={featureCollection}
         app={app}
         source={activeFeatureCollection.source}
@@ -144,7 +143,6 @@ class SearchResultsDataset extends React.Component {
       handleOnFeatureClick,
       handleOnFeatureKeyPress,
       getOriginBasedIcon,
-      getFeatureTitle,
       addFeatureToSelected,
       removeFeatureFromSelected,
       shouldRenderSelectedCollection,
@@ -158,12 +156,11 @@ class SearchResultsDataset extends React.Component {
           id={`search-result-dataset-details-${featureCollection.source.id}`}
         >
           {sortedFeatures.map((f) => {
-            const featureTitle = getFeatureTitle(f);
             return (
               <ListItem
                 disableTouchRipple
                 className={classes.featureListItem}
-                key={f.id}
+                key={f.getId()}
                 divider
                 button
                 onClick={() => {
@@ -178,17 +175,12 @@ class SearchResultsDataset extends React.Component {
               >
                 <SearchResultsDatasetFeature
                   feature={f}
-                  featureTitle={
-                    featureTitle.length > 0
-                      ? featureTitle
-                      : "Visningsfält saknas"
-                  }
                   app={app}
                   source={featureCollection.source}
                   origin={featureCollection.origin}
                   visibleInMap={
                     selectedFeatures.findIndex(
-                      (item) => item.feature.id === f.id
+                      (item) => item.feature.getId() === f.getId()
                     ) > -1
                   }
                   addFeatureToSelected={addFeatureToSelected}
@@ -211,10 +203,10 @@ class SearchResultsDataset extends React.Component {
   renderDatasetDetails = () => {
     const { activeFeature } = this.props;
 
+    // If the user has selected a feature, we should show its details
+    // if the feature does not have a onClickName. If it does, the details
+    // will be taken care of somewhere else.
     const shouldRenderFeatureDetails =
-      // If the user has selected a feature, we should show it's details
-      // IF the feature does not have a onClickName, if it does, the details
-      // will be taken care of somewhere else.
       activeFeature && !activeFeature.onClickName;
 
     const features = this.getFilteredFeatures();
@@ -226,11 +218,7 @@ class SearchResultsDataset extends React.Component {
 
   renderSearchResultPreview = () => {
     const { previewFeature, previewAnchorEl } = this.state;
-    const {
-      activeFeatureCollection,
-      getFeatureTitle,
-      enableFeaturePreview,
-    } = this.props;
+    const { activeFeatureCollection, enableFeaturePreview } = this.props;
     const shouldShowPreview =
       enableFeaturePreview && !isMobile && !previewFeature?.onClickName
         ? true
@@ -243,7 +231,6 @@ class SearchResultsDataset extends React.Component {
           activeFeatureCollection={activeFeatureCollection}
           app={this.props.app}
           anchorEl={previewAnchorEl}
-          getFeatureTitle={getFeatureTitle}
         />
       );
     } else {

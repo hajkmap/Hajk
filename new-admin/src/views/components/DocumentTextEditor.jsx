@@ -7,32 +7,56 @@ import {
   getDefaultKeyBinding,
   KeyBindingUtil,
   convertToRaw,
-  SelectionState
+  SelectionState,
 } from "draft-js";
 import Editor from "draft-js-plugins-editor";
 import { stateToHTML } from "draft-js-export-html";
 import DraftOffsetKey from "draft-js/lib/DraftOffsetKey";
 import { stateFromHTML } from "draft-js-import-html";
-
+import { withStyles } from "@material-ui/core/styles";
 import FormatBoldIcon from "@material-ui/icons/FormatBold";
 import FormatItalicIcon from "@material-ui/icons/FormatItalic";
 import FormatUnderlinedIcon from "@material-ui/icons/FormatUnderlined";
 import FormatListBulletedIcon from "@material-ui/icons/FormatListBulleted";
 import FormatListNumberedIcon from "@material-ui/icons/FormatListNumbered";
 import FormatQuoteIcon from "@material-ui/icons/FormatQuote";
+import TranslateIcon from "@material-ui/icons/Translate";
 import ImageIcon from "@material-ui/icons/Image";
+import MovieIcon from "@material-ui/icons/Movie";
+import AudiotrackIcon from "@material-ui/icons/Audiotrack";
 import DescriptionIcon from "@material-ui/icons/Description";
 import MapIcon from "@material-ui/icons/Map";
 import LaunchIcon from "@material-ui/icons/Launch";
 import Grid from "@material-ui/core/Grid";
 import TextField from "@material-ui/core/TextField";
 import Autocomplete from "@material-ui/lab/Autocomplete";
-
+import { red, green } from "@material-ui/core/colors";
 import TextAreaInput from "./TextAreaInput";
 import addLinkPlugin from "./addLinkPlugin";
 import StyleButton from "./StyleButton";
 import ImageComponent from "./ImageComponent";
 import insertNewLine from "../utils/insertNewLine";
+import { Typography, Button } from "@material-ui/core";
+
+const ColorButtonRed = withStyles((theme) => ({
+  root: {
+    color: theme.palette.getContrastText(red[500]),
+    backgroundColor: red[500],
+    "&:hover": {
+      backgroundColor: red[700],
+    },
+  },
+}))(Button);
+
+const ColorButtonGreen = withStyles((theme) => ({
+  root: {
+    color: theme.palette.getContrastText(green[700]),
+    backgroundColor: green[500],
+    "&:hover": {
+      backgroundColor: green[700],
+    },
+  },
+}))(Button);
 
 export default class DocumentTextEditor extends React.Component {
   constructor(props) {
@@ -48,14 +72,19 @@ export default class DocumentTextEditor extends React.Component {
       url: "",
       urlType: "",
       imageList: this.props.imageList,
+      videoList: this.props.videoList,
+      audioList: this.props.audioList,
       documents: this.props.documents,
       readOnly: false,
       onReadOnly: false,
       currentImage: "",
+      currentVideo: "",
+      currentAudio: "",
       imageData: {},
       urlValue: "",
+      imageAlt: "",
       defaultWidth: null,
-      defaultHeight: null
+      defaultHeight: null,
     };
     this.plugins = [addLinkPlugin];
     this.focus = () => this.refs.editor.focus();
@@ -64,30 +93,36 @@ export default class DocumentTextEditor extends React.Component {
       console.log("HTML", this.props.html);
       console.log(stateToHTML(content));
       console.log(convertToRaw(content));
+      console.log("content", content);
+      console.log("this.state.editorState", this.state.editorState);
+      console.log("---");
     };
     this.onChange = this._onChange.bind(this);
-    this.onURLChange = e => this.setState({ urlValue: e.target.value });
-    this.onTitleChange = e => this.setState({ urlTitle: e.target.value });
-    this.onTitleIdChange = e => this.setState({ urlTitleId: e.target.value });
-    this.onDataCaptionChange = e =>
+    this.onURLChange = (e) => this.setState({ urlValue: e.target.value });
+    this.onImageAltChange = (e) => this.setState({ imageAlt: e.target.value });
+    this.onTitleChange = (e) => this.setState({ urlTitle: e.target.value });
+    this.onTitleIdChange = (e) => this.setState({ urlTitleId: e.target.value });
+    this.onDataCaptionChange = (e) =>
       this.setState({ mediaCaption: e.target.value });
-    this.onDataSourceChange = e =>
+    this.onDataSourceChange = (e) =>
       this.setState({ mediaSource: e.target.value });
-    this.onDataPopupChange = e =>
+    this.onDataPopupChange = (e) =>
       this.setState({ mediaPopup: !this.state.mediaPopup });
-    this.onDataPositionChange = e =>
+    this.onDataPositionChange = (e) =>
       this.setState({ mediaPosition: e.target.value });
-    this.onBlockBackgroundChange = e =>
+    this.onBlockBackgroundChange = (e) =>
       this.setState({ blockBackground: e.target.value });
-    this.onBlockDividerChange = e =>
+    this.onBlockDividerChange = (e) =>
       this.setState({ blockDivider: e.target.value });
     this.addAudio = this._addAudio.bind(this);
     this.addImage = this._addImage.bind(this);
     this.addVideo = this._addVideo.bind(this);
+    this.addAudio = this._addAudio.bind(this);
     this.addMapLink = this._addMapLink.bind(this);
     this.addDocumentLink = this._addDocumentLink.bind(this);
     this.addWebLink = this._addWebLink.bind(this);
     this.addTextArea = this._addTextArea.bind(this);
+    this.addHoverText = this._addHoverText.bind(this);
     this.closeURLInput = this._closeURLInput.bind(this);
     this.closeLinkInput = this._closeLinkInput.bind(this);
     this.confirmMedia = this._confirmMedia.bind(this);
@@ -102,28 +137,31 @@ export default class DocumentTextEditor extends React.Component {
     this.toggleInlineStyle = this._toggleInlineStyle.bind(this);
     this.blockRenderer = this._blockRenderer.bind(this);
     this.onImgLoad = this.onImgLoad.bind(this);
+    this.onVideoLoad = this.onVideoLoad.bind(this);
   }
 
-  _stateFromHtmlWithOptions = html => {
-    const customBlockFn = element => {
+  _stateFromHtmlWithOptions = (html) => {
+    const customBlockFn = (element) => {
       let { tagName } = element;
       if (tagName === "BLOCKQUOTE") {
         return {
           type: "blockquote",
           data: {
-            dividerColor: element.attributes.getNamedItem("data-divider-color")
-              ?.value,
+            dividerColor:
+              element.attributes.getNamedItem("data-divider-color")?.value,
             backgroundColor: element.attributes.getNamedItem(
               "data-background-color"
             )?.value,
             textSection:
-              element.attributes.getNamedItem("data-text-section")?.value || ""
-          }
+              element.attributes.getNamedItem("data-text-section")?.value || "",
+          },
         };
       }
     };
+
     return stateFromHTML(html, { customBlockFn });
   };
+
   _onChange(editorState) {
     this.setState({ editorState });
     this.applyChanges();
@@ -144,42 +182,89 @@ export default class DocumentTextEditor extends React.Component {
       RichUtils.toggleInlineStyle(this.state.editorState, inlineStyle)
     );
   }
-  _confirmMedia(e) {
-    e.preventDefault();
+
+  _createContentStateWithEntity = () => {
     const {
       editorState,
       urlValue,
+      imageAlt,
       urlType,
       mediaWidth,
       mediaHeight,
       mediaCaption,
       mediaSource,
       mediaPopup,
-      mediaPosition
+      mediaPosition,
     } = this.state;
-    const contentState = editorState.getCurrentContent();
-    let contentStateWithEntity;
 
-    if (mediaPopup) {
+    let contentStateWithEntity;
+    const contentState = editorState.getCurrentContent();
+
+    if (urlType === "image") {
+      if (mediaPopup) {
+        contentStateWithEntity = contentState.createEntity(
+          urlType,
+          "IMMUTABLE",
+          {
+            src: urlValue,
+            type: "image",
+            alt: imageAlt ? imageAlt : "",
+            "data-image-width": mediaWidth ? mediaWidth + "px" : null,
+            "data-image-height": mediaHeight ? mediaHeight + "px" : null,
+            "data-caption": mediaCaption,
+            "data-source": mediaSource,
+            "data-image-popup": "",
+            "data-image-position": mediaPosition,
+          }
+        );
+      } else {
+        contentStateWithEntity = contentState.createEntity(
+          urlType,
+          "IMMUTABLE",
+          {
+            src: urlValue,
+            type: "image",
+            alt: imageAlt ? imageAlt : "",
+            "data-image-width": mediaWidth ? mediaWidth + "px" : null,
+            "data-image-height": mediaHeight ? mediaHeight + "px" : null,
+            "data-caption": mediaCaption,
+            "data-source": mediaSource,
+            "data-image-position": mediaPosition,
+          }
+        );
+      }
+    } else if (urlType === "video") {
       contentStateWithEntity = contentState.createEntity(urlType, "IMMUTABLE", {
         src: urlValue,
+        type: "video",
         "data-image-width": mediaWidth ? mediaWidth + "px" : null,
         "data-image-height": mediaHeight ? mediaHeight + "px" : null,
         "data-caption": mediaCaption,
         "data-source": mediaSource,
-        "data-image-popup": "",
-        "data-image-position": mediaPosition
+        "data-image-position": mediaPosition,
+        "data-type": "video",
       });
-    } else {
+    } else if (urlType === "audio") {
       contentStateWithEntity = contentState.createEntity(urlType, "IMMUTABLE", {
         src: urlValue,
+        type: "audio",
         "data-image-width": mediaWidth ? mediaWidth + "px" : null,
         "data-image-height": mediaHeight ? mediaHeight + "px" : null,
         "data-caption": mediaCaption,
         "data-source": mediaSource,
-        "data-image-position": mediaPosition
+        "data-image-position": mediaPosition,
+        "data-type": "audio",
       });
     }
+
+    return contentStateWithEntity;
+  };
+
+  _confirmMedia(e) {
+    e.preventDefault();
+
+    const { editorState, urlType } = this.state;
+    const contentStateWithEntity = this._createContentStateWithEntity();
 
     const entityKey = contentStateWithEntity.getLastCreatedEntityKey();
     const newEditorState = EditorState.push(
@@ -187,28 +272,107 @@ export default class DocumentTextEditor extends React.Component {
       contentStateWithEntity,
       "create-entity"
     );
+
+    let htmlText = " ";
+    if (urlType === "video") htmlText = this._createVideoHtmlText();
+    else if (urlType === "audio") htmlText = this._createAudioHtmlText();
+
     this.setState(
       {
         editorState: AtomicBlockUtils.insertAtomicBlock(
           newEditorState,
           entityKey,
-          " "
+          htmlText
         ),
         showURLInput: false,
         showLinkInput: false,
         showTextAreaInput: false,
         urlValue: "",
+        imageAlt: "",
         mediaWidth: "",
         mediaHeight: "",
         mediaCaption: "",
         mediaSource: "",
-        mediaPopup: false
+        mediaPopup: false,
       },
       () => {
         setTimeout(() => this.focus(), 0);
       }
     );
   }
+
+  _createVideoHtmlText() {
+    let {
+      urlValue,
+      imageAlt,
+      urlType,
+      mediaWidth,
+      mediaHeight,
+      mediaCaption,
+      mediaSource,
+      mediaPosition,
+    } = this.state;
+
+    imageAlt = imageAlt ? imageAlt : "";
+    mediaCaption = mediaCaption ? mediaCaption : "";
+    mediaSource = mediaSource ? mediaSource : "";
+    mediaPosition = mediaPosition ? mediaPosition : "left";
+
+    const htmlText =
+      '<img src="' +
+      urlValue +
+      '" data-type="' +
+      urlType +
+      '" data-image-width="' +
+      mediaWidth +
+      'px" data-image-height="' +
+      mediaHeight +
+      'px" alt="' +
+      imageAlt +
+      '" data-caption="' +
+      mediaCaption +
+      '" data-source="' +
+      mediaSource +
+      '" data-image-position="' +
+      mediaPosition +
+      '"/>';
+
+    return htmlText;
+  }
+
+  _createAudioHtmlText() {
+    let {
+      urlValue,
+      imageAlt,
+      urlType,
+      mediaCaption,
+      mediaSource,
+      mediaPosition,
+    } = this.state;
+
+    imageAlt = imageAlt ? imageAlt : "";
+    mediaCaption = mediaCaption ? mediaCaption : "";
+    mediaSource = mediaSource ? mediaSource : "";
+    mediaPosition = mediaPosition ? mediaPosition : "left";
+
+    const htmlText =
+      '<img src="' +
+      urlValue +
+      '" data-type="' +
+      urlType +
+      '" alt="' +
+      imageAlt +
+      '" data-caption="' +
+      mediaCaption +
+      '" data-source="' +
+      mediaSource +
+      '" data-image-position="' +
+      mediaPosition +
+      '"/>';
+
+    return htmlText;
+  }
+
   _onURLInputKeyDown(e) {
     if (e.which === 13) {
       this._confirmMedia(e);
@@ -221,11 +385,12 @@ export default class DocumentTextEditor extends React.Component {
         showLinkInput: false,
         showTextAreaInput: false,
         urlValue: "",
+        imageAlt: "",
         mediaWidth: "",
         mediaHeight: "",
         mediaCaption: "",
         mediaSource: "",
-        mediaPopup: false
+        mediaPopup: false,
       },
       () => {
         setTimeout(() => this.focus(), 0);
@@ -235,10 +400,12 @@ export default class DocumentTextEditor extends React.Component {
 
   _confirmLink(e) {
     e.preventDefault();
-    const { editorState, urlValue, urlType, urlTitle, urlTitleId } = this.state;
+    const { editorState, urlValue, imageAlt, urlType, urlTitle, urlTitleId } =
+      this.state;
     const data = {
       url: urlValue,
-      type: urlType
+      alt: imageAlt,
+      type: urlType,
     };
 
     if (urlType === "urllink") {
@@ -248,6 +415,8 @@ export default class DocumentTextEditor extends React.Component {
       data["data-document"] = urlValue;
     } else if (urlType === "maplink") {
       data["data-maplink"] = urlValue;
+    } else if (urlType === "hover") {
+      data["data-hover"] = urlValue;
     }
 
     const contentState = editorState.getCurrentContent();
@@ -258,7 +427,7 @@ export default class DocumentTextEditor extends React.Component {
     );
     const entityKey = contentStateWithEntity.getLastCreatedEntityKey();
     const newEditorState = EditorState.set(editorState, {
-      currentContent: contentStateWithEntity
+      currentContent: contentStateWithEntity,
     });
     this.setState(
       {
@@ -272,8 +441,9 @@ export default class DocumentTextEditor extends React.Component {
         showLinkInput: false,
         showTextAreaInput: false,
         urlValue: "",
+        imageAlt: "",
         urlTitle: "",
-        urlTitleId: ""
+        urlTitleId: "",
       },
       () => {
         setTimeout(() => this.focus(), 0);
@@ -291,8 +461,9 @@ export default class DocumentTextEditor extends React.Component {
       {
         showLinkInput: false,
         urlValue: "",
+        imageAlt: "",
         urlTitle: "",
-        urlTitleId: ""
+        urlTitleId: "",
       },
       () => {
         setTimeout(() => this.focus(), 0);
@@ -305,13 +476,13 @@ export default class DocumentTextEditor extends React.Component {
 
     if (evt.shiftKey) {
       this.setState({
-        editorState: RichUtils.insertSoftNewline(this.state.editorState)
+        editorState: RichUtils.insertSoftNewline(this.state.editorState),
       });
       return "handled";
     }
     if (this.isImageBlockInSelection(editorState)) {
       this.setState({
-        editorState: insertNewLine(editorState)
+        editorState: insertNewLine(editorState),
       });
       return "handled";
     }
@@ -323,7 +494,7 @@ export default class DocumentTextEditor extends React.Component {
     this.setState({
       showURLInput: false,
       showLinkInput: false,
-      showTextAreaInput: true
+      showTextAreaInput: true,
     });
   }
   _promptForMedia(type) {
@@ -333,12 +504,13 @@ export default class DocumentTextEditor extends React.Component {
         showLinkInput: false,
         showTextAreaInput: false,
         urlValue: this.state.urlValue,
+        imageAlt: this.state.imageAlt,
         urlType: type,
         mediaWidth: this.state.mediaWidth,
         mediaHeight: this.state.mediaHeight,
         mediaCaption: this.state.mediaCaption,
         mediaSource: this.state.mediaSource,
-        mediaPopup: this.state.mediaPopup
+        mediaPopup: this.state.mediaPopup,
       },
       () => {
         setTimeout(() => this.refs.url.focus(), 0);
@@ -352,9 +524,27 @@ export default class DocumentTextEditor extends React.Component {
         showLinkInput: true,
         showTextAreaInput: false,
         urlValue: this.state.urlValue,
+        imageAlt: this.state.imageAlt,
         urlType: type,
         urlTitle: "",
-        urlTitleId: ""
+        urlTitleId: "",
+      },
+      () => {
+        setTimeout(() => this.refs.link.focus(), 0);
+      }
+    );
+  }
+  _promptForHover() {
+    this.setState(
+      {
+        showURLInput: false,
+        showLinkInput: true,
+        showTextAreaInput: false,
+        urlValue: this.state.urlValue,
+        imageAlt: this.state.imageAlt,
+        urlType: "",
+        urlTitle: "",
+        urlTitleId: "",
       },
       () => {
         setTimeout(() => this.refs.link.focus(), 0);
@@ -366,14 +556,14 @@ export default class DocumentTextEditor extends React.Component {
     this._promptForTextArea();
   }
 
-  _addAudio() {
-    this._promptForMedia("audio");
-  }
   _addImage() {
     this._promptForMedia("image");
   }
   _addVideo() {
     this._promptForMedia("video");
+  }
+  _addAudio() {
+    this._promptForMedia("audio");
   }
   _addMapLink() {
     this._promptForLink("maplink");
@@ -383,6 +573,9 @@ export default class DocumentTextEditor extends React.Component {
   }
   _addWebLink() {
     this._promptForLink("urllink");
+  }
+  _addHoverText() {
+    this._promptForLink("hover");
   }
 
   _mapKeyToEditorCommand(e) {
@@ -452,38 +645,90 @@ export default class DocumentTextEditor extends React.Component {
   };
   _blockRenderer(block, { getEditorState }) {
     let blockType = block.getType();
-    const { editorState } = this.state;
     const contentState = getEditorState().getCurrentContent();
 
     if (blockType === "atomic") {
-      const entityKey = contentState.getEntity(block.getEntityAt(0));
-      const type = entityKey.getType().toLowerCase();
+      const data = contentState.getEntity(block.getEntityAt(0)).getData();
+      const dataType = data["data-type"] || "image";
 
-      if (type === "image") {
-        const selection = editorState.getSelection();
-
+      if (dataType === "image") {
         const contentBlockKey = block.getKey();
+        const isFocused =
+          getEditorState().getSelection().getAnchorKey() === contentBlockKey &&
+          this.isImageBlockInSelection(getEditorState());
 
         return {
           component: ImageComponent,
           editable: false,
           props: {
             readOnlyMode: this.toggleReadOnly,
-            currentImage: img => this.setState({ currentImage: img }),
-            imageData: data =>
-              this.updateSelectedImageData(contentBlockKey, editorState, data),
-            isFocused: () =>
-              selection.getAnchorKey() === contentBlockKey &&
-              this.isImageBlockInSelection(editorState),
+            imageData: (data) =>
+              this.updateSelectedImageData(
+                contentBlockKey,
+                getEditorState(),
+                data
+              ),
+            isFocused: () => isFocused,
             onClick: () =>
               EditorState.push(
-                this.selectImageWithBlockKey(editorState, contentBlockKey)
-              )
-          }
+                this.selectImageWithBlockKey(getEditorState(), contentBlockKey)
+              ),
+          },
+        };
+      }
+
+      if (dataType === "video") {
+        const contentBlockKey = block.getKey();
+        const isFocused =
+          getEditorState().getSelection().getAnchorKey() === contentBlockKey &&
+          this.isImageBlockInSelection(getEditorState());
+
+        return {
+          component: ImageComponent,
+          editable: false,
+          props: {
+            readOnlyMode: this.toggleReadOnly,
+            imageData: (data) =>
+              this.updateSelectedImageData(
+                contentBlockKey,
+                getEditorState(),
+                data
+              ),
+            isFocused: () => isFocused,
+            onClick: () =>
+              EditorState.push(
+                this.selectImageWithBlockKey(getEditorState(), contentBlockKey)
+              ),
+          },
+        };
+      }
+
+      if (dataType === "audio") {
+        const contentBlockKey = block.getKey();
+        const isFocused =
+          getEditorState().getSelection().getAnchorKey() === contentBlockKey &&
+          this.isImageBlockInSelection(getEditorState());
+
+        return {
+          component: ImageComponent,
+          editable: false,
+          props: {
+            readOnlyMode: this.toggleReadOnly,
+            imageData: (data) =>
+              this.updateSelectedImageData(
+                contentBlockKey,
+                getEditorState,
+                data
+              ),
+            isFocused: () => isFocused,
+            onClick: () =>
+              EditorState.push(
+                this.selectImageWithBlockKey(getEditorState, contentBlockKey)
+              ),
+          },
         };
       }
     }
-    return null;
   }
 
   selectImageWithBlockKey(editorState, key) {
@@ -505,7 +750,7 @@ export default class DocumentTextEditor extends React.Component {
       anchorKey: key,
       anchorOffset: 0,
       focusKey: key,
-      focusOffset: 0
+      focusOffset: 0,
     });
     return EditorState.forceSelection(editorState, sel);
   }
@@ -518,7 +763,7 @@ export default class DocumentTextEditor extends React.Component {
       anchorOffset: selection.anchorOffset,
       focusKey: anchorKey,
       focusOffset: selection.focusOffset,
-      isBackward: false
+      isBackward: false,
     });
     let newEditorState = EditorState.acceptSelection(
       editorState,
@@ -526,7 +771,7 @@ export default class DocumentTextEditor extends React.Component {
     );
 
     this.setState({
-      editorState: newEditorState
+      editorState: newEditorState,
     });
 
     let newSelection = newEditorState.getSelection();
@@ -542,7 +787,12 @@ export default class DocumentTextEditor extends React.Component {
       const entityKey = contentBlock.getEntityAt(0);
       const entity = contentState.getEntity(entityKey);
 
-      if (entity && entity.getType().toUpperCase() === "IMAGE") {
+      if (
+        entity &&
+        (entity.getType().toLowerCase() === "image" ||
+          entity.getType().toLowerCase() === "video" ||
+          entity.getType().toLowerCase() === "audio")
+      ) {
         const newContentState = contentState.replaceEntityData(entityKey, data);
         return EditorState.push(editorState, newContentState, "apply-entity");
       }
@@ -553,20 +803,20 @@ export default class DocumentTextEditor extends React.Component {
   getHtml() {
     const contentState = this.state.editorState.getCurrentContent();
 
-    const blockStyleFn = block => {
+    const blockStyleFn = (block) => {
       const blockType = block.getType().toLowerCase();
       if (blockType === "blockquote") {
         return {
           attributes: {
             "data-divider-color": block.getData().get("dividerColor"),
             "data-background-color": block.getData().get("backgroundColor"),
-            "data-text-section": block.getData().get("textSection")
-          }
+            "data-text-section": block.getData().get("textSection"),
+          },
         };
       }
     };
 
-    const entityStyleFn = entity => {
+    const entityStyleFn = (entity) => {
       const entityType = entity.getType().toUpperCase();
       if (entityType === "LINK") {
         // Add styling here
@@ -578,7 +828,7 @@ export default class DocumentTextEditor extends React.Component {
 
     const options = {
       blockStyleFn,
-      entityStyleFn
+      entityStyleFn,
     };
     return stateToHTML(contentState, options);
   }
@@ -587,7 +837,7 @@ export default class DocumentTextEditor extends React.Component {
     var htmlString = this.getHtml().replace(/<p><br><\/p>/gm, "");
     this.props.onUpdate(htmlString);
     this.setState({
-      html: htmlString
+      html: htmlString,
     });
   }
 
@@ -599,6 +849,8 @@ export default class DocumentTextEditor extends React.Component {
         return "dokumentlänk";
       case "maplink":
         return "kartlänk";
+      case "hover":
+        return "svävartext";
       default:
         return "länk";
     }
@@ -628,7 +880,7 @@ export default class DocumentTextEditor extends React.Component {
           style={styles.urlInput}
           type="text"
           value={this.state.urlValue || ""}
-          placeholder="Webblänk"
+          placeholder={this.getUrlType(type)}
           onKeyDown={this.onLinkInputKeyDown}
         />
       );
@@ -639,14 +891,20 @@ export default class DocumentTextEditor extends React.Component {
     // Return input field for default URL or documents
     if (type === "documentlink") {
       return (
-        <input
-          onChange={this.onTitleIdChange}
-          ref="url"
+        <TextField
+          autoFocus
           style={styles.urlInput}
-          type="text"
           value={this.state.urlTitleId || ""}
           placeholder="data-header-identifier"
           onKeyDown={this.onLinkInputKeyDown}
+          helperText="Id-nummer för kapitlet som ska visas"
+          margin="normal"
+          InputLabelProps={{
+            shrink: true,
+          }}
+          type="text"
+          onChange={this.onTitleIdChange}
+          ref="url"
         />
       );
     }
@@ -675,10 +933,10 @@ export default class DocumentTextEditor extends React.Component {
     return this.isImageBlock(contentBlock, contentState);
   }
 
-  toggleReadOnly = e => {
+  toggleReadOnly = (e) => {
     const { onReadOnly } = this.state;
     this.setState({
-      onReadOnly: !onReadOnly
+      onReadOnly: !onReadOnly,
     });
   };
 
@@ -690,7 +948,7 @@ export default class DocumentTextEditor extends React.Component {
       readOnly = false;
     }
     this.setState({
-      readOnly: readOnly
+      readOnly: readOnly,
     });
   };
 
@@ -699,53 +957,106 @@ export default class DocumentTextEditor extends React.Component {
       defaultWidth: img.offsetWidth,
       defaultHeight: img.offsetHeight,
       mediaWidth: img.offsetWidth,
-      mediaHeight: img.offsetHeight
+      mediaHeight: img.offsetHeight,
     });
   }
 
-  calculateHeight = width => {
+  onVideoLoad({ target: video }) {
+    this.setState({
+      defaultWidth: video.offsetWidth,
+      defaultHeight: video.offsetHeight,
+      mediaWidth: video.offsetWidth,
+      mediaHeight: video.offsetHeight,
+    });
+  }
+
+  calculateHeight = (width) => {
     let aspectRatio = this.state.defaultHeight / this.state.defaultWidth;
     let height = width * aspectRatio;
 
     this.setState({
       mediaWidth: Math.trunc(width),
-      mediaHeight: Math.trunc(height)
+      mediaHeight: Math.trunc(height),
     });
   };
 
-  calculateWidth = height => {
+  calculateWidth = (height) => {
     let aspectRatio = this.state.defaultWidth / this.state.defaultHeight;
     let width = height * aspectRatio;
 
     this.setState({
       mediaHeight: Math.trunc(height),
-      mediaWidth: Math.trunc(width)
+      mediaWidth: Math.trunc(width),
     });
   };
 
+  renderImagesVideosOrAudios = (type, imageList, videoList, audioList) => {
+    if (type === "image")
+      return imageList
+        ? imageList.map((image, i) => {
+            const imageUrl = "../Upload/" + image;
+            return imageUrl;
+          })
+        : null;
+    if (type === "video")
+      return videoList
+        ? videoList.map((video, i) => {
+            const videoUrl = "../Upload/" + video;
+            return videoUrl;
+          })
+        : null;
+    if (type === "audio")
+      return audioList
+        ? audioList.map((audio, i) => {
+            const audioUrl = "../Upload/" + audio;
+            return audioUrl;
+          })
+        : null;
+  };
+
+  preview = (type) => {
+    if (type === "image")
+      return this.state.urlValue ? (
+        <img
+          onLoad={this.onImgLoad}
+          src={this.state.urlValue}
+          alt={this.state.imageAlt}
+          width={this.state.mediaWidth}
+          height={this.state.mediaHeight}
+        />
+      ) : null;
+    if (type === "video")
+      return this.state.urlValue ? (
+        <video
+          onLoadedData={this.onVideoLoad}
+          src={this.state.urlValue}
+          alt={this.state.imageAlt}
+          width={this.state.mediaWidth}
+          height={this.state.mediaHeight}
+        />
+      ) : null;
+  };
+
   render() {
-    const { editorState, imageList, documents } = this.state;
-
+    const { editorState, imageList, videoList, audioList, documents } =
+      this.state;
     let editorContainer = styles.editor;
-    var contentState = editorState.getCurrentContent();
-    if (!contentState.hasText()) {
-      if (
-        contentState
-          .getBlockMap()
-          .first()
-          .getType() !== "unstyled"
-      ) {
-        editorContainer = " RichEditor-hidePlaceholder";
-      }
-    }
-
     let urlInput;
     if (this.state.showURLInput) {
+      const addTextLocale =
+        this.state.urlType === "image"
+          ? "bild"
+          : this.state.urlType === "video"
+          ? "video"
+          : "ljud";
+      const popupDisabled = this.state.urlType === "image" ? false : true;
+      const widthHeightDisable = this.state.urlType === "audio" ? true : false;
+
       urlInput = (
-        <Grid container>
-          <Grid container spacing={2} item xs={5}>
+        <Grid style={styles.gridItemContainer} container>
+          <Grid container direction="column" spacing={2} item xs={6}>
             <Grid item>
-              <p>Lägg till bild</p>
+              <Typography variant="h5">Lägg till {addTextLocale}</Typography>
               <Autocomplete
                 id="disabled-options-demo"
                 freeSolo
@@ -757,96 +1068,127 @@ export default class DocumentTextEditor extends React.Component {
                 }}
                 ref="url"
                 name="url"
-                options={
-                  imageList
-                    ? imageList.map((image, i) => {
-                        const imageUrl = "../Upload/" + image;
-                        return imageUrl;
-                      })
-                    : null
-                }
+                options={this.renderImagesVideosOrAudios(
+                  this.state.urlType,
+                  imageList,
+                  videoList,
+                  audioList
+                )}
                 style={{ width: 300 }}
-                renderInput={params => (
+                renderInput={(params) => (
                   <TextField
                     {...params}
-                    label="Ange URL eller välj en bild"
-                    variant="outlined"
+                    placeholder="Sökväg"
+                    helperText={`Ange URL till en ${addTextLocale}`}
+                    variant="standard"
                   />
                 )}
               />
-              <p>Förhandsvisning:</p>
-              <img
-                src={this.state.urlValue}
-                onLoad={this.onImgLoad}
-                width={this.state.mediaWidth}
-                height={this.state.mediaHeight}
-                alt="Förhandsvisning"
-              />
+            </Grid>
+            <Grid container item>
+              <Grid style={styles.gridItem} item>
+                <input
+                  onChange={(e) => this.calculateHeight(e.target.value)}
+                  ref="data-image-width"
+                  type="number"
+                  value={this.state.mediaWidth || ""}
+                  onKeyDown={this.onURLInputKeyDown}
+                  disabled={widthHeightDisable}
+                  placeholder="Bredd"
+                />
+              </Grid>
+              <Grid item>
+                <input
+                  onChange={(e) => this.calculateWidth(e.target.value)}
+                  ref="data-image-height"
+                  type="number"
+                  value={this.state.mediaHeight || ""}
+                  onKeyDown={this.onURLInputKeyDown}
+                  disabled={widthHeightDisable}
+                  placeholder="Höjd"
+                />
+              </Grid>
             </Grid>
             <Grid item>
               <input
-                onChange={e => this.calculateHeight(e.target.value)}
-                ref="data-image-width"
-                type="number"
-                value={this.state.mediaWidth || ""}
-                onKeyDown={this.onURLInputKeyDown}
-                placeholder="Bredd"
-              />
-              <input
-                onChange={e => this.calculateWidth(e.target.value)}
-                ref="data-image-height"
-                type="number"
-                value={this.state.mediaHeight || ""}
-                onKeyDown={this.onURLInputKeyDown}
-                placeholder="Höjd"
-              />
-            </Grid>
-            <Grid item>
-              <input
-                onChange={this.onDataCaptionChange}
-                ref="data-caption"
+                onChange={this.onImageAltChange}
+                ref="image-alt"
                 type="text"
-                value={this.state.mediaCaption || ""}
+                value={this.state.imageAlt || ""}
                 onKeyDown={this.onURLInputKeyDown}
-                placeholder="Beskrivning"
-              />
-              <input
-                onChange={this.onDataSourceChange}
-                ref="data-source"
-                type="text"
-                value={this.state.mediaSource || ""}
-                onKeyDown={this.onURLInputKeyDown}
-                placeholder="Källa"
+                placeholder="Alternativ text"
               />
             </Grid>
-            <Grid item>
-              <input
-                id="data-image-popup"
-                onChange={this.onDataPopupChange}
-                ref="data-image-popup"
-                type="checkbox"
-                value={this.state.mediaPopup}
-                onKeyDown={this.onURLInputKeyDown}
-              />
-              <label>Popup</label>
+            <Grid container item>
+              <Grid style={styles.gridItem} item>
+                <input
+                  onChange={this.onDataCaptionChange}
+                  ref="data-caption"
+                  type="text"
+                  value={this.state.mediaCaption || ""}
+                  onKeyDown={this.onURLInputKeyDown}
+                  placeholder="Beskrivning"
+                />
+              </Grid>
+              <Grid item>
+                <input
+                  onChange={this.onDataSourceChange}
+                  ref="data-source"
+                  type="text"
+                  value={this.state.mediaSource || ""}
+                  onKeyDown={this.onURLInputKeyDown}
+                  placeholder="Källa"
+                />
+              </Grid>
+            </Grid>
+            <Grid container item>
+              <Grid style={styles.gridItem} item>
+                <select
+                  value={this.state.mediaPosition}
+                  ref="data-image-position"
+                  onChange={this.onDataPositionChange}
+                >
+                  <option value="left">Vänster</option>
+                  <option value="center">Center</option>
+                  <option value="right">Höger</option>
+                  <option value="floatRight">Höger med text</option>
+                  <option value="floatLeft">Vänster med text</option>
+                </select>
+              </Grid>
+              <Grid item>
+                <input
+                  id="data-image-popup"
+                  onChange={this.onDataPopupChange}
+                  ref="data-image-popup"
+                  type="checkbox"
+                  value={this.state.mediaPopup}
+                  disabled={popupDisabled}
+                  onKeyDown={this.onURLInputKeyDown}
+                />
+                <label>Popup</label>
+              </Grid>
             </Grid>
             <Grid item>
-              <select
-                value={this.state.mediaPosition}
-                ref="data-image-position"
-                onChange={this.onDataPositionChange}
+              <ColorButtonGreen
+                style={styles.button}
+                variant="contained"
+                onMouseDown={this.confirmMedia}
               >
-                <option value="left">Vänster</option>
-                <option value="center">Center</option>
-                <option value="right">Höger</option>
-                <option value="floatRight">Höger med text</option>
-                <option value="floatLeft">Vänster med text</option>
-              </select>
+                OK
+              </ColorButtonGreen>
+              <ColorButtonRed
+                variant="contained"
+                onMouseDown={this.closeURLInput}
+              >
+                Avbryt
+              </ColorButtonRed>
             </Grid>
+          </Grid>
+          <Grid container direction="column" item xs={6}>
             <Grid item>
-              <button onMouseDown={this.confirmMedia}>OK</button>
-              <button onMouseDown={this.closeURLInput}>Avbryt</button>
+              <p>Förhandsvisning:</p>
             </Grid>
+            <Grid item>{this.preview(this.state.urlType)}</Grid>
           </Grid>
         </Grid>
       );
@@ -859,7 +1201,7 @@ export default class DocumentTextEditor extends React.Component {
             onCancelClick={() => {
               this.setState({ showTextAreaInput: false });
             }}
-            updateEditorState={newEditorState => {
+            updateEditorState={(newEditorState) => {
               this.setState({ editorState: newEditorState }, () => {
                 const selection = editorState.getSelection();
                 const blockType = editorState
@@ -884,14 +1226,35 @@ export default class DocumentTextEditor extends React.Component {
 
     if (this.state.showLinkInput) {
       urlInput = (
-        <div style={styles.urlInputContainer}>
-          <h1>Lägg till {this.getUrlType(this.state.urlType)}</h1>
-          <p>Markera den text som ska bli en länk</p>
-          {this.getUrlInput(this.state.urlType, documents)}
-          {this.getUrlId(this.state.urlType)}
-          <button onMouseDown={this.confirmLink}>OK</button>
-          <button onMouseDown={this.closeLinkInput}>Avbryt</button>
-        </div>
+        <Grid style={styles.gridItemContainer} direction="column" container>
+          <Grid item>
+            <Typography variant="h5">
+              Lägg till {this.getUrlType(this.state.urlType)}
+            </Typography>
+          </Grid>
+          <Grid item>
+            <Typography variant="subtitle2">
+              Markera den text som ska bli en länk
+            </Typography>
+          </Grid>
+          <Grid item>{this.getUrlInput(this.state.urlType, documents)}</Grid>
+          <Grid item>{this.getUrlId(this.state.urlType)}</Grid>
+          <Grid item>
+            <ColorButtonGreen
+              style={styles.button}
+              variant="contained"
+              onMouseDown={this.confirmLink}
+            >
+              OK
+            </ColorButtonGreen>
+            <ColorButtonRed
+              variant="contained"
+              onMouseDown={this.closeLinkInput}
+            >
+              Avbryt
+            </ColorButtonRed>
+          </Grid>
+        </Grid>
       );
     }
 
@@ -907,17 +1270,33 @@ export default class DocumentTextEditor extends React.Component {
               editorState={editorState}
               onToggle={this.toggleBlockType}
             />
-            <StyleButton
-              label={<FormatQuoteIcon />}
-              onToggle={this.addTextArea}
+
+            <TextStyleControls
+              onToggleQuote={this.addTextArea}
+              onToggleHover={this.addHoverText}
             />
-            <StyleButton label={<ImageIcon />} onToggle={this.addImage} />
-            <StyleButton label={<LaunchIcon />} onToggle={this.addWebLink} />
+
+            <MediaStyleControls
+              OnToggleImage={this.addImage}
+              OnToggleVideo={this.addVideo}
+              OnToggleAudio={this.addAudio}
+            />
+
             <StyleButton
+              tooltip="Lägg till en webblänk"
+              label={<LaunchIcon />}
+              onToggle={this.addWebLink}
+            />
+            <StyleButton
+              tooltip="Lägg till en dokumentlänk"
               label={<DescriptionIcon />}
               onToggle={this.addDocumentLink}
             />
-            <StyleButton label={<MapIcon />} onToggle={this.addMapLink} />
+            <StyleButton
+              tooltip="Lägg till en kartlänk"
+              label={<MapIcon />}
+              onToggle={this.addMapLink}
+            />
           </div>
         </div>
         {urlInput}
@@ -944,6 +1323,48 @@ export default class DocumentTextEditor extends React.Component {
   }
 }
 
+const TextStyleControls = (props) => {
+  return (
+    <div style={styles.buttons}>
+      <StyleButton
+        label={<FormatQuoteIcon />}
+        tooltip="Lägg till faktaruta"
+        onToggle={props.onToggleQuote}
+      />
+
+      <StyleButton
+        label={<TranslateIcon />}
+        tooltip="Lägg till en svävartext"
+        onToggle={props.onToggleHover}
+      />
+    </div>
+  );
+};
+
+const MediaStyleControls = (props) => {
+  return (
+    <div style={styles.buttons}>
+      <StyleButton
+        tooltip="Lägg till en bild"
+        label={<ImageIcon />}
+        onToggle={props.OnToggleImage}
+      />
+
+      <StyleButton
+        tooltip="Lägg till ett videoklipp"
+        label={<MovieIcon />}
+        onToggle={props.OnToggleVideo}
+      />
+
+      <StyleButton
+        tooltip="Lägg till ett ljudklipp"
+        label={<AudiotrackIcon />}
+        onToggle={props.OnToggleAudio}
+      />
+    </div>
+  );
+};
+
 /* Block types */
 function getBlockStyle(block) {
   switch (block.getType()) {
@@ -958,10 +1379,10 @@ const BLOCK_TYPES = [
   //{ label: "H1", style: "header-one" },
 
   { label: <FormatListBulletedIcon />, style: "unordered-list-item" },
-  { label: <FormatListNumberedIcon />, style: "ordered-list-item" }
+  { label: <FormatListNumberedIcon />, style: "ordered-list-item" },
 ];
 
-const BlockStyleControls = props => {
+const BlockStyleControls = (props) => {
   const { editorState } = props;
   const selection = editorState.getSelection();
   const blockType = editorState
@@ -971,7 +1392,7 @@ const BlockStyleControls = props => {
 
   return (
     <div style={styles.buttons}>
-      {BLOCK_TYPES.map(type => (
+      {BLOCK_TYPES.map((type) => (
         <StyleButton
           key={type.style}
           active={type.style === blockType}
@@ -988,13 +1409,13 @@ const BlockStyleControls = props => {
 const INLINE_STYLES = [
   { label: <FormatBoldIcon />, style: "BOLD" },
   { label: <FormatItalicIcon />, style: "ITALIC" },
-  { label: <FormatUnderlinedIcon />, style: "UNDERLINE" }
+  { label: <FormatUnderlinedIcon />, style: "UNDERLINE" },
 ];
-const InlineStyleControls = props => {
+const InlineStyleControls = (props) => {
   const currentStyle = props.editorState.getCurrentInlineStyle();
   return (
     <div style={styles.buttons}>
-      {INLINE_STYLES.map(type => (
+      {INLINE_STYLES.map((type) => (
         <StyleButton
           key={type.style}
           active={currentStyle.has(type.style)}
@@ -1011,46 +1432,49 @@ const InlineStyleControls = props => {
 const styles = {
   root: {
     fontFamily: "'Georgia', serif",
-    width: 1000,
-    border: "1px solid #ddd"
+    border: "1px solid #ddd",
   },
-
+  gridItem: {
+    marginRight: "8px",
+  },
+  gridItemContainer: {
+    margin: "8px",
+  },
   buttonContainer: {
     height: 40,
-    borderBottom: "1px solid #ddd"
+    borderBottom: "1px solid #ddd",
   },
   buttons: {
     borderRight: "1px solid #ccc",
-    float: "left"
+    float: "left",
   },
   urlInputContainer: {
-    marginBottom: 10
+    marginBottom: 10,
   },
   urlInput: {
     fontFamily: "'Georgia', serif",
     marginRight: 10,
-    padding: 3
+    marginBottom: 8,
   },
   editorContainer: {
     border: "1px solid #ccc",
     cursor: "text",
     minHeight: 80,
-    fontSize: 16
+    fontSize: 16,
   },
   editor: {
     backgroundColor: "#fff",
-    padding: "18px"
+    padding: "18px",
   },
   button: {
-    marginTop: 10,
-    textAlign: "center"
+    marginRight: "8px",
   },
   media: {
-    whiteSpace: "initial"
+    whiteSpace: "initial",
   },
   paper: {
     position: "absolute",
     width: 400,
-    border: "2px solid #000"
-  }
+    border: "2px solid #000",
+  },
 };

@@ -9,11 +9,9 @@ import Link from "@material-ui/core/Link";
 import { ColorButtonGreen, ColorButtonRed } from "./custombuttons";
 import Checkbox from "@material-ui/core/Checkbox";
 
-const getPopoverMenuItemTitle = label => {
+const getPopoverMenuItemTitle = (label) => {
   return <Typography variant="h6">{label}: </Typography>;
 };
-
-const presetColors = [];
 
 const getTextField = (value, onChangeFunction, variant) => {
   return (
@@ -28,37 +26,36 @@ const getTextField = (value, onChangeFunction, variant) => {
   );
 };
 
-const styles = theme => ({
-  paper: { width: "20%", padding: "20px" }
+const styles = (theme) => ({
+  paper: { width: "20%", padding: "20px" },
 });
 
 class SettingsPopover extends React.Component {
   state = {
     color: this.props.menuItem.color,
     icon: this.props.menuItem.icon,
-    expandedSubMenu: this.props.menuItem.expandedSubMenu
+    expandedSubMenu: this.props.menuItem.expandedSubMenu || false,
   };
 
-  updateColorState = e => {
+  updateColorState = (e) => {
     this.setState({ color: e.target.value });
   };
 
-  updateIconState = e => {
+  updateIconState = (e) => {
     let value = e.target.value;
-    this.setState(prevState => {
-      prevState.icon.materialUiIconName = value;
+    this.setState((prevState) => {
       return {
-        icon: prevState.icon
+        icon: { ...prevState.icon, materialUiIconName: value },
       };
     });
   };
 
-  updateDescriptiveIconText = e => {
+  updateDescriptiveIconText = (e) => {
     let value = e.target.value;
-    this.setState(prevState => {
+    this.setState((prevState) => {
       prevState.icon.descriptiveText = value;
       return {
-        icon: prevState.icon
+        icon: prevState.icon,
       };
     });
   };
@@ -91,13 +88,13 @@ class SettingsPopover extends React.Component {
     );
   };
 
-  handleColorPickerChange = color => {
+  handleColorPickerChange = (color) => {
     this.setState({ color: color.hex });
   };
 
   renderSettings = () => {
-    const { classes } = this.props;
-    const { closePopover } = this.props;
+    const { classes, menuItem } = this.props;
+
     return (
       <form
         className={classes.paper}
@@ -107,8 +104,8 @@ class SettingsPopover extends React.Component {
       >
         <Grid spacing={2} container>
           <Grid xs={12} item>
-            {this.props.menuItem.menu &&
-              this.props.menuItem.menu.length > 0 &&
+            {menuItem.menu &&
+              menuItem.menu.length > 0 &&
               this.renderExpandedByStartOption()}
           </Grid>
           <Grid xs={12} item>
@@ -157,13 +154,30 @@ class SettingsPopover extends React.Component {
               </ColorButtonGreen>
             </Grid>
             <Grid xs={2} container item>
-              <ColorButtonRed onClick={closePopover}>
+              <ColorButtonRed onClick={this.resetAndClosePopover}>
                 <Typography variant="button">AVBRYT</Typography>
               </ColorButtonRed>
             </Grid>
           </Grid>
         </Grid>
       </form>
+    );
+  };
+
+  resetAndClosePopover = () => {
+    const { closePopover, menuItem } = this.props;
+    this.setState(
+      {
+        color: menuItem.color,
+        icon: {
+          materialUiIconName: menuItem.icon.materialUiIconName,
+          fontSize: menuItem.icon.fontSize,
+        },
+        expandedSubMenu: menuItem.expandedSubMenu || false,
+      },
+      () => {
+        closePopover();
+      }
     );
   };
 
@@ -176,11 +190,11 @@ class SettingsPopover extends React.Component {
           anchorEl={anchorEl}
           anchorOrigin={{
             vertical: "bottom",
-            horizontal: "right"
+            horizontal: "right",
           }}
           transformOrigin={{
             vertical: "top",
-            horizontal: "left"
+            horizontal: "left",
           }}
         >
           {this.renderSettings()}

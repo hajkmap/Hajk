@@ -9,6 +9,7 @@ import {
   Tooltip,
   Legend
 } from "recharts";
+import { hfetch } from "utils/FetchWrapper";
 
 const styles = theme => ({});
 
@@ -21,7 +22,7 @@ class DiagramView extends React.PureComponent {
 
   componentDidMount() {
     const { source, feature } = this.props;
-    var url = this.parse(source, feature.getProperties());
+    const url = this.parse(source, feature.getProperties());
     this.load(url);
   }
 
@@ -52,9 +53,9 @@ class DiagramView extends React.PureComponent {
   }
 
   load(url) {
-    fetch(url).then(response => {
-      response.json().then(rsp => {
-        const data = rsp.features.map(feature => {
+    hfetch(url).then((response) => {
+      response.json().then((rsp) => {
+        const data = rsp.features.map((feature) => {
           return {
             date: feature.properties.datetime.split("T")[0],
             value: feature.properties.value

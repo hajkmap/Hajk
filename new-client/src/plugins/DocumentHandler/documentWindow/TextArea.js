@@ -9,7 +9,11 @@ const styles = (theme) => {
       overflowWrap: "break-word",
     },
     containerContent: {
-      backgroundColor: "#eeeeee",
+      //Need to manually change color when switching between dark/light-mode
+      backgroundColor:
+        theme.palette.type === "dark"
+          ? theme.palette.grey[700]
+          : theme.palette.grey[200],
     },
     typographyContainer: {
       padding: theme.spacing(1),
@@ -18,7 +22,11 @@ const styles = (theme) => {
       marginBottom: theme.spacing(1),
     },
     divider: {
-      backgroundColor: "#786aaf",
+      //Need to manually change color when switching between dark/light-mode
+      backgroundColor:
+        theme.palette.type === "dark"
+          ? theme.palette.grey[200]
+          : theme.palette.grey[400],
       height: "2px",
     },
   };
@@ -49,9 +57,7 @@ class TextArea extends React.PureComponent {
           <Grid
             xs={12}
             className={classes.containerContent}
-            style={{
-              backgroundColor: backgroundColor,
-            }}
+            style={{ backgroundColor: backgroundColor }}
             item
           >
             {this.renderDivider()}

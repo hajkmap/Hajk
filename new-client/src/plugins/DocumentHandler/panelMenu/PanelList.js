@@ -4,26 +4,39 @@ import PanelMenuListItem from "./PanelMenuListItem";
 
 class PanelList extends React.PureComponent {
   getMenuItemType = (item, type) => {
-    const { localObserver, globalObserver } = this.props;
-
     return (
       <PanelMenuListItem
-        setActiveMenuItems={this.props.setActiveMenuItems}
-        selectedIndex={this.props.selectedIndex}
-        expandedIndex={this.props.expandedIndex}
-        handleExpandClick={this.props.handleExpandClick}
+        {...this.props}
         type={type}
-        coloredIndex={this.props.coloredIndex}
-        handleMenuButtonClick={this.handleMenuButtonClick}
-        localObserver={localObserver}
-        globalObserver={globalObserver}
-        item={item}
+        menu={item.menu}
+        icon={item.icon}
+        id={item.id}
+        level={item.level}
+        color={item.color}
+        title={item.title}
+        itemRef={item.itemRef}
+        subMenuItems={this.#getSubMenuItems(item)}
+        expanded={item.expandedSubMenu}
+        colored={item.colored}
+        selected={item.selected}
       ></PanelMenuListItem>
     );
   };
 
+  #getSubMenuItems = (item) => {
+    return item.menuItemIds.reduce((subMenuItems, subItemId) => {
+      const subItem = Object.values(this.props.items).find((i) => {
+        return i.id === subItemId;
+      });
+      if (subItem.menuItemIds.length > 0) {
+        subMenuItems = [...subMenuItems, ...this.#getSubMenuItems(subItem)];
+      }
+      return [...subMenuItems, subItem];
+    }, []);
+  };
+
   #renderMenuItem = (item) => {
-    if (item.menu.length > 0) {
+    if (item.menuItemIds && item.menuItemIds.length > 0) {
       return this.getMenuItemType(item, "submenu");
     } else if (item.document) {
       return this.getMenuItemType(item, "document");
@@ -35,16 +48,26 @@ class PanelList extends React.PureComponent {
   };
 
   render() {
-    const { menu } = this.props;
+    const { items, level } = this.props;
     return (
-      <List disablePadding component="nav">
-        {menu.map((item) => {
-          return (
-            <React.Fragment key={item.id}>
-              {this.#renderMenuItem(item, item.id)}
-            </React.Fragment>
-          );
-        })}
+      <List
+        style={{ position: "static" }}
+        disablePadding
+        id={`panellist_${level}`}
+        role="navigation"
+        component="nav"
+      >
+        {Object.values(items)
+          .filter((item) => {
+            return item.level === level;
+          })
+          .map((item) => {
+            return (
+              <React.Fragment key={item.id}>
+                {this.#renderMenuItem(item, item.id)}
+              </React.Fragment>
+            );
+          })}
       </List>
     );
   }

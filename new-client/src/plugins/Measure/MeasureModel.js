@@ -13,6 +13,7 @@ class MeasureModel {
     this.localObserver = settings.localObserver;
     this.source = new VectorSource();
     this.vector = new VectorLayer({
+      name: "pluginMeasure",
       source: this.source,
       style: this.createStyle,
     });
@@ -22,14 +23,25 @@ class MeasureModel {
   }
 
   createStyle = (feature, resolution) => {
+    const fillColor = "rgba(255, 255, 255, 0.3)";
+    const strokeColor = "rgba(0, 0, 0, 0.5)";
     return [
       new Style({
         fill: new Fill({
-          color: "rgba(255, 255, 255, 0.3)",
+          color: fillColor,
         }),
         stroke: new Stroke({
-          color: "rgba(0, 0, 0, 0.5)",
+          color: strokeColor,
           width: 3,
+        }),
+        image: new CircleStyle({
+          radius: 5,
+          stroke: new Stroke({
+            color: strokeColor,
+          }),
+          fill: new Fill({
+            color: fillColor,
+          }),
         }),
         text: new Text({
           textAlign: "center",
@@ -39,7 +51,7 @@ class MeasureModel {
           text: this.getLabelText(feature),
           overflow: true,
           stroke: new Stroke({
-            color: "rgba(0, 0, 0, 0.5)",
+            color: strokeColor,
             width: 3,
           }),
           offsetX: 0,

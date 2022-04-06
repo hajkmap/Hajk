@@ -5,6 +5,7 @@ import ScatterPlotIcon from "@material-ui/icons/ScatterPlot";
 import BorderStyleIcon from "@material-ui/icons/BorderStyle";
 import LinearScaleIcon from "@material-ui/icons/LinearScale";
 import Typography from "@material-ui/core/Typography/Typography";
+import WKT from "ol/format/WKT";
 
 const styles = (theme) => ({
   button: {
@@ -37,6 +38,20 @@ class Toolbar extends Component {
         activeTool: undefined,
       });
     });
+
+    // Clear layer and attempt to read saved values
+    if (this.props.model.wkt) {
+      this.props.model.vectorSource.clear();
+
+      const format = new WKT();
+      const WKTString = this.props.model.formValues[this.props.field];
+      if (WKTString && WKTString.length > 0) {
+        let features = format.readFeatures(WKTString);
+        features.forEach((feature) => {
+          this.props.model.vectorSource.addFeature(feature);
+        });
+      }
+    }
   }
 
   componentWillUnmount() {
@@ -98,7 +113,7 @@ class Toolbar extends Component {
     if (!data) {
       return (
         <Typography>
-          Uppdatateringen lyckades men det upptäcktes inte några ändringar.
+          Uppdateringen lyckades men det upptäcktes inte några ändringar.
         </Typography>
       );
     }
@@ -174,6 +189,28 @@ class Toolbar extends Component {
     return style;
   }
 
+  storeValues() {
+    // Stores any potential features found on the map as WKT before taking the next or previous step.
+    //These are later pushed to the server on submission.
+    //They are also put on the map again if the user comes back to this step.
+    if (!this.props.model.wkt) {
+      return;
+    }
+    const format = new WKT();
+    let wkt = "";
+
+    if (this.props.model.vectorSource.getFeatures().length > 0) {
+      wkt = format.writeFeatures(this.props.model.vectorSource.getFeatures());
+    }
+
+    // Store the converted features in the model
+    let formValues = Object.assign({}, this.props.model.formValues);
+    formValues[this.props.field] = wkt;
+    this.props.model.formValues = formValues;
+    // Clear layer
+    this.props.model.vectorSource.clear();
+  }
+
   render() {
     const source = this.props.serviceConfig;
     var disabled = !this.props.enabled,
@@ -181,7 +218,14 @@ class Toolbar extends Component {
       editPolygon = false,
       editLine = false;
 
-    if (source) {
+    if (this.props.model.wkt) {
+      // WKT gets the information from the tag since there is support for multiple toolbars
+      // Different toolbars can therefore support different types of geometries
+      editPoint = this.props.geotype.indexOf("point") !== -1;
+      editPolygon = this.props.geotype.indexOf("polygon") !== -1;
+      editLine = this.props.geotype.indexOf("line") !== -1;
+    } else if (source) {
+      // Non-WKT only supports insertion of one geometry so it can be retrieved from the source
       editPoint = source.editPoint;
       editLine = source.editLine;
       editPolygon = source.editPolygon;

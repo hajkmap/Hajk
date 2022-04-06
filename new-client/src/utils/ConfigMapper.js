@@ -27,18 +27,33 @@ export default class ConfigMapper {
           getIndex >= 0 &&
           args.layersInfo[getIndex].style;
 
-        /**
-         * GeoServer allows finer control over the legend appearance via the vendor parameter LEGEND_OPTIONS.
-         * See: https://docs.geoserver.org/latest/en/user/services/wms/get_legend_graphic/index.html#controlling-legend-appearance-with-legend-options
-         */
-        // Use custom legend options if specified by admin
-        const geoserverLegendOptions = properties.mapConfig.map.hasOwnProperty(
-          "geoserverLegendOptions"
-        )
-          ? "LEGEND_OPTIONS=" + properties.mapConfig.map.geoserverLegendOptions
-          : "";
+        let geoserverLegendOptions = "";
+        let qgisOptions = "";
 
-        legendUrl = `${proxy}${args.url}?REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&LAYER=${layer}&STYLE=${style}&${geoserverLegendOptions}`;
+        if (args.serverType === "geoserver") {
+          /**
+           * GeoServer allows finer control over the legend appearance via the vendor parameter LEGEND_OPTIONS.
+           * See: https://docs.geoserver.org/latest/en/user/services/wms/get_legend_graphic/index.html#controlling-legend-appearance-with-legend-options
+           */
+          // Use custom legend options if specified by admin
+          geoserverLegendOptions = properties.mapConfig.map.hasOwnProperty(
+            "geoserverLegendOptions"
+          )
+            ? "&LEGEND_OPTIONS=" +
+              properties.mapConfig.map.geoserverLegendOptions
+            : "";
+        }
+
+        // QGIS Server requires the SERVICE parameter to be set, see issue #880.
+        if (args.serverType === "qgis") {
+          qgisOptions = "&SERVICE=WMS";
+        }
+
+        // If layers URL already includes a query string separator (ie question mark), we want
+        // to append the remaining values with &.
+        const theGlue = args.url.includes("?") ? "&" : "?";
+
+        legendUrl = `${proxy}${args.url}${theGlue}REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&LAYER=${layer}&STYLE=${style}${geoserverLegendOptions}${qgisOptions}`;
       }
       // If there's a legend URL specified in admin, use it as is
       else {
@@ -98,29 +113,50 @@ export default class ConfigMapper {
     // In the GetMap operation the srs parameter is called crs in 1.3.0,
     // see: https://docs.geoserver.org/latest/en/user/services/wms/basics.html#differences-between-wms-versions
     const srsOrCrs = args.version === "1.3.0" ? "CRS" : "SRS";
+
+    if (args.minZoom === 0 && args.maxZoom === 0) {
+      // backend returns 0 if not set in past
+      args.minZoom = undefined;
+      args.maxZoom = undefined;
+    }
+
     let config = {
       type: "wms",
       options: {
         id: args.id,
-        url: (this.proxy || "") + args.url,
+        url:
+          (this.proxy || "") +
+          (this.getPotentialCustomUrl(args.customGetMapUrl) || args.url),
         name: args.id, // FIXME: Should this be "args.caption"?
         layerType: args.layerType,
         caption: args.caption,
         visible: args.visibleAtStart,
         opacity: args.opacity || 1,
-        //information: args.infobox,
-        resolutions: properties.mapConfig.map.resolutions,
+        maxZoom: args.maxZoom,
+        minZoom: args.minZoom,
+        minMaxZoomAlertOnToggleOnly: args.minMaxZoomAlertOnToggleOnly,
+        infoClickSortType: args.infoClickSortType,
+        infoClickSortDesc: args.infoClickSortDesc,
+        infoClickSortProperty: args.infoClickSortProperty,
+        information: args.infobox,
+        resolutions: properties.mapConfig.map.allResolutions,
         projection: projection || "EPSG:3006",
         origin: properties.mapConfig.map.origin,
         extent: properties.mapConfig.map.extent,
         singleTile: args.singleTile || false,
+        hidpi: args.hidpi,
+        customRatio: args.customRatio,
         imageFormat: args.imageFormat || "image/png",
-        serverType: args.serverType || "geoserver",
+        serverType:
+          args.serverType === "arcgis"
+            ? "mapserver"
+            : args.serverType || "geoserver",
         crossOrigin: properties.mapConfig.map.crossOrigin || "anonymous",
         attribution: args.attribution,
         searchUrl: args.searchUrl,
         searchPropertyName: args.searchPropertyName,
         searchDisplayName: args.searchDisplayName,
+        searchShortDisplayName: args.searchShortDisplayName,
         searchOutputFormat: args.searchOutputFormat,
         searchGeometryField: args.searchGeometryField,
         legend: getLegends(),
@@ -145,6 +181,8 @@ export default class ConfigMapper {
         infoUrlText: args.infoUrlText,
         infoOwner: args.infoOwner,
         hideExpandArrow: args.hideExpandArrow,
+        timeSliderStart: args.timeSliderStart,
+        timeSliderEnd: args.timeSliderEnd,
       },
     };
 
@@ -158,13 +196,26 @@ export default class ConfigMapper {
           ? args.displayFields
           : args.searchFields[0] || "Sökträff",
         srsName: properties.mapConfig.map.projection || "EPSG:3006",
+        serverType: config.options.serverType,
       };
     }
 
     return config;
   }
 
+  // There might be a custom getMap-url provided in the config. If there
+  // is, we have to make sure to override the url-value with the custom getMap-url.
+  // See #345 for more information.
+  getPotentialCustomUrl(customGetMapUrl) {
+    return customGetMapUrl?.trim().length > 0 ? customGetMapUrl : null;
+  }
+
   mapWMTSConfig(args, properties) {
+    if (args.minZoom === 0 && args.maxZoom === 0) {
+      args.minZoom = undefined;
+      args.maxZoom = undefined;
+    }
+
     var config = {
       type: "wmts",
       options: {
@@ -176,6 +227,8 @@ export default class ConfigMapper {
         extent: properties.mapConfig.map.extent,
         queryable: false,
         opacity: args.opacity || 1,
+        maxZoom: args.maxZoom,
+        minZoom: args.minZoom,
         format: "image/png",
         crossOrigin: properties.mapConfig.map.crossOrigin || "anonymous",
         wrapX: false,
@@ -197,6 +250,8 @@ export default class ConfigMapper {
         infoUrlText: args.infoUrlText,
         infoOwner: args.infoOwner,
         hideExpandArrow: args.hideExpandArrow,
+        timeSliderStart: args.timeSliderStart,
+        timeSliderEnd: args.timeSliderEnd,
       },
     };
     return config;
@@ -230,11 +285,12 @@ export default class ConfigMapper {
         caption: args.caption,
         content: args.content,
         dataFormat: args.dataFormat,
+        fillColor: args.fillColor,
         filterable: args.filterable,
         filterAttribute: args.filterAttribute,
         filterComparer: args.filterComparer,
         filterValue: args.filterValue,
-        icon: args.legend,
+        icon: args.icon,
         id: args.id,
         infoOwner: args.infoOwner,
         information: args.infobox,
@@ -243,6 +299,9 @@ export default class ConfigMapper {
         infoUrl: args.infoUrl,
         infoUrlText: args.infoUrlText,
         infoVisible: args.infoVisible || false,
+        infoClickSortType: args.infoClickSortType,
+        infoClickSortDesc: args.infoClickSortDesc,
+        infoClickSortProperty: args.infoClickSortProperty,
         layerType: args.layerType,
         legend: [
           {
@@ -251,6 +310,9 @@ export default class ConfigMapper {
           },
         ],
         legendIcon: args.legendIcon,
+        lineColor: args.lineColor,
+        lineStyle: args.lineStyle,
+        lineWidth: args.lineWidth,
         maxZoom: args.maxZoom,
         minZoom: args.minZoom,
         name: args.id,
@@ -269,13 +331,18 @@ export default class ConfigMapper {
           srsname: args.projection,
           bbox: "",
         },
+        pointSize: args.pointSize,
         projection: args.projection,
         queryable: args.queryable,
         sldStyle: args.sldStyle,
         sldText: args.sldText,
         sldUrl: args.sldUrl,
+        symbolXOffset: args.symbolXOffset,
+        symbolYOffset: args.symbolYOffset,
         url: args.url,
         visible: args.visibleAtStart,
+        timeSliderStart: args.timeSliderStart,
+        timeSliderEnd: args.timeSliderEnd,
       },
     };
 
@@ -326,6 +393,8 @@ export default class ConfigMapper {
         infoUrlText: args.infoUrlText,
         infoOwner: args.infoOwner,
         hideExpandArrow: args.hideExpandArrow,
+        timeSliderStart: args.timeSliderStart,
+        timeSliderEnd: args.timeSliderEnd,
       },
     };
 

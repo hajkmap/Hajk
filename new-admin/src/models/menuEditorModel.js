@@ -1,8 +1,5 @@
 import { Model } from "backbone";
-
-const fetchConfig = {
-  credentials: "same-origin",
-};
+import { hfetch } from "utils/FetchWrapper";
 
 var menuEditorModel = Model.extend({
   constructor: function (settings) {
@@ -11,13 +8,11 @@ var menuEditorModel = Model.extend({
 
   async listAllAvailableDocuments() {
     try {
-      return fetch(this.config.url_document_list, fetchConfig).then(
-        (response) => {
-          return response.text().then((text) => {
-            return JSON.parse(text);
-          });
-        }
-      );
+      return hfetch(this.config.url_document_list).then((response) => {
+        return response.text().then((text) => {
+          return JSON.parse(text);
+        });
+      });
     } catch (err) {}
   },
 
@@ -228,13 +223,12 @@ var menuEditorModel = Model.extend({
   exportTreeAsMenuJson: function (tree, menuConfig) {
     this.removeHeaderTreeRow(tree);
     menuConfig.menu = this.createMenuFromTreeStructure([], tree);
-    console.log(menuConfig.menu, "menu");
     return menuConfig;
   },
 
   loadMenuConfigForMap: function (map) {
     var url = this.config.url_map + "/" + map;
-    return fetch(url, { credentials: "same-origin" }).then((response) => {
+    return hfetch(url).then((response) => {
       return response.json().then((data) => {
         let documentHandler = data.tools.find((tool) => {
           return tool.type === "documenthandler";

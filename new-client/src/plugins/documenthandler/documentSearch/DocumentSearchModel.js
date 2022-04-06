@@ -9,7 +9,25 @@ export default class DocumentSearchModel {
     this.documentCollections = this.createDocumentCollectionsToSearch(
       settings.allDocuments
     );
+    this.localObserver = settings.localObserver;
+    this.app = settings.app;
+    this.bindListenForSearchResultClick();
   }
+
+  bindListenForSearchResultClick = () => {
+    // The event published from the search component will be prepended
+    // with "search.featureClicked", therefore we have to subscribe
+    // to search.featureClicked.onClickName to catch the event.
+    this.app.globalObserver.subscribe(
+      "search.featureClicked.documentHandlerSearchResultClicked",
+      (searchResultClick) => {
+        this.localObserver.publish("document-link-clicked", {
+          documentName: searchResultClick.properties.documentFileName,
+          headerIdentifier: searchResultClick.properties.headerIdentifier,
+        });
+      }
+    );
+  };
 
   createDocumentCollectionsToSearch = (allDocuments) => {
     return allDocuments.reduce((documentCollection, document) => {
@@ -60,14 +78,19 @@ export default class DocumentSearchModel {
       documentFileName: document.documentFileName,
     };
 
+    const id = `${document.documentTitle}${Math.floor(Math.random() * 1000)}`;
+
     return {
       type: "Feature",
       isTitleFeature: true,
       geometry: null,
       searchValues: [document.title],
-      id: `${document.documentTitle}${Math.floor(Math.random() * 1000)}`,
+      id: id,
       onClickName: "documentHandlerSearchResultClicked",
       properties: properties,
+      get: (p) => properties[p],
+      getGeometry: () => null,
+      getId: () => id,
     };
   };
 
@@ -81,7 +104,7 @@ export default class DocumentSearchModel {
       searchValues = [...searchValues, ...chapter.keywords];
     }
 
-    let properties = {
+    const properties = {
       header: chapter.header,
       geoids: chapter.geoids,
       headerIdentifier: chapter.headerIdentifier,
@@ -89,14 +112,19 @@ export default class DocumentSearchModel {
       documentFileName: document.documentFileName,
     };
 
+    const id = `${chapter.headerIdentifier}${Math.floor(Math.random() * 1000)}`;
+
     return {
       type: "Feature",
       geometry: null,
       isTitleFeature: false,
       searchValues: searchValues,
-      id: `${chapter.headerIdentifier}${Math.floor(Math.random() * 1000)}`,
+      id: id,
       onClickName: "documentHandlerSearchResultClicked",
       properties: properties,
+      get: (p) => properties[p],
+      getGeometry: () => null,
+      getId: () => id,
     };
   };
 
@@ -142,9 +170,10 @@ export default class DocumentSearchModel {
 
       // The searchString will be encoded if the search has been initiated
       // by selecting an alternative in the autocomplete.
-      possibleSearchCombinations = this.decodePotentialSpecialCharsFromFeatureProps(
-        possibleSearchCombinations
-      );
+      possibleSearchCombinations =
+        this.decodePotentialSpecialCharsFromFeatureProps(
+          possibleSearchCombinations
+        );
 
       resolve({
         featureCollections: this.getFeatureCollectionsForMatchingDocuments(

@@ -1,3 +1,4 @@
+import { Tooltip } from "@material-ui/core";
 import React from "react";
 
 class StyleButton extends React.Component {
@@ -16,9 +17,11 @@ class StyleButton extends React.Component {
     }
 
     return (
-      <span style={btnStyle} onMouseDown={this.onToggle}>
-        {this.props.label}
-      </span>
+      <Tooltip title={this.props.tooltip || ""}>
+        <span style={btnStyle} onMouseDown={this.onToggle}>
+          {this.props.label}
+        </span>
+      </Tooltip>
     );
   }
 }

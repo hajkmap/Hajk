@@ -12,10 +12,7 @@ import { all as strategyAll } from "ol/loadingstrategy";
 import "ol/ol.css";
 import CoordinateSystemLoader from "./CoordinateSystemLoader.js";
 import { register } from "ol/proj/proj4";
-
-const fetchConfig = {
-  credentials: "same-origin"
-};
+import { hfetch } from "utils/FetchWrapper";
 
 function createStyle(layer, feature) {
   const icon = layer.icon || "";
@@ -41,7 +38,7 @@ function createStyle(layer, feature) {
   const pointSize = layer.pointSize;
 
   function getLineDash() {
-    var scale = (a, f) => a.map(b => f * b),
+    var scale = (a, f) => a.map((b) => f * b),
       width = lineWidth,
       style = lineStyle,
       dash = [12, 7],
@@ -58,7 +55,7 @@ function createStyle(layer, feature) {
 
   function getFill() {
     return new Fill({
-      color: fillColor
+      color: fillColor,
     });
   }
 
@@ -69,15 +66,15 @@ function createStyle(layer, feature) {
       font: font,
       text: feature ? feature.getProperties()[labelAttribute] : "",
       fill: new Fill({
-        color: labelFillColor
+        color: labelFillColor,
       }),
       stroke: new Stroke({
         color: outlineColor,
-        width: outlineWidth
+        width: outlineWidth,
       }),
       offsetX: offsetX,
       offsetY: offsetY,
-      rotation: rotation
+      rotation: rotation,
     });
   }
 
@@ -91,7 +88,7 @@ function createStyle(layer, feature) {
       scale: 1,
       anchorXUnits: "pixels",
       anchorYUnits: "pixels",
-      anchor: [symbolXOffset, symbolYOffset]
+      anchor: [symbolXOffset, symbolYOffset],
     });
   }
 
@@ -99,7 +96,7 @@ function createStyle(layer, feature) {
     return new Circle({
       fill: getFill(),
       stroke: getStroke(),
-      radius: parseInt(pointSize, 10) || 4
+      radius: parseInt(pointSize, 10) || 4,
     });
   }
 
@@ -107,7 +104,7 @@ function createStyle(layer, feature) {
     return new Stroke({
       color: lineColor,
       width: lineWidth,
-      lineDash: getLineDash()
+      lineDash: getLineDash(),
     });
   }
 
@@ -115,7 +112,7 @@ function createStyle(layer, feature) {
     var obj = {
       fill: getFill(),
       image: getImage(),
-      stroke: getStroke()
+      stroke: getStroke(),
     };
     if (showLabels) {
       obj.text = getText();
@@ -150,7 +147,7 @@ class OpenLayersMap {
     this.definitions = this.coordinateSystemLoader.getDefinitions();
 
     var definition = this.definitions.find(
-      definition => definition.code === this.mapSettings.projection
+      (definition) => definition.code === this.mapSettings.projection
     );
 
     if (definition) {
@@ -164,14 +161,14 @@ class OpenLayersMap {
         LAYERS: settings.wmsLayers,
         FORMAT: "image/png",
         VERSION: "1.1.0",
-        SRS: this.projection
+        SRS: this.projection,
       },
       serverType: "geoserver",
-      imageFormat: "image/png"
+      imageFormat: "image/png",
     };
     source.tileGrid = new TileGrid({
       resolutions: this.mapSettings.resolutions,
-      origin: this.mapSettings.origin
+      origin: this.mapSettings.origin,
     });
     source.extent = this.mapSettings.extent;
 
@@ -181,8 +178,8 @@ class OpenLayersMap {
           visible: true,
           opacity: 1,
           source: new TileWMS(source),
-          id: -1
-        })
+          id: -1,
+        }),
       ],
       target: settings.target,
       view: new View({
@@ -191,8 +188,8 @@ class OpenLayersMap {
         resolutions: this.mapSettings.resolutions,
         center: center,
         projection: this.projection,
-        extent: this.mapSettings.extent
-      })
+        extent: this.mapSettings.extent,
+      }),
     });
     this.onUpdate = settings.onUpdate;
     this.onUpdate(this.getState());
@@ -212,7 +209,7 @@ class OpenLayersMap {
     return {
       center: this.map.getView().getCenter(),
       zoom: Math.round(this.map.getView().getZoom()),
-      extent: this.map.getView().calculateExtent(this.map.getSize())
+      extent: this.map.getView().calculateExtent(this.map.getSize()),
     };
   }
 
@@ -231,17 +228,17 @@ class OpenLayersMap {
   }
 
   addWmsLayers(layers) {
-    layers.forEach(layer => {
+    layers.forEach((layer) => {
       var source = {
         url: layer.url,
         params: {
           LAYERS: layer.layers.join(","),
           FORMAT: "image/png",
           VERSION: "1.1.0",
-          SRS: this.projection
+          SRS: this.projection,
         },
         serverType: "geoserver",
-        imageFormat: "image/png"
+        imageFormat: "image/png",
       };
 
       var mapLayer = new TileLayer({
@@ -249,7 +246,7 @@ class OpenLayersMap {
         opacity: 1,
         id: layer.id,
         source: new TileWMS(source),
-        url: layer.url
+        url: layer.url,
       });
 
       this.map.addLayer(mapLayer);
@@ -276,7 +273,7 @@ class OpenLayersMap {
 
   reprojectFeatures(features, from, to) {
     if (Array.isArray(features)) {
-      features.forEach(feature => {
+      features.forEach((feature) => {
         if (feature.getGeometry() && feature.getGeometry().getCoordinates) {
           let coords = feature.getGeometry().getCoordinates();
           try {
@@ -290,14 +287,14 @@ class OpenLayersMap {
                 feature
                   .getGeometry()
                   .setCoordinates(
-                    coords.map(coord => transform(coord, from, to))
+                    coords.map((coord) => transform(coord, from, to))
                   );
                 break;
               case "Polygon":
                 feature
                   .getGeometry()
                   .setCoordinates([
-                    coords[0].map(coord => transform(coord, from, to))
+                    coords[0].map((coord) => transform(coord, from, to)),
                   ]);
                 break;
               default:
@@ -312,8 +309,8 @@ class OpenLayersMap {
   }
 
   loadData(layer, url, source) {
-    fetch(url, fetchConfig).then(response => {
-      response.text().then(features => {
+    hfetch(url).then((response) => {
+      response.text().then((features) => {
         this.addFeatures(layer, features, source);
       });
     });
@@ -322,10 +319,7 @@ class OpenLayersMap {
   addFeatures(layer, data, source) {
     var features = [],
       parser = new GeoJSON(),
-      to = this.map
-        .getView()
-        .getProjection()
-        .getCode(),
+      to = this.map.getView().getProjection().getCode(),
       from = layer.projection;
     features = parser.readFeatures(data);
 
@@ -337,7 +331,7 @@ class OpenLayersMap {
   }
 
   addVectorLayers(layers) {
-    layers.forEach(layer => {
+    layers.forEach((layer) => {
       layer.params = {
         service: "WFS",
         version: "1.1.0",
@@ -345,23 +339,23 @@ class OpenLayersMap {
         typename: layer.layer,
         srsname: layer.projection,
         outputFormat: "application/json",
-        bbox: ""
+        bbox: "",
       };
 
       var vectorSource = new VectorSource({
         format: new GeoJSON(),
-        loader: extent => {
+        loader: (extent) => {
           var url = this.createUrl(layer, extent);
           this.loadData(layer, url, vectorSource);
         },
-        strategy: strategyAll
+        strategy: strategyAll,
       });
 
       var vectorLayer = new VectorLayer({
         id: layer.id,
         visible: false,
         source: vectorSource,
-        style: createStyle.bind(this, layer)
+        style: createStyle.bind(this, layer),
       });
 
       this.map.addLayer(vectorLayer);
@@ -371,24 +365,24 @@ class OpenLayersMap {
   setLayers(layers = []) {
     var mapLayers = this.map.getLayers().getArray();
 
-    var hiddenLayers = mapLayers.filter(mapLayer => {
+    var hiddenLayers = mapLayers.filter((mapLayer) => {
       if (mapLayer.get("id") === -1) {
         return false;
       } else {
-        return !layers.some(layer => layer === mapLayer.get("id"));
+        return !layers.some((layer) => layer === mapLayer.get("id"));
       }
     });
-    var visibleLayers = mapLayers.filter(mapLayer => {
+    var visibleLayers = mapLayers.filter((mapLayer) => {
       if (mapLayer.get("id") === -1) {
         return true;
       } else {
-        return layers.some(layer => layer === mapLayer.get("id"));
+        return layers.some((layer) => layer === mapLayer.get("id"));
       }
     });
-    hiddenLayers.forEach(layer => {
+    hiddenLayers.forEach((layer) => {
       layer.setVisible(false);
     });
-    visibleLayers.forEach(layer => {
+    visibleLayers.forEach((layer) => {
       layer.setVisible(true);
     });
   }

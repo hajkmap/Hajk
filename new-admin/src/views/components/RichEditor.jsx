@@ -6,7 +6,7 @@ import {
   RichUtils,
   Modifier,
   AtomicBlockUtils,
-  getDefaultKeyBinding
+  getDefaultKeyBinding,
 } from "draft-js";
 //import { Editor } from "draft-extend";
 import { stateToHTML } from "draft-js-export-html";
@@ -19,39 +19,39 @@ import EditIcon from "@material-ui/icons/Edit";
 import { withStyles } from "@material-ui/core/styles";
 import { red, green, blue } from "@material-ui/core/colors";
 
-const ColorButtonRed = withStyles(theme => ({
+const ColorButtonRed = withStyles((theme) => ({
   root: {
     color: theme.palette.getContrastText(red[500]),
     backgroundColor: red[500],
     "&:hover": {
-      backgroundColor: red[700]
-    }
-  }
+      backgroundColor: red[700],
+    },
+  },
 }))(Button);
 
-const ColorButtonGreen = withStyles(theme => ({
+const ColorButtonGreen = withStyles((theme) => ({
   root: {
     color: theme.palette.getContrastText(green[700]),
     backgroundColor: green[500],
     "&:hover": {
-      backgroundColor: green[700]
-    }
-  }
+      backgroundColor: green[700],
+    },
+  },
 }))(Button);
 
-const ColorButtonBlue = withStyles(theme => ({
+const ColorButtonBlue = withStyles((theme) => ({
   root: {
     color: theme.palette.getContrastText(blue[500]),
     backgroundColor: blue[500],
     "&:hover": {
-      backgroundColor: blue[700]
-    }
-  }
+      backgroundColor: blue[700],
+    },
+  },
 }))(Button);
 class StyleButton extends React.Component {
   constructor() {
     super();
-    this.onToggle = e => {
+    this.onToggle = (e) => {
       e.preventDefault();
       this.props.onToggle(this.props.style);
     };
@@ -75,7 +75,7 @@ function mediaBlockRenderer(block) {
   if (block.getType() === "atomic") {
     return {
       component: Media,
-      editable: false
+      editable: false,
     };
   }
 
@@ -91,14 +91,32 @@ function getBlockStyle(block) {
   }
 }
 
-const Image = props => {
+const Audio = (props) => {
+  return <audio controls src={props.src} />;
+};
+
+const Image = (props) => {
   return <img src={props.src} alt="external" />;
 };
 
-const Media = props => {
+const Video = (props) => {
+  return <video controls src={props.src} />;
+};
+
+const Media = (props) => {
   const entity = props.contentState.getEntity(props.block.getEntityAt(0));
   const { src } = entity.getData();
-  let media = <Image src={src} />;
+  const type = entity.getType();
+
+  let media;
+  if (type === "audio") {
+    media = <Audio src={src} />;
+  } else if (type === "image") {
+    media = <Image src={src} />;
+  } else if (type === "video") {
+    media = <Video src={src} />;
+  }
+
   return media;
 };
 
@@ -107,8 +125,8 @@ const styleMap = {
     backgroundColor: "rgba(0, 0, 0, 0.05)",
     fontFamily: '"Inconsolata", "Menlo", "Consolas", monospace',
     fontSize: 16,
-    padding: 2
-  }
+    padding: 2,
+  },
 };
 
 const BLOCK_TYPES = [
@@ -120,16 +138,16 @@ const BLOCK_TYPES = [
   { label: "H6", style: "header-six" },
   { label: "Citat", style: "blockquote" },
   { label: "UL", style: "unordered-list-item" },
-  { label: "OL", style: "ordered-list-item" }
+  { label: "OL", style: "ordered-list-item" },
 ];
 
 var INLINE_STYLES = [
   { label: "Fet", style: "BOLD" },
   { label: "Kursiv", style: "ITALIC" },
-  { label: "Understuken", style: "UNDERLINE" }
+  { label: "Understuken", style: "UNDERLINE" },
 ];
 
-const BlockStyleControls = props => {
+const BlockStyleControls = (props) => {
   const { editorState } = props;
   const selection = editorState.getSelection();
   const blockType = editorState
@@ -139,7 +157,7 @@ const BlockStyleControls = props => {
 
   return (
     <div className="RichEditor-controls">
-      {BLOCK_TYPES.map(type => (
+      {BLOCK_TYPES.map((type) => (
         <StyleButton
           key={type.label}
           active={type.style === blockType}
@@ -152,12 +170,12 @@ const BlockStyleControls = props => {
   );
 };
 
-const InlineStyleControls = props => {
+const InlineStyleControls = (props) => {
   const currentStyle = props.editorState.getCurrentInlineStyle();
 
   return (
     <div className="RichEditor-controls">
-      {INLINE_STYLES.map(type => (
+      {INLINE_STYLES.map((type) => (
         <StyleButton
           key={type.label}
           active={currentStyle.has(type.style)}
@@ -174,9 +192,8 @@ class ImageButton extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      url:
-        "https://www.kitchentreaty.com/wp-content/uploads/2017/05/vegan-vanilla-bean-waffles-image-660x430.jpg",
-      urlInputVisible: false
+      url: "https://www.kitchentreaty.com/wp-content/uploads/2017/05/vegan-vanilla-bean-waffles-image-660x430.jpg",
+      urlInputVisible: false,
     };
   }
 
@@ -186,19 +203,19 @@ class ImageButton extends Component {
 
   urlChanged(e) {
     this.setState({
-      url: e.target.value
+      url: e.target.value,
     });
   }
 
   renderUrlInput() {
     var style = {
       color: "black",
-      marginBottom: "5px"
+      marginBottom: "5px",
     };
     if (this.state.urlInputVisible) {
       return (
         <div style={style}>
-          <input type="text" name="url" onChange={e => this.urlChanged(e)} />
+          <input type="text" name="url" onChange={(e) => this.urlChanged(e)} />
           &nbsp;
           <ColorButtonGreen
             variant="contained"
@@ -220,8 +237,9 @@ class ImageButton extends Component {
   render() {
     var style = {
       color: "black",
-      marginBottom: "5px"
+      marginBottom: "5px",
     };
+
     return (
       <div>
         <span
@@ -229,7 +247,7 @@ class ImageButton extends Component {
           className="RichEditor-styleButton fa fa-image"
           onClick={() => {
             this.setState({
-              urlInputVisible: !this.state.urlInputVisible
+              urlInputVisible: !this.state.urlInputVisible,
             });
           }}
         />
@@ -247,10 +265,10 @@ class RichEditor extends Component {
         stateFromHTML(this.props.html)
       ),
       readonly: true,
-      html: this.props.html
+      html: this.props.html,
     };
     this.focus = () => this.refs.editor.focus();
-    this.onChange = editorState => this.setState({ editorState });
+    this.onChange = (editorState) => this.setState({ editorState });
     this.handleKeyCommand = this._handleKeyCommand.bind(this);
     this.mapKeyToEditorCommand = this._mapKeyToEditorCommand.bind(this);
     this.toggleBlockType = this._toggleBlockType.bind(this);
@@ -303,7 +321,7 @@ class RichEditor extends Component {
     );
     const entityKey = contentStateWithEntity.getLastCreatedEntityKey();
     const newEditorState = EditorState.set(editorState, {
-      currentContent: contentStateWithEntity
+      currentContent: contentStateWithEntity,
     });
     this.setState(
       {
@@ -311,7 +329,7 @@ class RichEditor extends Component {
           newEditorState,
           entityKey,
           " "
-        )
+        ),
       },
       () => {
         setTimeout(() => this.focus(), 0);
@@ -330,19 +348,19 @@ class RichEditor extends Component {
     this.props.onUpdate(this.getHtml());
     this.setState({
       readonly: !this.state.readonly,
-      html: this.getHtml()
+      html: this.getHtml(),
     });
   }
 
   cancel() {
     this.setState({
-      readonly: !this.state.readonly
+      readonly: !this.state.readonly,
     });
   }
 
   createMarkup(html) {
     return {
-      __html: html
+      __html: html,
     };
   }
 
@@ -396,12 +414,7 @@ class RichEditor extends Component {
     let className = "RichEditor-editor";
     var contentState = editorState.getCurrentContent();
     if (!contentState.hasText()) {
-      if (
-        contentState
-          .getBlockMap()
-          .first()
-          .getType() !== "unstyled"
-      ) {
+      if (contentState.getBlockMap().first().getType() !== "unstyled") {
         className += " RichEditor-hidePlaceholder";
       }
     }
@@ -443,7 +456,7 @@ class RichEditor extends Component {
             Avbryt
           </ColorButtonRed>
           <div className="RichEditor-root">
-            <ImageButton addImage={url => this.addImage(url)} />
+            <ImageButton addImage={(url) => this.addImage(url)} />
             <BlockStyleControls
               editorState={editorState}
               onToggle={this.toggleBlockType}

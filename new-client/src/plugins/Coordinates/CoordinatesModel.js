@@ -11,9 +11,37 @@ class CoordinatesModel {
     this.app = settings.app;
     this.map = settings.map;
     this.localObserver = settings.localObserver;
+    this.thousandSeparator = settings.options.thousandSeparator ?? false;
+    this.showFieldsOnStart = settings.options.showFieldsOnStart ?? false;
 
     this.coordinates = undefined;
     this.transformations = settings.options.transformations;
+    if (!this.transformations || this.transformations.length === 0) {
+      this.transformations = [
+        {
+          code: "EPSG:4326",
+          precision: 3,
+          default: false,
+          hint: "",
+          title: "WGS84",
+          xtitle: "Lng",
+          ytitle: "Lat",
+          inverseAxis: true,
+        },
+      ];
+    } else {
+      // Give default values in case none is set
+      this.transformations.forEach((t) => {
+        t.code = t.code ?? "";
+        t.precision = t.precision ?? 3;
+        t.default = t.default ?? false;
+        t.title = t.title ?? "";
+        t.xtitle = t.xtitle ?? "";
+        t.ytitle = t.ytitle ?? "";
+        t.inverseAxis = t.inverseAxis ?? "";
+        t.coordinates = t.coordinates ?? "";
+      });
+    }
 
     this.source = new VectorSource();
     this.vector = new Vector({
@@ -21,11 +49,31 @@ class CoordinatesModel {
       name: "coordinateLayer",
     });
     this.map.addLayer(this.vector);
+    this.localObserver.subscribe("newCoordinates", (incomingCoords) => {
+      let transformedCoords = incomingCoords["coordinates"];
+      if (
+        incomingCoords["proj"] !== this.map.getView().getProjection().getCode()
+      ) {
+        transformedCoords = transform(
+          incomingCoords["coordinates"],
+          incomingCoords["proj"],
+          this.map.getView().getProjection().getCode()
+        );
+      }
+      this.addMarker(transformedCoords);
+    });
   }
 
   activate() {
     this.addInteraction();
     this.localObserver.publish("showSnackbar");
+    if (this.showFieldsOnStart) {
+      this.localObserver.publish("newCoordinates", {
+        coordinates: this.map.getView().getCenter(),
+        proj: this.map.getView().getProjection().getCode(),
+        force: true,
+      });
+    }
   }
 
   deactivate() {
@@ -33,7 +81,6 @@ class CoordinatesModel {
     this.vector.getSource().clear();
 
     this.localObserver.publish("hideSnackbar");
-    this.localObserver.publish("setTransformedCoordinates", []);
   }
 
   /**
@@ -63,10 +110,66 @@ class CoordinatesModel {
     this.source.addFeature(feature);
   };
 
-  transform(coordinates, to) {
-    const from = this.map.getView().getProjection();
-    return transform(coordinates, from, to);
-  }
+  /**
+   * @summary Pans so the marker is at the center of the view
+   */
+  centerOnMarker = () => {
+    if (this.vector.getSource().getFeatures().length > 0) {
+      this.map
+        .getView()
+        .setCenter(
+          this.vector
+            .getSource()
+            .getFeatures()[0]
+            .getGeometry()
+            .getCoordinates()
+        );
+    }
+  };
+
+  /**
+   * @summary Zooms in on and centers on the marker
+   */
+  zoomOnMarker = () => {
+    if (this.vector.getSource().getFeatures().length > 0) {
+      this.map
+        .getView()
+        .fit(this.vector.getSource().getFeatures()[0].getGeometry());
+    }
+  };
+
+  /**
+   * @summary Gets the user's position and puts the marker there
+   */
+  goToUserLocation = () => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition((pos) => {
+        const point = new Point([pos.coords.longitude, pos.coords.latitude]);
+        point.transform(
+          "EPSG:4326",
+          this.map.getView().getProjection().getCode()
+        );
+        this.coordinates = point.getCoordinates();
+        this.localObserver.publish("newCoordinates", {
+          coordinates: this.coordinates,
+          proj: this.map.getView().getProjection().getCode(),
+          force: true,
+        });
+        this.map.getView().setCenter(point.getCoordinates());
+      });
+    }
+  };
+
+  /**
+   * @summary Executed when the reset button is pressed and sends a request
+   * to all transformations to reset their values to empty strings.
+   * Also removes the marker
+   */
+  resetCoords = () => {
+    this.vector.getSource().clear();
+    this.localObserver.publish("resetCoordinates");
+    this.coordinates = undefined;
+  };
 
   /**
    * @summary When draw has ended, get the coordinates for the point
@@ -77,62 +180,13 @@ class CoordinatesModel {
   handleDrawEnd = (e) => {
     // Grab coordinates from the Point that has been drawn
     this.coordinates = e.feature.getGeometry().getCoordinates();
-
-    // Add a nice marker to those coordinates
     this.addMarker(this.coordinates);
 
-    let transformedCoordinates;
-
-    if (this.transformations.length > 0) {
-      // If there are defined transformations, loop through them
-      transformedCoordinates = this.transformations.map((transformation) => {
-        const container = {};
-
-        container.code = transformation.code ?? "";
-        container.precision = transformation.precision ?? 3;
-        container.default = transformation.default ?? false;
-        container.hint = transformation.hint ?? "";
-        container.title = transformation.title ?? "";
-        container.xtitle = transformation.xtitle ?? "";
-        container.ytitle = transformation.ytitle ?? "";
-        container.inverseAxis = transformation.inverseAxis ?? false;
-        container.coordinates =
-          this.transform(this.coordinates, transformation.code) ?? "";
-
-        return container;
-      });
-    } else {
-      // If no transformations are defined, fall back to default WGS84
-      transformedCoordinates = [
-        {
-          code: "EPSG:4326",
-          precision: 3,
-          default: false,
-          hint: "",
-          title: "WGS84",
-          xtitle: "Lng",
-          ytitle: "Lat",
-          inverseAxis: true,
-          coordinates: this.transform(this.coordinates, "EPSG:4326"),
-        },
-      ];
-    }
-
-    // Limit decimals to 3 by default
-    for (const [i, v] of transformedCoordinates.entries()) {
-      transformedCoordinates[i].coordinates[0] = v.coordinates[0].toFixed(
-        v.precision
-      );
-      transformedCoordinates[i].coordinates[1] = v.coordinates[1].toFixed(
-        v.precision
-      );
-    }
-
-    // Notify the View of the new coordinates
-    this.localObserver.publish(
-      "setTransformedCoordinates",
-      transformedCoordinates
-    );
+    this.localObserver.publish("newCoordinates", {
+      coordinates: this.coordinates,
+      proj: this.map.getView().getProjection(),
+      force: true,
+    });
   };
 
   addInteraction() {

@@ -2,12 +2,15 @@ import Draw from "ol/interaction/Draw";
 import { Stroke, Style, Circle, Fill } from "ol/style";
 import { Vector as VectorLayer } from "ol/layer";
 import VectorSource from "ol/source/Vector";
-import GeoJSON from "ol/format/GeoJSON";
 import { extend, createEmpty, isEmpty } from "ol/extent";
 import Feature from "ol/Feature";
 import FeatureStyle from "./utils/FeatureStyle";
 import { fromExtent } from "ol/geom/Polygon";
+import TileLayer from "ol/layer/Tile";
+import ImageLayer from "ol/layer/Image";
 import { handleClick } from "../../models/Click";
+import { deepMerge } from "utils/DeepMerge";
+import { isValidLayerId } from "../../utils/Validator";
 
 class MapViewModel {
   constructor(settings) {
@@ -27,10 +30,16 @@ class MapViewModel {
   // We use this to restore highlight after filter changes.
   lastFeaturesInfo = [];
 
+  refreshFeatureStyle = (options) => {
+    this.featureStyle = new FeatureStyle(deepMerge(this.options, options));
+    // Make sure to set the new style on the results layer. This way
+    // we'll get correct labels (if user wants to show them).
+    this.resultsLayer.setStyle(this.featureStyle.getDefaultSearchResultStyle);
+  };
+
   getDrawStyleSettings = () => {
-    const strokeColor =
-      this.options.drawStrokeColor ?? "rgba(255, 214, 91, 0.6)";
-    const fillColor = this.options.drawFillColor ?? "rgba(255, 214, 91, 0.2)";
+    const strokeColor = this.options.drawStrokeColor ?? "rgba(74,74,74,0.5)";
+    const fillColor = this.options.drawFillColor ?? "rgba(255,255,255,0.07)";
 
     return { strokeColor: strokeColor, fillColor: fillColor };
   };
@@ -46,19 +55,53 @@ class MapViewModel {
     });
   };
 
+  getVisibleLayers = () => {
+    return this.map
+      .getLayers()
+      .getArray()
+      .filter((layer) => {
+        return (
+          (layer instanceof TileLayer || layer instanceof ImageLayer) &&
+          layer.layersInfo !== undefined &&
+          // We consider a layer to be visible only if…
+          layer.getVisible() && // …it's visible…
+          layer.getSource().getParams()["LAYERS"] &&
+          layer.getProperties().name &&
+          isValidLayerId(layer.getProperties().name) // …has a specified name property…
+        );
+      })
+      .map((layer) => layer.getSource().getParams()["LAYERS"])
+      .join(",")
+      .split(",");
+  };
+
+  getVisibleSearchLayers = () => {
+    const searchSources = this.options.sources;
+    const visibleLayers = this.getVisibleLayers();
+    const visibleSearchLayers = searchSources.filter((s) => {
+      return visibleLayers.find((l_id) => l_id === s.id);
+    });
+    return visibleSearchLayers;
+  };
+
   initMapLayers = () => {
     this.resultSource = this.getNewVectorSource();
-    const defaultStyle = this.featureStyle.getDefaultSearchResultStyle();
     this.resultsLayer = this.getNewVectorLayer(
       this.resultSource,
-      this.options.showResultFeaturesInMap ?? true ? defaultStyle : null
+      this.options.showResultFeaturesInMap ?? true
+        ? this.featureStyle.getDefaultSearchResultStyle
+        : null
     );
+    // FIXME: Remove "type", use only "name" throughout
+    // the application. Should be done as part of #883.
     this.resultsLayer.set("type", "searchResultLayer");
+    this.resultsLayer.set("name", "pluginSearchResults");
     this.drawSource = this.getNewVectorSource();
     this.drawLayer = this.getNewVectorLayer(
       this.drawSource,
       this.getDrawStyle()
     );
+    this.drawLayer.set("name", "pluginSearchDraw");
     this.map.addLayer(this.drawLayer);
     this.map.addLayer(this.resultsLayer);
   };
@@ -96,6 +139,12 @@ class MapViewModel {
         } else {
           this.toggleDraw(true, options.type);
         }
+
+        // At this stage, the Search input field could be in focus. On
+        // mobile devices the on-screen keyboard will show up. We don't
+        // need it here (as these search options are purely click/touch-based)
+        // so we ensure that it's hidden by blurring the focus.
+        document.activeElement.blur();
       }
     );
   };
@@ -108,8 +157,8 @@ class MapViewModel {
       }
     });
     features.forEach((feature) => {
-      if (!this.resultSource.getFeatureById(feature.id)) {
-        this.resultSource.addFeature(new GeoJSON().readFeature(feature));
+      if (!this.resultSource.getFeatureById(feature.getId())) {
+        this.resultSource.addFeature(feature);
       }
     });
     this.setSelectedStyle(this.lastFeaturesInfo);
@@ -133,11 +182,7 @@ class MapViewModel {
 
   addFeaturesToResultsLayer = (features) => {
     this.resultSource.clear();
-    this.resultSource.addFeatures(
-      features.map((f) => {
-        return new GeoJSON().readFeature(f);
-      })
-    );
+    this.resultSource.addFeatures(features);
 
     if (this.options.showResultFeaturesInMap) {
       this.fitMapToSearchResult();
@@ -175,14 +220,9 @@ class MapViewModel {
     if (!feature) {
       return;
     }
-    const mapFeature = this.getFeatureFromResultSourceById(feature.id);
+    const mapFeature = this.getFeatureFromResultSourceById(feature.getId());
     return mapFeature?.setStyle(
-      this.featureStyle.getFeatureStyle(
-        mapFeature,
-        feature.featureTitle,
-        [],
-        "highlight"
-      )
+      this.featureStyle.getFeatureStyle(mapFeature, "highlight")
     );
   };
 
@@ -191,7 +231,7 @@ class MapViewModel {
       return;
     }
     const extent = createEmpty();
-    const mapFeature = this.getFeatureFromResultSourceById(feature.id);
+    const mapFeature = this.getFeatureFromResultSourceById(feature.getId());
     extend(extent, mapFeature?.getGeometry().getExtent());
     const extentToZoomTo = isEmpty(extent)
       ? this.resultSource.getExtent()
@@ -204,29 +244,17 @@ class MapViewModel {
     this.resetStyleForFeaturesInResultSource();
     featuresInfo.map((featureInfo) => {
       const feature = this.getFeatureFromResultSourceById(
-        featureInfo.feature.id
+        featureInfo.feature.getId()
       );
       return feature?.setStyle(
-        this.featureStyle.getFeatureStyle(
-          feature,
-          featureInfo.featureTitle,
-          [],
-          "selection"
-        )
+        this.featureStyle.getFeatureStyle(feature, "selection")
       );
     });
   };
 
   addAndHighlightFeatureInSearchResultLayer = (featureInfo) => {
-    const feature = new GeoJSON().readFeature(featureInfo.feature);
-    feature.setStyle(
-      this.featureStyle.getFeatureStyle(
-        feature,
-        featureInfo.featureTitle,
-        [],
-        "highlight"
-      )
-    );
+    const feature = featureInfo.feature;
+    feature.setStyle(this.featureStyle.getFeatureStyle(feature, "highlight"));
     this.resultSource.addFeature(feature);
     this.fitMapToSearchResult();
   };
@@ -241,12 +269,12 @@ class MapViewModel {
     //BoundingExtent-function gave wrong coordinates for some
     featuresInfo.forEach((featureInfo) => {
       const feature = this.getFeatureFromResultSourceById(
-        featureInfo.feature.id
+        featureInfo.feature.getId()
       );
       if (feature) {
         extend(
           extent,
-          this.getFeatureFromResultSourceById(featureInfo.feature.id)
+          this.getFeatureFromResultSourceById(featureInfo.feature.getId())
             .getGeometry()
             .getExtent()
         );
@@ -301,8 +329,16 @@ class MapViewModel {
   };
 
   handleDrawFeatureAdded = (e) => {
-    this.map.removeInteraction(this.draw);
-    this.map.clickLock.delete("search");
+    // OpenLayers seems to have a problem stopping the clicks if
+    // the draw interaction is removed too early. This fix is not pretty,
+    // but it gets the job done. It seems to be enough to remove the draw
+    // interaction after one cpu-cycle.
+    // If this is not added, the user will get a zoom-event when closing
+    // a polygon drawing.
+    setTimeout(() => {
+      this.map.removeInteraction(this.draw);
+      this.map.clickLock.delete("search");
+    }, 1);
     this.localObserver.publish("on-draw-end", e.feature);
   };
 

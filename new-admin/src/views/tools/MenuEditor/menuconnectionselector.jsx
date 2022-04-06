@@ -27,9 +27,9 @@ const getPopoverMenuItemTitle = label => {
 const getTextField = (value, onChangeFunction, variant) => {
   return (
     <TextField
-      id="icon-picker"
       label={""}
       type="icon"
+      fullWidth
       variant={variant}
       value={value}
       onChange={onChangeFunction}
@@ -162,17 +162,23 @@ class MenuConnectionSelector extends React.Component {
             >
               <Typography variant="button">OK</Typography>
             </ColorButtonGreen>
-            <ColorButtonRed
-              onClick={() => {
-                this.setState({ connectionsMenuAnchorEl: null });
-              }}
-            >
+            <ColorButtonRed onClick={this.reset}>
               <Typography variant="button">Avbryt</Typography>
             </ColorButtonRed>
           </Grid>
         </Grid>
       </Popover>
     );
+  };
+
+  reset = () => {
+    const { menuItem } = this.props;
+    this.setState({
+      mapLinkValue: menuItem.maplink,
+      linkValue: menuItem.link,
+      documentValue: menuItem.document,
+      connectionsMenuAnchorEl: null,
+    });
   };
 
   updateSelection = () => {

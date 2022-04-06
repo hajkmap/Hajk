@@ -1,25 +1,3 @@
-// Copyright (C) 2016 Göteborgs Stad
-//
-// Denna programvara är fri mjukvara: den är tillåten att distribuera och modifiera
-// under villkoren för licensen CC-BY-NC-SA 4.0.
-//
-// This program is free software: you can redistribute it and/or modify
-// it under the terms of the CC-BY-NC-SA 4.0 licence.
-//
-// http://creativecommons.org/licenses/by-nc-sa/4.0/
-//
-// Det är fritt att dela och anpassa programvaran för valfritt syfte
-// med förbehåll att följande villkor följs:
-// * Copyright till upphovsmannen inte modifieras.
-// * Programvaran används i icke-kommersiellt syfte.
-// * Licenstypen inte modifieras.
-//
-// Den här programvaran är öppen i syfte att den skall vara till nytta för andra
-// men UTAN NÅGRA GARANTIER; även utan underförstådd garanti för
-// SÄLJBARHET eller LÄMPLIGHET FÖR ETT VISST SYFTE.
-//
-// https://github.com/hajkmap/Hajk
-
 import React from "react";
 import { Component } from "react";
 import EditModel from "./../../models/edit.js";
@@ -27,18 +5,19 @@ import Button from "@material-ui/core/Button";
 import SaveIcon from "@material-ui/icons/SaveSharp";
 import { withStyles } from "@material-ui/core/styles";
 import { blue } from "@material-ui/core/colors";
+import Tree from "../treeEdit.jsx";
 
-const ColorButtonBlue = withStyles(theme => ({
+const ColorButtonBlue = withStyles((theme) => ({
   root: {
     color: theme.palette.getContrastText(blue[500]),
     backgroundColor: blue[500],
     "&:hover": {
-      backgroundColor: blue[700]
-    }
-  }
+      backgroundColor: blue[700],
+    },
+  },
 }))(Button);
 
-var defaultState = {
+const defaultState = {
   validationErrors: [],
   active: false,
   index: 0,
@@ -46,7 +25,9 @@ var defaultState = {
   instruction: "",
   visibleAtStart: false,
   visibleForGroups: [],
-  activeServices: []
+  activeServices: [],
+  editableLayers: {},
+  tree: "",
 };
 
 class ToolOptions extends Component {
@@ -58,53 +39,59 @@ class ToolOptions extends Component {
     this.state = defaultState;
     this.type = "edit";
     this.editModel = new EditModel();
+
+    this.handleAddEditableLayer = this.handleAddEditableLayer.bind(this);
+    this.loadLayers = this.loadLayers.bind(this);
   }
 
   componentDidMount() {
-    var tool = this.getTool();
-    var layersUrl =
+    this.loadEditableLayers();
+    let tool = this.getTool();
+    const layersUrl =
       this.props.model && this.props.model.get("config").url_layers
         ? this.props.model.get("config").url_layers
         : "";
     if (tool) {
-      this.setState({
-        active: true,
-        index: tool.index,
-        target: tool.options.target || "toolbar",
-        position: tool.options.position,
-        width: tool.options.width,
-        height: tool.options.height,
-        instruction: tool.options.instruction,
-        activeServices: tool.options.activeServices || [],
-        visibleAtStart: tool.options.visibleAtStart,
-        visibleForGroups: tool.options.visibleForGroups
-          ? tool.options.visibleForGroups
-          : []
-      });
+      this.setState(
+        {
+          active: true,
+          index: tool.index,
+          target: tool.options.target || "toolbar",
+          position: tool.options.position,
+          width: tool.options.width,
+          height: tool.options.height,
+          instruction: tool.options.instruction,
+          activeServices: tool.options.activeServices || [],
+          visibleAtStart: tool.options.visibleAtStart,
+          visibleForGroups:
+            tool.options.visibleForGroups || this.state.visibleForGroups,
+        },
+        () => {
+          this.loadLayers();
+        }
+      );
     } else {
       this.setState({
-        active: false
+        active: false,
       });
     }
     if (layersUrl) {
-      this.editModel.getConfig(layersUrl, services => {
+      this.editModel.getConfig(layersUrl, (services) => {
         this.setState({
-          services: services
+          services: services,
         });
       });
     }
   }
 
-  componentWillUnmount() {}
   /**
    *
    */
-  componentWillMount() {}
 
   handleInputChange(event) {
-    var target = event.target;
-    var name = target.name;
-    var value = target.type === "checkbox" ? target.checked : target.value;
+    const t = event.target;
+    const name = t.name;
+    let value = t.type === "checkbox" ? t.checked : t.value;
     if (typeof value === "string" && value.trim() !== "") {
       value = !isNaN(Number(value)) ? Number(value) : value;
     }
@@ -113,14 +100,89 @@ class ToolOptions extends Component {
       value = btoa(value);
     }
     this.setState({
-      [name]: value
+      [name]: value,
     });
+  }
+
+  handleLayerInputChange(event) {
+    const target = event.target;
+    const name = target.name;
+    let value = target.type === "checkbox" ? target.checked : target.value;
+    if (typeof value === "string" && value.trim() !== "") {
+      value = !isNaN(Number(value)) ? Number(value) : value;
+    }
+
+    if (name === "instruction") {
+      value = btoa(value);
+    }
+    this.setState({
+      [name]: value,
+    });
+  }
+
+  /**
+   * Called from treeEdit.jsx in componentDidMount and passes refs.
+   * Sets checkboxes and input fields for edit layers.
+   * @param {*} childRefs
+   */
+  loadLayers(childRefs) {
+    // check checkboxes, show input field
+    // and set text from map config
+    let ids = [];
+
+    for (let id of this.state.activeServices) {
+      ids.push(id);
+    }
+    if (ids.length > 0 && typeof ids[0].visibleForGroups === "undefined") {
+      let idsNew = [];
+      for (let i = 0; i < ids.length; i++) {
+        let as = {
+          id: ids[i],
+          visibleForGroups: [],
+        };
+        idsNew.push(as);
+      }
+      ids = idsNew;
+      this.setState({
+        activeServices: idsNew,
+      });
+    }
+    if (typeof childRefs !== "undefined") {
+      for (let i of ids) {
+        childRefs["cb_" + i.id] && (childRefs["cb_" + i.id].checked = true);
+        childRefs[i.id] && (childRefs[i.id].hidden = false);
+        childRefs[i.id] && (childRefs[i.id].value = i.visibleForGroups.join());
+      }
+    }
+  }
+
+  loadEditableLayers() {
+    this.props.model.getConfig(
+      this.props.model.get("config").url_layers,
+      (layers) => {
+        this.setState({
+          editableLayers: layers.wfstlayers,
+        });
+
+        this.setState({
+          tree: (
+            <Tree
+              model={this}
+              activeServices={this.state.editableLayers}
+              handleAddEditableLayer={this.handleAddEditableLayer}
+              loadLayers={this.loadLayers}
+              authActive={this.props.parent.props.parent.state.authActive}
+            />
+          ),
+        });
+      }
+    );
   }
 
   getTool() {
     return this.props.model
       .get("toolConfig")
-      .find(tool => tool.type === this.type);
+      .find((tool) => tool.type === this.type);
   }
 
   add(tool) {
@@ -131,12 +193,12 @@ class ToolOptions extends Component {
     this.props.model.set({
       toolConfig: this.props.model
         .get("toolConfig")
-        .filter(tool => tool.type !== this.type)
+        .filter((tool) => tool.type !== this.type),
     });
   }
 
   replace(tool) {
-    this.props.model.get("toolConfig").forEach(t => {
+    this.props.model.get("toolConfig").forEach((t) => {
       if (t.type === this.type) {
         t.options = tool.options;
         t.index = tool.index;
@@ -146,7 +208,15 @@ class ToolOptions extends Component {
   }
 
   save() {
-    var tool = {
+    // Set visibleForGroups to [] instead of [""] if input field is empty.
+    for (let aS of this.state.activeServices) {
+      if (typeof aS.visibleForGroups !== "undefined") {
+        if (aS.visibleForGroups.length === 1 && aS.visibleForGroups[0] === "") {
+          aS.visibleForGroups = [];
+        }
+      }
+    }
+    let tool = {
       type: this.type,
       index: this.state.index,
       options: {
@@ -160,11 +230,11 @@ class ToolOptions extends Component {
         visibleForGroups: this.state.visibleForGroups.map(
           Function.prototype.call,
           String.prototype.trim
-        )
-      }
+        ),
+      },
     };
 
-    var existing = this.getTool();
+    const existing = this.getTool();
 
     function update() {
       this.props.model.updateToolConfig(
@@ -172,7 +242,7 @@ class ToolOptions extends Component {
         () => {
           this.props.parent.props.parent.setState({
             alert: true,
-            alertMessage: "Uppdateringen lyckades"
+            alertMessage: "Uppdateringen lyckades",
           });
         }
       );
@@ -189,7 +259,7 @@ class ToolOptions extends Component {
             this.remove();
             update.call(this);
             this.setState(defaultState);
-          }
+          },
         });
       } else {
         this.remove();
@@ -217,7 +287,7 @@ class ToolOptions extends Component {
     }
 
     this.setState({
-      visibleForGroups: value !== "" ? groups : []
+      visibleForGroups: value !== "" ? groups : [],
     });
   }
 
@@ -231,7 +301,7 @@ class ToolOptions extends Component {
             value={this.state.visibleForGroups}
             type="text"
             name="visibleForGroups"
-            onChange={e => {
+            onChange={(e) => {
               this.handleAuthGrpsChange(e);
             }}
           />
@@ -242,46 +312,54 @@ class ToolOptions extends Component {
     }
   }
 
-  renderServices() {
-    const { services } = this.state;
-    if (services) {
-      return services.map((service, i) => {
-        var active = this.state.activeServices.find(
-          serviceId => serviceId === service.id
+  /**
+   * Called from treeEdit.jsx as event handler. Handles checkboxes and
+   * input of AD-groups for wfst
+   * @param {*} e
+   * @param {*} layer
+   */
+  handleAddEditableLayer(e, layer) {
+    if (e.target.type.toLowerCase() === "checkbox") {
+      if (e.target.checked) {
+        let toAdd = {
+          id: layer.id.toString(),
+          visibleForGroups: [],
+        };
+        this.setState({
+          activeServices: [...this.state.activeServices, toAdd],
+        });
+      } else {
+        let newArray = this.state.activeServices.filter(
+          (o) => o.id !== layer.id.toString()
         );
-        if (active === undefined) {
-          active = false;
-        }
-        return (
-          <li key={i}>
-            <input
-              id={service.id}
-              name={service.caption}
-              type="checkbox"
-              checked={active}
-              onChange={e => {
-                var actives = [...this.state.activeServices];
-                if (e.target.checked) {
-                  actives.push(service.id);
-                } else {
-                  actives = actives.filter(
-                    serviceId => serviceId !== service.id
-                  );
-                }
-                this.setState({
-                  activeServices: actives
-                });
-              }}
-            />
-            &nbsp;
-            <label htmlFor={service.id}>{service.caption}</label>
-          </li>
-        );
+
+        this.setState({
+          activeServices: newArray,
+        });
+      }
+    }
+    if (e.target.type.toLowerCase() === "text") {
+      let obj = this.state.activeServices.find(
+        (o) => o.id === layer.id.toString()
+      );
+      let newArray = this.state.activeServices.filter(
+        (o) => o.id !== layer.id.toString()
+      );
+
+      // Creates array and trims whitespace from start and end
+      if (typeof obj !== "undefined") {
+        obj.visibleForGroups = e.target.value.split(",");
+        obj.visibleForGroups = obj.visibleForGroups.map((el) => el.trim());
+      }
+
+      newArray.push(obj);
+
+      this.setState({
+        activeServices: newArray,
       });
-    } else {
-      return null;
     }
   }
+
   /**
    *
    */
@@ -293,7 +371,7 @@ class ToolOptions extends Component {
             <ColorButtonBlue
               variant="contained"
               className="btn"
-              onClick={e => {
+              onClick={(e) => {
                 e.preventDefault();
                 this.save();
               }}
@@ -307,7 +385,7 @@ class ToolOptions extends Component {
               id="active"
               name="active"
               type="checkbox"
-              onChange={e => {
+              onChange={(e) => {
                 this.handleInputChange(e);
               }}
               checked={this.state.active}
@@ -324,7 +402,7 @@ class ToolOptions extends Component {
               type="number"
               min="0"
               className="control-fixed-width"
-              onChange={e => {
+              onChange={(e) => {
                 this.handleInputChange(e);
               }}
               value={this.state.index}
@@ -336,7 +414,7 @@ class ToolOptions extends Component {
               id="target"
               name="target"
               className="control-fixed-width"
-              onChange={e => {
+              onChange={(e) => {
                 this.handleInputChange(e);
               }}
               value={this.state.target}
@@ -360,7 +438,7 @@ class ToolOptions extends Component {
               id="position"
               name="position"
               className="control-fixed-width"
-              onChange={e => {
+              onChange={(e) => {
                 this.handleInputChange(e);
               }}
               value={this.state.position}
@@ -384,7 +462,7 @@ class ToolOptions extends Component {
               type="number"
               min="0"
               className="control-fixed-width"
-              onChange={e => {
+              onChange={(e) => {
                 this.handleInputChange(e);
               }}
               value={this.state.width}
@@ -396,16 +474,15 @@ class ToolOptions extends Component {
               <i
                 className="fa fa-question-circle"
                 data-toggle="tooltip"
-                title="Höjd i pixlar på verktygets fönster. Anges som ett numeriskt värde. Lämna tomt för att använda maximal höjd."
+                title="Höjd i pixlar på verktygets fönster. Anges antingen numeriskt (pixlar), 'dynamic' för att automatiskt anpassa höjden efter innehållet eller 'auto' att använda maximal höjd."
               />
             </label>
             <input
               id="height"
               name="height"
-              type="number"
-              min="0"
+              type="text"
               className="control-fixed-width"
-              onChange={e => {
+              onChange={(e) => {
                 this.handleInputChange(e);
               }}
               value={this.state.height}
@@ -417,7 +494,7 @@ class ToolOptions extends Component {
               id="visibleAtStart"
               name="visibleAtStart"
               type="checkbox"
-              onChange={e => {
+              onChange={(e) => {
                 this.handleInputChange(e);
               }}
               checked={this.state.visibleAtStart}
@@ -438,24 +515,18 @@ class ToolOptions extends Component {
               type="text"
               id="instruction"
               name="instruction"
-              onChange={e => {
+              onChange={(e) => {
                 this.handleInputChange(e);
               }}
               value={this.state.instruction ? atob(this.state.instruction) : ""}
             />
           </div>
+          <div>{this.renderVisibleForGroups()}</div>
           <div>
-            <label>Tjänster</label>
-            <ul
-              style={{
-                display: "inline-block",
-                padding: 0
-              }}
-            >
-              {this.renderServices()}
-            </ul>
+            <div className="separator">Redigeringstjänster</div>
+
+            {this.state.tree}
           </div>
-          {this.renderVisibleForGroups()}
         </form>
       </div>
     );

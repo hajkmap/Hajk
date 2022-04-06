@@ -1,25 +1,3 @@
-// Copyright (C) 2016 Göteborgs Stad
-//
-// Denna programvara är fri mjukvara: den är tillåten att distribuera och modifiera
-// under villkoren för licensen CC-BY-NC-SA 4.0.
-//
-// This program is free software: you can redistribute it and/or modify
-// it under the terms of the CC-BY-NC-SA 4.0 licence.
-//
-// http://creativecommons.org/licenses/by-nc-sa/4.0/
-//
-// Det är fritt att dela och anpassa programvaran för valfritt syfte
-// med förbehåll att följande villkor följs:
-// * Copyright till upphovsmannen inte modifieras.
-// * Programvaran används i icke-kommersiellt syfte.
-// * Licenstypen inte modifieras.
-//
-// Den här programvaran är öppen i syfte att den skall vara till nytta för andra
-// men UTAN NÅGRA GARANTIER; även utan underförstådd garanti för
-// SÄLJBARHET eller LÄMPLIGHET FÖR ETT VISST SYFTE.
-//
-// https://github.com/hajkmap/Hajk
-
 import React, { Component } from "react";
 import { SketchPicker } from "react-color";
 import Tree from "../tree.jsx";
@@ -52,7 +30,7 @@ const defaultState = {
   markerImg: "",
   delayBeforeAutoSearch: 500,
   searchBarPlaceholder: "Sök...",
-
+  autocompleteWildcardAtStart: false,
   enablePolygonSearch: true,
   enableRadiusSearch: true,
   enableSelectSearch: true,
@@ -67,6 +45,7 @@ const defaultState = {
   showResultFeaturesInMap: true,
   showResultsLimitReachedWarning: true,
   enableFeatureToggler: true,
+  showCorrespondingWMSLayers: false,
 
   // Used to style the spatial search polygon/circle feature
   drawFillColor: "rgba(255,255,255,0.07)",
@@ -143,6 +122,9 @@ class ToolOptions extends Component {
           index: tool.index,
 
           layers: tool.options.layers || this.state.layers,
+          selectedSources: tool.options.selectedSources
+            ? tool.options.selectedSources
+            : [],
           visibleForGroups:
             tool.options.visibleForGroups || this.state.visibleForGroups,
           maxResultsPerDataset:
@@ -159,11 +141,17 @@ class ToolOptions extends Component {
           delayBeforeAutoSearch:
             tool.options.delayBeforeAutoSearch ||
             this.state.delayBeforeAutoSearch,
+          autocompleteWildcardAtStart:
+            tool.options.autocompleteWildcardAtStart ||
+            this.state.autocompleteWildcardAtStart,
           searchBarPlaceholder:
             tool.options.searchBarPlaceholder ||
             this.state.searchBarPlaceholder,
           enablePolygonSearch:
             tool.options.enablePolygonSearch ?? this.state.enablePolygonSearch,
+          showCorrespondingWMSLayers:
+            tool.options.showCorrespondingWMSLayers ??
+            this.state.showCorrespondingWMSLayers,
           enableRadiusSearch:
             tool.options.enableRadiusSearch ?? this.state.enableRadiusSearch,
           enableSelectSearch:
@@ -231,8 +219,8 @@ class ToolOptions extends Component {
             this.state.highlightStrokeColor,
         },
         () => {
-          this.loadLayers();
-          this.loadSources();
+          this.loadLayers(); // Load WFS search sources
+          this.loadSources(); // Load WMS layers as search sources too
         }
       );
     } else {
@@ -260,7 +248,10 @@ class ToolOptions extends Component {
       for (let i of ids) {
         childRefs["cb_" + i.id] && (childRefs["cb_" + i.id].checked = true);
         childRefs[i.id] && (childRefs[i.id].hidden = false);
-        childRefs[i.id] && (childRefs[i.id].value = i.visibleForGroups.join());
+        childRefs[i.id] &&
+          (childRefs[i.id].value = Array.isArray(i.visibleForGroups)
+            ? i.visibleForGroups.join()
+            : "");
       }
     }
   }
@@ -333,6 +324,9 @@ class ToolOptions extends Component {
       index: this.state.index,
       options: {
         layers: this.state.layers,
+        selectedSources: this.state.selectedSources
+          ? this.state.selectedSources
+          : [],
         visibleForGroups: this.state.visibleForGroups.map(
           Function.prototype.call,
           String.prototype.trim
@@ -343,23 +337,24 @@ class ToolOptions extends Component {
         markerImg: this.state.markerImg,
         delayBeforeAutoSearch: this.state.delayBeforeAutoSearch,
         searchBarPlaceholder: this.state.searchBarPlaceholder,
-
+        autocompleteWildcardAtStart: this.state.autocompleteWildcardAtStart,
         enablePolygonSearch: this.state.enablePolygonSearch,
+        showCorrespondingWMSLayers: this.state.showCorrespondingWMSLayers,
         enableRadiusSearch: this.state.enableRadiusSearch,
         enableSelectSearch: this.state.enableSelectSearch,
         enableExtentSearch: this.state.enableExtentSearch,
         enableResultsFiltering: this.state.enableResultsFiltering,
         enableResultsSorting: this.state.enableResultsSorting,
-        enableResultsSelectionClearing: this.state
-          .enableResultsSelectionClearing,
+        enableResultsSelectionClearing:
+          this.state.enableResultsSelectionClearing,
         enableResultsDownloading: this.state.enableResultsDownloading,
         enableFeaturePreview: this.state.enableFeaturePreview,
         enableLabelOnHighlight: this.state.enableLabelOnHighlight,
-        enableSelectedFeaturesCollection: this.state
-          .enableSelectedFeaturesCollection,
+        enableSelectedFeaturesCollection:
+          this.state.enableSelectedFeaturesCollection,
         showResultFeaturesInMap: this.state.showResultFeaturesInMap,
-        showResultsLimitReachedWarning: this.state
-          .showResultsLimitReachedWarning,
+        showResultsLimitReachedWarning:
+          this.state.showResultsLimitReachedWarning,
         enableFeatureToggler: this.state.enableFeatureToggler,
 
         drawFillColor: this.state.drawFillColor,
@@ -517,9 +512,12 @@ class ToolOptions extends Component {
   }
 
   flattern(groups) {
+    if (!groups) {
+      return [];
+    }
     return groups.reduce((i, group) => {
       var layers = [];
-      if (group.groups.length !== 0) {
+      if (group.groups?.length !== 0) {
         layers = [...this.flattern(group.groups)];
       }
       return [...i, ...group.layers, ...layers];
@@ -531,7 +529,9 @@ class ToolOptions extends Component {
     var layerTypes = Object.keys(layersConfig);
     for (let i = 0; i < layerTypes.length; i++) {
       for (let j = 0; j < layersConfig[layerTypes[i]].length; j++) {
-        if (Number(layersConfig[layerTypes[i]][j].id) === Number(layerId)) {
+        // We want to compare Numbers and Strings, hence the use of == operator.
+        // eslint-disable-next-line
+        if (layersConfig[layerTypes[i]][j].id == layerId) {
           found = layersConfig[layerTypes[i]][j].caption;
           break;
         }
@@ -563,6 +563,44 @@ class ToolOptions extends Component {
     });
   };
 
+  selectedSourceChange = (id, checked) => (e) => {
+    var selectedSources = checked
+      ? this.state.selectedSources.filter(
+          (selectedSource) => selectedSource !== id
+        )
+      : [id, ...this.state.selectedSources];
+
+    this.setState({
+      selectedSources: selectedSources,
+    });
+  };
+
+  renderSources(sources) {
+    if (!sources) return null;
+    return (
+      <ul>
+        {sources.map((source, i) => {
+          var id = "layer_" + source.id;
+          var checked = this.state.selectedSources.some(
+            (id) => id === source.id
+          );
+          return (
+            <li key={i}>
+              <input
+                id={id}
+                type="checkbox"
+                checked={checked}
+                onChange={this.selectedSourceChange(source.id, checked)}
+              />
+              &nbsp;
+              <label htmlFor={id}>{source.name}</label>
+            </li>
+          );
+        })}
+      </ul>
+    );
+  }
+
   /**
    * Infoclick's stroke and fill color are set by the React
    * color picker. This method handles change event for those
@@ -572,7 +610,6 @@ class ToolOptions extends Component {
    * @param {*} color
    */
   handleColorChange = (target, color) => {
-    console.log("color: ", color, RGBA.toString(color.rgb));
     this.setState({ [target]: RGBA.toString(color.rgb) });
   };
 
@@ -679,10 +716,54 @@ class ToolOptions extends Component {
               }}
             />
           </div>
+          <div>
+            <input
+              id="autocompleteWildcardAtStart"
+              name="autocompleteWildcardAtStart"
+              value={this.state.autocompleteWildcardAtStart}
+              type="checkbox"
+              checked={this.state.autocompleteWildcardAtStart}
+              onChange={(e) => {
+                this.handleInputChange(e);
+              }}
+            />{" "}
+            <label className="long-label" htmlFor="autocompleteWildcardAtStart">
+              Använd wildcard före sökord för autocomplete
+            </label>
+          </div>
 
           <div className="separator">Söktjänster</div>
 
           {this.state.tree}
+
+          <div className="separator">Sök inom WMS-lager</div>
+
+          <div>
+            <label htmlFor="searchLayers">
+              Välj vilka WMS-lager som ska vara tillgängliga som söktjänster.
+              Kom ihåg att konfigurera respektive WMS-lagers sökinställningar i
+              Lager-fliken!
+            </label>
+            <div className="layer-list">
+              {this.renderSources(this.state.sources)}
+            </div>
+          </div>
+
+          <div>
+            <input
+              id="showCorrespondingWMSLayers"
+              name="showCorrespondingWMSLayers"
+              type="checkbox"
+              onChange={(e) => {
+                this.handleInputChange(e);
+              }}
+              checked={this.state.showCorrespondingWMSLayers}
+            />
+            &nbsp;
+            <label htmlFor="showCorrespondingWMSLayers" className="long-label">
+              Tänd motsvarande WMS-lager automatiskt vid klick i resultatlistan
+            </label>
+          </div>
 
           <div className="separator">Spatiala sökverktyg</div>
 
@@ -744,7 +825,7 @@ class ToolOptions extends Component {
             />
             &nbsp;
             <label className="long-label" htmlFor="enableExtentSearch">
-              Sök i området
+              Sök inom vyn
             </label>
           </div>
 

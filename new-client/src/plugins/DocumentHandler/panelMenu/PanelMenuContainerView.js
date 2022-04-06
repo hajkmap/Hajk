@@ -1,235 +1,257 @@
 import React from "react";
 import PanelList from "./PanelList";
-import { isMobile } from "../../../utils/IsMobile";
+import { getIsMobile } from "../../../utils/IsMobile";
+import { delay } from "../../../utils/Delay";
+import { animateScroll as scroll } from "react-scroll";
+import { withStyles } from "@material-ui/core/styles";
+import { hasSubMenu } from "../utils/helpers";
+import { getNormalizedMenuState } from "../utils/stateConverter";
+import {
+  isExpandedTopLevelItem,
+  getItemIdsToColor,
+  findMenuItemWithDocumentName,
+} from "../panelMenu/panelMenuUtils";
+
+const styles = () => ({
+  panelListWrapper: {
+    maxHeight: "100%",
+    position: "relative",
+    overflow: "auto",
+  },
+});
 
 class PanelMenuView extends React.PureComponent {
-  state = {
-    selectedIndex: null,
-    coloredIndex: [],
-    expandedIndex: [],
-  };
-
   constructor(props) {
     super(props);
-    this.#setInternalReferences();
     this.#bindSubscriptions();
   }
 
+  internalId = 0;
+
+  state = {};
+
   componentDidMount = () => {
-    const { options } = this.props;
-    this.setState({
-      expandedIndex: this.getDefaultExpanded(options.menuConfig.menu),
-    });
-  };
-
-  handleExpandClick = (item) => {
-    const indexOfItemId = this.state.expandedIndex.indexOf(item.id);
-    let newExpandedState = [...this.state.expandedIndex];
-
-    if (indexOfItemId === -1) {
-      newExpandedState.push(item.id);
-    } else {
-      newExpandedState.splice(indexOfItemId);
-    }
-    this.setState({
-      expandedIndex: newExpandedState,
-      coloredIndex: this.#getItemIdsToColor(item),
-    });
-  };
-
-  isTopLevelMenuItemColored = () => {
-    const { options } = this.props;
-    return options.menuConfig.menu.some((item) => {
-      return (
-        item.menu.length === 0 && this.state.coloredIndex.indexOf(item.id) > -1
-      );
-    });
-  };
-
-  setActiveMenuItems = (documentName, item) => {
-    if (!documentName) {
-      if (this.isTopLevelMenuItemColored()) {
-        this.setState({
-          selectedIndex: null,
-          coloredIndex: [],
-        });
-      } else {
-        this.setState({
-          selectedIndex: null,
-        });
-      }
-    }
-    if (documentName === item.document) {
-      this.setState({
-        selectedIndex: item.id,
-        coloredIndex: this.#getItemIdsToColor(item),
-        expandedIndex: this.#getItemIdsToExpand(item),
-      });
-    }
-  };
-
-  #hasSubMenu = (menuItem) => {
-    return menuItem.menu && menuItem.menu.length > 0;
-  };
-
-  getDefaultExpanded = (menu) => {
-    return menu.reduce((acc, menuItem) => {
-      const hasSubMenu = this.#hasSubMenu(menuItem);
-      if (menuItem.expandedSubMenu && hasSubMenu) {
-        acc = [...acc, menuItem.id];
-      }
-      if (hasSubMenu) {
-        acc = [...acc, ...this.getDefaultExpanded(menuItem.menu)];
-      }
-      return acc;
-    }, []);
-  };
-
-  #setInternalReferences = () => {
-    const { options } = this.props;
-    this.internalId = 0;
-    options.menuConfig.menu.forEach((menuItem) => {
-      this.#setMenuItemLevel(menuItem, 0);
-      this.#setInternalId(menuItem);
-      this.#setParentMenuItem(menuItem, undefined);
-      this.internalId = this.internalId + 1;
-    });
+    this.#initializeItems();
   };
 
   #bindSubscriptions = () => {
     const { localObserver } = this.props;
-
-    localObserver.subscribe("document-clicked", (item) => {
-      localObserver.publish("set-active-document", {
-        documentName: item.document,
-        headerIdentifier: null,
-      });
-    });
-
-    localObserver.subscribe("link-clicked", (item) => {
-      window.open(item.link, "_blank");
-    });
-
-    localObserver.subscribe("maplink-clicked", (item) => {
-      if (!isMobile && this.props.options.closePanelOnMapLinkOpen) {
-        localObserver.publish("set-active-document", {
-          documentName: null,
-          headerIdentifier: null,
-        });
-        this.props.app.globalObserver.publish("documentviewer.closeWindow");
-      }
-      localObserver.publish("fly-to", item.maplink);
-    });
-  };
-
-  #setInternalId = (menuItem) => {
-    menuItem.id = this.internalId;
-    if (menuItem.menu.length > 0) {
-      menuItem.menu.forEach((child) => {
-        this.internalId = this.internalId + 1;
-        this.#setInternalId(child);
-      });
-    }
-  };
-
-  #setParentMenuItem = (menuItem, parent) => {
-    menuItem.parent = parent;
-    if (menuItem.menu.length > 0) {
-      menuItem.menu.forEach((child) => {
-        this.#setParentMenuItem(child, menuItem);
-      });
-    }
-  };
-
-  #setMenuItemLevel = (menuItem, level) => {
-    menuItem.level = level;
-    level = level + 1;
-    if (menuItem.menu && menuItem.menu.length > 0) {
-      menuItem.menu.forEach((subMenuItem) => {
-        this.#setMenuItemLevel(subMenuItem, level);
-      });
-    }
-  };
-
-  #getItemIdsToExpand = (item) => {
-    const shoudBeExpanded = this.#extractIdsFromItems(
-      this.#getAllAncestors(item)
+    localObserver.subscribe("submenu-clicked", this.#handleSubMenuClicked);
+    localObserver.subscribe(
+      "document-link-clicked",
+      this.#handleOpenDocumentFromLink
     );
-
-    const currentlyNoExpanded = shoudBeExpanded.filter(() => {
-      return this.state.expandedIndex.indexOf(item.id) === -1;
-    });
-    return [...this.state.expandedIndex, ...currentlyNoExpanded];
+    localObserver.subscribe(
+      "document-clicked",
+      this.#handleOpenDocumentFromPanelMenu
+    );
+    localObserver.subscribe("link-clicked", this.#handleExternalLinkClicked);
+    localObserver.subscribe(
+      "document-maplink-clicked",
+      this.#handleShowMapLayersFromLink
+    );
+    localObserver.subscribe(
+      "maplink-clicked",
+      this.#handleShowMapLayersFromPanelMenu
+    );
+    localObserver.subscribe("document-window-closed", this.#clearPanel);
   };
 
-  #getAllAncestors = (item) => {
-    const ancestors = [];
-    let parent = item.parent;
-    while (parent) {
-      ancestors.push(parent);
-      parent = parent.parent;
+  #initializeItems = () => {
+    const { options } = this.props;
+    options.menuConfig.menu.forEach(this.#setInitialMenuItemProperties);
+    this.setState(getNormalizedMenuState(options.menuConfig.menu));
+  };
+
+  #setInitialMenuItemProperties = (menuItem) => {
+    const { document } = this.props;
+    const itemMatchesOpenDocument =
+      document && menuItem.document === document.documentFileName;
+    //Do not use spread because we are mutating original item
+    Object.assign(menuItem, {
+      id: this.#getNextUniqueId(),
+      selected: itemMatchesOpenDocument,
+      colored: itemMatchesOpenDocument,
+    });
+    if (hasSubMenu(menuItem)) {
+      menuItem.hasSubMenu = true;
+      menuItem.menu.forEach((subMenuItem) => {
+        this.#setInitialMenuItemProperties(subMenuItem, menuItem);
+      });
     }
-    return ancestors;
   };
 
-  #extractIdsFromItems = (items) => {
-    return items.map((item) => {
-      return item.id;
+  //------------------Handle events-------------------------
+
+  #handleOpenDocumentFromLink = ({ documentName, headerIdentifier }) => {
+    const itemClicked = findMenuItemWithDocumentName(documentName, this.state);
+    this.#setDocument(documentName, headerIdentifier);
+    this.#setItemStateProperties(itemClicked.id).then(() => {
+      this.#scrollToMenuItem(itemClicked.itemRef.current.offsetTop);
     });
   };
 
-  #getAllSubMenuIds = (menu) => {
-    let itemIds = [];
-    menu.forEach((menuItem) => {
-      if (menuItem.menu.length > 0) {
-        itemIds.push(menuItem.id);
-        itemIds = itemIds.concat(this.#getAllSubMenuIds(menuItem.menu));
-      } else {
-        itemIds.push(menuItem.id);
-      }
+  #handleOpenDocumentFromPanelMenu = (id) => {
+    const { app } = this.props;
+    this.#setDocument(this.state[id].document, null);
+    this.#setItemStateProperties(id).then(() => {
+      app.globalObserver.publish("core.onlyHideDrawerIfNeeded");
     });
-    return itemIds;
   };
 
-  #getItemIdsToColor = (item) => {
-    const ancestors = [item, ...this.#getAllAncestors(item)];
-    const ancestorIds = this.#extractIdsFromItems(ancestors);
-    const allSubMenuItemIds = ancestors.reduce((acc, ancestor) => {
-      acc = acc.concat(this.#getAllSubMenuIds(ancestor.menu));
-      return acc;
-    }, []);
-    const topAncestor = ancestors.find((ancestor) => {
-      return ancestor.parent === undefined;
-    });
-    const isTopAncestor = topAncestor.id === item.id;
-    const allIds = [...ancestorIds, ...allSubMenuItemIds];
-    const isExpanded = this.state.expandedIndex.some((id) => {
-      return ancestorIds.indexOf(id) > -1;
-    });
-
-    if (isExpanded && isTopAncestor) {
-      return [];
+  #handleShowMapLayers = (mapLink) => {
+    const { options, localObserver, app } = this.props;
+    if (options.displayLoadingOnMapLinkOpen) {
+      localObserver.publish("maplink-loading");
     }
+    app.globalObserver.publish("core.onlyHideDrawerIfNeeded");
+    this.#delayAndFlyToMapLink(mapLink);
+  };
 
-    return allIds;
+  #closeDocumentWindow = () => {
+    const { app } = this.props;
+    this.#setDocument();
+    app.globalObserver.publish("documentviewer.closeWindow");
+  };
+
+  #handleShowMapLayersFromLink = (maplink) => {
+    if (getIsMobile()) {
+      this.#closeDocumentWindow();
+    }
+    this.#handleShowMapLayers(maplink);
+  };
+
+  #handleShowMapLayersFromPanelMenu = (id) => {
+    const { options } = this.props;
+    // If we're on small screen, or the admin option is set (no matter screen size),
+    // let's close the DocumentHandler window
+    if (getIsMobile() || options.closePanelOnMapLinkOpen) {
+      this.#closeDocumentWindow();
+    }
+    this.#handleShowMapLayers(this.state[id].maplink);
+  };
+
+  #handleSubMenuClicked = (id) => {
+    this.#setItemStateProperties(id);
+  };
+
+  #handleExternalLinkClicked = (id) => {
+    const { app } = this.props;
+    window.open(this.state[id].link, "_blank");
+    app.globalObserver.publish("core.onlyHideDrawerIfNeeded");
+  };
+
+  //---------------------------------------------------
+
+  #setClickedItemProperties = (clickedItem) => {
+    let newItem = { ...clickedItem };
+    return {
+      ...clickedItem,
+      colored: !isExpandedTopLevelItem(newItem),
+      selected: !newItem.hasSubMenu,
+      expandedSubMenu: newItem.hasSubMenu
+        ? !newItem.expandedSubMenu
+        : newItem.expandedSubMenu,
+    };
+  };
+
+  #setNonClickedItemProperties = (item, currentState, clickedItem) => {
+    const idsToColor = getItemIdsToColor(clickedItem, currentState);
+    return {
+      ...item,
+      colored: idsToColor.indexOf(item.id) !== -1,
+      expandedSubMenu:
+        clickedItem.allParents.indexOf(item.id) !== -1
+          ? true
+          : item.expandedSubMenu,
+      selected: clickedItem.hasSubMenu ? item.selected : false,
+    };
+  };
+
+  //Important to create new state and items to not mutate state directly
+  #setItemStateProperties = (idClicked) => {
+    return new Promise((resolve) => {
+      const currentState = { ...this.state };
+      const clickedItem = currentState[idClicked];
+      const newState = Object.values(currentState).reduce((items, item) => {
+        const isClickedItem = item.id === idClicked;
+        if (isClickedItem) {
+          return {
+            ...items,
+            [item.id]: this.#setClickedItemProperties(item),
+          };
+        } else {
+          return {
+            ...items,
+            [item.id]: this.#setNonClickedItemProperties(
+              item,
+              currentState,
+              clickedItem
+            ),
+          };
+        }
+      }, {});
+
+      this.setState(newState, resolve);
+    });
+  };
+
+  #clearPanel = () => {
+    let newState = Object.values({ ...this.state }).reduce((state, item) => {
+      let newItem = { ...item };
+      newItem.colored = false;
+      newItem.selected = false;
+      return { ...state, [newItem.id]: newItem };
+    }, {});
+
+    this.setState(newState);
+  };
+
+  #scrollToMenuItem = async (scrollOffset) => {
+    scroll.scrollTo(scrollOffset, {
+      containerId: "panelListWrapper",
+      smooth: false,
+      isDynamic: true,
+      delay: 0,
+    });
+  };
+
+  #setDocument = (documentName = null, headerIdentifier = null) => {
+    const { localObserver } = this.props;
+    localObserver.publish("set-active-document", {
+      documentName: documentName,
+      headerIdentifier: headerIdentifier,
+    });
+  };
+
+  /*
+  Large maplinks can be slow and cause the application to hang. This delay is a workaround in order
+  allow the other tasks such as closing the document and displaying a snackbar to run before the
+  application hangs.
+  */
+  #delayAndFlyToMapLink = async (maplink) => {
+    await delay(100);
+    this.props.localObserver.publish("fly-to", maplink);
+  };
+
+  #getNextUniqueId = () => {
+    this.internalId += 1;
+    return this.internalId;
   };
 
   render() {
-    const { localObserver, app, options } = this.props;
-    const { expandedIndex, coloredIndex, selectedIndex } = this.state;
+    const { classes, app, localObserver } = this.props;
     return (
-      <PanelList
-        localObserver={localObserver}
-        handleExpandClick={this.handleExpandClick}
-        setActiveMenuItems={this.setActiveMenuItems}
-        expandedIndex={expandedIndex}
-        coloredIndex={coloredIndex}
-        selectedIndex={selectedIndex}
-        globalObserver={app.globalObserver}
-        menu={options.menuConfig.menu}
-      ></PanelList>
+      <div className={classes.panelListWrapper} id="panelListWrapper">
+        <PanelList
+          app={app}
+          localObserver={localObserver}
+          level={0}
+          items={this.state}
+        ></PanelList>
+      </div>
     );
   }
 }
 
-export default PanelMenuView;
+export default withStyles(styles)(PanelMenuView);
