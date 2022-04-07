@@ -69,7 +69,7 @@ class GeosuiteExportModel {
             "geom",
           // Static defaults used as fallback if layer reference lookup by id fails
           version: "1.1.0",
-          url: "https://services.sbk.goteborg.se/geoteknik-v2-utv/wfs",
+          url: this.#options.services?.wfs?.projects?.url ?? "",
           featurePrefixName: "geoteknik-v2-utv",
           featureName: "geoteknisk_utredning",
         },
@@ -94,7 +94,7 @@ class GeosuiteExportModel {
             "geom",
           // Static defaults used as fallback if layer reference lookup by id fails
           version: "1.1.0",
-          url: "https://opengeodata.goteborg.se/services/borrhal-v2/wfs",
+          url: this.#options.services?.wfs?.boreholes?.url ?? "",
           featurePrefixName: "borrhal-v2",
           featureName: "borrhal",
         },
@@ -556,9 +556,7 @@ class GeosuiteExportModel {
    * @returns hfetch promise
    */
   #trimbleApiFetch = (signal, endpointAddress, httpMethod, body) => {
-    const apiUrlPrefix =
-      this.#options.services?.trimble?.url ??
-      "https://geoarkiv-api.goteborg.se/prod";
+    const apiUrlPrefix = this.#options.services?.trimble?.url ?? "";
     const apiUrl = apiUrlPrefix.concat(endpointAddress);
 
     const apiRequestOptions = {

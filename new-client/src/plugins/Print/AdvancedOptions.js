@@ -223,7 +223,7 @@ class AdvancedOptions extends React.PureComponent {
               )}
             </FormControl>
           </FormControlContainer>
-          <FormControlContainer item xs={12}>
+          <FormControlContainer container item>
             <Grid item xs={6} sx={{ paddingRight: "10px" }}>
               <FormControl fullWidth={true}>
                 <InputLabel variant="standard" htmlFor="includeNorthArrow">
@@ -250,7 +250,7 @@ class AdvancedOptions extends React.PureComponent {
               </FormControl>
             </Grid>
           </FormControlContainer>
-          <FormControlContainer item xs={12}>
+          <FormControlContainer container item>
             <Grid item xs={6} sx={{ paddingRight: "10px" }}>
               <FormControl fullWidth={true}>
                 <InputLabel variant="standard" htmlFor="includeScaleBar">
@@ -277,7 +277,7 @@ class AdvancedOptions extends React.PureComponent {
               </FormControl>
             </Grid>
           </FormControlContainer>
-          <FormControlContainer item xs={12}>
+          <FormControlContainer container item>
             <Grid item xs={6} sx={{ paddingRight: "10px" }}>
               <FormControl fullWidth={true}>
                 <InputLabel variant="standard" htmlFor="includeLogo">

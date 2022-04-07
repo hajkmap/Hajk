@@ -106,7 +106,7 @@ export default class KmlExport {
         new Blob([postData], {
           type: "application/vnd.google-earth.kml+xml;charset=utf-8",
         }),
-        `Hajk - ${new Date().toLocaleString()}.kml`
+        `Sökexport - ${new Date().toLocaleString()}.kml`
       );
     }
   };
