@@ -153,6 +153,7 @@ export default class ConfigMapper {
             : args.serverType || "geoserver",
         crossOrigin: properties.mapConfig.map.crossOrigin || "anonymous",
         attribution: args.attribution,
+        showAttributeTableButton: args.showAttributeTableButton,
         searchUrl: args.searchUrl,
         searchPropertyName: args.searchPropertyName,
         searchDisplayName: args.searchDisplayName,
@@ -294,6 +295,10 @@ export default class ConfigMapper {
         id: args.id,
         infoOwner: args.infoOwner,
         information: args.infobox,
+        displayFields: args.displayFields,
+        secondaryLabelFields: args.secondaryLabelFields,
+        shortDisplayFields: args.shortDisplayFields,
+        infoclickIcon: args.infoclickIcon,
         infoText: args.infoText,
         infoTitle: args.infoTitle,
         infoUrl: args.infoUrl,
@@ -305,7 +310,7 @@ export default class ConfigMapper {
         layerType: args.layerType,
         legend: [
           {
-            url: args.icon, //Use specified icon in legend
+            url: args.legend,
             description: args.caption,
           },
         ],

@@ -13,6 +13,7 @@ import RadioButtonUnchecked from "@mui/icons-material/RadioButtonUnchecked";
 import CheckBoxOutlineBlankIcon from "@mui/icons-material/CheckBoxOutlineBlank";
 import MoreHorizIcon from "@mui/icons-material/MoreHoriz";
 import CloseIcon from "@mui/icons-material/Close";
+import TableViewIcon from "@mui/icons-material/TableView";
 
 import LayerGroupItem from "./LayerGroupItem.js";
 import LayerSettings from "./LayerSettings.js";
@@ -88,6 +89,7 @@ class LayerItem extends React.PureComponent {
     this.infoUrlText = layerInfo.infoUrlText;
     this.infoOwner = layerInfo.infoOwner;
     this.localObserver = layer.localObserver;
+    this.showAttributeTableButton = layerInfo.showAttributeTableButton || false;
     this.usesMinMaxZoom = this.layerUsesMinMaxZoom();
     this.minMaxZoomAlertOnToggleOnly = layer.get("minMaxZoomAlertOnToggleOnly");
 
@@ -295,33 +297,37 @@ class LayerItem extends React.PureComponent {
 
   renderInfoButton = () => {
     return this.isInfoEmpty() ? null : (
-      <LayerButtonWrapper>
-        {this.state.infoVisible ? (
-          <RemoveCircleIcon onClick={this.toggleInfo} />
-        ) : (
-          <InfoIcon
-            onClick={this.toggleInfo}
-            sx={{
-              boxShadow: this.state.infoVisible
-                ? "rgb(204, 204, 204) 2px 3px 1px"
-                : "inherit",
-              borderRadius: "100%",
-            }}
-          />
-        )}
-      </LayerButtonWrapper>
+      <Tooltip title="Mer information om lagret">
+        <LayerButtonWrapper>
+          {this.state.infoVisible ? (
+            <RemoveCircleIcon onClick={this.toggleInfo} />
+          ) : (
+            <InfoIcon
+              onClick={this.toggleInfo}
+              sx={{
+                boxShadow: this.state.infoVisible
+                  ? "rgb(204, 204, 204) 2px 3px 1px"
+                  : "inherit",
+                borderRadius: "100%",
+              }}
+            />
+          )}
+        </LayerButtonWrapper>
+      </Tooltip>
     );
   };
 
   renderMoreButton = () => {
     return (
-      <LayerButtonWrapper>
-        {this.state.toggleSettings ? (
-          <CloseIcon onClick={this.toggleSettings} />
-        ) : (
-          <MoreHorizIcon onClick={this.toggleSettings} />
-        )}
-      </LayerButtonWrapper>
+      <Tooltip title="Fler inställningar">
+        <LayerButtonWrapper>
+          {this.state.toggleSettings ? (
+            <CloseIcon onClick={this.toggleSettings} />
+          ) : (
+            <MoreHorizIcon onClick={this.toggleSettings} />
+          )}
+        </LayerButtonWrapper>
+      </Tooltip>
     );
   };
 
@@ -509,6 +515,54 @@ class LayerItem extends React.PureComponent {
     return <LayerTogglerButtonWrapper>{icon}</LayerTogglerButtonWrapper>;
   };
 
+  #showAttributeTable = async () => {
+    try {
+      const url = this.props.layer.getSource().get("url").replace("wms", "wfs");
+      const { LAYERS } = this.props.layer.getSource().getParams();
+      // If URL already contains a query string part, we want to glue them together.
+      const glue = url.includes("?") ? "&" : "?";
+      const getFeatureUrl = `${url}${glue}service=WFS&version=1.0.0&request=GetFeature&typeName=${LAYERS}&maxFeatures=5000&outputFormat=application%2Fjson`;
+      const describeFeatureTypeUrl = `${url}${glue}service=WFS&version=1.0.0&request=DescribeFeatureType&typeName=${LAYERS}&outputFormat=application%2Fjson`;
+      // TODO: QGIS Server doesn't support JSON response for DescribeFeatureType. We must
+      // fetch the result as GML2 and then parse it accordingly. This will require
+      // some more work than the current approach.
+      // const describeFeatureTypeUrl = `${url}${glue}service=WFS&version=1.0.0&request=DescribeFeatureType&typeName=${LAYERS}`;
+      const r1 = await fetch(getFeatureUrl);
+      const features = await r1.json();
+      const r2 = await fetch(describeFeatureTypeUrl);
+      const description = await r2.json();
+
+      const columns = description.featureTypes
+        .find((f) => f.typeName === LAYERS) // featureTypes contains an object, where typeName will be the same as the layer name we requested
+        .properties.filter((c) => !c.type.toLowerCase().includes("gml")) // Best guess to try to filter out the geometry column, we don't want to show it
+        .map((c) => {
+          // Prepare an object that has the format of 'columns' prop for MUI's DataGrid
+          return {
+            field: c.name,
+            headerName: c.name,
+            type: c.localType === "int" ? "number" : c.localType, // DataGrid wants 'number', not 'int', see https://mui.com/components/data-grid/columns/#column-types
+            flex: 1,
+          };
+        });
+
+      const rows = features.features.map((r, i) => {
+        return { ...r.properties, id: i };
+      });
+
+      this.props.app.globalObserver.publish("core.showAttributeTable", {
+        title: `${this.caption} (${LAYERS})`,
+        content: { columns, rows },
+      });
+    } catch (error) {
+      console.error(error);
+      console.log(this);
+      this.props.enqueueSnackbar(
+        `Serverfel: attributtabellen för lagret "${this.caption}" kunde inte visas`,
+        { variant: "error" }
+      );
+    }
+  };
+
   render() {
     const { layer, model, app, chapters } = this.props;
 
@@ -566,6 +620,14 @@ class LayerItem extends React.PureComponent {
             )}
             {this.renderStatusButton()}
             {this.renderInfoButton()}
+
+            {this.showAttributeTableButton && (
+              <Tooltip title="Visa lagrets attributtabell">
+                <LayerButtonWrapper>
+                  <TableViewIcon onClick={this.#showAttributeTable} />
+                </LayerButtonWrapper>
+              </Tooltip>
+            )}
             {this.renderMoreButton()}
           </LayerButtonsContainer>
         </LayerItemWrapper>

@@ -1,5 +1,5 @@
 {
-  "version": "3.5.0",
+  "version": "3.9.0",
   "projections": [
     {
       "code": "EPSG:3006",
@@ -273,17 +273,10 @@
       "index": 2
     },
     {
-      "type": "draw",
+      "type": "sketch",
       "options": {
         "target": "left",
         "position": "left",
-        "height": 650,
-        "exportUrl": "",
-        "importUrl": "",
-        "base64Encode": false,
-        "instruction": "",
-        "icons": "",
-        "proxyUrl": "",
         "visibleForGroups": []
       },
       "index": 3
@@ -568,6 +561,6 @@
     "defaultCookieNoticeMessage": "Vi använder nödvändiga kakor (cookies) för att webbplatsen ska fungera på ett bra sätt för dig. Vi använder också funktionella kakor för att ge dig bästa möjliga funktion om du som användare har godkänt användningen av dessa.",
     "defaultCookieNoticeUrl": "https://pts.se/sv/bransch/regler/lagar/lag-om-elektronisk-kommunikation/kakor-cookies/",
     "crossOrigin": "anonymous",
-    "cookieUse3dPart": false,
+    "cookieUse3dPart": false
   }
 }

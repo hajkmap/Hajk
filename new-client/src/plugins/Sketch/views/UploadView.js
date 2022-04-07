@@ -8,8 +8,8 @@ import SaveAltIcon from "@mui/icons-material/SaveAlt";
 import DeleteIcon from "@mui/icons-material/Delete";
 import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
 import VisibilityIcon from "@mui/icons-material/Visibility";
-import ChatIcon from "@mui/icons-material/Chat";
-import ChatBubbleIcon from "@mui/icons-material/ChatBubble";
+import TextDecreaseIcon from "@mui/icons-material/TextDecrease";
+import TextIncreaseIcon from "@mui/icons-material/TextIncrease";
 
 import Information from "../components/Information";
 import UploadDialog from "../components/UploadDialog";
@@ -101,7 +101,11 @@ const UploadedFile = (props) => {
                 } objektens etiketter.`}
               >
                 <IconButton size="small" onClick={props.onToggleShowTextClick}>
-                  {props.textShown ? <ChatBubbleIcon /> : <ChatIcon />}
+                  {props.textShown ? (
+                    <TextDecreaseIcon />
+                  ) : (
+                    <TextIncreaseIcon />
+                  )}
                 </IconButton>
               </Tooltip>
             </Grid>

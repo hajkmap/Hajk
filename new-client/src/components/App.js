@@ -18,6 +18,8 @@ import Introduction from "./Introduction";
 import Announcement from "./Announcement/Announcement";
 import Alert from "./Alert";
 import PluginWindows from "./PluginWindows";
+import SimpleDialog from "./SimpleDialog";
+import MapClickViewer from "./MapClickViewer/MapClickViewer";
 
 import Search from "./Search/Search.js";
 
@@ -328,6 +330,10 @@ class App extends React.PureComponent {
 
     this.globalObserver = new Observer();
 
+    this.infoclickOptions = this.props.config.mapConfig.tools.find(
+      (t) => t.type === "infoclick"
+    )?.options;
+
     // We have to initialize the cookie-manager so we know how cookies should be managed.
     // The manager should ideally only be initialized once, since the initialization determines
     // wether the cookie-notice has to be shown or not. Running setConfig() again will not lead
@@ -546,9 +552,7 @@ class App extends React.PureComponent {
 
   renderInfoclickWindow() {
     // Check if admin wants Infoclick to be active
-    const infoclickOptions = this.props.config.mapConfig.tools.find(
-      (t) => t.type === "infoclick"
-    )?.options;
+    const { infoclickOptions } = this;
 
     // The 'open' prop, below, will control whether the Window is
     // currently visible or not. The 'open' property itself
@@ -809,6 +813,8 @@ class App extends React.PureComponent {
     const showMapSwitcher =
       clean === false && config.activeMap !== "simpleMapConfig";
 
+    const useNewInfoclick = this.infoclickOptions?.useNewInfoclick === true;
+
     return (
       <SnackbarProvider
         maxSnack={3}
@@ -962,10 +968,18 @@ class App extends React.PureComponent {
               },
             }}
           >
-            {this.renderInfoclickWindow()}
+            {useNewInfoclick === false && this.renderInfoclickWindow()}
+            {useNewInfoclick && (
+              <MapClickViewer
+                appModel={this.appModel}
+                globalObserver={this.globalObserver}
+                infoclickOptions={this.infoclickOptions}
+              />
+            )}
             <PluginWindows
               plugins={this.appModel.getBothDrawerAndWidgetPlugins()}
             />
+            <SimpleDialog globalObserver={this.globalObserver} />
           </WindowsContainer>
           {clean !== true && ( // NB: Special case here, important with !== true, because there is an edge-case where clean===undefined, and we don't want to match on that!
             <Drawer
@@ -998,11 +1012,14 @@ class App extends React.PureComponent {
           )}
           {clean === false && (
             <Introduction
-              experimentalIntroductionEnabled={
-                this.appModel.config.appConfig.experimentalIntroductionEnabled
+              introductionEnabled={
+                this.appModel.config.mapConfig.map.introductionEnabled
               }
-              experimentalIntroductionSteps={
-                this.appModel.config.appConfig.experimentalIntroductionSteps
+              introductionShowControlButton={
+                this.appModel.config.mapConfig.map.introductionShowControlButton
+              }
+              introductionSteps={
+                this.appModel.config.mapConfig.map.introductionSteps
               }
               globalObserver={this.globalObserver}
             />

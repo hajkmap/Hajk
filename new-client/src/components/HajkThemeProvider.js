@@ -49,8 +49,8 @@ function getColorScheme(preferredColorSchemeFromMapConfig, customTheme) {
         // If there's no preference yet in neither local storage nor admin…
         colorScheme =
           window?.matchMedia("(prefers-color-scheme: dark)").matches === true // …check if browser prefers dark mode…
-            ? "dark" // …if so, use dark mode…
-            : "light"; // … else go for light.
+            ? "dark" // …if so, use dark mode, else go for light.
+            : "light";
         break;
     }
   }

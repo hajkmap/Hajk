@@ -22,6 +22,7 @@ var defaultState = {
   anchorX: 0.5,
   anchorY: 1,
   allowDangerousHtml: true,
+  useNewInfoclick: false,
 };
 
 const ColorButtonBlue = withStyles((theme) => ({
@@ -63,6 +64,8 @@ class ToolOptions extends Component {
         anchorY: tool.options.anchor[1] || this.state.anchorY,
         allowDangerousHtml:
           tool.options.allowDangerousHtml || this.state.allowDangerousHtml,
+        useNewInfoclick:
+          tool.options.useNewInfoclick || this.state.useNewInfoclick,
         visibleForGroups: tool.options.visibleForGroups
           ? tool.options.visibleForGroups
           : [],
@@ -133,6 +136,7 @@ class ToolOptions extends Component {
         strokeWidth: this.state.strokeWidth,
         fillColor: this.state.fillColor,
         allowDangerousHtml: this.state.allowDangerousHtml,
+        useNewInfoclick: this.state.useNewInfoclick,
         visibleForGroups: this.state.visibleForGroups.map(
           Function.prototype.call,
           String.prototype.trim
@@ -360,6 +364,21 @@ class ToolOptions extends Component {
             />
             &nbsp;
             <label htmlFor="allowDangerousHtml">Tillåt HTML i infoclick</label>
+          </div>
+          <div>
+            <input
+              id="useNewInfoclick"
+              name="useNewInfoclick"
+              type="checkbox"
+              onChange={(e) => {
+                this.handleInputChange(e);
+              }}
+              checked={this.state.useNewInfoclick}
+            />
+            &nbsp;
+            <label htmlFor="useNewInfoclick" style={{ width: "auto" }}>
+              Använd ny Infoclick-variant (se GitHub issue #1034)
+            </label>
           </div>
           <div className="separator">Ikon och markering</div>
           <div>

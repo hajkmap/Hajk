@@ -9,6 +9,7 @@ import WMSLayer from "./layers/WMSLayer.js";
 import WMTSLayer from "./layers/WMTSLayer.js";
 import WFSVectorLayer from "./layers/VectorLayer.js";
 import { bindMapClickEvent } from "./Click.js";
+import MapClickModel from "./MapClickModel";
 import { defaults as defaultInteractions } from "ol/interaction";
 import { Map, View } from "ol";
 // TODO: Uncomment and ensure they show as expected
@@ -329,11 +330,50 @@ class AppModel {
     // So, we create the Set no matter what:
     this.map.clickLock = new Set();
 
+    const useNewInfoclick =
+      config.tools.find((t) => t.type === "infoclick")?.options
+        ?.useNewInfoclick === true;
+    if (useNewInfoclick) {
+      console.log("useNewInfoclick: ", useNewInfoclick);
+      const mapClickModel = new MapClickModel(this.map, this.globalObserver);
+
+      mapClickModel.bindMapClick((featureCollections) => {
+        const featureCollectionsToBeHandledByMapClickViewer =
+          featureCollections.filter((fc) => fc.type !== "SearchResults");
+
+        // Publish the retrived collections, even if they're empty. We want the
+        // handling components to know, so they can act accordingly (e.g. close
+        // window if no features are to be shown).
+        this.globalObserver.publish(
+          "mapClick.featureCollections",
+          featureCollectionsToBeHandledByMapClickViewer
+        );
+
+        // Next, handle search results features.
+        // Check if we've got any features from the search layer,
+        // and if we do, announce it to the search component so it can
+        // show relevant feature in the search results list.
+        const searchResultFeatures = featureCollections.find(
+          (c) => c.type === "SearchResults"
+        )?.features;
+
+        if (searchResultFeatures?.length > 0) {
+          this.globalObserver.publish(
+            "infoClick.searchResultLayerClick",
+            searchResultFeatures // Clicked features sent to the search-component for display
+          );
+        }
+      });
+    }
+
     // FIXME: Potential miss here: don't we want to register click on search results
     // But we register the Infoclick handler only if the plugin exists in map config:
     // even if Infoclick plugin is inactive? Currently search won't register clicks in
     // map without infoclick, which seems as an unnecessary limitation.
-    if (config.tools.some((tool) => tool.type === "infoclick")) {
+    if (
+      config.tools.some((tool) => tool.type === "infoclick") &&
+      useNewInfoclick === false
+    ) {
       bindMapClickEvent(this.map, (mapClickDataResult) => {
         // We have to separate features coming from the searchResult-layer
         // from the rest, since we want to render this information in the
@@ -757,10 +797,15 @@ class AppModel {
                   ? sl.searchPropertyName.split(",")
                   : [],
               infobox: sl.infobox || "",
+              infoclickIcon: sl.infoclickIcon || "",
               aliasDict: "",
               displayFields:
                 typeof sl.searchDisplayName === "string"
                   ? sl.searchDisplayName.split(",")
+                  : [],
+              secondaryLabelFields:
+                typeof sl.secondaryLabelFields === "string"
+                  ? sl.secondaryLabelFields.split(",")
                   : [],
               shortDisplayFields:
                 typeof sl.searchShortDisplayName === "string"

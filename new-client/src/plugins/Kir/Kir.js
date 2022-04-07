@@ -2,7 +2,7 @@ import React from "react";
 import PropTypes from "prop-types";
 import BaseWindowPlugin from "../BaseWindowPlugin";
 import Observer from "react-event-observer";
-import PluginIcon from "@material-ui/icons/PermContactCalendar";
+import PluginIcon from "@mui/icons-material/PermContactCalendar";
 import KirLayerController from "./KirLayerController";
 import KirModel from "./KirModel";
 import KirView from "./KirView";

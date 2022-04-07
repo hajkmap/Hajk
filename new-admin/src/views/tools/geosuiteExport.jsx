@@ -23,7 +23,7 @@ const defaultState = {
   visibleAtStart: false,
   services: {
     trimble: {
-      url: "https://geoarkiv-api.goteborg.se/prod",
+      url: "",
       projectDetailsMethod: "/investigation",
       exportMethod: "/export",
     },
@@ -32,6 +32,7 @@ const defaultState = {
         layer: {
           id: "",
           geometryField: "geom",
+          url: "",
         },
         spatialFilter: "intersects",
         attributes: {
@@ -44,6 +45,7 @@ const defaultState = {
         layer: {
           id: "",
           geometryField: "geom",
+          url: "",
         },
         attributes: {
           external_id: "externt_id",
@@ -54,7 +56,7 @@ const defaultState = {
     },
   },
   view: {
-    termsAndConditionsLink: "https://goteborg.se/wps/portal/om-webbplatsen",
+    termsAndConditionsLink: "",
     errorMessage:
       "Kunde inte hämta resultat. Vänligen försök igen. Kontakta oss om felet kvarstår.",
     digitizeDescription:
@@ -471,6 +473,25 @@ class ToolOptions extends Component {
             />
           </div>
           <div>
+            <label htmlFor="services__wfs__projects__layer__url">
+              WFS-adress{" "}
+              <i
+                className="fa fa-question-circle"
+                data-toggle="tooltip"
+                title="WFS-adress till tjänsten."
+              />
+            </label>
+            <input
+              type="text"
+              id="services__wfs__projects__layer__url"
+              name="services__wfs__projects__layer__url"
+              onChange={(e) => {
+                this.handleInputChange(e);
+              }}
+              value={this.state.services.wfs.projects.layer?.url || ""}
+            />
+          </div>
+          <div>
             <label htmlFor="services__wfs__projects__attributes__title">
               Attributnamn - titel{" "}
               <i
@@ -571,6 +592,25 @@ class ToolOptions extends Component {
               value={
                 this.state.services.wfs.boreholes.layer?.geometryField || ""
               }
+            />
+          </div>
+          <div>
+            <label htmlFor="services__wfs__boreholes__layer__url">
+              WFS-adress{" "}
+              <i
+                className="fa fa-question-circle"
+                data-toggle="tooltip"
+                title="WFS-adress till tjänsten."
+              />
+            </label>
+            <input
+              type="text"
+              id="services__wfs__boreholes__layer__url"
+              name="services__wfs__boreholes__layer__url"
+              onChange={(e) => {
+                this.handleInputChange(e);
+              }}
+              value={this.state.services.wfs.boreholes.layer?.url || ""}
             />
           </div>
           <div>
