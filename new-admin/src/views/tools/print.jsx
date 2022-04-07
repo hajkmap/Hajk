@@ -6,14 +6,14 @@ import { blue } from "@material-ui/core/colors";
 import { MenuItem, Select } from "@material-ui/core";
 import { SketchPicker } from "react-color";
 
-const ColorButtonBlue = withStyles(theme => ({
+const ColorButtonBlue = withStyles((theme) => ({
   root: {
     color: theme.palette.getContrastText(blue[500]),
     backgroundColor: blue[500],
     "&:hover": {
-      backgroundColor: blue[700]
-    }
-  }
+      backgroundColor: blue[700],
+    },
+  },
 }))(Button);
 
 var defaultState = {
@@ -96,11 +96,11 @@ class ToolOptions extends Component {
             ? tool.options.includeNorthArrow
             : this.state.includeNorthArrow,
         northArrowPlacement:
-          tool.options.northArrowPlacement || this.state.northArrowPlacement
+          tool.options.northArrowPlacement || this.state.northArrowPlacement,
       });
     } else {
       this.setState({
-        active: false
+        active: false,
       });
     }
   }
@@ -120,14 +120,14 @@ class ToolOptions extends Component {
       value = btoa(value);
     }
     this.setState({
-      [name]: value
+      [name]: value,
     });
   }
 
   getTool() {
     return this.props.model
       .get("toolConfig")
-      .find(tool => tool.type === this.type);
+      .find((tool) => tool.type === this.type);
   }
 
   add(tool) {
@@ -138,12 +138,12 @@ class ToolOptions extends Component {
     this.props.model.set({
       toolConfig: this.props.model
         .get("toolConfig")
-        .filter(tool => tool.type !== this.type)
+        .filter((tool) => tool.type !== this.type),
     });
   }
 
   replace(tool) {
-    this.props.model.get("toolConfig").forEach(t => {
+    this.props.model.get("toolConfig").forEach((t) => {
       if (t.type === this.type) {
         t.options = tool.options;
         t.index = tool.index;
@@ -182,8 +182,8 @@ class ToolOptions extends Component {
         includeScaleBar: this.state.includeScaleBar,
         scaleBarPlacement: this.state.scaleBarPlacement,
         includeNorthArrow: this.state.includeNorthArrow,
-        northArrowPlacement: this.state.northArrowPlacement
-      }
+        northArrowPlacement: this.state.northArrowPlacement,
+      },
     };
 
     var existing = this.getTool();
@@ -194,7 +194,7 @@ class ToolOptions extends Component {
         () => {
           this.props.parent.props.parent.setState({
             alert: true,
-            alertMessage: "Uppdateringen lyckades"
+            alertMessage: "Uppdateringen lyckades",
           });
         }
       );
@@ -211,7 +211,7 @@ class ToolOptions extends Component {
             this.remove();
             update.call(this);
             this.setState(defaultState);
-          }
+          },
         });
       } else {
         this.remove();
@@ -239,7 +239,7 @@ class ToolOptions extends Component {
     }
 
     this.setState({
-      visibleForGroups: value !== "" ? groups : []
+      visibleForGroups: value !== "" ? groups : [],
     });
   }
 
@@ -253,7 +253,7 @@ class ToolOptions extends Component {
             value={this.state.visibleForGroups}
             type="text"
             name="visibleForGroups"
-            onChange={e => {
+            onChange={(e) => {
               this.handleAuthGrpsChange(e);
             }}
           />
@@ -271,7 +271,7 @@ class ToolOptions extends Component {
         name={name}
         className="control-fixed-width"
         value={currentValue}
-        onChange={e => {
+        onChange={(e) => {
           this.handleInputChange(e);
         }}
       >
@@ -290,7 +290,7 @@ class ToolOptions extends Component {
         name={name}
         value={currentValue}
         className="control-fixed-width"
-        onChange={e => {
+        onChange={(e) => {
           this.handleInputChange(e);
         }}
       >
@@ -311,7 +311,7 @@ class ToolOptions extends Component {
             <ColorButtonBlue
               variant="contained"
               className="btn"
-              onClick={e => {
+              onClick={(e) => {
                 e.preventDefault();
                 this.save();
               }}
@@ -334,7 +334,7 @@ class ToolOptions extends Component {
               id="active"
               name="active"
               type="checkbox"
-              onChange={e => {
+              onChange={(e) => {
                 this.handleInputChange(e);
               }}
               checked={this.state.active}
@@ -352,7 +352,7 @@ class ToolOptions extends Component {
               type="number"
               min="0"
               className="control-fixed-width"
-              onChange={e => {
+              onChange={(e) => {
                 this.handleInputChange(e);
               }}
               value={this.state.index}
@@ -364,7 +364,7 @@ class ToolOptions extends Component {
               id="target"
               name="target"
               className="control-fixed-width"
-              onChange={e => {
+              onChange={(e) => {
                 this.handleInputChange(e);
               }}
               value={this.state.target}
@@ -388,7 +388,7 @@ class ToolOptions extends Component {
               id="position"
               name="position"
               className="control-fixed-width"
-              onChange={e => {
+              onChange={(e) => {
                 this.handleInputChange(e);
               }}
               value={this.state.position}
@@ -412,7 +412,7 @@ class ToolOptions extends Component {
               type="number"
               min="0"
               className="control-fixed-width"
-              onChange={e => {
+              onChange={(e) => {
                 this.handleInputChange(e);
               }}
               value={this.state.width}
@@ -432,7 +432,7 @@ class ToolOptions extends Component {
               name="height"
               type="text"
               className="control-fixed-width"
-              onChange={e => {
+              onChange={(e) => {
                 this.handleInputChange(e);
               }}
               value={this.state.height}
@@ -467,7 +467,7 @@ class ToolOptions extends Component {
               type="text"
               name="scales"
               value={this.state.scales}
-              onChange={e => {
+              onChange={(e) => {
                 this.handleInputChange(e);
               }}
             />
@@ -507,7 +507,7 @@ class ToolOptions extends Component {
               type="text"
               name="logo"
               value={this.state.logo}
-              onChange={e => {
+              onChange={(e) => {
                 this.handleInputChange(e);
               }}
             />
@@ -571,7 +571,7 @@ class ToolOptions extends Component {
               type="text"
               name="northArrow"
               value={this.state.northArrow}
-              onChange={e => {
+              onChange={(e) => {
                 this.handleInputChange(e);
               }}
             />
@@ -665,7 +665,7 @@ class ToolOptions extends Component {
               id="visibleAtStart"
               name="visibleAtStart"
               type="checkbox"
-              onChange={e => {
+              onChange={(e) => {
                 this.handleInputChange(e);
               }}
               checked={this.state.visibleAtStart}
@@ -686,7 +686,7 @@ class ToolOptions extends Component {
               type="text"
               id="instruction"
               name="instruction"
-              onChange={e => {
+              onChange={(e) => {
                 this.handleInputChange(e);
               }}
               value={

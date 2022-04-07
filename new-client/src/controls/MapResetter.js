@@ -4,13 +4,13 @@ import HomeIcon from "@material-ui/icons/Home";
 
 import { withStyles } from "@material-ui/core/styles";
 
-const styles = theme => ({
+const styles = (theme) => ({
   paper: {
-    marginBottom: theme.spacing(1)
+    marginBottom: theme.spacing(1),
   },
   button: {
-    minWidth: "unset"
-  }
+    minWidth: "unset",
+  },
 });
 
 /**
@@ -21,7 +21,7 @@ const styles = theme => ({
  */
 class MapResetter extends React.PureComponent {
   // TODO: Also reset layers to default visibility!
-  handleClick = e => {
+  handleClick = (e) => {
     const { map } = this.props;
     if (map !== undefined) {
       const view = map.getView();

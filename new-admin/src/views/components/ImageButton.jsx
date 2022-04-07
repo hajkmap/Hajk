@@ -7,20 +7,20 @@ import { withStyles } from "@material-ui/core/styles";
 import { green } from "@material-ui/core/colors";
 import ImageIcon from "@material-ui/icons/Image";
 
-const ColorButtonGreen = withStyles(theme => ({
+const ColorButtonGreen = withStyles((theme) => ({
   root: {
     color: theme.palette.getContrastText(green[700]),
     backgroundColor: green[500],
     "&:hover": {
-      backgroundColor: green[700]
-    }
-  }
+      backgroundColor: green[700],
+    },
+  },
 }))(Button);
 
 class StyleButton extends React.Component {
   constructor() {
     super();
-    this.onToggle = e => {
+    this.onToggle = (e) => {
       e.preventDefault();
       this.props.onToggle(this.props.style);
     };
@@ -52,13 +52,13 @@ class ImageButton extends Component {
       imageHeight: undefined,
       imageCaption: "",
       imageSource: "",
-      imagePopup: false
+      imagePopup: false,
     };
   }
 
   addImage() {
     this.setState({
-      imageDialogVisible: false
+      imageDialogVisible: false,
     });
     const imgData = {
       url: this.state.url,
@@ -66,56 +66,56 @@ class ImageButton extends Component {
       imageHeight: this.state.imageHeight,
       imageCaption: this.state.imageCaption,
       imageSource: this.state.imageSource,
-      imagePopup: this.state.imagePopup
+      imagePopup: this.state.imagePopup,
     };
     this.props.addImage(imgData);
   }
 
   urlChanged(e) {
     this.setState({
-      url: e.target.value
+      url: e.target.value,
     });
   }
 
   imageWidthChanged(e) {
     this.setState({
-      imageWidth: e.target.value
+      imageWidth: e.target.value,
     });
   }
 
   imageHeightChanged(e) {
     this.setState({
-      imageHeight: e.target.value
+      imageHeight: e.target.value,
     });
   }
 
   imageCaptionChanged(e) {
     this.setState({
-      imageCaption: e.target.value
+      imageCaption: e.target.value,
     });
   }
 
   imageSourceChanged(e) {
     this.setState({
-      imageSource: e.target.value
+      imageSource: e.target.value,
     });
   }
 
   imagePopupToggle(e) {
     this.setState({
-      imagePopup: !this.state.imagePopup
+      imagePopup: !this.state.imagePopup,
     });
   }
 
   renderUrlInput() {
     var style = {
       color: "black",
-      marginBottom: "5px"
+      marginBottom: "5px",
     };
     if (this.state.imageDialogVisible) {
       return (
         <div style={style}>
-          <input type="text" name="url" onChange={e => this.urlChanged(e)} />
+          <input type="text" name="url" onChange={(e) => this.urlChanged(e)} />
           &nbsp;
           <ColorButtonGreen
             variant="contained"
@@ -139,7 +139,7 @@ class ImageButton extends Component {
     return (
       <ReactModal
         isOpen={this.state.imageDialogVisible}
-        onRequestClose={e => this.closeImageDialog()}
+        onRequestClose={(e) => this.closeImageDialog()}
         className="modal document-editor-modal"
         overlayClassName="Overlay"
         appElement={document.getElementById("root")}
@@ -152,14 +152,14 @@ class ImageButton extends Component {
               className="close"
               data-dismiss="modal"
               aria-label="Close"
-              onClick={e => this.closeImageDialog()}
+              onClick={(e) => this.closeImageDialog()}
             >
               <span aria-hidden="true">&times;</span>
             </button>
           </div>
           <div className="modal-body">
             <span>Välj bild i listan eller ange en bildlänk</span>
-            <select onChange={e => this.urlChanged(e)}>
+            <select onChange={(e) => this.urlChanged(e)}>
               {imageList
                 ? imageList.map((image, i) => {
                     return (
@@ -179,22 +179,22 @@ class ImageButton extends Component {
             <input
               type="number"
               placeholder="Bildbredd"
-              onChange={e => this.imageWidthChanged(e)}
+              onChange={(e) => this.imageWidthChanged(e)}
             />
             <input
               type="number"
               placeholder="Bildhöjd"
-              onChange={e => this.imageHeightChanged(e)}
+              onChange={(e) => this.imageHeightChanged(e)}
             />
             <input
               type="text"
               placeholder="Bildtext (en beskrivning av bilden)"
-              onChange={e => this.imageCaptionChanged(e)}
+              onChange={(e) => this.imageCaptionChanged(e)}
             />
             <input
               type="text"
               placeholder="Källa (Källa: xxxx, Fotograf: xxxx)"
-              onChange={e => this.imageSourceChanged(e)}
+              onChange={(e) => this.imageSourceChanged(e)}
             />
             <label className="form-check-label">Popup på/av</label>
             <input
@@ -208,7 +208,7 @@ class ImageButton extends Component {
               name="url"
               placeholder="Välj bild i listan eller infoga webblänk"
               value={this.state.url}
-              onChange={e => this.urlChanged(e)}
+              onChange={(e) => this.urlChanged(e)}
             />
           </div>
           <div className="modal-footer">
@@ -225,7 +225,7 @@ class ImageButton extends Component {
               type="button"
               className="btn btn-secondary"
               data-dismiss="modal"
-              onClick={e => this.closeImageDialog()}
+              onClick={(e) => this.closeImageDialog()}
             >
               Avbryt
             </button>
@@ -237,7 +237,7 @@ class ImageButton extends Component {
 
   closeImageDialog() {
     this.setState({
-      imageDialogVisible: false
+      imageDialogVisible: false,
     });
   }
 
@@ -248,7 +248,7 @@ class ImageButton extends Component {
           label={<ImageIcon />}
           onToggle={() => {
             this.setState({
-              imageDialogVisible: !this.state.imageDialogVisible
+              imageDialogVisible: !this.state.imageDialogVisible,
             });
           }}
         />

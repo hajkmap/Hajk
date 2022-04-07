@@ -9,21 +9,21 @@ import FolderSpecial from "@material-ui/icons/FolderSpecial";
 
 import Dialog from "../components/Dialog/Dialog";
 
-const styles = theme => {
+const styles = (theme) => {
   return {
     paper: {
-      marginBottom: theme.spacing(1)
+      marginBottom: theme.spacing(1),
     },
     button: {
-      minWidth: "unset"
-    }
+      minWidth: "unset",
+    },
   };
 };
 
 class Preset extends React.PureComponent {
   static propTypes = {
     classes: propTypes.object.isRequired,
-    appModel: propTypes.object.isRequired
+    appModel: propTypes.object.isRequired,
   };
 
   state = {
@@ -35,7 +35,7 @@ class Preset extends React.PureComponent {
     super(props);
     this.type = "Preset"; // Special case - plugins that don't use BaseWindowPlugin must specify .type here
     this.config = props.appModel.config.mapConfig.tools.find(
-      t => t.type === "preset"
+      (t) => t.type === "preset"
     );
 
     this.appModel = props.appModel;
@@ -55,7 +55,7 @@ class Preset extends React.PureComponent {
   }
 
   // Show dropdown menu, anchored to the element clicked
-  handleClick = event => {
+  handleClick = (event) => {
     this.setState({ anchorEl: event.currentTarget });
   };
 
@@ -111,7 +111,7 @@ class Preset extends React.PureComponent {
       this.props.enqueueSnackbar(
         "Länken till platsen är tyvärr felaktig. Kontakta administratören av karttjänsten för att åtgärda felet.",
         {
-          variant: "warning"
+          variant: "warning",
         }
       );
       console.error(
@@ -130,7 +130,7 @@ class Preset extends React.PureComponent {
       menuItems.push(
         <MenuItem
           key={index}
-          onClick={event => this.handleItemClick(event, item)}
+          onClick={(event) => this.handleItemClick(event, item)}
         >
           {item.name}
         </MenuItem>
@@ -147,20 +147,20 @@ class Preset extends React.PureComponent {
     view.animate({
       center: location,
       zoom: zoom,
-      duration: duration
+      duration: duration,
     });
   }
 
   openDialog = () => {
     this.setState({
-      dialogOpen: true
+      dialogOpen: true,
     });
   };
 
   closeDialog = () => {
     const visibleLayers = this.layers.split(",");
     this.setState({
-      dialogOpen: false
+      dialogOpen: false,
     });
     this.toggleMapLayers(visibleLayers);
     this.flyTo(this.map.getView(), this.location, this.zoom);
@@ -168,7 +168,7 @@ class Preset extends React.PureComponent {
 
   abortDialog = () => {
     this.setState({
-      dialogOpen: false
+      dialogOpen: false,
     });
   };
 

@@ -1,7 +1,7 @@
 export function arraySort(options) {
   function getTitle(hit, property) {
     if (Array.isArray(property)) {
-      return property.map(item => hit.properties[item]).join(", ");
+      return property.map((item) => hit.properties[item]).join(", ");
     } else {
       return hit.properties[property] || property;
     }

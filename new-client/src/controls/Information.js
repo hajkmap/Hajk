@@ -10,21 +10,21 @@ import Dialog from "../components/Dialog/Dialog";
 
 import { functionalOk as functionalCookieOk } from "models/Cookie";
 
-const styles = theme => {
+const styles = (theme) => {
   return {
     paper: {
-      marginBottom: theme.spacing(1)
+      marginBottom: theme.spacing(1),
     },
     button: {
-      minWidth: "unset"
-    }
+      minWidth: "unset",
+    },
   };
 };
 
 class Information extends React.PureComponent {
   static propTypes = {
     classes: propTypes.object.isRequired,
-    options: propTypes.object.isRequired
+    options: propTypes.object.isRequired,
   };
 
   constructor(props) {
@@ -33,7 +33,7 @@ class Information extends React.PureComponent {
     this.options = props.options;
     this.title = this.options.title || "Om kartan";
     this.state = {
-      dialogOpen: false
+      dialogOpen: false,
     };
   }
 
@@ -59,19 +59,19 @@ class Information extends React.PureComponent {
     }
 
     this.setState({
-      dialogOpen
+      dialogOpen,
     });
   }
 
   onClose = () => {
     this.setState({
-      dialogOpen: false
+      dialogOpen: false,
     });
   };
 
   handleOnClick = () => {
     this.setState({
-      dialogOpen: true
+      dialogOpen: true,
     });
   };
 

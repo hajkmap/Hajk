@@ -10,7 +10,7 @@ var documentEditor = Model.extend({
   setParentChapter: function setParentChapter(chapter, parent) {
     chapter.parent = parent;
     if (chapter.chapters.length > 0) {
-      chapter.chapters.forEach(child => {
+      chapter.chapters.forEach((child) => {
         setParentChapter(child, chapter);
       });
     }
@@ -19,13 +19,13 @@ var documentEditor = Model.extend({
   deleteParentChapter: function deleteParentChapter(chapter, parent) {
     delete chapter.parent;
     if (chapter.chapters.length > 0) {
-      chapter.chapters.forEach(child => {
+      chapter.chapters.forEach((child) => {
         deleteParentChapter(child, chapter);
       });
     }
   },
 
-  delete: function(documentName, callback) {
+  delete: function (documentName, callback) {
     var url = this.get("config").url_delete + "/" + documentName;
     hfetch(url, {
       method: "delete",
@@ -34,9 +34,9 @@ var documentEditor = Model.extend({
     });
   },
 
-  save: function(documentName, data, callback) {
+  save: function (documentName, data, callback) {
     var url = this.get("config").url_save + "/" + documentName;
-    data.chapters.forEach(chapter => {
+    data.chapters.forEach((chapter) => {
       this.deleteParentChapter(chapter, data.chapters);
     });
 
@@ -44,20 +44,20 @@ var documentEditor = Model.extend({
       chapter.html = chapter.html
         .replaceAll("&lt;", "<")
         .replaceAll("&gt;", ">");
-        return false;
+      return false;
     });
 
     hfetch(url, {
       method: "post",
-      body: JSON.stringify(data)
-    }).then(response => {
-      response.text().then(text => {
+      body: JSON.stringify(data),
+    }).then((response) => {
+      response.text().then((text) => {
         callback(text);
       });
     });
   },
 
-  loadDocuments: async function(callback) {
+  loadDocuments: async function (callback) {
     var url = this.get("config").url_document_list;
     try {
       const response = await hfetch(url);
@@ -84,7 +84,7 @@ var documentEditor = Model.extend({
     });
   },
 
-  load: function(documentName, callback) {
+  load: function (documentName, callback) {
     var url = this.get("config").url_load + "/" + documentName;
     hfetch(url).then((response) => {
       response.json().then((data) => {
@@ -96,7 +96,7 @@ var documentEditor = Model.extend({
     });
   },
 
-  loadMaps: function(callback) {
+  loadMaps: function (callback) {
     var url = this.get("config").url_map_list;
     hfetch(url).then((response) => {
       response.json().then((data) => {
@@ -105,7 +105,7 @@ var documentEditor = Model.extend({
     });
   },
 
-  loadMapSettings: function(map, callback) {
+  loadMapSettings: function (map, callback) {
     var url = this.get("config").url_map + "/" + map;
     hfetch(url).then((response) => {
       response.json().then((data) => {
@@ -114,7 +114,7 @@ var documentEditor = Model.extend({
     });
   },
 
-  listImages: function(callback) {
+  listImages: function (callback) {
     var url = this.get("config").list_images;
     hfetch(url).then((response) => {
       response.json().then((data) => {
@@ -139,7 +139,7 @@ var documentEditor = Model.extend({
         callback(data);
       });
     });
-  }
+  },
 });
 
 export default documentEditor;

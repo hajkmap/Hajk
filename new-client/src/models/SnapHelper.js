@@ -64,7 +64,7 @@ export default class SnapHelper {
    * @param {object} source
    * @returns {*} isVectorSource
    */
-  #isVectorSource = source => {
+  #isVectorSource = (source) => {
     return typeof source["getFeatures"] === "function";
   };
 
@@ -74,7 +74,7 @@ export default class SnapHelper {
    *
    * @param {*} e Event that contains the layer who's visibility has changed.
    */
-  #handleLayerVisibilityChanged = e => {
+  #handleLayerVisibilityChanged = (e) => {
     if (
       this.activePlugins.size === 0 || // Abort if no plugin is interested of snap interactions
       this.updatePending === true || // Abort if there already is a pending update
@@ -99,14 +99,14 @@ export default class SnapHelper {
     const vectorSources = this.map
       .getLayers() // Get layers
       .getArray() // as arrays
-      .filter(l => l.getVisible()) // and only currently visible.
-      .map(l => l.getSource()) // Get each layer's source
+      .filter((l) => l.getVisible()) // and only currently visible.
+      .map((l) => l.getSource()) // Get each layer's source
       .filter(this.#isVectorSource); // but only if it is a VectorSource (which we'll know by checking for "getFeatures").
 
     // Add the snap interaction for each found source
-    vectorSources.forEach(source => {
+    vectorSources.forEach((source) => {
       const snap = new Snap({
-        source
+        source,
       });
       this.map.addInteraction(snap);
 

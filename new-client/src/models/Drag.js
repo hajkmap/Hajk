@@ -7,7 +7,7 @@ class Drag extends Pointer {
       handleDownEvent: this.handleDownEvent,
       handleDragEvent: this.handleDragEvent,
       handleMoveEvent: this.handleMoveEvent,
-      handleUpEvent: this.handleUpEvent
+      handleUpEvent: this.handleUpEvent,
     });
 
     this.coordinate_ = null;
@@ -21,7 +21,7 @@ class Drag extends Pointer {
     this.previousCursor_ = undefined;
 
     this.acceptedLayers = {
-      "preview-layer": true
+      "preview-layer": true,
     };
   }
 

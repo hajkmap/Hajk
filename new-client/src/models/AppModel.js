@@ -729,7 +729,8 @@ class AppModel {
 
           // Look into the layersInfo array - it will contain sublayers. We must
           // expose each one of them as a WFS service.
-          return layer.layersInfo.map((sl) => {
+          // Temporary Fix: Added ? after layer
+          return layer?.layersInfo.map((sl) => {
             return {
               id: sl.id,
               pid: layer.id, // Relevant for group layers: will hold the actual OL layer name, not only current sublayer

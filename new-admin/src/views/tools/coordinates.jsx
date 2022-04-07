@@ -7,34 +7,34 @@ import SaveIcon from "@material-ui/icons/SaveSharp";
 import { withStyles } from "@material-ui/core/styles";
 import { red, green, blue } from "@material-ui/core/colors";
 
-const ColorButtonRed = withStyles(theme => ({
+const ColorButtonRed = withStyles((theme) => ({
   root: {
     color: theme.palette.getContrastText(red[500]),
     backgroundColor: red[500],
     "&:hover": {
-      backgroundColor: red[700]
-    }
-  }
+      backgroundColor: red[700],
+    },
+  },
 }))(Button);
 
-const ColorButtonGreen = withStyles(theme => ({
+const ColorButtonGreen = withStyles((theme) => ({
   root: {
     color: theme.palette.getContrastText(green[700]),
     backgroundColor: green[500],
     "&:hover": {
-      backgroundColor: green[700]
-    }
-  }
+      backgroundColor: green[700],
+    },
+  },
 }))(Button);
 
-const ColorButtonBlue = withStyles(theme => ({
+const ColorButtonBlue = withStyles((theme) => ({
   root: {
     color: theme.palette.getContrastText(blue[500]),
     backgroundColor: blue[500],
     "&:hover": {
-      backgroundColor: blue[700]
-    }
-  }
+      backgroundColor: blue[700],
+    },
+  },
 }))(Button);
 
 var defaultState = {
@@ -80,11 +80,11 @@ class ToolOptions extends Component {
         showFieldsOnStart: tool.options.showFieldsOnStart,
         visibleForGroups: tool.options.visibleForGroups
           ? tool.options.visibleForGroups
-          : []
+          : [],
       });
     } else {
       this.setState({
-        active: false
+        active: false,
       });
     }
   }
@@ -105,14 +105,14 @@ class ToolOptions extends Component {
       value = btoa(value);
     }
     this.setState({
-      [name]: value
+      [name]: value,
     });
   }
 
   getTool() {
     return this.props.model
       .get("toolConfig")
-      .find(tool => tool.type === this.type);
+      .find((tool) => tool.type === this.type);
   }
 
   add(tool) {
@@ -123,12 +123,12 @@ class ToolOptions extends Component {
     this.props.model.set({
       toolConfig: this.props.model
         .get("toolConfig")
-        .filter(tool => tool.type !== this.type)
+        .filter((tool) => tool.type !== this.type),
     });
   }
 
   replace(tool) {
-    this.props.model.get("toolConfig").forEach(t => {
+    this.props.model.get("toolConfig").forEach((t) => {
       if (t.type === this.type) {
         t.options = tool.options;
         t.index = tool.index;
@@ -154,8 +154,8 @@ class ToolOptions extends Component {
         visibleForGroups: this.state.visibleForGroups.map(
           Function.prototype.call,
           String.prototype.trim
-        )
-      }
+        ),
+      },
     };
 
     var existing = this.getTool();
@@ -166,7 +166,7 @@ class ToolOptions extends Component {
         () => {
           this.props.parent.props.parent.setState({
             alert: true,
-            alertMessage: "Uppdateringen lyckades"
+            alertMessage: "Uppdateringen lyckades",
           });
         }
       );
@@ -183,9 +183,9 @@ class ToolOptions extends Component {
             this.remove();
             update.call(this);
             this.setState({
-              transformations: []
+              transformations: [],
             });
-          }
+          },
         });
       } else {
         this.remove();
@@ -211,17 +211,19 @@ class ToolOptions extends Component {
         title: elements["title"].value,
         xtitle: elements["xtitle"].value,
         ytitle: elements["ytitle"].value,
-        inverseAxis: elements["inverseAxis"].checked
+        inverseAxis: elements["inverseAxis"].checked,
       };
     this.state.transformations.push(transformation);
     this.setState({
-      transformations: this.state.transformations
+      transformations: this.state.transformations,
     });
   }
 
   removeTransformation(code) {
     this.setState({
-      transformations: this.state.transformations.filter(f => f.code !== code)
+      transformations: this.state.transformations.filter(
+        (f) => f.code !== code
+      ),
     });
   }
 
@@ -278,7 +280,7 @@ class ToolOptions extends Component {
     }
 
     this.setState({
-      visibleForGroups: value !== "" ? groups : []
+      visibleForGroups: value !== "" ? groups : [],
     });
   }
 
@@ -292,7 +294,7 @@ class ToolOptions extends Component {
             value={this.state.visibleForGroups}
             type="text"
             name="visibleForGroups"
-            onChange={e => {
+            onChange={(e) => {
               this.handleAuthGrpsChange(e);
             }}
           />
@@ -313,7 +315,7 @@ class ToolOptions extends Component {
             <ColorButtonBlue
               variant="contained"
               className="btn"
-              onClick={e => {
+              onClick={(e) => {
                 e.preventDefault();
                 this.save();
               }}
@@ -327,7 +329,7 @@ class ToolOptions extends Component {
               id="active"
               name="active"
               type="checkbox"
-              onChange={e => {
+              onChange={(e) => {
                 this.handleInputChange(e);
               }}
               checked={this.state.active}
@@ -344,7 +346,7 @@ class ToolOptions extends Component {
               type="number"
               min="0"
               className="control-fixed-width"
-              onChange={e => {
+              onChange={(e) => {
                 this.handleInputChange(e);
               }}
               value={this.state.index}
@@ -356,7 +358,7 @@ class ToolOptions extends Component {
               id="target"
               name="target"
               className="control-fixed-width"
-              onChange={e => {
+              onChange={(e) => {
                 this.handleInputChange(e);
               }}
               value={this.state.target}
@@ -380,7 +382,7 @@ class ToolOptions extends Component {
               id="position"
               name="position"
               className="control-fixed-width"
-              onChange={e => {
+              onChange={(e) => {
                 this.handleInputChange(e);
               }}
               value={this.state.position}
@@ -404,7 +406,7 @@ class ToolOptions extends Component {
               type="number"
               min="0"
               className="control-fixed-width"
-              onChange={e => {
+              onChange={(e) => {
                 this.handleInputChange(e);
               }}
               value={this.state.width}
@@ -424,7 +426,7 @@ class ToolOptions extends Component {
               name="height"
               type="text"
               className="control-fixed-width"
-              onChange={e => {
+              onChange={(e) => {
                 this.handleInputChange(e);
               }}
               value={this.state.height}
@@ -436,7 +438,7 @@ class ToolOptions extends Component {
               id="visibleAtStart"
               name="visibleAtStart"
               type="checkbox"
-              onChange={e => {
+              onChange={(e) => {
                 this.handleInputChange(e);
               }}
               checked={this.state.visibleAtStart}
@@ -487,7 +489,7 @@ class ToolOptions extends Component {
               type="text"
               id="instruction"
               name="instruction"
-              onChange={e => {
+              onChange={(e) => {
                 this.handleInputChange(e);
               }}
               value={this.state.instruction ? atob(this.state.instruction) : ""}
@@ -501,7 +503,7 @@ class ToolOptions extends Component {
           <div>
             <form
               ref="transformationForm"
-              onSubmit={e => {
+              onSubmit={(e) => {
                 e.preventDefault();
                 this.addTransformation(e);
               }}

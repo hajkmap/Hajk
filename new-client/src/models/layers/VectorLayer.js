@@ -22,15 +22,15 @@ const vectorLayerProperties = {
     typename: "",
     outputFormat: "GML3",
     srsname: "",
-    bbox: ""
+    bbox: "",
   },
-  showLabels: true
+  showLabels: true,
 };
 class WFSVectorLayer {
   constructor(config, proxyUrl, map) {
     this.config = {
       ...vectorLayerProperties,
-      ...config
+      ...config,
     };
     this.proxyUrl = proxyUrl;
     this.map = map;
@@ -53,7 +53,7 @@ class WFSVectorLayer {
       // The loading strategy to use. By default the BBox strategy is used,
       // loading features based on the view's extent and resolution.
       strategy:
-        this.config?.loadingStrategy === "all" ? strategyAll : bboxStrategy
+        this.config?.loadingStrategy === "all" ? strategyAll : bboxStrategy,
     });
 
     this.layer = new VectorLayer({
@@ -110,7 +110,7 @@ class WFSVectorLayer {
     // …or just fall back to OpenLayer's default styling if no SLD/SLD URL or OpenLayers style was specified.
   }
 
-  applySldTextOnLayer = text => {
+  applySldTextOnLayer = (text) => {
     const sldObject = SLDReader.Reader(text);
     const sldLayer = SLDReader.getLayer(sldObject);
     const style = SLDReader.getStyle(sldLayer, this.sldStyle);
@@ -119,7 +119,7 @@ class WFSVectorLayer {
     const viewProjection = this.map.getView().getProjection();
     const olFunction = SLDReader.createOlStyleFunction(featureTypeStyle, {
       // Use the convertResolution option to calculate a more accurate resolution.
-      convertResolution: viewResolution => {
+      convertResolution: (viewResolution) => {
         const viewCenter = this.map.getView().getCenter();
         return getPointResolution(viewProjection, viewResolution, viewCenter);
       },
@@ -128,14 +128,14 @@ class WFSVectorLayer {
       // If you do not do this, the image will only become visible after the next pan/zoom of the layer.
       imageLoadedCallback: () => {
         this.layer.changed();
-      }
+      },
     });
     this.layer.setStyle(olFunction);
   };
 
   reprojectFeatures(features, from, to) {
     if (Array.isArray(features)) {
-      features.forEach(feature => {
+      features.forEach((feature) => {
         if (feature.getGeometry() && feature.getGeometry().getCoordinates) {
           let coords = feature.getGeometry().getCoordinates();
           try {
@@ -149,14 +149,14 @@ class WFSVectorLayer {
                 feature
                   .getGeometry()
                   .setCoordinates(
-                    coords.map(coord => transform(coord, from, to))
+                    coords.map((coord) => transform(coord, from, to))
                   );
                 break;
               case "Polygon":
                 feature
                   .getGeometry()
                   .setCoordinates([
-                    coords[0].map(coord => transform(coord, from, to))
+                    coords[0].map((coord) => transform(coord, from, to)),
                   ]);
                 break;
               default:
@@ -173,10 +173,7 @@ class WFSVectorLayer {
   getAllFeatures(data) {
     let features = [];
     let parser = null;
-    const to = this.map
-      .getView()
-      .getProjection()
-      .getCode();
+    const to = this.map.getView().getProjection().getCode();
     const from = this.config.projection;
     const outputFormat = this.config.params.outputFormat;
 
@@ -186,7 +183,7 @@ class WFSVectorLayer {
       // else GML3.
       parser = new WFS({
         gmlFormat:
-          this.config.params.version === "1.0.0" ? new GML2() : new GML3()
+          this.config.params.version === "1.0.0" ? new GML2() : new GML3(),
       });
     }
 
@@ -214,7 +211,7 @@ class WFSVectorLayer {
    */
   getFilteredFeatures(f) {
     if (this.layer.get("filterAttribute") && this.layer.get("filterValue")) {
-      return f.filter(feature => this.filterMethod(feature));
+      return f.filter((feature) => this.filterMethod(feature));
     } else {
       return f;
     }

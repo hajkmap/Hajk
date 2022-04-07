@@ -5,10 +5,10 @@ import {
   Card as MUICard,
   CardHeader,
   CardActionArea,
-  Avatar
+  Avatar,
 } from "@material-ui/core";
 
-const styles = theme => {
+const styles = (theme) => {
   return {
     avatar: {
       background: theme.palette.text.primary,
@@ -22,16 +22,16 @@ const styles = theme => {
         borderRadius: 0,
         margin: 0,
         width: "100%",
-        justifyContent: "left"
-      }
-    }
+        justifyContent: "left",
+      },
+    },
   };
 };
 
 class Card extends React.PureComponent {
   state = {
     open: false,
-    text: ""
+    text: "",
   };
 
   static propTypes = {
@@ -39,12 +39,12 @@ class Card extends React.PureComponent {
     classes: propTypes.object.isRequired,
     icon: propTypes.object.isRequired,
     onClick: propTypes.func.isRequired,
-    title: propTypes.string.isRequired
+    title: propTypes.string.isRequired,
   };
 
   static defaultProps = {
     abstract: "Beskrivning saknas",
-    title: "Titel saknas"
+    title: "Titel saknas",
   };
 
   render() {

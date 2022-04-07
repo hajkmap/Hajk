@@ -90,7 +90,6 @@ class WMTSLayer {
       new View({
         zoom: view.getZoom(),
         center: view.getCenter(),
-        constrainResolution: view.getConstrainResolution(),
         resolutions: this.resolutions,
         projection: this.projection,
         constrainResolution: view.getConstrainResolution(),
