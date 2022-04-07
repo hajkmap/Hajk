@@ -1115,10 +1115,6 @@ export default class PrintModel {
         });
     });
 
-    // Set print size, resolution and center.
-    // This will initiate print, as we have a listener for renderComplete.
-    const printSize = [width, height];
-
     // Get print center from preview feature's center coordinate
     const printCenter = getCenter(
       this.previewFeature.getGeometry().getExtent()
@@ -1127,8 +1123,12 @@ export default class PrintModel {
     // Hide our preview feature so it won't get printed
     this.previewLayer.setVisible(false);
 
-    // Set map size and resolution
-    this.map.setSize(printSize);
+    console.log("Height: ", height, "width: ", width);
+    // Set map size and resolution, this will initiate print, as we have a listener for renderComplete.
+    // (Which will fire when the new size and resolution has been set and the new tiles has been loaded).
+    this.map.getTargetElement().style.width = `${width}px`;
+    this.map.getTargetElement().style.height = `${height}px`;
+    this.map.updateSize();
     this.map.getView().setCenter(printCenter);
     this.map.getView().setResolution(scaleResolution);
   };
@@ -1136,6 +1136,9 @@ export default class PrintModel {
   restoreOriginalView = () => {
     this.previewLayer.setVisible(true);
     this.map.setSize(this.originalMapSize);
+    this.map.getTargetElement().style.width = "";
+    this.map.getTargetElement().style.height = "";
+    this.map.updateSize();
     this.map.setView(this.originalView);
   };
 
