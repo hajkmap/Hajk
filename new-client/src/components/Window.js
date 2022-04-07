@@ -122,9 +122,6 @@ const styles = (theme) => {
     panelContentDisplayContents: {
       display: "contents",
     },
-    panelContentDisplayContents: {
-      display: "contents",
-    },
     content: {
       flex: "1",
       overflowY: "auto",
