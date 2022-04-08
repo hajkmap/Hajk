@@ -63,7 +63,7 @@
       "customRatio": 1,
       "tiled": true,
       "opacity": 1.0,
-      "singleTile": false,
+      "singleTile": true,
       "imageFormat": "image/png",
       "serverType": "geoserver",
       "attribution": "",
