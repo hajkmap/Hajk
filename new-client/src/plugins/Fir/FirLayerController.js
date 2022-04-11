@@ -5,7 +5,7 @@ import { Style, Icon } from "ol/style";
 import Feature from "ol/Feature.js";
 import HajkTransformer from "utils/HajkTransformer";
 import { Point } from "ol/geom.js";
-import styles from "./FirStyles";
+import FirStyles from "./FirStyles";
 import { hfetch } from "utils/FetchWrapper";
 import { GeoJSON } from "ol/format";
 
@@ -23,6 +23,7 @@ class FirLayerController {
       projection: this.model.app.map.getView().getProjection().getCode(),
     });
 
+    this.styles = new FirStyles(this.model);
     this.initLayers();
     this.initListeners();
   }
@@ -198,7 +199,7 @@ class FirLayerController {
     }
 
     arr.forEach((feature) => {
-      feature.setStyle(styles.getResultStyle());
+      feature.setStyle(this.styles.getResultStyle());
     });
 
     this.model.layers.feature.getSource().addFeatures(arr);
@@ -228,7 +229,7 @@ class FirLayerController {
 
     featureArr.forEach((feature) => {
       let c = feature.clone();
-      c.setStyle(styles.getLabelStyle(feature));
+      c.setStyle(this.styles.getLabelStyle(feature));
       c.set("owner_ol_uid", feature.ol_uid);
       arr.push(c);
     });
@@ -264,7 +265,7 @@ class FirLayerController {
       this.observer.publish("fir.search.feature.deselected", feature);
     } else {
       let clone = feature.clone();
-      clone.setStyle(styles.getHighlightStyle());
+      clone.setStyle(this.styles.getHighlightStyle());
       clone.set("owner_ol_uid", feature.ol_uid);
       this.model.layers.highlight.getSource().addFeature(clone);
       this.observer.publish("fir.search.feature.selected", feature);
