@@ -5,7 +5,7 @@ import { Fill, Stroke, Style, Circle, Icon } from "ol/style";
 import Feature from "ol/Feature.js";
 import HajkTransformer from "utils/HajkTransformer";
 import { Point } from "ol/geom.js";
-import styles from "../Fir/FirStyles";
+import FirStyles from "../Fir/FirStyles";
 
 class KirLayerController {
   #HT;
@@ -21,6 +21,7 @@ class KirLayerController {
       projection: this.model.app.map.getView().getProjection().getCode(),
     });
 
+    this.styles = new FirStyles(this.model);
     this.initLayers();
     this.initListeners();
   }
@@ -155,7 +156,7 @@ class KirLayerController {
     }
 
     arr.forEach((feature) => {
-      feature.setStyle(styles.getPointStyle());
+      feature.setStyle(this.styles.getPointStyle());
       feature.set("kir_type", "feature");
     });
 
