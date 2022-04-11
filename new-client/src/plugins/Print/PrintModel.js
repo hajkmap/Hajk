@@ -522,6 +522,16 @@ export default class PrintModel {
       });
   };
 
+  // Returns the layer placement (index) in the array of map-layers.
+  // The placement is generally the draw-order (unless z-index is set on the layer).
+  getLayerPlacementIndex = (layer) => {
+    return this.map
+      .getLayers()
+      .getArray()
+      .map((l) => l.get("name"))
+      .indexOf(layer.get("name"));
+  };
+
   // Hides the supplied layer and adds an image-layer instead to make sure that we
   // can request the images with the correct DPI for the print! Why exchange tiled sources
   // with image sources? Well, it seems as if OL does some funky stuff with all the tiles,
@@ -553,9 +563,11 @@ export default class PrintModel {
       const imageLayer = new ImageLayer({
         source: imageSource,
       });
-      // Finally we add the new layer to the map...
-      // TODO: The layer has to be added in the correct order!!
-      this.map.addLayer(imageLayer);
+      // Finally we add the new layer to the map... First we have to check where
+      // the original layer was placed (so that it keeps its draw-order).
+      const layerPlacement = this.getLayerPlacementIndex(layer);
+      // Then we can add the layer...
+      this.map.getLayers().insertAt(layerPlacement, imageLayer);
       // ... and update the array containing the added layers so that we can remove
       // them when the printing process is completed.
       this.addedLayers.add(imageLayer);
@@ -832,7 +844,6 @@ export default class PrintModel {
     // since the image-layers are easier to work with when we are updating the layer-settings
     // so that we can make sure to request the correct DPI etc.
     for (const tileLayer of this.getVisibleTileLayers()) {
-      console.log("layer_ ", tileLayer);
       this.exchangeTileLayer(tileLayer, options);
     }
     // Then we have to "prepare" all currently visible image-layers. An image-layer
