@@ -448,6 +448,11 @@ export default class MapClickModel {
       }
     }
 
+    // Sort the feature collections themselves using the displayName property
+    featureCollections.sort((a, b) =>
+      a.displayName.localeCompare(b.displayName)
+    );
+
     return featureCollections;
   }
 
