@@ -1,11 +1,17 @@
 {
   "name": "hajk-client",
-  "version": "3.5.0",
+  "version": "3.10.0-beta.7",
+  "description": "Hajk Client UI",
   "homepage": ".",
-  "private": true,
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/hajkmap/Hajk.git"
+  },
+  "license": "MIT",
   "scripts": {
-    "start": "react-scripts start",
-    "build": "react-scripts build",
+    "analyze": "source-map-explorer 'build/static/js/*.js'",
+    "start": "react-app-rewired start",
+    "build": "react-app-rewired build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
     "prestart": "node prebuild.js",
@@ -13,9 +19,12 @@
   },
   "eslintConfig": {
     "extends": [
-      "react-app",
-      "react-app/jest"
+      "react-app"
     ]
+  },
+  "overrides": {
+    "react": "$react",
+    "react-dom": "$react-dom"
   },
   "browserslist": {
     "production": [
@@ -23,67 +32,70 @@
       "last 2 versions",
       "Firefox ESR",
       "not dead",
-      "ie 11",
       "last 100 edge versions"
     ],
     "development": [
       "last 1 chrome version",
       "last 1 firefox version",
       "last 1 safari version",
-      "ie 11",
       "last 100 edge versions"
     ]
   },
-  "husky": {
-    "hooks": {
-      "pre-commit": "pretty-quick --staged"
-    }
+  "devDependencies": {
+    "eslint-config-prettier": "^8.5.0",
+    "eslint-plugin-prettier": "^4.0.0",
+    "prettier": "^2.6.2",
+    "react-app-rewired": "^2.2.1",
+    "react-scripts": "5.0.0",
+    "source-map-explorer": "^2.5.2"
   },
   "dependencies": {
-    "@material-ui/core": "^4.11.3",
-    "@material-ui/icons": "^4.11.2",
-    "@material-ui/lab": "^4.0.0-alpha.57",
-    "@nieuwlandgeo/sldreader": "^0.2.8",
-    "@testing-library/jest-dom": "^5.11.9",
-    "@testing-library/react": "^11.2.5",
-    "@testing-library/user-event": "^12.7.2",
-    "abortcontroller-polyfill": "^1.7.1",
+    "@date-io/date-fns": "^2.13.1",
+    "@emotion/react": "^11.9.0",
+    "@emotion/styled": "^11.8.1",
+    "@fontsource/material-icons": "^4.5.4",
+    "@fontsource/open-sans": "^4.5.8",
+    "@fontsource/roboto": "^4.5.5",
+    "@mui/icons-material": "^5.6.0",
+    "@mui/lab": "^5.0.0-alpha.76",
+    "@mui/material": "^5.6.0",
+    "@mui/x-data-grid": "^5.8.0",
+    "@nieuwlandgeo/sldreader": "^0.2.15",
+    "@turf/buffer": "^6.5.0",
+    "@turf/transform-translate": "^6.5.0",
+    "@turf/union": "^6.5.0",
+    "abortcontroller-polyfill": "^1.7.3",
     "allsettled-polyfill": "^1.0.4",
-    "clsx": "^1.1.1",
-    "detect-browser": "^5.2.0",
+    "date-fns": "^2.28.0",
+    "detect-browser": "^5.3.0",
     "elm-pep": "^1.0.6",
-    "eslint-config-prettier": "^8.0.0",
-    "eslint-plugin-prettier": "^3.3.1",
     "file-saver": "^2.0.5",
-    "html2canvas": "^1.0.0-rc.7",
+    "html2canvas": "1.4.1",
     "html2json": "^1.0.2",
-    "husky": "^5.1.1",
-    "intro.js": "^3.3.1",
-    "intro.js-react": "^0.3.0",
-    "jspdf": "^2.3.1",
-    "jsts": "^2.6.1",
+    "intro.js": "^5.1.0",
+    "intro.js-react": "^0.6.0",
+    "jspdf": "^2.5.1",
+    "jszip": "^3.9.1",
     "load-google-maps-api": "^2.0.2",
-    "notistack": "^1.0.3",
-    "ol": "^6.5.0",
-    "pdfjs-dist": "^2.6.347",
-    "prettier": "^2.2.1",
-    "pretty-quick": "^3.1.0",
-    "proj4": "^2.7.0",
-    "react": "^17.0.1",
-    "react-app-polyfill": "^2.0.0",
+    "notistack": "^2.0.3",
+    "ol": "^6.14.1",
+    "pdfjs-dist": "^2.13.216",
+    "proj4": "^2.8.0",
+    "react": "^18.0.0",
+    "react-app-polyfill": "^3.0.0",
     "react-color": "^2.19.3",
-    "react-dom": "^17.0.1",
+    "react-dom": "^18.0.0",
     "react-event-observer": "^0.5.11",
-    "react-horizontal-scrolling-menu": "^0.7.10",
-    "react-number-format": "^4.5.3",
-    "react-markdown": "^5.0.3",
-    "react-rnd": "^10.2.4",
-    "react-scripts": "4.0.3",
-    "react-scroll": "^1.8.2",
-    "recharts": "^2.0.7",
-    "remark-gfm": "^1.0.0",
-    "web-vitals": "^1.1.0",
-    "x2js": "^3.4.1",
-    "xlsx": "^0.16.9"
+    "react-horizontal-scrolling-menu": "^0.7.8",
+    "react-markdown": "^8.0.2",
+    "react-number-format": "^4.9.1",
+    "react-rnd": "^10.3.5",
+    "react-scroll": "^1.8.6",
+    "react-virtualized": "^9.22.3",
+    "recharts": "^2.1.9",
+    "rehype-raw": "^6.1.1",
+    "remark-gfm": "^3.0.1",
+    "x2js": "^3.4.3",
+    "xlsx": "^0.18.5"
   }
 }

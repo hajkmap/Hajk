@@ -1,25 +1,3 @@
-// Copyright (C) 2016 Göteborgs Stad
-//
-// Denna programvara är fri mjukvara: den är tillåten att distribuera och modifiera
-// under villkoren för licensen CC-BY-NC-SA 4.0.
-//
-// This program is free software: you can redistribute it and/or modify
-// it under the terms of the CC-BY-NC-SA 4.0 licence.
-//
-// http://creativecommons.org/licenses/by-nc-sa/4.0/
-//
-// Det är fritt att dela och anpassa programvaran för valfritt syfte
-// med förbehåll att följande villkor följs:
-// * Copyright till upphovsmannen inte modifieras.
-// * Programvaran används i icke-kommersiellt syfte.
-// * Licenstypen inte modifieras.
-//
-// Den här programvaran är öppen i syfte att den skall vara till nytta för andra
-// men UTAN NÅGRA GARANTIER; även utan underförstådd garanti för
-// SÄLJBARHET eller LÄMPLIGHET FÖR ETT VISST SYFTE.
-//
-// https://github.com/hajkmap/Hajk
-
 import React from "react";
 import { Component } from "react";
 import MapOptions from "./mapoptions.jsx";
@@ -158,7 +136,7 @@ $.fn.editable = function (component) {
         `<input id="${id5}" type="text" placeholder="Ny länk"/><br />`
       ),
       input3 = $(`<input id="${id6}" type="text" /><br />`),
-      input4 = $(`<textarea id="${id7}" type="text" /><br /><br />`),
+      input4 = $(`<textarea id="${id7}" type="text"></textarea>`),
       expanded = $('<div class="expanded-at-start"></div>'),
       toggled = $('<div class="expanded-at-start"></div>'),
       visible = $('<div class=""></div>'),
@@ -182,13 +160,16 @@ $.fn.editable = function (component) {
     });
 
     if (node.parent().attr("data-expanded")) {
-      checkbox.attr("checked", "checked");
+      checkbox.attr("checked", JSON.parse(node.parent().attr("data-expanded")));
     }
     if (node.parent().attr("data-toggled")) {
-      checkbox2.attr("checked", "checked");
+      checkbox2.attr("checked", JSON.parse(node.parent().attr("data-toggled")));
     }
     if (node.parent().attr("data-visibleatstart")) {
-      checkbox3.attr("checked", "checked");
+      checkbox3.attr(
+        "checked",
+        JSON.parse(node.parent().attr("data-visibleatstart"))
+      );
     }
     if (node.parent().attr("data-visibleforgroups")) {
       input3.val(node.parent().attr("data-visibleforgroups"));
@@ -295,39 +276,33 @@ $.fn.editable = function (component) {
  *
  */
 class Menu extends Component {
-  /**
-   *
-   */
-  constructor() {
-    super();
-    this.state = {
-      adGroups: [],
-      isHidden: true,
-      drawOrder: false,
-      layerMenu: true,
-      addedLayers: [],
-      maps: [],
-      active: true,
-      visibleAtStart: true,
-      visibleAtStartMobile: false,
-      backgroundSwitcherBlack: true,
-      backgroundSwitcherWhite: true,
-      enableOSM: false,
-      showBreadcrumbs: false,
-      enableTransparencySlider: true,
-      instruction: "",
-      dropdownThemeMaps: false,
-      themeMapHeaderCaption: "Temakartor",
-      visibleForGroups: [],
-      adList: null,
-      target: "toolbar",
-      position: "left",
-      width: "",
-      height: "",
-      title: "Innehåll",
-      description: "Välj innehåll att visa i kartan",
-    };
-  }
+  state = {
+    adGroups: [],
+    isHidden: true,
+    drawOrder: false,
+    layerMenu: true,
+    addedLayers: [],
+    maps: [],
+    active: true,
+    visibleAtStart: true,
+    visibleAtStartMobile: false,
+    backgroundSwitcherBlack: true,
+    backgroundSwitcherWhite: true,
+    enableOSM: false,
+    showBreadcrumbs: false,
+    enableTransparencySlider: true,
+    instruction: "",
+    dropdownThemeMaps: false,
+    themeMapHeaderCaption: "Temakartor",
+    visibleForGroups: [],
+    adList: null,
+    target: "toolbar",
+    position: "left",
+    width: "",
+    height: "",
+    title: "Innehåll",
+    description: "Välj innehåll att visa i kartan",
+  };
 
   /**
    *
@@ -347,24 +322,27 @@ class Menu extends Component {
         this.setState({
           reset: false,
           active: this.props.model.get("layerMenuConfig").active,
-          visibleAtStart: this.props.model.get("layerMenuConfig")
-            .visibleAtStart,
-          visibleAtStartMobile: this.props.model.get("layerMenuConfig")
-            .visibleAtStartMobile,
-          backgroundSwitcherBlack: this.props.model.get("layerMenuConfig")
-            .backgroundSwitcherBlack,
-          backgroundSwitcherWhite: this.props.model.get("layerMenuConfig")
-            .backgroundSwitcherWhite,
+          visibleAtStart:
+            this.props.model.get("layerMenuConfig").visibleAtStart ||
+            this.state.visibleAtStart,
+          visibleAtStartMobile:
+            this.props.model.get("layerMenuConfig").visibleAtStartMobile ||
+            this.state.visibleAtStartMobile,
+          backgroundSwitcherBlack:
+            this.props.model.get("layerMenuConfig").backgroundSwitcherBlack,
+          backgroundSwitcherWhite:
+            this.props.model.get("layerMenuConfig").backgroundSwitcherWhite,
           enableOSM: this.props.model.get("layerMenuConfig").enableOSM,
-          showBreadcrumbs: this.props.model.get("layerMenuConfig")
-            .showBreadcrumbs,
-          enableTransparencySlider: this.props.model.get("layerMenuConfig")
-            .enableTransparencySlider,
+          showBreadcrumbs:
+            this.props.model.get("layerMenuConfig").showBreadcrumbs,
+          enableTransparencySlider:
+            this.props.model.get("layerMenuConfig").enableTransparencySlider ||
+            this.state.enableTransparencySlider,
           instruction: this.props.model.get("layerMenuConfig").instruction,
-          dropdownThemeMaps: this.props.model.get("layerMenuConfig")
-            .dropdownThemeMaps,
-          themeMapHeaderCaption: this.props.model.get("layerMenuConfig")
-            .themeMapHeaderCaption,
+          dropdownThemeMaps:
+            this.props.model.get("layerMenuConfig").dropdownThemeMaps,
+          themeMapHeaderCaption:
+            this.props.model.get("layerMenuConfig").themeMapHeaderCaption,
           visibleForGroups: this.props.model.get("layerMenuConfig")
             .visibleForGroups
             ? this.props.model.get("layerMenuConfig").visibleForGroups
@@ -425,7 +403,6 @@ class Menu extends Component {
   /**
    *
    */
-  componentWillMount() {}
 
   /**
    *
@@ -544,16 +521,33 @@ class Menu extends Component {
    */
   getLayersWithFilter(filter) {
     return this.props.model.get("layers").filter((layer) => {
-      return new RegExp(this.state.filter).test(layer.caption.toLowerCase());
+      return (
+        new RegExp(this.state.filter.toLowerCase()).test(
+          layer.caption.toLowerCase()
+        ) ||
+        new RegExp(this.state.filter.toLowerCase()).test(
+          layer.internalLayerName?.toLowerCase()
+        )
+      );
     });
   }
 
   /**
    *
    */
-  getLayerNameFromId(id) {
+  getLayerNameFromIdForDisplay(id) {
     var layer = this.props.model.get("layers").find((layer) => layer.id === id);
-    return layer ? layer.caption : `---[layer id ${id} not found]---`;
+    let ret = "";
+    if (layer) {
+      if (layer.internalLayerName?.length > 0) {
+        ret = layer.internalLayerName;
+      } else {
+        ret = layer.caption;
+      }
+    } else {
+      ret = `---[layer id ${id} not found]---`;
+    }
+    return ret;
   }
 
   /**
@@ -797,7 +791,7 @@ class Menu extends Component {
   }
 
   createLayer(id) {
-    var layerName = this.getLayerNameFromId(id);
+    var layerName = this.getLayerNameFromIdForDisplay(id);
 
     var layer = $(`
       <li
@@ -864,20 +858,32 @@ class Menu extends Component {
 
     if (this.state.filter) {
       layers.forEach((layer) => {
-        layer.caption.toLowerCase().indexOf(this.state.filter) === 0
+        layer.caption.toLowerCase().indexOf(this.state.filter.toLowerCase()) ===
+          0 ||
+        layer.internalLayerName
+          ?.toLowerCase()
+          .indexOf(this.state.filter.toLowerCase()) === 0
           ? startsWith.push(layer)
           : alphabetically.push(layer);
       });
 
       startsWith.sort(function (a, b) {
-        if (a.caption.toLowerCase() < b.caption.toLowerCase()) return -1;
-        if (a.caption.toLowerCase() > b.caption.toLowerCase()) return 1;
+        let aName = a.internalLayerName ? a.internalLayerName : a.caption;
+        aName = aName.toLowerCase();
+        let bName = b.internalLayerName ? b.internalLayerName : b.caption;
+        bName = bName.toLowerCase();
+        if (aName < bName) return -1;
+        if (aName > bName) return 1;
         return 0;
       });
 
       alphabetically.sort(function (a, b) {
-        if (a.caption.toLowerCase() < b.caption.toLowerCase()) return -1;
-        if (a.caption.toLowerCase() > b.caption.toLowerCase()) return 1;
+        let aName = a.internalLayerName ? a.internalLayerName : a.caption;
+        aName = aName.toLowerCase();
+        let bName = b.internalLayerName ? b.internalLayerName : b.caption;
+        bName = bName.toLowerCase();
+        if (aName < bName) return -1;
+        if (aName > bName) return 1;
         return 0;
       });
 
@@ -920,7 +926,10 @@ class Menu extends Component {
           <span className={cls} />
           &nbsp;
           <span className="main-box">
-            {layer.caption} {displayType}
+            {layer.internalLayerName?.length > 0
+              ? layer.internalLayerName
+              : layer.caption}{" "}
+            {displayType}
           </span>
         </li>
       );
@@ -972,7 +981,7 @@ class Menu extends Component {
                 data-infobox={infobox}
               >
                 <span className="layer-name">
-                  {that.getLayerNameFromId(
+                  {that.getLayerNameFromIdForDisplay(
                     typeof layer === "object" ? layer.id : layer
                   )}
                 </span>
@@ -990,7 +999,7 @@ class Menu extends Component {
                 data-infobox={infobox}
               >
                 <span className="layer-name">
-                  {that.getLayerNameFromId(
+                  {that.getLayerNameFromIdForDisplay(
                     typeof layer === "object" ? layer.id : layer
                   )}
                 </span>
@@ -998,7 +1007,7 @@ class Menu extends Component {
             );
           }
         });
-        if (group.hasOwnProperty("groups")) {
+        if (group.hasOwnProperty("groups") && group.groups) {
           leafs.push(roots(group.groups));
         }
         return leafs;
@@ -1113,13 +1122,15 @@ class Menu extends Component {
     function flatten(config) {
       var layerList = [];
       function fromGroups(groups) {
-        return groups.reduce((list, n, index, array) => {
-          var g = array[index];
-          if (g.hasOwnProperty("groups")) {
-            list = list.concat(fromGroups(g.groups));
-          }
-          return list.concat(g.layers);
-        }, []);
+        if (groups) {
+          return groups.reduce((list, n, index, array) => {
+            var g = array[index];
+            if (g.hasOwnProperty("groups") && g.groups) {
+              list = list.concat(fromGroups(g.groups));
+            }
+            return list.concat(g.layers);
+          }, []);
+        }
       }
       layerList = layerList.concat(fromGroups(config.groups));
       return layerList;
@@ -1133,7 +1144,7 @@ class Menu extends Component {
     layers = layers.reverse();
 
     return layers.map((layer, i) => {
-      var name = this.getLayerNameFromId(layer.id);
+      var name = this.getLayerNameFromIdForDisplay(layer.id);
       return (
         <li
           className="layer-node"
@@ -1467,13 +1478,13 @@ class Menu extends Component {
                     <i
                       className="fa fa-question-circle"
                       data-toggle="tooltip"
-                      title="Höjd i pixlar på verktygets fönster. Anges som ett numeriskt värde. Lämna tomt för att använda maximal höjd."
+                      title="Höjd i pixlar på verktygets fönster. Anges antingen numeriskt (pixlar), 'dynamic' för att automatiskt anpassa höjden efter innehållet eller 'auto' att använda maximal höjd."
                     />
                   </label>
                   <input
                     id="height"
                     name="height"
-                    type="number"
+                    type="text"
                     min="0"
                     className="control-fixed-width"
                     onChange={this.handleInputChange}

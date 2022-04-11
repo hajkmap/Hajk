@@ -3,7 +3,7 @@ import propTypes from "prop-types";
 
 import BaseWindowPlugin from "../BaseWindowPlugin";
 
-import PrintIcon from "@material-ui/icons/Print";
+import PrintIcon from "@mui/icons-material/Print";
 
 import ExportPdfSettings from "./components/ExportPdfSettings.js";
 import ExportModel from "./ExportModel";
@@ -46,7 +46,7 @@ class Export extends React.PureComponent {
           icon: <PrintIcon />,
           title: "Exportera",
           description: "Exportera kartan till andra format",
-          height: 365,
+          height: "dynamic",
           width: 315,
           onWindowShow: this.onWindowShow,
           onWindowHide: this.onWindowHide,

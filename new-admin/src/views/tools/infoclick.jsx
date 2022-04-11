@@ -1,25 +1,3 @@
-// Copyright (C) 2016 Göteborgs Stad
-//
-// Denna programvara är fri mjukvara: den är tillåten att distribuera och modifiera
-// under villkoren för licensen CC-BY-NC-SA 4.0.
-//
-// This program is free software: you can redistribute it and/or modify
-// it under the terms of the CC-BY-NC-SA 4.0 licence.
-//
-// http://creativecommons.org/licenses/by-nc-sa/4.0/
-//
-// Det är fritt att dela och anpassa programvaran för valfritt syfte
-// med förbehåll att följande villkor följs:
-// * Copyright till upphovsmannen inte modifieras.
-// * Programvaran används i icke-kommersiellt syfte.
-// * Licenstypen inte modifieras.
-//
-// Den här programvaran är öppen i syfte att den skall vara till nytta för andra
-// men UTAN NÅGRA GARANTIER; även utan underförstådd garanti för
-// SÄLJBARHET eller LÄMPLIGHET FÖR ETT VISST SYFTE.
-//
-// https://github.com/hajkmap/Hajk
-
 import React, { Component } from "react";
 import { SketchPicker } from "react-color";
 import Button from "@material-ui/core/Button";
@@ -44,6 +22,7 @@ var defaultState = {
   anchorX: 0.5,
   anchorY: 1,
   allowDangerousHtml: true,
+  useNewInfoclick: false,
 };
 
 const ColorButtonBlue = withStyles((theme) => ({
@@ -85,6 +64,8 @@ class ToolOptions extends Component {
         anchorY: tool.options.anchor[1] || this.state.anchorY,
         allowDangerousHtml:
           tool.options.allowDangerousHtml || this.state.allowDangerousHtml,
+        useNewInfoclick:
+          tool.options.useNewInfoclick || this.state.useNewInfoclick,
         visibleForGroups: tool.options.visibleForGroups
           ? tool.options.visibleForGroups
           : [],
@@ -96,11 +77,9 @@ class ToolOptions extends Component {
     }
   }
 
-  componentWillUnmount() {}
   /**
    *
    */
-  componentWillMount() {}
 
   handleInputChange(event) {
     const target = event.target;
@@ -157,6 +136,7 @@ class ToolOptions extends Component {
         strokeWidth: this.state.strokeWidth,
         fillColor: this.state.fillColor,
         allowDangerousHtml: this.state.allowDangerousHtml,
+        useNewInfoclick: this.state.useNewInfoclick,
         visibleForGroups: this.state.visibleForGroups.map(
           Function.prototype.call,
           String.prototype.trim
@@ -355,15 +335,14 @@ class ToolOptions extends Component {
               <i
                 className="fa fa-question-circle"
                 data-toggle="tooltip"
-                title="Höjd i pixlar på verktygets fönster. Anges som ett numeriskt värde. Lämna tomt för att använda maximal höjd."
+                title="Höjd i pixlar på verktygets fönster. Anges antingen numeriskt (pixlar), 'dynamic' för att automatiskt anpassa höjden efter innehållet eller 'auto' att använda maximal höjd."
               />
             </label>
             <input
               id="height"
               name="height"
               placeholder={defaultState.height}
-              type="number"
-              min="0"
+              type="text"
               className="control-fixed-width"
               onChange={(e) => {
                 this.handleInputChange(e);
@@ -385,6 +364,21 @@ class ToolOptions extends Component {
             />
             &nbsp;
             <label htmlFor="allowDangerousHtml">Tillåt HTML i infoclick</label>
+          </div>
+          <div>
+            <input
+              id="useNewInfoclick"
+              name="useNewInfoclick"
+              type="checkbox"
+              onChange={(e) => {
+                this.handleInputChange(e);
+              }}
+              checked={this.state.useNewInfoclick}
+            />
+            &nbsp;
+            <label htmlFor="useNewInfoclick" style={{ width: "auto" }}>
+              Använd ny Infoclick-variant (se GitHub issue #1034)
+            </label>
           </div>
           <div className="separator">Ikon och markering</div>
           <div>

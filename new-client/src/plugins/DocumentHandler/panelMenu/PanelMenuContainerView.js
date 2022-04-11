@@ -1,9 +1,9 @@
 import React from "react";
 import PanelList from "./PanelList";
+import Box from "@mui/material/Box";
 import { getIsMobile } from "../../../utils/IsMobile";
 import { delay } from "../../../utils/Delay";
 import { animateScroll as scroll } from "react-scroll";
-import { withStyles } from "@material-ui/core/styles";
 import { hasSubMenu } from "../utils/helpers";
 import { getNormalizedMenuState } from "../utils/stateConverter";
 import {
@@ -11,14 +11,6 @@ import {
   getItemIdsToColor,
   findMenuItemWithDocumentName,
 } from "../panelMenu/panelMenuUtils";
-
-const styles = () => ({
-  panelListWrapper: {
-    maxHeight: "100%",
-    position: "relative",
-    overflow: "auto",
-  },
-});
 
 class PanelMenuView extends React.PureComponent {
   constructor(props) {
@@ -123,7 +115,9 @@ class PanelMenuView extends React.PureComponent {
 
   #handleShowMapLayersFromPanelMenu = (id) => {
     const { options } = this.props;
-    if (getIsMobile() && options.closePanelOnMapLinkOpen) {
+    // If we're on small screen, or the admin option is set (no matter screen size),
+    // let's close the DocumentHandler window
+    if (getIsMobile() || options.closePanelOnMapLinkOpen) {
       this.#closeDocumentWindow();
     }
     this.#handleShowMapLayers(this.state[id].maplink);
@@ -142,7 +136,7 @@ class PanelMenuView extends React.PureComponent {
   //---------------------------------------------------
 
   #setClickedItemProperties = (clickedItem) => {
-    let newItem = { ...clickedItem }; //
+    let newItem = { ...clickedItem };
     return {
       ...clickedItem,
       colored: !isExpandedTopLevelItem(newItem),
@@ -238,18 +232,21 @@ class PanelMenuView extends React.PureComponent {
   };
 
   render() {
-    const { classes, app, localObserver } = this.props;
+    const { app, localObserver } = this.props;
     return (
-      <div className={classes.panelListWrapper} id="panelListWrapper">
+      <Box
+        id="panelListWrapper"
+        sx={{ maxHeight: "100%", position: "relative", overflow: "auto" }}
+      >
         <PanelList
           app={app}
           localObserver={localObserver}
           level={0}
           items={this.state}
         ></PanelList>
-      </div>
+      </Box>
     );
   }
 }
 
-export default withStyles(styles)(PanelMenuView);
+export default PanelMenuView;

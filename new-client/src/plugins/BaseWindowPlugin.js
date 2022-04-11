@@ -2,31 +2,18 @@ import React from "react";
 import propTypes from "prop-types";
 import { isMobile } from "./../utils/IsMobile";
 import { createPortal } from "react-dom";
-import { withStyles } from "@material-ui/core/styles";
-import { withTheme } from "@material-ui/styles";
-import {
-  Hidden,
-  ListItem,
-  ListItemIcon,
-  ListItemText,
-} from "@material-ui/core";
+import { Hidden, ListItem, ListItemIcon, ListItemText } from "@mui/material";
 import Window from "../components/Window.js";
 import Card from "../components/Card.js";
 import PluginControlButton from "../components/PluginControlButton";
-
-const styles = (theme) => {
-  return {};
-};
 
 class BaseWindowPlugin extends React.PureComponent {
   static propTypes = {
     app: propTypes.object.isRequired,
     children: propTypes.object.isRequired,
-    classes: propTypes.object.isRequired,
     custom: propTypes.object.isRequired,
     map: propTypes.object.isRequired,
     options: propTypes.object.isRequired,
-    theme: propTypes.object.isRequired,
     type: propTypes.string.isRequired,
   };
 
@@ -93,6 +80,10 @@ class BaseWindowPlugin extends React.PureComponent {
       this.setState({ color: this.props.custom.color });
   }
 
+  pluginIsWidget(target) {
+    return ["left", "right"].includes(target);
+  }
+
   handleButtonClick = (e) => {
     this.showWindow({
       hideOtherPluginWindows: true,
@@ -144,9 +135,24 @@ class BaseWindowPlugin extends React.PureComponent {
       }
     );
   };
-
-  renderWindow(mode = "window") {
-    return (
+  /**
+   * @summary Render the plugin and its buttons according to settings in admin.
+   * @description See comments in code to follow the rendering logic.
+   * @param {*} custom
+   * @returns {object} React.Component
+   * @memberof BaseWindowPlugin
+   */
+  renderWindow(custom) {
+    const { target } = this.props.options;
+    // BaseWindowPlugin, which calls this method, will supply an object.
+    // If that object contains a render() function, we want to call it
+    // and bypass any other functionality from this method.
+    return typeof custom?.render === "function" ? (
+      custom.render()
+    ) : (
+      // If there was not custom render method, we do "normal" rendering.
+      // That includes rendering the plugin Window itself, as well as a
+      // button (that will trigger opening of the plugin Window).
       <>
         <Window
           globalObserver={this.props.app.globalObserver}
@@ -165,19 +171,27 @@ class BaseWindowPlugin extends React.PureComponent {
           width={this.width}
           height={this.height}
           position={this.position}
-          mode={mode}
+          mode="window"
           layerswitcherConfig={this.props.app.config.mapConfig.tools.find(
             (t) => t.type === "layerswitcher"
           )}
         >
-          {this.props.children}
+          {/* We have to pass windowVisible down to the children so that we can conditionally render
+          the <Tabs /> component, since it does not accept components with display: "none". We use the
+          windowVisible-prop to make sure that we don't render the <Tabs /> when the window
+          is not visible.*/}
+          {React.cloneElement(this.props.children, {
+            windowVisible: this.state.windowVisible,
+          })}
         </Window>
-        {this.renderDrawerButton()}
-        {this.props.options.target === "left" &&
-          this.renderWidgetButton("left-column")}
-        {this.props.options.target === "right" &&
-          this.renderWidgetButton("right-column")}
-        {this.props.options.target === "control" && this.renderControlButton()}
+        {/* Drawer buttons and Widget buttons should render a Drawer button. */}
+        {(target === "toolbar" || this.pluginIsWidget(target)) &&
+          this.renderDrawerButton()}
+        {/* Widget buttons must also render a Widget */}
+        {this.pluginIsWidget(target) &&
+          this.renderWidgetButton(`${target}-column`)}
+        {/* Finally, render a Control button if target has that value */}
+        {target === "control" && this.renderControlButton()}
       </>
     );
   }
@@ -187,35 +201,30 @@ class BaseWindowPlugin extends React.PureComponent {
    * not only plugins specified as Drawer plugins (target===toolbar),
    * but it will also render Widget plugins - given some special condition.
    *
-   * Those special conditions are small screens, were there's no screen
+   * Those special conditions are small screens, where there's no screen
    * estate to render the Widget button in Map Overlay.
-   *
-   * There is another special case needed to be taken care of: the "hidden"
-   * value on target should not render any button at all, but still load the plugin.
    */
   renderDrawerButton() {
-    return this.props.options.target === "hidden"
-      ? null
-      : createPortal(
-          <Hidden mdUp={this.props.options.target !== "toolbar"}>
-            <ListItem
-              button
-              divider={true}
-              selected={this.state.windowVisible}
-              onClick={this.handleButtonClick}
-            >
-              <ListItemIcon>{this.props.custom.icon}</ListItemIcon>
-              <ListItemText primary={this.title} />
-            </ListItem>
-          </Hidden>,
-          document.getElementById("plugin-buttons")
-        );
+    return createPortal(
+      <Hidden mdUp={this.pluginIsWidget(this.props.options.target)}>
+        <ListItem
+          button
+          divider={true}
+          selected={this.state.windowVisible}
+          onClick={this.handleButtonClick}
+        >
+          <ListItemIcon>{this.props.custom.icon}</ListItemIcon>
+          <ListItemText primary={this.title} />
+        </ListItem>
+      </Hidden>,
+      document.getElementById("plugin-buttons")
+    );
   }
 
   renderWidgetButton(id) {
     return createPortal(
       // Hide Widget button on small screens, see renderDrawerButton too
-      <Hidden smDown>
+      <Hidden mdDown>
         <Card
           icon={this.props.custom.icon}
           onClick={this.handleButtonClick}
@@ -242,9 +251,10 @@ class BaseWindowPlugin extends React.PureComponent {
   render() {
     // Don't render if "clean" query param is specified, otherwise go on
     return (
-      this.props.app.config.mapConfig.map.clean !== true && this.renderWindow()
+      this.props.app.config.mapConfig.map.clean !== true &&
+      this.renderWindow(this.props.custom)
     );
   }
 }
 
-export default withStyles(styles)(withTheme(BaseWindowPlugin));
+export default BaseWindowPlugin;

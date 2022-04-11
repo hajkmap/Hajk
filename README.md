@@ -1,20 +1,39 @@
-[![Netlify Status](https://api.netlify.com/api/v1/badges/fa0760e3-fd3a-43bf-a704-27e05cb901cc/deploy-status)](https://app.netlify.com/sites/hajk-demo/deploys)
+[![Docker Status](https://img.shields.io/docker/cloud/build/hallbergs/hajk)](https://hub.docker.com/r/hallbergs/hajk/)
+[![Netlify Status](https://img.shields.io/netlify/fa0760e3-fd3a-43bf-a704-27e05cb901cc)](https://app.netlify.com/sites/hajk-demo/deploys)
 
-# Hajk 3
+# Hajk
 
-_An open source web GIS solution based on OpenLayers_
+_A full-fledged open source web GIS solution based on OpenLayers_
 
 ![alt text](https://user-images.githubusercontent.com/110222/96265856-42960000-0fc6-11eb-805e-9e41ec5d77f9.png "Hajk 3 with all tools visible")
 
 **For developer info, see [CONTRIBUTING.md](https://github.com/hajkmap/Hajk/blob/master/CONTRIBUTING.md).**
 
-For user info, please visit [our welcome page (Swedish only)](https://hajkmap.github.io/Hajk)
+## New to Hajk and not a developer?
 
-## Demo
+If you are a new user of Hajk, please visit [our welcome page (Swedish only)](https://hajkmap.github.io/Hajk) for more information about Hajk.
 
-For a live demo of the latest version, go to https://hajk-demo.netlify.app/.
+## Looking for support?
+You can easily reach out to our community using the [Dicussions on GitHub](https://github.com/hajkmap/Hajk/discussions). 
 
-## Quick start
+## Live examples
+
+The official automatic build of the latest version can be found here: https://hajk-demo.netlify.app/.
+
+For some real-life examples, see the following solutions:
+
+- [Halmstad municipality's map](https://karta.halmstad.se)
+- [Kungsbacka municipality's map](https://karta.kungsbacka.se)
+- [Göteborg stad](https://karta.goteborg.se)
+- [The Gothenburg Region's map](https://karta.goteborgsregionen.se)
+- [Varberg municipality's map](https://karta.varberg.se)
+- [Uddevalla municipality's map](https://karta.uddevalla.se)
+
+## Quick start (for admins)
+
+Please refer to Hajk's official [installation guide](https://github.com/hajkmap/Hajk/wiki/Installation-guide-%28for-pre-packaged-releases%29).
+
+## Quick start (for developers)
 
 _Note that Hajk consists of 3 applications: the main 'client' (which is the web map front end), 'admin' (which basically is a frontend for client's configuration files) and 'mapservice' (the backend server application which has a REST API)._
 
@@ -56,6 +75,10 @@ npm run dev
 1. Build and publish.
 1. Deploy to IIS. Make sure that everything is running (choose "Browse" from IIS to see the mapservice page that lists available commands - if you see that, you're good to go).
 
+#### Alternative 3: NodeJS backend using Docker
+
+See Docker [README](Docker/README.md) for more information.
+
 ### Launch the Client app
 
 Now when Backend is up and running, it's time to start the Client (and optionally Admin) applications.
@@ -68,9 +91,10 @@ Now when Backend is up and running, it's time to start the Client (and optionall
 
 This process is similar to the Client app.
 
-1. Set the correct URL to Backend by editing `new-admin/public/config.json`.
-1. The admin application is located in `new-admin`. To get it running do `cd new-admin && npm i && npm start`.
-1. Verify that Admin is running on `http://localhost:3001`.
+1. Set the correct URL to Backend by editing `new-admin/public/config.json`.  
+*Map operations have moved to mapconfig so `"url_map", "url_map_list", "url_map_create", "url_map_delete"` needs to point toward `"http://localhost:3002/api/v1/mapconfig..."`, the rest is the same as for `new-client`*
+3. The admin application is located in `new-admin`. To get it running do `cd new-admin && npm i && npm start`.
+4. Verify that Admin is running on `http://localhost:3001`.
 
 ## Deploying
 

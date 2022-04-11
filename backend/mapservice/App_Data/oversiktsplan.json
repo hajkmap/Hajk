@@ -799,6 +799,7 @@
         "tableOfContents": {
           "expanded": false,
           "active": true,
+          "printMode": "partial",
           "chapterLevelsToShow": 2,
           "title": ""
         },
@@ -1301,13 +1302,7 @@
     "maxZoom": 6,
     "minZoom": 0,
     "resolutions": [
-      70.00022,
-      42.0,
-      28.00009,
-      14.00004,
-      7.000022,
-      2.800009,
-      1.400004
+      70.00022, 42.0, 28.00009, 14.00004, 7.000022, 2.800009, 1.400004
     ],
     "origin": [0.0, 0.0],
     "extent": [105000.0, 6355000.0, 185000.0, 6435000.0],

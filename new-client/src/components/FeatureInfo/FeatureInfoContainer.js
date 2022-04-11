@@ -1,8 +1,8 @@
 import React from "react";
 import propTypes from "prop-types";
-import { withStyles } from "@material-ui/core/styles";
-import ArrowLeftIcon from "@material-ui/icons/ArrowLeft";
-import ArrowRightIcon from "@material-ui/icons/ArrowRight";
+import { styled } from "@mui/material/styles";
+import ArrowLeftIcon from "@mui/icons-material/ArrowLeft";
+import ArrowRightIcon from "@mui/icons-material/ArrowRight";
 import FeaturePropsParsing from "./FeaturePropsParsing";
 // import Diagram from "../Diagram";
 // import HajkTable from "../Table";
@@ -16,39 +16,33 @@ import {
   Button,
   Typography,
   Grid,
-} from "@material-ui/core";
+} from "@mui/material";
 
-const styles = (theme) => ({
-  toggler: {
-    backgroundColor: theme.palette.primary.main,
-  },
-  infoContainer: {
-    height: "100%",
-    cursor: "auto",
-    userSelect: "text",
-  },
-  typography: {
-    textAlign: "center",
-  },
-  columnValue: {
-    wordBreak: "break-all",
-  },
-  columnKey: {
-    verticalAlign: "top",
-  },
-  featureInfoContainer: {
-    flex: "auto",
-  },
-  featureInfo: {
-    width: "100%",
-  },
-  togglerButtonRightContainer: {
-    borderRight: `${theme.spacing(0.2)}px solid ${theme.palette.divider}`,
-  },
-  togglerButtonLeftContainer: {
-    borderLeft: `${theme.spacing(0.2)}px solid ${theme.palette.divider}`,
-  },
-});
+const InfoContainer = styled(Grid)(() => ({
+  height: "100%",
+  cursor: "auto",
+  userSelect: "text",
+}));
+
+const StyledTableContainer = styled(TableContainer)(() => ({
+  marginBottom: "1.1rem",
+}));
+
+const TableCellKey = styled(TableCell)(() => ({
+  verticalAlign: "top",
+}));
+
+const TableCellValue = styled(TableCell)(() => ({
+  wordBreak: "break-all",
+}));
+
+const TogglerButtonRightContainer = styled(Grid)(({ theme }) => ({
+  borderRight: `${theme.spacing(0.2)} solid ${theme.palette.divider}`,
+}));
+
+const TogglerButtonLeftContainer = styled(Grid)(({ theme }) => ({
+  borderLeft: `${theme.spacing(0.2)} solid ${theme.palette.divider}`,
+}));
 
 class FeatureInfoContainer extends React.PureComponent {
   state = {
@@ -56,7 +50,6 @@ class FeatureInfoContainer extends React.PureComponent {
   };
 
   static propTypes = {
-    classes: propTypes.object.isRequired,
     features: propTypes.array.isRequired,
     onDisplay: propTypes.func.isRequired,
   };
@@ -94,51 +87,51 @@ class FeatureInfoContainer extends React.PureComponent {
   };
 
   getToggler = () => {
-    const { features, classes } = this.props;
+    const { features } = this.props;
     return (
       <Grid
         alignItems="center"
-        justify="space-between"
-        className={classes.toggler}
+        justifyContent="space-between"
+        sx={{ backgroundColor: "primary.main" }}
         container
       >
-        <Grid item className={classes.togglerButtonRightContainer}>
+        <TogglerButtonRightContainer item>
           <Button
             fullWidth
             disabled={this.state.selectedIndex - 1 < 0}
             onClick={this.stepLeft}
             aria-label="previous"
             id="step-left"
+            sx={{ color: "primary.contrastText" }}
           >
-            <ArrowLeftIcon color="secondary" />
+            <ArrowLeftIcon />
           </Button>
-        </Grid>
+        </TogglerButtonRightContainer>
         <Grid item>
           <Typography
             variant="button"
-            color="secondary"
-            className={classes.typography}
+            sx={{ textAlign: "center", color: "primary.contrastText" }}
           >
             {this.state.selectedIndex + 1} av {features.length}
           </Typography>
         </Grid>
-        <Grid item className={classes.togglerButtonLeftContainer}>
+        <TogglerButtonLeftContainer item>
           <Button
             fullWidth
             disabled={this.state.selectedIndex + 1 >= features.length}
             onClick={this.stepRight}
             aria-label="next"
             id="step-right"
+            sx={{ color: "primary.contrastText" }}
           >
-            <ArrowRightIcon color="secondary" />
+            <ArrowRightIcon />
           </Button>
-        </Grid>
+        </TogglerButtonLeftContainer>
       </Grid>
     );
   };
 
   getFeaturesAsDefaultTable(data, caption) {
-    const { classes } = this.props;
     // We can't use "i" for coloring every second row, as some rows
     // will be removed (Objects are not printed), so there's a need
     // for a separate counter of rows that actually get printed.
@@ -148,10 +141,8 @@ class FeatureInfoContainer extends React.PureComponent {
         ++j;
         return (
           <TableRow key={i} selected={j % 2 === 0}>
-            <TableCell className={classes.columnKey} variant="head">
-              {key}
-            </TableCell>
-            <TableCell className={classes.columnValue}>{data[key]}</TableCell>
+            <TableCellKey variant="head">{key}</TableCellKey>
+            <TableCellValue>{data[key]}</TableCellValue>
           </TableRow>
         );
       } else {
@@ -160,11 +151,11 @@ class FeatureInfoContainer extends React.PureComponent {
     });
 
     return (
-      <TableContainer component="div">
+      <StyledTableContainer component="div">
         <Table size="small" aria-label="Table with infoclick details">
           <TableBody>{tableBody}</TableBody>
         </Table>
-      </TableContainer>
+      </StyledTableContainer>
     );
   }
 
@@ -313,11 +304,10 @@ class FeatureInfoContainer extends React.PureComponent {
   renderFeatureInformation = () => {
     // const { caption, value, shortcodes, markdown } = this.state;
     const { caption, value } = this.state;
-    const { classes } = this.props;
 
     return (
-      <Grid className={classes.featureInfo} item>
-        <Typography variant="button" align="center" component="h6">
+      <Grid sx={{ width: "100%" }} item>
+        <Typography variant="button" align="center" component="h6" gutterBottom>
           {caption}
         </Typography>
         {value}
@@ -326,24 +316,19 @@ class FeatureInfoContainer extends React.PureComponent {
   };
 
   render() {
-    const { classes, features } = this.props;
+    const { features } = this.props;
     const featureInfoLoaded = this.isReadyToShowInfo();
     return (
-      <Grid
-        alignContent="flex-start"
-        className={classes.infoContainer}
-        container
-        spacing={1}
-      >
+      <InfoContainer alignContent="flex-start" container spacing={1}>
         {features.length > 1 && (
           <Grid xs={12} item>
             {this.getToggler()}
           </Grid>
         )}
         <Grid
-          justify="center"
+          justifyContent="center"
           alignContent={featureInfoLoaded ? "flex-start" : "center"}
-          className={classes.featureInfoContainer}
+          sx={{ flex: "auto" }}
           item
           container
         >
@@ -353,9 +338,9 @@ class FeatureInfoContainer extends React.PureComponent {
             <CircularProgress />
           )}
         </Grid>
-      </Grid>
+      </InfoContainer>
     );
   }
 }
 
-export default withStyles(styles)(FeatureInfoContainer);
+export default FeatureInfoContainer;

@@ -1,4 +1,8 @@
-import { WFS } from "ol/format";
+import { GeoJSON, WFS } from "ol/format";
+import GML2 from "ol/format/GML2";
+import GML3 from "ol/format/GML3";
+import GML32 from "ol/format/GML32";
+
 import IsLike from "ol/format/filter/IsLike";
 import Or from "ol/format/filter/Or";
 import And from "ol/format/filter/And";
@@ -6,7 +10,7 @@ import Intersects from "ol/format/filter/Intersects";
 import Within from "ol/format/filter/Within";
 import { fromCircle } from "ol/geom/Polygon";
 
-import { arraySort } from "../utils/ArraySort";
+// import { arraySort } from "../utils/ArraySort";
 import { decodeCommas } from "../utils/StringCommaCoder";
 import { hfetch } from "utils/FetchWrapper";
 
@@ -117,6 +121,8 @@ class SearchModel {
     // Ensure that we've cleaned obsolete AbortControllers before we put new ones there
     this.#controllers = [];
 
+    const viewProjection = this.#map.getView().getProjection().getCode();
+
     // Loop through all defined search sources
     searchSources.forEach((searchSource) => {
       // Expect the Promise and an AbortController from each Source
@@ -125,11 +131,17 @@ class SearchModel {
         searchSource,
         searchOptions
       );
-      // Push promises to local Array so we can act when all Promises have resolved
-      promises.push(promise);
 
-      // Also, put AbortController to the global collection of controllers, so we can abort searches at any time
-      this.#controllers.push(controller);
+      // If #lookup returned actual Promise and Controller objects, push
+      // them to our array of promises. Important that we don't push empty
+      // values to the array, hence this check!
+      if (promise !== null && controller !== null) {
+        // Push promises to local Array so we can act when all Promises have resolved
+        promises.push(promise);
+
+        // Also, put AbortController to the global collection of controllers, so we can abort searches at any time
+        this.#controllers.push(controller);
+      }
     });
 
     // Start fetching, allow both fulfilled and rejected Promises
@@ -137,29 +149,41 @@ class SearchModel {
 
     // fetchedResponses will be an array of Promises in object form.
     // Each object will have a "status" and a "value" property.
-    const jsonResponses = await Promise.allSettled(
-      fetchResponses.map((fetchResponse) => {
+    const responsePromises = await Promise.allSettled(
+      fetchResponses.map((fetchResponse, i) => {
         // We look at the status and filter out only those that fulfilled.
         if (fetchResponse.status === "rejected")
           return Promise.reject("Could not fetch");
-        // The Fetch Promise might have fulfilled, but it doesn't mean the Response
-        // can be parsed with JSON (i.e. errors from GeoServer will arrive as XML),
-        // so we must be careful before invoking .json() on our Response's value.
-        if (typeof fetchResponse.value.json !== "function")
-          return Promise.reject("Fetched result is not JSON");
-        // If Response can be parsed as JSON, return it.
-        return fetchResponse.value.json();
+        // If we requested GeoJSON, we can try parsing it with
+        // the Promise's body's .json() method.
+        switch (searchSources[i].outputFormat) {
+          case "application/json":
+          case "application/vnd.geo+json":
+            return fetchResponse.value.json();
+          // Otherwise we should expect XML, which needs to be parsed
+          // as text
+          case "GML2":
+          case "GML3":
+          case "GML32":
+            return fetchResponse.value.text();
+          default:
+            return Promise.reject("Output format now allowed");
+        }
       })
     );
 
-    let featureCollections = [];
-    let errors = [];
+    // Prepare two arrays that will hold our successful and
+    // failed responses
+    const successfulResponses = [];
+    const errors = [];
 
-    jsonResponses.forEach((r, i) => {
+    // Investigate each response and put in the correct collection,
+    // depending on if it succeeded or failed.
+    responsePromises.forEach((r, i) => {
       if (r.status === "fulfilled") {
         r.source = searchSources[i];
         r.origin = "WFS";
-        featureCollections.push(r);
+        successfulResponses.push(r);
       } else if ((r) => r.status === "rejected") {
         r.source = searchSources[i];
         r.origin = "WFS";
@@ -168,18 +192,61 @@ class SearchModel {
     });
 
     // Do some magic on our valid results
-    featureCollections.forEach((featureCollection, i) => {
-      if (featureCollection.value.features.length > 0) {
-        // FIXME: Investigate if this sorting is really needed, and if so, if we can find some Unicode variant and not only for Swedish characters
-        arraySort({
-          array: featureCollection.value.features,
-          index: featureCollection.source.searchFields[0],
-        });
+    successfulResponses.forEach((r) => {
+      // FIXME: Investigate if this sorting is really needed, and if so,
+      // if we can find some Unicode variant and not only for Swedish characters.
+      // FIXME: NB: This can't be done like this as it only works for GeoJSON
+      // responses. GML won't have an object assigned to r.value, so there won't
+      // be any "features" that can be sorted like this (in GML response, the r.value
+      // is a XML string).
+      // if (r.value?.features?.length > 0) {
+      //   arraySort({
+      //     array: r.value.features,
+      //     index: r.source.searchFields[0],
+      //   });
+      // }
+
+      switch (r.source.outputFormat) {
+        case "application/json":
+        case "application/vnd.geo+json": {
+          // If the CRS object is lacking in the GeoJSON response, we can
+          // safely assume that the geometries are in the standard-compilant
+          // WGS84 (EPSG:4326).
+          const parserOptions = r.value.crs
+            ? {}
+            : {
+                dataProjection: "EPSG:4326", //FIXME: Only valid for GeoJSON responses!
+                featureProjection: viewProjection,
+              };
+
+          // Parse the GeoJSON object, optionally supplying the options if needed (see above ^)
+          const olFeatures = new GeoJSON().readFeatures(r.value, parserOptions);
+          r.value = { features: olFeatures };
+          break;
+        }
+        case "GML2":
+        case "GML3":
+        case "GML32": {
+          let parser = null;
+          if (r.source.outputFormat === "GML2") {
+            parser = new GML2();
+          } else if (r.source.outputFormat === "GML3") {
+            parser = new GML3();
+          } else if (r.source.outputFormat === "GML32") {
+            parser = new GML32();
+          }
+          const olFeatures = parser.readFeatures(r.value);
+          r.value = { features: olFeatures };
+          break;
+        }
+
+        default:
+          throw new Error("Unknown output format");
       }
     });
 
     // Return an object with out results and errors
-    rawResults = { featureCollections, errors };
+    rawResults = { featureCollections: successfulResponses, errors };
 
     return rawResults;
   };
@@ -346,11 +413,12 @@ class SearchModel {
     let finalFilters = null;
     let possibleSearchCombinations = [];
 
-    if (searchString !== "") {
+    // In order to do a textual search, we must have both a search phrase
+    // and at least one search field (else there's no way to know where to search!)
+    if (searchString !== "" && searchSource.searchFields.length > 0) {
       if (searchOptions.getPossibleCombinations) {
-        possibleSearchCombinations = this.getPossibleSearchCombinations(
-          searchString
-        );
+        possibleSearchCombinations =
+          this.getPossibleSearchCombinations(searchString);
       } else {
         possibleSearchCombinations.push(
           this.#splitAndTrimOnCommas(searchString)
@@ -361,7 +429,7 @@ class SearchModel {
         possibleSearchCombinations
       );
 
-      let searchFilters = possibleSearchCombinations.map((combination) => {
+      const searchFilters = possibleSearchCombinations.map((combination) => {
         let searchWordsForCombination = combination.map((wordInCombination) => {
           wordInCombination = this.#escapeSpecialChars(wordInCombination);
           wordInCombination = this.#addPotentialWildCards(
@@ -389,11 +457,23 @@ class SearchModel {
         searchOptions.activeSpatialFilter === "within" ? Within : Intersects;
       // Next, loop through supplied features and create the desired filter
       spatialFilters = searchOptions.featuresToFilter.map((feature) => {
-        // Convert circle feature to polygon
-        let geometry = feature.getGeometry();
-        if (geometry.getType() === "Circle") {
-          geometry = fromCircle(geometry);
-        }
+        // If the drawn feature that we want to use as a filter happens to be an
+        // OpenLayers Circle feature, we must convert it to a polygon. (GML only
+        // accepts the following operands: Point, LineString, Polygon, Envelope.)
+        // If it's not a Circle however, let's clone the geometry, to avoid
+        // modifying the geometry that belongs to the feature that  will be used
+        // throughout the loop (see also "Fix for QGIS" below).
+        const geometry =
+          feature.getGeometry().getType() === "Circle"
+            ? fromCircle(feature.getGeometry())
+            : feature.getGeometry().clone();
+
+        // Fix for QGIS Server: for some unknown reasons QGIS doesn't want the Polygon
+        // to be closed. We fix it by basically removing the last two elements of the
+        // flatCoordinates array, effectively eliminating the last point of the polygon.
+        // See also: https://github.com/hajkmap/Hajk/issues/882#issuecomment-956099289
+        searchSource.serverType === "qgis" &&
+          geometry.flatCoordinates.splice(-2, 2);
         return new activeSpatialFilter(geometryName, geometry, srsName);
       });
 
@@ -416,11 +496,26 @@ class SearchModel {
       finalFilters = spatialFilters;
     }
 
+    // Before we actually send a fetch request, we must ensure
+    // that it won't be empty, i.e. we must have at least one filter.
+    // The reason where this can be empty is if _user tries to do a
+    // textual search on a layer that lacks searchFields_. Those layers
+    // are still usable (we don't need to defined searchFields for spatial
+    // searches), so admins may have setup a layer like this. And in that
+    // case, it's crucial that we don't do a GetFeature to the WFS that doesn't
+    // contain any filters.
+    // The return value of this method must be an object that contains a promise
+    // and controller property (because the return value is used in a destruction
+    // assignment later on), hence this odd return, instead of just a null value.
+    if (finalFilters === null) {
+      return { promise: null, controller: null };
+    }
+
     // Prepare the options for the upcoming request.
     const options = {
       featureTypes: searchSource.layers,
       srsName: srsName,
-      outputFormat: "JSON", //source.outputFormat,
+      outputFormat: searchSource.outputFormat,
       geometryName: geometryName,
       maxFeatures: maxFeatures,
       filter: finalFilters,

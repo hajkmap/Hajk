@@ -1,5 +1,5 @@
 {
-  "version": "3.5.0",
+  "version": "3.10.0-beta.7",
   "projections": [
     {
       "code": "EPSG:3006",
@@ -220,6 +220,22 @@
                 "infobox": null
               }
             ]
+          },
+          {
+            "id": "9938c969-590c-8683-435c-1ecaca271096",
+            "parent": "-1",
+            "name": "Övrigt",
+            "toggled": true,
+            "expanded": false,
+            "layers": [
+              {
+                "id": "1352",
+                "visibleAtStart": true,
+                "drawOrder": 4,
+                "visibleForGroups": null,
+                "infobox": null
+              }
+            ]
           }
         ],
         "active": true,
@@ -257,17 +273,10 @@
       "index": 2
     },
     {
-      "type": "draw",
+      "type": "sketch",
       "options": {
         "target": "left",
         "position": "left",
-        "height": 650,
-        "exportUrl": "",
-        "importUrl": "",
-        "base64Encode": false,
-        "instruction": "",
-        "icons": "",
-        "proxyUrl": "",
         "visibleForGroups": []
       },
       "index": 3
@@ -318,7 +327,8 @@
         "scale": "",
         "markerImg": "",
         "delayBeforeAutoSearch": 300,
-        "searchBarPlaceholder": "Sök...",
+        "searchBarPlaceholder": "Sök i Hajk",
+        "autocompleteWildcardAtStart": false,
         "enablePolygonSearch": true,
         "enableRadiusSearch": true,
         "enableSelectSearch": true,
@@ -397,6 +407,10 @@
           {
             "name": "Umeå",
             "presetUrl": "?m=simpleMapConfig&x=758454.9972847599&y=7084504.860998487&z=6.739288215480473&l=1&f=%7B%7D&clean=false"
+          },
+          {
+            "name": "Varberg",
+            "presetUrl": "?m=simpleMapConfig&x=337544.0333333551&y=6331254.569479619&z=6.502756678859521&ss=ss&f=%7B%7D&clean=false"
           }
         ],
         "visibleForGroups": []
@@ -453,22 +467,66 @@
         "scales": "200, 400, 1000, 2000, 5000, 10000, 25000, 50000, 100000, 200000, 400000, 800000, 1000000, 5000000, 10000000",
         "logo": "/logoLight.png",
         "northArrow": "/north_arrow.png",
+        "copyright": "© Hajkmap",
+        "disclaimer": "Observera att gränserna i kartan inte har någon rättsverkan.",
+        "mapTextColor": "#000000",
+        "includeNorthArrow": true,
+        "northArrowPlacement": "topLeft",
+        "includeScaleBar": true,
+        "scaleBarPlacement": "bottomLeft",
+        "includeLogo": true,
+        "logoPlacement": "topRight",
         "instruction": "",
         "visibleAtStart": false,
         "visibleForGroups": []
       },
       "index": 2
+    },
+    {
+      "type": "infodialog",
+      "index": 3,
+      "options": [
+        {
+          "target": "control",
+          "name": "help",
+          "icon": "helpcenter",
+          "headerText": "Example: InfoDialog with complex MarkDown",
+          "text": "# H1\n## H2\n### H3\n#### H4\n##### H5\n###### H6\n\nAlternatively, for H1 and H2, an underline-ish style:\n\nAlt-H1\n======\n\nAlt-H2\n------\n\nEmphasis, aka italics, with *asterisks* or _underscores_.\n\nStrong emphasis, aka bold, with **asterisks** or __underscores__.\n\nCombined emphasis with **asterisks and _underscores_**.\n\nStrikethrough uses two tildes. ~~Scratch this.~~\n\n# Lists\n\n1. First ordered list item\n2. Another item\n  * Unordered sub-list.\n1. Actual numbers don't matter, just that it's a number\n  1. Ordered sub-list\n4. And another item.\n\n    You can have properly indented paragraphs within list items. Notice the blank line above, and the leading spaces (at least one, but we'll use three here to also align the raw Markdown).\n\n    To have a line break without a paragraph, you will need to use two trailing spaces.\n    Note that this line is separate, but within the same paragraph.\n    (This is contrary to the typical GFM line break behaviour, where trailing spaces are not required.)\n\n* Unordered list can use asterisks\n- Or minuses\n+ Or pluses\n\n# Links\n[I'm an inline-style link](https://www.google.com)\n\n[I'm an inline-style link with title](https://www.google.com \"Google's Homepage\")\n\n[I'm a reference-style link][Arbitrary case-insensitive reference text]\n\n[I'm a relative reference to a repository file](../blob/master/LICENSE)\n\n[You can use numbers for reference-style link definitions][1]\n\nOr leave it empty and use the [link text itself].\n\nURLs and URLs in angle brackets will automatically get turned into links.\nhttp://www.example.com or <http://www.example.com> and sometimes\nexample.com (but not on Github, for example).\n\nSome text to show that the reference links can follow later.\n\n[arbitrary case-insensitive reference text]: https://www.mozilla.org\n[1]: http://slashdot.org\n[link text itself]: http://www.reddit.com\n\n# Images\nHere's our logo (hover to see the title text):\n\nInline-style:\n![alt text](https://github.com/adam-p/markdown-here/raw/master/src/common/images/icon48.png \"Logo Title Text 1\")\n\nReference-style:\n![alt text][logo]\n\n[logo]: https://github.com/adam-p/markdown-here/raw/master/src/common/images/icon48.png \"Logo Title Text 2\"\n\n# Code\nInline `code` has `back-ticks around` it.\n\nYou can have blocks of code too, just use ``` and ``` on new lines.\n\n\n# Tables\nColons can be used to align columns.\n\n| Tables        | Are           | Cool  |\n| ------------- |:-------------:| -----:|\n| col 3 is      | right-aligned | $1600 |\n| col 2 is      | centered      |   $12 |\n| zebra stripes | are neat      |    $1 |\n\nThere must be at least 3 dashes separating each header cell.\nThe outer pipes (|) are optional, and you don't need to make the\nraw Markdown line up prettily. You can also use inline Markdown.\n\nMarkdown | Less | Pretty\n--- | --- | ---\n*Still* | `renders` | **nicely**\n1 | 2 | 3\n\n# Quotes\n> Blockquotes are very handy in email to emulate reply text.\n> This line is part of the same quote.\n\nQuote break.\n\n> This is a very long line that will still be quoted properly when it wraps. Oh boy let's keep writing to make sure this is long enough to actually wrap for everyone. Oh, you can *put* **Markdown** into a blockquote.\n\n# Breakes\nThree or more...\n\n---\n\nHyphens\n\n***\n\nAsterisks\n\n___\n\nUnderscores",
+          "allowDangerousHtml": false,
+          "useLegacyNonMarkdownRenderer": false,
+          "buttonText": "Stäng",
+          "title": "Visa hjälp",
+          "visibleAtStart": false,
+          "showOnlyOnce": true,
+          "visibleForGroups": []
+        },
+        {
+          "target": "left",
+          "name": "announcements",
+          "headerText": "Nyheter i Hajk",
+          "icon": "announcement",
+          "text": "_[120 commits](https://github.com/hajkmap/Hajk/compare/v3.6.0...v3.7.0) since 3.6, here's Hajk 3.7! This release was brought to you by @Hallbergs  and @jacobwod . Please see the list of commits for all contributors._\n\n# Changelog\n\n## Major new features\n- Client: New plugin (Timeslider), allows for users to see how data changes over time (https://github.com/hajkmap/Hajk/wiki/Tidslinje)\n- Client: New plugin (VTsearch), allows for timetables searches (https://github.com/hajkmap/Hajk/wiki/Västtrafik)\n- Backend: Add a generic proxy to the backend (#824). This replaces the .NET proxy as it allows Hajk backend to proxy any service (exposed on any port), via a path on Hajk's API. Example usage includes solving CORS problems or proxying requests to underlying services running on different port (e.g. QGIS Server). \n- Client: **WMS layers** can be used as **search sources**, only minimal configuration is required to enabled search functionality for WMS (where a corresponding WFS service exists), (22d648e)\n- Client: Add support for WFS-T, including editing, from QGIS Server (#825)\n\n## New features\n- Search results labels in map can be turned off on a per-user basis, setting is stored locally in user's browser (#773)\n- WFS-T layers can be restricted to certain AD groups (#762)\n- **Min/max zoom** restrictions on layers are now visualized in client so that user knows that the layer is on, but outside current zoom (#788)\n- **New print** solution for the **DocumentHandler** plugin (#796)\n- Add support for **`dynamic` Window height** in Admin (#787)\n- Automatically **turn visibility on** for WMS search layers that got clicked (#816)\n- **More filters** in the feature-info dialog (#820)\n- Add **search phrase to Anchor link** (#830)\n- Updated the project's license to MIT to reflect recent policy change (799bcb5970f7e4b0febbd9ce4b48c96b3949605d)\n\n\n## Bug fixes\n- FeatureInfo: upgrade to ReactMarkdown 6.0 (#761)\n- Better infoclick (FeatureInfo) behavior (#771)\n- Unicode characters allowed in infoclick defintion placeholders (64bf6fa) \n- Breadcrumbs respect the chosen theme (light/dark) (#802)\n- Host Google Fonts locally (#809)\n- Map template updated to include all coordinate systems (RC1 only included EPSG:3006)\n- Minor bugfixes: #807, #812, #817, #822, #826, #831, #832, #836, #838, #839, #851, #852. \n\n---\n\n# Downloads\nThere are multiple ways to get the latest Hajk up and running. For the first time ever, we even provide a Docker container!\n\n## Pre-compiled releases\nThis time we have **three different** version of the pre-compiled solution (scroll down for download links):\n1. [Hajk 3.7.0 NodeJS edition](https://github.com/hajkmap/Hajk/releases/download/v3.7.0/hajk-v3.7.0-nodejs.zip)\n1. [Hajk 3.7.0 Simple edition](https://github.com/hajkmap/Hajk/releases/download/v3.7.0/hajk-v3.7.0-simple.zip)\n1. [Hajk 3.7.0 .NET edition](https://github.com/hajkmap/Hajk/releases/download/v3.7.0/hajk-v3.7.0-dotnet.zip)\n\n## Docker container\nThe container is available on Docker Hub: https://hub.docker.com/r/hallbergs/hajk\n\n# Installation\nRefer to our recently updated [installation guide](https://github.com/hajkmap/Hajk/wiki/Installation-guide-%28for-pre-packaged-releases%29).\n",
+          "allowDangerousHtml": true,
+          "useLegacyNonMarkdownRenderer": false,
+          "buttonText": "Ok, uppfattat!",
+          "title": "Visa nyheter",
+          "visibleAtStart": true,
+          "showOnlyOnce": true,
+          "visibleForGroups": []
+        }
+      ]
     }
   ],
   "map": {
     "target": "map",
-    "center": [523718, 6920000],
+    "center": [576357, 6386049],
     "title": "Hajk 3",
     "projection": "EPSG:3006",
-    "zoom": 0.67,
+    "zoom": 1.33,
     "maxZoom": 8,
     "minZoom": 0,
     "resolutions": [2048, 1024, 512, 256, 128, 64, 32, 16, 8],
+    "extraPrintResolutions": [],
     "origin": [0, 0],
     "extent": [-1200000.0, 4700000.0, 2600000.0, 8500000.0],
     "constrainOnlyCenter": false,
@@ -489,6 +547,11 @@
     },
     "defaultCookieNoticeMessage": "Vi använder cookies för att följa upp användandet och ge en bra upplevelse av kartan. Du kan blockera cookies i webbläsaren men då visas detta meddelande igen.",
     "defaultCookieNoticeUrl": "https://pts.se/sv/bransch/regler/lagar/lag-om-elektronisk-kommunikation/kakor-cookies/",
-    "crossOrigin": "anonymous"
+    "showCookieNotice": false,
+    "cookieUse3dPart": false,
+    "crossOrigin": "anonymous",
+    "introductionEnabled": true,
+    "introductionShowControlButton": true,
+    "introductionSteps": []
   }
 }

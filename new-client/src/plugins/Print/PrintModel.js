@@ -2,17 +2,21 @@ import { delay } from "../../utils/Delay";
 import { getPointResolution } from "ol/proj";
 import { getCenter } from "ol/extent";
 import jsPDF from "jspdf";
-import * as PDFjs from "pdfjs-dist";
-import pdfjsWorker from "pdfjs-dist/build/pdf.worker.entry";
+import { saveAs } from "file-saver";
 
 import Vector from "ol/layer/Vector.js";
+import View from "ol/View";
 import VectorSource from "ol/source/Vector.js";
 import Polygon from "ol/geom/Polygon";
 import Feature from "ol/Feature.js";
 import { Translate } from "ol/interaction.js";
 import Collection from "ol/Collection";
 import { Style, Stroke, Fill } from "ol/style.js";
-import { saveAs } from "file-saver";
+
+import ImageLayer from "ol/layer/Image";
+import TileLayer from "ol/layer/Tile";
+import TileWMS from "ol/source/TileWMS";
+import ImageWMS from "ol/source/ImageWMS";
 
 export default class PrintModel {
   constructor(settings) {
@@ -22,7 +26,41 @@ export default class PrintModel {
     this.northArrowUrl = settings.options.northArrow ?? "";
     this.logoMaxWidth = settings.options.logoMaxWidth;
     this.scales = settings.options.scales;
+    this.copyright = settings.options.copyright ?? "";
+    this.disclaimer = settings.options.disclaimer ?? "";
     this.localObserver = settings.localObserver;
+    this.mapConfig = settings.mapConfig;
+    // If we want the printed tiles to have correct styling, we have to use
+    // custom loaders to make sure that the requests has all the required parameters.
+    // If for some reason these tile-loaders shouldn't be used, a setting is exposed.
+    this.useCustomTileLoaders = settings.options.useCustomTileLoaders ?? true;
+    // Since the WMS-servers cannot handle enormous requests, we have to
+    // limit Image-WMS requests. The size below is the maximum tile-size allowed.
+    // This max-size is only used if the custom-tile-loaders are used.
+    this.maxTileSize = settings.options.maxTileSize || 4096;
+
+    // Let's keep track of the original view, since we're gonna change the view
+    // under the print-process. (And we want to be able to change back to the original one).
+    this.originalView = this.map.getView();
+    this.originalMapSize = null; // Needed to restore view. It is set when print().
+
+    // We're gonna need to keep a map containing the original layer parameters (since we will
+    // change some parameters such as requested dpi and so on).
+    this.originalLayerParams = new Map();
+
+    // We must initiate a "print-view" that includes potential "hidden" resolutions.
+    // These "hidden" resolutions allows the print-process to zoom more than what the
+    // users are allowed (which is required if we want to print in high resolutions).
+    this.printView = new View({
+      center: this.originalView.getCenter(),
+      constrainOnlyCenter: this.mapConfig.constrainOnlyCenter,
+      constrainResolution: false,
+      maxZoom: 24,
+      minZoom: 0,
+      projection: this.originalView.getProjection(),
+      resolutions: this.mapConfig.allResolutions, // allResolutions includes the "hidden" resolutions
+      zoom: this.originalView.getZoom(),
+    });
   }
 
   scaleBarLengths = {
@@ -45,9 +83,12 @@ export default class PrintModel {
   previewLayer = null;
   previewFeature = null;
 
-  // Used to store some values that will be needed for resetting the map
-  valuesToRestoreFrom = {};
+  // Used to calculate the margin around the map-image. Change this value to get
+  // more or less margin.
+  marginAmount = 0.03;
 
+  // Used to store the calculated margin.
+  margin = 0;
   // A flag that's used in "rendercomplete" to ensure that user has not cancelled the request
   pdfCreationCancelled = null;
 
@@ -69,10 +110,16 @@ export default class PrintModel {
   }
 
   getMapScale = () => {
+    // We have to make sure to get (and set on the printView) the current zoom
+    //  of the "original" view. Otherwise, the scale calculation could be wrong
+    // since it depends on the static zoom of the printView.
+    this.printView.setZoom(this.originalView.getZoom());
+    // When this is updated, we're ready to calculate the scale, which depends on the
+    // dpi, mpu, inchPerMeter, and resolution. (TODO: (@hallbergs) Clarify these calculations).
     const dpi = 25.4 / 0.28,
-      mpu = this.map.getView().getProjection().getMetersPerUnit(),
+      mpu = this.printView.getProjection().getMetersPerUnit(),
       inchesPerMeter = 39.37,
-      res = this.map.getView().getResolution();
+      res = this.printView.getResolution();
 
     return res * mpu * inchesPerMeter * dpi;
   };
@@ -100,20 +147,40 @@ export default class PrintModel {
     return getCenter(extent);
   };
 
+  // Calculates the margin around the map-image depending on
+  // the paper dimensions
+  getMargin = (paperDim) => {
+    const longestSide = Math.max(...paperDim);
+    return this.marginAmount * longestSide;
+  };
+
+  // Returns an array with the paper dimensions with the selected
+  // format and orientation.
+  getPaperDim = (format, orientation) => {
+    return orientation === "portrait"
+      ? [...this.dims[format]].reverse()
+      : this.dims[format];
+  };
+
   addPreview(options) {
     const scale = options.scale;
     const format = options.format;
     const orientation = options.orientation;
+    const useMargin = options.useMargin;
+    const dim = this.getPaperDim(format, orientation);
 
-    const dim =
-      orientation === "portrait"
-        ? [...this.dims[format]].reverse()
-        : this.dims[format];
+    this.margin = useMargin ? this.getMargin(dim) : 0;
 
-    const size = { width: dim[0] / 25.4, height: dim[1] / 25.4 },
-      inchInMillimeter = 25.4,
-      defaultPixelSizeInMillimeter = 0.28,
-      dpi = inchInMillimeter / defaultPixelSizeInMillimeter; // ~90
+    const inchInMillimeter = 25.4;
+    // We should take pixelRatio into account? What happens when we have
+    // pr=2? PixelSize will be 0.14?
+    const defaultPixelSizeInMillimeter = 0.28;
+    const dpi = inchInMillimeter / defaultPixelSizeInMillimeter; // ~90
+
+    const size = {
+      width: (dim[0] - this.margin * 2) / 25.4,
+      height: (dim[1] - this.margin * 2) / 25.4,
+    };
 
     const paper = {
       width: size.width * dpi,
@@ -169,7 +236,7 @@ export default class PrintModel {
    * @param {*} url
    * @returns {Promise}
    */
-  getImageDataBlogFromUrl = (url) => {
+  getImageDataBlobFromUrl = (url) => {
     return new Promise((resolve, reject) => {
       const image = new Image();
       image.setAttribute("crossOrigin", "anonymous"); //getting images from external domain
@@ -212,7 +279,7 @@ export default class PrintModel {
       data,
       width: sourceWidth,
       height: sourceHeight,
-    } = await this.getImageDataBlogFromUrl(url);
+    } = await this.getImageDataBlobFromUrl(url);
 
     // We must ensure that the logo will be printed with a max width of X, while keeping the aspect ratio between width and height
     const ratio = maxWidth / sourceWidth;
@@ -239,7 +306,8 @@ export default class PrintModel {
     pdfWidth,
     pdfHeight
   ) => {
-    const margin = 6;
+    // We must take the potential margin around the map-image into account (this.margin)
+    const margin = 6 + this.margin;
     let pdfPlacement = { x: 0, y: 0 };
     if (placement === "topLeft") {
       pdfPlacement.x = margin;
@@ -295,19 +363,27 @@ export default class PrintModel {
     color,
     scaleBarLength,
     scale,
-    scaleBarLengthMeters
+    scaleBarLengthMeters,
+    format,
+    orientation
   ) => {
     const lengthText = this.getLengthText(scaleBarLengthMeters);
-    pdf.setFontSize(6);
+    pdf.setFontSize(8);
     pdf.setFont("helvetica", "bold");
     pdf.setTextColor(color);
+    pdf.setLineWidth(0.25);
     pdf.text(
       lengthText,
       scaleBarPosition.x + scaleBarLength + 1,
-      scaleBarPosition.y + 3.7
+      scaleBarPosition.y + 4
     );
+    pdf.setFontSize(10);
     pdf.text(
-      `Skala: ${this.getUserFriendlyScale(scale)}`,
+      `Skala: ${this.getUserFriendlyScale(
+        scale
+      )} (vid ${format.toUpperCase()} ${
+        orientation === "landscape" ? "liggande" : "stående"
+      })`,
       scaleBarPosition.x,
       scaleBarPosition.y + 1
     );
@@ -345,7 +421,9 @@ export default class PrintModel {
     scale,
     resolution,
     scaleBarPlacement,
-    scaleResolution
+    scaleResolution,
+    format,
+    orientation
   ) => {
     const millimetersPerInch = 25.4;
     const pixelSize = millimetersPerInch / resolution / scaleResolution;
@@ -368,7 +446,9 @@ export default class PrintModel {
       color,
       scaleBarLength,
       scale,
-      scaleBarLengthMeters
+      scaleBarLengthMeters,
+      format,
+      orientation
     );
   };
 
@@ -384,8 +464,8 @@ export default class PrintModel {
     );
 
     // The desired options are OK if they result in a resolution bigger than the minimum
-    // resolution of the map.
-    return desiredResolution >= this.map.getView().getMinResolution();
+    // resolution of the print-view.
+    return desiredResolution >= this.printView.getMinResolution();
   };
 
   getScaleResolution = (scale, resolution, center) => {
@@ -403,9 +483,389 @@ export default class PrintModel {
   // the backgroundColor of the mapCanvas has changed. We must keep track of this
   // to make sure that the print-results has the same appearance.
   getMapBackgroundColor = () => {
-    const currentBackgroundColor = document.getElementById("map").style
-      .backgroundColor;
+    const currentBackgroundColor =
+      document.getElementById("map").style.backgroundColor;
     return currentBackgroundColor !== "" ? currentBackgroundColor : "white";
+  };
+
+  // Returns all currently active tile-layers as an array
+  getVisibleTileLayers = () => {
+    return this.map
+      .getLayers()
+      .getArray()
+      .filter((layer) => {
+        return (
+          layer.getVisible() &&
+          layer instanceof TileLayer &&
+          layer.getSource() instanceof TileWMS
+        );
+      });
+  };
+
+  // Returns all currently active image-layers as an array
+  getVisibleImageLayers = () => {
+    return this.map
+      .getLayers()
+      .getArray()
+      .filter((layer) => {
+        return (
+          layer.getVisible() &&
+          layer instanceof ImageLayer &&
+          layer.getSource() instanceof ImageWMS
+        );
+      });
+  };
+
+  // Updates the parameters of the supplied layer to make sure we
+  // request the images in the correct DPI for the print! This function
+  // only handles tile-layers.
+  prepareTileLayer = (layer, options) => {
+    // Let's run this in a try-catch just in case
+    try {
+      // We're gonna need to grab the layer-source
+      const source = layer.getSource();
+      // Let's also grab the layer id, so that we can use that as a key in the map
+      // containing all the original layer parameters. The id is stored in the name-
+      // property, wonderful!
+      const layerId = layer.get("name");
+      // Get the original DPI-source-parameters
+      const { DPI, MAP_RESOLUTION, FORMAT_OPTIONS } = source.getParams();
+      // and store them (so that we can reset the source params when the printing is done).
+      this.originalLayerParams.set(layerId, {
+        DPI,
+        MAP_RESOLUTION,
+        FORMAT_OPTIONS,
+      });
+      // Then we'll update the DPI-parameters to match the user-chosen DPI.
+      // Why three different options? Well, each server-type has chosen a different implementation,
+      // and to make sure we send requests that work for all these servers, we just pile all settings
+      // on each request (this is how Qgis does it as well, so it cant be that bad, right?).
+      source.updateParams({
+        DPI: options.resolution,
+        MAP_RESOLUTION: options.resolution,
+        FORMAT_OPTIONS: `dpi:${options.resolution}`,
+      });
+    } catch (error) {
+      console.error(
+        `Failed to update the DPI-options while creating print-image (Tiled WMS). Error: ${error}`
+      );
+    }
+  };
+
+  // Resets (applies the original parameters on) the supplied tile-layer.
+  resetTileLayer = (layer) => {
+    // Let's run this in a try-catch just in case
+    try {
+      // We're gonna need to grab the layer-source
+      const source = layer.getSource();
+      // We're gonna need the id so that we can grab the original parameters from
+      // the map.
+      const layerId = layer.get("name");
+      // Let's grab the original parameters...
+      const originalParams = this.originalLayerParams.get(layerId);
+      // ...and update the source with them!
+      source.updateParams(originalParams);
+    } catch (error) {
+      console.warn(
+        `Failed to reset a tile-layer after printing. Error: {error}`
+      );
+    }
+  };
+
+  // Returns an array of floats representing the bounding box found
+  // in the 'BBOX' query-parameter in the supplied url.
+  getBoundingBoxFromUrl = (url) => {
+    return url.searchParams
+      .get("BBOX")
+      .split(",")
+      .map((coord) => parseFloat(coord));
+  };
+
+  // Loads an image (tile) and draws it on the supplied canvas-context
+  loadImageTile = (canvas, tileOptions) => {
+    // We have to get the context so that we can draw the image
+    const ctx = canvas.getContext("2d");
+    // Then we need some tile-information
+    const { url, x, y, tileWidth, tileHeight } = tileOptions;
+    // Let's return a promise...
+    return new Promise((resolve, reject) => {
+      // Let's create an image-element
+      const tile = document.createElement("img");
+      tile.onload = () => {
+        // When the tile has loaded, we can draw the tile on the canvas.
+        ctx.drawImage(tile, x, y, tileWidth, tileHeight);
+        // The promise can be resolved when the tile has been fetched and
+        // drawn on the canvas.
+        resolve();
+      };
+      // If the fetch fails, we have to reject the promise.
+      tile.onerror = () => {
+        reject();
+      };
+      // Let's set the cross-origin-attribute to prevent cors-problems
+      tile.crossOrigin = "anonymous";
+      // Then we'll set the url so that the image can be fetched.
+      tile.src = url;
+    });
+  };
+
+  // Creates tile-information-objects for a column (all tiles needed to fill
+  // up to the target-height).
+  getTileColumn = (targetHeight, x, tileWidth) => {
+    // We're gonna need to store the tile-information in an array
+    const tiles = [];
+    // We'll iterate (and push tiles to the tile-array) until...
+    while (true) {
+      // ... we've reached the target-height. Let's summarize all tile-height
+      // so that we can check if we're done.
+      const accHeight = tiles.reduce((acc, curr) => acc + curr.tileHeight, 0);
+      // If we are, we can return the array of tile-information
+      if (accHeight >= targetHeight) return tiles;
+      // Otherwise we'll calculate how many pixels are left...
+      const remainingHeight = targetHeight - accHeight;
+      // And either create a tile with that height (or the max-height if the remainder is too large).
+      const tileHeight =
+        remainingHeight > this.maxTileSize ? this.maxTileSize : remainingHeight;
+      // Then we have to calculate where the tile is to be placed on the canvas later.
+      const y = targetHeight - accHeight - tileHeight;
+      // And finally we'll push the information to the array.
+      tiles.push({
+        x,
+        y,
+        tileWidth,
+        tileHeight,
+      });
+    }
+  };
+
+  // Returns a string representing the bounding-box for the supplied tile.
+  // (WMS-version 1.3.0)
+  // If the WMS-version is set to 1.3.0 the axis-orientation should be set by the
+  // definition of the projection. However, in 'ConfigMapper.js' we specify the
+  // axis-direction as 'NEU' (northing, easting, up). This means we can assume
+  // that the axis-direction is 'NEU' when dealing with version 1.3.0.
+  getVersionThreeBoundingBox = (tile, bBox, height, width) => {
+    // We have to know how much the northing and easting change per pixel, so that we
+    // can calculate proper bounding-boxes for the new tiles.
+    const northingChangePerPixel = (bBox[2] - bBox[0]) / height;
+    const eastingChangePerPixel = (bBox[3] - bBox[1]) / width;
+    // Then we can construct the bounding-box-string:
+    return `${
+      bBox[0] + northingChangePerPixel * (height - tile.y - tile.tileHeight)
+    },${bBox[1] + eastingChangePerPixel * tile.x},${
+      bBox[0] + northingChangePerPixel * (height - tile.y)
+    }, ${bBox[1] + eastingChangePerPixel * (tile.x + tile.tileWidth)}`;
+  };
+
+  // Returns a string representing the bounding-box for the supplied tile.
+  // (WMS-version 1.1.1)
+  // In version 1.1.1 the axis orientation is always 'ENU' (easting-northing-up).
+  getVersionOneBoundingBox = (tile, bBox, height, width) => {
+    // We have to know how much the northing and easting change per pixel, so that we
+    // can calculate proper bounding-boxes for the new tiles.
+    const northingChangePerPixel = (bBox[3] - bBox[1]) / height;
+    const eastingChangePerPixel = (bBox[2] - bBox[0]) / width;
+    // Then we can construct the bounding-box-string:
+    return `${bBox[0] + eastingChangePerPixel * tile.x},${
+      bBox[1] + northingChangePerPixel * (height - tile.y - tile.tileHeight)
+    },${bBox[0] + eastingChangePerPixel * (tile.x + tile.tileWidth)},${
+      bBox[1] + northingChangePerPixel * (height - tile.y)
+    }`;
+  };
+
+  // Appends a bounding-box to each tile-information-object.
+  appendBoundingBox = (tiles, bBox, height, width, wmsVersion) => {
+    // The bounding-box calculations might seem a bit messy... One reason for that
+    // is that the x- and y-values for the tiles are set to match how images are added
+    // to a canvas, and those coordinates go the opposite direction compared to the map-coordinate-axels.
+    // See: https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/drawImage for more info.
+    // Let's calculate and set the bounding-box for each tile-information-object.
+    for (const tile of tiles) {
+      // We have to make sure to check if we're dealing with version 1.3.0 or 1.1.1
+      // so that we can handle the axis-orientation properly.
+      if (wmsVersion === "1.3.0") {
+        tile.bBox = this.getVersionThreeBoundingBox(tile, bBox, height, width);
+      } else {
+        // If we're not dealing with version 1.3.0, we're probably dealing with 1.1.1
+        tile.bBox = this.getVersionOneBoundingBox(tile, bBox, height, width);
+      }
+    }
+  };
+
+  // Returns an array of objects containing information regarding the tiles
+  // that should be created to comply with the supplied 'MAX_TILE_SIZE' and
+  // also 'fill' the image.
+  getTileInformation = (height, width, url) => {
+    // We're gonna want to return an array containing the tile-objects
+    const tiles = [];
+    // We're also gonna need to keep track of the original bounding box. This bounding-box
+    // will be used to calculate the new bounding-boxes for each tile that we're about to create.
+    const bBox = this.getBoundingBoxFromUrl(url);
+    // Since the northing and easting axels are flipped in version 1.1.0 vs 1.3.0 we
+    // have to make sure to check which WMS-version we are dealing with.
+    const wmsVersion = url.searchParams.get("VERSION");
+    // To gather all the required tile-information we will work with 'columns'. This means
+    // we will create all necessary images at a fixed width, and then move to the next width.
+    // We'll do this until we've created enough columns to fill the entire width.
+    let accWidth = 0;
+    while (true) {
+      // If we've created enough columns to fill the supplied width, we can break.
+      if (accWidth >= width) break;
+      // Otherwise we'll check how many pixels remain until we do...
+      const remainingWidth = width - accWidth;
+      // We'll use a tile-width that is either:
+      // - The remaining amount of pixels
+      // - The max tile-size
+      const tileWidth =
+        remainingWidth > this.maxTileSize ? this.maxTileSize : remainingWidth;
+      // Then we'll create a column of tiles
+      tiles.push(...this.getTileColumn(height, accWidth, tileWidth));
+      // And bump the current width
+      accWidth += tileWidth;
+    }
+    // When the tile-information is created, we can append the bounding-box-information
+    // to each tile. The bounding-box-information will be used to fetch the tiles later.
+    this.appendBoundingBox(tiles, bBox, height, width, wmsVersion);
+    // Finally we can return the tile-information.
+    return tiles;
+  };
+
+  // Updates the parameters of the supplied layer to make sure we
+  // request the images in the correct DPI for the print! This function
+  // only handles image-layers.
+  prepareImageLayer = (layer, options) => {
+    // Let's run this in a try-catch just in case
+    try {
+      // We're gonna need to grab the layer-source
+      const source = layer.getSource();
+      // Let's also grab the layer id, so that we can use that as a key in the map
+      // containing all the original load-functions. The id is stored in the name-
+      // property, wonderful!
+      const layerId = layer.get("name");
+      // Then we'll need to fetch the original image-load-function (so that we can make sure
+      // to re-apply that function when the printing is done).
+      const originalLoadFunction = source.getImageLoadFunction();
+      // Then we'll store the original function
+      this.originalLayerParams.set(layerId, originalLoadFunction);
+      // When the original function is stored, we can create a new load-function
+      // (which takes the current print-DPI into consideration) and update the source function with this one.
+      source.setImageLoadFunction((image, src) => {
+        // TODO: Here we're gonna have some fun with the image-requests.
+        const url = new URL(src);
+        const searchParams = url.searchParams;
+        searchParams.set("DPI", options.resolution);
+        searchParams.set("MAP_RESOLUTION", options.resolution);
+        searchParams.set("FORMAT_OPTIONS", `dpi:${options.resolution}`);
+        // We're gonna need to grab the width and height so that we can make sure the
+        // requested image is not too large for the WMS-server to render. (If we're requesting
+        // too many pixels at a high DPI the server will not be able to create the image).
+        const height = parseFloat(searchParams.get("HEIGHT")) || 1;
+        const width = parseFloat(searchParams.get("WIDTH")) || 1;
+        // What will be too complex for the WMS-servers? Good question. For now,
+        // we say that the image is too complex if either the height or width is larger than
+        // 'this.maxTileSize' (around 4096 probably).
+        if (Math.max(height, width) > this.maxTileSize) {
+          // If the image is too complex, we have to create tiles that are no more than 'this.maxTileSize'
+          // wide or high. Let's gather some tile-information to begin with.
+          const tiles = this.getTileInformation(height, width, url);
+          // Then we'll create a canvas that we can use to draw the tile-images on.
+          const canvas = document.createElement("canvas");
+          // The canvas must be as big as the originally requested image was.
+          canvas.width = width;
+          canvas.height = height;
+          // Let's declare an array that we can use to store all the promises created when
+          // requesting the tile-images.
+          const promises = [];
+          // Then, for each tile-information-object, we'll create a request-url containing the
+          // information that we've gathered (such as the size and bounding-box).
+          for (const tile of tiles) {
+            const tileUrl = new URL(url.toString());
+            tileUrl.searchParams.set("BBOX", tile.bBox);
+            tileUrl.searchParams.set("HEIGHT", tile.tileHeight);
+            tileUrl.searchParams.set("WIDTH", tile.tileWidth);
+            // Then we'll fetch the images from the WMS-server
+            promises.push(
+              this.loadImageTile(canvas, { ...tile, url: tileUrl.toString() })
+            );
+          }
+          // When all image-promises has settled, we can set the image to the canvas on which we've
+          // added all the tile-images.
+          Promise.allSettled(promises).then(() => {
+            image.getImage().src = canvas.toDataURL();
+          });
+        } else {
+          // If the request is not too complex, we can fetch it right away.
+          image.getImage().src = url.toString();
+        }
+      });
+    } catch (error) {
+      console.error(
+        `Failed to update the DPI-options while creating print-image (Single-tile WMS). Error: ${error}`
+      );
+    }
+  };
+
+  // Resets (applies the original image-load-function on) the supplied image-layer.
+  resetImageLayer = (layer) => {
+    // Let's run this in a try-catch just in case
+    try {
+      // We're gonna need to grab the layer-source
+      const source = layer.getSource();
+      // We're gonna need the id so that we can grab the original parameters from
+      // the map.
+      const layerId = layer.get("name");
+      // Let's grab the original image-load-function
+      const originalLoadFunction = this.originalLayerParams.get(layerId);
+      // ...and update the source-function!
+      source.setImageLoadFunction(originalLoadFunction);
+    } catch (error) {
+      console.warn(
+        `Failed to reset an image-layer after printing. Error: {error}`
+      );
+    }
+  };
+
+  // Since we're allowing the user to print the map with different DPI-options,
+  // the layers that are about to be printed must be prepared. The preparation consists
+  // of settings the DPI-parameters so that we ensure that we are sending proper WMS-requests.
+  // (If we would print with 300 dpi, and just let OL send an ordinary request, the images returned
+  // from the server would not show the correct layout for 300 DPI usage).
+  prepareActiveLayersForPrint = (options) => {
+    // First we have to grab all currently visible tile-layers (Remember that this
+    // function call only returns layers that are based on TileWMS)!
+    const tileLayers = this.getVisibleTileLayers();
+    // We're also gonna have to grab all currently visible image-layers. An image-layer
+    // is a layer that has been added by an admin as a "single-tile" layer. (Remember that
+    // this function call only returns layers that are based on ImageWMS)!
+    const imageLayers = this.getVisibleImageLayers();
+    // We're gonna need to mess with all the tile-layers...
+    for (const tileLayer of tileLayers) {
+      this.prepareTileLayer(tileLayer, options);
+    }
+    // We're also gonna need to mess with all the image-layers...
+    for (const imageLayer of imageLayers) {
+      this.prepareImageLayer(imageLayer, options);
+    }
+  };
+
+  // Since we've been messing with the tile-layers parameters while printing, we have to provide
+  // a method to reset the parameters. This method gets the original parameters, and sets these.
+  resetActiveLayers = () => {
+    // First we'll have to grab all currently visible tile-layers.
+    const tileLayers = this.getVisibleTileLayers();
+    // We're also gonna have to grab all currently visible image-layers.
+    const imageLayers = this.getVisibleImageLayers();
+    // We're gonna need to reset all of the tile-layers
+    for (const tileLayer of tileLayers) {
+      this.resetTileLayer(tileLayer);
+    }
+    // We're also gonna have to reset all the image-layers.
+    for (const imageLayer of imageLayers) {
+      this.resetImageLayer(imageLayer);
+    }
+    // When all layers has been reset, we'll have to reset the map containing the
+    // original settings!
+    this.originalLayerParams = new Map();
   };
 
   print = (options) => {
@@ -422,30 +882,28 @@ export default class PrintModel {
 
     const width = Math.round((dim[0] * resolution) / 25.4);
     const height = Math.round((dim[1] * resolution) / 25.4);
-    const size = this.map.getSize();
-    const originalResolution = this.map.getView().getResolution();
-    const originalCenter = this.map.getView().getCenter();
 
-    // We must check if the resolution is constrained, if it is, we must
-    // turn it off while printing so that the map can be zoomed to the correct extent.
-    // Saving the value so that we can put everything back to normal when done.
-    const resolutionConstrained = this.map.getView().getConstrainResolution();
-    resolutionConstrained && this.map.getView().setConstrainResolution(false);
+    // Since we're allowing the users to choose which DPI they want to print the map
+    // in, we have to make sure to prepare the layers so that they are fetched with
+    // the correct DPI-settings! We're only doing this if we're supposed to. An admin
+    // might choose not to use this functionality (useCustomTileLoaders set to false).
+    this.useCustomTileLoaders && this.prepareActiveLayersForPrint(options);
+
+    // Before we're printing we must make sure to change the map-view from the
+    // original one, to the print-view.
+    this.printView.setCenter(this.originalView.getCenter());
+    this.map.setView(this.printView);
+
+    // Store mapsize, it's needed when map is restored after print or cancel.
+    this.originalMapSize = this.map.getSize();
 
     const scaleResolution = this.getScaleResolution(
       scale,
       resolution,
-      originalCenter
+      this.map.getView().getCenter()
     );
 
     // Save some of our values that are necessary to use if user want to cancel the process
-    this.valuesToRestoreFrom = {
-      size,
-      originalCenter,
-      originalResolution,
-      scaleResolution,
-      resolutionConstrained,
-    };
 
     this.map.once("rendercomplete", async () => {
       if (this.pdfCreationCancelled === true) {
@@ -501,6 +959,17 @@ export default class PrintModel {
 
       // Add our map canvas to the PDF, start at x/y=0/0 and stretch for entire width/height of the canvas
       pdf.addImage(mapCanvas, "JPEG", 0, 0, dim[0], dim[1]);
+
+      // Add potential margin around the image
+      if (this.margin > 0) {
+        // The lineWidth increases the line width equally to "both sides",
+        // therefore, we must have a line width two times the margin we want.
+        pdf.setLineWidth(this.margin * 2);
+        // We always want a white margin
+        pdf.setDrawColor("white");
+        // Draw the border (margin) around the entire image
+        pdf.rect(0, 0, dim[0], dim[1], "S");
+      }
 
       // If logo URL is provided, add the logo to the map
       if (options.includeLogo && this.logoUrl.trim().length >= 5) {
@@ -570,7 +1039,9 @@ export default class PrintModel {
           options.scale,
           options.resolution,
           options.scaleBarPlacement,
-          scaleResolution
+          scaleResolution,
+          options.format,
+          options.orientation
         );
       }
 
@@ -578,15 +1049,56 @@ export default class PrintModel {
       if (options.mapTitle.trim().length > 0) {
         pdf.setFontSize(24);
         pdf.setTextColor(options.mapTextColor);
-        pdf.text(options.mapTitle, dim[0] / 2, 12, { align: "center" });
+        pdf.text(options.mapTitle, dim[0] / 2, 12 + this.margin, {
+          align: "center",
+        });
       }
 
       // Add print comment if user supplied one
       if (options.printComment.trim().length > 0) {
         pdf.setFontSize(11);
         pdf.setTextColor(options.mapTextColor);
-        pdf.text(options.printComment, dim[0] / 2, 18, { align: "center" });
+        pdf.text(options.printComment, dim[0] / 2, 18 + this.margin, {
+          align: "center",
+        });
       }
+
+      // Add potential copyright text
+      if (this.copyright.length > 0) {
+        pdf.setFontSize(8);
+        pdf.setTextColor(options.mapTextColor);
+        pdf.text(
+          this.copyright,
+          dim[0] - 4 - this.margin,
+          dim[1] - 4 - this.margin,
+          {
+            align: "right",
+          }
+        );
+      }
+
+      // Add potential disclaimer text
+      if (this.disclaimer.length > 0) {
+        pdf.setFontSize(8);
+        pdf.setTextColor(options.mapTextColor);
+        let textLines = pdf.splitTextToSize(
+          this.disclaimer,
+          dim[0] / 2 - this.margin - 8
+        );
+        let textLinesDims = pdf.getTextDimensions(textLines, { fontSize: 8 });
+        pdf.text(
+          textLines,
+          dim[0] - 4 - this.margin,
+          dim[1] - 6 - this.margin - textLinesDims.h,
+          {
+            align: "right",
+          }
+        );
+      }
+
+      // Since we've been messing with the layer-settings while printing, we have to
+      // make sure to reset these settings. (Should only be done if custom loaders has been used).
+      this.useCustomTileLoaders && this.resetActiveLayers();
 
       // Finally, save the PDF (or PNG)
       this.saveToFile(pdf, width, options.saveAsType)
@@ -599,12 +1111,7 @@ export default class PrintModel {
         })
         .finally(() => {
           // Reset map to how it was before print
-          this.previewLayer.setVisible(true);
-          resolutionConstrained &&
-            this.map.getView().setConstrainResolution(true);
-          this.map.setSize(size);
-          this.map.getView().setResolution(originalResolution);
-          this.map.getView().setCenter(originalCenter);
+          this.restoreOriginalView();
         });
     });
 
@@ -626,47 +1133,102 @@ export default class PrintModel {
     this.map.getView().setResolution(scaleResolution);
   };
 
-  saveToFile = (pdf, width, type) => {
-    const fileName = `Hajk - ${new Date().toLocaleString()}`;
-    return new Promise((resolve, reject) => {
-      try {
-        if (type === "PDF") {
-          pdf.save(`${fileName}.pdf`);
-          resolve();
-        } else {
-          const ab = pdf.output("arraybuffer");
-          PDFjs.GlobalWorkerOptions.workerSrc = pdfjsWorker;
-          PDFjs.getDocument({ data: ab }).promise.then((pdf) => {
-            pdf.getPage(1).then((page) => {
-              let canvas = document.createElement("canvas");
-              let ctx = canvas.getContext("2d");
+  restoreOriginalView = () => {
+    this.previewLayer.setVisible(true);
+    this.map.setSize(this.originalMapSize);
+    this.map.setView(this.originalView);
+  };
 
-              //Scale viewport to match current resolution
-              const viewport = page.getViewport({ scale: 1 });
-              const scale = width / viewport.width;
-              const scaledViewport = page.getViewport({ scale: scale });
+  // Imports and returns the dependencies required to create a PNG-print-export.
+  #getPngDependencies = async () => {
+    try {
+      const pdfjs = await import("pdfjs-dist/build/pdf");
+      return { pdfjs };
+    } catch (error) {
+      throw new Error(
+        `Failed to import required dependencies. Error: ${error}`
+      );
+    }
+  };
 
-              const renderContext = {
-                canvasContext: ctx,
-                viewport: scaledViewport,
-              };
+  // Saves the supplied PDF with the supplied file-name.
+  #saveToPdf = async (pdf, fileName) => {
+    try {
+      pdf.save(`${fileName}.pdf`);
+    } catch (error) {
+      throw new Error(`Failed to save PDF. Error: ${error}`);
+    }
+  };
 
-              canvas.height = scaledViewport.height;
-              canvas.width = scaledViewport.width;
-
-              page.render(renderContext).promise.then(() => {
-                canvas.toBlob((blob) => {
-                  saveAs(blob, `${fileName}.png`);
-                  resolve();
-                });
-              });
+  // Saves the supplied PDF *as a PNG* with the supplied file-name.
+  // The width of the document has to be supplied since some calculations
+  // must be done in order to create a PNG with the correct resolution etc.
+  #saveToPng = async (pdf, fileName, width) => {
+    try {
+      // First we'll dynamically import the required dependencies.
+      const { pdfjs } = await this.#getPngDependencies();
+      // Then we'll set up the pdfJS-worker. TODO: Terrible?! PDF-js does not seem to have a better solution for the
+      // source-map-errors that occur from setting the worker the ordinary way.
+      pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.js`;
+      // We'll output the PDF as an array-buffer that can be used to create the PNG.
+      const ab = pdf.output("arraybuffer");
+      // We'll use the PDF-JS library to create a new "PDF-JS-PDF". (Wasteful? Yes very, but the JS-PDF-library
+      // does not support export to any other format than PDF, and the PDF-JS-library does.) Notice that
+      // JS-PDF and PDF-JS are two different libraries, both with their pros and cons.
+      // - PDF-JS: Pro => Can export to PNG, Con: Cannot create as nice of an image as JS-PDF.
+      // - JS-PDF: Pro => Creates good-looking PDFs, Con: Cannot export to PNG.
+      // - Conclusion: We use both...
+      pdfjs.getDocument({ data: ab }).promise.then((pdf) => {
+        // So, when the PDF-JS-PDF is created, we get the first page, and then render
+        // it on a canvas so that we can export it as a PNG.
+        pdf.getPage(1).then((page) => {
+          // We're gonna need a canvas and its context.
+          let canvas = document.createElement("canvas");
+          let ctx = canvas.getContext("2d");
+          // Scale the viewport to match current resolution
+          const viewport = page.getViewport({ scale: 1 });
+          const scale = width / viewport.width;
+          const scaledViewport = page.getViewport({ scale: scale });
+          // Create the render-context-object.
+          const renderContext = {
+            canvasContext: ctx,
+            viewport: scaledViewport,
+          };
+          // Set the canvas dimensions to the correct width and height.
+          canvas.height = scaledViewport.height;
+          canvas.width = scaledViewport.width;
+          // Then we'll render and save!
+          page.render(renderContext).promise.then(() => {
+            canvas.toBlob((blob) => {
+              saveAs(blob, `${fileName}.png`);
             });
           });
-        }
-      } catch (error) {
-        reject(`Failed to save file... ${error}`);
+        });
+      });
+    } catch (error) {
+      throw new Error(`Failed to save PNG. Error: ${error}`);
+    }
+  };
+
+  // Saves the print-contents to file, either PDF, or PNG (depending on supplied type).
+  saveToFile = async (pdf, width, type) => {
+    // We're gonna need to create a file-name.
+    const fileName = `Kartexport - ${new Date().toLocaleString()}`;
+    // Then we'll try to save the contents in the format the user requested.
+    try {
+      switch (type) {
+        case "PDF":
+          return this.#saveToPdf(pdf, fileName);
+        case "PNG":
+          return this.#saveToPng(pdf, fileName, width);
+        default:
+          throw new Error(
+            `Supplied type could not be handled. The supplied type was ${type} and currently only PDF and PNG is supported.`
+          );
       }
-    });
+    } catch (error) {
+      throw new Error(`Failed to save file... ${error}`);
+    }
   };
 
   cancelPrint = () => {
@@ -674,14 +1236,10 @@ export default class PrintModel {
     this.pdfCreationCancelled = true;
 
     // Reset map to how it was before print
-    this.previewLayer.setVisible(true);
-    this.map.setSize(this.valuesToRestoreFrom.size);
-    this.map
-      .getView()
-      .setResolution(this.valuesToRestoreFrom.originalResolution);
-    this.map.getView().setCenter(this.valuesToRestoreFrom.originalCenter);
-    this.valuesToRestoreFrom.resolutionConstrained &&
-      this.map.getView().setConstrainResolution(true);
+    this.restoreOriginalView();
+    // Reset the layer-settings to how it was before print.
+    // (Should only be done if custom loaders has been used).
+    this.useCustomTileLoaders && this.resetActiveLayers();
   };
 
   /**

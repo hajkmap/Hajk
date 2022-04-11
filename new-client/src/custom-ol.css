@@ -74,3 +74,10 @@
   user-select: none;
   pointer-events: none;
 }
+
+.introjs-tooltip {
+  width: 400px !important;
+}
+.introjs-skipbutton {
+  color: #fff !important;
+}

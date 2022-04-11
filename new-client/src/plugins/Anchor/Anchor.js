@@ -2,7 +2,7 @@ import React from "react";
 import propTypes from "prop-types";
 import BaseWindowPlugin from "../BaseWindowPlugin";
 
-import OpenInNewIcon from "@material-ui/icons/OpenInNew";
+import OpenInNewIcon from "@mui/icons-material/OpenInNew";
 
 import AnchorView from "./AnchorView";
 import AnchorModel from "./AnchorModel";
@@ -58,8 +58,8 @@ class Anchor extends React.PureComponent {
           icon: <OpenInNewIcon />,
           title: "Dela",
           description: "Skapa en länk och dela det du ser i kartan med andra",
-          height: 230,
-          width: 530,
+          height: 332,
+          width: 512,
           top: undefined,
           left: undefined,
         }}

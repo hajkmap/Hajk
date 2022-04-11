@@ -4,7 +4,7 @@ body {
   color: #373d3f;
 }
 
-input[type="text"]:not(#documentEditor input) {
+input[type="text"]:not(#documentEditor input):not(#fmeGroupArea input) {
   border: 1px solid #ccc;
   padding: 5px;
   border-radius: 3px;
@@ -40,8 +40,8 @@ article textarea {
   border: 1px solid #999;
 }
 
-article label:not(.sketch-picker label) {
-  width: 150px;
+article label:not(.sketch-picker label):not(#fmeWorkspaceInfo label) {
+  width: 160px;
   display: inline-block;
   margin: 0;
   vertical-align: top;
@@ -59,7 +59,7 @@ article label.full {
   white-space: nowrap;
 }
 
-article input[type="text"] {
+article input[type="text"]:not(#fmeGroupArea input) {
   width: 400px;
   margin-right: 5px;
   margin-bottom: 5px;
@@ -362,6 +362,10 @@ body.dragging * {
   margin: 0 !important;
 }
 
+.edit-fields-table-default {
+  width: 184px !important;
+}
+
 .list-value:first-child {
   margin-left: 0 !important;
 }
@@ -517,6 +521,12 @@ body.dragging * {
 }
 
 .tooltip-info {
+  padding-left: 8px;
+  padding-top: 8px;
+  border-left: 1px solid gray;
+}
+
+.tooltip-timeSlider {
   padding-left: 8px;
   padding-top: 8px;
   border-left: 1px solid gray;
@@ -868,4 +878,15 @@ figure img {
 
 .public-DraftStyleDefault-block {
   margin-bottom: 0.5em;
+}
+
+.document-blockquote {
+  padding-left: 0.5rem;
+  background-color: #f7fafc;
+  border-top: 4px solid #edf2f7;
+  border-bottom: 4px solid #edf2f7;
+  margin-top: 1.25rem;
+  margin-bottom: 1.25rem;
+  padding-top: 0.5rem;
+  padding-bottom: 0.5rem;
 }

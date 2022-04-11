@@ -1,36 +1,30 @@
 import React from "react";
 import { createPortal } from "react-dom";
-import { withStyles } from "@material-ui/core/styles";
+import { styled } from "@mui/material/styles";
 import propTypes from "prop-types";
+import { withSnackbar } from "notistack";
 
-import { Button, Paper, Tooltip, Menu, MenuItem } from "@material-ui/core";
-import Bookmarks from "@material-ui/icons/Bookmarks";
+import { IconButton, Paper, Tooltip, Menu, MenuItem } from "@mui/material";
+import FolderSpecial from "@mui/icons-material/FolderSpecial";
 
-import Dialog from "../components/Dialog.js";
+import Dialog from "../components/Dialog/Dialog";
 
-const styles = (theme) => {
-  return {
-    paper: {
-      marginBottom: theme.spacing(1),
-    },
-    button: {
-      minWidth: "unset",
-    },
-  };
-};
+const StyledPaper = styled(Paper)(({ theme }) => ({
+  marginBottom: theme.spacing(1),
+}));
+
+const StyledIconButton = styled(IconButton)(({ theme }) => ({
+  minWidth: "unset",
+}));
 
 class Preset extends React.PureComponent {
   static propTypes = {
-    classes: propTypes.object.isRequired,
     appModel: propTypes.object.isRequired,
   };
 
   state = {
+    anchorEl: null,
     dialogOpen: false,
-    view: null,
-    location: null,
-    zoom: null,
-    layers: null,
   };
 
   constructor(props) {
@@ -50,6 +44,10 @@ class Preset extends React.PureComponent {
     this.options = this.config.options;
     this.map = props.appModel.getMap();
     this.title = this.options.title || "Snabbval";
+
+    this.location = null;
+    this.zoom = null;
+    this.layers = null;
   }
 
   // Show dropdown menu, anchored to the element clicked
@@ -61,29 +59,51 @@ class Preset extends React.PureComponent {
     this.setState({ anchorEl: null });
   };
 
-  handleItemClick = (event, item) => {
-    let url = item.presetUrl.toLowerCase();
-    if (url.includes("x=") && url.includes("y=") && url.includes("z=")) {
-      this.handleClose(); // Ensure that popup menu is closed
-      let url = item.presetUrl.split("&");
-      let x = url[1].substring(2);
-      let y = url[2].substring(2);
-      let z = url[3].substring(2);
-      let l = url[4]?.substring(2);
-      let location = [x, y];
-      let zoom = z;
+  // A map-link must contain an x-, y-, and z-position to be valid. This function
+  // checks wether that is true or not.
+  isValidMapLink = (mapLink) => {
+    return (
+      (mapLink.includes("x=") && mapLink.includes("y=")) ||
+      mapLink.includes("l=")
+    );
+  };
 
-      if (l) {
-        this.setState({
-          location: location,
-          zoom: zoom,
-          layers: l,
-        });
+  // Extracts map-information from the provided link and returns the
+  // information as an object.
+  getMapInfoFromMapLink = (mapLink) => {
+    const queryParams = new URLSearchParams(mapLink);
+    const x = queryParams.get("x");
+    const y = queryParams.get("y");
+    const z = queryParams.get("z");
+    const l = queryParams.get("l");
+
+    const location = x && y ? [x, y] : null;
+    const zoom = location ? z : null; // no need to zoom if we don't have a position.
+    return { location, zoom, layers: l };
+  };
+
+  handleItemClick = (event, item) => {
+    const url = item.presetUrl.toLowerCase();
+    // Let's make sure that the provided url is a valid map-link
+    if (this.isValidMapLink(url)) {
+      this.handleClose(); // Ensure that popup menu is closed
+      const { location, zoom, layers } = this.getMapInfoFromMapLink(url);
+      this.location = location;
+      this.zoom = location ? zoom || this.map.getView().getZoom() : null;
+
+      this.layers = layers;
+
+      // If the link contains layers we open the dialog where the user can choose to
+      // proceed.
+      if (layers) {
         this.openDialog();
-      } else {
-        this.flyTo(this.map.getView(), location, zoom);
+      } // If the link does not contain layers, we can simply fly to the new location
+      // without toggling layers and so on.
+      else {
+        this.flyTo(this.map.getView(), this.location, this.zoom);
       }
-    } else {
+    } // If the provided url is not a valid map-link, warn the user.
+    else {
       this.props.enqueueSnackbar(
         "Länken till platsen är tyvärr felaktig. Kontakta administratören av karttjänsten för att åtgärda felet.",
         {
@@ -101,7 +121,7 @@ class Preset extends React.PureComponent {
   };
 
   renderMenuItems = () => {
-    let menuItems = [];
+    const menuItems = [];
     this.options.presetList.forEach((item, index) => {
       menuItems.push(
         <MenuItem
@@ -116,6 +136,9 @@ class Preset extends React.PureComponent {
   };
 
   flyTo(view, location, zoom) {
+    if (!location) {
+      return;
+    }
     const duration = 1500;
     view.animate({
       center: location,
@@ -131,11 +154,12 @@ class Preset extends React.PureComponent {
   };
 
   closeDialog = () => {
-    var visibleLayers = this.state.layers.split(",");
+    const visibleLayers = this.layers.split(",");
     this.setState({
       dialogOpen: false,
     });
-    this.displayMap(visibleLayers);
+    this.toggleMapLayers(visibleLayers);
+    this.flyTo(this.map.getView(), this.location, this.zoom);
   };
 
   abortDialog = () => {
@@ -144,52 +168,39 @@ class Preset extends React.PureComponent {
     });
   };
 
-  displayMap(visibleLayers) {
-    const layers = this.map.getLayers().getArray();
-
-    visibleLayers.forEach((arrays) =>
-      layers
-        .filter(
-          (layer) =>
-            layer.getProperties()["layerInfo"] &&
-            layer.getProperties()["layerInfo"]["layerType"] !== "base"
-        )
-        .forEach((layer) => {
-          if (layer.getProperties()["name"] === arrays) {
-            this.globalObserver.publish("layerswitcher.showLayer", layer);
-            layer.setVisible(true);
-          }
-          if (
-            visibleLayers.some(
-              (arrays) => arrays === layer.getProperties()["name"]
-            )
-          ) {
-            if (layer.layerType === "group") {
-              this.globalObserver.publish("layerswitcher.showLayer", layer);
-            } else {
-              layer.setVisible(true);
-            }
-          } else {
-            if (layer.layerType === "group") {
-              this.globalObserver.publish("layerswitcher.hideLayer", layer);
-            } else {
-              layer.setVisible(false);
-            }
-          }
-        })
+  layerShouldBeVisible = (layer, visibleLayers) => {
+    return visibleLayers.some(
+      (layerId) => layerId === layer.getProperties()["name"]
     );
-    this.flyTo(this.map.getView(), this.state.location, this.state.zoom);
-  }
+  };
+
+  toggleMapLayers = (visibleLayers) => {
+    const layerSwitcherLayers = this.map
+      .getLayers()
+      .getArray()
+      .filter((layer) => layer.get("layerInfo"));
+
+    for (const l of layerSwitcherLayers) {
+      if (this.layerShouldBeVisible(l, visibleLayers)) {
+        this.globalObserver.publish("layerswitcher.showLayer", l);
+        l.setVisible(true);
+      } else {
+        this.globalObserver.publish("layerswitcher.hideLayer", l);
+        l.setVisible(false);
+      }
+    }
+  };
 
   renderDialog() {
     if (this.state.dialogOpen) {
       return createPortal(
         <Dialog
           options={{
-            text: "Alla lager i kartan kommer nu att släckas.",
+            text: "Alla tända lager i kartan kommer nu att släckas. Snabbvalets fördefinierade lager tänds istället.",
             headerText: "Visa snabbval",
             buttonText: "OK",
             abortText: "Avbryt",
+            useLegacyNonMarkdownRenderer: true,
           }}
           open={this.state.dialogOpen}
           onClose={this.closeDialog}
@@ -212,20 +223,18 @@ class Preset extends React.PureComponent {
       return null;
     } else {
       const { anchorEl } = this.state;
-      const { classes } = this.props;
       const open = Boolean(anchorEl);
       return (
         <>
-          <Tooltip title={this.title}>
-            <Paper className={classes.paper}>
-              <Button
+          <Tooltip disableInteractive title={this.title}>
+            <StyledPaper>
+              <StyledIconButton
                 aria-label={this.title}
-                className={classes.button}
                 onClick={this.handleClick}
               >
-                <Bookmarks />
-              </Button>
-            </Paper>
+                <FolderSpecial />
+              </StyledIconButton>
+            </StyledPaper>
           </Tooltip>
           <Menu
             id="render-props-menu"
@@ -242,4 +251,4 @@ class Preset extends React.PureComponent {
   }
 }
 
-export default withStyles(styles)(Preset);
+export default withSnackbar(Preset);

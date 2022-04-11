@@ -1,52 +1,29 @@
 import React, { Component } from "react";
-import CloseIcon from "@material-ui/icons/Close";
-import VisibilityIcon from "@material-ui/icons/Visibility";
-import VisibilityOffIcon from "@material-ui/icons/VisibilityOff";
-import LaunchIcon from "@material-ui/icons/Launch";
-import Button from "@material-ui/core/Button";
-import CallMadeIcon from "@material-ui/icons/CallMade";
-import { withStyles } from "@material-ui/core/styles";
-import clsx from "clsx";
-import Popover from "@material-ui/core/Popover";
+import CloseIcon from "@mui/icons-material/Close";
+import VisibilityIcon from "@mui/icons-material/Visibility";
+import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
+import LaunchIcon from "@mui/icons-material/Launch";
+import { Button, IconButton, Grid, Typography, Paper } from "@mui/material";
+import CallMadeIcon from "@mui/icons-material/CallMade";
+import { styled } from "@mui/material/styles";
+import Popover from "@mui/material/Popover";
 
-const styles = (theme) => ({
-  breadCrumbFlat: {
-    borderRadius: "0 !important",
-    marginBottom: "5px !important",
-  },
-  breadCrumb: {
-    [theme.breakpoints.down("xs")]: {
-      background: "white",
-      display: "flex",
-      justifyContent: "space-between",
-      padding: "10px",
-      border: "1px solid #ccc",
-    },
-    [theme.breakpoints.up("sm")]: {
-      background: "white",
-      borderTopLeftRadius: "5px",
-      borderTopRightRadius: "5px",
-      margin: "0px",
-      marginLeft: "2px",
-      marginRight: "2px",
-      display: "flex",
-      justifyContent: "space-between",
-      padding: "10px",
-      border: "1px solid #ccc",
-      whiteSpace: "nowrap",
-    },
-  },
-  part: {
-    margin: "0 5px",
-    display: "flex",
-  },
-  icon: {
-    cursor: "pointer",
-  },
-  links: {
-    padding: "5px",
-  },
-});
+const StyledPaper = styled(Paper)(({ theme }) => ({
+  marginRight: theme.spacing(0.5),
+  border: `${theme.spacing(0.1)} solid ${theme.palette.divider}`,
+}));
+
+const ContentGridContainer = styled(Grid)(({ theme }) => ({
+  padding: theme.spacing(1),
+}));
+
+const TitleGridContainer = styled(Grid)(({ theme }) => ({
+  paddingLeft: theme.spacing(0.5),
+}));
+
+const LinkContainer = styled("div")(({ theme }) => ({
+  padding: theme.spacing(0.5),
+}));
 
 class BreadCrumb extends Component {
   constructor(props) {
@@ -124,32 +101,29 @@ class BreadCrumb extends Component {
   }
 
   renderChapterLinks() {
-    const { classes } = this.props;
     if (this.chapters && this.chapters.length > 0) {
       if (this.chapters.length > 0) {
         return (
-          <div className={classes.infoTextContainer}>
-            <div className={classes.links}>
-              {this.chapters.map((chapter, i) => {
-                return (
-                  <div key={i}>
-                    <Button
-                      size="small"
-                      onClick={() => {
-                        this.setState({
-                          popoverOpen: false,
-                        });
-                        this.openInformative(chapter);
-                      }}
-                    >
-                      {chapter.header}
-                      <CallMadeIcon className={classes.rightIcon} />
-                    </Button>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
+          <LinkContainer>
+            {this.chapters.map((chapter, i) => {
+              return (
+                <div key={i}>
+                  <Button
+                    size="small"
+                    onClick={() => {
+                      this.setState({
+                        popoverOpen: false,
+                      });
+                      this.openInformative(chapter);
+                    }}
+                  >
+                    {chapter.header}
+                    <CallMadeIcon />
+                  </Button>
+                </div>
+              );
+            })}
+          </LinkContainer>
         );
       } else {
         return null;
@@ -184,66 +158,60 @@ class BreadCrumb extends Component {
     if (!this.props.chapters) {
       return null;
     }
-    const { classes } = this.props;
     if (this.chapters && this.chapters.length > 0) {
-      if (this.chapters.length === 1) {
-        return (
-          <div className={classes.part}>
-            <LaunchIcon
-              className={classes.icon}
-              onClick={() => this.openInformative(this.chapters[0])}
-            />
-          </div>
-        );
-      } else {
-        return (
-          <div className={classes.part}>
-            <LaunchIcon
-              className={classes.icon}
-              onClick={(e) => {
-                this.renderChaptersPopover(e.target);
-              }}
-            />
-          </div>
-        );
-      }
+      return (
+        <IconButton
+          size="small"
+          onClick={(e) => {
+            this.chapters.length === 1
+              ? this.openInformative(this.chapters[0])
+              : this.renderChaptersPopover(e.target);
+          }}
+        >
+          <LaunchIcon />
+        </IconButton>
+      );
     } else {
       return null;
     }
   }
 
   render() {
-    const { classes } = this.props;
-    var { hidden } = this.state;
-    var cls =
-      this.props.type === "flat"
-        ? clsx(classes.breadCrumb, classes.breadCrumbFlat)
-        : classes.breadCrumb;
+    const { layer, title, type } = this.props;
+    const { hidden } = this.state;
     return (
-      <div className={cls} data-type="bread-crumb">
-        <div className={classes.part}>
-          <div className={classes.part}>
-            {!hidden ? (
-              <VisibilityIcon
-                className={classes.icon}
-                onClick={this.setLayerOpacity(this.props.layer)}
-              />
-            ) : (
-              <VisibilityOffIcon
-                className={classes.icon}
-                onClick={this.setLayerOpacity(this.props.layer)}
-              />
-            )}
-          </div>
+      <StyledPaper square={type === "flat"} elevation={0}>
+        <ContentGridContainer
+          container
+          data-type="bread-crumb"
+          justifyContent="space-between"
+          alignItems="center"
+        >
+          <Grid item>
+            <IconButton
+              size="small"
+              onClick={this.setLayerOpacity(layer)}
+              aria-label="Visa/dölj lagret tillfälligt"
+            >
+              {!hidden ? <VisibilityIcon /> : <VisibilityOffIcon />}
+            </IconButton>
+          </Grid>
           {this.renderInformativeIcon()}
-          <div className={classes.part}>{this.props.title}</div>
-        </div>
-        <div className={classes.part}>
-          <CloseIcon
-            className={classes.icon}
-            onClick={this.setLayerVisibility(this.props.layer)}
-          />
-        </div>
+          <TitleGridContainer item>
+            <Typography variant="body2" noWrap>
+              {title}
+            </Typography>
+          </TitleGridContainer>
+          <Grid item>
+            <IconButton
+              size="small"
+              onClick={this.setLayerVisibility(layer)}
+              aria-label="Ta bort lagret från kartan"
+            >
+              <CloseIcon />
+            </IconButton>
+          </Grid>
+        </ContentGridContainer>
         <Popover
           id="simple-popper"
           open={this.state.popoverOpen}
@@ -260,9 +228,9 @@ class BreadCrumb extends Component {
         >
           {this.renderChapterLinks()}
         </Popover>
-      </div>
+      </StyledPaper>
     );
   }
 }
 
-export default withStyles(styles)(BreadCrumb);
+export default BreadCrumb;

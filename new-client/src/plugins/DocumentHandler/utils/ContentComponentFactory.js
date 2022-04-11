@@ -1,11 +1,12 @@
 import React from "react";
-import MapIcon from "@material-ui/icons/Map";
-import DescriptionIcon from "@material-ui/icons/Description";
-import OpenInNewIcon from "@material-ui/icons/OpenInNew";
-import clsx from "clsx";
-import Box from "@material-ui/core/Box";
+import MapIcon from "@mui/icons-material/Map";
+import DescriptionIcon from "@mui/icons-material/Description";
+import OpenInNewIcon from "@mui/icons-material/OpenInNew";
+import Box from "@mui/material/Box";
 import TextArea from "../documentWindow/TextArea";
-import { makeStyles } from "@material-ui/core/styles";
+import { styled } from "@mui/material/styles";
+import { useTheme } from "@mui/material";
+
 import {
   Button,
   Typography,
@@ -13,7 +14,8 @@ import {
   List,
   ListItem,
   Grid,
-} from "@material-ui/core";
+  Tooltip,
+} from "@mui/material";
 
 const ELEMENT_NODE = 1;
 const TEXT_NODE = 3;
@@ -26,116 +28,24 @@ const getIndentationValue = (fontSize, multiplier, negative) => {
   return negative ? `${value * -1}rem` : `${value}rem`;
 };
 
-const useStyles = makeStyles((theme) => ({
-  documentImage: {
-    objectFit: "contain",
-    objectPosition: "left",
-  },
-  customLabel: {
-    textAlign: "left",
-  },
-  pictureRightFloatingText: {},
-  pictureLeftFloatingText: {},
-
-  floatRight: {
-    float: "right",
-    marginLeft: theme.spacing(1),
-  },
-  floatLeft: {
-    float: "left",
-    marginRight: theme.spacing(1),
-  },
-
-  pictureRight: {
-    alignItems: "flex-end",
-    display: "flex",
-    flexDirection: "column",
-  },
-  pictureLeft: {
-    alignItems: "flex-start",
-    display: "flex",
-    flexDirection: "column",
-  },
-  pictureCenter: {
-    alignItems: "center",
-    display: "flex",
-    flexDirection: "column",
-  },
-
-  popupActivatedImage: {
-    marginBottom: theme.spacing(1),
-    cursor: "pointer",
-  },
-  naturalDocumentImageProportions: {
-    marginTop: theme.spacing(1),
-    width: "100%",
-  },
-  imageText: {
-    marginBottom: theme.spacing(1),
-  },
-  imageInformationWrapper: {
-    marginBottom: theme.spacing(1),
-    maxWidth: "100%",
-  },
-  startIcon: {
-    marginLeft: theme.spacing(0),
-  },
-  linkIcon: {
-    verticalAlign: "middle",
-  },
-  heading: {
-    marginBottom: theme.spacing(1),
-  },
-  media: {
-    width: "auto",
-    maxWidth: "100%",
-  },
-  listItemOneDigit: {
-    marginRight: getIndentationValue(theme.typography.body1.fontSize, 1), //MAGIC
-    padding: theme.spacing(0),
-  },
-  listItemTwoDigit: {
-    marginBottom: theme.spacing(1),
-    padding: theme.spacing(0),
-    marginRight: getIndentationValue(theme.typography.body1.fontSize, 0.5), //MAGIC
-  },
-  olListItem: {
-    padding: theme.spacing(0),
-  },
-  ulList: {
-    listStyle: "initial",
-    listStylePosition: "inside",
-    overflowWrap: "break-word",
-    wordBreak: "break-word",
-    marginBottom: theme.spacing(1),
-    paddingLeft: getIndentationValue(theme.typography.body1.fontSize, 1.375), //MAGIC
-    textIndent: getIndentationValue(
-      theme.typography.body1.fontSize,
-      1.375,
-      true
-    ), //MAGIC
-    padding: theme.spacing(0),
-  },
-  olList: {
-    padding: theme.spacing(0),
-    marginBottom: theme.spacing(1),
-  },
-  bottomMargin: {
-    marginBottom: theme.spacing(1),
-  },
-  linkButton: {
-    padding: theme.spacing(0),
-    color: theme.palette.info.main,
-  },
-}));
-
 const renderChild = (child) => {
   if (child.nodeType === TEXT_NODE) {
     return child.data;
   }
 
   if (child.nodeType === ELEMENT_NODE) {
-    return child.callback(child);
+    // Don't assume that callback exits
+    if (typeof child.callback === "function") {
+      return child.callback(child);
+    } else {
+      // If there's no callback, warn and render just
+      // the inner text portion of Element
+      console.warn(
+        "Unsupported DOMElement encountered. Rendering only innerText",
+        child
+      );
+      return child.innerText;
+    }
   }
 };
 
@@ -154,70 +64,98 @@ export const Paragraph = ({ pTag }) => {
   );
 };
 
+const ListUlList = styled(List)(({ theme }) => ({
+  listStyle: "initial",
+  listStylePosition: "inside",
+  overflowWrap: "break-word",
+  wordBreak: "break-word",
+  marginBottom: theme.spacing(1),
+  padding: theme.spacing(0),
+  paddingLeft: getIndentationValue(theme.typography.body1.fontSize, 1.375),
+  textIndent: getIndentationValue(theme.typography.body1.fontSize, 1.375, true),
+}));
+
+const ListItemOlListItem = styled(ListItem)(({ theme }) => ({
+  padding: theme.spacing(0),
+}));
+
+const TypographyOlListItem = styled(Typography)(({ theme }) => ({
+  padding: theme.spacing(0),
+}));
+
+const ListOlList = styled(List)(({ theme }) => ({
+  padding: theme.spacing(0),
+  marginBottom: theme.spacing(1),
+}));
+
+const TypographyHeading = styled(Typography)(({ theme }) => ({
+  marginBottom: theme.spacing(1),
+}));
+
+const TypographyImageText = styled(Typography)(({ theme }) => ({
+  marginBottom: theme.spacing(1),
+}));
+
+const BoxImageInformationWrapper = styled(Box)(({ theme }) => ({
+  marginBottom: theme.spacing(1),
+  maxWidth: "100%",
+}));
+
 export const ULComponent = ({ ulComponent }) => {
   let children = [...ulComponent.children];
-  const classes = useStyles();
   return (
-    <List className={classes.ulList} component="ul">
+    <ListUlList component="ul">
       {children.map((listItem, index) => {
         return (
-          <Typography
-            key={index}
-            component="li"
-            className={classes.typography}
-            variant="body1"
-          >
+          <Typography key={index} component="li" variant="body1">
             {getFormattedComponentFromTag(listItem)}{" "}
           </Typography>
         );
       })}
-    </List>
+    </ListUlList>
   );
 };
 
 export const OLComponent = ({ olComponent }) => {
   let children = [...olComponent.children];
-  const classes = useStyles();
   return (
-    <List className={classes.olList} component="ol">
+    <ListOlList component="ol">
       {children.map((listItem, index) => {
         return (
-          <ListItem className={classes.olListItem} disableGutters key={index}>
+          <ListItemOlListItem disableGutters key={index}>
             <Grid wrap="nowrap" container>
               <Grid
-                className={clsx(
-                  index < 9
-                    ? classes.listItemOneDigit
-                    : classes.listItemTwoDigit
-                )}
                 item
+                sx={{
+                  marginRight: (theme) =>
+                    getIndentationValue(
+                      theme.typography.body1.fontSize,
+                      index < 9 ? 1 : 0.5
+                    ),
+                  padding: 0,
+                  marginBottom: index < 9 ? 1 : "inherit",
+                }}
               >
                 <Typography variant="body1">{`${index + 1}.`}</Typography>
               </Grid>
               <Grid item>
-                <Typography className={classes.olListItem} variant="body1">
+                <TypographyOlListItem variant="body1">
                   {getFormattedComponentFromTag(listItem)}
-                </Typography>
+                </TypographyOlListItem>
               </Grid>
             </Grid>
-          </ListItem>
+          </ListItemOlListItem>
         );
       })}
-    </List>
+    </ListOlList>
   );
 };
 
 export const Heading = ({ headingTag }) => {
-  const classes = useStyles();
   return (
-    <>
-      <Typography
-        className={classes.heading}
-        variant={headingTag.tagName.toLowerCase()}
-      >
-        {getFormattedComponentFromTag(headingTag)}
-      </Typography>
-    </>
+    <TypographyHeading variant={headingTag.tagName.toLowerCase()}>
+      {getFormattedComponentFromTag(headingTag)}
+    </TypographyHeading>
   );
 };
 
@@ -240,13 +178,18 @@ const getTextArea = (tag, defaultColors) => {
       backgroundColor={backgroundColor}
       dividerColor={dividerColor}
       textAreaContentArray={textAreaContentArray}
-    ></TextArea>
+    />
   );
 };
 
 export const BlockQuote = ({ blockQuoteTag, defaultColors }) => {
+  // Grab the theme to determine current light/dark mode
+  const theme = useTheme();
   if (blockQuoteTag.attributes.getNamedItem("data-text-section")) {
-    return getTextArea(blockQuoteTag, defaultColors);
+    return getTextArea(
+      blockQuoteTag,
+      theme.palette.mode === "light" && defaultColors // Only supply defaultColors if we're in light mode
+    );
   } else {
     return null;
   }
@@ -267,76 +210,81 @@ export const Figure = ({ figureTag }) => {
  *
  * @memberof Contents
  */
-export const Img = ({ imgTag, localObserver, componentId }) => {
-  const classes = useStyles();
+export const Img = ({ imgTag, localObserver, componentId, baseUrl }) => {
   const tagIsPresent = (imgTag, attribute) => {
     return imgTag.attributes.getNamedItem(attribute) == null ? false : true;
   };
 
   const getImageStyle = (image) => {
-    let className = image.popup
-      ? clsx(
-          classes.documentImage,
-          classes.naturalDocumentImageProportions,
-          classes.popupActivatedImage
-        )
-      : clsx(classes.documentImage, classes.naturalDocumentImageProportions);
-
     if (image.height && image.width) {
-      if (image.popup) {
-        className = clsx(classes.documentImage, classes.popupActivatedImage);
-      } else {
-        className = clsx(classes.documentImage);
-      }
+      return {
+        objectFit: "contain",
+        objectPosition: "left",
+        ...(image.popup && { marginBottom: 1, cursor: "pointer" }),
+      };
+    } else {
+      return {
+        objectFit: "contain",
+        objectPosition: "left",
+        marginTop: 1,
+        width: "100%",
+        ...(image.popup && { marginBottom: 1, cursor: "pointer" }),
+      };
     }
-    return className;
   };
 
-  const getImagePositionClass = (position) => {
-    if (position === "right") {
-      return classes.pictureRight;
+  const getMediaPositionStyle = (position) => {
+    switch (position) {
+      case "right":
+        return {
+          alignItems: "flex-end",
+          display: "flex",
+          flexDirection: "column",
+        };
+      case "floatRight":
+        return {
+          float: "right",
+          marginLeft: 1,
+        };
+      case "left":
+        return {
+          alignItems: "flex-start",
+          display: "flex",
+          flexDirection: "column",
+        };
+      case "floatLeft":
+        return {
+          float: "left",
+          marginRight: 1,
+        };
+      case "center":
+        return {
+          alignItems: "center",
+          display: "flex",
+          flexDirection: "column",
+        };
+      default:
+        return {};
     }
-
-    if (position === "left") {
-      return classes.pictureLeft;
-    }
-
-    if (position === "center") {
-      return classes.pictureCenter;
-    }
-
-    if (position === "floatLeft") {
-      return classes.floatLeft;
-    }
-
-    if (position === "floatRight") {
-      return classes.floatRight;
-    }
-
-    return;
   };
 
   const getImageDescription = (image) => {
     return (
-      <Box
-        style={{ width: image.width }}
-        className={classes.imageInformationWrapper}
-      >
+      <BoxImageInformationWrapper sx={{ width: image.width }}>
         {image.caption && (
           <Typography id={`image_${image.captionId}`} variant="subtitle2">
             {image.caption}
           </Typography>
         )}
         {image.source && (
-          <Typography
+          <TypographyImageText
             id={`image_${image.sourceId}`}
             variant="subtitle2"
-            className={classes.imageText}
           >
             {image.source}
-          </Typography>
+          </TypographyImageText>
         )}
-      </Box>
+      </BoxImageInformationWrapper>
     );
   };
 
@@ -360,8 +308,6 @@ export const Img = ({ imgTag, localObserver, componentId }) => {
       }
     : null;
 
-  const positioningClass = getImagePositionClass(image.position);
-
   const getDescribedByAttribute = () => {
     let describedBy = [];
     if (image.caption) {
@@ -373,29 +319,196 @@ export const Img = ({ imgTag, localObserver, componentId }) => {
     return describedBy.length > 0 ? describedBy.join(" ") : null;
   };
 
+  let imgUrl = image.url;
+  if (imgUrl.includes("../")) {
+    imgUrl = image.url.replace("../", baseUrl);
+  }
+
   return (
     <Box
       key={`${image.id}`}
       data-position={image.position}
-      className={positioningClass}
+      sx={getMediaPositionStyle(image.position)}
     >
       <CardMedia
         onClick={onClickCallback}
         alt={image.altValue || ""}
-        classes={{ media: classes.media }}
         aria-describedby={getDescribedByAttribute()}
         component="img"
-        style={
-          image.height && image.width
-            ? { height: image.height, width: image.width }
-            : null
-        }
-        className={getImageStyle(image)}
-        image={image.url}
+        image={imgUrl}
+        sx={{
+          ...getImageStyle(image),
+          ...(image.height &&
+            image.width && {
+              height: `${image.height}px`,
+              width: `${image.width}px`,
+            }),
+          ".MuiCardMedia-media": {
+            width: "auto",
+            maxWidth: "100%",
+          },
+        }}
       />
       {getImageDescription(image)}
     </Box>
   );
+};
+
+/**
+ * The render function for the video-tag as an img-tag.
+ * @param {object} imgTag The video-tag as an img-tag.
+ * @returns React.Fragment
+ */
+export const Video = ({ imgTag, componentId, baseUrl }) => {
+  const videoAttributes = {
+    caption: imgTag.dataset.caption,
+    height: imgTag.dataset.imageHeight,
+    width: imgTag.dataset.imageWidth,
+    position: imgTag.dataset.imagePosition,
+    source: imgTag.dataset.source,
+    url: imgTag.src,
+    id: `video_${componentId}`,
+  };
+
+  const getVideoDescription = (videoAttributes) => {
+    return (
+      <Box
+        sx={{
+          width: `${videoAttributes.width}px`,
+          marginBottom: 1,
+          maxWidth: "100%",
+        }}
+      >
+        {videoAttributes.caption && (
+          <Typography
+            id={`video_${videoAttributes.captionId}`}
+            variant="subtitle2"
+          >
+            {videoAttributes.caption}
+          </Typography>
+        )}
+        {videoAttributes.source && (
+          <Typography
+            id={`video_${videoAttributes.sourceId}`}
+            variant="subtitle2"
+            sx={{ marginBottom: 1 }}
+          >
+            {videoAttributes.source}
+          </Typography>
+        )}
+      </Box>
+    );
+  };
+
+  let videoUrl = videoAttributes.url;
+  if (videoUrl.includes("../")) {
+    videoUrl = videoAttributes.url.replace("../", baseUrl);
+  }
+
+  return (
+    <React.Fragment key={videoAttributes.id}>
+      <Box sx={this.getMediaPositionStyle(videoAttributes.position)}>
+        <video
+          height={videoAttributes.height}
+          width={videoAttributes.width}
+          controls={"controls"}
+        >
+          <source src={videoUrl} type="video/mp4"></source>
+        </video>
+        {getVideoDescription(videoAttributes)}
+      </Box>
+    </React.Fragment>
+  );
+};
+
+/**
+ * The render function for the audio-tag as an img-tag.
+ * @param {object} imgTag The audio-tag as an img-tag.
+ * @returns React.Fragment
+ */
+export const Audio = ({ imgTag, componentId, baseUrl }) => {
+  const audioAttributes = {
+    caption: imgTag.attributes.getNamedItem("data-caption")?.value,
+    position: imgTag.attributes.getNamedItem("data-image-position")?.value,
+    source: imgTag.attributes.getNamedItem("data-source")?.value,
+    url: imgTag.attributes.getNamedItem("src")?.value,
+    width: imgTag.attributes.getNamedItem("data-image-width")?.value,
+    id: `audio_${componentId}`,
+  };
+
+  const getAudioDescription = (audioAttributes) => {
+    return (
+      <Box
+        sx={{
+          width: audioAttributes.width + "px",
+          marginBottom: 1,
+          maxWidth: "100%",
+        }}
+      >
+        {audioAttributes.caption && (
+          <Typography
+            id={`video_${audioAttributes.captionId}`}
+            variant="subtitle2"
+          >
+            {audioAttributes.caption}
+          </Typography>
+        )}
+        {audioAttributes.source && (
+          <Typography
+            id={`video_${audioAttributes.sourceId}`}
+            variant="subtitle2"
+            sx={{ marginBottom: 1 }}
+          >
+            {audioAttributes.source}
+          </Typography>
+        )}
+      </Box>
+    );
+  };
+
+  let audioUrl = audioAttributes.url;
+  if (audioUrl.includes("../")) {
+    audioUrl = audioAttributes.url.replace("../", baseUrl);
+  }
+
+  return (
+    <Box
+      key={audioAttributes.id}
+      sx={this.getMediaPositionStyle(audioAttributes.position)}
+    >
+      <audio controls={"controls"}>
+        <source src={imgTag.src} type="audio/mpeg"></source>
+      </audio>
+      {getAudioDescription(audioAttributes)}
+    </Box>
+  );
+};
+
+/**
+ * The render function for the source-tag.
+ * @param {object} sourceTag The source-tag.
+ * @returns React.Fragment
+ */
+export const Source = ({ sourceTag }) => {
+  const children = [...sourceTag.childNodes];
+  const src = sourceTag.src;
+  const type = sourceTag.type;
+  let array = [];
+  if (children.length > 0) {
+    children.forEach((child, index) => {
+      array.push(
+        <React.Fragment key={index}>
+          <source src={src} type={type}></source>
+        </React.Fragment>
+      );
+    });
+    return array;
+  }
+  return [
+    <React.Fragment key={0}>
+      <source src={src} type={type}></source>
+    </React.Fragment>,
+  ];
 };
 
 export const Strong = ({ strongTag }) => {
@@ -417,6 +530,7 @@ export const Strong = ({ strongTag }) => {
     </React.Fragment>,
   ];
 };
+
 export const Underline = ({ uTag }) => {
   const children = [...uTag.childNodes];
   let array = [];
@@ -474,39 +588,61 @@ export const LineBreak = () => {
  * @memberof Contents
  */
 export const CustomLink = ({ aTag, localObserver, bottomMargin }) => {
-  const classes = useStyles();
-
   const getLinkDataPerType = (attributes) => {
     const {
       0: mapLink,
       1: headerIdentifier,
       2: documentLink,
       3: externalLink,
+      4: hoverLink,
     } = [
       "data-maplink",
       "data-header-identifier",
       "data-document",
       "data-link",
+      "data-hover",
     ].map((attributeKey) => {
       return attributes.getNamedItem(attributeKey)?.value;
     });
 
-    return { mapLink, headerIdentifier, documentLink, externalLink };
+    return { mapLink, headerIdentifier, documentLink, externalLink, hoverLink };
+  };
+
+  const getHoverLink = (hoverLink, tagText) => {
+    return (
+      <Tooltip title={hoverLink}>
+        <abbr
+          style={{
+            cursor: "text",
+            textDecoration: "underline dotted",
+          }}
+        >
+          {tagText}
+        </abbr>
+      </Tooltip>
+    );
   };
 
   const getExternalLink = (externalLink) => {
     return (
       <Button
-        color="default"
-        startIcon={<OpenInNewIcon className={classes.linkIcon}></OpenInNewIcon>}
-        classes={{ startIcon: classes.startIcon }}
+        startIcon={
+          <OpenInNewIcon
+            sx={{
+              verticalAlign: "middle",
+            }}
+          />
+        }
+        sx={{
+          padding: 0,
+          color: "info.main",
+          ".MuiButton-startIcon": {
+            marginLeft: 0,
+          },
+          ...(bottomMargin && { marginBottom: 1 }),
+        }}
         target="_blank"
         component="a"
-        className={clsx(
-          bottomMargin
-            ? [classes.bottomMargin, classes.linkButton]
-            : classes.linkButton
-        )}
         key="external-link"
         href={externalLink}
       >
@@ -514,17 +650,37 @@ export const CustomLink = ({ aTag, localObserver, bottomMargin }) => {
       </Button>
     );
   };
-  const getMapLink = (aTag, mapLink) => {
+
+  const getMapLink = (aTag, mapLinkOrg) => {
+    // Attempt to safely URI Decode the supplied string. If
+    // it fails, use it as-is.
+    // The reason we want probably want to decode is that the
+    // link is created using the Anchor plugin, which encodes
+    // the query string properly, see #831 and #838.
+    let mapLink = null;
+    try {
+      mapLink = decodeURIComponent(mapLinkOrg);
+    } catch (error) {
+      mapLink = mapLinkOrg;
+    }
+
     return (
       <Button
-        color="default"
-        className={clsx(
-          bottomMargin
-            ? [classes.bottomMargin, classes.linkButton]
-            : classes.linkButton
-        )}
-        startIcon={<MapIcon className={classes.linkIcon}></MapIcon>}
-        classes={{ startIcon: classes.startIcon, label: classes.customLabel }}
+        startIcon={
+          <MapIcon
+            sx={{
+              verticalAlign: "middle",
+            }}
+          />
+        }
+        sx={{
+          padding: 0,
+          color: "info.main",
+          ...(bottomMargin && { marginBottom: 1 }),
+          ".MuiButton-startIcon": {
+            marginLeft: 0,
+          },
+        }}
         target="_blank"
         href={externalLink}
         key="map-link"
@@ -537,23 +693,28 @@ export const CustomLink = ({ aTag, localObserver, bottomMargin }) => {
       </Button>
     );
   };
-  const getDocumentLink = (headerIdentifier, documentLink) => {
+
+  const getDocumentLink = (headerIdentifier, documentLink, isPrintMode) => {
     return (
       <Button
-        color="default"
-        className={clsx(
-          bottomMargin
-            ? [classes.bottomMargin, classes.linkButton]
-            : classes.linkButton
-        )}
         startIcon={
-          <DescriptionIcon className={classes.linkIcon}></DescriptionIcon>
+          <DescriptionIcon
+            sx={{
+              verticalAlign: "middle",
+            }}
+          />
         }
-        style={{ padding: 0 }}
-        classes={{ startIcon: classes.startIcon }}
+        sx={{
+          padding: 0,
+          color: "info.main",
+          ".MuiButton-startIcon": {
+            marginLeft: 0,
+          },
+          ...(bottomMargin && { marginBottom: 1 }),
+        }}
         href="#"
         key="document-link"
-        component="button"
+        component={isPrintMode ? "span" : "button"}
         underline="hover"
         onClick={() => {
           localObserver.publish("document-link-clicked", {
@@ -567,15 +728,12 @@ export const CustomLink = ({ aTag, localObserver, bottomMargin }) => {
     );
   };
 
-  const {
-    mapLink,
-    headerIdentifier,
-    documentLink,
-    externalLink,
-  } = getLinkDataPerType(aTag.attributes);
+  const { mapLink, headerIdentifier, documentLink, externalLink, hoverLink } =
+    getLinkDataPerType(aTag.attributes);
 
   if (documentLink) {
-    return getDocumentLink(headerIdentifier, documentLink);
+    const isPrintMode = Boolean(aTag.attributes.printMode);
+    return getDocumentLink(headerIdentifier, documentLink, isPrintMode);
   }
 
   if (mapLink) {
@@ -584,6 +742,11 @@ export const CustomLink = ({ aTag, localObserver, bottomMargin }) => {
 
   if (externalLink) {
     return getExternalLink(externalLink);
+  }
+
+  if (hoverLink) {
+    const tagText = aTag.text;
+    return getHoverLink(hoverLink, tagText);
   }
 
   return null;

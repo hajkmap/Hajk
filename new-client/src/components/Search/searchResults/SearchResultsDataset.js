@@ -1,24 +1,23 @@
 import React from "react";
-import { withStyles } from "@material-ui/core/styles";
 import { isMobile } from "../../../utils/IsMobile";
-import { List, ListItem } from "@material-ui/core";
+import { List, ListItem } from "@mui/material";
 import SearchResultsDatasetFeature from "./SearchResultsDatasetFeature";
 import SearchResultsDatasetFeatureDetails from "./SearchResultsDatasetFeatureDetails";
 import SearchResultsPreview from "./SearchResultsPreview";
+import { styled } from "@mui/material/styles";
 
-const styles = () => ({
-  featureList: {
-    padding: 0,
-    width: "100%",
-    transition: "none",
-  },
-  featureListItem: {
-    width: "100%",
-    display: "flex",
-    padding: 0,
-    transition: "none",
-  },
-});
+const StyledList = styled(List)(() => ({
+  padding: 0,
+  width: "100%",
+  transition: "none",
+}));
+
+const StyledListItem = styled(ListItem)(() => ({
+  width: "100%",
+  display: "flex",
+  padding: 0,
+  transition: "none",
+}));
 
 class SearchResultsDataset extends React.Component {
   //Some sources does not return numberMatched and numberReturned, falling back on features.length
@@ -71,7 +70,7 @@ class SearchResultsDataset extends React.Component {
   };
 
   getFilteredFeatures = () => {
-    const { featureFilter, getFeatureTitle } = this.props;
+    const { featureFilter } = this.props;
     const featureCollection = { ...this.props.featureCollection };
     // If user has a value in the filter input...
     if (featureFilter.length > 0) {
@@ -80,8 +79,7 @@ class SearchResultsDataset extends React.Component {
         (feature) => {
           // Returning the features having a title including
           // the filter string
-          const featureTitle = getFeatureTitle(feature);
-          return featureTitle
+          return feature.featureTitle
             .toLowerCase()
             .includes(featureFilter.toLowerCase());
         }
@@ -93,10 +91,12 @@ class SearchResultsDataset extends React.Component {
   };
 
   getSortedFeatures = (features) => {
-    const { featureSortingStrategy, getFeatureTitle } = this.props;
+    const { featureSortingStrategy } = this.props;
 
     const featuresAtoZSorted = features.sort((a, b) =>
-      getFeatureTitle(a).localeCompare(getFeatureTitle(b), "sv")
+      a.featureTitle.localeCompare(b.featureTitle, undefined, {
+        numeric: true, // Ensure that 1 < 2 < 10
+      })
     );
 
     switch (featureSortingStrategy) {
@@ -114,7 +114,6 @@ class SearchResultsDataset extends React.Component {
       app,
       activeFeatureCollection,
       activeFeature,
-      getFeatureTitle,
       localObserver,
       setActiveFeature,
       enableFeatureToggler,
@@ -124,7 +123,6 @@ class SearchResultsDataset extends React.Component {
         feature={activeFeature}
         features={features}
         setActiveFeature={setActiveFeature}
-        featureTitle={getFeatureTitle(activeFeature)}
         featureCollection={featureCollection}
         app={app}
         source={activeFeatureCollection.source}
@@ -137,14 +135,12 @@ class SearchResultsDataset extends React.Component {
   renderFeatureList = (features) => {
     const {
       featureCollection,
-      classes,
       app,
       selectedFeatures,
       activeFeature,
       handleOnFeatureClick,
       handleOnFeatureKeyPress,
       getOriginBasedIcon,
-      getFeatureTitle,
       addFeatureToSelected,
       removeFeatureFromSelected,
       shouldRenderSelectedCollection,
@@ -153,17 +149,14 @@ class SearchResultsDataset extends React.Component {
     const sortedFeatures = this.getSortedFeatures(features);
     return (
       <>
-        <List
-          className={classes.featureList}
+        <StyledList
           id={`search-result-dataset-details-${featureCollection.source.id}`}
         >
           {sortedFeatures.map((f) => {
-            const featureTitle = getFeatureTitle(f);
             return (
-              <ListItem
+              <StyledListItem
                 disableTouchRipple
-                className={classes.featureListItem}
-                key={f.id}
+                key={f.getId()}
                 divider
                 button
                 onClick={() => {
@@ -171,24 +164,44 @@ class SearchResultsDataset extends React.Component {
                   handleOnFeatureClick(f);
                 }}
                 onKeyDown={(event) => handleOnFeatureKeyPress(event, f)}
-                onMouseEnter={
-                  !isMobile ? (e) => this.setPreviewFeature(e, f) : null
-                }
-                onMouseLeave={!isMobile ? this.resetPreview : null}
+                onMouseEnter={(e) => {
+                  if (!isMobile) {
+                    this.props.localObserver.publish(
+                      "map.setHighLightedStyle",
+                      f
+                    );
+                    this.setPreviewFeature(e, f);
+                  }
+                }}
+                onMouseLeave={() => {
+                  if (!isMobile) {
+                    // Create a list of ol_uids of selected features
+                    const selectedOlUids = this.props.selectedFeatures.map(
+                      (f) => f.feature.ol_uid
+                    );
+                    // Check if the current feature is in the list of selected features
+                    if (selectedOlUids.includes(f.ol_uid)) {
+                      // If so, reset the style to "selection" style for that feature…
+                      this.props.localObserver.publish(
+                        "map.setSelectedFeatureStyle",
+                        f
+                      );
+                    } else {
+                      // …else, remove the styling entirely (fallback to default OL)
+                      f.setStyle(null);
+                    }
+                    this.resetPreview();
+                  }
+                }}
               >
                 <SearchResultsDatasetFeature
                   feature={f}
-                  featureTitle={
-                    featureTitle.length > 0
-                      ? featureTitle
-                      : "Visningsfält saknas"
-                  }
                   app={app}
                   source={featureCollection.source}
                   origin={featureCollection.origin}
                   visibleInMap={
                     selectedFeatures.findIndex(
-                      (item) => item.feature.id === f.id
+                      (item) => item.feature.getId() === f.getId()
                     ) > -1
                   }
                   addFeatureToSelected={addFeatureToSelected}
@@ -199,10 +212,10 @@ class SearchResultsDataset extends React.Component {
                     shouldRenderSelectedCollection
                   }
                 />
-              </ListItem>
+              </StyledListItem>
             );
           })}
-        </List>
+        </StyledList>
         {this.renderSearchResultPreview()}
       </>
     );
@@ -211,10 +224,10 @@ class SearchResultsDataset extends React.Component {
   renderDatasetDetails = () => {
     const { activeFeature } = this.props;
 
+    // If the user has selected a feature, we should show its details
+    // if the feature does not have a onClickName. If it does, the details
+    // will be taken care of somewhere else.
     const shouldRenderFeatureDetails =
-      // If the user has selected a feature, we should show it's details
-      // IF the feature does not have a onClickName, if it does, the details
-      // will be taken care of somewhere else.
       activeFeature && !activeFeature.onClickName;
 
     const features = this.getFilteredFeatures();
@@ -226,11 +239,7 @@ class SearchResultsDataset extends React.Component {
 
   renderSearchResultPreview = () => {
     const { previewFeature, previewAnchorEl } = this.state;
-    const {
-      activeFeatureCollection,
-      getFeatureTitle,
-      enableFeaturePreview,
-    } = this.props;
+    const { activeFeatureCollection, enableFeaturePreview } = this.props;
     const shouldShowPreview =
       enableFeaturePreview && !isMobile && !previewFeature?.onClickName
         ? true
@@ -243,7 +252,6 @@ class SearchResultsDataset extends React.Component {
           activeFeatureCollection={activeFeatureCollection}
           app={this.props.app}
           anchorEl={previewAnchorEl}
-          getFeatureTitle={getFeatureTitle}
         />
       );
     } else {
@@ -256,4 +264,4 @@ class SearchResultsDataset extends React.Component {
   }
 }
 
-export default withStyles(styles)(SearchResultsDataset);
+export default SearchResultsDataset;

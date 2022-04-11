@@ -1,11 +1,44 @@
 import React from "react";
 import propTypes from "prop-types";
-import { withStyles } from "@material-ui/core/styles";
+import { styled } from "@mui/material/styles";
 import PanelHeader from "./PanelHeader";
 import { Rnd } from "react-rnd";
 import { isMobile, getIsMobile } from "../utils/IsMobile.js";
 import FeatureInfoContainer from "./FeatureInfo/FeatureInfoContainer.js";
-import clsx from "clsx";
+
+const StyledRnd = styled(Rnd)(({ theme }) => ({
+  zIndex: zIndexStart + document.windows.length,
+  position: "absolute",
+  background: theme.palette.background.paper,
+  boxShadow: theme.shadows[24],
+  borderRadius: theme.shape.borderRadius,
+  overflow: "hidden",
+  pointerEvents: "all",
+  [theme.breakpoints.down("sm")]: {
+    borderRadius: "0",
+    position: "fixed !important",
+  },
+}));
+
+const PanelContent = styled("div")(({ theme }) => ({
+  display: "flex",
+  position: "absolute",
+  top: 0,
+  left: 0,
+  bottom: 0,
+  right: 0,
+  flexDirection: "column",
+  userSelect: "none",
+  outline: "none",
+  '& a:not([class*="Mui"])': {
+    color: theme.palette.primary.light,
+  },
+}));
+
+const StyledSection = styled("section")(() => ({
+  flex: "1",
+  cursor: "default !important",
+}));
 
 const zIndexStart = 1000;
 // Patch the RND component's onDragStart method with the ability to disable drag by its internal state.
@@ -90,49 +123,9 @@ Rnd.prototype.onDragStart = function (e, data) {
   });
 };
 
-const styles = (theme) => {
-  return {
-    window: {
-      zIndex: zIndexStart + document.windows.length,
-      position: "absolute",
-      background: theme.palette.background.paper,
-      boxShadow: theme.shadows[24],
-      borderRadius: theme.shape.borderRadius,
-      overflow: "hidden",
-      pointerEvents: "all",
-      [theme.breakpoints.down("xs")]: {
-        borderRadius: "0",
-        position: "fixed !important",
-      },
-    },
-    panelContent: {
-      display: "flex",
-      position: "absolute",
-      top: 0,
-      left: 0,
-      bottom: 0,
-      right: 0,
-      flexDirection: "column",
-      userSelect: "none",
-      outline: "none",
-    },
-    content: {
-      flex: "1",
-      overflowY: "auto",
-      padding: "10px",
-      cursor: "default !important",
-    },
-    nonScrollable: {
-      overflowY: "hidden",
-      padding: "0px",
-    },
-  };
-};
-
 class Window extends React.PureComponent {
   static propTypes = {
     children: propTypes.object,
-    classes: propTypes.object.isRequired,
     color: propTypes.string,
     features: propTypes.array,
     globalObserver: propTypes.object.isRequired,
@@ -165,7 +158,7 @@ class Window extends React.PureComponent {
       left: 0,
       top: 0,
       width: 300,
-      height: 400,
+      height: this.props.height === "dynamic" ? "auto" : 400,
     };
 
     window.addEventListener("resize", () => {
@@ -225,6 +218,19 @@ class Window extends React.PureComponent {
       : false;
   }
 
+  getMaxWindowHeight() {
+    if (this.rnd === undefined) return 400;
+    const parent = this.rnd.getSelfElement().parentElement;
+    const spaceForBreadcrumbs = this.areBreadcrumbsActivated() ? 42 : 0;
+    const h =
+      parent.clientHeight - // Maximum height of parent element
+      16 - // Reduce height with top margin
+      16 - // Reduce height with bottom margin
+      62 - // Reduce with space for Search bar
+      spaceForBreadcrumbs; // If Breadcrumbs are active, make space for them as well
+    return h;
+  }
+
   updatePosition() {
     const { width, height, position } = this.props;
     const parent = this.rnd.getSelfElement().parentElement;
@@ -236,16 +242,8 @@ class Window extends React.PureComponent {
     this.height = height || 300;
 
     // If "auto" height is set, it means we want the Window to take up maximum space available
-    if (this.height === "auto") {
-      // If Breadcrumbs are activated (in LayerSwitcher's config), we must make
-      // sure that our Windows leave some space at the bottom for the Breadcrumbs.
-      const spaceForBreadcrumbs = this.areBreadcrumbsActivated() ? 42 : 0;
-      this.height =
-        parent.clientHeight - // Maximum height of parent element
-        16 - // Reduce height with top margin
-        16 - // Reduce height with bottom margin
-        62 - // Reduce with space for Search bar
-        spaceForBreadcrumbs; // If Breadcrumbs are active, make space for them as well
+    if (this.props.height !== "dynamic" && this.height === "auto") {
+      this.height = this.getMaxWindowHeight();
     }
 
     // If Window renders on the right, there are some things that we need to compensate for
@@ -281,9 +279,11 @@ class Window extends React.PureComponent {
   }
 
   close = (e) => {
-    const { onClose } = this.props;
+    const { onClose, globalObserver, title } = this.props;
     this.latestWidth = this.rnd.getSelfElement().clientWidth;
     if (onClose) onClose();
+
+    globalObserver.publish("core.closeWindow", title);
   };
 
   fit = (target) => {
@@ -339,13 +339,22 @@ class Window extends React.PureComponent {
   };
 
   maximize = () => {
-    const { onMaximize, onResize, allowMaximizedWindow } = this.props;
+    const {
+      globalObserver,
+      onMaximize,
+      onResize,
+      allowMaximizedWindow,
+      title,
+    } = this.props;
 
     getIsMobile() && this.rnd.updatePosition({ y: 0 });
 
     switch (this.state.mode) {
       case "minimized":
         // Enlarge back to "window" mode
+        if (this.height === "dynamic") {
+          this.height = "auto";
+        }
         this.enlarge();
         break;
       case "window":
@@ -364,10 +373,12 @@ class Window extends React.PureComponent {
     // Run callbacks
     typeof onMaximize === "function" && onMaximize();
     typeof onResize === "function" && onResize();
+
+    globalObserver.publish("core.maximizeWindow", title);
   };
 
   minimize = () => {
-    const { onMinimize, onResize } = this.props;
+    const { globalObserver, onMinimize, onResize, title } = this.props;
 
     getIsMobile() &&
       this.rnd.updatePosition({
@@ -384,6 +395,8 @@ class Window extends React.PureComponent {
     // Run callbacks
     typeof onMinimize === "function" && onMinimize();
     typeof onResize === "function" && onResize();
+
+    globalObserver.publish("core.minimizeWindow", title);
   };
 
   bringToFront() {
@@ -399,7 +412,6 @@ class Window extends React.PureComponent {
   render() {
     const {
       children,
-      classes,
       color,
       features,
       open,
@@ -421,23 +433,53 @@ class Window extends React.PureComponent {
       resizeTopRight = true;
 
     if (isMobile) {
-      resizeBottom = resizeBottomLeft = resizeBottomRight = resizeRight = resizeTopLeft = resizeTopRight = resizeLeft = false;
+      resizeBottom =
+        resizeBottomLeft =
+        resizeBottomRight =
+        resizeRight =
+        resizeTopLeft =
+        resizeTopRight =
+        resizeLeft =
+          false;
     } else {
       if (this.state.mode === "maximized") {
-        resizeBottom = resizeBottomLeft = resizeBottomRight = resizeRight = resizeTop = resizeTopLeft = resizeTopRight = resizeLeft = false;
+        resizeBottom =
+          resizeBottomLeft =
+          resizeBottomRight =
+          resizeRight =
+          resizeTop =
+          resizeTopLeft =
+          resizeTopRight =
+          resizeLeft =
+            false;
       }
       if (this.state.mode === "minimized") {
-        resizeBottom = resizeBottomLeft = resizeBottomRight = resizeTop = resizeTopLeft = resizeTopRight = resizeLeft = false;
+        resizeBottom =
+          resizeBottomLeft =
+          resizeBottomRight =
+          resizeTop =
+          resizeTopLeft =
+          resizeTopRight =
+          resizeLeft =
+            false;
       }
 
       if (!resizingEnabled) {
-        resizeBottom = resizeBottomLeft = resizeBottomRight = resizeRight = resizeTop = resizeTopLeft = resizeTopRight = resizeLeft = false;
+        resizeBottom =
+          resizeBottomLeft =
+          resizeBottomRight =
+          resizeRight =
+          resizeTop =
+          resizeTopLeft =
+          resizeTopRight =
+          resizeLeft =
+            false;
       }
     }
 
     this.bringToFront();
     return (
-      <Rnd
+      <StyledRnd
         onMouseDown={(e) => {
           this.bringToFront();
         }}
@@ -481,9 +523,8 @@ class Window extends React.PureComponent {
           topLeft: resizeTopLeft,
           topRight: resizeTopRight,
         }}
-        className={classes.window}
         minWidth={200}
-        minHeight={this.state.mode === "minimized" ? 42 : 200}
+        minHeight={this.state.mode === "minimized" ? 42 : 100}
         size={{
           width: width,
           height: height,
@@ -495,23 +536,32 @@ class Window extends React.PureComponent {
           height: height,
         }}
       >
-        <div tabIndex="0" ref={this.windowRef} className={classes.panelContent}>
+        <PanelContent
+          tabIndex="0"
+          ref={this.windowRef}
+          sx={{
+            display: this.props.height === "dynamic" ? "contents" : "flex",
+          }}
+        >
           <PanelHeader
             allowMaximizedWindow={allowMaximizedWindow}
             color={color}
             customHeaderButtons={customPanelHeaderButtons}
             globalObserver={this.props.globalObserver}
+            localObserver={this.props.localObserver}
             onClose={this.close}
             onMaximize={this.maximize}
             onMinimize={this.minimize}
             mode={this.state.mode}
             title={title}
           />
-          <section
-            className={clsx(
-              classes.content,
-              this.props.scrollable ? null : classes.nonScrollable
-            )}
+          <StyledSection
+            sx={{
+              overflowY: this.props.scrollable ? "auto" : "hidden",
+              padding: this.props.scrollable ? "10px" : "0px",
+              maxHeight:
+                this.getMaxWindowHeight() - (isMobile === false ? 50 : -30), // Super-hack special case for small screens
+            }}
           >
             {features && features.length > 0 ? (
               <FeatureInfoContainer
@@ -529,11 +579,11 @@ class Window extends React.PureComponent {
             ) : (
               children
             )}
-          </section>
-        </div>
-      </Rnd>
+          </StyledSection>
+        </PanelContent>
+      </StyledRnd>
     );
   }
 }
 
-export default withStyles(styles)(Window);
+export default Window;

@@ -93,7 +93,8 @@ namespace MapService.Controllers
 			return stream;
 		}
 
-		[HttpOptions]
+#if !DISABLE_CORS_IN_CODE
+        [HttpOptions]
 		public ActionResult PDF()
 		{
 			// Catches and authorises pre-flight requests for /export/kml from remote domains
@@ -102,8 +103,9 @@ namespace MapService.Controllers
 			Response.AddHeader("Access-Control-Allow-Methods", "GET, PUT, POST, DELETE, OPTIONS");
 			return null;
 		}
+#endif
 
-		[HttpPost]
+        [HttpPost]
         public string PDF([System.Web.Http.FromBody]UploadData uploadData)
         {
 			// try to decode input string to see if it is base64 encoded
@@ -195,7 +197,8 @@ namespace MapService.Controllers
             }
         }
 
-		[HttpOptions]
+#if !DISABLE_CORS_IN_CODE
+        [HttpOptions]
 		public ActionResult KML()
 		{
 			// Catches and authorises pre-flight requests for /export/kml from remote domains
@@ -204,8 +207,9 @@ namespace MapService.Controllers
 			Response.AddHeader("Access-Control-Allow-Methods", "GET, PUT, POST, DELETE, OPTIONS");
 			return null;
 		}
+#endif
 
-		[HttpPost]
+        [HttpPost]
 		[ValidateInput(false)]
         public string KML([System.Web.Http.FromBody]UploadData uploadData)
         {			
@@ -226,6 +230,7 @@ namespace MapService.Controllers
             return Request.Url.GetLeftPart(UriPartial.Authority) + "/Temp/" + fileInfo[1];
         }
 
+#if !DISABLE_CORS_IN_CODE
         [HttpOptions]
         public ActionResult Document()
         {
@@ -235,6 +240,7 @@ namespace MapService.Controllers
             Response.AddHeader("Access-Control-Allow-Methods", "GET, PUT, POST, DELETE, OPTIONS");
             return null;
         }
+#endif
 
         [HttpPost]
         public string Document([System.Web.Http.FromBody]UploadData uploadData)

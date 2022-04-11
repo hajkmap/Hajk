@@ -1,8 +1,9 @@
 import React from "react";
-import Grid from "@material-ui/core/Grid";
-import { withStyles } from "@material-ui/core/styles";
+import Grid from "@mui/material/Grid";
+import { styled } from "@mui/material/styles";
 import { withSnackbar } from "notistack";
 import {
+  Badge,
   FormControl,
   FormHelperText,
   InputLabel,
@@ -13,21 +14,20 @@ import {
   Tooltip,
   IconButton,
   InputAdornment,
-} from "@material-ui/core";
-import PaletteIcon from "@material-ui/icons/Palette";
+} from "@mui/material";
+import PaletteIcon from "@mui/icons-material/Palette";
 import { TwitterPicker as ColorPicker } from "react-color";
 
-const styles = (theme) => ({
-  root: {
-    display: "flex",
-    flexWrap: "wrap",
-  },
-  formControl: {
-    width: "100%",
-    margin: theme.spacing(1),
-    display: "flex",
-  },
-});
+const Root = styled(Grid)(() => ({
+  display: "flex",
+  flexWrap: "wrap",
+}));
+
+const FormControlContainer = styled(Grid)(({ theme }) => ({
+  margin: theme.spacing(1),
+  width: "100%",
+  display: "flex",
+}));
 
 class AdvancedOptions extends React.PureComponent {
   state = {
@@ -65,9 +65,21 @@ class AdvancedOptions extends React.PureComponent {
     this.props.setMapTextColor(color);
   };
 
+  allowBottomRightPlacement = () => {
+    if (
+      (this.props.options.copyright ?? "").length > 0 ||
+      (this.props.options.disclaimer ?? "").length > 0
+    ) {
+      // no! This placement is now reserved for copyright and/or disclaimer.
+      return false;
+    }
+    return true;
+  };
+
   renderPlacementSelect = (value, name, changeHandler, disabled) => {
     return (
       <Select
+        variant="standard"
         value={value}
         onChange={changeHandler}
         disabled={disabled}
@@ -78,7 +90,9 @@ class AdvancedOptions extends React.PureComponent {
       >
         <MenuItem value={"topLeft"}>Uppe till vänster</MenuItem>
         <MenuItem value={"topRight"}>Uppe till höger</MenuItem>
-        <MenuItem value={"bottomRight"}>Nere till höger</MenuItem>
+        {this.allowBottomRightPlacement() && (
+          <MenuItem value={"bottomRight"}>Nere till höger</MenuItem>
+        )}
         <MenuItem value={"bottomLeft"}>Nere till vänster</MenuItem>
       </Select>
     );
@@ -87,6 +101,7 @@ class AdvancedOptions extends React.PureComponent {
   renderIncludeSelect = (value, name, changeHandler) => {
     return (
       <Select
+        variant="standard"
         value={value}
         onChange={changeHandler}
         inputProps={{
@@ -102,7 +117,6 @@ class AdvancedOptions extends React.PureComponent {
 
   render() {
     const {
-      classes,
       resolution,
       handleChange,
       mapTextColor,
@@ -118,8 +132,8 @@ class AdvancedOptions extends React.PureComponent {
     } = this.props;
     return (
       <>
-        <Grid container className={classes.root}>
-          <Grid item xs={12} className={classes.formControl}>
+        <Root>
+          <FormControlContainer item xs={12}>
             <FormControl fullWidth={true}>
               <TextField
                 value={mapTitle}
@@ -133,27 +147,37 @@ class AdvancedOptions extends React.PureComponent {
                   name: "mapTitle",
                   endAdornment: (
                     <InputAdornment position="end">
-                      <Tooltip title="Titelfärg påverkar inte kartans etiketter utan styr endast färgen för kringliggande texter, så som titel, copyrighttext, etc.">
-                        <IconButton
-                          id="mapTextColor"
-                          onClick={this.toggleColorPicker}
-                          style={{
-                            backgroundColor: mapTextColor,
-                            marginRight: 4,
-                          }}
-                          edge="start"
-                          size="small"
+                      <Badge
+                        sx={{
+                          "& .MuiBadge-dot": {
+                            backgroundColor: this.props.mapTextColor,
+                          },
+                        }}
+                        badgeContent=" "
+                        variant="dot"
+                      >
+                        <Tooltip
+                          disableInteractive
+                          title="Titelfärg påverkar inte kartans etiketter utan styr endast färgen för kringliggande texter, så som titel, copyrighttext, etc."
                         >
-                          <PaletteIcon />
-                        </IconButton>
-                      </Tooltip>
+                          <IconButton
+                            id="mapTextColor"
+                            onClick={this.toggleColorPicker}
+                            sx={{ marginRight: 0.5 }}
+                            edge="start"
+                            size="small"
+                          >
+                            <PaletteIcon />
+                          </IconButton>
+                        </Tooltip>
+                      </Badge>
                     </InputAdornment>
                   ),
                 }}
               />
             </FormControl>
-          </Grid>
-          <Grid item xs={12} className={classes.formControl}>
+          </FormControlContainer>
+          <FormControlContainer item xs={12}>
             <FormControl fullWidth={true}>
               <TextField
                 value={printComment}
@@ -168,11 +192,14 @@ class AdvancedOptions extends React.PureComponent {
                 }}
               />
             </FormControl>
-          </Grid>
-          <Grid item xs={12} className={classes.formControl}>
+          </FormControlContainer>
+          <FormControlContainer item xs={12}>
             <FormControl fullWidth={true} error={!printOptionsOk}>
-              <InputLabel htmlFor="resolution">Upplösning (DPI)</InputLabel>
+              <InputLabel variant="standard" htmlFor="resolution">
+                Upplösning (DPI)
+              </InputLabel>
               <Select
+                variant="standard"
                 value={resolution}
                 onChange={handleChange}
                 inputProps={{
@@ -180,22 +207,26 @@ class AdvancedOptions extends React.PureComponent {
                   id: "resolution",
                 }}
               >
-                <MenuItem value={72}>72</MenuItem>
-                <MenuItem value={150}>150</MenuItem>
-                <MenuItem value={300}>300</MenuItem>
+                {this.props.options.dpis.map((value, index) => {
+                  return (
+                    <MenuItem key={"dpis_" + index} value={value}>
+                      {value}
+                    </MenuItem>
+                  );
+                })}
               </Select>
               {!printOptionsOk && (
                 <FormHelperText>
                   Bilden kommer inte kunna skrivas ut korrekt. Testa med en
-                  mindre upplösning eller större skala.
+                  lägre upplösning eller mindre skala.
                 </FormHelperText>
               )}
             </FormControl>
-          </Grid>
-          <Grid item xs={12} className={classes.formControl}>
-            <Grid item xs={6} style={{ paddingRight: 10 }}>
+          </FormControlContainer>
+          <FormControlContainer container item>
+            <Grid item xs={6} sx={{ paddingRight: "10px" }}>
               <FormControl fullWidth={true}>
-                <InputLabel htmlFor="includeNorthArrow">
+                <InputLabel variant="standard" htmlFor="includeNorthArrow">
                   Inkludera norrpil
                 </InputLabel>
                 {this.renderIncludeSelect(
@@ -207,7 +238,9 @@ class AdvancedOptions extends React.PureComponent {
             </Grid>
             <Grid item xs={6}>
               <FormControl fullWidth={true}>
-                <InputLabel htmlFor="northArrowPlacement">Placering</InputLabel>
+                <InputLabel variant="standard" htmlFor="northArrowPlacement">
+                  Placering
+                </InputLabel>
                 {this.renderPlacementSelect(
                   northArrowPlacement,
                   "northArrowPlacement",
@@ -216,11 +249,11 @@ class AdvancedOptions extends React.PureComponent {
                 )}
               </FormControl>
             </Grid>
-          </Grid>
-          <Grid item xs={12} className={classes.formControl}>
-            <Grid item xs={6} style={{ paddingRight: 10 }}>
+          </FormControlContainer>
+          <FormControlContainer container item>
+            <Grid item xs={6} sx={{ paddingRight: "10px" }}>
               <FormControl fullWidth={true}>
-                <InputLabel htmlFor="includeScaleBar">
+                <InputLabel variant="standard" htmlFor="includeScaleBar">
                   Inkludera skalstock
                 </InputLabel>
                 {this.renderIncludeSelect(
@@ -232,7 +265,9 @@ class AdvancedOptions extends React.PureComponent {
             </Grid>
             <Grid item xs={6}>
               <FormControl fullWidth={true}>
-                <InputLabel htmlFor="scaleBarPlacement">Placering</InputLabel>
+                <InputLabel variant="standard" htmlFor="scaleBarPlacement">
+                  Placering
+                </InputLabel>
                 {this.renderPlacementSelect(
                   scaleBarPlacement,
                   "scaleBarPlacement",
@@ -241,11 +276,13 @@ class AdvancedOptions extends React.PureComponent {
                 )}
               </FormControl>
             </Grid>
-          </Grid>
-          <Grid item xs={12} className={classes.formControl}>
-            <Grid item xs={6} style={{ paddingRight: 10 }}>
+          </FormControlContainer>
+          <FormControlContainer container item>
+            <Grid item xs={6} sx={{ paddingRight: "10px" }}>
               <FormControl fullWidth={true}>
-                <InputLabel htmlFor="includeLogo">Inkludera logotyp</InputLabel>
+                <InputLabel variant="standard" htmlFor="includeLogo">
+                  Inkludera logotyp
+                </InputLabel>
                 {this.renderIncludeSelect(
                   includeLogo,
                   "includeLogo",
@@ -255,7 +292,9 @@ class AdvancedOptions extends React.PureComponent {
             </Grid>
             <Grid item xs={6}>
               <FormControl fullWidth={true}>
-                <InputLabel htmlFor="logoPlacement">Placering</InputLabel>
+                <InputLabel variant="standard" htmlFor="logoPlacement">
+                  Placering
+                </InputLabel>
                 {this.renderPlacementSelect(
                   logoPlacement,
                   "logoPlacement",
@@ -264,7 +303,7 @@ class AdvancedOptions extends React.PureComponent {
                 )}
               </FormControl>
             </Grid>
-          </Grid>
+          </FormControlContainer>
           <Popover
             id="color-picker-menu"
             anchorEl={this.state.anchorEl}
@@ -289,10 +328,10 @@ class AdvancedOptions extends React.PureComponent {
               onChangeComplete={this.handleMapTextColorChangeComplete}
             />
           </Popover>
-        </Grid>
+        </Root>
       </>
     );
   }
 }
 
-export default withStyles(styles)(withSnackbar(AdvancedOptions));
+export default withSnackbar(AdvancedOptions);

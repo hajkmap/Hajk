@@ -7,18 +7,19 @@
     "Coordinates",
     "DocumentHandler",
     "Draw",
-    "Dummy",
     "Edit",
     "Export",
-    "Informative",
+    "FmeServer",
+    "InfoDialog",
     "LayerSwitcher",
     "Location",
     "Measure",
     "Print",
     "Routing",
     "Search",
+    "Sketch",
     "StreetView",
-    "Suggest"
+    "TimeSlider"
   ],
   "allTools": [
     "Anchor",
@@ -31,15 +32,22 @@
     "Dummy",
     "Edit",
     "Export",
+    "Fir",
     "Fme",
+    "FmeServer",
+    "GeosuiteExport",
+    "InfoDialog",
     "Informative",
+    "Kir",
     "LayerSwitcher",
     "Location",
     "Measure",
     "Print",
     "Routing",
     "Search",
+    "Sketch",
     "StreetView",
-    "Suggest"
+    "TimeSlider",
+    "vtsearch"
   ]
 }

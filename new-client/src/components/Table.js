@@ -1,23 +1,21 @@
 import React from "react";
-import { withStyles } from "@material-ui/core/styles";
 import { hfetch } from "utils/FetchWrapper";
+import { styled } from "@mui/material/styles";
 
-const styles = (theme) => ({
-  table: {
-    borderCollapse: "collapse",
-    borderColor: "black",
-    margin: "10px",
-    "& th": {
-      textAlign: "left",
-    },
-    "& td": {
-      border: "1px solid #999",
-    },
-    "& thead": {
-      borderBottom: "2px solid",
-    },
+const StyledTable = styled("table")(() => ({
+  borderCollapse: "collapse",
+  borderColor: "black",
+  margin: "10px",
+  "& th": {
+    textAlign: "left",
   },
-});
+  "& td": {
+    border: "1px solid #999",
+  },
+  "& thead": {
+    borderBottom: "2px solid",
+  },
+}));
 
 class TableView extends React.PureComponent {
   state = {
@@ -28,7 +26,7 @@ class TableView extends React.PureComponent {
 
   componentDidMount() {
     const { source, feature } = this.props;
-    var url = this.parse(source, feature.getProperties());
+    const url = this.parse(source, feature.getProperties());
     this.load(url);
   }
 
@@ -72,10 +70,9 @@ class TableView extends React.PureComponent {
   }
 
   render() {
-    const { classes } = this.props;
     if (this.state.data) {
       return (
-        <table className={classes.table}>
+        <StyledTable>
           <thead>
             <tr>
               <th>Datum</th>
@@ -90,7 +87,7 @@ class TableView extends React.PureComponent {
               </tr>
             ))}
           </tbody>
-        </table>
+        </StyledTable>
       );
     } else {
       return <div>Laddar</div>;
@@ -98,4 +95,4 @@ class TableView extends React.PureComponent {
   }
 }
 
-export default withStyles(styles)(TableView);
+export default TableView;

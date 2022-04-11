@@ -1,89 +1,85 @@
 import React from "react";
 import VectorFilter from "./VectorFilter";
 import CQLFilter from "./CQLFilter";
-import Typography from "@material-ui/core/Typography";
-import Slider from "@material-ui/core/Slider";
-import { withStyles } from "@material-ui/core/styles";
+import Typography from "@mui/material/Typography";
+import Slider from "@mui/material/Slider";
+import { styled } from "@mui/material/styles";
 
-const styles = (theme) => ({
-  sliderContainer: {
-    display: "flex",
-    flexFlow: "row nowrap",
-    alignItems: "center",
+const SettingsContainer = styled("div")(({ theme }) => ({
+  overflow: "hidden",
+  paddingLeft: "45px",
+  paddingRight: "30px",
+  paddingBottom: "10px",
+  paddingTop: "10px",
+}));
+
+const SliderContainer = styled("div")(({ theme }) => ({
+  display: "flex",
+  flexFlow: "row nowrap",
+  alignItems: "center",
+}));
+
+const SliderTextWrapper = styled("div")(({ theme }) => ({
+  flex: "0 1 auto",
+  minWidth: "40px",
+}));
+
+const SliderWrapper = styled("div")(({ theme }) => ({
+  padding: "0 16px",
+  flex: "1 1 auto",
+  "& > span": {
+    top: "4px",
   },
-  icon: {
-    cursor: "pointer",
-  },
-  settingsContainer: {
-    overflow: "hidden",
-    paddingLeft: "45px",
-    paddingRight: "30px",
-    paddingBottom: "10px",
-    paddingTop: "10px",
-  },
-  subtitle2: {
-    fontWeight: 500,
-  },
-  sliderItem: {
-    padding: "0 16px",
-    flex: "1 1 auto",
-    "& > span": {
-      top: "4px",
-    },
-  },
-  sliderText: {
-    flex: "0 1 auto",
-    minWidth: "40px",
-  },
-});
+}));
 
 class LayerSettings extends React.PureComponent {
   constructor(props) {
     super(props);
 
     const { layer } = props;
-    var layerInfo = layer.get("layerInfo");
+    const layerInfo = layer.get("layerInfo");
+
     this.state = {
-      opacityValue: props.layer.get("opacity"),
+      opacityValue: layer.get("opacity"),
       legend: layerInfo.legend,
     };
-    props.layer.on("change:opacity", this.updateOpacity);
+
+    // Ensure that state is updated when OL Layer's opacity changes
+    layer.on?.("change:opacity", this.updateOpacity);
   }
 
+  // Ensure that opacity slider's value gets updated when
+  // opacity is changed programmatically (e.g. via BreadCrumbs)
   updateOpacity = (e) => {
-    var o = e.target.getOpacity();
-    if (o === 0 || o === 1) {
-      this.setState({
-        opacityValue: o,
-      });
-    }
+    const opacityValue = e.target.getOpacity();
+    this.setState({
+      opacityValue,
+    });
   };
 
   renderOpacitySlider() {
-    let opacityValue = this.state.opacityValue;
-    const { classes } = this.props;
+    const opacityValue = this.state.opacityValue;
     return (
-      <div className={classes.sliderContainer}>
-        <div className={classes.sliderText}>
-          <Typography className={classes.subtitle2} variant="subtitle2">
-            Transparens:
-          </Typography>
-        </div>
-        <div className={classes.sliderItem}>
+      <SliderContainer>
+        <SliderTextWrapper>
+          <Typography variant="subtitle2">Opacitet:</Typography>
+        </SliderTextWrapper>
+        <SliderWrapper>
           <Slider
+            size="small"
             value={opacityValue}
             min={0}
             max={1}
-            step={0.1}
+            step={0.05}
             onChange={this.opacitySliderChanged}
           />
-        </div>
-        <div className={classes.sliderText}>
-          <Typography className={classes.subtitle2} variant="subtitle2">
-            {Math.trunc(100 * (1 - opacityValue).toFixed(1))} %
+        </SliderWrapper>
+        <SliderTextWrapper>
+          <Typography variant="subtitle2">
+            {Math.trunc(100 * opacityValue.toFixed(2))} %
           </Typography>
-        </div>
-      </div>
+        </SliderTextWrapper>
+      </SliderContainer>
     );
   }
 
@@ -98,9 +94,7 @@ class LayerSettings extends React.PureComponent {
    * to worry about any conversion and rounding here.
    * */
   opacitySliderChanged = (event, opacityValue) => {
-    this.setState({ opacityValue }, () => {
-      this.props.layer.setOpacity(this.state.opacityValue);
-    });
+    this.props.layer.setOpacity(opacityValue);
   };
 
   toggle = (e) => {
@@ -112,8 +106,8 @@ class LayerSettings extends React.PureComponent {
   renderSettings() {
     return (
       <div>
-        <div className={this.props.classes.settingsContainer}>
-          {this.props.options.enableTransparencySlider !== false &&
+        <SettingsContainer>
+          {this.props.options?.enableTransparencySlider !== false &&
           this.props.showOpacity
             ? this.renderOpacitySlider()
             : null}
@@ -124,18 +118,15 @@ class LayerSettings extends React.PureComponent {
           {this.props.cqlFilterVisible && (
             <CQLFilter layer={this.props.layer} />
           )}
-        </div>
+        </SettingsContainer>
       </div>
     );
   }
 
   renderLegendImage() {
-    var index = this.props.index ? this.props.index : 0;
+    const index = this.props.index ? this.props.index : 0;
+    const src = this.state.legend?.[index]?.url ?? "";
 
-    var src =
-      this.state.legend[index] && this.state.legend[index].url
-        ? this.state.legend[index].url
-        : "";
     return src ? (
       <div>
         <img max-width="250px" alt="Teckenförklaring" src={src} />
@@ -152,4 +143,4 @@ class LayerSettings extends React.PureComponent {
   }
 }
 
-export default withStyles(styles)(LayerSettings);
+export default LayerSettings;

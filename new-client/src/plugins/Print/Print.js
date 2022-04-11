@@ -4,7 +4,7 @@ import BaseWindowPlugin from "../BaseWindowPlugin";
 import PrintModel from "./PrintModel";
 import PrintView from "./PrintView";
 import Observer from "react-event-observer";
-import PrintIcon from "@material-ui/icons/Print";
+import PrintIcon from "@mui/icons-material/Print";
 
 class Print extends React.PureComponent {
   // Paper dimensions: Array[width, height]
@@ -17,19 +17,15 @@ class Print extends React.PureComponent {
     a5: [210, 148],
   };
 
+  // Default DPIs, used if none supplied in options
+  dpis = [72, 150, 300];
+
+  // Default paperFormats a0-a5, used if none supplied in options
+  paperFormats = Object.keys(this.dims);
+
   // Default scales, used if none supplied in options
   scales = [
-    100,
-    250,
-    500,
-    1000,
-    2500,
-    5000,
-    10000,
-    25000,
-    50000,
-    100000,
-    200000,
+    100, 250, 500, 1000, 2500, 5000, 10000, 25000, 50000, 100000, 200000,
     500000,
   ];
 
@@ -49,6 +45,30 @@ class Print extends React.PureComponent {
       props.options.scales = this.scales;
     }
 
+    // Prepare dpis from admin options, fallback to default if needed
+    if (props?.options?.dpis?.split(",").length > 1) {
+      props.options.dpis = props.options.dpis
+        .replace(/\s/g, "")
+        .split(",")
+        .map((el) => {
+          return parseInt(el);
+        });
+    } else {
+      props.options.dpis = this.dpis;
+    }
+
+    // Prepare paperFormats from admin options, fallback to default if needed
+    if (props?.options?.paperFormats?.split(",").length > 1) {
+      props.options.paperFormats = props.options.paperFormats
+        .replace(/\s/g, "")
+        .split(",")
+        .map((el) => {
+          return el.toLowerCase();
+        });
+    } else {
+      props.options.paperFormats = this.paperFormats;
+    }
+
     // If no valid max logo width is supplied, use a hard-coded default
     props.options.logoMaxWidth =
       typeof props.options?.logoMaxWidth === "number"
@@ -66,6 +86,7 @@ class Print extends React.PureComponent {
       map: props.map,
       options: props.options,
       dims: this.dims,
+      mapConfig: props.app.config.mapConfig.map,
     });
   }
 
@@ -86,7 +107,7 @@ class Print extends React.PureComponent {
           icon: <PrintIcon />,
           title: "Skriv ut",
           description: "Skapa en PDF av kartan",
-          height: 550,
+          height: "dynamic",
           width: 350,
           onWindowShow: this.onWindowShow,
           onWindowHide: this.onWindowHide,

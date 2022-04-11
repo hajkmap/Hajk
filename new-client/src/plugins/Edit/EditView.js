@@ -1,17 +1,17 @@
 import React from "react";
 import Toolbar from "./components/Toolbar";
 import AttributeEditor from "./components/AttributeEditor";
-import FormControl from "@material-ui/core/FormControl";
-import FormHelperText from "@material-ui/core/FormHelperText";
-import { Step, StepContent, StepLabel, Stepper } from "@material-ui/core";
-import MenuItem from "@material-ui/core/MenuItem";
-import InputLabel from "@material-ui/core/InputLabel";
-import Grid from "@material-ui/core/Grid";
-import Button from "@material-ui/core/Button";
-import Select from "@material-ui/core/Select";
-import SaveIcon from "@material-ui/icons/Save";
-import CircularProgress from "@material-ui/core/CircularProgress";
-import Typography from "@material-ui/core/Typography/Typography";
+import FormControl from "@mui/material/FormControl";
+import FormHelperText from "@mui/material/FormHelperText";
+import { Step, StepContent, StepLabel, Stepper } from "@mui/material";
+import MenuItem from "@mui/material/MenuItem";
+import InputLabel from "@mui/material/InputLabel";
+import Grid from "@mui/material/Grid";
+import Button from "@mui/material/Button";
+import Select from "@mui/material/Select";
+import SaveIcon from "@mui/icons-material/Save";
+import CircularProgress from "@mui/material/CircularProgress";
+import Typography from "@mui/material/Typography";
 
 class EditView extends React.PureComponent {
   constructor(props) {
@@ -96,7 +96,7 @@ class EditView extends React.PureComponent {
     if (!data) {
       return (
         <Typography>
-          Uppdatateringen lyckades men det upptäcktes inte några ändringar.
+          Uppdateringen lyckades men det upptäcktes inte några ändringar.
         </Typography>
       );
     }
@@ -117,15 +117,18 @@ class EditView extends React.PureComponent {
           <Typography>Uppdateringen lyckades.</Typography>
           <Typography>
             Antal skapade objekt:{" "}
-            {data.TransactionResponse.TransactionSummary.totalInserted.toString()}
+            {data.TransactionResponse.TransactionSummary.totalInserted?.toString() ||
+              0}
           </Typography>
           <Typography>
             Antal borttagna objekt:{" "}
-            {data.TransactionResponse.TransactionSummary.totalDeleted.toString()}
+            {data.TransactionResponse.TransactionSummary.totalDeleted?.toString() ||
+              0}
           </Typography>
           <Typography>
             Antal uppdaterade objekt:{" "}
-            {data.TransactionResponse.TransactionSummary.totalUpdated.toString()}
+            {data.TransactionResponse.TransactionSummary.totalUpdated?.toString() ||
+              0}
           </Typography>
         </div>
       );
@@ -141,22 +144,40 @@ class EditView extends React.PureComponent {
   onSaveClicked = () => {
     const { model, app } = this.props;
     model.save((response) => {
-      model.filty = false;
-      model.refreshEditingLayer();
-      this.handleNext();
-      app.globalObserver.publish("core.alert", this.getStatusMessage(response));
-      this.toggleActiveTool(undefined);
-      model.deactivateInteraction();
+      if (
+        response &&
+        (response.ExceptionReport || !response.TransactionResponse)
+      ) {
+        this.props.observer.publish("editFeature", model.editFeatureBackup);
+        app.globalObserver.publish(
+          "core.alert",
+          this.getStatusMessage(response)
+        );
+      } else {
+        model.filty = false;
+        model.refreshEditingLayer();
+        model.editFeatureBackup = undefined;
+        this.handleNext();
+        app.globalObserver.publish(
+          "core.alert",
+          this.getStatusMessage(response)
+        );
+        this.toggleActiveTool(undefined);
+        model.deactivateInteraction();
+      }
     });
   };
 
   renderSources() {
     const { loadingError, editSource } = this.state;
     return (
-      <FormControl error={loadingError} fullWidth>
-        <InputLabel id="select-source-label">Datakälla</InputLabel>
+      <FormControl variant="standard" error={loadingError} fullWidth>
+        <InputLabel variant="standard" id="select-source-label">
+          Datakälla
+        </InputLabel>
         <Select
           id="select-source"
+          variant="standard"
           value={editSource?.id || ""}
           onChange={(e) => {
             this.setLayer(e.target.value);
@@ -238,7 +259,11 @@ class EditView extends React.PureComponent {
                 {!editFeature && (
                   <>
                     <Grid item xs={6}>
-                      <Button fullWidth onClick={this.handlePrev}>
+                      <Button
+                        fullWidth
+                        onClick={this.handlePrev}
+                        variant="contained"
+                      >
                         Bakåt
                       </Button>
                     </Grid>

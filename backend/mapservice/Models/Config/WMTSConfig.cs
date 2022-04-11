@@ -12,6 +12,8 @@ namespace MapService.Models.Config
 
         public string caption { get; set; }
 
+        public string internalLayerName { get; set; }
+
         public string url { get; set; }
 
         public string owner { get; set; }
@@ -54,6 +56,12 @@ namespace MapService.Models.Config
 
         public string infoOwner { get; set; }
 
+        public bool timeSliderVisible { get; set; }
+
+        public string timeSliderStart { get; set; }
+
+        public string timeSliderEnd { get; set; }
+        
         public string infoClickSortType { get; set; }
 
         public bool infoClickSortDesc { get; set; }

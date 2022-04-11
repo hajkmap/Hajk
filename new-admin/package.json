@@ -1,43 +1,18 @@
 {
   "name": "hajk-admin",
-  "version": "3.5.0",
-  "private": true,
+  "version": "3.10.0-beta.7",
+  "description": "Hajk Admin UI",
   "homepage": ".",
-  "dependencies": {
-    "@material-ui/core": "^4.10.2",
-    "@material-ui/icons": "^4.9.1",
-    "@material-ui/lab": "^4.0.0-alpha.57",
-    "antd": "^4.1.4",
-    "backbone": "^1.4.0",
-    "draft-js": "^0.11.7",
-    "draft-js-export-html": "^1.4.1",
-    "draft-js-import-html": "^1.4.1",
-    "draft-js-plugins-editor": "^3.0.0",
-    "jquery": "^3.5.1",
-    "jquery-sortable": "^0.9.13",
-    "ol": "^5.3.3",
-    "proj4": "^2.6.2",
-    "react": "^16.13.1",
-    "react-color": "^2.18.1",
-    "react-dom": "^16.13.1",
-    "react-modal": "^3.11.2",
-    "react-scripts": "^3.4.3",
-    "react-smooth-dnd": "^0.11.1",
-    "typescript": "^3.9.5",
-    "x2js": "^3.4.0"
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/hajkmap/Hajk.git"
   },
+  "license": "MIT",
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test --env=jsdom",
     "eject": "react-scripts eject"
-  },
-  "devDependencies": {
-    "draft-convert": "^2.1.10",
-    "draft-extend": "^1.6.5",
-    "husky": "^4.3.7",
-    "prettier": "^2.2.1",
-    "pretty-quick": "^2.0.1"
   },
   "browserslist": [
     ">0.5% in SE",
@@ -47,9 +22,32 @@
     "ie 11",
     "last 100 edge versions"
   ],
-  "husky": {
-    "hooks": {
-      "pre-commit": "pretty-quick --staged"
-    }
+  "dependencies": {
+    "@material-ui/core": "^4.11.4",
+    "@material-ui/icons": "^4.9.1",
+    "@material-ui/lab": "^4.0.0-alpha.58",
+    "antd": "^4.16.6",
+    "backbone": "^1.4.0",
+    "draft-js": "^0.11.7",
+    "draft-js-export-html": "^1.4.1",
+    "draft-js-import-html": "^1.4.1",
+    "draft-js-plugins-editor": "^3.0.0",
+    "jquery": "^3.6.0",
+    "jquery-sortable": "^0.9.13",
+    "ol": "^5.3.3",
+    "proj4": "^2.7.4",
+    "react": "^16.13.1",
+    "react-color": "^2.18.1",
+    "react-dom": "^16.13.1",
+    "react-modal": "^3.14.3",
+    "react-scripts": "^3.4.3",
+    "react-smooth-dnd": "^0.11.1",
+    "typescript": "^3.9.10",
+    "x2js": "^3.4.1"
+  },
+  "devDependencies": {
+    "draft-convert": "^2.1.11",
+    "draft-extend": "^1.6.5",
+    "prettier": "^2.3.2"
   }
 }

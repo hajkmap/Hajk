@@ -1,7 +1,13 @@
 {
   "name": "hajk-backend",
-  "version": "1.0.0",
-  "description": "Hajk backend",
+  "version": "3.10.0-beta.7",
+  "description": "Hajk Backend",
+  "homepage": ".",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/hajkmap/Hajk.git"
+  },
+  "license": "MIT",
   "engines": {
     "node": ">=12.0.0"
   },
@@ -9,7 +15,7 @@
   "scripts": {
     "start": "node dist/index.js",
     "compile": "babel server --out-dir dist --delete-dir-on-start --source-maps inline --copy-files",
-    "dev": "nodemon server --exec babel-node --config .nodemonrc.json",
+    "dev": "nodemon server --exec ./node_modules/.bin/babel-node --config .nodemonrc.json",
     "dev:debug": "nodemon server --exec babel-node --config .nodemonrc.json --inspect",
     "test": "mocha --require @babel/register --exit",
     "test:debug": "mocha --require @babel/register --inspect-brk --exit",
@@ -20,35 +26,33 @@
     "activedirectory2": "^2.1.0",
     "clf-date": "^0.2.0",
     "compression": "^1.7.4",
-    "cookie-parser": "^1.4.5",
+    "cookie-parser": "^1.4.6",
     "cors": "^2.8.5",
-    "dotenv": "^8.2.0",
-    "express": "^4.17.1",
-    "express-openapi-validator": "^3.17.2",
-    "helmet": "^4.4.1",
-    "http-proxy-middleware": "^1.0.6",
-    "log4js": "^6.3.0"
+    "dotenv": "^16.0.0",
+    "express": "^4.17.3",
+    "express-openapi-validator": "^4.13.7",
+    "helmet": "^5.0.2",
+    "http-proxy-middleware": "^2.0.4",
+    "log4js": "^6.4.4",
+    "node-windows": "^1.0.0-beta.7"
   },
   "devDependencies": {
-    "@babel/cli": "^7.12.10",
-    "@babel/core": "^7.12.10",
-    "@babel/node": "^7.12.10",
-    "@babel/plugin-proposal-nullish-coalescing-operator": "^7.12.1",
-    "@babel/plugin-proposal-optional-chaining": "^7.12.7",
-    "@babel/plugin-proposal-private-methods": "^7.12.1",
-    "@babel/preset-env": "^7.12.11",
-    "@babel/register": "^7.12.10",
-    "babel-eslint": "^10.1.0",
-    "chai": "^4.2.0",
-    "eslint": "^7.18.0",
-    "eslint-config-prettier": "^7.2.0",
-    "eslint-plugin-import": "^2.22.1",
+    "@babel/cli": "^7.17.6",
+    "@babel/core": "^7.17.9",
+    "@babel/eslint-parser": "^7.17.0",
+    "@babel/node": "^7.16.8",
+    "@babel/preset-env": "^7.16.11",
+    "@babel/register": "^7.17.7",
+    "chai": "^4.3.6",
+    "eslint": "^8.12.0",
+    "eslint-config-prettier": "^8.5.0",
+    "eslint-plugin-import": "^2.26.0",
     "eslint-plugin-node": "^11.1.0",
-    "eslint-plugin-prettier": "^3.3.1",
-    "mocha": "^8.2.1",
-    "nodemon": "^2.0.7",
-    "prettier": "^2.2.1",
-    "supertest": "^6.0.1"
+    "eslint-plugin-prettier": "^4.0.0",
+    "mocha": "^9.2.2",
+    "nodemon": "^2.0.15",
+    "prettier": "^2.6.2",
+    "supertest": "^6.2.2"
   },
   "author": "Jacob Wodzyński <jacob.wodzynski@halmstad.se> (https://github.com/hajkmap)"
 }

@@ -1,111 +1,148 @@
 import React from "react";
-import { withStyles, withTheme } from "@material-ui/core/styles";
-import ListItem from "@material-ui/core/ListItem";
-import Checkbox from "@material-ui/core/Checkbox";
-import ListItemText from "@material-ui/core/ListItemText";
-import ListItemIcon from "@material-ui/core/ListItemIcon";
-import ExpandLess from "@material-ui/icons/ExpandLess";
-import ExpandMore from "@material-ui/icons/ExpandMore";
-import PropTypes from "prop-types";
-import { Typography } from "@material-ui/core";
+import { styled } from "@mui/material/styles";
+import { visuallyHidden } from "@mui/utils";
 
-const styles = (theme) => ({
-  listItem: { overflowWrap: "break-word" },
-  listItemIcon: { minWidth: theme.spacing(3) },
-  collapseIconRoot: { minWidth: theme.spacing(4) },
-});
+import { withTheme } from "@emotion/react";
+import {
+  Checkbox,
+  Collapse,
+  ListItem,
+  ListItemIcon,
+  ListItemText,
+} from "@mui/material";
+import ExpandLess from "@mui/icons-material/ExpandLess";
+import ExpandMore from "@mui/icons-material/ExpandMore";
+import PrintList from "./PrintList";
+
+const StyledListItemIcon = styled(ListItemIcon)(({ theme }) => ({
+  minWidth: theme.spacing(3),
+}));
+
+const StyledCollapseIcon = styled(ListItemIcon)(({ theme }) => ({
+  ".MuiListItemIcon-root": {
+    minWidth: theme.spacing(4),
+  },
+}));
+const StyledListItem = styled(ListItem)(({ theme }) => ({
+  overflowWrap: "break-word",
+  ".MuiListItem-root": {
+    borderLeft: `${theme.spacing(1)} solid ${theme.palette.background.paper}`,
+    "&.Mui-selected": {
+      borderLeftColor: theme.palette.action.selected,
+    },
+    "&.Mui-selected:hover": {
+      borderLeftColor: theme.palette.action.selected,
+    },
+    "&:hover": {
+      borderColor: theme.palette.action.hover,
+    },
+  },
+}));
 
 class PrintListItem extends React.PureComponent {
-  static propTypes = {
-    chapter: PropTypes.object.isRequired,
+  #getListTitle = () => {
+    const { title } = this.props;
+    return <ListItemText>{title}</ListItemText>;
   };
 
-  state = {
-    expandedSubMenu: false,
-  };
+  #getCollapseIcon = () => {
+    const { title, expanded } = this.props;
 
-  getListTitle = () => {
-    const { chapter } = this.props;
-    return <ListItemText>{chapter.header}</ListItemText>;
-  };
-
-  handleOnExpandIconClick = (e) => {
-    const { toggleSubmenu } = this.props;
-    e.stopPropagation();
-    if (toggleSubmenu) {
-      toggleSubmenu();
-    }
-    this.setState((prevState) => {
-      return { expandedSubMenu: !prevState.expandedSubMenu };
-    });
-  };
-
-  getCollapseIcon = () => {
-    const { classes } = this.props;
-    const { expandedSubMenu } = this.state;
-
-    return expandedSubMenu ? (
-      <ListItemIcon
-        onClick={this.handleOnExpandIconClick}
-        classes={{ root: classes.collapseIconRoot }}
-      >
-        <Typography variant="srOnly">Minimera submeny</Typography>
+    return expanded ? (
+      <StyledCollapseIcon>
+        {!title && <span style={visuallyHidden}>Minimera submeny</span>}
         <ExpandLess />
-      </ListItemIcon>
+      </StyledCollapseIcon>
     ) : (
-      <ListItemIcon
-        onClick={this.handleOnExpandIconClick}
-        classes={{ root: classes.collapseIconRoot }}
-      >
-        <Typography variant="srOnly">Maximera submeny</Typography>
+      <StyledCollapseIcon>
+        {!title && <span style={visuallyHidden}>Maximera submeny</span>}
         <ExpandMore />
-      </ListItemIcon>
+      </StyledCollapseIcon>
     );
+  };
+
+  #hasSubMenu = () => {
+    const { subMenuItems } = this.props;
+    return subMenuItems && subMenuItems.length > 0;
+  };
+
+  #handleMenuButtonClick = (type, id) => {
+    const { localObserver } = this.props;
+    localObserver.publish(`print-${type}-clicked`, id);
+  };
+
+  #getMenuItemStyle = () => {
+    const { theme, level, color, colored } = this.props;
+    const hasSubMenu = this.#hasSubMenu();
+    return colored
+      ? {
+          paddingLeft: theme.spacing(1 + level * 3),
+          borderLeft: `${theme.spacing(0.5)} solid ${color}`,
+          paddingRight: hasSubMenu ? 0 : theme.spacing(1),
+        }
+      : {
+          paddingLeft: theme.spacing(1 + level * 3),
+          paddingRight: hasSubMenu ? 0 : theme.spacing(1),
+        };
   };
 
   render() {
     const {
-      chapter,
-      classes,
-      theme,
-      hasSubChapters,
-      checked,
-      handleCheckboxChange,
+      type,
+      selected,
+      subMenuItems,
+      expanded,
+      level,
+      title,
+      id,
+      chosenForPrint,
     } = this.props;
+    const hasSubMenu = this.#hasSubMenu();
     return (
       <>
-        <ListItem
+        <StyledListItem
           divider
+          selected={selected}
           button
+          ref={this.props.itemRef}
           size="small"
           disableGutters
-          onClick={(e) => handleCheckboxChange(chapter)}
-          aria-controls="submenu"
-          className={classes.listItem}
-          style={{
-            paddingLeft: theme.spacing(1) + theme.spacing(chapter.level * 3),
-            borderLeft: `${theme.spacing(0.5)}px solid ${chapter.color}`,
+          aria-controls={hasSubMenu ? `submenu_${id}` : null}
+          aria-expanded={expanded}
+          onClick={() => {
+            this.#handleMenuButtonClick(type, id);
           }}
+          sx={this.#getMenuItemStyle()}
         >
-          <ListItemIcon className={classes.listItemIcon}>
+          <StyledListItemIcon>
             <Checkbox
               color="primary"
+              checked={chosenForPrint}
               onChange={(e) => {
-                handleCheckboxChange(chapter);
+                this.props.handleTogglePrint(this.props.id);
               }}
               onClick={(e) => e.stopPropagation()}
               edge="start"
-              checked={checked}
               tabIndex={-1}
               disableRipple
             />
-          </ListItemIcon>
-          {chapter.header && this.getListTitle()}
-          {hasSubChapters && this.getCollapseIcon()}
-        </ListItem>
+          </StyledListItemIcon>
+          {title && this.#getListTitle()}
+          {hasSubMenu && this.#getCollapseIcon()}
+        </StyledListItem>
+        {hasSubMenu && (
+          <Collapse id={`submenu_${id}`} in={expanded} timeout={200}>
+            <PrintList
+              {...this.props}
+              level={level + 1}
+              documentMenu={subMenuItems}
+              handleTogglePrint={this.props.handleTogglePrint}
+            ></PrintList>
+          </Collapse>
+        )}
       </>
     );
   }
 }
 
-export default withStyles(styles)(withTheme(PrintListItem));
+export default withTheme(PrintListItem);

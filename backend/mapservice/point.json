@@ -1,9 +1,127 @@
 {
-"type": "FeatureCollection",
-"features": [
-{ "type": "Feature", "properties": { "Participants": [ { "firstName": "JOSÉ", "lastName": "G", "flowType": null, "role": "Fastighetsägare" }, { "firstName": "ELISABETH", "lastName": "G", "flowType": null, "role": "Fastighetsägare" }, { "firstName": "JOSÉ", "lastName": "G", "flowType": null, "role": "Fakturamottagare" } ], "CreatedDate": "2015\/03\/04", "Diary": "Kartavdelningen", "Description": "Kartunderlag för situationsplan", "Type": "7.3.2.1 Upprätta nybyggnadskarta", "URL": "<a href=\"lex:\/\/case\/356589\">356589<\/a>", "Decisions": [ ], "DiaryShortName": "KA", "DiaryNumber": "KA\/2015:1" }, "geometry": { "type": "Point", "coordinates": [ 321803.45, 6368737.06 ] } },
-{ "type": "Feature", "properties": { "Participants": [ { "firstName": "Nordin", "lastName": "stefan", "flowType": null, "role": "-" }, { "firstName": "MARIA", "lastName": "M", "flowType": null, "role": "Fastighetsägare" }, { "firstName": "FRANK", "lastName": "M", "flowType": null, "role": "Fastighetsägare" } ], "CreatedDate": "2015\/03\/05", "Diary": "Kartavdelningen", "Description": "Nybyggnadskarta", "Type": "7.3.2.1 Upprätta nybyggnadskarta", "URL": "<a href=\"lex:\/\/case\/356605\">356605<\/a>", "Decisions": [ ], "DiaryShortName": "KA", "DiaryNumber": "KA\/2015:2" }, "geometry": { "type": "Point", "coordinates": [ 316318.96, 6382764.47 ] } },
-{ "type": "Feature", "properties": { "Participants": [ { "firstName": "Tobias", "lastName": "A", "flowType": null, "role": "-" }, { "firstName": "TOBIAS", "lastName": "A", "flowType": null, "role": "Fastighetsägare" }, { "firstName": "ANNA", "lastName": "A", "flowType": null, "role": "Fastighetsägare" } ], "CreatedDate": "2015\/03\/05", "Diary": "Kartavdelningen", "Description": "Kartunderlag för situationsplan", "Type": "7.3.2.1 Upprätta nybyggnadskarta", "URL": "<a href=\"lex:\/\/case\/356606\">356606<\/a>", "Decisions": [ "{ \"decisionDate\": null, \"denotation\": \"BN\\\/2015 § 5\", \"description\": null }" ], "DiaryShortName": "KA", "DiaryNumber": "KA\/2015:3" }, "geometry": { "type": "Point", "coordinates": [ 320381.73, 6375316.42 ] } },
-{ "type": "Feature", "properties": { "Participants": "erik", "CreatedDate": "2017\/03\/13", "Diary": "", "Description": "Test", "Type": "Point", "URL": "http:\/\/www.googlge.se", "Decisions": null, "DiaryShortName": "KKN", "DiaryNumber": "123" }, "geometry": { "type": "Point", "coordinates": [ 422814.59756201343, 6582298.1517904187 ] } }
-]
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "Participants": [
+          {
+            "firstName": "JOSÉ",
+            "lastName": "G",
+            "flowType": null,
+            "role": "Fastighetsägare"
+          },
+          {
+            "firstName": "ELISABETH",
+            "lastName": "G",
+            "flowType": null,
+            "role": "Fastighetsägare"
+          },
+          {
+            "firstName": "JOSÉ",
+            "lastName": "G",
+            "flowType": null,
+            "role": "Fakturamottagare"
+          }
+        ],
+        "CreatedDate": "2015/03/04",
+        "Diary": "Kartavdelningen",
+        "Description": "Kartunderlag för situationsplan",
+        "Type": "7.3.2.1 Upprätta nybyggnadskarta",
+        "URL": "<a href=\"lex://case/356589\">356589</a>",
+        "Decisions": [],
+        "DiaryShortName": "KA",
+        "DiaryNumber": "KA/2015:1"
+      },
+      "geometry": { "type": "Point", "coordinates": [321803.45, 6368737.06] }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Participants": [
+          {
+            "firstName": "Nordin",
+            "lastName": "stefan",
+            "flowType": null,
+            "role": "-"
+          },
+          {
+            "firstName": "MARIA",
+            "lastName": "M",
+            "flowType": null,
+            "role": "Fastighetsägare"
+          },
+          {
+            "firstName": "FRANK",
+            "lastName": "M",
+            "flowType": null,
+            "role": "Fastighetsägare"
+          }
+        ],
+        "CreatedDate": "2015/03/05",
+        "Diary": "Kartavdelningen",
+        "Description": "Nybyggnadskarta",
+        "Type": "7.3.2.1 Upprätta nybyggnadskarta",
+        "URL": "<a href=\"lex://case/356605\">356605</a>",
+        "Decisions": [],
+        "DiaryShortName": "KA",
+        "DiaryNumber": "KA/2015:2"
+      },
+      "geometry": { "type": "Point", "coordinates": [316318.96, 6382764.47] }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Participants": [
+          {
+            "firstName": "Tobias",
+            "lastName": "A",
+            "flowType": null,
+            "role": "-"
+          },
+          {
+            "firstName": "TOBIAS",
+            "lastName": "A",
+            "flowType": null,
+            "role": "Fastighetsägare"
+          },
+          {
+            "firstName": "ANNA",
+            "lastName": "A",
+            "flowType": null,
+            "role": "Fastighetsägare"
+          }
+        ],
+        "CreatedDate": "2015/03/05",
+        "Diary": "Kartavdelningen",
+        "Description": "Kartunderlag för situationsplan",
+        "Type": "7.3.2.1 Upprätta nybyggnadskarta",
+        "URL": "<a href=\"lex://case/356606\">356606</a>",
+        "Decisions": [
+          "{ \"decisionDate\": null, \"denotation\": \"BN\\/2015 § 5\", \"description\": null }"
+        ],
+        "DiaryShortName": "KA",
+        "DiaryNumber": "KA/2015:3"
+      },
+      "geometry": { "type": "Point", "coordinates": [320381.73, 6375316.42] }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "Participants": "erik",
+        "CreatedDate": "2017/03/13",
+        "Diary": "",
+        "Description": "Test",
+        "Type": "Point",
+        "URL": "http://www.googlge.se",
+        "Decisions": null,
+        "DiaryShortName": "KKN",
+        "DiaryNumber": "123"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [422814.59756201343, 6582298.1517904187]
+      }
+    }
+  ]
 }

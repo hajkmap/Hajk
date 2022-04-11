@@ -1,55 +1,13 @@
 import React from "react";
 import ReactMarkdown from "react-markdown";
-import { withStyles } from "@material-ui/core";
+import rehypeRaw from "rehype-raw";
 import gfm from "remark-gfm";
+import FeaturePropFilters from "./FeaturePropsFilters";
+
 import {
-  Divider,
-  Link,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Typography,
-} from "@material-ui/core";
-
-// Styled Component, makes every second row colored
-const StyledTableRow = withStyles((theme) => ({
-  root: {
-    "&:nth-of-type(even)": {
-      backgroundColor: theme.palette.action.hover,
-    },
-  },
-}))(TableRow);
-
-const StyledTypography = withStyles((theme) => ({
-  h1: {
-    fontSize: "1.6rem",
-    fontWeight: "500",
-  },
-  h2: {
-    fontSize: "1.4rem",
-    fontWeight: "500",
-  },
-  h3: {
-    fontSize: "1.2rem",
-    fontWeight: "500",
-  },
-  h4: {
-    fontSize: "1rem",
-    fontWeight: "500",
-  },
-  h5: {
-    fontSize: "0.875rem",
-    fontWeight: "500",
-  },
-  h6: {
-    fontSize: "0.875rem",
-    fontWeight: "400",
-    fontStyle: "italic",
-  },
-}))(Typography);
+  customComponentsForReactMarkdown,
+  Paragraph,
+} from "utils/customComponentsForReactMarkdown";
 
 export default class FeaturePropsParsing {
   constructor(settings) {
@@ -66,45 +24,49 @@ export default class FeaturePropsParsing {
     // Default to true to ensure backwards compatibility with old configs that predominately use HTML
     this.allowDangerousHtml = this.options.allowDangerousHtml ?? true;
 
-    // Here we define the renderers used by ReactMarkdown, see https://github.com/remarkjs/react-markdown#appendix-b-node-types
-    this.renderers = {
-      text: (text) => {
-        // This helper is passed to ReactMarkdown at render. At this stage,
-        // we expect that the only remaining {stuff} will contain digits, and
-        // that those numbers represent element index in this.asyncComponentsPromises.
-        // So we want to replace all of them with the corresponding component from promises.
-        const match = text.value.match(/{(\d+)}/);
-        if (match) {
-          return this.resolvedPromisesWithComponents[match[1]];
-        } else return text.children;
-      },
-      thematicBreak: () => <Divider />,
-      link: (a) => {
-        return <Link href={a.href}>{a.children}</Link>;
-      },
-      heading: ({ level, children }) => {
+    // Here we define the components used by ReactMarkdown, see https://github.com/remarkjs/react-markdown#appendix-b-components
+    // Note that we import customComponentsForReactMarkdown from our shared library, spread those
+    // objects and finally override the definition of "p", as it differs in this case (we want to
+    // import external components in FeatureInfo, while the normal "p" implementation just maps P to
+    // a MUI Typography component).
+    this.components = {
+      ...customComponentsForReactMarkdown,
+      p: ({ children }) => {
+        if (!children) {
+          return null;
+        }
+
         return (
-          <StyledTypography variant={`h${level}`}>{children}</StyledTypography>
+          <Paragraph variant="body2">
+            {children.map((child, index) => {
+              // Initiate a holder for external components. If a regex matches below,
+              // this variable will be filled with correct value.
+              let externalComponent = null;
+
+              if (child && typeof child === "string") {
+                // This helper is passed to ReactMarkdown at render. At this stage,
+                // we expect that the only remaining {stuff} will contain digits, and
+                // that those numbers represent element index in this.resolvedPromisesWithComponents.
+                // Let's try to match the regex for a number within curly brackets.
+                const match = child.match(/{(\d+)}/);
+                if (
+                  match &&
+                  this.resolvedPromisesWithComponents.hasOwnProperty(match[1])
+                ) {
+                  // If matched, replace the placeholder with the corresponding component.
+                  externalComponent =
+                    this.resolvedPromisesWithComponents[match[1]];
+                }
+              }
+              // If externalComponent isn't null anymore, render it. Else, just render the children.
+              return (
+                <React.Fragment key={index}>
+                  {externalComponent || child}
+                </React.Fragment>
+              );
+            })}
+          </Paragraph>
         );
-      },
-      table: (a) => {
-        return (
-          <TableContainer component="div">
-            <Table size="small">{a.children}</Table>
-          </TableContainer>
-        );
-      },
-      tableHead: (a) => {
-        return <TableHead>{a.children}</TableHead>;
-      },
-      tableBody: (a) => {
-        return <TableBody>{a.children}</TableBody>;
-      },
-      tableRow: (a) => {
-        return <StyledTableRow>{a.children}</StyledTableRow>;
-      },
-      tableCell: (a) => {
-        return <TableCell align={a.align || "inherit"}>{a.children}</TableCell>;
       },
     };
   }
@@ -170,11 +132,22 @@ export default class FeaturePropsParsing {
           ) - 1
         }}`;
       }
+    } else if (placeholder.includes("|")) {
+      return FeaturePropFilters.applyFilters(this.properties, placeholder);
     }
     // Just a "normal" placeholder, e.g. {foobar}
     else {
-      // Grab the actual value from the Properties collection, if not found, fallback to empty string
-      return this.properties[placeholder] || "";
+      // Attempt to grab the actual value from the Properties collection, if not found, fallback to empty string.
+      // Note that we must replace equal sign in property value, else we'd run into trouble, see #812.
+
+      return (
+        // What you see on the next line is what we call "hängslen och livrem" in Sweden.
+        // (The truth is it's all needed - this.properties may not be an Array, it may not have a key named
+        // "placeholder", but if it does, we can't be sure that it will have the replace() method (as only Strings have it).)
+        this.properties?.[placeholder]?.replace?.(/=/g, "&equal;") || // If replace() exists, it's a string, so we can revert our equal signs.
+        this.properties[placeholder] || // If not a string, return the value as-is…
+        "" // …unless it's undefined - in that case, return an empty string.
+      );
     }
   };
 
@@ -198,6 +171,7 @@ export default class FeaturePropsParsing {
       return null;
     }
   };
+
   /**
    * @summary The evaluator helper used in the final stage of markdown string
    * parsing. Extracts <if> tags and either keeps the content (if value evaluates)
@@ -251,6 +225,47 @@ export default class FeaturePropsParsing {
   };
 
   /**
+   * @summary Ensure that the href part in Markdown links is well-formatted
+   * @description Href in Markdown should be UTF8 formatted and have whitespace
+   * escaped (with %20). The easiest way to ensure proper formatting is using the
+   * URL object. But the constructor of URL will crash if the string provided is
+   * not a proper path (e.g. lacks the protocol part). So we use try-catch to
+   * catch such occurrences, and in those cases, we return the anchor pretty much unchanged.
+   *
+   * @param {*} args
+   * @returns
+   */
+  #markdownHrefEncoder = (...args) => {
+    // The named capture groups will be the last parameter
+    const matched = args[args.length - 1];
+
+    // Anchor text and title are simple
+    const text = matched.text;
+    const title = matched.title ? " " + matched.title : "";
+
+    // Anchor href will require some more work.
+    let href = matched.href;
+
+    try {
+      // Try creating a new URL from the matched href.
+      // Invoking new URL will escape any special characters and ensure
+      // that we provide a well-formatted URL to the MarkDown.
+      href = new URL(href);
+    } catch (error) {
+      // If the URL creation failed for some reason (e.g. if a.href was empty,
+      // or if it was a relative path), fall back to using the provided
+      // string as-is, but remember to remove the leading and closing parentheses
+      // that our regex included in the match and encode the URL (i.e. still
+      // transform 'dir/file åäö.pdf' to 'dir/file%20%C3%A5%C3%A4%C3%B6.pdf').
+      href = encodeURI(href);
+    }
+
+    // Prepare a nice MD Anchor string
+    const r = `[${text}](${href}${title})`;
+    return r;
+  };
+
+  /**
    * Converts a JSON-string of properties into a properties object
    * @param {str} properties
    * @returns {object}
@@ -279,7 +294,8 @@ export default class FeaturePropsParsing {
    * @description There are three things going on here:
    * 1. The markdown is used as a template, anything between { and } gets replaced
    * with the real value from properties object, or is left empty.
-   * 2. Next we apply conditional rendering (where statements are between < and >).
+   * 2. Next we apply conditional rendering, where conditions are between {{ and }} while
+   * content is between {{condition}} and {{/condition}}.
    * Currently, if-condition is the only one supported, but more might become available.
    * Depending on the condition value, replacing can occur within our markdown string.
    * 3. The final markdown string is passed to the ReactMarkdown component.
@@ -295,36 +311,59 @@ export default class FeaturePropsParsing {
       // The regex below will match all placeholders.
       // The loop below extracts all placeholders and replaces them with actual values
       // current feature's property collection.
-      // Match any word character, @ sign, dash or dot
-      (this.markdown.match(/{[\w@\-.]+}/g) || []).forEach((placeholder) => {
-        // placeholder is a string, e.g. "{intern_url_1@@documenthandler}" or "{foobar}"
-        // Let's replace all occurrences of the placeholder like this:
-        // {foobar} -> Some nice FoobarValue
-        // {intern_url_1@@documenthandler} -> {n} // n is element index in the array that will hold Promises from external components
-        this.markdown = this.markdown.replace(
-          placeholder,
-          this.#getPropertyValueForPlaceholder(placeholder)
-        );
-      });
+      // Match any word character, range of unicode characters (åäö etc), @ sign, dash or dot
+      (this.markdown.match(/{[\s\w\u00C0-\u00ff@\-|,'.():]+}/g) || []).forEach(
+        (placeholder) => {
+          // placeholder is a string, e.g. "{intern_url_1@@documenthandler}" or "{foobar}"
+          // Let's replace all occurrences of the placeholder like this:
+          // {foobar} -> Some nice FoobarValue
+          // {intern_url_1@@documenthandler} -> {n} // n is element index in the array that will hold Promises from external components
+          this.markdown = this.markdown.replace(
+            placeholder,
+            this.#getPropertyValueForPlaceholder(placeholder)
+          );
+        }
+      );
 
       // this.markdown will now contain actual values instead of properties, OR
       // references to elements in the this.resolvedPromises array. The latter will
       // be the only remaining occurrences of numbers surrounded by curly brackets.
 
-      // Next step is to find all "conditional tags" (i.e. <if foo="bar">baz</if>)
+      // Next step is to find all "conditional tags" (i.e. {{if foo="bar"}}baz{{/if}})
       // and apply the replacer function on all matches.
       // The regex string below does the following:
       // Split each match into 3 named capture groups:
-      // - "condition": the word between < and whitespace, "if" in this example
-      // - "attributes": whatever follows the condition, until we see a >, 'foo="bar"'
-      // - "content": anything after > but before </ and whatever was the result in group one, "Baz"
-      // Note that we include any ending new lines in the match. That's because _if_ we find a match
+      // - "condition": the word between {{ and whitespace, "if" in this example
+      // - "attributes": whatever follows the condition, until we see a }}, 'foo="bar"'
+      // - "content": anything after }} but before {{/ and whatever was the result in group one, "baz"
+      // Note that the match will include one line ending. That's because _if_ we find a match
       // and will remove it, we must remove the line ending too, otherwise we would break the Markdown
       // formatting if only certain strings were to be removed, but all line endings would remain.
       this.markdown = this.markdown.replace(
-        /{{2}(?<condition>\w+)[\s/]?(?<attributes>[^}{2}]+)?}{2}(?<content>[^{{2}]+)?(?:{{2}\/\1}{2}\n*)?/gi,
+        /{{(?<condition>\w+)[\s/]?(?<attributes>[^}}]+)?}}(?<content>[^{{]+)?(?:{{\/\1}}\n?)/gi,
         this.#conditionalReplacer
       );
+
+      // Special precautious must be taken to accommodate white space in Markdown links. We can
+      // of course force our Hajk admins to write correctly formatted links (with URL encoded spaces),
+      // but many times we can not control the URL if it comes from outside source. E.g. imagine this
+      // infoclick setup:
+      // [{anchorText}]({anchorLink})
+      // Depending on values in the database, this can end up as something like this:
+      // [This is a link](https://www.example.com/Some PDF file we link to.pdf)
+      // This will not render correctly, only "https://www.example.com/Some" will become the
+      // href part of the anchor. What we want instead is our MarkDown to contain:
+      // [This is a link](https://www.example.com/Some%20PDF%20file%20we%20link%20to.pdf)
+      // The following regex does just that.
+      this.markdown = this.markdown.replace(
+        /\[(?<text>[^[]+)\]\((?<href>[^")]+)(?<title>".*")?\)/gm,
+        this.#markdownHrefEncoder
+      );
+
+      // Back in #getPropertyValueForPlaceholder we encode all equal signs ("=") as "&equal;",
+      // to ensure we don't run into the issue described in #812 when we do the conditional check.
+      // Now is a good time to revert that encoding back into an equal sign.
+      this.markdown = this.markdown.replace(/&equal;/g, "=");
 
       // The final step is to await for all promises that might exist (if we fetch from
       // external components) to fulfill. We can't render before that!
@@ -332,13 +371,17 @@ export default class FeaturePropsParsing {
         this.pendingPromises
       );
 
+      // If admin wants to allow HTML in Markdown, add rehypeRaw plugin.
+      // Note that the gfm plugin is always added: it gives access to Table syntax.
+      const rehypePlugins = this.allowDangerousHtml ? [rehypeRaw] : [];
+
       // Now, when promises are fulfilled, we can render. One of the render's helpers
       // will make use of the results in this.resolvedPromises, so that's why we had to wait.
       return (
         <ReactMarkdown
-          plugins={[gfm]} // GitHub Formatted Markdown adds support for Tables in MD
-          allowDangerousHtml={this.allowDangerousHtml}
-          renderers={this.renderers} // Custom renderers, see definition in this.renderers
+          remarkPlugins={[gfm]} // GitHub Formatted Markdown adds support for Tables in MD
+          rehypePlugins={rehypePlugins} // Needed to parse HTML, activated in admin
+          components={this.components} // Custom renderers for components, see definition in this.components
           children={this.markdown} // Our MD, as a text string
         />
       );

@@ -1,6 +1,10 @@
 import React, { useState } from "react";
-import { MuiThemeProvider, createMuiTheme } from "@material-ui/core/styles";
-import CssBaseline from "@material-ui/core/CssBaseline";
+import {
+  ThemeProvider,
+  StyledEngineProvider,
+  createTheme,
+} from "@mui/material/styles";
+import CssBaseline from "@mui/material/CssBaseline";
 import App from "./App";
 
 import { deepMerge } from "../utils/DeepMerge";
@@ -16,7 +20,7 @@ function getColorScheme(preferredColorSchemeFromMapConfig, customTheme) {
   // the light/dark mode value is set. If it is, this will override any
   // other logic, which means we're not interested in user's or OS's preference.
   if (["light", "dark"].includes(customTheme?.palette?.type)) {
-    return customTheme.palette.type;
+    return customTheme.palette.mode;
   }
 
   // If there's no global override, we can go on and
@@ -45,8 +49,8 @@ function getColorScheme(preferredColorSchemeFromMapConfig, customTheme) {
         // If there's no preference yet in neither local storage nor admin…
         colorScheme =
           window?.matchMedia("(prefers-color-scheme: dark)").matches === true // …check if browser prefers dark mode…
-            ? "dark" // …if so, use dark mode…
-            : "light"; // … else go for light.
+            ? "dark" // …if so, use dark mode, else go for light.
+            : "light";
         break;
     }
   }
@@ -74,7 +78,7 @@ function getTheme(config, customTheme) {
   // Setup some app-wide defaults that differ from MUI's defaults:
   const hardCodedDefaults = {
     palette: {
-      type: colorScheme,
+      mode: colorScheme,
       action: {
         active: colorScheme === "dark" ? "#fff" : "rgba(0, 0, 0, 0.87)",
       },
@@ -88,7 +92,7 @@ function getTheme(config, customTheme) {
   const themeFromMapConfig = {
     palette: {
       primary: {
-        main: config.mapConfig.map.colors.primaryColor, // primary: blue // <- Can be done like this (don't forget to import blue from "@material-ui/core/colors/blue"!)
+        main: config.mapConfig.map.colors.primaryColor, // primary: blue // <- Can be done like this (don't forget to import blue from "@mui/material/colors/blue"!)
       },
       secondary: {
         main: config.mapConfig.map.colors.secondaryColor, // secondary: { main: "#11cb5f" } // <- Or like this
@@ -110,6 +114,12 @@ const HajkThemeProvider = ({ activeTools, config, customTheme }) => {
   // Keep the app's theme in state so it can be changed dynamically.
   const [theme, setTheme] = useState(getTheme(config, customTheme));
 
+  // We need a state-variable so that we are able to re-render the theme-provider
+  // without changing the theme. Why, you might ask? Since we're using a custom theme
+  // when invoking the document-handler-print we must be able to reset the theme back
+  // to the original one (which requires a re-render).
+  const [themeUID, setThemeUID] = useState(Math.random());
+
   // Handles theme toggling
   const toggleMUITheme = () => {
     // If there's a override in customTheme.json, toggling is not possible.
@@ -117,7 +127,7 @@ const HajkThemeProvider = ({ activeTools, config, customTheme }) => {
 
     // Toggle the current value from theme's palette
     let userPreferredColorScheme =
-      theme.palette.type === "light" ? "dark" : "light";
+      theme.palette.mode === "light" ? "dark" : "light";
 
     // Save for later in browser's local storage
     window.localStorage.setItem(
@@ -129,7 +139,7 @@ const HajkThemeProvider = ({ activeTools, config, customTheme }) => {
     // and merging with the latest theme type value
     const newTheme = deepMerge(theme, {
       palette: {
-        type: userPreferredColorScheme,
+        mode: userPreferredColorScheme,
         action: {
           active:
             userPreferredColorScheme === "dark"
@@ -144,20 +154,32 @@ const HajkThemeProvider = ({ activeTools, config, customTheme }) => {
     setTheme(newTheme);
   };
 
+  // This will cause a re-render, allowing for the "standard" theme to be injected
+  // again - which will make sure that the "standard" theme has the highest css-specificity.
+  // Useful for those rare occasions where you might have used a custom theme inside components.
+  // An example of this is in the document-handler print solution, where we're injecting a custom
+  // print theme, which we want to get rid of.
+  const refreshMUITheme = () => {
+    setThemeUID(themeUID + Math.random());
+  };
+
   // Take the theme object from state and generate a MUI-theme
-  const muiTheme = createMuiTheme(theme);
+  const muiTheme = createTheme(theme);
 
   // Render, pass through some stuff into App.
   return (
-    <MuiThemeProvider theme={muiTheme}>
-      <CssBaseline />
-      <App
-        activeTools={activeTools}
-        config={config}
-        theme={muiTheme}
-        toggleMUITheme={toggleMUITheme} // Pass the toggle handler, so we can call it from another component later on
-      />
-    </MuiThemeProvider>
+    <StyledEngineProvider injectFirst>
+      <ThemeProvider theme={muiTheme}>
+        <CssBaseline />
+        <App
+          activeTools={activeTools}
+          config={config}
+          theme={muiTheme}
+          toggleMUITheme={toggleMUITheme} // Pass the toggle handler, so we can call it from another component later on
+          refreshMUITheme={refreshMUITheme}
+        />
+      </ThemeProvider>
+    </StyledEngineProvider>
   );
 };
 
