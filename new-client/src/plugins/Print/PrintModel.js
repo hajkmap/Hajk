@@ -656,6 +656,10 @@ export default class PrintModel {
     const northingChangePerPixel = (bBox[2] - bBox[0]) / height;
     const eastingChangePerPixel = (bBox[3] - bBox[1]) / width;
     // Then we can construct the bounding-box-string:
+    // The bounding-box is calculated by combining how much the bounding-box
+    // changes per pixel, along with the supplied tile height, width, and position
+    // (presented as pixel-values). For information regarding x, and y, see:
+    // https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/drawImage
     return `${
       bBox[0] + northingChangePerPixel * (height - tile.y - tile.tileHeight)
     },${bBox[1] + eastingChangePerPixel * tile.x},${
@@ -672,6 +676,10 @@ export default class PrintModel {
     const northingChangePerPixel = (bBox[3] - bBox[1]) / height;
     const eastingChangePerPixel = (bBox[2] - bBox[0]) / width;
     // Then we can construct the bounding-box-string:
+    // The bounding-box is calculated by combining how much the bounding-box
+    // changes per pixel, along with the supplied tile height, width, and position
+    // (presented as pixel-values). For information regarding x, and y, see:
+    // https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/drawImage
     return `${bBox[0] + eastingChangePerPixel * tile.x},${
       bBox[1] + northingChangePerPixel * (height - tile.y - tile.tileHeight)
     },${bBox[0] + eastingChangePerPixel * (tile.x + tile.tileWidth)},${
