@@ -21,6 +21,7 @@ export default function ResponsiveDialog(props) {
   const fullScreen = useMediaQuery(theme.breakpoints.down("xs"));
 
   const {
+    children,
     onAbort,
     onClose,
     open,
@@ -60,6 +61,7 @@ export default function ResponsiveDialog(props) {
         <DialogTitle id="responsive-dialog-title">{headerText}</DialogTitle>
       )}
       <DialogContent>
+        {children}
         {useLegacyNonMarkdownRenderer === true ? (
           <LegacyNonMarkdownRenderer text={text} />
         ) : (
