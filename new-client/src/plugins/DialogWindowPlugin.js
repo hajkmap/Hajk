@@ -22,45 +22,45 @@ class DialogWindowPlugin extends React.PureComponent {
   constructor(props) {
     super(props);
 
+    // Merge options with defaults
+    this.opts = { ...props.defaults, ...props.options };
+
     // Many plugins may use this class. Each plugin will have it's unique "type".
     // Some plugins, such as InfoDialog, will also provide a "name" property as
     // an option, to further identify its different instances.
     // We use this information to create a (hopefully) truly unique key, used
     // for local storage settings.
     this.uniqueIdentifier = `${props.type.toLowerCase()}${
-      props.options.name ? "." + props.options.name : ""
+      this.opts.name ? "." + this.opts.name : ""
     }`;
 
-    this.title =
-      props.options.title || props.defaults.title || "Unnamed plugin";
-    this.description =
-      props.options.description ||
-      props.defaults.description ||
-      "No description provided";
+    this.title = this.opts.title || "Unnamed plugin";
+    this.description = this.opts.description || "No description provided";
 
     // Allow Admin UI to provide an icon (as a string that will be turned to
     // a ligature by the MUI Icon component), or fall back to the default icon
     // provided by the creator of the plugin that's using DialogWindowPlugin.
-    this.icon = props.options.icon ? (
-      <Icon>{props.options.icon}</Icon>
-    ) : (
-      props.defaults.icon
-    );
+    this.icon =
+      typeof this.opts.icon === "string" ? (
+        <Icon>{this.opts.icon}</Icon>
+      ) : (
+        this.opts.icon
+      );
   }
 
   componentDidMount() {
-    let dialogOpen = this.props.options.visibleAtStart;
+    let dialogOpen = this.opts.visibleAtStart;
     const localStorageKey = `plugin.${this.uniqueIdentifier}.alreadyShown`;
 
     // TODO: Use LocalStorageHelper so we have a per-map-setting here…
-    if (this.props.options.visibleAtStart === true) {
+    if (this.opts.visibleAtStart === true) {
       if (
-        this.props.options.showOnlyOnce === true &&
+        this.opts.showOnlyOnce === true &&
         parseInt(window.localStorage.getItem(localStorageKey)) === 1
       ) {
         dialogOpen = false;
       } else {
-        if (this.props.options.showOnlyOnce === true) {
+        if (this.opts.showOnlyOnce === true) {
           window.localStorage.setItem(localStorageKey, 1);
         }
         dialogOpen = true;
@@ -93,10 +93,12 @@ class DialogWindowPlugin extends React.PureComponent {
   renderDialog() {
     return createPortal(
       <Dialog
-        options={this.props.options}
+        options={this.opts}
         open={this.state.dialogOpen}
         onClose={this.#onClose}
-      />,
+      >
+        {this.props.children}
+      </Dialog>,
       document.getElementById("windows-container")
     );
   }
@@ -111,7 +113,7 @@ class DialogWindowPlugin extends React.PureComponent {
    */
   renderDrawerButton() {
     return createPortal(
-      <Hidden mdUp={this.#pluginIsWidget(this.props.options.target)}>
+      <Hidden mdUp={this.#pluginIsWidget(this.opts.target)}>
         <ListItem
           button
           divider={true}
@@ -154,7 +156,7 @@ class DialogWindowPlugin extends React.PureComponent {
   }
 
   render() {
-    const { target } = this.props.options;
+    const { target } = this.opts;
     return (
       // Don't render if "clean" query param is specified, otherwise go on
       this.props.app.config.mapConfig.map.clean !== true && (
