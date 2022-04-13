@@ -32,6 +32,7 @@ const styles = (theme) => ({
   },
   firstMenuItem: { minHeight: 36 },
   searchButtonText: { color: theme.palette.primary.main },
+  showLinesCheckbox: { marginLeft: 16 },
 });
 
 //TODO - Only mockup //Tobias
@@ -354,6 +355,7 @@ class Lines extends React.PureComponent {
         <FormControlLabel
           control={
             <Checkbox
+              className={classes.showLinesCheckbox}
               checked={this.checkboxEnabled}
               onChange={this.#handleCheckBoxClick}
             />
