@@ -81,16 +81,14 @@ export default class OlSideBySideControl extends Control {
 
   #addLayerEvent(layers, side) {
     layers.forEach((layer) => {
-      if (layer.prerender) {
-        layer.layer.un("postrender", layer.postrender);
-        layer.postrender = null;
-      }
-      if (layer.postrender) {
-        layer.layer.un("prerender", layer.prerender);
-        layer.prerender = null;
-      }
-      layer.postrender = layer.layer.on("postrender", this.#postrender(side));
-      layer.prerender = layer.layer.on("prerender", this.#prerender(side));
+      const prerenderHandler =
+        side === "left" ? this.#prerenderLeft : this.#prerenderRight;
+
+      layer.layer.un("prerender", prerenderHandler);
+      layer.layer.un("postrender", this.#postrender);
+
+      layer.layer.on("prerender", prerenderHandler);
+      layer.layer.on("postrender", this.#postrender);
     });
   }
 
@@ -111,46 +109,50 @@ export default class OlSideBySideControl extends Control {
   }
 
   ///call back///////////////////////////////////////////////////////////////////////////////////////////////////
-  #postrender(side) {
-    return (event) => {
-      const ctx = event.context;
-      ctx.restore();
-    };
+  #postrender(event) {
+    const ctx = event.context;
+    ctx.restore();
   }
 
-  #prerender(side) {
-    return (event) => {
-      const ctx = event.context;
-      const mapSize = this.getMap().getSize();
-      const width = this.#getPosition();
-      let tl, tr, bl, br;
-      switch (side) {
-        case "left":
-          tl = getRenderPixel(event, [0, 0]);
-          tr = getRenderPixel(event, [width, 0]);
-          bl = getRenderPixel(event, [width, mapSize[1]]);
-          br = getRenderPixel(event, [0, mapSize[1]]);
-          break;
-        case "right":
-          tl = getRenderPixel(event, [width, 0]);
-          tr = getRenderPixel(event, [mapSize[0], 0]);
-          bl = getRenderPixel(event, mapSize);
-          br = getRenderPixel(event, [width, mapSize[1]]);
-          break;
-        default:
-          break;
-      }
+  #prerenderLeft = (event) => {
+    const ctx = event.context;
+    const mapSize = this.getMap().getSize();
+    const width = this.#getPosition();
+    let tl, tr, bl, br;
+    tl = getRenderPixel(event, [0, 0]);
+    tr = getRenderPixel(event, [width, 0]);
+    bl = getRenderPixel(event, [width, mapSize[1]]);
+    br = getRenderPixel(event, [0, mapSize[1]]);
 
-      ctx.save();
-      ctx.beginPath();
-      ctx.moveTo(tl[0], tl[1]);
-      ctx.lineTo(tr[0], tr[1]);
-      ctx.lineTo(bl[0], bl[1]);
-      ctx.lineTo(br[0], br[1]);
-      ctx.closePath();
-      ctx.clip();
-    };
-  }
+    ctx.save();
+    ctx.beginPath();
+    ctx.moveTo(tl[0], tl[1]);
+    ctx.lineTo(tr[0], tr[1]);
+    ctx.lineTo(bl[0], bl[1]);
+    ctx.lineTo(br[0], br[1]);
+    ctx.closePath();
+    ctx.clip();
+  };
+
+  #prerenderRight = (event) => {
+    const ctx = event.context;
+    const mapSize = this.getMap().getSize();
+    const width = this.#getPosition();
+    let tl, tr, bl, br;
+    tl = getRenderPixel(event, [width, 0]);
+    tr = getRenderPixel(event, [mapSize[0], 0]);
+    bl = getRenderPixel(event, mapSize);
+    br = getRenderPixel(event, [width, mapSize[1]]);
+
+    ctx.save();
+    ctx.beginPath();
+    ctx.moveTo(tl[0], tl[1]);
+    ctx.lineTo(tr[0], tr[1]);
+    ctx.lineTo(bl[0], bl[1]);
+    ctx.lineTo(br[0], br[1]);
+    ctx.closePath();
+    ctx.clip();
+  };
   ////call back end//////////////////////////////////////////////////////////////////////////////////////////////////
 
   ///public//////////////////////////////////////////////////////////////////////////////////////////////////
@@ -166,11 +168,46 @@ export default class OlSideBySideControl extends Control {
     return this;
   }
 
+  setCompareLayers(leftLayer, rightLayer) {
+    this.#unsetLayers();
+
+    leftLayer.set("visible", true, true);
+    leftLayer.set("isLeftCompareLayer", true);
+    leftLayer.on("prerender", this.#prerenderLeft);
+    leftLayer.on("postrender", this.#postrender);
+
+    rightLayer.set("visible", true, true);
+    rightLayer.set("isRightCompareLayer", true);
+    rightLayer.on("prerender", this.#prerenderRight);
+    rightLayer.on("postrender", this.#postrender);
+  }
+
+  #unsetLayers = () => {
+    // Grab previous compare layer and hide them
+    this.getMap()
+      .getLayers()
+      .getArray()
+      .filter(
+        (l) =>
+          l.get("isLeftCompareLayer") === true ||
+          l.get("isRightCompareLayer") === true
+      )
+      .forEach((l) => {
+        console.log("hiding: ", l);
+        l.set("visible", false, true);
+        if (l.get("isLeftCompareLayer") === true) {
+          l.set("isLeftCompareLayer", false);
+          l.un("prerender", this.#prerenderLeft);
+        } else {
+          l.set("isRightCompareLayer", false);
+          l.un("prerender", this.#prerenderRight);
+        }
+        l.un("postrender", this.#postrender);
+      });
+  };
+
   remove() {
-    this.#removeLayers(this.#leftLayers);
-    this.#removeLayers(this.#rightLayers);
-    this.#leftLayers = [];
-    this.#rightLayers = [];
+    this.#unsetLayers();
     // remove div
     try {
       this.#container.removeChild(this.#divider);

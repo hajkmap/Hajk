@@ -52,7 +52,7 @@ const LayerComparer = (props) => {
     } else {
       const l1 = props.map.getAllLayers().find((l) => l.ol_uid === layer1);
       const l2 = props.map.getAllLayers().find((l) => l.ol_uid === layer2);
-      console.log("Both layers selected:", l1, l2);
+      console.log("Compare layers:", l1, l2);
 
       // Hide old background layers
       oldBackgroundLayer.current = props.map
@@ -61,8 +61,9 @@ const LayerComparer = (props) => {
       oldBackgroundLayer.current?.setVisible(false);
 
       sds.current.open();
-      sds.current.setLeftLayer(l1);
-      sds.current.setRightLayer(l2);
+      sds.current.setCompareLayers(l1, l2);
+      // sds.current.setLeftLayer(l1);
+      // sds.current.setRightLayer(l2);
       console.log(
         "Visible layers",
         props.map
@@ -71,6 +72,13 @@ const LayerComparer = (props) => {
       );
     }
   }, [layer1, layer2, props.map]);
+
+  const onAbort = () => {
+    sds.current.remove();
+    oldBackgroundLayer.current?.setVisible(true);
+    setLayer1("");
+    setLayer2("");
+  };
 
   return (
     <DialogWindowPlugin
@@ -85,10 +93,14 @@ const LayerComparer = (props) => {
         description: "Jämför två lager sida vid sida", // Shown on Widget button as well as Tooltip for Control button
         headerText: "Jämför två lager sida vid sida",
         buttonText: "OK",
+        abortText: "Nollställ",
+        onAbort: onAbort,
       }}
     >
       {(layer1 === "" || layer2 === "") && (
-        <Alert variant="info">Välj två lager för att jämföra</Alert>
+        <Alert icon={<CompareIcon />} variant="info">
+          Välj två lager för att jämföra
+        </Alert>
       )}
       <SelectDropdown
         setter={setLayer1}
