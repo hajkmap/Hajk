@@ -1,7 +1,6 @@
 import React from "react";
 import { styled } from "@mui/material/styles";
-import TableCell from "@mui/material/TableCell";
-import TableRow from "@mui/material/TableRow";
+import Grid from "@mui/material/Grid";
 import Typography from "@mui/material/Typography";
 import TextField from "@mui/material/TextField";
 import NumberFormat from "react-number-format";
@@ -9,9 +8,23 @@ import { transform } from "ol/proj";
 import { withSnackbar } from "notistack";
 
 const StyledNumberFormat = styled(NumberFormat)(({ theme }) => ({
-  marginLeft: theme.spacing(1),
-  marginRight: theme.spacing(1),
-  marginTop: theme.spacing(2),
+  [theme.breakpoints.down("md")]: {
+    minWidth: "100%",
+  },
+  [theme.breakpoints.up("md")]: {
+    minWidth: 130,
+    marginRight: theme.spacing(1),
+    marginLeft: theme.spacing(1),
+  },
+}));
+
+const StyledGrid = styled(Grid)(({ theme }) => ({
+  borderBottom: "1px solid #e0e0e0",
+  padding: 1,
+}));
+
+const StyledGridColumn = styled(Grid)(({ theme }) => ({
+  width: 130,
 }));
 
 class CoordinatesTransformRow extends React.PureComponent {
@@ -183,52 +196,60 @@ class CoordinatesTransformRow extends React.PureComponent {
 
     if (this.model.showFieldsOnStart || this.state.wasModified) {
       return (
-        <TableRow key={this.props.transformation.code}>
-          <TableCell>
-            <Typography variant="body1" style={{ display: "flex" }}>
+        <StyledGrid
+          container
+          alignItems="center"
+          key={this.props.transformation.code}
+        >
+          <StyledGridColumn>
+            <Typography variant="body2" style={{ display: "flex" }}>
               {this.props.transformation.title}
             </Typography>
             <Typography variant="body2" style={{ display: "flex" }}>
               ({this.props.transformation.code})
             </Typography>
-          </TableCell>
-          <TableCell>
-            <StyledNumberFormat
-              label={this.props.transformation.xtitle}
-              margin="dense"
-              variant="outlined"
-              size="small"
-              value={xCoord}
-              name="numberformatX"
-              type="text"
-              onValueChange={(values) => {
-                this.handleInputX(values);
-              }}
-              axis={this.props.transformation.inverseAxis ? "X" : "Y"}
-              error={this.state.errorX !== ""}
-              helperText={this.state.errorX}
-              thousandSeparator={this.model.thousandSeparator ? " " : false}
-              customInput={TextField}
-            />
-            <StyledNumberFormat
-              label={this.props.transformation.ytitle}
-              margin="dense"
-              size="small"
-              variant="outlined"
-              value={yCoord}
-              name="numberformatY"
-              type="text"
-              onValueChange={(values) => {
-                this.handleInputY(values);
-              }}
-              axis={this.props.transformation.inverseAxis ? "Y" : "X"}
-              error={this.state.errorY !== ""}
-              helperText={this.state.errorY}
-              thousandSeparator={this.model.thousandSeparator ? " " : false}
-              customInput={TextField}
-            />
-          </TableCell>
-        </TableRow>
+          </StyledGridColumn>
+          <Grid container xs={12} sm>
+            <Grid item xs container direction="column">
+              <Grid item xs>
+                <StyledNumberFormat
+                  label={this.props.transformation.xtitle}
+                  margin="dense"
+                  variant="outlined"
+                  size="small"
+                  value={xCoord}
+                  name="numberformatX"
+                  type="text"
+                  onValueChange={(values) => {
+                    this.handleInputX(values);
+                  }}
+                  axis={this.props.transformation.inverseAxis ? "X" : "Y"}
+                  error={this.state.errorX !== ""}
+                  helperText={this.state.errorX}
+                  thousandSeparator={this.model.thousandSeparator ? " " : false}
+                  customInput={TextField}
+                />
+                <StyledNumberFormat
+                  label={this.props.transformation.ytitle}
+                  margin="dense"
+                  size="small"
+                  variant="outlined"
+                  value={yCoord}
+                  name="numberformatY"
+                  type="text"
+                  onValueChange={(values) => {
+                    this.handleInputY(values);
+                  }}
+                  axis={this.props.transformation.inverseAxis ? "Y" : "X"}
+                  error={this.state.errorY !== ""}
+                  helperText={this.state.errorY}
+                  thousandSeparator={this.model.thousandSeparator ? " " : false}
+                  customInput={TextField}
+                />
+              </Grid>
+            </Grid>
+          </Grid>
+        </StyledGrid>
       );
     } else {
       return <></>;
