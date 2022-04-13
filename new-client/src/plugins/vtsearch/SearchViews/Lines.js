@@ -8,6 +8,8 @@ import {
   Divider,
   Grid,
   FormControl,
+  Checkbox,
+  FormControlLabel,
 } from "@material-ui/core";
 import Select from "@material-ui/core/Select";
 import MenuItem from "@material-ui/core/MenuItem";
@@ -131,6 +133,10 @@ class Lines extends React.PureComponent {
       selectedFormType: "",
       searchCallback: this.clearSearchInputAndButtons,
     });
+  };
+
+  #handleCheckBoxClick = (checked) => {
+    this.checkboxEnabled = checked;
   };
 
   handlePolygonClick = () => {
@@ -344,6 +350,12 @@ class Lines extends React.PureComponent {
         >
           <Typography className={classes.searchButtonText}>SÖK</Typography>
         </Button>
+        <FormControlLabel
+          control={
+            <Checkbox checked={false} onChange={this.#handleCheckBoxClick} />
+          }
+          label="Visa hållplatser"
+        />
       </Grid>
     );
   };
