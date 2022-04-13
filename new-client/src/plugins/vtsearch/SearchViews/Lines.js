@@ -136,6 +136,7 @@ class Lines extends React.PureComponent {
   };
 
   #handleCheckBoxClick = (checked) => {
+    window.alert("Hello");
     this.checkboxEnabled = checked;
   };
 
@@ -352,7 +353,10 @@ class Lines extends React.PureComponent {
         </Button>
         <FormControlLabel
           control={
-            <Checkbox checked={false} onChange={this.#handleCheckBoxClick} />
+            <Checkbox
+              checked={this.checkboxEnabled}
+              onChange={this.#handleCheckBoxClick}
+            />
           }
           label="Visa hållplatser"
         />
