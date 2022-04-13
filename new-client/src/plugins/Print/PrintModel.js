@@ -847,6 +847,8 @@ export default class PrintModel {
   // from the server would not show the correct layout for 300 DPI usage).
   // To do this, we first make sure to exchange all tile-layers for image-layers. This is done since
   // OL seems to do some funky stuff to the tile-layers, and image-layers gives us more control.
+  // TODO: Vector-layers, for example from the draw-plugin, must be handled as well. Otherwise, the text
+  // on vector-layers will be very small when printing with high DPI.
   prepareActiveLayersForPrint = (options) => {
     // First we have to exchange all visible tile-layers for image-layers. This is done
     // since the image-layers are easier to work with when we are updating the layer-settings
