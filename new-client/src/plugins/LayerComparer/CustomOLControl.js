@@ -7,14 +7,20 @@ function asArray(arg) {
 }
 
 export default class OlSideBySideControl extends Control {
+  #container = null;
+  #divider = null;
+  #range = null;
+  #leftLayers = [];
+  #rightLayers = [];
+
   constructor() {
-    let container = document.createElement("div");
-    let divider = document.createElement("div");
+    const container = document.createElement("div");
+    const divider = document.createElement("div");
     divider.className = "ol-side-by-side-divider";
     divider.addEventListener("click", function () {
       alert(1);
     });
-    let range = document.createElement("input");
+    const range = document.createElement("input");
     range.type = "range";
     range.min = 0;
     range.max = 1;
@@ -26,62 +32,54 @@ export default class OlSideBySideControl extends Control {
       element: container,
     });
 
-    this._container = container;
-    this._divider = divider;
-    this._range = range;
-    this._leftLayers = [];
-    this._rightLayers = [];
-    this._leftLayer = null;
-    this._rightLayer = null;
-
-    //this.open();
+    this.#container = container;
+    this.#divider = divider;
+    this.#range = range;
   }
 
-  _addEvents() {
-    this._range.addEventListener("input", () => {
-      this._updateClip();
+  #addEvents() {
+    this.#range.addEventListener("input", () => {
+      this.#updateClip();
     });
   }
 
-  _updateClip() {
-    this._divider.style.left = this._getPosition() + "px";
+  #updateClip() {
+    this.#divider.style.left = this.#getPosition() + "px";
     this.getMap().render();
   }
 
-  _getPosition() {
-    let rangeValue = this._range.value;
+  #getPosition() {
+    let rangeValue = this.#range.value;
     let offset = (0.5 - rangeValue) * (2 * 0 + 42);
     let size = this.getMap().getSize(); // [width, height]
     return size[0] * Number(rangeValue) + offset;
   }
 
-  _updateLayer(layers, layer) {
-    let _layers = asArray(layer);
-    _layers.forEach((layer) => {
-      if (layers.indexOf(layer) >= 0) return;
+  #updateLayer(existingLayers, layer) {
+    const layers = asArray(layer);
+    layers.forEach((layer) => {
+      if (existingLayers.indexOf(layer) >= 0) return;
       let ind = this.getMap().getLayers().getArray().indexOf(layer);
       if (ind >= 0) {
-        console.log("ind: ", ind);
         layer = this.getMap().getLayers().item(ind);
         layer.setVisible(true);
       } else {
-        console.log("!!!ADDING NEW LAYER!!!");
         this.getMap().addLayer(layer);
       }
-      layers.push({
+      existingLayers.push({
         layer: layer,
         postrender: null,
         prerender: null,
       });
     });
 
-    this._addLayerEvent(this._leftLayers, "left");
-    this._addLayerEvent(this._rightLayers, "right");
+    this.#addLayerEvent(this.#leftLayers, "left");
+    this.#addLayerEvent(this.#rightLayers, "right");
 
-    this._updateClip();
+    this.#updateClip();
   }
 
-  _addLayerEvent(layers, side) {
+  #addLayerEvent(layers, side) {
     layers.forEach((layer) => {
       if (layer.prerender) {
         layer.layer.un("postrender", layer.postrender);
@@ -91,13 +89,13 @@ export default class OlSideBySideControl extends Control {
         layer.layer.un("prerender", layer.prerender);
         layer.prerender = null;
       }
-      layer.postrender = layer.layer.on("postrender", this._postrender(side));
-      layer.prerender = layer.layer.on("prerender", this._prerender(side));
+      layer.postrender = layer.layer.on("postrender", this.#postrender(side));
+      layer.prerender = layer.layer.on("prerender", this.#prerender(side));
     });
   }
 
-  _removeLayers(layers) {
-    layers.forEach((layer) => {
+  #removeLayers(existingLayers) {
+    existingLayers.forEach((layer) => {
       console.log("remove layer: ", layer);
       if (layer.prerender) {
         layer.layer.un("prerender", layer.prerender);
@@ -113,19 +111,18 @@ export default class OlSideBySideControl extends Control {
   }
 
   ///call back///////////////////////////////////////////////////////////////////////////////////////////////////
-  _postrender(side) {
-    return function (event) {
-      let ctx = event.context;
+  #postrender(side) {
+    return (event) => {
+      const ctx = event.context;
       ctx.restore();
     };
   }
 
-  _prerender(side) {
-    let that = this;
-    return function (event) {
-      let ctx = event.context;
-      let mapSize = that.getMap().getSize();
-      let width = that._getPosition();
+  #prerender(side) {
+    return (event) => {
+      const ctx = event.context;
+      const mapSize = this.getMap().getSize();
+      const width = this.#getPosition();
       let tl, tr, bl, br;
       switch (side) {
         case "left":
@@ -139,6 +136,8 @@ export default class OlSideBySideControl extends Control {
           tr = getRenderPixel(event, [mapSize[0], 0]);
           bl = getRenderPixel(event, mapSize);
           br = getRenderPixel(event, [width, mapSize[1]]);
+          break;
+        default:
           break;
       }
 
@@ -156,35 +155,35 @@ export default class OlSideBySideControl extends Control {
 
   ///public//////////////////////////////////////////////////////////////////////////////////////////////////
   setLeftLayer(leftLayer) {
-    this._removeLayers(this._leftLayers);
-    this._updateLayer(this._leftLayers, leftLayer);
+    this.#removeLayers(this.#leftLayers);
+    this.#updateLayer(this.#leftLayers, leftLayer);
     return this;
   }
 
   setRightLayer(rightLayer) {
-    this._removeLayers(this._rightLayers);
-    this._updateLayer(this._rightLayers, rightLayer);
+    this.#removeLayers(this.#rightLayers);
+    this.#updateLayer(this.#rightLayers, rightLayer);
     return this;
   }
 
   remove() {
-    this._removeLayers(this._leftLayers);
-    this._removeLayers(this._rightLayers);
-    this._leftLayer = [];
-    this._rightLayer = [];
+    this.#removeLayers(this.#leftLayers);
+    this.#removeLayers(this.#rightLayers);
+    this.#leftLayers = [];
+    this.#rightLayers = [];
     // remove div
     try {
-      this._container.removeChild(this._divider);
-      this._container.removeChild(this._range);
+      this.#container.removeChild(this.#divider);
+      this.#container.removeChild(this.#range);
     } catch (error) {
       console.log(error);
     }
   }
 
   open() {
-    this._container.appendChild(this._divider);
-    this._container.appendChild(this._range);
-    this._addEvents();
+    this.#container.appendChild(this.#divider);
+    this.#container.appendChild(this.#range);
+    this.#addEvents();
   }
   ///public end//////////////////////////////////////////////////////////////////////////////////////////////////
 }
