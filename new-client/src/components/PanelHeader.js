@@ -33,12 +33,6 @@ class PanelHeader extends Component {
     title: propTypes.string.isRequired,
   };
 
-  constructor(props) {
-    super(props);
-
-    this.localObserver = this.props.localObserver;
-  }
-
   renderCustomHeaderButtons = () => {
     const { customHeaderButtons } = this.props;
     return customHeaderButtons.map((buttonInfo, index) => {
