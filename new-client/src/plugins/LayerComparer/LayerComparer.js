@@ -58,13 +58,11 @@ const LayerComparer = (props) => {
       oldBackgroundLayer.current = props.map
         .getAllLayers()
         .find((l) => l.getVisible() === true && l.layerType === "base");
-      oldBackgroundLayer.current.setVisible(false);
+      oldBackgroundLayer.current?.setVisible(false);
 
       sds.current.open();
       sds.current.setLeftLayer(l1);
       sds.current.setRightLayer(l2);
-      l1.setVisible(true);
-      l2.setVisible(true);
       console.log(
         "Visible layers",
         props.map
@@ -95,6 +93,7 @@ const LayerComparer = (props) => {
       <SelectDropdown
         setter={setLayer1}
         value={layer1}
+        counterValue={layer2}
         baseLayers={baseLayers}
         layers={layers}
         label="Lager 1"
@@ -102,6 +101,7 @@ const LayerComparer = (props) => {
       <SelectDropdown
         setter={setLayer2}
         value={layer2}
+        counterValue={layer1}
         baseLayers={baseLayers}
         layers={layers}
         label="Lager 2"
@@ -111,7 +111,7 @@ const LayerComparer = (props) => {
 };
 
 const SelectDropdown = (props) => {
-  const { setter, value, baseLayers, layers, label } = props;
+  const { setter, value, counterValue, baseLayers, layers, label } = props;
 
   const handleChange = (setter, value) => {
     setter(value);
@@ -132,7 +132,7 @@ const SelectDropdown = (props) => {
           <ListSubheader>Bakgrundslager</ListSubheader>
           {baseLayers.map((l, i) => {
             return (
-              <MenuItem key={i} value={l.id}>
+              <MenuItem key={i} value={l.id} disabled={l.id === counterValue}>
                 {l.label}
               </MenuItem>
             );
