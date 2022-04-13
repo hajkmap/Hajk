@@ -2,24 +2,17 @@ import Control from "ol/control/Control";
 import { getRenderPixel } from "ol/render";
 import "./index.css";
 
-function asArray(arg) {
-  return arg === "undefined" ? [] : Array.isArray(arg) ? arg : [arg];
-}
-
 export default class OlSideBySideControl extends Control {
   #container = null;
   #divider = null;
   #range = null;
-  #leftLayers = [];
-  #rightLayers = [];
 
   constructor() {
     const container = document.createElement("div");
+
     const divider = document.createElement("div");
     divider.className = "ol-side-by-side-divider";
-    divider.addEventListener("click", function () {
-      alert(1);
-    });
+
     const range = document.createElement("input");
     range.type = "range";
     range.min = 0;
@@ -49,80 +42,21 @@ export default class OlSideBySideControl extends Control {
   }
 
   #getPosition() {
-    let rangeValue = this.#range.value;
-    let offset = (0.5 - rangeValue) * (2 * 0 + 42);
-    let size = this.getMap().getSize(); // [width, height]
+    const rangeValue = this.#range.value;
+    const offset = (0.5 - rangeValue) * (2 * 0 + 42);
+    const size = this.getMap().getSize();
     return size[0] * Number(rangeValue) + offset;
-  }
-
-  #updateLayer(existingLayers, layer) {
-    const layers = asArray(layer);
-    layers.forEach((layer) => {
-      if (existingLayers.indexOf(layer) >= 0) return;
-      let ind = this.getMap().getLayers().getArray().indexOf(layer);
-      if (ind >= 0) {
-        layer = this.getMap().getLayers().item(ind);
-        layer.setVisible(true);
-      } else {
-        this.getMap().addLayer(layer);
-      }
-      existingLayers.push({
-        layer: layer,
-        postrender: null,
-        prerender: null,
-      });
-    });
-
-    this.#addLayerEvent(this.#leftLayers, "left");
-    this.#addLayerEvent(this.#rightLayers, "right");
-
-    this.#updateClip();
-  }
-
-  #addLayerEvent(layers, side) {
-    layers.forEach((layer) => {
-      const prerenderHandler =
-        side === "left" ? this.#prerenderLeft : this.#prerenderRight;
-
-      layer.layer.un("prerender", prerenderHandler);
-      layer.layer.un("postrender", this.#postrender);
-
-      layer.layer.on("prerender", prerenderHandler);
-      layer.layer.on("postrender", this.#postrender);
-    });
-  }
-
-  #removeLayers(existingLayers) {
-    existingLayers.forEach((layer) => {
-      console.log("remove layer: ", layer);
-      if (layer.prerender) {
-        layer.layer.un("prerender", layer.prerender);
-        layer.prerender = null;
-      }
-      if (layer.postrender) {
-        layer.layer.un("postrender", layer.postrender);
-        layer.postrender = null;
-      }
-      layer.layer.setVisible(false);
-      // this.getMap().removeLayer(layer.layer);
-    });
-  }
-
-  ///call back///////////////////////////////////////////////////////////////////////////////////////////////////
-  #postrender(event) {
-    const ctx = event.context;
-    ctx.restore();
   }
 
   #prerenderLeft = (event) => {
     const ctx = event.context;
     const mapSize = this.getMap().getSize();
     const width = this.#getPosition();
-    let tl, tr, bl, br;
-    tl = getRenderPixel(event, [0, 0]);
-    tr = getRenderPixel(event, [width, 0]);
-    bl = getRenderPixel(event, [width, mapSize[1]]);
-    br = getRenderPixel(event, [0, mapSize[1]]);
+
+    const tl = getRenderPixel(event, [0, 0]);
+    const tr = getRenderPixel(event, [width, 0]);
+    const bl = getRenderPixel(event, [width, mapSize[1]]);
+    const br = getRenderPixel(event, [0, mapSize[1]]);
 
     ctx.save();
     ctx.beginPath();
@@ -138,11 +72,11 @@ export default class OlSideBySideControl extends Control {
     const ctx = event.context;
     const mapSize = this.getMap().getSize();
     const width = this.#getPosition();
-    let tl, tr, bl, br;
-    tl = getRenderPixel(event, [width, 0]);
-    tr = getRenderPixel(event, [mapSize[0], 0]);
-    bl = getRenderPixel(event, mapSize);
-    br = getRenderPixel(event, [width, mapSize[1]]);
+
+    const tl = getRenderPixel(event, [width, 0]);
+    const tr = getRenderPixel(event, [mapSize[0], 0]);
+    const bl = getRenderPixel(event, mapSize);
+    const br = getRenderPixel(event, [width, mapSize[1]]);
 
     ctx.save();
     ctx.beginPath();
@@ -153,33 +87,10 @@ export default class OlSideBySideControl extends Control {
     ctx.closePath();
     ctx.clip();
   };
-  ////call back end//////////////////////////////////////////////////////////////////////////////////////////////////
 
-  ///public//////////////////////////////////////////////////////////////////////////////////////////////////
-  setLeftLayer(leftLayer) {
-    this.#removeLayers(this.#leftLayers);
-    this.#updateLayer(this.#leftLayers, leftLayer);
-    return this;
-  }
-
-  setRightLayer(rightLayer) {
-    this.#removeLayers(this.#rightLayers);
-    this.#updateLayer(this.#rightLayers, rightLayer);
-    return this;
-  }
-
-  setCompareLayers(leftLayer, rightLayer) {
-    this.#unsetLayers();
-
-    leftLayer.set("visible", true, true);
-    leftLayer.set("isLeftCompareLayer", true);
-    leftLayer.on("prerender", this.#prerenderLeft);
-    leftLayer.on("postrender", this.#postrender);
-
-    rightLayer.set("visible", true, true);
-    rightLayer.set("isRightCompareLayer", true);
-    rightLayer.on("prerender", this.#prerenderRight);
-    rightLayer.on("postrender", this.#postrender);
+  #postrender(event) {
+    const ctx = event.context;
+    ctx.restore();
   }
 
   #unsetLayers = () => {
@@ -193,7 +104,6 @@ export default class OlSideBySideControl extends Control {
           l.get("isRightCompareLayer") === true
       )
       .forEach((l) => {
-        console.log("hiding: ", l);
         l.set("visible", false, true);
         if (l.get("isLeftCompareLayer") === true) {
           l.set("isLeftCompareLayer", false);
@@ -206,15 +116,37 @@ export default class OlSideBySideControl extends Control {
       });
   };
 
-  remove() {
+  setCompareLayers(leftLayer, rightLayer) {
+    // Unset possible previous compare layers
     this.#unsetLayers();
-    // remove div
+
+    // Set visibility, silently (don't trigger a map render at this time)
+    leftLayer.set("visible", true, true);
+
+    // Set a unique flag - used later
+    leftLayer.set("isLeftCompareLayer", true);
+
+    // Add the render event handler that will split the screen in two
+    leftLayer.on("prerender", this.#prerenderLeft);
+    leftLayer.on("postrender", this.#postrender);
+
+    // Do the same for the other side of the screen
+    rightLayer.set("visible", true, true);
+    rightLayer.set("isRightCompareLayer", true);
+    rightLayer.on("prerender", this.#prerenderRight);
+    rightLayer.on("postrender", this.#postrender);
+  }
+
+  remove() {
+    // Hide previous compare layers and remove custom render handlers
+    this.#unsetLayers();
+
+    // Remove the DIV. Do it in a try/catch, else the DOM will throw
+    // an error if element can't be found.
     try {
       this.#container.removeChild(this.#divider);
       this.#container.removeChild(this.#range);
-    } catch (error) {
-      console.log(error);
-    }
+    } catch (error) {}
   }
 
   open() {
@@ -222,5 +154,4 @@ export default class OlSideBySideControl extends Control {
     this.#container.appendChild(this.#range);
     this.#addEvents();
   }
-  ///public end//////////////////////////////////////////////////////////////////////////////////////////////////
 }

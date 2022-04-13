@@ -40,7 +40,6 @@ const LayerComparer = (props) => {
   }, [props.map]);
 
   useEffect(() => {
-    console.log("Creating and adding SDS control to Map");
     sds.current = new SDSControl();
     props.map.addControl(sds.current);
   }, [props.map]);
@@ -49,10 +48,12 @@ const LayerComparer = (props) => {
     if (layer1 === "" || layer2 === "") {
       // Show previous background
       oldBackgroundLayer.current?.setVisible(true);
+
+      // Remove the slider as soon as one of the compare layers is not selected
+      sds.current.remove();
     } else {
       const l1 = props.map.getAllLayers().find((l) => l.ol_uid === layer1);
       const l2 = props.map.getAllLayers().find((l) => l.ol_uid === layer2);
-      console.log("Compare layers:", l1, l2);
 
       // Hide old background layers
       oldBackgroundLayer.current = props.map
@@ -62,14 +63,6 @@ const LayerComparer = (props) => {
 
       sds.current.open();
       sds.current.setCompareLayers(l1, l2);
-      // sds.current.setLeftLayer(l1);
-      // sds.current.setRightLayer(l2);
-      console.log(
-        "Visible layers",
-        props.map
-          .getAllLayers()
-          .filter((l) => l.getVisible() === true && l.layerType === "base")
-      );
     }
   }, [layer1, layer2, props.map]);
 
