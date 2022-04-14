@@ -1,3 +1,5 @@
+import { MockdataSearchModel } from "./Mockdata/MockdataSearchModel";
+
 /**
  * @summary SearchModel used for VT specific searches.
  * @description NEED TO ADD A DESCRIPTION
@@ -781,6 +783,9 @@ export default class SearchModel {
    * @memberof SearchModel
    */
   fetchAllPossibleMunicipalityZoneNames(addEmptyMunicipality = true) {
+    if (!this?.geoServer?.municipalityZoneNames?.url)
+      return this.#returnMockDataMunicipalityZoneNames();
+
     const url = this.geoServer.municipalityZoneNames.url;
     return fetch(url)
       .then((res) => {
@@ -807,6 +812,11 @@ export default class SearchModel {
       });
   }
 
+  #returnMockDataMunicipalityZoneNames = () => {
+    return new Promise((resolve) => {
+      resolve(MockdataSearchModel().municipalities);
+    });
+  };
   /**
    * Function that fetch all transport mode type names and numbers.
    * @param {boolean} addEmptyMunicipality <option value="true">Adds an empty transport mode at the beginning of the array. </option>
@@ -815,6 +825,9 @@ export default class SearchModel {
    * @memberof SearchModel
    */
   fetchAllPossibleTransportModeTypeNames(addEmptyTransportMode = true) {
+    if (!this?.geoServer?.transportModeTypeNames?.url)
+      return this.#returnMockDataTransportModeTypeNames();
+
     this.localObserver.publish("transportModeTypeNames-result-begin", {
       label: this.geoServer.transportModeTypeNames.searchLabel,
     });
@@ -833,6 +846,12 @@ export default class SearchModel {
     });
   }
 
+  #returnMockDataTransportModeTypeNames = () => {
+    return new Promise((resolve) => {
+      resolve(MockdataSearchModel().modeTypeNames);
+    });
+  };
+
   /**
    * Gets requested journeys. Sends an event when the function is called and another one when it's promise is done.
    * @param {string} fromTime Start time, pass null if no start time is given.
@@ -842,6 +861,8 @@ export default class SearchModel {
    * @memberof SearchModel
    */
   getJourneys(filterOnFromDate, filterOnToDate, filterOnWkt) {
+    if (!this?.geoServer?.journeys?.url) return this.#returnMockDataJourneys();
+
     this.localObserver.publish("vtsearch-result-begin", {
       label: this.geoServer.journeys.searchLabel,
     });
@@ -893,6 +914,12 @@ export default class SearchModel {
       });
   }
 
+  #returnMockDataJourneys = () => {
+    return new Promise((resolve) => {
+      resolve(MockdataSearchModel().journeys);
+    });
+  };
+
   /**
    * Gets all Routes. Sends an event when the function is called and another one when it's promise is done.
    * @param {string} publicLineName Public line name.
@@ -912,6 +939,19 @@ export default class SearchModel {
     stopAreaNameOrNumber,
     polygonAsWkt
   ) {
+    if (!this?.geoServer?.routes?.url) {
+      let routes = {
+        featureCollection: MockdataSearchModel().routes,
+        label: this.geoServer.routes.searchLabel,
+        type: "routes",
+      };
+      debugger;
+      this.#returnRoutes(
+        routes,
+        MockdataSearchModel().routes.attributesToDisplay
+      );
+      return;
+    }
     this.localObserver.publish("vtsearch-result-begin", {
       label: this.geoServer.routes.searchLabel,
     });
@@ -982,23 +1022,22 @@ export default class SearchModel {
             type: "routes",
           };
 
-          routes.featureCollection = this.removeUnnecessaryAttributes(
-            routes.featureCollection,
-            this.attributesToKeepFromSettings(
-              this.geoServer.routes.attributesToDisplay
-            )
-          );
-          routes.featureCollection = this.removeDuplicates(
-            routes.featureCollection
-          );
-
-          this.localObserver.publish("vtsearch-result-done", routes);
+          this.#returnRoutes(routes, this.geoServer.routes.attributesToDisplay);
         });
       })
       .catch((err) => {
         console.log(err);
       });
   }
+
+  #returnRoutes = (routes, attributesToDisplay) => {
+    routes.featureCollection = this.removeUnnecessaryAttributes(
+      routes.featureCollection,
+      this.attributesToKeepFromSettings(attributesToDisplay)
+    );
+    routes.featureCollection = this.removeDuplicates(routes.featureCollection);
+    this.localObserver.publish("vtsearch-result-done", routes);
+  };
 
   /**
    * Get all stop areas. Sends an event when the function is called and another one when it's promise is done.
@@ -1015,6 +1054,8 @@ export default class SearchModel {
     filterOnMunicipalGid,
     filterOnWkt
   ) {
+    if (!this?.geoServer?.stopAreas?.url)
+      return this.#returnMockDataStopAreas();
     this.localObserver.publish("vtsearch-result-begin", {
       label: this.geoServer.stopAreas.searchLabel,
     });
@@ -1073,6 +1114,13 @@ export default class SearchModel {
     });
   }
 
+  #returnMockDataStopAreas = () => {
+    return new Promise((resolve) => {
+      debugger;
+      resolve(MockdataSearchModel().stopAreas);
+    });
+  };
+
   /**
    * Get all stop points. Sends an event when the function is called and another one when it's promise is done.
    * @param {string} filterOnNameOrNumber The public name or the number of the stop point, pass null of no name is given.
@@ -1088,6 +1136,9 @@ export default class SearchModel {
     filterOnMunicipalGid,
     filterOnWkt
   ) {
+    if (!this?.geoServer?.stopPoints?.url)
+      return this.#returnMockDataStopPoints();
+
     this.localObserver.publish("vtsearch-result-begin", {
       label: this.geoServer.stopPoints.searchLabel,
     });
@@ -1145,6 +1196,12 @@ export default class SearchModel {
         });
     });
   }
+
+  #returnMockDataStopPoints = () => {
+    return new Promise((resolve) => {
+      resolve(MockdataSearchModel().stopPoints);
+    });
+  };
 
   /**
    * Returns the global Map object.
