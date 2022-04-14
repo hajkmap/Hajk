@@ -32,7 +32,7 @@ const styles = (theme) => ({
   },
   firstMenuItem: { minHeight: 36 },
   searchButtonText: { color: theme.palette.primary.main },
-  showLinesCheckbox: { marginLeft: 16 },
+  showLinesCheckbox: { marginLeft: 8, marginTop: 6 },
 });
 
 //TODO - Only mockup //Tobias
@@ -137,7 +137,6 @@ class Lines extends React.PureComponent {
   };
 
   #handleCheckBoxClick = (checked) => {
-    window.alert("Hello");
     this.checkboxEnabled = checked;
   };
 
@@ -227,13 +226,13 @@ class Lines extends React.PureComponent {
     });
   };
 
-  handleKeyPress = (event) => {
+  #handleKeyPress = (event) => {
     if (event.key === "Enter") {
       this.doSearch();
     }
   };
 
-  renderPublicAndTechnicalNrSection = () => {
+  #renderPublicAndTechnicalNrSection = () => {
     return (
       <>
         <Grid item xs={6}>
@@ -256,7 +255,7 @@ class Lines extends React.PureComponent {
     );
   };
 
-  renderInputValueSection = () => {
+  #renderInputValueSection = () => {
     return (
       <Grid item xs={12}>
         <Typography variant="caption">VIA HÅLLPLATS</Typography>
@@ -270,7 +269,7 @@ class Lines extends React.PureComponent {
     );
   };
 
-  renderTrafficTypeSection = () => {
+  #renderTrafficTypeSection = () => {
     const { trafficTransports } = this.state;
     const { classes } = this.props;
     return (
@@ -305,7 +304,7 @@ class Lines extends React.PureComponent {
       </Grid>
     );
   };
-  renderMunicipalitySection = () => {
+  #renderMunicipalitySection = () => {
     const { classes } = this.props;
     const { municipalities } = this.state;
     return (
@@ -341,7 +340,7 @@ class Lines extends React.PureComponent {
     );
   };
 
-  renderSearchButtonSection = () => {
+  #renderSearchButtonSection = () => {
     const { classes } = this.props;
     return (
       <Grid item xs={12}>
@@ -352,21 +351,28 @@ class Lines extends React.PureComponent {
         >
           <Typography className={classes.searchButtonText}>SÖK</Typography>
         </Button>
-        <FormControlLabel
-          control={
-            <Checkbox
-              className={classes.showLinesCheckbox}
-              checked={this.checkboxEnabled}
-              onChange={this.#handleCheckBoxClick}
-            />
-          }
-          label="Visa hållplatser"
-        />
+        {this.#renderSearchCheckboxSection()}
       </Grid>
     );
   };
 
-  renderSpatialSearchSection = () => {
+  #renderSearchCheckboxSection = () => {
+    const { classes } = this.props;
+    return (
+      <FormControlLabel
+        className={classes.showLinesCheckbox}
+        control={
+          <Checkbox
+            checked={this.checkboxEnabled}
+            onChange={this.#handleCheckBoxClick}
+          />
+        }
+        label="Visa hållplatser"
+      />
+    );
+  };
+
+  #renderSpatialSearchSection = () => {
     const { classes } = this.props;
     return (
       <>
@@ -420,14 +426,14 @@ class Lines extends React.PureComponent {
           container
           justify="center"
           spacing={2}
-          onKeyPress={this.handleKeyPress}
+          onKeyPress={this.#handleKeyPress}
         >
-          {this.renderPublicAndTechnicalNrSection()}
-          {this.renderInputValueSection()}
-          {this.renderTrafficTypeSection()}
-          {this.renderMunicipalitySection()}
-          {this.renderSearchButtonSection()}
-          {this.renderSpatialSearchSection()}
+          {this.#renderPublicAndTechnicalNrSection()}
+          {this.#renderInputValueSection()}
+          {this.#renderTrafficTypeSection()}
+          {this.#renderMunicipalitySection()}
+          {this.#renderSearchButtonSection()}
+          {this.#renderSpatialSearchSection()}
         </Grid>
       </div>
     );
