@@ -112,7 +112,7 @@ class Stops extends React.PureComponent {
 
   bindSubscriptions() {
     const { localObserver } = this.props;
-    localObserver.subscribe("vtsearch-result-done", () => {
+    localObserver.subscribe("vt-result-done", () => {
       this.clearSearchInputAndButtons();
     });
   }
@@ -136,7 +136,7 @@ class Stops extends React.PureComponent {
 
   doSearch = () => {
     const { busStopValue, stopNameOrNr, publicLine, municipality } = this.state;
-    this.localObserver.publish("stops-search", {
+    this.localObserver.publish("vt-stops-search", {
       busStopValue: busStopValue,
       stopNameOrNr: stopNameOrNr,
       publicLine: publicLine,
@@ -149,14 +149,14 @@ class Stops extends React.PureComponent {
   handlePolygonClick = () => {
     const { busStopValue, stopNameOrNr, publicLine, municipality } = this.state;
     if (!this.state.isPolygonActive) {
-      this.localObserver.publish("activate-search", () => {});
+      this.localObserver.publish("vt-activate-search", () => {});
     }
     if (this.state.isPolygonActive || this.state.isRectangleActive) {
-      this.localObserver.publish("deactivate-search", () => {});
+      this.localObserver.publish("vt-deactivate-search", () => {});
       this.setState({ isRectangleActive: false });
     }
     if (this.state.isPolygonActive) {
-      this.localObserver.publish("stops-search", {
+      this.localObserver.publish("vt-stops-search", {
         busStopValue: busStopValue,
         stopNameOrNr: stopNameOrNr,
         publicLine: publicLine,
@@ -168,16 +168,16 @@ class Stops extends React.PureComponent {
   };
   handleRectangleClick = () => {
     if (!this.state.isRectangleActive) {
-      this.localObserver.publish("activate-search", () => {});
+      this.localObserver.publish("vt-activate-search", () => {});
     }
     if (this.state.isPolygonActive || this.state.isRectangleActive) {
-      this.localObserver.publish("deactivate-search", () => {});
+      this.localObserver.publish("vt-deactivate-search", () => {});
       this.setState({ isPolygonActive: false });
     }
     if (this.state.isRectangleActive) {
       const { busStopValue, stopNameOrNr, publicLine, municipality } =
         this.state;
-      this.localObserver.publish("stops-search", {
+      this.localObserver.publish("vt-stops-search", {
         busStopValue: busStopValue,
         stopNameOrNr: stopNameOrNr,
         publicLine: publicLine,
