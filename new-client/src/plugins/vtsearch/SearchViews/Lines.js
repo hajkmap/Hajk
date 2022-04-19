@@ -94,7 +94,7 @@ class Lines extends React.PureComponent {
   };
   bindSubscriptions() {
     const { localObserver } = this.props;
-    localObserver.subscribe("vtsearch-result-done", () => {
+    localObserver.subscribe("vt-result-done", () => {
       this.clearSearchInputAndButtons();
     });
   }
@@ -125,7 +125,7 @@ class Lines extends React.PureComponent {
       trafficTransport,
       throughStopArea,
     } = this.state;
-    this.localObserver.publish("routes-search", {
+    this.localObserver.publish("vt-routes-search", {
       publicLineName: publicLineName,
       internalLineNumber: internalLineNumber,
       municipality: municipality.gid,
@@ -149,14 +149,14 @@ class Lines extends React.PureComponent {
       throughStopArea,
     } = this.state;
     if (!this.state.isPolygonActive) {
-      this.localObserver.publish("activate-search", () => {});
+      this.localObserver.publish("vt-activate-search", () => {});
     }
     if (this.state.isPolygonActive || this.state.isRectangleActive) {
-      this.localObserver.publish("deactivate-search", () => {});
+      this.localObserver.publish("vt-deactivate-search", () => {});
       this.setState({ isRectangleActive: false });
     }
     if (this.state.isPolygonActive) {
-      this.localObserver.publish("routes-search", {
+      this.localObserver.publish("vt-routes-search", {
         publicLineName: publicLineName,
         internalLineNumber: internalLineNumber,
         municipality: municipality.gid,
@@ -177,14 +177,14 @@ class Lines extends React.PureComponent {
       throughStopArea,
     } = this.state;
     if (!this.state.isRectangleActive) {
-      this.localObserver.publish("activate-search", () => {});
+      this.localObserver.publish("vt-activate-search", () => {});
     }
     if (this.state.isRectangleActive || this.state.isPolygonActive) {
-      this.localObserver.publish("deactivate-search", () => {});
+      this.localObserver.publish("vt-deactivate-search", () => {});
       this.setState({ isPolygonActive: false });
     }
     if (this.state.isRectangleActive) {
-      this.localObserver.publish("routes-search", {
+      this.localObserver.publish("vt-routes-search", {
         publicLineName: publicLineName,
         internalLineNumber: internalLineNumber,
         municipality: municipality.gid,

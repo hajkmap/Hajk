@@ -159,23 +159,23 @@ class VTSearch extends React.PureComponent {
 
   bindSubscriptions = () => {
     // Subscribes for an event when the vt-search has begun.
-    this.localObserver.subscribe("vtsearch-result-begin", (label) => {
+    this.localObserver.subscribe("vt-result-begin", (label) => {
       this.setState({ loading: true });
     });
 
-    this.localObserver.subscribe("vtsearch-result-done", (ans) => {
+    this.localObserver.subscribe("vt-result-done", (ans) => {
       this.setState({ loading: false });
     });
 
-    this.localObserver.subscribe("vtsearch-chosen", (typeOfSearch) => {
-      this.localObserver.publish("deactivate-search");
+    this.localObserver.subscribe("vt-chosen", (typeOfSearch) => {
+      this.localObserver.publish("vt-deactivate-search");
       this.setState({
         activeSearchTool: typeOfSearch,
         expanded: typeOfSearch === searchTypes.DEFAULT ? false : true,
       });
     });
 
-    this.localObserver.subscribe("vtsearch-dragging-enabled", (enabled) => {
+    this.localObserver.subscribe("vt-dragging-enabled", (enabled) => {
       this.setState({ draggingEnabled: enabled });
     });
 
@@ -192,7 +192,7 @@ class VTSearch extends React.PureComponent {
           attributesToDisplay
         );
 
-        this.localObserver.publish("vtsearch-result-done", searchResult);
+        this.localObserver.publish("vt-result-done", searchResult);
       }
     );
 
@@ -215,7 +215,7 @@ class VTSearch extends React.PureComponent {
 
   handleChange = (e) => {
     var typeOfSearch = searchTypes[e.target.value];
-    this.localObserver.publish("deactivate-search");
+    this.localObserver.publish("vt-deactivate-search");
     this.setState({
       activeSearchTool: typeOfSearch,
       expanded: typeOfSearch === searchTypes.DEFAULT ? false : true,

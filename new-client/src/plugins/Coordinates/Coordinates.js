@@ -38,7 +38,7 @@ class Coordinates extends React.PureComponent {
           icon: <ExploreIcon />,
           title: "Visa koordinat",
           description: "Visa koordinater för given plats",
-          height: 300,
+          height: "dynamic",
           width: 400,
           onWindowShow: this.onWindowShow,
           onWindowHide: this.onWindowHide,

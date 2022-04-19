@@ -106,17 +106,17 @@ class SearchResultListContainer extends React.Component {
   }
   resetHeightOfResultList = () => {
     const { localObserver } = this.props;
-    localObserver.publish("search-result-list-normal");
+    localObserver.publish("vt-search-result-list-normal");
   };
 
   setActiveTabId = (searchResultId) => {
     const { localObserver } = this.props;
     if (searchResultId !== this.state.activeTabId) {
-      localObserver.publish("clear-highlight");
+      localObserver.publish("vt-clear-highlight");
     }
 
-    localObserver.publish("hide-all-layers");
-    localObserver.publish("toggle-visibility", searchResultId);
+    localObserver.publish("vt-hide-all-layers");
+    localObserver.publish("vt-toggle-visibility", searchResultId);
 
     this.setState({ activeTabId: searchResultId });
   };
@@ -124,7 +124,7 @@ class SearchResultListContainer extends React.Component {
   onSearchDone = (result) => {
     const { localObserver } = this.props;
     var searchResultId = this.addResultToSearchResultList(result);
-    localObserver.publish("add-search-result-to-map", {
+    localObserver.publish("vt-add-search-result-to-map", {
       searchResultId: searchResultId,
       olFeatures: this.convertToGeoJson(
         result?.featureCollection || result?.value
@@ -158,11 +158,11 @@ class SearchResultListContainer extends React.Component {
       });
     });
 
-    localObserver.subscribe("vtsearch-clicked", () => {
+    localObserver.subscribe("vt-clicked", () => {
       this.sendToBackSearchResultContainer();
     });
 
-    localObserver.subscribe("vtsearch-result-done", (result) => {
+    localObserver.subscribe("vt-result-done", (result) => {
       this.bringToFrontSearchResultContainer();
       this.setState({
         windowWidth: getWindowContainerWidth(),
@@ -171,20 +171,20 @@ class SearchResultListContainer extends React.Component {
       this.onSearchDone(result);
     });
 
-    localObserver.subscribe("attribute-table-row-clicked", (payload) => {
-      localObserver.publish("highlight-search-result-feature", payload);
+    localObserver.subscribe("vt-attribute-table-row-clicked", (payload) => {
+      localObserver.publish("vt-highlight-search-result-feature", payload);
     });
 
-    localObserver.subscribe("set-active-tab", (searchResultId) => {
+    localObserver.subscribe("vt-set-active-tab", (searchResultId) => {
       this.handleTabChange(null, searchResultId);
     });
 
-    localObserver.subscribe("features-clicked-in-map", (features) => {
+    localObserver.subscribe("vt-features-clicked-in-map", (features) => {
       this.bringToFrontSearchResultContainer();
-      localObserver.publish("highlight-attribute-row", features[0].getId());
+      localObserver.publish("vt-highlight-attribute-row", features[0].getId());
     });
 
-    localObserver.subscribe("search-result-list-minimized", () => {
+    localObserver.subscribe("vt-search-result-list-minimized", () => {
       this.setState((state) => {
         return {
           minimized: true,
@@ -193,7 +193,7 @@ class SearchResultListContainer extends React.Component {
         };
       });
     });
-    localObserver.subscribe("search-result-list-maximized", () => {
+    localObserver.subscribe("vt-search-result-list-maximized", () => {
       this.setState((state) => {
         return {
           minimized: false,
@@ -203,7 +203,7 @@ class SearchResultListContainer extends React.Component {
       });
     });
 
-    localObserver.subscribe("search-result-list-normal", () => {
+    localObserver.subscribe("vt-search-result-list-normal", () => {
       this.setState({
         minimized: false,
         maximized: false,
@@ -211,11 +211,11 @@ class SearchResultListContainer extends React.Component {
       });
     });
 
-    localObserver.subscribe("search-result-list-close", () => {
-      localObserver.publish("hide-all-layers");
-      localObserver.publish("close-all-vt-searchLayer");
-      localObserver.publish("clear-highlight");
-      localObserver.publish("resize-map", 0);
+    localObserver.subscribe("vt-search-result-list-close", () => {
+      localObserver.publish("vt-hide-all-layers");
+      localObserver.publish("vt-close-all-Layer");
+      localObserver.publish("vt-clear-highlight");
+      localObserver.publish("vt-resize-map", 0);
       this.searchResults.length = 0;
       this.setState({
         minimized: false,
@@ -229,7 +229,7 @@ class SearchResultListContainer extends React.Component {
   handleTabChange = (event, newValue) => {
     const { localObserver } = this.props;
     if (newValue !== this.state.activeTabId) {
-      localObserver.publish("remove-highlight-attribute-row");
+      localObserver.publish("vt-remove-highlight-attribute-row");
     }
     this.setActiveTabId(newValue);
   };
@@ -246,14 +246,14 @@ class SearchResultListContainer extends React.Component {
 
   onTabClose = (searchResultId) => {
     const { localObserver } = this.props;
-    localObserver.publish("hide-all-layers");
-    localObserver.publish("clear-highlight");
+    localObserver.publish("vt-hide-all-layers");
+    localObserver.publish("vt-clear-highlight");
     const nextactiveTabId = this.getNextTabActive(searchResultId);
     console.log(nextactiveTabId, "nextActiveTabId");
     this.setState({ activeTabId: nextactiveTabId });
-    localObserver.publish("toggle-visibility", nextactiveTabId);
+    localObserver.publish("vt-toggle-visibility", nextactiveTabId);
     this.removeSearchResult(searchResultId);
-    localObserver.publish("resize-map", 0);
+    localObserver.publish("vt-resize-map", 0);
   };
 
   addResultToSearchResultList = (result) => {
@@ -291,7 +291,7 @@ class SearchResultListContainer extends React.Component {
           this.searchResults = this.searchResults.filter((searchResult) => {
             return searchResult.id !== searchResultId;
           });
-          localObserver.publish("clear-search-result", searchResultId);
+          localObserver.publish("vt-clear-search-result", searchResultId);
           resolve();
         }
       );
@@ -406,7 +406,7 @@ class SearchResultListContainer extends React.Component {
 
   handleMapResizeWhenRendering = () => {
     const { localObserver } = this.props;
-    localObserver.publish("resize-map", this.state.resultListHeight);
+    localObserver.publish("vt-resize-map", this.state.resultListHeight);
   };
 
   bringToFrontSearchResultContainer = () => {

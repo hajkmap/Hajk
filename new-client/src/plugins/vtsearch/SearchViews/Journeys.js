@@ -338,7 +338,7 @@ class Journeys extends React.PureComponent {
       }
     );
     if (this.state.isPolygonActive) {
-      this.localObserver.publish("activate-search", () => {});
+      this.localObserver.publish("vt-activate-search", () => {});
     }
   };
 
@@ -356,18 +356,18 @@ class Journeys extends React.PureComponent {
       }
     );
     if (this.state.isRectangleActive) {
-      this.localObserver.publish("activate-search", () => {});
+      this.localObserver.publish("vt-activate-search", () => {});
     }
   };
 
   deactivateSearch = () => {
-    this.localObserver.publish("deactivate-search");
+    this.localObserver.publish("vt-deactivate-search");
   };
 
   activateSearch = (spatialType) => {
     const { formatFromDate, formatEndDate } = this.getFormattedDate();
 
-    this.localObserver.publish("journeys-search", {
+    this.localObserver.publish("vt-journeys-search", {
       selectedFromDate: formatFromDate,
       selectedEndDate: formatEndDate,
       selectedFormType: spatialType,
@@ -376,11 +376,11 @@ class Journeys extends React.PureComponent {
   };
 
   disableDrag = () => {
-    this.localObserver.publish("vtsearch-dragging-enabled", false);
+    this.localObserver.publish("vt-dragging-enabled", false);
   };
 
   enableDrag = () => {
-    this.localObserver.publish("vtsearch-dragging-enabled", true);
+    this.localObserver.publish("vt-dragging-enabled", true);
   };
 
   renderFromDateSection = () => {
