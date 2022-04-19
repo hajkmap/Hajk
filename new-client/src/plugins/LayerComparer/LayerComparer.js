@@ -22,15 +22,18 @@ const LayerComparer = (props) => {
       .map((l) => {
         return { id: l.ol_uid, label: l.get("caption") };
       });
-    const layers = allLayers
-      .filter((l) => l.layerType === "layer")
-      .map((l) => {
-        return { id: l.ol_uid, label: l.get("caption") };
-      });
+
+    if (props.options.showNonBaseLayersInSelect) {
+      const layers = allLayers
+        .filter((l) => l.layerType === "layer")
+        .map((l) => {
+          return { id: l.ol_uid, label: l.get("caption") };
+        });
+      setLayers(layers);
+    }
 
     setBaseLayers(baseLayers);
-    setLayers(layers);
-  }, [props.map]);
+  }, [props.map, props.options.showNonBaseLayersInSelect]);
 
   useEffect(() => {
     sds.current = new SDSControl();

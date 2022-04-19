@@ -36,7 +36,7 @@ const SelectDropdown = (props) => {
               </MenuItem>
             );
           })}
-          <ListSubheader>Lager</ListSubheader>
+          {layers.length > 0 && <ListSubheader>Lager</ListSubheader>}
           {layers.map((l, i) => {
             return (
               <MenuItem key={i} value={l.id}>
