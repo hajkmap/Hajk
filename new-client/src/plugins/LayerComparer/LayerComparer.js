@@ -1,16 +1,9 @@
 import React, { useEffect, useRef, useState } from "react";
-import {
-  Alert,
-  Box,
-  FormControl,
-  InputLabel,
-  ListSubheader,
-  Select,
-  MenuItem,
-} from "@mui/material";
+import { Alert, Stack } from "@mui/material";
 import DialogWindowPlugin from "plugins/DialogWindowPlugin";
 import CompareIcon from "@mui/icons-material/Compare";
 
+import SelectDropdown from "./SelectDropdown.js";
 import SDSControl from "./CustomOLControl.js";
 
 const LayerComparer = (props) => {
@@ -83,76 +76,37 @@ const LayerComparer = (props) => {
         // Some defaults to fall back to in case instanceOptions doesn't provide them.
         icon: <CompareIcon />, // Default icon for this plugin
         title: "Lagerjämförare",
-        description: "Jämför två lager sida vid sida", // Shown on Widget button as well as Tooltip for Control button
-        headerText: "Jämför två lager sida vid sida",
-        buttonText: "OK",
-        abortText: "Nollställ",
+        description: "Jämför lager sida vid sida", // Shown on Widget button as well as Tooltip for Control button
+        headerText: "Jämför lager sida vid sida",
+        buttonText: "Jämför",
+        primaryButtonVariant: "contained",
+        abortText: "Nollställ & stäng",
         onAbort: onAbort,
       }}
     >
-      {(layer1 === "" || layer2 === "") && (
+      <Stack spacing={2}>
         <Alert icon={<CompareIcon />} variant="info">
-          Välj två lager för att jämföra
+          Välj två lager att jämföra och tryck på <i>Jämför</i>.
         </Alert>
-      )}
-      <SelectDropdown
-        setter={setLayer1}
-        value={layer1}
-        counterValue={layer2}
-        baseLayers={baseLayers}
-        layers={layers}
-        label="Lager 1"
-      />
-      <SelectDropdown
-        setter={setLayer2}
-        value={layer2}
-        counterValue={layer1}
-        baseLayers={baseLayers}
-        layers={layers}
-        label="Lager 2"
-      />
+
+        <SelectDropdown
+          setter={setLayer1}
+          value={layer1}
+          counterValue={layer2}
+          baseLayers={baseLayers}
+          layers={layers}
+          label="Vänster sida"
+        />
+        <SelectDropdown
+          setter={setLayer2}
+          value={layer2}
+          counterValue={layer1}
+          baseLayers={baseLayers}
+          layers={layers}
+          label="Höger sida"
+        />
+      </Stack>
     </DialogWindowPlugin>
-  );
-};
-
-const SelectDropdown = (props) => {
-  const { setter, value, counterValue, baseLayers, layers, label } = props;
-
-  const handleChange = (setter, value) => {
-    setter(value);
-  };
-
-  return (
-    <Box sx={{ minWidth: 120 }}>
-      <FormControl fullWidth>
-        <InputLabel id="layer-1-label">{label}</InputLabel>
-        <Select
-          labelId="layer-1-label"
-          id="layer-1-select"
-          label="Lager 1"
-          value={value}
-          onChange={(e) => handleChange(setter, e.target.value)}
-        >
-          <MenuItem value="">Inget lager valt</MenuItem>
-          <ListSubheader>Bakgrundslager</ListSubheader>
-          {baseLayers.map((l, i) => {
-            return (
-              <MenuItem key={i} value={l.id} disabled={l.id === counterValue}>
-                {l.label}
-              </MenuItem>
-            );
-          })}
-          <ListSubheader>Lager</ListSubheader>
-          {layers.map((l, i) => {
-            return (
-              <MenuItem key={i} value={l.id}>
-                {l.label}
-              </MenuItem>
-            );
-          })}
-        </Select>
-      </FormControl>
-    </Box>
   );
 };
 
