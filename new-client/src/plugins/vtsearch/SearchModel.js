@@ -815,7 +815,7 @@ export default class SearchModel {
    * @memberof SearchModel
    */
   fetchAllPossibleTransportModeTypeNames(addEmptyTransportMode = true) {
-    this.localObserver.publish("transportModeTypeNames-result-begin", {
+    this.localObserver.publish("vt-transportModeTypeNames-result-begin", {
       label: this.geoServer.transportModeTypeNames.searchLabel,
     });
 
@@ -842,7 +842,7 @@ export default class SearchModel {
    * @memberof SearchModel
    */
   getJourneys(filterOnFromDate, filterOnToDate, filterOnWkt) {
-    this.localObserver.publish("vtsearch-result-begin", {
+    this.localObserver.publish("vt-result-begin", {
       label: this.geoServer.journeys.searchLabel,
     });
 
@@ -885,7 +885,7 @@ export default class SearchModel {
             this.geoServer.journeys.attributesToDisplay
           );
 
-          this.localObserver.publish("vtsearch-result-done", journeys);
+          this.localObserver.publish("vt-result-done", journeys);
         });
       })
       .catch((err) => {
@@ -912,7 +912,7 @@ export default class SearchModel {
     stopAreaNameOrNumber,
     polygonAsWkt
   ) {
-    this.localObserver.publish("vtsearch-result-begin", {
+    this.localObserver.publish("vt-result-begin", {
       label: this.geoServer.routes.searchLabel,
     });
 
@@ -992,7 +992,7 @@ export default class SearchModel {
             routes.featureCollection
           );
 
-          this.localObserver.publish("vtsearch-result-done", routes);
+          this.localObserver.publish("vt-result-done", routes);
         });
       })
       .catch((err) => {
@@ -1015,7 +1015,7 @@ export default class SearchModel {
     filterOnMunicipalGid,
     filterOnWkt
   ) {
-    this.localObserver.publish("vtsearch-result-begin", {
+    this.localObserver.publish("vt-result-begin", {
       label: this.geoServer.stopAreas.searchLabel,
     });
 
@@ -1065,7 +1065,7 @@ export default class SearchModel {
             stopAreas.featureCollection
           );
 
-          this.localObserver.publish("vtsearch-result-done", stopAreas);
+          this.localObserver.publish("vt-result-done", stopAreas);
         })
         .catch((err) => {
           console.log(err);
@@ -1088,7 +1088,7 @@ export default class SearchModel {
     filterOnMunicipalGid,
     filterOnWkt
   ) {
-    this.localObserver.publish("vtsearch-result-begin", {
+    this.localObserver.publish("vt-result-begin", {
       label: this.geoServer.stopPoints.searchLabel,
     });
 
@@ -1138,7 +1138,7 @@ export default class SearchModel {
             stopPoints.featureCollection
           );
 
-          this.localObserver.publish("vtsearch-result-done", stopPoints);
+          this.localObserver.publish("vt-result-done", stopPoints);
         })
         .catch((err) => {
           console.log(err);

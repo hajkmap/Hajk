@@ -41,7 +41,7 @@ export default class MapViewModel {
    */
   bindSubscriptions = () => {
     this.localObserver.subscribe(
-      "highlight-search-result-feature",
+      "vt-highlight-search-result-feature",
       (payload) => {
         var olFeature = this.getSearchResultLayerFromId(payload.searchResultId)
           .getSource()
@@ -51,59 +51,59 @@ export default class MapViewModel {
     );
 
     this.localObserver.subscribe(
-      "add-search-result-to-map",
+      "vt-add-search-result-to-map",
       ({ searchResultId, olFeatures }) => {
         var searchResultLayer = this.addSearchResultLayerToMap(searchResultId);
         this.addFeatureToSearchResultLayer(olFeatures, searchResultLayer);
       }
     );
 
-    this.localObserver.subscribe("clear-search-result", (searchResultId) => {
+    this.localObserver.subscribe("vt-clear-search-result", (searchResultId) => {
       this.map.removeLayer(this.getSearchResultLayerFromId(searchResultId));
     });
-    this.localObserver.subscribe("deactivate-search", this.deactivateSearch);
-    this.localObserver.subscribe("activate-search", this.activateSearch);
+    this.localObserver.subscribe("vt-deactivate-search", this.deactivateSearch);
+    this.localObserver.subscribe("vt-activate-search", this.activateSearch);
 
-    this.localObserver.subscribe("hide-all-layers", () => {
+    this.localObserver.subscribe("vt-hide-all-layers", () => {
       this.hideAllLayers();
     });
 
-    this.localObserver.subscribe("close-all-vt-searchLayer", () => {
+    this.localObserver.subscribe("vt-close-all-Layer", () => {
       this.map.getLayers().forEach((layer) => {
         if (layer.get("type") === "vt-search-result-layer")
           this.map.removeLayer(layer);
       });
     });
 
-    this.localObserver.subscribe("toggle-visibility", (searchResultID) => {
+    this.localObserver.subscribe("vt-toggle-visibility", (searchResultID) => {
       this.toggleLayerVisibility(searchResultID);
     });
 
-    this.localObserver.subscribe("hide-current-layer", () => {
+    this.localObserver.subscribe("vt-hide-current-layer", () => {
       this.hideCurrentLayer();
     });
 
     this.map.on("singleclick", this.onFeaturesClickedInMap);
 
-    this.localObserver.subscribe("add-search-result", (olFeatures) => {
+    this.localObserver.subscribe("vt-add-search-result", (olFeatures) => {
       this.addFeatureToSearchResultLayer(olFeatures);
     });
 
-    this.localObserver.subscribe("clear-highlight", () => {
+    this.localObserver.subscribe("vt-clear-highlight", () => {
       this.highlightLayer.getSource().clear();
     });
 
-    this.localObserver.subscribe("resize-map", (heightFromBottom) => {
+    this.localObserver.subscribe("vt-resize-map", (heightFromBottom) => {
       this.resizeMap(heightFromBottom);
     });
 
-    this.localObserver.subscribe("journeys-search", this.journeySearch);
+    this.localObserver.subscribe("vt-journeys-search", this.journeySearch);
 
-    this.localObserver.subscribe("stops-search", this.stopSearch);
+    this.localObserver.subscribe("vt-stops-search", this.stopSearch);
 
-    this.localObserver.subscribe("routes-search", this.routesSearch);
+    this.localObserver.subscribe("vt-routes-search", this.routesSearch);
 
-    this.localObserver.subscribe("vtsearch-result-done", (result) => {
+    this.localObserver.subscribe("vt-result-done", (result) => {
       this.clearDrawLayer();
       this.map.on("singleclick", this.onFeaturesClickedInMap);
     });
@@ -449,7 +449,7 @@ export default class MapViewModel {
     var featuresClicked = this.getFeaturesAtClickedPixel(e);
     if (featuresClicked.length > 0) {
       this.highlightFeature(featuresClicked[0]);
-      this.localObserver.publish("features-clicked-in-map", featuresClicked);
+      this.localObserver.publish("vt-features-clicked-in-map", featuresClicked);
     }
   };
 

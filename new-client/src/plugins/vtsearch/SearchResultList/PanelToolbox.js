@@ -49,7 +49,7 @@ class PanelToolbox extends React.PureComponent {
       minimizeVisible: false,
       normalVisible: true,
     });
-    localObserver.publish("search-result-list-minimized");
+    localObserver.publish("vt-search-result-list-minimized");
   };
 
   maximize = () => {
@@ -59,7 +59,7 @@ class PanelToolbox extends React.PureComponent {
       minimizeVisible: true,
       normalVisible: true,
     });
-    localObserver.publish("search-result-list-maximized");
+    localObserver.publish("vt-search-result-list-maximized");
   };
 
   normalize = () => {
@@ -69,7 +69,7 @@ class PanelToolbox extends React.PureComponent {
       minimizeVisible: true,
       normalVisible: false,
     });
-    localObserver.publish("search-result-list-normal");
+    localObserver.publish("vt-search-result-list-normal");
   };
 
   close = () => {
@@ -79,7 +79,7 @@ class PanelToolbox extends React.PureComponent {
       minimizeVisible: false,
       normalVisible: true,
     });
-    localObserver.publish("search-result-list-close");
+    localObserver.publish("vt-search-result-list-close");
   };
 
   renderButton = (onClickCallback, iconElement) => {
