@@ -7,6 +7,7 @@ import CloseIcon from "@material-ui/icons/Close";
 import { withStyles } from "@material-ui/core/styles";
 import IconButton from "@material-ui/core/IconButton";
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
+import SaveAltIcon from "@material-ui/icons/SaveAlt";
 
 /**
  * @summary Window size handling
@@ -82,6 +83,10 @@ class PanelToolbox extends React.PureComponent {
     localObserver.publish("vt-search-result-list-close");
   };
 
+  #export = () => {
+    //window.alert("Export"); //Just for testing puropses
+  };
+
   renderButton = (onClickCallback, iconElement) => {
     const { classes } = this.props;
     return (
@@ -97,6 +102,8 @@ class PanelToolbox extends React.PureComponent {
           <NormalIcon />
         ) : iconElement === "close" ? (
           <CloseIcon />
+        ) : iconElement === "export" ? (
+          <SaveAltIcon />
         ) : null}
       </IconButton>
     );
@@ -105,6 +112,7 @@ class PanelToolbox extends React.PureComponent {
   render() {
     return (
       <div>
+        {this.renderButton(this.#export, "export")}
         {this.state.minimizeVisible &&
           this.renderButton(this.minimize, "minimize")}
 
