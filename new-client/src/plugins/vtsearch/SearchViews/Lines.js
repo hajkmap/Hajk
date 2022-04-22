@@ -47,6 +47,7 @@ class Lines extends React.PureComponent {
     trafficTransports: [],
     trafficTransport: "",
     throughStopArea: "",
+    showStopAreas: false,
   };
 
   // propTypes and defaultProps are static properties, declared
@@ -114,6 +115,7 @@ class Lines extends React.PureComponent {
       municipality: "",
       trafficTransport: "",
       throughStopArea: "",
+      showStopAreas: false,
     });
   };
 
@@ -136,8 +138,10 @@ class Lines extends React.PureComponent {
     });
   };
 
-  #handleCheckBoxClick = (checked) => {
-    this.checkboxEnabled = checked;
+  #handleCheckBoxClick = (event) => {
+    this.setState({
+      showStopAreas: event.target.checked,
+    });
   };
 
   handlePolygonClick = () => {
@@ -363,8 +367,9 @@ class Lines extends React.PureComponent {
         className={classes.showLinesCheckbox}
         control={
           <Checkbox
-            checked={this.checkboxEnabled}
+            checked={this.state.showStopAreas}
             onChange={this.#handleCheckBoxClick}
+            color="default"
           />
         }
         label="Visa hållplatser"

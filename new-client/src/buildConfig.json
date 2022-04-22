@@ -9,13 +9,18 @@
     "Draw",
     "Dummy",
     "Edit",
+    "Export",
     "LayerSwitcher",
+    "GeosuiteExport",
+    "InfoDialog",
     "Location",
     "Measure",
     "Print",
     "Routing",
     "Search",
     "StreetView",
+    "Suggest",
+    "TimeSlider",
     "vtsearch"
   ],
   "allTools": [
