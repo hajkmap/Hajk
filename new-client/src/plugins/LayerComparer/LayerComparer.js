@@ -12,9 +12,19 @@ const LayerComparer = (props) => {
 
   const [layers, setLayers] = useState([]);
   const [baseLayers, setBaseLayers] = useState([]);
+
+  // Prepare a ref that will hold our map control
   const sds = useRef();
+
+  // Prepare a ref that will hold the ID of the original
+  // background layer. This makes it possible to restore
+  // to the same background when user closes the comparer.
   const oldBackgroundLayer = useRef();
 
+  // Prepare layers that will be available in the comparer.
+  // By doing it in this useEffect, we do it once and for all,
+  // which is a good idea, as such filter/map can be considered
+  // an expensive operation.
   useEffect(() => {
     const allLayers = props.map.getAllLayers();
     const baseLayers = allLayers
@@ -35,11 +45,24 @@ const LayerComparer = (props) => {
     setBaseLayers(baseLayers);
   }, [props.map, props.options.showNonBaseLayersInSelect]);
 
+  // Create a new SDSControl, add to a ref and add the ref to our map.
   useEffect(() => {
     sds.current = new SDSControl();
     props.map.addControl(sds.current);
   }, [props.map]);
 
+  // When Hajk Drawer is toggled the map's view (canvas's) size
+  // changes too. We must update the clipper's position accordingly.
+  useEffect(() => {
+    props.app.globalObserver.on("core.drawerToggled", () => {
+      sds.current.updateClip();
+    });
+  }, [props.app.globalObserver]);
+
+  // The main action happens in this useEffect. When both compare layers
+  // are set we initialize the comparer control and make it visible.
+  // If both compare layers are empty, we do the contrary and remove the control
+  // and restore the original background layer.
   useEffect(() => {
     if (layer1 === "" || layer2 === "") {
       // Show previous background
@@ -62,6 +85,8 @@ const LayerComparer = (props) => {
     }
   }, [layer1, layer2, props.map]);
 
+  // User can at any time abort the comparer, here's a handler
+  // that resets the UI.
   const onAbort = () => {
     sds.current.remove();
     oldBackgroundLayer.current?.setVisible(true);
