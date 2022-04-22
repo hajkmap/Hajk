@@ -139,8 +139,6 @@ class Lines extends React.PureComponent {
   };
 
   #handleCheckBoxClick = (event) => {
-    //this.checkboxEnabled = checked;
-    //window.alert("click");
     this.setState({
       showStopAreas: event.target.checked,
     });
@@ -371,6 +369,7 @@ class Lines extends React.PureComponent {
           <Checkbox
             checked={this.state.showStopAreas}
             onChange={this.#handleCheckBoxClick}
+            color="default"
           />
         }
         label="Visa hållplatser"
