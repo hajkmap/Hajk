@@ -424,6 +424,9 @@ class App extends React.PureComponent {
               },
             });
 
+          // Ensure to update the map canvas size. Otherwise we can run into #1058.
+          this.appModel.getMap().updateSize();
+
           // Tell everyone that we're done loading (in case someone listens)
           this.globalObserver.publish("core.appLoaded");
         }
