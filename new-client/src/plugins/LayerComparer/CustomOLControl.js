@@ -32,11 +32,11 @@ export default class OlSideBySideControl extends Control {
 
   #addEvents() {
     this.#range.addEventListener("input", () => {
-      this.#updateClip();
+      this.updateClip();
     });
   }
 
-  #updateClip() {
+  updateClip() {
     this.#divider.style.left = this.#getPosition() + "px";
     this.getMap().render();
   }
