@@ -44,11 +44,6 @@ export default class PrintModel {
     this.originalView = this.map.getView();
     this.originalMapSize = null; // Needed to restore view. It is set when print().
 
-    // We're gonna need to keep a map containing the original load-functions (since we will
-    // create new load-functions with updated dpi and so on). This map is used so that we can
-    // reset the load-function back to normal.
-    this.originalLoadFunctions = new Map();
-
     // Since we will be hiding all tile-layers during the print-process, and add image-layers
     // instead, we have to keep track of what we hide and show.
     this.hiddenLayers = new Set(); // Contains all tile-layers that have been exchanged with image-layers.
@@ -494,18 +489,22 @@ export default class PrintModel {
     return currentBackgroundColor !== "" ? currentBackgroundColor : "white";
   };
 
-  // Returns all currently active tile-layers as an array
-  getVisibleTileLayers = () => {
+  // Returns all currently active tile-, and image-layers as an array
+  getVisibleTileAndImageLayers = () => {
     return this.map
       .getLayers()
       .getArray()
       .filter((layer) => {
-        return (
-          layer.getVisible() &&
-          layer instanceof TileLayer &&
-          layer.getSource() instanceof TileWMS
-        );
+        return layer.getVisible() && this.layerIsTileOrImageLayer(layer);
       });
+  };
+
+  // Returns true if the supplied layer is a tiled or an image-based layer.
+  layerIsTileOrImageLayer = (layer) => {
+    return (
+      (layer instanceof TileLayer && layer.getSource() instanceof TileWMS) ||
+      (layer instanceof ImageLayer && layer.getSource() instanceof ImageWMS)
+    );
   };
 
   // Returns all currently active image-layers as an array
@@ -532,32 +531,33 @@ export default class PrintModel {
       .indexOf(layer.get("name"));
   };
 
-  // Hides the supplied layer and adds an image-layer instead to make sure that we
-  // can request the images with the correct DPI for the print! Why exchange tiled sources
-  // with image sources? Well, it seems as if OL does some funky stuff with all the tiles,
-  // leading to an excess of loaded tiles. By changing to an image-layer during print, we can
+  // Hides the supplied layer and adds another layer with appropriate settings for
+  // printing. The added layer is always an image-layer. Why exchange the sources
+  // with only image sources? Well, it seems as if OL does some funky stuff with all the tiled sources,
+  // leading to an excess of loaded tiles. By making sure to only use image-layers during print, we can
   // make sure we're not requesting too many tiles, and also that the wms-style is applied properly.
-  exchangeTileLayer = (layer) => {
+  exchangeLayer = (layer) => {
     // Let's run this in a try-catch just in case
     try {
-      // Since we're gonna exchange the tile-layer for a image-layer during the
-      // print process, we want to hide the tile-layer so that we don't get the
-      // same information twice.
+      // Since we're adding a "print-layer", we want to make sure to hide
+      // the "real" layer so that we don't show the same information twice.
       layer.setVisible(false);
       // We have to keep track of all the layers that we have hidden, so that
       // we can show them again when the printing is done.
       this.hiddenLayers.add(layer);
-      // When we create the new layer, we're gonna need the source!
+      // When we create the new layer, we're gonna need the original source!
       const source = layer.getSource();
-      // Let's create a new image-source containing all the options from the tile-source
-      // along with a new source. We also make sure to set the ratio to one (1) so that
-      // OL does not load more data than necessary.
+      // Let's create a new image-source containing all the options from the supplied source
+      // along with some additional settings. We make sure to set the ratio to one (1) so that
+      // OL does not load more data than necessary, and we also make sure to disable hiDpi!
+      // (Otherwise the print-process will fetch more pixels than necessary).
       const imageSource = new ImageWMS({
         ...source.getProperties(),
         projection: source.getProjection(),
         crossOrigin: source.crossOrigin,
         params: { ...source.getParams() },
         ratio: 1,
+        hidpi: false,
       });
       // We have to make sure to check the current layer-opacity and use that
       // opacity-value on the new layer.
@@ -577,7 +577,7 @@ export default class PrintModel {
       this.addedLayers.add(imageLayer);
     } catch (error) {
       console.error(
-        `Failed to update the DPI-options while creating print-image (Tiled WMS). Error: ${error}`
+        `Failed to exchange the supplied layer with a print-layer! Error: ${error}`
       );
     }
   };
@@ -756,17 +756,8 @@ export default class PrintModel {
     try {
       // We're gonna need to grab the layer-source
       const source = layer.getSource();
-      // Let's also grab the layer id, so that we can use that as a key in the map
-      // containing all the original load-functions. The id is stored in the name-
-      // property, wonderful!
-      const layerId = layer.get("name");
-      // Then we'll need to fetch the original image-load-function (so that we can make sure
-      // to re-apply that function when the printing is done).
-      const originalLoadFunction = source.getImageLoadFunction();
-      // Then we'll store the original function
-      this.originalLoadFunctions.set(layerId, originalLoadFunction);
-      // When the original function is stored, we can create a new load-function
-      // (which takes the current print-DPI into consideration) and update the source function with this one.
+      // We have to update the image-loading-function (so that the current print-DPI is taken
+      // into consideration).
       source.setImageLoadFunction((image, src) => {
         // Let's create an URL-object so that we can easily grab and alter search-parameters.
         const url = new URL(src);
@@ -824,56 +815,34 @@ export default class PrintModel {
     }
   };
 
-  // Resets (applies the original image-load-function on) the supplied image-layer.
-  resetImageLayer = (layer) => {
-    // Let's run this in a try-catch just in case
-    try {
-      // We're gonna need to grab the layer-source
-      const source = layer.getSource();
-      // We're gonna need the id so that we can grab the original parameters from
-      // the map.
-      const layerId = layer.get("name");
-      // Let's grab the original image-load-function
-      const originalLoadFunction = this.originalLoadFunctions.get(layerId);
-      // ...and update the source-function!
-      source.setImageLoadFunction(originalLoadFunction);
-    } catch (error) {
-      console.warn(
-        `Failed to reset an image-layer after printing. Error: {error}`
-      );
-    }
-  };
-
   // Since we're allowing the user to print the map with different DPI-options,
   // the layers that are about to be printed must be prepared. The preparation consists
   // of settings the DPI-parameters so that we ensure that we are sending proper WMS-requests.
   // (If we would print with 300 dpi, and just let OL send an ordinary request, the images returned
   // from the server would not show the correct layout for 300 DPI usage).
-  // To do this, we first make sure to exchange all tile-layers for image-layers. This is done since
+  // To do this, we first make sure to exchange all visible layers with "prepared image-layers". This is done since
   // OL seems to do some funky stuff to the tile-layers, and image-layers gives us more control.
   // TODO: Vector-layers, for example from the draw-plugin, must be handled as well. Otherwise, the text
   // on vector-layers will be very small when printing with high DPI.
   prepareActiveLayersForPrint = (options) => {
-    // First we have to exchange all visible tile-layers for image-layers. This is done
-    // since the image-layers are easier to work with when we are updating the layer-settings
-    // so that we can make sure to request the correct DPI etc.
-    for (const tileLayer of this.getVisibleTileLayers()) {
-      this.exchangeTileLayer(tileLayer, options);
+    // First we have to exchange all visible tile-, and image-layers for "print-image-layers".
+    for (const layer of this.getVisibleTileAndImageLayers()) {
+      this.exchangeLayer(layer, options);
     }
-    // Then we have to "prepare" all currently visible image-layers. An image-layer
-    // is a layer that has been added by an admin as a "single-tile" layer (or an
-    // exchanged tile-layer, as above).
+    // Then we have to "prepare" all currently visible image-layers. Note that all currently
+    // visible image-layers will be layers created in the method above! (Since all other image-layers
+    // has been turned off. They will be turned back on when the printing is complete).
     for (const imageLayer of this.getVisibleImageLayers()) {
       this.prepareImageLayer(imageLayer, options);
     }
   };
 
-  // Since we've been messing with the tile-layers parameters while printing, we have to provide
-  // a method to reset the parameters. This method gets the original parameters, and sets these.
+  // Since we've been adding and hiding layers while printing, we have to make sure to reset
+  // everything back to normal!
   resetPrintLayers = () => {
-    // Since we have been hiding all tile-layers and exchanged them with image-layers, we
-    // have to make sure to:
-    // 1. Show the tile-layers again
+    // Since we have been hiding all tile- and image-layers and exchanged them with
+    // "print-image-layers", we have to make sure to:
+    // 1. Show the original layers again
     for (const layer of this.hiddenLayers) {
       layer.setVisible(true);
     }
@@ -881,17 +850,10 @@ export default class PrintModel {
     for (const layer of this.addedLayers) {
       this.map.removeLayer(layer);
     }
-    // Then we have to grab all the "ordinary" image-layers...
-    const imageLayers = this.getVisibleImageLayers();
-    // ... and reset all these (when resetting, we exchange the updated load-function with the original-one).
-    for (const layer of imageLayers) {
-      this.resetImageLayer(layer);
-    }
     // When all layers has been reset and so on, we'll have to reset the collections
-    // containing the original settings and added/hidden layers.
+    // containing the added/hidden layers.
     this.hiddenLayers = new Set();
     this.addedLayers = new Set();
-    this.originalLoadFunctions = new Map();
   };
 
   print = (options) => {
