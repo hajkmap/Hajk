@@ -107,6 +107,16 @@ export default class MapViewModel {
       this.clearDrawLayer();
       this.map.on("singleclick", this.onFeaturesClickedInMap);
     });
+
+    this.localObserver.subscribe(
+      "vt-search-stop-points-by-line",
+      (parameters) => {
+        this.model.getStopPointsByLine(
+          parameters.internalLineNumber,
+          parameters.direction
+        );
+      }
+    );
   };
 
   /**

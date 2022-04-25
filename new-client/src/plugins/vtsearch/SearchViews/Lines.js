@@ -142,6 +142,9 @@ class Lines extends React.PureComponent {
     this.setState({
       showStopAreas: event.target.checked,
     });
+    this.localObserver.publish("vt-show-stop-points-by-line", {
+      showStopPoints: event.target.checked,
+    });
   };
 
   handlePolygonClick = () => {

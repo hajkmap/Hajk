@@ -77,6 +77,9 @@ class AttributeTable extends React.Component {
         focusedRow: foundRowIndex,
       });
     });
+    localObserver.subscribe("vt-show-stop-points-by-line", (showStopPoints) => {
+      this.showStopPoints = showStopPoints;
+    });
   };
 
   getDisplayName = (key) => {
@@ -248,6 +251,12 @@ class AttributeTable extends React.Component {
     localObserver.publish("vt-attribute-table-row-clicked", {
       olFeatureId: row.rowData.olFeatureId,
       searchResultId: searchResult.id,
+    });
+    debugger;
+    //if (this.showStopPoints)
+    localObserver.publish("vt-search-stop-points-by-line", {
+      internalLineNumber: row.rowData.InternalLineNumber,
+      direction: row.rowData.Direction,
     });
   };
 
