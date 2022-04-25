@@ -252,8 +252,7 @@ class AttributeTable extends React.Component {
       olFeatureId: row.rowData.olFeatureId,
       searchResultId: searchResult.id,
     });
-    debugger;
-    //if (this.showStopPoints)
+    // if (this.showStopPoints)
     localObserver.publish("vt-search-stop-points-by-line", {
       internalLineNumber: row.rowData.InternalLineNumber,
       direction: row.rowData.Direction,
