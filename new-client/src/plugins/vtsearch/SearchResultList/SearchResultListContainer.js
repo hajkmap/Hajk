@@ -13,6 +13,7 @@ import TabPanel from "./TabPanel";
 import ClearIcon from "@material-ui/icons/Clear";
 import GeoJSON from "ol/format/GeoJSON";
 import { Typography } from "@material-ui/core";
+import { CSVLink } from "react-csv";
 
 /**
  * @summary Base in the search result list
@@ -224,6 +225,15 @@ class SearchResultListContainer extends React.Component {
         searchResultIds: [],
       });
     });
+
+    localObserver.subscribe("vt-export-search-result", () => {
+      this.#exportSearchResult();
+    });
+  };
+
+  #exportSearchResult = () => {
+    let exportList = this.getSearchResults();
+    window.alert("here");
   };
 
   handleTabChange = (event, newValue) => {
@@ -421,6 +431,27 @@ class SearchResultListContainer extends React.Component {
     this.bringToFrontSearchResultContainer();
   };
 
+  #getExportList = () => {
+    let exportList = this.getSearchResults();
+    let features =
+      exportList[this.state.activeTabId].featureCollection.features;
+    return features.map((value) => {
+      return value.properties;
+    });
+  };
+
+  #renderExportCSVLink = () => {
+    return (
+      <CSVLink
+        data={this.#getExportList()}
+        separator=","
+        filename="test-SearchResultListContainer.csv"
+      >
+        CSV-SearchResult
+      </CSVLink>
+    );
+  };
+
   renderSearchResultContainer = () => {
     const { classes, windowContainerId } = this.props;
     let searchResults = this.getSearchResults();
@@ -476,6 +507,7 @@ class SearchResultListContainer extends React.Component {
           topRight: false,
         }}
       >
+        <section>{this.#renderExportCSVLink()}</section>
         <section>
           {this.renderTabsHeader(searchResults)}
           {searchResults.map((searchResult) => {

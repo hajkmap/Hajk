@@ -3,6 +3,7 @@ import Paper from "@material-ui/core/Paper";
 import VirtualizedTable from "./VirtualizedTable";
 import { withStyles } from "@material-ui/core/styles";
 import { SortDirection } from "react-virtualized";
+import { CSVLink } from "react-csv";
 
 const styles = (theme) => ({});
 
@@ -251,12 +252,35 @@ class AttributeTable extends React.Component {
     });
   };
 
+  #getExportHeaders = () => {
+    let columns = this.getColumns();
+    return columns.map((value) => {
+      return { label: value.label, key: value.dataKey };
+    });
+  };
+
+  #getExportList = () => {
+    const { searchResult } = this.props;
+    let features = this.getFeaturesFromSearchResult(searchResult);
+    return features.map((value) => {
+      return value.properties;
+    });
+  };
+
   // Lägg in en label från toolconfig i searchresult
   render() {
     const { height, searchResult, rowHeight } = this.props;
     const features = this.getFeaturesFromSearchResult(searchResult);
     return (
       <Paper style={{ height: height }}>
+        <CSVLink
+          data={this.#getExportList()}
+          headers={this.#getExportHeaders()}
+          filename={"test-AttributeTable.csv"}
+          className="ExportCSVLink"
+        >
+          CSV-AttributeTable
+        </CSVLink>
         {features.length > 0 ? (
           <VirtualizedTable
             rowCount={this.state.rows.length}
