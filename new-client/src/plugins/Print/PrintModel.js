@@ -559,8 +559,12 @@ export default class PrintModel {
         params: { ...source.getParams() },
         ratio: 1,
       });
+      // We have to make sure to check the current layer-opacity and use that
+      // opacity-value on the new layer.
+      const layerOpacity = layer.getOpacity() ?? 1;
       // Then we can create the new image-layer with the new image-source.
       const imageLayer = new ImageLayer({
+        opacity: layerOpacity,
         source: imageSource,
       });
       // Finally we add the new layer to the map... First we have to check where
