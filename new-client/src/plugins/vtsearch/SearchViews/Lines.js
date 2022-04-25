@@ -138,6 +138,9 @@ class Lines extends React.PureComponent {
 
   #handleCheckBoxClick = (checked) => {
     this.checkboxEnabled = checked;
+    this.localObserver.publish("vt-show-stop-points-by-line", {
+      showStopPoints: this.checkboxEnabled,
+    });
   };
 
   handlePolygonClick = () => {

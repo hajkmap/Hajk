@@ -1147,6 +1147,43 @@ export default class SearchModel {
   }
 
   /**
+   * Get all stop points. Sends an event when the function is called and another one when it's promise is done.
+   * @param {int} filterOnInternalLineNumber The internal number of the stop point, pass null of no number is given.
+   * @param {int} filterOnDirection The direction of line, pass null of no direction is given.
+   *
+   * @memberof SearchModel
+   */
+  getStopPointsByLine(filterOnInternalLineNumber, filterOnDirection) {
+    // Build up the url with viewparams.
+    let url = this.geoServer.ShowStopPoints.url;
+    let viewParams = "&viewparams=";
+    if (filterOnInternalLineNumber) {
+      viewParams =
+        viewParams + `filterOnLineNumber:${filterOnInternalLineNumber};`;
+    }
+    if (filterOnDirection) {
+      viewParams = viewParams + `filterOnDirection:${filterOnDirection};`;
+    }
+
+    if (filterOnInternalLineNumber || filterOnDirection) url = url + viewParams;
+    url = this.encodeUrlForGeoServer(url);
+
+    fetch(url).then((res) => {
+      res
+        .json()
+        .then((jsonResult) => {
+          let stopPoints = {
+            featureCollection: jsonResult,
+          };
+          this.localObserver.publish("vt-stop-point-showed", stopPoints);
+        })
+        .catch((err) => {
+          console.log(err);
+        });
+    });
+  }
+
+  /**
    * Returns the global Map object.
    * @returns {object} Map
    *
