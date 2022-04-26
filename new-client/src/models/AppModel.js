@@ -334,7 +334,6 @@ class AppModel {
       config.tools.find((t) => t.type === "infoclick")?.options
         ?.useNewInfoclick === true;
     if (useNewInfoclick) {
-      console.log("useNewInfoclick: ", useNewInfoclick);
       const mapClickModel = new MapClickModel(this.map, this.globalObserver);
 
       mapClickModel.bindMapClick((featureCollections) => {
