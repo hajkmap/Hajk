@@ -123,6 +123,11 @@ class SearchModel {
 
     const viewProjection = this.#map.getView().getProjection().getCode();
 
+    // We look at the sources and filter out only those that are defined.
+    searchSources = searchSources.filter(
+      (searchSource) => searchSource !== undefined
+    );
+
     // Loop through all defined search sources
     searchSources.forEach((searchSource) => {
       // Expect the Promise and an AbortController from each Source
