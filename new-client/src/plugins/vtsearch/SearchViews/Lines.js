@@ -47,7 +47,7 @@ class Lines extends React.PureComponent {
     trafficTransports: [],
     trafficTransport: "",
     throughStopArea: "",
-    showStopAreas: false,
+    showStopPoints: false,
   };
 
   // propTypes and defaultProps are static properties, declared
@@ -115,7 +115,7 @@ class Lines extends React.PureComponent {
       municipality: "",
       trafficTransport: "",
       throughStopArea: "",
-      showStopAreas: false,
+      showStopPoints: false,
     });
   };
 
@@ -139,12 +139,18 @@ class Lines extends React.PureComponent {
   };
 
   #handleCheckBoxClick = (event) => {
-    this.setState({
-      showStopAreas: event.target.checked,
-    });
-    this.localObserver.publish("vt-show-stop-points-by-line", {
-      showStopPoints: event.target.checked,
-    });
+    this.setState(
+      {
+        showStopPoints: event.target.checked,
+      },
+      () => {
+        debugger;
+        this.localObserver.publish(
+          "vt-show-stop-points-by-line",
+          this.state.showStopPoints
+        );
+      }
+    );
   };
 
   handlePolygonClick = () => {
@@ -370,7 +376,7 @@ class Lines extends React.PureComponent {
         className={classes.showLinesCheckbox}
         control={
           <Checkbox
-            checked={this.state.showStopAreas}
+            checked={this.state.showStopPoints}
             onChange={this.#handleCheckBoxClick}
             color="default"
           />
