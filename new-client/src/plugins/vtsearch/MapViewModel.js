@@ -487,6 +487,7 @@ export default class MapViewModel {
         layer.set("visible", false);
       }
     });
+    this.showStopPointsSource.clear();
   };
 
   /**
