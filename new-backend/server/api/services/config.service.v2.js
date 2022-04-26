@@ -168,7 +168,7 @@ class ConfigServiceV2 {
     const editOptions = mapConfig.tools.find((t) => t.type === "edit")?.options;
     let editLayerIds = [];
 
-    if (typeof editOptions != "undefined") {
+    if (editOptions !== undefined) {
       if (
         editOptions.activeServices &&
         editOptions.activeServices.length !== 0
@@ -185,12 +185,21 @@ class ConfigServiceV2 {
       }
     }
 
+    // Ensure that the WFST layer that is used by the Collector plugin is added too.
+    // This one differs a bit from the previous washes as there is no need to map
+    // an Array: the `serviceId` is just a string as Collector only supports one
+    // edit service at a time.
+    const collectorToolsServiceId = mapConfig.tools.find(
+      (t) => t.type === "collector"
+    )?.options.serviceId;
+
     // We utilize Set to get rid of potential duplicates in the final list
     const uniqueLayerIds = new Set([
       ...baseLayerIds,
       ...layerIds,
       ...searchLayerIds,
       ...editLayerIds,
+      ...(collectorToolsServiceId ? [collectorToolsServiceId] : []), // Conditional spread to avoid undefined inside the Set
     ]);
 
     // Prepare a new layers config object that will hold all keys
