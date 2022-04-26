@@ -1,3 +1,5 @@
+import { MockdataSearchModel } from "./Mockdata/MockdataSearchModel";
+
 /**
  * @summary SearchModel used for VT specific searches.
  * @description NEED TO ADD A DESCRIPTION
@@ -781,6 +783,9 @@ export default class SearchModel {
    * @memberof SearchModel
    */
   fetchAllPossibleMunicipalityZoneNames(addEmptyMunicipality = true) {
+    if (!this?.geoServer?.municipalityZoneNames?.url)
+      return this.#returnMockDataMunicipalityZoneNames();
+
     const url = this.geoServer.municipalityZoneNames.url;
     return fetch(url)
       .then((res) => {
@@ -807,6 +812,11 @@ export default class SearchModel {
       });
   }
 
+  #returnMockDataMunicipalityZoneNames = () => {
+    return new Promise((resolve) => {
+      resolve(MockdataSearchModel().municipalities);
+    });
+  };
   /**
    * Function that fetch all transport mode type names and numbers.
    * @param {boolean} addEmptyMunicipality <option value="true">Adds an empty transport mode at the beginning of the array. </option>
@@ -815,6 +825,9 @@ export default class SearchModel {
    * @memberof SearchModel
    */
   fetchAllPossibleTransportModeTypeNames(addEmptyTransportMode = true) {
+    if (!this?.geoServer?.transportModeTypeNames?.url)
+      return this.#returnMockDataTransportModeTypeNames();
+
     this.localObserver.publish("vt-transportModeTypeNames-result-begin", {
       label: this.geoServer.transportModeTypeNames.searchLabel,
     });
@@ -832,6 +845,12 @@ export default class SearchModel {
       });
     });
   }
+
+  #returnMockDataTransportModeTypeNames = () => {
+    return new Promise((resolve) => {
+      resolve(MockdataSearchModel().modeTypeNames);
+    });
+  };
 
   /**
    * Gets requested journeys. Sends an event when the function is called and another one when it's promise is done.

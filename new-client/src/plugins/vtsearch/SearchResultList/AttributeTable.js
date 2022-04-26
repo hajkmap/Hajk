@@ -3,6 +3,7 @@ import Paper from "@material-ui/core/Paper";
 import VirtualizedTable from "./VirtualizedTable";
 import { withStyles } from "@material-ui/core/styles";
 import { SortDirection } from "react-virtualized";
+import { MockdataSearchModel } from "./../Mockdata/MockdataSearchModel";
 
 const styles = (theme) => ({});
 
@@ -35,6 +36,14 @@ class AttributeTable extends React.Component {
   //Most efficient way to do it?
   componentDidMount() {
     if (this.state.rows.length > 0) {
+      if (!this.state.sortOrder) {
+        const sortOrder = MockdataSearchModel();
+        this.setState({
+          sortOrder:
+            MockdataSearchModel()[this.props.searchResult.type]
+              .defaultSortOrder,
+        });
+      }
       this.state.sortOrder.map((sortAttribute) => {
         this.sort({
           sortBy: sortAttribute,
