@@ -1,7 +1,7 @@
 import PropTypes from "prop-types";
 import VectorLayer from "ol/layer/Vector";
 import VectorSource from "ol/source/Vector";
-import { Fill, Stroke, Style, Circle } from "ol/style";
+import { Fill, Stroke, Style, Circle, Text } from "ol/style";
 import "ol/ol.css";
 import Draw from "ol/interaction/Draw.js";
 import WKT from "ol/format/WKT";
@@ -117,7 +117,6 @@ export default class MapViewModel {
     this.localObserver.subscribe(
       "vt-search-stop-points-by-line",
       (parameters) => {
-        //debugger;
         this.model.getStopPointsByLine(
           parameters.internalLineNumber,
           parameters.direction
@@ -346,33 +345,38 @@ export default class MapViewModel {
   };
 
   #addShowStopPointsLayerToMap = () => {
-    var fill = new Fill({
+    this.showStopPointsSource = new VectorSource();
+    this.showStopPointsLayer = new VectorLayer({
+      style: this.#getStopPointStyle(),
+      source: this.showStopPointsSource,
+    });
+    this.showStopPointsLayer.setZIndex(500);
+    this.map.addLayer(this.showStopPointsLayer);
+  };
+
+  #getStopPointStyle = () => {
+    const fill = new Fill({
       color: `rgba(${this.model.mapColors.searchFillColor.r},
         ${this.model.mapColors.searchFillColor.g},
         ${this.model.mapColors.searchFillColor.b},
         ${this.model.mapColors.searchFillColor.a})`,
     });
-    var stroke = new Stroke({
+    const stroke = new Stroke({
       color: `rgba(${this.model.mapColors.searchFillColor.r},
         ${this.model.mapColors.searchFillColor.g},
         ${this.model.mapColors.searchFillColor.b},
         ${this.model.mapColors.searchFillColor.a})`,
       width: this.model.mapColors.searchStrokeLineWidth,
     });
-    this.showStopPointsSource = new VectorSource();
-    this.showStopPointsLayer = new VectorLayer({
-      style: new Style({
-        image: new Circle({
-          fill: fill,
-          stroke: stroke,
-          radius: this.model.mapColors.searchStrokePointWidth,
-        }),
+    return new Style({
+      image: new Circle({
         fill: fill,
         stroke: stroke,
+        radius: this.model.geoServer.ShowStopPoints.radius,
       }),
-      source: this.showStopPointsSource,
+      fill: fill,
+      stroke: stroke,
     });
-    this.map.addLayer(this.showStopPointsLayer);
   };
 
   /**
@@ -531,11 +535,51 @@ export default class MapViewModel {
     this.showStopPointsSource.clear();
     const features = stopPoints.featureCollection.features.map(
       (geoServerFeature) => {
-        return new Feature({
+        let feature = new Feature({
           geometry: new Point(geoServerFeature.geometry.coordinates),
         });
-      }
+        feature.setStyle(this.#createFeatureStyleStopPoint(geoServerFeature));
+        return feature;
+      },
+      this
     );
     this.showStopPointsSource.addFeatures(features);
   };
+
+  #createFeatureStyleStopPoint = (geoServerFeature) => {
+    const baseStyle = this.#getStopPointStyle();
+    const textStyle = this.#getStopPointFeatureTextStyle(geoServerFeature);
+    baseStyle.setText(textStyle);
+    return baseStyle;
+  };
+
+  #getStopPointFeatureTextStyle = (geoServerFeature) => {
+    return new Text({
+      textAlign: this.model.geoServer.ShowStopPoints.textHorizontalAlign,
+      textBaseline: this.model.geoServer.ShowStopPoints.textVerticalAlign,
+      font: this.model.geoServer.ShowStopPoints.textFont,
+      text: this.#getText(geoServerFeature),
+      fill: new Fill({
+        color: `rgba(${this.model.geoServer.ShowStopPoints.textFillColor.r},
+        ${this.model.geoServer.ShowStopPoints.textFillColor.g},
+        ${this.model.geoServer.ShowStopPoints.textFillColor.b},
+        ${this.model.geoServer.ShowStopPoints.textFillColor.a})`,
+      }),
+      stroke: new Stroke({
+        color: `rgba(${this.model.geoServer.ShowStopPoints.textStrokeColor.r},
+        ${this.model.geoServer.ShowStopPoints.textStrokeColor.g},
+        ${this.model.geoServer.ShowStopPoints.textStrokeColor.b},
+        ${this.model.geoServer.ShowStopPoints.textStrokeColor.a})`,
+        width: this.model.geoServer.ShowStopPoints.textStrokeWidth,
+      }),
+      offsetX: this.model.geoServer.ShowStopPoints.textOffsetX,
+      offsetY: this.model.geoServer.ShowStopPoints.textOffsetY,
+      rotation: this.model.geoServer.ShowStopPoints.textRotation,
+      scale: 1,
+    });
+  };
+
+  #getText(geoServerFeature) {
+    return geoServerFeature.properties.Name;
+  }
 }

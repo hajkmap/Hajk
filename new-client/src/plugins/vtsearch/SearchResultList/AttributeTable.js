@@ -47,7 +47,8 @@ class AttributeTable extends React.Component {
 
   constructor(props) {
     super(props);
-    this.bindSubscriptions();
+    this.#init();
+    this.#bindSubscriptions();
   }
 
   getFeaturePropertiesKeys(searchResult) {
@@ -63,7 +64,11 @@ class AttributeTable extends React.Component {
       .indexOf(olFeatureId);
   };
 
-  bindSubscriptions = () => {
+  #init = () => {
+    this.showStopPoints = false;
+  };
+
+  #bindSubscriptions = () => {
     const { localObserver } = this.props;
     localObserver.subscribe("vt-remove-highlight-attribute-row", () => {
       this.setState({
@@ -252,7 +257,7 @@ class AttributeTable extends React.Component {
       olFeatureId: row.rowData.olFeatureId,
       searchResultId: searchResult.id,
     });
-    // if (this.showStopPoints)
+    //if (this.showStopPoints)
     localObserver.publish("vt-search-stop-points-by-line", {
       internalLineNumber: row.rowData.InternalLineNumber,
       direction: row.rowData.Direction,
