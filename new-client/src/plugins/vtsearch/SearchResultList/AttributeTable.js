@@ -38,7 +38,6 @@ class AttributeTable extends React.Component {
     if (this.state.rows.length > 0) {
       if (!this.state.sortOrder) {
         const sortOrder = MockdataSearchModel();
-        debugger;
         this.setState({
           sortOrder:
             MockdataSearchModel()[this.props.searchResult.type]
