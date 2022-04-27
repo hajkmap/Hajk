@@ -19,6 +19,7 @@ import EditView from "./EditView";
 import SettingsView from "./SettingsView";
 // Hooks
 import useCookieStatus from "hooks/useCookieStatus";
+import useUpdateEffect from "hooks/useUpdateEffect";
 
 import { useSnackbar } from "notistack";
 
@@ -38,8 +39,6 @@ const SketchView = (props) => {
 
   // Snackbar for info/help about our plugin
   const { closeSnackbar, enqueueSnackbar } = useSnackbar();
-
-  const [isFirstRender, setIsFirstRender] = React.useState(true);
 
   // We're gonna need to keep track of some draw-styling...
   const [drawStyle, setDrawStyle] = React.useState(
@@ -204,12 +203,11 @@ const SketchView = (props) => {
     functionalCookiesOk && model.setStoredTextStyleSettings(textStyle);
   }, [textStyle, functionalCookiesOk, model]);
 
-  React.useEffect(() => {
-    // Check if this is our first render, to ensure it doesn't come up on startup.
-    if (isFirstRender) {
-      setIsFirstRender(false);
-      return;
-    }
+  // This effect does not run on first render. (Otherwise the user would be
+  // prompted with information before they've even started using the plugin).
+  // If it's not the first render, the effect makes sure to prompt the user
+  // with information when they change the current draw-type.
+  useUpdateEffect(() => {
     const typeInformation = SNACKBAR_HELP_TYPE[activeDrawType];
     const snack = enqueueSnackbar(typeInformation.description, {
       variant: "info",
@@ -220,7 +218,7 @@ const SketchView = (props) => {
     return () => {
       closeSnackbar(snack);
     };
-  }, [activeDrawType, enqueueSnackbar]);
+  }, [activeDrawType, enqueueSnackbar, closeSnackbar]);
 
   // This effect makes sure to subscribe (and unsubscribe) to the observer-events that we care about.
   React.useEffect(() => {
