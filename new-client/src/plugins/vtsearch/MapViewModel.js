@@ -544,7 +544,10 @@ export default class MapViewModel {
         let stopPointFeature = new Feature({
           geometry: new Point(geoServerFeature.geometry.coordinates),
         });
-        stopPointFeature.labelText = geoServerFeature.properties.Name;
+        stopPointFeature.labelText =
+          geoServerFeature.properties.Name +
+          " " +
+          geoServerFeature.properties.Designation;
         this.#setAdjustThreshold(stopPointFeature);
 
         return stopPointFeature;
