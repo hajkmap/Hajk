@@ -184,3 +184,16 @@ export const MEASUREMENT_PRECISIONS = [
   { value: 2, name: "2 decimaler" },
   { value: 3, name: "3 decimaler" },
 ];
+
+export const DEFAULT_DRAW_STYLE_SETTINGS = {
+  strokeColor: { r: 10, g: 10, b: 10, a: 1 },
+  fillColor: { r: 60, g: 60, b: 60, a: 0.3 },
+  strokeType: "solid",
+  strokeWidth: 1,
+};
+
+export const DEFAULT_TEXT_STYLE_SETTINGS = {
+  foregroundColor: "#FFFFFF",
+  backgroundColor: "#000000",
+  size: 14,
+};
