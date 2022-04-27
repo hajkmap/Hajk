@@ -80,6 +80,7 @@ class DrawModel {
   #customHandleAddFeature;
   #highlightFillColor;
   #highlightStrokeColor;
+  #circleRadius;
 
   constructor(settings) {
     // Let's make sure that we don't allow initiation if required settings
@@ -2030,6 +2031,10 @@ class DrawModel {
     this.#refreshFeaturesTextStyle();
   };
 
+  setCircleRadius = (radius) => {
+    this.#circleRadius = radius;
+  };
+
   getMeasurementSettings = () => {
     return this.#measurementSettings;
   };
@@ -2072,6 +2077,11 @@ class DrawModel {
   // Get:er returning the current text-style settings
   getTextStyleSettings = () => {
     return this.#textStyleSettings;
+  };
+
+  // Get:er returning circle radius
+  getCircleRadius = () => {
+    return this.#circleRadius;
   };
 }
 export default DrawModel;
