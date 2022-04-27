@@ -4,7 +4,13 @@ import { Circle, Fill, Stroke } from "ol/style";
 import GeoJSON from "ol/format/GeoJSON";
 import { Circle as CircleGeometry, Point } from "ol/geom";
 
-import { STROKE_DASHES, MAX_LS_CHARS, PROMPT_TEXTS } from "../constants";
+import {
+  DEFAULT_DRAW_STYLE_SETTINGS,
+  DEFAULT_TEXT_STYLE_SETTINGS,
+  STROKE_DASHES,
+  MAX_LS_CHARS,
+  PROMPT_TEXTS,
+} from "../constants";
 
 class SketchModel {
   #geoJSONParser;
@@ -26,20 +32,33 @@ class SketchModel {
     this.#drawModel = settings.drawModel;
   }
 
-  // Updates the removed features in the local-storage
-  #setStoredRemovedFeatures = (removedFeatures) => {
+  #setSketchKeyInStorage = (key, value) => {
     LocalStorageHelper.set(this.#storageKey, {
       ...LocalStorageHelper.get(this.#storageKey),
-      removedFeatures: removedFeatures,
+      [key]: value,
     });
+  };
+
+  // Updates the removed features in the local-storage
+  #setStoredRemovedFeatures = (removedFeatures) => {
+    this.#setSketchKeyInStorage("removedFeatures", removedFeatures);
   };
 
   // Updates the stored sketches in the local-storage
   #setStoredSketches = (sketches) => {
-    LocalStorageHelper.set(this.#storageKey, {
-      ...LocalStorageHelper.get(this.#storageKey),
-      sketches: sketches,
-    });
+    this.#setSketchKeyInStorage("sketches", sketches);
+  };
+
+  // Updates the stored draw-style-settings in the local-storage.
+  // Exposed so direct calls from view is possible.
+  setStoredDrawStyleSettings = (settings) => {
+    this.#setSketchKeyInStorage("drawStyleSettings", settings);
+  };
+
+  // Updates the stored text-style-settings in the local-storage
+  // Exposed so direct calls from view is possible.
+  setStoredTextStyleSettings = (settings) => {
+    this.#setSketchKeyInStorage("textStyleSettings", settings);
   };
 
   // Creates an object containing all the supplied properties along with
@@ -70,6 +89,18 @@ class SketchModel {
     }
     // Then we'll create the geoJSON, and return that.
     return this.#geoJSONParser.writeFeature(f);
+  };
+
+  // Returns the draw-style-settings stored in LS, or the default draw-style-settings.
+  getDrawStyleSettings = () => {
+    const inStorage = LocalStorageHelper.get(this.#storageKey);
+    return inStorage["drawStyleSettings"] || DEFAULT_DRAW_STYLE_SETTINGS;
+  };
+
+  // Returns the text-style-settings stored in LS, or the default text-style-settings.
+  getTextStyleSettings = () => {
+    const inStorage = LocalStorageHelper.get(this.#storageKey);
+    return inStorage["textStyleSettings"] || DEFAULT_TEXT_STYLE_SETTINGS;
   };
 
   // Returns the activity-object connected to the supplied id

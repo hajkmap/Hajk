@@ -30,18 +30,13 @@ const SketchView = (props) => {
   // We're gonna need to keep track of the current chosen activity.
   const { activityId, setActivityId } = props;
   // We're gonna need to keep track of some draw-styling...
-  const [drawStyle, setDrawStyle] = React.useState({
-    strokeColor: { r: 10, g: 10, b: 10, a: 1 },
-    fillColor: { r: 60, g: 60, b: 60, a: 0.3 },
-    strokeType: "solid",
-    strokeWidth: 1,
-  });
+  const [drawStyle, setDrawStyle] = React.useState(
+    model.getDrawStyleSettings()
+  );
   // ...and some text-styling.
-  const [textStyle, setTextStyle] = React.useState({
-    foregroundColor: "#FFFFFF",
-    backgroundColor: "#000000",
-    size: 14,
-  });
+  const [textStyle, setTextStyle] = React.useState(
+    model.getTextStyleSettings()
+  );
   // We want to keep track of the last removed features so that the user can restore
   // features that they potentially removed by mistake.
   const [removedFeatures, setRemovedFeatures] = React.useState(
