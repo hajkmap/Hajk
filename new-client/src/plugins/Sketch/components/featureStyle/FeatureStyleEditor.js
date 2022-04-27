@@ -96,6 +96,7 @@ const FeatureStyleEditor = ({ feature, model, drawModel }) => {
         />
       )}
       <FeatureStyleSelector
+        isEdit={true}
         activeDrawType={feature.get("DRAW_METHOD")}
         drawStyle={featureStyle}
         textStyle={textStyle}

@@ -10,6 +10,7 @@ import Overlay from "ol/Overlay";
 import GeoJSON from "ol/format/GeoJSON";
 import transformTranslate from "@turf/transform-translate";
 import { getArea as getExtentArea } from "ol/extent";
+import { Feature } from "ol";
 
 /*
  * A model supplying useful Draw-functionality.
@@ -45,6 +46,7 @@ import { getArea as getExtentArea } from "ol/extent";
  * - get/set modifyActive(): Get or set wether the Modify-interaction should be active or not.
  * - get/set translateActive(): Get or set wether the Translate-interaction should be active or not.
  * - get/set measurementSettings(): Get or set the measurement-settings (units, show-area etc.)
+ * - get/set circleRadius(): Get or set the radius of the circle.
  */
 class DrawModel {
   #map;
@@ -80,6 +82,8 @@ class DrawModel {
   #customHandleAddFeature;
   #highlightFillColor;
   #highlightStrokeColor;
+  #circleRadius;
+  #circleInteractionActive;
 
   constructor(settings) {
     // Let's make sure that we don't allow initiation if required settings
@@ -136,6 +140,7 @@ class DrawModel {
     this.#customHandleAddFeature = null;
     this.#highlightFillColor = "rgba(35,119,252,1)";
     this.#highlightStrokeColor = "rgba(255,255,255,1)";
+    this.#circleRadius = 0;
 
     // A Draw-model is not really useful without a vector-layer, let's initiate it
     // right away, either by creating a new layer, or connect to an existing layer.
@@ -1193,6 +1198,9 @@ class DrawModel {
     if (this.#moveInteractionActive) {
       return this.#disableMoveInteraction();
     }
+    if (this.#circleInteractionActive) {
+      this.#disableCircleInteraction();
+    }
     // If there isn't an active draw interaction currently, we just return.
     if (!this.#drawInteraction) return;
     // Otherwise, we remove the interaction from the map.
@@ -1455,6 +1463,38 @@ class DrawModel {
       this.#map.removeInteraction(this.#translateInteraction);
       this.#translateInteraction = null;
     }
+  };
+
+  // Enables possibility to draw a circle with fixed radius by 'single-click'
+  #enableCircleInteraction = () => {
+    this.#map.clickLock.add("coreDrawModel");
+    this.#circleInteractionActive = true;
+    this.#map.on("singleclick", this.#createRadiusOnClick);
+  };
+
+  // Disables possibility to draw a circle with fixed radius by 'single-click'
+  #disableCircleInteraction = () => {
+    this.#map.clickLock.delete("coreDrawModel");
+    this.#map.un("singleclick", this.#createRadiusOnClick);
+    this.#circleInteractionActive = false;
+  };
+
+  // Creates a Feature with a circle geometry with fixed radius
+  // (If the radius is bigger than 0).
+  #createRadiusOnClick = (e) => {
+    // If the radius is zero we don't want to add a circle...
+    if (this.#circleRadius === 0) {
+      return;
+    }
+    // Create the feature
+    const feature = new Feature({
+      geometry: new CircleGeometry(e.coordinate, this.#circleRadius),
+    });
+    // Add the feature to the draw-source
+    this.#drawSource.addFeature(feature);
+    // Make sure to trigger the draw-end event so that all props etc. are
+    // set on the feature.
+    this.#handleDrawEnd({ feature });
   };
 
   // Handles the "select"-event that fires from the event-listener added when adding
@@ -1861,6 +1901,9 @@ class DrawModel {
     if (drawMethod === "Move") {
       return this.#enableMoveInteraction(settings);
     }
+    if (drawMethod === "Circle") {
+      this.#enableCircleInteraction();
+    }
     // If we've made it this far it's time to enable a new draw interaction!
     // First we must make sure to gather some settings and defaults.
     const type = this.#getDrawInteractionType(drawMethod);
@@ -2030,6 +2073,14 @@ class DrawModel {
     this.#refreshFeaturesTextStyle();
   };
 
+  setCircleRadius = (radius) => {
+    this.#circleRadius = parseInt(radius);
+    // Ensure is not NaN
+    if (Number.isNaN(this.#circleRadius)) {
+      this.#circleRadius = 0;
+    }
+  };
+
   getMeasurementSettings = () => {
     return this.#measurementSettings;
   };
@@ -2072,6 +2123,11 @@ class DrawModel {
   // Get:er returning the current text-style settings
   getTextStyleSettings = () => {
     return this.#textStyleSettings;
+  };
+
+  // Get:er returning circle radius
+  getCircleRadius = () => {
+    return this.#circleRadius;
   };
 }
 export default DrawModel;
