@@ -197,3 +197,34 @@ export const DEFAULT_TEXT_STYLE_SETTINGS = {
   backgroundColor: "#000000",
   size: 14,
 };
+
+export const SNACKBAR_HELP_TYPE = {
+  Circle: {
+    title: "Cirkel",
+    description: `Du kan skapa en cirkeln genom att klicka med en bestämd radie, eller dra för att få en önskad radie.`,
+  },
+  LineString: {
+    title: "Linje",
+    description: `Skapa linjer genom att klicka på en position och sen flytta musen för att dra en linje, avsluta med dubbelklick.`,
+  },
+  Rectangle: {
+    title: "Rektangel",
+    description: `Skapa en rektangel genom att hålla högerklick med musen och dra över en yta för att få en önskad storlek.`,
+  },
+  Arrow: {
+    title: "Pil",
+    description: `Skapa piler genom att klicka på en position och sen flytta musen för att dra en pil, avsluta med dubbelklick.`,
+  },
+  Polygon: {
+    title: "Polygon",
+    description: `Skapa en polygon genom att klicka på en position och sen flytta musen på en annan position och klicka för att skapa en ny yta.`,
+  },
+  Point: {
+    title: "Punkt",
+    description: `Klicka på en position för att infoga en punkt.`,
+  },
+  Text: {
+    title: "Text",
+    description: `Klicka på en position för att infoga text.`,
+  },
+};
