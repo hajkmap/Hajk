@@ -180,6 +180,18 @@ const SketchView = (props) => {
     return drawModel.setTextStyleSettings(textStyle);
   }, [drawModel, textStyle]);
 
+  // This effect makes sure to save the draw-style-settings to the LS when it
+  // changes. (Only if functional cookies are allowed obviously).
+  React.useEffect(() => {
+    functionalCookiesOk && model.setStoredDrawStyleSettings(drawStyle);
+  }, [drawStyle, functionalCookiesOk, model]);
+
+  // This effect makes sure to save the text-style-settings to the LS when it
+  // changes. (Only if functional cookies are allowed obviously).
+  React.useEffect(() => {
+    functionalCookiesOk && model.setStoredTextStyleSettings(textStyle);
+  }, [textStyle, functionalCookiesOk, model]);
+
   // This effect makes sure to subscribe (and unsubscribe) to the observer-events that we care about.
   React.useEffect(() => {
     // Fires when a feature has been removed from the draw-source.
