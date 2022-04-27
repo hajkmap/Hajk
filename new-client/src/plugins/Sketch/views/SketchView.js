@@ -213,6 +213,9 @@ const SketchView = (props) => {
     const typeInformation = SNACKBAR_HELP_TYPE[activeDrawType];
     const snack = enqueueSnackbar(typeInformation.description, {
       variant: "info",
+      // We want to make sure that the snackbar is not dismissed automatically.
+      // After 8 seconds, we'll dismiss it.
+      autoHideDuration: 8000,
     });
     return () => {
       closeSnackbar(snack);
