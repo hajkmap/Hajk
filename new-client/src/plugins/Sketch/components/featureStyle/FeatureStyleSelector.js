@@ -209,10 +209,33 @@ export default function FeatureStyleSelector(props) {
     }
   };
 
+  const renderCircleRadiusSelector = () => {
+    return (
+      <Grid item xs={12} style={{ marginTop: 16 }}>
+        <Grid item xs={12} style={{ marginBottom: 4 }}>
+          <Typography align="center">Radius</Typography>
+        </Grid>
+        <Grid item xs={12}>
+          <TextField
+            variant="outlined"
+            type="number"
+            size="small"
+            fullWidth
+            value={props.model.getCircleRadius()}
+            onChange={(e) => {
+              props.model.setCircleRadius(e.target.value);
+            }}
+          ></TextField>
+        </Grid>
+      </Grid>
+    );
+  };
+
   return (
     <Grid container>
       {props.activeDrawType === "LineString" && renderStrokeTypeSelector()}
       {props.activeDrawType === "Text" && renderTextSizeSelector()}
+      {props.activeDrawType === "Circle" && renderCircleRadiusSelector()}
       <Grid item xs={12} style={{ marginTop: 16 }}>
         <Grid item xs={12} style={{ marginBottom: 4 }}>
           <Typography align="center">Utseende</Typography>
