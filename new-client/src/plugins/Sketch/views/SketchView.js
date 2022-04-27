@@ -215,7 +215,7 @@ const SketchView = (props) => {
       variant: "info",
       // We want to make sure that the snackbar is not dismissed automatically.
       // After 8 seconds, we'll dismiss it.
-      autoHideDuration: 8000,
+      autoHideDuration: typeInformation.duration ?? 8000,
     });
     return () => {
       closeSnackbar(snack);

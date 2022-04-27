@@ -202,29 +202,36 @@ export const SNACKBAR_HELP_TYPE = {
   Circle: {
     title: "Cirkel",
     description: `Du kan skapa en cirkeln genom att klicka med en bestämd radie, eller dra för att få en önskad radie.`,
+    duration: 5000,
   },
   LineString: {
     title: "Linje",
     description: `Skapa linjer genom att klicka på en position och sen flytta musen för att dra en linje, avsluta med dubbelklick.`,
+    duration: 5000,
   },
   Rectangle: {
     title: "Rektangel",
     description: `Skapa en rektangel genom att hålla högerklick med musen och dra över en yta för att få en önskad storlek.`,
+    duration: 5000,
   },
   Arrow: {
     title: "Pil",
     description: `Skapa piler genom att klicka på en position och sen flytta musen för att dra en pil, avsluta med dubbelklick.`,
+    duration: 5000,
   },
   Polygon: {
     title: "Polygon",
     description: `Skapa en polygon genom att klicka på en position och sen flytta musen på en annan position och klicka för att skapa en ny yta.`,
+    duration: 5000,
   },
   Point: {
     title: "Punkt",
     description: `Klicka på en position för att infoga en punkt.`,
+    duration: 5000,
   },
   Text: {
     title: "Text",
     description: `Klicka på en position för att infoga text.`,
+    duration: 5000,
   },
 };
