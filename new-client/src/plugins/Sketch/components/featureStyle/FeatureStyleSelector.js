@@ -221,7 +221,7 @@ export default function FeatureStyleSelector(props) {
             type="number"
             size="small"
             fullWidth
-            value={props.drawModel.getCircleRadius()}
+            defaultValue={props.drawModel.getCircleRadius()}
             onChange={(e) => {
               props.drawModel.setCircleRadius(e.target.value);
             }}
