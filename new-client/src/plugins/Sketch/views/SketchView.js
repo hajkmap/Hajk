@@ -2,7 +2,11 @@
 import React from "react";
 import { Grid } from "@mui/material";
 // Constants
-import { PLUGIN_MARGIN, MAX_REMOVED_FEATURES } from "../constants";
+import {
+  PLUGIN_MARGIN,
+  MAX_REMOVED_FEATURES,
+  SNACKBAR_HELP_TYPE,
+} from "../constants";
 // Components
 import ActivityMenu from "../components/ActivityMenu";
 // Views
@@ -15,6 +19,8 @@ import EditView from "./EditView";
 import SettingsView from "./SettingsView";
 // Hooks
 import useCookieStatus from "hooks/useCookieStatus";
+
+import { useSnackbar } from "notistack";
 
 // The SketchView is the main view for the Sketch-plugin.
 const SketchView = (props) => {
@@ -29,6 +35,12 @@ const SketchView = (props) => {
   const { activeDrawType, setActiveDrawType } = props;
   // We're gonna need to keep track of the current chosen activity.
   const { activityId, setActivityId } = props;
+
+  // Snackbar for info/help about our plugin
+  const { closeSnackbar, enqueueSnackbar } = useSnackbar();
+
+  const [isFirstRender, setIsFirstRender] = React.useState(true);
+
   // We're gonna need to keep track of some draw-styling...
   const [drawStyle, setDrawStyle] = React.useState(
     model.getDrawStyleSettings()
@@ -191,6 +203,21 @@ const SketchView = (props) => {
   React.useEffect(() => {
     functionalCookiesOk && model.setStoredTextStyleSettings(textStyle);
   }, [textStyle, functionalCookiesOk, model]);
+
+  React.useEffect(() => {
+    // Check if this is our first render, to ensure it doesn't come up on startup.
+    if (isFirstRender) {
+      setIsFirstRender(false);
+      return;
+    }
+    const msg = SNACKBAR_HELP_TYPE[activeDrawType];
+    const snack = enqueueSnackbar(msg.description, {
+      variant: "info",
+    });
+    return () => {
+      closeSnackbar(snack);
+    };
+  }, [activeDrawType, enqueueSnackbar]);
 
   // This effect makes sure to subscribe (and unsubscribe) to the observer-events that we care about.
   React.useEffect(() => {
