@@ -32,7 +32,6 @@ const AddView = (props) => {
         activeDrawType={activeDrawType}
         drawStyle={props.drawStyle}
         drawModel={props.drawModel}
-        model={model}
         setDrawStyle={props.setDrawStyle}
         textStyle={props.textStyle}
         setTextStyle={props.setTextStyle}

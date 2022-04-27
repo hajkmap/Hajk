@@ -221,9 +221,9 @@ export default function FeatureStyleSelector(props) {
             type="number"
             size="small"
             fullWidth
-            value={props.model.getCircleRadius()}
+            value={props.drawModel.getCircleRadius()}
             onChange={(e) => {
-              props.model.setCircleRadius(e.target.value);
+              props.drawModel.setCircleRadius(e.target.value);
             }}
           ></TextField>
         </Grid>
