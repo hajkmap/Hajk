@@ -1465,25 +1465,23 @@ class DrawModel {
   };
 
   #enableCircleInteraction = () => {
-    console.log(`Interaction: enableCircleInteraction`);
+    this.#map.clickLock.add("coreDrawModel");
     this.#circleInteractionActive = true;
     this.#map.on("singleclick", this.#createRadiusOnClick);
   };
 
   #disableCircleInteraction = () => {
+    this.#map.clickLock.delete("coreDrawModel");
     this.#map.un("singleclick", this.#createRadiusOnClick);
     this.#circleInteractionActive = false;
   };
 
   #createRadiusOnClick = (e) => {
-    console.log("createRadiusOnClick", e);
     const newFeature = new Feature({
       geometry: new CircleGeometry(e.coordinate, this.getCircleRadius()),
     });
     newFeature.setStyle(this.#getFeatureStyle(newFeature));
-    this.addFeature(newFeature, {
-      silent: true,
-    });
+    this.#drawSource.addFeature(newFeature);
   };
 
   // Handles the "select"-event that fires from the event-listener added when adding
@@ -1891,7 +1889,6 @@ class DrawModel {
       return this.#enableMoveInteraction(settings);
     }
     if (drawMethod === "Circle") {
-      console.log("Circle");
       return this.#enableCircleInteraction();
     }
     // If we've made it this far it's time to enable a new draw interaction!
