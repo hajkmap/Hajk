@@ -1199,7 +1199,7 @@ class DrawModel {
       return this.#disableMoveInteraction();
     }
     if (this.#circleInteractionActive) {
-      return this.#disableCircleInteraction();
+      this.#disableCircleInteraction();
     }
     // If there isn't an active draw interaction currently, we just return.
     if (!this.#drawInteraction) return;
@@ -1481,11 +1481,11 @@ class DrawModel {
     if (this.#circleRadius === 0) {
       return;
     }
-    const newFeature = new Feature({
+    const feature = new Feature({
       geometry: new CircleGeometry(e.coordinate, this.#circleRadius),
     });
-    newFeature.setStyle(this.#getFeatureStyle(newFeature));
-    this.#drawSource.addFeature(newFeature);
+    feature.setStyle(this.#getFeatureStyle(feature));
+    this.#drawSource.addFeature(feature);
   };
 
   // Handles the "select"-event that fires from the event-listener added when adding
