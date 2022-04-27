@@ -210,8 +210,8 @@ const SketchView = (props) => {
       setIsFirstRender(false);
       return;
     }
-    const msg = SNACKBAR_HELP_TYPE[activeDrawType];
-    const snack = enqueueSnackbar(msg.description, {
+    const typeInformation = SNACKBAR_HELP_TYPE[activeDrawType];
+    const snack = enqueueSnackbar(typeInformation.description, {
       variant: "info",
     });
     return () => {
