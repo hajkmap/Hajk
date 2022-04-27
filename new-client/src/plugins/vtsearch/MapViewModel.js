@@ -24,6 +24,7 @@ export default class MapViewModel {
     this.app = settings.app;
     this.model = settings.model;
     this.localObserver = settings.localObserver;
+    this.globalObserver = settings.globalObserver;
 
     this.#bindSubscriptions();
     this.#addShowStopPointsLayerToMap();
@@ -126,6 +127,10 @@ export default class MapViewModel {
 
     this.localObserver.subscribe("vt-stop-point-showed", (stopPoints) => {
       this.#showStopPoints(stopPoints);
+    });
+
+    this.globalObserver.subscribe("core.zoomEnd", () => {
+      this.#adjustStopPointsZoomThreshold();
     });
   };
 
@@ -347,7 +352,7 @@ export default class MapViewModel {
   #addShowStopPointsLayerToMap = () => {
     this.showStopPointsSource = new VectorSource();
     this.showStopPointsLayer = new VectorLayer({
-      style: this.#getStopPointStyle(),
+      style: null,
       source: this.showStopPointsSource,
     });
     this.showStopPointsLayer.setZIndex(500);
@@ -534,32 +539,44 @@ export default class MapViewModel {
 
   #showStopPoints = (stopPoints) => {
     this.showStopPointsSource.clear();
-    const features = stopPoints.featureCollection.features.map(
+    const stopPointFeatures = stopPoints.featureCollection.features.map(
       (geoServerFeature) => {
-        let feature = new Feature({
+        let stopPointFeature = new Feature({
           geometry: new Point(geoServerFeature.geometry.coordinates),
         });
-        feature.setStyle(this.#createFeatureStyleStopPoint(geoServerFeature));
-        return feature;
+        stopPointFeature.labelText = geoServerFeature.properties.Name;
+        this.#setAdjustThreshold(stopPointFeature);
+
+        return stopPointFeature;
       },
       this
     );
-    this.showStopPointsSource.addFeatures(features);
+    this.showStopPointsSource.addFeatures(stopPointFeatures);
   };
 
-  #createFeatureStyleStopPoint = (geoServerFeature) => {
+  #setAdjustThreshold = (feature) => {
+    const resolution = this.map.getView().getResolution();
+    if (
+      resolution <
+      this.model.geoServer.ShowStopPoints.visibleStopPointsThresholdResolution
+    )
+      feature.setStyle(this.#createFeatureStyleStopPoint(feature));
+    else feature.setStyle(null);
+  };
+
+  #createFeatureStyleStopPoint = (stopPointFeature) => {
     const baseStyle = this.#getStopPointStyle();
-    const textStyle = this.#getStopPointFeatureTextStyle(geoServerFeature);
+    const textStyle = this.#getStopPointFeatureTextStyle(stopPointFeature);
     baseStyle.setText(textStyle);
     return baseStyle;
   };
 
-  #getStopPointFeatureTextStyle = (geoServerFeature) => {
+  #getStopPointFeatureTextStyle = (stopPointFeature) => {
     return new Text({
       textAlign: this.model.geoServer.ShowStopPoints.textHorizontalAlign,
       textBaseline: this.model.geoServer.ShowStopPoints.textVerticalAlign,
       font: this.model.geoServer.ShowStopPoints.textFont,
-      text: this.#getText(geoServerFeature),
+      text: this.#getText(stopPointFeature),
       fill: new Fill({
         color: `rgba(${this.model.geoServer.ShowStopPoints.textFillColor.r},
         ${this.model.geoServer.ShowStopPoints.textFillColor.g},
@@ -580,7 +597,16 @@ export default class MapViewModel {
     });
   };
 
-  #getText(geoServerFeature) {
-    return geoServerFeature.properties.Name;
-  }
+  #getText = (stopPointFeature) => {
+    return stopPointFeature.labelText;
+  };
+
+  #adjustStopPointsZoomThreshold = () => {
+    const stopPointsFeatures = this.showStopPointsSource.getFeatures();
+    if (stopPointsFeatures.length === 0) return;
+
+    stopPointsFeatures.forEach((stopPointsFeature) => {
+      this.#setAdjustThreshold(stopPointsFeature);
+    }, this);
+  };
 }

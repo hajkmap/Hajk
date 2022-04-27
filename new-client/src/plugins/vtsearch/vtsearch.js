@@ -152,6 +152,7 @@ class VTSearch extends React.PureComponent {
       app: props.app,
       map: props.map,
       localObserver: this.localObserver,
+      globalObserver: this.globalObserver,
       model: this.searchModel,
     });
     this.bindSubscriptions();
