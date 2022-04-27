@@ -74,7 +74,7 @@ class AttributeTable extends React.Component {
   };
 
   #init = () => {
-    this.showStopPoints = false;
+    this.showStopPoints = true;
   };
 
   #bindSubscriptions = () => {
@@ -91,9 +91,13 @@ class AttributeTable extends React.Component {
         focusedRow: foundRowIndex,
       });
     });
-    localObserver.subscribe("vt-show-stop-points-by-line", (showStopPoints) => {
-      this.showStopPoints = showStopPoints;
-    });
+    if (this.showStopPoints)
+      localObserver.subscribe(
+        "vt-show-stop-points-by-line",
+        (showStopPoints) => {
+          this.showStopPoints = showStopPoints;
+        }
+      );
   };
 
   getDisplayName = (key) => {

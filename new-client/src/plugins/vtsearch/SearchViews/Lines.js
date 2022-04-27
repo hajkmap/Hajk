@@ -47,7 +47,7 @@ class Lines extends React.PureComponent {
     trafficTransports: [],
     trafficTransport: "",
     throughStopArea: "",
-    showStopPoints: false,
+    showStopPoints: true,
   };
 
   // propTypes and defaultProps are static properties, declared
@@ -115,7 +115,7 @@ class Lines extends React.PureComponent {
       municipality: "",
       trafficTransport: "",
       throughStopArea: "",
-      showStopPoints: false,
+      showStopPoints: true,
     });
   };
 
@@ -144,7 +144,6 @@ class Lines extends React.PureComponent {
         showStopPoints: event.target.checked,
       },
       () => {
-        debugger;
         this.localObserver.publish(
           "vt-show-stop-points-by-line",
           this.state.showStopPoints
@@ -373,6 +372,7 @@ class Lines extends React.PureComponent {
     const { classes } = this.props;
     return (
       <FormControlLabel
+        disabled
         className={classes.showLinesCheckbox}
         control={
           <Checkbox
