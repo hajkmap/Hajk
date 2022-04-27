@@ -6,6 +6,7 @@ import { SnackbarProvider } from "notistack";
 import Observer from "react-event-observer";
 import { isMobile } from "../utils/IsMobile";
 import SrShortcuts from "../components/SrShortcuts/SrShortcuts";
+import Analytics from "../models/Analytics";
 import AppModel from "../models/AppModel.js";
 import {
   setConfig as setCookieConfig,
@@ -329,6 +330,16 @@ class App extends React.PureComponent {
     }
 
     this.globalObserver = new Observer();
+
+    const analytics = new Analytics(
+      props.config.mapConfig.analytics,
+      this.globalObserver
+    );
+    // Track page view
+    this.globalObserver.publish("trackPageview");
+
+    // Just a test event - this will get way more interesting!
+    this.globalObserver.publish("trackEvent", "AppLoad");
 
     this.infoclickOptions = this.props.config.mapConfig.tools.find(
       (t) => t.type === "infoclick"
