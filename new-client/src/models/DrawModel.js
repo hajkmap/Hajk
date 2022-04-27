@@ -10,6 +10,7 @@ import Overlay from "ol/Overlay";
 import GeoJSON from "ol/format/GeoJSON";
 import transformTranslate from "@turf/transform-translate";
 import { getArea as getExtentArea } from "ol/extent";
+import { Feature } from "ol";
 
 /*
  * A model supplying useful Draw-functionality.
@@ -45,6 +46,7 @@ import { getArea as getExtentArea } from "ol/extent";
  * - get/set modifyActive(): Get or set wether the Modify-interaction should be active or not.
  * - get/set translateActive(): Get or set wether the Translate-interaction should be active or not.
  * - get/set measurementSettings(): Get or set the measurement-settings (units, show-area etc.)
+ * - get/set circleRadius(): Get or set the radius of the circle.
  */
 class DrawModel {
   #map;
@@ -81,6 +83,7 @@ class DrawModel {
   #highlightFillColor;
   #highlightStrokeColor;
   #circleRadius;
+  #circleInteractionActive;
 
   constructor(settings) {
     // Let's make sure that we don't allow initiation if required settings
@@ -1194,6 +1197,9 @@ class DrawModel {
     if (this.#moveInteractionActive) {
       return this.#disableMoveInteraction();
     }
+    if (this.#circleInteractionActive) {
+      return this.#disableCircleInteraction();
+    }
     // If there isn't an active draw interaction currently, we just return.
     if (!this.#drawInteraction) return;
     // Otherwise, we remove the interaction from the map.
@@ -1456,6 +1462,28 @@ class DrawModel {
       this.#map.removeInteraction(this.#translateInteraction);
       this.#translateInteraction = null;
     }
+  };
+
+  #enableCircleInteraction = () => {
+    console.log(`Interaction: enableCircleInteraction`);
+    this.#circleInteractionActive = true;
+    this.#map.on("singleclick", this.#createRadiusOnClick);
+  };
+
+  #disableCircleInteraction = () => {
+    this.#map.un("singleclick", this.#createRadiusOnClick);
+    this.#circleInteractionActive = false;
+  };
+
+  #createRadiusOnClick = (e) => {
+    console.log("createRadiusOnClick", e);
+    const newFeature = new Feature({
+      geometry: new CircleGeometry(e.coordinate, this.getCircleRadius()),
+    });
+    newFeature.setStyle(this.#getFeatureStyle(newFeature));
+    this.addFeature(newFeature, {
+      silent: true,
+    });
   };
 
   // Handles the "select"-event that fires from the event-listener added when adding
@@ -1862,6 +1890,10 @@ class DrawModel {
     if (drawMethod === "Move") {
       return this.#enableMoveInteraction(settings);
     }
+    if (drawMethod === "Circle") {
+      console.log("Circle");
+      return this.#enableCircleInteraction();
+    }
     // If we've made it this far it's time to enable a new draw interaction!
     // First we must make sure to gather some settings and defaults.
     const type = this.#getDrawInteractionType(drawMethod);
@@ -2032,7 +2064,7 @@ class DrawModel {
   };
 
   setCircleRadius = (radius) => {
-    this.#circleRadius = radius;
+    this.#circleRadius = parseInt(radius);
   };
 
   getMeasurementSettings = () => {
