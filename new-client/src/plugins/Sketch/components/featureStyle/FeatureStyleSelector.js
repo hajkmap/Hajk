@@ -213,7 +213,7 @@ export default function FeatureStyleSelector(props) {
     return (
       <Grid item xs={12} style={{ marginTop: 16 }}>
         <Grid item xs={12} style={{ marginBottom: 4 }}>
-          <Typography align="center">Radius</Typography>
+          <Typography align="center">Radie (m)</Typography>
         </Grid>
         <Grid item xs={12}>
           <TextField
