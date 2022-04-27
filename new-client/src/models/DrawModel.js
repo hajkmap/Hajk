@@ -1465,27 +1465,36 @@ class DrawModel {
     }
   };
 
+  // Enables possibility to draw a circle with fixed radius by 'single-click'
   #enableCircleInteraction = () => {
     this.#map.clickLock.add("coreDrawModel");
     this.#circleInteractionActive = true;
     this.#map.on("singleclick", this.#createRadiusOnClick);
   };
 
+  // Disables possibility to draw a circle with fixed radius by 'single-click'
   #disableCircleInteraction = () => {
     this.#map.clickLock.delete("coreDrawModel");
     this.#map.un("singleclick", this.#createRadiusOnClick);
     this.#circleInteractionActive = false;
   };
 
+  // Creates a Feature with a circle geometry with fixed radius
+  // (If the radius is bigger than 0).
   #createRadiusOnClick = (e) => {
+    // If the radius is zero we don't want to add a circle...
     if (this.#circleRadius === 0) {
       return;
     }
+    // Create the feature
     const feature = new Feature({
       geometry: new CircleGeometry(e.coordinate, this.#circleRadius),
     });
-    feature.setStyle(this.#getFeatureStyle(feature));
+    // Add the feature to the draw-source
     this.#drawSource.addFeature(feature);
+    // Make sure to trigger the draw-end event so that all props etc. are
+    // set on the feature.
+    this.#handleDrawEnd({ feature });
   };
 
   // Handles the "select"-event that fires from the event-listener added when adding
