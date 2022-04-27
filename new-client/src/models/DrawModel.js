@@ -140,6 +140,7 @@ class DrawModel {
     this.#customHandleAddFeature = null;
     this.#highlightFillColor = "rgba(35,119,252,1)";
     this.#highlightStrokeColor = "rgba(255,255,255,1)";
+    this.#circleRadius = 0;
 
     // A Draw-model is not really useful without a vector-layer, let's initiate it
     // right away, either by creating a new layer, or connect to an existing layer.
@@ -1477,8 +1478,11 @@ class DrawModel {
   };
 
   #createRadiusOnClick = (e) => {
+    if (this.#circleRadius === 0) {
+      return;
+    }
     const newFeature = new Feature({
-      geometry: new CircleGeometry(e.coordinate, this.getCircleRadius()),
+      geometry: new CircleGeometry(e.coordinate, this.#circleRadius),
     });
     newFeature.setStyle(this.#getFeatureStyle(newFeature));
     this.#drawSource.addFeature(newFeature);
@@ -1889,7 +1893,7 @@ class DrawModel {
       return this.#enableMoveInteraction(settings);
     }
     if (drawMethod === "Circle") {
-      return this.#enableCircleInteraction();
+      this.#enableCircleInteraction();
     }
     // If we've made it this far it's time to enable a new draw interaction!
     // First we must make sure to gather some settings and defaults.
@@ -2062,6 +2066,10 @@ class DrawModel {
 
   setCircleRadius = (radius) => {
     this.#circleRadius = parseInt(radius);
+    // Ensure is not NaN
+    if (Number.isNaN(this.#circleRadius)) {
+      this.#circleRadius = 0;
+    }
   };
 
   getMeasurementSettings = () => {
