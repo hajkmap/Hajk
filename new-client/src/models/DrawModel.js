@@ -749,8 +749,8 @@ class DrawModel {
         },
         {
           type: "PERIMETER",
-          value: 2 * radius * Math.PI,
-          prefix: "\n Omkrets:",
+          value: radius,
+          prefix: "\n Radie:",
         },
       ];
     }

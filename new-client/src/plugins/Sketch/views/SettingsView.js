@@ -102,7 +102,7 @@ const SettingsView = (props) => {
           </Tooltip>
           <Tooltip title="Slå på om du vill visa objektens area.">
             <FormControlLabel
-              label="Visa objektens area"
+              label="Visa area"
               control={
                 <Switch
                   checked={measurementSettings.showArea}
@@ -117,9 +117,9 @@ const SettingsView = (props) => {
               }
             />
           </Tooltip>
-          <Tooltip title="Slå på om du vill visa objektens omkrets.">
+          <Tooltip title="Slå på om du vill visa objektens omkrets/radie.">
             <FormControlLabel
-              label="Visa objektens omkrets"
+              label="Visa omkrets/radie"
               control={
                 <Switch
                   checked={measurementSettings.showPerimeter}
