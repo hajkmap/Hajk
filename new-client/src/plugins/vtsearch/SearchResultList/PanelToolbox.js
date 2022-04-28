@@ -84,7 +84,8 @@ class PanelToolbox extends React.PureComponent {
   };
 
   #export = () => {
-    //window.alert("Export"); //Just for testing puropses
+    const { localObserver } = this.props;
+    localObserver.publish("vt-export-search-result-clicked");
   };
 
   renderButton = (onClickCallback, iconElement) => {

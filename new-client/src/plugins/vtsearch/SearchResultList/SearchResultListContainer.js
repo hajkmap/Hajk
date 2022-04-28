@@ -117,6 +117,7 @@ class SearchResultListContainer extends React.Component {
 
     localObserver.publish("vt-hide-all-layers");
     localObserver.publish("vt-toggle-visibility", searchResultId);
+    localObserver.publish("vt-active-tab-change", this.state.activeTabId);
 
     this.setState({ activeTabId: searchResultId });
   };
@@ -223,6 +224,12 @@ class SearchResultListContainer extends React.Component {
         resultListHeight: 300,
         searchResultIds: [],
       });
+    });
+    localObserver.subscribe("vt-export-search-result-clicked", () => {
+      localObserver.publish(
+        "vt-export-search-result-list-done",
+        this.searchResults[this.state.activeTabId]
+      );
     });
   };
 
