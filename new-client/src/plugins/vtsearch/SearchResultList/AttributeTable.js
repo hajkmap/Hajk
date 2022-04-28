@@ -62,7 +62,10 @@ class AttributeTable extends React.Component {
 
   getFeaturePropertiesKeys(searchResult) {
     const features = this.getFeaturesFromSearchResult(searchResult);
-    return Object.keys(features[0].properties);
+    const properties = features[0].properties
+      ? features[0].properties
+      : features[0].getProperties();
+    return Object.keys(properties);
   }
 
   getRowIndexFromOlFeatureId = (olFeatureId) => {
@@ -140,6 +143,9 @@ class AttributeTable extends React.Component {
       attributeDisplayOrder,
       propertyKeys
     );
+    propertyKeys = propertyKeys.filter((propertyKey) => {
+      return propertyKey !== null;
+    });
 
     return propertyKeys.map((key) => {
       var displayName = this.getDisplayName(key);
@@ -156,9 +162,12 @@ class AttributeTable extends React.Component {
     const { searchResult } = this.props;
     const features = this.getFeaturesFromSearchResult(searchResult);
     return features.map((feature, index) => {
-      return Object.keys(feature.properties).reduce(
+      const properties = feature.properties
+        ? feature.properties
+        : feature.getProperties();
+      return Object.keys(properties).reduce(
         (acc, key) => {
-          return { ...acc, [key]: feature.properties[key] };
+          return { ...acc, [key]: properties[key] };
         },
         { olFeatureId: feature.id, searchResultId: searchResult.id }
       );

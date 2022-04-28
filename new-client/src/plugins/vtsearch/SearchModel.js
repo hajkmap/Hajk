@@ -322,7 +322,10 @@ export default class SearchModel {
    */
   filterColumnsDisplayFormat(featureCollection, columnsDisplayFormat) {
     let firstFeature = featureCollection.features[0];
-    let featurePropertyNames = Object.keys(firstFeature.properties);
+    const properties = firstFeature.properties
+      ? firstFeature.properties
+      : firstFeature.getProperties();
+    let featurePropertyNames = Object.keys(properties);
     let formatChangeNames = columnsDisplayFormat.filter(
       (attributesToDisplayFormat) => {
         for (
