@@ -84,12 +84,13 @@ class AttributeTable extends React.Component {
 
     localObserver.subscribe("vt-export-search-result-list-done", (result) => {
       this.exportList = result;
+      debugger;
       this.#exportSearchResult();
     });
   };
 
   #getExportHeaders = () => {
-    let columns = this.getColumns();
+    let columns = this.getColumns(this.exportList);
     return columns.map((value) => {
       return { label: value.label, key: value.dataKey };
     });
@@ -110,10 +111,11 @@ class AttributeTable extends React.Component {
     this.setState({ exportCsvFile: true });
   };
 
-  getDisplayName = (key) => {
-    const { toolConfig, searchResult } = this.props;
+  getDisplayName = (key, resultList) => {
+    const { toolConfig } = this.props;
     var attributesMappingArray =
-      toolConfig.geoServer[searchResult.type]?.attributesToDisplay;
+      //toolConfig.geoServer[searchResult.type]?.attributesToDisplay;
+      toolConfig.geoServer[resultList.type]?.attributesToDisplay;
 
     var displayName = attributesMappingArray?.find((entry) => {
       return entry.key === key;
@@ -140,19 +142,21 @@ class AttributeTable extends React.Component {
     return newDisplayOrder;
   };
 
-  getColumns() {
-    const { searchResult, toolConfig } = this.props;
+  getColumns(resultList) {
+    const { toolConfig } = this.props;
 
-    let propertyKeys = this.getFeaturePropertiesKeys(searchResult);
+    //let propertyKeys = this.getFeaturePropertiesKeys(searchResult);
+    let propertyKeys = this.getFeaturePropertiesKeys(resultList);
     let attributeDisplayOrder =
-      toolConfig.geoServer[searchResult.type]?.attributesToDisplay;
+      //toolConfig.geoServer[searchResult.type]?.attributesToDisplay;
+      toolConfig.geoServer[resultList.type]?.attributesToDisplay;
     propertyKeys = this.reorderPropertyKeys(
       attributeDisplayOrder,
       propertyKeys
     );
 
     return propertyKeys.map((key) => {
-      var displayName = this.getDisplayName(key);
+      var displayName = this.getDisplayName(key, resultList);
       console.log(displayName, "displayName");
       return {
         label: displayName || key,
@@ -305,7 +309,7 @@ class AttributeTable extends React.Component {
             rowCount={this.state.rows.length}
             rowGetter={({ index }) => this.state.rows[index]}
             rowClicked={this.onRowClick}
-            columns={this.getColumns()}
+            columns={this.getColumns(searchResult)}
             sort={this.sort}
             sortDirection={this.state.sortDirection}
             sortBy={this.state.sortBy}
