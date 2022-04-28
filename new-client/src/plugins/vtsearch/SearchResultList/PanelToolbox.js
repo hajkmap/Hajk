@@ -8,7 +8,6 @@ import { withStyles } from "@material-ui/core/styles";
 import IconButton from "@material-ui/core/IconButton";
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 import SaveAltIcon from "@material-ui/icons/SaveAlt";
-import { CSVLink, CSVDownload } from "react-csv";
 
 /**
  * @summary Window size handling
@@ -86,39 +85,7 @@ class PanelToolbox extends React.PureComponent {
 
   #export = () => {
     const { localObserver } = this.props;
-    localObserver.publish("vt-export-search-result");
-  };
-
-  getTestData = () => {
-    return [
-      { details: { firstName: "Ahmed", lastName: "Tomi" }, job: "manager" },
-      { details: { firstName: "John", lastName: "Jones" }, job: "developer" },
-    ];
-  };
-
-  getTestHeaders = () => {
-    return [
-      { label: "First Name", key: "details.firstName" },
-      { label: "Last Name", key: "details.lastName" },
-      { label: "Job", key: "job" },
-    ];
-  };
-
-  #renderExportCSVLink = () => {
-    return (
-      <CSVLink
-        data={this.getTestData()}
-        headers={this.getTestHeaders()}
-        separator=","
-        filename="test-file.csv"
-        onClick={(event) => {
-          window.alert("click");
-          return false;
-        }}
-      >
-        TEST CSV
-      </CSVLink>
-    );
+    localObserver.publish("vt-export-search-result-clicked");
   };
 
   renderButton = (onClickCallback, iconElement) => {
@@ -146,7 +113,6 @@ class PanelToolbox extends React.PureComponent {
   render() {
     return (
       <div>
-        {this.#renderExportCSVLink()}
         {this.renderButton(this.#export, "export")}
         {this.state.minimizeVisible &&
           this.renderButton(this.minimize, "minimize")}
