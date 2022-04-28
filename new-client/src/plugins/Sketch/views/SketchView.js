@@ -212,7 +212,8 @@ const SketchView = (props) => {
     // If there is, we can prompt the user with a snack.
     if (helperText) {
       helperSnack.current = enqueueSnackbar(helperText, {
-        variant: "info",
+        variant: "default",
+        anchorOrigin: { vertical: "bottom", horizontal: "center" },
       });
     }
     // Let's make sure to clean-up out current snack when un-mounting!
