@@ -57,6 +57,25 @@ export default class Analytics {
         );
         break;
       case "matomo":
+        // Adding support for Matomo should be as simple as:
+        // npm install matomo-tracker
+        // import MatomoTracker from 'matomo-tracker';
+
+        // Initialize with your site ID and Matomo URL
+        // const { siteId, trackerUrl } = config.options;
+        // const matomo = new MatomoTracker(siteId, trackerUrl);
+
+        // Next, subscribe to our two global observer events. Call
+        // corresponding Matomo methods:
+        // globalObserver.subscribe("analytics.trackPageView", () =>
+        //   matomo.track()
+        // );
+
+        // globalObserver.subscribe(
+        //   "analytics.trackEvent",
+        //   ({ eventName, ...rest }) =>
+        //     matomo.track({ actionName: eventName, ...rest })
+        // );
         break;
 
       default:
