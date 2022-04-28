@@ -57,7 +57,8 @@ export default class Analytics {
         );
         break;
       case "matomo":
-        // Adding support for Matomo should be as simple as:
+        // TODO: Adding support for Matomo should be as simple as…
+        //
         // npm install matomo-tracker
         // import MatomoTracker from 'matomo-tracker';
 
