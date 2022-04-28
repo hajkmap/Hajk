@@ -17,6 +17,7 @@ class SketchModel {
   #storageKey;
   #dateTimeOptions;
   #drawModel;
+  #showHelperSnacks;
 
   constructor(settings) {
     this.#geoJSONParser = new GeoJSON();
@@ -30,7 +31,15 @@ class SketchModel {
       second: "numeric",
     };
     this.#drawModel = settings.drawModel;
+    this.#showHelperSnacks = this.#getDefaultShowHelperSnacks();
   }
+
+  // Returns the default value regarding wether helper-snacks should be shown or not.
+  // (Value from LS or defaults to true).
+  #getDefaultShowHelperSnacks = () => {
+    const inStorage = LocalStorageHelper.get(this.#storageKey);
+    return inStorage["showHelperSnacks"] ?? true;
+  };
 
   #setSketchKeyInStorage = (key, value) => {
     LocalStorageHelper.set(this.#storageKey, {
@@ -92,7 +101,13 @@ class SketchModel {
   };
 
   // Returns the helper text for the supplied activity and draw-type
-  getDrawHelperText = (activity, drawType) => {
+  getHelperSnackText = (activity, drawType) => {
+    // If we're nto supposed to show helper-snacks, let's return null so
+    // that no snack will be shown.
+    if (!this.#showHelperSnacks) {
+      return null;
+    }
+    // Otherwise we'll check the current activity and so on...
     switch (activity) {
       case "ADD":
         // If we're in the add-view, we want to prompt the user with
@@ -436,6 +451,16 @@ class SketchModel {
     }
     // Otherwise we'll return the result of a lowercase-compare.
     return s1.toLowerCase() === s2.toLowerCase();
+  };
+
+  // Returns wether helper-snacks should be shown or not
+  getShowHelperSnacks = () => {
+    return this.#showHelperSnacks;
+  };
+
+  // Set wether helper-snacks should be shown or not.
+  setShowHelperSnacks = (showSnacks) => {
+    this.#showHelperSnacks = showSnacks;
   };
 }
 export default SketchModel;

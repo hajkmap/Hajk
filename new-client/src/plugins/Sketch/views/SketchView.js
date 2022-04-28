@@ -208,7 +208,7 @@ const SketchView = (props) => {
   // with information when they change the current activity or draw-type.
   useUpdateEffect(() => {
     // Let's check if there's some helper-text that we should prompt the user with.
-    const helperText = model.getDrawHelperText(activityId, activeDrawType);
+    const helperText = model.getHelperSnackText(activityId, activeDrawType);
     // If there is, we can prompt the user with a snack.
     if (helperText) {
       helperSnack.current = enqueueSnackbar(helperText, {
@@ -325,6 +325,7 @@ const SketchView = (props) => {
             functionalCookiesOk={functionalCookiesOk}
             measurementSettings={props.measurementSettings}
             setMeasurementSettings={props.setMeasurementSettings}
+            globalObserver={globalObserver}
           />
         );
       default:

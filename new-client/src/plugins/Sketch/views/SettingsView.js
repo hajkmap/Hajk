@@ -13,7 +13,11 @@ import {
 
 import Information from "../components/Information";
 
+import LocalStorageHelper from "utils/LocalStorageHelper";
+import useCookieStatus from "hooks/useCookieStatus";
+
 import {
+  STORAGE_KEY,
   AREA_MEASUREMENT_UNITS,
   LENGTH_MEASUREMENT_UNITS,
   MEASUREMENT_PRECISIONS,
@@ -24,16 +28,57 @@ const SettingsView = (props) => {
   const { model, id, measurementSettings, setMeasurementSettings } = props;
   // Then we'll get some information about the current activity (view)
   const activity = model.getActivityFromId(id);
+  // We're gonna need to keep track of if we're allowed to save stuff in LS. Let's use the hook.
+  const { functionalCookiesOk } = useCookieStatus(props.globalObserver);
+  // We're gonna need some local state as well. For example, should we show helper-snacks?
+  const [showHelperSnacks, setShowHelperSnacks] = React.useState(
+    model.getShowHelperSnacks()
+  );
+  // An effect that makes sure to update the model with the user-choice regarding the helper-snacks.
+  // The effect also makes sure to store the setting in the LS (if allowed).
+  React.useEffect(() => {
+    model.setShowHelperSnacks(showHelperSnacks);
+    if (functionalCookiesOk) {
+      LocalStorageHelper.set(STORAGE_KEY, {
+        ...LocalStorageHelper.get(STORAGE_KEY),
+        showHelperSnacks: showHelperSnacks,
+      });
+    }
+  }, [model, showHelperSnacks, functionalCookiesOk]);
 
   return (
-    <Grid container spacing={2}>
+    <Grid container>
       <Grid item xs={12}>
         <Information text={activity.information} />
+      </Grid>
+      <Grid item xs={12} sx={{ marginTop: 2 }}>
+        <FormControl component="fieldset">
+          <FormLabel focused={false} component="legend">
+            Generella inställningar
+          </FormLabel>
+          <Tooltip
+            disableInteractive
+            title={`Slå ${showHelperSnacks ? "av" : "på"} om du vill ${
+              showHelperSnacks ? "dölja" : "visa"
+            } hjälptexter.`}
+          >
+            <FormControlLabel
+              label="Hjälptexter aktiverade"
+              control={
+                <Switch
+                  checked={showHelperSnacks}
+                  onChange={() => setShowHelperSnacks((show) => !show)}
+                  color="primary"
+                />
+              }
+            />
+          </Tooltip>
+        </FormControl>
       </Grid>
       <Grid item xs={12}>
         <FormControl component="fieldset">
           <FormLabel focused={false} component="legend">
-            Generella ritinställningar
+            Mätinställningar
           </FormLabel>
           <Tooltip
             disableInteractive
