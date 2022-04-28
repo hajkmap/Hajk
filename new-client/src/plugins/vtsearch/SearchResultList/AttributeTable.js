@@ -4,6 +4,7 @@ import VirtualizedTable from "./VirtualizedTable";
 import { withStyles } from "@material-ui/core/styles";
 import { SortDirection } from "react-virtualized";
 import { MockdataSearchModel } from "./../Mockdata/MockdataSearchModel";
+import { CSVDownload } from "react-csv";
 
 const styles = (theme) => ({
   cvsLinkComponent: { color: "orange" },
@@ -94,6 +95,11 @@ class AttributeTable extends React.Component {
         focusedRow: foundRowIndex,
       });
     });
+    localObserver.subscribe("vt-export-search-result-list-done", (result) => {
+      this.exportList = result;
+      debugger;
+      this.#exportSearchResult();
+    });
     if (this.showStopPoints)
       localObserver.subscribe(
         "vt-show-stop-points-by-line",
@@ -101,6 +107,28 @@ class AttributeTable extends React.Component {
           this.showStopPoints = showStopPoints;
         }
       );
+  };
+
+  #getExportHeaders = () => {
+    let columns = this.getColumns(this.exportList);
+    return columns.map((value) => {
+      return { label: value.label, key: value.dataKey };
+    });
+  };
+
+  #getExportList = () => {
+    let features = this.getFeaturesFromSearchResult(this.exportList);
+    return features.map((value) => {
+      return value.properties;
+    });
+  };
+
+  #exportSearchResult = () => {
+    //The download csv component will download only when rendered, so it needs to
+    //be removed and then readded to trigger the download. Otherwise download will
+    //only be possible the first time the download button is clicked
+    this.setState({ exportCsvFile: false });
+    this.setState({ exportCsvFile: true });
   };
 
   getDisplayName = (key, resultList) => {
@@ -282,6 +310,16 @@ class AttributeTable extends React.Component {
       direction: row.rowData.Direction,
     });
   };
+  #renderCSVDownloadComponent = () => {
+    return (
+      <CSVDownload
+        data={this.#getExportList()}
+        headers={this.#getExportHeaders()}
+        filename="DL-csv-attrtable.csv"
+        target="_blank"
+      />
+    );
+  };
 
   // Lägg in en label från toolconfig i searchresult
   render() {
@@ -289,6 +327,7 @@ class AttributeTable extends React.Component {
     const features = this.getFeaturesFromSearchResult(searchResult);
     return (
       <Paper style={{ height: height }}>
+        {this.state.exportCsvFile && this.#renderCSVDownloadComponent()}
         {features.length > 0 ? (
           <VirtualizedTable
             rowCount={this.state.rows.length}
