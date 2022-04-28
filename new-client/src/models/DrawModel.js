@@ -9,7 +9,7 @@ import { MultiPoint, Point } from "ol/geom";
 import Overlay from "ol/Overlay";
 import GeoJSON from "ol/format/GeoJSON";
 import transformTranslate from "@turf/transform-translate";
-import { getArea as getExtentArea } from "ol/extent";
+import { getArea as getExtentArea, getCenter, getWidth } from "ol/extent";
 import { Feature } from "ol";
 
 /*
@@ -1591,6 +1591,19 @@ class DrawModel {
     }
   };
 
+  // Creates an OpenLayers Circle geometry from a simplified circle geometry (polygon).
+  // Since the calculation from the extent does not seem to result in the exact radius,
+  // we allow for a optional radius to be passed.
+  #creteCircleGeomFromSimplified = (simplified, opt_radius) => {
+    // First we'll have to get the extent of the simplified circle
+    const simplifiedExtent = simplified.getExtent();
+    // Then we'll calculate the center and radius
+    const center = getCenter(simplifiedExtent);
+    const radius = opt_radius ?? getWidth(simplifiedExtent) / 2;
+    // Finally we'll return a circle geometry based on those:
+    return new CircleGeometry(center, radius);
+  };
+
   // Removes the property-change-listeners from all features and then adds
   // them again. Useful if a new feature is added to the draw-source, and you
   // have to make sure the new feature has a listener.
@@ -1732,18 +1745,37 @@ class DrawModel {
     try {
       // First we'll have to get a clone of the supplied feature
       const duplicate = this.#createDuplicateFeature(feature);
-      // Then we'll have to create a GeoJSON-feature from the ol-feature (since
-      // turf only accepts geoJSON).
+      // Then we'll have to check if we're dealing with a circle-geometry.
+      const isCircle = duplicate.getGeometry() instanceof CircleGeometry;
+      // We also have to make sure to store the eventual radius so that we can use
+      // that to create a 'real' circle later.
+      const radius = isCircle ? duplicate.getGeometry().getRadius() : 0;
+      // If we are dealing with a circle, we have to create a simplified geometry (since
+      // geoJSON does not like OpenLayers circles). Let's update the geometry if we are:
+      if (isCircle) {
+        duplicate.setGeometry(fromCircle(duplicate.getGeometry()));
+      }
+      // Then we'll have to create a GeoJSON-feature from the ol-feature (since turf only accepts geoJSON).
       const gjFeature = this.#geoJSONParser.writeFeatureObject(duplicate);
       // We want to add the cloned feature with an offset to the east. First, we'll
       // have to get the offset-amount.
       const offset = this.#getDuplicateOffsetAmount();
       // Then we'll translate (move) the geoJSON-feature slightly to the east.
       const translated = transformTranslate(gjFeature, offset, 140);
-      // When thats done, we'll update the duplicates geometry.
-      duplicate.setGeometry(
-        this.#geoJSONParser.readGeometry(translated.geometry)
+      // Then we have to read the geometry from the translated geoJSON
+      const translatedGeom = this.#geoJSONParser.readGeometry(
+        translated.geometry
       );
+      // When thats done, we'll update the duplicates geometry. If we are dealing
+      // with a circle, we have to create a "real" circle:
+      if (isCircle) {
+        duplicate.setGeometry(
+          this.#creteCircleGeomFromSimplified(translatedGeom, radius)
+        );
+      } else {
+        // Otherwise we can just set the geometry.
+        duplicate.setGeometry(translatedGeom);
+      }
       // Since the feature we are duplicating is probably selected for edit, we have to
       // make sure to toggle the edit-flag on the new feature to false.
       duplicate.set("EDIT_ACTIVE", false);

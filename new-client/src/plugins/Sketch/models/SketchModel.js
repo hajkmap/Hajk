@@ -411,6 +411,10 @@ class SketchModel {
     const storedSketches = this.getSketchesFromStorage();
     // Then we'll update the stored sketches with the supplied one.
     this.#setStoredSketches([sketch, ...storedSketches]);
+    // Finally, we'll make sure to refresh the map by removing all drawn features,
+    // and re-add the current sketch.
+    this.#drawModel.removeDrawnFeatures();
+    this.addSketchToMap(sketch);
     return { status: "SUCCESS", message: PROMPT_TEXTS.saveSuccess };
   };
 
