@@ -331,15 +331,8 @@ class App extends React.PureComponent {
 
     this.globalObserver = new Observer();
 
-    const analytics = new Analytics(
-      props.config.mapConfig.analytics,
-      this.globalObserver
-    );
-    // Track page view
-    this.globalObserver.publish("trackPageview");
-
-    // Just a test event - this will get way more interesting!
-    this.globalObserver.publish("trackEvent", "AppLoad");
+    // Initiate the Analytics model
+    props.config.mapConfig.analytics && this.initiateAnalyticsModel();
 
     this.infoclickOptions = this.props.config.mapConfig.tools.find(
       (t) => t.type === "infoclick"
@@ -399,6 +392,28 @@ class App extends React.PureComponent {
       )}. Please check your map config and buildConfig.json.  `
     );
   };
+  /**
+   * @summary Initiates the wanted analytics model (if any).
+   * @description If Hajk is configured to track map usage, this method will
+   * initialize the model and subscribe to two events ("analytics.trackPageView"
+   * and "analytics.trackEvent").
+   *
+   * @memberof App
+   */
+  initiateAnalyticsModel() {
+    this.analytics = new Analytics(
+      this.props.config.mapConfig.analytics,
+      this.globalObserver
+    );
+
+    // Subscribe to events on global observer
+    this.globalObserver.publish("analytics.trackPageView");
+
+    this.globalObserver.publish("analytics.trackEvent", {
+      eventName: "MapLoad",
+      mapName: this.props.config.activeMap,
+    });
+  }
 
   componentDidMount() {
     this.checkConfigForUnsupportedTools();
