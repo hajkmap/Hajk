@@ -91,6 +91,20 @@ class SketchModel {
     return this.#geoJSONParser.writeFeature(f);
   };
 
+  // Returns the helper text for the supplied activity and draw-type
+  getDrawHelperText = (activity, drawType) => {
+    switch (activity) {
+      case "ADD":
+        // If we're in the add-view, we want to prompt the user with
+        // information regarding the current draw-type.
+        return PROMPT_TEXTS[`${drawType}Help`];
+      default:
+        // If we're not in the add-view, we want to prompt the user
+        // with information regarding the current view (activity).
+        return PROMPT_TEXTS[`${activity}Help`];
+    }
+  };
+
   // Returns the draw-style-settings stored in LS, or the default draw-style-settings.
   getDrawStyleSettings = () => {
     const inStorage = LocalStorageHelper.get(this.#storageKey);

@@ -2,11 +2,7 @@
 import React from "react";
 import { Grid } from "@mui/material";
 // Constants
-import {
-  PLUGIN_MARGIN,
-  MAX_REMOVED_FEATURES,
-  SNACKBAR_HELP_TYPE,
-} from "../constants";
+import { PLUGIN_MARGIN, MAX_REMOVED_FEATURES } from "../constants";
 // Components
 import ActivityMenu from "../components/ActivityMenu";
 // Views
@@ -37,8 +33,11 @@ const SketchView = (props) => {
   // We're gonna need to keep track of the current chosen activity.
   const { activityId, setActivityId } = props;
 
-  // Snackbar for info/help about our plugin
+  // We're gonna need some snackbar functions so that we can prompt the user with information.
   const { closeSnackbar, enqueueSnackbar } = useSnackbar();
+  // We don't want to prompt the user with more than one snack, so lets track the current one,
+  // so that we can close it when another one is about to open.
+  const helperSnack = React.useRef(null);
 
   // We're gonna need to keep track of some draw-styling...
   const [drawStyle, setDrawStyle] = React.useState(
@@ -206,19 +205,21 @@ const SketchView = (props) => {
   // This effect does not run on first render. (Otherwise the user would be
   // prompted with information before they've even started using the plugin).
   // If it's not the first render, the effect makes sure to prompt the user
-  // with information when they change the current draw-type.
+  // with information when they change the current activity or draw-type.
   useUpdateEffect(() => {
-    const typeInformation = SNACKBAR_HELP_TYPE[activeDrawType];
-    const snack = enqueueSnackbar(typeInformation.description, {
-      variant: "info",
-      // We want to make sure that the snackbar is not dismissed automatically.
-      // After 8 seconds, we'll dismiss it.
-      autoHideDuration: typeInformation.duration ?? 8000,
-    });
+    // Let's check if there's some helper-text that we should prompt the user with.
+    const helperText = model.getDrawHelperText(activityId, activeDrawType);
+    // If there is, we can prompt the user with a snack.
+    if (helperText) {
+      helperSnack.current = enqueueSnackbar(helperText, {
+        variant: "info",
+      });
+    }
+    // Let's make sure to clean-up out current snack when un-mounting!
     return () => {
-      closeSnackbar(snack);
+      closeSnackbar(helperSnack.current);
     };
-  }, [activeDrawType, enqueueSnackbar, closeSnackbar]);
+  }, [activityId, activeDrawType, enqueueSnackbar, closeSnackbar]);
 
   // This effect makes sure to subscribe (and unsubscribe) to the observer-events that we care about.
   React.useEffect(() => {
