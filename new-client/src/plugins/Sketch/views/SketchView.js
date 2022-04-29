@@ -15,6 +15,9 @@ import EditView from "./EditView";
 import SettingsView from "./SettingsView";
 // Hooks
 import useCookieStatus from "hooks/useCookieStatus";
+import useUpdateEffect from "hooks/useUpdateEffect";
+
+import { useSnackbar } from "notistack";
 
 // The SketchView is the main view for the Sketch-plugin.
 const SketchView = (props) => {
@@ -29,6 +32,13 @@ const SketchView = (props) => {
   const { activeDrawType, setActiveDrawType } = props;
   // We're gonna need to keep track of the current chosen activity.
   const { activityId, setActivityId } = props;
+
+  // We're gonna need some snackbar functions so that we can prompt the user with information.
+  const { closeSnackbar, enqueueSnackbar } = useSnackbar();
+  // We don't want to prompt the user with more than one snack, so lets track the current one,
+  // so that we can close it when another one is about to open.
+  const helperSnack = React.useRef(null);
+
   // We're gonna need to keep track of some draw-styling...
   const [drawStyle, setDrawStyle] = React.useState(
     model.getDrawStyleSettings()
@@ -192,6 +202,26 @@ const SketchView = (props) => {
     functionalCookiesOk && model.setStoredTextStyleSettings(textStyle);
   }, [textStyle, functionalCookiesOk, model]);
 
+  // This effect does not run on first render. (Otherwise the user would be
+  // prompted with information before they've even started using the plugin).
+  // If it's not the first render, the effect makes sure to prompt the user
+  // with information when they change the current activity or draw-type.
+  useUpdateEffect(() => {
+    // Let's check if there's some helper-text that we should prompt the user with.
+    const helperText = model.getHelperSnackText(activityId, activeDrawType);
+    // If there is, we can prompt the user with a snack.
+    if (helperText) {
+      helperSnack.current = enqueueSnackbar(helperText, {
+        variant: "default",
+        anchorOrigin: { vertical: "bottom", horizontal: "center" },
+      });
+    }
+    // Let's make sure to clean-up out current snack when un-mounting!
+    return () => {
+      closeSnackbar(helperSnack.current);
+    };
+  }, [activityId, activeDrawType, enqueueSnackbar, closeSnackbar]);
+
   // This effect makes sure to subscribe (and unsubscribe) to the observer-events that we care about.
   React.useEffect(() => {
     // Fires when a feature has been removed from the draw-source.
@@ -296,6 +326,7 @@ const SketchView = (props) => {
             functionalCookiesOk={functionalCookiesOk}
             measurementSettings={props.measurementSettings}
             setMeasurementSettings={props.setMeasurementSettings}
+            globalObserver={globalObserver}
           />
         );
       default:

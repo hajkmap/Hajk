@@ -17,6 +17,7 @@ class SketchModel {
   #storageKey;
   #dateTimeOptions;
   #drawModel;
+  #showHelperSnacks;
 
   constructor(settings) {
     this.#geoJSONParser = new GeoJSON();
@@ -30,7 +31,15 @@ class SketchModel {
       second: "numeric",
     };
     this.#drawModel = settings.drawModel;
+    this.#showHelperSnacks = this.#getDefaultShowHelperSnacks();
   }
+
+  // Returns the default value regarding wether helper-snacks should be shown or not.
+  // (Value from LS or defaults to true).
+  #getDefaultShowHelperSnacks = () => {
+    const inStorage = LocalStorageHelper.get(this.#storageKey);
+    return inStorage["showHelperSnacks"] ?? true;
+  };
 
   #setSketchKeyInStorage = (key, value) => {
     LocalStorageHelper.set(this.#storageKey, {
@@ -89,6 +98,26 @@ class SketchModel {
     }
     // Then we'll create the geoJSON, and return that.
     return this.#geoJSONParser.writeFeature(f);
+  };
+
+  // Returns the helper text for the supplied activity and draw-type
+  getHelperSnackText = (activity, drawType) => {
+    // If we're nto supposed to show helper-snacks, let's return null so
+    // that no snack will be shown.
+    if (!this.#showHelperSnacks) {
+      return null;
+    }
+    // Otherwise we'll check the current activity and so on...
+    switch (activity) {
+      case "ADD":
+        // If we're in the add-view, we want to prompt the user with
+        // information regarding the current draw-type.
+        return PROMPT_TEXTS[`${drawType}Help`];
+      default:
+        // If we're not in the add-view, we want to prompt the user
+        // with information regarding the current view (activity).
+        return PROMPT_TEXTS[`${activity}Help`];
+    }
   };
 
   // Returns the draw-style-settings stored in LS, or the default draw-style-settings.
@@ -382,6 +411,10 @@ class SketchModel {
     const storedSketches = this.getSketchesFromStorage();
     // Then we'll update the stored sketches with the supplied one.
     this.#setStoredSketches([sketch, ...storedSketches]);
+    // Finally, we'll make sure to refresh the map by removing all drawn features,
+    // and re-add the current sketch.
+    this.#drawModel.removeDrawnFeatures();
+    this.addSketchToMap(sketch);
     return { status: "SUCCESS", message: PROMPT_TEXTS.saveSuccess };
   };
 
@@ -422,6 +455,16 @@ class SketchModel {
     }
     // Otherwise we'll return the result of a lowercase-compare.
     return s1.toLowerCase() === s2.toLowerCase();
+  };
+
+  // Returns wether helper-snacks should be shown or not
+  getShowHelperSnacks = () => {
+    return this.#showHelperSnacks;
+  };
+
+  // Set wether helper-snacks should be shown or not.
+  setShowHelperSnacks = (showSnacks) => {
+    this.#showHelperSnacks = showSnacks;
   };
 }
 export default SketchModel;

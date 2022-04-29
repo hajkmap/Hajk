@@ -163,6 +163,23 @@ export const PROMPT_TEXTS = {
   saveOverflow: "Objekten kunde inte sparas. Arbetsytan för många objekt.",
   saveNoFeatures: "Kunde inte skapa arbetsyta, inga ritobjekt hittades.",
   saveSuccess: "Arbetsytan sparades utan problem.",
+  CircleHelp:
+    "Du kan skapa en cirkel genom att klicka med en bestämd radie, eller dra för att få en önskad radie.",
+  LineStringHelp:
+    "Skapa linjer genom att klicka på en position för varje nod, avsluta med dubbelklick.",
+  RectangleHelp:
+    "Skapa en rektangel genom att hålla vänsterklick med musen och dra över en yta för att få en önskad storlek.",
+  ArrowHelp:
+    "En pil skapas genom att klicka på en position för varje nod, avsluta med dubbelklick.",
+  PolygonHelp:
+    "Skapa en polygon genom att klicka på en position för varje nod, avsluta med dubbelklick.",
+  PointHelp: "Klicka på en position för att infoga en punkt.",
+  TextHelp: "Klicka på en position för att infoga text.",
+  EDITHelp: "Klicka på ett objekt för att redigera dess utseende.",
+  MOVEHelp: "Klicka på ett objekt för att förflytta det.",
+  DELETEHelp: "Klicka på ett objekt för att radera det från din skiss.",
+  SAVEHelp:
+    "Här kan du spara en arbetsyta för att fortsätta ditt arbete senare. För att spara över en äldre arbetsyta, ange samma namn.",
 };
 
 export const AREA_MEASUREMENT_UNITS = [

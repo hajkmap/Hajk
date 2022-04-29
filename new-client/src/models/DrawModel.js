@@ -9,7 +9,8 @@ import { MultiPoint, Point } from "ol/geom";
 import Overlay from "ol/Overlay";
 import GeoJSON from "ol/format/GeoJSON";
 import transformTranslate from "@turf/transform-translate";
-import { getArea as getExtentArea } from "ol/extent";
+import { getArea as getExtentArea, getCenter, getWidth } from "ol/extent";
+import { Feature } from "ol";
 
 /*
  * A model supplying useful Draw-functionality.
@@ -45,6 +46,7 @@ import { getArea as getExtentArea } from "ol/extent";
  * - get/set modifyActive(): Get or set wether the Modify-interaction should be active or not.
  * - get/set translateActive(): Get or set wether the Translate-interaction should be active or not.
  * - get/set measurementSettings(): Get or set the measurement-settings (units, show-area etc.)
+ * - get/set circleRadius(): Get or set the radius of the circle.
  */
 class DrawModel {
   #map;
@@ -80,6 +82,8 @@ class DrawModel {
   #customHandleAddFeature;
   #highlightFillColor;
   #highlightStrokeColor;
+  #circleRadius;
+  #circleInteractionActive;
 
   constructor(settings) {
     // Let's make sure that we don't allow initiation if required settings
@@ -136,6 +140,7 @@ class DrawModel {
     this.#customHandleAddFeature = null;
     this.#highlightFillColor = "rgba(35,119,252,1)";
     this.#highlightStrokeColor = "rgba(255,255,255,1)";
+    this.#circleRadius = 0;
 
     // A Draw-model is not really useful without a vector-layer, let's initiate it
     // right away, either by creating a new layer, or connect to an existing layer.
@@ -744,8 +749,8 @@ class DrawModel {
         },
         {
           type: "PERIMETER",
-          value: 2 * radius * Math.PI,
-          prefix: "\n Omkrets:",
+          value: radius,
+          prefix: "\n Radie:",
         },
       ];
     }
@@ -1193,6 +1198,9 @@ class DrawModel {
     if (this.#moveInteractionActive) {
       return this.#disableMoveInteraction();
     }
+    if (this.#circleInteractionActive) {
+      this.#disableCircleInteraction();
+    }
     // If there isn't an active draw interaction currently, we just return.
     if (!this.#drawInteraction) return;
     // Otherwise, we remove the interaction from the map.
@@ -1457,6 +1465,38 @@ class DrawModel {
     }
   };
 
+  // Enables possibility to draw a circle with fixed radius by 'single-click'
+  #enableCircleInteraction = () => {
+    this.#map.clickLock.add("coreDrawModel");
+    this.#circleInteractionActive = true;
+    this.#map.on("singleclick", this.#createRadiusOnClick);
+  };
+
+  // Disables possibility to draw a circle with fixed radius by 'single-click'
+  #disableCircleInteraction = () => {
+    this.#map.clickLock.delete("coreDrawModel");
+    this.#map.un("singleclick", this.#createRadiusOnClick);
+    this.#circleInteractionActive = false;
+  };
+
+  // Creates a Feature with a circle geometry with fixed radius
+  // (If the radius is bigger than 0).
+  #createRadiusOnClick = (e) => {
+    // If the radius is zero we don't want to add a circle...
+    if (this.#circleRadius === 0) {
+      return;
+    }
+    // Create the feature
+    const feature = new Feature({
+      geometry: new CircleGeometry(e.coordinate, this.#circleRadius),
+    });
+    // Add the feature to the draw-source
+    this.#drawSource.addFeature(feature);
+    // Make sure to trigger the draw-end event so that all props etc. are
+    // set on the feature.
+    this.#handleDrawEnd({ feature });
+  };
+
   // Handles the "select"-event that fires from the event-listener added when adding
   // the Move-interaction.
   #handleFeatureSelect = (e) => {
@@ -1549,6 +1589,19 @@ class DrawModel {
         `Failed to create 'real' Circle geometry from supplied feature, error: ${error}`
       );
     }
+  };
+
+  // Creates an OpenLayers Circle geometry from a simplified circle geometry (polygon).
+  // Since the calculation from the extent does not seem to result in the exact radius,
+  // we allow for a optional radius to be passed.
+  #creteCircleGeomFromSimplified = (simplified, opt_radius) => {
+    // First we'll have to get the extent of the simplified circle
+    const simplifiedExtent = simplified.getExtent();
+    // Then we'll calculate the center and radius
+    const center = getCenter(simplifiedExtent);
+    const radius = opt_radius ?? getWidth(simplifiedExtent) / 2;
+    // Finally we'll return a circle geometry based on those:
+    return new CircleGeometry(center, radius);
   };
 
   // Removes the property-change-listeners from all features and then adds
@@ -1692,18 +1745,37 @@ class DrawModel {
     try {
       // First we'll have to get a clone of the supplied feature
       const duplicate = this.#createDuplicateFeature(feature);
-      // Then we'll have to create a GeoJSON-feature from the ol-feature (since
-      // turf only accepts geoJSON).
+      // Then we'll have to check if we're dealing with a circle-geometry.
+      const isCircle = duplicate.getGeometry() instanceof CircleGeometry;
+      // We also have to make sure to store the eventual radius so that we can use
+      // that to create a 'real' circle later.
+      const radius = isCircle ? duplicate.getGeometry().getRadius() : 0;
+      // If we are dealing with a circle, we have to create a simplified geometry (since
+      // geoJSON does not like OpenLayers circles). Let's update the geometry if we are:
+      if (isCircle) {
+        duplicate.setGeometry(fromCircle(duplicate.getGeometry()));
+      }
+      // Then we'll have to create a GeoJSON-feature from the ol-feature (since turf only accepts geoJSON).
       const gjFeature = this.#geoJSONParser.writeFeatureObject(duplicate);
       // We want to add the cloned feature with an offset to the east. First, we'll
       // have to get the offset-amount.
       const offset = this.#getDuplicateOffsetAmount();
       // Then we'll translate (move) the geoJSON-feature slightly to the east.
       const translated = transformTranslate(gjFeature, offset, 140);
-      // When thats done, we'll update the duplicates geometry.
-      duplicate.setGeometry(
-        this.#geoJSONParser.readGeometry(translated.geometry)
+      // Then we have to read the geometry from the translated geoJSON
+      const translatedGeom = this.#geoJSONParser.readGeometry(
+        translated.geometry
       );
+      // When thats done, we'll update the duplicates geometry. If we are dealing
+      // with a circle, we have to create a "real" circle:
+      if (isCircle) {
+        duplicate.setGeometry(
+          this.#creteCircleGeomFromSimplified(translatedGeom, radius)
+        );
+      } else {
+        // Otherwise we can just set the geometry.
+        duplicate.setGeometry(translatedGeom);
+      }
       // Since the feature we are duplicating is probably selected for edit, we have to
       // make sure to toggle the edit-flag on the new feature to false.
       duplicate.set("EDIT_ACTIVE", false);
@@ -1860,6 +1932,9 @@ class DrawModel {
     }
     if (drawMethod === "Move") {
       return this.#enableMoveInteraction(settings);
+    }
+    if (drawMethod === "Circle") {
+      this.#enableCircleInteraction();
     }
     // If we've made it this far it's time to enable a new draw interaction!
     // First we must make sure to gather some settings and defaults.
@@ -2030,6 +2105,14 @@ class DrawModel {
     this.#refreshFeaturesTextStyle();
   };
 
+  setCircleRadius = (radius) => {
+    this.#circleRadius = parseInt(radius);
+    // Ensure is not NaN
+    if (Number.isNaN(this.#circleRadius)) {
+      this.#circleRadius = 0;
+    }
+  };
+
   getMeasurementSettings = () => {
     return this.#measurementSettings;
   };
@@ -2072,6 +2155,11 @@ class DrawModel {
   // Get:er returning the current text-style settings
   getTextStyleSettings = () => {
     return this.#textStyleSettings;
+  };
+
+  // Get:er returning circle radius
+  getCircleRadius = () => {
+    return this.#circleRadius;
   };
 }
 export default DrawModel;
