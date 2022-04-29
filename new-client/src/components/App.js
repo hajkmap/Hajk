@@ -6,6 +6,7 @@ import { SnackbarProvider } from "notistack";
 import Observer from "react-event-observer";
 import { isMobile } from "../utils/IsMobile";
 import SrShortcuts from "../components/SrShortcuts/SrShortcuts";
+import Analytics from "../models/Analytics";
 import AppModel from "../models/AppModel.js";
 import {
   setConfig as setCookieConfig,
@@ -330,6 +331,9 @@ class App extends React.PureComponent {
 
     this.globalObserver = new Observer();
 
+    // Initiate the Analytics model
+    props.config.mapConfig.analytics && this.initiateAnalyticsModel();
+
     this.infoclickOptions = this.props.config.mapConfig.tools.find(
       (t) => t.type === "infoclick"
     )?.options;
@@ -388,6 +392,28 @@ class App extends React.PureComponent {
       )}. Please check your map config and buildConfig.json.  `
     );
   };
+  /**
+   * @summary Initiates the wanted analytics model (if any).
+   * @description If Hajk is configured to track map usage, this method will
+   * initialize the model and subscribe to two events ("analytics.trackPageView"
+   * and "analytics.trackEvent").
+   *
+   * @memberof App
+   */
+  initiateAnalyticsModel() {
+    this.analytics = new Analytics(
+      this.props.config.mapConfig.analytics,
+      this.globalObserver
+    );
+
+    // Subscribe to events on global observer
+    this.globalObserver.publish("analytics.trackPageView");
+
+    this.globalObserver.publish("analytics.trackEvent", {
+      eventName: "MapLoad",
+      mapName: this.props.config.activeMap,
+    });
+  }
 
   componentDidMount() {
     this.checkConfigForUnsupportedTools();

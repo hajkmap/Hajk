@@ -3,6 +3,7 @@ import path from "path";
 import ad from "./activedirectory.service";
 import asyncFilter from "../utils/asyncFilter";
 import log4js from "log4js";
+import getAnalyticsOptionsFromDotEnv from "../utils/getAnalyticsOptionsFromDotEnv";
 
 const logger = log4js.getLogger("service.config");
 
@@ -35,7 +36,16 @@ class ConfigServiceV2 {
       const json = await JSON.parse(text);
 
       // Ensure that we print the correct API version to output
-      json.version = 2;
+      json.version = 2.1;
+
+      // Ensure that we provide Analytics configuration from .env, if none exists in
+      // mapConfig yet but there are necessary keys in process.env.
+      if (
+        json.analytics === undefined &&
+        ["plausible", "matomo"].includes(process.env.ANALYTICS_TYPE)
+      ) {
+        json.analytics = getAnalyticsOptionsFromDotEnv();
+      }
 
       if (washContent === false) {
         logger.trace(
