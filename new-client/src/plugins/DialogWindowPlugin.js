@@ -72,6 +72,18 @@ class DialogWindowPlugin extends React.PureComponent {
     this.setState({
       dialogOpen,
     });
+
+    // If plugin is shown at start, we want to register it as shown in the Analytics module too.
+    // Normally, the event would be sent when user clicks on the button that activates the plugin,
+    // but in this case there won't be any click as the window will be visible at start.
+    if (dialogOpen) {
+      // Tell the Analytics model about this
+      this.props.app.globalObserver.publish("analytics.trackEvent", {
+        eventName: "pluginShown",
+        pluginName: this.uniqueIdentifier,
+        activeMap: this.props.app.config.activeMap,
+      });
+    }
   }
 
   #pluginIsWidget = (target) => {
@@ -81,6 +93,13 @@ class DialogWindowPlugin extends React.PureComponent {
   #handleButtonClick = (e) => {
     this.setState({
       dialogOpen: true,
+    });
+
+    // Tell the Analytics model about this
+    this.props.app.globalObserver.publish("analytics.trackEvent", {
+      eventName: "pluginShown",
+      pluginName: this.uniqueIdentifier,
+      activeMap: this.props.app.config.activeMap,
     });
   };
 
