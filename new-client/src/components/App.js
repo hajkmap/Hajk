@@ -410,8 +410,8 @@ class App extends React.PureComponent {
     this.globalObserver.publish("analytics.trackPageView");
 
     this.globalObserver.publish("analytics.trackEvent", {
-      eventName: "MapLoad",
-      mapName: this.props.config.activeMap,
+      eventName: "mapLoaded",
+      activeMap: this.props.config.activeMap,
     });
   }
 

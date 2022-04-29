@@ -31,6 +31,17 @@ class BaseWindowPlugin extends React.PureComponent {
         ? props.options.visibleAtStartMobile
         : props.options.visibleAtStart) || false;
 
+    // If plugin is shown at start, we want to register it as shown in the Analytis module too.
+    // Normally, the event would be sent when user clicks on the button that activates the plugin,
+    // but in this case there won't be any click as the window will be visible at start.
+    if (visibleAtStart) {
+      this.props.app.globalObserver.publish("analytics.trackEvent", {
+        eventName: "pluginShown",
+        pluginName: this.type,
+        activeMap: this.props.app.config.activeMap,
+      });
+    }
+
     // Title and Color are kept in state and not as class properties. Keeping them in state
     // ensures re-render when new props arrive and update the state variables (see componentDidUpdate() too).
     this.state = {
@@ -98,6 +109,13 @@ class BaseWindowPlugin extends React.PureComponent {
 
     // Let the App know which tool is currently active
     this.props.app.activeTool = this.type;
+
+    // Tell the Analytics model about this
+    this.props.app.globalObserver.publish("analytics.trackEvent", {
+      eventName: "pluginShown",
+      pluginName: this.type,
+      activeMap: this.props.app.config.activeMap,
+    });
 
     // Don't continue if visibility hasn't changed
     if (this.state.windowVisible === true) {
