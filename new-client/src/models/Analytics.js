@@ -32,11 +32,6 @@ export default class Analytics {
   constructor(config, globalObserver) {
     switch (config?.type) {
       case "plausible":
-        console.log(
-          "Activating Plausible Analytics with config: ",
-          config.options
-        );
-
         const { domain, apiHost, trackLocalhost } = config.options;
         const plausible = Plausible({
           domain,
