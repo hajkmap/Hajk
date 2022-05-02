@@ -3,6 +3,7 @@ import LocalStorageHelper from "../../../utils/LocalStorageHelper";
 import { Circle, Fill, Stroke } from "ol/style";
 import GeoJSON from "ol/format/GeoJSON";
 import { Circle as CircleGeometry, Point } from "ol/geom";
+import { Feature } from "ol";
 
 import {
   DEFAULT_DRAW_STYLE_SETTINGS,
@@ -465,6 +466,17 @@ class SketchModel {
   // Set wether helper-snacks should be shown or not.
   setShowHelperSnacks = (showSnacks) => {
     this.#showHelperSnacks = showSnacks;
+  };
+
+  // Returns the value of the FEATURE_TITLE-attribute (or an empty string if the attribute is not set).
+  getFeatureTitle = (feature) => {
+    // If no feature was supplied, or if the supplied 'feature' is not
+    // a feature, we'll return an empty string.
+    if (!(feature instanceof Feature)) {
+      return "";
+    }
+    // Otherwise well return the value or an empty string.
+    return feature.get("FEATURE_TITLE") ?? "";
   };
 }
 export default SketchModel;

@@ -3,6 +3,7 @@ import { Button, Grid, Paper } from "@mui/material";
 import { Tooltip, Typography, Switch } from "@mui/material";
 
 import Information from "../components/Information";
+import FeatureTitleEditor from "../components/FeatureTitleEditor";
 import FeatureStyleEditor from "../components/featureStyle/FeatureStyleEditor";
 
 const ModifyNodeToggler = ({ modifyEnabled, setModifyEnabled }) => {
@@ -57,11 +58,18 @@ const EditView = (props) => {
               Klicka på ett objekt i kartan för att ändra dess utseende.
             </Typography>
           ) : (
-            <FeatureStyleEditor
-              feature={props.editFeature}
-              model={props.model}
-              drawModel={props.drawModel}
-            />
+            <Grid item xs={12}>
+              <FeatureTitleEditor
+                feature={props.editFeature}
+                model={props.model}
+                drawModel={props.drawModel}
+              />
+              <FeatureStyleEditor
+                feature={props.editFeature}
+                model={props.model}
+                drawModel={props.drawModel}
+              />
+            </Grid>
           )}
         </Grid>
       </Grid>

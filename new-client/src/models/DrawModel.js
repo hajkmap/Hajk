@@ -659,11 +659,19 @@ class DrawModel {
     if (feature.get("DRAW_METHOD") === "Text") {
       return feature.get("USER_TEXT") ?? "";
     }
-    // Otherwise we return the measurement-text (If we're supposed to
-    // show it)!
-    return this.#measurementSettings.showText
+    // There might be a title present on the feature, if there is, we'll want
+    // to display it.
+    const featureTitle = feature.get("FEATURE_TITLE") ?? "";
+    // We'll also have to grab the eventual measurement-label
+    const measurementLabel = this.#measurementSettings.showText
       ? this.#getFeatureMeasurementLabel(feature, "LABEL")
       : "";
+    // Finally, we can return the eventual title, and the eventual measurement-label combined.
+    return featureTitle.length > 0
+      ? `${featureTitle}${
+          measurementLabel.length > 0 ? "\n" : ""
+        }${measurementLabel}`
+      : measurementLabel;
   };
 
   // Returns the supplied measurement as a kilometer-formatted string.
@@ -2077,6 +2085,18 @@ class DrawModel {
         f.setStyle(this.#getFeatureStyle(f));
       }
     });
+  };
+
+  // Updates the supplied features' <attribute> with the supplied <value>.
+  // When the attribute has been updated, the style is refreshed.
+  setFeatureAttribute = (feature, attribute, value) => {
+    // If no feature was supplied, or if the supplied 'feature' is not
+    // a feature, we'll abort.
+    if (!(feature instanceof Feature)) {
+      return;
+    }
+    // Otherwise we'll update the attribute.
+    feature.set(attribute, value);
   };
 
   // Updates the Text-style-settings.
