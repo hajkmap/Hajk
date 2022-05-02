@@ -9,6 +9,7 @@ import { useSnackbar } from "notistack";
 
 import { MAX_SKETCHES } from "../constants";
 import Information from "../components/Information";
+import SketchRemovalConfirmation from "../components/SketchRemovalConfirmation";
 
 const StyledPaper = styled(Paper)(({ theme }) => ({
   width: "100%",
@@ -221,19 +222,34 @@ const SavedSketch = ({
 };
 
 const SavedSketchList = ({ model, savedSketches, setSavedSketches }) => {
+  // We're gonna need a state to keep track of the sketch that the
+  // user is about to remove. (So that we can make sure to confirm that
+  // they want to remove it).
+  const [sketchToRemove, setSketchToRemove] = React.useState(null);
+  // Adds the features in the clicked sketch to the map.
   const handleAddToMapClick = (sketch) => {
     model.addSketchToMap(sketch);
   };
-
+  // When the user clicks the remove-button, we'll set the clicked
+  // sketch in state so that the user can confirm that they want to remove it.
   const handleRemoveClick = (sketch) => {
-    model.removeSketchFromStorage(sketch);
+    setSketchToRemove(sketch);
+  };
+  // Fires when the user confirms that they want to remove the sketch. Removes the
+  // sketch from LS.
+  const handleRemoveConfirmation = () => {
+    model.removeSketchFromStorage(sketchToRemove);
     setSavedSketches(
       savedSketches.filter(
-        (s) => !model.equalsIgnoringCase(s.title, sketch.title)
+        (s) => !model.equalsIgnoringCase(s.title, sketchToRemove.title)
       )
     );
+    setSketchToRemove(null);
   };
-
+  // Fires when the user closes the confirmation-window.
+  const handleRemoveConfirmationAbort = () => {
+    setSketchToRemove(null);
+  };
   return (
     <Grid container>
       <Grid item xs={12}>
@@ -255,6 +271,11 @@ const SavedSketchList = ({ model, savedSketches, setSavedSketches }) => {
           );
         })}
       </Grid>
+      <SketchRemovalConfirmation
+        open={sketchToRemove !== null}
+        handleConfirm={handleRemoveConfirmation}
+        handleAbort={handleRemoveConfirmationAbort}
+      />
     </Grid>
   );
 };
