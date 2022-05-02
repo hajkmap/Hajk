@@ -56,14 +56,16 @@ const MapClickViewer = (props) => {
     };
   }, [closeWindow, globalObserver]);
 
+  const { height, position, title, width } = props.infoclickOptions;
+
   return (
     <Window
       globalObserver={props.globalObserver}
-      title="Information"
+      title={title || "Information"}
       open={open}
-      height="dynamic"
-      width={400}
-      position="right"
+      height={height || "dynamic"}
+      width={width || 400}
+      position={position || "right"}
       mode="window"
       onClose={closeWindow}
     >
