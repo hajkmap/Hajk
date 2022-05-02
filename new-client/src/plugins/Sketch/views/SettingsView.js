@@ -58,6 +58,30 @@ const SettingsView = (props) => {
           </FormLabel>
           <Tooltip
             disableInteractive
+            title={`Slå ${
+              measurementSettings.showText ? "av" : "på"
+            } om du vill ${
+              measurementSettings.showText ? "dölja" : "visa"
+            } text på objekten.`}
+          >
+            <FormControlLabel
+              label="Visa text på objekten"
+              control={
+                <Switch
+                  checked={measurementSettings.showText}
+                  onChange={() => {
+                    setMeasurementSettings((settings) => ({
+                      ...settings,
+                      showText: !settings.showText,
+                    }));
+                  }}
+                  color="primary"
+                />
+              }
+            />
+          </Tooltip>
+          <Tooltip
+            disableInteractive
             title={`Slå ${showHelperSnacks ? "av" : "på"} om du vill ${
               showHelperSnacks ? "dölja" : "visa"
             } hjälptexter.`}
@@ -80,31 +104,24 @@ const SettingsView = (props) => {
           <FormLabel focused={false} component="legend">
             Mätinställningar
           </FormLabel>
+
           <Tooltip
             disableInteractive
-            title="Slå på om du vill visa objektens mått."
+            title={
+              !measurementSettings.showText
+                ? "Aktivera text på objekten om du vill visa objektens omkrets/radie."
+                : `Slå ${
+                    measurementSettings.showArea ? "av" : "på"
+                  } om du vill ${
+                    measurementSettings.showArea ? "dölja" : "visa"
+                  } area på objekten.`
+            }
           >
-            <FormControlLabel
-              label="Visa mått på objekten"
-              control={
-                <Switch
-                  checked={measurementSettings.showText}
-                  onChange={() => {
-                    setMeasurementSettings((settings) => ({
-                      ...settings,
-                      showText: !settings.showText,
-                    }));
-                  }}
-                  color="primary"
-                />
-              }
-            />
-          </Tooltip>
-          <Tooltip title="Slå på om du vill visa objektens area.">
             <FormControlLabel
               label="Visa area"
               control={
                 <Switch
+                  disabled={!measurementSettings.showText}
                   checked={measurementSettings.showArea}
                   onChange={() => {
                     setMeasurementSettings((settings) => ({
@@ -117,11 +134,23 @@ const SettingsView = (props) => {
               }
             />
           </Tooltip>
-          <Tooltip title="Slå på om du vill visa objektens omkrets/radie.">
+          <Tooltip
+            disableInteractive
+            title={
+              !measurementSettings.showText
+                ? "Aktivera text på objekten om du vill visa objektens omkrets/radie."
+                : `Slå ${
+                    measurementSettings.showPerimeter ? "av" : "på"
+                  } om du vill ${
+                    measurementSettings.showPerimeter ? "dölja" : "visa"
+                  } omkrets/radie. på objekten.`
+            }
+          >
             <FormControlLabel
               label="Visa omkrets/radie"
               control={
                 <Switch
+                  disabled={!measurementSettings.showText}
                   checked={measurementSettings.showPerimeter}
                   onChange={() => {
                     setMeasurementSettings((settings) => ({
