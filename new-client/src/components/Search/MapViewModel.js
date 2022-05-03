@@ -149,6 +149,15 @@ class MapViewModel {
           this.toggleDraw(true, options.type);
         }
 
+        // Tell the analytics model about which spatial search
+        // modes are most important for our users by sending the
+        // type of search performed.
+        this.app.globalObserver.publish("analytics.trackEvent", {
+          eventName: "spatialSearchPerformed",
+          type: options.type?.toLowerCase(),
+          activeMap: this.app.props.config.activeMap,
+        });
+
         // At this stage, the Search input field could be in focus. On
         // mobile devices the on-screen keyboard will show up. We don't
         // need it here (as these search options are purely click/touch-based)

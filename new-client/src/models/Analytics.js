@@ -47,8 +47,9 @@ export default class Analytics {
 
         globalObserver.subscribe(
           "analytics.trackEvent",
-          ({ eventName, ...rest }) =>
-            plausible.trackEvent(eventName, { props: rest })
+          ({ eventName, ...rest }) => {
+            plausible.trackEvent(eventName, { props: rest });
+          }
         );
         break;
       case "matomo":
