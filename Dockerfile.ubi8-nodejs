@@ -39,7 +39,7 @@ COPY /new-backend/static ./static
 COPY --from=clientBuilder /opt/app-root/src/build ./static/client
 COPY --from=adminBuilder /opt/app-root/src/build ./static/admin
 USER root
-RUN chown -R 1001 /App_Data
+RUN chown -R 1001 ./App_Data
 VOLUME /opt/app-root/src/App_Data
 EXPOSE 3002
 USER 1001
