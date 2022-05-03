@@ -41,7 +41,7 @@ COPY --from=adminBuilder /opt/app-root/src/build ./static/admin
 VOLUME /opt/app-root/src/App_Data
 EXPOSE 3002
 USER root
-RUN chown -R 1001: /opt/app-root/src/App_Data
+RUN chown -R 1001 /opt/app-root/src/App_Data
 USER 1001
 CMD node index.js
 
