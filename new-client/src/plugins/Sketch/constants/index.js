@@ -97,6 +97,11 @@ export const DRAW_TYPES = [
       "Rita en pil i kartan genom att klicka en gång per nod, avlsuta med ett dubbelklick.",
   },
   {
+    type: "Select",
+    label: "Välj & Kopiera",
+    tooltip: "Klicka på ett object och kopiera det på kartan.",
+  },
+  {
     type: "Polygon",
     label: "Polygon",
     tooltip:
