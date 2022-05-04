@@ -11,6 +11,7 @@ import GeoJSON from "ol/format/GeoJSON";
 import transformTranslate from "@turf/transform-translate";
 import { getArea as getExtentArea, getCenter, getWidth } from "ol/extent";
 import { Feature } from "ol";
+import { handleClick } from "./Click";
 
 /*
  * A model supplying useful Draw-functionality.
@@ -84,6 +85,9 @@ class DrawModel {
   #highlightStrokeColor;
   #circleRadius;
   #circleInteractionActive;
+  #selectInteractionActive;
+  #selectedFeatures;
+  #showSelectedFeatures;
 
   constructor(settings) {
     // Let's make sure that we don't allow initiation if required settings
@@ -141,6 +145,7 @@ class DrawModel {
     this.#highlightFillColor = "rgba(35,119,252,1)";
     this.#highlightStrokeColor = "rgba(255,255,255,1)";
     this.#circleRadius = 0;
+    this.#selectInteractionActive = false;
 
     // A Draw-model is not really useful without a vector-layer, let's initiate it
     // right away, either by creating a new layer, or connect to an existing layer.
@@ -1102,7 +1107,7 @@ class DrawModel {
     // of the user drawn features. We also set "DRAW_TYPE" so that we can
     // handle special features, such as arrows.
     feature.set("USER_DRAWN", true);
-    feature.set("DRAW_METHOD", this.#drawInteraction.get("DRAW_METHOD"));
+    feature.set("DRAW_METHOD", this.#drawInteraction?.get("DRAW_METHOD"));
     feature.set("TEXT_SETTINGS", this.#textStyleSettings);
     // And set a nice style on the feature to be added.
     feature.setStyle(this.#getFeatureStyle(feature));
@@ -1205,6 +1210,9 @@ class DrawModel {
     }
     if (this.#moveInteractionActive) {
       return this.#disableMoveInteraction();
+    }
+    if (this.#selectInteractionActive) {
+      return this.#disableSelectInteraction();
     }
     if (this.#circleInteractionActive) {
       this.#disableCircleInteraction();
@@ -1485,6 +1493,67 @@ class DrawModel {
     this.#map.clickLock.delete("coreDrawModel");
     this.#map.un("singleclick", this.#createRadiusOnClick);
     this.#circleInteractionActive = false;
+  };
+
+  #enableSelectInteraction = () => {
+    this.#map.clickLock.add("coreDrawModel");
+    this.#map.on("singleclick", this.#handleSelectOnClick);
+    this.#selectInteractionActive = true;
+  };
+
+  #disableSelectInteraction = () => {
+    this.#map.clickLock.delete("coreDrawModel");
+    this.#map.un("singleclick", this.#handleSelectOnClick);
+    this.#showSelectedFeatures = false;
+    this.#selectedFeatures = [];
+    this.#selectInteractionActive = true;
+  };
+
+  drawSelectedIndex = (index) => {
+    const feature = this.#selectedFeatures[index];
+    if (!feature) return;
+
+    // If we have only one feature, we can show it on the map.
+    this.#drawSource.addFeature(feature);
+    // Set style
+    this.#handleDrawEnd({ feature });
+    // feature.setStyle(this.#getFeatureStyle(feature));
+    this.#selectedFeatures = [];
+    this.#publishInformation({
+      subject: "drawModel.select.click",
+      payLoad: [],
+    });
+  };
+
+  #handleSelectOnClick = (event) => {
+    handleClick(event, event.map, (response) => {
+      // The response will contain an array
+      const features = response.features;
+      // Which might contain features without geometry. We have to make sure
+      // we remove those.
+      const featuresWithGeom = features.filter((feature) => {
+        return feature.getGeometry();
+      });
+      // The resulting array might be empty, then we abort.
+      if (featuresWithGeom.length === 0) {
+        return;
+      }
+
+      // We set out features so our frontend can later on use them.
+      this.#selectedFeatures = featuresWithGeom;
+      // Set to observer
+      this.#publishInformation({
+        subject: "drawModel.select.click",
+        payLoad: featuresWithGeom,
+      });
+      if (featuresWithGeom.length >= 2) return;
+
+      // If we have only one feature, we can show it on the map.
+      this.#drawSource.addFeature(featuresWithGeom[0]);
+      // Set style
+      // featuresWithGeom[0].setStyle(this.#getFeatureStyle(featuresWithGeom[0]));
+      this.#handleDrawEnd({ feature: featuresWithGeom[0] });
+    });
   };
 
   // Creates a Feature with a circle geometry with fixed radius
@@ -1940,6 +2009,9 @@ class DrawModel {
     }
     if (drawMethod === "Move") {
       return this.#enableMoveInteraction(settings);
+    }
+    if (drawMethod === "Select") {
+      return this.#enableSelectInteraction(settings);
     }
     if (drawMethod === "Circle") {
       this.#enableCircleInteraction();
