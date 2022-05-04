@@ -34,6 +34,7 @@ import MapResetter from "../controls/MapResetter";
 import MapSwitcher from "../controls/MapSwitcher";
 import Information from "../controls/Information";
 import PresetLinks from "../controls/PresetLinks";
+import ExternalLinks from "../controls/ExternalLinks";
 
 import DrawerToggleButtons from "../components/Drawer/DrawerToggleButtons";
 
@@ -955,6 +956,7 @@ class App extends React.PureComponent {
                 {showMapSwitcher && <MapSwitcher appModel={this.appModel} />}
                 {clean === false && <MapCleaner appModel={this.appModel} />}
                 {clean === false && <PresetLinks appModel={this.appModel} />}
+                {clean === false && <ExternalLinks appModel={this.appModel} />}
                 {clean === false && (
                   <ThemeToggler
                     showThemeToggler={
