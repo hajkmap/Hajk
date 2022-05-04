@@ -176,6 +176,8 @@ export const PROMPT_TEXTS = {
     "Skapa en rektangel genom att hålla vänsterklick med musen och dra över en yta för att få en önskad storlek.",
   ArrowHelp:
     "En pil skapas genom att klicka på en position för varje nod, avsluta med dubbelklick.",
+  SelectHelp:
+    "Välj en feature genom att klicka på den, om det finns fler feature där du klickade får du välja vilken av dem du vill kopiera.",
   PolygonHelp:
     "Skapa en polygon genom att klicka på en position för varje nod, avsluta med dubbelklick.",
   PointHelp: "Klicka på en position för att infoga en punkt.",
