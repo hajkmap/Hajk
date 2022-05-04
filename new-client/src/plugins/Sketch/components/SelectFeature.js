@@ -7,8 +7,8 @@ export default function SelectFeatureDialog(props) {
   const [selectedFeatures, setSelectedFeatures] = React.useState([]);
   const [modal, setModal] = React.useState(false);
   const handleSelectClick = React.useCallback((clickedFeatures) => {
-    setModal(true);
     setSelectedFeatures(clickedFeatures);
+    setModal(true);
   }, []);
 
   const [selectedValue, setSelectedValue] = React.useState({
@@ -72,7 +72,7 @@ export default function SelectFeatureDialog(props) {
         ),
         headerText: "Välj vilken feature du vill kopiera",
         buttonText: "OK",
-        abortText: "Avbryt",
+        abortText: "AVBRYT",
         useLegacyNonMarkdownRenderer: true,
       }}
       open={modal}
@@ -80,9 +80,7 @@ export default function SelectFeatureDialog(props) {
         drawModel.drawSelectedFeature(selectedValue.feature);
         setModal(false);
       }}
-      onAbort={() => {
-        setModal(false);
-      }}
+      onAbort={() => setModal(false)}
     ></Dialog>
   );
 }
