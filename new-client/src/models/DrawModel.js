@@ -1522,6 +1522,14 @@ class DrawModel {
       const featuresWithGeom = features.filter((feature) => {
         return feature.getGeometry();
       });
+      // TODO!!! TRASH!
+      console.log(event);
+      this.#drawSource
+        .getFeaturesAtCoordinate(event.coordinate_)
+        .forEach((f, index) => {
+          f.setId(`Ritlager.${index + 1}`);
+          featuresWithGeom.push(f);
+        });
       // The resulting array might be empty, then we abort.
       if (featuresWithGeom.length === 0) return;
 

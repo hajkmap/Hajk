@@ -5,15 +5,14 @@ import Dialog from "../../../components/Dialog/Dialog";
 export default function SelectFeatureDialog(props) {
   const { localObserver, drawModel } = props;
   const [selectedFeatures, setSelectedFeatures] = React.useState([]);
-  const [modal, setModal] = React.useState(false);
+
   const handleSelectClick = React.useCallback((clickedFeatures) => {
     setSelectedFeatures(clickedFeatures);
-    setModal(true);
   }, []);
 
   const [selectedValue, setSelectedValue] = React.useState({
     feature: null,
-    index: 0,
+    index: null,
   });
 
   React.useEffect(() => {
@@ -32,6 +31,8 @@ export default function SelectFeatureDialog(props) {
   };
 
   const getCaption = (feature) => {
+    console.log("feature: ", feature);
+    return feature.getId();
     let layer, caption;
     if (feature.layer.layersInfo && feature.getId()) {
       layer = getAGSCompatibleLayer(feature);
@@ -75,12 +76,13 @@ export default function SelectFeatureDialog(props) {
         abortText: "AVBRYT",
         useLegacyNonMarkdownRenderer: true,
       }}
-      open={modal}
+      open={selectedFeatures.length > 1}
       onClose={() => {
+        console.log("fire onclose");
         drawModel.drawSelectedFeature(selectedValue.feature);
-        setModal(false);
+        setSelectedFeatures([]);
       }}
-      onAbort={() => setModal(false)}
+      onAbort={() => setSelectedFeatures([])}
     ></Dialog>
   );
 }
