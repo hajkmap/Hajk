@@ -86,8 +86,6 @@ class DrawModel {
   #circleRadius;
   #circleInteractionActive;
   #selectInteractionActive;
-  #selectedFeatures;
-  #showSelectedFeatures;
 
   constructor(settings) {
     // Let's make sure that we don't allow initiation if required settings
@@ -1504,25 +1502,15 @@ class DrawModel {
   #disableSelectInteraction = () => {
     this.#map.clickLock.delete("coreDrawModel");
     this.#map.un("singleclick", this.#handleSelectOnClick);
-    this.#showSelectedFeatures = false;
-    this.#selectedFeatures = [];
     this.#selectInteractionActive = true;
   };
 
-  drawSelectedIndex = (index) => {
-    const feature = this.#selectedFeatures[index];
+  drawSelectedFeature = (feature) => {
     if (!feature) return;
-
     // If we have only one feature, we can show it on the map.
     this.#drawSource.addFeature(feature);
     // Set style
     this.#handleDrawEnd({ feature });
-    // feature.setStyle(this.#getFeatureStyle(feature));
-    this.#selectedFeatures = [];
-    this.#publishInformation({
-      subject: "drawModel.select.click",
-      payLoad: [],
-    });
   };
 
   #handleSelectOnClick = (event) => {
@@ -1535,24 +1523,22 @@ class DrawModel {
         return feature.getGeometry();
       });
       // The resulting array might be empty, then we abort.
-      if (featuresWithGeom.length === 0) {
-        return;
-      }
+      if (featuresWithGeom.length === 0) return;
 
-      // We set out features so our frontend can later on use them.
-      this.#selectedFeatures = featuresWithGeom;
       // Set to observer
       this.#publishInformation({
         subject: "drawModel.select.click",
         payLoad: featuresWithGeom,
       });
+
       if (featuresWithGeom.length >= 2) return;
 
+      const feature = featuresWithGeom[0];
+      if (!feature) return;
       // If we have only one feature, we can show it on the map.
-      this.#drawSource.addFeature(featuresWithGeom[0]);
+      this.#drawSource.addFeature(feature);
       // Set style
-      // featuresWithGeom[0].setStyle(this.#getFeatureStyle(featuresWithGeom[0]));
-      this.#handleDrawEnd({ feature: featuresWithGeom[0] });
+      this.#handleDrawEnd({ feature });
     });
   };
 
