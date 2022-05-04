@@ -1525,13 +1525,14 @@ class DrawModel {
       // The resulting array might be empty, then we abort.
       if (featuresWithGeom.length === 0) return;
 
-      // Set to observer
-      this.#publishInformation({
-        subject: "drawModel.select.click",
-        payLoad: featuresWithGeom,
-      });
-
-      if (featuresWithGeom.length >= 2) return;
+      if (featuresWithGeom.length >= 2) {
+        // Set to observer
+        this.#publishInformation({
+          subject: "drawModel.select.click",
+          payLoad: featuresWithGeom,
+        });
+        return;
+      }
 
       const feature = featuresWithGeom[0];
       if (!feature) return;
