@@ -51,7 +51,7 @@ export default function SelectFeatureDialog(props) {
             </div>
           </>
         ),
-        headerText: "Välj vilken feature du vill kopiera",
+        headerText: "Välj vilket objekt du vill kopiera",
         buttonText: "OK",
         abortText: "AVBRYT",
         useLegacyNonMarkdownRenderer: true,

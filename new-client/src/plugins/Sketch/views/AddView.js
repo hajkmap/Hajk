@@ -5,7 +5,7 @@ import DrawTypeSelector from "../components/DrawTypeSelector";
 import Information from "../components/Information";
 import FeatureStyleSelector from "../components/featureStyle/FeatureStyleSelector";
 import FeatureTextSetter from "../components/FeatureTextSetter";
-import SelectFeatureDialog from "../components/SelectFeature";
+import SelectFeatureDialog from "../components/SelectFeatureDialog";
 
 const AddView = (props) => {
   // Let's destruct some properties from the props

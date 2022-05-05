@@ -98,8 +98,9 @@ export const DRAW_TYPES = [
   },
   {
     type: "Select",
-    label: "Välj & Kopiera",
-    tooltip: "Klicka på ett object och kopiera det på kartan.",
+    label: "Välj i kartan",
+    tooltip:
+      "Klicka på ett existerande objekt i kartan och kopiera in det i ritlagret.",
   },
   {
     type: "Polygon",
@@ -177,7 +178,7 @@ export const PROMPT_TEXTS = {
   ArrowHelp:
     "En pil skapas genom att klicka på en position för varje nod, avsluta med dubbelklick.",
   SelectHelp:
-    "Välj en feature genom att klicka på den, om det finns fler feature där du klickade får du välja vilken av dem du vill kopiera.",
+    "Klicka på ett existerande objekt i kartan och kopiera in det i ritlagret.",
   PolygonHelp:
     "Skapa en polygon genom att klicka på en position för varje nod, avsluta med dubbelklick.",
   PointHelp: "Klicka på en position för att infoga en punkt.",
