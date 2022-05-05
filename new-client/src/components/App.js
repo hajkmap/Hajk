@@ -405,14 +405,6 @@ class App extends React.PureComponent {
       this.props.config.mapConfig.analytics,
       this.globalObserver
     );
-
-    // Subscribe to events on global observer
-    this.globalObserver.publish("analytics.trackPageView");
-
-    this.globalObserver.publish("analytics.trackEvent", {
-      eventName: "mapLoaded",
-      activeMap: this.props.config.activeMap,
-    });
   }
 
   componentDidMount() {
@@ -425,6 +417,17 @@ class App extends React.PureComponent {
       .loadPlugins(this.props.activeTools);
 
     Promise.all(promises).then(() => {
+      // Track the page view
+      this.globalObserver.publish("analytics.trackPageView");
+
+      // Track the mapLoaded event, distinguish between regular and
+      // cleanMode loads. See #1077.
+      this.globalObserver.publish("analytics.trackEvent", {
+        eventName: "mapLoaded",
+        activeMap: this.props.config.activeMap,
+        cleanMode: this.props.config.mapConfig.map.clean,
+      });
+
       this.setState(
         {
           tools: this.appModel.getPlugins(),
