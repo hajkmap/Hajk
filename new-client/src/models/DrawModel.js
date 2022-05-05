@@ -1507,6 +1507,8 @@ class DrawModel {
 
   drawSelectedFeature = (feature) => {
     if (!feature) return;
+    feature.setStyle(null);
+    feature.setId(Math.random().toString(36).substring(2, 15));
     // If we have only one feature, we can show it on the map.
     this.#drawSource.addFeature(feature);
     // Set style
