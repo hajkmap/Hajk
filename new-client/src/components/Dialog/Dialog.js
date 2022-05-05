@@ -57,6 +57,10 @@ export default function ResponsiveDialog(props) {
       fullScreen={fullScreen}
       onClose={handleClose}
       open={open}
+      // Must stop event-bubbling. Otherwise the parent element in react can be dragged etc.
+      onMouseDown={(e) => {
+        e.stopPropagation();
+      }}
     >
       {headerText && (
         <DialogTitle id="responsive-dialog-title">{headerText}</DialogTitle>
