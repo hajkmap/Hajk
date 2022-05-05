@@ -14,7 +14,11 @@ import {
   ListItemText,
 } from "@mui/material";
 
-export default function SelectFeaturesDialog({ localObserver, drawModel }) {
+export default function SelectFeaturesDialog({
+  localObserver,
+  drawModel,
+  model,
+}) {
   // Let's keep everything in one state here since all properties are
   // changing at the same time (almost).
   const [state, setState] = React.useState({
@@ -73,20 +77,17 @@ export default function SelectFeaturesDialog({ localObserver, drawModel }) {
 
   const handleMouseEnter = (index) => {
     const feature = state.clickedFeatures[index];
+    const nFeature = model.setHighlightOnFeature(feature);
     setState({
       ...state,
-      highlightedFeatures: [...state.highlightedFeatures, feature],
+      highlightedFeatures: [...state.highlightedFeatures, nFeature],
     });
-    drawModel.drawSelectedFeature(feature);
   };
 
-  const handleMouseLeave = (index) => {
-    const feature = state.clickedFeatures[index];
-    const newHighlightedFeatures = state.clickedFeatures.filter(
-      (f) => f.getId() !== feature.getId()
-    );
-    setState({ ...state, highlightedFeatures: newHighlightedFeatures });
-    drawModel.removeFeature(state.clickedFeatures[index]);
+  const handleMouseLeave = () => {
+    state.highlightedFeatures.forEach((f) => {
+      model.disableHighlightOnFeature(f);
+    });
   };
 
   // An effect that handles subscriptions (and un-subscriptions) to the observer-
