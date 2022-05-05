@@ -20,11 +20,16 @@ export default function SelectFeaturesDialog({ localObserver, drawModel }) {
   const [state, setState] = React.useState({
     clickedFeatures: [],
     selectedFeatureIndexes: [],
+    highlightedFeatures: [],
   });
 
   // Resets the state back to init.
   const resetState = React.useCallback(() => {
-    setState({ clickedFeatures: [], selectedFeatureIndexes: [] });
+    setState({
+      clickedFeatures: [],
+      selectedFeatureIndexes: [],
+      highlightedFeatures: [],
+    });
   }, []);
 
   // Handles map-click-event from drawModel and updates the clickedFeatures
@@ -50,6 +55,10 @@ export default function SelectFeaturesDialog({ localObserver, drawModel }) {
 
   // Handles dialog abort, resets the state so that the dialog can close.
   const handleAbort = () => {
+    // We have to remove all the highlighted features when aborting...
+    state.highlightedFeatures.forEach((f) => {
+      drawModel.removeFeature(f);
+    });
     resetState();
   };
 
@@ -60,6 +69,24 @@ export default function SelectFeaturesDialog({ localObserver, drawModel }) {
       return drawModel.drawSelectedFeature(state.clickedFeatures[index]);
     });
     resetState();
+  };
+
+  const handleMouseEnter = (index) => {
+    const feature = state.clickedFeatures[index];
+    setState({
+      ...state,
+      highlightedFeatures: [...state.highlightedFeatures, feature],
+    });
+    drawModel.drawSelectedFeature(feature);
+  };
+
+  const handleMouseLeave = (index) => {
+    const feature = state.clickedFeatures[index];
+    const newHighlightedFeatures = state.clickedFeatures.filter(
+      (f) => f.getId() !== feature.getId()
+    );
+    setState({ ...state, highlightedFeatures: newHighlightedFeatures });
+    drawModel.removeFeature(state.clickedFeatures[index]);
   };
 
   // An effect that handles subscriptions (and un-subscriptions) to the observer-
@@ -87,7 +114,12 @@ export default function SelectFeaturesDialog({ localObserver, drawModel }) {
       <DialogContent>
         <List sx={{ width: "100%", maxHeight: "30vh" }}>
           {state.clickedFeatures.map((feature, index) => (
-            <ListItem disableGutters key={index}>
+            <ListItem
+              disableGutters
+              key={index}
+              onMouseEnter={() => handleMouseEnter(index)}
+              onMouseLeave={() => handleMouseLeave(index)}
+            >
               <ListItemButton
                 onClick={() => handleFeatureSelectChange(index)}
                 dense
