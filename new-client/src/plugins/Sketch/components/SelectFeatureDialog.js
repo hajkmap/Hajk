@@ -2,13 +2,16 @@ import React from "react";
 import { createPortal } from "react-dom";
 import {
   Button,
+  Checkbox,
   Dialog,
   DialogActions,
   DialogContent,
   DialogTitle,
-  FormControlLabel,
-  Radio,
-  RadioGroup,
+  List,
+  ListItem,
+  ListItemButton,
+  ListItemIcon,
+  ListItemText,
 } from "@mui/material";
 
 export default function SelectFeatureDialog({ localObserver, drawModel }) {
@@ -16,12 +19,12 @@ export default function SelectFeatureDialog({ localObserver, drawModel }) {
   // changing at the same time (almost).
   const [state, setState] = React.useState({
     clickedFeatures: [],
-    selectedFeatureIndex: null,
+    selectedFeatureIndexes: [],
   });
 
   // Resets the state back to init.
   const resetState = React.useCallback(() => {
-    setState({ clickedFeatures: [], selectedFeatureIndex: null });
+    setState({ clickedFeatures: [], selectedFeatureIndexes: [] });
   }, []);
 
   // Handles map-click-event from drawModel and updates the clickedFeatures
@@ -33,8 +36,11 @@ export default function SelectFeatureDialog({ localObserver, drawModel }) {
   // Handles selection of feature in the dialog-list. Sets the currently
   // selected feature-index. Upon confirmation, the feature with the corresponding
   // index will be added to the map.
-  const handleFeatureSelectChange = (e) => {
-    setState((state) => ({ ...state, selectedFeatureIndex: e.target.value }));
+  const handleFeatureSelectChange = (index) => {
+    setState((state) => ({
+      ...state,
+      selectedFeatureIndexes: [...state.selectedFeatureIndexes, index],
+    }));
   };
 
   // Handles dialog abort, resets the state so that the dialog can close.
@@ -45,7 +51,9 @@ export default function SelectFeatureDialog({ localObserver, drawModel }) {
   // Handles confirmation from the dialog. Let's the drawModel add the feature,
   // and then the state is reset so that the dialog is closed.
   const handleConfirm = () => {
-    drawModel.drawSelectedFeature(clickedFeatures[selectedFeatureIndex]);
+    state.selectedFeatureIndexes.map((index) => {
+      return drawModel.drawSelectedFeature(state.clickedFeatures[index]);
+    });
     resetState();
   };
 
@@ -61,38 +69,41 @@ export default function SelectFeatureDialog({ localObserver, drawModel }) {
     };
   }, [localObserver, handleDrawSelectClick]);
 
-  const { clickedFeatures, selectedFeatureIndex } = state;
-
   return createPortal(
     <Dialog
-      open={clickedFeatures.length > 1}
+      open={state.clickedFeatures.length > 1}
       onClose={handleAbort}
       // Must stop event-bubbling. Otherwise the parent element in react can be dragged etc.
       onMouseDown={(e) => {
         e.stopPropagation();
       }}
     >
-      <DialogTitle>Välj vilket objekt du vill kopiera</DialogTitle>
+      <DialogTitle>Välj de objekt du vill kopiera</DialogTitle>
       <DialogContent>
-        <RadioGroup
-          aria-label="ringtone"
-          name="ringtone"
-          value={selectedFeatureIndex}
-          onChange={handleFeatureSelectChange}
-        >
-          {clickedFeatures.map((feature, index) => (
-            <FormControlLabel
-              value={index}
-              key={feature.getId()}
-              control={<Radio />}
-              label={feature.getId()}
-            />
+        <List sx={{ width: "100%", maxHeight: "30vh" }}>
+          {state.clickedFeatures.map((feature, index) => (
+            <ListItem disableGutters key={index}>
+              <ListItemButton
+                onClick={() => handleFeatureSelectChange(index)}
+                dense
+              >
+                <ListItemIcon>
+                  <Checkbox
+                    edge="start"
+                    checked={state.selectedFeatureIndexes.indexOf(index) !== -1}
+                    tabIndex={-1}
+                    disableRipple
+                  />
+                </ListItemIcon>
+                <ListItemText primary={feature.getId()} />
+              </ListItemButton>
+            </ListItem>
           ))}
-        </RadioGroup>
+        </List>
       </DialogContent>
       <DialogActions>
         <Button
-          disabled={selectedFeatureIndex === null}
+          disabled={state.selectedFeatureIndexes.length === 0}
           onClick={handleConfirm}
         >
           OK
