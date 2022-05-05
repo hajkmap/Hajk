@@ -64,7 +64,14 @@ export default function SelectFeatureDialog({ localObserver, drawModel }) {
   const { clickedFeatures, selectedFeatureIndex } = state;
 
   return createPortal(
-    <Dialog open={clickedFeatures.length > 1} onClose={handleAbort}>
+    <Dialog
+      open={clickedFeatures.length > 1}
+      onClose={handleAbort}
+      // Must stop event-bubbling. Otherwise the parent element in react can be dragged etc.
+      onMouseDown={(e) => {
+        e.stopPropagation();
+      }}
+    >
       <DialogTitle>Välj vilket objekt du vill kopiera</DialogTitle>
       <DialogContent>
         <RadioGroup
