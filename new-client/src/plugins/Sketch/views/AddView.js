@@ -5,7 +5,7 @@ import DrawTypeSelector from "../components/DrawTypeSelector";
 import Information from "../components/Information";
 import FeatureStyleSelector from "../components/featureStyle/FeatureStyleSelector";
 import FeatureTextSetter from "../components/FeatureTextSetter";
-import SelectFeatureDialog from "../components/SelectFeatureDialog";
+import SelectFeaturesDialog from "../components/SelectFeaturesDialog";
 
 const AddView = (props) => {
   // Let's destruct some properties from the props
@@ -42,7 +42,7 @@ const AddView = (props) => {
         localObserver={props.localObserver}
         drawModel={props.drawModel}
       />
-      <SelectFeatureDialog
+      <SelectFeaturesDialog
         localObserver={localObserver}
         drawModel={drawModel}
       />

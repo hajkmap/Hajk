@@ -14,7 +14,7 @@ import {
   ListItemText,
 } from "@mui/material";
 
-export default function SelectFeatureDialog({ localObserver, drawModel }) {
+export default function SelectFeaturesDialog({ localObserver, drawModel }) {
   // Let's keep everything in one state here since all properties are
   // changing at the same time (almost).
   const [state, setState] = React.useState({
