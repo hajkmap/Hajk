@@ -45,6 +45,7 @@ const AddView = (props) => {
       <SelectFeaturesDialog
         localObserver={localObserver}
         drawModel={drawModel}
+        model={model}
       />
     </Grid>
   );
