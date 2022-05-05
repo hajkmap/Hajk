@@ -1507,50 +1507,49 @@ class DrawModel {
 
   drawSelectedFeature = (feature) => {
     if (!feature) return;
-    feature.setStyle(null);
-    feature.setId(Math.random().toString(36).substring(2, 15));
+    // We clone to ensure we don't overwrite our original
+    const nFeature = feature.clone();
+    // We set an new ID as well to ensure it won't be overwritten by the original feature we get
+    nFeature.setId(Math.random().toString(36).substring(2, 15));
     // If we have only one feature, we can show it on the map.
-    this.#drawSource.addFeature(feature);
+    this.#drawSource.addFeature(nFeature);
     // Set style
-    this.#handleDrawEnd({ feature });
+    this.#handleDrawEnd({ feature: nFeature });
   };
 
-  #handleSelectOnClick = (event) => {
-    handleClick(event, event.map, (response) => {
-      // The response will contain an array
-      const features = response.features;
-      // Which might contain features without geometry. We have to make sure
-      // we remove those.
-      const featuresWithGeom = features.filter((feature) => {
-        return feature.getGeometry();
-      });
-      // TODO!!! TRASH!
-      console.log(event);
-      this.#drawSource
-        .getFeaturesAtCoordinate(event.coordinate_)
-        .forEach((f, index) => {
-          f.setId(`Ritlager.${index + 1}`);
-          featuresWithGeom.push(f);
-        });
-      // The resulting array might be empty, then we abort.
-      if (featuresWithGeom.length === 0) return;
-
-      if (featuresWithGeom.length >= 2) {
-        // Set to observer
-        this.#publishInformation({
-          subject: "drawModel.select.click",
-          payLoad: featuresWithGeom,
-        });
-        return;
-      }
-
-      const feature = featuresWithGeom[0];
-      if (!feature) return;
-      // If we have only one feature, we can show it on the map.
-      this.#drawSource.addFeature(feature);
-      // Set style
-      this.#handleDrawEnd({ feature });
+  #handleSelectOnClick = async (event) => {
+    const clickPromise = await new Promise((resolve) =>
+      handleClick(event, event.map, resolve)
+    );
+    // The response will contain an array
+    const features = clickPromise.features;
+    // Which might contain features without geometry. We have to make sure
+    // we remove those.
+    const featuresWithGeom = features.filter((feature) => {
+      return feature.getGeometry();
     });
+
+    this.#map.getFeaturesAtPixel(event.pixel).forEach((f, index) => {
+      f.setId(`Ritlager.${index + 1}`);
+      featuresWithGeom.push(f);
+    });
+
+    // The resulting array might be empty, then we abort.
+    if (featuresWithGeom.length === 0) return;
+
+    if (featuresWithGeom.length >= 2) {
+      // Set to observer
+      this.#publishInformation({
+        subject: "drawModel.select.click",
+        payLoad: featuresWithGeom,
+      });
+      return;
+    }
+
+    const feature = featuresWithGeom[0];
+
+    if (!feature) return;
+    this.drawSelectedFeature(feature);
   };
 
   // Creates a Feature with a circle geometry with fixed radius
