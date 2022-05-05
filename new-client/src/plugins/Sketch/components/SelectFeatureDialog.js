@@ -1,68 +1,83 @@
 import React from "react";
-import { RadioGroup, FormControlLabel, Radio } from "@mui/material";
-import Dialog from "../../../components/Dialog/Dialog";
+import { createPortal } from "react-dom";
+import {
+  Button,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  FormControlLabel,
+  Radio,
+  RadioGroup,
+} from "@mui/material";
 
-export default function SelectFeatureDialog(props) {
-  const { localObserver, drawModel } = props;
-  const [selectedFeatures, setSelectedFeatures] = React.useState([]);
-
-  const handleSelectClick = React.useCallback((clickedFeatures) => {
-    setSelectedFeatures(clickedFeatures);
-  }, []);
-
-  const [selectedValue, setSelectedValue] = React.useState({
-    feature: null,
-    index: null,
+export default function SelectFeatureDialog({ localObserver, drawModel }) {
+  const [state, setState] = React.useState({
+    clickedFeatures: [],
+    selectedFeatureIndex: null,
   });
 
+  const resetState = React.useCallback(() => {
+    setState({ clickedFeatures: [], selectedFeatureIndex: null });
+  }, []);
+
+  const handleDrawSelectClick = React.useCallback((clickedFeatures) => {
+    setState((state) => ({ ...state, clickedFeatures }));
+  }, []);
+
+  const handleFeatureSelectChange = (e) => {
+    setState((state) => ({ ...state, selectedFeatureIndex: e.target.value }));
+  };
+
+  const handleAbort = () => {
+    resetState();
+  };
+
+  const handleConfirm = () => {
+    const feature = clickedFeatures[selectedFeatureIndex];
+    drawModel.drawSelectedFeature(feature);
+    resetState();
+  };
+
   React.useEffect(() => {
-    localObserver.subscribe("drawModel.select.click", handleSelectClick);
+    localObserver.subscribe("drawModel.select.click", handleDrawSelectClick);
     return () => {
       localObserver.unsubscribe("drawModel.select.click");
     };
-  }, [localObserver, handleSelectClick]);
+  }, [localObserver, handleDrawSelectClick]);
 
-  return (
-    <Dialog
-      options={{
-        text: (
-          <>
-            <div>
-              <RadioGroup
-                aria-label="ringtone"
-                name="ringtone"
-                value={selectedValue.index}
-                onChange={(e) =>
-                  setSelectedValue({
-                    feature: selectedFeatures[e.target.value],
-                    index: e.target.value,
-                  })
-                }
-              >
-                {selectedFeatures.map((feature, index) => (
-                  <FormControlLabel
-                    value={index}
-                    key={feature.getId()}
-                    control={<Radio />}
-                    label={feature.getId()}
-                  />
-                ))}
-              </RadioGroup>
-            </div>
-          </>
-        ),
-        headerText: "Välj vilket objekt du vill kopiera",
-        buttonText: "OK",
-        abortText: "AVBRYT",
-        useLegacyNonMarkdownRenderer: true,
-      }}
-      open={selectedFeatures.length > 1}
-      onClose={() => {
-        console.log("fire onclose");
-        drawModel.drawSelectedFeature(selectedValue.feature);
-        setSelectedFeatures([]);
-      }}
-      onAbort={() => setSelectedFeatures([])}
-    ></Dialog>
+  const { clickedFeatures, selectedFeatureIndex } = state;
+
+  return createPortal(
+    <Dialog open={clickedFeatures.length > 1} onClose={handleAbort}>
+      <DialogTitle>Välj vilket objekt du vill kopiera</DialogTitle>
+      <DialogContent>
+        <RadioGroup
+          aria-label="ringtone"
+          name="ringtone"
+          value={selectedFeatureIndex}
+          onChange={handleFeatureSelectChange}
+        >
+          {clickedFeatures.map((feature, index) => (
+            <FormControlLabel
+              value={index}
+              key={feature.getId()}
+              control={<Radio />}
+              label={feature.getId()}
+            />
+          ))}
+        </RadioGroup>
+      </DialogContent>
+      <DialogActions>
+        <Button
+          disabled={selectedFeatureIndex === null}
+          onClick={handleConfirm}
+        >
+          OK
+        </Button>
+        <Button onClick={handleAbort}>Avbryt</Button>
+      </DialogActions>
+    </Dialog>,
+    document.getElementById("map")
   );
 }
