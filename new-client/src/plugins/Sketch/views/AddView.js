@@ -15,40 +15,38 @@ const AddView = (props) => {
   const activity = model.getActivityFromId(props.id);
 
   return (
-    <>
+    <Grid container>
+      <Grid item xs={12}>
+        <Information text={activity.information} />
+      </Grid>
+      <Grid item xs={12} style={{ marginTop: 16 }}>
+        <Grid item xs={12} style={{ marginBottom: 4 }}>
+          <Typography align="center">Typ</Typography>
+        </Grid>
+        <Grid item xs={12}>
+          <DrawTypeSelector
+            activeDrawType={activeDrawType}
+            setActiveDrawType={setActiveDrawType}
+          />
+        </Grid>
+      </Grid>
+      <FeatureStyleSelector
+        activeDrawType={activeDrawType}
+        drawStyle={props.drawStyle}
+        drawModel={props.drawModel}
+        setDrawStyle={props.setDrawStyle}
+        textStyle={props.textStyle}
+        setTextStyle={props.setTextStyle}
+      />
+      <FeatureTextSetter
+        localObserver={props.localObserver}
+        drawModel={props.drawModel}
+      />
       <SelectFeatureDialog
         localObserver={localObserver}
         drawModel={drawModel}
       />
-      <Grid container>
-        <Grid item xs={12}>
-          <Information text={activity.information} />
-        </Grid>
-        <Grid item xs={12} style={{ marginTop: 16 }}>
-          <Grid item xs={12} style={{ marginBottom: 4 }}>
-            <Typography align="center">Typ</Typography>
-          </Grid>
-          <Grid item xs={12}>
-            <DrawTypeSelector
-              activeDrawType={activeDrawType}
-              setActiveDrawType={setActiveDrawType}
-            />
-          </Grid>
-        </Grid>
-        <FeatureStyleSelector
-          activeDrawType={activeDrawType}
-          drawStyle={props.drawStyle}
-          drawModel={props.drawModel}
-          setDrawStyle={props.setDrawStyle}
-          textStyle={props.textStyle}
-          setTextStyle={props.setTextStyle}
-        />
-        <FeatureTextSetter
-          localObserver={props.localObserver}
-          drawModel={props.drawModel}
-        />
-      </Grid>
-    </>
+    </Grid>
   );
 };
 
