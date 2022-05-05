@@ -22,26 +22,6 @@ export default function SelectFeatureDialog(props) {
     };
   }, [localObserver, handleSelectClick]);
 
-  const getAGSCompatibleLayer = (feature) => {
-    return Object.keys(feature.layer.layersInfo).find((id) => {
-      const fid = feature.getId().split(".")[0];
-      const layerId = id.split(":").length === 2 ? id.split(":")[1] : id;
-      return fid === layerId;
-    });
-  };
-
-  const getCaption = (feature) => {
-    console.log("feature: ", feature);
-    return feature.getId();
-    let layer, caption;
-    if (feature.layer.layersInfo && feature.getId()) {
-      layer = getAGSCompatibleLayer(feature);
-    }
-    caption =
-      feature.layer?.layersInfo?.[layer]?.caption || feature.values_.namn;
-    return caption;
-  };
-
   return (
     <Dialog
       options={{
@@ -64,7 +44,7 @@ export default function SelectFeatureDialog(props) {
                     value={index}
                     key={feature.getId()}
                     control={<Radio />}
-                    label={getCaption(feature)}
+                    label={feature.getId()}
                   />
                 ))}
               </RadioGroup>
