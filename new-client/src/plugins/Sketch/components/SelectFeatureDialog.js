@@ -33,13 +33,18 @@ export default function SelectFeatureDialog({ localObserver, drawModel }) {
     setState((state) => ({ ...state, clickedFeatures }));
   }, []);
 
-  // Handles selection of feature in the dialog-list. Sets the currently
-  // selected feature-index. Upon confirmation, the feature with the corresponding
-  // index will be added to the map.
-  const handleFeatureSelectChange = (index) => {
+  // Handles selection of features in the dialog-list. If the feature-index is already
+  // selected, we remove it, otherwise we add it to the selection.
+  const handleFeatureSelectChange = (featureIndex) => {
+    // Create the new selected feature-indexes...
+    const newSelectedFeatureIndexes =
+      state.selectedFeatureIndexes.indexOf(featureIndex) !== -1
+        ? state.selectedFeatureIndexes.filter((i) => i !== featureIndex)
+        : [...state.selectedFeatureIndexes, featureIndex];
+    // ...and update the state
     setState((state) => ({
       ...state,
-      selectedFeatureIndexes: [...state.selectedFeatureIndexes, index],
+      selectedFeatureIndexes: newSelectedFeatureIndexes,
     }));
   };
 
