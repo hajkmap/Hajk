@@ -1,6 +1,6 @@
 import { ACTIVITIES, MAX_REMOVED_FEATURES } from "../constants";
 import LocalStorageHelper from "../../../utils/LocalStorageHelper";
-import { Circle, Fill, Stroke } from "ol/style";
+import { Circle, Fill, Stroke, Style } from "ol/style";
 import GeoJSON from "ol/format/GeoJSON";
 import { Circle as CircleGeometry, Point } from "ol/geom";
 import { Feature } from "ol";
@@ -456,6 +456,31 @@ class SketchModel {
     }
     // Otherwise we'll return the result of a lowercase-compare.
     return s1.toLowerCase() === s2.toLowerCase();
+  };
+
+  setHighlightOnFeature = (feature) => {
+    if (!feature) return;
+    const dFeature = feature.clone();
+    dFeature.setId(Math.random().toString(36).substring(2, 15));
+    dFeature.setStyle(
+      new Style({
+        stroke: new Stroke({
+          color: "rgba(255, 0, 0, 1)",
+          width: 3,
+        }),
+        fill: new Fill({
+          color: "rgba(255, 0, 0, 0.1)",
+        }),
+      })
+    );
+    // Add feature
+    this.#drawModel.addFeature(dFeature, { silent: true });
+    return dFeature;
+  };
+
+  disableHighlightOnFeature = (feature) => {
+    if (!feature) return;
+    this.#drawModel.removeFeature(feature);
   };
 
   // Returns wether helper-snacks should be shown or not
