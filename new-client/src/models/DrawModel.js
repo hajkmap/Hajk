@@ -1497,13 +1497,13 @@ class DrawModel {
   // create a "copy" of that feature.
   #enableSelectInteraction = () => {
     this.#map.clickLock.add("coreDrawModel");
-    this.#map.on("singleclick", this.#handleSelectOnClick);
+    this.#map.on("singleclick", this.#handleOnSelectClick);
     this.#selectInteractionActive = true;
   };
 
   #disableSelectInteraction = () => {
     this.#map.clickLock.delete("coreDrawModel");
-    this.#map.un("singleclick", this.#handleSelectOnClick);
+    this.#map.un("singleclick", this.#handleOnSelectClick);
     this.#selectInteractionActive = true;
   };
 
@@ -1522,39 +1522,35 @@ class DrawModel {
     }
   };
 
-  #handleSelectOnClick = async (event) => {
-    const clickPromise = await new Promise((resolve) =>
+  #handleOnSelectClick = async (event) => {
+    // Try to fetch features from WMS-layers etc.
+    const clickResult = await new Promise((resolve) =>
       handleClick(event, event.map, resolve)
     );
-    // The response will contain an array
-    const features = clickPromise.features;
-    // Which might contain features without geometry. We have to make sure
-    // we remove those.
+    // The response should contain an array of features
+    const features = clickResult.features;
+    // Which might contain features without geometry. We have to make sure we remove those.
     const featuresWithGeom = features.filter((feature) => {
       return feature.getGeometry();
     });
-
+    // Then we'll get features from the "core" layers
     this.#map.getFeaturesAtPixel(event.pixel).forEach((f, index) => {
-      f.setId(`Ritlager.${index + 1}`);
+      f.setId(`Vektorlager.${index + 1}`);
       featuresWithGeom.push(f);
     });
-
-    // The resulting array might be empty, then we abort.
+    // The resulting array might be empty, then we'll abort.
     if (featuresWithGeom.length === 0) return;
-
-    if (featuresWithGeom.length >= 2) {
-      // Set to observer
+    // If we have more than one feature, we'll have to let the user
+    // puck which features they want to add. LEt's publish some info...
+    if (featuresWithGeom.length > 1) {
       this.#publishInformation({
         subject: "drawModel.select.click",
         payLoad: featuresWithGeom,
       });
       return;
     }
-
-    const feature = featuresWithGeom[0];
-
-    if (!feature) return;
-    this.drawSelectedFeature(feature);
+    // If we've made it this far, we can just add the feature to the map
+    this.drawSelectedFeature(featuresWithGeom[0]);
   };
 
   // Creates a Feature with a circle geometry with fixed radius
