@@ -95,9 +95,7 @@ class ExternalLinks extends React.PureComponent {
     };
   };
 
-  handleItemClick = (event, item) => {
-    const uri = item.uri;
-
+  openUri = (uri, target) => {
     // Try to match {x|EPSG:4326|0} etc in uri.
     const regex = /\{([x,y].+?)\}/gim;
     const zoomKey = "{zoom}";
@@ -143,7 +141,18 @@ class ExternalLinks extends React.PureComponent {
     }
 
     console.log("External link will open", url);
-    window.open(url, "_blank");
+    window.open(url, target);
+  };
+
+  handleItemClick = (event, item) => {
+    const uri = item.uri;
+    try {
+      this.openUri(uri, "_blank");
+    } catch (err) {
+      console.warn(
+        `ExternalLinks: openUri: Could not open Uri:\n${uri}\n${err}`
+      );
+    }
   };
 
   renderMenuItems = () => {
