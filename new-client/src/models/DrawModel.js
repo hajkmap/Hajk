@@ -1210,7 +1210,7 @@ class DrawModel {
       return this.#disableMoveInteraction();
     }
     if (this.#selectInteractionActive) {
-      return this.#disableSelectInteraction();
+      this.#disableSelectInteraction();
     }
     if (this.#circleInteractionActive) {
       this.#disableCircleInteraction();
