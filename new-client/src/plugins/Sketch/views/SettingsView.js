@@ -144,7 +144,7 @@ const SettingsView = (props) => {
               control={
                 <Switch
                   disabled={!measurementSettings.showText}
-                  checked={measurementSettings.showLength}
+                  checked={measurementSettings.showLength ?? false}
                   onChange={() => {
                     setMeasurementSettings((settings) => ({
                       ...settings,
