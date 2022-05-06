@@ -27,11 +27,13 @@ class BaseWindowPlugin extends React.PureComponent {
 
     // Should Window be visible at start?
     const visibleAtStart =
-      (isMobile
-        ? props.options.visibleAtStartMobile
-        : props.options.visibleAtStart) || false;
+      (this.props.app.config.mapConfig.map.clean === false && // Never show in clean mode
+        (isMobile
+          ? props.options.visibleAtStartMobile
+          : props.options.visibleAtStart)) ||
+      false;
 
-    // If plugin is shown at start, we want to register it as shown in the Analytis module too.
+    // If plugin is shown at start, we want to register it as shown in the Analytics module too.
     // Normally, the event would be sent when user clicks on the button that activates the plugin,
     // but in this case there won't be any click as the window will be visible at start.
     if (visibleAtStart) {
