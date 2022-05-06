@@ -11,8 +11,6 @@ import {
   Tooltip,
 } from "@mui/material";
 
-import Information from "../components/Information";
-
 import LocalStorageHelper from "utils/LocalStorageHelper";
 import useCookieStatus from "hooks/useCookieStatus";
 
@@ -25,9 +23,7 @@ import {
 
 const SettingsView = (props) => {
   // Let's destruct some props
-  const { model, id, measurementSettings, setMeasurementSettings } = props;
-  // Then we'll get some information about the current activity (view)
-  const activity = model.getActivityFromId(id);
+  const { model, measurementSettings, setMeasurementSettings } = props;
   // We're gonna need to keep track of if we're allowed to save stuff in LS. Let's use the hook.
   const { functionalCookiesOk } = useCookieStatus(props.globalObserver);
   // We're gonna need some local state as well. For example, should we show helper-snacks?
@@ -48,9 +44,6 @@ const SettingsView = (props) => {
 
   return (
     <Grid container>
-      <Grid item xs={12}>
-        <Information text={activity.information} />
-      </Grid>
       <Grid item xs={12} sx={{ marginTop: 2 }}>
         <FormControl component="fieldset">
           <FormLabel focused={false} component="legend">
@@ -127,6 +120,35 @@ const SettingsView = (props) => {
                     setMeasurementSettings((settings) => ({
                       ...settings,
                       showArea: !settings.showArea,
+                    }));
+                  }}
+                  color="primary"
+                />
+              }
+            />
+          </Tooltip>
+          <Tooltip
+            disableInteractive
+            title={
+              !measurementSettings.showText
+                ? "Aktivera text på objekten om du vill visa objektens längd"
+                : `Slå ${
+                    measurementSettings.showLength ? "av" : "på"
+                  } om du vill ${
+                    measurementSettings.showLength ? "dölja" : "visa"
+                  } längd på objekten.`
+            }
+          >
+            <FormControlLabel
+              label="Visa längd"
+              control={
+                <Switch
+                  disabled={!measurementSettings.showText}
+                  checked={measurementSettings.showLength ?? false}
+                  onChange={() => {
+                    setMeasurementSettings((settings) => ({
+                      ...settings,
+                      showLength: !settings.showLength,
                     }));
                   }}
                   color="primary"
