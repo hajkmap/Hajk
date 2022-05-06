@@ -597,7 +597,7 @@ class DrawModel {
     // the supplied type (if we're creating a tooltip, we're always showing everything!).
     const showMeasurement =
       labelType === "TOOLTIP" ||
-      type === "LENGTH" ||
+      (type === "LENGTH" && this.#measurementSettings.showLength) ||
       (type === "AREA" && this.#measurementSettings.showArea) ||
       (type === "PERIMETER" && this.#measurementSettings.showPerimeter);
     // If we're not supposed to be showing the measurement, lets return an empty string.

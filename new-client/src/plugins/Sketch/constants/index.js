@@ -154,6 +154,7 @@ export const MAX_SKETCHES = 3;
 export const DEFAULT_MEASUREMENT_SETTINGS = {
   showText: false,
   showArea: false,
+  showLength: false,
   showPerimeter: false,
   areaUnit: "AUTO",
   lengthUnit: "AUTO",
