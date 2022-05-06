@@ -1493,6 +1493,8 @@ class DrawModel {
     this.#circleInteractionActive = false;
   };
 
+  // Enables functionality so that the user can select features from the map and
+  // create a "copy" of that feature.
   #enableSelectInteraction = () => {
     this.#map.clickLock.add("coreDrawModel");
     this.#map.on("singleclick", this.#handleSelectOnClick);
@@ -1506,15 +1508,18 @@ class DrawModel {
   };
 
   drawSelectedFeature = (feature) => {
-    if (!feature) return;
-    // We clone to ensure we don't overwrite our original
-    const nFeature = feature.clone();
-    // We set an new ID as well to ensure it won't be overwritten by the original feature we get
-    nFeature.setId(Math.random().toString(36).substring(2, 15));
-    // If we have only one feature, we can show it on the map.
-    this.#drawSource.addFeature(nFeature);
-    // Set style
-    this.#handleDrawEnd({ feature: nFeature });
+    try {
+      // We clone to ensure we don't overwrite our original
+      const featureCopy = feature.clone();
+      // We set an new ID as well to ensure it won't be overwritten by the original feature we get
+      featureCopy.setId(Math.random().toString(36).substring(2, 15));
+      // If we have only one feature, we can show it on the map.
+      this.#drawSource.addFeature(featureCopy);
+      // Fire the draw-end-event so that the feature gets correct style etc.
+      this.#handleDrawEnd({ feature: featureCopy });
+    } catch (error) {
+      console.error(`Failed to add selected feature. Error: ${error}`);
+    }
   };
 
   #handleSelectOnClick = async (event) => {
