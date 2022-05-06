@@ -1,33 +1,3 @@
-// {
-//   "type": "externalLinks",
-//   "options": {
-//     "list": [
-//       {
-//         "name": "Geodatabanken",
-//         "uri": "https://geodatabanken-test.varberg.se/?m=map_1&x={x|EPSG:3007|0}&y={y|EPSG:3007|0}&z={zoom}&l=1618%2C1842"
-//       },
-//       {
-//         "name": "Snedbilder (Slagboom en Peeters)",
-//         "uri": "https://app.slagboomenpeeters.com/varberg?x={x|EPSG:3007|0}&y={y|EPSG:3007|0}&z=12&mode=oblique&minimap=open"
-//       },
-//       {
-//         "name": "Google Street view",
-//         "uri": "https://maps.google.com/?q=&layer=c&cbll={y|EPSG:4326|4},{x|EPSG:4326|4}"
-//       },
-//       {
-//         "name": "Google maps",
-//         "uri": "https://maps.google.com/?q={y|EPSG:4326|4},{x|EPSG:4326|4}&ll={y|EPSG:4326|4},{x|EPSG:4326|4}&z=20"
-//       },
-//       {
-//         "name": "OpenStreetMap",
-//         "uri": "https://www.openstreetmap.org/#map=19/{y|EPSG:4326|4}/{x|EPSG:4326|4}"
-//       }
-//     ],
-//     "visibleForGroups": []
-//   },
-//   "index": 0
-// }
-
 import React from "react";
 import { styled } from "@mui/material/styles";
 import propTypes from "prop-types";
