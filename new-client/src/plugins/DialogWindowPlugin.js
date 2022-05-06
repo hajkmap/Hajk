@@ -51,16 +51,23 @@ class DialogWindowPlugin extends React.PureComponent {
   componentDidMount() {
     let dialogOpen = this.opts.visibleAtStart;
     const localStorageKey = `plugin.${this.uniqueIdentifier}.alreadyShown`;
+    const clean = this.props.app.config.mapConfig.map.clean;
 
     // TODO: Use LocalStorageHelper so we have a per-map-setting here…
-    if (this.opts.visibleAtStart === true) {
+    // No need to continue if we're in clean mode.
+    if (clean === false && this.opts.visibleAtStart === true) {
+      // If clean mode is false and visibleAtStart is true, however,
+      // check if showOnlyOnce is true.
       if (
         this.opts.showOnlyOnce === true &&
         parseInt(window.localStorage.getItem(localStorageKey)) === 1
       ) {
+        // If yes - don't show the dialog on load anymore.
         dialogOpen = false;
       } else {
+        // If not - check if showOnlyOnce is true and…
         if (this.opts.showOnlyOnce === true) {
+          // if yes, store the setting in local storage.
           window.localStorage.setItem(localStorageKey, 1);
         }
         dialogOpen = true;
