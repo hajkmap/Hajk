@@ -1412,7 +1412,7 @@ class DrawModel {
   #enableMoveInteraction = (settings) => {
     // The Move-interaction will obviously need a Select-interaction so that the features to
     // move can be selected.
-    this.#selectInteraction = new Select();
+    this.#selectInteraction = new Select({ layers: [this.#drawLayer] });
     // We need a handler catching the "select"-events so that we can keep track of if any
     // features has been selected or not.
     this.#selectInteraction.on("select", this.#handleFeatureSelect);
