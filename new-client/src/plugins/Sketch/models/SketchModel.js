@@ -207,6 +207,18 @@ class SketchModel {
     });
   };
 
+  #createHighlightStyle = () => {
+    return new Style({
+      stroke: new Stroke({
+        color: "rgba(255, 0, 0, 1)",
+        width: 3,
+      }),
+      fill: new Fill({
+        color: "rgba(255, 0, 0, 0.1)",
+      }),
+    });
+  };
+
   // Accepts a feature with a Circle-geometry and updates the feature-geometry
   // to a Point-geometry along with an additional property ("CIRCLE_RADIUS") that can
   // be used to construct a "real" Circle-geometry when the feature is to be added to
@@ -460,22 +472,11 @@ class SketchModel {
 
   setHighlightOnFeature = (feature) => {
     if (!feature) return;
-    const dFeature = feature.clone();
-    dFeature.setId(Math.random().toString(36).substring(2, 15));
-    dFeature.setStyle(
-      new Style({
-        stroke: new Stroke({
-          color: "rgba(255, 0, 0, 1)",
-          width: 3,
-        }),
-        fill: new Fill({
-          color: "rgba(255, 0, 0, 0.1)",
-        }),
-      })
-    );
-    // Add feature
-    this.#drawModel.addFeature(dFeature, { silent: true });
-    return dFeature;
+    const featureClone = feature.clone();
+    featureClone.setId(Math.random().toString(36).substring(2, 15));
+    featureClone.setStyle(this.#createHighlightStyle());
+    this.#drawModel.addFeature(featureClone, { silent: true });
+    return featureClone;
   };
 
   disableHighlightOnFeature = (feature) => {
