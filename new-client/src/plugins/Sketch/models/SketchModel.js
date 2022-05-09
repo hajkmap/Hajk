@@ -470,18 +470,21 @@ class SketchModel {
     return s1.toLowerCase() === s2.toLowerCase();
   };
 
-  setHighlightOnFeature = (feature) => {
-    if (!feature) return;
-    const featureClone = feature.clone();
-    featureClone.setId(Math.random().toString(36).substring(2, 15));
-    featureClone.setStyle(this.#createHighlightStyle());
-    this.#drawModel.addFeature(featureClone, { silent: true });
-    return featureClone;
-  };
-
-  disableHighlightOnFeature = (feature) => {
-    if (!feature) return;
-    this.#drawModel.removeFeature(feature);
+  // Creates a new feature with the same geometry as the supplied one. The new
+  // feature can be used an an highlight, to show where the supplied feature is.
+  createHighlightFeature = (feature) => {
+    // If no feature (or a feature with no get-geometry) is supplied, we abort.
+    if (feature && feature.getGeometry()) {
+      // Otherwise we create a new feature...
+      const highlightFeature = new Feature({
+        geometry: feature.getGeometry().clone(),
+      });
+      // ...set an id and a highlight-style...
+      highlightFeature.setId(this.generateRandomString());
+      highlightFeature.setStyle(this.#createHighlightStyle());
+      // Finally we return the feature so that we can add it to the map etc.
+      return highlightFeature;
+    }
   };
 
   // Returns wether helper-snacks should be shown or not

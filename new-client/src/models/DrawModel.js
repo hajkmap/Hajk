@@ -76,7 +76,6 @@ class DrawModel {
   #modifyInteraction;
   #keepModifyActive;
   #keepTranslateActive;
-  #allowedLabelFormats;
   #customHandleDrawStart;
   #customHandleDrawEnd;
   #customHandlePointerMove;
@@ -283,6 +282,9 @@ class DrawModel {
     // FIXME: Remove "type", use only "name" throughout
     // the application. Should be done as part of #883.
     this.#drawLayer.set("name", this.#layerName);
+    // We're also gonna have to set the queryable-property to true
+    // so that we can enable "Select" on the layer.
+    this.#drawLayer.set("queryable", true);
     // Then we can add the layer to the map.
     this.#map.addLayer(this.#drawLayer);
   };
@@ -1509,48 +1511,55 @@ class DrawModel {
 
   drawSelectedFeature = (feature) => {
     try {
-      // We clone to ensure we don't overwrite our original
-      const featureCopy = feature.clone();
-      // We set an new ID as well to ensure it won't be overwritten by the original feature we get
+      // We create a new feature with the same geometry as the supplied one. This way
+      // we ensure that the copy and the original feature are not connected.
+      const featureCopy = new Feature({
+        geometry: feature.getGeometry().clone(),
+      });
+      // We're gonna need to set some properties on the new feature... First, we'll set an ID.
       featureCopy.setId(Math.random().toString(36).substring(2, 15));
-      // If we have only one feature, we can show it on the map.
+      // Then we'll set some draw-properties from the original feature.
+      featureCopy.set("USER_DRAWN", true);
+      featureCopy.set("DRAW_METHOD", feature.get("DRAW_METHOD"));
+      featureCopy.set("TEXT_SETTINGS", feature.get("TEXT_SETTINGS"));
+      // We're gonna need to set some styling on the feature as-well. Let's use the same
+      // styling as on the supplied feature.
+      featureCopy.setStyle(this.#getFeatureStyle(featureCopy));
+      // Then we can add the feature to the draw-layer!
       this.#drawSource.addFeature(featureCopy);
-      // Fire the draw-end-event so that the feature gets correct style etc.
-      this.#handleDrawEnd({ feature: featureCopy });
     } catch (error) {
       console.error(`Failed to add selected feature. Error: ${error}`);
     }
   };
 
   #handleOnSelectClick = async (event) => {
-    // Try to fetch features from WMS-layers etc.
-    const clickResult = await new Promise((resolve) =>
-      handleClick(event, event.map, resolve)
-    );
-    // The response should contain an array of features
-    const features = clickResult.features;
-    // Which might contain features without geometry. We have to make sure we remove those.
-    const featuresWithGeom = features.filter((feature) => {
-      return feature.getGeometry();
-    });
-    // Then we'll get features from the "core" layers
-    this.#map.getFeaturesAtPixel(event.pixel).forEach((f, index) => {
-      f.setId(`Vektorlager.${index + 1}`);
-      featuresWithGeom.push(f);
-    });
-    // The resulting array might be empty, then we'll abort.
-    if (featuresWithGeom.length === 0) return;
-    // If we have more than one feature, we'll have to let the user
-    // puck which features they want to add. LEt's publish some info...
-    if (featuresWithGeom.length > 1) {
-      this.#publishInformation({
-        subject: "drawModel.select.click",
-        payLoad: featuresWithGeom,
-      });
-      return;
+    try {
+      // Try to fetch features from WMS-layers etc. (Also from all vector-layers).
+      const clickResult = await new Promise((resolve) =>
+        handleClick(event, event.map, resolve)
+      );
+      // The response should contain an array of features
+      const { features } = clickResult;
+      // Which might contain features without geometry. We have to make sure we remove those.
+      const featuresWithGeom = features.filter((feature) =>
+        feature.getGeometry()
+      );
+      // If we've fetched exactly one feature, we can add it straight away...
+      featuresWithGeom.length === 1 &&
+        this.drawSelectedFeature(featuresWithGeom[0]);
+      // If we have more than one feature, we'll have to let the user
+      // pick which features they want to add. Let's publish an event that the view can catch...
+      if (featuresWithGeom.length > 1) {
+        return this.#publishInformation({
+          subject: "drawModel.select.click",
+          payLoad: featuresWithGeom,
+        });
+      }
+    } catch (error) {
+      console.error(
+        `Failed to select features in drawModel... Error: ${error}`
+      );
     }
-    // If we've made it this far, we can just add the feature to the map
-    this.drawSelectedFeature(featuresWithGeom[0]);
   };
 
   // Creates a Feature with a circle geometry with fixed radius
