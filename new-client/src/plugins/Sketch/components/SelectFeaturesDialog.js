@@ -24,7 +24,7 @@ export default function SelectFeaturesDialog({
   const [state, setState] = React.useState({
     clickedFeatures: [],
     selectedFeatureIndexes: [],
-    highlightedFeatures: [],
+    highlightedFeature: null,
   });
 
   // Resets the state back to init.
@@ -32,7 +32,7 @@ export default function SelectFeaturesDialog({
     setState({
       clickedFeatures: [],
       selectedFeatureIndexes: [],
-      highlightedFeatures: [],
+      highlightedFeature: null,
     });
   }, []);
 
@@ -59,10 +59,10 @@ export default function SelectFeaturesDialog({
 
   // Handles dialog abort, resets the state so that the dialog can close.
   const handleAbort = () => {
-    // We have to remove all the highlighted features when aborting...
-    state.highlightedFeatures.forEach((f) => {
-      drawModel.removeFeature(f);
-    });
+    // We have to remove the eventual highlighted feature when aborting...
+    state.highlightedFeature &&
+      drawModel.removeFeature(state.highlightedFeature);
+    // ...and reset the state.
     resetState();
   };
 
@@ -75,19 +75,27 @@ export default function SelectFeaturesDialog({
     resetState();
   };
 
+  // Handler for mouse-enter on list of clicked features. Creates a new
+  // feature (which is used to show where the clicked feature is in the map).
   const handleMouseEnter = (index) => {
-    const feature = state.clickedFeatures[index];
-    const nFeature = model.setHighlightOnFeature(feature);
+    // Let's get the clicked feature we're currently hoovering.
+    const hoveredFeature = state.clickedFeatures[index];
+    // Then we can create a corresponding highlight-feature.
+    const highlightFeature = model.createHighlightFeature(hoveredFeature);
+    // We'll add the highlight-feature to the draw-layer...
+    drawModel.addFeature(highlightFeature, { silent: true });
+    // ...and update the state so that we can keep track of what we are highlighting.
     setState({
       ...state,
-      highlightedFeatures: [...state.highlightedFeatures, nFeature],
+      highlightedFeature: highlightFeature,
     });
   };
 
+  // Handler for mouse-leave on the list of clicked features. Removes the currently
+  // highlighted feature from the draw-layer.
   const handleMouseLeave = () => {
-    state.highlightedFeatures.forEach((f) => {
-      model.disableHighlightOnFeature(f);
-    });
+    state.highlightedFeature &&
+      drawModel.removeFeature(state.highlightedFeature);
   };
 
   // An effect that handles subscriptions (and un-subscriptions) to the observer-
