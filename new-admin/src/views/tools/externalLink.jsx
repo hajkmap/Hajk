@@ -64,8 +64,7 @@ class ToolOptions extends Component {
       list: [],
       active: false,
       index: 0,
-      //z target: "toolbar",
-      //z instruction: "",
+      showExamples: false,
       visibleAtStart: false,
       visibleForGroups: [],
       editing: null,
@@ -88,12 +87,6 @@ class ToolOptions extends Component {
           ? tool.options.visibleForGroups
           : [],
       });
-
-      if(list.length === 0){
-        this.setState({
-          list: [...examples],
-        });
-      }
 
     } else {
       this.setState({
@@ -151,12 +144,7 @@ class ToolOptions extends Component {
       type: this.type,
       index: this.state.index,
       options: {
-        //z target: this.state.target,
-        //z position: this.state.position,
-        //z width: this.state.width,
-        //z height: this.state.height,
         list: this.state.list,
-        //z instruction: this.state.instruction,
         visibleForGroups: this.state.visibleForGroups.map(
           Function.prototype.call,
           String.prototype.trim
@@ -207,9 +195,13 @@ class ToolOptions extends Component {
     }
   }
 
-  addLink(e) {
+  addLink(name, uri){
 
-    if(this.refs.link_name.value.trim() === "" || this.refs.link_url.value.trim() === ""){
+    const found = this.state.list.find((a)=> {
+      return a.name === name || a.uri === uri
+    });
+
+    if(found){
       return;
     }
 
@@ -217,11 +209,23 @@ class ToolOptions extends Component {
       list: [
         ...this.state.list,
         {
-          name: this.refs.link_name.value,
-          uri: this.refs.link_url.value,
+          name: name,
+          uri: uri,
         },
       ],
     });
+  }
+
+  addLinkClick(e) {
+
+    const name = this.refs.link_name.value.trim();
+    const uri = this.refs.link_url.value.trim();
+  
+    if(name === "" || uri === ""){
+      return;
+    }
+
+    this.addLink(name, uri);
   }
 
   removeLink(name) {
@@ -245,31 +249,16 @@ class ToolOptions extends Component {
     });
   }
 
-  createGuid() {
-    function s4() {
-      return Math.floor((1 + Math.random()) * 0x10000)
-        .toString(16)
-        .substring(1);
-    }
-    return (
-      s4() +
-      s4() +
-      "-" +
-      s4() +
-      "-" +
-      s4() +
-      "-" +
-      s4() +
-      "-" +
-      s4() +
-      s4() +
-      s4()
-    );
-  }
-
   renderLinks() {
+
+    if(this.state.list.length === 0){
+      return (<div>
+        <li>Inga länkar att visa. Lägg till egna eller använd exemplen ovan.</li>
+      </div>)
+    }
+
     return this.state.list.map((t, i) => (
-      <div key={i}>
+      <div key={t.name + i}>
         <li
           className="layer-node link-name"
           key={Math.round(Math.random() * 1e6)}
@@ -336,6 +325,15 @@ class ToolOptions extends Component {
     ));
   }
 
+  renderExamples(){
+    return examples.map((item, i) => (
+      <div key={"example"+i}>
+        {item.name}&nbsp;&nbsp;
+        <Button size="small" color="primary" onClick={() => this.addLink(item.name, item.uri)}>+ Lägg till</Button>
+      </div>
+    ))
+  }
+
   handleAuthGrpsChange(event) {
     const target = event.target;
     const value = target.value;
@@ -350,6 +348,10 @@ class ToolOptions extends Component {
     this.setState({
       visibleForGroups: value !== "" ? groups : [],
     });
+  }
+  
+  toggleExamples(){
+    this.setState({showExamples: !this.state.showExamples})
   }
 
   renderVisibleForGroups() {
@@ -440,21 +442,48 @@ class ToolOptions extends Component {
                 <input
                   name="uri"
                   type="text"
+                  placeholder="Url"
                   required
                   ref="link_url"
                 />
               </div>
-              <ColorButtonGreen
-                variant="contained"
-                className="btn"
-                onClick={(e) => {
-                  e.preventDefault();
-                  this.addLink(e);
-                }}
-                startIcon={<AddIcon />}
-              >
-                Lägg till
-              </ColorButtonGreen>
+              <div style={{display: "flex"}}>
+                <div style={{flex: "1 1 auto"}}>
+                  <ColorButtonGreen
+                    variant="contained"
+                    className="btn"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      this.addLinkClick(e);
+                    }}
+                    startIcon={<AddIcon />}
+                  >
+                    Lägg till
+                  </ColorButtonGreen>
+                </div>
+                <div style={{flex: "1 1 auto", textAlign: "right"}}>
+                  <Button size="small" color="primary" onClick={() => {this.toggleExamples()}}>{(this.state.showExamples ? "Dölj" : "Visa") + " exempel"}</Button>
+                </div>
+              </div>
+              {
+
+                (this.state.showExamples === true ? 
+                  <div style={{display: "flex", backgroundColor: "#f7f7f7", borderRadius: 8, padding: "10px", marginTop: "4px", fontSize: "0.8rem"}}>
+                    <div style={{display: "flex", flex: "0 1 60%"}}>
+                      <code style={{fontSize: "0.8rem"}}>
+                        {"{x|EPSG:4326|4}"}<br/>
+                        <br/>                        
+                        x eller y = koordinat från kartan<br/>
+                        EPSG:4326 = konvertera till valfri projektion<br/>
+                        4 = antal decimaler (optional, default = 4)<br/>
+                      </code>
+                    </div>
+                    <div style={{display: "flex", flexFlow: "column", alignItems: "flex-end", flex: "0 1 40%"}}>
+                    {this.renderExamples()}
+                    </div>
+                  </div> : null)
+                
+              }
             </div>
             <br/>
             <h4>Länkar</h4>
