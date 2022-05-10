@@ -109,6 +109,7 @@ class Search extends React.PureComponent {
     this.map = props.map;
     this.searchModel = props.app.appModel.searchModel;
     this.globalObserver = props.app.globalObserver;
+    this.disableAutocomplete = props.options.disableAutocomplete ?? false;
     this.initMapViewModel();
     this.initExportHandlers();
     this.bindSubscriptions();
@@ -384,6 +385,11 @@ class Search extends React.PureComponent {
     );
   };
 
+  // This function name is a bit confusing... It's really a handler for the search-bar-input (which is an
+  // <Autocomplete />-component, therefore the name). This change-handler makes sure to check the text inputted by
+  // the user, and if no input has been seen for 'this.delayBeforeAutoSearch' a search is conducted. The search will result
+  // in some autocomplete-objects, (if 'this.disableAutocomplete' is set to false) or some search-result-objects (if
+  // 'this.disableAutocomplete' is set to true).
   handleOnAutocompleteInputChange = (event, searchString, reason) => {
     if (this.isUserInput(searchString, reason)) {
       clearTimeout(this.timer);
@@ -399,9 +405,15 @@ class Search extends React.PureComponent {
             resultPanelCollapsed: false,
           },
           () => {
+            // If the search-string is long enough, we can perform a search...
             if (this.state.searchString.length >= 3) {
-              this.updateAutocompleteList(this.state.searchString);
+              // If the autocomplete should be disabled, we perform a regular search
+              // with doSearch(), otherwise we'll fetch some autoComplete-objects.
+              this.disableAutocomplete
+                ? this.doSearch()
+                : this.updateAutocompleteList(this.state.searchString);
             } else {
+              // If the search-string is not long enough, we'll reset the autoComplete.
               this.setState({
                 autocompleteList: [],
               });

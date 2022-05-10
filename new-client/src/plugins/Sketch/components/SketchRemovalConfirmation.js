@@ -13,7 +13,13 @@ import {
 // to remove a sketch from LS.
 const SketchRemovalConfirmation = ({ open, handleConfirm, handleAbort }) => {
   return createPortal(
-    <Dialog open={open} onClose={handleAbort}>
+    <Dialog
+      open={open}
+      onClose={handleAbort}
+      onMouseDown={(e) => {
+        e.stopPropagation();
+      }}
+    >
       <DialogTitle>Radera arbetsyta</DialogTitle>
       <DialogContent>
         <Typography>

@@ -97,6 +97,12 @@ export const DRAW_TYPES = [
       "Rita en pil i kartan genom att klicka en gång per nod, avlsuta med ett dubbelklick.",
   },
   {
+    type: "Select",
+    label: "Välj i kartan",
+    tooltip:
+      "Klicka på ett existerande objekt i kartan och kopiera in det i ritlagret.",
+  },
+  {
     type: "Polygon",
     label: "Polygon",
     tooltip:
@@ -148,6 +154,7 @@ export const MAX_SKETCHES = 3;
 export const DEFAULT_MEASUREMENT_SETTINGS = {
   showText: false,
   showArea: false,
+  showLength: false,
   showPerimeter: false,
   areaUnit: "AUTO",
   lengthUnit: "AUTO",
@@ -171,6 +178,8 @@ export const PROMPT_TEXTS = {
     "Skapa en rektangel genom att hålla vänsterklick med musen och dra över en yta för att få en önskad storlek.",
   ArrowHelp:
     "En pil skapas genom att klicka på en position för varje nod, avsluta med dubbelklick.",
+  SelectHelp:
+    "Klicka på ett existerande objekt i kartan och kopiera in det i ritlagret.",
   PolygonHelp:
     "Skapa en polygon genom att klicka på en position för varje nod, avsluta med dubbelklick.",
   PointHelp: "Klicka på en position för att infoga en punkt.",

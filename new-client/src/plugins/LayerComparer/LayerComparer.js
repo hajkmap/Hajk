@@ -1,7 +1,8 @@
 import React, { useEffect, useRef, useState } from "react";
-import { Alert, Stack } from "@mui/material";
+import { Alert, Button, Stack } from "@mui/material";
 import DialogWindowPlugin from "plugins/DialogWindowPlugin";
 import CompareIcon from "@mui/icons-material/Compare";
+import { useSnackbar } from "notistack";
 
 import SelectDropdown from "./SelectDropdown.js";
 import SDSControl from "./CustomOLControl.js";
@@ -20,6 +21,13 @@ const LayerComparer = (props) => {
   // background layer. This makes it possible to restore
   // to the same background when user closes the comparer.
   const oldBackgroundLayer = useRef();
+
+  // When compare mode is active, we want to show a snackbar that
+  // allows user to simply disable the comparer.
+  const { closeSnackbar, enqueueSnackbar } = useSnackbar();
+  // We don't want to prompt the user with more than one snack, so lets track the current one,
+  // so that we can close it when another one is about to open.
+  const helperSnack = React.useRef(null);
 
   // Prepare layers that will be available in the comparer.
   // By doing it in this useEffect, we do it once and for all,
@@ -70,6 +78,9 @@ const LayerComparer = (props) => {
 
       // Remove the slider as soon as one of the compare layers is not selected
       sds.current.remove();
+
+      // Close the snackbar
+      closeSnackbar(helperSnack.current);
     } else {
       const l1 = props.map.getAllLayers().find((l) => l.ol_uid === layer1);
       const l2 = props.map.getAllLayers().find((l) => l.ol_uid === layer2);
@@ -82,8 +93,28 @@ const LayerComparer = (props) => {
 
       sds.current.open();
       sds.current.setCompareLayers(l1, l2);
+
+      // Show the snackbar
+      helperSnack.current = enqueueSnackbar(
+        "Avsluta jämföringsläget genom att trycka på knappen",
+        {
+          variant: "default",
+          persist: true,
+          anchorOrigin: { vertical: "bottom", horizontal: "center" },
+          action: (key) => (
+            <Button
+              onClick={() => {
+                onAbort();
+                closeSnackbar(key);
+              }}
+            >
+              Sluta jämföra
+            </Button>
+          ),
+        }
+      );
     }
-  }, [layer1, layer2, props.map]);
+  }, [layer1, layer2, props.map, closeSnackbar, enqueueSnackbar]);
 
   // User can at any time abort the comparer, here's a handler
   // that resets the UI.

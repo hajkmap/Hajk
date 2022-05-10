@@ -11,6 +11,7 @@ import GeoJSON from "ol/format/GeoJSON";
 import transformTranslate from "@turf/transform-translate";
 import { getArea as getExtentArea, getCenter, getWidth } from "ol/extent";
 import { Feature } from "ol";
+import { handleClick } from "./Click";
 
 /*
  * A model supplying useful Draw-functionality.
@@ -75,7 +76,6 @@ class DrawModel {
   #modifyInteraction;
   #keepModifyActive;
   #keepTranslateActive;
-  #allowedLabelFormats;
   #customHandleDrawStart;
   #customHandleDrawEnd;
   #customHandlePointerMove;
@@ -84,6 +84,7 @@ class DrawModel {
   #highlightStrokeColor;
   #circleRadius;
   #circleInteractionActive;
+  #selectInteractionActive;
 
   constructor(settings) {
     // Let's make sure that we don't allow initiation if required settings
@@ -141,6 +142,7 @@ class DrawModel {
     this.#highlightFillColor = "rgba(35,119,252,1)";
     this.#highlightStrokeColor = "rgba(255,255,255,1)";
     this.#circleRadius = 0;
+    this.#selectInteractionActive = false;
 
     // A Draw-model is not really useful without a vector-layer, let's initiate it
     // right away, either by creating a new layer, or connect to an existing layer.
@@ -280,6 +282,9 @@ class DrawModel {
     // FIXME: Remove "type", use only "name" throughout
     // the application. Should be done as part of #883.
     this.#drawLayer.set("name", this.#layerName);
+    // We're also gonna have to set the queryable-property to true
+    // so that we can enable "Select" on the layer.
+    this.#drawLayer.set("queryable", true);
     // Then we can add the layer to the map.
     this.#map.addLayer(this.#drawLayer);
   };
@@ -594,7 +599,7 @@ class DrawModel {
     // the supplied type (if we're creating a tooltip, we're always showing everything!).
     const showMeasurement =
       labelType === "TOOLTIP" ||
-      type === "LENGTH" ||
+      (type === "LENGTH" && this.#measurementSettings.showLength) ||
       (type === "AREA" && this.#measurementSettings.showArea) ||
       (type === "PERIMETER" && this.#measurementSettings.showPerimeter);
     // If we're not supposed to be showing the measurement, lets return an empty string.
@@ -1102,7 +1107,7 @@ class DrawModel {
     // of the user drawn features. We also set "DRAW_TYPE" so that we can
     // handle special features, such as arrows.
     feature.set("USER_DRAWN", true);
-    feature.set("DRAW_METHOD", this.#drawInteraction.get("DRAW_METHOD"));
+    feature.set("DRAW_METHOD", this.#drawInteraction?.get("DRAW_METHOD"));
     feature.set("TEXT_SETTINGS", this.#textStyleSettings);
     // And set a nice style on the feature to be added.
     feature.setStyle(this.#getFeatureStyle(feature));
@@ -1205,6 +1210,9 @@ class DrawModel {
     }
     if (this.#moveInteractionActive) {
       return this.#disableMoveInteraction();
+    }
+    if (this.#selectInteractionActive) {
+      this.#disableSelectInteraction();
     }
     if (this.#circleInteractionActive) {
       this.#disableCircleInteraction();
@@ -1406,7 +1414,7 @@ class DrawModel {
   #enableMoveInteraction = (settings) => {
     // The Move-interaction will obviously need a Select-interaction so that the features to
     // move can be selected.
-    this.#selectInteraction = new Select();
+    this.#selectInteraction = new Select({ layers: [this.#drawLayer] });
     // We need a handler catching the "select"-events so that we can keep track of if any
     // features has been selected or not.
     this.#selectInteraction.on("select", this.#handleFeatureSelect);
@@ -1485,6 +1493,73 @@ class DrawModel {
     this.#map.clickLock.delete("coreDrawModel");
     this.#map.un("singleclick", this.#createRadiusOnClick);
     this.#circleInteractionActive = false;
+  };
+
+  // Enables functionality so that the user can select features from the map and
+  // create a "copy" of that feature.
+  #enableSelectInteraction = () => {
+    this.#map.clickLock.add("coreDrawModel");
+    this.#map.on("singleclick", this.#handleOnSelectClick);
+    this.#selectInteractionActive = true;
+  };
+
+  #disableSelectInteraction = () => {
+    this.#map.clickLock.delete("coreDrawModel");
+    this.#map.un("singleclick", this.#handleOnSelectClick);
+    this.#selectInteractionActive = true;
+  };
+
+  drawSelectedFeature = (feature) => {
+    try {
+      // We create a new feature with the same geometry as the supplied one. This way
+      // we ensure that the copy and the original feature are not connected.
+      const featureCopy = new Feature({
+        geometry: feature.getGeometry().clone(),
+      });
+      // We're gonna need to set some properties on the new feature... First, we'll set an ID.
+      featureCopy.setId(Math.random().toString(36).substring(2, 15));
+      // Then we'll set some draw-properties from the original feature.
+      featureCopy.set("USER_DRAWN", true);
+      featureCopy.set("DRAW_METHOD", feature.get("DRAW_METHOD"));
+      featureCopy.set("TEXT_SETTINGS", feature.get("TEXT_SETTINGS"));
+      // We're gonna need to set some styling on the feature as-well. Let's use the same
+      // styling as on the supplied feature.
+      featureCopy.setStyle(this.#getFeatureStyle(featureCopy));
+      // Then we can add the feature to the draw-layer!
+      this.#drawSource.addFeature(featureCopy);
+    } catch (error) {
+      console.error(`Failed to add selected feature. Error: ${error}`);
+    }
+  };
+
+  #handleOnSelectClick = async (event) => {
+    try {
+      // Try to fetch features from WMS-layers etc. (Also from all vector-layers).
+      const clickResult = await new Promise((resolve) =>
+        handleClick(event, event.map, resolve)
+      );
+      // The response should contain an array of features
+      const { features } = clickResult;
+      // Which might contain features without geometry. We have to make sure we remove those.
+      const featuresWithGeom = features.filter((feature) =>
+        feature.getGeometry()
+      );
+      // If we've fetched exactly one feature, we can add it straight away...
+      featuresWithGeom.length === 1 &&
+        this.drawSelectedFeature(featuresWithGeom[0]);
+      // If we have more than one feature, we'll have to let the user
+      // pick which features they want to add. Let's publish an event that the view can catch...
+      if (featuresWithGeom.length > 1) {
+        return this.#publishInformation({
+          subject: "drawModel.select.click",
+          payLoad: featuresWithGeom,
+        });
+      }
+    } catch (error) {
+      console.error(
+        `Failed to select features in drawModel... Error: ${error}`
+      );
+    }
   };
 
   // Creates a Feature with a circle geometry with fixed radius
@@ -1940,6 +2015,9 @@ class DrawModel {
     }
     if (drawMethod === "Move") {
       return this.#enableMoveInteraction(settings);
+    }
+    if (drawMethod === "Select") {
+      return this.#enableSelectInteraction(settings);
     }
     if (drawMethod === "Circle") {
       this.#enableCircleInteraction();
