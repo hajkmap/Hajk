@@ -345,151 +345,163 @@ class WMSLayerForm extends Component {
       : null;
 
     return (
-      <div>
-        <div>
+      <div class="layerDialog">
+        <div class="form-row split3070">
           <div>
             <label>Visningsnamn</label>
           </div>
-          <input
-            value={layerInfo.caption}
-            onChange={(e) => {
-              let addedLayersInfo = this.state.addedLayersInfo;
-              addedLayersInfo[layerInfo.id].caption = e.target.value;
-              this.setState(
-                {
-                  addedLayersInfo: addedLayersInfo,
-                },
-                () => {
-                  this.renderLayerInfoDialog(layerInfo);
-                }
-              );
-            }}
-            type="text"
-          />
+          <div>
+            <input
+              style={{ width: "100%" }}
+              value={layerInfo.caption}
+              onChange={(e) => {
+                let addedLayersInfo = this.state.addedLayersInfo;
+                addedLayersInfo[layerInfo.id].caption = e.target.value;
+                this.setState(
+                  {
+                    addedLayersInfo: addedLayersInfo,
+                  },
+                  () => {
+                    this.renderLayerInfoDialog(layerInfo);
+                  }
+                );
+              }}
+              type="text"
+            />
+            </div>
         </div>
-        <div>
+        <div class="form-row">
           <div>
             <label>Inforuta</label>
           </div>
-          <textarea
-            style={{ width: "100%" }}
-            value={layerInfo.infobox}
-            onChange={(e) => {
-              let addedLayersInfo = this.state.addedLayersInfo;
-              addedLayersInfo[layerInfo.id].infobox = e.target.value;
-              this.setState(
-                {
-                  addedLayersInfo: addedLayersInfo,
-                },
-                () => {
-                  this.renderLayerInfoDialog(layerInfo);
-                }
-              );
-            }}
-            type="text"
-          />
+
+            <textarea
+              class="infoClick"
+              style={{ width: "100%" }}
+              value={layerInfo.infobox}
+              onChange={(e) => {
+                let addedLayersInfo = this.state.addedLayersInfo;
+                addedLayersInfo[layerInfo.id].infobox = e.target.value;
+                this.setState(
+                  {
+                    addedLayersInfo: addedLayersInfo,
+                  },
+                  () => {
+                    this.renderLayerInfoDialog(layerInfo);
+                  }
+                );
+              }}
+              type="text"
+            />
+
         </div>
-        <div>
+        <div class="form-row split0">
           <div>
             <label>Teckenförklaringsikon</label>
           </div>
-          <input
-            style={{ marginRight: "5px" }}
-            type="text"
-            value={layerInfo.legendIcon}
-            onChange={(e) => {
-              let addedLayersInfo = this.state.addedLayersInfo;
-              addedLayersInfo[layerInfo.id].legendIcon = e.target.value;
-              this.setState(
-                {
-                  addedLayersInfo: addedLayersInfo,
-                },
-                () => {
-                  this.renderLayerInfoDialog(layerInfo);
-                }
-              );
-            }}
-          />
-          <span
-            onClick={(e) => {
-              this.props.model.on(
-                "change:select-layers-info-legend-icon",
-                () => {
-                  this.validateField("select-layers-info-legend-icon");
-                  let addedLayersInfo = this.state.addedLayersInfo;
-                  addedLayersInfo[layerInfo.id].legendIcon =
-                    this.props.model.get("select-layers-info-legend-icon");
-                  this.setState(
-                    {
-                      addedLayersInfo: addedLayersInfo,
-                    },
-                    () => {
-                      this.renderLayerInfoDialog(layerInfo);
-                      this.props.model.off(
-                        "change:select-layers-info-legend-icon"
-                      );
-                    }
-                  );
-                }
-              );
-              this.loadLayersInfoLegendIcon(e);
-            }}
-            className="btn btn-default"
-          >
-            Välj fil {imageLoader}
-          </span>
+          <div>
+            <input
+              style={{marginRight: "5px"}}
+              type="text"
+              value={layerInfo.legendIcon}
+              onChange={(e) => {
+                let addedLayersInfo = this.state.addedLayersInfo;
+                addedLayersInfo[layerInfo.id].legendIcon = e.target.value;
+                this.setState(
+                  {
+                    addedLayersInfo: addedLayersInfo,
+                  },
+                  () => {
+                    this.renderLayerInfoDialog(layerInfo);
+                  }
+                );
+              }}
+            />
+            <span
+              onClick={(e) => {
+                this.props.model.on(
+                  "change:select-layers-info-legend-icon",
+                  () => {
+                    this.validateField("select-layers-info-legend-icon");
+                    let addedLayersInfo = this.state.addedLayersInfo;
+                    addedLayersInfo[layerInfo.id].legendIcon =
+                      this.props.model.get("select-layers-info-legend-icon");
+                    this.setState(
+                      {
+                        addedLayersInfo: addedLayersInfo,
+                      },
+                      () => {
+                        this.renderLayerInfoDialog(layerInfo);
+                        this.props.model.off(
+                          "change:select-layers-info-legend-icon"
+                        );
+                      }
+                    );
+                  }
+                );
+                this.loadLayersInfoLegendIcon(e);
+              }}
+              className="btn btn-default"
+            >
+              Välj fil {imageLoader}
+            </span>
+          </div>
         </div>
 
-        <div>
+        <div class="form-row split0">
           <div>
             <label>Stil</label>
           </div>
-          <select
-            value={layerInfo.style}
-            className="control-fixed-width"
-            onChange={(e) => {
-              let addedLayersInfo = this.state.addedLayersInfo;
-              addedLayersInfo[layerInfo.id].style = e.target.value;
-              this.setState(
-                {
-                  addedLayersInfo: addedLayersInfo,
-                },
-                () => {
-                  this.renderLayerInfoDialog(layerInfo);
-                }
-              );
-            }}
-          >
-            <option value={""}>{"<default>"}</option>
-            {styles}
-          </select>
+          <div>
+            <select
+              value={layerInfo.style}
+              className="control-fixed-width"
+              onChange={(e) => {
+                let addedLayersInfo = this.state.addedLayersInfo;
+                addedLayersInfo[layerInfo.id].style = e.target.value;
+                this.setState(
+                  {
+                    addedLayersInfo: addedLayersInfo,
+                  },
+                  () => {
+                    this.renderLayerInfoDialog(layerInfo);
+                  }
+                );
+              }}
+            >
+              <option value={""}>{"<default>"}</option>
+              {styles}
+            </select>
+          </div>
         </div>
 
         <div className="separator">Infoclick</div>
 
-        <div>
+        <div class="form-row split0">
           <div>
             <label>Infoklick</label>
           </div>
-          <input
-            id="infoclickable"
-            type="checkbox"
-            checked={layerInfo.queryable}
-            onChange={(e) => {
-              let addedLayersInfo = this.state.addedLayersInfo;
-              addedLayersInfo[layerInfo.id].queryable = e.target.checked;
-              this.setState(
-                {
-                  addedLayersInfo: addedLayersInfo,
-                },
-                () => {
-                  this.renderLayerInfoDialog(layerInfo);
-                }
-              );
-            }}
-          />
+          <div>
+            <input
+              id="infoclickable"
+              type="checkbox"
+              checked={layerInfo.queryable}
+              onChange={(e) => {
+                let addedLayersInfo = this.state.addedLayersInfo;
+                addedLayersInfo[layerInfo.id].queryable = e.target.checked;
+                this.setState(
+                  {
+                    addedLayersInfo: addedLayersInfo,
+                  },
+                  () => {
+                    this.renderLayerInfoDialog(layerInfo);
+                  }
+                );
+              }}
+            />
+          </div>
         </div>
-        <div>
+        <div class="form-row split0">
           <div>
             <label>Infoclick-ikon</label> (
             <a
@@ -501,172 +513,203 @@ class WMSLayerForm extends Component {
             </a>
             )
           </div>
-          <input
-            value={layerInfo.infoclickIcon}
-            onChange={(e) => {
-              let addedLayersInfo = this.state.addedLayersInfo;
-              addedLayersInfo[layerInfo.id].infoclickIcon = e.target.value;
-              this.setState(
-                {
-                  addedLayersInfo: addedLayersInfo,
-                },
-                () => {
-                  this.renderLayerInfoDialog(layerInfo);
-                }
-              );
-            }}
-            type="text"
-          />
+          <div>
+            <input
+              style={{ width: "100%" }}
+              value={layerInfo.infoclickIcon}
+              onChange={(e) => {
+                let addedLayersInfo = this.state.addedLayersInfo;
+                addedLayersInfo[layerInfo.id].infoclickIcon = e.target.value;
+                this.setState(
+                  {
+                    addedLayersInfo: addedLayersInfo,
+                  },
+                  () => {
+                    this.renderLayerInfoDialog(layerInfo);
+                  }
+                );
+              }}
+              type="text"
+            />
+          </div>
         </div>
 
         <div className="separator">Infoclick och sökning</div>
 
-        <div>
-          <label>Visningsfält (i resultatlistan)</label>
-          <input
-            style={{ marginRight: "5px" }}
-            type="text"
-            value={layerInfo.searchDisplayName}
-            onChange={(e) => {
-              let addedLayersInfo = this.state.addedLayersInfo;
-              addedLayersInfo[layerInfo.id].searchDisplayName = e.target.value;
-              this.setState(
-                {
-                  addedLayersInfo: addedLayersInfo,
-                },
-                () => {
-                  this.renderLayerInfoDialog(layerInfo);
-                }
-              );
-            }}
-          />
+        <div class="form-row split50">
+          <div>
+            <label>Visningsfält (i resultatlistan)</label>
+          </div>
+          <div>
+            <input
+              style={{ width: "100%" }}
+              type="text"
+              value={layerInfo.searchDisplayName}
+              onChange={(e) => {
+                let addedLayersInfo = this.state.addedLayersInfo;
+                addedLayersInfo[layerInfo.id].searchDisplayName = e.target.value;
+                this.setState(
+                  {
+                    addedLayersInfo: addedLayersInfo,
+                  },
+                  () => {
+                    this.renderLayerInfoDialog(layerInfo);
+                  }
+                );
+              }}
+            />
+          </div>
         </div>
-        <div>
-          <label>Sekundära visningsfält (i resultatlistan)</label>
-          <input
-            style={{ marginRight: "5px" }}
-            type="text"
-            value={layerInfo.secondaryLabelFields}
-            onChange={(e) => {
-              let addedLayersInfo = this.state.addedLayersInfo;
-              addedLayersInfo[layerInfo.id].secondaryLabelFields =
-                e.target.value;
-              this.setState(
-                {
-                  addedLayersInfo: addedLayersInfo,
-                },
-                () => {
-                  this.renderLayerInfoDialog(layerInfo);
-                }
-              );
-            }}
-          />
+        <div class="form-row split50">
+          <div>
+            <label>Sekundära visningsfält (i resultatlistan)</label>
+          </div>
+          <div>
+            <input
+              style={{ width: "100%" }}
+              type="text"
+              value={layerInfo.secondaryLabelFields}
+              onChange={(e) => {
+                let addedLayersInfo = this.state.addedLayersInfo;
+                addedLayersInfo[layerInfo.id].secondaryLabelFields =
+                  e.target.value;
+                this.setState(
+                  {
+                    addedLayersInfo: addedLayersInfo,
+                  },
+                  () => {
+                    this.renderLayerInfoDialog(layerInfo);
+                  }
+                );
+              }}
+            />
+          </div>
         </div>
-        <div>
-          <label>Kort visningsfält (etikett i kartan)</label>
-          <input
-            style={{ marginRight: "5px" }}
-            type="text"
-            value={layerInfo.searchShortDisplayName}
-            onChange={(e) => {
-              let addedLayersInfo = this.state.addedLayersInfo;
-              addedLayersInfo[layerInfo.id].searchShortDisplayName =
-                e.target.value;
-              this.setState(
-                {
-                  addedLayersInfo: addedLayersInfo,
-                },
-                () => {
-                  this.renderLayerInfoDialog(layerInfo);
-                }
-              );
-            }}
-          />
+        <div class="form-row split50">
+          <div>
+            <label>Kort visningsfält (etikett i kartan)</label>
+          </div>
+          <div>
+            <input
+              style={{ width: "100%" }}
+              type="text"
+              value={layerInfo.searchShortDisplayName}
+              onChange={(e) => {
+                let addedLayersInfo = this.state.addedLayersInfo;
+                addedLayersInfo[layerInfo.id].searchShortDisplayName =
+                  e.target.value;
+                this.setState(
+                  {
+                    addedLayersInfo: addedLayersInfo,
+                  },
+                  () => {
+                    this.renderLayerInfoDialog(layerInfo);
+                  }
+                );
+              }}
+            />
+          </div>
         </div>
 
         <div className="separator">Sökning</div>
 
-        <div>
-          <label>Url</label>
-          <input
-            style={{ marginRight: "5px" }}
-            type="text"
-            value={layerInfo.searchUrl}
-            onChange={(e) => {
-              let addedLayersInfo = this.state.addedLayersInfo;
-              addedLayersInfo[layerInfo.id].searchUrl = e.target.value;
-              this.setState(
-                {
-                  addedLayersInfo: addedLayersInfo,
-                },
-                () => {
-                  this.renderLayerInfoDialog(layerInfo);
-                }
-              );
-            }}
-          />
+        <div class="form-row split3070">
+          <div>
+            <label>Url</label>
+          </div>
+          <div>
+            <input
+              style={{ width: "100%" }}
+              type="text"
+              value={layerInfo.searchUrl}
+              onChange={(e) => {
+                let addedLayersInfo = this.state.addedLayersInfo;
+                addedLayersInfo[layerInfo.id].searchUrl = e.target.value;
+                this.setState(
+                  {
+                    addedLayersInfo: addedLayersInfo,
+                  },
+                  () => {
+                    this.renderLayerInfoDialog(layerInfo);
+                  }
+                );
+              }}
+            />
+          </div>
         </div>
-        <div>
-          <label>Sökfält</label>
-          <input
-            style={{ marginRight: "5px" }}
-            type="text"
-            value={layerInfo.searchPropertyName}
-            onChange={(e) => {
-              let addedLayersInfo = this.state.addedLayersInfo;
-              addedLayersInfo[layerInfo.id].searchPropertyName = e.target.value;
-              this.setState(
-                {
-                  addedLayersInfo: addedLayersInfo,
-                },
-                () => {
-                  this.renderLayerInfoDialog(layerInfo);
-                }
-              );
-            }}
-          />
+        <div class="form-row split3070">
+          <div>
+            <label>Sökfält</label>
+          </div>
+          <div>
+            <input
+              style={{ width: "100%" }}
+              type="text"
+              value={layerInfo.searchPropertyName}
+              onChange={(e) => {
+                let addedLayersInfo = this.state.addedLayersInfo;
+                addedLayersInfo[layerInfo.id].searchPropertyName = e.target.value;
+                this.setState(
+                  {
+                    addedLayersInfo: addedLayersInfo,
+                  },
+                  () => {
+                    this.renderLayerInfoDialog(layerInfo);
+                  }
+                );
+              }}
+            />
+          </div>
         </div>
 
-        <div>
-          <label>Utdataformat</label>
-          <input
-            style={{ marginRight: "5px" }}
-            type="text"
-            value={layerInfo.searchOutputFormat}
-            onChange={(e) => {
-              let addedLayersInfo = this.state.addedLayersInfo;
-              addedLayersInfo[layerInfo.id].searchOutputFormat = e.target.value;
-              this.setState(
-                {
-                  addedLayersInfo: addedLayersInfo,
-                },
-                () => {
-                  this.renderLayerInfoDialog(layerInfo);
-                }
-              );
-            }}
-          />
+        <div class="form-row split3070">
+          <div>
+            <label>Utdataformat</label>
+          </div>
+          <div>
+            <input
+              style={{ width: "100%" }}
+              type="text"
+              value={layerInfo.searchOutputFormat}
+              onChange={(e) => {
+                let addedLayersInfo = this.state.addedLayersInfo;
+                addedLayersInfo[layerInfo.id].searchOutputFormat = e.target.value;
+                this.setState(
+                  {
+                    addedLayersInfo: addedLayersInfo,
+                  },
+                  () => {
+                    this.renderLayerInfoDialog(layerInfo);
+                  }
+                );
+              }}
+            />
+          </div>
         </div>
-        <div>
-          <label>Geometrifält</label>
-          <input
-            style={{ marginRight: "5px" }}
-            type="text"
-            value={layerInfo.searchGeometryField}
-            onChange={(e) => {
-              let addedLayersInfo = this.state.addedLayersInfo;
-              addedLayersInfo[layerInfo.id].searchGeometryField =
-                e.target.value;
-              this.setState(
-                {
-                  addedLayersInfo: addedLayersInfo,
-                },
-                () => {
-                  this.renderLayerInfoDialog(layerInfo);
-                }
-              );
-            }}
-          />
+        <div class="form-row split3070">
+          <div>
+            <label>Geometrifält</label>
+          </div>
+          <div>
+            <input
+              style={{ width: "100%" }}
+              type="text"
+              value={layerInfo.searchGeometryField}
+              onChange={(e) => {
+                let addedLayersInfo = this.state.addedLayersInfo;
+                addedLayersInfo[layerInfo.id].searchGeometryField =
+                  e.target.value;
+                this.setState(
+                  {
+                    addedLayersInfo: addedLayersInfo,
+                  },
+                  () => {
+                    this.renderLayerInfoDialog(layerInfo);
+                  }
+                );
+              }}
+            />
+          </div>
         </div>
       </div>
     );
