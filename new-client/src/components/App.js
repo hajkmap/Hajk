@@ -571,13 +571,27 @@ class App extends React.PureComponent {
     //     });
     //   });
 
-    // TODO: More plugins could use this - currently only Snap helper registers though
+    // Add some listeners to each layer's change event
     this.appModel
       .getMap()
       .getLayers()
       .getArray()
       .forEach((layer) => {
         layer.on("change:visible", (e) => {
+          // If the Analytics object exists, let's track layer visibility
+          if (this.analytics && e.target.get("visible") === true) {
+            const opts = {
+              eventName: "layerShown",
+              activeMap: this.props.config.activeMap,
+              layerId: e.target.get("name"),
+              layerName: e.target.get("caption"),
+            };
+            // Send a custom event to the Analytics model
+            this.globalObserver.publish("analytics.trackEvent", opts);
+          }
+
+          // Not related to Analytics: send an event on the global observer
+          // to anyone wanting to act on layer visibility change.
           this.globalObserver.publish("core.layerVisibilityChanged", e);
         });
       });
