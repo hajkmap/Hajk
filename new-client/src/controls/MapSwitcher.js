@@ -29,6 +29,11 @@ class MapSwitcher extends React.PureComponent {
 
   handleLoading(maps) {
     let { activeMap } = this.appModel.config;
+
+    maps.sort((a, b) =>
+      a.mapConfigurationTitle.localeCompare(b.mapConfigurationTitle)
+    );
+
     // Save fetched map configs to global variable
     this.maps = maps;
 
