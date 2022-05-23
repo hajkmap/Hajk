@@ -457,6 +457,21 @@ class App extends React.PureComponent {
           // Ensure to update the map canvas size. Otherwise we can run into #1058.
           this.appModel.getMap().updateSize();
 
+          // Temporarily show a nice overview of added layers
+          this.globalObserver.subscribe("core.appLoaded", () => {
+            const la = this.appModel.map.getAllLayers().map((l) => {
+              return {
+                layerInfo: l.layerInfo,
+                layerType: l.layerType,
+                layersInfo: l.layersInfo,
+                caption: l.get("caption"),
+                name: l.get("name"),
+                type: l.get("type"),
+              };
+            });
+            console.table(la);
+          });
+
           // Tell everyone that we're done loading (in case someone listens)
           this.globalObserver.publish("core.appLoaded");
         }
