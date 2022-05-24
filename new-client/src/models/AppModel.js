@@ -590,6 +590,9 @@ class AppModel {
     ];
     this.highlightSource = new VectorSource();
     this.highlightLayer = new VectorLayer({
+      caption: "Infoclick layer",
+      name: "pluginInfoclick",
+      layerType: "system",
       source: this.highlightSource,
       style: new Style({
         stroke: new Stroke({
