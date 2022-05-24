@@ -244,7 +244,7 @@ export default class MapClickModel {
       this.map.forEachFeatureAtPixel(
         e.pixel,
         (feature, layer) => {
-          if (layer?.get("type") === "searchResultLayer") {
+          if (layer?.get("name") === "pluginSearchResults") {
             // Super-special case here: we don't follow the new
             // interface for a return object (see the "r" constant above),
             // because we want to conform to the old, working search results
