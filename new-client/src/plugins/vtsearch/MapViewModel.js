@@ -317,7 +317,6 @@ export default class MapViewModel {
       source: new VectorSource({}),
     });
     console.log(this.map, "map");
-    searchResultLayer.set("type", "system");
     searchResultLayer.set("name", "vt-search-result-layer");
     searchResultLayer.set("searchResultId", searchResultId);
     searchResultLayer.set("queryable", false);
@@ -362,7 +361,7 @@ export default class MapViewModel {
       }),
       source: new VectorSource({}),
     });
-    this.highlightLayer.set("type", "vt-highlight-layer");
+    this.highlightLayer.set("name", "vt-highlight-layer");
     this.highlightLayer.setZIndex(50);
     this.map.addLayer(this.highlightLayer);
   };
