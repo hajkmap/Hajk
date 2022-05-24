@@ -459,7 +459,9 @@ class EditModel {
     });
 
     this.layer = new Vector({
+      layerType: "system",
       name: "pluginEdit",
+      caption: "Edit layer",
       source: this.vectorSource,
       style: this.getVectorStyle(),
     });
