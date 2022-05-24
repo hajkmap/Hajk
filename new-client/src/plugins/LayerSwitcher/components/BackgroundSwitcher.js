@@ -40,6 +40,9 @@ class BackgroundSwitcher extends React.PureComponent {
         visible: false,
         source: this.osmSource,
         zIndex: -1,
+        layerType: "base",
+        name: "osm-layer",
+        caption: "OpenStreetMap",
         layerInfo: {
           caption: "OpenStreetMap",
           layerType: "base",

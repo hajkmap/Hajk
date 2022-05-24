@@ -438,19 +438,16 @@ class AppModel {
     this.clearing = true;
     this.highlight(false);
     this.map
-      .getLayers()
-      .getArray()
-      .forEach((layer) => {
-        if (
-          layer.getProperties &&
-          layer.getProperties().layerInfo &&
-          layer.getProperties().layerInfo.layerType === "layer"
-        ) {
-          if (layer.layerType === "group") {
-            this.globalObserver.publish("layerswitcher.hideLayer", layer);
-          } else {
-            layer.setVisible(false);
-          }
+      .getAllLayers()
+      .filter(
+        (l) =>
+          l.getVisible() === true &&
+          ["layer", "group"].includes(l.get("layerType"))
+      )
+      .forEach((l) => {
+        l.setVisible(false);
+        if (l.get("layerType") === "group") {
+          this.globalObserver.publish("layerswitcher.hideLayer", l);
         }
       });
     setTimeout(() => {
@@ -503,11 +500,13 @@ class AppModel {
   }
 
   lookup(layers, type) {
-    var matchedLayers = [];
+    const matchedLayers = [];
     layers.forEach((layer) => {
       const layerConfig = this.config.layersConfig.find(
         (lookupLayer) => lookupLayer.id === layer.id
       );
+      // Note that "layer" below IS NOT an OL Layer, only a structure from our config.
+      // Hence, no layer.set("layerType"). Instead we do this:
       layer.layerType = type;
       // Use the general value for infobox if not present in map config.
       if (layerConfig !== undefined && layerConfig.type === "vector") {

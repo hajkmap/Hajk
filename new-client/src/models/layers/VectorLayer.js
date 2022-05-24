@@ -58,6 +58,7 @@ class WFSVectorLayer {
 
     this.layer = new VectorLayer({
       information: config.information,
+      layerType: config.layerType,
       caption: config.caption,
       name: config.name,
       visible: config.visible,
