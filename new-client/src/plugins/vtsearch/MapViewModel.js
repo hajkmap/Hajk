@@ -276,6 +276,7 @@ export default class MapViewModel {
 
   addDrawSearch = () => {
     this.drawlayer = new VectorLayer({
+      layerType: "system",
       source: new VectorSource({}),
     });
     this.map.addLayer(this.drawlayer);
@@ -303,6 +304,7 @@ export default class MapViewModel {
       width: this.model.mapColors.searchStrokeLineWidth,
     });
     var searchResultLayer = new VectorLayer({
+      layerType: "system",
       style: new Style({
         image: new Circle({
           fill: fill,
@@ -348,6 +350,7 @@ export default class MapViewModel {
     });
 
     this.highlightLayer = new VectorLayer({
+      layerType: "system",
       style: new Style({
         image: new Circle({
           fill: fill,
