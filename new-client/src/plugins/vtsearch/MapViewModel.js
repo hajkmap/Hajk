@@ -70,7 +70,7 @@ export default class MapViewModel {
 
     this.localObserver.subscribe("close-all-vt-searchLayer", () => {
       this.map.getLayers().forEach((layer) => {
-        if (layer.get("type") === "vt-search-result-layer")
+        if (layer.get("name") === "vt-search-result-layer")
           this.map.removeLayer(layer);
       });
     });
@@ -133,7 +133,7 @@ export default class MapViewModel {
       .getArray()
       .filter((layer) => {
         return (
-          layer.get("type") === "vt-search-result-layer" &&
+          layer.get("name") === "vt-search-result-layer" &&
           layer.get("searchResultId") === searchResultId
         );
       })[0];
@@ -315,7 +315,8 @@ export default class MapViewModel {
       source: new VectorSource({}),
     });
     console.log(this.map, "map");
-    searchResultLayer.set("type", "vt-search-result-layer");
+    searchResultLayer.set("type", "system");
+    searchResultLayer.set("name", "vt-search-result-layer");
     searchResultLayer.set("searchResultId", searchResultId);
     searchResultLayer.set("queryable", false);
     searchResultLayer.set("visible", false);
@@ -432,7 +433,7 @@ export default class MapViewModel {
    */
   hideAllLayers = () => {
     this.map.getLayers().forEach((layer) => {
-      if (layer.get("type") === "vt-search-result-layer") {
+      if (layer.get("name") === "vt-search-result-layer") {
         layer.set("visible", false);
       }
     });
@@ -465,7 +466,7 @@ export default class MapViewModel {
     this.map.forEachFeatureAtPixel(
       evt.pixel,
       (feature, layer) => {
-        if (layer.get("type") === "vt-search-result-layer") {
+        if (layer.get("name") === "vt-search-result-layer") {
           features.push(feature);
         }
       },

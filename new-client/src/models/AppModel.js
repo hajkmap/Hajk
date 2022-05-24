@@ -379,12 +379,12 @@ class AppModel {
         // search-component rather than in the featureInfo-component.
         const searchResultFeatures = mapClickDataResult.features.filter(
           (feature) => {
-            return feature?.layer.get("type") === "searchResultLayer";
+            return feature?.layer.get("name") === "pluginSearchResults";
           }
         );
         const infoclickFeatures = mapClickDataResult.features.filter(
           (feature) => {
-            return feature?.layer.get("type") !== "searchResultLayer";
+            return feature?.layer.get("name") !== "pluginSearchResults";
           }
         );
 
