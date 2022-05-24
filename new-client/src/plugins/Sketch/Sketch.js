@@ -62,7 +62,7 @@ const Sketch = (props) => {
   const [drawModel] = React.useState(
     () =>
       new DrawModel({
-        layerName: "sketchLayer",
+        layerName: "pluginSketch",
         map: props.map,
         observer: localObserver,
         measurementSettings: measurementSettings,
@@ -87,7 +87,7 @@ const Sketch = (props) => {
   const [kmlModel] = React.useState(
     () =>
       new KmlModel({
-        layerName: "sketchLayer",
+        layerName: "pluginSketch",
         map: props.map,
         observer: localObserver,
         drawModel: drawModel,
