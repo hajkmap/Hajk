@@ -28,6 +28,7 @@ class KirLayerController {
 
   initLayers() {
     this.model.layers.buffer = new VectorLayer({
+      layerType: "system",
       caption: "KIRBufferLayer",
       name: "KIRBufferLayer",
       source: new VectorSource(),
@@ -36,6 +37,7 @@ class KirLayerController {
     });
 
     this.model.layers.draw = new VectorLayer({
+      layerType: "system",
       caption: "KIRDrawLayer",
       name: "KIRDrawLayer",
       source: new VectorSource(),
@@ -50,6 +52,7 @@ class KirLayerController {
     });
 
     this.model.layers.features = new VectorLayer({
+      layerType: "system",
       caption: "KIRFeatures",
       name: "KIRFeatures",
       source: new VectorSource(),
@@ -58,6 +61,7 @@ class KirLayerController {
     });
 
     this.model.layers.marker = new VectorLayer({
+      layerType: "system",
       caption: "KIRMarker",
       name: "KIRMarker",
       source: new VectorSource(),
