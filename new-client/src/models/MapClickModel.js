@@ -133,10 +133,20 @@ export default class MapClickModel {
             // The only way to get it now is by looking into
             // the feature id, because it includes the layer's
             // name as a part of the id itself.
-            const layerName = this.#getLayerNameFromFeatureAndLayer(
+            let layerName = this.#getLayerNameFromFeatureAndLayer(
               feature,
               response.value.layer
             );
+
+            // Special case that can happen occur for WMS raster responses,
+            // see also #1090.
+            if (
+              layerName === undefined &&
+              feature.getId() === "" &&
+              response.value.layer.subLayers.length === 1
+            ) {
+              layerName = response.value.layer.subLayers[0];
+            }
 
             // Having just the layer's name as an ID is not safe - multiple
             // WFS's may use the same name for two totally different layers.
