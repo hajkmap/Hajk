@@ -890,3 +890,61 @@ figure img {
   padding-top: 0.5rem;
   padding-bottom: 0.5rem;
 }
+
+.modal {
+  height: 100%;
+  background: rgba(0, 0, 0, 0.4);
+}
+
+.modal-dialog{
+  margin-top: 1rem;
+  margin-bottom: 1rem;
+}
+
+.modal-content{
+  max-height: calc(100vh - 2rem);
+  overflow-y: scroll;
+}
+
+.layerDialog label,
+.layerDialog input{
+  margin: 0;
+  margin-bottom: 0;
+  margin-top: 0;
+}
+
+.layerDialog textarea.infoClick{
+  font-family: monospace;
+  font-size: 0.8rem;
+  height: 180px;
+}
+
+.layerDialog .form-row{
+  margin-bottom: 0.8rem;
+}
+
+
+.layerDialog div[class*="split"]{
+  display: flex;
+  align-items: center;
+}
+
+.layerDialog div[class*="split"] > div:first-child{
+  padding-right: 1rem;
+}
+
+.layerDialog .split50 > div{
+  flex: 0 0 50%;
+}
+
+.layerDialog .split0 > div{
+  flex: 0 0 auto;
+}
+
+.layerDialog .split3070 > div:first-child{
+  flex: 0 0 30%;
+}
+
+.layerDialog .split3070 > div:last-child{
+  flex: 0 0 70%;
+}

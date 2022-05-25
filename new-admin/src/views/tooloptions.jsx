@@ -25,6 +25,7 @@ import Dummy from "./tools/dummy.jsx";
 import MenuEditor from "./tools/MenuEditor/menuEditor.jsx";
 import TimeSlider from "./tools/timeslider.jsx";
 import GeosuiteExport from "./tools/geosuiteExport.jsx";
+import ExternalLinks from "./tools/externalLink.jsx";
 
 var defaultState = {
   activeTool: "",
@@ -105,6 +106,8 @@ class ToolOptions extends Component {
         return <StreetView parent={this} model={this.props.model} />;
       case "preset":
         return <Preset parent={this} model={this.props.model} />;
+      case "externalLinks":
+        return <ExternalLinks parent={this} model={this.props.model} />;
       case "measure":
         return <Measure parent={this} model={this.props.model} />;
       case "routing":
@@ -176,6 +179,7 @@ class ToolOptions extends Component {
       search: "Sök",
       streetview: "Google Street View",
       preset: "Snabbval",
+      externalLinks: "Externa länkar",
       measure: "Mät",
       location: "Visa min position",
       routing: "Navigation",
