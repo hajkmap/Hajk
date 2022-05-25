@@ -145,7 +145,13 @@ export default class MapClickModel {
               feature.getId() === "" &&
               response.value.layer.subLayers.length === 1
             ) {
+              // Let's assume that the layer's name is the name of the first layer
               layerName = response.value.layer.subLayers[0];
+
+              // Make sure to set a feature ID - without it we won't be able to
+              // set/unset selected feature later on (an absolut requirement to
+              // properly render components that follow such as Pagination, Markdown).
+              feature.setId("fakeFeatureIdIssue1090");
             }
 
             // Having just the layer's name as an ID is not safe - multiple
