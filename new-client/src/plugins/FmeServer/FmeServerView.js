@@ -596,7 +596,9 @@ const FmeServerView = (props) => {
     // Renders the selected value under the steps title
     // Is currently only used for group and product.
     return (
-      <div style={{ position: "absolute", fontWeight: "normal" }}>{value}</div>
+      <div style={{ position: "relative", fontWeight: "normal", height: "0" }}>
+        {value}
+      </div>
     );
   }
 
