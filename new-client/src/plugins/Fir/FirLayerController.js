@@ -1,29 +1,29 @@
 import { Vector as VectorLayer } from "ol/layer";
 import { Vector as VectorSource } from "ol/source";
 import { IconMarker } from "./FirIcons";
-import { Circle, Style, Icon } from "ol/style";
+import { Style, Icon } from "ol/style";
 import Feature from "ol/Feature.js";
-import LinearRing from "ol/geom/LinearRing.js";
-import {
-  Point,
-  LineString,
-  Polygon,
-  MultiPoint,
-  MultiLineString,
-  MultiPolygon,
-} from "ol/geom.js";
-import styles from "./FirStyles";
+import HajkTransformer from "utils/HajkTransformer";
+import { Point } from "ol/geom.js";
+import FirStyles from "./FirStyles";
 import { hfetch } from "utils/FetchWrapper";
 import { GeoJSON } from "ol/format";
-import * as jsts from "jsts";
 
 class FirLayerController {
+  #HT;
+
   constructor(model, observer) {
     this.model = model;
     this.observer = observer;
     this.bufferValue = 0;
     this.removeIsActive = false;
     this.ctrlKeyIsDown = false;
+
+    this.#HT = new HajkTransformer({
+      projection: this.model.app.map.getView().getProjection().getCode(),
+    });
+
+    this.styles = new FirStyles(this.model);
     this.initLayers();
     this.initListeners();
   }
@@ -199,7 +199,7 @@ class FirLayerController {
     }
 
     arr.forEach((feature) => {
-      feature.setStyle(styles.getResultStyle());
+      feature.setStyle(this.styles.getResultStyle());
     });
 
     this.model.layers.feature.getSource().addFeatures(arr);
@@ -229,7 +229,7 @@ class FirLayerController {
 
     featureArr.forEach((feature) => {
       let c = feature.clone();
-      c.setStyle(styles.getLabelStyle(feature));
+      c.setStyle(this.styles.getLabelStyle(feature));
       c.set("owner_ol_uid", feature.ol_uid);
       arr.push(c);
     });
@@ -265,7 +265,7 @@ class FirLayerController {
       this.observer.publish("fir.search.feature.deselected", feature);
     } else {
       let clone = feature.clone();
-      clone.setStyle(styles.getHighlightStyle());
+      clone.setStyle(this.styles.getHighlightStyle());
       clone.set("owner_ol_uid", feature.ol_uid);
       this.model.layers.highlight.getSource().addFeature(clone);
       this.observer.publish("fir.search.feature.selected", feature);
@@ -300,6 +300,11 @@ class FirLayerController {
       .then((data) => {
         try {
           let features = new GeoJSON().readFeatures(data);
+          features = features.filter((feature) => {
+            return feature.get(this.model.config.wmsRealEstateLayer.idField)
+              ? true
+              : false;
+          });
           this.addFeatures(features, { zoomToLayer: false });
           this.observer.publish("fir.search.add", features);
         } catch (err) {
@@ -392,17 +397,6 @@ class FirLayerController {
   };
 
   bufferFeatures = (options) => {
-    const parser = new jsts.io.OL3Parser();
-    parser.inject(
-      Point,
-      LineString,
-      LinearRing,
-      Polygon,
-      MultiPoint,
-      MultiLineString,
-      MultiPolygon
-    );
-
     if (this.bufferValue === 0) {
       if (options?.keepNeighborBuffer !== true) {
         this.getLayer("buffer").getSource().clear();
@@ -419,16 +413,8 @@ class FirLayerController {
     let _bufferFeatures = [];
 
     drawFeatures.forEach((feature) => {
-      let olGeom = feature.getGeometry();
-      if (olGeom instanceof Circle) {
-        olGeom = Polygon.fromCircle(olGeom, 0b10000000);
-      }
-      const jstsGeom = parser.read(olGeom);
-      const bufferedGeom = jstsGeom.buffer(this.bufferValue);
+      let bufferFeature = this.#HT.getBuffered(feature, this.bufferValue);
 
-      let bufferFeature = new Feature({
-        geometry: parser.write(bufferedGeom),
-      });
       bufferFeature.set("owner_ol_uid", feature.ol_uid);
       bufferFeature.set("fir_type", "buffer");
 

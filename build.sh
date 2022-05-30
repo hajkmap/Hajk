@@ -66,7 +66,7 @@ cd $GIT_DIR/new-backend
 # Before we can compile, we need to install NPM deps. 
 # Make sure to get the latest by first removing the dir entirely. 
 rm -rf node_modules/
-npm install --legacy-peer-deps
+npm ci
 
 # Build. Will create the dist directory.
 echo "Building backend..."
@@ -80,7 +80,7 @@ cp package*.json $DEST_DIR
 # Install deps in the final destination
 cd $DEST_DIR
 rm -rf node_modules
-npm install
+npm ci
 
 # Next step is to build client and admin and put them to $DEST_DIR/static
 # so that backend can serve them. Make sure that you've enabled that

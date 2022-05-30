@@ -1,81 +1,65 @@
 import React from "react";
 import propTypes from "prop-types";
 import LayerItem from "./LayerItem.js";
-import { withStyles } from "@material-ui/core/styles";
-import {
-  Accordion,
-  AccordionDetails,
-  AccordionSummary,
-  Typography,
-} from "@material-ui/core";
-import CheckBoxIcon from "@material-ui/icons/CheckBox";
-import CheckBoxOutlineBlankIcon from "@material-ui/icons/CheckBoxOutlineBlank";
-import ArrowRightIcon from "@material-ui/icons/ArrowRight";
-import ArrowDropDownIcon from "@material-ui/icons/ArrowDropDown";
+import { styled } from "@mui/material/styles";
+import { Accordion, AccordionDetails, AccordionSummary } from "@mui/material";
+import { Box, Typography } from "@mui/material";
+import CheckBoxIcon from "@mui/icons-material/CheckBox";
+import CheckBoxOutlineBlankIcon from "@mui/icons-material/CheckBoxOutlineBlank";
+import KeyboardArrowRightIcon from "@mui/icons-material/KeyboardArrowRight";
+import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 
-const styles = (theme) => ({
-  root: {
-    width: "100%",
-    display: "block",
-    padding: "0",
-  },
-  heading: {
-    fontSize: theme.typography.pxToRem(15),
-    flexBasis: "100%",
-  },
-  secondaryHeading: {
-    fontSize: theme.typography.pxToRem(15),
-    color: theme.palette.text.secondary,
-  },
-  disableTransition: {
-    borderRadius: "0 !important",
-    boxShadow: "none",
-  },
-  panel: {
-    marginLeft: "21px",
-  },
-  /*groupCheckbox: {
-    marginRight: "5px"
-  },*/
-  caption: {
-    display: "flex",
-    flexBasis: "100%",
-    borderBottom: "1px solid #ccc",
-  },
-  panelSummary: {
-    padding: "0px",
-    overflow: "hidden",
-  },
-  checkBoxIcon: {
-    cursor: "pointer",
-    float: "left",
-    marginRight: "5px",
-    padding: "0",
-  },
-  arrowIcon: {
-    float: "left",
-  },
-  Accordion: {},
-});
+const StyledAccordion = styled(Accordion)(() => ({
+  borderRadius: 0,
+  boxShadow: "none",
+  backgroundImage: "none",
+}));
 
-const StyledAccordionSummary = withStyles({
-  root: {
+const StyledAccordionSummary = styled(AccordionSummary)(() => ({
+  minHeight: 35,
+  padding: "0px",
+  overflow: "hidden",
+  "&.MuiAccordionSummary-root.Mui-expanded": {
     minHeight: 35,
-    "&$expanded": {
-      minHeight: 35,
+  },
+  "& .MuiAccordionSummary-content": {
+    transition: "inherit",
+    marginTop: 0,
+    marginBottom: 0,
+    "&.Mui-expanded": {
+      marginTop: 0,
+      marginBottom: 0,
     },
   },
-  content: {
-    transition: "inherit !important",
-    marginTop: "0",
-    marginBottom: "0",
-    "&$expanded": {
-      marginTop: "0",
-      marginBottom: "0",
-    },
-  },
-  expanded: {},
-})(AccordionSummary);
+}));
+
+const StyledAccordionDetails = styled(AccordionDetails)(() => ({
+  width: "100%",
+  display: "block",
+  padding: "0",
+}));
+
+const SummaryContainer = styled("div")(({ theme }) => ({
+  display: "flex",
+  flexBasis: "100%",
+  borderBottom: `${theme.spacing(0.2)} solid ${theme.palette.divider}`,
+}));
+
+const HeadingTypography = styled(Typography)(({ theme }) => ({
+  fontSize: theme.typography.pxToRem(15),
+  flexBasis: "100%",
+}));
+
+const ExpandButtonWrapper = styled("div")(() => ({
+  float: "left",
+}));
+
+const checkBoxIconStyle = {
+  cursor: "pointer",
+  float: "left",
+  marginRight: "5px",
+  padding: "0",
+};
 
 class LayerGroup extends React.PureComponent {
   state = {
@@ -97,7 +81,6 @@ class LayerGroup extends React.PureComponent {
     app: propTypes.object.isRequired,
     chapters: propTypes.array.isRequired,
     child: propTypes.bool.isRequired,
-    classes: propTypes.object.isRequired,
     expanded: propTypes.bool.isRequired,
     group: propTypes.object.isRequired,
     handleChange: propTypes.func,
@@ -173,7 +156,6 @@ class LayerGroup extends React.PureComponent {
 
   renderLayerGroups() {
     let { expanded } = this.state;
-    const { classes } = this.props;
     if (this.state.groups.length === 1 && this.state.groups[0].expanded) {
       expanded = this.state.groups[0].id;
     }
@@ -186,7 +168,6 @@ class LayerGroup extends React.PureComponent {
           model={this.props.model}
           handleChange={this.handleChange}
           app={this.props.app}
-          classes={classes}
           child={true}
           chapters={this.props.chapters}
           options={this.props.options}
@@ -314,34 +295,26 @@ class LayerGroup extends React.PureComponent {
   }
 
   getCheckbox = () => {
-    const { classes } = this.props;
     if (this.isToggled()) {
-      return <CheckBoxIcon className={classes.checkBoxIcon} />;
+      return <CheckBoxIcon sx={checkBoxIconStyle} />;
     }
     if (this.isSemiToggled()) {
-      return (
-        <CheckBoxIcon
-          style={{ color: "gray" }}
-          className={classes.checkBoxIcon}
-        />
-      );
+      return <CheckBoxIcon sx={{ ...checkBoxIconStyle, color: "gray" }} />;
     }
-    return <CheckBoxOutlineBlankIcon className={classes.checkBoxIcon} />;
+    return <CheckBoxOutlineBlankIcon sx={checkBoxIconStyle} />;
   };
   /**
-   * If Group has "togglable" property enabled, render the toggle all checkbox.
+   * If Group has "toggleable" property enabled, render the toggle all checkbox.
    *
    * @returns React.Component
    * @memberof LayerGroup
    */
   renderToggleAll() {
-    const { classes } = this.props;
-    // The property below should be renamed to "togglable" or something…
+    // TODO: Rename props.group.toggled to "toggleable" or something…
 
     if (this.props.group.toggled) {
       return (
-        <div
-          className={classes.caption}
+        <SummaryContainer
           onClick={(e) => {
             e.preventDefault();
             e.stopPropagation();
@@ -355,29 +328,25 @@ class LayerGroup extends React.PureComponent {
           }}
         >
           <div>{this.getCheckbox()}</div>
-          <Typography className={classes.heading}>{this.state.name}</Typography>
-        </div>
+          <HeadingTypography>{this.state.name}</HeadingTypography>
+        </SummaryContainer>
       );
     } else {
       return (
-        <div className={classes.caption}>
-          <Typography className={classes.heading}>{this.state.name}</Typography>
-        </div>
+        <SummaryContainer>
+          <HeadingTypography>{this.state.name}</HeadingTypography>
+        </SummaryContainer>
       );
     }
   }
 
   render() {
-    const { classes, child } = this.props;
     const { expanded } = this.state;
-    var groupClass = "";
-    if (child) {
-      groupClass = classes.panel;
-    }
     return (
-      <div ref="panelElement" className={groupClass}>
-        <Accordion
-          className={classes.disableTransition}
+      // If the layerItem is a child, it should be rendered a tad to the
+      // right. Apparently 21px.
+      <Box sx={{ marginLeft: this.props.child ? "21px" : "0px" }}>
+        <StyledAccordion
           expanded={this.state.expanded}
           TransitionProps={{
             timeout: 0,
@@ -388,21 +357,20 @@ class LayerGroup extends React.PureComponent {
             });
           }}
         >
-          <StyledAccordionSummary className={classes.panelSummary}>
-            <div className={classes.arrowIcon}>
+          <StyledAccordionSummary>
+            <ExpandButtonWrapper>
               {expanded ? (
-                <ArrowDropDownIcon onClick={() => this.toggleExpanded()} />
+                <KeyboardArrowDownIcon onClick={() => this.toggleExpanded()} />
               ) : (
-                <ArrowRightIcon onClick={() => this.toggleExpanded()} />
+                <KeyboardArrowRightIcon onClick={() => this.toggleExpanded()} />
               )}
-            </div>
+            </ExpandButtonWrapper>
             {this.renderToggleAll()}
           </StyledAccordionSummary>
-          <AccordionDetails classes={{ root: classes.root }}>
-            <div className={classes.Accordion}>
+          <StyledAccordionDetails>
+            <div>
               {this.state.layers.map((layer, i) => {
                 const mapLayer = this.model.layerMap[layer.id];
-
                 if (mapLayer) {
                   return (
                     <LayerItem
@@ -426,11 +394,11 @@ class LayerGroup extends React.PureComponent {
               })}
               {this.renderLayerGroups()}
             </div>
-          </AccordionDetails>
-        </Accordion>
-      </div>
+          </StyledAccordionDetails>
+        </StyledAccordion>
+      </Box>
     );
   }
 }
 
-export default withStyles(styles)(LayerGroup);
+export default LayerGroup;

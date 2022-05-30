@@ -1,37 +1,36 @@
 import React, { useEffect, useState } from "react";
 
-import { makeStyles } from "@material-ui/core/styles";
+import { styled } from "@mui/material/styles";
 
-import ToggleButton from "@material-ui/lab/ToggleButton";
-import ToggleButtonGroup from "@material-ui/lab/ToggleButtonGroup";
+import ToggleButton from "@mui/material/ToggleButton";
+import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";
 
-import CloseIcon from "@material-ui/icons/Close";
-import { Paper, Hidden } from "@material-ui/core";
+import CloseIcon from "@mui/icons-material/Close";
+import { Paper, Hidden } from "@mui/material";
+import { functionalOk as functionalCookieOk } from "models/Cookie";
 
-const useStyles = makeStyles((theme) => ({
-  root: {
-    marginRight: theme.spacing(1),
-    [theme.breakpoints.down("xs")]: {
-      boxShadow: "none",
-    },
+const StyledPaper = styled(Paper)(({ theme }) => ({
+  marginRight: theme.spacing(1),
+  backgroundImage: "unset",
+  [theme.breakpoints.down("sm")]: {
+    boxShadow: "none",
   },
-  button: {
-    border: 0,
-    color:
-      theme.palette.type === "dark"
-        ? theme.palette.common.white
-        : theme.palette.action.active,
+}));
+
+const StyledToggleButtonGroup = styled(ToggleButtonGroup)(({ theme }) => ({
+  [theme.breakpoints.down("sm")]: {
+    border: "none",
   },
-  icon: {
-    [theme.breakpoints.up("md")]: {
-      marginRight: theme.spacing(1),
-    },
+}));
+
+const StyledToggleButton = styled(ToggleButton)(({ theme }) => ({
+  [theme.breakpoints.down("sm")]: {
+    border: "none",
   },
-  grouped: {
-    [theme.breakpoints.down("xs")]: {
-      border: "none",
-    },
-  },
+  color:
+    theme.palette.mode === "dark"
+      ? theme.palette.common.white
+      : theme.palette.action.active,
 }));
 
 function DrawerToggleButtons({
@@ -39,8 +38,6 @@ function DrawerToggleButtons({
   globalObserver,
   initialActiveButton,
 }) {
-  const classes = useStyles();
-
   //Set initial active button state based on the initially active drawer, received from App.js
   //This will either be a drawer button name such as "plugins" or null, depending on whether there
   //is an active drawer when the map starts (set either from the cookie or config).
@@ -67,7 +64,9 @@ function DrawerToggleButtons({
     if (v === null) {
       window.localStorage.removeItem("activeDrawerContent");
     } else {
-      window.localStorage.setItem("activeDrawerContent", v);
+      if (functionalCookieOk()) {
+        window.localStorage.setItem("activeDrawerContent", v);
+      }
     }
 
     // Let the outside world know that a button has been pressed.
@@ -75,42 +74,56 @@ function DrawerToggleButtons({
     globalObserver.publish("core.drawerContentChanged", v);
   };
 
-  const renderToggleButton = ({ ButtonIcon, value, caption }) => {
+  const renderToggleButton = ({
+    ButtonIcon,
+    value,
+    caption,
+    hideOnMdScreensAndAbove = false,
+  }) => {
     // Currently active toggle button should have a "Close" icon
     const icon =
       value === activeButton ? (
-        <CloseIcon className={classes.icon} />
+        <CloseIcon sx={{ marginRight: { md: 1 } }} />
       ) : (
-        <ButtonIcon className={classes.icon} />
+        <ButtonIcon sx={{ marginRight: { md: 1 } }} />
       );
 
-    // Caption should be hidden on small screens
     return (
-      <ToggleButton
+      <StyledToggleButton
         id={value}
         key={value}
         value={value}
-        className={classes.button}
+        sx={{
+          // This sx rule is a special case, used by the
+          // "Plugin Tools" drawer button. There are some
+          // cases where we want to hide it on MD & up screens,
+          // see #1020.
+          ...(hideOnMdScreensAndAbove && {
+            display: {
+              md: "none",
+            },
+          }),
+        }}
       >
         {icon}
-        <Hidden smDown>{caption}</Hidden>
-      </ToggleButton>
+        {/* Caption should be hidden on small screens*/}
+        <Hidden mdDown>{caption}</Hidden>
+      </StyledToggleButton>
     );
   };
 
   return (
     drawerButtons.length > 0 && (
-      <Paper className={classes.root}>
-        <ToggleButtonGroup
+      <StyledPaper>
+        <StyledToggleButtonGroup
           value={activeButton}
           exclusive
           onChange={handleClickOnToggleButton}
           aria-label="Drawer content"
-          classes={{ grouped: classes.grouped }}
         >
           {drawerButtons.map((b) => renderToggleButton(b))}
-        </ToggleButtonGroup>
-      </Paper>
+        </StyledToggleButtonGroup>
+      </StyledPaper>
     )
   );
 }

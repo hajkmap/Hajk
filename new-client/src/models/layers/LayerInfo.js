@@ -2,6 +2,10 @@ export default class LayerInfo {
   constructor(properties) {
     this.attribution = properties.attribution;
     this.caption = properties.caption;
+    this.displayFields = properties.displayFields;
+    this.secondaryLabelFields = properties.secondaryLabelFields;
+    this.shortDisplayFields = properties.shortDisplayFields;
+    this.infoclickIcon = properties.infoclickIcon;
     this.infoOwner = properties.infoOwner;
     this.infoText = properties.infoText;
     this.infoTitle = properties.infoTitle;
@@ -22,5 +26,6 @@ export default class LayerInfo {
     this.searchUrl = properties.searchUrl;
     this.layerType = properties.layerType;
     this.hideExpandArrow = properties.hideExpandArrow;
+    this.showAttributeTableButton = properties.showAttributeTableButton;
   }
 }

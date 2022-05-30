@@ -1,15 +1,10 @@
 import React from "react";
-import { withStyles, withTheme } from "@material-ui/core/styles";
-import ListItem from "@material-ui/core/ListItem";
-import ListItemText from "@material-ui/core/ListItemText";
-import List from "@material-ui/core/List";
-import { Typography } from "@material-ui/core";
-import Grid from "@material-ui/core/Grid";
-
-const styles = (theme) => ({
-  listItem: { overflowWrap: "break-word" },
-  printToc: { pageBreakAfter: "always" },
-});
+import { withTheme } from "@emotion/react";
+import ListItem from "@mui/material/ListItem";
+import ListItemText from "@mui/material/ListItemText";
+import List from "@mui/material/List";
+import { Typography } from "@mui/material";
+import Grid from "@mui/material/Grid";
 
 class TableOfContents extends React.PureComponent {
   state = {
@@ -128,9 +123,9 @@ class TableOfContents extends React.PureComponent {
 
   render() {
     const { titlesAndLevels } = this.state;
-    const { theme, classes } = this.props;
+    const { theme } = this.props;
     return (
-      <Grid container className={classes.printToc}>
+      <Grid container sx={{ pageBreakAfter: "always" }}>
         <Typography variant="h4" gutterBottom={true}>
           Innehållsförteckning
         </Typography>
@@ -166,4 +161,4 @@ class TableOfContents extends React.PureComponent {
   }
 }
 
-export default withStyles(styles)(withTheme(TableOfContents));
+export default withTheme(TableOfContents);

@@ -1,6 +1,6 @@
 import React from "react";
 import DialogWindowPlugin from "plugins/DialogWindowPlugin";
-import DefaultIcon from "@material-ui/icons/InfoTwoTone";
+import DefaultIcon from "@mui/icons-material/InfoTwoTone";
 
 const InfoDialog = (props) => {
   // Make it possible to serve multiple Dialogs in one plugin

@@ -3,14 +3,15 @@ import ReactMarkdown from "react-markdown";
 import rehypeRaw from "rehype-raw";
 import gfm from "remark-gfm";
 
-import Button from "@material-ui/core/Button";
-import Dialog from "@material-ui/core/Dialog";
-import DialogActions from "@material-ui/core/DialogActions";
-import DialogContent from "@material-ui/core/DialogContent";
-import DialogTitle from "@material-ui/core/DialogTitle";
-import TextField from "@material-ui/core/TextField";
-import useMediaQuery from "@material-ui/core/useMediaQuery";
-import { useTheme } from "@material-ui/core/styles";
+import {
+  Button,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  TextField,
+} from "@mui/material";
+import { useMediaQuery, useTheme } from "@mui/material";
 
 import LegacyNonMarkdownRenderer from "./LegacyNonMarkdownRenderer";
 import { customComponentsForReactMarkdown } from "utils/customComponentsForReactMarkdown";
@@ -20,6 +21,7 @@ export default function ResponsiveDialog(props) {
   const fullScreen = useMediaQuery(theme.breakpoints.down("xs"));
 
   const {
+    children,
     onAbort,
     onClose,
     open,
@@ -28,6 +30,7 @@ export default function ResponsiveDialog(props) {
       allowDangerousHtml, // ReactMarkdown disables HTML by default but we let the Admin decide
       buttonText,
       headerText,
+      primaryButtonVariant,
       prompt,
       text,
       useLegacyNonMarkdownRenderer, // Admin can choose to pass-by the ReactMarkdown and just use dangerouslySetInnerHtml
@@ -54,11 +57,16 @@ export default function ResponsiveDialog(props) {
       fullScreen={fullScreen}
       onClose={handleClose}
       open={open}
+      // Must stop event-bubbling. Otherwise the parent element in react can be dragged etc.
+      onMouseDown={(e) => {
+        e.stopPropagation();
+      }}
     >
       {headerText && (
         <DialogTitle id="responsive-dialog-title">{headerText}</DialogTitle>
       )}
       <DialogContent>
+        {children}
         {useLegacyNonMarkdownRenderer === true ? (
           <LegacyNonMarkdownRenderer text={text} />
         ) : (
@@ -94,7 +102,9 @@ export default function ResponsiveDialog(props) {
         )}
       </DialogContent>
       <DialogActions>
-        <Button onClick={handleClose}>{buttonText}</Button>
+        <Button onClick={handleClose} variant={primaryButtonVariant || "text"}>
+          {buttonText}
+        </Button>
         {abortText && <Button onClick={handleAbort}>{abortText}</Button>}
       </DialogActions>
     </Dialog>

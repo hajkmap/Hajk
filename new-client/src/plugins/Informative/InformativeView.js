@@ -1,120 +1,147 @@
 import React from "react";
-import Button from "@material-ui/core/Button";
-import IconButton from "@material-ui/core/IconButton";
-import LinearProgress from "@material-ui/core/LinearProgress";
-import { withStyles } from "@material-ui/core/styles";
-import MapIcon from "@material-ui/icons/Map";
-import ArrowBackIcon from "@material-ui/icons/ArrowBack";
-import ArrowRightIcon from "@material-ui/icons/ArrowRight";
-import ArrowDropDownIcon from "@material-ui/icons/ArrowDropDown";
-import MenuIcon from "@material-ui/icons/Menu";
-import PrintIcon from "@material-ui/icons/Print";
-import ExpandLessIcon from "@material-ui/icons/ExpandLess";
-import TocIcon from "@material-ui/icons/Toc";
-import ArrowDownward from "@material-ui/icons/ArrowDownward";
-import Typography from "@material-ui/core/Typography";
+import Button from "@mui/material/Button";
+import IconButton from "@mui/material/IconButton";
+import LinearProgress from "@mui/material/LinearProgress";
+import MapIcon from "@mui/icons-material/Map";
+import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+import ArrowRightIcon from "@mui/icons-material/ArrowRight";
+import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
+import MenuIcon from "@mui/icons-material/Menu";
+import PrintIcon from "@mui/icons-material/Print";
+import ExpandLessIcon from "@mui/icons-material/ExpandLess";
+import TocIcon from "@mui/icons-material/Toc";
+import ArrowDownward from "@mui/icons-material/ArrowDownward";
+import Typography from "@mui/material/Typography";
 import BreadCrumbs from "./components/BreadCrumbs.js";
 import Alert from "../../components/Alert.js";
 import { withSnackbar } from "notistack";
-
-const styles = (theme) => ({
-  rightIcon: {
-    marginLeft: theme.spacing(1),
-    cursor: "pointer",
-  },
-  icon: {
-    marginRight: theme.spacing(1),
-  },
-  chapter: {},
-  toc: {
-    marginBottom: "10px",
-  },
-  tocHeader: {
-    display: "flex",
-    alignItems: "center",
-  },
-  tocContainer: {
-    borderBottom: "1px solid #ccc",
-    padding: "10px 0",
-  },
-  tocChapter: {
-    display: "flex",
-    cursor: "pointer",
-  },
-  tocChapters: {
-    marginLeft: "10px",
-  },
-  tocChapterExpander: {
-    width: "30px",
-    height: "30px",
-  },
-  tocChapterHeader: {
-    textDecoration: "underline",
-  },
-  content: {
-    userSelect: "text",
-    cursor: "auto",
-    "& img": {
-      maxWidth: "100%",
-    },
-    "& figure": {
-      margin: 0,
-    },
-  },
-  layers: {
-    marginTop: "10px",
-  },
-  markup: {
-    "& h1": {
-      lineHeight: "normal",
-    },
-    "& h2": {
-      lineHeight: "normal",
-    },
-    "& h3": {
-      lineHeight: "normal",
-    },
-    "& h4": {
-      lineHeight: "normal",
-    },
-    "& h5": {
-      lineHeight: "normal",
-    },
-    "& h6": {
-      lineHeight: "normal",
-    },
-    "& blockquote": {
-      borderLeft: "5px solid #eee",
-      color: "#666",
-      fontFamily: "Hoefler Text, Georgia, serif",
-      fontStyle: "italic",
-      margin: "16px 0",
-      padding: "10px 20px",
-    },
-  },
-  loader: {
-    opacity: 1,
-    transition: "opacity 2s ease-in",
-  },
-  button: {
-    margin: theme.spacing(1),
-  },
-  legend: {
-    border: "1px solid #999",
-    padding: theme.spacing(1),
-    flexFlow: "row wrap",
-    display: "flex",
-    borderRadius: "5px",
-  },
-  legendItem: {
-    margin: theme.spacing(1),
-    fontWeight: 600,
-    textAlign: "center",
-  },
-});
+import { styled } from "@mui/material/styles";
 
 const homeHeader = "";
 var homeHtml = "";
+
+const MapIconRightIcon = styled(MapIcon)(({ theme }) => ({
+  marginLeft: theme.spacing(1),
+  cursor: "pointer",
+}));
+
+const IconButtonButton = styled(IconButton)(({ theme }) => ({
+  margin: theme.spacing(1),
+}));
+
+const DivChapter = styled("div")(({ theme }) => ({}));
+
+const DivTocChapter = styled("div")(({ theme }) => ({
+  display: "flex",
+  cursor: "pointer",
+}));
+
+const DivTocChapters = styled("div")(({ theme }) => ({
+  marginLeft: "10px",
+}));
+
+const DivTocChapterExpander = styled("div")(({ theme }) => ({
+  width: "30px",
+  height: "30px",
+}));
+
+const DivTocChapterHeader = styled("div")(({ theme }) => ({
+  textDecoration: "underline",
+}));
+
+const DivMarkup = styled("div")(({ theme }) => ({
+  "& h1": {
+    lineHeight: "normal",
+  },
+
+  "& h2": {
+    lineHeight: "normal",
+  },
+
+  "& h3": {
+    lineHeight: "normal",
+  },
+
+  "& h4": {
+    lineHeight: "normal",
+  },
+
+  "& h5": {
+    lineHeight: "normal",
+  },
+
+  "& h6": {
+    lineHeight: "normal",
+  },
+
+  "& blockquote": {
+    borderLeft: "5px solid #eee",
+    color: "#666",
+    fontFamily: "Hoefler Text, Georgia, serif",
+    fontStyle: "italic",
+    margin: "16px 0",
+    padding: "10px 20px",
+  },
+}));
+
+const MenuIconRightIcon = styled(MenuIcon)(({ theme }) => ({
+  marginLeft: theme.spacing(1),
+  cursor: "pointer",
+}));
+
+const ArrowDownwardIcon = styled(ArrowDownward)(({ theme }) => ({
+  marginRight: theme.spacing(1),
+}));
+
+const DivToc = styled("div")(({ theme }) => ({
+  marginBottom: "10px",
+}));
+
+const DivTocHeader = styled("div")(({ theme }) => ({
+  display: "flex",
+  alignItems: "center",
+}));
+
+const DivTocContainer = styled("div")(({ theme }) => ({
+  borderBottom: "1px solid #ccc",
+  padding: "10px 0",
+}));
+
+const LinearProgressLoader = styled(LinearProgress)(({ theme }) => ({
+  opacity: 1,
+  transition: "opacity 2s ease-in",
+}));
+
+const DivLegend = styled("div")(({ theme }) => ({
+  border: "1px solid #999",
+  padding: theme.spacing(1),
+  flexFlow: "row wrap",
+  display: "flex",
+  borderRadius: "5px",
+}));
+
+const DivLegendItem = styled("div")(({ theme }) => ({
+  margin: theme.spacing(1),
+  fontWeight: 600,
+  textAlign: "center",
+}));
+
+const DivContent = styled("div")(({ theme }) => ({
+  userSelect: "text",
+  cursor: "auto",
+
+  "& img": {
+    maxWidth: "100%",
+  },
+
+  "& figure": {
+    margin: 0,
+  },
+}));
+
+const DivLayers = styled("div")(({ theme }) => ({
+  marginTop: "10px",
+}));
 
 class Informative extends React.PureComponent {
   constructor(props) {
@@ -201,7 +228,6 @@ class Informative extends React.PureComponent {
   };
 
   renderLayerItems(chapter) {
-    const { classes } = this.props;
     if (Array.isArray(chapter.layers) && chapter.layers.length > 0) {
       return (
         <div>
@@ -210,32 +236,30 @@ class Informative extends React.PureComponent {
             onClick={this.displayMap(chapter.layers, chapter.mapSettings)}
           >
             Karta
-            <MapIcon color="primary" className={classes.rightIcon} />
+            <MapIconRightIcon color="primary" />
           </Button>
-          <IconButton
-            className={classes.button}
+          <IconButtonButton
             aria-label="Teckenförklaring"
             onClick={this.toggleLegend}
+            size="large"
           >
             {this.state.displayLegend ? (
               <ExpandLessIcon color="primary" title="Teckenförklaring" />
             ) : (
               <TocIcon color="primary" title="Teckenförklaring" />
             )}
-          </IconButton>
+          </IconButtonButton>
         </div>
       );
     }
   }
 
   renderTocItem(chapters) {
-    var { classes } = this.props;
     return chapters.map((chapter, i) => {
       return (
-        <div key={i} className={classes.chapter}>
-          <div className={classes.tocChapter}>
-            <div
-              className={classes.tocChapterExpander}
+        <DivChapter key={i}>
+          <DivTocChapter>
+            <DivTocChapterExpander
               onClick={() => {
                 chapter.tocExpanded = !chapter.tocExpanded;
                 this.forceUpdate();
@@ -248,9 +272,8 @@ class Informative extends React.PureComponent {
               ) : (
                 <ArrowRightIcon />
               )}
-            </div>
-            <div
-              className={classes.tocChapterHeader}
+            </DivTocChapterExpander>
+            <DivTocChapterHeader
               onClick={() => {
                 var state = {
                   chapters: chapter.chapters,
@@ -262,15 +285,14 @@ class Informative extends React.PureComponent {
               }}
             >
               {chapter.header}
-            </div>
-          </div>
-          <div
-            className={classes.tocChapters}
+            </DivTocChapterHeader>
+          </DivTocChapter>
+          <DivTocChapters
             style={{ display: chapter.tocExpanded ? "block" : "none" }}
           >
             {this.renderTocItem(chapter.chapters)}
-          </div>
-        </div>
+          </DivTocChapters>
+        </DivChapter>
       );
     });
   }
@@ -280,13 +302,7 @@ class Informative extends React.PureComponent {
   }
 
   renderContent() {
-    const { classes } = this.props;
-    return (
-      <div
-        className={classes.markup}
-        dangerouslySetInnerHTML={this.createMarkup()}
-      />
-    );
+    return <DivMarkup dangerouslySetInnerHTML={this.createMarkup()} />;
   }
 
   findParentInToc(lookupChapter, chapters, parent) {
@@ -323,16 +339,15 @@ class Informative extends React.PureComponent {
   };
 
   renderBackButton() {
-    const { classes } = this.props;
     if (!this.state.chapter.header) {
       return null;
     }
     return (
-      <div className={classes.backButtonContainer}>
-        <div onClick={this.onBackButtonClick} className={classes.backButton}>
+      <div>
+        <div onClick={this.onBackButtonClick}>
           <ArrowBackIcon />
           &nbsp;
-          <Typography className={classes.backButtonText}>Tillbaka</Typography>
+          <Typography>Tillbaka</Typography>
         </div>
       </div>
     );
@@ -385,30 +400,29 @@ class Informative extends React.PureComponent {
   };
 
   renderChapters() {
-    const { classes } = this.props;
     const { tocVisible } = this.state;
     return (
-      <div className={classes.toc}>
-        {this.state.loading && <LinearProgress className={classes.loader} />}
+      <DivToc>
+        {this.state.loading && <LinearProgressLoader />}
         <Alert
           open={this.state.alert}
           dialogTitle="Felmeddelande"
           message="Det gick inte att skriva ut för tillfället, försök igen senare"
           parent={this}
         />
-        <div className={classes.tocHeader}>
+        <DivTocHeader>
           <Button variant="contained" onClick={this.toggleToc}>
             Innehållsförteckning
-            <MenuIcon color="primary" className={classes.rightIcon} />
+            <MenuIconRightIcon color="primary" />
           </Button>
-          <IconButton
-            className={classes.button}
+          <IconButtonButton
             aria-label="Skriv ut"
             onClick={this.print}
+            size="large"
           >
             <PrintIcon color="primary" title="Skriv ut" />
-          </IconButton>
-        </div>
+          </IconButtonButton>
+        </DivTocHeader>
         <div>
           {this.state.url && (
             <Button
@@ -422,44 +436,42 @@ class Informative extends React.PureComponent {
                 });
               }}
             >
-              <ArrowDownward className={classes.icon} /> Ladda ner
+              <ArrowDownwardIcon /> Ladda ner
             </Button>
           )}
         </div>
         {tocVisible ? (
-          <div className={classes.tocContainer} component="nav">
+          <DivTocContainer component="nav">
             {this.renderTocItem(this.toc || [])}
-          </div>
+          </DivTocContainer>
         ) : null}
-      </div>
+      </DivToc>
     );
   }
 
   renderLegend() {
-    const { classes } = this.props;
     return (
       this.state.displayLegend && (
         <div>
           <Typography variant="overline">Teckenförklaring</Typography>
-          <div className={classes.legend}>
+          <DivLegend>
             {this.props.parent.informativeModel
               .getLegends(this.state.chapter)
               .map((legend, i) => {
                 return (
-                  <div className={classes.legendItem} key={i}>
+                  <DivLegendItem key={i}>
                     <div>{legend.caption}</div>
                     <img key={i} alt="toc" src={legend.url} />
-                  </div>
+                  </DivLegendItem>
                 );
               })}
-          </div>
+          </DivLegend>
         </div>
       )
     );
   }
 
   render() {
-    const { classes } = this.props;
     return (
       <div>
         <BreadCrumbs
@@ -473,14 +485,12 @@ class Informative extends React.PureComponent {
         {this.state.chapter.header ? (
           <Typography variant="h4">{this.state.chapter.header}</Typography>
         ) : null}
-        <div className={classes.layers}>
-          {this.renderLayerItems(this.state.chapter)}
-        </div>
+        <DivLayers>{this.renderLayerItems(this.state.chapter)}</DivLayers>
         {this.renderLegend()}
-        <div className={classes.content}>{this.renderContent()}</div>
+        <DivContent>{this.renderContent()}</DivContent>
       </div>
     );
   }
 }
 
-export default withStyles(styles)(withSnackbar(Informative));
+export default withSnackbar(Informative);

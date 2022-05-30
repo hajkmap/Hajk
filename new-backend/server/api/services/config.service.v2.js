@@ -3,6 +3,7 @@ import path from "path";
 import ad from "./activedirectory.service";
 import asyncFilter from "../utils/asyncFilter";
 import log4js from "log4js";
+import getAnalyticsOptionsFromDotEnv from "../utils/getAnalyticsOptionsFromDotEnv";
 
 const logger = log4js.getLogger("service.config");
 
@@ -35,7 +36,16 @@ class ConfigServiceV2 {
       const json = await JSON.parse(text);
 
       // Ensure that we print the correct API version to output
-      json.version = 2;
+      json.version = 2.1;
+
+      // Ensure that we provide Analytics configuration from .env, if none exists in
+      // mapConfig yet but there are necessary keys in process.env.
+      if (
+        json.analytics === undefined &&
+        ["plausible", "matomo"].includes(process.env.ANALYTICS_TYPE)
+      ) {
+        json.analytics = getAnalyticsOptionsFromDotEnv();
+      }
 
       if (washContent === false) {
         logger.trace(
@@ -104,10 +114,11 @@ class ConfigServiceV2 {
         // If we got this far, it looks as the current user isn't member in any
         // of the required groups - hence no access can be given to the map.
         const e = new Error(
-          `[getMapConfig] ${user} is not member in any of the necessary groups. \nAccess to map restricted.`
+          `[getMapConfig] Access to map "${map}" not allowed for user "${user}"`
         );
 
-        logger.warn(e);
+        // Write a debug message to log telling that user can't access current layer
+        logger.debug(e.message);
 
         throw e;
       } else {
@@ -167,7 +178,7 @@ class ConfigServiceV2 {
     const editOptions = mapConfig.tools.find((t) => t.type === "edit")?.options;
     let editLayerIds = [];
 
-    if (typeof editOptions != "undefined") {
+    if (editOptions !== undefined) {
       if (
         editOptions.activeServices &&
         editOptions.activeServices.length !== 0
@@ -184,12 +195,21 @@ class ConfigServiceV2 {
       }
     }
 
+    // Ensure that the WFST layer that is used by the Collector plugin is added too.
+    // This one differs a bit from the previous washes as there is no need to map
+    // an Array: the `serviceId` is just a string as Collector only supports one
+    // edit service at a time.
+    const collectorToolsServiceId = mapConfig.tools.find(
+      (t) => t.type === "collector"
+    )?.options.serviceId;
+
     // We utilize Set to get rid of potential duplicates in the final list
     const uniqueLayerIds = new Set([
       ...baseLayerIds,
       ...layerIds,
       ...searchLayerIds,
       ...editLayerIds,
+      ...(collectorToolsServiceId ? [collectorToolsServiceId] : []), // Conditional spread to avoid undefined inside the Set
     ]);
 
     // Prepare a new layers config object that will hold all keys

@@ -1,10 +1,10 @@
 // IE 11 starts here.
 // If you don't need IE 11, comment out those lines line.
 // Also, change 'browserslist' in package.json to exclude ie11.
-import "react-app-polyfill/ie11";
+// import "react-app-polyfill/ie11";
 import "react-app-polyfill/stable";
-import "abortcontroller-polyfill/dist/polyfill-patch-fetch";
-import "allsettled-polyfill";
+// import "abortcontroller-polyfill/dist/polyfill-patch-fetch";
+// import "allsettled-polyfill";
 // IE 11 ends here.
 
 // iOS 12 and other older touch devices need this polyfill to
@@ -31,11 +31,10 @@ import "ol/ol.css";
 import "./custom-ol.css";
 
 import React from "react";
-import ReactDOM from "react-dom";
+import { createRoot } from "react-dom/client";
 import buildConfig from "./buildConfig.json";
-import ErrorIcon from "@material-ui/icons/Error";
+import ErrorIcon from "@mui/icons-material/Error";
 import HajkThemeProvider from "./components/HajkThemeProvider";
-import reportWebVitals from "./reportWebVitals";
 import { initHFetch, hfetch, initFetchWrapper } from "utils/FetchWrapper";
 import LocalStorageHelper from "utils/LocalStorageHelper";
 
@@ -46,16 +45,17 @@ let networkErrorMessage =
 let parseErrorMessage =
   "Fel när applikationen skulle läsas in. Detta beror troligtvis på ett konfigurationsfel. Försök igen senare.";
 
+const domRoot = createRoot(document.getElementById("root"));
+
 const renderError = (message, err) => {
   console.error(err);
-  ReactDOM.render(
+  domRoot.render(
     <div className="start-error">
       <div>
         <ErrorIcon />
       </div>
       <div>{message}</div>
-    </div>,
-    document.getElementById("root")
+    </div>
   );
 };
 
@@ -147,13 +147,12 @@ hfetch("appConfig.json", { cacheBuster: true })
                 LocalStorageHelper.setKeyName(config.activeMap);
 
                 // Invoke React's renderer. Render Theme. Theme will render App.
-                ReactDOM.render(
+                domRoot.render(
                   <HajkThemeProvider
                     activeTools={buildConfig.activeTools}
                     config={config}
                     customTheme={customTheme}
-                  />,
-                  document.getElementById("root")
+                  />
                 );
               })
               .catch((err) => renderError(parseErrorMessage, err));
@@ -217,13 +216,12 @@ hfetch("appConfig.json", { cacheBuster: true })
                   }
 
                   // Invoke React's renderer. Render Theme. Theme will render App.
-                  ReactDOM.render(
+                  domRoot.render(
                     <HajkThemeProvider
                       activeTools={buildConfig.activeTools}
                       config={config}
                       customTheme={customTheme}
-                    />,
-                    document.getElementById("root")
+                    />
                   );
                 })
                 .catch((err) => {
@@ -245,8 +243,3 @@ hfetch("appConfig.json", { cacheBuster: true })
   .catch((err) => {
     renderError(networkErrorMessage, err);
   });
-
-// If you want to start measuring performance in your app, pass a function
-// to log results (for example: reportWebVitals(console.log))
-// or send to an analytics endpoint. Learn more: https://bit.ly/CRA-vitals
-reportWebVitals();

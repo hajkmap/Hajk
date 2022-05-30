@@ -1,17 +1,16 @@
 import React from "react";
-import { Button, Menu, MenuItem, Paper, Tooltip } from "@material-ui/core";
-import { withStyles } from "@material-ui/core/styles";
-import SwitchCameraIcon from "@material-ui/icons/SwitchCamera";
+import { IconButton, Menu, MenuItem, Paper, Tooltip } from "@mui/material";
+import { styled } from "@mui/material/styles";
+import SwitchCameraIcon from "@mui/icons-material/SwitchCamera";
 import { hfetch } from "utils/FetchWrapper";
 
-const styles = (theme) => ({
-  paper: {
-    marginBottom: theme.spacing(1),
-  },
-  button: {
-    minWidth: "unset",
-  },
-});
+const StyledPaper = styled(Paper)(({ theme }) => ({
+  marginBottom: theme.spacing(1),
+}));
+
+const StyledIconButton = styled(IconButton)(({ theme }) => ({
+  minWidth: "unset",
+}));
 
 class MapSwitcher extends React.PureComponent {
   // Will hold map configs
@@ -30,6 +29,11 @@ class MapSwitcher extends React.PureComponent {
 
   handleLoading(maps) {
     let { activeMap } = this.appModel.config;
+
+    maps.sort((a, b) =>
+      a.mapConfigurationTitle.localeCompare(b.mapConfigurationTitle)
+    );
+
     // Save fetched map configs to global variable
     this.maps = maps;
 
@@ -60,20 +64,16 @@ class MapSwitcher extends React.PureComponent {
   }
 
   renderMenuItems = () => {
-    let menuItems = [];
-    this.maps.forEach((item, index) => {
-      menuItems.push(
-        <MenuItem
-          key={index}
-          // disabled={index === this.state.selectedIndex}
-          selected={index === this.state.selectedIndex}
-          onClick={(event) => this.handleMenuItemClick(event, index)}
-        >
-          {item.mapConfigurationTitle}
-        </MenuItem>
-      );
-    });
-    return menuItems;
+    return this.maps.map((item, index) => (
+      <MenuItem
+        key={index}
+        // disabled={index === this.state.selectedIndex}
+        selected={index === this.state.selectedIndex}
+        onClick={(event) => this.handleMenuItemClick(event, index)}
+      >
+        {item.mapConfigurationTitle}
+      </MenuItem>
+    ));
   };
 
   // Show dropdown menu, anchored to the element clicked
@@ -105,7 +105,6 @@ class MapSwitcher extends React.PureComponent {
 
   render() {
     const { anchorEl } = this.state;
-    const { classes } = this.props;
     const open = Boolean(anchorEl);
 
     const title =
@@ -115,18 +114,17 @@ class MapSwitcher extends React.PureComponent {
       // Render only if config says so
       this.props.appModel.config.mapConfig.map.mapselector && (
         <>
-          <Tooltip title={`Nuvarande karta: ${title}`}>
-            <Paper className={classes.paper}>
-              <Button
+          <Tooltip disableInteractive title={`Nuvarande karta: ${title}`}>
+            <StyledPaper>
+              <StyledIconButton
                 aria-label="Byt karta"
                 aria-owns={open ? "render-props-menu" : undefined}
                 aria-haspopup="true"
-                className={classes.button}
                 onClick={this.handleClick}
               >
                 <SwitchCameraIcon />
-              </Button>
-            </Paper>
+              </StyledIconButton>
+            </StyledPaper>
           </Tooltip>
           <Menu
             id="render-props-menu"
@@ -142,4 +140,4 @@ class MapSwitcher extends React.PureComponent {
   }
 }
 
-export default withStyles(styles)(MapSwitcher);
+export default MapSwitcher;

@@ -276,39 +276,33 @@ $.fn.editable = function (component) {
  *
  */
 class Menu extends Component {
-  /**
-   *
-   */
-  constructor() {
-    super();
-    this.state = {
-      adGroups: [],
-      isHidden: true,
-      drawOrder: false,
-      layerMenu: true,
-      addedLayers: [],
-      maps: [],
-      active: true,
-      visibleAtStart: true,
-      visibleAtStartMobile: false,
-      backgroundSwitcherBlack: true,
-      backgroundSwitcherWhite: true,
-      enableOSM: false,
-      showBreadcrumbs: false,
-      enableTransparencySlider: true,
-      instruction: "",
-      dropdownThemeMaps: false,
-      themeMapHeaderCaption: "Temakartor",
-      visibleForGroups: [],
-      adList: null,
-      target: "toolbar",
-      position: "left",
-      width: "",
-      height: "",
-      title: "Innehåll",
-      description: "Välj innehåll att visa i kartan",
-    };
-  }
+  state = {
+    adGroups: [],
+    isHidden: true,
+    drawOrder: false,
+    layerMenu: true,
+    addedLayers: [],
+    maps: [],
+    active: true,
+    visibleAtStart: true,
+    visibleAtStartMobile: false,
+    backgroundSwitcherBlack: true,
+    backgroundSwitcherWhite: true,
+    enableOSM: false,
+    showBreadcrumbs: false,
+    enableTransparencySlider: true,
+    instruction: "",
+    dropdownThemeMaps: false,
+    themeMapHeaderCaption: "Temakartor",
+    visibleForGroups: [],
+    adList: null,
+    target: "toolbar",
+    position: "left",
+    width: "",
+    height: "",
+    title: "Innehåll",
+    description: "Välj innehåll att visa i kartan",
+  };
 
   /**
    *
@@ -329,9 +323,11 @@ class Menu extends Component {
           reset: false,
           active: this.props.model.get("layerMenuConfig").active,
           visibleAtStart:
-            this.props.model.get("layerMenuConfig").visibleAtStart,
+            this.props.model.get("layerMenuConfig").visibleAtStart ||
+            this.state.visibleAtStart,
           visibleAtStartMobile:
-            this.props.model.get("layerMenuConfig").visibleAtStartMobile,
+            this.props.model.get("layerMenuConfig").visibleAtStartMobile ||
+            this.state.visibleAtStartMobile,
           backgroundSwitcherBlack:
             this.props.model.get("layerMenuConfig").backgroundSwitcherBlack,
           backgroundSwitcherWhite:
@@ -340,7 +336,8 @@ class Menu extends Component {
           showBreadcrumbs:
             this.props.model.get("layerMenuConfig").showBreadcrumbs,
           enableTransparencySlider:
-            this.props.model.get("layerMenuConfig").enableTransparencySlider,
+            this.props.model.get("layerMenuConfig").enableTransparencySlider ||
+            this.state.enableTransparencySlider,
           instruction: this.props.model.get("layerMenuConfig").instruction,
           dropdownThemeMaps:
             this.props.model.get("layerMenuConfig").dropdownThemeMaps,

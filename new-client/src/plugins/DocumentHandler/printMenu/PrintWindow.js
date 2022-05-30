@@ -1,49 +1,59 @@
 import React from "react";
+import { createRoot } from "react-dom/client";
 import { createPortal } from "react-dom";
-import { withStyles } from "@material-ui/core/styles";
 import { withSnackbar } from "notistack";
-import Grid from "@material-ui/core/Grid";
-import { Typography } from "@material-ui/core";
-import ReactDOM from "react-dom";
-import Button from "@material-ui/core/Button";
-import ArrowBackIcon from "@material-ui/icons/ArrowBack";
-import Checkbox from "@material-ui/core/Checkbox";
-import FormControlLabel from "@material-ui/core/FormControlLabel";
-import OpenInNewIcon from "@material-ui/icons/OpenInNew";
-import PrintList from "./PrintList";
-import TableOfContents from "./TableOfContents";
-import { ThemeProvider } from "@material-ui/styles";
-import { getNormalizedMenuState } from "../utils/stateConverter";
-import { hasSubMenu } from "../utils/helpers";
 
 import {
-  LinearProgress,
+  styled,
+  StyledEngineProvider,
+  ThemeProvider,
+} from "@mui/material/styles";
+
+import {
+  Button,
+  Checkbox,
   Dialog,
   DialogTitle,
   DialogContent,
   DialogContentText,
-} from "@material-ui/core";
+  FormControlLabel,
+  Grid,
+  LinearProgress,
+  Typography,
+} from "@mui/material";
 
-const styles = (theme) => ({
-  gridContainer: {
-    padding: theme.spacing(4),
-    height: "100%",
-  },
-  middleContainer: {
-    overflowX: "auto",
-    flexBasis: "100%",
-    marginTop: theme.spacing(2),
-  },
-  headerContainer: {
-    marginBottom: theme.spacing(2),
-  },
-  settingsContainer: {
-    marginBottom: theme.spacing(2),
-  },
-  footerContainer: {
-    flexBasis: "10%",
-  },
-});
+import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+import OpenInNewIcon from "@mui/icons-material/OpenInNew";
+
+import { deepMerge } from "utils/DeepMerge";
+
+import PrintList from "./PrintList";
+import TableOfContents from "./TableOfContents";
+import { getNormalizedMenuState } from "../utils/stateConverter";
+import { hasSubMenu } from "../utils/helpers";
+
+const GridGridContainer = styled(Grid)(({ theme }) => ({
+  padding: theme.spacing(4),
+  height: "100%",
+}));
+
+const GridMiddleContainer = styled(Grid)(({ theme }) => ({
+  overflowX: "auto",
+  flexBasis: "100%",
+  marginTop: theme.spacing(2),
+}));
+
+const GridHeaderContainer = styled(Grid)(({ theme }) => ({
+  marginBottom: theme.spacing(2),
+}));
+
+const GridSettingsContainer = styled(Grid)(({ theme }) => ({
+  marginBottom: theme.spacing(2),
+}));
+
+const GridFooterContainer = styled(Grid)(({ theme }) => ({
+  flexBasis: "10%",
+}));
 
 const maxHeight = 950;
 const imageResizeRatio = 0.7;
@@ -165,16 +175,27 @@ class PrintWindow extends React.PureComponent {
   };
 
   customRender = (element, container) => {
+    // Since the ThemeProvider seems to cache the theme in some way, we have to make sure to
+    // create a new theme-reference to make sure that the correct theme is used when rendering.
+    // If we don't create a new reference, the custom-theme will be overridden by the standard MUI-theme
+    // since the standard MUI-theme is refreshed (and thereby has the highest css-specificity) sometimes.
+    // This is quite messy, but get's the job done. See issue #999 for more info.
+    const theme = deepMerge(this.props.customTheme || this.props.theme, {});
+    // Make sure to render the components using the custom theme if it exists:
     return new Promise((resolve) => {
-      ReactDOM.render(
-        <ThemeProvider theme={this.props.customTheme || this.props.theme}>
-          {element}
-        </ThemeProvider>,
-        container,
-        (e) => {
-          resolve();
-        }
+      const rootElement = createRoot(container);
+
+      rootElement.render(
+        <StyledEngineProvider injectFirst>
+          <ThemeProvider theme={theme}>{element}</ThemeProvider>
+        </StyledEngineProvider>
       );
+
+      // Prior to React 18, the render() metod had an optional callback. As of React 18, the
+      // callback has been removed. One of the proposed solutions,
+      // see https://github.com/reactwg/react-18/discussions/5, is this to use setTimeout(fn(), 0).
+      // TODO: If we run into bugs regarding DH's print functionality, this is the place to look:
+      resolve();
     });
   };
 
@@ -715,15 +736,13 @@ class PrintWindow extends React.PureComponent {
   };
 
   renderCreatePDFButton() {
-    const { classes } = this.props;
     return (
-      <Grid
+      <GridFooterContainer
         item
-        className={classes.footerContainer}
         container
         alignContent="center"
         alignItems="center"
-        justify="center"
+        justifyContent="center"
       >
         <Button
           color="primary"
@@ -739,7 +758,7 @@ class PrintWindow extends React.PureComponent {
             Skriv ut
           </Typography>
         </Button>
-      </Grid>
+      </GridFooterContainer>
     );
   }
 
@@ -747,11 +766,7 @@ class PrintWindow extends React.PureComponent {
     return (
       <>
         {createPortal(
-          <Dialog
-            disableBackdropClick={true}
-            disableEscapeKeyDown={true}
-            open={this.state.pdfLoading}
-          >
+          <Dialog disableEscapeKeyDown={true} open={this.state.pdfLoading}>
             <LinearProgress />
             <DialogTitle>Din PDF skapas</DialogTitle>
             <DialogContent>
@@ -770,26 +785,12 @@ class PrintWindow extends React.PureComponent {
   };
 
   render() {
-    const {
-      classes,
-      togglePrintWindow,
-      localObserver,
-      documentWindowMaximized,
-    } = this.props;
+    const { togglePrintWindow, localObserver, documentWindowMaximized } =
+      this.props;
     const { menuInformation } = this.state;
     return (
-      <Grid
-        container
-        className={classes.gridContainer}
-        wrap="nowrap"
-        direction="column"
-      >
-        <Grid
-          className={classes.headerContainer}
-          alignItems="center"
-          item
-          container
-        >
+      <GridGridContainer container wrap="nowrap" direction="column">
+        <GridHeaderContainer alignItems="center" item container>
           <Grid item xs={4}>
             <Button
               color="primary"
@@ -805,9 +806,9 @@ class PrintWindow extends React.PureComponent {
               Skapa PDF
             </Typography>
           </Grid>
-        </Grid>
+        </GridHeaderContainer>
 
-        <Grid container item className={classes.settingsContainer}>
+        <GridSettingsContainer container item>
           <Typography variant="h6">Inställningar</Typography>
 
           <Grid xs={12} item>
@@ -826,24 +827,24 @@ class PrintWindow extends React.PureComponent {
               labelPlacement="end"
             />
           </Grid>
-        </Grid>
+        </GridSettingsContainer>
 
         <Typography variant="h6">Valt innehåll</Typography>
 
-        <Grid className={classes.middleContainer} item container>
+        <GridMiddleContainer item container>
           <PrintList
             localObserver={localObserver}
             documentMenu={menuInformation}
             level={0}
             handleTogglePrint={this.toggleChosenForPrint}
           />
-        </Grid>
+        </GridMiddleContainer>
 
         {documentWindowMaximized && this.renderCreatePDFButton()}
         {this.renderLoadingDialog()}
-      </Grid>
+      </GridGridContainer>
     );
   }
 }
 
-export default withStyles(styles)(withSnackbar(PrintWindow));
+export default withSnackbar(PrintWindow);

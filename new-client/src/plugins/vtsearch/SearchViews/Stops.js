@@ -1,12 +1,12 @@
 import React from "react";
 import PropTypes from "prop-types";
-import { withStyles } from "@material-ui/core/styles";
-import Radio from "@material-ui/core/Radio";
-import RadioGroup from "@material-ui/core/RadioGroup";
-import FormControlLabel from "@material-ui/core/FormControlLabel";
-import FormControl from "@material-ui/core/FormControl";
-import MenuItem from "@material-ui/core/MenuItem";
-import Select from "@material-ui/core/Select";
+import withStyles from "@mui/styles/withStyles";
+import Radio from "@mui/material/Radio";
+import RadioGroup from "@mui/material/RadioGroup";
+import FormControlLabel from "@mui/material/FormControlLabel";
+import FormControl from "@mui/material/FormControl";
+import MenuItem from "@mui/material/MenuItem";
+import Select from "@mui/material/Select";
 import {
   TextField,
   Button,
@@ -14,7 +14,7 @@ import {
   Divider,
   Grid,
   ButtonGroup,
-} from "@material-ui/core";
+} from "@mui/material";
 import InactivePolygon from "../img/polygonmarkering.png";
 import InactiveRectangle from "../img/rektangelmarkering.png";
 import ActivePolygon from "../img/polygonmarkering-blue.png";
@@ -197,7 +197,7 @@ class Stops extends React.PureComponent {
           value={this.state.busStopValue}
           onChange={this.handleChange}
         >
-          <Grid justify="flex-start" alignItems="center" container>
+          <Grid justifyContent="flex-start" alignItems="center" container>
             <Grid item xs={2}>
               <FormControlLabel
                 value="stopAreas"
@@ -309,7 +309,7 @@ class Stops extends React.PureComponent {
         <Grid item xs={12}>
           <Typography variant="body2">AVGRÄNSA SÖKOMRÅDE I KARTAN</Typography>
         </Grid>
-        <Grid justify="center" container>
+        <Grid justifyContent="center" container>
           <Grid item xs={4}>
             <div>
               <img
@@ -352,7 +352,7 @@ class Stops extends React.PureComponent {
       <div>
         <Grid
           container
-          justify="center"
+          justifyContent="center"
           spacing={2}
           onKeyPress={this.handleKeyPress}
         >

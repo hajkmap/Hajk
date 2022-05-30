@@ -1,8 +1,8 @@
 import React from "react";
-import { Grid, IconButton, TextField, Typography } from "@material-ui/core";
-import { FormControl, InputLabel, Select, MenuItem } from "@material-ui/core";
-import { Slider } from "@material-ui/core";
-import HelpIcon from "@material-ui/icons/Help";
+import { Grid, IconButton, TextField, Typography } from "@mui/material";
+import { FormControl, InputLabel, Select, MenuItem } from "@mui/material";
+import { Slider } from "@mui/material";
+import HelpIcon from "@mui/icons-material/Help";
 
 import InformationWrapper from "./InformationWrapper";
 import ListBoxSelector from "./ListBoxSelector";
@@ -46,7 +46,7 @@ const ProductParameters = (props) => {
 
   function renderParameterRenderingError() {
     return (
-      <Grid item xs={12} style={{ padding: 8 }}>
+      <Grid item xs={12} sx={{ padding: 1 }}>
         <InformationWrapper type="error">
           <Typography>
             Observera att vissa publicerade parametrar inte kunde renderas! Det
@@ -59,8 +59,8 @@ const ProductParameters = (props) => {
 
   function renderInformationUrl() {
     return (
-      <Grid container item xs={12} wrap="nowrap" justify="space-between">
-        <Typography style={{ alignSelf: "center", marginLeft: 8 }}>
+      <Grid container item xs={12} wrap="nowrap" justifyContent="space-between">
+        <Typography sx={{ alignSelf: "center", marginLeft: 1 }}>
           Oklart hur produkten fungerar? Tryck på frågetecknet för mer
           information.
         </Typography>
@@ -76,7 +76,7 @@ const ProductParameters = (props) => {
 
   function renderNoParametersToRenderError() {
     return (
-      <Grid item xs={12} style={{ padding: 8 }}>
+      <Grid item xs={12} sx={{ padding: 1 }}>
         <InformationWrapper type="info">
           <Typography>
             Det finns inga publicerade parametrar att rendera! Du kan fortsätta
@@ -89,12 +89,7 @@ const ProductParameters = (props) => {
 
   function renderChoice(parameter, index) {
     return (
-      <Grid
-        key={`${parameter.type}-${index}`}
-        item
-        xs={12}
-        style={{ padding: 8 }}
-      >
+      <Grid key={`${parameter.type}-${index}`} item xs={12} sx={{ padding: 1 }}>
         <FormControl fullWidth size="small" required={!parameter.optional}>
           <InputLabel
             variant="outlined"
@@ -139,12 +134,7 @@ const ProductParameters = (props) => {
     const sliderMin = model.getRangeSliderMinimum(parameter, step);
     const sliderMax = model.getRangeSliderMaximum(parameter, step);
     return (
-      <Grid
-        key={`${parameter.type}-${index}`}
-        item
-        xs={12}
-        style={{ padding: 8 }}
-      >
+      <Grid key={`${parameter.type}-${index}`} item xs={12} sx={{ padding: 1 }}>
         <Grid item xs={12}>
           <Typography variant="caption">{parameter.description}</Typography>
         </Grid>
@@ -168,12 +158,7 @@ const ProductParameters = (props) => {
 
   function renderText(parameter, index) {
     return (
-      <Grid
-        key={`${parameter.type}-${index}`}
-        item
-        xs={12}
-        style={{ padding: 8 }}
-      >
+      <Grid key={`${parameter.type}-${index}`} item xs={12} sx={{ padding: 1 }}>
         <TextField
           id={`fme-text-${index}`}
           size="small"
@@ -182,7 +167,6 @@ const ProductParameters = (props) => {
           label={parameter.description}
           onChange={(e) => handleParameterChange(e.target.value, index)}
           fullWidth
-          variant="outlined"
           value={parameter.value ?? parameter.defaultValue ?? ""}
         />
       </Grid>
@@ -204,6 +188,7 @@ const ProductParameters = (props) => {
               return renderListBox(parameter, index);
             case "RANGE_SLIDER":
               return renderRangeSlider(parameter, index);
+            case "STRING":
             case "TEXT":
             case "PASSWORD":
               return renderText(parameter, index);

@@ -1,5 +1,3 @@
-import XLSX from "xlsx";
-
 export default class XLSXExport {
   constructor(settings) {
     this.localObserver = settings.localObserver;
@@ -10,28 +8,33 @@ export default class XLSXExport {
     this.localObserver.subscribe("downloadMenu.exportXLSXClick", this.export);
   };
 
-  export = (exportItems) => {
+  export = async (exportItems) => {
     try {
+      const xlsx = await import("xlsx");
       const { featureCollections } = exportItems;
-      const workBook = XLSX.utils.book_new();
+      const workBook = xlsx.utils.book_new();
       const fileName = this.#getFileName(featureCollections);
 
       if (
         featureCollections?.length === 1 &&
         featureCollections[0].origin === "USERSELECT"
       ) {
-        return this.#createUserSelectedExport(featureCollections[0], fileName);
+        const results = await this.#createUserSelectedExport(
+          featureCollections[0],
+          fileName
+        );
+        return results;
       }
 
-      featureCollections.forEach((fc) => {
-        const sheet = this.#createXLSXSheet(fc);
+      for (const fc of featureCollections) {
+        const sheet = await this.#createXLSXSheet(fc);
         if (sheet) {
           const sheetName = this.#getSheetName(fc);
-          XLSX.utils.book_append_sheet(workBook, sheet, sheetName);
+          xlsx.utils.book_append_sheet(workBook, sheet, sheetName);
         }
-      });
+      }
 
-      return XLSX.writeFile(workBook, fileName);
+      return xlsx.writeFile(workBook, fileName);
     } catch (error) {
       console.warn("Failed to export xlsx...", error);
     }
@@ -45,9 +48,10 @@ export default class XLSXExport {
       : `Sökexport-${new Date().toLocaleString()}.xlsx`;
   };
 
-  #createUserSelectedExport = (featureCollection, fileName) => {
+  #createUserSelectedExport = async (featureCollection, fileName) => {
     try {
-      const workBook = XLSX.utils.book_new();
+      const xlsx = await import("xlsx");
+      const workBook = xlsx.utils.book_new();
       const groupedFeatures = this.#getGroupedFeatures(featureCollection);
 
       Object.keys(groupedFeatures).forEach((key) => {
@@ -55,11 +59,11 @@ export default class XLSXExport {
         const exportArray = this.#getUserSelectedExportArray(
           groupedFeatures[key]
         );
-        const sheet = XLSX.utils.aoa_to_sheet(exportArray);
-        XLSX.utils.book_append_sheet(workBook, sheet, sheetName);
+        const sheet = xlsx.utils.aoa_to_sheet(exportArray);
+        xlsx.utils.book_append_sheet(workBook, sheet, sheetName);
       });
 
-      return XLSX.writeFile(workBook, fileName);
+      return xlsx.writeFile(workBook, fileName);
     } catch (error) {
       console.warn("Failed to export user selected xlsx...", error);
     }
@@ -83,8 +87,9 @@ export default class XLSXExport {
     return exportArray;
   };
 
-  #createXLSXSheet = (featureCollection) => {
+  #createXLSXSheet = async (featureCollection) => {
     if (featureCollection?.value?.features?.length > 0) {
+      const xlsx = await import("xlsx");
       // Destruct the features for readability
       const { features } = featureCollection.value;
       // Initialize a set which will keep track of _all_ the keys that exist on the
@@ -136,7 +141,7 @@ export default class XLSXExport {
         exportArray.push(values);
       });
 
-      return XLSX.utils.aoa_to_sheet(exportArray);
+      return xlsx.utils.aoa_to_sheet(exportArray);
     } else {
       return null;
     }

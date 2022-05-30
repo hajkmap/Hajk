@@ -1,13 +1,14 @@
 import React from "react";
 import PropTypes from "prop-types";
 import DocumentWindowBase from "./documentWindow/DocumentWindowBase";
-import MenuIcon from "@material-ui/icons/Menu";
+import MenuIcon from "@mui/icons-material/Menu";
 
 import DocumentHandlerModel from "./DocumentHandlerModel";
 import PanelMenuContainerView from "./panelMenu/PanelMenuContainerView";
 import Observer from "react-event-observer";
 import MapViewModel from "./MapViewModel";
-import { withTheme, createMuiTheme } from "@material-ui/core/styles";
+import { createTheme } from "@mui/material/styles";
+import { withTheme } from "@emotion/react";
 import { deepMerge } from "../../utils/DeepMerge";
 
 class DocumentHandler extends React.PureComponent {
@@ -66,8 +67,8 @@ class DocumentHandler extends React.PureComponent {
 
   componentDidUpdate = (prevProps) => {
     const { theme } = this.props;
-    //We need to update the palette.type in the nested customTheme with dark/light from the main theme
-    if (prevProps.theme.palette.type !== theme.palette.type) {
+    //We need to update the palette.mode in the nested customTheme with dark/light from the main theme
+    if (prevProps.theme.palette.mode !== theme.palette.mode) {
       //Spread to not mutate
       this.setState((prevState) => {
         return {
@@ -75,7 +76,7 @@ class DocumentHandler extends React.PureComponent {
             ...prevState.customTheme,
             palette: {
               ...prevState.customTheme.palette,
-              type: theme.palette.type,
+              mode: theme.palette.mode,
             },
           },
         };
@@ -88,7 +89,7 @@ class DocumentHandler extends React.PureComponent {
     if (customTheme.typography) {
       this.setBottomMarginsForTypographyVariants(customTheme);
     }
-    return createMuiTheme(deepMerge(theme, customTheme));
+    return createTheme(deepMerge(theme, customTheme));
   };
 
   /**
@@ -233,7 +234,7 @@ class DocumentHandler extends React.PureComponent {
           chapters={this.state.chapters}
           model={this.state.model}
           localObserver={this.localObserver}
-        ></DocumentWindowBase>
+        />
       </>
     );
   }

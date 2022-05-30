@@ -1,5 +1,5 @@
 {
-  "version": "3.5.0",
+  "version": "3.9.0",
   "projections": [
     {
       "code": "EPSG:3006",
@@ -201,7 +201,7 @@
           {
             "id": "8838c969-590c-8683-435c-1ecaca271096",
             "parent": "-1",
-            "name": "Länstyrelsen",
+            "name": "Länsstyrelsen",
             "toggled": true,
             "expanded": false,
             "layers": [
@@ -275,17 +275,10 @@
       "index": 2
     },
     {
-      "type": "draw",
+      "type": "sketch",
       "options": {
         "target": "left",
         "position": "left",
-        "height": 650,
-        "exportUrl": "",
-        "importUrl": "",
-        "base64Encode": false,
-        "instruction": "",
-        "icons": "",
-        "proxyUrl": "",
         "visibleForGroups": []
       },
       "index": 3

@@ -1,5 +1,5 @@
 {
-  "version": "3.5.0",
+  "version": "3.10.0-beta.7",
   "projections": [
     {
       "code": "EPSG:3006",
@@ -273,17 +273,10 @@
       "index": 2
     },
     {
-      "type": "draw",
+      "type": "sketch",
       "options": {
         "target": "left",
         "position": "left",
-        "height": 650,
-        "exportUrl": "",
-        "importUrl": "",
-        "base64Encode": false,
-        "instruction": "",
-        "icons": "",
-        "proxyUrl": "",
         "visibleForGroups": []
       },
       "index": 3
@@ -554,6 +547,11 @@
     },
     "defaultCookieNoticeMessage": "Vi använder cookies för att följa upp användandet och ge en bra upplevelse av kartan. Du kan blockera cookies i webbläsaren men då visas detta meddelande igen.",
     "defaultCookieNoticeUrl": "https://pts.se/sv/bransch/regler/lagar/lag-om-elektronisk-kommunikation/kakor-cookies/",
-    "crossOrigin": "anonymous"
+    "showCookieNotice": false,
+    "cookieUse3dPart": false,
+    "crossOrigin": "anonymous",
+    "introductionEnabled": true,
+    "introductionShowControlButton": true,
+    "introductionSteps": []
   }
 }

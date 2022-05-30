@@ -251,14 +251,18 @@ class SettingsService {
       );
     }
 
-    // If any of the above resulted in modified file, write the changes
+    // If any of the above resulted in modified file, write the changes.
+    // Make sure to first check that we really have new options to write
+    // as we don't want to write an undefined "object".
     if (modified === true) {
       // Use the found index of LayerSwitcher to entirely replace
       // the "options" property on that object
-      json.tools[layerSwitcherToolIndex].options = lsOptions;
+      if (lsOptions !== undefined)
+        json.tools[layerSwitcherToolIndex].options = lsOptions;
 
       // Do the same for the options of Search tool
-      json.tools[searchToolIndex].options = searchOptions;
+      if (searchOptions !== undefined)
+        json.tools[searchToolIndex].options = searchOptions;
 
       // Write changes to file
       await fs.promises.writeFile(
@@ -314,6 +318,62 @@ class SettingsService {
       );
 
       return { mapConfig };
+    } catch (error) {
+      return { error };
+    }
+  }
+
+  /**
+   * @summary Update a specific tool's options in a given map config.
+   *
+   * @param {string} mapFile
+   * @param {string} toolName
+   * @param {object | object[]} incomingOptions
+   * @returns {object} mapConfig
+   */
+  async updateMapTool(mapFile, toolName, incomingOptions) {
+    try {
+      // Do a quick sanity check on the incoming data. We allow
+      // either an object, directly, or an Array of objects.
+      // Either way, typeof [] === "object", so we can do this:
+      if (typeof incomingOptions !== "object") {
+        throw new Error(
+          "Invalid options supplied. Valid options should either be an object or an array of objects."
+        );
+      }
+
+      // Ensure we have the correct file extension
+      mapFile = `${mapFile}.json`;
+
+      // Parse the file content so we get an object
+      const mapConfig = await this.readFileAsJson(mapFile);
+
+      // Check if the the relevant tool already exists in config
+      const i = mapConfig.tools.findIndex((tool) => tool.type === toolName);
+      if (i === -1) {
+        // The tool is new for this config. Let's create an object…
+        const o = {
+          type: toolName,
+          index: 0,
+          options: incomingOptions,
+        };
+        // …and push it into the tools array.
+        mapConfig.tools.push(o);
+      } else {
+        // The tool already exists. Let's override its current options
+        // with the new ones.
+        mapConfig.tools[i].options = incomingOptions;
+      }
+
+      // Write, format with 2 spaces indentation
+      await fs.promises.writeFile(
+        this.getFullPathToFile(mapFile),
+        JSON.stringify(mapConfig, null, 2)
+      );
+
+      // Send HTTP 201 status code if we created the entry,
+      // or 204 if we've updated an existing one.
+      return i === -1 ? 201 : 204;
     } catch (error) {
       return { error };
     }

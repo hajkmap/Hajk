@@ -67,6 +67,19 @@ class SearchModel {
     searchSources = this.getSources(),
     searchOptions = this.getSearchOptions()
   ) => {
+    // If the method was initiated by an actual search (not just autocomplete),
+    // let's send this to the analytics model.
+    if (
+      searchOptions.initiator === "search" &&
+      searchString.trim().length > 0
+    ) {
+      this.#app.globalObserver.publish("analytics.trackEvent", {
+        eventName: "textualSearchPerformed",
+        query: searchString.trim(),
+        activeMap: this.#app.config.activeMap,
+      });
+    }
+
     const { featureCollections, errors } = await this.#getRawResults(
       searchString.trim(), // Ensure that the search string isn't surrounded by whitespace
       searchSources,

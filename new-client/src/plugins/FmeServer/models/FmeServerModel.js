@@ -73,6 +73,7 @@ class FmeServerModel {
     switch (parameter.type) {
       case "CHOICE":
       case "LOOKUP_CHOICE":
+      case "STRING":
       case "TEXT":
       case "PASSWORD":
         // All above should be clean strings... TODO: Tests!
@@ -162,6 +163,7 @@ class FmeServerModel {
     switch (parameter.type) {
       case "CHOICE":
       case "LOOKUP_CHOICE":
+      case "STRING":
       case "TEXT":
       case "PASSWORD":
         // All of the above expects a single string

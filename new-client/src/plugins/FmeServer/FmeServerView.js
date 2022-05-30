@@ -1,10 +1,18 @@
 import React from "react";
-import { Button, Grid, TextField, Typography } from "@material-ui/core";
-import { Select, FormControl, InputLabel, MenuItem } from "@material-ui/core";
-import { Step, StepContent, StepLabel, Stepper } from "@material-ui/core";
-import { IconButton, InputAdornment, Tooltip } from "@material-ui/core";
-import HelpIcon from "@material-ui/icons/Help";
-import { LinearProgress } from "@material-ui/core";
+import { Button, Grid, TextField, Typography } from "@mui/material";
+import { Select, FormControl, InputLabel, MenuItem } from "@mui/material";
+import {
+  Step,
+  StepContent,
+  StepLabel,
+  Stepper,
+  IconButton,
+  InputAdornment,
+  Tooltip,
+} from "@mui/material";
+import HelpIcon from "@mui/icons-material/Help";
+
+import { LinearProgress } from "@mui/material";
 import { useSnackbar } from "notistack";
 
 import InformationWrapper from "./components/InformationWrapper";
@@ -76,11 +84,29 @@ const FmeServerView = (props) => {
     {
       label: `Välj ${groupDisplayName.toLowerCase()}`,
       renderFunction: renderChooseGroupStep,
+      renderValueFunction: () => {
+        return renderSelectedValue(activeGroup);
+      },
     },
-    { label: "Välj produkt", renderFunction: renderChooseProductStep },
-    { label: "Välj omfattning", renderFunction: renderDrawGeometryStep },
-    { label: "Fyll i parametrar", renderFunction: renderEnterParametersStep },
-    { label: "Beställ", renderFunction: renderOrderStep },
+    {
+      label: "Välj produkt",
+      renderFunction: renderChooseProductStep,
+      renderValueFunction: () => {
+        return renderSelectedValue(activeProduct);
+      },
+    },
+    {
+      label: "Välj omfattning",
+      renderFunction: renderDrawGeometryStep,
+    },
+    {
+      label: "Fyll i parametrar",
+      renderFunction: renderEnterParametersStep,
+    },
+    {
+      label: "Beställ",
+      renderFunction: renderOrderStep,
+    },
   ];
 
   // We are using a custom hook to poll data. If we are polling (determined
@@ -362,12 +388,12 @@ const FmeServerView = (props) => {
   // Accepts: An array of objects on {type: string, disabled: bool} form.
   function renderStepperButtons(buttons) {
     return (
-      <Grid container item justify="flex-end">
+      <Grid container item justifyContent="flex-end">
         {buttons.map((button, index) => {
           return (
             <Button
               key={index}
-              style={{ marginTop: 8, marginLeft: 8 }}
+              sx={{ marginTop: 1, marginLeft: 1 }}
               disabled={button.disabled}
               variant="contained"
               onClick={() => handleStepperButtonClick(button.type)}
@@ -505,7 +531,7 @@ const FmeServerView = (props) => {
           />
         </Grid>
         {drawError && (
-          <Grid item xs={12} style={{ marginTop: 8 }}>
+          <Grid item xs={12} sx={{ marginTop: 1 }}>
             <InformationWrapper type="error">
               <Typography variant="caption">
                 {`Den ritade ytan är för stor. Ta bort den och försök igen för att kunna gå vidare med beställningen! 
@@ -564,6 +590,16 @@ const FmeServerView = (props) => {
     );
   }
 
+  function renderSelectedValue(value) {
+    if (!value) return;
+
+    // Renders the selected value under the steps title
+    // Is currently only used for group and product.
+    return (
+      <div style={{ position: "absolute", fontWeight: "normal" }}>{value}</div>
+    );
+  }
+
   // Renders the content for the step where the user can select
   // which group they want to get their products from. If no group is selected,
   // the user cannot continue to the next step.
@@ -574,18 +610,27 @@ const FmeServerView = (props) => {
       props.options?.productGroups?.length > 0
         ? props.options.productGroups.sort()
         : [];
+
+    // If only one group is available from config, select it automatically
+    // and proceed to the next step.
+    if (groupsToRender.length === 1 && activeGroup === "") {
+      setActiveGroup(groupsToRender[0]);
+      setActiveStep(activeStep + 1);
+    }
+
     return (
       <Grid container item xs={12}>
         {groupsToRender.length > 0 ? (
           <Grid item xs={12}>
             <FormControl fullWidth>
-              <InputLabel id="fme-server-select-group-label">
+              <InputLabel size="small" id="fme-server-select-group-label">
                 {groupDisplayName}
               </InputLabel>
               <Select
                 labelId="fme-server-select-group-label"
                 id="fme-server-select-group"
                 value={activeGroup}
+                size="small"
                 label={groupDisplayName}
                 onChange={(e) => setActiveGroup(e.target.value)}
               >
@@ -634,6 +679,7 @@ const FmeServerView = (props) => {
                 select
                 id="fme-server-select-product"
                 value={activeProduct}
+                size="small"
                 label="Produkt"
                 onChange={(e) => setActiveProduct(e.target.value)}
                 InputProps={
@@ -751,15 +797,16 @@ const FmeServerView = (props) => {
   }
 
   return (
-    <Stepper
-      activeStep={activeStep}
-      orientation="vertical"
-      style={{ padding: 8 }}
-    >
+    <Stepper activeStep={activeStep} orientation="vertical" sx={{ padding: 1 }}>
       {steps.map((step, index) => {
         return (
           <Step key={index}>
-            <StepLabel>{step.label}</StepLabel>
+            <StepLabel>
+              {step.label}
+              {activeStep !== index && step.renderValueFunction
+                ? step.renderValueFunction()
+                : null}
+            </StepLabel>
             <StepContent>{step.renderFunction()}</StepContent>
           </Step>
         );

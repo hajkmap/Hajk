@@ -3,6 +3,7 @@ import path from "path";
 import ad from "./activedirectory.service";
 import asyncFilter from "../utils/asyncFilter";
 import log4js from "log4js";
+import getAnalyticsOptionsFromDotEnv from "../utils/getAnalyticsOptionsFromDotEnv";
 
 const logger = log4js.getLogger("service.config");
 
@@ -33,6 +34,18 @@ class ConfigService {
       const pathToFile = path.join(process.cwd(), "App_Data", `${map}.json`);
       const text = await fs.promises.readFile(pathToFile, "utf-8");
       const json = await JSON.parse(text);
+
+      // Tell the API version
+      json.version = 1;
+
+      // Ensure that we provide Analytics configuration from .env, if none exists in
+      // mapConfig yet but there are necessary keys in process.env.
+      if (
+        json.analytics === undefined &&
+        ["plausible", "matomo"].includes(process.env.ANALYTICS_TYPE)
+      ) {
+        json.analytics = getAnalyticsOptionsFromDotEnv();
+      }
 
       if (washContent === false) {
         logger.trace(
@@ -101,10 +114,11 @@ class ConfigService {
         // If we got this far, it looks as the current user isn't member in any
         // of the required groups - hence no access can be given to the map.
         const e = new Error(
-          `[getMapConfig] ${user} is not member in any of the necessary groups. \nAccess to map restricted.`
+          `[getMapConfig] Access to map "${map}" not allowed for user "${user}"`
         );
 
-        logger.warn(e);
+        // Write a debug message to log telling that user can't access current layer
+        logger.debug(e.message);
 
         throw e;
       } else {

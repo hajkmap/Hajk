@@ -40,6 +40,8 @@ var defaultState = {
   northArrowPlacement: "topLeft",
   useMargin: false,
   mapTextColor: "#000000",
+  useCustomTileLoaders: true,
+  maxTileSize: 4096,
 };
 
 class ToolOptions extends Component {
@@ -97,6 +99,9 @@ class ToolOptions extends Component {
             : this.state.includeNorthArrow,
         northArrowPlacement:
           tool.options.northArrowPlacement || this.state.northArrowPlacement,
+        useCustomTileLoaders:
+          tool.options.useCustomTileLoaders ?? this.state.useCustomTileLoaders,
+        maxTileSize: tool.options.maxTileSize || this.state.maxTileSize,
       });
     } else {
       this.setState({
@@ -183,6 +188,8 @@ class ToolOptions extends Component {
         scaleBarPlacement: this.state.scaleBarPlacement,
         includeNorthArrow: this.state.includeNorthArrow,
         northArrowPlacement: this.state.northArrowPlacement,
+        useCustomTileLoaders: this.state.useCustomTileLoaders,
+        maxTileSize: this.state.maxTileSize,
       },
     };
 
@@ -284,6 +291,23 @@ class ToolOptions extends Component {
   };
 
   renderIncludeSelect = (currentValue, name) => {
+    return (
+      <Select
+        id={name}
+        name={name}
+        value={currentValue}
+        className="control-fixed-width"
+        onChange={(e) => {
+          this.handleInputChange(e);
+        }}
+      >
+        <MenuItem value={true}>Ja</MenuItem>
+        <MenuItem value={false}>Nej</MenuItem>
+      </Select>
+    );
+  };
+
+  renderUseCustomTileLoadersSelect = (currentValue, name) => {
     return (
       <Select
         id={name}
@@ -436,6 +460,42 @@ class ToolOptions extends Component {
                 this.handleInputChange(e);
               }}
               value={this.state.height}
+            />
+          </div>
+          <div className="separator">Inställningar för bildhantering</div>
+          <div>
+            <label htmlFor="includeLogo">
+              Aktivera beräknad bildladdning{" "}
+              <i
+                className="fa fa-question-circle"
+                data-toggle="tooltip"
+                title="Om aktivt kommer verktyget se till att förfrågningar mot WMS-servern inte överstiger serverns minesgräns. Denna inställning gör också att bilderna kommer efterfrågas med korrekt DPI."
+              />
+            </label>
+            {this.renderUseCustomTileLoadersSelect(
+              this.state.useCustomTileLoaders,
+              "useCustomTileLoaders"
+            )}
+          </div>
+          <div>
+            <label htmlFor="disclaimer">
+              Maximal Tile-storlek{" "}
+              <i
+                className="fa fa-question-circle"
+                data-toggle="tooltip"
+                title="Om automatisk bildberäkning är satt till aktivt måste en maximal storlek på de framtagna bilderna anges. Värdet bör vara runt 4096."
+              />
+            </label>
+            <input
+              type="number"
+              name="maxTileSize"
+              value={this.state.maxTileSize}
+              min={256}
+              max={16384}
+              step={1}
+              onChange={(e) => {
+                this.handleInputChange(e);
+              }}
             />
           </div>
           <div className="separator">Inställningar för utskrift</div>
