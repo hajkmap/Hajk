@@ -15,7 +15,9 @@ class LocationModel {
     this.source = new VectorSource({ wrapX: false });
     this.layer = new VectorLayer({
       source: this.source,
-      name: "geolocation-layer",
+      layerType: "system",
+      name: "pluginLocation",
+      caption: "Location layer",
     });
     this.map.addLayer(this.layer);
 

@@ -14,6 +14,7 @@ export default class FmeModel {
     this.active = false;
     this.source = new VectorSource();
     this.vector = new VectorLayer({
+      layerType: "system",
       source: this.source,
       name: "drawLayer",
     });

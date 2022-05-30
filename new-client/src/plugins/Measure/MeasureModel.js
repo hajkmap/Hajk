@@ -13,7 +13,9 @@ class MeasureModel {
     this.localObserver = settings.localObserver;
     this.source = new VectorSource();
     this.vector = new VectorLayer({
+      layerType: "system",
       name: "pluginMeasure",
+      caption: "Measure layer",
       source: this.source,
       style: this.createStyle,
     });
