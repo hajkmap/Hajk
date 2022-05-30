@@ -8,7 +8,6 @@ import LayerInfo from "./LayerInfo.js";
 import { equals } from "ol/extent";
 import { delay } from "../../utils/Delay";
 import { hfetch, overrideLayerSourceParams } from "utils/FetchWrapper";
-import WMSServerType from "ol/source/WMSServerType";
 
 class WMSLayer {
   constructor(config, proxyUrl, globalObserver) {
@@ -90,8 +89,10 @@ class WMSLayer {
           config.minMaxZoomAlertOnToggleOnly || false,
       });
 
+      config.useCustomHiDpi = config.useCustomHiDpi || false;
+
       if (config.useCustomHiDpi) {
-        this.applyHiDpiTileLoader(config.serverType, this.layer.getSource());
+        this.applyCustomHiDpiTileLoader(this.layer.getSource(), config);
       }
     }
 
@@ -103,7 +104,7 @@ class WMSLayer {
     this.bindHandlers();
   }
 
-  applyHiDpiTileLoader(serverType, source) {
+  applyCustomHiDpiTileLoader(source, config) {
     // Experimental
     //
     // This tileLoader makes it possible to use specific dpi:s for specific ratios.
@@ -112,76 +113,49 @@ class WMSLayer {
     // ask the server for a tile with size 123x123 and dpi 123, which you probably wont
     // have cached server side.
     //
-    // Using this tileLoader and this example:
-    // const pixelRatios = [
-    //   { pxRatio: 0, dpi: 90 },
-    //   { pxRatio: 2, dpi: 180 },
-    //   { pxRatio: 3, dpi: 270 },
-    // ];
-    //
     // Note that the dpi:s above needs to also be configured server side to make the cache work.
     //
     // a pixelRatio of 0 to 2 would return dpi 90 and width and height 256 * 1 = 256
     // a pixelRatio of 2 to 3 would return dpi 180 and width and height 256 * 2 = 512
     // a pixelRatio of 3 to infinity would return dpi 270 and width and height 256 * 3 = 768
 
-    const pxRatio = window.devicePixelRatio;
+    // Layer config example:
+    // "useCustomHiDpi": true,
+    // "customHiDpiList": [
+    //   { "pxRatio": 0, "dpi": 90 },
+    //   { "pxRatio": 2, "dpi": 180 },
+    //   { "pxRatio": 3, "dpi": 270 }
+    // ]
 
-    // These values should come from config, not hard coded....
-    // TODO: Move to config
-    const pixelRatios = [
-      { pxRatio: 0, dpi: 90 },
-      { pxRatio: 2, dpi: 180 },
-      { pxRatio: 3, dpi: 270 },
-    ];
+    // Is it properly configured?
+    if (!config?.customHiDpiList?.length) {
+      return;
+    }
+
+    // Get the list of available ratios from config and sort it correctly.
+    const pixelRatios = config.customHiDpiList.sort((a, b) =>
+      a.pxRatio > b.pxRatio ? 1 : b.pxRatio > a.pxRatio ? -1 : 0
+    );
+
+    const pxRatio = window.devicePixelRatio;
 
     // Find the appropriate pixel ratio and dpi for the current device.
     const targetRatio = pixelRatios.reduce((a, b) => {
       return a.pxRatio <= pxRatio && b.pxRatio > pxRatio ? a : b;
     });
 
-    const getDpiQs = (() => {
-      // This method will return the correct dpi querystring for each of the supported server types.
-      // This is a factory that sets the correct function once before usage.
-      // Not that this method is invoked directly to set the correct function.
-      if (serverType === WMSServerType.GEOSERVER) {
-        return (src, dpi) => {
-          return `${src}&FORMAT_OPTIONS=dpi%3A${dpi}`;
-        };
-      } else if (serverType === WMSServerType.MAPSERVER) {
-        return (src, dpi) => {
-          // According to docs this is correct but it's not tested.
-          return `${src}&MAP_RESOLUTION=${dpi}`;
-        };
-      } else if (
-        serverType === WMSServerType.QGIS ||
-        serverType === WMSServerType.CARMENTA_SERVER
-      ) {
-        return (src, dpi) => {
-          // According to docs this is correct but it's not tested.
-          return `${src}&DPI=${dpi}`;
-        };
-      } else {
-        // Something is wrong in config, let the developer know this.
-        console.warn(
-          `applyHiDpiTileLoader: Server type: '${serverType}' is not supported, check your settings.`
-        );
-      }
-    })();
-
-    // regular expressions to find params in URI
-    const regexW = /WIDTH=([0-9]{1,3})/gi;
-    const regexH = /HEIGHT=([0-9]{1,3})/gi;
-
-    // Calculate the correct tile size
-    const wh = (targetRatio.pxRatio || 1) * 256;
+    // Calculate the correct tile size. No decimals allowed.
+    const wh = Math.round((targetRatio.pxRatio || 1) * 256);
 
     source.setTileLoadFunction((tile, src) => {
-      // We simply manipulate the src string.
-      // We could have used an url generator but this is speedier and creates no stray objects.
-      src = src.replace(regexW, `WIDTH=${wh}`).replace(regexH, `HEIGHT=${wh}`);
-      tile.getImage().src = getDpiQs(src, targetRatio.dpi);
-      src = null;
+      let url = new URL(src);
+      url.searchParams.set("WIDTH", wh);
+      url.searchParams.set("HEIGHT", wh);
+      url.searchParams.set("FORMAT_OPTIONS", `dpi:${targetRatio.dpi}`); // Support GEOSERVER
+      url.searchParams.set("DPI", targetRatio.dpi); // Support QGIS & CARMENTA_SERVER
+      url.searchParams.set("MAP_RESOLUTION", targetRatio.dpi); // Support MAPSERVER
+      tile.getImage().src = url.toString();
+      url = null;
     });
   }
 

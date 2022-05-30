@@ -154,6 +154,7 @@ export default class ConfigMapper {
         singleTile: args.singleTile || false,
         hidpi: args.hidpi,
         useCustomHiDpi: args.useCustomHiDpi,
+        customHiDpiList: args.customHiDpiList,
         customRatio: args.customRatio,
         imageFormat: args.imageFormat || "image/png",
         serverType:
