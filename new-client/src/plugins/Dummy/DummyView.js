@@ -37,12 +37,35 @@ const ButtonWithBorder = styled(Button)(({ border, theme }) => ({
 // Check out how the sx-prop works further down.
 
 function DummyView(props) {
+  // We're gonna need to access the snackbar-methods. Let's use the provided hook.
   const { closeSnackbar, enqueueSnackbar } = useSnackbar();
-  const [state, setState] = React.useState({
-    counter: 0,
-    borderColor: "#fff",
-  });
+  // We're gonna need to use the event-observers, let's destruct them so that we can
+  // get a hold of them easily. The localObserver can be accessed directly via the props:
+  const { localObserver } = props;
+  // The globalObserver can be accessed on the app (which is sent via the props):
+  const { globalObserver } = props.app;
+  // We're gonna want to keep track of some state... Let's use the State hook.
+  // If you want to read up on how state is managed in functional components, see: https://reactjs.org/docs/hooks-state.html
+  const [counter, setCounter] = React.useState(0);
+  const [borderColor, setBorderColor] = React.useState("#FFFFFF");
+  // You don’t have to use many state variables. State variables can hold objects and arrays just fine,
+  // so you can still group related data together. However, unlike this.setState in a class, updating a
+  // state variable always replaces it instead of merging it. The grouped state could look something like this:
+  // const [someState, setSomeState] = React.useState({
+  //   counter: 0,
+  //   borderColor: "#FFFFFF",
+  // });
+  // So how would you go about updating the grouped state? Well, all you have to do is to make sure
+  // to merge the old state manually. For example, to increment the counter, but keep the
+  // border-color constant, we can do:
+  // setSomeState((state) => ({...state, counter: state.counter + 1}))
 
+  // We've already covered the State-hook. Let's look into another one. The useCallback-hook
+  // returns a memoized callback (cached, only computed again when the inputs in the dependency
+  // array changes). Why do we want to memoize this function? It only returns some JSX? Well,
+  // since we want to use this function in a useEffect-hook (more on that later) we want to make
+  // sure that this function does not change on every render. (If it would, the useEffect would run
+  // on every render, which we want to avoid).
   const renderDrawerContent = React.useCallback(() => {
     return (
       // The sx-prop gives us some short hand commands, for example, the paddings below
@@ -55,54 +78,28 @@ function DummyView(props) {
           knapp uppe i headern. När du trycker på knappen visas det här
           innehållet i sidopanelen.
         </Typography>
-        <Typography variant="body1">
-          Lorem ipsum dolor sit amet, sit enim montes aliquam. Cras non lorem,
-          rhoncus condimentum, irure et ante. Pulvinar suscipit odio ante, et
-          tellus a enim, wisi ipsum, vel rhoncus eget faucibus varius, luctus
-          turpis nibh vel odio nulla pede. Consectetuer commodo at, ante risus
-          amet nec sollicitudin cras, rhoncus diam pharetra in, tristique leo
-          dictumst ullamcorper proin libero, et turpis laoreet nonummy
-          adipiscing quam mollis. Sed erat cum magna id, iaculis sed porta,
-          euismod nisl consequat leo in lectus, suspendisse tincidunt vehicula
-          pellentesque eget in justo. Mattis dolor nec, sapien magnis ultricies
-          maecenas per urna aperiam, justo aliquam at ut, ut urna quam
-          parturient pharetra feugiat, est sit. Sollicitudin cum tempor.
-          Suscipit eros aenean viverra velit. Interdum varius vitae, lacus
-          sapien ut ipsum et ut. Lobortis pulvinar a. Blandit suspendisse proin
-          integer. Aliquam sit, consectetuer sed molestie mauris inceptos. Et
-          sit semper semper, ante donec dictum. Est rhoncus sed vestibulum
-          vestibulum, sociis eleifend torquent eros, aliquam nulla et mattis
-          nulla augue leo, pellentesque cras ultrices dignissim sed, id nunc
-          vitae nulla consectetuer. Sed nam tincidunt, aliquam elit justo netus,
-          vestibulum nulla nibh sagittis nulla, id urna. Lorem libero mauris
-          sit. Amet eu id maecenas. Itaque nulla ut interdum nibh. Arcu
-          vulputate adipiscing donec nunc, cras id sodales sit. Nulla sapien sed
-          sagittis scelerisque, condimentum sollicitudin nibh donec scelerisque
-          conubia, adipiscing dictumst laoreet id, eget augue eu accumsan. Justo
-          proin sit tempor, lacus vestibulum non aliquam et id est, odio neque
-          elit vestibulum dapibus elit, eros et sapien malesuada vehicula. Neque
-          facilisis, suspendisse wisi in. Ultrices a nam morbi, faucibus ligula
-          tortor, dui consectetuer non accumsan, suspendisse semper lacinia
-          tincidunt sed sem voluptatem, in non. Justo amet sapien lacus id ipsum
-          orci, sed integer sem at lacinia dui pede, aliquam ridiculus vel
-          faucibus vivamus sed laoreet, lectus neque vitae felis. Tellus nisl
-          tristique, in rutrum viverra sollicitudin nunc mus, aenean in, vel vel
-          sed, massa ac deserunt volutpat mollis maecenas lacinia. Commodo
-          lectus at sapien nascetur pede aliquam, mauris sodales dolor sit
-          vitae, egestas sed lobortis lacinia, a nisl molestie in quis orci.
-          Velit nec. Cubilia nulla wisi, suspendisse justo lacus consectetuer
-          integer vestibulum, dui proin vulputate metus, etiam sollicitudin
-          pellentesque sapien. Ipsum risus, est ligula pede mauris. Arcu fusce
-          id ac, lacus tempus cubilia, enim auctor aliquam arcu nibh. Nibh
-          mauris, aenean neque facilisis, enim justo purus nullam et id, donec
-          vehicula. Vitae tellus quis enim dui auctor.
-        </Typography>
       </Box>
     );
-  }, []);
+  }, []); // <= dependency array. (Here we can add inputs that would cause the callback to be re-calculated).
 
+  // Another hook that is used a lot in functional components is the useEffect-hook.
+  // Mutations, subscriptions, timers, logging, and other side effects are not allowed inside the main body
+  // of a function component (referred to as React’s render phase). Doing so will lead to confusing bugs
+  // and inconsistencies in the UI. Instead, use the useEffect-hook. The function passed to useEffect will run after
+  // the render is committed to the screen. For more information, see: https://reactjs.org/docs/hooks-reference.html#useeffect
+
+  // When moving from Class-based components to Functional components i've seen several developers trying to mimic the
+  // constructor (which is obviously only present in Class-based components) by using the useEffect-hook. The useEffect-hook
+  // *could* be used in a 'constructor like' fashion (by leaving the dependency array empty, making the effect only run once).
+  // But be aware! The effect runs AFTER the initial render, in contrast to the 'real' constructor which runs before the initial
+  // render. To get around this, i would suggest to create a custom-hook instead. (To be fair, constructor-like behavior is rarely
+  // needed in functional components. But sometimes it **is** needed, and i thought that some clarification regarding how to work
+  // around this could be valid).
+
+  // Well, here we use a useEffect to publish a message on the global-observer (after the initial render).
+  // The message sent is used to render whatever 'renderDrawerContent' returns in Hajks drawer.
   React.useEffect(() => {
-    props.app.globalObserver.publish("core.addDrawerToggleButton", {
+    globalObserver.publish("core.addDrawerToggleButton", {
       value: "dummy",
       ButtonIcon: BugReportIcon,
       caption: "Dummyverktyg",
@@ -110,7 +107,10 @@ function DummyView(props) {
       order: 100,
       renderDrawerContent: renderDrawerContent,
     });
-  }, [props.app.globalObserver, renderDrawerContent]);
+  }, [globalObserver, renderDrawerContent]); // <= The dependency array. Since we reference the global-observer and 'renderDrawerContent' we have to include these.
+  // There is a lot more to say regarding the useEffect-hook, but i'll leave that to you to read up on. Just a couple of tips:
+  // - Remember the cleanup-function! Especially when you're working with subscriptions.
+  // - Remember that you can use several useEffect-hooks! Maybe you want to do something when 'counter' changes?
 
   const buttonClick = () => {
     // We have access to plugin's model:
@@ -118,13 +118,13 @@ function DummyView(props) {
 
     // We have access to plugin's observer. Below we publish an event that the parent
     // component is listing to, see dummy.js for how to subscribe to events.
-    props.localObserver.publish(
+    localObserver.publish(
       "dummyEvent",
       "This has been sent from DummyView using the Observer"
     );
 
     // And we can of course access this component's state
-    setState((prevState) => ({ ...prevState, counter: prevState.counter + 1 }));
+    setCounter(counter + 1);
   };
 
   // Event handler for a button that shows a global info message when clicked
@@ -134,7 +134,7 @@ function DummyView(props) {
 
   const showIntroduction = () => {
     // Show the introduction guide, see components/Introduction.js
-    props.app.globalObserver.publish("core.showIntroduction");
+    globalObserver.publish("core.showIntroduction");
   };
 
   // A more complicate snackbar example, this one with an action button and persistent snackbar
@@ -178,12 +178,12 @@ function DummyView(props) {
     props.updateCustomProp("color", getRandomHexColorString());
   };
 
-  // Make it possible to programatically update the border color of a button
+  // Make it possible to programmatically update the border color of a button
   const updateBorderColor = () => {
     // Get a random hex color string...
     const randomColor = getRandomHexColorString();
-    // ...and update the state!
-    setState((prevState) => ({ ...prevState, borderColor: randomColor }));
+    // ...and update the border-color state!
+    setBorderColor(randomColor);
   };
 
   return (
@@ -196,8 +196,7 @@ function DummyView(props) {
         onClick={buttonClick}
         sx={{ marginBottom: 2 }} // The sx-prop is available on all MUI-components!
       >
-        {state.test ||
-          `Clicked ${state.counter} ${state.counter === 1 ? "time" : "times"}`}
+        {`Clicked ${counter} ${counter === 1 ? "time" : "times"}`}
       </Button>
       <ButtonWithBorder
         border="blue"
@@ -231,7 +230,7 @@ function DummyView(props) {
         Set random title and color
       </ButtonWithBottomMargin>
       <ButtonWithBorder
-        border={state.borderColor} // Let's keep the borderColor in state so that we can update it!
+        border={borderColor} // Let's keep the borderColor in state so that we can update it!
         sx={{ marginBottom: 2 }} // The sx-prop is available on all styled components!
         variant="contained"
         fullWidth={true}
