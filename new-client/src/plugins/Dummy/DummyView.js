@@ -1,19 +1,10 @@
 import React from "react";
-import PropTypes from "prop-types";
 
 import { styled } from "@mui/material/styles";
-import {
-  Box,
-  Button,
-  MenuItem,
-  Select,
-  Slider,
-  Typography,
-} from "@mui/material";
+import { Box, Button, Typography } from "@mui/material";
 import BugReportIcon from "@mui/icons-material/BugReport";
 
-import { getRenderPixel } from "ol/render";
-import { withSnackbar } from "notistack";
+import { useSnackbar } from "notistack";
 
 // Hajk components are primarily styled in two ways:
 // - Using the styled-utility, see: https://mui.com/system/styled/
@@ -45,48 +36,14 @@ const ButtonWithBorder = styled(Button)(({ border, theme }) => ({
 // All mui-components (and all styled components, even styled div:s!) will have access to the sx-prop.
 // Check out how the sx-prop works further down.
 
-class DummyView extends React.PureComponent {
-  // Initialize state - this is the correct way of doing it nowadays.
-  state = {
-    activeCompareLayer: "-100",
+function DummyView(props) {
+  const { closeSnackbar, enqueueSnackbar } = useSnackbar();
+  const [state, setState] = React.useState({
     counter: 0,
-    slider: 50,
     borderColor: "#fff",
-  };
+  });
 
-  // propTypes and defaultProps are static properties, declared
-  // as high as possible within the component code. They should
-  // be immediately visible to other devs reading the file,
-  // since they serve as documentation.
-  static propTypes = {
-    model: PropTypes.object.isRequired,
-    app: PropTypes.object.isRequired,
-    localObserver: PropTypes.object.isRequired,
-    enqueueSnackbar: PropTypes.func.isRequired,
-    closeSnackbar: PropTypes.func.isRequired,
-  };
-
-  static defaultProps = {};
-
-  constructor(props) {
-    // If you're not using some of properties defined below, remove them from your code.
-    // They are shown here for demonstration purposes only.
-    super(props);
-    this.model = this.props.model;
-    this.localObserver = this.props.localObserver;
-    this.globalObserver = this.props.app.globalObserver;
-
-    this.globalObserver.publish("core.addDrawerToggleButton", {
-      value: "dummy",
-      ButtonIcon: BugReportIcon,
-      caption: "Dummyverktyg",
-      drawerTitle: "Dummyverktyg",
-      order: 100,
-      renderDrawerContent: this.renderDrawerContent,
-    });
-  }
-
-  renderDrawerContent = () => {
+  const renderDrawerContent = React.useCallback(() => {
     return (
       // The sx-prop gives us some short hand commands, for example, the paddings below
       // will be set to theme.spacing(2), and not 2px! Make sure to read up on how the sx-prop
@@ -142,37 +99,46 @@ class DummyView extends React.PureComponent {
         </Typography>
       </Box>
     );
-  };
+  }, []);
 
-  buttonClick = () => {
+  React.useEffect(() => {
+    props.app.globalObserver.publish("core.addDrawerToggleButton", {
+      value: "dummy",
+      ButtonIcon: BugReportIcon,
+      caption: "Dummyverktyg",
+      drawerTitle: "Dummyverktyg",
+      order: 100,
+      renderDrawerContent: renderDrawerContent,
+    });
+  }, [props.app.globalObserver, renderDrawerContent]);
+
+  const buttonClick = () => {
     // We have access to plugin's model:
-    console.log("Dummy can access model's map:", this.model.getMap());
+    console.log("Dummy can access model's map:", props.model.getMap());
 
     // We have access to plugin's observer. Below we publish an event that the parent
     // component is listing to, see dummy.js for how to subscribe to events.
-    this.localObserver.publish(
+    props.localObserver.publish(
       "dummyEvent",
       "This has been sent from DummyView using the Observer"
     );
 
     // And we can of course access this component's state
-    this.setState((prevState) => ({
-      counter: prevState.counter + 1,
-    }));
+    setState((prevState) => ({ ...prevState, counter: prevState.counter + 1 }));
   };
 
   // Event handler for a button that shows a global info message when clicked
-  showDefaultSnackbar = () => {
-    this.props.enqueueSnackbar("Yay, a nice message with default styling.");
+  const showDefaultSnackbar = () => {
+    enqueueSnackbar("Yay, a nice message with default styling.");
   };
 
-  showIntroduction = () => {
+  const showIntroduction = () => {
     // Show the introduction guide, see components/Introduction.js
-    this.globalObserver.publish("core.showIntroduction");
+    props.app.globalObserver.publish("core.showIntroduction");
   };
 
   // A more complicate snackbar example, this one with an action button and persistent snackbar
-  showAdvancedSnackbar = () => {
+  const showAdvancedSnackbar = () => {
     const action = (key) => (
       <>
         <Button
@@ -184,7 +150,7 @@ class DummyView extends React.PureComponent {
         </Button>
         <Button
           onClick={() => {
-            this.props.closeSnackbar(key);
+            closeSnackbar(key);
           }}
         >
           {"Dismiss"}
@@ -192,7 +158,7 @@ class DummyView extends React.PureComponent {
       </>
     );
 
-    this.props.enqueueSnackbar("Oops, a message with error styling!", {
+    enqueueSnackbar("Oops, a message with error styling!", {
       variant: "error",
       persist: true,
       action,
@@ -200,185 +166,81 @@ class DummyView extends React.PureComponent {
   };
 
   // Generate a custom HEX color string
-  getRandomHexColorString = () => {
+  const getRandomHexColorString = () => {
     return `#${((Math.random() * 0xffffff) << 0).toString(16)}`;
   };
 
   // Make it possible to programatically update Window's title/color
-  handleClickOnRandomTitle = () => {
+  const handleClickOnRandomTitle = () => {
     // We use the updateCustomProp mehtod which is passed down from parent
     // component as a prop to this View.
-    this.props.updateCustomProp("title", new Date().getTime().toString()); // Generate a timestamp
-    this.props.updateCustomProp("color", this.getRandomHexColorString());
+    props.updateCustomProp("title", new Date().getTime().toString()); // Generate a timestamp
+    props.updateCustomProp("color", getRandomHexColorString());
   };
 
   // Make it possible to programatically update the border color of a button
-  updateBorderColor = () => {
+  const updateBorderColor = () => {
     // Get a random hex color string...
-    const randomColor = this.getRandomHexColorString();
+    const randomColor = getRandomHexColorString();
     // ...and update the state!
-    this.setState({
-      borderColor: randomColor,
-    });
+    setState((prevState) => ({ ...prevState, borderColor: randomColor }));
   };
 
-  getBaseLayers() {
-    return [
-      { name: "-100", caption: "None" },
-      ...this.props.app.map
-        .getLayers()
-        .getArray()
-        .filter((l) => l.get("layerType") === "base")
-        .map((l) => l.getProperties()),
-    ];
-  }
-
-  renderCompareLayerOptions = () => {
-    return this.getBaseLayers().map((l, i) => (
-      <MenuItem value={l.name} key={i}>
-        {l.caption}
-      </MenuItem>
-    ));
-  };
-
-  prerenderHandler = (event) => {
-    console.log("event: ", event);
-    const ctx = event.context;
-    const mapSize = this.props.app.map.getSize();
-    const width = mapSize[0] * (this.state.slider / 100);
-    const tl = getRenderPixel(event, [width, 0]);
-    const tr = getRenderPixel(event, [mapSize[0], 0]);
-    const bl = getRenderPixel(event, [width, mapSize[1]]);
-    const br = getRenderPixel(event, mapSize);
-
-    ctx.save();
-    ctx.beginPath();
-    ctx.moveTo(tl[0], tl[1]);
-    ctx.lineTo(bl[0], bl[1]);
-    ctx.lineTo(br[0], br[1]);
-    ctx.lineTo(tr[0], tr[1]);
-    ctx.closePath();
-    ctx.clip();
-  };
-
-  postrenderHandler = (event) => {
-    console.log("event: ", event);
-    const ctx = event.context;
-    ctx.restore();
-  };
-
-  handleCompareLayerChange = (e) => {
-    this.setState({ activeCompareLayer: e.target.value }, () => {
-      const mapLayers = this.props.app.map.getLayers().getArray();
-      // Grab previous compare layer and hide them
-      mapLayers
-        .filter((l) => l.get("isActiveCompareLayer") === true)
-        .forEach((l) => {
-          l.set("visible", false, true);
-          l.set("isActiveCompareLayer", false);
-          l.un("prerender", this.prerenderHandler);
-          l.un("postrender", this.postrenderHandler);
-          console.log("l for deactivation: ", l);
-        });
-
-      if (e.target.value === "-100") {
-        // Special value "None" was selected - deactive comparer functionality
-      } else {
-        // Activate selected later as comparer
-        const l = mapLayers.filter((l) => l.get("name") === e.target.value)[0];
-
-        l.set("visible", true, true);
-        l.set("isActiveCompareLayer", true);
-
-        l.on("prerender", this.prerenderHandler);
-        l.on("postrender", this.postrenderHandler);
-      }
-    });
-  };
-
-  handleSliderChange = (event, newValue) => {
-    this.setState({ slider: newValue }, () => {
-      this.props.app.map.render();
-    });
-  };
-
-  render() {
-    return (
-      <>
-        <Select
-          labelId="demo-simple-select-label"
-          id="demo-simple-select"
-          value={this.state.activeCompareLayer}
-          onChange={this.handleCompareLayerChange}
-        >
-          {this.renderCompareLayerOptions()}
-        </Select>
-        {this.state.activeCompareLayer !== "-100" && (
-          <Slider
-            value={this.state.slider}
-            onChange={this.handleSliderChange}
-            aria-labelledby="continuous-slider"
-          />
-        )}
-        <Button
-          variant="contained"
-          fullWidth={true}
-          // onChange={(e) => { console.log(e) }}
-          // ^ Don't do this. Closures here are inefficient. Use the below:
-          onClick={this.buttonClick}
-          sx={{ marginBottom: 2 }} // The sx-prop is available on all MUI-components!
-        >
-          {this.state.test ||
-            `Clicked ${this.state.counter} ${
-              this.state.counter === 1 ? "time" : "times"
-            }`}
-        </Button>
-        <ButtonWithBorder
-          border="blue"
-          sx={{ marginBottom: 2 }} // The sx-prop is available on all styled components!
-          variant="contained"
-          fullWidth={true}
-          onClick={this.showDefaultSnackbar}
-        >
-          Show default snackbar
-        </ButtonWithBorder>
-        <ButtonWithBottomMargin
-          variant="contained"
-          fullWidth={true}
-          onClick={this.showAdvancedSnackbar}
-        >
-          Show error snackbar
-        </ButtonWithBottomMargin>
-        <ButtonWithBottomMargin
-          variant="contained"
-          fullWidth={true}
-          color="primary"
-          onClick={this.showIntroduction}
-        >
-          Show Hajk Introduction
-        </ButtonWithBottomMargin>
-        <ButtonWithBottomMargin
-          variant="contained"
-          fullWidth={true}
-          onClick={this.handleClickOnRandomTitle}
-        >
-          Set random title and color
-        </ButtonWithBottomMargin>
-        <ButtonWithBorder
-          border={this.state.borderColor} // Let's keep the borderColor in state so that we can update it!
-          sx={{ marginBottom: 2 }} // The sx-prop is available on all styled components!
-          variant="contained"
-          fullWidth={true}
-          onClick={this.updateBorderColor} // When we click the button, we update the borderColor.
-        >
-          Set random border color
-        </ButtonWithBorder>
-      </>
-    );
-  }
+  return (
+    <>
+      <Button
+        variant="contained"
+        fullWidth={true}
+        // onChange={(e) => { console.log(e) }}
+        // ^ Don't do this. Closures here are inefficient. Use the below:
+        onClick={buttonClick}
+        sx={{ marginBottom: 2 }} // The sx-prop is available on all MUI-components!
+      >
+        {state.test ||
+          `Clicked ${state.counter} ${state.counter === 1 ? "time" : "times"}`}
+      </Button>
+      <ButtonWithBorder
+        border="blue"
+        sx={{ marginBottom: 2 }} // The sx-prop is available on all styled components!
+        variant="contained"
+        fullWidth={true}
+        onClick={showDefaultSnackbar}
+      >
+        Show default snackbar
+      </ButtonWithBorder>
+      <ButtonWithBottomMargin
+        variant="contained"
+        fullWidth={true}
+        onClick={showAdvancedSnackbar}
+      >
+        Show error snackbar
+      </ButtonWithBottomMargin>
+      <ButtonWithBottomMargin
+        variant="contained"
+        fullWidth={true}
+        color="primary"
+        onClick={showIntroduction}
+      >
+        Show Hajk Introduction
+      </ButtonWithBottomMargin>
+      <ButtonWithBottomMargin
+        variant="contained"
+        fullWidth={true}
+        onClick={handleClickOnRandomTitle}
+      >
+        Set random title and color
+      </ButtonWithBottomMargin>
+      <ButtonWithBorder
+        border={state.borderColor} // Let's keep the borderColor in state so that we can update it!
+        sx={{ marginBottom: 2 }} // The sx-prop is available on all styled components!
+        variant="contained"
+        fullWidth={true}
+        onClick={updateBorderColor} // When we click the button, we update the borderColor.
+      >
+        Set random border color
+      </ButtonWithBorder>
+    </>
+  );
 }
 
-// Exporting like this adds some props to DummyView.
-// withSnackbar adds two functions (enqueueSnackbar() and closeSnackbar())
-// that can be used throughout the Component.
-export default withSnackbar(DummyView);
+export default DummyView;
