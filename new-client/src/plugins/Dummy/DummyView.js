@@ -40,10 +40,8 @@ function DummyView(props) {
   // We're gonna need to access the snackbar-methods. Let's use the provided hook.
   const { closeSnackbar, enqueueSnackbar } = useSnackbar();
   // We're gonna need to use the event-observers, let's destruct them so that we can
-  // get a hold of them easily. The localObserver can be accessed directly via the props:
-  const { localObserver } = props;
-  // The globalObserver can be accessed on the app (which is sent via the props):
-  const { globalObserver } = props.app;
+  // get a hold of them easily. The observers can be accessed directly via the props:
+  const { globalObserver, localObserver } = props;
   // We're gonna want to keep track of some state... Let's use the State hook.
   // If you want to read up on how state is managed in functional components, see: https://reactjs.org/docs/hooks-state.html
   const [counter, setCounter] = React.useState(0);
