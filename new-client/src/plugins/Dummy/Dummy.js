@@ -66,7 +66,7 @@ function Dummy(props) {
   }, [localObserver]); // <-- Dependency array, specifies which objects changes will trigger the effect to run
 
   // Used to update title/color (or any other state variable…). Title and color are passed on to BaseWindowPlugin as props,
-  // and will result in updating the Window's color/title. Note that we put this method here, in dummy.js, and then pass it on
+  // and will result in updating the Window's color/title. Note that we put this method here, in Dummy.js, and then pass it on
   // to DummyView as a prop. It is then called in DummyView when user clicks a button. This is just made for illustrating
   // the concept of passing on props to BaseWindowPlugin from a plugin's view.
   const updateCustomProp = (prop, value) => {
