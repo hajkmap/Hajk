@@ -1,4 +1,5 @@
-// Generic imports – all plugins need these
+// Generic imports – all plugins need these.
+// (BaseWindowPlugin can be substituted with DialogWindowPlugin though.)
 import React from "react";
 import BaseWindowPlugin from "../BaseWindowPlugin";
 
@@ -23,26 +24,26 @@ function Dummy(props) {
   // We're gonna want to initiate an observer which can be used for communication within the component.
   // We must remember that in functional components all code within the component runs on every render.
   // This means that if we would initiate the observer as follow:
-  // const localObserver = Observer(); we would create a new observer on every render... Not good.
+  // [Don't do  this!] const localObserver = Observer(); we would create a new observer on every render... Not good.
   //
   // So how would we combat this? One way would be to use the useRef-hook, as follows:
   // const localObserver = React.useRef(Observer());
-  // The useRef-hook memoized the value and does not create a new reference on every render. The draw-back
+  // The useRef hook memoizes the value and does not create a new reference on every render. The drawback
   // of this approach is that in order to access the variable we have to do as follows:
   // const observer = localObserver.current;
   //
-  // There is some debate regarding my next statement, but my idea is that the useState-hook would be
+  // There is some debate regarding my next statement, but my idea is that the useState hook would be
   // a better fit in this case... Why? Well, we combat the issue with re-assignments on every render (since
-  // the useState-hook also persists the value) and we do not have to use .current to access the value.
+  // the useState hook also persists the value) and we do not have to use ".current" property to access the value.
   //
   // Some criticism regarding this approach might be related to rendering issues if we for some reason happen
   // to update the state (which would be cumbersome since we're not exposing the updater) or that we're using
-  // an anti-pattern since we're not using the state as intended. I don't agree, especially since the useRef-hook
-  // is basically the useState-hook with some synthetic sugar (useRef is basically useState({current: initialValue})[0]).
+  // an anti-pattern since we're not using the state as intended. I don't agree, especially since the useRef hook
+  // is basically the useState hook with some synthetic sugar (useRef is basically useState({current: initialValue})[0]).
   //
-  // I hope that the explanation will help you. Anyways, let's initiate the local-observer!
+  // I hope that the explanation will help you. Anyways, let's initiate the local observer in the following, recommended fashion:
   const [localObserver] = React.useState(Observer());
-  // We're also gonna initiate the model (which should/could hold the plugin-logic so we're not bloating the components)
+  // We're also gonna initiate the model (which should/could hold the plugin's logic, so we're not bloating the components).
   const [dummyModel] = React.useState(
     new DummyModel({
       localObserver: localObserver,
@@ -50,9 +51,10 @@ function Dummy(props) {
       map: props.map,
     })
   );
-  // Subscriptions to events etc. should be done in the useEffect-hooks. Pay attention to the
-  // return (cleanup) function which makes sure to unsubscribe to the event when the component unmounts.
-  // More information regarding the useEffect-hook can be found in ./DummyView.js
+
+  // Subscriptions to events etc. should be done in the useEffect hooks. Pay attention to the
+  // return (cleanup) function which makes sure to unsubscribe from the event when the component unmounts.
+  // More information regarding the useEffect hook can be found in ./DummyView.js
   React.useEffect(() => {
     const dummyEvent = localObserver.subscribe("dummyEvent", (message) => {
       console.log(message);
@@ -61,7 +63,7 @@ function Dummy(props) {
     return () => {
       localObserver.unsubscribe(dummyEvent);
     };
-  }, [localObserver]); // <= Dependency array. On what input change should the effect run?
+  }, [localObserver]); // <-- Dependency array, specifies which objects changes will trigger the effect to run
 
   // Used to update title/color (or any other state variable…). Title and color are passed on to BaseWindowPlugin as props,
   // and will result in updating the Window's color/title. Note that we put this method here, in dummy.js, and then pass it on
@@ -77,7 +79,7 @@ function Dummy(props) {
     console.log("You just clicked the panel-header button!");
   };
 
-  // Render is now super-simplified compared to previous versions of Hajk3.
+  // Render is now super-simplified compared to previous versions of Hajk.
   // All common functionality that has to do with showing a Window, and rendering
   // Drawer or Widget buttons, as well as keeping the state of Window, are now
   // abstracted away to BaseWindowPlugin Component.
