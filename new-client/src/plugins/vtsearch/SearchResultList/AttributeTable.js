@@ -33,7 +33,7 @@ class AttributeTable extends React.Component {
       this.props.toolConfig.geoServer[this.props.searchResult.type]
         ?.defaultSortOrder,
     focusedRow: 0,
-    rows: this.getRows(),
+    rows: this.getRows(this.props.searchResult),
     exportCsvFile: false,
   };
 
@@ -100,7 +100,6 @@ class AttributeTable extends React.Component {
     });
     localObserver.subscribe("vt-export-search-result-list-done", (result) => {
       this.exportList = result;
-      debugger;
       this.#exportSearchResult();
     });
     if (this.showStopPoints)
@@ -120,10 +119,7 @@ class AttributeTable extends React.Component {
   };
 
   #getExportList = () => {
-    let features = this.getFeaturesFromSearchResult(this.exportList);
-    return features.map((value) => {
-      return value.properties;
-    });
+    return this.getRows(this.exportList);
   };
 
   #exportSearchResult = () => {
@@ -168,10 +164,8 @@ class AttributeTable extends React.Component {
   getColumns(resultList) {
     const { toolConfig } = this.props;
 
-    //let propertyKeys = this.getFeaturePropertiesKeys(searchResult);
     let propertyKeys = this.getFeaturePropertiesKeys(resultList);
     let attributeDisplayOrder =
-      //toolConfig.geoServer[searchResult.type]?.attributesToDisplay;
       toolConfig.geoServer[resultList.type]?.attributesToDisplay;
     propertyKeys = this.reorderPropertyKeys(
       attributeDisplayOrder,
@@ -192,9 +186,9 @@ class AttributeTable extends React.Component {
     });
   }
 
-  getRows() {
+  getRows(resultList) {
     const { searchResult } = this.props;
-    const features = this.getFeaturesFromSearchResult(searchResult);
+    const features = this.getFeaturesFromSearchResult(resultList);
     return features.map((feature, index) => {
       const properties = feature.properties
         ? feature.properties
@@ -319,6 +313,7 @@ class AttributeTable extends React.Component {
       direction: row.rowData.Direction,
     });
   };
+
   #renderCSVDownloadComponent = () => {
     return (
       <CSVDownload
