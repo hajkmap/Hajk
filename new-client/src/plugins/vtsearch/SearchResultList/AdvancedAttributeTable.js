@@ -3,6 +3,7 @@ import { withStyles } from "@material-ui/core/styles";
 
 import AttributeTable from "./AttributeTable";
 import SummaryTable from "./SummaryTable";
+import { CSVDownload } from "react-csv";
 
 const styles = (theme) => ({
   paper: { height: 240, marginBottom: 10, boxShadow: "none" },
@@ -19,6 +20,35 @@ class AdvancedAttributeTable extends React.Component {
   state = {
     rows: this.getRows(),
     summaryHeight: this.getSummarizationHeight(),
+    exportCsvFile: false,
+  };
+
+  constructor(props) {
+    super(props);
+    this.#bindSubscriptions();
+  }
+
+  #bindSubscriptions = () => {
+    const { localObserver } = this.props;
+    localObserver.subscribe("vt-export-search-journey-summary-table", () => {
+      this.#exportSearchResult();
+    });
+  };
+
+  #exportSearchResult = () => {
+    //The download csv component will download only when rendered, so it needs to
+    //be removed and then readded to trigger the download. Otherwise download will
+    //only be possible the first time the download button is clicked
+    this.setState({ exportCsvFile: false });
+    this.setState({ exportCsvFile: true });
+    this.setState({ exportCsvFile: false });
+  };
+
+  #getExportHeaders = () => {
+    let columns = this.getColumns();
+    return columns.map((value) => {
+      return { label: value.label, key: value.dataKey };
+    });
   };
 
   getSummarizationHeight() {
@@ -102,6 +132,17 @@ class AdvancedAttributeTable extends React.Component {
     });
     return summary;
   }
+
+  #renderCSVDownloadComponent = () => {
+    return (
+      <CSVDownload
+        data={this.getRows()}
+        headers={this.#getExportHeaders()}
+        filename="kartsidanExport_summaryTable.csv"
+        target="_self"
+      />
+    );
+  };
 
   render = () => {
     const {
