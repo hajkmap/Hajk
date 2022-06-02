@@ -30,8 +30,10 @@ class AdvancedAttributeTable extends React.Component {
 
   #bindSubscriptions = () => {
     const { localObserver } = this.props;
-    localObserver.subscribe("vt-export-search-journey-summary-table", () => {
-      this.#exportSearchResult();
+    localObserver.subscribe("vt-export-search-result-list-done", (result) => {
+      if (result.type === "journeys") {
+        this.#exportSearchResult();
+      }
     });
   };
 
@@ -153,6 +155,7 @@ class AdvancedAttributeTable extends React.Component {
 
     return (
       <>
+        {this.state.exportCsvFile && this.#renderCSVDownloadComponent()}
         <SummaryTable
           localObserver={localObserver}
           height={this.state.summaryHeight}
