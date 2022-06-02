@@ -76,9 +76,15 @@ export default class MapViewModel {
     });
 
     this.localObserver.subscribe("vt-close-all-Layer", () => {
-      this.map.getLayers().forEach((layer) => {
-        if (layer.get("type") === "vt-search-result-layer")
-          this.map.removeLayer(layer);
+      const layersToRemove = this.map
+        .getLayers()
+        .getArray()
+        .filter((layer) => {
+          if (layer.get("type") === "vt-search-result-layer") return layer;
+          return null;
+        });
+      layersToRemove.forEach((layer) => {
+        this.map.removeLayer(layer);
       });
     });
 
