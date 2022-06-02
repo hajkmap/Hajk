@@ -10,26 +10,54 @@ import { IconButton } from "@mui/material";
 
 import LayersIcon from "@mui/icons-material/Layers";
 import WallpaperIcon from "@mui/icons-material/Wallpaper";
+import GppMaybeIcon from "@mui/icons-material/GppMaybe";
+import Visibility from "@mui/icons-material/Visibility";
+import VisibilityOff from "@mui/icons-material/VisibilityOff";
 
 function DrawOrderListItem({ changeOrder, layer }) {
+  const [visible, setVisible] = useState(layer.get("opacity") !== 0);
+
+  const handleChangeVisible = () => {
+    layer.set("opacity", visible ? 0 : 1);
+    setVisible(!visible);
+  };
+
+  const getIconFromLayerType = (layerType) => {
+    switch (layerType) {
+      case "layer":
+      case "group":
+        return <LayersIcon />;
+      case "base":
+        return <WallpaperIcon />;
+      case "system":
+      default:
+        return <GppMaybeIcon />;
+    }
+  };
+
   return (
     <ListItem disablePadding>
-      <ListItemButton>
+      <ListItemButton
+        sx={{
+          opacity: visible ? 1 : 0.38,
+        }}
+        disableRipple={!visible}
+        disableTouchRipple={!visible}
+      >
         <ListItemIcon>
-          {layer.get("layerType") === "layer" ? (
-            <LayersIcon />
-          ) : (
-            <WallpaperIcon />
-          )}
+          {getIconFromLayerType(layer.get("layerType"))}
         </ListItemIcon>
         <ListItemText
           primary={layer.get("caption")}
           secondary={"z-index:" + layer.getZIndex()}
         />
-        <IconButton onClick={() => changeOrder(layer, +1)}>
+        <IconButton onClick={handleChangeVisible}>
+          {visible ? <VisibilityOff /> : <Visibility />}
+        </IconButton>
+        <IconButton disabled={!visible} onClick={() => changeOrder(layer, +1)}>
           <ArrowUpward />
         </IconButton>
-        <IconButton onClick={() => changeOrder(layer, -1)}>
+        <IconButton disabled={!visible} onClick={() => changeOrder(layer, -1)}>
           <ArrowDownward />
         </IconButton>
       </ListItemButton>
