@@ -46,6 +46,7 @@ class CoordinatesModel {
     this.source = new VectorSource();
     this.vector = new Vector({
       layerType: "system",
+      zIndex: 5000,
       name: "pluginCoordinate",
       caption: "Coordinate layer",
       source: this.source,

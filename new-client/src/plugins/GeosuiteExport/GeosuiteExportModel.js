@@ -46,6 +46,7 @@ class GeosuiteExportModel {
     this.#source = new VectorSource();
     this.#vector = new VectorLayer({
       layerType: "system",
+      zIndex: 5000,
       source: this.#source,
       name: "pluginGeoSuite",
       caption: "GeoSuite layer",

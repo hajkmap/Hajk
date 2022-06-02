@@ -29,6 +29,7 @@ class DrawModel {
     this.source = new VectorSource();
     this.vector = new VectorLayer({
       layerType: "system",
+      zIndex: 5000,
       name: "pluginDraw",
       caption: "Draw layer",
       source: this.source,

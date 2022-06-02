@@ -460,6 +460,7 @@ class EditModel {
 
     this.layer = new Vector({
       layerType: "system",
+      zIndex: 5000,
       name: "pluginEdit",
       caption: "Edit layer",
       source: this.vectorSource,
