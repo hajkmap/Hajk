@@ -8,6 +8,7 @@ import { AppBar, Tab, Tabs } from "@mui/material";
 import BackgroundSwitcher from "./components/BackgroundSwitcher.js";
 import LayerGroup from "./components/LayerGroup.js";
 import BreadCrumbs from "./components/BreadCrumbs.js";
+import DrawOrder from "./components/DrawOrder.js";
 
 // The styled-component below might seem unnecessary since we are using the sx-prop
 // on it as well. However, since we cannot use the sx-prop on a non-MUI-component
@@ -159,6 +160,7 @@ class LayersSwitcherView extends React.PureComponent {
           >
             <Tab label="Kartlager" />
             <Tab label="Bakgrund" />
+            <Tab label="Ritordning" />
           </Tabs>
         </StyledAppBar>
         <ContentWrapper>
@@ -173,6 +175,9 @@ class LayersSwitcherView extends React.PureComponent {
             map={this.props.map}
             app={this.props.app}
           />
+          {this.state.activeTab === 2 && (
+            <DrawOrder map={this.props.map} app={this.props.app} />
+          )}
         </ContentWrapper>
         {this.renderBreadCrumbs()}
       </Root>
