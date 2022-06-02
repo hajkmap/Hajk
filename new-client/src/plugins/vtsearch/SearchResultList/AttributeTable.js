@@ -98,16 +98,16 @@ class AttributeTable extends React.Component {
         focusedRow: foundRowIndex,
       });
     });
-    localObserver.subscribe("vt-export-search-result-list-done", (result) => {
-      const { searchResult } = this.props;
-      //window.alert(searchResult.id);
-      //window.alert(result);
-      debugger;
-      if (searchResult.id === result) {
-        this.exportList = searchResult;
-        this.#exportSearchResult();
+    localObserver.subscribe(
+      "vt-export-search-result-for-active-tab",
+      (activeTabId) => {
+        const { searchResult } = this.props;
+        if (searchResult.id === activeTabId) {
+          this.exportList = searchResult;
+          this.#exportSearchResult();
+        }
       }
-    });
+    );
     if (this.showStopPoints)
       localObserver.subscribe(
         "vt-show-stop-points-by-line",
