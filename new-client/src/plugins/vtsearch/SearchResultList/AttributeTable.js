@@ -123,11 +123,15 @@ class AttributeTable extends React.Component {
   };
 
   #exportSearchResult = () => {
+    const { localObserver } = this.props;
     //The download csv component will download only when rendered, so it needs to
     //be removed and then readded to trigger the download. Otherwise download will
     //only be possible the first time the download button is clicked
     this.setState({ exportCsvFile: false });
     this.setState({ exportCsvFile: true });
+    if (this.exportList.type === "journeys") {
+      localObserver.publish("vt-export-search-journey-summary-table");
+    }
   };
 
   getDisplayName = (key, resultList) => {

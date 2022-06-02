@@ -41,7 +41,6 @@ class AdvancedAttributeTable extends React.Component {
     //only be possible the first time the download button is clicked
     this.setState({ exportCsvFile: false });
     this.setState({ exportCsvFile: true });
-    this.setState({ exportCsvFile: false });
   };
 
   #getExportHeaders = () => {
