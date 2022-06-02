@@ -99,8 +99,14 @@ class AttributeTable extends React.Component {
       });
     });
     localObserver.subscribe("vt-export-search-result-list-done", (result) => {
-      this.exportList = result;
-      this.#exportSearchResult();
+      const { searchResult } = this.props;
+      //window.alert(searchResult.id);
+      //window.alert(result);
+      debugger;
+      if (searchResult.id === result) {
+        this.exportList = searchResult;
+        this.#exportSearchResult();
+      }
     });
     if (this.showStopPoints)
       localObserver.subscribe(

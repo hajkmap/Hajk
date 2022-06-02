@@ -228,7 +228,8 @@ class SearchResultListContainer extends React.Component {
     localObserver.subscribe("vt-export-search-result-clicked", () => {
       localObserver.publish(
         "vt-export-search-result-list-done",
-        this.searchResults[this.state.activeTabId]
+        //this.searchResults[this.state.activeTabId],
+        this.state.activeTabId
       );
     });
   };

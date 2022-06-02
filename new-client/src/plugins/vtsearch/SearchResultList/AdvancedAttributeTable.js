@@ -31,6 +31,7 @@ class AdvancedAttributeTable extends React.Component {
   #bindSubscriptions = () => {
     const { localObserver } = this.props;
     localObserver.subscribe("vt-export-search-result-list-done", (result) => {
+      window.alert("AdvAttrTable-subscribe");
       if (result.type === "journeys") {
         this.#exportSearchResult();
       }
