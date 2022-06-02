@@ -6,7 +6,7 @@ import ListItemIcon from "@mui/material/ListItemIcon";
 import ListItemText from "@mui/material/ListItemText";
 import ArrowUpward from "@mui/icons-material/ArrowUpward";
 import ArrowDownward from "@mui/icons-material/ArrowDownward";
-import { IconButton } from "@mui/material";
+import { Icon, IconButton } from "@mui/material";
 
 import LayersIcon from "@mui/icons-material/Layers";
 import WallpaperIcon from "@mui/icons-material/Wallpaper";
@@ -15,6 +15,9 @@ import Visibility from "@mui/icons-material/Visibility";
 import VisibilityOff from "@mui/icons-material/VisibilityOff";
 
 function DrawOrderListItem({ changeOrder, layer }) {
+  // We want let user toggle a layer on/off without actually removing it
+  // from the list of visible layers. To accomplish this, we will change
+  // the layer's opacity between 0 and 1.
   const [visible, setVisible] = useState(layer.get("opacity") !== 0);
 
   const handleChangeVisible = () => {
@@ -22,16 +25,26 @@ function DrawOrderListItem({ changeOrder, layer }) {
     setVisible(!visible);
   };
 
-  const getIconFromLayerType = (layerType) => {
-    switch (layerType) {
-      case "layer":
-      case "group":
-        return <LayersIcon />;
-      case "base":
-        return <WallpaperIcon />;
-      case "system":
-      default:
-        return <GppMaybeIcon />;
+  // To make the layers list more fun, we want to display an icon next to
+  // the layer.
+  const getIconFromLayer = (layer) => {
+    // Some layers can have a "infoclickIcon" property. If so, use it.
+    const layerSpecificIcon =
+      layer.get("layerInfo")?.infoclickIcon || layer.get("infoclickIcon");
+    if (layerSpecificIcon !== undefined) {
+      return <Icon>{layerSpecificIcon}</Icon>;
+    } else {
+      // Else, let's pick an icon depending on the layer's type.
+      switch (layer.get("layerType")) {
+        case "layer":
+        case "group":
+          return <LayersIcon />;
+        case "base":
+          return <WallpaperIcon />;
+        case "system":
+        default:
+          return <GppMaybeIcon />;
+      }
     }
   };
 
@@ -39,17 +52,17 @@ function DrawOrderListItem({ changeOrder, layer }) {
     <ListItem disablePadding>
       <ListItemButton
         sx={{
+          // When a layer is toggled off, we want to make it look
+          // more "light" in the list.
           opacity: visible ? 1 : 0.38,
         }}
         disableRipple={!visible}
         disableTouchRipple={!visible}
       >
-        <ListItemIcon>
-          {getIconFromLayerType(layer.get("layerType"))}
-        </ListItemIcon>
+        <ListItemIcon>{getIconFromLayer(layer)}</ListItemIcon>
         <ListItemText
           primary={layer.get("caption")}
-          secondary={"z-index:" + layer.getZIndex()}
+          secondary={"zIndex:" + layer.getZIndex()}
         />
         <IconButton onClick={handleChangeVisible}>
           {visible ? <VisibilityOff /> : <Visibility />}
