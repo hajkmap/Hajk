@@ -102,14 +102,15 @@ class SearchResultListContainer extends React.Component {
       });
     });
 
-    this.bindSubscriptions();
+    this.#bindSubscriptions();
   }
-  resetHeightOfResultList = () => {
+
+  #resetHeightOfResultList = () => {
     const { localObserver } = this.props;
     localObserver.publish("vt-search-result-list-normal");
   };
 
-  setActiveTabId = (searchResultId) => {
+  #setActiveTabId = (searchResultId) => {
     const { localObserver } = this.props;
     if (searchResultId !== this.state.activeTabId) {
       localObserver.publish("vt-clear-highlight");
@@ -122,27 +123,55 @@ class SearchResultListContainer extends React.Component {
     this.setState({ activeTabId: searchResultId });
   };
 
-  onSearchDone = (result) => {
+  #onSearchDone = (result) => {
     const { localObserver } = this.props;
-    var searchResultId = this.addResultToSearchResultList(result);
+    var searchResultId = this.#addResultToSearchResultList(result);
+
     localObserver.publish("vt-add-search-result-to-map", {
       searchResultId: searchResultId,
-      olFeatures: this.convertToGeoJson(
-        result?.featureCollection || result?.value
-      ),
+      olFeatures: this.#getFeaturesFromResult(result),
     });
-    this.setActiveTabId(searchResultId);
+    this.#setActiveTabId(searchResultId);
 
     if (result.type === "journeys") {
-      this.resetHeightOfResultList();
+      this.#resetHeightOfResultList();
     }
   };
 
-  convertToGeoJson = (featureCollectionAsString) => {
-    return new GeoJSON().readFeatures(featureCollectionAsString);
+  /**
+   * Gets all features from a search result. If the search result comes from the search module in the core,
+   * the data is already converted. If the result comes from the vtsearch plugin, data must be converted.
+   * @param {object} result The result from the core search module or the vtsearch search module.
+   * @returns {array} Returns an array of features.
+   *
+   * @memberof SearchResultListContainer
+   */
+  #getFeaturesFromResult = (result) => {
+    if (this.#isResultFromPluginvtsearch(result))
+      return this.#convertToGeoJson(result?.featureCollection);
+
+    return result?.value?.features;
   };
 
-  bindSubscriptions = () => {
+  /**
+   * Determines if the result comes from the vtsearch plugin.
+   * @param {object} result The result from the core search module or the vtsearch search module.
+   * @returns {bool} Returns true if the result comes from the vtsearch plugin.
+   */
+  #isResultFromPluginvtsearch = (result) => {
+    return result.featureCollection;
+  };
+
+  /**
+   * Read all features and converts them into an array. Works with both a single feature and a feature collection.
+   * @param {object} featureCollection A feature collection from GeoServer.
+   * @returns {array} Returns an array of features.s
+   */
+  #convertToGeoJson = (featureCollection) => {
+    return new GeoJSON().readFeatures(featureCollection);
+  };
+
+  #bindSubscriptions = () => {
     const { localObserver, app } = this.props;
 
     app.globalObserver.subscribe("core.drawerToggled", () => {
@@ -160,16 +189,16 @@ class SearchResultListContainer extends React.Component {
     });
 
     localObserver.subscribe("vt-clicked", () => {
-      this.sendToBackSearchResultContainer();
+      this.#sendToBackSearchResultContainer();
     });
 
     localObserver.subscribe("vt-result-done", (result) => {
-      this.bringToFrontSearchResultContainer();
+      this.#bringToFrontSearchResultContainer();
       this.setState({
         windowWidth: getWindowContainerWidth(),
         windowHeight: getWindowContainerHeight(),
       });
-      this.onSearchDone(result);
+      this.#onSearchDone(result);
     });
 
     localObserver.subscribe("vt-attribute-table-row-clicked", (payload) => {
@@ -177,11 +206,11 @@ class SearchResultListContainer extends React.Component {
     });
 
     localObserver.subscribe("vt-set-active-tab", (searchResultId) => {
-      this.handleTabChange(null, searchResultId);
+      this.#handleTabChange(null, searchResultId);
     });
 
     localObserver.subscribe("vt-features-clicked-in-map", (features) => {
-      this.bringToFrontSearchResultContainer();
+      this.#bringToFrontSearchResultContainer();
       localObserver.publish("vt-highlight-attribute-row", features[0].getId());
     });
 
@@ -233,15 +262,15 @@ class SearchResultListContainer extends React.Component {
     });
   };
 
-  handleTabChange = (event, newValue) => {
+  #handleTabChange = (event, newValue) => {
     const { localObserver } = this.props;
     if (newValue !== this.state.activeTabId) {
       localObserver.publish("vt-remove-highlight-attribute-row");
     }
-    this.setActiveTabId(newValue);
+    this.#setActiveTabId(newValue);
   };
 
-  getNextTabActive = (searchResultId) => {
+  #getNextTabActive = (searchResultId) => {
     const { searchResultIds } = this.state;
     var index = searchResultIds.indexOf(searchResultId);
     if (searchResultIds[index + 1]) {
@@ -251,19 +280,19 @@ class SearchResultListContainer extends React.Component {
     }
   };
 
-  onTabClose = (searchResultId) => {
+  #onTabClose = (searchResultId) => {
     const { localObserver } = this.props;
     localObserver.publish("vt-hide-all-layers");
     localObserver.publish("vt-clear-highlight");
-    const nextactiveTabId = this.getNextTabActive(searchResultId);
+    const nextactiveTabId = this.#getNextTabActive(searchResultId);
     console.log(nextactiveTabId, "nextActiveTabId");
     this.setState({ activeTabId: nextactiveTabId });
     localObserver.publish("vt-toggle-visibility", nextactiveTabId);
-    this.removeSearchResult(searchResultId);
+    this.#removeSearchResult(searchResultId);
     localObserver.publish("vt-resize-map", 0);
   };
 
-  addResultToSearchResultList = (result) => {
+  #addResultToSearchResultList = (result) => {
     var newId = 0;
 
     if (this.state.searchResultIds.length > 0) {
@@ -281,7 +310,7 @@ class SearchResultListContainer extends React.Component {
     return newId;
   };
 
-  removeSearchResult = (searchResultId) => {
+  #removeSearchResult = (searchResultId) => {
     const { searchResultIds } = this.state;
     const { localObserver } = this.props;
     const newSearchResultIds = searchResultIds.filter(
@@ -305,13 +334,13 @@ class SearchResultListContainer extends React.Component {
     });
   };
 
-  getSearchResults = () => {
+  #getSearchResults = () => {
     return this.state.searchResultIds.map((id) => {
       return this.searchResults.find((result) => result.id === id);
     });
   };
 
-  renderTabs = (searchResult) => {
+  #renderTabs = (searchResult) => {
     const { classes, toolConfig } = this.props;
     var searchResultId = searchResult.id;
 
@@ -333,7 +362,7 @@ class SearchResultListContainer extends React.Component {
               <ClearIcon
                 onClick={(e) => {
                   e.stopPropagation();
-                  this.onTabClose(searchResultId);
+                  this.#onTabClose(searchResultId);
                 }}
                 fontSize="inherit"
               />
@@ -347,7 +376,7 @@ class SearchResultListContainer extends React.Component {
     );
   };
 
-  renderTabsController = (searchResults) => {
+  #renderTabsController = (searchResults) => {
     const { classes } = this.props;
     console.log(this.state.activeTabId, "activeTabId");
     return (
@@ -356,17 +385,17 @@ class SearchResultListContainer extends React.Component {
           root: classes.tabsRoot,
         }}
         value={this.state.activeTabId}
-        onChange={this.handleTabChange}
+        onChange={this.#handleTabChange}
         aria-label="search-result-tabs"
       >
         {searchResults.map((searchResult) => {
-          return this.renderTabs(searchResult);
+          return this.#renderTabs(searchResult);
         })}
       </Tabs>
     );
   };
 
-  renderTabsHeader = (searchResults) => {
+  #renderTabsHeader = (searchResults) => {
     const { classes, localObserver } = this.props;
     return (
       <AppBar
@@ -381,7 +410,7 @@ class SearchResultListContainer extends React.Component {
           <Grid justify="space-between" alignItems="center" container>
             <Grid style={{ paddingLeft: 10 }} item>
               {searchResults.length > 0 &&
-                this.renderTabsController(searchResults)}
+                this.#renderTabsController(searchResults)}
             </Grid>
 
             <Grid style={{ paddingLeft: 0 }} item>
@@ -393,7 +422,7 @@ class SearchResultListContainer extends React.Component {
     );
   };
 
-  renderSearchResultAsTabContent = (searchResult) => {
+  #renderSearchResultAsTabContent = (searchResult) => {
     const { toolConfig, localObserver } = this.props;
     return (
       <TabPanel
@@ -411,33 +440,33 @@ class SearchResultListContainer extends React.Component {
     );
   };
 
-  handleMapResizeWhenRendering = () => {
+  #handleMapResizeWhenRendering = () => {
     const { localObserver } = this.props;
     localObserver.publish("vt-resize-map", this.state.resultListHeight);
   };
 
-  bringToFrontSearchResultContainer = () => {
+  #bringToFrontSearchResultContainer = () => {
     this.setState({ zIndex: 1100 });
   };
 
-  sendToBackSearchResultContainer = () => {
+  #sendToBackSearchResultContainer = () => {
     this.setState({ zIndex: 800 });
   };
 
-  onClickSearchResultContainer = () => {
-    this.bringToFrontSearchResultContainer();
+  #onClickSearchResultContainer = () => {
+    this.#bringToFrontSearchResultContainer();
   };
 
-  renderSearchResultContainer = () => {
+  #renderSearchResultContainer = () => {
     const { classes, windowContainerId } = this.props;
-    let searchResults = this.getSearchResults();
-    this.handleMapResizeWhenRendering();
+    let searchResults = this.#getSearchResults();
+    this.#handleMapResizeWhenRendering();
     return (
       <Rnd
         style={{
           zIndex: this.state.zIndex,
         }}
-        onClick={this.onClickSearchResultContainer}
+        onClick={this.#onClickSearchResultContainer}
         className={classes.window}
         size={{
           width: this.state.windowWidth,
@@ -484,9 +513,9 @@ class SearchResultListContainer extends React.Component {
         }}
       >
         <section>
-          {this.renderTabsHeader(searchResults)}
+          {this.#renderTabsHeader(searchResults)}
           {searchResults.map((searchResult) => {
-            return this.renderSearchResultAsTabContent(searchResult);
+            return this.#renderSearchResultAsTabContent(searchResult);
           })}
         </section>
       </Rnd>
@@ -495,7 +524,7 @@ class SearchResultListContainer extends React.Component {
 
   render() {
     return this.state.searchResultIds.length > 0
-      ? this.renderSearchResultContainer()
+      ? this.#renderSearchResultContainer()
       : null;
   }
 }
