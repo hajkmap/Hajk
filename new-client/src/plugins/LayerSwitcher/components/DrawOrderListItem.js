@@ -7,6 +7,7 @@ import {
   ListItemButton,
   ListItemIcon,
   ListItemText,
+  Slider,
   SvgIcon,
   Tooltip,
 } from "@mui/material";
@@ -45,6 +46,24 @@ function MouseNoClickIcon(props) {
         />
       </SvgIcon>
     </Tooltip>
+  );
+}
+
+function OpacitySlider({ layer }) {
+  const [opacity, setOpacity] = React.useState(layer.get("opacity") * 100);
+
+  const handleChange = (event, newValue) => {
+    layer.set("opacity", opacity / 100);
+    setOpacity(newValue);
+  };
+
+  return (
+    <Slider
+      aria-label="Layer opacity"
+      value={opacity}
+      onChange={handleChange}
+      size="small"
+    />
   );
 }
 
@@ -148,7 +167,7 @@ function DrawOrderListItem({ changeOrder, layer }) {
         </ListItemIcon>
         <ListItemText
           primary={layer.get("caption")}
-          secondary={"zIndex:" + layer.getZIndex()}
+          secondary={<OpacitySlider layer={layer} />}
         />
         <Tooltip title={(visible ? "Dölj " : "Visa ") + "lager"}>
           <IconButton onClick={handleChangeVisible}>
