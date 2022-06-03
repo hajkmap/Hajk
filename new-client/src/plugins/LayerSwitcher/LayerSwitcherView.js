@@ -161,7 +161,7 @@ class LayersSwitcherView extends React.PureComponent {
             <Tab label="Kartlager" />
             <Tab label="Bakgrund" />
             {this.options.showActiveLayersView === true && (
-              <Tab label="Ritordning" />
+              <Tab label="Aktiva lager" />
             )}
           </Tabs>
         </StyledAppBar>
