@@ -160,7 +160,9 @@ class LayersSwitcherView extends React.PureComponent {
           >
             <Tab label="Kartlager" />
             <Tab label="Bakgrund" />
-            <Tab label="Ritordning" />
+            {this.options.showActiveLayersView === true && (
+              <Tab label="Ritordning" />
+            )}
           </Tabs>
         </StyledAppBar>
         <ContentWrapper>
@@ -175,9 +177,10 @@ class LayersSwitcherView extends React.PureComponent {
             map={this.props.map}
             app={this.props.app}
           />
-          {this.state.activeTab === 2 && (
-            <DrawOrder map={this.props.map} app={this.props.app} />
-          )}
+          {this.options.showActiveLayersView === true &&
+            this.state.activeTab === 2 && (
+              <DrawOrder map={this.props.map} app={this.props.app} />
+            )}
         </ContentWrapper>
         {this.renderBreadCrumbs()}
       </Root>
