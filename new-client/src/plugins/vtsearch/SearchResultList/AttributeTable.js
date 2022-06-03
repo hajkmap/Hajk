@@ -131,6 +131,46 @@ class AttributeTable extends React.Component {
     this.setState({ exportCsvFile: true });
   };
 
+  #testGetSortedExportRows = () => {
+    let sorted = this.getSortedRows(
+      this.state.sortBy,
+      this.state.sortDirection
+    );
+    return sorted;
+  };
+
+  getSortedRows = (sortBy, sortDirection) => {
+    var compareOne = null;
+    var compareTwo = null;
+    var rowsToBeSorted = this.state.rows;
+    var sortByNumber = typeof rowsToBeSorted[0][sortBy] === "number";
+
+    if (sortByNumber) {
+      rowsToBeSorted.sort((a, b) => {
+        compareOne = a[sortBy] === "" ? null : a[sortBy]; //Handle empty string same way as null
+        compareTwo = b[sortBy] === "" ? null : b[sortBy]; //Handle empty string same way as null
+        return parseFloat(compareOne) - parseFloat(compareTwo);
+      });
+    } else {
+      rowsToBeSorted.sort((a, b) => {
+        compareOne = a[sortBy] === "" ? null : a[sortBy]; //Handle empty string same way as null
+        compareTwo = b[sortBy] === "" ? null : b[sortBy]; //Handle empty string same way as null
+        if (compareOne !== null && compareTwo !== null) {
+          return this.sortAlphaNumerical(compareOne, compareTwo);
+        } else {
+          return this.sortNulls(compareOne, compareTwo);
+        }
+      });
+    }
+
+    rowsToBeSorted =
+      sortDirection === SortDirection.DESC
+        ? rowsToBeSorted.reverse()
+        : rowsToBeSorted;
+
+    return rowsToBeSorted;
+  };
+
   getDisplayName = (key, resultList) => {
     const { toolConfig } = this.props;
     var attributesMappingArray =
@@ -318,7 +358,7 @@ class AttributeTable extends React.Component {
   #renderCSVDownloadComponent = () => {
     return (
       <CSVDownload
-        data={this.getRows()}
+        data={this.#testGetSortedExportRows()}
         headers={this.#getExportHeaders()}
         filename="DL-csv-attrtable.csv"
         target="_self"
