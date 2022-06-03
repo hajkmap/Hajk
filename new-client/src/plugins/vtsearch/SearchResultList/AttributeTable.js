@@ -257,7 +257,7 @@ class AttributeTable extends React.Component {
     return compareTwoString[i] ? -1 : 0;
   };
 
-  sort = ({ sortBy, sortDirection }) => {
+  getSortedRows = (sortBy, sortDirection) => {
     var compareOne = null;
     var compareTwo = null;
     var rowsToBeSorted = this.state.rows;
@@ -285,6 +285,12 @@ class AttributeTable extends React.Component {
       sortDirection === SortDirection.DESC
         ? rowsToBeSorted.reverse()
         : rowsToBeSorted;
+
+    return rowsToBeSorted;
+  };
+
+  sort = ({ sortBy, sortDirection }) => {
+    let rowsToBeSorted = this.getSortedRows(sortBy, sortDirection);
 
     this.setState((state) => {
       return {
@@ -318,7 +324,7 @@ class AttributeTable extends React.Component {
   #renderCSVDownloadComponent = () => {
     return (
       <CSVDownload
-        data={this.getRows()}
+        data={this.getSortedRows(this.state.sortBy, this.state.sortDirection)}
         headers={this.#getExportHeaders()}
         filename="kartsidanExport.csv"
         target="_self"
