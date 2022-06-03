@@ -33,7 +33,7 @@ class AttributeTable extends React.Component {
       this.props.toolConfig.geoServer[this.props.searchResult.type]
         ?.defaultSortOrder,
     focusedRow: 0,
-    rows: this.getRows(this.props.searchResult),
+    rows: this.getRows(),
     exportCsvFile: false,
   };
 
@@ -98,10 +98,15 @@ class AttributeTable extends React.Component {
         focusedRow: foundRowIndex,
       });
     });
-    localObserver.subscribe("vt-export-search-result-list-done", (result) => {
-      this.exportList = result;
-      this.#exportSearchResult();
-    });
+    localObserver.subscribe(
+      "vt-export-search-result-for-active-tab",
+      (activeTabId) => {
+        const { searchResult } = this.props;
+        if (searchResult.id === activeTabId) {
+          this.#exportSearchResult();
+        }
+      }
+    );
     if (this.showStopPoints)
       localObserver.subscribe(
         "vt-show-stop-points-by-line",
@@ -112,14 +117,10 @@ class AttributeTable extends React.Component {
   };
 
   #getExportHeaders = () => {
-    let columns = this.getColumns(this.exportList);
+    let columns = this.getColumns();
     return columns.map((value) => {
       return { label: value.label, key: value.dataKey };
     });
-  };
-
-  #getExportList = () => {
-    return this.getRows(this.exportList);
   };
 
   #exportSearchResult = () => {
@@ -161,12 +162,12 @@ class AttributeTable extends React.Component {
     return newDisplayOrder;
   };
 
-  getColumns(resultList) {
-    const { toolConfig } = this.props;
+  getColumns() {
+    const { toolConfig, searchResult } = this.props;
 
-    let propertyKeys = this.getFeaturePropertiesKeys(resultList);
+    let propertyKeys = this.getFeaturePropertiesKeys(searchResult);
     let attributeDisplayOrder =
-      toolConfig.geoServer[resultList.type]?.attributesToDisplay;
+      toolConfig.geoServer[searchResult.type]?.attributesToDisplay;
     propertyKeys = this.reorderPropertyKeys(
       attributeDisplayOrder,
       propertyKeys
@@ -176,7 +177,7 @@ class AttributeTable extends React.Component {
     });
 
     return propertyKeys.map((key) => {
-      var displayName = this.getDisplayName(key, resultList);
+      var displayName = this.getDisplayName(key, searchResult);
       console.log(displayName, "displayName");
       return {
         label: displayName || key,
@@ -186,9 +187,9 @@ class AttributeTable extends React.Component {
     });
   }
 
-  getRows(resultList) {
+  getRows() {
     const { searchResult } = this.props;
-    const features = this.getFeaturesFromSearchResult(resultList);
+    const features = this.getFeaturesFromSearchResult(searchResult);
     return features.map((feature, index) => {
       const properties = feature.properties
         ? feature.properties
@@ -317,7 +318,7 @@ class AttributeTable extends React.Component {
   #renderCSVDownloadComponent = () => {
     return (
       <CSVDownload
-        data={this.#getExportList()}
+        data={this.getRows()}
         headers={this.#getExportHeaders()}
         filename="DL-csv-attrtable.csv"
         target="_self"
@@ -337,7 +338,7 @@ class AttributeTable extends React.Component {
             rowCount={this.state.rows.length}
             rowGetter={({ index }) => this.state.rows[index]}
             rowClicked={this.onRowClick}
-            columns={this.getColumns(searchResult)}
+            columns={this.getColumns()}
             sort={this.sort}
             sortDirection={this.state.sortDirection}
             sortBy={this.state.sortBy}
