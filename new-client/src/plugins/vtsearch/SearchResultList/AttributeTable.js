@@ -320,7 +320,7 @@ class AttributeTable extends React.Component {
       <CSVDownload
         data={this.getRows()}
         headers={this.#getExportHeaders()}
-        filename="DL-csv-attrtable.csv"
+        filename="kartsidanExport.csv"
         target="_self"
       />
     );
