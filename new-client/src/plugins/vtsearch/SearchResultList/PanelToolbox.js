@@ -9,6 +9,8 @@ import IconButton from "@material-ui/core/IconButton";
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 import SaveAltIcon from "@material-ui/icons/SaveAlt";
 
+import { Tooltip } from "@material-ui/core";
+
 /**
  * @summary Window size handling
  * @description Module with three buttons to handle size of window.
@@ -96,15 +98,25 @@ class PanelToolbox extends React.PureComponent {
         onClick={onClickCallback}
       >
         {iconElement === "minimize" ? (
-          <ExpandMoreIcon />
+          <Tooltip title="Minimera">
+            <ExpandMoreIcon />
+          </Tooltip>
         ) : iconElement === "maximize" ? (
-          <ExpandMoreIcon className={classes.expandOpen} />
+          <Tooltip title="Maximera">
+            <ExpandMoreIcon className={classes.expandOpen} />
+          </Tooltip>
         ) : iconElement === "normalize" ? (
-          <NormalIcon />
+          <Tooltip title="Återställ">
+            <NormalIcon />
+          </Tooltip>
         ) : iconElement === "close" ? (
-          <CloseIcon />
+          <Tooltip title="Stäng">
+            <CloseIcon />
+          </Tooltip>
         ) : iconElement === "export" ? (
-          <SaveAltIcon />
+          <Tooltip title="Exportera">
+            <SaveAltIcon />
+          </Tooltip>
         ) : null}
       </IconButton>
     );
