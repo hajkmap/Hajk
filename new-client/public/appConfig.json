@@ -1,11 +1,11 @@
 {
   "appName": "Hajk",
   "version": "3.10.0-beta.7",
-  "mapserviceBase": "",
+  "mapserviceBase": "http://localhost:3002/api/v1",
   "proxy": "",
   "searchProxy": "",
   "defaultMap": "map_1",
-  "experimentalNewApi": false,
+  "experimentalNewApi": true,
   "noLayerSwitcherMessage": "This map has no layer switcher, which indicates that you are not allowed to use this map!",
   "networkErrorMessage": "Nätverksfel. Försök att ladda om sidan genom att trycka på F5.",
   "parseErrorMessage": "Konfigurationsfel. Försök att ladda om sidan genom att trycka på F5.",

@@ -472,6 +472,17 @@
       "index": 2
     },
     {
+      "type": "visionintegration",
+      "options": {
+        "target": "left",
+        "position": "left",
+        "visibleAtStart": true,
+        "hubUrl": "http://localhost:8000/gisandrealestate",
+        "visibleForGroups": []
+      },
+      "index": 99
+    },
+    {
       "type": "documenthandler",
       "index": 0,
       "options": {
