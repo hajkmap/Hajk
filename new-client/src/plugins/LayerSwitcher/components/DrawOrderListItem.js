@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 
 import {
   Icon,
@@ -49,33 +49,25 @@ function MouseNoClickIcon(props) {
   );
 }
 
-function OpacitySlider({ layer }) {
-  const [opacity, setOpacity] = React.useState(layer.get("opacity") * 100);
-
-  const handleChange = (event, newValue) => {
-    layer.set("opacity", opacity / 100);
-    setOpacity(newValue);
-  };
-
-  return (
-    <Slider
-      aria-label="Layer opacity"
-      value={opacity}
-      onChange={handleChange}
-      size="small"
-    />
-  );
-}
-
-function DrawOrderListItem({ changeOrder, layer }) {
+export default function DrawOrderListItem({ changeOrder, layer }) {
   // We want let user toggle a layer on/off without actually removing it
   // from the list of visible layers. To accomplish this, we will change
   // the layer's opacity between 0 and 1.
-  const [visible, setVisible] = useState(layer.get("opacity") !== 0);
 
-  const handleChangeVisible = () => {
-    layer.set("opacity", visible ? 0 : 1);
-    setVisible(!visible);
+  // We keep the opacity in state…
+  const [opacity, setOpacity] = React.useState(layer.get("opacity"));
+
+  // …and let a useEffect manage the actual OL layer's opacity.
+  useEffect(() => {
+    layer.set("opacity", opacity);
+  }, [layer, opacity]);
+
+  const handleOpacitySliderChange = (event, newValue) => {
+    setOpacity(newValue);
+  };
+
+  const handleVisibilityButtonClick = () => {
+    setOpacity(opacity === 0 ? 1 : 0);
   };
 
   // To make the layers list more fun, we want to display an icon next to
@@ -146,7 +138,7 @@ function DrawOrderListItem({ changeOrder, layer }) {
         sx={{
           // When a layer is toggled off, we want to make it look
           // more "light" in the list.
-          opacity: visible ? 1 : 0.38,
+          opacity: opacity > 0 ? 1 : 0.38,
         }}
         disableRipple
         disableTouchRipple
@@ -167,22 +159,36 @@ function DrawOrderListItem({ changeOrder, layer }) {
         </ListItemIcon>
         <ListItemText
           primary={layer.get("caption")}
-          secondary={<OpacitySlider layer={layer} />}
+          secondary={
+            <Slider
+              aria-label="Layer opacity"
+              value={opacity}
+              onChange={handleOpacitySliderChange}
+              size="small"
+              min={0}
+              max={1}
+              step={0.01}
+            />
+          }
         />
-        <Tooltip title={(visible ? "Dölj " : "Visa ") + "lager"}>
-          <IconButton onClick={handleChangeVisible}>
-            {visible ? <VisibilityOff /> : <Visibility />}
+        <Tooltip title={(opacity > 0 ? "Dölj " : "Visa ") + "lager"}>
+          <IconButton onClick={handleVisibilityButtonClick}>
+            {opacity > 0 ? <VisibilityOff /> : <Visibility />}
           </IconButton>
         </Tooltip>
-        <IconButton disabled={!visible} onClick={() => changeOrder(layer, +1)}>
+        <IconButton
+          disabled={opacity === 0}
+          onClick={() => changeOrder(layer, +1)}
+        >
           <ArrowUpward />
         </IconButton>
-        <IconButton disabled={!visible} onClick={() => changeOrder(layer, -1)}>
+        <IconButton
+          disabled={opacity === 0}
+          onClick={() => changeOrder(layer, -1)}
+        >
           <ArrowDownward />
         </IconButton>
       </ListItemButton>
     </ListItem>
   );
 }
-
-export default DrawOrderListItem;
