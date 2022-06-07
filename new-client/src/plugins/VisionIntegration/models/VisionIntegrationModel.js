@@ -1,11 +1,24 @@
 // A simple class containing functionality that is used in the VisionIntegration-plugin.
 class VisionIntegrationModel {
   #options;
+  #hubConnection;
 
   // There will probably not be many settings for this model... Options are required though!
   constructor(settings) {
     this.#options = settings.options || {};
+    this.#hubConnection = this.#createHubConnection();
+    this.#hubConnection !== null && this.#initiateHubListeners();
   }
+
+  // Creates a connection to supplied hub-url. (Hub meaning a signalR-communication-hub).
+  #createHubConnection = () => {
+    return null;
+  };
+
+  // Initiates all the hub-listeners (handlers that can catch events sent from Vision).
+  #initiateHubListeners = () => {
+    return null;
+  };
 
   // Makes sure that the supplied options contains all required settings.
   configurationIsValid = () => {
