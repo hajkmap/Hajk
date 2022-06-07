@@ -13,6 +13,8 @@ import VisionIntegrationView from "./VisionIntegrationView";
 import VisionIntegrationModel from "./models/VisionIntegrationModel";
 
 function VisionIntegration(props) {
+  // Let's destruct the options from the props (and fall back on empty object to avoid
+  // a complete disaster if the plugin is wrongly configured).
   const { options = {} } = props;
   // Since we're gonna be drawing, we're gonna need to keep track of wether
   // the plugin is currently shown or not. (If the plugin is hidden the draw-
@@ -28,6 +30,11 @@ function VisionIntegration(props) {
   // the plugin... If some crucial settings are missing we'll just display an
   // error instead of the "real" UI.
   const [configError] = useState(!model.configurationIsValid());
+
+  // We're gonna want to keep track of wether the hub is connected or not. (We're
+  // gonna want to show the connection state to the user so that they can know if the
+  // connection has failed).
+  const [hubIsConnected] = useState(model.hubIsConnected());
 
   // We're gonna need to catch if the user closes the window, and make sure to
   // update the state so that the effect handling the draw-interaction-toggling fires.
@@ -58,6 +65,7 @@ function VisionIntegration(props) {
       <VisionIntegrationView
         pluginShown={pluginShown}
         configError={configError}
+        hubIsConnected={hubIsConnected}
       />
     </BaseWindowPlugin>
   );

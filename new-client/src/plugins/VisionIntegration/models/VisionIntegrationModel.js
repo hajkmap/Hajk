@@ -31,6 +31,11 @@ class VisionIntegrationModel {
     // If we've made it this far, we're all good!
     return true;
   };
+
+  // Returns wether the communication-hub is connected or not...
+  hubIsConnected = () => {
+    return this.#hubConnection !== null;
+  };
 }
 
 export default VisionIntegrationModel;
