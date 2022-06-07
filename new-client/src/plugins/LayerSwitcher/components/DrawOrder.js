@@ -1,16 +1,22 @@
 import React, { useCallback, useEffect, useState } from "react";
+import { useSnackbar } from "notistack";
 import Box from "@mui/material/Box";
 import FormControlLabel from "@mui/material/FormControlLabel";
 import FormGroup from "@mui/material/FormGroup";
 import Switch from "@mui/material/Switch";
 import List from "@mui/material/List";
+import { Button, ButtonGroup } from "@mui/material";
 import DrawOrderListItem from "./DrawOrderListItem";
+import Save from "@mui/icons-material/Save";
+import { FolderOpen } from "@mui/icons-material";
 
 function DrawOrder({ app, map }) {
+  const { enqueueSnackbar } = useSnackbar();
+
   // A Set that will hold type of OL layers that should be shown.
   // This is a user setting, changed by toggling a switch control.
   const [filterList, setFilterList] = useState(
-    new Set(["layer", "group"]) // Also "base" and "system" are available, but let's start without them
+    new Set(["layer", "group", "base"]) // Also "system" is available, but let's start without it
   );
 
   // A helper that grabs all visible OL layers, filters so that
@@ -48,15 +54,13 @@ function DrawOrder({ app, map }) {
   }, [filterList, getSortedLayers]);
 
   // Handler function for the show/hide system layers switch
-  const handleSystemAndBaseLayerSwitchChange = (e) => {
+  const handleSystemLayerSwitchChange = (e) => {
     const v = e.target.checked;
     if (v === true) {
       filterList.add("system");
-      filterList.add("base");
       setFilterList(new Set(filterList));
     } else {
       filterList.delete("system");
-      filterList.delete("base");
       setFilterList(new Set(filterList));
     }
   };
@@ -118,17 +122,112 @@ function DrawOrder({ app, map }) {
     setSortedLayers(getSortedLayers());
   };
 
+  /**
+   * Take care of saving active layers so that they can be restored layer.
+   * For time being we're only saving in local storage, but this may change
+   * in the future.
+   * We take care of saving **all non-system layers**.
+   * We save the opacity as well as the layers' internal order (by reading
+   * the value of zIndex).
+   */
+  const handleSave = () => {
+    // Grab layers to be saved by…
+    const savedLayers = map
+      .getAllLayers() //
+      .filter((l) => l.getVisible() === true && l.get("layerType") !== "system") // …filtering out system layers.
+      .map((l) => {
+        // Create an array of objects. For each layer, we want to read its…
+        return { i: l.get("name"), z: l.getZIndex(), o: l.getOpacity() }; // …name, zIndex and opacity.
+      });
+
+    // Let's create some metadata about our saved layers. User might want to know
+    // how many layers are saved and when they were saved.
+    // First, we try to get the map's name. We can't be certain that this exists (not
+    // all maps have the userSpecificMaps property), so we must be careful.
+    const mapName =
+      Array.isArray(app.config.userSpecificMaps) &&
+      app.config.userSpecificMaps.find(
+        (m) => m.mapConfigurationName === app.config.activeMap
+      )?.mapConfigurationTitle;
+
+    // Next, let's put together the metadata object…
+    const metadata = {
+      savedAt: new Date(),
+      numberOfLayers: savedLayers.length,
+      ...(mapName && { mapName }), // …if we have a map name, let's add it too.
+    };
+
+    // Let's combine it all to an object that will be saved.
+    const objectToSave = { savedLayers, metadata };
+
+    localStorage.setItem(
+      "plugin.layerswitcher.savedLayers",
+      JSON.stringify(objectToSave) // Remember to stringify prior storing in local storage.
+    );
+
+    enqueueSnackbar(`${metadata.numberOfLayers} lager sparades utan problem`, {
+      variant: "success",
+    });
+  };
+
+  const handleRestore = () => {
+    // Let's be safe about parsing JSON
+    try {
+      const { metadata, savedLayers } = JSON.parse(
+        localStorage.getItem("plugin.layerswitcher.savedLayers")
+      );
+
+      map
+        .getAllLayers() // Traverse all layers…
+        .filter((l) => l.get("layerType") !== "system") // …ignore system layers.
+        .forEach((l) => {
+          // See if the current layer is in the list of saved layers.
+          const match = savedLayers.find((rl) => rl.i === l.get("name"));
+          // If yes…
+          if (match) {
+            // …read and set some options.
+            l.setZIndex(match.z);
+            l.setOpacity(match.o);
+            l.setVisible(true);
+          } else {
+            // If not, ensure that the layer is hidden.
+            l.setVisible(false);
+          }
+        });
+
+      enqueueSnackbar(
+        `${metadata.numberOfLayers} lager återställdes från tidigare session`,
+        {
+          variant: "success",
+        }
+      );
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
   return (
     <Box>
+      <ButtonGroup
+        variant="contained"
+        aria-label="outlined primary button group"
+      >
+        <Button onClick={handleSave}>
+          <Save />
+        </Button>
+        <Button onClick={handleRestore}>
+          <FolderOpen />
+        </Button>
+      </ButtonGroup>
       <FormGroup sx={{ p: 2 }}>
         <FormControlLabel
           control={
             <Switch
               checked={filterList.has("system")}
-              onChange={handleSystemAndBaseLayerSwitchChange}
+              onChange={handleSystemLayerSwitchChange}
             />
           }
-          label="Visa system- och bakgrundslager"
+          label="Visa systemlager (avancerat)"
         />
       </FormGroup>
 
