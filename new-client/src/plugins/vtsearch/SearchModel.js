@@ -901,7 +901,13 @@ export default class SearchModel {
           journeys.featureCollection = this.removeDuplicates(
             journeys.featureCollection
           );
-          /*journeys.featureCollection = */
+
+          journeys.searchParams = {
+            filterOnFromDate: filterOnFromDate,
+            filterOnToDate: filterOnToDate,
+            filterOnWkt: filterOnWkt,
+          };
+
           this.updateDisplayFormat(
             journeys.featureCollection,
             this.geoServer.journeys.attributesToDisplay
@@ -1014,6 +1020,15 @@ export default class SearchModel {
             routes.featureCollection
           );
 
+          routes.searchParams = {
+            publicLineName: publicLineName,
+            internalLineNumber: internalLineNumber,
+            isInMunicipalityZoneGid: isInMunicipalityZoneGid,
+            transportModeType: transportModeType,
+            stopAreaNameOrNumber: stopAreaNameOrNumber,
+            polygonAsWkt: polygonAsWkt,
+          };
+
           this.localObserver.publish("vt-result-done", routes);
         });
       })
@@ -1086,6 +1101,13 @@ export default class SearchModel {
           stopAreas.featureCollection = this.removeDuplicates(
             stopAreas.featureCollection
           );
+
+          stopAreas.searchParams = {
+            filterOnNameOrNumber: filterOnNameOrNumber,
+            filterOnPublicLine: filterOnPublicLine,
+            filterOnMunicipalGid: filterOnMunicipalGid,
+            filterOnWkt: filterOnWkt,
+          };
 
           this.localObserver.publish("vt-result-done", stopAreas);
         })
@@ -1160,6 +1182,13 @@ export default class SearchModel {
             stopPoints.featureCollection
           );
 
+          stopPoints.searchParams = {
+            filterOnNameOrNumber: filterOnNameOrNumber,
+            filterOnPublicLine: filterOnPublicLine,
+            filterOnMunicipalGid: filterOnMunicipalGid,
+            filterOnWkt: filterOnWkt,
+          };
+
           this.localObserver.publish("vt-result-done", stopPoints);
         })
         .catch((err) => {
@@ -1197,6 +1226,12 @@ export default class SearchModel {
           let stopPoints = {
             featureCollection: jsonResult,
           };
+
+          stopPoints.searchParams = {
+            filterOnInternalLineNumber: filterOnInternalLineNumber,
+            filterOnDirection: filterOnDirection,
+          };
+
           this.localObserver.publish("vt-stop-point-showed", stopPoints);
         })
         .catch((err) => {

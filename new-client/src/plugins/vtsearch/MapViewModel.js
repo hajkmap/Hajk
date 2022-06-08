@@ -122,7 +122,7 @@ export default class MapViewModel {
     });
 
     this.localObserver.subscribe(
-      "vt-search-stop-points-by-line",
+      "vt-search-show-stop-points-by-line",
       (parameters) => {
         this.model.getStopPointsByLine(
           parameters.internalLineNumber,
@@ -130,6 +130,10 @@ export default class MapViewModel {
         );
       }
     );
+
+    this.localObserver.subscribe("vt-search-hide-stop-points-by-line", () => {
+      this.#hideStopPoints();
+    });
 
     this.localObserver.subscribe("vt-stop-point-showed", (stopPoints) => {
       this.#showStopPoints(stopPoints);
@@ -561,6 +565,10 @@ export default class MapViewModel {
       this
     );
     this.showStopPointsSource.addFeatures(stopPointFeatures);
+  };
+
+  #hideStopPoints = () => {
+    this.showStopPointsSource.clear();
   };
 
   #setAdjustThreshold = (feature) => {
