@@ -45,6 +45,9 @@ class VisionIntegrationModel {
 
   // Initiates all the hub and its listeners (handlers that can catch events sent from Vision).
   #initiateHub = () => {
+    // First we'll connect all the listeners...
+    this.#initiateHubListeners();
+    // Then we'll try to start the connection
     this.#hubConnection
       .start()
       .then(() => this.#localObserver.publish("hub-initiation-success"))
@@ -54,6 +57,24 @@ class VisionIntegrationModel {
         console.error(`Failed to initiate hub-connection. ${error}`);
       });
     return null;
+  };
+
+  // Connects all events that we're interested in to the hub-connection.
+  #initiateHubListeners = () => {
+    // The first event that we're interested in is the event where Vision is asking for
+    // information regarding all currently selected real-estates.
+    this.#hubConnection.on(
+      "HandleAskingForRealEstateIdentifiers",
+      this.#handleVisionAskingForRealEstateIdentifiers
+    );
+  };
+
+  // Handles when Vision is asking for information regarding all currently selected real-estates.
+  #handleVisionAskingForRealEstateIdentifiers = (payload) => {
+    console.log(
+      "handleVisionAskingForRealEstateIdentifiers, payload: ",
+      payload
+    );
   };
 
   // Makes sure that the supplied options contains all required settings.
