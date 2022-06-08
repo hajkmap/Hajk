@@ -102,6 +102,7 @@ class SearchResultListContainer extends React.Component {
       });
     });
 
+    this.#init();
     this.#bindSubscriptions();
   }
 
@@ -125,6 +126,7 @@ class SearchResultListContainer extends React.Component {
 
   #onSearchDone = (result) => {
     const { localObserver } = this.props;
+    this.#applyFilterFunction(result);
     var searchResultId = this.#addResultToSearchResultList(result);
 
     localObserver.publish("vt-add-search-result-to-map", {
@@ -136,6 +138,16 @@ class SearchResultListContainer extends React.Component {
     if (result.type === "journeys") {
       this.#resetHeightOfResultList();
     }
+  };
+
+  /**
+   * Applies a filter function that adds filter parameters to a result if needed, i.e. showStopPoints in Lines.
+   * @param {object} result The result from the search model in either core or vtsearch.
+   *
+   * @memberof SearchResultListContainer
+   */
+  #applyFilterFunction = (result) => {
+    this.filterFunctions[result.type](result, true);
   };
 
   /**
@@ -169,6 +181,14 @@ class SearchResultListContainer extends React.Component {
    */
   #convertToGeoJson = (featureCollection) => {
     return new GeoJSON().readFeatures(featureCollection);
+  };
+
+  #init = () => {
+    this.filterFunctions = { routes: this.#routesFilterFunction };
+  };
+
+  #routesFilterFunction = (result, showStopPoints) => {
+    result.filterParams = { showStopPoints: showStopPoints };
   };
 
   #bindSubscriptions = () => {
@@ -262,7 +282,7 @@ class SearchResultListContainer extends React.Component {
     });
   };
 
-  #handleTabChange = (event, newValue) => {
+  #handleTabChange = (_event, newValue) => {
     const { localObserver } = this.props;
     if (newValue !== this.state.activeTabId) {
       localObserver.publish("vt-remove-highlight-attribute-row");
