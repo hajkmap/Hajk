@@ -1,3 +1,5 @@
+import { HubConnectionBuilder } from "@microsoft/signalr";
+
 // A simple class containing functionality that is used in the VisionIntegration-plugin.
 class VisionIntegrationModel {
   #options;
@@ -23,11 +25,34 @@ class VisionIntegrationModel {
 
   // Creates a connection to supplied hub-url. (Hub meaning a signalR-communication-hub).
   #createHubConnection = () => {
-    return null;
+    try {
+      // Let's get the url tht we're supposed to connect to from the options...
+      const { hubUrl } = this.#options;
+      // Then we'll make sure we're dealing with a string...
+      if (typeof hubUrl !== "string" || hubUrl.length < 1) {
+        throw new Error(
+          `Failed to create hub-connection. Parameter 'hubUrl' missing.`
+        );
+      }
+      // ... If we are, we can try to create the connection
+      return new HubConnectionBuilder().withUrl(hubUrl).build();
+    } catch (error) {
+      // If we fail for some reason, we'll log an error and return null
+      console.error(`Failed to create hub-connection. ${error}`);
+      return null;
+    }
   };
 
   // Initiates all the hub and its listeners (handlers that can catch events sent from Vision).
   #initiateHub = () => {
+    this.#hubConnection
+      .start()
+      .then(() => this.#localObserver.publish("hub-initiation-success"))
+      .catch((error) => {
+        this.#hubConnection = null;
+        this.#localObserver.publish("hub-initiation-failed");
+        console.error(`Failed to initiate hub-connection. ${error}`);
+      });
     return null;
   };
 
@@ -44,7 +69,7 @@ class VisionIntegrationModel {
   };
 
   // Returns wether the communication-hub is connected or not...
-  hubIsConnected = () => {
+  getHubConnected = () => {
     return this.#hubConnection !== null;
   };
 }

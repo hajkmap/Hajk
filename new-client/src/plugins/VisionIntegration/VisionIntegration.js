@@ -1,7 +1,6 @@
 // Base
-import React from "react";
+import React, { useState, useEffect } from "react";
 import Observer from "react-event-observer";
-import { useState } from "react";
 
 // Icons
 import RepeatIcon from "@mui/icons-material/Repeat";
@@ -28,7 +27,7 @@ function VisionIntegration(props) {
 
   // We're gonna need a model containing VisionIntegration-functionality...
   const [model] = useState(
-    new VisionIntegrationModel({ options, localObserver })
+    () => new VisionIntegrationModel({ options, localObserver })
   );
 
   // We're gonna want to make sure proper settings are supplied when starting
@@ -39,7 +38,26 @@ function VisionIntegration(props) {
   // We're gonna want to keep track of wether the hub is connected or not. (We're
   // gonna want to show the connection state to the user so that they can know if the
   // connection has failed).
-  const [hubIsConnected] = useState(model.hubIsConnected());
+  const [hubConnected, setHubConnected] = useState(false);
+
+  // We're gonna want to subscribe to some events so that we can keep track of hub-status etc.
+  useEffect(() => {
+    // A Listener for hub-connection failure. Make sure to update connection-state...
+    const connectionFailureListener = localObserver.subscribe(
+      "hub-initiation-failed",
+      () => setHubConnected(false)
+    );
+    // A Listener for hub-connection success. Make sure to update connection-state...
+    const connectionSuccessListener = localObserver.subscribe(
+      "hub-initiation-success",
+      () => setHubConnected(true)
+    );
+    // Make sure to clean up!
+    return () => {
+      connectionFailureListener.unSubscribe();
+      connectionSuccessListener.unSubscribe();
+    };
+  }, [localObserver]);
 
   // We're gonna need to catch if the user closes the window, and make sure to
   // update the state so that the effect handling the draw-interaction-toggling fires.
@@ -70,7 +88,7 @@ function VisionIntegration(props) {
       <VisionIntegrationView
         pluginShown={pluginShown}
         configError={configError}
-        hubIsConnected={hubIsConnected}
+        hubConnected={hubConnected}
       />
     </BaseWindowPlugin>
   );
