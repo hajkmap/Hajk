@@ -1,5 +1,6 @@
 // Base
 import React from "react";
+import Observer from "react-event-observer";
 import { useState } from "react";
 
 // Icons
@@ -16,6 +17,8 @@ function VisionIntegration(props) {
   // Let's destruct the options from the props (and fall back on empty object to avoid
   // a complete disaster if the plugin is wrongly configured).
   const { options = {} } = props;
+  // We're gonna need a local-observer so that we can pass some events around
+  const [localObserver] = React.useState(() => Observer());
   // Since we're gonna be drawing, we're gonna need to keep track of wether
   // the plugin is currently shown or not. (If the plugin is hidden the draw-
   // functionality should be disabled).
@@ -24,7 +27,9 @@ function VisionIntegration(props) {
   );
 
   // We're gonna need a model containing VisionIntegration-functionality...
-  const [model] = useState(new VisionIntegrationModel({ options }));
+  const [model] = useState(
+    new VisionIntegrationModel({ options, localObserver })
+  );
 
   // We're gonna want to make sure proper settings are supplied when starting
   // the plugin... If some crucial settings are missing we'll just display an
