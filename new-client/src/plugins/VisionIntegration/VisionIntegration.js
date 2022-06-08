@@ -52,10 +52,16 @@ function VisionIntegration(props) {
       "hub-initiation-success",
       () => setHubConnected(true)
     );
+    // A Listener for when/if the hub connection is disconnected for some reason...
+    const hubDisconnectedListener = localObserver.subscribe(
+      "hub-disconnected",
+      () => setHubConnected(false)
+    );
     // Make sure to clean up!
     return () => {
       connectionFailureListener.unSubscribe();
       connectionSuccessListener.unSubscribe();
+      hubDisconnectedListener.unSubscribe();
     };
   }, [localObserver]);
 

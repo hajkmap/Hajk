@@ -60,8 +60,14 @@ class VisionIntegrationModel {
 
   // Connects all events that we're interested in to the hub-connection.
   #initiateHubListeners = () => {
-    // The first event that we're interested in is the event where Vision is asking for
-    // information regarding all currently selected real-estates.
+    // We're gonna need a listener for the close-event. (The connection might close if the hub
+    // shuts down etc).
+    this.#hubConnection.onclose(() => {
+      this.#hubConnection = null;
+      this.#localObserver.publish("hub-disconnected");
+    });
+    // The first implementation specific event that we're interested in is an event where
+    // Vision is asking for information regarding all currently selected real-estates.
     this.#hubConnection.on(
       "HandleAskingForRealEstateIdentifiers",
       this.#handleVisionAskingForRealEstateIdentifiers
