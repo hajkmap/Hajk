@@ -96,7 +96,9 @@ export default class PrintModel {
   addPreviewLayer() {
     this.previewLayer = new Vector({
       source: new VectorSource(),
-      name: "preview-layer",
+      layerType: "system",
+      name: "pluginPrint",
+      caption: "Print layer",
       style: new Style({
         stroke: new Stroke({
           color: "rgba(0, 0, 0, 0.7)",

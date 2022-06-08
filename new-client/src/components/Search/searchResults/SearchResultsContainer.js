@@ -750,7 +750,7 @@ class SearchResultsContainer extends React.PureComponent {
 
     const layer = this.#getLayerById(featureCollection.source.pid);
 
-    if (layer.layerType === "group") {
+    if (layer.get("layerType") === "group") {
       // Group layers will publish an event to LayerSwitcher that will take
       // care of the somewhat complicated toggling.
 

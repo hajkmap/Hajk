@@ -1,6 +1,6 @@
 import { Style, Icon, Fill, Stroke, Circle } from "ol/style";
 import { Vector } from "ol/source";
-import { Vector as layerVector } from "ol/layer";
+import { Vector as VectorLayer } from "ol/layer";
 import { Point } from "ol/geom";
 import { Feature } from "ol";
 import { transform } from "ol/proj";
@@ -156,34 +156,38 @@ class RouteModel {
     var source_drawing = new Vector({});
 
     if (this.layer_start === undefined) {
-      this.layer_start = new layerVector({
+      this.layer_start = new VectorLayer({
+        layerType: "system",
         source: source_start,
-        name: "routing",
-        content: "Punkt",
+        name: "pluginRoutingStart",
+        content: "point",
         queryable: false,
         style: this.style_start,
       });
 
-      this.layer_end = new layerVector({
+      this.layer_end = new VectorLayer({
+        layerType: "system",
         source: source_end,
-        name: "routing",
-        content: "Punkt",
+        name: "pluginRoutingEnd",
+        content: "point",
         queryable: false,
         style: this.style_end,
       });
 
-      this.layer_route = new layerVector({
+      this.layer_route = new VectorLayer({
+        layerType: "system",
         source: source_route,
-        name: "routing",
-        content: "Punkt",
+        name: "pluginRoutingRoute",
+        content: "point",
         queryable: true,
         style: this.style_route,
       });
 
-      this.layer_drawing = new layerVector({
+      this.layer_drawing = new VectorLayer({
+        layerType: "system",
         source: source_drawing,
-        name: "routing",
-        content: "linje",
+        name: "pluginRoutingDrawing",
+        content: "line",
         queryable: false,
         style: this.layer_drawing_style,
       });

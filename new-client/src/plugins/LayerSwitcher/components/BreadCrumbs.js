@@ -132,15 +132,7 @@ class BreadCrumbs extends Component {
   }
 
   clear = () => {
-    this.state.visibleLayers
-      .filter((layer) =>
-        layer.getProperties().layerInfo
-          ? layer.getProperties().layerInfo.layerType !== "base"
-          : false
-      )
-      .forEach((layer) => {
-        layer.setVisible(false);
-      });
+    this.props.app.clear();
   };
 
   componentDidMount() {
@@ -153,19 +145,11 @@ class BreadCrumbs extends Component {
     }
   }
 
-  // Returns all active layers that contains layer-info
-  // and is not a background-layer.
+  // Returns all active layers except background layers
   getBreadCrumbCompatibleLayers = () => {
-    return this.state.visibleLayers.filter((layer) => {
-      if (
-        !layer.getProperties().layerInfo ||
-        (layer.getProperties().layerInfo &&
-          layer.getProperties().layerInfo.layerType === "base")
-      ) {
-        return false;
-      }
-      return true;
-    });
+    return this.state.visibleLayers.filter((layer) =>
+      ["layer", "group"].includes(layer.get("layerType"))
+    );
   };
 
   toggle = () => {

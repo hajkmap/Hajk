@@ -228,7 +228,7 @@ class DummyView extends React.PureComponent {
       ...this.props.app.map
         .getLayers()
         .getArray()
-        .filter((l) => l.getProperties().layerInfo?.layerType === "base")
+        .filter((l) => l.get("layerType") === "base")
         .map((l) => l.getProperties()),
     ];
   }

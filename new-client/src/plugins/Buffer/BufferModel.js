@@ -20,7 +20,9 @@ class BufferModel {
     this.highlightSource = new VectorSource();
     this.highlightLayer = new VectorLayer({
       source: this.highlightSource,
-      name: "bufferSelectionLayer",
+      layerType: "system",
+      name: "pluginBufferSelection",
+      caption: "Buffer selection layer",
       style: new Style({
         fill: new Fill({
           color: "rgba(255, 168, 231, 0.47)",
@@ -46,7 +48,9 @@ class BufferModel {
     this.bufferSource = new VectorSource();
     this.bufferLayer = new VectorLayer({
       source: this.bufferSource,
-      name: "bufferLayer",
+      layerType: "system",
+      name: "pluginBuffer",
+      caption: "Buffer layer",
       style: new Style({
         fill: new Fill({
           color: "rgba(255, 255, 255, 0.5)",
@@ -97,7 +101,7 @@ class BufferModel {
       .getFeaturesAtPixel(e.pixel, {
         layerFilter: function (l) {
           const name = l.get("name");
-          return name !== "bufferLayer" && name !== "bufferSelectionLayer"; // …but ignore them if they happen to come from buffer layer.
+          return name !== "pluginBuffer" && name !== "pluginBufferSelection"; // …but ignore them if they happen to come from buffer layer.
         },
       })
       // Take each of the returned features from any vector layer…
