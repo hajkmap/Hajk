@@ -56,7 +56,6 @@ class VisionIntegrationModel {
         this.#localObserver.publish("hub-initiation-failed");
         console.error(`Failed to initiate hub-connection. ${error}`);
       });
-    return null;
   };
 
   // Connects all events that we're interested in to the hub-connection.
@@ -67,6 +66,11 @@ class VisionIntegrationModel {
       "HandleAskingForRealEstateIdentifiers",
       this.#handleVisionAskingForRealEstateIdentifiers
     );
+    // We're also interested in an event where Vision is asking for the currently selected coordinate(s)
+    this.#hubConnection.on(
+      "HandleAskingForCoordinates",
+      this.#handleVisionAskingForCoordinates
+    );
   };
 
   // Handles when Vision is asking for information regarding all currently selected real-estates.
@@ -75,6 +79,11 @@ class VisionIntegrationModel {
       "handleVisionAskingForRealEstateIdentifiers, payload: ",
       payload
     );
+  };
+
+  // Handles when Vision is asking for information regarding all currently selected coordinates.
+  #handleVisionAskingForCoordinates = (payload) => {
+    console.log("handleVisionAskingForCoordinates, payload: ", payload);
   };
 
   // Makes sure that the supplied options contains all required settings.
