@@ -15,6 +15,9 @@ import VisionIntegrationModel from "./models/VisionIntegrationModel";
 // Utils
 import { getSearchSources } from "./utils";
 
+// Constants
+import { HUB_CONNECTION_STATUS } from "./constants";
+
 function VisionIntegration(props) {
   // Let's destruct the options from the props (and fall back on empty object to avoid
   // a complete disaster if the plugin is wrongly configured).
@@ -42,27 +45,29 @@ function VisionIntegration(props) {
   // error instead of the "real" UI.
   const [configError] = useState(!model.configurationIsValid());
 
-  // We're gonna want to keep track of wether the hub is connected or not. (We're
+  // We're gonna want to keep track of the hub connection-status (We're
   // gonna want to show the connection state to the user so that they can know if the
-  // connection has failed).
-  const [hubConnected, setHubConnected] = useState(false);
+  // connection has failed etc).
+  const [hubConnectionStatus, setHubConnectionStatus] = useState(
+    HUB_CONNECTION_STATUS.LOADING
+  );
 
   // We're gonna want to subscribe to some events so that we can keep track of hub-status etc.
   useEffect(() => {
     // A Listener for hub-connection failure. Make sure to update connection-state...
     const connectionFailureListener = localObserver.subscribe(
       "hub-initiation-failed",
-      () => setHubConnected(false)
+      () => setHubConnectionStatus(HUB_CONNECTION_STATUS.FAILED)
     );
     // A Listener for hub-connection success. Make sure to update connection-state...
     const connectionSuccessListener = localObserver.subscribe(
       "hub-initiation-success",
-      () => setHubConnected(true)
+      () => setHubConnectionStatus(HUB_CONNECTION_STATUS.SUCCESS)
     );
     // A Listener for when/if the hub connection is disconnected for some reason...
     const hubDisconnectedListener = localObserver.subscribe(
       "hub-disconnected",
-      () => setHubConnected(false)
+      () => setHubConnectionStatus(HUB_CONNECTION_STATUS.FAILED)
     );
     // Make sure to clean up!
     return () => {
@@ -101,7 +106,7 @@ function VisionIntegration(props) {
       <VisionIntegrationView
         pluginShown={pluginShown}
         configError={configError}
-        hubConnected={hubConnected}
+        hubConnectionStatus={hubConnectionStatus}
       />
     </BaseWindowPlugin>
   );
