@@ -174,6 +174,13 @@ class ConfigServiceV2 {
     )?.options;
     const searchLayerIds = searchOptions?.layers.map((l) => l.id) || [];
 
+    // Grab (search) layer-ids from the Vision-Integration-plugin
+    const visionIntegrationOptions = mapConfig.tools.find(
+      (t) => t.type === "visionintegration"
+    )?.options;
+    const visionIntegrationLayerIds =
+      visionIntegrationOptions?.searchSources?.map((l) => l.id) || [];
+
     // Grab layers from Edit
     const editOptions = mapConfig.tools.find((t) => t.type === "edit")?.options;
     let editLayerIds = [];
@@ -208,6 +215,7 @@ class ConfigServiceV2 {
       ...baseLayerIds,
       ...layerIds,
       ...searchLayerIds,
+      ...visionIntegrationLayerIds,
       ...editLayerIds,
       ...(collectorToolsServiceId ? [collectorToolsServiceId] : []), // Conditional spread to avoid undefined inside the Set
     ]);
