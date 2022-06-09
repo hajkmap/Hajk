@@ -12,12 +12,19 @@ import VisionIntegrationView from "./VisionIntegrationView";
 // Models
 import VisionIntegrationModel from "./models/VisionIntegrationModel";
 
+// Utils
+import { getSearchSources } from "./utils";
+
 function VisionIntegration(props) {
   // Let's destruct the options from the props (and fall back on empty object to avoid
   // a complete disaster if the plugin is wrongly configured).
   const { options = {} } = props;
   // We're gonna need a local-observer so that we can pass some events around
-  const [localObserver] = React.useState(() => Observer());
+  const [localObserver] = useState(() => Observer());
+  // We're gonna need the search-sources (basically information regarding the search-sources
+  // that are set in the plugin-options. In the plugin-options we only reference to these objects,
+  // and they have to be fetched from the global config).
+  const [searchSources] = useState(() => getSearchSources(props));
   // Since we're gonna be drawing, we're gonna need to keep track of wether
   // the plugin is currently shown or not. (If the plugin is hidden the draw-
   // functionality should be disabled).
@@ -27,7 +34,7 @@ function VisionIntegration(props) {
 
   // We're gonna need a model containing VisionIntegration-functionality...
   const [model] = useState(
-    () => new VisionIntegrationModel({ options, localObserver })
+    () => new VisionIntegrationModel({ options, localObserver, searchSources })
   );
 
   // We're gonna want to make sure proper settings are supplied when starting
