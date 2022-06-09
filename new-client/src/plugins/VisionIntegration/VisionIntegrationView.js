@@ -35,13 +35,13 @@ function VisionIntegrationView(props) {
         />
       </Grid>
       <Grid item container justifyContent="center">
-        <Tabs value={props.activeTab}>
+        <Tabs sx={{ width: "100%" }} value={props.activeTab}>
           {TABS.map((tab) => {
             return (
               <Tab
                 key={tab.id}
                 value={tab.id}
-                sx={{ width: "130px" }}
+                sx={{ width: `${100 / TABS.length}%` }}
                 disabled={tab.disabled}
                 icon={tab.icon}
                 label={tab.label}
