@@ -750,6 +750,7 @@ class AppModel {
       layers.arcgislayers = this.config.layersConfig.arcgislayers || [];
 
       layers.wmslayers.forEach((l) => (l.type = "wms"));
+      layers.wfslayers.forEach((l) => (l.type = "wfs"));
       layers.wmtslayers.forEach((l) => (l.type = "wmts"));
       layers.wfstlayers.forEach((l) => (l.type = "edit"));
       layers.vectorlayers.forEach((l) => (l.type = "vector"));
@@ -757,6 +758,7 @@ class AppModel {
 
       let allLayers = [
         ...layers.wmslayers,
+        ...layers.wfslayers,
         ...layers.wmtslayers,
         ...layers.vectorlayers,
         ...layers.wfstlayers,
