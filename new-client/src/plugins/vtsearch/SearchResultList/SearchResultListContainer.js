@@ -147,6 +147,7 @@ class SearchResultListContainer extends React.Component {
    * @memberof SearchResultListContainer
    */
   #applyFilterFunction = (result) => {
+    if (!this.filterFunctions[result.type]) return;
     this.filterFunctions[result.type](result, true);
   };
 
