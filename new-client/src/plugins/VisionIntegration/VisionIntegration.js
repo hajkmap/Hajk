@@ -20,8 +20,8 @@ import { HUB_CONNECTION_STATUS } from "./constants";
 
 function VisionIntegration(props) {
   // Let's destruct the options from the props (and fall back on empty object to avoid
-  // a complete disaster if the plugin is wrongly configured).
-  const { options = {} } = props;
+  // a complete disaster if the plugin is wrongly configured), along with the map and app.
+  const { options = {}, map, app } = props;
   // We're gonna need a local-observer so that we can pass some events around
   const [localObserver] = useState(() => Observer());
   // We're gonna need the search-sources (basically information regarding the search-sources
@@ -37,7 +37,14 @@ function VisionIntegration(props) {
 
   // We're gonna need a model containing VisionIntegration-functionality...
   const [model] = useState(
-    () => new VisionIntegrationModel({ options, localObserver, searchSources })
+    () =>
+      new VisionIntegrationModel({
+        options,
+        localObserver,
+        searchSources,
+        map,
+        app,
+      })
   );
 
   // We're gonna want to make sure proper settings are supplied when starting
