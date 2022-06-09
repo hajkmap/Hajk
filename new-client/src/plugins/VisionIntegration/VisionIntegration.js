@@ -16,7 +16,7 @@ import VisionIntegrationModel from "./models/VisionIntegrationModel";
 import { getSearchSources } from "./utils";
 
 // Constants
-import { HUB_CONNECTION_STATUS } from "./constants";
+import { HUB_CONNECTION_STATUS, TAB_IDS } from "./constants";
 
 function VisionIntegration(props) {
   // Let's destruct the options from the props (and fall back on empty object to avoid
@@ -34,6 +34,8 @@ function VisionIntegration(props) {
   const [pluginShown, setPluginShown] = useState(
     options.visibleAtStart ?? false
   );
+  // We have to keep track of which tab we're currently on...
+  const [activeTab, setActiveTab] = useState(TAB_IDS.ESTATES);
 
   // We're gonna need a model containing VisionIntegration-functionality...
   const [model] = useState(
@@ -105,7 +107,7 @@ function VisionIntegration(props) {
         title: "EDP Integration",
         description: "Kommunicera med EDP Vision.",
         height: "dynamic",
-        width: 350,
+        width: 400,
         onWindowHide: onWindowHide,
         onWindowShow: onWindowShow,
       }}
@@ -114,6 +116,8 @@ function VisionIntegration(props) {
         pluginShown={pluginShown}
         configError={configError}
         hubConnectionStatus={hubConnectionStatus}
+        activeTab={activeTab}
+        setActiveTab={setActiveTab}
       />
     </BaseWindowPlugin>
   );

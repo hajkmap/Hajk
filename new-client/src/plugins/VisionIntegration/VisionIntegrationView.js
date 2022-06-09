@@ -1,9 +1,9 @@
 // Base
 import React, { useMemo } from "react";
-import { Chip, Grid } from "@mui/material";
+import { Chip, Grid, Tabs, Tab } from "@mui/material";
 
 // Constants
-import { HUB_CONNECTION_STATUS } from "./constants";
+import { HUB_CONNECTION_STATUS, TABS } from "./constants";
 
 function VisionIntegrationView(props) {
   // We're gonna want to display a chip with some information regarding the hub-connection-status.
@@ -35,15 +35,21 @@ function VisionIntegrationView(props) {
         />
       </Grid>
       <Grid item container justifyContent="center">
-        <pre
-          style={{
-            whiteSpace: "pre-wrap",
-            wordWrap: "break-word",
-            maxWidth: "100%",
-          }}
-        >
-          {JSON.stringify(props)}
-        </pre>
+        <Tabs value={props.activeTab}>
+          {TABS.map((tab) => {
+            return (
+              <Tab
+                key={tab.id}
+                value={tab.id}
+                sx={{ width: "130px" }}
+                disabled={tab.disabled}
+                icon={tab.icon}
+                label={tab.label}
+                onClick={() => props.setActiveTab(tab.id)}
+              />
+            );
+          })}
+        </Tabs>
       </Grid>
     </Grid>
   );
