@@ -29,6 +29,7 @@ class SearchModel {
     matchCase: false, // should search be case sensitive?
     wildcardAtStart: false, // should the search string start with the wildcard character?
     wildcardAtEnd: true, // should the search string be end with the wildcard character?
+    orSeparator: null, // <string> Makes it possible to search for "string1" OR "string2" by providing "string1 <orSeparator> string2"
   };
 
   #componentOptions;
@@ -441,6 +442,18 @@ class SearchModel {
       possibleSearchCombinations = this.#decodePotentialSpecialChars(
         possibleSearchCombinations
       );
+
+      // If an OR-separator is supplied in the searchOptions (defaults to undefined) we'll
+      // split the search-string on the separator and add each string to the possible combinations.
+      // For example: We want to provide an option so that we can search for "river" OR "lake", which
+      // could be written as "river ? lake" if searchOptions.orSeparator is set to "?".
+      typeof searchOptions.orSeparator === "string" &&
+        searchString.includes(searchOptions.orSeparator) &&
+        possibleSearchCombinations.push(
+          ...searchString
+            .split(searchOptions.orSeparator)
+            .map((s) => [s.trim()])
+        );
 
       const searchFilters = possibleSearchCombinations.map((combination) => {
         let searchWordsForCombination = combination.map((wordInCombination) => {
