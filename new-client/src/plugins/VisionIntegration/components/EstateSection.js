@@ -1,6 +1,9 @@
 // Base
 import React from "react";
-import { Grid, Typography } from "@mui/material";
+import { Divider, Grid, Typography } from "@mui/material";
+
+// Components
+import EstateToolbox from "./EstateToolbox";
 
 // Constants
 import { ESTATE_TEXT } from "../constants";
@@ -16,6 +19,14 @@ function EstateSection(props) {
       : "";
   return (
     <Grid container sx={{ padding: 2 }}>
+      <EstateToolbox />
+      <Grid
+        container
+        sx={{ marginTop: 2, marginBottom: 1 }}
+        justifyContent="center"
+      >
+        <Divider sx={{ width: "20%" }} />
+      </Grid>
       <Grid container item xs={12}>
         <Typography variant="h6" align="center" sx={{ width: "100%" }}>
           {headerText}
