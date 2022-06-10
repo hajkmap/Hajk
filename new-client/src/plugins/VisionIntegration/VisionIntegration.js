@@ -1,5 +1,5 @@
 // Base
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import Observer from "react-event-observer";
 
 // Icons
@@ -36,7 +36,6 @@ function VisionIntegration(props) {
   );
   // We have to keep track of which tab we're currently on...
   const [activeTab, setActiveTab] = useState(INTEGRATION_IDS.ESTATES);
-
   // We're gonna need a model containing VisionIntegration-functionality...
   const [model] = useState(
     () =>
@@ -48,18 +47,28 @@ function VisionIntegration(props) {
         app,
       })
   );
-
   // We're gonna want to make sure proper settings are supplied when starting
   // the plugin... If some crucial settings are missing we'll just display an
   // error instead of the "real" UI.
   const [configError] = useState(!model.configurationIsValid());
-
   // We're gonna want to keep track of the hub connection-status (We're
   // gonna want to show the connection state to the user so that they can know if the
   // connection has failed etc).
   const [hubConnectionStatus, setHubConnectionStatus] = useState(
     HUB_CONNECTION_STATUS.LOADING
   );
+  // We're gonna need to keep track of the currently selected estates.
+  // The selected estates could change when a user selects/deselects estates in the map
+  // or if estates are sent from Vision.
+  const [selectedEstates, setSelectedEstates] = useState([]);
+
+  // We're gonna need a handler for the estate-search-success event.
+  const handleEstateSearchSuccess = useCallback((features) => {
+    // We want to jump to the estate-section when new estates has been found
+    setActiveTab(INTEGRATION_IDS.ESTATES);
+    // Then we'll update the state
+    setSelectedEstates(features);
+  }, []);
 
   // We're gonna want to subscribe to some events so that we can keep track of hub-status etc.
   useEffect(() => {
@@ -83,15 +92,10 @@ function VisionIntegration(props) {
       "estate-search-failed",
       () => console.error("Estate search failed...")
     );
-    // A listener for when the estate-search found no results
-    const estateSearchNoFeaturesFoundListener = localObserver.subscribe(
-      "estate-search-no-features-found",
-      () => console.error("Estate search failed...")
-    );
     // A listener for when the estate-search was successful
     const estateSearchCompletedListener = localObserver.subscribe(
       "estate-search-completed",
-      (features) => console.log("Estate search completed, results: ", features)
+      (features) => handleEstateSearchSuccess(features)
     );
     // Make sure to clean up!
     return () => {
@@ -99,10 +103,9 @@ function VisionIntegration(props) {
       connectionSuccessListener.unSubscribe();
       hubDisconnectedListener.unSubscribe();
       estateSearchFailedListener.unSubscribe();
-      estateSearchNoFeaturesFoundListener.unSubscribe();
       estateSearchCompletedListener.unSubscribe();
     };
-  }, [localObserver]);
+  }, [localObserver, handleEstateSearchSuccess]);
 
   // We're gonna need to catch if the user closes the window, and make sure to
   // update the state so that the effect handling the draw-interaction-toggling fires.
@@ -122,7 +125,7 @@ function VisionIntegration(props) {
       type="VisionIntegration"
       custom={{
         icon: <RepeatIcon />,
-        title: "EDP Integration",
+        title: "Vision Integration",
         description: "Kommunicera med EDP Vision.",
         height: "dynamic",
         width: 400,
@@ -136,6 +139,8 @@ function VisionIntegration(props) {
         hubConnectionStatus={hubConnectionStatus}
         activeTab={activeTab}
         setActiveTab={setActiveTab}
+        selectedEstates={selectedEstates}
+        setSelectedEstates={setSelectedEstates}
       />
     </BaseWindowPlugin>
   );

@@ -171,11 +171,6 @@ class VisionIntegrationModel {
     const estateCollection = featureCollections[0];
     // Then we can grab the resulting features
     const estateFeatures = estateCollection.value.features || [];
-    // If we got not features, we'll make sure to publish a message that none were found
-    if (estateFeatures.length === 0) {
-      this.#localObserver.publish("estate-search-no-features-found");
-      return null;
-    }
     // Otherwise we'll publish an event including the features that were found
     this.#localObserver.publish("estate-search-completed", estateFeatures);
   };
