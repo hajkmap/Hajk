@@ -477,7 +477,16 @@
         "target": "left",
         "position": "left",
         "visibleAtStart": true,
-        "hubUrl": "http://localhost:8000/gisandrealestate",
+        "hubUrl": "http://localhost:8000/gisandrealestate?user=bjonil1230",
+        "searchSources": [{ "id": "99", "visibleForGroups": [] }],
+        "integrationSettings": [
+          {
+            "id": "ESTATES",
+            "searchKey": "fnr",
+            "wmsId": null,
+            "wfsId": "99"
+          }
+        ],
         "visibleForGroups": []
       },
       "index": 99
