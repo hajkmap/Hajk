@@ -78,11 +78,29 @@ function VisionIntegration(props) {
       "hub-disconnected",
       () => setHubConnectionStatus(HUB_CONNECTION_STATUS.FAILED)
     );
+    // A listener for when the estate-search failed
+    const estateSearchFailedListener = localObserver.subscribe(
+      "estate-search-failed",
+      () => console.error("Estate search failed...")
+    );
+    // A listener for when the estate-search found no results
+    const estateSearchNoFeaturesFoundListener = localObserver.subscribe(
+      "estate-search-no-features-found",
+      () => console.error("Estate search failed...")
+    );
+    // A listener for when the estate-search was successful
+    const estateSearchCompletedListener = localObserver.subscribe(
+      "estate-search-completed",
+      (features) => console.log("Estate search completed, results: ", features)
+    );
     // Make sure to clean up!
     return () => {
       connectionFailureListener.unSubscribe();
       connectionSuccessListener.unSubscribe();
       hubDisconnectedListener.unSubscribe();
+      estateSearchFailedListener.unSubscribe();
+      estateSearchNoFeaturesFoundListener.unSubscribe();
+      estateSearchCompletedListener.unSubscribe();
     };
   }, [localObserver]);
 

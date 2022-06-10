@@ -157,8 +157,27 @@ class VisionIntegrationModel {
       [estateSearchSource],
       this.#searchOptions
     );
-    // Let's just log the results for now...
-    console.log("searchResult: ", searchResult);
+    // When the search is done, we'll get two objects:
+    // 1: The feature-collections (one for each source)
+    // 2: The potential errors (one for each source)
+    // Since we know we're dealing with one source here, we can just grab the [0]th
+    const { featureCollections, errors } = searchResult;
+    // If we got an error, or if the results are missing, we have to prompt the user in some way...
+    if (errors[0] || !featureCollections[0]) {
+      this.#localObserver.publish("estate-search-failed");
+      return null;
+    }
+    // If we didn't, we can grab the first featureCollection, which will include our results
+    const estateCollection = featureCollections[0];
+    // Then we can grab the resulting features
+    const estateFeatures = estateCollection.value.features || [];
+    // If we got not features, we'll make sure to publish a message that none were found
+    if (estateFeatures.length === 0) {
+      this.#localObserver.publish("estate-search-no-features-found");
+      return null;
+    }
+    // Otherwise we'll publish an event including the features that were found
+    this.#localObserver.publish("estate-search-completed", estateFeatures);
   };
 
   // Returns the WFS-source (config, not a "real" source) stated to be the
