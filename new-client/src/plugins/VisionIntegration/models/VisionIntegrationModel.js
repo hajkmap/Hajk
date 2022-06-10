@@ -133,7 +133,7 @@ class VisionIntegrationModel {
       return null;
     }
     // We'll also have to check that we have an estate-search-source to search for the estates in
-    const estateSearchSource = this.#getEstateSearchSource();
+    const estateSearchSource = this.getEstateSearchSource();
     if (!estateSearchSource) {
       console.error(
         `HandleRealEstateIdentifiers was invoked but could not be handled. No estate-search-source is configured.`
@@ -177,7 +177,7 @@ class VisionIntegrationModel {
 
   // Returns the WFS-source (config, not a "real" source) stated to be the
   // real-estate-source.
-  #getEstateSearchSource = () => {
+  getEstateSearchSource = () => {
     // First we'll get the estate-source-id
     const estateSourceId = this.#getEstateSearchSourceId();
     // If no id could be found, we cannot search for the source either...

@@ -2,8 +2,11 @@
 import React, { useMemo } from "react";
 import { Chip, Grid, Tabs, Tab } from "@mui/material";
 
+// Components
+import EstateSection from "./components/EstateSection";
+
 // Constants
-import { HUB_CONNECTION_STATUS, TABS } from "./constants";
+import { HUB_CONNECTION_STATUS, INTEGRATION_IDS, TABS } from "./constants";
 
 function VisionIntegrationView(props) {
   // We're gonna want to display a chip with some information regarding the hub-connection-status.
@@ -24,6 +27,27 @@ function VisionIntegrationView(props) {
 
     return { label, color };
   }, [props.hubConnectionStatus]);
+
+  // Renders the section connected to the active tab
+  const renderActiveSection = () => {
+    switch (props.activeTab) {
+      case INTEGRATION_IDS.ESTATES:
+        return (
+          <EstateSection
+            model={props.model}
+            selectedEstates={props.selectedEstates}
+            searchSource={props.model.getEstateSearchSource()}
+          />
+        );
+      case INTEGRATION_IDS.COORDINATES:
+        return null;
+      // TODO: Since the edit-tab is disabled ofr now, we'll just return null for now.
+      case INTEGRATION_IDS.EDIT:
+        return null;
+      default:
+        return null;
+    }
+  };
 
   return (
     <Grid container>
@@ -50,6 +74,9 @@ function VisionIntegrationView(props) {
             );
           })}
         </Tabs>
+      </Grid>
+      <Grid item xs={12}>
+        {renderActiveSection()}
       </Grid>
     </Grid>
   );

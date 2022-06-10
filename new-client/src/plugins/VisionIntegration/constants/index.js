@@ -15,6 +15,15 @@ export const INTEGRATION_IDS = Object.freeze({
   EDIT: "EDIT",
 });
 
+export const ESTATE_TEXT = Object.freeze({
+  NO_SELECTED_ESTATES_HEADER: "Det finns inga selekterade fastigheter",
+  SELECTED_ESTATES_HEADER: "Selekterade fastigheter",
+  NO_SELECTED_ESTATES_HELP:
+    "Selektera fastigheter genom att aktivera selektering och klicka på fastigheter i kartan.",
+  SELECTED_ESTATES_HELP:
+    "De selekterade fastigheterna kan nu hämtas från Vision",
+});
+
 export const TABS = [
   {
     id: INTEGRATION_IDS.ESTATES,
