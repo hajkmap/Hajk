@@ -31,6 +31,12 @@ const defaultState = {
   showAttributeTableButton: false,
   singleTile: false,
   hidpi: true,
+  useCustomDpiList: false,
+  customDpiList: [
+    { "pxRatio": 0, "dpi": 90 },
+    { "pxRatio": 2, "dpi": 180 },
+    { "pxRatio": 3, "dpi": 270 }
+  ],
   customRatio: 0,
   imageFormat: "",
   serverType: "geoserver",
@@ -103,6 +109,7 @@ class WMSLayerForm extends Component {
     let _state = { ...defaultState };
     _state.url = this.props.url;
     this.setState(_state);
+
     this.props.model.on("change:select-image", () => {
       this.setState({
         legend: this.props.model.get("select-image"),
@@ -115,6 +122,8 @@ class WMSLayerForm extends Component {
       });
       this.validateField("select-legend-icon");
     });
+
+
   }
 
   componentWillUnmount() {
@@ -897,6 +906,12 @@ class WMSLayerForm extends Component {
           hideExpandArrow: layer.hideExpandArrow ?? false,
           minMaxZoomAlertOnToggleOnly:
             layer.minMaxZoomAlertOnToggleOnly ?? false,
+          useCustomDpiList: layer.useCustomDpiList ?? false,
+          customDpiList: layer.customDpiList?.length > 0 ? layer.customDpiList : [
+            { "pxRatio": 0, "dpi": 90 },
+            { "pxRatio": 2, "dpi": 180 },
+            { "pxRatio": 3, "dpi": 270 }
+          ],
         },
         () => {
           this.setServerType();
@@ -1145,6 +1160,8 @@ class WMSLayerForm extends Component {
       minMaxZoomAlertOnToggleOnly: this.getValue("minMaxZoomAlertOnToggleOnly"),
       singleTile: this.getValue("singleTile"),
       hidpi: this.getValue("hidpi"),
+      useCustomDpiList: this.state.useCustomDpiList,
+      customDpiList: this.state.useCustomDpiList ? this.state.customDpiList : [],
       customRatio: this.getValue("customRatio"),
       imageFormat: this.getValue("imageFormat"),
       serverType: this.getValue("serverType"),
@@ -1205,10 +1222,10 @@ class WMSLayerForm extends Component {
       return value === 0 ? -1 : value;
     }
     if (fieldName === "minMaxZoomAlertOnToggleOnly") value = input.checked;
-
     if (fieldName === "date") value = create_date();
     if (fieldName === "singleTile") value = input.checked;
     if (fieldName === "hidpi") value = input.checked;
+    if (fieldName === "useCustomDpiList") value = input.checked;
     if (fieldName === "customRatio")
       value = parseFloat(Number(value).toFixed(2));
     if (fieldName === "tiled") value = input.checked;
@@ -1343,6 +1360,35 @@ class WMSLayerForm extends Component {
     }
     this.setState({ workspaceList: sortedWorksapes });
   };
+
+  updateDpiList(e, kv, key){
+    const index = this.state.customDpiList.findIndex(o => o === kv);
+
+    if(e.target.value.includes(".") || e.target.value.includes(",")){
+      kv[key] = parseFloat(parseFloat(e.target.value.replace(",", ".")).toFixed(1));
+    }else{
+      kv[key] = parseInt(e.target.value);
+    }
+    
+    let newValue = [...this.state.customDpiList];
+    newValue[index] = kv;
+    this.setState({customDpiList: newValue});
+  }
+
+  removeDpiListRow(e, index){
+    if(this.state.customDpiList.length <= 1){
+      return;
+    }
+    let newValue = [...this.state.customDpiList];
+    newValue.splice(index, 1);
+    this.setState({customDpiList: newValue});
+  }
+
+  addDpiListRow(){
+    let newValue = [...this.state.customDpiList];
+    newValue.push({ pxRatio: 0, dpi: 90 });
+    this.setState({customDpiList: newValue});
+  }
 
   render() {
     const loader = this.state.load ? (
@@ -1538,6 +1584,54 @@ class WMSLayerForm extends Component {
             />
           </label>
         </div>
+        <div>
+          <input
+            type="checkbox"
+            ref="input_useCustomDpiList"
+            id="input_useCustomDpiList"
+            onChange={(e) => this.setState({ useCustomDpiList: e.target.checked })}
+            checked={this.state.useCustomDpiList}
+          />
+          &nbsp;
+          <label htmlFor="input_useCustomDpiList">
+            Custom DPI {" "}
+            <i
+              className="fa fa-question-circle"
+              data-toggle="tooltip"
+              title="Hämta 'kartbilder' med specifik dpi vid pixelRatio-brytpunkt."
+            />
+          </label>
+          {this.state.useCustomDpiList
+            ? 
+            <div>
+              <div style={{display: "flex", color: "#c0c0c0"}}>
+                <div style={{width: "155px"}}>pixel ratio</div>
+                <div style={{width: "155px"}}>dpi</div>
+              </div>              
+            {
+            this.state.customDpiList.map((kv, index) =>
+              <div key={`${kv.pxRatio}__${kv.dpi}__${index}`} style={{display: "flex"}}>
+                <div>
+                  <input type="text" defaultValue={kv.pxRatio} style={{width: "150px"}}
+                    onBlur={(e) => { this.updateDpiList(e, kv, "pxRatio"); }}/>
+                </div>
+                <div>
+                  <input type="text" defaultValue={kv.dpi} style={{width: "150px"}}
+                    onBlur={(e) => { this.updateDpiList(e, kv, "dpi"); }}/>
+                    <button type="button" className="btn btn-default" style={{fontWeight: "bold"}} disabled={this.state.customDpiList.length === 1}
+                      onClick={(e)=>{ this.removeDpiListRow(e, index); }}>-</button>
+                    {index === this.state.customDpiList.length-1 ?
+                    <button type="button" className="btn btn-default" style={{fontWeight: "bold", marginLeft: "5px"}}
+                      onClick={(e)=>{ this.addDpiListRow(); }}>+</button>
+                    : ""  
+                  }
+                </div>
+              </div>
+            )
+            }
+            </div>
+            : null }
+        </div>        
         <div>
           <input
             type="checkbox"

@@ -89,10 +89,10 @@ class WMSLayer {
           config.minMaxZoomAlertOnToggleOnly || false,
       });
 
-      config.useCustomHiDpi = config.useCustomHiDpi || false;
+      config.useCustomDpiList = config.useCustomDpiList || false;
 
-      if (config.useCustomHiDpi) {
-        this.applyCustomHiDpiTileLoader(this.layer.getSource(), config);
+      if (config.useCustomDpiList) {
+        this.applyCustomDpiTileLoader(this.layer.getSource(), config);
       }
     }
 
@@ -104,7 +104,7 @@ class WMSLayer {
     this.bindHandlers();
   }
 
-  applyCustomHiDpiTileLoader(source, config) {
+  applyCustomDpiTileLoader(source, config) {
     // Experimental
     //
     // This tileLoader makes it possible to use specific dpi:s for specific ratios.
@@ -120,20 +120,20 @@ class WMSLayer {
     // a pixelRatio of 3 to infinity would return dpi 270 and width and height 256 * 3 = 768
 
     // Layer config example:
-    // "useCustomHiDpi": true,
-    // "customHiDpiList": [
+    // "useCustomDpiList": true,
+    // "customDpiList": [
     //   { "pxRatio": 0, "dpi": 90 },
     //   { "pxRatio": 2, "dpi": 180 },
     //   { "pxRatio": 3, "dpi": 270 }
     // ]
 
     // Is it properly configured?
-    if (!config?.customHiDpiList?.length) {
+    if (!config?.customDpiList?.length) {
       return;
     }
 
     // Get the list of available ratios from config and sort it correctly.
-    const pixelRatios = config.customHiDpiList.sort((a, b) =>
+    const pixelRatios = config.customDpiList.sort((a, b) =>
       a.pxRatio > b.pxRatio ? 1 : b.pxRatio > a.pxRatio ? -1 : 0
     );
 
