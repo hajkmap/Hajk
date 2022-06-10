@@ -9,7 +9,7 @@ export const HUB_CONNECTION_STATUS = Object.freeze({
   SUCCESS: "SUCCESS",
 });
 
-export const TAB_IDS = Object.freeze({
+export const INTEGRATION_IDS = Object.freeze({
   ESTATES: "ESTATES",
   COORDINATES: "COORDINATES",
   EDIT: "EDIT",
@@ -17,21 +17,21 @@ export const TAB_IDS = Object.freeze({
 
 export const TABS = [
   {
-    id: TAB_IDS.ESTATES,
+    id: INTEGRATION_IDS.ESTATES,
     icon: <HomeIcon />,
     label: "Fastigheter",
     tooltip: "Skicka fastigheter mellan Vision och kartan.",
     disabled: false,
   },
   {
-    id: TAB_IDS.COORDINATES,
+    id: INTEGRATION_IDS.COORDINATES,
     icon: <PlaceIcon />,
     label: "Koordinater",
     tooltip: "Skicka koordinater mellan Vision och kartan.",
     disabled: false,
   },
   {
-    id: TAB_IDS.EDIT,
+    id: INTEGRATION_IDS.EDIT,
     icon: <EditIcon />,
     label: "Redigera",
     tooltip:

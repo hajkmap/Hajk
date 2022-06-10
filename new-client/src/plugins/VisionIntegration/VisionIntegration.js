@@ -16,7 +16,7 @@ import VisionIntegrationModel from "./models/VisionIntegrationModel";
 import { getSearchSources } from "./utils";
 
 // Constants
-import { HUB_CONNECTION_STATUS, TAB_IDS } from "./constants";
+import { HUB_CONNECTION_STATUS, INTEGRATION_IDS } from "./constants";
 
 function VisionIntegration(props) {
   // Let's destruct the options from the props (and fall back on empty object to avoid
@@ -35,7 +35,7 @@ function VisionIntegration(props) {
     options.visibleAtStart ?? false
   );
   // We have to keep track of which tab we're currently on...
-  const [activeTab, setActiveTab] = useState(TAB_IDS.ESTATES);
+  const [activeTab, setActiveTab] = useState(INTEGRATION_IDS.ESTATES);
 
   // We're gonna need a model containing VisionIntegration-functionality...
   const [model] = useState(

@@ -1,11 +1,14 @@
 import { HubConnectionBuilder } from "@microsoft/signalr";
 import SearchModel from "models/SearchModel";
 
+import { INTEGRATION_IDS } from "../constants";
+
 // A simple class containing functionality that is used in the VisionIntegration-plugin.
 class VisionIntegrationModel {
   #options;
   #localObserver;
   #hubConnection;
+  #searchSources;
   #orSeparator;
   #searchOptions;
   #searchModel;
@@ -24,7 +27,12 @@ class VisionIntegrationModel {
     this.#options = options; // We're probably gonna need the options...
     this.#localObserver = localObserver; // ...and the observer
     this.#hubConnection = this.#createHubConnection(); // Create the hub-connection
-    this.#searchModel = new SearchModel({ sources: searchSources }, map, app); // Initiate a search-model with the provided sources
+    this.#searchSources = searchSources;
+    this.#searchModel = new SearchModel(
+      { sources: this.#searchSources },
+      map,
+      app
+    ); // Initiate a search-model with the provided sources
     this.#orSeparator = "?"; // We're gonna be using an or-separator when searching, let's use "?"
     this.#searchOptions = this.#getDefaultSearchOptions(); // Create the default search-options
     this.#hubConnection !== null && this.#initiateHub(); // Initiate the hub and its listeners.
@@ -124,21 +132,92 @@ class VisionIntegrationModel {
       );
       return null;
     }
+    // We'll also have to check that we have an estate-search-source to search for the estates in
+    const estateSearchSource = this.#getEstateSearchSource();
+    if (!estateSearchSource) {
+      console.error(
+        `HandleRealEstateIdentifiers was invoked but could not be handled. No estate-search-source is configured.`
+      );
+      return null;
+    }
+    // We'll also have to get the settings for this part of the integration...
+    const estateIntegrationSettings = this.#getEstateIntegrationSettings();
+    // ...so that we can get the search-key...
+    const searchKey = estateIntegrationSettings?.searchKey || "fnr";
     // If we we're supplied an array, we can try to construct an "or-separator"-separated search-string
     // (Vision might be trying to show several estates, in that case we'll get the estate-key for each
     // estate-object and construct a "or-separator"-separated string with these. The search-model will make sure
     // to create an OR-filter for each key in the "or-separator"-separated string).
     const searchString = payload
-      .map((estate) => estate.fnr || "")
+      .map((estate) => estate[searchKey] || "")
       .join(this.#orSeparator);
     // When the string is constructed, we can conduct a search
     const searchResult = await this.#searchModel.getResults(
       searchString,
-      null,
+      [estateSearchSource],
       this.#searchOptions
     );
     // Let's just log the results for now...
     console.log("searchResult: ", searchResult);
+  };
+
+  // Returns the WFS-source (config, not a "real" source) stated to be the
+  // real-estate-source.
+  #getEstateSearchSource = () => {
+    // First we'll get the estate-source-id
+    const estateSourceId = this.#getEstateSearchSourceId();
+    // If no id could be found, we cannot search for the source either...
+    if (!estateSourceId) {
+      console.error(
+        "Could not fetch estate-source. Estate-source-ID is missing!"
+      );
+      return null;
+    }
+    // If we have an id, we can return the source connected to the id
+    return (
+      this.#searchSources.find((source) => source.id === estateSourceId) || null
+    );
+  };
+
+  // Returns the id of the WFS-source that is connected to the estate-part of the integration.
+  #getEstateSearchSourceId = () => {
+    // First we'll get all the estate-settings
+    const estateSettings = this.#getEstateIntegrationSettings();
+    // Then we'll get the wfs-id
+    const { wfsId } = estateSettings;
+    // We'll check if the wfsId is defined so that we can log an error if its not
+    if (!this.#isValidString(wfsId)) {
+      console.error(
+        `Error fetching estate WFS-source. Expected "wfsId" to be a string but got ${typeof wfsId}`
+      );
+      return null;
+    }
+    // If we've made it this far, we'll return the wfsId
+    return estateSettings.wfsId || null;
+  };
+
+  // Returns the estate-integration-settings
+  #getEstateIntegrationSettings = () => {
+    // First we'll get all the integration-settings
+    const { integrationSettings } = this.#options;
+    // We also have to make sure the settings is an array...
+    if (!Array.isArray(integrationSettings)) {
+      console.error(
+        `The plugin is missing proper integration-settings. Expected an array but got ${typeof integrationSettings}`
+      );
+      return null;
+    }
+    // If the settings is an array, we can try to find the estate-settings by using the ID.
+    const estateSettings = integrationSettings.find(
+      (setting) => setting.id === INTEGRATION_IDS.ESTATES
+    );
+    // If no settings were found, we'll return null...
+    if (!estateSettings || typeof estateSettings !== "object") {
+      console.error("Estate-settings missing from configuration.");
+      return null;
+    }
+    // If we've made it this far, we can return the settings...
+    return estateSettings;
   };
 
   // Returns wether any of the required parameters for the model is missing or not.
