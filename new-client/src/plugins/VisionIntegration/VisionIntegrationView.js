@@ -1,12 +1,34 @@
 // Base
 import React, { useMemo } from "react";
-import { Chip, Grid, Tabs, Tab } from "@mui/material";
+import { styled } from "@mui/material/styles";
+import { AppBar, Chip, Divider, Grid, Tabs, Tab } from "@mui/material";
 
 // Components
 import EstateSection from "./components/EstateSection";
 
 // Constants
 import { HUB_CONNECTION_STATUS, INTEGRATION_IDS, TABS } from "./constants";
+
+const Root = styled("div")(() => ({
+  margin: -10,
+  display: "flex",
+  flexDirection: "column",
+  height: "100%",
+}));
+
+const StyledAppBar = styled(AppBar)(() => ({
+  top: -10,
+}));
+
+const TabContent = styled("div")(({ theme }) => ({
+  display: "flex",
+  flexDirection: "column",
+  justifyContent: "space-between",
+  padding: theme.spacing(1),
+  width: "100%",
+  height: "100%",
+  minHeight: 300,
+}));
 
 function VisionIntegrationView(props) {
   // We're gonna want to display a chip with some information regarding the hub-connection-status.
@@ -50,35 +72,46 @@ function VisionIntegrationView(props) {
   };
 
   return (
-    <Grid container>
+    <Root>
       <Grid item container justifyContent="center">
-        <Chip
-          color={hubChipInformation.color}
-          size="small"
-          label={hubChipInformation.label}
-        />
+        <StyledAppBar position="sticky" color="default">
+          <Tabs variant="fullWidth" value={props.activeTab}>
+            {TABS.map((tab) => {
+              return (
+                <Tab
+                  key={tab.id}
+                  value={tab.id}
+                  sx={{ width: `${100 / TABS.length}%` }}
+                  disabled={tab.disabled}
+                  icon={tab.icon}
+                  label={tab.label}
+                  onClick={() => props.setActiveTab(tab.id)}
+                />
+              );
+            })}
+          </Tabs>
+        </StyledAppBar>
       </Grid>
-      <Grid item container justifyContent="center">
-        <Tabs sx={{ width: "100%" }} value={props.activeTab}>
-          {TABS.map((tab) => {
-            return (
-              <Tab
-                key={tab.id}
-                value={tab.id}
-                sx={{ width: `${100 / TABS.length}%` }}
-                disabled={tab.disabled}
-                icon={tab.icon}
-                label={tab.label}
-                onClick={() => props.setActiveTab(tab.id)}
-              />
-            );
-          })}
-        </Tabs>
-      </Grid>
-      <Grid item xs={12}>
+      <TabContent>
         {renderActiveSection()}
-      </Grid>
-    </Grid>
+        <Grid container>
+          <Grid
+            container
+            sx={{ marginTop: 0, marginBottom: 1 }}
+            justifyContent="center"
+          >
+            <Divider sx={{ width: "20%" }} />
+          </Grid>
+          <Grid item container justifyContent="center">
+            <Chip
+              color={hubChipInformation.color}
+              size="small"
+              label={hubChipInformation.label}
+            />
+          </Grid>
+        </Grid>
+      </TabContent>
+    </Root>
   );
 }
 
