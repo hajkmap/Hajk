@@ -8,6 +8,7 @@ function EstateList(props) {
       {props.selectedEstates.map((estate, index) => {
         return (
           <EstateListItem
+            app={props.app}
             key={index}
             estate={estate}
             source={props.source}

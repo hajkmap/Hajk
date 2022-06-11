@@ -57,6 +57,7 @@ function VisionIntegrationView(props) {
       case INTEGRATION_IDS.ESTATES:
         return (
           <EstateSection
+            app={props.app}
             model={props.model}
             selectedEstates={props.selectedEstates}
             setSelectedEstates={props.setSelectedEstates}

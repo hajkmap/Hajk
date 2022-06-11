@@ -141,6 +141,7 @@ function VisionIntegration(props) {
       }}
     >
       <VisionIntegrationView
+        app={app}
         model={model}
         pluginShown={pluginShown}
         configError={configError}

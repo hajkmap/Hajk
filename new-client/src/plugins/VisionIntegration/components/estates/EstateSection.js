@@ -46,6 +46,7 @@ function EstateSection(props) {
         )}
       </Grid>
       <EstateList
+        app={props.app}
         source={props.source}
         selectedEstates={props.selectedEstates}
         setSelectedEstates={props.setSelectedEstates}
