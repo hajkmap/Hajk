@@ -51,9 +51,10 @@ function EstateSection(props) {
         setSelectedEstates={props.setSelectedEstates}
       />
       {props.selectedEstates.length > 0 && (
-        <Grid item xs={8} sx={{ marginTop: 1 }}>
+        <Grid item xs={12} sx={{ marginTop: 1 }}>
           <Button
             fullWidth
+            size="small"
             variant="contained"
             onClick={handleResetSelectionClick}
           >
