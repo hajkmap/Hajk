@@ -5,6 +5,7 @@ import { INTEGRATION_IDS } from "../constants";
 
 // A simple class containing functionality that is used in the VisionIntegration-plugin.
 class VisionIntegrationModel {
+  #app;
   #options;
   #localObserver;
   #hubConnection;
@@ -24,6 +25,7 @@ class VisionIntegrationModel {
       );
     }
     // Then we'll initiate some private fields...
+    this.#app = app;
     this.#options = options; // We're probably gonna need the options...
     this.#localObserver = localObserver; // ...and the observer
     this.#hubConnection = this.#createHubConnection(); // Create the hub-connection
@@ -49,13 +51,40 @@ class VisionIntegrationModel {
           `Failed to create hub-connection. Parameter 'hubUrl' missing.`
         );
       }
+      // The url in the options does not include the current user (a test or a "real" user
+      // is required when connecting to the hub). Let's try to get the override-user or the logged on user:
+      const user = this.#getHubUser();
+      // Then we have to make sure we found a valid user
+      if (!this.#isValidString(user)) {
+        throw new Error(
+          `Failed to create hub-connection. No user defined to create connection. Is the AD properly configured?`
+        );
+      }
+      // If we did find a user, we can create a hub-url with the user appended...
+      const urlWithUser = hubUrl.includes("?")
+        ? `${hubUrl}&user=${user}`
+        : `${hubUrl}?user=${user}`;
       // ... If we are, we can try to create the connection
-      return new HubConnectionBuilder().withUrl(hubUrl).build();
+      return new HubConnectionBuilder().withUrl(urlWithUser).build();
     } catch (error) {
       // If we fail for some reason, we'll log an error and return null
       console.error(`Failed to create hub-connection. ${error}`);
+      // Ugh... But we have to make sure all listeners are ready before we publish the failiure...
+      setTimeout(() => {
+        this.#localObserver.publish("hub-initiation-failed");
+      }, 200);
       return null;
     }
+  };
+
+  // Returns either the user-override from config, or the currently logged on user
+  #getHubUser = () => {
+    // If we have a valid string set in the user-override, we return that
+    if (this.#isValidString(this.#options.userOverride)) {
+      return this.#options.userOverride;
+    }
+    // Otherwise we return the ciurrently logged in user
+    return this.#app.config.userDetails?.sAMAccountName || null;
   };
 
   // Returns the default search-options
