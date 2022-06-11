@@ -1,6 +1,6 @@
 // Base
 import React from "react";
-import { Divider, Grid, Typography } from "@mui/material";
+import { Button, Divider, Grid, Typography } from "@mui/material";
 
 // Components
 import EstateToolbox from "./EstateToolbox";
@@ -10,16 +10,23 @@ import EstateList from "./EstateList";
 import { ESTATE_TEXT } from "../../constants";
 
 function EstateSection(props) {
+  // The header-text depends on if the user has selected any features or not...
   const headerText =
     props.selectedEstates.length === 0
       ? ESTATE_TEXT.NO_SELECTED_ESTATES_HEADER
       : ESTATE_TEXT.SELECTED_ESTATES_HEADER;
+  // ...the helper-text does as well obviously.s
   const helperText =
     props.selectedEstates.length === 0
       ? ESTATE_TEXT.NO_SELECTED_ESTATES_HELP
       : "";
+  // Handles click on button used to remove all selected estates
+  const handleResetSelectionClick = () => {
+    props.setSelectedEstates([]);
+  };
+
   return (
-    <Grid container sx={{ padding: 2 }}>
+    <Grid container sx={{ padding: 2 }} justifyContent="center">
       <EstateToolbox />
       <Grid
         container
@@ -43,6 +50,17 @@ function EstateSection(props) {
         selectedEstates={props.selectedEstates}
         setSelectedEstates={props.setSelectedEstates}
       />
+      {props.selectedEstates.length > 0 && (
+        <Grid item xs={8} sx={{ marginTop: 1 }}>
+          <Button
+            fullWidth
+            variant="contained"
+            onClick={handleResetSelectionClick}
+          >
+            Rensa selektering
+          </Button>
+        </Grid>
+      )}
     </Grid>
   );
 }
