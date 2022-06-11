@@ -107,6 +107,13 @@ function VisionIntegration(props) {
     };
   }, [localObserver, handleEstateSearchSuccess]);
 
+  // We're gonna need an useEffect that can handle side-effects when the selected
+  // etstaes changes. (We're gonna have to update the map etc.).
+  useEffect(() => {
+    console.log("Selected estates updated!");
+    localObserver.publish("selected-estates-uddated", selectedEstates);
+  }, [localObserver, selectedEstates]);
+
   // We're gonna need to catch if the user closes the window, and make sure to
   // update the state so that the effect handling the draw-interaction-toggling fires.
   const onWindowHide = () => {

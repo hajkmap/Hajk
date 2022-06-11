@@ -56,7 +56,10 @@ function EstateListItem(props) {
     // Make sure the event does not propagate to the accordion...
     e.preventDefault();
     e.stopPropagation();
-    console.log("TODO!");
+    // Then we'll update the state by removing the estate we wanted to delete
+    props.setSelectedEstates((prevSelected) =>
+      prevSelected.filter((prev) => prev.getId() !== props.estate.getId())
+    );
   };
 
   return (

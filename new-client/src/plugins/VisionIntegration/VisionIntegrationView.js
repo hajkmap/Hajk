@@ -59,6 +59,7 @@ function VisionIntegrationView(props) {
           <EstateSection
             model={props.model}
             selectedEstates={props.selectedEstates}
+            setSelectedEstates={props.setSelectedEstates}
             source={props.model.getEstateSearchSource()}
           />
         );
