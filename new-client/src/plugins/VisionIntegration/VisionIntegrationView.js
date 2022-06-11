@@ -78,7 +78,7 @@ function VisionIntegrationView(props) {
     }
   };
 
-  return (
+  return props.windowVisible ? (
     <Root>
       <Grid item container justifyContent="center">
         <StyledAppBar position="sticky" color="default">
@@ -119,7 +119,7 @@ function VisionIntegrationView(props) {
         </Grid>
       </TabContent>
     </Root>
-  );
+  ) : null;
 }
 
 export default VisionIntegrationView;
