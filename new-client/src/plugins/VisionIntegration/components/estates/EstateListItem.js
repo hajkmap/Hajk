@@ -6,7 +6,21 @@ import {
   AccordionSummary,
   AccordionDetails,
   Grid,
+  Typography,
 } from "@mui/material";
+
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+
+const StyledAccordion = styled(Accordion)(({ theme }) => ({
+  border: `1px solid ${theme.palette.divider}`,
+  "&:not(:first-of-type)": {
+    borderTop: 0,
+    marginTop: theme.spacing(1),
+  },
+  "&:not(:last-of-type)": {
+    borderBottom: 0,
+  },
+}));
 
 const StyledAccordionSummary = styled(AccordionSummary)(() => ({
   minHeight: 35,
@@ -27,15 +41,25 @@ const StyledAccordionSummary = styled(AccordionSummary)(() => ({
 function EstateListItem(props) {
   const [expanded, setExpanded] = useState(false);
   return (
-    <Accordion
+    <StyledAccordion
+      sx={{ width: "100%" }}
       expanded={expanded}
+      disableGutters
+      square
       TransitionProps={{
         timeout: 0,
       }}
       onChange={() => setExpanded(!expanded)}
     >
-      <StyledAccordionSummary>{props.title}</StyledAccordionSummary>
-    </Accordion>
+      <StyledAccordionSummary expandIcon={<ExpandMoreIcon />}>
+        {props.title}
+      </StyledAccordionSummary>
+      <AccordionDetails style={{ maxWidth: "100%" }}>
+        <Typography>
+          Here's alot of nice info regarding the current estate...
+        </Typography>
+      </AccordionDetails>
+    </StyledAccordion>
   );
 }
 
