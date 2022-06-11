@@ -4,8 +4,8 @@ import { styled } from "@mui/material/styles";
 import { AppBar, Chip, Divider, Grid, Tabs, Tab } from "@mui/material";
 
 // Components
-import EstateSection from "./components/EstateSection";
-import CoordinateSection from "./components/CoordinateSection";
+import EstateSection from "./components/estates/EstateSection";
+import CoordinateSection from "./components/coordinates/CoordinateSection";
 
 // Constants
 import { HUB_CONNECTION_STATUS, INTEGRATION_IDS, TABS } from "./constants";

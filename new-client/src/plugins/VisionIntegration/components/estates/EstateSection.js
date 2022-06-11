@@ -6,7 +6,7 @@ import { Divider, Grid, Typography } from "@mui/material";
 import EstateToolbox from "./EstateToolbox";
 
 // Constants
-import { ESTATE_TEXT } from "../constants";
+import { ESTATE_TEXT } from "../../constants";
 
 function EstateSection(props) {
   const headerText =
