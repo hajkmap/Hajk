@@ -4,7 +4,7 @@ import EstateListItem from "./EstateListItem";
 
 function EstateList(props) {
   return (
-    <Grid item xs={12} sx={{ maxHeight: "250px", overflowY: "auto" }}>
+    <Grid item xs={12} sx={{ maxHeight: "450px", overflowY: "auto" }}>
       {props.selectedEstates.map((estate, index) => {
         return (
           <EstateListItem

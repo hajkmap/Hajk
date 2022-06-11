@@ -23,7 +23,7 @@ const StyledAccordion = styled(Accordion)(({ theme }) => ({
     marginTop: theme.spacing(1),
   },
   "&:not(:last-of-type)": {
-    borderBottom: 0,
+    boxShadow: "none",
   },
 }));
 
