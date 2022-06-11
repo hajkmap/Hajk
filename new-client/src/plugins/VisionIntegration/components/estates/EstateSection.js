@@ -4,6 +4,7 @@ import { Divider, Grid, Typography } from "@mui/material";
 
 // Components
 import EstateToolbox from "./EstateToolbox";
+import EstateListItem from "./EstateListItem";
 
 // Constants
 import { ESTATE_TEXT } from "../../constants";
@@ -41,7 +42,7 @@ function EstateSection(props) {
         {props.selectedEstates.map((estate) => {
           return (
             <Grid container item xs={12} key={estate.getId()}>
-              {estate.get("fnr_fr")}
+              <EstateListItem title={estate.get("fnr_fr")} />
             </Grid>
           );
         })}
