@@ -59,7 +59,7 @@ function VisionIntegrationView(props) {
           <EstateSection
             model={props.model}
             selectedEstates={props.selectedEstates}
-            searchSource={props.model.getEstateSearchSource()}
+            source={props.model.getEstateSearchSource()}
           />
         );
       case INTEGRATION_IDS.COORDINATES:

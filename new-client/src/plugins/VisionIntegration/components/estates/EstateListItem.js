@@ -1,5 +1,5 @@
 // Base
-import React, { useState } from "react";
+import React from "react";
 import { styled } from "@mui/material/styles";
 import {
   Accordion,
@@ -28,6 +28,7 @@ const StyledAccordionSummary = styled(AccordionSummary)(() => ({
     minHeight: 35,
   },
   "& .MuiAccordionSummary-content": {
+    maxWidth: "100%",
     transition: "inherit !important",
     marginTop: 0,
     marginBottom: 0,
@@ -39,20 +40,30 @@ const StyledAccordionSummary = styled(AccordionSummary)(() => ({
 }));
 
 function EstateListItem(props) {
-  const [expanded, setExpanded] = useState(false);
+  const getTitle = () => {
+    return props.source.displayFields.reduce((title, displayField) => {
+      return title === ""
+        ? (title = props.estate.get(displayField))
+        : (title += ` | ${props.estate.get(displayField)}`);
+    }, "");
+  };
+
   return (
     <StyledAccordion
       sx={{ width: "100%" }}
-      expanded={expanded}
       disableGutters
       square
       TransitionProps={{
         timeout: 0,
       }}
-      onChange={() => setExpanded(!expanded)}
     >
-      <StyledAccordionSummary expandIcon={<ExpandMoreIcon />}>
-        {props.title}
+      <StyledAccordionSummary
+        style={{ maxWidth: "100%" }}
+        expandIcon={<ExpandMoreIcon />}
+      >
+        <Typography style={{ maxWidth: "100%" }} noWrap>
+          {getTitle()}
+        </Typography>
       </StyledAccordionSummary>
       <AccordionDetails style={{ maxWidth: "100%" }}>
         <Typography>

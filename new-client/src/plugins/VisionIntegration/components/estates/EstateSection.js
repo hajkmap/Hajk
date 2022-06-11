@@ -39,12 +39,9 @@ function EstateSection(props) {
         )}
       </Grid>
       <Grid item xs={12}>
-        {props.selectedEstates.map((estate) => {
+        {props.selectedEstates.map((estate, index) => {
           return (
-            <EstateListItem
-              key={estate.get("fnr_fr")}
-              title={estate.get("fnr_fr")}
-            />
+            <EstateListItem key={index} estate={estate} source={props.source} />
           );
         })}
       </Grid>
