@@ -4,7 +4,7 @@ import { Divider, Grid, Typography } from "@mui/material";
 
 // Components
 import EstateToolbox from "./EstateToolbox";
-import EstateListItem from "./EstateListItem";
+import EstateList from "./EstateList";
 
 // Constants
 import { ESTATE_TEXT } from "../../constants";
@@ -38,13 +38,10 @@ function EstateSection(props) {
           </Typography>
         )}
       </Grid>
-      <Grid item xs={12}>
-        {props.selectedEstates.map((estate, index) => {
-          return (
-            <EstateListItem key={index} estate={estate} source={props.source} />
-          );
-        })}
-      </Grid>
+      <EstateList
+        source={props.source}
+        selectedEstates={props.selectedEstates}
+      />
     </Grid>
   );
 }
