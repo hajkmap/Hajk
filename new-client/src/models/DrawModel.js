@@ -1724,6 +1724,8 @@ class DrawModel {
         feature.setStyle(this.#getFeatureStyle(feature, extractedStyle));
       // When we're done styling we can add the feature.
       this.#drawSource.addFeature(feature);
+      // We also have to update the current extent after we've added a feature...
+      this.#currentExtent = this.#drawSource.getExtent();
       // Then we'll publish some information about the addition. (If we're not supposed to be silent).
       !silent &&
         this.#publishInformation({
