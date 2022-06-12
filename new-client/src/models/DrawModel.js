@@ -105,7 +105,7 @@ class DrawModel {
     // which will act as a prefix on all messages published on the
     // supplied observer.
     this.#observerPrefix = this.#getObserverPrefix(settings);
-    this.measurementSettings =
+    this.#measurementSettings =
       settings.measurementSettings ?? this.#getDefaultMeasurementSettings();
     this.#drawStyleSettings =
       settings.drawStyleSettings ?? this.#getDefaultDrawStyleSettings();
@@ -1720,8 +1720,9 @@ class DrawModel {
       // that has been set in an earlier session. Let's apply that style (if present)
       // before we add the feature to the source.
       const extractedStyle = feature.get("EXTRACTED_STYLE");
-      extractedStyle &&
-        feature.setStyle(this.#getFeatureStyle(feature, extractedStyle));
+      extractedStyle
+        ? feature.setStyle(this.#getFeatureStyle(feature, extractedStyle))
+        : feature.setStyle(this.#getFeatureStyle(feature));
       // When we're done styling we can add the feature.
       this.#drawSource.addFeature(feature);
       // We also have to update the current extent after we've added a feature...
