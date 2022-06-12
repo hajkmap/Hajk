@@ -48,3 +48,13 @@ export const TABS = [
     disabled: true,
   },
 ];
+
+export const DEFAULT_DRAW_SETTINGS = {
+  showText: true,
+  showArea: false,
+  showLength: false,
+  showPerimeter: false,
+  areaUnit: "AUTO",
+  lengthUnit: "AUTO",
+  precision: 0,
+};
