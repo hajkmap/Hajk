@@ -49,6 +49,7 @@ class VisionIntegrationModel {
     this.#drawModel.getCurrentVectorSource().clear();
     // Then we'll add all the currently selected features
     estates.forEach((estate) => {
+      estate.set("VISION_TYPE", "ESTATE");
       this.#drawModel.addFeature(estate);
     });
     // Then we'll zoom to the current extent (If we've not removed all features, since it
@@ -60,7 +61,18 @@ class VisionIntegrationModel {
 
   // Returns all drawn (selected) estates from the map
   getDrawnEstates = () => {
-    return this.#drawModel.getCurrentVectorSource().getFeatures();
+    return this.#drawModel
+      .getCurrentVectorSource()
+      .getFeatures()
+      .filter((f) => f.get("VISION_TYPE") === "ESTATE");
+  };
+
+  // Returns all the drawn (selected) coordinates from the map.
+  getDrawnCoordinates = () => {
+    return this.#drawModel
+      .getCurrentVectorSource()
+      .getFeatures()
+      .filter((f) => f.get("VISION_TYPE") === "COORDINATE");
   };
 }
 

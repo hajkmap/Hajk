@@ -152,7 +152,7 @@ class VisionIntegrationModel {
       selectedEstates.forEach((estate) => {
         informationToSend.push(this.#createEstateSendObject(estate));
       });
-      // Finally, we'll invoke amethod on the hub, sending the information to Vision
+      // Finally, we'll invoke amethod on the hub, sending the estate-information to Vision
       this.#hubConnection.invoke(
         "SendRealEstateIdentifiers",
         informationToSend
@@ -163,8 +163,23 @@ class VisionIntegrationModel {
   };
 
   // Handles when Vision is asking for information regarding all currently selected coordinates.
-  #handleVisionAskingForCoordinates = (payload) => {
-    console.log("handleVisionAskingForCoordinates, payload: ", payload);
+  #handleVisionAskingForCoordinates = () => {
+    try {
+      // First we'll get all the currently selected coordinates. (The selected coordinates are drawn in the
+      // map so let's get them from there...)
+      const selectedCoordinates = this.#mapViewModel.getDrawnCoordinates();
+      // Then we'll initiate an array that we can send. (Vision expects an array with coordinate-information-objects
+      // in a specific form, see below):
+      // DTO: [ {northing: <string>, easting: <string>, spatialReferenceSystemIdentifier: <string>, label: <string>} ]
+      const informationToSend = [];
+      selectedCoordinates.forEach((estate) => {
+        informationToSend.push(this.#createCoordinateSendObject(estate));
+      });
+      // Finally, we'll invoke amethod on the hub, sending the coordinate-information to Vision
+      this.#hubConnection.invoke("SendCoordinates", informationToSend);
+    } catch (error) {
+      console.error(`Could not send coordinates to Vision. ${error}`);
+    }
   };
 
   // Handles when Vision is asking the map to show the geometries connected to
@@ -250,6 +265,21 @@ class VisionIntegrationModel {
     });
     // Fianlly we'll return the object!
     return sendObject;
+  };
+
+  // Accepts a feature and returns an object with the required keys to match Visions API description.
+  #createCoordinateSendObject = (coordinateFeature) => {
+    // First we'll get the feature geometry (so that we can get it's coordinates)
+    const geometry = coordinateFeature.getGeometry();
+    // Then we'll create the object
+    return {
+      northing: geometry.getCoordinates()[1],
+      easting: geometry.getCoordinates()[0],
+      spatialReferenceSystemIdentifier: `${
+        this.#mapViewModel.getView().getProjection().split()[1]
+      }`,
+      label: "",
+    };
   };
 
   // Returns the WFS-source (config, not a "real" source) stated to be the
