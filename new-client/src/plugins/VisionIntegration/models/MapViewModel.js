@@ -43,13 +43,19 @@ class VisionIntegrationModel {
     return !localObserver || !options || !app || !map;
   };
 
+  // Handles when the selected estates has been updated. Makes sure to update the map accordingly.
   setEstatesToShow = (estates) => {
-    console.log("Will show these estate in map: ", estates);
+    // First we'll clear any eventual features already in the map
     this.#drawModel.getCurrentVectorSource().clear();
+    // Then we'll add all the currently selected features
     estates.forEach((estate) => {
       this.#drawModel.addFeature(estate);
     });
-    this.#drawModel.zoomToCurrentExtent();
+    // Then we'll zoom to the current extent (If we've not removed all features, since it
+    // does not make sence to zoom to nothing...)
+    if (estates.length !== 0) {
+      this.#drawModel.zoomToCurrentExtent();
+    }
   };
 }
 
