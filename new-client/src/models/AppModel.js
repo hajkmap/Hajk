@@ -384,7 +384,11 @@ class AppModel {
         );
         const infoclickFeatures = mapClickDataResult.features.filter(
           (feature) => {
-            return feature?.layer.get("name") !== "pluginSearchResults";
+            return ![
+              "pluginSearchResults",
+              "pluginSketch",
+              "pluginVisionIntegration",
+            ].includes(feature?.layer.get("name"));
           }
         );
 
