@@ -200,7 +200,12 @@ class VisionIntegrationModel {
     const estateCollection = featureCollections[0];
     // Then we can grab the resulting features
     const estateFeatures = estateCollection.value.features || [];
-    // Otherwise we'll publish an event including the features that were found
+    // We're gonna want to show a feature title in several places. Let's put the title
+    // directly on the feature so we don't have to construct it several times.
+    estateFeatures.forEach((estate) => {
+      this.#setFeatureTitle(estate, estateSearchSource.displayFields);
+    });
+    // Finnally we'll publish an event with the features that were found
     this.#localObserver.publish("estate-search-completed", estateFeatures);
   };
 
@@ -220,6 +225,19 @@ class VisionIntegrationModel {
     return (
       this.#searchSources.find((source) => source.id === estateSourceId) || null
     );
+  };
+
+  // Sets a "FEATURE_TITLE"-attribute on the supplied feature. The title is
+  // built by using the values of the display-fields.
+  #setFeatureTitle = (feature, displayFields) => {
+    // First we'll construct the title
+    const title = displayFields.reduce((title, displayField) => {
+      return title === ""
+        ? (title = feature.get(displayField))
+        : (title += ` | ${feature.get(displayField)}`);
+    }, "");
+    // Then we'll set the attribute on the supplied feature.
+    feature.set("FEATURE_TITLE", title);
   };
 
   // Returns the id of the WFS-source that is connected to the estate-part of the integration.

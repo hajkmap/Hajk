@@ -78,14 +78,6 @@ function EstateListItem({ app, estate, setSelectedEstates, source }) {
       });
   }, [estate, source, app]);
 
-  // We're gonna neeed a title on each estate-item. The title can be constructed
-  // by using the values of the display-fields set in the source.
-  const itemTitle = source.displayFields.reduce((title, displayField) => {
-    return title === ""
-      ? (title = estate.get(displayField))
-      : (title += ` | ${estate.get(displayField)}`);
-  }, "");
-
   // We need a handler for when the user wants to remove a selected estate
   const handleRemoveClick = (e) => {
     // Make sure the event does not propagate to the accordion...
@@ -113,7 +105,7 @@ function EstateListItem({ app, estate, setSelectedEstates, source }) {
         <Grid container alignItems="center">
           <Tooltip
             disableInteractive
-            title={`Ta bort ${itemTitle} från selekteringen`}
+            title={`Ta bort ${estate.get("FEATURE_TITLE")} från selekteringen`}
           >
             <IconButton
               sx={{ paddingLeft: 0 }}
@@ -123,9 +115,9 @@ function EstateListItem({ app, estate, setSelectedEstates, source }) {
               <DeleteIcon />
             </IconButton>
           </Tooltip>
-          <Tooltip disableInteractive title={itemTitle}>
+          <Tooltip disableInteractive title={estate.get("FEATURE_TITLE")}>
             <Typography sx={{ maxWidth: "100%" }} noWrap>
-              {itemTitle}
+              {estate.get("FEATURE_TITLE")}
             </Typography>
           </Tooltip>
         </Grid>
