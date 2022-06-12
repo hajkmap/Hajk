@@ -107,7 +107,7 @@ function EstateListItem({ app, estate, setSelectedEstates, source }) {
       }}
     >
       <StyledAccordionSummary
-        style={{ maxWidth: "100%" }}
+        sx={{ maxWidth: "100%" }}
         expandIcon={<ExpandMoreIcon />}
       >
         <Grid container alignItems="center">
@@ -124,14 +124,16 @@ function EstateListItem({ app, estate, setSelectedEstates, source }) {
             </IconButton>
           </Tooltip>
           <Tooltip disableInteractive title={itemTitle}>
-            <Typography style={{ maxWidth: "100%" }} noWrap>
+            <Typography sx={{ maxWidth: "100%" }} noWrap>
               {itemTitle}
             </Typography>
           </Tooltip>
         </Grid>
       </StyledAccordionSummary>
-      <AccordionDetails style={{ maxWidth: "100%" }}>
-        {detailsComponent}
+      <AccordionDetails sx={{ maxWidth: "100%" }}>
+        <Grid item xs={12} sx={{ userSelect: "text" }}>
+          {detailsComponent}
+        </Grid>
       </AccordionDetails>
     </StyledAccordion>
   );
