@@ -25,10 +25,14 @@ const StyledAccordion = styled(Accordion)(({ theme }) => ({
   "&:not(:last-of-type)": {
     boxShadow: "none",
   },
+  "&.MuiAccordion-root.Mui-expanded": {
+    borderTop: `1px solid ${theme.palette.divider}`,
+  },
 }));
 
-const StyledAccordionSummary = styled(AccordionSummary)(() => ({
+const StyledAccordionSummary = styled(AccordionSummary)(({ theme }) => ({
   minHeight: 35,
+  padding: "0px 8px",
   "&.MuiAccordionSummary-root.Mui-expanded": {
     minHeight: 35,
   },
