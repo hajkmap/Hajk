@@ -19,14 +19,14 @@ import FeaturePropsParsing from "components/FeatureInfo/FeaturePropsParsing";
 const StyledAccordion = styled(Accordion)(({ theme }) => ({
   border: `1px solid ${theme.palette.divider}`,
   "&:not(:first-of-type)": {
-    borderTop: 0,
     marginTop: theme.spacing(1),
   },
   "&:not(:last-of-type)": {
     boxShadow: "none",
   },
-  "&.MuiAccordion-root.Mui-expanded": {
-    borderTop: `1px solid ${theme.palette.divider}`,
+  transition: "unset",
+  "&:before": {
+    display: "none",
   },
 }));
 
@@ -34,6 +34,7 @@ const StyledAccordionSummary = styled(AccordionSummary)(({ theme }) => ({
   minHeight: 35,
   padding: "0px 8px",
   "&.MuiAccordionSummary-root.Mui-expanded": {
+    borderBottom: `1px solid ${theme.palette.divider}`,
     minHeight: 35,
   },
   "& .MuiAccordionSummary-content": {
