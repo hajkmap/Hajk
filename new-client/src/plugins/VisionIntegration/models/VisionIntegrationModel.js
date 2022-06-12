@@ -1,3 +1,5 @@
+import Feature from "ol/Feature";
+import Point from "ol/geom/Point";
 import { HubConnectionBuilder } from "@microsoft/signalr";
 import SearchModel from "models/SearchModel";
 
@@ -6,6 +8,7 @@ import { INTEGRATION_IDS } from "../constants";
 // A simple class containing functionality that is used in the VisionIntegration-plugin.
 class VisionIntegrationModel {
   #app;
+  #map;
   #options;
   #localObserver;
   #hubConnection;
@@ -27,6 +30,7 @@ class VisionIntegrationModel {
     }
     // Then we'll initiate some private fields...
     this.#app = app;
+    this.#map = map;
     this.#options = options; // We're probably gonna need the options...
     this.#localObserver = localObserver; // ...and the observer
     this.#hubConnection = this.#createHubConnection(); // Create the hub-connection
@@ -132,10 +136,15 @@ class VisionIntegrationModel {
       "HandleAskingForCoordinates",
       this.#handleVisionAskingForCoordinates
     );
-    // Vision can also ask us to show the geometries connected to the supplied real-estate-information.
+    // Vision can also ask us to show the geometries connected to the supplied real-estate-information...
     this.#hubConnection.on(
       "HandleRealEstateIdentifiers",
       this.#handleVisionAskingToShowRealEstates
+    );
+    // ... or ask us to show the location of coordinates...
+    this.#hubConnection.on(
+      "HandleCoordinates",
+      this.#handleVisionAskingToShowCoordinates
     );
   };
 
@@ -241,6 +250,36 @@ class VisionIntegrationModel {
     this.#localObserver.publish("estate-search-completed", estateFeatures);
   };
 
+  // Handles when Vision is asking the map to show the location connected to the supplied coordinate-information.
+  #handleVisionAskingToShowCoordinates = (payload) => {
+    // First we'll have to make sure we were supplied an array (we're expecting the payload
+    // to consist of an array with coordinate-information).
+    if (!Array.isArray(payload)) {
+      console.error(
+        `HandleVisionAskingToShowCoordinates was invoked with incorrect parameters. Expecting an array with coordinate-information but got ${typeof payload}`
+      );
+      return null;
+    }
+    // Otherwise, we'll initate an array where we're gonna store coordinate features
+    const coordinateFeatures = [];
+    // Then we'll create an OL-feature for each coordinate-information-object and append it to the array
+    payload.forEach((coordinateInfo) => {
+      coordinateFeatures.push(
+        new Feature({
+          geometry: new Point([
+            coordinateInfo.northing,
+            coordinateInfo.easting,
+          ]),
+        })
+      );
+    });
+    // Finally, we'll publish a message with the array of coordinate-features
+    this.#localObserver.publish(
+      "coordinates-recieved-from-vision",
+      coordinateFeatures
+    );
+  };
+
   // Accepts a feature and returns an object with the required keys to match Visions API description.
   #createEstateSendObject = (estateFeature) => {
     // First we'll get the estate-integration-settings that we can use to check where we're supposed
@@ -276,7 +315,7 @@ class VisionIntegrationModel {
       northing: geometry.getCoordinates()[1],
       easting: geometry.getCoordinates()[0],
       spatialReferenceSystemIdentifier: `${
-        this.#mapViewModel.getView().getProjection().split()[1]
+        this.#map.getView().getProjection().getCode().split()[1]
       }`,
       label: "",
     };

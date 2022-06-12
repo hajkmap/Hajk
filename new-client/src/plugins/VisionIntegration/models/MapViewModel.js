@@ -62,6 +62,24 @@ class VisionIntegrationModel {
     }
   };
 
+  // Handles when the selected coordinates has been updated. Makes sure to update the map accordingly.
+  setCoordinatesToShow = (coordinates) => {
+    // First we'll clear any eventual estate-features already in the map
+    this.getDrawnCoordinates().forEach((f) => {
+      this.#drawModel.removeFeature(f);
+    });
+    // Then we'll add all the currently selected features
+    coordinates.forEach((coordinate) => {
+      coordinate.set("VISION_TYPE", INTEGRATION_IDS.COORDINATES);
+      this.#drawModel.addFeature(coordinate);
+    });
+    // Then we'll zoom to the current extent (If we've not removed all features, since it
+    // does not make sence to zoom to nothing...)
+    if (coordinates.length !== 0) {
+      this.#drawModel.zoomToCurrentExtent();
+    }
+  };
+
   // Returns all drawn (selected) estates from the map
   getDrawnEstates = () => {
     return this.#drawModel
