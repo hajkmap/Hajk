@@ -1,5 +1,8 @@
 import DrawModel from "models/DrawModel";
-import { DEFAULT_DRAW_SETTINGS } from "../constants";
+import {
+  DEFAULT_DRAW_SETTINGS,
+  DEFAULT_DRAW_STYLE_SETTINGS,
+} from "../constants";
 
 // A simple class containing functionality that is used in the VisionIntegration-plugin.
 class VisionIntegrationModel {
@@ -30,6 +33,7 @@ class VisionIntegrationModel {
       map: map,
       observer: localObserver,
       measurementSettings: DEFAULT_DRAW_SETTINGS,
+      drawStyleSettings: DEFAULT_DRAW_STYLE_SETTINGS,
     });
   }
 

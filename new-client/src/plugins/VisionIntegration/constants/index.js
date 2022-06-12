@@ -58,3 +58,10 @@ export const DEFAULT_DRAW_SETTINGS = {
   lengthUnit: "AUTO",
   precision: 0,
 };
+
+export const DEFAULT_DRAW_STYLE_SETTINGS = {
+  strokeColor: "rgba(41,51,242,0.8)",
+  strokeDash: null,
+  strokeWidth: 2,
+  fillColor: "rgba(255,255,255,0.07)",
+};
