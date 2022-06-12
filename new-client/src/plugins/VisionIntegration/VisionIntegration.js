@@ -10,6 +10,7 @@ import BaseWindowPlugin from "../BaseWindowPlugin";
 import VisionIntegrationView from "./VisionIntegrationView";
 
 // Models
+import MapViewModel from "./models/MapViewModel";
 import VisionIntegrationModel from "./models/VisionIntegrationModel";
 
 // Utils
@@ -36,6 +37,10 @@ function VisionIntegration(props) {
   );
   // We have to keep track of which tab we're currently on...
   const [activeTab, setActiveTab] = useState(INTEGRATION_IDS.ESTATES);
+  // We're gonna need a map-view-model to interact with the map...
+  const [mapViewModel] = useState(
+    () => new MapViewModel({ options, localObserver, map, app })
+  );
   // We're gonna need a model containing VisionIntegration-functionality...
   const [model] = useState(
     () =>
@@ -110,9 +115,11 @@ function VisionIntegration(props) {
   // We're gonna need an useEffect that can handle side-effects when the selected
   // etstaes changes. (We're gonna have to update the map etc.).
   useEffect(() => {
-    console.log("Selected estates updated!");
+    // We're gonna want to show the selected estates in the map. Let's use the map-view-model
+    mapViewModel.setEstatesToShow(selectedEstates);
+    // Then we'll publish an event if we want to prompt the user etc.
     localObserver.publish("selected-estates-uddated", selectedEstates);
-  }, [localObserver, selectedEstates]);
+  }, [mapViewModel, localObserver, selectedEstates]);
 
   // We're gonna need to catch if the user closes the window, and make sure to
   // update the state so that the effect handling the draw-interaction-toggling fires.
