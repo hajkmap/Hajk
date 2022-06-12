@@ -13,6 +13,7 @@ class VisionIntegrationModel {
   #orSeparator;
   #searchOptions;
   #searchModel;
+  #mapViewModel;
 
   // There will probably not be many settings for this model... Options are required though!
   constructor(settings) {
@@ -35,6 +36,7 @@ class VisionIntegrationModel {
       map,
       app
     ); // Initiate a search-model with the provided sources
+    this.#mapViewModel = settings.mapViewModel;
     this.#orSeparator = "?"; // We're gonna be using an or-separator when searching, let's use "?"
     this.#searchOptions = this.#getDefaultSearchOptions(); // Create the default search-options
     this.#hubConnection !== null && this.#initiateHub(); // Initiate the hub and its listeners.
@@ -138,11 +140,26 @@ class VisionIntegrationModel {
   };
 
   // Handles when Vision is asking for information regarding all currently selected real-estates.
-  #handleVisionAskingForRealEstateIdentifiers = (payload) => {
-    console.log(
-      "handleVisionAskingForRealEstateIdentifiers, payload: ",
-      payload
-    );
+  #handleVisionAskingForRealEstateIdentifiers = () => {
+    try {
+      // First we'll get all the currently selected estates. (The selected estaes are drawn in the
+      // map so let's get them from there...)
+      const selectedEstates = this.#mapViewModel.getDrawnEstates();
+      // Then we'll initiate an array that we can send. (Vision expects an array with estate-information-objects
+      // in a specific form, see below):
+      // DTO: [ {fnr: <string>, name: <string>, uuid: <string>, municipality: <string>} ]
+      const informationToSend = [];
+      selectedEstates.forEach((estate) => {
+        informationToSend.push(this.#createEstateSendObject(estate));
+      });
+      // Finally, we'll invoke amethod on the hub, sending the information to Vision
+      this.#hubConnection.invoke(
+        "SendRealEstateIdentifiers",
+        informationToSend
+      );
+    } catch (error) {
+      console.error(`Could not send estates to Vision. ${error}`);
+    }
   };
 
   // Handles when Vision is asking for information regarding all currently selected coordinates.
@@ -207,6 +224,32 @@ class VisionIntegrationModel {
     });
     // Finnally we'll publish an event with the features that were found
     this.#localObserver.publish("estate-search-completed", estateFeatures);
+  };
+
+  // Accepts a feature and returns an object with the required keys to match Visions API description.
+  #createEstateSendObject = (estateFeature) => {
+    // First we'll get the estate-integration-settings that we can use to check where we're supposed
+    // to get the information to send from.
+    const estateIntegrationSettings = this.#getEstateIntegrationSettings();
+    // Then we'll grab the "valuesToSend" property from the settings.
+    const { fieldsToSend } = estateIntegrationSettings;
+    // Then we'll make sure the property is valid. (We're expecting the fieldsToSend-property
+    // to be an array of objects containing which key to send information on, and where to get that value
+    // from on the feature).
+    if (!Array.isArray(fieldsToSend)) {
+      throw new Error(
+        "Estate-integration-settings not valid. Could not create estate-informaion to send"
+      );
+    }
+    // If it is valid, we can create the object...
+    const sendObject = {};
+    // And then add all the properties...
+    fieldsToSend.forEach((field) => {
+      sendObject[field.key] =
+        field.overrideValue || estateFeature.get(field.featureProperty);
+    });
+    // Fianlly we'll return the object!
+    return sendObject;
   };
 
   // Returns the WFS-source (config, not a "real" source) stated to be the
@@ -283,13 +326,15 @@ class VisionIntegrationModel {
 
   // Returns wether any of the required parameters for the model is missing or not.
   #requiredParametersMissing = (parameters) => {
-    const { localObserver, options, searchSources, app, map } = parameters;
+    const { localObserver, options, searchSources, app, map, mapViewModel } =
+      parameters;
     return (
       !localObserver ||
       !options ||
       !Array.isArray(searchSources) ||
       !app ||
-      !map
+      !map ||
+      !mapViewModel
     );
   };
 

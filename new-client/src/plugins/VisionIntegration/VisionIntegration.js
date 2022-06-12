@@ -50,6 +50,7 @@ function VisionIntegration(props) {
         searchSources,
         map,
         app,
+        mapViewModel,
       })
   );
   // We're gonna want to make sure proper settings are supplied when starting

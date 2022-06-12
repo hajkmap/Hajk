@@ -57,6 +57,11 @@ class VisionIntegrationModel {
       this.#drawModel.zoomToCurrentExtent();
     }
   };
+
+  // Returns all drawn (selected) estates from the map
+  getDrawnEstates = () => {
+    return this.#drawModel.getCurrentVectorSource().getFeatures();
+  };
 }
 
 export default VisionIntegrationModel;
