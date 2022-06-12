@@ -122,6 +122,13 @@ function VisionIntegration(props) {
     localObserver.publish("selected-estates-uddated", selectedEstates);
   }, [mapViewModel, localObserver, selectedEstates]);
 
+  // An effect that makes sure to hide/show features depending on which tab we're currently on.
+  // (We don't want to show estates when we're on the coordinate tab and so on...)
+  // If the plugin is hidden, we send an empty string (and no features will be shown).
+  useEffect(() => {
+    mapViewModel.updateHiddenFeatures(pluginShown ? activeTab : "");
+  }, [mapViewModel, activeTab, pluginShown]);
+
   // We're gonna need to catch if the user closes the window, and make sure to
   // update the state so that the effect handling the draw-interaction-toggling fires.
   const onWindowHide = () => {

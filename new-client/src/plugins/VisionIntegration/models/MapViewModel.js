@@ -1,5 +1,6 @@
 import DrawModel from "models/DrawModel";
 import {
+  INTEGRATION_IDS,
   DEFAULT_DRAW_SETTINGS,
   DEFAULT_DRAW_STYLE_SETTINGS,
 } from "../constants";
@@ -45,11 +46,13 @@ class VisionIntegrationModel {
 
   // Handles when the selected estates has been updated. Makes sure to update the map accordingly.
   setEstatesToShow = (estates) => {
-    // First we'll clear any eventual features already in the map
-    this.#drawModel.getCurrentVectorSource().clear();
+    // First we'll clear any eventual estate-features already in the map
+    this.getDrawnEstates().forEach((f) => {
+      this.#drawModel.removeFeature(f);
+    });
     // Then we'll add all the currently selected features
     estates.forEach((estate) => {
-      estate.set("VISION_TYPE", "ESTATE");
+      estate.set("VISION_TYPE", INTEGRATION_IDS.ESTATES);
       this.#drawModel.addFeature(estate);
     });
     // Then we'll zoom to the current extent (If we've not removed all features, since it
@@ -64,7 +67,7 @@ class VisionIntegrationModel {
     return this.#drawModel
       .getCurrentVectorSource()
       .getFeatures()
-      .filter((f) => f.get("VISION_TYPE") === "ESTATE");
+      .filter((f) => f.get("VISION_TYPE") === INTEGRATION_IDS.ESTATES);
   };
 
   // Returns all the drawn (selected) coordinates from the map.
@@ -72,7 +75,24 @@ class VisionIntegrationModel {
     return this.#drawModel
       .getCurrentVectorSource()
       .getFeatures()
-      .filter((f) => f.get("VISION_TYPE") === "COORDINATE");
+      .filter((f) => f.get("VISION_TYPE") === INTEGRATION_IDS.COORDINATES);
+  };
+
+  // Hidea all features that does not have the vision type supplied
+  updateHiddenFeatures = (visionTypeToShow) => {
+    // First we'll update the hidden-prop on all features
+    this.#drawModel
+      .getCurrentVectorSource()
+      .getFeatures()
+      .forEach((feature) => {
+        if (feature.get("VISION_TYPE") === visionTypeToShow) {
+          feature.set("HIDDEN", false);
+        } else {
+          feature.set("HIDDEN", true);
+        }
+      });
+    // Then we'll refresh the draw-layer so that the change is applied
+    this.#drawModel.refreshDrawLayer();
   };
 }
 
