@@ -161,7 +161,6 @@ class VisionIntegrationModel {
       case MAP_INTERACTIONS.SELECT_COORDINATE:
         this.#activeMapInteraction = MAP_INTERACTIONS.SELECT_COORDINATE;
         return this.#enableCreateCoordinateInteraction();
-        return null;
       default:
         return null;
     }
