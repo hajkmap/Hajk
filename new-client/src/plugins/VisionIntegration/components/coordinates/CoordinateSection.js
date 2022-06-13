@@ -17,7 +17,10 @@ function CoordinateSection(props) {
 
   return (
     <Grid container sx={{ padding: 2 }}>
-      <CoordinateToolbox />
+      <CoordinateToolbox
+        activeMapInteraction={props.activeMapInteraction}
+        setActiveMapInteraction={props.setActiveMapInteraction}
+      />
       <Grid
         container
         sx={{ marginTop: 2, marginBottom: 0.5 }}

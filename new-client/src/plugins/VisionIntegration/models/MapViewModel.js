@@ -1,4 +1,6 @@
 import { extend, createEmpty, isEmpty } from "ol/extent";
+import Feature from "ol/Feature";
+import Point from "ol/geom/Point";
 import DrawModel from "models/DrawModel";
 import { handleClick } from "models/Click";
 import {
@@ -75,6 +77,7 @@ class VisionIntegrationModel {
     this.#activeMapInteraction = null;
     this.#map.clickLock.delete("visionintegration");
     this.#disableEstateSelectInteraction();
+    this.#disableCreateCoordinateInteraction();
   };
 
   // Enables functionality so that the user can select estates from the map
@@ -83,10 +86,22 @@ class VisionIntegrationModel {
     this.#map.on("singleclick", this.#handleOnSelectEstateClick);
   };
 
+  // Enables functionality so that the user can create coordinate (point) features
+  #enableCreateCoordinateInteraction = () => {
+    this.#map.clickLock.add("visionintegration");
+    this.#map.on("singleclick", this.#handleOnCreateCoordinateClick);
+  };
+
   // Disables select estates from map functionality
   #disableEstateSelectInteraction = () => {
     this.#map.clickLock.delete("visionintegration");
     this.#map.un("singleclick", this.#handleOnSelectEstateClick);
+  };
+
+  // Disables create coordinate from map functionality
+  #disableCreateCoordinateInteraction = () => {
+    this.#map.clickLock.delete("visionintegration");
+    this.#map.un("singleclick", this.#handleOnCreateCoordinateClick);
   };
 
   // Handler for map-clicks when user is to select estates
@@ -108,6 +123,32 @@ class VisionIntegrationModel {
     }
   };
 
+  // Handler for map-clicks when user is to create a coordinate (point) feature
+  #handleOnCreateCoordinateClick = (event) => {
+    // First we'll get the coordinates from the click-event
+    const coordinates = this.#map.getCoordinateFromPixel(event.pixel);
+    // Then we'll create a new point-feature with the required properties
+    const coordinateFeature = new Feature({
+      geometry: new Point(coordinates),
+      VISION_TYPE: "COORDINATES",
+      FEATURE_TITLE: `Nord: ${parseInt(coordinates[1])}, Öst: ${parseInt(
+        coordinates[0]
+      )}`,
+    });
+    // We also have to set a random id on each feature (since OL doesn't...)
+    coordinateFeature.setId(this.#generateRandomString());
+    // Then we'll publish an event so that the views can be updated
+    this.#localObserver.publish(
+      "mapview-new-coordinate-created",
+      coordinateFeature
+    );
+  };
+
+  // Generates a random string that can be used as an ID.
+  #generateRandomString = () => {
+    return Math.random().toString(36).slice(2, 9);
+  };
+
   // Toggles map-interactions (possible interactions are "SELECT_ESTATE" and "SELECT_COORDINATE")
   toggleMapInteraction = (interaction) => {
     // First we must disable any potential interactions...
@@ -119,7 +160,7 @@ class VisionIntegrationModel {
         return this.#enableEstateSelectInteraction();
       case MAP_INTERACTIONS.SELECT_COORDINATE:
         this.#activeMapInteraction = MAP_INTERACTIONS.SELECT_COORDINATE;
-        console.log("Enable select coordinate (TODO!)");
+        return this.#enableCreateCoordinateInteraction();
         return null;
       default:
         return null;

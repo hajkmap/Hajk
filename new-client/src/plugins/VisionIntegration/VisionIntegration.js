@@ -95,6 +95,11 @@ function VisionIntegration(props) {
     setSelectedEstates((prevEstates) => [...prevEstates, ...estates]);
   }, []);
 
+  // Handles when a new coordinate has been created in the map
+  const handleNewCoordinateCreated = useCallback((feature) => {
+    setSelectedCoordinates((prevCoordinates) => [...prevCoordinates, feature]);
+  }, []);
+
   // We're gonna want to subscribe to some events so that we can keep track of hub-status etc.
   useEffect(() => {
     // A Listener for hub-connection failure. Make sure to update connection-state...
@@ -132,6 +137,11 @@ function VisionIntegration(props) {
       "add-estates-to-selection",
       (features) => handleAddNewEstates(features)
     );
+    // A listener for when a new coordinate has been created by a map-click
+    const newCoordinateCreatedListener = localObserver.subscribe(
+      "mapview-new-coordinate-created",
+      (feature) => handleNewCoordinateCreated(feature)
+    );
     // Make sure to clean up!
     return () => {
       connectionFailureListener.unSubscribe();
@@ -141,12 +151,14 @@ function VisionIntegration(props) {
       estateSearchCompletedListener.unSubscribe();
       coordinatesRevievedFromVisionListener.unSubscribe();
       addNewEstatesListener.unSubscribe();
+      newCoordinateCreatedListener.unSubscribe();
     };
   }, [
     localObserver,
     handleEstateSearchSuccess,
     handleCoordinatesRevievedFromVision,
     handleAddNewEstates,
+    handleNewCoordinateCreated,
   ]);
 
   // We're gonna need an useEffect that can handle side-effects when the selected

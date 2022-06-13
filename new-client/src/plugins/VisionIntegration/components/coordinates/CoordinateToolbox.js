@@ -1,8 +1,16 @@
 // Base
 import React from "react";
 import { Divider, Stack, Grid, Paper, Switch, Typography } from "@mui/material";
+import { MAP_INTERACTIONS } from "../../constants";
 
 function CoordinateToolbox(props) {
+  // Handles when select-coordinates-switch is toggled
+  const handleSelectCoordinatesSwitchChange = (e) => {
+    props.setActiveMapInteraction(
+      e.target.checked ? MAP_INTERACTIONS.SELECT_COORDINATE : null
+    );
+  };
+
   return (
     <Grid container item xs={12} justifyContent="center" alignContent="center">
       <Paper
@@ -21,7 +29,13 @@ function CoordinateToolbox(props) {
             <Typography variant="body2" sx={{ marginTop: 1 }}>
               Selektering
             </Typography>
-            <Switch />
+            <Switch
+              onChange={handleSelectCoordinatesSwitchChange}
+              checked={
+                props.activeMapInteraction ===
+                MAP_INTERACTIONS.SELECT_COORDINATE
+              }
+            />
           </Stack>
         </Grid>
         <Divider flexItem orientation="vertical" sx={{ mx: 0.5, my: 1 }} />
