@@ -267,7 +267,7 @@ class VisionIntegrationModel {
       const { northing, easting } = coordinateInfo;
       coordinateFeatures.push(
         new Feature({
-          geometry: new Point([northing, easting]),
+          geometry: new Point([easting, northing]),
           VISION_TYPE: "COORDINATES",
           FEATURE_TITLE: `Nord: ${parseInt(northing)}, Öst: ${parseInt(
             easting
@@ -323,8 +323,8 @@ class VisionIntegrationModel {
         : projectionCode.split(":")[0];
     // Then we'll create the object
     return {
-      northing: geometry.getCoordinates()[0],
-      easting: geometry.getCoordinates()[1],
+      northing: geometry.getCoordinates()[1],
+      easting: geometry.getCoordinates()[0],
       spatialReferenceSystemIdentifier: cleanedProjectionCode,
       label: "", // TODO: Should we send something on the label?...
     };
