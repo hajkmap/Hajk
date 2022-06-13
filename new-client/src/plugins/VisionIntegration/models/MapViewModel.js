@@ -1,3 +1,4 @@
+import { extend, createEmpty, isEmpty } from "ol/extent";
 import DrawModel from "models/DrawModel";
 import {
   INTEGRATION_IDS,
@@ -44,6 +45,27 @@ class VisionIntegrationModel {
     return !localObserver || !options || !app || !map;
   };
 
+  // Zooms to the supplied extent (with some padding)
+  #fitMapToExtent = (extent) => {
+    this.#map.getView().fit(extent, {
+      size: this.#map.getSize(),
+      padding: [20, 20, 20, 20],
+      maxZoom: 7,
+    });
+  };
+
+  // Zooms to the supplied features
+  #zoomToFeatures = (features) => {
+    // First we'll create an empty extent
+    const extent = createEmpty();
+    // Then, for each feature, we'll extend the extent
+    features.forEach((feature) => {
+      extend(extent, feature.getGeometry().getExtent());
+    });
+    // Finnaly, if the extent is not empty, we'll zoom to it
+    !isEmpty(extent) && this.#fitMapToExtent(extent);
+  };
+
   // Handles when the selected estates has been updated. Makes sure to update the map accordingly.
   setEstatesToShow = (estates) => {
     // First we'll clear any eventual estate-features already in the map
@@ -58,7 +80,7 @@ class VisionIntegrationModel {
     // Then we'll zoom to the current extent (If we've not removed all features, since it
     // does not make sence to zoom to nothing...)
     if (estates.length !== 0) {
-      this.#drawModel.zoomToCurrentExtent();
+      this.#zoomToFeatures(estates);
     }
   };
 
@@ -76,7 +98,7 @@ class VisionIntegrationModel {
     // Then we'll zoom to the current extent (If we've not removed all features, since it
     // does not make sence to zoom to nothing...)
     if (coordinates.length !== 0) {
-      this.#drawModel.zoomToCurrentExtent();
+      this.#zoomToFeatures(coordinates);
     }
   };
 
