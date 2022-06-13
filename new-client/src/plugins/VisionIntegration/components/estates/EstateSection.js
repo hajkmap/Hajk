@@ -34,7 +34,7 @@ function EstateSection(props) {
       />
       <Grid
         container
-        sx={{ marginTop: 2, marginBottom: 1 }}
+        sx={{ marginTop: 2, marginBottom: 0.5 }}
         justifyContent="center"
       >
         <Divider sx={{ width: "20%" }} />
