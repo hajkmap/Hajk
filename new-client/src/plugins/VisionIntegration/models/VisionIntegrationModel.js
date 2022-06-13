@@ -77,7 +77,7 @@ class VisionIntegrationModel {
     } catch (error) {
       // If we fail for some reason, we'll log an error and return null
       console.error(`Failed to create hub-connection. ${error}`);
-      // Ugh... But we have to make sure all listeners are ready before we publish the failiure...
+      // Ugh... But we have to make sure all listeners are ready before we publish the failure...
       setTimeout(() => {
         this.#localObserver.publish("hub-initiation-failed");
       }, 200);
@@ -91,7 +91,7 @@ class VisionIntegrationModel {
     if (this.#isValidString(this.#options.userOverride)) {
       return this.#options.userOverride;
     }
-    // Otherwise we return the ciurrently logged in user
+    // Otherwise we return the currently logged in user
     return this.#app.config.userDetails?.sAMAccountName || null;
   };
 
@@ -153,7 +153,7 @@ class VisionIntegrationModel {
   // Initiates all listeners on the local-observer. Used for communication within the plugin.
   #initiateObserverListeners = () => {
     this.#localObserver.on(
-      "mapview-estate-map-click-result",
+      "mapView-estate-map-click-result",
       this.#handleEstateMapClickResults
     );
   };
@@ -177,7 +177,7 @@ class VisionIntegrationModel {
   // Handles when Vision is asking for information regarding all currently selected real-estates.
   #handleVisionAskingForRealEstateIdentifiers = () => {
     try {
-      // First we'll get all the currently selected estates. (The selected estaes are drawn in the
+      // First we'll get all the currently selected estates. (The selected estates are drawn in the
       // map so let's get them from there...)
       const selectedEstates = this.#mapViewModel.getDrawnEstates();
       // Then we'll initiate an array that we can send. (Vision expects an array with estate-information-objects
@@ -187,7 +187,7 @@ class VisionIntegrationModel {
       selectedEstates.forEach((estate) => {
         informationToSend.push(this.#createEstateSendObject(estate));
       });
-      // Finally, we'll invoke amethod on the hub, sending the estate-information to Vision
+      // Finally, we'll invoke a method on the hub, sending the estate-information to Vision
       this.#hubConnection.invoke(
         "SendRealEstateIdentifiers",
         informationToSend
@@ -210,7 +210,7 @@ class VisionIntegrationModel {
       selectedCoordinates.forEach((coordinate) => {
         informationToSend.push(this.#createCoordinateSendObject(coordinate));
       });
-      // Finally, we'll invoke amethod on the hub, sending the coordinate-information to Vision
+      // Finally, we'll invoke a method on the hub, sending the coordinate-information to Vision
       this.#hubConnection.invoke("SendCoordinates", informationToSend);
     } catch (error) {
       console.error(`Could not send coordinates to Vision. ${error}`);
@@ -286,7 +286,7 @@ class VisionIntegrationModel {
       );
       return null;
     }
-    // Otherwise, we'll initate an array where we're gonna store coordinate features
+    // Otherwise, we'll initiate an array where we're gonna store coordinate features
     const coordinateFeatures = [];
     // Then we'll create an OL-feature for each coordinate-information-object and append it to the array
     payload.forEach((coordinateInfo) => {
@@ -307,7 +307,7 @@ class VisionIntegrationModel {
     });
     // Finally, we'll publish a message with the array of coordinate-features
     this.#localObserver.publish(
-      "coordinates-recieved-from-vision",
+      "coordinates-received-from-vision",
       coordinateFeatures
     );
   };
@@ -324,7 +324,7 @@ class VisionIntegrationModel {
     // from on the feature).
     if (!Array.isArray(fieldsToSend)) {
       throw new Error(
-        "Estate-integration-settings not valid. Could not create estate-informaion to send"
+        "Estate-integration-settings not valid. Could not create estate-information to send"
       );
     }
     // If it is valid, we can create the object...
@@ -334,7 +334,7 @@ class VisionIntegrationModel {
       sendObject[field.key] =
         field.overrideValue || estateFeature.get(field.featureProperty);
     });
-    // Fianlly we'll return the object!
+    // Finally we'll return the object!
     return sendObject;
   };
 

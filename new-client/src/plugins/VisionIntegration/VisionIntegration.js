@@ -83,14 +83,14 @@ function VisionIntegration(props) {
   }, []);
 
   // We're gonna need a handler for the coordinates-from-vision event.
-  const handleCoordinatesRevievedFromVision = useCallback((features) => {
+  const handleCoordinatesReceivedFromVision = useCallback((features) => {
     // We want to jump to the estate-section when new estates has been found
     setActiveTab(INTEGRATION_IDS.COORDINATES);
     // Then we'll update the state
     setSelectedCoordinates(features);
   }, []);
 
-  // Handles when we've recieved estates from a map-click-event
+  // Handles when we've received estates from a map-click-event
   const handleAddNewEstates = useCallback((estates) => {
     setSelectedEstates((prevEstates) => [...prevEstates, ...estates]);
   }, []);
@@ -128,9 +128,9 @@ function VisionIntegration(props) {
       (features) => handleEstateSearchSuccess(features)
     );
     // A listener for when we've gotten coordinate-features from Vison
-    const coordinatesRevievedFromVisionListener = localObserver.subscribe(
-      "coordinates-recieved-from-vision",
-      (features) => handleCoordinatesRevievedFromVision(features)
+    const coordinatesReceivedFromVisionListener = localObserver.subscribe(
+      "coordinates-received-from-vision",
+      (features) => handleCoordinatesReceivedFromVision(features)
     );
     // A listener for when we've gotten new estates to add to the selection (from map-click originally)
     const addNewEstatesListener = localObserver.subscribe(
@@ -139,7 +139,7 @@ function VisionIntegration(props) {
     );
     // A listener for when a new coordinate has been created by a map-click
     const newCoordinateCreatedListener = localObserver.subscribe(
-      "mapview-new-coordinate-created",
+      "mapView-new-coordinate-created",
       (feature) => handleNewCoordinateCreated(feature)
     );
     // Make sure to clean up!
@@ -149,25 +149,25 @@ function VisionIntegration(props) {
       hubDisconnectedListener.unSubscribe();
       estateSearchFailedListener.unSubscribe();
       estateSearchCompletedListener.unSubscribe();
-      coordinatesRevievedFromVisionListener.unSubscribe();
+      coordinatesReceivedFromVisionListener.unSubscribe();
       addNewEstatesListener.unSubscribe();
       newCoordinateCreatedListener.unSubscribe();
     };
   }, [
     localObserver,
     handleEstateSearchSuccess,
-    handleCoordinatesRevievedFromVision,
+    handleCoordinatesReceivedFromVision,
     handleAddNewEstates,
     handleNewCoordinateCreated,
   ]);
 
   // We're gonna need an useEffect that can handle side-effects when the selected
-  // etstaes changes. (We're gonna have to update the map etc.).
+  // estates changes. (We're gonna have to update the map etc.).
   useEffect(() => {
     // We're gonna want to show the selected estates in the map. Let's use the map-view-model
     mapViewModel.setEstatesToShow(selectedEstates);
     // Then we'll publish an event if we want to prompt the user etc.
-    localObserver.publish("selected-estates-uddated", selectedEstates);
+    localObserver.publish("selected-estates-updated", selectedEstates);
   }, [mapViewModel, localObserver, selectedEstates]);
 
   // We're gonna need an useEffect that can handle side-effect when the selected
@@ -176,7 +176,7 @@ function VisionIntegration(props) {
     // We're gonna want to show the selected estates in the map. Let's use the map-view-model
     mapViewModel.setCoordinatesToShow(selectedCoordinates);
     // Then we'll publish an event if we want to prompt the user etc.
-    localObserver.publish("selected-coordinates-uddated", selectedCoordinates);
+    localObserver.publish("selected-coordinates-updated", selectedCoordinates);
   }, [mapViewModel, localObserver, selectedCoordinates]);
 
   // An effect that makes sure to hide/show features depending on which tab we're currently on.

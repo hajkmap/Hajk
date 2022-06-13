@@ -70,7 +70,7 @@ class VisionIntegrationModel {
     features.forEach((feature) => {
       extend(extent, feature.getGeometry().getExtent());
     });
-    // Finnaly, if the extent is not empty, we'll zoom to it
+    // Finally, if the extent is not empty, we'll zoom to it
     !isEmpty(extent) && this.#fitMapToExtent(extent);
   };
 
@@ -117,7 +117,7 @@ class VisionIntegrationModel {
       const { features } = clickResult;
       // We'll just publish an event with all the features and let VisionIntegration-model
       // handle filtering etc.
-      this.#localObserver.publish("mapview-estate-map-click-result", features);
+      this.#localObserver.publish("mapView-estate-map-click-result", features);
     } catch (error) {
       console.error(
         `Failed to select estates in VisionIntegration... ${error}`
@@ -141,7 +141,7 @@ class VisionIntegrationModel {
     coordinateFeature.setId(generateRandomString());
     // Then we'll publish an event so that the views can be updated
     this.#localObserver.publish(
-      "mapview-new-coordinate-created",
+      "mapView-new-coordinate-created",
       coordinateFeature
     );
   };
@@ -236,7 +236,7 @@ class VisionIntegrationModel {
       .filter((f) => f.get("VISION_TYPE") === INTEGRATION_IDS.COORDINATES);
   };
 
-  // Hidea all features that does not have the vision type supplied
+  // Hide all features that does not have the vision type supplied
   updateHiddenFeatures = (visionTypeToShow) => {
     // First we'll update the hidden-prop on all features
     this.#drawModel
