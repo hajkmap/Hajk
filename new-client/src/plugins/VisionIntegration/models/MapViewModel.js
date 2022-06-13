@@ -1,8 +1,10 @@
 import { extend, createEmpty, isEmpty } from "ol/extent";
 import Feature from "ol/Feature";
 import Point from "ol/geom/Point";
+
 import DrawModel from "models/DrawModel";
 import { handleClick } from "models/Click";
+import { generateRandomString } from "../utils";
 import {
   INTEGRATION_IDS,
   DEFAULT_DRAW_SETTINGS,
@@ -136,17 +138,12 @@ class VisionIntegrationModel {
       )}`,
     });
     // We also have to set a random id on each feature (since OL doesn't...)
-    coordinateFeature.setId(this.#generateRandomString());
+    coordinateFeature.setId(generateRandomString());
     // Then we'll publish an event so that the views can be updated
     this.#localObserver.publish(
       "mapview-new-coordinate-created",
       coordinateFeature
     );
-  };
-
-  // Generates a random string that can be used as an ID.
-  #generateRandomString = () => {
-    return Math.random().toString(36).slice(2, 9);
   };
 
   // Toggles map-interactions (possible interactions are "SELECT_ESTATE" and "SELECT_COORDINATE")

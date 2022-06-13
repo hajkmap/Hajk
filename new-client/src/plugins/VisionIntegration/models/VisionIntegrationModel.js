@@ -1,8 +1,9 @@
 import Feature from "ol/Feature";
 import Point from "ol/geom/Point";
 import { HubConnectionBuilder } from "@microsoft/signalr";
-import SearchModel from "models/SearchModel";
 
+import { generateRandomString } from "../utils";
+import SearchModel from "models/SearchModel";
 import { INTEGRATION_IDS } from "../constants";
 
 // A simple class containing functionality that is used in the VisionIntegration-plugin.
@@ -302,18 +303,13 @@ class VisionIntegrationModel {
     });
     // Then we have to set random id's on each feature (since OL doesn't...)
     coordinateFeatures.forEach((f) => {
-      f.setId(this.#generateRandomString());
+      f.setId(generateRandomString());
     });
     // Finally, we'll publish a message with the array of coordinate-features
     this.#localObserver.publish(
       "coordinates-recieved-from-vision",
       coordinateFeatures
     );
-  };
-
-  // Generates a random string that can be used as an ID.
-  #generateRandomString = () => {
-    return Math.random().toString(36).slice(2, 9);
   };
 
   // Accepts a feature and returns an object with the required keys to match Visions API description.

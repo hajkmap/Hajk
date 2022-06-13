@@ -21,3 +21,8 @@ export const getSearchSources = (props) => {
   // that are used in the plugin...
   return app.config.layersConfig.filter((l) => searchSourceIds.includes(l.id));
 };
+
+// Returns a random string that can be used as an ID for example
+export const generateRandomString = () => {
+  return Math.random().toString(36).slice(2, 9);
+};
