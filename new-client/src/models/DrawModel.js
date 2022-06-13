@@ -574,9 +574,9 @@ class DrawModel {
     return measurements.reduce((acc, curr) => {
       switch (curr.type) {
         case "COORDINATES":
-          return (acc += `N: ${Math.round(curr.value[1])} E: ${Math.round(
-            curr.value[0]
-          )}`);
+          return (acc += this.#measurementSettings.showArea
+            ? `N: ${Math.round(curr.value[1])} E: ${Math.round(curr.value[0])}`
+            : "");
         case "AREA":
         case "PERIMETER":
         case "LENGTH":

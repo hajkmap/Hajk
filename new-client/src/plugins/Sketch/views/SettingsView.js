@@ -107,7 +107,7 @@ const SettingsView = (props) => {
                     measurementSettings.showArea ? "av" : "på"
                   } om du vill ${
                     measurementSettings.showArea ? "dölja" : "visa"
-                  } area på objekten.`
+                  } area på objekten. (På punkter visas koordinaterna).`
             }
           >
             <FormControlLabel
