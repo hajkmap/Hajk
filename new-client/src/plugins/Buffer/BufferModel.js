@@ -21,6 +21,7 @@ class BufferModel {
     this.highlightLayer = new VectorLayer({
       source: this.highlightSource,
       layerType: "system",
+      zIndex: 5000,
       name: "pluginBufferSelection",
       caption: "Buffer selection layer",
       style: new Style({
@@ -49,6 +50,7 @@ class BufferModel {
     this.bufferLayer = new VectorLayer({
       source: this.bufferSource,
       layerType: "system",
+      zIndex: 5000,
       name: "pluginBuffer",
       caption: "Buffer layer",
       style: new Style({

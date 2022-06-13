@@ -97,6 +97,7 @@ export default class PrintModel {
     this.previewLayer = new Vector({
       source: new VectorSource(),
       layerType: "system",
+      zIndex: 5000,
       name: "pluginPrint",
       caption: "Print layer",
       style: new Style({

@@ -16,6 +16,7 @@ class LocationModel {
     this.layer = new VectorLayer({
       source: this.source,
       layerType: "system",
+      zIndex: 5000,
       name: "pluginLocation",
       caption: "Location layer",
     });

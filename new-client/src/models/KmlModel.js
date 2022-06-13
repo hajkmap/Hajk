@@ -203,6 +203,7 @@ class KmlModel {
     return new VectorLayer({
       source: source,
       layerType: "system",
+      zIndex: 5000,
       caption: "KML model",
     });
   };

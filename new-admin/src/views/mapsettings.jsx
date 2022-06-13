@@ -290,6 +290,7 @@ class Menu extends Component {
     backgroundSwitcherWhite: true,
     enableOSM: false,
     showBreadcrumbs: false,
+    showActiveLayersView: false,
     enableTransparencySlider: true,
     instruction: "",
     dropdownThemeMaps: false,
@@ -335,6 +336,8 @@ class Menu extends Component {
           enableOSM: this.props.model.get("layerMenuConfig").enableOSM,
           showBreadcrumbs:
             this.props.model.get("layerMenuConfig").showBreadcrumbs,
+          showActiveLayersView:
+            this.props.model.get("layerMenuConfig").showActiveLayersView,
           enableTransparencySlider:
             this.props.model.get("layerMenuConfig").enableTransparencySlider ||
             this.state.enableTransparencySlider,
@@ -564,6 +567,7 @@ class Menu extends Component {
       backgroundSwitcherWhite: this.state.backgroundSwitcherWhite,
       enableOSM: this.state.enableOSM,
       showBreadcrumbs: this.state.showBreadcrumbs,
+      showActiveLayersView: this.state.showActiveLayersView,
       enableTransparencySlider: this.state.enableTransparencySlider,
       instruction: this.state.instruction,
       dropdownThemeMaps: this.state.dropdownThemeMaps,
@@ -1527,7 +1531,7 @@ class Menu extends Component {
                   />
                 </div>
               </div>
-              <div className="separator">Inställningar för plugins</div>
+              <div className="separator">Inställningar för Lagerhanteraren</div>
               <div>
                 <input
                   id="visibleAtStart"
@@ -1551,7 +1555,7 @@ class Menu extends Component {
                 />
                 &nbsp;
                 <label className="long-label" htmlFor="visibleAtStartMobile">
-                  Synlig vid start - Mobil
+                  Synlig vid start (mobil)
                 </label>
               </div>
               <div>
@@ -1564,11 +1568,29 @@ class Menu extends Component {
                 />
                 &nbsp;
                 <label className="long-label" htmlFor="showBreadcrumbs">
-                  Visa "brödsmulor"{" "}
+                  Visa brödsmulor{" "}
                   <i
                     className="fa fa-question-circle"
                     data-toggle="tooltip"
                     title="När rutan är ikryssad visas små kort längst ned på skärmen, ett för varje lager som är aktivt"
+                  />
+                </label>
+              </div>
+              <div>
+                <input
+                  id="showActiveLayersView"
+                  name="showActiveLayersView"
+                  type="checkbox"
+                  onChange={this.handleInputChange}
+                  checked={this.state.showActiveLayersView}
+                />
+                &nbsp;
+                <label className="long-label" htmlFor="showActiveLayersView">
+                  Visa en flik med aktiva lager (beta){" "}
+                  <i
+                    className="fa fa-question-circle"
+                    data-toggle="tooltip"
+                    title="När rutan är ikryssad visas en tredje flik i Lagerhanteraren. Där kan användaren bland annat styra ritordningen av aktiva lager."
                   />
                 </label>
               </div>
