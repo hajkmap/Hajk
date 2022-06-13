@@ -210,6 +210,7 @@ function VisionIntegration(props) {
       <VisionIntegrationView
         app={app}
         model={model}
+        mapViewModel={mapViewModel}
         pluginShown={pluginShown}
         configError={configError}
         hubConnectionStatus={hubConnectionStatus}

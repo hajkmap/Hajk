@@ -57,7 +57,7 @@ class VisionIntegrationModel {
   };
 
   // Zooms to the supplied features
-  #zoomToFeatures = (features) => {
+  zoomToFeatures = (features) => {
     // First we'll create an empty extent
     const extent = createEmpty();
     // Then, for each feature, we'll extend the extent
@@ -135,7 +135,7 @@ class VisionIntegrationModel {
     // Then we'll zoom to the current extent (If we've not removed all features, since it
     // does not make sence to zoom to nothing...)
     if (estates.length !== 0) {
-      this.#zoomToFeatures(estates);
+      this.zoomToFeatures(estates);
     }
   };
 
@@ -153,7 +153,7 @@ class VisionIntegrationModel {
     // Then we'll zoom to the current extent (If we've not removed all features, since it
     // does not make sence to zoom to nothing...)
     if (coordinates.length !== 0) {
-      this.#zoomToFeatures(coordinates);
+      this.zoomToFeatures(coordinates);
     }
   };
 

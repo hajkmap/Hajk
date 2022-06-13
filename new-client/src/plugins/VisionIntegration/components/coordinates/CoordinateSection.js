@@ -40,6 +40,7 @@ function CoordinateSection(props) {
         source={props.source}
         features={props.selectedCoordinates}
         setSelectedFeatures={props.setSelectedCoordinates}
+        mapViewModel={props.mapViewModel}
       />
       {props.selectedCoordinates.length > 0 && (
         <Grid item xs={12} sx={{ marginTop: 1 }}>

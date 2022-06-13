@@ -5,6 +5,7 @@ import {
   Accordion,
   AccordionSummary,
   AccordionDetails,
+  Button,
   Grid,
   IconButton,
   Tooltip,
@@ -49,7 +50,13 @@ const StyledAccordionSummary = styled(AccordionSummary)(({ theme }) => ({
   },
 }));
 
-function FeatureListItem({ app, feature, setSelectedFeatures, source }) {
+function FeatureListItem({
+  app,
+  mapViewModel,
+  feature,
+  setSelectedFeatures,
+  source,
+}) {
   // The component that will be shown in the accordion-details is saved in state...
   const [detailsComponent, setDetailsComponent] = React.useState(null);
   // This is not pretty, but it get's the job done for now...
@@ -133,7 +140,21 @@ function FeatureListItem({ app, feature, setSelectedFeatures, source }) {
       </StyledAccordionSummary>
       <AccordionDetails sx={{ maxWidth: "100%" }}>
         <Grid item xs={12} sx={{ userSelect: "text" }}>
-          {detailsComponent}
+          <Grid item xs={12}>
+            {detailsComponent}
+          </Grid>
+          <Grid item xs={12}>
+            <Tooltip title="Centrera kartan över objektet">
+              <Button
+                size="small"
+                variant="outlined"
+                fullWidth
+                onClick={() => mapViewModel.zoomToFeatures([feature])}
+              >
+                Centrera
+              </Button>
+            </Tooltip>
+          </Grid>
         </Grid>
       </AccordionDetails>
     </StyledAccordion>

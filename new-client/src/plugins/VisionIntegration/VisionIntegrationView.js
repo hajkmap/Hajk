@@ -59,6 +59,7 @@ function VisionIntegrationView(props) {
           <EstateSection
             app={props.app}
             model={props.model}
+            mapViewModel={props.mapViewModel}
             selectedEstates={props.selectedEstates}
             setSelectedEstates={props.setSelectedEstates}
             source={props.model.getEstateSearchSource()}
@@ -71,6 +72,7 @@ function VisionIntegrationView(props) {
           <CoordinateSection
             app={props.app}
             model={props.model}
+            mapViewModel={props.mapViewModel}
             selectedCoordinates={props.selectedCoordinates}
             setSelectedCoordinates={props.setSelectedCoordinates}
             source={props.model.getCoordinateSearchSource()}

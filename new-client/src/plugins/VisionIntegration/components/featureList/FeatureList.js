@@ -13,6 +13,7 @@ function FeatureList(props) {
             feature={feature}
             source={props.source}
             setSelectedFeatures={props.setSelectedFeatures}
+            mapViewModel={props.mapViewModel}
           />
         );
       })}

@@ -54,6 +54,7 @@ function EstateSection(props) {
         source={props.source}
         features={props.selectedEstates}
         setSelectedFeatures={props.setSelectedEstates}
+        mapViewModel={props.mapViewModel}
       />
       {props.selectedEstates.length > 0 && (
         <Grid item xs={12} sx={{ marginTop: 1 }}>
