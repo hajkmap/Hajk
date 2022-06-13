@@ -70,8 +70,8 @@ function FeatureListItem({
     // a typography stating that theres no info to show
     if (!source) {
       return setDetailsComponent(
-        <Typography>
-          Det finns ingen information att visa om detta objektet.
+        <Typography sx={{ paddingBottom: 2 }}>
+          {feature.get("FEATURE_TITLE")}
         </Typography>
       );
     }
