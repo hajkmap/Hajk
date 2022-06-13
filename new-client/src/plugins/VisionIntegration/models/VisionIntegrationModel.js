@@ -206,8 +206,8 @@ class VisionIntegrationModel {
       // in a specific form, see below):
       // DTO: [ {northing: <string>, easting: <string>, spatialReferenceSystemIdentifier: <string>, label: <string>} ]
       const informationToSend = [];
-      selectedCoordinates.forEach((estate) => {
-        informationToSend.push(this.#createCoordinateSendObject(estate));
+      selectedCoordinates.forEach((coordinate) => {
+        informationToSend.push(this.#createCoordinateSendObject(coordinate));
       });
       // Finally, we'll invoke amethod on the hub, sending the coordinate-information to Vision
       this.#hubConnection.invoke("SendCoordinates", informationToSend);
@@ -357,8 +357,8 @@ class VisionIntegrationModel {
         : projectionCode.split(":")[0];
     // Then we'll create the object
     return {
-      northing: geometry.getCoordinates()[1],
-      easting: geometry.getCoordinates()[0],
+      northing: geometry.getCoordinates()[1].toString(),
+      easting: geometry.getCoordinates()[0].toString(),
       spatialReferenceSystemIdentifier: cleanedProjectionCode,
       label: "", // TODO: Should we send something on the label?...
     };
