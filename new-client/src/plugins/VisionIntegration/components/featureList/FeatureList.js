@@ -1,18 +1,18 @@
 import React from "react";
 import { Grid } from "@mui/material";
-import EstateListItem from "./EstateListItem";
+import FeatureListItem from "./FeatureListItem";
 
-function EstateList(props) {
+function FeatureList(props) {
   return (
     <Grid item xs={12} sx={{ maxHeight: "450px", overflowY: "auto" }}>
-      {props.selectedEstates.map((estate, index) => {
+      {props.features.map((feature, index) => {
         return (
-          <EstateListItem
+          <FeatureListItem
             app={props.app}
             key={index}
-            estate={estate}
+            feature={feature}
             source={props.source}
-            setSelectedEstates={props.setSelectedEstates}
+            setSelectedFeatures={props.setSelectedFeatures}
           />
         );
       })}
@@ -20,4 +20,4 @@ function EstateList(props) {
   );
 }
 
-export default EstateList;
+export default FeatureList;

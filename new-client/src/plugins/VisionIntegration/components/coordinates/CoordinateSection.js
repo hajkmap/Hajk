@@ -1,11 +1,19 @@
 // Base
 import React from "react";
-import { Grid, Typography } from "@mui/material";
+import { Button, Grid, Typography } from "@mui/material";
+
+import FeatureList from "../featureList/FeatureList";
 
 function CoordinateSection(props) {
   const headerText = "Det finns inga selekterade koordinater";
   const helperText =
     "Aktivera verktyget och klicka i kartan för att välja koordinater.";
+
+  // Handles click on button used to remove all selected estates
+  const handleResetSelectionClick = () => {
+    props.setSelectedCoordinates([]);
+  };
+
   return (
     <Grid container sx={{ padding: 2 }}>
       <Grid container item xs={12}>
@@ -18,6 +26,24 @@ function CoordinateSection(props) {
           </Typography>
         )}
       </Grid>
+      <FeatureList
+        app={props.app}
+        source={props.source}
+        features={props.selectedCoordinates}
+        setSelectedFeatures={props.setSelectedCoordinates}
+      />
+      {props.selectedCoordinates.length > 0 && (
+        <Grid item xs={12} sx={{ marginTop: 1 }}>
+          <Button
+            fullWidth
+            size="small"
+            variant="contained"
+            onClick={handleResetSelectionClick}
+          >
+            Rensa selektering
+          </Button>
+        </Grid>
+      )}
     </Grid>
   );
 }

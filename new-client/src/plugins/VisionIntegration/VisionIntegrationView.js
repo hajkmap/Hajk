@@ -67,9 +67,11 @@ function VisionIntegrationView(props) {
       case INTEGRATION_IDS.COORDINATES:
         return (
           <CoordinateSection
+            app={props.app}
             model={props.model}
-            selectedEstates={props.selectedEstates}
-            searchSource={props.model.getEstateSearchSource()}
+            selectedCoordinates={props.selectedCoordinates}
+            setSelectedCoordinates={props.setSelectedCoordinates}
+            source={props.model.getCoordinateSearchSource()}
           />
         );
       // TODO: Since the edit-tab is disabled ofr now, we'll just return null for now.

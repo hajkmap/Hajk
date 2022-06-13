@@ -4,7 +4,7 @@ import { Button, Divider, Grid, Typography } from "@mui/material";
 
 // Components
 import EstateToolbox from "./EstateToolbox";
-import EstateList from "./EstateList";
+import FeatureList from "../featureList/FeatureList";
 
 // Constants
 import { ESTATE_TEXT } from "../../constants";
@@ -45,11 +45,11 @@ function EstateSection(props) {
           </Typography>
         )}
       </Grid>
-      <EstateList
+      <FeatureList
         app={props.app}
         source={props.source}
-        selectedEstates={props.selectedEstates}
-        setSelectedEstates={props.setSelectedEstates}
+        features={props.selectedEstates}
+        setSelectedFeatures={props.setSelectedEstates}
       />
       {props.selectedEstates.length > 0 && (
         <Grid item xs={12} sx={{ marginTop: 1 }}>

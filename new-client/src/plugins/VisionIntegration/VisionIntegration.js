@@ -196,6 +196,8 @@ function VisionIntegration(props) {
         setActiveTab={setActiveTab}
         selectedEstates={selectedEstates}
         setSelectedEstates={setSelectedEstates}
+        selectedCoordinates={selectedCoordinates}
+        setSelectedCoordinates={setSelectedCoordinates}
       />
     </BaseWindowPlugin>
   );

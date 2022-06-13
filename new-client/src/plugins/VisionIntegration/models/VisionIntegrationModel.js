@@ -264,12 +264,14 @@ class VisionIntegrationModel {
     const coordinateFeatures = [];
     // Then we'll create an OL-feature for each coordinate-information-object and append it to the array
     payload.forEach((coordinateInfo) => {
+      const { northing, easting } = coordinateInfo;
       coordinateFeatures.push(
         new Feature({
-          geometry: new Point([
-            coordinateInfo.northing,
-            coordinateInfo.easting,
-          ]),
+          geometry: new Point([northing, easting]),
+          VISION_TYPE: "COORDINATES",
+          FEATURE_TITLE: `Nord: ${parseInt(northing)}, Öst: ${parseInt(
+            easting
+          )}`,
         })
       );
     });
@@ -337,6 +339,11 @@ class VisionIntegrationModel {
     return (
       this.#searchSources.find((source) => source.id === estateSourceId) || null
     );
+  };
+
+  // Returns the WFS-source (config, not a "real" source) stated to be the coordinate-source.
+  getCoordinateSearchSource = () => {
+    return null;
   };
 
   // Sets a "FEATURE_TITLE"-attribute on the supplied feature. The title is

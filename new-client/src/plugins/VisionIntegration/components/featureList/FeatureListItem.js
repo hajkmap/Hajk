@@ -49,16 +49,25 @@ const StyledAccordionSummary = styled(AccordionSummary)(({ theme }) => ({
   },
 }));
 
-function EstateListItem({ app, estate, setSelectedEstates, source }) {
+function FeatureListItem({ app, feature, setSelectedFeatures, source }) {
   // The component that will be shown in the accordion-details is saved in state...
   const [detailsComponent, setDetailsComponent] = React.useState(null);
   // This is not pretty, but it get's the job done for now...
   // We want to create a info-box that depends on the settings on the source.
-  // (A info-box is built using the source's "infoBox" markdown-string in combination with the estate-props).
+  // (A info-box is built using the source's "infoBox" markdown-string in combination with the feature-props).
   // To do this, we use a couple of methods found on our feature-props-parser.
   // Since one of the methods is async, we'll save the result in state.
   // TODO: Clean this trash up.
   useEffect(() => {
+    // If no source was supplied, we cannot create a info-box. Let's instead return
+    // a typography stating that theres no info to show
+    if (!source) {
+      return setDetailsComponent(
+        <Typography>
+          Det finns ingen information att visa om detta objektet.
+        </Typography>
+      );
+    }
     // We need a new feature-props-parser for every estate since it saves the config...
     const featurePropsParser = new FeaturePropsParsing({
       globalObserver: app.globalObserver,
@@ -70,13 +79,13 @@ function EstateListItem({ app, estate, setSelectedEstates, source }) {
     featurePropsParser
       .setMarkdownAndProperties({
         markdown: source.infobox,
-        properties: estate.getProperties(),
+        properties: feature.getProperties(),
       })
       .mergeFeaturePropsWithMarkdown()
       .then((MarkdownComponent) => {
         setDetailsComponent(MarkdownComponent);
       });
-  }, [estate, source, app]);
+  }, [feature, source, app]);
 
   // We need a handler for when the user wants to remove a selected estate
   const handleRemoveClick = (e) => {
@@ -84,8 +93,8 @@ function EstateListItem({ app, estate, setSelectedEstates, source }) {
     e.preventDefault();
     e.stopPropagation();
     // Then we'll update the state by removing the estate we wanted to delete
-    setSelectedEstates((prevSelected) =>
-      prevSelected.filter((prev) => prev.getId() !== estate.getId())
+    setSelectedFeatures((prevSelected) =>
+      prevSelected.filter((prev) => prev.getId() !== feature.getId())
     );
   };
 
@@ -105,7 +114,7 @@ function EstateListItem({ app, estate, setSelectedEstates, source }) {
         <Grid container alignItems="center">
           <Tooltip
             disableInteractive
-            title={`Ta bort ${estate.get("FEATURE_TITLE")} från selekteringen`}
+            title={`Ta bort ${feature.get("FEATURE_TITLE")} från selekteringen`}
           >
             <IconButton
               sx={{ paddingLeft: 0 }}
@@ -115,9 +124,9 @@ function EstateListItem({ app, estate, setSelectedEstates, source }) {
               <DeleteIcon />
             </IconButton>
           </Tooltip>
-          <Tooltip disableInteractive title={estate.get("FEATURE_TITLE")}>
+          <Tooltip disableInteractive title={feature.get("FEATURE_TITLE")}>
             <Typography sx={{ maxWidth: "100%" }} noWrap>
-              {estate.get("FEATURE_TITLE")}
+              {feature.get("FEATURE_TITLE")}
             </Typography>
           </Tooltip>
         </Grid>
@@ -131,4 +140,4 @@ function EstateListItem({ app, estate, setSelectedEstates, source }) {
   );
 }
 
-export default EstateListItem;
+export default FeatureListItem;
