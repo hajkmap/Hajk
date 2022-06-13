@@ -65,3 +65,8 @@ export const DEFAULT_DRAW_STYLE_SETTINGS = {
   strokeWidth: 2,
   fillColor: "rgba(255,255,255,0.07)",
 };
+
+export const MAP_INTERACTIONS = Object.freeze({
+  SELECT_ESTATE: "SELECT_ESTATE",
+  SELECT_COORDINATE: "SELECT_COORDINATE",
+});

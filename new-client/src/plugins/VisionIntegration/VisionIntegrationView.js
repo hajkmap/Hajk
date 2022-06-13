@@ -62,6 +62,8 @@ function VisionIntegrationView(props) {
             selectedEstates={props.selectedEstates}
             setSelectedEstates={props.setSelectedEstates}
             source={props.model.getEstateSearchSource()}
+            activeMapInteraction={props.activeMapInteraction}
+            setActiveMapInteraction={props.setActiveMapInteraction}
           />
         );
       case INTEGRATION_IDS.COORDINATES:
@@ -72,6 +74,8 @@ function VisionIntegrationView(props) {
             selectedCoordinates={props.selectedCoordinates}
             setSelectedCoordinates={props.setSelectedCoordinates}
             source={props.model.getCoordinateSearchSource()}
+            activeMapInteraction={props.activeMapInteraction}
+            setActiveMapInteraction={props.setActiveMapInteraction}
           />
         );
       // TODO: Since the edit-tab is disabled ofr now, we'll just return null for now.

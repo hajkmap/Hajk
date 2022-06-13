@@ -71,6 +71,8 @@ function VisionIntegration(props) {
   // The selected coordinates could change when a user selected/deselects coordinates in
   // the map or if coordinates are sent from Vision
   const [selectedCoordinates, setSelectedCoordinates] = useState([]);
+  // We also have to keep track of which map-interaction that is currently active
+  const [activeMapInteraction, setActiveMapInteraction] = useState(null);
 
   // We're gonna need a handler for the estate-search-success event.
   const handleEstateSearchSuccess = useCallback((features) => {
@@ -86,6 +88,11 @@ function VisionIntegration(props) {
     setActiveTab(INTEGRATION_IDS.COORDINATES);
     // Then we'll update the state
     setSelectedCoordinates(features);
+  }, []);
+
+  // Handles when we've recieved estates from a map-click-event
+  const handleAddNewEstates = useCallback((estates) => {
+    setSelectedEstates((prevEstates) => [...prevEstates, ...estates]);
   }, []);
 
   // We're gonna want to subscribe to some events so that we can keep track of hub-status etc.
@@ -120,6 +127,11 @@ function VisionIntegration(props) {
       "coordinates-recieved-from-vision",
       (features) => handleCoordinatesRevievedFromVision(features)
     );
+    // A listener for when we've gotten new estates to add to the selection (from map-click originally)
+    const addNewEstatesListener = localObserver.subscribe(
+      "add-estates-to-selection",
+      (features) => handleAddNewEstates(features)
+    );
     // Make sure to clean up!
     return () => {
       connectionFailureListener.unSubscribe();
@@ -128,11 +140,13 @@ function VisionIntegration(props) {
       estateSearchFailedListener.unSubscribe();
       estateSearchCompletedListener.unSubscribe();
       coordinatesRevievedFromVisionListener.unSubscribe();
+      addNewEstatesListener.unSubscribe();
     };
   }, [
     localObserver,
     handleEstateSearchSuccess,
     handleCoordinatesRevievedFromVision,
+    handleAddNewEstates,
   ]);
 
   // We're gonna need an useEffect that can handle side-effects when the selected
@@ -156,9 +170,16 @@ function VisionIntegration(props) {
   // An effect that makes sure to hide/show features depending on which tab we're currently on.
   // (We don't want to show estates when we're on the coordinate tab and so on...)
   // If the plugin is hidden, we send an empty string (and no features will be shown).
+  // The effect also makes sure to disable any map-interaction that could be active.
   useEffect(() => {
     mapViewModel.updateHiddenFeatures(pluginShown ? activeTab : "");
+    setActiveMapInteraction(null);
   }, [mapViewModel, activeTab, pluginShown]);
+
+  // An effect making sure to set the chosen map-interaction in the model when state changes...
+  useEffect(() => {
+    mapViewModel.toggleMapInteraction(activeMapInteraction);
+  }, [activeMapInteraction, mapViewModel]);
 
   // We're gonna need to catch if the user closes the window, and make sure to
   // update the state so that the effect handling the draw-interaction-toggling fires.
@@ -198,6 +219,8 @@ function VisionIntegration(props) {
         setSelectedEstates={setSelectedEstates}
         selectedCoordinates={selectedCoordinates}
         setSelectedCoordinates={setSelectedCoordinates}
+        activeMapInteraction={activeMapInteraction}
+        setActiveMapInteraction={setActiveMapInteraction}
       />
     </BaseWindowPlugin>
   );

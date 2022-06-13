@@ -2,7 +2,13 @@
 import React, { useEffect, useState } from "react";
 import { Divider, Stack, Grid, Paper, Switch, Typography } from "@mui/material";
 
-function EstateToolbox({ layer }) {
+import { MAP_INTERACTIONS } from "../../constants";
+
+function EstateToolbox({
+  layer,
+  activeMapInteraction,
+  setActiveMapInteraction,
+}) {
   // Let's make sure to warn if no layer is supplied...
   if (!layer) {
     console.warn("No layer supplied to Estate-toolbox... Check configuration.");
@@ -22,9 +28,16 @@ function EstateToolbox({ layer }) {
     return () => layer?.un("change:visible", handleLayerVisibilityChange);
   }, [layer]);
 
-  // Handles when switch is toggled
+  // Handles when layer-visibility-switch is toggled
   const handleWmsVisibilitySwitchChange = (e) => {
     layer.set("visible", e.target.checked);
+  };
+
+  // Handles when select-estates-switch is toggled
+  const handleSelectEstateSwitchChange = (e) => {
+    setActiveMapInteraction(
+      e.target.checked ? MAP_INTERACTIONS.SELECT_ESTATE : null
+    );
   };
 
   return (
@@ -45,7 +58,10 @@ function EstateToolbox({ layer }) {
             <Typography variant="body2" sx={{ marginTop: 1 }}>
               Selektering
             </Typography>
-            <Switch />
+            <Switch
+              checked={activeMapInteraction === MAP_INTERACTIONS.SELECT_ESTATE}
+              onChange={handleSelectEstateSwitchChange}
+            />
           </Stack>
         </Grid>
         <Divider flexItem orientation="vertical" sx={{ mx: 0.5, my: 1 }} />

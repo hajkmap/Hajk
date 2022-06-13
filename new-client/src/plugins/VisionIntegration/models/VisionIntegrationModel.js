@@ -44,6 +44,7 @@ class VisionIntegrationModel {
     this.#orSeparator = "?"; // We're gonna be using an or-separator when searching, let's use "?"
     this.#searchOptions = this.#getDefaultSearchOptions(); // Create the default search-options
     this.#hubConnection !== null && this.#initiateHub(); // Initiate the hub and its listeners.
+    this.#localObserver && this.#initiateObserverListeners(); // Initiate observer-listeners.
   }
 
   // Creates a connection to supplied hub-url. (Hub meaning a signalR-communication-hub).
@@ -146,6 +147,30 @@ class VisionIntegrationModel {
       "HandleCoordinates",
       this.#handleVisionAskingToShowCoordinates
     );
+  };
+
+  // Initiates all listeners on the local-observer. Used for communication within the plugin.
+  #initiateObserverListeners = () => {
+    this.#localObserver.on(
+      "mapview-estate-map-click-result",
+      this.#handleEstateMapClickResults
+    );
+  };
+
+  // Handles when the map-view-model has gotten som features from a map-click. Here we're supposed
+  // to find the features connected to the estate-layer, and update the view with those.
+  #handleEstateMapClickResults = (features) => {
+    const estateFeatures = features.filter(
+      (feature) => feature.layer.get("name") === this.#getEstateWmsId()
+    );
+    // We're gonna need the estate-source so that we can construct a valid title for the estates
+    const estateSearchSource = this.getEstateSearchSource();
+    // Then we'll construct and add the title to every estate feature...
+    estateFeatures.forEach((feature) => {
+      this.#setFeatureTitle(feature, estateSearchSource.displayFields);
+    });
+    // And finally we'll publish an event so that the view can be updated...
+    this.#localObserver.publish("add-estates-to-selection", features);
   };
 
   // Handles when Vision is asking for information regarding all currently selected real-estates.

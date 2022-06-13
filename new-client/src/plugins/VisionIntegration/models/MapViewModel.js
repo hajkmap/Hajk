@@ -1,9 +1,11 @@
 import { extend, createEmpty, isEmpty } from "ol/extent";
 import DrawModel from "models/DrawModel";
+import { handleClick } from "models/Click";
 import {
   INTEGRATION_IDS,
   DEFAULT_DRAW_SETTINGS,
   DEFAULT_DRAW_STYLE_SETTINGS,
+  MAP_INTERACTIONS,
 } from "../constants";
 
 // A simple class containing functionality that is used in the VisionIntegration-plugin.
@@ -64,6 +66,59 @@ class VisionIntegrationModel {
     });
     // Finnaly, if the extent is not empty, we'll zoom to it
     !isEmpty(extent) && this.#fitMapToExtent(extent);
+  };
+
+  // Disables any potential interactions and removes click-lock
+  #disableInteractions = () => {
+    this.#map.clickLock.delete("visionintegration");
+    this.#disableEstateSelectInteraction();
+  };
+
+  // Enables functionality so that the user can select estates from the map
+  #enableEstateSelectInteraction = () => {
+    this.#map.clickLock.add("visionintegration");
+    this.#map.on("singleclick", this.#handleOnSelectEstateClick);
+  };
+
+  // Disables select estates from map functionality
+  #disableEstateSelectInteraction = () => {
+    this.#map.clickLock.delete("visionintegration");
+    this.#map.un("singleclick", this.#handleOnSelectEstateClick);
+  };
+
+  // Handler for map-clicks when user is to select estates
+  #handleOnSelectEstateClick = async (event) => {
+    try {
+      // Try to fetch features from WMS-layers etc. (Also from all vector-layers).
+      const clickResult = await new Promise((resolve) =>
+        handleClick(event, event.map, resolve)
+      );
+      // The response should contain an array of features
+      const { features } = clickResult;
+      // We'll just publish an event with all the features and let VisionIntegration-model
+      // handle filtering etc.
+      this.#localObserver.publish("mapview-estate-map-click-result", features);
+    } catch (error) {
+      console.error(
+        `Failed to select estates in VisionIntegration... ${error}`
+      );
+    }
+  };
+
+  // Toggles map-interactions (possible interactions are "SELECT_ESTATE" and "SELECT_COORDINATE")
+  toggleMapInteraction = (interaction) => {
+    // First we must disable any potential interactions...
+    this.#disableInteractions();
+    // Then we'll check which interaction we should enable and enable that one...
+    switch (interaction) {
+      case MAP_INTERACTIONS.SELECT_ESTATE:
+        return this.#enableEstateSelectInteraction();
+      case MAP_INTERACTIONS.SELECT_COORDINATE:
+        console.log("Enable select coordinate (TODO!)");
+        return null;
+      default:
+        return null;
+    }
   };
 
   // Handles when the selected estates has been updated. Makes sure to update the map accordingly.
