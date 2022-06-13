@@ -92,7 +92,15 @@ function VisionIntegration(props) {
 
   // Handles when we've received estates from a map-click-event
   const handleAddNewEstates = useCallback((estates) => {
-    setSelectedEstates((prevEstates) => [...prevEstates, ...estates]);
+    // Since we don't want to allow for duplicate estates we do some really funky shit here...
+    // Basically we're creating a set containing the id's of every selected estate (this one
+    // wont include duplicates since it's a set). Then we get the corresponding estate by grabbing
+    // them from the new array using the id. (It doesn't really matter which one we get since they're duplicates).
+    setSelectedEstates((prevEstates) =>
+      Array.from(
+        new Set([...prevEstates, ...estates].map((e) => e.getId()))
+      ).map((id) => [...prevEstates, ...estates].find((e) => e.getId() === id))
+    );
   }, []);
 
   // Handles when a new coordinate has been created in the map
