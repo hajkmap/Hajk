@@ -15,6 +15,7 @@ class VisionIntegrationModel {
   #options;
   #localObserver;
   #drawModel;
+  #activeMapInteraction;
 
   // There will probably not be many settings for this model... Options are required though!
   constructor(settings) {
@@ -31,6 +32,7 @@ class VisionIntegrationModel {
     this.#localObserver = localObserver;
     this.#map = map;
     this.#app = app;
+    this.#activeMapInteraction = null;
     // ...including a draw-model, which can be used to show draw features in the map in a simple way.
     this.#drawModel = new DrawModel({
       layerName: "pluginVisionIntegration",
@@ -70,6 +72,7 @@ class VisionIntegrationModel {
 
   // Disables any potential interactions and removes click-lock
   #disableInteractions = () => {
+    this.#activeMapInteraction = null;
     this.#map.clickLock.delete("visionintegration");
     this.#disableEstateSelectInteraction();
   };
@@ -112,8 +115,10 @@ class VisionIntegrationModel {
     // Then we'll check which interaction we should enable and enable that one...
     switch (interaction) {
       case MAP_INTERACTIONS.SELECT_ESTATE:
+        this.#activeMapInteraction = MAP_INTERACTIONS.SELECT_ESTATE;
         return this.#enableEstateSelectInteraction();
       case MAP_INTERACTIONS.SELECT_COORDINATE:
+        this.#activeMapInteraction = MAP_INTERACTIONS.SELECT_COORDINATE;
         console.log("Enable select coordinate (TODO!)");
         return null;
       default:
@@ -133,8 +138,9 @@ class VisionIntegrationModel {
       this.#drawModel.addFeature(estate);
     });
     // Then we'll zoom to the current extent (If we've not removed all features, since it
-    // does not make sence to zoom to nothing...)
-    if (estates.length !== 0) {
+    // does not make sence to zoom to nothing... We don't want to zoom if the user is selecting features
+    // by their own either...)
+    if (estates.length !== 0 && this.#activeMapInteraction === null) {
       this.zoomToFeatures(estates);
     }
   };
