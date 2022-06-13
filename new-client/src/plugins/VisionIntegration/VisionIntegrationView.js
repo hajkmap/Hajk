@@ -86,7 +86,7 @@ function VisionIntegrationView(props) {
     <Root>
       <Grid item container justifyContent="center">
         <StyledAppBar position="sticky" color="default">
-          <Tabs variant="fullWidth" value={props.activeTab}>
+          <Tabs variant="fullWidth" value={props.activeTab} textColor="inherit">
             {TABS.map((tab) => {
               return (
                 <Tab
