@@ -120,9 +120,9 @@ function DrawOrder({ app, map }) {
         <Chip label={getLabelFromNumber()} />
       </Divider>
       <List>
-        {sortedLayers.map((l, i) => (
+        {sortedLayers.map((l) => (
           <DrawOrderListItem
-            key={i}
+            key={l.ol_uid}
             changeOrder={handleLayerOrderChange}
             layer={l}
           />
