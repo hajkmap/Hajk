@@ -1,8 +1,32 @@
 // Base
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Divider, Stack, Grid, Paper, Switch, Typography } from "@mui/material";
 
-function EstateToolbox(props) {
+function EstateToolbox({ layer }) {
+  // Let's make sure to warn if no layer is supplied...
+  if (!layer) {
+    console.warn("No layer supplied to Estate-toolbox... Check configuration.");
+  }
+  // We're gonna need a state to keep track of the switch
+  const [layerVisible, setLayerVisible] = useState(layer?.get("visible"));
+
+  // An effect making sure to toggle the switch when the layer-visibility changes
+  useEffect(() => {
+    // Handler for the visibility change
+    const handleLayerVisibilityChange = (e) => {
+      setLayerVisible(layer?.get("visible"));
+    };
+    // Set  up the listener on mount
+    layer?.on("change:visible", handleLayerVisibilityChange);
+    // Remove listener on unmount
+    return () => layer?.un("change:visible", handleLayerVisibilityChange);
+  }, [layer]);
+
+  // Handles when switch is toggled
+  const handleWmsVisibilitySwitchChange = (e) => {
+    layer.set("visible", e.target.checked);
+  };
+
   return (
     <Grid container item xs={12} justifyContent="center" alignContent="center">
       <Paper
@@ -30,7 +54,10 @@ function EstateToolbox(props) {
             <Typography variant="body2" sx={{ marginTop: 1 }}>
               Fastighetslager
             </Typography>
-            <Switch />
+            <Switch
+              checked={layerVisible}
+              onChange={handleWmsVisibilitySwitchChange}
+            />
           </Stack>
         </Grid>
       </Paper>

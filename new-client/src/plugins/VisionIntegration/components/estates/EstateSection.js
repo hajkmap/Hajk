@@ -27,7 +27,7 @@ function EstateSection(props) {
 
   return (
     <Grid container sx={{ padding: 2 }} justifyContent="center">
-      <EstateToolbox />
+      <EstateToolbox layer={props.model.getEstateWmsLayer()} />
       <Grid
         container
         sx={{ marginTop: 2, marginBottom: 1 }}

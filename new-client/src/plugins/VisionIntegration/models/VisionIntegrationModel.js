@@ -348,6 +348,24 @@ class VisionIntegrationModel {
     );
   };
 
+  getEstateWmsLayer = () => {
+    // First we'll get the estate-source-id
+    const estateWmsId = this.#getEstateWmsId();
+    // If no id could be found, we cannot search for the source either...
+    if (!estateWmsId) {
+      console.error(
+        "Could not fetch estate-layer. Estate-layer-ID is missing!"
+      );
+      return null;
+    }
+    // If we have an id, we can return the layer connected to the id
+    return (
+      this.#map
+        .getAllLayers()
+        .find((layer) => layer.get("name") === estateWmsId) || null
+    );
+  };
+
   // Returns the WFS-source (config, not a "real" source) stated to be the coordinate-source.
   getCoordinateSearchSource = () => {
     return null;
@@ -381,6 +399,23 @@ class VisionIntegrationModel {
     }
     // If we've made it this far, we'll return the wfsId
     return estateSettings.wfsId || null;
+  };
+
+  // Returns the id of the WMS-layer that is connected to the estate-part of the integration.
+  #getEstateWmsId = () => {
+    // First we'll get all the estate-settings
+    const estateSettings = this.#getEstateIntegrationSettings();
+    // Then we'll get the wfs-id
+    const { wmsId } = estateSettings;
+    // We'll check if the wfsId is defined so that we can log an error if its not
+    if (!this.#isValidString(wmsId)) {
+      console.error(
+        `Error fetching estate WMS-layer. Expected "wmsId" to be a string but got ${typeof wmsId}`
+      );
+      return null;
+    }
+    // If we've made it this far, we'll return the wfsId
+    return estateSettings.wmsId || null;
   };
 
   // Returns the estate-integration-settings
