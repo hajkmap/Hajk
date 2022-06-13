@@ -1,7 +1,8 @@
 // Base
 import React from "react";
-import { Button, Grid, Typography } from "@mui/material";
+import { Button, Divider, Grid, Typography } from "@mui/material";
 
+import CoordinateToolbox from "./CoordinateToolbox";
 import FeatureList from "../featureList/FeatureList";
 
 function CoordinateSection(props) {
@@ -16,6 +17,14 @@ function CoordinateSection(props) {
 
   return (
     <Grid container sx={{ padding: 2 }}>
+      <CoordinateToolbox />
+      <Grid
+        container
+        sx={{ marginTop: 2, marginBottom: 1 }}
+        justifyContent="center"
+      >
+        <Divider sx={{ width: "20%" }} />
+      </Grid>
       <Grid container item xs={12}>
         <Typography variant="h6" align="center" sx={{ width: "100%" }}>
           {headerText}
