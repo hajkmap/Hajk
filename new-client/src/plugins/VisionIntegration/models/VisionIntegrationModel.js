@@ -312,14 +312,21 @@ class VisionIntegrationModel {
   #createCoordinateSendObject = (coordinateFeature) => {
     // First we'll get the feature geometry (so that we can get it's coordinates)
     const geometry = coordinateFeature.getGeometry();
+    // Then we'll grab the projection-code. (Vision expects EPSG: to be removed for some reason...)
+    // Example: If we're working with EPSG:3007, Vision expects "3007" only.
+    // Let's grab the code to begin with
+    const projectionCode = this.#map.getView().getProjection().getCode() || "";
+    // Then we'll remove the EPSG-part...
+    const cleanedProjectionCode =
+      projectionCode.split(":").length > 1
+        ? projectionCode.split(":")[1]
+        : projectionCode.split(":")[0];
     // Then we'll create the object
     return {
-      northing: geometry.getCoordinates()[1],
-      easting: geometry.getCoordinates()[0],
-      spatialReferenceSystemIdentifier: `${
-        this.#map.getView().getProjection().getCode().split()[1]
-      }`,
-      label: "",
+      northing: geometry.getCoordinates()[0],
+      easting: geometry.getCoordinates()[1],
+      spatialReferenceSystemIdentifier: cleanedProjectionCode,
+      label: "", // TODO: Should we send something on the label?...
     };
   };
 
