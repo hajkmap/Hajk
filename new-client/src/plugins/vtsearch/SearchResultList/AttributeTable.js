@@ -196,7 +196,10 @@ class AttributeTable extends React.Component {
         (acc, key) => {
           return { ...acc, [key]: properties[key] };
         },
-        { olFeatureId: feature.getId(), searchResultId: searchResult.id }
+        {
+          olFeatureId: feature.id ? feature.id : feature.getId(),
+          searchResultId: searchResult.id,
+        }
       );
     });
   }
