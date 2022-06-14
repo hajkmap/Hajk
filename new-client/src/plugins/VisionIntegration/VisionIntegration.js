@@ -192,9 +192,9 @@ function VisionIntegration(props) {
   // If the plugin is hidden, we send an empty string (and no features will be shown).
   // The effect also makes sure to disable any map-interaction that could be active.
   useEffect(() => {
-    mapViewModel.updateHiddenFeatures(pluginShown ? activeTab : "");
+    mapViewModel.updateHiddenFeatures(activeTab);
     setActiveMapInteraction(null);
-  }, [mapViewModel, activeTab, pluginShown]);
+  }, [mapViewModel, activeTab]);
 
   // An effect making sure to set the chosen map-interaction in the model when state changes...
   useEffect(() => {
