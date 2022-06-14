@@ -749,5 +749,15 @@ export const CustomLink = ({ aTag, localObserver, bottomMargin }) => {
     return getHoverLink(hoverLink, tagText);
   }
 
+  // If we got this far it seems that _we've been trying to parse an A tag that didn't
+  // have any of the data-* attributes_. One possible reason why this has happened is that
+  // some mobile browsers (iOS on Safari…) auto-creates A tags from number sequencies, as
+  // it thinks that the number is a phone number. We don't want this to happen, but we
+  // don't want to lose the number sequence either. So we must parse this auto-inserted
+  // A tag. See also #1098 for details.
+  if (aTag.href?.startsWith("tel:")) {
+    return getFormattedComponentFromTag(aTag);
+  }
+
   return null;
 };
