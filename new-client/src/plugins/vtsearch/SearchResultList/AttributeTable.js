@@ -235,9 +235,15 @@ class AttributeTable extends React.Component {
 
     if (compareOne === compareTwo) return 0;
 
-    compareOneString = compareOne.toString().toLowerCase().match(regex);
+    compareOneString =
+      compareOne === undefined
+        ? ""
+        : compareOne.toString().toLowerCase().match(regex);
 
-    compareTwoString = compareTwo.toString().toLowerCase().match(regex);
+    compareTwoString =
+      compareTwo === undefined
+        ? ""
+        : compareTwo.toString().toLowerCase().match(regex);
 
     length = compareOneString.length;
 
@@ -274,11 +280,9 @@ class AttributeTable extends React.Component {
       rowsToBeSorted.sort((a, b) => {
         compareOne = a[sortBy] === "" ? null : a[sortBy]; //Handle empty string same way as null
         compareTwo = b[sortBy] === "" ? null : b[sortBy]; //Handle empty string same way as null
-        if (compareOne !== null && compareTwo !== null) {
+        if (compareOne !== null && compareTwo !== null)
           return this.#sortAlphaNumerical(compareOne, compareTwo);
-        } else {
-          return this.#sortNulls(compareOne, compareTwo);
-        }
+        else return this.#sortNulls(compareOne, compareTwo);
       });
     }
 
