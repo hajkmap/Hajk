@@ -94,7 +94,8 @@ const LayerComparer = (props) => {
       sds.current.open();
       sds.current.setCompareLayers(l1, l2);
 
-      // Show the snackbar
+      // Show the snackbar, but ensure that only one snackbar exists
+      closeSnackbar(helperSnack.current);
       helperSnack.current = enqueueSnackbar(
         "Avsluta jämföringsläget genom att trycka på knappen",
         {
@@ -103,6 +104,8 @@ const LayerComparer = (props) => {
           anchorOrigin: { vertical: "bottom", horizontal: "center" },
           action: (key) => (
             <Button
+              variant="contained"
+              color="error"
               onClick={() => {
                 onAbort();
                 closeSnackbar(key);
