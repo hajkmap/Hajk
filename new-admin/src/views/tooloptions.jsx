@@ -25,6 +25,7 @@ import Dummy from "./tools/dummy.jsx";
 import MenuEditor from "./tools/MenuEditor/menuEditor.jsx";
 import TimeSlider from "./tools/timeslider.jsx";
 import GeosuiteExport from "./tools/geosuiteExport.jsx";
+import VisionIntegration from "./tools/visionIntegration.jsx";
 import ExternalLinks from "./tools/externalLink.jsx";
 
 var defaultState = {
@@ -120,6 +121,8 @@ class ToolOptions extends Component {
         return <MenuEditor parent={this} model={this.props.model} />;
       case "geosuiteexport":
         return <GeosuiteExport parent={this} model={this.props.model} />;
+      case "visionintegration":
+        return <VisionIntegration parent={this} model={this.props.model} />;
       default:
         return null;
     }
@@ -187,6 +190,7 @@ class ToolOptions extends Component {
       dummy: "Dummy plugin",
       timeslider: "Tidslinje",
       documenthandler: "Dokumenthanterare 2.0",
+      visionintegration: "Vision-integration",
       geosuiteexport: "GeoSuite export",
     };
 
