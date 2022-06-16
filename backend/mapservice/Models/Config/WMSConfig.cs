@@ -27,7 +27,7 @@ namespace MapService.Models.Config
     public class DpiSetting
     {
         public double pxRatio { get; set; }
-        public double dpi { get; set; }
+        public int dpi { get; set; }
     }
 
 
