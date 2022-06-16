@@ -45,8 +45,10 @@ class GeosuiteExportModel {
     };
     this.#source = new VectorSource();
     this.#vector = new VectorLayer({
+      layerType: "system",
       source: this.#source,
-      name: "geoSuiteDrawLayer",
+      name: "pluginGeoSuite",
+      caption: "GeoSuite layer",
     });
     this.#style = new Style({
       fill: new Fill({

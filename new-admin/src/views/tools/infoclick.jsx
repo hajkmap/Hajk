@@ -11,6 +11,8 @@ var defaultState = {
   index: 0,
   visibleForGroups: [],
   title: "Infoclick",
+  linksColor: "primary",
+  linksUnderline: "always",
   position: "right",
   width: 400,
   height: 300,
@@ -53,6 +55,8 @@ class ToolOptions extends Component {
         index: tool.index,
         title: tool.options.title,
         position: tool.options.position,
+        linksColor: tool.options.linksColor,
+        linksUnderline: tool.options.linksUnderline,
         width: tool.options.width,
         height: tool.options.height,
         src: tool.options.src,
@@ -127,6 +131,8 @@ class ToolOptions extends Component {
       options: {
         title: this.state.title,
         position: this.state.position,
+        linksColor: this.state.linksColor,
+        linksUnderline: this.state.linksUnderline,
         width: this.state.width,
         height: this.state.height,
         anchor: [this.state.anchorX, this.state.anchorY],
@@ -380,6 +386,55 @@ class ToolOptions extends Component {
               Använd ny Infoclick-variant (se GitHub issue #1034)
             </label>
           </div>
+          <div className="separator">Länkarnas utseende</div>
+
+          <div>
+            <label htmlFor="linksColor">
+              Färg{" "}
+              <i
+                className="fa fa-question-circle"
+                data-toggle="tooltip"
+                title="Länkarnas färg. Se MUI:s dokumentation på https://mui.com/material-ui/react-link/"
+              />
+            </label>
+            <select
+              id="linksColor"
+              name="linksColor"
+              className="control-fixed-width"
+              onChange={(e) => {
+                this.handleInputChange(e);
+              }}
+              value={this.state.linksColor}
+            >
+              <option value="primary">primary</option>
+              <option value="secondary">secondary</option>
+              <option value="inherit">inherit</option>
+            </select>
+          </div>
+          <div>
+            <label htmlFor="linksUnderline">
+              Understuket{" "}
+              <i
+                className="fa fa-question-circle"
+                data-toggle="tooltip"
+                title="Om länktexten ska vara understruken. Se MUI:s dokumentation på https://mui.com/material-ui/react-link/"
+              />
+            </label>
+            <select
+              id="linksUnderline"
+              name="linksUnderline"
+              className="control-fixed-width"
+              onChange={(e) => {
+                this.handleInputChange(e);
+              }}
+              value={this.state.linksUnderline}
+            >
+              <option value="always">always</option>
+              <option value="hover">hover</option>
+              <option value="no">no</option>
+            </select>
+          </div>
+
           <div className="separator">Ikon och markering</div>
           <div>
             <label htmlFor="src">URL till bild</label>

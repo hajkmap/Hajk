@@ -159,7 +159,7 @@ class KmlModel {
   // the layerName supplied when initiating the model. Also makes
   // sure that the layer is a vectorLayer.
   #layerHasCorrectNameAndType = (layer) => {
-    return layer.get("type") === this.#layerName && this.#isVectorLayer(layer);
+    return layer.get("name") === this.#layerName && this.#isVectorLayer(layer);
   };
 
   // Checks wether the supplied layer is a vectorLayer or not.
@@ -187,10 +187,7 @@ class KmlModel {
     this.#kmlSource = this.#getNewVectorSource();
     // Let's create a layer
     this.#kmlLayer = this.#getNewVectorLayer(this.#kmlSource);
-    // Make sure to set the layer type to something understandable.
-    this.#kmlLayer.set("type", this.#layerName);
-    // FIXME: Remove "type", use only "name" throughout
-    // the application. Should be done as part of #883.
+    // Make sure to set a unique name
     this.#kmlLayer.set("name", this.#layerName);
     // Then we can add the layer to the map.
     this.#map.addLayer(this.#kmlLayer);
@@ -205,6 +202,8 @@ class KmlModel {
   #getNewVectorLayer = (source) => {
     return new VectorLayer({
       source: source,
+      layerType: "system",
+      caption: "KML model",
     });
   };
 

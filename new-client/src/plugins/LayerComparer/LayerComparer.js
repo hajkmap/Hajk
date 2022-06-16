@@ -36,14 +36,14 @@ const LayerComparer = (props) => {
   useEffect(() => {
     const allLayers = props.map.getAllLayers();
     const baseLayers = allLayers
-      .filter((l) => l.layerType === "base")
+      .filter((l) => l.get("layerType") === "base")
       .map((l) => {
         return { id: l.ol_uid, label: l.get("caption") };
       });
 
     if (props.options.showNonBaseLayersInSelect) {
       const layers = allLayers
-        .filter((l) => l.layerType === "layer")
+        .filter((l) => ["layer", "group"].includes(l.get("layerType")))
         .map((l) => {
           return { id: l.ol_uid, label: l.get("caption") };
         });
@@ -88,13 +88,14 @@ const LayerComparer = (props) => {
       // Hide old background layers
       oldBackgroundLayer.current = props.map
         .getAllLayers()
-        .find((l) => l.getVisible() === true && l.layerType === "base");
+        .find((l) => l.getVisible() === true && l.get("layerType") === "base");
       oldBackgroundLayer.current?.setVisible(false);
 
       sds.current.open();
       sds.current.setCompareLayers(l1, l2);
 
-      // Show the snackbar
+      // Show the snackbar, but ensure that only one snackbar exists
+      closeSnackbar(helperSnack.current);
       helperSnack.current = enqueueSnackbar(
         "Avsluta jämföringsläget genom att trycka på knappen",
         {
@@ -103,6 +104,8 @@ const LayerComparer = (props) => {
           anchorOrigin: { vertical: "bottom", horizontal: "center" },
           action: (key) => (
             <Button
+              variant="contained"
+              color="error"
               onClick={() => {
                 onAbort();
                 closeSnackbar(key);

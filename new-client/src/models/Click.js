@@ -314,7 +314,7 @@ export function handleClick(evt, map, callback) {
               if (
                 layer &&
                 (layer.get("queryable") === true ||
-                  layer.get("type") === "searchResultLayer")
+                  layer.get("name") === "pluginSearchResults")
               ) {
                 feature.layer = layer;
                 features.push(feature);

@@ -59,6 +59,7 @@ class WMSLayer {
       }
       this.layer = new ImageLayer({
         name: config.name,
+        layerType: this.getLayerType(),
         visible: config.visible,
         caption: config.caption,
         opacity: config.opacity,
@@ -75,6 +76,7 @@ class WMSLayer {
     } else {
       this.layer = new TileLayer({
         name: config.name,
+        layerType: this.getLayerType(),
         visible: config.visible,
         caption: config.caption,
         opacity: config.opacity,
@@ -98,7 +100,6 @@ class WMSLayer {
 
     this.layer.layersInfo = config.layersInfo;
     this.layer.subLayers = this.subLayers;
-    this.layer.layerType = this.getLayerType();
     this.layer.getSource().set("url", config.url);
     this.type = "wms";
     this.bindHandlers();

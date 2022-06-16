@@ -276,14 +276,14 @@ class LayerGroup extends React.PureComponent {
   }
 
   toggleLayers(visibility, layers) {
-    var mapLayers = this.props.app.getMap().getLayers().getArray();
-
-    mapLayers
+    this.props.app
+      .getMap()
+      .getAllLayers()
       .filter((mapLayer) => {
         return layers.some((layer) => layer.id === mapLayer.get("name"));
       })
       .forEach((mapLayer) => {
-        if (mapLayer.layerType === "group") {
+        if (mapLayer.get("layerType") === "group") {
           if (visibility === true) {
             this.model.observer.publish("showLayer", mapLayer);
           } else {

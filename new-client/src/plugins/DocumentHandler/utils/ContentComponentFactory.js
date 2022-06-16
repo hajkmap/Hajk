@@ -340,8 +340,8 @@ export const Img = ({ imgTag, localObserver, componentId, baseUrl }) => {
           ...getImageStyle(image),
           ...(image.height &&
             image.width && {
-              height: `${image.height}px`,
-              width: `${image.width}px`,
+              height: image.height,
+              width: image.width,
             }),
           ".MuiCardMedia-media": {
             width: "auto",
@@ -374,7 +374,7 @@ export const Video = ({ imgTag, componentId, baseUrl }) => {
     return (
       <Box
         sx={{
-          width: `${videoAttributes.width}px`,
+          width: videoAttributes.width,
           marginBottom: 1,
           maxWidth: "100%",
         }}
@@ -440,7 +440,7 @@ export const Audio = ({ imgTag, componentId, baseUrl }) => {
     return (
       <Box
         sx={{
-          width: audioAttributes.width + "px",
+          width: audioAttributes.width,
           marginBottom: 1,
           maxWidth: "100%",
         }}
@@ -747,6 +747,16 @@ export const CustomLink = ({ aTag, localObserver, bottomMargin }) => {
   if (hoverLink) {
     const tagText = aTag.text;
     return getHoverLink(hoverLink, tagText);
+  }
+
+  // If we got this far it seems that _we've been trying to parse an A tag that didn't
+  // have any of the data-* attributes_. One possible reason why this has happened is that
+  // some mobile browsers (iOS on Safari…) auto-creates A tags from number sequencies, as
+  // it thinks that the number is a phone number. We don't want this to happen, but we
+  // don't want to lose the number sequence either. So we must parse this auto-inserted
+  // A tag. See also #1098 for details.
+  if (aTag.href?.startsWith("tel:")) {
+    return getFormattedComponentFromTag(aTag);
   }
 
   return null;
