@@ -340,8 +340,8 @@ export const Img = ({ imgTag, localObserver, componentId, baseUrl }) => {
           ...getImageStyle(image),
           ...(image.height &&
             image.width && {
-              height: `${image.height}px`,
-              width: `${image.width}px`,
+              height: image.height,
+              width: image.width,
             }),
           ".MuiCardMedia-media": {
             width: "auto",
@@ -374,7 +374,7 @@ export const Video = ({ imgTag, componentId, baseUrl }) => {
     return (
       <Box
         sx={{
-          width: `${videoAttributes.width}px`,
+          width: videoAttributes.width,
           marginBottom: 1,
           maxWidth: "100%",
         }}
@@ -440,7 +440,7 @@ export const Audio = ({ imgTag, componentId, baseUrl }) => {
     return (
       <Box
         sx={{
-          width: audioAttributes.width + "px",
+          width: audioAttributes.width,
           marginBottom: 1,
           maxWidth: "100%",
         }}

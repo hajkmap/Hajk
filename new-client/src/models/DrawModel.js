@@ -1880,13 +1880,34 @@ class DrawModel {
   translateSelectedFeatures = (length, angle) => {
     this.#selectInteraction.getFeatures().forEach((f) => {
       try {
-        // We'll have to create a GeoJSON-feature from the ol-feature (since
-        // turf only accepts geoJSON).
+        // Since geoJSON cannot handle OL's circle-geometries, we'll have to check
+        // if we're dealing with a circle before creating the geoJSON-feature...
+        const isCircle = f.getGeometry() instanceof CircleGeometry;
+        // We also have to make sure to store the eventual radius so that we can use that to create a 'real' circle later.
+        const radius = isCircle ? f.getGeometry().getRadius() : 0;
+        // If we are dealing with a circle, we have to set the feature-geometry to a
+        // simplified circle (Don't worry, we'll create a "real" circle again later).
+        if (isCircle) {
+          f.setGeometry(fromCircle(f.getGeometry()));
+        }
+        // Then we'll create a GeoJSON-feature from the ol-feature (since turf only accepts geoJSON).
         const gjFeature = this.#geoJSONParser.writeFeatureObject(f);
         // Then we'll translate the feature according to the supplied parameters
         const translated = transformTranslate(gjFeature, length / 1000, angle);
-        // When thats done, we'll update the duplicates geometry.
-        f.setGeometry(this.#geoJSONParser.readGeometry(translated.geometry));
+        // When thats done, we'll read the geometry from the translated geoJSON
+        const translatedGeometry = this.#geoJSONParser.readGeometry(
+          translated.geometry
+        );
+        // When thats done, we'll update the feature geometry to the translated one. If we are dealing
+        // with a circle, we have to create a "real" circle:
+        if (isCircle) {
+          f.setGeometry(
+            this.#creteCircleGeomFromSimplified(translatedGeometry, radius)
+          );
+        } else {
+          // Otherwise we can just set the geometry.
+          f.setGeometry(translatedGeometry);
+        }
       } catch (error) {
         console.error(`Failed to translate selected features. Error: ${error}`);
       }
