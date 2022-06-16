@@ -194,8 +194,8 @@ class PrintWindow extends React.PureComponent {
       // Prior to React 18, the render() metod had an optional callback. As of React 18, the
       // callback has been removed. One of the proposed solutions,
       // see https://github.com/reactwg/react-18/discussions/5, is this to use setTimeout(fn(), 0).
-      // TODO: If we run into bugs regarding DH's print functionality, this is the place to look:
-      resolve();
+      // Also, see #1107.
+      setTimeout(() => resolve(), 10);
     });
   };
 
