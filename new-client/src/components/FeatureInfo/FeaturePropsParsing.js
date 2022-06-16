@@ -5,14 +5,21 @@ import gfm from "remark-gfm";
 import FeaturePropFilters from "./FeaturePropsFilters";
 
 import {
-  customComponentsForReactMarkdown,
-  Paragraph,
+  customComponentsForReactMarkdown, // the object with all custom components
+  setOptions, // a method that will allow us to send infoclick options from here to the module that defines custom components
+  Paragraph, // special case - we want to override the Paragraph component here, so we import it separately
 } from "utils/customComponentsForReactMarkdown";
 
 export default class FeaturePropsParsing {
   constructor(settings) {
     this.globalObserver = settings.globalObserver;
     this.options = settings.options;
+
+    // Send the options to our custom components module too. This is necessary
+    // and without it we won't be able to access Hajk's settings in customComponentsForReactMarkdown
+    // because it's not a class that we initiate (only a plain JS object).
+    // Also, see #1106.
+    setOptions(this.options);
 
     // Two arrays that will hold pending promises and their resolved values, respectively.
     this.pendingPromises = [];
