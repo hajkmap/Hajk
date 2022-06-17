@@ -56,6 +56,20 @@ class CoordinatesView extends React.PureComponent {
     this.localObserver.subscribe("hideSnackbar", () => {
       this.props.closeSnackbar(this.snackbarKey);
     });
+
+    this.localObserver.subscribe("location-permissions-denied", () => {
+      this.props.enqueueSnackbar(
+        "Du måste aktivera din position i webbläsaren för att kunna fastställa position.",
+        {
+          variant: "info",
+          persist: false,
+          anchorOrigin: {
+            vertical: "top",
+            horizontal: "center",
+          },
+        }
+      );
+    });
   }
 
   componentWillUnmount() {

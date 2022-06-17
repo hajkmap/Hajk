@@ -143,20 +143,28 @@ class CoordinatesModel {
    */
   goToUserLocation = () => {
     if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition((pos) => {
-        const point = new Point([pos.coords.longitude, pos.coords.latitude]);
-        point.transform(
-          "EPSG:4326",
-          this.map.getView().getProjection().getCode()
-        );
-        this.coordinates = point.getCoordinates();
-        this.localObserver.publish("newCoordinates", {
-          coordinates: this.coordinates,
-          proj: this.map.getView().getProjection().getCode(),
-          force: true,
-        });
-        this.map.getView().setCenter(point.getCoordinates());
-      });
+      navigator.geolocation.getCurrentPosition(
+        (pos) => {
+          const point = new Point([pos.coords.longitude, pos.coords.latitude]);
+          point.transform(
+            "EPSG:4326",
+            this.map.getView().getProjection().getCode()
+          );
+          this.coordinates = point.getCoordinates();
+          this.localObserver.publish("newCoordinates", {
+            coordinates: this.coordinates,
+            proj: this.map.getView().getProjection().getCode(),
+            force: true,
+          });
+          this.map.getView().setCenter(point.getCoordinates());
+        },
+        (error) => {
+          // If error code is 1 (User denied Geolocation), show Snackbar with error message
+          if (error.code === 1) {
+            this.localObserver.publish("location-permissions-denied");
+          }
+        }
+      );
     }
   };
 
