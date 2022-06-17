@@ -1,5 +1,3 @@
 **/node_modules
 **/build
-**/.git*
-**/.eslint*
-**/.prettier*
+**/dist

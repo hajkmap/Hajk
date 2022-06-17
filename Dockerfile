@@ -8,12 +8,18 @@ RUN npm run compile
 
 # Stage 2 - Building the client
 FROM node:18-alpine as clientBuilder
+RUN apk update
+RUN apk add git
 WORKDIR /usr/app
 COPY /new-client/package*.json ./
 RUN npm ci --ignore-scripts
+# Grab the git dir so we can extract the latest commit ID in our prebuild.js
+COPY ./.git .
 COPY ./new-client .
 RUN rm ./public/appConfig.json
 RUN mv ./public/appConfig.docker.json ./public/appConfig.json
+# Run the prebuild script. Will ensure that some <meta> tags are added to index.html
+RUN node prebuild.js
 RUN npm run build --ignore-scripts
 
 # Stage 3 - Building the admin
