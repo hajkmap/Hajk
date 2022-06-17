@@ -6,9 +6,14 @@ import CoordinateToolbox from "./CoordinateToolbox";
 import FeatureList from "../featureList/FeatureList";
 
 function CoordinateSection(props) {
-  const headerText = "Det finns inga selekterade koordinater";
+  const headerText =
+    props.selectedCoordinates.length > 0
+      ? "Selekterade koordinater"
+      : "Det finns inga selekterade koordinater";
   const helperText =
-    "Aktivera verktyget och klicka i kartan för att välja koordinater.";
+    props.selectedCoordinates.length > 0
+      ? ""
+      : "Aktivera verktyget och klicka i kartan för att välja koordinater.";
 
   // Handles click on button used to remove all selected estates
   const handleResetSelectionClick = () => {

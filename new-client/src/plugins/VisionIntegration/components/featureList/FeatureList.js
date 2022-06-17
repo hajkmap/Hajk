@@ -4,7 +4,7 @@ import FeatureListItem from "./FeatureListItem";
 
 function FeatureList(props) {
   return (
-    <Grid item xs={12} sx={{ maxHeight: "450px", overflowY: "auto" }}>
+    <Grid item xs={12} sx={{ maxHeight: "300px", overflowY: "auto" }}>
       {props.features.map((feature, index) => {
         return (
           <FeatureListItem
