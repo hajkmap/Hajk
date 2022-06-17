@@ -35,9 +35,9 @@ The data to send between Hajk and Vision trough the hub must follow the followin
 
 ```json
 {
-  Northing: <string>,
-  Easting: <string>,
-  SpatialReferenceSystemIdentifier: <string> example ”3007” <= notice lack of "EPSG",
+  Northing: <number>,
+  Easting: <number>,
+  SpatialReferenceSystemIdentifier: <integer> example 3007 <= notice lack of "EPSG",
   Label: <string>,
 }
 ```
