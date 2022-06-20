@@ -1,4 +1,4 @@
-FROM node:16-alpine
+FROM node:16-alpine AS buildImage
 
 # --- BACKEND --- #
 # Start with Backend
@@ -33,6 +33,7 @@ RUN mv ./public/appConfig.docker.json ./public/appConfig.json
 # Now let's build, including running the prebuild.js script. 
 # This ensure that some <meta> tags are added to index.html
 RUN npm run build
+RUN apk del git
 # --- CLIENT END --- #
 
 # --- ADMIN --- #
@@ -46,7 +47,8 @@ RUN npm run build
 # --- ADMIN --- #
 
 # --- FINAL ASSEMBLY --- #
-# Finally, let's assembly it all into another dir
+# Finally, let's assembly it all into another image
+FROM node:16-alpine
 WORKDIR /usr/app
 
 # Copy NPM package files from Backend
@@ -54,7 +56,7 @@ COPY /new-backend/package*.json ./
 RUN npm ci --production
 
 # Move the built Backend into app's root at /usr/app
-RUN mv /tmp/build/new-backend/dist/* .
+COPY --from=buildImage /tmp/build/new-backend/dist ./
 
 # Copy some more necessary files. There's a great chance that 
 # they'll be mounted when running anyway, but if someone forgets
@@ -64,11 +66,8 @@ COPY /new-backend/App_Data ./App_Data
 COPY /new-backend/static ./static
 
 # Move the built Client and Admin dirs into static
-RUN mv /tmp/build/new-client/build/* ./static/client
-RUN mv /tmp/build/new-admin/build/* ./static/admin
-
-# Cleanup
-RUN rm -rf /tmp/build
+COPY --from=buildImage /tmp/build/new-client/build ./static/client
+COPY --from=buildImage /tmp/build/new-admin/build ./static/admin
 # --- FINAL ASSEMBLY END --- #
 
 # Go!
