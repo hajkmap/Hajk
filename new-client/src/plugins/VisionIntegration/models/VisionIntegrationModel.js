@@ -290,13 +290,14 @@ class VisionIntegrationModel {
     const coordinateFeatures = [];
     // Then we'll create an OL-feature for each coordinate-information-object and append it to the array
     payload.forEach((coordinateInfo) => {
+      // The coordinates sent from vision are sent with northing on the X-axis and easting on the Y-axis...
       const { northing, easting } = coordinateInfo;
       coordinateFeatures.push(
         new Feature({
-          geometry: new Point([easting, northing]),
+          geometry: new Point([northing, easting]),
           VISION_TYPE: "COORDINATES",
-          FEATURE_TITLE: `Nord: ${parseInt(northing)}, Öst: ${parseInt(
-            easting
+          FEATURE_TITLE: `Nord: ${parseInt(easting)}, Öst: ${parseInt(
+            northing
           )}`,
         })
       );
@@ -343,7 +344,7 @@ class VisionIntegrationModel {
     // First we'll get the feature geometry (so that we can get it's coordinates)
     const geometry = coordinateFeature.getGeometry();
     // Then we'll grab the projection-code. (Vision expects EPSG: to be removed for some reason...)
-    // Example: If we're working with EPSG:3007, Vision expects "3007" only.
+    // Example: If we're working with EPSG:3007, Vision expects 3007 (integer) only.
     // Let's grab the code to begin with
     const projectionCode = this.#map.getView().getProjection().getCode() || "";
     // Then we'll remove the EPSG-part...
@@ -353,8 +354,8 @@ class VisionIntegrationModel {
         : projectionCode.split(":")[0];
     // Then we'll create the object
     return {
-      northing: geometry.getCoordinates()[1],
-      easting: geometry.getCoordinates()[0],
+      northing: geometry.getCoordinates()[0],
+      easting: geometry.getCoordinates()[1],
       spatialReferenceSystemIdentifier: parseInt(cleanedProjectionCode),
       label: "", // TODO: Should we send something on the label?...
     };
