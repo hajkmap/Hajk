@@ -75,20 +75,30 @@ function VisionIntegration(props) {
   const [activeMapInteraction, setActiveMapInteraction] = useState(null);
 
   // We're gonna need a handler for the estate-search-success event.
-  const handleEstateSearchSuccess = useCallback((features) => {
-    // We want to jump to the estate-section when new estates has been found
-    setActiveTab(INTEGRATION_IDS.ESTATES);
-    // Then we'll update the state
-    setSelectedEstates(features);
-  }, []);
+  const handleEstateSearchSuccess = useCallback(
+    (features) => {
+      // We want to jump to the estate-section when new estates has been found
+      setActiveTab(INTEGRATION_IDS.ESTATES);
+      // We also want to zoom to the features that we we're sent
+      mapViewModel.zoomToFeatures(features);
+      // Then we'll update the state
+      setSelectedEstates(features);
+    },
+    [mapViewModel]
+  );
 
   // We're gonna need a handler for the coordinates-from-vision event.
-  const handleCoordinatesReceivedFromVision = useCallback((features) => {
-    // We want to jump to the estate-section when new estates has been found
-    setActiveTab(INTEGRATION_IDS.COORDINATES);
-    // Then we'll update the state
-    setSelectedCoordinates(features);
-  }, []);
+  const handleCoordinatesReceivedFromVision = useCallback(
+    (features) => {
+      // We want to jump to the estate-section when new estates has been found
+      setActiveTab(INTEGRATION_IDS.COORDINATES);
+      // We also want to zoom to the features that we we're sent
+      mapViewModel.zoomToFeatures(features);
+      // Then we'll update the state
+      setSelectedCoordinates(features);
+    },
+    [mapViewModel]
+  );
 
   // Handles when we've received estates from a map-click-event
   const handleAddNewEstates = useCallback((estates) => {

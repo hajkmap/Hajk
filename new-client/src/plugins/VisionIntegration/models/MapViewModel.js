@@ -167,38 +167,21 @@ class VisionIntegrationModel {
   setEstatesToShow = (estates) => {
     // First we'll get any potential estates already in the map
     const estatesInMap = this.getDrawnEstates();
-    // Then we'll check how many estates there are in the map before adding the new ones.
-    // (This is done since we want to check if we're adding or removing estates later)
-    const numEstatesInMapBefore = estatesInMap.length;
     // Then we'll remove the old estates features...
     estatesInMap.forEach((f) => {
       this.#drawModel.removeFeature(f);
     });
-    // ,...and then we'll add all the currently selected features
+    // ...and then we'll add all the currently selected features
     estates.forEach((estate) => {
       estate.set("VISION_TYPE", INTEGRATION_IDS.ESTATES);
       this.#drawModel.addFeature(estate);
     });
-    // Then we'll check if we should zoom to the currently selected features or not.
-    // We should zoom if we are adding more features, and only when no map-interaction is active.
-    // (Since we don't want to zoom when the user is adding new estates by clicking in the map)...
-    const shouldZoom =
-      estates.length !== 0 &&
-      this.#activeMapInteraction === null &&
-      numEstatesInMapBefore < estates.length;
-    // Then we'll zoom (if we're allowed to)
-    if (shouldZoom) {
-      this.zoomToFeatures(estates);
-    }
   };
 
   // Handles when the selected coordinates has been updated. Makes sure to update the map accordingly.
   setCoordinatesToShow = (coordinates) => {
     // First we'll get any potential coordinates already in the map
     const coordinatesInMap = this.getDrawnCoordinates();
-    // Then we'll check how many coordinates there are in the map before adding the new ones.
-    // (This is done since we want to check if we're adding or removing coordinates later)
-    const numCoordinatesInMapBefore = coordinatesInMap.length;
     // Then we'll remove the old coordinate features...
     coordinatesInMap.forEach((f) => {
       this.#drawModel.removeFeature(f);
@@ -208,16 +191,6 @@ class VisionIntegrationModel {
       coordinate.set("VISION_TYPE", INTEGRATION_IDS.COORDINATES);
       this.#drawModel.addFeature(coordinate);
     });
-    /// Then we'll check if we should zoom to the currently selected features or not.
-    // We should zoom if we are adding more features, and only when no map-interaction is active.
-    // (Since we don't want to zoom when the user is adding new estates by clicking in the map)...
-    const shouldZoom =
-      coordinates.length !== 0 &&
-      this.#activeMapInteraction === null &&
-      numCoordinatesInMapBefore < coordinates.length;
-    if (shouldZoom) {
-      this.zoomToFeatures(coordinates);
-    }
   };
 
   // Returns all drawn (selected) estates from the map
