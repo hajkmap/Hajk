@@ -57,8 +57,8 @@ class VisionIntegrationModel {
   #fitMapToExtent = (extent) => {
     this.#map.getView().fit(extent, {
       size: this.#map.getSize(),
-      padding: [20, 20, 20, 20],
-      maxZoom: 7,
+      padding: [100, 100, 100, 100],
+      duration: 1000,
     });
   };
 
