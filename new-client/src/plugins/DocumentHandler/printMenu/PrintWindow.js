@@ -1,5 +1,5 @@
 import React from "react";
-import ReactDOM from "react-dom";
+import { createRoot } from "react-dom/client";
 import { createPortal } from "react-dom";
 import { withSnackbar } from "notistack";
 
@@ -183,15 +183,19 @@ class PrintWindow extends React.PureComponent {
     const theme = deepMerge(this.props.customTheme || this.props.theme, {});
     // Make sure to render the components using the custom theme if it exists:
     return new Promise((resolve) => {
-      ReactDOM.render(
+      const rootElement = createRoot(container);
+
+      rootElement.render(
         <StyledEngineProvider injectFirst>
           <ThemeProvider theme={theme}>{element}</ThemeProvider>
-        </StyledEngineProvider>,
-        container,
-        (e) => {
-          resolve();
-        }
+        </StyledEngineProvider>
       );
+
+      // Prior to React 18, the render() metod had an optional callback. As of React 18, the
+      // callback has been removed. One of the proposed solutions,
+      // see https://github.com/reactwg/react-18/discussions/5.
+      // Also, see #1107.
+      setTimeout(() => resolve(), 2000);
     });
   };
 
@@ -355,18 +359,16 @@ class PrintWindow extends React.PureComponent {
       this.state.tocPrintMode !== "none" && this.renderToc(),
       this.renderContent(),
     ]).then(() => {
-      this.areAllImagesLoaded().then(() => {
-        const printWindow = this.createPrintWindow();
-        this.toc && printWindow.document.body.appendChild(this.toc);
-        printWindow.document.body.appendChild(this.content);
-        this.addPageBreaksBeforeHeadings(printWindow);
-        printWindow.document.close(); // necessary for IE >= 10
-        printWindow.focus(); // necessary for IE >= 10*/
-        printWindow.print();
-        printWindow.close();
-        // When the user closes the print-window we have to do some cleanup...
-        this.handlePrintCompleted();
-      });
+      const printWindow = this.createPrintWindow();
+      this.toc && printWindow.document.body.appendChild(this.toc);
+      printWindow.document.body.appendChild(this.content);
+      this.addPageBreaksBeforeHeadings(printWindow);
+      printWindow.document.close(); // necessary for IE >= 10
+      printWindow.focus(); // necessary for IE >= 10*/
+      printWindow.print();
+      printWindow.close();
+      // When the user closes the print-window we have to do some cleanup...
+      this.handlePrintCompleted();
     });
   };
 
