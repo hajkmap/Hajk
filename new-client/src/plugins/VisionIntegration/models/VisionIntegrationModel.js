@@ -291,11 +291,12 @@ class VisionIntegrationModel {
     // Then we'll create an OL-feature for each coordinate-information-object and append it to the array
     payload.forEach((coordinateInfo) => {
       // The coordinates sent from vision are sent with northing on the X-axis and easting on the Y-axis...
-      const { northing, easting } = coordinateInfo;
+      const { northing, easting, label } = coordinateInfo;
       coordinateFeatures.push(
         new Feature({
           geometry: new Point([northing, easting]),
           VISION_TYPE: "COORDINATES",
+          VISION_LABEL: label || "",
           FEATURE_TITLE: `Nord: ${parseInt(easting)}, Öst: ${parseInt(
             northing
           )}`,
@@ -357,7 +358,7 @@ class VisionIntegrationModel {
       northing: geometry.getCoordinates()[0],
       easting: geometry.getCoordinates()[1],
       spatialReferenceSystemIdentifier: parseInt(cleanedProjectionCode),
-      label: "", // TODO: Should we send something on the label?...
+      label: coordinateFeature.get("VISION_LABEL") || "",
     };
   };
 

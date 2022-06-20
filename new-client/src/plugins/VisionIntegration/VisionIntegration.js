@@ -162,14 +162,14 @@ function VisionIntegration(props) {
     );
     // Make sure to clean up!
     return () => {
-      connectionFailureListener.unSubscribe();
-      connectionSuccessListener.unSubscribe();
-      hubDisconnectedListener.unSubscribe();
-      estateSearchFailedListener.unSubscribe();
-      estateSearchCompletedListener.unSubscribe();
-      coordinatesReceivedFromVisionListener.unSubscribe();
-      addNewEstatesListener.unSubscribe();
-      newCoordinateCreatedListener.unSubscribe();
+      connectionFailureListener.unsubscribe();
+      connectionSuccessListener.unsubscribe();
+      hubDisconnectedListener.unsubscribe();
+      estateSearchFailedListener.unsubscribe();
+      estateSearchCompletedListener.unsubscribe();
+      coordinatesReceivedFromVisionListener.unsubscribe();
+      addNewEstatesListener.unsubscribe();
+      newCoordinateCreatedListener.unsubscribe();
     };
   }, [
     localObserver,
@@ -240,6 +240,7 @@ function VisionIntegration(props) {
       <VisionIntegrationView
         app={app}
         model={model}
+        localObserver={localObserver}
         mapViewModel={mapViewModel}
         pluginShown={pluginShown}
         configError={configError}

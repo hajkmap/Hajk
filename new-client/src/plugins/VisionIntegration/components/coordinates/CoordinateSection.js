@@ -4,6 +4,7 @@ import { Button, Divider, Grid, Typography } from "@mui/material";
 
 import CoordinateToolbox from "./CoordinateToolbox";
 import FeatureList from "../featureList/FeatureList";
+import CoordinateTextSetter from "./CoordinateTextSetter";
 
 function CoordinateSection(props) {
   const headerText =
@@ -62,6 +63,7 @@ function CoordinateSection(props) {
           </Button>
         </Grid>
       )}
+      <CoordinateTextSetter localObserver={props.localObserver} />
     </Grid>
   );
 }

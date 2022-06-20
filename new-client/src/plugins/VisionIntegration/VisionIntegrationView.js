@@ -72,6 +72,7 @@ function VisionIntegrationView(props) {
           <CoordinateSection
             app={props.app}
             model={props.model}
+            localObserver={props.localObserver}
             mapViewModel={props.mapViewModel}
             selectedCoordinates={props.selectedCoordinates}
             setSelectedCoordinates={props.setSelectedCoordinates}
