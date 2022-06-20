@@ -3,12 +3,9 @@ import { useSnackbar } from "notistack";
 
 import Button from "@mui/material/Button";
 import Divider from "@mui/material/Divider";
-import Paper from "@mui/material/Paper";
-import MenuList from "@mui/material/MenuList";
 import MenuItem from "@mui/material/MenuItem";
 import ListItemText from "@mui/material/ListItemText";
 import ListItemIcon from "@mui/material/ListItemIcon";
-import Typography from "@mui/material/Typography";
 
 import FolderOpen from "@mui/icons-material/FolderOpen";
 import GppMaybeIcon from "@mui/icons-material/GppMaybe";
