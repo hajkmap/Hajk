@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useLayoutEffect } from "react";
 import { createRoot } from "react-dom/client";
 import { createPortal } from "react-dom";
 import { withSnackbar } from "notistack";
@@ -31,6 +31,7 @@ import PrintList from "./PrintList";
 import TableOfContents from "./TableOfContents";
 import { getNormalizedMenuState } from "../utils/stateConverter";
 import { hasSubMenu } from "../utils/helpers";
+import { useEffect } from "react";
 
 const GridGridContainer = styled(Grid)(({ theme }) => ({
   padding: theme.spacing(4),
@@ -59,7 +60,9 @@ const maxHeight = 950;
 const imageResizeRatio = 0.7;
 
 function ComponentWithRenderCallback({ callback, children }) {
-  return <div ref={callback}>{children}</div>;
+  useEffect(() => callback());
+
+  return <div>{children}</div>;
 }
 
 class PrintWindow extends React.PureComponent {
