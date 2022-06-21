@@ -198,7 +198,7 @@ class PrintWindow extends React.PureComponent {
       // see https://github.com/reactwg/react-18/discussions/5, is this to use setTimeout(fn(), 0).
       // TODO: If we run into bugs regarding DH's print functionality, this is the place to look:
       rootElement.render(
-        <StyledEngineProvider injectFirst>
+        <StyledEngineProvider>
           <ThemeProvider theme={theme}>
             <ComponentWithRenderCallback
               callback={() => {
@@ -211,6 +211,7 @@ class PrintWindow extends React.PureComponent {
           </ThemeProvider>
         </StyledEngineProvider>
       );
+      console.log("Resolving directly");
     });
   };
 
