@@ -990,6 +990,7 @@ class DrawModel {
     return new VectorLayer({
       source: source,
       layerType: "system",
+      zIndex: 5000,
       caption: "Draw model",
     });
   };

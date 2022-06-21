@@ -277,6 +277,7 @@ export default class MapViewModel {
   addDrawSearch = () => {
     this.drawlayer = new VectorLayer({
       layerType: "system",
+      zIndex: 5000,
       source: new VectorSource({}),
     });
     this.map.addLayer(this.drawlayer);
@@ -305,6 +306,7 @@ export default class MapViewModel {
     });
     var searchResultLayer = new VectorLayer({
       layerType: "system",
+      zIndex: 5000,
       style: new Style({
         image: new Circle({
           fill: fill,
@@ -350,6 +352,7 @@ export default class MapViewModel {
 
     this.highlightLayer = new VectorLayer({
       layerType: "system",
+      zIndex: 5000,
       style: new Style({
         image: new Circle({
           fill: fill,
@@ -362,7 +365,6 @@ export default class MapViewModel {
       source: new VectorSource({}),
     });
     this.highlightLayer.set("name", "vt-highlight-layer");
-    this.highlightLayer.setZIndex(50);
     this.map.addLayer(this.highlightLayer);
   };
 

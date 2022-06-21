@@ -27,7 +27,7 @@ export default class MapClickModel {
       caption: "MapClick Viewer", // #883, should we call the layers the same as models that create them?
       name: "pluginMapClickViewer", // #883, should we call the layers the same as models that create them?
       layerType: "system", // #883: "system" for the core system layers, to differentiate from "normal" WMS/Vector/etc layers?
-      zIndex: 1000, // We want this to stay on top of other layers
+      zIndex: 5001, // We want this to stay on top of other layers
     });
     this.map.addLayer(this.vector);
 
