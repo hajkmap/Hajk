@@ -352,30 +352,57 @@ class PrintWindow extends React.PureComponent {
     }
   };
 
+  // Creates a new window, appends all elements that should be printed, and invokes
+  // window.print(), allowing the user to save the document as a PDF (or print it straight away).
   printContents = () => {
+    // We're gonna want to make sure everything is rendered...
     Promise.all([
       this.state.tocPrintMode !== "none" && this.renderToc(),
       this.renderContent(),
     ]).then(() => {
+      // We're also gonna want to make sure all images has been loaded
       this.areAllImagesLoaded().then(() => {
-        // Create the DIV that will hold our TOC and print content
+        // Then we can create an element that will hold our TOC and print-content...
         const printContent = document.createElement("div");
-
-        // Append content to the new DIV
+        // ...append the TOC to the element (only if applicable)...
         this.toc && printContent.appendChild(this.toc);
+        // ...and append the actual content.
         printContent.appendChild(this.content);
+        // Then we'll make sure to create page-breaks before headings to
+        // create a more appealing document.
         this.addPageBreaksBeforeHeadings(printContent);
-
-        // Open a new window in the browser
+        // Then we'll create and open a new window in the browser
         const newWindow = this.createPrintWindow();
 
-        // Copy all HEAD contents from this document to the new,
-        // in the new window. This way we ensure that all styling
-        // goes along.
-        newWindow.document.head.insertAdjacentHTML(
-          "beforeend",
-          document.head.innerHTML
-        );
+        // We're gonna need to get all the styles into the new window...
+        // The styling is applied differently if we're in dev- or prod-mode.
+        // (Both are handled with this solution). Let's loop every emotion-style-tag
+        for (const style of document.querySelectorAll("[data-emotion]")) {
+          // Create a new style-tag
+          const s = document.createElement("style");
+          // Append an empty text-node (TODO: Why? :) )
+          s.appendChild(document.createTextNode(""));
+          // There's gonna be information in either the style-sheet or in the textContent
+          // depending on if we're in dev- or prod-mode.
+          const { textContent, sheet } = style;
+          // In development we'll have pure text styling the components...
+          if (textContent) {
+            // In that case we can just append a text-node with that text
+            s.appendChild(document.createTextNode(textContent));
+            newWindow.document.head.appendChild(s);
+            // While in prod, we'll have a stylesheet
+          } else {
+            // We have to append the new style to the document, otherwise the sheet will be null.
+            newWindow.document.head.appendChild(s);
+            for (const rule of sheet.cssRules) {
+              try {
+                s.sheet.insertRule(rule.cssText);
+              } catch (error) {
+                console.warn(`Could not insert rule: ${rule?.cssText}`);
+              }
+            }
+          }
+        }
 
         // Add our recently-created DIV to the new window's document
         newWindow.document.body.appendChild(printContent);
