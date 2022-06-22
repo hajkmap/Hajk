@@ -108,12 +108,27 @@ const CustomControlButtonView = React.memo((props) => {
     });
 
     model.localObserver.subscribe("geolocationError", (error) => {
-      enqueueSnackbar(
-        `Kunde inte fastställa din plats. Felkod: ${error.code}. Detaljer: "${error.message}".`,
-        {
-          variant: "error",
-        }
-      );
+      // If error code is 1 (User denied Geolocation), show Snackbar with instructions to enable it again
+      if (error.code === 1) {
+        enqueueSnackbar(
+          "Du behöver tillåta att applikationen visar din position. För datorer: De flesta webbläsare har en lås-ikon i adressfältet som du kan klicka på för att tillåta Plats/Position.",
+          {
+            variant: "info",
+            persist: false,
+            anchorOrigin: {
+              vertical: "top",
+              horizontal: "center",
+            },
+          }
+        );
+      } else {
+        enqueueSnackbar(
+          `Kunde inte fastställa din plats. Felkod: ${error.code}. Detaljer: "${error.message}".`,
+          {
+            variant: "error",
+          }
+        );
+      }
     });
   }, [model, enqueueSnackbar, originalTooltip]);
 
