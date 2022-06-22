@@ -182,7 +182,6 @@ class PrintWindow extends React.PureComponent {
   };
 
   customRender = (element, container) => {
-    // element[0][0][0].ref = () => console.log("renderedByRef");
     // Since the ThemeProvider seems to cache the theme in some way, we have to make sure to
     // create a new theme-reference to make sure that the correct theme is used when rendering.
     // If we don't create a new reference, the custom-theme will be overridden by the standard MUI-theme
@@ -192,17 +191,11 @@ class PrintWindow extends React.PureComponent {
     // Make sure to render the components using the custom theme if it exists:
     return new Promise((resolve) => {
       const rootElement = createRoot(container);
-
-      // Prior to React 18, the render() metod had an optional callback. As of React 18, the
-      // callback has been removed. One of the proposed solutions,
-      // see https://github.com/reactwg/react-18/discussions/5, is this to use setTimeout(fn(), 0).
-      // TODO: If we run into bugs regarding DH's print functionality, this is the place to look:
       rootElement.render(
         <StyledEngineProvider>
           <ThemeProvider theme={theme}>
             <ComponentWithRenderCallback
               callback={() => {
-                console.log("Resolving in callback");
                 resolve();
               }}
             >
@@ -211,7 +204,6 @@ class PrintWindow extends React.PureComponent {
           </ThemeProvider>
         </StyledEngineProvider>
       );
-      console.log("Resolving directly");
     });
   };
 
@@ -277,10 +269,6 @@ class PrintWindow extends React.PureComponent {
       return this.handleNewWindowBlocked();
     }
 
-    this.getCurrentStyleTags().forEach((tag) => {
-      printWindow.document.head.appendChild(tag);
-    });
-
     printWindow.document.head.insertAdjacentHTML(
       "beforeend",
       ` <title>${document.title}</title>
@@ -336,7 +324,7 @@ class PrintWindow extends React.PureComponent {
   };
 
   addPageBreaksBeforeHeadings = (printWindow) => {
-    const headings = printWindow.document.body.querySelectorAll(["h1", "h2"]);
+    const headings = printWindow.querySelectorAll(["h1", "h2"]);
     //we don't want page breaks before a h2 if there is a h1 immediately before. In this case the H1 is the group parent heading.
     let isAfterH1 = false;
     let isConsecutiveH1 = false;
@@ -376,16 +364,26 @@ class PrintWindow extends React.PureComponent {
       this.renderContent(),
     ]).then(() => {
       this.areAllImagesLoaded().then(() => {
-        const printWindow = this.createPrintWindow();
-        this.toc && printWindow.document.body.appendChild(this.toc);
-        printWindow.document.body.appendChild(this.content);
-        this.addPageBreaksBeforeHeadings(printWindow);
-        printWindow.document.close(); // necessary for IE >= 10
-        printWindow.focus(); // necessary for IE >= 10*/
-        printWindow.print();
-        printWindow.close();
-        // When the user closes the print-window we have to do some cleanup...
-        this.handlePrintCompleted();
+        const printContent = document.createElement("div");
+        this.toc && printContent.appendChild(this.toc);
+        printContent.appendChild(this.content);
+
+        const newWindow = this.createPrintWindow();
+        newWindow.document.head.insertAdjacentHTML(
+          "beforeend",
+          document.head.innerHTML
+        );
+        newWindow.document.body.innerHTML = printContent.innerHTML;
+        this.addPageBreaksBeforeHeadings(printContent);
+        setTimeout(() => {
+          newWindow.document.close(); // necessary for IE >= 10
+          newWindow.focus(); // necessary for IE >= 10*/
+          newWindow.print();
+          newWindow.close();
+
+          // When the user closes the print-window we have to do some cleanup...
+          this.handlePrintCompleted();
+        }, 1000);
       });
     });
   };
