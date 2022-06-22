@@ -3,7 +3,7 @@
 
 # Hajk
 
-_A full-fledged open source web GIS solution based on OpenLayers_
+_Hajk is an open source web GIS solution based on the latest technologies such as React, Material UI and OpenLayers. It is developed in Sweden and used by various municipalities and government agencies, as well as by public and private enterprises._
 
 ![alt text](https://user-images.githubusercontent.com/110222/96265856-42960000-0fc6-11eb-805e-9e41ec5d77f9.png "Hajk 3 with all tools visible")
 

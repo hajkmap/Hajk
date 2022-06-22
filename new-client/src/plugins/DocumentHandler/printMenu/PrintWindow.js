@@ -1,4 +1,4 @@
-import React, { useLayoutEffect } from "react";
+import React, { useEffect } from "react";
 import { createRoot } from "react-dom/client";
 import { createPortal } from "react-dom";
 import { withSnackbar } from "notistack";
@@ -238,16 +238,6 @@ class PrintWindow extends React.PureComponent {
     );
   };
 
-  getCurrentStyleTags = () => {
-    const styleTags = [];
-    [...document.head.children].forEach((c) => {
-      if (c.nodeName === "STYLE") {
-        styleTags.push(c.cloneNode(true));
-      }
-    });
-    return styleTags;
-  };
-
   handleNewWindowBlocked = () => {
     window.alert(
       "Please allow opening of popup windows in order to print this document."
@@ -291,7 +281,7 @@ class PrintWindow extends React.PureComponent {
             h6 {
               page-break-after: avoid;
             }
-            MuiTypography-body1 {
+            .MuiTypography-body1 {
               page-break-before: avoid;
             }
             .MuiBox-root {
@@ -313,7 +303,10 @@ class PrintWindow extends React.PureComponent {
     // Since we've altered the theme while printing, we must refresh to make sure
     // the original theme has the highest specificity when the printing is done.
     // Otherwise the entire application will follow the theming used in the print-contents.
-    this.props.app.refreshMUITheme();
+    // FIXME: This might not be needed after the upgrade to React 18. Let's ensure that's the
+    // case and remove if so.
+    // this.props.app.refreshMUITheme();
+
     // Then we'll update the view
     this.toggleAllDocuments(false);
     this.setState({
@@ -323,9 +316,11 @@ class PrintWindow extends React.PureComponent {
     });
   };
 
-  addPageBreaksBeforeHeadings = (printWindow) => {
-    const headings = printWindow.querySelectorAll(["h1", "h2"]);
-    //we don't want page breaks before a h2 if there is a h1 immediately before. In this case the H1 is the group parent heading.
+  addPageBreaksBeforeHeadings = (printContent) => {
+    const headings = printContent.querySelectorAll(["h1", "h2"]);
+
+    // We don't want page breaks before a H2 if there is a H1 immediately before.
+    // In this case the H1 is the group parent heading.
     let isAfterH1 = false;
     let isConsecutiveH1 = false;
 
@@ -364,26 +359,37 @@ class PrintWindow extends React.PureComponent {
       this.renderContent(),
     ]).then(() => {
       this.areAllImagesLoaded().then(() => {
+        // Create the DIV that will hold our TOC and print content
         const printContent = document.createElement("div");
+
+        // Append content to the new DIV
         this.toc && printContent.appendChild(this.toc);
         printContent.appendChild(this.content);
+        this.addPageBreaksBeforeHeadings(printContent);
 
+        // Open a new window in the browser
         const newWindow = this.createPrintWindow();
+
+        // Copy all HEAD contents from this document to the new,
+        // in the new window. This way we ensure that all styling
+        // goes along.
         newWindow.document.head.insertAdjacentHTML(
           "beforeend",
           document.head.innerHTML
         );
-        newWindow.document.body.innerHTML = printContent.innerHTML;
-        this.addPageBreaksBeforeHeadings(printContent);
-        setTimeout(() => {
-          newWindow.document.close(); // necessary for IE >= 10
-          newWindow.focus(); // necessary for IE >= 10*/
-          newWindow.print();
-          newWindow.close();
 
-          // When the user closes the print-window we have to do some cleanup...
-          this.handlePrintCompleted();
-        }, 1000);
+        // Add our recently-created DIV to the new window's document
+        newWindow.document.body.appendChild(printContent);
+
+        // Invoke browser's print dialog - this will block the thread
+        // until user does something with it.
+        newWindow.print();
+
+        // Once the print dialog has disappeared, let's close the new window
+        newWindow.close();
+
+        // When the user closes the print-window we have to do some cleanup...
+        this.handlePrintCompleted();
       });
     });
   };
@@ -446,7 +452,7 @@ class PrintWindow extends React.PureComponent {
 
   createMenu() {
     /* 
-    Create a normalised menu structure for the print menu, similar to that of the panel menu, but only for printable documents. 
+    Create a normalized menu structure for the print menu, similar to that of the panel menu, but only for printable documents. 
     */
     const { options } = this.props;
 
