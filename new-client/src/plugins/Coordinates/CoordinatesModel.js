@@ -159,7 +159,7 @@ class CoordinatesModel {
           this.map.getView().setCenter(point.getCoordinates());
         },
         (error) => {
-          // If error code is 1 (User denied Geolocation), show Snackbar with error message
+          // If error code is 1 (User denied Geolocation), show Snackbar with instructions to enable it again
           if (error.code === 1) {
             this.localObserver.publish("location-permissions-denied");
           }
