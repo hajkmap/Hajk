@@ -31,7 +31,6 @@ import PrintList from "./PrintList";
 import TableOfContents from "./TableOfContents";
 import { getNormalizedMenuState } from "../utils/stateConverter";
 import { hasSubMenu } from "../utils/helpers";
-import { useEffect } from "react";
 
 const GridGridContainer = styled(Grid)(({ theme }) => ({
   padding: theme.spacing(4),
