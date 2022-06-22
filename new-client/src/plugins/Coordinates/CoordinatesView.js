@@ -58,7 +58,7 @@ class CoordinatesView extends React.PureComponent {
     });
 
     this.localObserver.subscribe("location-permissions-denied", () => {
-      this.snackbarKey = this.props.enqueueSnackbar(
+      this.props.enqueueSnackbar(
         "Du behöver tillåta att applikationen visar din position. För datorer: De flesta webbläsare har en lås-ikon i adressfältet som du kan klicka på för att tillåta Plats/Position.",
         {
           variant: "info",
