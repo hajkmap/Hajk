@@ -421,6 +421,8 @@ export default class MapClickModel {
      * @description Admin UI can set the displayFields property. If it exists, we want to grab
      * the specified properties' values for the given feature. If our attempt results in an
      * empty string, we try with a fallback.
+     * In addition, if the string that comes from Admin UI is surrounded by quotations marks, we
+     * see it as a hard-coded label that should be printed directly to the user.
      *
      * @param {Feature} feature
      * @return {string} Label describing the feature
@@ -429,7 +431,13 @@ export default class MapClickModel {
       return (
         fields
           .map((df) => {
-            return feature.get(df);
+            // Check if our display field starts and ends with a double quote. If yes,
+            // this is a special label that should be printed directly to the UI.
+            // If not, this is a name of a field and we should try to grab its value
+            // from the feature.
+            return /(^".*?"$)/g.test(df)
+              ? df.replaceAll('"', "")
+              : feature.get(df);
           })
           .filter((i) => i) // Get rid of all falsy values like undefined or ""
           .join(", ") || // Join values from specified display fields…
