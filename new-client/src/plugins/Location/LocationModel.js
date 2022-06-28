@@ -3,6 +3,9 @@ import Feature from "ol/Feature.js";
 import Point from "ol/geom/Point.js";
 import { Vector as VectorLayer } from "ol/layer.js";
 import { Vector as VectorSource } from "ol/source.js";
+import { easeOut } from "ol/easing";
+import { getVectorContext } from "ol/render";
+import { unByKey } from "ol/Observable";
 import { Circle as CircleStyle, Fill, Stroke, Style } from "ol/style.js";
 
 class LocationModel {
@@ -93,7 +96,10 @@ class LocationModel {
     this.localObserver.publish("locationStatus", "on");
 
     if (this.zoomToLocation) {
-      this.map.getView().animate({ center: coordinates, zoom: 10 });
+      const maxZoom = this.map.getView().getMaxZoom();
+      const minZoom = this.map.getView().getMinZoom();
+      const zoom = Math.ceil((maxZoom - minZoom) * 0.5); // Let's end up in the middle zoom
+      this.map.getView().animate({ duration: 2500, center: coordinates, zoom });
       this.zoomToLocation = false;
     }
   };
@@ -116,7 +122,61 @@ class LocationModel {
     else {
       this.layer.getSource().addFeature(this.accuracyFeature);
       this.layer.getSource().addFeature(this.positionFeature);
+
+      // Finally, start flashing the position feature
+      setInterval(() => {
+        this.flash(this.positionFeature);
+      }, 3000);
     }
+  };
+
+  // Flash handler: sets up the animation and creats a handler for the postrender
+  flash = (feature) => {
+    // Helper: takes care of the actual animation.
+    const animate = (event) => {
+      console.log("event: ", event);
+      // Event is the postrender event that happens - surprise - after render,
+      // because we actually tell the map to render (see at the end of this function)
+      const frameState = event.frameState;
+      const elapsed = frameState.time - start;
+      if (elapsed >= duration) {
+        // Remove the listener when time has elapsed
+        unByKey(listenerKey);
+        return;
+      }
+
+      // Grab the context that will hold our animated feature
+      const vectorContext = getVectorContext(event);
+      const elapsedRatio = elapsed / duration;
+
+      // Radius will be 5 at start and 30 at end
+      const radius = easeOut(elapsedRatio) * 25 + 5;
+      const opacity = easeOut(1 - elapsedRatio);
+
+      const style = new Style({
+        image: new CircleStyle({
+          radius: radius,
+          stroke: new Stroke({
+            color: "rgba(255, 0, 0, " + opacity + ")",
+            width: 0.25 + opacity,
+          }),
+        }),
+      });
+
+      vectorContext.setStyle(style);
+      vectorContext.drawGeometry(flashGeom);
+
+      // This ensure that the listener for postrender will be triggered
+      this.map.render();
+    };
+
+    // Setup the animation
+    const duration = 3000;
+    const start = Date.now();
+    // Prepare the feature that will get animated
+    const flashGeom = feature.getGeometry().clone();
+    // Save the listener key so we can unsubscribe when animation is done
+    const listenerKey = this.layer.on("postrender", animate);
   };
 
   enable() {
