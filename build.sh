@@ -86,12 +86,15 @@ npm ci
 # so that backend can serve them. Make sure that you've enabled that
 # functionality in your .env too!
 
+# Ensure that the static dir exists, if not, create it
+mkdir -p $DEST_DIR/static
+
 # CLIENT
 echo "Preparing to install client dependencies..."
 cd $GIT_DIR/new-client
 rm -rf node_modules/
 echo "Installing client dependencies..."
-npm install --legacy-peer-deps
+npm ci
 
 echo "Building client..."
 npm run build
@@ -108,7 +111,7 @@ echo "Preparing to install admin dependencies..."
 cd $GIT_DIR/new-admin
 rm -rf node_modules/
 echo "Installing admin dependencies..."
-npm install --legacy-peer-deps
+npm ci
 echo "Building admin..."
 npm run build
 echo "Copying admin to destination..."
