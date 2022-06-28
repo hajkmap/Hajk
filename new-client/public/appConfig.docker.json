@@ -1,6 +1,6 @@
 {
   "appName": "Hajk",
-  "version": "3.10.0-rc.2",
+  "version": "3.10",
   "mapserviceBase": "/api/v1",
   "proxy": "",
   "searchProxy": "",
