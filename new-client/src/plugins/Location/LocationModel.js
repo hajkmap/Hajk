@@ -93,7 +93,10 @@ class LocationModel {
     this.localObserver.publish("locationStatus", "on");
 
     if (this.zoomToLocation) {
-      this.map.getView().animate({ center: coordinates, zoom: 10 });
+      const maxZoom = this.map.getView().getMaxZoom();
+      const minZoom = this.map.getView().getMinZoom();
+      const zoom = Math.ceil((maxZoom - minZoom) * 0.5); // Let's end up in the middle zoom
+      this.map.getView().animate({ duration: 2500, center: coordinates, zoom });
       this.zoomToLocation = false;
     }
   };
