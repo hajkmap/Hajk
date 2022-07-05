@@ -288,7 +288,10 @@ class SearchBar extends React.PureComponent {
         renderOption={(props, option) => {
           if (searchString.length > 0) {
             return (
-              <Grid container alignItems="center" {...props}>
+              // Important: the `key` prop must be set last, so we override the
+              // one that gets there when we spread props (there is already a key
+              // there, which can become duplicated under some circumstances).
+              <Grid container alignItems="center" {...props} key={props.id}>
                 <Grid item xs={1}>
                   {this.getOriginBasedIcon(option.origin)}
                 </Grid>

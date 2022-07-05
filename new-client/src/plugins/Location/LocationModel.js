@@ -134,7 +134,6 @@ class LocationModel {
   flash = (feature) => {
     // Helper: takes care of the actual animation.
     const animate = (event) => {
-      console.log("event: ", event);
       // Event is the postrender event that happens - surprise - after render,
       // because we actually tell the map to render (see at the end of this function)
       const frameState = event.frameState;

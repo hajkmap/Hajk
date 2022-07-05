@@ -330,11 +330,15 @@ class AppModel {
     // So, we create the Set no matter what:
     this.map.clickLock = new Set();
 
-    const useNewInfoclick =
-      config.tools.find((t) => t.type === "infoclick")?.options
-        ?.useNewInfoclick === true;
-    if (useNewInfoclick) {
-      const mapClickModel = new MapClickModel(this.map, this.globalObserver);
+    const infoclickOptions = config.tools.find(
+      (t) => t.type === "infoclick"
+    )?.options;
+    if (infoclickOptions?.useNewInfoclick === true) {
+      const mapClickModel = new MapClickModel(
+        this.map,
+        this.globalObserver,
+        infoclickOptions
+      );
 
       mapClickModel.bindMapClick((featureCollections) => {
         const featureCollectionsToBeHandledByMapClickViewer =
@@ -371,7 +375,7 @@ class AppModel {
     // map without infoclick, which seems as an unnecessary limitation.
     if (
       config.tools.some((tool) => tool.type === "infoclick") &&
-      useNewInfoclick === false
+      infoclickOptions?.useNewInfoclick !== true
     ) {
       bindMapClickEvent(this.map, (mapClickDataResult) => {
         // We have to separate features coming from the searchResult-layer
