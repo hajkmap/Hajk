@@ -161,6 +161,14 @@ class GeosuiteExportView extends React.PureComponent {
     return valid;
   };
 
+  isProjectsActive = () => {
+    return this.props.model.isProjectsActive();
+  };
+
+  isBoreholesActive = () => {
+    return this.props.model.isBoreholesActive();
+  };
+
   //toggle all projects exportAll setting, which controls the information that is exported for that borehole
   //when the order is completed. if exportAll is true, all boreholes within the project will be exported.
   //if exportAll is false, only those boreholes within the drawn polygon that belong to the project will be exported.
@@ -935,6 +943,15 @@ class GeosuiteExportView extends React.PureComponent {
   }
 
   componentDidUpdate(prevProps, prevState) {
+    //If the projects option is not active in the configuration, it is therefore not selectable and defaults to the other option.
+    if (!this.isProjectsActive()) {
+      if (!this.isBoreholesActive()) {
+        this.setState({ selectedProduct: undefined });
+      } else {
+        this.setState({ selectedProduct: "borrhal" });
+      }
+    }
+
     //When the step of the stepper tool change, leave the current step and enter the new active step.
     if (prevState.activeStep !== this.state.activeStep) {
       this.handleLeaveStep(prevState.activeStep);
@@ -1016,11 +1033,13 @@ class GeosuiteExportView extends React.PureComponent {
                       value="document"
                       label="Geotekniska utredningar"
                       control={<Radio color="primary" />}
+                      disabled={!this.isProjectsActive()}
                     ></FormControlLabel>
                     <FormControlLabel
                       value="borrhal"
                       label="Borrhålsdata i GeoSuite format"
                       control={<Radio color="primary" />}
+                      disabled={!this.isBoreholesActive()}
                     ></FormControlLabel>
                   </RadioGroup>
                 </FormControl>
