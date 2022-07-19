@@ -1,13 +1,12 @@
 import React from "react";
 import PropTypes from "prop-types";
-import { withStyles } from "@material-ui/core/styles";
 import { withSnackbar } from "notistack";
-import ReplayIcon from "@material-ui/icons/Replay";
-import CancelOutlinedIcon from "@material-ui/icons/CancelOutlined";
-import DescriptionOutlinedIcon from "@material-ui/icons/DescriptionOutlined";
-import EmailOutlinedIcon from "@material-ui/icons/EmailOutlined";
-import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
-import LaunchIcon from "@material-ui/icons/Launch";
+import ReplayIcon from "@mui/icons-material/Replay";
+import CancelOutlinedIcon from "@mui/icons-material/CancelOutlined";
+import DescriptionOutlinedIcon from "@mui/icons-material/DescriptionOutlined";
+import EmailOutlinedIcon from "@mui/icons-material/EmailOutlined";
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import LaunchIcon from "@mui/icons-material/Launch";
 import {
   Stepper,
   Step,
@@ -21,16 +20,16 @@ import {
   Radio,
   Box,
   Grid,
-  Link,
   Accordion,
   AccordionSummary,
   AccordionDetails,
   OutlinedInput,
   CircularProgress,
   FormLabel,
-} from "@material-ui/core";
+} from "@mui/material";
+import Link from "@mui/material/Link";
 import ProductList from "./components/ProductList";
-import { Checkbox } from "@material-ui/core";
+import { Checkbox } from "@mui/material";
 
 const styles = (theme) => ({
   //specific request from SBK to reduce the default MUI stepper padding.
