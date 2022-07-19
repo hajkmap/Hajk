@@ -1,5 +1,6 @@
 import React from "react";
 import PropTypes from "prop-types";
+import { styled } from "@mui/material/styles";
 import { withSnackbar } from "notistack";
 import ReplayIcon from "@mui/icons-material/Replay";
 import CancelOutlinedIcon from "@mui/icons-material/CancelOutlined";
@@ -31,43 +32,54 @@ import Link from "@mui/material/Link";
 import ProductList from "./components/ProductList";
 import { Checkbox } from "@mui/material";
 
-const styles = (theme) => ({
+const StyledStepper = styled(Stepper)(({ theme }) => ({
   //specific request from SBK to reduce the default MUI stepper padding.
-  stepper: {
-    paddingLeft: theme.spacing(1),
-    paddingRight: theme.spacing(1),
-  },
-  bold: {
-    fontWeight: 500,
-  },
-  subheading: {
-    padding: theme.spacing(1),
-    fontWeight: theme.typography.fontWeightMedium,
-  },
-  checkBoxList: {
-    maxHeight: 200,
-    overflowY: "scroll",
-    overflowX: "hidden",
-    border: `1px solid ${theme.palette.divider}`,
-    width: "100%",
-    padding: "0px 0px 0px 10px",
-  },
-  checkBoxItem: {
-    marginBottom: "-10px",
-  },
-  noResultMessage: {
-    display: "flex",
-    justifyContent: "center",
-    marginTop: theme.spacing(2),
-    marginBottom: theme.spacing(2),
-    fontWeight: theme.typography.fontWeightMedium,
-  },
-});
+  paddingLeft: theme.spacing(1),
+  paddingRight: theme.spacing(1),
+}));
+
+const TypographyBold = styled(Typography)(() => ({
+  fontWeight: 500,
+}));
+
+const TypographySubheading = styled(Typography)(({ theme }) => ({
+  padding: theme.spacing(1),
+  fontWeight: theme.typography.fontWeightMedium,
+}));
+
+const DivCheckBoxList = styled("div")(({ theme }) => ({
+  maxHeight: 200,
+  overflowY: "scroll",
+  overflowX: "hidden",
+  border: `1px solid ${theme.palette.divider}`,
+  width: "100%",
+  padding: "0px 0px 0px 10px",
+}));
+
+const GridCheckBoxItem = styled(Grid)(() => ({
+  marginBottom: "-10px",
+}));
+
+const DivNoResultMessage = styled("div")(({ theme }) => ({
+  display: "flex",
+  justifyContent: "center",
+  marginTop: theme.spacing(2),
+  marginBottom: theme.spacing(2),
+  fontWeight: theme.typography.fontWeightMedium,
+}));
+
+const TypographyNoResultMessage = styled(Typography)(({ theme }) => ({
+  display: "flex",
+  justifyContent: "center",
+  marginTop: theme.spacing(2),
+  marginBottom: theme.spacing(2),
+  fontWeight: theme.typography.fontWeightMedium,
+}));
 
 const defaultState = {
   projects: [],
   documents: [],
-  activeStep: null,
+  activeStep: 1,
   isAreaSelected: false,
   selectedProduct: "document",
   email: "",
@@ -90,7 +102,6 @@ class GeosuiteExportView extends React.PureComponent {
   static propTypes = {
     model: PropTypes.object.isRequired,
     app: PropTypes.object.isRequired,
-    classes: PropTypes.object.isRequired,
     localObserver: PropTypes.object.isRequired,
     globalObserver: PropTypes.object.isRequired,
     enqueueSnackbar: PropTypes.func.isRequired,
@@ -443,7 +454,7 @@ class GeosuiteExportView extends React.PureComponent {
 
   //render the orderStep for the product 'documents'.
   renderOrderStepDocument() {
-    const { classes, options } = this.props;
+    const { options } = this.props;
     const termsAndConditionsLink = this.#getTermsAndConditionsLink();
     const documentDescription =
       options.view?.projects?.order?.description ??
@@ -452,9 +463,9 @@ class GeosuiteExportView extends React.PureComponent {
       <>
         <Grid container direction="row" alignItems="center">
           <DescriptionOutlinedIcon />
-          <Typography variant="subtitle1" className={classes.subheading}>
+          <TypographySubheading variant="subtitle1">
             {"Geotekniska utredningar"}
-          </Typography>
+          </TypographySubheading>
         </Grid>
         <Typography style={{ marginBottom: "8px" }}>
           {documentDescription}
@@ -562,7 +573,6 @@ class GeosuiteExportView extends React.PureComponent {
 
   //The results to be shown in the OrderStep for product 'documents'.
   renderDocumentOrderResult() {
-    const { classes } = this.props;
     const { responsePending, responseFailed, documents } = this.state;
 
     if (responsePending) {
@@ -575,12 +585,12 @@ class GeosuiteExportView extends React.PureComponent {
 
     return documents.length > 0 ? (
       <Grid container columns={1}>
-        <div className={classes.checkBoxList}>
+        <DivCheckBoxList>
           {this.state.documents
             .sort((a, b) => (a.title > b.title ? 1 : -1))
             .map((document) => {
               return (
-                <Grid item key={document.id} className={classes.checkBoxItem}>
+                <GridCheckBoxItem item key={document.id}>
                   <FormControlLabel
                     control={
                       <Checkbox
@@ -592,23 +602,21 @@ class GeosuiteExportView extends React.PureComponent {
                     }
                     label={document.title}
                   />
-                </Grid>
+                </GridCheckBoxItem>
               );
             })}
-        </div>
+        </DivCheckBoxList>
       </Grid>
     ) : (
-      <div className={classes.noResultMessage}>
-        <Typography className={classes.noResultMessage}>
-          Inga resultat
-        </Typography>
-      </div>
+      <DivNoResultMessage>
+        <TypographyNoResultMessage>Inga resultat</TypographyNoResultMessage>
+      </DivNoResultMessage>
     );
   }
 
   //render the orderStep for the product 'borehole'.
   renderOrderStepGeoSuite() {
-    const { classes, options } = this.props;
+    const { options } = this.props;
     const termsAndConditionsLink = this.#getTermsAndConditionsLink();
     const boreholeIntro =
       options.view?.boreholes?.order?.intro ??
@@ -632,9 +640,9 @@ class GeosuiteExportView extends React.PureComponent {
         <Grid container>
           <Grid container direction="row" alignItems="center">
             <EmailOutlinedIcon />
-            <Typography className={classes.subheading} variant="subtitle1">
+            <TypographySubheading variant="subtitle1">
               {"Borrhålsdata i GeoSuite-format"}
-            </Typography>
+            </TypographySubheading>
           </Grid>
           <Typography paragraph>{boreholeIntro}</Typography>
           <Typography paragraph>{boreholeDescription}</Typography>
@@ -649,7 +657,7 @@ class GeosuiteExportView extends React.PureComponent {
                 style={{ padding: "0px" }}
                 expandIcon={<ExpandMoreIcon />}
               >
-                <Typography className={classes.bold}>Referenssystem</Typography>
+                <TypographyBold>Referenssystem</TypographyBold>
               </AccordionSummary>
               <AccordionDetails style={{ padding: "0px" }}>
                 <Typography>{referenceSystemText}</Typography>
@@ -660,9 +668,7 @@ class GeosuiteExportView extends React.PureComponent {
                 style={{ padding: "0px" }}
                 expandIcon={<ExpandMoreIcon />}
               >
-                <Typography className={classes.bold}>
-                  Leveransinformation
-                </Typography>
+                <TypographyBold>Leveransinformation</TypographyBold>
               </AccordionSummary>
               <AccordionDetails style={{ padding: "0px" }}>
                 <Grid container>
@@ -728,7 +734,7 @@ class GeosuiteExportView extends React.PureComponent {
   }
 
   renderConfirmationStep = () => {
-    const { classes, options } = this.props;
+    const { options } = this.props;
     const deliveryConfirmationHeader =
       options.view?.boreholes?.confirmation?.header ??
       "Tack för din beställning!";
@@ -741,10 +747,7 @@ class GeosuiteExportView extends React.PureComponent {
     const step = this.state.activeStep;
     return (
       <>
-        <Typography className={classes.bold}>
-          {" "}
-          {deliveryConfirmationHeader}
-        </Typography>
+        <TypographyBold> {deliveryConfirmationHeader}</TypographyBold>
         <br />
         <Typography variant="body1">
           {confirmDeliveryInformationText}
@@ -780,7 +783,7 @@ class GeosuiteExportView extends React.PureComponent {
   };
 
   renderConfirmStepDocument = () => {
-    const { classes, options } = this.props;
+    const { options } = this.props;
     const deliveryConfirmationHeader =
       options.view?.projects?.confirmation?.header ??
       "Tack för din beställning!";
@@ -810,10 +813,7 @@ class GeosuiteExportView extends React.PureComponent {
 
     return (
       <>
-        <Typography className={classes.bold}>
-          {" "}
-          {deliveryConfirmationHeader}
-        </Typography>
+        <TypographyBold> {deliveryConfirmationHeader}</TypographyBold>
         <br />
         {jsxConfirmDeliveryInformationText}
         <Typography variant="body1">{whereNextText}</Typography>
@@ -991,17 +991,16 @@ class GeosuiteExportView extends React.PureComponent {
   }
 
   render() {
-    const { options, classes } = this.props;
+    const { options } = this.props;
     const description =
       options.view?.digitizeDescription ??
       "Rita ditt område i kartan, avsluta genom att dubbelklicka.";
     return (
       <>
         <div>
-          <Stepper
+          <StyledStepper
             activeStep={this.state.activeStep}
             orientation="vertical"
-            className={classes.stepper}
           >
             <Step key="selectArea" completed={false}>
               <StepLabel>Markera område</StepLabel>
@@ -1061,7 +1060,7 @@ class GeosuiteExportView extends React.PureComponent {
                   : this.renderConfirmationStep()}
               </StepContent>
             </Step>
-          </Stepper>
+          </StyledStepper>
         </div>
         <div>
           {this.state.processComplete === true && this.renderStepperButtons()}
@@ -1071,4 +1070,4 @@ class GeosuiteExportView extends React.PureComponent {
   }
 }
 
-export default withStyles(styles)(withSnackbar(GeosuiteExportView));
+export default withSnackbar(GeosuiteExportView);
