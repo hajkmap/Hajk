@@ -1,7 +1,6 @@
 import React from "react";
 import PropTypes from "prop-types";
 import {
-  withStyles,
   Typography,
   Chip,
   IconButton,
@@ -10,10 +9,10 @@ import {
   Paper,
   Menu,
   MenuItem,
-} from "@material-ui/core";
-import MoreVertIcon from "@material-ui/icons/MoreVert";
-import WorkIcon from "@material-ui/icons/Work";
-import Crop32Icon from "@material-ui/icons/Crop32";
+} from "@mui/material";
+import MoreVertIcon from "@mui/icons-material/MoreVert";
+import WorkIcon from "@mui/icons-material/Work";
+import Crop32Icon from "@mui/icons-material/Crop32";
 
 const styles = (theme) => ({
   productList: {
