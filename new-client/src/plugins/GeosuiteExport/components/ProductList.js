@@ -149,7 +149,7 @@ class ProductList extends React.PureComponent {
                             id="choice-menu"
                             autoFocus={false}
                             anchorEl={anchorEl}
-                            getContentAnchorEl={null}
+                            getcontentanchorel={null}
                             anchorOrigin={{
                               vertical: "bottom",
                               horizontal: "right",
