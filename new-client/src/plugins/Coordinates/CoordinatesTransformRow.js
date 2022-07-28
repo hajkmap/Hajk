@@ -1,17 +1,26 @@
 import React from "react";
 import { styled } from "@mui/material/styles";
-import TableCell from "@mui/material/TableCell";
-import TableRow from "@mui/material/TableRow";
 import Typography from "@mui/material/Typography";
 import TextField from "@mui/material/TextField";
 import NumberFormat from "react-number-format";
 import { transform } from "ol/proj";
 import { withSnackbar } from "notistack";
+import Grid from "@mui/material/Grid";
+
+const StyledGridContainer = styled(Grid)(({ theme }) => ({
+  borderBottom: "1px solid #e0e0e0",
+}));
 
 const StyledNumberFormat = styled(NumberFormat)(({ theme }) => ({
-  marginLeft: theme.spacing(1),
-  marginRight: theme.spacing(1),
-  marginTop: theme.spacing(2),
+  minWidth: 120,
+  margin: theme.spacing(0.5),
+}));
+
+//Styled Grid Item that centers text to the left
+const StyledItem = styled(Grid)(({ theme }) => ({
+  textAlign: "left",
+  width: 120,
+  margin: theme.spacing(0.5),
 }));
 
 class CoordinatesTransformRow extends React.PureComponent {
@@ -183,16 +192,18 @@ class CoordinatesTransformRow extends React.PureComponent {
 
     if (this.model.showFieldsOnStart || this.state.wasModified) {
       return (
-        <TableRow key={this.props.transformation.code}>
-          <TableCell>
-            <Typography variant="body1" style={{ display: "flex" }}>
-              {this.props.transformation.title}
-            </Typography>
-            <Typography variant="body2" style={{ display: "flex" }}>
-              ({this.props.transformation.code})
-            </Typography>
-          </TableCell>
-          <TableCell>
+        <StyledGridContainer container spacing={1} alignItems="center">
+          <Grid item>
+            <StyledItem>
+              <Typography variant="body1">
+                {this.props.transformation.title}
+              </Typography>
+              <Typography variant="body2">
+                ({this.props.transformation.code})
+              </Typography>
+            </StyledItem>
+          </Grid>
+          <Grid item xs>
             <StyledNumberFormat
               label={this.props.transformation.xtitle}
               margin="dense"
@@ -227,8 +238,8 @@ class CoordinatesTransformRow extends React.PureComponent {
               thousandSeparator={this.model.thousandSeparator ? " " : false}
               customInput={TextField}
             />
-          </TableCell>
-        </TableRow>
+          </Grid>
+        </StyledGridContainer>
       );
     } else {
       return <></>;
