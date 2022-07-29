@@ -20,21 +20,25 @@ const StyledButton = styled(Button)(({ theme }) => ({
     minWidth: "100%",
   },
   [theme.breakpoints.up("md")]: {
-    minWidth: 130,
+    minWidth: 136,
   },
   margin: theme.spacing(0.5),
 }));
 
-const StyledGridContainer = styled(Grid)(({ theme }) => ({
+const StyledGridContainer = styled(Grid)(() => ({
   borderBottom: "1px solid #e0e0e0",
 }));
 
-//Styled Grid Item that centers text to the left
-const StyledItem = styled(Grid)(({ theme }) => ({
+//Styled Grid that centers text to the left
+const StyledGrid = styled(Grid)(({ theme }) => ({
   textAlign: "left",
   width: 120,
-  margin: theme.spacing(0.5),
+  margin: theme.spacing(1),
   color: theme.palette.text.secondary,
+}));
+
+const StyledGridItem = styled(Grid)(({ theme }) => ({
+  margin: theme.spacing(0.5),
 }));
 
 class CoordinatesView extends React.PureComponent {
@@ -97,15 +101,15 @@ class CoordinatesView extends React.PureComponent {
       <Root>
         <StyledGridContainer container spacing={1}>
           <Grid item>
-            <StyledItem>Projektion</StyledItem>
+            <StyledGrid>Projektion</StyledGrid>
           </Grid>
           <Grid item xs>
-            <StyledItem>Koordinater</StyledItem>
+            <StyledGrid>Koordinater</StyledGrid>
           </Grid>
         </StyledGridContainer>
         {this.renderProjections()}
         <Grid container spacing={1}>
-          <Grid item xs={12}>
+          <StyledGridItem item xs={12}>
             <Tooltip title="Rensa fält">
               <StyledButton
                 variant="contained"
@@ -146,7 +150,7 @@ class CoordinatesView extends React.PureComponent {
                 Zooma
               </StyledButton>
             </Tooltip>
-          </Grid>
+          </StyledGridItem>
         </Grid>
       </Root>
     );
