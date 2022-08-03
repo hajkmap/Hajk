@@ -29,6 +29,7 @@ const defaultState = {
     },
     wfs: {
       projects: {
+        active: true,
         layer: {
           id: "",
           geometryField: "geom",
@@ -42,6 +43,7 @@ const defaultState = {
         maxFeatures: 50,
       },
       boreholes: {
+        active: true,
         layer: {
           id: "",
           geometryField: "geom",
@@ -433,6 +435,26 @@ class ToolOptions extends Component {
             Tjänsteinställningar - Söklager Geotekniska utredningar
           </div>
           <div>
+            <input
+              id="services__wfs__projects__active"
+              name="services__wfs__projects__active"
+              type="checkbox"
+              onChange={(e) => {
+                this.handleInputChange(e);
+              }}
+              checked={this.state.services.wfs.projects.active}
+            />
+            &nbsp;
+            <label htmlFor="services__wfs__projects__active">
+              Aktiverad{" "}
+              <i
+                className="fa fa-question-circle"
+                data-toggle="tooltip"
+                title="Aktivera alternativet i verktyget. Ej valbart om rutan inte är ikryssad."
+              />
+            </label>
+          </div>
+          <div>
             <label htmlFor="services__wfs__projects__layer__id">
               Söklager, id{" "}
               <i
@@ -553,6 +575,26 @@ class ToolOptions extends Component {
 
           <div className="separator">
             Tjänsteinställningar - Söklager GeoSuite-format
+          </div>
+          <div>
+            <input
+              id="services__wfs__boreholes__active"
+              name="services__wfs__boreholes__active"
+              type="checkbox"
+              onChange={(e) => {
+                this.handleInputChange(e);
+              }}
+              checked={this.state.services.wfs.boreholes.active}
+            />
+            &nbsp;
+            <label htmlFor="services__wfs__boreholes__active">
+              Aktiverad{" "}
+              <i
+                className="fa fa-question-circle"
+                data-toggle="tooltip"
+                title="Aktivera alternativet i verktyget. Ej valbart om rutan inte är ikryssad."
+              />
+            </label>
           </div>
           <div>
             <label htmlFor="services__wfs__boreholes__layer__id">

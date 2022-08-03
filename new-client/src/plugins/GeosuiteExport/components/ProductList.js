@@ -1,7 +1,7 @@
 import React from "react";
 import PropTypes from "prop-types";
+import { styled } from "@mui/material/styles";
 import {
-  withStyles,
   Typography,
   Chip,
   IconButton,
@@ -10,28 +10,27 @@ import {
   Paper,
   Menu,
   MenuItem,
-} from "@material-ui/core";
-import MoreVertIcon from "@material-ui/icons/MoreVert";
-import WorkIcon from "@material-ui/icons/Work";
-import Crop32Icon from "@material-ui/icons/Crop32";
+} from "@mui/material";
+import MoreVertIcon from "@mui/icons-material/MoreVert";
+import WorkIcon from "@mui/icons-material/Work";
+import Crop32Icon from "@mui/icons-material/Crop32";
 
-const styles = (theme) => ({
-  productList: {
-    maxHeight: 350,
-    overflowY: "scroll",
-    overflowX: "hidden",
-    marginTop: theme.spacing(1),
-    border: `1px solid ${theme.palette.divider}`,
-  },
-  listItemContainer: {
-    padding: theme.spacing(1),
-    borderBottom: `${theme.spacing(0.2)}px solid ${theme.palette.divider}`,
-  },
-  //chips same size
-  chip: {
-    minWidth: "40%",
-  },
-});
+const DivProductList = styled("div")(({ theme }) => ({
+  maxHeight: 350,
+  overflowY: "scroll",
+  overflowX: "hidden",
+  marginTop: theme.spacing(1),
+  border: `1px solid ${theme.palette.divider}`,
+}));
+
+const GridListItemContainer = styled(Grid)(({ theme }) => ({
+  padding: theme.spacing(1),
+  borderBottom: `${theme.spacing(0.2)}px solid ${theme.palette.divider}`,
+}));
+
+const StyledChip = styled(Chip)(() => ({
+  minWidth: "40%",
+}));
 
 class ProductList extends React.PureComponent {
   state = {
@@ -65,7 +64,6 @@ class ProductList extends React.PureComponent {
 
   render() {
     const {
-      classes,
       projects,
       handleExportAll,
       exportPerProject = false,
@@ -78,8 +76,7 @@ class ProductList extends React.PureComponent {
         <Grid container style={{ marginTop: "10px" }}>
           <Grid item xs={12}>
             <Box display="flex" justifyContent="start" gridColumnGap="8px">
-              <Chip
-                className={classes.chip}
+              <StyledChip
                 onClick={() => {
                   this.setState({ globalExportSetting: "withinArea" });
                   handleExportAll(false);
@@ -93,8 +90,7 @@ class ProductList extends React.PureComponent {
                     : "outlined"
                 }`}
               />
-              <Chip
-                className={classes.chip}
+              <StyledChip
                 onClick={() => {
                   this.setState({ globalExportSetting: "withinProject" });
                   handleExportAll(true);
@@ -111,14 +107,13 @@ class ProductList extends React.PureComponent {
             </Box>
           </Grid>
           <Grid item xs={12} style={{ marginTop: "10px" }}>
-            <div className={classes.productList}>
+            <DivProductList>
               {projects.map((project) => {
                 return (
-                  <Grid
+                  <GridListItemContainer
                     key={project.id}
                     container
                     alignContent="center"
-                    className={classes.listItemContainer}
                   >
                     <Grid item xs={12}>
                       <Box
@@ -154,7 +149,7 @@ class ProductList extends React.PureComponent {
                             id="choice-menu"
                             autoFocus={false}
                             anchorEl={anchorEl}
-                            getContentAnchorEl={null}
+                            getcontentanchorel={null}
                             anchorOrigin={{
                               vertical: "bottom",
                               horizontal: "right",
@@ -216,10 +211,10 @@ class ProductList extends React.PureComponent {
                         {this.renderProjectDetails(project)}
                       </Box>
                     </Grid>
-                  </Grid>
+                  </GridListItemContainer>
                 );
               })}
-            </div>
+            </DivProductList>
           </Grid>
         </Grid>
       );
@@ -234,4 +229,4 @@ class ProductList extends React.PureComponent {
     }
   }
 }
-export default withStyles(styles)(ProductList);
+export default ProductList;
