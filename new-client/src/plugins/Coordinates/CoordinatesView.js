@@ -12,6 +12,11 @@ import CoordinatesTransformRow from "./CoordinatesTransformRow.js";
 
 import { withSnackbar } from "notistack";
 
+import {
+  LOCATION_DENIED_SNACK_OPTIONS,
+  LOCATION_DENIED_SNACK_MESSAGE,
+} from "plugins/Location/constants/index.js";
+
 const StyledPaper = styled(Paper)(() => ({
   backgroundImage: "none",
   display: "flex",
@@ -59,15 +64,8 @@ class CoordinatesView extends React.PureComponent {
 
     this.localObserver.subscribe("location-permissions-denied", () => {
       this.props.enqueueSnackbar(
-        "Du behöver tillåta att applikationen visar din position. För datorer: De flesta webbläsare har en lås-ikon i adressfältet som du kan klicka på för att tillåta Plats/Position.",
-        {
-          variant: "info",
-          persist: false,
-          anchorOrigin: {
-            vertical: "top",
-            horizontal: "center",
-          },
-        }
+        LOCATION_DENIED_SNACK_MESSAGE,
+        LOCATION_DENIED_SNACK_OPTIONS
       );
     });
   }
