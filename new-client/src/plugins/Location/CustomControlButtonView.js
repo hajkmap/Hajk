@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useCallback } from "react";
 import { useSnackbar } from "notistack";
 
 import { Paper, Tooltip } from "@mui/material";
@@ -8,6 +8,11 @@ import CircularProgress from "@mui/material/CircularProgress";
 import LocationSearchingIcon from "@mui/icons-material/LocationSearching";
 import LocationDisabledIcon from "@mui/icons-material/LocationDisabled";
 import MyLocationIcon from "@mui/icons-material/MyLocation";
+
+import {
+  LOCATION_DENIED_SNACK_MESSAGE,
+  LOCATION_DENIED_SNACK_OPTIONS,
+} from "./constants";
 
 const StyledPaper = styled(Paper)(({ theme }) => ({
   marginBottom: theme.spacing(1),
@@ -24,22 +29,19 @@ const StyledToggleButton = styled(ToggleButton)(() => ({
   paddingBottom: 6,
 }));
 
-const CustomControlButtonView = React.memo((props) => {
-  const { onClick, title, abstract, model } = props;
+const CustomControlButtonView = React.memo(
+  ({ onClick, defaultTooltip, model }) => {
+    const { enqueueSnackbar } = useSnackbar();
 
-  const { enqueueSnackbar } = useSnackbar();
-  const [selected, setSelected] = React.useState(false);
-  const [currentIcon, setCurrentIcon] = React.useState(
-    <LocationSearchingIcon />
-  );
+    const [selected, setSelected] = React.useState(false);
+    const [tooltip, setTooltip] = React.useState(defaultTooltip);
+    const [currentIcon, setCurrentIcon] = React.useState(
+      <LocationSearchingIcon />
+    );
 
-  // Save the original tooltip for later - we will want to
-  // reset when user disables tracking
-  const originalTooltip = `${title}: ${abstract}`;
-  const [tooltip, setTooltip] = React.useState(originalTooltip);
-
-  useEffect(() => {
-    model.localObserver.subscribe("geolocationChange", (rawData) => {
+    // Handler for the "geoLocationChange" event. Makes sure to format the raw input data
+    // and update state with nice looking messages.
+    const handleGeoLocationChange = useCallback((rawData) => {
       // We must do some formatting (to limit the decimal precision on
       // some values). Let's prepare an object.
       const formattedData = {};
@@ -85,56 +87,111 @@ const CustomControlButtonView = React.memo((props) => {
       );
 
       setTooltip(str);
-    });
+    }, []);
 
-    model.localObserver.subscribe("locationStatus", (status) => {
-      switch (status) {
-        case "loading":
-          setCurrentIcon(<CircularProgress size={24} />);
-          break;
-        case "on":
-          setCurrentIcon(<MyLocationIcon />);
-          break;
-        case "error":
-          setCurrentIcon(<LocationDisabledIcon />);
-          setTooltip("Positionera: position ej tillgänglig");
-          break;
-        case "off":
-        default:
-          setCurrentIcon(<LocationSearchingIcon />);
-          setTooltip(originalTooltip);
-          break;
-      }
-    });
-
-    model.localObserver.subscribe("geolocationError", (error) => {
-      enqueueSnackbar(
-        `Kunde inte fastställa din plats. Felkod: ${error.code}. Detaljer: "${error.message}".`,
-        {
-          variant: "error",
+    // Handler for the "locationStatus" event. Makes sure to update the state according
+    // to the current location status.
+    const handleStatusChange = useCallback(
+      (status) => {
+        switch (status) {
+          case "loading":
+            setCurrentIcon(<CircularProgress size={24} />);
+            break;
+          case "on":
+            setCurrentIcon(<MyLocationIcon />);
+            break;
+          case "error":
+            setCurrentIcon(<LocationDisabledIcon />);
+            setTooltip("Positionera: position ej tillgänglig");
+            break;
+          case "off":
+          default:
+            setCurrentIcon(<LocationSearchingIcon />);
+            setTooltip(defaultTooltip);
+            break;
         }
-      );
-    });
-  }, [model, enqueueSnackbar, originalTooltip]);
+      },
+      [defaultTooltip]
+    );
 
-  return (
-    <Tooltip disableInteractive title={tooltip}>
-      <StyledPaper>
-        <StyledToggleButton
-          aria-label={title}
-          onClick={onClick}
-          value="check"
-          selected={selected}
-          onChange={() => {
-            selected ? model.disable() : model.enable();
-            setSelected(!selected);
-          }}
-        >
-          {currentIcon}
-        </StyledToggleButton>
-      </StyledPaper>
-    </Tooltip>
-  );
-});
+    // Handler for the "locationError" event. Makes sure to prompt the user with information
+    // regarding the error along with information on how to fix the error.
+    const handleLocationError = useCallback(
+      (error) => {
+        // If error code is 1 (User denied Geolocation), show Snackbar with instructions to enable it again
+        if (error.code === 1) {
+          enqueueSnackbar(
+            LOCATION_DENIED_SNACK_MESSAGE,
+            LOCATION_DENIED_SNACK_OPTIONS
+          );
+        } else {
+          enqueueSnackbar(
+            `Kunde inte fastställa din plats. Felkod: ${error.code}. Detaljer: "${error.message}".`,
+            {
+              variant: "error",
+            }
+          );
+        }
+      },
+      [enqueueSnackbar]
+    );
+
+    // This effect makes sure to subscribe to all events that could be sent on the local-observer.
+    useEffect(() => {
+      // We are submitting events on the local-observer when the geoLocation-api emits changes.
+      // We have to catch the local-observer events and update the view accordingly.
+      const changeListener = model.localObserver.subscribe(
+        "geolocationChange",
+        handleGeoLocationChange
+      );
+
+      // We are submitting events on the local-observer when the geoLocation is toggled off/on etc.
+      // We have to catch the local-observer events and update the view accordingly.
+      const statusListener = model.localObserver.subscribe(
+        "locationStatus",
+        handleStatusChange
+      );
+
+      // We are submitting events on the local-observer if the geoLocation-api encounters some
+      // kind of error (for example if the user has denied use of location in the browser). These
+      // are caught here.
+      const errorListener = model.localObserver.subscribe(
+        "geolocationError",
+        handleLocationError
+      );
+
+      // We have to make sure to clean up all listeners on eventual effect trigger.
+      return () => {
+        changeListener.unsubscribe();
+        statusListener.unsubscribe();
+        errorListener.unsubscribe();
+      };
+    }, [
+      model,
+      handleGeoLocationChange,
+      handleStatusChange,
+      handleLocationError,
+    ]);
+
+    return (
+      <Tooltip disableInteractive title={tooltip}>
+        <StyledPaper>
+          <StyledToggleButton
+            aria-label={defaultTooltip}
+            onClick={onClick}
+            value="check"
+            selected={selected}
+            onChange={() => {
+              selected ? model.disable() : model.enable();
+              setSelected(!selected);
+            }}
+          >
+            {currentIcon}
+          </StyledToggleButton>
+        </StyledPaper>
+      </Tooltip>
+    );
+  }
+);
 
 export default CustomControlButtonView;
