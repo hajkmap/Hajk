@@ -45,8 +45,11 @@ class CoordinatesModel {
 
     this.source = new VectorSource();
     this.vector = new Vector({
+      layerType: "system",
+      zIndex: 5000,
+      name: "pluginCoordinate",
+      caption: "Coordinate layer",
       source: this.source,
-      name: "coordinateLayer",
     });
     this.map.addLayer(this.vector);
     this.localObserver.subscribe("newCoordinates", (incomingCoords) => {

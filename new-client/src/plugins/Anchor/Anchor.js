@@ -58,7 +58,7 @@ class Anchor extends React.PureComponent {
           icon: <ShareIcon />,
           title: "Dela",
           description: "Skapa en länk och dela det du ser i kartan med andra",
-          height: 332,
+          height: "dynamic",
           width: 512,
           top: undefined,
           left: undefined,
@@ -68,6 +68,7 @@ class Anchor extends React.PureComponent {
           cleanUrl={this.state.cleanUrl}
           localObserver={this.localObserver}
           model={this.anchorModel}
+          options={this.props.options}
           toggleCleanUrl={this.toggleCleanUrl}
         />
       </BaseWindowPlugin>

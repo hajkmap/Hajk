@@ -249,7 +249,7 @@ class DrawModel {
   // the layerName supplied when initiating the model. Also makes
   // sure that the layer is a vectorLayer.
   #layerHasCorrectNameAndType = (layer) => {
-    return layer.get("type") === this.#layerName && this.#isVectorLayer(layer);
+    return layer.get("name") === this.#layerName && this.#isVectorLayer(layer);
   };
 
   // Checks wether the supplied layer is a vectorLayer or not.
@@ -277,10 +277,7 @@ class DrawModel {
     this.#drawSource = this.#getNewVectorSource();
     // Then we'll create the layer
     this.#drawLayer = this.#getNewVectorLayer(this.#drawSource);
-    // Make sure to set the layer type to something understandable.
-    this.#drawLayer.set("type", this.#layerName);
-    // FIXME: Remove "type", use only "name" throughout
-    // the application. Should be done as part of #883.
+    // Make sure to set a unique name
     this.#drawLayer.set("name", this.#layerName);
     // We're also gonna have to set the queryable-property to true
     // so that we can enable "Select" on the layer.
@@ -992,6 +989,9 @@ class DrawModel {
   #getNewVectorLayer = (source) => {
     return new VectorLayer({
       source: source,
+      layerType: "system",
+      zIndex: 5000,
+      caption: "Draw model",
     });
   };
 
