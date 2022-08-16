@@ -1,0 +1,48 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Map {
+  id          Int                 @id @default(autoincrement())
+  name        String
+  options     Json                @default("{}")
+  projections ProjectionsOnMaps[]
+  tools       ToolsOnMaps[]
+}
+
+model Tool {
+  id      Int           @id(map: "tools_pkey") @default(autoincrement())
+  type    String
+  options Json          @default("{}")
+  maps    ToolsOnMaps[]
+}
+
+model ToolsOnMaps {
+  mapId  Int
+  toolId Int
+  index  Int  @default(0)
+  map    Map  @relation(fields: [mapId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "ToolMap_mapId_fkey")
+  tool   Tool @relation(fields: [toolId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "ToolMap_toolId_fkey")
+
+  @@id([mapId, toolId])
+}
+
+model Projection {
+  id   Int                 @id @default(autoincrement())
+  data Json                @default("[]")
+  maps ProjectionsOnMaps[]
+}
+
+model ProjectionsOnMaps {
+  projectionId Int
+  mapId        Int
+  map          Map        @relation(fields: [mapId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  projection   Projection @relation(fields: [projectionId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@id([projectionId, mapId])
+}

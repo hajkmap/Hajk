@@ -1,6 +1,6 @@
 {
   "name": "hajk-backend",
-  "version": "3.11-dev",
+  "version": "3.11.0-dev",
   "description": "Hajk Backend",
   "homepage": ".",
   "repository": {
@@ -23,6 +23,7 @@
     "lint:fix": "eslint --fix ."
   },
   "dependencies": {
+    "@prisma/client": "^4.2.1",
     "activedirectory2": "^2.1.0",
     "clf-date": "^0.2.0",
     "compression": "^1.7.4",
@@ -52,6 +53,7 @@
     "mocha": "^9.2.2",
     "nodemon": "^2.0.15",
     "prettier": "^2.6.2",
+    "prisma": "^4.2.1",
     "supertest": "^6.2.2"
   },
   "author": "Jacob Wodzyński <jacob.wodzynski@halmstad.se> (https://github.com/hajkmap)"
