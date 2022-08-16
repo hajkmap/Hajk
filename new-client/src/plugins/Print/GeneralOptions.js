@@ -148,7 +148,7 @@ class GeneralOptions extends React.PureComponent {
       ...scales.map((s) => {
         return { value: s, label: model.getUserFriendlyScale(s) };
       }),
-      { value: "CUSTOM_SCALE", label: "Ange egen skala..." },
+      { value: "CUSTOM_SCALE", label: "Ange annan skala" },
     ];
     return (
       <Select
