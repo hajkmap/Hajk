@@ -62,6 +62,7 @@ class ExportModel {
     this.previewLayer = new Vector({
       source: new VectorSource(),
       layerType: "system",
+      zIndex: 5000,
       name: "pluginExport",
       caption: "Export plugin",
       style: new Style({

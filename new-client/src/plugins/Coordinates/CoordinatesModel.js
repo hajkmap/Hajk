@@ -46,6 +46,7 @@ class CoordinatesModel {
     this.source = new VectorSource();
     this.vector = new Vector({
       layerType: "system",
+      zIndex: 5000,
       name: "pluginCoordinate",
       caption: "Coordinate layer",
       source: this.source,
@@ -145,20 +146,28 @@ class CoordinatesModel {
    */
   goToUserLocation = () => {
     if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition((pos) => {
-        const point = new Point([pos.coords.longitude, pos.coords.latitude]);
-        point.transform(
-          "EPSG:4326",
-          this.map.getView().getProjection().getCode()
-        );
-        this.coordinates = point.getCoordinates();
-        this.localObserver.publish("newCoordinates", {
-          coordinates: this.coordinates,
-          proj: this.map.getView().getProjection().getCode(),
-          force: true,
-        });
-        this.map.getView().setCenter(point.getCoordinates());
-      });
+      navigator.geolocation.getCurrentPosition(
+        (pos) => {
+          const point = new Point([pos.coords.longitude, pos.coords.latitude]);
+          point.transform(
+            "EPSG:4326",
+            this.map.getView().getProjection().getCode()
+          );
+          this.coordinates = point.getCoordinates();
+          this.localObserver.publish("newCoordinates", {
+            coordinates: this.coordinates,
+            proj: this.map.getView().getProjection().getCode(),
+            force: true,
+          });
+          this.map.getView().setCenter(point.getCoordinates());
+        },
+        (error) => {
+          // If error code is 1 (User denied Geolocation), show Snackbar with instructions to enable it again
+          if (error.code === 1) {
+            this.localObserver.publish("location-permissions-denied");
+          }
+        }
+      );
     }
   };
 

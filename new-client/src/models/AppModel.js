@@ -330,11 +330,15 @@ class AppModel {
     // So, we create the Set no matter what:
     this.map.clickLock = new Set();
 
-    const useNewInfoclick =
-      config.tools.find((t) => t.type === "infoclick")?.options
-        ?.useNewInfoclick === true;
-    if (useNewInfoclick) {
-      const mapClickModel = new MapClickModel(this.map, this.globalObserver);
+    const infoclickOptions = config.tools.find(
+      (t) => t.type === "infoclick"
+    )?.options;
+    if (infoclickOptions?.useNewInfoclick === true) {
+      const mapClickModel = new MapClickModel(
+        this.map,
+        this.globalObserver,
+        infoclickOptions
+      );
 
       mapClickModel.bindMapClick((featureCollections) => {
         const featureCollectionsToBeHandledByMapClickViewer =
@@ -371,7 +375,7 @@ class AppModel {
     // map without infoclick, which seems as an unnecessary limitation.
     if (
       config.tools.some((tool) => tool.type === "infoclick") &&
-      useNewInfoclick === false
+      infoclickOptions?.useNewInfoclick !== true
     ) {
       bindMapClickEvent(this.map, (mapClickDataResult) => {
         // We have to separate features coming from the searchResult-layer
@@ -552,19 +556,16 @@ class AppModel {
 
     // Prepare layers
     this.layers = this.flattern(layerSwitcherConfig);
-    // FIXME: Use map instead?
-    Object.keys(this.layers)
-      .sort((a, b) => this.layers[a].drawOrder - this.layers[b].drawOrder)
-      .map((sortedKey) => this.layers[sortedKey])
-      .forEach((layer) => {
-        if (this.layersFromParams.length > 0) {
-          layer.visibleAtStart = this.layersFromParams.some(
-            (layerId) => layerId === layer.id
-          );
-        }
-        layer.cqlFilter = this.cqlFiltersFromParams[layer.id] || null;
-        this.addMapLayer(layer);
-      });
+    // Loop the layers and add each of them to the map
+    this.layers.forEach((layer) => {
+      if (this.layersFromParams.length > 0) {
+        layer.visibleAtStart = this.layersFromParams.some(
+          (layerId) => layerId === layer.id
+        );
+      }
+      layer.cqlFilter = this.cqlFiltersFromParams[layer.id] || null;
+      this.addMapLayer(layer);
+    });
 
     // FIXME: Move to infoClick instead. All other plugins create their own layers.
     if (infoclickConfig !== undefined) {
@@ -593,6 +594,7 @@ class AppModel {
       caption: "Infoclick layer",
       name: "pluginInfoclick",
       layerType: "system",
+      zIndex: 5001, // System layer's zIndex start at 5000, ensure click is above
       source: this.highlightSource,
       style: new Style({
         stroke: new Stroke({

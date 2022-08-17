@@ -442,7 +442,7 @@ class ToolOptions extends Component {
               value={this.state.src}
               type="text"
               name="src"
-              placeholder={defaultState.src}
+              placeholder="Lämnas tomt för en cirkel, alternativ ange URL till ikon."
               onChange={(e) => {
                 this.handleInputChange(e);
               }}

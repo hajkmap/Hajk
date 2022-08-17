@@ -12,6 +12,11 @@ import CoordinatesTransformRow from "./CoordinatesTransformRow.js";
 
 import { withSnackbar } from "notistack";
 
+import {
+  LOCATION_DENIED_SNACK_OPTIONS,
+  LOCATION_DENIED_SNACK_MESSAGE,
+} from "plugins/Location/constants/index.js";
+
 const StyledPaper = styled(Paper)(() => ({
   backgroundImage: "none",
   display: "flex",
@@ -55,6 +60,13 @@ class CoordinatesView extends React.PureComponent {
 
     this.localObserver.subscribe("hideSnackbar", () => {
       this.props.closeSnackbar(this.snackbarKey);
+    });
+
+    this.localObserver.subscribe("location-permissions-denied", () => {
+      this.props.enqueueSnackbar(
+        LOCATION_DENIED_SNACK_MESSAGE,
+        LOCATION_DENIED_SNACK_OPTIONS
+      );
     });
   }
 

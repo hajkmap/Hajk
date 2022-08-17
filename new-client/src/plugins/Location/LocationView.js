@@ -13,6 +13,11 @@ import TableRow from "@mui/material/TableRow";
 import Paper from "@mui/material/Paper";
 import LinearProgress from "@mui/material/LinearProgress";
 
+import {
+  LOCATION_DENIED_SNACK_MESSAGE,
+  LOCATION_DENIED_SNACK_OPTIONS,
+} from "./constants";
+
 class LocationView extends React.PureComponent {
   state = {
     loading: false, // indicates if loading is in progress
@@ -68,12 +73,20 @@ class LocationView extends React.PureComponent {
     });
 
     this.model.localObserver.subscribe("geolocationError", (error) => {
-      this.props.enqueueSnackbar(
-        `Kunde inte fastställa din plats. Felkod: ${error.code}. Detaljer: "${error.message}".`,
-        {
-          variant: "error",
-        }
-      );
+      // If error code is 1 (User denied Geolocation), show Snackbar with instructions to enable it again
+      if (error.code === 1) {
+        this.props.enqueueSnackbar(
+          LOCATION_DENIED_SNACK_MESSAGE,
+          LOCATION_DENIED_SNACK_OPTIONS
+        );
+      } else {
+        this.props.enqueueSnackbar(
+          `Kunde inte fastställa din plats. Felkod: ${error.code}. Detaljer: "${error.message}".`,
+          {
+            variant: "error",
+          }
+        );
+      }
     });
   }
 

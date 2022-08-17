@@ -290,6 +290,7 @@ class Menu extends Component {
     backgroundSwitcherWhite: true,
     enableOSM: false,
     showBreadcrumbs: false,
+    showActiveLayersView: false,
     enableTransparencySlider: true,
     instruction: "",
     dropdownThemeMaps: false,
@@ -319,41 +320,43 @@ class Menu extends Component {
       });
 
       this.load("layermenu", () => {
+        const existingConfig = this.props.model.get("layerMenuConfig");
         this.setState({
           reset: false,
-          active: this.props.model.get("layerMenuConfig").active,
+          active: existingConfig.active,
           visibleAtStart:
-            this.props.model.get("layerMenuConfig").visibleAtStart ||
-            this.state.visibleAtStart,
+            existingConfig.visibleAtStart ?? this.state.visibleAtStart,
           visibleAtStartMobile:
-            this.props.model.get("layerMenuConfig").visibleAtStartMobile ||
+            existingConfig.visibleAtStartMobile ??
             this.state.visibleAtStartMobile,
           backgroundSwitcherBlack:
-            this.props.model.get("layerMenuConfig").backgroundSwitcherBlack,
+            existingConfig.backgroundSwitcherBlack ??
+            this.state.backgroundSwitcherBlack,
           backgroundSwitcherWhite:
-            this.props.model.get("layerMenuConfig").backgroundSwitcherWhite,
-          enableOSM: this.props.model.get("layerMenuConfig").enableOSM,
+            existingConfig.backgroundSwitcherWhite ??
+            this.state.backgroundSwitcherWhite,
+          enableOSM: existingConfig.enableOSM ?? this.state.enableOSM,
           showBreadcrumbs:
-            this.props.model.get("layerMenuConfig").showBreadcrumbs,
+            existingConfig.showBreadcrumbs ?? this.state.showBreadcrumbs,
+          showActiveLayersView:
+            existingConfig.showActiveLayersView ??
+            this.state.showActiveLayersView,
           enableTransparencySlider:
-            this.props.model.get("layerMenuConfig").enableTransparencySlider ||
+            existingConfig.enableTransparencySlider ??
             this.state.enableTransparencySlider,
-          instruction: this.props.model.get("layerMenuConfig").instruction,
+          instruction: existingConfig.instruction,
           dropdownThemeMaps:
-            this.props.model.get("layerMenuConfig").dropdownThemeMaps,
-          themeMapHeaderCaption:
-            this.props.model.get("layerMenuConfig").themeMapHeaderCaption,
-          visibleForGroups: this.props.model.get("layerMenuConfig")
-            .visibleForGroups
-            ? this.props.model.get("layerMenuConfig").visibleForGroups
+            existingConfig.dropdownThemeMaps ?? this.state.dropdownThemeMaps,
+          themeMapHeaderCaption: existingConfig.themeMapHeaderCaption,
+          visibleForGroups: existingConfig.visibleForGroups
+            ? existingConfig.visibleForGroups
             : [],
-          target: this.props.model.get("layerMenuConfig").target || "toolbar",
-          position: this.props.model.get("layerMenuConfig").position || "left",
-          width: this.props.model.get("layerMenuConfig").width || "",
-          height: this.props.model.get("layerMenuConfig").height || "",
-          title: this.props.model.get("layerMenuConfig").title || "",
-          description:
-            this.props.model.get("layerMenuConfig").description || "",
+          target: existingConfig.target || "toolbar",
+          position: existingConfig.position || "left",
+          width: existingConfig.width || "",
+          height: existingConfig.height || "",
+          title: existingConfig.title || "",
+          description: existingConfig.description || "",
         });
         $(".tree-view li").editable(this);
         $(".tree-view > ul").sortable();
@@ -564,6 +567,7 @@ class Menu extends Component {
       backgroundSwitcherWhite: this.state.backgroundSwitcherWhite,
       enableOSM: this.state.enableOSM,
       showBreadcrumbs: this.state.showBreadcrumbs,
+      showActiveLayersView: this.state.showActiveLayersView,
       enableTransparencySlider: this.state.enableTransparencySlider,
       instruction: this.state.instruction,
       dropdownThemeMaps: this.state.dropdownThemeMaps,
@@ -1527,7 +1531,7 @@ class Menu extends Component {
                   />
                 </div>
               </div>
-              <div className="separator">Inställningar för plugins</div>
+              <div className="separator">Inställningar för Lagerhanteraren</div>
               <div>
                 <input
                   id="visibleAtStart"
@@ -1551,7 +1555,7 @@ class Menu extends Component {
                 />
                 &nbsp;
                 <label className="long-label" htmlFor="visibleAtStartMobile">
-                  Synlig vid start - Mobil
+                  Synlig vid start (mobil)
                 </label>
               </div>
               <div>
@@ -1564,11 +1568,29 @@ class Menu extends Component {
                 />
                 &nbsp;
                 <label className="long-label" htmlFor="showBreadcrumbs">
-                  Visa "brödsmulor"{" "}
+                  Visa brödsmulor{" "}
                   <i
                     className="fa fa-question-circle"
                     data-toggle="tooltip"
                     title="När rutan är ikryssad visas små kort längst ned på skärmen, ett för varje lager som är aktivt"
+                  />
+                </label>
+              </div>
+              <div>
+                <input
+                  id="showActiveLayersView"
+                  name="showActiveLayersView"
+                  type="checkbox"
+                  onChange={this.handleInputChange}
+                  checked={this.state.showActiveLayersView}
+                />
+                &nbsp;
+                <label className="long-label" htmlFor="showActiveLayersView">
+                  Visa en flik med aktiva lager (beta){" "}
+                  <i
+                    className="fa fa-question-circle"
+                    data-toggle="tooltip"
+                    title="När rutan är ikryssad visas en tredje flik i Lagerhanteraren. Där kan användaren bland annat styra ritordningen av aktiva lager."
                   />
                 </label>
               </div>

@@ -202,19 +202,37 @@ export default class FeaturePropsParsing {
         // all ending new lines (after </if>) in the regex.
         matched.content += "\n";
 
-        // Handle <if foo="bar"> or <if foo=bar>
+        // Handle <if foo="bar">, <if foo=bar> as well as <if foo!="bar"> and <if foo!=bar>
         if (matched.attributes?.includes("=")) {
+          // We allow two comparers: "equal" ("=") and "not equal" ("!=")
+          const comparer = matched.attributes.includes("!=") ? "!=" : "=";
+
           // Turn "FOO=\"BAR\"" into k = "FOO" and v = "BAR"
-          let [k, v] = matched.attributes
-            .split("=") // Create an array
+          const [k, v] = matched.attributes
+            .split(comparer) // Create an array by splitting the attributes on our comparer string
             .map((e) => e.replaceAll('"', "").trim()); // Remove double quotes and whitespace
 
-          // Using truthy equal below: we want 2 and "2" to be seen as equal.
-          // eslint-disable-next-line eqeqeq
-          if (k == v) {
-            return matched.content;
-          } else {
-            return "";
+          switch (comparer) {
+            // See #669
+            case "=":
+              // Using truthy equal below: we want 2 and "2" to be seen as equal.
+              // eslint-disable-next-line eqeqeq
+              if (k == v) {
+                return matched.content;
+              } else {
+                return "";
+              }
+            // See #1128
+            case "!=":
+              // Using truthy not equal below: we want '2 is not equal "2"' to evaluate to false.
+              // eslint-disable-next-line eqeqeq
+              if (k != v) {
+                return matched.content;
+              } else {
+                return "";
+              }
+            default:
+              return "";
           }
         }
         // Handle <if foo> - if it exits, evaluate to true and show content

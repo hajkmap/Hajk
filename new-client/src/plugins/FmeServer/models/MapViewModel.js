@@ -51,6 +51,7 @@ class MapViewModel {
       this.#getDrawStyle(),
       {
         layerType: "system",
+        zIndex: 5000,
         name: "pluginFmeServer",
       }
     );
