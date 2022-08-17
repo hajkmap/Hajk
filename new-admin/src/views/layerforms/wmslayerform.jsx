@@ -34,8 +34,7 @@ const defaultState = {
   useCustomDpiList: false,
   customDpiList: [
     { "pxRatio": 0, "dpi": 90 },
-    { "pxRatio": 2, "dpi": 180 },
-    { "pxRatio": 3, "dpi": 270 }
+    { "pxRatio": 2, "dpi": 180 }
   ],
   customRatio: 0,
   imageFormat: "",
