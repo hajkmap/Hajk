@@ -9,7 +9,7 @@ datasource db {
 
 model Map {
   id          Int                 @id @default(autoincrement())
-  name        String
+  name        String              @unique
   options     Json                @default("{}")
   projections ProjectionsOnMaps[]
   tools       ToolsOnMaps[]
@@ -23,11 +23,12 @@ model Tool {
 }
 
 model ToolsOnMaps {
-  mapId  Int
-  toolId Int
-  index  Int  @default(0)
-  map    Map  @relation(fields: [mapId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "ToolMap_mapId_fkey")
-  tool   Tool @relation(fields: [toolId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "ToolMap_toolId_fkey")
+  mapId   Int
+  toolId  Int
+  index   Int  @default(0)
+  options Json @default("{}") // Allows overridding default tool options (set in Tool) on a per-map basis
+  map     Map  @relation(fields: [mapId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "ToolMap_mapId_fkey")
+  tool    Tool @relation(fields: [toolId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "ToolMap_toolId_fkey")
 
   @@id([mapId, toolId])
 }

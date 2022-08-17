@@ -84,6 +84,9 @@ const toolsOnMapData = [
     mapId: 1,
     toolId: 1,
     index: 1,
+    options: {
+      target: "control",
+    },
   },
   {
     mapId: 1,
