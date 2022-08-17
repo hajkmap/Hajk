@@ -2,14 +2,41 @@ import { PrismaClient } from "@prisma/client";
 
 const prisma = new PrismaClient();
 
+const projectionData = [
+  {
+    data: {
+      code: "EPSG:3006",
+      definition:
+        "+proj=utm +zone=33 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs",
+      extent: [181896.33, 6101648.07, 864416.0, 7689478.3],
+      units: null,
+    },
+  },
+  {
+    data: {
+      code: "EPSG:3007",
+      definition:
+        "+proj=tmerc +lat_0=0 +lon_0=12 +k=1 +x_0=150000 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs",
+      extent: [60436.5084, 6192389.565, 217643.4713, 6682784.4276],
+      units: null,
+    },
+  },
+];
+
 const mapData = [
   {
     name: "default",
     options: {},
+    projections: {
+      connect: [{ id: 1 }, { id: 2 }],
+    },
   },
   {
     name: "secondary",
     options: {},
+    projections: {
+      connect: [{ id: 1 }],
+    },
   },
 ];
 
@@ -21,16 +48,6 @@ const toolData = [
       position: "left",
       instruction: "",
       visibleAtStart: false,
-      visibleForGroups: [],
-    },
-  },
-  {
-    type: "layerswitcher",
-    options: {
-      target: "right",
-      position: "right",
-      instruction: "",
-      visibleAtStart: true,
       visibleForGroups: [],
     },
   },
@@ -58,28 +75,7 @@ const toolData = [
   },
 ];
 
-const projectionData = [
-  {
-    data: {
-      code: "EPSG:3006",
-      definition:
-        "+proj=utm +zone=33 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs",
-      extent: [181896.33, 6101648.07, 864416.0, 7689478.3],
-      units: null,
-    },
-  },
-  {
-    data: {
-      code: "EPSG:3007",
-      definition:
-        "+proj=tmerc +lat_0=0 +lon_0=12 +k=1 +x_0=150000 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs",
-      extent: [60436.5084, 6192389.565, 217643.4713, 6682784.4276],
-      units: null,
-    },
-  },
-];
-
-const toolsOnMapData = [
+const toolsOnMapsData = [
   {
     mapId: 1,
     toolId: 1,
@@ -100,23 +96,15 @@ const toolsOnMapData = [
   },
 ];
 
-const projectionOnMapData = [
-  {
-    mapId: 1,
-    projectionId: 1,
-  },
-  {
-    mapId: 1,
-    projectionId: 2,
-  },
-  {
-    mapId: 2,
-    projectionId: 1,
-  },
-];
-
 async function main() {
   console.log(`Start seeding ...`);
+  for (const u of projectionData) {
+    const projection = await prisma.projection.create({
+      data: u,
+    });
+    console.log(`Created projection with id: ${projection.id}`);
+  }
+
   for (const u of mapData) {
     const map = await prisma.map.create({
       data: u,
@@ -131,26 +119,13 @@ async function main() {
     console.log(`Created tool with id: ${tool.id}`);
   }
 
-  for (const u of projectionData) {
-    const projection = await prisma.projection.create({
-      data: u,
-    });
-    console.log(`Created projection with id: ${projection.id}`);
-  }
-
-  for (const u of toolsOnMapData) {
+  for (const u of toolsOnMapsData) {
     const toolOnMap = await prisma.toolsOnMaps.create({
       data: u,
     });
     console.log(`Added tool to map with id ${toolOnMap.mapId}`);
   }
 
-  for (const u of projectionOnMapData) {
-    const projectionOnMap = await prisma.projectionsOnMaps.create({
-      data: u,
-    });
-    console.log(`Added projection to map with id ${projectionOnMap.mapId}`);
-  }
   console.log(`Seeding finished.`);
 }
 
