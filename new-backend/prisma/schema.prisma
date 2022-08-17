@@ -8,15 +8,16 @@ datasource db {
 }
 
 model Map {
-  id          Int                 @id @default(autoincrement())
-  name        String              @unique
-  options     Json                @default("{}")
-  projections ProjectionsOnMaps[]
+  id          Int            @id @default(autoincrement())
+  name        String         @unique
+  options     Json           @default("{}")
+  projections Projection[]
   tools       ToolsOnMaps[]
+  layers      LayersOnMaps[]
 }
 
 model Tool {
-  id      Int           @id(map: "tools_pkey") @default(autoincrement())
+  id      Int           @id @default(autoincrement())
   type    String
   options Json          @default("{}")
   maps    ToolsOnMaps[]
@@ -25,25 +26,43 @@ model Tool {
 model ToolsOnMaps {
   mapId   Int
   toolId  Int
+  /// Determines the sort between tools
   index   Int  @default(0)
-  options Json @default("{}") // Allows overridding default tool options (set in Tool) on a per-map basis
-  map     Map  @relation(fields: [mapId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "ToolMap_mapId_fkey")
-  tool    Tool @relation(fields: [toolId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "ToolMap_toolId_fkey")
+  /// Allows overridding default tool options (set in Tool) on a per-map basis
+  options Json @default("{}")
+  map     Map  @relation(fields: [mapId], references: [id])
+  tool    Tool @relation(fields: [toolId], references: [id])
 
   @@id([mapId, toolId])
 }
 
 model Projection {
-  id   Int                 @id @default(autoincrement())
-  data Json                @default("[]")
-  maps ProjectionsOnMaps[]
+  id   Int   @id @default(autoincrement())
+  data Json  @default("[]")
+  maps Map[]
 }
 
-model ProjectionsOnMaps {
-  projectionId Int
-  mapId        Int
-  map          Map        @relation(fields: [mapId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  projection   Projection @relation(fields: [projectionId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+model Layer {
+  id      String         @id @default(cuid())
+  type    LayerType
+  options Json           @default("{}")
+  maps    LayersOnMaps[]
+}
 
-  @@id([projectionId, mapId])
+model LayersOnMaps {
+  id      Int    @id @default(autoincrement())
+  mapId   Int
+  layerId String
+  map     Map    @relation(fields: [mapId], references: [id])
+  layer   Layer  @relation(fields: [layerId], references: [id])
+  options Json?
+}
+
+enum LayerType {
+  ARCGIS
+  VECTOR
+  WFS
+  WFST
+  WMS
+  WMTS
 }
