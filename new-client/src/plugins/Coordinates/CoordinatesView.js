@@ -4,6 +4,9 @@ import { styled } from "@mui/material/styles";
 import Grid from "@mui/material/Grid";
 import CoordinatesTransformRow from "./CoordinatesTransformRow.js";
 import { Tooltip } from "@mui/material";
+import IconButton from "@mui/material/IconButton";
+import ZoomInMapIcon from "@mui/icons-material/ZoomInMap";
+import ZoomInIcon from "@mui/icons-material/ZoomIn";
 
 import { withSnackbar } from "notistack";
 
@@ -16,12 +19,6 @@ const Root = styled("div")(() => ({
 }));
 
 const StyledButton = styled(Button)(({ theme }) => ({
-  [theme.breakpoints.down("md")]: {
-    minWidth: "100%",
-  },
-  [theme.breakpoints.up("md")]: {
-    minWidth: 136,
-  },
   margin: theme.spacing(0.5),
 }));
 
@@ -35,10 +32,6 @@ const StyledGrid = styled(Grid)(({ theme }) => ({
   width: 120,
   margin: theme.spacing(1),
   color: theme.palette.text.secondary,
-}));
-
-const StyledGridItem = styled(Grid)(({ theme }) => ({
-  margin: theme.spacing(0.5),
 }));
 
 class CoordinatesView extends React.PureComponent {
@@ -109,20 +102,18 @@ class CoordinatesView extends React.PureComponent {
         </StyledGridContainer>
         {this.renderProjections()}
         <Grid container spacing={1}>
-          <StyledGridItem item xs={12}>
+          <Grid item>
             <Tooltip title="Rensa fält">
               <StyledButton
-                variant="contained"
                 onClick={() => {
                   this.props.model.resetCoords();
                 }}
               >
-                Rensa fält
+                Rensa
               </StyledButton>
             </Tooltip>
             <Tooltip title="Min position">
               <StyledButton
-                variant="contained"
                 onClick={() => {
                   this.props.model.goToUserLocation();
                 }}
@@ -130,27 +121,35 @@ class CoordinatesView extends React.PureComponent {
                 Min position
               </StyledButton>
             </Tooltip>
-            <Tooltip title="Panorera till markering">
-              <StyledButton
-                variant="contained"
-                onClick={() => {
-                  this.props.model.centerOnMarker();
-                }}
-              >
-                Panorera
-              </StyledButton>
-            </Tooltip>
-            <Tooltip title="Zooma till markering">
-              <StyledButton
-                variant="contained"
-                onClick={() => {
-                  this.props.model.zoomOnMarker();
-                }}
-              >
-                Zooma
-              </StyledButton>
-            </Tooltip>
-          </StyledGridItem>
+          </Grid>
+          <Grid item xs>
+            <Grid container direction="row-reverse">
+              <Grid item>
+                <Tooltip title="Centrera till markering">
+                  <IconButton
+                    aria-label="Centrera till markering"
+                    component="label"
+                    onClick={() => {
+                      this.props.model.centerOnMarker();
+                    }}
+                  >
+                    <ZoomInMapIcon />
+                  </IconButton>
+                </Tooltip>
+                <Tooltip title="Zooma in till markering">
+                  <IconButton
+                    aria-label="Zooma in till markering"
+                    component="label"
+                    onClick={() => {
+                      this.props.model.zoomOnMarker();
+                    }}
+                  >
+                    <ZoomInIcon />
+                  </IconButton>
+                </Tooltip>
+              </Grid>
+            </Grid>
+          </Grid>
         </Grid>
       </Root>
     );
