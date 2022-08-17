@@ -37,9 +37,9 @@ model ToolsOnMaps {
 }
 
 model Projection {
-  id   Int   @id @default(autoincrement())
-  data Json  @default("[]")
-  maps Map[]
+  id      Int   @id @default(autoincrement())
+  options Json  @default("[]")
+  maps    Map[]
 }
 
 model Layer {

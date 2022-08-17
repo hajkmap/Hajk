@@ -19,7 +19,9 @@ class PrismaService {
 
   async getMaps() {
     try {
-      return await prisma.map.findMany();
+      const maps = await prisma.map.findMany({ select: { name: true } });
+      // Transform the [{name: "map1"}, {name: "map2"}] to ["map1", "map2"]
+      return maps.map((m) => m.name);
     } catch (error) {
       return { error };
     }
@@ -27,10 +29,18 @@ class PrismaService {
 
   async getMapByName(mapName) {
     try {
-      const map = await prisma.map.findFirst({ where: { name: mapName } });
-      const tools = await this.#getToolsForMap(mapName);
-      const projections = await this.#getProjectionsForMap(mapName);
-      return { version: "0.0.1", projections, map, tools };
+      const map = await prisma.map.findFirst({
+        where: { name: mapName },
+        include: { projections: true, tools: true, layers: true },
+      });
+
+      return {
+        version: "0.0.1",
+        projections: map.projections,
+        tools: map.tools,
+        layers: map.layers,
+        map: map.options,
+      };
     } catch (error) {
       return { error };
     }
@@ -46,7 +56,8 @@ class PrismaService {
 
   async getMapsWithTool(toolName) {
     try {
-      return await prisma.map.findMany({
+      const maps = await prisma.map.findMany({
+        select: { name: true },
         where: {
           tools: {
             some: {
@@ -57,6 +68,7 @@ class PrismaService {
           },
         },
       });
+      return maps.map((m) => m.name);
     } catch (error) {
       return { error };
     }
@@ -65,20 +77,6 @@ class PrismaService {
   // This method is abstracted away as we use it in (at least) two places
   async #getToolsForMap(mapName) {
     return await prisma.tool.findMany({
-      where: {
-        maps: {
-          some: {
-            map: {
-              name: mapName,
-            },
-          },
-        },
-      },
-    });
-  }
-
-  async #getProjectionsForMap(mapName) {
-    return await prisma.projection.findMany({
       where: {
         maps: {
           some: {
