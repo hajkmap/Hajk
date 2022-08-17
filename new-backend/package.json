@@ -22,6 +22,9 @@
     "lint": "eslint .",
     "lint:fix": "eslint --fix ."
   },
+  "prisma": {
+    "seed": "babel-node prisma/seed.js"
+  },
   "dependencies": {
     "@prisma/client": "^4.2.1",
     "activedirectory2": "^2.1.0",
