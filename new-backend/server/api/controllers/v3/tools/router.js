@@ -3,4 +3,5 @@ import controller from "./controller";
 
 export default express
   .Router()
-  .get("/toolsInMap/:mapName", controller.getToolsForMap);
+  .get("/", controller.getTools)
+  .get("/:toolName/maps", controller.getMapsWithTool);

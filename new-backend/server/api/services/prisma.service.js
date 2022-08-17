@@ -9,7 +9,23 @@ class PrismaService {
     logger.debug("Initiating Prisma Service");
   }
 
-  async getMap(mapName) {
+  async getTools() {
+    try {
+      return await prisma.tool.findMany();
+    } catch (error) {
+      return { error };
+    }
+  }
+
+  async getMaps() {
+    try {
+      return await prisma.map.findMany();
+    } catch (error) {
+      return { error };
+    }
+  }
+
+  async getMapByName(mapName) {
     try {
       const map = await prisma.map.findFirst({ where: { name: mapName } });
       const tools = await this.#getToolsForMap(mapName);
