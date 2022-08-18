@@ -77,6 +77,8 @@ export default function DrawOrderOptions({
     // Let's combine it all to an object that will be saved.
     const objectToSave = { savedLayers, metadata };
 
+    // TODO: Determine whether this should be a functional or required cookie,
+    // add the appropriate hook and describe here https://github.com/hajkmap/Hajk/wiki/Cookies-in-Hajk.
     localStorage.setItem(
       "plugin.layerswitcher.savedLayers",
       JSON.stringify(objectToSave) // Remember to stringify prior storing in local storage.
