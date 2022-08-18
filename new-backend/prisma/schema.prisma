@@ -8,8 +8,7 @@ datasource db {
 }
 
 model Map {
-  id          Int            @id @default(autoincrement())
-  name        String         @unique
+  name        String         @id
   options     Json           @default("{}")
   projections Projection[]
   tools       ToolsOnMaps[]
@@ -24,16 +23,16 @@ model Tool {
 }
 
 model ToolsOnMaps {
-  mapId   Int
+  mapName String
   toolId  Int
   /// Determines the sort between tools
-  index   Int  @default(0)
+  index   Int    @default(0)
   /// Allows overridding default tool options (set in Tool) on a per-map basis
-  options Json @default("{}")
-  map     Map  @relation(fields: [mapId], references: [id])
-  tool    Tool @relation(fields: [toolId], references: [id])
+  options Json   @default("{}")
+  map     Map    @relation(fields: [mapName], references: [name])
+  tool    Tool   @relation(fields: [toolId], references: [id])
 
-  @@id([mapId, toolId])
+  @@id([mapName, toolId])
 }
 
 model Projection {
@@ -51,9 +50,9 @@ model Layer {
 
 model LayersOnMaps {
   id      Int    @id @default(autoincrement())
-  mapId   Int
+  mapName String
   layerId String
-  map     Map    @relation(fields: [mapId], references: [id])
+  map     Map    @relation(fields: [mapName], references: [name])
   layer   Layer  @relation(fields: [layerId], references: [id])
   options Json?
 }
