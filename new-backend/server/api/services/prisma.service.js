@@ -29,7 +29,7 @@ class PrismaService {
 
   async getMapByName(mapName) {
     try {
-      const map = await prisma.map.findFirst({
+      const map = await prisma.map.findUnique({
         where: { name: mapName },
         include: { projections: true, tools: true, layers: true },
       });
