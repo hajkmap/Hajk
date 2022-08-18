@@ -447,7 +447,7 @@ const toolData = [
 
 const toolsOnMapsData = [
   {
-    mapId: 1,
+    mapName: "default",
     toolId: 1,
     index: 1,
     options: {
@@ -455,17 +455,17 @@ const toolsOnMapsData = [
     },
   },
   {
-    mapId: 1,
+    mapName: "default",
     toolId: 2,
     index: 2,
   },
   {
-    mapId: 1,
+    mapName: "default",
     toolId: 3,
     index: 2,
   },
   {
-    mapId: 2,
+    mapName: "secondary",
     toolId: 2,
     index: 1,
   },
@@ -498,7 +498,7 @@ async function main() {
     const toolOnMap = await prisma.toolsOnMaps.create({
       data: u,
     });
-    console.log(`Added tool to map with id ${toolOnMap.mapId}`);
+    console.log(`Added tool to map with id ${toolOnMap.mapName}`);
   }
 
   console.log(`Seeding finished.`);
