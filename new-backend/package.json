@@ -20,7 +20,8 @@
     "test": "mocha --require @babel/register --exit",
     "test:debug": "mocha --require @babel/register --inspect-brk --exit",
     "lint": "eslint .",
-    "lint:fix": "eslint --fix ."
+    "lint:fix": "eslint --fix .",
+    "reset:db": "prisma db push --force-reset && prisma db seed"
   },
   "prisma": {
     "seed": "babel-node prisma/seed.js"
