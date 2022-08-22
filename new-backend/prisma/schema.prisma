@@ -44,11 +44,13 @@ model Projection {
 }
 
 model Group {
-  id      String           @id @default(cuid())
-  name    String
-  caption String
-  layers  LayersOnGroups[]
-  maps    GroupsOnMaps[]
+  id          String           @id @default(cuid())
+  name        String
+  caption     String
+  groups      Group[]          @relation("GroupHasGroups")
+  parentGroup Group[]          @relation("GroupHasGroups")
+  layers      LayersOnGroups[]
+  maps        GroupsOnMaps[]
 }
 
 model Layer {
