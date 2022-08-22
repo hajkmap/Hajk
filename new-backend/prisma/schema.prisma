@@ -8,11 +8,13 @@ datasource db {
 }
 
 model Map {
-  name        String         @id
+  id          Int            @id @default(autoincrement())
+  name        String         @unique
   options     Json           @default("{}")
   projections Projection[]
   tools       ToolsOnMaps[]
   layers      LayersOnMaps[]
+  groups      GroupsOnMaps[]
 }
 
 model Tool {
@@ -41,19 +43,49 @@ model Projection {
   maps    Map[]
 }
 
+model Group {
+  id      String           @id @default(cuid())
+  name    String
+  caption String
+  layers  LayersOnGroups[]
+  maps    GroupsOnMaps[]
+}
+
 model Layer {
-  id      String         @id @default(cuid())
+  id      String           @id @default(cuid())
   type    LayerType
-  options Json           @default("{}")
+  options Json             @default("{}")
   maps    LayersOnMaps[]
+  groups  LayersOnGroups[]
+}
+
+model LayersOnGroups {
+  id      Int     @id @default(autoincrement())
+  groupId String
+  layerId String
+  group   Group   @relation(fields: [groupId], references: [id])
+  layer   Layer   @relation(fields: [layerId], references: [id])
+  usage   UseType
+  options Json?
+}
+
+model GroupsOnMaps {
+  id      Int     @id @default(autoincrement())
+  mapName String
+  groupId String
+  map     Map     @relation(fields: [mapName], references: [name])
+  group   Group   @relation(fields: [groupId], references: [id])
+  usage   UseType
+  options Json?
 }
 
 model LayersOnMaps {
-  id      Int    @id @default(autoincrement())
+  id      Int     @id @default(autoincrement())
   mapName String
   layerId String
-  map     Map    @relation(fields: [mapName], references: [name])
-  layer   Layer  @relation(fields: [layerId], references: [id])
+  map     Map     @relation(fields: [mapName], references: [name])
+  layer   Layer   @relation(fields: [layerId], references: [id])
+  usage   UseType
   options Json?
 }
 
@@ -64,4 +96,9 @@ enum LayerType {
   WFST
   WMS
   WMTS
+}
+
+enum UseType {
+  BACKGROUND
+  FOREGROUND
 }
