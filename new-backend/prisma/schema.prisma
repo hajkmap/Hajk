@@ -66,7 +66,7 @@ model LayersOnGroups {
   group   Group   @relation(fields: [groupId], references: [id])
   layer   Layer   @relation(fields: [layerId], references: [id])
   usage   UseType
-  options Json?
+  options Json    @default("{}")
 }
 
 model GroupsOnMaps {
@@ -76,7 +76,7 @@ model GroupsOnMaps {
   map     Map     @relation(fields: [mapName], references: [name])
   group   Group   @relation(fields: [groupId], references: [id])
   usage   UseType
-  options Json?
+  options Json    @default("{}")
 }
 
 model LayersOnMaps {
@@ -86,7 +86,7 @@ model LayersOnMaps {
   map     Map     @relation(fields: [mapName], references: [name])
   layer   Layer   @relation(fields: [layerId], references: [id])
   usage   UseType
-  options Json?
+  options Json    @default("{}")
 }
 
 enum LayerType {

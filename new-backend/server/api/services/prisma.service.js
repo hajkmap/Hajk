@@ -31,15 +31,17 @@ class PrismaService {
     try {
       const map = await prisma.map.findUnique({
         where: { name: mapName },
-        include: { projections: true, tools: true, layers: true },
+        include: {
+          projections: true,
+          tools: { include: { tool: true } },
+          layers: { include: { layer: true } },
+          groups: { include: { group: { include: { layers: true } } } },
+        },
       });
 
       return {
         version: "0.0.1",
-        projections: map.projections,
-        tools: map.tools,
-        layers: map.layers,
-        map: map.options,
+        ...map,
       };
     } catch (error) {
       return { error };
