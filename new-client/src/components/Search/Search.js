@@ -1041,6 +1041,7 @@ class Search extends React.PureComponent {
           handleSearchBarKeyPress={this.handleSearchBarKeyPress}
           getArrayWithSearchWords={this.getArrayWithSearchWords}
           failedWFSFetchMessage={failedWFSFetchMessage}
+          mapViewModel={this.mapViewModel}
           {...this.props}
         />
       )
