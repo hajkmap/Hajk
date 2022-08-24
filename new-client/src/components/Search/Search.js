@@ -781,18 +781,26 @@ class Search extends React.PureComponent {
     }
 
     const reducerFn = (featureTitleString, df) => {
-      let displayField = feature.get(df);
+      // Check if our display field (df) starts and ends with a double quote. If yes,
+      // this is a special label that should be printed directly to the UI.
+      // If not, this is a name of a field and we should try to grab its value
+      // from the feature.
+      let displayField = /(^".*?"$)/g.test(df)
+        ? df.replaceAll('"', "")
+        : feature.get(df);
+
       if (Array.isArray(displayField)) {
         displayField = displayField.join(", ");
       }
       if (displayField) {
+        // If we already have a string, let's append this value too…
         if (featureTitleString.length > 0) {
-          featureTitleString = featureTitleString.concat(` | ${displayField}`);
+          return featureTitleString.concat(` | ${displayField}`);
         } else {
-          featureTitleString = displayField.toString();
+          // …else, just return this
+          return displayField.toString();
         }
       }
-      return featureTitleString;
     };
 
     // Prepare the title be using the defined displayFields. Note that this
