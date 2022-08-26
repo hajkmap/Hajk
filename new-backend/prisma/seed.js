@@ -445,6 +445,14 @@ const toolData = [
   },
 ];
 
+const layersOnMapsdata = [
+  {
+    mapName: "default",
+    layerId: "1",
+    usage: "BACKGROUND",
+  },
+];
+
 const toolsOnMapsData = [
   {
     mapName: "default",
@@ -471,8 +479,32 @@ const toolsOnMapsData = [
   },
 ];
 
+const layerData = [
+  {
+    id: "1",
+    type: "WMS",
+    options: {
+      name: "Topografiska",
+    },
+  },
+  {
+    id: "2",
+    type: "WMTS",
+    options: {
+      name: "Ortofoto",
+    },
+  },
+];
+
 async function main() {
   console.log(`Start seeding ...`);
+  for (const u of layerData) {
+    const layer = await prisma.layer.create({
+      data: u,
+    });
+    console.log(`Created layer with id: ${layer.id}`);
+  }
+
   for (const u of projectionData) {
     const projection = await prisma.projection.create({
       data: { options: u },
@@ -499,6 +531,12 @@ async function main() {
       data: u,
     });
     console.log(`Added tool to map with id ${toolOnMap.mapName}`);
+  }
+  for (const u of layersOnMapsdata) {
+    const layerOnMap = await prisma.layersOnMaps.create({
+      data: u,
+    });
+    console.log(`Added layer to map with id ${layerOnMap.mapName}`);
   }
 
   console.log(`Seeding finished.`);
