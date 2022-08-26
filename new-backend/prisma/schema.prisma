@@ -25,7 +25,6 @@ model Tool {
 }
 
 model ToolsOnMaps {
-  id      Int    @id
   mapName String
   toolId  Int
   /// Determines the sort between tools
@@ -34,6 +33,8 @@ model ToolsOnMaps {
   options Json   @default("{}")
   map     Map    @relation(fields: [mapName], references: [name])
   tool    Tool   @relation(fields: [toolId], references: [id])
+
+  @@id([mapName, toolId])
 }
 
 model Projection {

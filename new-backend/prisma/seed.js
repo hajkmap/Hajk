@@ -30,6 +30,8 @@ async function getAvailableMaps() {
 }
 
 async function readMapConfigAndPopulateMap(file) {
+  console.log(`START MAP CONFIG "${file}"`);
+
   // Start by reading the existing JSON config
   const pathToFile = path.join(process.cwd(), "App_Data", `${file}.json`);
   const text = await fs.promises.readFile(pathToFile, "utf-8");
@@ -40,7 +42,7 @@ async function readMapConfigAndPopulateMap(file) {
   // collection of Projections, we must ensure that we've populated
   // the Projection model.
   // We do want to skip duplicates as each projection code should be unique.
-  console.log("Creating projections");
+  console.log("Creating projections…");
   const proj = await prisma.projection.createMany({
     data: mapConfig.projections,
     skipDuplicates: true,
@@ -53,23 +55,30 @@ async function readMapConfigAndPopulateMap(file) {
   const projectionsToConnect = mapConfig.projections.map((p) => {
     return { code: p.code };
   });
+  console.log(
+    `Connected ${projectionsToConnect.length} projections to map ${file}`
+  );
 
   // Take care of tools. Right now we let each map have it's own Tool.
-  // So we just insert everything from this map, grab the IDs of inserted
-  // records and use them later to connect them with this Map.
-  console.log("Creating tools");
-  const idsOfToolsCreated = [];
+  console.log("Creating tools…");
+  const toolsToConnectToMap = [];
   for await (const t of mapConfig.tools) {
     const tool = await prisma.tool.create({
       data: { type: t.type, options: t.options },
     });
-    idsOfToolsCreated.push({
-      id: tool.id,
+    // While inserting each of the tools, we prepare an object
+    // that will be used later, to connect the recently-inserted tool
+    // with the map that it belongs to.
+    toolsToConnectToMap.push({
+      toolId: tool.id,
+      mapName: file,
+      index: t.index,
+      options: t.options,
     });
   }
 
   // Finally we can create the map
-  console.log("Creating map");
+  console.log("Creating map…");
   await prisma.map.create({
     data: {
       name: file, // We use the file name as our unique map identifier
@@ -77,12 +86,22 @@ async function readMapConfigAndPopulateMap(file) {
       projections: {
         connect: projectionsToConnect,
       },
-      // tools: { // Connecting tools is not working yet
-      //   connect: idsOfToolsCreated,
-      // },
+      // I can't figure out how to connect 'tools' and 'layers' at
+      // this stage. It doesn't work as for 'projections'. The main
+      // difference is that 'projections' is an implicit m-n relation,
+      // while the other are explicit. But we take care of it in the
+      // next step, where we write some data into the relation tables
+      // directly.
     },
   });
-  console.log("Created map: ", file);
+
+  // Once the map is created, we can connect it with its tools
+  const connectedTools = await prisma.toolsOnMaps.createMany({
+    data: toolsToConnectToMap,
+  });
+  console.log(`Connected ${connectedTools.count} tools to map ${file}`);
+
+  console.log(`END MAP CONFIG "${file}"\n\n`);
 }
 
 async function readAndPopulateLayers() {
