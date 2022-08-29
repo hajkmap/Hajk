@@ -4,9 +4,6 @@ import { styled } from "@mui/material/styles";
 import Grid from "@mui/material/Grid";
 import CoordinatesTransformRow from "./CoordinatesTransformRow.js";
 import { Tooltip } from "@mui/material";
-import IconButton from "@mui/material/IconButton";
-import ZoomInMapIcon from "@mui/icons-material/ZoomInMap";
-import ZoomInIcon from "@mui/icons-material/ZoomIn";
 
 import { withSnackbar } from "notistack";
 
