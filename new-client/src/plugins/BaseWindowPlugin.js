@@ -188,6 +188,7 @@ class BaseWindowPlugin extends React.PureComponent {
           resizingEnabled={this.props.custom.resizingEnabled}
           scrollable={this.props.custom.scrollable}
           allowMaximizedWindow={this.props.custom.allowMaximizedWindow}
+          disablePadding={this.props.custom.disablePadding}
           width={this.width}
           height={this.height}
           position={this.position}

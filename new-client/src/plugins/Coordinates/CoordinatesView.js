@@ -2,13 +2,8 @@ import React from "react";
 import Button from "@mui/material/Button";
 import { styled } from "@mui/material/styles";
 import Grid from "@mui/material/Grid";
-import Table from "@mui/material/Table";
-import TableBody from "@mui/material/TableBody";
-import TableCell from "@mui/material/TableCell";
-import TableHead from "@mui/material/TableHead";
-import TableRow from "@mui/material/TableRow";
-import Paper from "@mui/material/Paper";
 import CoordinatesTransformRow from "./CoordinatesTransformRow.js";
+import { Divider, Tooltip } from "@mui/material";
 
 import { withSnackbar } from "notistack";
 
@@ -17,16 +12,8 @@ import {
   LOCATION_DENIED_SNACK_MESSAGE,
 } from "plugins/Location/constants/index.js";
 
-const StyledPaper = styled(Paper)(() => ({
-  backgroundImage: "none",
-  display: "flex",
-  flexGrow: 1,
-  flexWrap: "wrap",
-}));
-
-const StyledButton = styled(Button)(({ theme }) => ({
-  minWidth: 64,
-  margin: 0,
+const StyledGridContainer = styled(Grid)(({ theme }) => ({
+  padding: theme.spacing(2),
 }));
 
 class CoordinatesView extends React.PureComponent {
@@ -77,69 +64,94 @@ class CoordinatesView extends React.PureComponent {
   renderProjections() {
     return (
       <>
-        {this.props.model.transformations.map((transformation, index) => {
-          return (
-            <CoordinatesTransformRow
-              key={transformation.code + index + "-element"}
-              model={this.model}
-              transformation={transformation}
-              inverseAxis={transformation.inverseAxis}
-            />
-          );
-        })}
+        {this.props.model.transformations.map((transformation, index) => (
+          <CoordinatesTransformRow
+            key={`${transformation.code}${index}-element`}
+            model={this.model}
+            transformation={transformation}
+            inverseAxis={transformation.inverseAxis}
+          />
+        ))}
       </>
     );
   }
 
-  render() {
+  renderButtons() {
     return (
-      <>
-        <StyledPaper>
-          <Table>
-            <TableHead>
-              <TableRow>
-                <TableCell>Projektion</TableCell>
-                <TableCell>Koordinater</TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>{this.renderProjections()}</TableBody>
-          </Table>
-          <Grid container justifyContent="space-between">
-            <StyledButton
-              variant="text"
+      <Grid container item spacing={2} rowSpacing={1}>
+        <Grid item xs={12} md={6}>
+          <Tooltip title="Rensa fält">
+            <Button
+              fullWidth={true}
+              variant="contained"
+              color="primary"
               onClick={() => {
-                this.props.model.zoomOnMarker();
+                this.props.model.resetCoords();
               }}
             >
-              Zooma
-            </StyledButton>
-            <StyledButton
-              variant="text"
-              onClick={() => {
-                this.props.model.centerOnMarker();
-              }}
-            >
-              Panorera
-            </StyledButton>
-            <StyledButton
-              variant="text"
+              Rensa
+            </Button>
+          </Tooltip>
+        </Grid>
+        <Grid item xs={12} md={6}>
+          <Tooltip title="Min position">
+            <Button
+              fullWidth={true}
+              variant="contained"
+              color="primary"
               onClick={() => {
                 this.props.model.goToUserLocation();
               }}
             >
               Min position
-            </StyledButton>
-            <StyledButton
-              variant="text"
+            </Button>
+          </Tooltip>
+        </Grid>
+        <Grid item xs={12} sm={6} md={6}>
+          <Tooltip title="Panorera till markering">
+            <Button
+              fullWidth={true}
+              variant="contained"
+              color="primary"
               onClick={() => {
-                this.props.model.resetCoords();
+                this.props.model.centerOnMarker();
               }}
             >
-              Rensa fält
-            </StyledButton>
-          </Grid>
-        </StyledPaper>
-      </>
+              Panorera
+            </Button>
+          </Tooltip>
+        </Grid>
+        <Grid item xs={12} sm={6} md={6}>
+          <Tooltip title="Zooma in till markering">
+            <Button
+              fullWidth={true}
+              variant="contained"
+              color="primary"
+              onClick={() => {
+                this.props.model.zoomOnMarker();
+              }}
+            >
+              Zooma
+            </Button>
+          </Tooltip>
+        </Grid>
+      </Grid>
+    );
+  }
+
+  render() {
+    return (
+      <Grid container>
+        <StyledGridContainer container rowSpacing={2} columnSpacing={1}>
+          {this.renderProjections()}
+        </StyledGridContainer>
+        <Grid item xs={12}>
+          <Divider />
+        </Grid>
+        <StyledGridContainer container rowSpacing={2} columnSpacing={1}>
+          {this.renderButtons()}
+        </StyledGridContainer>
+      </Grid>
     );
   }
 }
