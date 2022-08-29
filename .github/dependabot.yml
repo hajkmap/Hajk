@@ -1,0 +1,32 @@
+version: 2
+updates:
+  - package-ecosystem: "npm"
+    directory: "/new-client"
+    schedule:
+      interval: "daily"
+    # We only want security-updates, not version-updates. Setting the limit to 0 makes sure we have 0 version-updates, but still 10 security-updates.
+    open-pull-requests-limit: 0
+    target-branch: "develop"
+    labels:
+      - "module:client/core"
+      - "dependabot"
+  - package-ecosystem: "npm"
+    directory: "/new-admin"
+    schedule:
+      interval: "daily"
+    # We only want security-updates, not version-updates. Setting the limit to 0 makes sure we have 0 version-updates, but still 10 security-updates.
+    open-pull-requests-limit: 0
+    target-branch: "develop"
+    labels:
+      - "module:admin"
+      - "dependabot"
+  - package-ecosystem: "npm"
+    directory: "/new-backend"
+    schedule:
+      interval: "daily"
+    # We only want security-updates, not version-updates. Setting the limit to 0 makes sure we have 0 version-updates, but still 10 security-updates.
+    open-pull-requests-limit: 0
+    target-branch: "develop"
+    labels:
+      - "module:backend"
+      - "dependabot"
