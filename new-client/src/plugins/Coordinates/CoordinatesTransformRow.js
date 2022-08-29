@@ -7,23 +7,6 @@ import { transform } from "ol/proj";
 import { withSnackbar } from "notistack";
 import Grid from "@mui/material/Grid";
 
-const StyledGridContainer = styled(Grid)(() => ({
-  borderBottom: "1px solid #e0e0e0",
-}));
-
-const StyledNumberFormat = styled(NumberFormat)(({ theme }) => ({
-  marginLeft: theme.spacing(0.75),
-  marginRight: theme.spacing(0.75),
-  minWidth: 120,
-}));
-
-//Styled Grid that centers text to the left
-const StyledGrid = styled(Grid)(({ theme }) => ({
-  textAlign: "left",
-  width: 120,
-  margin: theme.spacing(1.25),
-}));
-
 class CoordinatesTransformRow extends React.PureComponent {
   state = {
     errorX: "",

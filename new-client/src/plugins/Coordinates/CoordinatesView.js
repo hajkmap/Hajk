@@ -18,20 +18,8 @@ const Root = styled("div")(() => ({
   overflowX: "hidden",
 }));
 
-const StyledButton = styled(Button)(({ theme }) => ({
-  margin: theme.spacing(0.5),
-}));
-
 const StyledGridContainer = styled(Grid)(({ theme }) => ({
   padding: theme.spacing(2),
-}));
-
-//Styled Grid that centers text to the left
-const StyledGrid = styled(Grid)(({ theme }) => ({
-  textAlign: "left",
-  width: 120,
-  margin: theme.spacing(1),
-  color: theme.palette.text.secondary,
 }));
 
 class CoordinatesView extends React.PureComponent {
