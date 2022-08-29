@@ -175,7 +175,7 @@ class CoordinatesTransformRow extends React.PureComponent {
 
     if (this.model.showFieldsOnStart || this.state.wasModified) {
       return (
-        <Grid container item spacing={2} rowSpacing={1} sx={{ mb: 1 }}>
+        <Grid container item spacing={2} rowSpacing={1}>
           <Grid item xs={12}>
             <Typography variant="body2" style={{ fontWeight: 600 }}>
               {this.transformation
@@ -186,7 +186,7 @@ class CoordinatesTransformRow extends React.PureComponent {
                 : ""}
             </Typography>
           </Grid>
-          <Grid item xs={12} sm={6} md={6}>
+          <Grid item xs={12} md={6}>
             <NumberFormat
               label={this.props.transformation.xtitle}
               margin="dense"
@@ -206,7 +206,7 @@ class CoordinatesTransformRow extends React.PureComponent {
               fullWidth={true}
             />
           </Grid>
-          <Grid item xs={12} sm={6} md={6}>
+          <Grid item xs={12} md={6}>
             <NumberFormat
               label={this.props.transformation.ytitle}
               margin="dense"

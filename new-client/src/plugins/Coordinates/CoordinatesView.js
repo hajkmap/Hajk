@@ -3,17 +3,9 @@ import Button from "@mui/material/Button";
 import { styled } from "@mui/material/styles";
 import Grid from "@mui/material/Grid";
 import CoordinatesTransformRow from "./CoordinatesTransformRow.js";
-import { Tooltip } from "@mui/material";
+import { Divider, Tooltip } from "@mui/material";
 
 import { withSnackbar } from "notistack";
-
-const Root = styled("div")(() => ({
-  margin: -10,
-  display: "flex",
-  flexDirection: "column",
-  height: "100%",
-  overflowX: "hidden",
-}));
 
 const StyledGridContainer = styled(Grid)(({ theme }) => ({
   padding: theme.spacing(2),
@@ -62,7 +54,7 @@ class CoordinatesView extends React.PureComponent {
       <>
         {this.props.model.transformations.map((transformation, index) => (
           <CoordinatesTransformRow
-            key={transformation.code + index + "-element"}
+            key={`${transformation.code}${index}-element`}
             model={this.model}
             transformation={transformation}
             inverseAxis={transformation.inverseAxis}
@@ -74,14 +66,8 @@ class CoordinatesView extends React.PureComponent {
 
   renderButtons() {
     return (
-      <Grid
-        container
-        item
-        spacing={2}
-        rowSpacing={1}
-        sx={{ mb: { xs: 6, sm: 0, md: 0 }, mt: 0.5 }}
-      >
-        <Grid item xs={12} sm={6} md={6}>
+      <Grid container item spacing={2} rowSpacing={1}>
+        <Grid item xs={12} md={6}>
           <Tooltip title="Rensa fält">
             <Button
               fullWidth={true}
@@ -95,7 +81,7 @@ class CoordinatesView extends React.PureComponent {
             </Button>
           </Tooltip>
         </Grid>
-        <Grid item xs={12} sm={6} md={6}>
+        <Grid item xs={12} md={6}>
           <Tooltip title="Min position">
             <Button
               fullWidth={true}
@@ -143,19 +129,17 @@ class CoordinatesView extends React.PureComponent {
 
   render() {
     return (
-      <Root>
-        <StyledGridContainer
-          container
-          rowSpacing={2}
-          columnSpacing={1}
-          sx={{ borderBottom: 1, borderColor: "#9e9e9e" }}
-        >
+      <Grid container>
+        <StyledGridContainer container rowSpacing={2} columnSpacing={1}>
           {this.renderProjections()}
         </StyledGridContainer>
+        <Grid item xs={12}>
+          <Divider />
+        </Grid>
         <StyledGridContainer container rowSpacing={2} columnSpacing={1}>
           {this.renderButtons()}
         </StyledGridContainer>
-      </Root>
+      </Grid>
     );
   }
 }
