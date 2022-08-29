@@ -193,19 +193,19 @@ class CoordinatesTransformRow extends React.PureComponent {
 
     if (this.model.showFieldsOnStart || this.state.wasModified) {
       return (
-        <StyledGridContainer container spacing={1} alignItems="center">
-          <Grid item>
-            <StyledGrid>
-              <Typography variant="body1">
-                {this.props.transformation.title}
-              </Typography>
-              <Typography variant="body2">
-                ({this.props.transformation.code})
-              </Typography>
-            </StyledGrid>
+        <Grid container item spacing={2} rowSpacing={1} sx={{ mb: 1 }}>
+          <Grid item xs={12}>
+            <Typography variant="body2" style={{ fontWeight: 600 }}>
+              {this.transformation
+                ? this.transformation.title +
+                  " (" +
+                  this.transformation.code +
+                  ")"
+                : ""}
+            </Typography>
           </Grid>
-          <Grid item xs>
-            <StyledNumberFormat
+          <Grid item xs={12} sm={6} md={6}>
+            <NumberFormat
               label={this.props.transformation.xtitle}
               margin="dense"
               variant="outlined"
@@ -221,8 +221,11 @@ class CoordinatesTransformRow extends React.PureComponent {
               helperText={this.state.errorX}
               thousandSeparator={this.model.thousandSeparator ? " " : false}
               customInput={TextField}
+              fullWidth={true}
             />
-            <StyledNumberFormat
+          </Grid>
+          <Grid item xs={12} sm={6} md={6}>
+            <NumberFormat
               label={this.props.transformation.ytitle}
               margin="dense"
               size="small"
@@ -238,9 +241,10 @@ class CoordinatesTransformRow extends React.PureComponent {
               helperText={this.state.errorY}
               thousandSeparator={this.model.thousandSeparator ? " " : false}
               customInput={TextField}
+              fullWidth={true}
             />
           </Grid>
-        </StyledGridContainer>
+        </Grid>
       );
     } else {
       return <></>;
