@@ -22,8 +22,8 @@ const StyledButton = styled(Button)(({ theme }) => ({
   margin: theme.spacing(0.5),
 }));
 
-const StyledGridContainer = styled(Grid)(() => ({
-  borderBottom: "1px solid #e0e0e0",
+const StyledGridContainer = styled(Grid)(({ theme }) => ({
+  padding: theme.spacing(2),
 }));
 
 //Styled Grid that centers text to the left
@@ -89,8 +89,8 @@ class CoordinatesView extends React.PureComponent {
 
   renderButtons() {
     return (
-      <Grid container item spacing={2}>
-        <Grid item>
+      <Grid container item spacing={2} rowSpacing={1}>
+        <Grid item xs={12} sm={6} md={6}>
           <Tooltip title="Rensa fält">
             <Button
               fullWidth={true}
@@ -104,7 +104,7 @@ class CoordinatesView extends React.PureComponent {
             </Button>
           </Tooltip>
         </Grid>
-        <Grid item>
+        <Grid item xs={12} sm={6} md={6}>
           <Tooltip title="Min position">
             <Button
               fullWidth={true}
@@ -118,7 +118,7 @@ class CoordinatesView extends React.PureComponent {
             </Button>
           </Tooltip>
         </Grid>
-        <Grid item>
+        <Grid item xs={12} sm={6} md={6}>
           <Tooltip title="Panorera till markering">
             <Button
               fullWidth={true}
@@ -132,7 +132,7 @@ class CoordinatesView extends React.PureComponent {
             </Button>
           </Tooltip>
         </Grid>
-        <Grid item>
+        <Grid item xs={12} sm={6} md={6}>
           <Tooltip title="Zooma in till markering">
             <Button
               fullWidth={true}
@@ -153,7 +153,12 @@ class CoordinatesView extends React.PureComponent {
   render() {
     return (
       <Root>
-        <StyledGridContainer container rowSpacing={2} columnSpacing={1}>
+        <StyledGridContainer
+          container
+          rowSpacing={2}
+          columnSpacing={1}
+          sx={{ borderBottom: 1, borderColor: "#9e9e9e" }}
+        >
           {this.renderProjections()}
         </StyledGridContainer>
         <StyledGridContainer container rowSpacing={2} columnSpacing={1}>
