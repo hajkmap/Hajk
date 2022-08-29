@@ -75,82 +75,90 @@ class CoordinatesView extends React.PureComponent {
   renderProjections() {
     return (
       <>
-        {this.props.model.transformations.map((transformation, index) => {
-          return (
-            <CoordinatesTransformRow
-              key={transformation.code + index + "-element"}
-              model={this.model}
-              transformation={transformation}
-              inverseAxis={transformation.inverseAxis}
-            />
-          );
-        })}
+        {this.props.model.transformations.map((transformation, index) => (
+          <CoordinatesTransformRow
+            key={transformation.code + index + "-element"}
+            model={this.model}
+            transformation={transformation}
+            inverseAxis={transformation.inverseAxis}
+          />
+        ))}
       </>
+    );
+  }
+
+  renderButtons() {
+    return (
+      <Grid container item spacing={2}>
+        <Grid item>
+          <Tooltip title="Rensa fält">
+            <Button
+              fullWidth={true}
+              variant="contained"
+              color="primary"
+              onClick={() => {
+                this.props.model.resetCoords();
+              }}
+            >
+              Rensa
+            </Button>
+          </Tooltip>
+        </Grid>
+        <Grid item>
+          <Tooltip title="Min position">
+            <Button
+              fullWidth={true}
+              variant="contained"
+              color="primary"
+              onClick={() => {
+                this.props.model.goToUserLocation();
+              }}
+            >
+              Min position
+            </Button>
+          </Tooltip>
+        </Grid>
+        <Grid item>
+          <Tooltip title="Panorera till markering">
+            <Button
+              fullWidth={true}
+              variant="contained"
+              color="primary"
+              onClick={() => {
+                this.props.model.centerOnMarker();
+              }}
+            >
+              Panorera
+            </Button>
+          </Tooltip>
+        </Grid>
+        <Grid item>
+          <Tooltip title="Zooma in till markering">
+            <Button
+              fullWidth={true}
+              variant="contained"
+              color="primary"
+              onClick={() => {
+                this.props.model.zoomOnMarker();
+              }}
+            >
+              Zooma
+            </Button>
+          </Tooltip>
+        </Grid>
+      </Grid>
     );
   }
 
   render() {
     return (
       <Root>
-        <StyledGridContainer container spacing={1}>
-          <Grid item>
-            <StyledGrid>Projektion</StyledGrid>
-          </Grid>
-          <Grid item xs>
-            <StyledGrid>Koordinater</StyledGrid>
-          </Grid>
+        <StyledGridContainer container rowSpacing={2} columnSpacing={1}>
+          {this.renderProjections()}
         </StyledGridContainer>
-        {this.renderProjections()}
-        <Grid container spacing={1}>
-          <Grid item>
-            <Tooltip title="Rensa fält">
-              <StyledButton
-                onClick={() => {
-                  this.props.model.resetCoords();
-                }}
-              >
-                Rensa
-              </StyledButton>
-            </Tooltip>
-            <Tooltip title="Min position">
-              <StyledButton
-                onClick={() => {
-                  this.props.model.goToUserLocation();
-                }}
-              >
-                Min position
-              </StyledButton>
-            </Tooltip>
-          </Grid>
-          <Grid item xs>
-            <Grid container direction="row-reverse">
-              <Grid item>
-                <Tooltip title="Centrera till markering">
-                  <IconButton
-                    aria-label="Centrera till markering"
-                    component="label"
-                    onClick={() => {
-                      this.props.model.centerOnMarker();
-                    }}
-                  >
-                    <ZoomInMapIcon />
-                  </IconButton>
-                </Tooltip>
-                <Tooltip title="Zooma in till markering">
-                  <IconButton
-                    aria-label="Zooma in till markering"
-                    component="label"
-                    onClick={() => {
-                      this.props.model.zoomOnMarker();
-                    }}
-                  >
-                    <ZoomInIcon />
-                  </IconButton>
-                </Tooltip>
-              </Grid>
-            </Grid>
-          </Grid>
-        </Grid>
+        <StyledGridContainer container rowSpacing={2} columnSpacing={1}>
+          {this.renderButtons()}
+        </StyledGridContainer>
       </Root>
     );
   }
