@@ -789,9 +789,11 @@ class Search extends React.PureComponent {
         ? df.replaceAll('"', "")
         : feature.get(df);
 
+      // TODO: Can this ever happen? If not - remove.
       if (Array.isArray(displayField)) {
         displayField = displayField.join(", ");
       }
+
       if (displayField) {
         // If we already have a string, let's append this value too…
         if (featureTitleString.length > 0) {
@@ -800,6 +802,11 @@ class Search extends React.PureComponent {
           // …else, just return this
           return displayField.toString();
         }
+      } else {
+        // 'displayField' can be undefined (if feature.get() can't find a value for
+        // the given attribute). In this case we must ensure that the reducer returns
+        // the previously-accumulated string.
+        return featureTitleString;
       }
     };
 
