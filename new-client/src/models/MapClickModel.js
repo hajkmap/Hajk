@@ -6,33 +6,104 @@ import TileLayer from "ol/layer/Tile";
 import ImageLayer from "ol/layer/Image";
 import VectorLayer from "ol/layer/Vector";
 import VectorSource from "ol/source/Vector";
-import { Style, Icon } from "ol/style";
+import { Style, Icon, Fill, Stroke, Circle } from "ol/style";
 import Feature from "ol/Feature";
 import Point from "ol/geom/Point";
 
+const convertRGBAtoString = (color) => {
+  if (
+    typeof color === "object" &&
+    Object.hasOwn(color, "r") &&
+    Object.hasOwn(color, "g") &&
+    Object.hasOwn(color, "b") &&
+    Object.hasOwn(color, "a")
+  ) {
+    return `rgba(${color.r},${color.g},${color.b},${color.a})`;
+  } else {
+    // Return undefined - rather than null - to ensure that
+    // no color is set if the RGBA object was incomplete.
+    return undefined;
+  }
+};
+
 export default class MapClickModel {
-  constructor(map, globalObserver) {
+  #markerStyle;
+
+  constructor(map, globalObserver, infoclickOptions) {
     this.map = map;
     this.globalObserver = globalObserver;
+    this.infoclickOptions = infoclickOptions;
 
     // Setup the parsers once and for all
     this.geoJsonParser = new GeoJSON();
     this.wmsGetFeatureInfoParser = new WMSGetFeatureInfo();
+
+    // Setup the OL style used to indicate where mouse click
+    // ocurred. We do it once, as it's kind of expensive.
+    this.#markerStyle = this.#prepareMarkerStyle();
 
     // Prepare a source and layer so that we can put
     // a marker in map when user clicks a coordinate
     this.source = new VectorSource();
     this.vector = new VectorLayer({
       source: this.source,
-      name: "MapClickModel", // #883, should we call the layers the same as models that create them?
-      type: "system", // #883: "system" for the core system layers, to differentiate from "normal" WMS/Vector/etc layers?
-      zIndex: 1000, // We want this to stay on top of other layers
+      caption: "MapClick Viewer", // #883, should we call the layers the same as models that create them?
+      name: "pluginMapClickViewer", // #883, should we call the layers the same as models that create them?
+      layerType: "system", // #883: "system" for the core system layers, to differentiate from "normal" WMS/Vector/etc layers?
+      zIndex: 5002, // We want this to stay on top of other layers
     });
     this.map.addLayer(this.vector);
 
     // Register a listener for removing the clicked marker
     this.globalObserver.subscribe("mapClick.removeMarker", this.#removeMarker);
   }
+
+  #prepareMarkerStyle = () => {
+    // If Admin UI provided a SRC for the marker icon, let's use it
+    if (this.infoclickOptions.src !== "") {
+      const { anchor, fillColor, scale, src } = this.infoclickOptions;
+      // fillColor is an object with r, g, b and a properties. OL
+      // wants a string. Use this handy converter:
+      const color = convertRGBAtoString(fillColor);
+
+      return new Style({
+        image: new Icon({
+          anchor,
+          scale,
+          src,
+          color,
+        }),
+      });
+    } else {
+      // No icon defined - let's create a circle to indicate
+      // where click ocurred. We will use the colors provided in
+      // Admin UI, but ignore the stroke width. The reason is that
+      // we always hard-code the circle radius (to 5), and letting
+      // admin set stroke width to something else (perhaps 6?) would
+      // give unexpected results. The stroke width is still important
+      // (for the polygon stroke width), but as I said, we ignore it
+      // for the circle marker.
+      const { fillColor, strokeColor } = this.infoclickOptions;
+
+      const fill = new Fill({
+        color: convertRGBAtoString(fillColor),
+      });
+      const stroke = new Stroke({
+        color: convertRGBAtoString(strokeColor),
+        width: 1, // hard-coded on purpose
+      });
+
+      return new Style({
+        image: new Circle({
+          fill: fill,
+          stroke: stroke,
+          radius: 5, // hard-coded on purpose
+        }),
+        fill: fill,
+        stroke: stroke,
+      });
+    }
+  };
 
   /**
    * @summary Public method that handles the map click event and calls
@@ -133,10 +204,26 @@ export default class MapClickModel {
             // The only way to get it now is by looking into
             // the feature id, because it includes the layer's
             // name as a part of the id itself.
-            const layerName = this.#getLayerNameFromFeatureAndLayer(
+            let layerName = this.#getLayerNameFromFeatureAndLayer(
               feature,
               response.value.layer
             );
+
+            // Special case that can happen occur for WMS raster responses,
+            // see also #1090.
+            if (
+              layerName === undefined &&
+              feature.getId() === "" &&
+              response.value.layer.subLayers.length === 1
+            ) {
+              // Let's assume that the layer's name is the name of the first layer
+              layerName = response.value.layer.subLayers[0];
+
+              // Make sure to set a feature ID - without it we won't be able to
+              // set/unset selected feature later on (an absolut requirement to
+              // properly render components that follow such as Pagination, Markdown).
+              feature.setId("fakeFeatureIdIssue1090");
+            }
 
             // Having just the layer's name as an ID is not safe - multiple
             // WFS's may use the same name for two totally different layers.
@@ -243,7 +330,7 @@ export default class MapClickModel {
       this.map.forEachFeatureAtPixel(
         e.pixel,
         (feature, layer) => {
-          if (layer?.get("type") === "searchResultLayer") {
+          if (layer?.get("name") === "pluginSearchResults") {
             // Super-special case here: we don't follow the new
             // interface for a return object (see the "r" constant above),
             // because we want to conform to the old, working search results
@@ -377,15 +464,7 @@ export default class MapClickModel {
       geometry: new Point(coordinates),
     });
 
-    // Style it with a nice icon
-    const styleMarker = new Style({
-      image: new Icon({
-        anchor: [0.5, 1],
-        scale: 0.15,
-        src: "marker.png",
-      }),
-    });
-    feature.setStyle(styleMarker);
+    feature.setStyle(this.#markerStyle);
 
     // Remove any previous markers
     this.#removeMarker();
@@ -404,6 +483,8 @@ export default class MapClickModel {
      * @description Admin UI can set the displayFields property. If it exists, we want to grab
      * the specified properties' values for the given feature. If our attempt results in an
      * empty string, we try with a fallback.
+     * In addition, if the string that comes from Admin UI is surrounded by quotations marks, we
+     * see it as a hard-coded label that should be printed directly to the user.
      *
      * @param {Feature} feature
      * @return {string} Label describing the feature
@@ -412,7 +493,13 @@ export default class MapClickModel {
       return (
         fields
           .map((df) => {
-            return feature.get(df);
+            // Check if our display field starts and ends with a double quote. If yes,
+            // this is a special label that should be printed directly to the UI.
+            // If not, this is a name of a field and we should try to grab its value
+            // from the feature.
+            return /(^".*?"$)/g.test(df)
+              ? df.replaceAll('"', "")
+              : feature.get(df);
           })
           .filter((i) => i) // Get rid of all falsy values like undefined or ""
           .join(", ") || // Join values from specified display fields…
@@ -447,6 +534,13 @@ export default class MapClickModel {
         collection.features = collection.features.sort(basicLocaleCompare);
       }
     }
+
+    // Sort the feature collections themselves using the displayName property.
+    // As the SearchResults collection doesn't have the needed property, we
+    // must do the conditional check before calling localeCompare.
+    featureCollections.sort((a, b) => {
+      return a.displayName?.localeCompare(b.displayName);
+    });
 
     return featureCollections;
   }

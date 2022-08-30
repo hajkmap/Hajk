@@ -330,12 +330,15 @@ class AppModel {
     // So, we create the Set no matter what:
     this.map.clickLock = new Set();
 
-    const useNewInfoclick =
-      config.tools.find((t) => t.type === "infoclick")?.options
-        ?.useNewInfoclick === true;
-    if (useNewInfoclick) {
-      console.log("useNewInfoclick: ", useNewInfoclick);
-      const mapClickModel = new MapClickModel(this.map, this.globalObserver);
+    const infoclickOptions = config.tools.find(
+      (t) => t.type === "infoclick"
+    )?.options;
+    if (infoclickOptions?.useNewInfoclick === true) {
+      const mapClickModel = new MapClickModel(
+        this.map,
+        this.globalObserver,
+        infoclickOptions
+      );
 
       mapClickModel.bindMapClick((featureCollections) => {
         const featureCollectionsToBeHandledByMapClickViewer =
@@ -372,7 +375,7 @@ class AppModel {
     // map without infoclick, which seems as an unnecessary limitation.
     if (
       config.tools.some((tool) => tool.type === "infoclick") &&
-      useNewInfoclick === false
+      infoclickOptions?.useNewInfoclick !== true
     ) {
       bindMapClickEvent(this.map, (mapClickDataResult) => {
         // We have to separate features coming from the searchResult-layer
@@ -380,12 +383,12 @@ class AppModel {
         // search-component rather than in the featureInfo-component.
         const searchResultFeatures = mapClickDataResult.features.filter(
           (feature) => {
-            return feature?.layer.get("type") === "searchResultLayer";
+            return feature?.layer.get("name") === "pluginSearchResults";
           }
         );
         const infoclickFeatures = mapClickDataResult.features.filter(
           (feature) => {
-            return feature?.layer.get("type") !== "searchResultLayer";
+            return feature?.layer.get("name") !== "pluginSearchResults";
           }
         );
 
@@ -439,19 +442,16 @@ class AppModel {
     this.clearing = true;
     this.highlight(false);
     this.map
-      .getLayers()
-      .getArray()
-      .forEach((layer) => {
-        if (
-          layer.getProperties &&
-          layer.getProperties().layerInfo &&
-          layer.getProperties().layerInfo.layerType === "layer"
-        ) {
-          if (layer.layerType === "group") {
-            this.globalObserver.publish("layerswitcher.hideLayer", layer);
-          } else {
-            layer.setVisible(false);
-          }
+      .getAllLayers()
+      .filter(
+        (l) =>
+          l.getVisible() === true &&
+          ["layer", "group"].includes(l.get("layerType"))
+      )
+      .forEach((l) => {
+        l.setVisible(false);
+        if (l.get("layerType") === "group") {
+          this.globalObserver.publish("layerswitcher.hideLayer", l);
         }
       });
     setTimeout(() => {
@@ -504,11 +504,13 @@ class AppModel {
   }
 
   lookup(layers, type) {
-    var matchedLayers = [];
+    const matchedLayers = [];
     layers.forEach((layer) => {
       const layerConfig = this.config.layersConfig.find(
         (lookupLayer) => lookupLayer.id === layer.id
       );
+      // Note that "layer" below IS NOT an OL Layer, only a structure from our config.
+      // Hence, no layer.set("layerType"). Instead we do this:
       layer.layerType = type;
       // Use the general value for infobox if not present in map config.
       if (layerConfig !== undefined && layerConfig.type === "vector") {
@@ -554,19 +556,16 @@ class AppModel {
 
     // Prepare layers
     this.layers = this.flattern(layerSwitcherConfig);
-    // FIXME: Use map instead?
-    Object.keys(this.layers)
-      .sort((a, b) => this.layers[a].drawOrder - this.layers[b].drawOrder)
-      .map((sortedKey) => this.layers[sortedKey])
-      .forEach((layer) => {
-        if (this.layersFromParams.length > 0) {
-          layer.visibleAtStart = this.layersFromParams.some(
-            (layerId) => layerId === layer.id
-          );
-        }
-        layer.cqlFilter = this.cqlFiltersFromParams[layer.id] || null;
-        this.addMapLayer(layer);
-      });
+    // Loop the layers and add each of them to the map
+    this.layers.forEach((layer) => {
+      if (this.layersFromParams.length > 0) {
+        layer.visibleAtStart = this.layersFromParams.some(
+          (layerId) => layerId === layer.id
+        );
+      }
+      layer.cqlFilter = this.cqlFiltersFromParams[layer.id] || null;
+      this.addMapLayer(layer);
+    });
 
     // FIXME: Move to infoClick instead. All other plugins create their own layers.
     if (infoclickConfig !== undefined) {
@@ -592,6 +591,10 @@ class AppModel {
     ];
     this.highlightSource = new VectorSource();
     this.highlightLayer = new VectorLayer({
+      caption: "Infoclick layer",
+      name: "pluginInfoclick",
+      layerType: "system",
+      zIndex: 5001, // System layer's zIndex start at 5000, ensure click is above
       source: this.highlightSource,
       style: new Style({
         stroke: new Stroke({

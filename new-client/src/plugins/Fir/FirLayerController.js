@@ -5,7 +5,7 @@ import { Style, Icon } from "ol/style";
 import Feature from "ol/Feature.js";
 import HajkTransformer from "utils/HajkTransformer";
 import { Point } from "ol/geom.js";
-import styles from "./FirStyles";
+import FirStyles from "./FirStyles";
 import { hfetch } from "utils/FetchWrapper";
 import { GeoJSON } from "ol/format";
 
@@ -23,6 +23,7 @@ class FirLayerController {
       projection: this.model.app.map.getView().getProjection().getCode(),
     });
 
+    this.styles = new FirStyles(this.model);
     this.initLayers();
     this.initListeners();
   }
@@ -42,6 +43,8 @@ class FirLayerController {
     }
 
     this.model.layers.feature = new VectorLayer({
+      layerType: "system",
+      zIndex: 5000,
       caption: "FIRSearchResultsLayer",
       name: "FIRSearchResultsLayer",
       source: new VectorSource(),
@@ -50,6 +53,8 @@ class FirLayerController {
     });
 
     this.model.layers.highlight = new VectorLayer({
+      layerType: "system",
+      zIndex: 5000,
       caption: "FIRHighlightsLayer",
       name: "FIRHighlightsLayer",
       source: new VectorSource(),
@@ -58,6 +63,8 @@ class FirLayerController {
     });
 
     this.model.layers.buffer = new VectorLayer({
+      layerType: "system",
+      zIndex: 5000,
       caption: "FIRBufferLayer",
       name: "FIRBufferLayer",
       source: new VectorSource(),
@@ -66,6 +73,8 @@ class FirLayerController {
     });
 
     this.model.layers.draw = new VectorLayer({
+      layerType: "system",
+      zIndex: 5000,
       caption: "FIRDrawLayer",
       name: "FIRDrawLayer",
       source: new VectorSource(),
@@ -80,6 +89,8 @@ class FirLayerController {
     });
 
     this.model.layers.label = new VectorLayer({
+      layerType: "system",
+      zIndex: 5000,
       caption: "FIRLabels",
       name: "FIRLabels",
       source: new VectorSource(),
@@ -88,6 +99,8 @@ class FirLayerController {
     });
 
     this.model.layers.marker = new VectorLayer({
+      layerType: "system",
+      zIndex: 5000,
       caption: "FIRMarker",
       name: "FIRMarker",
       source: new VectorSource(),
@@ -198,7 +211,7 @@ class FirLayerController {
     }
 
     arr.forEach((feature) => {
-      feature.setStyle(styles.getResultStyle());
+      feature.setStyle(this.styles.getResultStyle());
     });
 
     this.model.layers.feature.getSource().addFeatures(arr);
@@ -228,7 +241,7 @@ class FirLayerController {
 
     featureArr.forEach((feature) => {
       let c = feature.clone();
-      c.setStyle(styles.getLabelStyle(feature));
+      c.setStyle(this.styles.getLabelStyle(feature));
       c.set("owner_ol_uid", feature.ol_uid);
       arr.push(c);
     });
@@ -264,7 +277,7 @@ class FirLayerController {
       this.observer.publish("fir.search.feature.deselected", feature);
     } else {
       let clone = feature.clone();
-      clone.setStyle(styles.getHighlightStyle());
+      clone.setStyle(this.styles.getHighlightStyle());
       clone.set("owner_ol_uid", feature.ol_uid);
       this.model.layers.highlight.getSource().addFeature(clone);
       this.observer.publish("fir.search.feature.selected", feature);

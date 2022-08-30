@@ -26,6 +26,7 @@ import {
 } from "@mui/material";
 import { visuallyHidden } from "@mui/utils";
 import { styled } from "@mui/material/styles";
+import { Visibility, VisibilityOff } from "@mui/icons-material";
 
 // A HOC that pipes isMobile to the children. See this as a proposed
 // solution. It is not pretty, but if we move this to a separate file
@@ -97,6 +98,31 @@ class SearchBar extends React.PureComponent {
     moreOptionsId: undefined,
     moreOptionsOpen: false,
     selectSourcesOpen: false,
+    resultsLayerVisible: true,
+  };
+
+  componentDidMount() {
+    // The OL layer that holds the result features. We grab
+    // it here so we can control its visibility using a button
+    // in the search bar.
+    this.resultsLayer = this.props.mapViewModel.resultsLayer;
+
+    // Ensure that our state is synced to the actual visibility state
+    // of the OL layer
+    if (this.resultsLayer.getVisible() !== true) {
+      this.setState({ resultsLayer: false });
+    }
+  }
+
+  toggleResultsLayerVisibility = () => {
+    const isVisible = this.resultsLayer.getVisible();
+    if (isVisible) {
+      this.resultsLayer.setVisible(false);
+      this.setState({ resultsLayerVisible: false });
+    } else {
+      this.resultsLayer.setVisible(true);
+      this.setState({ resultsLayerVisible: true });
+    }
   };
 
   getOriginBasedIcon = (origin) => {
@@ -288,7 +314,10 @@ class SearchBar extends React.PureComponent {
         renderOption={(props, option) => {
           if (searchString.length > 0) {
             return (
-              <Grid container alignItems="center" {...props}>
+              // Important: the `key` prop must be set last, so we override the
+              // one that gets there when we spread props (there is already a key
+              // there, which can become duplicated under some circumstances).
+              <Grid container alignItems="center" {...props} key={props.id}>
                 <Grid item xs={1}>
                   {this.getOriginBasedIcon(option.origin)}
                 </Grid>
@@ -353,9 +382,15 @@ class SearchBar extends React.PureComponent {
     const disableUnderline = isMobile ? { disableUnderline: true } : null;
     const showFailedWFSMessage =
       failedWFSFetchMessage.length > 0 && showSearchResults;
+
     const expandMessage = resultPanelCollapsed
-      ? "Visa sökresultat"
-      : "Dölj sökresultat";
+      ? "Visa lista med sökresultat"
+      : "Dölj lista med sökresultat";
+
+    const toggleResultsLayerVisibilityMessage = this.state.resultsLayerVisible
+      ? "Dölj sökresultat i kartan"
+      : "Visa sökresultat i kartan";
+
     const placeholder = this.getPlaceholder();
     return (
       <TextField
@@ -382,27 +417,50 @@ class SearchBar extends React.PureComponent {
                     size="small"
                     onClick={handleOnClickOrKeyboardSearch}
                   >
-                    <span style={visuallyHidden}>Exekvera sökning</span>
+                    <span style={visuallyHidden}>Utför sökning</span>
                     <SearchIcon />
                   </IconButton>
                 </Tooltip>
               ) : (
-                <Tooltip disableInteractive title={expandMessage}>
-                  <IconButton
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      toggleCollapseSearchResults();
-                    }}
-                    size="small"
+                <>
+                  <Tooltip disableInteractive title={expandMessage}>
+                    <IconButton
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        toggleCollapseSearchResults();
+                      }}
+                      size="small"
+                    >
+                      <span style={visuallyHidden}>{expandMessage}</span>
+                      {resultPanelCollapsed ? (
+                        <ExpandMoreIcon />
+                      ) : (
+                        <ExpandLessIcon />
+                      )}
+                    </IconButton>
+                  </Tooltip>
+                  <Tooltip
+                    disableInteractive
+                    title={toggleResultsLayerVisibilityMessage}
                   >
-                    <span style={visuallyHidden}>{expandMessage}</span>
-                    {resultPanelCollapsed ? (
-                      <ExpandMoreIcon />
-                    ) : (
-                      <ExpandLessIcon />
-                    )}
-                  </IconButton>
-                </Tooltip>
+                    <IconButton
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        this.toggleResultsLayerVisibility();
+                      }}
+                      size="small"
+                    >
+                      <span style={visuallyHidden}>
+                        {toggleResultsLayerVisibilityMessage}
+                      </span>
+                      {this.state.resultsLayerVisible ? (
+                        <VisibilityOff />
+                      ) : (
+                        <Visibility />
+                      )}
+                    </IconButton>
+                  </Tooltip>
+                </>
               )}
               {searchString.length > 0 ||
               showSearchResults ||

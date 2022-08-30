@@ -70,7 +70,7 @@ export default class MapViewModel {
 
     this.localObserver.subscribe("close-all-vt-searchLayer", () => {
       this.map.getLayers().forEach((layer) => {
-        if (layer.get("type") === "vt-search-result-layer")
+        if (layer.get("name") === "vt-search-result-layer")
           this.map.removeLayer(layer);
       });
     });
@@ -133,7 +133,7 @@ export default class MapViewModel {
       .getArray()
       .filter((layer) => {
         return (
-          layer.get("type") === "vt-search-result-layer" &&
+          layer.get("name") === "vt-search-result-layer" &&
           layer.get("searchResultId") === searchResultId
         );
       })[0];
@@ -276,6 +276,8 @@ export default class MapViewModel {
 
   addDrawSearch = () => {
     this.drawlayer = new VectorLayer({
+      layerType: "system",
+      zIndex: 5000,
       source: new VectorSource({}),
     });
     this.map.addLayer(this.drawlayer);
@@ -303,6 +305,8 @@ export default class MapViewModel {
       width: this.model.mapColors.searchStrokeLineWidth,
     });
     var searchResultLayer = new VectorLayer({
+      layerType: "system",
+      zIndex: 5000,
       style: new Style({
         image: new Circle({
           fill: fill,
@@ -315,7 +319,7 @@ export default class MapViewModel {
       source: new VectorSource({}),
     });
     console.log(this.map, "map");
-    searchResultLayer.set("type", "vt-search-result-layer");
+    searchResultLayer.set("name", "vt-search-result-layer");
     searchResultLayer.set("searchResultId", searchResultId);
     searchResultLayer.set("queryable", false);
     searchResultLayer.set("visible", false);
@@ -347,6 +351,8 @@ export default class MapViewModel {
     });
 
     this.highlightLayer = new VectorLayer({
+      layerType: "system",
+      zIndex: 5000,
       style: new Style({
         image: new Circle({
           fill: fill,
@@ -358,8 +364,7 @@ export default class MapViewModel {
       }),
       source: new VectorSource({}),
     });
-    this.highlightLayer.set("type", "vt-highlight-layer");
-    this.highlightLayer.setZIndex(50);
+    this.highlightLayer.set("name", "vt-highlight-layer");
     this.map.addLayer(this.highlightLayer);
   };
 
@@ -432,7 +437,7 @@ export default class MapViewModel {
    */
   hideAllLayers = () => {
     this.map.getLayers().forEach((layer) => {
-      if (layer.get("type") === "vt-search-result-layer") {
+      if (layer.get("name") === "vt-search-result-layer") {
         layer.set("visible", false);
       }
     });
@@ -465,7 +470,7 @@ export default class MapViewModel {
     this.map.forEachFeatureAtPixel(
       evt.pixel,
       (feature, layer) => {
-        if (layer.get("type") === "vt-search-result-layer") {
+        if (layer.get("name") === "vt-search-result-layer") {
           features.push(feature);
         }
       },

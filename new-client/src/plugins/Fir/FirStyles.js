@@ -1,16 +1,18 @@
 import { Fill, Stroke, Style, Text, Circle } from "ol/style";
 
 class FirStyles {
-  constructor() {
+  constructor(model) {
+    const config = model.config;
     this.colors = {
-      colorResult: "rgba(255,255,0,0.15)",
-      colorResultStroke: "rgba(0,0,0,0.6)",
-      colorHighlight: "rgba(255,255,0,0.25)",
-      colorHighlightStroke: "rgba(0, 130, 179, 1)",
-      colorResult100: "rgba(255,255,0,1)",
-      colorResultStroke100: "rgba(0,0,0,1)",
+      result: config.colors?.result || "rgba(255,255,0,0.15)",
+      resultStroke: config.colors?.resultStroke || "rgba(0,0,0,0.6)",
+      highlight: config.colors?.highlight || "rgba(255,255,0,0.25)",
+      highlightStroke: config.colors?.highlightStroke || "rgba(0, 130, 179, 1)",
+      point: config.colors?.point || "rgba(255,255,0,1)",
+      pointStroke: config.colors?.pointStroke || "rgba(0,0,0,1)",
     };
-    this.model = {};
+
+    this.model = model;
     this.setResultStyle();
     this.setHighlightStyle();
     this.setPointStyle();
@@ -27,10 +29,10 @@ class FirStyles {
   setResultStyle() {
     this.resultStyle = new Style({
       fill: new Fill({
-        color: this.getColor("colorResult"),
+        color: this.getColor("result"),
       }),
       stroke: new Stroke({
-        color: this.getColor("colorResultStroke"),
+        color: this.getColor("resultStroke"),
         width: 2,
       }),
     });
@@ -40,17 +42,13 @@ class FirStyles {
     return this.highlightStyle;
   }
 
-  setModel(model) {
-    this.model = model;
-  }
-
   setHighlightStyle() {
     this.highlightStyle = new Style({
       fill: new Fill({
-        color: this.getColor("colorHighlight"),
+        color: this.getColor("highlight"),
       }),
       stroke: new Stroke({
-        color: this.getColor("colorHighlightStroke"),
+        color: this.getColor("highlightStroke"),
         width: 3,
       }),
     });
@@ -76,10 +74,10 @@ class FirStyles {
 
   setPointStyle() {
     const fill = new Fill({
-      color: this.getColor("colorResult100"),
+      color: this.getColor("point"),
     });
     const stroke = new Stroke({
-      color: this.getColor("colorResultStroke100"),
+      color: this.getColor("pointStroke"),
       width: 2,
     });
 
@@ -95,6 +93,4 @@ class FirStyles {
   }
 }
 
-const instance = new FirStyles();
-
-export default instance;
+export default FirStyles;

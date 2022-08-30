@@ -48,10 +48,11 @@ class MapViewModel {
     return new VectorSource({ wrapX: false });
   };
 
-  getNewVectorLayer = (source, style) => {
+  getNewVectorLayer = (source, style, props = {}) => {
     return new VectorLayer({
       source: source,
       style: style,
+      ...props,
     });
   };
 
@@ -90,18 +91,25 @@ class MapViewModel {
       this.resultSource,
       this.options.showResultFeaturesInMap ?? true
         ? this.featureStyle.getDefaultSearchResultStyle
-        : null
+        : null,
+      {
+        layerType: "system",
+        zIndex: 5000,
+        name: "pluginSearchResults",
+        caption: "Search results",
+      }
     );
-    // FIXME: Remove "type", use only "name" throughout
-    // the application. Should be done as part of #883.
-    this.resultsLayer.set("type", "searchResultLayer");
-    this.resultsLayer.set("name", "pluginSearchResults");
     this.drawSource = this.getNewVectorSource();
     this.drawLayer = this.getNewVectorLayer(
       this.drawSource,
-      this.getDrawStyle()
+      this.getDrawStyle(),
+      {
+        layerType: "system",
+        zIndex: 5000,
+        name: "pluginSearchDraw",
+        caption: "Search draw",
+      }
     );
-    this.drawLayer.set("name", "pluginSearchDraw");
     this.map.addLayer(this.drawLayer);
     this.map.addLayer(this.resultsLayer);
   };
@@ -148,6 +156,15 @@ class MapViewModel {
         } else {
           this.toggleDraw(true, options.type);
         }
+
+        // Tell the analytics model about which spatial search
+        // modes are most important for our users by sending the
+        // type of search performed.
+        this.app.globalObserver.publish("analytics.trackEvent", {
+          eventName: "spatialSearchPerformed",
+          type: options.type?.toLowerCase(),
+          activeMap: this.app.props.config.activeMap,
+        });
 
         // At this stage, the Search input field could be in focus. On
         // mobile devices the on-screen keyboard will show up. We don't

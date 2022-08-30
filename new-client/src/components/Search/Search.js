@@ -109,6 +109,7 @@ class Search extends React.PureComponent {
     this.map = props.map;
     this.searchModel = props.app.appModel.searchModel;
     this.globalObserver = props.app.globalObserver;
+    this.disableAutocomplete = props.options.disableAutocomplete ?? false;
     this.initMapViewModel();
     this.initExportHandlers();
     this.bindSubscriptions();
@@ -384,6 +385,11 @@ class Search extends React.PureComponent {
     );
   };
 
+  // This function name is a bit confusing... It's really a handler for the search-bar-input (which is an
+  // <Autocomplete />-component, therefore the name). This change-handler makes sure to check the text inputted by
+  // the user, and if no input has been seen for 'this.delayBeforeAutoSearch' a search is conducted. The search will result
+  // in some autocomplete-objects, (if 'this.disableAutocomplete' is set to false) or some search-result-objects (if
+  // 'this.disableAutocomplete' is set to true).
   handleOnAutocompleteInputChange = (event, searchString, reason) => {
     if (this.isUserInput(searchString, reason)) {
       clearTimeout(this.timer);
@@ -399,9 +405,15 @@ class Search extends React.PureComponent {
             resultPanelCollapsed: false,
           },
           () => {
+            // If the search-string is long enough, we can perform a search...
             if (this.state.searchString.length >= 3) {
-              this.updateAutocompleteList(this.state.searchString);
+              // If the autocomplete should be disabled, we perform a regular search
+              // with doSearch(), otherwise we'll fetch some autoComplete-objects.
+              this.disableAutocomplete
+                ? this.doSearch()
+                : this.updateAutocompleteList(this.state.searchString);
             } else {
+              // If the search-string is not long enough, we'll reset the autoComplete.
               this.setState({
                 autocompleteList: [],
               });
@@ -769,18 +781,33 @@ class Search extends React.PureComponent {
     }
 
     const reducerFn = (featureTitleString, df) => {
-      let displayField = feature.get(df);
+      // Check if our display field (df) starts and ends with a double quote. If yes,
+      // this is a special label that should be printed directly to the UI.
+      // If not, this is a name of a field and we should try to grab its value
+      // from the feature.
+      let displayField = /(^".*?"$)/g.test(df)
+        ? df.replaceAll('"', "")
+        : feature.get(df);
+
+      // TODO: Can this ever happen? If not - remove.
       if (Array.isArray(displayField)) {
         displayField = displayField.join(", ");
       }
+
       if (displayField) {
+        // If we already have a string, let's append this value too…
         if (featureTitleString.length > 0) {
-          featureTitleString = featureTitleString.concat(` | ${displayField}`);
+          return featureTitleString.concat(` | ${displayField}`);
         } else {
-          featureTitleString = displayField.toString();
+          // …else, just return this
+          return displayField.toString();
         }
+      } else {
+        // 'displayField' can be undefined (if feature.get() can't find a value for
+        // the given attribute). In this case we must ensure that the reducer returns
+        // the previously-accumulated string.
+        return featureTitleString;
       }
-      return featureTitleString;
     };
 
     // Prepare the title be using the defined displayFields. Note that this
@@ -1029,6 +1056,7 @@ class Search extends React.PureComponent {
           handleSearchBarKeyPress={this.handleSearchBarKeyPress}
           getArrayWithSearchWords={this.getArrayWithSearchWords}
           failedWFSFetchMessage={failedWFSFetchMessage}
+          mapViewModel={this.mapViewModel}
           {...this.props}
         />
       )

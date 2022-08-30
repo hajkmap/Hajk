@@ -26,7 +26,10 @@ class StreetViewModel {
 
     this.streetViewMarkerLayer = new Vector({
       source: new VectorSource({}),
-      name: "streetViewMarkerLayer",
+      layerType: "system",
+      zIndex: 5000,
+      name: "pluginStreetView",
+      caption: "StreetView layer",
     });
     this.map.addLayer(this.streetViewMarkerLayer);
   }

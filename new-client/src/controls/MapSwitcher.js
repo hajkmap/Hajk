@@ -29,6 +29,11 @@ class MapSwitcher extends React.PureComponent {
 
   handleLoading(maps) {
     let { activeMap } = this.appModel.config;
+
+    maps.sort((a, b) =>
+      a.mapConfigurationTitle.localeCompare(b.mapConfigurationTitle)
+    );
+
     // Save fetched map configs to global variable
     this.maps = maps;
 
@@ -59,20 +64,16 @@ class MapSwitcher extends React.PureComponent {
   }
 
   renderMenuItems = () => {
-    let menuItems = [];
-    this.maps.forEach((item, index) => {
-      menuItems.push(
-        <MenuItem
-          key={index}
-          // disabled={index === this.state.selectedIndex}
-          selected={index === this.state.selectedIndex}
-          onClick={(event) => this.handleMenuItemClick(event, index)}
-        >
-          {item.mapConfigurationTitle}
-        </MenuItem>
-      );
-    });
-    return menuItems;
+    return this.maps.map((item, index) => (
+      <MenuItem
+        key={index}
+        // disabled={index === this.state.selectedIndex}
+        selected={index === this.state.selectedIndex}
+        onClick={(event) => this.handleMenuItemClick(event, index)}
+      >
+        {item.mapConfigurationTitle}
+      </MenuItem>
+    ));
   };
 
   // Show dropdown menu, anchored to the element clicked

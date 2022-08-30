@@ -6,6 +6,7 @@ import { SnackbarProvider } from "notistack";
 import Observer from "react-event-observer";
 import { isMobile } from "../utils/IsMobile";
 import SrShortcuts from "../components/SrShortcuts/SrShortcuts";
+import Analytics from "../models/Analytics";
 import AppModel from "../models/AppModel.js";
 import {
   setConfig as setCookieConfig,
@@ -33,6 +34,7 @@ import MapResetter from "../controls/MapResetter";
 import MapSwitcher from "../controls/MapSwitcher";
 import Information from "../controls/Information";
 import PresetLinks from "../controls/PresetLinks";
+import ExternalLinks from "../controls/ExternalLinks";
 
 import DrawerToggleButtons from "../components/Drawer/DrawerToggleButtons";
 
@@ -330,6 +332,9 @@ class App extends React.PureComponent {
 
     this.globalObserver = new Observer();
 
+    // Initiate the Analytics model
+    props.config.mapConfig.analytics && this.initiateAnalyticsModel();
+
     this.infoclickOptions = this.props.config.mapConfig.tools.find(
       (t) => t.type === "infoclick"
     )?.options;
@@ -388,6 +393,20 @@ class App extends React.PureComponent {
       )}. Please check your map config and buildConfig.json.  `
     );
   };
+  /**
+   * @summary Initiates the wanted analytics model (if any).
+   * @description If Hajk is configured to track map usage, this method will
+   * initialize the model and subscribe to two events ("analytics.trackPageView"
+   * and "analytics.trackEvent").
+   *
+   * @memberof App
+   */
+  initiateAnalyticsModel() {
+    this.analytics = new Analytics(
+      this.props.config.mapConfig.analytics,
+      this.globalObserver
+    );
+  }
 
   componentDidMount() {
     this.checkConfigForUnsupportedTools();
@@ -399,6 +418,17 @@ class App extends React.PureComponent {
       .loadPlugins(this.props.activeTools);
 
     Promise.all(promises).then(() => {
+      // Track the page view
+      this.globalObserver.publish("analytics.trackPageView");
+
+      // Track the mapLoaded event, distinguish between regular and
+      // cleanMode loads. See #1077.
+      this.globalObserver.publish("analytics.trackEvent", {
+        eventName: "mapLoaded",
+        activeMap: this.props.config.activeMap,
+        cleanMode: this.props.config.mapConfig.map.clean,
+      });
+
       this.setState(
         {
           tools: this.appModel.getPlugins(),
@@ -423,6 +453,9 @@ class App extends React.PureComponent {
                 return null; // Nothing specific should be rendered - this is a special case!
               },
             });
+
+          // Ensure to update the map canvas size. Otherwise we can run into #1058.
+          this.appModel.getMap().updateSize();
 
           // Tell everyone that we're done loading (in case someone listens)
           this.globalObserver.publish("core.appLoaded");
@@ -538,13 +571,27 @@ class App extends React.PureComponent {
     //     });
     //   });
 
-    // TODO: More plugins could use this - currently only Snap helper registers though
+    // Add some listeners to each layer's change event
     this.appModel
       .getMap()
       .getLayers()
       .getArray()
       .forEach((layer) => {
         layer.on("change:visible", (e) => {
+          // If the Analytics object exists, let's track layer visibility
+          if (this.analytics && e.target.get("visible") === true) {
+            const opts = {
+              eventName: "layerShown",
+              activeMap: this.props.config.activeMap,
+              layerId: e.target.get("name"),
+              layerName: e.target.get("caption"),
+            };
+            // Send a custom event to the Analytics model
+            this.globalObserver.publish("analytics.trackEvent", opts);
+          }
+
+          // Not related to Analytics: send an event on the global observer
+          // to anyone wanting to act on layer visibility change.
           this.globalObserver.publish("core.layerVisibilityChanged", e);
         });
       });
@@ -926,6 +973,7 @@ class App extends React.PureComponent {
                 {showMapSwitcher && <MapSwitcher appModel={this.appModel} />}
                 {clean === false && <MapCleaner appModel={this.appModel} />}
                 {clean === false && <PresetLinks appModel={this.appModel} />}
+                {clean === false && <ExternalLinks appModel={this.appModel} />}
                 {clean === false && (
                   <ThemeToggler
                     showThemeToggler={

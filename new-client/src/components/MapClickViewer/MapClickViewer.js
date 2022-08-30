@@ -8,6 +8,7 @@ import { MapClickViewerContext } from "./MapClickViewerContext";
 
 const MapClickViewer = (props) => {
   const { appModel, globalObserver, infoclickOptions } = props;
+  const { activeMap } = appModel.config;
 
   const [open, setOpen] = useState(false);
   const [featureCollections, setFeatureCollections] = useState([]);
@@ -46,6 +47,11 @@ const MapClickViewer = (props) => {
         if (fc.length > 0) {
           setFeatureCollections(fc);
           setOpen(true);
+          globalObserver.publish("analytics.trackEvent", {
+            eventName: "pluginShown",
+            pluginName: "mapclickviewer",
+            activeMap: activeMap,
+          });
         } else {
           closeWindow();
         }
@@ -54,16 +60,18 @@ const MapClickViewer = (props) => {
     return () => {
       mapClickObserver.unsubscribe();
     };
-  }, [closeWindow, globalObserver]);
+  }, [closeWindow, globalObserver, activeMap]);
+
+  const { height, position, title, width } = props.infoclickOptions;
 
   return (
     <Window
       globalObserver={props.globalObserver}
-      title="Information"
+      title={title || "Information"}
       open={open}
-      height="dynamic"
-      width={400}
-      position="right"
+      height={height || "dynamic"}
+      width={width || 400}
+      position={position || "right"}
       mode="window"
       onClose={closeWindow}
     >

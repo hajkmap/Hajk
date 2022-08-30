@@ -84,11 +84,29 @@ const FmeServerView = (props) => {
     {
       label: `Välj ${groupDisplayName.toLowerCase()}`,
       renderFunction: renderChooseGroupStep,
+      renderValueFunction: () => {
+        return renderSelectedValue(activeGroup);
+      },
     },
-    { label: "Välj produkt", renderFunction: renderChooseProductStep },
-    { label: "Välj omfattning", renderFunction: renderDrawGeometryStep },
-    { label: "Fyll i parametrar", renderFunction: renderEnterParametersStep },
-    { label: "Beställ", renderFunction: renderOrderStep },
+    {
+      label: "Välj produkt",
+      renderFunction: renderChooseProductStep,
+      renderValueFunction: () => {
+        return renderSelectedValue(activeProduct);
+      },
+    },
+    {
+      label: "Välj omfattning",
+      renderFunction: renderDrawGeometryStep,
+    },
+    {
+      label: "Fyll i parametrar",
+      renderFunction: renderEnterParametersStep,
+    },
+    {
+      label: "Beställ",
+      renderFunction: renderOrderStep,
+    },
   ];
 
   // We are using a custom hook to poll data. If we are polling (determined
@@ -572,6 +590,18 @@ const FmeServerView = (props) => {
     );
   }
 
+  function renderSelectedValue(value) {
+    if (!value) return;
+
+    // Renders the selected value under the steps title
+    // Is currently only used for group and product.
+    return (
+      <div style={{ position: "relative", fontWeight: "normal", height: "0" }}>
+        {value}
+      </div>
+    );
+  }
+
   // Renders the content for the step where the user can select
   // which group they want to get their products from. If no group is selected,
   // the user cannot continue to the next step.
@@ -582,6 +612,14 @@ const FmeServerView = (props) => {
       props.options?.productGroups?.length > 0
         ? props.options.productGroups.sort()
         : [];
+
+    // If only one group is available from config, select it automatically
+    // and proceed to the next step.
+    if (groupsToRender.length === 1 && activeGroup === "") {
+      setActiveGroup(groupsToRender[0]);
+      setActiveStep(activeStep + 1);
+    }
+
     return (
       <Grid container item xs={12}>
         {groupsToRender.length > 0 ? (
@@ -765,7 +803,12 @@ const FmeServerView = (props) => {
       {steps.map((step, index) => {
         return (
           <Step key={index}>
-            <StepLabel>{step.label}</StepLabel>
+            <StepLabel>
+              {step.label}
+              {activeStep !== index && step.renderValueFunction
+                ? step.renderValueFunction()
+                : null}
+            </StepLabel>
             <StepContent>{step.renderFunction()}</StepContent>
           </Step>
         );

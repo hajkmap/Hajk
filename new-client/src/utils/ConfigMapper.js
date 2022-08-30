@@ -53,7 +53,15 @@ export default class ConfigMapper {
         // to append the remaining values with &.
         const theGlue = args.url.includes("?") ? "&" : "?";
 
-        legendUrl = `${proxy}${args.url}${theGlue}REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&LAYER=${layer}&STYLE=${style}${geoserverLegendOptions}${qgisOptions}`;
+        // There might be a custom get-map url specified. The customGetMapUrl naming is a bit
+        // confusing, since this custom url should not only be used for getMap-requests... The custom
+        // url should be used for all requests, and the 'ordinary' url (args.url) should only be used
+        // for the getCapabilities-request (used in admin). The custom url is used as a work around so
+        // that problems linked to reverse-proxies can be avoided.
+        // Let's check if there is a custom url, and if there is we'll use that one instead of the 'ordinary' url:
+        const baseUrl = args.customGetMapUrl || args.url;
+        // Then we can create the legend-url by combining all the necessary search-params end so on...
+        legendUrl = `${proxy}${baseUrl}${theGlue}REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&LAYER=${layer}&STYLE=${style}${geoserverLegendOptions}${qgisOptions}`;
       }
       // If there's a legend URL specified in admin, use it as is
       else {
@@ -132,6 +140,7 @@ export default class ConfigMapper {
         caption: args.caption,
         visible: args.visibleAtStart,
         opacity: args.opacity || 1,
+        zIndex: args.drawOrder || 0,
         maxZoom: args.maxZoom,
         minZoom: args.minZoom,
         minMaxZoomAlertOnToggleOnly: args.minMaxZoomAlertOnToggleOnly,
@@ -145,6 +154,8 @@ export default class ConfigMapper {
         extent: properties.mapConfig.map.extent,
         singleTile: args.singleTile || false,
         hidpi: args.hidpi,
+        useCustomDpiList: args.useCustomDpiList,
+        customDpiList: args.customDpiList,
         customRatio: args.customRatio,
         imageFormat: args.imageFormat || "image/png",
         serverType:
@@ -228,6 +239,7 @@ export default class ConfigMapper {
         extent: properties.mapConfig.map.extent,
         queryable: false,
         opacity: args.opacity || 1,
+        zIndex: args.drawOrder || 0,
         maxZoom: args.maxZoom,
         minZoom: args.minZoom,
         format: "image/png",
@@ -269,6 +281,7 @@ export default class ConfigMapper {
         caption: args.caption,
         visible: args.visibleAtStart,
         opacity: 1,
+        zIndex: args.drawOrder || 0,
         queryable: args.queryable !== false,
         extent: args.extent,
         projection: args.projection,
@@ -348,6 +361,7 @@ export default class ConfigMapper {
         visible: args.visibleAtStart,
         timeSliderStart: args.timeSliderStart,
         timeSliderEnd: args.timeSliderEnd,
+        zIndex: args.drawOrder || 0,
       },
     };
 
@@ -400,6 +414,7 @@ export default class ConfigMapper {
         hideExpandArrow: args.hideExpandArrow,
         timeSliderStart: args.timeSliderStart,
         timeSliderEnd: args.timeSliderEnd,
+        zIndex: args.drawOrder || 0,
       },
     };
 

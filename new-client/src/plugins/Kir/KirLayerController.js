@@ -5,7 +5,7 @@ import { Fill, Stroke, Style, Circle, Icon } from "ol/style";
 import Feature from "ol/Feature.js";
 import HajkTransformer from "utils/HajkTransformer";
 import { Point } from "ol/geom.js";
-import styles from "../Fir/FirStyles";
+import FirStyles from "../Fir/FirStyles";
 
 class KirLayerController {
   #HT;
@@ -21,12 +21,15 @@ class KirLayerController {
       projection: this.model.app.map.getView().getProjection().getCode(),
     });
 
+    this.styles = new FirStyles(this.model);
     this.initLayers();
     this.initListeners();
   }
 
   initLayers() {
     this.model.layers.buffer = new VectorLayer({
+      layerType: "system",
+      zIndex: 5000,
       caption: "KIRBufferLayer",
       name: "KIRBufferLayer",
       source: new VectorSource(),
@@ -35,6 +38,8 @@ class KirLayerController {
     });
 
     this.model.layers.draw = new VectorLayer({
+      layerType: "system",
+      zIndex: 5000,
       caption: "KIRDrawLayer",
       name: "KIRDrawLayer",
       source: new VectorSource(),
@@ -49,6 +54,8 @@ class KirLayerController {
     });
 
     this.model.layers.features = new VectorLayer({
+      layerType: "system",
+      zIndex: 5000,
       caption: "KIRFeatures",
       name: "KIRFeatures",
       source: new VectorSource(),
@@ -57,6 +64,8 @@ class KirLayerController {
     });
 
     this.model.layers.marker = new VectorLayer({
+      layerType: "system",
+      zIndex: 5000,
       caption: "KIRMarker",
       name: "KIRMarker",
       source: new VectorSource(),
@@ -155,7 +164,7 @@ class KirLayerController {
     }
 
     arr.forEach((feature) => {
-      feature.setStyle(styles.getPointStyle());
+      feature.setStyle(this.styles.getPointStyle());
       feature.set("kir_type", "feature");
     });
 

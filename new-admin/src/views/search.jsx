@@ -821,7 +821,12 @@ class Search extends Component {
                 </div>
               </div>
               <div>
-                <label>Visningsnamn*</label>
+                <label>
+                  Visningsnamn*{" "}
+                  <abbr title="Visas för användaren i bland annat sökresultatlistan som namnet på datamängden man söker i.">
+                    (?)
+                  </abbr>
+                </label>
                 <input
                   type="text"
                   ref="input_caption"
@@ -838,7 +843,12 @@ class Search extends Component {
                 />
               </div>
               <div>
-                <label>Visningsnamn Admin</label>
+                <label>
+                  Visningsnamn Admin UI{" "}
+                  <abbr title="Visas INTE för användaren. Lokalt namn som endast visas i administrationsgränssnittet och kan användas för att särskilja om flera lager behöver ha samma Visningsnamn utåt.">
+                    (?)
+                  </abbr>
+                </label>
                 <input
                   type="text"
                   ref="input_internalLayerName"
@@ -850,7 +860,12 @@ class Search extends Component {
                 />
               </div>
               <div>
-                <label>Inforuta</label>
+                <label>
+                  Inforuta{" "}
+                  <abbr title="Styr hur resultatet visas i detaljvyn. Referera till dokumentationen för Sökverktyget samt Infoclick (för tillåten syntax i infoboxen). Se Hajks Wiki på GitHub.">
+                    (?)
+                  </abbr>
+                </label>
                 <textarea
                   ref="input_infobox"
                   value={this.state.infobox}
@@ -868,7 +883,12 @@ class Search extends Component {
                 />
               </div>
               <div>
-                <label>Sökfält</label>
+                <label>
+                  Sökfält{" "}
+                  <abbr title="Styr vilka attribut (kolumner i tabellen) som sökning sker mot. Anges som kommaseparerad lista.">
+                    (?)
+                  </abbr>
+                </label>
                 <input
                   type="text"
                   ref="input_searchFields"
@@ -885,7 +905,12 @@ class Search extends Component {
                 />
               </div>
               <div>
-                <label>Visningsfält</label>
+                <label>
+                  Visningsfält{" "}
+                  <abbr title="Visas i sökresultatlistan. Dessutom kan visas som etikett i kartan när användaren selekterat ett sökresultat, om 'Visa resultat i kartan' är aktivt för sökverktyget. Anges som kommaseparerad lista.">
+                    (?)
+                  </abbr>
+                </label>
                 <input
                   type="text"
                   ref="input_displayFields"
@@ -902,7 +927,12 @@ class Search extends Component {
                 />
               </div>
               <div>
-                <label>Kort visningsfält</label>
+                <label>
+                  Kort visningsfält{" "}
+                  <abbr title="Visas som etikett bredvid sökresultat i ett första läge, om 'Visa resultat i kartan' är aktivt för sökverktyget. Anges som kommaseparerad lista.">
+                    (?)
+                  </abbr>
+                </label>
                 <input
                   type="text"
                   ref="input_shortDisplayFields"
