@@ -311,12 +311,35 @@ export default class ExpressServer {
   }
 
   listen(port = process.env.PORT) {
+    // Startup handler
     const welcome = (p) => () =>
       logger.info(
         `Server startup completed. Launched on port ${p}. (http://localhost:${p})`
       );
 
-    http.createServer(app).listen(port, welcome(port));
+    // Shutdown handler
+    const shutdown = (signal, value) => {
+      logger.info("Shutdown requested…");
+      server.close(() => {
+        logger.info(`Server stopped by ${signal} with value ${value}.`);
+      });
+    };
+
+    // Take care of graceful shutdown by defining signals that we want to handle.
+    // Please note that SIGKILL signal (9) cannot be intercepted, so it's omitted.
+    const signals = {
+      SIGHUP: 1,
+      SIGINT: 2,
+      SIGTERM: 15,
+    };
+
+    // Create a listener for each of the signals that we want to handle
+    Object.keys(signals).forEach((signal) => {
+      process.on(signal, () => shutdown(signal, signals[signal]));
+    });
+
+    // Finally, let's setup the server and start listening!
+    const server = http.createServer(app).listen(port, welcome(port));
 
     return app;
   }

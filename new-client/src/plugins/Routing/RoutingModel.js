@@ -158,6 +158,7 @@ class RouteModel {
     if (this.layer_start === undefined) {
       this.layer_start = new VectorLayer({
         layerType: "system",
+        zIndex: 5000,
         source: source_start,
         name: "pluginRoutingStart",
         content: "point",
@@ -167,6 +168,7 @@ class RouteModel {
 
       this.layer_end = new VectorLayer({
         layerType: "system",
+        zIndex: 5000,
         source: source_end,
         name: "pluginRoutingEnd",
         content: "point",
@@ -176,6 +178,7 @@ class RouteModel {
 
       this.layer_route = new VectorLayer({
         layerType: "system",
+        zIndex: 5000,
         source: source_route,
         name: "pluginRoutingRoute",
         content: "point",
@@ -185,6 +188,7 @@ class RouteModel {
 
       this.layer_drawing = new VectorLayer({
         layerType: "system",
+        zIndex: 5000,
         source: source_drawing,
         name: "pluginRoutingDrawing",
         content: "line",

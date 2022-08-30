@@ -44,6 +44,7 @@ class FirLayerController {
 
     this.model.layers.feature = new VectorLayer({
       layerType: "system",
+      zIndex: 5000,
       caption: "FIRSearchResultsLayer",
       name: "FIRSearchResultsLayer",
       source: new VectorSource(),
@@ -53,6 +54,7 @@ class FirLayerController {
 
     this.model.layers.highlight = new VectorLayer({
       layerType: "system",
+      zIndex: 5000,
       caption: "FIRHighlightsLayer",
       name: "FIRHighlightsLayer",
       source: new VectorSource(),
@@ -62,6 +64,7 @@ class FirLayerController {
 
     this.model.layers.buffer = new VectorLayer({
       layerType: "system",
+      zIndex: 5000,
       caption: "FIRBufferLayer",
       name: "FIRBufferLayer",
       source: new VectorSource(),
@@ -71,6 +74,7 @@ class FirLayerController {
 
     this.model.layers.draw = new VectorLayer({
       layerType: "system",
+      zIndex: 5000,
       caption: "FIRDrawLayer",
       name: "FIRDrawLayer",
       source: new VectorSource(),
@@ -86,6 +90,7 @@ class FirLayerController {
 
     this.model.layers.label = new VectorLayer({
       layerType: "system",
+      zIndex: 5000,
       caption: "FIRLabels",
       name: "FIRLabels",
       source: new VectorSource(),
@@ -95,6 +100,7 @@ class FirLayerController {
 
     this.model.layers.marker = new VectorLayer({
       layerType: "system",
+      zIndex: 5000,
       caption: "FIRMarker",
       name: "FIRMarker",
       source: new VectorSource(),

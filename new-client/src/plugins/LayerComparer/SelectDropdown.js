@@ -28,7 +28,9 @@ const SelectDropdown = (props) => {
           onChange={(e) => handleChange(setter, e.target.value)}
         >
           <MenuItem value="">Inget lager valt</MenuItem>
-          <ListSubheader>Bakgrundslager</ListSubheader>
+          {baseLayers.length > 0 && layers.length > 0 && (
+            <ListSubheader>Bakgrundslager</ListSubheader>
+          )}
           {baseLayers.map((l, i) => {
             return (
               <MenuItem key={i} value={l.id} disabled={l.id === counterValue}>
@@ -36,7 +38,9 @@ const SelectDropdown = (props) => {
               </MenuItem>
             );
           })}
-          {layers.length > 0 && <ListSubheader>Lager</ListSubheader>}
+          {baseLayers.length > 0 && layers.length > 0 && (
+            <ListSubheader>Lager</ListSubheader>
+          )}
           {layers.map((l, i) => {
             return (
               <MenuItem key={i} value={l.id}>

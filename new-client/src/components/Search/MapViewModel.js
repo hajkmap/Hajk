@@ -94,6 +94,7 @@ class MapViewModel {
         : null,
       {
         layerType: "system",
+        zIndex: 5000,
         name: "pluginSearchResults",
         caption: "Search results",
       }
@@ -104,6 +105,7 @@ class MapViewModel {
       this.getDrawStyle(),
       {
         layerType: "system",
+        zIndex: 5000,
         name: "pluginSearchDraw",
         caption: "Search draw",
       }

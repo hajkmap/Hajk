@@ -114,7 +114,11 @@ export default class FeatureStyle {
         scale: (isValidNumber(scale) ? scale : 1) * multiplier,
         src: markerImg?.length > 0 ? markerImg : defaultMarker,
       }),
-      ...(type === "highlight" && { zIndex: 1000 }), // Highlight style should always stay on top of other labels
+      ...(!type
+        ? { zIndex: 990 } // "default" search result style on bottom
+        : type === "selection"
+        ? { zIndex: 995 } // "selected" search result above the default
+        : { zIndex: 1000 }), // "highlighted" search result at the top
       ...(this.#enableLabelOnHighlight && {
         text: new Text({
           textAlign: textAlign,
@@ -123,7 +127,7 @@ export default class FeatureStyle {
           fill: new Fill({
             color: settings.textFillColor,
           }),
-          text: feature.featureTitle,
+          text: feature.shortFeatureTitle,
           overflow: true,
           stroke: new Stroke({
             color: settings.textStrokeColor,

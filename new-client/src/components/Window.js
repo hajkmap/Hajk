@@ -558,7 +558,10 @@ class Window extends React.PureComponent {
           <StyledSection
             sx={{
               overflowY: this.props.scrollable ? "auto" : "hidden",
-              padding: this.props.scrollable ? "10px" : "0px",
+              padding:
+                this.props.scrollable && this.props.disablePadding !== true
+                  ? "10px"
+                  : "0px",
               maxHeight:
                 this.getMaxWindowHeight() - (isMobile === false ? 50 : -30), // Super-hack special case for small screens
             }}
