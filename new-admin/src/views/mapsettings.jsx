@@ -112,14 +112,14 @@ $.fn.editable = function (component) {
       id5 = Math.floor(Math.random() * 1e5),
       id6 = Math.floor(Math.random() * 1e5),
       id7 = Math.floor(Math.random() * 1e5),
-      ok = $('<span class="btn btn-success">OK</span>'),
-      layerOk = $('<span class="btn btn-success">OK</span>'),
-      layerOk2 = $('<span class="btn btn-success">OK</span>'),
+      ok = $('<span className="btn btn-success">OK</span>'),
+      layerOk = $('<span className="btn btn-success">OK</span>'),
+      layerOk2 = $('<span className="btn btn-success">OK</span>'),
       presetTools = $("<div></div>"),
       tools = $("<div></div>"),
       layerTools = $("<div></div>"),
-      abort = $('<span class="btn btn-default">Avbryt</span>'),
-      abort2 = $('<span class="btn btn-default">Avbryt</span>'),
+      abort = $('<span className="btn btn-default">Avbryt</span>'),
+      abort2 = $('<span className="btn btn-default">Avbryt</span>'),
       label = $(`<label for="${id}">Expanderad vid start&nbsp;</label>`),
       label2 = $(`<label for="${id2}">Toggla alla-knapp&nbsp;</label>`),
       label3 = $(`<label for="${id3}">Synlig vid start&nbsp;</label><br />`),
@@ -130,17 +130,17 @@ $.fn.editable = function (component) {
       checkbox2 = $(`<input id="${id2}" type="checkbox"/>`),
       checkbox3 = $(`<input id="${id3}" type="checkbox"/>`),
       checkbox4 = $(`<input id="${id4}" type="text" value="Nytt namn"/><br />`),
-      remove = $('<span class="fa fa-minus-circle"></span>'),
+      remove = $('<span className="fa fa-minus-circle"></span>'),
       input = $("<input />"),
       input2 = $(
         `<input id="${id5}" type="text" placeholder="Ny länk"/><br />`
       ),
       input3 = $(`<input id="${id6}" type="text" /><br />`),
       input4 = $(`<textarea id="${id7}" type="text"></textarea>`),
-      expanded = $('<div class="expanded-at-start"></div>'),
-      toggled = $('<div class="expanded-at-start"></div>'),
-      visible = $('<div class=""></div>'),
-      editPreset = $('<div class=""></div>'),
+      expanded = $('<div className="expanded-at-start"></div>'),
+      toggled = $('<div className="expanded-at-start"></div>'),
+      visible = $('<div className=""></div>'),
+      editPreset = $('<div className=""></div>'),
       elem = node.get(0) || {};
 
     ok.css(btnCSS).click(store);
@@ -799,10 +799,10 @@ class Menu extends Component {
 
     var layer = $(`
       <li
-        class="layer-node"
+        className="layer-node"
         data-id=${id}
         data-type="layer">
-        <span class="layer-name">${layerName}</span>
+        <span className="layer-name">${layerName}</span>
       </li>
     `);
 
@@ -818,13 +818,13 @@ class Menu extends Component {
     var id = this.createGuid();
     var group = $(`
       <li
-        class="group-node"
+        className="group-node"
         data-id="${id}"
         data-type="group"
         data-toggled="${toggled}"
         data-expanded="${expanded}"
         data-name="${name}">
-        <span class="group-name">${name}</span>
+        <span className="group-name">${name}</span>
         <ul></ul>
       </li>
       `);
