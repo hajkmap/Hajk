@@ -170,7 +170,9 @@ function DummyView(props) {
 
   // Generate a custom HEX color string
   const getRandomHexColorString = () => {
-    return `#${((Math.random() * 0xffffff) << 0).toString(16)}`;
+    return `#${((Math.random() * 0xffffff) << 0)
+      .toString(16)
+      .padStart(6, "0")}`;
   };
 
   // Make it possible to programmatically update Window's title/color
