@@ -264,8 +264,8 @@ filters.add("formatNumber", function (value) {
   outputs: 8
 */
 filters.add("multiplyBy", function (value, multiplier) {
-  if (isNaN(value)) {
-    throw new Error("Argument should be a number");
+  if (isNaN(value) || isNaN(multiplier)) {
+    throw new Error("Arguments should be numbers");
   }
   return value * multiplier;
 });
