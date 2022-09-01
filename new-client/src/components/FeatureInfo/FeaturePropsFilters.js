@@ -258,6 +258,19 @@ filters.add("formatNumber", function (value) {
 });
 
 /*
+  multiplyBy
+  Example:
+  {'0.08'|multiplyBy(100)}
+  outputs: 8
+*/
+filters.add("multiplyBy", function (value, multiplier) {
+  if (isNaN(value) || isNaN(multiplier)) {
+    throw new Error("Arguments should be numbers");
+  }
+  return value * multiplier;
+});
+
+/*
   toUpper
   Example:
   {'testing'|toUpper}
