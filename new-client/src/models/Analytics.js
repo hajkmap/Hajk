@@ -1,4 +1,5 @@
 import Plausible from "plausible-tracker";
+import MatomoTracker from "@jonkoops/matomo-tracker";
 
 /**
  * @description Each of the provided analytics services must subscribe to two
@@ -30,6 +31,9 @@ import Plausible from "plausible-tracker";
  */
 export default class Analytics {
   constructor(config, globalObserver) {
+    config = {};
+    config.options = {};
+    config.type = "matomo";
     switch (config?.type) {
       case "plausible":
         const { domain, apiHost, trackLocalhost } = config.options;
@@ -53,26 +57,72 @@ export default class Analytics {
         );
         break;
       case "matomo":
-        // TODO: Adding support for Matomo should be as simple as…
-        //
-        // npm install matomo-tracker
-        // import MatomoTracker from 'matomo-tracker';
+        let { siteId, trackerUrl } = config.options;
+        // TODO: Remove hardcoded siteId and trackerUrl....
+        siteId = 3;
+        trackerUrl = "https://varbergsstatistik.matomo.cloud";
 
-        // Initialize with your site ID and Matomo URL
-        // const { siteId, trackerUrl } = config.options;
-        // const matomo = new MatomoTracker(siteId, trackerUrl);
+        const matomo = new MatomoTracker({
+          urlBase: trackerUrl,
+          siteId: siteId,
+        });
 
-        // Next, subscribe to our two global observer events. Call
-        // corresponding Matomo methods:
-        // globalObserver.subscribe("analytics.trackPageView", () =>
-        //   matomo.track()
-        // );
+        // Because of the nature of Matomo and how the tracking was implemented
+        // we need to use a translate table to get the values we need.
+        // If new events are added they will need to be added here as well.
 
-        // globalObserver.subscribe(
-        //   "analytics.trackEvent",
-        //   ({ eventName, ...rest }) =>
-        //     matomo.track({ actionName: eventName, ...rest })
-        // );
+        const eventValueKeys = {
+          pluginShown: "pluginName",
+          mapLoaded: "activeMap",
+          layerShown: "layerName (layerId)",
+          spatialSearchPerformed: "type",
+          textualSearchPerformed: "query",
+        };
+
+        const regex = /[a-z0-0_].?[a-z0-9_]*/gim;
+
+        const getValue = (eventName, data) => {
+          // This gives us the possibility to merge values to one string, see layerShown
+          const propNames = eventValueKeys[eventName];
+          let value = propNames;
+          let m;
+          const repl = (match) => {
+            value = value.replace(match, data[match]);
+          };
+
+          while ((m = regex.exec(propNames)) !== null) {
+            if (m.index === regex.lastIndex) {
+              regex.lastIndex++;
+            }
+            m.forEach(repl);
+          }
+          return value;
+        };
+
+        globalObserver.subscribe("analytics.trackPageView", () => {
+          matomo.trackPageView();
+        });
+
+        globalObserver.subscribe(
+          "analytics.trackEvent",
+          ({ eventName, ...rest }) => {
+            const value = getValue(eventName, rest);
+
+            // TODO: handle search with Matomos specific search request.
+            // matomo.trackSiteSearch()
+            // TODO: how will we handle spatial searches?
+
+            // We send the retrieved value using the name prop which is predefined in Matomo.
+            // The value prop is in useless in our cases as it only supports numbers.
+
+            matomo.trackEvent({
+              category: "general",
+              action: eventName,
+              name: value,
+              value: 0,
+            });
+          }
+        );
         break;
 
       default:
