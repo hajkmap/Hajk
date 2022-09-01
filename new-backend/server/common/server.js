@@ -343,11 +343,12 @@ export default class ExpressServer {
       process.on(signal, () => shutdown(signal, signals[signal]));
     });
 
-    // Finally, let's setup the server, start listening…
+    // Let's setup the server and start listening.
     const server = http.createServer(app).listen(port, welcome(port));
 
-    // …and supply the server to the WebSocket component.
-    websockets(server);
+    // For WS support we must also supply the server to the WebSocket component.
+    process.env.ENABLE_WEBSOCKETS?.toLowerCase() === "true" &&
+      websockets(server);
 
     return app;
   }

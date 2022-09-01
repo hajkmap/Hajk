@@ -1,6 +1,19 @@
+import crypto from "crypto";
 import WebSocket from "ws";
 import queryString from "query-string";
 import log4js from "../../api/utils/hajkLogger";
+import WebSocketMessageHandler from "./WebSocketMessageHandler";
+
+// Just a small example of how we can handle sending synchronized
+// messages to all connected clients.
+function broadcastToClients(clients) {
+  let broadcastId = 0;
+  setInterval(() => {
+    for (let c of clients.values()) {
+      c.send(`Broadcast message number ${++broadcastId}`);
+    }
+  }, 3000);
+}
 
 export default async (expressServer) => {
   const logger = log4js.getLogger("websockets");
@@ -20,6 +33,10 @@ export default async (expressServer) => {
     });
   });
 
+  // Let's setup a broadcast channel, just for fun. Any and all
+  // connected clients will get the same message at the same time.
+  broadcastToClients(websocketServer.clients);
+
   // Handler for established socket connection
   websocketServer.on(
     "connection",
@@ -33,39 +50,73 @@ export default async (expressServer) => {
       // 'connectionRequest' is the original HTTP request that was
       // used to upgrade the request to WebSocket.
 
+      // First, let's set a unique ID on this specific connection:
+      websocketConnection.uuid = crypto.randomUUID();
+
       // We can use 'connectionRequest' to read additional options, such
       // as query parameters and request path:
       const [path, params] = connectionRequest?.url?.split("?") || undefined;
       const connectionParams = queryString.parse(params);
 
       logger.trace(
-        `Upgrade successful. Opening connection. Path: "${path}". Query params: "${JSON.stringify(
+        `Upgrade successful. Opening connection ${
+          websocketConnection.uuid
+        }. Path: "${path}". Query params: "${JSON.stringify(
           connectionParams
         )}".`
       );
 
-      // We can send messages to the client. Here's a short demo that
-      // sends a message every 5th second:
+      // Let's be polite:
+      websocketConnection.send(`Hello ${websocketConnection.uuid}!`);
+
+      // We can also setup a health check:
+      let healthCheckId = 0;
       setInterval(() => {
         websocketConnection.send(
-          `Health check from sever. ${new Date().toISOString()}`
+          `Health check ${++healthCheckId} for connection ${
+            websocketConnection.uuid
+          }. ${new Date().toISOString()}`
         );
-      }, 5000);
+      }, 1000);
 
-      // We can receive messages from the client. To handle them,
-      // we need this listener:
+      // In addition to sending, we can also receive messages from the client.
+      // To handle them, we need this listener:
       websocketConnection.on("message", (message) => {
-        const parsedMessage = JSON.parse(message);
-        logger.trace(`Got message: "${parsedMessage}"`);
+        try {
+          const parsedMessage = JSON.parse(message);
+          logger.trace(
+            `Got message from ${websocketConnection.uuid}: "${parsedMessage}"`
+          );
 
-        // Usually we'd like to process the data somehow, but for this
-        // demo, let's just send it back to the client.
-        websocketConnection.send(
-          JSON.stringify({
-            message: "Message successfully received over WebSockets!",
-            originalMessage: parsedMessage,
-          })
-        );
+          // First let's see if there's a 'type' property on the message…
+          if (!parsedMessage.type) {
+            // … and abort if there isn't.
+            websocketConnection.send("'type' not provided. Aborting.");
+            return;
+          }
+
+          // If we got here, it looks like we have a 'type' property.
+          // Let's dispatch an event, providing our webSocketConnection, so
+          // that the handler can send a response.
+          // The WebSocketMessageHandler will take care of the details!
+          WebSocketMessageHandler.handleMessage(
+            websocketConnection,
+            parsedMessage
+          );
+        } catch (error) {
+          websocketConnection.send(
+            `Couldn't parse message. Error: ${error.message}`
+          );
+
+          return;
+        }
+      });
+
+      // This will be called when connection is closed. Can be used for
+      // various cleanups.
+      websocketConnection.on("close", () => {
+        // Can't send a message at this time, but we can at least log
+        logger.trace(`Goodbye ${websocketConnection.uuid}!`);
       });
     }
   );
