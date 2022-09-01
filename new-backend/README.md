@@ -57,6 +57,9 @@ cp dist/* /opt/wwwroot/hajk
 # Bring the settings from .env
 cp .env /opt/wwwroot/hajk
 
+# Bring the App_Data folder (our map and layers configuration) 
+cp -r App_Data /opt/wwwroot/hajk
+
 # Bring info on NPM modules too
 cp package*.json /opt/wwwroot/hajk
 
