@@ -344,7 +344,8 @@ export default class ExpressServer {
     const server = http.createServer(app).listen(port, welcome(port));
 
     // For WS support we must also supply the server to the WebSocket component.
-    websockets(server);
+    process.env.ENABLE_WEBSOCKETS?.toLowerCase() === "true" &&
+      websockets(server);
 
     return app;
   }
