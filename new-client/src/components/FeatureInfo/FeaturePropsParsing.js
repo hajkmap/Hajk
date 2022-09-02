@@ -3,6 +3,7 @@ import ReactMarkdown from "react-markdown";
 import rehypeRaw from "rehype-raw";
 import gfm from "remark-gfm";
 import FeaturePropFilters from "./FeaturePropsFilters";
+import { getAppModelInstance } from "models/AppModel.js";
 
 import {
   customComponentsForReactMarkdown, // the object with all custom components
@@ -147,6 +148,9 @@ export default class FeaturePropsParsing {
       // Attempt to grab the actual value from the Properties collection, if not found, fallback to empty string.
       // Note that we must replace equal sign in property value, else we'd run into trouble, see #812.
 
+      // Do we reach the clickdata x y zoom we need?
+      // TODO: remove logging
+      console.log(getAppModelInstance().lastLocationClickData);
       return (
         // What you see on the next line is what we call "hängslen och livrem" in Sweden.
         // (The truth is it's all needed - this.properties may not be an Array, it may not have a key named

@@ -7,7 +7,7 @@ import Observer from "react-event-observer";
 import { isMobile } from "../utils/IsMobile";
 import SrShortcuts from "../components/SrShortcuts/SrShortcuts";
 import Analytics from "../models/Analytics";
-import AppModel from "../models/AppModel.js";
+import { AppModel } from "../models/AppModel.js";
 import {
   setConfig as setCookieConfig,
   functionalOk as functionalCookieOk,

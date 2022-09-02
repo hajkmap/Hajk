@@ -40,6 +40,12 @@ class AppModel {
    * @param Observer observer
    */
   constructor(settings) {
+    // Lets prevent multiple instances...
+    if (appModelInstance)
+      throw new Error("Please only create one AppModel, this is a singleton.");
+
+    appModelInstance = this;
+
     const { config, globalObserver, refreshMUITheme } = settings;
     this.map = undefined;
     this.windows = [];
@@ -56,6 +62,11 @@ class AppModel {
     register(this.coordinateSystemLoader.getProj4());
     this.hfetch = hfetch;
     this.refreshMUITheme = refreshMUITheme;
+    this.lastLocationClickData = {
+      x: 0,
+      y: 0,
+      zoom: 0,
+    };
   }
 
   decorateConfig() {
@@ -874,4 +885,10 @@ class AppModel {
   }
 }
 
-export default AppModel;
+let appModelInstance = null;
+
+function getAppModelInstance(obj) {
+  return appModelInstance;
+}
+
+export { AppModel, getAppModelInstance };
