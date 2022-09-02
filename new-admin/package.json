@@ -40,7 +40,7 @@
     "react-color": "^2.18.1",
     "react-dom": "^16.13.1",
     "react-modal": "^3.14.3",
-    "react-scripts": "^3.4.3",
+    "react-scripts": "^5.0.1",
     "react-smooth-dnd": "^0.11.1",
     "typescript": "^3.9.10",
     "x2js": "^3.4.1"
