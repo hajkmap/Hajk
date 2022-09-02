@@ -118,11 +118,9 @@ class ToolOptions extends Component {
     });
   }
 
-  componentWillUnmount() {}
   /**
    *
    */
-  componentWillMount() {}
 
   handleInputChange(event) {
     const target = event.target;
@@ -551,7 +549,10 @@ class ToolOptions extends Component {
                       }}
                     />
                     <label className="full" htmlFor={service.id + "_" + i}>
-                      &nbsp;{service.caption}
+                      &nbsp;
+                      {service.internalLayerName?.length > 0
+                        ? service.internalLayerName
+                        : service.caption}
                     </label>
                   </div>
                 );

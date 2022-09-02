@@ -84,11 +84,9 @@ class ToolOptions extends Component {
     }
   }
 
-  componentWillUnmount() {}
   /**
    *
    */
-  componentWillMount() {}
 
   handleInputChange(event) {
     const t = event.target;
@@ -96,6 +94,10 @@ class ToolOptions extends Component {
     let value = t.type === "checkbox" ? t.checked : t.value;
     if (typeof value === "string" && value.trim() !== "") {
       value = !isNaN(Number(value)) ? Number(value) : value;
+    }
+
+    if (name === "instruction") {
+      value = btoa(value);
     }
     this.setState({
       [name]: value,

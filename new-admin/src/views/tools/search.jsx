@@ -29,6 +29,7 @@ const defaultState = {
   scale: "",
   markerImg: "",
   delayBeforeAutoSearch: 500,
+  disableAutocomplete: false,
   searchBarPlaceholder: "Sök...",
   autocompleteWildcardAtStart: false,
   enablePolygonSearch: true,
@@ -141,6 +142,8 @@ class ToolOptions extends Component {
           delayBeforeAutoSearch:
             tool.options.delayBeforeAutoSearch ||
             this.state.delayBeforeAutoSearch,
+          disableAutocomplete:
+            tool.options.disableAutocomplete ?? this.state.disableAutocomplete,
           autocompleteWildcardAtStart:
             tool.options.autocompleteWildcardAtStart ||
             this.state.autocompleteWildcardAtStart,
@@ -336,6 +339,7 @@ class ToolOptions extends Component {
         scale: this.state.scale,
         markerImg: this.state.markerImg,
         delayBeforeAutoSearch: this.state.delayBeforeAutoSearch,
+        disableAutocomplete: this.state.disableAutocomplete,
         searchBarPlaceholder: this.state.searchBarPlaceholder,
         autocompleteWildcardAtStart: this.state.autocompleteWildcardAtStart,
         enablePolygonSearch: this.state.enablePolygonSearch,
@@ -512,9 +516,12 @@ class ToolOptions extends Component {
   }
 
   flattern(groups) {
+    if (!groups) {
+      return [];
+    }
     return groups.reduce((i, group) => {
       var layers = [];
-      if (group.groups.length !== 0) {
+      if (group.groups?.length !== 0) {
         layers = [...this.flattern(group.groups)];
       }
       return [...i, ...group.layers, ...layers];
@@ -697,8 +704,24 @@ class ToolOptions extends Component {
           </div>
 
           <div>
+            <input
+              id="disableAutocomplete"
+              name="disableAutocomplete"
+              type="checkbox"
+              onChange={(e) => {
+                this.handleInputChange(e);
+              }}
+              checked={this.state.disableAutocomplete}
+            />
+            &nbsp;
+            <label className="long-label" htmlFor="disableAutocomplete">
+              Avaktivera autocomplete (visa sökresultat direkt).
+            </label>
+          </div>
+
+          <div>
             <label htmlFor="delayBeforeAutoSearch">
-              Fördröjning innan autocomplete (i millisekunder)
+              Fördröjning innan auto-sök (i millisekunder)
             </label>
             <input
               value={this.state.delayBeforeAutoSearch}

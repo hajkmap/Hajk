@@ -3,6 +3,7 @@ import path from "path";
 import ad from "./activedirectory.service";
 import asyncFilter from "../utils/asyncFilter";
 import log4js from "log4js";
+import getAnalyticsOptionsFromDotEnv from "../utils/getAnalyticsOptionsFromDotEnv";
 
 const logger = log4js.getLogger("service.config");
 
@@ -35,7 +36,16 @@ class ConfigServiceV2 {
       const json = await JSON.parse(text);
 
       // Ensure that we print the correct API version to output
-      json.version = 2;
+      json.version = 2.1;
+
+      // Ensure that we provide Analytics configuration from .env, if none exists in
+      // mapConfig yet but there are necessary keys in process.env.
+      if (
+        json.analytics === undefined &&
+        ["plausible", "matomo"].includes(process.env.ANALYTICS_TYPE)
+      ) {
+        json.analytics = getAnalyticsOptionsFromDotEnv();
+      }
 
       if (washContent === false) {
         logger.trace(
@@ -104,10 +114,11 @@ class ConfigServiceV2 {
         // If we got this far, it looks as the current user isn't member in any
         // of the required groups - hence no access can be given to the map.
         const e = new Error(
-          `[getMapConfig] ${user} is not member in any of the necessary groups. \nAccess to map restricted.`
+          `[getMapConfig] Access to map "${map}" not allowed for user "${user}"`
         );
 
-        logger.warn(e);
+        // Write a debug message to log telling that user can't access current layer
+        logger.debug(e.message);
 
         throw e;
       } else {
@@ -167,7 +178,7 @@ class ConfigServiceV2 {
     const editOptions = mapConfig.tools.find((t) => t.type === "edit")?.options;
     let editLayerIds = [];
 
-    if (typeof editOptions != "undefined") {
+    if (editOptions !== undefined) {
       if (
         editOptions.activeServices &&
         editOptions.activeServices.length !== 0
@@ -184,12 +195,21 @@ class ConfigServiceV2 {
       }
     }
 
+    // Ensure that the WFST layer that is used by the Collector plugin is added too.
+    // This one differs a bit from the previous washes as there is no need to map
+    // an Array: the `serviceId` is just a string as Collector only supports one
+    // edit service at a time.
+    const collectorToolsServiceId = mapConfig.tools.find(
+      (t) => t.type === "collector"
+    )?.options.serviceId;
+
     // We utilize Set to get rid of potential duplicates in the final list
     const uniqueLayerIds = new Set([
       ...baseLayerIds,
       ...layerIds,
       ...searchLayerIds,
       ...editLayerIds,
+      ...(collectorToolsServiceId ? [collectorToolsServiceId] : []), // Conditional spread to avoid undefined inside the Set
     ]);
 
     // Prepare a new layers config object that will hold all keys
@@ -260,14 +280,21 @@ class ConfigServiceV2 {
         layersStore
       );
 
-      // Finally, take a look in LayerSwitcher.options and see
+      // Next, take a look in LayerSwitcher.options and see
       // whether user specific maps are needed. If so, grab them.
       let userSpecificMaps = []; // Set to empty array, client will do .map() on it.
       if (mapConfig.map.mapselector === true) {
         userSpecificMaps = await this.getUserSpecificMaps(user);
       }
 
-      return { mapConfig, layersConfig, userSpecificMaps };
+      // Finally, if we're running with authentication on, let's send
+      // some user details to the client.
+      let userDetails = undefined;
+      if (user !== undefined && process.env.AD_EXPOSE_USER_OBJECT === "true") {
+        userDetails = await ad.findUser(user);
+      }
+
+      return { mapConfig, layersConfig, userSpecificMaps, userDetails };
     } catch (error) {
       return { error };
     }
@@ -454,6 +481,30 @@ class ConfigServiceV2 {
           )
       );
       mapConfig.tools[editIndexInTools].options.activeServices = activeServices;
+    }
+
+    // Part 5: Wash FME-server products
+    const fmeServerIndexInTools = mapConfig.tools.findIndex(
+      (t) => t.type === "fmeServer"
+    );
+
+    if (fmeServerIndexInTools !== -1) {
+      // The FME-server tool got a bunch of products, and each one of them
+      // can be controlled to be visible only for some groups.
+      let { products } = mapConfig.tools[fmeServerIndexInTools].options;
+      // So let's remove the products that the current user does not have
+      // access to.
+      products = await asyncFilter(
+        products,
+        async (product) =>
+          await this.filterByGroupVisibility(
+            product.visibleForGroups,
+            user,
+            `FME-server product "${product.name}"`
+          )
+      );
+      // And then update the mapConfig with the products.
+      mapConfig.tools[fmeServerIndexInTools].options.products = products;
     }
 
     return mapConfig;

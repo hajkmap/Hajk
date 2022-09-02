@@ -78,14 +78,20 @@ export default class DocumentSearchModel {
       documentFileName: document.documentFileName,
     };
 
+    const id = `${document.documentTitle}${Math.floor(Math.random() * 1000)}`;
+
     return {
       type: "Feature",
       isTitleFeature: true,
       geometry: null,
       searchValues: [document.title],
-      id: `${document.documentTitle}${Math.floor(Math.random() * 1000)}`,
+      id: id,
       onClickName: "documentHandlerSearchResultClicked",
       properties: properties,
+      get: (p) => properties[p],
+      getGeometry: () => null,
+      getId: () => id,
+      setStyle: () => null,
     };
   };
 
@@ -99,7 +105,7 @@ export default class DocumentSearchModel {
       searchValues = [...searchValues, ...chapter.keywords];
     }
 
-    let properties = {
+    const properties = {
       header: chapter.header,
       geoids: chapter.geoids,
       headerIdentifier: chapter.headerIdentifier,
@@ -107,14 +113,20 @@ export default class DocumentSearchModel {
       documentFileName: document.documentFileName,
     };
 
+    const id = `${chapter.headerIdentifier}${Math.floor(Math.random() * 1000)}`;
+
     return {
       type: "Feature",
       geometry: null,
       isTitleFeature: false,
       searchValues: searchValues,
-      id: `${chapter.headerIdentifier}${Math.floor(Math.random() * 1000)}`,
+      id: id,
       onClickName: "documentHandlerSearchResultClicked",
       properties: properties,
+      get: (p) => properties[p],
+      getGeometry: () => null,
+      getId: () => id,
+      setStyle: () => null,
     };
   };
 

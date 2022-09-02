@@ -1,21 +1,15 @@
 import React from "react";
-import { withTheme } from "@material-ui/styles";
-import { Grid, Typography, Tooltip, Switch } from "@material-ui/core";
-import {
-  FormControl,
-  FormHelperText,
-  MenuItem,
-  Select,
-} from "@material-ui/core";
+import { Grid, Typography, Tooltip, Switch } from "@mui/material";
+import { FormControl, FormHelperText, MenuItem, Select } from "@mui/material";
 import {
   List,
   ListItem,
   ListItemIcon,
   ListItemText,
   ListItemSecondaryAction,
-} from "@material-ui/core";
+} from "@mui/material";
 
-import WarningIcon from "@material-ui/icons/Warning";
+import WarningIcon from "@mui/icons-material/Warning";
 
 class TimeSliderSettings extends React.PureComponent {
   constructor(props) {
@@ -24,7 +18,7 @@ class TimeSliderSettings extends React.PureComponent {
   }
 
   renderLayerList = () => {
-    const { layers, layerStatus, theme } = this.props;
+    const { layers, layerStatus } = this.props;
 
     return (
       <List>
@@ -44,15 +38,19 @@ class TimeSliderSettings extends React.PureComponent {
           return (
             <ListItem
               key={index}
-              style={{
-                borderLeft: `${theme.spacing(0.5)}px solid ${
-                  error ? theme.palette.error.main : theme.palette.success.main
-                }`,
+              sx={{
+                borderLeft: (theme) =>
+                  `${theme.spacing(0.5)} solid ${
+                    error
+                      ? theme.palette.error.main
+                      : theme.palette.success.main
+                  }`,
               }}
               disabled={!visible}
             >
               {error && (
                 <Tooltip
+                  disableInteractive
                   key={`tt_${index}`}
                   title={`${
                     error
@@ -71,7 +69,10 @@ class TimeSliderSettings extends React.PureComponent {
               <ListItemText primary={layer.get("caption")} />
 
               <ListItemSecondaryAction>
-                <Tooltip title={visible ? "Dölj lager" : "Visa lager"}>
+                <Tooltip
+                  disableInteractive
+                  title={visible ? "Dölj lager" : "Visa lager"}
+                >
                   <Switch
                     checked={visible}
                     onChange={() => {
@@ -102,6 +103,7 @@ class TimeSliderSettings extends React.PureComponent {
         <Grid item xs={6}>
           <FormControl fullWidth>
             <Select
+              variant="standard"
               labelId="select-stepSize-label"
               id="select-stepSize"
               value={sliderSpeed}
@@ -119,6 +121,7 @@ class TimeSliderSettings extends React.PureComponent {
         <Grid item xs={6}>
           <FormControl fullWidth>
             <Select
+              variant="standard"
               labelId="select-resolution-label"
               id="select-resolution"
               value={resolution}
@@ -169,4 +172,4 @@ class TimeSliderSettings extends React.PureComponent {
   }
 }
 
-export default withTheme(TimeSliderSettings);
+export default TimeSliderSettings;

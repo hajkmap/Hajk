@@ -1,21 +1,22 @@
 import React from "react";
-import { withStyles } from "@material-ui/core/styles";
-import PropTypes from "prop-types";
 
 import { withSnackbar } from "notistack";
 
-import FormGroup from "@material-ui/core/FormGroup";
-import FormControlLabel from "@material-ui/core/FormControlLabel";
-import Switch from "@material-ui/core/Switch";
-import Table from "@material-ui/core/Table";
-import TableBody from "@material-ui/core/TableBody";
-import TableCell from "@material-ui/core/TableCell";
-import TableHead from "@material-ui/core/TableHead";
-import TableRow from "@material-ui/core/TableRow";
-import Paper from "@material-ui/core/Paper";
-import LinearProgress from "@material-ui/core/LinearProgress";
+import FormGroup from "@mui/material/FormGroup";
+import FormControlLabel from "@mui/material/FormControlLabel";
+import Switch from "@mui/material/Switch";
+import Table from "@mui/material/Table";
+import TableBody from "@mui/material/TableBody";
+import TableCell from "@mui/material/TableCell";
+import TableHead from "@mui/material/TableHead";
+import TableRow from "@mui/material/TableRow";
+import Paper from "@mui/material/Paper";
+import LinearProgress from "@mui/material/LinearProgress";
 
-const styles = (theme) => ({});
+import {
+  LOCATION_DENIED_SNACK_MESSAGE,
+  LOCATION_DENIED_SNACK_OPTIONS,
+} from "./constants";
 
 class LocationView extends React.PureComponent {
   state = {
@@ -72,12 +73,20 @@ class LocationView extends React.PureComponent {
     });
 
     this.model.localObserver.subscribe("geolocationError", (error) => {
-      this.props.enqueueSnackbar(
-        `Kunde inte fastställa din plats. Felkod: ${error.code}. Detaljer: "${error.message}".`,
-        {
-          variant: "error",
-        }
-      );
+      // If error code is 1 (User denied Geolocation), show Snackbar with instructions to enable it again
+      if (error.code === 1) {
+        this.props.enqueueSnackbar(
+          LOCATION_DENIED_SNACK_MESSAGE,
+          LOCATION_DENIED_SNACK_OPTIONS
+        );
+      } else {
+        this.props.enqueueSnackbar(
+          `Kunde inte fastställa din plats. Felkod: ${error.code}. Detaljer: "${error.message}".`,
+          {
+            variant: "error",
+          }
+        );
+      }
     });
   }
 
@@ -144,8 +153,4 @@ class LocationView extends React.PureComponent {
   }
 }
 
-LocationView.propTypes = {
-  classes: PropTypes.object.isRequired,
-};
-
-export default withStyles(styles)(withSnackbar(LocationView));
+export default withSnackbar(LocationView);

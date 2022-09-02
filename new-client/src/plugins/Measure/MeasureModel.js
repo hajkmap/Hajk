@@ -13,6 +13,10 @@ class MeasureModel {
     this.localObserver = settings.localObserver;
     this.source = new VectorSource();
     this.vector = new VectorLayer({
+      layerType: "system",
+      zIndex: 5000,
+      name: "pluginMeasure",
+      caption: "Measure layer",
       source: this.source,
       style: this.createStyle,
     });

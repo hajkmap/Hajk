@@ -1,24 +1,23 @@
 import React from "react";
-import { withStyles } from "@material-ui/core/styles";
-import Select from "@material-ui/core/Select";
-import MenuItem from "@material-ui/core/MenuItem";
-import InputLabel from "@material-ui/core/InputLabel";
-import FormControl from "@material-ui/core/FormControl";
-import Input from "@material-ui/core/Input";
-import Button from "@material-ui/core/Button";
-import Typography from "@material-ui/core/Typography";
+import { styled } from "@mui/material/styles";
+import Select from "@mui/material/Select";
+import MenuItem from "@mui/material/MenuItem";
+import InputLabel from "@mui/material/InputLabel";
+import FormControl from "@mui/material/FormControl";
+import Input from "@mui/material/Input";
+import Button from "@mui/material/Button";
+import Typography from "@mui/material/Typography";
 import { Vector as VectorLayer } from "ol/layer";
 import { hfetch } from "utils/FetchWrapper";
 
-const styles = (theme) => ({
-  formControl: {
-    margin: theme.spacing(1),
-    minWidth: 120,
-  },
-  subtitle2: {
-    fontWeight: 500,
-  },
-});
+const StyledFormControl = styled(FormControl)(({ theme }) => ({
+  margin: theme.spacing(1),
+  minWidth: 120,
+}));
+
+const StyledTypography = styled(Typography)(({ theme }) => ({
+  fontWeight: 500,
+}));
 
 class VectorFilter extends React.PureComponent {
   constructor(props) {
@@ -41,7 +40,7 @@ class VectorFilter extends React.PureComponent {
     const { url, featureType } = this.props.layer.getProperties();
     hfetch(
       url +
-        `?request=describeFeatureType&outputFormat=application/json&typename=${featureType}`
+        `?service=WFS&request=describeFeatureType&outputFormat=application/json&typename=${featureType}`
     ).then((response) => {
       response.json().then((featureInfo) => {
         const featureTypeInfo = featureInfo.featureTypes.find(
@@ -101,14 +100,14 @@ class VectorFilter extends React.PureComponent {
   };
 
   render() {
-    const { layer, classes } = this.props;
+    const { layer } = this.props;
     if (layer instanceof VectorLayer) {
       return (
         <>
-          <Typography className={classes.subtitle2} variant="subtitle2">
+          <StyledTypography variant="subtitle2">
             Filtrera innehåll baserat på attribut
-          </Typography>
-          <FormControl className={classes.formControl}>
+          </StyledTypography>
+          <StyledFormControl>
             <InputLabel htmlFor="attribute">Attribut</InputLabel>
             <Select
               value={this.state.filterAttribute}
@@ -126,8 +125,8 @@ class VectorFilter extends React.PureComponent {
                 );
               })}
             </Select>
-          </FormControl>
-          <FormControl className={classes.formControl}>
+          </StyledFormControl>
+          <StyledFormControl>
             <InputLabel htmlFor="comparer">Jämförare</InputLabel>
             <Select
               value={this.state.filterComparer}
@@ -142,8 +141,8 @@ class VectorFilter extends React.PureComponent {
               <MenuItem value="eq">Lika med</MenuItem>
               <MenuItem value="not">Skilt från</MenuItem>
             </Select>
-          </FormControl>
-          <FormControl className={classes.formControl}>
+          </StyledFormControl>
+          <StyledFormControl>
             <Input
               value={this.state.filterValue}
               onChange={this.handleChange}
@@ -153,7 +152,7 @@ class VectorFilter extends React.PureComponent {
                 "aria-label": "Värde",
               }}
             />
-          </FormControl>
+          </StyledFormControl>
 
           <Button variant="contained" color="primary" onClick={this.setFilter}>
             Aktivera
@@ -167,4 +166,4 @@ class VectorFilter extends React.PureComponent {
   }
 }
 
-export default withStyles(styles)(VectorFilter);
+export default VectorFilter;

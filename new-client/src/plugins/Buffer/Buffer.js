@@ -2,7 +2,7 @@ import React from "react";
 import BaseWindowPlugin from "../BaseWindowPlugin";
 import Observer from "react-event-observer";
 
-import BufferIcon from "@material-ui/icons/Adjust";
+import BufferIcon from "@mui/icons-material/Adjust";
 
 import BufferView from "./BufferView.js";
 import BufferModel from "./BufferModel.js";

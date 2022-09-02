@@ -3,8 +3,8 @@ import { detect } from "detect-browser";
 
 import { useSnackbar } from "notistack";
 
-import { IconButton } from "@material-ui/core";
-import CloseIcon from "@material-ui/icons/Close";
+import { IconButton } from "@mui/material";
+import CloseIcon from "@mui/icons-material/Close";
 
 /**
  * You should have something like this in your appConfig.json in

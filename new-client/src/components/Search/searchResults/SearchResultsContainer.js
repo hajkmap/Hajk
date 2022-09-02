@@ -1,84 +1,61 @@
 import React from "react";
-import Alert from "@material-ui/lab/Alert";
-import SearchResultsList from "./SearchResultsList";
-import Collapse from "@material-ui/core/Collapse";
-import Breadcrumbs from "@material-ui/core/Breadcrumbs";
-import Link from "@material-ui/core/Link";
-import FilterListIcon from "@material-ui/icons/FilterList";
-import SortIcon from "@material-ui/icons/Sort";
-import MoreVertIcon from "@material-ui/icons/MoreVert";
-import CloseIcon from "@material-ui/icons/Close";
-import DeleteIcon from "@material-ui/icons/Delete";
-import ClearIcon from "@material-ui/icons/Clear";
+import { visuallyHidden } from "@mui/utils";
+import { styled } from "@mui/material/styles";
+
 import {
-  Paper,
-  Button,
-  Grid,
-  TextField,
-  Typography,
-  Tooltip,
+  Alert,
   Badge,
-  Menu,
-  MenuItem,
+  Breadcrumbs,
+  Button,
+  Collapse,
+  Divider,
+  Grid,
   Grow,
   IconButton,
-} from "@material-ui/core";
-import { withStyles } from "@material-ui/core/styles";
-import SearchResultsDownloadMenu from "./SearchResultsDownloadMenu";
+  Link,
+  Menu,
+  MenuItem,
+  Paper,
+  TextField,
+  Tooltip,
+  Typography,
+} from "@mui/material";
 
-const styles = (theme) => ({
-  hidden: {
-    display: "none",
+import FilterListIcon from "@mui/icons-material/FilterList";
+import SortIcon from "@mui/icons-material/Sort";
+import MoreVertIcon from "@mui/icons-material/MoreVert";
+import CloseIcon from "@mui/icons-material/Close";
+import DeleteIcon from "@mui/icons-material/Delete";
+import ClearIcon from "@mui/icons-material/Clear";
+
+import SearchResultsList from "./SearchResultsList";
+import SearchResultsDownloadMenu from "./SearchResultsDownloadMenu";
+import ArrowBack from "@mui/icons-material/ArrowBack";
+
+const StyledPaper = styled(Paper)(({ theme }) => ({
+  maxHeight: "80vh",
+  overflow: "auto",
+  minWidth: 200,
+  [theme.breakpoints.up("sm")]: {
+    maxWidth: 520,
   },
-  searchResultListWrapper: {
-    [theme.breakpoints.down("xs")]: {
-      maxHeight: "78vh",
-    },
-    [theme.breakpoints.up("sm")]: {
-      maxHeight: "82vh",
-    },
-  },
-  root: {
-    maxHeight: "80vh",
-    overflow: "auto",
-    minWidth: 200,
-    [theme.breakpoints.up("sm")]: {
-      maxWidth: 520,
-    },
-    [theme.breakpoints.down("xs")]: {
-      minWidth: "100%",
-      maxWidth: "100%",
-      position: "absolute",
-      left: 0,
-      borderTop: `${theme.spacing(0.2)}px solid ${theme.palette.divider}`,
-    },
-  },
-  filterInputFieldContainer: {
-    padding: theme.spacing(1),
-    borderBottom: `${theme.spacing(0.1)}px solid ${theme.palette.divider}`,
-  },
-  headerContainer: {
-    paddingRight: theme.spacing(1),
-    paddingLeft: theme.spacing(1),
-  },
-  tallHeaderContainer: {
-    minHeight: 42,
-    paddingRight: theme.spacing(1),
-    paddingLeft: theme.spacing(1),
-    borderBottom: `${theme.spacing(0.1)}px solid ${theme.palette.divider}`,
-  },
-  headerTypography: {
+  [theme.breakpoints.down("sm")]: {
+    minWidth: "100%",
     maxWidth: "100%",
-    fontSize: 18,
+    position: "absolute",
+    left: 0,
+    borderTop: `${theme.spacing(0.2)} solid ${theme.palette.divider}`,
   },
-  headerButtons: {
-    minWidth: 30,
+}));
+
+const ResultListWrapper = styled(Grid)(({ theme }) => ({
+  [theme.breakpoints.down("sm")]: {
+    maxHeight: "78vh",
   },
-  breadCrumbLinks: {
-    border: "none",
-    cursor: "pointer",
+  [theme.breakpoints.up("sm")]: {
+    maxHeight: "82vh",
   },
-});
+}));
 
 class SearchResultsContainer extends React.PureComponent {
   state = {
@@ -86,9 +63,7 @@ class SearchResultsContainer extends React.PureComponent {
     activeFeatureCollection: null,
     filteredFeatureCollections: null,
     filteredFeatures: null,
-    sumOfResults: this.props.searchResults.featureCollections
-      .map((fc) => fc.value.features.length ?? 0)
-      .reduce((a, b) => a + b, 0),
+    sumOfResults: null,
     filterInputFieldOpen: false,
     featureCollectionFilter: "", // String used to filter featureCollections
     featureFilter: "", // String used to filter features
@@ -163,7 +138,7 @@ class SearchResultsContainer extends React.PureComponent {
         this.showFeatureDetails(featureIds);
       }
     );
-    this.getPotentialSingleHit();
+    this.initializeResultsInformation();
   };
 
   componentWillUnmount = () => {
@@ -188,7 +163,7 @@ class SearchResultsContainer extends React.PureComponent {
 
     // Get the clicked feature
     const feature = featureCollection.value.features.find(
-      (feature) => feature.id === featureId
+      (feature) => feature.getId() === featureId
     );
 
     // If the feature has onClickName set we won't show the details
@@ -204,13 +179,13 @@ class SearchResultsContainer extends React.PureComponent {
     return featureCollections.find((featureCollection) => {
       return (
         featureCollection.value.features.findIndex(
-          (feature) => feature.id === featureId
+          (feature) => feature.getId() === featureId
         ) > -1
       );
     });
   };
 
-  getPotentialSingleHit = () => {
+  initializeResultsInformation = () => {
     const { featureCollections } = this.props;
 
     const activeFeatureCollection =
@@ -220,6 +195,9 @@ class SearchResultsContainer extends React.PureComponent {
         ? activeFeatureCollection.value.features[0]
         : undefined
       : undefined;
+    const sumOfResults = featureCollections
+      .map((fc) => fc.value.features.length ?? 0)
+      .reduce((a, b) => a + b, 0);
 
     // Hack hack.. we shouldn't set active collection and feature if we have a onClickName
     // on the source
@@ -232,6 +210,11 @@ class SearchResultsContainer extends React.PureComponent {
       this.setState({
         activeFeatureCollection: activeFeatureCollection,
         activeFeature: activeFeature,
+        sumOfResults: sumOfResults,
+      });
+    } else {
+      this.setState({
+        sumOfResults: sumOfResults,
       });
     }
   };
@@ -257,7 +240,7 @@ class SearchResultsContainer extends React.PureComponent {
     const { activeFeatureCollection } = this.state;
     const selectedFeatures = [...this.state.selectedFeatures];
 
-    const featureIndex = this.getSelectedFeatureIndex(feature.id);
+    const featureIndex = this.getSelectedFeatureIndex(feature.getId());
     selectedFeatures.splice(featureIndex, 1);
 
     if (activeFeatureCollection?.origin === "USERSELECT") {
@@ -282,7 +265,7 @@ class SearchResultsContainer extends React.PureComponent {
 
   getSelectedFeatureIndex = (featureId) => {
     return this.state.selectedFeatures.findIndex((featureInfo) => {
-      return featureInfo.feature.id === featureId;
+      return featureInfo.feature.getId() === featureId;
     });
   };
 
@@ -354,16 +337,21 @@ class SearchResultsContainer extends React.PureComponent {
   };
 
   renderFilterInputField = () => {
-    const { classes } = this.props;
     const { activeFeatureCollection, featureFilter, featureCollectionFilter } =
       this.state;
     const showClearFilterButton =
       featureFilter.length > 0 || featureCollectionFilter.length > 0;
     return (
-      <Grid item className={classes.filterInputFieldContainer} xs={12}>
-        <Typography variant="srOnly">
-          Textfält för att filtrera resultatet
-        </Typography>
+      <Grid
+        item
+        sx={{
+          padding: 1,
+          borderBottom: 0.8,
+          borderBottomColor: "divider",
+        }}
+        xs={12}
+      >
+        <span style={visuallyHidden}>Textfält för att filtrera resultatet</span>
         <TextField
           autoFocus
           onChange={this.handleFilterTextFieldInputChange}
@@ -376,9 +364,9 @@ class SearchResultsContainer extends React.PureComponent {
           label="Filtrera sökresultaten"
           InputProps={{
             endAdornment: showClearFilterButton && (
-              <Tooltip title="Rensa filtret">
+              <Tooltip disableInteractive title="Rensa filtret">
                 <IconButton onClick={this.clearViewFilters} size="small">
-                  <Typography variant="srOnly">Rensa filtret</Typography>
+                  <span style={visuallyHidden}>Rensa filtret</span>
                   <ClearIcon />
                 </IconButton>
               </Tooltip>
@@ -511,15 +499,14 @@ class SearchResultsContainer extends React.PureComponent {
   };
 
   renderFilterTool = () => {
-    const { classes } = this.props;
     const filterActive = this.isFilterActive();
     const filterHelpText = filterActive
       ? "Filtret är aktivt"
       : "Filtrera resultatet";
     return (
-      <Tooltip title={filterHelpText}>
-        <Button
-          className={classes.headerButtons}
+      <Tooltip disableInteractive title={filterHelpText}>
+        <IconButton
+          sx={{ minWidth: 30 }}
           onClick={() =>
             this.setState({
               filterInputFieldOpen: !this.state.filterInputFieldOpen,
@@ -534,13 +521,12 @@ class SearchResultsContainer extends React.PureComponent {
           >
             <FilterListIcon />
           </Badge>
-        </Button>
+        </IconButton>
       </Tooltip>
     );
   };
 
   renderSortTool = () => {
-    const { classes } = this.props;
     const {
       activeFeatureCollection,
       featureCollectionSortingStrategy,
@@ -563,29 +549,28 @@ class SearchResultsContainer extends React.PureComponent {
     }`;
 
     return (
-      <Tooltip title={sortHelpText}>
-        <Button
-          className={classes.headerButtons}
+      <Tooltip disableInteractive title={sortHelpText}>
+        <IconButton
+          sx={{ minWidth: 30 }}
           onClick={(e) =>
             this.setState({ sortingMenuAnchorEl: e.currentTarget })
           }
         >
           <SortIcon />
-        </Button>
+        </IconButton>
       </Tooltip>
     );
   };
 
   renderClearTool = () => {
-    const { classes } = this.props;
     return (
-      <Tooltip title="Rensa alla selekterade objekt">
-        <Button
-          className={classes.headerButtons}
+      <Tooltip disableInteractive title="Rensa alla selekterade objekt">
+        <IconButton
+          sx={{ minWidth: 30 }}
           onClick={this.clearAllSelectedFeaturesInView}
         >
           <DeleteIcon />
-        </Button>
+        </IconButton>
       </Tooltip>
     );
   };
@@ -636,17 +621,13 @@ class SearchResultsContainer extends React.PureComponent {
   };
 
   renderSearchResultListTools = () => {
-    const { classes } = this.props;
     if (this.allToolsDisabled()) {
       return null;
     } else {
       return (
-        <Grid item container align="center" justify="flex-end">
+        <Grid item container align="center" justifyContent="flex-end">
           <Grow in={this.state.showTools} timeout={800}>
-            <Grid
-              item
-              className={!this.state.showTools ? classes.hidden : null}
-            >
+            <Grid item sx={!this.state.showTools ? { display: "none" } : null}>
               {this.searchResultTools.map((tool, index) => {
                 return (
                   tool.enabled && (
@@ -658,10 +639,11 @@ class SearchResultsContainer extends React.PureComponent {
           </Grow>
           <Grid item>
             <Tooltip
+              disableInteractive
               title={`${this.state.showTools ? "Dölj" : "Visa"} verktyg`}
             >
-              <Button
-                className={classes.headerButtons}
+              <IconButton
+                sx={{ minWidth: 30 }}
                 onClick={() =>
                   this.setState({
                     showTools: !this.state.showTools,
@@ -670,7 +652,7 @@ class SearchResultsContainer extends React.PureComponent {
                 }
               >
                 {this.state.showTools ? <CloseIcon /> : <MoreVertIcon />}
-              </Button>
+              </IconButton>
             </Tooltip>
           </Grid>
         </Grid>
@@ -692,7 +674,7 @@ class SearchResultsContainer extends React.PureComponent {
     if (activeFeature) {
       const featureIndex = selectedFeatures.findIndex((featureInfo) => {
         return (
-          featureInfo.feature.id === activeFeature.id &&
+          featureInfo.feature.getId() === activeFeature.getId() &&
           featureInfo.initiator !== "userSelect"
         );
       });
@@ -732,7 +714,7 @@ class SearchResultsContainer extends React.PureComponent {
   featureIsSelected = (feature) => {
     const { selectedFeatures } = this.state;
     return selectedFeatures.some((featureInfo) => {
-      return featureInfo.feature.id === feature.id;
+      return featureInfo.feature.getId() === feature.getId();
     });
   };
 
@@ -740,12 +722,9 @@ class SearchResultsContainer extends React.PureComponent {
     if (!nextFeature.source) {
       nextFeature.source = nextCollection.source;
     }
-    const featureTitle = this.getFeatureTitle(nextFeature);
-    nextFeature.featureTitle = featureTitle;
 
     return {
       feature: nextFeature,
-      featureTitle: featureTitle,
       sourceId: nextFeature.source ?? nextCollection.source.id,
       initiator: initiator,
     };
@@ -760,7 +739,10 @@ class SearchResultsContainer extends React.PureComponent {
       },
       () => {
         this.handleFilterUpdate();
-        this.#showCorrespondingWMSLayers(featureCollection);
+        // If FC comes from a DocumentHandler document, there is never a corresponding
+        // WMS layer - so don't bother
+        featureCollection?.origin !== "DOCUMENT" &&
+          this.#showCorrespondingWMSLayers(featureCollection);
       }
     );
   };
@@ -771,7 +753,10 @@ class SearchResultsContainer extends React.PureComponent {
 
     const layer = this.#getLayerById(featureCollection.source.pid);
 
-    if (layer.layerType === "group") {
+    // There is a possibility that no layer was found, if so, quit early
+    if (layer === undefined) return;
+
+    if (layer.get("layerType") === "group") {
       // Group layers will publish an event to LayerSwitcher that will take
       // care of the somewhat complicated toggling.
 
@@ -832,7 +817,7 @@ class SearchResultsContainer extends React.PureComponent {
     const { featureCollectionSortingStrategy } = this.state;
 
     const featureCollectionsAtoZSorted = featureCollections.sort((a, b) =>
-      a.source.caption.localeCompare(b.source.caption, "sv")
+      a.source.caption.localeCompare(b.source.caption)
     );
 
     switch (featureCollectionSortingStrategy) {
@@ -848,34 +833,6 @@ class SearchResultsContainer extends React.PureComponent {
     }
   };
 
-  getFeatureTitle = (feature) => {
-    const { activeFeatureCollection } = this.state;
-
-    if (feature.featureTitle) {
-      return feature.featureTitle;
-    }
-
-    const source = feature.source ?? activeFeatureCollection.source;
-
-    return source.displayFields.reduce((featureTitleString, df) => {
-      let displayField = feature.properties[df];
-      if (Array.isArray(displayField)) {
-        displayField = displayField.join(", ");
-      }
-
-      if (displayField) {
-        if (featureTitleString.length > 0) {
-          featureTitleString = featureTitleString.concat(` | ${displayField}`);
-        } else {
-          featureTitleString = displayField.toString();
-        }
-      }
-
-      feature.featureTitle = featureTitleString;
-      return featureTitleString;
-    }, "");
-  };
-
   keyPressIsEnter = (event) => {
     return event.which === 13 || event.keyCode === 13;
   };
@@ -887,8 +844,7 @@ class SearchResultsContainer extends React.PureComponent {
         if (activeFeatureCollection) {
           if (fc.source.id === activeFeatureCollection.source.id) {
             return fc.value.features.filter((f) => {
-              const featureTitle = this.getFeatureTitle(f);
-              return featureTitle
+              return f.featureTitle
                 .toLowerCase()
                 .includes(featureFilter.toLowerCase());
             });
@@ -916,7 +872,7 @@ class SearchResultsContainer extends React.PureComponent {
       filteredFeatureCollections
     );
     const currentFeatureIds = filteredFeatures.map((feature) => {
-      return feature.id;
+      return feature.getId();
     });
 
     this.setState({
@@ -934,7 +890,6 @@ class SearchResultsContainer extends React.PureComponent {
   };
 
   renderBreadCrumbs = (featureCollectionTitle, featureTitle) => {
-    const { classes } = this.props;
     const { activeFeatureCollection, activeFeature } = this.state;
     const shouldRenderFeatureCollectionDetails =
       activeFeatureCollection && !activeFeatureCollection.source.onClickName;
@@ -942,59 +897,81 @@ class SearchResultsContainer extends React.PureComponent {
       activeFeature && !activeFeature.onClickName;
     if (shouldRenderFeatureCollectionDetails) {
       return (
-        <Breadcrumbs aria-label="breadcrumb" separator="/">
-          <Tooltip title="Tillbaka till alla sökresultat">
-            <Link
-              className={classes.breadCrumbLinks}
-              tabIndex={0}
-              color="textPrimary"
-              variant="caption"
-              onClick={(e) => {
-                e.stopPropagation();
-                this.handleActiveFeatureChange();
-              }}
-              onKeyDown={(event) => {
-                if (this.keyPressIsEnter(event)) {
-                  this.handleActiveFeatureChange();
-                }
-              }}
-              onChange={this.handleActiveFeatureChange}
-            >
-              Sökresultat
-            </Link>
-          </Tooltip>
-          <Tooltip title={featureCollectionTitle}>
-            <Link
-              className={classes.breadCrumbLinks}
-              tabIndex={0}
-              color="textPrimary"
-              variant="caption"
-              onClick={(e) => {
-                e.stopPropagation();
-                this.setActiveFeature(undefined);
-              }}
-              onKeyDown={(event) => {
-                if (this.keyPressIsEnter(event)) {
-                  this.setActiveFeature(undefined);
-                }
-              }}
-            >
-              {featureCollectionTitle}
-            </Link>
-          </Tooltip>
-          {shouldRenderFeatureDetails && (
-            <Tooltip title={featureTitle}>
+        <>
+          <Button
+            startIcon={<ArrowBack />}
+            fullWidth
+            onClick={(e) => {
+              e.stopPropagation();
+              this.handleActiveFeatureChange(
+                undefined,
+                this.state.activeFeature
+                  ? this.state.activeFeatureCollection
+                  : undefined // Supplying a value here will go back to step 2. No value will go back to step 1.
+              );
+            }}
+          >
+            Gå till föregående vy
+          </Button>
+          <Divider />
+          <Breadcrumbs aria-label="breadcrumb" separator="/">
+            <Tooltip disableInteractive title="Tillbaka till alla sökresultat">
               <Link
                 tabIndex={0}
-                className={classes.breadCrumbLinks}
+                underline="hover"
+                sx={{ border: "none", cursor: "pointer" }}
                 color="textPrimary"
                 variant="caption"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  this.handleActiveFeatureChange();
+                }}
+                onKeyDown={(event) => {
+                  if (this.keyPressIsEnter(event)) {
+                    this.handleActiveFeatureChange();
+                  }
+                }}
+                onChange={this.handleActiveFeatureChange}
               >
-                {featureTitle}
+                Sökresultat
               </Link>
             </Tooltip>
-          )}
-        </Breadcrumbs>
+            <Tooltip disableInteractive title={featureCollectionTitle}>
+              <Link
+                tabIndex={0}
+                underline="hover"
+                sx={{ border: "none", cursor: "pointer" }}
+                color="textPrimary"
+                variant="caption"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  this.setActiveFeature(undefined);
+                }}
+                onKeyDown={(event) => {
+                  if (this.keyPressIsEnter(event)) {
+                    this.setActiveFeature(undefined);
+                  }
+                }}
+              >
+                {featureCollectionTitle}
+              </Link>
+            </Tooltip>
+            {shouldRenderFeatureDetails && (
+              <Tooltip disableInteractive title={featureTitle}>
+                <Link
+                  tabIndex={0}
+                  underline="hover"
+                  sx={{ border: "none", cursor: "pointer" }}
+                  color="textPrimary"
+                  variant="caption"
+                >
+                  {featureTitle}
+                </Link>
+              </Tooltip>
+            )}
+          </Breadcrumbs>
+          <Divider />
+        </>
       );
     } else {
       return null;
@@ -1003,12 +980,11 @@ class SearchResultsContainer extends React.PureComponent {
 
   renderHeaderInfoBar = (featureCollectionTitle) => {
     const { activeFeatureCollection } = this.state;
-    const { classes } = this.props;
     return (
       <Grid
         container
         item
-        justify="space-between"
+        justifyContent="space-between"
         alignItems="center"
         wrap="nowrap"
         xs={12}
@@ -1021,6 +997,7 @@ class SearchResultsContainer extends React.PureComponent {
           xs={this.state.showTools ? 5 : 11}
         >
           <Tooltip
+            disableInteractive
             title={
               activeFeatureCollection ? featureCollectionTitle : "Sökresultat"
             }
@@ -1029,7 +1006,7 @@ class SearchResultsContainer extends React.PureComponent {
               variant="button"
               component="div"
               noWrap
-              className={classes.headerTypography}
+              sx={{ maxWidth: "100%", fontSize: 18 }}
             >
               {`${
                 activeFeatureCollection ? featureCollectionTitle : "Sökresultat"
@@ -1040,7 +1017,7 @@ class SearchResultsContainer extends React.PureComponent {
         <Grid
           container
           item
-          justify="flex-end"
+          justifyContent="flex-end"
           xs={this.state.showTools ? 7 : 1}
         >
           {this.renderSearchResultListTools()}
@@ -1050,24 +1027,27 @@ class SearchResultsContainer extends React.PureComponent {
   };
 
   renderSearchResultsHeader = () => {
-    const { classes } = this.props;
     const { activeFeatureCollection, activeFeature } = this.state;
 
     const featureCollectionTitle = activeFeatureCollection
       ? activeFeatureCollection.source.caption
       : "";
-    const featureTitle = activeFeature
-      ? this.getFeatureTitle(activeFeature)
-      : "";
+    const featureTitle = activeFeature ? activeFeature.featureTitle : "";
     const shouldRenderHeaderInfoBar =
       !activeFeature || activeFeature?.onClickName;
 
     return (
       <Grid
-        className={
+        sx={
           shouldRenderHeaderInfoBar
-            ? classes.tallHeaderContainer
-            : classes.headerContainer
+            ? {
+                minHeight: 42,
+                paddingRight: 1,
+                paddingLeft: 1,
+                borderBottom: 0.8,
+                borderBottomColor: "divider",
+              }
+            : { paddingRight: 1, paddingLeft: 1 }
         }
         container
         item
@@ -1083,14 +1063,8 @@ class SearchResultsContainer extends React.PureComponent {
   };
 
   render() {
-    const {
-      classes,
-      app,
-      getOriginBasedIcon,
-      localObserver,
-      panelCollapsed,
-      options,
-    } = this.props;
+    const { app, getOriginBasedIcon, localObserver, panelCollapsed, options } =
+      this.props;
     const {
       sumOfResults,
       activeFeatureCollection,
@@ -1123,13 +1097,13 @@ class SearchResultsContainer extends React.PureComponent {
 
     return (
       <Collapse in={!panelCollapsed}>
-        {sumOfResults === 0 ? (
-          <Paper className={classes.root}>
+        {sumOfResults === null ? null : sumOfResults === 0 ? (
+          <StyledPaper>
             <Alert severity="warning">Sökningen gav inget resultat.</Alert>
-          </Paper>
+          </StyledPaper>
         ) : (
-          <Paper className={classes.root}>
-            <Grid container className={classes.searchResultListWrapper}>
+          <StyledPaper>
+            <ResultListWrapper container>
               {this.renderSearchResultsHeader()}
               {filterInputFieldOpen && this.renderFilterInputField()}
               {this.renderSortingMenu()}
@@ -1152,7 +1126,6 @@ class SearchResultsContainer extends React.PureComponent {
                   featureSortingStrategy={featureSortingStrategy}
                   enableFeaturePreview={options.enableFeaturePreview ?? true}
                   enableFeatureToggler={options.enableFeatureToggler ?? true}
-                  getFeatureTitle={this.getFeatureTitle}
                   addFeatureToSelected={this.addFeatureToSelected}
                   removeFeatureFromSelected={this.removeFeatureFromSelected}
                   selectedFeatures={this.state.selectedFeatures}
@@ -1162,12 +1135,12 @@ class SearchResultsContainer extends React.PureComponent {
                   options={options}
                 />
               </Grid>
-            </Grid>
-          </Paper>
+            </ResultListWrapper>
+          </StyledPaper>
         )}
       </Collapse>
     );
   }
 }
 
-export default withStyles(styles)(SearchResultsContainer);
+export default SearchResultsContainer;

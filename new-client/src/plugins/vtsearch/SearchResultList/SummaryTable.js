@@ -1,6 +1,6 @@
 import React from "react";
-import { withStyles } from "@material-ui/core/styles";
-import Paper from "@material-ui/core/Paper";
+import withStyles from "@mui/styles/withStyles";
+import Paper from "@mui/material/Paper";
 import VirtualizedTable from "./VirtualizedTable";
 
 const styles = (theme) => ({

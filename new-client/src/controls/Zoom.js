@@ -1,24 +1,21 @@
 import React from "react";
 import { easeOut } from "ol/easing";
-import { Button, Paper } from "@material-ui/core";
-import AddIcon from "@material-ui/icons/Add";
-import RemoveIcon from "@material-ui/icons/Remove";
-import { makeStyles } from "@material-ui/styles";
+import { IconButton, Paper } from "@mui/material";
+import AddIcon from "@mui/icons-material/Add";
+import RemoveIcon from "@mui/icons-material/Remove";
+import { styled } from "@mui/material/styles";
 
-const useStyles = makeStyles((theme) => ({
-  paper: {
-    marginBottom: theme.spacing(1),
-    display: "flex",
-    flexDirection: "column",
-  },
-  button: {
-    minWidth: "unset",
-  },
+const StyledPaper = styled(Paper)(({ theme }) => ({
+  marginBottom: theme.spacing(1),
+  display: "flex",
+  flexDirection: "column",
+}));
+
+const StyledIconButton = styled(IconButton)(({ theme }) => ({
+  minWidth: "unset",
 }));
 
 const ZoomControl = React.memo((props) => {
-  const classes = useStyles();
-
   function zoomByDelta(delta) {
     if (!props.map) return;
     const view = props.map.getView();
@@ -47,26 +44,26 @@ const ZoomControl = React.memo((props) => {
   }
 
   return (
-    <Paper className={classes.paper}>
-      <Button
-        aria-label="Zooma in"
-        className={classes.button}
-        onClick={() => {
-          zoomByDelta(1);
-        }}
-      >
-        <AddIcon />
-      </Button>
-      <Button
-        aria-label="Zooma ut"
-        className={classes.button}
-        onClick={() => {
-          zoomByDelta(-1);
-        }}
-      >
-        <RemoveIcon />
-      </Button>
-    </Paper>
+    props.map !== undefined && (
+      <StyledPaper>
+        <StyledIconButton
+          aria-label="Zooma in"
+          onClick={() => {
+            zoomByDelta(1);
+          }}
+        >
+          <AddIcon />
+        </StyledIconButton>
+        <StyledIconButton
+          aria-label="Zooma ut"
+          onClick={() => {
+            zoomByDelta(-1);
+          }}
+        >
+          <RemoveIcon />
+        </StyledIconButton>
+      </StyledPaper>
+    )
   );
 });
 

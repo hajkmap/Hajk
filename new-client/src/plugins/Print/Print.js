@@ -4,7 +4,7 @@ import BaseWindowPlugin from "../BaseWindowPlugin";
 import PrintModel from "./PrintModel";
 import PrintView from "./PrintView";
 import Observer from "react-event-observer";
-import PrintIcon from "@material-ui/icons/Print";
+import PrintIcon from "@mui/icons-material/Print";
 
 class Print extends React.PureComponent {
   // Paper dimensions: Array[width, height]
@@ -86,6 +86,7 @@ class Print extends React.PureComponent {
       map: props.map,
       options: props.options,
       dims: this.dims,
+      mapConfig: props.app.config.mapConfig.map,
     });
   }
 
@@ -106,7 +107,7 @@ class Print extends React.PureComponent {
           icon: <PrintIcon />,
           title: "Skriv ut",
           description: "Skapa en PDF av kartan",
-          height: 550,
+          height: "dynamic",
           width: 350,
           onWindowShow: this.onWindowShow,
           onWindowHide: this.onWindowHide,

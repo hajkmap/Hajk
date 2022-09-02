@@ -1,32 +1,29 @@
 import React from "react";
 import propTypes from "prop-types";
-import { withStyles } from "@material-ui/core/styles";
+import { styled } from "@mui/material/styles";
 import {
   Card as MUICard,
   CardHeader,
   CardActionArea,
   Avatar,
-} from "@material-ui/core";
+} from "@mui/material";
 
-const styles = (theme) => {
-  return {
-    avatar: {
-      background: theme.palette.text.primary,
-    },
-    card: {
-      marginBottom: theme.spacing(1),
-      width: "210px",
-      [theme.breakpoints.down("xs")]: {
-        boxShadow: "none",
-        borderBottom: "1px solid #ccc",
-        borderRadius: 0,
-        margin: 0,
-        width: "100%",
-        justifyContent: "left",
-      },
-    },
-  };
-};
+const StyledCard = styled(MUICard)(({ theme }) => ({
+  marginBottom: theme.spacing(1),
+  width: "210px",
+  [theme.breakpoints.down("sm")]: {
+    boxShadow: "none",
+    borderBottom: "1px solid #ccc",
+    borderRadius: 0,
+    margin: 0,
+    width: "100%",
+    justifyContent: "left",
+  },
+}));
+
+const StyledAvatar = styled(Avatar)(({ theme }) => ({
+  background: theme.palette.text.primary,
+}));
 
 class Card extends React.PureComponent {
   state = {
@@ -36,7 +33,6 @@ class Card extends React.PureComponent {
 
   static propTypes = {
     abstract: propTypes.string.isRequired,
-    classes: propTypes.object.isRequired,
     icon: propTypes.object.isRequired,
     onClick: propTypes.func.isRequired,
     title: propTypes.string.isRequired,
@@ -48,20 +44,20 @@ class Card extends React.PureComponent {
   };
 
   render() {
-    const { abstract, classes, icon, onClick, title } = this.props;
+    const { abstract, icon, onClick, title } = this.props;
 
     return (
-      <MUICard onClick={onClick} className={classes.card}>
+      <StyledCard onClick={onClick}>
         <CardActionArea>
           <CardHeader
-            avatar={<Avatar className={classes.avatar}>{icon}</Avatar>}
+            avatar={<StyledAvatar>{icon}</StyledAvatar>}
             title={title}
             subheader={abstract}
           />
         </CardActionArea>
-      </MUICard>
+      </StyledCard>
     );
   }
 }
 
-export default withStyles(styles)(Card);
+export default Card;

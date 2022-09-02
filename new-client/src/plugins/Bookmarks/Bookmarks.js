@@ -3,7 +3,7 @@ import PropTypes from "prop-types";
 import BaseWindowPlugin from "../BaseWindowPlugin";
 import BookmarksModel from "./BookmarksModel";
 import BookmarksView from "./BookmarksView";
-import BookmarksIcon from "@material-ui/icons/Bookmarks";
+import BookmarksIcon from "@mui/icons-material/Bookmarks";
 
 /**
  * @summary Main class for the Bookmarks plugin.

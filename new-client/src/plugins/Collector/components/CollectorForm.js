@@ -1,22 +1,19 @@
 import React, { Component } from "react";
-import { withStyles } from "@material-ui/core/styles";
+import { styled } from "@mui/material/styles";
 import Page from "./Page.js";
-import Typography from "@material-ui/core/Typography/Typography";
+import Typography from "@mui/material/Typography";
 
-const styles = (theme) => {
-  return {
-    saveError: {
-      color: theme.palette.error.contrastText,
-      background: theme.palette.error.main,
-      marginTop: "15px",
-      borderRadius: theme.shape.borderRadius,
-      padding: "5px",
-    },
-    errorText: {
-      color: theme.palette.error.contrastText,
-    },
-  };
-};
+const SaveErrorTextWrapper = styled("div")(({ theme }) => ({
+  color: theme.palette.error.contrastText,
+  background: theme.palette.error.main,
+  marginTop: "15px",
+  borderRadius: theme.shape.borderRadius,
+  padding: "5px",
+}));
+
+const ErrorTypography = styled(Typography)(({ theme }) => ({
+  color: theme.palette.text.primary,
+}));
 
 const saveErrorText = "Fel - din kommentar gick inte att spara.";
 //const validationErrorText = " - detta fält krävs";
@@ -75,9 +72,8 @@ class CollectorForm extends Component {
   };
 
   renderSaveError() {
-    const { classes } = this.props;
     return this.state.saveError ? (
-      <div className={classes.saveError}>{this.state.saveError}</div>
+      <SaveErrorTextWrapper>{this.state.saveError}</SaveErrorTextWrapper>
     ) : null;
   }
 
@@ -87,13 +83,13 @@ class CollectorForm extends Component {
 
   render() {
     const { activePage, direction } = this.state;
-    const { form, serviceConfig, classes } = this.props;
+    const { form, serviceConfig } = this.props;
     if (this.state.configurationError) {
       return (
-        <Typography className={classes.errorText}>
+        <ErrorTypography>
           Nödvändig konfiguration saknas. Verktyget kan inte användas för
           tillfället.
-        </Typography>
+        </ErrorTypography>
       );
     } else {
       return form
@@ -131,4 +127,4 @@ class CollectorForm extends Component {
   }
 }
 
-export default withStyles(styles)(CollectorForm);
+export default CollectorForm;

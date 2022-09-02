@@ -10,6 +10,7 @@ import WMTSLayer from "./layers/WMTSLayer.js";
 import WFSVectorLayer from "./layers/VectorLayer.js";
 import MVTLayer from "./layers/MVTLayer";
 import { bindMapClickEvent } from "./Click.js";
+import MapClickModel from "./MapClickModel";
 import { defaults as defaultInteractions } from "ol/interaction";
 import { Map, View } from "ol";
 // TODO: Uncomment and ensure they show as expected
@@ -39,12 +40,14 @@ class AppModel {
    * @param object Config
    * @param Observer observer
    */
-  constructor(config, globalObserver) {
+  constructor(settings) {
+    const { config, globalObserver, refreshMUITheme } = settings;
     this.map = undefined;
     this.windows = [];
     this.plugins = {};
     this.activeTool = undefined;
     this.config = config;
+    this.decorateConfig();
     this.coordinateSystemLoader = new CoordinateSystemLoader(
       config.mapConfig.projections
     );
@@ -53,6 +56,16 @@ class AppModel {
     this.cqlFiltersFromParams = {};
     register(this.coordinateSystemLoader.getProj4());
     this.hfetch = hfetch;
+    this.refreshMUITheme = refreshMUITheme;
+  }
+
+  decorateConfig() {
+    // .allResolutions should be used when creating layers etc
+    // It will also be used in the print plugin to be able to print in higher resolutions.
+    this.config.mapConfig.map.allResolutions = [
+      ...this.config.mapConfig.map.resolutions,
+      ...(this.config.mapConfig.map.extraPrintResolutions ?? []),
+    ];
   }
 
   registerWindowPlugin(windowComponent) {
@@ -94,21 +107,32 @@ class AppModel {
   }
 
   /**
-   * A plugin may have the 'target' option. Currently we use three
-   * targets: toolbar, left and right. Toolbar means it's a
+   * @summary Helper used by getBothDrawerAndWidgetPlugins(), checks
+   * that the supplied parameter has one of the valid "target" values.
+   *
+   * @param {string} t Target to be tested
+   * @returns {boolean}
+   */
+  #validPluginTarget = (t) => {
+    // FIXME: Why is "hidden" included in this list, anyone?
+    return ["toolbar", "left", "right", "control", "hidden"].includes(t);
+  };
+
+  /**
+   * A plugin may have the 'target' option. Currently we use four
+   * targets: toolbar, control, left and right. Toolbar means it's a
    * plugin that will be visible in Drawer list. Left and right
    * are Widget plugins, that on large displays show on left/right
    * side of the map viewport, while on small screens change its
-   * appearance and end up as Drawer list plugins too.
+   * appearance and end up as Drawer list plugins too. Control buttons
+   * are displayed in the same area as map controls, e.g. zoom buttons.
    *
    * This method filters out those plugins that should go into
-   * the Drawer or Widget list and returns them.
+   * the Drawer, Widget or Control list and returns them.
    *
    * It is used in AppModel to initiate all plugins' Components,
    * so whatever is returned here will result in a render() for
-   * that plugin. That is the reason why 'search' is filtered out
-   * from the results: we render Search plugin separately in App,
-   * and we don't want a second render invoked from here.
+   * that plugin.
    *
    * @returns array of Plugins
    * @memberof AppModel
@@ -116,8 +140,14 @@ class AppModel {
   getBothDrawerAndWidgetPlugins() {
     const r = this.getPlugins()
       .filter((plugin) => {
-        return ["toolbar", "left", "right", "control", "hidden"].includes(
-          plugin.options.target
+        return (
+          // If "options" is an Array (of plugin entities) we must
+          // look for the "target" property inside that array. As soon
+          // as one of the entities has a valid "target" value, we
+          // consider the entire plugin to be valid and included in this list.
+          plugin.options.some?.((p) => this.#validPluginTarget(p.target)) ||
+          // If "options" isn't an array, we can grab the "target" directly.
+          this.#validPluginTarget(plugin.options.target)
         );
       })
       .sort((a, b) => a.sortOrder - b.sortOrder);
@@ -127,6 +157,22 @@ class AppModel {
   getDrawerPlugins() {
     return this.getPlugins().filter((plugin) => {
       return ["toolbar"].includes(plugin.options.target);
+    });
+  }
+
+  /**
+   * @summary Return all plugins that might render in Drawer.
+   *
+   * @description There reason this functions exists is that we must
+   * have a way to determine whether the Drawer toggle button should be
+   * rendered. It's not as easy as checking for Drawer plugins only (i.e.
+   * those with target=toolbar) - this simple logic gets complicated by
+   * the fact that Widget plugins (target=left|right) also render Drawer
+   * buttons on small screens.
+   */
+  getPluginsThatMightRenderInDrawer() {
+    return this.getPlugins().filter((plugin) => {
+      return ["toolbar", "left", "right"].includes(plugin.options.target);
     });
   }
 
@@ -183,6 +229,47 @@ class AppModel {
    */
   createMap() {
     const config = this.translateConfig();
+
+    // Prepare OL interactions options, refer to https://openlayers.org/en/latest/apidoc/module-ol_interaction.html#.defaults.
+    // We use conditional properties to ensure that only existing keys are set. The rest
+    // will fallback to defaults from OL. (The entire interactionsOptions object, as well as all its properties are optional
+    // according to OL documentation, so there's no need to set stuff that won't be needed.)
+    const interactionsOptions = {
+      ...(config.map.hasOwnProperty("altShiftDragRotate") && {
+        altShiftDragRotate: config.map.altShiftDragRotate,
+      }),
+      ...(config.map.hasOwnProperty("onFocusOnly") && {
+        onFocusOnly: config.map.onFocusOnly,
+      }),
+      ...(config.map.hasOwnProperty("doubleClickZoom") && {
+        doubleClickZoom: config.map.doubleClickZoom,
+      }),
+      ...(config.map.hasOwnProperty("keyboard") && {
+        keyboard: config.map.keyboard,
+      }),
+      ...(config.map.hasOwnProperty("mouseWheelZoom") && {
+        mouseWheelZoom: config.map.mouseWheelZoom,
+      }),
+      ...(config.map.hasOwnProperty("shiftDragZoom") && {
+        shiftDragZoom: config.map.shiftDragZoom,
+      }),
+      ...(config.map.hasOwnProperty("dragPan") && {
+        dragPan: config.map.dragPan,
+      }),
+      ...(config.map.hasOwnProperty("pinchRotate") && {
+        pinchRotate: config.map.pinchRotate,
+      }),
+      ...(config.map.hasOwnProperty("pinchZoom") && {
+        pinchZoom: config.map.pinchZoom,
+      }),
+      ...(!Number.isNaN(Number.parseInt(config.map.zoomDelta)) && {
+        zoomDelta: config.map.zoomDelta,
+      }),
+      ...(!Number.isNaN(Number.parseInt(config.map.zoomDuration)) && {
+        zoomDuration: config.map.zoomDuration,
+      }),
+    };
+
     this.map = new Map({
       controls: [
         // new FullScreen({ target: document.getElementById("controls-column") }),
@@ -197,7 +284,7 @@ class AppModel {
         //   })
         // })
       ],
-      interactions: defaultInteractions(),
+      interactions: defaultInteractions(interactionsOptions),
       layers: [],
       target: config.map.target,
       overlays: [],
@@ -205,7 +292,10 @@ class AppModel {
         center: config.map.center,
         extent: config.map.extent.length > 0 ? config.map.extent : undefined, // backend will always write extent as an Array, so basic "config.map.extent || undefined" wouldn't work here
         constrainOnlyCenter: config.map.constrainOnlyCenter, // If true, the extent constraint will only apply to the view center and not the whole extent.
-        constrainResolution: config.map.constrainResolution, // If true, the view will always animate to the closest zoom level after an interaction; false means intermediary zoom levels are allowed.
+        constrainResolution:
+          isMobile && config.map.constrainResolutionMobile !== undefined
+            ? config.map.constrainResolutionMobile
+            : config.map.constrainResolution, // If true, the view will always animate to the closest zoom level after an interaction; false means intermediary zoom levels are allowed.
         maxZoom: config.map.maxZoom || 24,
         minZoom: config.map.minZoom || 0,
         projection: config.map.projection,
@@ -241,23 +331,65 @@ class AppModel {
     // So, we create the Set no matter what:
     this.map.clickLock = new Set();
 
+    const infoclickOptions = config.tools.find(
+      (t) => t.type === "infoclick"
+    )?.options;
+    if (infoclickOptions?.useNewInfoclick === true) {
+      const mapClickModel = new MapClickModel(
+        this.map,
+        this.globalObserver,
+        infoclickOptions
+      );
+
+      mapClickModel.bindMapClick((featureCollections) => {
+        const featureCollectionsToBeHandledByMapClickViewer =
+          featureCollections.filter((fc) => fc.type !== "SearchResults");
+
+        // Publish the retrived collections, even if they're empty. We want the
+        // handling components to know, so they can act accordingly (e.g. close
+        // window if no features are to be shown).
+        this.globalObserver.publish(
+          "mapClick.featureCollections",
+          featureCollectionsToBeHandledByMapClickViewer
+        );
+
+        // Next, handle search results features.
+        // Check if we've got any features from the search layer,
+        // and if we do, announce it to the search component so it can
+        // show relevant feature in the search results list.
+        const searchResultFeatures = featureCollections.find(
+          (c) => c.type === "SearchResults"
+        )?.features;
+
+        if (searchResultFeatures?.length > 0) {
+          this.globalObserver.publish(
+            "infoClick.searchResultLayerClick",
+            searchResultFeatures // Clicked features sent to the search-component for display
+          );
+        }
+      });
+    }
+
     // FIXME: Potential miss here: don't we want to register click on search results
     // But we register the Infoclick handler only if the plugin exists in map config:
     // even if Infoclick plugin is inactive? Currently search won't register clicks in
     // map without infoclick, which seems as an unnecessary limitation.
-    if (config.tools.some((tool) => tool.type === "infoclick")) {
+    if (
+      config.tools.some((tool) => tool.type === "infoclick") &&
+      infoclickOptions?.useNewInfoclick !== true
+    ) {
       bindMapClickEvent(this.map, (mapClickDataResult) => {
         // We have to separate features coming from the searchResult-layer
         // from the rest, since we want to render this information in the
         // search-component rather than in the featureInfo-component.
         const searchResultFeatures = mapClickDataResult.features.filter(
           (feature) => {
-            return feature?.layer.get("type") === "searchResultLayer";
+            return feature?.layer.get("name") === "pluginSearchResults";
           }
         );
         const infoclickFeatures = mapClickDataResult.features.filter(
           (feature) => {
-            return feature?.layer.get("type") !== "searchResultLayer";
+            return feature?.layer.get("name") !== "pluginSearchResults";
           }
         );
 
@@ -311,19 +443,16 @@ class AppModel {
     this.clearing = true;
     this.highlight(false);
     this.map
-      .getLayers()
-      .getArray()
-      .forEach((layer) => {
-        if (
-          layer.getProperties &&
-          layer.getProperties().layerInfo &&
-          layer.getProperties().layerInfo.layerType === "layer"
-        ) {
-          if (layer.layerType === "group") {
-            this.globalObserver.publish("layerswitcher.hideLayer", layer);
-          } else {
-            layer.setVisible(false);
-          }
+      .getAllLayers()
+      .filter(
+        (l) =>
+          l.getVisible() === true &&
+          ["layer", "group"].includes(l.get("layerType"))
+      )
+      .forEach((l) => {
+        l.setVisible(false);
+        if (l.get("layerType") === "group") {
+          this.globalObserver.publish("layerswitcher.hideLayer", l);
         }
       });
     setTimeout(() => {
@@ -391,6 +520,8 @@ class AppModel {
       const layerConfig = this.config.layersConfig.find(
         (lookupLayer) => lookupLayer.id === layer.id
       );
+      // Note that "layer" below IS NOT an OL Layer, only a structure from our config.
+      // Hence, no layer.set("layerType"). Instead we do this:
       layer.layerType = type;
       // Use the general value for infobox if not present in map config.
       if (layerConfig !== undefined && layerConfig.type === "vector") {
@@ -436,19 +567,16 @@ class AppModel {
 
     // Prepare layers
     this.layers = this.flattern(layerSwitcherConfig);
-
-    Object.keys(this.layers)
-      .sort((a, b) => this.layers[a].drawOrder - this.layers[b].drawOrder)
-      .map((sortedKey) => this.layers[sortedKey])
-      .forEach((layer) => {
-        if (this.layersFromParams.length > 0) {
-          layer.visibleAtStart = this.layersFromParams.some(
-            (layerId) => layerId === layer.id
-          );
-        }
-        layer.cqlFilter = this.cqlFiltersFromParams[layer.id] || null;
-        this.addMapLayer(layer);
-      });
+    // Loop the layers and add each of them to the map
+    this.layers.forEach((layer) => {
+      if (this.layersFromParams.length > 0) {
+        layer.visibleAtStart = this.layersFromParams.some(
+          (layerId) => layerId === layer.id
+        );
+      }
+      layer.cqlFilter = this.cqlFiltersFromParams[layer.id] || null;
+      this.addMapLayer(layer);
+    });
 
     // FIXME: Move to infoClick instead. All other plugins create their own layers.
     if (infoclickConfig !== undefined) {
@@ -474,6 +602,10 @@ class AppModel {
     ];
     this.highlightSource = new VectorSource();
     this.highlightLayer = new VectorLayer({
+      caption: "Infoclick layer",
+      name: "pluginInfoclick",
+      layerType: "system",
+      zIndex: 5001, // System layer's zIndex start at 5000, ensure click is above
       source: this.highlightSource,
       style: new Style({
         stroke: new Stroke({
@@ -682,13 +814,23 @@ class AppModel {
                   ? sl.searchPropertyName.split(",")
                   : [],
               infobox: sl.infobox || "",
+              infoclickIcon: sl.infoclickIcon || "",
               aliasDict: "",
               displayFields:
                 typeof sl.searchDisplayName === "string"
                   ? sl.searchDisplayName.split(",")
                   : [],
+              secondaryLabelFields:
+                typeof sl.secondaryLabelFields === "string"
+                  ? sl.secondaryLabelFields.split(",")
+                  : [],
+              shortDisplayFields:
+                typeof sl.searchShortDisplayName === "string"
+                  ? sl.searchShortDisplayName.split(",")
+                  : [],
               geometryField: sl.searchGeometryField || "geom",
               outputFormat: sl.searchOutputFormat || "GML3",
+              serverType: layer.serverType || "geoserver",
             };
           });
         }

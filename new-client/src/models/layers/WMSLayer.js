@@ -59,9 +59,11 @@ class WMSLayer {
       }
       this.layer = new ImageLayer({
         name: config.name,
+        layerType: this.getLayerType(),
         visible: config.visible,
         caption: config.caption,
         opacity: config.opacity,
+        zIndex: config.zIndex,
         source: new ImageWMS(source),
         layerInfo: this.layerInfo,
         url: config.url,
@@ -69,13 +71,17 @@ class WMSLayer {
         timeSliderEnd: config?.timeSliderEnd,
         minZoom: minZoom,
         maxZoom: maxZoom,
+        minMaxZoomAlertOnToggleOnly:
+          config.minMaxZoomAlertOnToggleOnly || false,
       });
     } else {
       this.layer = new TileLayer({
         name: config.name,
+        layerType: this.getLayerType(),
         visible: config.visible,
         caption: config.caption,
         opacity: config.opacity,
+        zIndex: config.zIndex,
         source: new TileWMS(source),
         layerInfo: this.layerInfo,
         url: config.url,
@@ -83,15 +89,99 @@ class WMSLayer {
         timeSliderEnd: config?.timeSliderEnd,
         minZoom: minZoom,
         maxZoom: maxZoom,
+        minMaxZoomAlertOnToggleOnly:
+          config.minMaxZoomAlertOnToggleOnly || false,
       });
+
+      config.useCustomDpiList = config.useCustomDpiList || false;
+
+      if (config.useCustomDpiList) {
+        this.applyCustomDpiTileLoader(this.layer.getSource(), config);
+      }
     }
 
     this.layer.layersInfo = config.layersInfo;
     this.layer.subLayers = this.subLayers;
-    this.layer.layerType = this.subLayers.length > 1 ? "group" : "layer";
     this.layer.getSource().set("url", config.url);
     this.type = "wms";
     this.bindHandlers();
+  }
+
+  applyCustomDpiTileLoader(source, config) {
+    // Experimental
+    //
+    // This tileLoader makes it possible to use specific dpi:s for specific ratios.
+    // The builtin OpenLayers HiDPI setting will only request dpi depending on the exact pixel ratio
+    // which makes it impossible to cache WMS data server side. For example the HiDPI could
+    // ask the server for a tile with size 123x123 and dpi 123, which you probably wont
+    // have cached server side.
+    //
+    // Note that the dpi:s above needs to also be configured server side to make the cache work.
+    //
+    // a pixelRatio of 0 to 2 would return dpi 90 and width and height 256 * 1 = 256
+    // a pixelRatio of 2 to 3 would return dpi 180 and width and height 256 * 2 = 512
+    // a pixelRatio of 3 to infinity would return dpi 270 and width and height 256 * 3 = 768
+
+    // Layer config example:
+    // "useCustomDpiList": true,
+    // "customDpiList": [
+    //   { "pxRatio": 0, "dpi": 90 },
+    //   { "pxRatio": 2, "dpi": 180 },
+    //   { "pxRatio": 3, "dpi": 270 }
+    // ]
+
+    // Is it properly configured?
+    if (!config?.customDpiList?.length) {
+      return;
+    }
+
+    // Get the list of available ratios from config and sort it correctly.
+    const pixelRatios = config.customDpiList.sort((a, b) =>
+      a.pxRatio > b.pxRatio ? 1 : b.pxRatio > a.pxRatio ? -1 : 0
+    );
+
+    const pxRatio = window.devicePixelRatio;
+
+    // Find the appropriate pixel ratio and dpi for the current device.
+    const targetRatio = pixelRatios.reduce((a, b) => {
+      return a.pxRatio <= pxRatio && b.pxRatio > pxRatio ? a : b;
+    });
+
+    // Calculate the correct tile size. No decimals allowed.
+    const wh = Math.round((targetRatio.pxRatio || 1) * 256);
+
+    source.setTileLoadFunction((tile, src) => {
+      let url = new URL(src);
+      url.searchParams.set("WIDTH", wh);
+      url.searchParams.set("HEIGHT", wh);
+      url.searchParams.set("FORMAT_OPTIONS", `dpi:${targetRatio.dpi}`); // Support GEOSERVER
+      url.searchParams.set("DPI", targetRatio.dpi); // Support QGIS & CARMENTA_SERVER
+      url.searchParams.set("MAP_RESOLUTION", targetRatio.dpi); // Support MAPSERVER
+      tile.getImage().src = url.toString();
+      url = null;
+    });
+  }
+
+  // If the layerType is set as a base-layer in the config-mapper,
+  // it should be kept as a base-layer, *even if it has sub-layers*.
+  // The old behavior (before this commit) was that the base-layer was
+  // "transformed" to a "group-layer" if it had more than one subLayer.
+  // Since base-layers might be constructed with several subLayers, we
+  // shouldn't do that transformation... If the baseLayer is transformed
+  // to a "group-layer" we will get several errors, since the baseLayers
+  // does not contain all necessary information to render a "group-layer".
+  getLayerType() {
+    // Destruct the layerType from the layerInfo
+    const { layerType } = this.layerInfo;
+    // Check if the type is set to "base", and if it is,
+    // return "base". If it is not, we check if we have more than
+    // one subLayer; if we do, we return "group", and otherwise it is
+    // a regular "layer".
+    return layerType === "base"
+      ? "base"
+      : this.subLayers.length > 1
+      ? "group"
+      : "layer";
   }
 
   /**

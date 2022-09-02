@@ -16,11 +16,7 @@ class LayerSwitcherModel {
     return this.olMap
       .getLayers()
       .getArray()
-      .filter(
-        (l) =>
-          l.getProperties().layerInfo &&
-          l.getProperties().layerInfo.layerType === "base"
-      )
+      .filter((l) => l.get("layerType") === "base")
       .map((l) => l.getProperties());
   }
 }

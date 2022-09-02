@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { List, ListItem, Link } from "@material-ui/core";
+import { List, ListItem, Link } from "@mui/material";
 
 /*
  * @summary Small component to render a shortcut-menu high up in the DOM for screen readers
