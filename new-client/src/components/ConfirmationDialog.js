@@ -9,8 +9,7 @@ import {
   Typography,
 } from "@mui/material";
 
-// Simple dialog that is used to confirm that the user actually wants
-// to remove a sketch from LS.
+// Simple dialog that can be used to prompt the user before committing action.
 const ConfirmationDialog = ({
   open,
   handleConfirm,
