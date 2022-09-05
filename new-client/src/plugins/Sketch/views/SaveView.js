@@ -9,7 +9,7 @@ import { useSnackbar } from "notistack";
 
 import { MAX_SKETCHES } from "../constants";
 import Information from "../components/Information";
-import SketchRemovalConfirmation from "../components/SketchRemovalConfirmation";
+import ConfirmationDialog from "../../../components/ConfirmationDialog";
 
 const StyledPaper = styled(Paper)(({ theme }) => ({
   width: "100%",
@@ -271,8 +271,14 @@ const SavedSketchList = ({ model, savedSketches, setSavedSketches }) => {
           );
         })}
       </Grid>
-      <SketchRemovalConfirmation
+      <ConfirmationDialog
         open={sketchToRemove !== null}
+        titleName={"Radera arbetsyta"}
+        contentDescription={
+          "Är du säker på att du vill radera arbetsytan? Detta går inte att ångra."
+        }
+        cancel={"Avbryt"}
+        confirm={"Radera"}
         handleConfirm={handleRemoveConfirmation}
         handleAbort={handleRemoveConfirmationAbort}
       />
