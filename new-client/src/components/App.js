@@ -7,7 +7,7 @@ import Observer from "react-event-observer";
 import { isMobile } from "../utils/IsMobile";
 import SrShortcuts from "../components/SrShortcuts/SrShortcuts";
 import Analytics from "../models/Analytics";
-import { AppModel } from "../models/AppModel.js";
+import AppModel from "../models/AppModel.js";
 import {
   setConfig as setCookieConfig,
   functionalOk as functionalCookieOk,
@@ -348,11 +348,13 @@ class App extends React.PureComponent {
       globalObserver: this.globalObserver,
     });
 
-    this.appModel = new AppModel({
+    AppModel.init({
       config: props.config,
       globalObserver: this.globalObserver,
       refreshMUITheme: props.refreshMUITheme,
     });
+
+    this.appModel = AppModel;
   }
 
   hasAnyToolbarTools = () => {
