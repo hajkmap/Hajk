@@ -40,33 +40,41 @@ class AppModel {
    * @param Observer observer
    */
   constructor(settings) {
-    // Lets prevent multiple instances...
-    if (appModelInstance)
-      throw new Error("Please only create one AppModel, this is a singleton.");
-
-    appModelInstance = this;
-
-    const { config, globalObserver, refreshMUITheme } = settings;
     this.map = undefined;
     this.windows = [];
     this.plugins = {};
     this.activeTool = undefined;
+    this.layersFromParams = [];
+    this.cqlFiltersFromParams = {};
+    this.hfetch = hfetch;
+
+    // We store the click location data here for later use.
+    // Right now this is only used in the new infoClick but it will most likely be used in other parts of the program.
+    // Not optimal...
+    this.clickLocationData = {
+      x: 0,
+      y: 0,
+      zoom: 0,
+    };
+  }
+
+  init(settings) {
+    // Lets prevent multiple instances...
+    if (this.initialized)
+      throw new Error("You should only initialize AppModel once!");
+
+    this.initialized = true;
+
+    const { config, globalObserver, refreshMUITheme } = settings;
+
     this.config = config;
     this.decorateConfig();
     this.coordinateSystemLoader = new CoordinateSystemLoader(
       config.mapConfig.projections
     );
     this.globalObserver = globalObserver;
-    this.layersFromParams = [];
-    this.cqlFiltersFromParams = {};
     register(this.coordinateSystemLoader.getProj4());
-    this.hfetch = hfetch;
     this.refreshMUITheme = refreshMUITheme;
-    this.lastLocationClickData = {
-      x: 0,
-      y: 0,
-      zoom: 0,
-    };
   }
 
   decorateConfig() {
@@ -96,6 +104,18 @@ class AppModel {
           window.closeWindow();
         }
       });
+  }
+
+  getClickLocationData() {
+    return this.clickLocationData;
+  }
+
+  setClickLocationData(x, y, zoom) {
+    this.clickLocationData = {
+      x: x,
+      y: y,
+      zoom: zoom,
+    };
   }
 
   /**
@@ -885,10 +905,4 @@ class AppModel {
   }
 }
 
-let appModelInstance = null;
-
-function getAppModelInstance(obj) {
-  return appModelInstance;
-}
-
-export { AppModel, getAppModelInstance };
+export default new AppModel();
