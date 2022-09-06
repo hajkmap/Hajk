@@ -3,7 +3,7 @@ import ReactMarkdown from "react-markdown";
 import rehypeRaw from "rehype-raw";
 import gfm from "remark-gfm";
 import FeaturePropFilters from "./FeaturePropsFilters";
-import { getAppModelInstance } from "models/AppModel.js";
+import AppModel from "models/AppModel.js";
 
 import {
   customComponentsForReactMarkdown, // the object with all custom components
@@ -318,10 +318,7 @@ export default class FeaturePropsParsing {
 
     // Here we can decorate the incoming properties with data from the last click in the map.
     // By decorating, these props can be used like any other prop.
-    this.#decorateProperties(
-      "click",
-      getAppModelInstance().lastLocationClickData
-    );
+    this.#decorateProperties("click", AppModel.getClickLocationData());
 
     return this;
   }
