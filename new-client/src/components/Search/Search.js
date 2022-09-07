@@ -16,12 +16,16 @@ import { functionalOk as functionalCookieOk } from "models/Cookie";
 
 class Search extends React.PureComponent {
   defaultSearchOptions = {
-    enableLabelOnHighlight: true,
-    searchInVisibleLayers: false,
-    wildcardAtStart: false,
-    wildcardAtEnd: true,
-    matchCase: false,
-    activeSpatialFilter: "intersects",
+    searchInVisibleLayers: this.props.options?.searchInVisibleLayers ?? false,
+    wildcardAtStart: this.props.options?.wildcardAtStart ?? false,
+    wildcardAtEnd: this.props.options?.wildcardAtEnd ?? true,
+    matchCase: this.props.options?.matchCase ?? false,
+    activeSpatialFilter: ["intersects", "within"].includes(
+      this.props.options?.activeSpatialFilter
+    )
+      ? this.props.options.activeSpatialFilter
+      : "intersects",
+    enableLabelOnHighlight: this.props.options?.enableLabelOnHighlight ?? true,
     maxResultsPerDataset: !isNaN(this.props.options.maxResultsPerDataset)
       ? this.props.options.maxResultsPerDataset
       : 100,
