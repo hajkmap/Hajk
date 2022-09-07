@@ -233,7 +233,7 @@ class WMSLayerForm extends Component {
          * in only the last <input> being checked.
          *
          * This must be solved, but to get this working for now, we can inform the
-         * user to preform the correct selection manually.
+         * user to perform the correct selection manually.
          **/
         // // Fake event
         // let e = {
