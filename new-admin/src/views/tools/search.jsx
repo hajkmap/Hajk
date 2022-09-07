@@ -41,9 +41,14 @@ const defaultState = {
   enableResultsSelectionClearing: true,
   enableResultsDownloading: true,
   enableFeaturePreview: true,
-  enableLabelOnHighlight: true,
   enableSelectedFeaturesCollection: true,
   showResultFeaturesInMap: true,
+  searchInVisibleLayers: false,
+  wildcardAtStart: false,
+  wildcardAtEnd: true,
+  matchCase: false,
+  activeSpatialFilter: "intersects",
+  enableLabelOnHighlight: true,
   showResultsLimitReachedWarning: true,
   enableFeatureToggler: true,
   showCorrespondingWMSLayers: false,
@@ -185,6 +190,15 @@ class ToolOptions extends Component {
           showResultFeaturesInMap:
             tool.options.showResultFeaturesInMap ??
             this.state.showResultFeaturesInMap,
+          searchInVisibleLayers:
+            tool.options.searchInVisibleLayers ??
+            this.state.searchInVisibleLayers,
+          wildcardAtStart:
+            tool.options.wildcardAtStart ?? this.state.wildcardAtStart,
+          wildcardAtEnd: tool.options.wildcardAtEnd ?? this.state.wildcardAtEnd,
+          matchCase: tool.options.matchCase ?? this.state.matchCase,
+          activeSpatialFilter:
+            tool.options.activeSpatialFilter ?? this.state.activeSpatialFilter,
           showResultsLimitReachedWarning:
             tool.options.showResultsLimitReachedWarning ??
             this.state.showResultsLimitReachedWarning,
@@ -266,9 +280,18 @@ class ToolOptions extends Component {
     if (typeof value === "string" && value.trim() !== "") {
       value = !isNaN(Number(value)) ? Number(value) : value;
     }
-    this.setState({
-      [name]: value,
-    });
+    // Special case: activeSpatialFilter is a checkbox but we want
+    // it to save string values
+    if (t.name === "activeSpatialFilter") {
+      console.log(value);
+      this.setState({
+        activeSpatialFilter: value === false ? "intersects" : "within",
+      });
+    } else {
+      this.setState({
+        [name]: value,
+      });
+    }
   }
 
   loadSearchableLayers() {
@@ -357,6 +380,11 @@ class ToolOptions extends Component {
         enableSelectedFeaturesCollection:
           this.state.enableSelectedFeaturesCollection,
         showResultFeaturesInMap: this.state.showResultFeaturesInMap,
+        searchInVisibleLayers: this.state.searchInVisibleLayers,
+        wildcardAtStart: this.state.wildcardAtStart,
+        wildcardAtEnd: this.state.wildcardAtEnd,
+        matchCase: this.state.matchCase,
+        activeSpatialFilter: this.state.activeSpatialFilter,
         showResultsLimitReachedWarning:
           this.state.showResultsLimitReachedWarning,
         enableFeatureToggler: this.state.enableFeatureToggler,
@@ -878,6 +906,116 @@ class ToolOptions extends Component {
             />
           </div>
 
+          <div className="separator">Förvalda användarinställningar</div>
+
+          <p>
+            De här inställningarna påverkar endast <i>förval</i> i användarens
+            sökinställningar. Användaren kommer kunna anpassa dessa utifrån sina
+            önskemål under pågående session.
+          </p>
+
+          <div>
+            <input
+              id="searchInVisibleLayers"
+              value={this.state.searchInVisibleLayers}
+              type="checkbox"
+              name="searchInVisibleLayers"
+              onChange={(e) => {
+                this.handleInputChange(e);
+              }}
+              checked={this.state.searchInVisibleLayers}
+            />
+            &nbsp;
+            <label className="long-label" htmlFor="searchInVisibleLayers">
+              Sök endast i synliga lager
+            </label>
+          </div>
+
+          <div>
+            <input
+              id="wildcardAtStart"
+              value={this.state.wildcardAtStart}
+              type="checkbox"
+              name="wildcardAtStart"
+              onChange={(e) => {
+                this.handleInputChange(e);
+              }}
+              checked={this.state.wildcardAtStart}
+            />
+            &nbsp;
+            <label className="long-label" htmlFor="wildcardAtStart">
+              Wildcard före
+            </label>
+          </div>
+
+          <div>
+            <input
+              id="wildcardAtEnd"
+              value={this.state.wildcardAtEnd}
+              type="checkbox"
+              name="wildcardAtEnd"
+              onChange={(e) => {
+                this.handleInputChange(e);
+              }}
+              checked={this.state.wildcardAtEnd}
+            />
+            &nbsp;
+            <label className="long-label" htmlFor="wildcardAtEnd">
+              Wildcard efter
+            </label>
+          </div>
+
+          <div>
+            <input
+              id="matchCase"
+              value={this.state.matchCase}
+              type="checkbox"
+              name="matchCase"
+              onChange={(e) => {
+                this.handleInputChange(e);
+              }}
+              checked={this.state.matchCase}
+            />
+            &nbsp;
+            <label className="long-label" htmlFor="matchCase">
+              Skiftlägeskänslighet
+            </label>
+          </div>
+
+          <div>
+            <input
+              id="activeSpatialFilter"
+              value={this.state.activeSpatialFilter === "within"}
+              type="checkbox"
+              name="activeSpatialFilter"
+              onChange={(e) => {
+                this.handleInputChange(e);
+              }}
+              checked={this.state.activeSpatialFilter === "within"}
+            />
+            &nbsp;
+            <label className="long-label" htmlFor="activeSpatialFilter">
+              Kräv att hela objektet ryms inom sökområde
+            </label>
+          </div>
+
+          <div>
+            <input
+              id="enableLabelOnHighlight"
+              value={this.state.enableLabelOnHighlight}
+              type="checkbox"
+              name="enableLabelOnHighlight"
+              onChange={(e) => {
+                this.handleInputChange(e);
+              }}
+              checked={this.state.enableLabelOnHighlight}
+            />
+            &nbsp;
+            <label className="long-label" htmlFor="enableLabelOnHighlight">
+              Visa etikett för valda resultat i kartan
+            </label>
+          </div>
+
           <div className="separator">Alternativ för visning av resultat</div>
 
           <div>
@@ -981,24 +1119,7 @@ class ToolOptions extends Component {
             />
             &nbsp;
             <label className="long-label" htmlFor="enableFeaturePreview">
-              Visa förhandvisning vid mouse over
-            </label>
-          </div>
-
-          <div>
-            <input
-              id="enableLabelOnHighlight"
-              value={this.state.enableLabelOnHighlight}
-              type="checkbox"
-              name="enableLabelOnHighlight"
-              onChange={(e) => {
-                this.handleInputChange(e);
-              }}
-              checked={this.state.enableLabelOnHighlight}
-            />
-            &nbsp;
-            <label className="long-label" htmlFor="enableLabelOnHighlight">
-              Visa etikett för valda resultat i kartan
+              Visa förhandsvisning vid mouse over
             </label>
           </div>
 

@@ -78,7 +78,13 @@ class CoordinatesView extends React.PureComponent {
 
   renderButtons() {
     return (
-      <Grid container item spacing={2} rowSpacing={1}>
+      <Grid
+        container
+        item
+        spacing={2}
+        rowSpacing={1}
+        sx={{ mb: { xs: 6, sm: 0, md: 0 } }}
+      >
         <Grid item xs={12} md={6}>
           <Tooltip title="Rensa fält">
             <Button
