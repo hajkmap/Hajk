@@ -1,5 +1,5 @@
 import React from "react";
-import { styled } from "@mui/material";
+import { styled, Typography } from "@mui/material";
 import { Button, IconButton, Zoom } from "@mui/material";
 import { Grid, Paper, TextField, Tooltip } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
@@ -23,7 +23,6 @@ const StyledTextWarning = styled("span")(({ theme }) => ({
   color: `${theme.palette.error.main}`,
   fontSize: "11px",
   letterSpacing: "0.035rem",
-  display: "inline-block",
 }));
 
 // A view that is rendered if the user has selected not to accept functional
@@ -223,9 +222,9 @@ const SavedSketch = ({
                 xs={12}
                 sx={{ overflow: "hidden", textOverflow: "ellipsis" }}
               >
-                <span variant="button" noWrap>
+                <Typography variant="button" noWrap>
                   {sketchInfo.title}
-                </span>
+                </Typography>
               </Grid>
             </Tooltip>
             <Grid item xs={12}>
@@ -233,9 +232,9 @@ const SavedSketch = ({
                 disableInteractive
                 title={`Arbetsytan uppdaterades senast ${sketchInfo.date}`}
               >
-                <span variant="caption">
+                <Typography variant="caption">
                   {`Uppdaterad: ${sketchInfo.date?.split(" ")[0]}`}
-                </span>
+                </Typography>
               </Tooltip>
             </Grid>
           </Grid>
@@ -296,11 +295,11 @@ const SavedSketchList = ({ model, savedSketches, setSavedSketches }) => {
   return (
     <Grid container>
       <Grid item xs={12}>
-        <span variant="caption">
+        <Typography variant="caption">
           {savedSketches.length === 0
             ? "Inga sparade arbetsytor hittades."
             : "Sparade arbetsytor:"}
-        </span>
+        </Typography>
       </Grid>
       <Grid item xs={12}>
         {savedSketches.map((sketch) => {
