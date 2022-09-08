@@ -53,6 +53,7 @@ const defaultState = {
   infobox: "",
   aliasDict: "",
   displayFields: "",
+  secondaryLabelFields: "",
   shortDisplayFields: "",
   geometryField: "",
   url: "",
@@ -141,6 +142,7 @@ class Search extends Component {
       infobox: layer.infobox,
       aliasDict: layer.aliasDict,
       displayFields: layer.displayFields,
+      secondaryLabelFields: layer.secondaryLabelFields,
       shortDisplayFields: layer.shortDisplayFields,
       geometryField: layer.geometryField,
       outputFormat: layer.outputFormat || "GML3",
@@ -153,6 +155,7 @@ class Search extends Component {
       this.validateField("url", true);
       this.validateField("searchFields", true);
       this.validateField("displayFields", true);
+      this.validateField("secondaryLabelFields", true);
       this.validateField("shortDisplayFields", true);
       this.validateField("geometryField", true);
       this.validateField("outputFormat", true);
@@ -357,6 +360,7 @@ class Search extends Component {
 
     switch (fieldName) {
       case "displayFields":
+      case "secondaryLabelFields":
       case "shortDisplayFields":
       case "searchFields":
         valid = value.every((val) => /^\w+$/.test(val));
@@ -423,6 +427,7 @@ class Search extends Component {
     if (fieldName === "layers") value = format_layers(this.state.addedLayers);
     if (fieldName === "searchFields") value = value.split(",");
     if (fieldName === "displayFields") value = value.split(",");
+    if (fieldName === "secondaryLabelFields") value = value.split(",");
     if (fieldName === "shortDisplayFields") value = value.split(",");
 
     return value;
@@ -462,6 +467,7 @@ class Search extends Component {
         "layers",
         "searchFields",
         "displayFields",
+        "secondaryLabelFields",
         "shortDisplayFields",
         "geometryField",
         "outputFormat",
@@ -489,6 +495,7 @@ class Search extends Component {
         infobox: this.getValue("infobox"),
         aliasDict: this.getValue("aliasDict"),
         displayFields: this.getValue("displayFields"),
+        secondaryLabelFields: this.getValue("secondaryLabelFields"),
         shortDisplayFields: this.getValue("shortDisplayFields"),
         geometryField: this.getValue("geometryField"),
         outputFormat: this.getValue("outputFormat"),
@@ -902,7 +909,7 @@ class Search extends Component {
               </div>
               <div>
                 <label>
-                  Visningsfält{" "}
+                  Primära visningsfält{" "}
                   <abbr title="Visas i sökresultatlistan. Dessutom kan visas som etikett i kartan när användaren selekterat ett sökresultat, om 'Visa resultat i kartan' är aktivt för sökverktyget. Anges som kommaseparerad lista.">
                     (?)
                   </abbr>
@@ -924,7 +931,29 @@ class Search extends Component {
               </div>
               <div>
                 <label>
-                  Kort visningsfält{" "}
+                  Sekundära visningsfält{" "}
+                  <abbr title="Visas i sökresultat med något mindre text, under de primära visningsfälten. Anges som kommaseparerad lista.">
+                    (?)
+                  </abbr>
+                </label>
+                <input
+                  type="text"
+                  ref="input_secondaryLabelFields"
+                  onChange={(e) => {
+                    this.setState(
+                      {
+                        secondaryLabelFields: e.target.value,
+                      },
+                      () => this.validateField("secondaryLabelFields", true)
+                    );
+                  }}
+                  value={this.state.secondaryLabelFields}
+                  className={this.getValidationClass("secondaryLabelFields")}
+                />
+              </div>
+              <div>
+                <label>
+                  Visningsfält i kartan{" "}
                   <abbr title="Visas som etikett bredvid sökresultat i ett första läge, om 'Visa resultat i kartan' är aktivt för sökverktyget. Anges som kommaseparerad lista.">
                     (?)
                   </abbr>
