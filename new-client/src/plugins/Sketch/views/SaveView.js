@@ -1,7 +1,7 @@
 import React from "react";
 import { styled } from "@mui/material";
 import { Button, IconButton, Zoom } from "@mui/material";
-import { Grid, Paper, TextField, Tooltip, Typography } from "@mui/material";
+import { Grid, Paper, TextField, Tooltip } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import DeleteIcon from "@mui/icons-material/Delete";
 
@@ -17,6 +17,13 @@ const StyledPaper = styled(Paper)(({ theme }) => ({
   marginBottom: theme.spacing(1),
   borderRight: `${theme.spacing(0.5)} solid ${theme.palette.info.main}`,
   borderLeft: `${theme.spacing(0.5)} solid ${theme.palette.info.main}`,
+}));
+
+const StyledTextWarning = styled("span")(({ theme }) => ({
+  color: `${theme.palette.error.main}`,
+  fontSize: "11px",
+  letterSpacing: "0.035rem",
+  display: "inline-block",
 }));
 
 // A view that is rendered if the user has selected not to accept functional
@@ -52,6 +59,12 @@ const NotSupportedView = ({ globalObserver }) => {
 // A simple component allowing the user to select a name and save the current
 // sketch to LS under that name.
 const SketchSaver = (props) => {
+  // A hook component that sets and gets a replaceWarning
+  // This prompts when the user types in a sketch name that already exists
+  const [replaceWarning, setReplaceWarning] = React.useState({
+    text: " ",
+    show: false,
+  });
   // We're gonna want to prompt the user with a snackbar when a sketch is saved.
   const { enqueueSnackbar } = useSnackbar();
 
@@ -72,17 +85,38 @@ const SketchSaver = (props) => {
     // Then we'll update the state with the new sketches and clear the text-field.
     props.setSavedSketches(props.model.getSketchesFromStorage());
     props.setSketchName("");
+    setReplaceWarning({ ...replaceWarning, text: " ", show: false });
     // And prompt the user.
     enqueueSnackbar(message, {
       variant: status === "FAILED" ? "error" : "success",
     });
   };
 
-  // Checks wether the sketch-name entered by the user is already taken or not.
-  const nameExists = () => {
-    return props.savedSketches.some(
+  // Checks if a text warning needs to be prompted when the user has typed
+  // an already existing sketch name. This function replaces but also incorporates
+  // most of the code from the previous "nameExists"-method
+  const checkSketchName = (name) => {
+    if (name.trim() === "") {
+      setReplaceWarning({ ...replaceWarning, text: " ", show: false });
+      return false;
+    }
+
+    // This is the original code from "nameExists" that has been moved into this functio0n.
+    // Checks if input name exists in saved sketches
+    let exists = props.savedSketches.some(
       (sketch) => sketch.title.toLowerCase() === props.sketchName.toLowerCase()
     );
+
+    // If "exists" returns true we set replaceWarning to true along with a text warning
+    setReplaceWarning({
+      ...replaceWarning,
+      text: exists
+        ? `Namnet upptaget. Ersätt arbetsyta "${props.sketchName}?"`
+        : " ",
+      show: exists ? true : false,
+    });
+
+    return exists ? false : true;
   };
 
   // Let's listen for enter-key-down. If the enter-key is pressed and
@@ -91,6 +125,11 @@ const SketchSaver = (props) => {
     if (e.key === "Enter") {
       !saveButtonState.disabled && handleSaveSketchClick();
     }
+  };
+
+  // Listens to every keypress to see if the input matches any existing saved sketches
+  const handleKeyUp = (e) => {
+    checkSketchName(e.target.value);
   };
 
   // Returns an object stating if the save-button should be disabled or not, along
@@ -107,7 +146,7 @@ const SketchSaver = (props) => {
     // If the name does not already exist, and we've already saved the maximum number of sketches,
     // the button should be disabled. (If the name does exist, it is OK to save since one
     // will be over-written).
-    if (props.savedSketches.length === MAX_SKETCHES && !nameExists()) {
+    if (props.savedSketches.length === MAX_SKETCHES && !checkSketchName()) {
       return {
         disabled: true,
         message:
@@ -137,6 +176,7 @@ const SketchSaver = (props) => {
               variant="outlined"
               style={{ maxWidth: "100%" }}
               onChange={handleInputChange}
+              onKeyUp={handleKeyUp}
               onKeyDown={handleKeyDown}
               value={props.sketchName}
             />
@@ -151,11 +191,14 @@ const SketchSaver = (props) => {
                 disabled={saveButtonState.disabled}
                 onClick={handleSaveSketchClick}
               >
-                Spara
+                {replaceWarning.show ? "Ersätt" : "Spara"}
               </Button>
             </span>
           </Tooltip>
         </Grid>
+      </Grid>
+      <Grid>
+        <StyledTextWarning>{replaceWarning.text}</StyledTextWarning>
       </Grid>
     </Paper>
   );
@@ -180,9 +223,9 @@ const SavedSketch = ({
                 xs={12}
                 sx={{ overflow: "hidden", textOverflow: "ellipsis" }}
               >
-                <Typography variant="button" noWrap>
+                <span variant="button" noWrap>
                   {sketchInfo.title}
-                </Typography>
+                </span>
               </Grid>
             </Tooltip>
             <Grid item xs={12}>
@@ -190,9 +233,9 @@ const SavedSketch = ({
                 disableInteractive
                 title={`Arbetsytan uppdaterades senast ${sketchInfo.date}`}
               >
-                <Typography variant="caption">
+                <span variant="caption">
                   {`Uppdaterad: ${sketchInfo.date?.split(" ")[0]}`}
-                </Typography>
+                </span>
               </Tooltip>
             </Grid>
           </Grid>
@@ -253,11 +296,11 @@ const SavedSketchList = ({ model, savedSketches, setSavedSketches }) => {
   return (
     <Grid container>
       <Grid item xs={12}>
-        <Typography variant="caption">
+        <span variant="caption">
           {savedSketches.length === 0
             ? "Inga sparade arbetsytor hittades."
             : "Sparade arbetsytor:"}
-        </Typography>
+        </span>
       </Grid>
       <Grid item xs={12}>
         {savedSketches.map((sketch) => {
