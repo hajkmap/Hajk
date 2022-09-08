@@ -686,12 +686,11 @@ class Search extends React.PureComponent {
         // Prepare all features so that they do have titles/short titles
         searchResults.featureCollections.forEach((fc) => {
           fc.value.features.forEach((f) => {
-            const { featureTitle, shortFeatureTitle } = this.getFeatureLabels(
-              f,
-              fc.source
-            );
+            const { featureTitle, shortFeatureTitle, secondaryLabelFields } =
+              this.getFeatureLabels(f, fc.source);
             f.featureTitle = featureTitle;
             f.shortFeatureTitle = shortFeatureTitle;
+            f.secondaryLabelFields = secondaryLabelFields;
           });
         });
 
@@ -777,10 +776,15 @@ class Search extends React.PureComponent {
   }
 
   getFeatureLabels = (feature, source) => {
-    if (feature.featureTitle && feature.shortFeatureTitle) {
+    if (
+      feature.featureTitle &&
+      feature.shortFeatureTitle &&
+      feature.secondaryLabelFields
+    ) {
       return {
         featureTitle: feature.featureTitle,
         shortFeatureTitle: feature.shortFeatureTitle,
+        secondaryLabelFields: feature.secondaryLabelFields,
       };
     }
 
@@ -826,7 +830,10 @@ class Search extends React.PureComponent {
     // an empty label as shortFeatureTitle.
     const shortFeatureTitle =
       source.shortDisplayFields?.reduce(reducerFn, "") || "";
-    return { featureTitle, shortFeatureTitle };
+
+    const secondaryLabelFields =
+      source.secondaryLabelFields?.reduce(reducerFn, "") || "";
+    return { featureTitle, shortFeatureTitle, secondaryLabelFields };
   };
 
   filterFeaturesWithGeometry = (features) => {
