@@ -10,7 +10,7 @@ tags:
   - name: Client-accessible
     description: Resources necessary to load a working map in client
   - name: Admin - Maps and layers
-    description: Preform CRUD operations on layers and maps configurations
+    description: Perform CRUD operations on layers and maps configurations
   - name: Admin - Informative/DocumentHandler
     description: Resources for working with the "Documents API", used mainly by the Informative plugin
   - name: Admin - ActiveDirectory

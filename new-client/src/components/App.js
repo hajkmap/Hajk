@@ -653,7 +653,7 @@ class App extends React.PureComponent {
   }
 
   /**
-   * Flip the @this.state.drawerPermanent switch, then preform some
+   * Flip the @this.state.drawerPermanent switch, then perform some
    * more work to ensure the OpenLayers canvas has the correct
    * canvas size.
    *
