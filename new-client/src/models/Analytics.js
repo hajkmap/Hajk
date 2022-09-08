@@ -31,9 +31,6 @@ import MatomoTracker from "@jonkoops/matomo-tracker";
  */
 export default class Analytics {
   constructor(config, globalObserver) {
-    config = {};
-    config.options = {};
-    config.type = "matomo";
     switch (config?.type) {
       case "plausible":
         const { domain, apiHost, trackLocalhost } = config.options;
@@ -58,9 +55,6 @@ export default class Analytics {
         break;
       case "matomo":
         let { siteId, trackerUrl } = config.options;
-        // TODO: Remove hardcoded siteId and trackerUrl....
-        siteId = 3;
-        trackerUrl = "https://varbergsstatistik.matomo.cloud";
 
         const matomo = new MatomoTracker({
           urlBase: trackerUrl,
@@ -74,7 +68,7 @@ export default class Analytics {
         const eventValueKeys = {
           pluginShown: "pluginName",
           mapLoaded: "activeMap",
-          layerShown: "layerName (layerId)",
+          layerShown: "layerName (layerId)", // concat the name and id.
           spatialSearchPerformed: "type",
           textualSearchPerformed: "query",
         };
@@ -108,13 +102,18 @@ export default class Analytics {
           ({ eventName, ...rest }) => {
             const value = getValue(eventName, rest);
 
-            // TODO: handle search with Matomos specific search request.
-            // matomo.trackSiteSearch()
-            // TODO: how will we handle spatial searches?
+            if (eventName.indexOf("SearchPerformed") > -1) {
+              // spatial or textual
+              matomo.trackSiteSearch({
+                keyword: value,
+                category: eventName,
+                count: rest.totalHits, // always zero for spatial searches.
+              });
+              return;
+            }
 
             // We send the retrieved value using the name prop which is predefined in Matomo.
             // The value prop is in useless in our cases as it only supports numbers.
-
             matomo.trackEvent({
               category: "general",
               action: eventName,
