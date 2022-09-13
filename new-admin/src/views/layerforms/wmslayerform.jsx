@@ -1075,6 +1075,12 @@ class WMSLayerForm extends Component {
       projections = this.state.capabilities.Capability.Layer[RS];
     }
 
+    if (projections) {
+      projections = projections.map((projection) => {
+        return projection.toUpperCase();
+      });
+    }
+
     let projEles = projections
       ? supportedProjections.map((proj, i) => {
           if (projections.indexOf(proj) > -1) {

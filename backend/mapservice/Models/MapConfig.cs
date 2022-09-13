@@ -16,5 +16,7 @@ namespace MapService.Models
         public List<Tool> tools { get; set; }
 
         public MapSetting map { get; set; }
+
+        public object analytics { get; set; }
     }
 }
