@@ -1,7 +1,7 @@
 import React from "react";
-import { styled } from "@mui/material";
+import { styled, Typography } from "@mui/material";
 import { Button, IconButton, Zoom } from "@mui/material";
-import { Grid, Paper, TextField, Tooltip, Typography } from "@mui/material";
+import { Grid, Paper, TextField, Tooltip } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import DeleteIcon from "@mui/icons-material/Delete";
 
@@ -17,6 +17,13 @@ const StyledPaper = styled(Paper)(({ theme }) => ({
   marginBottom: theme.spacing(1),
   borderRight: `${theme.spacing(0.5)} solid ${theme.palette.info.main}`,
   borderLeft: `${theme.spacing(0.5)} solid ${theme.palette.info.main}`,
+}));
+
+const StyledTextWarning = styled("div")(({ theme }) => ({
+  color: `${theme.palette.error.main}`,
+  fontSize: "11px",
+  letterSpacing: "0.035rem",
+  marginTop: "3px",
 }));
 
 // A view that is rendered if the user has selected not to accept functional
@@ -52,12 +59,26 @@ const NotSupportedView = ({ globalObserver }) => {
 // A simple component allowing the user to select a name and save the current
 // sketch to LS under that name.
 const SketchSaver = (props) => {
+  // A hook component that sets and gets a replaceWarning
+  // This prompts when the user types in a sketch name that already exists
+  const [replaceWarning, setReplaceWarning] = React.useState({
+    truncatedSketchName: "",
+    text: " ",
+    show: false,
+  });
+
+  const [saveButtonStateTest, setSaveButtonStateTest] = React.useState({
+    disabled: true,
+    message: "Klicka för att spara de ritobjekt som finns i kartan.",
+  });
+
   // We're gonna want to prompt the user with a snackbar when a sketch is saved.
   const { enqueueSnackbar } = useSnackbar();
 
   // Handles text-input on the sketch-name
   const handleInputChange = (e) => {
     props.setSketchName(e.target.value);
+    getSaveButtonState();
   };
 
   // Handles when the user wants to add (or update an existing) sketch.
@@ -72,57 +93,85 @@ const SketchSaver = (props) => {
     // Then we'll update the state with the new sketches and clear the text-field.
     props.setSavedSketches(props.model.getSketchesFromStorage());
     props.setSketchName("");
+    setReplaceWarning({ ...replaceWarning, text: " ", show: false });
     // And prompt the user.
     enqueueSnackbar(message, {
       variant: status === "FAILED" ? "error" : "success",
     });
   };
 
-  // Checks wether the sketch-name entered by the user is already taken or not.
-  const nameExists = () => {
-    return props.savedSketches.some(
+  // Checks if a text warning needs to be prompted when the user has typed
+  // an already existing sketch name. This function replaces but also incorporates
+  // most of the code from the previous "nameExists"-method
+  const checkSketchName = () => {
+    // This is the original code from "nameExists" that has been moved into this functio0n.
+    // Checks if input name exists in saved sketches
+    let exists = props.savedSketches.some(
       (sketch) => sketch.title.toLowerCase() === props.sketchName.toLowerCase()
     );
+
+    // If "exists" returns true we set replaceWarning to true along with a text warning.
+    // Also, if the sketchName is longer than 15 chars we truncate the name to show.
+    setReplaceWarning({
+      ...replaceWarning,
+      truncatedSketchName:
+        props.sketchName.length > 15
+          ? props.sketchName.substring(0, 15) + "..."
+          : props.sketchName,
+      text: exists
+        ? `Namnet upptaget. Ersätt arbetsyta "${replaceWarning.truncatedSketchName}"?`
+        : " ",
+      show: exists ? true : false,
+    });
+
+    return exists;
   };
 
   // Let's listen for enter-key-down. If the enter-key is pressed and
   // the save-button isn't disabled we can save the sketch.
   const handleKeyDown = (e) => {
     if (e.key === "Enter") {
-      !saveButtonState.disabled && handleSaveSketchClick();
+      !saveButtonStateTest.disabled && handleSaveSketchClick();
     }
+  };
+
+  // Listens to every keypress to see if the input matches any existing saved sketches
+  const handleKeyUp = (e) => {
+    checkSketchName(e.target.value);
+    getSaveButtonState();
   };
 
   // Returns an object stating if the save-button should be disabled or not, along
   // with a tooltip-message.
   const getSaveButtonState = () => {
     // If the name consists of less than four characters, the button should be disabled.
+    // We only allow workspace-names that consist of three characters or more.
     if (props.sketchName.length < 4) {
-      return {
+      return setSaveButtonStateTest({
+        ...saveButtonStateTest,
         disabled: true,
         message:
           "Minst fyra tecken måste anges för att en arbetsyta ska kunna skapas.",
-      };
+      });
     }
     // If the name does not already exist, and we've already saved the maximum number of sketches,
     // the button should be disabled. (If the name does exist, it is OK to save since one
     // will be over-written).
-    if (props.savedSketches.length === MAX_SKETCHES && !nameExists()) {
-      return {
+    if (props.savedSketches.length >= MAX_SKETCHES && !checkSketchName()) {
+      return setSaveButtonStateTest({
+        ...saveButtonStateTest,
         disabled: true,
         message:
           "Maximalt antal arbetsytor har sparats. Ta bort eller skriv över en genom att ange ett av namnen i listan nedan.",
-      };
+      });
     }
     // If we've made it this far, it is OK to save!
-    return {
+    setSaveButtonStateTest({
+      ...saveButtonStateTest,
       disabled: false,
       message: "Klicka för att spara de ritobjekt som finns i kartan.",
-    };
+    });
   };
-
-  // We only allow workspace-names that consist of three characters or more.
-  const saveButtonState = getSaveButtonState();
 
   return (
     <Paper style={{ padding: 8 }}>
@@ -137,26 +186,28 @@ const SketchSaver = (props) => {
               variant="outlined"
               style={{ maxWidth: "100%" }}
               onChange={handleInputChange}
+              onKeyUp={handleKeyUp}
               onKeyDown={handleKeyDown}
               value={props.sketchName}
             />
           </Tooltip>
         </Grid>
         <Grid container item xs={3} justifyContent="flex-end">
-          <Tooltip disableInteractive title={saveButtonState.message}>
+          <Tooltip disableInteractive title={saveButtonStateTest.message}>
             <span>
               <Button
                 size="small"
                 variant="contained"
-                disabled={saveButtonState.disabled}
+                disabled={saveButtonStateTest.disabled}
                 onClick={handleSaveSketchClick}
               >
-                Spara
+                {replaceWarning.show ? "Ersätt" : "Spara"}
               </Button>
             </span>
           </Tooltip>
         </Grid>
       </Grid>
+      <StyledTextWarning>{replaceWarning.text}</StyledTextWarning>
     </Paper>
   );
 };
