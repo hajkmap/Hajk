@@ -5,11 +5,11 @@
  * once (in index.js), so you don't have to worry about the details.
  * Just get/set whatever you want.
  *
- * Please not however that THERE IS A TWIST HERE TO THE  USUAL LOCALSTORAGE
+ * Please not however that THERE IS A TWIST HERE TO THE  USUAL LOCAL STORAGE
  * behavior!
  *
- * A. This helper is map-specific. That means that ALL SETTINGS RELEATED TO A
- * MAPCONFIG WILL BE HELD IN ONE KEY/VALUE PAIR IN LOCALSTOREGE.
+ * A. This helper is map-specific. That means that ALL SETTINGS RELATED TO A
+ * MAPCONFIG WILL BE HELD IN ONE KEY/VALUE PAIR IN LOCAL STORAGE.
  * B. Because we only have one value to play with for all the settings, and
  * LocalStorage stores values as string, we utilized JSON.stringify and JSON.parse.
  *
@@ -45,6 +45,10 @@ class LocalStorageHelper {
     this.mapName = `map_options_${mapName}`;
   }
 
+  // Helper that "translates" the dot notation into a getter from a nested object.
+  getValueFromPath = (obj, path) =>
+    path.split(".").reduce((r, k) => r?.[k], obj);
+
   /**
    * @summary Get map-specific settings from LocalStorage for the given key, fallback to supplied default
    * if parsing not possible.
@@ -54,12 +58,14 @@ class LocalStorageHelper {
    * @returns
    * @memberof
    */
-  get(key, defaults = {}) {
+  get(key, defaults = {}, useGlobal = false) {
     try {
+      const mapName = useGlobal ? "global_options" : this.mapName;
+
       // Return a shallow merged objects with
       return {
         ...defaults, // …supplied defaults, that can be overwritten by…
-        ...JSON.parse(window.localStorage.getItem(this.mapName))[
+        ...JSON.parse(window.localStorage.getItem(mapName))[
           key // …whatever exists in local storage for the specified key
         ],
       };
@@ -68,6 +74,35 @@ class LocalStorageHelper {
       return defaults;
     }
   }
+
+  /**
+   * @summary Use the key as a path to transverse the map settings object
+   * and retrieve the desired key.
+   * @example LocalStorageHelper._experimentalGet("sketch.drawStyleSettings.fillColor", "#efefef")
+   * @param {*} key The path used to get the value
+   * @param {*} [defaults={}]
+   * @param {boolean} [useGlobal=false]
+   * @return {*}
+   * @memberof LocalStorageHelper
+   */
+  _experimentalGet(key, defaults = {}, useGlobal = false) {
+    try {
+      const mapName = useGlobal ? "global_options" : this.mapName;
+
+      const mapSettings = JSON.parse(window.localStorage.getItem(mapName));
+      return this.getValueFromPath(mapSettings, key) || defaults;
+    } catch (error) {
+      // If parsing failed, return defaults
+      return defaults;
+    }
+  }
+
+  // _setExperimental(key, value, useGlobal = false) {
+  //   const mapName = useGlobal ? "global_options" : this.mapName;
+  //   const s = key.split(".").reverse();
+  //   console.log("s: ", s, value);
+  // }
+
   /**
    * @summary Save any JSON-able value to a specified key in a local storage object specific to current map
    *
@@ -75,11 +110,12 @@ class LocalStorageHelper {
    * @param {*} value Value that the key will be set to
    * @memberof
    */
-  set(key, value) {
+  set(key, value, useGlobal = false) {
+    const mapName = useGlobal ? "global_options" : this.mapName;
     window.localStorage.setItem(
-      this.mapName, // Use a map-specific name as key for LocalStorage setting
+      mapName, // Use a map-specific name as key for LocalStorage setting
       JSON.stringify({
-        ...JSON.parse(window.localStorage.getItem(this.mapName)),
+        ...JSON.parse(window.localStorage.getItem(mapName)),
         [key]: value,
       })
     );
