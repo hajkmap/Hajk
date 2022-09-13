@@ -10,6 +10,7 @@ using System.Web;
 using System.Web.Mvc;
 using System.Configuration;
 using log4net;
+using System.IO.Compression;
 
 namespace Proxy.Controllers
 {
@@ -24,7 +25,7 @@ namespace Proxy.Controllers
     {
         ILog _log = LogManager.GetLogger(typeof(MyActionResult));
         // Static -> only read once from Web.config
-        static private string _headerAttributeName, _localhostServer;
+        static private string _headerAttributeName, _localhostServer, _proxyBaseUrl;
         static private int _removeDomainFromUserName = -1; // -1 = not initialized from Web.config. 0 = Do not remove, 1 = Remove
 
         private string GetlocalhostServer()
@@ -62,6 +63,20 @@ namespace Proxy.Controllers
                 }
             }
             return _headerAttributeName;
+        }
+
+        private string GetProxyBaseUrl()
+        {
+            if (_proxyBaseUrl == null)
+            {
+                _proxyBaseUrl = ConfigurationManager.AppSettings["proxyBaseUrl"];
+                if (_proxyBaseUrl == null)
+                {
+                    _proxyBaseUrl = "";
+                    _log.DebugFormat("No config found in Web.config for 'proxyBaseUrl'. No replacement of 'localhostServer' is performed");
+                }
+            }
+            return _proxyBaseUrl;
         }
 
         private async Task DoMethod(string method, string urlPath, string queryString, string body, string contentType, Encoding contentEncoding)
@@ -124,23 +139,51 @@ namespace Proxy.Controllers
                     using (var resp = await request.GetResponseAsync())
                     {
                         using (var stream = resp.GetResponseStream())
-                        {
-                            var bytes = new byte[BUFFER_SIZE];
-                            while (true)
+                        {                            
+                            if (GetProxyBaseUrl().Length > 0 && (resp.ContentType.StartsWith("application/vnd.ogc.wms_xml") || resp.ContentType.StartsWith( "text/xml")))
                             {
-                                var n = stream.Read(bytes, 0, BUFFER_SIZE);
-                                if (n == 0)
+                                var ms = new MemoryStream();
+                                stream.CopyTo(ms);
+                                byte[] bytes = ms.ToArray();
+
+                                _log.DebugFormat("Response handled the new way, ContentType={0}", resp.ContentType);
+
+                                _log.DebugFormat("Response - content-encodig: {0}", resp.Headers["content-encoding"]);
+
+                                bool compressionUsed = resp.Headers["content-encoding"] == "gzip" ? true : false;
+                                if (compressionUsed)
                                 {
-                                    break;
+                                    bytes = Compress(bytes, CompressionMode.Decompress);
                                 }
-                                Response.OutputStream.Write(bytes, 0, n);
-                            }
-                            if (Response.ContentType == "application/vnd.ogc.wms_xml")
-                            {
+                                var strResponse = Encoding.UTF8.GetString(bytes); // Assume that GeoServer returns GetCapabilities in UTF8. Maybe add this to Web.config
+                                //_log.DebugFormat("Response stream, before replacement: {0}", strResponse);
+
+                                var strResponseReplaced = strResponse.Replace(GetlocalhostServer(), GetProxyBaseUrl());
+                                _log.DebugFormat("Response stream, after replacement: {0}", strResponseReplaced);
+
+                                byte[] byteResponseReplaced = Encoding.UTF8.GetBytes(strResponseReplaced);
+                                if (compressionUsed)
+                                {
+                                    byteResponseReplaced = Compress(byteResponseReplaced, CompressionMode.Compress);
+                                }
+
+                                Response.OutputStream.Write(byteResponseReplaced, 0, byteResponseReplaced.Length);
                                 Response.ContentType = "text/xml";
                             }
                             else
                             {
+                                _log.DebugFormat("Response handled the old way, ContentType={0}", resp.ContentType);
+
+                                var bytes = new byte[BUFFER_SIZE];
+                                while (true)
+                                {
+                                    var n = stream.Read(bytes, 0, BUFFER_SIZE);
+                                    if (n == 0)
+                                    {
+                                        break;
+                                    }
+                                    Response.OutputStream.Write(bytes, 0, n);
+                                }
                                 Response.ContentType = resp.ContentType;
                             }
                         }
@@ -159,6 +202,31 @@ namespace Proxy.Controllers
                     _log.WarnFormat("Exception in HandleResponse: Status: {0}, Message: {1}", e.Status, e.Message);
                     Response.StatusCode = GetHttpStatusCode(e);
                     Response.StatusDescription = e.Message;
+                }
+            }
+        }
+
+        private byte[] Compress(byte[] inByteArray, CompressionMode mode)
+        {
+            // Create a GZIP stream with decompression mode.
+            // ... Then create a buffer and write into while reading from the GZIP stream.
+            using (GZipStream stream = new GZipStream(new MemoryStream(inByteArray), CompressionMode.Decompress))
+            {
+                const int size = 4096;
+                byte[] buffer = new byte[size];
+                using (MemoryStream memory = new MemoryStream())
+                {
+                    int count = 0;
+                    do
+                    {
+                        count = stream.Read(buffer, 0, size);
+                        if (count > 0)
+                        {
+                            memory.Write(buffer, 0, count);
+                        }
+                    }
+                    while (count > 0);
+                    return memory.ToArray();
                 }
             }
         }
@@ -182,14 +250,13 @@ namespace Proxy.Controllers
         {
             _log.DebugFormat("EndPoint url: {0}", url);
 
-            if(!string.IsNullOrEmpty(url) && url.StartsWith("web/"))
+            if (!string.IsNullOrEmpty(url) && url.StartsWith("web/"))
             {
                 _log.Warn("Not allowed to use GeoServer Web-interface through proxy: {0}");
                 Response.StatusCode = 400;
                 Response.StatusDescription = "Not allowed to use GeoServer Web-interface";
             }
-
-            if (Request.HttpMethod != "GET" && Request.HttpMethod != "POST")
+            else if (Request.HttpMethod != "GET" && Request.HttpMethod != "POST")
             {
                 _log.WarnFormat("EndPoint called with not supported HTTP method: {0}", Request.HttpMethod);
                 Response.StatusCode = 405;
