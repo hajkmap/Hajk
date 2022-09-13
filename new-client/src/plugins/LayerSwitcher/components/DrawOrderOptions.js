@@ -1,17 +1,20 @@
 import * as React from "react";
 import { useSnackbar } from "notistack";
 
-import Button from "@mui/material/Button";
-import Divider from "@mui/material/Divider";
-import MenuItem from "@mui/material/MenuItem";
-import ListItemText from "@mui/material/ListItemText";
-import ListItemIcon from "@mui/material/ListItemIcon";
+import LocalStorageHelper from "utils/LocalStorageHelper";
 
+import {
+  Button,
+  Divider,
+  ListItemIcon,
+  ListItemText,
+  Menu,
+  MenuItem,
+} from "@mui/material";
 import FolderOpen from "@mui/icons-material/FolderOpen";
 import GppMaybeIcon from "@mui/icons-material/GppMaybe";
 import Save from "@mui/icons-material/Save";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
-import { Menu } from "@mui/material";
 
 export default function DrawOrderOptions({
   app,
@@ -49,7 +52,7 @@ export default function DrawOrderOptions({
    */
   const handleSave = () => {
     // Grab layers to be saved by…
-    const savedLayers = map
+    const layers = map
       .getAllLayers() //
       .filter((l) => l.getVisible() === true && l.get("layerType") !== "system") // …filtering out system layers.
       .map((l) => {
@@ -70,19 +73,21 @@ export default function DrawOrderOptions({
     // Next, let's put together the metadata object…
     const metadata = {
       savedAt: new Date(),
-      numberOfLayers: savedLayers.length,
+      numberOfLayers: layers.length,
       ...(mapName && { mapName }), // …if we have a map name, let's add it too.
     };
 
     // Let's combine it all to an object that will be saved.
-    const objectToSave = { savedLayers, metadata };
+    const objectToSave = { layers, metadata };
+
+    const currentLsSettings = LocalStorageHelper.get("layerswitcher");
 
     // TODO: Determine whether this should be a functional or required cookie,
     // add the appropriate hook and describe here https://github.com/hajkmap/Hajk/wiki/Cookies-in-Hajk.
-    localStorage.setItem(
-      "plugin.layerswitcher.savedLayers",
-      JSON.stringify(objectToSave) // Remember to stringify prior storing in local storage.
-    );
+    LocalStorageHelper.set("layerswitcher", {
+      ...currentLsSettings,
+      savedLayers: objectToSave,
+    });
 
     enqueueSnackbar(`${metadata.numberOfLayers} lager sparades utan problem`, {
       variant: "success",
@@ -92,8 +97,8 @@ export default function DrawOrderOptions({
   const handleRestore = () => {
     // Let's be safe about parsing JSON
     try {
-      const { metadata, savedLayers } = JSON.parse(
-        localStorage.getItem("plugin.layerswitcher.savedLayers")
+      const { metadata, layers } = LocalStorageHelper._experimentalGet(
+        "layerswitcher.savedLayers"
       );
 
       map
@@ -101,7 +106,7 @@ export default function DrawOrderOptions({
         .filter((l) => l.get("layerType") !== "system") // …ignore system layers.
         .forEach((l) => {
           // See if the current layer is in the list of saved layers.
-          const match = savedLayers.find((rl) => rl.i === l.get("name"));
+          const match = layers.find((rl) => rl.i === l.get("name"));
           // If yes…
           if (match) {
             // …read and set some options.

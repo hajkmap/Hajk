@@ -1,10 +1,15 @@
+import AppModel from "models/AppModel";
+import HajkTransformer from "utils/HajkTransformer";
+
 class PropFilters {
   constructor() {
     this.filters = {};
+    this.properties = {};
     return this;
   }
 
   applyFilters(properties, input) {
+    this.properties = properties; // Make properties available for the filters
     let args = input.split("|");
     const key = args.shift().trim();
 
@@ -15,7 +20,7 @@ class PropFilters {
       // example: {'2021-06-03T13:04:12Z'|date}
       value = key.substring(1, key.length - 1);
     } else {
-      value = properties[key];
+      value = this.properties[key];
       if (!value) {
         value = "";
       }
@@ -350,5 +355,40 @@ filters.add("right", function (value, searchFor) {
 filters.add("trim", function (value) {
   return value.trim();
 });
+
+/*
+  toProjection
+  Example:
+  {'166198.59821362677'|toProjection('x','xproperty', 'yproperty','EPSG:4326', 4)}
+  outputs: 12.2675 with 4 decimals.. 
+*/
+filters.add(
+  "toProjection",
+  function (value, xOrY, xProp, yProp, targetProjection, numDecimals = 4) {
+    // This is a bit awkward as you need to specify both x and y to get one value.
+    // Not fully straight forward...
+    const transformer = new HajkTransformer({
+      projection: AppModel.map.getView().getProjection().getCode(),
+    });
+
+    if (isNaN(value)) {
+      throw new Error("Value should be a number");
+    } else if (!xOrY) {
+      throw new Error("Is it 'x' or 'y' you want? Provide as argument.");
+    } else if (!xProp || !yProp) {
+      throw new Error("Please provide both xProp and yProp");
+    } else if (!targetProjection) {
+      throw new Error("A target projection is required");
+    }
+
+    const coordinates = transformer.getCoordinatesWithProjection(
+      Number(this.properties[xProp]),
+      Number(this.properties[yProp]),
+      targetProjection,
+      numDecimals
+    );
+    return coordinates[xOrY.toLowerCase()];
+  }
+);
 
 export default filters;
