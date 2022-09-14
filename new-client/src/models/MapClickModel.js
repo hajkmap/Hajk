@@ -9,6 +9,7 @@ import VectorSource from "ol/source/Vector";
 import { Style, Icon, Fill, Stroke, Circle } from "ol/style";
 import Feature from "ol/Feature";
 import Point from "ol/geom/Point";
+import AppModel from "../models/AppModel.js";
 
 const convertRGBAtoString = (color) => {
   if (
@@ -114,7 +115,15 @@ export default class MapClickModel {
    */
   async bindMapClick(callback) {
     this.map.on("singleclick", (e) => {
-      this.map.clickLock.size === 0 && this.#handleClick(e, callback);
+      if (this.map.clickLock.size === 0) {
+        // Store location data in AppModel for later use
+        AppModel.setClickLocationData(
+          e.coordinate[0],
+          e.coordinate[1],
+          this.map.getView().getZoom()
+        );
+        this.#handleClick(e, callback);
+      }
     });
   }
   /**

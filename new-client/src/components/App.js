@@ -348,11 +348,13 @@ class App extends React.PureComponent {
       globalObserver: this.globalObserver,
     });
 
-    this.appModel = new AppModel({
+    AppModel.init({
       config: props.config,
       globalObserver: this.globalObserver,
       refreshMUITheme: props.refreshMUITheme,
     });
+
+    this.appModel = AppModel;
   }
 
   hasAnyToolbarTools = () => {
@@ -654,7 +656,7 @@ class App extends React.PureComponent {
   }
 
   /**
-   * Flip the @this.state.drawerPermanent switch, then preform some
+   * Flip the @this.state.drawerPermanent switch, then perform some
    * more work to ensure the OpenLayers canvas has the correct
    * canvas size.
    *

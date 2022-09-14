@@ -33,8 +33,8 @@ const defaultState = {
   hidpi: true,
   useCustomDpiList: false,
   customDpiList: [
-    { "pxRatio": 0, "dpi": 90 },
-    { "pxRatio": 2, "dpi": 180 }
+    { pxRatio: 0, dpi: 90 },
+    { pxRatio: 2, dpi: 180 },
   ],
   customRatio: 0,
   imageFormat: "",
@@ -121,8 +121,6 @@ class WMSLayerForm extends Component {
       });
       this.validateField("select-legend-icon");
     });
-
-
   }
 
   componentWillUnmount() {
@@ -235,7 +233,7 @@ class WMSLayerForm extends Component {
          * in only the last <input> being checked.
          *
          * This must be solved, but to get this working for now, we can inform the
-         * user to preform the correct selection manually.
+         * user to perform the correct selection manually.
          **/
         // // Fake event
         // let e = {
@@ -330,16 +328,17 @@ class WMSLayerForm extends Component {
 
   renderLayerInfoInput(layerInfo) {
     var currentLayer = this.findInCapabilities(layerInfo.id);
+    console.log("currentLayer: ", currentLayer);
     var imageLoader = this.state.imageLoad ? (
       <i className="fa fa-refresh fa-spin" />
     ) : null;
 
     this.setState({
-      style: currentLayer.Style || [],
+      style: currentLayer?.Style || [],
     });
 
     let addedLayersInfo = this.state.addedLayersInfo;
-    addedLayersInfo[layerInfo.id].styles = currentLayer.Style;
+    addedLayersInfo[layerInfo.id].styles = currentLayer?.Style;
     this.setState({
       addedLayersInfo: addedLayersInfo,
     });
@@ -353,8 +352,8 @@ class WMSLayerForm extends Component {
       : null;
 
     return (
-      <div class="layerDialog">
-        <div class="form-row split3070">
+      <div className="layerDialog">
+        <div className="form-row split3070">
           <div>
             <label>Visningsnamn</label>
           </div>
@@ -376,40 +375,39 @@ class WMSLayerForm extends Component {
               }}
               type="text"
             />
-            </div>
+          </div>
         </div>
-        <div class="form-row">
+        <div className="form-row">
           <div>
             <label>Inforuta</label>
           </div>
 
-            <textarea
-              class="infoClick"
-              style={{ width: "100%" }}
-              value={layerInfo.infobox}
-              onChange={(e) => {
-                let addedLayersInfo = this.state.addedLayersInfo;
-                addedLayersInfo[layerInfo.id].infobox = e.target.value;
-                this.setState(
-                  {
-                    addedLayersInfo: addedLayersInfo,
-                  },
-                  () => {
-                    this.renderLayerInfoDialog(layerInfo);
-                  }
-                );
-              }}
-              type="text"
-            />
-
+          <textarea
+            className="infoClick"
+            style={{ width: "100%" }}
+            value={layerInfo.infobox}
+            onChange={(e) => {
+              let addedLayersInfo = this.state.addedLayersInfo;
+              addedLayersInfo[layerInfo.id].infobox = e.target.value;
+              this.setState(
+                {
+                  addedLayersInfo: addedLayersInfo,
+                },
+                () => {
+                  this.renderLayerInfoDialog(layerInfo);
+                }
+              );
+            }}
+            type="text"
+          />
         </div>
-        <div class="form-row split0">
+        <div className="form-row split0">
           <div>
             <label>Teckenförklaringsikon</label>
           </div>
           <div>
             <input
-              style={{marginRight: "5px"}}
+              style={{ marginRight: "5px" }}
               type="text"
               value={layerInfo.legendIcon}
               onChange={(e) => {
@@ -456,7 +454,7 @@ class WMSLayerForm extends Component {
           </div>
         </div>
 
-        <div class="form-row split0">
+        <div className="form-row split0">
           <div>
             <label>Stil</label>
           </div>
@@ -485,7 +483,7 @@ class WMSLayerForm extends Component {
 
         <div className="separator">Infoclick</div>
 
-        <div class="form-row split0">
+        <div className="form-row split0">
           <div>
             <label>Infoklick</label>
           </div>
@@ -509,7 +507,7 @@ class WMSLayerForm extends Component {
             />
           </div>
         </div>
-        <div class="form-row split0">
+        <div className="form-row split0">
           <div>
             <label>Infoclick-ikon</label> (
             <a
@@ -544,9 +542,14 @@ class WMSLayerForm extends Component {
 
         <div className="separator">Infoclick och sökning</div>
 
-        <div class="form-row split50">
+        <div className="form-row split50">
           <div>
-            <label>Visningsfält (i resultatlistan)</label>
+            <label>
+              Visningsfält (i resultatlistan){" "}
+              <abbr title="Visas i sökresultatlistan. Dessutom kan visas som etikett i kartan när användaren selekterat ett sökresultat, om 'Visa resultat i kartan' är aktivt för sökverktyget. Anges som kommaseparerad lista.">
+                (?)
+              </abbr>
+            </label>
           </div>
           <div>
             <input
@@ -555,7 +558,8 @@ class WMSLayerForm extends Component {
               value={layerInfo.searchDisplayName}
               onChange={(e) => {
                 let addedLayersInfo = this.state.addedLayersInfo;
-                addedLayersInfo[layerInfo.id].searchDisplayName = e.target.value;
+                addedLayersInfo[layerInfo.id].searchDisplayName =
+                  e.target.value;
                 this.setState(
                   {
                     addedLayersInfo: addedLayersInfo,
@@ -568,9 +572,14 @@ class WMSLayerForm extends Component {
             />
           </div>
         </div>
-        <div class="form-row split50">
+        <div className="form-row split50">
           <div>
-            <label>Sekundära visningsfält (i resultatlistan)</label>
+            <label>
+              Sekundära visningsfält (i resultatlistan){" "}
+              <abbr title="Visas i sökresultatlistan som en andra rad med något mindre textstorlek under den första raden (Visningsfält). ">
+                (?)
+              </abbr>
+            </label>
           </div>
           <div>
             <input
@@ -593,9 +602,14 @@ class WMSLayerForm extends Component {
             />
           </div>
         </div>
-        <div class="form-row split50">
+        <div className="form-row split50">
           <div>
-            <label>Kort visningsfält (etikett i kartan)</label>
+            <label>
+              Kort visningsfält{" "}
+              <abbr title="Visas som etikett bredvid sökresultat i ett första läge, om 'Visa resultat i kartan' är aktivt för sökverktyget. Anges som kommaseparerad lista.">
+                (?)
+              </abbr>
+            </label>
           </div>
           <div>
             <input
@@ -621,7 +635,7 @@ class WMSLayerForm extends Component {
 
         <div className="separator">Sökning</div>
 
-        <div class="form-row split3070">
+        <div className="form-row split3070">
           <div>
             <label>Url</label>
           </div>
@@ -645,9 +659,14 @@ class WMSLayerForm extends Component {
             />
           </div>
         </div>
-        <div class="form-row split3070">
+        <div className="form-row split3070">
           <div>
-            <label>Sökfält</label>
+            <label>
+              Sökfält{" "}
+              <abbr title="Styr vilka attribut (kolumner i tabellen) som sökning sker mot. Anges som kommaseparerad lista.">
+                (?)
+              </abbr>
+            </label>
           </div>
           <div>
             <input
@@ -656,7 +675,8 @@ class WMSLayerForm extends Component {
               value={layerInfo.searchPropertyName}
               onChange={(e) => {
                 let addedLayersInfo = this.state.addedLayersInfo;
-                addedLayersInfo[layerInfo.id].searchPropertyName = e.target.value;
+                addedLayersInfo[layerInfo.id].searchPropertyName =
+                  e.target.value;
                 this.setState(
                   {
                     addedLayersInfo: addedLayersInfo,
@@ -670,7 +690,7 @@ class WMSLayerForm extends Component {
           </div>
         </div>
 
-        <div class="form-row split3070">
+        <div className="form-row split3070">
           <div>
             <label>Utdataformat</label>
           </div>
@@ -681,7 +701,8 @@ class WMSLayerForm extends Component {
               value={layerInfo.searchOutputFormat}
               onChange={(e) => {
                 let addedLayersInfo = this.state.addedLayersInfo;
-                addedLayersInfo[layerInfo.id].searchOutputFormat = e.target.value;
+                addedLayersInfo[layerInfo.id].searchOutputFormat =
+                  e.target.value;
                 this.setState(
                   {
                     addedLayersInfo: addedLayersInfo,
@@ -694,7 +715,7 @@ class WMSLayerForm extends Component {
             />
           </div>
         </div>
-        <div class="form-row split3070">
+        <div className="form-row split3070">
           <div>
             <label>Geometrifält</label>
           </div>
@@ -906,11 +927,14 @@ class WMSLayerForm extends Component {
           minMaxZoomAlertOnToggleOnly:
             layer.minMaxZoomAlertOnToggleOnly ?? false,
           useCustomDpiList: layer.useCustomDpiList ?? false,
-          customDpiList: layer.customDpiList?.length > 0 ? layer.customDpiList : [
-            { "pxRatio": 0, "dpi": 90 },
-            { "pxRatio": 2, "dpi": 180 },
-            { "pxRatio": 3, "dpi": 270 }
-          ],
+          customDpiList:
+            layer.customDpiList?.length > 0
+              ? layer.customDpiList
+              : [
+                  { pxRatio: 0, dpi: 90 },
+                  { pxRatio: 2, dpi: 180 },
+                  { pxRatio: 3, dpi: 270 },
+                ],
         },
         () => {
           this.setServerType();
@@ -1051,6 +1075,12 @@ class WMSLayerForm extends Component {
       projections = this.state.capabilities.Capability.Layer[RS];
     }
 
+    if (projections) {
+      projections = projections.map((projection) => {
+        return projection.toUpperCase();
+      });
+    }
+
     let projEles = projections
       ? supportedProjections.map((proj, i) => {
           if (projections.indexOf(proj) > -1) {
@@ -1160,7 +1190,9 @@ class WMSLayerForm extends Component {
       singleTile: this.getValue("singleTile"),
       hidpi: this.getValue("hidpi"),
       useCustomDpiList: this.state.useCustomDpiList,
-      customDpiList: this.state.useCustomDpiList ? this.state.customDpiList : [],
+      customDpiList: this.state.useCustomDpiList
+        ? this.state.customDpiList
+        : [],
       customRatio: this.getValue("customRatio"),
       imageFormat: this.getValue("imageFormat"),
       serverType: this.getValue("serverType"),
@@ -1360,33 +1392,35 @@ class WMSLayerForm extends Component {
     this.setState({ workspaceList: sortedWorksapes });
   };
 
-  updateDpiList(e, kv, key){
-    const index = this.state.customDpiList.findIndex(o => o === kv);
+  updateDpiList(e, kv, key) {
+    const index = this.state.customDpiList.findIndex((o) => o === kv);
 
-    if(e.target.value.includes(".") || e.target.value.includes(",")){
-      kv[key] = parseFloat(parseFloat(e.target.value.replace(",", ".")).toFixed(1));
-    }else{
+    if (e.target.value.includes(".") || e.target.value.includes(",")) {
+      kv[key] = parseFloat(
+        parseFloat(e.target.value.replace(",", ".")).toFixed(1)
+      );
+    } else {
       kv[key] = parseInt(e.target.value);
     }
-    
+
     let newValue = [...this.state.customDpiList];
     newValue[index] = kv;
-    this.setState({customDpiList: newValue});
+    this.setState({ customDpiList: newValue });
   }
 
-  removeDpiListRow(e, index){
-    if(this.state.customDpiList.length <= 1){
+  removeDpiListRow(e, index) {
+    if (this.state.customDpiList.length <= 1) {
       return;
     }
     let newValue = [...this.state.customDpiList];
     newValue.splice(index, 1);
-    this.setState({customDpiList: newValue});
+    this.setState({ customDpiList: newValue });
   }
 
-  addDpiListRow(){
+  addDpiListRow() {
     let newValue = [...this.state.customDpiList];
     newValue.push({ pxRatio: 0, dpi: 90 });
-    this.setState({customDpiList: newValue});
+    this.setState({ customDpiList: newValue });
   }
 
   render() {
@@ -1588,49 +1622,81 @@ class WMSLayerForm extends Component {
             type="checkbox"
             ref="input_useCustomDpiList"
             id="input_useCustomDpiList"
-            onChange={(e) => this.setState({ useCustomDpiList: e.target.checked })}
+            onChange={(e) =>
+              this.setState({ useCustomDpiList: e.target.checked })
+            }
             checked={this.state.useCustomDpiList}
           />
           &nbsp;
           <label htmlFor="input_useCustomDpiList">
-            Custom DPI {" "}
+            Custom DPI{" "}
             <i
               className="fa fa-question-circle"
               data-toggle="tooltip"
               title="Hämta 'kartbilder' med specifik dpi vid pixelRatio-brytpunkt."
             />
           </label>
-          {this.state.useCustomDpiList
-            ? 
+          {this.state.useCustomDpiList ? (
             <div>
-              <div style={{display: "flex", color: "#c0c0c0"}}>
-                <div style={{width: "155px"}}>pixel ratio</div>
-                <div style={{width: "155px"}}>dpi</div>
-              </div>              
-            {
-            this.state.customDpiList.map((kv, index) =>
-              <div key={`${kv.pxRatio}__${kv.dpi}__${index}`} style={{display: "flex"}}>
-                <div>
-                  <input type="text" defaultValue={kv.pxRatio} style={{width: "150px"}}
-                    onBlur={(e) => { this.updateDpiList(e, kv, "pxRatio"); }}/>
-                </div>
-                <div>
-                  <input type="text" defaultValue={kv.dpi} style={{width: "150px"}}
-                    onBlur={(e) => { this.updateDpiList(e, kv, "dpi"); }}/>
-                    <button type="button" className="btn btn-default" style={{fontWeight: "bold"}} disabled={this.state.customDpiList.length === 1}
-                      onClick={(e)=>{ this.removeDpiListRow(e, index); }}>-</button>
-                    {index === this.state.customDpiList.length-1 ?
-                    <button type="button" className="btn btn-default" style={{fontWeight: "bold", marginLeft: "5px"}}
-                      onClick={(e)=>{ this.addDpiListRow(); }}>+</button>
-                    : ""  
-                  }
-                </div>
+              <div style={{ display: "flex", color: "#c0c0c0" }}>
+                <div style={{ width: "155px" }}>pixel ratio</div>
+                <div style={{ width: "155px" }}>dpi</div>
               </div>
-            )
-            }
+              {this.state.customDpiList.map((kv, index) => (
+                <div
+                  key={`${kv.pxRatio}__${kv.dpi}__${index}`}
+                  style={{ display: "flex" }}
+                >
+                  <div>
+                    <input
+                      type="text"
+                      defaultValue={kv.pxRatio}
+                      style={{ width: "150px" }}
+                      onBlur={(e) => {
+                        this.updateDpiList(e, kv, "pxRatio");
+                      }}
+                    />
+                  </div>
+                  <div>
+                    <input
+                      type="text"
+                      defaultValue={kv.dpi}
+                      style={{ width: "150px" }}
+                      onBlur={(e) => {
+                        this.updateDpiList(e, kv, "dpi");
+                      }}
+                    />
+                    <button
+                      type="button"
+                      className="btn btn-default"
+                      style={{ fontWeight: "bold" }}
+                      disabled={this.state.customDpiList.length === 1}
+                      onClick={(e) => {
+                        this.removeDpiListRow(e, index);
+                      }}
+                    >
+                      -
+                    </button>
+                    {index === this.state.customDpiList.length - 1 ? (
+                      <button
+                        type="button"
+                        className="btn btn-default"
+                        style={{ fontWeight: "bold", marginLeft: "5px" }}
+                        onClick={(e) => {
+                          this.addDpiListRow();
+                        }}
+                      >
+                        +
+                      </button>
+                    ) : (
+                      ""
+                    )}
+                  </div>
+                </div>
+              ))}
             </div>
-            : null }
-        </div>        
+          ) : null}
+        </div>
         <div>
           <input
             type="checkbox"

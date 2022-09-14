@@ -75,6 +75,9 @@ class Print extends React.PureComponent {
         ? props.options.logoMaxWidth
         : 40;
 
+    // If no path to north-arrow image is supplied, use fallback
+    props.options.northArrow = props.options.northArrow || "/north_arrow.png";
+
     // Ensure we have a value for the crossOrigin parameter
     props.options.crossOrigin =
       props.app.config.mapConfig.map?.crossOrigin || "anonymous";

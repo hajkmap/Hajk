@@ -3,6 +3,7 @@ import ReactMarkdown from "react-markdown";
 import rehypeRaw from "rehype-raw";
 import gfm from "remark-gfm";
 import FeaturePropFilters from "./FeaturePropsFilters";
+import AppModel from "models/AppModel.js";
 
 import {
   customComponentsForReactMarkdown, // the object with all custom components
@@ -146,7 +147,6 @@ export default class FeaturePropsParsing {
     else {
       // Attempt to grab the actual value from the Properties collection, if not found, fallback to empty string.
       // Note that we must replace equal sign in property value, else we'd run into trouble, see #812.
-
       return (
         // What you see on the next line is what we call "hängslen och livrem" in Sweden.
         // (The truth is it's all needed - this.properties may not be an Array, it may not have a key named
@@ -290,6 +290,12 @@ export default class FeaturePropsParsing {
     return r;
   };
 
+  #decorateProperties(prefix, kvData) {
+    Object.entries(kvData).forEach(([key, value]) => {
+      this.properties[`${prefix}:${key}`] = value;
+    });
+  }
+
   /**
    * Converts a JSON-string of properties into a properties object
    * @param {str} properties
@@ -309,6 +315,11 @@ export default class FeaturePropsParsing {
   setMarkdownAndProperties({ markdown, properties }) {
     this.markdown = markdown;
     this.properties = properties;
+
+    // Here we can decorate the incoming properties with data from the last click in the map.
+    // By decorating, these props can be used like any other prop.
+    this.#decorateProperties("click", AppModel.getClickLocationData());
+
     return this;
   }
 

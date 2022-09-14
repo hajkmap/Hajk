@@ -53,6 +53,7 @@ const defaultState = {
   infobox: "",
   aliasDict: "",
   displayFields: "",
+  secondaryLabelFields: "",
   shortDisplayFields: "",
   geometryField: "",
   url: "",
@@ -141,6 +142,7 @@ class Search extends Component {
       infobox: layer.infobox,
       aliasDict: layer.aliasDict,
       displayFields: layer.displayFields,
+      secondaryLabelFields: layer.secondaryLabelFields,
       shortDisplayFields: layer.shortDisplayFields,
       geometryField: layer.geometryField,
       outputFormat: layer.outputFormat || "GML3",
@@ -153,6 +155,7 @@ class Search extends Component {
       this.validateField("url", true);
       this.validateField("searchFields", true);
       this.validateField("displayFields", true);
+      this.validateField("secondaryLabelFields", true);
       this.validateField("shortDisplayFields", true);
       this.validateField("geometryField", true);
       this.validateField("outputFormat", true);
@@ -277,16 +280,12 @@ class Search extends Component {
   /**
    *
    */
-  getLayersWithFilter(filter) {
+  getLayersWithFilter() {
     return this.props.model.get("layers").filter((layer) => {
-      return (
-        new RegExp(this.state.filter.toLowerCase()).test(
-          layer.caption.toLowerCase()
-        ) ||
-        new RegExp(this.state.filter.toLowerCase()).test(
-          layer.internalLayerName?.toLowerCase()
-        )
-      );
+      const caption = layer.caption.toLowerCase();
+      const internalLayerName = layer.internalLayerName?.toLowerCase() || "";
+      const filter = this.state.filter.toLowerCase();
+      return caption.includes(filter) || internalLayerName.includes(filter);
     });
   }
   /**
@@ -361,6 +360,7 @@ class Search extends Component {
 
     switch (fieldName) {
       case "displayFields":
+      case "secondaryLabelFields":
       case "shortDisplayFields":
       case "searchFields":
         valid = value.every((val) => /^\w+$/.test(val));
@@ -427,6 +427,7 @@ class Search extends Component {
     if (fieldName === "layers") value = format_layers(this.state.addedLayers);
     if (fieldName === "searchFields") value = value.split(",");
     if (fieldName === "displayFields") value = value.split(",");
+    if (fieldName === "secondaryLabelFields") value = value.split(",");
     if (fieldName === "shortDisplayFields") value = value.split(",");
 
     return value;
@@ -466,6 +467,7 @@ class Search extends Component {
         "layers",
         "searchFields",
         "displayFields",
+        "secondaryLabelFields",
         "shortDisplayFields",
         "geometryField",
         "outputFormat",
@@ -493,6 +495,7 @@ class Search extends Component {
         infobox: this.getValue("infobox"),
         aliasDict: this.getValue("aliasDict"),
         displayFields: this.getValue("displayFields"),
+        secondaryLabelFields: this.getValue("secondaryLabelFields"),
         shortDisplayFields: this.getValue("shortDisplayFields"),
         geometryField: this.getValue("geometryField"),
         outputFormat: this.getValue("outputFormat"),
@@ -821,7 +824,12 @@ class Search extends Component {
                 </div>
               </div>
               <div>
-                <label>Visningsnamn*</label>
+                <label>
+                  Visningsnamn*{" "}
+                  <abbr title="Visas för användaren i bland annat sökresultatlistan som namnet på datamängden man söker i.">
+                    (?)
+                  </abbr>
+                </label>
                 <input
                   type="text"
                   ref="input_caption"
@@ -838,7 +846,12 @@ class Search extends Component {
                 />
               </div>
               <div>
-                <label>Visningsnamn Admin</label>
+                <label>
+                  Visningsnamn Admin UI{" "}
+                  <abbr title="Visas INTE för användaren. Lokalt namn som endast visas i administrationsgränssnittet och kan användas för att särskilja om flera lager behöver ha samma Visningsnamn utåt.">
+                    (?)
+                  </abbr>
+                </label>
                 <input
                   type="text"
                   ref="input_internalLayerName"
@@ -850,7 +863,12 @@ class Search extends Component {
                 />
               </div>
               <div>
-                <label>Inforuta</label>
+                <label>
+                  Inforuta{" "}
+                  <abbr title="Styr hur resultatet visas i detaljvyn. Referera till dokumentationen för Sökverktyget samt Infoclick (för tillåten syntax i infoboxen). Se Hajks Wiki på GitHub.">
+                    (?)
+                  </abbr>
+                </label>
                 <textarea
                   ref="input_infobox"
                   value={this.state.infobox}
@@ -868,7 +886,12 @@ class Search extends Component {
                 />
               </div>
               <div>
-                <label>Sökfält</label>
+                <label>
+                  Sökfält{" "}
+                  <abbr title="Styr vilka attribut (kolumner i tabellen) som sökning sker mot. Anges som kommaseparerad lista.">
+                    (?)
+                  </abbr>
+                </label>
                 <input
                   type="text"
                   ref="input_searchFields"
@@ -885,7 +908,12 @@ class Search extends Component {
                 />
               </div>
               <div>
-                <label>Visningsfält</label>
+                <label>
+                  Primära visningsfält{" "}
+                  <abbr title="Visas i sökresultatlistan. Dessutom kan visas som etikett i kartan när användaren selekterat ett sökresultat, om 'Visa resultat i kartan' är aktivt för sökverktyget. Anges som kommaseparerad lista.">
+                    (?)
+                  </abbr>
+                </label>
                 <input
                   type="text"
                   ref="input_displayFields"
@@ -902,7 +930,34 @@ class Search extends Component {
                 />
               </div>
               <div>
-                <label>Kort visningsfält</label>
+                <label>
+                  Sekundära visningsfält{" "}
+                  <abbr title="Visas i sökresultat med något mindre text, under de primära visningsfälten. Anges som kommaseparerad lista.">
+                    (?)
+                  </abbr>
+                </label>
+                <input
+                  type="text"
+                  ref="input_secondaryLabelFields"
+                  onChange={(e) => {
+                    this.setState(
+                      {
+                        secondaryLabelFields: e.target.value,
+                      },
+                      () => this.validateField("secondaryLabelFields", true)
+                    );
+                  }}
+                  value={this.state.secondaryLabelFields}
+                  className={this.getValidationClass("secondaryLabelFields")}
+                />
+              </div>
+              <div>
+                <label>
+                  Visningsfält i kartan{" "}
+                  <abbr title="Visas som etikett bredvid sökresultat i ett första läge, om 'Visa resultat i kartan' är aktivt för sökverktyget. Anges som kommaseparerad lista.">
+                    (?)
+                  </abbr>
+                </label>
                 <input
                   type="text"
                   ref="input_shortDisplayFields"

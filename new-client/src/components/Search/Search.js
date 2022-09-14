@@ -16,12 +16,16 @@ import { functionalOk as functionalCookieOk } from "models/Cookie";
 
 class Search extends React.PureComponent {
   defaultSearchOptions = {
-    enableLabelOnHighlight: true,
-    searchInVisibleLayers: false,
-    wildcardAtStart: false,
-    wildcardAtEnd: true,
-    matchCase: false,
-    activeSpatialFilter: "intersects",
+    searchInVisibleLayers: this.props.options?.searchInVisibleLayers ?? false,
+    wildcardAtStart: this.props.options?.wildcardAtStart ?? false,
+    wildcardAtEnd: this.props.options?.wildcardAtEnd ?? true,
+    matchCase: this.props.options?.matchCase ?? false,
+    activeSpatialFilter: ["intersects", "within"].includes(
+      this.props.options?.activeSpatialFilter
+    )
+      ? this.props.options.activeSpatialFilter
+      : "intersects",
+    enableLabelOnHighlight: this.props.options?.enableLabelOnHighlight ?? true,
     maxResultsPerDataset: !isNaN(this.props.options.maxResultsPerDataset)
       ? this.props.options.maxResultsPerDataset
       : 100,
@@ -682,12 +686,11 @@ class Search extends React.PureComponent {
         // Prepare all features so that they do have titles/short titles
         searchResults.featureCollections.forEach((fc) => {
           fc.value.features.forEach((f) => {
-            const { featureTitle, shortFeatureTitle } = this.getFeatureLabels(
-              f,
-              fc.source
-            );
+            const { featureTitle, shortFeatureTitle, secondaryLabelFields } =
+              this.getFeatureLabels(f, fc.source);
             f.featureTitle = featureTitle;
             f.shortFeatureTitle = shortFeatureTitle;
+            f.secondaryLabelFields = secondaryLabelFields;
           });
         });
 
@@ -773,10 +776,15 @@ class Search extends React.PureComponent {
   }
 
   getFeatureLabels = (feature, source) => {
-    if (feature.featureTitle && feature.shortFeatureTitle) {
+    if (
+      feature.featureTitle &&
+      feature.shortFeatureTitle &&
+      feature.secondaryLabelFields
+    ) {
       return {
         featureTitle: feature.featureTitle,
         shortFeatureTitle: feature.shortFeatureTitle,
+        secondaryLabelFields: feature.secondaryLabelFields,
       };
     }
 
@@ -789,9 +797,11 @@ class Search extends React.PureComponent {
         ? df.replaceAll('"', "")
         : feature.get(df);
 
+      // TODO: Can this ever happen? If not - remove.
       if (Array.isArray(displayField)) {
         displayField = displayField.join(", ");
       }
+
       if (displayField) {
         // If we already have a string, let's append this value too…
         if (featureTitleString.length > 0) {
@@ -800,6 +810,11 @@ class Search extends React.PureComponent {
           // …else, just return this
           return displayField.toString();
         }
+      } else {
+        // 'displayField' can be undefined (if feature.get() can't find a value for
+        // the given attribute). In this case we must ensure that the reducer returns
+        // the previously-accumulated string.
+        return featureTitleString;
       }
     };
 
@@ -815,7 +830,10 @@ class Search extends React.PureComponent {
     // an empty label as shortFeatureTitle.
     const shortFeatureTitle =
       source.shortDisplayFields?.reduce(reducerFn, "") || "";
-    return { featureTitle, shortFeatureTitle };
+
+    const secondaryLabelFields =
+      source.secondaryLabelFields?.reduce(reducerFn, "") || "";
+    return { featureTitle, shortFeatureTitle, secondaryLabelFields };
   };
 
   filterFeaturesWithGeometry = (features) => {
