@@ -7,6 +7,8 @@ import BugReportIcon from "@mui/icons-material/BugReport";
 
 import { useSnackbar } from "notistack";
 
+import useCookieStatus from "hooks/useCookieStatus";
+
 // Hajk components are primarily styled in two ways:
 // - Using the styled-utility, see: https://mui.com/system/styled/
 // - Using the sx-prop, see: https://mui.com/system/basics/#the-sx-prop
@@ -44,6 +46,9 @@ function DummyView(props) {
   // We're gonna need to use the event observers. Let's destruct them so that we can
   // get a hold of them easily. The observers can be accessed directly via the props:
   const { globalObserver, localObserver } = props;
+
+  // We're gonna need to keep track of if we're allowed to save stuff in LS. Let's use the hook.
+  const { functionalCookiesOk } = useCookieStatus(globalObserver);
 
   // We're gonna want to keep track of some state. Let's use the useState hook.
   // If you want to read up on how state is managed in functional components, see: https://reactjs.org/docs/hooks-state.html
@@ -172,10 +177,17 @@ function DummyView(props) {
 
   // Make it possible to programmatically update Window's title/color
   const handleClickOnRandomTitle = () => {
-    // We use the updateCustomProp method which is passed down from parent
-    // component as a prop to this View.
-    props.updateCustomProp("title", new Date().getTime().toString()); // Generate a timestamp
-    props.updateCustomProp("color", getRandomHexColorString());
+    // First we'll generate a random title and color
+    const title = new Date().getTime().toString();
+    const color = getRandomHexColorString();
+    // Then we'll use the updateCustomProp method which is passed down from parent component as a prop to this View.
+    props.updateCustomProp("title", title); // Generate a timestamp
+    props.updateCustomProp("color", color);
+    // We might want to (if we're allowed) save some values in LS for later use. Let's check
+    // if we're allowed to save in LS (We might not be if the user has not accepted functional cookies).
+    if (functionalCookiesOk) {
+      props.model.setDummyKeyInStorage("title", title);
+    }
   };
 
   // Make it possible to programmatically update the border color of a button
