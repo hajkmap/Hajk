@@ -333,7 +333,11 @@ class FirToolbarView extends React.PureComponent {
                 this.handleToolbarClick("Import");
               }}
             >
-              <InsertDriveFileIcon />
+              <InsertDriveFileIcon
+                style={{
+                  color: this.state.tools.Import.selected ? "#fff" : "#000",
+                }}
+              />
             </IconButton>
             <IconButton
               title="Ta bort objekt"
@@ -344,7 +348,11 @@ class FirToolbarView extends React.PureComponent {
                 this.handleToolbarClick("Delete");
               }}
             >
-              <DeleteIcon />
+              <DeleteIcon
+                style={{
+                  color: this.state.tools.Delete.selected ? "#fff" : "#000",
+                }}
+              />
             </IconButton>
           </StyledButtonGroup>
           <Collapse in={this.state.tools.Import.selected === true}>
