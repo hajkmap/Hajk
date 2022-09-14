@@ -119,6 +119,9 @@ class BaseWindowPlugin extends React.PureComponent {
       activeMap: this.props.app.config.activeMap,
     });
 
+    // AppModel keeps track of recently shown plugins
+    this.props.app.pushPluginIntoHistory(this.type);
+
     // Don't continue if visibility hasn't changed
     if (this.state.windowVisible === true) {
       return null;

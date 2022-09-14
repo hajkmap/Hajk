@@ -108,6 +108,9 @@ class DialogWindowPlugin extends React.PureComponent {
       pluginName: this.uniqueIdentifier,
       activeMap: this.props.app.config.activeMap,
     });
+
+    // AppModel keeps track of recently shown plugins
+    this.props.app.pushPluginIntoHistory(this.uniqueIdentifier);
   };
 
   #onClose = () => {

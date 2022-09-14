@@ -47,6 +47,7 @@ class AppModel {
     this.layersFromParams = [];
     this.cqlFiltersFromParams = {};
     this.hfetch = hfetch;
+    this.pluginHistory = new Set();
 
     // We store the click location data here for later use.
     // Right now this is only used in the new infoClick but it will most likely be used in other parts of the program.
@@ -104,6 +105,24 @@ class AppModel {
           window.closeWindow();
         }
       });
+  }
+
+  pushPluginIntoHistory(name) {
+    // If plugin already exists in set…
+    if (this.pluginHistory.has(name)) {
+      // …remove it…
+      this.pluginHistory.delete(name);
+      // …then re-add to ensure our entry ends up last in the Set.
+      this.pluginHistory.add(name);
+    } else {
+      this.pluginHistory.add(name);
+    }
+
+    // Finally, announce to everyone who cares
+    this.globalObserver.publish(
+      "core.pluginHistoryChanged",
+      this.pluginHistory
+    );
   }
 
   getClickLocationData() {
