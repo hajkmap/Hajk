@@ -11,6 +11,9 @@ import Observer from "react-event-observer";
 // All plugins will need to display an icon. Make sure to pick a relevant one from MUI Icons.
 import BugReportIcon from "@mui/icons-material/BugReport";
 
+// We might want to import some other classes etc.
+import DrawModel from "models/DrawModel";
+
 /**
  * @summary Main component for the Dummy-plugin.
  * @description The purpose of having a Dummy plugin is to exemplify
@@ -20,7 +23,16 @@ function Dummy(props) {
   // We're gonna want to keep track of some state... Let's use the State hook.
   // If you want to read up on how state is managed in functional components, see: https://reactjs.org/docs/hooks-state.html
   // There is a more thorough explanation regarding state in ./DummyView.js
+  // Here is an example where we keep track of a state object (kind of like class-based components).
   const [state, setState] = React.useState({ title: "Dummy", color: null });
+  // But we can also keep just one variable, allowing us to keep naming etc. clean. The pluginShown state
+  // keeps track of wether the plugin is shown or not, and is obviously initiated to the visibleAtStart-option set in admin.
+  const [pluginShown, setPluginShown] = React.useState(
+    props.options.visibleAtStart ?? false
+  );
+  // Another state variable we need to keep track off is the current draw-interaction. (Used to tell the drawModel
+  // what we want to draw). Since this is an example, we'll keep it simple: It will either be set to "POLYGON" or "" (off).
+  const [drawInteraction, setDrawInteraction] = React.useState("");
   // We're gonna want to initiate an observer which can be used for communication within the component.
   // We must remember that in functional components all code within the component runs on every render.
   // This means that if we would initiate the observer as follow:
@@ -43,12 +55,22 @@ function Dummy(props) {
   //
   // I hope that the explanation will help you. Anyways, let's initiate the local observer in the following, recommended fashion:
   const [localObserver] = React.useState(Observer());
-  // We're also gonna initiate the model (which should/could hold the plugin's logic, so we're not bloating the components).
+  // We're also gonna initiate the plugin-model (which should/could hold the plugin's logic, to avoid bloating the components).
   const [dummyModel] = React.useState(
     new DummyModel({
       localObserver: localObserver,
       app: props.app,
       map: props.map,
+    })
+  );
+  // There are some core models that can be used as well. The core models take care of logic that is used in several places in the application.
+  // Some example core models are: SearchModel (for searching in WFS etc.), DrawModel (for drawing on the map), KmlModel (for importing/exporting .kml).
+  // Let's initiate the DrawModel!
+  const [drawModel] = React.useState(
+    new DrawModel({
+      layerName: "pluginDummy",
+      map: props.map,
+      observer: localObserver,
     })
   );
 
@@ -65,6 +87,17 @@ function Dummy(props) {
     };
   }, [localObserver]); // <-- Dependency array, specifies which objects changes will trigger the effect to run
 
+  // Here's an affect that fires when the pluginShown or activeDrawType state changes. It makes sure to toggle the
+  // draw-interaction (either off if the plugin-window has been closed, or to whatever the currentDrawInteraction is set to.
+  React.useEffect(() => {
+    // If pluginShown is set to false, we toggle the draw-interaction to "" (off).
+    if (!pluginShown) {
+      return drawModel.toggleDrawInteraction("");
+    }
+    // Otherwise we'll set it to whatever the current draw-interaction is.
+    return drawModel.toggleDrawInteraction(drawInteraction);
+  }, [drawModel, drawInteraction, pluginShown]); // We need to keep the drawModel in the dep. arr. since it _could_ change.
+
   // Used to update title/color (or any other state variable…). Title and color are passed on to BaseWindowPlugin as props,
   // and will result in updating the Window's color/title. Note that we put this method here, in Dummy.js, and then pass it on
   // to DummyView as a prop. It is then called in DummyView when user clicks a button. This is just made for illustrating
@@ -77,6 +110,20 @@ function Dummy(props) {
   // Fires when the custom header-panel button is clicked. Add more logic and see what happens!
   const panelHeaderButtonCallback = () => {
     console.log("You just clicked the panel-header button!");
+  };
+
+  // We're gonna need to catch if the user closes the window, and make sure to
+  // update the local state so that the effect making sure to disable eventual active tools
+  // (such as draw, we don't want that active when the plugin-window is closed).
+  const onWindowHide = () => {
+    setPluginShown(false);
+  };
+
+  // We're gonna need to catch if the user opens the window, and make sure to
+  // update the local state so that the effect making sure to activate eventual tools
+  // (such as draw) that were active before closing the window.
+  const onWindowShow = () => {
+    setPluginShown(true);
   };
 
   // Render is now super-simplified compared to previous versions of Hajk.
@@ -106,6 +153,8 @@ function Dummy(props) {
         ],
         height: "dynamic", // The height of the plugin-window in px. "dynamic" resizes the window so all content fits, "auto" uses all available space.
         width: 400, // The width of the plugin-window in px.
+        onWindowHide: onWindowHide, // Handler for when user closes window.
+        onWindowShow: onWindowShow, // Handler for when user shows window.
       }}
     >
       {/* This is the child object of BaseWindowPlugin. It will be displayed
@@ -118,6 +167,7 @@ function Dummy(props) {
         localObserver={localObserver} // And also the local-observer (handling communication within the plugin)...
         globalObserver={props.app.globalObserver} // ... and the global-observer (handling communication within the entire application).
         updateCustomProp={updateCustomProp} // We're also gonna pass a function that we can use to update the state in this (the parent) component.
+        setDrawInteraction={setDrawInteraction} // Finally, we'll pass the updater for the draw-interaction state (so that we can toggle draw on/off).
       />
     </BaseWindowPlugin>
   );
