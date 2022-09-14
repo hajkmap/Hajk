@@ -542,8 +542,9 @@ class App extends React.PureComponent {
     });
 
     this.globalObserver.subscribe("core.addDrawerToggleButton", (button) => {
-      const newState = [...this.state.drawerButtons, button];
-      this.setState({ drawerButtons: newState });
+      this.setState((prevState) => ({
+        drawerButtons: [...prevState.drawerButtons, button],
+      }));
     });
 
     /**
