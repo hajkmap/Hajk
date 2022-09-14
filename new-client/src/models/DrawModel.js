@@ -105,7 +105,7 @@ class DrawModel {
     // which will act as a prefix on all messages published on the
     // supplied observer.
     this.#observerPrefix = this.#getObserverPrefix(settings);
-    this.measurementSettings =
+    this.#measurementSettings =
       settings.measurementSettings ?? this.#getDefaultMeasurementSettings();
     this.#drawStyleSettings =
       settings.drawStyleSettings ?? this.#getDefaultDrawStyleSettings();
