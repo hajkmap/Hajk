@@ -11,7 +11,8 @@ import Observer from "react-event-observer";
 // All plugins will need to display an icon. Make sure to pick a relevant one from MUI Icons.
 import BugReportIcon from "@mui/icons-material/BugReport";
 
-// We might want to import some other classes etc.
+// We might want to import some other classes or constants etc.
+import { DEFAULT_MEASUREMENT_SETTINGS } from "./constants";
 import DrawModel from "models/DrawModel";
 
 /**
@@ -31,7 +32,7 @@ function Dummy(props) {
     props.options.visibleAtStart ?? false
   );
   // Another state variable we need to keep track off is the current draw-interaction. (Used to tell the drawModel
-  // what we want to draw). Since this is an example, we'll keep it simple: It will either be set to "POLYGON" or "" (off).
+  // what we want to draw). Since this is an example, we'll keep it simple: It will either be set to "Polygon" or "" (off).
   const [drawInteraction, setDrawInteraction] = React.useState("");
   // We're gonna want to initiate an observer which can be used for communication within the component.
   // We must remember that in functional components all code within the component runs on every render.
@@ -57,21 +58,24 @@ function Dummy(props) {
   const [localObserver] = React.useState(Observer());
   // We're also gonna initiate the plugin-model (which should/could hold the plugin's logic, to avoid bloating the components).
   const [dummyModel] = React.useState(
-    new DummyModel({
-      localObserver: localObserver,
-      app: props.app,
-      map: props.map,
-    })
+    () =>
+      new DummyModel({
+        localObserver: localObserver,
+        app: props.app,
+        map: props.map,
+      })
   );
   // There are some core models that can be used as well. The core models take care of logic that is used in several places in the application.
   // Some example core models are: SearchModel (for searching in WFS etc.), DrawModel (for drawing on the map), KmlModel (for importing/exporting .kml).
   // Let's initiate the DrawModel!
   const [drawModel] = React.useState(
-    new DrawModel({
-      layerName: "pluginDummy",
-      map: props.map,
-      observer: localObserver,
-    })
+    () =>
+      new DrawModel({
+        layerName: "pluginDummy",
+        map: props.map,
+        observer: localObserver,
+        measurementSettings: DEFAULT_MEASUREMENT_SETTINGS,
+      })
   );
 
   // Subscriptions to events etc. should be done in the useEffect hooks. Pay attention to the
@@ -167,6 +171,7 @@ function Dummy(props) {
         localObserver={localObserver} // And also the local-observer (handling communication within the plugin)...
         globalObserver={props.app.globalObserver} // ... and the global-observer (handling communication within the entire application).
         updateCustomProp={updateCustomProp} // We're also gonna pass a function that we can use to update the state in this (the parent) component.
+        drawInteraction={drawInteraction} // We want to show what the current draw-interaction is in the view.
         setDrawInteraction={setDrawInteraction} // Finally, we'll pass the updater for the draw-interaction state (so that we can toggle draw on/off).
       />
     </BaseWindowPlugin>

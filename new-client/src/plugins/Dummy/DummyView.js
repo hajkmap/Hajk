@@ -135,11 +135,6 @@ function DummyView(props) {
     enqueueSnackbar("Yay, a nice message with default styling.");
   };
 
-  const showIntroduction = () => {
-    // Show the introduction guide, see components/Introduction.js
-    globalObserver.publish("core.showIntroduction");
-  };
-
   // A more complicate snackbar example, this one with an action button and persistent snackbar
   const showAdvancedSnackbar = () => {
     const action = (key) => (
@@ -191,6 +186,15 @@ function DummyView(props) {
     setBorderColor(randomColor);
   };
 
+  // Handles when user clicks the "Toggle draw interaction"-button
+  const handleToggleDrawClick = () => {
+    // First we'll get the current draw interaction and its setter from props
+    const { drawInteraction, setDrawInteraction } = props;
+    // If the draw-interaction is currently disabled (set to ""), we activate it (by setting it to "Polygon").
+    // If it is currently active (not set to ""), we disable it.
+    setDrawInteraction(drawInteraction === "" ? "Polygon" : "");
+  };
+
   return (
     <>
       <Button
@@ -223,9 +227,11 @@ function DummyView(props) {
         variant="contained"
         fullWidth={true}
         color="primary"
-        onClick={showIntroduction}
+        onClick={handleToggleDrawClick}
       >
-        Show Hajk Introduction
+        {`${
+          props.drawInteraction === "" ? "Activate" : "Disable"
+        } draw interaction`}
       </ButtonWithBottomMargin>
       <ButtonWithBottomMargin
         variant="contained"
