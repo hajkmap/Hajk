@@ -247,7 +247,7 @@ class CollectorModel {
           anchor: [0.5, 1],
           anchorXUnits: "fraction",
           anchorYUnits: "fraction",
-          src: "marker_x2.png",
+          src: "marker.png",
         }),
       }),
     ];
