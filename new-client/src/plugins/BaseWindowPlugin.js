@@ -105,10 +105,9 @@ class BaseWindowPlugin extends React.PureComponent {
     this.props.app.globalObserver.publish("core.onlyHideDrawerIfNeeded");
   };
 
-  showWindow = (opts) => {
+  showWindow = (opts = {}) => {
     const hideOtherPluginWindows = opts.hideOtherPluginWindows || true,
       runCallback = opts.runCallback || true;
-
     // Let the App know which tool is currently active
     this.props.app.activeTool = this.type;
 
@@ -119,8 +118,13 @@ class BaseWindowPlugin extends React.PureComponent {
       activeMap: this.props.app.config.activeMap,
     });
 
-    // AppModel keeps track of recently shown plugins
-    this.props.app.pushPluginIntoHistory(this.type);
+    // AppModel keeps track of recently shown plugins.
+    this.props.app.pushPluginIntoHistory({
+      type: this.type,
+      icon: this.props.custom.icon,
+      title: this.title,
+      description: this.description,
+    });
 
     // Don't continue if visibility hasn't changed
     if (this.state.windowVisible === true) {

@@ -35,6 +35,7 @@ import MapSwitcher from "../controls/MapSwitcher";
 import Information from "../controls/Information";
 import PresetLinks from "../controls/PresetLinks";
 import ExternalLinks from "../controls/ExternalLinks";
+import RecentlyUsedPlugins from "../controls/RecentlyUsedPlugins";
 
 import DrawerToggleButtons from "../components/Drawer/DrawerToggleButtons";
 
@@ -986,6 +987,7 @@ class App extends React.PureComponent {
                   />
                 )}
                 {clean === false && this.renderInformationPlugin()}
+                <RecentlyUsedPlugins globalObserver={this.globalObserver} />
               </Box>
             </StyledMain>
             <StyledFooter
