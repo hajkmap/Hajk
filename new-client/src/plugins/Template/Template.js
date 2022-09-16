@@ -12,8 +12,8 @@ function Template(props) {
       type="Template"
       custom={{
         icon: <AddIcon />,
-        title: "Template",
-        description: "Short description about the template plugin.",
+        title: "Change me",
+        description: "Short description that should be changed",
         height: "dynamic",
         width: 330,
       }}
