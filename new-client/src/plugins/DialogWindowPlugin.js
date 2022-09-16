@@ -91,6 +91,15 @@ class DialogWindowPlugin extends React.PureComponent {
         activeMap: this.props.app.config.activeMap,
       });
     }
+
+    // Subscribe to a global event that makes it possible to show this dialog.
+    // First we prepare a unique event name for each plugin so it looks like '{pluginName}.showWindow'.
+    const eventName = `${this.uniqueIdentifier}.showWindow`;
+    // Next, subscribe to that event, expect 'opts' array.
+    // To find all places where this event is publish, search for 'globalObserver.publish("show'
+    this.props.app.globalObserver.subscribe(eventName, (opts = {}) => {
+      this.setState({ dialogOpen: true });
+    });
   }
 
   #pluginIsWidget = (target) => {
@@ -109,8 +118,13 @@ class DialogWindowPlugin extends React.PureComponent {
       activeMap: this.props.app.config.activeMap,
     });
 
-    // AppModel keeps track of recently shown plugins
-    this.props.app.pushPluginIntoHistory(this.uniqueIdentifier);
+    // AppModel keeps track of recently shown plugins.
+    this.props.app.pushPluginIntoHistory({
+      type: this.uniqueIdentifier,
+      icon: this.icon,
+      title: this.title,
+      description: this.description,
+    });
   };
 
   #onClose = () => {

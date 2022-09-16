@@ -8,7 +8,6 @@ import SpeedDialAction from "@mui/material/SpeedDialAction";
 export default function RecentlyUsedPlugins({ globalObserver }) {
   const [actions, setActions] = useState([]);
   useEffect(() => {
-    console.log("Subscribing");
     globalObserver.subscribe("core.pluginHistoryChanged", (plugins) => {
       const pluginsAsActions = Array.from(plugins.entries())
         .slice(-4) // Just keep the 4 latest plugins
@@ -25,6 +24,9 @@ export default function RecentlyUsedPlugins({ globalObserver }) {
   }, [globalObserver]);
 
   const handleActionClick = (type) => {
+    // Each BaseWindowPlugin and DialogWindowPlugin have subscribed to
+    // a unique event called {plugin}.showWindow. Upon invocation, the plugin
+    // will show itself.
     const eventName = `${type}.showWindow`;
     globalObserver.publish(eventName);
   };
