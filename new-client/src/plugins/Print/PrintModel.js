@@ -90,6 +90,9 @@ export default class PrintModel {
 
   // Used to store the calculated margin.
   margin = 0;
+
+  textIconsMargin = 0;
+
   // A flag that's used in "rendercomplete" to ensure that user has not cancelled the request
   pdfCreationCancelled = null;
 
@@ -171,19 +174,27 @@ export default class PrintModel {
     const format = options.format;
     const orientation = options.orientation;
     const useMargin = options.useMargin;
+    const useTextIconsInMargin = useMargin
+      ? options.useTextIconsInMargin
+      : false;
     const dim = this.getPaperDim(format, orientation);
 
     this.margin = useMargin ? this.getMargin(dim) : 0;
+
+    this.textIconsMargin = useTextIconsInMargin ? 0 : 6;
 
     const inchInMillimeter = 25.4;
     // We should take pixelRatio into account? What happens when we have
     // pr=2? PixelSize will be 0.14?
     const defaultPixelSizeInMillimeter = 0.28;
+
     const dpi = inchInMillimeter / defaultPixelSizeInMillimeter; // ~90
+    let sizeHeight =
+      options.useMargin && options.useTextIconsInMargin ? dim[1] - 35 : dim[1];
 
     const size = {
       width: (dim[0] - this.margin * 2) / 25.4,
-      height: (dim[1] - this.margin * 2) / 25.4,
+      height: (sizeHeight - this.margin * 2) / 25.4,
     };
 
     const paper = {
@@ -311,7 +322,9 @@ export default class PrintModel {
     pdfHeight
   ) => {
     // We must take the potential margin around the map-image into account (this.margin)
-    const margin = 6 + this.margin;
+
+    const margin = this.textIconsMargin + this.margin;
+
     let pdfPlacement = { x: 0, y: 0 };
     if (placement === "topLeft") {
       pdfPlacement.x = margin;
@@ -955,11 +968,19 @@ export default class PrintModel {
       if (this.margin > 0) {
         // The lineWidth increases the line width equally to "both sides",
         // therefore, we must have a line width two times the margin we want.
-        pdf.setLineWidth(this.margin * 2);
+        if (options.useTextIconsInMargin) {
+          pdf.setLineWidth(28);
+        } else {
+          pdf.setLineWidth(this.margin * 2);
+        }
         // We always want a white margin
         pdf.setDrawColor("white");
         // Draw the border (margin) around the entire image
-        pdf.rect(0, 0, dim[0], dim[1], "S");
+        if (options.useTextIconsInMargin) {
+          pdf.rect(-5, 12, dim[0] + 10, dim[1] - 24, "S");
+        } else {
+          pdf.rect(0, 0, dim[0], dim[1], "S");
+        }
       }
 
       // If logo URL is provided, add the logo to the map
@@ -1038,38 +1059,37 @@ export default class PrintModel {
 
       // Add map title if user supplied one
       if (options.mapTitle.trim().length > 0) {
+        let yPos = options.useTextIconsInMargin ? 16 : 12 + this.margin;
         pdf.setFontSize(24);
         pdf.setTextColor(options.mapTextColor);
-        pdf.text(options.mapTitle, dim[0] / 2, 12 + this.margin, {
+        pdf.text(options.mapTitle, dim[0] / 2, yPos, {
           align: "center",
         });
       }
 
       // Add print comment if user supplied one
       if (options.printComment.trim().length > 0) {
+        let yPos = options.useTextIconsInMargin ? 22 : 18 + this.margin;
         pdf.setFontSize(11);
         pdf.setTextColor(options.mapTextColor);
-        pdf.text(options.printComment, dim[0] / 2, 18 + this.margin, {
+        pdf.text(options.printComment, dim[0] / 2, yPos, {
           align: "center",
         });
       }
 
       // Add potential copyright text
       if (this.copyright.length > 0) {
+        let yPos = options.useTextIconsInMargin ? 6 : this.margin;
         pdf.setFontSize(8);
         pdf.setTextColor(options.mapTextColor);
-        pdf.text(
-          this.copyright,
-          dim[0] - 4 - this.margin,
-          dim[1] - 4 - this.margin,
-          {
-            align: "right",
-          }
-        );
+        pdf.text(this.copyright, dim[0] - 4 - yPos, dim[1] - 4 - yPos, {
+          align: "right",
+        });
       }
 
       // Add potential disclaimer text
       if (this.disclaimer.length > 0) {
+        let yPos = options.useTextIconsInMargin ? 6 : this.margin;
         pdf.setFontSize(8);
         pdf.setTextColor(options.mapTextColor);
         let textLines = pdf.splitTextToSize(
@@ -1079,8 +1099,8 @@ export default class PrintModel {
         let textLinesDims = pdf.getTextDimensions(textLines, { fontSize: 8 });
         pdf.text(
           textLines,
-          dim[0] - 4 - this.margin,
-          dim[1] - 6 - this.margin - textLinesDims.h,
+          dim[0] - 4 - yPos,
+          dim[1] - 6 - yPos - textLinesDims.h,
           {
             align: "right",
           }
