@@ -1,53 +1,78 @@
 import * as React from "react";
 import { useEffect, useState } from "react";
-import Box from "@mui/material/Box";
-import SpeedDial from "@mui/material/SpeedDial";
-import SpeedDialIcon from "@mui/material/SpeedDialIcon";
-import SpeedDialAction from "@mui/material/SpeedDialAction";
+import { SpeedDial, SpeedDialAction, SpeedDialIcon } from "@mui/material";
 
-export default function RecentlyUsedPlugins({ globalObserver }) {
+import RestoreIcon from "@mui/icons-material/Restore";
+
+export default function RecentlyUsedPlugins({
+  globalObserver,
+  showRecentlyUsedPlugins = false,
+}) {
+  // Will be populated with actions to re-open our recently opened plugins
   const [actions, setActions] = useState([]);
+
+  // Controls the state of our SpeedDial and allows hiding it on click
+  const [open, setOpen] = useState(false);
+
+  // We want to subscribe to an event on load
   useEffect(() => {
+    // This event will supply us with a well-formatted object that contains
+    // a history of all plugins activated by the user during this session.
     globalObserver.subscribe("core.pluginHistoryChanged", (plugins) => {
+      // When a new list of plugins arrives, we want to…
       const pluginsAsActions = Array.from(plugins.entries())
-        .slice(-4) // Just keep the 4 latest plugins
-        .reverse() // Reverse, so we get the most recently used at the bottom of our SpeedDial
+        .slice(-4) // …only keep the 4 latest plugins…
+        .reverse() // …reverse, so the most recently used end up at the bottom of our SpeedDial…
         .map(([k, v]) => {
+          // …and translate it all to an array that will be used in the render method.
           return {
             type: k,
             ...v,
           };
         });
 
+      // Let the State know about it, so the component re-renders.
       setActions(pluginsAsActions);
     });
   }, [globalObserver]);
 
   const handleActionClick = (type) => {
     // Each BaseWindowPlugin and DialogWindowPlugin have subscribed to
-    // a unique event called {plugin}.showWindow. Upon invocation, the plugin
-    // will show itself.
+    // a unique event called {plugin}.showWindow. We can use it now
+    // to make the plugin show itself.
     const eventName = `${type}.showWindow`;
     globalObserver.publish(eventName);
   };
 
   return (
-    // <Box sx={{ height: 320, transform: "translateZ(0px)", flexGrow: 1 }}>
-    <SpeedDial
-      ariaLabel="Recently used plugins quick selector"
-      sx={{ position: "absolute", bottom: 54, right: 8 }}
-      icon={<SpeedDialIcon />}
-      hidden={actions.length === 0}
-    >
-      {actions.map((action) => (
-        <SpeedDialAction
-          key={action.type}
-          icon={action.icon}
-          tooltipTitle={action.title}
-          onClick={() => handleActionClick(action.type)}
-        />
-      ))}
-    </SpeedDial>
-    // </Box>
+    showRecentlyUsedPlugins && (
+      <SpeedDial
+        ariaLabel="Recently used plugins quick selector"
+        FabProps={{
+          size: "small",
+        }}
+        hidden={actions.length === 0} // Don't show the SpeedDial if no history is available
+        icon={<SpeedDialIcon icon={<RestoreIcon />} />}
+        onClose={() => setOpen(false)}
+        onOpen={() => setOpen(true)}
+        open={open}
+        sx={{ position: "absolute", bottom: 54, right: 8 }}
+      >
+        {actions.map((action) => (
+          <SpeedDialAction
+            icon={action.icon}
+            key={action.type}
+            onClick={() => {
+              // Tell the plugin to activate itself…
+              handleActionClick(action.type);
+              // …and hide the SpeedDial.
+              setOpen(false);
+            }}
+            tooltipOpen // This makes tooltips sticky - disable or make an option perhaps
+            tooltipTitle={action.title}
+          />
+        ))}
+      </SpeedDial>
+    )
   );
 }

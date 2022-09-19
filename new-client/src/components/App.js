@@ -987,7 +987,14 @@ class App extends React.PureComponent {
                   />
                 )}
                 {clean === false && this.renderInformationPlugin()}
-                <RecentlyUsedPlugins globalObserver={this.globalObserver} />
+                {clean === false && (
+                  <RecentlyUsedPlugins
+                    globalObserver={this.globalObserver}
+                    showRecentlyUsedPlugins={
+                      this.appModel.config.mapConfig.map.showRecentlyUsedPlugins
+                    }
+                  />
+                )}
               </Box>
             </StyledMain>
             <StyledFooter
