@@ -60,7 +60,7 @@
     "@mui/icons-material": "^5.10.3",
     "@mui/lab": "^5.0.0-alpha.99",
     "@mui/material": "^5.10.5",
-    "@mui/x-data-grid": "^5.17.2",
+    "@mui/x-data-grid": "^5.17.3",
     "@nieuwlandgeo/sldreader": "^0.2.15",
     "@turf/buffer": "^6.5.0",
     "@turf/transform-translate": "^6.5.0",
