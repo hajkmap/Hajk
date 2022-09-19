@@ -18,22 +18,29 @@ export default function RecentlyUsedPlugins({
   useEffect(() => {
     // This event will supply us with a well-formatted object that contains
     // a history of all plugins activated by the user during this session.
-    globalObserver.subscribe("core.pluginHistoryChanged", (plugins) => {
-      // When a new list of plugins arrives, we want to…
-      const pluginsAsActions = Array.from(plugins.entries())
-        .slice(-4) // …only keep the 4 latest plugins…
-        .reverse() // …reverse, so the most recently used end up at the bottom of our SpeedDial…
-        .map(([k, v]) => {
-          // …and translate it all to an array that will be used in the render method.
-          return {
-            type: k,
-            ...v,
-          };
-        });
+    const pluginHistoryChanged = globalObserver.subscribe(
+      "core.pluginHistoryChanged",
+      (plugins) => {
+        // When a new list of plugins arrives, we want to…
+        const pluginsAsActions = Array.from(plugins.entries())
+          .slice(-4) // …only keep the 4 latest plugins…
+          .reverse() // …reverse, so the most recently used end up at the bottom of our SpeedDial…
+          .map(([k, v]) => {
+            // …and translate it all to an array that will be used in the render method.
+            return {
+              type: k,
+              ...v,
+            };
+          });
 
-      // Let the State know about it, so the component re-renders.
-      setActions(pluginsAsActions);
-    });
+        // Let the State know about it, so the component re-renders.
+        setActions(pluginsAsActions);
+
+        return () => {
+          pluginHistoryChanged.unsubscribe();
+        };
+      }
+    );
   }, [globalObserver]);
 
   const handleActionClick = (type) => {
