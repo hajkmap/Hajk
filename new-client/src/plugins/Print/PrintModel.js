@@ -174,13 +174,19 @@ export default class PrintModel {
     const format = options.format;
     const orientation = options.orientation;
     const useMargin = options.useMargin;
+
+    // If the user wants text and icons in the margins and outside the map image
+    // we should only allow that if margins are used
     const useTextIconsInMargin = useMargin
       ? options.useTextIconsInMargin
       : false;
+
     const dim = this.getPaperDim(format, orientation);
 
     this.margin = useMargin ? this.getMargin(dim) : 0;
 
+    //We need a different margin value for text and icons to be placed in the margins,
+    //because "this.margin" (above) is sometimes used independently
     this.textIconsMargin = useTextIconsInMargin ? 0 : 6;
 
     const inchInMillimeter = 25.4;
