@@ -105,5 +105,7 @@ namespace MapService.Models
 
         public bool zoomDuration { get; set; }
 
+        public bool showRecentlyUsedPlugins { get; set; }
+
     }
 }
