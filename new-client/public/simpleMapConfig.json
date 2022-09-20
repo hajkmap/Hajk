@@ -1,5 +1,5 @@
 {
-  "version": "3.11-dev",
+  "version": "3.11.0-dev",
   "projections": [
     {
       "code": "EPSG:3006",

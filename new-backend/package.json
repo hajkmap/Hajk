@@ -1,6 +1,6 @@
 {
   "name": "hajk-backend",
-  "version": "3.11-dev",
+  "version": "3.11.0-dev",
   "description": "Hajk Backend",
   "homepage": ".",
   "repository": {
@@ -38,10 +38,10 @@
   },
   "devDependencies": {
     "@babel/cli": "^7.18.10",
-    "@babel/core": "^7.19.0",
-    "@babel/eslint-parser": "^7.18.9",
-    "@babel/node": "^7.18.10",
-    "@babel/preset-env": "^7.19.0",
+    "@babel/core": "^7.19.1",
+    "@babel/eslint-parser": "^7.19.1",
+    "@babel/node": "^7.19.1",
+    "@babel/preset-env": "^7.19.1",
     "@babel/register": "^7.18.9",
     "chai": "^4.3.6",
     "eslint": "^8.23.1",
@@ -50,7 +50,7 @@
     "eslint-plugin-node": "^11.1.0",
     "eslint-plugin-prettier": "^4.2.1",
     "mocha": "^10.0.0",
-    "nodemon": "^2.0.19",
+    "nodemon": "^2.0.20",
     "prettier": "^2.7.1",
     "supertest": "^6.2.4"
   },
