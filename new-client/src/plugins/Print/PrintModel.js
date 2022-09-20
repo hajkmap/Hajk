@@ -90,7 +90,6 @@ export default class PrintModel {
 
   // Used to store the calculated margin.
   margin = 0;
-
   textIconsMargin = 0;
 
   // A flag that's used in "rendercomplete" to ensure that user has not cancelled the request
@@ -156,9 +155,9 @@ export default class PrintModel {
 
   // Calculates the margin around the map-image depending on
   // the paper dimensions
-  getMargin = (paperDim) => {
+  getMargin = (paperDim, marginAmount) => {
     const longestSide = Math.max(...paperDim);
-    return this.marginAmount * longestSide;
+    return marginAmount * longestSide;
   };
 
   // Returns an array with the paper dimensions with the selected
@@ -183,7 +182,7 @@ export default class PrintModel {
 
     const dim = this.getPaperDim(format, orientation);
 
-    this.margin = useMargin ? this.getMargin(dim) : 0;
+    this.margin = useMargin ? this.getMargin(dim, this.marginAmount) : 0;
 
     //We need a different margin value for text and icons to be placed in the margins,
     //because "this.margin" (above) is sometimes used independently
@@ -195,12 +194,11 @@ export default class PrintModel {
     const defaultPixelSizeInMillimeter = 0.28;
 
     const dpi = inchInMillimeter / defaultPixelSizeInMillimeter; // ~90
-    let sizeHeight =
-      options.useMargin && options.useTextIconsInMargin ? dim[1] - 35 : dim[1];
+    let sizeMultiplier = options.useTextIconsInMargin ? 6 : 2;
 
     const size = {
       width: (dim[0] - this.margin * 2) / 25.4,
-      height: (sizeHeight - this.margin * 2) / 25.4,
+      height: (dim[1] - this.margin * sizeMultiplier) / 25.4,
     };
 
     const paper = {
@@ -972,19 +970,19 @@ export default class PrintModel {
 
       // Add potential margin around the image
       if (this.margin > 0) {
+        // We always want a white margin
+        pdf.setDrawColor("white");
         // The lineWidth increases the line width equally to "both sides",
         // therefore, we must have a line width two times the margin we want.
         if (options.useTextIconsInMargin) {
-          pdf.setLineWidth(28);
+          let dimValue =
+            options.format === "a5" ? this.margin + 2 : this.margin;
+          pdf.setLineWidth(dimValue * 6);
+          // Draw the border (margin) around the entire image
+          pdf.rect(-(dimValue * 2), 0, dim[0] + dimValue * 4, dim[1], "S");
         } else {
           pdf.setLineWidth(this.margin * 2);
-        }
-        // We always want a white margin
-        pdf.setDrawColor("white");
-        // Draw the border (margin) around the entire image
-        if (options.useTextIconsInMargin) {
-          pdf.rect(-5, 12, dim[0] + 10, dim[1] - 24, "S");
-        } else {
+          // Draw the border (margin) around the entire image
           pdf.rect(0, 0, dim[0], dim[1], "S");
         }
       }
@@ -1065,7 +1063,9 @@ export default class PrintModel {
 
       // Add map title if user supplied one
       if (options.mapTitle.trim().length > 0) {
-        let yPos = options.useTextIconsInMargin ? 16 : 12 + this.margin;
+        let yPos = options.useTextIconsInMargin
+          ? this.margin * 2
+          : 12 + this.margin;
         pdf.setFontSize(24);
         pdf.setTextColor(options.mapTextColor);
         pdf.text(options.mapTitle, dim[0] / 2, yPos, {
@@ -1075,7 +1075,9 @@ export default class PrintModel {
 
       // Add print comment if user supplied one
       if (options.printComment.trim().length > 0) {
-        let yPos = options.useTextIconsInMargin ? 22 : 18 + this.margin;
+        let yPos = options.useTextIconsInMargin
+          ? 6 + this.margin * 2
+          : 18 + this.margin;
         pdf.setFontSize(11);
         pdf.setTextColor(options.mapTextColor);
         pdf.text(options.printComment, dim[0] / 2, yPos, {
@@ -1085,7 +1087,9 @@ export default class PrintModel {
 
       // Add potential copyright text
       if (this.copyright.length > 0) {
-        let yPos = options.useTextIconsInMargin ? 6 : this.margin;
+        let yPos = options.useTextIconsInMargin
+          ? this.textIconsMargin + this.margin / 2
+          : this.margin;
         pdf.setFontSize(8);
         pdf.setTextColor(options.mapTextColor);
         pdf.text(this.copyright, dim[0] - 4 - yPos, dim[1] - 4 - yPos, {
@@ -1095,7 +1099,10 @@ export default class PrintModel {
 
       // Add potential disclaimer text
       if (this.disclaimer.length > 0) {
-        let yPos = options.useTextIconsInMargin ? 6 : this.margin;
+        console.log(this.margin);
+        let yPos = options.useTextIconsInMargin
+          ? this.textIconsMargin + this.margin / 2
+          : this.margin;
         pdf.setFontSize(8);
         pdf.setTextColor(options.mapTextColor);
         let textLines = pdf.splitTextToSize(
