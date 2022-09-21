@@ -1,1 +1,1 @@
-export { ROBOTO_NORMAL as FONT_ROBOTO } from "./roboto-normal";
+export { ROBOTO_NORMAL } from "./roboto-normal";

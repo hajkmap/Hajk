@@ -18,7 +18,7 @@ import TileLayer from "ol/layer/Tile";
 import TileWMS from "ol/source/TileWMS";
 import ImageWMS from "ol/source/ImageWMS";
 
-import { FONT_ROBOTO } from "./constants";
+import { ROBOTO_NORMAL } from "./constants";
 
 export default class PrintModel {
   constructor(settings) {
@@ -862,15 +862,15 @@ export default class PrintModel {
 
   // Adds fonts needed to properly render necessary characters. (The default jsPDF fonts does not support all characters).
   // Also enables a font (in the future we could provide a possibility for the user to select font).
-  setupFonts = (pdf, font = "ROBOTO") => {
+  setupFonts = (pdf, font = "ROBOTO_NORMAL") => {
     // First we'll add the available fonts
-    pdf.addFileToVFS("roboto-regular.ttf", FONT_ROBOTO);
-    pdf.addFont("roboto-regular.ttf", "roboto-regular", "normal");
+    pdf.addFileToVFS("roboto-normal.ttf", ROBOTO_NORMAL);
+    pdf.addFont("roboto-normal.ttf", "roboto-normal", "normal");
     // Then we'll set the font we want to use now. (The switch below is unnecessary but
     // added for possible future use cases).
     switch (font) {
-      case "ROBOTO":
-        pdf.setFont("roboto-regular");
+      case "ROBOTO_NORMAL":
+        pdf.setFont("roboto-normal");
         break;
       default:
         break;
