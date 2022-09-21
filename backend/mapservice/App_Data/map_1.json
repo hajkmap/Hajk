@@ -561,6 +561,7 @@
     "defaultCookieNoticeMessage": "Vi använder nödvändiga kakor (cookies) för att webbplatsen ska fungera på ett bra sätt för dig. Vi använder också funktionella kakor för att ge dig bästa möjliga funktion om du som användare har godkänt användningen av dessa.",
     "defaultCookieNoticeUrl": "https://pts.se/sv/bransch/regler/lagar/lag-om-elektronisk-kommunikation/kakor-cookies/",
     "crossOrigin": "anonymous",
-    "cookieUse3dPart": false
+    "cookieUse3dPart": false,
+    "showRecentlyUsedPlugins": false
   }
 }

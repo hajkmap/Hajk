@@ -105,7 +105,11 @@ export default function ResponsiveDialog(props) {
         <Button onClick={handleClose} variant={primaryButtonVariant || "text"}>
           {buttonText}
         </Button>
-        {abortText && <Button onClick={handleAbort}>{abortText}</Button>}
+        {abortText && (
+          <Button onClick={handleAbort} sx={{ color: "text.primary" }}>
+            {abortText}
+          </Button>
+        )}
       </DialogActions>
     </Dialog>
   );
