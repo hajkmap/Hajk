@@ -18,6 +18,8 @@ import TileLayer from "ol/layer/Tile";
 import TileWMS from "ol/source/TileWMS";
 import ImageWMS from "ol/source/ImageWMS";
 
+import { FONT_ROBOTO } from "./constants";
+
 export default class PrintModel {
   constructor(settings) {
     this.map = settings.map;
@@ -373,7 +375,6 @@ export default class PrintModel {
   ) => {
     const lengthText = this.getLengthText(scaleBarLengthMeters);
     pdf.setFontSize(8);
-    pdf.setFont("helvetica", "bold");
     pdf.setTextColor(color);
     pdf.setLineWidth(0.25);
     pdf.text(
@@ -859,6 +860,23 @@ export default class PrintModel {
     this.addedLayers = new Set();
   };
 
+  // Adds fonts needed to properly render necessary characters. (The default jsPDF fonts does not support all characters).
+  // Also enables a font (in the future we could provide a possibility for the user to select font).
+  setupFonts = (pdf, font = "ROBOTO") => {
+    // First we'll add the available fonts
+    pdf.addFileToVFS("roboto-regular.ttf", FONT_ROBOTO);
+    pdf.addFont("roboto-regular.ttf", "roboto-regular", "normal");
+    // Then we'll set the font we want to use now. (The switch below is unnecessary but
+    // added for possible future use cases).
+    switch (font) {
+      case "ROBOTO":
+        pdf.setFont("roboto-regular");
+        break;
+      default:
+        break;
+    }
+  };
+
   print = (options) => {
     const format = options.format;
     const orientation = options.orientation;
@@ -947,6 +965,9 @@ export default class PrintModel {
         putOnlyUsedFonts: true,
         compress: true,
       });
+
+      // Make sure to add necessary fonts and enable the font we want to use.
+      this.setupFonts(pdf, "ROBOTO");
 
       // Add our map canvas to the PDF, start at x/y=0/0 and stretch for entire width/height of the canvas
       pdf.addImage(mapCanvas, "JPEG", 0, 0, dim[0], dim[1]);
