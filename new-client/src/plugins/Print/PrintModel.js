@@ -1099,7 +1099,6 @@ export default class PrintModel {
 
       // Add potential disclaimer text
       if (this.disclaimer.length > 0) {
-        console.log(this.margin);
         let yPos = options.useTextIconsInMargin
           ? this.textIconsMargin + this.margin / 2
           : this.margin;

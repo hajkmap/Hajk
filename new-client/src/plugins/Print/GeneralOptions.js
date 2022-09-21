@@ -255,7 +255,7 @@ class GeneralOptions extends React.PureComponent {
           </StyledFormControl>
           <StyledFormControl>
             <InputLabel variant="standard" htmlFor="useMargin">
-              Text och ikoner utanför kartan
+              Rubriktext m.m. i marginalerna
             </InputLabel>
             {this.renderTextIconInMarginsSelector()}
           </StyledFormControl>
