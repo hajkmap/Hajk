@@ -1064,7 +1064,7 @@ export default class PrintModel {
       // Add map title if user supplied one
       if (options.mapTitle.trim().length > 0) {
         let yPos = options.useTextIconsInMargin
-          ? this.margin * 2
+          ? 8 + this.margin
           : 12 + this.margin;
         pdf.setFontSize(24);
         pdf.setTextColor(options.mapTextColor);
@@ -1076,7 +1076,7 @@ export default class PrintModel {
       // Add print comment if user supplied one
       if (options.printComment.trim().length > 0) {
         let yPos = options.useTextIconsInMargin
-          ? 6 + this.margin * 2
+          ? 13 + this.margin
           : 18 + this.margin;
         pdf.setFontSize(11);
         pdf.setTextColor(options.mapTextColor);
