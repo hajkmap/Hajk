@@ -11,7 +11,7 @@ import WFSVectorLayer from "./layers/VectorLayer.js";
 import { bindMapClickEvent } from "./Click.js";
 import MapClickModel from "./MapClickModel";
 import { defaults as defaultInteractions } from "ol/interaction";
-import { Map, View } from "ol";
+import { Map as OLMap, View } from "ol";
 // TODO: Uncomment and ensure they show as expected
 // import {
 // defaults as defaultControls,
@@ -47,6 +47,7 @@ class AppModel {
     this.layersFromParams = [];
     this.cqlFiltersFromParams = {};
     this.hfetch = hfetch;
+    this.pluginHistory = new Map();
 
     // We store the click location data here for later use.
     // Right now this is only used in the new infoClick but it will most likely be used in other parts of the program.
@@ -104,6 +105,24 @@ class AppModel {
           window.closeWindow();
         }
       });
+  }
+
+  pushPluginIntoHistory(plugin) {
+    // plugin is an object that will contain a 'type' as well as some
+    // other properties. We use the 'type' as a unique key in our Map.
+    const { type, ...rest } = plugin;
+    // If plugin already exists in set…
+    if (this.pluginHistory.has(type)) {
+      // …remove it first so that we don't have duplicates.
+      this.pluginHistory.delete(type);
+    }
+    this.pluginHistory.set(type, rest);
+
+    // Finally, announce to everyone who cares
+    this.globalObserver.publish(
+      "core.pluginHistoryChanged",
+      this.pluginHistory
+    );
   }
 
   getClickLocationData() {
@@ -300,7 +319,7 @@ class AppModel {
       }),
     };
 
-    this.map = new Map({
+    this.map = new OLMap({
       controls: [
         // new FullScreen({ target: document.getElementById("controls-column") }),
         // new Rotate({ target: document.getElementById("controls-column") }),
