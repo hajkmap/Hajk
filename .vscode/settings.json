@@ -1,11 +1,6 @@
 {
   "editor.formatOnSave": true,
-  "eslint.workingDirectories": [
-    "./new-admin",
-    "./new-client"
-  ],
-  "i18n-ally.localesPaths": [
-    "new-client/src/i18n"
-  ],
+  "eslint.workingDirectories": ["./new-admin", "./new-client"],
+  "i18n-ally.localesPaths": ["new-client/src/i18n"],
   "i18n-ally.keystyle": "nested"
 }
