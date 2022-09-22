@@ -52,6 +52,13 @@
       },
       "error": "The map-link contains errors. Reach out to the system administrator.",
       "title": "Quick select"
+    },
+    "recentlyUsedPlugins": {
+      "ariaLabel": "Recently used plugins quick selector"
+    },
+    "rotate": {
+      "ariaLabel": "Reset rotation",
+      "title": "Reset rotation"
     }
   },
   "core": {
