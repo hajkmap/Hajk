@@ -90,9 +90,14 @@ export default function DrawOrderOptions({
       savedLayers: objectToSave,
     });
 
-    enqueueSnackbar(`${metadata.numberOfLayers} lager sparades utan problem`, {
-      variant: "success",
-    });
+    enqueueSnackbar(
+      `${metadata.numberOfLayers} ${t(
+        "plugins.layerSwitcher.window.activeLayers.layersSaved"
+      )}`,
+      {
+        variant: "success",
+      }
+    );
   };
 
   const handleRestore = () => {
@@ -155,7 +160,7 @@ export default function DrawOrderOptions({
         onClick={handleShowMoreOptionsClick}
         endIcon={<KeyboardArrowDownIcon />}
       >
-        Fler alternativ
+        {t("plugins.layerSwitcher.window.activeLayers.moreOptions")}
       </Button>
       <Menu
         anchorEl={anchorEl}
@@ -171,7 +176,9 @@ export default function DrawOrderOptions({
           <ListItemIcon>
             <Save fontSize="small" />
           </ListItemIcon>
-          <ListItemText>Spara aktiva lager</ListItemText>
+          <ListItemText>
+            {t("plugins.layerSwitcher.window.activeLayers.saveActiveLayers")}
+          </ListItemText>
         </MenuItem>
         <MenuItem
           onClick={() => {
@@ -182,7 +189,9 @@ export default function DrawOrderOptions({
           <ListItemIcon>
             <FolderOpen fontSize="small" />
           </ListItemIcon>
-          <ListItemText>Återställ sparade lager</ListItemText>
+          <ListItemText>
+            {t("plugins.layerSwitcher.window.activeLayers.restoreSavedLayers")}
+          </ListItemText>
         </MenuItem>
         <Divider />
         <MenuItem
@@ -195,8 +204,10 @@ export default function DrawOrderOptions({
             <GppMaybeIcon fontSize="small" />
           </ListItemIcon>
           <ListItemText>{`${
-            filterList.has("system") ? "Dölj" : "Visa"
-          } systemlager`}</ListItemText>
+            filterList.has("system") ? t("common.hide") : t("common.show")
+          } ${t(
+            "plugins.layerSwitcher.window.activeLayers.systemLayers"
+          )}`}</ListItemText>
         </MenuItem>
       </Menu>
     </>

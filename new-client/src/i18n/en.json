@@ -2,10 +2,12 @@
   "common": {
     "cancel": "Cancel",
     "closeWindow": "Close",
+    "hide": "Hide",
     "maximizeWindow": "Maximize",
     "minimizeWindow": "Minimize",
     "ok": "Ok",
     "results": "Results",
+    "show": "Show",
     "showing": "Showing"
   },
   "controls": {
@@ -39,17 +41,17 @@
       "toolTip": "Reset the map to default state"
     },
     "mapSwitcher": {
-      "title": "Map title missing",
       "activeMap": "Active map:",
-      "switchMap": "Change map"
+      "switchMap": "Change map",
+      "title": "Map title missing"
     },
     "presetLinks": {
-      "title": "Quick select",
       "dialog": {
         "header": "Show quick select layers",
         "text": "All map layers will be turned off. The quick select pre defined layers will be activated instead."
       },
-      "error": "The map-link contains errors. Reach out to the system administrator."
+      "error": "The map-link contains errors. Reach out to the system administrator.",
+      "title": "Quick select"
     }
   },
   "core": {
@@ -232,8 +234,12 @@
       "title": "Layer manager",
       "window": {
         "activeLayers": {
+          "layersSaved": "layers saved successfully",
+          "moreOptions": "More options",
           "nothingToRestore": "Please save some layers before restoring.",
-          "numOfLayersRestored": "layers restored from previous session"
+          "numOfLayersRestored": "layers restored from previous session",
+          "restoreSavedLayers": "Restore saved layers",
+          "saveActiveLayers": "Save active layers"
         },
         "appBar": {
           "tabActiveLayers": "Active layers",

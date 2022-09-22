@@ -2,10 +2,12 @@
   "common": {
     "cancel": "Avbryt",
     "closeWindow": "Stäng fönstret",
+    "hide": "Dölj",
     "maximizeWindow": "Maximera fönstret",
     "minimizeWindow": "Minimera fönstret",
     "ok": "Ok",
     "results": "Resultat",
+    "show": "Visa",
     "showing": "Visar"
   },
   "controls": {
@@ -39,17 +41,17 @@
       "toolTip": "Återställ kartan till startläget"
     },
     "mapSwitcher": {
-      "title": "Karta utan titel",
       "activeMap": "Nuvarande karta:",
-      "switchMap": "Byt karta"
+      "switchMap": "Byt karta",
+      "title": "Karta utan titel"
     },
     "presetLinks": {
-      "title": "Snabbval",
       "dialog": {
         "header": "Visa snabbval",
         "text": "Alla tända lager i kartan kommer nu att släckas. Snabbvalets fördefinierade lager tänds istället."
       },
-      "error": "Länken till platsen är tyvärr felaktig. Kontakta administratören av karttjänsten för att åtgärda felet."
+      "error": "Länken till platsen är tyvärr felaktig. Kontakta administratören av karttjänsten för att åtgärda felet.",
+      "title": "Snabbval"
     }
   },
   "core": {
@@ -232,8 +234,13 @@
       "title": "Lagerhanterare",
       "window": {
         "activeLayers": {
+          "layersSaved": "lager sparades utan problem",
+          "moreOptions": "Fler alternativ",
           "nothingToRestore": "Innan du kan återställa måste du spara dina befintliga lager först.",
-          "numOfLayersRestored": "lager återställdes från tidigare session"
+          "numOfLayersRestored": "lager återställdes från tidigare session",
+          "restoreSavedLayers": "Återställ sparade lager",
+          "saveActiveLayers": "Spara aktiva lager",
+          "systemLayers": "systemlager"
         },
         "appBar": {
           "tabActiveLayers": "Aktiva lager",
