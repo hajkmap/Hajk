@@ -270,4 +270,4 @@ class SearchResultsDatasetFeatureDetails extends React.PureComponent {
     );
   }
 }
-export default withTranslation(SearchResultsDatasetFeatureDetails);
+export default withTranslation()(SearchResultsDatasetFeatureDetails);
