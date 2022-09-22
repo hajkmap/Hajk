@@ -52,6 +52,9 @@
       },
       "error": "Länken till platsen är tyvärr felaktig. Kontakta administratören av karttjänsten för att åtgärda felet.",
       "title": "Snabbval"
+    },
+    "recentlyUsedPlugins": {
+      "ariaLabel": "Senast använda verktyg snabbval"
     }
   },
   "core": {
