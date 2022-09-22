@@ -30,6 +30,10 @@
     },
     "information": {
       "title": "Om kartan"
+    },
+    "mapCleaner": {
+      "toolTip": "Dölj alla aktiva lager",
+      "ariaLabel": "Rensa kartan"
     }
   },
   "core": {

@@ -30,6 +30,10 @@
     },
     "information": {
       "title": "About the map"
+    },
+    "mapCleaner": {
+      "toolTip": "Hide all active layers",
+      "ariaLabel": "Clear map"
     }
   },
   "core": {
