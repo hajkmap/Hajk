@@ -155,9 +155,9 @@ export default class PrintModel {
 
   // Calculates the margin around the map-image depending on
   // the paper dimensions
-  getMargin = (paperDim, marginAmount) => {
+  getMargin = (paperDim) => {
     const longestSide = Math.max(...paperDim);
-    return marginAmount * longestSide;
+    return this.marginAmount * longestSide;
   };
 
   // Returns an array with the paper dimensions with the selected
@@ -182,7 +182,7 @@ export default class PrintModel {
 
     const dim = this.getPaperDim(format, orientation);
 
-    this.margin = useMargin ? this.getMargin(dim, this.marginAmount) : 0;
+    this.margin = useMargin ? this.getMargin(dim) : 0;
 
     //We need a different margin value for text and icons to be placed in the margins,
     //because "this.margin" (above) is sometimes used independently
@@ -1063,12 +1063,12 @@ export default class PrintModel {
 
       // Add map title if user supplied one
       if (options.mapTitle.trim().length > 0) {
-        let yPos = options.useTextIconsInMargin
+        let verticalMargin = options.useTextIconsInMargin
           ? 8 + this.margin
           : 12 + this.margin;
         pdf.setFontSize(24);
         pdf.setTextColor(options.mapTextColor);
-        pdf.text(options.mapTitle, dim[0] / 2, yPos, {
+        pdf.text(options.mapTitle, dim[0] / 2, verticalMargin, {
           align: "center",
         });
       }
