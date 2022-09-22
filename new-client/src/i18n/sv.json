@@ -24,6 +24,9 @@
     "attribution": {
       "label": "©",
       "tipLabel": "Visa/dölj copyrightinformation för kartdata"
+    },
+    "externalLinks": {
+      "title": "Öppna koordinat i extern applikation"
     }
   },
   "core": {

@@ -4,6 +4,7 @@ import propTypes from "prop-types";
 import { IconButton, Paper, Tooltip, Menu, MenuItem } from "@mui/material";
 import LaunchIcon from "@mui/icons-material/Launch";
 import HajkTransformer from "utils/HajkTransformer";
+import { withTranslation } from "react-i18next";
 
 const StyledPaper = styled(Paper)(({ theme }) => ({
   marginBottom: theme.spacing(1),
@@ -39,7 +40,6 @@ class ExternalLinks extends React.PureComponent {
 
     this.options = this.config.options;
     this.map = props.appModel.getMap();
-    this.title = this.options.title || "Öppna koordinat i extern applikation";
   }
 
   // Show dropdown menu, anchored to the element clicked
@@ -141,10 +141,18 @@ class ExternalLinks extends React.PureComponent {
       const open = Boolean(anchorEl);
       return (
         <>
-          <Tooltip disableInteractive title={this.title}>
+          <Tooltip
+            disableInteractive
+            title={
+              this.options.title || this.props.t("controls.externalLinks.title")
+            }
+          >
             <StyledPaper>
               <StyledIconButton
-                aria-label={this.title}
+                aria-label={
+                  this.options.title ||
+                  this.props.t("controls.externalLinks.title")
+                }
                 onClick={this.handleClick}
               >
                 <LaunchIcon />
@@ -165,4 +173,4 @@ class ExternalLinks extends React.PureComponent {
   }
 }
 
-export default ExternalLinks;
+export default withTranslation()(ExternalLinks);

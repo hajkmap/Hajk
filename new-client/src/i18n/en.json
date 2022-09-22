@@ -24,6 +24,9 @@
     "attribution": {
       "label": "©",
       "tipLabel": "Show/hide map copyright information"
+    },
+    "externalLinks": {
+      "title": "Open coordinate in external application"
     }
   },
   "core": {
