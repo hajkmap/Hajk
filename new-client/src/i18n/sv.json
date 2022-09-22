@@ -218,6 +218,9 @@
       "description": "Välj vad du vill se i kartan",
       "title": "Lagerhanterare",
       "window": {
+        "activeLayers": {
+          "nothingToRestore": "Innan du kan återställa måste du spara dina befintliga lager först."
+        },
         "appBar": {
           "tabActiveLayers": "Aktiva lager",
           "tabBackgroundLayers": "Bakgrund",

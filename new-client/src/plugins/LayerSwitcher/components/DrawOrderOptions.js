@@ -15,6 +15,7 @@ import FolderOpen from "@mui/icons-material/FolderOpen";
 import GppMaybeIcon from "@mui/icons-material/GppMaybe";
 import Save from "@mui/icons-material/Save";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
+import { t } from "i18next";
 
 export default function DrawOrderOptions({
   app,
@@ -127,7 +128,7 @@ export default function DrawOrderOptions({
       );
     } catch (error) {
       enqueueSnackbar(
-        "Innan du kan återställa måste du spara dina befintliga lager först."
+        t("plugins.layerSwitcher.window.activeLayers.nothingToRestore")
       );
     }
   };

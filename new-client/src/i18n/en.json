@@ -218,6 +218,9 @@
       "description": "Choose what to show in the map",
       "title": "Layer manager",
       "window": {
+        "activeLayers": {
+          "nothingToRestore": "Please save some layers before restoring."
+        },
         "appBar": {
           "tabActiveLayers": "Active layers",
           "tabBackgroundLayers": "Background",
