@@ -66,6 +66,10 @@
     "themeToggler": {
       "ariaLabel": "Växla färgtema",
       "title": "Växla mellan mörkt och ljust färgtema"
+    },
+    "zoom": {
+      "zoomIn": "Zooma in",
+      "zoomOut": "Zooma ut"
     }
   },
   "core": {

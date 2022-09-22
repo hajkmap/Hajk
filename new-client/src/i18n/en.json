@@ -66,6 +66,10 @@
     "themeToggler": {
       "ariaLabel": "Change color theme",
       "title": "Toggle between dark and light theme"
+    },
+    "zoom": {
+      "zoomIn": "Zoom in",
+      "zoomOut": "Zoom out"
     }
   },
   "core": {
