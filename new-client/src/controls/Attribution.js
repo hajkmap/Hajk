@@ -2,6 +2,8 @@ import React from "react";
 import { styled } from "@mui/material/styles";
 import { Attribution } from "ol/control";
 
+import { withTranslation } from "react-i18next";
+
 const Root = styled("div")(({ theme }) => ({
   background: theme.palette.background.paper,
   borderRadius: "2px",
@@ -45,14 +47,15 @@ class AttributionControl extends React.PureComponent {
   }
 
   componentDidUpdate() {
+    const { t } = this.props;
     // Go on only if map exists AND we haven't done this yet.
     // Without the children.length part, we'd do this all the
     // time as we're inside componentDidUpdate.
     if (this.props.map && this.ref.current.children.length === 0) {
       const attributionControl = new Attribution({
         target: this.ref.current,
-        tipLabel: "Visa/dölj copyrightinformation för kartdata",
-        label: "©",
+        tipLabel: t("controls.attribution.tipLabel"),
+        label: t("controls.attribution.label"),
       });
       this.props.map.addControl(attributionControl);
     }
@@ -63,4 +66,4 @@ class AttributionControl extends React.PureComponent {
   }
 }
 
-export default AttributionControl;
+export default withTranslation()(AttributionControl);

@@ -20,6 +20,10 @@
           "swedish": "Svenska"
         }
       }
+    },
+    "attribution": {
+      "label": "©",
+      "tipLabel": "Visa/dölj copyrightinformation för kartdata"
     }
   },
   "core": {

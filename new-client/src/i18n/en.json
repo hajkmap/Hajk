@@ -20,6 +20,10 @@
           "swedish": "Swedish"
         }
       }
+    },
+    "attribution": {
+      "label": "©",
+      "tipLabel": "Show/hide map copyright information"
     }
   },
   "core": {
