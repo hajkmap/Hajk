@@ -9,6 +9,16 @@
     "showing": "Showing"
   },
   "controls": {
+    "attribution": {
+      "label": "©",
+      "tipLabel": "Show/hide map copyright information"
+    },
+    "externalLinks": {
+      "title": "Open coordinate in external application"
+    },
+    "information": {
+      "title": "About the map"
+    },
     "languageSwitcher": {
       "iconButton": {
         "ariaLabel": "Change language",
@@ -21,19 +31,9 @@
         }
       }
     },
-    "attribution": {
-      "label": "©",
-      "tipLabel": "Show/hide map copyright information"
-    },
-    "externalLinks": {
-      "title": "Open coordinate in external application"
-    },
-    "information": {
-      "title": "About the map"
-    },
     "mapCleaner": {
-      "toolTip": "Hide all active layers",
-      "ariaLabel": "Clear map"
+      "ariaLabel": "Clear map",
+      "toolTip": "Hide all active layers"
     },
     "mapResetter": {
       "toolTip": "Reset the map to default state"
@@ -219,7 +219,8 @@
       "title": "Layer manager",
       "window": {
         "activeLayers": {
-          "nothingToRestore": "Please save some layers before restoring."
+          "nothingToRestore": "Please save some layers before restoring.",
+          "numOfLayersRestored": "layers restored from previous session"
         },
         "appBar": {
           "tabActiveLayers": "Active layers",

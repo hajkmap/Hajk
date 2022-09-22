@@ -9,6 +9,16 @@
     "showing": "Visar"
   },
   "controls": {
+    "attribution": {
+      "label": "©",
+      "tipLabel": "Visa/dölj copyrightinformation för kartdata"
+    },
+    "externalLinks": {
+      "title": "Öppna koordinat i extern applikation"
+    },
+    "information": {
+      "title": "Om kartan"
+    },
     "languageSwitcher": {
       "iconButton": {
         "ariaLabel": "Växla språk",
@@ -21,19 +31,9 @@
         }
       }
     },
-    "attribution": {
-      "label": "©",
-      "tipLabel": "Visa/dölj copyrightinformation för kartdata"
-    },
-    "externalLinks": {
-      "title": "Öppna koordinat i extern applikation"
-    },
-    "information": {
-      "title": "Om kartan"
-    },
     "mapCleaner": {
-      "toolTip": "Dölj alla aktiva lager",
-      "ariaLabel": "Rensa kartan"
+      "ariaLabel": "Rensa kartan",
+      "toolTip": "Dölj alla aktiva lager"
     },
     "mapResetter": {
       "toolTip": "Återställ kartan till startläget"
@@ -219,7 +219,8 @@
       "title": "Lagerhanterare",
       "window": {
         "activeLayers": {
-          "nothingToRestore": "Innan du kan återställa måste du spara dina befintliga lager först."
+          "nothingToRestore": "Innan du kan återställa måste du spara dina befintliga lager först.",
+          "numOfLayersRestored": "lager återställdes från tidigare session"
         },
         "appBar": {
           "tabActiveLayers": "Aktiva lager",

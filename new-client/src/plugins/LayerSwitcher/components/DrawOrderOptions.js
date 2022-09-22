@@ -121,7 +121,9 @@ export default function DrawOrderOptions({
         });
 
       enqueueSnackbar(
-        `${metadata.numberOfLayers} lager återställdes från tidigare session`,
+        `${metadata.numberOfLayers} ${t(
+          "plugins.layerSwitcher.window.activeLayers.numOfLayersRestored"
+        )}`,
         {
           variant: "success",
         }
