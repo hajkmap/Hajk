@@ -235,11 +235,14 @@
       "window": {
         "activeLayers": {
           "layersSaved": "layers saved successfully",
+          "manyActiveLayers": "ACTIVE LAYERS",
           "moreOptions": "More options",
           "nothingToRestore": "Please save some layers before restoring.",
           "numOfLayersRestored": "layers restored from previous session",
+          "oneActiveLayer": "ACTIVE LAYER",
           "restoreSavedLayers": "Restore saved layers",
-          "saveActiveLayers": "Save active layers"
+          "saveActiveLayers": "Save active layers",
+          "systemLayers": "system layers"
         },
         "appBar": {
           "tabActiveLayers": "Active layers",

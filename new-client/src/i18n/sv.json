@@ -235,9 +235,11 @@
       "window": {
         "activeLayers": {
           "layersSaved": "lager sparades utan problem",
+          "manyActiveLayers": "AKTIVA LAGER",
           "moreOptions": "Fler alternativ",
           "nothingToRestore": "Innan du kan återställa måste du spara dina befintliga lager först.",
           "numOfLayersRestored": "lager återställdes från tidigare session",
+          "oneActiveLayer": "AKTIVT LAGER",
           "restoreSavedLayers": "Återställ sparade lager",
           "saveActiveLayers": "Spara aktiva lager",
           "systemLayers": "systemlager"

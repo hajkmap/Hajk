@@ -4,6 +4,7 @@ import List from "@mui/material/List";
 import DrawOrderListItem from "./DrawOrderListItem";
 import DrawOrderOptions from "./DrawOrderOptions";
 import { Chip, Divider } from "@mui/material";
+import { t } from "i18next";
 
 function DrawOrder({ app, map }) {
   // A Set that will hold type of OL layers that should be shown.
@@ -106,7 +107,9 @@ function DrawOrder({ app, map }) {
   const getLabelFromNumber = () =>
     sortedLayers.length.toString() +
     " " +
-    (sortedLayers.length === 1 ? "AKTIVT LAGER" : "AKTIVA LAGER");
+    (sortedLayers.length === 1
+      ? t("plugins.layerSwitcher.window.activeLayers.oneActiveLayer")
+      : t("plugins.layerSwitcher.window.activeLayers.manyActiveLayers"));
 
   return (
     <Box>
