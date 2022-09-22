@@ -37,6 +37,11 @@
     },
     "mapResetter": {
       "toolTip": "Återställ kartan till startläget"
+    },
+    "mapSwitcher": {
+      "title": "Karta utan titel",
+      "activeMap": "Nuvarande karta:",
+      "switchMap": "Byt karta"
     }
   },
   "core": {

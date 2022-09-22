@@ -37,6 +37,11 @@
     },
     "mapResetter": {
       "toolTip": "Reset the map to default state"
+    },
+    "mapSwitcher": {
+      "title": "Map title missing",
+      "activeMap": "Active map:",
+      "switchMap": "Change map"
     }
   },
   "core": {
