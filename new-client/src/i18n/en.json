@@ -27,6 +27,9 @@
     },
     "externalLinks": {
       "title": "Open coordinate in external application"
+    },
+    "information": {
+      "title": "About the map"
     }
   },
   "core": {
