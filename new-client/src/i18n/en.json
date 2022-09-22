@@ -55,6 +55,10 @@
     },
     "recentlyUsedPlugins": {
       "ariaLabel": "Recently used plugins quick selector"
+    },
+    "rotate": {
+      "ariaLabel": "Reset rotation",
+      "title": "Reset rotation"
     }
   },
   "core": {

@@ -55,6 +55,10 @@
     },
     "recentlyUsedPlugins": {
       "ariaLabel": "Senast använda verktyg snabbval"
+    },
+    "rotate": {
+      "ariaLabel": "Återställ rotation",
+      "title": "Återställ rotation"
     }
   },
   "core": {
