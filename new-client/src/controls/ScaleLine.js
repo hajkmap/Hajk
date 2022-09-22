@@ -2,6 +2,7 @@ import React from "react";
 import { styled } from "@mui/material/styles";
 import { ScaleLine } from "ol/control";
 import { Paper, Tooltip } from "@mui/material";
+import { withTranslation } from "react-i18next";
 
 const Root = styled("div")(({ theme }) => ({
   "& .ol-scale-line": {
@@ -94,7 +95,10 @@ class ScaleLineControl extends React.PureComponent {
 
   renderScaleBadge() {
     return (
-      <Tooltip disableInteractive title="Nuvarande skala">
+      <Tooltip
+        disableInteractive
+        title={this.props.t("controls.scaleLine.toolTip")}
+      >
         <StyledPaper elevation={4}>1:{this.state.scale}</StyledPaper>
       </Tooltip>
     );
@@ -110,4 +114,4 @@ class ScaleLineControl extends React.PureComponent {
   }
 }
 
-export default ScaleLineControl;
+export default withTranslation()(ScaleLineControl);

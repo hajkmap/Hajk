@@ -59,6 +59,9 @@
     "rotate": {
       "ariaLabel": "Återställ rotation",
       "title": "Återställ rotation"
+    },
+    "scaleLine": {
+      "toolTip": "Nuvarande skala"
     }
   },
   "core": {
