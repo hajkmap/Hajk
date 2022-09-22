@@ -42,6 +42,14 @@
       "title": "Map title missing",
       "activeMap": "Active map:",
       "switchMap": "Change map"
+    },
+    "presetLinks": {
+      "title": "Quick select",
+      "dialog": {
+        "header": "Show quick select layers",
+        "text": "All map layers will be turned off. The quick select pre defined layers will be activated instead."
+      },
+      "error": "The map-link contains errors. Reach out to the system administrator."
     }
   },
   "core": {
