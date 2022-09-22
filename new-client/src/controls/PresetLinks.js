@@ -3,6 +3,7 @@ import { createPortal } from "react-dom";
 import { styled } from "@mui/material/styles";
 import propTypes from "prop-types";
 import { withSnackbar } from "notistack";
+import { withTranslation } from "react-i18next";
 
 import { IconButton, Paper, Tooltip, Menu, MenuItem } from "@mui/material";
 import FolderSpecial from "@mui/icons-material/FolderSpecial";
@@ -13,7 +14,7 @@ const StyledPaper = styled(Paper)(({ theme }) => ({
   marginBottom: theme.spacing(1),
 }));
 
-const StyledIconButton = styled(IconButton)(({ theme }) => ({
+const StyledIconButton = styled(IconButton)(() => ({
   minWidth: "unset",
 }));
 
@@ -43,7 +44,6 @@ class Preset extends React.PureComponent {
     // Else, if we're still here, go on.
     this.options = this.config.options;
     this.map = props.appModel.getMap();
-    this.title = this.options.title || "Snabbval";
 
     this.location = null;
     this.zoom = null;
@@ -83,6 +83,7 @@ class Preset extends React.PureComponent {
   };
 
   handleItemClick = (event, item) => {
+    const { t } = this.props;
     const url = item.presetUrl.toLowerCase();
     // Let's make sure that the provided url is a valid map-link
     if (this.isValidMapLink(url)) {
@@ -104,18 +105,15 @@ class Preset extends React.PureComponent {
       }
     } // If the provided url is not a valid map-link, warn the user.
     else {
-      this.props.enqueueSnackbar(
-        "Länken till platsen är tyvärr felaktig. Kontakta administratören av karttjänsten för att åtgärda felet.",
-        {
-          variant: "warning",
-        }
-      );
+      this.props.enqueueSnackbar(t("controls.presetLinks.error"), {
+        variant: "warning",
+      });
       console.error(
-        "Fel i verktyget Snabbval. Länken til : \n" +
+        "Error in PresetLinks. Link to : \n" +
           item.name +
           "\n" +
           item.presetUrl +
-          "\när tyvärr felaktig. Någon av följande parametrar saknas: &x=, &y=, &z= eller innehåller fel."
+          "\ncontains errors. Required parameters (&x=, &y=, &z=) is missing or contains errors."
       );
     }
   };
@@ -192,14 +190,15 @@ class Preset extends React.PureComponent {
   };
 
   renderDialog() {
+    const { t } = this.props;
     if (this.state.dialogOpen) {
       return createPortal(
         <Dialog
           options={{
-            text: "Alla tända lager i kartan kommer nu att släckas. Snabbvalets fördefinierade lager tänds istället.",
-            headerText: "Visa snabbval",
-            buttonText: "OK",
-            abortText: "Avbryt",
+            text: t("controls.presetLinks.dialog.text"),
+            headerText: t("controls.presetLinks.dialog.header"),
+            buttonText: t("common.ok"),
+            abortText: t("common.cancel"),
             useLegacyNonMarkdownRenderer: true,
           }}
           open={this.state.dialogOpen}
@@ -222,14 +221,20 @@ class Preset extends React.PureComponent {
     ) {
       return null;
     } else {
+      const { t } = this.props;
       const { anchorEl } = this.state;
       const open = Boolean(anchorEl);
       return (
         <>
-          <Tooltip disableInteractive title={this.title}>
+          <Tooltip
+            disableInteractive
+            title={this.options.title || t("controls.presetLinks.title")}
+          >
             <StyledPaper>
               <StyledIconButton
-                aria-label={this.title}
+                aria-label={
+                  this.options.title || t("controls.presetLinks.title")
+                }
                 onClick={this.handleClick}
               >
                 <FolderSpecial />
@@ -251,4 +256,4 @@ class Preset extends React.PureComponent {
   }
 }
 
-export default withSnackbar(Preset);
+export default withTranslation()(withSnackbar(Preset));

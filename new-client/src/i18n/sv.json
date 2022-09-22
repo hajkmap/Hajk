@@ -37,6 +37,19 @@
     },
     "mapResetter": {
       "toolTip": "Återställ kartan till startläget"
+    },
+    "mapSwitcher": {
+      "title": "Karta utan titel",
+      "activeMap": "Nuvarande karta:",
+      "switchMap": "Byt karta"
+    },
+    "presetLinks": {
+      "title": "Snabbval",
+      "dialog": {
+        "header": "Visa snabbval",
+        "text": "Alla tända lager i kartan kommer nu att släckas. Snabbvalets fördefinierade lager tänds istället."
+      },
+      "error": "Länken till platsen är tyvärr felaktig. Kontakta administratören av karttjänsten för att åtgärda felet."
     }
   },
   "core": {
