@@ -108,9 +108,15 @@ class SearchSettings extends React.PureComponent {
               )}
             </FormGroup>
             <FormGroup>
-              <Tooltip title="Om aktivt kommer sökningen att ske i lager som är inställda för sökning av systemadministratören och som är synliga.">
+              <Tooltip
+                title={t(
+                  "core.search.settings.general.useVisibleSources.toolTip"
+                )}
+              >
                 <FormControlLabel
-                  label="Sök endast i synliga lager"
+                  label={t(
+                    "core.search.settings.general.useVisibleSources.title"
+                  )}
                   control={
                     <Switch
                       checked={searchOptions.searchInVisibleLayers}

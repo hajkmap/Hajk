@@ -110,7 +110,11 @@
             "title": "Limit sources",
             "toolTip": "Enable to select which sources the search will be performed in. If the toggle is in it's off position, the search will be performed in all available sources."
           },
-          "title": "General settings"
+          "title": "General settings",
+          "useVisibleSources": {
+            "title": "Search in visible layers",
+            "toolTip": "If active, searching will only be perfomed in visible layers."
+          }
         },
         "resultsDisplay": {
           "mapLabels": {

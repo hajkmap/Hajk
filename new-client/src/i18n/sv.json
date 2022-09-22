@@ -110,7 +110,11 @@
             "title": "Begränsa sökkällor",
             "toolTip": "Slå på för att välja vilka datakällor som sökningen kommer göras i. Om reglaget är i off-läget kommer sökningen att ske i alla tillgänliga sökkällor."
           },
-          "title": "Generella sökinställningar"
+          "title": "Generella sökinställningar",
+          "useVisibleSources": {
+            "title": "Sök endast i synliga lager",
+            "toolTip": "Om aktivt kommer sökningen att ske i lager som är inställda för sökning av systemadministratören och som är synliga."
+          }
         },
         "resultsDisplay": {
           "mapLabels": {
