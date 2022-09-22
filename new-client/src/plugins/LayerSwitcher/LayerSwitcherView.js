@@ -169,7 +169,9 @@ class LayersSwitcherView extends React.PureComponent {
               )}
             />
             {this.options.showActiveLayersView === true && (
-              <Tab label="Aktiva lager" />
+              <Tab
+                label={t("plugins.layerSwitcher.window.appBar.tabActiveLayers")}
+              />
             )}
           </Tabs>
         </StyledAppBar>

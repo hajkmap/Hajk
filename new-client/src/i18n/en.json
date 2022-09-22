@@ -8,154 +8,6 @@
     "results": "Results",
     "showing": "Showing"
   },
-  "core": {
-    "drawer": {
-      "toggleButtons": {
-        "plugins": "Tools"
-      }
-    },
-    "search": {
-      "searchBar": {
-        "placeHolders": {
-          "defaultSearch": "Search...",
-          "extentSearch": "Searching in the area...",
-          "objectSearch": "Searching with objects..."
-        },
-        "onlyVisibleLayersPostfix": " (only in visible layers)",
-        "expandButton": {
-          "collapsed": "Show the search results",
-          "open": "Hide the search results"
-        },
-        "visibilityButton": {
-          "show": "Show search results in map",
-          "hide": "Hide search results from map"
-        },
-        "clearButton": {
-          "toolTip": "Clear search",
-          "srText": "Clear search"
-        },
-        "moreButton": {
-          "toolTip": "More search tools and settings",
-          "srText": "Open dialog with more settings"
-        },
-        "searchButton": {
-          "toolTip": "Perform search",
-          "srText": "Perform search"
-        },
-        "srText": "Search the content of the website"
-      },
-      "searchResults": {
-        "feature": {
-          "addToSelection": "Add to selection",
-          "removeFromSelection": "Remove from selection"
-        },
-        "featureDetails": {
-          "showNext": "Show the next object from the results list",
-          "showPrevious": "Show the previous object from the results list"
-        },
-        "datasetSummary": {
-          "maxWarning": "Maximum number of search hits has been reached. Refine your search to ensure that important information is not missed."
-        },
-        "headerTitle": "Search results",
-        "breadCrumbs": {
-          "searchResults": {
-            "toolTip": "Back to all search results"
-          }
-        },
-        "tools": {
-          "toolTipClosed": "Show tools",
-          "toolTipOpened": "Hide tools",
-          "clear": {
-            "toolTip": "Clear all selected objects"
-          },
-          "download": {
-            "toolTip": "Download the objects",
-            "options": {
-              "xlsx": "Download to Excel",
-              "kml": "Download to KML"
-            }
-          },
-          "filter": {
-            "toolTipActive": "The filter is active",
-            "toolTipInActive": "Filter the results"
-          },
-          "sort": {
-            "toolTip": "Sort the results, currently sorting after ",
-            "strategies": {
-              "AtoZ": "alphabetically ascending",
-              "ZtoA": "alphabetically descending",
-              "numHits": "number of hits"
-            }
-          }
-        },
-        "previewTitle": "Preview"
-      },
-      "settings": {
-        "title": "Search settings",
-        "general": {
-          "title": "General settings",
-          "limitSources": {
-            "title": "Limit sources",
-            "toolTip": "Enable to select which sources the search will be performed in. If the toggle is in it's off position, the search will be performed in all available sources."
-          }
-        },
-        "resultsDisplay": {
-          "title": "Results display",
-          "mapLabels": {
-            "title": "Show feature labels",
-            "toolTip": "If active, a label will be shown in the map next to the highlighted search result."
-          }
-        },
-        "spatial": {
-          "title": "Spatial settings",
-          "activeFilter": {
-            "title": "Demand that the whole feature must fit in the search area.",
-            "toolTip": "If active, the whole feature (for example an estate polygon) must fit within the search area to be shown in the search results. If inactive, only a small part of the polygon must be in the search area to be shown in the search results."
-          }
-        },
-        "text": {
-          "title": "Text settings",
-          "wildcardAtStart": {
-            "title": "Wildcard before",
-            "toolTip": "If active, a search for 'road' will also return hits on 'big road'."
-          },
-          "wildcardAtEnd": {
-            "title": "Wildcard after",
-            "toolTip": "If active, a search for 'road' will also return hits on 'road block'."
-          },
-          "matchCase": {
-            "title": "Case sensitivity",
-            "toolTip": "If active, a search for 'a' won't match features containing 'A'. Disable to search regardless of lowercase / uppercase."
-          }
-        }
-      },
-      "tools": {
-        "extentSearch": {
-          "title": "View search",
-          "toolTip": "Perform a search throughout the current map area."
-        },
-        "objectSearch": {
-          "title": "Object search",
-          "toolTip": "Perform a search by selecting one or more areas in the map.",
-          "snackBarText": "Select an object in the map where you want to perform a search. Hold down CTRL to select multiple objects."
-        },
-        "radiusSearch": {
-          "title": "Radius search",
-          "toolTip": "Perform a search in an area by drawing a circle.",
-          "snackBarText": "Tap the map to place a center point, then drag outwards and release."
-        },
-        "polygonSearch": {
-          "title": "Polygon search",
-          "toolTip": "Perform a search in an area by drawing a polygon.",
-          "snackBarText": "Tap the map once for each node in the polygon. Perform the search by pressing the last node again."
-        },
-        "searchSettings": {
-          "title": "Search settings",
-          "toolTip": "Change the search settings."
-        }
-      }
-    }
-  },
   "controls": {
     "languageSwitcher": {
       "iconButton": {
@@ -166,6 +18,154 @@
         "menuItems": {
           "english": "English",
           "swedish": "Swedish"
+        }
+      }
+    }
+  },
+  "core": {
+    "drawer": {
+      "toggleButtons": {
+        "plugins": "Tools"
+      }
+    },
+    "search": {
+      "searchBar": {
+        "clearButton": {
+          "srText": "Clear search",
+          "toolTip": "Clear search"
+        },
+        "expandButton": {
+          "collapsed": "Show the search results",
+          "open": "Hide the search results"
+        },
+        "moreButton": {
+          "srText": "Open dialog with more settings",
+          "toolTip": "More search tools and settings"
+        },
+        "onlyVisibleLayersPostfix": " (only in visible layers)",
+        "placeHolders": {
+          "defaultSearch": "Search...",
+          "extentSearch": "Searching in the area...",
+          "objectSearch": "Searching with objects..."
+        },
+        "searchButton": {
+          "srText": "Perform search",
+          "toolTip": "Perform search"
+        },
+        "srText": "Search the content of the website",
+        "visibilityButton": {
+          "hide": "Hide search results from map",
+          "show": "Show search results in map"
+        }
+      },
+      "searchResults": {
+        "breadCrumbs": {
+          "searchResults": {
+            "toolTip": "Back to all search results"
+          }
+        },
+        "datasetSummary": {
+          "maxWarning": "Maximum number of search hits has been reached. Refine your search to ensure that important information is not missed."
+        },
+        "feature": {
+          "addToSelection": "Add to selection",
+          "removeFromSelection": "Remove from selection"
+        },
+        "featureDetails": {
+          "showNext": "Show the next object from the results list",
+          "showPrevious": "Show the previous object from the results list"
+        },
+        "headerTitle": "Search results",
+        "previewTitle": "Preview",
+        "tools": {
+          "clear": {
+            "toolTip": "Clear all selected objects"
+          },
+          "download": {
+            "options": {
+              "kml": "Download to KML",
+              "xlsx": "Download to Excel"
+            },
+            "toolTip": "Download the objects"
+          },
+          "filter": {
+            "toolTipActive": "The filter is active",
+            "toolTipInActive": "Filter the results"
+          },
+          "sort": {
+            "strategies": {
+              "AtoZ": "alphabetically ascending",
+              "ZtoA": "alphabetically descending",
+              "numHits": "number of hits"
+            },
+            "toolTip": "Sort the results, currently sorting after "
+          },
+          "toolTipClosed": "Show tools",
+          "toolTipOpened": "Hide tools"
+        }
+      },
+      "settings": {
+        "general": {
+          "limitSources": {
+            "title": "Limit sources",
+            "toolTip": "Enable to select which sources the search will be performed in. If the toggle is in it's off position, the search will be performed in all available sources."
+          },
+          "title": "General settings"
+        },
+        "resultsDisplay": {
+          "mapLabels": {
+            "title": "Show feature labels",
+            "toolTip": "If active, a label will be shown in the map next to the highlighted search result."
+          },
+          "title": "Results display"
+        },
+        "spatial": {
+          "activeFilter": {
+            "title": "Demand that the whole feature must fit in the search area.",
+            "toolTip": "If active, the whole feature (for example an estate polygon) must fit within the search area to be shown in the search results. If inactive, only a small part of the polygon must be in the search area to be shown in the search results."
+          },
+          "title": "Spatial settings"
+        },
+        "text": {
+          "matchCase": {
+            "title": "Case sensitivity",
+            "toolTip": "If active, a search for 'a' won't match features containing 'A'. Disable to search regardless of lowercase / uppercase."
+          },
+          "title": "Text settings",
+          "wildcardAtEnd": {
+            "title": "Wildcard after",
+            "toolTip": "If active, a search for 'road' will also return hits on 'road block'."
+          },
+          "wildcardAtStart": {
+            "title": "Wildcard before",
+            "toolTip": "If active, a search for 'road' will also return hits on 'big road'."
+          }
+        },
+        "title": "Search settings"
+      },
+      "tools": {
+        "extentSearch": {
+          "title": "View search",
+          "toolTip": "Perform a search throughout the current map area."
+        },
+        "objectSearch": {
+          "snackBarText": "Select an object in the map where you want to perform a search. Hold down CTRL to select multiple objects.",
+          "title": "Object search",
+          "toolTip": "Perform a search by selecting one or more areas in the map."
+        },
+        "polygonSearch": {
+          "snackBarText": "Tap the map once for each node in the polygon. Perform the search by pressing the last node again.",
+          "title": "Polygon search",
+          "toolTip": "Perform a search in an area by drawing a polygon."
+        },
+        "radiusSearch": {
+          "snackBarText": "Tap the map to place a center point, then drag outwards and release.",
+          "title": "Radius search",
+          "toolTip": "Perform a search in an area by drawing a circle."
+        },
+        "searchSettings": {
+          "title": "Search settings",
+          "toolTip": "Change the search settings."
         }
       }
     }
@@ -197,18 +197,19 @@
       "title": "Layer manager",
       "window": {
         "appBar": {
-          "tabMapLayers": "Map layers",
-          "tabBackgroundLayers": "Background"
+          "tabActiveLayers": "Active layers",
+          "tabBackgroundLayers": "Background",
+          "tabMapLayers": "Map layers"
         }
       }
     },
     "print": {
-      "title": "Print",
       "description": "Save the map as a PDF",
+      "title": "Print",
       "window": {
         "appBar": {
-          "tabGeneral": "General settings",
-          "tabAdvanced": "Advanced settings"
+          "tabAdvanced": "Advanced settings",
+          "tabGeneral": "General settings"
         }
       }
     }

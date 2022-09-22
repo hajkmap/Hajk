@@ -8,154 +8,6 @@
     "results": "Resultat",
     "showing": "Visar"
   },
-  "core": {
-    "drawer": {
-      "toggleButtons": {
-        "plugins": "Kartverktyg"
-      }
-    },
-    "search": {
-      "searchBar": {
-        "placeHolders": {
-          "defaultSearch": "Sök...",
-          "extentSearch": "Söker i området...",
-          "objectSearch": "Söker med objekt..."
-        },
-        "onlyVisibleLayersPostfix": " (endast i synliga lager)",
-        "expandButton": {
-          "collapsed": "Visa sökresultat",
-          "open": "Dölj sökresultat"
-        },
-        "visibilityButton": {
-          "show": "Visa sökresultat i kartan",
-          "hide": "Dölj sökresultat i kartan"
-        },
-        "clearButton": {
-          "toolTip": "Rensa sökning",
-          "srText": "Rensa sökning"
-        },
-        "moreButton": {
-          "toolTip": "Fler sökverktyg och inställningar",
-          "srText": "Öppna dialog med fler inställningar"
-        },
-        "searchButton": {
-          "toolTip": "Utför sökning",
-          "srText": "Utför sökning"
-        },
-        "srText": "Sök i webbplatsens innehåll"
-      },
-      "searchResults": {
-        "feature": {
-          "addToSelection": "Lägg till i urval",
-          "removeFromSelection": "Ta bort från urval"
-        },
-        "featureDetails": {
-          "showNext": "Visa nästa objekt i resultatlistan",
-          "showPrevious": "Visa föregående objekt i resultatlistan"
-        },
-        "datasetSummary": {
-          "maxWarning": "Maximalt antal sökträffar har uppnåtts. Förfina sökningen för att säkerställa att viktig information inte missas."
-        },
-        "headerTitle": "Sökresultat",
-        "breadCrumbs": {
-          "searchResults": {
-            "toolTip": "Tillbaka till alla sökresultat"
-          }
-        },
-        "tools": {
-          "toolTipClosed": "Visa verktyg",
-          "toolTipOpened": "Dölj verktyg",
-          "clear": {
-            "toolTip": "Rensa alla selekterade objekt"
-          },
-          "download": {
-            "toolTip": "Ladda ner objekten",
-            "options": {
-              "xlsx": "Ladda ner till Excel",
-              "kml": "Ladda ner till KML"
-            }
-          },
-          "filter": {
-            "toolTipActive": "Filtret är aktivt",
-            "toolTipInActive": "Filtrera resultatet"
-          },
-          "sort": {
-            "toolTip": "Sortera resultatet, sorterar nu enligt ",
-            "strategies": {
-              "AtoZ": "alfabetisk stigande",
-              "ZtoA": "alfabetisk fallande",
-              "numHits": "antal träffar"
-            }
-          }
-        },
-        "previewTitle": "Förhandsvisning"
-      },
-      "settings": {
-        "title": "Sökinställningar",
-        "general": {
-          "title": "Generella sökinställningar",
-          "limitSources": {
-            "title": "Begränsa sökkällor",
-            "toolTip": "Slå på för att välja vilka datakällor som sökningen kommer göras i. Om reglaget är i off-läget kommer sökningen att ske i alla tillgänliga sökkällor."
-          }
-        },
-        "resultsDisplay": {
-          "title": "Visning av resultat",
-          "mapLabels": {
-            "title": "Visa textetikett i kartan",
-            "toolTip": "Om aktivt kommer en etikett att visas i kartan intill det markerade sökresultatet."
-          }
-        },
-        "spatial": {
-          "title": "Spatiala sökinställningar",
-          "activeFilter": {
-            "title": "Kräv att hela objektet ryms inom sökområde",
-            "toolTip": "Om aktivt kommer hela objektet (exempelvis en fastigheten) behöva rymmas inom sökområdet för att komma med i resultatet. Om inaktivt räcker det att endast en liten del av objektet ryms inom, eller nuddar vid, sökområdet."
-          }
-        },
-        "text": {
-          "title": "Inställningar för textsökning",
-          "wildcardAtStart": {
-            "title": "Wildcard före",
-            "toolTip": "Om aktivt kommer en sökning på 'väg' även ge träffar på exempelvis 'storväg'."
-          },
-          "wildcardAtEnd": {
-            "title": "Wildcard efter",
-            "toolTip": "Om aktivt kommer en sökning på 'väg' även ge träffar på exempelvis 'vägen'."
-          },
-          "matchCase": {
-            "title": "Skiftlägeskänslighet",
-            "toolTip": "Om aktivt kommer en sökning på 'a' inte ge träffar på 'A'. Inaktivera för att söka oberoende av gemener/versaler."
-          }
-        }
-      },
-      "tools": {
-        "extentSearch": {
-          "title": "Sök i vyn",
-          "toolTip": "Genomför en sökning i hela det område som kartan visar."
-        },
-        "objectSearch": {
-          "title": "Sök med objekt",
-          "toolTip": "Genomför en sökning genom att välja en eller flera områden i kartan.",
-          "snackBarText": "Tryck på den yta i kartan där du vill genomföra en sökning. Håll in CTRL för att välja flera ytor."
-        },
-        "radiusSearch": {
-          "title": "Sök med radie",
-          "toolTip": "Genomför en sökning i ett område genom att rita en cirkel.",
-          "snackBarText": "Tryck i kartan där du vill ha centrumpunkten, dra sedan utåt och släpp."
-        },
-        "polygonSearch": {
-          "title": "Sök med polygon",
-          "toolTip": "Genomför en sökning i ett område genom att rita en polygon.",
-          "snackBarText": "Tryck en gång i kartan för varje nod i polygonen. Genomför sökningen genom att trycka på den sista noden en gång till."
-        },
-        "searchSettings": {
-          "title": "Sökinställningar",
-          "toolTip": "Ändra sökinställningarna."
-        }
-      }
-    }
-  },
   "controls": {
     "languageSwitcher": {
       "iconButton": {
@@ -166,6 +18,154 @@
         "menuItems": {
           "english": "Engelska",
           "swedish": "Svenska"
+        }
+      }
+    }
+  },
+  "core": {
+    "drawer": {
+      "toggleButtons": {
+        "plugins": "Kartverktyg"
+      }
+    },
+    "search": {
+      "searchBar": {
+        "clearButton": {
+          "srText": "Rensa sökning",
+          "toolTip": "Rensa sökning"
+        },
+        "expandButton": {
+          "collapsed": "Visa sökresultat",
+          "open": "Dölj sökresultat"
+        },
+        "moreButton": {
+          "srText": "Öppna dialog med fler inställningar",
+          "toolTip": "Fler sökverktyg och inställningar"
+        },
+        "onlyVisibleLayersPostfix": " (endast i synliga lager)",
+        "placeHolders": {
+          "defaultSearch": "Sök...",
+          "extentSearch": "Söker i området...",
+          "objectSearch": "Söker med objekt..."
+        },
+        "searchButton": {
+          "srText": "Utför sökning",
+          "toolTip": "Utför sökning"
+        },
+        "srText": "Sök i webbplatsens innehåll",
+        "visibilityButton": {
+          "hide": "Dölj sökresultat i kartan",
+          "show": "Visa sökresultat i kartan"
+        }
+      },
+      "searchResults": {
+        "breadCrumbs": {
+          "searchResults": {
+            "toolTip": "Tillbaka till alla sökresultat"
+          }
+        },
+        "datasetSummary": {
+          "maxWarning": "Maximalt antal sökträffar har uppnåtts. Förfina sökningen för att säkerställa att viktig information inte missas."
+        },
+        "feature": {
+          "addToSelection": "Lägg till i urval",
+          "removeFromSelection": "Ta bort från urval"
+        },
+        "featureDetails": {
+          "showNext": "Visa nästa objekt i resultatlistan",
+          "showPrevious": "Visa föregående objekt i resultatlistan"
+        },
+        "headerTitle": "Sökresultat",
+        "previewTitle": "Förhandsvisning",
+        "tools": {
+          "clear": {
+            "toolTip": "Rensa alla selekterade objekt"
+          },
+          "download": {
+            "options": {
+              "kml": "Ladda ner till KML",
+              "xlsx": "Ladda ner till Excel"
+            },
+            "toolTip": "Ladda ner objekten"
+          },
+          "filter": {
+            "toolTipActive": "Filtret är aktivt",
+            "toolTipInActive": "Filtrera resultatet"
+          },
+          "sort": {
+            "strategies": {
+              "AtoZ": "alfabetisk stigande",
+              "ZtoA": "alfabetisk fallande",
+              "numHits": "antal träffar"
+            },
+            "toolTip": "Sortera resultatet, sorterar nu enligt "
+          },
+          "toolTipClosed": "Visa verktyg",
+          "toolTipOpened": "Dölj verktyg"
+        }
+      },
+      "settings": {
+        "general": {
+          "limitSources": {
+            "title": "Begränsa sökkällor",
+            "toolTip": "Slå på för att välja vilka datakällor som sökningen kommer göras i. Om reglaget är i off-läget kommer sökningen att ske i alla tillgänliga sökkällor."
+          },
+          "title": "Generella sökinställningar"
+        },
+        "resultsDisplay": {
+          "mapLabels": {
+            "title": "Visa textetikett i kartan",
+            "toolTip": "Om aktivt kommer en etikett att visas i kartan intill det markerade sökresultatet."
+          },
+          "title": "Visning av resultat"
+        },
+        "spatial": {
+          "activeFilter": {
+            "title": "Kräv att hela objektet ryms inom sökområde",
+            "toolTip": "Om aktivt kommer hela objektet (exempelvis en fastigheten) behöva rymmas inom sökområdet för att komma med i resultatet. Om inaktivt räcker det att endast en liten del av objektet ryms inom, eller nuddar vid, sökområdet."
+          },
+          "title": "Spatiala sökinställningar"
+        },
+        "text": {
+          "matchCase": {
+            "title": "Skiftlägeskänslighet",
+            "toolTip": "Om aktivt kommer en sökning på 'a' inte ge träffar på 'A'. Inaktivera för att söka oberoende av gemener/versaler."
+          },
+          "title": "Inställningar för textsökning",
+          "wildcardAtEnd": {
+            "title": "Wildcard efter",
+            "toolTip": "Om aktivt kommer en sökning på 'väg' även ge träffar på exempelvis 'vägen'."
+          },
+          "wildcardAtStart": {
+            "title": "Wildcard före",
+            "toolTip": "Om aktivt kommer en sökning på 'väg' även ge träffar på exempelvis 'storväg'."
+          }
+        },
+        "title": "Sökinställningar"
+      },
+      "tools": {
+        "extentSearch": {
+          "title": "Sök i vyn",
+          "toolTip": "Genomför en sökning i hela det område som kartan visar."
+        },
+        "objectSearch": {
+          "snackBarText": "Tryck på den yta i kartan där du vill genomföra en sökning. Håll in CTRL för att välja flera ytor.",
+          "title": "Sök med objekt",
+          "toolTip": "Genomför en sökning genom att välja en eller flera områden i kartan."
+        },
+        "polygonSearch": {
+          "snackBarText": "Tryck en gång i kartan för varje nod i polygonen. Genomför sökningen genom att trycka på den sista noden en gång till.",
+          "title": "Sök med polygon",
+          "toolTip": "Genomför en sökning i ett område genom att rita en polygon."
+        },
+        "radiusSearch": {
+          "snackBarText": "Tryck i kartan där du vill ha centrumpunkten, dra sedan utåt och släpp.",
+          "title": "Sök med radie",
+          "toolTip": "Genomför en sökning i ett område genom att rita en cirkel."
+        },
+        "searchSettings": {
+          "title": "Sökinställningar",
+          "toolTip": "Ändra sökinställningarna."
         }
       }
     }
@@ -197,18 +197,19 @@
       "title": "Lagerhanterare",
       "window": {
         "appBar": {
-          "tabMapLayers": "Kartlager",
-          "tabBackgroundLayers": "Bakgrund"
+          "tabActiveLayers": "Aktiva lager",
+          "tabBackgroundLayers": "Bakgrund",
+          "tabMapLayers": "Kartlager"
         }
       }
     },
     "print": {
-      "title": "Skriv ut",
       "description": "Skapa en PDF av kartan",
+      "title": "Skriv ut",
       "window": {
         "appBar": {
-          "tabGeneral": "Generella inställningar",
-          "tabAdvanced": "Avancerade inställningar"
+          "tabAdvanced": "Avancerade inställningar",
+          "tabGeneral": "Generella inställningar"
         }
       }
     }
