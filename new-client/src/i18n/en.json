@@ -34,6 +34,9 @@
     "mapCleaner": {
       "toolTip": "Hide all active layers",
       "ariaLabel": "Clear map"
+    },
+    "mapResetter": {
+      "toolTip": "Reset the map to default state"
     }
   },
   "core": {

@@ -34,6 +34,9 @@
     "mapCleaner": {
       "toolTip": "Dölj alla aktiva lager",
       "ariaLabel": "Rensa kartan"
+    },
+    "mapResetter": {
+      "toolTip": "Återställ kartan till startläget"
     }
   },
   "core": {
