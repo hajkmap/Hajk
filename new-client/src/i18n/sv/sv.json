@@ -21,9 +21,14 @@
           "extentSearch": "Söker i området...",
           "objectSearch": "Söker med objekt..."
         },
+        "onlyVisibleLayersPostfix": " (endast i synliga lager)",
         "expandButton": {
           "collapsed": "Visa sökresultat",
           "open": "Dölj sökresultat"
+        },
+        "visibilityButton": {
+          "show": "Visa sökresultat i kartan",
+          "hide": "Dölj sökresultat i kartan"
         },
         "clearButton": {
           "toolTip": "Rensa sökning",

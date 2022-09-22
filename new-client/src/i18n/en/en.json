@@ -21,9 +21,14 @@
           "extentSearch": "Searching in the area...",
           "objectSearch": "Searching with objects..."
         },
+        "onlyVisibleLayersPostfix": " (only in visible layers)",
         "expandButton": {
           "collapsed": "Show the search results",
           "open": "Hide the search results"
+        },
+        "visibilityButton": {
+          "show": "Show search results in map",
+          "hide": "Hide search results from map"
         },
         "clearButton": {
           "toolTip": "Clear search",

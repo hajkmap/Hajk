@@ -148,8 +148,8 @@ class SearchBar extends React.PureComponent {
     return string.replace(/,/g, "").replace(/ /g, "");
   };
 
-  //Can't use string.prototype.matchAll because of Edge (Polyfill not working atm)
-  getMatches = (string, regex, index) => {
+  // Can't use string.prototype.matchAll because of Edge (Polyfill not working atm)
+  getMatches = (string, regex) => {
     var matches = [];
     var match = regex.exec(string);
 
@@ -241,16 +241,18 @@ class SearchBar extends React.PureComponent {
     } = this.props;
 
     const labelPostfix = searchInVisibleLayers
-      ? " (endast i synliga lager)"
+      ? t("core.search.searchBar.onlyVisibleLayersPostfix")
       : "";
 
     return searchActive === "selectSearch" || searchActive === "draw"
-      ? `Söker med objekt${labelPostfix}`
+      ? `${t("core.search.searchBar.placeHolders.objectSearch")}${labelPostfix}`
       : searchActive === "extentSearch"
-      ? `Söker i området${labelPostfix}`
+      ? `${t("core.search.searchBar.placeHolders.extentSearch")}${labelPostfix}`
       : options.searchBarPlaceholder
       ? `${options.searchBarPlaceholder}${labelPostfix}`
-      : `Sök${labelPostfix}`;
+      : `${t(
+          "core.search.searchBar.placeHolders.defaultSearch"
+        )}${labelPostfix}`;
   };
 
   renderSearchResultList = () => {
@@ -391,8 +393,8 @@ class SearchBar extends React.PureComponent {
       : t("core.search.searchBar.expandButton.open");
 
     const toggleResultsLayerVisibilityMessage = this.state.resultsLayerVisible
-      ? "Dölj sökresultat i kartan"
-      : "Visa sökresultat i kartan";
+      ? t("core.search.searchBar.visibilityButton.hide")
+      : t("core.search.searchBar.visibilityButton.show");
 
     const placeholder = this.getPlaceholder();
     return (
