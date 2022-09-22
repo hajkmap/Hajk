@@ -45,7 +45,11 @@ export default class Tree extends Component {
                     }}
                   />
                   &nbsp;
-                  <label>{layer.caption}</label>
+                  <label>
+                    {layer.internalLayerName?.length > 0
+                      ? layer.internalLayerName
+                      : layer.caption}
+                  </label>
                   <input
                     ref={layer.id}
                     type="text"

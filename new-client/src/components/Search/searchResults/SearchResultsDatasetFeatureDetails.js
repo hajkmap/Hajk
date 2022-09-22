@@ -1,7 +1,5 @@
 import React from "react";
 import FeaturePropsParsing from "../../FeatureInfo/FeaturePropsParsing";
-import { withStyles } from "@material-ui/core/styles";
-import { withTranslation } from "react-i18next";
 import {
   Table,
   TableBody,
@@ -12,33 +10,37 @@ import {
   Grid,
   Button,
   Tooltip,
-} from "@material-ui/core";
-import ArrowLeftIcon from "@material-ui/icons/ArrowLeft";
-import ArrowRightIcon from "@material-ui/icons/ArrowRight";
+} from "@mui/material";
+import ArrowLeftIcon from "@mui/icons-material/ArrowLeft";
+import ArrowRightIcon from "@mui/icons-material/ArrowRight";
+import { styled } from "@mui/material/styles";
+import { withTranslation } from "react-i18next";
 
-const styles = (theme) => ({
-  tableCell: {
-    paddingLeft: 0,
-    wordBreak: "break-all",
-    width: "50%",
-  },
-  allFeatureDetailsContainer: {
-    maxWidth: "100%",
-    paddingLeft: theme.spacing(1),
-    paddingRight: theme.spacing(1),
-  },
-  headerTypography: {
-    maxWidth: "100%",
-    fontSize: 18,
-  },
-  headerContainer: {
-    paddingTop: theme.spacing(1),
-  },
-  togglerButton: {
-    minWidth: 26,
-    padding: 0,
-  },
-});
+const StyledTableCell = styled(TableCell)(() => ({
+  paddingLeft: 0,
+  wordBreak: "break-all",
+  width: "50%",
+}));
+
+const FeatureDetailsContainer = styled(Grid)(({ theme }) => ({
+  maxWidth: "100%",
+  paddingLeft: theme.spacing(1),
+  paddingRight: theme.spacing(1),
+}));
+
+const HeaderContainer = styled(Grid)(({ theme }) => ({
+  paddingTop: theme.spacing(1),
+}));
+
+const HeaderTypography = styled(Typography)(() => ({
+  maxWidth: "100%",
+  fontSize: 18,
+}));
+
+const TogglerButton = styled(Button)(() => ({
+  minWidth: 26,
+  padding: 0,
+}));
 
 class SearchResultsDatasetFeatureDetails extends React.PureComponent {
   state = {
@@ -86,13 +88,15 @@ class SearchResultsDatasetFeatureDetails extends React.PureComponent {
   getHtmlItemInfoBox = () => {
     const { feature } = this.props;
     const source = feature.source ?? this.props.source;
-    feature.properties = this.featurePropsParsing.extractPropertiesFromJson(
-      feature.properties
+    feature.setProperties(
+      this.featurePropsParsing.extractPropertiesFromJson(
+        feature.getProperties()
+      )
     );
     this.featurePropsParsing
       .setMarkdownAndProperties({
         markdown: source.infobox,
-        properties: feature.properties,
+        properties: feature.getProperties(),
       })
       .mergeFeaturePropsWithMarkdown()
       .then((MarkdownComponent) => {
@@ -105,16 +109,14 @@ class SearchResultsDatasetFeatureDetails extends React.PureComponent {
   };
 
   renderTableCell = (content, position) => {
-    const { classes } = this.props;
     const textToRender = Array.isArray(content) ? content.join(", ") : content;
     return (
-      <TableCell
+      <StyledTableCell
         align={position}
         style={position === "right" ? { paddingRight: 0 } : null}
-        className={classes.tableCell}
       >
         {textToRender}
-      </TableCell>
+      </StyledTableCell>
     );
   };
 
@@ -124,13 +126,19 @@ class SearchResultsDatasetFeatureDetails extends React.PureComponent {
       <TableContainer>
         <Table size="small">
           <TableBody>
-            {Object.entries(feature.properties).map((row) => {
-              return (
+            {Object.entries(feature.getProperties()).map((row) => {
+              // feature.getProperties() can contain values of any data type
+              // (whatever is set on the current feature). But since we can not
+              // render e.g. Date or Point objects, we must do the following check
+              // and only allow String, Number or Array:
+              return typeof row[1] === "string" ||
+                typeof row[1] === "number" ||
+                Array.isArray(row[1]) ? (
                 <TableRow key={row[0]}>
                   {this.renderTableCell(row[0])}
                   {this.renderTableCell(row[1], "right")}
                 </TableRow>
-              );
+              ) : null;
             })}
           </TableBody>
         </Table>
@@ -147,13 +155,13 @@ class SearchResultsDatasetFeatureDetails extends React.PureComponent {
   getFeatureIndex = (feature, features) => {
     return (
       features?.findIndex((f) => {
-        return f.id === feature.id;
+        return f.getId() === feature.getId();
       }) ?? -1
     );
   };
 
   renderFeatureToggler = () => {
-    const { feature, classes, features, t } = this.props;
+    const { feature, features, t } = this.props;
     const numFeaturesInCollection = features.length;
     const currentFeatureIndex = this.getFeatureIndex(feature, features);
 
@@ -162,9 +170,10 @@ class SearchResultsDatasetFeatureDetails extends React.PureComponent {
       currentFeatureIndex + 1 >= numFeaturesInCollection;
 
     return (
-      <Grid container item alignItems="center" justify="space-between">
+      <Grid container item alignItems="center" justifyContent="space-between">
         <Grid item>
           <Tooltip
+            disableInteractive
             title={
               !buttonLeftDisabled
                 ? t("core.search.searchResults.featureDetails.showPrevious")
@@ -172,10 +181,9 @@ class SearchResultsDatasetFeatureDetails extends React.PureComponent {
             }
           >
             <span>
-              <Button
+              <TogglerButton
                 size="small"
                 variant="outlined"
-                className={classes.togglerButton}
                 disabled={buttonLeftDisabled}
                 onClick={() =>
                   this.handleTogglerPressed(currentFeatureIndex - 1)
@@ -187,12 +195,13 @@ class SearchResultsDatasetFeatureDetails extends React.PureComponent {
                   fontSize="small"
                   color={buttonLeftDisabled ? "disabled" : "action"}
                 />
-              </Button>
+              </TogglerButton>
             </span>
           </Tooltip>
         </Grid>
         <Grid item>
           <Tooltip
+            disableInteractive
             title={
               !buttonRightDisabled
                 ? t("core.search.searchResults.featureDetails.showNext")
@@ -200,10 +209,9 @@ class SearchResultsDatasetFeatureDetails extends React.PureComponent {
             }
           >
             <span>
-              <Button
+              <TogglerButton
                 size="small"
                 variant="outlined"
-                className={classes.togglerButton}
                 disabled={buttonRightDisabled}
                 onClick={() =>
                   this.handleTogglerPressed(currentFeatureIndex + 1)
@@ -215,7 +223,7 @@ class SearchResultsDatasetFeatureDetails extends React.PureComponent {
                   fontSize="small"
                   color={buttonRightDisabled ? "disabled" : "action"}
                 />
-              </Button>
+              </TogglerButton>
             </span>
           </Tooltip>
         </Grid>
@@ -224,28 +232,22 @@ class SearchResultsDatasetFeatureDetails extends React.PureComponent {
   };
 
   renderFeatureTitle = () => {
-    const { featureTitle, classes } = this.props;
+    const { feature } = this.props;
     return (
-      <Typography
-        noWrap
-        className={classes.headerTypography}
-        component="div"
-        variant="button"
-        align="left"
-      >
-        {featureTitle}
-      </Typography>
+      <HeaderTypography noWrap component="div" variant="button" align="left">
+        {feature.featureTitle}
+      </HeaderTypography>
     );
   };
 
   render() {
-    const { classes, features, enableFeatureToggler } = this.props;
+    const { features, enableFeatureToggler } = this.props;
     const { infoBox } = this.state;
     const shouldRenderToggler =
       (enableFeatureToggler ?? true) && features?.length > 1;
     return (
-      <Grid container className={classes.allFeatureDetailsContainer}>
-        <Grid container alignItems="center" className={classes.headerContainer}>
+      <FeatureDetailsContainer container>
+        <HeaderContainer container alignItems="center">
           <Grid
             item
             xs={shouldRenderToggler ? 9 : 12}
@@ -258,16 +260,14 @@ class SearchResultsDatasetFeatureDetails extends React.PureComponent {
               {this.renderFeatureToggler()}
             </Grid>
           )}
-        </Grid>
+        </HeaderContainer>
         {infoBox && (
           <Grid item xs={12}>
             {infoBox}
           </Grid>
         )}
-      </Grid>
+      </FeatureDetailsContainer>
     );
   }
 }
-export default withTranslation()(
-  withStyles(styles)(SearchResultsDatasetFeatureDetails)
-);
+export default withTranslation(SearchResultsDatasetFeatureDetails);

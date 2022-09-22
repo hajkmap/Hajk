@@ -4,7 +4,7 @@ import BaseWindowPlugin from "../BaseWindowPlugin";
 import PrintModel from "./PrintModel";
 import PrintView from "./PrintView";
 import Observer from "react-event-observer";
-import PrintIcon from "@material-ui/icons/Print";
+import PrintIcon from "@mui/icons-material/Print";
 
 class Print extends React.PureComponent {
   // Paper dimensions: Array[width, height]
@@ -75,6 +75,9 @@ class Print extends React.PureComponent {
         ? props.options.logoMaxWidth
         : 40;
 
+    // If no path to north-arrow image is supplied, use fallback
+    props.options.northArrow = props.options.northArrow || "/north_arrow.png";
+
     // Ensure we have a value for the crossOrigin parameter
     props.options.crossOrigin =
       props.app.config.mapConfig.map?.crossOrigin || "anonymous";
@@ -86,6 +89,7 @@ class Print extends React.PureComponent {
       map: props.map,
       options: props.options,
       dims: this.dims,
+      mapConfig: props.app.config.mapConfig.map,
     });
   }
 
@@ -106,7 +110,7 @@ class Print extends React.PureComponent {
           icon: <PrintIcon />,
           title: "plugins.print.title",
           description: "plugins.print.description",
-          height: 550,
+          height: "dynamic",
           width: 350,
           onWindowShow: this.onWindowShow,
           onWindowHide: this.onWindowHide,

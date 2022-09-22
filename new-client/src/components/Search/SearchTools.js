@@ -1,8 +1,7 @@
 import React from "react";
 import { createPortal } from "react-dom";
-import IconButton from "@material-ui/core/IconButton";
-import MoreVertIcon from "@material-ui/icons/MoreVert";
-import { withStyles } from "@material-ui/core/styles";
+import IconButton from "@mui/material/IconButton";
+import MoreVertIcon from "@mui/icons-material/MoreVert";
 import { withTranslation } from "react-i18next";
 import {
   ListItemIcon,
@@ -11,12 +10,11 @@ import {
   Paper,
   Tooltip,
   Typography,
-} from "@material-ui/core";
+} from "@mui/material";
+import { visuallyHidden } from "@mui/utils";
 
-import Dialog from "../Dialog.js";
+import Dialog from "../Dialog/Dialog";
 import SearchSettings from "./SearchSettings";
-
-const styles = (theme) => ({});
 
 class SearchTools extends React.PureComponent {
   state = {
@@ -68,6 +66,7 @@ class SearchTools extends React.PureComponent {
             ),
             headerText: "core.search.settings.title",
             buttonText: "OK",
+            useLegacyNonMarkdownRenderer: true,
           }}
           open={settingsDialog}
           onClose={() => {
@@ -90,7 +89,10 @@ class SearchTools extends React.PureComponent {
     return (
       <>
         {this.renderSettingsDialog()}
-        <Tooltip title={t("core.search.searchBar.moreButton.toolTip")}>
+        <Tooltip
+          disableInteractive
+          title={t("core.search.searchBar.moreButton.toolTip")}
+        >
           <IconButton
             aria-haspopup="true"
             aria-controls="lock-menu"
@@ -102,9 +104,9 @@ class SearchTools extends React.PureComponent {
               })
             }
           >
-            <Typography variant="srOnly">
+            <span style={visuallyHidden}>
               {t("core.search.searchBar.moreButton.srText")}
-            </Typography>
+            </span>
             <MoreVertIcon />
           </IconButton>
         </Tooltip>
@@ -113,7 +115,6 @@ class SearchTools extends React.PureComponent {
             id="lock-menu"
             autoFocus={false}
             anchorEl={anchorEl}
-            getContentAnchorEl={null}
             anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
             transformOrigin={{ vertical: "top", horizontal: "center" }}
             keepMounted
@@ -125,7 +126,11 @@ class SearchTools extends React.PureComponent {
             }
           >
             {enabledTools.map((option, index) => (
-              <Tooltip key={index} title={t(option.toolTipTitle) ?? ""}>
+              <Tooltip
+                disableInteractive
+                key={index}
+                title={t(option.toolTipTitle) ?? ""}
+              >
                 <MenuItem
                   onClick={(event) =>
                     this.handleMenuItemClick(event, index, option)
@@ -134,9 +139,7 @@ class SearchTools extends React.PureComponent {
                   {option.icon ? (
                     <ListItemIcon>{option.icon}</ListItemIcon>
                   ) : null}
-                  <Typography variant="srOnly" noWrap>
-                    {t(option.name)}
-                  </Typography>
+                  <span style={visuallyHidden}>{t(option.name)}</span>
                   <Typography variant="inherit" noWrap>
                     {t(option.name)}
                   </Typography>
@@ -150,4 +153,4 @@ class SearchTools extends React.PureComponent {
   }
 }
 
-export default withTranslation()(withStyles(styles)(SearchTools));
+export default withTranslation()(SearchTools);

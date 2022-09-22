@@ -1,7 +1,7 @@
 import React from "react";
 import BaseWindowPlugin from "../BaseWindowPlugin";
 
-import DrawIcon from "@material-ui/icons/Edit";
+import DrawIcon from "@mui/icons-material/Edit";
 
 import DrawView from "./DrawView";
 import DrawModel from "./DrawModel";
@@ -42,7 +42,7 @@ class Draw extends React.PureComponent {
           icon: <DrawIcon />,
           title: "plugins.draw.title",
           description: "plugins.draw.description",
-          height: 600,
+          height: "dynamic",
           width: 285,
           top: undefined,
           left: undefined,

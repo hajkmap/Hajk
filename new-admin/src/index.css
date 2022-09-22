@@ -4,7 +4,7 @@ body {
   color: #373d3f;
 }
 
-input[type="text"]:not(#documentEditor input) {
+input[type="text"]:not(#documentEditor input):not(#fmeGroupArea input) {
   border: 1px solid #ccc;
   padding: 5px;
   border-radius: 3px;
@@ -40,8 +40,8 @@ article textarea {
   border: 1px solid #999;
 }
 
-article label:not(.sketch-picker label) {
-  width: 150px;
+article label:not(.sketch-picker label):not(#fmeWorkspaceInfo label) {
+  width: 160px;
   display: inline-block;
   margin: 0;
   vertical-align: top;
@@ -59,7 +59,7 @@ article label.full {
   white-space: nowrap;
 }
 
-article input[type="text"] {
+article input[type="text"]:not(#fmeGroupArea input) {
   width: 400px;
   margin-right: 5px;
   margin-bottom: 5px;
@@ -360,6 +360,10 @@ body.dragging * {
 .edit-fields-table input[type="text"] {
   width: 160px !important;
   margin: 0 !important;
+}
+
+.edit-fields-table-default {
+  width: 184px !important;
 }
 
 .list-value:first-child {
@@ -885,4 +889,62 @@ figure img {
   margin-bottom: 1.25rem;
   padding-top: 0.5rem;
   padding-bottom: 0.5rem;
+}
+
+.modal {
+  height: 100%;
+  background: rgba(0, 0, 0, 0.4);
+}
+
+.modal-dialog{
+  margin-top: 1rem;
+  margin-bottom: 1rem;
+}
+
+.modal-content{
+  max-height: calc(100vh - 2rem);
+  overflow-y: scroll;
+}
+
+.layerDialog label,
+.layerDialog input{
+  margin: 0;
+  margin-bottom: 0;
+  margin-top: 0;
+}
+
+.layerDialog textarea.infoClick{
+  font-family: monospace;
+  font-size: 0.8rem;
+  height: 180px;
+}
+
+.layerDialog .form-row{
+  margin-bottom: 0.8rem;
+}
+
+
+.layerDialog div[class*="split"]{
+  display: flex;
+  align-items: center;
+}
+
+.layerDialog div[class*="split"] > div:first-child{
+  padding-right: 1rem;
+}
+
+.layerDialog .split50 > div{
+  flex: 0 0 50%;
+}
+
+.layerDialog .split0 > div{
+  flex: 0 0 auto;
+}
+
+.layerDialog .split3070 > div:first-child{
+  flex: 0 0 30%;
+}
+
+.layerDialog .split3070 > div:last-child{
+  flex: 0 0 70%;
 }

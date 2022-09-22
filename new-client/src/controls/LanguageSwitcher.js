@@ -1,20 +1,19 @@
 import React from "react";
-import { Button, Menu, MenuItem, Paper, Tooltip } from "@material-ui/core";
-import LanguageIcon from "@material-ui/icons/Language";
-import { makeStyles } from "@material-ui/styles";
+import { IconButton, Menu, MenuItem, Paper, Tooltip } from "@mui/material";
+import LanguageIcon from "@mui/icons-material/Language";
+
+import { styled } from "@mui/material/styles";
 import { useTranslation } from "react-i18next";
 
-const useStyles = makeStyles((theme) => ({
-  paper: {
-    marginBottom: theme.spacing(1),
-  },
-  button: {
-    minWidth: "unset",
-  },
+const StyledPaper = styled(Paper)(({ theme }) => ({
+  marginBottom: theme.spacing(1),
+}));
+
+const StyledIconButton = styled(IconButton)(({ theme }) => ({
+  minWidth: "unset",
 }));
 
 const LanguageSwitcher = React.memo((props) => {
-  const classes = useStyles();
   const { t, i18n } = useTranslation();
   const [anchor, setAnchor] = React.useState(null);
 
@@ -51,15 +50,14 @@ const LanguageSwitcher = React.memo((props) => {
     (props.showExperimentalLanguageSwitcher && (
       <>
         <Tooltip title={t("controls.languageSwitcher.iconButton.tooltip")}>
-          <Paper className={classes.paper}>
-            <Button
+          <StyledPaper>
+            <StyledIconButton
               aria-label={t("controls.languageSwitcher.iconButton.ariaLabel")}
-              className={classes.button}
               onClick={(e) => setAnchor(!anchor ? e.currentTarget : null)}
             >
               <LanguageIcon />
-            </Button>
-          </Paper>
+            </StyledIconButton>
+          </StyledPaper>
         </Tooltip>
         <Menu
           id="render-props-menu"

@@ -15,11 +15,11 @@ namespace MapService.Models
 
     public class MapSetting
     {
-        public string target { get; set; }  
-              
+        public string target { get; set; }
+
         public int[] center { get; set; }
-		
-		public string title { get; set; }
+
+        public string title { get; set; }
 
         public string projection { get; set; }
 
@@ -31,6 +31,8 @@ namespace MapService.Models
 
         public double[] resolutions { get; set; }
 
+        public double[] extraPrintResolutions { get; set; }
+
         public double[] origin { get; set; }
 
         public double[] extent { get; set; }
@@ -38,24 +40,28 @@ namespace MapService.Models
         public bool constrainOnlyCenter { get; set; }
 
         public bool constrainResolution { get; set; }
-        
+
+        public bool constrainResolutionMobile { get; set; }
+
         public bool enableDownloadLink { get; set; }
 
         public string logo { get; set; }
 
         public string logoLight { get; set; }
 
-        public string logoDark { get; set; }        
+        public string logoDark { get; set; }
 
         public string geoserverLegendOptions { get; set; }
 
-		public bool mapselector { get; set; }
+        public bool mapselector { get; set; }
 
         public bool mapcleaner { get; set; }
 
+        public bool mapresetter { get; set; }
+
         public bool drawerVisible { get; set; }
 
-        public bool drawerVisibleMobile {get; set; }
+        public bool drawerVisibleMobile { get; set; }
 
         public bool drawerPermanent { get; set; }
 
@@ -66,11 +72,40 @@ namespace MapService.Models
         public string defaultCookieNoticeMessage { get; set; }
 
         public string defaultCookieNoticeUrl { get; set; }
-        
+
         public string crossOrigin { get; set; }
 
         public bool showCookieNotice { get; set; }
 
+        public bool cookieUse3dPart { get; set; }
+
         public bool showThemeToggler { get; set; }
+
+        public bool showUserAvatar { get; set; }
+
+        public bool altShiftDragRotate { get; set; }
+
+        public bool onFocusOnly { get; set; }
+
+        public bool doubleClickZoom { get; set; }
+
+        public bool keyboard { get; set; }
+
+        public bool mouseWheelZoom { get; set; }
+
+        public bool shiftDragZoom { get; set; }
+
+        public bool dragPan { get; set; }
+
+        public bool pinchRotate { get; set; }
+
+        public bool pinchZoom { get; set; }
+
+        public bool zoomDelta { get; set; }
+
+        public bool zoomDuration { get; set; }
+
+        public bool showRecentlyUsedPlugins { get; set; }
+
     }
 }

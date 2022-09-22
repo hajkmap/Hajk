@@ -9,6 +9,9 @@
  * Store bookmarks using a key with version.
  * In future we might want to create backwardcompatibility if we add functionality.
  */
+
+import { isValidLayerId } from "../../utils/Validator";
+
 const bookmarksVersion = "1.0";
 const storageKey = `bookmarks_v${bookmarksVersion}`;
 
@@ -29,7 +32,7 @@ class BookmarksModel {
         (layer) =>
           layer.getVisible() &&
           layer.getProperties().name &&
-          !Number.isNaN(parseInt(layer.getProperties().name))
+          isValidLayerId(layer.getProperties().name)
       )
       .map((layer) => layer.getProperties().name)
       .join(",");
@@ -43,7 +46,7 @@ class BookmarksModel {
       .filter(
         (layer) =>
           layer.getProperties().name &&
-          !Number.isNaN(parseInt(layer.getProperties().name))
+          isValidLayerId(layer.getProperties().name)
       )
       .forEach((layer) => {
         layer.setVisible(layers.indexOf(layer.getProperties().name) > -1);
@@ -90,6 +93,7 @@ class BookmarksModel {
     let storedBookmarks = localStorage.getItem(storageKey);
     if (!storedBookmarks) {
       let emptyJSONArr = "[]";
+      // TODO: Describe in https://github.com/hajkmap/Hajk/wiki/Cookies-in-Hajk and add the functionalOk() hook
       localStorage.setItem(storageKey, emptyJSONArr);
       storedBookmarks = emptyJSONArr;
     }
@@ -97,6 +101,7 @@ class BookmarksModel {
   }
 
   writeToStorage() {
+    // TODO: Describe in https://github.com/hajkmap/Hajk/wiki/Cookies-in-Hajk and add the functionalOk() hook
     localStorage.setItem(storageKey, JSON.stringify(this.bookmarks));
   }
 

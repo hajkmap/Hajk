@@ -1,7 +1,4 @@
 import React from "react";
-
-import { withStyles } from "@material-ui/core/styles";
-import { withTranslation } from "react-i18next";
 import {
   Tooltip,
   Grid,
@@ -14,17 +11,14 @@ import {
   Chip,
   MenuItem,
   Input,
-} from "@material-ui/core";
+} from "@mui/material";
+import { styled } from "@mui/material/styles";
+import { withTranslation } from "react-i18next";
 
-const styles = (theme) => ({
-  chips: {
-    display: "flex",
-    flexWrap: "wrap",
-  },
-  chip: {
-    margin: 2,
-  },
-});
+const ChipsWrapper = styled("div")(({ theme }) => ({
+  display: "flex",
+  flexWrap: "wrap",
+}));
 
 class SearchSettings extends React.PureComponent {
   state = {
@@ -38,8 +32,7 @@ class SearchSettings extends React.PureComponent {
   };
 
   render() {
-    const { classes, searchOptions, searchSources, searchModel, t } =
-      this.props;
+    const { searchOptions, searchSources, searchModel, t } = this.props;
     return (
       <Grid container spacing={2} direction="column">
         <Grid item xs>
@@ -49,6 +42,7 @@ class SearchSettings extends React.PureComponent {
             </FormLabel>
             <FormGroup>
               <Tooltip
+                disableInteractive
                 title={t("core.search.settings.general.limitSources.toolTip")}
               >
                 <FormControlLabel
@@ -88,15 +82,15 @@ class SearchSettings extends React.PureComponent {
                       }
                       input={<Input id="select-multiple-chip" />}
                       renderValue={(selected) => (
-                        <div className={classes.chips}>
+                        <ChipsWrapper>
                           {selected.map((option) => (
                             <Chip
                               key={option.id}
                               label={option.caption}
-                              className={classes.chip}
+                              sx={{ margin: 0.25 }}
                             />
                           ))}
-                        </div>
+                        </ChipsWrapper>
                       )}
                     >
                       {searchModel.getSources().map((source) => (
@@ -113,6 +107,25 @@ class SearchSettings extends React.PureComponent {
                 </Grid>
               )}
             </FormGroup>
+            <FormGroup>
+              <Tooltip title="Om aktivt kommer sökningen att ske i lager som är inställda för sökning av systemadministratören och som är synliga.">
+                <FormControlLabel
+                  label="Sök endast i synliga lager"
+                  control={
+                    <Switch
+                      checked={searchOptions.searchInVisibleLayers}
+                      onChange={() => {
+                        this.localUpdateSearchOptions(
+                          "searchInVisibleLayers",
+                          !searchOptions.searchInVisibleLayers
+                        );
+                      }}
+                      color="primary"
+                    />
+                  }
+                />
+              </Tooltip>
+            </FormGroup>
           </FormControl>
         </Grid>
 
@@ -123,6 +136,7 @@ class SearchSettings extends React.PureComponent {
             </FormLabel>
             <FormGroup>
               <Tooltip
+                disableInteractive
                 title={t("core.search.settings.text.wildcardAtStart.toolTip")}
               >
                 <FormControlLabel
@@ -142,6 +156,7 @@ class SearchSettings extends React.PureComponent {
                 />
               </Tooltip>
               <Tooltip
+                disableInteractive
                 title={t("core.search.settings.text.wildcardAtEnd.toolTip")}
               >
                 <FormControlLabel
@@ -160,7 +175,10 @@ class SearchSettings extends React.PureComponent {
                   }
                 />
               </Tooltip>
-              <Tooltip title={t("core.search.settings.text.matchCase.toolTip")}>
+              <Tooltip
+                disableInteractive
+                title={t("core.search.settings.text.matchCase.toolTip")}
+              >
                 <FormControlLabel
                   label={t("core.search.settings.text.matchCase.title")}
                   control={
@@ -188,6 +206,7 @@ class SearchSettings extends React.PureComponent {
             </FormLabel>
             <FormGroup>
               <Tooltip
+                disableInteractive
                 title={t("core.search.settings.spatial.activeFilter.toolTip")}
               >
                 <FormControlLabel
@@ -219,6 +238,7 @@ class SearchSettings extends React.PureComponent {
             </FormLabel>
             <FormGroup>
               <Tooltip
+                disableInteractive
                 title={t(
                   "core.search.settings.resultsDisplay.mapLabels.toolTip"
                 )}
@@ -249,4 +269,4 @@ class SearchSettings extends React.PureComponent {
   }
 }
 
-export default withTranslation()(withStyles(styles)(SearchSettings));
+export default withTranslation()(SearchSettings);

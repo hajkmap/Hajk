@@ -1,7 +1,7 @@
 import React from "react";
 import BaseWindowPlugin from "../BaseWindowPlugin";
 
-import SatelliteIcon from "@material-ui/icons/Satellite";
+import SatelliteIcon from "@mui/icons-material/Satellite";
 
 import InformativeView from "./InformativeView.js";
 import InformativeModel from "./InformativeModel.js";

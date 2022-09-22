@@ -1,7 +1,7 @@
 import React from "react";
 import BaseWindowPlugin from "../BaseWindowPlugin";
 
-import StreetviewIcon from "@material-ui/icons/Streetview";
+import StreetviewIcon from "@mui/icons-material/Streetview";
 
 import StreetViewView from "./StreetViewView";
 import StreetViewModel from "./StreetViewModel";

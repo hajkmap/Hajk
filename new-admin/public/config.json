@@ -31,6 +31,7 @@
   },
   "mapsettings": {
     "url_proxy": "",
+    "url_base": "http://localhost:55630",
     "url_map": "http://localhost:55630/config",
     "url_map_create": "http://localhost:55630/config/create",
     "url_map_delete": "http://localhost:55630/config/delete",
@@ -77,7 +78,9 @@
     "default_coordinate": [320564, 6471766],
     "wms_url": "http://giscloud.se/mapservice/lmproxy/wms/topowebb",
     "wms_layers": "topowebbkartan",
-    "list_images": "http://localhost:55630/config/listimage"
+    "list_images": "http://localhost:55630/config/listimage",
+    "list_videos": "http://localhost:55630/config/listvideo",
+    "list_audios": "http://localhost:55630/config/listaudio"
   },
   "router": [
     { "name": "layermanager", "title": "Lager", "default": true },

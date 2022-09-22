@@ -1,53 +1,43 @@
 import React from "react";
-import { withStyles } from "@material-ui/core/styles";
-import IconButton from "@material-ui/core/IconButton";
-import CloseIcon from "@material-ui/icons/Close";
-import Dialog from "@material-ui/core/Dialog";
-import Paper from "@material-ui/core/Paper";
+import { styled } from "@mui/material/styles";
+import IconButton from "@mui/material/IconButton";
+import CloseIcon from "@mui/icons-material/Close";
+import Dialog from "@mui/material/Dialog";
+import Paper from "@mui/material/Paper";
 
 const mapDiv = document.getElementById("map");
 const blurCss = "filter : blur(7px)";
 
-const styles = (theme) => ({
-  closeButton: {
-    position: "absolute",
-    backgroundColor: theme.palette.grey[50],
-    "&:hover": {
-      backgroundColor: theme.palette.grey[400],
-    },
-    zIndex: 100,
-    right: theme.spacing(2),
-    top: theme.spacing(2),
-  },
-  paper: {
-    maxHeight: "80%",
-    maxWidth: "90%",
-    overflow: "auto",
-    backgroundColor: "transparent",
-    boxShadow: "none",
-    objectFit: "contain",
-  },
-});
+const CloseButton = styled(IconButton)(({ theme }) => ({
+  position: "absolute",
+  backgroundColor: theme.palette.grey[50],
 
-const PaperComponent = withStyles(styles)(PaperComponentRaw);
+  "&:hover": {
+    backgroundColor: theme.palette.grey[400],
+  },
 
-function PaperComponentRaw(props) {
-  const { classes, component, onClose, src, altValue } = props;
+  zIndex: 100,
+  right: theme.spacing(2),
+  top: theme.spacing(2),
+}));
+
+const StyledPaper = styled(Paper)(() => ({
+  maxHeight: "80%",
+  maxWidth: "90%",
+  overflow: "auto",
+  backgroundColor: "transparent",
+  boxShadow: "none",
+  objectFit: "contain",
+}));
+
+function PaperComponent(props) {
+  const { component, onClose, src, altValue } = props;
   return (
     <>
-      <IconButton
-        size="small"
-        onClick={onClose}
-        className={classes.closeButton}
-      >
-        <CloseIcon></CloseIcon>
-      </IconButton>
-      <Paper
-        alt={altValue}
-        component={component}
-        src={src}
-        className={classes.paper}
-      ></Paper>
+      <CloseButton size="small" onClick={onClose}>
+        <CloseIcon />
+      </CloseButton>
+      <StyledPaper alt={altValue} component={component} src={src} />
     </>
   );
 }
@@ -72,22 +62,20 @@ class ImagePopupModal extends React.PureComponent {
     open ? this.addMapBlur() : this.removeMapBlur();
 
     return (
-      <>
-        <Dialog
-          maxWidth="lg"
-          onBackdropClick={close}
-          PaperComponent={PaperComponent}
-          PaperProps={{
-            component: "img",
-            onClose: close,
-            src: image?.url,
-            altValue: image?.altValue,
-          }}
-          open={open}
-        ></Dialog>
-      </>
+      <Dialog
+        maxWidth="lg"
+        onBackdropClick={close}
+        PaperComponent={PaperComponent}
+        PaperProps={{
+          component: "img",
+          onClose: close,
+          src: image?.url,
+          altValue: image?.altValue,
+        }}
+        open={open}
+      />
     );
   }
 }
 
-export default withStyles(styles)(ImagePopupModal);
+export default ImagePopupModal;

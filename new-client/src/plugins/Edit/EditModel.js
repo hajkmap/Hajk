@@ -25,6 +25,7 @@ class EditModel {
     this.modify = undefined;
     this.key = undefined;
     this.editFeature = undefined;
+    this.editFeatureBackup = undefined;
     this.editSource = undefined;
     this.removeFeature = undefined;
     this.shell = undefined;
@@ -132,12 +133,18 @@ class EditModel {
       })
         .then((response) => {
           response.text().then((wfsResponseText) => {
-            this.refreshLayer(src.layers[0]);
-            this.vectorSource
-              .getFeatures()
-              .filter((f) => f.modification !== undefined)
-              .forEach((f) => (f.modification = undefined));
-            done(this.parseWFSTresponse(wfsResponseText));
+            const resXml = this.parseWFSTresponse(wfsResponseText);
+            if (resXml.ExceptionReport || !resXml.TransactionResponse) {
+              // do not delete the data so the user can submit it again
+              done(resXml);
+            } else {
+              this.refreshLayer(src.layers[0]);
+              this.vectorSource
+                .getFeatures()
+                .filter((f) => f.modification !== undefined)
+                .forEach((f) => (f.modification = undefined));
+              done(resXml);
+            }
           });
         })
         .catch((response) => {
@@ -346,25 +353,39 @@ class EditModel {
     });
   };
 
-  urlFromObject(url, obj) {
-    return Object.keys(obj).reduce((str, key, i, a) => {
-      str = str + key + "=" + obj[key];
-      if (i < a.length - 1) {
-        str = str + "&";
-      }
-      return str;
-    }, (url += "?"));
-  }
-
   loadData(source, extent, done) {
-    const url = this.urlFromObject(source.url, {
-      service: "WFS",
-      version: "1.1.0",
-      request: "GetFeature",
-      typename: source.layers[0],
-      srsname: source.projection,
-    });
-    hfetch(url)
+    // Prepare the URL for retrieving WFS data. We will want to set
+    // some search params later on, but we want to avoid any duplicates.
+    // The values we will set below should override any existing, if
+    // same key already exists in URL.
+    // To ensure it will happen, we read the possible current params…
+    const url = new URL(source.url);
+
+    // …and make sure that the keys are in UPPER CASE.
+    const existingSearchParams = {};
+    for (const [k, v] of url.searchParams.entries()) {
+      existingSearchParams[k.toUpperCase()] = v;
+    }
+
+    // Now we merge the possible existing params with the rest, defined
+    // below. We can be confident that we won't have duplicates and that
+    // our values "win", as they are defined last.
+    const mergedSearchParams = {
+      ...existingSearchParams,
+      SERVICE: "WFS",
+      VERSION: "1.1.0",
+      REQUEST: "GetFeature",
+      TYPENAME: source.layers[0],
+      SRSNAME: source.projection,
+    };
+
+    // Create a new URLSearchParams object from the merged object…
+    const searchParams = new URLSearchParams(mergedSearchParams);
+    // …and update our URL's search string with the new value
+    url.search = searchParams.toString();
+
+    // Send a String as HFetch doesn't currently accept true URL objects
+    hfetch(url.toString())
       .then((response) => {
         if (response.status !== 200) {
           return done("data-load-error");
@@ -438,6 +459,10 @@ class EditModel {
     });
 
     this.layer = new Vector({
+      layerType: "system",
+      zIndex: 5000,
+      name: "pluginEdit",
+      caption: "Edit layer",
       source: this.vectorSource,
       style: this.getVectorStyle(),
     });
@@ -477,11 +502,21 @@ class EditModel {
       source: this.vectorSource,
       style: this.getSketchStyle(),
       type: geometryType,
+      stopClick: true,
       geometryName: this.geometryName,
     });
     this.draw.on("drawend", (event) => {
       event.feature.modification = "added";
       this.editAttributes(event.feature);
+      // OpenLayers seems to have a problem stopping the clicks if
+      // the draw interaction is removed too early. This fix is not pretty,
+      // but it gets the job done. It seems to be enough to remove the draw
+      // interaction after one cpu-cycle.
+      // If this is not added, the user will get a zoom-event when closing
+      // a polygon drawing.
+      setTimeout(() => {
+        this.deactivateInteraction();
+      }, 1);
     });
     this.map.addInteraction(this.draw);
     this.map.clickLock.add("edit");
@@ -571,6 +606,7 @@ class EditModel {
   }
 
   resetEditFeature = () => {
+    this.editFeatureBackup = this.editFeature;
     this.editFeature = undefined;
     this.observer.publish("editFeature", this.editFeature);
   };

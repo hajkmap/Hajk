@@ -172,6 +172,7 @@ class Manager extends Component {
         this.refs["ArcGISLayerForm"].setState({
           id: layer.id,
           caption: layer.caption,
+          internalLayerName: layer.internalLayerName,
           content: layer.content,
           date: layer.date,
           infobox: layer.infobox,
@@ -213,9 +214,15 @@ class Manager extends Component {
           id: layer.id,
           dataFormat: layer.dataFormat || "WFS",
           caption: layer.caption,
+          internalLayerName: layer.internalLayerName,
           content: layer.content,
           date: layer.date,
+          icon: layer.icon || "",
           infobox: layer.infobox,
+          infoclickIcon: layer.infoclickIcon,
+          displayFields: layer.displayFields,
+          secondaryLabelFields: layer.secondaryLabelFields,
+          shortDisplayFields: layer.shortDisplayFields,
           legend: layer.legend,
           legendIcon: layer.legendIcon,
           owner: layer.owner,
@@ -223,10 +230,10 @@ class Manager extends Component {
           queryable: layer.queryable,
           filterable: layer.filterable || false,
           projection: layer.projection,
-          lineWidth: layer.lineWidth || "3",
-          lineStyle: layer.lineStyle || "solid",
-          lineColor: layer.lineColor || "rgba(0, 0, 0, 0.5)",
-          fillColor: layer.fillColor || "rgba(255, 255, 255, 0.5)",
+          lineWidth: layer.lineWidth || "",
+          lineStyle: layer.lineStyle || "",
+          lineColor: layer.lineColor || "",
+          fillColor: layer.fillColor || "",
           opacity: layer.opacity,
           minZoom: layer.minZoom,
           maxZoom: layer.maxZoom,
@@ -283,12 +290,14 @@ class Manager extends Component {
         this.refs["WMSLayerForm"].setState({
           id: layer.id,
           caption: layer.caption,
+          internalLayerName: layer.internalLayerName,
           content: layer.content,
           date: layer.date,
           legend: layer.legend,
           legendIcon: layer.legendIcon,
           owner: layer.owner,
           url: layer.url,
+          customGetMapUrl: layer.customGetMapUrl || "",
           opacity: layer.opacity,
           minZoom: layer.minZoom,
           maxZoom: layer.maxZoom,
@@ -309,6 +318,7 @@ class Manager extends Component {
           searchUrl: layer.searchUrl || "",
           searchPropertyName: layer.searchPropertyName || "",
           searchDisplayName: layer.searchDisplayName || "",
+          searchShortDisplayName: layer.searchShortDisplayName || "",
           searchOutputFormat: layer.searchOutputFormat || "",
           searchGeometryField: layer.searchGeometryField || "",
           infoVisible: layer.infoVisible,
@@ -338,6 +348,7 @@ class Manager extends Component {
         this.refs["WMTSLayerForm"].setState({
           id: layer.id,
           caption: layer.caption,
+          internalLayerName: layer.internalLayerName,
           content: layer.content,
           date: layer.date,
           infobox: layer.infobox,
@@ -445,9 +456,12 @@ class Manager extends Component {
     });
   }
 
-  getLayersWithFilter(filter) {
+  getLayersWithFilter() {
     return this.props.model.get("layers").filter((layer) => {
-      return new RegExp(this.state.filter).test(layer.caption.toLowerCase());
+      const caption = layer.caption.toLowerCase();
+      const internalLayerName = layer.internalLayerName?.toLowerCase() || "";
+      const filter = this.state.filter.toLowerCase();
+      return caption.includes(filter) || internalLayerName.includes(filter);
     });
   }
 
@@ -461,20 +475,32 @@ class Manager extends Component {
 
     if (this.state.filter) {
       layers.forEach((layer) => {
-        layer.caption.toLowerCase().indexOf(this.state.filter) === 0
+        layer.caption.toLowerCase().indexOf(this.state.filter.toLowerCase()) ===
+          0 ||
+        layer.internalLayerName
+          ?.toLowerCase()
+          .indexOf(this.state.filter.toLowerCase()) === 0
           ? startsWith.push(layer)
           : alphabetically.push(layer);
       });
 
       startsWith.sort(function (a, b) {
-        if (a.caption.toLowerCase() < b.caption.toLowerCase()) return -1;
-        if (a.caption.toLowerCase() > b.caption.toLowerCase()) return 1;
+        let aName = a.internalLayerName ? a.internalLayerName : a.caption;
+        aName = aName.toLowerCase();
+        let bName = b.internalLayerName ? b.internalLayerName : b.caption;
+        bName = bName.toLowerCase();
+        if (aName < bName) return -1;
+        if (aName > bName) return 1;
         return 0;
       });
 
       alphabetically.sort(function (a, b) {
-        if (a.caption.toLowerCase() < b.caption.toLowerCase()) return -1;
-        if (a.caption.toLowerCase() > b.caption.toLowerCase()) return 1;
+        let aName = a.internalLayerName ? a.internalLayerName : a.caption;
+        aName = aName.toLowerCase();
+        let bName = b.internalLayerName ? b.internalLayerName : b.caption;
+        bName = bName.toLowerCase();
+        if (aName < bName) return -1;
+        if (aName > bName) return 1;
         return 0;
       });
 
@@ -504,7 +530,10 @@ class Manager extends Component {
         <li onClick={(e) => this.loadLayer(e, layer)} key={"layer_" + i}>
           <div className="main-box">
             <span>
-              {layer.caption} {displayType}
+              {layer.internalLayerName?.length > 0
+                ? layer.internalLayerName
+                : layer.caption}{" "}
+              {displayType}
             </span>
           </div>
           <div className="options-box">

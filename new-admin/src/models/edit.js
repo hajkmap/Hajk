@@ -76,6 +76,7 @@ var edit = Model.extend({
     url = prepareProxyUrl(url, this.get("config").url_proxy);
     $.ajax(url, {
       data: {
+        service: "WFS",
         request: "describeFeatureType",
         // Not part of WFS 1.0.0/1.1.0 spec, but GeoServer supports it,
         // so we try it first. Later on we'll check if we got back JSON

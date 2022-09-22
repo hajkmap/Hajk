@@ -1,7 +1,7 @@
 import React from "react";
 import PrintListItem from "./PrintListItem";
 import PrintList from "./PrintList";
-import Collapse from "@material-ui/core/Collapse";
+import Collapse from "@mui/material/Collapse";
 
 class PrintSubList extends React.Component {
   state = {

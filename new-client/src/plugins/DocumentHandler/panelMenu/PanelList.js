@@ -1,5 +1,5 @@
 import React from "react";
-import List from "@material-ui/core/List";
+import List from "@mui/material/List";
 import PanelMenuListItem from "./PanelMenuListItem";
 
 class PanelList extends React.PureComponent {

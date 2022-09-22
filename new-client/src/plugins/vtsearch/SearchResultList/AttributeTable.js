@@ -1,7 +1,7 @@
 import React from "react";
-import Paper from "@material-ui/core/Paper";
+import Paper from "@mui/material/Paper";
 import VirtualizedTable from "./VirtualizedTable";
-import { withStyles } from "@material-ui/core/styles";
+import withStyles from "@mui/styles/withStyles";
 import { SortDirection } from "react-virtualized";
 
 const styles = (theme) => ({});

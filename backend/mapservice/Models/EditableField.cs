@@ -12,6 +12,10 @@ namespace MapService.Models
 
         public string name { get; set; }
 
+        public string alias { get; set; }
+
+        public string description { get; set; }
+
         public string dataType { get; set; }
 
         public string textType { get; set; }

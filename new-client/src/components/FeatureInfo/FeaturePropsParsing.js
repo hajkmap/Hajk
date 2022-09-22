@@ -1,88 +1,26 @@
 import React from "react";
 import ReactMarkdown from "react-markdown";
 import rehypeRaw from "rehype-raw";
-import { withStyles } from "@material-ui/core";
 import gfm from "remark-gfm";
 import FeaturePropFilters from "./FeaturePropsFilters";
+import AppModel from "models/AppModel.js";
+
 import {
-  Divider,
-  Link,
-  Paper,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Typography,
-} from "@material-ui/core";
-
-const Paragraph = withStyles((theme) => ({
-  root: {
-    marginBottom: "1.1rem",
-  },
-}))(Typography);
-
-// Styled Table Row Component, makes every second row in a Table colored
-const StyledTableRow = withStyles((theme) => ({
-  root: {
-    "&:nth-of-type(even)": {
-      backgroundColor: theme.palette.action.hover,
-    },
-  },
-}))(TableRow);
-
-const StyledTableContainer = withStyles((theme) => ({
-  root: {
-    marginBottom: "1.1rem",
-  },
-}))(TableContainer);
-
-const StyledPaper = withStyles((theme) => ({
-  root: {
-    padding: theme.spacing(1),
-    marginBottom: "1.1rem",
-    backgroundColor: theme.palette.background.default,
-    "& p": {
-      marginBottom: "0",
-    },
-  },
-}))(Paper);
-
-const StyledTypography = withStyles((theme) => ({
-  h1: {
-    fontSize: "1.6rem",
-    fontWeight: "500",
-    marginBottom: "0.375rem",
-  },
-  h2: {
-    fontSize: "1.4rem",
-    fontWeight: "500",
-    marginBottom: "0.018rem",
-  },
-  h3: {
-    fontSize: "1.2rem",
-    fontWeight: "500",
-  },
-  h4: {
-    fontSize: "1rem",
-    fontWeight: "500",
-  },
-  h5: {
-    fontSize: "0.875rem",
-    fontWeight: "500",
-  },
-  h6: {
-    fontSize: "0.875rem",
-    fontWeight: "400",
-    fontStyle: "italic",
-  },
-}))(Typography);
+  customComponentsForReactMarkdown, // the object with all custom components
+  setOptions, // a method that will allow us to send infoclick options from here to the module that defines custom components
+  Paragraph, // special case - we want to override the Paragraph component here, so we import it separately
+} from "utils/customComponentsForReactMarkdown";
 
 export default class FeaturePropsParsing {
   constructor(settings) {
     this.globalObserver = settings.globalObserver;
     this.options = settings.options;
+
+    // Send the options to our custom components module too. This is necessary
+    // and without it we won't be able to access Hajk's settings in customComponentsForReactMarkdown
+    // because it's not a class that we initiate (only a plain JS object).
+    // Also, see #1106.
+    setOptions(this.options);
 
     // Two arrays that will hold pending promises and their resolved values, respectively.
     this.pendingPromises = [];
@@ -95,101 +33,51 @@ export default class FeaturePropsParsing {
     this.allowDangerousHtml = this.options.allowDangerousHtml ?? true;
 
     // Here we define the components used by ReactMarkdown, see https://github.com/remarkjs/react-markdown#appendix-b-components
+    // Note that we import customComponentsForReactMarkdown from our shared library, spread those
+    // objects and finally override the definition of "p", as it differs in this case (we want to
+    // import external components in FeatureInfo, while the normal "p" implementation just maps P to
+    // a MUI Typography component).
     this.components = {
-      p: (props) => {
-        const r = props.children.map((child, index) => {
-          // Initiate a holder for external components. If a regex matches below,
-          // this variable will be filled with correct value.
-          let externalComponent = null;
+      ...customComponentsForReactMarkdown,
+      p: ({ children }) => {
+        if (!children) {
+          return null;
+        }
 
-          if (child && typeof child === "string") {
-            // This helper is passed to ReactMarkdown at render. At this stage,
-            // we expect that the only remaining {stuff} will contain digits, and
-            // that those numbers represent element index in this.resolvedPromisesWithComponents.
-            // Let's try to match the regex for a number within curly brackets.
-            const match = child.match(/{(\d+)}/);
-            if (
-              match &&
-              this.resolvedPromisesWithComponents.hasOwnProperty(match[1])
-            ) {
-              // If matched, replace the placeholder with the corresponding component.
-              externalComponent = this.resolvedPromisesWithComponents[match[1]];
-            }
-          }
-          // If externalComponent isn't null anymore, render it. Else, just render the children.
-          return externalComponent || child;
-        });
+        return (
+          <Paragraph variant="body2">
+            {children.map((child, index) => {
+              // Initiate a holder for external components. If a regex matches below,
+              // this variable will be filled with correct value.
+              let externalComponent = null;
 
-        return <Paragraph variant="body2">{r}</Paragraph>;
-      },
-      hr: () => <Divider />,
-      a: ({ children, href, title }) => {
-        return (
-          <Link href={href} title={title} target="_blank">
-            {children}
-          </Link>
+              if (child && typeof child === "string") {
+                // This helper is passed to ReactMarkdown at render. At this stage,
+                // we expect that the only remaining {stuff} will contain digits, and
+                // that those numbers represent element index in this.resolvedPromisesWithComponents.
+                // Let's try to match the regex for a number within curly brackets.
+                const match = child.match(/{(\d+)}/);
+                if (
+                  match &&
+                  this.resolvedPromisesWithComponents.hasOwnProperty(match[1])
+                ) {
+                  // If matched, replace the placeholder with the corresponding component.
+                  externalComponent =
+                    this.resolvedPromisesWithComponents[match[1]];
+                }
+              }
+              // If externalComponent isn't null anymore, render it. Else, just render the children.
+              return (
+                <React.Fragment key={index}>
+                  {externalComponent || child}
+                </React.Fragment>
+              );
+            })}
+          </Paragraph>
         );
-      },
-      h1: this.#markdownHeaderComponent,
-      h2: this.#markdownHeaderComponent,
-      h3: this.#markdownHeaderComponent,
-      h4: this.#markdownHeaderComponent,
-      h5: this.#markdownHeaderComponent,
-      h6: this.#markdownHeaderComponent,
-      table: ({ children, className, style }) => {
-        return (
-          <StyledTableContainer component="div">
-            <Table size="small" className={className} style={style}>
-              {children}
-            </Table>
-          </StyledTableContainer>
-        );
-      },
-      thead: ({ children }) => {
-        return <TableHead>{children}</TableHead>;
-      },
-      tbody: ({ children }) => {
-        return <TableBody>{children}</TableBody>;
-      },
-      tr: ({ children }) => {
-        return <StyledTableRow>{children}</StyledTableRow>;
-      },
-      td: this.#markdownTableCellComponent,
-      th: this.#markdownTableCellComponent,
-      style: ({ children }) => {
-        return <style type="text/css">{children}</style>;
-      },
-      div: ({ children, className, style }) => {
-        return (
-          <div className={className} style={style}>
-            {children}
-          </div>
-        );
-      },
-      blockquote: (props) => {
-        return <StyledPaper variant="outlined">{props.children}</StyledPaper>;
       },
     };
   }
-
-  #markdownTableCellComponent = ({ children, style, isHeader, className }) => {
-    return (
-      <TableCell
-        variant={isHeader ? "head" : "body"}
-        align={style?.textAlign || "inherit"}
-        style={style}
-        className={className}
-      >
-        {children}
-      </TableCell>
-    );
-  };
-
-  #markdownHeaderComponent = ({ level, children }) => {
-    return (
-      <StyledTypography variant={`h${level}`}>{children}</StyledTypography>
-    );
-  };
 
   #valueFromJson = (str) => {
     if (typeof str !== "string") return false;
@@ -259,7 +147,6 @@ export default class FeaturePropsParsing {
     else {
       // Attempt to grab the actual value from the Properties collection, if not found, fallback to empty string.
       // Note that we must replace equal sign in property value, else we'd run into trouble, see #812.
-
       return (
         // What you see on the next line is what we call "hängslen och livrem" in Sweden.
         // (The truth is it's all needed - this.properties may not be an Array, it may not have a key named
@@ -315,19 +202,37 @@ export default class FeaturePropsParsing {
         // all ending new lines (after </if>) in the regex.
         matched.content += "\n";
 
-        // Handle <if foo="bar"> or <if foo=bar>
+        // Handle <if foo="bar">, <if foo=bar> as well as <if foo!="bar"> and <if foo!=bar>
         if (matched.attributes?.includes("=")) {
+          // We allow two comparers: "equal" ("=") and "not equal" ("!=")
+          const comparer = matched.attributes.includes("!=") ? "!=" : "=";
+
           // Turn "FOO=\"BAR\"" into k = "FOO" and v = "BAR"
-          let [k, v] = matched.attributes
-            .split("=") // Create an array
+          const [k, v] = matched.attributes
+            .split(comparer) // Create an array by splitting the attributes on our comparer string
             .map((e) => e.replaceAll('"', "").trim()); // Remove double quotes and whitespace
 
-          // Using truthy equal below: we want 2 and "2" to be seen as equal.
-          // eslint-disable-next-line eqeqeq
-          if (k == v) {
-            return matched.content;
-          } else {
-            return "";
+          switch (comparer) {
+            // See #669
+            case "=":
+              // Using truthy equal below: we want 2 and "2" to be seen as equal.
+              // eslint-disable-next-line eqeqeq
+              if (k == v) {
+                return matched.content;
+              } else {
+                return "";
+              }
+            // See #1128
+            case "!=":
+              // Using truthy not equal below: we want '2 is not equal "2"' to evaluate to false.
+              // eslint-disable-next-line eqeqeq
+              if (k != v) {
+                return matched.content;
+              } else {
+                return "";
+              }
+            default:
+              return "";
           }
         }
         // Handle <if foo> - if it exits, evaluate to true and show content
@@ -385,6 +290,12 @@ export default class FeaturePropsParsing {
     return r;
   };
 
+  #decorateProperties(prefix, kvData) {
+    Object.entries(kvData).forEach(([key, value]) => {
+      this.properties[`${prefix}:${key}`] = value;
+    });
+  }
+
   /**
    * Converts a JSON-string of properties into a properties object
    * @param {str} properties
@@ -404,6 +315,11 @@ export default class FeaturePropsParsing {
   setMarkdownAndProperties({ markdown, properties }) {
     this.markdown = markdown;
     this.properties = properties;
+
+    // Here we can decorate the incoming properties with data from the last click in the map.
+    // By decorating, these props can be used like any other prop.
+    this.#decorateProperties("click", AppModel.getClickLocationData());
+
     return this;
   }
 

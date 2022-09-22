@@ -89,6 +89,7 @@ var search = Model.extend({
     } else {
       $.ajax(url, {
         data: {
+          service: "WFS",
           request: "describeFeatureType",
           typename: layer.name,
         },

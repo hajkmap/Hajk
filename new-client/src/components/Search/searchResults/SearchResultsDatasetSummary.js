@@ -1,25 +1,25 @@
 import React from "react";
-import { withStyles } from "@material-ui/core/styles";
+import { Typography, Chip, Tooltip, Grid } from "@mui/material";
+import { styled } from "@mui/material/styles";
 import { withTranslation } from "react-i18next";
-import { Typography, Chip, Tooltip, Grid } from "@material-ui/core";
 
-const styles = (theme) => ({
-  summaryContainer: {
-    minHeight: 42,
-    paddingRight: theme.spacing(1),
-    paddingLeft: theme.spacing(1),
-  },
-  typography: {
-    maxWidth: "100%",
-  },
-  warningChip: {
-    color: theme.palette.warning.contrastText,
-    backgroundColor:
-      theme.palette.type === "dark"
-        ? theme.palette.warning.dark
-        : theme.palette.warning.light,
-  },
-});
+const SummaryContainer = styled(Grid)(({ theme }) => ({
+  minHeight: 42,
+  paddingRight: theme.spacing(1),
+  paddingLeft: theme.spacing(1),
+}));
+
+const StyledTypography = styled(Typography)(() => ({
+  maxWidth: "100%",
+}));
+
+const WarningChip = styled(Chip)(({ theme }) => ({
+  color: theme.palette.warning.contrastText,
+  backgroundColor:
+    theme.palette.mode === "dark"
+      ? theme.palette.warning.dark
+      : theme.palette.warning.light,
+}));
 
 class SearchResultsDatasetSummary extends React.PureComponent {
   //Some sources does not return numberMatched and numberReturned, falling back on features.length
@@ -50,7 +50,7 @@ class SearchResultsDatasetSummary extends React.PureComponent {
 
   renderDatasetSummary = () => {
     const { numberOfResultsToDisplay } = this.state;
-    const { featureCollection, getOriginBasedIcon, classes, t } = this.props;
+    const { featureCollection, getOriginBasedIcon, t } = this.props;
 
     const displayWarning = this.shouldDisplayWarning();
     const toolTipTitle = displayWarning
@@ -61,37 +61,41 @@ class SearchResultsDatasetSummary extends React.PureComponent {
 
     return (
       <>
-        <Grid
-          alignItems="center"
-          container
-          className={classes.summaryContainer}
-        >
+        <SummaryContainer alignItems="center" container>
           <Grid item xs={1}>
             {getOriginBasedIcon(featureCollection.origin)}
           </Grid>
           <Grid item xs={9}>
-            <Typography
+            <StyledTypography
               noWrap
               variant="button"
               component="div" // The noWrap does not work on variant="button" without changing component
-              className={classes.typography}
             >
               {featureCollection.source.caption}
-            </Typography>
+            </StyledTypography>
           </Grid>
-          <Grid container item justify="flex-end" xs={2}>
-            <Tooltip title={toolTipTitle}>
-              <Chip
-                size="small"
-                color="default"
-                className={displayWarning ? classes.warningChip : null}
-                label={`${numberOfResultsToDisplay}${
-                  displayWarning ? "+" : ""
-                }`}
-              />
+          <Grid container item justifyContent="flex-end" xs={2}>
+            <Tooltip disableInteractive title={toolTipTitle}>
+              {displayWarning ? (
+                <WarningChip
+                  size="small"
+                  color="default"
+                  label={`${numberOfResultsToDisplay}${
+                    displayWarning ? "+" : ""
+                  }`}
+                />
+              ) : (
+                <Chip
+                  size="small"
+                  color="default"
+                  label={`${numberOfResultsToDisplay}${
+                    displayWarning ? "+" : ""
+                  }`}
+                />
+              )}
             </Tooltip>
           </Grid>
-        </Grid>
+        </SummaryContainer>
       </>
     );
   };
@@ -104,6 +108,4 @@ class SearchResultsDatasetSummary extends React.PureComponent {
   }
 }
 
-export default withTranslation()(
-  withStyles(styles)(SearchResultsDatasetSummary)
-);
+export default withTranslation()(SearchResultsDatasetSummary);

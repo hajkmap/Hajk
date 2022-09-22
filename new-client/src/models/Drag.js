@@ -2,6 +2,8 @@ import { Pointer } from "ol/interaction";
 
 class Drag extends Pointer {
   constructor() {
+    // FIXME: This code looks obsolete, I can't find any imports.
+    // Candidate for removal?
     super();
     Pointer.call(this, {
       handleDownEvent: this.handleDownEvent,
@@ -21,7 +23,8 @@ class Drag extends Pointer {
     this.previousCursor_ = undefined;
 
     this.acceptedLayers = {
-      "preview-layer": true,
+      pluginPrint: true,
+      pluginExport: true,
     };
   }
 

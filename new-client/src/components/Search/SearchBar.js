@@ -1,19 +1,17 @@
 import React from "react";
-import cslx from "clsx";
-import Grid from "@material-ui/core/Grid";
-import ClearIcon from "@material-ui/icons/Clear";
-import withWidth from "@material-ui/core/withWidth";
-import Autocomplete from "@material-ui/lab/Autocomplete";
-import SearchIcon from "@material-ui/icons/Search";
-import RoomIcon from "@material-ui/icons/Room";
-import CheckIcon from "@material-ui/icons/Check";
-import DescriptionIcon from "@material-ui/icons/Description";
-import ExpandLessIcon from "@material-ui/icons/ExpandLess";
-import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
-import WarningIcon from "@material-ui/icons/Warning";
+import Grid from "@mui/material/Grid";
+import ClearIcon from "@mui/icons-material/Clear";
+import Autocomplete, { autocompleteClasses } from "@mui/material/Autocomplete";
+import SearchIcon from "@mui/icons-material/Search";
+import RoomIcon from "@mui/icons-material/Room";
+import CheckIcon from "@mui/icons-material/Check";
+import DescriptionIcon from "@mui/icons-material/Description";
+import ExpandLessIcon from "@mui/icons-material/ExpandLess";
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import WarningIcon from "@mui/icons-material/Warning";
 import SearchResultsContainer from "./searchResults/SearchResultsContainer";
 import SearchTools from "./SearchTools";
-import { withTheme, useTheme, withStyles } from "@material-ui/core/styles";
+import { useTheme } from "@mui/material";
 import { decodeCommas } from "../../utils/StringCommaCoder";
 import {
   CircularProgress,
@@ -25,51 +23,58 @@ import {
   useMediaQuery,
   Popper,
   Tooltip,
-} from "@material-ui/core";
+} from "@mui/material";
+import { visuallyHidden } from "@mui/utils";
+import { styled } from "@mui/material/styles";
+import { Visibility, VisibilityOff } from "@mui/icons-material";
 import { withTranslation } from "react-i18next";
 
-const styles = (theme) => ({
-  searchContainer: {
-    width: 400,
+// A HOC that pipes isMobile to the children. See this as a proposed
+// solution. It is not pretty, but if we move this to a separate file
+// we could use this HOC instead of the isMobile helper function in ../../utils/.
+// TODO: Move to some /hooks folder
+const withIsMobile = () => (WrappedComponent) => (props) => {
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+  return <WrappedComponent {...props} isMobile={isMobile} />;
+};
+
+const StyledAutocomplete = styled(Autocomplete)(({ theme }) => ({
+  [`& .${autocompleteClasses.inputRoot}`]: {
     height: theme.spacing(6),
   },
-  searchCollapsed: {
-    left: -440,
-  },
+}));
 
-  autocompleteTypography: {
-    maxWidth: "100%",
-  },
-
-  inputRoot: {
-    height: theme.spacing(6),
-  },
-  originIconWrapper: {
-    display: "flex",
-    flexWrap: "wrap",
-    paddingRight: theme.spacing(1),
-  },
-});
+const IconWrapper = styled("div")(({ theme }) => ({
+  display: "flex",
+  flexWrap: "wrap",
+  paddingRight: theme.spacing(1),
+}));
 
 //Needed to make a CustomPopper with inline styling to be able to override width,
 //Popper.js didn't work as expected
 const CustomPopper = (props) => {
   const theme = useTheme();
-  const smallScreen = useMediaQuery(theme.breakpoints.down("xs"));
+  const smallScreen = useMediaQuery(theme.breakpoints.down("sm"));
   const style = smallScreen ? { width: "100%" } : { width: 400 };
   return (
     <Popper
       {...props}
       style={style}
       popperOptions={{
-        modifiers: {
-          computeStyle: { gpuAcceleration: false },
-          preventOverflow: {
+        modifiers: [
+          {
+            name: "preventOverflow",
             enabled: smallScreen,
-            boundariesElement: "root",
+            options: {
+              boundariesElement: "root",
+            },
           },
-          hide: { enabled: smallScreen },
-        },
+          {
+            name: "hide",
+            enabled: smallScreen,
+          },
+        ],
       }}
       placement="bottom-end"
     />
@@ -78,11 +83,11 @@ const CustomPopper = (props) => {
 
 const CustomPaper = (props) => {
   const theme = useTheme();
-  const smallScreen = useMediaQuery(theme.breakpoints.down("xs"));
+  const smallScreen = useMediaQuery(theme.breakpoints.down("sm"));
   const style = smallScreen
     ? {
         margin: 0,
-        borderTop: `${theme.spacing(0.2)}px solid ${theme.palette.divider}`,
+        borderTop: `${theme.spacing(0.2)} solid ${theme.palette.divider}`,
       }
     : { margin: 0 };
   return <Paper {...props} style={style} />;
@@ -91,14 +96,37 @@ const CustomPaper = (props) => {
 class SearchBar extends React.PureComponent {
   state = {
     drawActive: false,
-    panelCollapsed: false,
     moreOptionsId: undefined,
     moreOptionsOpen: false,
     selectSourcesOpen: false,
+    resultsLayerVisible: true,
+  };
+
+  componentDidMount() {
+    // The OL layer that holds the result features. We grab
+    // it here so we can control its visibility using a button
+    // in the search bar.
+    this.resultsLayer = this.props.mapViewModel.resultsLayer;
+
+    // Ensure that our state is synced to the actual visibility state
+    // of the OL layer
+    if (this.resultsLayer.getVisible() !== true) {
+      this.setState({ resultsLayer: false });
+    }
+  }
+
+  toggleResultsLayerVisibility = () => {
+    const isVisible = this.resultsLayer.getVisible();
+    if (isVisible) {
+      this.resultsLayer.setVisible(false);
+      this.setState({ resultsLayerVisible: false });
+    } else {
+      this.resultsLayer.setVisible(true);
+      this.setState({ resultsLayerVisible: true });
+    }
   };
 
   getOriginBasedIcon = (origin) => {
-    const { classes } = this.props;
     let icon;
     switch (origin) {
       case "WFS":
@@ -113,7 +141,7 @@ class SearchBar extends React.PureComponent {
       default:
         icon = <RoomIcon color="disabled" />;
     }
-    return <div className={classes.originIconWrapper}>{icon}</div>;
+    return <IconWrapper>{icon}</IconWrapper>;
   };
 
   removeCommasAndSpaces = (string) => {
@@ -171,7 +199,7 @@ class SearchBar extends React.PureComponent {
   };
 
   getHighlightedACE = (searchString, autocompleteEntry) => {
-    const { getArrayWithSearchWords, classes } = this.props;
+    const { getArrayWithSearchWords } = this.props;
     const stringArraySS = getArrayWithSearchWords(searchString);
 
     let highlightInformation = stringArraySS
@@ -189,7 +217,7 @@ class SearchBar extends React.PureComponent {
       .flat();
 
     return (
-      <Typography noWrap={true} className={classes.autocompleteTypography}>
+      <Typography noWrap={true} sx={{ maxWidth: "100%" }}>
         {highlightInformation.length > 0
           ? this.renderHighlightedAutocompleteEntry(
               highlightInformation,
@@ -200,18 +228,29 @@ class SearchBar extends React.PureComponent {
     );
   };
 
+  /**
+   * @summary Prepare a label to show as the placeholder in the Search bar
+   * @returns {string} placeholder text
+   */
   getPlaceholder = () => {
-    // Due to I18N, we ignore the value of `props.options.searchBarPlaceholder`. If the value from
-    // `props.options.searchBarPlaceholder` is missing in the I18N translation files the users might
-    // experience strange behavior when switching languages.
-    const { searchActive, t } = this.props;
-    // Depending on which search tool that is active we want different placeholders in the search bar.
-    // If the draw or select tool is active...
+    const {
+      options,
+      searchActive,
+      searchOptions: { searchInVisibleLayers },
+      t,
+    } = this.props;
+
+    const labelPostfix = searchInVisibleLayers
+      ? " (endast i synliga lager)"
+      : "";
+
     return searchActive === "selectSearch" || searchActive === "draw"
-      ? t("core.search.searchBar.placeHolders.objectSearch") // we want a text telling the user that they are searching with an object in the map...
+      ? `Söker med objekt${labelPostfix}`
       : searchActive === "extentSearch"
-      ? t("core.search.searchBar.placeHolders.extentSearch") // and if the extent tool is active we want to tell the user that they are searching in the entire extent...
-      : this.props.t("core.search.searchBar.placeHolders.defaultSearch"); // otherwise we fall back on the standard placeHolder.
+      ? `Söker i området${labelPostfix}`
+      : options.searchBarPlaceholder
+      ? `${options.searchBarPlaceholder}${labelPostfix}`
+      : `Sök${labelPostfix}`;
   };
 
   renderSearchResultList = () => {
@@ -246,19 +285,15 @@ class SearchBar extends React.PureComponent {
       autoCompleteOpen,
       searchString,
       searchActive,
-      classes,
       loading,
       handleOnAutocompleteInputChange,
       handleSearchInput,
     } = this.props;
     return (
-      <Autocomplete
+      <StyledAutocomplete
         id="searchInputField"
         freeSolo
         size={"small"}
-        classes={{
-          inputRoot: classes.inputRoot,
-        }}
         PopperComponent={CustomPopper}
         PaperComponent={CustomPaper}
         clearOnEscape
@@ -275,13 +310,16 @@ class SearchBar extends React.PureComponent {
         disableClearable
         onChange={handleSearchInput}
         onInputChange={handleOnAutocompleteInputChange}
-        getOptionSelected={(option, value) =>
+        isOptionEqualToValue={(option, value) =>
           option.autocompleteEntry === value.autocompleteEntry
         }
-        renderOption={(option) => {
+        renderOption={(props, option) => {
           if (searchString.length > 0) {
             return (
-              <Grid container alignItems="center">
+              // Important: the `key` prop must be set last, so we override the
+              // one that gets there when we spread props (there is already a key
+              // there, which can become duplicated under some circumstances).
+              <Grid container alignItems="center" {...props} key={props.id}>
                 <Grid item xs={1}>
                   {this.getOriginBasedIcon(option.origin)}
                 </Grid>
@@ -314,9 +352,9 @@ class SearchBar extends React.PureComponent {
 
   renderFailedWFSFetchWarning = (errorMessage) => {
     return (
-      <Tooltip title={errorMessage}>
+      <Tooltip disableInteractive title={errorMessage}>
         <WarningIcon color="error">
-          <Typography variant="srOnly">{errorMessage}</Typography>
+          <span style={visuallyHidden}>{errorMessage}</span>
         </WarningIcon>
       </Tooltip>
     );
@@ -326,7 +364,6 @@ class SearchBar extends React.PureComponent {
     const {
       searchString,
       loading,
-      width,
       searchActive,
       map,
       app,
@@ -343,23 +380,30 @@ class SearchBar extends React.PureComponent {
       setSearchSources,
       failedWFSFetchMessage,
       t,
+      isMobile,
     } = this.props;
-    const disableUnderline = width === "xs" ? { disableUnderline: true } : null;
+    const disableUnderline = isMobile ? { disableUnderline: true } : null;
     const showFailedWFSMessage =
       failedWFSFetchMessage.length > 0 && showSearchResults;
+
     const expandMessage = resultPanelCollapsed
       ? t("core.search.searchBar.expandButton.collapsed")
       : t("core.search.searchBar.expandButton.open");
+
+    const toggleResultsLayerVisibilityMessage = this.state.resultsLayerVisible
+      ? "Dölj sökresultat i kartan"
+      : "Visa sökresultat i kartan";
+
     const placeholder = this.getPlaceholder();
     return (
       <TextField
         {...params}
         label={
-          <Typography variant="srOnly">
+          <span style={visuallyHidden}>
             {t("core.search.searchBar.srText")}
-          </Typography>
+          </span>
         }
-        variant={width === "xs" ? "standard" : "outlined"}
+        variant={isMobile ? "standard" : "outlined"}
         placeholder={placeholder}
         onKeyPress={handleSearchBarKeyPress}
         InputLabelProps={{ shrink: true }}
@@ -367,7 +411,7 @@ class SearchBar extends React.PureComponent {
           ...params.InputProps,
           ...disableUnderline,
           style: { margin: 0 },
-          notched: width === "xs" ? null : false,
+          notched: isMobile ? null : false,
           endAdornment: (
             <>
               {loading ? <CircularProgress color="inherit" size={20} /> : null}
@@ -376,44 +420,71 @@ class SearchBar extends React.PureComponent {
                 this.renderFailedWFSFetchWarning(failedWFSFetchMessage)}
               {!showSearchResults ? (
                 <Tooltip
+                  disableInteractive
                   title={t("core.search.searchBar.searchButton.toolTip")}
                 >
                   <IconButton
                     size="small"
                     onClick={handleOnClickOrKeyboardSearch}
                   >
-                    <Typography variant="srOnly">
+                    <span style={visuallyHidden}>
                       {t("core.search.searchBar.searchButton.srText")}
-                    </Typography>
+                    </span>
                     <SearchIcon />
                   </IconButton>
                 </Tooltip>
               ) : (
-                <Tooltip title={expandMessage}>
-                  <IconButton
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      toggleCollapseSearchResults();
-                    }}
-                    size="small"
+                <>
+                  <Tooltip disableInteractive title={expandMessage}>
+                    <IconButton
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        toggleCollapseSearchResults();
+                      }}
+                      size="small"
+                    >
+                      <span style={visuallyHidden}>{expandMessage}</span>
+                      {resultPanelCollapsed ? (
+                        <ExpandMoreIcon />
+                      ) : (
+                        <ExpandLessIcon />
+                      )}
+                    </IconButton>
+                  </Tooltip>
+                  <Tooltip
+                    disableInteractive
+                    title={toggleResultsLayerVisibilityMessage}
                   >
-                    <Typography variant="srOnly">{expandMessage}</Typography>
-                    {resultPanelCollapsed ? (
-                      <ExpandMoreIcon />
-                    ) : (
-                      <ExpandLessIcon />
-                    )}
-                  </IconButton>
-                </Tooltip>
+                    <IconButton
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        this.toggleResultsLayerVisibility();
+                      }}
+                      size="small"
+                    >
+                      <span style={visuallyHidden}>
+                        {toggleResultsLayerVisibilityMessage}
+                      </span>
+                      {this.state.resultsLayerVisible ? (
+                        <VisibilityOff />
+                      ) : (
+                        <Visibility />
+                      )}
+                    </IconButton>
+                  </Tooltip>
+                </>
               )}
               {searchString.length > 0 ||
               showSearchResults ||
               searchActive !== "" ? (
-                <Tooltip title={t("core.search.searchBar.clearButton.toolTip")}>
+                <Tooltip
+                  disableInteractive
+                  title={t("core.search.searchBar.clearButton.toolTip")}
+                >
                   <IconButton onClick={handleOnClear} size="small">
-                    <Typography variant="srOnly">
+                    <span style={visuallyHidden}>
                       {t("core.search.searchBar.clearButton.srText")}
-                    </Typography>
+                    </span>
                     <ClearIcon />
                   </IconButton>
                 </Tooltip>
@@ -437,17 +508,12 @@ class SearchBar extends React.PureComponent {
   };
 
   render() {
-    const { classes, showSearchResults, width } = this.props;
-    const { panelCollapsed } = this.state;
+    const { showSearchResults, isMobile } = this.props;
 
     return (
-      <Grid
-        className={cslx(classes.searchContainer, {
-          [classes.searchCollapsed]: panelCollapsed,
-        })}
-      >
+      <Grid sx={{ width: 400, height: (theme) => theme.spacing(6) }}>
         <Grid item>
-          <Paper elevation={width === "xs" ? 0 : 1}>
+          <Paper elevation={isMobile ? 0 : 1}>
             {this.renderAutoComplete()}
           </Paper>
         </Grid>
@@ -457,6 +523,4 @@ class SearchBar extends React.PureComponent {
   }
 }
 
-export default withTranslation()(
-  withStyles(styles)(withTheme(withWidth()(SearchBar)))
-);
+export default withTranslation()(withIsMobile()(SearchBar));
