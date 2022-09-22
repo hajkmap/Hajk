@@ -926,7 +926,7 @@ class SearchResultsContainer extends React.PureComponent {
               );
             }}
           >
-            Gå till föregående vy
+            {t("core.search.searchResults.breadCrumbs.toPreviousView")}
           </Button>
           <Divider />
           <Breadcrumbs aria-label="breadcrumb" separator="/">

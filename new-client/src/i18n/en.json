@@ -62,7 +62,8 @@
         "breadCrumbs": {
           "searchResults": {
             "toolTip": "Back to all search results"
-          }
+          },
+          "toPreviousView": "To previous view"
         },
         "datasetSummary": {
           "maxWarning": "Maximum number of search hits has been reached. Refine your search to ensure that important information is not missed."

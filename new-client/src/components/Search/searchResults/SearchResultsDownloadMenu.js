@@ -106,17 +106,7 @@ class SearchResultsDownloadMenu extends React.PureComponent {
   render() {
     return (
       <>
-        <Tooltip disableInteractive title="Ladda ner objekten">
-          <MenuTogglerButton
-            onClick={(e) =>
-              this.setState({
-                anchorEl: e.currentTarget,
-              })
-            }
-          >
-            <GetAppIcon />
-          </MenuTogglerButton>
-        </Tooltip>
+        {this.renderMenuTogglerButton()}
         {this.renderDownloadMenu()}
       </>
     );

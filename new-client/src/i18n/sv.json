@@ -62,7 +62,8 @@
         "breadCrumbs": {
           "searchResults": {
             "toolTip": "Tillbaka till alla sökresultat"
-          }
+          },
+          "toPreviousView": "Gå till föregående vy"
         },
         "datasetSummary": {
           "maxWarning": "Maximalt antal sökträffar har uppnåtts. Förfina sökningen för att säkerställa att viktig information inte missas."
