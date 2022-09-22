@@ -62,6 +62,10 @@
     },
     "scaleLine": {
       "toolTip": "Nuvarande skala"
+    },
+    "themeToggler": {
+      "ariaLabel": "Växla färgtema",
+      "title": "Växla mellan mörkt och ljust färgtema"
     }
   },
   "core": {

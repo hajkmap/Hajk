@@ -62,6 +62,10 @@
     },
     "scaleLine": {
       "toolTip": "Current scale"
+    },
+    "themeToggler": {
+      "ariaLabel": "Change color theme",
+      "title": "Toggle between dark and light theme"
     }
   },
   "core": {
