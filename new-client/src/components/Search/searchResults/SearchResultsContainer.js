@@ -1168,4 +1168,4 @@ class SearchResultsContainer extends React.PureComponent {
   }
 }
 
-export default withTranslation(SearchResultsContainer);
+export default withTranslation()(SearchResultsContainer);
