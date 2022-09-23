@@ -139,6 +139,7 @@
           "showPrevious": "Visa föregående objekt i resultatlistan"
         },
         "headerTitle": "Sökresultat",
+        "noResultsWarning": "Sökningen gav inget resultat.",
         "previewTitle": "Förhandsvisning",
         "tools": {
           "clear": {

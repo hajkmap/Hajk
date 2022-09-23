@@ -1088,8 +1088,14 @@ class SearchResultsContainer extends React.PureComponent {
   };
 
   render() {
-    const { app, getOriginBasedIcon, localObserver, panelCollapsed, options } =
-      this.props;
+    const {
+      app,
+      getOriginBasedIcon,
+      localObserver,
+      panelCollapsed,
+      options,
+      t,
+    } = this.props;
     const {
       sumOfResults,
       activeFeatureCollection,
@@ -1124,7 +1130,9 @@ class SearchResultsContainer extends React.PureComponent {
       <Collapse in={!panelCollapsed}>
         {sumOfResults === null ? null : sumOfResults === 0 ? (
           <StyledPaper>
-            <Alert severity="warning">Sökningen gav inget resultat.</Alert>
+            <Alert severity="warning">
+              {t("core.search.searchResults.noResultsWarning")}
+            </Alert>
           </StyledPaper>
         ) : (
           <StyledPaper>

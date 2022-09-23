@@ -139,6 +139,7 @@
           "showPrevious": "Show the previous object from the results list"
         },
         "headerTitle": "Search results",
+        "noResultsWarning": "The search generated no results.",
         "previewTitle": "Preview",
         "tools": {
           "clear": {
