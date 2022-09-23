@@ -3,15 +3,18 @@
     "cancel": "Cancel",
     "closeWindow": "Close",
     "hide": "Hide",
+    "key": "Key",
     "maximizeWindow": "Maximize",
     "minimizeWindow": "Minimize",
     "next": "Next",
     "of": "Of",
     "ok": "Ok",
+    "overview": "Overview",
     "previous": "Previous",
     "results": "Results",
     "show": "Show",
-    "showing": "Showing"
+    "showing": "Showing",
+    "value": "Value"
   },
   "controls": {
     "attribution": {
@@ -79,6 +82,12 @@
     "drawer": {
       "toggleButtons": {
         "plugins": "Tools"
+      }
+    },
+    "mapClickViewer": {
+      "hits": "Hits",
+      "navigation": {
+        "helpText": "Tip: You can scroll trough the results using the arrow keys on your keyboard."
       }
     },
     "search": {

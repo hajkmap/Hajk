@@ -50,7 +50,7 @@ const Breadcrumbs = (props) => {
             variant="caption"
             href="#"
           >
-            Översikt
+            {t("common.overview")}
           </Link>
         )}
         {setSelectedFeatureCollection && !setSelectedFeatureId && (

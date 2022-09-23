@@ -3,15 +3,18 @@
     "cancel": "Avbryt",
     "closeWindow": "Stäng fönstret",
     "hide": "Dölj",
+    "key": "Nyckel",
     "maximizeWindow": "Maximera fönstret",
     "minimizeWindow": "Minimera fönstret",
     "next": "Nästa",
     "of": "Av",
     "ok": "Ok",
+    "overview": "Översikt",
     "previous": "Tidigare",
     "results": "Resultat",
     "show": "Visa",
-    "showing": "Visar"
+    "showing": "Visar",
+    "value": "Värde"
   },
   "controls": {
     "attribution": {
@@ -79,6 +82,12 @@
     "drawer": {
       "toggleButtons": {
         "plugins": "Kartverktyg"
+      }
+    },
+    "mapClickViewer": {
+      "hits": "Träffar",
+      "navigation": {
+        "helpText": "Tips: du kan bläddra bland resultaten med piltangenterna på tangentbordet."
       }
     },
     "search": {

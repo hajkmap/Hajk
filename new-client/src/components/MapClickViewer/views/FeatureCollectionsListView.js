@@ -6,6 +6,7 @@ import ListItemAvatar from "@mui/material/ListItemAvatar";
 import Avatar from "@mui/material/Avatar";
 import ImageIcon from "@mui/icons-material/MapTwoTone";
 import Icon from "@mui/material/Icon";
+import { useTranslation } from "react-i18next";
 
 const FeatureCollectionsListView = (props) => {
   const {
@@ -13,6 +14,7 @@ const FeatureCollectionsListView = (props) => {
     selectedFeatureCollection,
     setSelectedFeatureCollection,
   } = props;
+  const { t } = useTranslation();
 
   return (
     <List sx={{ width: "100%", maxWidth: 360, bgcolor: "background.paper" }}>
@@ -34,7 +36,9 @@ const FeatureCollectionsListView = (props) => {
             </ListItemAvatar>
             <ListItemText
               primary={fc.displayName}
-              secondary={`${fc.numHits} träffar`}
+              secondary={`${fc.numHits} ${t(
+                "core.mapClickViewer.hits"
+              ).toLowerCase()}`}
             />
           </ListItemButton>
         );
