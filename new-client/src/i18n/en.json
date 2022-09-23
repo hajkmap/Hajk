@@ -1,9 +1,11 @@
 {
   "common": {
+    "backgroundLayers": "Background layers",
     "cancel": "Cancel",
     "closeWindow": "Close",
     "hide": "Hide",
     "key": "Key",
+    "layers": "Layers",
     "maximizeWindow": "Maximize",
     "minimizeWindow": "Minimize",
     "next": "Next",
@@ -260,9 +262,21 @@
       },
       "title": "Draw"
     },
+    "layerComparer": {
+      "closeCompareMode": "Close the compare mode by pushing the button",
+      "compare": "Compare",
+      "compareSideBySide": "Compare layers side-by-side",
+      "leftSide": "Left side",
+      "noLayerSelected": "No layer selected",
+      "resetAndClose": "Reset & close",
+      "rightSide": "Right side",
+      "selectTwoLayersAndPressCompare": "Select two layers and press",
+      "stopComparing": "Close",
+      "title": "Layer Comparer"
+    },
     "layerSwitcher": {
       "description": "Choose what to show in the map",
-      "title": "Layer manager",
+      "title": "Layer Manager",
       "window": {
         "activeLayers": {
           "layersSaved": "layers saved successfully",

@@ -8,9 +8,11 @@ import {
   Select,
   MenuItem,
 } from "@mui/material";
+import { t } from "i18next";
 
 const SelectDropdown = (props) => {
-  const { setter, value, counterValue, baseLayers, layers, label } = props;
+  const { setter, value, counterValue, baseLayers, layers, label, labelId } =
+    props;
 
   const handleChange = (setter, value) => {
     setter(value);
@@ -19,17 +21,18 @@ const SelectDropdown = (props) => {
   return (
     <Box sx={{ minWidth: 120 }}>
       <FormControl fullWidth>
-        <InputLabel id="layer-1-label">{label}</InputLabel>
+        <InputLabel id={labelId}>{label}</InputLabel>
         <Select
-          labelId="layer-1-label"
-          id="layer-1-select"
-          label="Lager 1"
+          labelId={labelId}
+          label={label}
           value={value}
           onChange={(e) => handleChange(setter, e.target.value)}
         >
-          <MenuItem value="">Inget lager valt</MenuItem>
+          <MenuItem value="">
+            {t("plugins.layerComparer.noLayerSelected")}
+          </MenuItem>
           {baseLayers.length > 0 && layers.length > 0 && (
-            <ListSubheader>Bakgrundslager</ListSubheader>
+            <ListSubheader>{t("common.backgroundLayers")}</ListSubheader>
           )}
           {baseLayers.map((l, i) => {
             return (
@@ -39,7 +42,7 @@ const SelectDropdown = (props) => {
             );
           })}
           {baseLayers.length > 0 && layers.length > 0 && (
-            <ListSubheader>Lager</ListSubheader>
+            <ListSubheader>{t("common.layers")}</ListSubheader>
           )}
           {layers.map((l, i) => {
             return (

@@ -1,9 +1,11 @@
 {
   "common": {
+    "backgroundLayers": "Bakgrundslager",
     "cancel": "Avbryt",
     "closeWindow": "Stäng fönstret",
     "hide": "Dölj",
     "key": "Nyckel",
+    "layers": "Lager",
     "maximizeWindow": "Maximera fönstret",
     "minimizeWindow": "Minimera fönstret",
     "next": "Nästa",
@@ -259,6 +261,18 @@
         }
       },
       "title": "Rita"
+    },
+    "layerComparer": {
+      "closeCompareMode": "Avsluta jämföringsläget genom att trycka på knappen",
+      "compare": "Jämför",
+      "compareSideBySide": "Jämför lager sida vid sida",
+      "leftSide": "Vänster sida",
+      "noLayerSelected": "Inget lager valt",
+      "resetAndClose": "Nollställ & stäng",
+      "rightSide": "Höger sida",
+      "selectTwoLayersAndPressCompare": "Välj två lager att jämföra och tryck på",
+      "stopComparing": "Sluta jämföra",
+      "title": "Lagerjämförare"
     },
     "layerSwitcher": {
       "description": "Välj vad du vill se i kartan",
