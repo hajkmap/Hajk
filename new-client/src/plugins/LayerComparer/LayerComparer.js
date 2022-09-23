@@ -6,9 +6,11 @@ import { useSnackbar } from "notistack";
 
 import SelectDropdown from "./SelectDropdown.js";
 import SDSControl from "./CustomOLControl.js";
-import { t } from "i18next";
+import { useTranslation } from "react-i18next";
 
 const LayerComparer = (props) => {
+  const { t } = useTranslation();
+
   const [layer1, setLayer1] = useState("");
   const [layer2, setLayer2] = useState("");
 
@@ -118,7 +120,7 @@ const LayerComparer = (props) => {
         }
       );
     }
-  }, [layer1, layer2, props.map, closeSnackbar, enqueueSnackbar]);
+  }, [layer1, layer2, props.map, closeSnackbar, enqueueSnackbar, t]);
 
   // User can at any time abort the comparer, here's a handler
   // that resets the UI.

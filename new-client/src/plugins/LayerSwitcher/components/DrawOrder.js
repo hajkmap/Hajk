@@ -4,9 +4,11 @@ import List from "@mui/material/List";
 import DrawOrderListItem from "./DrawOrderListItem";
 import DrawOrderOptions from "./DrawOrderOptions";
 import { Chip, Divider } from "@mui/material";
-import { t } from "i18next";
+import { useTranslation } from "react-i18next";
 
 function DrawOrder({ app, map }) {
+  const { t } = useTranslation();
+
   // A Set that will hold type of OL layers that should be shown.
   // This is a user setting, changed by toggling a switch control.
   const [filterList, setFilterList] = useState(

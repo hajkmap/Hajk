@@ -15,7 +15,7 @@ import FolderOpen from "@mui/icons-material/FolderOpen";
 import GppMaybeIcon from "@mui/icons-material/GppMaybe";
 import Save from "@mui/icons-material/Save";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
-import { t } from "i18next";
+import { useTranslation } from "react-i18next";
 
 export default function DrawOrderOptions({
   app,
@@ -26,6 +26,8 @@ export default function DrawOrderOptions({
   // Prepare the Snackbar - we want to display nice messages when
   // user saves/restores layers.
   const { enqueueSnackbar } = useSnackbar();
+
+  const { t } = useTranslation();
 
   // Element that we will anchor the options menu to is
   // held in state. If it's null (unanchored), we can tell

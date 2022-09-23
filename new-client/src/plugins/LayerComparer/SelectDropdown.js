@@ -8,9 +8,10 @@ import {
   Select,
   MenuItem,
 } from "@mui/material";
-import { t } from "i18next";
+import { useTranslation } from "react-i18next";
 
 const SelectDropdown = (props) => {
+  const { t } = useTranslation();
   const { setter, value, counterValue, baseLayers, layers, label, labelId } =
     props;
 
