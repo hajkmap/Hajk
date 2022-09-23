@@ -17,6 +17,7 @@ import {
   Typography,
   Grid,
 } from "@mui/material";
+import { withTranslation } from "react-i18next";
 
 const InfoContainer = styled(Grid)(() => ({
   height: "100%",
@@ -87,7 +88,7 @@ class FeatureInfoContainer extends React.PureComponent {
   };
 
   getToggler = () => {
-    const { features } = this.props;
+    const { features, t } = this.props;
     return (
       <Grid
         alignItems="center"
@@ -100,7 +101,7 @@ class FeatureInfoContainer extends React.PureComponent {
             fullWidth
             disabled={this.state.selectedIndex - 1 < 0}
             onClick={this.stepLeft}
-            aria-label="previous"
+            aria-label={t("common.previous")}
             id="step-left"
             sx={{ color: "primary.contrastText" }}
           >
@@ -112,7 +113,7 @@ class FeatureInfoContainer extends React.PureComponent {
             variant="button"
             sx={{ textAlign: "center", color: "primary.contrastText" }}
           >
-            {this.state.selectedIndex + 1} av {features.length}
+            {this.state.selectedIndex + 1} {t("common.of")} {features.length}
           </Typography>
         </Grid>
         <TogglerButtonLeftContainer item>
@@ -120,7 +121,7 @@ class FeatureInfoContainer extends React.PureComponent {
             fullWidth
             disabled={this.state.selectedIndex + 1 >= features.length}
             onClick={this.stepRight}
-            aria-label="next"
+            aria-label={t("common.next")}
             id="step-right"
             sx={{ color: "primary.contrastText" }}
           >
@@ -343,4 +344,4 @@ class FeatureInfoContainer extends React.PureComponent {
   }
 }
 
-export default FeatureInfoContainer;
+export default withTranslation()(FeatureInfoContainer);
