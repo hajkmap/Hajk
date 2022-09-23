@@ -194,8 +194,17 @@ export default class PrintModel {
     const defaultPixelSizeInMillimeter = 0.28;
 
     const dpi = inchInMillimeter / defaultPixelSizeInMillimeter; // ~90
-    let sizeMultiplier = options.useTextIconsInMargin ? 6 : 2;
+    // Here we set a special sizeMultiplier to use below when we calculate
+    // the preview window size. If format is a5 or if user wants text in margins
+    // the height is diminished
+    let sizeMultiplier =
+      options.useTextIconsInMargin && format === "a5"
+        ? 8
+        : options.useTextIconsInMargin
+        ? 6
+        : 2;
 
+    // Here we use sizeMultiplier to further diminish height of preview window
     const size = {
       width: (dim[0] - this.margin * 2) / 25.4,
       height: (dim[1] - this.margin * sizeMultiplier) / 25.4,
@@ -972,18 +981,26 @@ export default class PrintModel {
       if (this.margin > 0) {
         // We always want a white margin
         pdf.setDrawColor("white");
-        // The lineWidth increases the line width equally to "both sides",
-        // therefore, we must have a line width two times the margin we want.
-        if (options.useTextIconsInMargin) {
-          let dimValue =
-            options.format === "a5" ? this.margin + 2 : this.margin;
-          pdf.setLineWidth(dimValue * 6);
-          // Draw the border (margin) around the entire image
-          pdf.rect(-(dimValue * 2), 0, dim[0] + dimValue * 4, dim[1], "S");
-        } else {
+        // We want to check if user has chosen to put icons and text
+        // in the margins, which if so, must be larger than usual
+        // Note that we first check if user has NOT chosen this (!).
+        if (!options.useTextIconsInMargin) {
+          // The lineWidth increases the line width equally to "both sides",
+          // therefore, we must have a line width two times the margin we want.
           pdf.setLineWidth(this.margin * 2);
           // Draw the border (margin) around the entire image
           pdf.rect(0, 0, dim[0], dim[1], "S");
+          // Now we check if user did choose text in margins
+        } else {
+          // We do a special check for a5-format and set the dimValue
+          // to get the correct margin values when drawing the rectangle
+          let dimValue =
+            options.format === "a5" ? this.margin + 2 : this.margin;
+          // This lineWidth needs to be larger if user has chosen text in margins
+          pdf.setLineWidth(dimValue * 6);
+          // Draw the increased border (margin) around the entire image
+          // here with special values for larger margins.
+          pdf.rect(-(dimValue * 2), 0, dim[0] + dimValue * 4, dim[1], "S");
         }
       }
 
