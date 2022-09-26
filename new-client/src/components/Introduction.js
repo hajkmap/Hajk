@@ -11,6 +11,8 @@ import "intro.js/themes/introjs-modern.css";
 
 import { functionalOk as functionalCookieOk } from "models/Cookie";
 
+import { withTranslation } from "react-i18next";
+
 /**
  * @summary Renders a guide that introduces new users to features present in Hajk.
  * @description The introduction will only be rendered once. This is achieved by setting
@@ -42,43 +44,38 @@ class Introduction extends React.PureComponent {
 
   predefinedSteps = [
     {
-      title: "Välkommen till Hajk! 👋",
-      intro:
-        "Här kommer en kort guide som visar dig runt i applikationen. <br /><br />Häng med!",
+      title: "core.introduction.steps.welcome.title",
+      intro: "core.introduction.steps.welcome.intro",
     },
     {
-      title: "Verktygspanel",
+      title: "core.introduction.steps.toolPanel.title",
       element: "header > div:first-child",
-      intro: "Med hjälp av knappen här uppe tar du fram verktygspanelen.",
+      intro: "core.introduction.steps.toolPanel.intro",
     },
     {
-      title: "Sökruta",
-      element: '[class*="searchContainer"]',
-      intro:
-        "Sökrutan hittar du här.<br /><br /> Med hjälp av sökverktyget hittar du enkelt till rätt ställe i kartan.",
+      title: "core.introduction.steps.searchBar.title",
+      element: '[name="searchBar"]',
+      intro: "core.introduction.steps.searchBar.intro",
     },
     {
-      title: "Fler sökverktyg",
+      title: "core.introduction.steps.searchBar.moreOptions.title",
       element: '[name="searchOptions"]',
-      intro: "Under den här knappen hittar du fler avancerade sökalternativ.",
+      intro: "core.introduction.steps.searchBar.moreOptions.intro",
     },
     {
-      title: "Kartkontroller",
+      title: "core.introduction.steps.controls.title",
       element: "#controls-column",
-      intro:
-        "Längst ut i den högra delen av skärmen finns olika kontroller som du använder för att navigera i kartan.",
+      intro: "core.introduction.steps.controls.intro",
     },
     {
-      title: "Fönster",
+      title: "core.introduction.steps.window.title",
       element: '#windows-container > div[style*="display: block"]', // My favorite selector. Selects the first visible Window, so if there's a plugin Window open, we can add intro text to it.
-      intro:
-        "Varje verktyg ritar ut ett eget fönster. Du kan flytta på fönstret och ändra dess storlek genom att dra i fönstrets sidor.",
+      intro: "core.introduction.steps.window.intro",
     },
     {
-      title: "Widget-knapp",
+      title: "core.introduction.steps.widget.title",
       element: "#left-column > div > button",
-      intro:
-        "Det här är en Widget-knapp. Genom att klicka på den öppnar du det verktyget som knappen är kopplad till. <br><br>Det var det hela. Hoppas du kommer tycka om att använda Hajk!",
+      intro: "core.introduction.steps.widget.intro",
     },
   ];
 
@@ -158,22 +155,34 @@ class Introduction extends React.PureComponent {
 
   // Render a control button that allows the user to invoke the guide on demand
   renderControlButton() {
+    const { t } = this.props;
     return createPortal(
       <PluginControlButton
         icon={<InsertEmoticonIcon />}
         onClick={() => {
           this.showIntroduction();
         }}
-        title="Introduktionsguide"
-        abstract="Öppna guidad tour"
+        title={t("core.introduction.title")}
+        abstract={t("core.introduction.abstract")}
       />,
       document.getElementById("plugin-control-buttons")
     );
   }
 
   render() {
-    const { introductionEnabled, introductionShowControlButton } = this.props;
+    const { introductionEnabled, introductionShowControlButton, t } =
+      this.props;
     const { initialStep, steps, stepsEnabled } = this.state;
+
+    // The steps (should) contain translation keys, we'll have to get the
+    // proper information by getting the corresponding text using the translator.
+    const translatedSteps = steps.map((s) => {
+      return {
+        ...s,
+        title: t(s.title),
+        intro: t(s.intro),
+      };
+    });
 
     return introductionEnabled ? (
       <>
@@ -187,14 +196,14 @@ class Introduction extends React.PureComponent {
               this.state.forceShow === true) && (
               <Steps
                 enabled={stepsEnabled}
-                steps={steps}
+                steps={translatedSteps}
                 initialStep={initialStep}
                 onExit={this.disableSteps}
                 options={{
                   exitOnOverlayClick: false,
-                  nextLabel: "Nästa",
-                  prevLabel: "Föregående",
-                  doneLabel: "Klart!",
+                  nextLabel: t("common.next"),
+                  prevLabel: t("common.previous"),
+                  doneLabel: t("common.done"),
                 }}
               />
             )
@@ -204,4 +213,4 @@ class Introduction extends React.PureComponent {
   }
 }
 
-export default Introduction;
+export default withTranslation()(Introduction);
