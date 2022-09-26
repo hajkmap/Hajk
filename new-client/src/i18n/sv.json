@@ -3,6 +3,7 @@
     "backgroundLayers": "Bakgrundslager",
     "cancel": "Avbryt",
     "closeWindow": "Stäng fönstret",
+    "done": "Klart!",
     "hide": "Dölj",
     "key": "Nyckel",
     "layers": "Lager",
@@ -85,6 +86,40 @@
       "toggleButtons": {
         "plugins": "Kartverktyg"
       }
+    },
+    "introduction": {
+      "abstract": "Öppna guidad tour",
+      "steps": {
+        "controls": {
+          "intro": "Längst ut i den högra delen av skärmen finns olika kontroller som du använder för att navigera i kartan.",
+          "title": "Kartkontroller"
+        },
+        "searchBar": {
+          "intro": "Sökrutan hittar du här.<br /><br /> Med hjälp av sökverktyget hittar du enkelt till rätt ställe i kartan.",
+          "moreOptions": {
+            "intro": "Under den här knappen hittar du fler avancerade sökalternativ.",
+            "title": "Fler sökverktyg"
+          },
+          "title": "Sökruta"
+        },
+        "toolPanel": {
+          "intro": "Med hjälp av denna knappen kan du ta fram verktygspanelen.",
+          "title": "Verktygspanel"
+        },
+        "welcome": {
+          "intro": "Här kommer en kort guide som visar dig runt i applikationen. <br /><br />Häng med!",
+          "title": "Välkommen till Hajk! 👋"
+        },
+        "widget": {
+          "intro": "Det här är en Widget-knapp. Genom att klicka på den öppnar du det verktyget som knappen är kopplad till. <br><br>Det var det hela. Hoppas du kommer tycka om att använda Hajk!",
+          "title": "Widget-knapp"
+        },
+        "window": {
+          "intro": "Varje verktyg ritar ut ett eget fönster. Du kan flytta på fönstret och ändra dess storlek genom att dra i fönstrets sidor.",
+          "title": "Fönster"
+        }
+      },
+      "title": "Introduktionsguide"
     },
     "mapClickViewer": {
       "hits": "Träffar",

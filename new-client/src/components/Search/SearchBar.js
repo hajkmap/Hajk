@@ -513,7 +513,10 @@ class SearchBar extends React.PureComponent {
     const { showSearchResults, isMobile } = this.props;
 
     return (
-      <Grid sx={{ width: 400, height: (theme) => theme.spacing(6) }}>
+      <Grid
+        sx={{ width: 400, height: (theme) => theme.spacing(6) }}
+        name="searchBar"
+      >
         <Grid item>
           <Paper elevation={isMobile ? 0 : 1}>
             {this.renderAutoComplete()}
