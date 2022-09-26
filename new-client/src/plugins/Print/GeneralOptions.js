@@ -119,6 +119,25 @@ class GeneralOptions extends React.PureComponent {
     );
   };
 
+  renderTextIconInMarginsSelector = () => {
+    const { useMargin, useTextIconsInMargin, handleChange } = this.props;
+    return (
+      <Select
+        variant="standard"
+        value={useTextIconsInMargin}
+        onChange={handleChange}
+        disabled={!useMargin}
+        inputProps={{
+          name: "useTextIconsInMargin",
+          id: "useTextIconsInMargin",
+        }}
+      >
+        <MenuItem value={true}>Ja</MenuItem>
+        <MenuItem value={false}>Nej</MenuItem>
+      </Select>
+    );
+  };
+
   renderOrientationSelector = () => {
     const { orientation, handleChange } = this.props;
     return (
@@ -233,6 +252,12 @@ class GeneralOptions extends React.PureComponent {
               Marginaler runt kartbilden
             </InputLabel>
             {this.renderUseMarginSelector()}
+          </StyledFormControl>
+          <StyledFormControl>
+            <InputLabel variant="standard" htmlFor="useMargin">
+              Rubriktext m.m. i marginalerna
+            </InputLabel>
+            {this.renderTextIconInMarginsSelector()}
           </StyledFormControl>
           <StyledFormControl>
             <InputLabel variant="standard" htmlFor="orientation">
