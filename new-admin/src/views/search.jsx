@@ -363,11 +363,6 @@ class Search extends Component {
       case "secondaryLabelFields":
       case "shortDisplayFields":
       case "searchFields":
-        valid = value.every((val) => /^\w+$/.test(val));
-        if (value.length === 1 && value[0] === "") {
-          valid = true;
-        }
-
         break;
       case "layers":
         if (value.length === 0) {
