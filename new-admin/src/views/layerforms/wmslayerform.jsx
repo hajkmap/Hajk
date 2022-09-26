@@ -810,7 +810,11 @@ class WMSLayerForm extends Component {
         let opts = {
           title: trueTitle,
           abstract: abstract,
-          children: Array.isArray(layer.Layer) ? layer.Layer : [layer.Layer], // See #1182
+          // Ensure that there's a sublayer before pushing children, see #1182
+          ...(layer.Layer && {
+            // In addition, we always want an Array here, even if it's just one element. See #1182.
+            children: Array.isArray(layer.Layer) ? layer.Layer : [layer.Layer],
+          }),
         };
 
         let queryableIcon =
@@ -860,10 +864,14 @@ class WMSLayerForm extends Component {
         // Such group has no name attribute and can't be rendered on its own. If we
         // find one of these, don't add it to the list.
         if (layer.Name) layers.push(append(layer, parentGuid));
-        // Next, check if there are sublayers and repeat the procedure. Ensure that we
-        // deal with an array, as e.g. QGIS Server can append the Layer directly if
-        // only one child exists, see #1182.
-        if (Array.isArray(layer.Layer)) {
+        // Next, check if there are sublayers and repeat the procedure.
+        if (layer.Layer) {
+          // Ensure that we deal with an array, as e.g.
+          // QGIS Server can append the Layer directly if
+          // only one child exists, see #1182.
+          if (!Array.isArray(layer.Layer)) {
+            layer.Layer = [layer.Layer];
+          }
           // Create a guid to indicate which element is the parent of current
           layer.Layer.forEach((layer) => {
             const guid = this.createGuid();
