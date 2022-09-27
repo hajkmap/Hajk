@@ -993,7 +993,7 @@ export default class PrintModel {
       });
 
       // Make sure to add necessary fonts and enable the font we want to use.
-      this.setupFonts(pdf, "ROBOTO");
+      this.setupFonts(pdf, "ROBOTO_NORMAL");
 
       // Add our map canvas to the PDF, start at x/y=0/0 and stretch for entire width/height of the canvas
       pdf.addImage(mapCanvas, "JPEG", 0, 0, dim[0], dim[1]);
