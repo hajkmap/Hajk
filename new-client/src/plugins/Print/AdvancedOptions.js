@@ -52,7 +52,11 @@ class AdvancedOptions extends React.PureComponent {
     "#9B9B9B",
   ];
 
-  placementWarnings = [false, false, false];
+  placementOverlaps = {
+    northArrow: false,
+    scaleBar: false,
+    logo: false,
+  };
 
   toggleColorPicker = (e) => {
     this.setState({ anchorEl: e.currentTarget });
@@ -79,22 +83,28 @@ class AdvancedOptions extends React.PureComponent {
   };
 
   hasPlacementOverlap() {
-    let northA = this.props.includeNorthArrow
+    const northArrow = this.props.includeNorthArrow
       ? this.props.northArrowPlacement
       : "northDisabled";
-    let scaleB = this.props.includeScaleBar
+    const scaleBar = this.props.includeScaleBar
       ? this.props.scaleBarPlacement
       : "scaleDisabled";
-    let logoT = this.props.includeLogo
+    const logo = this.props.includeLogo
       ? this.props.logoPlacement
       : "logoDisabled";
 
-    this.placementWarnings[0] =
-      northA === scaleB || northA === logoT ? true : false;
-    this.placementWarnings[1] =
-      scaleB === northA || scaleB === logoT ? true : false;
-    this.placementWarnings[2] =
-      logoT === northA || logoT === scaleB ? true : false;
+    this.placementOverlaps.northArrow =
+      northArrow === scaleBar || northArrow === logo ? true : false;
+    this.placementOverlaps.scaleBar =
+      scaleBar === northArrow || scaleBar === logo ? true : false;
+    this.placementOverlaps.logo =
+      logo === northArrow || logo === scaleBar ? true : false;
+
+    return (this.placementOverlaps.northArrow ||
+      this.placementOverlaps.scaleBar ||
+      this.placementOverlaps.logo) === true
+      ? true
+      : false;
   }
 
   renderPlacementSelect = (value, name, changeHandler, disabled) => {
@@ -137,7 +147,7 @@ class AdvancedOptions extends React.PureComponent {
   };
 
   render() {
-    this.hasPlacementOverlap();
+    let showOverlapWarning = this.hasPlacementOverlap();
     const {
       resolution,
       handleChange,
@@ -259,7 +269,10 @@ class AdvancedOptions extends React.PureComponent {
               </FormControl>
             </Grid>
             <Grid item xs={6}>
-              <FormControl fullWidth={true} error={this.placementWarnings[0]}>
+              <FormControl
+                fullWidth={true}
+                error={this.placementOverlaps.northArrow}
+              >
                 <InputLabel variant="standard" htmlFor="northArrowPlacement">
                   Placering
                 </InputLabel>
@@ -286,7 +299,10 @@ class AdvancedOptions extends React.PureComponent {
               </FormControl>
             </Grid>
             <Grid item xs={6}>
-              <FormControl fullWidth={true} error={this.placementWarnings[1]}>
+              <FormControl
+                fullWidth={true}
+                error={this.placementOverlaps.scaleBar}
+              >
                 <InputLabel variant="standard" htmlFor="scaleBarPlacement">
                   Placering
                 </InputLabel>
@@ -313,7 +329,7 @@ class AdvancedOptions extends React.PureComponent {
               </FormControl>
             </Grid>
             <Grid item xs={6}>
-              <FormControl fullWidth={true} error={this.placementWarnings[2]}>
+              <FormControl fullWidth={true} error={this.placementOverlaps.logo}>
                 <InputLabel variant="standard" htmlFor="logoPlacement">
                   Placering
                 </InputLabel>
@@ -326,7 +342,7 @@ class AdvancedOptions extends React.PureComponent {
               </FormControl>
             </Grid>
             <Grid item xs={12}>
-              {this.placementWarnings.includes(true) && (
+              {showOverlapWarning && (
                 <FormHelperText error={true}>
                   Bilden kommer inte kunna skrivas ut korrekt. Placeringsvalen
                   överlappar.
