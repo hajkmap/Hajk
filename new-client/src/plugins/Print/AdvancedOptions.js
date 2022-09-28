@@ -52,6 +52,8 @@ class AdvancedOptions extends React.PureComponent {
     "#9B9B9B",
   ];
 
+  placementWarnings = [false, false, false];
+
   toggleColorPicker = (e) => {
     this.setState({ anchorEl: e.currentTarget });
   };
@@ -75,6 +77,25 @@ class AdvancedOptions extends React.PureComponent {
     }
     return true;
   };
+
+  hasPlacementOverlap() {
+    let northA = this.props.includeNorthArrow
+      ? this.props.northArrowPlacement
+      : "northDisabled";
+    let scaleB = this.props.includeScaleBar
+      ? this.props.scaleBarPlacement
+      : "scaleDisabled";
+    let logoT = this.props.includeLogo
+      ? this.props.logoPlacement
+      : "logoDisabled";
+
+    this.placementWarnings[0] =
+      northA === scaleB || northA === logoT ? true : false;
+    this.placementWarnings[1] =
+      scaleB === northA || scaleB === logoT ? true : false;
+    this.placementWarnings[2] =
+      logoT === northA || logoT === scaleB ? true : false;
+  }
 
   renderPlacementSelect = (value, name, changeHandler, disabled) => {
     return (
@@ -116,6 +137,7 @@ class AdvancedOptions extends React.PureComponent {
   };
 
   render() {
+    this.hasPlacementOverlap();
     const {
       resolution,
       handleChange,
@@ -237,7 +259,7 @@ class AdvancedOptions extends React.PureComponent {
               </FormControl>
             </Grid>
             <Grid item xs={6}>
-              <FormControl fullWidth={true}>
+              <FormControl fullWidth={true} error={this.placementWarnings[0]}>
                 <InputLabel variant="standard" htmlFor="northArrowPlacement">
                   Placering
                 </InputLabel>
@@ -264,7 +286,7 @@ class AdvancedOptions extends React.PureComponent {
               </FormControl>
             </Grid>
             <Grid item xs={6}>
-              <FormControl fullWidth={true}>
+              <FormControl fullWidth={true} error={this.placementWarnings[1]}>
                 <InputLabel variant="standard" htmlFor="scaleBarPlacement">
                   Placering
                 </InputLabel>
@@ -291,7 +313,7 @@ class AdvancedOptions extends React.PureComponent {
               </FormControl>
             </Grid>
             <Grid item xs={6}>
-              <FormControl fullWidth={true}>
+              <FormControl fullWidth={true} error={this.placementWarnings[2]}>
                 <InputLabel variant="standard" htmlFor="logoPlacement">
                   Placering
                 </InputLabel>
@@ -302,6 +324,14 @@ class AdvancedOptions extends React.PureComponent {
                   !includeLogo
                 )}
               </FormControl>
+            </Grid>
+            <Grid item xs={12}>
+              {this.placementWarnings.includes(true) && (
+                <FormHelperText error={true}>
+                  Bilden kommer inte kunna skrivas ut korrekt. Placeringsvalen
+                  överlappar.
+                </FormHelperText>
+              )}
             </Grid>
           </FormControlContainer>
           <Popover
