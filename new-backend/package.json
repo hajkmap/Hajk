@@ -27,7 +27,7 @@
     "seed": "babel-node prisma/seed.js"
   },
   "dependencies": {
-    "@prisma/client": "^4.2.1",
+    "@prisma/client": "^4.4.0",
     "activedirectory2": "^2.1.0",
     "clf-date": "^0.2.0",
     "compression": "^1.7.4",
