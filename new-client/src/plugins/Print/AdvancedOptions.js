@@ -17,6 +17,7 @@ import {
 } from "@mui/material";
 import PaletteIcon from "@mui/icons-material/Palette";
 import { TwitterPicker as ColorPicker } from "react-color";
+import { ContactSupport } from "@mui/icons-material";
 
 const Root = styled(Grid)(() => ({
   display: "flex",
@@ -93,9 +94,13 @@ class AdvancedOptions extends React.PureComponent {
       ? this.props.logoPlacement
       : "logoDisabled";
 
-    this.placementOverlaps.northArrow = northArrow === (scaleBar || logo);
-    this.placementOverlaps.scaleBar = scaleBar === (northArrow || logo);
-    this.placementOverlaps.logoType = logo === (northArrow || scaleBar);
+    console.log(northArrow, scaleBar, logo);
+
+    this.placementOverlaps.northArrow =
+      northArrow === scaleBar || northArrow === logo;
+    this.placementOverlaps.scaleBar =
+      scaleBar === northArrow || scaleBar === logo;
+    this.placementOverlaps.logoType = logo === northArrow || logo === scaleBar;
 
     return (
       this.placementOverlaps.northArrow ||
