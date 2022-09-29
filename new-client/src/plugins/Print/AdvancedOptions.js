@@ -17,7 +17,6 @@ import {
 } from "@mui/material";
 import PaletteIcon from "@mui/icons-material/Palette";
 import { TwitterPicker as ColorPicker } from "react-color";
-import { ContactSupport } from "@mui/icons-material";
 
 const Root = styled(Grid)(() => ({
   display: "flex",
@@ -85,7 +84,7 @@ class AdvancedOptions extends React.PureComponent {
 
   // Method for checking if any placement values are overlapping
   hasPlacementOverlap() {
-    // We want to check if the selections are set to "Ja", otherwise they are set to
+    // We want to check if the selections are set to "Enabled", otherwise they are set to
     // "disabled" and cannot overlap.
     const northArrow = this.props.includeNorthArrow
       ? this.props.northArrowPlacement
@@ -98,7 +97,7 @@ class AdvancedOptions extends React.PureComponent {
       : "logoDisabled";
 
     // We check if any given value is the same as the other two placement values.
-    // If so, they are stored as bools in "placementOverlaps"
+    // If so, they are stored as booleans in "placementOverlaps"
     this.placementOverlaps.northArrow =
       northArrow === scaleBar || northArrow === logo;
     this.placementOverlaps.scaleBar =
