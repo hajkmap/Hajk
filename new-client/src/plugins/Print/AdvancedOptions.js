@@ -93,13 +93,14 @@ class AdvancedOptions extends React.PureComponent {
       ? this.props.logoPlacement
       : "logoDisabled";
 
+    this.placementOverlaps.northArrow = northArrow === (scaleBar || logo);
+    this.placementOverlaps.scaleBar = scaleBar === (northArrow || logo);
+    this.placementOverlaps.logoType = logo === (northArrow || scaleBar);
+
     return (
-      (this.placementOverlaps.northArrow =
-        northArrow === scaleBar || northArrow === logo) ||
-      (this.placementOverlaps.scaleBar =
-        scaleBar === northArrow || scaleBar === logo) ||
-      (this.placementOverlaps.logoType =
-        logo === northArrow || logo === scaleBar)
+      this.placementOverlaps.northArrow ||
+      this.placementOverlaps.scaleBar ||
+      this.placementOverlaps.logoType
     );
   }
 
