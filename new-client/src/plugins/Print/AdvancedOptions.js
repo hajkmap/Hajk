@@ -55,7 +55,7 @@ class AdvancedOptions extends React.PureComponent {
   placementOverlaps = {
     northArrow: false,
     scaleBar: false,
-    logo: false,
+    logoType: false,
   };
 
   toggleColorPicker = (e) => {
@@ -93,16 +93,13 @@ class AdvancedOptions extends React.PureComponent {
       ? this.props.logoPlacement
       : "logoDisabled";
 
-    this.placementOverlaps.northArrow =
-      northArrow === scaleBar || northArrow === logo;
-    this.placementOverlaps.scaleBar =
-      scaleBar === northArrow || scaleBar === logo;
-    this.placementOverlaps.logo = logo === northArrow || logo === scaleBar;
-
     return (
-      (this.placementOverlaps.northArrow ||
-        this.placementOverlaps.scaleBar ||
-        this.placementOverlaps.logo) === true
+      (this.placementOverlaps.northArrow =
+        northArrow === scaleBar || northArrow === logo) ||
+      (this.placementOverlaps.scaleBar =
+        scaleBar === northArrow || scaleBar === logo) ||
+      (this.placementOverlaps.logoType =
+        logo === northArrow || logo === scaleBar)
     );
   }
 
@@ -328,7 +325,10 @@ class AdvancedOptions extends React.PureComponent {
               </FormControl>
             </Grid>
             <Grid item xs={6}>
-              <FormControl fullWidth={true} error={this.placementOverlaps.logo}>
+              <FormControl
+                fullWidth={true}
+                error={this.placementOverlaps.logoType}
+              >
                 <InputLabel variant="standard" htmlFor="logoPlacement">
                   Placering
                 </InputLabel>
