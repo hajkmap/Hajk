@@ -83,7 +83,10 @@ class AdvancedOptions extends React.PureComponent {
     return true;
   };
 
+  // Method for checking if any placement values are overlapping
   hasPlacementOverlap() {
+    // We want to check if the selections are set to "Ja", otherwise they are set to
+    // "disabled" and cannot overlap.
     const northArrow = this.props.includeNorthArrow
       ? this.props.northArrowPlacement
       : "northDisabled";
@@ -94,14 +97,16 @@ class AdvancedOptions extends React.PureComponent {
       ? this.props.logoPlacement
       : "logoDisabled";
 
-    console.log(northArrow, scaleBar, logo);
-
+    // We check if any given value is the same as the other two placement values.
+    // If so, they are stored as bools in "placementOverlaps"
     this.placementOverlaps.northArrow =
       northArrow === scaleBar || northArrow === logo;
     this.placementOverlaps.scaleBar =
       scaleBar === northArrow || scaleBar === logo;
     this.placementOverlaps.logoType = logo === northArrow || logo === scaleBar;
 
+    // If any placement values are the same we return true and use it to display
+    // error-message in render()
     return (
       this.placementOverlaps.northArrow ||
       this.placementOverlaps.scaleBar ||
