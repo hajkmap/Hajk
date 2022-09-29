@@ -17,6 +17,7 @@ import {
 } from "@mui/material";
 import PaletteIcon from "@mui/icons-material/Palette";
 import { TwitterPicker as ColorPicker } from "react-color";
+import { ContactSupport } from "@mui/icons-material";
 
 const Root = styled(Grid)(() => ({
   display: "flex",
@@ -52,6 +53,12 @@ class AdvancedOptions extends React.PureComponent {
     "#9B9B9B",
   ];
 
+  placementOverlaps = {
+    northArrow: false,
+    scaleBar: false,
+    logoType: false,
+  };
+
   toggleColorPicker = (e) => {
     this.setState({ anchorEl: e.currentTarget });
   };
@@ -75,6 +82,37 @@ class AdvancedOptions extends React.PureComponent {
     }
     return true;
   };
+
+  // Method for checking if any placement values are overlapping
+  hasPlacementOverlap() {
+    // We want to check if the selections are set to "Ja", otherwise they are set to
+    // "disabled" and cannot overlap.
+    const northArrow = this.props.includeNorthArrow
+      ? this.props.northArrowPlacement
+      : "northDisabled";
+    const scaleBar = this.props.includeScaleBar
+      ? this.props.scaleBarPlacement
+      : "scaleDisabled";
+    const logo = this.props.includeLogo
+      ? this.props.logoPlacement
+      : "logoDisabled";
+
+    // We check if any given value is the same as the other two placement values.
+    // If so, they are stored as bools in "placementOverlaps"
+    this.placementOverlaps.northArrow =
+      northArrow === scaleBar || northArrow === logo;
+    this.placementOverlaps.scaleBar =
+      scaleBar === northArrow || scaleBar === logo;
+    this.placementOverlaps.logoType = logo === northArrow || logo === scaleBar;
+
+    // If any placement values are the same we return true and use it to display
+    // error-message in render()
+    return (
+      this.placementOverlaps.northArrow ||
+      this.placementOverlaps.scaleBar ||
+      this.placementOverlaps.logoType
+    );
+  }
 
   renderPlacementSelect = (value, name, changeHandler, disabled) => {
     return (
@@ -116,6 +154,7 @@ class AdvancedOptions extends React.PureComponent {
   };
 
   render() {
+    let showOverlapWarning = this.hasPlacementOverlap();
     const {
       resolution,
       handleChange,
@@ -237,7 +276,10 @@ class AdvancedOptions extends React.PureComponent {
               </FormControl>
             </Grid>
             <Grid item xs={6}>
-              <FormControl fullWidth={true}>
+              <FormControl
+                fullWidth={true}
+                error={this.placementOverlaps.northArrow}
+              >
                 <InputLabel variant="standard" htmlFor="northArrowPlacement">
                   Placering
                 </InputLabel>
@@ -264,7 +306,10 @@ class AdvancedOptions extends React.PureComponent {
               </FormControl>
             </Grid>
             <Grid item xs={6}>
-              <FormControl fullWidth={true}>
+              <FormControl
+                fullWidth={true}
+                error={this.placementOverlaps.scaleBar}
+              >
                 <InputLabel variant="standard" htmlFor="scaleBarPlacement">
                   Placering
                 </InputLabel>
@@ -291,7 +336,10 @@ class AdvancedOptions extends React.PureComponent {
               </FormControl>
             </Grid>
             <Grid item xs={6}>
-              <FormControl fullWidth={true}>
+              <FormControl
+                fullWidth={true}
+                error={this.placementOverlaps.logoType}
+              >
                 <InputLabel variant="standard" htmlFor="logoPlacement">
                   Placering
                 </InputLabel>
@@ -302,6 +350,14 @@ class AdvancedOptions extends React.PureComponent {
                   !includeLogo
                 )}
               </FormControl>
+            </Grid>
+            <Grid item xs={12}>
+              {showOverlapWarning && (
+                <FormHelperText error={true}>
+                  Bilden kommer inte kunna skrivas ut korrekt. Placeringsvalen
+                  överlappar.
+                </FormHelperText>
+              )}
             </Grid>
           </FormControlContainer>
           <Popover
