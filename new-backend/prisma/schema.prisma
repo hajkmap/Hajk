@@ -65,33 +65,41 @@ model Layer {
 }
 
 model LayersOnGroups {
-  id      Int     @id @default(autoincrement())
-  groupId String
-  layerId String
-  group   Group   @relation(fields: [groupId], references: [id])
-  layer   Layer   @relation(fields: [layerId], references: [id])
-  usage   UseType
-  options Json    @default("{}")
+  id               Int     @id @default(autoincrement())
+  groupId          String
+  layerId          String
+  group            Group   @relation(fields: [groupId], references: [id])
+  layer            Layer   @relation(fields: [layerId], references: [id])
+  usage            UseType
+  infoBox          String
+  drawOrder        Int
+  visibleAtStart   Boolean
+  visibleForGroups Int[]
 }
 
 model GroupsOnMaps {
-  id      Int     @id @default(autoincrement())
-  mapName String
-  groupId String
-  map     Map     @relation(fields: [mapName], references: [name])
-  group   Group   @relation(fields: [groupId], references: [id])
-  usage   UseType
-  options Json    @default("{}")
+  id       Int     @id @default(autoincrement())
+  mapName  String
+  groupId  String
+  map      Map     @relation(fields: [mapName], references: [name])
+  group    Group   @relation(fields: [groupId], references: [id])
+  usage    UseType
+  name     String
+  toggled  Boolean
+  expanded Boolean
 }
 
 model LayersOnMaps {
-  id      Int     @id @default(autoincrement())
-  mapName String
-  layerId String
-  map     Map     @relation(fields: [mapName], references: [name])
-  layer   Layer   @relation(fields: [layerId], references: [id])
-  usage   UseType
-  options Json    @default("{}")
+  id               Int     @id @default(autoincrement())
+  mapName          String
+  layerId          String
+  map              Map     @relation(fields: [mapName], references: [name])
+  layer            Layer   @relation(fields: [layerId], references: [id])
+  usage            UseType
+  infoBox          String
+  drawOrder        Int
+  visibleAtStart   Boolean
+  visibleForGroups Int[]
 }
 
 enum LayerType {
