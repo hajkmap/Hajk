@@ -29,6 +29,7 @@ export default class PrintModel {
     this.logoMaxWidth = settings.options.logoMaxWidth;
     this.scales = settings.options.scales;
     this.copyright = settings.options.copyright ?? "";
+    this.date = settings.options.date ?? "";
     this.disclaimer = settings.options.disclaimer ?? "";
     this.localObserver = settings.localObserver;
     this.mapConfig = settings.mapConfig;
@@ -1130,7 +1131,23 @@ export default class PrintModel {
           : this.margin;
         pdf.setFontSize(8);
         pdf.setTextColor(options.mapTextColor);
-        pdf.text(this.copyright, dim[0] - 4 - yPos, dim[1] - 4 - yPos, {
+        pdf.text(this.copyright, dim[0] - 4 - yPos, dim[1] - 5.5 - yPos, {
+          align: "right",
+        });
+      }
+
+      // Add potential date text
+      if (this.date.length > 0) {
+        const date = this.date.replace(
+          "{date}",
+          new Date().toLocaleDateString()
+        );
+        let yPos = options.useTextIconsInMargin
+          ? this.textIconsMargin + this.margin / 2
+          : this.margin;
+        pdf.setFontSize(8);
+        pdf.setTextColor(options.mapTextColor);
+        pdf.text(date, dim[0] - 4 - yPos, dim[1] - 2 - yPos, {
           align: "right",
         });
       }
