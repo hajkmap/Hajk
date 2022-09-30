@@ -142,6 +142,19 @@ async function readAndPopulateLayers() {
           options: { ...rest },
         });
       });
+
+      // Look out for duplicates!
+      const dupes = data
+        .map((e) => e.id)
+        .filter((e, i, a) => a.indexOf(e) !== i);
+      // Abort if found (we can't continue because we
+      // enforce a unique constraint on the IDs in Layer model)
+      if (dupes.length !== 0) {
+        throw new Error(
+          `Found duplicate layer id(s): ${dupes.toString()}. Please remove the duplicate entry/ies from your layers.json and retry.`
+        );
+      }
+
       const layer = await prisma.layer.createMany({
         data,
       });
