@@ -90,6 +90,90 @@ class PrismaService {
       },
     });
   }
+
+  // TODO: Move me to seed.js
+  async populateLayersAndGroups(mapName) {
+    // Please note that this extraction _ignores_ the relationships
+    // between groups and layers/groups. At this stage we're not
+    // interested of the tree structure, but rather determining if a
+    // layer or group is used in a given map.
+    const t = await prisma.map.findUnique({
+      where: {
+        name: mapName,
+      },
+      select: {
+        tools: {
+          where: {
+            tool: {
+              type: "layerswitcher",
+            },
+          },
+        },
+      },
+    });
+    const { baselayers, groups } = t.tools[0].options;
+
+    const layersToInsert = [];
+    const groupsToInsert = [];
+
+    // Prepare background layers for insert
+    baselayers.forEach((bl) => {
+      const { id: layerId, ...rest } = bl;
+      layersToInsert.push({
+        layerId,
+        mapName,
+        usage: "BACKGROUND",
+        ...rest,
+      });
+    });
+
+    // Next, go on with groups, recursively
+    const extractLayersFromGroup = (group) => {
+      group.layers.forEach((l) => {
+        const { id: layerId, ...rest } = l;
+
+        layersToInsert.push({
+          layerId,
+          mapName,
+          useage: "FOREGROUND",
+          ...rest,
+        });
+      });
+      return;
+    };
+
+    const extractGroup = (group) => {
+      // First let's handle the group's layers
+      extractLayersFromGroup(group);
+
+      // Next, let's handle the group itself
+      const { id: groupId, name, toggled, expanded } = group;
+      const insertObject = {
+        groupId,
+        mapName,
+        useage: "FOREGROUND",
+        name,
+        toggled,
+        expanded,
+      };
+
+      groupsToInsert.push(insertObject);
+
+      // Finally, recursively call on any other groups that might be in this group
+      group.groups?.forEach((g) => extractGroup(g));
+    };
+
+    groups.forEach((g) => extractGroup(g));
+
+    return {
+      layersCount: layersToInsert.length,
+      groupsCount: groupsToInsert.length,
+      layersToInsert,
+      groupsToInsert,
+      baselayers,
+      groups,
+    };
+  }
 }
 
 export default new PrismaService();

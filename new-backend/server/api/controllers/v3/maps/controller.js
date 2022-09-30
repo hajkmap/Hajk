@@ -17,5 +17,12 @@ export class Controller {
       handleStandardResponse(res, data)
     );
   }
+
+  // TODO: Move me to seed.js
+  populate(req, res) {
+    PrismaService.populateLayersAndGroups(req.params.mapName).then((data) =>
+      handleStandardResponse(res, data)
+    );
+  }
 }
 export default new Controller();
