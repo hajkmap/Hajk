@@ -146,7 +146,11 @@ class CoordinatesModel {
    */
   goToUserLocation = () => {
     if (navigator.geolocation) {
-      const options = {};
+      const options = {
+        enableHighAccuracy: true,
+        timeout: 5000,
+        maximumAge: 30000,
+      };
 
       navigator.geolocation.getCurrentPosition(
         (pos) => {
