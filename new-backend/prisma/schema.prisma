@@ -67,7 +67,6 @@ model LayersOnGroups {
   layerId          String
   group            Group    @relation(fields: [groupId], references: [id])
   layer            Layer    @relation(fields: [layerId], references: [id])
-  usage            UseType
   infoBox          String
   drawOrder        Int
   visibleAtStart   Boolean

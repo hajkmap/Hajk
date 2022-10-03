@@ -144,7 +144,6 @@ class PrismaService {
         layersOnGroups.push({
           layerId,
           groupId: group.id,
-          usage: "FOREGROUND",
           ...rest,
         });
 
