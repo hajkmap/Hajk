@@ -47,11 +47,10 @@ model Projection {
 }
 
 model Group {
-  id      String           @id @default(cuid())
-  name    String
-  caption String
-  layers  LayersOnGroups[]
-  maps    GroupsOnMaps[]
+  id     String           @id @default(cuid())
+  name   String
+  layers LayersOnGroups[]
+  maps   GroupsOnMaps[]
 }
 
 model Layer {
@@ -75,20 +74,6 @@ model LayersOnGroups {
   visibleForGroups String[]
 }
 
-model GroupsOnMaps {
-  id          Int            @id @default(autoincrement()) // A group on a map has a unique ID
-  mapName     String // It relates to a map via its name
-  groupId     String // It relates to a group via its ID
-  map         Map            @relation(fields: [mapName], references: [name])
-  group       Group          @relation(fields: [groupId], references: [id])
-  groups      GroupsOnMaps[] @relation("GroupHasGroups")
-  parentGroup GroupsOnMaps[] @relation("GroupHasGroups")
-  usage       UseType // It may be used as a background or a foreground group
-  name        String // It has a title, shown to the user
-  toggled     Boolean
-  expanded    Boolean
-}
-
 model LayersOnMaps {
   id               Int      @id @default(autoincrement())
   mapName          String
@@ -100,6 +85,22 @@ model LayersOnMaps {
   drawOrder        Int
   visibleAtStart   Boolean
   visibleForGroups String[]
+}
+
+model GroupsOnMaps {
+  id            String         @id @default(cuid())
+  mapName       String // It relates to a map via its name
+  groupId       String // It relates to a group via its ID
+  map           Map            @relation(fields: [mapName], references: [name])
+  group         Group          @relation(fields: [groupId], references: [id])
+  parentGroupId String? // This particular GroupOnMap can have a parent GroupOnMap
+  parent        GroupsOnMaps?  @relation("GroupOnGroups", fields: [parentGroupId], references: [id]) // The optional parent record
+  groups        GroupsOnMaps[] @relation("GroupOnGroups") // The optional list of children records
+
+  usage    UseType // It may be used as a background or a foreground group
+  name     String // It has a title, shown to the user
+  toggled  Boolean
+  expanded Boolean
 }
 
 enum LayerType {
