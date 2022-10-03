@@ -47,13 +47,11 @@ model Projection {
 }
 
 model Group {
-  id          String           @id @default(cuid())
-  name        String
-  caption     String
-  groups      Group[]          @relation("GroupHasGroups")
-  parentGroup Group[]          @relation("GroupHasGroups")
-  layers      LayersOnGroups[]
-  maps        GroupsOnMaps[]
+  id      String           @id @default(cuid())
+  name    String
+  caption String
+  layers  LayersOnGroups[]
+  maps    GroupsOnMaps[]
 }
 
 model Layer {
@@ -65,41 +63,43 @@ model Layer {
 }
 
 model LayersOnGroups {
-  id               Int     @id @default(autoincrement())
+  id               Int      @id @default(autoincrement())
   groupId          String
   layerId          String
-  group            Group   @relation(fields: [groupId], references: [id])
-  layer            Layer   @relation(fields: [layerId], references: [id])
+  group            Group    @relation(fields: [groupId], references: [id])
+  layer            Layer    @relation(fields: [layerId], references: [id])
   usage            UseType
   infoBox          String
   drawOrder        Int
   visibleAtStart   Boolean
-  visibleForGroups Int[]
+  visibleForGroups String[]
 }
 
 model GroupsOnMaps {
-  id       Int     @id @default(autoincrement())
-  mapName  String
-  groupId  String
-  map      Map     @relation(fields: [mapName], references: [name])
-  group    Group   @relation(fields: [groupId], references: [id])
-  usage    UseType
-  name     String
-  toggled  Boolean
-  expanded Boolean
+  id          Int            @id @default(autoincrement()) // A group on a map has a unique ID
+  mapName     String // It relates to a map via its name
+  groupId     String // It relates to a group via its ID
+  map         Map            @relation(fields: [mapName], references: [name])
+  group       Group          @relation(fields: [groupId], references: [id])
+  groups      GroupsOnMaps[] @relation("GroupHasGroups")
+  parentGroup GroupsOnMaps[] @relation("GroupHasGroups")
+  usage       UseType // It may be used as a background or a foreground group
+  name        String // It has a title, shown to the user
+  toggled     Boolean
+  expanded    Boolean
 }
 
 model LayersOnMaps {
-  id               Int     @id @default(autoincrement())
+  id               Int      @id @default(autoincrement())
   mapName          String
   layerId          String
-  map              Map     @relation(fields: [mapName], references: [name])
-  layer            Layer   @relation(fields: [layerId], references: [id])
+  map              Map      @relation(fields: [mapName], references: [name])
+  layer            Layer    @relation(fields: [layerId], references: [id])
   usage            UseType
   infoBox          String
   drawOrder        Int
   visibleAtStart   Boolean
-  visibleForGroups Int[]
+  visibleForGroups String[]
 }
 
 enum LayerType {

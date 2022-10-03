@@ -129,29 +129,37 @@ class PrismaService {
 
     // Next, go on with groups, recursively
     const extractLayersFromGroup = (group) => {
+      const layerIds = [];
       group.layers.forEach((l) => {
         const { id: layerId, ...rest } = l;
 
+        // Prepare object to insert into LayersOnMaps
         layersToInsert.push({
           layerId,
           mapName,
-          useage: "FOREGROUND",
+          usage: "FOREGROUND",
           ...rest,
         });
+
+        layerIds.push(layerId);
       });
-      return;
+
+      // Return a list of ids that relate to a given group
+      return layerIds;
     };
 
-    const extractGroup = (group) => {
+    const extractGroup = (group, parentId = null) => {
       // First let's handle the group's layers
-      extractLayersFromGroup(group);
+      const layerIds = extractLayersFromGroup(group);
 
       // Next, let's handle the group itself
       const { id: groupId, name, toggled, expanded } = group;
       const insertObject = {
         groupId,
+        parentId,
         mapName,
-        useage: "FOREGROUND",
+        layers: layerIds,
+        usage: "FOREGROUND",
         name,
         toggled,
         expanded,
@@ -160,18 +168,30 @@ class PrismaService {
       groupsToInsert.push(insertObject);
 
       // Finally, recursively call on any other groups that might be in this group
-      group.groups?.forEach((g) => extractGroup(g));
+      group.groups?.forEach((g) => extractGroup(g, groupId));
     };
 
     groups.forEach((g) => extractGroup(g));
 
+    // Below is a demo (not for seed.js) that shows how easily
+    // we can transform the relationship between groups into a
+    // tree structure, ready for use in e.g. LayerSwitcher.
+    const transformListToTree = (items, groupId = null) =>
+      items
+        .filter((item) => item["parentId"] === groupId)
+        .map((item) => ({
+          ...item,
+          children: transformListToTree(items, item.groupId),
+        }));
+
     return {
       layersCount: layersToInsert.length,
       groupsCount: groupsToInsert.length,
+      tree: transformListToTree(groupsToInsert),
       layersToInsert,
       groupsToInsert,
-      baselayers,
-      groups,
+      // baselayers,
+      // groups,
     };
   }
 }
