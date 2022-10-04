@@ -24,13 +24,13 @@ export default class PrintModel {
   constructor(settings) {
     this.map = settings.map;
     this.dims = settings.dims;
-    this.logoUrl = settings.options.logo ?? "";
-    this.northArrowUrl = settings.options.northArrow ?? "";
+    this.logoUrl = settings.options.logo || "";
+    this.northArrowUrl = settings.options.northArrow || "";
     this.logoMaxWidth = settings.options.logoMaxWidth;
     this.scales = settings.options.scales;
-    this.copyright = settings.options.copyright ?? "";
-    this.date = settings.options.date ?? "";
-    this.disclaimer = settings.options.disclaimer ?? "";
+    this.copyright = settings.options.copyright || "";
+    this.date = settings.options.date || "";
+    this.disclaimer = settings.options.disclaimer || "";
     this.localObserver = settings.localObserver;
     this.mapConfig = settings.mapConfig;
     // If we want the printed tiles to have correct styling, we have to use
