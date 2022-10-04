@@ -156,7 +156,7 @@ class PrismaService {
 
     const extractGroup = (group, parentId = null) => {
       // First let's handle the group's layers
-      const layerIds = extractLayersFromGroup(group);
+      extractLayersFromGroup(group);
 
       // Next, let's handle the group itself
       const { id: groupId, name, toggled, expanded } = group;
@@ -165,7 +165,6 @@ class PrismaService {
       groupsToInsert.push({
         id: groupId,
         name: name,
-        layers: layerIds,
       });
 
       // Create a unique ID for this specific relation
@@ -202,12 +201,51 @@ class PrismaService {
           children: transformListToTree(items, item.id),
         }));
 
+    // PLEASE NOTE THAT YOU CAN RUN THIS ONLY ONCE AS WE WRITE STUFF
+    // INTO DB HERE. ENSURE TO COMMENT OUT WHATEVER HAS ALREADY BEEN
+    // WRITTEN IN ORDER TO CONTINUE DEVELOPMENT OF THE REMAINING PARTS!!!
+
+    // DONE: Populates the Group model ("groups.json")
+    for await (const g of groupsToInsert) {
+      await prisma.group.create({
+        data: {
+          id: g.id,
+          name: g.name,
+        },
+      });
+    }
+
+    // DONE: Connect each of the inserted groups to map (and another group, where applicable)
+    await prisma.groupsOnMaps.createMany({ data: groupsOnMap });
+
+    // DONE: Connect layers on maps (i.e. those layers that are not part of any group but part of a map)
+    await prisma.layersOnMaps.createMany({ data: layersOnMaps });
+
+    // TODO: A foreign key fails here…
+    // await prisma.layersOnGroups.createMany({ data: layersOnGroups });
+
+    // Demo: let's get the newly created groups that belong to our map
+    const groupsOnMapFromDB = await prisma.groupsOnMaps.findMany({
+      where: { mapName },
+    });
+    const layersOnMapFromDB = await prisma.layersOnMaps.findMany({
+      where: { mapName },
+    });
+    const mapConfigFromDB = await prisma.map.findMany({
+      where: { name: mapName },
+      include: { layers: true, groups: true, projections: true, tools: true },
+    });
+
     return {
+      treeFromDB: transformListToTree(groupsOnMapFromDB),
       tree: transformListToTree(groupsOnMap),
+      layersOnMapFromDB,
+      groupsOnMapFromDB,
       groupsToInsert,
       groupsOnMap,
       layersOnMaps,
       layersOnGroups,
+      mapConfigFromDB,
     };
   }
 }

@@ -67,7 +67,7 @@ model LayersOnGroups {
   layerId          String
   group            Group    @relation(fields: [groupId], references: [id])
   layer            Layer    @relation(fields: [layerId], references: [id])
-  infoBox          String
+  infobox          String
   drawOrder        Int
   visibleAtStart   Boolean
   visibleForGroups String[]
@@ -80,7 +80,7 @@ model LayersOnMaps {
   map              Map      @relation(fields: [mapName], references: [name])
   layer            Layer    @relation(fields: [layerId], references: [id])
   usage            UseType
-  infoBox          String
+  infobox          String
   drawOrder        Int
   visibleAtStart   Boolean
   visibleForGroups String[]
