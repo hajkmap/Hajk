@@ -228,14 +228,7 @@ class PrismaService {
 
     // /**
     // Populates the Group model (the imaginative "groups.json")
-    for await (const g of groupsToInsert) {
-      await prisma.group.create({
-        data: {
-          id: g.id,
-          name: g.name,
-        },
-      });
-    }
+    await prisma.group.createMany({ data: groupsToInsert });
 
     // Connect each of the inserted groups to map (and another group, where applicable)
     await prisma.groupsOnMaps.createMany({ data: groupsOnMap });
