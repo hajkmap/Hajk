@@ -24,6 +24,7 @@ var defaultState = {
   instruction: "",
   copyright: "",
   disclaimer: "",
+  date: "",
   scales: "200, 400, 1000, 2000, 5000, 10000, 25000, 50000, 100000, 200000",
   dpis: "72, 150, 300",
   paperFormats: "A2, A3, A4",
@@ -39,6 +40,7 @@ var defaultState = {
   includeNorthArrow: true,
   northArrowPlacement: "topLeft",
   useMargin: false,
+  useTextIconsInMargin: false,
   mapTextColor: "#000000",
   useCustomTileLoaders: true,
   maxTileSize: 4096,
@@ -63,6 +65,7 @@ class ToolOptions extends Component {
         target: tool.options.target || "toolbar",
         copyright: tool.options.copyright || this.state.copyright,
         disclaimer: tool.options.disclaimer || this.state.disclaimer,
+        date: tool.options.date || this.state.date,
         position: tool.options.position,
         width: tool.options.width,
         height: tool.options.height,
@@ -77,6 +80,10 @@ class ToolOptions extends Component {
           typeof tool.options.useMargin !== "undefined"
             ? tool.options.useMargin
             : this.state.useMargin,
+        useTextIconsInMargin:
+          typeof tool.options.useTextIconsInMargin !== "undefined"
+            ? tool.options.useTextIconsInMargin
+            : this.state.useTextIconsInMargin,
         mapTextColor: tool.options.mapTextColor || this.state.mapTextColor,
         visibleAtStart: tool.options.visibleAtStart,
         visibleForGroups: tool.options.visibleForGroups
@@ -166,6 +173,7 @@ class ToolOptions extends Component {
         position: this.state.position,
         copyright: this.state.copyright,
         disclaimer: this.state.disclaimer,
+        date: this.state.date,
         width: this.state.width,
         height: this.state.height,
         scales: this.state.scales,
@@ -175,6 +183,7 @@ class ToolOptions extends Component {
         paperFormats: this.state.paperFormats,
         northArrow: this.state.northArrow,
         useMargin: this.state.useMargin,
+        useTextIconsInMargin: this.state.useTextIconsInMargin,
         mapTextColor: this.state.mapTextColor,
         instruction: this.state.instruction,
         visibleAtStart: this.state.visibleAtStart,
@@ -522,6 +531,17 @@ class ToolOptions extends Component {
             />
           </div>
           <div>
+            <label htmlFor="date">Date</label>
+            <input
+              type="text"
+              name="date"
+              value={this.state.date}
+              onChange={(e) => {
+                this.handleInputChange(e);
+              }}
+            />
+          </div>
+          <div>
             <label htmlFor="scales">Skalor</label>
             <input
               type="text"
@@ -704,6 +724,21 @@ class ToolOptions extends Component {
             />
             &nbsp;
             <label htmlFor="useMargin">Marginal runt karta (förval)</label>
+          </div>
+          <div>
+            <input
+              id="useTextIconsInMargin"
+              name="useTextIconsInMargin"
+              type="checkbox"
+              onChange={(e) => {
+                this.handleInputChange(e);
+              }}
+              checked={this.state.useTextIconsInMargin}
+            />
+            &nbsp;
+            <label htmlFor="useMargin">
+              Rubriktext m.m. i marginalerna (förval)
+            </label>
           </div>
           <div>
             <div>
