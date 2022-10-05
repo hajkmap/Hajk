@@ -94,7 +94,19 @@ class PrismaService {
   }
 
   // TODO: Move me to seed.js
-  async populateLayersAndGroups(mapName) {
+  async populateAllMaps() {
+    const mapsFromDB = await prisma.map.findMany({ select: { name: true } });
+    const maps = mapsFromDB.map((m) => m.name);
+    const ro = [];
+    for await (const map of maps) {
+      const r = await this.populateMap(map);
+      ro.push(r);
+    }
+    return { ro };
+  }
+
+  // TODO: Move me to seed.js
+  async populateMap(mapName) {
     const t = await prisma.map.findUnique({
       where: {
         name: mapName,

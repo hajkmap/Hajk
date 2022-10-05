@@ -19,8 +19,15 @@ export class Controller {
   }
 
   // TODO: Move me to seed.js
-  populate(req, res) {
-    PrismaService.populateLayersAndGroups(req.params.mapName).then((data) =>
+  populateMap(req, res) {
+    PrismaService.populateMap(req.params.mapName).then((data) =>
+      handleStandardResponse(res, data)
+    );
+  }
+
+  // TODO: Move me to seed.js
+  populateAllMaps(req, res) {
+    PrismaService.populateAllMaps().then((data) =>
       handleStandardResponse(res, data)
     );
   }
