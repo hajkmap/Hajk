@@ -228,7 +228,10 @@ class PrismaService {
 
     // /**
     // Populates the Group model (the imaginative "groups.json")
-    await prisma.group.createMany({ data: groupsToInsert });
+    await prisma.group.createMany({
+      data: groupsToInsert,
+      skipDuplicates: true, // We assume - for now! - that same ID means same group, so there's no need to watch out for conflicts
+    });
 
     // Connect each of the inserted groups to map (and another group, where applicable)
     await prisma.groupsOnMaps.createMany({ data: groupsOnMap });
