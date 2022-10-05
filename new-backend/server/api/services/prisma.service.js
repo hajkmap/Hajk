@@ -130,6 +130,10 @@ class PrismaService {
         mapName,
         usage: "BACKGROUND",
         ...rest,
+        visibleForGroups: !Array.isArray(bl.visibleForGroups)
+          ? []
+          : bl.visibleForGroups,
+        infobox: typeof bl.infobox !== "string" ? "" : bl.infobox,
       });
     });
 
@@ -181,6 +185,10 @@ class PrismaService {
           layerId,
           groupId: group.id,
           ...rest,
+          visibleForGroups: !Array.isArray(group.visibleForGroups)
+            ? []
+            : group.visibleForGroups,
+          infobox: typeof group.infobox !== "string" ? "" : group.infobox,
         });
 
         layerIds.push(layerId);
