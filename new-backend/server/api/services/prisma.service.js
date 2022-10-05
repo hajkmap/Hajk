@@ -95,10 +95,6 @@ class PrismaService {
 
   // TODO: Move me to seed.js
   async populateLayersAndGroups(mapName) {
-    // Please note that this extraction _ignores_ the relationships
-    // between groups and layers/groups. At this stage we're not
-    // interested of the tree structure, but rather determining if a
-    // layer or group is used in a given map.
     const t = await prisma.map.findUnique({
       where: {
         name: mapName,
@@ -115,15 +111,18 @@ class PrismaService {
     });
     const { baselayers, groups } = t.tools[0].options;
 
-    // Imaging this is our "groups.json"…
+    // Imagine this is our "groups.json"…
     const groupsToInsert = [];
 
-    // And here are the different relations between our entities
+    // These arrays will hold the different relations between our entities
     const layersOnMaps = [];
     const layersOnGroups = [];
     const groupsOnMap = [];
 
-    // Prepare background layers for insert
+    // Prepare background layers for insert by looping through everything
+    // in "baselayers" in current map's LayerSwitcher's options. The goal
+    // is to prepare an object that will be almost ready to use in Prisma's
+    // createMany() method.
     baselayers.forEach((bl) => {
       const { id: layerId, ...rest } = bl;
       layersOnMaps.push({
@@ -134,26 +133,8 @@ class PrismaService {
       });
     });
 
-    // Next, go on with groups, recursively
-    const extractLayersFromGroup = (group) => {
-      const layerIds = [];
-      group.layers.forEach((l) => {
-        const { id: layerId, ...rest } = l;
-
-        // Prepare object to insert into layersOnGroups
-        layersOnGroups.push({
-          layerId,
-          groupId: group.id,
-          ...rest,
-        });
-
-        layerIds.push(layerId);
-      });
-
-      // Return a list of ids that relate to a given group
-      return layerIds;
-    };
-
+    // Helper: invoked recursively and extract any
+    // layers and groups within the given group.
     const extractGroup = (group, parentId = null) => {
       // First let's handle the group's layers
       extractLayersFromGroup(group);
@@ -188,24 +169,57 @@ class PrismaService {
       group.groups?.forEach((g) => extractGroup(g, newCuid));
     };
 
+    // Helper: called by extractGroup. Grabs all layers
+    // in the given group.
+    const extractLayersFromGroup = (group) => {
+      const layerIds = [];
+      group.layers.forEach((l) => {
+        const { id: layerId, ...rest } = l;
+
+        // Prepare object to insert into layersOnGroups
+        layersOnGroups.push({
+          layerId,
+          groupId: group.id,
+          ...rest,
+        });
+
+        layerIds.push(layerId);
+      });
+
+      // Return a list of ids that relate to a given group
+      return layerIds;
+    };
+
+    // Next, go on with groups, recursively
     groups.forEach((g) => extractGroup(g));
 
-    // Below is a demo (not for seed.js) that shows how easily
-    // we can transform the relationship between groups into a
-    // tree structure, ready for use in e.g. LayerSwitcher.
-    const transformListToTree = (items, id = null) =>
-      items
-        .filter((item) => item["parentGroupId"] === id)
-        .map((item) => ({
-          ...item,
-          children: transformListToTree(items, item.id),
-        }));
+    // Now we have all arrays ready. One more thing left is to
+    // check for consistency: our map config may refer to layerIds
+    // that did not exist in layers.json (hence they won't exist in
+    // the Layer model now either). If we'd try to connect such a layer
+    // to a map or group, we'd get a foreign key error. So let's wash the
+    // layers so only valid entries remain.
+    let layersInDB = await prisma.layer.findMany({
+      select: { id: true },
+    });
 
-    // PLEASE NOTE THAT YOU CAN RUN THIS ONLY ONCE AS WE WRITE STUFF
+    layersInDB = layersInDB.map((l) => l.id);
+
+    // Helper: used as a filter predicate to remove layers
+    // that did not exist in database.
+    const removeUnknownLayers = (l) => {
+      return layersInDB.indexOf(l.layerId) !== -1;
+    };
+
+    const validLayersOnMaps = layersOnMaps.filter(removeUnknownLayers);
+    const validLayersOnGroups = layersOnGroups.filter(removeUnknownLayers);
+
+    // PLEASE NOTE THAT YOU CAN ONLY RUN THIS ONCE AS WE WRITE STUFF
     // INTO DB HERE. ENSURE TO COMMENT OUT WHATEVER HAS ALREADY BEEN
     // WRITTEN IN ORDER TO CONTINUE DEVELOPMENT OF THE REMAINING PARTS!!!
 
-    // DONE: Populates the Group model ("groups.json")
+    // /**
+    // Populates the Group model (the imaginative "groups.json")
     for await (const g of groupsToInsert) {
       await prisma.group.create({
         data: {
@@ -215,36 +229,45 @@ class PrismaService {
       });
     }
 
-    // DONE: Connect each of the inserted groups to map (and another group, where applicable)
+    // Connect each of the inserted groups to map (and another group, where applicable)
     await prisma.groupsOnMaps.createMany({ data: groupsOnMap });
 
-    // DONE: Connect layers on maps (i.e. those layers that are not part of any group but part of a map)
-    await prisma.layersOnMaps.createMany({ data: layersOnMaps });
+    // Connect valid layers to maps (i.e. those layers that are not part of any group but part of a map)
+    await prisma.layersOnMaps.createMany({ data: validLayersOnMaps });
 
-    // TODO: A foreign key fails here…
-    // await prisma.layersOnGroups.createMany({ data: layersOnGroups });
+    // Connect valid layers to groups
+    await prisma.layersOnGroups.createMany({ data: validLayersOnGroups });
 
-    // Demo: let's get the newly created groups that belong to our map
-    const groupsOnMapFromDB = await prisma.groupsOnMaps.findMany({
-      where: { mapName },
-    });
-    const layersOnMapFromDB = await prisma.layersOnMaps.findMany({
-      where: { mapName },
-    });
+    // **/
+
+    // Showtime! Let's get the newly created groups that belong to our map
     const mapConfigFromDB = await prisma.map.findMany({
       where: { name: mapName },
-      include: { layers: true, groups: true, projections: true, tools: true },
+      include: {
+        layers: true,
+        // Not the most beautiful, but recursive nested reads are not supported in Prisma ATM.
+        // Anyway, six levels of groups is about the practical limit in the UI anyway, I guess.
+        groups: {
+          include: {
+            groups: {
+              include: {
+                groups: {
+                  include: {
+                    groups: {
+                      include: { groups: { include: { groups: true } } },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+        projections: true,
+        tools: true,
+      },
     });
 
     return {
-      treeFromDB: transformListToTree(groupsOnMapFromDB),
-      tree: transformListToTree(groupsOnMap),
-      layersOnMapFromDB,
-      groupsOnMapFromDB,
-      groupsToInsert,
-      groupsOnMap,
-      layersOnMaps,
-      layersOnGroups,
       mapConfigFromDB,
     };
   }
