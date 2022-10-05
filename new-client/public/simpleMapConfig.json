@@ -476,6 +476,7 @@
         "scaleBarPlacement": "bottomLeft",
         "includeLogo": true,
         "logoPlacement": "topRight",
+        "date": "Utskriftsdatum: {date}",
         "instruction": "",
         "visibleAtStart": false,
         "visibleForGroups": []

@@ -24,12 +24,13 @@ export default class PrintModel {
   constructor(settings) {
     this.map = settings.map;
     this.dims = settings.dims;
-    this.logoUrl = settings.options.logo ?? "";
-    this.northArrowUrl = settings.options.northArrow ?? "";
+    this.logoUrl = settings.options.logo || "";
+    this.northArrowUrl = settings.options.northArrow || "";
     this.logoMaxWidth = settings.options.logoMaxWidth;
     this.scales = settings.options.scales;
-    this.copyright = settings.options.copyright ?? "";
-    this.disclaimer = settings.options.disclaimer ?? "";
+    this.copyright = settings.options.copyright || "";
+    this.date = settings.options.date || "";
+    this.disclaimer = settings.options.disclaimer || "";
     this.localObserver = settings.localObserver;
     this.mapConfig = settings.mapConfig;
     // If we want the printed tiles to have correct styling, we have to use
@@ -1130,7 +1131,23 @@ export default class PrintModel {
           : this.margin;
         pdf.setFontSize(8);
         pdf.setTextColor(options.mapTextColor);
-        pdf.text(this.copyright, dim[0] - 4 - yPos, dim[1] - 4 - yPos, {
+        pdf.text(this.copyright, dim[0] - 4 - yPos, dim[1] - 5.5 - yPos, {
+          align: "right",
+        });
+      }
+
+      // Add potential date text
+      if (this.date.length > 0) {
+        const date = this.date.replace(
+          "{date}",
+          new Date().toLocaleDateString()
+        );
+        let yPos = options.useTextIconsInMargin
+          ? this.textIconsMargin + this.margin / 2
+          : this.margin;
+        pdf.setFontSize(8);
+        pdf.setTextColor(options.mapTextColor);
+        pdf.text(date, dim[0] - 4 - yPos, dim[1] - 2 - yPos, {
           align: "right",
         });
       }
