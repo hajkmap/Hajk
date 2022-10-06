@@ -58,6 +58,21 @@ class PrismaService {
     }
   }
 
+  async getLayersForMap(mapName) {
+    try {
+      return await prisma.layer.findMany({
+        where: {
+          OR: [
+            { maps: { every: { mapName } } },
+            { groups: { every: { group: { maps: { every: { mapName } } } } } },
+          ],
+        },
+      });
+    } catch (error) {
+      return { error };
+    }
+  }
+
   async getMapsWithTool(toolName) {
     try {
       const maps = await prisma.map.findMany({

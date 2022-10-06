@@ -18,6 +18,12 @@ export class Controller {
     );
   }
 
+  getLayersForMap(req, res) {
+    PrismaService.getLayersForMap(req.params.mapName).then((data) =>
+      handleStandardResponse(res, data)
+    );
+  }
+
   // TODO: Move me to seed.js
   populateMap(req, res) {
     PrismaService.populateMap(req.params.mapName).then((data) =>
