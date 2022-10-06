@@ -26,10 +26,21 @@
     "react": "$react",
     "react-dom": "$react-dom"
   },
-  "browserslist": [
-    "defaults and supports es6-module",
-    "maintained node versions"
-  ],
+  "browserslist": {
+    "production": [
+      ">0.5% in SE",
+      "last 2 versions",
+      "Firefox ESR",
+      "not dead",
+      "last 100 edge versions"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version",
+      "last 100 edge versions"
+    ]
+  },
   "devDependencies": {
     "eslint-config-prettier": "^8.5.0",
     "eslint-plugin-prettier": "^4.2.1",
