@@ -146,6 +146,12 @@ class CoordinatesModel {
    */
   goToUserLocation = () => {
     if (navigator.geolocation) {
+      const options = {
+        enableHighAccuracy: true,
+        timeout: 5000,
+        maximumAge: 30000,
+      };
+
       navigator.geolocation.getCurrentPosition(
         (pos) => {
           const point = new Point([pos.coords.longitude, pos.coords.latitude]);
@@ -166,7 +172,8 @@ class CoordinatesModel {
           if (error.code === 1) {
             this.localObserver.publish("location-permissions-denied");
           }
-        }
+        },
+        options
       );
     }
   };
