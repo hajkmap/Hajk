@@ -2,12 +2,12 @@ import { PrismaClient } from "@prisma/client";
 
 import log4js from "log4js";
 
-const logger = log4js.getLogger("service.prisma");
+const logger = log4js.getLogger("service.v3.map");
 const prisma = new PrismaClient();
 
-class PrismaService {
+class MapService {
   constructor() {
-    logger.debug("Initiating Prisma Service");
+    logger.debug("Initiating Map Service");
   }
 
   async getMaps() {
@@ -78,54 +78,21 @@ class PrismaService {
 
   async getToolsForMap(mapName) {
     try {
-      return await this.#getToolsForMap(mapName);
-    } catch (error) {
-      return { error };
-    }
-  }
-
-  async getTools() {
-    try {
-      return await prisma.tool.findMany();
-    } catch (error) {
-      return { error };
-    }
-  }
-
-  async getMapsWithTool(toolName) {
-    try {
-      const maps = await prisma.map.findMany({
-        select: { name: true },
+      return await prisma.tool.findMany({
         where: {
-          tools: {
+          maps: {
             some: {
-              tool: {
-                type: toolName,
+              map: {
+                name: mapName,
               },
             },
           },
         },
       });
-      return maps.map((m) => m.name);
     } catch (error) {
       return { error };
     }
   }
-
-  // This method is abstracted away as we use it in (at least) two places
-  async #getToolsForMap(mapName) {
-    return await prisma.tool.findMany({
-      where: {
-        maps: {
-          some: {
-            map: {
-              name: mapName,
-            },
-          },
-        },
-      },
-    });
-  }
 }
 
-export default new PrismaService();
+export default new MapService();

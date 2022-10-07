@@ -1,13 +1,13 @@
-import PrismaService from "../../../services/prisma.service";
+import ToolService from "../../../services/v3/tool.service";
 import handleStandardResponse from "../../../utils/handleStandardResponse";
 
 export class Controller {
   getTools(req, res) {
-    PrismaService.getTools().then((data) => handleStandardResponse(res, data));
+    ToolService.getTools().then((data) => handleStandardResponse(res, data));
   }
 
   getMapsWithTool(req, res) {
-    PrismaService.getMapsWithTool(req.params.toolName).then((data) =>
+    ToolService.getMapsWithTool(req.params.toolName).then((data) =>
       handleStandardResponse(res, data)
     );
   }

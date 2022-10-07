@@ -8,7 +8,4 @@ export default express
   .get("/:mapName/groups", controller.getGroupsForMap)
   .get("/:mapName/layers", controller.getLayersForMap)
   .get("/:mapName/projections", controller.getProjectionsForMap)
-  .get("/:mapName/tools", controller.getToolsForMap)
-  // TODO: Move me to seed.js
-  .get("/:mapName/populate", controller.populateMap)
-  .get("/populateAllMaps", controller.populateAllMaps);
+  .get("/:mapName/tools", controller.getToolsForMap);
