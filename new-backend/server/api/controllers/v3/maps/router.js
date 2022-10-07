@@ -4,10 +4,11 @@ import controller from "./controller";
 export default express
   .Router()
   .get("/", controller.getMaps)
-  // TODO: Move me to seed.js
-  .get("/populateAllMaps", controller.populateAllMaps)
-  .get("/:mapName/tools", controller.getToolsForMap)
+  .get("/:mapName", controller.getMapByName)
+  .get("/:mapName/groups", controller.getGroupsForMap)
   .get("/:mapName/layers", controller.getLayersForMap)
+  .get("/:mapName/projections", controller.getProjectionsForMap)
+  .get("/:mapName/tools", controller.getToolsForMap)
   // TODO: Move me to seed.js
   .get("/:mapName/populate", controller.populateMap)
-  .get("/:mapName", controller.getMapByName);
+  .get("/populateAllMaps", controller.populateAllMaps);

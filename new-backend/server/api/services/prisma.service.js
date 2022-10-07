@@ -50,6 +50,16 @@ class PrismaService {
     }
   }
 
+  async getProjectionsForMap(mapName) {
+    try {
+      return await prisma.projection.findMany({
+        where: { maps: { some: { name: mapName } } },
+      });
+    } catch (error) {
+      return { error };
+    }
+  }
+
   async getToolsForMap(mapName) {
     try {
       return await this.#getToolsForMap(mapName);
@@ -63,10 +73,20 @@ class PrismaService {
       return await prisma.layer.findMany({
         where: {
           OR: [
-            { maps: { every: { mapName } } },
-            { groups: { every: { group: { maps: { every: { mapName } } } } } },
+            { maps: { some: { mapName } } },
+            { groups: { some: { group: { maps: { some: { mapName } } } } } },
           ],
         },
+      });
+    } catch (error) {
+      return { error };
+    }
+  }
+
+  async getGroupsForMap(mapName) {
+    try {
+      return await prisma.group.findMany({
+        where: { maps: { some: { name: mapName } } },
       });
     } catch (error) {
       return { error };

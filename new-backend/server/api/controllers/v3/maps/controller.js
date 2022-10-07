@@ -12,6 +12,12 @@ export class Controller {
     );
   }
 
+  getProjectionsForMap(req, res) {
+    PrismaService.getProjectionsForMap(req.params.mapName).then((data) =>
+      handleStandardResponse(res, data)
+    );
+  }
+
   getToolsForMap(req, res) {
     PrismaService.getToolsForMap(req.params.mapName).then((data) =>
       handleStandardResponse(res, data)
@@ -20,6 +26,12 @@ export class Controller {
 
   getLayersForMap(req, res) {
     PrismaService.getLayersForMap(req.params.mapName).then((data) =>
+      handleStandardResponse(res, data)
+    );
+  }
+
+  getGroupsForMap(req, res) {
+    PrismaService.getGroupsForMap(req.params.mapName).then((data) =>
       handleStandardResponse(res, data)
     );
   }
