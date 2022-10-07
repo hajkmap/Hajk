@@ -24,27 +24,27 @@
   },
   "dependencies": {
     "activedirectory2": "^2.1.0",
-    "clf-date": "^0.2.0",
+    "clf-date": "^0.2.1",
     "compression": "^1.7.4",
     "cookie-parser": "^1.4.6",
     "cors": "^2.8.5",
-    "dotenv": "^16.0.2",
+    "dotenv": "^16.0.3",
     "express": "^4.18.1",
     "express-openapi-validator": "^4.13.8",
     "helmet": "^6.0.0",
     "http-proxy-middleware": "^2.0.6",
-    "log4js": "^6.6.1",
+    "log4js": "^6.7.0",
     "node-windows": "^1.0.0-beta.8"
   },
   "devDependencies": {
-    "@babel/cli": "^7.18.10",
-    "@babel/core": "^7.19.1",
+    "@babel/cli": "^7.19.3",
+    "@babel/core": "^7.19.3",
     "@babel/eslint-parser": "^7.19.1",
     "@babel/node": "^7.19.1",
-    "@babel/preset-env": "^7.19.1",
+    "@babel/preset-env": "^7.19.3",
     "@babel/register": "^7.18.9",
     "chai": "^4.3.6",
-    "eslint": "^8.23.1",
+    "eslint": "^8.24.0",
     "eslint-config-prettier": "^8.5.0",
     "eslint-plugin-import": "^2.26.0",
     "eslint-plugin-node": "^11.1.0",
@@ -52,7 +52,7 @@
     "mocha": "^10.0.0",
     "nodemon": "^2.0.20",
     "prettier": "^2.7.1",
-    "supertest": "^6.2.4"
+    "supertest": "^6.3.0"
   },
   "author": "Jacob Wodzyński <jacob.wodzynski@halmstad.se> (https://github.com/hajkmap)"
 }
