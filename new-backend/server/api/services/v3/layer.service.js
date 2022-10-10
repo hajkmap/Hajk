@@ -17,6 +17,16 @@ class LayerService {
       return { error };
     }
   }
+
+  async getLayerById(id) {
+    try {
+      return await prisma.layer.findUnique({
+        where: { id },
+      });
+    } catch (error) {
+      return { error };
+    }
+  }
 }
 
 export default new LayerService();
