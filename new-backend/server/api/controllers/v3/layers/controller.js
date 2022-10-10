@@ -12,7 +12,13 @@ export class Controller {
     );
   }
 
-  getLayerByType(req, res) {
+  getLayerTypes(req, res) {
+    LayerService.getLayerTypes().then((data) =>
+      handleStandardResponse(res, data)
+    );
+  }
+
+  getLayersByType(req, res) {
     LayerService.getLayersByType(req.params.type).then((data) =>
       handleStandardResponse(res, data)
     );
