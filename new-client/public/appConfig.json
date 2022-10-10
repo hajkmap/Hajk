@@ -1,7 +1,7 @@
 {
   "appName": "Hajk",
   "version": "3.11.0-dev",
-  "mapserviceBase": "",
+  "mapserviceBase": "https://hajk.orebro.se/api/v1",
   "proxy": "",
   "searchProxy": "",
   "defaultMap": "map_1",
@@ -15,7 +15,9 @@
       "active": true,
       "text": "This demo message from Hajk will show only once.",
       "showOnlyOnce": true,
-      "maps": ["map_1"],
+      "maps": [
+        "map_1"
+      ],
       "timeout": 5000,
       "startTime": "2020-06-29",
       "stopTime": "2099-12-31",
@@ -28,7 +30,9 @@
       "text": "Your browser is not supported anymore. Please update to a modern browser.",
       "showOnlyOnce": false,
       "type": "warning",
-      "browsers": ["ie"]
+      "browsers": [
+        "ie"
+      ]
     }
   ]
 }
