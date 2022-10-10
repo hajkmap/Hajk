@@ -11,5 +11,11 @@ export class Controller {
       handleStandardResponse(res, data)
     );
   }
+
+  getLayerByType(req, res) {
+    LayerService.getLayersByType(req.params.type).then((data) =>
+      handleStandardResponse(res, data)
+    );
+  }
 }
 export default new Controller();

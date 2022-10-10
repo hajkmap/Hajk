@@ -27,6 +27,17 @@ class LayerService {
       return { error };
     }
   }
+
+  async getLayersByType(type) {
+    try {
+      const result = await prisma.layer.findMany({
+        where: { type: type.toUpperCase() },
+      });
+      return result;
+    } catch (error) {
+      return { error };
+    }
+  }
 }
 
 export default new LayerService();
