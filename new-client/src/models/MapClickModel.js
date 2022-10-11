@@ -114,6 +114,7 @@ export default class MapClickModel {
    * @memberof MapClickModel
    */
   async bindMapClick(callback) {
+    // Bind regular infoclick
     this.map.on("singleclick", (e) => {
       if (this.map.clickLock.size === 0) {
         // Store location data in AppModel for later use
@@ -124,6 +125,12 @@ export default class MapClickModel {
         );
         this.#handleClick(e, callback);
       }
+    });
+
+    // Also, listen for multi-feature infoclick event that we will send
+    // on the global observer, see #974.
+    this.globalObserver.on("mapclick.extentChanged", (extent) => {
+      this.#handleClick(extent, callback);
     });
   }
   /**
@@ -183,7 +190,7 @@ export default class MapClickModel {
             ?.split(";")[0];
 
           // Prepare an object to hold the features to be parsed.
-          let olFeatures = null;
+          let olFeatures = [];
 
           // Depending on the response type, parse accordingly
           switch (responseContentType) {
@@ -336,94 +343,97 @@ export default class MapClickModel {
       const queryableLayerResults = [];
 
       // Grab all features at clicked pixel, with 10px tolerance
-      this.map.forEachFeatureAtPixel(
-        e.pixel,
-        (feature, layer) => {
-          if (layer?.get("name") === "pluginSearchResults") {
-            // Super-special case here: we don't follow the new
-            // interface for a return object (see the "r" constant above),
-            // because we want to conform to the old, working search results
-            // code, which expects search results on the following form:
-            feature.layer = layer;
-            searchResultFeatures.push(feature);
-          } else if (
-            layer?.get("queryable") === true &&
-            layer?.get("ignoreInFeatureInfo") !== true
-          ) {
-            // If we have any features from vector (WFS) layers, we want
-            // to return them in a way that is similar to how the GetFeatureInfo
-            // features are treated. This will make it easy in the Component,
-            // so we prepare an object that is similar to the "r" constant above.
+      // FIXME: As part of #974 I had to add this check (multi-feature infoclick does
+      // not contain `pixel` property on its event).
+      e.pixel &&
+        this.map.forEachFeatureAtPixel(
+          e.pixel,
+          (feature, layer) => {
+            if (layer?.get("name") === "pluginSearchResults") {
+              // Super-special case here: we don't follow the new
+              // interface for a return object (see the "r" constant above),
+              // because we want to conform to the old, working search results
+              // code, which expects search results on the following form:
+              feature.layer = layer;
+              searchResultFeatures.push(feature);
+            } else if (
+              layer?.get("queryable") === true &&
+              layer?.get("ignoreInFeatureInfo") !== true
+            ) {
+              // If we have any features from vector (WFS) layers, we want
+              // to return them in a way that is similar to how the GetFeatureInfo
+              // features are treated. This will make it easy in the Component,
+              // so we prepare an object that is similar to the "r" constant above.
 
-            // Keep in mind that at this point we loop through _features_, not
-            // layers. But we want to group features from the same layer together.
-            // So the first step is to get a unique ID for the layer that the
-            // current feature belongs to. We create it by combining the layer's name…
-            const layerName = this.#getLayerNameFromVectorFeature(
-              feature,
-              layer
-            );
+              // Keep in mind that at this point we loop through _features_, not
+              // layers. But we want to group features from the same layer together.
+              // So the first step is to get a unique ID for the layer that the
+              // current feature belongs to. We create it by combining the layer's name…
+              const layerName = this.#getLayerNameFromVectorFeature(
+                feature,
+                layer
+              );
 
-            // …with the OL layer's UID property.
-            const layerUid = layer?.ol_uid;
-            const layerId =
-              layerName + (layerUid !== undefined && "." + layerUid);
+              // …with the OL layer's UID property.
+              const layerUid = layer?.ol_uid;
+              const layerId =
+                layerName + (layerUid !== undefined && "." + layerUid);
 
-            // Next, check if we already have this layer in our collection…
-            const existingLayer = queryableLayerResults.find(
-              (c) => c.layerId === layerId
-            );
+              // Next, check if we already have this layer in our collection…
+              const existingLayer = queryableLayerResults.find(
+                (c) => c.layerId === layerId
+              );
 
-            // …if yes…
-            if (existingLayer) {
-              // …just push the new feature to existing Array…
-              existingLayer.features.push(feature);
-              // …and increase the count.
-              existingLayer.numHits++;
-            } else {
-              // Else, create the return object…
-              const r = {
-                layerId: layerId, // Unique layer id, used above
-                type: "QueryableLayerResults",
-                features: [feature], // Create a new Array, add the current feature
-                numHits: 1, // Duh…
-                displayName:
-                  layer.get("layerInfo")?.caption ||
-                  layer.get("caption") ||
-                  "Unnamed vector layer",
-                infoclickDefinition:
-                  layer.get("layerInfo")?.information ||
-                  layer.get("information") ||
-                  "",
-                infoclickIcon:
-                  layer.get("layerInfo")?.infoclickIcon ||
-                  layer.get("infoclickIcon") ||
-                  "",
-                displayFields:
-                  layer
-                    .get("layerInfo")
-                    ?.displayFields?.split(",")
-                    .map((df) => df.trim()) || [],
-                shortDisplayFields:
-                  layer
-                    .get("layerInfo")
-                    ?.shortDisplayFields?.split(",")
-                    .map((df) => df.trim()) || [],
-                secondaryLabelFields:
-                  layer
-                    .get("layerInfo")
-                    ?.secondaryLabelFields?.split(",")
-                    .map((df) => df.trim()) || [],
-              };
-              // …and push to the layers collection.
-              queryableLayerResults.push(r);
+              // …if yes…
+              if (existingLayer) {
+                // …just push the new feature to existing Array…
+                existingLayer.features.push(feature);
+                // …and increase the count.
+                existingLayer.numHits++;
+              } else {
+                // Else, create the return object…
+                const r = {
+                  layerId: layerId, // Unique layer id, used above
+                  type: "QueryableLayerResults",
+                  features: [feature], // Create a new Array, add the current feature
+                  numHits: 1, // Duh…
+                  displayName:
+                    layer.get("layerInfo")?.caption ||
+                    layer.get("caption") ||
+                    "Unnamed vector layer",
+                  infoclickDefinition:
+                    layer.get("layerInfo")?.information ||
+                    layer.get("information") ||
+                    "",
+                  infoclickIcon:
+                    layer.get("layerInfo")?.infoclickIcon ||
+                    layer.get("infoclickIcon") ||
+                    "",
+                  displayFields:
+                    layer
+                      .get("layerInfo")
+                      ?.displayFields?.split(",")
+                      .map((df) => df.trim()) || [],
+                  shortDisplayFields:
+                    layer
+                      .get("layerInfo")
+                      ?.shortDisplayFields?.split(",")
+                      .map((df) => df.trim()) || [],
+                  secondaryLabelFields:
+                    layer
+                      .get("layerInfo")
+                      ?.secondaryLabelFields?.split(",")
+                      .map((df) => df.trim()) || [],
+                };
+                // …and push to the layers collection.
+                queryableLayerResults.push(r);
+              }
             }
+          },
+          {
+            hitTolerance: 10,
           }
-        },
-        {
-          hitTolerance: 10,
-        }
-      );
+        );
 
       // If the operation above resulted in features that should
       // be treated by the search component, let's push them to
@@ -598,7 +608,11 @@ export default class MapClickModel {
   }
 
   #query(layer, e) {
-    const coordinate = e.coordinate;
+    console.log(`Querying layer ${layer.get("caption")}`, e);
+    let coordinate = e.coordinate;
+    if (coordinate === undefined) {
+      coordinate = [e[0], e[1]];
+    }
     const resolution = this.map.getView().getResolution();
     const currentZoom = this.map.getView().getZoom();
     const referenceSystem = this.map.getView().getProjection().getCode();
@@ -658,9 +672,14 @@ export default class MapClickModel {
         };
       }
 
-      const url = layer
+      let url = layer
         .getSource()
         .getFeatureInfoUrl(coordinate, resolution, referenceSystem, params);
+      console.log("Original URL: ", url);
+      if (!e.coordinate) {
+        url = url.split("BBOX")[0] + "BBOX=" + e.join().replaceAll(",", "%2C");
+      }
+      console.log("Fetching (perhaps modified) URL:", url);
       return hfetch(url); // Return a Promise
     } else {
       return false;

@@ -12,6 +12,8 @@ import { bindMapClickEvent } from "./Click.js";
 import MapClickModel from "./MapClickModel";
 import { defaults as defaultInteractions } from "ol/interaction";
 import { Map as OLMap, View } from "ol";
+import ExtentInteraction from "ol/interaction/Extent";
+import { altKeyOnly } from "ol/events/condition";
 // TODO: Uncomment and ensure they show as expected
 // import {
 // defaults as defaultControls,
@@ -353,6 +355,23 @@ class AppModel {
         zoom: config.map.zoom,
       }),
     });
+
+    // We use this interaction to draw multi-feature infoclick select box, #974
+    // TODO: Make this optional?
+    const extentInteraction = new ExtentInteraction({
+      condition: altKeyOnly,
+    });
+
+    this.map.on("pointerup", () => {
+      const mapClickInfoExtent = extentInteraction.getExtent();
+      mapClickInfoExtent !== null &&
+        this.globalObserver.publish(
+          "mapclick.extentChanged",
+          mapClickInfoExtent
+        );
+    });
+
+    this.map.addInteraction(extentInteraction);
 
     // Create throttled zoomEnd event
     let currentZoom = this.map.getView().getZoom();
