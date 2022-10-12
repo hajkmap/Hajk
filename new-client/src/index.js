@@ -1,16 +1,9 @@
-// IE 11 starts here.
-// If you don't need IE 11, comment out those lines line.
-// Also, change 'browserslist' in package.json to exclude ie11.
-// import "react-app-polyfill/ie11";
-import "react-app-polyfill/stable";
-// import "abortcontroller-polyfill/dist/polyfill-patch-fetch";
-// import "allsettled-polyfill";
-// IE 11 ends here.
-
 // iOS 12 and other older touch devices need this polyfill to
 // support OpenLayers map interactions through Pointer Events API.
 // See: https://github.com/hajkmap/Hajk/issues/606
 import "elm-pep";
+// In order to support iOS 12 we need this polyfill too:
+import "core-js/features/promise/all-settled";
 
 // Since we don't want to download roboto from the Google CDN,
 // we use fontSource and import all subsets that MUI relies on here.

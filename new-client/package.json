@@ -27,7 +27,8 @@
     "react-dom": "$react-dom"
   },
   "browserslist": [
-    "defaults"
+    "defaults and supports es6-module",
+    "ios > 12"
   ],
   "devDependencies": {
     "eslint-config-prettier": "^8.5.0",
@@ -65,7 +66,6 @@
     "plausible-tracker": "^0.3.8",
     "proj4": "^2.8.0",
     "react": "^18.2.0",
-    "react-app-polyfill": "^3.0.0",
     "react-color": "^2.19.3",
     "react-dom": "^18.2.0",
     "react-event-observer": "^0.5.11",
