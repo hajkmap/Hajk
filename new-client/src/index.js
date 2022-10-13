@@ -1,3 +1,7 @@
+// Removing this causes some of the older but still common devices (e.g. iOS 12, 13)
+// to run into trouble.
+import "react-app-polyfill/stable";
+
 // iOS 12 and other older touch devices need this polyfill to
 // support OpenLayers map interactions through Pointer Events API.
 // See: https://github.com/hajkmap/Hajk/issues/606
