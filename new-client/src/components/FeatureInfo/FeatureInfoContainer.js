@@ -220,10 +220,11 @@ class FeatureInfoContainer extends React.PureComponent {
     const layerInfo = feature.layer.get("layerInfo");
 
     // Get current id of feature and find out if it occurs in the layersInfo array.
-    let featureId = feature.getId();
+    // Remove the unique identifier after the last dot, since there can be dots that is part of the ID.
+    let featureId = feature.getId().split(".").slice(0, -1).join(".");
     let layersInfo = layerInfo.layersInfo;
-    let layerId = Object.keys(layersInfo).find((key) =>
-      featureId.includes(layersInfo[key].id)
+    let layerId = Object.keys(layersInfo).find(
+      (key) => featureId === layersInfo[key].id
     );
 
     let markdown = layerInfo?.information,
@@ -243,9 +244,10 @@ class FeatureInfoContainer extends React.PureComponent {
     // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Optional_chaining),
     // which will return the new caption, if exists, or a falsy value. If falsy value is returned,
     // just fall back to the previous value of caption.
-    if (layerId) {
-      caption = layersInfo[layerId]?.caption || caption;
-    }
+    caption =
+      feature.layer?.layersInfo?.[layer]?.caption ||
+      layersInfo[layerId]?.caption ||
+      caption;
     markdown = this.getMarkdownFromLocalInfoBox(feature, layer, markdown);
 
     // Disabled shortcodes for now as they mess with Markdown tags
