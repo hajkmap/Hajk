@@ -72,6 +72,7 @@ body {
   font-size: 5rem;
   font-variant-caps: all-small-caps;
   font-style: italic;
+  text-align: center;
 }
 
 .app-version {
