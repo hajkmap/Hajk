@@ -3,10 +3,11 @@ import {
   Button,
   Checkbox,
   Dialog,
+  DialogActions,
   DialogContent,
   DialogContentText,
   FormControlLabel,
-  Grid,
+  FormGroup,
   Link,
   Slide,
 } from "@mui/material";
@@ -19,10 +20,12 @@ const DEFAULT_MESSAGE =
 const DEFAULT_URL =
   "https://pts.se/sv/bransch/regler/lagar/lag-om-elektronisk-kommunikation/kakor-cookies/";
 
-const StyledDialog = styled(Dialog)(() => ({
-  "& .MuiDialog-container": {
-    alignItems: "flex-end",
-    padding: "16px 20px",
+const StyledDialog = styled(Dialog)(({ theme }) => ({
+  [theme.breakpoints.up("sm")]: {
+    "& .MuiDialog-container": {
+      alignItems: "flex-end",
+      padding: "16px 20px",
+    },
   },
 }));
 
@@ -121,7 +124,7 @@ function CookieNotice({ globalObserver, appModel }) {
       keepMounted
       aria-describedby="cookie-dialog-content-text"
     >
-      <DialogContent sx={{ padding: 2 }}>
+      <DialogContent>
         <DialogContentText
           sx={{ color: "text.primary" }}
           id="cookie-dialog-content-text"
@@ -136,54 +139,56 @@ function CookieNotice({ globalObserver, appModel }) {
             {"Mer information om kakor"}
           </Link>
         </DialogContentText>
-        <Grid
-          container
-          direction="row"
-          alignItems="center"
-          justifyContent="flex-end"
+      </DialogContent>
+
+      <DialogActions
+        sx={{
+          flexDirection: { xs: "column", sm: "row" },
+        }}
+      >
+        <FormGroup
+          sx={{
+            flexDirection: { xs: "column", sm: "row" },
+          }}
         >
-          <Grid item>
-            <LabeledCheckbox
-              disabled={true}
-              checked={true}
-              label={"Nödvändiga"}
-            />
+          <LabeledCheckbox
+            disabled={true}
+            checked={true}
+            label={"Nödvändiga"}
+          />
+          <LabeledCheckbox
+            onChange={(event) => {
+              setFunctionalChecked(event.target.checked);
+            }}
+            checked={functionalChecked}
+            label={"Funktionella"}
+          />
+          {showThirdPartCheckbox && (
             <LabeledCheckbox
               onChange={(event) => {
-                setFunctionalChecked(event.target.checked);
+                setThirdPartChecked(event.target.checked);
               }}
-              checked={functionalChecked}
-              label={"Funktionella"}
+              checked={thirdPartChecked}
+              label={"Tredjepart"}
             />
-            {showThirdPartCheckbox && (
-              <LabeledCheckbox
-                onChange={(event) => {
-                  setThirdPartChecked(event.target.checked);
-                }}
-                checked={thirdPartChecked}
-                label={"Tredjepart"}
-              />
-            )}
-          </Grid>
-          <Grid item>
-            <Button
-              color="primary"
-              variant="contained"
-              onClick={handleAllowSelectedClick}
-            >
-              {"Tillåt valda"}
-            </Button>
-            <Button
-              color="primary"
-              variant="contained"
-              onClick={handleAllowAllClick}
-              style={{ marginLeft: 8 }}
-            >
-              {"Tillåt Alla"}
-            </Button>
-          </Grid>
-        </Grid>
-      </DialogContent>
+          )}
+        </FormGroup>
+        <Button
+          color="primary"
+          variant="contained"
+          onClick={handleAllowSelectedClick}
+        >
+          {"Tillåt valda"}
+        </Button>
+        <Button
+          color="primary"
+          variant="contained"
+          onClick={handleAllowAllClick}
+          sx={{ margin: [1, 1] }}
+        >
+          {"Tillåt Alla"}
+        </Button>
+      </DialogActions>
     </StyledDialog>
   );
 }
