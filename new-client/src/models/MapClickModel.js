@@ -243,9 +243,21 @@ export default class MapClickModel {
               (response.value.layer?.ol_uid &&
                 "." + response.value.layer?.ol_uid);
 
+            // Get layer for this dataset.
+            const layer = response.value.layer;
+
+            // Get the feature's ID and remove the unique identifier after the last dot, since there can be dots that is part of the ID.
+            // If the featureId is equal to the corresponding layersInfo object entry's ID, then set the id variable.
+            let featureId = feature.getId().split(".").slice(0, -1).join(".");
+            let layersInfo = layer.layersInfo;
+            let id = Object.keys(layersInfo).find(
+              (key) => featureId === layersInfo[key].id
+            );
+
             // Get caption for this dataset
+            // If there are layer groups, we get the display name from the layer's caption.
             const displayName =
-              response.value.layer?.layersInfo?.[layerName]?.caption ||
+              layersInfo[id]?.caption ||
               response.value.layer?.get("caption") ||
               "Unnamed dataset";
 
