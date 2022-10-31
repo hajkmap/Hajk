@@ -4,6 +4,7 @@ import ad from "./activedirectory.service";
 import asyncFilter from "../utils/asyncFilter";
 import log4js from "log4js";
 import getAnalyticsOptionsFromDotEnv from "../utils/getAnalyticsOptionsFromDotEnv";
+import { XMLParser } from "fast-xml-parser";
 
 const logger = log4js.getLogger("service.config");
 
@@ -384,6 +385,118 @@ class ConfigService {
       // and replace the return below with something like this:
       // return this.washLayersStore(json);
       return json;
+    } catch (error) {
+      return { error };
+    }
+  }
+
+  async verifyLayers() {
+    // Prepare the XML parser
+    const xmlParser = new XMLParser();
+
+    // Prepare a delay utility - we don't want to send all fetch request simultaneously
+    const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+    // Prepare a return object with properties, read to push to
+    const returnObject = { missingWMSLayers: [] };
+
+    try {
+      // Read the JSON layers store without any restrictions (hence the parameters)
+      const layers = await this.getLayersStore(false, false);
+
+      // Extract layer stores
+      const { wmslayers } = layers;
+
+      // We want to group layers by service URL. This object will keep track.
+      const getCapabilitiesUrls = {};
+
+      // Now, iterate WMS layers and group by URL to service
+      wmslayers.forEach((l) => {
+        if (!Object.hasOwn(getCapabilitiesUrls, l.url)) {
+          getCapabilitiesUrls[l.url] = [
+            {
+              id: l.id,
+              caption: l.caption,
+              layers: [...l.layers],
+            },
+          ];
+        } else {
+          getCapabilitiesUrls[l.url].push({
+            id: l.id,
+            caption: l.caption,
+            layers: [...l.layers],
+          });
+        }
+      });
+
+      // For each of the URLs to the WMS services…
+      for (const [url, layersObject] of Object.entries(getCapabilitiesUrls)) {
+        // … check if the URL already contains "?". If so, we want to append
+        // our remaining URL params.
+        const glue = url.includes("?") ? "&" : "?";
+
+        // Next, prepare the URL that we will fetch in order to GetCapabilities
+        const getCapabilitiesUrl =
+          url +
+          glue +
+          new URLSearchParams({
+            SERVICE: "WMS",
+            VERSION: "1.3.0",
+            REQUEST: "GetCapabilities",
+          });
+
+        // A sligth delay - too many requests to the same server can cause a block
+        await delay(100);
+
+        // Go fetch
+        const response = await fetch(getCapabilitiesUrl);
+
+        // We expect XML, so let's parse response as text
+        const text = await response.text();
+
+        // Next, let's parse the XML itself
+        const json = xmlParser.parse(text);
+
+        // The parsed response will contain service's available layers.
+        // Let's prepare a simple array (of strings) that will contain
+        // layer names that exist on this given WMS service.
+        const layersFromGetCapabilities =
+          json?.WMS_Capabilities?.Capability?.Layer?.Layer?.map?.(
+            (l) => l.Name
+          );
+
+        // Compare reportedly existing layers with those from Hajk's repository
+        const missing = layersObject
+          .map((l) => {
+            // Filter the array by saving all layers that do not exist in GetCapabilities
+            const missingLayers = l.layers.filter(
+              (x) => !layersFromGetCapabilities?.includes(x)
+            );
+
+            // If we found something…
+            if (missingLayers.length > 0) {
+              // …prepare a nice return object that, apart from the
+              // missing layers, contains some handy properties (e.g. layer ID).
+              return {
+                getCapabilitiesUrl,
+                hajkLayerId: l.id,
+                hajkCaption: l.caption,
+                missingLayers,
+              };
+            }
+          })
+          .filter((el) => el); // Final filter to remove empty entries (as .map() will return an object for each element in array)
+
+        // Push only if we've got any missing layers
+        missing.length > 0 &&
+          returnObject.missingWMSLayers.push({
+            url, // This WMS's URL
+            missing,
+          });
+      }
+
+      // Spread the return. No need to see the 'returnObject' as a container.
+      return { ...returnObject };
     } catch (error) {
       return { error };
     }
