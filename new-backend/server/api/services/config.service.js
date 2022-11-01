@@ -8,6 +8,9 @@ import { XMLParser } from "fast-xml-parser";
 
 const logger = log4js.getLogger("service.config");
 
+// Prepare a delay utility - we don't want to send all fetch request simultaneously
+const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
 class ConfigService {
   constructor() {
     // TODO: As reading files is expansive, we can read all
@@ -17,6 +20,8 @@ class ConfigService {
     // have a global bus (using EventEmitter?), so we can trigger
     // re-reads from FS into our in-memory store.
     logger.trace("Initiating ConfigService");
+    // Prepare the XML parser
+    this.xmlParser = new XMLParser();
   }
 
   /**
@@ -390,113 +395,145 @@ class ConfigService {
     }
   }
 
+  async #verifyOWSLayers({ type, layers }) {
+    const missingLayers = [];
+
+    // We want to group layers by service URL. This object will keep track.
+    const getCapabilitiesUrls = {};
+
+    // Now, iterate WMS layers and group by URL to service
+    layers.forEach((l) => {
+      if (!Object.hasOwn(getCapabilitiesUrls, l.url)) {
+        getCapabilitiesUrls[l.url] = [
+          {
+            id: l.id,
+            caption: l.caption,
+            layers: [...l.layers],
+          },
+        ];
+      } else {
+        getCapabilitiesUrls[l.url].push({
+          id: l.id,
+          caption: l.caption,
+          layers: [...l.layers],
+        });
+      }
+    });
+
+    // For each of the URLs to the WMS services…
+    for (const [url, layersObject] of Object.entries(getCapabilitiesUrls)) {
+      // … check if the URL already contains "?". If so, we want to append
+      // our remaining URL params.
+      const glue = url.includes("?") ? "&" : "?";
+
+      // Next, prepare the URL that we will fetch in order to GetCapabilities
+      let params = {};
+      switch (type) {
+        case "wms":
+          params = {
+            SERVICE: "WMS",
+            VERSION: "1.3.0",
+            REQUEST: "GetCapabilities",
+          };
+          break;
+        case "wfs":
+          params = {
+            SERVICE: "WFS",
+            VERSION: "2.0.0",
+            REQUEST: "GetCapabilities",
+          };
+          break;
+
+        default:
+          throw "Unknown OWS type provided";
+      }
+      const getCapabilitiesUrl = url + glue + new URLSearchParams(params);
+
+      // A slight delay - too many requests to the same server can cause a block
+      await delay(100);
+
+      // Go fetch
+      const response = await fetch(getCapabilitiesUrl);
+
+      // We expect XML, so let's parse response as text
+      const text = await response.text();
+
+      // Next, let's parse the XML itself
+      const json = this.xmlParser.parse(text);
+
+      // The parsed response will contain service's available layers.
+      // Let's prepare a simple array (of strings) that will contain
+      // layer names that exist on this given WMS service.
+      let layersFromGetCapabilities = "";
+      switch (type) {
+        case "wms":
+          layersFromGetCapabilities =
+            json?.WMS_Capabilities?.Capability?.Layer?.Layer?.map?.(
+              (l) => l.Name
+            );
+          break;
+        case "wfs":
+          layersFromGetCapabilities = json?.[
+            "wfs:WFS_Capabilities"
+          ]?.FeatureTypeList?.FeatureType?.map?.((l) => l.Name);
+          break;
+
+        default:
+          throw "Unknown OWS type provided";
+      }
+
+      // Compare reportedly existing layers with those from Hajk's repository
+      const missing = layersObject
+        .map((l) => {
+          // Filter the array by saving all layers that do not exist in GetCapabilities
+          const missingLayers = l.layers.filter(
+            (x) => !layersFromGetCapabilities?.includes(x)
+          );
+
+          // If we found something…
+          if (missingLayers.length > 0) {
+            // …prepare a nice return object that, apart from the
+            // missing layers, contains some handy properties (e.g. layer ID).
+            return {
+              getCapabilitiesUrl,
+              hajkLayerId: l.id,
+              hajkCaption: l.caption,
+              missingLayers,
+            };
+          }
+        })
+        .filter((el) => el); // Final filter to remove empty entries (as .map() will return an object for each element in array)
+
+      // Push only if we've got any missing layers
+      missing.length > 0 &&
+        missingLayers.push({
+          url, // This WMS's URL
+          missing,
+        });
+    }
+
+    // Spread the return. No need to see the 'returnObject' as a container.
+    return missingLayers;
+  }
+
   async verifyLayers() {
-    // Prepare the XML parser
-    const xmlParser = new XMLParser();
-
-    // Prepare a delay utility - we don't want to send all fetch request simultaneously
-    const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
-
-    // Prepare a return object with properties, read to push to
-    const returnObject = { missingWMSLayers: [] };
-
     try {
       // Read the JSON layers store without any restrictions (hence the parameters)
       const layers = await this.getLayersStore(false, false);
 
       // Extract layer stores
-      const { wmslayers } = layers;
+      const { wmslayers, wfslayers } = layers;
 
-      // We want to group layers by service URL. This object will keep track.
-      const getCapabilitiesUrls = {};
-
-      // Now, iterate WMS layers and group by URL to service
-      wmslayers.forEach((l) => {
-        if (!Object.hasOwn(getCapabilitiesUrls, l.url)) {
-          getCapabilitiesUrls[l.url] = [
-            {
-              id: l.id,
-              caption: l.caption,
-              layers: [...l.layers],
-            },
-          ];
-        } else {
-          getCapabilitiesUrls[l.url].push({
-            id: l.id,
-            caption: l.caption,
-            layers: [...l.layers],
-          });
-        }
+      const missingWMSLayers = await this.#verifyOWSLayers({
+        type: "wms",
+        layers: wmslayers,
+      });
+      const missingWFSLayers = await this.#verifyOWSLayers({
+        type: "wfs",
+        layers: wfslayers,
       });
 
-      // For each of the URLs to the WMS services…
-      for (const [url, layersObject] of Object.entries(getCapabilitiesUrls)) {
-        // … check if the URL already contains "?". If so, we want to append
-        // our remaining URL params.
-        const glue = url.includes("?") ? "&" : "?";
-
-        // Next, prepare the URL that we will fetch in order to GetCapabilities
-        const getCapabilitiesUrl =
-          url +
-          glue +
-          new URLSearchParams({
-            SERVICE: "WMS",
-            VERSION: "1.3.0",
-            REQUEST: "GetCapabilities",
-          });
-
-        // A sligth delay - too many requests to the same server can cause a block
-        await delay(100);
-
-        // Go fetch
-        const response = await fetch(getCapabilitiesUrl);
-
-        // We expect XML, so let's parse response as text
-        const text = await response.text();
-
-        // Next, let's parse the XML itself
-        const json = xmlParser.parse(text);
-
-        // The parsed response will contain service's available layers.
-        // Let's prepare a simple array (of strings) that will contain
-        // layer names that exist on this given WMS service.
-        const layersFromGetCapabilities =
-          json?.WMS_Capabilities?.Capability?.Layer?.Layer?.map?.(
-            (l) => l.Name
-          );
-
-        // Compare reportedly existing layers with those from Hajk's repository
-        const missing = layersObject
-          .map((l) => {
-            // Filter the array by saving all layers that do not exist in GetCapabilities
-            const missingLayers = l.layers.filter(
-              (x) => !layersFromGetCapabilities?.includes(x)
-            );
-
-            // If we found something…
-            if (missingLayers.length > 0) {
-              // …prepare a nice return object that, apart from the
-              // missing layers, contains some handy properties (e.g. layer ID).
-              return {
-                getCapabilitiesUrl,
-                hajkLayerId: l.id,
-                hajkCaption: l.caption,
-                missingLayers,
-              };
-            }
-          })
-          .filter((el) => el); // Final filter to remove empty entries (as .map() will return an object for each element in array)
-
-        // Push only if we've got any missing layers
-        missing.length > 0 &&
-          returnObject.missingWMSLayers.push({
-            url, // This WMS's URL
-            missing,
-          });
-      }
-
-      // Spread the return. No need to see the 'returnObject' as a container.
-      return { ...returnObject };
+      return { missingWMSLayers, missingWFSLayers };
     } catch (error) {
       return { error };
     }
