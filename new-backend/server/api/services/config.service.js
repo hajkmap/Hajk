@@ -397,7 +397,7 @@ class ConfigService {
 
   async #verifyOWSLayers({ type, layers }) {
     const missingLayers = [];
-
+    const errors = [];
     // We want to group layers by service URL. This object will keep track.
     const getCapabilitiesUrls = {};
 
@@ -452,19 +452,50 @@ class ConfigService {
       // A slight delay - too many requests to the same server can cause a block
       await delay(100);
 
-      // Go fetch
-      const response = await fetch(getCapabilitiesUrl);
+      let response,
+        text,
+        json = "";
+      try {
+        // Go fetch
+        response = await fetch(getCapabilitiesUrl);
 
-      // We expect XML, so let's parse response as text
-      const text = await response.text();
+        // Ensure that we got a correct response.
+        if (response.status !== 200) {
+          throw new Error(
+            `Error: expected response status 200. Got ${response.status}.`
+          );
+        } else {
+          // If the response was OK, we expect XML.
+          // Let's parse response as text…
+          text = await response.text();
+          // …next, let's parse the XML itself.
+          json = this.xmlParser.parse(text);
+        }
+      } catch (error) {
+        // We want to display all errors that ocurred during the loop,
+        // so we push this one to the array that will be appended to the
+        // response.
+        errors.push({
+          url: getCapabilitiesUrl,
+          message: error?.cause?.toString() || error.message,
+        });
 
-      // Next, let's parse the XML itself
-      const json = this.xmlParser.parse(text);
+        // In addition (and this is important!), we skip the remaining code
+        // (by continuing the for-loop). If we didn't get the expected response,
+        // we don't have anything to compare our layers against - so there's no
+        // need to do it. The results would be misleading.
+        continue;
+      }
+
+      // If we got this far, it means that fetching and parsing were successful.
 
       // The parsed response will contain service's available layers.
       // Let's prepare a simple array (of strings) that will contain
       // layer names that exist on this given WMS service.
       let layersFromGetCapabilities = "";
+
+      // Depending on OWS service type (WMS or WFS), the actual layers will be
+      // found in slightly different locations in the response.
       switch (type) {
         case "wms":
           layersFromGetCapabilities =
@@ -513,7 +544,7 @@ class ConfigService {
     }
 
     // Spread the return. No need to see the 'returnObject' as a container.
-    return missingLayers;
+    return { services: missingLayers, errors };
   }
 
   async verifyLayers() {
@@ -533,7 +564,7 @@ class ConfigService {
         layers: wfslayers,
       });
 
-      return { missingWMSLayers, missingWFSLayers };
+      return { wms: missingWMSLayers, wfs: missingWFSLayers };
     } catch (error) {
       return { error };
     }
