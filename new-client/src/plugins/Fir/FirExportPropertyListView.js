@@ -97,7 +97,7 @@ class FirExportPropertyListView extends React.PureComponent {
     };
 
     let data = {
-      fnr: fnrList,
+      uuid: fnrList,
       param: params,
     };
 
