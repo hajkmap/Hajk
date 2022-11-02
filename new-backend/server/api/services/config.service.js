@@ -514,8 +514,8 @@ class ConfigService {
       }
 
       // Compare reportedly existing layers with those from Hajk's repository
-      const missing = layersObject
-        .map((l) => {
+      const missing = await Promise.allSettled(
+        layersObject.map(async (l) => {
           // Filter the array by saving all layers that do not exist in GetCapabilities
           const missingLayers = l.layers.filter(
             (x) => !layersFromGetCapabilities?.includes(x)
@@ -523,27 +523,118 @@ class ConfigService {
 
           // If we found something…
           if (missingLayers.length > 0) {
-            // …prepare a nice return object that, apart from the
-            // missing layers, contains some handy properties (e.g. layer ID).
+            // …ensure that the layer is really missing. We can have false positives
+            // here, because layers can be available but _not_ announced by the OWS service.
+            const problematic = [];
+
+            const reallyMissingLayers = await Promise.allSettled(
+              missingLayers.map(async (ml) => {
+                let describeParams = {};
+                switch (type) {
+                  case "wms":
+                    describeParams = {
+                      SERVICE: "WMS",
+                      VERSION: "1.1.1",
+                      SLD_VERSION: "1.1.0",
+                      REQUEST: "DescribeLayer",
+                      LAYERS: ml,
+                    };
+                    break;
+                  case "wfs":
+                    describeParams = {
+                      SERVICE: "WFS",
+                      VERSION: "1.1.1",
+                      REQUEST: "DescribeFeatureType",
+                      TYPENAME: ml,
+                    };
+                    break;
+
+                  default:
+                    break;
+                }
+
+                const describeLayerUrl =
+                  url + glue + new URLSearchParams(describeParams);
+
+                const response = await fetch(describeLayerUrl);
+
+                if (response.status !== 200) {
+                  errors.push({
+                    url: describeLayerUrl,
+                    message: `Error: expected response status 200. Got ${response.status}.`,
+                  });
+                  return ml;
+                } else {
+                  try {
+                    const text = await response.text();
+                    const xml = this.xmlParser.parse(text);
+
+                    // If XML does not contain any of the following:
+                    if (
+                      !Object.hasOwn(xml, "WMS_DescribeLayerResponse") && // GeoServer WMS
+                      !Object.hasOwn(xml, "DescribeLayerResponse") && // QGIS Server WMS
+                      !Object.hasOwn(xml, "xsd:complexType") && // GeoServer WFS
+                      !Object.hasOwn(xml, "complexType") // QGIS Server WFS
+                    ) {
+                      // … we can consider the layer missing (hence return it back to the missing array).
+                      return ml;
+                    } else {
+                      // Else, the layer seems OK according to DescribeLayer, but it did not
+                      // show up in GetCapabilities. This can be fully legit (i.e. layer not announced).
+                      // But it can also mean that there are other problems. Therefore, it's nice to collect
+                      // those problematic layers and return them as well.
+                      problematic.push({
+                        describeLayerUrl,
+                        layer: ml,
+                      });
+                      // Return a null value so we can wash the array further on.
+                      return null;
+                    }
+                  } catch (error) {
+                    // Push any errors to the errors array…
+                    errors.push({
+                      url: describeLayerUrl,
+                      message: error?.cause?.toString() || error.message,
+                    });
+                    // …and return null so we can wash empty values from the array.
+                    return null;
+                  }
+                }
+              })
+            );
+            // …prepare a nice return object that contains some
+            // handy properties (e.g. layer ID and caption).
             return {
-              getCapabilitiesUrl,
-              hajkLayerId: l.id,
               hajkCaption: l.caption,
-              missingLayers,
+              hajkLayerId: l.id,
+              getCapabilitiesUrl,
+              missing: reallyMissingLayers.flatMap(
+                // flatMap will wash the array of Promises and extract
+                // only those with a value (removing empty elements from the array)
+                ({ value }) => (value === null ? [] : value) // returning an empty array from flatMap removes element
+              ),
+              problematic,
             };
+          } else {
+            return null;
           }
         })
-        .filter((el) => el); // Final filter to remove empty entries (as .map() will return an object for each element in array)
+      );
+
+      // Final filter to "remove" empty entries: we'll have an element for each
+      // settled promise, but we're only interested in those with a "value" property.
+      const washedMissingLayers = missing.flatMap(({ value }) =>
+        value === null ? [] : value
+      );
 
       // Push only if we've got any missing layers
-      missing.length > 0 &&
+      washedMissingLayers.length > 0 &&
         missingLayers.push({
-          url, // This WMS's URL
-          missing,
+          url,
+          hajkLayers: washedMissingLayers,
         });
     }
 
-    // Spread the return. No need to see the 'returnObject' as a container.
     return { services: missingLayers, errors };
   }
 
