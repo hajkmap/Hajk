@@ -14,10 +14,10 @@ import AppModel from "../models/AppModel.js";
 const convertRGBAtoString = (color) => {
   if (
     typeof color === "object" &&
-    Object.hasOwn(color, "r") &&
-    Object.hasOwn(color, "g") &&
-    Object.hasOwn(color, "b") &&
-    Object.hasOwn(color, "a")
+    color.hasOwnProperty("r") &&
+    color.hasOwnProperty("g") &&
+    color.hasOwnProperty("b") &&
+    color.hasOwnProperty("a")
   ) {
     return `rgba(${color.r},${color.g},${color.b},${color.a})`;
   } else {
@@ -152,7 +152,7 @@ export default class MapClickModel {
    * @return {string} layerName
    */
   #getLayerNameFromVectorFeature = (feature) => {
-    return feature.getId().split(".")[0];
+    return feature.getId()?.split(".")[0];
   };
 
   /**
@@ -346,7 +346,10 @@ export default class MapClickModel {
             // code, which expects search results on the following form:
             feature.layer = layer;
             searchResultFeatures.push(feature);
-          } else if (layer?.get("queryable") === true) {
+          } else if (
+            layer?.get("queryable") === true &&
+            layer?.get("ignoreInFeatureInfo") !== true
+          ) {
             // If we have any features from vector (WFS) layers, we want
             // to return them in a way that is similar to how the GetFeatureInfo
             // features are treated. This will make it easy in the Component,

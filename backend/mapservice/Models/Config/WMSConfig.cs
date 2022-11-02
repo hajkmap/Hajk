@@ -24,12 +24,6 @@ namespace MapService.Models.Config
         public string searchUrl { get; set; }
     }
 
-    public class DpiSetting
-    {
-        public double pxRatio { get; set; }
-        public int dpi { get; set; }
-    }
-
 
     public class WMSConfig : ILayerConfig
     {
@@ -139,7 +133,7 @@ namespace MapService.Models.Config
         public string timeSliderEnd { get; set; }
 
         public bool useCustomDpiList { get; set; }
-        public DpiSetting[] customDpiList { get; set; }
+        public object[] customDpiList { get; set; }
 
         public int? zIndex { get; set; }
 

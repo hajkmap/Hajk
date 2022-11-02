@@ -48,6 +48,7 @@ class PrintView extends React.PureComponent {
   state = {
     format: "a4", // a0-a5
     useMargin: this.props.options.useMargin ?? false, // User can choose to have a margin around the map-image
+    useTextIconsInMargin: this.props.options.useTextIconsInMargin ?? false,
     orientation: "landscape",
     resolution: 150, // 72, 150, 300,
     scale: this.props.scales[Math.round((this.props.scales.length - 1) / 2)], // 10000 means scale of 1:10000
@@ -151,6 +152,7 @@ class PrintView extends React.PureComponent {
   getPrintOptions = () => {
     return {
       useMargin: this.state.useMargin,
+      useTextIconsInMargin: this.state.useTextIconsInMargin,
       format: this.state.format,
       orientation: this.state.orientation,
       resolution: this.state.resolution,
@@ -222,6 +224,7 @@ class PrintView extends React.PureComponent {
     const {
       scale,
       useMargin,
+      useTextIconsInMargin,
       format,
       orientation,
       resolution,
@@ -233,6 +236,7 @@ class PrintView extends React.PureComponent {
       <GeneralOptions
         scales={scales}
         useMargin={useMargin}
+        useTextIconsInMargin={useTextIconsInMargin}
         scale={scale}
         format={format}
         resolution={resolution}
@@ -298,6 +302,7 @@ class PrintView extends React.PureComponent {
       previewLayerVisible,
       scale,
       useMargin,
+      useTextIconsInMargin,
       format,
       orientation,
       printInProgress,
@@ -311,6 +316,7 @@ class PrintView extends React.PureComponent {
       format: format,
       orientation: orientation,
       useMargin: useMargin,
+      useTextIconsInMargin: useTextIconsInMargin,
     });
 
     return (

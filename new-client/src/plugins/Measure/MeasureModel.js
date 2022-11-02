@@ -1,7 +1,7 @@
 import { Circle as CircleStyle, Fill, Stroke, Style, Text } from "ol/style.js";
 import { Vector as VectorSource } from "ol/source.js";
 import { Vector as VectorLayer } from "ol/layer.js";
-import { LineString, Polygon } from "ol/geom.js";
+import { LineString, Polygon, Circle } from "ol/geom.js";
 import Draw from "ol/interaction/Draw.js";
 
 import Overlay from "ol/Overlay";
@@ -89,6 +89,11 @@ class MeasureModel {
 
         if (e.target instanceof Polygon) {
           toolTip = this.formatLabel("area", e.target.getArea());
+          coord = pointerCoord || e.target.getFirstCoordinate();
+        }
+
+        if (e.target instanceof Circle) {
+          toolTip = this.formatLabel("circle", e.target.getRadius());
           coord = pointerCoord || e.target.getFirstCoordinate();
         }
 

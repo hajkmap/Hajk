@@ -363,11 +363,18 @@ class Search extends Component {
       case "secondaryLabelFields":
       case "shortDisplayFields":
       case "searchFields":
-        valid = value.every((val) => /^\w+$/.test(val));
+        valid = value.every((val) =>
+          // Ensure that we allow most glyphs from most languages but prevent some "invalid"
+          // characters such as ` or ^ or %. See #1187.
+          /^[\p{L}\u0590-\u05fe_-]+[\p{L}\p{N}\u0590-\u05fe_\-.]+(\s+[\p{L}\p{N}\u0590-\u05fe_-]+)*$/gu.test(
+            val
+          )
+        );
+
+        // Completely empty strings are valid too
         if (value.length === 1 && value[0] === "") {
           valid = true;
         }
-
         break;
       case "layers":
         if (value.length === 0) {

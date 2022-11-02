@@ -11,7 +11,7 @@ import WFSVectorLayer from "./layers/VectorLayer.js";
 import { bindMapClickEvent } from "./Click.js";
 import MapClickModel from "./MapClickModel";
 import { defaults as defaultInteractions } from "ol/interaction";
-import { Map, View } from "ol";
+import { Map as OLMap, View } from "ol";
 // TODO: Uncomment and ensure they show as expected
 // import {
 // defaults as defaultControls,
@@ -47,6 +47,7 @@ class AppModel {
     this.layersFromParams = [];
     this.cqlFiltersFromParams = {};
     this.hfetch = hfetch;
+    this.pluginHistory = new Map();
 
     // We store the click location data here for later use.
     // Right now this is only used in the new infoClick but it will most likely be used in other parts of the program.
@@ -104,6 +105,24 @@ class AppModel {
           window.closeWindow();
         }
       });
+  }
+
+  pushPluginIntoHistory(plugin) {
+    // plugin is an object that will contain a 'type' as well as some
+    // other properties. We use the 'type' as a unique key in our Map.
+    const { type, ...rest } = plugin;
+    // If plugin already exists in set…
+    if (this.pluginHistory.has(type)) {
+      // …remove it first so that we don't have duplicates.
+      this.pluginHistory.delete(type);
+    }
+    this.pluginHistory.set(type, rest);
+
+    // Finally, announce to everyone who cares
+    this.globalObserver.publish(
+      "core.pluginHistoryChanged",
+      this.pluginHistory
+    );
   }
 
   getClickLocationData() {
@@ -300,7 +319,7 @@ class AppModel {
       }),
     };
 
-    this.map = new Map({
+    this.map = new OLMap({
       controls: [
         // new FullScreen({ target: document.getElementById("controls-column") }),
         // new Rotate({ target: document.getElementById("controls-column") }),
@@ -817,9 +836,17 @@ class AppModel {
           // Find the corresponding layer
           const layer = layers.wmslayers.find((l) => l.id === wmslayerId);
 
+          // Prevent crash if no layer was found, see #1206
+          if (layer === undefined) {
+            console.warn(
+              `WMS layer with ID "${wmslayerId}" does not exist and should be removed from config. Please contact the system administrator.`
+            );
+            return undefined;
+          }
+
           // Look into the layersInfo array - it will contain sublayers. We must
           // expose each one of them as a WFS service.
-          return layer.layersInfo.map((sl) => {
+          return layer?.layersInfo.map((sl) => {
             return {
               id: sl.id,
               pid: layer.id, // Relevant for group layers: will hold the actual OL layer name, not only current sublayer
@@ -854,8 +881,9 @@ class AppModel {
       );
 
       // Spread the WMS search layers onto the array with WFS search sources,
-      // from now on they're equal to our code.
-      Array.isArray(wmslayers) && wfslayers.push(...wmslayers);
+      // from now on they're equal to our code. Before spreading, let's filter
+      // the wmslayers so we get rid of potential undefined values (see #1206).
+      Array.isArray(wmslayers) && wfslayers.push(...wmslayers.filter(Boolean));
 
       searchTool.options.sources = wfslayers;
     }
