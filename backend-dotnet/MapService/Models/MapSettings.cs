@@ -2,7 +2,7 @@
 
 namespace MapService.Models
 {
-    public class mapsettings
+    public class MapSettings
     {
         /// <summary>
         /// Specify the drawer contents that should be active on start.
