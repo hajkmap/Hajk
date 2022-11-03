@@ -16,6 +16,8 @@ export default class LayerInfo {
     this.infoClickSortDesc = properties.infoClickSortDesc;
     this.infoClickSortProperty = properties.infoClickSortProperty;
     this.information = properties.information;
+    this.layers = properties.layers;
+    this.layersInfo = properties.layersInfo;
     this.legend = properties.legend;
     this.legendIcon = properties.legendIcon;
     this.searchDisplayName = properties.searchDisplayName;
