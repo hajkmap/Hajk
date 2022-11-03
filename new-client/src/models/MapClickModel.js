@@ -14,10 +14,10 @@ import AppModel from "../models/AppModel.js";
 const convertRGBAtoString = (color) => {
   if (
     typeof color === "object" &&
-    Object.hasOwn(color, "r") &&
-    Object.hasOwn(color, "g") &&
-    Object.hasOwn(color, "b") &&
-    Object.hasOwn(color, "a")
+    color.hasOwnProperty("r") &&
+    color.hasOwnProperty("g") &&
+    color.hasOwnProperty("b") &&
+    color.hasOwnProperty("a")
   ) {
     return `rgba(${color.r},${color.g},${color.b},${color.a})`;
   } else {
