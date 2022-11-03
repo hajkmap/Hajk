@@ -76,15 +76,11 @@ class AttributeEditor extends React.Component {
         } else {
           //If the feature has field: "" it will be changed to the default value.
           //Not sure if we want this behavior?
-          //Object that returns as a string results in [object] [Object]
-          if (
-            JSON.stringify(featureProps[field.name]) === '{"xsi:nil":"true"}'
-          ) {
-            valueMap[field.name] = "";
-          } else {
-            valueMap[field.name] =
-              featureProps[field.name] || field.defaultValue || "";
-          }
+          //QGIS-server, object that returns as a string results in [object] [Object]
+          featureProps[field.name]?.["xsi:nil"] === "true"
+            ? (valueMap[field.name] = "")
+            : (valueMap[field.name] =
+                featureProps[field.name] || field.defaultValue || "");
         }
       }
     });
