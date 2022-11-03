@@ -248,9 +248,9 @@ export default class MapClickModel {
 
             // Get the feature's ID and remove the unique identifier after the last dot, since there can be dots that is part of the ID.
             // If the featureId is equal to the corresponding layersInfo object entry's ID, then set the id variable.
-            let featureId = feature.getId().split(".").slice(0, -1).join(".");
-            let layersInfo = layer.layersInfo;
-            let id = Object.keys(layersInfo).find(
+            const featureId = feature.getId().split(".").slice(0, -1).join(".");
+            const layersInfo = layer.layersInfo;
+            const id = Object.keys(layersInfo).find(
               (key) => featureId === layersInfo[key].id
             );
 

@@ -221,9 +221,9 @@ class FeatureInfoContainer extends React.PureComponent {
 
     // Get current id of feature and find out if it occurs in the layersInfo array.
     // Remove the unique identifier after the last dot, since there can be dots that is part of the ID.
-    let featureId = feature.getId().split(".").slice(0, -1).join(".");
-    let layersInfo = layerInfo.layersInfo;
-    let layerId = Object.keys(layersInfo).find(
+    const featureId = feature.getId().split(".").slice(0, -1).join(".");
+    const layersInfo = layerInfo.layersInfo;
+    const layerId = Object.keys(layersInfo).find(
       (key) => featureId === layersInfo[key].id
     );
 
