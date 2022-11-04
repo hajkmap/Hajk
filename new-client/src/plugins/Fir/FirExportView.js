@@ -56,7 +56,6 @@ class FirExportView extends React.PureComponent {
           ) : (
             ""
           )}
-
           {this.model.config.residentList ? (
             <FirExportResidentListView
               results={this.state.results}
@@ -67,8 +66,8 @@ class FirExportView extends React.PureComponent {
           ) : (
             ""
           )}
-
-          {this.model.config.edp ? (
+          {/* // TODO: Remove all references to EDP */}
+          {/* {this.model.config.edp ? (
             <FirExportEdpView
               results={this.state.results}
               model={this.model}
@@ -77,7 +76,7 @@ class FirExportView extends React.PureComponent {
             />
           ) : (
             ""
-          )}
+          )} */}
         </div>
       </>
     );
