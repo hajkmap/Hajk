@@ -4,6 +4,8 @@ class FirStyles {
   constructor(model) {
     const config = model.config;
     this.colors = {
+      selection: config.colors?.selection || "rgba(255,255,0,0.15)",
+      selectionStroke: config.colors?.selectionStroke || "rgba(0,0,0,0.6)",
       result: config.colors?.result || "rgba(255,255,0,0.15)",
       resultStroke: config.colors?.resultStroke || "rgba(0,0,0,0.6)",
       previousResult: config.colors?.previousResult || "rgba(255,0,0,0.15)",
@@ -16,6 +18,7 @@ class FirStyles {
     };
 
     this.model = model;
+    this.setSelectionStyle();
     this.setPreviousResultStyle();
     this.setResultStyle();
     this.setHighlightStyle();
@@ -28,6 +31,10 @@ class FirStyles {
 
   getResultStyle() {
     return this.resultStyle;
+  }
+
+  getSelectionStyle() {
+    return this.selectionStyle;
   }
 
   getPreviousResultStyle() {
@@ -46,6 +53,25 @@ class FirStyles {
     });
   }
 
+  setSelectionStyle() {
+    this.selectionStyle = new Style({
+      fill: new Fill({
+        color: this.getColor("selection"),
+      }),
+      stroke: new Stroke({
+        color: this.getColor("selectionStroke"),
+        width: 2,
+      }),
+      image: new Circle({
+        radius: 6,
+        stroke: new Stroke({
+          color: this.getColor("selectionStroke"),
+          width: 3,
+        }),
+      }),
+    });
+  }
+
   setPreviousResultStyle() {
     this.previousResultStyle = new Style({
       fill: new Fill({
@@ -55,6 +81,7 @@ class FirStyles {
         color: this.getColor("previousResultStroke"),
         width: 2,
       }),
+      zIndex: 100000,
     });
   }
 
