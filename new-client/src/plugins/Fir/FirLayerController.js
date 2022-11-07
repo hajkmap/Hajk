@@ -261,7 +261,7 @@ class FirLayerController {
     this.model.layers.label.getSource().addFeatures(arr);
   };
 
-  clearBeforeSearch = (options = { keepNeighborBuffer: false }, a) => {
+  clearBeforeSearch = (options = { keepNeighborBuffer: false }) => {
     let previousFeatures = [];
 
     if (options.keepNeighborBuffer === true) {
