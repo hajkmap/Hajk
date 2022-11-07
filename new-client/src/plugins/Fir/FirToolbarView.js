@@ -11,6 +11,7 @@ import Collapse from "@mui/material/Collapse";
 import TextField from "@mui/material/TextField";
 import InputAdornment from "@mui/material/InputAdornment";
 import Draw, { createBox } from "ol/interaction/Draw.js";
+import FirStyles from "./FirStyles";
 
 const ContainerTopPadded = styled("div")(({ theme }) => ({
   paddingTop: theme.spacing(2),
@@ -102,6 +103,7 @@ class FirToolbarView extends React.PureComponent {
     this.localObserver = this.props.localObserver;
     this.globalObserver = this.props.app.globalObserver;
     this.prefix = this.props.prefix || "fir";
+    this.styles = new FirStyles(this.model);
     this.initListeners();
   }
 
@@ -110,6 +112,9 @@ class FirToolbarView extends React.PureComponent {
       this.deactivateDraw();
       this.setState({ files: { list: [] } });
       this.deselectButtonItems();
+    });
+    this.model.layers.draw.getSource().on("addfeature", (e) => {
+      e.feature.setStyle(this.styles.getSelectionStyle());
     });
   };
 
@@ -202,6 +207,7 @@ class FirToolbarView extends React.PureComponent {
         type: type,
         geometryFunction: geometryFunction,
         geometryName: type,
+        style: this.styles.getSelectionStyle(),
       });
       this.interaction.on("drawend", () => {
         this.deactivateDraw();
@@ -333,7 +339,11 @@ class FirToolbarView extends React.PureComponent {
                 this.handleToolbarClick("Import");
               }}
             >
-              <InsertDriveFileIcon />
+              <InsertDriveFileIcon
+                style={{
+                  color: this.state.tools.Import.selected ? "#fff" : "#000",
+                }}
+              />
             </IconButton>
             <IconButton
               title="Ta bort objekt"
@@ -344,7 +354,11 @@ class FirToolbarView extends React.PureComponent {
                 this.handleToolbarClick("Delete");
               }}
             >
-              <DeleteIcon />
+              <DeleteIcon
+                style={{
+                  color: this.state.tools.Delete.selected ? "#fff" : "#000",
+                }}
+              />
             </IconButton>
           </StyledButtonGroup>
           <Collapse in={this.state.tools.Import.selected === true}>
