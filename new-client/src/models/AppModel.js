@@ -854,22 +854,26 @@ class AppModel {
               url: sl.searchUrl || layer.url,
               layers: [sl.id],
               searchFields:
-                typeof sl.searchPropertyName === "string"
+                typeof sl.searchPropertyName === "string" &&
+                sl.searchPropertyName.length > 0
                   ? sl.searchPropertyName.split(",")
                   : [],
               infobox: sl.infobox || "",
               infoclickIcon: sl.infoclickIcon || "",
               aliasDict: "",
               displayFields:
-                typeof sl.searchDisplayName === "string"
+                typeof sl.searchDisplayName === "string" &&
+                sl.searchDisplayName.length > 0
                   ? sl.searchDisplayName.split(",")
                   : [],
               secondaryLabelFields:
-                typeof sl.secondaryLabelFields === "string"
+                typeof sl.secondaryLabelFields === "string" &&
+                sl.secondaryLabelFields.length > 0
                   ? sl.secondaryLabelFields.split(",")
                   : [],
               shortDisplayFields:
-                typeof sl.searchShortDisplayName === "string"
+                typeof sl.searchShortDisplayName === "string" &&
+                sl.searchShortDisplayName.length > 0
                   ? sl.searchShortDisplayName.split(",")
                   : [],
               geometryField: sl.searchGeometryField || "geom",
