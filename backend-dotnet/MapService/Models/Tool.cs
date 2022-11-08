@@ -43,7 +43,7 @@
 
                 public Guid id { get; set; }
 
-                public Guid parent { get; set; }
+                public Guid? parent { get; set; }
 
                 public string? name { get; set; }
 
