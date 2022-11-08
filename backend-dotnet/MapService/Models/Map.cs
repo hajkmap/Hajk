@@ -1,8 +1,8 @@
 ﻿namespace MapService.Models
 {
-    public class MapBody
+    public class Map
     {
-        public MapBody()
+        public Map()
         {
             this.projections = new List<Projection>();
             this.tools = new List<Tool>();
