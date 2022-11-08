@@ -4,7 +4,7 @@
     {
         public Projection() 
         {
-            this.extent = new Enevelop();
+            this.extent = new Envelop();
         }
 
         public string? code 
@@ -21,7 +21,7 @@
 
         public string? definition { get; set; }
 
-        public Enevelop extent { get; set; }
+        public Envelop extent { get; set; }
 
         public string? units { get; set; }
     }

@@ -1,8 +1,8 @@
 ﻿namespace MapService.Models
 {
-    public class Enevelop
+    public class Envelop
     {
-        public string? code { get; set }
+        public string? code { get; set; }
 
         public double? x1 { get; set; }
 
