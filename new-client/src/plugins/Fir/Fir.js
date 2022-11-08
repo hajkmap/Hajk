@@ -74,7 +74,10 @@ class Fir extends React.PureComponent {
 
   loadFeatures = (features) => {
     this.layerController.clearBeforeSearch();
-    this.layerController.addFeatures(features, { zoomToLayer: true });
+    this.layerController.addFeatures(features, {
+      zoomToLayer: true,
+      clearPrevious: true,
+    });
     this.localObserver.publish("fir.search.completed", features);
   };
 

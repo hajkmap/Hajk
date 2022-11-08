@@ -1429,8 +1429,13 @@ class DrawModel {
   // Move-interaction.
   #enableMoveInteraction = (settings) => {
     // The Move-interaction will obviously need a Select-interaction so that the features to
-    // move can be selected.
-    this.#selectInteraction = new Select({ layers: [this.#drawLayer] });
+    // move can be selected. We provide `null` as style - this will cancel the default OL Select
+    // interaction (which was problematic in some situations, see #1225).
+    this.#selectInteraction = new Select({
+      layers: [this.#drawLayer],
+      style: null,
+    });
+
     // We need a handler catching the "select"-events so that we can keep track of if any
     // features has been selected or not.
     this.#selectInteraction.on("select", this.#handleFeatureSelect);

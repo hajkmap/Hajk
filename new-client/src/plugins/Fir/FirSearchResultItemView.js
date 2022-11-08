@@ -39,7 +39,7 @@ class FirSearchResultItemView extends React.PureComponent {
     model: PropTypes.object.isRequired,
     app: PropTypes.object.isRequired,
     localObserver: PropTypes.object.isRequired,
-    classes: PropTypes.object.isRequired,
+    classes: PropTypes.object,
   };
 
   static defaultProps = {};

@@ -149,7 +149,7 @@ class SearchBar extends React.PureComponent {
 
   //Can't use string.prototype.matchAll because of Edge (Polyfill not working atm)
   getMatches = (string, regex, index) => {
-    var matches = [];
+    const matches = [];
     var match = regex.exec(string);
 
     while (match != null && match[0] !== "") {
