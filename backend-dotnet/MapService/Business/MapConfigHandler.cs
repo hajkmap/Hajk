@@ -53,5 +53,30 @@ namespace MapService.Business.MapConfig
 
             return videoFileNameList;
         }
+
+        public static IEnumerable<string> GetListOfAudioFiles()
+        {
+            var audioFileNameList = new List<string>();
+
+            var uploadContentRootPath = AppDomain.CurrentDomain.GetData("UploadContentRootPath") as string;
+
+            if (uploadContentRootPath == null)
+            {
+                return audioFileNameList;
+            }
+
+            var files = FolderDataAccess.GetAllFiles(uploadContentRootPath);
+
+            foreach (string file in files)
+            {
+                if (Path.GetExtension(file).ToLower() == ".mp3" || Path.GetExtension(file).ToLower() == ".wav" || Path.GetExtension(file).ToLower() == ".ogg")
+                {
+                    var fileName = Path.GetFileName(file);
+                    audioFileNameList.Add(fileName);
+                }
+            }
+
+            return audioFileNameList;
+        }
     }
 }
