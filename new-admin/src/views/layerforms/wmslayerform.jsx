@@ -285,8 +285,8 @@ class WMSLayerForm extends Component {
 
       if (opts.children) {
         opts.children.forEach((subLayer) => {
-          addedLayersInfo[subLayer.Name] = {
-            id: subLayer.Name,
+          addedLayersInfo[subLayer.Title] = {
+            id: subLayer.Title,
             caption: "",
             legend: "",
             legendIcon: "",
@@ -314,7 +314,7 @@ class WMSLayerForm extends Component {
       if (children) {
         children.forEach((child) => {
           // clean up sublayers
-          delete addedLayersInfo[child.Name];
+          delete addedLayersInfo[child.Title];
         });
       }
 
@@ -839,54 +839,12 @@ class WMSLayerForm extends Component {
       .substring(1);
   }
 
-  addAllSublayers(opts) {
-    let subLayers = opts.children;
-    let layerNames = [...this.state.addedLayers];
-    let addedLayersInfo = { ...this.state.addedLayersInfo };
-
-    subLayers.forEach((layer) => {
-      if (subLayers.indexOf(layer.Name) === -1) {
-        layerNames.push(layer.Name);
-        addedLayersInfo[layer.Name] = {
-          id: layer.Name,
-          caption: layer.Title,
-          legend: "",
-          legendIcon: "",
-          infobox: "",
-          style: "",
-          queryable: true,
-          infoclickIcon: "",
-        };
-      }
-    });
-
-    this.setState(
-      {
-        addedLayers: [...layerNames],
-        addedLayersInfo: addedLayersInfo,
-      },
-      () => this.validateLayers(opts)
-    );
-  }
-
   renderLayersFromCapabilites() {
     if (this.state && this.state.capabilities) {
       var layers = [];
       const subLayerInfo = (opts) => {
         if (opts?.children) {
-          return (
-            <a
-              href="about:blank"
-              onClick={(e) => {
-                e.preventDefault();
-                this.addAllSublayers(opts);
-              }}
-            >
-              {"[Lägg till alla "}
-              {opts?.children?.length}
-              {" sublager separat]"}
-            </a>
-          );
+          return `(${opts?.children?.length} sublayers)`;
         }
 
         return "";
@@ -896,7 +854,7 @@ class WMSLayerForm extends Component {
 
         let trueTitle = layer.hasOwnProperty("Title") ? layer.Title : "";
 
-        const opts = this.state.layerOpts[layer.Name];
+        const opts = this.state.layerOpts[layer.Title];
 
         let queryableIcon =
           layer.queryable === "1" ? "fa fa-check" : "fa fa-remove";
@@ -920,7 +878,7 @@ class WMSLayerForm extends Component {
               <label htmlFor={"layer" + guid}>{trueTitle}</label>
             </td>
             <td>
-              {layer.Name} {subLayerInfo(this.state.layerOpts[layer.Name])}
+              {layer.Name} {subLayerInfo(this.state.layerOpts[layer.Title])}
             </td>
             <td>
               <i className={isGroupIcon} />
@@ -980,7 +938,6 @@ class WMSLayerForm extends Component {
       // We can not assume that layer.version exists, because the
       // previous implementation of WMS in Hajk2 assumed it was "1.1.1"
       // and did not add "version" property.
-
       layer.version = layer.version || "1.1.1";
 
       var addedLayersInfo = {};
@@ -998,7 +955,7 @@ class WMSLayerForm extends Component {
         layer.layers.forEach((layer) => {
           addedLayersInfo[layer] = {
             id: layer,
-            caption: layer,
+            caption: "",
             legend: "",
             legendIcon: "",
             infobox: "",
@@ -1009,12 +966,30 @@ class WMSLayerForm extends Component {
         });
       }
 
-      this.setLayerOpts(capabilities);
+      // Lets prepare layer opts with children etc before we start to render.
+      // Previously this was done while rendering.
+      capabilities.Capability.Layer.Layer.forEach((_layer) => {
+        let trueTitle = _layer.hasOwnProperty("Title") ? _layer.Title : "";
+        let abstract = _layer.hasOwnProperty("Abstract") ? _layer.Abstract : "";
+        let opts = {
+          title: trueTitle,
+          abstract: abstract,
+          // Ensure that there's a sublayer before pushing children, see #1182
+          ...(_layer.Layer && {
+            // In addition, we always want an Array here, even if it's just one element. See #1182.
+            children: Array.isArray(_layer.Layer)
+              ? _layer.Layer
+              : [_layer.Layer],
+          }),
+        };
+        layerOpts[_layer.Title] = opts;
+      });
 
       this.setState(
         {
           addedLayers: layer.layers,
           addedLayersInfo: addedLayersInfo,
+          layerOpts: layerOpts,
           capabilities,
           projection: layer.projection,
           version: capabilities.version,
@@ -1031,6 +1006,7 @@ class WMSLayerForm extends Component {
               : [
                   { pxRatio: 0, dpi: 90 },
                   { pxRatio: 2, dpi: 180 },
+                  { pxRatio: 3, dpi: 270 },
                 ],
         },
         () => {
@@ -1043,28 +1019,6 @@ class WMSLayerForm extends Component {
     });
   }
 
-  setLayerOpts(capabilities) {
-    // Lets prepare layer opts with children etc before we start to render.
-    // Previously this was done while rendering.
-
-    let layerOpts = {};
-    capabilities.Capability.Layer.Layer.forEach((_layer) => {
-      let trueTitle = _layer.hasOwnProperty("Title") ? _layer.Title : "";
-      let abstract = _layer.hasOwnProperty("Abstract") ? _layer.Abstract : "";
-      let opts = {
-        title: trueTitle,
-        abstract: abstract,
-        // Ensure that there's a sublayer before pushing children, see #1182
-        ...(_layer.Layer && {
-          // In addition, we always want an Array here, even if it's just one element. See #1182.
-          children: Array.isArray(_layer.Layer) ? _layer.Layer : [_layer.Layer],
-        }),
-      };
-      layerOpts[_layer.Name] = opts;
-    });
-    this.setState({ layerOpts: layerOpts });
-  }
-
   loadWMSCapabilities(e, callback) {
     if (e) {
       e.preventDefault();
@@ -1074,7 +1028,6 @@ class WMSLayerForm extends Component {
       load: true,
       addedLayers: [],
       addedLayersInfo: {},
-      layerOpts: {},
       capabilities: false,
       layerProperties: undefined,
       layerPropertiesName: undefined,
@@ -1110,7 +1063,6 @@ class WMSLayerForm extends Component {
                   version: capabilities.version,
                 },
                 () => {
-                  this.setLayerOpts(capabilities);
                   this.setServerType();
                 }
               );
