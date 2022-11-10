@@ -17,6 +17,29 @@ namespace MapService.Controllers
         }
 
         [HttpGet()]
+        [Route("listimage")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        [SwaggerOperation(Tags = new[] { "Admin - Maps and layers" })]
+        [Obsolete]
+        public ActionResult<IEnumerable<string>> GetListImage()
+        {
+            var listOfImages = new List<string>();
+
+            try
+            {
+                listOfImages = MapConfigHandler.GetListOfImages().ToList();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Internal Server Error");
+                return StatusCode(StatusCodes.Status500InternalServerError, "Internal Server Error");
+            }
+
+            return listOfImages;
+        }
+
+        [HttpGet()]
         [Route("listvideo")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
