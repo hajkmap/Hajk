@@ -59,5 +59,27 @@ namespace MapService.Controllers
 
             return listOfVideos;
         }
+
+        [HttpGet()]
+        [Route("listaudio")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        [SwaggerOperation(Tags = new[] { "Admin - Maps and layers" })]
+        public ActionResult<IEnumerable<string>> GetListAudio()
+        {
+            var listOfAudioFiles = new List<string>();
+
+            try
+            {
+                listOfAudioFiles = MapConfigHandler.GetListOfAudioFiles().ToList();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Internal Server Error");
+                return StatusCode(StatusCodes.Status500InternalServerError, "Internal Server Error");
+            }
+
+            return listOfAudioFiles;
+        }
     }
 }
