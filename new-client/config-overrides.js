@@ -36,6 +36,7 @@ module.exports = function override(config) {
   // they shouldn't be included in the bundle! Let's add a Webpack-Ignore-Plugin making sure to
   // remove (ignore) those plugins. This will reduce the bundle-since significantly if unused plugins
   // are removed from the "activeTools"-prop.
+  console.log(config);
   config.ignoreWarnings = [/Failed to parse source map/];
   config.plugins.push(
     new webpack.IgnorePlugin({
