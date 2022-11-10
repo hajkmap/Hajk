@@ -21,6 +21,11 @@ builder.Services.AddSwaggerGen(options =>
 
 var app = builder.Build();
 
+// Setup app's root folders
+AppDomain.CurrentDomain.SetData("ContentRootPath", app.Environment.ContentRootPath);
+AppDomain.CurrentDomain.SetData("WebRootPath", app.Environment.WebRootPath);
+AppDomain.CurrentDomain.SetData("UploadContentRootPath", app.Environment.ContentRootPath + "Upload");
+
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
