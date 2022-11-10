@@ -15,6 +15,8 @@ builder.Services.AddSwaggerGen(options =>
         Title = "hajk-backend",
         Description = ".NET-backend for HAJK."
     });
+
+    options.EnableAnnotations();
 });
 
 var app = builder.Build();
