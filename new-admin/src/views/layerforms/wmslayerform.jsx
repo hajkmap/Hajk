@@ -13,7 +13,6 @@ const defaultState = {
   layers: [],
   addedLayers: [],
   addedLayersInfo: {},
-  layerOpts: {},
   id: "",
   caption: "",
   internalLayerName: "",
@@ -159,7 +158,6 @@ class WMSLayerForm extends Component {
 
   renderLayerList() {
     let layers = this.renderLayersFromCapabilites();
-
     let tr =
       layers === null ? (
         <tr>
@@ -191,7 +189,6 @@ class WMSLayerForm extends Component {
   }
 
   appendLayer(e, checkedLayer, opts = {}) {
-
     if (e.target.checked === true) {
       let addedLayersInfo = { ...this.state.addedLayersInfo };
 
@@ -224,7 +221,6 @@ class WMSLayerForm extends Component {
       }
 
       if (opts.children) {
-
         /**
          * TODO: If we're dealing with Named Tree type, we must ensure
          * that the group itself is unchecked (not added to the "green list"),
@@ -281,53 +277,25 @@ class WMSLayerForm extends Component {
         legendIcon: "",
         infobox: "",
         style: "",
-        queryable: false,
+        queryable: "",
         infoclickIcon: "",
       };
-
-      if(opts.children){
-        opts.children.forEach(subLayer => {
-          addedLayersInfo[subLayer.Title] = {
-            id: subLayer.Title,
-            caption: "",
-            legend: "",
-            legendIcon: "",
-            infobox: "",
-            style: "",
-            queryable: true,
-            infoclickIcon: "",
-          };        
-        })
-      }      
-
       this.setState(
         {
           addedLayers: [...this.state.addedLayers, checkedLayer],
-          addedLayersInfo: addedLayersInfo
+          addedLayersInfo: addedLayersInfo,
         },
         () => this.validateLayers(opts)
       );
     } else {
-      // unchecked..
       let addedLayersInfo = { ...this.state.addedLayersInfo };
-
-      // clean up group layer children
-      const children = this.state.layerOpts[checkedLayer]?.children;
-      if(children){
-        children.forEach((child) => {
-          // clean up sublayers
-          delete addedLayersInfo[child.Title];
-        });
-      }
-
       delete addedLayersInfo[checkedLayer];
-
       this.setState(
         {
           addedLayersInfo: addedLayersInfo,
           addedLayers: this.state.addedLayers.filter(
             (layer) => layer !== checkedLayer
-          )
+          ),
         },
         () => this.validateLayers(opts)
       );
@@ -360,7 +328,7 @@ class WMSLayerForm extends Component {
 
   renderLayerInfoInput(layerInfo) {
     var currentLayer = this.findInCapabilities(layerInfo.id);
-
+    console.log("currentLayer: ", currentLayer);
     var imageLoader = this.state.imageLoad ? (
       <i className="fa fa-refresh fa-spin" />
     ) : null;
@@ -394,9 +362,6 @@ class WMSLayerForm extends Component {
               style={{ width: "100%" }}
               value={layerInfo.caption}
               onChange={(e) => {
-                // Note: This is soooo slow.........
-                // Hopefully nobody will ever do like this in 2023 version of Admin!
-                // It is like this for every input in the dialog
                 let addedLayersInfo = this.state.addedLayersInfo;
                 addedLayersInfo[layerInfo.id].caption = e.target.value;
                 this.setState(
@@ -421,7 +386,7 @@ class WMSLayerForm extends Component {
             className="infoClick"
             style={{ width: "100%" }}
             value={layerInfo.infobox}
-            onChange={(e) => {          
+            onChange={(e) => {
               let addedLayersInfo = this.state.addedLayersInfo;
               addedLayersInfo[layerInfo.id].infobox = e.target.value;
               this.setState(
@@ -445,7 +410,7 @@ class WMSLayerForm extends Component {
               style={{ marginRight: "5px" }}
               type="text"
               value={layerInfo.legendIcon}
-              onChange={(e) => {             
+              onChange={(e) => {
                 let addedLayersInfo = this.state.addedLayersInfo;
                 addedLayersInfo[layerInfo.id].legendIcon = e.target.value;
                 this.setState(
@@ -811,23 +776,17 @@ class WMSLayerForm extends Component {
       this.validateField("layers");
     }
 
-    // Note that we're now iterating thru addedLayersInfo instead of addedLayers.
-    // This is for adding GeoServer group layer sublayers.
-    // But we will only allow to remove the group itself.
-
-    return Object.keys(this.state.addedLayersInfo).map((key, i) => (
-      <li className="layer" key={"addedLayer_" + i + key}>
+    return this.state.addedLayers.map((layer, i) => (
+      <li className="layer" key={"addedLayer_" + i}>
         <span
           onClick={() => {
-            this.renderLayerInfoDialog(this.state.addedLayersInfo[key]);
+            this.renderLayerInfoDialog(this.state.addedLayersInfo[layer]);
           }}
         >
-          {key}
+          {layer}
         </span>
         &nbsp;
-        {this.state.addedLayers.indexOf(key) > -1 && // Only allow "real" layers to be removed.
-        <i className="fa fa-times" onClick={uncheck.bind(this, this.state.addedLayersInfo[key].id)} />
-        }
+        <i className="fa fa-times" onClick={uncheck.bind(this, layer)} />
       </li>
     ));
   }
@@ -845,11 +804,18 @@ class WMSLayerForm extends Component {
       const append = (layer, parentGuid) => {
         const guid = this.createGuid();
 
-        let trueTitle = layer.hasOwnProperty("Title") ? layer.Title : ""
+        let trueTitle = layer.hasOwnProperty("Title") ? layer.Title : "";
+        let abstract = layer.hasOwnProperty("Abstract") ? layer.Abstract : "";
 
-
-        const opts = this.state.layerOpts[layer.Title];
-
+        let opts = {
+          title: trueTitle,
+          abstract: abstract,
+          // Ensure that there's a sublayer before pushing children, see #1182
+          ...(layer.Layer && {
+            // In addition, we always want an Array here, even if it's just one element. See #1182.
+            children: Array.isArray(layer.Layer) ? layer.Layer : [layer.Layer],
+          }),
+        };
 
         let queryableIcon =
           layer.queryable === "1" ? "fa fa-check" : "fa fa-remove";
@@ -914,11 +880,10 @@ class WMSLayerForm extends Component {
         }
       };
 
-      if(this.state.capabilities?.Capability?.Layer?.Layer){
+      this.state.capabilities?.Capability?.Layer?.Layer &&
         this.state.capabilities.Capability.Layer.Layer.forEach((layer) => {
           recursivePushLayer(layer);
         });
-      }
 
       return layers;
     } else {
@@ -928,14 +893,12 @@ class WMSLayerForm extends Component {
 
   loadLayers(layer, callback) {
     this.loadWMSCapabilities(undefined, () => {
-
       // We can not assume that layer.version exists, because the
       // previous implementation of WMS in Hajk2 assumed it was "1.1.1"
       // and did not add "version" property.
       layer.version = layer.version || "1.1.1";
 
       var addedLayersInfo = {};
-      let layerOpts = {};
       var capabilities = this.state.capabilitiesList.find(
         (capabilities) => capabilities.version === layer.version
       );
@@ -943,7 +906,7 @@ class WMSLayerForm extends Component {
         addedLayersInfo = layer.layersInfo.reduce((c, l) => {
           c[l.id] = l;
           return c;
-        }, {});    
+        }, {});
       } else {
         addedLayersInfo = {};
         layer.layers.forEach((layer) => {
@@ -954,34 +917,16 @@ class WMSLayerForm extends Component {
             legendIcon: "",
             infobox: "",
             style: "",
-            queryable: false,
+            queryable: "",
             infoclickIcon: "",
-          };         
+          };
         });
       }
-      
-      // Lets prepare layer opts with children etc before we start to render.
-      // Previously this was done while rendering.
-      capabilities.Capability.Layer.Layer.forEach((_layer) => {
-        let trueTitle = _layer.hasOwnProperty("Title") ? _layer.Title : "";
-        let abstract = _layer.hasOwnProperty("Abstract") ? _layer.Abstract : "";          
-        let opts = {
-          title: trueTitle,
-          abstract: abstract,
-          // Ensure that there's a sublayer before pushing children, see #1182
-          ...(_layer.Layer && {
-            // In addition, we always want an Array here, even if it's just one element. See #1182.
-            children: Array.isArray(_layer.Layer) ? _layer.Layer : [_layer.Layer],
-          }),
-        };
-        layerOpts[_layer.Title] = opts;
-      });    
 
       this.setState(
         {
           addedLayers: layer.layers,
           addedLayersInfo: addedLayersInfo,
-          layerOpts: layerOpts,
           capabilities,
           projection: layer.projection,
           version: capabilities.version,
