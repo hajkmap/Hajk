@@ -15,9 +15,16 @@ builder.Services.AddSwaggerGen(options =>
         Title = "hajk-backend",
         Description = ".NET-backend for HAJK."
     });
+
+    options.EnableAnnotations();
 });
 
 var app = builder.Build();
+
+// Setup app's root folders
+AppDomain.CurrentDomain.SetData("ContentRootPath", app.Environment.ContentRootPath);
+AppDomain.CurrentDomain.SetData("WebRootPath", app.Environment.WebRootPath);
+AppDomain.CurrentDomain.SetData("UploadContentRootPath", app.Environment.ContentRootPath + "Upload");
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
