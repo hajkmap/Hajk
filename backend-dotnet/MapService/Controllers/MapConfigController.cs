@@ -23,11 +23,11 @@ namespace MapService.Controllers
         [SwaggerOperation(Tags = new[] { "Admin - Maps and layers" })]
         public ActionResult<IEnumerable<string>> GetListImage()
         {
-            var listOfImagess = new List<string>();
+            var listOfImages = new List<string>();
 
             try
             {
-                listOfImagess = MapConfigHandler.GetListOfImages().ToList();
+                listOfImages = MapConfigHandler.GetListOfImages().ToList();
             }
             catch (Exception ex)
             {
@@ -35,7 +35,7 @@ namespace MapService.Controllers
                 return StatusCode(StatusCodes.Status500InternalServerError, "Internal Server Error");
             }
 
-            return listOfImagess;
+            return listOfImages;
         }
 
         [HttpGet()]
