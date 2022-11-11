@@ -25,6 +25,7 @@ var app = builder.Build();
 AppDomain.CurrentDomain.SetData("ContentRootPath", app.Environment.ContentRootPath);
 AppDomain.CurrentDomain.SetData("WebRootPath", app.Environment.WebRootPath);
 AppDomain.CurrentDomain.SetData("UploadContentRootPath", app.Environment.ContentRootPath + "Upload");
+AppDomain.CurrentDomain.SetData("AppDataContentRootPath", app.Environment.ContentRootPath + "App_Data");
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
