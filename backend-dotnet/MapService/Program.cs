@@ -32,6 +32,7 @@ AppDomain.CurrentDomain.SetData("ContentRootPath", app.Environment.ContentRootPa
 AppDomain.CurrentDomain.SetData("WebRootPath", app.Environment.WebRootPath);
 AppDomain.CurrentDomain.SetData("UploadContentRootPath", app.Environment.ContentRootPath + "Upload");
 AppDomain.CurrentDomain.SetData("AppDataContentRootPath", app.Environment.ContentRootPath + "App_Data");
+AppDomain.CurrentDomain.SetData("DocumentsContentRootPath", app.Environment.ContentRootPath + "App_Data\\documents\\");
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
