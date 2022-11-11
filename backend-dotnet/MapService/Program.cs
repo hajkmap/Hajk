@@ -1,4 +1,5 @@
 using Microsoft.OpenApi.Models;
+using System.Reflection;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -17,6 +18,11 @@ builder.Services.AddSwaggerGen(options =>
     });
 
     options.EnableAnnotations();
+
+    var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+    var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
+
+    options.IncludeXmlComments(xmlPath);
 });
 
 var app = builder.Build();
@@ -25,6 +31,7 @@ var app = builder.Build();
 AppDomain.CurrentDomain.SetData("ContentRootPath", app.Environment.ContentRootPath);
 AppDomain.CurrentDomain.SetData("WebRootPath", app.Environment.WebRootPath);
 AppDomain.CurrentDomain.SetData("UploadContentRootPath", app.Environment.ContentRootPath + "Upload");
+AppDomain.CurrentDomain.SetData("AppDataContentRootPath", app.Environment.ContentRootPath + "App_Data");
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
