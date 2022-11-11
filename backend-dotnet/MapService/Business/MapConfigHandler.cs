@@ -1,9 +1,15 @@
 ﻿using MapService.DataAccess;
+using System.Text.Json.Nodes;
 
 namespace MapService.Business.MapConfig
 {
     public static class MapConfigHandler
     {
+        public static JsonObject GetLayers()
+        {
+            return JsonFileDataAccess.ReadLayerFile();
+        }
+
         public static IEnumerable<string> GetListOfImages()
         {
             var imageFileNameList = new List<string>();
