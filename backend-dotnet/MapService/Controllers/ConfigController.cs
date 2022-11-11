@@ -1,4 +1,4 @@
-﻿using MapService.Business.MapConfig;
+using MapService.Business.MapConfig;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
 using System.Text.Json.Nodes;
@@ -18,7 +18,7 @@ namespace MapService.Controllers
         }
 
         /// <remarks>
-        /// List available layers, do not apply any visibility restrictions (required for Admin UI)
+        /// List available layers. If AD authentication is active, filter by user's permission
         /// </remarks>
         /// <response code="200">All layers were fetched successfully</response>
         /// <response code="500">Internal Server Error</response>
@@ -26,8 +26,7 @@ namespace MapService.Controllers
         [Route("layers")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        [SwaggerOperation(Tags = new[] { "Admin - Maps and layers" })]
-        [Obsolete]
+        [SwaggerOperation(Tags = new[] { "Client-accessible" })]
         public ActionResult<IEnumerable<string>> GetLayers()
         {
             JsonObject layerObject;
