@@ -1,6 +1,7 @@
 ﻿using MapService.Business.MapConfig;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
+using System.Text.Json.Nodes;
 
 namespace MapService.Controllers
 {
@@ -16,6 +17,40 @@ namespace MapService.Controllers
             _logger = logger;
         }
 
+        /// <remarks>
+        /// List available layers, do not apply any visibility restrictions (required for Admin UI)
+        /// </remarks>
+        /// <response code="200">All layers were fetched successfully</response>
+        /// <response code="500">Internal Server Error</response>
+        [HttpGet]
+        [Route("layers")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        [SwaggerOperation(Tags = new[] { "Admin - Maps and layers" })]
+        [Obsolete]
+        public ActionResult<IEnumerable<string>> GetLayers()
+        {
+            JsonObject layerObject;
+
+            try
+            {
+                layerObject = MapConfigHandler.GetLayers();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Internal server error");
+
+                return StatusCode(StatusCodes.Status500InternalServerError, "Internal Server Error");
+            }
+
+            return StatusCode(StatusCodes.Status200OK, layerObject);
+        }
+
+        /// <remarks>
+        /// List available images in the upload folder
+        /// </remarks>
+        /// <response code="200">Available images were fetched successfully</response>
+        /// <response code="500">Internal Server Error</response>
         [HttpGet()]
         [Route("listimage")]
         [ProducesResponseType(StatusCodes.Status200OK)]
@@ -33,12 +68,18 @@ namespace MapService.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Internal Server Error");
+
                 return StatusCode(StatusCodes.Status500InternalServerError, "Internal Server Error");
             }
 
-            return listOfImages;
+            return StatusCode(StatusCodes.Status200OK, listOfImages);
         }
 
+        /// <remarks>
+        /// List available videos in the upload folder
+        /// </remarks>
+        /// <response code="200">Available videos were fetched successfully</response>
+        /// <response code="500">Internal Server Error</response>
         [HttpGet()]
         [Route("listvideo")]
         [ProducesResponseType(StatusCodes.Status200OK)]
@@ -56,12 +97,18 @@ namespace MapService.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Internal Server Error");
+
                 return StatusCode(StatusCodes.Status500InternalServerError, "Internal Server Error");
             }
 
-            return listOfVideos;
+            return StatusCode(StatusCodes.Status200OK, listOfVideos);
         }
 
+        /// <remarks>
+        /// List available audio files in the upload folder
+        /// </remarks>
+        /// <response code="200">Available audio files were fetched successfully</response>
+        /// <response code="500">Internal Server Error</response>
         [HttpGet()]
         [Route("listaudio")]
         [ProducesResponseType(StatusCodes.Status200OK)]
@@ -79,10 +126,11 @@ namespace MapService.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Internal Server Error");
+
                 return StatusCode(StatusCodes.Status500InternalServerError, "Internal Server Error");
             }
 
-            return listOfAudioFiles;
+            return StatusCode(StatusCodes.Status200OK, listOfAudioFiles);
         }
     }
 }
