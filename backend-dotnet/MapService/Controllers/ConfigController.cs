@@ -75,6 +75,35 @@ namespace MapService.Controllers
         }
 
         /// <remarks>
+        /// Gets all maps names. 
+        /// </remarks>
+        /// <returns>Return all map names. </returns>
+        /// <response code="200">All map names were fetched successfully</response>
+        /// <response code="500">Internal Server Error</response>
+        [HttpGet]
+        [Route("list")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        [SwaggerOperation(Tags = new[] { "Admin - Maps and layers" })]
+        [Obsolete]
+        public ActionResult<IEnumerable<string>> GetMaps()
+        {
+            ICollection<string> maps;
+
+            try
+            {
+                maps = MapConfigHandler.GetMaps();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Internal server error");
+                return StatusCode(StatusCodes.Status500InternalServerError, "Internal Server Error");
+            }
+
+            return StatusCode(StatusCodes.Status200OK, maps);
+        }
+
+        /// <remarks>
         /// List available images in the upload folder
         /// </remarks>
         /// <response code="200">Available images were fetched successfully</response>

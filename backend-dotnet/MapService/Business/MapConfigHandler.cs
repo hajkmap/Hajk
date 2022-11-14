@@ -1,4 +1,4 @@
-using MapService.DataAccess;
+﻿using MapService.DataAccess;
 using System.Text.Json.Nodes;
 
 namespace MapService.Business.MapConfig
@@ -18,6 +18,15 @@ namespace MapService.Business.MapConfig
         public static JsonObject GetMap(string mapFileName)
         {
             return JsonFileDataAccess.ReadMapFile(mapFileName);
+        }
+
+        /// <summary>
+        /// Gets all maps names. 
+        /// </summary>
+        /// <returns>Return all map names.</returns>
+        public static ICollection<string> GetMaps()
+        {
+            return JsonFileDataAccess.GetMapConfigFiles();
         }
 
         public static IEnumerable<string> GetListOfImages()

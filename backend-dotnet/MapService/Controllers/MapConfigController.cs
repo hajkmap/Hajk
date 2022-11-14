@@ -1,4 +1,4 @@
-using MapService.Business.MapConfig;
+﻿using MapService.Business.MapConfig;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
 using System.Text.Json.Nodes;
@@ -50,6 +50,8 @@ namespace MapService.Controllers
         /// </summary>
         /// <param name="map">The name of the map including the file ending. </param>
         /// <returns>Returns a map as a JsonObject. </returns>
+        /// <response code="200">The map object fetched successfully</response>
+        /// <response code="500">Internal Server Error</response>
         [HttpGet]
         [Route("{map}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
@@ -70,6 +72,35 @@ namespace MapService.Controllers
             }
 
             return StatusCode(StatusCodes.Status200OK, mapObject);
+        }
+
+        /// <remarks>
+        /// Gets all maps names. 
+        /// </remarks>
+        /// <returns>Return all map names. </returns>
+        /// <response code="200">All map names were fetched successfully</response>
+        /// <response code="500">Internal Server Error</response>
+        [HttpGet]
+        [Route("list")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        [SwaggerOperation(Tags = new[] { "Admin - Maps and layers" })]
+        public ActionResult<IEnumerable<string>> GetMaps()
+        {
+            ICollection<string> maps;
+
+            try
+            {
+                maps = MapConfigHandler.GetMaps();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Internal server error");
+
+                return StatusCode(StatusCodes.Status500InternalServerError, "Internal Server Error");
+            }
+
+            return StatusCode(StatusCodes.Status200OK, maps);
         }
 
         /// <remarks>
