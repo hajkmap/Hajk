@@ -52,7 +52,7 @@ namespace MapService.Controllers
         /// <param name="map">The name of the map including the file ending. </param>
         /// <returns>Returns a map as a JsonObject. </returns>
         [HttpGet]
-        [Route("config/{map}")]
+        [Route("{map}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         [SwaggerOperation(Tags = new[] { "Client-accessible" })]
@@ -63,7 +63,7 @@ namespace MapService.Controllers
 
             try
             {
-                mapObject = AdHandler.GetMap(map);
+                mapObject = MapConfigHandler.GetMap(map);
             }
             catch (Exception ex)
             {
