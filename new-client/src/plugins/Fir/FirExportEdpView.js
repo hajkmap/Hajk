@@ -13,6 +13,8 @@ import CircularProgress from "@mui/material/CircularProgress";
 import Collapse from "@mui/material/Collapse";
 import { hfetch } from "utils/FetchWrapper";
 
+// TODO: Remove all references to EDP
+
 const ButtonWithLoader = styled(Button)(({ theme, loading }) => ({
   "& img": {
     opacity: loading === "true" ? 0.3 : 1.0,
