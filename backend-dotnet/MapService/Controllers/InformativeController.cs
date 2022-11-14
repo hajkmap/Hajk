@@ -1,6 +1,7 @@
 ﻿using MapService.Business.Informative;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
+using System.Text.Json.Nodes;
 
 namespace MapService.Controllers
 {
@@ -69,6 +70,31 @@ namespace MapService.Controllers
             }
 
             return StatusCode(StatusCodes.Status200OK, documentList);
+        }
+
+        /// <param name="name">Name of the document to be fetched</param>
+        /// <response code="200">All layers were fetched successfully</response>
+        /// <response code="500">Internal Server Error</response>
+        [HttpGet]
+        [Route("load/{name}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        [SwaggerOperation(Tags = new[] { "Client-accessible" })]
+        public ActionResult<JsonObject> GetDocument(string name)
+        {
+            var document = new JsonObject();
+
+            try
+            {
+                document = InformativeHandler.GetDocument(name);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Internal Server Error");
+                return StatusCode(StatusCodes.Status500InternalServerError, "Internal Server Error");
+            }
+
+            return StatusCode(StatusCodes.Status200OK, document);
         }
     }
 }

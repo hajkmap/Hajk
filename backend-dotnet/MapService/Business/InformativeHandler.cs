@@ -1,6 +1,5 @@
 ﻿using MapService.DataAccess;
-using MapService.Models;
-using System.Text.Json;
+using System.Text.Json.Nodes;
 
 
 namespace MapService.Business.Informative
@@ -63,6 +62,21 @@ namespace MapService.Business.Informative
             }
 
             return documentNameList;
+        }
+
+        public static JsonObject GetDocument(string fileName)
+        {
+            var document = new JsonObject();
+
+            var documentsContentRootPath = AppDomain.CurrentDomain.GetData("DocumentsContentRootPath") as string;
+
+            if (documentsContentRootPath == null)
+            {
+                return document;
+            }
+
+            var filePath = Path.Combine(documentsContentRootPath, fileName + ".json");
+            return JsonFileDataAccess.ReadMapFile(filePath);
         }
     }
 }
