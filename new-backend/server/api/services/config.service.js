@@ -398,12 +398,14 @@ class ConfigService {
   async #verifyOWSLayers({ type, layers }) {
     const missingLayers = [];
     const errors = [];
+
     // We want to group layers by service URL. This object will keep track.
     const getCapabilitiesUrls = {};
 
-    // Now, iterate WMS layers and group by URL to service
+    // Now, iterate the layers and group by URL to service
     layers.forEach((l) => {
       if (!Object.hasOwn(getCapabilitiesUrls, l.url)) {
+        // First time we encounter a given URL, we must create the property
         getCapabilitiesUrls[l.url] = [
           {
             id: l.id,
@@ -412,6 +414,7 @@ class ConfigService {
           },
         ];
       } else {
+        // If URL already exists as property, just push into existing array
         getCapabilitiesUrls[l.url].push({
           id: l.id,
           caption: l.caption,
@@ -420,13 +423,14 @@ class ConfigService {
       }
     });
 
-    // For each of the URLs to the WMS services…
+    // For each of the URLs…
     for (const [url, layersObject] of Object.entries(getCapabilitiesUrls)) {
       // … check if the URL already contains "?". If so, we want to append
       // our remaining URL params.
       const glue = url.includes("?") ? "&" : "?";
 
-      // Next, prepare the URL that we will fetch in order to GetCapabilities
+      // Next, prepare the URL that we will fetch in order to GetCapabilities.
+      // This differs a little, depending on if it's WMS or WFS.
       let params = {};
       switch (type) {
         case "wms":
@@ -611,7 +615,7 @@ class ConfigService {
               missing: reallyMissingLayers.flatMap(
                 // flatMap will wash the array of Promises and extract
                 // only those with a value (removing empty elements from the array)
-                ({ value }) => (value === null ? [] : value) // returning an empty array from flatMap removes element
+                ({ value }) => (value === null ? [] : value) // Remember: returning an empty array from flatMap removes the element.
               ),
               problematic,
             };
@@ -638,23 +642,34 @@ class ConfigService {
     return { services: missingLayers, errors };
   }
 
-  async verifyLayers() {
+  async verifyLayers(user) {
+    logger.info("[verifyLayers] invoked by user %s", user);
+
     try {
+      if (typeof fetch !== "function") {
+        throw new Error(
+          `Function not supported. Please update your NodeJS runtime to at least v18.0.0. Current Node version: ${process.version}.`
+        );
+      }
       // Read the JSON layers store without any restrictions (hence the parameters)
       const layers = await this.getLayersStore(false, false);
 
-      // Extract layer stores
+      // Extract layer stores that will be checked
       const { wmslayers, wfslayers } = layers;
 
+      // Check WMS layers
       const missingWMSLayers = await this.#verifyOWSLayers({
         type: "wms",
         layers: wmslayers,
       });
+
+      // Check WFS layers
       const missingWFSLayers = await this.#verifyOWSLayers({
         type: "wfs",
         layers: wfslayers,
       });
 
+      logger.info("[verifyLayers] ended with a successful response");
       return { wms: missingWMSLayers, wfs: missingWFSLayers };
     } catch (error) {
       return { error };

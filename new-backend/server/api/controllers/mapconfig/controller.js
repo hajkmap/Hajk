@@ -59,7 +59,7 @@ export class Controller {
   }
 
   layersVerify(req, res) {
-    ConfigService.verifyLayers().then((data) =>
+    ConfigService.verifyLayers(ad.getUserFromRequestHeader(req)).then((data) =>
       handleStandardResponse(res, data)
     );
   }
