@@ -7,11 +7,34 @@ namespace MapService.Business.Informative
 {
     public static class InformativeHandler
     {
+        public static IEnumerable<string> GetAllDocuments()
+        {
+            var documentList = new List<string>();
+            var documentsContentRootPath = AppDomain.CurrentDomain.GetData("DocumentsContentRootPath") as string;
+
+            if (documentsContentRootPath == null)
+            {
+                return documentList;
+            }
+
+            var files = FolderDataAccess.GetAllFiles(documentsContentRootPath);
+
+            foreach (var file in files)
+            {
+                if (Path.GetExtension(file).ToLower() == ".json")
+                {
+                    documentList.Add(file);
+                }
+            }
+
+            return documentList;
+        }
+
         public static IEnumerable<string> GetDocumentList()
         {
             var documentNameList = new List<string>();
             
-            var files = FolderDataAccess.GetAllDocuments();
+            var files = GetAllDocuments();
 
             foreach (var file in files)
             {
@@ -26,7 +49,7 @@ namespace MapService.Business.Informative
         {
             var documentNameList = new List<string>();
 
-            var files = FolderDataAccess.GetAllDocuments().Select(f => Path.GetFullPath(f)).ToArray();
+            var files = GetAllDocuments().Select(f => Path.GetFullPath(f)).ToArray();
 
             foreach (var file in files)
             {
