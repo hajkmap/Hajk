@@ -222,56 +222,6 @@ class WMSLayerForm extends Component {
         this.setState({ projection });
       }
 
-      if (opts.children) {
-        /**
-         * TODO: If we're dealing with Named Tree type, we must ensure
-         * that the group itself is unchecked (not added to the "green list"),
-         * while its children must be checked and added. Vice versa on uncheck.
-         * Below is an attempt:
-         **/
-        /**
-         * The approach below didn't work out due to a racing scenario (setState
-         * is async). Before we're done setting state, the loop is done, resulting
-         * in only the last <input> being checked.
-         *
-         * This must be solved, but to get this working for now, we can inform the
-         * user to perform the correct selection manually.
-         **/
-        // // Fake event
-        // let e = {
-        //   target: {
-        //     checked: true
-        //   }
-        // };
-        // opts.children.forEach(childLayer => {
-        //   let trueTitle = childLayer.hasOwnProperty("Title")
-        //     ? childLayer.Title
-        //     : "";
-        //   let abstract = childLayer.hasOwnProperty("Abstract")
-        //     ? childLayer.Abstract
-        //     : "";
-        //   let o = {
-        //     title: trueTitle,
-        //     abstract: abstract,
-        //     children: childLayer.Layer
-        //   };
-        //   this.appendLayer(e, childLayer.Name, o);
-        // });
-
-        // Temporary solution, until we manage it properly
-        let message = `Det valda lagret (${checkedLayer}) är en lagergrupp som består av följande underlager:\n
-        ${opts.children.map((ch) => ch.Title).join(", ")}\n
-        I dagsläget saknar Hajk funktionaliteten att automatiskt lägga till underlagren, men du kan enkelt göra det själv genom att kryssa för underlagren vars namn du ser ovan. \n
-        Se även till att avmarkera själva lagergruppen (${checkedLayer}), för den behöver du inte ha om du lägger till dess underlager.`;
-
-        this.props.parent.setState({
-          alert: true,
-          alertMessage: message,
-          caption: "Valt lager är en lagergrupp",
-        });
-        // End of temporary solution
-      }
-
       addedLayersInfo[checkedLayer] = {
         id: checkedLayer,
         caption: "",
@@ -284,6 +234,7 @@ class WMSLayerForm extends Component {
       };
 
       if (opts.children) {
+        // Handle grouplayers (named tree in geoserver)
         opts.children.forEach((subLayer) => {
           addedLayersInfo[subLayer.Name] = {
             id: subLayer.Name,
@@ -984,7 +935,6 @@ class WMSLayerForm extends Component {
       layer.version = layer.version || "1.1.1";
 
       var addedLayersInfo = {};
-      let layerOpts = {};
       var capabilities = this.state.capabilitiesList.find(
         (capabilities) => capabilities.version === layer.version
       );
