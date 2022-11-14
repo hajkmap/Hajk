@@ -42,5 +42,33 @@ namespace MapService.Controllers
 
             return StatusCode(StatusCodes.Status200OK, documentList);
         }
+
+        /// <param name="name">Name of the map for which connected documents will be returned</param>
+        /// <remarks>
+        /// Return available documents for the specified map
+        /// </remarks>
+        /// <response code="200">All layers were fetched successfully</response>
+        /// <response code="500">Internal Server Error</response>
+        [HttpGet]
+        [Route("list/{name}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        [SwaggerOperation(Tags = new[] { "Admin - Informative/DocumentHandler" })]
+        public ActionResult<IEnumerable<string>> GetDocumentList(string name)
+        {
+            var documentList = new List<string>();
+
+            try
+            {
+                documentList = InformativeHandler.GetDocumentList(name).ToList();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Internal Server Error");
+                return StatusCode(StatusCodes.Status500InternalServerError, "Internal Server Error");
+            }
+
+            return StatusCode(StatusCodes.Status200OK, documentList);
+        }
     }
 }

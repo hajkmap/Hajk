@@ -16,7 +16,24 @@ namespace MapService.Business.Informative
                 return documentNameList;
             }
 
-            var files = FolderDataAccess.GetAllFiles(documentsContentRootPath);
+            return GetDocumentList(documentsContentRootPath);
+        }
+
+        public static IEnumerable<string> GetDocumentList(string folderPath)
+        {
+            var documentNameList = new List<string>();
+            
+            if (folderPath == null)
+            {
+                return documentNameList;
+            }
+
+            if (Directory.Exists(folderPath) == false)
+            {
+                return documentNameList;
+            }
+
+            var files = FolderDataAccess.GetAllFiles(folderPath);
 
             foreach (var file in files)
             {
