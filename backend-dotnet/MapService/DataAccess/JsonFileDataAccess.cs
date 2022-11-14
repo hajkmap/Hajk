@@ -7,9 +7,7 @@ namespace MapService.DataAccess
     {
         private const string LAYER_FILE = "layers.json";
 
-        public const string MAP_NODE_NAME = "map";
-
-        public static List<string> GetMapConfigFiles()
+        public static IList<string> GetMapConfigFiles()
         {
             List<string> mapConfigFiles = new List<string>();
 
