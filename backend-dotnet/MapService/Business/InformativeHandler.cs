@@ -20,7 +20,7 @@ namespace MapService.Business.Informative
 
             foreach (var file in files)
             {
-                var fileName = Path.GetFileName(file);
+                var fileName = Path.GetFileNameWithoutExtension(file);
                 documentNameList.Add(fileName);
             }
 
