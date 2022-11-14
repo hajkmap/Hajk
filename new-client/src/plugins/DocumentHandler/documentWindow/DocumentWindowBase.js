@@ -185,8 +185,8 @@ class DocumentWindowBase extends React.PureComponent {
           onMinimize: onMinimize,
           onMaximize: onMaximize,
           onWindowHide: onWindowHide,
-          draggingEnabled: false,
-          resizingEnabled: false,
+          draggingEnabled: options.draggingEnabled || false,
+          resizingEnabled: options.resizingEnabled || false,
           allowMaximizedWindow: false,
         }}
       >

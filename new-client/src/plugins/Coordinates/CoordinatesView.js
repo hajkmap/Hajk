@@ -41,6 +41,25 @@ class CoordinatesView extends React.PureComponent {
             vertical: "bottom",
             horizontal: "center",
           },
+          sx: {
+            // Custom styling to follow Material Design guidelines for Snackbar.
+            // Placing the close button to the right of the text.
+            ".SnackbarItem-contentRoot": {
+              flexWrap: "inherit !important",
+            },
+          },
+          action: (key) => (
+            <Button
+              aria-label="close"
+              color="inherit"
+              id={key}
+              onClick={() => {
+                this.props.model.closeSnackbar();
+              }}
+            >
+              Stäng
+            </Button>
+          ),
         }
       );
     });
