@@ -1,3 +1,4 @@
+using MapService.Business.Ad;
 using MapService.Business.MapConfig;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
@@ -43,6 +44,34 @@ namespace MapService.Controllers
             }
 
             return StatusCode(StatusCodes.Status200OK, layerObject);
+        }
+
+        /// <summary>
+        /// Gets a map as a JsonObject. 
+        /// </summary>
+        /// <param name="map">The name of the map including the file ending. </param>
+        /// <returns>Returns a map as a JsonObject. </returns>
+        [HttpGet]
+        [Route("config/{map}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        [SwaggerOperation(Tags = new[] { "Client-accessible" })]
+        [Obsolete]
+        public ActionResult<JsonObject> GetMap(string map)
+        {
+            JsonObject mapObject;
+
+            try
+            {
+                mapObject = AdHandler.GetMap(map);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Internal server error");
+                return StatusCode(StatusCodes.Status500InternalServerError, "Internal Server Error");
+            }
+
+            return StatusCode(StatusCodes.Status200OK, mapObject);
         }
 
         /// <remarks>
