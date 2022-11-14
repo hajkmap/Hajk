@@ -17,7 +17,7 @@ namespace MapService.Controllers
         }
 
         /// <remarks>
-        /// List available documents
+        /// Return all available documents
         /// </remarks>
         /// <response code="200">All layers were fetched successfully</response>
         /// <response code="500">Internal Server Error</response>
