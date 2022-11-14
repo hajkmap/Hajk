@@ -48,9 +48,14 @@ namespace MapService.DataAccess
             return ReadJsonFile<JsonObject>(LAYER_FILE);
         }
 
-        public static JsonObject ReadMapFile(string configFileName)
+        /// <summary>
+        /// Gets a map as a JsonObject. 
+        /// </summary>
+        /// <param name="mapFileName">The name of the map including the file ending. </param>
+        /// <returns>Returns a map as a JsonObject. </returns>
+        public static JsonObject ReadMapFile(string mapFileName)
         {
-            return ReadJsonFile<JsonObject>(configFileName);
+            return ReadJsonFile<JsonObject>(mapFileName);
         }
 
         public static void SaveJsonFile(string pathToFile, JsonObject jsonObject)
