@@ -21,20 +21,20 @@ namespace MapService.Controllers
         /// <summary>
         /// Gets a map as a JsonObject. 
         /// </summary>
-        /// <param name="mapFileName">The name of the map including the file ending. </param>
+        /// <param name="map">The name of the map including the file ending. </param>
         /// <returns>Returns a map as a JsonObject. </returns>
         [HttpGet]
-        [Route("config")]
+        [Route("mapconfig/{map}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         [SwaggerOperation(Tags = new[] { "Admin - Maps and layers" })]
-        public ActionResult<JsonObject> GetMap(string mapFileName)
+        public ActionResult<JsonObject> GetMap(string map)
         {
             JsonObject mapObject;
 
             try
             {
-                mapObject = AdHandler.GetMap(mapFileName);
+                mapObject = AdHandler.GetMap(map);
             }
             catch (Exception ex)
             {
