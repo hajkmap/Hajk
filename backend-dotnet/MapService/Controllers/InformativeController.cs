@@ -17,11 +17,9 @@ namespace MapService.Controllers
             _logger = logger;
         }
 
-        /// <remarks>
-        /// Return all available documents
-        /// </remarks>
-        /// <response code="200">All layers were fetched successfully</response>
+        /// <response code="200">Return all available documents</response>
         /// <response code="500">Internal Server Error</response>
+        /// <returns>List of string</returns>
         [HttpGet]
         [Route("list")]
         [ProducesResponseType(StatusCodes.Status200OK)]
@@ -45,11 +43,9 @@ namespace MapService.Controllers
         }
 
         /// <param name="name">Name of the map for which connected documents will be returned</param>
-        /// <remarks>
-        /// Return available documents for the specified map
-        /// </remarks>
-        /// <response code="200">All layers were fetched successfully</response>
+        /// <response code="200">Return available documents for the specified map</response>
         /// <response code="500">Internal Server Error</response>
+        /// <returns>List of string</returns>
         [HttpGet]
         [Route("list/{name}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
@@ -73,8 +69,9 @@ namespace MapService.Controllers
         }
 
         /// <param name="name">Name of the document to be fetched</param>
-        /// <response code="200">All layers were fetched successfully</response>
+        /// <response code="200">Return the JSON file</response>
         /// <response code="500">Internal Server Error</response>
+        /// <returns>JsonObject</returns>
         [HttpGet]
         [Route("load/{name}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
