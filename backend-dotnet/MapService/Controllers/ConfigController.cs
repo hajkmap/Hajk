@@ -1,5 +1,6 @@
-using MapService.Business.Ad;
+using MapService.Business.Config;
 using MapService.Business.MapConfig;
+using MapService.Models;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
 using System.Text.Json.Nodes;
@@ -47,7 +48,7 @@ namespace MapService.Controllers
         }
 
         /// <summary>
-        /// Gets a map as a JsonObject. 
+        /// Gets a map as a JsonObject.
         /// </summary>
         /// <param name="map">The name of the map including the file ending. </param>
         /// <returns>Returns a map as a JsonObject. </returns>
@@ -75,7 +76,35 @@ namespace MapService.Controllers
         }
 
         /// <remarks>
-        /// Gets all maps names. 
+        /// List available layers, do not apply any visibility restrictions (required for Admin UI)
+        /// </remarks>
+        /// <response code="200">All layers were fetched successfully</response>
+        /// <response code="500">Internal Server Error</response>
+        [HttpGet]
+        [Route("userspecificmaps")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        [SwaggerOperation(Tags = new[] { "Client-accessible" })]
+        public ActionResult<IEnumerable<string>> GetUserSpecificMaps()
+        {
+            IEnumerable<UserSpecificMaps> userSpecificMaps;
+
+            try
+            {
+                userSpecificMaps = ConfigHandler.GetUserSpecificMaps();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Internal server error");
+
+                return StatusCode(StatusCodes.Status500InternalServerError, "Internal Server Error");
+            }
+
+            return StatusCode(StatusCodes.Status200OK, userSpecificMaps);
+        }
+
+        /// <remarks>
+        /// Gets all maps names.
         /// </remarks>
         /// <returns>Return all map names. </returns>
         /// <response code="200">All map names were fetched successfully</response>
