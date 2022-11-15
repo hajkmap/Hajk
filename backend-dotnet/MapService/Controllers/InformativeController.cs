@@ -1,6 +1,7 @@
 ﻿using MapService.Business.Informative;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
+using System.Text.Json.Nodes;
 
 namespace MapService.Controllers
 {
@@ -16,11 +17,9 @@ namespace MapService.Controllers
             _logger = logger;
         }
 
-        /// <remarks>
-        /// Return all available documents
-        /// </remarks>
-        /// <response code="200">All layers were fetched successfully</response>
+        /// <response code="200">Return all available documents</response>
         /// <response code="500">Internal Server Error</response>
+        /// <returns>List of string</returns>
         [HttpGet]
         [Route("list")]
         [ProducesResponseType(StatusCodes.Status200OK)]
@@ -44,11 +43,9 @@ namespace MapService.Controllers
         }
 
         /// <param name="name">Name of the map for which connected documents will be returned</param>
-        /// <remarks>
-        /// Return available documents for the specified map
-        /// </remarks>
-        /// <response code="200">All layers were fetched successfully</response>
+        /// <response code="200">Return available documents for the specified map</response>
         /// <response code="500">Internal Server Error</response>
+        /// <returns>List of string</returns>
         [HttpGet]
         [Route("list/{name}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
@@ -69,6 +66,32 @@ namespace MapService.Controllers
             }
 
             return StatusCode(StatusCodes.Status200OK, documentList);
+        }
+
+        /// <param name="name">Name of the document to be fetched</param>
+        /// <response code="200">Return the JSON file</response>
+        /// <response code="500">Internal Server Error</response>
+        /// <returns>JsonObject</returns>
+        [HttpGet]
+        [Route("load/{name}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        [SwaggerOperation(Tags = new[] { "Client-accessible" })]
+        public ActionResult<JsonObject> GetDocument(string name)
+        {
+            var document = new JsonObject();
+
+            try
+            {
+                document = InformativeHandler.GetDocument(name);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Internal Server Error");
+                return StatusCode(StatusCodes.Status500InternalServerError, "Internal Server Error");
+            }
+
+            return StatusCode(StatusCodes.Status200OK, document);
         }
     }
 }
