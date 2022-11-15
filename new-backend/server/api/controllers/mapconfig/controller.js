@@ -56,6 +56,12 @@ export class Controller {
     ).then((data) => handleStandardResponse(res, data));
   }
 
+  layersVerify(req, res) {
+    ConfigService.verifyLayers(ad.getUserFromRequestHeader(req)).then((data) =>
+      handleStandardResponse(res, data)
+    );
+  }
+
   /**
    * @summary List all available map configs - used in admin
    *
