@@ -218,6 +218,15 @@ paths:
         200:
           description: All layers were fetched successfully
           content: {}
+  /mapconfig/layers/verify:
+    get:
+      tags:
+        - Admin - Maps and layers
+      description: Verify that all layers used in layers repository are reachable
+      responses:
+        200:
+          description: Object that contains missing layers, grouped per OGC service.
+          content: {}
   /mapconfig/list:
     get:
       tags:
