@@ -687,82 +687,85 @@ class ConfigService {
    * @returns Human-friendly description of layers used in the specified map
    * @memberof ConfigService
    */
-  async exportMapConfig(map = "layers", format = "json", user, next) {
-    // Obtain layers definition as JSON. It will be needed
-    // both if we want to grab all available layers or
-    // describe a specific map config.
-    const layersConfig = await this.getLayersStore(user);
+  async exportMapConfig(map = "layers", format = "json", user) {
+    try {
+      // Obtain layers definition as JSON. It will be needed
+      // both if we want to grab all available layers or
+      // describe a specific map config.
+      const layersConfig = await this.getLayersStore(user);
 
-    // Create a Map, indexed with each map's ID to allow
-    // fast lookup later on
-    const layersById = new Map();
+      // Create a Map, indexed with each map's ID to allow
+      // fast lookup later on
+      const layersById = new Map();
 
-    // Populate the Map so we'll have {layerId: layerCaption}
-    for (const type in layersConfig) {
-      layersConfig[type].map((layer) =>
-        layersById.set(layer.id, {
-          name: layer.caption,
-          ...(layer.layers &&
-            layer.layers.length > 1 && { subLayers: layer.layers }),
-        })
-      );
-    }
-
-    // If a list of all available layers was requested, we're
-    // done here and can return the Map.
-    if (map === "layers") return Object.fromEntries(layersById); // TODO: Perhaps sort on layer name?
-
-    // If we got this far, we now need to grab the contents of
-    // the requested map config. Note that content washing is disabled:
-    // we will export the entire map config as-is.
-    const mapConfig = await this.getMapConfig(map, user, false);
-
-    // Some clumsy error handling
-    if (mapConfig.error) {
-      next(mapConfig.error);
-      return;
-    }
-
-    // Grab LayerSwitcher's setup
-    const { groups, baselayers } = mapConfig.tools.find(
-      (tool) => tool.type === "layerswitcher"
-    ).options;
-
-    // Define a recursive function that will grab contents
-    // of a group (and possibly all groups beneath).
-    const decodeGroup = (group) => {
-      const g = {};
-      // First grab current group's name
-      if (group.name) g.name = group.name;
-
-      // Next assign names to all layers
-      if (Array.isArray(group.layers))
-        g.layers = group.layers.map((l) => layersById.get(l.id));
-
-      // Finally, go recursive if there are subgroups
-      if (group.groups && group.groups.length !== 0) {
-        g.groups = group.groups.map((gg) => decodeGroup(gg));
+      // Populate the Map so we'll have {layerId: layerCaption}
+      for (const type in layersConfig) {
+        layersConfig[type].map((layer) =>
+          layersById.set(layer.id, {
+            name: layer.caption,
+            ...(layer.layers &&
+              layer.layers.length > 1 && { subLayers: layer.layers }),
+          })
+        );
       }
 
-      return g;
-    };
+      // If a list of all available layers was requested, we're
+      // done here and can return the Map.
+      if (map === "layers") return Object.fromEntries(layersById); // TODO: Perhaps sort on layer name?
 
-    // Prepare the object that will be returned
-    const output = {
-      baselayers: [],
-      groups: [],
-    };
+      // If we got this far, we now need to grab the contents of
+      // the requested map config. Note that content washing is disabled:
+      // we will export the entire map config as-is.
+      const mapConfig = await this.getMapConfig(map, user, false);
 
-    // Grab names for base layers and put into output
-    baselayers.map((l) => output.baselayers.push(layersById.get(l.id)));
+      // Reading map config can fail, e.g. the file can be missing
+      if (mapConfig.error) {
+        throw new Error(mapConfig.error);
+      }
 
-    // Take all groups and call our decode method on them
-    output.groups = groups.map((group) => decodeGroup(group));
+      // Grab LayerSwitcher's setup
+      const { groups, baselayers } = mapConfig.tools.find(
+        (tool) => tool.type === "layerswitcher"
+      ).options;
 
-    if (format === "json") return output;
+      // Define a recursive function that will grab contents
+      // of a group (and possibly all groups beneath).
+      const decodeGroup = (group) => {
+        const g = {};
+        // First grab current group's name
+        if (group.name) g.name = group.name;
 
-    // Throw error if output is not yet implemented
-    next(Error(`Output format ${format} is not implemented.`));
+        // Next assign names to all layers
+        if (Array.isArray(group.layers))
+          g.layers = group.layers.map((l) => layersById.get(l.id));
+
+        // Finally, go recursive if there are subgroups
+        if (group.groups && group.groups.length !== 0) {
+          g.groups = group.groups.map((gg) => decodeGroup(gg));
+        }
+
+        return g;
+      };
+
+      // Prepare the object that will be returned
+      const output = {
+        baselayers: [],
+        groups: [],
+      };
+
+      // Grab names for base layers and put into output
+      baselayers.map((l) => output.baselayers.push(layersById.get(l.id)));
+
+      // Take all groups and call our decode method on them
+      output.groups = groups.map((group) => decodeGroup(group));
+
+      if (format === "json") return output;
+
+      // Throw error if output is not yet implemented
+      throw new Error(`Output format ${format} is not implemented.`);
+    } catch (error) {
+      return { error };
+    }
   }
 
   /**

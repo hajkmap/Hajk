@@ -32,15 +32,13 @@ export class Controller {
    * of a map's contents from e.g. LayerSwitcher.
    * @param {*} req
    * @param {*} res
-   * @param {*} next
    * @memberof Controller
    */
-  exportMapConfig(req, res, next) {
+  exportMapConfig(req, res) {
     ConfigService.exportMapConfig(
       req.params.map,
       req.params.format,
-      ad.getUserFromRequestHeader(req),
-      next
+      ad.getUserFromRequestHeader(req)
     ).then((data) => handleStandardResponse(res, data));
   }
 
