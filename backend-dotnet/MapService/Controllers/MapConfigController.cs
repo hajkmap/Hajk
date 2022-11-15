@@ -186,5 +186,37 @@ namespace MapService.Controllers
 
             return StatusCode(StatusCodes.Status200OK, listOfAudioFiles);
         }
+
+        /// <summary>
+        /// Exports a map with all available layers in a human-readable format. 
+        /// </summary>
+        /// <param name="map">The name of the map excluding the file ending. </param>
+        /// <param name="format">Only Json-format is supported. </param>
+        /// <returns>Returns a map as a JsonObject. </returns>
+        /// <response code="200">The map object fetched successfully</response>
+        /// <response code="500">Internal Server Error</response>
+        [HttpGet]
+        [Route("export/{map}/{format}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        [SwaggerOperation(Tags = new[] { "Admin - Maps and layers" })]
+        public ActionResult<string> ExportMapWithFormat(string map, string format)
+        {
+            return StatusCode(StatusCodes.Status200OK, "abc");
+
+            //JsonObject mapObject;
+
+            //try
+            //{
+            //    mapObject = MapConfigHandler.GetMap(map);
+            //}
+            //catch (Exception ex)
+            //{
+            //    _logger.LogError(ex, "Internal server error");
+            //    return StatusCode(StatusCodes.Status500InternalServerError, "Internal Server Error");
+            //}
+
+            //return StatusCode(StatusCodes.Status200OK, mapObject);
+        }
     }
 }
