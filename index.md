@@ -43,7 +43,7 @@ Vi har stormöten där alla som är aktiva utvecklare, användare eller nyfikna 
 Längst ner på den här sidan har vi börjat lägga upp användardokumentation.
 På GitHub har vi [Wiki-sidan](https://github.com/hajkmap/Hajk/wiki) där man kommer åt administratörsdokumentation på svenska. Här finns också en Quick setup guide och annat läsvärt. 
 
-Vi har också en ny egen hemsida [https://www.hajkmap.se] som håller på att byggas upp med bl a supporthantering och en kunskapsbank.
+Vi har också en ny egen hemsida [https://www.hajkmap.se](https://www.hajkmap.se) som håller på att byggas upp med bl a supporthantering och en kunskapsbank.
 
 ## Historik
 HAJK är just nu inne på sin tredje generation. HAJK 1 utvecklades 2013, denna version krävde mer av administratören då all konfiguration sparades i JSON-filer som editerades manuellt. 
