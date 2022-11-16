@@ -239,7 +239,7 @@ namespace MapService.Controllers
                     if (layer == null)
                         continue;
 
-                    string? caption = (string?)layer.AsObject()["caption"];
+                    string? captionPossibleNull = (string?)layer.AsObject()["caption"];
                     string? idPossibleNull = (string?)layer.AsObject()["id"];
 
                     List<JsonValue> subLayers = new List<JsonValue>();
@@ -256,23 +256,13 @@ namespace MapService.Controllers
                         continue;
 
                     string id = idPossibleNull.ToString();                   
-                    var obj = new
+                    var anonymousObject = new
                     {
-                        name = caption,
+                        name = captionPossibleNull,
                         subLayers = subLayers,
                     };
 
-                    string serializedJson = JsonSerializer.Serialize(obj);
-                    JsonObject? deserializedJson;
-                    try
-                    {
-                        deserializedJson = JsonSerializer.Deserialize<JsonObject>(serializedJson);
-                    }
-                    catch (Exception)
-                    {
-                        throw;
-                    }
-
+                    JsonObject? deserializedJson = Deserialize(anonymousObject);
                     if (deserializedJson == null)
                         continue;
 
@@ -285,6 +275,27 @@ namespace MapService.Controllers
         private JsonObject GetMaps(JsonObject jsonObject)
         {
             return jsonObject;
+        }
+
+        /// <summary>
+        /// Serialize an anonymous object as a json string and then Deserialize the json string as an Json Object. 
+        /// </summary>
+        /// <param name="anonymousObject">An anonomys object</param>
+        /// <returns>Returns a Json Object</returns>
+        private JsonObject? Deserialize(dynamic anonymousObject)
+        {
+            string serializedJson = JsonSerializer.Serialize(anonymousObject);
+            JsonObject? deserializedJson;
+            try
+            {
+                deserializedJson = JsonSerializer.Deserialize<JsonObject>(serializedJson);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+
+            return deserializedJson;
         }
     }
 }
