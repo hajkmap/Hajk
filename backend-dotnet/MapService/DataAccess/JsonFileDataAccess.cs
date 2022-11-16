@@ -78,6 +78,9 @@ namespace MapService.DataAccess
 
             try
             {
+                if (!fileName.EndsWith(".json"))
+                    fileName = fileName + ".json";
+
                 string pathToFile = GetPathToFile(fileName);
                 string jsonString = File.ReadAllText(pathToFile);
 

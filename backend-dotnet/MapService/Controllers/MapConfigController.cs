@@ -1,6 +1,7 @@
 ﻿using MapService.Business.MapConfig;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
+using System.Text.Json;
 using System.Text.Json.Nodes;
 
 namespace MapService.Controllers
@@ -200,23 +201,90 @@ namespace MapService.Controllers
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         [SwaggerOperation(Tags = new[] { "Admin - Maps and layers" })]
-        public ActionResult<string> ExportMapWithFormat(string map, string format)
+        public ActionResult<JsonObject> ExportMapWithFormat(string map, string format)
         {
-            return StatusCode(StatusCodes.Status200OK, "abc");
+            if (format != "json")
+                return StatusCode(StatusCodes.Status500InternalServerError, "Only json format is supported");
 
-            //JsonObject mapObject;
+            JsonObject jsonObject;
+            try
+            {
+                jsonObject = MapConfigHandler.GetMap(map);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Internal server error");
+                return StatusCode(StatusCodes.Status500InternalServerError, "Internal Server Error");
+            }
 
-            //try
-            //{
-            //    mapObject = MapConfigHandler.GetMap(map);
-            //}
-            //catch (Exception ex)
-            //{
-            //    _logger.LogError(ex, "Internal server error");
-            //    return StatusCode(StatusCodes.Status500InternalServerError, "Internal Server Error");
-            //}
+            if (map == "layers")
+                jsonObject = GetLayers(jsonObject);
+            else
+                jsonObject = GetMaps(jsonObject);
 
-            //return StatusCode(StatusCodes.Status200OK, mapObject);
+
+            return StatusCode(StatusCodes.Status200OK, jsonObject);
+        }
+
+        private JsonObject GetLayers(JsonObject jsonObject)
+        {
+            JsonObject layers = new JsonObject();
+            foreach (KeyValuePair<string, JsonNode?> root in jsonObject)
+            {
+                if (root.Value == null)
+                    continue;
+
+                foreach (JsonObject? layer in root.Value.AsArray())
+                {
+                    if (layer == null)
+                        continue;
+
+                    string? caption = (string?)layer.AsObject()["caption"];
+                    string? idPossibleNull = (string?)layer.AsObject()["id"];
+
+                    List<JsonValue> subLayers = new List<JsonValue>();
+                    foreach (JsonNode? subLayer in layer["layers"].AsArray())
+                    {
+                        if (subLayer == null)
+                            continue;
+
+                        JsonValue? subLayerValue = subLayer.AsValue();
+                        subLayers.Add(subLayerValue);
+                    }
+
+                    if (idPossibleNull == null)
+                        continue;
+
+                    string id = idPossibleNull.ToString();                   
+                    var obj = new
+                    {
+                        name = caption,
+                        subLayers = subLayers,
+                    };
+
+                    string serializedJson = JsonSerializer.Serialize(obj);
+                    JsonObject? deserializedJson;
+                    try
+                    {
+                        deserializedJson = JsonSerializer.Deserialize<JsonObject>(serializedJson);
+                    }
+                    catch (Exception)
+                    {
+                        throw;
+                    }
+
+                    if (deserializedJson == null)
+                        continue;
+
+                    layers.TryAdd<string, JsonNode>(id, deserializedJson);
+                }
+            }
+            return layers;
+        }
+
+        private JsonObject GetMaps(JsonObject jsonObject)
+        {
+            return jsonObject;
         }
     }
 }
