@@ -12,8 +12,6 @@ HAJK är fritt att använda och förändra, källkoden är fritt tillgänglig oc
 ### Exempel på karttjänster med HAJK:
 Göteborg – [https://karta.goteborg.se/](https://karta.goteborg.se/)
 
-Göteborgsregionen – [https://karta.goteborgsregionen.se/](https://karta.goteborgsregionen.se/)
-
 Halmstad – [https://karta.halmstad.se/](https://karta.halmstad.se/)
 
 Kungsbacka – [https://karta.kungsbacka.se/](https://karta.kungsbacka.se/)
@@ -26,10 +24,12 @@ Demo (senaste versionen) - [https://hajk-demo.netlify.app/](https://hajk-demo.ne
 
 ### Exempel på digitala översiktsplaner (ÖP) med HAJK:
 
+Göteborg - [https://oversiktsplan.goteborg.se](https://oversiktsplan.goteborg.se)
 Kungsbacka - [https://karta.kungsbacka.se/oversiktsplan/](https://karta.kungsbacka.se/oversiktsplan/)
+Uddevalla - [https://karta.uddevalla.se/op2022/](https://karta.uddevalla.se/op2022/)
 
 ## Organisationen
-Aktiva kommuner är Halmstad, Göteborg, Kungsbacka, Uddevalla, Varberg, m.fl. Andra organisationer som använder (och utvecklar) HAJK är bl. a. Västtrafik och Göteborgsregionen. 
+Aktiva kommuner är Halmstad, Göteborg, Kungsbacka, Uddevalla, Varberg, m.fl. Andra organisationer som använder (och utvecklar) HAJK är bl. a. Västtrafik.
 
 Det finns en produktägargrupp, en kodgrupp och en förvaltargrupp där medlemmar som är aktiva utvecklare är representerade. 
 * Produktägargruppen är beslutande och står för det strategiska.
@@ -39,7 +39,8 @@ Det finns en produktägargrupp, en kodgrupp och en förvaltargrupp där medlemma
 Vi har stormöten där alla som är aktiva utvecklare, användare eller nyfikna är välkomna att delta. Dessa möten turas vi om att anordna, på plats eller digitalt. Slack används för kommunikation och alla frågor som rör HAJK-samarbetet, här informerar vi om kommande möten och dylikt. Tekniska frågor som rör kod ställs på GitHub. Här används Issues för att tackla eventuella problem och ny utveckling. 
 
 Längst ner på den här sidan har vi börjat lägga upp användardokumentation.
-På GitHub har vi [Wiki-sidan](https://github.com/hajkmap/Hajk/wiki) där man kommer åt administratörsdokumentation på svenska. Här finns också en Quick setup guide och annat läsvärt. 
+På GitHub har vi [Wiki-sidan](https://github.com/hajkmap/Hajk/wiki) där man kommer åt administratörsdokumentation på svenska. Här finns också en Quick setup guide och annat läsvärt.
+Vi har också en ny egen hemsida [https://www.hajkmap.se] som håller på att byggas upp med bl a supporthantering och en kunskapsbank.
 
 ## Historik
 HAJK är just nu inne på sin tredje generation. HAJK 1 utvecklades 2013, denna version krävde mer av administratören då all konfiguration sparades i JSON-filer som editerades manuellt. 
