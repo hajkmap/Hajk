@@ -20,7 +20,8 @@
         public LayerExportItem(string caption, List<string> subLayers)
         {
             this.caption = caption;
-            this.subLayers = subLayers;
+            if (subLayers.Count > 1)
+                this.subLayers = subLayers;
         }
     }
 }

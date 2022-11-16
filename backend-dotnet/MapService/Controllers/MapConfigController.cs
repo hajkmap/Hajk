@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
 using System.Text.Json;
 using System.Text.Json.Nodes;
+using System.Text.Json.Serialization;
 
 namespace MapService.Controllers
 {
@@ -253,10 +254,9 @@ namespace MapService.Controllers
                     }
 
                     if (id == null)
-                        continue;                
+                        continue;
 
-                    LayerExportItem layerAsModel = new LayerExportItem(caption, subLayers);
-                    layerExportItems.Add(id, layerAsModel);
+                    layerExportItems.Add(id, new LayerExportItem(caption, subLayers));
                 }
             }
 
@@ -275,7 +275,12 @@ namespace MapService.Controllers
         /// <returns>Returns a Json Object</returns>
         private JsonObject? Deserialize(dynamic anonymousObject)
         {
-            string serializedJson = JsonSerializer.Serialize(anonymousObject);
+            var jsonOptions = new JsonSerializerOptions()
+            {
+                WriteIndented = true,
+                DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
+            };
+            string serializedJson = JsonSerializer.Serialize(anonymousObject, jsonOptions);
             JsonObject? deserializedJson;
             try
             {
