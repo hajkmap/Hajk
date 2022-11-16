@@ -1,4 +1,5 @@
 ﻿using MapService.Business.MapConfig;
+using MapService.Models;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
 using System.Text.Json;
@@ -228,7 +229,7 @@ namespace MapService.Controllers
 
         private JsonObject GetLayers(JsonObject jsonObject)
         {
-            JsonObject layers = new JsonObject();
+            Dictionary<string, LayerExportItem> layerExportItems = new Dictionary<string, LayerExportItem>();
             foreach (KeyValuePair<string, JsonNode?> root in jsonObject)
             {
                 if (root.Value == null)
@@ -239,37 +240,27 @@ namespace MapService.Controllers
                     if (layer == null)
                         continue;
 
-                    string? captionPossibleNull = (string?)layer.AsObject()["caption"];
-                    string? idPossibleNull = (string?)layer.AsObject()["id"];
+                    string? caption = (string?)layer.AsObject()["caption"];
+                    string? id = (string?)layer.AsObject()["id"];
 
-                    List<JsonValue> subLayers = new List<JsonValue>();
+                    List<string> subLayers = new List<string>();
                     foreach (JsonNode? subLayer in layer["layers"].AsArray())
                     {
                         if (subLayer == null)
-                            continue;
+                            continue; 
 
-                        JsonValue? subLayerValue = subLayer.AsValue();
-                        subLayers.Add(subLayerValue);
+                        subLayers.Add(subLayer.ToString());
                     }
 
-                    if (idPossibleNull == null)
-                        continue;
+                    if (id == null)
+                        continue;                
 
-                    string id = idPossibleNull.ToString();                   
-                    var anonymousObject = new
-                    {
-                        name = captionPossibleNull,
-                        subLayers = subLayers,
-                    };
-
-                    JsonObject? deserializedJson = Deserialize(anonymousObject);
-                    if (deserializedJson == null)
-                        continue;
-
-                    layers.TryAdd<string, JsonNode>(id, deserializedJson);
+                    LayerExportItem layerAsModel = new LayerExportItem(caption, subLayers);
+                    layerExportItems.Add(id, layerAsModel);
                 }
             }
-            return layers;
+
+            return Deserialize(layerExportItems);
         }
 
         private JsonObject GetMaps(JsonObject jsonObject)
