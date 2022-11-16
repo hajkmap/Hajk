@@ -8,7 +8,7 @@
         public string caption { get; set; }
 
         /// <summary>
-        /// The "layers" propery from the layers.json file. 
+        /// The "layers" property from the layers.json file. 
         /// </summary>
         public List<string> subLayers { get; set; }
 
@@ -20,7 +20,7 @@
         public LayerExportItem(string caption, List<string> subLayers)
         {
             this.caption = caption;
-            if (subLayers.Count > 1)
+            if (subLayers != null && subLayers.Count > 1)
                 this.subLayers = subLayers;
         }
     }
