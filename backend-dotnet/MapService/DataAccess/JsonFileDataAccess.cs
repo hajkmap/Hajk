@@ -51,7 +51,7 @@ namespace MapService.DataAccess
         }
 
         /// <summary>
-        /// Gets a map as a JsonObject. 
+        /// Gets a map as a JsonObject.
         /// </summary>
         /// <param name="mapFileName">The name of the map including the file ending. </param>
         /// <returns>Returns a map as a JsonObject. </returns>
@@ -110,6 +110,27 @@ namespace MapService.DataAccess
                 throw new DirectoryNotFoundException();
 
             return appDataFolderPath;
+        }
+
+        public static JsonObject GetSpecification()
+        {
+            JsonObject jsonObject;
+
+            var appDataFolderPath = AppDomain.CurrentDomain.GetData("SwaggerContentRootPath") as string;
+            var pathToFile = Path.Combine(appDataFolderPath, "swagger.json");
+
+            try
+            {
+                var jsonString = File.ReadAllText(pathToFile);
+
+                jsonObject = JsonSerializer.Deserialize<JsonObject>(jsonString);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+
+            return jsonObject;
         }
     }
 }
