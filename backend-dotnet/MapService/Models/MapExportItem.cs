@@ -2,13 +2,61 @@
 {
     public class MapExportItem
     {
+        public List<MapExportItem.BaseLayerExportItem> baselayers { get; set; }
+
+        public List<MapExportItem.GroupExportItem> groups { get; set; }
+
+        public MapExportItem(List<MapExportItem.BaseLayerExportItem> baselayers, List<MapExportItem.GroupExportItem> groups)
+        {
+            this.baselayers = baselayers;
+            this.groups = groups;
+        }
+
         public class BaseLayerExportItem
         {
-            public Tuple<string, string> baseLayer { get; set; }
+            public string name { get; set; }
 
-            public BaseLayerExportItem(Tuple<string, string> baseLayer)
+            public BaseLayerExportItem(string name)
             { 
-                this.baseLayer = baseLayer;
+                this.name = name;
+            }
+        }
+
+        public class GroupExportItem
+        {
+            public string name { get; set; }
+
+            public List<GroupLayerExportItem> layers { get; set; }
+
+            public GroupExportItem(string name, List<GroupLayerExportItem> layers)
+            {
+                this.name = name;
+                this.layers = layers;
+            }
+
+
+            public class GroupLayerExportItem
+            {
+                /// <summary>
+                /// The "caption" propery from the layers.json file. 
+                /// </summary>
+                public string name { get; set; }
+
+                /// <summary>
+                /// The "layers" property from the layers.json file. 
+                /// </summary>
+                public List<string> subLayers { get; set; }
+
+                /// <summary>
+                /// Creates a new LayerExportItem. 
+                /// </summary>
+                /// <param name="name">The "caption" propery from the layers.json file.</param>
+                /// <param name="subLayers">The "layers" propery from the layers.json file.</param>
+                public GroupLayerExportItem(LayerExportItem layerExportItem)
+                {
+                    this.name = layerExportItem.caption;
+                    this.subLayers = layerExportItem.subLayers;
+                }
             }
         }
     }

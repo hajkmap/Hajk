@@ -2,9 +2,7 @@
 using MapService.Models;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
-using System.Text.Json;
 using System.Text.Json.Nodes;
-using System.Text.Json.Serialization;
 
 namespace MapService.Controllers
 {
@@ -244,18 +242,24 @@ namespace MapService.Controllers
 
                     string? caption = (string?)layer.AsObject()["caption"];
                     string? id = (string?)layer.AsObject()["id"];
+                    if (id == null)
+                        continue;
+
+                    JsonNode? layers = layer["layers"];
+                    if (layers == null)
+                    {
+                        layerExportItems.Add(id, new LayerExportItem(caption, null));
+                        continue;
+                    }
 
                     List<string> subLayers = new List<string>();
-                    foreach (JsonNode? subLayer in layer["layers"].AsArray())
+                    foreach (JsonNode? subLayer in layers.AsArray())
                     {
                         if (subLayer == null)
                             continue; 
 
                         subLayers.Add(subLayer.ToString());
                     }
-
-                    if (id == null)
-                        continue;
 
                     layerExportItems.Add(id, new LayerExportItem(caption, subLayers));
                 }
@@ -266,81 +270,91 @@ namespace MapService.Controllers
 
         private JsonObject GetMaps(JsonObject jsonObjectMap, JsonObject jsonObjectLayers)
         {
-            Dictionary<string, List<MapExportItem.BaseLayerExportItem>> baseLayerExportItems = new Dictionary<string, List<MapExportItem.BaseLayerExportItem>>();
-            Dictionary<string, MapExportItem> mapExportItems = new Dictionary<string, MapExportItem>();
+            List<MapExportItem.BaseLayerExportItem> baseLayers = new List<MapExportItem.BaseLayerExportItem>();
+            List<MapExportItem.GroupExportItem> groups = new List<MapExportItem.GroupExportItem>();
+
             JsonNode? tools = jsonObjectMap["tools"];
-            List<string> baseLayerIds = new List<string>();
-            List<Tuple<string, List<LayerExportItem>>> groupsLayerIds = new List<Tuple<string, List<LayerExportItem>>>();
+            if (tools == null)
+                throw new Exception();
 
             foreach (JsonNode? tool in tools.AsArray())
             {
-                if (tool["type"].ToString() != "layerswitcher")
+                if (tool == null)
                     continue;
+
+                JsonNode? type = tool["type"];
+                if (type == null || type.ToString() != "layerswitcher")
+                    continue;
+
                 JsonNode? options = tool["options"];
+                if (options == null)
+                    continue;
 
                 JsonNode? baselayers = options["baselayers"];
-
                 if (baselayers == null)
                     continue;
 
-                JsonArray? baselayerArray = baselayers.AsArray();
-                foreach (JsonNode? baselayer in baselayerArray)
+                List<string> baseLayerIds = new List<string>();
+                foreach (JsonNode? baselayer in baselayers.AsArray())
                 {
-                    string? id = (string?)baselayer["id"];
+                    if (baselayer == null)
+                        continue;
 
+                    string? id = (string?)baselayer["id"];
                     if (id == null)
                         continue;
 
                     baseLayerIds.Add(id);
                 }
 
-                List<MapExportItem.BaseLayerExportItem> baseLayers = new List<MapExportItem.BaseLayerExportItem>();
                 foreach (string baseLayerId in baseLayerIds)
                 {
-                    JsonObject? layerInGroup = jsonObjectLayers[baseLayerId].AsObject();
+                    JsonNode? layerInGroupNode = jsonObjectLayers[baseLayerId];
+                    if (layerInGroupNode == null)
+                        continue;
 
+                    JsonObject? layerInGroup = layerInGroupNode.AsObject();
                     if (layerInGroup == null)
                         continue;
 
                     string? caption = (string?)layerInGroup["caption"];
+                    if (caption == null)
+                        continue;
 
-                    baseLayers.Add(new MapExportItem.BaseLayerExportItem(new Tuple<string, string>("name", caption)));
+                    baseLayers.Add(new MapExportItem.BaseLayerExportItem(caption));
                 }
 
-                baseLayerExportItems.Add("baseLayers", baseLayers);
-
-                JsonNode? groups = options["groups"];
-
-                if (groups == null)
+                JsonNode? groupsNode = options["groups"];
+                if (groupsNode == null)
                     continue;
 
                 List<string> Ids = new List<string>();
-
-                JsonArray? groupsArray = groups.AsArray();
-                foreach (JsonNode? group in groupsArray)
+                foreach (JsonNode? group in groupsNode.AsArray())
                 {
-                    string? name = (string?)group["name"];
+                    if (group == null)
+                        continue;
 
+                    string? name = (string?)group["name"];
                     if (name == null)
                         continue;
 
                     JsonNode? layers = group["layers"];
-
                     if (layers == null)
                         continue;
 
-                    JsonArray? layersArray = layers.AsArray();
-                    foreach (JsonNode? layer in layersArray)
+                    foreach (JsonNode? layer in layers.AsArray())
                     {
-                        string? id = (string?)layer["id"];
+                        if (layer == null)
+                            continue;
 
+                        string? id = (string?)layer["id"];
                         if (id == null)
                             continue;
 
                         Ids.Add(id);
                     }
-                                      
-                    List<LayerExportItem> layersInGroup = new List<LayerExportItem>();
+
+                    List<MapExportItem.GroupExportItem.GroupLayerExportItem> layersInGroup = new List<MapExportItem.GroupExportItem.GroupLayerExportItem>();
                     foreach(string id in Ids)
                     {
                         JsonObject? layerInGroup = jsonObjectLayers[id].AsObject();
@@ -349,16 +363,16 @@ namespace MapService.Controllers
                             continue;
 
                         LayerExportItem layerExportItem = ControllerUtility.ConvertToJsonObject<LayerExportItem>(layerInGroup);
-
-                        layersInGroup.Add(layerExportItem);
+                        MapExportItem.GroupExportItem.GroupLayerExportItem groupLayerExportItem = new MapExportItem.GroupExportItem.GroupLayerExportItem(layerExportItem);
+                        layersInGroup.Add(groupLayerExportItem);
                     }
-
-                    groupsLayerIds.Add(new Tuple<string, List<LayerExportItem>>(name, layersInGroup));
+                    groups.Add(new MapExportItem.GroupExportItem(name, layersInGroup));
+                    Ids.Clear();
                 }
             }
 
-            return jsonObjectMap;
-            //return ControllerUtility.ConvertToJsonObject(new Tuple<Dictionary<string, List<string>>, Dictionary>);
+            MapExportItem mapExportItem = new MapExportItem(baseLayers, groups);
+            return ControllerUtility.ConvertToJsonObject(mapExportItem);
         }
     }
 }
