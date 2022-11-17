@@ -8,6 +8,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
+
 builder.Services.AddSwaggerGen(options =>
 {
     options.SwaggerDoc("v1", new OpenApiInfo
@@ -33,13 +34,19 @@ AppDomain.CurrentDomain.SetData("WebRootPath", app.Environment.WebRootPath);
 AppDomain.CurrentDomain.SetData("UploadContentRootPath", app.Environment.ContentRootPath + "App_Data\\Upload");
 AppDomain.CurrentDomain.SetData("AppDataContentRootPath", app.Environment.ContentRootPath + "App_Data");
 AppDomain.CurrentDomain.SetData("DocumentsContentRootPath", app.Environment.ContentRootPath + "App_Data\\documents");
+AppDomain.CurrentDomain.SetData("SwaggerContentRootPath", app.Environment.ContentRootPath + "Swagger");
 
 // Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
+//if (app.Environment.IsDevelopment())
+//{
+app.UseSwagger();
+
+app.UseSwaggerUI(c =>
 {
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
+    c.SwaggerEndpoint("/spec", "HAJK Backend");
+    c.SwaggerEndpoint("/swagger/v1/swagger.json", "HAJK .NET Backend");
+});
+//}
 
 app.UseAuthorization();
 
