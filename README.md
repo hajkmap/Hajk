@@ -10,7 +10,7 @@ _Hajk is an open source web GIS solution based on the latest technologies such a
 
 ## New to Hajk and not a developer?
 
-If you are a new user of Hajk, please visit [our welcome page (Swedish only)](https://hajkmap.github.io/Hajk) for more information about Hajk.
+If you are a new user of Hajk, please visit [our welcome page (Swedish only)](https://www.hajkmap.se/) for more information about Hajk.
 
 ## Looking for support?
 You can easily reach out to our community using the [Discussions on GitHub](https://github.com/hajkmap/Hajk/discussions). 
