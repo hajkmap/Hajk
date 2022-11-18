@@ -73,7 +73,8 @@ class AnchorModel {
   }
 
   getPartlyToggledGroupLayers() {
-    return this.map
+    const partlyToggledGroupLayers = {};
+    this.map
       .getLayers()
       .getArray()
       .filter((layer) => {
@@ -90,16 +91,17 @@ class AnchorModel {
             layer.getSource().getParams?.().LAYERS?.split(",").length
         );
       })
-      .map((layer) => {
+      .forEach((layer) => {
         // Create an array where each element will have the layer id as key
         // and a string of selected sublayers as value. This comma-separated
         // string is handy as it's the exact format that is used in OL as the
         // LAYER property of getParams, so it will be easy to turn it back into
         // valid OL configuration.
-        return {
-          [layer.getProperties().name]: layer.getSource().getParams().LAYERS,
-        };
+        partlyToggledGroupLayers[layer.getProperties().name] = layer
+          .getSource()
+          .getParams().LAYERS;
       });
+    return partlyToggledGroupLayers;
   }
 
   getAnchor() {
@@ -128,7 +130,7 @@ class AnchorModel {
 
     // Only add gl if there are group layers with a subset of selected layers
     const partlyToggledGroupLayers = this.getPartlyToggledGroupLayers();
-    partlyToggledGroupLayers.length > 0 &&
+    Object.keys(partlyToggledGroupLayers).length > 0 &&
       url.searchParams.append("gl", JSON.stringify(partlyToggledGroupLayers));
 
     // Only add 'f' if it isn't an empty object
