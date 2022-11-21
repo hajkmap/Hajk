@@ -424,8 +424,13 @@ class LayerGroupItem extends Component {
     return (
       <LayerInfo key={index}>
         <LayerSummaryContainer>
-          <Grid container alignItems="center" wrap="nowrap">
-            <CheckBoxWrapper onClick={this.toggleLayerVisible(subLayer)}>
+          <Grid
+            container
+            alignItems="center"
+            wrap="nowrap"
+            onClick={this.toggleLayerVisible(subLayer)}
+          >
+            <CheckBoxWrapper>
               {visible ? <CheckBoxIcon /> : <CheckBoxOutlineBlankIcon />}
             </CheckBoxWrapper>
             {legendIcon && this.renderLegendIcon(legendIcon)}
