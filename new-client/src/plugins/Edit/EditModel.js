@@ -155,7 +155,7 @@ class EditModel {
     }
   }
 
-  save(done) {
+  findUpdatedFeatures() {
     const find = (mode) =>
       this.vectorSource
         .getFeatures()
@@ -169,6 +169,12 @@ class EditModel {
       inserts: find("added"),
       deletes: find("removed"),
     };
+
+    return features;
+  }
+
+  save(done) {
+    const features = this.findUpdatedFeatures();
 
     if (
       features.updates.length === 0 &&

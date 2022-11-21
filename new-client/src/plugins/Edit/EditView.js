@@ -12,6 +12,7 @@ import Select from "@mui/material/Select";
 import SaveIcon from "@mui/icons-material/Save";
 import CircularProgress from "@mui/material/CircularProgress";
 import Typography from "@mui/material/Typography";
+import ConfirmationDialog from "../../components/ConfirmationDialog";
 
 class EditView extends React.PureComponent {
   constructor(props) {
@@ -22,6 +23,8 @@ class EditView extends React.PureComponent {
       editFeature: undefined,
       activeStep: 0,
       activeTool: undefined,
+      showSaveConfirmation: false,
+      editSummary: "",
     };
     this.bindSubscriptions();
   }
@@ -142,6 +145,16 @@ class EditView extends React.PureComponent {
   };
 
   onSaveClicked = () => {
+    const { options } = this.props;
+    if (options.requireConfirmOnSave) {
+      let editSummary = this.createSummaryMessage();
+      this.setState({ showSaveConfirmation: true, editSummary: editSummary });
+    } else {
+      this.onSaveConfirmed();
+    }
+  };
+
+  onSaveConfirmed = () => {
     const { model, app } = this.props;
     model.save((response) => {
       if (
@@ -167,6 +180,25 @@ class EditView extends React.PureComponent {
       }
     });
   };
+
+  createSummaryMessage() {
+    const features = this.props.model.findUpdatedFeatures();
+    let totalInserts = features.inserts.length;
+    let totalUpdates = features.updates.length;
+    let totalDeletes = features.deletes.length;
+    const message = `Dina ändringar bestär av ${totalInserts} skapade objekt, ${totalUpdates} uppdaterade objekt och ${totalDeletes} borttagna objekt. Vill du spara?`;
+
+    return message;
+  }
+
+  handleSaveConfirmation() {
+    this.onSaveConfirmed();
+    this.setState({ showSaveConfirmation: false, editSummary: "" });
+  }
+
+  handleSaveConfirmationAbort() {
+    this.setState({ showSaveConfirmation: false, editSummary: "" });
+  }
 
   renderSources() {
     const { loadingError, editSource } = this.state;
@@ -302,6 +334,15 @@ class EditView extends React.PureComponent {
             </StepContent>
           </Step>
         </Stepper>
+        <ConfirmationDialog
+          open={this.state.showSaveConfirmation === true}
+          titleName={"Bekräfta ändringar"}
+          contentDescription={this.state.editSummary}
+          cancel={"Avbryt"}
+          confirm={"Bekräfta"}
+          handleConfirm={() => this.handleSaveConfirmation()}
+          handleAbort={() => this.handleSaveConfirmationAbort()}
+        />
       </>
     );
   }
