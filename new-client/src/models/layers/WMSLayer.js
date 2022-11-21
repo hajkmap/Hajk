@@ -37,7 +37,7 @@ class WMSLayer {
 
     // If this is layer item has sublayers and only a subset of them
     // should be visible at start, there will be a value in this property.
-    if (config.visibleAtStartSubLayers.length > 0) {
+    if (config.visibleAtStartSubLayers?.length > 0) {
       // In that case, replace the previously prepared LAYERS value (which
       // got set in ConfigMapper and contains all sublayers) with this
       // subset of layers.
