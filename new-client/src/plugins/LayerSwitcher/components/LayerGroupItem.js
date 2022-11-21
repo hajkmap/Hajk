@@ -91,7 +91,14 @@ class LayerGroupItem extends Component {
     this.state = {
       caption: layerInfo.caption,
       visible: props.layer.get("visible"),
-      visibleSubLayers: props.layer.get("visible") ? props.layer.subLayers : [],
+      // If layer is to be shown, check if there are some specified sublayers (if yes, we'll
+      // enable only those). Else, let's default to showing all sublayers, or finally fallback
+      // to an empty array.
+      visibleSubLayers: props.layer.get("visible")
+        ? props.layer.visibleAtStartSubLayers?.length > 0
+          ? props.layer.visibleAtStartSubLayers
+          : props.layer.subLayers
+        : [],
       expanded: false,
       name: props.layer.get("name"),
       legend: layerInfo.legend,

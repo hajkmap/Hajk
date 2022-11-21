@@ -115,6 +115,7 @@ class WMSLayer {
 
     this.layer.layersInfo = config.layersInfo;
     this.layer.subLayers = this.subLayers;
+    this.layer.visibleAtStartSubLayers = config.visibleAtStartSubLayers;
     this.layer.getSource().set("url", config.url);
     this.type = "wms";
     this.bindHandlers();
