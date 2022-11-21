@@ -42,6 +42,10 @@ class WMSLayer {
       // got set in ConfigMapper and contains all sublayers) with this
       // subset of layers.
       source.params["LAYERS"] = config.visibleAtStartSubLayers.join(",");
+      source.params["STYLES"] = Object.entries(config.layersInfo)
+        .filter((k) => config.visibleAtStartSubLayers.indexOf(k[0]) !== -1)
+        .map((l) => l[1].style)
+        .join(",");
     }
 
     overrideLayerSourceParams(source);
