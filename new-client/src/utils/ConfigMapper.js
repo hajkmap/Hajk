@@ -195,6 +195,7 @@ export default class ConfigMapper {
         hideExpandArrow: args.hideExpandArrow,
         timeSliderStart: args.timeSliderStart,
         timeSliderEnd: args.timeSliderEnd,
+        visibleAtStartSubLayers: args.visibleAtStartSubLayers,
       },
     };
 
