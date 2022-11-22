@@ -253,6 +253,33 @@ class AttributeEditor extends React.Component {
     );
   }
 
+  checkCustomValidation(name, validationRule, validationMessage, value) {
+    //Create regex from the property validationRule. Note that we should not include the encompassing '/' characters in the string itself, as converting to regex will add these.
+    const regex = new RegExp(validationRule);
+    const message = validationMessage ? validationMessage : "ogiltigt värde";
+
+    let valid = regex.test(value);
+
+    let formValues = Object.assign({}, this.state.formValues);
+
+    if (valid) {
+      formValues[name] = value;
+      delete this.formErrors[name];
+    } else {
+      formValues[name] = "";
+      this.formErrors[name] = message;
+    }
+
+    this.setState(
+      {
+        formValues: formValues,
+      },
+      () => {
+        this.updateFeature();
+      }
+    );
+  }
+
   setChanged() {
     if (
       this.props.model.editFeature.modification !== "added" &&
@@ -463,6 +490,15 @@ class AttributeEditor extends React.Component {
                 this.setChanged();
                 if (field.textType === "url") {
                   this.checkUrl(field.name, e.target.value);
+                }
+                //If we have something in the customValidation field. We want to do a validity check on it.
+                if (field.customValidation) {
+                  this.checkCustomValidation(
+                    field.name,
+                    field.customValidation,
+                    field.customValidationMessage,
+                    e.target.value
+                  );
                 }
                 field.initialRender = false;
               }}
