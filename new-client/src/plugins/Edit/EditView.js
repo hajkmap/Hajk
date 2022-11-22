@@ -186,7 +186,7 @@ class EditView extends React.PureComponent {
     let totalInserts = features.inserts.length;
     let totalUpdates = features.updates.length;
     let totalDeletes = features.deletes.length;
-    const message = `Dina ändringar bestär av ${totalInserts} skapade objekt, ${totalUpdates} uppdaterade objekt och ${totalDeletes} borttagna objekt. Vill du spara?`;
+    const message = `Dina ändringar består av ${totalInserts} skapade objekt, ${totalUpdates} uppdaterade objekt och ${totalDeletes} borttagna objekt. Vill du spara?`;
 
     return message;
   }
