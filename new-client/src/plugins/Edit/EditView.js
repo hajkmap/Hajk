@@ -25,6 +25,7 @@ class EditView extends React.PureComponent {
       activeTool: undefined,
       showSaveConfirmation: false,
       editSummary: "",
+      snapOn: false,
     };
     this.bindSubscriptions();
   }
@@ -45,6 +46,12 @@ class EditView extends React.PureComponent {
         editSource: undefined,
         activeStep: 0,
         activeTool: undefined,
+      });
+    });
+
+    this.props.observer.subscribe("edit-snap-changed", (snapEnabled) => {
+      this.setState({
+        snapOn: snapEnabled,
       });
     });
   };
@@ -200,6 +207,12 @@ class EditView extends React.PureComponent {
     this.setState({ showSaveConfirmation: false, editSummary: "" });
   }
 
+  toggleSnap() {
+    this.state.snapOn
+      ? this.props.model.deactivateSnapping()
+      : this.props.model.activateSnapping();
+  }
+
   renderSources() {
     const { loadingError, editSource } = this.state;
     return (
@@ -243,6 +256,8 @@ class EditView extends React.PureComponent {
         app={this.props.app}
         activeTool={this.state.activeTool}
         toggleActiveTool={(toolName) => this.toggleActiveTool(toolName)}
+        toggleSnap={() => this.toggleSnap()}
+        snapOn={this.state.snapOn}
       />
     );
   };

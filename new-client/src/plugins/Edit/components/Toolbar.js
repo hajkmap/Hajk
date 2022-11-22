@@ -9,6 +9,9 @@ import ZoomOutMapIcon from "@mui/icons-material/ZoomOutMap";
 import FormatShapesIcon from "@mui/icons-material/FormatShapes";
 import Typography from "@mui/material/Typography";
 import Grid from "@mui/material/Grid";
+import FormGroup from "@mui/material/FormGroup";
+import FormControlLabel from "@mui/material/FormControlLabel";
+import Switch from "@mui/material/Switch";
 
 const StyledButton = styled(Button)(({ selected, theme }) => ({
   borderTop: `${theme.spacing(0.5)} solid transparent`,
@@ -109,13 +112,25 @@ class Toolbar extends Component {
   }
 
   render() {
-    const { editSource } = this.props;
+    const { editSource, snapOn } = this.props;
     const { editFeature } = this.state;
 
     if (!editSource || editFeature) return null;
 
     return (
       <Grid container spacing={1}>
+        <FormGroup>
+          <FormControlLabel
+            control={
+              <Switch
+                checked={snapOn}
+                onChange={this.props.toggleSnap}
+                disabled={!this.props.activeTool}
+              />
+            }
+            label="Snappa"
+          />
+        </FormGroup>
         <Grid item xs={12}>
           <Typography>Lägg till</Typography>
         </Grid>

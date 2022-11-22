@@ -540,6 +540,16 @@ class EditModel {
     this.map.addInteraction(this.move);
   }
 
+  activateSnapping() {
+    this.map.snapHelper.add("edit");
+    this.observer.publish("edit-snap-changed", true);
+  }
+
+  deactivateSnapping() {
+    this.map.snapHelper.delete("edit");
+    this.observer.publish("edit-snap-changed", false);
+  }
+
   activateInteraction(type, geometryType) {
     if (type === "add") {
       this.activateAdd(geometryType);
@@ -555,8 +565,7 @@ class EditModel {
       this.activateRemove();
     }
 
-    // Add snap after all interactions have been added
-    this.map.snapHelper.add("measure");
+    this.activateSnapping();
   }
 
   removeSelected = (e) => {
@@ -574,7 +583,7 @@ class EditModel {
 
   deactivateInteraction() {
     // First remove the snap interaction
-    this.map.snapHelper.delete("measure");
+    this.deactivateSnapping();
 
     // Next, remove correct map interaction
     if (this.select) {
