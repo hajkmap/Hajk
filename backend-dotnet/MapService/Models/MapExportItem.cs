@@ -52,7 +52,7 @@
                 /// </summary>
                 /// <param name="name">The "caption" propery from the layers.json file.</param>
                 /// <param name="subLayers">The "layers" propery from the layers.json file.</param>
-                public GroupLayerExportItem(LayerExportItem layerExportItem)
+                public GroupLayerExportItem(LayerExportItem.LayerExportBaseItem layerExportItem)
                 {
                     this.name = layerExportItem.caption;
                     this.subLayers = layerExportItem.subLayers;

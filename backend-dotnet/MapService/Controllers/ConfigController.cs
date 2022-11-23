@@ -117,7 +117,7 @@ namespace MapService.Controllers
         [Obsolete]
         public ActionResult<IEnumerable<string>> GetMaps()
         {
-            ICollection<string> maps;
+            IEnumerable<string> maps;
 
             try
             {

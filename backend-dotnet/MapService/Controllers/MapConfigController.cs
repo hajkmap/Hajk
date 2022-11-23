@@ -88,7 +88,7 @@ namespace MapService.Controllers
         [SwaggerOperation(Tags = new[] { "Admin - Maps and layers" })]
         public ActionResult<IEnumerable<string>> GetMaps()
         {
-            ICollection<string> maps;
+            IEnumerable<string> maps;
 
             try
             {
@@ -201,178 +201,20 @@ namespace MapService.Controllers
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         [SwaggerOperation(Tags = new[] { "Admin - Maps and layers" })]
-        public ActionResult<JsonObject> ExportMapWithFormat(string map, string format)
+        public ActionResult ExportMapWithFormat(string map, string format)
         {
-            if (format != "json")
-                return StatusCode(StatusCodes.Status500InternalServerError, "Only json format is supported");
-
-            JsonObject jsonObjectMap;
-            JsonObject jsonObjectLayers;
+            JsonObject exportedWithFormats;
             try
             {
-                jsonObjectMap = MapConfigHandler.GetMap(map);
-                jsonObjectLayers = MapConfigHandler.GetLayers();
+                exportedWithFormats = MapConfigHandler.ExportMapWithFormat(map, format);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Internal server error");
+                _logger.LogError(ex, "Internal Server Error");
                 return StatusCode(StatusCodes.Status500InternalServerError, "Internal Server Error");
             }
-            jsonObjectLayers = GetLayers(jsonObjectLayers);
-            if (map == "layers")
-                return StatusCode(StatusCodes.Status200OK, jsonObjectLayers);
 
-            jsonObjectMap = GetMaps(jsonObjectMap, jsonObjectLayers);
-
-            return StatusCode(StatusCodes.Status200OK, jsonObjectMap);
-        }
-
-        private JsonObject GetLayers(JsonObject jsonObject)
-        {
-            Dictionary<string, LayerExportItem> layerExportItems = new Dictionary<string, LayerExportItem>();
-            foreach (KeyValuePair<string, JsonNode?> root in jsonObject)
-            {
-                if (root.Value == null)
-                    continue;
-
-                foreach (JsonObject? layer in root.Value.AsArray())
-                {
-                    if (layer == null)
-                        continue;
-
-                    string? caption = (string?)layer.AsObject()["caption"];
-                    string? id = (string?)layer.AsObject()["id"];
-                    if (id == null)
-                        continue;
-
-                    JsonNode? layers = layer["layers"];
-                    if (layers == null)
-                    {
-                        layerExportItems.Add(id, new LayerExportItem(caption, null));
-                        continue;
-                    }
-
-                    List<string> subLayers = new List<string>();
-                    foreach (JsonNode? subLayer in layers.AsArray())
-                    {
-                        if (subLayer == null)
-                            continue; 
-
-                        subLayers.Add(subLayer.ToString());
-                    }
-
-                    layerExportItems.Add(id, new LayerExportItem(caption, subLayers));
-                }
-            }
-
-            return ControllerUtility.ConvertToJsonObject(layerExportItems);
-        }
-
-        private JsonObject GetMaps(JsonObject jsonObjectMap, JsonObject jsonObjectLayers)
-        {
-            List<MapExportItem.BaseLayerExportItem> baseLayers = new List<MapExportItem.BaseLayerExportItem>();
-            List<MapExportItem.GroupExportItem> groups = new List<MapExportItem.GroupExportItem>();
-
-            JsonNode? tools = jsonObjectMap["tools"];
-            if (tools == null)
-                throw new Exception();
-
-            foreach (JsonNode? tool in tools.AsArray())
-            {
-                if (tool == null)
-                    continue;
-
-                JsonNode? type = tool["type"];
-                if (type == null || type.ToString() != "layerswitcher")
-                    continue;
-
-                JsonNode? options = tool["options"];
-                if (options == null)
-                    continue;
-
-                JsonNode? baselayers = options["baselayers"];
-                if (baselayers == null)
-                    continue;
-
-                List<string> baseLayerIds = new List<string>();
-                foreach (JsonNode? baselayer in baselayers.AsArray())
-                {
-                    if (baselayer == null)
-                        continue;
-
-                    string? id = (string?)baselayer["id"];
-                    if (id == null)
-                        continue;
-
-                    baseLayerIds.Add(id);
-                }
-
-                foreach (string baseLayerId in baseLayerIds)
-                {
-                    JsonNode? layerInGroupNode = jsonObjectLayers[baseLayerId];
-                    if (layerInGroupNode == null)
-                        continue;
-
-                    JsonObject? layerInGroup = layerInGroupNode.AsObject();
-                    if (layerInGroup == null)
-                        continue;
-
-                    string? caption = (string?)layerInGroup["caption"];
-                    if (caption == null)
-                        continue;
-
-                    baseLayers.Add(new MapExportItem.BaseLayerExportItem(caption));
-                }
-
-                JsonNode? groupsNode = options["groups"];
-                if (groupsNode == null)
-                    continue;
-
-                List<string> Ids = new List<string>();
-                foreach (JsonNode? group in groupsNode.AsArray())
-                {
-                    if (group == null)
-                        continue;
-
-                    string? name = (string?)group["name"];
-                    if (name == null)
-                        continue;
-
-                    JsonNode? layers = group["layers"];
-                    if (layers == null)
-                        continue;
-
-                    foreach (JsonNode? layer in layers.AsArray())
-                    {
-                        if (layer == null)
-                            continue;
-
-                        string? id = (string?)layer["id"];
-                        if (id == null)
-                            continue;
-
-                        Ids.Add(id);
-                    }
-
-                    List<MapExportItem.GroupExportItem.GroupLayerExportItem> layersInGroup = new List<MapExportItem.GroupExportItem.GroupLayerExportItem>();
-                    foreach(string id in Ids)
-                    {
-                        JsonObject? layerInGroup = jsonObjectLayers[id].AsObject();
-
-                        if (layerInGroup == null)
-                            continue;
-
-                        LayerExportItem layerExportItem = ControllerUtility.ConvertToJsonObject<LayerExportItem>(layerInGroup);
-                        MapExportItem.GroupExportItem.GroupLayerExportItem groupLayerExportItem = new MapExportItem.GroupExportItem.GroupLayerExportItem(layerExportItem);
-                        layersInGroup.Add(groupLayerExportItem);
-                    }
-                    groups.Add(new MapExportItem.GroupExportItem(name, layersInGroup));
-                    Ids.Clear();
-                }
-            }
-
-            MapExportItem mapExportItem = new MapExportItem(baseLayers, groups);
-            return ControllerUtility.ConvertToJsonObject(mapExportItem);
+            return StatusCode(StatusCodes.Status200OK, exportedWithFormats);
         }
     }
 }
