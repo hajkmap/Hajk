@@ -2,9 +2,9 @@
 using System.Text.Json.Nodes;
 using System.Text.Json.Serialization;
 
-namespace MapService.Controllers
+namespace MapService.Business.Utility
 {
-    public static class ControllerUtility
+    public static class HandlerUtility
     {
         /// <summary>
         /// Serialize an anonymous object as a json string and then Deserialize the json string as an Json Object. 
@@ -37,7 +37,7 @@ namespace MapService.Controllers
         /// </summary>
         /// <param name="jsonObject">An json object</param>
         /// <returns>Returns a Json Object</returns>
-        public static T ConvertToJsonObject<T>(JsonObject jsonObject)
+        public static T ConvertFromJsonObject<T>(JsonObject jsonObject)
         {
             var jsonOptions = new JsonSerializerOptions()
             {
