@@ -1,5 +1,4 @@
-﻿using MapService.Business.Utility;
-using MapService.DataAccess;
+﻿using MapService.DataAccess;
 using MapService.Models;
 using System.Text.Json.Nodes;
 
@@ -13,17 +12,17 @@ namespace MapService.Business.MapConfig
         }
 
         /// <summary>
-        /// Gets a map as a JsonObject. 
+        /// Gets a map as a JsonObject.
         /// </summary>
         /// <param name="mapFileName">The name of the map including the file ending. </param>
         /// <returns>Returns a map as a JsonObject. </returns>
         public static JsonObject GetMap(string mapFileName)
         {
-            return JsonFileDataAccess.ReadMapFile(mapFileName);
+            return JsonFileDataAccess.ReadMapFileAsJsonObject(mapFileName);
         }
 
         /// <summary>
-        /// Gets all maps names. 
+        /// Gets all maps names.
         /// </summary>
         /// <returns>Return all map names.</returns>
         public static IEnumerable<string> GetMaps()
@@ -259,7 +258,7 @@ namespace MapService.Business.MapConfig
                     foreach (string id in Ids)
                     {
                         LayerExportItem.LayerExportBaseItem layerExportItem = layerExportItems.layers[id];
-                        MapExportItem.GroupExportItem.GroupLayerExportItem groupLayerExportItem = 
+                        MapExportItem.GroupExportItem.GroupLayerExportItem groupLayerExportItem =
                             new MapExportItem.GroupExportItem.GroupLayerExportItem(layerExportItem);
                         layersInGroup.Add(groupLayerExportItem);
                     }

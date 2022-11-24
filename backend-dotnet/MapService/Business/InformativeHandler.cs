@@ -1,7 +1,6 @@
 ﻿using MapService.DataAccess;
 using System.Text.Json.Nodes;
 
-
 namespace MapService.Business.Informative
 {
     public static class InformativeHandler
@@ -40,7 +39,7 @@ namespace MapService.Business.Informative
         public static IEnumerable<string> GetDocumentList()
         {
             var documentNameList = new List<string>();
-            
+
             var files = GetAllDocuments();
 
             foreach (var file in files)
@@ -65,10 +64,10 @@ namespace MapService.Business.Informative
 
             foreach (var file in files)
             {
-                var jsonObject = JsonFileDataAccess.ReadMapFile(file);
+                var jsonObject = JsonFileDataAccess.ReadMapFileAsJsonObject(file);
                 jsonObject.TryGetPropertyValue(JsonFileDataAccess.MAP_NODE_NAME, out var mapNodeValue);
 
-                if(mapNodeValue != null && mapNodeValue.ToString() == name)
+                if (mapNodeValue != null && mapNodeValue.ToString() == name)
                 {
                     documentNameList.Add(Path.GetFileNameWithoutExtension(file));
                 }
@@ -99,7 +98,7 @@ namespace MapService.Business.Informative
                 return document;
             }
 
-            return JsonFileDataAccess.ReadMapFile(filePath);
+            return JsonFileDataAccess.ReadMapFileAsJsonObject(filePath);
         }
     }
 }
