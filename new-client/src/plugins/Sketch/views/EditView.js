@@ -90,6 +90,26 @@ const EditView = (props) => {
               Duplicera objekt
             </Button>
           </Tooltip>
+          <Button
+            variant="contained"
+            fullWidth
+            onClick={() => {
+              props.drawModel.moveFeatureZIndexUp(props.editFeature);
+            }}
+          >
+            Up +1
+            {/* todo: ui */}
+          </Button>
+          <Button
+            variant="contained"
+            fullWidth
+            onClick={() => {
+              props.drawModel.moveFeatureZIndexDown(props.editFeature);
+            }}
+          >
+            Down -1
+            {/* todo: ui */}
+          </Button>
         </Grid>
       )}
     </Grid>
