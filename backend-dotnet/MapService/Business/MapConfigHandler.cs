@@ -4,8 +4,15 @@ using System.Text.Json.Nodes;
 
 namespace MapService.Business.MapConfig
 {
+    /// <summary>
+    /// Business logic for map config endpoints
+    /// </summary>
     public static class MapConfigHandler
     {
+        /// <summary>
+        /// Gets a layer from layers file
+        /// </summary>
+        /// <returns>Returns all layers as a JsonObject.</returns>
         public static JsonObject GetLayers()
         {
             return JsonFileDataAccess.ReadLayerFile();
@@ -15,7 +22,7 @@ namespace MapService.Business.MapConfig
         /// Gets a map as a JsonObject.
         /// </summary>
         /// <param name="mapFileName">The name of the map including the file ending. </param>
-        /// <returns>Returns a map as a JsonObject. </returns>
+        /// <returns>Returns a map as a JsonObject.</returns>
         public static JsonObject GetMap(string mapFileName)
         {
             return JsonFileDataAccess.ReadMapFileAsJsonObject(mapFileName);
@@ -39,6 +46,10 @@ namespace MapService.Business.MapConfig
             return JsonFileDataAccess.GetMapConfigFiles();
         }
 
+        /// <summary>
+        /// Returns names of all image files in a folder
+        /// </summary>
+        /// <returns>Collection of image file names</returns>
         public static IEnumerable<string> GetListOfImages()
         {
             var imageFileNameList = new List<string>();
@@ -64,6 +75,10 @@ namespace MapService.Business.MapConfig
             return imageFileNameList;
         }
 
+        /// <summary>
+        /// Returns names of all video files in a folder
+        /// </summary>
+        /// <returns>Collection of video file names</returns>
         public static IEnumerable<string> GetListOfVideos()
         {
             var videoFileNameList = new List<string>();
@@ -89,6 +104,10 @@ namespace MapService.Business.MapConfig
             return videoFileNameList;
         }
 
+        /// <summary>
+        /// Returns names of all audio files in a folder
+        /// </summary>
+        /// <returns>Collection of audio file names</returns>
         public static IEnumerable<string> GetListOfAudioFiles()
         {
             var audioFileNameList = new List<string>();
@@ -114,6 +133,14 @@ namespace MapService.Business.MapConfig
             return audioFileNameList;
         }
 
+        /// <summary>
+        ///
+        /// </summary>
+        /// <param name="map"></param>
+        /// <param name="format"></param>
+        /// <returns></returns>
+        /// <exception cref="FormatException"></exception>
+        /// <exception cref="NullReferenceException"></exception>
         public static JsonObject ExportMapWithFormat(string map, string format)
         {
             if (format != "json")
@@ -131,7 +158,7 @@ namespace MapService.Business.MapConfig
                 throw;
             }
             LayerExportItem layerExportItems = FilterLayers(jsonObjectLayers);
-            JsonObject? jsonObjectLayerExportItems = HandlerUtility.ConvertToJsonObject(layerExportItems.layers);
+            JsonObject? jsonObjectLayerExportItems = JsonUtility.ConvertToJsonObject(layerExportItems.layers);
             if (map == "layers")
             {
                 if (jsonObjectLayerExportItems == null)
@@ -277,7 +304,7 @@ namespace MapService.Business.MapConfig
             }
 
             MapExportItem mapExportItem = new MapExportItem(baseLayers, groups);
-            return HandlerUtility.ConvertToJsonObject(mapExportItem);
+            return JsonUtility.ConvertToJsonObject(mapExportItem);
         }
     }
 }
