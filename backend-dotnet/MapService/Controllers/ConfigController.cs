@@ -47,9 +47,9 @@ namespace MapService.Controllers
             return StatusCode(StatusCodes.Status200OK, layerObject);
         }
 
-        /// <summary>
+        /// <remarks>
         /// Gets a map as a JsonObject.
-        /// </summary>
+        /// </remarks>
         /// <param name="map">The name of the map including the file ending. </param>
         /// <returns>Returns a map as a JsonObject. </returns>
         [HttpGet]
@@ -73,6 +73,31 @@ namespace MapService.Controllers
             }
 
             return StatusCode(StatusCodes.Status200OK, mapObject);
+        }
+
+        /// <remarks>
+        /// Delete an existing map configuration
+        /// </remarks>
+        /// <param name="name">Name of the map to be deleted</param>
+        [HttpGet]
+        [Route("delete/{name}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        [SwaggerOperation(Tags = new[] { "Admin - Maps and layers" })]
+        [Obsolete]
+        public ActionResult Delete(string name)
+        {
+            try
+            {
+                MapConfigHandler.DeleteMap(name);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Internal server error");
+                return StatusCode(StatusCodes.Status500InternalServerError, "Internal Server Error");
+            }
+
+            return StatusCode(StatusCodes.Status200OK);
         }
 
         /// <remarks>

@@ -61,6 +61,22 @@ namespace MapService.DataAccess
         }
 
         /// <summary>
+        /// Deletes the map configuration.
+        /// </summary>
+        /// <param name="mapFileName">The name of the map including the file ending. </param>
+        public static void DeleteMapFile(string mapFileName)
+        {
+            if (!mapFileName.EndsWith(".json"))
+                mapFileName += ".json";
+
+            string path = GetPathToFile(mapFileName);
+
+            if (!File.Exists(path)) { throw new FileNotFoundException(); }
+
+            File.Delete(path);
+        }
+
+        /// <summary>
         /// Gets a map as a JsonObject.
         /// </summary>
         /// <param name="mapFileName">The name of the map including the file ending. </param>
