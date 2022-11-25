@@ -131,7 +131,7 @@ class KirLayerController {
       image: new Icon({
         anchor: [0.5, 1.18],
         scale: 0.15,
-        src: IconMarker(),
+        src: IconMarker(this.styles.getColor("highlightStroke")),
       }),
     });
     this.markerFeature.setStyle(styleMarker);

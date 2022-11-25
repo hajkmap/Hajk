@@ -81,10 +81,10 @@ class FirExportPropertyListView extends React.PureComponent {
   }
 
   #collectAndSendData = () => {
-    let fnrList = [];
+    let ids = [];
 
     this.props.results.forEach((feature) => {
-      fnrList.push("" + feature.get(this.options.propertyList.idField)); // force string
+      ids.push("" + feature.get(this.options.propertyList.idField)); // force string
     });
 
     const params = {
@@ -97,7 +97,7 @@ class FirExportPropertyListView extends React.PureComponent {
     };
 
     let data = {
-      fnr: fnrList,
+      uuid: ids,
       param: params,
     };
 
