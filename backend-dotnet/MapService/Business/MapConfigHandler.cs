@@ -22,6 +22,15 @@ namespace MapService.Business.MapConfig
         }
 
         /// <summary>
+        /// Deletes the map configuration.
+        /// </summary>
+        /// <param name="mapFileName">The name of the map including the file ending. </param>
+        public static void DeleteMap(string mapFileName)
+        {
+            JsonFileDataAccess.DeleteMapFile(mapFileName);
+        }
+
+        /// <summary>
         /// Gets all maps names.
         /// </summary>
         /// <returns>Return all map names.</returns>

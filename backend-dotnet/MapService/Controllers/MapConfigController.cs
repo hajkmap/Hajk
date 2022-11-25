@@ -1,5 +1,4 @@
 ﻿using MapService.Business.MapConfig;
-using MapService.Models;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
 using System.Text.Json.Nodes;
@@ -46,11 +45,11 @@ namespace MapService.Controllers
             return StatusCode(StatusCodes.Status200OK, layerObject);
         }
 
-        /// <summary>
-        /// Gets a map as a JsonObject. 
-        /// </summary>
-        /// <param name="map">The name of the map including the file ending. </param>
-        /// <returns>Returns a map as a JsonObject. </returns>
+        /// <remarks>
+        /// Gets a map as a JsonObject
+        /// </remarks>
+        /// <param name="map">The name of the map including the file ending</param>
+        /// <returns>Returns a map as a JsonObject</returns>
         /// <response code="200">The map object fetched successfully</response>
         /// <response code="500">Internal Server Error</response>
         [HttpGet]
@@ -76,7 +75,56 @@ namespace MapService.Controllers
         }
 
         /// <remarks>
-        /// Gets all maps names. 
+        /// Delete an existing map configuration
+        /// </remarks>
+        /// <param name="name">Name of the map to be deleted</param>
+        [HttpDelete]
+        [Route("delete/{name}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        [SwaggerOperation(Tags = new[] { "Admin - Maps and layers" })]
+        public ActionResult DeleteMap(string name)
+        {
+            try
+            {
+                MapConfigHandler.DeleteMap(name);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Internal server error");
+                return StatusCode(StatusCodes.Status500InternalServerError, "Internal Server Error");
+            }
+
+            return StatusCode(StatusCodes.Status200OK);
+        }
+
+        /// <remarks>
+        /// Delete an existing map configuration
+        /// </remarks>
+        /// <param name="name">Name of the map to be deleted</param>
+        [HttpGet]
+        [Route("delete/{name}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        [SwaggerOperation(Tags = new[] { "Admin - Maps and layers" })]
+        [Obsolete]
+        public ActionResult GetDeleteMap(string name)
+        {
+            try
+            {
+                MapConfigHandler.DeleteMap(name);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Internal server error");
+                return StatusCode(StatusCodes.Status500InternalServerError, "Internal Server Error");
+            }
+
+            return StatusCode(StatusCodes.Status200OK);
+        }
+
+        /// <remarks>
+        /// Gets all maps names.
         /// </remarks>
         /// <returns>Return all map names. </returns>
         /// <response code="200">All map names were fetched successfully</response>
@@ -188,12 +236,12 @@ namespace MapService.Controllers
             return StatusCode(StatusCodes.Status200OK, listOfAudioFiles);
         }
 
-        /// <summary>
-        /// Exports a map with all available layers in a human-readable format. 
-        /// </summary>
-        /// <param name="map">The name of the map excluding the file ending. </param>
-        /// <param name="format">Only Json-format is supported. </param>
-        /// <returns>Returns a map as a JsonObject. </returns>
+        /// <remarks>
+        /// Exports a map with all available layers in a human-readable format
+        /// </remarks>
+        /// <param name="map">The name of the map excluding the file ending</param>
+        /// <param name="format">Only Json-format is supported</param>
+        /// <returns>Returns a map as a JsonObject</returns>
         /// <response code="200">The map object fetched successfully</response>
         /// <response code="500">Internal Server Error</response>
         [HttpGet]
