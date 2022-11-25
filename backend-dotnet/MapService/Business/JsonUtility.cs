@@ -4,7 +4,10 @@ using System.Text.Json.Serialization;
 
 namespace MapService.Business
 {
-    public static class HandlerUtility
+    /// <summary>
+    /// Json utility class
+    /// </summary>
+    public static class JsonUtility
     {
         /// <summary>
         /// Serialize an anonymous object as a json string and then Deserialize the json string as an Json Object.
