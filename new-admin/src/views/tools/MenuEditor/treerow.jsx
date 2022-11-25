@@ -9,6 +9,8 @@ import { IconButton } from "@material-ui/core";
 import Icon from "@material-ui/core/Icon";
 import SettingsPopover from "./settingspopover.jsx";
 import MenuConnectionSelector from "./menuconnectionselector.jsx";
+import MenuConnectionSelector2 from "./menuconnectionselector2.jsx";
+import MenuConnectionSelector3 from "./menuconnectionselector3.jsx";
 import WarningModal from "./warningModal.jsx";
 
 const getTextField = (value, onChangeFunction, variant) => {
@@ -65,6 +67,42 @@ class TreeRow extends React.Component {
         model={model}
         menuItem={menuItem}
       ></MenuConnectionSelector>
+    );
+  };
+
+  renderConnectionSelect2 = () => {
+    const { model, treeNodeId, updateMenuItem, availableDocuments, menuItem } =
+      this.props;
+
+    return (
+      <MenuConnectionSelector2
+        treeNodeId={treeNodeId}
+        updateMenuItem={updateMenuItem}
+        updateTreeValidation={this.updateTreeValidation}
+        availableDocuments={availableDocuments}
+        updateValidationForTreeNode={this.props.updateValidationForTreeNode}
+        valid={this.props.valid}
+        model={model}
+        menuItem={menuItem}
+      ></MenuConnectionSelector2>
+    );
+  };
+
+  renderConnectionSelect3 = () => {
+    const { model, treeNodeId, updateMenuItem, availableDocuments, menuItem } =
+      this.props;
+
+    return (
+      <MenuConnectionSelector3
+        treeNodeId={treeNodeId}
+        updateMenuItem={updateMenuItem}
+        updateTreeValidation={this.updateTreeValidation}
+        availableDocuments={availableDocuments}
+        updateValidationForTreeNode={this.props.updateValidationForTreeNode}
+        valid={this.props.valid}
+        model={model}
+        menuItem={menuItem}
+      ></MenuConnectionSelector3>
     );
   };
 
@@ -162,6 +200,12 @@ class TreeRow extends React.Component {
             </Grid>
             <Grid xs={4} item>
               {this.renderConnectionSelect()}
+            </Grid>
+            <Grid xs={2} item>
+              {this.renderConnectionSelect2()}
+            </Grid>
+            <Grid xs={2} item>
+              {this.renderConnectionSelect3()}
             </Grid>
             <Grid xs={1} item>
               {this.renderRemoveButton()}

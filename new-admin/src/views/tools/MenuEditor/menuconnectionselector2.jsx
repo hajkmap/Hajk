@@ -38,9 +38,9 @@ const getTextField = (value, onChangeFunction, variant) => {
 };
 
 const MENU_CONNECTION_TYPES = {
-  documentConnection: "Koppla dokument",
- // mapLink: "Koppla karta och lager",
- // link: "Koppla webblänk",
+ // documentConnection: "Koppla dokument",
+  mapLink: "Koppla karta och lager",
+  //link: "Koppla webblänk",
   none: "Inget valt",
 };
 
@@ -58,7 +58,7 @@ const styles = (theme) => ({
   paper: { width: "20%", padding: "20px" },
 });
 
-class MenuConnectionSelector extends React.Component {
+class MenuConnectionSelector2 extends React.Component {
   state = {
     open: false,
     mapLinkValue: this.props.menuItem.maplink,
@@ -76,16 +76,16 @@ class MenuConnectionSelector extends React.Component {
   getInitialValue = () => {
     const { menuItem } = this.props;
 
-    if (menuItem.document !== "") {
-      return MENU_CONNECTION_TYPES.documentConnection;
+    if (menuItem.maplink) {
+        return MENU_CONNECTION_TYPES.mapLink;
     }
 
    /* if (menuItem.link) {
-      return MENU_CONNECTION_TYPES.link;
+        return MENU_CONNECTION_TYPES.link;
     }
 
-    if (menuItem.maplink) {
-      return MENU_CONNECTION_TYPES.mapLink;
+    if (menuItem.document !== "") {
+      return MENU_CONNECTION_TYPES.documentConnection;
     }*/
 
     return MENU_CONNECTION_TYPES.none;
@@ -196,34 +196,8 @@ class MenuConnectionSelector extends React.Component {
     newMenuItem = { ...newMenuItem, maplink: this.state.mapLinkValue };
 
     if (activeMenu === MENU_CONNECTION_TYPES.none) {
-      
-      newMenuItem = { ...newMenuItem, document: "" };
-      /*newMenuItem = { ...newMenuItem, link: "" };
-      newMenuItem = { ...newMenuItem, maplink: "" };*/
-      
+      newMenuItem = { ...newMenuItem, maplink: "" };
     }
-    
-
-    /*if (activeMenu === MENU_CONNECTION_TYPES.documentConnection) {
-      if (!this.state.documentValue) {
-        value = MENU_CONNECTION_TYPES.none;
-      }
-      newMenuItem = { ...newMenuItem, document: this.state.documentValue };
-    }
-    
-    if (activeMenu === MENU_CONNECTION_TYPES.link) {
-      if (!this.state.linkValue) {
-        value = MENU_CONNECTION_TYPES.none;
-      }
-      newMenuItem = { ...newMenuItem, link: this.state.linkValue };
-    }
-
-    if (activeMenu === MENU_CONNECTION_TYPES.mapLink) {
-      if (!this.state.mapLinkValue) {
-        value = MENU_CONNECTION_TYPES.none;
-      }
-      newMenuItem = { ...newMenuItem, maplink: this.state.mapLinkValue };
-    }*/
 
     updateMenuItem(treeNodeId, newMenuItem);
 
@@ -292,13 +266,13 @@ class MenuConnectionSelector extends React.Component {
     if (activeMenu === MENU_CONNECTION_TYPES.none) {
       return null;
     }
-    if (activeMenu === MENU_CONNECTION_TYPES.documentConnection) {
+    /*if (activeMenu === MENU_CONNECTION_TYPES.documentConnection) {
       return this.renderDocumentList();
     }
 
     if (activeMenu === MENU_CONNECTION_TYPES.link) {
       return this.renderLink();
-    }
+    }*/
 
     if (activeMenu === MENU_CONNECTION_TYPES.mapLink) {
       return this.renderMapLink();
@@ -443,4 +417,4 @@ class MenuConnectionSelector extends React.Component {
   };
 }
 
-export default withStyles(styles)(MenuConnectionSelector);
+export default withStyles(styles)(MenuConnectionSelector2);
