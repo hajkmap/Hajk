@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 namespace MapService.Controllers
 {
     [Route("fmeproxy")]
+    [Produces("application/json")]
     [ApiController]
     public class FmeProxyController : ControllerBase
     {
@@ -22,7 +23,8 @@ namespace MapService.Controllers
         /// <param query="query">Path corresponding to an endpoint on the FME-server REST API.</param>
         /// <response code="200">Result will vary depending on response from the API.</response>
         /// <response code="500">Internal Server Error</response>
-        [HttpGet("{query}")]
+        [Route("{query}")]
+        [HttpGet]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status405MethodNotAllowed)]
@@ -30,9 +32,7 @@ namespace MapService.Controllers
         public async Task<ActionResult<string>> SendQueryToFmeServerAPI(string query)
         {
             string responseBody;
-            HttpResponseMessage response;
-            var errorStatusCode = StatusCodes.Status500InternalServerError;
-
+            
             if (string.IsNullOrEmpty(query))
             {
                 _logger.LogWarning("Not allowed to call proxy with empty url");
@@ -48,15 +48,14 @@ namespace MapService.Controllers
             
             try
             {
-                response = await FmeProxyHandler.SendQueryToFmeServerAPI(Request, query);
-                responseBody = await response.Content.ReadAsStringAsync();
+                responseBody = await FmeProxyHandler.SendQueryToFmeServerAPI(Request, query);
 
             }
             catch (HttpRequestException ex)
             {
                 _logger.LogError(ex, "HttpRequestException");
-                var code = ex.StatusCode == null ? errorStatusCode : ((int)ex.StatusCode);
-                return StatusCode(code, ex.Message);
+                var statusCode = ex.StatusCode == null ? StatusCodes.Status500InternalServerError : ((int)ex.StatusCode);
+                return StatusCode(statusCode, ex.Message);
             }
             catch (Exception ex)
             {
@@ -64,7 +63,7 @@ namespace MapService.Controllers
                 return StatusCode(StatusCodes.Status500InternalServerError, "Internal Server Error");
             }
                         
-            return StatusCode(((int)response.StatusCode), responseBody);
+            return StatusCode(((int)Response.StatusCode), responseBody);
         }
     }
 }
