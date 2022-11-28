@@ -63,6 +63,7 @@ class WFSVectorLayer {
       name: config.name,
       visible: config.visible,
       opacity: config.opacity,
+      zIndex: config.zIndex,
       queryable: config.queryable,
       filterable: config.filterable,
       filterAttribute: config.filterAttribute,

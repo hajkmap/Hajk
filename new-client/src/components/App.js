@@ -35,6 +35,7 @@ import MapSwitcher from "../controls/MapSwitcher";
 import Information from "../controls/Information";
 import PresetLinks from "../controls/PresetLinks";
 import ExternalLinks from "../controls/ExternalLinks";
+import RecentlyUsedPlugins from "../controls/RecentlyUsedPlugins";
 
 import DrawerToggleButtons from "../components/Drawer/DrawerToggleButtons";
 
@@ -348,11 +349,13 @@ class App extends React.PureComponent {
       globalObserver: this.globalObserver,
     });
 
-    this.appModel = new AppModel({
+    AppModel.init({
       config: props.config,
       globalObserver: this.globalObserver,
       refreshMUITheme: props.refreshMUITheme,
     });
+
+    this.appModel = AppModel;
   }
 
   hasAnyToolbarTools = () => {
@@ -540,8 +543,9 @@ class App extends React.PureComponent {
     });
 
     this.globalObserver.subscribe("core.addDrawerToggleButton", (button) => {
-      const newState = [...this.state.drawerButtons, button];
-      this.setState({ drawerButtons: newState });
+      this.setState((prevState) => ({
+        drawerButtons: [...prevState.drawerButtons, button],
+      }));
     });
 
     /**
@@ -653,7 +657,7 @@ class App extends React.PureComponent {
   }
 
   /**
-   * Flip the @this.state.drawerPermanent switch, then preform some
+   * Flip the @this.state.drawerPermanent switch, then perform some
    * more work to ensure the OpenLayers canvas has the correct
    * canvas size.
    *
@@ -983,6 +987,14 @@ class App extends React.PureComponent {
                   />
                 )}
                 {clean === false && this.renderInformationPlugin()}
+                {clean === false && (
+                  <RecentlyUsedPlugins
+                    globalObserver={this.globalObserver}
+                    showRecentlyUsedPlugins={
+                      this.appModel.config.mapConfig.map.showRecentlyUsedPlugins
+                    }
+                  />
+                )}
               </Box>
             </StyledMain>
             <StyledFooter

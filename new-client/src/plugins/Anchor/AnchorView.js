@@ -64,6 +64,8 @@ class AnchorView extends React.PureComponent {
   };
 
   render() {
+    const allowCreatingCleanUrls =
+      this.props.options.allowCreatingCleanUrls ?? true;
     return (
       <Box sx={{ width: "100%" }}>
         <Grid container item spacing={2} columns={12}>
@@ -74,30 +76,32 @@ class AnchorView extends React.PureComponent {
             </Typography>
           </Grid>
         </Grid>
-        <Box sx={{ ml: { xs: 0, sm: 3 } }}>
-          <Grid container item spacing={2} columns={12}>
-            <Grid item xs={12}>
-              <RadioGroup
-                aria-label="copy-url"
-                name="copy-url"
-                onChange={this.props.toggleCleanUrl}
-              >
-                <FormControlLabel
-                  checked={!this.props.cleanUrl}
-                  value="default"
-                  control={<Radio color="primary" />}
-                  label="Skapa länk till karta"
-                />
-                <FormControlLabel
-                  checked={this.props.cleanUrl}
-                  value="clean"
-                  control={<Radio color="primary" />}
-                  label="Skapa länk till karta utan verktyg etc."
-                />
-              </RadioGroup>
+        {allowCreatingCleanUrls && (
+          <Box sx={{ ml: { xs: 0, sm: 3 } }}>
+            <Grid container item spacing={2} columns={12}>
+              <Grid item xs={12}>
+                <RadioGroup
+                  aria-label="copy-url"
+                  name="copy-url"
+                  onChange={this.props.toggleCleanUrl}
+                >
+                  <FormControlLabel
+                    checked={!this.props.cleanUrl}
+                    value="default"
+                    control={<Radio color="primary" />}
+                    label="Skapa länk till karta"
+                  />
+                  <FormControlLabel
+                    checked={this.props.cleanUrl}
+                    value="clean"
+                    control={<Radio color="primary" />}
+                    label="Skapa länk till karta utan verktyg etc."
+                  />
+                </RadioGroup>
+              </Grid>
             </Grid>
-          </Grid>
-        </Box>
+          </Box>
+        )}
         <Box sx={{ ml: { xs: 0, sm: 7 }, mr: { xs: 0, sm: 7 } }}>
           <Grid container item spacing={2} columns={12}>
             <Grid item xs={12}>

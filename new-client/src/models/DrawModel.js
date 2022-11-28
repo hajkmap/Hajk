@@ -413,6 +413,17 @@ class DrawModel {
     const featureIsPoint = feature?.getGeometry() instanceof Point;
     // We also have to check if we're dealing with a text-feature or not
     const featureIsTextType = feature?.get("DRAW_METHOD") === "Text";
+    // Let's grab the foreground (fill) and background (stroke) colors that we're supposed to use.
+    // First we'll try to grab the color from the feature style, then from the current settings, and lastly from the fallback.
+    const foregroundColor = featureIsTextType
+      ? feature.get("TEXT_SETTINGS")?.foregroundColor ??
+        this.#textStyleSettings.foregroundColor
+      : "#FFF";
+    // Same applies for the background
+    const backgroundColor = featureIsTextType
+      ? feature.get("TEXT_SETTINGS")?.backgroundColor ??
+        this.#textStyleSettings.backgroundColor
+      : "rgba(0, 0, 0, 0.5)";
     // Then we can create and return the style
     return new Text({
       textAlign: "center",
@@ -430,13 +441,17 @@ class DrawModel {
       }),
       text: this.#getFeatureLabelText(feature),
       overflow: true,
-      stroke: new Stroke({
-        color: featureIsTextType
-          ? feature.get("TEXT_SETTINGS")?.backgroundColor ??
-            this.#textStyleSettings.backgroundColor
-          : "rgba(0, 0, 0, 0.5)",
-        width: 3,
-      }),
+      stroke:
+        // If the foreground and the background are the same color, we don't need a stroke.
+        foregroundColor !== backgroundColor
+          ? new Stroke({
+              color: featureIsTextType
+                ? feature.get("TEXT_SETTINGS")?.backgroundColor ??
+                  this.#textStyleSettings.backgroundColor
+                : "rgba(0, 0, 0, 0.5)",
+              width: 3,
+            })
+          : null,
       offsetX: 0,
       offsetY: featureIsPoint && !featureIsTextType ? -15 : 0,
       rotation: 0,
@@ -990,6 +1005,8 @@ class DrawModel {
     return new VectorLayer({
       source: source,
       layerType: "system",
+      ignoreInFeatureInfo: true,
+      zIndex: 5000,
       caption: "Draw model",
     });
   };
@@ -1412,8 +1429,13 @@ class DrawModel {
   // Move-interaction.
   #enableMoveInteraction = (settings) => {
     // The Move-interaction will obviously need a Select-interaction so that the features to
-    // move can be selected.
-    this.#selectInteraction = new Select({ layers: [this.#drawLayer] });
+    // move can be selected. We provide `null` as style - this will cancel the default OL Select
+    // interaction (which was problematic in some situations, see #1225).
+    this.#selectInteraction = new Select({
+      layers: [this.#drawLayer],
+      style: null,
+    });
+
     // We need a handler catching the "select"-events so that we can keep track of if any
     // features has been selected or not.
     this.#selectInteraction.on("select", this.#handleFeatureSelect);

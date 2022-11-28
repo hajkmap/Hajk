@@ -123,7 +123,6 @@ class TableOfContents extends React.PureComponent {
 
   render() {
     const { titlesAndLevels } = this.state;
-    const { theme } = this.props;
     return (
       <Grid container sx={{ pageBreakAfter: "always" }}>
         <Typography variant="h4" gutterBottom={true}>
@@ -135,9 +134,8 @@ class TableOfContents extends React.PureComponent {
               <ListItem
                 key={index}
                 dense={true}
-                style={{
-                  paddingLeft:
-                    theme.spacing(1) + theme.spacing(document.level * 3),
+                sx={{
+                  paddingLeft: 1 + document.level * 3,
                 }}
               >
                 <ListItemText>{document.title}</ListItemText>
@@ -146,9 +144,8 @@ class TableOfContents extends React.PureComponent {
               <ListItem
                 dense={true}
                 key={index}
-                style={{
-                  paddingLeft:
-                    theme.spacing(1) + theme.spacing(document.level * 3),
+                sx={{
+                  paddingLeft: 1 + document.level * 3,
                 }}
               >
                 <ListItemText>{document.title}</ListItemText>

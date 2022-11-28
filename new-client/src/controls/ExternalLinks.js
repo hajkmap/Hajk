@@ -3,7 +3,7 @@ import { styled } from "@mui/material/styles";
 import propTypes from "prop-types";
 import { IconButton, Paper, Tooltip, Menu, MenuItem } from "@mui/material";
 import LaunchIcon from "@mui/icons-material/Launch";
-import { transform } from "ol/proj";
+import HajkTransformer from "utils/HajkTransformer";
 
 const StyledPaper = styled(Paper)(({ theme }) => ({
   marginBottom: theme.spacing(1),
@@ -51,20 +51,6 @@ class ExternalLinks extends React.PureComponent {
     this.setState({ anchorEl: null });
   };
 
-  convertCoordinates = (
-    x,
-    y,
-    projection,
-    targetProjection,
-    numberOfDecimals = 4
-  ) => {
-    const newCoords = transform([x, y], projection, targetProjection);
-    return {
-      x: parseFloat(newCoords[0].toFixed(numberOfDecimals)),
-      y: parseFloat(newCoords[1].toFixed(numberOfDecimals)),
-    };
-  };
-
   openUri = (uri, target) => {
     // Try to match {x|EPSG:4326|0} etc in uri.
     const regex = /\{([x,y].+?)\}/gim;
@@ -90,14 +76,16 @@ class ExternalLinks extends React.PureComponent {
 
     const coordinates = this.map.getView().getCenter();
     const projection = this.map.getView().getProjection().getCode();
+    const transformer = new HajkTransformer({
+      projection: projection,
+    });
 
     let url = uri;
     dataList.forEach((o) => {
       // Convert coordinate to the projection specified in uri..
-      const newCoord = this.convertCoordinates(
+      const newCoord = transformer.getCoordinatesWithProjection(
         coordinates[0],
         coordinates[1],
-        projection,
         o.projection,
         o.decimals
       );

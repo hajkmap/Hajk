@@ -8,6 +8,7 @@ import CssBaseline from "@mui/material/CssBaseline";
 import App from "./App";
 
 import { deepMerge } from "../utils/DeepMerge";
+import { functionalOk as functionalCookieOk } from "models/Cookie";
 
 /**
  * @summary Helper, used to determine if user's browser prefers dark mode.
@@ -130,10 +131,12 @@ const HajkThemeProvider = ({ activeTools, config, customTheme }) => {
       theme.palette.mode === "light" ? "dark" : "light";
 
     // Save for later in browser's local storage
-    window.localStorage.setItem(
-      "userPreferredColorScheme",
-      userPreferredColorScheme
-    );
+    if (functionalCookieOk()) {
+      window.localStorage.setItem(
+        "userPreferredColorScheme",
+        userPreferredColorScheme
+      );
+    }
 
     // Create a new theme object by taking the current theme
     // and merging with the latest theme type value

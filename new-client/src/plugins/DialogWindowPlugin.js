@@ -91,6 +91,15 @@ class DialogWindowPlugin extends React.PureComponent {
         activeMap: this.props.app.config.activeMap,
       });
     }
+
+    // Subscribe to a global event that makes it possible to show this dialog.
+    // First we prepare a unique event name for each plugin so it looks like '{pluginName}.showWindow'.
+    const eventName = `${this.uniqueIdentifier}.showWindow`;
+    // Next, subscribe to that event, expect 'opts' array.
+    // To find all places where this event is publish, search for 'globalObserver.publish("show'
+    this.props.app.globalObserver.subscribe(eventName, (opts = {}) => {
+      this.setState({ dialogOpen: true });
+    });
   }
 
   #pluginIsWidget = (target) => {
@@ -107,6 +116,14 @@ class DialogWindowPlugin extends React.PureComponent {
       eventName: "pluginShown",
       pluginName: this.uniqueIdentifier,
       activeMap: this.props.app.config.activeMap,
+    });
+
+    // AppModel keeps track of recently shown plugins.
+    this.props.app.pushPluginIntoHistory({
+      type: this.uniqueIdentifier,
+      icon: this.icon,
+      title: this.title,
+      description: this.description,
     });
   };
 
@@ -141,14 +158,19 @@ class DialogWindowPlugin extends React.PureComponent {
   /**
    * This is a bit of a special case. This method will render
    * not only plugins specified as Drawer plugins (target===toolbar),
-   * but it will also render Widget plugins - given some special condition.
+   * but it will also render Widget and Control plugins - given some special condition.
    *
    * Those special conditions are small screens, where there's no screen
    * estate to render the Widget button in Map Overlay.
    */
   renderDrawerButton() {
     return createPortal(
-      <Hidden mdUp={this.#pluginIsWidget(this.opts.target)}>
+      <Hidden
+        mdUp={
+          this.#pluginIsWidget(this.opts.target) ||
+          this.opts.target === "control"
+        }
+      >
         <ListItem
           button
           divider={true}
@@ -166,7 +188,7 @@ class DialogWindowPlugin extends React.PureComponent {
   renderWidgetButton(id) {
     return createPortal(
       // Hide Widget button on small screens, see renderDrawerButton too
-      <Hidden smDown>
+      <Hidden mdDown>
         <Card
           icon={this.icon}
           onClick={this.#handleButtonClick}
@@ -180,12 +202,15 @@ class DialogWindowPlugin extends React.PureComponent {
 
   renderControlButton() {
     return createPortal(
-      <PluginControlButton
-        icon={this.icon}
-        onClick={this.#handleButtonClick}
-        title={this.title}
-        abstract={this.description}
-      />,
+      // Hide Control button on small screens, see renderDrawerButton too
+      <Hidden mdDown>
+        <PluginControlButton
+          icon={this.icon}
+          onClick={this.#handleButtonClick}
+          title={this.title}
+          abstract={this.description}
+        />
+      </Hidden>,
       document.getElementById("plugin-control-buttons")
     );
   }
@@ -197,9 +222,10 @@ class DialogWindowPlugin extends React.PureComponent {
       this.props.app.config.mapConfig.map.clean !== true && (
         <>
           {this.renderDialog()}
-          {/* Drawer buttons and Widget buttons should render a Drawer button. */}
-          {(target === "toolbar" || this.#pluginIsWidget(target)) &&
-            this.renderDrawerButton()}
+          {/* Always render a Drawer button (it's a backup for plugins 
+              render elsewhere: we hide Widget and Control buttons on 
+              small screens and fall back to Drawer button). */}
+          {this.renderDrawerButton()}
           {/* Widget buttons must also render a Widget */}
           {this.#pluginIsWidget(target) &&
             this.renderWidgetButton(`${target}-column`)}

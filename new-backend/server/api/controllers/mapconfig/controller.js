@@ -32,15 +32,13 @@ export class Controller {
    * of a map's contents from e.g. LayerSwitcher.
    * @param {*} req
    * @param {*} res
-   * @param {*} next
    * @memberof Controller
    */
-  exportMapConfig(req, res, next) {
+  exportMapConfig(req, res) {
     ConfigService.exportMapConfig(
       req.params.map,
       req.params.format,
-      ad.getUserFromRequestHeader(req),
-      next
+      ad.getUserFromRequestHeader(req)
     ).then((data) => handleStandardResponse(res, data));
   }
 
@@ -56,6 +54,12 @@ export class Controller {
       ad.getUserFromRequestHeader(req),
       false // won't "wash" content, which is what we need for admin UI to list the entire layer's store
     ).then((data) => handleStandardResponse(res, data));
+  }
+
+  layersVerify(req, res) {
+    ConfigService.verifyLayers(ad.getUserFromRequestHeader(req)).then((data) =>
+      handleStandardResponse(res, data)
+    );
   }
 
   /**

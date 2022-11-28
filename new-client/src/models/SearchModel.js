@@ -68,24 +68,38 @@ class SearchModel {
     searchSources = this.getSources(),
     searchOptions = this.getSearchOptions()
   ) => {
-    // If the method was initiated by an actual search (not just autocomplete),
-    // let's send this to the analytics model.
-    if (
-      searchOptions.initiator === "search" &&
-      searchString.trim().length > 0
-    ) {
-      this.#app.globalObserver.publish("analytics.trackEvent", {
-        eventName: "textualSearchPerformed",
-        query: searchString.trim(),
-        activeMap: this.#app.config.activeMap,
-      });
-    }
+    searchString = searchString.trim();
 
     const { featureCollections, errors } = await this.#getRawResults(
-      searchString.trim(), // Ensure that the search string isn't surrounded by whitespace
+      searchString, // Ensure that the search string isn't surrounded by whitespace
       searchSources,
       searchOptions
     );
+
+    // If the method was initiated by an actual search (not just autocomplete),
+    // let's send this to the analytics model.
+    if (searchOptions.initiator === "search" && searchString.length > 0) {
+      let totalHits = 0;
+      if (featureCollections) {
+        featureCollections.forEach((f) => {
+          totalHits += f.value.features.length;
+        });
+      }
+
+      // Lets focus on the first error.
+      const errorMessage = errors.length
+        ? `${errors[0].status}: ${errors[0].reason}`
+        : "";
+
+      // track!
+      this.#app.globalObserver.publish("analytics.trackEvent", {
+        eventName: "textualSearchPerformed",
+        query: searchString,
+        activeMap: this.#app.config.activeMap,
+        totalHits: totalHits,
+        errorMessage: errorMessage,
+      });
+    }
 
     return { featureCollections, errors };
   };

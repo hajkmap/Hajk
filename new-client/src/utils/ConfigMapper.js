@@ -140,6 +140,7 @@ export default class ConfigMapper {
         caption: args.caption,
         visible: args.visibleAtStart,
         opacity: args.opacity || 1,
+        zIndex: args.drawOrder || 0,
         maxZoom: args.maxZoom,
         minZoom: args.minZoom,
         minMaxZoomAlertOnToggleOnly: args.minMaxZoomAlertOnToggleOnly,
@@ -153,6 +154,8 @@ export default class ConfigMapper {
         extent: properties.mapConfig.map.extent,
         singleTile: args.singleTile || false,
         hidpi: args.hidpi,
+        useCustomDpiList: args.useCustomDpiList,
+        customDpiList: args.customDpiList,
         customRatio: args.customRatio,
         imageFormat: args.imageFormat || "image/png",
         serverType:
@@ -192,6 +195,7 @@ export default class ConfigMapper {
         hideExpandArrow: args.hideExpandArrow,
         timeSliderStart: args.timeSliderStart,
         timeSliderEnd: args.timeSliderEnd,
+        visibleAtStartSubLayers: args.visibleAtStartSubLayers,
       },
     };
 
@@ -236,6 +240,7 @@ export default class ConfigMapper {
         extent: properties.mapConfig.map.extent,
         queryable: false,
         opacity: args.opacity || 1,
+        zIndex: args.drawOrder || 0,
         maxZoom: args.maxZoom,
         minZoom: args.minZoom,
         format: "image/png",
@@ -277,6 +282,7 @@ export default class ConfigMapper {
         caption: args.caption,
         visible: args.visibleAtStart,
         opacity: 1,
+        zIndex: args.drawOrder || 0,
         queryable: args.queryable !== false,
         extent: args.extent,
         projection: args.projection,
@@ -356,6 +362,7 @@ export default class ConfigMapper {
         visible: args.visibleAtStart,
         timeSliderStart: args.timeSliderStart,
         timeSliderEnd: args.timeSliderEnd,
+        zIndex: args.drawOrder || 0,
       },
     };
 
@@ -408,6 +415,7 @@ export default class ConfigMapper {
         hideExpandArrow: args.hideExpandArrow,
         timeSliderStart: args.timeSliderStart,
         timeSliderEnd: args.timeSliderEnd,
+        zIndex: args.drawOrder || 0,
       },
     };
 

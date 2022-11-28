@@ -18,6 +18,7 @@ class FirLayerController {
     this.bufferValue = 0;
     this.removeIsActive = false;
     this.ctrlKeyIsDown = false;
+    this.previousFeatures = [];
 
     this.#HT = new HajkTransformer({
       projection: this.model.app.map.getView().getProjection().getCode(),
@@ -44,6 +45,7 @@ class FirLayerController {
 
     this.model.layers.feature = new VectorLayer({
       layerType: "system",
+      zIndex: 5000,
       caption: "FIRSearchResultsLayer",
       name: "FIRSearchResultsLayer",
       source: new VectorSource(),
@@ -53,6 +55,7 @@ class FirLayerController {
 
     this.model.layers.highlight = new VectorLayer({
       layerType: "system",
+      zIndex: 5000,
       caption: "FIRHighlightsLayer",
       name: "FIRHighlightsLayer",
       source: new VectorSource(),
@@ -62,6 +65,7 @@ class FirLayerController {
 
     this.model.layers.buffer = new VectorLayer({
       layerType: "system",
+      zIndex: 5000,
       caption: "FIRBufferLayer",
       name: "FIRBufferLayer",
       source: new VectorSource(),
@@ -71,6 +75,7 @@ class FirLayerController {
 
     this.model.layers.draw = new VectorLayer({
       layerType: "system",
+      zIndex: 5000,
       caption: "FIRDrawLayer",
       name: "FIRDrawLayer",
       source: new VectorSource(),
@@ -86,6 +91,7 @@ class FirLayerController {
 
     this.model.layers.label = new VectorLayer({
       layerType: "system",
+      zIndex: 5000,
       caption: "FIRLabels",
       name: "FIRLabels",
       source: new VectorSource(),
@@ -95,6 +101,7 @@ class FirLayerController {
 
     this.model.layers.marker = new VectorLayer({
       layerType: "system",
+      zIndex: 5000,
       caption: "FIRMarker",
       name: "FIRMarker",
       source: new VectorSource(),
@@ -102,10 +109,10 @@ class FirLayerController {
       visible: true,
     });
 
-    this.model.map.addLayer(this.model.layers.feature);
-    this.model.map.addLayer(this.model.layers.highlight);
     this.model.map.addLayer(this.model.layers.buffer);
+    this.model.map.addLayer(this.model.layers.feature);
     this.model.map.addLayer(this.model.layers.draw);
+    this.model.map.addLayer(this.model.layers.highlight);
     this.model.map.addLayer(this.model.layers.label);
     this.model.map.addLayer(this.model.layers.marker);
 
@@ -191,7 +198,7 @@ class FirLayerController {
       image: new Icon({
         anchor: [0.5, 1.18],
         scale: 0.15,
-        src: IconMarker(),
+        src: IconMarker(this.styles.getColor("highlightStroke")),
       }),
     });
     this.markerFeature.setStyle(styleMarker);
@@ -204,8 +211,20 @@ class FirLayerController {
       return;
     }
 
+    if (options.clearPrevious === true) {
+      this.previousFeatures = [];
+    }
+
     arr.forEach((feature) => {
-      feature.setStyle(this.styles.getResultStyle());
+      if (
+        this.previousFeatures.indexOf(
+          feature.get(this.model.config.wmsRealEstateLayer.idField)
+        ) > -1
+      ) {
+        feature.setStyle(this.styles.getPreviousResultStyle());
+      } else {
+        feature.setStyle(this.styles.getResultStyle());
+      }
     });
 
     this.model.layers.feature.getSource().addFeatures(arr);
@@ -243,6 +262,20 @@ class FirLayerController {
   };
 
   clearBeforeSearch = (options = { keepNeighborBuffer: false }) => {
+    let previousFeatures = [];
+
+    if (options.keepNeighborBuffer === true) {
+      this.model.layers.feature
+        .getSource()
+        .getFeatures()
+        .forEach((o) => {
+          previousFeatures.push(
+            o.get(this.model.config.wmsRealEstateLayer.idField)
+          );
+        });
+    }
+
+    this.previousFeatures = previousFeatures;
     this.model.layers.feature.getSource().clear();
     this.model.layers.highlight.getSource().clear();
     this.model.layers.label.getSource().clear();

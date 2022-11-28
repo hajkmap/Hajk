@@ -150,7 +150,7 @@ export const customComponentsForReactMarkdown = {
     // Grab color and underline from options. Fallback to default MUI values if no settings exist.
     // Also, see #1106.
     const { linksColor = "primary", linksUnderline = "always" } =
-      infoclickOptions;
+      infoclickOptions || {};
     return children ? (
       <Link
         href={href}
