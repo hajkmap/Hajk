@@ -326,10 +326,27 @@ class DrawModel {
     }
   };
 
+  moveFeatureZIndexToTop = (feature) => {
+    const indexes = this.#getAllZIndexes();
+    const topIndex = Math.max(...indexes);
+    if (topIndex && isFinite(topIndex)) {
+      this.#setFeatureZIndex(feature, topIndex + 1);
+    }
+  };
+
   moveFeatureZIndexUp = (feature) => {
     const zIndex = this.#findClosestZIndex(feature, true);
     this.#setFeatureZIndex(feature, zIndex);
   };
+
+  moveFeatureZIndexToBottom = (feature) => {
+    const indexes = this.#getAllZIndexes();
+    const bottomIndex = Math.min(...indexes);
+    if (bottomIndex && isFinite(bottomIndex)) {
+      this.#setFeatureZIndex(feature, bottomIndex - 1);
+    }
+  };
+
   moveFeatureZIndexDown = (feature) => {
     const zIndex = this.#findClosestZIndex(feature, false);
     this.#setFeatureZIndex(feature, zIndex);
@@ -350,9 +367,7 @@ class DrawModel {
   };
 
   #findClosestZIndex = (feature, up) => {
-    let style = feature.getStyle();
-    style = Array.isArray(style) ? style[0] : style;
-    let zIndex = style.getZIndex();
+    let zIndex = this.#getFeatureZIndex(feature);
 
     const indexes = this.#getAllZIndexes().filter((index) => {
       return up === true ? index > zIndex : index < zIndex;

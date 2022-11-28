@@ -1,6 +1,24 @@
 import React from "react";
-import { Button, Grid, Paper } from "@mui/material";
-import { Tooltip, Typography, Switch } from "@mui/material";
+import {
+  Button,
+  Grid,
+  Paper,
+  Menu,
+  MenuItem,
+  Tooltip,
+  Typography,
+  Switch,
+  ListItemIcon,
+  ListItemText,
+} from "@mui/material";
+
+import {
+  FlipToFront,
+  FlipToBack,
+  ArrowDropDown,
+  ArrowDropUp,
+  ContentCopy,
+} from "@mui/icons-material/";
 
 import Information from "../components/Information";
 import FeatureTitleEditor from "../components/FeatureTitleEditor";
@@ -34,6 +52,15 @@ const ModifyNodeToggler = ({ modifyEnabled, setModifyEnabled }) => {
 const EditView = (props) => {
   // We have to get some information about the current activity (view)
   const activity = props.model.getActivityFromId(props.id);
+  const [zIndexAnchor, setZIndexAnchor] = React.useState(null);
+  const zIndexMenuOpen = Boolean(zIndexAnchor);
+  const handleZIndexMenu = (e) => {
+    setZIndexAnchor(e.currentTarget);
+  };
+  const handleZIndexMenuClose = () => {
+    setZIndexAnchor(null);
+  };
+
   return (
     <Grid
       container
@@ -74,42 +101,92 @@ const EditView = (props) => {
         </Grid>
       </Grid>
       {props.editFeature && (
-        <Grid container style={{ marginTop: 8 }}>
-          <Tooltip
-            disableInteractive
-            title="Klicka för att duplicera det markerade objektet."
-          >
+        <Grid container style={{ marginTop: 8 }} spacing={2}>
+          <Grid item xs={7}>
+            <Tooltip
+              disableInteractive
+              title="Klicka för att duplicera det markerade objektet."
+            >
+              <Button
+                variant="contained"
+                fullWidth
+                startIcon={<ContentCopy />}
+                size="small"
+                onClick={() => {
+                  props.drawModel.duplicateFeature(props.editFeature);
+                  props.drawModel.reBindFeaturePropertyListener();
+                }}
+              >
+                Duplicera
+              </Button>
+            </Tooltip>
+          </Grid>
+          <Grid item xs={5}>
             <Button
+              id="zIndexMenuButton"
               variant="contained"
               fullWidth
-              onClick={() => {
-                props.drawModel.duplicateFeature(props.editFeature);
-                props.drawModel.reBindFeaturePropertyListener();
+              onClick={handleZIndexMenu}
+              endIcon={<ArrowDropDown />}
+              size="small"
+            >
+              Ordna
+            </Button>
+
+            <Menu
+              id="zindexmenu"
+              anchorEl={zIndexAnchor}
+              open={zIndexMenuOpen}
+              onClose={handleZIndexMenuClose}
+              MenuListProps={{
+                "aria-labelledby": "zIndexMenuButton",
               }}
             >
-              Duplicera objekt
-            </Button>
-          </Tooltip>
-          <Button
-            variant="contained"
-            fullWidth
-            onClick={() => {
-              props.drawModel.moveFeatureZIndexUp(props.editFeature);
-            }}
-          >
-            Up +1
-            {/* todo: ui */}
-          </Button>
-          <Button
-            variant="contained"
-            fullWidth
-            onClick={() => {
-              props.drawModel.moveFeatureZIndexDown(props.editFeature);
-            }}
-          >
-            Down -1
-            {/* todo: ui */}
-          </Button>
+              <MenuItem
+                onClick={() => {
+                  props.drawModel.moveFeatureZIndexToTop(props.editFeature);
+                }}
+              >
+                <ListItemIcon>
+                  <FlipToFront fontSize="small" />
+                </ListItemIcon>
+                <ListItemText>Placera längst fram</ListItemText>
+              </MenuItem>
+
+              <MenuItem
+                onClick={() => {
+                  props.drawModel.moveFeatureZIndexUp(props.editFeature);
+                }}
+              >
+                <ListItemIcon>
+                  <ArrowDropUp fontSize="small" />
+                </ListItemIcon>
+                <ListItemText>Flytta framåt</ListItemText>
+              </MenuItem>
+
+              <MenuItem
+                onClick={() => {
+                  props.drawModel.moveFeatureZIndexDown(props.editFeature);
+                }}
+              >
+                <ListItemIcon>
+                  <ArrowDropDown fontSize="small" />
+                </ListItemIcon>
+                <ListItemText>Flytta bakåt</ListItemText>
+              </MenuItem>
+
+              <MenuItem
+                onClick={() => {
+                  props.drawModel.moveFeatureZIndexToBottom(props.editFeature);
+                }}
+              >
+                <ListItemIcon>
+                  <FlipToBack fontSize="small" />
+                </ListItemIcon>
+                <ListItemText>Placera längst bak</ListItemText>
+              </MenuItem>
+            </Menu>
+          </Grid>
         </Grid>
       )}
     </Grid>
