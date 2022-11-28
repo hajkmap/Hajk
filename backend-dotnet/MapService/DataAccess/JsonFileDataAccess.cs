@@ -45,9 +45,14 @@ namespace MapService.DataAccess
             return mapConfigFiles;
         }
 
-        public static JsonObject ReadLayerFile()
+        public static JsonDocument ReadLayerFileAsJsonDocument()
         {
-            return ReadJsonFile<JsonObject>(LAYER_FILE);
+            return ReadMapFileAsJsonDocument(LAYER_FILE);
+        }
+
+        public static JsonObject ReadLayerFileAsJsonObject()
+        {
+            return ReadMapFileAsJsonObject(LAYER_FILE);
         }
 
         /// <summary>

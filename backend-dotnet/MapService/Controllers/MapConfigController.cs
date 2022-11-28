@@ -1,6 +1,7 @@
 ﻿using MapService.Business.MapConfig;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
+using System.Text.Json;
 using System.Text.Json.Nodes;
 
 namespace MapService.Controllers
@@ -27,13 +28,13 @@ namespace MapService.Controllers
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         [SwaggerOperation(Tags = new[] { "Admin - Maps and layers" })]
-        public ActionResult<IEnumerable<string>> GetLayers()
+        public ActionResult GetLayers()
         {
-            JsonObject layerObject;
+            JsonDocument layerObject;
 
             try
             {
-                layerObject = MapConfigHandler.GetLayers();
+                layerObject = MapConfigHandler.GetLayersAsJsonDocument();
             }
             catch (Exception ex)
             {
@@ -57,13 +58,13 @@ namespace MapService.Controllers
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         [SwaggerOperation(Tags = new[] { "Admin - Maps and layers" })]
-        public ActionResult<JsonObject> GetMap(string map)
+        public ActionResult GetMap(string map)
         {
-            JsonObject mapObject;
+            JsonDocument mapObject;
 
             try
             {
-                mapObject = MapConfigHandler.GetMap(map);
+                mapObject = MapConfigHandler.GetMapAsJsonDocument(map);
             }
             catch (Exception ex)
             {

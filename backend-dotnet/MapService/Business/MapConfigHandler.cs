@@ -1,5 +1,7 @@
-﻿using MapService.DataAccess;
+﻿using Json.Path;
+using MapService.DataAccess;
 using MapService.Models;
+using System.Text.Json;
 using System.Text.Json.Nodes;
 
 namespace MapService.Business.MapConfig
@@ -13,9 +15,18 @@ namespace MapService.Business.MapConfig
         /// Gets a layer from layers file
         /// </summary>
         /// <returns>Returns all layers as a JsonObject.</returns>
-        public static JsonObject GetLayers()
+        public static JsonDocument GetLayersAsJsonDocument()
         {
-            return JsonFileDataAccess.ReadLayerFile();
+            return JsonFileDataAccess.ReadLayerFileAsJsonDocument();
+        }
+
+        /// <summary>
+        /// Gets a layer from layers file
+        /// </summary>
+        /// <returns>Returns all layers as a JsonObject.</returns>
+        public static JsonObject GetLayersAsJsonObject()
+        {
+            return JsonFileDataAccess.ReadLayerFileAsJsonObject();
         }
 
         /// <summary>
@@ -23,9 +34,14 @@ namespace MapService.Business.MapConfig
         /// </summary>
         /// <param name="mapFileName">The name of the map including the file ending. </param>
         /// <returns>Returns a map as a JsonObject.</returns>
-        public static JsonObject GetMap(string mapFileName)
+        public static JsonObject GetMapAsJsonObject(string mapFileName)
         {
             return JsonFileDataAccess.ReadMapFileAsJsonObject(mapFileName);
+        }
+
+        public static JsonDocument GetMapAsJsonDocument(string mapFileName)
+        {
+            return JsonFileDataAccess.ReadMapFileAsJsonDocument(mapFileName); ;
         }
 
         /// <summary>
@@ -146,18 +162,19 @@ namespace MapService.Business.MapConfig
             if (format != "json")
                 throw new FormatException();
 
-            JsonObject? jsonObjectMap;
-            JsonObject? jsonObjectLayers;
+            JsonElement jsonElementLayers;
+            JsonElement jsonElementMaps;
             try
             {
-                jsonObjectMap = GetMap(map);
-                jsonObjectLayers = GetLayers();
+                jsonElementLayers = GetLayersAsJsonDocument().RootElement;
+                jsonElementMaps = GetMapAsJsonDocument(map).RootElement; ;
             }
             catch (Exception)
             {
                 throw;
             }
-            LayerExportItem layerExportItems = FilterLayers(jsonObjectLayers);
+            LayerExportItem layerExportItems = new LayerExportItem();
+            layerExportItems = FilterLayers(jsonElementLayers);
             JsonObject? jsonObjectLayerExportItems = JsonUtility.ConvertToJsonObject(layerExportItems.layers);
             if (map == "layers")
             {
@@ -167,144 +184,124 @@ namespace MapService.Business.MapConfig
                 return jsonObjectLayerExportItems;
             }
 
-            JsonObject? jsonObjectMapExportItems = FilterMaps(jsonObjectMap, layerExportItems);
+            JsonObject? jsonObjectMapExportItems = FilterMaps(jsonElementMaps, layerExportItems);
             if (jsonObjectMapExportItems == null)
                 throw new NullReferenceException();
 
             return jsonObjectMapExportItems;
         }
 
-        private static LayerExportItem FilterLayers(JsonObject jsonObject)
+        private static LayerExportItem FilterLayers(JsonElement jsonElementLayers)
         {
             LayerExportItem layerExportItems = new LayerExportItem();
-            foreach (KeyValuePair<string, JsonNode?> root in jsonObject)
+
+            var input = "$[*][*]";
+            var result = JsonPathUtility.GetJsonArray(jsonElementLayers, input);
+            if (result == null)
+                return layerExportItems;
+
+            foreach (PathMatch path in result)
             {
-                if (root.Value == null)
+                JsonElement caption;
+                if (!path.Value.TryGetProperty("caption", out caption) && caption.GetString() == null)
                     continue;
 
-                foreach (JsonObject? layer in root.Value.AsArray())
+                JsonElement id;
+                if (!path.Value.TryGetProperty("id", out id) && id.GetString() == null)
+                    continue;
+
+                JsonElement layers;
+               if (!path.Value.TryGetProperty("layers", out layers))
+               {
+                    layerExportItems.layers.Add(id.GetString(), 
+                        new LayerExportItem.LayerExportBaseItem(caption.GetString(), null));
+                    continue;
+               }
+
+                List<string> subLayers = new List<string>();
+                foreach (JsonElement subLayer in layers.EnumerateArray())
                 {
-                    if (layer == null)
+                    if (subLayer.GetString() == null)
                         continue;
 
-                    string? caption = (string?)layer.AsObject()["caption"];
-                    string? id = (string?)layer.AsObject()["id"];
-                    if (id == null)
-                        continue;
-
-                    JsonNode? layers = layer["layers"];
-                    if (layers == null)
-                    {
-                        layerExportItems.layers.Add(id, new LayerExportItem.LayerExportBaseItem(caption, null));
-                        continue;
-                    }
-
-                    List<string> subLayers = new List<string>();
-                    foreach (JsonNode? subLayer in layers.AsArray())
-                    {
-                        if (subLayer == null)
-                            continue;
-
-                        subLayers.Add(subLayer.ToString());
-                    }
-
-                    layerExportItems.layers.Add(id, new LayerExportItem.LayerExportBaseItem(caption, subLayers));
+                    subLayers.Add(subLayer.GetString());
                 }
+
+                layerExportItems.layers.Add(id.GetString(), 
+                    new LayerExportItem.LayerExportBaseItem(caption.GetString(), subLayers));
             }
 
             return layerExportItems;
         }
 
-        private static JsonObject? FilterMaps(JsonObject jsonObjectMap, LayerExportItem layerExportItems)
+        private static JsonObject? FilterMaps(JsonElement jsonElementMaps, LayerExportItem layerExportItems)
         {
             List<MapExportItem.BaseLayerExportItem> baseLayers = new List<MapExportItem.BaseLayerExportItem>();
             List<MapExportItem.GroupExportItem> groups = new List<MapExportItem.GroupExportItem>();
 
-            JsonNode? tools = jsonObjectMap["tools"];
-            if (tools == null)
-                throw new Exception();
+            var input = "$.tools[?(@.type == 'layerswitcher')].options";
+            var result = JsonPathUtility.GetJsonElement(jsonElementMaps, input);
+            if (result == null)
+                return null;
 
-            foreach (JsonNode? tool in tools.AsArray())
+            JsonElement baselayers;
+            if (!result.Value.TryGetProperty("baselayers", out baselayers))
+                return null;
+
+            List<string> baseLayerIds = GetArrayValues(baselayers, "id");
+            foreach (string baseLayerId in baseLayerIds)
             {
-                if (tool == null)
+                string caption = layerExportItems.layers[baseLayerId].caption;
+                baseLayers.Add(new MapExportItem.BaseLayerExportItem(caption));
+            }
+
+            JsonElement groupsNode;
+            if (!result.Value.TryGetProperty("groups", out groupsNode))
+                return null;
+
+            foreach (JsonElement element in groupsNode.EnumerateArray())
+            {
+                JsonElement name;
+                if (!element.TryGetProperty("name", out name) && name.GetString() == null)
                     continue;
 
-                JsonNode? type = tool["type"];
-                if (type == null || type.ToString() != "layerswitcher")
+                JsonElement groupLayers;
+                if (!element.TryGetProperty("layers", out groupLayers) && groupLayers.GetString() == null)
                     continue;
 
-                JsonNode? options = tool["options"];
-                if (options == null)
-                    continue;
+                List<MapExportItem.GroupExportItem.GroupLayerExportItem> layersInGroup = 
+                    new List<MapExportItem.GroupExportItem.GroupLayerExportItem>();
 
-                JsonNode? baselayers = options["baselayers"];
-                if (baselayers == null)
-                    continue;
-
-                List<string> baseLayerIds = new List<string>();
-                foreach (JsonNode? baselayer in baselayers.AsArray())
+                List<string> Ids = GetArrayValues(groupLayers, "id");
+                foreach (string id in Ids)
                 {
-                    if (baselayer == null)
-                        continue;
+                    LayerExportItem.LayerExportBaseItem layerExportItem = layerExportItems.layers[id];
+                    MapExportItem.GroupExportItem.GroupLayerExportItem groupLayerExportItem =
+                        new MapExportItem.GroupExportItem.GroupLayerExportItem(layerExportItem);
 
-                    string? id = (string?)baselayer["id"];
-                    if (id == null)
-                        continue;
-
-                    baseLayerIds.Add(id);
+                    layersInGroup.Add(groupLayerExportItem);
                 }
-
-                foreach (string baseLayerId in baseLayerIds)
-                {
-                    string caption = layerExportItems.layers[baseLayerId].caption;
-                    baseLayers.Add(new MapExportItem.BaseLayerExportItem(caption));
-                }
-
-                JsonNode? groupsNode = options["groups"];
-                if (groupsNode == null)
-                    continue;
-
-                List<string> Ids = new List<string>();
-                foreach (JsonNode? group in groupsNode.AsArray())
-                {
-                    if (group == null)
-                        continue;
-
-                    string? name = (string?)group["name"];
-                    if (name == null)
-                        continue;
-
-                    JsonNode? layers = group["layers"];
-                    if (layers == null)
-                        continue;
-
-                    foreach (JsonNode? layer in layers.AsArray())
-                    {
-                        if (layer == null)
-                            continue;
-
-                        string? id = (string?)layer["id"];
-                        if (id == null)
-                            continue;
-
-                        Ids.Add(id);
-                    }
-
-                    List<MapExportItem.GroupExportItem.GroupLayerExportItem> layersInGroup = new List<MapExportItem.GroupExportItem.GroupLayerExportItem>();
-                    foreach (string id in Ids)
-                    {
-                        LayerExportItem.LayerExportBaseItem layerExportItem = layerExportItems.layers[id];
-                        MapExportItem.GroupExportItem.GroupLayerExportItem groupLayerExportItem =
-                            new MapExportItem.GroupExportItem.GroupLayerExportItem(layerExportItem);
-                        layersInGroup.Add(groupLayerExportItem);
-                    }
-                    groups.Add(new MapExportItem.GroupExportItem(name, layersInGroup));
-                    Ids.Clear();
-                }
+                groups.Add(new MapExportItem.GroupExportItem(name.GetString(), layersInGroup));
+                Ids.Clear();
             }
 
             MapExportItem mapExportItem = new MapExportItem(baseLayers, groups);
             return JsonUtility.ConvertToJsonObject(mapExportItem);
+        }
+
+        private static List<string> GetArrayValues(JsonElement array, string proptertyName)
+        {
+            List<string> values = new List<string>();
+            foreach (JsonElement element in array.EnumerateArray())
+            {
+                JsonElement item;
+                if (!element.TryGetProperty(proptertyName, out item) && item.GetString() == null)
+                    continue;
+
+                values.Add(item.GetString());
+            }
+
+            return values;
         }
     }
 }
