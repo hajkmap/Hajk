@@ -53,6 +53,7 @@ class EditModel {
   }
 
   write(features) {
+    let wfsVersion = this.options?.wfsVersion || "1.1.0";
     var format = new WFS(),
       lr = this.editSource.layers[0].split(":"),
       fp = lr.length === 2 ? lr[0] : "",
@@ -62,7 +63,7 @@ class EditModel {
         featurePrefix: fp,
         featureType: ft,
         hasZ: false,
-        version: "1.1.0", // or "1.0.0"
+        version: wfsVersion, // or "1.0.0"
         srsName: this.editSource.projection,
       };
 
@@ -376,10 +377,12 @@ class EditModel {
     // Now we merge the possible existing params with the rest, defined
     // below. We can be confident that we won't have duplicates and that
     // our values "win", as they are defined last.
+    let wfsVersion = this.options?.wfsVersion || "1.1.0";
+
     const mergedSearchParams = {
       ...existingSearchParams,
       SERVICE: "WFS",
-      VERSION: "1.1.0",
+      VERSION: wfsVersion,
       REQUEST: "GetFeature",
       TYPENAME: source.layers[0],
       SRSNAME: source.projection,
