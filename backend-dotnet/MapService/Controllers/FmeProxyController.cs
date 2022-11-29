@@ -1,8 +1,6 @@
 ﻿using MapService.Business.FmeProxy;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
-using System;
-using System.Threading.Tasks;
 
 namespace MapService.Controllers
 {
@@ -12,7 +10,6 @@ namespace MapService.Controllers
     public class FmeProxyController : ControllerBase
     {
         private readonly ILogger<ConfigController> _logger;
-        private const int BUFFER_SIZE = 1024 * 1024;
 
         public FmeProxyController(ILogger<ConfigController> logger)
         {
@@ -28,6 +25,7 @@ namespace MapService.Controllers
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status405MethodNotAllowed)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         [SwaggerOperation(Tags = new[] { "FME-server Proxy" })]
         public async Task<ActionResult<string>> SendQueryToFmeServerAPI(string query)
         {
@@ -40,7 +38,8 @@ namespace MapService.Controllers
             }
 
             //From old backend, should be removed to support all request methods?
-            if (Request.Method != "POST" && Request.Method != "GET")
+            var method = new HttpMethod(Request.Method);
+            if (method != HttpMethod.Post && method != HttpMethod.Get)
             {
                 _logger.LogWarning(string.Format("EndPoint called with not supported HTTP method: {0}", Request.Method));
                 return StatusCode(StatusCodes.Status405MethodNotAllowed, "Not supported HTTP method");

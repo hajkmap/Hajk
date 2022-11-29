@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
 using System.Net.Http.Headers;
 using System.Text.RegularExpressions;
+using Microsoft.AspNetCore.Http.Extensions;
 
 namespace MapService.Business.FmeProxy
 {
@@ -27,7 +28,6 @@ namespace MapService.Business.FmeProxy
             client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/vnd.github.v3+json"));
             client.DefaultRequestHeaders.Add("User-Agent", ".NET Foundation Repository Reporter");
 
-
             //Create request
             string url = fmeServerHost.EndsWith("/") ? fmeServerHost + urlPath : fmeServerHost + "/" + urlPath;
 
@@ -38,10 +38,21 @@ namespace MapService.Business.FmeProxy
             HttpRequestMessage request = new HttpRequestMessage(new HttpMethod(incomingRequest.Method), url);
             request.Headers.Add("Authorization", "Basic " + Convert.ToBase64String(Encoding.UTF8.GetBytes(fmeServerUser + ":" + fmeServerPwd)).ToString());
 
+            //If POST set request body and headers
+            var contentEncoding = incomingRequest.Headers.ContentEncoding;
+            if (new HttpMethod(incomingRequest.Method) == HttpMethod.Post)
+            {
+                StreamReader bodyStreamReader = new StreamReader(incomingRequest.Body);
+                string body = bodyStreamReader.ReadToEnd();
+                request.Content = new StringContent(body);
+                if (incomingRequest.ContentType != null) { request.Content.Headers.ContentType = new MediaTypeHeaderValue(incomingRequest.ContentType); }
+                request.Content.Headers.ContentLength = incomingRequest.ContentLength;
+            }
+
             //Get Response
             var response = await client.SendAsync(request);
-            response.EnsureSuccessStatusCode(); //throws exception if other than status code 200 is returned
-            
+            response.EnsureSuccessStatusCode(); //throws HttpRequestException if other than status code 200 is returned
+
             //Return content as string
             return await response.Content.ReadAsStringAsync();
         }
