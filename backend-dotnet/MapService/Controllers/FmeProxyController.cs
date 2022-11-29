@@ -5,7 +5,7 @@ using Swashbuckle.AspNetCore.Annotations;
 namespace MapService.Controllers
 {
     [Route("fmeproxy")]
-    [Produces("application/json")]
+    [Produces("text/plain")]
     [ApiController]
     public class FmeProxyController : ControllerBase
     {
@@ -20,11 +20,9 @@ namespace MapService.Controllers
         /// <param query="query">Path corresponding to an endpoint on the FME-server REST API.</param>
         /// <response code="200">Result will vary depending on response from the API.</response>
         /// <response code="500">Internal Server Error</response>
-        [Route("{query}")]
-        [HttpGet]
+        [Route("{*query}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        [ProducesResponseType(StatusCodes.Status405MethodNotAllowed)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         [SwaggerOperation(Tags = new[] { "FME-server Proxy" })]
         public async Task<ActionResult<string>> SendQueryToFmeServerAPI(string query)
@@ -33,16 +31,8 @@ namespace MapService.Controllers
             
             if (string.IsNullOrEmpty(query))
             {
-                _logger.LogWarning("Not allowed to call proxy with empty url");
+                _logger.LogWarning("Not allowed to call proxy with empty query");
                 return StatusCode(StatusCodes.Status400BadRequest, "Not allowed to call proxy with empty query");
-            }
-
-            //From old backend, should be removed to support all request methods?
-            var method = new HttpMethod(Request.Method);
-            if (method != HttpMethod.Post && method != HttpMethod.Get)
-            {
-                _logger.LogWarning(string.Format("EndPoint called with not supported HTTP method: {0}", Request.Method));
-                return StatusCode(StatusCodes.Status405MethodNotAllowed, "Not supported HTTP method");
             }
             
             try

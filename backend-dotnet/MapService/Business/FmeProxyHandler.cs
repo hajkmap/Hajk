@@ -7,6 +7,8 @@ using Microsoft.AspNetCore.Mvc.Infrastructure;
 using System.Net.Http.Headers;
 using System.Text.RegularExpressions;
 using Microsoft.AspNetCore.Http.Extensions;
+using Microsoft.Extensions.Primitives;
+using Json.More;
 
 namespace MapService.Business.FmeProxy
 {
@@ -18,15 +20,14 @@ namespace MapService.Business.FmeProxy
         {
             //Better way to handle this?
             urlPath = urlPath.Replace("%2F", "/");
-            
+
             //Just for testing purposes
-            var fmeServerHost = "https://api.github.com/";//"https://fmeserver.some.domain.com";
+            var fmeServerHost = "https://jsonplaceholder.typicode.com"; //"https://fmeserver.some.domain.com";
             var fmeServerUser = "someFmeUser";
             var fmeServerPwd = "aGreatPassword";
           
             client.DefaultRequestHeaders.Accept.Clear();
-            client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/vnd.github.v3+json"));
-            client.DefaultRequestHeaders.Add("User-Agent", ".NET Foundation Repository Reporter");
+            //client.DefaultRequestHeaders.Add("Authorization", "Basic " + Convert.ToBase64String(Encoding.UTF8.GetBytes(fmeServerUser + ":" + fmeServerPwd)).ToString());
 
             //Create request
             string url = fmeServerHost.EndsWith("/") ? fmeServerHost + urlPath : fmeServerHost + "/" + urlPath;
@@ -36,16 +37,19 @@ namespace MapService.Business.FmeProxy
                 url += "?" + queryString;
 
             HttpRequestMessage request = new HttpRequestMessage(new HttpMethod(incomingRequest.Method), url);
-            request.Headers.Add("Authorization", "Basic " + Convert.ToBase64String(Encoding.UTF8.GetBytes(fmeServerUser + ":" + fmeServerPwd)).ToString());
 
-            //If POST set request body and headers
+            //If needed set request body and headers
             var contentEncoding = incomingRequest.Headers.ContentEncoding;
-            if (new HttpMethod(incomingRequest.Method) == HttpMethod.Post)
+            if (new HttpMethod(incomingRequest.Method) != HttpMethod.Get)
             {
                 StreamReader bodyStreamReader = new StreamReader(incomingRequest.Body);
-                string body = bodyStreamReader.ReadToEnd();
+                string body = await bodyStreamReader.ReadToEndAsync();
                 request.Content = new StringContent(body);
-                if (incomingRequest.ContentType != null) { request.Content.Headers.ContentType = new MediaTypeHeaderValue(incomingRequest.ContentType); }
+                if (incomingRequest.ContentType != null) 
+                { 
+                    request.Content.Headers.ContentType = 
+                        new MediaTypeHeaderValue(incomingRequest.ContentType); 
+                }
                 request.Content.Headers.ContentLength = incomingRequest.ContentLength;
             }
 
