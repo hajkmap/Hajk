@@ -256,7 +256,7 @@ class AttributeEditor extends React.Component {
   checkCustomValidation(name, validationRule, validationMessage, value) {
     //Create regex from the property validationRule. Note that we should not include the encompassing '/' characters in the string itself, as converting to regex will add these.
     const regex = new RegExp(validationRule);
-    const message = validationMessage ? validationMessage : "ogiltigt värde";
+    const message = validationMessage ? validationMessage : "Ogiltigt värde";
 
     let valid = regex.test(value);
 
