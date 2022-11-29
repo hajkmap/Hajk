@@ -25,5 +25,9 @@ namespace MapService.Models
         public bool hidden { get; set; }
 
         public string defaultValue { get; set; }
+
+        public string customValidation { get; set; }
+
+        public string customValidationMessage { get; set; }
     }
 }
