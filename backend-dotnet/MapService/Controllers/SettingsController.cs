@@ -28,7 +28,7 @@ namespace MapService.Controllers
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         [SwaggerOperation(Tags = new[] { "Admin - Maps and layers" })]
-        public ActionResult GetLayers([Required] string mapFile, [Required][FromBody] JsonObject requestBody)
+        public ActionResult UpdateMapSettings([Required] string mapFile, [Required][FromBody] JsonObject requestBody)
         {
             try
             {
