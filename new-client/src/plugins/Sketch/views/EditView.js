@@ -52,6 +52,8 @@ const ModifyNodeToggler = ({ modifyEnabled, setModifyEnabled }) => {
 const EditView = (props) => {
   // We have to get some information about the current activity (view)
   const activity = props.model.getActivityFromId(props.id);
+
+  // Z-Index order related
   const [zIndexAnchor, setZIndexAnchor] = React.useState(null);
   const zIndexMenuOpen = Boolean(zIndexAnchor);
   const handleZIndexMenu = (e) => {

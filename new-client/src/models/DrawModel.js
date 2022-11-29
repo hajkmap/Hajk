@@ -326,6 +326,7 @@ class DrawModel {
     }
   };
 
+  // Find the highest zindex used and move on top of it.
   moveFeatureZIndexToTop = (feature) => {
     const indexes = this.#getAllZIndexes();
     const topIndex = Math.max(...indexes);
@@ -334,11 +335,13 @@ class DrawModel {
     }
   };
 
+  // Find the closest zindex and move on top of it.
   moveFeatureZIndexUp = (feature) => {
     const zIndex = this.#findClosestZIndex(feature, true);
     this.#setFeatureZIndex(feature, zIndex);
   };
 
+  // Find the lowest zindex used and move below it.
   moveFeatureZIndexToBottom = (feature) => {
     const indexes = this.#getAllZIndexes();
     const bottomIndex = Math.min(...indexes);
@@ -347,17 +350,20 @@ class DrawModel {
     }
   };
 
+  // Find the closest zindex and move below it.
   moveFeatureZIndexDown = (feature) => {
     const zIndex = this.#findClosestZIndex(feature, false);
     this.#setFeatureZIndex(feature, zIndex);
   };
 
+  // Find the closest zindex and move on top of it.
   #getFeaturesSortedByZIndex = () => {
     return this.#drawSource.getFeatures().sort((a, b) => {
       return this.#getFeatureZIndex(a) < this.#getFeatureZIndex(b);
     });
   };
 
+  // Get an array of all zindexes
   #getAllZIndexes = () => {
     let indexes = [];
     this.#getFeaturesSortedByZIndex().forEach((f) => {
@@ -366,6 +372,7 @@ class DrawModel {
     return indexes;
   };
 
+  // Find the closest valid zindex
   #findClosestZIndex = (feature, up) => {
     let zIndex = this.#getFeatureZIndex(feature);
 
