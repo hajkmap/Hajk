@@ -1,6 +1,7 @@
 ﻿using Json.Path;
 using MapService.DataAccess;
 using MapService.Models;
+using MapService.Utility;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 
@@ -39,6 +40,11 @@ namespace MapService.Business.MapConfig
             return JsonFileDataAccess.ReadMapFileAsJsonObject(mapFileName);
         }
 
+        /// <summary>
+        /// Gets a map as a JsonDocument.
+        /// </summary>
+        /// <param name="mapFileName">The name of the map including the file ending. </param>
+        /// <returns>Returns a map as a JsonDocument.</returns>
         public static JsonDocument GetMapAsJsonDocument(string mapFileName)
         {
             return JsonFileDataAccess.ReadMapFileAsJsonDocument(mapFileName); ;
@@ -98,80 +104,19 @@ namespace MapService.Business.MapConfig
             return GetMediaFiles(mediaPath, allowedExtentions);
         }
 
-        private static IConfiguration GetConfiguration()
+        private static string GetMediaPath(string pathInConfiguration)
         {
-            object? configurationObject = AppDomain.CurrentDomain.GetData("Configuration");
-            if (configurationObject == null)
-                throw new Exception();
-
-            if (!(configurationObject is IConfiguration))
-                throw new Exception();
-
-            return configurationObject as IConfiguration;
-        }
-
-        private static string GetMediaPath(string configurationPath)
-        {
-            IConfiguration configuration = GetConfiguration();
-            string? mediaUploadPath = configuration.GetSection(configurationPath).Value;
-
-            var folderPath = string.Empty;
-            Uri? pathAbsolut = GetUriPath(mediaUploadPath, UriKind.Absolute);
-            if (pathAbsolut != null)
-                folderPath = pathAbsolut.AbsolutePath;
-
-            Uri? pathRelative = GetUriPath(mediaUploadPath, UriKind.Relative);
-            if (pathRelative != null)
-            {
-                object? configurationObject = AppDomain.CurrentDomain.GetData("ContentRootPath");
-                if (configurationObject == null)
-                    throw new Exception();
-
-                if (!(configurationObject is string))
-                    throw new Exception();
-
-                var contentRootPath = configurationObject as string;
-                folderPath = Path.GetFullPath(
-                    Path.Combine(Path.GetDirectoryName(contentRootPath), pathRelative.OriginalString));
-            }
-
-            return folderPath;
-        }
-
-        private static Uri? GetUriPath(string? mediaUploadPath, UriKind kindOfUri)
-        {
-            Uri? path;
-            Uri.TryCreate(mediaUploadPath, kindOfUri, out path);
-            return path;
+            return PathUtility.GetPath(pathInConfiguration);
         }
 
         private static IEnumerable<string> GetAllowedExtensions(string sectionKeyPath)
         {
-            IConfiguration configuration = GetConfiguration();
-            return configuration.GetSection(sectionKeyPath).Get<List<string>>();
+            return ConfigurationUtility.GetSectionArray(sectionKeyPath);
         }
 
         private static IEnumerable<string> GetMediaFiles(string mediaPath, IEnumerable<string> allowedExtentions)
         {
-            IEnumerable<string> files = FolderDataAccess.GetAllFiles(mediaPath);
-            IList<string> imagesFileNameList = new List<string>();
-            foreach (string file in files)
-            {
-                foreach (string extention in allowedExtentions)
-                {
-                    string allowedExtention = extention;
-                    if (allowedExtention.First() != '.')
-                        allowedExtention = "." + allowedExtention;
-
-                    if (Path.GetExtension(file).ToLower() != allowedExtention)
-                        continue;
-
-                    var fileName = Path.GetFileName(file);
-                    imagesFileNameList.Add(fileName);
-                }
-            }
-
-            return imagesFileNameList;
+            return FileUtility.GetFiles(mediaPath, allowedExtentions);
         }
 
         /// <summary>

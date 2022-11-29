@@ -1,4 +1,5 @@
 ﻿using MapService.DataAccess;
+using MapService.Utility;
 using System.Text.Json.Nodes;
 
 namespace MapService.Business.Informative
@@ -11,25 +12,12 @@ namespace MapService.Business.Informative
         /// <returns>List of all document paths</returns>
         public static IEnumerable<string> GetAllDocuments()
         {
-            var documentList = new List<string>();
-            var documentsContentRootPath = AppDomain.CurrentDomain.GetData("DocumentsContentRootPath") as string;
-
-            if (documentsContentRootPath == null)
-            {
-                return documentList;
-            }
-
-            var files = FolderDataAccess.GetAllFiles(documentsContentRootPath);
-
-            foreach (var file in files)
-            {
-                if (Path.GetExtension(file).ToLower() == ".json")
-                {
-                    documentList.Add(file);
-                }
-            }
-
-            return documentList;
+            string documentPath = PathUtility.GetPath("Documents:Path");
+            if (documentPath == null)
+                return new List<string>(); ;
+            
+            IEnumerable<string> allowedExtentions = new List<string>() { "json" };
+            return FileUtility.GetFiles(documentPath, allowedExtentions);
         }
 
         /// <summary>

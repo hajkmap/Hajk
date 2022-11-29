@@ -31,10 +31,6 @@ var app = builder.Build();
 // Setup app's root folders
 AppDomain.CurrentDomain.SetData("ContentRootPath", app.Environment.ContentRootPath);
 AppDomain.CurrentDomain.SetData("WebRootPath", app.Environment.WebRootPath);
-AppDomain.CurrentDomain.SetData("AppDataContentRootPath", app.Environment.ContentRootPath + "App_Data");
-AppDomain.CurrentDomain.SetData("DocumentsContentRootPath", app.Environment.ContentRootPath + "App_Data\\documents");
-AppDomain.CurrentDomain.SetData("SwaggerContentRootPath", app.Environment.ContentRootPath + "Swagger");
-
 IConfiguration configuration = new ConfigurationBuilder()
     .AddJsonFile("appsettings.json")
     .Build();
