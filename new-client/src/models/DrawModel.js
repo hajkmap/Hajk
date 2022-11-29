@@ -330,7 +330,7 @@ class DrawModel {
   moveFeatureZIndexToTop = (feature) => {
     const indexes = this.#getAllZIndexes();
     const topIndex = Math.max(...indexes);
-    if (topIndex && isFinite(topIndex)) {
+    if (isFinite(topIndex)) {
       this.#setFeatureZIndex(feature, topIndex + 1);
     }
   };
@@ -345,7 +345,7 @@ class DrawModel {
   moveFeatureZIndexToBottom = (feature) => {
     const indexes = this.#getAllZIndexes();
     const bottomIndex = Math.min(...indexes);
-    if (bottomIndex && isFinite(bottomIndex)) {
+    if (isFinite(bottomIndex)) {
       this.#setFeatureZIndex(feature, bottomIndex - 1);
     }
   };
@@ -419,6 +419,15 @@ class DrawModel {
 
   // Returns the style that should be used on the drawn features
   #getFeatureStyle = (feature, settingsOverride) => {
+    if (feature.getStyle()) {
+      const currentZIndex = this.#getFeatureZIndex(feature);
+      if (currentZIndex === 0) {
+        // force a newly drawn feature to get a valid zindex.
+        this.#lastZIndex++;
+        this.#setFeatureZIndex(feature, this.#lastZIndex);
+      }
+    }
+
     if (feature.get("HIDDEN") === true) {
       !feature.get("STYLE_BEFORE_HIDE") &&
         feature.set("STYLE_BEFORE_HIDE", feature.getStyle());
@@ -950,7 +959,7 @@ class DrawModel {
 
   // Returns the feature zIndex
   #getDrawZIndex = (settings) => {
-    return settings?.zIndex || 1;
+    return settings?.zIndex || 0;
   };
 
   // Returns the image style (based on the style settings)
