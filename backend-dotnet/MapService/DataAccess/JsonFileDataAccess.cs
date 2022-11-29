@@ -1,4 +1,5 @@
-﻿using System.Text.Json;
+﻿using MapService.Utility;
+using System.Text.Json;
 using System.Text.Json.Nodes;
 
 namespace MapService.DataAccess
@@ -135,7 +136,7 @@ namespace MapService.DataAccess
 
         private static string GetPathToAppFolder()
         {
-            var appDataFolderPath = AppDomain.CurrentDomain.GetData("AppDataContentRootPath") as string;
+            var appDataFolderPath = PathUtility.GetPath("DataContent:Path");
 
             if (appDataFolderPath == null)
                 throw new DirectoryNotFoundException();
@@ -147,8 +148,9 @@ namespace MapService.DataAccess
         {
             JsonObject jsonObject;
 
-            var appDataFolderPath = AppDomain.CurrentDomain.GetData("SwaggerContentRootPath") as string;
-            var pathToFile = Path.Combine(appDataFolderPath, "swagger.json");
+            var appDataFolderPath = PathUtility.GetPath("Swagger:Path");
+            var swaggerFileName = ConfigurationUtility.GetSectionItem("Swagger:File");
+            var pathToFile = Path.Combine(appDataFolderPath, swaggerFileName);
 
             try
             {

@@ -1,6 +1,7 @@
 ﻿using Json.Path;
 using MapService.DataAccess;
 using MapService.Models;
+using MapService.Utility;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 
@@ -39,6 +40,11 @@ namespace MapService.Business.MapConfig
             return JsonFileDataAccess.ReadMapFileAsJsonObject(mapFileName);
         }
 
+        /// <summary>
+        /// Gets a map as a JsonDocument.
+        /// </summary>
+        /// <param name="mapFileName">The name of the map including the file ending. </param>
+        /// <returns>Returns a map as a JsonDocument.</returns>
         public static JsonDocument GetMapAsJsonDocument(string mapFileName)
         {
             return JsonFileDataAccess.ReadMapFileAsJsonDocument(mapFileName); ;
@@ -68,27 +74,10 @@ namespace MapService.Business.MapConfig
         /// <returns>Collection of image file names</returns>
         public static IEnumerable<string> GetListOfImages()
         {
-            var imageFileNameList = new List<string>();
+            string mediaPath = GetMediaPath("Media:Image:Path");
+            IEnumerable<string> allowedExtentions = GetAllowedExtensions("Media:Image:AllowedExtentions");
 
-            var uploadContentRootPath = AppDomain.CurrentDomain.GetData("UploadContentRootPath") as string;
-
-            if (uploadContentRootPath == null)
-            {
-                return imageFileNameList;
-            }
-
-            var files = FolderDataAccess.GetAllFiles(uploadContentRootPath);
-
-            foreach (string file in files)
-            {
-                if (Path.GetExtension(file).ToLower() == ".png" || Path.GetExtension(file).ToLower() == ".jpeg" || Path.GetExtension(file).ToLower() == ".jpg")
-                {
-                    var fileName = Path.GetFileName(file);
-                    imageFileNameList.Add(fileName);
-                }
-            }
-
-            return imageFileNameList;
+            return GetMediaFiles(mediaPath, allowedExtentions);
         }
 
         /// <summary>
@@ -97,27 +86,10 @@ namespace MapService.Business.MapConfig
         /// <returns>Collection of video file names</returns>
         public static IEnumerable<string> GetListOfVideos()
         {
-            var videoFileNameList = new List<string>();
+            string mediaPath = GetMediaPath("Media:Video:Path");
+            IEnumerable<string> allowedExtentions = GetAllowedExtensions("Media:Video:AllowedExtentions");
 
-            var uploadContentRootPath = AppDomain.CurrentDomain.GetData("UploadContentRootPath") as string;
-
-            if (uploadContentRootPath == null)
-            {
-                return videoFileNameList;
-            }
-
-            var files = FolderDataAccess.GetAllFiles(uploadContentRootPath);
-
-            foreach (string file in files)
-            {
-                if (Path.GetExtension(file).ToLower() == ".mp4" || Path.GetExtension(file).ToLower() == ".mov" || Path.GetExtension(file).ToLower() == ".ogg")
-                {
-                    var fileName = Path.GetFileName(file);
-                    videoFileNameList.Add(fileName);
-                }
-            }
-
-            return videoFileNameList;
+            return GetMediaFiles(mediaPath, allowedExtentions);
         }
 
         /// <summary>
@@ -126,27 +98,25 @@ namespace MapService.Business.MapConfig
         /// <returns>Collection of audio file names</returns>
         public static IEnumerable<string> GetListOfAudioFiles()
         {
-            var audioFileNameList = new List<string>();
+            string mediaPath = GetMediaPath("Media:Audio:Path");
+            IEnumerable<string> allowedExtentions = GetAllowedExtensions("Media:Audio:AllowedExtentions");
 
-            var uploadContentRootPath = AppDomain.CurrentDomain.GetData("UploadContentRootPath") as string;
+            return GetMediaFiles(mediaPath, allowedExtentions);
+        }
 
-            if (uploadContentRootPath == null)
-            {
-                return audioFileNameList;
-            }
+        private static string GetMediaPath(string pathInConfiguration)
+        {
+            return PathUtility.GetPath(pathInConfiguration);
+        }
 
-            var files = FolderDataAccess.GetAllFiles(uploadContentRootPath);
+        private static IEnumerable<string> GetAllowedExtensions(string sectionKeyPath)
+        {
+            return ConfigurationUtility.GetSectionArray(sectionKeyPath);
+        }
 
-            foreach (string file in files)
-            {
-                if (Path.GetExtension(file).ToLower() == ".mp3" || Path.GetExtension(file).ToLower() == ".wav" || Path.GetExtension(file).ToLower() == ".ogg")
-                {
-                    var fileName = Path.GetFileName(file);
-                    audioFileNameList.Add(fileName);
-                }
-            }
-
-            return audioFileNameList;
+        private static IEnumerable<string> GetMediaFiles(string mediaPath, IEnumerable<string> allowedExtentions)
+        {
+            return FileUtility.GetFiles(mediaPath, allowedExtentions);
         }
 
         /// <summary>

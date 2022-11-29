@@ -1,7 +1,7 @@
 ﻿using Json.Path;
 using System.Text.Json;
 
-namespace MapService.Business
+namespace MapService.Utility
 {
     /// <summary>
     /// JsonPath utility class

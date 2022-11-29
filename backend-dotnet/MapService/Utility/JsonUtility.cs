@@ -2,7 +2,7 @@
 using System.Text.Json.Nodes;
 using System.Text.Json.Serialization;
 
-namespace MapService.Business
+namespace MapService.Utility
 {
     /// <summary>
     /// Json utility class
