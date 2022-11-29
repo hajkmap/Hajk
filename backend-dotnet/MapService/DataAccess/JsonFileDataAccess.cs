@@ -1,4 +1,4 @@
-﻿using MapService.Utility;
+using MapService.Utility;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 
@@ -80,6 +80,28 @@ namespace MapService.DataAccess
             if (!File.Exists(path)) { throw new FileNotFoundException(); }
 
             File.Delete(path);
+        }
+
+        /// <summary>
+        /// Deletes the map configuration.
+        /// </summary>
+        /// <param name="mapFileName">The name of the map including the file ending. </param>
+        /// <param name="mapFile">The content of the map as a JsonObject. </param>
+        public static void UpdateMapFile(string mapFileName, JsonObject mapFile)
+        {
+            if (!mapFileName.EndsWith(".json"))
+                mapFileName += ".json";
+
+            string path = GetPathToFile(mapFileName);
+
+            if (!File.Exists(path)) { throw new FileNotFoundException(); }
+
+            var jsonSerializerOptions = new JsonSerializerOptions
+            {
+                WriteIndented = true
+            };
+
+            File.WriteAllText(path, mapFile.ToJsonString(jsonSerializerOptions));
         }
 
         /// <summary>
