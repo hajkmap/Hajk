@@ -244,5 +244,32 @@ namespace MapService.Controllers
 
             return StatusCode(StatusCodes.Status200OK, listOfAudioFiles);
         }
+
+        /// <summary>
+        /// Create a new map configuration
+        /// </summary>
+        /// <param name="name">The name of the map to create </param>
+        /// <response code="200">The map configuration was created successfully</response>
+        /// <response code="500">Internal Server Error</response>
+        [HttpGet]
+        [Route("create/{name}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        [SwaggerOperation(Tags = new[] { "Admin - Maps and layers" })]
+        [Obsolete]
+        public ActionResult Create(string name)
+        {
+            try
+            {
+                MapConfigHandler.CreateMapConfiguration(name);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Internal Server Error");
+                return StatusCode(StatusCodes.Status500InternalServerError, "Internal Server Error");
+            }
+
+            return StatusCode(StatusCodes.Status200OK);
+        }
     }
 }
