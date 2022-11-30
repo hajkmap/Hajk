@@ -30,6 +30,7 @@ var defaultState = {
   paperFormats: "A2, A3, A4",
   logo: "https://github.com/hajkmap/Hajk/raw/master/design/logo_small.png",
   logoMaxWidth: 40,
+  northArrowMaxWidth: 10,
   northArrow: "",
   visibleForGroups: [],
   visibleAtStart: false,
@@ -75,6 +76,8 @@ class ToolOptions extends Component {
         paperFormats: tool.options.paperFormats || this.state.paperFormats,
         logo: tool.options.logo,
         logoMaxWidth: tool.options.logoMaxWidth || this.state.logoMaxWidth,
+        northArrowMaxWidth:
+          tool.options.northArrowMaxWidth || this.state.northArrowMaxWidth,
         northArrow: tool.options.northArrow || this.state.northArrow,
         useMargin:
           typeof tool.options.useMargin !== "undefined"
@@ -179,6 +182,7 @@ class ToolOptions extends Component {
         scales: this.state.scales,
         logo: this.state.logo,
         logoMaxWidth: this.state.logoMaxWidth,
+        northArrowMaxWidth: this.state.northArrowMaxWidth,
         dpis: this.state.dpis,
         paperFormats: this.state.paperFormats,
         northArrow: this.state.northArrow,
@@ -684,6 +688,29 @@ class ToolOptions extends Component {
               "northArrowPlacement"
             )}
           </div>
+
+          <div>
+            <label htmlFor="northArrowMaxWidth">
+              Norrpil maxbredd{" "}
+              <i
+                className="fa fa-question-circle"
+                data-toggle="tooltip"
+                title="0 betyder att storleken på loggans bild används"
+              />
+            </label>
+            <input
+              id="northArrowMaxWidth"
+              name="northArrowMaxWidth"
+              type="number"
+              min="0"
+              className="control-fixed-width"
+              onChange={(e) => {
+                this.handleInputChange(e);
+              }}
+              value={this.state.northArrowMaxWidth}
+            />
+          </div>
+
           <div>
             <label htmlFor="includeScaleBar">
               Inkludera skalstock{" "}
