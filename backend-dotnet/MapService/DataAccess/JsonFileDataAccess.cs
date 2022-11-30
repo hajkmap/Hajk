@@ -104,6 +104,22 @@ namespace MapService.DataAccess
             File.WriteAllText(path, mapFile.ToJsonString(jsonSerializerOptions));
         }
 
+        internal static void DuplicateMapFile(string mapFileNameFrom, string mapFileNameTo)
+        {
+            if (!mapFileNameFrom.EndsWith(".json"))
+                mapFileNameFrom += ".json";
+
+            if (!mapFileNameTo.EndsWith(".json"))
+                mapFileNameTo += ".json";
+
+            string sourcePath = GetPathToFile(mapFileNameFrom);
+            string destinationPath = GetPathToFile(mapFileNameTo);
+
+            if (!File.Exists(sourcePath)) { throw new FileNotFoundException(); }
+
+            File.Copy(sourcePath, destinationPath);
+        }
+
         /// <summary>
         /// Gets a map as a JsonObject.
         /// </summary>

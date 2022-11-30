@@ -76,6 +76,33 @@ namespace MapService.Controllers
         }
 
         /// <remarks>
+        /// Create a new map configuration by duplicating an existing one
+        /// </remarks>
+        /// <param name="nameFrom">Name of the map to be duplicated</param>
+        /// <param name="nameTo">Name of the new map (the duplicate)</param>
+        /// <response code="200">Success</response>
+        /// <response code="500">Internal Server Error</response>
+        [HttpPut]
+        [Route("duplicate/{nameFrom}/{nameTo}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        [SwaggerOperation(Tags = new[] { "Admin - Maps and layers" })]
+        public ActionResult DuplicateMap(string nameFrom, string nameTo)
+        {
+            try
+            {
+                MapConfigHandler.DuplicateMap(nameFrom, nameTo);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Internal Server Error");
+                return StatusCode(StatusCodes.Status500InternalServerError, "Internal Server Error");
+            }
+
+            return StatusCode(StatusCodes.Status200OK);
+        }
+
+        /// <remarks>
         /// Delete an existing map configuration
         /// </remarks>
         /// <param name="name">Name of the map to be deleted</param>

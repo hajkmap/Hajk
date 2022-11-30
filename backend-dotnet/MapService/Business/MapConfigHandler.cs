@@ -51,21 +51,26 @@ namespace MapService.Business.MapConfig
         }
 
         /// <summary>
-        /// Deletes the map configuration.
-        /// </summary>
-        /// <param name="mapFileName">The name of the map including the file ending. </param>
-        public static void DeleteMap(string mapFileName)
-        {
-            JsonFileDataAccess.DeleteMapFile(mapFileName);
-        }
-
-        /// <summary>
         /// Gets all maps names.
         /// </summary>
         /// <returns>Return all map names.</returns>
         public static IEnumerable<string> GetMaps()
         {
             return JsonFileDataAccess.GetMapConfigFiles();
+        }
+
+        internal static void DuplicateMap(string mapFileNameFrom, string mapFileNameTo)
+        {
+            JsonFileDataAccess.DuplicateMapFile(mapFileNameFrom, mapFileNameTo);
+        }
+
+        /// <summary>
+        /// Deletes the map configuration.
+        /// </summary>
+        /// <param name="mapFileName">The name of the map including the file ending. </param>
+        public static void DeleteMap(string mapFileName)
+        {
+            JsonFileDataAccess.DeleteMapFile(mapFileName);
         }
 
         /// <summary>
@@ -175,7 +180,7 @@ namespace MapService.Business.MapConfig
             //string? templatesFolder = AppDomain.CurrentDomain.GetData("TemplatesContentRootPath") as string;
             File.Copy($"{templatesFolder}\\map.template", $"{appDataFolder}\\{name}.json"); //map.template borde inte vara hårdkodat här. Hämtas från config
         }
-        
+
         private static LayerExportItem FilterLayers(JsonElement jsonElementLayers)
         {
             LayerExportItem layerExportItems = new LayerExportItem();
@@ -196,12 +201,12 @@ namespace MapService.Business.MapConfig
                     continue;
 
                 JsonElement layers;
-               if (!path.Value.TryGetProperty("layers", out layers))
-               {
-                    layerExportItems.layers.Add(id.GetString(), 
+                if (!path.Value.TryGetProperty("layers", out layers))
+                {
+                    layerExportItems.layers.Add(id.GetString(),
                         new LayerExportItem.LayerExportBaseItem(caption.GetString(), null));
                     continue;
-               }
+                }
 
                 List<string> subLayers = new List<string>();
                 foreach (JsonElement subLayer in layers.EnumerateArray())
@@ -212,7 +217,7 @@ namespace MapService.Business.MapConfig
                     subLayers.Add(subLayer.GetString());
                 }
 
-                layerExportItems.layers.Add(id.GetString(), 
+                layerExportItems.layers.Add(id.GetString(),
                     new LayerExportItem.LayerExportBaseItem(caption.GetString(), subLayers));
             }
 
@@ -254,7 +259,7 @@ namespace MapService.Business.MapConfig
                 if (!element.TryGetProperty("layers", out groupLayers) && groupLayers.GetString() == null)
                     continue;
 
-                List<MapExportItem.GroupExportItem.GroupLayerExportItem> layersInGroup = 
+                List<MapExportItem.GroupExportItem.GroupLayerExportItem> layersInGroup =
                     new List<MapExportItem.GroupExportItem.GroupLayerExportItem>();
 
                 List<string> Ids = GetArrayValues(groupLayers, "id");
