@@ -171,7 +171,7 @@ class VisionIntegrationModel {
       this.#setFeatureTitle(feature, estateSearchSource.displayFields);
     });
     // And finally we'll publish an event so that the view can be updated...
-    this.#localObserver.publish("add-estates-to-selection", features);
+    this.#localObserver.publish("add-estates-to-selection", estateFeatures);
   };
 
   // Handles when Vision is asking for information regarding all currently selected real-estates.
