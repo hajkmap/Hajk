@@ -179,3 +179,5 @@ proxy/lmproxy
 
 #Log-file for backend
 backend/mapservice/Logs/log-file.txt
+/backend-dotnet/MapService/App_Data/Upload/test1.json
+/backend-dotnet/MapService/App_Data/templates/map.template
