@@ -35,6 +35,7 @@ AppDomain.CurrentDomain.SetData("UploadContentRootPath", app.Environment.Content
 AppDomain.CurrentDomain.SetData("AppDataContentRootPath", app.Environment.ContentRootPath + "App_Data");
 AppDomain.CurrentDomain.SetData("DocumentsContentRootPath", app.Environment.ContentRootPath + "App_Data\\documents");
 AppDomain.CurrentDomain.SetData("SwaggerContentRootPath", app.Environment.ContentRootPath + "Swagger");
+AppDomain.CurrentDomain.SetData("TemplatesContentRootPath", app.Environment.ContentRootPath + "App_Data\\templates");
 
 // Configure the HTTP request pipeline.
 //if (app.Environment.IsDevelopment())

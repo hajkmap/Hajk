@@ -1,6 +1,7 @@
 ﻿using MapService.Business.Utility;
 using MapService.DataAccess;
 using MapService.Models;
+using Microsoft.Extensions.Hosting.Internal;
 using System.Text.Json.Nodes;
 
 namespace MapService.Business.MapConfig
@@ -137,6 +138,13 @@ namespace MapService.Business.MapConfig
                 throw new NullReferenceException();
 
             return jsonObjectMapExportItems;
+        }
+
+        public static void CreateMapConfiguration(string name)
+        {            
+            string? appDataFolder = AppDomain.CurrentDomain.GetData("UploadContentRootPath") as string;
+            string? templatesFolder = AppDomain.CurrentDomain.GetData("TemplatesContentRootPath") as string;
+            File.Copy($"{templatesFolder}\\map.template", $"{appDataFolder}\\{name}.json"); //map.template borde inte vara hårdkodat här. Hämtas från config
         }
 
         private static LayerExportItem FilterLayers(JsonObject jsonObject)
