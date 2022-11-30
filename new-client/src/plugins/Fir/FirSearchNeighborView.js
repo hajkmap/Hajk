@@ -20,6 +20,7 @@ import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import HistoryIcon from "@mui/icons-material/History";
 import { Typography } from "@mui/material";
 import CircularProgress from "@mui/material/CircularProgress";
+import FirStyles from "./FirStyles";
 
 const TypographyHeading = styled(Typography)(({ theme }) => ({
   fontWeight: 500,
@@ -89,6 +90,8 @@ class FirSearchNeighborView extends React.PureComponent {
     this.globalObserver = this.props.app.globalObserver;
     this.update_tm = null;
 
+    this.styles = new FirStyles(this.model);
+
     this.#HT = new HajkTransformer({
       projection: this.model.app.map.getView().getProjection().getCode(),
     });
@@ -124,6 +127,7 @@ class FirSearchNeighborView extends React.PureComponent {
     this.setState({ loading: true });
 
     this.props.model.layers.buffer.getSource().clear();
+
     // Now we need to get previous results and publish to ResultView etc.
     this.localObserver.publish(
       "fir.search.load",
