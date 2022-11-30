@@ -105,7 +105,9 @@ const AccordionSummaryContents = (props) => {
           <Typography variant="caption">{`${
             typeof props.color === "string"
               ? 100
-              : Math.floor(props.color?.a * 100 || 100)
+              : Math.floor(
+                  (!isNaN(props.color?.a) ? props.color?.a : 100) * 100
+                )
           }%`}</Typography>
         )}
         {typeof props.strokeWidth === "number" && (
