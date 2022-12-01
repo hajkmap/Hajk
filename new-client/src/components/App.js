@@ -489,6 +489,46 @@ class App extends React.PureComponent {
       // which is important for smooth scrolling to work correctly.
     );
 
+    // This event is used to allow controlling Hajk programmatically, e.g in an embedded context, see #1252
+    window.addEventListener(
+      "hashchange",
+      () => {
+        // Extract existing params
+        const hashParams = new URLSearchParams(
+          window.location.hash.replaceAll("#", "")
+        );
+        console.log("hashParams: ", hashParams);
+
+        // We also want to extract query params
+        const queryParams = new URLSearchParams(document.location.search);
+        console.log("queryParams: ", queryParams);
+
+        // Let's merge both query and hash params,
+        // let hash params override query values
+        const mergedParams = new URLSearchParams({
+          ...Object.fromEntries(queryParams),
+          ...Object.fromEntries(hashParams),
+        });
+        console.log("mergedParams: ", mergedParams);
+
+        // This will be refactored. But for now, if the merged
+        // params contain the zoom level value…
+        if (mergedParams.get("z")) {
+          // …and that value differs from current zoom level…
+          if (
+            this.appModel.map.getView().getZoom() !==
+            parseInt(mergedParams.get("z"))
+          ) {
+            // …let's update our View's zoom.
+            this.appModel.map
+              .getView()
+              .setZoom(parseInt(mergedParams.get("z")));
+          }
+        }
+      },
+      false
+    );
+
     // Register various global listeners.
     this.globalObserver.subscribe("infoClick.mapClick", (results) => {
       this.setState({

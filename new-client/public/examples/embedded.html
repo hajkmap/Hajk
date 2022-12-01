@@ -1,0 +1,71 @@
+<html lang=en>
+
+<head>
+    <meta charset=utf-8>
+    <title>Example: Hajk Embedded</title>
+</head>
+
+<body>
+    <h1>How to embed and control Hajk</h1>
+    <p>This example shows how an embedded Hajk instance can be controlled from the embedding website.</p>
+    <p>The buttons change the SRC attribute value of the IFRAME. By only modifying the hash part of the URL, no reload
+        is triggered.</p>
+    <p>Hajk listens to changes to the hash parameters and acts accordingly, e.g. by changing the map's zoom level.</p>
+    <form>
+        <button id="increaseButton">Increase zoom</button>
+        <button id="decreaseButton">Decrease zoom</button>
+    </form>
+    <iframe id="iframe" src="/" width="1280" height="768"></iframe>
+    <script>
+        const iframe = document.getElementById("iframe");
+        const increaseButton = document.getElementById("increaseButton");
+        const decreaseButton = document.getElementById("decreaseButton");
+
+        const changeZoom = (increaseBy = 1) => {
+            const currentSrc = iframe.src;
+
+            const url = new URL(currentSrc);
+
+            // Extract hash params
+            const hash = new URLSearchParams(url.hash.replaceAll("#", ""));
+
+            // Try to grab current zoom level from hash params, default to "2"
+            const currentZ = parseInt(hash.get("z")) || 2;
+
+            const newZ = currentZ + increaseBy;
+            if (newZ < 1) {
+                alert("Can't zoom below level 1")
+            }
+
+            if (newZ > 10) {
+                alert("Can't zoom above level 10")
+            }
+
+            // Set the property of the URLSearchParams object. This will either
+            // add "z", or update if already exists
+            hash.set("z", newZ);
+
+            // Transform the URLSearchParams object to a valid hash string…
+            const newHash = "#" + hash.toString();
+
+            // …and add to our URL.
+            url.hash = newHash;
+
+            // Finally, let's update the IFRAME's SRC attribute
+            iframe.src = url.toString();
+        }
+
+        // Bind the listeners
+        increaseButton.addEventListener("click", (e) => {
+            e.preventDefault();
+            changeZoom(1);
+        });
+
+        decreaseButton.addEventListener("click", (e) => {
+            e.preventDefault();
+            changeZoom(-1);
+        });
+    </script>
+</body>
+
+</html>
