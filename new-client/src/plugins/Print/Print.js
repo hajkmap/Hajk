@@ -78,6 +78,11 @@ class Print extends React.PureComponent {
     // If no path to north-arrow image is supplied, use fallback
     props.options.northArrow = props.options.northArrow || "/north_arrow.png";
 
+    props.options.includeImageBorder =
+      typeof props.options?.includeImageBorder === "boolean"
+        ? props.options.includeImageBorder
+        : false;
+
     // Ensure we have a value for the crossOrigin parameter
     props.options.crossOrigin =
       props.app.config.mapConfig.map?.crossOrigin || "anonymous";

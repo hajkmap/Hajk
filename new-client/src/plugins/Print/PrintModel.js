@@ -27,6 +27,7 @@ export default class PrintModel {
     this.logoUrl = settings.options.logo || "";
     this.northArrowUrl = settings.options.northArrow || "";
     this.logoMaxWidth = settings.options.logoMaxWidth;
+    this.includeImageBorder = settings.options.includeImageBorder;
     this.scales = settings.options.scales;
     this.copyright = settings.options.copyright || "";
     this.date = settings.options.date || "";
@@ -1012,6 +1013,19 @@ export default class PrintModel {
           pdf.setLineWidth(this.margin * 2);
           // Draw the border (margin) around the entire image
           pdf.rect(0, 0, dim[0], dim[1], "S");
+          // If selected as feature in Admin, we draw a frame around the map image
+          if (this.includeImageBorder) {
+            // Frame color is set to dark gray
+            pdf.setDrawColor("#5A5A5A");
+            pdf.setLineWidth(0.5);
+            pdf.rect(
+              this.margin,
+              this.margin,
+              dim[0] - this.margin * 2,
+              dim[1] - this.margin * 2,
+              "S"
+            );
+          }
           // Now we check if user did choose text in margins
         } else {
           // We do a special check for a5-format and set the dimValue
@@ -1023,9 +1037,21 @@ export default class PrintModel {
           // Draw the increased border (margin) around the entire image
           // here with special values for larger margins.
           pdf.rect(-(dimValue * 2), 0, dim[0] + dimValue * 4, dim[1], "S");
+          // If selected as feature in Admin, we draw a frame around the map image
+          if (this.includeImageBorder) {
+            // Frame color is set to dark gray
+            pdf.setDrawColor("#5A5A5A");
+            pdf.setLineWidth(0.5);
+            pdf.rect(
+              dimValue,
+              dimValue * 3,
+              dim[0] - dimValue * 2,
+              dim[1] - dimValue * 6,
+              "S"
+            );
+          }
         }
       }
-
       // If logo URL is provided, add the logo to the map
       if (options.includeLogo && this.logoUrl.trim().length >= 5) {
         try {
