@@ -186,14 +186,14 @@ class MenuConnectionSelector extends React.Component {
     const { activeMenu } = this.state;
     let value = this.state.activeMenu;
     let newMenuItem = {
-      maplink: "",
-      link: "",
+      //maplink: "",
+      //link: "",
       document: "",
     };
 
     newMenuItem = { ...newMenuItem, document: this.state.documentValue };
-    newMenuItem = { ...newMenuItem, link: this.state.linkValue };
-    newMenuItem = { ...newMenuItem, maplink: this.state.mapLinkValue };
+   // newMenuItem = { ...newMenuItem, link: this.state.linkValue };
+   // newMenuItem = { ...newMenuItem, maplink: this.state.mapLinkValue };
 
     if (activeMenu === MENU_CONNECTION_TYPES.none) {
       
