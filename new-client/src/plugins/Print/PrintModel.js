@@ -19,7 +19,6 @@ import TileWMS from "ol/source/TileWMS";
 import ImageWMS from "ol/source/ImageWMS";
 
 import { ROBOTO_NORMAL } from "./constants";
-
 export default class PrintModel {
   constructor(settings) {
     this.map = settings.map;
@@ -42,7 +41,7 @@ export default class PrintModel {
     // limit Image-WMS requests. The size below is the maximum tile-size allowed.
     // This max-size is only used if the custom-tile-loaders are used.
     this.maxTileSize = settings.options.maxTileSize || 4096;
-
+    this.textColor = settings.options.map;
     // Let's keep track of the original view, since we're gonna change the view
     // under the print-process. (And we want to be able to change back to the original one).
     this.originalView = this.map.getView();
@@ -1016,7 +1015,7 @@ export default class PrintModel {
           // If selected as feature in Admin, we draw a frame around the map image
           if (this.includeImageBorder) {
             // Frame color is set to dark gray
-            pdf.setDrawColor("#5A5A5A");
+            pdf.setDrawColor(this.textColor);
             pdf.setLineWidth(0.5);
             pdf.rect(
               this.margin,
@@ -1040,7 +1039,7 @@ export default class PrintModel {
           // If selected as feature in Admin, we draw a frame around the map image
           if (this.includeImageBorder) {
             // Frame color is set to dark gray
-            pdf.setDrawColor("#5A5A5A");
+            pdf.setDrawColor(this.textColor);
             pdf.setLineWidth(0.5);
             pdf.rect(
               dimValue,
