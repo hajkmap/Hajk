@@ -83,7 +83,7 @@ namespace MapService.DataAccess
         }
 
         /// <summary>
-        /// Deletes the map configuration.
+        /// Updates the map configuration.
         /// </summary>
         /// <param name="mapFileName">The name of the map including the file ending. </param>
         /// <param name="mapFile">The content of the map as a JsonObject. </param>
