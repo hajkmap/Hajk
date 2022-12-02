@@ -47,5 +47,43 @@ namespace MapService.Business.Settings
                 throw new Exception("Could not update map settings in the map configuration file.", ex);
             }
         }
+
+        internal static void CreateLayerType(string layerType, JsonObject layerSettings)
+        {
+            if(layerType.Last() != 's')
+                layerType = layerType + "s";
+
+            JsonObject layersFile = JsonFileDataAccess.ReadLayerFileAsJsonObject();
+
+            JsonArray? layers = layersFile[layerType]?.AsArray();
+            if (layers == null)
+                throw new Exception("Layer type " + layerType +  " not found in layers database.");
+
+            layers.Add(layerSettings);
+
+            JsonFileDataAccess.UpdateMapFile(JsonFileDataAccess.LAYER_FILE, layersFile);
+        }
+
+        internal static void UpdateLayerType(string layerType, JsonObject layerSettings)
+        {
+            if (layerType.Last() != 's')
+                layerType = layerType + "s";
+
+            JsonObject layersFile = JsonFileDataAccess.ReadLayerFileAsJsonObject();
+
+            JsonArray? layers = layersFile[layerType]?.AsArray();
+            if (layers == null)
+                throw new Exception("Layer type " + layerType + " not found in layers database.");
+            
+            foreach(JsonObject layer in layers)
+            {
+                string id = layer["id"].ToString();
+            }
+
+            layers.Remove(layerSettings);
+            layers.Add(layerSettings);
+
+            JsonFileDataAccess.UpdateMapFile(JsonFileDataAccess.LAYER_FILE, layersFile);
+        }
     }
 }

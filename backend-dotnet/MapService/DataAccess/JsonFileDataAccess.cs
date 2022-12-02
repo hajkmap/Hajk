@@ -6,7 +6,7 @@ namespace MapService.DataAccess
 {
     public static class JsonFileDataAccess
     {
-        private const string LAYER_FILE = "layers.json";
+        public const string LAYER_FILE = "layers.json";
 
         public const string MAP_NODE_NAME = "map";
 
