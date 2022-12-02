@@ -1226,7 +1226,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/LayerSwitcherBody"
+                "$ref": "#/components/schemas/toolsetting"
               }
             }
           },
