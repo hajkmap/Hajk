@@ -696,14 +696,13 @@ class ToolOptions extends Component {
               "scaleBarPlacement"
             )}
           </div>
-
           <div>
             <label htmlFor="includeImageBorder">
               Inkludera bildram{" "}
               <i
                 className="fa fa-question-circle"
                 data-toggle="tooltip"
-                title="Inställning för om kartbildsram skall inkluderas som standard. Användarna kan ändra detta själva."
+                title="Inställning för om kartbildsram skall inkluderas som standard."
               />
             </label>
             {this.renderIncludeSelect(
@@ -711,7 +710,6 @@ class ToolOptions extends Component {
               "includeImageBorder"
             )}
           </div>
-
           <div>
             <input
               id="useMargin"
