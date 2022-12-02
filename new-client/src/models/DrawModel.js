@@ -85,6 +85,7 @@ class DrawModel {
   #circleRadius;
   #circleInteractionActive;
   #selectInteractionActive;
+  #lastZIndex;
 
   constructor(settings) {
     // Let's make sure that we don't allow initiation if required settings
@@ -143,6 +144,7 @@ class DrawModel {
     this.#highlightStrokeColor = "rgba(255,255,255,1)";
     this.#circleRadius = 0;
     this.#selectInteractionActive = false;
+    this.#lastZIndex = 1;
 
     // A Draw-model is not really useful without a vector-layer, let's initiate it
     // right away, either by creating a new layer, or connect to an existing layer.
@@ -324,8 +326,108 @@ class DrawModel {
     }
   };
 
+  // Find the highest zindex used and move on top of it.
+  moveFeatureZIndexToTop = (feature) => {
+    const indexes = this.#getAllZIndexes();
+    const topIndex = Math.max(...indexes);
+    if (isFinite(topIndex)) {
+      this.#setFeatureZIndex(feature, topIndex + 1);
+    }
+  };
+
+  // Find the closest zindex and move on top of it.
+  moveFeatureZIndexUp = (feature) => {
+    const zIndex = this.#findClosestZIndex(feature, true);
+    this.#setFeatureZIndex(feature, zIndex);
+  };
+
+  // Find the lowest zindex used and move below it.
+  moveFeatureZIndexToBottom = (feature) => {
+    const indexes = this.#getAllZIndexes();
+    const bottomIndex = Math.min(...indexes);
+    if (isFinite(bottomIndex)) {
+      this.#setFeatureZIndex(feature, bottomIndex - 1);
+    }
+  };
+
+  // Find the closest zindex and move below it.
+  moveFeatureZIndexDown = (feature) => {
+    const zIndex = this.#findClosestZIndex(feature, false);
+    this.#setFeatureZIndex(feature, zIndex);
+  };
+
+  // Find the closest zindex and move on top of it.
+  #getFeaturesSortedByZIndex = () => {
+    return this.#drawSource.getFeatures().sort((a, b) => {
+      return this.#getFeatureZIndex(a) < this.#getFeatureZIndex(b);
+    });
+  };
+
+  // Get an array of all zindexes
+  #getAllZIndexes = () => {
+    let indexes = [];
+    this.#getFeaturesSortedByZIndex().forEach((f) => {
+      indexes.push(this.#getFeatureZIndex(f));
+    });
+    return indexes;
+  };
+
+  // Find the closest valid zindex
+  #findClosestZIndex = (feature, up) => {
+    let zIndex = this.#getFeatureZIndex(feature);
+
+    const indexes = this.#getAllZIndexes().filter((index) => {
+      return up === true ? index > zIndex : index < zIndex;
+    });
+
+    let closest = Math.max(...indexes);
+    if (!isFinite(closest)) {
+      closest = up === true ? zIndex + 1 : zIndex - 1;
+    }
+
+    indexes.forEach((index) => {
+      if (
+        (up === true && index >= zIndex && index < closest) ||
+        (up === false && index <= zIndex && index > closest)
+      ) {
+        closest = index;
+      }
+    });
+
+    zIndex = up === true ? closest + 1 : closest - 1;
+
+    return zIndex;
+  };
+
+  #setFeatureZIndex = (feature, zIndex) => {
+    let style = feature.getStyle();
+    style = Array.isArray(style) ? style[0] : style;
+    if (style) {
+      style.setZIndex(zIndex);
+      feature.setStyle(style);
+    }
+  };
+
+  #getFeatureZIndex = (feature) => {
+    let style = feature.getStyle();
+    if (style) {
+      style = Array.isArray(style) ? style[0] : style;
+      return style.getZIndex() || 0;
+    }
+    return 0;
+  };
+
   // Returns the style that should be used on the drawn features
   #getFeatureStyle = (feature, settingsOverride) => {
+    if (feature.getStyle()) {
+      const currentZIndex = this.#getFeatureZIndex(feature);
+      if (currentZIndex === 0) {
+        // force a newly drawn feature to get a valid zindex.
+        this.#lastZIndex++;
+        this.#setFeatureZIndex(feature, this.#lastZIndex);
+      }
+    }
+
     if (feature.get("HIDDEN") === true) {
       !feature.get("STYLE_BEFORE_HIDE") &&
         feature.set("STYLE_BEFORE_HIDE", feature.getStyle());
@@ -827,6 +929,7 @@ class DrawModel {
       stroke: this.#getDrawStrokeStyle(settings),
       fill: this.#getDrawFillStyle(settings),
       image: this.#getDrawImageStyle(settings),
+      zIndex: this.#getDrawZIndex(settings),
     });
   };
 
@@ -852,6 +955,11 @@ class DrawModel {
         ? settings.fillStyle.color
         : this.#drawStyleSettings.fillColor,
     });
+  };
+
+  // Returns the feature zIndex
+  #getDrawZIndex = (settings) => {
+    return settings?.zIndex || 0;
   };
 
   // Returns the image style (based on the style settings)
@@ -964,11 +1072,21 @@ class DrawModel {
       const fillStyle = this.#getFillStyleInfo(featureStyle);
       const strokeStyle = this.#getStrokeStyleInfo(featureStyle);
       const imageStyle = this.#getImageStyleInfo(featureStyle);
+
+      const zIndex = (
+        Array.isArray(featureStyle) ? featureStyle[0] : featureStyle
+      ).getZIndex();
+
       // And return an object containing them
-      return { fillStyle, strokeStyle, imageStyle };
+      return { fillStyle, strokeStyle, imageStyle, zIndex };
     } catch (error) {
       console.error(`Failed to extract feature-style. Error: ${error}`);
-      return { fillStyle: null, strokeStyle: null, imageStyle: null };
+      return {
+        fillStyle: null,
+        strokeStyle: null,
+        imageStyle: null,
+        zIndex: 0,
+      };
     }
   };
 
@@ -1742,8 +1860,19 @@ class DrawModel {
       // that has been set in an earlier session. Let's apply that style (if present)
       // before we add the feature to the source.
       const extractedStyle = feature.get("EXTRACTED_STYLE");
-      extractedStyle &&
-        feature.setStyle(this.#getFeatureStyle(feature, extractedStyle));
+
+      if (extractedStyle) {
+        // apply style
+        let style = this.#getFeatureStyle(feature, extractedStyle);
+        if (!style.getZIndex()) {
+          // getZIndex() returns 0 if not set
+          // force a zIndex if missing, for later use.
+          style.setZIndex(this.#lastZIndex);
+          this.#lastZIndex++;
+        }
+        feature.setStyle(style);
+      }
+
       // When we're done styling we can add the feature.
       this.#drawSource.addFeature(feature);
       // Then we'll publish some information about the addition. (If we're not supposed to be silent).
@@ -2119,6 +2248,10 @@ class DrawModel {
       .forEach((feature) => {
         this.#drawSource.removeFeature(feature);
       });
+
+    // reset lastZIndex
+    this.#lastZIndex = 1;
+
     // When the drawn features has been removed, we have to make sure
     // to update the current extent.
     this.#currentExtent = this.#drawSource.getExtent();
