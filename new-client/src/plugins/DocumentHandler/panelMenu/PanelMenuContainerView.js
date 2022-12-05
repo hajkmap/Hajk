@@ -151,7 +151,24 @@ class PanelMenuView extends React.PureComponent {
     this.#handleShowMapLayers(this.state[id].maplink);
   };
 
+  //Show multiple actions when clicked on submenu
   #handleSubMenuClicked = (id) => {
+    const { app } = this.props;
+    const { options } = this.props;
+    this.#setDocument(this.state[id].document, null);
+    this.#setItemStateProperties(id).then(() => {
+      app.globalObserver.publish("core.onlyHideDrawerIfNeeded");
+    });
+
+    if (this.state[id].link) {
+      window.open(this.state[id].link, "_blank");
+      app.globalObserver.publish("core.onlyHideDrawerIfNeeded");
+    }
+
+    if (getIsMobile() || options.closePanelOnMapLinkOpen) {
+      this.#closeDocumentWindow();
+    }
+    this.#handleShowMapLayers(this.state[id].maplink);
     this.#setItemStateProperties(id);
   };
 

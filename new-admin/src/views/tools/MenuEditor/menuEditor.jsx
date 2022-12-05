@@ -323,7 +323,8 @@ class ToolOptions extends Component {
     this.addNewItem();
   };
 
-  getHeader = (canSave) => {
+  //getHeader = (canSave) => {
+  getHeader = () => {
     const { classes } = this.props;
     return (
       <Grid
@@ -360,7 +361,7 @@ class ToolOptions extends Component {
             <ColorButtonBlue
               variant="contained"
               className="btn"
-              disabled={!canSave}
+              //disabled={!canSave}
               onClick={this.onSaveMenuEditsClick}
               startIcon={<SaveIcon />}
             >

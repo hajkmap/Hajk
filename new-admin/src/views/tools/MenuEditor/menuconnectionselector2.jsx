@@ -369,18 +369,18 @@ class MenuConnectionSelector2 extends React.Component {
 
   render = () => {
     const { value, open } = this.state;
-    const { valid } = this.props;
+    //const { valid } = this.props;
 
     if (value) {
       return (
         <>
           <FormControl>
             <Grid alignItems="center" container>
-              {!valid && (
+              {/*!valid && (
                 <Grid xs={2} item>
                   {this.renderWarning()}
                 </Grid>
-              )}
+              )*/}
               <Grid xs={10} item>
                 <Select
                   MenuProps={{
