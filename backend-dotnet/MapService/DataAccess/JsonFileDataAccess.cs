@@ -1,4 +1,5 @@
 using MapService.Utility;
+using Microsoft.AspNetCore.Hosting.Server;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 
@@ -67,11 +68,24 @@ namespace MapService.DataAccess
         /// <summary>
         /// Gets a document as a JsonObject.
         /// </summary>
-        /// <param name="documentName">The name of the document including the file ending. </param>
+        /// <param name="documentName">The name of the document including the file ending.</param>
         /// <returns>Returns a document as a JsonObject. </returns>
         public static JsonObject ReadDocumentFileAsJsonObject(string documentName)
         {
             return ReadJsonFile<JsonObject>(GetPathToDocumentFile(documentName));
+        }
+
+        /// <summary>
+        /// Checks if the specified document file exists.
+        /// </summary>
+        /// <param name="documentName">The name of the document file.</param>
+        /// <returns>True if the file exists. False if the file does not exist.</returns>
+        public static bool DocumentFileExists(string documentName)
+        {
+            if (!documentName.EndsWith(".json"))
+                documentName += ".json";
+
+            return File.Exists(GetPathToDocumentFile(documentName));
         }
 
         /// <summary>
