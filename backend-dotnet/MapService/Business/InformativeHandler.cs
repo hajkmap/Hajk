@@ -14,7 +14,7 @@ namespace MapService.Business.Informative
         {
             string documentPath = PathUtility.GetPath("Documents:Path");
             if (documentPath == null)
-                return new List<string>(); ;
+                return new List<string>();
             
             IEnumerable<string> allowedExtentions = new List<string>() { "json" };
             return FileUtility.GetFiles(documentPath, allowedExtentions);
@@ -48,7 +48,7 @@ namespace MapService.Business.Informative
         {
             var documentNameList = new List<string>();
 
-            var files = GetAllDocuments().Select(f => Path.GetFullPath(f)).ToArray();
+            var files = GetAllDocuments(); //.Select(f => Path.GetFullPath(f)).ToArray();
 
             foreach (var file in files)
             {
