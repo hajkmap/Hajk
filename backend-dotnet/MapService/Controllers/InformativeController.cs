@@ -10,9 +10,9 @@ namespace MapService.Controllers
     [ApiController]
     public class InformativeController : ControllerBase
     {
-        private readonly ILogger<MapConfigController> _logger;
+        private readonly ILogger<InformativeController> _logger;
 
-        public InformativeController(ILogger<MapConfigController> logger)
+        public InformativeController(ILogger<InformativeController> logger)
         {
             _logger = logger;
         }
