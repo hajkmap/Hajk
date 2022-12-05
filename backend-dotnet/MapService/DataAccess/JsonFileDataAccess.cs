@@ -67,6 +67,17 @@ namespace MapService.DataAccess
         }
 
         /// <summary>
+        /// Gets a document as a JsonObject.
+        /// </summary>
+        /// <param name="documentName">The name of the document including the file ending. </param>
+        /// <returns>Returns a document as a JsonObject. </returns>
+        public static JsonObject ReadDocumentFileAsJsonObject(string documentName)
+        {
+            string documentPath = PathUtility.GetPath("Documents:Path");
+            return ReadJsonFile<JsonObject>(Path.Combine(documentPath, documentName));
+        }
+
+        /// <summary>
         /// Deletes the map configuration.
         /// </summary>
         /// <param name="mapFileName">The name of the map including the file ending. </param>

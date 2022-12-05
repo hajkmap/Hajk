@@ -48,16 +48,16 @@ namespace MapService.Business.Informative
         {
             var documentNameList = new List<string>();
 
-            var files = GetAllDocuments(); //.Select(f => Path.GetFullPath(f)).ToArray();
-
-            foreach (var file in files)
+            var documentNames = GetAllDocuments();
+            
+            foreach (var documentName in documentNames)
             {
-                var jsonObject = JsonFileDataAccess.ReadMapFileAsJsonObject(file);
+                var jsonObject = JsonFileDataAccess.ReadDocumentFileAsJsonObject(documentName);
                 jsonObject.TryGetPropertyValue(JsonFileDataAccess.MAP_NODE_NAME, out var mapNodeValue);
 
                 if (mapNodeValue != null && mapNodeValue.ToString() == name)
                 {
-                    documentNameList.Add(Path.GetFileNameWithoutExtension(file));
+                    documentNameList.Add(Path.GetFileNameWithoutExtension(documentName));
                 }
             }
 
