@@ -61,7 +61,7 @@ namespace MapService.DataAccess
         /// <returns>Returns a map as a JsonObject. </returns>
         public static JsonObject ReadMapFileAsJsonObject(string mapFileName)
         {
-            return ReadJsonFile<JsonObject>(mapFileName);
+            return ReadJsonFile<JsonObject>(GetPathToFile(mapFileName));
         }
 
         /// <summary>
@@ -71,8 +71,7 @@ namespace MapService.DataAccess
         /// <returns>Returns a document as a JsonObject. </returns>
         public static JsonObject ReadDocumentFileAsJsonObject(string documentName)
         {
-            string documentPath = PathUtility.GetPath("Documents:Path");
-            return ReadJsonFile<JsonObject>(Path.Combine(documentPath, documentName));
+            return ReadJsonFile<JsonObject>(GetPathToDocumentFile(documentName));
         }
 
         /// <summary>
@@ -136,7 +135,7 @@ namespace MapService.DataAccess
         /// <returns>Returns a map as a JsonDocument. </returns>
         public static JsonDocument ReadMapFileAsJsonDocument(string mapFileName)
         {
-            return ReadJsonFile<JsonDocument>(mapFileName);
+            return ReadJsonFile<JsonDocument>(GetPathToFile(mapFileName));
         }
 
         public static void SaveJsonFile(string pathToFile, JsonObject jsonObject)
@@ -151,16 +150,15 @@ namespace MapService.DataAccess
             File.WriteAllText(pathToFile, jsonObjectAsString);
         }
 
-        private static T ReadJsonFile<T>(string fileName)
+        private static T ReadJsonFile<T>(string pathToFile)
         {
             T? answerObject;
 
             try
             {
-                if (!fileName.EndsWith(".json"))
-                    fileName = fileName + ".json";
+                if (!pathToFile.EndsWith(".json"))
+                    pathToFile = pathToFile + ".json";
 
-                string pathToFile = GetPathToFile(fileName);
                 string jsonString = File.ReadAllText(pathToFile);
 
                 answerObject = JsonSerializer.Deserialize<T>(jsonString);
@@ -189,6 +187,21 @@ namespace MapService.DataAccess
                 throw new DirectoryNotFoundException();
 
             return appDataFolderPath;
+        }
+
+        private static string GetPathToDocumentFile(string fileName)
+        {
+            return Path.Combine(GetPathToDocumentsFolder(), fileName).ToString();
+        }
+
+        private static string GetPathToDocumentsFolder() 
+        {
+            var documentsFolderPath = PathUtility.GetPath("Documents:Path");
+
+            if (documentsFolderPath == null)
+                throw new DirectoryNotFoundException();
+
+            return documentsFolderPath;
         }
 
         public static JsonObject GetSpecification()
