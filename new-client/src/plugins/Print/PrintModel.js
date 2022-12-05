@@ -19,7 +19,6 @@ import TileWMS from "ol/source/TileWMS";
 import ImageWMS from "ol/source/ImageWMS";
 
 import { ROBOTO_NORMAL } from "./constants";
-import { isFuture } from "date-fns";
 export default class PrintModel {
   constructor(settings) {
     this.map = settings.map;
@@ -198,32 +197,26 @@ export default class PrintModel {
     const defaultPixelSizeInMillimeter = 0.28;
 
     const dpi = inchInMillimeter / defaultPixelSizeInMillimeter; // ~90
-    // Here we set a special sizeMultiplier to use below when we calculate
-    // the preview window size. If format is a5 or if user wants text in margins
-    // the height is diminished
 
-    let size;
-    if (this.includeImageBorder && !options.useMargin) {
-      size = {
-        width: (dim[0] - 1) / 25.4,
-        height: (dim[1] - 1) / 25.4,
-      };
-    } else if (options.useTextIconsInMargin && format === "a5") {
-      size = {
-        width: (dim[0] - this.margin * 2) / 25.4,
-        height: (dim[1] - this.margin * 8) / 25.4,
-      };
-    } else if (options.useTextIconsInMargin) {
-      size = {
-        width: (dim[0] - this.margin * 2) / 25.4,
-        height: (dim[1] - this.margin * 6) / 25.4,
-      };
-    } else {
-      size = {
-        width: (dim[0] - this.margin * 2) / 25.4,
-        height: (dim[1] - this.margin * 2) / 25.4,
-      };
-    }
+    // Here we calculate height and width of preview window based on user and admin selection
+    // (ex. if admin wants image border or if user wants margins).
+    const calculatedWidth =
+      this.includeImageBorder && !options.useMargin ? 1 : this.margin * 2;
+
+    const calculatedHeight =
+      this.includeImageBorder && !options.useMargin
+        ? 1
+        : options.useTextIconsInMargin && format === "a5"
+        ? this.margin * 8
+        : options.useTextIconsInMargin
+        ? this.margin * 6
+        : this.margin * 2;
+
+    //We set the size of preview window based on the calculated heights and widths.
+    const size = {
+      width: (dim[0] - calculatedWidth) / 25.4,
+      height: (dim[1] - calculatedHeight) / 25.4,
+    };
 
     const paper = {
       width: size.width * dpi,
