@@ -3,6 +3,7 @@ using MapService.Business.MapConfig;
 using MapService.Models;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
+using System.Text.Json;
 using System.Text.Json.Nodes;
 
 namespace MapService.Controllers
@@ -29,13 +30,13 @@ namespace MapService.Controllers
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         [SwaggerOperation(Tags = new[] { "Client-accessible" })]
-        public ActionResult<IEnumerable<string>> GetLayers()
+        public ActionResult GetLayers()
         {
-            JsonObject layerObject;
+            JsonDocument layerObject;
 
             try
             {
-                layerObject = MapConfigHandler.GetLayers();
+                layerObject = MapConfigHandler.GetLayersAsJsonDocument();
             }
             catch (Exception ex)
             {
@@ -58,13 +59,13 @@ namespace MapService.Controllers
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         [SwaggerOperation(Tags = new[] { "Client-accessible" })]
         [Obsolete]
-        public ActionResult<JsonObject> GetMap(string map)
+        public ActionResult GetMap(string map)
         {
-            JsonObject mapObject;
+            JsonDocument mapObject;
 
             try
             {
-                mapObject = MapConfigHandler.GetMap(map);
+                mapObject = MapConfigHandler.GetMapAsJsonDocument(map);
             }
             catch (Exception ex)
             {
@@ -242,6 +243,33 @@ namespace MapService.Controllers
             }
 
             return StatusCode(StatusCodes.Status200OK, listOfAudioFiles);
+        }
+
+        /// <summary>
+        /// Create a new map configuration
+        /// </summary>
+        /// <param name="name">The name of the map to create </param>
+        /// <response code="200">The map configuration was created successfully</response>
+        /// <response code="500">Internal Server Error</response>
+        [HttpGet]
+        [Route("create/{name}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        [SwaggerOperation(Tags = new[] { "Admin - Maps and layers" })]
+        [Obsolete]
+        public ActionResult Create(string name)
+        {
+            try
+            {
+                MapConfigHandler.CreateMapConfiguration(name);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Internal Server Error");
+                return StatusCode(StatusCodes.Status500InternalServerError, "Internal Server Error");
+            }
+
+            return StatusCode(StatusCodes.Status200OK);
         }
     }
 }

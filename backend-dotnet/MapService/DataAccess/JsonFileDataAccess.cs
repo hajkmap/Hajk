@@ -1,4 +1,6 @@
-﻿using System.Text.Json;
+using MapService.Utility;
+using Microsoft.AspNetCore.Hosting.Server;
+using System.Text.Json;
 using System.Text.Json.Nodes;
 
 namespace MapService.DataAccess
@@ -6,8 +8,6 @@ namespace MapService.DataAccess
     public static class JsonFileDataAccess
     {
         private const string LAYER_FILE = "layers.json";
-
-        public const string MAP_NODE_NAME = "map";
 
         public static IList<string> GetMapConfigFiles()
         {
@@ -45,9 +45,14 @@ namespace MapService.DataAccess
             return mapConfigFiles;
         }
 
-        public static JsonObject ReadLayerFile()
+        public static JsonDocument ReadLayerFileAsJsonDocument()
         {
-            return ReadJsonFile<JsonObject>(LAYER_FILE);
+            return ReadMapFileAsJsonDocument(LAYER_FILE);
+        }
+
+        public static JsonObject ReadLayerFileAsJsonObject()
+        {
+            return ReadMapFileAsJsonObject(LAYER_FILE);
         }
 
         /// <summary>
@@ -57,7 +62,30 @@ namespace MapService.DataAccess
         /// <returns>Returns a map as a JsonObject. </returns>
         public static JsonObject ReadMapFileAsJsonObject(string mapFileName)
         {
-            return ReadJsonFile<JsonObject>(mapFileName);
+            return ReadJsonFile<JsonObject>(GetPathToFile(mapFileName));
+        }
+
+        /// <summary>
+        /// Gets a document as a JsonObject.
+        /// </summary>
+        /// <param name="documentName">The name of the document including the file ending.</param>
+        /// <returns>Returns a document as a JsonObject. </returns>
+        public static JsonObject ReadDocumentFileAsJsonObject(string documentName)
+        {
+            return ReadJsonFile<JsonObject>(GetPathToDocumentFile(documentName));
+        }
+
+        /// <summary>
+        /// Checks if the specified document file exists.
+        /// </summary>
+        /// <param name="documentName">The name of the document file.</param>
+        /// <returns>True if the file exists. False if the file does not exist.</returns>
+        public static bool DocumentFileExists(string documentName)
+        {
+            if (!documentName.EndsWith(".json"))
+                documentName += ".json";
+
+            return File.Exists(GetPathToDocumentFile(documentName));
         }
 
         /// <summary>
@@ -77,13 +105,51 @@ namespace MapService.DataAccess
         }
 
         /// <summary>
+        /// Updates the map configuration.
+        /// </summary>
+        /// <param name="mapFileName">The name of the map including the file ending. </param>
+        /// <param name="mapFile">The content of the map as a JsonObject. </param>
+        public static void UpdateMapFile(string mapFileName, JsonObject mapFile)
+        {
+            if (!mapFileName.EndsWith(".json"))
+                mapFileName += ".json";
+
+            string path = GetPathToFile(mapFileName);
+
+            if (!File.Exists(path)) { throw new FileNotFoundException(); }
+
+            var jsonSerializerOptions = new JsonSerializerOptions
+            {
+                WriteIndented = true
+            };
+
+            File.WriteAllText(path, mapFile.ToJsonString(jsonSerializerOptions));
+        }
+
+        internal static void DuplicateMapFile(string mapFileNameFrom, string mapFileNameTo)
+        {
+            if (!mapFileNameFrom.EndsWith(".json"))
+                mapFileNameFrom += ".json";
+
+            if (!mapFileNameTo.EndsWith(".json"))
+                mapFileNameTo += ".json";
+
+            string sourcePath = GetPathToFile(mapFileNameFrom);
+            string destinationPath = GetPathToFile(mapFileNameTo);
+
+            if (!File.Exists(sourcePath)) { throw new FileNotFoundException(); }
+
+            File.Copy(sourcePath, destinationPath);
+        }
+
+        /// <summary>
         /// Gets a map as a JsonObject.
         /// </summary>
         /// <param name="mapFileName">The name of the map including the file ending. </param>
         /// <returns>Returns a map as a JsonDocument. </returns>
         public static JsonDocument ReadMapFileAsJsonDocument(string mapFileName)
         {
-            return ReadJsonFile<JsonDocument>(mapFileName);
+            return ReadJsonFile<JsonDocument>(GetPathToFile(mapFileName));
         }
 
         public static void SaveJsonFile(string pathToFile, JsonObject jsonObject)
@@ -98,16 +164,15 @@ namespace MapService.DataAccess
             File.WriteAllText(pathToFile, jsonObjectAsString);
         }
 
-        private static T ReadJsonFile<T>(string fileName)
+        private static T ReadJsonFile<T>(string pathToFile)
         {
             T? answerObject;
 
             try
             {
-                if (!fileName.EndsWith(".json"))
-                    fileName = fileName + ".json";
+                if (!pathToFile.EndsWith(".json"))
+                    pathToFile = pathToFile + ".json";
 
-                string pathToFile = GetPathToFile(fileName);
                 string jsonString = File.ReadAllText(pathToFile);
 
                 answerObject = JsonSerializer.Deserialize<T>(jsonString);
@@ -130,7 +195,7 @@ namespace MapService.DataAccess
 
         private static string GetPathToAppFolder()
         {
-            var appDataFolderPath = AppDomain.CurrentDomain.GetData("AppDataContentRootPath") as string;
+            var appDataFolderPath = PathUtility.GetPath("DataContent:Path");
 
             if (appDataFolderPath == null)
                 throw new DirectoryNotFoundException();
@@ -138,12 +203,28 @@ namespace MapService.DataAccess
             return appDataFolderPath;
         }
 
+        private static string GetPathToDocumentFile(string fileName)
+        {
+            return Path.Combine(GetPathToDocumentsFolder(), fileName).ToString();
+        }
+
+        private static string GetPathToDocumentsFolder() 
+        {
+            var documentsFolderPath = PathUtility.GetPath("Documents:Path");
+
+            if (documentsFolderPath == null)
+                throw new DirectoryNotFoundException();
+
+            return documentsFolderPath;
+        }
+
         public static JsonObject GetSpecification()
         {
             JsonObject jsonObject;
 
-            var appDataFolderPath = AppDomain.CurrentDomain.GetData("SwaggerContentRootPath") as string;
-            var pathToFile = Path.Combine(appDataFolderPath, "swagger.json");
+            var appDataFolderPath = PathUtility.GetPath("Swagger:Path");
+            var swaggerFileName = ConfigurationUtility.GetSectionItem("Swagger:File");
+            var pathToFile = Path.Combine(appDataFolderPath, swaggerFileName);
 
             try
             {

@@ -10,9 +10,9 @@ namespace MapService.Controllers
     [ApiController]
     public class InformativeController : ControllerBase
     {
-        private readonly ILogger<MapConfigController> _logger;
+        private readonly ILogger<InformativeController> _logger;
 
-        public InformativeController(ILogger<MapConfigController> logger)
+        public InformativeController(ILogger<InformativeController> logger)
         {
             _logger = logger;
         }
@@ -25,13 +25,13 @@ namespace MapService.Controllers
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         [SwaggerOperation(Tags = new[] { "Admin - Informative/DocumentHandler" })]
-        public ActionResult<IEnumerable<string>> GetDocumentList()
+        public ActionResult GetDocumentList()
         {
-            var documentList = new List<string>();
+            IEnumerable<string> documentList;
 
             try
             {
-                documentList = InformativeHandler.GetDocumentList().ToList();
+                documentList = InformativeHandler.GetDocumentList();
             }
             catch (Exception ex)
             {
@@ -51,13 +51,13 @@ namespace MapService.Controllers
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         [SwaggerOperation(Tags = new[] { "Admin - Informative/DocumentHandler" })]
-        public ActionResult<IEnumerable<string>> GetDocumentList(string name)
+        public ActionResult GetDocumentList(string name)
         {
-            var documentList = new List<string>();
+            IEnumerable<string> documentList;
 
             try
             {
-                documentList = InformativeHandler.GetDocumentList(name).ToList();
+                documentList = InformativeHandler.GetDocumentList(name);
             }
             catch (Exception ex)
             {
@@ -77,9 +77,9 @@ namespace MapService.Controllers
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         [SwaggerOperation(Tags = new[] { "Client-accessible" })]
-        public ActionResult<JsonObject> GetDocument(string name)
+        public ActionResult GetDocument(string name)
         {
-            var document = new JsonObject();
+            JsonObject document;
 
             try
             {

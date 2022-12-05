@@ -1,6 +1,7 @@
 ﻿using MapService.Business.MapConfig;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
+using System.Text.Json;
 using System.Text.Json.Nodes;
 
 namespace MapService.Controllers
@@ -27,22 +28,21 @@ namespace MapService.Controllers
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         [SwaggerOperation(Tags = new[] { "Admin - Maps and layers" })]
-        public ActionResult<IEnumerable<string>> GetLayers()
+        public ActionResult GetLayers()
         {
-            JsonObject layerObject;
+            JsonDocument layers;
 
             try
             {
-                layerObject = MapConfigHandler.GetLayers();
+                layers = MapConfigHandler.GetLayersAsJsonDocument();
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Internal server error");
-
+                _logger.LogError(ex, "Internal Server Error");
                 return StatusCode(StatusCodes.Status500InternalServerError, "Internal Server Error");
             }
 
-            return StatusCode(StatusCodes.Status200OK, layerObject);
+            return StatusCode(StatusCodes.Status200OK, layers);
         }
 
         /// <remarks>
@@ -57,13 +57,13 @@ namespace MapService.Controllers
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         [SwaggerOperation(Tags = new[] { "Admin - Maps and layers" })]
-        public ActionResult<JsonObject> GetMap(string map)
+        public ActionResult GetMap(string map)
         {
-            JsonObject mapObject;
+            JsonDocument mapDocument;
 
             try
             {
-                mapObject = MapConfigHandler.GetMap(map);
+                mapDocument = MapConfigHandler.GetMapAsJsonDocument(map);
             }
             catch (Exception ex)
             {
@@ -71,7 +71,34 @@ namespace MapService.Controllers
                 return StatusCode(StatusCodes.Status500InternalServerError, "Internal Server Error");
             }
 
-            return StatusCode(StatusCodes.Status200OK, mapObject);
+            return StatusCode(StatusCodes.Status200OK, mapDocument);
+        }
+
+        /// <remarks>
+        /// Create a new map configuration by duplicating an existing one
+        /// </remarks>
+        /// <param name="nameFrom">Name of the map to be duplicated</param>
+        /// <param name="nameTo">Name of the new map (the duplicate)</param>
+        /// <response code="200">Success</response>
+        /// <response code="500">Internal Server Error</response>
+        [HttpPut]
+        [Route("duplicate/{nameFrom}/{nameTo}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        [SwaggerOperation(Tags = new[] { "Admin - Maps and layers" })]
+        public ActionResult DuplicateMap(string nameFrom, string nameTo)
+        {
+            try
+            {
+                MapConfigHandler.DuplicateMap(nameFrom, nameTo);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Internal Server Error");
+                return StatusCode(StatusCodes.Status500InternalServerError, "Internal Server Error");
+            }
+
+            return StatusCode(StatusCodes.Status200OK);
         }
 
         /// <remarks>
@@ -91,7 +118,7 @@ namespace MapService.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Internal server error");
+                _logger.LogError(ex, "Internal Server Error");
                 return StatusCode(StatusCodes.Status500InternalServerError, "Internal Server Error");
             }
 
@@ -116,7 +143,7 @@ namespace MapService.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Internal server error");
+                _logger.LogError(ex, "Internal Server Error");
                 return StatusCode(StatusCodes.Status500InternalServerError, "Internal Server Error");
             }
 
@@ -134,7 +161,7 @@ namespace MapService.Controllers
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         [SwaggerOperation(Tags = new[] { "Admin - Maps and layers" })]
-        public ActionResult<IEnumerable<string>> GetMaps()
+        public ActionResult GetMaps()
         {
             IEnumerable<string> maps;
 
@@ -144,8 +171,7 @@ namespace MapService.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Internal server error");
-
+                _logger.LogError(ex, "Internal Server Error");
                 return StatusCode(StatusCodes.Status500InternalServerError, "Internal Server Error");
             }
 
@@ -162,18 +188,17 @@ namespace MapService.Controllers
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         [SwaggerOperation(Tags = new[] { "Admin - Maps and layers" })]
-        public ActionResult<IEnumerable<string>> GetListImage()
+        public ActionResult GetListImage()
         {
-            var listOfImages = new List<string>();
+            IEnumerable<string> listOfImages;
 
             try
             {
-                listOfImages = MapConfigHandler.GetListOfImages().ToList();
+                listOfImages = MapConfigHandler.GetListOfImages();
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Internal Server Error");
-
                 return StatusCode(StatusCodes.Status500InternalServerError, "Internal Server Error");
             }
 
@@ -190,18 +215,17 @@ namespace MapService.Controllers
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         [SwaggerOperation(Tags = new[] { "Admin - Maps and layers" })]
-        public ActionResult<IEnumerable<string>> GetListVideo()
+        public ActionResult GetListVideo()
         {
-            var listOfVideos = new List<string>();
+            IEnumerable<string> listOfVideos;
 
             try
             {
-                listOfVideos = MapConfigHandler.GetListOfVideos().ToList();
+                listOfVideos = MapConfigHandler.GetListOfVideos();
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Internal Server Error");
-
                 return StatusCode(StatusCodes.Status500InternalServerError, "Internal Server Error");
             }
 
@@ -218,18 +242,17 @@ namespace MapService.Controllers
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         [SwaggerOperation(Tags = new[] { "Admin - Maps and layers" })]
-        public ActionResult<IEnumerable<string>> GetListAudio()
+        public ActionResult GetListAudio()
         {
-            var listOfAudioFiles = new List<string>();
+            IEnumerable<string> listOfAudioFiles;
 
             try
             {
-                listOfAudioFiles = MapConfigHandler.GetListOfAudioFiles().ToList();
+                listOfAudioFiles = MapConfigHandler.GetListOfAudioFiles();
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Internal Server Error");
-
                 return StatusCode(StatusCodes.Status500InternalServerError, "Internal Server Error");
             }
 
@@ -251,10 +274,11 @@ namespace MapService.Controllers
         [SwaggerOperation(Tags = new[] { "Admin - Maps and layers" })]
         public ActionResult ExportMapWithFormat(string map, string format)
         {
-            JsonObject exportedWithFormats;
+            JsonObject exportedMapWithFormats;
+
             try
             {
-                exportedWithFormats = MapConfigHandler.ExportMapWithFormat(map, format);
+                exportedMapWithFormats = MapConfigHandler.ExportMapWithFormat(map, format);
             }
             catch (Exception ex)
             {
@@ -262,7 +286,33 @@ namespace MapService.Controllers
                 return StatusCode(StatusCodes.Status500InternalServerError, "Internal Server Error");
             }
 
-            return StatusCode(StatusCodes.Status200OK, exportedWithFormats);
+            return StatusCode(StatusCodes.Status200OK, exportedMapWithFormats);
+        }
+
+        /// <summary>
+        /// Create a new map configuration
+        /// </summary>
+        /// <param name="name">The name of the map to create </param>
+        /// <response code="200">The map configuration was created successfully</response>
+        /// <response code="500">Internal Server Error</response>
+        [HttpPut]
+        [Route("create/{name}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        [SwaggerOperation(Tags = new[] { "Admin - Maps and layers" })]
+        public ActionResult Create(string name)
+        {
+            try
+            {
+                MapConfigHandler.CreateMapConfiguration(name);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Internal Server Error");
+                return StatusCode(StatusCodes.Status500InternalServerError, "Internal Server Error");
+            }
+
+            return StatusCode(StatusCodes.Status200OK);
         }
     }
 }
