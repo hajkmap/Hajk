@@ -53,7 +53,7 @@ namespace MapService.Business.Informative
             foreach (var documentName in documentNames)
             {
                 var jsonObject = JsonFileDataAccess.ReadDocumentFileAsJsonObject(documentName);
-                jsonObject.TryGetPropertyValue(JsonFileDataAccess.MAP_NODE_NAME, out var mapNodeValue);
+                jsonObject.TryGetPropertyValue(PropertyName.MAP, out var mapNodeValue);
 
                 if (mapNodeValue != null && mapNodeValue.ToString() == name)
                 {
