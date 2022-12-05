@@ -22,6 +22,7 @@ var defaultState = {
   target: "toolbar",
   instruction: "",
   visibleAtStart: false,
+  allowCreatingCleanUrls: true,
   visibleForGroups: [],
 };
 
@@ -47,6 +48,7 @@ class ToolOptions extends Component {
         height: tool.options.height,
         instruction: tool.options.instruction,
         visibleAtStart: tool.options.visibleAtStart,
+        allowCreatingCleanUrls: tool.options.allowCreatingCleanUrls,
         visibleForGroups: tool.options.visibleForGroups
           ? tool.options.visibleForGroups
           : [],
@@ -116,6 +118,7 @@ class ToolOptions extends Component {
         height: this.state.height,
         instruction: this.state.instruction,
         visibleAtStart: this.state.visibleAtStart,
+        allowCreatingCleanUrls: this.state.allowCreatingCleanUrls,
         visibleForGroups: this.state.visibleForGroups.map(
           Function.prototype.call,
           String.prototype.trim
@@ -342,6 +345,22 @@ class ToolOptions extends Component {
             />
             &nbsp;
             <label htmlFor="visibleAtStart">Synlig vid start</label>
+          </div>
+          <div>
+            <input
+              id="allowCreatingCleanUrls"
+              name="allowCreatingCleanUrls"
+              type="checkbox"
+              onChange={(e) => {
+                this.handleInputChange(e);
+              }}
+              checked={this.state.allowCreatingCleanUrls}
+            />
+            &nbsp;
+            <label htmlFor="allowCreatingCleanUrls">
+              Visa väljare som låter användare skapa "rena" länkar
+              (`clean=true`)
+            </label>
           </div>
           <div>
             <label htmlFor="instruction">

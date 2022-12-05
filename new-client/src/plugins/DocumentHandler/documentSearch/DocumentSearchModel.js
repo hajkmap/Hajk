@@ -91,6 +91,7 @@ export default class DocumentSearchModel {
       get: (p) => properties[p],
       getGeometry: () => null,
       getId: () => id,
+      setStyle: () => null,
     };
   };
 
@@ -125,6 +126,7 @@ export default class DocumentSearchModel {
       get: (p) => properties[p],
       getGeometry: () => null,
       getId: () => id,
+      setStyle: () => null,
     };
   };
 

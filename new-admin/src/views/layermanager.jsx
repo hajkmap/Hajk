@@ -456,15 +456,15 @@ class Manager extends Component {
     });
   }
 
-  getLayersWithFilter(filter) {
+  getLayersWithFilter() {
     return this.props.model.get("layers").filter((layer) => {
+      const caption = layer.caption.toLowerCase();
+      const internalLayerName = layer.internalLayerName?.toLowerCase() || "";
+      const filter = this.state.filter.toLowerCase();
       return (
-        new RegExp(this.state.filter.toLowerCase()).test(
-          layer.caption.toLowerCase()
-        ) ||
-        new RegExp(this.state.filter.toLowerCase()).test(
-          layer.internalLayerName?.toLowerCase()
-        )
+        caption.includes(filter) ||
+        internalLayerName.includes(filter) ||
+        layer.id.includes(filter)
       );
     });
   }

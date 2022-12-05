@@ -1,6 +1,7 @@
 import GeoJSON from "ol/format/GeoJSON.js";
 import buffer from "@turf/buffer";
 import union from "@turf/union";
+import { transform } from "ol/proj";
 
 class HajkTransformer {
   #mapProjection;
@@ -64,6 +65,14 @@ class HajkTransformer {
     });
     olf.setId(Math.random() * 1e20);
     return olf;
+  }
+
+  getCoordinatesWithProjection(x, y, targetProjection, numberOfDecimals = 4) {
+    const newCoords = transform([x, y], this.#mapProjection, targetProjection);
+    return {
+      x: parseFloat(newCoords[0].toFixed(numberOfDecimals)),
+      y: parseFloat(newCoords[1].toFixed(numberOfDecimals)),
+    };
   }
 }
 

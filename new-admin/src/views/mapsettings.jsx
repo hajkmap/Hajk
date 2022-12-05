@@ -11,6 +11,7 @@ import DeleteIcon from "@material-ui/icons/DeleteForever";
 import AddIcon from "@material-ui/icons/Add";
 import SaveIcon from "@material-ui/icons/SaveSharp";
 import CreateNewFolderIcon from "@material-ui/icons/CreateNewFolder";
+import OpenInNewIcon from "@material-ui/icons/OpenInNew";
 import LayersIcon from "@material-ui/icons/Layers";
 import SwapVertIcon from "@material-ui/icons/SwapVert";
 import SettingsIcon from "@material-ui/icons/Settings";
@@ -290,6 +291,7 @@ class Menu extends Component {
     backgroundSwitcherWhite: true,
     enableOSM: false,
     showBreadcrumbs: false,
+    showActiveLayersView: false,
     enableTransparencySlider: true,
     instruction: "",
     dropdownThemeMaps: false,
@@ -337,6 +339,9 @@ class Menu extends Component {
           enableOSM: existingConfig.enableOSM ?? this.state.enableOSM,
           showBreadcrumbs:
             existingConfig.showBreadcrumbs ?? this.state.showBreadcrumbs,
+          showActiveLayersView:
+            existingConfig.showActiveLayersView ??
+            this.state.showActiveLayersView,
           enableTransparencySlider:
             existingConfig.enableTransparencySlider ??
             this.state.enableTransparencySlider,
@@ -518,16 +523,12 @@ class Menu extends Component {
   /**
    *
    */
-  getLayersWithFilter(filter) {
+  getLayersWithFilter() {
     return this.props.model.get("layers").filter((layer) => {
-      return (
-        new RegExp(this.state.filter.toLowerCase()).test(
-          layer.caption.toLowerCase()
-        ) ||
-        new RegExp(this.state.filter.toLowerCase()).test(
-          layer.internalLayerName?.toLowerCase()
-        )
-      );
+      const caption = layer.caption.toLowerCase();
+      const internalLayerName = layer.internalLayerName?.toLowerCase() || "";
+      const filter = this.state.filter.toLowerCase();
+      return caption.includes(filter) || internalLayerName.includes(filter);
     });
   }
 
@@ -563,6 +564,7 @@ class Menu extends Component {
       backgroundSwitcherWhite: this.state.backgroundSwitcherWhite,
       enableOSM: this.state.enableOSM,
       showBreadcrumbs: this.state.showBreadcrumbs,
+      showActiveLayersView: this.state.showActiveLayersView,
       enableTransparencySlider: this.state.enableTransparencySlider,
       instruction: this.state.instruction,
       dropdownThemeMaps: this.state.dropdownThemeMaps,
@@ -1526,7 +1528,7 @@ class Menu extends Component {
                   />
                 </div>
               </div>
-              <div className="separator">Inställningar för plugins</div>
+              <div className="separator">Inställningar för Lagerhanteraren</div>
               <div>
                 <input
                   id="visibleAtStart"
@@ -1550,7 +1552,7 @@ class Menu extends Component {
                 />
                 &nbsp;
                 <label className="long-label" htmlFor="visibleAtStartMobile">
-                  Synlig vid start - Mobil
+                  Synlig vid start (mobil)
                 </label>
               </div>
               <div>
@@ -1563,11 +1565,29 @@ class Menu extends Component {
                 />
                 &nbsp;
                 <label className="long-label" htmlFor="showBreadcrumbs">
-                  Visa "brödsmulor"{" "}
+                  Visa brödsmulor{" "}
                   <i
                     className="fa fa-question-circle"
                     data-toggle="tooltip"
                     title="När rutan är ikryssad visas små kort längst ned på skärmen, ett för varje lager som är aktivt"
+                  />
+                </label>
+              </div>
+              <div>
+                <input
+                  id="showActiveLayersView"
+                  name="showActiveLayersView"
+                  type="checkbox"
+                  onChange={this.handleInputChange}
+                  checked={this.state.showActiveLayersView}
+                />
+                &nbsp;
+                <label className="long-label" htmlFor="showActiveLayersView">
+                  Visa en flik med aktiva lager (beta){" "}
+                  <i
+                    className="fa fa-question-circle"
+                    data-toggle="tooltip"
+                    title="När rutan är ikryssad visas en tredje flik i Lagerhanteraren. Där kan användaren bland annat styra ritordningen av aktiva lager."
                   />
                 </label>
               </div>
@@ -1799,6 +1819,14 @@ class Menu extends Component {
               >
                 {options}
               </select>
+              &nbsp;
+              <ColorButtonBlue
+                startIcon={<OpenInNewIcon />}
+                href={`${this.props.config.url_client_ui}?m=${this.props.model.attributes.mapFile}`}
+                target="_blank"
+              >
+                Öppna i nytt fönster
+              </ColorButtonBlue>
               &nbsp;
               <ColorButtonRed
                 variant="contained"

@@ -45,8 +45,11 @@ class GeosuiteExportModel {
     };
     this.#source = new VectorSource();
     this.#vector = new VectorLayer({
+      layerType: "system",
+      zIndex: 5000,
       source: this.#source,
-      name: "geoSuiteDrawLayer",
+      name: "pluginGeoSuite",
+      caption: "GeoSuite layer",
     });
     this.#style = new Style({
       fill: new Fill({
@@ -61,6 +64,7 @@ class GeosuiteExportModel {
     // Set configuration from defaults and option overrides, if any
     this.#config = {
       projects: {
+        active: this.#options.services?.wfs?.projects?.active ?? false,
         layer: {
           // Configurable plug-in options
           id: this.#options.services?.wfs?.projects?.layer?.id ?? "",
@@ -86,6 +90,7 @@ class GeosuiteExportModel {
         maxFeatures: this.#options.services?.wfs?.projects?.maxFeatures ?? 0,
       },
       boreholes: {
+        active: this.#options.services?.wfs?.boreholes?.active ?? false,
         layer: {
           // Configurable plug-in options
           id: this.#options.services?.wfs?.boreholes?.layer?.id ?? "",
@@ -319,6 +324,22 @@ class GeosuiteExportModel {
       documents.push(this.#getDocumentById(featureId));
     });
     return documents;
+  };
+
+  /**
+   * @summary Returns true if projects are enabled in the configuration.
+   * @returns {boolean} true if projects is enabled, false otherwise
+   */
+  isProjectsActive = () => {
+    return this.#config.projects.active;
+  };
+
+  /**
+   * @summary Returns true if borehole are enabled in the configuration.
+   * @returns {boolean} true if boreholes are enabled, false otherwise
+   */
+  isBoreholesActive = () => {
+    return this.#config.boreholes.active;
   };
 
   #updateSelectionStateFromWfs = (

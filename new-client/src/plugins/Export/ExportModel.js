@@ -61,7 +61,10 @@ class ExportModel {
   addPreviewLayer() {
     this.previewLayer = new Vector({
       source: new VectorSource(),
-      name: "preview-layer",
+      layerType: "system",
+      zIndex: 5000,
+      name: "pluginExport",
+      caption: "Export plugin",
       style: new Style({
         stroke: new Stroke({
           color: "rgba(0, 0, 0, 0.7)",
@@ -424,7 +427,7 @@ class ExportModel {
       (layer) =>
         layer instanceof Vector &&
         layer.getVisible() &&
-        layer.get("name") !== "preview-layer"
+        layer.get("name") !== "pluginExport"
     );
 
     vectorLayers = vectorLayers

@@ -1,40 +1,34 @@
-import React from "react";
-import PropTypes from "prop-types";
+// Make sure to only import the hooks you intend to use
+import React, { useCallback, useEffect, useState } from "react";
 
 import { styled } from "@mui/material/styles";
-import {
-  Box,
-  Button,
-  MenuItem,
-  Select,
-  Slider,
-  Typography,
-} from "@mui/material";
+import { Box, Button, Typography } from "@mui/material";
 import BugReportIcon from "@mui/icons-material/BugReport";
 
-import { getRenderPixel } from "ol/render";
-import { withSnackbar } from "notistack";
+import { useSnackbar } from "notistack";
+
+import useCookieStatus from "hooks/useCookieStatus";
 
 // Hajk components are primarily styled in two ways:
 // - Using the styled-utility, see: https://mui.com/system/styled/
 // - Using the sx-prop, see: https://mui.com/system/basics/#the-sx-prop
-// The styled-utility creates a re-usable component, and might be the
+// The styled-utility creates a reusable component, and might be the
 // best choice if the style is to be applied in several places.
 
-// The styled-components should be created at the top of the document
+// The styled components should be created at the top of the document
 // (but after imports) for consistency. Hajk does not have a naming
-// convention for the styled-components, but keep in mind to use names
+// convention for the styled components, but keep in mind to use names
 // that does not collide with regular components. (E.g. a styled div
 // should not be called Box).
 
-// The example below shows how a <Button /> with a bottom-margin can be created.
+// The example below shows how a <Button /> with a bottom margin can be created.
 // Notice that we are also accessing the application theme.
 const ButtonWithBottomMargin = styled(Button)(({ theme }) => ({
   marginBottom: theme.spacing(2),
 }));
 
 // We can also create a custom button that accepts border as a
-// prop. If the border-prop is missing, we fall back on the theme
+// prop. If the border prop is missing, we fall back on the theme
 // divider color. (borderColor would be a more fitting name, but
 // since this is a custom prop it must be all lowerCase, hence border will have
 // to do!)
@@ -42,55 +36,49 @@ const ButtonWithBorder = styled(Button)(({ border, theme }) => ({
   border: `${theme.spacing(0.5)} solid ${border ?? theme.palette.divider}`,
 }));
 
-// All mui-components (and all styled components, even styled div:s!) will have access to the sx-prop.
+// All MUI components (and all styled components, even styled div:s!) will have access to the sx-prop.
 // Check out how the sx-prop works further down.
 
-class DummyView extends React.PureComponent {
-  // Initialize state - this is the correct way of doing it nowadays.
-  state = {
-    activeCompareLayer: "-100",
-    counter: 0,
-    slider: 50,
-    borderColor: "#fff",
-  };
+function DummyView(props) {
+  // We're gonna need to access the snackbar methods. Let's use the provided hook.
+  const { closeSnackbar, enqueueSnackbar } = useSnackbar();
 
-  // propTypes and defaultProps are static properties, declared
-  // as high as possible within the component code. They should
-  // be immediately visible to other devs reading the file,
-  // since they serve as documentation.
-  static propTypes = {
-    model: PropTypes.object.isRequired,
-    app: PropTypes.object.isRequired,
-    localObserver: PropTypes.object.isRequired,
-    enqueueSnackbar: PropTypes.func.isRequired,
-    closeSnackbar: PropTypes.func.isRequired,
-  };
+  // We're gonna need to use the event observers. Let's destruct them so that we can
+  // get a hold of them easily. The observers can be accessed directly via the props:
+  const { globalObserver, localObserver } = props;
 
-  static defaultProps = {};
+  // We're gonna need to keep track of if we're allowed to save stuff in LS. Let's use the hook.
+  const { functionalCookiesOk } = useCookieStatus(globalObserver);
 
-  constructor(props) {
-    // If you're not using some of properties defined below, remove them from your code.
-    // They are shown here for demonstration purposes only.
-    super(props);
-    this.model = this.props.model;
-    this.localObserver = this.props.localObserver;
-    this.globalObserver = this.props.app.globalObserver;
+  // We're gonna want to keep track of some state. Let's use the useState hook.
+  // If you want to read up on how state is managed in functional components, see: https://reactjs.org/docs/hooks-state.html
+  const [counter, setCounter] = useState(0);
+  const [borderColor, setBorderColor] = useState("#FFFFFF");
 
-    this.globalObserver.publish("core.addDrawerToggleButton", {
-      value: "dummy",
-      ButtonIcon: BugReportIcon,
-      caption: "Dummyverktyg",
-      drawerTitle: "Dummyverktyg",
-      order: 100,
-      renderDrawerContent: this.renderDrawerContent,
-    });
-  }
+  // You don’t have to use many state variables. State variables can hold objects and arrays just fine,
+  // so you can still group related data together. However, unlike this.setState in a class, updating a
+  // state variable always replaces it instead of merging it. A grouped state, with two variables,
+  // could look something like this:
+  // const [someState, setSomeState] = useState({
+  //   counter: 0,
+  //   borderColor: "#FFFFFF",
+  // });
+  // So how would you go about updating just one of the variables in the grouped state?
+  // Well, all you have to do is to make sure to merge the old state manually.
+  // For example, to increment the counter, but keep the border-color constant, we can do:
+  // setSomeState((state) => ({...state, counter: state.counter + 1}))
 
-  renderDrawerContent = () => {
+  // We've already covered the useState hook. Let's look into another one. The useCallback hook
+  // returns a memoized callback (cached, only computed again when the inputs in the dependency
+  // array changes). Why do we want to memoize this function? It only returns some JSX? Well,
+  // since we want to use this function in a useEffect hook (more on that later) we want to make
+  // sure that this function does not change on every render. (If it would, the useEffect would run
+  // on every render, which we want to avoid).
+  const renderDrawerContent = useCallback(() => {
     return (
-      // The sx-prop gives us some short hand commands, for example, the paddings below
+      // The sx-prop gives us some shorthand commands, for example, the paddings below
       // will be set to theme.spacing(2), and not 2px! Make sure to read up on how the sx-prop
-      // works before using it.
+      // works before using it, check out the MUI docs.
       <Box sx={{ paddingLeft: 2, paddingRight: 2 }}>
         <Typography variant="h6">Dummy</Typography>
         <Typography variant="body1">
@@ -98,81 +86,62 @@ class DummyView extends React.PureComponent {
           knapp uppe i headern. När du trycker på knappen visas det här
           innehållet i sidopanelen.
         </Typography>
-        <Typography variant="body1">
-          Lorem ipsum dolor sit amet, sit enim montes aliquam. Cras non lorem,
-          rhoncus condimentum, irure et ante. Pulvinar suscipit odio ante, et
-          tellus a enim, wisi ipsum, vel rhoncus eget faucibus varius, luctus
-          turpis nibh vel odio nulla pede. Consectetuer commodo at, ante risus
-          amet nec sollicitudin cras, rhoncus diam pharetra in, tristique leo
-          dictumst ullamcorper proin libero, et turpis laoreet nonummy
-          adipiscing quam mollis. Sed erat cum magna id, iaculis sed porta,
-          euismod nisl consequat leo in lectus, suspendisse tincidunt vehicula
-          pellentesque eget in justo. Mattis dolor nec, sapien magnis ultricies
-          maecenas per urna aperiam, justo aliquam at ut, ut urna quam
-          parturient pharetra feugiat, est sit. Sollicitudin cum tempor.
-          Suscipit eros aenean viverra velit. Interdum varius vitae, lacus
-          sapien ut ipsum et ut. Lobortis pulvinar a. Blandit suspendisse proin
-          integer. Aliquam sit, consectetuer sed molestie mauris inceptos. Et
-          sit semper semper, ante donec dictum. Est rhoncus sed vestibulum
-          vestibulum, sociis eleifend torquent eros, aliquam nulla et mattis
-          nulla augue leo, pellentesque cras ultrices dignissim sed, id nunc
-          vitae nulla consectetuer. Sed nam tincidunt, aliquam elit justo netus,
-          vestibulum nulla nibh sagittis nulla, id urna. Lorem libero mauris
-          sit. Amet eu id maecenas. Itaque nulla ut interdum nibh. Arcu
-          vulputate adipiscing donec nunc, cras id sodales sit. Nulla sapien sed
-          sagittis scelerisque, condimentum sollicitudin nibh donec scelerisque
-          conubia, adipiscing dictumst laoreet id, eget augue eu accumsan. Justo
-          proin sit tempor, lacus vestibulum non aliquam et id est, odio neque
-          elit vestibulum dapibus elit, eros et sapien malesuada vehicula. Neque
-          facilisis, suspendisse wisi in. Ultrices a nam morbi, faucibus ligula
-          tortor, dui consectetuer non accumsan, suspendisse semper lacinia
-          tincidunt sed sem voluptatem, in non. Justo amet sapien lacus id ipsum
-          orci, sed integer sem at lacinia dui pede, aliquam ridiculus vel
-          faucibus vivamus sed laoreet, lectus neque vitae felis. Tellus nisl
-          tristique, in rutrum viverra sollicitudin nunc mus, aenean in, vel vel
-          sed, massa ac deserunt volutpat mollis maecenas lacinia. Commodo
-          lectus at sapien nascetur pede aliquam, mauris sodales dolor sit
-          vitae, egestas sed lobortis lacinia, a nisl molestie in quis orci.
-          Velit nec. Cubilia nulla wisi, suspendisse justo lacus consectetuer
-          integer vestibulum, dui proin vulputate metus, etiam sollicitudin
-          pellentesque sapien. Ipsum risus, est ligula pede mauris. Arcu fusce
-          id ac, lacus tempus cubilia, enim auctor aliquam arcu nibh. Nibh
-          mauris, aenean neque facilisis, enim justo purus nullam et id, donec
-          vehicula. Vitae tellus quis enim dui auctor.
-        </Typography>
       </Box>
     );
-  };
+  }, []); // <-- dependency array. (Here we can add inputs that would cause the callback to be re-calculated).
 
-  buttonClick = () => {
-    // We have access to plugin's model:
-    console.log("Dummy can access model's map:", this.model.getMap());
+  // Another hook that is used a lot in functional components is the useEffect hook.
+  // Mutations, subscriptions, timers, logging, and other side effects are not allowed inside the main body
+  // of a function component (referred to as React’s render phase). Doing so will lead to confusing bugs
+  // and inconsistencies in the UI. Instead, use the useEffect hook. The function passed to useEffect will run after
+  // the render is committed to the screen. For more information, see: https://reactjs.org/docs/hooks-reference.html#useeffect
 
-    // We have access to plugin's observer. Below we publish an event that the parent
-    // component is listing to, see dummy.js for how to subscribe to events.
-    this.localObserver.publish(
+  // When moving from Class-based components to Functional components I've seen several developers trying to mimic the
+  // constructor (which is obviously only present in Class-based components) by using the useEffect hook. The useEffect hook
+  // *could* be used in a "constructor like" fashion (by leaving the dependency array empty, making the effect only run once).
+  // But be aware! The effect runs AFTER the initial render, in contrast to the 'real' constructor which runs before the initial
+  // render. To get around this, I would suggest to create a custom hook instead. (To be fair, constructor-like behavior is rarely
+  // needed in functional components. But sometimes it **is** needed, and I thought that some clarification regarding how to work
+  // around this could be valid).
+
+  // Well, here we use a useEffect to publish a message on the global observer (after the initial render).
+  // The message sent is used to render whatever 'renderDrawerContent' returns in Hajks drawer.
+  useEffect(() => {
+    globalObserver.publish("core.addDrawerToggleButton", {
+      value: "dummy",
+      ButtonIcon: BugReportIcon,
+      caption: "Dummyverktyg",
+      drawerTitle: "Dummyverktyg",
+      order: 100,
+      renderDrawerContent: renderDrawerContent,
+    });
+  }, [globalObserver, renderDrawerContent]); // <-- The dependency array. Since we reference the global observer and 'renderDrawerContent' we have to include these.
+  // There is a lot more to say regarding the useEffect hook, but I'll leave that to you to read up on. Just a couple of tips:
+  // - Remember the cleanup-function! Especially when you're working with subscriptions.
+  // - Remember that you can use several useEffect hooks! Maybe you want to do something when 'counter' changes?
+
+  const buttonClick = () => {
+    // Here's an example of how to access the plugin's model:
+    console.log("Dummy can access model's map:", props.model.getMap());
+
+    // We have access to plugin's observer too. Below we publish an event that the parent
+    // component is listing to, see Dummy.js for how to subscribe to events.
+    localObserver.publish(
       "dummyEvent",
       "This has been sent from DummyView using the Observer"
     );
 
     // And we can of course access this component's state
-    this.setState((prevState) => ({
-      counter: prevState.counter + 1,
-    }));
+    setCounter(counter + 1);
   };
 
   // Event handler for a button that shows a global info message when clicked
-  showDefaultSnackbar = () => {
-    this.props.enqueueSnackbar("Yay, a nice message with default styling.");
-  };
-
-  showIntroduction = () => {
-    // Show the introduction guide, see components/Introduction.js
-    this.globalObserver.publish("core.showIntroduction");
+  const showDefaultSnackbar = () => {
+    enqueueSnackbar("Yay, a nice message with default styling.");
   };
 
   // A more complicate snackbar example, this one with an action button and persistent snackbar
-  showAdvancedSnackbar = () => {
+  const showAdvancedSnackbar = () => {
     const action = (key) => (
       <>
         <Button
@@ -184,7 +153,7 @@ class DummyView extends React.PureComponent {
         </Button>
         <Button
           onClick={() => {
-            this.props.closeSnackbar(key);
+            closeSnackbar(key);
           }}
         >
           {"Dismiss"}
@@ -192,7 +161,7 @@ class DummyView extends React.PureComponent {
       </>
     );
 
-    this.props.enqueueSnackbar("Oops, a message with error styling!", {
+    enqueueSnackbar("Oops, a message with error styling!", {
       variant: "error",
       persist: true,
       action,
@@ -200,185 +169,100 @@ class DummyView extends React.PureComponent {
   };
 
   // Generate a custom HEX color string
-  getRandomHexColorString = () => {
-    return `#${((Math.random() * 0xffffff) << 0).toString(16)}`;
+  const getRandomHexColorString = () => {
+    return `#${((Math.random() * 0xffffff) << 0)
+      .toString(16)
+      .padStart(6, "0")}`;
   };
 
-  // Make it possible to programatically update Window's title/color
-  handleClickOnRandomTitle = () => {
-    // We use the updateCustomProp mehtod which is passed down from parent
-    // component as a prop to this View.
-    this.props.updateCustomProp("title", new Date().getTime().toString()); // Generate a timestamp
-    this.props.updateCustomProp("color", this.getRandomHexColorString());
+  // Make it possible to programmatically update Window's title/color
+  const handleClickOnRandomTitle = () => {
+    // First we'll generate a random title and color
+    const title = new Date().getTime().toString();
+    const color = getRandomHexColorString();
+    // Then we'll use the updateCustomProp method which is passed down from parent component as a prop to this View.
+    props.updateCustomProp("title", title); // Generate a timestamp
+    props.updateCustomProp("color", color);
+    // We might want to (if we're allowed) save some values in LS for later use. Let's check
+    // if we're allowed to save in LS (We might not be if the user has not accepted functional cookies).
+    if (functionalCookiesOk) {
+      props.model.setDummyKeyInStorage("title", title);
+    }
   };
 
-  // Make it possible to programatically update the border color of a button
-  updateBorderColor = () => {
+  // Make it possible to programmatically update the border color of a button
+  const updateBorderColor = () => {
     // Get a random hex color string...
-    const randomColor = this.getRandomHexColorString();
-    // ...and update the state!
-    this.setState({
-      borderColor: randomColor,
-    });
+    const randomColor = getRandomHexColorString();
+    // ...and update the border-color state!
+    setBorderColor(randomColor);
   };
 
-  getBaseLayers() {
-    return [
-      { name: "-100", caption: "None" },
-      ...this.props.app.map
-        .getLayers()
-        .getArray()
-        .filter((l) => l.getProperties().layerInfo?.layerType === "base")
-        .map((l) => l.getProperties()),
-    ];
-  }
-
-  renderCompareLayerOptions = () => {
-    return this.getBaseLayers().map((l, i) => (
-      <MenuItem value={l.name} key={i}>
-        {l.caption}
-      </MenuItem>
-    ));
+  // Handles when user clicks the "Toggle draw interaction"-button
+  const handleToggleDrawClick = () => {
+    // First we'll get the current draw interaction and its setter from props
+    const { drawInteraction, setDrawInteraction } = props;
+    // If the draw-interaction is currently disabled (set to ""), we activate it (by setting it to "Polygon").
+    // If it is currently active (not set to ""), we disable it.
+    setDrawInteraction(drawInteraction === "" ? "Polygon" : "");
   };
 
-  prerenderHandler = (event) => {
-    console.log("event: ", event);
-    const ctx = event.context;
-    const mapSize = this.props.app.map.getSize();
-    const width = mapSize[0] * (this.state.slider / 100);
-    const tl = getRenderPixel(event, [width, 0]);
-    const tr = getRenderPixel(event, [mapSize[0], 0]);
-    const bl = getRenderPixel(event, [width, mapSize[1]]);
-    const br = getRenderPixel(event, mapSize);
-
-    ctx.save();
-    ctx.beginPath();
-    ctx.moveTo(tl[0], tl[1]);
-    ctx.lineTo(bl[0], bl[1]);
-    ctx.lineTo(br[0], br[1]);
-    ctx.lineTo(tr[0], tr[1]);
-    ctx.closePath();
-    ctx.clip();
-  };
-
-  postrenderHandler = (event) => {
-    console.log("event: ", event);
-    const ctx = event.context;
-    ctx.restore();
-  };
-
-  handleCompareLayerChange = (e) => {
-    this.setState({ activeCompareLayer: e.target.value }, () => {
-      const mapLayers = this.props.app.map.getLayers().getArray();
-      // Grab previous compare layer and hide them
-      mapLayers
-        .filter((l) => l.get("isActiveCompareLayer") === true)
-        .forEach((l) => {
-          l.set("visible", false, true);
-          l.set("isActiveCompareLayer", false);
-          l.un("prerender", this.prerenderHandler);
-          l.un("postrender", this.postrenderHandler);
-          console.log("l for deactivation: ", l);
-        });
-
-      if (e.target.value === "-100") {
-        // Special value "None" was selected - deactive comparer functionality
-      } else {
-        // Activate selected later as comparer
-        const l = mapLayers.filter((l) => l.get("name") === e.target.value)[0];
-
-        l.set("visible", true, true);
-        l.set("isActiveCompareLayer", true);
-
-        l.on("prerender", this.prerenderHandler);
-        l.on("postrender", this.postrenderHandler);
-      }
-    });
-  };
-
-  handleSliderChange = (event, newValue) => {
-    this.setState({ slider: newValue }, () => {
-      this.props.app.map.render();
-    });
-  };
-
-  render() {
-    return (
-      <>
-        <Select
-          labelId="demo-simple-select-label"
-          id="demo-simple-select"
-          value={this.state.activeCompareLayer}
-          onChange={this.handleCompareLayerChange}
-        >
-          {this.renderCompareLayerOptions()}
-        </Select>
-        {this.state.activeCompareLayer !== "-100" && (
-          <Slider
-            value={this.state.slider}
-            onChange={this.handleSliderChange}
-            aria-labelledby="continuous-slider"
-          />
-        )}
-        <Button
-          variant="contained"
-          fullWidth={true}
-          // onChange={(e) => { console.log(e) }}
-          // ^ Don't do this. Closures here are inefficient. Use the below:
-          onClick={this.buttonClick}
-          sx={{ marginBottom: 2 }} // The sx-prop is available on all MUI-components!
-        >
-          {this.state.test ||
-            `Clicked ${this.state.counter} ${
-              this.state.counter === 1 ? "time" : "times"
-            }`}
-        </Button>
-        <ButtonWithBorder
-          border="blue"
-          sx={{ marginBottom: 2 }} // The sx-prop is available on all styled components!
-          variant="contained"
-          fullWidth={true}
-          onClick={this.showDefaultSnackbar}
-        >
-          Show default snackbar
-        </ButtonWithBorder>
-        <ButtonWithBottomMargin
-          variant="contained"
-          fullWidth={true}
-          onClick={this.showAdvancedSnackbar}
-        >
-          Show error snackbar
-        </ButtonWithBottomMargin>
-        <ButtonWithBottomMargin
-          variant="contained"
-          fullWidth={true}
-          color="primary"
-          onClick={this.showIntroduction}
-        >
-          Show Hajk Introduction
-        </ButtonWithBottomMargin>
-        <ButtonWithBottomMargin
-          variant="contained"
-          fullWidth={true}
-          onClick={this.handleClickOnRandomTitle}
-        >
-          Set random title and color
-        </ButtonWithBottomMargin>
-        <ButtonWithBorder
-          border={this.state.borderColor} // Let's keep the borderColor in state so that we can update it!
-          sx={{ marginBottom: 2 }} // The sx-prop is available on all styled components!
-          variant="contained"
-          fullWidth={true}
-          onClick={this.updateBorderColor} // When we click the button, we update the borderColor.
-        >
-          Set random border color
-        </ButtonWithBorder>
-      </>
-    );
-  }
+  return (
+    <>
+      <Button
+        variant="contained"
+        fullWidth={true}
+        // onChange={(e) => { console.log(e) }}
+        // ^ Don't do this. Closures here are inefficient. Use the below:
+        onClick={buttonClick}
+        sx={{ marginBottom: 2 }} // The sx-prop is available on all MUI-components!
+      >
+        {`Clicked ${counter} ${counter === 1 ? "time" : "times"}`}
+      </Button>
+      <ButtonWithBorder
+        border="blue"
+        sx={{ marginBottom: 2 }} // The sx-prop is available on all styled components!
+        variant="contained"
+        fullWidth={true}
+        onClick={showDefaultSnackbar}
+      >
+        Show default snackbar
+      </ButtonWithBorder>
+      <ButtonWithBottomMargin
+        variant="contained"
+        fullWidth={true}
+        onClick={showAdvancedSnackbar}
+      >
+        Show error snackbar
+      </ButtonWithBottomMargin>
+      <ButtonWithBottomMargin
+        variant="contained"
+        fullWidth={true}
+        color="primary"
+        onClick={handleToggleDrawClick}
+      >
+        {`${
+          props.drawInteraction === "" ? "Activate" : "Disable"
+        } draw interaction`}
+      </ButtonWithBottomMargin>
+      <ButtonWithBottomMargin
+        variant="contained"
+        fullWidth={true}
+        onClick={handleClickOnRandomTitle}
+      >
+        Set random title and color
+      </ButtonWithBottomMargin>
+      <ButtonWithBorder
+        border={borderColor} // Let's keep the borderColor in state so that we can update it!
+        sx={{ marginBottom: 2 }} // The sx-prop is available on all styled components!
+        variant="contained"
+        fullWidth={true}
+        onClick={updateBorderColor} // When we click the button, we update the borderColor.
+      >
+        Set random border color
+      </ButtonWithBorder>
+    </>
+  );
 }
 
-// Exporting like this adds some props to DummyView.
-// withSnackbar adds two functions (enqueueSnackbar() and closeSnackbar())
-// that can be used throughout the Component.
-export default withSnackbar(DummyView);
+export default DummyView;

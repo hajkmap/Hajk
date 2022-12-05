@@ -24,6 +24,7 @@ namespace MapService.Models.Config
         public string searchUrl { get; set; }
     }
 
+
     public class WMSConfig : ILayerConfig
     {
         public WMSInfo AsInfo(int zIndex)
@@ -131,6 +132,11 @@ namespace MapService.Models.Config
 
         public string timeSliderEnd { get; set; }
 
+        public bool useCustomDpiList { get; set; }
+        public object[] customDpiList { get; set; }
+
         public int? zIndex { get; set; }
+
+
     }
 }

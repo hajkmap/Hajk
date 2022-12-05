@@ -28,6 +28,8 @@ class KirLayerController {
 
   initLayers() {
     this.model.layers.buffer = new VectorLayer({
+      layerType: "system",
+      zIndex: 5000,
       caption: "KIRBufferLayer",
       name: "KIRBufferLayer",
       source: new VectorSource(),
@@ -36,6 +38,8 @@ class KirLayerController {
     });
 
     this.model.layers.draw = new VectorLayer({
+      layerType: "system",
+      zIndex: 5000,
       caption: "KIRDrawLayer",
       name: "KIRDrawLayer",
       source: new VectorSource(),
@@ -50,6 +54,8 @@ class KirLayerController {
     });
 
     this.model.layers.features = new VectorLayer({
+      layerType: "system",
+      zIndex: 5000,
       caption: "KIRFeatures",
       name: "KIRFeatures",
       source: new VectorSource(),
@@ -58,6 +64,8 @@ class KirLayerController {
     });
 
     this.model.layers.marker = new VectorLayer({
+      layerType: "system",
+      zIndex: 5000,
       caption: "KIRMarker",
       name: "KIRMarker",
       source: new VectorSource(),
@@ -123,7 +131,7 @@ class KirLayerController {
       image: new Icon({
         anchor: [0.5, 1.18],
         scale: 0.15,
-        src: IconMarker(),
+        src: IconMarker(this.styles.getColor("highlightStroke")),
       }),
     });
     this.markerFeature.setStyle(styleMarker);

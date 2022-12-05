@@ -65,6 +65,7 @@ class MapOptions extends Component {
         mapresetter: config.mapresetter,
         showThemeToggler: config.showThemeToggler,
         showUserAvatar: config.showUserAvatar,
+        showRecentlyUsedPlugins: config.showRecentlyUsedPlugins,
         introductionEnabled: config.introductionEnabled || false,
         introductionShowControlButton:
           config.introductionShowControlButton || false,
@@ -165,6 +166,7 @@ class MapOptions extends Component {
       mapresetter: mapConfig.mapresetter,
       showThemeToggler: mapConfig.showThemeToggler,
       showUserAvatar: mapConfig.showUserAvatar,
+      showRecentlyUsedPlugins: mapConfig.showRecentlyUsedPlugins,
       introductionEnabled: mapConfig.introductionEnabled || false,
       introductionShowControlButton:
         mapConfig.introductionShowControlButton || false,
@@ -359,6 +361,7 @@ class MapOptions extends Component {
       case "mapresetter":
       case "showThemeToggler":
       case "showUserAvatar":
+      case "showRecentlyUsedPlugins":
       case "introductionEnabled":
       case "introductionShowControlButton":
       case "drawerVisible":
@@ -427,6 +430,9 @@ class MapOptions extends Component {
         config.mapresetter = this.getValue("mapresetter");
         config.showThemeToggler = this.getValue("showThemeToggler");
         config.showUserAvatar = this.getValue("showUserAvatar");
+        config.showRecentlyUsedPlugins = this.getValue(
+          "showRecentlyUsedPlugins"
+        );
         config.introductionEnabled = this.getValue("introductionEnabled");
         config.introductionShowControlButton = this.getValue(
           "introductionShowControlButton"
@@ -1275,6 +1281,29 @@ class MapOptions extends Component {
                   className="fa fa-question-circle"
                   data-toggle="tooltip"
                   title="Om AD-kopplingen är aktiv kommer en avatar-ikon bestående av användarens initialer att visas bland kartkontrollerna"
+                />
+              </label>
+            </div>
+            <div>
+              <input
+                id="input_showRecentlyUsedPlugins"
+                type="checkbox"
+                ref="input_showRecentlyUsedPlugins"
+                onChange={(e) => {
+                  this.setState({ showRecentlyUsedPlugins: e.target.checked });
+                }}
+                checked={this.state.showRecentlyUsedPlugins}
+              />
+              &nbsp;
+              <label
+                className="long-label"
+                htmlFor="input_showRecentlyUsedPlugins"
+              >
+                Visa en snabbväljare med de senast använda verktygen{" "}
+                <i
+                  className="fa fa-question-circle"
+                  data-toggle="tooltip"
+                  title="Den här kontrollen visar en liten knapp som vid hover/touch visar de senast använda verktygen och låter användaren aktivera dessa. Snabbväljaren är särskild användbar i mobilläget."
                 />
               </label>
             </div>

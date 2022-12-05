@@ -1,5 +1,5 @@
 {
-  "version": "3.10.0",
+  "version": "3.11.0-rc.1",
   "projections": [
     {
       "code": "EPSG:3006",
@@ -476,6 +476,7 @@
         "scaleBarPlacement": "bottomLeft",
         "includeLogo": true,
         "logoPlacement": "topRight",
+        "date": "Utskriftsdatum: {date}",
         "instruction": "",
         "visibleAtStart": false,
         "visibleForGroups": []
@@ -552,6 +553,7 @@
     "crossOrigin": "anonymous",
     "introductionEnabled": true,
     "introductionShowControlButton": true,
-    "introductionSteps": []
+    "introductionSteps": [],
+    "showRecentlyUsedPlugins": false
   }
 }

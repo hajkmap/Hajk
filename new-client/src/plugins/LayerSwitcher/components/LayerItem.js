@@ -573,7 +573,7 @@ class LayerItem extends React.PureComponent {
       return null;
     }
 
-    if (layer.layerType === "group") {
+    if (layer.get("layerType") === "group") {
       return (
         <LayerGroupItem
           appConfig={app.config.appConfig}

@@ -739,7 +739,10 @@ class SearchResultsContainer extends React.PureComponent {
       },
       () => {
         this.handleFilterUpdate();
-        this.#showCorrespondingWMSLayers(featureCollection);
+        // If FC comes from a DocumentHandler document, there is never a corresponding
+        // WMS layer - so don't bother
+        featureCollection?.origin !== "DOCUMENT" &&
+          this.#showCorrespondingWMSLayers(featureCollection);
       }
     );
   };
@@ -750,7 +753,10 @@ class SearchResultsContainer extends React.PureComponent {
 
     const layer = this.#getLayerById(featureCollection.source.pid);
 
-    if (layer.layerType === "group") {
+    // There is a possibility that no layer was found, if so, quit early
+    if (layer === undefined) return;
+
+    if (layer.get("layerType") === "group") {
       // Group layers will publish an event to LayerSwitcher that will take
       // care of the somewhat complicated toggling.
 

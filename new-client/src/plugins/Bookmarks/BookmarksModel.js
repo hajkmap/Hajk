@@ -93,6 +93,7 @@ class BookmarksModel {
     let storedBookmarks = localStorage.getItem(storageKey);
     if (!storedBookmarks) {
       let emptyJSONArr = "[]";
+      // TODO: Describe in https://github.com/hajkmap/Hajk/wiki/Cookies-in-Hajk and add the functionalOk() hook
       localStorage.setItem(storageKey, emptyJSONArr);
       storedBookmarks = emptyJSONArr;
     }
@@ -100,6 +101,7 @@ class BookmarksModel {
   }
 
   writeToStorage() {
+    // TODO: Describe in https://github.com/hajkmap/Hajk/wiki/Cookies-in-Hajk and add the functionalOk() hook
     localStorage.setItem(storageKey, JSON.stringify(this.bookmarks));
   }
 

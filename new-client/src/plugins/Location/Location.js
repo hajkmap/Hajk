@@ -29,8 +29,7 @@ class Location extends React.PureComponent {
   renderControlButton() {
     return createPortal(
       <CustomControlButtonView
-        title="Positionera"
-        abstract="Visa min position i kartan"
+        defaultTooltip={`Positionera: Visa min position i kartan`}
         model={this.model}
       />,
       document.getElementById("plugin-control-buttons")

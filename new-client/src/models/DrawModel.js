@@ -85,6 +85,7 @@ class DrawModel {
   #circleRadius;
   #circleInteractionActive;
   #selectInteractionActive;
+  #lastZIndex;
 
   constructor(settings) {
     // Let's make sure that we don't allow initiation if required settings
@@ -105,7 +106,7 @@ class DrawModel {
     // which will act as a prefix on all messages published on the
     // supplied observer.
     this.#observerPrefix = this.#getObserverPrefix(settings);
-    this.measurementSettings =
+    this.#measurementSettings =
       settings.measurementSettings ?? this.#getDefaultMeasurementSettings();
     this.#drawStyleSettings =
       settings.drawStyleSettings ?? this.#getDefaultDrawStyleSettings();
@@ -143,6 +144,7 @@ class DrawModel {
     this.#highlightStrokeColor = "rgba(255,255,255,1)";
     this.#circleRadius = 0;
     this.#selectInteractionActive = false;
+    this.#lastZIndex = 1;
 
     // A Draw-model is not really useful without a vector-layer, let's initiate it
     // right away, either by creating a new layer, or connect to an existing layer.
@@ -249,7 +251,7 @@ class DrawModel {
   // the layerName supplied when initiating the model. Also makes
   // sure that the layer is a vectorLayer.
   #layerHasCorrectNameAndType = (layer) => {
-    return layer.get("type") === this.#layerName && this.#isVectorLayer(layer);
+    return layer.get("name") === this.#layerName && this.#isVectorLayer(layer);
   };
 
   // Checks wether the supplied layer is a vectorLayer or not.
@@ -277,10 +279,7 @@ class DrawModel {
     this.#drawSource = this.#getNewVectorSource();
     // Then we'll create the layer
     this.#drawLayer = this.#getNewVectorLayer(this.#drawSource);
-    // Make sure to set the layer type to something understandable.
-    this.#drawLayer.set("type", this.#layerName);
-    // FIXME: Remove "type", use only "name" throughout
-    // the application. Should be done as part of #883.
+    // Make sure to set a unique name
     this.#drawLayer.set("name", this.#layerName);
     // We're also gonna have to set the queryable-property to true
     // so that we can enable "Select" on the layer.
@@ -327,8 +326,108 @@ class DrawModel {
     }
   };
 
+  // Find the highest zindex used and move on top of it.
+  moveFeatureZIndexToTop = (feature) => {
+    const indexes = this.#getAllZIndexes();
+    const topIndex = Math.max(...indexes);
+    if (isFinite(topIndex)) {
+      this.#setFeatureZIndex(feature, topIndex + 1);
+    }
+  };
+
+  // Find the closest zindex and move on top of it.
+  moveFeatureZIndexUp = (feature) => {
+    const zIndex = this.#findClosestZIndex(feature, true);
+    this.#setFeatureZIndex(feature, zIndex);
+  };
+
+  // Find the lowest zindex used and move below it.
+  moveFeatureZIndexToBottom = (feature) => {
+    const indexes = this.#getAllZIndexes();
+    const bottomIndex = Math.min(...indexes);
+    if (isFinite(bottomIndex)) {
+      this.#setFeatureZIndex(feature, bottomIndex - 1);
+    }
+  };
+
+  // Find the closest zindex and move below it.
+  moveFeatureZIndexDown = (feature) => {
+    const zIndex = this.#findClosestZIndex(feature, false);
+    this.#setFeatureZIndex(feature, zIndex);
+  };
+
+  // Find the closest zindex and move on top of it.
+  #getFeaturesSortedByZIndex = () => {
+    return this.#drawSource.getFeatures().sort((a, b) => {
+      return this.#getFeatureZIndex(a) < this.#getFeatureZIndex(b);
+    });
+  };
+
+  // Get an array of all zindexes
+  #getAllZIndexes = () => {
+    let indexes = [];
+    this.#getFeaturesSortedByZIndex().forEach((f) => {
+      indexes.push(this.#getFeatureZIndex(f));
+    });
+    return indexes;
+  };
+
+  // Find the closest valid zindex
+  #findClosestZIndex = (feature, up) => {
+    let zIndex = this.#getFeatureZIndex(feature);
+
+    const indexes = this.#getAllZIndexes().filter((index) => {
+      return up === true ? index > zIndex : index < zIndex;
+    });
+
+    let closest = Math.max(...indexes);
+    if (!isFinite(closest)) {
+      closest = up === true ? zIndex + 1 : zIndex - 1;
+    }
+
+    indexes.forEach((index) => {
+      if (
+        (up === true && index >= zIndex && index < closest) ||
+        (up === false && index <= zIndex && index > closest)
+      ) {
+        closest = index;
+      }
+    });
+
+    zIndex = up === true ? closest + 1 : closest - 1;
+
+    return zIndex;
+  };
+
+  #setFeatureZIndex = (feature, zIndex) => {
+    let style = feature.getStyle();
+    style = Array.isArray(style) ? style[0] : style;
+    if (style) {
+      style.setZIndex(zIndex);
+      feature.setStyle(style);
+    }
+  };
+
+  #getFeatureZIndex = (feature) => {
+    let style = feature.getStyle();
+    if (style) {
+      style = Array.isArray(style) ? style[0] : style;
+      return style.getZIndex() || 0;
+    }
+    return 0;
+  };
+
   // Returns the style that should be used on the drawn features
   #getFeatureStyle = (feature, settingsOverride) => {
+    if (feature.getStyle()) {
+      const currentZIndex = this.#getFeatureZIndex(feature);
+      if (currentZIndex === 0) {
+        // force a newly drawn feature to get a valid zindex.
+        this.#lastZIndex++;
+        this.#setFeatureZIndex(feature, this.#lastZIndex);
+      }
+    }
+
     if (feature.get("HIDDEN") === true) {
       !feature.get("STYLE_BEFORE_HIDE") &&
         feature.set("STYLE_BEFORE_HIDE", feature.getStyle());
@@ -416,6 +515,17 @@ class DrawModel {
     const featureIsPoint = feature?.getGeometry() instanceof Point;
     // We also have to check if we're dealing with a text-feature or not
     const featureIsTextType = feature?.get("DRAW_METHOD") === "Text";
+    // Let's grab the foreground (fill) and background (stroke) colors that we're supposed to use.
+    // First we'll try to grab the color from the feature style, then from the current settings, and lastly from the fallback.
+    const foregroundColor = featureIsTextType
+      ? feature.get("TEXT_SETTINGS")?.foregroundColor ??
+        this.#textStyleSettings.foregroundColor
+      : "#FFF";
+    // Same applies for the background
+    const backgroundColor = featureIsTextType
+      ? feature.get("TEXT_SETTINGS")?.backgroundColor ??
+        this.#textStyleSettings.backgroundColor
+      : "rgba(0, 0, 0, 0.5)";
     // Then we can create and return the style
     return new Text({
       textAlign: "center",
@@ -433,13 +543,17 @@ class DrawModel {
       }),
       text: this.#getFeatureLabelText(feature),
       overflow: true,
-      stroke: new Stroke({
-        color: featureIsTextType
-          ? feature.get("TEXT_SETTINGS")?.backgroundColor ??
-            this.#textStyleSettings.backgroundColor
-          : "rgba(0, 0, 0, 0.5)",
-        width: 3,
-      }),
+      stroke:
+        // If the foreground and the background are the same color, we don't need a stroke.
+        foregroundColor !== backgroundColor
+          ? new Stroke({
+              color: featureIsTextType
+                ? feature.get("TEXT_SETTINGS")?.backgroundColor ??
+                  this.#textStyleSettings.backgroundColor
+                : "rgba(0, 0, 0, 0.5)",
+              width: 3,
+            })
+          : null,
       offsetX: 0,
       offsetY: featureIsPoint && !featureIsTextType ? -15 : 0,
       rotation: 0,
@@ -815,6 +929,7 @@ class DrawModel {
       stroke: this.#getDrawStrokeStyle(settings),
       fill: this.#getDrawFillStyle(settings),
       image: this.#getDrawImageStyle(settings),
+      zIndex: this.#getDrawZIndex(settings),
     });
   };
 
@@ -840,6 +955,11 @@ class DrawModel {
         ? settings.fillStyle.color
         : this.#drawStyleSettings.fillColor,
     });
+  };
+
+  // Returns the feature zIndex
+  #getDrawZIndex = (settings) => {
+    return settings?.zIndex || 0;
   };
 
   // Returns the image style (based on the style settings)
@@ -952,11 +1072,21 @@ class DrawModel {
       const fillStyle = this.#getFillStyleInfo(featureStyle);
       const strokeStyle = this.#getStrokeStyleInfo(featureStyle);
       const imageStyle = this.#getImageStyleInfo(featureStyle);
+
+      const zIndex = (
+        Array.isArray(featureStyle) ? featureStyle[0] : featureStyle
+      ).getZIndex();
+
       // And return an object containing them
-      return { fillStyle, strokeStyle, imageStyle };
+      return { fillStyle, strokeStyle, imageStyle, zIndex };
     } catch (error) {
       console.error(`Failed to extract feature-style. Error: ${error}`);
-      return { fillStyle: null, strokeStyle: null, imageStyle: null };
+      return {
+        fillStyle: null,
+        strokeStyle: null,
+        imageStyle: null,
+        zIndex: 0,
+      };
     }
   };
 
@@ -992,6 +1122,10 @@ class DrawModel {
   #getNewVectorLayer = (source) => {
     return new VectorLayer({
       source: source,
+      layerType: "system",
+      ignoreInFeatureInfo: true,
+      zIndex: 5000,
+      caption: "Draw model",
     });
   };
 
@@ -1413,8 +1547,13 @@ class DrawModel {
   // Move-interaction.
   #enableMoveInteraction = (settings) => {
     // The Move-interaction will obviously need a Select-interaction so that the features to
-    // move can be selected.
-    this.#selectInteraction = new Select({ layers: [this.#drawLayer] });
+    // move can be selected. We provide `null` as style - this will cancel the default OL Select
+    // interaction (which was problematic in some situations, see #1225).
+    this.#selectInteraction = new Select({
+      layers: [this.#drawLayer],
+      style: null,
+    });
+
     // We need a handler catching the "select"-events so that we can keep track of if any
     // features has been selected or not.
     this.#selectInteraction.on("select", this.#handleFeatureSelect);
@@ -1721,8 +1860,19 @@ class DrawModel {
       // that has been set in an earlier session. Let's apply that style (if present)
       // before we add the feature to the source.
       const extractedStyle = feature.get("EXTRACTED_STYLE");
-      extractedStyle &&
-        feature.setStyle(this.#getFeatureStyle(feature, extractedStyle));
+
+      if (extractedStyle) {
+        // apply style
+        let style = this.#getFeatureStyle(feature, extractedStyle);
+        if (!style.getZIndex()) {
+          // getZIndex() returns 0 if not set
+          // force a zIndex if missing, for later use.
+          style.setZIndex(this.#lastZIndex);
+          this.#lastZIndex++;
+        }
+        feature.setStyle(style);
+      }
+
       // When we're done styling we can add the feature.
       this.#drawSource.addFeature(feature);
       // Then we'll publish some information about the addition. (If we're not supposed to be silent).
@@ -2098,6 +2248,10 @@ class DrawModel {
       .forEach((feature) => {
         this.#drawSource.removeFeature(feature);
       });
+
+    // reset lastZIndex
+    this.#lastZIndex = 1;
+
     // When the drawn features has been removed, we have to make sure
     // to update the current extent.
     this.#currentExtent = this.#drawSource.getExtent();

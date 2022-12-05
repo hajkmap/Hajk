@@ -12,6 +12,8 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import IconButton from "@mui/material/IconButton";
 import Typography from "@mui/material/Typography";
 
+import ConfirmationDialog from "../../components/ConfirmationDialog";
+
 const List = styled("div")(() => ({
   display: "flex",
   flex: "1 0 100%",
@@ -46,8 +48,8 @@ const AddButton = styled(Button)(() => ({
 
 const BookmarkButton = styled(Button)(({ theme }) => ({
   display: "flex",
-  flex: "1 0 100%",
   justifyContent: "flex-start",
+  flex: "1 0 100%",
   transform: "translateZ(1px)",
   "& svg": {
     color: theme.palette.text.secondary,
@@ -114,6 +116,8 @@ class BookmarksView extends React.PureComponent {
     error: false,
     helperText: " ",
     bookmarks: [],
+    showRemovalConfirmation: false,
+    bookmarkToDelete: null,
   };
 
   static propTypes = {
@@ -128,6 +132,9 @@ class BookmarksView extends React.PureComponent {
     this.model = this.props.model;
     this.state.bookmarks = [...this.model.bookmarks];
     this.handleKeyUp = this.handleKeyUp.bind(this);
+    this.handleRemoveConfirmation = this.handleRemoveConfirmation.bind(this);
+    this.handleRemoveConfirmationAbort =
+      this.handleRemoveConfirmationAbort.bind(this);
   }
 
   btnAddBookmark = (e) => {
@@ -136,6 +143,7 @@ class BookmarksView extends React.PureComponent {
     }
 
     this.model.addBookmark(this.state.name, true);
+
     this.setState({
       name: "",
       bookmarks: [...this.model.bookmarks],
@@ -147,7 +155,21 @@ class BookmarksView extends React.PureComponent {
     this.model.setMapState(bookmark);
   }
 
-  btnDeleteBookmark(bookmark) {
+  btnHandleRemoveModal(bookmark) {
+    this.setState({ showRemovalConfirmation: true });
+    this.setState({ bookmarkToDelete: bookmark });
+  }
+
+  handleRemoveConfirmation() {
+    this.deleteBookmark(this.state.bookmarkToDelete);
+    this.setState({ showRemovalConfirmation: false });
+  }
+
+  handleRemoveConfirmationAbort() {
+    this.setState({ showRemovalConfirmation: false });
+  }
+
+  deleteBookmark(bookmark) {
     this.model.removeBookmark(bookmark);
     this.setState({ bookmarks: [...this.model.bookmarks] });
   }
@@ -244,7 +266,7 @@ class BookmarksView extends React.PureComponent {
               <DeleteButton
                 aria-label="Ta bort"
                 onClick={() => {
-                  this.btnDeleteBookmark(item);
+                  this.btnHandleRemoveModal(item);
                 }}
                 size="large"
               >
@@ -252,6 +274,17 @@ class BookmarksView extends React.PureComponent {
               </DeleteButton>
             </ListItem>
           ))}
+          <ConfirmationDialog
+            open={this.state.showRemovalConfirmation === true}
+            titleName={"Radera bokmärke"}
+            contentDescription={
+              "Är du säker på att du vill radera bokmärket? Detta går inte att ångra."
+            }
+            cancel={"Avbryt"}
+            confirm={"Radera"}
+            handleConfirm={this.handleRemoveConfirmation}
+            handleAbort={this.handleRemoveConfirmationAbort}
+          />
         </List>
       </div>
     );

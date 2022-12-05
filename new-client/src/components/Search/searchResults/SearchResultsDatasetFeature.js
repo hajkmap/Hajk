@@ -15,6 +15,11 @@ const GridRoot = styled(Grid)(() => ({
   width: "100%",
 }));
 
+const GridLabel = styled(Grid)(({ theme }) => ({
+  padding: theme.spacing(1),
+  paddingRight: theme.spacing(2), // We want some room after our results labels
+}));
+
 const StyledTypography = styled(Typography)(() => ({
   maxWidth: "100%",
 }));
@@ -25,18 +30,16 @@ class SearchResultsDatasetFeature extends React.PureComponent {
     const helpText = !visibleInMap ? "Lägg till i urval" : "Ta bort från urval";
 
     return (
-      <Grid item align="center">
-        <Tooltip disableInteractive title={helpText}>
-          <Checkbox
-            color="default"
-            checked={visibleInMap}
-            onClick={(e) => e.stopPropagation()}
-            onChange={this.handleCheckboxToggle}
-            icon={<StarBorderIcon />}
-            checkedIcon={<StarIcon />}
-          />
-        </Tooltip>
-      </Grid>
+      <Tooltip disableInteractive title={helpText}>
+        <Checkbox
+          color="default"
+          checked={visibleInMap}
+          onClick={(e) => e.stopPropagation()}
+          onChange={this.handleCheckboxToggle}
+          icon={<StarBorderIcon />}
+          checkedIcon={<StarIcon />}
+        />
+      </Tooltip>
     );
   };
 
@@ -71,16 +74,26 @@ class SearchResultsDatasetFeature extends React.PureComponent {
       feature.getGeometry() && shouldRenderSelectedCollection;
     if (feature.featureTitle.length > 0) {
       return (
-        <GridRoot container alignItems="center" hej="hejhej">
-          {shouldRenderCheckbox
-            ? this.renderShowInMapCheckbox()
-            : this.renderOriginBasedIcon()}
-          <Grid item xs={9}>
+        <GridRoot container alignItems="center">
+          <Grid item xs={1} align="center">
+            {shouldRenderCheckbox
+              ? this.renderShowInMapCheckbox()
+              : this.renderOriginBasedIcon()}
+          </Grid>
+          <GridLabel item xs={10} alignItems="center">
             <StyledTypography noWrap align="left">
               {feature.featureTitle}
             </StyledTypography>
-          </Grid>
-          <Grid item xs={1}></Grid>
+            <StyledTypography
+              variant="caption"
+              component="p"
+              noWrap
+              align="left"
+            >
+              {feature.secondaryLabelFields}
+            </StyledTypography>
+          </GridLabel>
+          <Grid item xs={1} />
         </GridRoot>
       );
     } else {
