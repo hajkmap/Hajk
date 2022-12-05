@@ -9,9 +9,9 @@ namespace MapService.Controllers
     [ApiController]
     public class FmeProxyController : ControllerBase
     {
-        private readonly ILogger<ConfigController> _logger;
+        private readonly ILogger<FmeProxyController> _logger;
 
-        public FmeProxyController(ILogger<ConfigController> logger)
+        public FmeProxyController(ILogger<FmeProxyController> logger)
         {
             _logger = logger;
         }
