@@ -19,6 +19,7 @@ import TileWMS from "ol/source/TileWMS";
 import ImageWMS from "ol/source/ImageWMS";
 
 import { ROBOTO_NORMAL } from "./constants";
+import { isFuture } from "date-fns";
 export default class PrintModel {
   constructor(settings) {
     this.map = settings.map;
@@ -41,7 +42,7 @@ export default class PrintModel {
     // limit Image-WMS requests. The size below is the maximum tile-size allowed.
     // This max-size is only used if the custom-tile-loaders are used.
     this.maxTileSize = settings.options.maxTileSize || 4096;
-    this.textColor = settings.options.map;
+    this.textColor = settings.options.mapTextColor;
     // Let's keep track of the original view, since we're gonna change the view
     // under the print-process. (And we want to be able to change back to the original one).
     this.originalView = this.map.getView();
@@ -200,18 +201,29 @@ export default class PrintModel {
     // Here we set a special sizeMultiplier to use below when we calculate
     // the preview window size. If format is a5 or if user wants text in margins
     // the height is diminished
-    let sizeMultiplier =
-      options.useTextIconsInMargin && format === "a5"
-        ? 8
-        : options.useTextIconsInMargin
-        ? 6
-        : 2;
 
-    // Here we use sizeMultiplier to further diminish height of preview window
-    const size = {
-      width: (dim[0] - this.margin * 2) / 25.4,
-      height: (dim[1] - this.margin * sizeMultiplier) / 25.4,
-    };
+    let size;
+    if (this.includeImageBorder && !options.useMargin) {
+      size = {
+        width: (dim[0] - 1) / 25.4,
+        height: (dim[1] - 1) / 25.4,
+      };
+    } else if (options.useTextIconsInMargin && format === "a5") {
+      size = {
+        width: (dim[0] - this.margin * 2) / 25.4,
+        height: (dim[1] - this.margin * 8) / 25.4,
+      };
+    } else if (options.useTextIconsInMargin) {
+      size = {
+        width: (dim[0] - this.margin * 2) / 25.4,
+        height: (dim[1] - this.margin * 6) / 25.4,
+      };
+    } else {
+      size = {
+        width: (dim[0] - this.margin * 2) / 25.4,
+        height: (dim[1] - this.margin * 2) / 25.4,
+      };
+    }
 
     const paper = {
       width: size.width * dpi,
@@ -998,6 +1010,13 @@ export default class PrintModel {
 
       // Add our map canvas to the PDF, start at x/y=0/0 and stretch for entire width/height of the canvas
       pdf.addImage(mapCanvas, "JPEG", 0, 0, dim[0], dim[1]);
+
+      if (this.includeImageBorder) {
+        // Frame color is set to dark gray
+        pdf.setDrawColor(this.textColor);
+        pdf.setLineWidth(0.5);
+        pdf.rect(0.3, 0.3, dim[0] - 0.5, dim[1] - 0, "S");
+      }
 
       // Add potential margin around the image
       if (this.margin > 0) {
