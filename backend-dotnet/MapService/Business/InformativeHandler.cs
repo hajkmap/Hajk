@@ -7,21 +7,21 @@ namespace MapService.Business.Informative
     public static class InformativeHandler
     {
         /// <summary>
-        /// Returns list of file paths for all json files in 'DocumentsContentRootPath' folder
+        /// Returns list of file paths for all json files in the documents folder
         /// </summary>
         /// <returns>List of all document paths</returns>
         public static IEnumerable<string> GetAllDocuments()
         {
             string documentPath = PathUtility.GetPath("Documents:Path");
             if (documentPath == null)
-                return new List<string>(); ;
+                return new List<string>();
             
             IEnumerable<string> allowedExtentions = new List<string>() { "json" };
             return FileUtility.GetFiles(documentPath, allowedExtentions);
         }
 
         /// <summary>
-        /// Returns list of file names (without file extension) for all json files in 'DocumentsContentRootPath' folder
+        /// Returns list of file names (without file extension) for all json files in the documents folder
         /// </summary>
         /// <returns>List of all document names</returns>
         public static IEnumerable<string> GetDocumentList()
@@ -40,7 +40,7 @@ namespace MapService.Business.Informative
         }
 
         /// <summary>
-        /// Returns list of file names (without file extension) for json files in 'DocumentsContentRootPath' folder for the specified map
+        /// Returns list of file names (without file extension) for json files in the documents folder for the specified map
         /// </summary>
         /// <param name="name">Name of the map for which connected documents will be returned</param>
         /// <returns>List of document names</returns>
@@ -48,16 +48,16 @@ namespace MapService.Business.Informative
         {
             var documentNameList = new List<string>();
 
-            var files = GetAllDocuments().Select(f => Path.GetFullPath(f)).ToArray();
-
-            foreach (var file in files)
+            var documentNames = GetAllDocuments();
+            
+            foreach (var documentName in documentNames)
             {
-                var jsonObject = JsonFileDataAccess.ReadMapFileAsJsonObject(file);
-                jsonObject.TryGetPropertyValue(JsonFileDataAccess.MAP_NODE_NAME, out var mapNodeValue);
+                var jsonObject = JsonFileDataAccess.ReadDocumentFileAsJsonObject(documentName);
+                jsonObject.TryGetPropertyValue(PropertyName.MAP, out var mapNodeValue);
 
                 if (mapNodeValue != null && mapNodeValue.ToString() == name)
                 {
-                    documentNameList.Add(Path.GetFileNameWithoutExtension(file));
+                    documentNameList.Add(Path.GetFileNameWithoutExtension(documentName));
                 }
             }
 
@@ -73,20 +73,12 @@ namespace MapService.Business.Informative
         {
             var document = new JsonObject();
 
-            var documentsContentRootPath = AppDomain.CurrentDomain.GetData("DocumentsContentRootPath") as string;
-
-            if (documentsContentRootPath == null)
+            if (!JsonFileDataAccess.DocumentFileExists(name))
             {
                 return document;
             }
 
-            var filePath = Path.Combine(documentsContentRootPath, name + ".json");
-            if (!File.Exists(filePath))
-            {
-                return document;
-            }
-
-            return JsonFileDataAccess.ReadMapFileAsJsonObject(filePath);
+            return JsonFileDataAccess.ReadDocumentFileAsJsonObject(name);
         }
     }
 }

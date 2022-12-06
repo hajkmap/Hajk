@@ -167,8 +167,9 @@ namespace MapService.Business.MapConfig
         {
             var appDataFolder = PathUtility.GetPath("Upload:Path");
             var templatesFolder = PathUtility.GetPath("Templates:Path");
+            var templateFileName = ConfigurationUtility.GetSectionItem("Templates:Name");
 
-            File.Copy($"{templatesFolder}\\map.template", $"{appDataFolder}\\{name}.json"); //map.template borde inte vara hårdkodat här. Hämtas från config
+            File.Copy($"{templatesFolder}\\{templateFileName}", $"{appDataFolder}\\{name}.json");
         }
 
         private static LayerExportItem FilterLayers(JsonElement jsonElementLayers)
