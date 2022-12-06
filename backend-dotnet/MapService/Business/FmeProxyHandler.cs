@@ -1,14 +1,7 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using System.Net;
-using System;
-using System.Text;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc.Infrastructure;
+﻿using System.Text;
 using System.Net.Http.Headers;
+using MapService.Utility;
 using System.Text.RegularExpressions;
-using Microsoft.AspNetCore.Http.Extensions;
-using Microsoft.Extensions.Primitives;
-using Json.More;
 
 namespace MapService.Business.FmeProxy
 {
@@ -21,24 +14,24 @@ namespace MapService.Business.FmeProxy
             //Better way to handle this?
             urlPath = urlPath.Replace("%2F", "/");
 
-            //Just for testing purposes
-            var fmeServerHost = "https://jsonplaceholder.typicode.com"; //"https://fmeserver.some.domain.com";
-            var fmeServerUser = "someFmeUser";
-            var fmeServerPwd = "aGreatPassword";
-          
-            client.DefaultRequestHeaders.Accept.Clear();
-            //client.DefaultRequestHeaders.Add("Authorization", "Basic " + Convert.ToBase64String(Encoding.UTF8.GetBytes(fmeServerUser + ":" + fmeServerPwd)).ToString());
+            //Get server settings
+            var fmeServerHost = ConfigurationUtility.GetSectionItem("FmeProxy:FmeServerBaseUrl");
+            var fmeServerUser = ConfigurationUtility.GetSectionItem("FmeProxy:FmeServerUser");
+            var fmeServerPwd = ConfigurationUtility.GetSectionItem("FmeProxy:FmeServerPassword");
 
             //Create request
+            client.DefaultRequestHeaders.Accept.Clear();
+            client.DefaultRequestHeaders.Add("Authorization", "Basic " + Convert.ToBase64String(Encoding.UTF8.GetBytes(fmeServerUser + ":" + fmeServerPwd)).ToString());
+                        
             string url = fmeServerHost.EndsWith("/") ? fmeServerHost + urlPath : fmeServerHost + "/" + urlPath;
 
             var queryString = incomingRequest.QueryString.ToString();
             if (!string.IsNullOrEmpty(queryString))
-                url += "?" + queryString;
+                url += queryString;
 
             HttpRequestMessage request = new HttpRequestMessage(new HttpMethod(incomingRequest.Method), url);
 
-            //If needed set request body and headers
+            //If needed, set request body and headers
             var contentEncoding = incomingRequest.Headers.ContentEncoding;
             if (new HttpMethod(incomingRequest.Method) != HttpMethod.Get)
             {

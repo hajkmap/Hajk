@@ -51,7 +51,7 @@ namespace MapService.Controllers
                 _logger.LogError(ex, "Internal Server Error");
                 return StatusCode(StatusCodes.Status500InternalServerError, "Internal Server Error");
             }
-                        
+
             return StatusCode(((int)Response.StatusCode), responseBody);
         }
     }
