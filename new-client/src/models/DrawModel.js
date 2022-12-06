@@ -936,13 +936,13 @@ class DrawModel {
   // Returns the stroke style (based on the style settings)
   #getDrawStrokeStyle = (settings) => {
     return new Stroke({
-      color: settings
+      color: settings?.strokeStyle?.color
         ? settings.strokeStyle.color
         : this.#drawStyleSettings.strokeColor,
-      lineDash: settings
+      lineDash: settings?.strokeStyle
         ? settings.strokeStyle.dash
         : this.#drawStyleSettings.lineDash,
-      width: settings
+      width: settings?.strokeStyle?.width
         ? settings.strokeStyle.width
         : this.#drawStyleSettings.strokeWidth,
     });
@@ -951,7 +951,7 @@ class DrawModel {
   // Returns the fill style (based on the style settings)
   #getDrawFillStyle = (settings) => {
     return new Fill({
-      color: settings
+      color: settings?.fillStyle?.color
         ? settings.fillStyle.color
         : this.#drawStyleSettings.fillColor,
     });
@@ -967,18 +967,18 @@ class DrawModel {
     return new Circle({
       radius: 6,
       stroke: new Stroke({
-        color: settings
+        color: settings?.strokeStyle?.color
           ? settings.strokeStyle.color
           : this.#drawStyleSettings.strokeColor,
-        width: settings
+        width: settings?.strokeStyle?.width
           ? settings.strokeStyle.width
           : this.#drawStyleSettings.strokeWidth,
-        lineDash: settings
+        lineDash: settings?.strokeStyle
           ? settings.strokeStyle.dash
           : this.#drawStyleSettings.lineDash,
       }),
       fill: new Fill({
-        color: settings
+        color: settings?.fillStyle?.color
           ? settings.fillStyle.color
           : this.#drawStyleSettings.fillColor,
       }),
