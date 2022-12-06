@@ -1,105 +1,130 @@
-<html lang=en>
-
-<head>
-    <meta charset=utf-8>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
     <title>Example: Hajk Embedded</title>
-</head>
+  </head>
 
-<body style="max-width: 1280px">
+  <body style="max-width: 1280px">
     <h1>How to embed and control Hajk</h1>
-    <p>This example shows how an embedded Hajk instance can be controlled from the embedding website.</p>
-    <p>The buttons change the SRC attribute value of the IFRAME. By only modifying the hash part of the URL, no reload
-        is triggered.</p>
-    <p>Hajk listens to changes to the hash parameters and acts accordingly, e.g. by changing the map's zoom level.</p>
+    <p>
+      This example shows how an embedded Hajk instance can be controlled from
+      the embedding website.
+    </p>
+    <p>
+      The buttons change the SRC attribute value of the IFRAME. By only
+      modifying the hash part of the URL, no reload is triggered.
+    </p>
+    <p>
+      Hajk listens to changes to the hash parameters and acts accordingly, e.g.
+      by changing the map's zoom level.
+    </p>
     <form>
-        <fieldset>
-            <legend>Full control:</legend>
-            <input id="hashField" type="text" size="80" />
-            <button id="updateButton">Update IFRAME</button>
-        </fieldset>
-        <fieldset>
-            <legend>Quick buttons:</legend>
-            <button id="increaseButton">Increase zoom</button>
-            <button id="decreaseButton">Decrease zoom</button>
-        </fieldset>
-
+      <fieldset>
+        <legend>Full control:</legend>
+        <input id="hashField" type="text" size="80" />
+        <button id="updateButton">Update IFRAME</button>
+      </fieldset>
+      <fieldset>
+        <legend>Quick buttons:</legend>
+        <button id="increaseButton">Increase zoom</button>
+        <button id="decreaseButton">Decrease zoom</button>
+      </fieldset>
     </form>
     <iframe id="iframe" src="/" width="1280" height="768"></iframe>
-    <script>
-        // We start off with an empty hash
-        // const currentHash = new URLSearchParams("/");
+    <script type="module">
+      // We start off with an empty hash
+      // const currentHash = new URLSearchParams("/");
 
-        // Grab some elements we want to access
-        const iframe = document.getElementById("iframe");
-        const hashField = document.getElementById("hashField");
-        const updateButton = document.getElementById("updateButton");
-        const increaseButton = document.getElementById("increaseButton");
-        const decreaseButton = document.getElementById("decreaseButton");
+      // Grab some elements we want to access
+      const iframe = document.getElementById("iframe");
+      const hashField = document.getElementById("hashField");
+      const updateButton = document.getElementById("updateButton");
+      const increaseButton = document.getElementById("increaseButton");
+      const decreaseButton = document.getElementById("decreaseButton");
 
-        const changeZoom = (increaseBy = 1) => {
-            const url = new URL(iframe.src);
+      let hajkPublicApi = {
+        minZoom: 2,
+        maxZoom: 20,
+      };
 
-            // Extract hash params
-            const hash = new URLSearchParams(url.hash.replaceAll("#", ""));
+      const changeZoom = (increaseBy = 1) => {
+        const url = new URL(iframe.src);
 
-            // Try to grab current zoom level from hash params, default to "2"
-            const currentZ = parseInt(hash.get("z")) || 2;
+        // Extract hash params
+        const hash = new URLSearchParams(url.hash.replaceAll("#", ""));
 
-            const newZ = currentZ + increaseBy;
-            if (newZ < 1) {
-                alert("Can't zoom below level 1")
-            }
+        // Try to grab current zoom level from hash params, default to "2"
+        const currentZ = parseInt(hash.get("z")) || 2;
 
-            if (newZ > 10) {
-                alert("Can't zoom above level 10")
-            }
-
-            // Set the property of the URLSearchParams object. This will either
-            // add "z", or update if already exists
-            hash.set("z", newZ);
-
-            // Transform the URLSearchParams object to a valid hash string…
-            const newHash = "#" + hash.toString();
-
-            // …and add to our URL.
-            url.hash = newHash;
-
-            // Finally, let's update the IFRAME's SRC attribute
-            iframe.src = url.toString();
-
-            // For the purpose of this test, let's update hash text field
-            hashField.value = hash.toString();
+        let newZ = currentZ + increaseBy;
+        if (newZ < hajkPublicApi.minZoom) {
+          alert(`Can't zoom below level ${hajkPublicApi.minZoom}`);
+          newZ = hajkPublicApi.minZoom;
         }
 
-        // Bind the listeners
-        updateButton.addEventListener("click", (e) => {
-            e.preventDefault();
-            // Create the new hash value by taking the current hash field value
-            // and parse it into an params object
-            const newHash = new URLSearchParams(hashField.value).toString();
+        if (newZ > hajkPublicApi.maxZoom) {
+          alert(`Can't zoom above level ${hajkPublicApi.maxZoom}`);
+          newZ = hajkPublicApi.maxZoom;
+        }
 
-            // Grab the URL (will be used to replace the SRC param of the IFRAME soon)
-            const url = new URL(iframe.src);
-            url.hash = "#" + newHash;
+        // Set the property of the URLSearchParams object. This will either
+        // add "z", or update if already exists
+        hash.set("z", newZ);
 
-            // Update IFRAME's SRC attribute
-            iframe.src = url.toString();
+        // Transform the URLSearchParams object to a valid hash string…
+        const newHash = "#" + hash.toString();
 
-            // Finally, let's ensure our hash field has correctly formatted
-            // params string too, with encoded values, e.g. ","->"%2C"
-            hashField.value = newHash;
-        });
+        // …and add to our URL.
+        url.hash = newHash;
 
-        increaseButton.addEventListener("click", (e) => {
-            e.preventDefault();
-            changeZoom(1);
-        });
+        // Finally, let's update the IFRAME's SRC attribute
+        iframe.src = url.toString();
 
-        decreaseButton.addEventListener("click", (e) => {
-            e.preventDefault();
-            changeZoom(-1);
-        });
+        // For the purpose of this test, let's update hash text field
+        hashField.value = hash.toString();
+      };
+
+      // Bind the listeners
+      iframe.addEventListener("load", (e) => {
+        // Wait a second to ensure that JS is processed after Hajk is loaded in
+        // the IFRAME.
+        setTimeout(() => {
+          hajkPublicApi = {
+            ...hajkPublicApi,
+            ...iframe.contentWindow.hajkPublicApi,
+          };
+          console.log("Got hajkPublicApi from IFRAME: ", hajkPublicApi);
+        }, 500);
+      });
+
+      updateButton.addEventListener("click", (e) => {
+        e.preventDefault();
+        // Create the new hash value by taking the current hash field value
+        // and parse it into an params object
+        const newHash = new URLSearchParams(hashField.value).toString();
+
+        // Grab the URL (will be used to replace the SRC param of the IFRAME soon)
+        const url = new URL(iframe.src);
+        url.hash = "#" + newHash;
+
+        // Update IFRAME's SRC attribute
+        iframe.src = url.toString();
+        console.log("iframe: ", iframe);
+
+        // Finally, let's ensure our hash field has correctly formatted
+        // params string too, with encoded values, e.g. ","->"%2C"
+        hashField.value = newHash;
+      });
+
+      increaseButton.addEventListener("click", (e) => {
+        e.preventDefault();
+        changeZoom(1);
+      });
+
+      decreaseButton.addEventListener("click", (e) => {
+        e.preventDefault();
+        changeZoom(-1);
+      });
     </script>
-</body>
-
+  </body>
 </html>

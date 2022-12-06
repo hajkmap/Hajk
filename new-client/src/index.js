@@ -140,6 +140,28 @@ hfetch("appConfig.json", { cacheBuster: true })
                   urlParams,
                 };
 
+                // TODO: Watchout - this can be a controversial introduction!
+                // Before we merge, ensure that we really want this!
+                // Why am I adding it? The examples/embedded.html shows Hajk running
+                // in an IFRAME and allows it to be controlled by changing the SRC
+                // attribute of the IFRAME. In that file, there are two buttons (one
+                // to increase and another one to decrease the zoom level). However,
+                // we don't want to zoom past map's zoom limits. At first I used some
+                // hard-coded values for min/max zoom, but these will vary depending on
+                // map config. So I figured out that we could expose some of Hajk's settings
+                // on the global object. That way, the IFRAME's parent document can read
+                // those values and use to check that we don't allow zooming past limits.
+                //
+                // We can of course add more things that can be "nice to have" for an
+                // embedded solution. In addition to parameters, we could expose some API
+                // that would control the map itself! But it should be carefully crafted.
+                //
+                // For the sake of this example, I'm committing this basic object:
+                window.hajkPublicApi = {
+                  maxZoom: config.mapConfig.map.maxZoom,
+                  minZoom: config.mapConfig.map.minZoom,
+                };
+
                 // At this stage, we know for sure what activeMap is, so we can initiate the LocalStorageHelper
                 LocalStorageHelper.setKeyName(config.activeMap);
 
