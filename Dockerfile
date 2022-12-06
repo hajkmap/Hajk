@@ -1,4 +1,4 @@
-FROM node:16-alpine AS buildImage
+FROM node:18-alpine AS buildImage
 
 # --- BACKEND --- #
 # Start with Backend
@@ -48,7 +48,7 @@ RUN npm run build
 
 # --- FINAL ASSEMBLY --- #
 # Finally, let's assembly it all into another image
-FROM node:16-alpine
+FROM node:18-alpine
 WORKDIR /usr/app
 
 # Copy NPM package files from Backend
