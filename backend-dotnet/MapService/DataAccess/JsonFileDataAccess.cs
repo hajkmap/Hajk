@@ -163,7 +163,7 @@ namespace MapService.DataAccess
 
             try
             {
-                FileUtility.AddMissingEnding(fileName, ".json");
+                FileUtility.AddMissingEnding(pathToFile, ".json");
 
                 string jsonString = File.ReadAllText(pathToFile);
 

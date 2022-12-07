@@ -79,6 +79,7 @@
     },
     "/informative/create": {
       "post": {
+        "deprecated": true,
         "tags": [
           "Admin - Informative/DocumentHandler"
         ],
@@ -111,10 +112,20 @@
         }
       },
       "put": {
-        "deprecated": true,
         "tags": [
           "Admin - Informative/DocumentHandler"
         ],
+        "requestBody": {
+          "description": "Settings for given map's LayerSwitcher component",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/InformativeDocumentCreateBody"
+              }
+            }
+          },
+          "required": true
+        },
         "responses": {
           "200": {
             "description": "Create a document connected to a specified map",

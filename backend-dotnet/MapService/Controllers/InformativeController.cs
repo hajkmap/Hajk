@@ -95,17 +95,42 @@ namespace MapService.Controllers
             return StatusCode(StatusCodes.Status200OK, document);
         }
 
-        /// <remarks>
-        ///
-        /// </remarks>
+        /// <param name="requestBody">The name of the document and the map</param>
         /// <response code="204">All good</response>
         /// <response code="500">Internal Server Error</response>
+        /// <returns>JsonObject</returns>
         [HttpPost]
         [Route("create")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         [SwaggerOperation(Tags = new[] { "Admin - Informative/DocumentHandler" })]
-        public ActionResult CreateDocument([Required][FromBody] JsonObject requestBody)
+        [Obsolete]
+        public ActionResult CreateDocumentPost([Required][FromBody] JsonObject requestBody)
+        {
+            try
+            {
+                InformativeHandler.CreateDocument(requestBody);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Internal server error");
+
+                return StatusCode(StatusCodes.Status500InternalServerError, "Internal Server Error");
+            }
+
+            return StatusCode(StatusCodes.Status204NoContent);
+        }
+
+        /// <param name="requestBody">The name of the document and the map</param>
+        /// <response code="204">All good</response>
+        /// <response code="500">Internal Server Error</response>
+        /// <returns>JsonObject</returns>
+        [HttpPut]
+        [Route("create")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        [SwaggerOperation(Tags = new[] { "Admin - Informative/DocumentHandler" })]
+        public ActionResult CreateDocumentPut([Required][FromBody] JsonObject requestBody)
         {
             try
             {
