@@ -2,6 +2,7 @@ import React from "react";
 import PropTypes from "prop-types";
 import DocumentWindowBase from "./documentWindow/DocumentWindowBase";
 import MenuIcon from "@mui/icons-material/Menu";
+import MenuBookIcon from "@mui/icons-material/MenuBook";
 
 import DocumentHandlerModel from "./DocumentHandlerModel";
 import PanelMenuContainerView from "./panelMenu/PanelMenuContainerView";
@@ -152,7 +153,9 @@ class DocumentHandler extends React.PureComponent {
     ]);
     app.globalObserver.publish("core.addDrawerToggleButton", {
       value: "documenthandler",
-      ButtonIcon: MenuIcon,
+      ButtonIcon: options.drawerButtonIcon
+        ? this.getIcon(options.drawerButtonIcon)
+        : MenuIcon,
       caption: options.drawerButtonTitle || "Meny",
       drawerTitle: options.drawerTitle || "Översiktsplan",
       order: 100,
@@ -212,6 +215,17 @@ class DocumentHandler extends React.PureComponent {
     this.setState({
       showPrintWindow: !this.state.showPrintWindow,
     });
+  };
+
+  getIcon = (icon) => {
+    switch (icon) {
+      case "Menu":
+        return MenuIcon;
+      case "MenuBook":
+        return MenuBookIcon;
+      default:
+        return MenuIcon;
+    }
   };
 
   render() {
