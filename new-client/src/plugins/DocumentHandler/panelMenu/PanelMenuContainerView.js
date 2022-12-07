@@ -103,20 +103,25 @@ class PanelMenuView extends React.PureComponent {
   #handleOpenDocumentLinkMaplinkFromPanelMenu = (id) => {
     const { app } = this.props;
     const { options } = this.props;
-    this.#setDocument(this.state[id].document, null);
-    this.#setItemStateProperties(id).then(() => {
-      app.globalObserver.publish("core.onlyHideDrawerIfNeeded");
-    });
+
+    if (this.state[id].document) {
+      this.#setDocument(this.state[id].document, null);
+      this.#setItemStateProperties(id).then(() => {
+        app.globalObserver.publish("core.onlyHideDrawerIfNeeded");
+      });
+    }
 
     if (this.state[id].link) {
       window.open(this.state[id].link, "_blank");
       app.globalObserver.publish("core.onlyHideDrawerIfNeeded");
     }
 
-    if (getIsMobile() || options.closePanelOnMapLinkOpen) {
-      this.#closeDocumentWindow();
+    if (this.state[id].maplink) {
+      if (getIsMobile() || options.closePanelOnMapLinkOpen) {
+        this.#closeDocumentWindow();
+      }
+      this.#handleShowMapLayers(this.state[id].maplink);
     }
-    this.#handleShowMapLayers(this.state[id].maplink);
   };
 
   #handleShowMapLayers = (mapLink) => {
@@ -155,20 +160,25 @@ class PanelMenuView extends React.PureComponent {
   #handleSubMenuClicked = (id) => {
     const { app } = this.props;
     const { options } = this.props;
-    this.#setDocument(this.state[id].document, null);
-    this.#setItemStateProperties(id).then(() => {
-      app.globalObserver.publish("core.onlyHideDrawerIfNeeded");
-    });
+
+    if (this.state[id].document) {
+      this.#setDocument(this.state[id].document, null);
+      this.#setItemStateProperties(id).then(() => {
+        app.globalObserver.publish("core.onlyHideDrawerIfNeeded");
+      });
+    }
 
     if (this.state[id].link) {
       window.open(this.state[id].link, "_blank");
       app.globalObserver.publish("core.onlyHideDrawerIfNeeded");
     }
 
-    if (getIsMobile() || options.closePanelOnMapLinkOpen) {
-      this.#closeDocumentWindow();
+    if (this.state[id].maplink) {
+      if (getIsMobile() || options.closePanelOnMapLinkOpen) {
+        this.#closeDocumentWindow();
+      }
+      this.#handleShowMapLayers(this.state[id].maplink);
     }
-    this.#handleShowMapLayers(this.state[id].maplink);
     this.#setItemStateProperties(id);
   };
 
