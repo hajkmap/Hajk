@@ -9,7 +9,7 @@ namespace MapService.Business.FmeProxy
     {
         static readonly HttpClient client = new HttpClient();
 
-        public static async Task<string> SendQueryToFmeServerAPI(HttpRequest incomingRequest, string urlPath)
+        public static async Task<HttpResponseMessage> SendQueryToFmeServerAPI(HttpRequest incomingRequest, string urlPath)
         {
             //Better way to handle this?
             urlPath = urlPath.Replace("%2F", "/");
@@ -21,7 +21,7 @@ namespace MapService.Business.FmeProxy
 
             //Create request
             client.DefaultRequestHeaders.Accept.Clear();
-            client.DefaultRequestHeaders.Add("Authorization", "Basic " + Convert.ToBase64String(Encoding.UTF8.GetBytes(fmeServerUser + ":" + fmeServerPwd)).ToString());
+            //client.DefaultRequestHeaders.Add("Authorization", "Basic " + Convert.ToBase64String(Encoding.UTF8.GetBytes(fmeServerUser + ":" + fmeServerPwd)).ToString());
                         
             string url = fmeServerHost.EndsWith("/") ? fmeServerHost + urlPath : fmeServerHost + "/" + urlPath;
 
@@ -51,7 +51,8 @@ namespace MapService.Business.FmeProxy
             response.EnsureSuccessStatusCode(); //throws HttpRequestException if other than status code 200 is returned
 
             //Return content as string
-            return await response.Content.ReadAsStringAsync();
+            //return await response.Content.ReadAsStringAsync();
+            return response;
         }
     }
 }
