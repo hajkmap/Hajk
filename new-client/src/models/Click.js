@@ -2,6 +2,7 @@ import GeoJSON from "ol/format/GeoJSON";
 import TileLayer from "ol/layer/Tile";
 import ImageLayer from "ol/layer/Image";
 import WMSGetFeatureInfo from "ol/format/WMSGetFeatureInfo";
+import Feature from "ol/Feature";
 import { hfetch } from "utils/FetchWrapper";
 
 function query(map, layer, evt) {
@@ -198,6 +199,29 @@ function getFeaturesFromGml(response, text) {
   }
 }
 
+function getFeaturesFromXml(response, text) {
+  let parser = new DOMParser();
+  let doc = parser.parseFromString(text, "text/xml");
+  let features = [];
+  let fields = doc.getElementsByTagName("FIELDS");
+  for (let i = 0; i < fields.length; i++) {
+    let feature = new Feature();
+    let attributes = fields[i].attributes;
+    for (let j = 0; j < attributes.length; j++) {
+      feature.set(attributes[j].name, attributes[j].value);
+    }
+    if (!feature.getId()) {
+      feature.setId(
+        `${response.layer.getProperties().layerInfo.name}.${feature.ol_uid}`
+      );
+    }
+    feature.layer = response.layer;
+    features.push(feature);
+  }
+  sortFeatures(response.layer, features);
+  return features;
+}
+
 /**
  * Query the map for features when the user clicks the map.
  * The approach is to stack all the queryable WMS-requests and return a promise with a pointer to the referring layer.
@@ -275,7 +299,26 @@ export function handleClick(evt, map, callback) {
                   })
               );
               break;
-            case "text/xml":
+            case "text/xml": {
+              featurePromises.push(
+                response.value.requestResponse
+                  .text()
+                  .then((text) => {
+                    if (text !== undefined && text) {
+                      features.push(
+                        ...getFeaturesFromXml(response.value, text)
+                      );
+                    }
+                  })
+                  .catch((err) => {
+                    console.error(
+                      "GetFeatureInfo couldn't retrieve correct data for the clicked object.",
+                      err
+                    );
+                  })
+              );
+              break;
+            }
             case "application/vnd.ogc.gml": {
               featurePromises.push(
                 response.value.requestResponse
