@@ -5,6 +5,20 @@ namespace MapService.Utility
     public static class FileUtility
     {
         /// <summary>
+        /// Adds a file extension if it is missing from the file name.
+        /// </summary>
+        /// <param name="fileName">The file name. </param>
+        /// <param name="fileExtension">The file extension. </param>
+        /// <returns>Returns a file name that always has a file extension. </returns>
+        public static string AddMissingEnding(string fileName, string fileExtension)
+        {
+            if (!fileName.EndsWith(fileExtension))
+                fileName = fileName + fileExtension;
+
+            return fileName;
+        }
+
+        /// <summary>
         /// Gets all media files from a folder. 
         /// </summary>
         /// <param name="path">The path to the media folder</param>
@@ -31,6 +45,18 @@ namespace MapService.Utility
             }
 
             return fileNameList;
+        }
+
+        public static void CreateFile(string filePathAndName, string fileContents)
+        {
+            try
+            {
+                File.WriteAllText(filePathAndName, fileContents);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
         }
     }
 }

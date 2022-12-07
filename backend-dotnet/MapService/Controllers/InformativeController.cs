@@ -1,6 +1,7 @@
 ﻿using MapService.Business.Informative;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
+using System.ComponentModel.DataAnnotations;
 using System.Text.Json.Nodes;
 
 namespace MapService.Controllers
@@ -92,6 +93,32 @@ namespace MapService.Controllers
             }
 
             return StatusCode(StatusCodes.Status200OK, document);
+        }
+
+        /// <remarks>
+        ///
+        /// </remarks>
+        /// <response code="204">All good</response>
+        /// <response code="500">Internal Server Error</response>
+        [HttpPost]
+        [Route("create")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        [SwaggerOperation(Tags = new[] { "Admin - Informative/DocumentHandler" })]
+        public ActionResult CreateDocument([Required][FromBody] JsonObject requestBody)
+        {
+            try
+            {
+                InformativeHandler.CreateDocument(requestBody);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Internal server error");
+
+                return StatusCode(StatusCodes.Status500InternalServerError, "Internal Server Error");
+            }
+
+            return StatusCode(StatusCodes.Status204NoContent);
         }
     }
 }
