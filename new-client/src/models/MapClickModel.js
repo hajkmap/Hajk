@@ -194,7 +194,12 @@ export default class MapClickModel {
               );
               break;
             }
-            case "text/xml":
+            case "text/xml": {
+              olFeatures = this.#parseWmsGetFeatureInfoXml(
+                await response.value.requestResponse.text()
+              );
+              break;
+            }
             case "application/vnd.ogc.gml": {
               // (See comments for GeoJSON parser - this is similar.)
               olFeatures = this.#parseGMLFeatures(
@@ -681,6 +686,46 @@ export default class MapClickModel {
 
   #parseGeoJsonFeatures(json) {
     return this.geoJsonParser.readFeatures(json);
+  }
+
+  #parseWmsGetFeatureInfoXml(xml) {
+    const features = [];
+    const parser = new DOMParser();
+    const xmlDoc = parser.parseFromString(xml, "text/xml");
+    const featureNodes = xmlDoc.getElementsByTagName("FeatureInfoResponse");
+    for (let i = 0; i < featureNodes.length; i++) {
+      const featureNode = featureNodes[i];
+      const feature = new Feature();
+      const properties = {};
+      const geometryNode = featureNode.getElementsByTagName("Geometry")[0];
+      const geometry = this.#parseWmsGetFeatureInfoGeometry(geometryNode);
+      feature.setGeometry(geometry);
+      const propertyNodes = featureNode.getElementsByTagName("Attribute");
+      for (let j = 0; j < propertyNodes.length; j++) {
+        const propertyNode = propertyNodes[j];
+        const name = propertyNode.getAttribute("name");
+        const value = propertyNode.getAttribute("value");
+        properties[name] = value;
+      }
+      feature.setProperties(properties);
+      features.push(feature);
+    }
+    return features;
+  }
+
+  #parseWmsGetFeatureInfoGeometry(geometryNode) {
+    const geometryType = geometryNode.getAttribute("type");
+    const geometry = geometryNode.textContent;
+    switch (geometryType) {
+      case "Point":
+        return this.wktParser.readGeometry(geometry);
+      case "LineString":
+        return this.wktParser.readGeometry(geometry);
+      case "Polygon":
+        return this.wktParser.readGeometry(geometry);
+      default:
+        return null;
+    }
   }
 
   #parseGMLFeatures(gml) {
