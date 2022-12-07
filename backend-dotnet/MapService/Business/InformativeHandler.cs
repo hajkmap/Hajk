@@ -1,5 +1,7 @@
 ﻿using MapService.DataAccess;
+using MapService.Models;
 using MapService.Utility;
+using System.Text.Json;
 using System.Text.Json.Nodes;
 
 namespace MapService.Business.Informative
@@ -79,6 +81,50 @@ namespace MapService.Business.Informative
             }
 
             return JsonFileDataAccess.ReadDocumentFileAsJsonObject(name);
+        }
+
+        public static void CreateDocument(JsonObject documentNameAndMapName)
+        {
+            JsonValue? document = documentNameAndMapName["documentName"]?.AsValue();
+            if (document == null)
+                throw new Exception("Internal server error, no document name in body");
+
+            JsonValue? map = documentNameAndMapName["mapName"]?.AsValue();
+            if (map == null)
+                throw new Exception("Internal server error, no map name in body");
+
+            string? documentName = string.Empty;
+            document.TryGetValue(out documentName);
+            if (documentName == null)
+                throw new Exception("Internal server error, no document name value in body");
+
+            string? mapName = string.Empty;
+            map.TryGetValue(out mapName);
+            if (mapName == null)
+                throw new Exception("Internal server error, no map name value in body");
+
+            CreateDocumentWriteToFile(documentName, mapName);
+        }
+
+        private static void CreateDocumentWriteToFile(string documentName, string mapName)
+        {
+            string fileName = documentName;
+            fileName = FileUtility.AddMissingEnding(fileName, ".json");
+
+            string documentPath = PathUtility.GetPath("Documents:Path");
+            if (documentPath == null)
+                throw new Exception("Internal server error, path settings to documents not found");
+            string path = Path.Combine(documentPath, fileName);
+
+            Document newDocument = new Document(mapName);
+            string stringDocument = JsonUtility.ConvertToJsonObject(newDocument).ToJsonString(
+                new JsonSerializerOptions()
+                {
+                    WriteIndented = true
+                }
+            );
+
+            FileUtility.CreateFile(path, stringDocument);
         }
     }
 }
