@@ -80,6 +80,7 @@ class DrawModel {
   #customHandleDrawEnd;
   #customHandlePointerMove;
   #customHandleAddFeature;
+  #customGetDrawImageStyle;
   #highlightFillColor;
   #highlightStrokeColor;
   #circleRadius;
@@ -106,6 +107,7 @@ class DrawModel {
     // which will act as a prefix on all messages published on the
     // supplied observer.
     this.#observerPrefix = this.#getObserverPrefix(settings);
+    this.#customGetDrawImageStyle = settings.customGetDrawImageStyle;
     this.#measurementSettings =
       settings.measurementSettings ?? this.#getDefaultMeasurementSettings();
     this.#drawStyleSettings =
@@ -964,23 +966,33 @@ class DrawModel {
 
   // Returns the image style (based on the style settings)
   #getDrawImageStyle = (settings) => {
+    if (this.#customGetDrawImageStyle) {
+      return this.#customGetDrawImageStyle();
+    }
+
+    // If image style is present we will use it
+    // Otherwise we need to fallback to default style (same as drawing) as it is used in Sketch plugin
+    const storedSettings = this.#drawStyleSettings.image
+      ? this.#drawStyleSettings.image
+      : this.#drawStyleSettings;
+
     return new Circle({
       radius: 6,
       stroke: new Stroke({
         color: settings?.strokeStyle?.color
           ? settings.strokeStyle.color
-          : this.#drawStyleSettings.strokeColor,
+          : storedSettings.strokeColor,
         width: settings?.strokeStyle?.width
           ? settings.strokeStyle.width
-          : this.#drawStyleSettings.strokeWidth,
+          : storedSettings.strokeWidth,
         lineDash: settings?.strokeStyle
           ? settings.strokeStyle.dash
-          : this.#drawStyleSettings.lineDash,
+          : storedSettings.lineDash,
       }),
       fill: new Fill({
         color: settings?.fillStyle?.color
           ? settings.fillStyle.color
-          : this.#drawStyleSettings.fillColor,
+          : storedSettings.fillColor,
       }),
     });
   };

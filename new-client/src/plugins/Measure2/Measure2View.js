@@ -2,6 +2,7 @@ import { styled } from "@mui/material/styles";
 import { ToggleButtonGroup, ToggleButton } from "@mui/material";
 
 import { IconPolygon, IconPoint, IconLine, IconCircle } from "./MeasureIcons";
+import DeleteIcon from "@mui/icons-material/Delete";
 
 // import useCookieStatus from "hooks/useCookieStatus";
 
@@ -15,7 +16,7 @@ const StyledToggleButton = styled(ToggleButton)(({ theme }) => ({
     filter: theme.palette.mode === "dark" ? "invert(1)" : "",
   },
   "&.Mui-selected, &.Mui-selected:hover": {
-    img: {
+    "img, svg": {
       marginBottom: "-3px",
     },
     borderBottom: `3px solid ${theme.palette.primary.main}`,
@@ -42,8 +43,7 @@ const StyledToggleButtonGroup = styled(ToggleButtonGroup)(({ theme }) => ({
 }));
 
 function Measure2View(props) {
-  const { globalObserver, localObserver, handleDrawTypeChange, drawType } =
-    props;
+  const { handleDrawTypeChange, drawType } = props;
 
   return (
     <>
@@ -66,6 +66,9 @@ function Measure2View(props) {
         </StyledToggleButton>
         <StyledToggleButton value="Circle" title="Cirkel">
           <SvgImg src={IconCircle()} />
+        </StyledToggleButton>
+        <StyledToggleButton value="Delete" title="Ta bort">
+          <DeleteIcon />
         </StyledToggleButton>
       </StyledToggleButtonGroup>
     </>
