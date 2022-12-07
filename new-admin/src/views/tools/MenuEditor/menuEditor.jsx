@@ -22,6 +22,15 @@ import {
   ColorButtonRed,
 } from "./custombuttons.jsx";
 
+import { Menu as MenuIcon, MenuBook as MenuBookIcon } from "@material-ui/icons";
+
+import {
+  Select,
+  MenuItem,
+  ListItemIcon,
+  ListItemText,
+} from "@material-ui/core";
+
 import Tree from "antd/es/tree"; //Specific import to keep bundle-size small
 import "antd/es/tree/style/css"; //Specific import to keep bundle-size small
 
@@ -77,6 +86,7 @@ class ToolOptions extends Component {
     documentOnStart: "",
     drawerTitle: "",
     drawerButtonTitle: "",
+    drawerButtonIcon: "",
     resizingEnabled: false,
     draggingEnabled: false,
     searchImplemented: true,
@@ -153,6 +163,7 @@ class ToolOptions extends Component {
         documentOnStart: tool.options.documentOnStart,
         drawerTitle: tool.options.drawerTitle,
         drawerButtonTitle: tool.options.drawerButtonTitle,
+        drawerButtonIcon: tool.options.drawerButtonIcon,
         resizingEnabled: tool.options.resizingEnabled || false,
         draggingEnabled: tool.options.draggingEnabled || false,
         searchImplemented: tool.options.searchImplemented,
@@ -256,6 +267,7 @@ class ToolOptions extends Component {
         documentOnStart: this.state.documentOnStart,
         drawerTitle: this.state.drawerTitle,
         drawerButtonTitle: this.state.drawerButtonTitle,
+        drawerButtonIcon: this.state.drawerButtonIcon,
         resizingEnabled: this.state.resizingEnabled,
         draggingEnabled: this.state.draggingEnabled,
         tableOfContents: this.state.tableOfContents,
@@ -747,6 +759,46 @@ class ToolOptions extends Component {
                 this.handleInputChange(e);
               }}
             />
+          </div>
+          <div>
+            <label htmlFor="drawerButtonIcon">
+              Knappikon{" "}
+              <i
+                className="fa fa-question-circle"
+                data-toggle="tooltip"
+                title="Ikon på knapp som öppnar verktyget. Hämtat från Material-UI ikonbibliotek."
+              />
+            </label>
+            <Select
+              id="drawerButtonIcon"
+              value={this.state.drawerButtonIcon}
+              className="control-fixed-width"
+              name="drawerButtonIcon"
+              onChange={(e) => {
+                this.handleInputChange(e);
+              }}
+              renderValue={(value) => (
+                <div style={{ display: "flex", alignItems: "center" }}>
+                  {value === "Menu" ? <MenuIcon /> : <MenuBookIcon />}
+                  <Typography variant="body1" style={{ marginLeft: "5px" }}>
+                    {value}
+                  </Typography>
+                </div>
+              )}
+            >
+              <MenuItem value="Menu">
+                <ListItemIcon>
+                  <MenuIcon />
+                </ListItemIcon>
+                <ListItemText primary="Menu" />
+              </MenuItem>
+              <MenuItem value="MenuBook">
+                <ListItemIcon>
+                  <MenuBookIcon />
+                </ListItemIcon>
+                <ListItemText primary="MenuBook" />
+              </MenuItem>
+            </Select>
           </div>
           <div>
             <input
