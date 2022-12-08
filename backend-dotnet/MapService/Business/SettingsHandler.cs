@@ -1,7 +1,5 @@
-﻿using Json.More;
-using MapService.DataAccess;
-using MapService.Utility;
-using System.Text.Json;
+﻿using MapService.DataAccess;
+using MapService.Models;
 using System.Text.Json.Nodes;
 
 namespace MapService.Business.Settings
@@ -31,10 +29,10 @@ namespace MapService.Business.Settings
             try
             {
                 JsonArray tools = mapFile["tools"]?.AsArray();
-               
+
                 foreach (JsonObject tool in tools)
                 {
-                    if(tool["type"].ToString() == "layerswitcher")
+                    if (tool["type"].ToString() == "layerswitcher")
                     {
                         tool.Remove("options");
                         tool.Add("options", layerMenu);
@@ -54,7 +52,7 @@ namespace MapService.Business.Settings
             JsonObject mapFile = JsonFileDataAccess.ReadMapFileAsJsonObject(mapFileName);
 
             try
-            {                
+            {
                 //Convert to JsonArray
                 var tools = new JsonArray();
                 toolSettings.Select(x => x.Value)
@@ -63,11 +61,11 @@ namespace MapService.Business.Settings
 
                 //Remove the layerswitcher node from the tools node
                 var node = tools.FirstOrDefault(x => x["type"].ToString() == "layerswitcher");
-                if(node != null) 
+                if (node != null)
                 {
                     tools.Remove(node);
                 }
-                
+
                 //Add the layerswitcher node from file at Index = 0 to the tools node
                 var layerswitcher = mapFile["tools"].AsArray()
                                                     .Where(x => x["type"].ToString() == "layerswitcher")
@@ -162,7 +160,6 @@ namespace MapService.Business.Settings
             {
                 throw new Exception("Could not update map settings in the map configuration file.", ex);
             }
-
         }
 
         internal static string GenerateLayerId()
@@ -178,16 +175,62 @@ namespace MapService.Business.Settings
 
             for (int i = 0; i < size; i++)
             {
-
                 // Selecting a index randomly
                 int x = res.Next(str.Length);
 
-                // Appending the character at the 
+                // Appending the character at the
                 // index to the random alphanumeric string.
                 randomstring = randomstring + str[x];
             }
 
             return randomstring;
+        }
+
+        internal static int UpdateMapTool(string mapName, string toolName, JsonObject toolSettings)
+        {
+            JsonObject mapFile = JsonFileDataAccess.ReadMapFileAsJsonObject(mapName);
+
+            int statusCode = StatusCodes.Status500InternalServerError;
+
+            try
+            {
+                var tools = mapFile["tools"].AsArray();
+
+                if (tools == null) { return statusCode; }
+
+                var existingTool = tools.Where(x => x["type"].ToString().ToLower() == toolName.ToLower()).FirstOrDefault();
+
+                if (existingTool == null)
+                {
+                    var mapTool = new ToolSetting
+                    {
+                        type = toolName,
+                        index = 0,
+                        options = toolSettings
+                    };
+
+                    tools.Add(mapTool);
+
+                    statusCode = StatusCodes.Status201Created;
+                }
+                else
+                {
+                    int index = tools.IndexOf(existingTool);
+                    tools[index]["options"] = toolSettings;
+
+                    statusCode = StatusCodes.Status204NoContent;
+                }
+
+                mapFile["tools"] = tools;
+
+                JsonFileDataAccess.UpdateMapFile(mapName, mapFile);
+
+                return statusCode;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Could not update map tool in the map configuration file.", ex);
+            }
         }
     }
 }
