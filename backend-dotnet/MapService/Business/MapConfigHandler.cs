@@ -139,7 +139,7 @@ namespace MapService.Business.MapConfig
             try
             {
                 jsonElementLayers = GetLayersAsJsonDocument().RootElement;
-                jsonElementMaps = GetMapAsJsonDocument(map).RootElement; ;
+                jsonElementMaps = GetMapAsJsonDocument(map).RootElement;
             }
             catch (Exception)
             {

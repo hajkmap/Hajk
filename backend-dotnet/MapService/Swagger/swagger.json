@@ -79,19 +79,25 @@
     },
     "/informative/create": {
       "post": {
+        "deprecated": true,
         "tags": [
           "Admin - Informative/DocumentHandler"
         ],
-        "responses": {
-          "200": {
-            "description": "Create a document connected to a specified map",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/InformativeDocumentCreateBody"
-                }
+        "requestBody": {
+          "description": "Settings for given map's LayerSwitcher component",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/InformativeDocumentCreateBody"
               }
             }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Document created",
+            "content": {}
           },
           "5XX": {
             "description": "Internal server error",
@@ -106,10 +112,20 @@
         }
       },
       "put": {
-        "deprecated": true,
         "tags": [
           "Admin - Informative/DocumentHandler"
         ],
+        "requestBody": {
+          "description": "Settings for given map's LayerSwitcher component",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/InformativeDocumentCreateBody"
+              }
+            }
+          },
+          "required": true
+        },
         "responses": {
           "200": {
             "description": "Create a document connected to a specified map",
@@ -5036,11 +5052,13 @@
         "properties": {
           "documentName": {
             "type": "string",
-            "description": "The name of the document"
+            "description": "The name of the document", 
+            "example":  "Document"
           },
           "mapName": {
             "type": "string",
-            "description": "The map name"
+            "description": "The map name",
+            "example": "map_1"
           }
         }
       },

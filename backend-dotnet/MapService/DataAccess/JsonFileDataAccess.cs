@@ -94,9 +94,7 @@ namespace MapService.DataAccess
         /// <param name="mapFileName">The name of the map including the file ending. </param>
         public static void DeleteMapFile(string mapFileName)
         {
-            if (!mapFileName.EndsWith(".json"))
-                mapFileName += ".json";
-
+            FileUtility.AddMissingEnding(mapFileName, ".json");
             string path = GetPathToFile(mapFileName);
 
             if (!File.Exists(path)) { throw new FileNotFoundException(); }
@@ -125,9 +123,7 @@ namespace MapService.DataAccess
 
         public static void UpdateFile(string mapFileName, JsonObject mapFile)
         {
-            if (!mapFileName.EndsWith(".json"))
-                mapFileName += ".json";
-
+            FileUtility.AddMissingEnding(mapFileName, ".json");
             string path = GetPathToFile(mapFileName);
 
             if (!File.Exists(path)) { throw new FileNotFoundException(); }
@@ -142,11 +138,8 @@ namespace MapService.DataAccess
 
         internal static void DuplicateMapFile(string mapFileNameFrom, string mapFileNameTo)
         {
-            if (!mapFileNameFrom.EndsWith(".json"))
-                mapFileNameFrom += ".json";
-
-            if (!mapFileNameTo.EndsWith(".json"))
-                mapFileNameTo += ".json";
+            FileUtility.AddMissingEnding(mapFileNameFrom, ".json");
+            FileUtility.AddMissingEnding(mapFileNameTo, ".json");
 
             string sourcePath = GetPathToFile(mapFileNameFrom);
             string destinationPath = GetPathToFile(mapFileNameTo);
@@ -184,8 +177,7 @@ namespace MapService.DataAccess
 
             try
             {
-                if (!pathToFile.EndsWith(".json"))
-                    pathToFile = pathToFile + ".json";
+                FileUtility.AddMissingEnding(pathToFile, ".json");
 
                 string jsonString = File.ReadAllText(pathToFile);
 
