@@ -2,7 +2,6 @@ import React from "react";
 import PropTypes from "prop-types";
 import DocumentWindowBase from "./documentWindow/DocumentWindowBase";
 import MenuIcon from "@mui/icons-material/Menu";
-import MenuBookIcon from "@mui/icons-material/MenuBook";
 
 import DocumentHandlerModel from "./DocumentHandlerModel";
 import PanelMenuContainerView from "./panelMenu/PanelMenuContainerView";
@@ -217,15 +216,21 @@ class DocumentHandler extends React.PureComponent {
     });
   };
 
-  getIcon = (icon) => {
-    switch (icon) {
-      case "Menu":
-        return MenuIcon;
-      case "MenuBook":
-        return MenuBookIcon;
-      default:
-        return MenuIcon;
-    }
+  getIcon = (iconName) => {
+    const { dynamicImportUrls } = this.props.options;
+    if (dynamicImportUrls.iconFonts) {
+      return (props) => (
+        <span
+          style={{
+            display: "inline-flex",
+            alignItems: "center",
+            marginRight: "8px",
+          }}
+        >
+          <i className={`material-icons ${props.className}`}>{iconName}</i>
+        </span>
+      );
+    } else return null;
   };
 
   render() {
