@@ -1,6 +1,4 @@
 ﻿using MapService.Business.Settings;
-using MapService.Models;
-using MapService.Utility;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
 using System.ComponentModel.DataAnnotations;
@@ -82,10 +80,10 @@ namespace MapService.Controllers
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         [SwaggerOperation(Tags = new[] { "Admin - Maps and layers" })]
-        public ActionResult UpdateToolSettings([Required]JsonObject toolSettings, [Required]string mapFile)
+        public ActionResult UpdateToolSettings([Required] JsonObject toolSettings, [Required] string mapFile)
         {
             try
-            {                
+            {
                 SettingsHandler.UpdateToolSettings(toolSettings, mapFile);
             }
             catch (Exception ex)
@@ -123,6 +121,38 @@ namespace MapService.Controllers
 
             return StatusCode(StatusCodes.Status204NoContent);
         }
-       
+
+        /// <remarks>
+        ///
+        /// </remarks>
+        /// <param name="map">Name of the map</param>
+        /// <param name="tool">Name of the tool to be edited</param>
+        /// <param name="requestBody">Name of the tool to be edited</param>
+        /// <response code="201">Created</response>
+        /// <response code="204">Updated</response>
+        /// <response code="500">Internal Server Error</response>
+        [HttpPut]
+        [Route("update/{map}/{tool}")]
+        [ProducesResponseType(StatusCodes.Status201Created)]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        [SwaggerOperation(Tags = new[] { "Admin - Maps and layers" })]
+        public ActionResult UpdateMapTool([Required] string map, [Required] string tool, [Required][FromBody] JsonObject requestBody)
+        {
+            int statusCode;
+
+            try
+            {
+                statusCode = SettingsHandler.UpdateMapTool(map, tool, requestBody);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Internal server error");
+
+                return StatusCode(StatusCodes.Status500InternalServerError, "Internal Server Error");
+            }
+
+            return StatusCode(statusCode);
+        }
     }
 }
