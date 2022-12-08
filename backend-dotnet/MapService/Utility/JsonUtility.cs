@@ -92,5 +92,19 @@ namespace MapService.Utility
 
             return jsonNode;
         }
+
+        /// <summary>
+        /// Clone a Json Node from JsonNode
+        /// </summary>
+        /// <param name="jsonNode">A json node</param>
+        /// <returns>The json node</returns>
+        public static JsonNode? CloneJsonNodeFromJsonNode(JsonNode? jsonNode)
+        {
+            if (jsonNode == null) { return null; }
+
+            var clonedJsonNode = jsonNode.Deserialize<JsonNode?>();
+
+            return clonedJsonNode;
+        }
     }
 }

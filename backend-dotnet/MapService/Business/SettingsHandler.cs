@@ -87,5 +87,107 @@ namespace MapService.Business.Settings
                 throw new Exception("Could not update tool settings in the map configuration file.", ex);
             }
         }
+
+        internal static void UpdateLayerType(string layerType, JsonObject layerSettings)
+        {
+            //If id for layer is null then we generate a new one, otherwise we take it
+            string idValue = String.Empty;
+            JsonValue? id = layerSettings["id"]?.AsValue();
+            if (id == null)
+            {
+                idValue = GenerateLayerId();
+                layerSettings.Add(new KeyValuePair<string, JsonNode?>("id", idValue));
+            }
+            else
+            {
+                idValue = id.ToString();
+            }
+            var newIdValue = new { id = idValue };
+            JsonObject? newLayer = JsonUtility.ConvertToJsonObject(newIdValue);
+
+            JsonObject? layerSettingsObject = JsonUtility.ConvertToJsonObject(layerSettings);
+            var enumerator = layerSettingsObject.GetEnumerator();
+            while (enumerator.MoveNext())
+            {
+                var item = enumerator.Current;
+
+                if (item.Key == "id")
+                    continue;
+
+                newLayer?.Add(item.Key, JsonUtility.CloneJsonNodeFromJsonNode(item.Value));
+            }
+
+            JsonObject layerFile = JsonFileDataAccess.ReadLayerFileAsJsonObject();
+            try
+            {
+                //If layer is e.g. wmslayer then we add 's' to the end
+                if (layerType.Last() != 's')
+                    layerType = layerType + "s";
+                JsonArray? layers = layerFile[layerType]?.AsArray();
+
+                //Layer type not found in layers database.
+                if (layers == null)
+                    return;
+
+                //If we take the newly generated id, we put that id-value first in the array
+                JsonArray newLayers = new JsonArray();
+                Boolean newLayerIsAdded = false;
+                foreach (JsonNode layer in layers)
+                {
+                    if (layer["id"].AsValue().ToString() != idValue)
+                    {
+                        newLayers.Add(JsonUtility.CloneJsonNodeFromJsonNode(layer));
+                    }
+                    else
+                    {
+                        newLayers.Add(newLayer);
+                        newLayerIsAdded = true;
+                    }
+                }
+                if (id == null || (!newLayerIsAdded && !layers.Contains(idValue)))
+                {
+                    newLayers.Add(newLayer);
+                }
+
+                JsonArray? layerTypes = layerFile[layerType]?.AsArray();
+                layerTypes?.Clear();
+                foreach (JsonNode layer in newLayers)
+                {
+                    layerTypes?.Add(JsonUtility.CloneJsonNodeFromJsonNode(layer));
+                }
+
+                JsonFileDataAccess.UpdateLayerFile(layerFile);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Could not update map settings in the map configuration file.", ex);
+            }
+
+        }
+
+        internal static string GenerateLayerId()
+        {
+            Random res = new Random();
+
+            // String that contain both alphabets and numbers
+            String str = "abcdefghijklmnopqrstuvwxyz0123456789";
+            int size = 6;
+
+            // Initializing the empty string
+            String randomstring = "";
+
+            for (int i = 0; i < size; i++)
+            {
+
+                // Selecting a index randomly
+                int x = res.Next(str.Length);
+
+                // Appending the character at the 
+                // index to the random alphanumeric string.
+                randomstring = randomstring + str[x];
+            }
+
+            return randomstring;
+        }
     }
 }

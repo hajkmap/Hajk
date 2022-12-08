@@ -7,7 +7,7 @@ namespace MapService.DataAccess
 {
     public static class JsonFileDataAccess
     {
-        private const string LAYER_FILE = "layers.json";
+        public const string LAYER_FILE = "layers.json";
 
         public static IList<string> GetMapConfigFiles()
         {
@@ -110,6 +110,20 @@ namespace MapService.DataAccess
         /// <param name="mapFileName">The name of the map including the file ending. </param>
         /// <param name="mapFile">The content of the map as a JsonObject. </param>
         public static void UpdateMapFile(string mapFileName, JsonObject mapFile)
+        {
+            UpdateFile(mapFileName, mapFile);
+        }
+
+        /// <summary>
+        /// Updates the layers configuration.
+        /// </summary>
+        /// <param name="layerFile">The content of the layers as a JsonObject. </param>
+        public static void UpdateLayerFile(JsonObject layerFile)
+        {
+            UpdateFile(LAYER_FILE, layerFile);
+        }
+
+        public static void UpdateFile(string mapFileName, JsonObject mapFile)
         {
             if (!mapFileName.EndsWith(".json"))
                 mapFileName += ".json";
