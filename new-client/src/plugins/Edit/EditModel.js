@@ -377,12 +377,11 @@ class EditModel {
     // Now we merge the possible existing params with the rest, defined
     // below. We can be confident that we won't have duplicates and that
     // our values "win", as they are defined last.
-    let wfsVersion = this.options?.wfsVersion || "1.1.0";
 
     const mergedSearchParams = {
       ...existingSearchParams,
       SERVICE: "WFS",
-      VERSION: wfsVersion,
+      version: "1.1.0", // or "1.0.0"
       REQUEST: "GetFeature",
       TYPENAME: source.layers[0],
       SRSNAME: source.projection,
