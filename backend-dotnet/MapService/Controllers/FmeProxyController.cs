@@ -1,5 +1,6 @@
 ﻿using MapService.Business.FmeProxy;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Primitives;
 using Swashbuckle.AspNetCore.Annotations;
 using System.IO.Pipelines;
 
@@ -14,7 +15,6 @@ namespace MapService.Controllers
     }
 
     [Route("fmeproxy")]
-    [Produces("text/plain")]
     [ApiController]
     public class FmeProxyController : ControllerBase
     {
@@ -71,15 +71,29 @@ namespace MapService.Controllers
             try
             {
                 //Write response headers
-                string contentType = "";
-                if (response.Content.Headers.ContentType != null)
-                    contentType = response.Content.Headers.ContentType.ToString();
-                Response.ContentType = contentType;
-                Response.ContentLength = response.Content.Headers.ContentLength;
-
+                //string contentType = "";
+                //if (response.Content.Headers.ContentType != null)
+                //    contentType = response.Content.Headers.ContentType.ToString();
+                //Response.ContentType = contentType;
+                //Response.ContentLength = response.Content.Headers.ContentLength;
+                
                 foreach (var header in response.Content.Headers)
                 {
+                    var test1 = header.Key;
+                    var test2 = header.Value;
                     //Do stuff
+                    if (!Response.Headers.ContainsKey(header.Key))
+                        Response.Headers.Add(header.Key, new StringValues(header.Value.FirstOrDefault<string>()));
+                    else
+                        Response.Headers[header.Key.ToString()] = header.Value.FirstOrDefault<string>();
+                }
+
+                foreach (var header in response.Headers)
+                {
+                    if (!Response.Headers.ContainsKey(header.Key))
+                        Response.Headers.Add(header.Key, new StringValues(header.Value.FirstOrDefault<string>()));
+                    else
+                        Response.Headers[header.Key.ToString()] = header.Value.FirstOrDefault<string>();
                 }
 
                 //Write response body

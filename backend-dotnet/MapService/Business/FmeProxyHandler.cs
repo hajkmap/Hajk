@@ -22,7 +22,7 @@ namespace MapService.Business.FmeProxy
             //Create request
             client.DefaultRequestHeaders.Accept.Clear();
             //client.DefaultRequestHeaders.Add("Authorization", "Basic " + Convert.ToBase64String(Encoding.UTF8.GetBytes(fmeServerUser + ":" + fmeServerPwd)).ToString());
-                        
+            
             string url = fmeServerHost.EndsWith("/") ? fmeServerHost + urlPath : fmeServerHost + "/" + urlPath;
 
             var queryString = incomingRequest.QueryString.ToString();
