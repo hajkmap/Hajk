@@ -34,6 +34,7 @@ import ErrorIcon from "@mui/icons-material/Error";
 import HajkThemeProvider from "./components/HajkThemeProvider";
 import { initHFetch, hfetch, initFetchWrapper } from "utils/FetchWrapper";
 import LocalStorageHelper from "utils/LocalStorageHelper";
+import { getMergedSearchAndHashParams } from "utils/getMergedSearchAndHashParams";
 
 initHFetch();
 
@@ -75,13 +76,13 @@ hfetch("appConfig.json", { cacheBuster: true })
       if (appConfig.parseErrorMessage)
         parseErrorMessage = appConfig.parseErrorMessage;
 
-      // Grab URL params using the new URL API, save for later
-      const urlParams = new URL(window.location).searchParams;
+      // Grab URL params and save for later use
+      const initialURLParams = getMergedSearchAndHashParams();
 
       // If m param is supplied, try loading a map with that name
       // or else, fall back to default from appConfig.json
-      let activeMap = urlParams.has("m")
-        ? urlParams.get("m")
+      let activeMap = initialURLParams.has("m")
+        ? initialURLParams.get("m")
         : appConfig.defaultMap;
 
       // Check if mapserviceBase is set in appConfig. If it is not, we will
@@ -137,7 +138,7 @@ hfetch("appConfig.json", { cacheBuster: true })
                   mapConfig: mapConfig.mapConfig,
                   userDetails: mapConfig.userDetails,
                   userSpecificMaps: mapConfig.userSpecificMaps,
-                  urlParams,
+                  initialURLParams,
                 };
 
                 // TODO: Watchout - this can be a controversial introduction!
@@ -215,7 +216,12 @@ hfetch("appConfig.json", { cacheBuster: true })
                     appConfig: appConfig,
                     layersConfig: layersConfig,
                     mapConfig: mapConfig,
-                    urlParams,
+                    initialURLParams,
+                  };
+
+                  window.hajkPublicApi = {
+                    maxZoom: config.mapConfig.map.maxZoom,
+                    minZoom: config.mapConfig.map.minZoom,
                   };
 
                   // At this stage, we know for sure what activeMap is, so we can initiate the LocalStorageHelper

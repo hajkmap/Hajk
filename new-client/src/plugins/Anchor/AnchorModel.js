@@ -1,4 +1,5 @@
 import { isValidLayerId } from "../../utils/Validator";
+
 class AnchorModel {
   constructor(settings) {
     this.app = settings.app;
@@ -140,6 +141,18 @@ class AnchorModel {
     // Only add 'q' if it isn't empty
     q.length > 0 && url.searchParams.append("q", q);
 
+    // TODO: This functionality, perhaps the entire getAnchor function should
+    // be moved to a more central place.
+
+    // We want to update the URL with new hash value only
+    // if the newly calculated hash differs from the one that
+    // already exists in URL.
+    const newHash = "#" + url.searchParams.toString();
+    if (newHash !== window.location.hash) {
+      window.location.hash = newHash;
+    }
+
+    // TODO: Don't return the query string part. Hash params is enough.
     return url.toString();
   }
 }

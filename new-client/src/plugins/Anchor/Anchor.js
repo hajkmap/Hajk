@@ -1,12 +1,12 @@
 import React from "react";
 import propTypes from "prop-types";
+import Observer from "react-event-observer";
 import BaseWindowPlugin from "../BaseWindowPlugin";
 
 import ShareIcon from "@mui/icons-material/Share";
 
 import AnchorView from "./AnchorView";
 import AnchorModel from "./AnchorModel";
-import Observer from "react-event-observer";
 
 class Anchor extends React.PureComponent {
   static propTypes = {
@@ -16,8 +16,14 @@ class Anchor extends React.PureComponent {
   };
 
   // cleanUrl is lifted here so that it can be handled in both Model and View
+  // We need to grab the valid value on init. Since it's a string and we need a Boolean
+  // there are a couple of checks. As a shorthand, we specify the allowed values that
+  // will be interpreted as cleanMode === true inside an Array. Any other value of `clean`
+  // will be understood as `false`.
   state = {
-    cleanUrl: false,
+    cleanUrl: ["", "true", "1"].includes(
+      this.props.app.config.initialURLParams.get("clean")
+    ),
   };
 
   constructor(props) {

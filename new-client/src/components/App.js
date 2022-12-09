@@ -5,6 +5,7 @@ import { styled } from "@mui/material/styles";
 import { SnackbarProvider } from "notistack";
 import Observer from "react-event-observer";
 import { isMobile } from "../utils/IsMobile";
+import { getMergedSearchAndHashParams } from "../utils/getMergedSearchAndHashParams";
 import SrShortcuts from "../components/SrShortcuts/SrShortcuts";
 import Analytics from "../models/Analytics";
 import AppModel from "../models/AppModel.js";
@@ -493,23 +494,9 @@ class App extends React.PureComponent {
     window.addEventListener(
       "hashchange",
       () => {
-        // Extract existing params
-        const hashParams = new URLSearchParams(
-          window.location.hash.replaceAll("#", "")
-        );
-        console.log("hashParams: ", hashParams);
-
-        // We also want to extract query params
-        const queryParams = new URLSearchParams(document.location.search);
-        console.log("queryParams: ", queryParams);
-
-        // Let's merge both query and hash params,
-        // let hash params override query values
-        const mergedParams = new URLSearchParams({
-          ...Object.fromEntries(queryParams),
-          ...Object.fromEntries(hashParams),
-        });
-        console.log("mergedParams: ", mergedParams);
+        // Extract existing params. Using this helper we will take into account both
+        // the query and the hash parameters.
+        const mergedParams = getMergedSearchAndHashParams();
 
         // This will be refactored. But for now, if the merged
         // params contain the zoom level value…

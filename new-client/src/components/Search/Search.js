@@ -324,8 +324,8 @@ class Search extends React.PureComponent {
   handlePotentialUrlQuerySearch = () => {
     const { appModel } = this.props.app;
     // Grab the (already decoded) URL param values
-    const q = appModel.config.urlParams.get("q")?.trim(); // Use of "?." will return either a String or undefined
-    const s = appModel.config.urlParams.get("s")?.trim(); // (As opposed to null which would be the return value of get() otherwise!).
+    const q = appModel.config.initialURLParams.get("q")?.trim(); // Use of "?." will return either a String or undefined
+    const s = appModel.config.initialURLParams.get("s")?.trim(); // (As opposed to null which would be the return value of get() otherwise!).
 
     // Check so that we have a searchString in the url (q)
     if (q !== undefined && q.length > 0) {

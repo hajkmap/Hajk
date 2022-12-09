@@ -89,12 +89,19 @@
         // Wait a second to ensure that JS is processed after Hajk is loaded in
         // the IFRAME.
         setTimeout(() => {
+          // Retrieve some data from public API
           hajkPublicApi = {
             ...hajkPublicApi,
             ...iframe.contentWindow.hajkPublicApi,
           };
-          console.log("Got hajkPublicApi from IFRAME: ", hajkPublicApi);
-        }, 500);
+
+          // Ensure that the hash text field here corresponds to the actual from
+          // the embedded document (Hajk will change its hash string on init)
+          hashField.value = iframe.contentDocument.location.hash.replaceAll(
+            "#",
+            ""
+          );
+        }, 700);
       });
 
       updateButton.addEventListener("click", (e) => {
