@@ -1,19 +1,14 @@
 ﻿using MapService.Business.FmeProxy;
+using MapService.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Primitives;
 using Swashbuckle.AspNetCore.Annotations;
+using MapService.Utility;
+using System.Buffers;
 using System.IO.Pipelines;
 
 namespace MapService.Controllers
 {
-    public class MyActionResult : ActionResult
-    {
-        public override void ExecuteResult(ActionContext context)
-        {
-            
-        }
-    }
-
     [Route("fmeproxy")]
     [ApiController]
     public class FmeProxyController : ControllerBase
@@ -34,18 +29,18 @@ namespace MapService.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         [SwaggerOperation(Tags = new[] { "FME-server Proxy" })]
-        public async Task<MyActionResult> SendQueryToFmeServerAPI(string query)
+        public async Task<IActionResult> SendQueryToFmeServerAPI(string query)
         {
-            //string responseBody;
+            //string responseBody = "";
             HttpResponseMessage response = new HttpResponseMessage();
-            
+
             if (string.IsNullOrEmpty(query))
             {
                 _logger.LogWarning("Not allowed to call proxy with empty query");
                 Response.StatusCode = StatusCodes.Status400BadRequest;
                 //return StatusCode(StatusCodes.Status400BadRequest, "Not allowed to call proxy with empty query");
             }
-            
+
             try
             {
                 //responseBody = await FmeProxyHandler.SendQueryToFmeServerAPI(Request, query);
@@ -66,57 +61,7 @@ namespace MapService.Controllers
                 //return StatusCode(StatusCodes.Status500InternalServerError, "Internal Server Error");
             }
 
-            //Just for testing purposes
-            //****************
-            try
-            {
-                //Write response headers
-                //string contentType = "";
-                //if (response.Content.Headers.ContentType != null)
-                //    contentType = response.Content.Headers.ContentType.ToString();
-                //Response.ContentType = contentType;
-                //Response.ContentLength = response.Content.Headers.ContentLength;
-                
-                foreach (var header in response.Content.Headers)
-                {
-                    var test1 = header.Key;
-                    var test2 = header.Value;
-                    //Do stuff
-                    if (!Response.Headers.ContainsKey(header.Key))
-                        Response.Headers.Add(header.Key, new StringValues(header.Value.FirstOrDefault<string>()));
-                    else
-                        Response.Headers[header.Key.ToString()] = header.Value.FirstOrDefault<string>();
-                }
-
-                foreach (var header in response.Headers)
-                {
-                    if (!Response.Headers.ContainsKey(header.Key))
-                        Response.Headers.Add(header.Key, new StringValues(header.Value.FirstOrDefault<string>()));
-                    else
-                        Response.Headers[header.Key.ToString()] = header.Value.FirstOrDefault<string>();
-                }
-
-                //Write response body
-                const int BUFFER_SIZE = 1024 * 1024;
-                var responseStream = await response.Content.ReadAsStreamAsync();
-                var bytes = new byte[BUFFER_SIZE];
-                while (true)
-                {
-                    var n = responseStream.Read(bytes, 0, BUFFER_SIZE);
-                    if (n == 0)
-                        break;
-
-                    var test = await Response.BodyWriter.WriteAsync(bytes);
-                }
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Internal Server Error");
-                Response.StatusCode = StatusCodes.Status500InternalServerError;
-            }
-            //***************
-
-            return new MyActionResult();
+            return new ProxyResponseUtility(response);
         }
     }
 }
