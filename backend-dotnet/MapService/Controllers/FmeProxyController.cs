@@ -31,19 +31,16 @@ namespace MapService.Controllers
         [SwaggerOperation(Tags = new[] { "FME-server Proxy" })]
         public async Task<IActionResult> SendQueryToFmeServerAPI(string query)
         {
-            //string responseBody = "";
             HttpResponseMessage response = new HttpResponseMessage();
 
             if (string.IsNullOrEmpty(query))
             {
                 _logger.LogWarning("Not allowed to call proxy with empty query");
                 Response.StatusCode = StatusCodes.Status400BadRequest;
-                //return StatusCode(StatusCodes.Status400BadRequest, "Not allowed to call proxy with empty query");
             }
 
             try
             {
-                //responseBody = await FmeProxyHandler.SendQueryToFmeServerAPI(Request, query);
                 response = await FmeProxyHandler.SendQueryToFmeServerAPI(Request, query);
 
             }
@@ -51,14 +48,12 @@ namespace MapService.Controllers
             {
                 _logger.LogError(ex, "HttpRequestException");
                 var statusCode = ex.StatusCode == null ? StatusCodes.Status500InternalServerError : ((int)ex.StatusCode);
-                //return StatusCode(statusCode, ex.Message);
                 Response.StatusCode = statusCode;
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Internal Server Error");
                 Response.StatusCode = StatusCodes.Status500InternalServerError;
-                //return StatusCode(StatusCodes.Status500InternalServerError, "Internal Server Error");
             }
 
             return new ProxyResponseUtility(response);

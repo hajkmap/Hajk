@@ -2,6 +2,7 @@
 using System.Net.Http.Headers;
 using MapService.Utility;
 using System.Text.RegularExpressions;
+using Microsoft.AspNetCore.Http.Headers;
 
 namespace MapService.Business.FmeProxy
 {
@@ -11,7 +12,7 @@ namespace MapService.Business.FmeProxy
 
         public static async Task<HttpResponseMessage> SendQueryToFmeServerAPI(HttpRequest incomingRequest, string urlPath)
         {
-            //Better way to handle this?
+            //Temporary solution
             urlPath = urlPath.Replace("%2F", "/");
 
             //Get server settings
@@ -32,16 +33,29 @@ namespace MapService.Business.FmeProxy
             HttpRequestMessage request = new HttpRequestMessage(new HttpMethod(incomingRequest.Method), url);
 
             //If needed, set request body and headers
-            var contentEncoding = incomingRequest.Headers.ContentEncoding;
             if (new HttpMethod(incomingRequest.Method) != HttpMethod.Get)
             {
+                //Body
                 StreamReader bodyStreamReader = new StreamReader(incomingRequest.Body);
                 string body = await bodyStreamReader.ReadToEndAsync();
                 request.Content = new StringContent(body);
+
+                var requestHeaders = new RequestHeaders(incomingRequest.Headers);
+                
+                /*if (requestHeaders != null)
+                {
+                    foreach (var header in requestHeaders)
+                    {
+                        var test = header.Key;
+                        var test2 = header.Value;
+                        if (request.Content.Headers.Contains(header.Key))
+                            request.Content.Headers.Add(header.Key, header.Value.ToArray());
+                    }
+                }*/
+                //Headers
                 if (incomingRequest.ContentType != null) 
                 { 
-                    request.Content.Headers.ContentType = 
-                        new MediaTypeHeaderValue(incomingRequest.ContentType); 
+                    request.Content.Headers.ContentType = new MediaTypeHeaderValue(incomingRequest.ContentType); 
                 }
                 request.Content.Headers.ContentLength = incomingRequest.ContentLength;
             }
@@ -51,7 +65,6 @@ namespace MapService.Business.FmeProxy
             response.EnsureSuccessStatusCode(); //throws HttpRequestException if other than status code 200 is returned
 
             //Return content as string
-            //return await response.Content.ReadAsStringAsync();
             return response;
         }
 
