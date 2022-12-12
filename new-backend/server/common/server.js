@@ -27,6 +27,14 @@ const logger = log4js.getLogger("hajk");
 
 export default class ExpressServer {
   constructor() {
+    // Check engine version and display notice if applicable
+    const recommendedMajorVersion = 18;
+    if (process.versions.node.split(".")[0] < recommendedMajorVersion) {
+      logger.warn(
+        `The current NodeJS runtime version (${process.version}) is lower than the recommended one (v${recommendedMajorVersion}.0.0). Some features will not be available. Consider upgrading to the recommended version in order to make use of all the latest features.`
+      );
+    }
+
     logger.debug("Process's current working directory: ", process.cwd());
     const apiSpec = path.join(__dirname, "api.yml");
     const validateResponses = !!(

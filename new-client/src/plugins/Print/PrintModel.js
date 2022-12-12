@@ -27,6 +27,7 @@ export default class PrintModel {
     this.northArrowUrl = settings.options.northArrow || "";
     this.logoMaxWidth = settings.options.logoMaxWidth;
     this.includeImageBorder = settings.options.includeImageBorder;
+    this.northArrowMaxWidth = settings.options.northArrowMaxWidth;
     this.scales = settings.options.scales;
     this.copyright = settings.options.copyright || "";
     this.date = settings.options.date || "";
@@ -1100,7 +1101,10 @@ export default class PrintModel {
             data: arrowData,
             width: arrowWidth,
             height: arrowHeight,
-          } = await this.getImageForPdfFromUrl(this.northArrowUrl, 10);
+          } = await this.getImageForPdfFromUrl(
+            this.northArrowUrl,
+            this.northArrowMaxWidth
+          );
 
           const arrowPlacement = this.getPlacement(
             options.northArrowPlacement,

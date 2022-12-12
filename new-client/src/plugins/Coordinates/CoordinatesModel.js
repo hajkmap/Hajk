@@ -237,6 +237,10 @@ class CoordinatesModel {
     this.map.removeInteraction(this.draw);
     this.map.clickLock.delete("coordinates");
   }
+
+  closeSnackbar() {
+    this.localObserver.publish("hideSnackbar");
+  }
 }
 
 export default CoordinatesModel;

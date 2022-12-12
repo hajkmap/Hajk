@@ -197,7 +197,7 @@ paths:
     get:
       tags:
         - Client-accessible
-      description: List available layers
+      description: List available layers. If AD authentication is active, filter by user's permission.
       parameters:
         - in: header
           name: X-Control-Header
@@ -208,6 +208,24 @@ paths:
       responses:
         200:
           description: All layers were fetched successfully
+          content: {}
+  /mapconfig/layers:
+    get:
+      tags:
+        - Admin - Maps and layers
+      description: List available layers, do not apply any visibility restrictions (required for Admin UI).
+      responses:
+        200:
+          description: All layers were fetched successfully
+          content: {}
+  /mapconfig/layers/verify:
+    get:
+      tags:
+        - Admin - Maps and layers
+      description: Verify that all layers used in layers repository are reachable
+      responses:
+        200:
+          description: Object that contains missing layers, grouped per OGC service.
           content: {}
   /mapconfig/list:
     get:

@@ -65,7 +65,7 @@ class PanelMenuView extends React.PureComponent {
     // defined, probably because of timing issues...
     const itemMatchesOpenDocument =
       (document && menuItem.document === document.documentFileName) ||
-      (options.documentOnStart &&
+      (options.documentOnStart !== "" &&
         options.documentOnStart === menuItem.document);
     // Do not use spread because we are mutating original item
     Object.assign(menuItem, {

@@ -564,7 +564,9 @@ class ToolOptions extends Component {
         // We want to compare Numbers and Strings, hence the use of == operator.
         // eslint-disable-next-line
         if (layersConfig[layerTypes[i]][j].id == layerId) {
-          found = layersConfig[layerTypes[i]][j].caption;
+          found =
+            layersConfig[layerTypes[i]][j]?.internalLayerName ||
+            layersConfig[layerTypes[i]][j].caption;
           break;
         }
       }

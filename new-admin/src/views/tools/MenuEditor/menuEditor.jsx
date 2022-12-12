@@ -9,7 +9,12 @@ import TreeRow from "./treerow.jsx";
 import { withStyles } from "@material-ui/core/styles";
 import { SketchPicker } from "react-color";
 
-import { Typography, RadioGroup, Radio, FormControlLabel } from "@material-ui/core";
+import {
+  Typography,
+  RadioGroup,
+  Radio,
+  FormControlLabel,
+} from "@material-ui/core";
 
 import {
   ColorButtonBlue,
@@ -72,6 +77,8 @@ class ToolOptions extends Component {
     documentOnStart: "",
     drawerTitle: "",
     drawerButtonTitle: "",
+    resizingEnabled: false,
+    draggingEnabled: false,
     searchImplemented: true,
     enablePrint: true,
     closePanelOnMapLinkOpen: false,
@@ -146,6 +153,8 @@ class ToolOptions extends Component {
         documentOnStart: tool.options.documentOnStart,
         drawerTitle: tool.options.drawerTitle,
         drawerButtonTitle: tool.options.drawerButtonTitle,
+        resizingEnabled: tool.options.resizingEnabled || false,
+        draggingEnabled: tool.options.draggingEnabled || false,
         searchImplemented: tool.options.searchImplemented,
         enablePrint: tool.options.enablePrint,
         closePanelOnMapLinkOpen: tool.options.closePanelOnMapLinkOpen,
@@ -247,6 +256,8 @@ class ToolOptions extends Component {
         documentOnStart: this.state.documentOnStart,
         drawerTitle: this.state.drawerTitle,
         drawerButtonTitle: this.state.drawerButtonTitle,
+        resizingEnabled: this.state.resizingEnabled,
+        draggingEnabled: this.state.draggingEnabled,
         tableOfContents: this.state.tableOfContents,
         defaultDocumentColorSettings: this.state.defaultDocumentColorSettings,
         menuConfig: this.state.menuConfig,
@@ -752,6 +763,36 @@ class ToolOptions extends Component {
           </div>
           <div>
             <input
+              id="resizingEnabled"
+              name="resizingEnabled"
+              type="checkbox"
+              onChange={(e) => {
+                this.handleInputChange(e);
+              }}
+              checked={this.state.resizingEnabled}
+            />
+            &nbsp;
+            <label htmlFor="resizingEnabled">
+              Tillåt att ändra storlek på dokumentfönstret
+            </label>
+          </div>
+          <div>
+            <input
+              id="draggingEnabled"
+              name="draggingEnabled"
+              type="checkbox"
+              onChange={(e) => {
+                this.handleInputChange(e);
+              }}
+              checked={this.state.draggingEnabled}
+            />
+            &nbsp;
+            <label htmlFor="draggingEnabled">
+              Tillåt att flytta på dokumentfönstret
+            </label>
+          </div>
+          <div>
+            <input
               id="enablePrint"
               name="enablePrint"
               type="checkbox"
@@ -891,17 +932,17 @@ class ToolOptions extends Component {
           </div>
           <div>
             <label htmlFor="tocPrintMode" style={{ width: "400px" }}>
-            Välj hur innehållsförteckningen skall skivas ut{" "}
-                <i
-                  className="fa fa-question-circle"
-                  data-toggle="tooltip"
-                  title="Välj hur innehållsförteckning ska skrivas ut"
-                />
+              Välj hur innehållsförteckningen skall skivas ut{" "}
+              <i
+                className="fa fa-question-circle"
+                data-toggle="tooltip"
+                title="Välj hur innehållsförteckning ska skrivas ut"
+              />
             </label>
-            <RadioGroup 
+            <RadioGroup
               id="printMode"
-              name="printMode" 
-              value={this.state.tableOfContents.printMode} 
+              name="printMode"
+              value={this.state.tableOfContents.printMode}
               onChange={(e) => {
                 const value = e.target.value;
                 this.setState((prevState) => ({
@@ -910,11 +951,24 @@ class ToolOptions extends Component {
                     printMode: value,
                   },
                 }));
-              }}>
-            <FormControlLabel value="full" control={<Radio color="primary" />} label="Hela" />
-            <FormControlLabel value="partial" control={<Radio color="primary" />} label="Valda" />
-            <FormControlLabel value="none" control={<Radio color="primary" />} label="Inga" />
-          </RadioGroup>
+              }}
+            >
+              <FormControlLabel
+                value="full"
+                control={<Radio color="primary" />}
+                label="Hela"
+              />
+              <FormControlLabel
+                value="partial"
+                control={<Radio color="primary" />}
+                label="Valda"
+              />
+              <FormControlLabel
+                value="none"
+                control={<Radio color="primary" />}
+                label="Inga"
+              />
+            </RadioGroup>
           </div>
           <div className="separator">Faktaruta</div>
           <div>

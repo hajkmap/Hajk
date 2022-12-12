@@ -1,6 +1,6 @@
 {
   "name": "hajk-client",
-  "version": "3.11.0",
+  "version": "3.11.0-rc.1",
   "description": "Hajk Client UI",
   "homepage": ".",
   "repository": {
@@ -26,47 +26,34 @@
     "react": "$react",
     "react-dom": "$react-dom"
   },
-  "browserslist": {
-    "production": [
-      ">0.5% in SE",
-      "last 2 versions",
-      "Firefox ESR",
-      "not dead",
-      "last 100 edge versions"
-    ],
-    "development": [
-      "last 1 chrome version",
-      "last 1 firefox version",
-      "last 1 safari version",
-      "last 100 edge versions"
-    ]
-  },
+  "browserslist": [
+    "defaults and supports es6-module",
+    "ios > 12"
+  ],
   "devDependencies": {
     "eslint-config-prettier": "^8.5.0",
     "eslint-plugin-prettier": "^4.2.1",
-    "prettier": "^2.7.1",
+    "prettier": "^2.8.0",
     "react-app-rewired": "^2.2.1",
     "react-scripts": "5.0.1",
-    "source-map-explorer": "^2.5.2"
+    "source-map-explorer": "^2.5.3"
   },
   "dependencies": {
-    "@date-io/date-fns": "^2.15.0",
-    "@emotion/react": "^11.10.4",
-    "@emotion/styled": "^11.10.4",
+    "@date-io/date-fns": "^2.16.0",
+    "@emotion/react": "^11.10.5",
+    "@emotion/styled": "^11.10.5",
     "@fontsource/material-icons": "^4.5.4",
-    "@fontsource/open-sans": "^4.5.11",
+    "@fontsource/open-sans": "^4.5.13",
     "@fontsource/roboto": "^4.5.8",
     "@jonkoops/matomo-tracker": "^0.7.0",
-    "@mui/icons-material": "^5.10.3",
-    "@mui/lab": "^5.0.0-alpha.99",
-    "@mui/material": "^5.10.5",
-    "@mui/x-data-grid": "^5.17.3",
-    "@nieuwlandgeo/sldreader": "^0.2.15",
+    "@mui/icons-material": "^5.10.16",
+    "@mui/lab": "^5.0.0-alpha.110",
+    "@mui/material": "^5.10.16",
+    "@mui/x-data-grid": "^5.17.14",
+    "@nieuwlandgeo/sldreader": "^0.2.16",
     "@turf/buffer": "^6.5.0",
     "@turf/transform-translate": "^6.5.0",
     "@turf/union": "^6.5.0",
-    "abortcontroller-polyfill": "^1.7.3",
-    "allsettled-polyfill": "^1.0.4",
     "date-fns": "^2.29.3",
     "detect-browser": "^5.3.0",
     "elm-pep": "^1.0.6",
@@ -74,30 +61,29 @@
     "html2canvas": "1.4.1",
     "html2json": "^1.0.2",
     "intro.js": "^6.0.0",
-    "intro.js-react": "^0.6.0",
+    "intro.js-react": "^0.7.1",
     "jspdf": "^2.5.1",
     "jszip": "^3.10.1",
     "load-google-maps-api": "^2.0.2",
-    "notistack": "^2.0.5",
+    "notistack": "^2.0.8",
     "ol": "^7.1.0",
     "pdfjs-dist": "^2.16.105",
     "plausible-tracker": "^0.3.8",
     "proj4": "^2.8.0",
     "react": "^18.2.0",
-    "react-app-polyfill": "^3.0.0",
     "react-color": "^2.19.3",
     "react-dom": "^18.2.0",
     "react-event-observer": "^0.5.11",
     "react-horizontal-scrolling-menu": "^0.7.8",
-    "react-markdown": "^8.0.3",
+    "react-markdown": "^8.0.4",
     "react-number-format": "^4.9.4",
     "react-rnd": "^10.3.7",
-    "react-scroll": "^1.8.7",
+    "react-scroll": "^1.8.8",
     "react-virtualized": "^9.22.3",
-    "recharts": "^2.1.14",
+    "recharts": "^2.1.16",
     "rehype-raw": "^6.1.1",
     "remark-gfm": "^3.0.1",
-    "x2js": "^3.4.3",
+    "x2js": "^3.4.4",
     "xlsx": "^0.18.5"
   }
 }

@@ -45,6 +45,7 @@ class AppModel {
     this.plugins = {};
     this.activeTool = undefined;
     this.layersFromParams = [];
+    this.groupLayersFromParams = [];
     this.cqlFiltersFromParams = {};
     this.hfetch = hfetch;
     this.pluginHistory = new Map();
@@ -609,9 +610,21 @@ class AppModel {
     // Loop the layers and add each of them to the map
     this.layers.forEach((layer) => {
       if (this.layersFromParams.length > 0) {
+        // Override the default visibleAtStart if a value was provided in URLSearchParams
         layer.visibleAtStart = this.layersFromParams.some(
           (layerId) => layerId === layer.id
         );
+
+        // groupLayersFromParams is an object where keys are layer IDs and values are
+        // the sublayers that should be active for this given layer. A layer's key will
+        // only exist in groupLayersFromParams if there is a subset of sublayers to be shown
+        // at start (default behavior is to turn on all sublayers).
+        layer.visibleAtStartSubLayers = Object.hasOwn(
+          this.groupLayersFromParams,
+          layer.id
+        )
+          ? this.groupLayersFromParams[layer.id]?.split(",")
+          : [];
       }
       layer.cqlFilter = this.cqlFiltersFromParams[layer.id] || null;
       this.addMapLayer(layer);
@@ -704,10 +717,21 @@ class AppModel {
     // Merge query params to the map config from JSON
     let x = parseFloat(urlSearchParams.x),
       y = parseFloat(urlSearchParams.y),
-      z = parseInt(urlSearchParams.z, 10),
-      l = undefined;
+      z = parseInt(urlSearchParams.z, 10);
+
     if (typeof urlSearchParams.l === "string") {
-      l = urlSearchParams.l.split(",");
+      this.layersFromParams = urlSearchParams.l.split(",");
+    }
+
+    if (typeof urlSearchParams.gl === "string") {
+      try {
+        this.groupLayersFromParams = JSON.parse(urlSearchParams.gl);
+      } catch (error) {
+        console.error(
+          "Couldn't parse the group layers parameter. Attempted with this value:",
+          urlSearchParams.gl
+        );
+      }
     }
 
     if (Number.isNaN(x)) {
@@ -724,10 +748,6 @@ class AppModel {
     mapConfig.map.center[0] = x;
     mapConfig.map.center[1] = y;
     mapConfig.map.zoom = z;
-
-    if (l) {
-      this.layersFromParams = l;
-    }
 
     if (f) {
       // Filters come as a URI encoded JSON object, so we must parse it first
@@ -836,9 +856,17 @@ class AppModel {
           // Find the corresponding layer
           const layer = layers.wmslayers.find((l) => l.id === wmslayerId);
 
+          // Prevent crash if no layer was found, see #1206
+          if (layer === undefined) {
+            console.warn(
+              `WMS layer with ID "${wmslayerId}" does not exist and should be removed from config. Please contact the system administrator.`
+            );
+            return undefined;
+          }
+
           // Look into the layersInfo array - it will contain sublayers. We must
           // expose each one of them as a WFS service.
-          return layer.layersInfo.map((sl) => {
+          return layer?.layersInfo.map((sl) => {
             return {
               id: sl.id,
               pid: layer.id, // Relevant for group layers: will hold the actual OL layer name, not only current sublayer
@@ -846,22 +874,26 @@ class AppModel {
               url: sl.searchUrl || layer.url,
               layers: [sl.id],
               searchFields:
-                typeof sl.searchPropertyName === "string"
+                typeof sl.searchPropertyName === "string" &&
+                sl.searchPropertyName.length > 0
                   ? sl.searchPropertyName.split(",")
                   : [],
               infobox: sl.infobox || "",
               infoclickIcon: sl.infoclickIcon || "",
               aliasDict: "",
               displayFields:
-                typeof sl.searchDisplayName === "string"
+                typeof sl.searchDisplayName === "string" &&
+                sl.searchDisplayName.length > 0
                   ? sl.searchDisplayName.split(",")
                   : [],
               secondaryLabelFields:
-                typeof sl.secondaryLabelFields === "string"
+                typeof sl.secondaryLabelFields === "string" &&
+                sl.secondaryLabelFields.length > 0
                   ? sl.secondaryLabelFields.split(",")
                   : [],
               shortDisplayFields:
-                typeof sl.searchShortDisplayName === "string"
+                typeof sl.searchShortDisplayName === "string" &&
+                sl.searchShortDisplayName.length > 0
                   ? sl.searchShortDisplayName.split(",")
                   : [],
               geometryField: sl.searchGeometryField || "geom",
@@ -873,8 +905,9 @@ class AppModel {
       );
 
       // Spread the WMS search layers onto the array with WFS search sources,
-      // from now on they're equal to our code.
-      Array.isArray(wmslayers) && wfslayers.push(...wmslayers);
+      // from now on they're equal to our code. Before spreading, let's filter
+      // the wmslayers so we get rid of potential undefined values (see #1206).
+      Array.isArray(wmslayers) && wfslayers.push(...wmslayers.filter(Boolean));
 
       searchTool.options.sources = wfslayers;
     }

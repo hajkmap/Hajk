@@ -1,7 +1,6 @@
 import React from "react";
 import PropTypes from "prop-types";
 import { styled } from "@mui/material/styles";
-import FirExportEdpView from "./FirExportEdpView";
 import FirExportPropertyListView from "./FirExportPropertyListView";
 import FirExportResidentListView from "./FirExportResidentListView";
 
@@ -56,20 +55,8 @@ class FirExportView extends React.PureComponent {
           ) : (
             ""
           )}
-
           {this.model.config.residentList ? (
             <FirExportResidentListView
-              results={this.state.results}
-              model={this.model}
-              app={this.app}
-              localObserver={this.localObserver}
-            />
-          ) : (
-            ""
-          )}
-
-          {this.model.config.edp ? (
-            <FirExportEdpView
               results={this.state.results}
               model={this.model}
               app={this.app}
