@@ -1,4 +1,5 @@
 using Microsoft.OpenApi.Models;
+using Serilog;
 using System.Reflection;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -18,6 +19,7 @@ builder.Services.AddSwaggerGen(options =>
         Description = ".NET-backend for HAJK."
     });
 
+
     options.EnableAnnotations();
 
     var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
@@ -25,6 +27,8 @@ builder.Services.AddSwaggerGen(options =>
 
     options.IncludeXmlComments(xmlPath);
 });
+
+builder.Host.UseSerilog();
 
 var app = builder.Build();
 
@@ -35,6 +39,10 @@ IConfiguration configuration = new ConfigurationBuilder()
     .AddJsonFile("appsettings.json")
     .Build();
 AppDomain.CurrentDomain.SetData("Configuration", configuration);
+
+Log.Logger = new LoggerConfiguration()
+    .ReadFrom.Configuration(configuration)
+    .CreateLogger();
 
 // Configure the HTTP request pipeline.
 //if (app.Environment.IsDevelopment())
@@ -49,6 +57,8 @@ app.UseSwaggerUI(c =>
 //}
 
 app.UseAuthorization();
+
+app.UseSerilogRequestLogging();
 
 app.MapControllers();
 
