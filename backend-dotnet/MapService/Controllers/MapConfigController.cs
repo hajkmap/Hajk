@@ -34,6 +34,9 @@ namespace MapService.Controllers
 
             try
             {
+                var appDataFolderPath = MapService.Utility.PathUtility.GetPath("DataContent:Path");
+                _logger.LogInformation("GetLayers DataFolderPath: {appDataFolderPath} ", appDataFolderPath);
+
                 layers = MapConfigHandler.GetLayersAsJsonDocument();
             }
             catch (Exception ex)
@@ -90,6 +93,9 @@ namespace MapService.Controllers
         {
             try
             {
+                var appDataFolderPath = MapService.Utility.PathUtility.GetPath("DataContent:Path");
+                _logger.LogInformation("DuplicateMap DataFolderPath: {appDataFolderPath} ", appDataFolderPath);
+
                 MapConfigHandler.DuplicateMap(nameFrom, nameTo);
             }
             catch (Exception ex)
