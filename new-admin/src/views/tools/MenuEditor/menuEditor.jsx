@@ -777,7 +777,7 @@ class ToolOptions extends Component {
               target="_blank"
               startIcon={<OpenInNewIcon />}
             >
-              <Typography variant="button">Ikoner</Typography>
+              <Typography variant="button">Visa ikoner</Typography>
             </ColorButtonBlue>
           </div>
           <div>
