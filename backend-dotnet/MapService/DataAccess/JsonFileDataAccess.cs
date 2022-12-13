@@ -94,7 +94,7 @@ namespace MapService.DataAccess
         /// <param name="mapFileName">The name of the map including the file ending. </param>
         public static void DeleteMapFile(string mapFileName)
         {
-            FileUtility.AddMissingEnding(mapFileName, ".json");
+            mapFileName = FileUtility.AddMissingEnding(mapFileName, ".json");
             string path = GetPathToFile(mapFileName);
 
             if (!File.Exists(path)) { throw new FileNotFoundException(); }
@@ -123,7 +123,7 @@ namespace MapService.DataAccess
 
         public static void UpdateFile(string mapFileName, JsonObject mapFile)
         {
-            FileUtility.AddMissingEnding(mapFileName, ".json");
+            mapFileName = FileUtility.AddMissingEnding(mapFileName, ".json");
             string path = GetPathToFile(mapFileName);
 
             if (!File.Exists(path)) { throw new FileNotFoundException(); }
@@ -138,8 +138,8 @@ namespace MapService.DataAccess
 
         internal static void DuplicateMapFile(string mapFileNameFrom, string mapFileNameTo)
         {
-            FileUtility.AddMissingEnding(mapFileNameFrom, ".json");
-            FileUtility.AddMissingEnding(mapFileNameTo, ".json");
+            mapFileNameFrom = FileUtility.AddMissingEnding(mapFileNameFrom, ".json");
+            mapFileNameTo = FileUtility.AddMissingEnding(mapFileNameTo, ".json");
 
             string sourcePath = GetPathToFile(mapFileNameFrom);
             string destinationPath = GetPathToFile(mapFileNameTo);
@@ -177,7 +177,7 @@ namespace MapService.DataAccess
 
             try
             {
-                FileUtility.AddMissingEnding(pathToFile, ".json");
+                pathToFile = FileUtility.AddMissingEnding(pathToFile, ".json");
 
                 string jsonString = File.ReadAllText(pathToFile);
 
@@ -204,6 +204,9 @@ namespace MapService.DataAccess
             var appDataFolderPath = PathUtility.GetPath("DataContent:Path");
 
             if (appDataFolderPath == null)
+                throw new DirectoryNotFoundException();
+
+            if (!Directory.Exists(appDataFolderPath))
                 throw new DirectoryNotFoundException();
 
             return appDataFolderPath;
