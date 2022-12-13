@@ -8,6 +8,7 @@ import DragHandle from "@material-ui/icons/DragHandle";
 import TreeRow from "./treerow.jsx";
 import { withStyles } from "@material-ui/core/styles";
 import { SketchPicker } from "react-color";
+import OpenInNewIcon from "@material-ui/icons/OpenInNew";
 
 import {
   Typography,
@@ -757,7 +758,7 @@ class ToolOptions extends Component {
               <i
                 className="fa fa-question-circle"
                 data-toggle="tooltip"
-                title="Ikon på knapp som öppnar verktyget. Hämtat från Material-UI ikonbibliotek."
+                title="Ikon på knapp som öppnar verktyget. Hämtat från Material Symbols ikonbibliotek."
               />
             </label>
             <input
@@ -769,6 +770,15 @@ class ToolOptions extends Component {
                 this.handleInputChange(e);
               }}
             />
+            <ColorButtonBlue
+              variant="contained"
+              className="btn"
+              href="https://fonts.google.com/icons"
+              target="_blank"
+              startIcon={<OpenInNewIcon />}
+            >
+              <Typography variant="button">Ikoner</Typography>
+            </ColorButtonBlue>
           </div>
           <div>
             <input
