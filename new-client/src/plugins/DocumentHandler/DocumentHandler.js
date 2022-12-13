@@ -224,7 +224,7 @@ class DocumentHandler extends React.PureComponent {
           style={{
             display: "inline-flex",
             alignItems: "center",
-            marginRight: "8px",
+            marginRight: this.props.options.drawerButtonTitle ? "8px" : "0px",
           }}
         >
           <i className={`material-icons ${props.className}`}>{iconName}</i>
