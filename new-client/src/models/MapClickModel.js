@@ -692,40 +692,21 @@ export default class MapClickModel {
     const features = [];
     const parser = new DOMParser();
     const xmlDoc = parser.parseFromString(xml, "text/xml");
-    const featureNodes = xmlDoc.getElementsByTagName("FeatureInfoResponse");
-    for (let i = 0; i < featureNodes.length; i++) {
-      const featureNode = featureNodes[i];
-      const feature = new Feature();
-      const properties = {};
-      const geometryNode = featureNode.getElementsByTagName("Geometry")[0];
-      const geometry = this.#parseWmsGetFeatureInfoGeometry(geometryNode);
-      feature.setGeometry(geometry);
-      const propertyNodes = featureNode.getElementsByTagName("Attribute");
-      for (let j = 0; j < propertyNodes.length; j++) {
-        const propertyNode = propertyNodes[j];
-        const name = propertyNode.getAttribute("name");
-        const value = propertyNode.getAttribute("value");
-        properties[name] = value;
+    const featureInfoResponse = xmlDoc.getElementsByTagName(
+      "FeatureInfoResponse"
+    );
+    if (featureInfoResponse.length > 0) {
+      const fields = featureInfoResponse[0].getElementsByTagName("FIELDS");
+      if (fields.length > 0) {
+        const feature = new Feature();
+        for (let i = 0; i < fields[0].attributes.length; i++) {
+          const attribute = fields[0].attributes[i];
+          feature.set(attribute.name, attribute.value);
+        }
+        features.push(feature);
       }
-      feature.setProperties(properties);
-      features.push(feature);
     }
     return features;
-  }
-
-  #parseWmsGetFeatureInfoGeometry(geometryNode) {
-    const geometryType = geometryNode.getAttribute("type");
-    const geometry = geometryNode.textContent;
-    switch (geometryType) {
-      case "Point":
-        return this.wktParser.readGeometry(geometry);
-      case "LineString":
-        return this.wktParser.readGeometry(geometry);
-      case "Polygon":
-        return this.wktParser.readGeometry(geometry);
-      default:
-        return null;
-    }
   }
 
   #parseGMLFeatures(gml) {
