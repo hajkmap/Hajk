@@ -472,6 +472,12 @@ class App extends React.PureComponent {
   componentDidCatch(error) {}
 
   bindHandlers() {
+    // Extend the hajkPublicApi with a couple of things that are available now
+    window.hajkPublicApi = {
+      ...window.hajkPublicApi,
+      olMap: this.appModel.map,
+    };
+
     // Register a handle to prevent pinch zoom on mobile devices.
     document.body.addEventListener(
       "touchmove",
