@@ -74,12 +74,6 @@ export default function DrawOrderListItem({
     settingClickCallback(layer.ol_uid);
   };
 
-  const toggleInfo = (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    // TODO: Refinement needed
-  };
-
   return (
     <div>
       {isBackgroundLayer ? (
@@ -93,11 +87,6 @@ export default function DrawOrderListItem({
             <PublicOutlinedIcon inset="true" />
           </IconButton>
           <ListItemText primary={layer.get("caption")} />
-          <ListItemSecondaryAction>
-            <IconButton edge="end" onClick={toggleInfo}>
-              <InfoOutlinedIcon />
-            </IconButton>
-          </ListItemSecondaryAction>
         </ListItem>
       ) : (
         <>
