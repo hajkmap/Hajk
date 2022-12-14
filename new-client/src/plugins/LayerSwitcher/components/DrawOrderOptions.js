@@ -4,17 +4,17 @@ import { useSnackbar } from "notistack";
 import LocalStorageHelper from "utils/LocalStorageHelper";
 
 import {
-  Button,
+  IconButton,
   Divider,
   ListItemIcon,
   ListItemText,
   Menu,
   MenuItem,
 } from "@mui/material";
-import FolderOpen from "@mui/icons-material/FolderOpen";
-import GppMaybeIcon from "@mui/icons-material/GppMaybe";
-import Save from "@mui/icons-material/Save";
-import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
+import SettingsBackupRestoreOutlinedIcon from "@mui/icons-material/SettingsBackupRestoreOutlined";
+import GppMaybeOutlinedIcon from "@mui/icons-material/GppMaybeOutlined";
+import SaveOutlinedIcon from "@mui/icons-material/SaveOutlined";
+import MoreVertOutlinedIcon from "@mui/icons-material/MoreVertOutlined";
 
 export default function DrawOrderOptions({
   app,
@@ -145,15 +145,15 @@ export default function DrawOrderOptions({
 
   return (
     <>
-      <Button
+      <IconButton
+        edge="end"
         aria-controls={optionsMenuIsOpen ? "basic-menu" : undefined}
         aria-haspopup="true"
         aria-expanded={optionsMenuIsOpen ? "true" : undefined}
         onClick={handleShowMoreOptionsClick}
-        endIcon={<KeyboardArrowDownIcon />}
       >
-        Fler alternativ
-      </Button>
+        <MoreVertOutlinedIcon />
+      </IconButton>
       <Menu
         anchorEl={anchorEl}
         open={optionsMenuIsOpen}
@@ -166,9 +166,9 @@ export default function DrawOrderOptions({
           }}
         >
           <ListItemIcon>
-            <Save fontSize="small" />
+            <SaveOutlinedIcon fontSize="small" />
           </ListItemIcon>
-          <ListItemText>Spara aktiva lager</ListItemText>
+          <ListItemText>Spara session</ListItemText>
         </MenuItem>
         <MenuItem
           onClick={() => {
@@ -177,9 +177,9 @@ export default function DrawOrderOptions({
           }}
         >
           <ListItemIcon>
-            <FolderOpen fontSize="small" />
+            <SettingsBackupRestoreOutlinedIcon fontSize="small" />
           </ListItemIcon>
-          <ListItemText>Återställ sparade lager</ListItemText>
+          <ListItemText>Återställ session</ListItemText>
         </MenuItem>
         <Divider />
         <MenuItem
@@ -189,7 +189,7 @@ export default function DrawOrderOptions({
           }}
         >
           <ListItemIcon>
-            <GppMaybeIcon fontSize="small" />
+            <GppMaybeOutlinedIcon fontSize="small" />
           </ListItemIcon>
           <ListItemText>{`${
             filterList.has("system") ? "Dölj" : "Visa"

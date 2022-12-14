@@ -3,7 +3,7 @@ import { createPortal } from "react-dom";
 import propTypes from "prop-types";
 
 import { styled } from "@mui/material/styles";
-import { AppBar, Tab, Tabs } from "@mui/material";
+import { AppBar, Tab, Tabs, Badge } from "@mui/material";
 
 import BackgroundSwitcher from "./components/BackgroundSwitcher.js";
 import LayerGroup from "./components/LayerGroup.js";
@@ -42,6 +42,7 @@ class LayersSwitcherView extends React.PureComponent {
       chapters: [],
       baseLayers: props.model.getBaseLayers(),
       activeTab: 0,
+      activeLayers: this.getActiveLayers(),
     };
 
     props.app.globalObserver.subscribe("informativeLoaded", (chapters) => {
@@ -51,7 +52,24 @@ class LayersSwitcherView extends React.PureComponent {
         });
       }
     });
+
+    props.app.globalObserver.subscribe("core.layerVisibilityChanged", (l) => {
+      this.setState({
+        activeLayers: this.getActiveLayers(),
+      });
+    });
   }
+
+  getActiveLayers = () => {
+    const layerTypes = ["layer", "group"];
+    return this.props.map
+      .getAllLayers()
+      .filter(
+        (l) =>
+          l.get("active") === true &&
+          Array.from(layerTypes).includes(l.get("layerType"))
+      ).length;
+  };
 
   /**
    * LayerSwitcher consists of two Tabs: one shows
@@ -157,18 +175,25 @@ class LayersSwitcherView extends React.PureComponent {
             // false is OK though, apparently.
             variant="fullWidth"
             textColor="inherit"
+            sx={{ "& .MuiBadge-badge": { right: -16, top: 8 } }}
           >
             <Tab label="Kartlager" />
-            <Tab label="Bakgrund" />
             {this.options.showActiveLayersView === true && (
-              <Tab label="Aktiva lager" />
+              <Tab
+                label={
+                  <Badge badgeContent={this.state.activeLayers} color="primary">
+                    Aktiva
+                  </Badge>
+                }
+              />
             )}
+            <Tab label="Bakgrund" />
           </Tabs>
         </StyledAppBar>
         <ContentWrapper>
           {this.renderLayerGroups(this.state.activeTab === 0)}
           <BackgroundSwitcher
-            display={this.state.activeTab === 1}
+            display={this.state.activeTab === 2}
             layers={this.state.baseLayers}
             layerMap={this.props.model.layerMap}
             backgroundSwitcherBlack={this.options.backgroundSwitcherBlack}
@@ -178,7 +203,7 @@ class LayersSwitcherView extends React.PureComponent {
             app={this.props.app}
           />
           {this.options.showActiveLayersView === true &&
-            this.state.activeTab === 2 && (
+            this.state.activeTab === 1 && (
               <DrawOrder map={this.props.map} app={this.props.app} />
             )}
         </ContentWrapper>

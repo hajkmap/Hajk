@@ -95,3 +95,8 @@ body {
 .introjs-tooltip {
   min-width: 280px !important;
 }
+
+/* Z-index override for draggable listitem in layerswitcher */
+.smooth-dnd-ghost.vertical.smooth-dnd-draggable-wrapper {
+  z-index: 99999 !important;
+}

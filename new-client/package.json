@@ -79,6 +79,7 @@
     "react-number-format": "^4.9.4",
     "react-rnd": "^10.3.7",
     "react-scroll": "^1.8.7",
+    "react-smooth-dnd": "^0.11.1",
     "react-virtualized": "^9.22.3",
     "recharts": "^2.1.14",
     "rehype-raw": "^6.1.1",
