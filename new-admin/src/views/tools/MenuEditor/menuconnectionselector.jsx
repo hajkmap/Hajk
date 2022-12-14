@@ -3,8 +3,8 @@ import React from "react";
 import Grid from "@material-ui/core/Grid";
 import ArrowRightIcon from "@material-ui/icons/ArrowRight";
 import DescriptionIcon from "@material-ui/icons/Description";
-import RoomIcon from "@material-ui/icons/Room";
-import LanguageIcon from "@material-ui/icons/Language";
+//import RoomIcon from "@material-ui/icons/Room";
+//import LanguageIcon from "@material-ui/icons/Language";
 import List from "@material-ui/core/List";
 import ListItem from "@material-ui/core/ListItem";
 import ListItemText from "@material-ui/core/ListItemText";
@@ -47,7 +47,7 @@ const MENU_CONNECTION_TYPES = {
 const MAPLINK_TEXT = "Kartlänk";
 const WEBLINK_TEXT = "Webblänk";
 const NONE_TEXT = "Inget valt";
-const MAP_TEXT = "Karta";
+//const MAP_TEXT = "Karta";
 
 const styles = (theme) => ({
   menuItem: {
@@ -61,8 +61,8 @@ const styles = (theme) => ({
 class MenuConnectionSelector extends React.Component {
   state = {
     open: false,
-    mapLinkValue: this.props.menuItem.maplink,
-    linkValue: this.props.menuItem.link,
+    //mapLinkValue: this.props.menuItem.maplink,
+    //linkValue: this.props.menuItem.link,
     documentValue: this.props.menuItem.document,
     activeMenu: "",
   };
@@ -102,11 +102,7 @@ class MenuConnectionSelector extends React.Component {
   };
 
   getMenuConnectionTypeIcon = (type) => {
-    return type === MENU_CONNECTION_TYPES.link ? (
-      <LanguageIcon></LanguageIcon>
-    ) : type === MENU_CONNECTION_TYPES.mapLink ? (
-      <RoomIcon></RoomIcon>
-    ) : type === MENU_CONNECTION_TYPES.documentConnection ? (
+    return type === MENU_CONNECTION_TYPES.documentConnection ? (
       <DescriptionIcon></DescriptionIcon>
     ) : type === MENU_CONNECTION_TYPES.none ? (
       <BlockIcon></BlockIcon>
@@ -174,8 +170,8 @@ class MenuConnectionSelector extends React.Component {
   reset = () => {
     const { menuItem } = this.props;
     this.setState({
-      mapLinkValue: menuItem.maplink,
-      linkValue: menuItem.link,
+      //mapLinkValue: menuItem.maplink,
+      //linkValue: menuItem.link,
       documentValue: menuItem.document,
       connectionsMenuAnchorEl: null,
     });
@@ -296,13 +292,13 @@ class MenuConnectionSelector extends React.Component {
       return this.renderDocumentList();
     }
 
-    if (activeMenu === MENU_CONNECTION_TYPES.link) {
+    /*if (activeMenu === MENU_CONNECTION_TYPES.link) {
       return this.renderLink();
     }
 
     if (activeMenu === MENU_CONNECTION_TYPES.mapLink) {
       return this.renderMapLink();
-    }
+    }*/
   };
 
   handleChange = (target, value) => {
@@ -364,7 +360,7 @@ class MenuConnectionSelector extends React.Component {
       );
     }
 
-    if (this.state.value === MENU_CONNECTION_TYPES.link) {
+    /*if (this.state.value === MENU_CONNECTION_TYPES.link) {
       return this.getRenderedSelectionText(
         WEBLINK_TEXT,
         this.getMenuConnectionTypeIcon(MENU_CONNECTION_TYPES.link)
@@ -376,7 +372,7 @@ class MenuConnectionSelector extends React.Component {
         MAP_TEXT,
         this.getMenuConnectionTypeIcon(MENU_CONNECTION_TYPES.mapLink)
       );
-    }
+    }*/
 
     return this.getRenderedSelectionText(NONE_TEXT);
   };

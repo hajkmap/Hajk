@@ -2,8 +2,8 @@ import React from "react";
 
 import Grid from "@material-ui/core/Grid";
 import ArrowRightIcon from "@material-ui/icons/ArrowRight";
-import DescriptionIcon from "@material-ui/icons/Description";
-import RoomIcon from "@material-ui/icons/Room";
+//import DescriptionIcon from "@material-ui/icons/Description";
+//import RoomIcon from "@material-ui/icons/Room";
 import LanguageIcon from "@material-ui/icons/Language";
 import List from "@material-ui/core/List";
 import ListItem from "@material-ui/core/ListItem";
@@ -47,7 +47,7 @@ const MENU_CONNECTION_TYPES = {
 const MAPLINK_TEXT = "Kartlänk";
 const WEBLINK_TEXT = "Webblänk";
 const NONE_TEXT = "Inget valt";
-const MAP_TEXT = "Karta";
+//const MAP_TEXT = "Karta";
 
 const styles = (theme) => ({
   menuItem: {
@@ -61,9 +61,9 @@ const styles = (theme) => ({
 class MenuConnectionSelector3 extends React.Component {
   state = {
     open: false,
-    mapLinkValue: this.props.menuItem.maplink,
+    //mapLinkValue: this.props.menuItem.maplink,
     linkValue: this.props.menuItem.link,
-    documentValue: this.props.menuItem.document,
+    //documentValue: this.props.menuItem.document,
     activeMenu: "",
   };
 
@@ -104,10 +104,6 @@ class MenuConnectionSelector3 extends React.Component {
   getMenuConnectionTypeIcon = (type) => {
     return type === MENU_CONNECTION_TYPES.link ? (
       <LanguageIcon></LanguageIcon>
-    ) : type === MENU_CONNECTION_TYPES.mapLink ? (
-      <RoomIcon></RoomIcon>
-    ) : type === MENU_CONNECTION_TYPES.documentConnection ? (
-      <DescriptionIcon></DescriptionIcon>
     ) : type === MENU_CONNECTION_TYPES.none ? (
       <BlockIcon></BlockIcon>
     ) : (
@@ -174,9 +170,9 @@ class MenuConnectionSelector3 extends React.Component {
   reset = () => {
     const { menuItem } = this.props;
     this.setState({
-      mapLinkValue: menuItem.maplink,
+      //mapLinkValue: menuItem.maplink,
       linkValue: menuItem.link,
-      documentValue: menuItem.document,
+      //documentValue: menuItem.document,
       connectionsMenuAnchorEl: null,
     });
   };
@@ -323,13 +319,13 @@ class MenuConnectionSelector3 extends React.Component {
   };
 
   getRenderValue = () => {
-    const { menuItem } = this.props;
-    if (this.state.value === MENU_CONNECTION_TYPES.documentConnection) {
+    //const { menuItem } = this.props;
+    /*if (this.state.value === MENU_CONNECTION_TYPES.documentConnection) {
       return this.getRenderedSelectionText(
         menuItem.document,
         this.getMenuConnectionTypeIcon(MENU_CONNECTION_TYPES.documentConnection)
       );
-    }
+    }*/
 
     if (this.state.value === MENU_CONNECTION_TYPES.none) {
       return this.getRenderedSelectionText(
@@ -345,12 +341,12 @@ class MenuConnectionSelector3 extends React.Component {
       );
     }
 
-    if (this.state.value === MENU_CONNECTION_TYPES.mapLink) {
+    /*if (this.state.value === MENU_CONNECTION_TYPES.mapLink) {
       return this.getRenderedSelectionText(
         MAP_TEXT,
         this.getMenuConnectionTypeIcon(MENU_CONNECTION_TYPES.mapLink)
       );
-    }
+    }*/
 
     return this.getRenderedSelectionText(NONE_TEXT);
   };
