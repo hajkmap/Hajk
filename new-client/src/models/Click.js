@@ -200,6 +200,11 @@ function getFeaturesFromGml(response, text) {
 }
 
 function getFeaturesFromXml(response, text) {
+  // In cases where the xml have no FIELDS element, the xml is parsed as gml.
+  if (!text.includes("<FIELDS")) {
+    return getFeaturesFromGml(response, text);
+  }
+
   let parser = new DOMParser();
   let doc = parser.parseFromString(text, "text/xml");
   let features = [];
