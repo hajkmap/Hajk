@@ -30,6 +30,11 @@ namespace MapService.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         [SwaggerOperation(Tags = new[] { "FME-server Proxy" })]
+        [HttpGet]
+        [HttpPost]
+        [HttpPut]
+        [HttpDelete]
+        [HttpPatch]
         public async Task<IActionResult> SendQueryToFmeServerAPI(string query)
         {
             HttpResponseMessage response = new HttpResponseMessage();
@@ -37,7 +42,7 @@ namespace MapService.Controllers
             if (string.IsNullOrEmpty(query))
             {
                 _logger.LogWarning("Not allowed to call proxy with empty query");
-                Response.StatusCode = StatusCodes.Status400BadRequest;
+                response.StatusCode = (HttpStatusCode)StatusCodes.Status400BadRequest;
             }
 
             try
