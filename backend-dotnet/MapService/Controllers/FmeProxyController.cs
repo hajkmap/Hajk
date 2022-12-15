@@ -43,25 +43,20 @@ namespace MapService.Controllers
             try
             {
                 response = await FmeProxyHandler.SendQueryToFmeServerAPI(Request, query);
-                return new ProxyResponseUtility(response);
-
             }
             catch (HttpRequestException ex)
             {
                 _logger.LogError(ex, "HttpRequestException");
-                HttpStatusCode internalServerErrorStatusCode = (HttpStatusCode)StatusCodes.Status500InternalServerError;
-                HttpStatusCode statusCode = (HttpStatusCode)(ex.StatusCode == null ? internalServerErrorStatusCode : ex.StatusCode);
-                //Response.StatusCode = statusCode;
+                HttpStatusCode statusCode = (HttpStatusCode)(ex.StatusCode == null ? (HttpStatusCode)StatusCodes.Status500InternalServerError : ex.StatusCode);
                 response.StatusCode = statusCode;
-                return new ProxyResponseUtility(response);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Internal Server Error");
-                //Response.StatusCode = StatusCodes.Status500InternalServerError;
                 response.StatusCode = (HttpStatusCode)StatusCodes.Status500InternalServerError;
-                return new ProxyResponseUtility(response);
             }
+
+            return new ProxyResponseUtility(response);
         }
     }
 }

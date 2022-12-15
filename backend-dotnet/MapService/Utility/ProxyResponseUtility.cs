@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Primitives;
+using System.Net;
 
 namespace MapService.Utility
 {
@@ -15,22 +16,30 @@ namespace MapService.Utility
         public async Task ExecuteResultAsync(ActionContext context)
         {
             var response = context.HttpContext.Response;
-            response.StatusCode = (int)_responseMessage.StatusCode;
-
-            //Headers
-            response.Headers.Clear();
-            foreach (var header in _responseMessage.Content.Headers)
+            try
             {
-                response.Headers.Append(header.Key, header.Value.ToArray());
-            }
+                response.StatusCode = (int)_responseMessage.StatusCode;
 
-            foreach (var header in _responseMessage.Headers)
+                //Headers
+                response.Headers.Clear();
+                foreach (var header in _responseMessage.Content.Headers)
+                {
+                    response.Headers.Append(header.Key, header.Value.ToArray());
+                }
+
+                foreach (var header in _responseMessage.Headers)
+                {
+                    response.Headers.Append(header.Key, header.Value.ToArray());
+                }
+
+                //Body
+                await _responseMessage.Content.CopyToAsync(response.Body);
+            }
+            catch (Exception ex)
             {
-                response.Headers.Append(header.Key, header.Value.ToArray());
+                response.StatusCode = StatusCodes.Status500InternalServerError;
             }
-
-            //Body
-            await _responseMessage.Content.CopyToAsync(response.Body);
+            
         }
     }
 }

@@ -22,7 +22,7 @@ namespace MapService.Business.FmeProxy
 
             //Create request
             client.DefaultRequestHeaders.Accept.Clear();
-            //client.DefaultRequestHeaders.Add("Authorization", "Basic " + Convert.ToBase64String(Encoding.UTF8.GetBytes(fmeServerUser + ":" + fmeServerPwd)).ToString());
+            client.DefaultRequestHeaders.TryAddWithoutValidation("Authorization", Convert.ToBase64String(Encoding.UTF8.GetBytes(fmeServerUser + ":" + fmeServerPwd)).ToString());
             
             string url = fmeServerHost.EndsWith("/") ? fmeServerHost + urlPath : fmeServerHost + "/" + urlPath;
 
@@ -41,13 +41,13 @@ namespace MapService.Business.FmeProxy
                 request.Content = new StringContent(body);
                 
                 //Headers
-                /*if (incomingRequest.ContentType != null)
+                if (incomingRequest.ContentType != null)
                 {
                     request.Content.Headers.ContentType = new MediaTypeHeaderValue(incomingRequest.ContentType);
                 }
-                request.Content.Headers.ContentLength = incomingRequest.ContentLength;*/
+                request.Content.Headers.ContentLength = incomingRequest.ContentLength;
 
-                var incomingHeaders = incomingRequest.Headers.GetEnumerator();
+                /*var incomingHeaders = incomingRequest.Headers.GetEnumerator();
                 request.Headers.Clear();
                 request.Content.Headers.Clear();
                 while (incomingHeaders.MoveNext())
@@ -62,7 +62,7 @@ namespace MapService.Business.FmeProxy
                         request.Content.Headers.TryAddWithoutValidation(header.Key, header.Value.ToArray());
 
                     //If it could not be added to either, the header will not be included in the request
-                }
+                }*/
 
             }
             
@@ -70,7 +70,6 @@ namespace MapService.Business.FmeProxy
             var response = await client.SendAsync(request);
             response.EnsureSuccessStatusCode(); //throws HttpRequestException if other than status code 200 is returned
 
-            //Return content as string
             return response;
         }
 
