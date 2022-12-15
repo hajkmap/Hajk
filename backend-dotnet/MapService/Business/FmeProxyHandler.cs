@@ -39,27 +39,33 @@ namespace MapService.Business.FmeProxy
                 StreamReader bodyStreamReader = new StreamReader(incomingRequest.Body);
                 string body = await bodyStreamReader.ReadToEndAsync();
                 request.Content = new StringContent(body);
-
-                var requestHeaders = new RequestHeaders(incomingRequest.Headers);
                 
-                /*if (requestHeaders != null)
-                {
-                    foreach (var header in requestHeaders)
-                    {
-                        var test = header.Key;
-                        var test2 = header.Value;
-                        if (request.Content.Headers.Contains(header.Key))
-                            request.Content.Headers.Add(header.Key, header.Value.ToArray());
-                    }
-                }*/
                 //Headers
-                if (incomingRequest.ContentType != null) 
-                { 
-                    request.Content.Headers.ContentType = new MediaTypeHeaderValue(incomingRequest.ContentType); 
+                /*if (incomingRequest.ContentType != null)
+                {
+                    request.Content.Headers.ContentType = new MediaTypeHeaderValue(incomingRequest.ContentType);
                 }
-                request.Content.Headers.ContentLength = incomingRequest.ContentLength;
-            }
+                request.Content.Headers.ContentLength = incomingRequest.ContentLength;*/
 
+                var incomingHeaders = incomingRequest.Headers.GetEnumerator();
+                request.Headers.Clear();
+                request.Content.Headers.Clear();
+                while (incomingHeaders.MoveNext())
+                {
+                    var header = incomingHeaders.Current;
+
+                    //Try add as request header 
+                    var headerAdded = request.Headers.TryAddWithoutValidation(header.Key, header.Value.ToArray());
+
+                    //If not succesful try add as content header
+                    if (!headerAdded)
+                        request.Content.Headers.TryAddWithoutValidation(header.Key, header.Value.ToArray());
+
+                    //If it could not be added to either, the header will not be included in the request
+                }
+
+            }
+            
             //Get Response
             var response = await client.SendAsync(request);
             response.EnsureSuccessStatusCode(); //throws HttpRequestException if other than status code 200 is returned
