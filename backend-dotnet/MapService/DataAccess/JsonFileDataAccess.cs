@@ -89,6 +89,17 @@ namespace MapService.DataAccess
         }
 
         /// <summary>
+        /// Deletes the specified document file
+        /// </summary>
+        /// <param name="documentFileName">The name of the document. </param>
+        public static void DeleteDocumentFile(string documentFileName)
+        {
+            documentFileName = FileUtility.AddMissingEnding(documentFileName, ".json");
+            string path = GetPathToDocumentFile(documentFileName);
+            FileUtility.DeleteFile(path);
+        }
+
+        /// <summary>
         /// Deletes the map configuration.
         /// </summary>
         /// <param name="mapFileName">The name of the map including the file ending. </param>

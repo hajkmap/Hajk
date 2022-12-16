@@ -58,5 +58,12 @@ namespace MapService.Utility
                 throw;
             }
         }
+
+        public static void DeleteFile(string path)
+        {
+            if (!File.Exists(path)) { throw new FileNotFoundException(); }
+
+            File.Delete(path);
+        }
     }
 }
