@@ -1,7 +1,8 @@
 using MapService.Utility;
-using Microsoft.AspNetCore.Hosting.Server;
+using System.Text.Encodings.Web;
 using System.Text.Json;
 using System.Text.Json.Nodes;
+using System.Text.Unicode;
 
 namespace MapService.DataAccess
 {
@@ -130,6 +131,7 @@ namespace MapService.DataAccess
 
             var jsonSerializerOptions = new JsonSerializerOptions
             {
+                Encoder = JavaScriptEncoder.Create(UnicodeRanges.BasicLatin, UnicodeRanges.Latin1Supplement),
                 WriteIndented = true
             };
 
@@ -161,8 +163,9 @@ namespace MapService.DataAccess
 
         public static void SaveJsonFile(string pathToFile, JsonObject jsonObject)
         {
-            JsonSerializerOptions jsonSerializerOptions = new JsonSerializerOptions()
+            var jsonSerializerOptions = new JsonSerializerOptions()
             {
+                Encoder = JavaScriptEncoder.Create(UnicodeRanges.BasicLatin, UnicodeRanges.Latin1Supplement),
                 WriteIndented = true,
             };
 
@@ -217,7 +220,7 @@ namespace MapService.DataAccess
             return Path.Combine(GetPathToDocumentsFolder(), fileName).ToString();
         }
 
-        private static string GetPathToDocumentsFolder() 
+        private static string GetPathToDocumentsFolder()
         {
             var documentsFolderPath = PathUtility.GetPath("Documents:Path");
 
