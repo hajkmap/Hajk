@@ -1,8 +1,10 @@
 ﻿using MapService.DataAccess;
 using MapService.Models;
 using MapService.Utility;
+using System.Text.Encodings.Web;
 using System.Text.Json;
 using System.Text.Json.Nodes;
+using System.Text.Unicode;
 
 namespace MapService.Business.Informative
 {
@@ -17,7 +19,7 @@ namespace MapService.Business.Informative
             string documentPath = PathUtility.GetPath("Documents:Path");
             if (documentPath == null)
                 return new List<string>();
-            
+
             IEnumerable<string> allowedExtentions = new List<string>() { "json" };
             return FileUtility.GetFiles(documentPath, allowedExtentions);
         }
@@ -51,7 +53,7 @@ namespace MapService.Business.Informative
             var documentNameList = new List<string>();
 
             var documentNames = GetAllDocuments();
-            
+
             foreach (var documentName in documentNames)
             {
                 var jsonObject = JsonFileDataAccess.ReadDocumentFileAsJsonObject(documentName);
@@ -120,6 +122,7 @@ namespace MapService.Business.Informative
             string stringDocument = JsonUtility.ConvertToJsonObject(newDocument).ToJsonString(
                 new JsonSerializerOptions()
                 {
+                    Encoder = JavaScriptEncoder.Create(UnicodeRanges.BasicLatin, UnicodeRanges.Latin1Supplement),
                     WriteIndented = true
                 }
             );
