@@ -82,8 +82,7 @@ namespace MapService.DataAccess
         /// <returns>True if the file exists. False if the file does not exist.</returns>
         public static bool DocumentFileExists(string documentName)
         {
-            if (!documentName.EndsWith(".json"))
-                documentName += ".json";
+            documentName = FileUtility.AddMissingEnding(documentName, ".json");
 
             return File.Exists(GetPathToDocumentFile(documentName));
         }
