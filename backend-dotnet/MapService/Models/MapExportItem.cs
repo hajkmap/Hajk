@@ -16,9 +16,15 @@
         {
             public string name { get; set; }
 
-            public BaseLayerExportItem(string name)
-            { 
+            /// <summary>
+            /// The "layers" property from the layers.json file. 
+            /// </summary>
+            public List<string> subLayers { get; set; }
+
+            public BaseLayerExportItem(string name, List<string> subLayers)
+            {
                 this.name = name;
+                this.subLayers = subLayers;
             }
         }
 
@@ -54,7 +60,7 @@
                 /// <param name="subLayers">The "layers" propery from the layers.json file.</param>
                 public GroupLayerExportItem(LayerExportItem.LayerExportBaseItem layerExportItem)
                 {
-                    this.name = layerExportItem.caption;
+                    this.name = layerExportItem.name;
                     this.subLayers = layerExportItem.subLayers;
                 }
             }

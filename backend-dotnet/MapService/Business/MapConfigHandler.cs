@@ -148,7 +148,7 @@ namespace MapService.Business.MapConfig
 
             var layerExportItems = FilterLayers(jsonElementLayers);
             JsonObject? jsonObjectLayerExportItems = JsonUtility.ConvertToJsonObject(layerExportItems.layers);
-            if (map == "layers")
+            if (map == "layers" || map == JsonFileDataAccess.LAYER_FILE)
             {
                 if (jsonObjectLayerExportItems == null)
                     throw new NullReferenceException();
@@ -184,7 +184,7 @@ namespace MapService.Business.MapConfig
 
             foreach (PathMatch path in result)
             {
-                if (!path.Value.TryGetProperty("caption", out JsonElement caption) && caption.GetString() == null)
+                if (!path.Value.TryGetProperty("caption", out JsonElement name) && name.GetString() == null)
                     continue;
 
                 if (!path.Value.TryGetProperty("id", out JsonElement id) && id.GetString() == null)
@@ -193,7 +193,7 @@ namespace MapService.Business.MapConfig
                 if (!path.Value.TryGetProperty("layers", out JsonElement layers))
                 {
                     layerExportItem.layers.Add(id.GetString(),
-                                               new LayerExportItem.LayerExportBaseItem(caption.GetString(), null));
+                                               new LayerExportItem.LayerExportBaseItem(name.GetString(), null));
                     continue;
                 }
 
@@ -208,7 +208,7 @@ namespace MapService.Business.MapConfig
                 }
 
                 layerExportItem.layers.Add(id.GetString(),
-                    new LayerExportItem.LayerExportBaseItem(caption.GetString(), subLayers));
+                    new LayerExportItem.LayerExportBaseItem(name.GetString(), subLayers));
             }
 
             return layerExportItem;
@@ -231,8 +231,9 @@ namespace MapService.Business.MapConfig
 
             foreach (string baseLayerId in baseLayerIds)
             {
-                string? caption = layerExportItems.layers[baseLayerId].caption;
-                baseLayers.Add(new MapExportItem.BaseLayerExportItem(caption));
+                string? name = layerExportItems.layers[baseLayerId].name;
+                List<string> sublayers = layerExportItems.layers[baseLayerId].subLayers;
+                baseLayers.Add(new MapExportItem.BaseLayerExportItem(name, sublayers));
             }
 
             JsonElement groupsNode;
