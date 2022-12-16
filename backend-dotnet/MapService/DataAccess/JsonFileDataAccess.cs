@@ -83,10 +83,20 @@ namespace MapService.DataAccess
         /// <returns>True if the file exists. False if the file does not exist.</returns>
         public static bool DocumentFileExists(string documentName)
         {
-            if (!documentName.EndsWith(".json"))
-                documentName += ".json";
+            documentName = FileUtility.AddMissingEnding(documentName, ".json");
 
             return File.Exists(GetPathToDocumentFile(documentName));
+        }
+
+        /// <summary>
+        /// Deletes the specified document file
+        /// </summary>
+        /// <param name="documentFileName">The name of the document. </param>
+        public static void DeleteDocumentFile(string documentFileName)
+        {
+            documentFileName = FileUtility.AddMissingEnding(documentFileName, ".json");
+            string path = GetPathToDocumentFile(documentFileName);
+            FileUtility.DeleteFile(path);
         }
 
         /// <summary>

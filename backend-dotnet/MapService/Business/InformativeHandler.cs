@@ -129,5 +129,10 @@ namespace MapService.Business.Informative
 
             FileUtility.CreateFile(path, stringDocument);
         }
+
+        internal static void DeleteDocument(string documentName)
+        {
+            JsonFileDataAccess.DeleteDocumentFile(documentName);
+        }
     }
 }

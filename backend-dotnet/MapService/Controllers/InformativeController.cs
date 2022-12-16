@@ -145,5 +145,34 @@ namespace MapService.Controllers
 
             return StatusCode(StatusCodes.Status204NoContent);
         }
+
+        /// <remarks>
+        /// Delete an existing document
+        /// </remarks>
+        /// <param name="name">Document to be deleted</param>
+        [HttpDelete]
+        [Route("delete/{name}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        [SwaggerOperation(Tags = new[] { "Admin - Informative/DocumentHandler" })]
+        public ActionResult DeleteDocument(string name)
+        {
+            try
+            {
+                InformativeHandler.DeleteDocument(name);
+            }
+            catch (FileNotFoundException ex)
+            {
+                _logger.LogError(ex, "File not found");
+                return StatusCode(StatusCodes.Status500InternalServerError, "File not found");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Internal Server Error");
+                return StatusCode(StatusCodes.Status500InternalServerError, "Internal Server Error");
+            }
+
+            return StatusCode(StatusCodes.Status200OK, "Document deleted");
+        }
     }
 }
