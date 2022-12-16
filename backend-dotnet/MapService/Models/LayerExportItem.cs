@@ -14,16 +14,16 @@
             /// <summary>
             /// The "caption" propery from the layers.json file. 
             /// </summary>
-            public string caption { get; set; }
+            public string name { get; set; }
 
             /// <summary>
             /// The "layers" property from the layers.json file. 
             /// </summary>
             public List<string> subLayers { get; set; }
 
-            public LayerExportBaseItem(string caption, List<string> subLayers)
+            public LayerExportBaseItem(string name, List<string> subLayers)
             {
-                this.caption = caption;
+                this.name = name;
                 if (subLayers != null && subLayers.Count > 1)
                     this.subLayers = subLayers;
             }
