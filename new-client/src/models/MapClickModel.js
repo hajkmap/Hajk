@@ -183,7 +183,7 @@ export default class MapClickModel {
             ?.split(";")[0];
 
           // Prepare an object to hold the features to be parsed.
-          let olFeatures = null;
+          let olFeatures = [];
 
           // Depending on the response type, parse accordingly
           switch (responseContentType) {
