@@ -184,7 +184,8 @@ export const PROMPT_TEXTS = {
     "Skapa en polygon genom att klicka på en position för varje nod, avsluta med dubbelklick.",
   PointHelp: "Klicka på en position för att infoga en punkt.",
   TextHelp: "Klicka på en position för att infoga text.",
-  EDITHelp: "Klicka på ett objekt för att redigera dess utseende.",
+  EDITHelp:
+    "Klicka på ett objekt för att ändra dess utseende eller ritordning.",
   MOVEHelp: "Klicka på ett objekt för att förflytta det.",
   DELETEHelp: "Klicka på ett objekt för att radera det från din skiss.",
   SAVEHelp:
