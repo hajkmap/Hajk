@@ -84,7 +84,8 @@ const EditView = (props) => {
         <Grid item xs={12}>
           {props.editFeature === null ? (
             <Typography align="center" style={{ marginTop: 24 }}>
-              Klicka på ett objekt i kartan för att ändra dess utseende.
+              Klicka på ett objekt i kartan för att ändra dess utseende eller
+              för att byta dess ritordning.
             </Typography>
           ) : (
             <Grid item xs={12}>

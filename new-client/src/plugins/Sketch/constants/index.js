@@ -18,7 +18,7 @@ export const ACTIVITIES = [
     id: "EDIT",
     tooltip: "Redigera existerande objekt.",
     information:
-      "Redigera objekt du ritat tidigare genom att flytta noder, eller ändra färg.",
+      "Redigera noder, byt ritordning, eller ändra färg på ritade objekt.",
     icon: <FormatShapesIcon />,
   },
   {
