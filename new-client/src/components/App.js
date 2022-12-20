@@ -518,6 +518,21 @@ class App extends React.PureComponent {
               .setZoom(parseInt(mergedParams.get("z")));
           }
         }
+
+        // Next, check if the q-parameter exists and differs from
+        // the most recent search. If so, let's publish an event that
+        // the Search component listens to.
+        // TODO: Also handle sources change, the s-parameter
+        if (
+          mergedParams.get("q") !==
+            this.appModel.searchModel.lastSearchPhrase &&
+          mergedParams.get("q") !== null
+        ) {
+          this.globalObserver.publish(
+            "search.setSearchPhrase",
+            mergedParams.get("q")
+          );
+        }
       },
       false
     );

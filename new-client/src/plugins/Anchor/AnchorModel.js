@@ -1,4 +1,5 @@
-import { isValidLayerId } from "../../utils/Validator";
+import { isValidLayerId } from "utils/Validator";
+import debounce from "utils/debounce";
 
 class AnchorModel {
   constructor(settings) {
@@ -105,7 +106,12 @@ class AnchorModel {
     return partlyToggledGroupLayers;
   }
 
-  getAnchor() {
+  // getAnchor is where the main action happens. A lot of events will cause
+  // a call to this function. Because of that we limit the amount of actual
+  // calls by wrapping it in a debounce helper. The default delay is 300 ms,
+  // so we will avoid all sorts of issues but still get a pretty responsive
+  // link/hash string.
+  getAnchor = debounce(() => {
     // Read some "optional" values so we have them prepared.
     // If some conditions aren't met, we won't add them to the
     // anchor string, in order to keep the string short.
@@ -154,7 +160,7 @@ class AnchorModel {
 
     // TODO: Don't return the query string part. Hash params is enough.
     return url.toString();
-  }
+  });
 }
 
 export default AnchorModel;

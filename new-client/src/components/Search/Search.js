@@ -155,6 +155,14 @@ class Search extends React.PureComponent {
   };
 
   bindSubscriptions = () => {
+    // Make it possible for other components to set the value of the search bar
+    // and invoke a search operation.
+    this.globalObserver.subscribe("search.setSearchPhrase", (searchString) => {
+      this.setState({ searchString }, () => {
+        this.handlePotentialSearchFromParams(searchString);
+      });
+    });
+
     this.localObserver.subscribe("on-draw-start", (type) => {
       if (type === "Circle") {
         this.snackbarKey = this.props.enqueueSnackbar(
@@ -308,7 +316,15 @@ class Search extends React.PureComponent {
             searchTools: this.getSearchTools(searchImplementedPlugins),
           },
           () => {
-            this.handlePotentialUrlQuerySearch();
+            // After we've set up everything, let's handle the possibility
+            // of initial q and s parameter values. Here, we use the initialURLParams
+            // object that was prepared for us in AppModel. It parses relevant value
+            // on initial app load and is exactly what we're looking for at this point.
+            const { appModel } = this.props.app;
+            // Grab the (already decoded) URL param values
+            const q = appModel.config.initialURLParams.get("q")?.trim(); // Use of "?." will return either a String or undefined
+            const s = appModel.config.initialURLParams.get("s")?.trim(); // (As opposed to null which would be the return value of get() otherwise!).
+            this.handlePotentialSearchFromParams(q, s);
           }
         );
       });
@@ -321,12 +337,7 @@ class Search extends React.PureComponent {
       .filter((source) => sourceIds.indexOf(source.id) > -1);
   };
 
-  handlePotentialUrlQuerySearch = () => {
-    const { appModel } = this.props.app;
-    // Grab the (already decoded) URL param values
-    const q = appModel.config.initialURLParams.get("q")?.trim(); // Use of "?." will return either a String or undefined
-    const s = appModel.config.initialURLParams.get("s")?.trim(); // (As opposed to null which would be the return value of get() otherwise!).
-
+  handlePotentialSearchFromParams = (q, s) => {
     // Check so that we have a searchString in the url (q)
     if (q !== undefined && q.length > 0) {
       // Initializing sources to an empty array
@@ -357,16 +368,17 @@ class Search extends React.PureComponent {
       loading: false,
     });
     this.resetFeaturesToFilter();
+    this.searchModel.lastSearchPhrase = "";
     this.localObserver.publish("clearMapView");
   };
 
   handleSearchInput = (event, value, reason) => {
-    let searchString = value?.autocompleteEntry || value || "";
+    const searchString = (value?.autocompleteEntry || value || "")?.trim();
 
     if (searchString !== "") {
       this.setState(
         {
-          searchString: searchString,
+          searchString,
           searchFromAutoComplete: true,
           searchActive: "input",
         },
@@ -375,8 +387,10 @@ class Search extends React.PureComponent {
         }
       );
     } else {
+      // FIXME: When does this run? Can't invoke it by manually removing
+      // the string, so what is this good for?
       this.setState({
-        searchString: searchString,
+        searchString,
       });
     }
   };
