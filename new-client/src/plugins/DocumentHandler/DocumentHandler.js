@@ -2,6 +2,7 @@ import React from "react";
 import PropTypes from "prop-types";
 import DocumentWindowBase from "./documentWindow/DocumentWindowBase";
 import MenuIcon from "@mui/icons-material/Menu";
+import { styled } from "@mui/material/styles";
 
 import DocumentHandlerModel from "./DocumentHandlerModel";
 import PanelMenuContainerView from "./panelMenu/PanelMenuContainerView";
@@ -10,6 +11,14 @@ import MapViewModel from "./MapViewModel";
 import { createTheme } from "@mui/material/styles";
 import { withTheme } from "@emotion/react";
 import { deepMerge } from "../../utils/DeepMerge";
+
+const StyledIconContainer = styled("div")(({ theme }) => ({
+  display: "inline-flex",
+  alignItems: "center",
+  [theme.breakpoints.up("md")]: {
+    marginRight: theme.spacing(1),
+  },
+}));
 
 class DocumentHandler extends React.PureComponent {
   static propTypes = {
@@ -220,17 +229,15 @@ class DocumentHandler extends React.PureComponent {
     const { dynamicImportUrls } = this.props.options;
     if (dynamicImportUrls.iconFonts) {
       return (props) => (
-        <span
-          style={{
-            display: "inline-flex",
-            alignItems: "center",
-            marginRight: this.props.options.drawerButtonTitle ? "8px" : "0px",
-          }}
-        >
-          <i className={`material-icons ${props.className}`}>{iconName}</i>
-        </span>
+        <StyledIconContainer>
+          <span className={`material-icons ${props.className}`}>
+            {iconName}
+          </span>
+        </StyledIconContainer>
       );
-    } else return null;
+    } else {
+      return null;
+    }
   };
 
   render() {
