@@ -61,7 +61,7 @@ export default class MapClickModel {
 
   #prepareMarkerStyle = () => {
     // If Admin UI provided a SRC for the marker icon, let's use it
-    if (this.infoclickOptions.src !== "") {
+    if (this.infoclickOptions.src) {
       const { anchor, fillColor, scale, src } = this.infoclickOptions;
       // fillColor is an object with r, g, b and a properties. OL
       // wants a string. Use this handy converter:
