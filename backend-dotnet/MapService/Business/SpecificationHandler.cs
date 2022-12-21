@@ -1,13 +1,12 @@
 ﻿using MapService.DataAccess;
-using System.Text.Json.Nodes;
 
 namespace MapService.Business
 {
-    public static class SpecificationHandler
+    internal static class SpecificationHandler
     {
-        public static JsonObject GetSpecification()
+        internal static string GetOpenApiSpecification()
         {
-            return JsonFileDataAccess.GetSpecification();
+            return JsonFileDataAccess.GetOpenApiSpecification();
         }
     }
 }

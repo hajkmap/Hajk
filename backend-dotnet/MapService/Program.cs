@@ -19,7 +19,6 @@ builder.Services.AddSwaggerGen(options =>
         Description = ".NET-backend for HAJK."
     });
 
-
     options.EnableAnnotations();
 
     var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
@@ -27,11 +26,9 @@ builder.Services.AddSwaggerGen(options =>
 
     options.IncludeXmlComments(xmlPath);
 });
-
 builder.Host.UseSerilog();
 
 var app = builder.Build();
-
 // Setup app's root folders
 AppDomain.CurrentDomain.SetData("ContentRootPath", app.Environment.ContentRootPath);
 AppDomain.CurrentDomain.SetData("WebRootPath", app.Environment.WebRootPath);
@@ -52,7 +49,7 @@ app.UseSwagger();
 app.UseSwaggerUI(c =>
 {
     c.SwaggerEndpoint("/spec", "HAJK Backend");
-    c.SwaggerEndpoint("/swagger/v1/swagger.json", "HAJK .NET Backend");
+    c.SwaggerEndpoint("/swagger/v1/swagger.yml", "HAJK .NET Backend");
 });
 //}
 
