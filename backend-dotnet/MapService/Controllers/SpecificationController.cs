@@ -1,12 +1,11 @@
 ﻿using MapService.Business;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
-using System.Text.Json.Nodes;
 
 namespace MapService.Controllers
 {
     [Route("")]
-    [Produces("application/json")]
+    [Produces("text/plain")]
     [ApiController]
     public class SpecificationController : ControllerBase
     {
@@ -24,13 +23,13 @@ namespace MapService.Controllers
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         [SwaggerOperation(Tags = new[] { "Specification" })]
-        public ActionResult<IEnumerable<string>> GetSpecification()
+        public ActionResult<string> GetSpecification()
         {
-            JsonObject layerObject;
+            string openApiSpecification;
 
             try
             {
-                layerObject = SpecificationHandler.GetSpecification();
+                openApiSpecification = SpecificationHandler.GetOpenApiSpecification();
             }
             catch (Exception ex)
             {
@@ -39,7 +38,7 @@ namespace MapService.Controllers
                 return StatusCode(StatusCodes.Status500InternalServerError, "Internal Server Error");
             }
 
-            return StatusCode(StatusCodes.Status200OK, layerObject);
+            return StatusCode(StatusCodes.Status200OK, openApiSpecification);
         }
     }
 }

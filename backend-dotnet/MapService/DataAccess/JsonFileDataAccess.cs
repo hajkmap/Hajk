@@ -239,26 +239,24 @@ namespace MapService.DataAccess
             return documentsFolderPath;
         }
 
-        public static JsonObject GetSpecification()
+        internal static string GetOpenApiSpecification()
         {
-            JsonObject jsonObject;
+            string openAPISpecification;
 
-            var appDataFolderPath = PathUtility.GetPath("Swagger:Path");
-            var swaggerFileName = ConfigurationUtility.GetSectionItem("Swagger:File");
-            var pathToFile = Path.Combine(appDataFolderPath, swaggerFileName);
+            var appDataFolderPath = PathUtility.GetPath("OpenAPISpecification:Path");
+            var openAPISpecificationFileName = ConfigurationUtility.GetSectionItem("OpenAPISpecification:File");
+            var pathToFile = Path.Combine(appDataFolderPath, openAPISpecificationFileName);
 
             try
             {
-                var jsonString = File.ReadAllText(pathToFile);
-
-                jsonObject = JsonSerializer.Deserialize<JsonObject>(jsonString);
+                openAPISpecification = File.ReadAllText(pathToFile);
             }
             catch (Exception)
             {
                 throw;
             }
 
-            return jsonObject;
+            return openAPISpecification;
         }
     }
 }
