@@ -4,7 +4,6 @@ using MapService.Utility;
 using System.Text.Encodings.Web;
 using System.Text.Json;
 using System.Text.Json.Nodes;
-using System.Text.Unicode;
 
 namespace MapService.Business.Informative
 {
@@ -122,7 +121,7 @@ namespace MapService.Business.Informative
             string stringDocument = JsonUtility.ConvertToJsonObject(newDocument).ToJsonString(
                 new JsonSerializerOptions()
                 {
-                    Encoder = JavaScriptEncoder.Create(UnicodeRanges.BasicLatin, UnicodeRanges.Latin1Supplement),
+                    Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
                     WriteIndented = true
                 }
             );
