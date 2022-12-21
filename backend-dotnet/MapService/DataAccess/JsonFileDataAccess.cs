@@ -158,7 +158,7 @@ namespace MapService.DataAccess
 
             if (!File.Exists(sourcePath)) { throw new FileNotFoundException(); }
 
-            File.Copy(sourcePath, destinationPath);
+            File.Copy(sourcePath, destinationPath, true);
         }
 
         /// <summary>
