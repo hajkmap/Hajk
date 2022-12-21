@@ -758,11 +758,12 @@ class ToolOptions extends Component {
               <i
                 className="fa fa-question-circle"
                 data-toggle="tooltip"
-                title="Ikon på knapp som öppnar verktyget. Hämtat från Material Symbols ikonbibliotek."
+                title="Ikon på knapp som öppnar verktyget. Skriv in ikonens namn i textfältet för att välja ikon. Hämtat från Material Symbols ikonbibliotek."
               />
             </label>
             <input
               id="drawerButtonIcon"
+              placeholder="Ange ikonens namn"
               value={this.state.drawerButtonIcon}
               type="text"
               name="drawerButtonIcon"
