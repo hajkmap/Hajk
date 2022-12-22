@@ -11,6 +11,8 @@ import Feature from "ol/Feature";
 import Point from "ol/geom/Point";
 import AppModel from "../models/AppModel.js";
 
+import { getInfoClickInfoFromLayerConfig } from "utils/InfoClickHelpers.js";
+
 const convertRGBAtoString = (color) => {
   if (
     typeof color === "object" &&
@@ -127,25 +129,6 @@ export default class MapClickModel {
     });
   }
   /**
-   * @summary Determine the sublayer's name by looking at the feature's id
-   * @description We must know which of the queried sublayers a given feature comes
-   * from and the best way to determine that is by looking at the feature ID (FID).
-   * It looks like WMS services set the FID using this formula:
-   * [<workspaceName>:]<layerName>.<numericFeatureId>
-   * where the part inside "[" and "]" is optional (not used by GeoServer nor QGIS,
-   * but other WMSes might use it).
-   * @param {Feature} feature
-   * @param {Layer} layer
-   * @return {string} layerName
-   */
-  #getLayerNameFromFeatureAndLayer = (feature, layer) => {
-    return Object.keys(layer.layersInfo).find((id) => {
-      const fid = feature.getId().split(".")[0];
-      const layerId = id.split(":").length === 2 ? id.split(":")[1] : id;
-      return fid === layerId;
-    });
-  };
-  /**
    * @summary Get the name of a layer by taking a look at the first part of a feature's name.
    *
    * @param {Feature} feature
@@ -208,94 +191,17 @@ export default class MapClickModel {
 
           // Next, loop through the features (if we managed to parse any).
           for (const feature of olFeatures) {
-            // First we need the sublayer's name in order to grab
-            // the relevant caption, infobox definition, etc.
-            // The only way to get it now is by looking into
-            // the feature id, because it includes the layer's
-            // name as a part of the id itself.
-            let layerName = this.#getLayerNameFromFeatureAndLayer(
+            // We're gonna need a lot of information from each layer that each feature
+            // is coming from. Let's extract all that information
+            const infoClickInformation = getInfoClickInfoFromLayerConfig(
               feature,
               response.value.layer
             );
-
-            // Special case that can happen occur for WMS raster responses,
-            // see also #1090.
-            if (
-              layerName === undefined &&
-              feature.getId() === "" &&
-              response.value.layer.subLayers.length === 1
-            ) {
-              // Let's assume that the layer's name is the name of the first layer
-              layerName = response.value.layer.subLayers[0];
-
-              // Make sure to set a feature ID - without it we won't be able to
-              // set/unset selected feature later on (an absolut requirement to
-              // properly render components that follow such as Pagination, Markdown).
-              feature.setId("fakeFeatureIdIssue1090");
-            }
-
-            // Having just the layer's name as an ID is not safe - multiple
-            // WFS's may use the same name for two totally different layers.
-            // So we need something more. Luckily, we can use the UID property
-            // of our OL layer.
-            const layerId =
-              layerName +
-              (response.value.layer?.ol_uid &&
-                "." + response.value.layer?.ol_uid);
-
-            // Get layer for this dataset.
-            const layer = response.value.layer;
-
-            // Get the feature's ID and remove the unique identifier after the last dot, since there can be dots that is part of the ID.
-            // If the featureId is equal to the corresponding layersInfo object entry's ID, then set the id variable.
-            const featureId = feature.getId().split(".").slice(0, -1).join(".");
-            const layersInfo = layer.layersInfo;
-            const id = Object.keys(layersInfo).find(
-              (key) => featureId === layersInfo[key].id
-            );
-
-            // Get caption for this dataset
-            // If there are layer groups, we get the display name from the layer's caption.
-            const displayName =
-              layersInfo[id]?.caption ||
-              response.value.layer?.get("caption") ||
-              "Unnamed dataset";
-
-            // Get infoclick definition for this dataset
-            const infoclickDefinition =
-              response.value.layer?.layersInfo?.[layerName]?.infobox || "";
-
-            // Prepare the infoclick icon string
-            const infoclickIcon =
-              response.value.layer?.layersInfo?.[layerName]?.infoclickIcon ||
-              "";
-
-            // Prepare displayFields, shortDisplayFields and secondaryLabelFields.
-            // We need them to determine what should be displayed
-            // in the features list view.
-            const displayFields =
-              response.value.layer?.layersInfo?.[layerName]?.searchDisplayName
-                ?.split(",")
-                .map((df) => df.trim()) || [];
-            const shortDisplayFields =
-              response.value.layer?.layersInfo?.[
-                layerName
-              ]?.searchShortDisplayName
-                ?.split(",")
-                .map((df) => df.trim()) || [];
-            const secondaryLabelFields =
-              response.value.layer?.layersInfo?.[
-                layerName
-              ]?.secondaryLabelFields
-                ?.split(",")
-                .map((df) => df.trim()) || [];
-
             // Before we create the feature collection, ensure that
             // it doesn't exist already.
             const existingLayer = getFeatureInfoResults.find(
-              (f) => f.layerId === layerId
+              (f) => f.layerId === infoClickInformation.layerId
             );
-
             // If it exists…
             if (existingLayer) {
               // …push the current feature…
@@ -306,16 +212,10 @@ export default class MapClickModel {
               // If this is the first feature from this layer…
               // …prepare the return object…
               const r = {
-                layerId: layerId,
                 type: "GetFeatureInfoResults",
                 features: [feature],
                 numHits: 1,
-                displayName,
-                infoclickDefinition,
-                infoclickIcon,
-                displayFields,
-                shortDisplayFields,
-                secondaryLabelFields,
+                ...infoClickInformation,
               };
               // …and push onto the array.
               getFeatureInfoResults.push(r);
