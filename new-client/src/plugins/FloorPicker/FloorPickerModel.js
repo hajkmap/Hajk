@@ -8,10 +8,7 @@ export default class FloorPickerModel {
     this.floorConfig = settings.options?.floorConfig ?? EXAMPLE_FLOOR_CONFIG;
     this.filteredLayers = [];
     this.initialized = false;
-    this.floorLimits = {
-      top: 0,
-      bottom: 0,
-    };
+    this.floorLimits = { top: 100, bottom: -100 };
   }
 
   init = () => {

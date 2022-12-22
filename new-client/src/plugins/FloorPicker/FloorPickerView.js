@@ -84,14 +84,14 @@ const FloorPickerView = (props) => {
           <IconButton
             size="small"
             onClick={() => moveUp()}
-            disabled={currentFloor.floorValue === model.floorLimits.top}
+            disabled={currentFloor.floorLevel === model.floorLimits.top}
           >
             <ExpandLessIcon fontSize="small" />
           </IconButton>
           <IconButton
             size="small"
             onClick={() => moveDown()}
-            disabled={currentFloor.floorValue === model.floorLimits.bottom}
+            disabled={currentFloor.floorLevel === model.floorLimits.bottom}
           >
             <ExpandMoreIcon fontSize="small" />
           </IconButton>
