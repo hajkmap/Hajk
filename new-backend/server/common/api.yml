@@ -80,6 +80,39 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Error"
+  /informative/createfolder:
+    post:
+      tags:
+        - Admin - Informative/DocumentHandler
+      responses:
+        200:
+          description: Create a folder
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InformativeCreateFolder"
+        5XX:
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+    put:
+      tags:
+        - Admin - Informative/DocumentHandler
+      responses:
+        200:
+          description: Create a document connected to a specified map
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InformativeDocumentCreateBody"
+        5XX:
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
   /informative/list:
     get:
       tags:
@@ -749,6 +782,11 @@ components:
         documentName:
           type: string
         documentMap:
+          type: string
+    InformativeCreateFolder:
+      type: object
+      properties:
+        folderName:
           type: string
     ExampleBody:
       title: example

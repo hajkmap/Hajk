@@ -84,6 +84,19 @@ var documentEditor = Model.extend({
     });
   },
 
+  createFolder(data, callback) {
+    var url = this.get("config").url_create_folder;
+    hfetch(url, {
+      method: "post",
+      body: JSON.stringify(data),
+    }).then((response) => {
+      response.text().then((text) => {
+        callback(text);
+        console.log(text);
+      });
+    });
+  },
+
   load: function (documentName, callback) {
     var url = this.get("config").url_load + "/" + documentName;
     hfetch(url).then((response) => {

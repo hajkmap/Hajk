@@ -122,6 +122,7 @@ class DocumentEditor extends Component {
       data: undefined,
       newChapterName: "",
       newDocumentName: "",
+      newFolderName: "",
       newDocumentMap: "",
       newHeaderIdentifier: "",
       documents: [],
@@ -762,6 +763,11 @@ class DocumentEditor extends Component {
     return valid;
   }
 
+  validateNewFolderName(value) {
+    var valid = value === "" || /^[A-Za-z0-9_]+$/.test(value);
+    return valid;
+  }
+
   renderCreateForm() {
     setTimeout(() => {
       var i = document.getElementById("new-document-name");
@@ -815,6 +821,45 @@ class DocumentEditor extends Component {
     );
   }
 
+  renderCreateFormFolder() {
+    setTimeout(() => {
+      var i = document.getElementById("new-folder-name");
+      if (i) {
+        i.focus();
+      }
+    }, 50);
+    return (
+      <>
+        <TextField
+          autoFocus
+          id="new-folder-name"
+          label="Mappnamn"
+          margin="normal"
+          InputLabelProps={{
+            shrink: true,
+          }}
+          type="text"
+          defaultValue={this.state.newFolderName}
+          fullWidth
+          onChange={(e) => {
+            if (this.validateNewFolderName(e.target.value)) {
+              this.setState(
+                {
+                  newFolderName: e.target.value,
+                },
+                () => {
+                  this.setState({
+                    modalContent: this.renderCreateFormFolder(),
+                  });
+                }
+              );
+            }
+          }}
+        />
+      </>
+    );
+  }
+
   renderCreateDialog(chapter, parentChapters, index) {
     this.setState({
       showModal: true,
@@ -830,6 +875,27 @@ class DocumentEditor extends Component {
         if (data.documentName !== "") {
           this.props.model.createDocument(data, (response) => {
             this.load(data.documentName);
+          });
+          this.hideModal();
+        }
+      },
+    });
+  }
+
+  renderCreateDialogFolder() {
+    this.setState({
+      showModal: true,
+      showAbortButton: true,
+      modalTitle: "Skapa ny mapp",
+      modalContent: this.renderCreateFormFolder(),
+      okButtonText: "Spara",
+      modalConfirmCallback: () => {
+        var data = {
+          folderName: this.state.newFolderName,
+        };
+        if (data.folderName !== "") {
+          this.props.model.createFolder(data, (response) => {
+            
           });
           this.hideModal();
         }
@@ -1010,6 +1076,16 @@ class DocumentEditor extends Component {
                 startIcon={<AddBoxIcon />}
               >
                 Nytt dokument
+              </ColorButtonGreen>
+            </Grid>
+            <Grid className={classes.gridItem} item>
+              <ColorButtonGreen
+                variant="contained"
+                className="btn"
+                onClick={() => this.renderCreateDialogFolder()}
+                startIcon={<AddBoxIcon />}
+              >
+                Ny mapp
               </ColorButtonGreen>
             </Grid>
             {selectedDocument && (

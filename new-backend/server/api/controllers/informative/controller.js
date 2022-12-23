@@ -19,6 +19,16 @@ export class Controller {
     });
   }
 
+  createFolder(req, res) {
+    const { folderName } = JSON.parse(req.body);
+    InformativeService.createFolder(folderName).then((r) => {
+      if (r && !r.error) {
+        res.status(200).send("Folder created");
+        ael.info(`${res.locals.authUser} created a new folder, ${folderName}`);
+      } else res.status(500).send(r.error.message);
+    });
+  }
+
   getByName(req, res) {
     InformativeService.getByName(req.params.name).then((r) => {
       if (r && !r.error) res.json(r);

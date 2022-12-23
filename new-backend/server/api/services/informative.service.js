@@ -1,6 +1,7 @@
 import fs from "fs";
 import path from "path";
 import log4js from "log4js";
+import { Console } from "console";
 const logger = log4js.getLogger("service.informative");
 
 class InformativeService {
@@ -66,6 +67,36 @@ class InformativeService {
       await fs.promises.writeFile(pathToFile, jsonString);
 
       return json;
+    } catch (error) {
+      return { error };
+    }
+  }
+
+  /**
+   * @summary Create a new, empty folder.
+   *
+   * @param {*} folderName to be created
+   * @returns
+   * @memberof InformativeService
+   */
+  async createFolder(folderName) {
+    try {
+      const foldern = {
+        foldername: folderName, // Return
+      };
+      // …and create a new path to that folder.
+      const pathToFolder = path.join(
+        process.cwd(),
+        "App_Data/documents",
+        folderName
+      );
+      console.log(pathToFolder);
+      if (!fs.existsSync(pathToFolder)) {
+        fs.promises.mkdir(pathToFolder);
+        return foldern;
+      } else {
+        return foldern;
+      }
     } catch (error) {
       return { error };
     }
