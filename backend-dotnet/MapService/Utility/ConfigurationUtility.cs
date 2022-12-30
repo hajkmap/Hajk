@@ -64,5 +64,20 @@
         {
             return configuration.GetSection(sectionKeyPath).Get<List<string>>();
         }
+
+
+        /// <summary>
+        /// Adds the letter 's' to the end of the layer type name if necessary
+        /// </summary>
+        /// <param name="layerTypeName">The layer type name. </param>
+        /// <returns>Returns a layer type name in the plural. </returns>
+        public static string SetLayerTypeName(string layerTypeName)
+        {
+            //If layer is e.g. wmslayer then we add 's' to the end
+            if (layerTypeName.Last() != 's')
+                layerTypeName = layerTypeName + "s";
+
+            return layerTypeName;
+        }
     }
 }

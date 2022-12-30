@@ -1,6 +1,9 @@
-﻿using MapService.DataAccess;
+﻿using Json.Path;
+using MapService.Business.MapConfig;
+using MapService.DataAccess;
 using MapService.Models;
 using MapService.Utility;
+using System.Text.Json;
 using System.Text.Json.Nodes;
 
 namespace MapService.Business.Settings
@@ -119,9 +122,8 @@ namespace MapService.Business.Settings
             JsonObject layerFile = JsonFileDataAccess.ReadLayerFileAsJsonObject();
             try
             {
-                //If layer is e.g. wmslayer then we add 's' to the end
-                if (layerType.Last() != 's')
-                    layerType = layerType + "s";
+                layerType = ConfigurationUtility.SetLayerTypeName(layerType);
+
                 JsonArray? layers = layerFile[layerType]?.AsArray();
 
                 //Layer type not found in layers database.
@@ -186,6 +188,158 @@ namespace MapService.Business.Settings
 
             return randomstring;
         }
+
+        internal static void DeleteLayer(string layerType, string layerId)
+        {
+            //Adds the letter 's' to the end of the layer type name if necessary
+            layerType = ConfigurationUtility.SetLayerTypeName(layerType);
+
+            DeleteLayerFromLayerFile(layerType, layerId);
+            DeleteLayerFromMapConfigFiles(layerId);
+        }
+
+        internal static void DeleteLayerFromLayerFile(string layerType, string layerId)
+        {
+            //Deleting from global layer file
+            JsonObject layerFile = JsonFileDataAccess.ReadLayerFileAsJsonObject();
+            try
+            {                
+                JsonArray? layers = layerFile[layerType]?.AsArray();
+
+                //Layer with specified id for specified layer type has to exist in global layers store
+                if (layers == null || layers.FirstOrDefault(x => x["id"].GetValue<string>() == layerId) == null)
+                    throw new Exception("Layer with id " + layerId + " not found in " + layerType + " in global layers store");
+
+                //New array should contain all existing layers without the one we will remove
+                JsonArray newLayers = new JsonArray();
+                foreach (JsonNode layer in layers)
+                {
+                    if (layer["id"].AsValue().ToString() != layerId)
+                    {
+                        newLayers.Add(JsonUtility.CloneJsonNodeFromJsonNode(layer));                       
+                    }
+                }
+
+                JsonArray? layerTypes = layerFile[layerType]?.AsArray();
+                layerTypes?.Clear();
+                foreach (JsonNode layer in newLayers)
+                {
+                    layerTypes?.Add(JsonUtility.CloneJsonNodeFromJsonNode(layer));
+                }
+
+                JsonFileDataAccess.UpdateLayerFile(layerFile);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Could not delete layer Id for " + layerType + " in the map configuration file.", ex);
+            }
+        }
+      
+        internal static void DeleteLayerFromMapConfigFiles(string layerId)
+        {
+            var mapConfigurationFiles = JsonFileDataAccess.GetMapConfigFiles();
+
+            //Looking at all .json files except global layer file
+            foreach (string mapConfigurationFile in mapConfigurationFiles)
+            {
+                JsonObject mapConfigurationObjects = JsonFileDataAccess.ReadMapFileAsJsonObject(mapConfigurationFile);
+                var jsonDocument = JsonFileDataAccess.ReadMapFileAsJsonDocument(mapConfigurationFile);
+
+                #region baselayers
+                var input = "$.tools[?(@.type == 'layerswitcher')].options";
+                var result = JsonPathUtility.GetJsonElement(jsonDocument, input);
+                if (result == null)
+                    continue;
+
+                JsonElement baselayers = result.Value.GetProperty("baselayers");
+
+                if (baselayers.ValueKind == JsonValueKind.Null)
+                {
+                    continue;
+                }
+
+                JsonArray baseLayerArray = CreateNewArrayOfLayersWithoutSpecifiedLayer(baselayers, layerId);
+
+                JsonArray tools = mapConfigurationObjects["tools"]?.AsArray();
+
+                foreach (JsonObject tool in tools)
+                {
+                    if (tool["type"].ToString() == "layerswitcher")
+                    {
+                        tool["options"]["baselayers"].AsArray().Clear();
+                        tool["options"]["baselayers"] = baseLayerArray;
+                        break;
+                    }
+                }
+                #endregion
+
+                #region layersingroups
+                var inputGroups = "$.tools[?(@.type == 'layerswitcher')].options.groups";
+                var resultGroups = JsonPathUtility.GetJsonElement(jsonDocument, inputGroups);
+                if (resultGroups == null)
+                    continue;
+
+                foreach(JsonElement jsonElement in resultGroups.Value.EnumerateArray())
+                {
+                    JsonElement layersInGroup = jsonElement.GetProperty("layers");
+
+                    JsonElement idOfGroup = jsonElement.GetProperty("id");
+
+                    if (layersInGroup.ValueKind == JsonValueKind.Null)
+                    {
+                        continue;
+                    }
+
+                    JsonArray layerArray = CreateNewArrayOfLayersWithoutSpecifiedLayer(layersInGroup, layerId);
+
+                    foreach (JsonObject tool in tools)
+                    {
+                        if (tool["type"].ToString() == "layerswitcher")
+                        {
+                            JsonArray jsonArrayGroups = tool["options"]["groups"].AsArray();
+                            foreach(JsonObject jsonObject in jsonArrayGroups)
+                            {
+                                //Looping through all the groups, the code only runs when we work with a group for the first time(new group-id)
+                                if (idOfGroup.ToString() == jsonObject["id"].ToString())
+                                { 
+                                    jsonObject["layers"].AsArray().Clear();
+                                    jsonObject["layers"] = layerArray;
+                                    break;
+                                }
+                            }
+                           
+                        }
+                    }
+                }
+                #endregion
+
+                JsonFileDataAccess.UpdateMapFile(mapConfigurationFile, mapConfigurationObjects);
+
+            }
+        }
+
+        public static JsonArray CreateNewArrayOfLayersWithoutSpecifiedLayer(JsonElement layers, string layerId)
+        {
+            var layersArray = JsonArray.Create(layers);
+
+            JsonArray newLayers = new JsonArray();
+            foreach (JsonNode layer in layersArray)
+            {
+                if (layer["id"].AsValue().ToString() != layerId)
+                {
+                    newLayers.Add(JsonUtility.CloneJsonNodeFromJsonNode(layer));
+                }
+            }
+
+            layersArray?.Clear();
+            foreach (JsonNode layer in newLayers)
+            {
+                layersArray?.Add(JsonUtility.CloneJsonNodeFromJsonNode(layer));
+            }
+
+            return layersArray;
+        }       
+    
 
         internal static int UpdateMapTool(string mapName, string toolName, JsonObject toolSettings)
         {
