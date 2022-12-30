@@ -1,4 +1,6 @@
 import { EXAMPLE_FLOOR_CONFIG } from "./DefaultConfig";
+import { functionalOk as functionalCookieOk } from "./../../models/Cookie";
+import LocalStorageHelper from "./../../utils/LocalStorageHelper";
 
 export default class FloorPickerModel {
   constructor(settings) {
@@ -30,9 +32,9 @@ export default class FloorPickerModel {
     this.initialized = true;
   };
 
-  //we need to reset (remove the filters) when we close the tool.
+  // We need to reset (remove the filters) when we close the tool.
   reset = () => {
-    //remove the CQL filter from the layers that we added it to.
+    // Remove the CQL filter from the layers that we added it to.
     this.filteredLayers.forEach((l) => {
       if (l.originalCQL) {
         l.layer.getSource().updateParams({ CQL_FILTER: l.originalCQL });
@@ -44,7 +46,10 @@ export default class FloorPickerModel {
       }
     });
 
-    //reset the filtered layers
+    // Remove the global filter from localStorage (thereby resetting it for search and other tools that may look for it there).
+    LocalStorageHelper.set("globalCqlFilter", null);
+
+    // Reset the filtered layers
     this.filteredLayers = [];
     this.initialized = false;
   };
@@ -54,7 +59,7 @@ export default class FloorPickerModel {
     return defaultFloor ? defaultFloor : this.floorConfig[0];
   };
 
-  //sort the floor config by the floor level. We put the highest floor first, as it makes more visual sense in the dropdown list.
+  // Sort the floor config by the floor level. We put the highest floor first, as it makes more visual sense in the dropdown list.
   #sortFloorConfig = () => {
     this.floorConfig.sort((a, b) => {
       return a.floorLevel < b.floorLevel ? 1 : -1;
@@ -86,20 +91,43 @@ export default class FloorPickerModel {
     layers.forEach((l) => {
       //Add the new CQL filter to the layer - Hajk will automatically reload the layer with the new params.
       l.getSource().updateParams({ CQL_FILTER: cqlFilter });
-      //TODO - what if the layer already has a CQL filter? - we will need to take this into account.
     });
   };
 
+  #updateFilterInStorage = (cqlFilter, filterPropertyName, filterValue) => {
+    const floorPickerLayerIds = [];
+    this.options.activeLayers.forEach((layer) =>
+      floorPickerLayerIds.push(layer.id)
+    );
+
+    if (functionalCookieOk()) {
+      LocalStorageHelper.set("globalCqlFilter", {
+        cqlFilter: cqlFilter,
+        filterProperty: filterPropertyName,
+        filterValue: filterValue,
+        layers: floorPickerLayerIds,
+      });
+
+      // Tell the globalObserver that we have updated this, we may need to respond (for example within the LayerSettings CQLFilter.js)
+      // although nothing responds at the moment.
+      this.app.globalObserver.publish("layerswitcher.updateCQLFilter");
+    }
+  };
+
+  // Create a CQL filter based on properties from the Floorpicker tool config.
+  // Apply the filter to the layers specified in the tool config.
+  // Add the filter (and parameters needed to create an OpenLayers filter) onto LocalStorage, to be available for other tools
+  // that need to be aware if a global map filter is being used.
   filterMapByFloor = (floor) => {
-    //First, create an updated cql filter statement, based on the new floorValue
     const filterPropertyName = this.options.filterPropertyName;
-
-    //Use the floorId from the floorValue - this is the value that will be tested by the filter.
     const filterValue = floor.floorId;
-
     const cqlFilter = `${filterPropertyName} = ${filterValue}`;
 
-    const layersToFilter = this.#getAffectedLayers(); //TODO: make this more efficient - we shouldn't need to do this every time we filter, only once.
+    // TODO: make 'layersToFilter' this more efficient - we shouldn't need to do this every time we filter, only once as it comes from the
+    // config and will never change.
+    const layersToFilter = this.#getAffectedLayers();
+
     this.#applyFilterToLayers(layersToFilter, cqlFilter);
+    this.#updateFilterInStorage(cqlFilter, filterPropertyName, filterValue);
   };
 }
