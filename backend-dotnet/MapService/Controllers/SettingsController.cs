@@ -125,6 +125,32 @@ namespace MapService.Controllers
         /// <remarks>
         ///
         /// </remarks>
+        /// <response code="200">Layer deleted successfully</response>
+        /// <response code="500">Internal Server Error</response>
+        [HttpDelete]
+        [Route("{type}/{layerId}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        [SwaggerOperation(Tags = new[] { "Admin - Maps and layers" })]
+        public ActionResult DeleteLayer(string type, string layerId)
+        {
+            try
+            {
+                SettingsHandler.DeleteLayer(type, layerId);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Internal server error");
+
+                return StatusCode(StatusCodes.Status500InternalServerError, "Internal Server Error");
+            }
+
+            return StatusCode(StatusCodes.Status200OK);
+        }
+
+        /// <remarks>
+        ///
+        /// </remarks>
         /// <param name="map">Name of the map</param>
         /// <param name="tool">Name of the tool to be edited</param>
         /// <param name="requestBody">Name of the tool to be edited</param>
