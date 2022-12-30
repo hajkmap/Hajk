@@ -101,6 +101,32 @@ namespace MapService.Controllers
         /// </remarks>
         /// <response code="204">All good</response>
         /// <response code="500">Internal Server Error</response>
+        [HttpPost]
+        [Route("{layerType}")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        [SwaggerOperation(Tags = new[] { "Admin - Maps and layers" })]
+        public ActionResult CreateOrUpdateLayerType(string layerType, [Required][FromBody] JsonObject requestBody)
+        {
+            try
+            {
+                SettingsHandler.UpdateLayerType(layerType, requestBody);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Internal server error");
+
+                return StatusCode(StatusCodes.Status500InternalServerError, "Internal Server Error");
+            }
+
+            return StatusCode(StatusCodes.Status204NoContent);
+        }
+
+        /// <remarks>
+        ///
+        /// </remarks>
+        /// <response code="204">All good</response>
+        /// <response code="500">Internal Server Error</response>
         [HttpPut]
         [Route("{layerType}")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
