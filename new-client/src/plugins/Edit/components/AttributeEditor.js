@@ -11,6 +11,8 @@ import FormGroup from "@mui/material/FormGroup";
 import FormControlLabel from "@mui/material/FormControlLabel";
 import { Button, FormHelperText } from "@mui/material";
 import Chip from "@mui/material/Chip";
+import { functionalOk } from "models/Cookie";
+import LocalStorageHelper from "utils/LocalStorageHelper";
 
 const StyledGrid = styled(Grid)(({ theme }) => ({
   textAlign: "center",
@@ -81,8 +83,68 @@ class AttributeEditor extends React.Component {
         }
       }
     });
+    //Before we return the valueMap, let's check if we should set any properties from the mapProperties.
+    let setFieldFromGlobalMapValue = true; //This needs to come from config and default to false.
+
+    if (setFieldFromGlobalMapValue === true) {
+      valueMap = this.#getFieldPropertiesFromMapValues(valueMap, feature);
+    }
+
     return valueMap;
   };
+
+  #getFieldPropertiesFromMapValues(valueMap, feature) {
+    let isNewFeature = Object.keys(feature.getProperties()).length === 1;
+
+    if (isNewFeature && functionalOk) {
+      const globalMapOptions = LocalStorageHelper.get("globalMapState", null);
+      const globalMapProperties = globalMapOptions.mapProperties;
+
+      Object.keys(valueMap).forEach((field) => {
+        if (globalMapProperties) {
+          const mapPropertyExists = globalMapProperties.hasOwnProperty(field);
+
+          if (mapPropertyExists) {
+            let fieldValue = globalMapProperties[field];
+            valueMap[field] = fieldValue;
+          }
+        }
+      });
+    }
+
+    return valueMap;
+  }
+
+  #checkSetOnlyByMap(field) {
+    let setOnlyByMap = false;
+
+    //Have we set that fields should be set by global map properties if matching properties exist?
+    const setFieldsFromMatchingGlobalMapValue =
+      this.props.model.options.setFieldsFromMatchingMapValues ?? false;
+
+    //Have we set that the user can override fields that are set by the map properties?
+    const allowUserOverride =
+      this.props.model.options?.userOverrideMatchingMapValues ?? true;
+
+    if (
+      allowUserOverride ||
+      !setFieldsFromMatchingGlobalMapValue ||
+      !functionalOk
+    )
+      return false;
+
+    //If we reach here, then if the field is set by the map settings, then the field should not be changeable by the user.
+    const globalMapOptions = LocalStorageHelper.get("globalMapState", null);
+    const globalMapProperties = globalMapOptions.mapProperties;
+
+    if (globalMapProperties) {
+      if (globalMapProperties.hasOwnProperty(field.name)) {
+        setOnlyByMap = true;
+      }
+    }
+
+    return setOnlyByMap;
+  }
 
   updateFeature() {
     const featureProps = this.props.model.editFeature.getProperties();
@@ -328,6 +390,12 @@ class AttributeEditor extends React.Component {
       }
     }
 
+    // It is possible that the edit tool is configured so that certain fields are set automatically from
+    // properties within the map. In this case it may be set that these fields are not then changeable by
+    // the user, in which case they should be disabled.
+    let fieldSetOnlyByMapProperties = this.#checkSetOnlyByMap(field);
+    let isDisabled = !editable || fieldSetOnlyByMapProperties;
+
     switch (field.textType) {
       case "heltal":
         return (
@@ -337,7 +405,7 @@ class AttributeEditor extends React.Component {
             fullWidth={true}
             margin="normal"
             variant="outlined"
-            disabled={!editable}
+            disabled={isDisabled}
             value={value}
             error={this.formErrors.hasOwnProperty(field.name)}
             helperText={
@@ -360,7 +428,7 @@ class AttributeEditor extends React.Component {
             fullWidth={true}
             margin="normal"
             variant="outlined"
-            disabled={!editable}
+            disabled={isDisabled}
             value={value}
             error={this.formErrors.hasOwnProperty(field.name)}
             helperText={
@@ -384,7 +452,7 @@ class AttributeEditor extends React.Component {
             margin="normal"
             type="date"
             variant="outlined"
-            disabled={!editable}
+            disabled={isDisabled}
             value={value}
             error={this.formErrors.hasOwnProperty(field.name)}
             helperText={
@@ -411,7 +479,7 @@ class AttributeEditor extends React.Component {
             margin="normal"
             type="datetime-local"
             variant="outlined"
-            disabled={!editable}
+            disabled={isDisabled}
             value={value}
             error={this.formErrors.hasOwnProperty(field.name)}
             helperText={
@@ -439,7 +507,7 @@ class AttributeEditor extends React.Component {
               fullWidth={true}
               margin="normal"
               variant="outlined"
-              disabled={!editable}
+              disabled={isDisabled}
               error={this.formErrors.hasOwnProperty(field.name)}
               helperText={
                 this.formErrors[field.name]?.length >= 0
@@ -472,7 +540,7 @@ class AttributeEditor extends React.Component {
               fullWidth={true}
               margin="normal"
               variant="outlined"
-              disabled={!editable}
+              disabled={isDisabled}
               multiline
               error={this.formErrors.hasOwnProperty(field.name)}
               helperText={
@@ -532,7 +600,7 @@ class AttributeEditor extends React.Component {
               control={
                 <Checkbox
                   checked={item.checked}
-                  disabled={!editable}
+                  disabled={isDisabled}
                   color="primary"
                   onChange={(e) => {
                     this.setChanged();
@@ -573,7 +641,7 @@ class AttributeEditor extends React.Component {
               <NativeSelect
                 value={value}
                 variant="outlined"
-                disabled={!editable}
+                disabled={isDisabled}
                 input={<Input name={field.name} id={field.name} />}
                 onChange={(e) => {
                   this.setChanged();
@@ -598,7 +666,7 @@ class AttributeEditor extends React.Component {
                   (field.dataType === "int" && field.value === 1)
                 }
                 color="primary"
-                disabled={!editable}
+                disabled={isDisabled}
                 onChange={(e) => {
                   this.setChanged();
                   if (e.target.checked) {

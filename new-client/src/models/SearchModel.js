@@ -523,19 +523,17 @@ class SearchModel {
 
     //Example globalFilterOptions: {filter: 'LevelId = 155', filterProperty: "LevelId", filterValue: "155", layers: ["1", "2", "3"]}
     if (functionalOk) {
-      const globalFilterOptions = LocalStorageHelper.get(
-        "globalCqlFilter",
-        null
-      );
+      const globalMapState = LocalStorageHelper.get("globalMapState", null);
+      const mapFilter = globalMapState?.mapFilter || null;
 
       // If we have a globalFilterOptions object stored, and the layer being searched is in the list of layers where the globalFilter
       // should be applied, we create an extra search filter. OBS. At the moment, the globalFilter is a simple EqualTo.
       // We will later add this as an And filter to the final search filters, once they are prepared.
-      if (globalFilterOptions && globalFilterOptions?.layers) {
-        if (globalFilterOptions.layers.includes(searchSource.id)) {
+      if (mapFilter && mapFilter?.filterLayers) {
+        if (mapFilter.filterLayers.includes(searchSource.id)) {
           globalCqlFilter = new EqualTo(
-            globalFilterOptions.filterProperty,
-            globalFilterOptions.filterValue,
+            mapFilter.filterProperty,
+            mapFilter.filterValue,
             false
           );
         }

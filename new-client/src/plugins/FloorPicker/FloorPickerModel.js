@@ -47,7 +47,7 @@ export default class FloorPickerModel {
     });
 
     // Remove the global filter from localStorage (thereby resetting it for search and other tools that may look for it there).
-    LocalStorageHelper.set("globalCqlFilter", null);
+    LocalStorageHelper.set("globalMapState", null);
 
     // Reset the filtered layers
     this.filteredLayers = [];
@@ -94,18 +94,24 @@ export default class FloorPickerModel {
     });
   };
 
-  #updateFilterInStorage = (cqlFilter, filterPropertyName, filterValue) => {
+  #updateFilterInStorage = (cqlFilter, filterPropertyName, floor) => {
     const floorPickerLayerIds = [];
     this.options.activeLayers.forEach((layer) =>
       floorPickerLayerIds.push(layer.id)
     );
 
     if (functionalCookieOk()) {
-      LocalStorageHelper.set("globalCqlFilter", {
-        cqlFilter: cqlFilter,
-        filterProperty: filterPropertyName,
-        filterValue: filterValue,
-        layers: floorPickerLayerIds,
+      LocalStorageHelper.set("globalMapState", {
+        mapFilter: {
+          filter: cqlFilter,
+          filterProperty: filterPropertyName,
+          filterValue: floor.floorId,
+          filterLayers: floorPickerLayerIds,
+        },
+        mapProperties: {
+          levelId: floor.floorId,
+          Level_Name: floor.floorValue,
+        },
       });
 
       // Tell the globalObserver that we have updated this, we may need to respond (for example within the LayerSettings CQLFilter.js)
@@ -128,6 +134,6 @@ export default class FloorPickerModel {
     const layersToFilter = this.#getAffectedLayers();
 
     this.#applyFilterToLayers(layersToFilter, cqlFilter);
-    this.#updateFilterInStorage(cqlFilter, filterPropertyName, filterValue);
+    this.#updateFilterInStorage(cqlFilter, filterPropertyName, floor);
   };
 }

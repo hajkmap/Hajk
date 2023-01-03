@@ -8,6 +8,8 @@ import { Select, Modify, Draw, Translate } from "ol/interaction";
 import { never } from "ol/events/condition";
 import X2JS from "x2js";
 import { hfetch } from "utils/FetchWrapper";
+import { functionalOk } from "models/Cookie";
+import LocalStorageHelper from "utils/LocalStorageHelper";
 
 class EditModel {
   constructor(settings) {
@@ -317,6 +319,33 @@ class EditModel {
     });
   }
 
+  #filterByMapFilter(features) {
+    if (functionalOk) {
+      const globalMapState = LocalStorageHelper.get("globalMapState", null);
+      const globalFilter = globalMapState.mapFilter;
+
+      // If the current edit layer is marked by the global filter as a layer where the filter should be applied
+      // we will need to filter apply the filter to the incoming features.
+      if (globalFilter && globalFilter.filterLayers) {
+        if (globalFilter.filterLayers.includes(this.editSource.id)) {
+          //If it is then we need to apply a filter, on the filterProperty and filterValue
+          const filterProperty = globalFilter.filterProperty;
+          const filterValue = globalFilter.filterValue;
+          features = features.filter((feature) => {
+            if (
+              feature.getProperties()[filterProperty] === filterValue.toString()
+            ) {
+              return true;
+            }
+            return false;
+          });
+        }
+      }
+
+      return features;
+    }
+  }
+
   loadDataSuccess = (data) => {
     var format = new WFS();
     var features;
@@ -326,12 +355,17 @@ class EditModel {
       alert("Fel: data kan inte läsas in. Kontrollera koordinatsystem.");
     }
 
+    //If there is a global filter on the map, we take this into account. If there is no filter, all features will be returned.
+    features = this.#filterByMapFilter(features);
+
     // Make sure we have a name for geometry column. If there are features already,
     // take a look at the first one and get geometry field's name from that first feature.
     // If there are no features however, default to 'geom'. If we don't then OL will
     // fallback to its own default geometry field name, which happens to be 'geometry' and not 'geom.
     this.geometryName =
-      features.length > 0 ? features[0].getGeometryName() : "geom";
+      features.length > 0
+        ? features[0].getGeometryName()
+        : this.editSource.geometryField || "geom";
 
     if (this.editSource.editableFields.some((field) => field.hidden)) {
       features = this.filterByDefaultValue(features);
