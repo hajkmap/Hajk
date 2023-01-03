@@ -31,6 +31,7 @@ paths:
           required: true
           schema:
             type: string
+      description: Fetch contents of the whole document.
       responses:
         '200':
           description: Return the JSON file
@@ -49,8 +50,8 @@ paths:
       deprecated: true
       tags:
         - Admin - Informative/DocumentHandler
+      description: Create a new document.
       requestBody:
-        description: Settings for given map's LayerSwitcher component
         content:
           application/json:
             schema:
@@ -69,8 +70,8 @@ paths:
     put:
       tags:
         - Admin - Informative/DocumentHandler
+      description: Create a new document with the name given in the body, to the map given in the body.
       requestBody:
-        description: Settings for given map's LayerSwitcher component
         content:
           application/json:
             schema:
@@ -93,6 +94,7 @@ paths:
     get:
       tags:
         - Admin - Informative/DocumentHandler
+      description: Return all available documents
       responses:
         '200':
           description: Return all available documents
@@ -110,10 +112,11 @@ paths:
     get:
       tags:
         - Admin - Informative/DocumentHandler
+      description: Return available documents of a map
       parameters:
         - name: name
           in: path
-          description: Name of the map for which connected documents will be returned
+          description: Name of the map of which the connected documents will be returned
           required: true
           schema:
             type: string
@@ -135,10 +138,11 @@ paths:
       deprecated: true
       tags:
         - Admin - Informative/DocumentHandler
+      description: Save a document
       parameters:
         - name: name
           in: path
-          description: Document to be saved
+          description: Name of the document to be saved
           required: true
           schema:
             type: string
@@ -158,10 +162,11 @@ paths:
     put:
       tags:
         - Admin - Informative/DocumentHandler
+      description: Save a document
       parameters:
         - name: name
           in: path
-          description: Document to be saved
+          description: Name of the document to be saved
           required: true
           schema:
             type: string
@@ -182,10 +187,11 @@ paths:
     delete:
       tags:
         - Admin - Informative/DocumentHandler
+      description: Delete a document
       parameters:
         - name: name
           in: path
-          description: Document to deleted
+          description: Name of the document to be deleted
           required: true
           schema:
             type: string
@@ -340,7 +346,7 @@ paths:
       parameters:
         - name: map
           in: path
-          description: Name of the map to fetch
+          description: Name of the map configuration to fetch
           required: true
           schema:
             type: string
@@ -350,7 +356,7 @@ paths:
           schema:
             type: string
           required: false
-      description: Fetch contents of a map configuration
+      description: Fetch contents of a map configuration. If AD authentication is active, filter by user's permission.
       responses:
         '200':
           description: Success
@@ -366,7 +372,7 @@ paths:
       parameters:
         - name: map
           in: path
-          description: Name of the map to fetch
+          description: Name of the map configuration to fetch
           required: true
           schema:
             type: string
@@ -394,11 +400,11 @@ paths:
             type: string
         - name: format
           in: path
-          description: Name of the map to fetch
+          description: The format of what's exported. Always 'json'
           required: true
           schema:
             type: string
-      description: Exports the map's layers in a human-readable format
+      description: Exports layers of the map in a human-readable format. If the parameter map is given the value 'layer.json', the layers of that file is returned. If the parameter map is given any other value, the base layers and group layers of that map configuration is returned.
       responses:
         '200':
           description: Success
@@ -411,7 +417,7 @@ paths:
       parameters:
         - name: name
           in: path
-          description: File name of the new map config
+          description: File name of the new map configuration
           required: true
           schema:
             type: string
@@ -443,7 +449,7 @@ paths:
       parameters:
         - name: name
           in: path
-          description: File name of the new map config
+          description: File name of the new map configuration
           required: true
           schema:
             type: string
@@ -460,7 +466,7 @@ paths:
       parameters:
         - name: name
           in: path
-          description: Name of the map to be deleted
+          description: Name of the map configuration to be deleted
           required: true
           schema:
             type: string
@@ -475,7 +481,7 @@ paths:
       parameters:
         - name: name
           in: path
-          description: Name of the map to be deleted
+          description: Name of the map configurationto be deleted
           required: true
           schema:
             type: string
@@ -492,7 +498,7 @@ paths:
       parameters:
         - name: name
           in: path
-          description: Name of the map to be deleted
+          description: Name of the map configuration to be deleted
           required: true
           schema:
             type: string
@@ -508,13 +514,13 @@ paths:
       parameters:
         - name: nameFrom
           in: path
-          description: Name of the map to be duplicated
+          description: Name of the map configuration to be duplicated
           required: true
           schema:
             type: string
         - name: nameTo
           in: path
-          description: Name of the new map (the duplicate)
+          description: Name of the new map configuration (the duplicate)
           required: true
           schema:
             type: string
@@ -574,6 +580,7 @@ paths:
       parameters:
         - in: query
           name: users
+          description: Names of users to find shared AD group memberships of
           schema:
             type: array
             items:
@@ -652,7 +659,7 @@ paths:
     get:
       tags:
         - Admin - ActiveDirectory
-      description: Get the current content of local AD Groups Per User store
+      description: Get the current content of local AD groups per user store
       responses:
         '200':
           description: Success
@@ -722,6 +729,7 @@ paths:
     get:
       tags:
         - Specification
+      description: Return the API specification
       responses:
         '200':
           description: Return the API specification
@@ -730,6 +738,7 @@ paths:
     put:
       tags:
         - Admin - Maps and layers
+      description: Update the LayerSwitcher component of a map.
       requestBody:
         description: Settings for given map's LayerSwitcher component
         content:
@@ -740,7 +749,7 @@ paths:
       parameters:
         - name: mapFile
           in: query
-          description: Name of the map who's LayerSwitcher config should be written
+          description: Name of the map of which the LayerSwitcher config should be written
           required: true
           schema:
             type: string
@@ -752,17 +761,18 @@ paths:
     put:
       tags:
         - Admin - Maps and layers
+      description: Update the mapsettings of a map.
       requestBody:
-        description: Settings for given map's LayerSwitcher component
+        description: Settings for given map's mapsettings
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/LayerSwitcherBody'
+              $ref: '#/components/schemas/mapsettings'
         required: true
       parameters:
         - name: mapFile
           in: query
-          description: Name of the map who's LayerSwitcher config should be written
+          description: Name of the map who's mapsettings config should be written
           required: true
           schema:
             type: string
@@ -774,8 +784,9 @@ paths:
     put:
       tags:
         - Admin - Maps and layers
+      description: Update the tools configuration of a map.
       requestBody:
-        description: Settings for given map's LayerSwitcher component
+        description: Settings for given map's tools
         content:
           application/json:
             schema:
@@ -784,7 +795,7 @@ paths:
       parameters:
         - name: mapFile
           in: query
-          description: Name of the map who's LayerSwitcher config should be written
+          description: Name of the map who's tools configuration should be written
           required: true
           schema:
             type: string
@@ -796,12 +807,13 @@ paths:
     put:
       tags:
         - Admin - Maps and layers
+      description: Update a tool configuration of a map.
       requestBody:
         description: Settings for given map's specific tool
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/LayerSwitcherBody'
+              $ref: '#/components/schemas/toolsetting'
         required: true
       parameters:
         - name: map
@@ -878,6 +890,7 @@ paths:
     delete:
       tags:
         - Admin - Maps and layers
+      description: Delete a layer
       parameters:
         - name: type
           in: path
@@ -967,7 +980,7 @@ components:
                           example: -1
                         name:
                           type: string
-                          example: Länstyrelsen
+                          example: Lï¿½nstyrelsen
                         toggled:
                           type: boolean
                         expanded:
@@ -1037,7 +1050,7 @@ components:
                     example: Lagerhanterare
                   description:
                     type: string
-                    example: Välj vad du vill visa i kartan.
+                    example: Vï¿½lj vad du vill visa i kartan.
                   dropdownThemeMaps:
                     type: boolean
                     description: Display the map in the list of available maps.
@@ -1157,7 +1170,7 @@ components:
                   example: light
             defaultCookieNoticeMessage:
               type: string
-              example: Vi använder nödvändiga kakor (cookies) för att webbplatsen ska fungera på ett bra sätt för dig. Vi använder också funktionella kakor för att ge dig bästa möjliga funktion om du som användare har godkänt användningen av dessa.
+              example: Vi anvï¿½nder nï¿½dvï¿½ndiga kakor (cookies) fï¿½r att webbplatsen ska fungera pï¿½ ett bra sï¿½tt fï¿½r dig. Vi anvï¿½nder ocksï¿½ funktionella kakor fï¿½r att ge dig bï¿½sta mï¿½jliga funktion om du som anvï¿½ndare har godkï¿½nt anvï¿½ndningen av dessa.
             defaultCookieNoticeUrl:
               type: string
               example: https://pts.se/sv/bransch/regler/lagar/lag-om-elektronisk-kommunikation/kakor-cookies/
@@ -1303,7 +1316,7 @@ components:
                         example: -1
                       name:
                         type: string
-                        example: Länstyrelsen
+                        example: Lï¿½nstyrelsen
                       toggled:
                         type: boolean
                       expanded:
@@ -1375,7 +1388,7 @@ components:
                   example: Lagerhanterare
                 description:
                   type: string
-                  example: Välj vad du vill visa i kartan.
+                  example: Vï¿½lj vad du vill visa i kartan.
                 dropdownThemeMaps:
                   type: boolean
                   description: Display the map in the list of available maps.
@@ -1655,7 +1668,7 @@ components:
                   description: If true, auto-complete is disabled. Instead results are displayed directly
                 searchBarPlaceholder:
                   type: string
-                  example: Sök...
+                  example: Sï¿½k...
                 autocompleteWildcardAtStart:
                   type: boolean
                   description: If true, a wildcard is used before each search word
@@ -2164,7 +2177,7 @@ components:
                       description: The number of chapter levels
                     title:
                       type: string
-                      example: Innehållsförteckning
+                      example: Innehï¿½llsfï¿½rteckning
                       description: The ToC title
                 defaultDocumentColorSettings:
                   type: object
@@ -2328,11 +2341,11 @@ components:
                   description: The header text
                 text:
                   type: string
-                  example: Här är det möjligt att skriva lite vad som helst
+                  example: Hï¿½r ï¿½r det mï¿½jligt att skriva lite vad som helst
                   description: The text to display information
                 buttonText:
                   type: string
-                  example: Stäng
+                  example: Stï¿½ng
                   description: The button text
                 title:
                   type: string
@@ -2455,22 +2468,22 @@ components:
                   type: boolean
                 title:
                   type: string
-                  example: Översiktsplan
+                  example: ï¿½versiktsplan
                   description: The tool window title
                 caption:
                   type: string
-                  example: Översiktsplan
+                  example: ï¿½versiktsplan
                   description: The tool window caption
                 exportRoot:
                   type: string
                   example: null
                 abstract:
                   type: string
-                  example: Läs mer om vad som planeras i kommunen
+                  example: Lï¿½s mer om vad som planeras i kommunen
                   description: If the tool is displayed as a widget, then this abstract will be shown inside the widget button.
                 html:
                   type: string
-                  example: <div>HTML som beskriver dokumentets innehåll</div>
+                  example: <div>HTML som beskriver dokumentets innehï¿½ll</div>
                 document:
                   type: string
                   example: null
@@ -2573,7 +2586,7 @@ components:
           description: The cross origin parameter
         defaultCookieNoticeMessage:
           type: string
-          example: Vi använder nödvändiga kakor (cookies) för att webbplatsen ska fungera på ett bra sätt för dig. Vi använder också funktionella kakor för att ge dig bästa möjliga funktion om du som användare har godkänt användningen av dessa.
+          example: Vi anvï¿½nder nï¿½dvï¿½ndiga kakor (cookies) fï¿½r att webbplatsen ska fungera pï¿½ ett bra sï¿½tt fï¿½r dig. Vi anvï¿½nder ocksï¿½ funktionella kakor fï¿½r att ge dig bï¿½sta mï¿½jliga funktion om du som anvï¿½ndare har godkï¿½nt anvï¿½ndningen av dessa.
           description: The cookie message
         defaultCookieNoticeUrl:
           type: string
@@ -2722,7 +2735,7 @@ components:
           example: 2
         caption:
           type: string
-          example: Nedtonad stadskarta Göteborg
+          example: Nedtonad stadskarta Gï¿½teborg
         internalLayerName:
           type: string
           example: null
@@ -2870,7 +2883,7 @@ components:
           example: null
         infoText:
           type: string
-          example: Sammansatt bakgrundskarta i gråton.
+          example: Sammansatt bakgrundskarta i grï¿½ton.
         infoUrl:
           type: string
           example: null
@@ -2879,7 +2892,7 @@ components:
           example: null
         infoOwner:
           type: string
-          example: Stadsbyggnadskontoret Göteborg
+          example: Stadsbyggnadskontoret Gï¿½teborg
         timeSliderVisible:
           type: boolean
         timeSliderStart:
@@ -2920,7 +2933,7 @@ components:
                 example: 1
               caption:
                 type: string
-                example: Topografiska webbkartan öppna data1
+                example: Topografiska webbkartan ï¿½ppna data1
               internalLayerName:
                 type: string
                 format: nullable
@@ -2974,7 +2987,7 @@ components:
                   example: 1
               attribution:
                 type: string
-                example: Lantmäteriet
+                example: Lantmï¿½teriet
               infoVisible:
                 type: boolean
               infoTitle:
@@ -2982,16 +2995,16 @@ components:
                 example: Topowebbkartan i WMTS-format
               infoText:
                 type: string
-                example: Bakgrundskarta från Lantmäteriet i WMTS-format.
+                example: Bakgrundskarta frï¿½n Lantmï¿½teriet i WMTS-format.
               infoUrl:
                 type: string
                 example: https://www.lantmateriet.se/globalassets/kartor-och-geografisk-information/geodatatjanster/tb_twkvisningv1.0.4.pdf
               infoUrlText:
                 type: string
-                example: Information om tjänsten
+                example: Information om tjï¿½nsten
               infoOwner:
                 type: string
-                example: Lantmäteriet
+                example: Lantmï¿½teriet
               timeSliderVisible:
                 type: boolean
               timeSliderStart:
@@ -3029,7 +3042,7 @@ components:
                 example: 2
               caption:
                 type: string
-                example: Nedtonad stadskarta Göteborg
+                example: Nedtonad stadskarta Gï¿½teborg
               internalLayerName:
                 type: string
                 format: nullable
@@ -3171,7 +3184,7 @@ components:
                 example: null
               infoText:
                 type: string
-                example: Sammansatt bakgrundskarta i gråton.
+                example: Sammansatt bakgrundskarta i grï¿½ton.
               infoUrl:
                 type: string
                 example: null
@@ -3180,7 +3193,7 @@ components:
                 example: null
               infoOwner:
                 type: string
-                example: Stadsbyggnadskontoret Göteborg
+                example: Stadsbyggnadskontoret Gï¿½teborg
               infoClickSortType:
                 type: string
                 format: nullable
@@ -3216,10 +3229,10 @@ components:
                 example: 4
               caption:
                 type: string
-                example: Adresser Göteborg
+                example: Adresser Gï¿½teborg
               internalLayerName:
                 type: string
-                example: Adresser Göteborg
+                example: Adresser Gï¿½teborg
               url:
                 type: string
                 example: https://opengeodata.goteborg.se/services/adresser/wfs/v1
@@ -3290,10 +3303,10 @@ components:
           example: 4
         caption:
           type: string
-          example: Adresser Göteborg
+          example: Adresser Gï¿½teborg
         internalLayerName:
           type: string
-          example: Adresser Göteborg
+          example: Adresser Gï¿½teborg
         url:
           type: string
           example: https://opengeodata.goteborg.se/services/adresser/wfs/v1
@@ -3582,7 +3595,7 @@ components:
                 description: Show layer at start
         description:
           type: string
-          example: Välj vad du vill visa i kartan.
+          example: Vï¿½lj vad du vill visa i kartan.
           description: If the tool displays as a widget (the setting 'Verktygsplacering' is set to either 'left' or 'right') then this description will display inside the widget button
         dropdownThemeMaps:
           type: boolean
@@ -3632,7 +3645,7 @@ components:
                       description: Show layer at start
               name:
                 type: string
-                example: Länstyrelsen
+                example: Lï¿½nstyrelsen
                 description: The layer name
               parent:
                 type: string
