@@ -312,6 +312,11 @@ namespace MapService.Controllers
             {
                 MapConfigHandler.CreateMapConfiguration(name);
             }
+            catch (IOException iex)
+            {
+                _logger.LogError(iex, "Internal Server Error");
+                return StatusCode(StatusCodes.Status500InternalServerError, "The file " + name + " already exisits");
+            }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Internal Server Error");

@@ -165,11 +165,11 @@ namespace MapService.Business.MapConfig
 
         internal static void CreateMapConfiguration(string name)
         {
-            var appDataFolder = PathUtility.GetPath("Upload:Path");
+            var appDataFolder = PathUtility.GetPath("DataContent:Path");
             var templatesFolder = PathUtility.GetPath("Templates:Path");
             var templateFileName = ConfigurationUtility.GetSectionItem("Templates:Name");
 
-            File.Copy($"{templatesFolder}\\{templateFileName}", $"{appDataFolder}\\{name}.json");
+            File.Copy(Path.Combine(templatesFolder, templateFileName), Path.Combine(appDataFolder, $"{name}.json"));
         }
 
         private static LayerExportItem FilterLayers(JsonElement jsonElementLayers)
