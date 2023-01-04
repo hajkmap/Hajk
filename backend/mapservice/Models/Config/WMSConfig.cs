@@ -15,6 +15,7 @@ namespace MapService.Models.Config
         public string legend { get; set; }
         public string legendIcon { get; set; }
         public string infobox { get; set; }
+        public string infoclickIcon { get; set; }
         public string style { get; set; }
         public bool queryable { get; set; }
         public string searchDisplayName { get; set; }
