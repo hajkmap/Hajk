@@ -94,6 +94,8 @@ class AttributeEditor extends React.Component {
   };
 
   #getFieldPropertiesFromMapValues(valueMap, feature) {
+    // We only want to (if configured to do so) pre-fill the attributes form with available map properties
+    // if it's a new feature. Existing features should keep their own properties.
     let isNewFeature = Object.keys(feature.getProperties()).length === 1;
 
     if (isNewFeature && functionalOk) {
@@ -115,7 +117,8 @@ class AttributeEditor extends React.Component {
     return valueMap;
   }
 
-  #checkSetOnlyByMap(field) {
+  #checkSetOnlyByMap(field, feature) {
+    let isNewFeature = Object.keys(feature.getProperties()).length === 1;
     let setOnlyByMap = false;
 
     //Have we set that fields should be set by global map properties if matching properties exist?
@@ -124,9 +127,10 @@ class AttributeEditor extends React.Component {
 
     //Have we set that the user can override fields that are set by the map properties?
     const allowUserOverride =
-      this.props.model.options?.userOverrideMatchingMapValues ?? true;
+      this.props.model.options.userOverrideMatchingMapValues ?? true;
 
     if (
+      !isNewFeature ||
       allowUserOverride ||
       !setFieldsFromMatchingGlobalMapValue ||
       !functionalOk
@@ -393,7 +397,12 @@ class AttributeEditor extends React.Component {
     // It is possible that the edit tool is configured so that certain fields are set automatically from
     // properties within the map. In this case it may be set that these fields are not then changeable by
     // the user, in which case they should be disabled.
-    let fieldSetOnlyByMapProperties = this.#checkSetOnlyByMap(field);
+
+    let fieldSetOnlyByMapProperties = this.#checkSetOnlyByMap(
+      field,
+      this.state.feature
+    );
+
     let isDisabled = !editable || fieldSetOnlyByMapProperties;
 
     switch (field.textType) {
