@@ -147,6 +147,22 @@ namespace MapService.DataAccess
             File.WriteAllText(path, mapFile.ToJsonString(jsonSerializerOptions));
         }
 
+        public static void SaveDocumentFile(string fileName, JsonObject jsonObject)
+        {
+            fileName = FileUtility.AddMissingEnding(fileName, ".json");
+            string path = GetPathToDocumentFile(fileName);
+
+            if (!File.Exists(path)) { throw new FileNotFoundException(); }
+
+            var jsonSerializerOptions = new JsonSerializerOptions
+            {
+                Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
+                WriteIndented = true
+            };
+
+            File.WriteAllText(path, jsonObject.ToJsonString(jsonSerializerOptions));
+        }
+
         internal static void DuplicateMapFile(string mapFileNameFrom, string mapFileNameTo)
         {
             mapFileNameFrom = FileUtility.AddMissingEnding(mapFileNameFrom, ".json");

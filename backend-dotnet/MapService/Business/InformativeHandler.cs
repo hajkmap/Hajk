@@ -129,6 +129,11 @@ namespace MapService.Business.Informative
             FileUtility.CreateFile(path, stringDocument);
         }
 
+        public static void SaveDocument(string name, JsonObject jsonObject)
+        {
+            JsonFileDataAccess.SaveDocumentFile(name, jsonObject);
+        }
+
         internal static void DeleteDocument(string documentName)
         {
             JsonFileDataAccess.DeleteDocumentFile(documentName);
