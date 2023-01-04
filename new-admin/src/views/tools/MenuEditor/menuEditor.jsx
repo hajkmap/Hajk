@@ -8,6 +8,7 @@ import DragHandle from "@material-ui/icons/DragHandle";
 import TreeRow from "./treerow.jsx";
 import { withStyles } from "@material-ui/core/styles";
 import { SketchPicker } from "react-color";
+import OpenInNewIcon from "@material-ui/icons/OpenInNew";
 
 import {
   Typography,
@@ -77,6 +78,7 @@ class ToolOptions extends Component {
     documentOnStart: "",
     drawerTitle: "",
     drawerButtonTitle: "",
+    drawerButtonIcon: "",
     resizingEnabled: false,
     draggingEnabled: false,
     searchImplemented: true,
@@ -153,6 +155,7 @@ class ToolOptions extends Component {
         documentOnStart: tool.options.documentOnStart,
         drawerTitle: tool.options.drawerTitle,
         drawerButtonTitle: tool.options.drawerButtonTitle,
+        drawerButtonIcon: tool.options.drawerButtonIcon,
         resizingEnabled: tool.options.resizingEnabled || false,
         draggingEnabled: tool.options.draggingEnabled || false,
         searchImplemented: tool.options.searchImplemented,
@@ -256,6 +259,7 @@ class ToolOptions extends Component {
         documentOnStart: this.state.documentOnStart,
         drawerTitle: this.state.drawerTitle,
         drawerButtonTitle: this.state.drawerButtonTitle,
+        drawerButtonIcon: this.state.drawerButtonIcon,
         resizingEnabled: this.state.resizingEnabled,
         draggingEnabled: this.state.draggingEnabled,
         tableOfContents: this.state.tableOfContents,
@@ -747,6 +751,35 @@ class ToolOptions extends Component {
                 this.handleInputChange(e);
               }}
             />
+          </div>
+          <div>
+            <label htmlFor="drawerButtonIcon">
+              Knappikon{" "}
+              <i
+                className="fa fa-question-circle"
+                data-toggle="tooltip"
+                title="Ikon på knapp som öppnar verktyget. Skriv in ikonens namn i textfältet för att välja ikon. Hämtat från Material Symbols ikonbibliotek."
+              />
+            </label>
+            <input
+              id="drawerButtonIcon"
+              placeholder="Ange ikonens namn"
+              value={this.state.drawerButtonIcon}
+              type="text"
+              name="drawerButtonIcon"
+              onChange={(e) => {
+                this.handleInputChange(e);
+              }}
+            />
+            <ColorButtonBlue
+              variant="contained"
+              className="btn"
+              href="https://fonts.google.com/icons"
+              target="_blank"
+              startIcon={<OpenInNewIcon />}
+            >
+              <Typography variant="button">Visa ikoner</Typography>
+            </ColorButtonBlue>
           </div>
           <div>
             <input
