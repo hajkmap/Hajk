@@ -147,6 +147,65 @@ namespace MapService.Controllers
         }
 
         /// <remarks>
+        /// Save a document
+        /// </remarks>
+        /// <param name="name">Name of the document to be saved</param>
+        /// <param name="requestBody">Settings from the request body</param>
+        /// <response code="200">All good</response>
+        /// <response code="500">Internal Server Error</response>
+        /// <returns>JsonObject</returns>
+        [HttpPost]
+        [Route("save/{name}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        [SwaggerOperation(Tags = new[] { "Admin - Informative/DocumentHandler" })]
+        [Obsolete]
+        public ActionResult SaveDocumentPost(string name, [Required][FromBody] JsonObject requestBody)
+        {
+            try
+            {
+                InformativeHandler.SaveDocument(name, requestBody);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Internal server error");
+
+                return StatusCode(StatusCodes.Status500InternalServerError, "Internal Server Error");
+            }
+
+            return StatusCode(StatusCodes.Status200OK);
+        }
+
+        /// <remarks>
+        /// Save a document
+        /// </remarks>
+        /// <param name="name">Name of the document to be saved</param>
+        /// <param name="requestBody">Settings from the request body</param>
+        /// <response code="200">All good</response>
+        /// <response code="500">Internal Server Error</response>
+        /// <returns>JsonObject</returns>
+        [HttpPut]
+        [Route("save/{name}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        [SwaggerOperation(Tags = new[] { "Admin - Informative/DocumentHandler" })]
+        public ActionResult SaveDocumentPut(string name, [Required][FromBody] JsonObject requestBody)
+        {
+            try
+            {
+                InformativeHandler.SaveDocument(name, requestBody);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Internal server error");
+
+                return StatusCode(StatusCodes.Status500InternalServerError, "Internal Server Error");
+            }
+
+            return StatusCode(StatusCodes.Status200OK);
+        }
+
+        /// <remarks>
         /// Delete an existing document
         /// </remarks>
         /// <param name="name">Document to be deleted</param>
