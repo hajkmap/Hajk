@@ -128,7 +128,7 @@ namespace MapService.Business.Settings
 
                 //Layer type not found in layers database.
                 if (layers == null)
-                    return;
+                    throw new NullReferenceException();
 
                 //If we take the newly generated id, we put that id-value first in the array
                 JsonArray newLayers = new JsonArray();
