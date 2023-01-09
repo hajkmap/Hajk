@@ -1,5 +1,3 @@
-import { hfetch } from "utils/FetchWrapper";
-
 import GeoJSON from "ol/format/GeoJSON";
 import WMSGetFeatureInfo from "ol/format/WMSGetFeatureInfo";
 import TileLayer from "ol/layer/Tile";
@@ -9,8 +7,9 @@ import VectorSource from "ol/source/Vector";
 import { Style, Icon, Fill, Stroke, Circle } from "ol/style";
 import Feature from "ol/Feature";
 import Point from "ol/geom/Point";
-import AppModel from "../models/AppModel.js";
 
+import AppModel from "models/AppModel";
+import { hfetch } from "utils/FetchWrapper";
 import { getInfoClickInfoFromLayerConfig } from "utils/InfoClickHelpers.js";
 
 const convertRGBAtoString = (color) => {

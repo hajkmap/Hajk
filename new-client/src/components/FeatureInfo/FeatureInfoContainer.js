@@ -3,10 +3,6 @@ import propTypes from "prop-types";
 import { styled } from "@mui/material/styles";
 import ArrowLeftIcon from "@mui/icons-material/ArrowLeft";
 import ArrowRightIcon from "@mui/icons-material/ArrowRight";
-import FeaturePropsParsing from "./FeaturePropsParsing";
-import { getInfoClickInfoFromLayerConfig } from "utils/InfoClickHelpers.js";
-// import Diagram from "../Diagram";
-// import HajkTable from "../Table";
 import {
   Table,
   TableContainer,
@@ -18,6 +14,11 @@ import {
   Typography,
   Grid,
 } from "@mui/material";
+
+import FeaturePropsParsing from "./FeaturePropsParsing";
+import { getInfoClickInfoFromLayerConfig } from "utils/InfoClickHelpers.js";
+// import Diagram from "../Diagram";
+// import HajkTable from "../Table";
 
 const InfoContainer = styled(Grid)(() => ({
   height: "100%",
@@ -221,7 +222,7 @@ class FeatureInfoContainer extends React.PureComponent {
     // }
 
     // When we've grabbed the markdown-definition for the layer, we can create the
-    // information that we want to display to the user bu combining the definition with
+    // information that we want to display to the user by combining the definition with
     // the feature properties.
     const properties = this.getFeatureProperties(feature);
     const value = await this.getValue(markdown, properties, caption);
