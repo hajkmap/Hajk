@@ -304,32 +304,13 @@ export function handleClick(evt, map, callback) {
                   })
               );
               break;
-            case "text/xml": {
+            case "text/xml":
+            case "application/vnd.ogc.gml":
               featurePromises.push(
                 response.value.requestResponse
                   .text()
                   .then((text) => {
-                    if (text !== undefined && text) {
-                      features.push(
-                        ...getFeaturesFromXml(response.value, text)
-                      );
-                    }
-                  })
-                  .catch((err) => {
-                    console.error(
-                      "GetFeatureInfo couldn't retrieve correct data for the clicked object.",
-                      err
-                    );
-                  })
-              );
-              break;
-            }
-            case "application/vnd.ogc.gml": {
-              featurePromises.push(
-                response.value.requestResponse
-                  .text()
-                  .then((text) => {
-                    features.push(...getFeaturesFromGml(response.value, text));
+                    features.push(...getFeaturesFromXml(response.value, text));
                   })
                   .catch((err) => {
                     console.error(
@@ -338,7 +319,6 @@ export function handleClick(evt, map, callback) {
                   })
               );
               break;
-            }
             // For any other Content-Type, just ignore - we can't parse any
             // features if we don't know the data format (or if it's simply missing)
             default:
