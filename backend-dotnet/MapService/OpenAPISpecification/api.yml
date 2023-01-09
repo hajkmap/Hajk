@@ -992,7 +992,7 @@ components:
                           example: -1
                         name:
                           type: string
-                          example: L�nstyrelsen
+                          example: Länstyrelsen
                         toggled:
                           type: boolean
                         expanded:
@@ -1062,7 +1062,7 @@ components:
                     example: Lagerhanterare
                   description:
                     type: string
-                    example: V�lj vad du vill visa i kartan.
+                    example: Välj vad du vill visa i kartan.
                   dropdownThemeMaps:
                     type: boolean
                     description: Display the map in the list of available maps.
@@ -1182,7 +1182,7 @@ components:
                   example: light
             defaultCookieNoticeMessage:
               type: string
-              example: Vi anv�nder n�dv�ndiga kakor (cookies) f�r att webbplatsen ska fungera p� ett bra s�tt f�r dig. Vi anv�nder ocks� funktionella kakor f�r att ge dig b�sta m�jliga funktion om du som anv�ndare har godk�nt anv�ndningen av dessa.
+              example: Vi använder nödvändiga kakor (cookies) för att webbplatsen ska fungera på ett bra sätt för dig. Vi använder också funktionella kakor för att ge dig bästa möjliga funktion om du som användare har godkänt användningen av dessa.
             defaultCookieNoticeUrl:
               type: string
               example: https://pts.se/sv/bransch/regler/lagar/lag-om-elektronisk-kommunikation/kakor-cookies/
@@ -1328,7 +1328,7 @@ components:
                         example: -1
                       name:
                         type: string
-                        example: L�nstyrelsen
+                        example: Länstyrelsen
                       toggled:
                         type: boolean
                       expanded:
@@ -1400,7 +1400,7 @@ components:
                   example: Lagerhanterare
                 description:
                   type: string
-                  example: V�lj vad du vill visa i kartan.
+                  example: Välj vad du vill visa i kartan.
                 dropdownThemeMaps:
                   type: boolean
                   description: Display the map in the list of available maps.
@@ -1680,7 +1680,7 @@ components:
                   description: If true, auto-complete is disabled. Instead results are displayed directly
                 searchBarPlaceholder:
                   type: string
-                  example: S�k...
+                  example: Sök...
                 autocompleteWildcardAtStart:
                   type: boolean
                   description: If true, a wildcard is used before each search word
@@ -2189,7 +2189,7 @@ components:
                       description: The number of chapter levels
                     title:
                       type: string
-                      example: Inneh�llsf�rteckning
+                      example: Innehållsförteckning
                       description: The ToC title
                 defaultDocumentColorSettings:
                   type: object
@@ -2353,11 +2353,11 @@ components:
                   description: The header text
                 text:
                   type: string
-                  example: H�r �r det m�jligt att skriva lite vad som helst
+                  example: Här är det möjligt att skriva lite vad som helst
                   description: The text to display information
                 buttonText:
                   type: string
-                  example: St�ng
+                  example: Stäng
                   description: The button text
                 title:
                   type: string
@@ -2480,22 +2480,22 @@ components:
                   type: boolean
                 title:
                   type: string
-                  example: �versiktsplan
+                  example: Översiktsplan
                   description: The tool window title
                 caption:
                   type: string
-                  example: �versiktsplan
+                  example: Översiktsplan
                   description: The tool window caption
                 exportRoot:
                   type: string
                   example: null
                 abstract:
                   type: string
-                  example: L�s mer om vad som planeras i kommunen
+                  example: Läs mer om vad som planeras i kommunen
                   description: If the tool is displayed as a widget, then this abstract will be shown inside the widget button.
                 html:
                   type: string
-                  example: <div>HTML som beskriver dokumentets inneh�ll</div>
+                  example: <div>HTML som beskriver dokumentets innehåll</div>
                 document:
                   type: string
                   example: null
@@ -2598,7 +2598,7 @@ components:
           description: The cross origin parameter
         defaultCookieNoticeMessage:
           type: string
-          example: Vi anv�nder n�dv�ndiga kakor (cookies) f�r att webbplatsen ska fungera p� ett bra s�tt f�r dig. Vi anv�nder ocks� funktionella kakor f�r att ge dig b�sta m�jliga funktion om du som anv�ndare har godk�nt anv�ndningen av dessa.
+          example: Vi använder nödvändiga kakor (cookies) för att webbplatsen ska fungera på ett bra sätt för dig. Vi använder också funktionella kakor för att ge dig bästa möjliga funktion om du som användare har godkänt användningen av dessa.
           description: The cookie message
         defaultCookieNoticeUrl:
           type: string
@@ -2747,7 +2747,7 @@ components:
           example: 2
         caption:
           type: string
-          example: Nedtonad stadskarta G�teborg
+          example: Nedtonad stadskarta Göteborg
         internalLayerName:
           type: string
           example: null
@@ -2895,7 +2895,7 @@ components:
           example: null
         infoText:
           type: string
-          example: Sammansatt bakgrundskarta i gr�ton.
+          example: Sammansatt bakgrundskarta i gråton.
         infoUrl:
           type: string
           example: null
@@ -2904,7 +2904,7 @@ components:
           example: null
         infoOwner:
           type: string
-          example: Stadsbyggnadskontoret G�teborg
+          example: Stadsbyggnadskontoret Göteborg
         timeSliderVisible:
           type: boolean
         timeSliderStart:
@@ -2945,7 +2945,7 @@ components:
                 example: 1
               caption:
                 type: string
-                example: Topografiska webbkartan �ppna data1
+                example: Topografiska webbkartan öppna data1
               internalLayerName:
                 type: string
                 format: nullable
@@ -2999,7 +2999,7 @@ components:
                   example: 1
               attribution:
                 type: string
-                example: Lantm�teriet
+                example: Lantmäteriet
               infoVisible:
                 type: boolean
               infoTitle:
@@ -3007,16 +3007,16 @@ components:
                 example: Topowebbkartan i WMTS-format
               infoText:
                 type: string
-                example: Bakgrundskarta fr�n Lantm�teriet i WMTS-format.
+                example: Bakgrundskarta från Lantmäteriet i WMTS-format.
               infoUrl:
                 type: string
                 example: https://www.lantmateriet.se/globalassets/kartor-och-geografisk-information/geodatatjanster/tb_twkvisningv1.0.4.pdf
               infoUrlText:
                 type: string
-                example: Information om tj�nsten
+                example: Information om tjänsten
               infoOwner:
                 type: string
-                example: Lantm�teriet
+                example: Lantmäteriet
               timeSliderVisible:
                 type: boolean
               timeSliderStart:
@@ -3054,7 +3054,7 @@ components:
                 example: 2
               caption:
                 type: string
-                example: Nedtonad stadskarta G�teborg
+                example: Nedtonad stadskarta Göteborg
               internalLayerName:
                 type: string
                 format: nullable
@@ -3196,7 +3196,7 @@ components:
                 example: null
               infoText:
                 type: string
-                example: Sammansatt bakgrundskarta i gr�ton.
+                example: Sammansatt bakgrundskarta i gråton.
               infoUrl:
                 type: string
                 example: null
@@ -3205,7 +3205,7 @@ components:
                 example: null
               infoOwner:
                 type: string
-                example: Stadsbyggnadskontoret G�teborg
+                example: Stadsbyggnadskontoret Göteborg
               infoClickSortType:
                 type: string
                 format: nullable
@@ -3241,10 +3241,10 @@ components:
                 example: 4
               caption:
                 type: string
-                example: Adresser G�teborg
+                example: Adresser Göteborg
               internalLayerName:
                 type: string
-                example: Adresser G�teborg
+                example: Adresser Göteborg
               url:
                 type: string
                 example: https://opengeodata.goteborg.se/services/adresser/wfs/v1
@@ -3315,10 +3315,10 @@ components:
           example: 4
         caption:
           type: string
-          example: Adresser G�teborg
+          example: Adresser Göteborg
         internalLayerName:
           type: string
-          example: Adresser G�teborg
+          example: Adresser Göteborg
         url:
           type: string
           example: https://opengeodata.goteborg.se/services/adresser/wfs/v1
@@ -3540,13 +3540,10 @@ components:
             properties:
               header:
                 type: string
-                example: rubrik1
               headerIdentifier:
                 type: string
-                example: rub1
               html:
                 type: string
-                example: null
               keywords:
                 type: array
                 items:
@@ -3558,10 +3555,95 @@ components:
               chapters:
                 type: array
                 items:
-                  type: string
+                  type: object
+                  properties:
+                    header:
+                      type: string
+                    headerIdentifier:
+                      type: string
+                    html:
+                      type: string
+                    keywords:
+                      type: array
+                      items:
+                        type: string
+                    geoObjects:
+                      type: array
+                      items:
+                        type: string
+                    chapters:
+                      type: array
+                      items:
+                        type: object
+                        properties:
+                          header:
+                            type: string
+                          headerIdentifier:
+                            type: string
+                          html:
+                            type: string
+                          keywords:
+                            type: array
+                            items:
+                              type: string
+                          geoObjects:
+                            type: array
+                            items:
+                              type: string
+                          chapters:
+                            type: array
+                            items:
+                              type: object
+              expanded:
+                type: boolean
+            example:
+            - header: Rubrik 1
+              headerIdentifier: rubrik_1
+              html: <p><u><strong>Kapiteltext för Rubrik 1. Reagerar på nyckelordet översikt</strong></u></p>
+              keywords: [ översikt ]
+              geoObjects: []
+              chapters: [
+               { 
+                  header: Underrubrik 1, 
+                  headerIdentifier: underubrik_1, 
+                  html: <p><u><strong>Kapiteltext för Underrubrik 1. Reagerar på nyckelordet underplan</strong></u></p>, 
+                  keywords: [ underplan ], 
+                  geoObjects: [], 
+                  chapters: []
+                } 
+              ]
+              expanded: true
+            - header: Rubrik 2
+              headerIdentifier: rubrik_2
+              html: <p><u><strong>Kapiteltext för Rubrik 2. Reagerar på nyckelordet plan</strong></u></p>
+              keywords: [ plan ]
+              geoObjects: []
+              chapters: [
+               { 
+                  header: Underrubrik 2, 
+                  headerIdentifier: underubrik_2, 
+                  html: <p><u><strong>Kapiteltext för Underrubrik 2. Reagerar inte nyckelord</strong></u></p>, 
+                  keywords: [], 
+                  geoObjects: [], 
+                  chapters: [
+                    { 
+                      header: Underrubrik 3, 
+                      headerIdentifier: underubrik_3, 
+                      html: <p><u><strong>Kapiteltext för Underrubrik 3. Reagerar inte nyckelord</strong></u></p>, 
+                      keywords: [], 
+                      geoObjects: [], 
+                      chapters: []
+                    }
+                  ]
+                }
+              ]
+              expanded: true
         map:
           type: string
           example: map_1
+        title: 
+          type: string
+          example: Exempeldokument
     InformativeDocumentCreateBody:
       type: object
       properties:
@@ -3607,7 +3689,7 @@ components:
                 description: Show layer at start
         description:
           type: string
-          example: V�lj vad du vill visa i kartan.
+          example: Välj vad du vill visa i kartan.
           description: If the tool displays as a widget (the setting 'Verktygsplacering' is set to either 'left' or 'right') then this description will display inside the widget button
         dropdownThemeMaps:
           type: boolean
@@ -3657,7 +3739,7 @@ components:
                       description: Show layer at start
               name:
                 type: string
-                example: L�nstyrelsen
+                example: Länstyrelsen
                 description: The layer name
               parent:
                 type: string
