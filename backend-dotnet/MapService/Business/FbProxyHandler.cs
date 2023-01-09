@@ -22,7 +22,12 @@ namespace MapService.Business.FbProxy
 
             //Connection string
             url += String.Format("?Database={0}&User={1}&Password={2}", fbServiceDb, fbServiceUser, fbServicePwd);
-            //Query string 
+            
+            //Query string
+            var queryString = incomingRequest.QueryString.ToString();
+            queryString = queryString.Substring(queryString.IndexOf("?")+1);
+            if (!string.IsNullOrEmpty(queryString))
+                url += queryString;
 
             //Create request
             HttpRequestMessage request = new HttpRequestMessage(new HttpMethod(incomingRequest.Method), url);

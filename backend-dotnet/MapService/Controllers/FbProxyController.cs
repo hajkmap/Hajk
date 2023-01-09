@@ -6,6 +6,8 @@ using MapService.Business.FbProxy;
 
 namespace MapService.Controllers
 {
+    [Route("fbproxy")]
+    [ApiController]
     public class FbProxyController : ControllerBase
     {
         private readonly ILogger<FbProxyController> _logger;
