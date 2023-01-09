@@ -67,6 +67,12 @@ function getSubLayerNameFromFeatureId(feature, layer) {
  *  - An object containing information needed to properly render the FeatureInfo-window. All information is parsed from the layer config.
  */
 export function getInfoClickInfoFromLayerConfig(feature, layer) {
+  if (!feature || !layer || !layer.layersInfo) {
+    console.error(
+      `getInfoClickInfoFromLayerConfig was called with bad parameters. Got feature: ${feature}, and layer: ${layer}`
+    );
+    return {};
+  }
   const subLayerName = getSubLayerNameFromFeatureId(feature, layer);
   // Having just the layer's name as an ID is not safe - multiple
   // WFS's may use the same name for two totally different layers.
