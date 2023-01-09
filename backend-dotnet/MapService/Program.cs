@@ -21,11 +21,16 @@ builder.Services.AddSwaggerGen(options =>
 
     options.EnableAnnotations();
 
+    options.DescribeAllParametersInCamelCase();
+
     var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
     var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
 
     options.IncludeXmlComments(xmlPath);
 });
+
+builder.Services.AddMemoryCache();
+
 builder.Host.UseSerilog();
 
 var app = builder.Build();

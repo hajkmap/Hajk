@@ -1,10 +1,20 @@
-﻿using MapService.Utility;
+﻿using MapService.Caches;
+using MapService.Models;
+using MapService.Utility;
+using Microsoft.Extensions.Caching.Memory;
 using System.DirectoryServices;
 
 namespace MapService.Business.Ad
 {
-    internal static class AdHandler
+    internal class AdHandler
     {
+        private readonly AdCache _adCache;
+
+        internal AdHandler(IMemoryCache memoryCache, ILogger logger)
+        {
+            _adCache = new AdCache(memoryCache, logger);
+        }
+
         internal static bool AdIsActive
         {
             get { return bool.Parse(ConfigurationUtility.GetSectionItem("ActiveDirectory:Active")); }
@@ -43,6 +53,83 @@ namespace MapService.Business.Ad
             var directorySearcher = new DirectorySearcher(directoryEntry);
 
             return directorySearcher;
+        }
+
+        private AdUser? FindUser(string userprincipalname)
+        {
+            if (!_adCache.GetAdUsers().ContainsKey(userprincipalname))
+            {
+                var adUser = GetUserFromAd(userprincipalname);
+
+                _adCache.Set(userprincipalname, adUser);
+            }
+
+            _adCache.GetAdUsers().TryGetValue(userprincipalname, out var user);
+
+            return user;
+        }
+
+        private static AdUser GetUserFromAd(string userPrincipalName)
+        {
+            var user = new AdUser();
+
+            var directorySearcher = CreateDirectorySearcher();
+
+            directorySearcher.Filter = string.Format("(&(objectClass=user)(userPrincipalName={0}))", userPrincipalName);
+
+            directorySearcher.PropertiesToLoad.Add("distinguishedname");
+            directorySearcher.PropertiesToLoad.Add("userprincipalname");
+            directorySearcher.PropertiesToLoad.Add("samaccountname");
+            directorySearcher.PropertiesToLoad.Add("mail");
+            directorySearcher.PropertiesToLoad.Add("whencreated");
+            directorySearcher.PropertiesToLoad.Add("pwdlastset");
+            directorySearcher.PropertiesToLoad.Add("useraccountcontrol");
+            directorySearcher.PropertiesToLoad.Add("sn");
+            directorySearcher.PropertiesToLoad.Add("givenname");
+            directorySearcher.PropertiesToLoad.Add("cn");
+            directorySearcher.PropertiesToLoad.Add("displayname");
+
+            SearchResult? searchResultUser = null;
+
+            try
+            {
+                searchResultUser = directorySearcher.FindOne();
+            }
+            catch
+            {
+            }
+
+            if (searchResultUser != null)
+            {
+                user = new AdUser
+                {
+                    Dn = searchResultUser.Properties["distinguishedname"][0].ToString(),
+                    DistinguishedName = searchResultUser.Properties["distinguishedname"][0].ToString(),
+                    UserPrincipalName = searchResultUser.Properties["userprincipalname"][0].ToString(),
+                    SAMAccountName = searchResultUser.Properties["samaccountname"][0].ToString(),
+                    Mail = searchResultUser.Properties["mail"][0].ToString(),
+                    WhenCreated = searchResultUser.Properties["whencreated"][0].ToString(),
+                    PwdLastSet = searchResultUser.Properties["pwdlastset"][0].ToString(),
+                    UserAccountControl = searchResultUser.Properties["useraccountcontrol"][0].ToString(),
+                    Sn = searchResultUser.Properties["sn"][0].ToString(),
+                    GivenName = searchResultUser.Properties["givenname"][0].ToString(),
+                    Cn = searchResultUser.Properties["cn"][0].ToString(),
+                    DisplayName = searchResultUser.Properties["displayname"][0].ToString(),
+                };
+            }
+
+            return user;
+        }
+
+        internal bool UserIsValid(string userprincipalname)
+        {
+            var user = FindUser(userprincipalname);
+
+            if (user == null) { return false; }
+
+            if (user.SAMAccountName == null) { return false; }
+
+            return true;
         }
 
         internal static bool UserHasAdAccess(string userPrincipalName)
@@ -101,6 +188,11 @@ namespace MapService.Business.Ad
             }
 
             return groups;
+        }
+
+        internal Dictionary<string, AdUser> GetUsers()
+        {
+            return _adCache.GetAdUsers();
         }
     }
 }
