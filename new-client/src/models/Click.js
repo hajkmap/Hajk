@@ -1,8 +1,9 @@
+import Feature from "ol/Feature";
 import GeoJSON from "ol/format/GeoJSON";
+import WMSGetFeatureInfo from "ol/format/WMSGetFeatureInfo";
 import TileLayer from "ol/layer/Tile";
 import ImageLayer from "ol/layer/Image";
-import WMSGetFeatureInfo from "ol/format/WMSGetFeatureInfo";
-import Feature from "ol/Feature";
+
 import { hfetch } from "utils/FetchWrapper";
 
 function query(map, layer, evt) {
@@ -127,7 +128,7 @@ function sortFeatures(layer, features) {
     parser: getSortParser(sortType),
   };
 
-  features.sort(getSortMethod(sortOptions));
+  return features.sort(getSortMethod(sortOptions));
 }
 
 // Function similar to GeoJSON().readFeatures, with the subtle difference that we set an
@@ -177,41 +178,43 @@ function getFeaturesFromJson(response, jsonData) {
     parsed.forEach((f) => {
       f.layer = response.layer;
     });
-    sortFeatures(response.layer, parsed);
-    return parsed;
+    const sortedFeatures = sortFeatures(response.layer, parsed);
+    return sortedFeatures;
   } else {
     return [];
   }
 }
 
 function getFeaturesFromGml(response, text) {
-  let wmsGetFeatureInfo = new WMSGetFeatureInfo();
-  //let doc = new DOMParser().parseFromString(text, "text/xml");
-  let parsed = wmsGetFeatureInfo.readFeatures(text);
+  const wmsGetFeatureInfo = new WMSGetFeatureInfo();
+  const parsed = wmsGetFeatureInfo.readFeatures(text);
   if (parsed && parsed.length > 0) {
     parsed.forEach((f) => {
       f.layer = response.layer;
     });
-    sortFeatures(response.layer, parsed);
-    return parsed;
+    const sortedFeatures = sortFeatures(response.layer, parsed);
+    return sortedFeatures;
   } else {
     return [];
   }
 }
 
-function getFeaturesFromXml(response, text) {
-  // In cases where the xml have no FIELDS element, the xml is parsed as gml.
+function getFeaturesFromXmlOrGml(response, text) {
+  // In cases where the XML has no FIELDS element, the XML is assumed
+  // not to come from Esri and can be parsed as GML.
   if (!text.includes("<FIELDS")) {
     return getFeaturesFromGml(response, text);
   }
 
-  let parser = new DOMParser();
-  let doc = parser.parseFromString(text, "text/xml");
-  let features = [];
-  let fields = doc.getElementsByTagName("FIELDS");
+  // If we got this far, it looks like an Esri response and we can't use
+  // the standard GML parser. Instead we implement a custom solution.
+  const parser = new DOMParser();
+  const doc = parser.parseFromString(text, "text/xml");
+  const features = [];
+  const fields = doc.getElementsByTagName("FIELDS");
   for (let i = 0; i < fields.length; i++) {
-    let feature = new Feature();
-    let attributes = fields[i].attributes;
+    const feature = new Feature();
+    const attributes = fields[i].attributes;
     for (let j = 0; j < attributes.length; j++) {
       feature.set(attributes[j].name, attributes[j].value);
     }
@@ -223,8 +226,9 @@ function getFeaturesFromXml(response, text) {
     feature.layer = response.layer;
     features.push(feature);
   }
-  sortFeatures(response.layer, features);
-  return features;
+
+  const sortedFeatures = sortFeatures(response.layer, features);
+  return sortedFeatures;
 }
 
 /**
@@ -310,7 +314,9 @@ export function handleClick(evt, map, callback) {
                 response.value.requestResponse
                   .text()
                   .then((text) => {
-                    features.push(...getFeaturesFromXml(response.value, text));
+                    features.push(
+                      ...getFeaturesFromXmlOrGml(response.value, text)
+                    );
                   })
                   .catch((err) => {
                     console.error(

@@ -201,7 +201,6 @@ export default class MapClickModel {
               break;
             }
             case "application/vnd.ogc.gml": {
-              // (See comments for GeoJSON parser - this is similar.)
               olFeatures = this.#parseGMLFeatures(
                 await response.value.requestResponse.text()
               );
@@ -688,6 +687,7 @@ export default class MapClickModel {
     return this.geoJsonParser.readFeatures(json);
   }
 
+  // Special implementation for parsing text/xml responses from Esri, see #1090.
   #parseWmsGetFeatureInfoXml(xml) {
     const features = [];
     const parser = new DOMParser();
