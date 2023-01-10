@@ -2,6 +2,7 @@
 import React, { useEffect, useState } from "react";
 import { Divider, Stack, Grid, Paper, Switch, Typography } from "@mui/material";
 
+import AppModel from "models/AppModel";
 import { MAP_INTERACTIONS } from "../../constants";
 
 function EstateToolbox({
@@ -18,19 +19,40 @@ function EstateToolbox({
 
   // An effect making sure to toggle the switch when the layer-visibility changes
   useEffect(() => {
-    // Handler for the visibility change
-    const handleLayerVisibilityChange = (e) => {
-      setLayerVisible(layer?.get("visible"));
-    };
-    // Set  up the listener on mount
-    layer?.on("change:visible", handleLayerVisibilityChange);
+    // The globalObserver will emit events when layer visibility changes.
+    // (The layer might be toggled from the layerSwitcher for example).
+    // We need to catch those and update the view accordingly.
+    const layerVisibilityChangeListener = AppModel.globalObserver.subscribe(
+      "core.layerVisibilityChanged",
+      (e) => {
+        // The observer will emit an event with the changed layer as target.
+        const clickedLayer = e.target;
+        // If the clicked layer is tha same as the layer from props, we can update the view.
+        if (clickedLayer && clickedLayer.get("name") === layer?.get("name")) {
+          setLayerVisible(layer?.get("visible"));
+        }
+      }
+    );
     // Remove listener on unmount
-    return () => layer?.un("change:visible", handleLayerVisibilityChange);
+    return () => layerVisibilityChangeListener.unsubscribe();
   }, [layer]);
 
   // Handles when layer-visibility-switch is toggled
   const handleWmsVisibilitySwitchChange = (e) => {
     layer.set("visible", e.target.checked);
+    if (!e.target.checked) {
+      layer.getSource().updateParams({
+        // Ensure that the list of sublayers is emptied (otherwise they'd be
+        // "remembered" the next time user toggles group)
+        LAYERS: "",
+      });
+    } else {
+      layer.getSource().updateParams({
+        // Ensure that the list of sublayers is emptied (otherwise they'd be
+        // "remembered" the next time user toggles group)
+        LAYERS: layer.subLayers.join(","),
+      });
+    }
   };
 
   // Handles when select-estates-switch is toggled
