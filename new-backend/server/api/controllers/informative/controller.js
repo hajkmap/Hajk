@@ -22,7 +22,11 @@ export class Controller {
   getByName(req, res) {
     InformativeService.getByName(req.params.name).then((r) => {
       if (r && !r.error) res.json(r);
-      else res.status(500).send(r.error.message);
+      else {
+        res
+          .status(404)
+          .send(`Document "${req.params.name}" could not be found`);
+      }
     });
   }
 
