@@ -61,7 +61,7 @@ namespace MapService.Business.Ad
             {
                 var adUser = GetUserFromAd(userprincipalname);
 
-                _adCache.Set(userprincipalname, adUser);
+                _adCache.SetUser(userprincipalname, adUser);
             }
 
             _adCache.GetAdUsers().TryGetValue(userprincipalname, out var user);
@@ -121,6 +121,39 @@ namespace MapService.Business.Ad
             return user;
         }
 
+        private static IEnumerable<AdGroup> GetGroupsFromAd()
+        {
+            var groups = new List<AdGroup>();
+
+            var directorySearcher = CreateDirectorySearcher();
+
+            directorySearcher.Sort = new SortOption("cn", SortDirection.Ascending);
+
+            directorySearcher.PropertiesToLoad.Add("cn");
+            directorySearcher.PropertiesToLoad.Add("distinguishedname");
+
+            directorySearcher.Filter = "(&(objectCategory=Group))";
+
+            var results = directorySearcher.FindAll();
+
+            if (results != null)
+            {
+                foreach (SearchResult searchResult in results)
+                {
+                    var adGroup = new AdGroup
+                    {
+                        Dn = searchResult.Properties["distinguishedname"][0].ToString(),
+                        Cn = searchResult.Properties["cn"][0].ToString(),
+                        DistinguishedName = searchResult.Properties["distinguishedname"][0].ToString(),
+                    };
+
+                    groups.Add(adGroup);
+                }
+            }
+
+            return groups;
+        }
+
         internal bool UserIsValid(string userprincipalname)
         {
             var user = FindUser(userprincipalname);
@@ -166,33 +199,28 @@ namespace MapService.Business.Ad
             return false;
         }
 
-        internal static IEnumerable<string> GetAvailableADGroups()
+        internal IEnumerable<AdGroup> GetAvailableADGroups()
         {
-            var directorySearcher = CreateDirectorySearcher();
+            var adGroups = _adCache.GetAdGroups();
 
-            directorySearcher.Sort = new SortOption("name", SortDirection.Ascending);
-            directorySearcher.PropertiesToLoad.Add("name");
-
-            directorySearcher.Filter = "(&(objectCategory=Group))";
-
-            var results = directorySearcher.FindAll();
-
-            var groups = new List<string>();
-
-            if (results != null)
+            if (!adGroups.Any())
             {
-                foreach (SearchResult searchResult in results)
-                {
-                    groups.Add(searchResult.Properties["name"][0].ToString());
-                }
+                adGroups = GetGroupsFromAd();
+
+                _adCache.SetGroups(adGroups);
             }
 
-            return groups;
+            return adGroups;
         }
 
         internal Dictionary<string, AdUser> GetUsers()
         {
             return _adCache.GetAdUsers();
+        }
+
+        internal IEnumerable<AdGroup> GetGroups()
+        {
+            return _adCache.GetAdGroups();
         }
     }
 }

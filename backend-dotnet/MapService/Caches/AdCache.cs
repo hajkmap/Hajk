@@ -11,6 +11,7 @@ namespace MapService.Caches
         private readonly MemoryCacheEntryOptions _cacheEntryOptions = new();
 
         private static readonly string _cacheKeyAdUser = "AD_USERS";
+        private static readonly string _cacheKeyAdGroup = "AD_GROUPS";
         private static readonly string _cacheLockKey = "CACHE_LOCK";
 
         internal AdCache(IMemoryCache memoryCache, ILogger logger)
@@ -30,7 +31,18 @@ namespace MapService.Caches
             return adUsers;
         }
 
-        internal void Set(string userprincipalname, AdUser user)
+        internal IEnumerable<AdGroup> GetAdGroups()
+        {
+            WaitForCacheLock();
+
+            IEnumerable<AdGroup> adGroups = (IEnumerable<AdGroup>)_memoryCache.Get(_cacheKeyAdGroup);
+
+            adGroups ??= new List<AdGroup>();
+
+            return adGroups;
+        }
+
+        internal void SetUser(string userprincipalname, AdUser user)
         {
             try
             {
@@ -38,6 +50,21 @@ namespace MapService.Caches
                 LockCache();
 
                 UpdateUserCache(userprincipalname, user);
+            }
+            finally
+            {
+                UnlockCache();
+            }
+        }
+
+        internal void SetGroups(IEnumerable<AdGroup> groups)
+        {
+            try
+            {
+                WaitForCacheLock();
+                LockCache();
+
+                UpdateGroupCache(groups);
             }
             finally
             {
@@ -54,6 +81,11 @@ namespace MapService.Caches
             adUsers.Add(userprincipalname, user);
 
             _memoryCache.Set(_cacheKeyAdUser, adUsers, _cacheEntryOptions);
+        }
+
+        private void UpdateGroupCache(IEnumerable<AdGroup> groups)
+        {
+            _memoryCache.Set(_cacheKeyAdGroup, groups, _cacheEntryOptions);
         }
 
         /// <summary>
