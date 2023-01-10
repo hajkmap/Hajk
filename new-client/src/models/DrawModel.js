@@ -1871,6 +1871,8 @@ class DrawModel {
           this.#lastZIndex++;
         }
         feature.setStyle(style);
+      } else {
+        feature.setStyle(this.#getFeatureStyle(feature));
       }
 
       // When we're done styling we can add the feature.
