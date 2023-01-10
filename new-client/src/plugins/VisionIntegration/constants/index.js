@@ -1,6 +1,6 @@
 import HomeIcon from "@mui/icons-material/Home";
 import PlaceIcon from "@mui/icons-material/Place";
-import EditIcon from "@mui/icons-material/Edit";
+import YardIcon from "@mui/icons-material/Yard";
 
 // Enum for possible hub-connection-status
 export const HUB_CONNECTION_STATUS = Object.freeze({
@@ -12,7 +12,7 @@ export const HUB_CONNECTION_STATUS = Object.freeze({
 export const INTEGRATION_IDS = Object.freeze({
   ESTATES: "ESTATES",
   COORDINATES: "COORDINATES",
-  EDIT: "EDIT",
+  ENVIRONMENT: "ENVIRONMENT",
 });
 
 export const ESTATE_TEXT = Object.freeze({
@@ -40,12 +40,12 @@ export const TABS = [
     disabled: false,
   },
   {
-    id: INTEGRATION_IDS.EDIT,
-    icon: <EditIcon />,
-    label: "Redigera",
+    id: INTEGRATION_IDS.ENVIRONMENT,
+    icon: <YardIcon />,
+    label: "Markmiljö",
     tooltip:
-      "Redigera och skapa nya ytor som kan kopplas till objekt i Vision. Denna funktion är ännu inte implementerad.",
-    disabled: true,
+      "Skicka områden, undersökningar, och föroreningar mellan Vision och kartan.",
+    disabled: false,
   },
 ];
 

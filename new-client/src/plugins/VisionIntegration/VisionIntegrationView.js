@@ -81,8 +81,7 @@ function VisionIntegrationView(props) {
             setActiveMapInteraction={props.setActiveMapInteraction}
           />
         );
-      // TODO: Since the edit-tab is disabled ofr now, we'll just return null for now.
-      case INTEGRATION_IDS.EDIT:
+      case INTEGRATION_IDS.ENVIRONMENT:
         return null;
       default:
         return null;
