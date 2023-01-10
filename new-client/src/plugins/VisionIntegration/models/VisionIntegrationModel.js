@@ -239,7 +239,7 @@ class VisionIntegrationModel {
     // We'll also have to get the settings for this part of the integration...
     const estateIntegrationSettings = this.#getEstateIntegrationSettings();
     // ...so that we can get the search-key...
-    const searchKey = estateIntegrationSettings?.searchKey || "fnr";
+    const searchKey = estateIntegrationSettings?.searchKey || "uuid";
     // If we we're supplied an array, we can try to construct an "or-separator"-separated search-string
     // (Vision might be trying to show several estates, in that case we'll get the estate-key for each
     // estate-object and construct a "or-separator"-separated string with these. The search-model will make sure
