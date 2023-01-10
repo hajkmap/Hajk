@@ -49,6 +49,27 @@ export const TABS = [
   },
 ];
 
+export const ENVIRONMENT_IDS = Object.freeze({
+  AREA: 1,
+  INVESTIGATION: 2,
+  POLLUTION: 3,
+});
+
+export const ENVIRONMENT_INFO = [
+  {
+    id: ENVIRONMENT_IDS.AREA,
+    name: "Områden",
+  },
+  {
+    id: ENVIRONMENT_IDS.INVESTIGATION,
+    name: "Undersökningar",
+  },
+  {
+    id: ENVIRONMENT_IDS.POLLUTION,
+    name: "Föroreningar",
+  },
+];
+
 export const DEFAULT_DRAW_SETTINGS = {
   showText: true,
   showArea: false,

@@ -6,6 +6,7 @@ import { AppBar, Chip, Divider, Grid, Tabs, Tab } from "@mui/material";
 // Components
 import EstateSection from "./components/estates/EstateSection";
 import CoordinateSection from "./components/coordinates/CoordinateSection";
+import EnvironmentSection from "./components/environment/EnvironmentSection";
 
 // Constants
 import { HUB_CONNECTION_STATUS, INTEGRATION_IDS, TABS } from "./constants";
@@ -82,7 +83,7 @@ function VisionIntegrationView(props) {
           />
         );
       case INTEGRATION_IDS.ENVIRONMENT:
-        return null;
+        return <EnvironmentSection />;
       default:
         return null;
     }
