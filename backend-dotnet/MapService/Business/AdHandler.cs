@@ -296,5 +296,10 @@ namespace MapService.Business.Ad
 
             return commonGroupsForUsers;
         }
+
+        internal void FlushStores()
+        {
+            _adCache.ClearCache();
+        }
     }
 }

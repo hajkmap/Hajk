@@ -99,6 +99,23 @@ namespace MapService.Caches
             }
         }
 
+        internal void ClearCache()
+        {
+            try
+            {
+                WaitForCacheLock();
+                LockCache();
+
+                _memoryCache.Remove(_cacheKeyAdUser);
+                _memoryCache.Remove(_cacheKeyAdGroup);
+                _memoryCache.Remove(_cacheKeyAdGroupsPerUser);
+            }
+            finally
+            {
+                UnlockCache();
+            }
+        }
+
         private void UpdateUserCache(string userprincipalname, AdUser user)
         {
             var adUsers = (Dictionary<string, AdUser>)_memoryCache.Get(_cacheKeyAdUser);
