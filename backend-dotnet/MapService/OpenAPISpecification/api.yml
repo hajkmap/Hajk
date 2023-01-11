@@ -33,18 +33,18 @@ paths:
             type: string
       description: Fetch contents of the whole document.
       responses:
-        '200':
+        200:
           description: Return the JSON file
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/DocumentBody'
+                $ref: "#/components/schemas/DocumentBody"
         5XX:
           description: Example not found
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: "#/components/schemas/Error"
   /informative/create:
     post:
       deprecated: true
@@ -55,10 +55,10 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/InformativeDocumentCreateBody'
+              $ref: "#/components/schemas/InformativeDocumentCreateBody"
         required: true
       responses:
-        '200':
+        200:
           description: Document created
           content: {}
         5XX:
@@ -66,7 +66,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: "#/components/schemas/Error"
     put:
       tags:
         - Admin - Informative/DocumentHandler
@@ -75,39 +75,39 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/InformativeDocumentCreateBody'
+              $ref: "#/components/schemas/InformativeDocumentCreateBody"
         required: true
       responses:
-        '200':
+        200:
           description: Create a document connected to a specified map
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/InformativeDocumentCreateBody'
+                $ref: "#/components/schemas/InformativeDocumentCreateBody"
         5XX:
           description: Internal server error
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: "#/components/schemas/Error"
   /informative/list:
     get:
       tags:
         - Admin - Informative/DocumentHandler
       description: Return all available documents
       responses:
-        '200':
+        200:
           description: Return all available documents
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/DocumentsList'
+                $ref: "#/components/schemas/DocumentsList"
         5XX:
           description: Internal server error
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: "#/components/schemas/Error"
   /informative/list/{name}:
     get:
       tags:
@@ -121,18 +121,18 @@ paths:
           schema:
             type: string
       responses:
-        '200':
+        200:
           description: Return available documents for the specified map
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/DocumentsList'
+                $ref: "#/components/schemas/DocumentsList"
         5XX:
           description: Internal server error
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: "#/components/schemas/Error"
   /informative/save/{name}:
     post:
       deprecated: true
@@ -143,7 +143,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/SaveDocument'
+              $ref: "#/components/schemas/SaveDocument"
         required: true
       parameters:
         - name: name
@@ -153,27 +153,27 @@ paths:
           schema:
             type: string
       responses:
-        '200':
+        200:
           description: Return the saved document's body
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/SaveDocument'
+                $ref: "#/components/schemas/SaveDocument"
         5XX:
           description: Internal server error
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: "#/components/schemas/Error"
     put:
       tags:
         - Admin - Informative/DocumentHandler
       description: Save a document
       requestBody:
+        description: Save a document.
         content:
           application/json:
-            schema:
-              $ref: '#/components/schemas/SaveDocument'
+            schema: $ref:'#/components/schemas/SaveDocument'
         required: true
       parameters:
         - name: name
@@ -183,18 +183,18 @@ paths:
           schema:
             type: string
       responses:
-        '200':
+        200:
           description: Return the saved document's body
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/SaveDocument'
+                $ref: "#/components/schemas/SaveDocument"
         5XX:
           description: Internal server error
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: "#/components/schemas/Error"
   /informative/delete/{name}:
     delete:
       tags:
@@ -208,18 +208,18 @@ paths:
           schema:
             type: string
       responses:
-        '200':
+        200:
           description: Delete the specified document
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/DocumentsList'
+                $ref: "#/components/schemas/DocumentsList"
         5XX:
           description: Internal server error
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: "#/components/schemas/Error"
   /config/layers:
     get:
       tags:
@@ -233,36 +233,36 @@ paths:
             type: string
           required: false
       responses:
-        '200':
+        200:
           description: All layers were fetched successfully
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ConfigLayers'
+                $ref: "#/components/schemas/ConfigLayers"
   /mapconfig/layers:
     get:
       tags:
         - Admin - Maps and layers
       description: List available layers, do not apply any visibility restrictions (required for Admin UI).
       responses:
-        '200':
+        200:
           description: All layers were fetched successfully
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ConfigLayers'
+                $ref: "#/components/schemas/ConfigLayers"
   /mapconfig/list:
     get:
       tags:
         - Admin - Maps and layers
       description: List available map configurations
       responses:
-        '200':
+        200:
           description: Available maps were fetched successfully
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ConfigList'
+                $ref: "#/components/schemas/ConfigList"
   /config/list:
     get:
       deprecated: true
@@ -270,24 +270,24 @@ paths:
         - Admin - Maps and layers
       description: List available map configurations
       responses:
-        '200':
+        200:
           description: Available maps were fetched successfully
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ConfigList'
+                $ref: "#/components/schemas/ConfigList"
   /mapconfig/listimage:
     get:
       tags:
         - Admin - Maps and layers
       description: List available images in the upload folder
       responses:
-        '200':
+        200:
           description: Available images were fetched successfully
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ListImage'
+                $ref: "#/components/schemas/ListImage"
   /config/listimage:
     get:
       deprecated: true
@@ -295,24 +295,24 @@ paths:
         - Admin - Maps and layers
       description: List available images in the upload folder
       responses:
-        '200':
+        200:
           description: Available images were fetched successfully
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ListImage'
+                $ref: "#/components/schemas/ListImage"
   /mapconfig/listvideo:
     get:
       tags:
         - Admin - Maps and layers
       description: List available videos in the upload folder
       responses:
-        '200':
+        200:
           description: Available videos were fetched successfully
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ListVideo'
+                $ref: "#/components/schemas/ListVideo"
   /config/listvideo:
     get:
       deprecated: true
@@ -320,24 +320,24 @@ paths:
         - Admin - Maps and layers
       description: List available videos in the upload folder
       responses:
-        '200':
+        200:
           description: Available videos were fetched successfully
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ListVideo'
+                $ref: "#/components/schemas/ListVideo"
   /mapconfig/listaudio:
     get:
       tags:
         - Admin - Maps and layers
       description: List available audio files in the upload folder
       responses:
-        '200':
+        200:
           description: Available audio files were fetched successfully
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ListAudio'
+                $ref: "#/components/schemas/ListAudio"
   /config/listaudio:
     get:
       deprecated: true
@@ -345,12 +345,12 @@ paths:
         - Admin - Maps and layers
       description: List available audio files in the upload folder
       responses:
-        '200':
+        200:
           description: Available audio files were fetched successfully
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ListAudio'
+                $ref: "#/components/schemas/ListAudio"
   /mapconfig/{map}:
     get:
       tags:
@@ -370,12 +370,12 @@ paths:
           required: false
       description: Fetch contents of a map configuration. If AD authentication is active, filter by user's permission.
       responses:
-        '200':
+        200:
           description: Success
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/MapBody'
+                $ref: "#/components/schemas/MapBody"
   /config/{map}:
     get:
       deprecated: true
@@ -396,7 +396,7 @@ paths:
           required: false
       description: Fetch contents of a map configuration
       responses:
-        '200':
+        200:
           description: Success
           content: {}
   /mapconfig/export/{map}/{format}:
@@ -418,7 +418,7 @@ paths:
             type: string
       description: Exports layers of the map in a human-readable format. If the parameter map is given the value 'layer.json', the layers of that file is returned. If the parameter map is given any other value, the base layers and group layers of that map configuration is returned.
       responses:
-        '200':
+        200:
           description: Success
           content: {}
   /mapconfig/create/{name}:
@@ -435,7 +435,7 @@ paths:
             type: string
       description: Create a new map configuration
       responses:
-        '200':
+        200:
           description: Success
           content: {}
     put:
@@ -450,7 +450,7 @@ paths:
             type: string
       description: Create a new map configuration
       responses:
-        '200':
+        200:
           description: Success
           content: {}
   /config/create/{name}:
@@ -467,7 +467,7 @@ paths:
             type: string
       description: Create a new map configuration
       responses:
-        '200':
+        200:
           description: Success
           content: {}
   /mapconfig/delete/{name}:
@@ -484,7 +484,7 @@ paths:
             type: string
       description: Delete an existing map configuration
       responses:
-        '200':
+        200:
           description: Success
           content: {}
     delete:
@@ -499,7 +499,7 @@ paths:
             type: string
       description: Delete an existing map configuration
       responses:
-        '200':
+        200:
           description: Success
           content: {}
   /config/delete/{name}:
@@ -516,7 +516,7 @@ paths:
             type: string
       description: Delete an existing map configuration
       responses:
-        '200':
+        200:
           description: Success
           content: {}
   /mapconfig/duplicate/{nameFrom}/{nameTo}:
@@ -538,7 +538,7 @@ paths:
             type: string
       description: Create a new map configuration by duplicating an existing one
       responses:
-        '200':
+        200:
           description: Success
           content: {}
   /config/userspecificmaps:
@@ -554,19 +554,18 @@ paths:
             type: string
           required: false
       responses:
-        '200':
+        200:
           description: Success
           content:
             application/json:
-              schema:
-                $ref: '#/components/schemas/UserSpecificMaps'
+              schema: $ref:'#/components/schemas/UserSpecificMaps'
   /ad/availableadgroups:
     get:
       tags:
         - Admin - ActiveDirectory
       description: Get a list of all available AD groups to make it easier for admins to set map and layer permissions
       responses:
-        '200':
+        200:
           description: The list of available AD groups is returned. In the case of an empty Json, either there are no available AD groups or the AD is not enabled and/or unreachable
           content:
             application/json:
@@ -576,7 +575,7 @@ paths:
                   type: string
                   description: The ad group
                 description: The list of available ad groups
-        '500':
+        500:
           description: Internal server error
           content:
             plain/text:
@@ -601,7 +600,7 @@ paths:
           explode: false
           allowReserved: true
       responses:
-        '200':
+        200:
           description: The list of common AD groups is returned. In the case of an empty Json, either there are no common AD groups or the AD is not enabled and/or unreachable
           content:
             application/json:
@@ -611,7 +610,7 @@ paths:
                   type: string
                   description: The ad group
                 description: The list of common ad groups
-        '500':
+        500:
           description: Internal server error
           content:
             plain/text:
@@ -625,7 +624,7 @@ paths:
         - Admin - ActiveDirectory
       description: Get the current content of local AD Users store
       responses:
-        '200':
+        200:
           description: The list of users is returned
           content:
             application/json:
@@ -635,13 +634,13 @@ paths:
                   type: string
                   description: The ad group
                 description: The list of users
-        '500':
+        500:
           description: Internal server error. The AD might be disabled in settings
           content:
             plain/text:
               schema:
                 type: string
-                example: 'ActiveDirectoryError: Can''t access AD methods because AD functionality is disabled in .env'
+                example: "ActiveDirectoryError: Can't access AD methods because AD functionality is disabled in .env"
                 description: The error message describing the error
   /ad/groups:
     get:
@@ -649,7 +648,7 @@ paths:
         - Admin - ActiveDirectory
       description: Get the current content of local AD Groups store
       responses:
-        '200':
+        200:
           description: The list of users is returned
           content:
             application/json:
@@ -659,13 +658,13 @@ paths:
                   type: string
                   description: The ad group
                 description: The list of groups
-        '500':
+        500:
           description: Internal server error. The AD might be disabled in settings
           content:
             plain/text:
               schema:
                 type: string
-                example: 'ActiveDirectoryError: Can''t access AD methods because AD functionality is disabled in .env'
+                example: "ActiveDirectoryError: Can't access AD methods because AD functionality is disabled in .env"
                 description: The error message describing the error
   /ad/groupsPerUser:
     get:
@@ -673,16 +672,16 @@ paths:
         - Admin - ActiveDirectory
       description: Get the current content of local AD groups per user store
       responses:
-        '200':
+        200:
           description: Success
           content: {}
-        '500':
+        500:
           description: Internal server error. The AD might be disabled in settings
           content:
             plain/text:
               schema:
                 type: string
-                example: 'ActiveDirectoryError: Can''t access AD methods because AD functionality is disabled in .env'
+                example: "ActiveDirectoryError: Can't access AD methods because AD functionality is disabled in .env"
                 description: The error message describing the error
   /ad/flushStores:
     put:
@@ -690,14 +689,14 @@ paths:
         - Admin - ActiveDirectory
       description: Flush the contents of all local AD stores (removes the cached objects)
       responses:
-        '200':
+        200:
           description: Success
           content:
             plain/text:
               schema:
                 type: string
                 example: All local caches successfully flushed
-        '500':
+        500:
           description: Internal server error
           content:
             plain/text:
@@ -718,7 +717,7 @@ paths:
             type: string
       description: Proxy the specified query to Sokigo's FB API
       responses:
-        '200':
+        200:
           description: Result will vary depending on response from the API
           content: {}
   /fmeproxy/{query}:
@@ -734,7 +733,7 @@ paths:
             type: string
       description: Proxy the specified query to FME-server REST API. For information on available endpoints, checkout the [FME-server API documentation](https://docs.safe.com/fme/html/FME_REST/apidoc/v3/#). The proxy will forward all HTTP-methods, not only GET.
       responses:
-        '200':
+        200:
           description: Result will vary depending on response from the API.
           content: {}
   /spec:
@@ -743,7 +742,7 @@ paths:
         - Specification
       description: Return the API specification
       responses:
-        '200':
+        200:
           description: Return the API specification
           content: {}
   /settings/layermenu:
@@ -756,7 +755,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/LayerSwitcherBody'
+              $ref: "#/components/schemas/LayerSwitcherBody"
         required: true
       parameters:
         - name: mapFile
@@ -766,7 +765,7 @@ paths:
           schema:
             type: string
       responses:
-        '204':
+        204:
           description: All good
           content: {}
   /settings/mapsettings:
@@ -779,7 +778,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/mapsettings'
+              $ref: "#/components/schemas/mapsettings"
         required: true
       parameters:
         - name: mapFile
@@ -789,7 +788,7 @@ paths:
           schema:
             type: string
       responses:
-        '204':
+        204:
           description: All good
           content: {}
   /settings/toolsettings:
@@ -802,7 +801,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/toolsetting'
+              $ref: "#/components/schemas/toolsetting"
         required: true
       parameters:
         - name: mapFile
@@ -812,7 +811,7 @@ paths:
           schema:
             type: string
       responses:
-        '204':
+        204:
           description: All good
           content: {}
   /settings/update/{map}/{tool}:
@@ -825,7 +824,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/toolsetting'
+              $ref: "#/components/schemas/toolsetting"
         required: true
       parameters:
         - name: map
@@ -841,10 +840,10 @@ paths:
           schema:
             type: string
       responses:
-        '201':
+        201:
           description: Created
           content: {}
-        '204':
+        204:
           description: Updated
           content: {}
   /settings/{layerType}:
@@ -858,9 +857,9 @@ paths:
           application/json:
             schema:
               anyOf:
-                - $ref: '#/components/schemas/wmslayer'
-                - $ref: '#/components/schemas/wmtslayer'
-                - $ref: '#/components/schemas/wfslayer'
+                - $ref: "#/components/schemas/wmslayer"
+                - $ref: "#/components/schemas/wmtslayer"
+                - $ref: "#/components/schemas/wfslayer"
         required: true
       parameters:
         - name: layerType
@@ -870,7 +869,7 @@ paths:
           schema:
             type: string
       responses:
-        '204':
+        204:
           description: All good
           content: {}
     put:
@@ -883,9 +882,9 @@ paths:
           application/json:
             schema:
               anyOf:
-                - $ref: '#/components/schemas/wmslayer'
-                - $ref: '#/components/schemas/wmtslayer'
-                - $ref: '#/components/schemas/wfslayer'
+                - $ref: "#/components/schemas/wmslayer"
+                - $ref: "#/components/schemas/wmtslayer"
+                - $ref: "#/components/schemas/wfslayer"
         required: true
       parameters:
         - name: layerType
@@ -895,7 +894,7 @@ paths:
           schema:
             type: string
       responses:
-        '204':
+        204:
           description: All good
           content: {}
   /settings/{type}/{layerId}:
@@ -917,7 +916,7 @@ paths:
           schema:
             type: string
       responses:
-        '200':
+        200:
           description: Layer deleted successfully
           content: {}
 components:
@@ -1222,16 +1221,16 @@ components:
     ConfigList:
       type: object
       properties:
-        '0':
+        "0":
           type: string
           example: map_1
-        '1':
+        "1":
           type: string
           example: nytt
-        '2':
+        "2":
           type: string
           example: oversiktsplan
-        '3':
+        "3":
           type: string
           example: oversiktsplan_OLD
     ListImage:
@@ -1264,7 +1263,7 @@ components:
     UserSpecificMaps:
       type: object
       properties:
-        '0':
+        "0":
           type: object
           properties:
             mapConfigurationName:
@@ -1273,7 +1272,7 @@ components:
             mapConfigurationTitle:
               type: string
               example: Kartan Map 1
-        '1':
+        "1":
           type: object
           properties:
             mapConfigurationName:
@@ -1284,1269 +1283,287 @@ components:
               example: Hajk 3 template
     toolsetting:
       type: object
-      properties:
-        '0':
-          type: object
-          properties:
-            type:
-              type: string
-              example: layerswitcher
-            options:
-              type: object
-              properties:
-                baselayers:
-                  type: array
-                  items:
-                    type: object
-                    properties:
-                      id:
-                        type: string
-                        example: 1
-                      visibleAtStart:
-                        type: boolean
-                        description: Show at start
-                      drawOrder:
-                        type: integer
-                        format: int32
-                        example: 0
-                      visibleForGroups:
-                        type: string
-                        format: nullable
-                      infobox:
-                        type: string
-                        example: null
-                groups:
-                  type: array
-                  items:
-                    type: object
-                    properties:
-                      id:
-                        type: string
-                        example: 8838c969-590c-8683-435c-1ecaca271096
-                      parent:
-                        type: string
-                        example: -1
-                      name:
-                        type: string
-                        example: Länstyrelsen
-                      toggled:
-                        type: boolean
-                      expanded:
-                        type: boolean
-                      layers:
-                        type: array
-                        items:
-                          type: object
-                          properties:
-                            id:
-                              type: string
-                              example: 7
-                            visibleAtStart:
-                              type: boolean
-                              description: Show at start
-                            drawOrder:
-                              type: integer
-                              format: int32
-                              example: 3
-                            visibleForGroups:
-                              type: string
-                              format: nullable
-                            infobox:
-                              type: string
-                              example: null
-                      groups:
-                        type: array
-                        items:
-                          type: string
-                active:
-                  type: boolean
-                visibleAtStart:
-                  type: boolean
-                  description: Show at start
-                visibleAtStartMobile:
-                  type: boolean
-                  description: Show at start for mobile
-                backgroundSwitcherBlack:
-                  type: boolean
-                  description: Show black background
-                backgroundSwitcherWhite:
-                  type: boolean
-                  description: Show white background
-                enableOSM:
-                  type: boolean
-                  description: Show OpenStreetMap
-                showBreadcrumbs:
-                  type: boolean
-                  description: Show "breadcrumbs". When checked, small buttons will show at the bottom of the screen for each layer that is active.
-                enableTransparencySlider:
-                  type: boolean
-                  description: Show transparency slider. Global setting to choose whether transparency slider is active or not. If the setting is active, then it's possible to configure individual layers if the transparency slider should show in the layer. If this is not checked, the transparency slider will not show on any layer.
-                target:
-                  type: string
-                  example: toolbar
-                  description: The tool placement. Either 'toolbar', 'left', 'right' or 'control'
-                position:
-                  type: string
-                  example: right
-                  description: The tool position 'left' or 'right'
-                width:
-                  type: string
-                  description: The tool window width in pixels
-                height:
-                  type: string
-                  description: The tool window height in pixels
-                title:
-                  type: string
-                  example: Lagerhanterare
-                description:
-                  type: string
-                  example: Välj vad du vill visa i kartan.
-                dropdownThemeMaps:
-                  type: boolean
-                  description: Display the map in the list of available maps.
-                themeMapHeaderCaption:
-                  type: string
-                  example: Standardkartan
-                  description: The map title as shown in the list of available maps.
-                instruction:
-                  type: string
-                  example: null
-                  description: A tooltip that is displayed when hovering over the tool button
+      example:
+        - type: layerswitcher
+          options:
+            baselayers:
+              - id: "1"
+                visibleAtStart: true
+                drawOrder: 0
                 visibleForGroups:
-                  type: array
-                  items:
-                    type: string
-            index:
-              type: integer
-              format: int32
-              example: 1
-              description: The sorting order of the tool window
-        '1':
-          type: object
-          properties:
-            type:
-              type: string
-              example: infoclick
-            options:
-              type: object
-              properties:
-                target:
-                  type: string
-                  example: toolbar
-                  description: The tool placement. Either 'toolbar', 'left', 'right' or 'control'
-                position:
-                  type: string
-                  example: right
-                  description: The tool position 'left' or 'right'
-                width:
-                  type: string
-                  description: The tool window width in pixels
-                height:
-                  type: string
-                  description: The tool window height in pixels
-                instruction:
-                  type: string
-                  example: null
-                  description: A tooltip that is displayed when hovering over the tool button
-                displayPopup:
-                  type: boolean
-                markerImg:
-                  type: string
-                  example: /marker.png
-                anchor:
-                  type: array
-                  items:
-                    type: number
-                    example: 0.5
-                imgSize:
-                  type: array
-                  items:
-                    type: integer
-                    format: int32
-                    example: 32
-                popupOffsetY:
-                  type: integer
-                  format: int32
-                  example: 0
+                infobox:
+              - id: "2"
+                visibleAtStart: false
+                drawOrder: 0
                 visibleForGroups:
-                  type: array
-                  items:
-                    type: string
-            index:
-              type: integer
-              format: int32
-              example: 2
-              description: The sorting order of the tool window
-        '2':
-          type: object
-          properties:
-            type:
-              type: string
-              example: sketch
-            options:
-              type: object
-              properties:
-                target:
-                  type: string
-                  example: toolbar
-                  description: The tool placement. Either 'toolbar', 'left', 'right' or 'control'
-                position:
-                  type: string
-                  example: right
-                  description: The tool position 'left' or 'right'
-                width:
-                  type: string
-                  description: The tool window width in pixels
-                height:
-                  type: string
-                  description: The tool window height in pixels
-                instruction:
-                  type: string
-                  example: null
-                  description: A tooltip that is displayed when hovering over the tool button
+                infobox:
+              - id: "3"
+                visibleAtStart: false
+                drawOrder: 0
                 visibleForGroups:
-                  type: array
-                  items:
-                    type: string
-            index:
-              type: integer
-              format: int32
-              example: 3
-              description: The sorting order of the tool window
-        '3':
-          type: object
-          properties:
-            type:
-              type: string
-              example: measure
-            options:
-              type: object
-              properties:
-                target:
-                  type: string
-                  example: toolbar
-                  description: The tool placement. Either 'toolbar', 'left', 'right' or 'control'
-                position:
-                  type: string
-                  example: right
-                  description: The tool position 'left' or 'right'
-                width:
-                  type: string
-                  description: The tool window width in pixels
-                height:
-                  type: string
-                  description: The tool window height in pixels
-                instruction:
-                  type: string
-                  example: null
-                  description: A tooltip that is displayed when hovering over the tool button
-                icons:
-                  type: string
-                  example: null
-            index:
-              type: integer
-              format: int32
-              example: 4
-              description: The sorting order of the tool window
-        '4':
-          type: object
-          properties:
-            type:
-              type: string
-              example: streetview
-            options:
-              type: object
-              properties:
-                target:
-                  type: string
-                  example: toolbar
-                  description: The tool placement. Either 'toolbar', 'left', 'right' or 'control'
-                position:
-                  type: string
-                  example: right
-                  description: The tool position 'left' or 'right'
-                width:
-                  type: string
-                  description: The tool window width in pixels
-                height:
-                  type: string
-                  description: The tool window height in pixels
-                apiKey:
-                  type: string
-                  example: AIzaSyCb-bvLmybNb4QSERR43eGlvvQyUrBAQG4
-                instruction:
-                  type: string
-                  example: null
-                visibleForGroups:
-                  type: array
-                  items:
-                    type: string
-            index:
-              type: integer
-              format: int32
-              example: 5
-              description: The sorting order of the tool window
-        '5':
-          type: object
-          properties:
-            type:
-              type: string
-              example: anchor
-            options:
-              type: object
-              properties:
-                target:
-                  type: string
-                  example: toolbar
-                  description: The tool placement. Either 'toolbar', 'left', 'right' or 'control'
-                position:
-                  type: string
-                  example: right
-                  description: The tool position 'left' or 'right'
-                width:
-                  type: string
-                  description: The tool window width in pixels
-                height:
-                  type: string
-                  description: The tool window height in pixels
-                instruction:
-                  type: string
-                  example: null
-                  description: A tooltip that is displayed when hovering over the tool button
-                visibleForGroups:
-                  type: array
-                  items:
-                    type: string
-            index:
-              type: integer
-              format: int32
-              example: 7
-              description: The sorting order of the tool window
-        '6':
-          type: object
-          properties:
-            type:
-              type: string
-              example: search
-            options:
-              type: object
-              properties:
+                infobox:
+            groups:
+              - id: 8838c969-590c-8683-435c-1ecaca271096
+                parent: "-1"
+                name: Länstyrelsen
+                toggled: true
+                expanded: false
                 layers:
-                  type: array
-                  items:
-                    type: object
-                    properties:
-                      id:
-                        type: string
-                        example: 4
-                        description: This is the layer ID
-                      visibleForGroups:
-                        type: array
-                        items:
-                          type: string
-                  description: This is list containing the layer IDs
-                selectedSources:
-                  type: array
-                  items:
-                    type: integer
-                    example: 1352
-                  description: This is a list of WMS layers that should be available as search engines
-                visibleForGroups:
-                  type: array
-                  items:
-                    type: string
-                maxResultsPerDataset:
-                  type: integer
-                  format: int32
-                  example: 100
-                  description: The max number of search hits per dataset
-                anchor:
-                  type: array
-                  items:
-                    type: string
-                    example: null
-                scale:
-                  type: string
-                  example: null
-                markerImg:
-                  type: string
-                  example: null
-                delayBeforeAutoSearch:
-                  type: integer
-                  format: int32
-                  example: 300
-                disableAutocomplete:
-                  type: boolean
-                  description: If true, auto-complete is disabled. Instead results are displayed directly
-                searchBarPlaceholder:
-                  type: string
-                  example: Sök...
-                autocompleteWildcardAtStart:
-                  type: boolean
-                  description: If true, a wildcard is used before each search word
-                showCorrespondingWMSLayers:
-                  type: boolean
-                  description: If true, the corresponding layer will be shown when clicking in the result list
-                enablePolygonSearch:
-                  type: boolean
-                  description: If true, search with polygon
-                enableRadiusSearch:
-                  type: boolean
-                  description: If true, search with radius
-                enableSelectSearch:
-                  type: boolean
-                  description: If true, search within the view
-                enableExtentSearch:
-                  type: boolean
-                  description: If true, search with area
-                enableResultsFiltering:
-                  type: boolean
-                  description: If true, results can be filtered
-                enableResultsSorting:
-                  type: boolean
-                  description: If true, results can be sorted
-                enableResultsSelectionClearing:
-                  type: boolean
-                  description: If true, results can be cleared by highlighting
-                enableResultsDownloading:
-                  type: boolean
-                  description: If true, results can be downloaded
-                enableFeaturePreview:
-                  type: boolean
-                  description: If true, results can be previewed by hovering
-                enableLabelOnHighlight:
-                  type: boolean
-                  description: If true, tag is shown when results are highlighted
-                enableSelectedFeaturesCollection:
-                  type: boolean
-                  description: If true, results can be selected into collections
-                showResultFeaturesInMap:
-                  type: boolean
-                  description: If true, results are drawn on the map automatically
-                enableFeatureToggler:
-                  type: boolean
-                  description: If true, previous/next-button is displayed
-                drawFillColor:
-                  type: string
-                  example: rgba(2552552550.07)
-                drawStrokeColor:
-                  type: string
-                  example: rgba(7474740.5)
-                displayFillColor:
-                  type: string
-                  example: rgba(741442260.15)
-                displayStrokeColor:
-                  type: string
-                  example: rgba(741442260.4)
-                selectionTextStroke:
-                  type: string
-                  example: rgba(2552552551)
-                selectionTextFill:
-                  type: string
-                  example: rgba(631221901)
-                selectionFillColor:
-                  type: string
-                  example: rgba(741442260.7)
-                selectionStrokeColor:
-                  type: string
-                  example: rgba(741442260.8)
-                highlightTextStroke:
-                  type: string
-                  example: rgba(2552552551)
-                highlightTextFill:
-                  type: string
-                  example: rgba(214143281)
-                highlightFillColor:
-                  type: string
-                  example: rgba(245166350.7)
-                highlightStrokeColor:
-                  type: string
-                  example: rgba(245166350.8)
-            index:
-              type: integer
-              format: int32
-              example: 11
-              description: The sorting order of the tool window
-        '7':
-          type: object
-          properties:
-            type:
-              type: string
-              example: routing
-            options:
-              type: object
-              properties:
-                target:
-                  type: string
-                  example: toolbar
-                apiKey:
-                  type: string
-                  example: AIzaSyCb-bvLmybNb4QSERR43eGlvvQyUrBAQG4
-                instruction:
-                  type: string
-                  example: null
-                visibleForGroups:
-                  type: array
-                  items:
-                    type: string
-            index:
-              type: integer
-              format: int32
-              example: 12
-              description: The sorting order of the tool window
-        '8':
-          type: object
-          properties:
-            type:
-              type: string
-              example: location
-            options:
-              type: object
-              properties:
-                target:
-                  type: string
-                  example: toolbar
-                  description: The tool placement. Either 'toolbar', 'left', 'right' or 'control'
-                position:
-                  type: string
-                  example: right
-                  description: The tool position 'left' or 'right'
-                width:
-                  type: string
-                  description: The tool window width in pixels
-                height:
-                  type: string
-                  description: The tool window height in pixels
-                instruction:
-                  type: string
-                  example: null
-                  description: A tooltip that is displayed when hovering over the tool button
-                visibleForGroups:
-                  type: array
-                  items:
-                    type: string
-            index:
-              type: integer
-              format: int32
-              example: 13
-              description: The sorting order of the tool window
-        '9':
-          type: object
-          properties:
-            type:
-              type: string
-              example: preset
-            options:
-              type: object
-              properties:
-                presetList:
-                  type: array
-                  items:
-                    type: object
-                    properties:
-                      name:
-                        type: string
-                        example: Halmstad
-                      presetUrl:
-                        type: string
-                        example: '?m=simpleMapConfig&x=368494.9197547268&y=6282312.7413127115&z=6.7339618545565125&l=1&f=%7B%7D&clean=false'
-                visibleForGroups:
-                  type: array
-                  items:
-                    type: string
-            index:
-              type: integer
-              format: int32
-              example: 14
-              description: The sorting order of the tool window
-        '10':
-          type: object
-          properties:
-            type:
-              type: string
-              example: coordinates
-            options:
-              type: object
-              properties:
-                target:
-                  type: string
-                  example: toolbar
-                  description: The tool placement. Either 'toolbar', 'left', 'right' or 'control'
-                position:
-                  type: string
-                  example: right
-                  description: The tool position 'left' or 'right'
-                width:
-                  type: string
-                  description: The tool window width in pixels
-                height:
-                  type: string
-                  description: The tool window height in pixels
-                instruction:
-                  type: string
-                  example: null
-                  description: A tooltip that is displayed when hovering over the tool button
-                transformations:
-                  type: array
-                  items:
-                    type: object
-                    properties:
-                      code:
-                        type: string
-                        example: EPSG:3006
-                      default:
-                        type: boolean
-                      hint:
-                        type: string
-                        example: Sweref99 TM
-                      title:
-                        type: string
-                        example: Sweref99 TM
-                      xtitle:
-                        type: string
-                        example: E
-                      ytitle:
-                        type: string
-                        example: 'N'
-                      inverseAxis:
-                        type: boolean
-                visibleForGroups:
-                  type: array
-                  items:
-                    type: string
-            index:
-              type: integer
-              format: int32
-              example: 15
-              description: The sorting order of the tool window
-        '11':
-          type: object
-          properties:
-            type:
-              type: string
-              example: bookmark
-            options:
-              type: object
-              properties:
-                target:
-                  type: string
-                  example: toolbar
-                  description: The tool placement. Either 'toolbar', 'left', 'right' or 'control'
-                position:
-                  type: string
-                  example: right
-                  description: The tool position 'left' or 'right'
-                width:
-                  type: string
-                  description: The tool window width in pixels
-                height:
-                  type: string
-                  description: The tool window height in pixels
-                instruction:
-                  type: string
-                  example: null
-                  description: A tooltip that is displayed when hovering over the tool button
-                visibleAtStart:
-                  type: boolean
-                  description: If true, is the tool window displayed at start
-                visibleForGroups:
-                  type: array
-                  items:
-                    type: string
-            index:
-              type: integer
-              format: int32
-              example: 16
-              description: The sorting order of the tool window
-        '12':
-          type: object
-          properties:
-            type:
-              type: string
-              example: buffer
-            options:
-              type: object
-              properties:
-                target:
-                  type: string
-                  example: toolbar
-                  description: The tool placement. Either 'toolbar', 'left', 'right' or 'control'
-                position:
-                  type: string
-                  example: right
-                  description: The tool position 'left' or 'right'
-                width:
-                  type: string
-                  description: The tool window width in pixels
-                height:
-                  type: string
-                  description: The tool window height in pixels
-                instruction:
-                  type: string
-                  example: A tooltip that is displayed when hovering over the tool button
-                varbergVer:
-                  type: boolean
-                geoserverUrl:
-                  type: string
-                  example: null
-                notFeatureLayers:
-                  type: array
-                  items:
-                    type: string
-                visibleForGroups:
-                  type: array
-                  items:
-                    type: string
-            index:
-              type: integer
-              format: int32
-              example: 17
-              description: The sorting order of the tool window
-        '13':
-          type: object
-          properties:
-            type:
-              type: string
-              example: print
-            options:
-              type: object
-              properties:
-                target:
-                  type: string
-                  example: toolbar
-                  description: The tool placement. Either 'toolbar', 'left', 'right' or 'control'
-                position:
-                  type: string
-                  example: right
-                  description: The tool position 'left' or 'right'
-                width:
-                  type: string
-                  description: The tool window width in pixels
-                height:
-                  type: string
-                  description: The tool window height in pixels
-                copyright:
-                  type: string
-                  example: null
-                  description: The copyright text
-                disclaimer:
-                  type: string
-                  example: null
-                  description: The disclaimer text
-                scales:
-                  type: string
-                  example: 200 400 1000 2000 5000 10000 25000 50000 100000 200000 400000 800000 1000000 5000000 10000000
-                logo:
-                  type: string
-                  example: /logoLight.png
-                  description: File path to the logo to be used in the <img> tag. Can be either be relative to Hajk root or absolute.
-                logoMaxWidth:
-                  type: integer
-                  format: int32
-                  example: 40
-                  description: If 0 then the logo's original width is used
-                dpis:
-                  type: string
-                  example: 72 150 300
-                paperFormats:
-                  type: string
-                  example: A2 A3 A4
-                northArrow:
-                  type: string
-                  example: /north_arrow.png
-                  description: File path to the logo to be used in the <img> tag. Can be either be relative to Hajk root or absolute.
-                useMargin:
-                  type: boolean
-                  description: If true, a margin is produced around the map
-                mapTextColor:
-                  type: string
-                  example: '#000000'
-                  description: The color of the text in HEX
-                instruction:
-                  type: string
-                  example: null
-                  description: A tooltip that is displayed when hovering over the tool button
-                visibleAtStart:
-                  type: boolean
-                  description: If true, is the tool window displayed at start
-                visibleForGroups:
-                  type: array
-                  items:
-                    type: string
-                includeLogo:
-                  type: boolean
-                  description: If true, the logo is included as standard
-                logoPlacement:
-                  type: string
-                  example: topRight
-                  description: The logo placement either 'topRight', 'topLeft', 'bottomRight' or 'bottomLeft'
-                includeScaleBar:
-                  type: boolean
-                scaleBarPlacement:
-                  type: string
-                  example: bottomLeft
-                  description: The scale bar placement either 'topRight', 'topLeft', 'bottomRight' or 'bottomLeft'
-                includeNorthArrow:
-                  type: boolean
-                northArrowPlacement:
-                  type: string
-                  example: topLeft
-                  description: The logo placement either 'topRight', 'topLeft', 'bottomRight' or 'bottomLeft'
-                useCustomTileLoaders:
-                  type: boolean
-                  description: If true, the tool will make sure calls against the WMS server do not exceed the server memory limit. This setting also makes sure that the images will be in the correct DPI
-                maxTileSize:
-                  type: integer
-                  format: int32
-                  example: 4096
-                  description: If 'useCustomTileLoaders' is true, this is the maximum tile size of the produced images. Recommended value is 4096
-            index:
-              type: integer
-              format: int32
-              example: 2
-              description: The sorting order of the tool window
-        '14':
-          type: object
-          properties:
-            type:
-              type: string
-              example: documenthandler
-            options:
-              type: object
-              properties:
-                title:
-                  type: string
-                  example: Visa informationsruta
-                target:
-                  type: string
-                  example: hidden
-                showScrollButtonLimit:
-                  type: integer
-                  format: int32
-                  example: 400
-                dynamicImportUrls:
-                  type: object
-                  properties:
-                    iconFonts:
-                      type: string
-                      example: https://fonts.googleapis.com/icon?family=Material+Icons
-                    customFont:
-                      type: string
-                      example: https://fonts.googleapis.com/css?family=Open+Sans
-                iconLibraryLink:
-                  type: string
-                  example: https://material.io/resources/icons/?style=baseline
-                  description: Link that is displayed in the document setting to help find an icon for the document
-                customThemeUrl:
-                  type: string
-                  example: /documentHandlerTheme.json
-                width:
-                  type: integer
-                  format: int32
-                  example: 600
-                  description: The tool window width in pixels
-                height:
-                  type: string
-                  example: 90vh
-                  description: The tool window height in pixels
-                searchImplemented:
-                  type: boolean
-                  description: If true, the search is displayed
-                enablePrint:
-                  type: boolean
-                  description: If true, the print option is available
-                closePanelOnMapLinkOpen:
-                  type: boolean
-                  description: If true, the document window is closed when a map link is clicked
-                displayLoadingOnMapLinkOpen:
-                  type: boolean
-                  description: If true, the "map loading" dialog window is displayed when a map link is clicked
-                documentOnStart:
-                  type: string
-                  example: null
-                  description: The document to be displayed on start
-                drawerTitle:
-                  type: string
-                  example: null
-                  description: The drawer title that is displayed at the top
-                drawerButtonTitle:
-                  type: string
-                  example: Meny
-                  description: The button text that opens the tool
-                tableOfContents:
-                  type: object
-                  properties:
-                    active:
-                      type: boolean
-                      description: If the ToC is active
-                    expanded:
-                      type: boolean
-                      description: If the ToC should be displayed as expanded by default
-                    chapterLevelsToShow:
-                      type: integer
-                      format: int32
-                      example: 2
-                      description: The number of chapter levels
-                    title:
-                      type: string
-                      example: Innehållsförteckning
-                      description: The ToC title
-                defaultDocumentColorSettings:
-                  type: object
-                  properties:
-                    textAreaBackgroundColor:
-                      type: string
-                      example: null
-                      description: The background color of the text area in HEX value
-                    textAreaDividerColor:
-                      type: string
-                      example: null
-                      description: The color of the text area divider in HEX value
-                menuConfig:
-                  type: object
-                  properties:
-                    menu:
-                      type: array
-                      items:
-                        type: object
-                        properties:
-                          title:
-                            type: string
-                            example: Exempeldokument
-                            description: The document title to display in the tool
-                          document:
-                            type: string
-                            example: exempeldokument
-                            description: The actual document name
-                          color:
-                            type: string
-                            example: null
-                            description: The color of the background in HEX value
-                          icon:
-                            type: object
-                            properties:
-                              materialUiIconName:
-                                type: string
-                                example: null
-                                description: The name of the icon to use for the document
-                              descriptiveText:
-                                type: string
-                                example: null
-                                description: The text that describes the icon for accessability purposes
-                              fontSize:
-                                type: string
-                                example: large
-                                description: The size of the font of the descriptive text
-                          maplink:
-                            type: string
-                            example: null
-                            description: The path to the map that is connected to the document
-                          link:
-                            type: string
-                            example: null
-                            description: The webb URL that is connected to the document
-                          menu:
-                            type: array
-                            items:
-                              type: string
-                          expandedSubMenu:
-                            type: boolean
-                            description: If true, the submenu is expanded by default
-            index:
-              type: integer
-              format: int32
-              example: 0
-              description: The sorting order of the tool window
-        '15':
-          type: object
-          properties:
-            type:
-              type: string
-              example: bookmarks
-            options:
-              type: object
-              properties:
-                target:
-                  type: string
-                  example: toolbar
-                  description: The tool placement. Either 'toolbar', 'left', 'right' or 'control'
-                position:
-                  type: string
-                  example: right
-                  description: The tool position 'left' or 'right'
-                width:
-                  type: string
-                  description: The tool window width in pixels
-                height:
-                  type: string
-                  description: The tool window height in pixels
-                instruction:
-                  type: string
-                  example: null
-                  description: A tooltip that is displayed when hovering over the tool button
-                visibleAtStart:
-                  type: boolean
-                  description: If true, is the tool window displayed at start
-                visibleForGroups:
-                  type: array
-                  items:
-                    type: string
-            index:
-              type: integer
-              format: int32
-              example: 1
-        '16':
-          type: object
-          properties:
-            type:
-              type: string
-              example: layercomparer
-            options:
-              type: object
-              properties:
-                target:
-                  type: string
-                  example: toolbar
-                  description: The tool placement. Either 'toolbar', 'left', 'right' or 'control'
-                showNonBaseLayersInSelect:
-                  type: boolean
-                  example: true
-                  description: Show the usual map layers as available in the layer comparer
-                position:
-                  type: string
-                  example: right
-                  description: The tool position 'left' or 'right'
-                width:
-                  type: string
-                  description: The tool window width in pixels
-                height:
-                  type: string
-                  description: The tool window height in pixels
-                instruction:
-                  type: string
-                  example: null
-                  description: A tooltip that is displayed when hovering over the tool button
-                visibleAtStart:
-                  type: boolean
-                  description: If true, is the tool window displayed at start
-                visibleForGroups:
-                  type: array
-                  items:
-                    type: string
-            index:
-              type: integer
-              format: int32
-              example: 0
-              description: The sorting order of the tool window
-        '17':
-          type: object
-          properties:
-            type:
-              type: string
-              example: information
-            options:
-              type: object
-              properties:
-                headerText:
-                  type: string
-                  example: Information om kartan
-                  description: The header text
-                text:
-                  type: string
-                  example: Här är det möjligt att skriva lite vad som helst
-                  description: The text to display information
-                buttonText:
-                  type: string
-                  example: Stäng
-                  description: The button text
-                title:
-                  type: string
-                  example: Visa informationsruta
-                  description: This text is displayed when hovering over the information button
-                visibleAtStart:
-                  type: boolean
-                  description: If true, is the tool window displayed at start
-                showInfoOnce:
-                  type: boolean
-                  description: If true, the tool is displayed only once for each new user
-                visibleForGroups:
-                  type: array
-                  items:
-                    type: string
-            index:
-              type: integer
-              format: int32
-              example: 0
-              description: The sorting order of the tool window
-        '18':
-          type: object
-          properties:
-            type:
-              type: string
-              example: draw
-            options:
-              type: object
-              properties:
-                target:
-                  type: string
-                  example: toolbar
-                  description: The tool placement. Either 'toolbar', 'left', 'right' or 'control'
-                position:
-                  type: string
-                  example: right
-                  description: The tool position 'left' or 'right'
-                width:
-                  type: string
-                  description: The tool window width in pixels
-                height:
-                  type: string
-                  description: The tool window height in pixels
-                instruction:
-                  type: string
-                  example: null
-                  description: A tooltip that is displayed when hovering over the tool button
-                icons:
-                  type: string
-                  example: null
-                visibleAtStart:
-                  type: boolean
-                  description: If true, is the tool window displayed at start
-                visibleForGroups:
-                  type: array
-                  items:
-                    type: string
-            index:
-              type: integer
-              format: int32
-              example: 0
-              description: The sorting order of the tool window
-        '19':
-          type: object
-          properties:
-            type:
-              type: string
-              example: edit
-            options:
-              type: object
-              properties:
-                target:
-                  type: string
-                  example: toolbar
-                  description: The tool placement. Either 'toolbar', 'left', 'right' or 'control'
-                instruction:
-                  type: string
-                  example: null
-                  description: A tooltip that is displayed when hovering over the tool button
-                activeServices:
-                  type: array
-                  items:
-                    type: string
-                visibleAtStart:
-                  type: boolean
-                  description: If true, is the tool window displayed at start
-                visibleForGroups:
-                  type: array
-                  items:
-                    type: string
-            index:
-              type: integer
-              format: int32
-              example: 0
-              description: The sorting order of the tool window
-        '20':
-          type: object
-          properties:
-            type:
-              type: string
-              example: informative
-            options:
-              type: object
-              properties:
-                target:
-                  type: string
-                  example: toolbar
-                  description: The tool placement. Either 'toolbar', 'left', 'right' or 'control'
-                position:
-                  type: string
-                  example: right
-                  description: The tool position 'left' or 'right'
-                width:
-                  type: string
-                  description: The tool window width in pixels
-                height:
-                  type: string
-                  description: The tool window height in pixels
-                tocExpanded:
-                  type: boolean
-                title:
-                  type: string
-                  example: Översiktsplan
-                  description: The tool window title
-                caption:
-                  type: string
-                  example: Översiktsplan
-                  description: The tool window caption
-                exportRoot:
-                  type: string
-                  example: null
-                abstract:
-                  type: string
-                  example: Läs mer om vad som planeras i kommunen
-                  description: If the tool is displayed as a widget, then this abstract will be shown inside the widget button.
-                html:
-                  type: string
-                  example: <div>HTML som beskriver dokumentets innehåll</div>
-                document:
-                  type: string
-                  example: null
-                visibleAtStart:
-                  type: boolean
-                  description: If true, is the tool window displayed at start
-                visibleForGroups:
-                  type: array
-                  items:
-                    type: string
-            index:
-              type: integer
-              format: int32
-              example: 0
-              description: The sorting order of the tool window
-        '21':
-          type: object
-          properties:
-            type:
-              type: string
-              example: timeslider
-            options:
-              type: object
-              properties:
-                target:
-                  type: string
-                  example: toolbar
-                  description: The tool placement. Either 'toolbar', 'left', 'right' or 'control'
-                visibleAtStart:
-                  type: boolean
-                  description: If true, is the tool window displayed at start
-                instruction:
-                  type: string
-                  example: null
-                  description: A tooltip that is displayed when hovering over the tool button
-                icons:
-                  type: string
-                  example: null
+                  - id: "7"
+                    visibleAtStart: false
+                    drawOrder: 3
+                    visibleForGroups:
+                    infobox:
+                  - id: "8"
+                    visibleAtStart: false
+                    drawOrder: 3
+                    visibleForGroups:
+                    infobox:
+                groups: []
+              - id: 9938c969-590c-8683-435c-1ecaca271096
+                parent: "-1"
+                name: Övrigt
+                toggled: true
+                expanded: false
                 layers:
-                  type: array
-                  items:
-                    type: string
-                defaultResolution:
-                  type: string
-                  example: years
-                  description: How big of a leap will be taken when updating the timeline. Either 'days', 'years' or 'months'
-            index:
-              type: integer
-              format: int32
-              example: 0
-              description: The sorting order of the tool window
+                  - id: "1352"
+                    visibleAtStart: true
+                    drawOrder: 4
+                    visibleForGroups:
+                    infobox:
+                groups: []
+            active: true
+            visibleAtStart: false
+            visibleAtStartMobile: false
+            backgroundSwitcherBlack: true
+            backgroundSwitcherWhite: true
+            enableOSM: true
+            showBreadcrumbs: true
+            target: left
+            position: left
+            width: 0
+            height: 0
+            title: Lagerhanterare
+            description: Välj vad du vill visa i kartan.
+            enableTransparencySlider: true
+            dropdownThemeMaps: true
+            themeMapHeaderCaption: Standardkartan
+            instruction: ""
+            visibleForGroups: []
+          index: 1
+        - type: infoclick
+          options:
+            target: ""
+            displayPopup: false
+            markerImg: "/marker.png"
+            anchor:
+              - 0.5
+              - 1
+            imgSize:
+              - 32
+              - 32
+            popupOffsetY: 0
+            visibleForGroups: []
+          index: 2
+        - type: sketch
+          options:
+            target: left
+            position: left
+            visibleForGroups: []
+          index: 3
+        - type: measure
+          options:
+            target: control
+            position: right
+            instruction: ""
+            icons: ""
+          index: 4
+        - type: streetview
+          options:
+            target: control
+            position: right
+            apiKey: AIzaSyCb-bvLmybNb4QSERR43eGlvvQyUrBAQG4
+            instruction: ""
+            visibleForGroups: []
+          index: 5
+        - type: anchor
+          options:
+            target: left
+            position: left
+            instruction: ""
+            visibleForGroups: []
+          index: 7
+        - type: search
+          options:
+            layers:
+              - id: "4"
+                visibleForGroups: []
+            selectedSources: []
+            visibleForGroups: []
+            maxResultsPerDataset: 100
+            anchor:
+              - ""
+              - ""
+            scale: ""
+            markerImg: ""
+            delayBeforeAutoSearch: 300
+            searchBarPlaceholder: Sök....
+            autocompleteWildcardAtStart: false
+            enablePolygonSearch: true
+            showCorrespondingWMSLayers: false
+            enableRadiusSearch: true
+            enableSelectSearch: true
+            enableExtentSearch: true
+            enableResultsFiltering: true
+            enableResultsSorting: true
+            enableResultsSelectionClearing: true
+            enableResultsDownloading: true
+            enableFeaturePreview: true
+            enableLabelOnHighlight: true
+            enableSelectedFeaturesCollection: true
+            showResultFeaturesInMap: true
+            showResultsLimitReachedWarning: true
+            enableFeatureToggler: true
+            drawFillColor: rgba(255,255,255,0.07)
+            drawStrokeColor: rgba(74,74,74,0.5)
+            displayFillColor: rgba(74,144,226,0.15)
+            displayStrokeColor: rgba(74,144,226,0.4)
+            selectionTextStroke: rgba(255,255,255,1)
+            selectionTextFill: rgba(63,122,190,1)
+            selectionFillColor: rgba(74,144,226,0.7)
+            selectionStrokeColor: rgba(74,144,226,0.8)
+            highlightTextStroke: rgba(255,255,255,1)
+            highlightTextFill: rgba(214,143,28,1)
+            highlightFillColor: rgba(245,166,35,0.7)
+            highlightStrokeColor: rgba(245,166,35,0.8)
+          index: 11
+        - type: routing
+          options:
+            target: toolbar
+            apiKey: AIzaSyCb-bvLmybNb4QSERR43eGlvvQyUrBAQG4
+            instruction: ""
+            visibleForGroups: []
+          index: 12
+        - type: location
+          options:
+            target: control
+            position: right
+            visibleForGroups: []
+          index: 13
+        - type: preset
+          options:
+            presetList:
+              - name: Halmstad
+                presetUrl: "?m=simpleMapConfig&x=368494.9197547268&y=6282312.7413127115&z=6.7339618545565125&l=1&f=%7B%7D&clean=false"
+              - name: Alingsås
+                presetUrl: "?m=simpleMapConfig&x=354049.24452326825&y=6424217.248216377&z=7.903686478656474&l=1&f=%7B%7D&clean=false"
+              - name: Göteborg
+                presetUrl: "?m=simpleMapConfig&x=315850.5321760868&y=6398503.693206446&z=6.502756678859521&l=1&f=%7B%7D&clean=false"
+              - name: Jönköping
+                presetUrl: "?m=simpleMapConfig&x=450214.34373580024&y=6403315.750951234&z=6.7931556775514546&l=1&f=%7B%7D&clean=false"
+              - name: Karlstad
+                presetUrl: "?m=simpleMapConfig&x=416370.6129169631&y=6583095.470395488&z=6.221222447365537&l=1&f=%7B%7D&clean=false"
+              - name: Stockholm
+                presetUrl: "?m=simpleMapConfig&x=671675.4989296548&y=6570377.474044046&z=4.9236065968776375&l=1&f=%7B%7D&clean=false"
+              - name: Umeå
+                presetUrl: "?m=simpleMapConfig&x=758454.9972847599&y=7084504.860998487&z=6.739288215480473&l=1&f=%7B%7D&clean=false"
+            visibleForGroups: []
+          index: 14
+        - type: coordinates
+          options:
+            target: control
+            position: right
+            instruction: ""
+            transformations:
+              - code: EPSG:3006
+                default: true
+                hint: Sweref99 TM
+                title: Sweref99 TM
+                xtitle: E
+                ytitle: N
+                inverseAxis: false
+            visibleForGroups: []
+          index: 15
+        - type: bookmark
+          options:
+            target: toolbar
+            instruction: ""
+            visibleForGroups: []
+          index: 16
+        - type: buffer
+          options:
+            target: toolbar
+            instruction: ""
+            varbergVer: false
+            geoserverUrl: ""
+            notFeatureLayers: []
+            visibleForGroups: []
+          index: 17
+        - type: print
+          options:
+            target: left
+            position: left
+            scales:
+              200, 400, 1000, 2000, 5000, 10000, 25000, 50000, 100000, 200000, 400000,
+              800000, 1000000, 5000000, 10000000
+            logo: "/logoLight.png"
+            northArrow: "/north_arrow.png"
+            instruction: ""
+            visibleAtStart: false
+            visibleForGroups: []
+          index: 2
+        - type: documenthandler
+          index: 0
+          options:
+            title: Visa informationsruta
+            target: hidden
+            showScrollButtonLimit: 400
+            dynamicImportUrls:
+              iconFonts: https://fonts.googleapis.com/icon?family=Material+Icons
+              customFont: https://fonts.googleapis.com/css?family=Open+Sans
+            iconLibraryLink: https://material.io/resources/icons/?style=baseline
+            customThemeUrl: "/documentHandlerTheme.json"
+            width: 600
+            height: 90vh
+            searchImplemented: true
+            enablePrint: true
+            closePanelOnMapLinkOpen: false
+            displayLoadingOnMapLinkOpen: false
+            documentOnStart: ""
+            drawerTitle: ""
+            drawerButtonTitle: Meny
+            tableOfContents:
+              active: false
+              expanded: false
+              chapterLevelsToShow: 2
+              title: Innehållsförteckning
+            defaultDocumentColorSettings:
+              textAreaBackgroundColor: "#ccc"
+              textAreaDividerColor: "#6A0DAD"
+            menuConfig:
+              menu:
+                - title: Exempeldokument
+                  document: exempeldokument
+                  color: ""
+                  icon:
+                    materialUiIconName: ""
+                    fontSize: large
+                  maplink: ""
+                  link: ""
+                  menu: []
+                - title: Exempeldokument2
+                  document: exempeldokument2
+                  color: ""
+                  icon:
+                    materialUiIconName: ""
+                    fontSize: large
+                  maplink: ""
+                  link: ""
+                  menu: []
+    tools3:
+      example:
+        - type: layerswitcher
+          options: test
     mapsettings:
       type: object
       properties:
@@ -3597,51 +2614,54 @@ components:
               expanded:
                 type: boolean
             example:
-            - header: Rubrik 1
-              headerIdentifier: rubrik_1
-              html: <p><u><strong>Kapiteltext för Rubrik 1. Reagerar på nyckelordet översikt</strong></u></p>
-              keywords: [ översikt ]
-              geoObjects: []
-              chapters: [
-               { 
-                  header: Underrubrik 1, 
-                  headerIdentifier: underubrik_1, 
-                  html: <p><u><strong>Kapiteltext för Underrubrik 1. Reagerar på nyckelordet underplan</strong></u></p>, 
-                  keywords: [ underplan ], 
-                  geoObjects: [], 
-                  chapters: []
-                } 
-              ]
-              expanded: true
-            - header: Rubrik 2
-              headerIdentifier: rubrik_2
-              html: <p><u><strong>Kapiteltext för Rubrik 2. Reagerar på nyckelordet plan</strong></u></p>
-              keywords: [ plan ]
-              geoObjects: []
-              chapters: [
-               { 
-                  header: Underrubrik 2, 
-                  headerIdentifier: underubrik_2, 
-                  html: <p><u><strong>Kapiteltext för Underrubrik 2. Reagerar inte nyckelord</strong></u></p>, 
-                  keywords: [], 
-                  geoObjects: [], 
-                  chapters: [
-                    { 
-                      header: Underrubrik 3, 
-                      headerIdentifier: underubrik_3, 
-                      html: <p><u><strong>Kapiteltext för Underrubrik 3. Reagerar inte nyckelord</strong></u></p>, 
-                      keywords: [], 
-                      geoObjects: [], 
-                      chapters: []
-                    }
+              - header: Rubrik 1
+                headerIdentifier: rubrik_1
+                html: <p><u><strong>Kapiteltext för Rubrik 1. Reagerar på nyckelordet översikt</strong></u></p>
+                keywords: [översikt]
+                geoObjects: []
+                chapters:
+                  [
+                    {
+                      header: Underrubrik 1,
+                      headerIdentifier: underubrik_1,
+                      html: <p><u><strong>Kapiteltext för Underrubrik 1. Reagerar på nyckelordet underplan</strong></u></p>,
+                      keywords: [underplan],
+                      geoObjects: [],
+                      chapters: [],
+                    },
                   ]
-                }
-              ]
-              expanded: true
+                expanded: true
+              - header: Rubrik 2
+                headerIdentifier: rubrik_2
+                html: <p><u><strong>Kapiteltext för Rubrik 2. Reagerar på nyckelordet plan</strong></u></p>
+                keywords: [plan]
+                geoObjects: []
+                chapters:
+                  [
+                    {
+                      header: Underrubrik 2,
+                      headerIdentifier: underubrik_2,
+                      html: <p><u><strong>Kapiteltext för Underrubrik 2. Reagerar inte nyckelord</strong></u></p>,
+                      keywords: [],
+                      geoObjects: [],
+                      chapters:
+                        [
+                          {
+                            header: Underrubrik 3,
+                            headerIdentifier: underubrik_3,
+                            html: <p><u><strong>Kapiteltext för Underrubrik 3. Reagerar inte nyckelord</strong></u></p>,
+                            keywords: [],
+                            geoObjects: [],
+                            chapters: [],
+                          },
+                        ],
+                    },
+                  ]
+                expanded: true
         map:
           type: string
           example: map_1
-        title: 
+        title:
           type: string
           example: Exempeldokument
     InformativeDocumentCreateBody:
