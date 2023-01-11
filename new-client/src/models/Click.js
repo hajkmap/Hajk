@@ -178,8 +178,8 @@ function getFeaturesFromJson(response, jsonData) {
     parsed.forEach((f) => {
       f.layer = response.layer;
     });
-    const sortedFeatures = sortFeatures(response.layer, parsed);
-    return sortedFeatures;
+    sortFeatures(response.layer, parsed);
+    return parsed;
   } else {
     return [];
   }
@@ -192,8 +192,8 @@ function getFeaturesFromGml(response, text) {
     parsed.forEach((f) => {
       f.layer = response.layer;
     });
-    const sortedFeatures = sortFeatures(response.layer, parsed);
-    return sortedFeatures;
+    sortFeatures(response.layer, parsed);
+    return parsed;
   } else {
     return [];
   }
@@ -227,8 +227,8 @@ function getFeaturesFromXmlOrGml(response, text) {
     features.push(feature);
   }
 
-  const sortedFeatures = sortFeatures(response.layer, features);
-  return sortedFeatures;
+  sortFeatures(response.layer, features);
+  return features;
 }
 
 /**
