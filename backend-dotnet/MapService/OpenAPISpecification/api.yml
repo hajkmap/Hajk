@@ -173,7 +173,8 @@ paths:
         description: Save a document.
         content:
           application/json:
-            schema: $ref:'#/components/schemas/SaveDocument'
+            schema:
+              $ref: "#/components/schemas/SaveDocument"
         required: true
       parameters:
         - name: name
@@ -558,7 +559,8 @@ paths:
           description: Success
           content:
             application/json:
-              schema: $ref:'#/components/schemas/UserSpecificMaps'
+              schema:
+                $ref: "#/components/schemas/UserSpecificMaps"
   /ad/availableadgroups:
     get:
       tags:
