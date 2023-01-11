@@ -1,10 +1,11 @@
+using MapService.Business.Ad;
 using MapService.Business.Config;
 using MapService.Business.MapConfig;
 using MapService.Models;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Caching.Memory;
 using Swashbuckle.AspNetCore.Annotations;
 using System.Text.Json;
-using System.Text.Json.Nodes;
 
 namespace MapService.Controllers
 {
@@ -13,10 +14,12 @@ namespace MapService.Controllers
     [ApiController]
     public class ConfigController : ControllerBase
     {
+        private readonly IMemoryCache _memoryCache;
         private readonly ILogger<ConfigController> _logger;
 
-        public ConfigController(ILogger<ConfigController> logger)
+        public ConfigController(IMemoryCache memoryCache, ILogger<ConfigController> logger)
         {
+            _memoryCache = memoryCache;
             _logger = logger;
         }
 
@@ -30,13 +33,27 @@ namespace MapService.Controllers
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         [SwaggerOperation(Tags = new[] { "Client-accessible" })]
-        public ActionResult GetLayers()
+        public ActionResult GetLayers([FromHeader(Name = "X-Control-Header")] string? userPrincipalName = null)
         {
             JsonDocument layerObject;
 
             try
             {
-                layerObject = MapConfigHandler.GetLayersAsJsonDocument();
+                if (AdHandler.AdIsActive)
+                {
+                    var adHandler = new AdHandler(_memoryCache, _logger);
+
+                    if (!adHandler.UserIsValid(userPrincipalName))
+                    {
+                        return StatusCode(StatusCodes.Status500InternalServerError, "AD authentication is active, but supplied user name could not be validated.");
+                    }
+
+                    layerObject = MapConfigHandler.GetLayersAsJsonDocument();
+                }
+                else
+                {
+                    layerObject = MapConfigHandler.GetLayersAsJsonDocument();
+                }
             }
             catch (Exception ex)
             {
