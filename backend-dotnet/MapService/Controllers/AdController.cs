@@ -24,10 +24,12 @@ namespace MapService.Controllers
         /// Get a list of all available AD groups to make it easier for admins to set map and layer permissions
         /// </remarks>
         /// <response code="200">Success</response>
+        /// <response code="403">Forbidden</response>
         /// <response code="500">Internal Server Error</response>
         [HttpGet]
         [Route("availableadgroups")]
         [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         [SwaggerOperation(Tags = new[] { "Admin - ActiveDirectory" })]
         public ActionResult GetAvailableADGroups([FromHeader(Name = "X-Control-Header")] string userPrincipalName)
@@ -64,10 +66,12 @@ namespace MapService.Controllers
         /// Get the current content of local AD Users store
         /// </remarks>
         /// <response code="200">Success</response>
+        /// <response code="403">Forbidden</response>
         /// <response code="500">Internal Server Error</response>
         [HttpGet]
         [Route("users")]
         [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         [SwaggerOperation(Tags = new[] { "Admin - ActiveDirectory" })]
         public ActionResult GetUsers([FromHeader(Name = "X-Control-Header")] string userPrincipalName)
@@ -104,10 +108,12 @@ namespace MapService.Controllers
         /// Get the current content of local AD Groups store
         /// </remarks>
         /// <response code="200">Success</response>
+        /// <response code="403">Forbidden</response>
         /// <response code="500">Internal Server Error</response>
         [HttpGet]
         [Route("groups")]
         [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         [SwaggerOperation(Tags = new[] { "Admin - ActiveDirectory" })]
         public ActionResult GetGroups([FromHeader(Name = "X-Control-Header")] string userPrincipalName)
@@ -138,6 +144,48 @@ namespace MapService.Controllers
             }
 
             return StatusCode(StatusCodes.Status200OK, groups);
+        }
+
+        /// <remarks>
+        /// Get the current content of local AD groups per user store
+        /// </remarks>
+        /// <response code="200">Success</response>
+        /// <response code="403">Forbidden</response>
+        /// <response code="500">Internal Server Error</response>
+        [HttpGet]
+        [Route("groupsPerUser")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        [SwaggerOperation(Tags = new[] { "Admin - ActiveDirectory" })]
+        public ActionResult GetGroupsPerUser([FromHeader(Name = "X-Control-Header")] string userPrincipalName)
+        {
+            Dictionary<string, IEnumerable<string>> groupsPerUser;
+
+            try
+            {
+                if (!AdHandler.AdIsActive)
+                {
+                    return StatusCode(StatusCodes.Status500InternalServerError, "Can't access AD methods because AD functionality is disabled");
+                }
+
+                var adHandler = new AdHandler(_memoryCache, _logger);
+
+                if (!adHandler.UserIsValid(userPrincipalName) || !AdHandler.UserHasAdAccess(userPrincipalName))
+                {
+                    return StatusCode(StatusCodes.Status403Forbidden, "Forbidden");
+                }
+
+                groupsPerUser = adHandler.GetGroupsPerUser();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Internal server error");
+
+                return StatusCode(StatusCodes.Status500InternalServerError, "Internal Server Error");
+            }
+
+            return StatusCode(StatusCodes.Status200OK, groupsPerUser);
         }
     }
 }
