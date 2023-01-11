@@ -158,9 +158,11 @@ namespace MapService.Business.Ad
             return groups;
         }
 
-        private static IEnumerable<AdGroup> GetGroupsForUserFromAd(string distinguishedName)
+        private static IEnumerable<AdGroup> GetGroupsForUserFromAd(string? distinguishedName)
         {
             var groups = new List<AdGroup>();
+
+            if (distinguishedName == null || distinguishedName == string.Empty) { return groups; }
 
             var directorySearcher = CreateDirectorySearcher();
 
@@ -263,6 +265,36 @@ namespace MapService.Business.Ad
         internal Dictionary<string, IEnumerable<string>> GetGroupsPerUser()
         {
             return _adCache.GetAdGroupsPerUser();
+        }
+
+        internal IEnumerable<AdGroup> FindCommonGroupsForUsers(IEnumerable<string> users)
+        {
+            var commonGroupsForUsers = new List<AdGroup>();
+
+            var availableADGroups = GetAvailableADGroups();
+
+            foreach (var adGroup in availableADGroups)
+            {
+                bool allUserHasAdGroup = true;
+
+                foreach (string userPrincipalName in users)
+                {
+                    var user = FindUser(userPrincipalName);
+
+                    if (user == null) { allUserHasAdGroup = false; }
+
+                    _adCache.GetAdGroupsPerUser().TryGetValue(userPrincipalName, out var adGroups);
+
+                    if (adGroups == null || !adGroups.Contains(adGroup.Cn)) { allUserHasAdGroup = false; }
+                }
+
+                if (allUserHasAdGroup)
+                {
+                    commonGroupsForUsers.Add(adGroup);
+                }
+            }
+
+            return commonGroupsForUsers;
         }
     }
 }

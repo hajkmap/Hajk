@@ -63,6 +63,48 @@ namespace MapService.Controllers
         }
 
         /// <remarks>
+        /// Find out which AD group membership is shared between specified users
+        /// </remarks>
+        /// <response code="200">Success</response>
+        /// <response code="403">Forbidden</response>
+        /// <response code="500">Internal Server Error</response>
+        [HttpGet]
+        [Route("findcommongroupsforusers")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        [SwaggerOperation(Tags = new[] { "Admin - ActiveDirectory" })]
+        public ActionResult FindCommonGroupsForUsers([FromHeader(Name = "X-Control-Header")] string userPrincipalName, [FromQuery] IEnumerable<string> users)
+        {
+            IEnumerable<string?> commonGroupsForUsers;
+
+            try
+            {
+                if (!AdHandler.AdIsActive)
+                {
+                    return StatusCode(StatusCodes.Status500InternalServerError, "Can't access AD methods because AD functionality is disabled");
+                }
+
+                var adHandler = new AdHandler(_memoryCache, _logger);
+
+                if (!adHandler.UserIsValid(userPrincipalName) || !AdHandler.UserHasAdAccess(userPrincipalName))
+                {
+                    return StatusCode(StatusCodes.Status403Forbidden, "Forbidden");
+                }
+
+                commonGroupsForUsers = adHandler.FindCommonGroupsForUsers(users).Select(x => x.Cn); ;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Internal server error");
+
+                return StatusCode(StatusCodes.Status500InternalServerError, "Internal Server Error");
+            }
+
+            return StatusCode(StatusCodes.Status200OK, commonGroupsForUsers);
+        }
+
+        /// <remarks>
         /// Get the current content of local AD Users store
         /// </remarks>
         /// <response code="200">Success</response>
