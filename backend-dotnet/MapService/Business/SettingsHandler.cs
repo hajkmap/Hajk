@@ -51,18 +51,12 @@ namespace MapService.Business.Settings
             }
         }
 
-        internal static void UpdateToolSettings(JsonObject toolSettings, string mapFileName)
+        internal static void UpdateToolSettings(JsonArray tools, string mapFileName)
         {
             JsonObject mapFile = JsonFileDataAccess.ReadMapFileAsJsonObject(mapFileName);
 
             try
             {
-                //Convert to JsonArray
-                var tools = new JsonArray();
-                toolSettings.Select(x => x.Value)
-                            .ToList()
-                            .ForEach(h => tools.Add(JsonNode.Parse(h.ToJsonString())));
-
                 //Remove the layerswitcher node from the tools node
                 var node = tools.FirstOrDefault(x => x["type"].ToString() == "layerswitcher");
                 if (node != null)

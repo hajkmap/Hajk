@@ -80,7 +80,7 @@ namespace MapService.Controllers
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         [SwaggerOperation(Tags = new[] { "Admin - Maps and layers" })]
-        public ActionResult UpdateToolSettings([Required] JsonObject toolSettings, [Required] string mapFile)
+        public ActionResult UpdateToolSettings([Required] JsonArray toolSettings, [Required] string mapFile)
         {
             try
             {
