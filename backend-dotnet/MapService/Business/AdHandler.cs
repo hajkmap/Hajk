@@ -55,8 +55,10 @@ namespace MapService.Business.Ad
             return directorySearcher;
         }
 
-        private AdUser? FindUser(string userprincipalname)
+        private AdUser? FindUser(string? userprincipalname)
         {
+            if (string.IsNullOrEmpty(userprincipalname)) { return null; }
+
             if (!_adCache.GetAdUsers().ContainsKey(userprincipalname))
             {
                 var adUser = GetUserFromAd(userprincipalname);
@@ -73,9 +75,11 @@ namespace MapService.Business.Ad
             return user;
         }
 
-        private static AdUser GetUserFromAd(string userPrincipalName)
+        private static AdUser GetUserFromAd(string? userPrincipalName)
         {
             var user = new AdUser();
+
+            if (string.IsNullOrEmpty(userPrincipalName)) { return user; }
 
             var directorySearcher = CreateDirectorySearcher();
 
@@ -162,7 +166,7 @@ namespace MapService.Business.Ad
         {
             var groups = new List<AdGroup>();
 
-            if (distinguishedName == null || distinguishedName == string.Empty) { return groups; }
+            if (string.IsNullOrEmpty(distinguishedName)) { return groups; }
 
             var directorySearcher = CreateDirectorySearcher();
 
@@ -193,9 +197,9 @@ namespace MapService.Business.Ad
             return groups;
         }
 
-        internal bool UserIsValid(string userprincipalname)
+        internal bool UserIsValid(string? userPrincipalName)
         {
-            var user = FindUser(userprincipalname);
+            var user = FindUser(userPrincipalName);
 
             if (user == null) { return false; }
 
@@ -204,8 +208,10 @@ namespace MapService.Business.Ad
             return true;
         }
 
-        internal static bool UserHasAdAccess(string userPrincipalName)
+        internal static bool UserHasAdAccess(string? userPrincipalName)
         {
+            if (string.IsNullOrEmpty(userPrincipalName)) { return false; }
+
             var directorySearcher = CreateDirectorySearcher();
 
             directorySearcher.PropertiesToLoad.Add("distinguishedname");
