@@ -12,6 +12,7 @@ namespace MapService.Caches
 
         private static readonly string _cacheKeyAdUser = "AD_USERS";
         private static readonly string _cacheKeyAdGroup = "AD_GROUPS";
+        private static readonly string _cacheKeyAdGroupsPerUser = "AD_GROUPS_PER_USER";
         private static readonly string _cacheLockKey = "CACHE_LOCK";
 
         internal AdCache(IMemoryCache memoryCache, ILogger logger)
@@ -24,7 +25,7 @@ namespace MapService.Caches
         {
             WaitForCacheLock();
 
-            Dictionary<string, AdUser> adUsers = (Dictionary<string, AdUser>)_memoryCache.Get(_cacheKeyAdUser);
+            var adUsers = (Dictionary<string, AdUser>)_memoryCache.Get(_cacheKeyAdUser);
 
             adUsers ??= new Dictionary<string, AdUser>();
 
@@ -35,11 +36,22 @@ namespace MapService.Caches
         {
             WaitForCacheLock();
 
-            IEnumerable<AdGroup> adGroups = (IEnumerable<AdGroup>)_memoryCache.Get(_cacheKeyAdGroup);
+            var adGroups = (IEnumerable<AdGroup>)_memoryCache.Get(_cacheKeyAdGroup);
 
             adGroups ??= new List<AdGroup>();
 
             return adGroups;
+        }
+
+        internal Dictionary<string, IEnumerable<string>> GetAdGroupsPerUser()
+        {
+            WaitForCacheLock();
+
+            var adGroupsPerUser = (Dictionary<string, IEnumerable<string>>)_memoryCache.Get(_cacheKeyAdGroupsPerUser);
+
+            adGroupsPerUser ??= new Dictionary<string, IEnumerable<string>>();
+
+            return adGroupsPerUser;
         }
 
         internal void SetUser(string userprincipalname, AdUser user)
@@ -72,6 +84,21 @@ namespace MapService.Caches
             }
         }
 
+        internal void SetGroupsPerUser(string userprincipalname, IEnumerable<AdGroup> groups)
+        {
+            try
+            {
+                WaitForCacheLock();
+                LockCache();
+
+                UpdateGroupsPerUserCache(userprincipalname, groups);
+            }
+            finally
+            {
+                UnlockCache();
+            }
+        }
+
         private void UpdateUserCache(string userprincipalname, AdUser user)
         {
             var adUsers = (Dictionary<string, AdUser>)_memoryCache.Get(_cacheKeyAdUser);
@@ -86,6 +113,17 @@ namespace MapService.Caches
         private void UpdateGroupCache(IEnumerable<AdGroup> groups)
         {
             _memoryCache.Set(_cacheKeyAdGroup, groups, _cacheEntryOptions);
+        }
+
+        private void UpdateGroupsPerUserCache(string userprincipalname, IEnumerable<AdGroup> groups)
+        {
+            var groupsPerUsers = (Dictionary<string, IEnumerable<string?>>)_memoryCache.Get(_cacheKeyAdGroupsPerUser);
+
+            groupsPerUsers ??= new Dictionary<string, IEnumerable<string?>>();
+
+            groupsPerUsers.Add(userprincipalname, groups.Select(x => x.Cn));
+
+            _memoryCache.Set(_cacheKeyAdGroupsPerUser, groupsPerUsers, _cacheEntryOptions);
         }
 
         /// <summary>

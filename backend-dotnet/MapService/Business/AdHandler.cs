@@ -62,6 +62,10 @@ namespace MapService.Business.Ad
                 var adUser = GetUserFromAd(userprincipalname);
 
                 _adCache.SetUser(userprincipalname, adUser);
+
+                var adGroupsForUser = GetGroupsForUserFromAd(adUser.DistinguishedName);
+
+                _adCache.SetGroupsPerUser(userprincipalname, adGroupsForUser);
             }
 
             _adCache.GetAdUsers().TryGetValue(userprincipalname, out var user);
@@ -154,6 +158,39 @@ namespace MapService.Business.Ad
             return groups;
         }
 
+        private static IEnumerable<AdGroup> GetGroupsForUserFromAd(string distinguishedName)
+        {
+            var groups = new List<AdGroup>();
+
+            var directorySearcher = CreateDirectorySearcher();
+
+            directorySearcher.Sort = new SortOption("cn", SortDirection.Ascending);
+
+            directorySearcher.PropertiesToLoad.Add("cn");
+            directorySearcher.PropertiesToLoad.Add("distinguishedname");
+
+            directorySearcher.Filter = string.Format("(&(objectCategory=Group)(member={0}))", distinguishedName);
+
+            var results = directorySearcher.FindAll();
+
+            if (results != null)
+            {
+                foreach (SearchResult searchResult in results)
+                {
+                    var adGroup = new AdGroup
+                    {
+                        Dn = searchResult.Properties["distinguishedname"][0].ToString(),
+                        Cn = searchResult.Properties["cn"][0].ToString(),
+                        DistinguishedName = searchResult.Properties["distinguishedname"][0].ToString(),
+                    };
+
+                    groups.Add(adGroup);
+                }
+            }
+
+            return groups;
+        }
+
         internal bool UserIsValid(string userprincipalname)
         {
             var user = FindUser(userprincipalname);
@@ -221,6 +258,11 @@ namespace MapService.Business.Ad
         internal IEnumerable<AdGroup> GetGroups()
         {
             return _adCache.GetAdGroups();
+        }
+
+        internal Dictionary<string, IEnumerable<string>> GetGroupsPerUser()
+        {
+            return _adCache.GetAdGroupsPerUser();
         }
     }
 }
