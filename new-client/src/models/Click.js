@@ -111,7 +111,7 @@ function getSortMethod(options) {
   }
 }
 
-function sortFeatures(layer, features) {
+function sortAndMutateFeaturesArray(layer, features) {
   if (!features || features.length <= 1) {
     return;
   }
@@ -119,7 +119,6 @@ function sortFeatures(layer, features) {
   if (!layerInfo.infoClickSortProperty) {
     return;
   }
-
   const sortType = layerInfo.infoClickSortType || "string";
   const sortOptions = {
     type: sortType,
@@ -127,8 +126,7 @@ function sortFeatures(layer, features) {
     prop: layerInfo.infoClickSortProperty.trim(),
     parser: getSortParser(sortType),
   };
-
-  return features.sort(getSortMethod(sortOptions));
+  features.sort(getSortMethod(sortOptions));
 }
 
 // Function similar to GeoJSON().readFeatures, with the subtle difference that we set an
@@ -173,30 +171,28 @@ function readJsonFeatures(jsonData, layerProjection, viewProjection) {
 function getFeaturesFromJson(response, jsonData) {
   const layerProjection = response.layer.getSource().getProjection();
   const viewProjection = response.viewProjection;
-  const parsed = readJsonFeatures(jsonData, layerProjection, viewProjection);
-  if (parsed && parsed.length > 0) {
-    parsed.forEach((f) => {
+  let features = readJsonFeatures(jsonData, layerProjection, viewProjection);
+  if (features && features.length > 0) {
+    features = features.map((f) => {
       f.layer = response.layer;
+      return f;
     });
-    sortFeatures(response.layer, parsed);
-    return parsed;
-  } else {
-    return [];
+    sortAndMutateFeaturesArray(response.layer, features);
   }
+  return features;
 }
 
 function getFeaturesFromGml(response, text) {
   const wmsGetFeatureInfo = new WMSGetFeatureInfo();
-  const parsed = wmsGetFeatureInfo.readFeatures(text);
-  if (parsed && parsed.length > 0) {
-    parsed.forEach((f) => {
+  let features = wmsGetFeatureInfo.readFeatures(text);
+  if (features && features.length > 0) {
+    features = features.map((f) => {
       f.layer = response.layer;
+      return f;
     });
-    sortFeatures(response.layer, parsed);
-    return parsed;
-  } else {
-    return [];
+    sortAndMutateFeaturesArray(response.layer, features);
   }
+  return features;
 }
 
 function getFeaturesFromXmlOrGml(response, text) {
@@ -210,7 +206,7 @@ function getFeaturesFromXmlOrGml(response, text) {
   // the standard GML parser. Instead we implement a custom solution.
   const parser = new DOMParser();
   const doc = parser.parseFromString(text, "text/xml");
-  const features = [];
+  let features = [];
   const fields = doc.getElementsByTagName("FIELDS");
   for (let i = 0; i < fields.length; i++) {
     const feature = new Feature();
@@ -227,7 +223,7 @@ function getFeaturesFromXmlOrGml(response, text) {
     features.push(feature);
   }
 
-  sortFeatures(response.layer, features);
+  sortAndMutateFeaturesArray(response.layer, features);
   return features;
 }
 
