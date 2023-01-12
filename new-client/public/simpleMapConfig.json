@@ -327,7 +327,7 @@
         "scale": "",
         "markerImg": "",
         "delayBeforeAutoSearch": 300,
-        "searchBarPlaceholder": "Sök i Hajk",
+        "searchBarPlaceholder": "",
         "autocompleteWildcardAtStart": false,
         "enablePolygonSearch": true,
         "enableRadiusSearch": true,
