@@ -313,7 +313,8 @@ export function handleClick(evt, map, callback) {
             (feature, layer) => {
               if (
                 layer &&
-                (layer.get("queryable") === true ||
+                ((layer?.get("queryable") === true &&
+                  layer?.get("ignoreInFeatureInfo") !== true) ||
                   layer.get("name") === "pluginSearchResults")
               ) {
                 feature.layer = layer;
