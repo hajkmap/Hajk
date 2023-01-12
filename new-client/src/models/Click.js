@@ -1,7 +1,9 @@
+import Feature from "ol/Feature";
 import GeoJSON from "ol/format/GeoJSON";
+import WMSGetFeatureInfo from "ol/format/WMSGetFeatureInfo";
 import TileLayer from "ol/layer/Tile";
 import ImageLayer from "ol/layer/Image";
-import WMSGetFeatureInfo from "ol/format/WMSGetFeatureInfo";
+
 import { hfetch } from "utils/FetchWrapper";
 
 function query(map, layer, evt) {
@@ -109,7 +111,7 @@ function getSortMethod(options) {
   }
 }
 
-function sortFeatures(layer, features) {
+function sortAndMutateFeaturesArray(layer, features) {
   if (!features || features.length <= 1) {
     return;
   }
@@ -117,7 +119,6 @@ function sortFeatures(layer, features) {
   if (!layerInfo.infoClickSortProperty) {
     return;
   }
-
   const sortType = layerInfo.infoClickSortType || "string";
   const sortOptions = {
     type: sortType,
@@ -125,7 +126,6 @@ function sortFeatures(layer, features) {
     prop: layerInfo.infoClickSortProperty.trim(),
     parser: getSortParser(sortType),
   };
-
   features.sort(getSortMethod(sortOptions));
 }
 
@@ -171,31 +171,60 @@ function readJsonFeatures(jsonData, layerProjection, viewProjection) {
 function getFeaturesFromJson(response, jsonData) {
   const layerProjection = response.layer.getSource().getProjection();
   const viewProjection = response.viewProjection;
-  const parsed = readJsonFeatures(jsonData, layerProjection, viewProjection);
-  if (parsed && parsed.length > 0) {
-    parsed.forEach((f) => {
+  let features = readJsonFeatures(jsonData, layerProjection, viewProjection);
+  if (features && features.length > 0) {
+    features = features.map((f) => {
       f.layer = response.layer;
+      return f;
     });
-    sortFeatures(response.layer, parsed);
-    return parsed;
-  } else {
-    return [];
+    sortAndMutateFeaturesArray(response.layer, features);
   }
+  return features;
 }
 
 function getFeaturesFromGml(response, text) {
-  let wmsGetFeatureInfo = new WMSGetFeatureInfo();
-  //let doc = new DOMParser().parseFromString(text, "text/xml");
-  let parsed = wmsGetFeatureInfo.readFeatures(text);
-  if (parsed && parsed.length > 0) {
-    parsed.forEach((f) => {
+  const wmsGetFeatureInfo = new WMSGetFeatureInfo();
+  let features = wmsGetFeatureInfo.readFeatures(text);
+  if (features && features.length > 0) {
+    features = features.map((f) => {
       f.layer = response.layer;
+      return f;
     });
-    sortFeatures(response.layer, parsed);
-    return parsed;
-  } else {
-    return [];
+    sortAndMutateFeaturesArray(response.layer, features);
   }
+  return features;
+}
+
+function getFeaturesFromXmlOrGml(response, text) {
+  // In cases where the XML has no FIELDS element, the XML is assumed
+  // not to come from Esri and can be parsed as GML.
+  if (!text.includes("<FIELDS")) {
+    return getFeaturesFromGml(response, text);
+  }
+
+  // If we got this far, it looks like an Esri response and we can't use
+  // the standard GML parser. Instead we implement a custom solution.
+  const parser = new DOMParser();
+  const doc = parser.parseFromString(text, "text/xml");
+  let features = [];
+  const fields = doc.getElementsByTagName("FIELDS");
+  for (let i = 0; i < fields.length; i++) {
+    const feature = new Feature();
+    const attributes = fields[i].attributes;
+    for (let j = 0; j < attributes.length; j++) {
+      feature.set(attributes[j].name, attributes[j].value);
+    }
+    if (!feature.getId()) {
+      feature.setId(
+        `${response.layer.getProperties().layerInfo.name}.${feature.ol_uid}`
+      );
+    }
+    feature.layer = response.layer;
+    features.push(feature);
+  }
+
+  sortAndMutateFeaturesArray(response.layer, features);
+  return features;
 }
 
 /**
@@ -276,12 +305,14 @@ export function handleClick(evt, map, callback) {
               );
               break;
             case "text/xml":
-            case "application/vnd.ogc.gml": {
+            case "application/vnd.ogc.gml":
               featurePromises.push(
                 response.value.requestResponse
                   .text()
                   .then((text) => {
-                    features.push(...getFeaturesFromGml(response.value, text));
+                    features.push(
+                      ...getFeaturesFromXmlOrGml(response.value, text)
+                    );
                   })
                   .catch((err) => {
                     console.error(
@@ -290,7 +321,6 @@ export function handleClick(evt, map, callback) {
                   })
               );
               break;
-            }
             // For any other Content-Type, just ignore - we can't parse any
             // features if we don't know the data format (or if it's simply missing)
             default:

@@ -194,9 +194,13 @@ export default class MapClickModel {
               );
               break;
             }
-            case "text/xml":
+            case "text/xml": {
+              olFeatures = this.#parseWmsGetFeatureInfoXml(
+                await response.value.requestResponse.text()
+              );
+              break;
+            }
             case "application/vnd.ogc.gml": {
-              // (See comments for GeoJSON parser - this is similar.)
               olFeatures = this.#parseGMLFeatures(
                 await response.value.requestResponse.text()
               );
@@ -681,6 +685,28 @@ export default class MapClickModel {
 
   #parseGeoJsonFeatures(json) {
     return this.geoJsonParser.readFeatures(json);
+  }
+
+  // Special implementation for parsing text/xml responses from Esri, see #1090.
+  #parseWmsGetFeatureInfoXml(xml) {
+    const features = [];
+    const parser = new DOMParser();
+    const xmlDoc = parser.parseFromString(xml, "text/xml");
+    const featureInfoResponse = xmlDoc.getElementsByTagName(
+      "FeatureInfoResponse"
+    );
+    if (featureInfoResponse.length > 0) {
+      const fields = featureInfoResponse[0].getElementsByTagName("FIELDS");
+      if (fields.length > 0) {
+        const feature = new Feature();
+        for (let i = 0; i < fields[0].attributes.length; i++) {
+          const attribute = fields[0].attributes[i];
+          feature.set(attribute.name, attribute.value);
+        }
+        features.push(feature);
+      }
+    }
+    return features;
   }
 
   #parseGMLFeatures(gml) {
