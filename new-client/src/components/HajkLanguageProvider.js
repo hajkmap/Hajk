@@ -3,6 +3,7 @@ import i18n from "i18next";
 import { initReactI18next } from "react-i18next";
 import translationsEN from "../i18n/en.json";
 import translationsSV from "../i18n/sv.json";
+import translationsBG from "../i18n/bg.json";
 
 const resources = {
   en: {
@@ -10,6 +11,9 @@ const resources = {
   },
   sv: {
     translation: translationsSV,
+  },
+  bg: {
+    translation: translationsBG,
   },
 };
 

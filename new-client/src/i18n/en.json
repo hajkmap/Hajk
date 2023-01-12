@@ -38,7 +38,8 @@
       "menu": {
         "menuItems": {
           "english": "English",
-          "swedish": "Swedish"
+          "swedish": "Swedish",
+          "bulgarian": "Bulgarian"
         }
       }
     },

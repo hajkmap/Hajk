@@ -26,6 +26,10 @@ const LanguageSwitcher = React.memo((props) => {
       code: "en",
       displayName: t("controls.languageSwitcher.menu.menuItems.english"),
     },
+    {
+      code: "bg",
+      displayName: t("controls.languageSwitcher.menu.menuItems.bulgarian"),
+    },
   ];
 
   const renderLanguages = () => {
