@@ -281,9 +281,10 @@ class DrawModel {
     this.#drawLayer = this.#getNewVectorLayer(this.#drawSource);
     // Make sure to set a unique name
     this.#drawLayer.set("name", this.#layerName);
-    // We're also gonna have to set the queryable-property to true
-    // so that we can enable "Select" on the layer.
+    // We're also gonna have to set the queryable-property to true so that we can enable "Select" on the layer.
     this.#drawLayer.set("queryable", true);
+    // We don't want drawn features to show in feature-info (the info-click-window)
+    this.#drawLayer.set("ignoreInFeatureInfo", true);
     // Then we can add the layer to the map.
     this.#map.addLayer(this.#drawLayer);
   };
