@@ -419,6 +419,7 @@ class App extends React.PureComponent {
       .createMap()
       .addSearchModel()
       .addLayers()
+      .addAnchorModel() // Anchor model must be added after the layers
       .loadPlugins(this.props.activeTools);
 
     Promise.all(promises).then(() => {

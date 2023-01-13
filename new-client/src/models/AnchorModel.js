@@ -1,22 +1,35 @@
 import { isValidLayerId } from "utils/Validator";
-import debounce from "utils/debounce";
+import { debounce } from "utils/debounce";
 
 class AnchorModel {
   constructor(settings) {
     this.app = settings.app;
-    this.getCleanUrl = settings.getCleanUrl;
     this.cqlFilters = {};
     this.map = settings.map;
-    this.localObserver = settings.localObserver;
 
-    // Update the URL when map view changes
-    this.map.getView().on("change", this.update);
-
-    // Update the URL when search phrase changes
-    this.app.globalObserver.subscribe("search.searchPhraseChanged", () => {
-      this.localObserver.publish("mapUpdated", this.getAnchor());
+    this.app.globalObserver.subscribe("core.appLoaded", () => {
+      this.#initiate();
     });
+  }
 
+  #initiate() {
+    // Initiate the model by defining what should trigger an update.
+    console.log("Init AnchorModel: ", this);
+    // A: Update when map view changes
+    this.map.getView().on("change", this.#getAnchorWhenAnimationFinishes);
+
+    // B: Update when search phrase changes
+    this.app.globalObserver.subscribe(
+      "search.searchPhraseChanged",
+      async () => {
+        this.app.globalObserver.publish("core.mapUpdated", {
+          url: await this.getAnchor(),
+          source: "search",
+        });
+      }
+    );
+
+    // C: Update when a layer's visibility changes
     this.map
       .getLayers()
       .getArray()
@@ -25,12 +38,15 @@ class AnchorModel {
         const layerId = layer.get("name");
 
         // Update anchor each time layer visibility changes (to reflect current visible layers)
-        layer.on("change:visible", (event) => {
-          this.localObserver.publish("mapUpdated", this.getAnchor());
+        layer.on("change:visible", async (event) => {
+          this.app.globalObserver.publish("core.mapUpdated", {
+            url: await this.getAnchor(),
+            source: "layerVisibility",
+          });
         });
 
         // Update anchor each time an underlying Source changes in some way (could be new CQL params, for example).
-        layer.getSource().on("change", ({ target }) => {
+        layer.getSource().on("change", async ({ target }) => {
           if (typeof target.getParams !== "function") return;
 
           // Update CQL filters only if a real value exists
@@ -43,22 +59,27 @@ class AnchorModel {
           }
 
           // Publish the event
-          this.localObserver.publish("mapUpdated", this.getAnchor());
+          this.app.globalObserver.publish("core.mapUpdated", {
+            url: await this.getAnchor(),
+            source: "sourceVisibility",
+          });
         });
       });
   }
 
-  update = (e) => {
-    // If view is still animating, postpone updating Anchor
-    e.target.getAnimating() === false &&
-      this.localObserver.publish("mapUpdated", this.getAnchor());
+  #getAnchorWhenAnimationFinishes = async (e) => {
+    // Only update the anchor if View is done animating
+    if (e.target.getAnimating() === false) {
+      const newAnchor = await this.getAnchor();
+      console.log("Anim done, got URL", newAnchor);
+      this.app.globalObserver.publish("core.mapUpdated", {
+        url: newAnchor,
+        source: "animating",
+      });
+    }
   };
 
-  getMap() {
-    return this.map;
-  }
-
-  getVisibleLayers() {
+  #getVisibleLayers() {
     return this.map
       .getLayers()
       .getArray()
@@ -74,7 +95,7 @@ class AnchorModel {
       .join(",");
   }
 
-  getPartlyToggledGroupLayers() {
+  #getPartlyToggledGroupLayers() {
     const partlyToggledGroupLayers = {};
     this.map
       .getLayers()
@@ -111,13 +132,18 @@ class AnchorModel {
   // calls by wrapping it in a debounce helper. The default delay is 300 ms,
   // so we will avoid all sorts of issues but still get a pretty responsive
   // link/hash string.
-  getAnchor = debounce(() => {
+  getAnchor = debounce((forceParams = {}, updateHash = true) => {
+    // getAnchor = (forceParams = {}, updateHash = true) => {
     // Read some "optional" values so we have them prepared.
     // If some conditions aren't met, we won't add them to the
     // anchor string, in order to keep the string short.
     const q = document.getElementById("searchInputField")?.value.trim() || "";
     const f = this.cqlFilters;
-    const clean = this.getCleanUrl();
+
+    // The only way to set clean to true is by forcing it by
+    // supplying it to getAnchor. One way where it's done is in
+    // the Anchor plugin.
+    const clean = forceParams.clean || false;
 
     // Split current URL on the "?" and just get the first part. This
     // way we'll get rid of any unwanted search params, without messing
@@ -129,14 +155,15 @@ class AnchorModel {
     url.searchParams.append("x", this.map.getView().getCenter()[0]);
     url.searchParams.append("y", this.map.getView().getCenter()[1]);
     url.searchParams.append("z", this.map.getView().getZoom());
-    url.searchParams.append("l", this.getVisibleLayers());
+    url.searchParams.append("l", this.#getVisibleLayers());
 
     // Optionally, append those too:
     // Only add 'clean' if the value is true
+    console.log("clean is: ", clean);
     clean === true && url.searchParams.append("clean", clean);
 
     // Only add gl if there are group layers with a subset of selected layers
-    const partlyToggledGroupLayers = this.getPartlyToggledGroupLayers();
+    const partlyToggledGroupLayers = this.#getPartlyToggledGroupLayers();
     Object.keys(partlyToggledGroupLayers).length > 0 &&
       url.searchParams.append("gl", JSON.stringify(partlyToggledGroupLayers));
 
@@ -147,18 +174,18 @@ class AnchorModel {
     // Only add 'q' if it isn't empty
     q.length > 0 && url.searchParams.append("q", q);
 
-    // TODO: This functionality, perhaps the entire getAnchor function should
-    // be moved to a more central place.
-
-    // We want to update the URL with new hash value only
-    // if the newly calculated hash differs from the one that
-    // already exists in URL.
-    const newHash = "#" + url.searchParams.toString();
-    if (newHash !== window.location.hash) {
-      window.location.hash = newHash;
+    if (updateHash !== false) {
+      // We want to update the URL with new hash value only
+      // if the newly calculated hash differs from the one that
+      // already exists in URL.
+      const newHash = "#" + url.searchParams.toString();
+      if (newHash !== window.location.hash) {
+        window.location.hash = newHash;
+      }
     }
 
     // TODO: Don't return the query string part. Hash params is enough.
+    console.log("Returning new URL", url.toString());
     return url.toString();
   });
 }

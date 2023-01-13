@@ -28,31 +28,37 @@ const StyledTextField = styled(TextField)(({ theme }) => ({
 
 class AnchorView extends React.PureComponent {
   static propTypes = {
-    cleanUrl: PropTypes.bool.isRequired,
     closeSnackbar: PropTypes.func.isRequired,
     enqueueSnackbar: PropTypes.func.isRequired,
-    localObserver: PropTypes.object.isRequired,
+    globalObserver: PropTypes.object.isRequired,
     model: PropTypes.object.isRequired,
-    toggleCleanUrl: PropTypes.func.isRequired,
   };
 
   state = {
-    anchor: this.props.model.getAnchor(),
+    anchor: "",
+    cleanUrl: false,
   };
 
-  constructor(props) {
-    super(props);
-    this.model = this.props.model;
-    this.localObserver = this.props.localObserver;
+  async componentDidMount() {
+    this.setState({
+      anchor: await this.props.model.getAnchor(),
+    });
+    this.props.globalObserver.subscribe(
+      "core.mapUpdated",
+      ({ url, source }) => {
+        console.log("View got new url & source: ", url, source);
+        this.setState({
+          anchor: url,
+        });
+      }
+    );
   }
 
-  componentDidMount() {
-    this.localObserver.subscribe("mapUpdated", (anchor) => {
-      this.setState({
-        anchor: anchor,
-      });
-    });
-  }
+  toggleCleanUrl = async () => {
+    const newCleanState = !this.state.cleanUrl;
+    const newUrl = await this.props.model.getAnchor({ clean: newCleanState });
+    this.setState({ cleanUrl: newCleanState, anchor: newUrl });
+  };
 
   handleClickOnCopyToClipboard = (e) => {
     const input = document.getElementById("anchorUrl");
@@ -83,16 +89,16 @@ class AnchorView extends React.PureComponent {
                 <RadioGroup
                   aria-label="copy-url"
                   name="copy-url"
-                  onChange={this.props.toggleCleanUrl}
+                  onChange={this.toggleCleanUrl}
                 >
                   <FormControlLabel
-                    checked={!this.props.cleanUrl}
+                    checked={!this.state.cleanUrl}
                     value="default"
                     control={<Radio color="primary" />}
                     label="Skapa länk till karta"
                   />
                   <FormControlLabel
-                    checked={this.props.cleanUrl}
+                    checked={this.state.cleanUrl}
                     value="clean"
                     control={<Radio color="primary" />}
                     label="Skapa länk till karta utan verktyg etc."

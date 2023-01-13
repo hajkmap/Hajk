@@ -1,5 +1,6 @@
-import SearchModel from "./SearchModel";
+import AnchorModel from "./AnchorModel";
 import MapClickModel from "./MapClickModel";
+import SearchModel from "./SearchModel";
 import Plugin from "./Plugin";
 import SnapHelper from "./SnapHelper";
 import { bindMapClickEvent } from "./Click";
@@ -282,7 +283,6 @@ class AppModel {
    */
   createMap() {
     const config = this.translateConfig();
-    console.log("translateConfig: ", config);
 
     // Prepare OL interactions options, refer to https://openlayers.org/en/latest/apidoc/module-ol_interaction.html#.defaults.
     // We use conditional properties to ensure that only existing keys are set. The rest
@@ -488,6 +488,17 @@ class AppModel {
         this
       );
     }
+
+    // Either way, return self, so we can go on and chain more methods on App model
+    return this;
+  }
+
+  addAnchorModel() {
+    this.anchorModel = new AnchorModel({
+      app: this,
+      globalObserver: this.globalObserver,
+      map: this.map,
+    });
 
     // Either way, return self, so we can go on and chain more methods on App model
     return this;
