@@ -2,7 +2,8 @@
 {
     public class UserSpecificMaps
     {
-        public string? mapConfigurationName { get; set; }
-        public string? mapConfigurationTitle { get; set; }
+        public string? MapConfigurationName { get; set; }
+        public string? MapConfigurationTitle { get; set; }
+        internal IEnumerable<string>? VisibleForGroups { get; set; }
     }
 }
