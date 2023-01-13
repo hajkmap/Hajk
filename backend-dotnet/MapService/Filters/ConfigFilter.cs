@@ -1,6 +1,6 @@
 ﻿using MapService.Models;
 
-namespace MapService.Filter
+namespace MapService.Filters
 {
     internal static class ConfigFilter
     {

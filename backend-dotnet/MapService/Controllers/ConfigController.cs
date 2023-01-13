@@ -1,7 +1,7 @@
 using MapService.Business.Ad;
 using MapService.Business.Config;
 using MapService.Business.MapConfig;
-using MapService.Filter;
+using MapService.Filters;
 using MapService.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Memory;
