@@ -9,13 +9,9 @@ namespace MapService.Business.Config
     /// <summary>
     /// Business logic for config endpoints
     /// </summary>
-    public static class ConfigHandler
+    internal static class ConfigHandler
     {
-        /// <summary>
-        /// Filter and returns returns user specific maps
-        /// </summary>
-        /// <returns>Collection of UserSpecificMaps</returns>
-        public static IEnumerable<UserSpecificMaps> GetUserSpecificMaps()
+        internal static IEnumerable<UserSpecificMaps> GetUserSpecificMaps()
         {
             var mapConfigurationFiles = JsonFileDataAccess.GetMapConfigFiles();
 
@@ -30,11 +26,13 @@ namespace MapService.Business.Config
 
                 string mapConfigurationName = Path.GetFileNameWithoutExtension(mapConfigurationFile);
                 string mapConfigurationTitle = JsonUtility.GetPropertyValueFromJsonObjectAsString(GetMapfromMapConfiguration(mapConfiguration), "title");
+                var visibleForGroups = GetVisibleForGroups(mapConfiguration);
 
                 var userSpecificMap = new UserSpecificMaps
                 {
-                    mapConfigurationTitle = mapConfigurationTitle,
-                    mapConfigurationName = mapConfigurationName
+                    MapConfigurationTitle = mapConfigurationTitle,
+                    MapConfigurationName = mapConfigurationName,
+                    VisibleForGroups = visibleForGroups
                 };
 
                 mapConfigurationsList.Add(userSpecificMap);
@@ -51,6 +49,16 @@ namespace MapService.Business.Config
             if (result == null) { return false; }
 
             return result.Value.GetBoolean();
+        }
+
+        private static IEnumerable<string>? GetVisibleForGroups(JsonDocument mapConfiguration)
+        {
+            var input = "$.tools[?(@.type == 'layerswitcher')].options.visibleForGroups";
+            var result = JsonPathUtility.GetJsonElement(mapConfiguration, input);
+
+            if (result == null) { return null; }
+
+            return JsonSerializer.Deserialize<IEnumerable<String>>(result.Value.GetRawText());
         }
 
         private static JsonObject? GetMapfromMapConfiguration(JsonDocument mapConfiguration)
