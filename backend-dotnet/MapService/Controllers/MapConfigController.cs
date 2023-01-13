@@ -1,5 +1,7 @@
-﻿using MapService.Business.MapConfig;
+﻿using MapService.Business.Ad;
+using MapService.Business.MapConfig;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Caching.Memory;
 using Swashbuckle.AspNetCore.Annotations;
 using System.Text.Json;
 using System.Text.Json.Nodes;
@@ -11,10 +13,12 @@ namespace MapService.Controllers
     [ApiController]
     public class MapConfigController : ControllerBase
     {
+        private readonly IMemoryCache _memoryCache;
         private readonly ILogger<MapConfigController> _logger;
 
-        public MapConfigController(ILogger<MapConfigController> logger)
+        public MapConfigController(IMemoryCache memoryCache, ILogger<MapConfigController> logger)
         {
+            _memoryCache = memoryCache;
             _logger = logger;
         }
 
@@ -54,18 +58,30 @@ namespace MapService.Controllers
         /// <param name="map">The name of the map including the file ending</param>
         /// <returns>Returns a map as a JsonObject</returns>
         /// <response code="200">The map object fetched successfully</response>
+        /// <response code="403">Forbidden</response>
         /// <response code="500">Internal Server Error</response>
         [HttpGet]
         [Route("{map}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         [SwaggerOperation(Tags = new[] { "Admin - Maps and layers" })]
-        public ActionResult GetMap(string map)
+        public ActionResult GetMap(string map, [FromHeader(Name = "X-Control-Header")] string userPrincipalName)
         {
             JsonDocument mapDocument;
 
             try
             {
+                if (AdHandler.AdIsActive)
+                {
+                    var adHandler = new AdHandler(_memoryCache, _logger);
+
+                    if (!adHandler.UserIsValid(userPrincipalName) || !AdHandler.UserHasAdAccess(userPrincipalName))
+                    {
+                        return StatusCode(StatusCodes.Status403Forbidden, "Forbidden");
+                    }
+                }                
+
                 mapDocument = MapConfigHandler.GetMapAsJsonDocument(map);
             }
             catch (Exception ex)
