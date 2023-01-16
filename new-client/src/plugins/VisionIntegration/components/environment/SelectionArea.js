@@ -37,7 +37,6 @@ function SelectionArea(props) {
     console.log("Reset");
   };
 
-  console.log(objectInfo);
   return (
     <Grid container>
       <Grid container item xs={12}>
