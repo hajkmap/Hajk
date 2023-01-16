@@ -136,18 +136,12 @@ class AnchorModel {
   // calls by wrapping it in a debounce helper. The default delay is 300 ms,
   // so we will avoid all sorts of issues but still get a pretty responsive
   // link/hash string.
-  getAnchor = debounce((forceParams = {}, updateHash = true) => {
-    // getAnchor = (forceParams = {}, updateHash = true) => {
+  getAnchor = debounce((preventHashUpdate = false) => {
     // Read some "optional" values so we have them prepared.
     // If some conditions aren't met, we won't add them to the
     // anchor string, in order to keep the string short.
     const q = document.getElementById("searchInputField")?.value.trim() || "";
     const f = this.#cqlFilters;
-
-    // The only way to set clean to true is by forcing it by
-    // supplying it to getAnchor. One way where it's done is in
-    // the Anchor plugin.
-    const clean = forceParams.clean || false;
 
     // Split current URL on the "?" and just get the first part. This
     // way we'll get rid of any unwanted search params, without messing
@@ -161,11 +155,6 @@ class AnchorModel {
     url.searchParams.append("z", this.#map.getView().getZoom());
     url.searchParams.append("l", this.#getVisibleLayers());
 
-    // Optionally, append those too:
-    // Only add 'clean' if the value is true
-    console.log("clean is: ", clean);
-    clean === true && url.searchParams.append("clean", clean);
-
     // Only add gl if there are group layers with a subset of selected layers
     const partlyToggledGroupLayers = this.#getPartlyToggledGroupLayers();
     Object.keys(partlyToggledGroupLayers).length > 0 &&
@@ -178,7 +167,8 @@ class AnchorModel {
     // Only add 'q' if it isn't empty
     q.length > 0 && url.searchParams.append("q", q);
 
-    if (updateHash !== false) {
+    // Occasionally we may want to prevent hash update, but it's off by default
+    if (preventHashUpdate === false) {
       // We want to update the URL with new hash value only
       // if the newly calculated hash differs from the one that
       // already exists in URL.
