@@ -516,7 +516,48 @@ class App extends React.PureComponent {
             // …let's update our View's zoom.
             this.appModel.map
               .getView()
-              .setZoom(parseInt(mergedParams.get("z")));
+              .animate({ zoom: parseInt(mergedParams.get("z")) });
+          }
+        }
+
+        if (mergedParams.get("x") || mergedParams.get("y")) {
+          const [x, y] = this.appModel.map.getView().getCenter();
+
+          if (
+            mergedParams.get("x") !== x.toString() ||
+            mergedParams.get("y") !== y.toString()
+          ) {
+            this.appModel.map.getView().animate({
+              center: [mergedParams.get("x"), mergedParams.get("y")],
+            });
+          }
+        }
+
+        if (mergedParams.get("p")) {
+          const currentlyVisiblePlugins = this.appModel.windows
+            .filter((w) => w.state.windowVisible)
+            .map((p) => p.type);
+
+          if (currentlyVisiblePlugins.join(",") === mergedParams.get("p")) {
+            console.log("Exactly the same, returning");
+          } else {
+            const pInParams = mergedParams.get("p").split(",");
+            console.log(currentlyVisiblePlugins, pInParams);
+
+            // First hide if window not longer visible
+            currentlyVisiblePlugins.forEach((p) => {
+              if (!pInParams.includes(p)) {
+                this.globalObserver.publish(`${p}.closeWindow`);
+              }
+            });
+
+            // Next, show any windows that are still hidden
+            mergedParams
+              .get("p")
+              .split(",")
+              .forEach((p) => {
+                this.globalObserver.publish(`${p}.showWindow`);
+              });
           }
         }
 

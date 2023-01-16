@@ -18,8 +18,7 @@ class AnchorModel {
 
   #initiate() {
     // Initiate the model by defining what should trigger an update.
-    console.log("Init AnchorModel: ", this);
-    // A: Update when map view changes
+    // A: Update when map view changes (zoom, pan, rotate etc)
     this.#map.getView().on("change", this.#getAnchorWhenAnimationFinishes);
 
     // B: Update when search phrase changes
@@ -33,7 +32,18 @@ class AnchorModel {
       }
     );
 
-    // C: Update when a layer's visibility changes
+    // C: A plugin based on BaseWindowPlugin changes visibility
+    this.#app.globalObserver.subscribe(
+      "core.pluginVisibilityChanged",
+      async () => {
+        this.#app.globalObserver.publish("core.mapUpdated", {
+          url: await this.getAnchor(),
+          source: "pluginVisibility",
+        });
+      }
+    );
+
+    // D: A layer's visibility changes
     this.#map
       .getLayers()
       .getArray()
@@ -131,6 +141,12 @@ class AnchorModel {
     return partlyToggledGroupLayers;
   }
 
+  #getVisiblePlugins = () =>
+    this.#app.windows
+      .filter((w) => w.state.windowVisible)
+      .map((p) => p.type)
+      .join();
+
   // getAnchor is where the main action happens. A lot of events will cause
   // a call to this function. Because of that we limit the amount of actual
   // calls by wrapping it in a debounce helper. The default delay is 300 ms,
@@ -154,6 +170,7 @@ class AnchorModel {
     url.searchParams.append("y", this.#map.getView().getCenter()[1]);
     url.searchParams.append("z", this.#map.getView().getZoom());
     url.searchParams.append("l", this.#getVisibleLayers());
+    url.searchParams.append("p", this.#getVisiblePlugins());
 
     // Only add gl if there are group layers with a subset of selected layers
     const partlyToggledGroupLayers = this.#getPartlyToggledGroupLayers();

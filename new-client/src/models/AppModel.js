@@ -726,9 +726,6 @@ class AppModel {
       paramsAsPlainObject.clean !== "false" &&
       paramsAsPlainObject.clean !== "0";
 
-    // f contains our CQL Filters
-    const f = paramsAsPlainObject.f;
-
     // Merge query params to the map config from JSON
     let x = parseFloat(paramsAsPlainObject.x),
       y = parseFloat(paramsAsPlainObject.y),
@@ -764,9 +761,29 @@ class AppModel {
     mapConfig.map.center[1] = y;
     mapConfig.map.zoom = z;
 
+    // f contains our CQL Filters
+    const f = paramsAsPlainObject.f;
     if (f) {
       // Filters come as a URI encoded JSON object, so we must parse it first
       this.cqlFiltersFromParams = JSON.parse(decodeURIComponent(f));
+    }
+
+    // If the 'p' param exists, we want to modify which plugins are visible at start
+    const pluginsToShow = paramsAsPlainObject?.p?.split();
+    if (pluginsToShow) {
+      // If the value of 'p' is an empty string, it means that no plugin should be shown at start
+      if (pluginsToShow.length === 1 && pluginsToShow[0] === "") {
+        mapConfig.tools.forEach((t) => {
+          t.options.visibleAtStart = false;
+        });
+      }
+      // If 'p' exists but is not an empty string, we have a list of plugins that should be
+      // shown at start. All others should be hidden (no matter the setting in Admin).
+      else {
+        mapConfig.tools.forEach((t) => {
+          t.options.visibleAtStart = pluginsToShow.includes(t.type);
+        });
+      }
     }
 
     return mapConfig;
