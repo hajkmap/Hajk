@@ -291,6 +291,11 @@ namespace MapService.Controllers
             {
                 MapConfigHandler.CreateMapConfiguration(name);
             }
+            catch (IOException iex)
+            {
+                _logger.LogError(iex, "Internal Server Error");
+                return StatusCode(StatusCodes.Status500InternalServerError, "Kartan " + name + " finns redan. Ta bort kartan " + name + " innan du skapar om den på nytt. ");
+            }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Internal Server Error");
