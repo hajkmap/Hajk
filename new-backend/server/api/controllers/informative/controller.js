@@ -68,5 +68,12 @@ export class Controller {
       else res.status(500).send(r.error.message);
     });
   }
+
+  folderlist(req, res) {
+    InformativeService.getAvailableFolders().then((r) => {
+      if (r && !r.error) res.json(r);
+      else res.status(500).send(r.error.message);
+    });
+  }
 }
 export default new Controller();

@@ -177,6 +177,27 @@ class InformativeService {
       return { error };
     }
   }
+
+  /**
+   * @summary Lists all available folders
+   *
+   * @returns {array} Names of files as array of strings
+   * @memberof InformativeService
+   */
+  async getAvailableFolders() {
+    try {
+      const dir = path.join(process.cwd(), "App_Data", "documents");
+      const dirContents = await fs.promises.readdir(dir, {
+        withFileTypes: true,
+      });
+      const availableFolders = dirContents.filter((entry) =>
+        entry.isDirectory()
+      );
+      return availableFolders;
+    } catch (error) {
+      return { error };
+    }
+  }
 }
 
 export default new InformativeService();

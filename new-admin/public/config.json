@@ -76,6 +76,7 @@
     "url_save": "http://localhost:55630/informative/save",
     "url_create": "http://localhost:55630/informative/create",
     "url_create_folder": "http://localhost:3002/api/v1/informative/createfolder",
+    "url_folder_list": "http://localhost:3002/api/v1/informative/folderlist",
     "url_delete": "http://localhost:55630/informative/delete",
     "default_coordinate": [320564, 6471766],
     "wms_url": "http://giscloud.se/mapservice/lmproxy/wms/topowebb",
