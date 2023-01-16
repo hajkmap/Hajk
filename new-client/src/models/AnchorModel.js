@@ -2,12 +2,16 @@ import { isValidLayerId } from "utils/Validator";
 import { debounce } from "utils/debounce";
 
 class AnchorModel {
-  constructor(settings) {
-    this.app = settings.app;
-    this.cqlFilters = {};
-    this.map = settings.map;
+  #app;
+  #cqlFilters;
+  #map;
 
-    this.app.globalObserver.subscribe("core.appLoaded", () => {
+  constructor(settings) {
+    this.#app = settings.app;
+    this.#cqlFilters = {};
+    this.#map = settings.map;
+
+    this.#app.globalObserver.subscribe("core.appLoaded", () => {
       this.#initiate();
     });
   }
@@ -16,13 +20,13 @@ class AnchorModel {
     // Initiate the model by defining what should trigger an update.
     console.log("Init AnchorModel: ", this);
     // A: Update when map view changes
-    this.map.getView().on("change", this.#getAnchorWhenAnimationFinishes);
+    this.#map.getView().on("change", this.#getAnchorWhenAnimationFinishes);
 
     // B: Update when search phrase changes
-    this.app.globalObserver.subscribe(
+    this.#app.globalObserver.subscribe(
       "search.searchPhraseChanged",
       async () => {
-        this.app.globalObserver.publish("core.mapUpdated", {
+        this.#app.globalObserver.publish("core.mapUpdated", {
           url: await this.getAnchor(),
           source: "search",
         });
@@ -30,7 +34,7 @@ class AnchorModel {
     );
 
     // C: Update when a layer's visibility changes
-    this.map
+    this.#map
       .getLayers()
       .getArray()
       .forEach((layer) => {
@@ -39,7 +43,7 @@ class AnchorModel {
 
         // Update anchor each time layer visibility changes (to reflect current visible layers)
         layer.on("change:visible", async (event) => {
-          this.app.globalObserver.publish("core.mapUpdated", {
+          this.#app.globalObserver.publish("core.mapUpdated", {
             url: await this.getAnchor(),
             source: "layerVisibility",
           });
@@ -55,11 +59,11 @@ class AnchorModel {
             cqlFilterForCurrentLayer !== null &&
             cqlFilterForCurrentLayer !== undefined
           ) {
-            this.cqlFilters[layerId] = cqlFilterForCurrentLayer;
+            this.#cqlFilters[layerId] = cqlFilterForCurrentLayer;
           }
 
           // Publish the event
-          this.app.globalObserver.publish("core.mapUpdated", {
+          this.#app.globalObserver.publish("core.mapUpdated", {
             url: await this.getAnchor(),
             source: "sourceVisibility",
           });
@@ -72,7 +76,7 @@ class AnchorModel {
     if (e.target.getAnimating() === false) {
       const newAnchor = await this.getAnchor();
       console.log("Anim done, got URL", newAnchor);
-      this.app.globalObserver.publish("core.mapUpdated", {
+      this.#app.globalObserver.publish("core.mapUpdated", {
         url: newAnchor,
         source: "animating",
       });
@@ -80,7 +84,7 @@ class AnchorModel {
   };
 
   #getVisibleLayers() {
-    return this.map
+    return this.#map
       .getLayers()
       .getArray()
       .filter((layer) => {
@@ -97,7 +101,7 @@ class AnchorModel {
 
   #getPartlyToggledGroupLayers() {
     const partlyToggledGroupLayers = {};
-    this.map
+    this.#map
       .getLayers()
       .getArray()
       .filter((layer) => {
@@ -138,7 +142,7 @@ class AnchorModel {
     // If some conditions aren't met, we won't add them to the
     // anchor string, in order to keep the string short.
     const q = document.getElementById("searchInputField")?.value.trim() || "";
-    const f = this.cqlFilters;
+    const f = this.#cqlFilters;
 
     // The only way to set clean to true is by forcing it by
     // supplying it to getAnchor. One way where it's done is in
@@ -151,10 +155,10 @@ class AnchorModel {
     const url = new URL(document.location.href.split("?")[0]);
 
     // The following params are always appended
-    url.searchParams.append("m", this.app.config.activeMap);
-    url.searchParams.append("x", this.map.getView().getCenter()[0]);
-    url.searchParams.append("y", this.map.getView().getCenter()[1]);
-    url.searchParams.append("z", this.map.getView().getZoom());
+    url.searchParams.append("m", this.#app.config.activeMap);
+    url.searchParams.append("x", this.#map.getView().getCenter()[0]);
+    url.searchParams.append("y", this.#map.getView().getCenter()[1]);
+    url.searchParams.append("z", this.#map.getView().getZoom());
     url.searchParams.append("l", this.#getVisibleLayers());
 
     // Optionally, append those too:
