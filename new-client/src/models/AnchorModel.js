@@ -178,8 +178,10 @@ class AnchorModel {
       }
     }
 
-    // TODO: Don't return the query string part. Hash params is enough.
-    console.log("Returning new URL", url.toString());
+    // Finalize by setting hash value by using all search params AND
+    // removing all search params. I.e.: no more ?, only # in our URL.
+    url.hash = url.searchParams.toString();
+    url.search = "";
     return url.toString();
   });
 }
