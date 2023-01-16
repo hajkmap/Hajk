@@ -512,7 +512,12 @@ class VisionIntegrationModel {
 
   // Returns an object containing information about an environment-object from a environment-object-id
   getEnvironmentInfoFromId = (id = 0) => {
-    return ENVIRONMENT_INFO.find((o) => o.id === id);
+    const configInfo =
+      this.#options.integrationSettings?.find(
+        (s) => parseInt(s.id.split("ENVIRONMENT_")[1]) === id
+      ) || {};
+    const constantInfo = ENVIRONMENT_INFO.find((o) => o.id === id) || {};
+    return { ...configInfo, ...constantInfo };
   };
 }
 

@@ -18,16 +18,16 @@ function getInformationTexts(typeId = 0, selectedObjects = [], model) {
       ? ""
       : `Aktivera verktyget och klicka i kartan för att välja ${typeInfo.name.toLowerCase()}.`;
 
-  return { headerText, helperText };
+  return { headerText, helperText, ...typeInfo };
 }
 
 function SelectionArea(props) {
-  const [informationTexts, setInformationTexts] = useState(
+  const [objectInfo, setObjectInfo] = useState(() =>
     getInformationTexts(props.typeId, props.selectedObjects, props.model)
   );
 
   useEffect(() => {
-    setInformationTexts(
+    setObjectInfo(() =>
       getInformationTexts(props.typeId, props.selectedObjects, props.model)
     );
   }, [props.typeId, props.selectedObjects, props.model]);
@@ -37,15 +37,16 @@ function SelectionArea(props) {
     console.log("Reset");
   };
 
+  console.log(objectInfo);
   return (
     <Grid container>
       <Grid container item xs={12}>
         <Typography variant="h6" align="center" sx={{ width: "100%" }}>
-          {informationTexts.headerText}
+          {objectInfo.headerText}
         </Typography>
-        {informationTexts.helperText !== "" && (
+        {objectInfo.helperText !== "" && (
           <Typography variant="caption" align="center" sx={{ width: "100%" }}>
-            {informationTexts.helperText}
+            {objectInfo.helperText}
           </Typography>
         )}
       </Grid>

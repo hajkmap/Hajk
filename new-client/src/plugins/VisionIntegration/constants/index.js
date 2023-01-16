@@ -59,14 +59,17 @@ export const ENVIRONMENT_INFO = [
   {
     id: ENVIRONMENT_IDS.POLLUTION,
     name: "Föroreningar",
+    layerText: "Föroreningslager",
   },
   {
     id: ENVIRONMENT_IDS.AREA,
     name: "Områden",
+    layerText: "Områdeslager",
   },
   {
     id: ENVIRONMENT_IDS.INVESTIGATION,
     name: "Undersökningar",
+    layerText: "Undersökningslager",
   },
 ];
 
