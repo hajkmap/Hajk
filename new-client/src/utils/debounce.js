@@ -6,7 +6,7 @@
  * @param {*} delay Delay in ms
  * @returns Return value 'func'
  */
-export function debounceSync(func, delay = 300) {
+export function debounceSync(func, delay = 500) {
   let timeout;
 
   return (...args) => {
