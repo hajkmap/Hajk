@@ -83,7 +83,16 @@ function VisionIntegrationView(props) {
           />
         );
       case INTEGRATION_IDS.ENVIRONMENT:
-        return <EnvironmentSection />;
+        return (
+          <EnvironmentSection
+            activeType={props.activeEnvironmentType}
+            setActiveType={props.setActiveEnvironmentType}
+            app={props.app}
+            model={props.model}
+            source={null}
+            mapViewModel={props.mapViewModel}
+          />
+        );
       default:
         return null;
     }

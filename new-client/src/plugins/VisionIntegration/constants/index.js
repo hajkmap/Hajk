@@ -57,16 +57,16 @@ export const ENVIRONMENT_IDS = Object.freeze({
 
 export const ENVIRONMENT_INFO = [
   {
+    id: ENVIRONMENT_IDS.POLLUTION,
+    name: "Föroreningar",
+  },
+  {
     id: ENVIRONMENT_IDS.AREA,
     name: "Områden",
   },
   {
     id: ENVIRONMENT_IDS.INVESTIGATION,
     name: "Undersökningar",
-  },
-  {
-    id: ENVIRONMENT_IDS.POLLUTION,
-    name: "Föroreningar",
   },
 ];
 

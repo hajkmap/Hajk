@@ -17,7 +17,11 @@ import VisionIntegrationModel from "./models/VisionIntegrationModel";
 import { getSearchSources } from "./utils";
 
 // Constants
-import { HUB_CONNECTION_STATUS, INTEGRATION_IDS } from "./constants";
+import {
+  HUB_CONNECTION_STATUS,
+  INTEGRATION_IDS,
+  ENVIRONMENT_IDS,
+} from "./constants";
 
 function VisionIntegration(props) {
   // Let's destruct the options from the props (and fall back on empty object to avoid
@@ -37,6 +41,10 @@ function VisionIntegration(props) {
   );
   // We have to keep track of which tab we're currently on...
   const [activeTab, setActiveTab] = useState(INTEGRATION_IDS.ESTATES);
+  // We have to keep track of which environment-type is currently active...
+  const [activeEnvironmentType, setActiveEnvironmentType] = useState(
+    ENVIRONMENT_IDS.AREA
+  );
   // We're gonna need a map-view-model to interact with the map...
   const [mapViewModel] = useState(
     () => new MapViewModel({ options, localObserver, map, app })
@@ -247,6 +255,8 @@ function VisionIntegration(props) {
         hubConnectionStatus={hubConnectionStatus}
         activeTab={activeTab}
         setActiveTab={setActiveTab}
+        activeEnvironmentType={activeEnvironmentType}
+        setActiveEnvironmentType={setActiveEnvironmentType}
         selectedEstates={selectedEstates}
         setSelectedEstates={setSelectedEstates}
         selectedCoordinates={selectedCoordinates}

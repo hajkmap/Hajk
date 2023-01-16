@@ -4,7 +4,7 @@ import { HubConnectionBuilder } from "@microsoft/signalr";
 
 import { generateRandomString } from "../utils";
 import SearchModel from "models/SearchModel";
-import { INTEGRATION_IDS } from "../constants";
+import { INTEGRATION_IDS, ENVIRONMENT_INFO } from "../constants";
 
 // A simple class containing functionality that is used in the VisionIntegration-plugin.
 class VisionIntegrationModel {
@@ -508,6 +508,11 @@ class VisionIntegrationModel {
   // Returns wether the communication-hub is connected or not...
   getHubConnected = () => {
     return this.#hubConnection !== null;
+  };
+
+  // Returns an object containing information about an environment-object from a environment-object-id
+  getEnvironmentInfoFromId = (id = 0) => {
+    return ENVIRONMENT_INFO.find((o) => o.id === id);
   };
 }
 
