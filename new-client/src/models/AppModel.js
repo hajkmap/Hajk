@@ -769,7 +769,7 @@ class AppModel {
     }
 
     // If the 'p' param exists, we want to modify which plugins are visible at start
-    const pluginsToShow = paramsAsPlainObject?.p?.split();
+    const pluginsToShow = paramsAsPlainObject?.p?.split(",");
     if (pluginsToShow) {
       // If the value of 'p' is an empty string, it means that no plugin should be shown at start
       if (pluginsToShow.length === 1 && pluginsToShow[0] === "") {
