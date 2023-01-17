@@ -1,18 +1,23 @@
 ﻿using MapService.Caches;
+using MapService.Controllers;
 using MapService.Models;
 using MapService.Utility;
 using Microsoft.Extensions.Caching.Memory;
 using System.DirectoryServices;
+using System.Security.Principal;
 
 namespace MapService.Business.Ad
 {
     internal class AdHandler
     {
         private readonly AdCache _adCache;
+        private readonly ILogger _logger;
+
 
         internal AdHandler(IMemoryCache memoryCache, ILogger logger)
         {
             _adCache = new AdCache(memoryCache, logger);
+            _logger = logger;
         }
 
         internal static bool AdIsActive
@@ -206,6 +211,30 @@ namespace MapService.Business.Ad
             if (user.SAMAccountName == null) { return false; }
 
             return true;
+        }
+
+
+        public string PickUserNameToUse(string userName)
+        {
+            if (userName != null)
+                return userName;
+            else
+                return GetWindowsAuthenticationUser();
+        }
+
+
+        public string GetWindowsAuthenticationUser()
+        {
+#pragma warning disable CA1416 // Validate platform compatibility
+            var activeUser = WindowsIdentity.GetCurrent();
+            _logger.LogInformation("Active user {0}", activeUser.Name);
+
+            if (activeUser.ImpersonationLevel == TokenImpersonationLevel.Impersonation)
+            {
+                return activeUser.Name;
+            }
+#pragma warning restore CA1416 // Validate platform compatibility
+            else return String.Empty;
         }
 
         internal static bool UserHasAdAccess(string? userPrincipalName)

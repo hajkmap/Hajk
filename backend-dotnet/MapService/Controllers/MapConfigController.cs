@@ -75,6 +75,7 @@ namespace MapService.Controllers
                 if (AdHandler.AdIsActive)
                 {
                     var adHandler = new AdHandler(_memoryCache, _logger);
+                    userPrincipalName = adHandler.PickUserNameToUse(userPrincipalName);
 
                     if (!adHandler.UserIsValid(userPrincipalName) || !AdHandler.UserHasAdAccess(userPrincipalName))
                     {
