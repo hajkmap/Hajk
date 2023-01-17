@@ -79,6 +79,10 @@ function VisionIntegration(props) {
   // The selected coordinates could change when a user selected/deselects coordinates in
   // the map or if coordinates are sent from Vision
   const [selectedCoordinates, setSelectedCoordinates] = useState([]);
+  // We're also gonna have to keep track of the environment-state (such as selected environment-objects etc.)
+  const [environmentState, setEnvironmentState] = useState(() =>
+    model.getInitialEnvironmentState()
+  );
   // We also have to keep track of which map-interaction that is currently active
   const [activeMapInteraction, setActiveMapInteraction] = useState(null);
 
@@ -94,6 +98,25 @@ function VisionIntegration(props) {
     },
     [mapViewModel]
   );
+
+  // We're gonna need a handler for the environment-search-success event.
+  const handleEnvironmentSearchSuccess = useCallback((payload) => {
+    // The payload from this event will contain the resulting features along
+    // with the environment-type-id to which they belong.
+    const { features, typeId } = payload;
+    // We want to jump to the environment-section when new environment features has been found
+    setActiveTab(INTEGRATION_IDS.ENVIRONMENT);
+    // We also want to set the environment-type
+    setActiveEnvironmentType(typeId);
+    // We also have to update the environment-state with the features to show...
+    setEnvironmentState((prev) => ({
+      ...prev,
+      [typeId]: {
+        selectedFeatures: features,
+        wmsActive: prev[typeId].wmsActive,
+      },
+    }));
+  }, []);
 
   // We're gonna need a handler for the coordinates-from-vision event.
   const handleCoordinatesReceivedFromVision = useCallback(
@@ -153,6 +176,11 @@ function VisionIntegration(props) {
       "estate-search-completed",
       (features) => handleEstateSearchSuccess(features)
     );
+    // A listener for when the environment-feature-search was successful
+    const environmentSearchCompletedListener = localObserver.subscribe(
+      "environment-search-completed",
+      (payload) => handleEnvironmentSearchSuccess(payload)
+    );
     // A listener for when we've gotten coordinate-features from Vison
     const coordinatesReceivedFromVisionListener = localObserver.subscribe(
       "coordinates-received-from-vision",
@@ -175,6 +203,7 @@ function VisionIntegration(props) {
       hubDisconnectedListener.unsubscribe();
       estateSearchFailedListener.unsubscribe();
       estateSearchCompletedListener.unsubscribe();
+      environmentSearchCompletedListener.unsubscribe();
       coordinatesReceivedFromVisionListener.unsubscribe();
       addNewEstatesListener.unsubscribe();
       newCoordinateCreatedListener.unsubscribe();
@@ -182,6 +211,7 @@ function VisionIntegration(props) {
   }, [
     localObserver,
     handleEstateSearchSuccess,
+    handleEnvironmentSearchSuccess,
     handleCoordinatesReceivedFromVision,
     handleAddNewEstates,
     handleNewCoordinateCreated,
@@ -204,6 +234,12 @@ function VisionIntegration(props) {
     // Then we'll publish an event if we want to prompt the user etc.
     localObserver.publish("selected-coordinates-updated", selectedCoordinates);
   }, [mapViewModel, localObserver, selectedCoordinates]);
+
+  // We're gonna need an useEffect that can handle side-effects when the environment-state has
+  // been updated.
+  useEffect(() => {
+    console.log(environmentState);
+  }, [environmentState]);
 
   // An effect that makes sure to hide/show features depending on which tab we're currently on.
   // (We don't want to show estates when we're on the coordinate tab and so on...)

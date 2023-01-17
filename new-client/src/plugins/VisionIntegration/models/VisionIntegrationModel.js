@@ -394,8 +394,10 @@ class VisionIntegrationModel {
       this.#setFeatureTitle(f, environmentSearchSource.displayFields);
     });
     // Finally we'll publish an event with the features that were found
-    // TODO: this.#localObserver.publish("estate-search-completed", estateFeatures);
-    console.log("Show features! Result: ", features);
+    this.#localObserver.publish("environment-search-completed", {
+      features,
+      typeId: type,
+    });
   };
 
   // Accepts a feature and returns an object with the required keys to match Visions API description.
@@ -605,6 +607,15 @@ class VisionIntegrationModel {
       ) || {};
     const constantInfo = ENVIRONMENT_INFO.find((o) => o.id === id) || {};
     return { ...configInfo, ...constantInfo };
+  };
+
+  // Returns an object containing the initial environment state.
+  getInitialEnvironmentState = () => {
+    return {
+      1: { selectedFeatures: [], wmsActive: false },
+      2: { selectedFeatures: [], wmsActive: false },
+      3: { selectedFeatures: [], wmsActive: false },
+    };
   };
 }
 
