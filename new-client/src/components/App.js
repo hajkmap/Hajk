@@ -505,10 +505,8 @@ class App extends React.PureComponent {
         // the query and the hash parameters.
         const mergedParams = getMergedSearchAndHashParams();
 
-        // This will be refactored. But for now, if the merged
-        // params contain the zoom level value…
+        // Act when view's zoom changes
         if (mergedParams.get("z")) {
-          // …and that value differs from current zoom level…
           if (
             this.appModel.map.getView().getZoom() !==
             parseInt(mergedParams.get("z"))
@@ -520,6 +518,7 @@ class App extends React.PureComponent {
           }
         }
 
+        // Act when view's center coordinate changes
         if (mergedParams.get("x") || mergedParams.get("y")) {
           const [x, y] = this.appModel.map.getView().getCenter();
 
@@ -533,16 +532,19 @@ class App extends React.PureComponent {
           }
         }
 
-        if (mergedParams.get("p")) {
+        // Act when plugin window's visibility changes.
+        // p contains the list of plugins to show. It's important to check
+        // for null, as an empty string value is a valid value that indicates
+        // that no plugin should be shown, while a null value indicates that
+        // the parameter does not exist and default plugin visibility should
+        // be respected.
+        if (mergedParams.get("p") !== null) {
           const currentlyVisiblePlugins = this.appModel.windows
             .filter((w) => w.state.windowVisible)
             .map((p) => p.type);
 
-          if (currentlyVisiblePlugins.join(",") === mergedParams.get("p")) {
-            console.log("Exactly the same, returning");
-          } else {
+          if (currentlyVisiblePlugins.join(",") !== mergedParams.get("p")) {
             const pInParams = mergedParams.get("p").split(",");
-            console.log(currentlyVisiblePlugins, pInParams);
 
             // First hide if window not longer visible
             currentlyVisiblePlugins.forEach((p) => {
@@ -561,10 +563,11 @@ class App extends React.PureComponent {
           }
         }
 
-        // Next, check if the q-parameter exists and differs from
+        // Act when search string changes.
+        // Check if the q parameter exists and differs from
         // the most recent search. If so, let's publish an event that
         // the Search component listens to.
-        // TODO: Also handle sources change, the s-parameter
+        // TODO: Also handle sources change, the s parameter
         if (
           mergedParams.get("q") !==
             this.appModel.searchModel.lastSearchPhrase &&
