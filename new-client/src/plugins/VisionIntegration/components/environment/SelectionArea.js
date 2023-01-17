@@ -58,7 +58,7 @@ function SelectionArea(props) {
       </Grid>
       <FeatureList
         app={props.app}
-        source={props.source}
+        source={props.model.getSearchSourceFromId(objectInfo.wfsId)}
         features={props.selectedFeatures}
         setSelectedFeatures={props.setSelectedFeatures}
         mapViewModel={props.mapViewModel}

@@ -91,7 +91,6 @@ function VisionIntegrationView(props) {
             setEnvironmentState={props.setEnvironmentState}
             app={props.app}
             model={props.model}
-            source={null}
             mapViewModel={props.mapViewModel}
             activeMapInteraction={props.activeMapInteraction}
             setActiveMapInteraction={props.setActiveMapInteraction}

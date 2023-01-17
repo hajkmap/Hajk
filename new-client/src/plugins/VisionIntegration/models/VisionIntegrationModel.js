@@ -348,7 +348,7 @@ class VisionIntegrationModel {
     // We can get the appropriate setting by providing the type (which should correspond to the correct settings).
     const environmentSettings = this.getEnvironmentInfoFromId(type);
     // When we have the settings, we can get the search-source etc. so that we can fetch the features connected to the provided id's.
-    const environmentSearchSource = this.#getSearchSourceFromId(
+    const environmentSearchSource = this.getSearchSourceFromId(
       environmentSettings.wfsId
     );
     // We have to make sure we have a proper search-source
@@ -461,11 +461,11 @@ class VisionIntegrationModel {
       return null;
     }
     // If we have an id, we can return the source connected to the id
-    return this.#getSearchSourceFromId(estateSourceId);
+    return this.getSearchSourceFromId(estateSourceId);
   };
 
   // Returns the layer connected to the provided id
-  #getSearchSourceFromId = (id) => {
+  getSearchSourceFromId = (id) => {
     return this.#searchSources.find((source) => source.id === id) || null;
   };
 

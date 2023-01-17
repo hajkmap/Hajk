@@ -46,7 +46,6 @@ function EnvironmentSection(props) {
       </Grid>
       <SelectionArea
         app={props.app}
-        source={props.source}
         mapViewModel={props.mapViewModel}
         model={props.model}
         typeId={props.activeType}
