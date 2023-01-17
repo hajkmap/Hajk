@@ -87,6 +87,8 @@ function VisionIntegrationView(props) {
           <EnvironmentSection
             activeType={props.activeEnvironmentType}
             setActiveType={props.setActiveEnvironmentType}
+            environmentState={props.environmentState}
+            setEnvironmentState={props.setEnvironmentState}
             app={props.app}
             model={props.model}
             source={null}

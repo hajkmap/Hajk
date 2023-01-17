@@ -312,6 +312,8 @@ function VisionIntegration(props) {
         setActiveEnvironmentType={setActiveEnvironmentType}
         selectedEstates={selectedEstates}
         setSelectedEstates={setSelectedEstates}
+        environmentState={environmentState}
+        setEnvironmentState={setEnvironmentState}
         selectedCoordinates={selectedCoordinates}
         setSelectedCoordinates={setSelectedCoordinates}
         activeMapInteraction={activeMapInteraction}

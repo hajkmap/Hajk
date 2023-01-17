@@ -6,15 +6,15 @@ import FeatureList from "../featureList/FeatureList";
 import { useState } from "react";
 import { useEffect } from "react";
 
-function getInformationTexts(typeId = 0, selectedObjects = [], model) {
+function getInformationTexts(typeId = 0, selectedFeatures = [], model) {
   const typeInfo = model.getEnvironmentInfoFromId(typeId);
 
   const headerText =
-    selectedObjects.length > 0
+    selectedFeatures.length > 0
       ? `Selekterade ${typeInfo.name.toLowerCase()}`
       : `Det finns inga selekterade ${typeInfo.name.toLowerCase()}`;
   const helperText =
-    selectedObjects.length > 0
+    selectedFeatures.length > 0
       ? ""
       : `Aktivera verktyget och klicka i kartan för att välja ${typeInfo.name.toLowerCase()}.`;
 
@@ -23,18 +23,18 @@ function getInformationTexts(typeId = 0, selectedObjects = [], model) {
 
 function SelectionArea(props) {
   const [objectInfo, setObjectInfo] = useState(() =>
-    getInformationTexts(props.typeId, props.selectedObjects, props.model)
+    getInformationTexts(props.typeId, props.selectedFeatures, props.model)
   );
 
   useEffect(() => {
     setObjectInfo(() =>
-      getInformationTexts(props.typeId, props.selectedObjects, props.model)
+      getInformationTexts(props.typeId, props.selectedFeatures, props.model)
     );
-  }, [props.typeId, props.selectedObjects, props.model]);
+  }, [props.typeId, props.selectedFeatures, props.model]);
 
   // Handles click on button used to remove all selected estates
   const handleResetSelectionClick = () => {
-    console.log("Reset");
+    props.setSelectedFeatures([]);
   };
 
   return (
@@ -52,11 +52,11 @@ function SelectionArea(props) {
       <FeatureList
         app={props.app}
         source={props.source}
-        features={props.selectedObjects || []}
-        setSelectedFeatures={props.setSelectedObjects || console.log}
+        features={props.selectedFeatures}
+        setSelectedFeatures={props.setSelectedFeatures}
         mapViewModel={props.mapViewModel}
       />
-      {props.selectedObjects.length > 0 && (
+      {props.selectedFeatures.length > 0 && (
         <Grid item xs={12} sx={{ marginTop: 1 }}>
           <Button
             fullWidth
