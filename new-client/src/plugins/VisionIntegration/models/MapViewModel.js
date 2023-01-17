@@ -110,6 +110,10 @@ class VisionIntegrationModel {
 
   #handlePolygonFeatureAdded = (e) => {
     const { feature } = e;
+    this.#localObserver.publish("search-with-feature", {
+      interaction: this.#activeMapInteraction,
+      feature,
+    });
     this.#drawModel.removeFeature(feature);
   };
 

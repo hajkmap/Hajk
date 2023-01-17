@@ -4,7 +4,11 @@ import { HubConnectionBuilder } from "@microsoft/signalr";
 
 import { generateRandomString } from "../utils";
 import SearchModel from "models/SearchModel";
-import { INTEGRATION_IDS, ENVIRONMENT_INFO } from "../constants";
+import {
+  INTEGRATION_IDS,
+  ENVIRONMENT_INFO,
+  MAP_INTERACTIONS,
+} from "../constants";
 
 // A simple class containing functionality that is used in the VisionIntegration-plugin.
 class VisionIntegrationModel {
@@ -101,6 +105,7 @@ class VisionIntegrationModel {
   #getDefaultSearchOptions = () => {
     return {
       ...this.#searchModel.getSearchOptions(),
+      activeSpatialFilter: "within",
       orSeparator: this.#orSeparator,
       initiator: "VisionIntegration",
     };
@@ -171,6 +176,10 @@ class VisionIntegrationModel {
     this.#localObserver.on(
       "mapView-environment-map-click-result",
       this.#handleEnvironmentMapClickResults
+    );
+    this.#localObserver.on(
+      "search-with-feature",
+      this.#handleSearchWithFeature
     );
   };
 
@@ -531,6 +540,49 @@ class VisionIntegrationModel {
     });
     // Then we can return the object!
     return sendObject;
+  };
+
+  #handleSearchWithFeature = async (payload) => {
+    const source =
+      payload.interaction === MAP_INTERACTIONS.SELECT_ESTATE
+        ? this.getEstateSearchSource()
+        : this.#getEnvironmentSearchSource();
+    const searchResult = await this.#searchModel.getResults("", [source], {
+      ...this.#searchOptions,
+      featuresToFilter: [payload.feature],
+    });
+    const { featureCollections, errors } = searchResult;
+    // If we got an error, or if the results are missing, we have to prompt the user in some way...
+    if (errors[0] || !featureCollections[0]) {
+      // TODO: this.#localObserver.publish("estate-search-failed");
+      return null;
+    }
+    // If we didn't, we can grab the first featureCollection, which will include our results
+    const featureCollection = featureCollections[0];
+    // Then we can grab the resulting features
+    const features = featureCollection.value.features || [];
+    // We're gonna want to show a feature title in several places. Let's put the title
+    // directly on the feature so we don't have to construct it several times.
+    features.forEach((f) => {
+      this.#setFeatureTitle(f, source.displayFields);
+    });
+    // Finally we'll publish an event with the features that were found
+    if (payload.interaction === MAP_INTERACTIONS.SELECT_ESTATE) {
+      this.#localObserver.publish("add-estates-to-selection", features);
+    } else {
+      this.#localObserver.publish("add-environment-features-to-selection", {
+        features,
+        typeId: this.#currentEnvironmentTypeId,
+      });
+    }
+  };
+
+  #getEnvironmentSearchSource = () => {
+    const environmentSettings = this.getEnvironmentInfoFromId(
+      this.#currentEnvironmentTypeId
+    );
+    // When we have the settings, we can get the search-source etc. so that we can fetch the features connected to the provided id's.
+    return this.getSearchSourceFromId(environmentSettings.wfsId);
   };
 
   // Returns the WFS-source (config, not a "real" source) stated to be the
