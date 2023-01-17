@@ -80,12 +80,18 @@ class VisionIntegrationModel {
     this.#map.clickLock.delete("visionintegration");
     this.#disableEstateSelectInteraction();
     this.#disableCreateCoordinateInteraction();
+    this.#disableEnvironmentSelectInteraction();
   };
 
   // Enables functionality so that the user can select estates from the map
   #enableEstateSelectInteraction = () => {
     this.#map.clickLock.add("visionintegration");
     this.#map.on("singleclick", this.#handleOnSelectEstateClick);
+  };
+
+  #enableEnvironmentSelectInteraction = () => {
+    this.#map.clickLock.add("visionintegration");
+    this.#map.on("singleclick", this.#handleOnSelectEnvironmentClick);
   };
 
   // Enables functionality so that the user can create coordinate (point) features
@@ -98,6 +104,12 @@ class VisionIntegrationModel {
   #disableEstateSelectInteraction = () => {
     this.#map.clickLock.delete("visionintegration");
     this.#map.un("singleclick", this.#handleOnSelectEstateClick);
+  };
+
+  // Disables select environment-features from map functionality
+  #disableEnvironmentSelectInteraction = () => {
+    this.#map.clickLock.delete("visionintegration");
+    this.#map.un("singleclick", this.#handleOnSelectEnvironmentClick);
   };
 
   // Disables create coordinate from map functionality
@@ -121,6 +133,27 @@ class VisionIntegrationModel {
     } catch (error) {
       console.error(
         `Failed to select estates in VisionIntegration... ${error}`
+      );
+    }
+  };
+
+  #handleOnSelectEnvironmentClick = async (event) => {
+    try {
+      // Try to fetch features from WMS-layers etc. (Also from all vector-layers).
+      const clickResult = await new Promise((resolve) =>
+        handleClick(event, event.map, resolve)
+      );
+      // The response should contain an array of features
+      const { features } = clickResult;
+      // We'll just publish an event with all the features and let VisionIntegration-model
+      // handle filtering etc.
+      this.#localObserver.publish(
+        "mapView-environment-map-click-result",
+        features
+      );
+    } catch (error) {
+      console.error(
+        `Failed to select environment-features in VisionIntegration... ${error}`
       );
     }
   };
@@ -158,6 +191,9 @@ class VisionIntegrationModel {
       case MAP_INTERACTIONS.SELECT_COORDINATE:
         this.#activeMapInteraction = MAP_INTERACTIONS.SELECT_COORDINATE;
         return this.#enableCreateCoordinateInteraction();
+      case MAP_INTERACTIONS.SELECT_ENVIRONMENT:
+        this.#activeMapInteraction = MAP_INTERACTIONS.SELECT_ENVIRONMENT;
+        return this.#enableEnvironmentSelectInteraction();
       default:
         return null;
     }

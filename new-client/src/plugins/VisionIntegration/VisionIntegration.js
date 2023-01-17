@@ -59,6 +59,7 @@ function VisionIntegration(props) {
         map,
         app,
         mapViewModel,
+        initialEnvironmentTypeId: ENVIRONMENT_IDS.AREA,
       })
   );
   // We're gonna want to make sure proper settings are supplied when starting
@@ -149,6 +150,32 @@ function VisionIntegration(props) {
     );
   }, []);
 
+  // Handles when we've received environment features from a map-click-event
+  const handleAddNewEnvironmentFeatures = useCallback((payload) => {
+    // Since we don't want to allow for duplicate estates we do some really funky shit here...
+    // Basically we're creating a set containing the id's of every selected estate (this one
+    // wont include duplicates since it's a set). Then we get the corresponding estate by grabbing
+    // them from the new array using the id. (It doesn't really matter which one we get since they're duplicates).
+    const { typeId, features } = payload;
+    setEnvironmentState((prev) => ({
+      ...prev,
+      [typeId]: {
+        ...prev[typeId],
+        selectedFeatures: Array.from(
+          new Set(
+            [...prev[typeId].selectedFeatures, ...features].map((e) =>
+              e.getId()
+            )
+          )
+        ).map((id) =>
+          [...prev[typeId].selectedFeatures, ...features].find(
+            (e) => e.getId() === id
+          )
+        ),
+      },
+    }));
+  }, []);
+
   // Handles when a new coordinate has been created in the map
   const handleNewCoordinateCreated = useCallback((feature) => {
     setSelectedCoordinates((prevCoordinates) => [...prevCoordinates, feature]);
@@ -196,6 +223,11 @@ function VisionIntegration(props) {
       "add-estates-to-selection",
       (features) => handleAddNewEstates(features)
     );
+    // A listener for when we've gotten new estates to add to the selection (from map-click originally)
+    const addNewEnvironmentFeaturesListener = localObserver.subscribe(
+      "add-environment-features-to-selection",
+      (payload) => handleAddNewEnvironmentFeatures(payload)
+    );
     // A listener for when a new coordinate has been created by a map-click
     const newCoordinateCreatedListener = localObserver.subscribe(
       "mapView-new-coordinate-created",
@@ -211,6 +243,7 @@ function VisionIntegration(props) {
       environmentSearchCompletedListener.unsubscribe();
       coordinatesReceivedFromVisionListener.unsubscribe();
       addNewEstatesListener.unsubscribe();
+      addNewEnvironmentFeaturesListener.unsubscribe();
       newCoordinateCreatedListener.unsubscribe();
     };
   }, [
@@ -219,6 +252,7 @@ function VisionIntegration(props) {
     handleEnvironmentSearchSuccess,
     handleCoordinatesReceivedFromVision,
     handleAddNewEstates,
+    handleAddNewEnvironmentFeatures,
     handleNewCoordinateCreated,
   ]);
 
@@ -244,12 +278,16 @@ function VisionIntegration(props) {
   // been updated. Before the environment-state was updated, the active activeEnvironmentType has been set
   // as well. We can use that fact to out advantage, as seen below.
   useEffect(() => {
+    // We'll make sure to update the model with the currently active environment-type...
+    // We need to keep track of that in the model to allow for proper selections etc. further on.
+    model.setCurrentEnvironmentTypeId(activeEnvironmentType);
+    // Then we can update thr map-view.
     const updatedEnvironment = environmentState[activeEnvironmentType];
     mapViewModel.setEnvironmentFeaturesToShow(
       updatedEnvironment.selectedFeatures,
       activeEnvironmentType
     );
-  }, [mapViewModel, environmentState, activeEnvironmentType]);
+  }, [model, mapViewModel, environmentState, activeEnvironmentType]);
 
   // An effect that makes sure to hide/show features depending on which tab we're currently on.
   // (We don't want to show estates when we're on the coordinate tab and so on...)

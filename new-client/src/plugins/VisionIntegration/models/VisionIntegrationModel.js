@@ -18,6 +18,7 @@ class VisionIntegrationModel {
   #searchOptions;
   #searchModel;
   #mapViewModel;
+  #currentEnvironmentTypeId;
 
   // There will probably not be many settings for this model... Options are required though!
   constructor(settings) {
@@ -46,6 +47,7 @@ class VisionIntegrationModel {
     this.#searchOptions = this.#getDefaultSearchOptions(); // Create the default search-options
     this.#hubConnection !== null && this.#initiateHub(); // Initiate the hub and its listeners.
     this.#localObserver && this.#initiateObserverListeners(); // Initiate observer-listeners.
+    this.#currentEnvironmentTypeId = settings.initialEnvironmentTypeId; // We're gonna need to keep track of the currently active environment-type...
   }
 
   // Creates a connection to supplied hub-url. (Hub meaning a signalR-communication-hub).
@@ -166,6 +168,10 @@ class VisionIntegrationModel {
       "mapView-estate-map-click-result",
       this.#handleEstateMapClickResults
     );
+    this.#localObserver.on(
+      "mapView-environment-map-click-result",
+      this.#handleEnvironmentMapClickResults
+    );
   };
 
   // Handles when the map-view-model has gotten som features from a map-click. Here we're supposed
@@ -182,6 +188,32 @@ class VisionIntegrationModel {
     });
     // And finally we'll publish an event so that the view can be updated...
     this.#localObserver.publish("add-estates-to-selection", estateFeatures);
+  };
+
+  // Handles when the map-view-model has gotten som features from a map-click. Here we're supposed
+  // to find the features connected to the currently active environment-layer, and update the view with those.
+  #handleEnvironmentMapClickResults = (features) => {
+    // We're gonna need the current environment-type settings...
+    const environmentSettings = this.getEnvironmentInfoFromId(
+      this.#currentEnvironmentTypeId
+    );
+    // ...so that we can get features belonging to the correct layer.
+    const environmentFeatures = features.filter(
+      (feature) => feature.layer.get("name") === environmentSettings.wmsId
+    );
+    // We're gonna need the current environment-source so that we can construct a valid title for the estates
+    const environmentSource = this.getSearchSourceFromId(
+      environmentSettings.wfsId
+    );
+    // Then we'll construct and add the title to every estate feature...
+    environmentFeatures.forEach((f) => {
+      this.#setFeatureTitle(f, environmentSource.displayFields);
+    });
+    // And finally we'll publish an event so that the view can be updated...
+    this.#localObserver.publish("add-environment-features-to-selection", {
+      typeId: this.#currentEnvironmentTypeId,
+      features: environmentFeatures,
+    });
   };
 
   // Handles when Vision is asking for information regarding all currently selected real-estates.
@@ -625,15 +657,23 @@ class VisionIntegrationModel {
 
   // Returns wether any of the required parameters for the model is missing or not.
   #requiredParametersMissing = (parameters) => {
-    const { localObserver, options, searchSources, app, map, mapViewModel } =
-      parameters;
+    const {
+      localObserver,
+      options,
+      searchSources,
+      app,
+      map,
+      mapViewModel,
+      initialEnvironmentTypeId,
+    } = parameters;
     return (
       !localObserver ||
       !options ||
       !Array.isArray(searchSources) ||
       !app ||
       !map ||
-      !mapViewModel
+      !mapViewModel ||
+      !initialEnvironmentTypeId
     );
   };
 
@@ -676,6 +716,16 @@ class VisionIntegrationModel {
       2: { selectedFeatures: [], wmsActive: false },
       3: { selectedFeatures: [], wmsActive: false },
     };
+  };
+
+  // Returns the currently set environment-type-id
+  getCurrentEnvironmentTypeId = () => {
+    return this.#currentEnvironmentTypeId;
+  };
+
+  // Sets the environment-type-id
+  setCurrentEnvironmentTypeId = (id) => {
+    this.#currentEnvironmentTypeId = id;
   };
 }
 
