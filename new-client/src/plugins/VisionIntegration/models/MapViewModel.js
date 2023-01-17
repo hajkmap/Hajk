@@ -178,6 +178,22 @@ class VisionIntegrationModel {
     });
   };
 
+  // Handles when the selected environment features has been updated. Makes sure to update the map accordingly.
+  setEnvironmentFeaturesToShow = (features, environmentType) => {
+    // First we'll get any potential features already in the map
+    const featuresInMap =
+      this.getDrawnEnvironmentFeaturesByType(environmentType);
+    // Then we'll remove the old features...
+    featuresInMap.forEach((f) => {
+      this.#drawModel.removeFeature(f);
+    });
+    // ...and then we'll add all the currently selected features
+    features.forEach((f) => {
+      f.set("VISION_TYPE", `ENVIRONMENT_${environmentType}`);
+      this.#drawModel.addFeature(f);
+    });
+  };
+
   // Handles when the selected coordinates has been updated. Makes sure to update the map accordingly.
   setCoordinatesToShow = (coordinates) => {
     // First we'll get any potential coordinates already in the map
@@ -199,6 +215,23 @@ class VisionIntegrationModel {
       .getCurrentVectorSource()
       .getFeatures()
       .filter((f) => f.get("VISION_TYPE") === INTEGRATION_IDS.ESTATES);
+  };
+
+  // Returns all drawn (selected) environment features belonging to the supplied type
+  // The supplied type is an id corresponding to the environment-type (areas, investigations etc.)
+  // The VISION_TYPE is set to ENVIRONMENT_TYPE-ID, hence the odd solution below.
+  getDrawnEnvironmentFeaturesByType = (type) => {
+    return this.#drawModel
+      .getCurrentVectorSource()
+      .getFeatures()
+      .filter((f) => {
+        const visionType = f.get("VISION_TYPE");
+        if (!visionType.includes("ENVIRONMENT_")) {
+          return false;
+        }
+        const typeId = visionType.split("ENVIRONMENT_")[1];
+        return parseInt(typeId) === type;
+      });
   };
 
   // Returns all the drawn (selected) coordinates from the map.

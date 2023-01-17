@@ -236,19 +236,31 @@ function VisionIntegration(props) {
   }, [mapViewModel, localObserver, selectedCoordinates]);
 
   // We're gonna need an useEffect that can handle side-effects when the environment-state has
-  // been updated.
+  // been updated. Before the environment-state was updated, the active activeEnvironmentType has been set
+  // as well. We can use that fact to out advantage, as seen below.
   useEffect(() => {
-    console.log(environmentState);
-  }, [environmentState]);
+    const updatedEnvironment = environmentState[activeEnvironmentType];
+    mapViewModel.setEnvironmentFeaturesToShow(
+      updatedEnvironment.selectedFeatures,
+      activeEnvironmentType
+    );
+  }, [mapViewModel, environmentState, activeEnvironmentType]);
 
   // An effect that makes sure to hide/show features depending on which tab we're currently on.
   // (We don't want to show estates when we're on the coordinate tab and so on...)
   // If the plugin is hidden, we send an empty string (and no features will be shown).
   // The effect also makes sure to disable any map-interaction that could be active.
   useEffect(() => {
-    mapViewModel.updateHiddenFeatures(activeTab);
+    if (activeTab === INTEGRATION_IDS.ENVIRONMENT) {
+      mapViewModel.updateHiddenFeatures(
+        `${activeTab}_${activeEnvironmentType}`
+      );
+    } else {
+      mapViewModel.updateHiddenFeatures(activeTab);
+    }
+
     setActiveMapInteraction(null);
-  }, [mapViewModel, activeTab]);
+  }, [mapViewModel, activeTab, activeEnvironmentType]);
 
   // An effect making sure to set the chosen map-interaction in the model when state changes...
   useEffect(() => {
