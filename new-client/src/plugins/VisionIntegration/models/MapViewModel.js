@@ -67,6 +67,7 @@ class VisionIntegrationModel {
       this.#ctrlKeyPressed = true;
       if (this.#polygonSelectIsAvailable()) {
         console.log("Here we should enable polygon select!");
+        this.#enablePolygonSelection();
       }
     }
   };
@@ -79,6 +80,7 @@ class VisionIntegrationModel {
       this.#ctrlKeyPressed = false;
       if (this.#polygonSelectIsAvailable()) {
         console.log("Here we should disable polygon select!");
+        this.#disablePolygonSelection();
       }
     }
   };
@@ -89,6 +91,26 @@ class VisionIntegrationModel {
       MAP_INTERACTIONS.SELECT_ESTATE,
       MAP_INTERACTIONS.SELECT_ENVIRONMENT,
     ].includes(this.#activeMapInteraction);
+  };
+
+  #enablePolygonSelection = () => {
+    // First we must disable any potential interactions...
+    this.#disableEstateSelectInteraction();
+    this.#disableEnvironmentSelectInteraction();
+    this.#drawModel.toggleDrawInteraction("Rectangle", {
+      handleAddFeature: this.#handlePolygonFeatureAdded,
+    });
+  };
+
+  #disablePolygonSelection = () => {
+    // First we must disable any potential interactions...
+    this.#drawModel.toggleDrawInteraction();
+    this.toggleMapInteraction(this.#activeMapInteraction);
+  };
+
+  #handlePolygonFeatureAdded = (e) => {
+    const { feature } = e;
+    this.#drawModel.removeFeature(feature);
   };
 
   // Zooms to the supplied extent (with some padding)
@@ -116,6 +138,7 @@ class VisionIntegrationModel {
   #disableInteractions = () => {
     this.#activeMapInteraction = null;
     this.#map.clickLock.delete("visionintegration");
+    this.#drawModel.toggleDrawInteraction();
     this.#disableEstateSelectInteraction();
     this.#disableCreateCoordinateInteraction();
     this.#disableEnvironmentSelectInteraction();
@@ -300,7 +323,7 @@ class VisionIntegrationModel {
       .getCurrentVectorSource()
       .getFeatures()
       .filter((f) => {
-        const visionType = f.get("VISION_TYPE");
+        const visionType = f.get("VISION_TYPE") || "";
         if (!visionType.includes("ENVIRONMENT_")) {
           return false;
         }
