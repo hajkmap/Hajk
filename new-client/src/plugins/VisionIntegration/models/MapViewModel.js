@@ -189,6 +189,7 @@ class VisionIntegrationModel {
     });
     // ...and then we'll add all the currently selected features
     features.forEach((f) => {
+      f.set("VISION_TYPE_ID", environmentType);
       f.set("VISION_TYPE", `ENVIRONMENT_${environmentType}`);
       this.#drawModel.addFeature(f);
     });
@@ -240,6 +241,19 @@ class VisionIntegrationModel {
       .getCurrentVectorSource()
       .getFeatures()
       .filter((f) => f.get("VISION_TYPE") === INTEGRATION_IDS.COORDINATES);
+  };
+
+  // Returns the environment features that are currently visible in the map
+  getDrawnEnvironmentFeatures = () => {
+    return this.#drawModel
+      .getCurrentVectorSource()
+      .getFeatures()
+      .filter((f) => {
+        return (
+          f.get("VISION_TYPE").includes("ENVIRONMENT_") &&
+          f.get("HIDDEN") !== true
+        );
+      });
   };
 
   // Hide all features that does not have the vision type supplied

@@ -138,6 +138,11 @@ class VisionIntegrationModel {
       "HandleAskingForCoordinates",
       this.#handleVisionAskingForCoordinates
     );
+    // We're also interested in an event where Vision is asking for the currently selected environment-features(s)
+    this.#hubConnection.on(
+      "HandleAskingForFeatures",
+      this.#handleVisionAskingForFeatures
+    );
     // Vision can also ask us to show the geometries connected to the supplied real-estate-information...
     this.#hubConnection.on(
       "HandleRealEstateIdentifiers",
@@ -219,6 +224,27 @@ class VisionIntegrationModel {
       this.#hubConnection.invoke("SendCoordinates", informationToSend);
     } catch (error) {
       console.error(`Could not send coordinates to Vision. ${error}`);
+    }
+  };
+
+  #handleVisionAskingForFeatures = () => {
+    try {
+      // First we'll get all the currently selected features. NOTE: We're only sending the
+      // features that are currently showing in the map... There might be hidden features as well,
+      // (for example, if areas are currently active, only these features are sent... Not investigations etc.)
+      const selectedFeatures = this.#mapViewModel.getDrawnEnvironmentFeatures();
+      // Then we'll initiate an array that we can send. (Vision expects an array with feature-information-objects
+      // in a specific form, see below):
+      // DTO: [ {id: <string>, type: <integer>} ]
+      const informationToSend = [];
+      selectedFeatures.forEach((f) => {
+        informationToSend.push(this.#createFeatureSendObject(f));
+      });
+
+      // Finally, we'll invoke a method on the hub, sending the feature-information to Vision
+      this.#hubConnection.invoke("SendFeatures", informationToSend);
+    } catch (error) {
+      console.error(`Could not send features to Vision. ${error}`);
     }
   };
 
@@ -446,6 +472,33 @@ class VisionIntegrationModel {
       spatialReferenceSystemIdentifier: parseInt(cleanedProjectionCode),
       label: coordinateFeature.get("VISION_LABEL") || "",
     };
+  };
+
+  // Creates an object from the provided feature to match Vision's DTO
+  #createFeatureSendObject = (f) => {
+    // First we'll need to check which environment type we're dealing with...
+    const typeId = f.get("VISION_TYPE_ID");
+    // ...and get the settings for that type...
+    const environmentSettings = this.getEnvironmentInfoFromId(typeId);
+    // ...in the settings we've stored which fields we should send.
+    const { fieldsToSend } = environmentSettings;
+    // Then we'll make sure the fieldsToSend is valid. (We're expecting the fieldsToSend-property
+    // to be an array of objects containing which key to send information on, and where to get that value
+    // from on the feature).
+    if (!Array.isArray(fieldsToSend)) {
+      throw new Error(
+        "Environment-integration-settings not valid. Could not create environment-information to send"
+      );
+    }
+    // If it is valid, we can create the object...
+    const sendObject = {};
+    // And then add all the properties...
+    fieldsToSend.forEach((field) => {
+      sendObject[field.key] =
+        field.overrideValue || f.get(field.featureProperty);
+    });
+    // Then we can return the object!
+    return sendObject;
   };
 
   // Returns the WFS-source (config, not a "real" source) stated to be the
