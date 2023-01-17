@@ -171,7 +171,7 @@ namespace MapService.Utility
                 var visibleForGroups = layerArray["visibleForGroups"]?.AsArray();
 
                 //If visibleForGroups is null returns it
-                if (visibleForGroups.Count == 0)
+                if (visibleForGroups == null || visibleForGroups.Count == 0)
                 {
                     JsonNode jsonNodeClone = CloneJsonNodeFromJsonNode(layerArray);
                     filteredLayers.Add(jsonNodeClone);
