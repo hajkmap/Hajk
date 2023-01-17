@@ -480,10 +480,17 @@ class VisionIntegrationModel {
       return null;
     }
     // If we have an id, we can return the layer connected to the id
+    return this.getLayerFromId(estateWmsId);
+  };
+
+  // Returns the layer connected to the supplied id.
+  getLayerFromId = (id) => {
+    if (!id) {
+      console.error("Could not fetch layer. Layer-ID is missing!");
+      return null;
+    }
     return (
-      this.#map
-        .getAllLayers()
-        .find((layer) => layer.get("name") === estateWmsId) || null
+      this.#map.getAllLayers().find((layer) => layer.get("name") === id) || null
     );
   };
 

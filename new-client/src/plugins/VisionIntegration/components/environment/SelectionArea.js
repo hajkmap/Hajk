@@ -5,6 +5,7 @@ import { Button, Grid, Typography } from "@mui/material";
 import FeatureList from "../featureList/FeatureList";
 import { useState } from "react";
 import { useEffect } from "react";
+import EnvironmentToolbox from "./EnvironmentToolbox";
 
 function getInformationTexts(typeId = 0, selectedFeatures = [], model) {
   const typeInfo = model.getEnvironmentInfoFromId(typeId);
@@ -39,7 +40,13 @@ function SelectionArea(props) {
 
   return (
     <Grid container>
-      <Grid container item xs={12}>
+      <EnvironmentToolbox
+        model={props.model}
+        objectInfo={objectInfo}
+        activeMapInteraction={props.activeMapInteraction}
+        setActiveMapInteraction={props.setActiveMapInteraction}
+      />
+      <Grid container item xs={12} sx={{ mt: 2 }}>
         <Typography variant="h6" align="center" sx={{ width: "100%" }}>
           {objectInfo.headerText}
         </Typography>

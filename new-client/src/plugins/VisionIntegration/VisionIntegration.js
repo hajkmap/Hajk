@@ -293,7 +293,7 @@ function VisionIntegration(props) {
         title: "Vision Integration",
         description: "Kommunicera med EDP Vision.",
         height: "dynamic",
-        width: 400,
+        width: 450,
         onWindowHide: onWindowHide,
         onWindowShow: onWindowShow,
       }}

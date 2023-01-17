@@ -93,6 +93,8 @@ function VisionIntegrationView(props) {
             model={props.model}
             source={null}
             mapViewModel={props.mapViewModel}
+            activeMapInteraction={props.activeMapInteraction}
+            setActiveMapInteraction={props.setActiveMapInteraction}
           />
         );
       default:

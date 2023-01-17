@@ -41,11 +41,7 @@ function EnvironmentSection(props) {
         type={props.activeType}
         handleChange={handleTypeSelectChange}
       />
-      <Grid
-        container
-        sx={{ marginTop: 2, marginBottom: 0.5 }}
-        justifyContent="center"
-      >
+      <Grid container sx={{ mt: 2, mb: 2 }} justifyContent="center">
         <Divider sx={{ width: "20%" }} />
       </Grid>
       <SelectionArea
@@ -58,6 +54,8 @@ function EnvironmentSection(props) {
           props.environmentState[props.activeType].selectedFeatures
         }
         setSelectedFeatures={setSelectedFeatures}
+        activeMapInteraction={props.activeMapInteraction}
+        setActiveMapInteraction={props.setActiveMapInteraction}
       />
     </Grid>
   );
