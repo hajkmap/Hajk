@@ -51,7 +51,7 @@ namespace MapService.Business.Config
             return result.Value.GetBoolean();
         }
 
-        private static IEnumerable<string>? GetVisibleForGroups(JsonDocument mapConfiguration)
+        public static IEnumerable<string>? GetVisibleForGroups(JsonDocument mapConfiguration)
         {
             var input = "$.tools[?(@.type == 'layerswitcher')].options.visibleForGroups";
             var result = JsonPathUtility.GetJsonElement(mapConfiguration, input);
