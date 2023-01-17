@@ -100,23 +100,28 @@ function VisionIntegration(props) {
   );
 
   // We're gonna need a handler for the environment-search-success event.
-  const handleEnvironmentSearchSuccess = useCallback((payload) => {
-    // The payload from this event will contain the resulting features along
-    // with the environment-type-id to which they belong.
-    const { features, typeId } = payload;
-    // We want to jump to the environment-section when new environment features has been found
-    setActiveTab(INTEGRATION_IDS.ENVIRONMENT);
-    // We also want to set the environment-type
-    setActiveEnvironmentType(typeId);
-    // We also have to update the environment-state with the features to show...
-    setEnvironmentState((prev) => ({
-      ...prev,
-      [typeId]: {
-        selectedFeatures: features,
-        wmsActive: prev[typeId].wmsActive,
-      },
-    }));
-  }, []);
+  const handleEnvironmentSearchSuccess = useCallback(
+    (payload) => {
+      // The payload from this event will contain the resulting features along
+      // with the environment-type-id to which they belong.
+      const { features, typeId } = payload;
+      // We want to jump to the environment-section when new environment features has been found
+      setActiveTab(INTEGRATION_IDS.ENVIRONMENT);
+      // We also want to set the environment-type
+      setActiveEnvironmentType(typeId);
+      // We also want to zoom to the features that we received
+      mapViewModel.zoomToFeatures(features);
+      // We also have to update the environment-state with the features to show...
+      setEnvironmentState((prev) => ({
+        ...prev,
+        [typeId]: {
+          selectedFeatures: features,
+          wmsActive: prev[typeId].wmsActive,
+        },
+      }));
+    },
+    [mapViewModel]
+  );
 
   // We're gonna need a handler for the coordinates-from-vision event.
   const handleCoordinatesReceivedFromVision = useCallback(
