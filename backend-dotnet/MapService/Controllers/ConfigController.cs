@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Memory;
 using Swashbuckle.AspNetCore.Annotations;
 using System.Text.Json;
+using System.Text.Json.Nodes;
 
 namespace MapService.Controllers
 {
@@ -62,24 +63,35 @@ namespace MapService.Controllers
             return StatusCode(StatusCodes.Status200OK, layerObject);
         }
 
-        /// <remarks>
-        /// Gets a map as a JsonObject.
-        /// </remarks>
-        /// <param name="map">The name of the map including the file ending. </param>
-        /// <returns>Returns a map as a JsonObject. </returns>
+
         [HttpGet]
         [Route("{map}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         [SwaggerOperation(Tags = new[] { "Client-accessible" })]
         [Obsolete]
-        public ActionResult GetMap(string map)
+        public ActionResult GetMap(string map, [FromHeader(Name = "X-Control-Header")] string? userPrincipalName = null)
         {
-            JsonDocument mapObject;
+            JsonObject mapObject;
 
             try
             {
-                mapObject = MapConfigHandler.GetMapAsJsonDocument(map);
+                mapObject = MapConfigHandler.GetMapAsJsonObject(map);
+
+                if (AdHandler.AdIsActive)
+                {
+                    var adHandler = new AdHandler(_memoryCache, _logger);
+
+                    if (userPrincipalName == null || !adHandler.UserIsValid(userPrincipalName))
+                    {
+                        return StatusCode(StatusCodes.Status500InternalServerError, "AD authentication is active, but supplied user name could not be validated.");
+                    }
+
+                    adHandler.GetGroupsPerUser().TryGetValue(userPrincipalName, out var adUserGroups);
+
+                    mapObject = ConfigFilter.FilterMaps(map, adUserGroups);
+                }
+
             }
             catch (Exception ex)
             {

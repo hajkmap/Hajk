@@ -246,25 +246,12 @@ namespace MapService.Business.Settings
                     continue;
 
                 JsonElement baselayers = result.Value.GetProperty("baselayers");
-
                 if (baselayers.ValueKind == JsonValueKind.Null)
                 {
                     continue;
                 }
-
                 JsonArray baseLayerArray = CreateNewArrayOfLayersWithoutSpecifiedLayer(baselayers, layerId);
-
-                JsonArray tools = mapConfigurationObjects["tools"]?.AsArray();
-
-                foreach (JsonObject tool in tools)
-                {
-                    if (tool["type"].ToString() == "layerswitcher")
-                    {
-                        tool["options"]["baselayers"].AsArray().Clear();
-                        tool["options"]["baselayers"] = baseLayerArray;
-                        break;
-                    }
-                }
+                JsonUtility.SetBaseLayersFromJsonObject(mapConfigurationObjects, baseLayerArray);
                 #endregion
 
                 #region layersingroups
@@ -276,39 +263,19 @@ namespace MapService.Business.Settings
                 foreach(JsonElement jsonElement in resultGroups.Value.EnumerateArray())
                 {
                     JsonElement layersInGroup = jsonElement.GetProperty("layers");
-
                     JsonElement idOfGroup = jsonElement.GetProperty("id");
-
                     if (layersInGroup.ValueKind == JsonValueKind.Null)
                     {
                         continue;
                     }
 
                     JsonArray layerArray = CreateNewArrayOfLayersWithoutSpecifiedLayer(layersInGroup, layerId);
-
-                    foreach (JsonObject tool in tools)
-                    {
-                        if (tool["type"].ToString() == "layerswitcher")
-                        {
-                            JsonArray jsonArrayGroups = tool["options"]["groups"].AsArray();
-                            foreach(JsonObject jsonObject in jsonArrayGroups)
-                            {
-                                //Looping through all the groups, the code only runs when we work with a group for the first time(new group-id)
-                                if (idOfGroup.ToString() == jsonObject["id"].ToString())
-                                { 
-                                    jsonObject["layers"].AsArray().Clear();
-                                    jsonObject["layers"] = layerArray;
-                                    break;
-                                }
-                            }
-                           
-                        }
-                    }
+                    JsonUtility.SetLayersInGroupFromJsonObject(mapConfigurationObjects, layerArray, idOfGroup);
                 }
                 #endregion
 
-                JsonFileDataAccess.UpdateMapFile(mapConfigurationFile, mapConfigurationObjects);
 
+                JsonFileDataAccess.UpdateMapFile(mapConfigurationFile, mapConfigurationObjects);
             }
         }
 

@@ -106,5 +106,91 @@ namespace MapService.Utility
 
             return clonedJsonNode;
         }
+
+        /// <summary>
+        /// Clone a Json Array from JsonArray
+        /// </summary>
+        /// <param name="jsonArray">A json array</param>
+        /// <returns>The json array</returns>
+        public static JsonArray? CloneJsonArrayFromJsonArray(JsonArray? jsonArray)
+        {
+            if (jsonArray == null) { return null; }
+
+            var clonedJsonArray = jsonArray.Deserialize<JsonArray?>();
+
+            return clonedJsonArray;
+        }
+
+        public static void SetBaseLayersFromJsonObject(JsonObject jsonObject, JsonArray jsonArray)
+        {
+            JsonArray tools = jsonObject["tools"]?.AsArray();
+
+            foreach (JsonObject tool in tools)
+            {
+                if (tool["type"].ToString() == "layerswitcher")
+                {
+                    tool["options"]["baselayers"].AsArray().Clear();
+                    tool["options"]["baselayers"] = jsonArray;
+                    break;
+                }
+            }
+        }
+
+        public static void SetLayersInGroupFromJsonObject(JsonObject jsonObject, JsonArray jsonArray, JsonElement groupId)
+        {
+            JsonArray tools = jsonObject["tools"]?.AsArray();
+            foreach (JsonObject tool in tools)
+            {
+                if (tool["type"].ToString() == "layerswitcher")
+                {
+                    JsonArray jsonArrayGroups = tool["options"]["groups"].AsArray();
+                    foreach (JsonObject jsonObjectInArray in jsonArrayGroups)
+                    {
+                        //Looping through all the groups, the code only runs when we work with a group for the first time(new group-id)
+                        if (groupId.ToString() == jsonObjectInArray["id"].ToString())
+                        {
+                            jsonObjectInArray["layers"].AsArray().Clear();
+                            jsonObjectInArray["layers"] = jsonArray;
+                            break;
+                        }
+                    }
+
+                }
+            }
+        }
+
+        public static JsonArray FilterLayers(IEnumerable<string>? adUserGroups, JsonElement layers)
+        {
+            var layersArray = JsonArray.Create(layers);
+
+            var filteredLayers = CloneJsonArrayFromJsonArray(layersArray);
+            filteredLayers.Clear();
+
+            foreach (var layerArray in layersArray)
+            {
+                var visibleForGroups = layerArray["visibleForGroups"]?.AsArray();
+
+                //If visibleForGroups is null returns it
+                if (visibleForGroups.Count == 0)
+                {
+                    JsonNode jsonNodeClone = CloneJsonNodeFromJsonNode(layerArray);
+                    filteredLayers.Add(jsonNodeClone);
+                    continue;
+                }
+
+                foreach (var visibleForGroup in visibleForGroups)
+                {
+                    string group = visibleForGroup.GetValue<string>();
+                    if (adUserGroups.Contains(group))
+                    {
+                        JsonNode jsonNodeClone = CloneJsonNodeFromJsonNode(layerArray);
+                        filteredLayers.Add(jsonNodeClone);
+                    }
+                }
+            }
+
+            return filteredLayers;
+        }
+
     }
 }
