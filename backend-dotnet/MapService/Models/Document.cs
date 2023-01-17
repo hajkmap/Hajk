@@ -30,24 +30,11 @@
         /// </summary>
         public class Chapter
         {
-            //public string? header { get; set; }
-
-            //public string? headerIdentifier { get; set; }
-
-            //public string? html { get; set; }
-
-            //public string? keywords { get; set; }
-
-            //public bool? expanded { get; set; }
-
-            //public List<Chapter> chapters { get; set; }
-
             /// <summary>
             /// Creates a new chapter. 
             /// </summary>
             public Chapter()
             {
-                //this.chapters = new List<Chapter>();
             }
         }
     }
