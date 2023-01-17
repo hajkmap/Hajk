@@ -20,6 +20,7 @@ class VisionIntegrationModel {
   #localObserver;
   #drawModel;
   #activeMapInteraction;
+  #ctrlKeyPressed;
 
   // There will probably not be many settings for this model... Options are required though!
   constructor(settings) {
@@ -37,6 +38,7 @@ class VisionIntegrationModel {
     this.#map = map;
     this.#app = app;
     this.#activeMapInteraction = null;
+    this.#ctrlKeyPressed = false; // The CTRL-key is used to extend the select-features functionality. Let's keep track of its state.
     // ...including a draw-model, which can be used to show draw features in the map in a simple way.
     this.#drawModel = new DrawModel({
       layerName: "pluginVisionIntegration",
@@ -45,12 +47,48 @@ class VisionIntegrationModel {
       measurementSettings: DEFAULT_DRAW_SETTINGS,
       drawStyleSettings: DEFAULT_DRAW_STYLE_SETTINGS,
     });
+    // We're always gonna want to listen for some key-down/up events... Let's initiate the listeners.
+    // (We want to keep track of the CTRL-key state...)
+    document.addEventListener("keydown", this.#handleKeyDown);
+    document.addEventListener("keyup", this.#handleKeyUp);
   }
 
   // Returns wether any of the required parameters for the model is missing or not.
   #requiredParametersMissing = (parameters) => {
     const { localObserver, options, app, map } = parameters;
     return !localObserver || !options || !app || !map;
+  };
+
+  // Handles key-down events and makes sure to track wether the CTRL-key is pressed or not.
+  // If any of the selection-modes are currently active, we make sure to change it to polygon-selection instead!
+  #handleKeyDown = (event) => {
+    const { keyCode } = event;
+    if (keyCode === 17 && !this.#ctrlKeyPressed) {
+      this.#ctrlKeyPressed = true;
+      if (this.#polygonSelectIsAvailable()) {
+        console.log("Here we should enable polygon select!");
+      }
+    }
+  };
+
+  // Handles key-up events and makes sure to track wether the CTRL-key is pressed or not.
+  // If any of the selection-modes are currently active, we make sure to remove the polygon selection!
+  #handleKeyUp = (event) => {
+    const { keyCode } = event;
+    if (keyCode === 17 && this.#ctrlKeyPressed) {
+      this.#ctrlKeyPressed = false;
+      if (this.#polygonSelectIsAvailable()) {
+        console.log("Here we should disable polygon select!");
+      }
+    }
+  };
+
+  // Returns wether the currently enabled interaction allows for polygon-select or not.
+  #polygonSelectIsAvailable = () => {
+    return [
+      MAP_INTERACTIONS.SELECT_ESTATE,
+      MAP_INTERACTIONS.SELECT_ENVIRONMENT,
+    ].includes(this.#activeMapInteraction);
   };
 
   // Zooms to the supplied extent (with some padding)
