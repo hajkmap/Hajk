@@ -148,6 +148,11 @@ class VisionIntegrationModel {
       "HandleCoordinates",
       this.#handleVisionAskingToShowCoordinates
     );
+    // Vision can also ask us to show "features" (features are in this case som environment-object)
+    this.#hubConnection.on(
+      "HandleFeatures",
+      this.#handleVisionAskingToShowFeatures
+    );
   };
 
   // Initiates all listeners on the local-observer. Used for communication within the plugin.
@@ -272,7 +277,7 @@ class VisionIntegrationModel {
     estateFeatures.forEach((estate) => {
       this.#setFeatureTitle(estate, estateSearchSource.displayFields);
     });
-    // Finnally we'll publish an event with the features that were found
+    // Finally we'll publish an event with the features that were found
     this.#localObserver.publish("estate-search-completed", estateFeatures);
   };
 
@@ -312,6 +317,85 @@ class VisionIntegrationModel {
       "coordinates-received-from-vision",
       coordinateFeatures
     );
+  };
+
+  // Handles when Vision is asking the map to show the features connected to the supplied id's.
+  #handleVisionAskingToShowFeatures = async (payload) => {
+    // First we'll have to make sure we were supplied an array (we're expecting the payload
+    // to consist of an array with feature-information).
+    if (!Array.isArray(payload)) {
+      console.error(
+        `HandleVisionAskingToShowFeatures was invoked with incorrect parameters. Expecting an array with feature-information but got ${typeof payload}`
+      );
+      return null;
+    }
+    if (
+      payload.some((o) => {
+        return !o.type || !o.id || o.type !== payload[0].type;
+      })
+    ) {
+      console.error(
+        `HandleVisionAskingToShowFeatures was invoked with incorrect parameters. 
+        Expecting an array with objects containing 'id' <string> and 'type' <integer>. 
+        All objects must have the same type. Got ${JSON.stringify(payload)}`
+      );
+      return null;
+    }
+    // Since the payload can only contain information connected to one type, we can get the type from the first entry...
+    // (The type is an integer which corresponds to an environment type, see the constants for more info).
+    const type = payload[0].type;
+    // Since 'features' are really environment-objects, we have to get the environment-settings.
+    // We can get the appropriate setting by providing the type (which should correspond to the correct settings).
+    const environmentSettings = this.getEnvironmentInfoFromId(type);
+    // When we have the settings, we can get the search-source etc. so that we can fetch the features connected to the provided id's.
+    const environmentSearchSource = this.#getSearchSourceFromId(
+      environmentSettings.wfsId
+    );
+    // We have to make sure we have a proper search-source
+    if (!environmentSearchSource) {
+      console.error(
+        `HandleVisionAskingToShowFeatures was invoked but could not be handled. No search-source is configured.`
+      );
+      return null;
+    }
+    // When we've got the search-source, we can go ahead and create the search-string.
+    // First, we'll need the search key...
+    const searchKey = environmentSettings.searchKey || "id";
+    // If we were supplied more than one feature-info, we can try to construct an "or-separator"-separated search-string
+    // (Vision might be trying to show several features, in that case we'll get the search-key for each
+    // feature-object and construct a "or-separator"-separated string with these. The search-model will make sure
+    // to create an OR-filter for each key in the "or-separator"-separated string).
+    const searchString = payload
+      .map((f) => f[searchKey] || "")
+      .join(this.#orSeparator);
+    // When the string is constructed, we can conduct a search
+    const searchResult = await this.#searchModel.getResults(
+      searchString,
+      [environmentSearchSource],
+      this.#searchOptions
+    );
+    // When the search is done, we'll get two objects:
+    // 1: The feature-collections (one for each source)
+    // 2: The potential errors (one for each source)
+    // Since we know we're dealing with one source here, we can just grab the [0]th
+    const { featureCollections, errors } = searchResult;
+    // If we got an error, or if the results are missing, we have to prompt the user in some way...
+    if (errors[0] || !featureCollections[0]) {
+      // TODO: this.#localObserver.publish("estate-search-failed");
+      return null;
+    }
+    // If we didn't, we can grab the first featureCollection, which will include our results
+    const featureCollection = featureCollections[0];
+    // Then we can grab the resulting features
+    const features = featureCollection.value.features || [];
+    // We're gonna want to show a feature title in several places. Let's put the title
+    // directly on the feature so we don't have to construct it several times.
+    features.forEach((f) => {
+      this.#setFeatureTitle(f, environmentSearchSource.displayFields);
+    });
+    // Finally we'll publish an event with the features that were found
+    // TODO: this.#localObserver.publish("estate-search-completed", estateFeatures);
+    console.log("Show features! Result: ", features);
   };
 
   // Accepts a feature and returns an object with the required keys to match Visions API description.
@@ -375,9 +459,12 @@ class VisionIntegrationModel {
       return null;
     }
     // If we have an id, we can return the source connected to the id
-    return (
-      this.#searchSources.find((source) => source.id === estateSourceId) || null
-    );
+    return this.#getSearchSourceFromId(estateSourceId);
+  };
+
+  // Returns the layer connected to the provided id
+  #getSearchSourceFromId = (id) => {
+    return this.#searchSources.find((source) => source.id === id) || null;
   };
 
   getEstateWmsLayer = () => {
