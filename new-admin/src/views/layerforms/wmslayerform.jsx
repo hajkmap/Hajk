@@ -87,9 +87,11 @@ const supportedProjections = [
 ];
 
 const supportedInfoFormats = [
-  "application/json",
-  "text/xml",
   "application/geojson",
+  "application/json",
+  "application/vnd.esri.wms_raw_xml",
+  "application/vnd.ogc.gml",
+  "text/xml",
 ];
 
 const supportedImageFormats = [

@@ -195,6 +195,62 @@ function getFeaturesFromGml(response, text) {
   return features;
 }
 
+function experimentalParseEsriWmsRawXml(response, xml) {
+  const parser = new DOMParser();
+  const xmlDoc = parser.parseFromString(xml, "text/xml");
+
+  // Consider making this a setting
+  const namespacePrefix = "esri_wms";
+
+  const collections = xmlDoc.getElementsByTagName(
+    `${namespacePrefix}:FeatureInfoCollection`
+  );
+
+  // Let's loop the collections using a flat map (the resulting object must
+  // be flat, not grouped by layer as this response).
+  let features = Array.from(collections).flatMap((c) => {
+    // First grab the layer name (it's an attribute to the collection DOM node)
+    const layerName = c.getAttribute("layername") || "unknownLayerName";
+
+    // Next, loop the collection's children to extract features
+    const featureInfos = Array.from(c.children).map((f, i) => {
+      // Create an OL Feature
+      const newFeature = new Feature();
+
+      // Ensure it has an ID
+      newFeature.setId(`${layerName}.fid${i}`);
+
+      // Extract "FIELDS", i.e. the attribute values of this feature
+      const fields = f.getElementsByTagName(`${namespacePrefix}:Field`);
+
+      // Loop the fields…
+      Array.from(fields).forEach((field) => {
+        // …grab the key…
+        const attributeName = field.getElementsByTagName(
+          `${namespacePrefix}:FieldName`
+        )[0].textContent;
+
+        // …and the value corresponding with this attribute…
+        const attributeValue = field.getElementsByTagName(
+          `${namespacePrefix}:FieldValue`
+        )[0].textContent;
+
+        // …and set as OL attributes on our OL Feature.
+        newFeature.set(attributeName, attributeValue);
+      });
+
+      newFeature.layer = response.layer;
+
+      return newFeature;
+    });
+
+    return featureInfos;
+  });
+
+  sortAndMutateFeaturesArray(response.layer, features);
+  return features;
+}
+
 function getFeaturesFromXmlOrGml(response, text) {
   // In cases where the XML has no FIELDS element, the XML is assumed
   // not to come from Esri and can be parsed as GML.
@@ -300,6 +356,22 @@ export function handleClick(evt, map, callback) {
                     console.error(
                       "GetFeatureInfo couldn't retrieve correct data for the clicked object.",
                       err
+                    );
+                  })
+              );
+              break;
+            case "application/vnd.esri.wms_raw_xml":
+              featurePromises.push(
+                response.value.requestResponse
+                  .text()
+                  .then((text) => {
+                    features.push(
+                      ...experimentalParseEsriWmsRawXml(response.value, text)
+                    );
+                  })
+                  .catch((err) => {
+                    console.error(
+                      "GetFeatureInfo couldn't retrieve correct data for the clicked object. "
                     );
                   })
               );
