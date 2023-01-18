@@ -28,6 +28,7 @@ namespace MapService.Controllers
         /// <remarks>
         /// List available layers. If AD authentication is active, filter by user's permission
         /// </remarks>
+        /// <param name="userPrincipalName">User name that will be supplied to AD</param>
         /// <response code="200">All layers were fetched successfully</response>
         /// <response code="500">Internal Server Error</response>
         [HttpGet]
@@ -64,7 +65,6 @@ namespace MapService.Controllers
             return StatusCode(StatusCodes.Status200OK, layerObject);
         }
 
-
         [HttpGet]
         [Route("{map}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
@@ -93,7 +93,6 @@ namespace MapService.Controllers
 
                     mapObject = ConfigFilter.FilterMaps(map, adUserGroups);
                 }
-
             }
             catch (Exception ex)
             {
@@ -108,16 +107,33 @@ namespace MapService.Controllers
         /// Delete an existing map configuration
         /// </remarks>
         /// <param name="name">Name of the map to be deleted</param>
+        /// <param name="userPrincipalName">User name that will be supplied to AD</param>
+        /// <response code="200">Success</response>
+        /// <response code="403">Forbidden</response>
+        /// <response code="500">Internal Server Error</response>
         [HttpGet]
         [Route("delete/{name}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         [SwaggerOperation(Tags = new[] { "Admin - Maps and layers" })]
         [Obsolete]
-        public ActionResult Delete(string name)
+        public ActionResult Delete(string name, [FromHeader(Name = "X-Control-Header")] string? userPrincipalName = null)
         {
             try
             {
+                if (AdHandler.AdIsActive)
+                {
+                    var adHandler = new AdHandler(_memoryCache, _logger);
+
+                    userPrincipalName = adHandler.PickUserNameToUse(userPrincipalName);
+
+                    if (!adHandler.UserIsValid(userPrincipalName) || !AdHandler.UserHasAdAccess(userPrincipalName))
+                    {
+                        return StatusCode(StatusCodes.Status403Forbidden, "Forbidden");
+                    }
+                }
+
                 MapConfigHandler.DeleteMap(name);
             }
             catch (Exception ex)
@@ -132,6 +148,7 @@ namespace MapService.Controllers
         /// <remarks>
         /// List available layers, do not apply any visibility restrictions (required for Admin UI)
         /// </remarks>
+        /// <param name="userPrincipalName">User name that will be supplied to AD</param>
         /// <response code="200">All layers were fetched successfully</response>
         /// <response code="500">Internal Server Error</response>
         [HttpGet]
@@ -151,7 +168,6 @@ namespace MapService.Controllers
                 {
                     var adHandler = new AdHandler(_memoryCache, _logger);
                     userPrincipalName = adHandler.PickUserNameToUse(userPrincipalName);
-
 
                     if (userPrincipalName == null || !adHandler.UserIsValid(userPrincipalName))
                     {
@@ -176,21 +192,36 @@ namespace MapService.Controllers
         /// <remarks>
         /// Gets all maps names.
         /// </remarks>
+        /// <param name="userPrincipalName">User name that will be supplied to AD</param>
         /// <returns>Return all map names. </returns>
         /// <response code="200">All map names were fetched successfully</response>
+        /// <response code="403">Forbidden</response>
         /// <response code="500">Internal Server Error</response>
         [HttpGet]
         [Route("list")]
         [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         [SwaggerOperation(Tags = new[] { "Admin - Maps and layers" })]
         [Obsolete]
-        public ActionResult<IEnumerable<string>> GetMaps()
+        public ActionResult<IEnumerable<string>> GetMaps([FromHeader(Name = "X-Control-Header")] string? userPrincipalName = null)
         {
             IEnumerable<string> maps;
 
             try
             {
+                if (AdHandler.AdIsActive)
+                {
+                    var adHandler = new AdHandler(_memoryCache, _logger);
+
+                    userPrincipalName = adHandler.PickUserNameToUse(userPrincipalName);
+
+                    if (!adHandler.UserIsValid(userPrincipalName) || !AdHandler.UserHasAdAccess(userPrincipalName))
+                    {
+                        return StatusCode(StatusCodes.Status403Forbidden, "Forbidden");
+                    }
+                }
+
                 maps = MapConfigHandler.GetMaps();
             }
             catch (Exception ex)
@@ -205,20 +236,35 @@ namespace MapService.Controllers
         /// <remarks>
         /// List available images in the upload folder
         /// </remarks>
+        /// <param name="userPrincipalName">User name that will be supplied to AD</param>
         /// <response code="200">Available images were fetched successfully</response>
+        /// <response code="403">Forbidden</response>
         /// <response code="500">Internal Server Error</response>
         [HttpGet()]
         [Route("listimage")]
         [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         [SwaggerOperation(Tags = new[] { "Admin - Maps and layers" })]
         [Obsolete]
-        public ActionResult<IEnumerable<string>> GetListImage()
+        public ActionResult<IEnumerable<string>> GetListImage([FromHeader(Name = "X-Control-Header")] string? userPrincipalName = null)
         {
             var listOfImages = new List<string>();
 
             try
             {
+                if (AdHandler.AdIsActive)
+                {
+                    var adHandler = new AdHandler(_memoryCache, _logger);
+
+                    userPrincipalName = adHandler.PickUserNameToUse(userPrincipalName);
+
+                    if (!adHandler.UserIsValid(userPrincipalName) || !AdHandler.UserHasAdAccess(userPrincipalName))
+                    {
+                        return StatusCode(StatusCodes.Status403Forbidden, "Forbidden");
+                    }
+                }
+
                 listOfImages = MapConfigHandler.GetListOfImages().ToList();
             }
             catch (Exception ex)
@@ -234,20 +280,35 @@ namespace MapService.Controllers
         /// <remarks>
         /// List available videos in the upload folder
         /// </remarks>
+        /// <param name="userPrincipalName">User name that will be supplied to AD</param>
         /// <response code="200">Available videos were fetched successfully</response>
+        /// <response code="403">Forbidden</response>
         /// <response code="500">Internal Server Error</response>
         [HttpGet()]
         [Route("listvideo")]
         [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         [SwaggerOperation(Tags = new[] { "Admin - Maps and layers" })]
         [Obsolete]
-        public ActionResult<IEnumerable<string>> GetListVideo()
+        public ActionResult<IEnumerable<string>> GetListVideo([FromHeader(Name = "X-Control-Header")] string? userPrincipalName = null)
         {
             var listOfVideos = new List<string>();
 
             try
             {
+                if (AdHandler.AdIsActive)
+                {
+                    var adHandler = new AdHandler(_memoryCache, _logger);
+
+                    userPrincipalName = adHandler.PickUserNameToUse(userPrincipalName);
+
+                    if (!adHandler.UserIsValid(userPrincipalName) || !AdHandler.UserHasAdAccess(userPrincipalName))
+                    {
+                        return StatusCode(StatusCodes.Status403Forbidden, "Forbidden");
+                    }
+                }
+
                 listOfVideos = MapConfigHandler.GetListOfVideos().ToList();
             }
             catch (Exception ex)
@@ -263,20 +324,35 @@ namespace MapService.Controllers
         /// <remarks>
         /// List available audio files in the upload folder
         /// </remarks>
+        /// <param name="userPrincipalName">User name that will be supplied to AD</param>
         /// <response code="200">Available audio files were fetched successfully</response>
+        /// <response code="403">Forbidden</response>
         /// <response code="500">Internal Server Error</response>
         [HttpGet()]
         [Route("listaudio")]
         [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         [SwaggerOperation(Tags = new[] { "Admin - Maps and layers" })]
         [Obsolete]
-        public ActionResult<IEnumerable<string>> GetListAudio()
+        public ActionResult<IEnumerable<string>> GetListAudio([FromHeader(Name = "X-Control-Header")] string? userPrincipalName = null)
         {
             var listOfAudioFiles = new List<string>();
 
             try
             {
+                if (AdHandler.AdIsActive)
+                {
+                    var adHandler = new AdHandler(_memoryCache, _logger);
+
+                    userPrincipalName = adHandler.PickUserNameToUse(userPrincipalName);
+
+                    if (!adHandler.UserIsValid(userPrincipalName) || !AdHandler.UserHasAdAccess(userPrincipalName))
+                    {
+                        return StatusCode(StatusCodes.Status403Forbidden, "Forbidden");
+                    }
+                }
+
                 listOfAudioFiles = MapConfigHandler.GetListOfAudioFiles().ToList();
             }
             catch (Exception ex)
@@ -293,18 +369,33 @@ namespace MapService.Controllers
         /// Create a new map configuration
         /// </summary>
         /// <param name="name">The name of the map to create </param>
+        /// <param name="userPrincipalName">User name that will be supplied to AD</param>
         /// <response code="200">The map configuration was created successfully</response>
+        /// <response code="403">Forbidden</response>
         /// <response code="500">Internal Server Error</response>
         [HttpGet]
         [Route("create/{name}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         [SwaggerOperation(Tags = new[] { "Admin - Maps and layers" })]
         [Obsolete]
-        public ActionResult Create(string name)
+        public ActionResult Create(string name, [FromHeader(Name = "X-Control-Header")] string? userPrincipalName = null)
         {
             try
             {
+                if (AdHandler.AdIsActive)
+                {
+                    var adHandler = new AdHandler(_memoryCache, _logger);
+
+                    userPrincipalName = adHandler.PickUserNameToUse(userPrincipalName);
+
+                    if (!adHandler.UserIsValid(userPrincipalName) || !AdHandler.UserHasAdAccess(userPrincipalName))
+                    {
+                        return StatusCode(StatusCodes.Status403Forbidden, "Forbidden");
+                    }
+                }
+
                 MapConfigHandler.CreateMapConfiguration(name);
             }
             catch (Exception ex)

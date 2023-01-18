@@ -1,5 +1,4 @@
 ﻿using MapService.Caches;
-using MapService.Controllers;
 using MapService.Models;
 using MapService.Utility;
 using Microsoft.Extensions.Caching.Memory;
@@ -12,7 +11,6 @@ namespace MapService.Business.Ad
     {
         private readonly AdCache _adCache;
         private readonly ILogger _logger;
-
 
         internal AdHandler(IMemoryCache memoryCache, ILogger logger)
         {
@@ -213,15 +211,13 @@ namespace MapService.Business.Ad
             return true;
         }
 
-
-        public string PickUserNameToUse(string userName)
+        public string PickUserNameToUse(string? userName)
         {
             if (userName != null)
                 return userName;
             else
                 return GetWindowsAuthenticationUser();
         }
-
 
         public string GetWindowsAuthenticationUser()
         {
