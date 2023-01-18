@@ -72,6 +72,21 @@ var documentEditor = Model.extend({
     }
   },
 
+  loadFolders: async function (callback) {
+    var url = this.get("config").url_folder_list;
+    try {
+      const response = await hfetch(url);
+      const text = await response.text();
+      const data = JSON.parse(text);
+      callback(data);
+    } catch (err) {
+      alert(
+        "Kunde inte ladda mappen med mappar. Verifiera att uppsättningen är korrekt utförd."
+      );
+      console.error(err);
+    }
+  },
+
   createDocument(data, callback) {
     var url = this.get("config").url_create;
     hfetch(url, {

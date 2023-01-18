@@ -120,12 +120,14 @@ class DocumentEditor extends Component {
     this.state = {
       showModal: false,
       data: undefined,
+      folderData: undefined,
       newChapterName: "",
       newDocumentName: "",
       newFolderName: "",
       newDocumentMap: "",
       newHeaderIdentifier: "",
       documents: [],
+      folders: [],
       keywords: [],
       geoObjects: [],
       imageList: undefined,
@@ -201,6 +203,14 @@ class DocumentEditor extends Component {
     });
   }
 
+  loadFolderList() {
+    this.props.model.loadFolders((data) => {
+      this.setState({ 
+        folders: data,
+      });
+    });
+  }
+
   loadImageList() {
     this.props.model.listImages((data) => {
       this.setState({
@@ -231,6 +241,7 @@ class DocumentEditor extends Component {
     this.loadImageList();
     this.loadVideoList();
     this.loadAudioList();
+    this.loadFolderList();
   }
 
   save() {
@@ -758,6 +769,12 @@ class DocumentEditor extends Component {
     ));
   }
 
+  renderFolders() {
+    return this.state.folders.map((folder, i) => (
+      <option key={i}>{folder}</option>
+    ));
+  }
+
   validateNewDocumentName(value) {
     var valid = value === "" || /^[A-Za-z0-9_]+$/.test(value);
     return valid;
@@ -1026,6 +1043,7 @@ class DocumentEditor extends Component {
   render() {
     const { classes } = this.props;
     const { selectedDocument, data } = this.state;
+    const { selectedFolder } = this.state;
 
     return (
       <Grid className={classes.root} id="documentEditor" container>
@@ -1041,6 +1059,22 @@ class DocumentEditor extends Component {
             container
             item
           >
+            <Grid className={classes.gridItem} item>
+              <FormControl>
+                <NativeSelect
+                  onChange={(e) => {
+                    this.loadFolderList(e.target.value);
+                  }}
+                  value={selectedFolder}
+                >
+                  <option value="Välj en mapp">
+                  Välj en mapp
+                  </option>
+                  {this.renderFolders()}
+                </NativeSelect>
+                <FormHelperText>Välj en befintlig mapp</FormHelperText>
+              </FormControl>
+            </Grid>
             <Grid className={classes.gridItem} item>
               <FormControl>
                 <NativeSelect

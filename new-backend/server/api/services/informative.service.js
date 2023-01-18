@@ -190,9 +190,9 @@ class InformativeService {
       const dirContents = await fs.promises.readdir(dir, {
         withFileTypes: true,
       });
-      const availableFolders = dirContents.filter((entry) =>
-        entry.isDirectory()
-      );
+      const availableFolders = dirContents
+        .filter((entry) => entry.isDirectory())
+        .map((entry) => entry.name);
       return availableFolders;
     } catch (error) {
       return { error };
