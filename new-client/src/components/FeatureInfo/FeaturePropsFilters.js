@@ -26,6 +26,13 @@ class PropFilters {
       }
     }
 
+    // Handle different kind of arguments using this RegEx
+    // Previously split(',') was used but that of course prevented ',' etc to be used in arguments.... (It broke the rendering)
+    const splitArgsRegEx = /'[^']+'|(\d+(\.\d+))|\d|[a-z_0-9]+/gm;
+
+    // Regex to match a property name when testing if it's a nested property.
+    const isPropertyRegEx = /^[a-z][a-z_0-9]+$/gm;
+
     args.forEach((inFilter) => {
       // This is where we handle chained filters.
       const argsStart = inFilter.indexOf("(");
@@ -36,9 +43,15 @@ class PropFilters {
         filterName = inFilter.substr(0, argsStart);
         args = inFilter
           .substring(argsStart + 1, inFilter.indexOf(")"))
-          .split(",");
+          .match(splitArgsRegEx);
         args.forEach((v, i, a) => {
-          a[i] = this.cleanString(v.trim());
+          v = v.trim();
+          if (isPropertyRegEx.test(v)) {
+            // The value is in fact a nested property! Replace the value!
+            a[i] = this.properties[v] ? this.properties[v].trim() : "";
+          } else {
+            a[i] = this.freeString(v);
+          }
         });
       }
 
@@ -65,8 +78,8 @@ class PropFilters {
     return value;
   }
 
-  cleanString(s) {
-    // Free the strings contained inside ''
+  freeString(s) {
+    // Free a string contained inside ''
     if (s.indexOf("'") === 0) {
       s = s.substring(1, s.length - 1);
     }
