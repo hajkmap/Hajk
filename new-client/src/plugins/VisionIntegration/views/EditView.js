@@ -1,17 +1,14 @@
 // Base
-import React, { useMemo } from "react";
+import React from "react";
 import { styled } from "@mui/material/styles";
-import { Button, Chip, Grid, Typography } from "@mui/material";
+import { Button, Grid, Typography } from "@mui/material";
 
 // Constants
-import {
-  EDIT_VIEW_CAPTION,
-  EDIT_VIEW_TITLE,
-  HUB_CONNECTION_STATUS,
-} from "../constants";
+import { EDIT_VIEW_CAPTION, EDIT_VIEW_TITLE } from "../constants";
 
 // Components
 import SmallDivider from "../components/SmallDivider";
+import HubConnectionStatusChip from "../components/HubConnectionStatusChip";
 
 const Root = styled("div")(({ theme }) => ({
   display: "flex",
@@ -24,25 +21,6 @@ const Root = styled("div")(({ theme }) => ({
 }));
 
 function EditView(props) {
-  // We're gonna want to display a chip with some information regarding the hub-connection-status.
-  // Let's get the information every time the connection-status changes.
-  const hubChipInformation = useMemo(() => {
-    const label =
-      props.hubConnectionStatus === HUB_CONNECTION_STATUS.LOADING
-        ? "Upprättar koppling mot Vision"
-        : props.hubConnectionStatus === HUB_CONNECTION_STATUS.SUCCESS
-        ? "Uppkopplad mot Vision"
-        : "Uppkoppling mot Vision misslyckad";
-    const color =
-      props.hubConnectionStatus === HUB_CONNECTION_STATUS.LOADING
-        ? "warning"
-        : props.hubConnectionStatus === HUB_CONNECTION_STATUS.SUCCESS
-        ? "success"
-        : "error";
-
-    return { label, color };
-  }, [props.hubConnectionStatus]);
-
   return (
     <Root>
       <Grid container justifyContent="center" sx={{ pl: 2, pr: 2 }}>
@@ -78,10 +56,8 @@ function EditView(props) {
         </Grid>
         <SmallDivider mt={1} />
         <Grid item container justifyContent="center">
-          <Chip
-            color={hubChipInformation.color}
-            size="small"
-            label={hubChipInformation.label}
+          <HubConnectionStatusChip
+            hubConnectionStatus={props.hubConnectionStatus}
           />
         </Grid>
       </Grid>

@@ -1,7 +1,7 @@
 // Base
-import React, { useMemo } from "react";
+import React from "react";
 import { styled } from "@mui/material/styles";
-import { AppBar, Chip, Grid, Tabs, Tab } from "@mui/material";
+import { AppBar, Grid, Tabs, Tab } from "@mui/material";
 
 // Components
 import EstateSection from "../components/estates/EstateSection";
@@ -9,10 +9,11 @@ import CoordinateSection from "../components/coordinates/CoordinateSection";
 import EnvironmentSection from "../components/environment/EnvironmentSection";
 
 // Constants
-import { HUB_CONNECTION_STATUS, INTEGRATION_IDS, TABS } from "../constants";
+import { INTEGRATION_IDS, TABS } from "../constants";
 
 // Components
 import SmallDivider from "../components/SmallDivider";
+import HubConnectionStatusChip from "../components/HubConnectionStatusChip";
 
 const Root = styled("div")(() => ({
   margin: -10,
@@ -36,25 +37,6 @@ const TabContent = styled("div")(({ theme }) => ({
 }));
 
 function BaseView(props) {
-  // We're gonna want to display a chip with some information regarding the hub-connection-status.
-  // Let's get the information every time the connection-status changes.
-  const hubChipInformation = useMemo(() => {
-    const label =
-      props.hubConnectionStatus === HUB_CONNECTION_STATUS.LOADING
-        ? "Upprättar koppling mot Vision"
-        : props.hubConnectionStatus === HUB_CONNECTION_STATUS.SUCCESS
-        ? "Uppkopplad mot Vision"
-        : "Uppkoppling mot Vision misslyckad";
-    const color =
-      props.hubConnectionStatus === HUB_CONNECTION_STATUS.LOADING
-        ? "warning"
-        : props.hubConnectionStatus === HUB_CONNECTION_STATUS.SUCCESS
-        ? "success"
-        : "error";
-
-    return { label, color };
-  }, [props.hubConnectionStatus]);
-
   // Renders the section connected to the active tab
   const renderActiveSection = () => {
     switch (props.activeTab) {
@@ -130,10 +112,8 @@ function BaseView(props) {
         <Grid container>
           <SmallDivider />
           <Grid item container justifyContent="center">
-            <Chip
-              color={hubChipInformation.color}
-              size="small"
-              label={hubChipInformation.label}
+            <HubConnectionStatusChip
+              hubConnectionStatus={props.hubConnectionStatus}
             />
           </Grid>
         </Grid>
