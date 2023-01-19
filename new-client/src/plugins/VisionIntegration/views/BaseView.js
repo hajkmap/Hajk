@@ -1,7 +1,7 @@
 // Base
 import React, { useMemo } from "react";
 import { styled } from "@mui/material/styles";
-import { AppBar, Chip, Divider, Grid, Tabs, Tab } from "@mui/material";
+import { AppBar, Chip, Grid, Tabs, Tab } from "@mui/material";
 
 // Components
 import EstateSection from "../components/estates/EstateSection";
@@ -10,6 +10,9 @@ import EnvironmentSection from "../components/environment/EnvironmentSection";
 
 // Constants
 import { HUB_CONNECTION_STATUS, INTEGRATION_IDS, TABS } from "../constants";
+
+// Components
+import SmallDivider from "../components/SmallDivider";
 
 const Root = styled("div")(() => ({
   margin: -10,
@@ -125,13 +128,7 @@ function BaseView(props) {
       <TabContent>
         {renderActiveSection()}
         <Grid container>
-          <Grid
-            container
-            sx={{ marginTop: 0, marginBottom: 1 }}
-            justifyContent="center"
-          >
-            <Divider sx={{ width: "20%" }} />
-          </Grid>
+          <SmallDivider />
           <Grid item container justifyContent="center">
             <Chip
               color={hubChipInformation.color}

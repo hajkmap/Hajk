@@ -1,10 +1,11 @@
 // Base
 import React from "react";
-import { Button, Divider, Grid, Typography } from "@mui/material";
+import { Button, Grid, Typography } from "@mui/material";
 
 import CoordinateToolbox from "./CoordinateToolbox";
 import FeatureList from "../featureList/FeatureList";
 import CoordinateTextSetter from "./CoordinateTextSetter";
+import SmallDivider from "../SmallDivider";
 
 function CoordinateSection(props) {
   const headerText =
@@ -27,13 +28,7 @@ function CoordinateSection(props) {
         activeMapInteraction={props.activeMapInteraction}
         setActiveMapInteraction={props.setActiveMapInteraction}
       />
-      <Grid
-        container
-        sx={{ marginTop: 2, marginBottom: 0.5 }}
-        justifyContent="center"
-      >
-        <Divider sx={{ width: "20%" }} />
-      </Grid>
+      <SmallDivider mt={2} mb={0.5} />
       <Grid container item xs={12}>
         <Typography variant="h6" align="center" sx={{ width: "100%" }}>
           {headerText}

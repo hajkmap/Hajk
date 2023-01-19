@@ -1,10 +1,13 @@
 // Base
 import React, { useMemo } from "react";
 import { styled } from "@mui/material/styles";
-import { Button, Chip, Divider, Grid } from "@mui/material";
+import { Button, Chip, Grid, Typography } from "@mui/material";
 
 // Constants
 import { HUB_CONNECTION_STATUS } from "../constants";
+
+// Components
+import SmallDivider from "../components/SmallDivider";
 
 const Root = styled("div")(({ theme }) => ({
   display: "flex",
@@ -37,17 +40,17 @@ function EditView(props) {
   }, [props.hubConnectionStatus]);
   return (
     <Root>
-      <Grid container>
-        <Grid
-          container
-          sx={{ marginTop: 0, marginBottom: 1 }}
-          justifyContent="center"
-        >
-          <Divider sx={{ width: "20%" }} />
+      <Typography>Editering</Typography>
+      <Grid container justifyContent="center">
+        <Grid item xs={12} sx={{ p: 2 }}>
+          <Button
+            variant="contained"
+            onClick={() => props.setEditModeActive(false)}
+          >
+            Avbryt
+          </Button>
         </Grid>
-        <Grid item xs={12}>
-          <Button onClick={() => props.setEditModeActive(false)}>Avbryt</Button>
-        </Grid>
+        <SmallDivider />
         <Grid item container justifyContent="center">
           <Chip
             color={hubChipInformation.color}
