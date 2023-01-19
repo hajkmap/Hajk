@@ -1,4 +1,4 @@
-import React from "react";
+import { useState, useEffect } from "react";
 import PropTypes from "prop-types";
 import { styled } from "@mui/material/styles";
 import Button from "@mui/material/Button";
@@ -13,6 +13,7 @@ import IconButton from "@mui/material/IconButton";
 import Typography from "@mui/material/Typography";
 
 import ConfirmationDialog from "../../components/ConfirmationDialog";
+import useUpdateEffect from "hooks/useUpdateEffect";
 
 const List = styled("div")(() => ({
   display: "flex",
@@ -110,185 +111,167 @@ const StyledDeleteIcon = styled(DeleteIcon)(() => ({
   transition: "all 300ms",
 }));
 
-class BookmarksView extends React.PureComponent {
-  state = {
-    name: "",
-    error: false,
-    helperText: " ",
-    bookmarks: [],
-    showRemovalConfirmation: false,
-    bookmarkToDelete: null,
-  };
+const BookmarksView = ({ model, app }) => {
+  const [name, setName] = useState("");
+  const [error, setError] = useState(false);
+  const [helperText, setHelperText] = useState(" ");
+  const [bookmarks, setBookmarks] = useState([]);
+  const [showRemovalConfirmation, setShowRemovalConfirmation] = useState(false);
+  const [bookmarkToDelete, setBookmarkToDelete] = useState(null);
 
-  static propTypes = {
-    model: PropTypes.object.isRequired,
-    app: PropTypes.object.isRequired,
-  };
+  useUpdateEffect(() => {
+    setBookmarks(model.getBookmarks());
+  }, [model.bookmarks]);
 
-  static defaultProps = {};
-
-  constructor(props) {
-    super(props);
-    this.model = this.props.model;
-    this.state.bookmarks = [...this.model.bookmarks];
-    this.handleKeyUp = this.handleKeyUp.bind(this);
-    this.handleRemoveConfirmation = this.handleRemoveConfirmation.bind(this);
-    this.handleRemoveConfirmationAbort =
-      this.handleRemoveConfirmationAbort.bind(this);
-  }
-
-  btnAddBookmark = (e) => {
-    if (this.state.name.trim() === "") {
+  const btnAddBookmark = (e) => {
+    if (name.trim() === "") {
       return;
     }
 
-    this.model.addBookmark(this.state.name, true);
+    model.addBookmark(name, true);
 
-    this.setState({
-      name: "",
-      bookmarks: [...this.model.bookmarks],
-    });
-    this.checkBookmarkName("");
+    setName("");
+    setBookmarks([...model.bookmarks]);
+    checkBookmarkName("");
   };
 
-  btnOpenBookmark(bookmark) {
-    this.model.setMapState(bookmark);
-  }
+  const btnOpenBookmark = (bookmark) => {
+    model.setMapState(bookmark);
+  };
 
-  btnHandleRemoveModal(bookmark) {
-    this.setState({ showRemovalConfirmation: true });
-    this.setState({ bookmarkToDelete: bookmark });
-  }
+  const btnHandleRemoveModal = (bookmark) => {
+    setShowRemovalConfirmation(true);
+    setBookmarkToDelete(bookmark);
+  };
 
-  handleRemoveConfirmation() {
-    this.deleteBookmark(this.state.bookmarkToDelete);
-    this.setState({ showRemovalConfirmation: false });
-  }
+  const handleRemoveConfirmation = () => {
+    deleteBookmark(bookmarkToDelete);
+    setShowRemovalConfirmation(false);
+  };
 
-  handleRemoveConfirmationAbort() {
-    this.setState({ showRemovalConfirmation: false });
-  }
+  const handleRemoveConfirmationAbort = () => {
+    setShowRemovalConfirmation(false);
+  };
 
-  deleteBookmark(bookmark) {
-    this.model.removeBookmark(bookmark);
-    this.setState({ bookmarks: [...this.model.bookmarks] });
-  }
+  const deleteBookmark = (bookmark) => {
+    model.removeBookmark(bookmark);
+    setBookmarks([...model.bookmarks]);
+  };
 
-  checkBookmarkName(name) {
+  const checkBookmarkName = (name) => {
     if (name.trim() === "") {
-      this.setState({
-        error: false,
-        helperText: " ",
-      });
+      setError(false);
+      setHelperText(" ");
       return false;
     }
 
-    let exists = this.model.bookmarkWithNameExists(name);
+    let exists = model.bookmarkWithNameExists(name);
 
-    this.setState({
-      error: exists ? true : false,
-      helperText: exists
-        ? `Namnet upptaget. Ersätt bokmärke "${this.state.name}"?`
-        : " ",
-    });
-
-    return exists ? false : true;
-  }
-
-  handleChange = (name) => (event) => {
-    this.setState({
-      [name]: event.target.value,
-    });
+    if (exists) {
+      setError(true);
+      setHelperText(`Namnet upptaget. Ersätt bokmärke "${name}"?`);
+      return false;
+    } else {
+      setError(false);
+      setHelperText(" ");
+      return true;
+    }
   };
 
-  handleKeyUp(e) {
-    this.checkBookmarkName(e.target.value);
+  const handleChange = (event) => {
+    setName(event.target.value);
+  };
+
+  const handleKeyUp = (e) => {
+    checkBookmarkName(e.target.value);
 
     if (e.nativeEvent.keyCode === 13 /* Enter, yes we all know... */) {
-      this.btnAddBookmark();
+      btnAddBookmark();
     }
-  }
+  };
 
-  refreshBookmarks() {
-    this.setState({ bookmarks: [...this.model.bookmarks] });
-  }
-
-  render() {
-    return (
-      <div>
-        <Typography sx={{ marginBottom: 1 }}>
-          Skapa ett bokmärke med kartans synliga lager, aktuella zoomnivå och
-          utbredning.
-        </Typography>
-        <Box
-          sx={{
-            display: "flex",
-            flexFlow: "row nowrap",
-            alignItems: "flex-end",
-          }}
+  return (
+    <div>
+      <Typography sx={{ marginBottom: 1 }}>
+        Skapa ett bokmärke med kartans synliga lager, aktuella zoomnivå och
+        utbredning.
+      </Typography>
+      <Box
+        sx={{
+          display: "flex",
+          flexFlow: "row nowrap",
+          alignItems: "flex-end",
+        }}
+      >
+        <TextField
+          placeholder="Skriv bokmärkets namn"
+          label="Namn"
+          value={name}
+          onChange={handleChange}
+          onKeyUp={handleKeyUp}
+          error={error}
+          helperText={helperText}
+          sx={{ flex: "0 1 100%", height: "0%" }}
+          variant="standard"
+        ></TextField>
+        <AddButton
+          variant="contained"
+          color="primary"
+          size="small"
+          startIcon={error ? null : <AddCircleOutlineIcon />}
+          onClick={btnAddBookmark}
         >
-          <TextField
-            placeholder="Skriv bokmärkets namn"
-            label="Namn"
-            value={this.state.name}
-            onChange={this.handleChange("name")}
-            onKeyUp={this.handleKeyUp}
-            error={this.state.error}
-            helperText={this.state.helperText}
-            sx={{ flex: "0 1 100%", height: "0%" }}
-            variant="standard"
-          ></TextField>
-          <AddButton
-            variant="contained"
-            color="primary"
-            size="small"
-            startIcon={this.state.error ? null : <AddCircleOutlineIcon />}
-            onClick={this.btnAddBookmark}
-          >
-            {this.state.error ? "Ersätt" : "Lägg till"}
-          </AddButton>
-        </Box>
+          {error ? "Ersätt" : "Lägg till"}
+        </AddButton>
+      </Box>
 
-        <List>
-          {this.state.bookmarks.map((item, index) => (
-            <ListItem key={index + "_" + item.name}>
-              <BookmarkButton
-                onClick={() => {
-                  this.btnOpenBookmark(item);
-                }}
-              >
-                <BookmarkIconSpan>
-                  <BookmarkOutlinedIcon />
-                  <BookmarkIcon className="on" />
-                </BookmarkIconSpan>
-                <ItemNameSpan>{item.name}</ItemNameSpan>
-              </BookmarkButton>
-              <DeleteButton
-                aria-label="Ta bort"
-                onClick={() => {
-                  this.btnHandleRemoveModal(item);
-                }}
-                size="large"
-              >
-                <StyledDeleteIcon fontSize="small" />
-              </DeleteButton>
-            </ListItem>
-          ))}
-          <ConfirmationDialog
-            open={this.state.showRemovalConfirmation === true}
-            titleName={"Radera bokmärke"}
-            contentDescription={
-              "Är du säker på att du vill radera bokmärket? Detta går inte att ångra."
-            }
-            cancel={"Avbryt"}
-            confirm={"Radera"}
-            handleConfirm={this.handleRemoveConfirmation}
-            handleAbort={this.handleRemoveConfirmationAbort}
-          />
-        </List>
-      </div>
-    );
-  }
-}
+      <List>
+        {bookmarks.map((item, index) => (
+          <ListItem key={index + "_" + item.name}>
+            <BookmarkButton
+              variant="contained"
+              color="primary"
+              size="small"
+              onClick={() => btnOpenBookmark(item)}
+            >
+              <BookmarkIconSpan>
+                <BookmarkOutlinedIcon />
+                <BookmarkIcon className="on" />
+              </BookmarkIconSpan>
+              <ItemNameSpan>{item.name}</ItemNameSpan>
+            </BookmarkButton>
+            <DeleteButton
+              aria-label="Ta bort"
+              variant="contained"
+              color="primary"
+              size="large"
+              onClick={() => btnHandleRemoveModal(item)}
+            >
+              <StyledDeleteIcon />
+            </DeleteButton>
+          </ListItem>
+        ))}
+        <ConfirmationDialog
+          open={showRemovalConfirmation === true}
+          titleName={"Radera bokmärke"}
+          contentDescription={
+            "Är du säker på att du vill radera bokmärket " +
+            bookmarkToDelete?.name +
+            "?"
+          }
+          cancel={"Avbryt"}
+          confirm={"Radera"}
+          handleConfirm={handleRemoveConfirmation}
+          handleAbort={handleRemoveConfirmationAbort}
+        />
+      </List>
+    </div>
+  );
+};
+
+BookmarksView.propTypes = {
+  model: PropTypes.object.isRequired,
+  app: PropTypes.object.isRequired,
+};
 
 export default BookmarksView;
