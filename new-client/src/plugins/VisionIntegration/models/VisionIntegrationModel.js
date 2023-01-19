@@ -482,6 +482,8 @@ class VisionIntegrationModel {
 
   #handleVisionAskingForFeatureGeometry = async (payload) => {
     console.log("Got asking for feature geometry! Payload: ", payload);
+    // Let's publish an event that will make sure the edit mode is activated...
+    this.#localObserver.publish("enable-edit-mode");
     // TODO: A lot...
     // When we've edited an existing (or created a new) geometry we will send the
     // geometry back to vision!

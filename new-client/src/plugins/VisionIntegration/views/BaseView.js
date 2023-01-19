@@ -4,12 +4,12 @@ import { styled } from "@mui/material/styles";
 import { AppBar, Chip, Divider, Grid, Tabs, Tab } from "@mui/material";
 
 // Components
-import EstateSection from "./components/estates/EstateSection";
-import CoordinateSection from "./components/coordinates/CoordinateSection";
-import EnvironmentSection from "./components/environment/EnvironmentSection";
+import EstateSection from "../components/estates/EstateSection";
+import CoordinateSection from "../components/coordinates/CoordinateSection";
+import EnvironmentSection from "../components/environment/EnvironmentSection";
 
 // Constants
-import { HUB_CONNECTION_STATUS, INTEGRATION_IDS, TABS } from "./constants";
+import { HUB_CONNECTION_STATUS, INTEGRATION_IDS, TABS } from "../constants";
 
 const Root = styled("div")(() => ({
   margin: -10,
@@ -32,7 +32,7 @@ const TabContent = styled("div")(({ theme }) => ({
   minHeight: 300,
 }));
 
-function VisionIntegrationView(props) {
+function BaseView(props) {
   // We're gonna want to display a chip with some information regarding the hub-connection-status.
   // Let's get the information every time the connection-status changes.
   const hubChipInformation = useMemo(() => {
@@ -101,7 +101,7 @@ function VisionIntegrationView(props) {
     }
   };
 
-  return props.windowVisible ? (
+  return (
     <Root>
       <Grid item container justifyContent="center">
         <StyledAppBar position="sticky" color="default">
@@ -142,7 +142,7 @@ function VisionIntegrationView(props) {
         </Grid>
       </TabContent>
     </Root>
-  ) : null;
+  );
 }
 
-export default VisionIntegrationView;
+export default BaseView;

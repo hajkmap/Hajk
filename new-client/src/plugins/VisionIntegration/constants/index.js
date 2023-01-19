@@ -13,6 +13,7 @@ export const INTEGRATION_IDS = Object.freeze({
   ESTATES: "ESTATES",
   COORDINATES: "COORDINATES",
   ENVIRONMENT: "ENVIRONMENT",
+  EDIT: "EDIT",
 });
 
 export const ESTATE_TEXT = Object.freeze({
