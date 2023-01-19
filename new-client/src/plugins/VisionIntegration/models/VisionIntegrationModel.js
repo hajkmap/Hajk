@@ -166,6 +166,18 @@ class VisionIntegrationModel {
       "HandleFeatures",
       this.#handleVisionAskingToShowFeatures
     );
+    // Vision can also ask us for a feature geometry (this can mean either that we have to create a new one,
+    // but it can also mean that there already exists a geometry for the supplied feature - which we have to modify).
+    this.#hubConnection.on(
+      "HandleAskForFeatureGeometry",
+      this.#handleVisionAskingForFeatureGeometry
+    );
+    // When Vision has saved a geometry to the database, it will send some operation feedback. Let's make
+    // sure we are listening for it...
+    this.#hubConnection.on(
+      "HandleOperationFeedback",
+      this.#handleVisionSendingOperationFeedback
+    );
   };
 
   // Initiates all listeners on the local-observer. Used for communication within the plugin.
@@ -466,6 +478,21 @@ class VisionIntegrationModel {
       features,
       typeId: type,
     });
+  };
+
+  #handleVisionAskingForFeatureGeometry = async (payload) => {
+    console.log("Got asking for feature geometry! Payload: ", payload);
+    // TODO: A lot...
+    // When we've edited an existing (or created a new) geometry we will send the
+    // geometry back to vision!
+    this.#hubConnection.invoke("SendGeometry", {
+      wkt: "This is a WKT",
+      srsId: 3007,
+    });
+  };
+
+  #handleVisionSendingOperationFeedback = (payload) => {
+    console.log("Got operation feedback! ", payload);
   };
 
   // Accepts a feature and returns an object with the required keys to match Visions API description.
