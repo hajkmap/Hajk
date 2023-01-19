@@ -1,6 +1,7 @@
 // Base
 import React, { useState, useEffect, useCallback } from "react";
 import Observer from "react-event-observer";
+import { useSnackbar } from "notistack";
 
 // Icons
 import RepeatIcon from "@mui/icons-material/Repeat";
@@ -21,9 +22,11 @@ import {
   HUB_CONNECTION_STATUS,
   INTEGRATION_IDS,
   ENVIRONMENT_IDS,
+  EDIT_STATUS,
 } from "./constants";
+
+// Hooks
 import useUpdateEffect from "hooks/useUpdateEffect";
-import { useSnackbar } from "notistack";
 
 function VisionIntegration(props) {
   // Let's destruct the options from the props (and fall back on empty object to avoid
@@ -43,8 +46,8 @@ function VisionIntegration(props) {
   );
   // We have to keep track of which tab we're currently on...
   const [activeTab, setActiveTab] = useState(INTEGRATION_IDS.ESTATES);
-  // We have to keep track of wether we are in edit mode or not...
-  const [editModeActive, setEditModeActive] = useState(false);
+  // We have to keep track of the edit-mode status...
+  const [editModeStatus, setEditModeStatus] = useState(EDIT_STATUS.INACTIVE);
   // We have to keep track of which environment-type is currently active...
   const [activeEnvironmentType, setActiveEnvironmentType] = useState(
     ENVIRONMENT_IDS.AREA
@@ -192,7 +195,7 @@ function VisionIntegration(props) {
 
   // Handles for when edit-mode should be activated
   const enableEditMode = useCallback(() => {
-    setEditModeActive(true);
+    setEditModeStatus(EDIT_STATUS.ACTIVE);
   }, []);
 
   // We're gonna want to subscribe to some events so that we can keep track of hub-status etc.
@@ -315,15 +318,16 @@ function VisionIntegration(props) {
   // The edit-mode is a special case since its not really a "tab", but rather a view. The thought process is the same though.
   // The effect also makes sure to disable any map-interaction that could be active.
   useEffect(() => {
-    const featureTypeToShow = editModeActive
-      ? INTEGRATION_IDS.EDIT
-      : activeTab === INTEGRATION_IDS.ENVIRONMENT
-      ? `${activeTab}_${activeEnvironmentType}`
-      : activeTab;
+    const featureTypeToShow =
+      editModeStatus !== EDIT_STATUS.INACTIVE
+        ? INTEGRATION_IDS.EDIT
+        : activeTab === INTEGRATION_IDS.ENVIRONMENT
+        ? `${activeTab}_${activeEnvironmentType}`
+        : activeTab;
     mapViewModel.updateHiddenFeatures(featureTypeToShow);
 
     setActiveMapInteraction(null);
-  }, [mapViewModel, activeTab, editModeActive, activeEnvironmentType]);
+  }, [mapViewModel, activeTab, editModeStatus, activeEnvironmentType]);
 
   // An effect making sure to set the chosen map-interaction in the model when state changes...
   useEffect(() => {
@@ -386,8 +390,8 @@ function VisionIntegration(props) {
         hubConnectionStatus={hubConnectionStatus}
         activeTab={activeTab}
         setActiveTab={setActiveTab}
-        editModeActive={editModeActive}
-        setEditModeActive={setEditModeActive}
+        editModeStatus={editModeStatus}
+        setEditModeStatus={setEditModeStatus}
         activeEnvironmentType={activeEnvironmentType}
         setActiveEnvironmentType={setActiveEnvironmentType}
         selectedEstates={selectedEstates}

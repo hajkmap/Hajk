@@ -149,6 +149,13 @@ export const MAP_INTERACTION_INFO = [
   },
 ];
 
+export const EDIT_STATUS = {
+  INACTIVE: "EDIT_INACTIVE",
+  SEARCH_LOADING: "EDIT_SEARCH_LOADING",
+  WAITING: "EDIT_WAITING",
+  ACTIVE: "EDIT_ACTIVE",
+};
+
 export const EDIT_VIEW_TITLE = "Uppdatera geometri";
 
 export const EDIT_VIEW_CAPTION =

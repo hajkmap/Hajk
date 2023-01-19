@@ -5,6 +5,7 @@ import { Button, Grid, Typography } from "@mui/material";
 
 // Constants
 import {
+  EDIT_STATUS,
   EDIT_VIEW_CAPTION,
   EDIT_VIEW_TITLE,
   MAP_INTERACTIONS,
@@ -36,7 +37,7 @@ function EditView(props) {
 
   const handleCancelClick = () => {
     setActiveMapInteraction(MAP_INTERACTIONS.EDIT_NONE);
-    props.setEditModeActive(false);
+    props.setEditModeStatus(EDIT_STATUS.INACTIVE);
   };
 
   return (
