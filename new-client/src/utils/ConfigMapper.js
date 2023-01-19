@@ -28,7 +28,6 @@ export default class ConfigMapper {
           args.layersInfo[getIndex].style;
 
         let geoserverLegendOptions = "";
-        let qgisOptions = "";
 
         if (args.serverType === "geoserver") {
           /**
@@ -44,11 +43,6 @@ export default class ConfigMapper {
             : "";
         }
 
-        // QGIS Server requires the SERVICE parameter to be set, see issue #880.
-        if (args.serverType === "qgis") {
-          qgisOptions = "&SERVICE=WMS";
-        }
-
         // If layers URL already includes a query string separator (ie question mark), we want
         // to append the remaining values with &.
         const theGlue = args.url.includes("?") ? "&" : "?";
@@ -61,7 +55,7 @@ export default class ConfigMapper {
         // Let's check if there is a custom url, and if there is we'll use that one instead of the 'ordinary' url:
         const baseUrl = args.customGetMapUrl || args.url;
         // Then we can create the legend-url by combining all the necessary search-params end so on...
-        legendUrl = `${proxy}${baseUrl}${theGlue}REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&LAYER=${layer}&STYLE=${style}${geoserverLegendOptions}${qgisOptions}`;
+        legendUrl = `${proxy}${baseUrl}${theGlue}SERVICE=WMS&REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&LAYER=${layer}&STYLE=${style}${geoserverLegendOptions}`;
       }
       // If there's a legend URL specified in admin, use it as is
       else {

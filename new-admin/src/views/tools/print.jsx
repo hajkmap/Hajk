@@ -44,6 +44,7 @@ var defaultState = {
   useTextIconsInMargin: false,
   mapTextColor: "#000000",
   useCustomTileLoaders: true,
+  includeImageBorder: false,
   maxTileSize: 4096,
 };
 
@@ -109,6 +110,8 @@ class ToolOptions extends Component {
             : this.state.includeNorthArrow,
         northArrowPlacement:
           tool.options.northArrowPlacement || this.state.northArrowPlacement,
+        includeImageBorder:
+          tool.options.includeImageBorder || this.state.includeImageBorder,
         useCustomTileLoaders:
           tool.options.useCustomTileLoaders ?? this.state.useCustomTileLoaders,
         maxTileSize: tool.options.maxTileSize || this.state.maxTileSize,
@@ -201,6 +204,7 @@ class ToolOptions extends Component {
         scaleBarPlacement: this.state.scaleBarPlacement,
         includeNorthArrow: this.state.includeNorthArrow,
         northArrowPlacement: this.state.northArrowPlacement,
+        includeImageBorder: this.state.includeImageBorder,
         useCustomTileLoaders: this.state.useCustomTileLoaders,
         maxTileSize: this.state.maxTileSize,
       },
@@ -737,6 +741,20 @@ class ToolOptions extends Component {
             {this.renderPlacementSelect(
               this.state.scaleBarPlacement,
               "scaleBarPlacement"
+            )}
+          </div>
+          <div>
+            <label htmlFor="includeImageBorder">
+              Inkludera bildram{" "}
+              <i
+                className="fa fa-question-circle"
+                data-toggle="tooltip"
+                title="Inställning för om kartbildsram skall inkluderas som standard."
+              />
+            </label>
+            {this.renderIncludeSelect(
+              this.state.includeImageBorder,
+              "includeImageBorder"
             )}
           </div>
           <div>
