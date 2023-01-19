@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import PropTypes from "prop-types";
 import BaseWindowPlugin from "../BaseWindowPlugin";
 import BookmarksModel from "./BookmarksModel";
@@ -11,58 +11,52 @@ import BookmarksIcon from "@mui/icons-material/Bookmarks";
  * in localStorage. A bookmark contains the map, x,y, zoom level, visible layers etc.
  *
  * @class Bookmarks
- * @extends {React.PureComponent}
+ * @extends {React.Component}
  */
-class Bookmarks extends React.PureComponent {
-  state = {
-    title: "Bokmärken",
-    color: null,
+
+const Bookmarks = ({ app, map, options }) => {
+  const [title, setTitle] = useState("Bokmärken");
+  const [color, setColor] = useState(null);
+  const globalObserver = app.globalObserver;
+  const bookmarksModel = BookmarksModel({ app, map });
+
+  const updateCustomProp = (prop, value) => {
+    if (prop === "title") setTitle(value);
+    else if (prop === "color") setColor(value);
+    else console.error("Unknown prop: " + prop);
   };
 
-  static propTypes = {
-    app: PropTypes.object.isRequired,
-    map: PropTypes.object.isRequired,
-    options: PropTypes.object.isRequired,
-  };
+  return (
+    <BaseWindowPlugin
+      {...{ app, map, options }}
+      type="Bookmarks"
+      custom={{
+        icon: <BookmarksIcon />,
+        title: title,
+        color: color,
+        description: "Användarens bokmärken",
+        height: 450,
+        width: 400,
+      }}
+    >
+      <BookmarksView
+        globalObserver={globalObserver}
+        model={bookmarksModel}
+        app={app}
+        updateCustomProp={updateCustomProp}
+      />
+    </BaseWindowPlugin>
+  );
+};
 
-  static defaultProps = {
-    options: {},
-  };
+Bookmarks.propTypes = {
+  app: PropTypes.object.isRequired,
+  map: PropTypes.object.isRequired,
+  options: PropTypes.object,
+};
 
-  constructor(props) {
-    super(props);
-    this.bookmarksModel = new BookmarksModel({
-      app: props.app,
-      map: props.map,
-    });
-  }
-
-  updateCustomProp = (prop, value) => {
-    this.setState({ [prop]: value });
-  };
-
-  render() {
-    return (
-      <BaseWindowPlugin
-        {...this.props}
-        type="Bookmarks"
-        custom={{
-          icon: <BookmarksIcon />,
-          title: this.state.title,
-          color: this.state.color,
-          description: "Användarens bokmärken",
-          height: 450,
-          width: 400,
-        }}
-      >
-        <BookmarksView
-          model={this.bookmarksModel}
-          app={this.props.app}
-          updateCustomProp={this.updateCustomProp}
-        />
-      </BaseWindowPlugin>
-    );
-  }
-}
+Bookmarks.defaultProps = {
+  options: {},
+};
 
 export default Bookmarks;
