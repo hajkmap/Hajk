@@ -4,7 +4,11 @@ import { styled } from "@mui/material/styles";
 import { Button, Chip, Grid, Typography } from "@mui/material";
 
 // Constants
-import { HUB_CONNECTION_STATUS } from "../constants";
+import {
+  EDIT_VIEW_CAPTION,
+  EDIT_VIEW_TITLE,
+  HUB_CONNECTION_STATUS,
+} from "../constants";
 
 // Components
 import SmallDivider from "../components/SmallDivider";
@@ -38,19 +42,41 @@ function EditView(props) {
 
     return { label, color };
   }, [props.hubConnectionStatus]);
+
   return (
     <Root>
-      <Typography>Editering</Typography>
+      <Grid container justifyContent="center" sx={{ pl: 2, pr: 2 }}>
+        <Typography variant="h6" align="center" sx={{ width: "100%" }}>
+          {EDIT_VIEW_TITLE}
+        </Typography>
+        <Typography variant="caption" align="center" sx={{ width: "100%" }}>
+          {EDIT_VIEW_CAPTION}
+        </Typography>
+      </Grid>
       <Grid container justifyContent="center">
-        <Grid item xs={12} sx={{ p: 2 }}>
-          <Button
-            variant="contained"
-            onClick={() => props.setEditModeActive(false)}
-          >
-            Avbryt
-          </Button>
+        <Grid container spacing={2} justifyContent="center">
+          <Grid item>
+            <Button
+              size="small"
+              sx={{ minWidth: 100 }}
+              variant="contained"
+              onClick={() => props.setEditModeActive(false)}
+            >
+              Avbryt
+            </Button>
+          </Grid>
+          <Grid item>
+            <Button
+              size="small"
+              sx={{ minWidth: 100 }}
+              variant="contained"
+              disabled
+            >
+              Spara
+            </Button>
+          </Grid>
         </Grid>
-        <SmallDivider />
+        <SmallDivider mt={1} />
         <Grid item container justifyContent="center">
           <Chip
             color={hubChipInformation.color}

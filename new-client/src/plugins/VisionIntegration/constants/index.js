@@ -116,3 +116,8 @@ export const MAP_INTERACTION_INFO = [
       "Klicka de objekt som du vill välja. Om du håller in CTRL så kan du rita ett område och välja flera objekt samtidigt.",
   },
 ];
+
+export const EDIT_VIEW_TITLE = "Uppdatera geometri";
+
+export const EDIT_VIEW_CAPTION =
+  "Här kan du hantera det geometri-objekt som ska vara kopplat till Vision. När du är nöjd klickar du på 'spara' för att skicka informationen till Vision.";
