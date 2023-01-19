@@ -22,6 +22,8 @@ import {
   INTEGRATION_IDS,
   ENVIRONMENT_IDS,
 } from "./constants";
+import useUpdateEffect from "hooks/useUpdateEffect";
+import { useSnackbar } from "notistack";
 
 function VisionIntegration(props) {
   // Let's destruct the options from the props (and fall back on empty object to avoid
@@ -86,6 +88,11 @@ function VisionIntegration(props) {
   );
   // We also have to keep track of which map-interaction that is currently active
   const [activeMapInteraction, setActiveMapInteraction] = useState(null);
+  // We're gonna need some snackbar functions so that we can prompt the user with information.
+  const { closeSnackbar, enqueueSnackbar } = useSnackbar();
+  // We don't want to prompt the user with more than one snack, so lets track the current one,
+  // so that we can close it when another one is about to open.
+  const helperSnack = React.useRef(null);
 
   // We're gonna need a handler for the estate-search-success event.
   const handleEstateSearchSuccess = useCallback(
@@ -309,6 +316,26 @@ function VisionIntegration(props) {
   useEffect(() => {
     mapViewModel.toggleMapInteraction(activeMapInteraction);
   }, [activeMapInteraction, mapViewModel]);
+
+  // This effect does not run on first render. (Otherwise the user would be
+  // prompted with information before they've even started using the plugin).
+  // If it's not the first render, the effect makes sure to prompt the user
+  // with information when they change the current activity or draw-type.
+  useUpdateEffect(() => {
+    // Let's check if there's some helper-text that we should prompt the user with.
+    const helperText = model.getHelperSnackText(activeMapInteraction);
+    // If there is, we can prompt the user with a snack.
+    if (helperText) {
+      helperSnack.current = enqueueSnackbar(helperText, {
+        variant: "default",
+        anchorOrigin: { vertical: "bottom", horizontal: "center" },
+      });
+    }
+    // Let's make sure to clean-up out current snack when un-mounting!
+    return () => {
+      closeSnackbar(helperSnack.current);
+    };
+  }, [activeMapInteraction, enqueueSnackbar, closeSnackbar]);
 
   // We're gonna need to catch if the user closes the window, and make sure to
   // update the state so that the effect handling the draw-interaction-toggling fires.

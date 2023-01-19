@@ -8,6 +8,7 @@ import {
   INTEGRATION_IDS,
   ENVIRONMENT_INFO,
   MAP_INTERACTIONS,
+  MAP_INTERACTION_INFO,
 } from "../constants";
 
 // A simple class containing functionality that is used in the VisionIntegration-plugin.
@@ -778,6 +779,19 @@ class VisionIntegrationModel {
   // Sets the environment-type-id
   setCurrentEnvironmentTypeId = (id) => {
     this.#currentEnvironmentTypeId = id;
+  };
+
+  // Returns a string that can be used to prompt the user with helping text.
+  // The returned string is based on which map interaction id is supplied (Since we want the helping
+  // text to be suitable to what the user is currently doing).
+  getHelperSnackText = (mapInteractionId) => {
+    const interactionInfo = MAP_INTERACTION_INFO.find(
+      (info) => info.id === mapInteractionId
+    );
+    if (!interactionInfo) {
+      return null;
+    }
+    return interactionInfo.helperText;
   };
 }
 

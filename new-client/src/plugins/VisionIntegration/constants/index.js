@@ -95,3 +95,23 @@ export const MAP_INTERACTIONS = Object.freeze({
   SELECT_COORDINATE: "SELECT_COORDINATE",
   SELECT_ENVIRONMENT: "SELECT_ENVIRONMENT",
 });
+
+export const MAP_INTERACTION_INFO = [
+  {
+    id: MAP_INTERACTIONS.SELECT_ESTATE,
+    name: "Selektera fastighet",
+    helperText:
+      "Klicka på fastigheterna som du vill välja. Om du håller in CTRL så kan du rita ett område och välja flera fastigheter samtidigt.",
+  },
+  {
+    id: MAP_INTERACTIONS.SELECT_COORDINATE,
+    name: "Seletera koordinat",
+    helperText: "Klicka där du vill placera en koordinat.",
+  },
+  {
+    id: MAP_INTERACTIONS.SELECT_ENVIRONMENT,
+    name: "Selektera markmiljö-objekt",
+    helperText:
+      "Klicka de objekt som du vill välja. Om du håller in CTRL så kan du rita ett område och välja flera objekt samtidigt.",
+  },
+];

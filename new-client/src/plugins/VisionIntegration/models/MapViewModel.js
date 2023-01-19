@@ -66,7 +66,6 @@ class VisionIntegrationModel {
     if (keyCode === 17 && !this.#ctrlKeyPressed) {
       this.#ctrlKeyPressed = true;
       if (this.#polygonSelectIsAvailable()) {
-        console.log("Here we should enable polygon select!");
         this.#enablePolygonSelection();
       }
     }
@@ -79,7 +78,6 @@ class VisionIntegrationModel {
     if (keyCode === 17 && this.#ctrlKeyPressed) {
       this.#ctrlKeyPressed = false;
       if (this.#polygonSelectIsAvailable()) {
-        console.log("Here we should disable polygon select!");
         this.#disablePolygonSelection();
       }
     }
