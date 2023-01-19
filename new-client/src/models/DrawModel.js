@@ -552,7 +552,7 @@ class DrawModel {
               color: featureIsTextType
                 ? feature.get("TEXT_SETTINGS")?.backgroundColor ??
                   this.#textStyleSettings.backgroundColor
-                : "rgba(0, 0, 0, 0.5)",
+                : "rgba(0, 0, 0, 0.7)",
               width: 3,
             })
           : null,
@@ -1338,8 +1338,13 @@ class DrawModel {
   // We want to handle key-up events so that we can let the user
   // remove the last drawn point by pressing the escape key. (And perhaps more...?)
   #handleKeyUp = (e) => {
-    const { keyCode } = e;
-    if (keyCode === 27) {
+    if (!this.#drawInteraction) return;
+    const { keyCode, ctrlKey } = e;
+    if (keyCode === 27 || keyCode === 13) {
+      // escape or enter finishes drawing
+      this.finishDraw();
+    } else if (ctrlKey === true && keyCode === 90) {
+      // ctrl + z removes last draw point
       this.#drawInteraction.removeLastPoint();
     }
   };
@@ -2230,6 +2235,13 @@ class DrawModel {
     this.#map.clickLock.add("coreDrawModel");
     //  ...and snap-helper for the snap-functionality.
     this.#map.snapHelper.add("coreDrawModel");
+  };
+
+  // Finishes the currently active draw interaction.
+  finishDraw = () => {
+    if (this.#drawInteraction) {
+      this.#drawInteraction.finishDraw();
+    }
   };
 
   // Fits the map to the extent of the drawn features in the draw-source

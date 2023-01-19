@@ -1,5 +1,5 @@
 import { styled } from "@mui/material/styles";
-import { ToggleButtonGroup, ToggleButton } from "@mui/material";
+import { ToggleButtonGroup, ToggleButton, Button, Grid } from "@mui/material";
 
 import { IconPolygon, IconPoint, IconLine, IconCircle } from "./MeasureIcons";
 import DeleteIcon from "@mui/icons-material/Delete";
@@ -43,34 +43,47 @@ const StyledToggleButtonGroup = styled(ToggleButtonGroup)(({ theme }) => ({
 }));
 
 function Measure2View(props) {
-  const { handleDrawTypeChange, drawType } = props;
+  const { handleDrawTypeChange, drawType, drawModel } = props;
+
+  const DeleteAllClick = () => {
+    drawModel.removeDrawnFeatures();
+  };
 
   return (
     <>
-      <StyledToggleButtonGroup
-        exclusive
-        value={drawType}
-        onChange={handleDrawTypeChange}
-        orientation="horizontal"
-        variant="contained"
-        aria-label="outlined button group"
-      >
-        <StyledToggleButton value="Point" title="Punkt">
-          <SvgImg src={IconPoint()} />
-        </StyledToggleButton>
-        <StyledToggleButton value="LineString" title="Sträcka">
-          <SvgImg src={IconLine()} />
-        </StyledToggleButton>
-        <StyledToggleButton value="Polygon" title="Areal">
-          <SvgImg src={IconPolygon()} />
-        </StyledToggleButton>
-        <StyledToggleButton value="Circle" title="Cirkel">
-          <SvgImg src={IconCircle()} />
-        </StyledToggleButton>
-        <StyledToggleButton value="Delete" title="Ta bort">
-          <DeleteIcon />
-        </StyledToggleButton>
-      </StyledToggleButtonGroup>
+      <Grid container spacing={1} alignItems="center">
+        <Grid item xs={9}>
+          <StyledToggleButtonGroup
+            exclusive
+            value={drawType}
+            onChange={handleDrawTypeChange}
+            orientation="horizontal"
+            variant="contained"
+            aria-label="outlined button group"
+          >
+            <StyledToggleButton value="Point" title="Punkt">
+              <SvgImg src={IconPoint()} />
+            </StyledToggleButton>
+            <StyledToggleButton value="LineString" title="Sträcka">
+              <SvgImg src={IconLine()} />
+            </StyledToggleButton>
+            <StyledToggleButton value="Polygon" title="Areal">
+              <SvgImg src={IconPolygon()} />
+            </StyledToggleButton>
+            <StyledToggleButton value="Circle" title="Cirkel">
+              <SvgImg src={IconCircle()} />
+            </StyledToggleButton>
+            <StyledToggleButton value="Delete" title="Ta bort enskild mätning">
+              <DeleteIcon />
+            </StyledToggleButton>
+          </StyledToggleButtonGroup>
+        </Grid>
+        <Grid item xs={3}>
+          <Button variant="contained" fullWidth onClick={DeleteAllClick}>
+            Rensa
+          </Button>
+        </Grid>
+      </Grid>
     </>
   );
 }

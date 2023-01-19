@@ -11,7 +11,6 @@ import { MeasureIcon } from "./MeasureIcons";
 import { DEFAULT_MEASUREMENT_SETTINGS } from "./constants";
 import DrawModel from "models/DrawModel";
 import { Circle, Fill, RegularShape, Stroke, Style } from "ol/style";
-import Point from "ol/geom/Point";
 
 function Measure2(props) {
   const [state] = React.useState({});
@@ -59,13 +58,6 @@ function Measure2(props) {
           // we use dashes while drawing and then make the lines solid in handleDrawEnd
           lineDash: [10, 10],
         },
-        // TODO: DrawModel only accepts changed to Draw type TEXT (as in Sketch).
-        // The labels for measurements are uneffected.
-        // textStyleSettings: {
-        //   foregroundColor: "#00ffff",
-        //   backgroundColor: "#000000",
-        //   size: 14,
-        // },
       })
   );
 
@@ -77,7 +69,7 @@ function Measure2(props) {
 
     if (!style) return;
 
-    if (feature.getGeometry() instanceof Point) {
+    if (feature.getGeometry().getType() === "Point") {
       style = new Style({
         image: new Circle({
           radius: 6,
@@ -220,6 +212,7 @@ function Measure2(props) {
         localObserver={localObserver}
         globalObserver={props.app.globalObserver}
         drawType={drawType}
+        drawModel={drawModel}
         handleDrawTypeChange={handleDrawTypeChange}
       />
     </BaseWindowPlugin>
