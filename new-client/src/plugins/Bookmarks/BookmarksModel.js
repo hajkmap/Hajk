@@ -10,22 +10,23 @@
  * In future we might want to create backwardcompatibility if we add functionality.
  */
 
+import { useState, useEffect } from "react";
 import { isValidLayerId } from "../../utils/Validator";
 
 const bookmarksVersion = "1.0";
 const storageKey = `bookmarks_v${bookmarksVersion}`;
 
-class BookmarksModel {
-  constructor(settings) {
-    this.map = settings.map;
-    this.app = settings.app;
-    this.bookmarks = [];
+const BookmarksModel = (settings) => {
+  const [map, setMap] = useState(settings.map);
+  const [app, setApp] = useState(settings.app);
+  const [bookmarks, setBookmarks] = useState([]);
 
-    this.readFromStorage();
-  }
+  useEffect(() => {
+    readFromStorage();
+  }, []);
 
-  getVisibleLayers() {
-    return this.map
+  const getVisibleLayers = () => {
+    return map
       .getLayers()
       .getArray()
       .filter(
@@ -36,11 +37,11 @@ class BookmarksModel {
       )
       .map((layer) => layer.getProperties().name)
       .join(",");
-  }
+  };
 
-  setVisibleLayers(strLayers) {
+  const setVisibleLayers = (strLayers) => {
     let layers = strLayers.split(",");
-    this.map
+    map
       .getLayers()
       .getArray()
       .filter(
@@ -51,10 +52,10 @@ class BookmarksModel {
       .forEach((layer) => {
         layer.setVisible(layers.indexOf(layer.getProperties().name) > -1);
       });
-  }
+  };
 
-  getMapState() {
-    const view = this.map.getView();
+  const getMapState = () => {
+    const view = map.getView();
     const viewCenter = view.getCenter();
     const pos = {
       x: viewCenter[0],
@@ -63,33 +64,33 @@ class BookmarksModel {
     };
 
     return {
-      m: this.app.config.activeMap,
-      l: this.getVisibleLayers(),
+      m: app.config.activeMap,
+      l: getVisibleLayers(),
       ...pos,
     };
-  }
+  };
 
-  setMapStateFromBookmarkIndex(index) {
-    let bookmark = this.bookmarks[index];
+  const setMapStateFromBookmarkIndex = (index) => {
+    let bookmark = bookmarks[index];
     if (bookmark) {
-      this.setMapState(bookmark);
+      setMapState(bookmark);
     }
-  }
+  };
 
-  setMapState(bookmark) {
+  const setMapState = (bookmark) => {
     if (!bookmark) {
       return;
     }
 
-    let bm = this.getDecodedBookmark(bookmark);
-    this.setVisibleLayers(bm.settings.l);
-    let view = this.map.getView();
+    let bm = getDecodedBookmark(bookmark);
+    setVisibleLayers(bm.settings.l);
+    let view = map.getView();
     view.setCenter([bm.settings.x, bm.settings.y]);
     view.setZoom(bm.settings.z);
     bm = null;
-  }
+  };
 
-  readFromStorage() {
+  const readFromStorage = () => {
     let storedBookmarks = localStorage.getItem(storageKey);
     if (!storedBookmarks) {
       let emptyJSONArr = "[]";
@@ -97,63 +98,85 @@ class BookmarksModel {
       localStorage.setItem(storageKey, emptyJSONArr);
       storedBookmarks = emptyJSONArr;
     }
-    this.bookmarks = JSON.parse(storedBookmarks);
-  }
+    setBookmarks(JSON.parse(storedBookmarks));
+  };
 
-  writeToStorage() {
+  const writeToStorage = () => {
     // TODO: Describe in https://github.com/hajkmap/Hajk/wiki/Cookies-in-Hajk and add the functionalOk() hook
-    localStorage.setItem(storageKey, JSON.stringify(this.bookmarks));
-  }
+    localStorage.setItem(storageKey, JSON.stringify(bookmarks));
+  };
 
-  getDecodedBookmark(bookmark) {
+  const getDecodedBookmark = (bookmark) => {
     let decoded = null;
     if (bookmark) {
       decoded = { ...bookmark };
       decoded.settings = JSON.parse(atob(bookmark.settings));
     }
     return decoded;
-  }
+  };
 
-  bookmarkWithNameExists(name) {
-    return this.bookmarks.find((bookmark) => bookmark.name === name);
-  }
+  const bookmarkWithNameExists = (name) => {
+    return bookmarks.find((bookmark) => bookmark.name === name);
+  };
 
-  replaceBookmark(bookmark) {
+  const replaceBookmark = (bookmark) => {
     if (bookmark) {
-      bookmark.settings = btoa(JSON.stringify(this.getMapState()));
-      this.writeToStorage();
+      bookmark.settings = btoa(JSON.stringify(getMapState()));
+      writeToStorage();
     }
-  }
+  };
 
-  addBookmark(name, allowReplace = false) {
-    let bookmark = this.bookmarkWithNameExists(name);
+  const addBookmark = (name, allowReplace = false) => {
+    let bookmark = bookmarkWithNameExists(name);
 
     if (bookmark) {
       if (allowReplace === true) {
-        this.replaceBookmark(bookmark);
+        replaceBookmark(bookmark);
       }
       return false;
     }
 
-    let settings = this.getMapState();
-    this.bookmarks.push({
+    let settings = getMapState();
+    bookmarks.push({
       name: name,
       settings: btoa(JSON.stringify(settings)),
       sortOrder: 0,
       favorite: false,
     });
-    this.writeToStorage();
+    writeToStorage();
 
     return true;
-  }
+  };
 
-  removeBookmark(bookmark) {
-    let index = this.bookmarks.indexOf(bookmark);
+  const removeBookmark = (bookmark) => {
+    let index = bookmarks.indexOf(bookmark);
     if (index > -1) {
-      this.bookmarks.splice(index, 1);
-      this.writeToStorage();
+      bookmarks.splice(index, 1);
+      writeToStorage();
     }
-  }
-}
+  };
+
+  const getBookmarks = () => {
+    return bookmarks;
+  };
+
+  return {
+    bookmarks,
+    setBookmarks,
+    getVisibleLayers,
+    setVisibleLayers,
+    getMapState,
+    setMapStateFromBookmarkIndex,
+    setMapState,
+    readFromStorage,
+    writeToStorage,
+    getDecodedBookmark,
+    bookmarkWithNameExists,
+    replaceBookmark,
+    addBookmark,
+    removeBookmark,
+    getBookmarks,
+  };
+};
 
 export default BookmarksModel;
