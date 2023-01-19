@@ -169,7 +169,18 @@ namespace MapService.Business.MapConfig
             var templatesFolder = PathUtility.GetPath("Templates:Path");
             var templateFileName = ConfigurationUtility.GetSectionItem("Templates:Name");
 
-            File.Copy(Path.Combine(templatesFolder, templateFileName), Path.Combine(appDataFolder, $"{name}.json"));
+            File.Copy(
+                Path.Combine(templatesFolder, templateFileName), 
+                Path.Combine(appDataFolder, GetNewFileNameWithExtension(name))
+            );
+        }
+
+        private static string GetNewFileNameWithExtension(string filename)
+        {
+            if (filename.EndsWith(".json"))
+                return filename;
+
+            return filename + ".json";
         }
 
         private static LayerExportItem FilterLayers(JsonElement jsonElementLayers)
