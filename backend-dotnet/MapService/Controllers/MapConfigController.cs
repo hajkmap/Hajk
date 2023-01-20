@@ -452,9 +452,9 @@ namespace MapService.Controllers
             return StatusCode(StatusCodes.Status200OK, exportedMapWithFormats);
         }
 
-        /// <summary>
+        /// <remarks>
         /// Create a new map configuration
-        /// </summary>
+        /// </remarks>
         /// <param name="name">The name of the map to create </param>
         /// <param name="userPrincipalName">User name that will be supplied to AD</param>
         /// <response code="200">The map configuration was created successfully</response>
