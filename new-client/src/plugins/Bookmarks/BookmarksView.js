@@ -228,12 +228,7 @@ const BookmarksView = ({ model, app }) => {
       <List>
         {bookmarks.map((item, index) => (
           <ListItem key={index + "_" + item.name}>
-            <BookmarkButton
-              variant="contained"
-              color="primary"
-              size="small"
-              onClick={() => btnOpenBookmark(item)}
-            >
+            <BookmarkButton onClick={() => btnOpenBookmark(item)}>
               <BookmarkIconSpan>
                 <BookmarkOutlinedIcon />
                 <BookmarkIcon className="on" />
@@ -242,12 +237,10 @@ const BookmarksView = ({ model, app }) => {
             </BookmarkButton>
             <DeleteButton
               aria-label="Ta bort"
-              variant="contained"
-              color="primary"
               size="large"
               onClick={() => btnHandleRemoveModal(item)}
             >
-              <StyledDeleteIcon />
+              <StyledDeleteIcon fontSize="small" />
             </DeleteButton>
           </ListItem>
         ))}
