@@ -10,6 +10,8 @@ export default express
   .put("/create", controller.create) // PUT is correct here, as this operation is idempotent
   .post("/createfolder", controller.createFolder)
   .get("/folderlist", controller.folderlist)
+  .get("/documentfolderlist", controller.documentFolderList)
+  .get("/documentfolderlist/:name", controller.documentFolderList)
   .delete("/delete/:name", controller.deleteByName)
   .get("/list", controller.list)
   .get("/list/:name", controller.list) // FIXME: For now, the name paramter is ignored - should list only documents connected to specified map

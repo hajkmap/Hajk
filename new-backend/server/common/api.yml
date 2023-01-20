@@ -130,6 +130,40 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Error"
+  /informative/documentfolderlist:
+    get:
+      tags:
+        - Admin - Informative/DocumentHandler
+      responses:
+        200:
+          description: Return all available documents
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Informativedocumentfolderlist"
+        5XX:
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /informative/documentfolderlist/{name}:
+    get:
+      tags:
+        - Admin - Informative/DocumentHandler
+      responses:
+        200:
+          description: Return all available documents
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Informativedocumentfolderlist"
+        5XX:
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
   /informative/folderlist:
     get:
       tags:
@@ -806,6 +840,11 @@ components:
         folderName:
           type: string
     Informativelistfolders:
+      type: object
+      properties:
+        folderName:
+          type: string
+    Informativedocumentfolderlist:
       type: object
       properties:
         folderName:

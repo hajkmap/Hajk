@@ -179,6 +179,41 @@ class InformativeService {
   }
 
   /**
+   * @summary Lists all available documents in a specifik folder
+   *
+   * @returns {array} Names of files as array of strings
+   * @memberof InformativeService
+   */
+  async getAvailableDocumentsFolder(foldername) {
+    try {
+      var dir = "";
+      if (foldername) {
+        dir = path.join(process.cwd(), "App_Data", "documents", foldername);
+      } else {
+        dir = path.join(process.cwd(), "App_Data", "documents");
+      }
+      //const dir = path.join(process.cwd(), "App_Data", "documents", "Tomas");
+
+      const dirContents = await fs.promises.readdir(dir, {
+        withFileTypes: true,
+      });
+      const availableDocuments = dirContents
+        .filter(
+          (entry) =>
+            // Filter out only files (we're not interested in directories).
+            entry.isFile() &&
+            // Only JSON files
+            entry.name.endsWith(".json")
+        )
+        // Create an array using name of each Dirent object, remove file extension
+        .map((entry) => entry.name.replace(".json", ""));
+      return availableDocuments;
+    } catch (error) {
+      return { error };
+    }
+  }
+
+  /**
    * @summary Lists all available folders
    *
    * @returns {array} Names of files as array of strings
