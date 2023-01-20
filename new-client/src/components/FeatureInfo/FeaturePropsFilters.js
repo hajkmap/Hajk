@@ -10,8 +10,9 @@ class PropFilters {
 
   applyFilters(properties, input) {
     this.properties = properties; // Make properties available for the filters
-    let args = input.split("|");
-    const key = args.shift().trim();
+
+    let filters = input.split("|");
+    const key = filters.shift().trim();
 
     let value = null;
 
@@ -28,12 +29,12 @@ class PropFilters {
 
     // Handle different kind of arguments using this RegEx
     // Previously split(',') was used but that of course prevented ',' etc to be used in arguments.... (It broke the rendering)
-    const splitArgsRegEx = /'[^']+'|(\d+(\.\d+))|\d|[a-z_0-9]+/gm;
+    const splitArgsRegEx = /^''|'[^']+'|(\d+(\.\d+))|\d|[a-z_0-9]+/gm;
 
     // Regex to match a property name when testing if it's a nested property.
     const isPropertyRegEx = /^[a-z][a-z_0-9]+$/gm;
 
-    args.forEach((inFilter) => {
+    filters.forEach((inFilter) => {
       // This is where we handle chained filters.
       const argsStart = inFilter.indexOf("(");
       let filterName = inFilter;
@@ -42,7 +43,7 @@ class PropFilters {
       if (argsStart > -1) {
         filterName = inFilter.substr(0, argsStart);
         args = inFilter
-          .substring(argsStart + 1, inFilter.indexOf(")"))
+          .substring(argsStart + 1, inFilter.lastIndexOf(")"))
           .match(splitArgsRegEx);
         args.forEach((v, i, a) => {
           v = v.trim();
@@ -181,6 +182,16 @@ filters.add("lt", function (value, test, lessValue, greaterValue) {
 });
 
 /*
+  hasValue
+  Example:
+  {'test'|hasValue('It has a value', 'Sorry, no value here.')}
+  outputs: It has a value
+*/
+filters.add("hasValue", function (value, trueValue = "", falseValue = "") {
+  return value === "" ? falseValue : trueValue;
+});
+
+/*
   equals
   Example:
   {'true'|equals('true', 'yes', 'no')}
@@ -286,6 +297,50 @@ filters.add("multiplyBy", function (value, multiplier) {
     throw new Error("Arguments should be numbers");
   }
   return value * multiplier;
+});
+
+/*
+  subscript
+  Example:
+  {'test1'|subscript}
+  outputs: test₁
+*/
+filters.add("subscript", function (value) {
+  let s = value;
+  value.match(/\d/gm).forEach((num) => {
+    // We'll use unicode chars because html might not be allowed.
+    // subscript chars is in order in unicode table
+    s = s.replace(num, String.fromCodePoint("0x208" + num));
+  });
+  return s;
+});
+
+/*
+  superscript
+  Example:
+  {'test1'|superscript}
+  outputs: test¹
+*/
+filters.add("superscript", function (value) {
+  // We'll use unicode chars because html might not be allowed.
+  // superscript chars is not in order so we specify these here.
+  const sup = [
+    "\u2070",
+    "\u00B9",
+    "\u00B2",
+    "\u00B3",
+    "\u2074",
+    "\u2075",
+    "\u2076",
+    "\u2077",
+    "\u2078",
+    "\u2079",
+  ];
+  let s = value;
+  value.match(/\d/gm).forEach((num) => {
+    s = s.replace(num, sup[num]);
+  });
+  return s;
 });
 
 /*
