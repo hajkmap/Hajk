@@ -17,8 +17,8 @@ const bookmarksVersion = "1.0";
 const storageKey = `bookmarks_v${bookmarksVersion}`;
 
 const BookmarksModel = (settings) => {
-  const map = useState(settings.map);
-  const app = useState(settings.app);
+  const [map] = useState(settings.map);
+  const [app] = useState(settings.app);
   const [bookmarks, setBookmarks] = useState([]);
 
   useEffect(() => {
