@@ -208,7 +208,7 @@ class DocumentEditor extends Component {
   loadDoc(folder, document) {
     this.props.model.loadDocumentsFromFolder(folder, (documents) => {
       if (documents.length > 0) {
-        this.props.model.load(document || documents[0], (data) => {
+        this.props.model.loadD(folder, document || documents[0], (data) => {
           this.setState(
             {
               data: data,

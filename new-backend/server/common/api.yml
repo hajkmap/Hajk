@@ -46,6 +46,54 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Error"
+  /informative/loaddocument/{folder}/{name}:
+    get:
+      tags:
+        - Client-accessible
+      parameters:
+        - name: name
+          in: path
+          description: Name of the document to be fetched
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: Return the JSON file
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DocumentBodyFolder"
+        5XX:
+          description: Example not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /informative/loaddocument/{name}:
+    get:
+      tags:
+        - Client-accessible
+      parameters:
+        - name: name
+          in: path
+          description: Name of the document to be fetched
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: Return the JSON file
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DocumentBodyFolder"
+        5XX:
+          description: Example not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
   /informative/create:
     post:
       deprecated: true
@@ -803,6 +851,26 @@ components:
           type: string
           example: ENOENT
     DocumentBody:
+      type: object
+      properties:
+        chapters:
+          type: array
+          items:
+            type: object
+            properties:
+              header:
+                type: string
+              html:
+                type: string
+              expanded:
+                type: boolean
+              mapSettings:
+                type: object
+              chapters:
+                type: array
+                items:
+                  type: object
+    DocumentBodyFolder:
       type: object
       properties:
         chapters:

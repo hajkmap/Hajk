@@ -145,6 +145,38 @@ var documentEditor = Model.extend({
     });
   },
 
+  loadD: function (folder, documentName, callback) {
+    var url = "";
+    if (folder) {
+      url =
+        this.get("config").url_load_document +
+        "/" +
+        folder +
+        "/" +
+        documentName;
+      hfetch(url).then((response) => {
+        response.status === 200 &&
+          response.json().then((data) => {
+            data.chapters.forEach((chapter) => {
+              this.setParentChapter(chapter, data.chapters);
+            });
+            callback(data);
+          });
+      });
+    } else {
+      url = this.get("config").url_load_document + "/" + documentName;
+      hfetch(url).then((response) => {
+        response.status === 200 &&
+          response.json().then((data) => {
+            data.chapters.forEach((chapter) => {
+              this.setParentChapter(chapter, data.chapters);
+            });
+            callback(data);
+          });
+      });
+    }
+  },
+
   loadMaps: function (callback) {
     var url = this.get("config").url_map_list;
     hfetch(url).then((response) => {

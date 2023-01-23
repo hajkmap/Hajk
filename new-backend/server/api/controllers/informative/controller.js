@@ -40,6 +40,29 @@ export class Controller {
     });
   }
 
+  getByNameDoc(req, res) {
+    InformativeService.getByNameDocument("", req.params.name).then((r) => {
+      if (r && !r.error) res.json(r);
+      else {
+        res
+          .status(404)
+          .send(`Document "${req.params.name}" could not be found`);
+      }
+    });
+  }
+
+  getByNameDocFolder(req, res) {
+    const { folder } = req.params;
+    InformativeService.getByNameDocument(folder, req.params.name).then((r) => {
+      if (r && !r.error) res.json(r);
+      else {
+        res
+          .status(404)
+          .send(`Document "${req.params.name}" could not be found`);
+      }
+    });
+  }
+
   saveByName(req, res) {
     InformativeService.saveByName(req.params.name, req.body).then((r) => {
       if (r && !r.error) {

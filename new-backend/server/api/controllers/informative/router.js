@@ -5,6 +5,8 @@ import restrictAdmin from "../../middlewares/restrict.admin";
 export default express
   .Router()
   .get("/load/:name", controller.getByName)
+  .get("/loaddocument/:name", controller.getByNameDoc)
+  .get("/loaddocument/:folder/:name", controller.getByNameDocFolder)
   .use(restrictAdmin) // All routes that follow are admin-only!
   .post("/create", controller.create) // FIXME: Remove POST
   .put("/create", controller.create) // PUT is correct here, as this operation is idempotent
