@@ -154,6 +154,10 @@ class BookmarksModel {
       this.writeToStorage();
     }
   }
+
+  getBookmarks() {
+    return this.bookmarks;
+  }
 }
 
 export default BookmarksModel;
