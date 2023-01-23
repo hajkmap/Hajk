@@ -20,12 +20,6 @@ const Bookmarks = ({ app, map, options }) => {
   const globalObserver = app.globalObserver;
   const bookmarksModel = BookmarksModel({ app, map });
 
-  const updateCustomProp = (prop, value) => {
-    if (prop === "title") setTitle(value);
-    else if (prop === "color") setColor(value);
-    else console.error("Unknown prop: " + prop);
-  };
-
   return (
     <BaseWindowPlugin
       {...{ app, map, options }}
@@ -43,7 +37,6 @@ const Bookmarks = ({ app, map, options }) => {
         globalObserver={globalObserver}
         model={bookmarksModel}
         app={app}
-        updateCustomProp={updateCustomProp}
       />
     </BaseWindowPlugin>
   );
