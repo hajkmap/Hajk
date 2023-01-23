@@ -5,6 +5,7 @@ import { HubConnectionBuilder } from "@microsoft/signalr";
 import { generateRandomString } from "../utils";
 import SearchModel from "models/SearchModel";
 import {
+  EDIT_STATUS,
   INTEGRATION_IDS,
   ENVIRONMENT_INFO,
   MAP_INTERACTIONS,
@@ -480,10 +481,63 @@ class VisionIntegrationModel {
     });
   };
 
+  // Handler for when vision asks for a geometry to be connected to the supplied object.
+  // (Vision asks for a geometry, we enable edit-mode, and return a geometry when the user is done drawing).
   #handleVisionAskingForFeatureGeometry = async (payload) => {
-    console.log("Got asking for feature geometry! Payload: ", payload);
+    // If no id and type is supplied, we cannot allow the user to start drawing...
+    const { id, type } = payload;
+    if (!id || !type) {
+      console.error(
+        `HandleAskForFeatureGeometry was invoked with bad parameters. 'id' and 'type' is required. Got: ${JSON.stringify(
+          payload
+        )}`
+      );
+      return null;
+    }
+    // If we got OK parameters, we can get the proper search-source to find eventual existing geometries
+    // First we'll have to get the settings so we can get the wfs-id etc.
+    const environmentSettings = this.getEnvironmentInfoFromId(type);
+    console.log(environmentSettings);
     // Let's publish an event that will make sure the edit mode is activated...
-    this.#localObserver.publish("enable-edit-mode");
+    // The first status will be "SEARCH_LOADING" since we always want to check if geometries
+    // already exists or not...
+    this.#localObserver.publish("set-edit-state", {
+      mode: EDIT_STATUS.SEARCH_LOADING,
+      features: [],
+      mapInteraction: MAP_INTERACTIONS.EDIT_NONE,
+      text: `Letar efter ${environmentSettings.name} med id: ${id}`,
+    });
+    // Then we can get the search-source...
+    const source = this.getSearchSourceFromId(environmentSettings.wfsId);
+    // We have to make sure we have a proper search-source
+    if (!source) {
+      console.error(
+        `HandleAskForFeatureGeometry was invoked but could not be handled. No search-source is configured.`
+      );
+      return null;
+    }
+    // When we've got the search-source, we can go ahead and conduct the search
+    const searchResult = await this.#searchModel.getResults(id, [source]);
+    const { featureCollections, errors } = searchResult;
+    // If we got an error, or if the results are missing, we have to prompt the user in some way...
+    if (errors[0] || !featureCollections[0]) {
+      // TODO: this.#localObserver.publish("edit-search-failed");
+      return null;
+    }
+    // If we didn't, we can grab the first featureCollection, which will include our results
+    const featureCollection = featureCollections[0];
+    // Then we can grab the resulting features
+    const features = featureCollection.value.features || [];
+    // When the search is done, we'll publish an event so that the view can update...
+    this.#localObserver.publish("set-edit-state", {
+      mode: EDIT_STATUS.ACTIVE,
+      features,
+      mapInteraction: MAP_INTERACTIONS.EDIT_NONE,
+      text: "",
+    });
+    // When we've published the event, we'll have to make sure to fetch eventual feature-geometries
+    // that already exist for the supplied object-information. (The user might want to delete or update these).
+    // To find these features, first we'll have to grab the correct source!
     // TODO: A lot...
     // When we've edited an existing (or created a new) geometry we will send the
     // geometry back to vision!

@@ -46,8 +46,14 @@ function VisionIntegration(props) {
   );
   // We have to keep track of which tab we're currently on...
   const [activeTab, setActiveTab] = useState(INTEGRATION_IDS.ESTATES);
-  // We have to keep track of the edit-mode status...
-  const [editModeStatus, setEditModeStatus] = useState(EDIT_STATUS.INACTIVE);
+  // We have to keep track of the edit-state
+  const [editState, setEditState] = useState({
+    mode: EDIT_STATUS.INACTIVE,
+    features: [],
+    text: "",
+  });
+  // We also have to keep track of the edit-features that we are currently dealing with...
+  const [editFeatures, setEditFeatures] = useState([]);
   // We have to keep track of which environment-type is currently active...
   const [activeEnvironmentType, setActiveEnvironmentType] = useState(
     ENVIRONMENT_IDS.AREA
@@ -193,9 +199,12 @@ function VisionIntegration(props) {
     setSelectedCoordinates((prevCoordinates) => [...prevCoordinates, feature]);
   }, []);
 
-  // Handles for when edit-mode should be activated
-  const enableEditMode = useCallback(() => {
-    setEditModeStatus(EDIT_STATUS.ACTIVE);
+  // Handler for when the listener for edit-state-changes has fired
+  const handleSetEditState = useCallback((payload) => {
+    setEditState((prev) => ({
+      ...prev,
+      ...payload,
+    }));
   }, []);
 
   // We're gonna want to subscribe to some events so that we can keep track of hub-status etc.
@@ -250,10 +259,10 @@ function VisionIntegration(props) {
       "mapView-new-coordinate-created",
       (feature) => handleNewCoordinateCreated(feature)
     );
-    // A listener for when vision asks for the edit mode to be enabled
-    const enableEditModeListener = localObserver.subscribe(
-      "enable-edit-mode",
-      () => enableEditMode()
+    // A listener for when the edit state is to be changed from the model
+    const updateEditStateListener = localObserver.subscribe(
+      "set-edit-state",
+      (payload) => handleSetEditState(payload)
     );
     // Make sure to clean up!
     return () => {
@@ -267,7 +276,7 @@ function VisionIntegration(props) {
       addNewEstatesListener.unsubscribe();
       addNewEnvironmentFeaturesListener.unsubscribe();
       newCoordinateCreatedListener.unsubscribe();
-      enableEditModeListener.unsubscribe();
+      updateEditStateListener.unsubscribe();
     };
   }, [
     localObserver,
@@ -277,7 +286,7 @@ function VisionIntegration(props) {
     handleAddNewEstates,
     handleAddNewEnvironmentFeatures,
     handleNewCoordinateCreated,
-    enableEditMode,
+    handleSetEditState,
   ]);
 
   // We're gonna need an useEffect that can handle side-effects when the selected
@@ -297,6 +306,13 @@ function VisionIntegration(props) {
     // Then we'll publish an event if we want to prompt the user etc.
     localObserver.publish("selected-coordinates-updated", selectedCoordinates);
   }, [mapViewModel, localObserver, selectedCoordinates]);
+
+  // We're gonna need an useEffect that can handle side-effect when the
+  // edit-features changes. (We're gonna want to update the map etc.).
+  useEffect(() => {
+    // We're gonna want to show the selected estates in the map. Let's use the map-view-model
+    mapViewModel.setEditFeaturesToShow(editState.features);
+  }, [mapViewModel, localObserver, editState]);
 
   // We're gonna need an useEffect that can handle side-effects when the environment-state has
   // been updated. Before the environment-state was updated, the active activeEnvironmentType has been set
@@ -319,7 +335,7 @@ function VisionIntegration(props) {
   // The effect also makes sure to disable any map-interaction that could be active.
   useEffect(() => {
     const featureTypeToShow =
-      editModeStatus !== EDIT_STATUS.INACTIVE
+      editState.mode !== EDIT_STATUS.INACTIVE
         ? INTEGRATION_IDS.EDIT
         : activeTab === INTEGRATION_IDS.ENVIRONMENT
         ? `${activeTab}_${activeEnvironmentType}`
@@ -327,7 +343,7 @@ function VisionIntegration(props) {
     mapViewModel.updateHiddenFeatures(featureTypeToShow);
 
     setActiveMapInteraction(null);
-  }, [mapViewModel, activeTab, editModeStatus, activeEnvironmentType]);
+  }, [mapViewModel, activeTab, editState, activeEnvironmentType]);
 
   // An effect making sure to set the chosen map-interaction in the model when state changes...
   useEffect(() => {
@@ -390,8 +406,10 @@ function VisionIntegration(props) {
         hubConnectionStatus={hubConnectionStatus}
         activeTab={activeTab}
         setActiveTab={setActiveTab}
-        editModeStatus={editModeStatus}
-        setEditModeStatus={setEditModeStatus}
+        editState={editState}
+        setEditState={setEditState}
+        editFeatures={editFeatures}
+        setEditFeatures={setEditFeatures}
         activeEnvironmentType={activeEnvironmentType}
         setActiveEnvironmentType={setActiveEnvironmentType}
         selectedEstates={selectedEstates}

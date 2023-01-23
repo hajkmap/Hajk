@@ -9,12 +9,12 @@ import BaseView from "./BaseView";
 import EditView from "./EditView";
 
 function VisionIntegrationView(props) {
-  return !props.windowVisible ? null : props.editModeStatus !==
+  return !props.windowVisible ? null : props.editState.mode !==
     EDIT_STATUS.INACTIVE ? (
     <EditView
       hubConnectionStatus={props.hubConnectionStatus}
-      editModeStatus={props.editModeStatus}
-      setEditModeStatus={props.setEditModeStatus}
+      editState={props.editState}
+      setEditState={props.setEditState}
     />
   ) : (
     <BaseView {...props} />

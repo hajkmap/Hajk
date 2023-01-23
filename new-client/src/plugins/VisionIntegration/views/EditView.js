@@ -37,7 +37,7 @@ function EditView(props) {
 
   const handleCancelClick = () => {
     setActiveMapInteraction(MAP_INTERACTIONS.EDIT_NONE);
-    props.setEditModeStatus(EDIT_STATUS.INACTIVE);
+    props.setEditState((prev) => ({ ...prev, mode: EDIT_STATUS.INACTIVE }));
   };
 
   return (
@@ -54,6 +54,7 @@ function EditView(props) {
           interaction={activeMapInteraction}
           handleChange={handleSelectMapInteractionChange}
         />
+        <Typography>{props.editState.text}</Typography>
       </Grid>
       <Grid container justifyContent="center">
         <Grid container spacing={2} justifyContent="center">

@@ -309,6 +309,21 @@ class VisionIntegrationModel {
     });
   };
 
+  // Handles when the features that are selected for editing has been updated. Makes sure to update the map accordingly.
+  setEditFeaturesToShow = (features) => {
+    // First we'll get any potential edit-featyres already in the map
+    const editFeaturesInMap = this.getDrawnEditFeatures();
+    // Then we'll remove the old features...
+    editFeaturesInMap.forEach((f) => {
+      this.#drawModel.removeFeature(f);
+    });
+    // Then we'll add all the currently selected edit-features
+    features.forEach((f) => {
+      f.set("VISION_TYPE", INTEGRATION_IDS.EDIT);
+      this.#drawModel.addFeature(f);
+    });
+  };
+
   // Returns all drawn (selected) estates from the map
   getDrawnEstates = () => {
     return this.#drawModel
@@ -353,6 +368,14 @@ class VisionIntegrationModel {
           f.get("HIDDEN") !== true
         );
       });
+  };
+
+  // Returns the edit-features that are currently visible in the map
+  getDrawnEditFeatures = () => {
+    return this.#drawModel
+      .getCurrentVectorSource()
+      .getFeatures()
+      .filter((f) => f.get("VISION_TYPE") === INTEGRATION_IDS.EDIT);
   };
 
   // Hide all features that does not have the vision type supplied
