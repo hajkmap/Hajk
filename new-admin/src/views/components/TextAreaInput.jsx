@@ -1,10 +1,10 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { makeStyles } from "@material-ui/core/styles";
 import Grid from "@material-ui/core/Grid";
 import { red, green } from "@material-ui/core/colors";
 import { withStyles } from "@material-ui/core/styles";
 import { EditorState, Modifier } from "draft-js";
-import { Typography, Button } from "@material-ui/core";
+import { Typography, Button, Checkbox } from "@material-ui/core";
 
 const ColorButtonRed = withStyles((theme) => ({
   root: {
@@ -30,6 +30,7 @@ const TextAreaInput = ({ editorState, updateEditorState, onCancelClick }) => {
   const classes = useStyles();
   const [backgroundColor, setBackgroundColor] = useState();
   const [dividerColor, setDividerColor] = useState();
+  const [accordionTitle, setAccordionTitle] = useState();
 
   const selectionState = editorState.getSelection();
   const hasFocus = selectionState.get("hasFocus");
@@ -41,6 +42,18 @@ const TextAreaInput = ({ editorState, updateEditorState, onCancelClick }) => {
   const data = contentBlock.getData();
   const focusedBackgroundColor = data.get("backgroundColor") || "INGEN FÄRG";
   const focusedDividerColor = data.get("dividerColor") || "INGEN FÄRG";
+  const focusedIsAccordion =
+    data.get("isAccordion") === "true" ? "ÄR" : "ÄR INTE";
+  const focusedAccordionTitle = data.get("accordionTitle") || "INGEN TITEL";
+
+  const currentAccordionTitle = data.get("accordionTitle");
+  const accordionIsChecked = data.get("isAccordion") === "true";
+  const [isAccordion, setIsAccordion] = useState(accordionIsChecked);
+  console.log(currentAccordionTitle);
+
+  useEffect(() => {
+    setIsAccordion(accordionIsChecked);
+  }, [contentBlock]);
 
   const onConfirmClick = () => {
     const contentState = editorState.getCurrentContent();
@@ -49,6 +62,8 @@ const TextAreaInput = ({ editorState, updateEditorState, onCancelClick }) => {
     data.set("backgroundColor", backgroundColor);
     data.set("dividerColor", dividerColor);
     data.set("textSection", "");
+    data.set("isAccordion", isAccordion);
+    isAccordion && data.set("accordionTitle", accordionTitle);
     updateEditorState(
       EditorState.push(
         editorState,
@@ -111,6 +126,39 @@ const TextAreaInput = ({ editorState, updateEditorState, onCancelClick }) => {
                   placeholder="#6A0DAD"
                 />
               </Grid>
+              <Grid item>
+                <label style={{ margin: 0 }}>
+                  Hopfällbar faktaruta (data-isAccordion)
+                </label>
+              </Grid>
+              <Grid item>
+                <Checkbox
+                  id="data-isAccordion"
+                  onChange={(e) => {
+                    setIsAccordion(!isAccordion);
+                  }}
+                  checked={isAccordion}
+                />
+              </Grid>
+              <Grid item>
+                <label style={{ margin: 0 }}>
+                  Titel på hopfällbar faktaruta
+                </label>
+              </Grid>
+              <Grid item>
+                <input
+                  id="data-isAccordion-title"
+                  onChange={(e) => {
+                    setAccordionTitle(e.target.value);
+                  }}
+                  type="text"
+                  value={accordionTitle || ""}
+                  placeholder={
+                    currentAccordionTitle ? currentAccordionTitle : "Titel..."
+                  }
+                  disabled={!isAccordion}
+                />
+              </Grid>
             </Grid>
             <Grid container direction="column" item></Grid>
           </Grid>
@@ -143,6 +191,18 @@ const TextAreaInput = ({ editorState, updateEditorState, onCancelClick }) => {
             {hasFocus && (
               <p>{`Markerad faktaruta har data-divider-color
             ${focusedDividerColor}`}</p>
+            )}
+          </Grid>
+          <Grid item>
+            {hasFocus && (
+              <p>{`Markerad faktaruta ${focusedIsAccordion} data-isAccordion
+            `}</p>
+            )}
+          </Grid>
+          <Grid item>
+            {hasFocus && (
+              <p>{`Markerad faktaruta har data-accordion-title ${focusedAccordionTitle}
+            `}</p>
             )}
           </Grid>
         </Grid>

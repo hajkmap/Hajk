@@ -1,12 +1,12 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import MapIcon from "@mui/icons-material/Map";
 import DescriptionIcon from "@mui/icons-material/Description";
 import OpenInNewIcon from "@mui/icons-material/OpenInNew";
 import Box from "@mui/material/Box";
 import TextArea from "../documentWindow/TextArea";
 import { styled } from "@mui/material/styles";
-import { useTheme } from "@mui/material";
-
+import { Accordion, AccordionSummary, useTheme } from "@mui/material";
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import {
   Button,
   Typography,
@@ -16,6 +16,19 @@ import {
   Grid,
   Tooltip,
 } from "@mui/material";
+
+const StyledAccordionSummary = styled(AccordionSummary)({
+  width: "100%",
+  transition: "opacity 0.2s ease-in-out",
+  justifyContent: "space-between",
+  "& .MuiAccordionSummary-content": {
+    whiteSpace: "nowrap",
+    overflow: "hidden",
+    textOverflow: "ellipsis",
+    maxWidth: "90%",
+    display: "block",
+  },
+});
 
 const ELEMENT_NODE = 1;
 const TEXT_NODE = 3;
@@ -159,19 +172,21 @@ export const Heading = ({ headingTag }) => {
   );
 };
 
-const getTextArea = (tag, defaultColors) => {
+const getTextArea = (tag, defaultColors, isAccordion) => {
   const children = [...tag.childNodes];
   let textAreaContentArray = children.map((element, index) => {
     return <React.Fragment key={index}>{renderChild(element)}</React.Fragment>;
   });
 
   const backgroundColor =
-    tag.attributes.getNamedItem("data-background-color")?.value ||
-    defaultColors?.textAreaBackgroundColor;
+    tag.attributes.getNamedItem("data-background-color")?.value || isAccordion
+      ? "white"
+      : defaultColors?.textAreaBackgroundColor;
 
   const dividerColor =
-    tag.attributes.getNamedItem("data-divider-color")?.value ||
-    defaultColors?.textAreaDividerColor;
+    tag.attributes.getNamedItem("data-divider-color")?.value || isAccordion
+      ? "white"
+      : defaultColors?.textAreaDividerColor;
 
   return (
     <TextArea
@@ -184,15 +199,46 @@ const getTextArea = (tag, defaultColors) => {
 
 export const BlockQuote = ({ blockQuoteTag, defaultColors }) => {
   // Grab the theme to determine current light/dark mode
+
   const theme = useTheme();
   if (blockQuoteTag.attributes.getNamedItem("data-text-section")) {
     return getTextArea(
       blockQuoteTag,
-      theme.palette.mode === "light" && defaultColors // Only supply defaultColors if we're in light mode
+      theme.palette.mode === "light" && defaultColors, // Only supply defaultColors if we're in light mode
+      false
     );
   } else {
     return null;
   }
+};
+
+export const AccordionSection = ({ blockQuoteTag, defaultColors }) => {
+  const theme = useTheme();
+  const [expanded, setExpanded] = useState(false);
+  let title = blockQuoteTag.attributes["data-accordion-title"];
+  title = title
+    ? blockQuoteTag.attributes["data-accordion-title"].value
+    : (blockQuoteTag.innerText || blockQuoteTag.textContent).substring(0, 100);
+
+  return (
+    <Accordion style={{ width: "100%" }}>
+      <StyledAccordionSummary
+        expandIcon={<ExpandMoreIcon />}
+        expanded={expanded.toString()}
+        onClick={() => setExpanded(!expanded)}
+        style={{
+          opacity: expanded ? 0.5 : 1,
+        }}
+      >
+        {title}
+      </StyledAccordionSummary>
+      {getTextArea(
+        blockQuoteTag,
+        theme.palette.mode === "light" && defaultColors,
+        true
+      )}
+    </Accordion>
+  );
 };
 
 export const Figure = ({ figureTag }) => {

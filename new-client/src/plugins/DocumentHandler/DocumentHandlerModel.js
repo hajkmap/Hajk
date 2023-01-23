@@ -17,6 +17,7 @@ import {
   Video,
   Audio,
   Source,
+  AccordionSection,
 } from "./utils/ContentComponentFactory";
 
 import DocumentSearchModel from "./documentSearch/DocumentSearchModel";
@@ -364,12 +365,24 @@ export default class DocumentHandlerModel {
     allowedHtmlTags.push({
       tagType: "blockquote",
       callback: (e) => {
-        return (
-          <BlockQuote
-            blockQuoteTag={e}
-            defaultColors={this.options.defaultDocumentColorSettings}
-          />
-        );
+        if (
+          e.attributes["data-isAccordion"] &&
+          e.attributes["data-isAccordion"].value === "true"
+        ) {
+          return (
+            <AccordionSection
+              blockQuoteTag={e}
+              defaultColors={this.options.defaultDocumentColorSettings}
+            />
+          );
+        } else {
+          return (
+            <BlockQuote
+              blockQuoteTag={e}
+              defaultColors={this.options.defaultDocumentColorSettings}
+            />
+          );
+        }
       },
     });
     allowedHtmlTags.push({
