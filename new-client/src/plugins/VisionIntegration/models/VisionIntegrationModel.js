@@ -1,5 +1,6 @@
 import Feature from "ol/Feature";
 import Point from "ol/geom/Point";
+import WKT from "ol/format/WKT";
 import { HubConnectionBuilder } from "@microsoft/signalr";
 
 import { generateRandomString } from "../utils";
@@ -25,6 +26,7 @@ class VisionIntegrationModel {
   #searchModel;
   #mapViewModel;
   #currentEnvironmentTypeId;
+  #wktParser;
 
   // There will probably not be many settings for this model... Options are required though!
   constructor(settings) {
@@ -42,6 +44,7 @@ class VisionIntegrationModel {
     this.#options = options; // We're probably gonna need the options...
     this.#localObserver = localObserver; // ...and the observer
     this.#hubConnection = this.#createHubConnection(); // Create the hub-connection
+    this.#wktParser = new WKT();
     this.#searchSources = searchSources;
     this.#searchModel = new SearchModel(
       { sources: this.#searchSources },
@@ -497,7 +500,6 @@ class VisionIntegrationModel {
     // If we got OK parameters, we can get the proper search-source to find eventual existing geometries
     // First we'll have to get the settings so we can get the wfs-id etc.
     const environmentSettings = this.getEnvironmentInfoFromId(type);
-    console.log(environmentSettings);
     // Let's publish an event that will make sure the edit mode is activated...
     // The first status will be "SEARCH_LOADING" since we always want to check if geometries
     // already exists or not...
@@ -505,7 +507,7 @@ class VisionIntegrationModel {
       mode: EDIT_STATUS.SEARCH_LOADING,
       features: [],
       mapInteraction: MAP_INTERACTIONS.EDIT_NONE,
-      text: `Letar efter ${environmentSettings.name} med id: ${id}`,
+      text: `Letar efter ${environmentSettings.name.toLowerCase()} med id: ${id}`,
     });
     // Then we can get the search-source...
     const source = this.getSearchSourceFromId(environmentSettings.wfsId);
@@ -528,27 +530,37 @@ class VisionIntegrationModel {
     const featureCollection = featureCollections[0];
     // Then we can grab the resulting features
     const features = featureCollection.value.features || [];
+    // Let's zoom to the potential features so that the user doesn't miss that they
+    // already have some features...
+    this.#mapViewModel.zoomToFeatures(features);
     // When the search is done, we'll publish an event so that the view can update...
     this.#localObserver.publish("set-edit-state", {
       mode: EDIT_STATUS.ACTIVE,
       features,
       mapInteraction: MAP_INTERACTIONS.EDIT_NONE,
-      text: "",
-    });
-    // When we've published the event, we'll have to make sure to fetch eventual feature-geometries
-    // that already exist for the supplied object-information. (The user might want to delete or update these).
-    // To find these features, first we'll have to grab the correct source!
-    // TODO: A lot...
-    // When we've edited an existing (or created a new) geometry we will send the
-    // geometry back to vision!
-    this.#hubConnection.invoke("SendGeometry", {
-      wkt: "This is a WKT",
-      srsId: 3007,
+      text: `Du uppdaterar geometrin för ${environmentSettings.name.toLowerCase()} med id: ${id}.`,
     });
   };
 
   #handleVisionSendingOperationFeedback = (payload) => {
-    console.log("Got operation feedback! ", payload);
+    this.#localObserver.publish("set-edit-state", {
+      mode: EDIT_STATUS.SAVE_SUCCESS,
+      mapInteraction: MAP_INTERACTIONS.EDIT_NONE,
+      text: payload?.text,
+    });
+  };
+
+  // Returns the map SRS without EPSG: (Vision expects EPSG: to be removed for some reason...)
+  #getMapSrsAsInteger = () => {
+    // Example: If we're working with EPSG:3007, Vision expects 3007 (integer) only. Let's grab the code to begin with
+    const projectionCode = this.#map.getView().getProjection().getCode() || "";
+    // Then we'll remove the EPSG-part...
+    const cleanedProjectionCode =
+      projectionCode.split(":").length > 1
+        ? projectionCode.split(":")[1]
+        : projectionCode.split(":")[0];
+    // Then we'll return the code as an int...
+    return parseInt(cleanedProjectionCode);
   };
 
   // Accepts a feature and returns an object with the required keys to match Visions API description.
@@ -581,20 +593,11 @@ class VisionIntegrationModel {
   #createCoordinateSendObject = (coordinateFeature) => {
     // First we'll get the feature geometry (so that we can get it's coordinates)
     const geometry = coordinateFeature.getGeometry();
-    // Then we'll grab the projection-code. (Vision expects EPSG: to be removed for some reason...)
-    // Example: If we're working with EPSG:3007, Vision expects 3007 (integer) only.
-    // Let's grab the code to begin with
-    const projectionCode = this.#map.getView().getProjection().getCode() || "";
-    // Then we'll remove the EPSG-part...
-    const cleanedProjectionCode =
-      projectionCode.split(":").length > 1
-        ? projectionCode.split(":")[1]
-        : projectionCode.split(":")[0];
     // Then we'll create the object
     return {
       northing: geometry.getCoordinates()[0],
       easting: geometry.getCoordinates()[1],
-      spatialReferenceSystemIdentifier: parseInt(cleanedProjectionCode),
+      spatialReferenceSystemIdentifier: this.#getMapSrsAsInteger(),
       label: coordinateFeature.get("VISION_LABEL") || "",
     };
   };
@@ -624,6 +627,35 @@ class VisionIntegrationModel {
     });
     // Then we can return the object!
     return sendObject;
+  };
+
+  // Handles when the save button in the edit view has been clicked.
+  // - Makes sure to update the edit-state
+  // - Gets all edit-features from map
+  // - Creates a WKT
+  // Sends WKT to Vision
+  handleEditSaveClick = () => {
+    // First we'll have to update the edit-state so that the view reflects what is going on...
+    this.#localObserver.publish("set-edit-state", {
+      mode: EDIT_STATUS.WAITING,
+      mapInteraction: MAP_INTERACTIONS.EDIT_NONE,
+      text: "Objkten har skickats till Vision. Väntar på respons...",
+    });
+    const editFeatures = this.#mapViewModel.getDrawnEditFeatures();
+    try {
+      const wktString = this.#wktParser.writeFeatures(editFeatures);
+      this.#hubConnection.invoke("SendGeometry", {
+        wkt: wktString,
+        srsId: this.#getMapSrsAsInteger(),
+      });
+    } catch (error) {
+      console.error(error);
+      this.#localObserver.publish("set-edit-state", {
+        mode: EDIT_STATUS.SAVE_FAILED,
+        mapInteraction: MAP_INTERACTIONS.EDIT_NONE,
+        text: "Något gick fel när objekten skulle sparas i Vision. Kontakta systemförvaltaren.",
+      });
+    }
   };
 
   #handleSearchWithFeature = async (payload) => {

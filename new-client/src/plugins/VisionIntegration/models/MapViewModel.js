@@ -311,7 +311,7 @@ class VisionIntegrationModel {
 
   // Handles when the features that are selected for editing has been updated. Makes sure to update the map accordingly.
   setEditFeaturesToShow = (features) => {
-    // First we'll get any potential edit-featyres already in the map
+    // First we'll get any potential edit-features already in the map
     const editFeaturesInMap = this.getDrawnEditFeatures();
     // Then we'll remove the old features...
     editFeaturesInMap.forEach((f) => {

@@ -200,12 +200,22 @@ function VisionIntegration(props) {
   }, []);
 
   // Handler for when the listener for edit-state-changes has fired
-  const handleSetEditState = useCallback((payload) => {
-    setEditState((prev) => ({
-      ...prev,
-      ...payload,
-    }));
-  }, []);
+  const handleSetEditState = useCallback(
+    (payload) => {
+      // If Vision sends operation feedback while the view is not expecting it, we want to ignore it...
+      if (
+        payload.mode === EDIT_STATUS.SAVE_SUCCESS &&
+        editState.mode !== EDIT_STATUS.WAITING
+      ) {
+        return null;
+      }
+      setEditState((prev) => ({
+        ...prev,
+        ...payload,
+      }));
+    },
+    [editState.mode]
+  );
 
   // We're gonna want to subscribe to some events so that we can keep track of hub-status etc.
   useEffect(() => {

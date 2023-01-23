@@ -4,7 +4,7 @@ import { Grid, MenuItem, TextField } from "@mui/material";
 
 import { MAP_INTERACTION_INFO } from "../../constants";
 
-function MapInteractionSelector({ interaction, handleChange }) {
+function MapInteractionSelector({ interaction, handleChange, disabled }) {
   const interactions = MAP_INTERACTION_INFO.filter(
     (interaction) => interaction.useInEditView === true
   );
@@ -13,6 +13,7 @@ function MapInteractionSelector({ interaction, handleChange }) {
     <Grid container sx={{ ml: 1, mr: 1 }} justifyContent="center">
       <Grid item xs={12}>
         <TextField
+          disabled={disabled}
           fullWidth
           id="edit-interaction-select"
           variant="outlined"

@@ -15,6 +15,7 @@ function VisionIntegrationView(props) {
       hubConnectionStatus={props.hubConnectionStatus}
       editState={props.editState}
       setEditState={props.setEditState}
+      model={props.model}
     />
   ) : (
     <BaseView {...props} />
