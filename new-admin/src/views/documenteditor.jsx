@@ -126,6 +126,8 @@ class DocumentEditor extends Component {
       newFolderName: "",
       newDocumentMap: "",
       newHeaderIdentifier: "",
+      selectedFolder: '',
+      selectedDocument: '',
       documents: [],
       folders: [],
       keywords: [],
@@ -144,8 +146,67 @@ class DocumentEditor extends Component {
     this.documentTitle = React.createRef();
   }
 
-  load(document) {
+  /*load(document) {
     this.props.model.loadDocuments((documents) => {
+      if (documents.length > 0) {
+        this.props.model.load(document || documents[0], (data) => {
+          this.setState(
+            {
+              data: data,
+              documents: documents,
+              documentTitle: data.title,
+              selectedDocument: document || "",
+              tableOfContents: {
+                expanded: data.tableOfContents
+                  ? data.tableOfContents.expanded
+                  : true,
+                active: data.tableOfContents
+                  ? data.tableOfContents.active
+                  : true,
+                chapterLevelsToShow: data.tableOfContents
+                  ? data.tableOfContents.chapterLevelsToShow
+                  : 100,
+                title: data.tableOfContents
+                  ? data.tableOfContents.title
+                  : "Innehållsförteckning",
+              },
+              newTableOfContentsExpanded: data.tableOfContents
+                ? data.tableOfContents.expanded
+                : true,
+              newTableOfContentsActive: data.tableOfContents
+                ? data.tableOfContents.active
+                : true,
+              newTableOfContentsLevels: data.tableOfContents
+                ? data.tableOfContents.chapterLevelsToShow
+                : 100,
+              newTableOfContentsTitle: data.tableOfContents
+                ? data.tableOfContents.title
+                : "Innehållsförteckning",
+            },
+            () => {
+              this.props.model.loadMaps((maps) => {
+                this.setState({
+                  maps: maps,
+                  map: data.map,
+                  newDocumentMap: maps[0],
+                });
+              });
+            }
+          );
+        });
+      } else {
+        this.props.model.loadMaps((maps) => {
+          this.setState({
+            maps: maps,
+            newDocumentMap: maps[0],
+          });
+        });
+      }
+    });
+  }*/
+
+  loadDoc(folder, document) {
+    this.props.model.loadDocumentsFromFolder(folder, (documents) => {
       if (documents.length > 0) {
         this.props.model.load(document || documents[0], (data) => {
           this.setState(
@@ -203,6 +264,15 @@ class DocumentEditor extends Component {
     });
   }
 
+  changeDoc(event)
+  {
+    this.props.model.loadDocumentsFromFolder(event.target.value, (documents) => {
+      this.setState({ 
+        documents: documents,
+      });
+    })
+  }
+
   loadFolderList() {
     this.props.model.loadFolders((data) => {
       this.setState({ 
@@ -237,7 +307,7 @@ class DocumentEditor extends Component {
 
   componentDidMount() {
     this.props.model.set("config", this.props.config);
-    this.load();
+    this.loadDoc();
     this.loadImageList();
     this.loadVideoList();
     this.loadAudioList();
@@ -275,7 +345,7 @@ class DocumentEditor extends Component {
       showAbortButton: true,
       modalConfirmCallback: () => {
         this.props.model.delete(this.state.selectedDocument, (result) => {
-          this.load();
+          this.loadDoc();
         });
       },
     });
@@ -763,13 +833,14 @@ class DocumentEditor extends Component {
     }
   }
 
-  renderDocuments() {
-    return this.state.documents.map((document, i) => (
-      <option key={i}>{document}</option>
-    ));
+  renderDocuments(folder) {
+    //if (!folder) return;
+    return this.state.documents
+    .filter(document => document.folder === folder)
+    .map((document, i) => (<option key={i}>{document}</option>));
   }
 
-  renderFolders() {
+   renderFolders() {
     return this.state.folders.map((folder, i) => (
       <option key={i}>{folder}</option>
     ));
@@ -891,7 +962,7 @@ class DocumentEditor extends Component {
         };
         if (data.documentName !== "") {
           this.props.model.createDocument(data, (response) => {
-            this.load(data.documentName);
+            this.loadDoc(data.documentName);
           });
           this.hideModal();
         }
@@ -1040,6 +1111,13 @@ class DocumentEditor extends Component {
     );
   }
 
+  handleFolderChange = (event) => {
+    this.setState({
+     selectedFolder: event.target.value
+    });
+    this.changeDoc(event);
+ }
+
   render() {
     const { classes } = this.props;
     const { selectedDocument, data } = this.state;
@@ -1062,12 +1140,10 @@ class DocumentEditor extends Component {
             <Grid className={classes.gridItem} item>
               <FormControl>
                 <NativeSelect
-                  onChange={(e) => {
-                    this.loadFolderList(e.target.value);
-                  }}
+                  onChange={(event) => this.handleFolderChange(event)}
                   value={selectedFolder}
                 >
-                  <option value="Välj en mapp">
+                  <option value="">
                   Välj en mapp
                   </option>
                   {this.renderFolders()}
@@ -1079,7 +1155,7 @@ class DocumentEditor extends Component {
               <FormControl>
                 <NativeSelect
                   onChange={(e) => {
-                    this.load(e.target.value);
+                    this.loadDoc(this.state.selectedFolder, e.target.value);
                   }}
                   value={selectedDocument}
                 >
