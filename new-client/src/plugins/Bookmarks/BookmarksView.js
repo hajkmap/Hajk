@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import React from "react";
 import PropTypes from "prop-types";
 import { styled } from "@mui/material/styles";
 import Button from "@mui/material/Button";
@@ -111,32 +111,33 @@ const StyledDeleteIcon = styled(DeleteIcon)(() => ({
   transition: "all 300ms",
 }));
 
-const BookmarksView = ({ model, app }) => {
-  const [name, setName] = useState("");
-  const [error, setError] = useState(false);
-  const [helperText, setHelperText] = useState(" ");
-  const [bookmarks, setBookmarks] = useState([]);
-  const [showRemovalConfirmation, setShowRemovalConfirmation] = useState(false);
-  const [bookmarkToDelete, setBookmarkToDelete] = useState(null);
+const BookmarksView = (props) => {
+  const [name, setName] = React.useState("");
+  const [error, setError] = React.useState(false);
+  const [helperText, setHelperText] = React.useState(" ");
+  const [bookmarks, setBookmarks] = React.useState([]);
+  const [showRemovalConfirmation, setShowRemovalConfirmation] =
+    React.useState(false);
+  const [bookmarkToDelete, setBookmarkToDelete] = React.useState(null);
 
   useUpdateEffect(() => {
-    setBookmarks(model.getBookmarks());
-  }, [model.bookmarks]);
+    setBookmarks(props.model.getBookmarks());
+  }, [props.model.bookmarks]);
 
   const btnAddBookmark = (e) => {
     if (name.trim() === "") {
       return;
     }
 
-    model.addBookmark(name, true);
+    props.model.addBookmark(name, true);
 
     setName("");
-    setBookmarks([...model.bookmarks]);
+    setBookmarks([...props.model.bookmarks]);
     checkBookmarkName("");
   };
 
   const btnOpenBookmark = (bookmark) => {
-    model.setMapState(bookmark);
+    props.model.setMapState(bookmark);
   };
 
   const btnHandleRemoveModal = (bookmark) => {
@@ -154,8 +155,8 @@ const BookmarksView = ({ model, app }) => {
   };
 
   const deleteBookmark = (bookmark) => {
-    model.removeBookmark(bookmark);
-    setBookmarks([...model.bookmarks]);
+    props.model.removeBookmark(bookmark);
+    setBookmarks([...props.model.bookmarks]);
   };
 
   const checkBookmarkName = (name) => {
@@ -165,7 +166,7 @@ const BookmarksView = ({ model, app }) => {
       return false;
     }
 
-    let exists = model.bookmarkWithNameExists(name);
+    let exists = props.model.bookmarkWithNameExists(name);
 
     if (exists) {
       setError(true);
@@ -264,7 +265,6 @@ const BookmarksView = ({ model, app }) => {
 
 BookmarksView.propTypes = {
   model: PropTypes.object.isRequired,
-  app: PropTypes.object.isRequired,
 };
 
 export default BookmarksView;
