@@ -1,5 +1,5 @@
 // Base
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { styled } from "@mui/material/styles";
 import { Button, Grid, LinearProgress, Typography } from "@mui/material";
 
@@ -38,6 +38,10 @@ function EditView(props) {
   const [activeMapInteraction, setActiveMapInteraction] = useState(
     MAP_INTERACTIONS.EDIT_NONE
   );
+
+  useEffect(() => {
+    props.mapViewModel.toggleMapInteraction(activeMapInteraction);
+  }, [props.mapViewModel, activeMapInteraction]);
 
   const handleSelectMapInteractionChange = (e) => {
     setActiveMapInteraction(e.target.value);

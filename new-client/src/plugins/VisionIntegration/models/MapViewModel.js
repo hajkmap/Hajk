@@ -115,6 +115,13 @@ class VisionIntegrationModel {
     this.#drawModel.removeFeature(feature);
   };
 
+  // Handler for when the user has finished drawing a polygon while in edit mode
+  #handleEditFeatureAdded = (e) => {
+    const { feature } = e;
+    feature.set("VISION_DRAW_TYPE", "USER_DRAWN");
+    this.#localObserver.publish("add-edit-feature", feature);
+  };
+
   // Zooms to the supplied extent (with some padding)
   #fitMapToExtent = (extent) => {
     this.#map.getView().fit(extent, {
@@ -144,6 +151,7 @@ class VisionIntegrationModel {
     this.#disableEstateSelectInteraction();
     this.#disableCreateCoordinateInteraction();
     this.#disableEnvironmentSelectInteraction();
+    this.#disableDrawPolygonInteraction();
   };
 
   // Enables functionality so that the user can select estates from the map
@@ -163,6 +171,14 @@ class VisionIntegrationModel {
     this.#map.on("singleclick", this.#handleOnCreateCoordinateClick);
   };
 
+  // Enables functionality so that the user can draw polygons
+  #enableDrawPolygonInteraction = () => {
+    this.#map.clickLock.add("visionintegration");
+    this.#drawModel.toggleDrawInteraction("Polygon", {
+      handleDrawEnd: this.#handleEditFeatureAdded,
+    });
+  };
+
   // Disables select estates from map functionality
   #disableEstateSelectInteraction = () => {
     this.#map.clickLock.delete("visionintegration");
@@ -179,6 +195,12 @@ class VisionIntegrationModel {
   #disableCreateCoordinateInteraction = () => {
     this.#map.clickLock.delete("visionintegration");
     this.#map.un("singleclick", this.#handleOnCreateCoordinateClick);
+  };
+
+  // Disables the draw-polygon interaction
+  #disableDrawPolygonInteraction = () => {
+    this.#map.clickLock.delete("visionintegration");
+    this.#drawModel.toggleDrawInteraction();
   };
 
   // Handler for map-clicks when user is to select estates
@@ -257,6 +279,9 @@ class VisionIntegrationModel {
       case MAP_INTERACTIONS.SELECT_ENVIRONMENT:
         this.#activeMapInteraction = MAP_INTERACTIONS.SELECT_ENVIRONMENT;
         return this.#enableEnvironmentSelectInteraction();
+      case MAP_INTERACTIONS.EDIT_CREATE_POLYGON:
+        this.#activeMapInteraction = MAP_INTERACTIONS.EDIT_CREATE_POLYGON;
+        return this.#enableDrawPolygonInteraction();
       default:
         return null;
     }
@@ -318,9 +343,17 @@ class VisionIntegrationModel {
       this.#drawModel.removeFeature(f);
     });
     // Then we'll add all the currently selected edit-features
+    // Some funky stuff is going on here... Features added by drawing will be added twice
+    // (once by this added and then by the draw-model) if we don't prevent it. By checking the
+    // VISION_DRAW_TYPE (which will be set to "USER_DRAWN" in the double feature case) we can prevent that.
     features.forEach((f) => {
+      console.log("f: ", f);
       f.set("VISION_TYPE", INTEGRATION_IDS.EDIT);
-      this.#drawModel.addFeature(f);
+      if (f.get("VISION_DRAW_TYPE") === "USER_DRAWN") {
+        f.unset("VISION_DRAW_TYPE");
+      } else {
+        this.#drawModel.addFeature(f);
+      }
     });
   };
 

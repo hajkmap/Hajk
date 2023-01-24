@@ -542,6 +542,7 @@ class VisionIntegrationModel {
     });
   };
 
+  // Handler for when Vision sends feedback regarding the geometry that was recently saved
   #handleVisionSendingOperationFeedback = (payload) => {
     this.#localObserver.publish("set-edit-state", {
       mode: EDIT_STATUS.SAVE_SUCCESS,

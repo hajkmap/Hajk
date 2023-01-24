@@ -52,8 +52,6 @@ function VisionIntegration(props) {
     features: [],
     text: "",
   });
-  // We also have to keep track of the edit-features that we are currently dealing with...
-  const [editFeatures, setEditFeatures] = useState([]);
   // We have to keep track of which environment-type is currently active...
   const [activeEnvironmentType, setActiveEnvironmentType] = useState(
     ENVIRONMENT_IDS.AREA
@@ -217,6 +215,14 @@ function VisionIntegration(props) {
     [editState.mode]
   );
 
+  // Handler for when the listener for add-edit-feature has fired
+  const handleAddEditFeature = useCallback((feature) => {
+    setEditState((prev) => ({
+      ...prev,
+      features: [...prev.features, feature],
+    }));
+  }, []);
+
   // We're gonna want to subscribe to some events so that we can keep track of hub-status etc.
   useEffect(() => {
     // A Listener for hub-connection failure. Make sure to update connection-state...
@@ -274,6 +280,11 @@ function VisionIntegration(props) {
       "set-edit-state",
       (payload) => handleSetEditState(payload)
     );
+    // A listener for when a new edit-feature should be added
+    const addNewEditFeatureListener = localObserver.subscribe(
+      "add-edit-feature",
+      (feature) => handleAddEditFeature(feature)
+    );
     // Make sure to clean up!
     return () => {
       connectionFailureListener.unsubscribe();
@@ -287,6 +298,7 @@ function VisionIntegration(props) {
       addNewEnvironmentFeaturesListener.unsubscribe();
       newCoordinateCreatedListener.unsubscribe();
       updateEditStateListener.unsubscribe();
+      addNewEditFeatureListener.unsubscribe();
     };
   }, [
     localObserver,
@@ -297,6 +309,7 @@ function VisionIntegration(props) {
     handleAddNewEnvironmentFeatures,
     handleNewCoordinateCreated,
     handleSetEditState,
+    handleAddEditFeature,
   ]);
 
   // We're gonna need an useEffect that can handle side-effects when the selected
@@ -320,9 +333,9 @@ function VisionIntegration(props) {
   // We're gonna need an useEffect that can handle side-effect when the
   // edit-features changes. (We're gonna want to update the map etc.).
   useEffect(() => {
-    // We're gonna want to show the selected estates in the map. Let's use the map-view-model
+    // We're gonna want to show the edit-features in the map. Let's use the map-view-model
     mapViewModel.setEditFeaturesToShow(editState.features);
-  }, [mapViewModel, localObserver, editState]);
+  }, [mapViewModel, localObserver, editState.features]);
 
   // We're gonna need an useEffect that can handle side-effects when the environment-state has
   // been updated. Before the environment-state was updated, the active activeEnvironmentType has been set
@@ -353,7 +366,7 @@ function VisionIntegration(props) {
     mapViewModel.updateHiddenFeatures(featureTypeToShow);
 
     setActiveMapInteraction(null);
-  }, [mapViewModel, activeTab, editState, activeEnvironmentType]);
+  }, [mapViewModel, activeTab, editState.mode, activeEnvironmentType]);
 
   // An effect making sure to set the chosen map-interaction in the model when state changes...
   useEffect(() => {
@@ -418,8 +431,6 @@ function VisionIntegration(props) {
         setActiveTab={setActiveTab}
         editState={editState}
         setEditState={setEditState}
-        editFeatures={editFeatures}
-        setEditFeatures={setEditFeatures}
         activeEnvironmentType={activeEnvironmentType}
         setActiveEnvironmentType={setActiveEnvironmentType}
         selectedEstates={selectedEstates}
