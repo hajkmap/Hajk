@@ -85,7 +85,6 @@ class AnchorModel {
     // Only update the anchor if View is done animating
     if (e.target.getAnimating() === false) {
       const newAnchor = await this.getAnchor();
-      console.log("Anim done, got URL", newAnchor);
       this.#app.globalObserver.publish("core.mapUpdated", {
         url: newAnchor,
         source: "animating",
