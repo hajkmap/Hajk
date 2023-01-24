@@ -999,6 +999,7 @@ class DocumentEditor extends Component {
           this.props.model.createFolder(data, (response) => {
             
           });
+          this.loadFolderList();
           this.hideModal();
         }
       },
@@ -1132,11 +1133,11 @@ class DocumentEditor extends Component {
     this.changeDoc(event);
  }
 
- handleFolderChangeNew = (event) => {
-  this.setState({
-   newFolderName: event.target.value
-  });
-}
+  handleFolderChangeNew = (event) => {
+    this.setState({
+    newFolderName: event.target.value
+    });
+  }
 
   render() {
     const { classes } = this.props;

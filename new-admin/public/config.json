@@ -75,7 +75,7 @@
     "url_load": "http://localhost:55630/informative/load",
     "url_save": "http://localhost:55630/informative/save",
     "url_create": "http://localhost:55630/informative/create",
-    "url_createdoc": "http://localhost:55630/informative/createdoc",
+    "url_createdoc": "http://localhost:3002/api/v1/informative/createdoc",
     "url_create_folder": "http://localhost:3002/api/v1/informative/createfolder",
     "url_folder_list": "http://localhost:3002/api/v1/informative/folderlist",
     "url_document_folder_list": "http://localhost:3002/api/v1/informative/documentfolderlist",
