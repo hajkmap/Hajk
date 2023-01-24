@@ -277,7 +277,6 @@ class LayerGroupItem extends Component {
     const { layer } = this.props;
 
     if (l.get("name") === layer.get("name")) {
-      console.log("setHidden: ", layer);
       // Fix underlying source
       this.props.layer.getSource().updateParams({
         // Ensure that the list of sublayers is emptied (otherwise they'd be
@@ -321,8 +320,6 @@ class LayerGroupItem extends Component {
     // so without this check we'd end up running this for every LayerGroupItem, which
     // is not intended.
     if (l === this.props.layer) {
-      console.log("setVisible: ", this.props.layer, subLayersToShow);
-
       // Show the OL layer
       this.props.layer.setVisible(true);
 
@@ -589,7 +586,6 @@ class LayerGroupItem extends Component {
     const { cqlFilterVisible, layer } = this.props;
     const { open, visible, visibleSubLayers, toggleSettings, infoVisible } =
       this.state;
-    console.log("visibleSubLayers: ", visibleSubLayers);
 
     function getCheckBox() {
       return (
