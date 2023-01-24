@@ -125,14 +125,15 @@ class InformativeService {
       documentName += ".json";
 
       // …and create a new path to that file.
+      var pathToFile = "";
       if (folderName) {
-        const pathToFile = path.join(
+        pathToFile = path.join(
           process.cwd(),
           "App_Data/documents" + "/" + folderName,
           documentName
         );
       } else {
-        const pathToFile = path.join(
+        pathToFile = path.join(
           process.cwd(),
           "App_Data/documents",
           documentName

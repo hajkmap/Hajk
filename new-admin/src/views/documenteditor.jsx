@@ -893,17 +893,16 @@ class DocumentEditor extends Component {
         />
 
         <FormControl fullWidth>
-          <InputLabel shrink>Välj Mapp</InputLabel>
-          <Select
+          <InputLabel shrink>Välj mapp</InputLabel>
+          <NativeSelect
+            onChange={(event) => this.handleFolderChangeNew(event)}
             value={this.state.newFolderName}
-            onChange={(e) => {
-              this.setState({
-                newFolderName: e.target.value,
-              });
-            }}
           >
+            <option value="">
+            Välj en mapp
+            </option>
             {this.renderFolders()}
-          </Select>
+          </NativeSelect>
         </FormControl>
 
         <FormControl fullWidth>
@@ -971,12 +970,13 @@ class DocumentEditor extends Component {
       okButtonText: "Spara",
       modalConfirmCallback: () => {
         var data = {
+          folderName: this.state.newFolderName,
           documentName: this.state.newDocumentName,
           mapName: this.state.newDocumentMap,
         };
         if (data.documentName !== "") {
           this.props.model.createDF(data, (response) => {
-            this.loadDoc(this.state.newFolderName, data.documentName);
+            this.loadDoc(data.folderName, data.documentName);
           });
           this.hideModal();
         }
@@ -1131,6 +1131,12 @@ class DocumentEditor extends Component {
     });
     this.changeDoc(event);
  }
+
+ handleFolderChangeNew = (event) => {
+  this.setState({
+   newFolderName: event.target.value
+  });
+}
 
   render() {
     const { classes } = this.props;

@@ -21,14 +21,16 @@ export class Controller {
 
   createDoc(req, res) {
     const { documentName, mapName, folderName } = JSON.parse(req.body);
-    InformativeService.create(documentName, mapName, folderName).then((r) => {
-      if (r && !r.error) {
-        res.status(200).send("Document created");
-        ael.info(
-          `${res.locals.authUser} created a new document, ${documentName}.json, and connected it to map ${mapName}.json and ${folderName}`
-        );
-      } else res.status(500).send(r.error.message);
-    });
+    InformativeService.createDoc(documentName, mapName, folderName).then(
+      (r) => {
+        if (r && !r.error) {
+          res.status(200).send("Document created");
+          ael.info(
+            `${res.locals.authUser} created a new document, ${documentName}.json, and connected it to map ${mapName}.json and ${folderName}`
+          );
+        } else res.status(500).send(r.error.message);
+      }
+    );
   }
 
   createFolder(req, res) {
