@@ -612,33 +612,6 @@ class App extends React.PureComponent {
                 // Get what should be hidden
                 const lToHide = currentL.filter((a) => !wantedL.includes(a));
 
-                wantedL.forEach((layer) => {
-                  const olLayer = this.appModel.map
-                    .getAllLayers()
-                    .find(
-                      (l) =>
-                        l.get("name") === layer &&
-                        l.get("layerType") === "group"
-                    );
-
-                  if (olLayer !== undefined) {
-                    // Determine how we should call the layerswitcher.showLayer event.
-                    // A: No sublayers specified for layer in 'wantedGl'. That means show ALL sublayers.
-                    // B: Sublayers found in 'wantedGl'. Set visibility accordingly.
-                    const param =
-                      wantedGl[layer] === undefined
-                        ? olLayer
-                        : {
-                            layer: olLayer,
-                            subLayersToShow: wantedGl[layer]?.split(","),
-                          };
-                    this.globalObserver.publish(
-                      "layerswitcher.showLayer",
-                      param
-                    );
-                  }
-                });
-
                 // Act!
                 lToShow.forEach((layer) => {
                   // Grab the corresponding OL layer from Map
@@ -732,6 +705,32 @@ class App extends React.PureComponent {
                 // One solution is to loop through our visible layers (again). Any of them
                 // that are of type 'groupLayer', and where a wantedGl key is missing should
                 // be toggled on completely.
+                wantedL.forEach((layer) => {
+                  const olLayer = this.appModel.map
+                    .getAllLayers()
+                    .find(
+                      (l) =>
+                        l.get("name") === layer &&
+                        l.get("layerType") === "group"
+                    );
+
+                  if (olLayer !== undefined) {
+                    // Determine how we should call the layerswitcher.showLayer event.
+                    // A: No sublayers specified for layer in 'wantedGl'. That means show ALL sublayers.
+                    // B: Sublayers found in 'wantedGl'. Set visibility accordingly.
+                    const param =
+                      wantedGl[layer] === undefined
+                        ? olLayer
+                        : {
+                            layer: olLayer,
+                            subLayersToShow: wantedGl[layer]?.split(","),
+                          };
+                    this.globalObserver.publish(
+                      "layerswitcher.showLayer",
+                      param
+                    );
+                  }
+                });
               }
             }, 1);
           }
