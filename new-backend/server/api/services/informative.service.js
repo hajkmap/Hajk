@@ -112,6 +112,52 @@ class InformativeService {
   }
 
   /**
+   * @summary Create a new, empty documents file, link it to specified map config.
+   *
+   * @param {*} documentName File name to be created
+   * @param {*} mapName Name of map config that this document file will be linked to
+   * @returns
+   * @memberof InformativeService
+   */
+  async createDoc(documentName, mapName, folderName) {
+    try {
+      // Add desired file extension to our file's name…
+      documentName += ".json";
+
+      // …and create a new path to that file.
+      if (folderName) {
+        const pathToFile = path.join(
+          process.cwd(),
+          "App_Data/documents" + "/" + folderName,
+          documentName
+        );
+      } else {
+        const pathToFile = path.join(
+          process.cwd(),
+          "App_Data/documents",
+          documentName
+        );
+      }
+
+      // Prepare the contents of our new documents file
+      const json = {
+        chapters: [], // No chapters
+        map: mapName, // Link this document to the desired map config
+      };
+
+      // Transform JSON object to string using 2 spaces indentation
+      const jsonString = JSON.stringify(json, null, 2);
+
+      // Write to file
+      await fs.promises.writeFile(pathToFile, jsonString);
+
+      return json;
+    } catch (error) {
+      return { error };
+    }
+  }
+
+  /**
    * @summary Create a new, empty folder.
    *
    * @param {*} folderName to be created

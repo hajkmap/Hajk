@@ -893,6 +893,20 @@ class DocumentEditor extends Component {
         />
 
         <FormControl fullWidth>
+          <InputLabel shrink>Välj Mapp</InputLabel>
+          <Select
+            value={this.state.newFolderName}
+            onChange={(e) => {
+              this.setState({
+                newFolderName: e.target.value,
+              });
+            }}
+          >
+            {this.renderFolders()}
+          </Select>
+        </FormControl>
+
+        <FormControl fullWidth>
           <InputLabel shrink>Välj Karta</InputLabel>
           <Select
             value={this.state.newDocumentMap}
@@ -961,8 +975,8 @@ class DocumentEditor extends Component {
           mapName: this.state.newDocumentMap,
         };
         if (data.documentName !== "") {
-          this.props.model.createDocument(data, (response) => {
-            this.loadDoc(data.documentName);
+          this.props.model.createDF(data, (response) => {
+            this.loadDoc(this.state.newFolderName, data.documentName);
           });
           this.hideModal();
         }

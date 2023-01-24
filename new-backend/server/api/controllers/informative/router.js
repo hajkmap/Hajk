@@ -10,6 +10,7 @@ export default express
   .use(restrictAdmin) // All routes that follow are admin-only!
   .post("/create", controller.create) // FIXME: Remove POST
   .put("/create", controller.create) // PUT is correct here, as this operation is idempotent
+  .post("/createdoc", controller.createDoc)
   .post("/createfolder", controller.createFolder)
   .get("/folderlist", controller.folderlist)
   .get("/documentfolderlist", controller.documentFolderList)

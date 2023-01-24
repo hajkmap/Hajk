@@ -128,6 +128,40 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Error"
+  /informative/createdoc:
+    post:
+      deprecated: true
+      tags:
+        - Admin - Informative/DocumentHandler
+      responses:
+        200:
+          description: Create a document connected to a specified map (OBSOLETE)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InformativeDocumentCreateBody"
+        5XX:
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+    put:
+      tags:
+        - Admin - Informative/DocumentHandler
+      responses:
+        200:
+          description: Create a document connected to a specified map
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InformativeDocumentCreateBody"
+        5XX:
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
   /informative/createfolder:
     post:
       tags:
