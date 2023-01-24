@@ -93,7 +93,7 @@ class AnchorModel {
     }
   };
 
-  #getVisibleLayers() {
+  getVisibleLayers() {
     return this.#map
       .getLayers()
       .getArray()
@@ -109,7 +109,7 @@ class AnchorModel {
       .join(",");
   }
 
-  #getPartlyToggledGroupLayers() {
+  getPartlyToggledGroupLayers() {
     const partlyToggledGroupLayers = {};
     this.#map
       .getLayers()
@@ -169,11 +169,11 @@ class AnchorModel {
     url.searchParams.append("x", this.#map.getView().getCenter()[0]);
     url.searchParams.append("y", this.#map.getView().getCenter()[1]);
     url.searchParams.append("z", this.#map.getView().getZoom());
-    url.searchParams.append("l", this.#getVisibleLayers());
+    url.searchParams.append("l", this.getVisibleLayers());
     url.searchParams.append("p", this.#getVisiblePlugins());
 
     // Only add gl if there are group layers with a subset of selected layers
-    const partlyToggledGroupLayers = this.#getPartlyToggledGroupLayers();
+    const partlyToggledGroupLayers = this.getPartlyToggledGroupLayers();
     Object.keys(partlyToggledGroupLayers).length > 0 &&
       url.searchParams.append("gl", JSON.stringify(partlyToggledGroupLayers));
 
@@ -185,7 +185,10 @@ class AnchorModel {
     q.length > 0 && url.searchParams.append("q", q);
 
     // Occasionally we may want to prevent hash update, but it's off by default
-    if (preventHashUpdate === false) {
+    if (
+      this.#app.config.mapConfig.map.enableAppStateInHash === true &&
+      preventHashUpdate === false
+    ) {
       // We want to update the URL with new hash value only
       // if the newly calculated hash differs from the one that
       // already exists in URL.
@@ -195,10 +198,12 @@ class AnchorModel {
       }
     }
 
-    // Finalize by setting hash value by using all search params AND
-    // removing all search params. I.e.: no more ?, only # in our URL.
-    url.hash = url.searchParams.toString();
-    url.search = "";
+    if (this.#app.config.mapConfig.map.enableAppStateInHash === true) {
+      // Finalize by setting hash value by using all search params AND
+      // removing all search params. I.e.: no more ?, only # in our URL.
+      url.hash = url.searchParams.toString();
+      url.search = "";
+    }
     return url.toString();
   });
 }

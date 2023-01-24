@@ -498,89 +498,178 @@ class App extends React.PureComponent {
     );
 
     // This event is used to allow controlling Hajk programmatically, e.g in an embedded context, see #1252
-    window.addEventListener(
-      "hashchange",
-      () => {
-        // Extract existing params. Using this helper we will take into account both
-        // the query and the hash parameters.
-        const mergedParams = getMergedSearchAndHashParams();
+    this.props.config.mapConfig.map.enableAppStateInHash === true &&
+      window.addEventListener(
+        "hashchange",
+        () => {
+          // Extract existing params. Using this helper we will take into account both
+          // the query and the hash parameters.
+          const mergedParams = getMergedSearchAndHashParams();
 
-        // Act when view's zoom changes
-        if (mergedParams.get("z")) {
-          if (
-            this.appModel.map.getView().getZoom() !==
-            parseInt(mergedParams.get("z"))
-          ) {
-            // …let's update our View's zoom.
-            this.appModel.map
-              .getView()
-              .animate({ zoom: parseInt(mergedParams.get("z")) });
+          // Act when view's zoom changes
+          if (mergedParams.get("z")) {
+            if (
+              this.appModel.map.getView().getZoom() !==
+              parseInt(mergedParams.get("z"))
+            ) {
+              // …let's update our View's zoom.
+              this.appModel.map
+                .getView()
+                .animate({ zoom: parseInt(mergedParams.get("z")) });
+            }
           }
-        }
 
-        // Act when view's center coordinate changes
-        if (mergedParams.get("x") || mergedParams.get("y")) {
-          const [x, y] = this.appModel.map.getView().getCenter();
+          // Act when view's center coordinate changes
+          if (mergedParams.get("x") || mergedParams.get("y")) {
+            const [x, y] = this.appModel.map.getView().getCenter();
 
-          if (
-            mergedParams.get("x") !== x.toString() ||
-            mergedParams.get("y") !== y.toString()
-          ) {
-            this.appModel.map.getView().animate({
-              center: [mergedParams.get("x"), mergedParams.get("y")],
-            });
-          }
-        }
-
-        // Act when plugin window's visibility changes.
-        // p contains the list of plugins to show. It's important to check
-        // for null, as an empty string value is a valid value that indicates
-        // that no plugin should be shown, while a null value indicates that
-        // the parameter does not exist and default plugin visibility should
-        // be respected.
-        if (mergedParams.get("p") !== null) {
-          const currentlyVisiblePlugins = this.appModel.windows
-            .filter((w) => w.state.windowVisible)
-            .map((p) => p.type);
-
-          if (currentlyVisiblePlugins.join(",") !== mergedParams.get("p")) {
-            const pInParams = mergedParams.get("p").split(",");
-
-            // First hide if window not longer visible
-            currentlyVisiblePlugins.forEach((p) => {
-              if (!pInParams.includes(p)) {
-                this.globalObserver.publish(`${p}.closeWindow`);
-              }
-            });
-
-            // Next, show any windows that are still hidden
-            mergedParams
-              .get("p")
-              .split(",")
-              .forEach((p) => {
-                this.globalObserver.publish(`${p}.showWindow`);
+            if (
+              mergedParams.get("x") !== x.toString() ||
+              mergedParams.get("y") !== y.toString()
+            ) {
+              this.appModel.map.getView().animate({
+                center: [mergedParams.get("x"), mergedParams.get("y")],
               });
+            }
           }
-        }
 
-        // Act when search string changes.
-        // Check if the q parameter exists and differs from
-        // the most recent search. If so, let's publish an event that
-        // the Search component listens to.
-        // TODO: Also handle sources change, the s parameter
-        if (
-          mergedParams.get("q") !==
-            this.appModel.searchModel.lastSearchPhrase &&
-          mergedParams.get("q") !== null
-        ) {
-          this.globalObserver.publish(
-            "search.setSearchPhrase",
-            mergedParams.get("q")
-          );
-        }
-      },
-      false
-    );
+          // Act when plugin window's visibility changes.
+          // p contains the list of plugins to show. It's important to check
+          // for null, as an empty string value is a valid value that indicates
+          // that no plugin should be shown, while a null value indicates that
+          // the parameter does not exist and default plugin visibility should
+          // be respected.
+          if (mergedParams.get("p") !== null) {
+            const currentlyVisiblePlugins = this.appModel.windows
+              .filter((w) => w.state.windowVisible)
+              .map((p) => p.type);
+
+            if (currentlyVisiblePlugins.join(",") !== mergedParams.get("p")) {
+              const pInParams = mergedParams.get("p").split(",");
+
+              // First hide if window not longer visible
+              currentlyVisiblePlugins.forEach((p) => {
+                if (!pInParams.includes(p)) {
+                  this.globalObserver.publish(`${p}.closeWindow`);
+                }
+              });
+
+              // Next, show any windows that are still hidden
+              mergedParams
+                .get("p")
+                .split(",")
+                .forEach((p) => {
+                  this.globalObserver.publish(`${p}.showWindow`);
+                });
+            }
+          }
+
+          // Act when search string changes.
+          // Check if the q parameter exists and differs from
+          // the most recent search. If so, let's publish an event that
+          // the Search component listens to.
+          // TODO: Also handle sources change, the s parameter
+          if (
+            mergedParams.get("q") !==
+              this.appModel.searchModel.lastSearchPhrase &&
+            mergedParams.get("q") !== null
+          ) {
+            this.globalObserver.publish(
+              "search.setSearchPhrase",
+              mergedParams.get("q")
+            );
+          }
+
+          // Act when the l parameter changes
+          if (mergedParams.get("l") || mergedParams.get("gl")) {
+            setTimeout(() => {
+              // Grab the wanted values from params
+              const l = mergedParams.get("l");
+              const gl = mergedParams.get("gl") ?? "{}"; // Default to a stringified empty object, as that's what we'll compare against
+
+              // Find out what's currently visible
+              const visibleLayers =
+                this.appModel.anchorModel.getVisibleLayers();
+              const partlyToggledGroupLayers =
+                this.appModel.anchorModel.getPartlyToggledGroupLayers();
+
+              // Compare these two
+              if (
+                l === visibleLayers &&
+                JSON.stringify(partlyToggledGroupLayers) === gl
+              ) {
+                console.log("No changes");
+              } else {
+                // It's easier to work on the values if we parse them first
+                const wantedL = l.split(",");
+                const wantedGl = JSON.parse(gl);
+                const currentL = visibleLayers.split(",");
+                const currentGl = partlyToggledGroupLayers; // This is already an object, no need to parse
+
+                // console.log("Wanted layers: ", wantedL);
+                // console.log("Current layers: ", currentL);
+                // console.log("Wanted group layers: ", wantedGl);
+                // console.log("Current group layers: ", currentGl);
+
+                // Get what should be shown
+                const lToShow = wantedL.filter((a) => !currentL.includes(a));
+                console.log("Layers to show: ", lToShow);
+
+                // Get what should be hidden
+                const lToHide = currentL.filter((a) => !wantedL.includes(a));
+                console.log("Layers to hide: ", lToHide);
+
+                // Act!
+                lToShow.forEach((layer) => {
+                  // Grab the corresponding OL layer from Map
+                  const olLayer = this.appModel.map
+                    .getAllLayers()
+                    .find((l) => l.get("name") === layer);
+                  console.log(`Showing ${olLayer.get("layerType")}`, olLayer);
+
+                  if (olLayer.get("layerType") === "group") {
+                    // If it's a group layer we have some work to do…
+                    // if (wantedGl[layer]) {
+                    // In addition, this looks like a group layer that has
+                    // its sublayers specified and we should take care of that too
+                    console.log(
+                      `Setting selected sublayers for ${layer} to the following:`,
+                      wantedGl[layer]
+                    );
+                    this.globalObserver.publish("layerswitcher.showLayer", {
+                      layer: olLayer,
+                      subLayersToShow: wantedGl[layer],
+                    });
+                    // }
+                  } else {
+                    // If it's a "normal" layers are easier, just show them.
+                    // Each layer has a listener that will take care of toggling
+                    // the checkbox in LayerSwitcher.
+                    olLayer.setVisible(true);
+                  }
+                });
+
+                lToHide.forEach((layer) => {
+                  const olLayer = this.appModel.map
+                    .getAllLayers()
+                    .find((l) => l.get("name") === layer);
+                  console.log(`Hiding ${olLayer.get("layerType")}`, olLayer);
+                  if (olLayer.get("layerType") === "group") {
+                    // Tell the LayerSwitcher about it
+                    this.globalObserver.publish(
+                      "layerswitcher.hideLayer",
+                      olLayer
+                    );
+                  } else {
+                    olLayer.setVisible(false);
+                  }
+                });
+              }
+            }, 1);
+          }
+        },
+        false
+      );
 
     // Register various global listeners.
     this.globalObserver.subscribe("infoClick.mapClick", (results) => {
