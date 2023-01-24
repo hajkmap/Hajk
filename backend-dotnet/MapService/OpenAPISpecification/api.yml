@@ -449,6 +449,12 @@ paths:
           required: true
           schema:
             type: string
+        - in: header
+          name: X-Control-Header
+          description: User name that will be supplied to AD
+          schema:
+            type: string
+          required: false
       description: Create a new map configuration
       responses:
         200:
@@ -498,6 +504,12 @@ paths:
           required: true
           schema:
             type: string
+        - in: header
+          name: X-Control-Header
+          description: User name that will be supplied to AD
+          schema:
+            type: string
+          required: false
       description: Delete an existing map configuration
       responses:
         200:
@@ -537,6 +549,12 @@ paths:
           required: true
           schema:
             type: string
+        - in: header
+          name: X-Control-Header
+          description: User name that will be supplied to AD
+          schema:
+            type: string
+          required: false
       description: Create a new map configuration by duplicating an existing one
       responses:
         200:
@@ -766,6 +784,12 @@ paths:
           required: true
           schema:
             type: string
+        - in: header
+          name: X-Control-Header
+          description: User name that will be supplied to AD
+          schema:
+            type: string
+          required: false
       responses:
         204:
           description: All good
@@ -789,6 +813,12 @@ paths:
           required: true
           schema:
             type: string
+        - in: header
+          name: X-Control-Header
+          description: User name that will be supplied to AD
+          schema:
+            type: string
+          required: false
       responses:
         204:
           description: All good
@@ -812,6 +842,12 @@ paths:
           required: true
           schema:
             type: string
+        - in: header
+          name: X-Control-Header
+          description: User name that will be supplied to AD
+          schema:
+            type: string
+          required: false
       responses:
         204:
           description: All good
@@ -841,6 +877,12 @@ paths:
           required: true
           schema:
             type: string
+        - in: header
+          name: X-Control-Header
+          description: User name that will be supplied to AD
+          schema:
+            type: string
+          required: false
       responses:
         201:
           description: Created
@@ -870,6 +912,12 @@ paths:
           required: true
           schema:
             type: string
+        - in: header
+          name: X-Control-Header
+          description: User name that will be supplied to AD
+          schema:
+            type: string
+          required: false
       responses:
         204:
           description: All good
@@ -895,6 +943,12 @@ paths:
           required: true
           schema:
             type: string
+        - in: header
+          name: X-Control-Header
+          description: User name that will be supplied to AD
+          schema:
+            type: string
+          required: false
       responses:
         204:
           description: All good
@@ -917,6 +971,12 @@ paths:
           required: true
           schema:
             type: string
+        - in: header
+          name: X-Control-Header
+          description: User name that will be supplied to AD
+          schema:
+            type: string
+          required: false
       responses:
         200:
           description: Layer deleted successfully
@@ -2680,14 +2740,6 @@ components:
     LayerSwitcherBody:
       title: LayerSwitcher body
       properties:
-        active:
-          type: boolean
-        backgroundSwitcherBlack:
-          type: boolean
-          description: Show black background
-        backgroundSwitcherWhite:
-          type: boolean
-          description: Show white background
         baselayers:
           type: array
           items:
@@ -2709,19 +2761,6 @@ components:
               visibleAtStart:
                 type: boolean
                 description: Show layer at start
-        description:
-          type: string
-          example: Välj vad du vill visa i kartan.
-          description: If the tool displays as a widget (the setting 'Verktygsplacering' is set to either 'left' or 'right') then this description will display inside the widget button
-        dropdownThemeMaps:
-          type: boolean
-          description: Display the map in the list of available maps.
-        enableOSM:
-          type: boolean
-          description: Show OpenStreetMap
-        enableTransparencySlider:
-          type: boolean
-          description: Show transparency slider. Global setting to choose whether transparency slider is active or not. If the setting is active, then it's possible to configure individual layers if the transparency slider should show in the layer. If this is not checked, the transparency slider will not show on any layer.
         groups:
           type: array
           items:
@@ -2772,6 +2811,27 @@ components:
               type:
                 type: string
                 example: group
+        active:
+          type: boolean
+        backgroundSwitcherBlack:
+          type: boolean
+          description: Show black background
+        backgroundSwitcherWhite:
+          type: boolean
+          description: Show white background
+        description:
+          type: string
+          example: Välj vad du vill visa i kartan.
+          description: If the tool displays as a widget (the setting 'Verktygsplacering' is set to either 'left' or 'right') then this description will display inside the widget button
+        dropdownThemeMaps:
+          type: boolean
+          description: Display the map in the list of available maps.
+        enableOSM:
+          type: boolean
+          description: Show OpenStreetMap
+        enableTransparencySlider:
+          type: boolean
+          description: Show transparency slider. Global setting to choose whether transparency slider is active or not. If the setting is active, then it's possible to configure individual layers if the transparency slider should show in the layer. If this is not checked, the transparency slider will not show on any layer.
         height:
           type: string
           example: null
