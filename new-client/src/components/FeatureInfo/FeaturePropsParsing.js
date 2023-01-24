@@ -350,7 +350,7 @@ export default class FeaturePropsParsing {
       // The loop below extracts all placeholders and replaces them with actual values
       // current feature's property collection.
       // Match any word character, range of unicode characters (åäö etc), @ sign, dash or dot
-      (this.markdown.match(/{[\s\w\u00C0-\u00ff@\-|,'.():]+}/g) || []).forEach(
+      (this.markdown.match(/{[\s\w\u00C0-\u00ff@\-|!,'.():]+}/g) || []).forEach(
         (placeholder) => {
           // placeholder is a string, e.g. "{intern_url_1@@documenthandler}" or "{foobar}"
           // Let's replace all occurrences of the placeholder like this:
