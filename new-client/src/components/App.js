@@ -582,157 +582,150 @@ class App extends React.PureComponent {
 
           // Act when the l parameter changes
           if (mergedParams.get("l") || mergedParams.get("gl")) {
-            setTimeout(() => {
-              // Grab the wanted values from params
-              const l = mergedParams.get("l");
-              const gl = mergedParams.get("gl") ?? "{}"; // Default to a stringified empty object, as that's what we'll compare against
+            // Grab the wanted values from params
+            const l = mergedParams.get("l");
+            const gl = mergedParams.get("gl") ?? "{}"; // Default to a stringified empty object, as that's what we'll compare against
 
-              // Find out what's currently visible
-              const visibleLayers =
-                this.appModel.anchorModel.getVisibleLayers();
-              const partlyToggledGroupLayers =
-                this.appModel.anchorModel.getPartlyToggledGroupLayers();
+            // Find out what's currently visible
+            const visibleLayers = this.appModel.anchorModel.getVisibleLayers();
+            const partlyToggledGroupLayers =
+              this.appModel.anchorModel.getPartlyToggledGroupLayers();
 
-              // Compare these two
-              if (
-                l === visibleLayers &&
-                JSON.stringify(partlyToggledGroupLayers) === gl
-              ) {
-                // console.log("No changes");
-              } else {
-                // It's easier to work on the values if we parse them first
-                const wantedL = l.split(",");
-                const wantedGl = JSON.parse(gl);
-                const currentL = visibleLayers.split(",");
-                const currentGl = partlyToggledGroupLayers; // This is already an object, no need to parse
+            // Compare these two
+            if (
+              l === visibleLayers &&
+              JSON.stringify(partlyToggledGroupLayers) === gl
+            ) {
+              // console.log("No changes");
+            } else {
+              // It's easier to work on the values if we parse them first
+              const wantedL = l.split(",");
+              const wantedGl = JSON.parse(gl);
+              const currentL = visibleLayers.split(",");
+              const currentGl = partlyToggledGroupLayers; // This is already an object, no need to parse
 
-                // Get what should be shown
-                const lToShow = wantedL.filter((a) => !currentL.includes(a));
+              // Get what should be shown
+              const lToShow = wantedL.filter((a) => !currentL.includes(a));
 
-                // Get what should be hidden
-                const lToHide = currentL.filter((a) => !wantedL.includes(a));
+              // Get what should be hidden
+              const lToHide = currentL.filter((a) => !wantedL.includes(a));
 
-                // Act!
-                lToShow.forEach((layer) => {
-                  // Grab the corresponding OL layer from Map
-                  const olLayer = this.appModel.map
-                    .getAllLayers()
-                    .find((l) => l.get("name") === layer);
+              // Act!
+              lToShow.forEach((layer) => {
+                // Grab the corresponding OL layer from Map
+                const olLayer = this.appModel.map
+                  .getAllLayers()
+                  .find((l) => l.get("name") === layer);
 
-                  // If it's a group layer we can use the 'layerswitcher.showLayer' event
-                  // that each group layer listens to.
-                  if (olLayer.get("layerType") === "group") {
-                    // We can publish the 'layerswitcher.showLayer' event with two different
-                    // sets of parameters, depending on whether the group layer has all
-                    // sublayers selected, or only a subset.
+                // If it's a group layer we can use the 'layerswitcher.showLayer' event
+                // that each group layer listens to.
+                if (olLayer.get("layerType") === "group") {
+                  // We can publish the 'layerswitcher.showLayer' event with two different
+                  // sets of parameters, depending on whether the group layer has all
+                  // sublayers selected, or only a subset.
 
-                    // If only a subset is selected, we will find the sublayers in our 'wantedGl' object.
-                    // Anything else than 'undefined' here means that we want to publish
-                    // the showLayer event and supply the sub-selection of sublayers too.
-                    if (wantedGl[layer]) {
-                      // In addition, this looks like a group layer that has
-                      // its sublayers specified and we should take care of that too
-                      this.globalObserver.publish("layerswitcher.showLayer", {
-                        layer: olLayer,
-                        subLayersToShow: wantedGl[layer]?.split(","),
-                      });
-                    }
-                    // On the other hand, if the layer to be shown does not exist in 'wantedGl',
-                    // it means that we should show ALL the sublayers.
-                    // For that we must publish the event slightly differently. (Also, see
-                    // where we subscribe to layerswitcher.showLayer for further understanding.)
-                    else {
-                      this.globalObserver.publish(
-                        "layerswitcher.showLayer",
-                        olLayer
-                      );
-                    }
-                  }
-                  // That's it for group layer. The other layers, the "normal"
-                  // ones, are easier: just show them.
-                  else {
-                    // Each layer has a listener that will take care of toggling
-                    // the checkbox in LayerSwitcher.
-                    olLayer.setVisible(true);
-                  }
-                });
-
-                // Next, let's take care of layers that should be hidden.
-                lToHide.forEach((layer) => {
-                  const olLayer = this.appModel.map
-                    .getAllLayers()
-                    .find((l) => l.get("name") === layer);
-
-                  if (olLayer.get("layerType") === "group") {
-                    // Tell the LayerSwitcher about it
-                    this.globalObserver.publish(
-                      "layerswitcher.hideLayer",
-                      olLayer
-                    );
-                  } else {
-                    olLayer.setVisible(false);
-                  }
-                });
-
-                // One more special case must be taken care of. lToShow and lToHide can be empty
-                // if user toggled only a sublayer WITHIN a group layer. In that case we
-                // won't need to change visibility for any OL layers, but we must still fix the group
-                // layer's components' visibility.
-                // We start by looping the wantedGl and comparing to currentGl.
-                for (const key of Object.keys(wantedGl)) {
-                  // If the currently visible groups object has the layer's key…
-                  // …and it's value differs from the wantedGl's corresponding value…
-                  if (
-                    Object.hasOwn(currentGl, key) &&
-                    currentGl[key] !== wantedGl[key]
-                  ) {
-                    const olLayer = this.appModel.map
-                      .getAllLayers()
-                      .find((l) => l.get("name") === key);
+                  // If only a subset is selected, we will find the sublayers in our 'wantedGl' object.
+                  // Anything else than 'undefined' here means that we want to publish
+                  // the showLayer event and supply the sub-selection of sublayers too.
+                  if (wantedGl[layer]) {
+                    // In addition, this looks like a group layer that has
+                    // its sublayers specified and we should take care of that too
                     this.globalObserver.publish("layerswitcher.showLayer", {
                       layer: olLayer,
-                      subLayersToShow: wantedGl[key]?.split(","),
+                      subLayersToShow: wantedGl[layer]?.split(","),
                     });
                   }
-                }
-
-                // Super-special case:
-                // If a partly-toggled group layer becomes fully toggled it will
-                // not show up as a diff in wanted vs current layers. Neither will
-                // we see anything in 'wantedGl' (it will be empty, as that's what we
-                // expect for fully toggled group layers [no sub-selection]).
-                // So what can we do?
-                // One solution is to loop through our visible layers (again). Any of them
-                // that are of type 'groupLayer', and where a wantedGl key is missing should
-                // be toggled on completely.
-                wantedL.forEach((layer) => {
-                  const olLayer = this.appModel.map
-                    .getAllLayers()
-                    .find(
-                      (l) =>
-                        l.get("name") === layer &&
-                        l.get("layerType") === "group"
-                    );
-
-                  if (olLayer !== undefined) {
-                    // Determine how we should call the layerswitcher.showLayer event.
-                    // A: No sublayers specified for layer in 'wantedGl'. That means show ALL sublayers.
-                    // B: Sublayers found in 'wantedGl'. Set visibility accordingly.
-                    const param =
-                      wantedGl[layer] === undefined
-                        ? olLayer
-                        : {
-                            layer: olLayer,
-                            subLayersToShow: wantedGl[layer]?.split(","),
-                          };
+                  // On the other hand, if the layer to be shown does not exist in 'wantedGl',
+                  // it means that we should show ALL the sublayers.
+                  // For that we must publish the event slightly differently. (Also, see
+                  // where we subscribe to layerswitcher.showLayer for further understanding.)
+                  else {
                     this.globalObserver.publish(
                       "layerswitcher.showLayer",
-                      param
+                      olLayer
                     );
                   }
-                });
+                }
+                // That's it for group layer. The other layers, the "normal"
+                // ones, are easier: just show them.
+                else {
+                  // Each layer has a listener that will take care of toggling
+                  // the checkbox in LayerSwitcher.
+                  olLayer.setVisible(true);
+                }
+              });
+
+              // Next, let's take care of layers that should be hidden.
+              lToHide.forEach((layer) => {
+                const olLayer = this.appModel.map
+                  .getAllLayers()
+                  .find((l) => l.get("name") === layer);
+
+                if (olLayer.get("layerType") === "group") {
+                  // Tell the LayerSwitcher about it
+                  this.globalObserver.publish(
+                    "layerswitcher.hideLayer",
+                    olLayer
+                  );
+                } else {
+                  olLayer.setVisible(false);
+                }
+              });
+
+              // One more special case must be taken care of. lToShow and lToHide can be empty
+              // if user toggled only a sublayer WITHIN a group layer. In that case we
+              // won't need to change visibility for any OL layers, but we must still fix the group
+              // layer's components' visibility.
+              // We start by looping the wantedGl and comparing to currentGl.
+              for (const key of Object.keys(wantedGl)) {
+                // If the currently visible groups object has the layer's key…
+                // …and it's value differs from the wantedGl's corresponding value…
+                if (
+                  Object.hasOwn(currentGl, key) &&
+                  currentGl[key] !== wantedGl[key]
+                ) {
+                  const olLayer = this.appModel.map
+                    .getAllLayers()
+                    .find((l) => l.get("name") === key);
+                  this.globalObserver.publish("layerswitcher.showLayer", {
+                    layer: olLayer,
+                    subLayersToShow: wantedGl[key]?.split(","),
+                  });
+                }
               }
-            }, 1);
+
+              // Super-special case:
+              // If a partly-toggled group layer becomes fully toggled it will
+              // not show up as a diff in wanted vs current layers. Neither will
+              // we see anything in 'wantedGl' (it will be empty, as that's what we
+              // expect for fully toggled group layers [no sub-selection]).
+              // So what can we do?
+              // One solution is to loop through our visible layers (again). Any of them
+              // that are of type 'groupLayer', and where a wantedGl key is missing should
+              // be toggled on completely.
+              wantedL.forEach((layer) => {
+                const olLayer = this.appModel.map
+                  .getAllLayers()
+                  .find(
+                    (l) =>
+                      l.get("name") === layer && l.get("layerType") === "group"
+                  );
+
+                if (olLayer !== undefined) {
+                  // Determine how we should call the layerswitcher.showLayer event.
+                  // A: No sublayers specified for layer in 'wantedGl'. That means show ALL sublayers.
+                  // B: Sublayers found in 'wantedGl'. Set visibility accordingly.
+                  const param =
+                    wantedGl[layer] === undefined
+                      ? olLayer
+                      : {
+                          layer: olLayer,
+                          subLayersToShow: wantedGl[layer]?.split(","),
+                        };
+                  this.globalObserver.publish("layerswitcher.showLayer", param);
+                }
+              });
+            }
           }
         },
         false
