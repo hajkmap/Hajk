@@ -15,7 +15,7 @@ const ColorButtonBlue = withStyles((theme) => ({
   },
 }))(Button);
 
-const DEFAULT_FIELDS_TO_SEND = [
+const ESTATE_FIELDS_TO_SEND = [
   {
     key: "fnr",
     featureProperty: "fnr_fr",
@@ -28,13 +28,52 @@ const DEFAULT_FIELDS_TO_SEND = [
   },
   {
     key: "uuid",
-    featureProperty: null,
-    overrideValue: "5d560563-48c6-4588-9d24-46c41d0c7278",
+    featureProperty: "uuid",
+    overrideValue: null,
   },
   {
     key: "municipality",
     featureProperty: null,
     overrideValue: "Gothenburg",
+  },
+];
+
+const AREA_FIELDS_TO_SEND = [
+  {
+    key: "id",
+    featureProperty: "stromraadekod",
+    overrideValue: null,
+  },
+  {
+    key: "type",
+    featureProperty: null,
+    overrideValue: 1,
+  },
+];
+
+const INVESTIGATION_FIELDS_TO_SEND = [
+  {
+    key: "id",
+    featureProperty: "recundersoekningytaid",
+    overrideValue: null,
+  },
+  {
+    key: "type",
+    featureProperty: null,
+    overrideValue: 2,
+  },
+];
+
+const POLLUTION_FIELDS_TO_SEND = [
+  {
+    key: "id",
+    featureProperty: "strfoeroreningkod",
+    overrideValue: null,
+  },
+  {
+    key: "type",
+    featureProperty: null,
+    overrideValue: 2,
   },
 ];
 
@@ -52,15 +91,37 @@ const defaultState = {
     {
       id: "ESTATES",
       searchKey: "fnr",
-      wmsId: "999",
-      wfsId: "99",
-      fieldsToSend: DEFAULT_FIELDS_TO_SEND,
+      wmsId: "",
+      wfsId: "",
+      fieldsToSend: ESTATE_FIELDS_TO_SEND,
+    },
+    {
+      id: "ENVIRONMENT_1",
+      searchKey: "id",
+      wmsId: "",
+      wfsId: "",
+      fieldsToSend: AREA_FIELDS_TO_SEND,
+    },
+    {
+      id: "ENVIRONMENT_2",
+      searchKey: "id",
+      wmsId: "",
+      wfsId: "",
+      fieldsToSend: INVESTIGATION_FIELDS_TO_SEND,
+    },
+    {
+      id: "ENVIRONMENT_3",
+      searchKey: "id",
+      wmsId: "",
+      wfsId: "",
+      fieldsToSend: POLLUTION_FIELDS_TO_SEND,
     },
   ],
   searchSources: [],
   searchableLayers: [],
   visibleForGroups: [],
   availableWmsLayers: [],
+  integrationText: "",
 };
 
 class ToolOptions extends Component {
@@ -77,6 +138,8 @@ class ToolOptions extends Component {
 
     const tool = this.getTool();
     if (tool) {
+      const integrationSettings =
+        tool.options.integrationSettings || this.state.integrationSettings;
       this.setState(
         {
           active: true,
@@ -90,8 +153,8 @@ class ToolOptions extends Component {
           hubUrl: tool.options.hubUrl || this.state.hubUrl,
           userOverride: tool.options.userOverride || this.state.userOverride,
           searchSources: tool.options.searchSources || this.state.searchSources,
-          integrationSettings:
-            tool.options.integrationSettings || this.state.integrationSettings,
+          integrationSettings: integrationSettings,
+          integrationText: JSON.stringify(integrationSettings, null, 4),
         },
         () => {
           this.loadLayers(); // Load WFS search sources
@@ -199,6 +262,13 @@ class ToolOptions extends Component {
   }
 
   save() {
+    let integrationSettings;
+    try {
+      integrationSettings = JSON.parse(this.state.integrationText);
+    } catch (error) {
+      console.error("Failed to parse integration-settings...");
+      integrationSettings = this.state.integrationSettings;
+    }
     const tool = {
       type: this.type,
       index: this.state.index,
@@ -210,7 +280,7 @@ class ToolOptions extends Component {
         hubUrl: this.state.hubUrl,
         userOverride: this.state.userOverride,
         searchSources: this.state.searchSources,
-        integrationSettings: this.state.integrationSettings,
+        integrationSettings: integrationSettings,
         visibleForGroups: this.state.visibleForGroups,
       },
     };
@@ -610,64 +680,22 @@ class ToolOptions extends Component {
           </div>
           <div className="separator">Söktjänster</div>
           {this.state.tree}
-          <div className="separator">Fastighetskoppling</div>
-          <div>
-            <label htmlFor="estate_settings_wfsId">Sökkälla</label>
-            <select
-              id="estate_settings_wfsId"
-              name="estate_settings_wfsId"
-              className="control-fixed-width"
-              onChange={(e) => {
-                const selected = e.target.value;
-                const estateSettings = this.getEstateIntegrationSettings();
-                estateSettings.wfsId = selected;
-                this.setState({ integrationSettings: [estateSettings] });
-              }}
-              value={this.getEstateIntegrationSettings().wfsId}
-            >
-              {this.state.searchableLayers.map((l) => {
-                return (
-                  <option key={l.id} value={l.id.toString()}>
-                    {l.internalLayerName?.length > 0
-                      ? l.internalLayerName
-                      : l.caption}
-                  </option>
-                );
-              })}
-            </select>
-          </div>
-          <div>
-            <label htmlFor="estate_settings_searchKey">
-              Fält för sökning i fastighets-WFS
-            </label>
-            <input
-              id="estate_settings_searchKey"
-              value={this.getEstateIntegrationSettings().searchKey}
-              type="text"
-              name="estate_settings_searchKey"
-              onChange={(e) => {
-                const sk = e.target.value;
-                const estateSettings = this.getEstateIntegrationSettings();
-                estateSettings.searchKey = sk;
-                this.setState({ integrationSettings: [estateSettings] });
-              }}
-            />
-          </div>
-          <div>
-            <label htmlFor="estate_settings_wmsId">Id för fastighets-WMS</label>
-            <input
-              id="estate_settings_wmsId"
-              value={this.getEstateIntegrationSettings().wmsId}
-              type="text"
-              name="estate_settings_wmsId"
-              onChange={(e) => {
-                const id = e.target.value;
-                const estateSettings = this.getEstateIntegrationSettings();
-                estateSettings.wmsId = id;
-                this.setState({ integrationSettings: [estateSettings] });
-              }}
-            />
-          </div>
+          <div className="separator">Vision-inställningar</div>
+          <textarea
+            className="integrationSettings"
+            style={{ width: "100%", minHeight: 700 }}
+            value={this.state.integrationText}
+            onChange={(e) => {
+              try {
+                this.setState({
+                  integrationText: e.target.value,
+                });
+              } catch (error) {
+                console.log("Editing...");
+              }
+            }}
+            type="text"
+          />
           {this.renderVisibleForGroups()}
         </form>
       </div>
