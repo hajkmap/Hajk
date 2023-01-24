@@ -93,6 +93,7 @@ function EstateToolbox({
               Fastighetslager
             </Typography>
             <Switch
+              disabled={!layer}
               checked={layerVisible}
               onChange={handleWmsVisibilitySwitchChange}
             />

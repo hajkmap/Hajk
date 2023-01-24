@@ -18,12 +18,12 @@ function EnvironmentToolbox(props) {
     props.model.getLayerFromId(props.objectInfo.wmsId)
   );
   // We're gonna need a state to keep track of the layer-switch
-  const [layerVisible, setLayerVisible] = useState(() => layer.get("visible"));
+  const [layerVisible, setLayerVisible] = useState(() => layer?.get("visible"));
 
   useEffect(() => {
     const l = props.model.getLayerFromId(props.objectInfo.wmsId);
     setLayer(l);
-    setLayerVisible(l.get("visible"));
+    setLayerVisible(l?.get("visible"));
   }, [props.model, props.objectInfo.wmsId]);
 
   // An effect making sure to toggle the switch when the layer-visibility changes
@@ -37,7 +37,7 @@ function EnvironmentToolbox(props) {
         // The observer will emit an event with the changed layer as target.
         const clickedLayer = e.target;
         // If the clicked layer is tha same as the layer from props, we can update the view.
-        if (clickedLayer && clickedLayer.get("name") === layer.get("name")) {
+        if (clickedLayer && clickedLayer.get("name") === layer?.get("name")) {
           setLayerVisible(layer.get("visible"));
         }
       }
@@ -106,6 +106,7 @@ function EnvironmentToolbox(props) {
             </Typography>
             <Switch
               checked={layerVisible}
+              disabled={!layer}
               onChange={handleWmsVisibilitySwitchChange}
             />
           </Stack>

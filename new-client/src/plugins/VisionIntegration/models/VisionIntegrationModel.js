@@ -779,7 +779,7 @@ class VisionIntegrationModel {
   // Returns the id of the WFS-source that is connected to the estate-part of the integration.
   #getEstateSearchSourceId = () => {
     // First we'll get all the estate-settings
-    const estateSettings = this.#getEstateIntegrationSettings();
+    const estateSettings = this.#getEstateIntegrationSettings() || {};
     // Then we'll get the wfs-id
     const { wfsId } = estateSettings;
     // We'll check if the wfsId is defined so that we can log an error if its not
@@ -796,7 +796,7 @@ class VisionIntegrationModel {
   // Returns the id of the WMS-layer that is connected to the estate-part of the integration.
   #getEstateWmsId = () => {
     // First we'll get all the estate-settings
-    const estateSettings = this.#getEstateIntegrationSettings();
+    const estateSettings = this.#getEstateIntegrationSettings() || {};
     // Then we'll get the wfs-id
     const { wmsId } = estateSettings;
     // We'll check if the wfsId is defined so that we can log an error if its not
