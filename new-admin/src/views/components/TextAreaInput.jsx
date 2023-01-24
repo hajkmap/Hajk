@@ -40,16 +40,15 @@ const TextAreaInput = ({ editorState, updateEditorState, onCancelClick }) => {
     selectionState.getAnchorKey()
   );
   const data = contentBlock.getData();
+
   const focusedBackgroundColor = data.get("backgroundColor") || "INGEN FÄRG";
   const focusedDividerColor = data.get("dividerColor") || "INGEN FÄRG";
   const focusedIsAccordion =
     data.get("isAccordion") === "true" ? "ÄR" : "ÄR INTE";
   const focusedAccordionTitle = data.get("accordionTitle") || "INGEN TITEL";
 
-  const currentAccordionTitle = data.get("accordionTitle");
   const accordionIsChecked = data.get("isAccordion") === "true";
   const [isAccordion, setIsAccordion] = useState(accordionIsChecked);
-  console.log(currentAccordionTitle);
 
   useEffect(() => {
     setIsAccordion(accordionIsChecked);
@@ -128,36 +127,42 @@ const TextAreaInput = ({ editorState, updateEditorState, onCancelClick }) => {
               </Grid>
               <Grid item>
                 <label style={{ margin: 0 }}>
-                  Hopfällbar faktaruta (data-isAccordion)
+                  Hopfällbar faktaruta (data-accordion)
                 </label>
               </Grid>
-              <Grid item>
-                <Checkbox
-                  id="data-isAccordion"
-                  onChange={(e) => {
-                    setIsAccordion(!isAccordion);
-                  }}
-                  checked={isAccordion}
-                />
-              </Grid>
-              <Grid item>
-                <label style={{ margin: 0 }}>
-                  Titel på hopfällbar faktaruta
-                </label>
-              </Grid>
-              <Grid item>
-                <input
-                  id="data-isAccordion-title"
-                  onChange={(e) => {
-                    setAccordionTitle(e.target.value);
-                  }}
-                  type="text"
-                  value={accordionTitle || ""}
-                  placeholder={
-                    currentAccordionTitle ? currentAccordionTitle : "Titel..."
-                  }
-                  disabled={!isAccordion}
-                />
+              <Grid container direction="row" item>
+                <Grid item>
+                  <Checkbox
+                    style={{ padding: "0 10px 0px 10px" }}
+                    size="large"
+                    id="data-accordion"
+                    onChange={(e) => {
+                      setIsAccordion(!isAccordion);
+                    }}
+                    checked={isAccordion}
+                  />
+                </Grid>
+                {/* <Grid item>
+                  <label style={{ margin: 0 }}>
+                    Titel på hopfällbar faktaruta
+                  </label>
+                </Grid> */}
+                <Grid item>
+                  <input
+                    id="data-accordion-title"
+                    onChange={(e) => {
+                      setAccordionTitle(e.target.value);
+                    }}
+                    type="text"
+                    value={accordionTitle || ""}
+                    placeholder={
+                      focusedAccordionTitle != "INGEN TITEL"
+                        ? focusedAccordionTitle
+                        : "Titel..."
+                    }
+                    disabled={!isAccordion}
+                  />
+                </Grid>
               </Grid>
             </Grid>
             <Grid container direction="column" item></Grid>
@@ -195,7 +200,7 @@ const TextAreaInput = ({ editorState, updateEditorState, onCancelClick }) => {
           </Grid>
           <Grid item>
             {hasFocus && (
-              <p>{`Markerad faktaruta ${focusedIsAccordion} data-isAccordion
+              <p>{`Markerad faktaruta ${focusedIsAccordion} data-accordion
             `}</p>
             )}
           </Grid>

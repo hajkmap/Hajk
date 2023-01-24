@@ -366,8 +366,8 @@ export default class DocumentHandlerModel {
       tagType: "blockquote",
       callback: (e) => {
         if (
-          e.attributes["data-isAccordion"] &&
-          e.attributes["data-isAccordion"].value === "true"
+          e.attributes["data-accordion"] &&
+          e.attributes["data-accordion"].value === "true"
         ) {
           return (
             <AccordionSection

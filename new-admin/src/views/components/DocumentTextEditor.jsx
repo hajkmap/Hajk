@@ -155,8 +155,7 @@ export default class DocumentTextEditor extends React.Component {
             textSection:
               element.attributes.getNamedItem("data-text-section")?.value || "",
             isAccordion:
-              element.attributes.getNamedItem("data-isAccordion")?.value ||
-              false,
+              element.attributes.getNamedItem("data-accordion")?.value || false,
             accordionTitle: element.attributes.getNamedItem(
               "data-accordion-title"
             )?.value,
@@ -817,7 +816,7 @@ export default class DocumentTextEditor extends React.Component {
             "data-divider-color": block.getData().get("dividerColor"),
             "data-background-color": block.getData().get("backgroundColor"),
             "data-text-section": block.getData().get("textSection"),
-            "data-isAccordion": block.getData().get("isAccordion"),
+            "data-accordion": block.getData().get("isAccordion"),
             "data-accordion-title": block.getData().get("accordionTitle"),
           },
         };

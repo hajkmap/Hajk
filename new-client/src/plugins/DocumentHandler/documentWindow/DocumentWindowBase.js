@@ -136,6 +136,7 @@ class DocumentWindowBase extends React.PureComponent {
 
   getDocumentViewer = () => {
     const { documentWindowMaximized, document } = this.props;
+    console.log(document);
     return (
       <DocumentViewer
         documentWindowMaximized={documentWindowMaximized}
