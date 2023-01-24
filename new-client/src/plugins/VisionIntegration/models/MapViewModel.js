@@ -152,6 +152,7 @@ class VisionIntegrationModel {
     this.#disableCreateCoordinateInteraction();
     this.#disableEnvironmentSelectInteraction();
     this.#disableDrawPolygonInteraction();
+    this.#disableDeleteFeatureInteraction();
   };
 
   // Enables functionality so that the user can select estates from the map
@@ -179,6 +180,14 @@ class VisionIntegrationModel {
     });
   };
 
+  // Enables functionality so that the user can remove a drawn feature
+  #enableDeleteFeatureInteraction = () => {
+    // Let's add the clickLock to avoid the featureInfo etc.
+    this.#map.clickLock.add("visionintegration");
+    // Then we'll add the event-handler responsible for removing clicked features.
+    this.#map.on("singleclick", this.#removeClickedFeature);
+  };
+
   // Disables select estates from map functionality
   #disableEstateSelectInteraction = () => {
     this.#map.clickLock.delete("visionintegration");
@@ -201,6 +210,12 @@ class VisionIntegrationModel {
   #disableDrawPolygonInteraction = () => {
     this.#map.clickLock.delete("visionintegration");
     this.#drawModel.toggleDrawInteraction();
+  };
+
+  // Disables the delete-feature interaction
+  #disableDeleteFeatureInteraction = () => {
+    this.#map.clickLock.delete("visionintegration");
+    this.#map.un("singleclick", this.#removeClickedFeature);
   };
 
   // Handler for map-clicks when user is to select estates
@@ -264,6 +279,26 @@ class VisionIntegrationModel {
     );
   };
 
+  // Removes the first feature that is present at the supplied
+  // pixel from the click-event.
+  #removeClickedFeature = (e) => {
+    // Get features present at the clicked feature.
+    const clickedFeatures = this.#map.getFeaturesAtPixel(e.pixel);
+    // We only care about features that are connected to the Vision-plugin
+    const visionFeatures = clickedFeatures.filter(
+      (f) => f.get("VISION_TYPE") === INTEGRATION_IDS.EDIT
+    );
+    // Let's make sure we found some feature(s) to remove. We're only removing the first one.
+    if (visionFeatures.length > 0) {
+      // Let's get the first user-drawn feature
+      const feature = visionFeatures[0];
+      // Then we remove it from the draw-source
+      this.#drawModel.removeFeature(feature);
+      // Finally we'll have to make sure to update the view-state
+      this.#localObserver.publish("remove-edit-feature", feature);
+    }
+  };
+
   // Toggles map-interactions (possible interactions are "SELECT_ESTATE" and "SELECT_COORDINATE")
   toggleMapInteraction = (interaction) => {
     // First we must disable any potential interactions...
@@ -282,6 +317,9 @@ class VisionIntegrationModel {
       case MAP_INTERACTIONS.EDIT_CREATE_POLYGON:
         this.#activeMapInteraction = MAP_INTERACTIONS.EDIT_CREATE_POLYGON;
         return this.#enableDrawPolygonInteraction();
+      case MAP_INTERACTIONS.EDIT_DELETE:
+        this.#activeMapInteraction = MAP_INTERACTIONS.EDIT_DELETE;
+        return this.#enableDeleteFeatureInteraction();
       default:
         return null;
     }
@@ -347,7 +385,6 @@ class VisionIntegrationModel {
     // (once by this added and then by the draw-model) if we don't prevent it. By checking the
     // VISION_DRAW_TYPE (which will be set to "USER_DRAWN" in the double feature case) we can prevent that.
     features.forEach((f) => {
-      console.log("f: ", f);
       f.set("VISION_TYPE", INTEGRATION_IDS.EDIT);
       if (f.get("VISION_DRAW_TYPE") === "USER_DRAWN") {
         f.unset("VISION_DRAW_TYPE");

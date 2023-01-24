@@ -223,6 +223,14 @@ function VisionIntegration(props) {
     }));
   }, []);
 
+  // Handler for when the listener for remove-edit-feature has fired
+  const handleRemoveEditFeature = useCallback((feature) => {
+    setEditState((prev) => ({
+      ...prev,
+      features: prev.features.filter((f) => f !== feature),
+    }));
+  }, []);
+
   // We're gonna want to subscribe to some events so that we can keep track of hub-status etc.
   useEffect(() => {
     // A Listener for hub-connection failure. Make sure to update connection-state...
@@ -281,11 +289,16 @@ function VisionIntegration(props) {
       (payload) => handleSetEditState(payload)
     );
     // A listener for when a new edit-feature should be added
-    const addNewEditFeatureListener = localObserver.subscribe(
+    const addEditFeatureListener = localObserver.subscribe(
       "add-edit-feature",
       (feature) => handleAddEditFeature(feature)
     );
-    // Make sure to clean up!
+    // A listener for when a edit-feature should be removed
+    const removeEditFeatureListener = localObserver.subscribe(
+      "remove-edit-feature",
+      (feature) => handleRemoveEditFeature(feature)
+    );
+    // Make sure to clean up! remove-edit-feature
     return () => {
       connectionFailureListener.unsubscribe();
       connectionSuccessListener.unsubscribe();
@@ -298,7 +311,8 @@ function VisionIntegration(props) {
       addNewEnvironmentFeaturesListener.unsubscribe();
       newCoordinateCreatedListener.unsubscribe();
       updateEditStateListener.unsubscribe();
-      addNewEditFeatureListener.unsubscribe();
+      addEditFeatureListener.unsubscribe();
+      removeEditFeatureListener.unsubscribe();
     };
   }, [
     localObserver,
@@ -310,6 +324,7 @@ function VisionIntegration(props) {
     handleNewCoordinateCreated,
     handleSetEditState,
     handleAddEditFeature,
+    handleRemoveEditFeature,
   ]);
 
   // We're gonna need an useEffect that can handle side-effects when the selected

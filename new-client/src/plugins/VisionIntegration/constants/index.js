@@ -99,6 +99,7 @@ export const MAP_INTERACTIONS = Object.freeze({
   EDIT_CREATE_POLYGON: "EDIT_CREATE_POLYGON",
   EDIT_SELECT_FROM_LAYER: "EDIT_SELECT_FROM_LAYER",
   EDIT_MODIFY: "EDIT_MODIFY",
+  EDIT_DELETE: "EDIT_DELETE",
 });
 
 export const MAP_INTERACTION_INFO = [
@@ -145,6 +146,12 @@ export const MAP_INTERACTION_INFO = [
     id: MAP_INTERACTIONS.EDIT_MODIFY,
     name: "Redigera yta",
     helperText: "Redigera existerande yta genom att flytta dess noder.",
+    useInEditView: true,
+  },
+  {
+    id: MAP_INTERACTIONS.EDIT_DELETE,
+    name: "Radera yta",
+    helperText: "Radera en yta genom att klicka på den.",
     useInEditView: true,
   },
 ];
