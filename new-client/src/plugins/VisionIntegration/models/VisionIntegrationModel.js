@@ -546,8 +546,18 @@ class VisionIntegrationModel {
     this.#localObserver.publish("set-edit-state", {
       mode: EDIT_STATUS.SAVE_SUCCESS,
       mapInteraction: MAP_INTERACTIONS.EDIT_NONE,
-      text: payload?.text,
+      text: payload?.text || this.#getDefaultFeedbackText(payload),
     });
+  };
+
+  // Returns a string that can be prompted to the user when they have tried to save a geometry to Vision
+  #getDefaultFeedbackText = (payload) => {
+    // The payload from Vision should contain a flag stating if the geometry was saved successfully or not...
+    const { success } = payload;
+    // Return a string based on the success flag...
+    return success
+      ? "Geometrin sparades utan problem!"
+      : "Vision misslyckades att spara geometrin. Kontakta systemförvaltaren.";
   };
 
   // Returns the map SRS without EPSG: (Vision expects EPSG: to be removed for some reason...)
