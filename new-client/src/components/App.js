@@ -510,7 +510,7 @@ class App extends React.PureComponent {
           if (mergedParams.get("z")) {
             if (
               this.appModel.map.getView().getZoom() !==
-              parseInt(mergedParams.get("z"))
+              Number(mergedParams.get("z"))
             ) {
               // …let's update our View's zoom.
               this.appModel.map
