@@ -219,6 +219,60 @@ class InformativeService {
     }
   }
 
+  /**
+   * @summary Replace contents of the specified documents file with the incoming body.
+   *
+   * @param {*} file Name of the document to be replaced (without file extension)
+   * @param {*} body Content that will entirely replace the existing content of file
+   * @returns
+   * @memberof InformativeService
+   */
+  async saveByNameDoc(folder, file, body) {
+    try {
+      if (folder) {
+        file += ".json";
+        // Prepare the path to our file
+        const pathToFile = path.join(
+          process.cwd(),
+          "App_Data/documents/" + folder,
+          file
+        );
+
+        // Simple way to verify we've got valid JSON: try parsing it.
+        const json = JSON.parse(body);
+
+        // If parsing was successful, convert back to string,
+        // using 2 spaces as indentation
+        const jsonString = JSON.stringify(json, null, 2);
+
+        // Write to file
+        await fs.promises.writeFile(pathToFile, jsonString);
+
+        // Return the parsed JSON object
+        return jsonString;
+      } else {
+        file += ".json";
+        // Prepare the path to our file
+        const pathToFile = path.join(process.cwd(), "App_Data/documents", file);
+
+        // Simple way to verify we've got valid JSON: try parsing it.
+        const json = JSON.parse(body);
+
+        // If parsing was successful, convert back to string,
+        // using 2 spaces as indentation
+        const jsonString = JSON.stringify(json, null, 2);
+
+        // Write to file
+        await fs.promises.writeFile(pathToFile, jsonString);
+
+        // Return the parsed JSON object
+        return jsonString;
+      }
+    } catch (error) {
+      return { error };
+    }
+  }
+
   async deleteByName(file) {
     try {
       file += ".json";

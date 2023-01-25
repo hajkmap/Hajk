@@ -88,6 +88,33 @@ export class Controller {
     });
   }
 
+  saveByNameDoc(req, res) {
+    InformativeService.saveByNameDoc("", req.params.name, req.body).then(
+      (r) => {
+        if (r && !r.error) {
+          res.status(200).send("File saved");
+          ael.info(
+            `${res.locals.authUser} saved document ${req.params.name}.json`
+          );
+        } else res.status(500).send(r.error.message);
+      }
+    );
+  }
+
+  saveByNameDocFolder(req, res) {
+    const { folder } = req.params;
+    InformativeService.saveByNameDoc(folder, req.params.name, req.body).then(
+      (r) => {
+        if (r && !r.error) {
+          res.status(200).send("File saved");
+          ael.info(
+            `${res.locals.authUser} saved document ${req.params.name}.json`
+          );
+        } else res.status(500).send(r.error.message);
+      }
+    );
+  }
+
   deleteByName(req, res) {
     InformativeService.deleteByName(req.params.name).then((r) => {
       if (r && !r.error) {

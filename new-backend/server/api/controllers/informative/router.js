@@ -19,4 +19,6 @@ export default express
   .get("/list", controller.list)
   .get("/list/:name", controller.list) // FIXME: For now, the name paramter is ignored - should list only documents connected to specified map
   .post("/save/:name", controller.saveByName) // FIXME: Remove POST
+  .post("/savedoc/:folder/:name", controller.saveByNameDocFolder)
+  .post("/savedoc/:name", controller.saveByNameDoc)
   .put("/save/:name", controller.saveByName); // PUT is correct here, as this operation is idempotent

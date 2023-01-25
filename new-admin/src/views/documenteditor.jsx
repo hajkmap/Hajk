@@ -315,7 +315,8 @@ class DocumentEditor extends Component {
   }
 
   save() {
-    this.props.model.save(
+    this.props.model.saveDoc(
+      this.state.selectedFolder,
       this.state.selectedDocument,
       this.state.data,
       (result) => {

@@ -57,6 +57,44 @@ var documentEditor = Model.extend({
     });
   },
 
+  saveDoc: function (folder, documentName, data, callback) {
+    var url = "";
+    if (folder) {
+      url = this.get("config").url_savedoc + "/" + folder + "/" + documentName;
+      data.chapters.forEach((chapter) => {
+        this.deleteParentChapter(chapter, data.chapters);
+      });
+
+      data.chapters.map((chapter) => {
+        chapter.html = chapter.html
+          .replaceAll("&lt;", "<")
+          .replaceAll("&gt;", ">");
+        return false;
+      });
+    } else {
+      url = this.get("config").url_save + "/" + documentName;
+      data.chapters.forEach((chapter) => {
+        this.deleteParentChapter(chapter, data.chapters);
+      });
+
+      data.chapters.map((chapter) => {
+        chapter.html = chapter.html
+          .replaceAll("&lt;", "<")
+          .replaceAll("&gt;", ">");
+        return false;
+      });
+    }
+
+    hfetch(url, {
+      method: "post",
+      body: JSON.stringify(data),
+    }).then((response) => {
+      response.text().then((text) => {
+        callback(text);
+      });
+    });
+  },
+
   loadDocuments: async function (callback) {
     var url = this.get("config").url_document_list;
     try {
