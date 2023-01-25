@@ -275,7 +275,8 @@ class LayerGroupItem extends Component {
 
   setHidden = (l) => {
     const { layer } = this.props;
-    if (l === layer) {
+
+    if (l.get("name") === layer.get("name")) {
       // Fix underlying source
       this.props.layer.getSource().updateParams({
         // Ensure that the list of sublayers is emptied (otherwise they'd be
