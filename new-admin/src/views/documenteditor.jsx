@@ -215,6 +215,7 @@ class DocumentEditor extends Component {
               documents: documents,
               documentTitle: data.title,
               selectedDocument: document || "",
+              selectedFolder: folder,
               tableOfContents: {
                 expanded: data.tableOfContents
                   ? data.tableOfContents.expanded
