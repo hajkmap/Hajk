@@ -1,17 +1,20 @@
+import AnchorModel from "./AnchorModel";
+import MapClickModel from "./MapClickModel";
 import SearchModel from "./SearchModel";
-import Plugin from "./Plugin.js";
-import ConfigMapper from "./../utils/ConfigMapper.js";
-import CoordinateSystemLoader from "./../utils/CoordinateSystemLoader.js";
-import { isMobile } from "./../utils/IsMobile.js";
+import Plugin from "./Plugin";
+import SnapHelper from "./SnapHelper";
+import { bindMapClickEvent } from "./Click";
+
+import ConfigMapper from "utils/ConfigMapper";
+import CoordinateSystemLoader from "utils/CoordinateSystemLoader";
+import { hfetch } from "utils/FetchWrapper";
+import { isMobile } from "utils/IsMobile";
+import { getMergedSearchAndHashParams } from "utils/getMergedSearchAndHashParams";
 // import ArcGISLayer from "./layers/ArcGISLayer.js";
 // import DataLayer from "./layers/DataLayer.js";
 import WMSLayer from "./layers/WMSLayer.js";
 import WMTSLayer from "./layers/WMTSLayer.js";
 import WFSVectorLayer from "./layers/VectorLayer.js";
-import { bindMapClickEvent } from "./Click.js";
-import MapClickModel from "./MapClickModel";
-import { defaults as defaultInteractions } from "ol/interaction";
-import { Map as OLMap, View } from "ol";
 // TODO: Uncomment and ensure they show as expected
 // import {
 // defaults as defaultControls,
@@ -26,12 +29,13 @@ import { Map as OLMap, View } from "ol";
 // ZoomSlider,
 // ZoomToExtent
 // } from "ol/control";
+
+import { Map as OLMap, View } from "ol";
+import { defaults as defaultInteractions } from "ol/interaction";
 import { register } from "ol/proj/proj4";
 import VectorLayer from "ol/layer/Vector";
 import VectorSource from "ol/source/Vector";
-import { Icon, Fill, Stroke, Style } from "ol/style.js";
-import SnapHelper from "./SnapHelper";
-import { hfetch } from "utils/FetchWrapper";
+import { Icon, Fill, Stroke, Style } from "ol/style";
 
 class AppModel {
   /**
@@ -489,6 +493,17 @@ class AppModel {
     return this;
   }
 
+  addAnchorModel() {
+    this.anchorModel = new AnchorModel({
+      app: this,
+      globalObserver: this.globalObserver,
+      map: this.map,
+    });
+
+    // Either way, return self, so we can go on and chain more methods on App model
+    return this;
+  }
+
   clear() {
     this.clearing = true;
     this.highlight(false);
@@ -700,36 +715,33 @@ class AppModel {
    * @summary Merges two objects.
    *
    * @param {*} mapConfig
-   * @param {*} urlSearchParams
+   * @param {*} paramsAsPlainObject
    * @returns {*} a Result of overwriting a with values from b
    * @memberof AppModel
    */
-  mergeConfig(mapConfig, urlSearchParams) {
+  mergeConfigWithValuesFromParams(mapConfig, paramsAsPlainObject) {
     // clean is used to strip the UI of all elements so we get a super clean viewport back, without any plugins
     const clean =
-      Boolean(urlSearchParams.hasOwnProperty("clean")) &&
-      urlSearchParams.clean !== "false" &&
-      urlSearchParams.clean !== "0";
-
-    // f contains our CQL Filters
-    const f = urlSearchParams.f;
+      Boolean(paramsAsPlainObject.hasOwnProperty("clean")) &&
+      paramsAsPlainObject.clean !== "false" &&
+      paramsAsPlainObject.clean !== "0";
 
     // Merge query params to the map config from JSON
-    let x = parseFloat(urlSearchParams.x),
-      y = parseFloat(urlSearchParams.y),
-      z = parseInt(urlSearchParams.z, 10);
+    let x = parseFloat(paramsAsPlainObject.x),
+      y = parseFloat(paramsAsPlainObject.y),
+      z = parseInt(paramsAsPlainObject.z, 10);
 
-    if (typeof urlSearchParams.l === "string") {
-      this.layersFromParams = urlSearchParams.l.split(",");
+    if (typeof paramsAsPlainObject.l === "string") {
+      this.layersFromParams = paramsAsPlainObject.l.split(",");
     }
 
-    if (typeof urlSearchParams.gl === "string") {
+    if (typeof paramsAsPlainObject.gl === "string") {
       try {
-        this.groupLayersFromParams = JSON.parse(urlSearchParams.gl);
+        this.groupLayersFromParams = JSON.parse(paramsAsPlainObject.gl);
       } catch (error) {
         console.error(
           "Couldn't parse the group layers parameter. Attempted with this value:",
-          urlSearchParams.gl
+          paramsAsPlainObject.gl
         );
       }
     }
@@ -749,9 +761,29 @@ class AppModel {
     mapConfig.map.center[1] = y;
     mapConfig.map.zoom = z;
 
+    // f contains our CQL Filters
+    const f = paramsAsPlainObject.f;
     if (f) {
       // Filters come as a URI encoded JSON object, so we must parse it first
       this.cqlFiltersFromParams = JSON.parse(decodeURIComponent(f));
+    }
+
+    // If the 'p' param exists, we want to modify which plugins are visible at start
+    const pluginsToShow = paramsAsPlainObject?.p?.split(",");
+    if (pluginsToShow) {
+      // If the value of 'p' is an empty string, it means that no plugin should be shown at start
+      if (pluginsToShow.length === 1 && pluginsToShow[0] === "") {
+        mapConfig.tools.forEach((t) => {
+          t.options.visibleAtStart = false;
+        });
+      }
+      // If 'p' exists but is not an empty string, we have a list of plugins that should be
+      // shown at start. All others should be hidden (no matter the setting in Admin).
+      else {
+        mapConfig.tools.forEach((t) => {
+          t.options.visibleAtStart = pluginsToShow.includes(t.type);
+        });
+      }
     }
 
     return mapConfig;
@@ -950,9 +982,9 @@ class AppModel {
       }
     }
 
-    return this.mergeConfig(
+    return this.mergeConfigWithValuesFromParams(
       this.config.mapConfig,
-      Object.fromEntries(new URLSearchParams(document.location.search))
+      Object.fromEntries(getMergedSearchAndHashParams())
     );
   }
 }
