@@ -508,14 +508,11 @@ class App extends React.PureComponent {
 
           // Act when view's zoom changes
           if (mergedParams.get("z")) {
-            if (
-              this.appModel.map.getView().getZoom() !==
-              Number(mergedParams.get("z"))
-            ) {
+            // Since we're dealing with a string, we're gonna need to parse it to a float
+            const zoomInHash = parseFloat(mergedParams.get("z"));
+            if (this.appModel.map.getView().getZoom() !== zoomInHash) {
               // …let's update our View's zoom.
-              this.appModel.map
-                .getView()
-                .animate({ zoom: parseInt(mergedParams.get("z")) });
+              this.appModel.map.getView().animate({ zoom: zoomInHash });
             }
           }
 
