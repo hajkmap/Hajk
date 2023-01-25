@@ -23,7 +23,7 @@ export function debounceSync(func, delay = 500) {
  * @param {Number} delay Delay in ms
  * @returns Promise that resolves to the return value of 'func'
  */
-export function debounce(func, delay) {
+export function debounce(func, delay = 500) {
   let timer = null;
 
   return (...args) => {

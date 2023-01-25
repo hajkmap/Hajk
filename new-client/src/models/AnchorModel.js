@@ -148,7 +148,7 @@ class AnchorModel {
 
   // getAnchor is where the main action happens. A lot of events will cause
   // a call to this function. Because of that we limit the amount of actual
-  // calls by wrapping it in a debounce helper. The default delay is 300 ms,
+  // calls by wrapping it in a debounce helper. The default delay is 500 ms,
   // so we will avoid all sorts of issues but still get a pretty responsive
   // link/hash string.
   getAnchor = debounce((preventHashUpdate = false) => {
