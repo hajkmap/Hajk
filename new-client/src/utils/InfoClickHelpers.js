@@ -57,6 +57,35 @@ function getSubLayerNameFromFeatureId(feature, layer) {
 }
 
 /**
+ * @summary Get information needed to properly render the (old) FeatureInfo-window
+ * @description Will try to find the displayName and infoClickDefinition from the
+ * "layerInfo"-property on the supplied layer. This function should be used as a fallback
+ * when the "layersInfo"-property is missing.
+ * Expects:
+ *  - OL feature parsed from getFeatureInfo-response.
+ *  - OL layer that has been clicked.
+ * Returns:
+ *  - An object containing information needed to properly render the (old) FeatureInfo-window. All information is parsed from the layer config.
+ */
+function getSimpleInfoClickInfoFromLayerConfig(layer) {
+  // First we'll make sure a layer with the layerInfo-prop was supplied...
+  const layerInfo = layer?.get("layerInfo");
+  // If the prop is missing, there's nothing we can do...
+  if (!layerInfo) {
+    console.error(
+      "getSimpleInfoClickInfoFromLayerConfig was invoked with bad parameters. The supplied layer is probably missing the layerInfo-property."
+    );
+    return {};
+  }
+  // The display name and infoClickDefinition is called caption and information on the layerInfo-prop...
+  const { caption, information } = layerInfo;
+  return {
+    displayName: caption,
+    infoclickDefinition: information,
+  };
+}
+
+/**
  * @summary Get information needed to properly render the FeatureInfo-window
  * @description Will get the sub-layer from which the supplied feature comes from and
  * extract all necessary information needed to properly render the FeatureInfo-window.
@@ -67,11 +96,16 @@ function getSubLayerNameFromFeatureId(feature, layer) {
  *  - An object containing information needed to properly render the FeatureInfo-window. All information is parsed from the layer config.
  */
 export function getInfoClickInfoFromLayerConfig(feature, layer) {
-  if (!feature || !layer || !layer.layersInfo) {
+  if (!feature || !layer) {
     console.error(
-      `getInfoClickInfoFromLayerConfig was called with bad parameters. Got feature: ${feature}, and layer: ${layer}`
+      "getInfoClickInfoFromLayerConfig was called with bad parameters."
     );
     return {};
+  }
+  // If layersInfo is missing, we wont be able to find the info-click-info in "layer.layersInfo"...
+  // Luckily, some layers store (more simple) info-click-info on another layer-property, so let's try to find that instead.
+  if (!layer.layersInfo) {
+    return getSimpleInfoClickInfoFromLayerConfig(layer);
   }
   const subLayerName = getSubLayerNameFromFeatureId(feature, layer);
   // Having just the layer's name as an ID is not safe - multiple
