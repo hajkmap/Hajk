@@ -72,7 +72,7 @@ var documentEditor = Model.extend({
         return false;
       });
     } else {
-      url = this.get("config").url_save + "/" + documentName;
+      url = this.get("config").url_savedoc + "/" + documentName;
       data.chapters.forEach((chapter) => {
         this.deleteParentChapter(chapter, data.chapters);
       });
