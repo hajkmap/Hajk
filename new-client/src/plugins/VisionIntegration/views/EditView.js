@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from "react";
 import { styled } from "@mui/material/styles";
 import { Button, Grid, LinearProgress, Typography } from "@mui/material";
+import { useSnackbar } from "notistack";
 
 // Constants
 import {
@@ -16,6 +17,9 @@ import SmallDivider from "../components/SmallDivider";
 import HubConnectionStatusChip from "../components/HubConnectionStatusChip";
 import MapInteractionSelector from "../components/edit/MapInteractionSelector";
 import SelectFeaturesDialog from "../components/edit/SelectFeaturesDialog";
+
+// Hooks (custom)
+import useUpdateEffect from "hooks/useUpdateEffect";
 
 const Root = styled("div")(({ theme }) => ({
   display: "flex",
@@ -39,6 +43,31 @@ function EditView(props) {
   const [activeMapInteraction, setActiveMapInteraction] = useState(
     MAP_INTERACTIONS.EDIT_NONE
   );
+  // We're gonna need some snackbar functions so that we can prompt the user with information.
+  const { closeSnackbar, enqueueSnackbar } = useSnackbar();
+  // We don't want to prompt the user with more than one snack, so lets track the current one,
+  // so that we can close it when another one is about to open.
+  const helperSnack = React.useRef(null);
+
+  // This effect does not run on first render. (Otherwise the user would be
+  // prompted with information before they've even started using the plugin).
+  // If it's not the first render, the effect makes sure to prompt the user
+  // with information when they change the current activity or draw-type.
+  useUpdateEffect(() => {
+    // Let's check if there's some helper-text that we should prompt the user with.
+    const helperText = props.model.getHelperSnackText(activeMapInteraction);
+    // If there is, we can prompt the user with a snack.
+    if (helperText) {
+      helperSnack.current = enqueueSnackbar(helperText, {
+        variant: "default",
+        anchorOrigin: { vertical: "bottom", horizontal: "center" },
+      });
+    }
+    // Let's make sure to clean-up out current snack when un-mounting!
+    return () => {
+      closeSnackbar(helperSnack.current);
+    };
+  }, [activeMapInteraction, enqueueSnackbar, closeSnackbar]);
 
   useEffect(() => {
     props.mapViewModel.toggleMapInteraction(activeMapInteraction);
