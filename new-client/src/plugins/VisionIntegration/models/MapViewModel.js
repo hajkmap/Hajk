@@ -369,11 +369,6 @@ class VisionIntegrationModel {
     }
   };
 
-  // Generates a random string that can be used as an ID.
-  #generateRandomString = () => {
-    return Math.random().toString(36).slice(2, 9);
-  };
-
   // Returns the style used to highlight features
   #createHighlightStyle = () => {
     return new Style({
@@ -569,7 +564,7 @@ class VisionIntegrationModel {
         geometry: feature.getGeometry().clone(),
       });
       // ...set an id and a highlight-style...
-      highlightFeature.setId(this.#generateRandomString());
+      highlightFeature.setId(generateRandomString());
       highlightFeature.setStyle(this.#createHighlightStyle());
       // Finally we return the feature so that we can add it to the map etc.
       return highlightFeature;
