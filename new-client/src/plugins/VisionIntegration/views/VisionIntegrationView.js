@@ -17,6 +17,7 @@ function VisionIntegrationView(props) {
       setEditState={props.setEditState}
       model={props.model}
       mapViewModel={props.mapViewModel}
+      localObserver={props.localObserver}
     />
   ) : (
     <BaseView {...props} />

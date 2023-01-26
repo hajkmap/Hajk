@@ -15,6 +15,7 @@ import {
 import SmallDivider from "../components/SmallDivider";
 import HubConnectionStatusChip from "../components/HubConnectionStatusChip";
 import MapInteractionSelector from "../components/edit/MapInteractionSelector";
+import SelectFeaturesDialog from "../components/edit/SelectFeaturesDialog";
 
 const Root = styled("div")(({ theme }) => ({
   display: "flex",
@@ -129,6 +130,10 @@ function EditView(props) {
           />
         </Grid>
       </Grid>
+      <SelectFeaturesDialog
+        localObserver={props.localObserver}
+        mapViewModel={props.mapViewModel}
+      />
     </Root>
   );
 }

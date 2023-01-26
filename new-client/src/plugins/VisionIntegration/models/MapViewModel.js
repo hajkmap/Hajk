@@ -1,4 +1,5 @@
 import { extend, createEmpty, isEmpty } from "ol/extent";
+import { Fill, Stroke, Style } from "ol/style";
 import Collection from "ol/Collection";
 import { Modify } from "ol/interaction";
 import Feature from "ol/Feature";
@@ -158,6 +159,7 @@ class VisionIntegrationModel {
     this.#disableDrawPolygonInteraction();
     this.#disableDeleteFeatureInteraction();
     this.#disableModifyFeatureInteraction();
+    this.#disableSelectFeatureInteraction();
   };
 
   // Enables functionality so that the user can select estates from the map
@@ -203,6 +205,14 @@ class VisionIntegrationModel {
     this.#map.addInteraction(this.#modifyInteraction);
   };
 
+  // Enables functionality so that the user can select features from active layers
+  #enableSelectFeatureInteraction = () => {
+    // Let's add the clickLock to avoid the featureInfo etc.
+    this.#map.clickLock.add("visionintegration");
+    // Then we can add the select-listener to the map...
+    this.#map.on("singleclick", this.#handleOnSelectClick);
+  };
+
   // Disables select estates from map functionality
   #disableEstateSelectInteraction = () => {
     this.#map.clickLock.delete("visionintegration");
@@ -233,6 +243,12 @@ class VisionIntegrationModel {
     this.#map.un("singleclick", this.#removeClickedFeature);
   };
 
+  // Disables the delete-feature interaction
+  #disableSelectFeatureInteraction = () => {
+    this.#map.clickLock.delete("visionintegration");
+    this.#map.un("singleclick", this.#handleOnSelectClick);
+  };
+
   // Disables the modify-feature interaction
   #disableModifyFeatureInteraction = () => {
     // If the modify-interaction is not active, we can abort.
@@ -258,6 +274,35 @@ class VisionIntegrationModel {
     } catch (error) {
       console.error(
         `Failed to select estates in VisionIntegration... ${error}`
+      );
+    }
+  };
+
+  // Handler for select-features-from-layers map-click
+  #handleOnSelectClick = async (event) => {
+    try {
+      // Try to fetch features from WMS-layers etc. (Also from all vector-layers).
+      const clickResult = await new Promise((resolve) =>
+        handleClick(event, event.map, resolve)
+      );
+      // The response should contain an array of features
+      const { features } = clickResult;
+      // Which might contain features without geometry. We have to make sure we remove those.
+      const featuresWithGeom = features.filter((feature) =>
+        feature.getGeometry()
+      );
+      // If we've fetched exactly one feature, we can add it straight away...
+      featuresWithGeom.length === 1 &&
+        this.#localObserver.publish("add-edit-feature", featuresWithGeom[0]);
+      // If we have more than one feature, we'll have to let the user
+      // pick which features they want to add. Let's publish an event that the view can catch...
+      if (featuresWithGeom.length > 1) {
+        this.#localObserver.publish("select-edit-features", featuresWithGeom);
+        return;
+      }
+    } catch (error) {
+      console.error(
+        `(VisionIntegration) Failed to select features in mapViewModel... Error: ${error}`
       );
     }
   };
@@ -324,6 +369,24 @@ class VisionIntegrationModel {
     }
   };
 
+  // Generates a random string that can be used as an ID.
+  #generateRandomString = () => {
+    return Math.random().toString(36).slice(2, 9);
+  };
+
+  // Returns the style used to highlight features
+  #createHighlightStyle = () => {
+    return new Style({
+      stroke: new Stroke({
+        color: "rgba(255, 0, 0, 1)",
+        width: 3,
+      }),
+      fill: new Fill({
+        color: "rgba(255, 0, 0, 0.1)",
+      }),
+    });
+  };
+
   // Toggles map-interactions (possible interactions are "SELECT_ESTATE" and "SELECT_COORDINATE")
   toggleMapInteraction = (interaction) => {
     // First we must disable any potential interactions...
@@ -348,6 +411,9 @@ class VisionIntegrationModel {
       case MAP_INTERACTIONS.EDIT_MODIFY:
         this.#activeMapInteraction = MAP_INTERACTIONS.EDIT_MODIFY;
         return this.#enableModifyFeatureInteraction();
+      case MAP_INTERACTIONS.EDIT_SELECT_FROM_LAYER:
+        this.#activeMapInteraction = MAP_INTERACTIONS.EDIT_SELECT_FROM_LAYER;
+        return this.#enableSelectFeatureInteraction();
       default:
         return null;
     }
@@ -491,6 +557,33 @@ class VisionIntegrationModel {
       });
     // Then we'll refresh the draw-layer so that the change is applied
     this.#drawModel.refreshDrawLayer();
+  };
+
+  // Creates a new feature with the same geometry as the supplied one. The new
+  // feature can be used an an highlight, to show where the supplied feature is.
+  createHighlightFeature = (feature) => {
+    // If no feature (or a feature with no get-geometry) is supplied, we abort.
+    if (feature && feature.getGeometry()) {
+      // Otherwise we create a new feature...
+      const highlightFeature = new Feature({
+        geometry: feature.getGeometry().clone(),
+      });
+      // ...set an id and a highlight-style...
+      highlightFeature.setId(this.#generateRandomString());
+      highlightFeature.setStyle(this.#createHighlightStyle());
+      // Finally we return the feature so that we can add it to the map etc.
+      return highlightFeature;
+    }
+  };
+
+  // Draws the supplied feature in the current draw-layer
+  drawFeature = (f) => {
+    this.#drawModel.addFeature(f, { silent: true });
+  };
+
+  // Removes the supplied feature from the current draw-layer
+  removeDrawnFeature = (f) => {
+    this.#drawModel.removeFeature(f);
   };
 }
 
