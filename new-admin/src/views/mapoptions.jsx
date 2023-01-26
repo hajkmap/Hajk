@@ -50,7 +50,8 @@ class MapOptions extends Component {
         constrainOnlyCenter: config.constrainOnlyCenter,
         constrainResolution: config.constrainResolution,
         constrainResolutionMobile: config.constrainResolutionMobile || false,
-        enableDownloadLink: config.enableDownloadLink,
+        enableDownloadLink: config.enableDownloadLink || false,
+        enableAppStateInHash: config.enableAppStateInHash,
         altShiftDragRotate: config.altShiftDragRotate || true,
         onFocusOnly: config.onFocusOnly || false,
         doubleClickZoom: config.doubleClickZoom || true,
@@ -150,6 +151,7 @@ class MapOptions extends Component {
       constrainResolution: mapConfig.constrainResolution,
       constrainResolutionMobile: mapConfig.constrainResolutionMobile || false,
       enableDownloadLink: mapConfig.enableDownloadLink,
+      enableAppStateInHash: mapConfig.enableAppStateInHash,
       altShiftDragRotate: mapConfig.altShiftDragRotate,
       onFocusOnly: mapConfig.onFocusOnly,
       doubleClickZoom: mapConfig.doubleClickZoom,
@@ -347,6 +349,7 @@ class MapOptions extends Component {
       case "constrainResolution":
       case "constrainResolutionMobile":
       case "enableDownloadLink":
+      case "enableAppStateInHash":
       case "altShiftDragRotate":
       case "onFocusOnly":
       case "doubleClickZoom":
@@ -414,6 +417,7 @@ class MapOptions extends Component {
           "constrainResolutionMobile"
         );
         config.enableDownloadLink = this.getValue("enableDownloadLink");
+        config.enableAppStateInHash = this.getValue("enableAppStateInHash");
         config.altShiftDragRotate = this.getValue("altShiftDragRotate");
         config.onFocusOnly = this.getValue("onFocusOnly");
         config.doubleClickZoom = this.getValue("doubleClickZoom");
@@ -819,6 +823,29 @@ class MapOptions extends Component {
                   className="fa fa-question-circle"
                   data-toggle="tooltip"
                   title="Om aktivt kommer en nedladdningsknapp att visas brevid varje lager i Lagerhanteraren."
+                />
+              </label>
+            </div>
+            <div>
+              <input
+                id="input_enableAppStateInHash"
+                type="checkbox"
+                ref="input_enableAppStateInHash"
+                onChange={(e) => {
+                  this.setState({ enableAppStateInHash: e.target.checked });
+                }}
+                checked={this.state.enableAppStateInHash}
+              />
+              &nbsp;
+              <label
+                className="long-label"
+                htmlFor="input_enableAppStateInHash"
+              >
+                Beta: aktivera liveuppdatering av hashparametar i URL-fältet{" "}
+                <i
+                  className="fa fa-question-circle"
+                  data-toggle="tooltip"
+                  title="Kartans status hålls ständigt uppdaterad, som en del av URL:ens #-parametrar. Se även #1252."
                 />
               </label>
             </div>

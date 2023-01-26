@@ -1,16 +1,22 @@
-import GeoJSON from "ol/format/GeoJSON";
-import WMSGetFeatureInfo from "ol/format/WMSGetFeatureInfo";
-import TileLayer from "ol/layer/Tile";
-import ImageLayer from "ol/layer/Image";
-import VectorLayer from "ol/layer/Vector";
-import VectorSource from "ol/source/Vector";
-import { Style, Icon, Fill, Stroke, Circle } from "ol/style";
 import Feature from "ol/Feature";
 import Point from "ol/geom/Point";
 
+import ImageLayer from "ol/layer/Image";
+import TileLayer from "ol/layer/Tile";
+import VectorLayer from "ol/layer/Vector";
+import VectorSource from "ol/source/Vector";
+
+import { Style, Icon, Fill, Stroke, Circle } from "ol/style";
+
 import AppModel from "models/AppModel";
 import { hfetch } from "utils/FetchWrapper";
-import { getInfoClickInfoFromLayerConfig } from "utils/InfoClickHelpers.js";
+import { getInfoClickInfoFromLayerConfig } from "utils/InfoClickHelpers";
+import {
+  parseGMLFeatures,
+  parseGeoJsonFeatures,
+  experimentalParseEsriWmsRawXml,
+  parseWmsGetFeatureInfoXml,
+} from "utils/wmsFeatureParsers";
 
 const convertRGBAtoString = (color) => {
   if (
@@ -35,10 +41,6 @@ export default class MapClickModel {
     this.map = map;
     this.globalObserver = globalObserver;
     this.infoclickOptions = infoclickOptions;
-
-    // Setup the parsers once and for all
-    this.geoJsonParser = new GeoJSON();
-    this.wmsGetFeatureInfoParser = new WMSGetFeatureInfo();
 
     // Setup the OL style used to indicate where mouse click
     // ocurred. We do it once, as it's kind of expensive.
@@ -171,30 +173,34 @@ export default class MapClickModel {
           switch (responseContentType) {
             case "application/geojson":
             case "application/json": {
-              olFeatures = this.#parseGeoJsonFeatures(
+              olFeatures = parseGeoJsonFeatures(
                 await response.value.requestResponse.json()
               );
               break;
             }
             case "text/xml": {
-              olFeatures = this.#parseWmsGetFeatureInfoXml(
+              olFeatures = parseWmsGetFeatureInfoXml(
                 await response.value.requestResponse.text()
               );
               break;
             }
             case "application/vnd.ogc.gml": {
-              olFeatures = this.#parseGMLFeatures(
+              olFeatures = parseGMLFeatures(
                 await response.value.requestResponse.text()
               );
               break;
             }
             case "application/vnd.esri.wms_raw_xml": {
-              olFeatures = this.#experimentalParseEsriWmsRawXml(
+              olFeatures = experimentalParseEsriWmsRawXml(
                 await response.value.requestResponse.text()
               );
               break;
             }
             default:
+              console.warn(
+                "Unsupported response type for GetFeatureInfo request:",
+                responseContentType
+              );
               break;
           }
 
@@ -586,106 +592,5 @@ export default class MapClickModel {
     } else {
       return false;
     }
-  }
-
-  #parseGeoJsonFeatures(json) {
-    return this.geoJsonParser.readFeatures(json);
-  }
-
-  #parseGMLFeatures(gml) {
-    return this.wmsGetFeatureInfoParser.readFeatures(gml);
-  }
-
-  // Special implementation for parsing text/xml responses from Esri, see #1266
-  #experimentalParseEsriWmsRawXml(xml) {
-    const parser = new DOMParser();
-    const xmlDoc = parser.parseFromString(xml, "text/xml");
-
-    // Consider making this a setting
-    const namespacePrefix = "esri_wms";
-
-    const collections = xmlDoc.getElementsByTagName(
-      `${namespacePrefix}:FeatureInfoCollection`
-    );
-
-    // Let's loop the collections using a flat map (the resulting object must
-    // be flat, not grouped by layer as this response).
-    const features = Array.from(collections).flatMap((c) => {
-      // First grab the layer name (it's an attribute to the collection DOM node)
-      const layerName = c.getAttribute("layername") || "unknownLayerName";
-
-      // Next, loop the collection's children to extract features
-      const featureInfos = Array.from(c.children).map((f, i) => {
-        // Create an OL Feature
-        const newFeature = new Feature();
-
-        // Ensure it has an ID
-        newFeature.setId(`${layerName}.fid${i}`);
-
-        // Extract "FIELDS", i.e. the attribute values of this feature
-        const fields = f.getElementsByTagName(`${namespacePrefix}:Field`);
-
-        // Loop the fields…
-        Array.from(fields).forEach((field) => {
-          // …grab the key…
-          const attributeName = field.getElementsByTagName(
-            `${namespacePrefix}:FieldName`
-          )[0].textContent;
-
-          // …and the value corresponding with this attribute…
-          const attributeValue = field.getElementsByTagName(
-            `${namespacePrefix}:FieldValue`
-          )[0].textContent;
-
-          // …and set as OL attributes on our OL Feature.
-          newFeature.set(attributeName, attributeValue);
-        });
-
-        return newFeature;
-      });
-
-      return featureInfos;
-    });
-
-    return features;
-  }
-
-  // Special implementation for parsing text/xml responses from Esri, see #1090.
-  #parseWmsGetFeatureInfoXml(xml) {
-    // As this takes care of text/xml, we should try using the OL's built-in parser, see
-    // https://openlayers.org/en/latest/apidoc/module-ol_format_WMSGetFeatureInfo-WMSGetFeatureInfo.html.
-    const responseFromOfficialParser =
-      this.wmsGetFeatureInfoParser.readFeatures(xml);
-
-    // If we've successfully parsed at least one feature using the official parser, let's
-    // return it
-    if (responseFromOfficialParser.length > 0) {
-      return responseFromOfficialParser;
-    }
-
-    // If we haven't parsed any features yet, let's fall back to a custom implementation, as this might
-    // be a response from Esri formatted as text/xml
-    const parser = new DOMParser();
-    const xmlDoc = parser.parseFromString(xml, "text/xml");
-
-    const featureInfoResponse = xmlDoc.getElementsByTagName(
-      "FeatureInfoResponse"
-    );
-
-    const fields = Array.from(
-      featureInfoResponse[0].getElementsByTagName("FIELDS")
-    );
-
-    const features = fields.map((f, i) => {
-      const feature = new Feature();
-      // Ensure we have a feature id
-      feature.setId(`unknownArcGISLayerIssue1266.fid${i}`);
-      for (let i = 0; i < f.attributes.length; i++) {
-        const attribute = f.attributes[i];
-        feature.set(attribute.name, attribute.value);
-      }
-      return feature;
-    });
-    return features;
   }
 }
