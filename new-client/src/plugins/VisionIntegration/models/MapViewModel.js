@@ -1,4 +1,6 @@
 import { extend, createEmpty, isEmpty } from "ol/extent";
+import Collection from "ol/Collection";
+import { Modify } from "ol/interaction";
 import Feature from "ol/Feature";
 import Point from "ol/geom/Point";
 
@@ -21,6 +23,7 @@ class VisionIntegrationModel {
   #drawModel;
   #activeMapInteraction;
   #ctrlKeyPressed;
+  #modifyInteraction;
 
   // There will probably not be many settings for this model... Options are required though!
   constructor(settings) {
@@ -38,6 +41,7 @@ class VisionIntegrationModel {
     this.#map = map;
     this.#app = app;
     this.#activeMapInteraction = null;
+    this.#modifyInteraction = null;
     this.#ctrlKeyPressed = false; // The CTRL-key is used to extend the select-features functionality. Let's keep track of its state.
     // ...including a draw-model, which can be used to show draw features in the map in a simple way.
     this.#drawModel = new DrawModel({
@@ -153,6 +157,7 @@ class VisionIntegrationModel {
     this.#disableEnvironmentSelectInteraction();
     this.#disableDrawPolygonInteraction();
     this.#disableDeleteFeatureInteraction();
+    this.#disableModifyFeatureInteraction();
   };
 
   // Enables functionality so that the user can select estates from the map
@@ -188,6 +193,16 @@ class VisionIntegrationModel {
     this.#map.on("singleclick", this.#removeClickedFeature);
   };
 
+  // Enables functionality so that the user can modify a drawn feature
+  #enableModifyFeatureInteraction = () => {
+    // Go ahead and create the modify-interaction..
+    this.#modifyInteraction = new Modify({
+      features: new Collection(this.getDrawnEditFeatures()),
+    });
+    // Then we'll add the interaction to the map.
+    this.#map.addInteraction(this.#modifyInteraction);
+  };
+
   // Disables select estates from map functionality
   #disableEstateSelectInteraction = () => {
     this.#map.clickLock.delete("visionintegration");
@@ -216,6 +231,16 @@ class VisionIntegrationModel {
   #disableDeleteFeatureInteraction = () => {
     this.#map.clickLock.delete("visionintegration");
     this.#map.un("singleclick", this.#removeClickedFeature);
+  };
+
+  // Disables the modify-feature interaction
+  #disableModifyFeatureInteraction = () => {
+    // If the modify-interaction is not active, we can abort.
+    if (!this.#modifyInteraction) {
+      return;
+    }
+    // Otherwise, let's disable it. First remove the interaction.
+    this.#map.removeInteraction(this.#modifyInteraction);
   };
 
   // Handler for map-clicks when user is to select estates
@@ -320,6 +345,9 @@ class VisionIntegrationModel {
       case MAP_INTERACTIONS.EDIT_DELETE:
         this.#activeMapInteraction = MAP_INTERACTIONS.EDIT_DELETE;
         return this.#enableDeleteFeatureInteraction();
+      case MAP_INTERACTIONS.EDIT_MODIFY:
+        this.#activeMapInteraction = MAP_INTERACTIONS.EDIT_MODIFY;
+        return this.#enableModifyFeatureInteraction();
       default:
         return null;
     }
