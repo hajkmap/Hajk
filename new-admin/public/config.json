@@ -81,6 +81,7 @@
     "url_document_folder_list": "http://localhost:3002/api/v1/informative/documentfolderlist",
     "url_load_document": "http://localhost:3002/api/v1/informative/loaddocument",
     "url_savedoc": "http://localhost:3002/api/v1/informative/savedoc",
+    "url_deletedoc": "http://localhost:3002/api/v1/informative/deletedoc",
     "url_delete": "http://localhost:55630/informative/delete",
     "default_coordinate": [320564, 6471766],
     "wms_url": "http://giscloud.se/mapservice/lmproxy/wms/topowebb",

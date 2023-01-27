@@ -126,6 +126,29 @@ export class Controller {
     });
   }
 
+  deleteByNameDoc(req, res) {
+    InformativeService.deleteByNameDoc("", req.params.name).then((r) => {
+      if (r && !r.error) {
+        res.status(200).send("File deleted");
+        ael.info(
+          `${res.locals.authUser} deleted document ${req.params.name}.json`
+        );
+      } else res.status(500).send(r.error.message);
+    });
+  }
+
+  deleteByNameDocFolder(req, res) {
+    const { folder } = req.params;
+    InformativeService.deleteByNameDoc(folder, req.params.name).then((r) => {
+      if (r && !r.error) {
+        res.status(200).send("File deleted");
+        ael.info(
+          `${res.locals.authUser} deleted document ${req.params.name}.json`
+        );
+      } else res.status(500).send(r.error.message);
+    });
+  }
+
   list(req, res) {
     InformativeService.getAvailableDocuments().then((r) => {
       if (r && !r.error) res.json(r);

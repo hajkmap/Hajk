@@ -455,6 +455,54 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Error"
+  /informative/deletedoc/{name}:
+    delete:
+      tags:
+        - Admin - Informative/DocumentHandler
+      parameters:
+        - name: name
+          in: path
+          description: Document to deleted
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: Delete the specified document
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DocumentsList"
+        5XX:
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /informative/deletedoc/{folder}/{name}:
+    delete:
+      tags:
+        - Admin - Informative/DocumentHandler
+      parameters:
+        - name: name
+          in: path
+          description: Document to deleted
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: Delete the specified document
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DocumentsList"
+        5XX:
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
   /config/layers:
     get:
       tags:

@@ -346,8 +346,11 @@ class DocumentEditor extends Component {
       ),
       showAbortButton: true,
       modalConfirmCallback: () => {
-        this.props.model.delete(this.state.selectedDocument, (result) => {
+        this.props.model.deleteDoc(this.state.selectedFolder, this.state.selectedDocument, (result) => {
           this.loadDoc();
+          this.setState({
+            selectedFolder: '',
+          })
         });
       },
     });

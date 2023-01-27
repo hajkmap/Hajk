@@ -16,6 +16,8 @@ export default express
   .get("/documentfolderlist", controller.documentFolderList)
   .get("/documentfolderlist/:name", controller.documentFolderList)
   .delete("/delete/:name", controller.deleteByName)
+  .delete("/deletedoc/:name", controller.deleteByNameDoc)
+  .delete("/deletedoc/:folder/:name", controller.deleteByNameDocFolder)
   .get("/list", controller.list)
   .get("/list/:name", controller.list) // FIXME: For now, the name paramter is ignored - should list only documents connected to specified map
   .post("/save/:name", controller.saveByName) // FIXME: Remove POST

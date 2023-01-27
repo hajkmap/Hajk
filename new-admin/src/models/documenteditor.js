@@ -34,6 +34,22 @@ var documentEditor = Model.extend({
     });
   },
 
+  deleteDoc: function (folder, documentName, callback) {
+    var url = "";
+    if (folder) {
+      url =
+        this.get("config").url_deletedoc + "/" + folder + "/" + documentName;
+    } else {
+      url = this.get("config").url_deletedoc + "/" + documentName;
+    }
+
+    hfetch(url, {
+      method: "delete",
+    }).then((response) => {
+      callback(response);
+    });
+  },
+
   save: function (documentName, data, callback) {
     var url = this.get("config").url_save + "/" + documentName;
     data.chapters.forEach((chapter) => {

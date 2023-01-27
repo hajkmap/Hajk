@@ -290,6 +290,40 @@ class InformativeService {
   }
 
   /**
+   * @summary Replace contents of the specified documents file with the incoming body.
+   *
+   * @param {*} file Name of the document to be replaced (without file extension)
+   * @param {*} body Content that will entirely replace the existing content of file
+   * @returns
+   * @memberof InformativeService
+   */
+  async deleteByNameDoc(folder, file) {
+    try {
+      var pathToFile = "";
+      if (folder) {
+        file += ".json";
+        // Prepare the path to our file
+        pathToFile = path.join(
+          process.cwd(),
+          "App_Data/documents/" + folder,
+          file
+        );
+      } else {
+        file += ".json";
+        // Prepare the path to our file
+        pathToFile = path.join(process.cwd(), "App_Data/documents", file);
+      }
+      // Just drop the specified file…
+      await fs.promises.unlink(pathToFile);
+
+      // Return an empty JSON object
+      return {};
+    } catch (error) {
+      return { error };
+    }
+  }
+
+  /**
    * @summary Lists all available documents
    *
    * @returns {array} Names of files as array of strings
