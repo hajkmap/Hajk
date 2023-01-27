@@ -473,27 +473,6 @@
       "index": 2
     },
     {
-      "type": "visionintegration",
-      "options": {
-        "target": "left",
-        "position": "left",
-        "visibleAtStart": true,
-        "hubUrl": "http://localhost:8000/gisandrealestate/?organisation=MF-test&clientType=External&client=webmapapp",
-        "userOverride": "bjonil1230",
-        "searchSources": [{ "id": "99", "visibleForGroups": [] }],
-        "integrationSettings": [
-          {
-            "id": "ESTATES",
-            "searchKey": "fnr",
-            "wmsId": null,
-            "wfsId": "99"
-          }
-        ],
-        "visibleForGroups": []
-      },
-      "index": 99
-    },
-    {
       "type": "documenthandler",
       "index": 0,
       "options": {
