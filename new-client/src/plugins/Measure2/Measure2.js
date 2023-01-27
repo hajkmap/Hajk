@@ -11,6 +11,7 @@ import { MeasureIcon } from "./MeasureIcons";
 import { DEFAULT_MEASUREMENT_SETTINGS } from "./constants";
 import DrawModel from "models/DrawModel";
 import { Circle, Fill, RegularShape, Stroke, Style } from "ol/style";
+import HelpIcon from "@mui/icons-material/Help";
 
 function Measure2(props) {
   const [state] = React.useState({});
@@ -192,6 +193,17 @@ function Measure2(props) {
     setPluginShown(true);
   };
 
+  const customHeaderButtons = [
+    {
+      icon: <HelpIcon />,
+      description: "Hjälp",
+      onClickCallback: () => {
+        console.log(666);
+      },
+    },
+  ];
+
+  //
   return (
     <BaseWindowPlugin
       {...props}
@@ -202,6 +214,8 @@ function Measure2(props) {
         description: "En kort beskrivning som visas i widgeten",
         height: "dynamic",
         width: 400,
+        customPanelHeaderButtons: customHeaderButtons,
+
         onWindowHide: onWindowHide,
         onWindowShow: onWindowShow,
       }}
