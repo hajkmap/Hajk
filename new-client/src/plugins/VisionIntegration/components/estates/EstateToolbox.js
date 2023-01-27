@@ -40,19 +40,6 @@ function EstateToolbox({
   // Handles when layer-visibility-switch is toggled
   const handleWmsVisibilitySwitchChange = (e) => {
     layer.set("visible", e.target.checked);
-    if (!e.target.checked) {
-      layer.getSource().updateParams({
-        // Ensure that the list of sublayers is emptied (otherwise they'd be
-        // "remembered" the next time user toggles group)
-        LAYERS: "",
-      });
-    } else {
-      layer.getSource().updateParams({
-        // Ensure that the list of sublayers is emptied (otherwise they'd be
-        // "remembered" the next time user toggles group)
-        LAYERS: layer.subLayers.join(","),
-      });
-    }
   };
 
   // Handles when select-estates-switch is toggled
