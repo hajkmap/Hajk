@@ -443,11 +443,7 @@ class AppModel {
         );
         const infoclickFeatures = mapClickDataResult.features.filter(
           (feature) => {
-            return ![
-              "pluginSearchResults",
-              "pluginSketch",
-              "pluginVisionIntegration",
-            ].includes(feature?.layer.get("name"));
+            return feature?.layer.get("name") !== "pluginSearchResults";
           }
         );
 
