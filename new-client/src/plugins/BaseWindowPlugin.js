@@ -138,6 +138,9 @@ class BaseWindowPlugin extends React.PureComponent {
         windowVisible: true,
       },
       () => {
+        // Notify the app that a plugin's visibility has changed
+        this.props.app.globalObserver.publish("core.pluginVisibilityChanged");
+
         // If there's a callback defined in custom, run it
         runCallback === true &&
           typeof this.props.custom.onWindowShow === "function" &&
@@ -157,6 +160,9 @@ class BaseWindowPlugin extends React.PureComponent {
         windowVisible: false,
       },
       () => {
+        // Notify the app that a plugin's visibility has changed
+        this.props.app.globalObserver.publish("core.pluginVisibilityChanged");
+
         typeof this.props.custom.onWindowHide === "function" &&
           this.props.custom.onWindowHide();
       }
