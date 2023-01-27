@@ -2241,7 +2241,7 @@ class DrawModel {
   // Finishes the currently active draw interaction.
   finishDraw = () => {
     if (this.#drawInteraction) {
-      this.#drawInteraction.finishDraw();
+      this.#drawInteraction.finishDrawing();
     }
   };
 
