@@ -79,7 +79,12 @@ function EditView(props) {
 
   const handleCancelClick = () => {
     setActiveMapInteraction(MAP_INTERACTIONS.EDIT_NONE);
-    props.setEditState((prev) => ({ ...prev, mode: EDIT_STATUS.INACTIVE }));
+    props.setEditState((prev) => ({
+      ...prev,
+      mode: EDIT_STATUS.INACTIVE,
+      features: [],
+      text: "",
+    }));
   };
 
   const handleSaveClick = () => {

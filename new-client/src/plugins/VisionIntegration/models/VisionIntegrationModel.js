@@ -27,6 +27,7 @@ class VisionIntegrationModel {
   #mapViewModel;
   #currentEnvironmentTypeId;
   #wktParser;
+  #editEnabled;
 
   // There will probably not be many settings for this model... Options are required though!
   constructor(settings) {
@@ -45,6 +46,7 @@ class VisionIntegrationModel {
     this.#localObserver = localObserver; // ...and the observer
     this.#hubConnection = this.#createHubConnection(); // Create the hub-connection
     this.#wktParser = new WKT();
+    this.#editEnabled = false; // A field to keep track of wether the edit-mode is enabled or not.
     this.#searchSources = searchSources;
     this.#searchModel = new SearchModel(
       { sources: this.#searchSources },
@@ -245,6 +247,10 @@ class VisionIntegrationModel {
   // Handles when Vision is asking for information regarding all currently selected real-estates.
   #handleVisionAskingForRealEstateIdentifiers = () => {
     try {
+      // If the edit-mode is enabled, we don't want to let the user mess with anything else...
+      if (this.#editEnabled) {
+        return;
+      }
       // First we'll get all the currently selected estates. (The selected estates are drawn in the
       // map so let's get them from there...)
       const selectedEstates = this.#mapViewModel.getDrawnEstates();
@@ -268,6 +274,10 @@ class VisionIntegrationModel {
   // Handles when Vision is asking for information regarding all currently selected coordinates.
   #handleVisionAskingForCoordinates = () => {
     try {
+      // If the edit-mode is enabled, we don't want to let the user mess with anything else...
+      if (this.#editEnabled) {
+        return;
+      }
       // First we'll get all the currently selected coordinates. (The selected coordinates are drawn in the
       // map so let's get them from there...)
       const selectedCoordinates = this.#mapViewModel.getDrawnCoordinates();
@@ -287,6 +297,10 @@ class VisionIntegrationModel {
 
   #handleVisionAskingForFeatures = () => {
     try {
+      // If the edit-mode is enabled, we don't want to let the user mess with anything else...
+      if (this.#editEnabled) {
+        return;
+      }
       // First we'll get all the currently selected features. NOTE: We're only sending the
       // features that are currently showing in the map... There might be hidden features as well,
       // (for example, if areas are currently active, only these features are sent... Not investigations etc.)
@@ -309,6 +323,10 @@ class VisionIntegrationModel {
   // Handles when Vision is asking the map to show the geometries connected to
   // the supplied real-estate-information.
   #handleVisionAskingToShowRealEstates = async (payload) => {
+    // If the edit-mode is enabled, we don't want to let the user mess with anything else...
+    if (this.#editEnabled) {
+      return;
+    }
     // First we'll have to make sure we were supplied an array (we're expecting the payload
     // to consist of an array with real-estate-information).
     if (!Array.isArray(payload)) {
@@ -367,6 +385,10 @@ class VisionIntegrationModel {
 
   // Handles when Vision is asking the map to show the location connected to the supplied coordinate-information.
   #handleVisionAskingToShowCoordinates = (payload) => {
+    // If the edit-mode is enabled, we don't want to let the user mess with anything else...
+    if (this.#editEnabled) {
+      return;
+    }
     // First we'll have to make sure we were supplied an array (we're expecting the payload
     // to consist of an array with coordinate-information).
     if (!Array.isArray(payload)) {
@@ -405,6 +427,10 @@ class VisionIntegrationModel {
 
   // Handles when Vision is asking the map to show the features connected to the supplied id's.
   #handleVisionAskingToShowFeatures = async (payload) => {
+    // If the edit-mode is enabled, we don't want to let the user mess with anything else...
+    if (this.#editEnabled) {
+      return;
+    }
     // First we'll have to make sure we were supplied an array (we're expecting the payload
     // to consist of an array with feature-information).
     if (!Array.isArray(payload)) {
@@ -487,6 +513,10 @@ class VisionIntegrationModel {
   // Handler for when vision asks for a geometry to be connected to the supplied object.
   // (Vision asks for a geometry, we enable edit-mode, and return a geometry when the user is done drawing).
   #handleVisionAskingForFeatureGeometry = async (payload) => {
+    // If the edit-mode is enabled, we don't want to let the user mess with anything else...
+    if (this.#editEnabled) {
+      return;
+    }
     // If no id and type is supplied, we cannot allow the user to start drawing...
     const { id, type } = payload;
     if (!id || !type) {
@@ -533,6 +563,11 @@ class VisionIntegrationModel {
     // Let's zoom to the potential features so that the user doesn't miss that they
     // already have some features...
     this.#mapViewModel.zoomToFeatures(features);
+    // Let's make sure to set unique ids on the edit-features so that they cannot be mixed up with
+    // "regular" features.
+    features.forEach((f) => {
+      f.setId(generateRandomString());
+    });
     // When the search is done, we'll publish an event so that the view can update...
     this.#localObserver.publish("set-edit-state", {
       mode: EDIT_STATUS.ACTIVE,
@@ -918,6 +953,11 @@ class VisionIntegrationModel {
       return null;
     }
     return interactionInfo.helperText;
+  };
+
+  // Sets the field stating if edit is enabled or not.
+  setEditEnabled = (enabled) => {
+    this.#editEnabled = enabled;
   };
 }
 

@@ -379,9 +379,11 @@ function VisionIntegration(props) {
         ? `${activeTab}_${activeEnvironmentType}`
         : activeTab;
     mapViewModel.updateHiddenFeatures(featureTypeToShow);
-
+    model.setEditEnabled(
+      editState.mode === EDIT_STATUS.INACTIVE ? false : true
+    );
     setActiveMapInteraction(null);
-  }, [mapViewModel, activeTab, editState.mode, activeEnvironmentType]);
+  }, [model, mapViewModel, activeTab, editState.mode, activeEnvironmentType]);
 
   // An effect making sure to set the chosen map-interaction in the model when state changes...
   useEffect(() => {

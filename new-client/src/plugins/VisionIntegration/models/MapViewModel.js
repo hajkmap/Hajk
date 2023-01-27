@@ -544,10 +544,15 @@ class VisionIntegrationModel {
       .getCurrentVectorSource()
       .getFeatures()
       .forEach((feature) => {
-        if (feature.get("VISION_TYPE") === visionTypeToShow) {
+        const visionType = feature.get("VISION_TYPE");
+        if (visionType === visionTypeToShow) {
           feature.set("HIDDEN", false);
         } else {
-          feature.set("HIDDEN", true);
+          if (visionType === INTEGRATION_IDS.EDIT) {
+            this.removeDrawnFeature(feature);
+          } else {
+            feature.set("HIDDEN", true);
+          }
         }
       });
     // Then we'll refresh the draw-layer so that the change is applied
