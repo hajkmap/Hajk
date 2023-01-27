@@ -585,6 +585,18 @@ class VisionIntegrationModel {
   removeDrawnFeature = (f) => {
     this.#drawModel.removeFeature(f);
   };
+
+  // Refreshes the supplied layer to make sure eventual changes can be seen
+  // Only works for WMS-layers.
+  refreshWmsLayer = (layer) => {
+    if (!layer || !layer?.getSource()) {
+      console.error("Invalid layer was supplied to 'refreshWmsLayer'");
+      return;
+    }
+    layer.getSource().updateParams({
+      TIME: new Date(this.startTime).toISOString(),
+    });
+  };
 }
 
 export default VisionIntegrationModel;

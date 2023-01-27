@@ -579,10 +579,18 @@ class VisionIntegrationModel {
 
   // Handler for when Vision sends feedback regarding the geometry that was recently saved
   #handleVisionSendingOperationFeedback = (payload) => {
+    // First we'll make sure to update the view state
     this.#localObserver.publish("set-edit-state", {
       mode: EDIT_STATUS.SAVE_SUCCESS,
       mapInteraction: MAP_INTERACTIONS.EDIT_NONE,
       text: payload?.text || this.#getDefaultFeedbackText(payload),
+    });
+    // Then we'll make sure to refresh the environment layers to make sure eventual changes can be seen!
+    this.#options.integrationSettings.forEach((setting) => {
+      // First we'll grab the layer using the id in the settings!
+      const layer = this.getLayerFromId(setting.wmsId);
+      // Then we'll refresh the layer!
+      this.#mapViewModel.refreshWmsLayer(layer);
     });
   };
 
