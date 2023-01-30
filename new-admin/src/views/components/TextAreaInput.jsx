@@ -28,30 +28,59 @@ const ColorButtonGreen = withStyles((theme) => ({
 
 const TextAreaInput = ({ editorState, updateEditorState, onCancelClick }) => {
   const classes = useStyles();
-  const [backgroundColor, setBackgroundColor] = useState();
-  const [dividerColor, setDividerColor] = useState();
-  const [accordionTitle, setAccordionTitle] = useState();
 
   const selectionState = editorState.getSelection();
   const hasFocus = selectionState.get("hasFocus");
-
   const contentState = editorState.getCurrentContent();
   const contentBlock = contentState.getBlockForKey(
     selectionState.getAnchorKey()
   );
   const data = contentBlock.getData();
 
-  const focusedBackgroundColor = data.get("backgroundColor") || "INGEN FÄRG";
-  const focusedDividerColor = data.get("dividerColor") || "INGEN FÄRG";
-  const focusedIsAccordion =
-    data.get("isAccordion") === "true" ? "ÄR" : "ÄR INTE";
-  const focusedAccordionTitle = data.get("accordionTitle") || "INGEN TITEL";
+  // const focusedBackgroundColor = data.get("backgroundColor") || "INGEN FÄRG";
+  const currentBackgroundColor = data.get("backgroundColor");
+  const [backgroundColor, setBackgroundColor] = useState();
 
-  const accordionIsChecked = data.get("isAccordion") === "true";
-  const [isAccordion, setIsAccordion] = useState(accordionIsChecked);
+  // const focusedDividerColor = data.get("dividerColor") || "INGEN FÄRG";
+  const currentDividerColor = data.get("dividerColor");
+  const [dividerColor, setDividerColor] = useState();
+
+  // const focusedIsAccordion =
+  //   data.get("isAccordion") === "true" ? "ÄR" : "ÄR INTE";
+  const currentIsAccordion = data.get("isAccordion") === "true";
+  const [isAccordion, setIsAccordion] = useState(currentIsAccordion);
+
+  // const focusedAccordionTitle = data.get("accordionTitle") || "INGEN TITEL";
+  const currentAccordionTitle = data.get("accordionTitle");
+  const [accordionTitle, setAccordionTitle] = useState();
+
+  const currentBackgroundColorBox = (
+    <p
+      style={{
+        width: "30px",
+        height: "20px",
+        backgroundColor: currentBackgroundColor,
+        display: currentBackgroundColor ? "inherit" : "none",
+      }}
+    ></p>
+  );
+
+  const currentDividerColorBox = (
+    <p
+      style={{
+        width: "30px",
+        height: "20px",
+        backgroundColor: currentDividerColor,
+        display: currentDividerColor ? "inherit" : "none",
+      }}
+    ></p>
+  );
 
   useEffect(() => {
-    setIsAccordion(accordionIsChecked);
+    setIsAccordion(currentIsAccordion);
+    setAccordionTitle(currentAccordionTitle);
+    setBackgroundColor(currentBackgroundColor);
+    setDividerColor(currentDividerColor);
   }, [contentBlock]);
 
   const onConfirmClick = () => {
@@ -106,7 +135,7 @@ const TextAreaInput = ({ editorState, updateEditorState, onCancelClick }) => {
                   }}
                   type="text"
                   value={backgroundColor || ""}
-                  placeholder="#ccc"
+                  placeholder="Ex. #ccc"
                 />
               </Grid>
               <Grid item>
@@ -122,7 +151,7 @@ const TextAreaInput = ({ editorState, updateEditorState, onCancelClick }) => {
                   }}
                   type="text"
                   value={dividerColor || ""}
-                  placeholder="#6A0DAD"
+                  placeholder="Ex. #6A0DAD"
                 />
               </Grid>
               <Grid item>
@@ -134,7 +163,6 @@ const TextAreaInput = ({ editorState, updateEditorState, onCancelClick }) => {
                 <Grid item>
                   <Checkbox
                     style={{ padding: "0 10px 0px 10px" }}
-                    size="large"
                     id="data-accordion"
                     onChange={(e) => {
                       setIsAccordion(!isAccordion);
@@ -155,11 +183,7 @@ const TextAreaInput = ({ editorState, updateEditorState, onCancelClick }) => {
                     }}
                     type="text"
                     value={accordionTitle || ""}
-                    placeholder={
-                      focusedAccordionTitle != "INGEN TITEL"
-                        ? focusedAccordionTitle
-                        : "Titel..."
-                    }
+                    placeholder={"Titel..."}
                     disabled={!isAccordion}
                   />
                 </Grid>
@@ -184,29 +208,43 @@ const TextAreaInput = ({ editorState, updateEditorState, onCancelClick }) => {
           </ColorButtonRed>
         </Grid>
       </Grid>
-      <Grid className={classes.textAreaInput} item xs={4}>
+      <Grid className={classes.textAreaInput} item xs={5}>
         <Grid direction="column" container item>
           <Grid item>
             {hasFocus && (
-              <p>{`Markerad faktaruta har data-background-color
-            ${focusedBackgroundColor}`}</p>
+              <div>
+                <p style={{ margin: currentBackgroundColor ? "0" : "" }}>
+                  {`Markerad faktaruta har data-background-color
+            ${currentBackgroundColor || "INGEN FÄRG"}`}
+                </p>
+                {currentBackgroundColorBox}
+              </div>
             )}
           </Grid>
           <Grid item>
             {hasFocus && (
-              <p>{`Markerad faktaruta har data-divider-color
-            ${focusedDividerColor}`}</p>
+              <div>
+                <p
+                  style={{ margin: currentDividerColor ? "0" : "" }}
+                >{`Markerad faktaruta har data-divider-color
+            ${currentDividerColor || "INGEN FÄRG"}`}</p>
+                {currentDividerColorBox}
+              </div>
             )}
           </Grid>
           <Grid item>
             {hasFocus && (
-              <p>{`Markerad faktaruta ${focusedIsAccordion} data-accordion
+              <p>{`Markerad faktaruta ${
+                currentIsAccordion ? "ÄR" : "ÄR INTE"
+              } data-accordion
             `}</p>
             )}
           </Grid>
           <Grid item>
             {hasFocus && (
-              <p>{`Markerad faktaruta har data-accordion-title ${focusedAccordionTitle}
+              <p>{`Markerad faktaruta har data-accordion-title ${
+                currentAccordionTitle || "INGEN TITEL"
+              }
             `}</p>
             )}
           </Grid>
