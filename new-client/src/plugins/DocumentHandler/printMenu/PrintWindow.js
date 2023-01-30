@@ -288,14 +288,11 @@ class PrintWindow extends React.PureComponent {
               box-shadow: none;
               border: 4px solid #edf2f7;
             }
-            body .blockQuoteAccordion .MuiCollapse-root {
+            .blockQuoteAccordion .MuiCollapse-root {
               height: auto;
               visibility: visible;
             }
-            body .blockQuoteAccordion .MuiAccordionSummary-root {
-              display:none
-            }
-            body .blockQuoteAccordion .MuiAccordionSummary-expandIconWrapper {
+            .blockQuoteAccordion .MuiAccordionSummary-expandIconWrapper {
               display: none;
             }
           }        
