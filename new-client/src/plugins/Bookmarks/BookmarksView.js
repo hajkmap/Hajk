@@ -115,39 +115,33 @@ const BookmarksView = (props) => {
   const [name, setName] = React.useState("");
   const [error, setError] = React.useState(false);
   const [helperText, setHelperText] = React.useState(" ");
-  const [bookmarks, setBookmarks] = React.useState([]);
+  const [bookmarks, setBookmarks] = React.useState({});
   const [showRemovalConfirmation, setShowRemovalConfirmation] =
     React.useState(false);
   const [bookmarkToDelete, setBookmarkToDelete] = React.useState(null);
 
+  // Update bookmarks when model changes.
   useUpdateEffect(() => {
-    setBookmarks(props.model.getBookmarks());
+    setBookmarks(props.model.bookmarks);
   }, [props.model.bookmarks]);
 
-  const btnAddBookmark = (e) => {
+  const addBookmark = (e) => {
     if (name.trim() === "") {
       return;
     }
-
     props.model.addBookmark(name, true);
 
     setName("");
-    setBookmarks([...props.model.bookmarks]);
     checkBookmarkName("");
   };
 
-  const btnOpenBookmark = (bookmark) => {
+  const openBookmark = (bookmark) => {
     props.model.setMapState(bookmark);
   };
 
-  const btnHandleRemoveModal = (bookmark) => {
+  const deleteBookmark = (id) => {
     setShowRemovalConfirmation(true);
-    setBookmarkToDelete(bookmark);
-  };
-
-  const deleteBookmark = (bookmark) => {
-    props.model.removeBookmark(bookmark);
-    setBookmarks([...props.model.bookmarks]);
+    setBookmarkToDelete(id);
   };
 
   const checkBookmarkName = (name) => {
@@ -157,7 +151,7 @@ const BookmarksView = (props) => {
       return false;
     }
 
-    let exists = props.model.bookmarkWithNameExists(name);
+    const exists = props.model.bookmarkWithNameExists(name);
 
     if (exists) {
       setError(true);
@@ -178,8 +172,20 @@ const BookmarksView = (props) => {
     checkBookmarkName(e.target.value);
 
     if (e.nativeEvent.keyCode === 13 /* Enter, yes we all know... */) {
-      btnAddBookmark();
+      addBookmark();
     }
+  };
+
+  const handleRemoveConfirmation = (result) => {
+    setShowRemovalConfirmation(false);
+    if (result) {
+      props.model.deleteBookmark(bookmarkToDelete);
+    }
+    setBookmarkToDelete(null);
+  };
+
+  const handleRemoveConfirmationAbort = () => {
+    setShowRemovalConfirmation(false);
   };
 
   return (
@@ -211,39 +217,38 @@ const BookmarksView = (props) => {
           color="primary"
           size="small"
           startIcon={error ? null : <AddCircleOutlineIcon />}
-          onClick={btnAddBookmark}
+          onClick={addBookmark}
         >
           {error ? "Ersätt" : "Lägg till"}
         </AddButton>
       </Box>
 
       <List>
-        {bookmarks.map((item, index) => (
-          <ListItem key={index + "_" + item.name}>
-            <BookmarkButton onClick={() => btnOpenBookmark(item)}>
-              <BookmarkIconSpan>
-                <BookmarkOutlinedIcon />
-                <BookmarkIcon className="on" />
-              </BookmarkIconSpan>
-              <ItemNameSpan>{item.name}</ItemNameSpan>
-            </BookmarkButton>
-            <DeleteButton
-              aria-label="Ta bort"
-              size="large"
-              onClick={() => btnHandleRemoveModal(item)}
-            >
-              <StyledDeleteIcon fontSize="small" />
-            </DeleteButton>
-          </ListItem>
-        ))}
+        {Object.keys(bookmarks).map((id) => {
+          const bookmark = bookmarks[id];
+          return (
+            <ListItem key={id}>
+              <BookmarkButton onClick={() => openBookmark(bookmark)}>
+                <BookmarkIconSpan>
+                  <BookmarkOutlinedIcon />
+                  <BookmarkIcon className="on" />
+                </BookmarkIconSpan>
+                <ItemNameSpan>{id}</ItemNameSpan>
+              </BookmarkButton>
+              <DeleteButton
+                aria-label="Ta bort"
+                size="large"
+                onClick={() => deleteBookmark(id)}
+              >
+                <StyledDeleteIcon fontSize="small" />
+              </DeleteButton>
+            </ListItem>
+          );
+        })}
         <ConfirmationDialog
           open={showRemovalConfirmation === true}
           titleName={"Radera bokmärke"}
-          contentDescription={
-            "Är du säker på att du vill radera bokmärket " +
-            bookmarkToDelete?.name +
-            "?"
-          }
+          contentDescription={`Är du säker på att du vill radera bokmärket "${bookmarkToDelete}"?`}
           cancel={"Avbryt"}
           confirm={"Radera"}
           handleConfirm={handleRemoveConfirmation}

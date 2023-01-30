@@ -102,10 +102,10 @@ class BookmarksModel {
         );
       }
 
-      LocalStorageHelper.set(this.#storageKey || "bookmarks", newBookmarks); // change this line
+      LocalStorageHelper.set(this.#storageKey || "bookmarks", newBookmarks);
       localStorage.removeItem("bookmarks_v1.0");
 
-      // Change back to current map
+      // Change back to current map.
       LocalStorageHelper.setKeyName(this.app.config.activeMap);
     }
 
@@ -115,7 +115,7 @@ class BookmarksModel {
 
   writeToStorage() {
     // TODO: Describe in https://github.com/hajkmap/Hajk/wiki/Cookies-in-Hajk and add the functionalOk() hook
-    localStorage.setItem(storageKey, JSON.stringify(this.bookmarks));
+    LocalStorageHelper.set(this.#storageKey, this.bookmarks);
   }
 
   getDecodedBookmark(bookmark) {
@@ -128,7 +128,7 @@ class BookmarksModel {
   }
 
   bookmarkWithNameExists(name) {
-    return this.bookmarks.find((bookmark) => bookmark.name === name);
+    return Object.keys(this.bookmarks).includes(name);
   }
 
   replaceBookmark(bookmark) {
@@ -151,8 +151,9 @@ class BookmarksModel {
     this.writeToStorage();
   }
 
-  getBookmarks() {
-    return this.bookmarks;
+  deleteBookmark(name) {
+    delete this.bookmarks[name];
+    this.writeToStorage();
   }
 }
 
