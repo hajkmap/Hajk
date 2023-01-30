@@ -434,6 +434,12 @@ paths:
           required: true
           schema:
             type: string
+        - in: header
+          name: X-Control-Header
+          description: User name that will be supplied to AD
+          schema:
+            type: string
+          required: false
       description: Create a new map configuration
       responses:
         200:
