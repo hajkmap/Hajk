@@ -126,25 +126,16 @@ class BookmarksModel {
   }
 
   addBookmark(name, allowReplace = false) {
-    let bookmark = this.bookmarkWithNameExists(name);
-
-    if (bookmark) {
-      if (allowReplace === true) {
-        this.replaceBookmark(bookmark);
-      }
-      return false;
+    // Check if bookmark exist and if we should replace it.
+    if (this.bookmarkWithNameExists(name) && allowReplace) {
+      this.replaceBookmark(this.bookmarks[name]);
+      return;
     }
 
-    let settings = this.getMapState();
-    this.bookmarks.push({
-      name: name,
-      settings: btoa(JSON.stringify(settings)),
-      sortOrder: 0,
-      favorite: false,
-    });
+    this.bookmarks[name] = {
+      settings: btoa(JSON.stringify(this.getMapState())),
+    };
     this.writeToStorage();
-
-    return true;
   }
 
   removeBookmark(bookmark) {
