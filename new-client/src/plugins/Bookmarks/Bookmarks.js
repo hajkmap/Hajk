@@ -5,6 +5,9 @@ import BookmarksModel from "./BookmarksModel";
 import BookmarksView from "./BookmarksView";
 import BookmarksIcon from "@mui/icons-material/Bookmarks";
 
+// Constants
+import { STORAGE_KEY } from "./constants";
+
 /**
  * @summary Main class for the Bookmarks plugin.
  * @description The Bookmarks plugin allows the user to store bookmarks
@@ -20,6 +23,7 @@ const Bookmarks = (props) => {
       new BookmarksModel({
         app: props.app,
         map: props.map,
+        storageKey: STORAGE_KEY,
       })
   );
   const [bookmarks, setBookmarks] = React.useState(bookmarksModel.bookmarks);
@@ -36,6 +40,7 @@ const Bookmarks = (props) => {
       type="Bookmarks"
       custom={{
         icon: <BookmarksIcon />,
+        title: "Bokmärken",
         description: "Användarens bokmärken",
         height: 450,
         width: 400,

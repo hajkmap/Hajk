@@ -11,12 +11,16 @@
  */
 
 import { isValidLayerId } from "../../utils/Validator";
+import LocalStorageHelper from "../../utils/LocalStorageHelper";
 
 class BookmarksModel {
+  #storageKey;
+
   constructor(settings) {
     this.map = settings.map;
     this.app = settings.app;
-    this.bookmarks = [];
+    this.bookmarks = this.readFromStorage() || {};
+    this.#storageKey = settings.storageKey || "bookmarks";
   }
 
   getVisibleLayers() {
@@ -68,24 +72,45 @@ class BookmarksModel {
     if (!bookmark) {
       return;
     }
-
-    let bm = this.getDecodedBookmark(bookmark);
-    this.setVisibleLayers(bm.settings.l);
+    bookmark = this.getDecodedBookmark(bookmark);
+    this.setVisibleLayers(bookmark.settings.l);
     let view = this.map.getView();
-    view.setCenter([bm.settings.x, bm.settings.y]);
-    view.setZoom(bm.settings.z);
-    bm = null;
+    view.setCenter([bookmark.settings.x, bookmark.settings.y]);
+    view.setZoom(bookmark.settings.z);
+    bookmark = null;
   }
 
   readFromStorage() {
-    let storedBookmarks = localStorage.getItem(storageKey);
-    if (!storedBookmarks) {
-      let emptyJSONArr = "[]";
+    // Check if we have legacy bookmarks in localStorage.
+    if (localStorage.getItem("bookmarks_v1.0")) {
       // TODO: Describe in https://github.com/hajkmap/Hajk/wiki/Cookies-in-Hajk and add the functionalOk() hook
-      localStorage.setItem(storageKey, emptyJSONArr);
-      storedBookmarks = emptyJSONArr;
+      const legacyBookmarks = JSON.parse(
+        localStorage.getItem("bookmarks_v1.0")
+      );
+      const newBookmarks = {};
+      legacyBookmarks.forEach((bookmark) => {
+        newBookmarks[bookmark.name] = {
+          settings: bookmark.settings,
+        };
+      });
+      const decodedBookmark = this.getDecodedBookmark(legacyBookmarks[0]);
+      try {
+        LocalStorageHelper.setKeyName(decodedBookmark.settings.m);
+      } catch (error) {
+        console.log(
+          `An error occurred while trying to set the bookmarks in localStorage: ${error}`
+        );
+      }
+
+      LocalStorageHelper.set(this.#storageKey || "bookmarks", newBookmarks); // change this line
+      localStorage.removeItem("bookmarks_v1.0");
+
+      // Change back to current map
+      LocalStorageHelper.setKeyName(this.app.config.activeMap);
     }
-    this.bookmarks = JSON.parse(storedBookmarks);
+
+    const inStorage = LocalStorageHelper.get(this.#storageKey);
+    this.bookmarks = inStorage || {};
   }
 
   writeToStorage() {
