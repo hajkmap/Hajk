@@ -31,6 +31,12 @@ paths:
           required: true
           schema:
             type: string
+        - in: header
+          name: X-Control-Header
+          description: User name that will be supplied to AD
+          schema:
+            type: string
+          required: false
       description: Fetch contents of the whole document.
       responses:
         200:
@@ -48,9 +54,16 @@ paths:
   /informative/create:
     post:
       deprecated: true
+      description: Create a new document.
       tags:
         - Admin - Informative/DocumentHandler
-      description: Create a new document.
+      parameters:
+        - in: header
+          name: X-Control-Header
+          description: User name that will be supplied to AD
+          schema:
+            type: string
+          required: false
       requestBody:
         content:
           application/json:
@@ -71,6 +84,13 @@ paths:
       tags:
         - Admin - Informative/DocumentHandler
       description: Create a new document with the name given in the body, to the map given in the body.
+      parameters:
+        - in: header
+          name: X-Control-Header
+          description: User name that will be supplied to AD
+          schema:
+            type: string
+          required: false
       requestBody:
         content:
           application/json:
@@ -95,6 +115,13 @@ paths:
       tags:
         - Admin - Informative/DocumentHandler
       description: Return all available documents
+      parameters:
+        - in: header
+          name: X-Control-Header
+          description: User name that will be supplied to AD
+          schema:
+            type: string
+          required: false
       responses:
         200:
           description: Return all available documents
@@ -120,6 +147,12 @@ paths:
           required: true
           schema:
             type: string
+        - in: header
+          name: X-Control-Header
+          description: User name that will be supplied to AD
+          schema:
+            type: string
+          required: false
       responses:
         200:
           description: Return available documents for the specified map
@@ -152,6 +185,12 @@ paths:
           required: true
           schema:
             type: string
+        - in: header
+          name: X-Control-Header
+          description: User name that will be supplied to AD
+          schema:
+            type: string
+          required: false
       responses:
         200:
           description: Return the saved document's body
@@ -183,6 +222,12 @@ paths:
           required: true
           schema:
             type: string
+        - in: header
+          name: X-Control-Header
+          description: User name that will be supplied to AD
+          schema:
+            type: string
+          required: false
       responses:
         200:
           description: Return the saved document's body
@@ -208,6 +253,12 @@ paths:
           required: true
           schema:
             type: string
+        - in: header
+          name: X-Control-Header
+          description: User name that will be supplied to AD
+          schema:
+            type: string
+          required: false
       responses:
         200:
           description: Delete the specified document
@@ -245,6 +296,13 @@ paths:
       tags:
         - Admin - Maps and layers
       description: List available layers, do not apply any visibility restrictions (required for Admin UI).
+      parameters:
+        - in: header
+          name: X-Control-Header
+          description: User name that will be supplied to AD
+          schema:
+            type: string
+          required: false
       responses:
         200:
           description: All layers were fetched successfully
@@ -257,6 +315,13 @@ paths:
       tags:
         - Admin - Maps and layers
       description: List available map configurations
+      parameters:
+        - in: header
+          name: X-Control-Header
+          description: User name that will be supplied to AD
+          schema:
+            type: string
+          required: false
       responses:
         200:
           description: Available maps were fetched successfully
@@ -270,6 +335,13 @@ paths:
       tags:
         - Admin - Maps and layers
       description: List available map configurations
+      parameters:
+        - in: header
+          name: X-Control-Header
+          description: User name that will be supplied to AD
+          schema:
+            type: string
+          required: false
       responses:
         200:
           description: Available maps were fetched successfully
@@ -282,6 +354,13 @@ paths:
       tags:
         - Admin - Maps and layers
       description: List available images in the upload folder
+      parameters:
+        - in: header
+          name: X-Control-Header
+          description: User name that will be supplied to AD
+          schema:
+            type: string
+          required: false
       responses:
         200:
           description: Available images were fetched successfully
@@ -295,6 +374,13 @@ paths:
       tags:
         - Admin - Maps and layers
       description: List available images in the upload folder
+      parameters:
+        - in: header
+          name: X-Control-Header
+          description: User name that will be supplied to AD
+          schema:
+            type: string
+          required: false
       responses:
         200:
           description: Available images were fetched successfully
@@ -307,6 +393,13 @@ paths:
       tags:
         - Admin - Maps and layers
       description: List available videos in the upload folder
+      parameters:
+        - in: header
+          name: X-Control-Header
+          description: User name that will be supplied to AD
+          schema:
+            type: string
+          required: false
       responses:
         200:
           description: Available videos were fetched successfully
@@ -320,6 +413,13 @@ paths:
       tags:
         - Admin - Maps and layers
       description: List available videos in the upload folder
+      parameters:
+        - in: header
+          name: X-Control-Header
+          description: User name that will be supplied to AD
+          schema:
+            type: string
+          required: false
       responses:
         200:
           description: Available videos were fetched successfully
@@ -332,6 +432,13 @@ paths:
       tags:
         - Admin - Maps and layers
       description: List available audio files in the upload folder
+      parameters:
+        - in: header
+          name: X-Control-Header
+          description: User name that will be supplied to AD
+          schema:
+            type: string
+          required: false
       responses:
         200:
           description: Available audio files were fetched successfully
@@ -345,6 +452,13 @@ paths:
       tags:
         - Admin - Maps and layers
       description: List available audio files in the upload folder
+      parameters:
+        - in: header
+          name: X-Control-Header
+          description: User name that will be supplied to AD
+          schema:
+            type: string
+          required: false
       responses:
         200:
           description: Available audio files were fetched successfully
@@ -356,6 +470,7 @@ paths:
     get:
       tags:
         - Admin - Maps and layers
+      description: Fetch contents of a map configuration. If AD authentication is active, filter by user's permission.
       parameters:
         - name: map
           in: path
@@ -369,7 +484,6 @@ paths:
           schema:
             type: string
           required: false
-      description: Fetch contents of a map configuration. If AD authentication is active, filter by user's permission.
       responses:
         200:
           description: Success
@@ -382,6 +496,7 @@ paths:
       deprecated: true
       tags:
         - Client-accessible
+      description: Fetch contents of a map configuration
       parameters:
         - name: map
           in: path
@@ -395,7 +510,6 @@ paths:
           schema:
             type: string
           required: false
-      description: Fetch contents of a map configuration
       responses:
         200:
           description: Success
@@ -404,6 +518,7 @@ paths:
     get:
       tags:
         - Admin - Maps and layers
+      description: Exports layers of the map in a human-readable format. If the parameter map is given the value 'layer.json', the layers of that file is returned. If the parameter map is given any other value, the base layers and group layers of that map configuration is returned.
       parameters:
         - name: map
           in: path
@@ -417,7 +532,12 @@ paths:
           required: true
           schema:
             type: string
-      description: Exports layers of the map in a human-readable format. If the parameter map is given the value 'layer.json', the layers of that file is returned. If the parameter map is given any other value, the base layers and group layers of that map configuration is returned.
+        - in: header
+          name: X-Control-Header
+          description: User name that will be supplied to AD
+          schema:
+            type: string
+          required: false
       responses:
         200:
           description: Success
@@ -427,6 +547,7 @@ paths:
       deprecated: true
       tags:
         - Admin - Maps and layers
+      description: Create a new map configuration
       parameters:
         - name: name
           in: path
@@ -440,7 +561,6 @@ paths:
           schema:
             type: string
           required: false
-      description: Create a new map configuration
       responses:
         200:
           description: Success
@@ -448,6 +568,7 @@ paths:
     put:
       tags:
         - Admin - Maps and layers
+      description: Create a new map configuration
       parameters:
         - name: name
           in: path
@@ -461,7 +582,6 @@ paths:
           schema:
             type: string
           required: false
-      description: Create a new map configuration
       responses:
         200:
           description: Success
@@ -471,6 +591,7 @@ paths:
       deprecated: true
       tags:
         - Admin - Maps and layers
+      description: Create a new map configuration
       parameters:
         - name: name
           in: path
@@ -478,7 +599,12 @@ paths:
           required: true
           schema:
             type: string
-      description: Create a new map configuration
+        - in: header
+          name: X-Control-Header
+          description: User name that will be supplied to AD
+          schema:
+            type: string
+          required: false
       responses:
         200:
           description: Success
@@ -488,6 +614,7 @@ paths:
       deprecated: true
       tags:
         - Admin - Maps and layers
+      description: Delete an existing map configuration
       parameters:
         - name: name
           in: path
@@ -495,7 +622,12 @@ paths:
           required: true
           schema:
             type: string
-      description: Delete an existing map configuration
+        - in: header
+          name: X-Control-Header
+          description: User name that will be supplied to AD
+          schema:
+            type: string
+          required: false
       responses:
         200:
           description: Success
@@ -503,6 +635,7 @@ paths:
     delete:
       tags:
         - Admin - Maps and layers
+      description: Delete an existing map configuration
       parameters:
         - name: name
           in: path
@@ -516,7 +649,6 @@ paths:
           schema:
             type: string
           required: false
-      description: Delete an existing map configuration
       responses:
         200:
           description: Success
@@ -526,6 +658,7 @@ paths:
       deprecated: true
       tags:
         - Admin - Maps and layers
+      description: Delete an existing map configuration
       parameters:
         - name: name
           in: path
@@ -533,7 +666,12 @@ paths:
           required: true
           schema:
             type: string
-      description: Delete an existing map configuration
+        - in: header
+          name: X-Control-Header
+          description: User name that will be supplied to AD
+          schema:
+            type: string
+          required: false
       responses:
         200:
           description: Success
@@ -542,6 +680,7 @@ paths:
     put:
       tags:
         - Admin - Maps and layers
+      description: Create a new map configuration by duplicating an existing one
       parameters:
         - name: nameFrom
           in: path
@@ -561,7 +700,6 @@ paths:
           schema:
             type: string
           required: false
-      description: Create a new map configuration by duplicating an existing one
       responses:
         200:
           description: Success
@@ -590,6 +728,13 @@ paths:
       tags:
         - Admin - ActiveDirectory
       description: Get a list of all available AD groups to make it easier for admins to set map and layer permissions
+      parameters:
+        - in: header
+          name: X-Control-Header
+          description: User name that will be supplied to AD
+          schema:
+            type: string
+          required: false
       responses:
         200:
           description: The list of available AD groups is returned. In the case of an empty Json, either there are no available AD groups or the AD is not enabled and/or unreachable
@@ -625,6 +770,12 @@ paths:
           style: form
           explode: false
           allowReserved: true
+        - in: header
+          name: X-Control-Header
+          description: User name that will be supplied to AD
+          schema:
+            type: string
+          required: false
       responses:
         200:
           description: The list of common AD groups is returned. In the case of an empty Json, either there are no common AD groups or the AD is not enabled and/or unreachable
@@ -649,6 +800,13 @@ paths:
       tags:
         - Admin - ActiveDirectory
       description: Get the current content of local AD Users store
+      parameters:
+        - in: header
+          name: X-Control-Header
+          description: User name that will be supplied to AD
+          schema:
+            type: string
+          required: false
       responses:
         200:
           description: The list of users is returned
@@ -673,6 +831,13 @@ paths:
       tags:
         - Admin - ActiveDirectory
       description: Get the current content of local AD Groups store
+      parameters:
+        - in: header
+          name: X-Control-Header
+          description: User name that will be supplied to AD
+          schema:
+            type: string
+          required: false
       responses:
         200:
           description: The list of users is returned
@@ -697,6 +862,13 @@ paths:
       tags:
         - Admin - ActiveDirectory
       description: Get the current content of local AD groups per user store
+      parameters:
+        - in: header
+          name: X-Control-Header
+          description: User name that will be supplied to AD
+          schema:
+            type: string
+          required: false
       responses:
         200:
           description: Success
@@ -714,6 +886,13 @@ paths:
       tags:
         - Admin - ActiveDirectory
       description: Flush the contents of all local AD stores (removes the cached objects)
+      parameters:
+        - in: header
+          name: X-Control-Header
+          description: User name that will be supplied to AD
+          schema:
+            type: string
+          required: false
       responses:
         200:
           description: Success
@@ -734,6 +913,7 @@ paths:
     get:
       tags:
         - Sokigo FB Proxy
+      description: Proxy the specified query to Sokigo's FB API
       parameters:
         - name: query
           in: path
@@ -741,7 +921,6 @@ paths:
           required: true
           schema:
             type: string
-      description: Proxy the specified query to Sokigo's FB API
       responses:
         200:
           description: Result will vary depending on response from the API
@@ -750,6 +929,7 @@ paths:
     get:
       tags:
         - FME-server Proxy
+      description: Proxy the specified query to FME-server REST API. For information on available endpoints, checkout the [FME-server API documentation](https://docs.safe.com/fme/html/FME_REST/apidoc/v3/#). The proxy will forward all HTTP-methods, not only GET.
       parameters:
         - name: query
           in: path
@@ -757,7 +937,6 @@ paths:
           required: true
           schema:
             type: string
-      description: Proxy the specified query to FME-server REST API. For information on available endpoints, checkout the [FME-server API documentation](https://docs.safe.com/fme/html/FME_REST/apidoc/v3/#). The proxy will forward all HTTP-methods, not only GET.
       responses:
         200:
           description: Result will vary depending on response from the API.

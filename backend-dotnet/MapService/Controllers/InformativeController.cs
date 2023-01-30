@@ -112,12 +112,24 @@ namespace MapService.Controllers
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         [SwaggerOperation(Tags = new[] { "Client-accessible" })]
-        public ActionResult GetDocument(string name)
+        public ActionResult GetDocument(string name, [FromHeader(Name = "X-Control-Header")] string? userPrincipalName = null)
         {
             JsonObject document;
 
             try
             {
+                if (AdHandler.AdIsActive)
+                {
+                    var adHandler = new AdHandler(_memoryCache, _logger);
+
+                    userPrincipalName = adHandler.PickUserNameToUse(userPrincipalName);
+
+                    if (!adHandler.UserIsValid(userPrincipalName) || !AdHandler.UserHasAdAccess(userPrincipalName))
+                    {
+                        return StatusCode(StatusCodes.Status403Forbidden, "Forbidden");
+                    }
+                }
+
                 document = InformativeHandler.GetDocument(name);
             }
             catch (Exception ex)
