@@ -12,16 +12,11 @@
 
 import { isValidLayerId } from "../../utils/Validator";
 
-const bookmarksVersion = "1.0";
-const storageKey = `bookmarks_v${bookmarksVersion}`;
-
 class BookmarksModel {
   constructor(settings) {
     this.map = settings.map;
     this.app = settings.app;
     this.bookmarks = [];
-
-    this.readFromStorage();
   }
 
   getVisibleLayers() {
@@ -67,13 +62,6 @@ class BookmarksModel {
       l: this.getVisibleLayers(),
       ...pos,
     };
-  }
-
-  setMapStateFromBookmarkIndex(index) {
-    let bookmark = this.bookmarks[index];
-    if (bookmark) {
-      this.setMapState(bookmark);
-    }
   }
 
   setMapState(bookmark) {
@@ -136,14 +124,6 @@ class BookmarksModel {
       settings: btoa(JSON.stringify(this.getMapState())),
     };
     this.writeToStorage();
-  }
-
-  removeBookmark(bookmark) {
-    let index = this.bookmarks.indexOf(bookmark);
-    if (index > -1) {
-      this.bookmarks.splice(index, 1);
-      this.writeToStorage();
-    }
   }
 
   getBookmarks() {

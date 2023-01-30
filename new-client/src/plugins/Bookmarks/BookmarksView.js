@@ -145,15 +145,6 @@ const BookmarksView = (props) => {
     setBookmarkToDelete(bookmark);
   };
 
-  const handleRemoveConfirmation = () => {
-    deleteBookmark(bookmarkToDelete);
-    setShowRemovalConfirmation(false);
-  };
-
-  const handleRemoveConfirmationAbort = () => {
-    setShowRemovalConfirmation(false);
-  };
-
   const deleteBookmark = (bookmark) => {
     props.model.removeBookmark(bookmark);
     setBookmarks([...props.model.bookmarks]);

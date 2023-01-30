@@ -3,7 +3,6 @@ import PropTypes from "prop-types";
 import BaseWindowPlugin from "../BaseWindowPlugin";
 import BookmarksModel from "./BookmarksModel";
 import BookmarksView from "./BookmarksView";
-import Observer from "react-event-observer";
 import BookmarksIcon from "@mui/icons-material/Bookmarks";
 
 /**
@@ -16,11 +15,6 @@ import BookmarksIcon from "@mui/icons-material/Bookmarks";
  */
 
 const Bookmarks = (props) => {
-  const [state, setState] = React.useState({ title: "Bokmärken", color: null });
-  const [pluginShown, setPluginShown] = React.useState(
-    props.options.visibleAtStart ?? false
-  );
-  const [localObserver] = React.useState(Observer());
   const [bookmarksModel] = React.useState(
     () =>
       new BookmarksModel({
@@ -36,48 +30,18 @@ const Bookmarks = (props) => {
     setBookmarks(bookmarksModel.bookmarks);
   }, [bookmarksModel]);
 
-  // Listen for updates to bookmarks in local storage
-  React.useEffect(() => {
-    const updateBookmarks = () => {
-      bookmarksModel.readFromStorage();
-      setBookmarks(bookmarksModel.bookmarks);
-    };
-    window.addEventListener("storage", updateBookmarks);
-    return () => window.removeEventListener("storage", updateBookmarks);
-  }, [bookmarksModel]);
-
-  // Called when the plugin is hidden
-  const onWindowHide = () => {
-    setPluginShown(false);
-  };
-
-  // Called when the plugin is shown
-  const onWindowShow = () => {
-    setPluginShown(true);
-  };
-
   return (
     <BaseWindowPlugin
       {...props}
       type="Bookmarks"
       custom={{
         icon: <BookmarksIcon />,
-        title: state.title,
-        color: state.color,
         description: "Användarens bokmärken",
         height: 450,
         width: 400,
-        onWindowHide: onWindowHide,
-        onWindowShow: onWindowShow,
       }}
     >
-      <BookmarksView
-        model={bookmarksModel}
-        bookmarks={bookmarks}
-        app={props.app}
-        localObserver={localObserver}
-        globalObserver={props.app.globalObserver}
-      />
+      <BookmarksView model={bookmarksModel} bookmarks={bookmarks} />
     </BaseWindowPlugin>
   );
 };
