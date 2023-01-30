@@ -1,11 +1,16 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import MapIcon from "@mui/icons-material/Map";
 import DescriptionIcon from "@mui/icons-material/Description";
 import OpenInNewIcon from "@mui/icons-material/OpenInNew";
 import Box from "@mui/material/Box";
 import TextArea from "../documentWindow/TextArea";
 import { styled } from "@mui/material/styles";
-import { Accordion, AccordionSummary, useTheme } from "@mui/material";
+import {
+  Accordion,
+  AccordionSummary,
+  AccordionDetails,
+  useTheme,
+} from "@mui/material";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import {
   Button,
@@ -17,16 +22,36 @@ import {
   Tooltip,
 } from "@mui/material";
 
+const StyledAccordion = styled(Accordion)({
+  "&:before": {
+    backgroundColor: "white",
+  },
+  margin: "0px 0px 10px 0px",
+  borderRadius: "5px",
+});
+
+const StyledAccordionTypography = styled(Typography)({
+  marginBottom: "0",
+  fontSize: "16px",
+  whiteSpace: "nowrap",
+  overflow: "hidden",
+  textOverflow: "ellipsis",
+  maxWidth: "100%",
+  display: "block",
+});
+
+const StyledAccordionButton = styled(Button)({
+  textAlign: "inherit",
+  padding: "0",
+  textTransform: "inherit",
+});
+
 const StyledAccordionSummary = styled(AccordionSummary)({
   width: "100%",
   transition: "opacity 0.2s ease-in-out",
   justifyContent: "space-between",
   "& .MuiAccordionSummary-content": {
-    whiteSpace: "nowrap",
-    overflow: "hidden",
-    textOverflow: "ellipsis",
     maxWidth: "90%",
-    display: "block",
   },
 });
 
@@ -179,14 +204,12 @@ const getTextArea = (tag, defaultColors, isAccordion) => {
   });
 
   const backgroundColor =
-    tag.attributes.getNamedItem("data-background-color")?.value || isAccordion
-      ? "white"
-      : defaultColors?.textAreaBackgroundColor;
+    tag.attributes.getNamedItem("data-background-color")?.value ||
+    (isAccordion ? "white" : defaultColors?.textAreaBackgroundColor);
 
   const dividerColor =
-    tag.attributes.getNamedItem("data-divider-color")?.value || isAccordion
-      ? "white"
-      : defaultColors?.textAreaDividerColor;
+    tag.attributes.getNamedItem("data-divider-color")?.value ||
+    (isAccordion ? "white" : defaultColors?.textAreaDividerColor);
 
   return (
     <TextArea
@@ -212,32 +235,55 @@ export const BlockQuote = ({ blockQuoteTag, defaultColors }) => {
   }
 };
 
+const getAccordionTextArea = (tag, defaultColors, expanded, setExpanded) => {
+  const children = [...tag.childNodes];
+  let textAreaContentArray = children.map((element, index) => {
+    return <React.Fragment key={index}>{renderChild(element)}</React.Fragment>;
+  });
+
+  let title = tag.attributes["data-accordion-title"];
+  title = title
+    ? tag.attributes["data-accordion-title"].value
+    : (tag.innerText || tag.textContent).substring(0, 100);
+
+  const backgroundColor =
+    tag.attributes.getNamedItem("data-background-color")?.value || "whitesmoke";
+
+  return (
+    <StyledAccordion
+      className="blockQuoteAccordion"
+      style={{
+        backgroundColor: backgroundColor,
+      }}
+    >
+      <StyledAccordionButton color="inherit" fullWidth>
+        <StyledAccordionSummary
+          expandIcon={<ExpandMoreIcon />}
+          expanded={expanded.toString()}
+          onClick={() => setExpanded(!expanded)}
+          style={{
+            opacity: expanded ? 0.8 : 1,
+          }}
+        >
+          <StyledAccordionTypography variant="body1">
+            {title}
+          </StyledAccordionTypography>
+        </StyledAccordionSummary>
+      </StyledAccordionButton>
+      <AccordionDetails>{textAreaContentArray}</AccordionDetails>
+    </StyledAccordion>
+  );
+};
+
 export const AccordionSection = ({ blockQuoteTag, defaultColors }) => {
   const theme = useTheme();
   const [expanded, setExpanded] = useState(false);
-  let title = blockQuoteTag.attributes["data-accordion-title"];
-  title = title
-    ? blockQuoteTag.attributes["data-accordion-title"].value
-    : (blockQuoteTag.innerText || blockQuoteTag.textContent).substring(0, 100);
 
-  return (
-    <Accordion style={{ width: "100%" }}>
-      <StyledAccordionSummary
-        expandIcon={<ExpandMoreIcon />}
-        expanded={expanded.toString()}
-        onClick={() => setExpanded(!expanded)}
-        style={{
-          opacity: expanded ? 0.5 : 1,
-        }}
-      >
-        {title}
-      </StyledAccordionSummary>
-      {getTextArea(
-        blockQuoteTag,
-        theme.palette.mode === "light" && defaultColors,
-        true
-      )}
-    </Accordion>
+  return getAccordionTextArea(
+    blockQuoteTag,
+    theme.palette.mode === "light" && defaultColors,
+    expanded,
+    setExpanded
   );
 };
 
