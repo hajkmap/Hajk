@@ -460,6 +460,53 @@ namespace MapService.Controllers
         /// <response code="200">The map configuration was created successfully</response>
         /// <response code="403">Forbidden</response>
         /// <response code="500">Internal Server Error</response>
+        [HttpGet]
+        [Route("create/{name}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        [SwaggerOperation(Tags = new[] { "Admin - Maps and layers" })]
+        [Obsolete]
+        public ActionResult CreateDeprecated(string name, [FromHeader(Name = "X-Control-Header")] string? userPrincipalName = null)
+        {
+            try
+            {
+                if (AdHandler.AdIsActive)
+                {
+                    var adHandler = new AdHandler(_memoryCache, _logger);
+
+                    userPrincipalName = adHandler.PickUserNameToUse(userPrincipalName);
+
+                    if (!adHandler.UserIsValid(userPrincipalName) || !AdHandler.UserHasAdAccess(userPrincipalName))
+                    {
+                        return StatusCode(StatusCodes.Status403Forbidden, "Forbidden");
+                    }
+                }
+
+                MapConfigHandler.CreateMapConfiguration(name);
+            }
+            catch (IOException iex)
+            {
+                _logger.LogError(iex, "Internal Server Error");
+                return StatusCode(StatusCodes.Status500InternalServerError, "Kartan " + name + " finns redan. Ta bort kartan " + name + " innan du skapar om den på nytt. ");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Internal Server Error");
+                return StatusCode(StatusCodes.Status500InternalServerError, "Internal Server Error");
+            }
+
+            return StatusCode(StatusCodes.Status200OK);
+        }
+
+        /// <remarks>
+        /// Create a new map configuration
+        /// </remarks>
+        /// <param name="name">The name of the map to create </param>
+        /// <param name="userPrincipalName">User name that will be supplied to AD</param>
+        /// <response code="200">The map configuration was created successfully</response>
+        /// <response code="403">Forbidden</response>
+        /// <response code="500">Internal Server Error</response>
         [HttpPut]
         [Route("create/{name}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
