@@ -89,20 +89,31 @@ class BookmarksModel {
       );
       const newBookmarks = {};
       legacyBookmarks.forEach((bookmark) => {
-        newBookmarks[bookmark.name] = {
+        const decodedBookmark = this.getDecodedBookmark(bookmark);
+        if (!decodedBookmark) return;
+        const keyName = decodedBookmark.settings.m || this.app.config.activeMap;
+        try {
+          LocalStorageHelper.setKeyName(keyName);
+        } catch (error) {
+          console.log(
+            `An error occurred while trying to set the bookmarks in localStorage: ${error}`
+          );
+        }
+
+        const inStorage = LocalStorageHelper.get(
+          this.#storageKey || "bookmarks"
+        );
+        newBookmarks[keyName] = inStorage || {};
+        newBookmarks[keyName][decodedBookmark.name] = {
           settings: bookmark.settings,
         };
-      });
-      const decodedBookmark = this.getDecodedBookmark(legacyBookmarks[0]);
-      try {
-        LocalStorageHelper.setKeyName(decodedBookmark.settings.m);
-      } catch (error) {
-        console.log(
-          `An error occurred while trying to set the bookmarks in localStorage: ${error}`
-        );
-      }
 
-      LocalStorageHelper.set(this.#storageKey || "bookmarks", newBookmarks);
+        LocalStorageHelper.set(
+          this.#storageKey || "bookmarks",
+          newBookmarks[keyName]
+        );
+      });
+
       localStorage.removeItem("bookmarks_v1.0");
 
       // Change back to current map.
