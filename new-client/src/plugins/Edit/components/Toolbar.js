@@ -7,11 +7,13 @@ import BorderStyleIcon from "@mui/icons-material/BorderStyle";
 import LinearScaleIcon from "@mui/icons-material/LinearScale";
 import ZoomOutMapIcon from "@mui/icons-material/ZoomOutMap";
 import FormatShapesIcon from "@mui/icons-material/FormatShapes";
+import ContentPasteIcon from "@mui/icons-material/ContentPaste";
 import Typography from "@mui/material/Typography";
 import Grid from "@mui/material/Grid";
 import FormGroup from "@mui/material/FormGroup";
 import FormControlLabel from "@mui/material/FormControlLabel";
 import Switch from "@mui/material/Switch";
+import Tooltip from "@mui/material/Tooltip";
 
 const StyledButton = styled(Button)(({ selected, theme }) => ({
   borderTop: `${theme.spacing(0.5)} solid transparent`,
@@ -111,8 +113,13 @@ class Toolbar extends Component {
     this.changeTool("move");
   }
 
+  onPasteFeatureClicked() {
+    let mapClipboardFeature = this.props.app.getMapClipboardFeature();
+    this.props.onPasteFeature(mapClipboardFeature);
+  }
+
   render() {
-    const { editSource, snapOn } = this.props;
+    const { editSource, snapOn, model, isClipboardFeature } = this.props;
     const { editFeature } = this.state;
 
     if (!editSource || editFeature) return null;
@@ -131,6 +138,24 @@ class Toolbar extends Component {
             label="Snappa"
           />
         </FormGroup>
+        {model.options.pasteFeatureTool === true && (
+          <Tooltip title="Klistra in objeckt från kartans urklipp">
+            <Button
+              variant="contained"
+              endIcon={<ContentPasteIcon />}
+              disabled={
+                !["point", "linestring", "polygon"].includes(
+                  this.props.activeTool
+                ) || !isClipboardFeature === true
+              }
+              onClick={() => {
+                this.onPasteFeatureClicked();
+              }}
+            >
+              Klistra in
+            </Button>
+          </Tooltip>
+        )}
         <Grid item xs={12}>
           <Typography>Lägg till</Typography>
         </Grid>
