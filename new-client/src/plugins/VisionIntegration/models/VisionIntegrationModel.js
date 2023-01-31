@@ -175,7 +175,7 @@ class VisionIntegrationModel {
     // Vision can also ask us for a feature geometry (this can mean either that we have to create a new one,
     // but it can also mean that there already exists a geometry for the supplied feature - which we have to modify).
     this.#hubConnection.on(
-      "HandleAskForFeatureGeometry",
+      "HandleAskingForFeatureGeometry",
       this.#handleVisionAskingForFeatureGeometry
     );
     // When Vision has saved a geometry to the database, it will send some operation feedback. Let's make
