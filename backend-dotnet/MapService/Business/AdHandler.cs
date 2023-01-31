@@ -20,7 +20,25 @@ namespace MapService.Business.Ad
 
         internal static bool AdIsActive
         {
-            get { return bool.Parse(ConfigurationUtility.GetSectionItem("ActiveDirectory:Active")); }
+            get
+            {
+                var value = ConfigurationUtility.GetSectionItem("ActiveDirectory:Active");
+                if (value != null)
+                    return bool.Parse(value);
+                else
+                    return false;
+            }
+        }
+
+        internal static bool IdentifyUserWithWindowsAuthentication
+        {
+            get {
+                var value = ConfigurationUtility.GetSectionItem("ActiveDirectory:IdentifyUserWithWindowsAuthentication");
+                if (value != null)
+                    return bool.Parse(value);
+                else
+                    return false;
+            }
         }
 
         private static string Username
@@ -213,15 +231,14 @@ namespace MapService.Business.Ad
 
         public string PickUserNameToUse(string? userName)
         {
-            if (userName != null)
-                return userName;
+            if (IdentifyUserWithWindowsAuthentication)
+                return GetWindowsAuthenticationUserName();
             else
-                return GetWindowsAuthenticationUser();
+                return userName;
         }
 
-        public string GetWindowsAuthenticationUser()
+        public string GetWindowsAuthenticationUserName()
         {
-#pragma warning disable CA1416 // Validate platform compatibility
             var activeUser = WindowsIdentity.GetCurrent();
             _logger.LogInformation("Active user {0}", activeUser.Name);
 
@@ -229,7 +246,6 @@ namespace MapService.Business.Ad
             {
                 return activeUser.Name;
             }
-#pragma warning restore CA1416 // Validate platform compatibility
             else return String.Empty;
         }
 
