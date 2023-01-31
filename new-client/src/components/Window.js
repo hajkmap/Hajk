@@ -571,6 +571,7 @@ class Window extends React.PureComponent {
                 features={this.props.features}
                 options={this.props.options}
                 onDisplay={this.props.onDisplay}
+                onCopyFeature={this.props.onCopyFeature}
                 globalObserver={this.props.globalObserver}
                 key={
                   Array.isArray(this.props.features) &&
