@@ -176,6 +176,35 @@ class EditModel {
     return features;
   }
 
+  checkPasteIsValid(feature) {
+    const editSource = this.editSource;
+
+    // Make sure that we have both a feature to paste and a source to paste into.
+    if (!feature || !editSource || !this.vectorSource)
+      return {
+        valid: false,
+        message: "Kopieringsobjekt eller mållager saknas.",
+      };
+
+    // Make sure that the geometry type of the pasted feature matches that of the edit source (e.g. polygon)
+    let pasteFeatureGeometryType = feature.getGeometry().getType();
+    let editSourceGeometryType =
+      this.vectorSource.getFeatures().length > 0
+        ? this.vectorSource.getFeatures()[0].getGeometry().getType()
+        : "empty";
+
+    if (pasteFeatureGeometryType !== editSourceGeometryType)
+      return {
+        valid: false,
+        message:
+          "Kopierad objektet och redigeringslagret har inte samma geometrityp",
+      };
+
+    // If we reach here, there are no clear reasons why we shouldn't be able to add the copied feature to the edit layer.
+    // Try to paste the feature.
+    return { valid: true, message: "" };
+  }
+
   save(done) {
     const features = this.findUpdatedFeatures();
 
@@ -519,6 +548,50 @@ class EditModel {
     this.observer.publish("editSource", this.source);
     this.observer.publish("editFeature", null);
     this.observer.publish("layerChanged", this.layer);
+  }
+
+  #zoomToFeature = (feature) => {
+    if (!feature) {
+      return;
+    }
+
+    const extent = feature.getGeometry().getExtent();
+    this.map.getView().fit(extent);
+  };
+
+  pasteFeature(feature) {
+    // Here we are pasting into draw interaction layer being edited by the edit tool.
+    // The Geometry name was set when the draw interaction was created (as this.geometryName), so we need to make sure
+    // That when we paste in our feature, we give it the same geometry name as the draw interaction was given.
+
+    //If our geometry names differ, add a geometry property under the correct geometry name.
+    if (this.geometryName !== feature.getGeometryName()) {
+      const newGeometryName = this.geometryName;
+
+      let newGeomProperty = { [newGeometryName]: feature.getGeometry() };
+
+      feature.setProperties(newGeomProperty);
+      feature.setGeometryName(newGeometryName);
+    }
+
+    //Add our feature to the current edit drawing layer.
+    this.vectorSource.addFeature(feature);
+
+    //Center on or zoom the feature - as the user has not drawn the feature we need to make it clear which feature has been added.
+    this.#zoomToFeature(feature); //Call the zoomToFeature on the MapViewModel instead?
+
+    // Below we do some actions that usually happen when the 'add' draw interaction finishes, when a feature
+    // is being added by the draw, instead of being pasted in.
+
+    // Add the 'added' flag, so that The edit tool knows that it is changed.
+    feature.modification = "added";
+
+    // Call this.editAttributes otherwise we will never jump to the attribute step in the edit menu.
+    this.editAttributes(feature);
+
+    setTimeout(() => {
+      this.deactivateInteraction();
+    }, 1);
   }
 
   activateModify() {

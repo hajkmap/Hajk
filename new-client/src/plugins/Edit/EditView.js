@@ -13,6 +13,7 @@ import SaveIcon from "@mui/icons-material/Save";
 import CircularProgress from "@mui/material/CircularProgress";
 import Typography from "@mui/material/Typography";
 import ConfirmationDialog from "../../components/ConfirmationDialog";
+import { withSnackbar } from "notistack";
 
 class EditView extends React.PureComponent {
   constructor(props) {
@@ -26,6 +27,7 @@ class EditView extends React.PureComponent {
       showSaveConfirmation: false,
       editSummary: "",
       snapOn: false,
+      isClipboardFeature: props.app.getMapClipboardFeature() !== null,
     };
     this.bindSubscriptions();
   }
@@ -54,6 +56,17 @@ class EditView extends React.PureComponent {
         snapOn: snapEnabled,
       });
     });
+
+    this.props.app.globalObserver.subscribe(
+      "core.clipboard-feature-updated",
+      () => {
+        this.setState({
+          isClipboardFeature: this.props.app.getMapClipboardFeature()
+            ? true
+            : false,
+        });
+      }
+    );
   };
 
   handleVectorLoadingDone = (status) => {
@@ -213,6 +226,32 @@ class EditView extends React.PureComponent {
       : this.props.model.activateSnapping();
   }
 
+  pasteFeature(feature) {
+    const featureValid = this.props.model.checkPasteIsValid(feature);
+
+    if (featureValid.valid) {
+      try {
+        //No obvious reasons why we shouldn't be able to add the feature to the edit layer. Try to add.
+        this.props.model.pasteFeature(feature);
+        this.props.enqueueSnackbar("Inklistringen lyckades", {
+          variant: "success",
+          autoHideDuration: 2000,
+        });
+      } catch (error) {
+        this.props.enqueueSnackbar(`Inklistring misslyckades`, {
+          variant: "warning",
+        });
+      }
+    } else {
+      this.props.enqueueSnackbar(
+        `Inklistring misslyckades: ${featureValid.message}`,
+        {
+          variant: "warning",
+        }
+      );
+    }
+  }
+
   renderSources() {
     const { loadingError, editSource } = this.state;
     return (
@@ -258,6 +297,8 @@ class EditView extends React.PureComponent {
         toggleActiveTool={(toolName) => this.toggleActiveTool(toolName)}
         toggleSnap={() => this.toggleSnap()}
         snapOn={this.state.snapOn}
+        isClipboardFeature={this.state.isClipboardFeature}
+        onPasteFeature={(feature) => this.pasteFeature(feature)}
       />
     );
   };
@@ -362,4 +403,4 @@ class EditView extends React.PureComponent {
     );
   }
 }
-export default EditView;
+export default withSnackbar(EditView);
