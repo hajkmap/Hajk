@@ -26,6 +26,19 @@ const ColorButtonGreen = withStyles((theme) => ({
   },
 }))(Button);
 
+const colorBox = (color) => {
+  return (
+    <p
+      style={{
+        width: "30px",
+        height: "20px",
+        backgroundColor: color,
+        display: color ? "inherit" : "none",
+      }}
+    ></p>
+  );
+};
+
 const TextAreaInput = ({ editorState, updateEditorState, onCancelClick }) => {
   const classes = useStyles();
 
@@ -37,44 +50,17 @@ const TextAreaInput = ({ editorState, updateEditorState, onCancelClick }) => {
   );
   const data = contentBlock.getData();
 
-  // const focusedBackgroundColor = data.get("backgroundColor") || "INGEN FÄRG";
   const currentBackgroundColor = data.get("backgroundColor");
   const [backgroundColor, setBackgroundColor] = useState();
 
-  // const focusedDividerColor = data.get("dividerColor") || "INGEN FÄRG";
   const currentDividerColor = data.get("dividerColor");
   const [dividerColor, setDividerColor] = useState();
 
-  // const focusedIsAccordion =
-  //   data.get("isAccordion") === "true" ? "ÄR" : "ÄR INTE";
   const currentIsAccordion = data.get("isAccordion") === "true";
   const [isAccordion, setIsAccordion] = useState(currentIsAccordion);
 
-  // const focusedAccordionTitle = data.get("accordionTitle") || "INGEN TITEL";
   const currentAccordionTitle = data.get("accordionTitle");
   const [accordionTitle, setAccordionTitle] = useState();
-
-  const currentBackgroundColorBox = (
-    <p
-      style={{
-        width: "30px",
-        height: "20px",
-        backgroundColor: currentBackgroundColor,
-        display: currentBackgroundColor ? "inherit" : "none",
-      }}
-    ></p>
-  );
-
-  const currentDividerColorBox = (
-    <p
-      style={{
-        width: "30px",
-        height: "20px",
-        backgroundColor: currentDividerColor,
-        display: currentDividerColor ? "inherit" : "none",
-      }}
-    ></p>
-  );
 
   useEffect(() => {
     setIsAccordion(currentIsAccordion);
@@ -170,11 +156,6 @@ const TextAreaInput = ({ editorState, updateEditorState, onCancelClick }) => {
                     checked={isAccordion}
                   />
                 </Grid>
-                {/* <Grid item>
-                  <label style={{ margin: 0 }}>
-                    Titel på hopfällbar faktaruta
-                  </label>
-                </Grid> */}
                 <Grid item>
                   <input
                     id="data-accordion-title"
@@ -217,7 +198,7 @@ const TextAreaInput = ({ editorState, updateEditorState, onCancelClick }) => {
                   {`Markerad faktaruta har data-background-color
             ${currentBackgroundColor || "INGEN FÄRG"}`}
                 </p>
-                {currentBackgroundColorBox}
+                {colorBox(currentBackgroundColor)}
               </div>
             )}
           </Grid>
@@ -228,7 +209,7 @@ const TextAreaInput = ({ editorState, updateEditorState, onCancelClick }) => {
                   style={{ margin: currentDividerColor ? "0" : "" }}
                 >{`Markerad faktaruta har data-divider-color
             ${currentDividerColor || "INGEN FÄRG"}`}</p>
-                {currentDividerColorBox}
+                {colorBox(currentDividerColor)}
               </div>
             )}
           </Grid>
