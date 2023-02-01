@@ -24,7 +24,7 @@ _The events that the plugin is subscribed to are the following:_
    When invoked, the plugin sends all currently selected environment-features to Vision. Could be used to create a filter in Vision for example.
 - `HandleFeatures(List<Features> features)`  
   When invoked, the plugin shows the geometry connected to the supplied environment-objects. The geometries are not sent trough the communication-hub, instead the geometries are fetched by doing a WFS-lookup against the specified `WFS-service`.
-- `HandleAskForFeatureGeometry(Feature feature)`  
+- `HandleAskingForFeatureGeometry(Feature feature)`  
   When invoked, the plugin enables the edit-view, allowing the user to create/modify the geometry connected to the current object. When Vision asks for feature geometry eventual already existing geometries are not sent trough the communication-hub, instead the geometries are fetched by doing a WFS-lookup against the specified `WFS-service`.
 - `HandleOperationFeedback(OperationFeedback feedback)`  
   Vision sends sends feedback regarding the save-event of a new geometry. The flow is as follow: 1. Visions asks for a feature geometry. 2. Edit view is enabled in Hajk, and the user draws a geometry. 3. The user clicks save and the geometry is sent to Vision. 4. Vision saves the geometry and sends feedback over this subscription.
