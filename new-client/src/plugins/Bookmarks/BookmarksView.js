@@ -188,6 +188,24 @@ const BookmarksView = (props) => {
     setShowRemovalConfirmation(false);
   };
 
+  const renderCookiesWarning = () => {
+    return (
+      <div>
+        <Typography sx={{ marginBottom: 1 }}>
+          Du har inte tillåtit funktionella kakor. För att kunna spara bokmärken
+          måste du tillåta funktionella kakor.
+        </Typography>
+        <Button
+          fullWidth
+          variant="contained"
+          onClick={props.model.handleChangeCookieSettingsClick}
+        >
+          Cookie-inställningar
+        </Button>
+      </div>
+    );
+  };
+
   return (
     <div>
       <Typography sx={{ marginBottom: 1 }}>
