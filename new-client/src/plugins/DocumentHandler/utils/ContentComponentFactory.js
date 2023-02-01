@@ -28,6 +28,7 @@ const StyledAccordion = styled(Accordion)({
   },
   margin: "0px 0px 10px 0px",
   borderRadius: "5px",
+  position: "inherit",
 });
 
 const StyledAccordionTypography = styled(Typography)({
@@ -197,7 +198,7 @@ export const Heading = ({ headingTag }) => {
   );
 };
 
-const getTextArea = (tag, defaultColors, isAccordion) => {
+const getTextArea = (tag, defaultColors) => {
   const children = [...tag.childNodes];
   let textAreaContentArray = children.map((element, index) => {
     return <React.Fragment key={index}>{renderChild(element)}</React.Fragment>;
@@ -205,11 +206,11 @@ const getTextArea = (tag, defaultColors, isAccordion) => {
 
   const backgroundColor =
     tag.attributes.getNamedItem("data-background-color")?.value ||
-    (isAccordion ? "white" : defaultColors?.textAreaBackgroundColor);
+    defaultColors?.textAreaBackgroundColor;
 
   const dividerColor =
     tag.attributes.getNamedItem("data-divider-color")?.value ||
-    (isAccordion ? "white" : defaultColors?.textAreaDividerColor);
+    defaultColors?.textAreaDividerColors;
 
   return (
     <TextArea
@@ -247,13 +248,19 @@ const getAccordionTextArea = (tag, defaultColors, expanded, setExpanded) => {
     : (tag.innerText || tag.textContent).substring(0, 100);
 
   const backgroundColor =
-    tag.attributes.getNamedItem("data-background-color")?.value || "whitesmoke";
+    tag.attributes.getNamedItem("data-background-color")?.value ||
+    defaultColors?.textAreaBackgroundColor;
+
+  const dividerColor =
+    tag.attributes.getNamedItem("data-divider-color")?.value ||
+    defaultColors?.textAreaDividerColors;
 
   return (
     <StyledAccordion
       className="blockQuoteAccordion"
       style={{
         backgroundColor: backgroundColor,
+        border: `solid 2px ${dividerColor}`,
       }}
     >
       <StyledAccordionButton color="inherit" fullWidth>
