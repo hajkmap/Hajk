@@ -13,7 +13,6 @@ import Grid from "@mui/material/Grid";
 import FormGroup from "@mui/material/FormGroup";
 import FormControlLabel from "@mui/material/FormControlLabel";
 import Switch from "@mui/material/Switch";
-import Tooltip from "@mui/material/Tooltip";
 
 const StyledButton = styled(Button)(({ selected, theme }) => ({
   borderTop: `${theme.spacing(0.5)} solid transparent`,
@@ -139,22 +138,21 @@ class Toolbar extends Component {
           />
         </FormGroup>
         {model.options.pasteFeatureTool === true && (
-          <Tooltip title="Klistra in objeckt från kartans urklipp">
-            <Button
-              variant="contained"
-              endIcon={<ContentPasteIcon />}
-              disabled={
-                !["point", "linestring", "polygon"].includes(
-                  this.props.activeTool
-                ) || !isClipboardFeature === true
-              }
-              onClick={() => {
-                this.onPasteFeatureClicked();
-              }}
-            >
-              Klistra in
-            </Button>
-          </Tooltip>
+          <StyledButton
+            variant="contained"
+            endIcon={<ContentPasteIcon />}
+            title="Klistra in objeckt från kartans urklipp"
+            disabled={
+              !["point", "linestring", "polygon"].includes(
+                this.props.activeTool
+              ) || !isClipboardFeature === true
+            }
+            onClick={() => {
+              this.onPasteFeatureClicked();
+            }}
+          >
+            Klistra in
+          </StyledButton>
         )}
         <Grid item xs={12}>
           <Typography>Lägg till</Typography>
