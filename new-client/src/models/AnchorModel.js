@@ -1,21 +1,50 @@
-import { isValidLayerId } from "../../utils/Validator";
+import { isValidLayerId } from "utils/Validator";
+import { debounce } from "utils/debounce";
+
 class AnchorModel {
+  #app;
+  #cqlFilters;
+  #map;
+
   constructor(settings) {
-    this.app = settings.app;
-    this.getCleanUrl = settings.getCleanUrl;
-    this.cqlFilters = {};
-    this.map = settings.map;
-    this.localObserver = settings.localObserver;
+    this.#app = settings.app;
+    this.#cqlFilters = {};
+    this.#map = settings.map;
 
-    // Update the URL when map view changes
-    this.map.getView().on("change", this.update);
-
-    // Update the URL when search phrase changes
-    this.app.globalObserver.subscribe("search.searchPhraseChanged", () => {
-      this.localObserver.publish("mapUpdated", this.getAnchor());
+    this.#app.globalObserver.subscribe("core.appLoaded", () => {
+      this.#initiate();
     });
+  }
 
-    this.map
+  #initiate() {
+    // Initiate the model by defining what should trigger an update.
+    // A: Update when map view changes (zoom, pan, rotate etc)
+    this.#map.getView().on("change", this.#getAnchorWhenAnimationFinishes);
+
+    // B: Update when search phrase changes
+    this.#app.globalObserver.subscribe(
+      "search.searchPhraseChanged",
+      async () => {
+        this.#app.globalObserver.publish("core.mapUpdated", {
+          url: await this.getAnchor(),
+          source: "search",
+        });
+      }
+    );
+
+    // C: A plugin based on BaseWindowPlugin changes visibility
+    this.#app.globalObserver.subscribe(
+      "core.pluginVisibilityChanged",
+      async () => {
+        this.#app.globalObserver.publish("core.mapUpdated", {
+          url: await this.getAnchor(),
+          source: "pluginVisibility",
+        });
+      }
+    );
+
+    // D: A layer's visibility changes
+    this.#map
       .getLayers()
       .getArray()
       .forEach((layer) => {
@@ -23,12 +52,15 @@ class AnchorModel {
         const layerId = layer.get("name");
 
         // Update anchor each time layer visibility changes (to reflect current visible layers)
-        layer.on("change:visible", (event) => {
-          this.localObserver.publish("mapUpdated", this.getAnchor());
+        layer.on("change:visible", async (event) => {
+          this.#app.globalObserver.publish("core.mapUpdated", {
+            url: await this.getAnchor(),
+            source: "layerVisibility",
+          });
         });
 
         // Update anchor each time an underlying Source changes in some way (could be new CQL params, for example).
-        layer.getSource().on("change", ({ target }) => {
+        layer.getSource().on("change", async ({ target }) => {
           if (typeof target.getParams !== "function") return;
 
           // Update CQL filters only if a real value exists
@@ -37,27 +69,31 @@ class AnchorModel {
             cqlFilterForCurrentLayer !== null &&
             cqlFilterForCurrentLayer !== undefined
           ) {
-            this.cqlFilters[layerId] = cqlFilterForCurrentLayer;
+            this.#cqlFilters[layerId] = cqlFilterForCurrentLayer;
           }
 
           // Publish the event
-          this.localObserver.publish("mapUpdated", this.getAnchor());
+          this.#app.globalObserver.publish("core.mapUpdated", {
+            url: await this.getAnchor(),
+            source: "sourceVisibility",
+          });
         });
       });
   }
 
-  update = (e) => {
-    // If view is still animating, postpone updating Anchor
-    e.target.getAnimating() === false &&
-      this.localObserver.publish("mapUpdated", this.getAnchor());
+  #getAnchorWhenAnimationFinishes = async (e) => {
+    // Only update the anchor if View is done animating
+    if (e.target.getAnimating() === false) {
+      const newAnchor = await this.getAnchor();
+      this.#app.globalObserver.publish("core.mapUpdated", {
+        url: newAnchor,
+        source: "animating",
+      });
+    }
   };
 
-  getMap() {
-    return this.map;
-  }
-
   getVisibleLayers() {
-    return this.map
+    return this.#map
       .getLayers()
       .getArray()
       .filter((layer) => {
@@ -74,7 +110,7 @@ class AnchorModel {
 
   getPartlyToggledGroupLayers() {
     const partlyToggledGroupLayers = {};
-    this.map
+    this.#map
       .getLayers()
       .getArray()
       .filter((layer) => {
@@ -104,13 +140,23 @@ class AnchorModel {
     return partlyToggledGroupLayers;
   }
 
-  getAnchor() {
+  #getVisiblePlugins = () =>
+    this.#app.windows
+      .filter((w) => w.state.windowVisible)
+      .map((p) => p.type)
+      .join();
+
+  // getAnchor is where the main action happens. A lot of events will cause
+  // a call to this function. Because of that we limit the amount of actual
+  // calls by wrapping it in a debounce helper. The default delay is 500 ms,
+  // so we will avoid all sorts of issues but still get a pretty responsive
+  // link/hash string.
+  getAnchor = debounce((preventHashUpdate = false) => {
     // Read some "optional" values so we have them prepared.
     // If some conditions aren't met, we won't add them to the
     // anchor string, in order to keep the string short.
     const q = document.getElementById("searchInputField")?.value.trim() || "";
-    const f = this.cqlFilters;
-    const clean = this.getCleanUrl();
+    const f = this.#cqlFilters;
 
     // Split current URL on the "?" and just get the first part. This
     // way we'll get rid of any unwanted search params, without messing
@@ -118,15 +164,12 @@ class AnchorModel {
     const url = new URL(document.location.href.split("?")[0]);
 
     // The following params are always appended
-    url.searchParams.append("m", this.app.config.activeMap);
-    url.searchParams.append("x", this.map.getView().getCenter()[0]);
-    url.searchParams.append("y", this.map.getView().getCenter()[1]);
-    url.searchParams.append("z", this.map.getView().getZoom());
+    url.searchParams.append("m", this.#app.config.activeMap);
+    url.searchParams.append("x", this.#map.getView().getCenter()[0]);
+    url.searchParams.append("y", this.#map.getView().getCenter()[1]);
+    url.searchParams.append("z", this.#map.getView().getZoom());
     url.searchParams.append("l", this.getVisibleLayers());
-
-    // Optionally, append those too:
-    // Only add 'clean' if the value is true
-    clean === true && url.searchParams.append("clean", clean);
+    url.searchParams.append("p", this.#getVisiblePlugins());
 
     // Only add gl if there are group layers with a subset of selected layers
     const partlyToggledGroupLayers = this.getPartlyToggledGroupLayers();
@@ -140,8 +183,28 @@ class AnchorModel {
     // Only add 'q' if it isn't empty
     q.length > 0 && url.searchParams.append("q", q);
 
+    // Occasionally we may want to prevent hash update, but it's off by default
+    if (
+      this.#app.config.mapConfig.map.enableAppStateInHash === true &&
+      preventHashUpdate === false
+    ) {
+      // We want to update the URL with new hash value only
+      // if the newly calculated hash differs from the one that
+      // already exists in URL.
+      const newHash = "#" + url.searchParams.toString();
+      if (newHash !== window.location.hash) {
+        window.location.hash = newHash;
+      }
+    }
+
+    if (this.#app.config.mapConfig.map.enableAppStateInHash === true) {
+      // Finalize by setting hash value by using all search params AND
+      // removing all search params. I.e.: no more ?, only # in our URL.
+      url.hash = url.searchParams.toString();
+      url.search = "";
+    }
     return url.toString();
-  }
+  });
 }
 
 export default AnchorModel;

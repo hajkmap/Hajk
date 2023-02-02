@@ -138,6 +138,9 @@ class BaseWindowPlugin extends React.PureComponent {
         windowVisible: true,
       },
       () => {
+        // Notify the app that a plugin's visibility has changed
+        this.props.app.globalObserver.publish("core.pluginVisibilityChanged");
+
         // If there's a callback defined in custom, run it
         runCallback === true &&
           typeof this.props.custom.onWindowShow === "function" &&
@@ -157,6 +160,9 @@ class BaseWindowPlugin extends React.PureComponent {
         windowVisible: false,
       },
       () => {
+        // Notify the app that a plugin's visibility has changed
+        this.props.app.globalObserver.publish("core.pluginVisibilityChanged");
+
         typeof this.props.custom.onWindowHide === "function" &&
           this.props.custom.onWindowHide();
       }
@@ -212,10 +218,11 @@ class BaseWindowPlugin extends React.PureComponent {
             windowVisible: this.state.windowVisible,
           })}
         </Window>
-        {/* Always render a Drawer button (it's a backup for plugins 
-              render elsewhere: we hide Widget and Control buttons on 
-              small screens and fall back to Drawer button). */}
-        {this.renderDrawerButton()}
+        {/* Always render a Drawer button unless its target is "hidden". 
+              It's a backup for plugins render elsewhere: we hide 
+              Widget and Control buttons on small screens and fall 
+              back to Drawer button). */}
+        {target !== "hidden" && this.renderDrawerButton()}
         {/* Widget buttons must also render a Widget */}
         {this.pluginIsWidget(target) &&
           this.renderWidgetButton(`${target}-column`)}
