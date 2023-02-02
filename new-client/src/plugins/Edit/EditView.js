@@ -85,6 +85,13 @@ class EditView extends React.PureComponent {
     this.props.model.setLayer(serviceId, this.handleVectorLoadingDone);
   }
 
+  resetStepOne = () => {
+    // When we go back to step one after clicking to continue editing after saving a feature
+    // We need to reset the editLayer, otherwise if the database has done anything to the newly added/updated features
+    // (For example added an id) these won't be in our edit layer unless we reload it.
+    this.setLayer(this.state.editSource.id);
+  };
+
   handlePrev = () => {
     const activeStep = this.state.activeStep - 1;
     if (activeStep === 0) {
@@ -95,6 +102,9 @@ class EditView extends React.PureComponent {
         activeStep: 0,
         activeTool: undefined,
       });
+    }
+    if (activeStep === 1) {
+      this.resetStepOne();
     } else {
       this.setState({ activeStep });
     }
@@ -113,6 +123,11 @@ class EditView extends React.PureComponent {
     this.setState({
       activeTool: setTool,
     });
+  };
+
+  handleFeatureSaveFailure = (model) => {
+    //Add the feature back, otherwise subsequent attempts to edit it again will crash.
+    model.editFeature = model.editFeatureBackup;
   };
 
   getStatusMessage = (data) => {
@@ -182,6 +197,7 @@ class EditView extends React.PureComponent {
         (response.ExceptionReport || !response.TransactionResponse)
       ) {
         this.props.observer.publish("editFeature", model.editFeatureBackup);
+        this.handleFeatureSaveFailure(model);
         app.globalObserver.publish(
           "core.alert",
           this.getStatusMessage(response)
