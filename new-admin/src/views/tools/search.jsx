@@ -30,6 +30,7 @@ const defaultState = {
   markerImg: "",
   delayBeforeAutoSearch: 500,
   disableAutocomplete: false,
+  disableSearchCombinations: false,
   searchBarPlaceholder: "Sök...",
   autocompleteWildcardAtStart: false,
   enablePolygonSearch: true,
@@ -149,6 +150,9 @@ class ToolOptions extends Component {
             this.state.delayBeforeAutoSearch,
           disableAutocomplete:
             tool.options.disableAutocomplete ?? this.state.disableAutocomplete,
+          disableSearchCombinations:
+            tool.options.disableSearchCombinations ??
+            this.state.disableSearchCombinations,
           autocompleteWildcardAtStart:
             tool.options.autocompleteWildcardAtStart ||
             this.state.autocompleteWildcardAtStart,
@@ -363,6 +367,7 @@ class ToolOptions extends Component {
         markerImg: this.state.markerImg,
         delayBeforeAutoSearch: this.state.delayBeforeAutoSearch,
         disableAutocomplete: this.state.disableAutocomplete,
+        disableSearchCombinations: this.state.disableSearchCombinations,
         searchBarPlaceholder: this.state.searchBarPlaceholder,
         autocompleteWildcardAtStart: this.state.autocompleteWildcardAtStart,
         enablePolygonSearch: this.state.enablePolygonSearch,
@@ -746,6 +751,29 @@ class ToolOptions extends Component {
             &nbsp;
             <label className="long-label" htmlFor="disableAutocomplete">
               Avaktivera autocomplete (visa sökresultat direkt).
+            </label>
+          </div>
+          <div>
+            <input
+              id="disableSearchCombinations"
+              name="disableSearchCombinations"
+              type="checkbox"
+              onChange={(e) => {
+                this.handleInputChange(e);
+              }}
+              checked={this.state.disableSearchCombinations}
+            />
+            &nbsp;
+            <label htmlFor="disableSearchCombinations" className="long-label">
+              Avaktivera automatiska sök-kombinationer{" "}
+              <i
+                className="fa fa-question-circle"
+                data-toggle="tooltip"
+                title="Låt inte sökmotorn skapa automatiska sök-kombinationer.
+                (Kombinationerna kan öka möjligheten att användarna hittar vad de
+                letar efter, men det kan ta längre tid för servern att bearbeta
+                sökningen.)"
+              />
             </label>
           </div>
 
