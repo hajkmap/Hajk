@@ -44,6 +44,13 @@ const FloorPickerView = (props) => {
     setCurrentFloor(nextFloorDown);
   };
 
+  const sortFloorConfig = (floorConfig) => {
+    floorConfig.sort((a, b) => {
+      return a.floorLevel < b.floorLevel ? 1 : -1;
+    });
+    return floorConfig;
+  };
+
   // This effect tells the model to apply the filter, whenever the chosen floor changes. On first run, we will do some initialization, and mark initialized as true. future runs will filter the layers by the specified floor.
   React.useEffect(() => {
     if (props.toolActive && !model.initialized) {
@@ -68,11 +75,13 @@ const FloorPickerView = (props) => {
               updateFloor(e.target.value);
             }}
           >
-            {model.floorConfig.map((item, index) => (
-              <MenuItem key={index} value={item.floorValue}>
-                {item.floorDisplayName}
-              </MenuItem>
-            ))}
+            {sortFloorConfig(model.floorConfig).map((item, index) => {
+              return (
+                <MenuItem key={index} value={item.floorValue}>
+                  {item.floorDisplayName}
+                </MenuItem>
+              );
+            })}
           </Select>
         </FormControl>
       </Grid>
