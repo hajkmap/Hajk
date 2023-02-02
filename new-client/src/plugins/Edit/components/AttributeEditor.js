@@ -204,15 +204,34 @@ class AttributeEditor extends React.Component {
     );
   }
 
-  checkBoolean(name, value) {
-    let formValues = Object.assign({}, this.state.formValues);
-    if (value === "ja") {
-      value = true;
-    } else if (value === "nej") {
-      value = false;
+  // Was not sure why we are switching booleans to "ja/nej" text or 0/1 instead of using true/false, but didn't want to
+  // risk changing too much. Did need to fix so that the initial value is set correctly, so have covered the text/int
+  // Types that were already being used as Booleans.
+  mapFromBooleanValue(field, value) {
+    if (field.dataType === "boolean") {
+      return value ? "ja" : "nej";
+    }
+    //Otherwise our 'boolean' type is integer...
+    else {
+      return value ? 1 : 0;
+    }
+  }
+
+  mapToBooleanValue(field, value) {
+    if (field.dataType === "boolean") {
+      let trueValues = ["ja", "true", true];
+      return trueValues.includes(value) ? true : false;
     }
 
-    formValues[name] = value;
+    //To cover the integer type
+    else {
+      return value === "0" || value === 0 ? false : true;
+    }
+  }
+
+  checkBoolean(field, value) {
+    let formValues = Object.assign({}, this.state.formValues);
+    formValues[field.name] = this.mapFromBooleanValue(field, value);
     this.setState(
       {
         formValues: formValues,
@@ -666,38 +685,29 @@ class AttributeEditor extends React.Component {
           </>
         );
       case "boolean":
+        //Make sure we set the initialValue for the checkbox, if the feature has a value for the property.
+        let initialValue = this.mapToBooleanValue(field, value);
+
         return (
           <FormControlLabel
             control={
               <Checkbox
                 checked={
-                  (field.dataType === "boolean" && field.value === "ja") ||
-                  (field.dataType === "int" && field.value === 1)
+                  field.initialRender
+                    ? initialValue
+                    : this.mapToBooleanValue(field, value)
                 }
                 color="primary"
                 disabled={isDisabled}
                 onChange={(e) => {
+                  this.checkBoolean(field, e.target.checked);
                   this.setChanged();
-                  if (e.target.checked) {
-                    if (field.dataType === "boolean") {
-                      field.value = "ja";
-                    } else {
-                      field.value = 1;
-                    }
-                  } else {
-                    if (field.dataType === "boolean") {
-                      field.value = "nej";
-                    } else {
-                      field.value = 0;
-                    }
-                  }
                   field.initialRender = false;
-                  this.checkBoolean(field.name, field.value);
                   this.forceUpdate();
                 }}
               />
             }
-            label={field.name}
+            label={field.alias}
           />
         );
       case null:
