@@ -114,7 +114,8 @@ class Search extends React.PureComponent {
     this.searchModel = props.app.appModel.searchModel;
     this.globalObserver = props.app.globalObserver;
     this.disableAutocomplete = props.options.disableAutocomplete ?? false;
-    this.disableSearchCombinations = props.options.disableAutocomplete ?? false;
+    this.disableSearchCombinations =
+      props.options.disableSearchCombinations ?? false;
     this.initMapViewModel();
     this.initExportHandlers();
     this.bindSubscriptions();
