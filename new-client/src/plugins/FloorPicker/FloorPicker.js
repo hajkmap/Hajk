@@ -32,8 +32,8 @@ const FloorPicker = (props) => {
       type="FloorPicker"
       custom={{
         icon: <VerticalAlignCenterIcon />,
-        title: "Välj Våning",
-        description: "Filtrera vid våning",
+        title: "Välj Plan",
+        description: "Filtrera vid plan",
         height: "dynamic",
         width: 250,
         onWindowHide: onWindowHide,
