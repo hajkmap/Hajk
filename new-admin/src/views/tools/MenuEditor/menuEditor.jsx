@@ -346,8 +346,14 @@ class ToolOptions extends Component {
           <Grid xs={3} item>
             <Typography variant="h5">Inställningar</Typography>
           </Grid>
+          <Grid xs={4} item>
+            <Typography variant="h5">Dokument</Typography>
+          </Grid>
           <Grid xs={2} item>
-            <Typography variant="h5">Koppling</Typography>
+            <Typography variant="h5">Kartlänk</Typography>
+          </Grid>
+          <Grid xs={2} item>
+            <Typography variant="h5">Extern länk</Typography>
           </Grid>
 
           <Grid ref={this.buttonHeaderRef} xs={4} item>

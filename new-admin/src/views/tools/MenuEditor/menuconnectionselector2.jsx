@@ -2,9 +2,7 @@ import React from "react";
 
 import Grid from "@material-ui/core/Grid";
 import ArrowRightIcon from "@material-ui/icons/ArrowRight";
-//import DescriptionIcon from "@material-ui/icons/Description";
 import RoomIcon from "@material-ui/icons/Room";
-//import LanguageIcon from "@material-ui/icons/Language";
 import List from "@material-ui/core/List";
 import ListItem from "@material-ui/core/ListItem";
 import ListItemText from "@material-ui/core/ListItemText";
@@ -38,9 +36,7 @@ const getTextField = (value, onChangeFunction, variant) => {
 };
 
 const MENU_CONNECTION_TYPES = {
- // documentConnection: "Koppla dokument",
   mapLink: "Koppla karta och lager",
-  //link: "Koppla webblänk",
   none: "Inget valt",
 };
 
@@ -62,8 +58,6 @@ class MenuConnectionSelector2 extends React.Component {
   state = {
     open: false,
     mapLinkValue: this.props.menuItem.maplink,
-    //linkValue: this.props.menuItem.link,
-    //documentValue: this.props.menuItem.document,
     activeMenu: "",
   };
 
@@ -79,15 +73,6 @@ class MenuConnectionSelector2 extends React.Component {
     if (menuItem.maplink) {
         return MENU_CONNECTION_TYPES.mapLink;
     }
-
-   /* if (menuItem.link) {
-        return MENU_CONNECTION_TYPES.link;
-    }
-
-    if (menuItem.document !== "") {
-      return MENU_CONNECTION_TYPES.documentConnection;
-    }*/
-
     return MENU_CONNECTION_TYPES.none;
   };
 
@@ -171,8 +156,6 @@ class MenuConnectionSelector2 extends React.Component {
     const { menuItem } = this.props;
     this.setState({
       mapLinkValue: menuItem.maplink,
-      //linkValue: menuItem.link,
-      //documentValue: menuItem.document,
       connectionsMenuAnchorEl: null,
     });
   };
@@ -183,12 +166,8 @@ class MenuConnectionSelector2 extends React.Component {
     let value = this.state.activeMenu;
     let newMenuItem = {
       maplink: "",
-     // link: "",
-     // document: "",
     };
 
-   // newMenuItem = { ...newMenuItem, document: this.state.documentValue };
-   // newMenuItem = { ...newMenuItem, link: this.state.linkValue };
     newMenuItem = { ...newMenuItem, maplink: this.state.mapLinkValue };
 
     if (activeMenu === MENU_CONNECTION_TYPES.none) {
@@ -262,14 +241,6 @@ class MenuConnectionSelector2 extends React.Component {
     if (activeMenu === MENU_CONNECTION_TYPES.none) {
       return null;
     }
-    /*if (activeMenu === MENU_CONNECTION_TYPES.documentConnection) {
-      return this.renderDocumentList();
-    }
-
-    if (activeMenu === MENU_CONNECTION_TYPES.link) {
-      return this.renderLink();
-    }*/
-
     if (activeMenu === MENU_CONNECTION_TYPES.mapLink) {
       return this.renderMapLink();
     }
@@ -319,27 +290,12 @@ class MenuConnectionSelector2 extends React.Component {
   };
 
   getRenderValue = () => {
-    //const { menuItem } = this.props;
-    /*if (this.state.value === MENU_CONNECTION_TYPES.documentConnection) {
-      return this.getRenderedSelectionText(
-        menuItem.document,
-        this.getMenuConnectionTypeIcon(MENU_CONNECTION_TYPES.documentConnection)
-      );
-    }*/
-
     if (this.state.value === MENU_CONNECTION_TYPES.none) {
       return this.getRenderedSelectionText(
         NONE_TEXT,
         this.getMenuConnectionTypeIcon(MENU_CONNECTION_TYPES.none)
       );
     }
-
-    /*if (this.state.value === MENU_CONNECTION_TYPES.link) {
-      return this.getRenderedSelectionText(
-        WEBLINK_TEXT,
-        this.getMenuConnectionTypeIcon(MENU_CONNECTION_TYPES.link)
-      );
-    }*/
 
     if (this.state.value === MENU_CONNECTION_TYPES.mapLink) {
       return this.getRenderedSelectionText(
@@ -365,18 +321,13 @@ class MenuConnectionSelector2 extends React.Component {
 
   render = () => {
     const { value, open } = this.state;
-    //const { valid } = this.props;
 
     if (value) {
       return (
         <>
           <FormControl>
             <Grid alignItems="center" container>
-              {/*!valid && (
-                <Grid xs={2} item>
-                  {this.renderWarning()}
-                </Grid>
-              )*/}
+              {}
               <Grid xs={10} item>
                 <Select
                   MenuProps={{

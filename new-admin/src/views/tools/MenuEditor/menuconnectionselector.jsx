@@ -3,8 +3,6 @@ import React from "react";
 import Grid from "@material-ui/core/Grid";
 import ArrowRightIcon from "@material-ui/icons/ArrowRight";
 import DescriptionIcon from "@material-ui/icons/Description";
-//import RoomIcon from "@material-ui/icons/Room";
-//import LanguageIcon from "@material-ui/icons/Language";
 import List from "@material-ui/core/List";
 import ListItem from "@material-ui/core/ListItem";
 import ListItemText from "@material-ui/core/ListItemText";
@@ -61,8 +59,6 @@ const styles = (theme) => ({
 class MenuConnectionSelector extends React.Component {
   state = {
     open: false,
-    //mapLinkValue: this.props.menuItem.maplink,
-    //linkValue: this.props.menuItem.link,
     documentValue: this.props.menuItem.document,
     activeMenu: "",
   };
@@ -79,15 +75,6 @@ class MenuConnectionSelector extends React.Component {
     if (menuItem.document !== "") {
       return MENU_CONNECTION_TYPES.documentConnection;
     }
-
-   /* if (menuItem.link) {
-      return MENU_CONNECTION_TYPES.link;
-    }
-
-    if (menuItem.maplink) {
-      return MENU_CONNECTION_TYPES.mapLink;
-    }*/
-
     return MENU_CONNECTION_TYPES.none;
   };
 
@@ -170,8 +157,6 @@ class MenuConnectionSelector extends React.Component {
   reset = () => {
     const { menuItem } = this.props;
     this.setState({
-      //mapLinkValue: menuItem.maplink,
-      //linkValue: menuItem.link,
       documentValue: menuItem.document,
       connectionsMenuAnchorEl: null,
     });
@@ -182,45 +167,17 @@ class MenuConnectionSelector extends React.Component {
     const { activeMenu } = this.state;
     let value = this.state.activeMenu;
     let newMenuItem = {
-      //maplink: "",
-      //link: "",
       document: "",
     };
 
     newMenuItem = { ...newMenuItem, document: this.state.documentValue };
-   // newMenuItem = { ...newMenuItem, link: this.state.linkValue };
-   // newMenuItem = { ...newMenuItem, maplink: this.state.mapLinkValue };
 
     if (activeMenu === MENU_CONNECTION_TYPES.none) {
       
       newMenuItem = { ...newMenuItem, document: "" };
-      /*newMenuItem = { ...newMenuItem, link: "" };
-      newMenuItem = { ...newMenuItem, maplink: "" };*/
       
     }
     
-
-    /*if (activeMenu === MENU_CONNECTION_TYPES.documentConnection) {
-      if (!this.state.documentValue) {
-        value = MENU_CONNECTION_TYPES.none;
-      }
-      newMenuItem = { ...newMenuItem, document: this.state.documentValue };
-    }
-    
-    if (activeMenu === MENU_CONNECTION_TYPES.link) {
-      if (!this.state.linkValue) {
-        value = MENU_CONNECTION_TYPES.none;
-      }
-      newMenuItem = { ...newMenuItem, link: this.state.linkValue };
-    }
-
-    if (activeMenu === MENU_CONNECTION_TYPES.mapLink) {
-      if (!this.state.mapLinkValue) {
-        value = MENU_CONNECTION_TYPES.none;
-      }
-      newMenuItem = { ...newMenuItem, maplink: this.state.mapLinkValue };
-    }*/
-
     updateMenuItem(treeNodeId, newMenuItem);
 
     this.setState({
@@ -291,14 +248,6 @@ class MenuConnectionSelector extends React.Component {
     if (activeMenu === MENU_CONNECTION_TYPES.documentConnection) {
       return this.renderDocumentList();
     }
-
-    /*if (activeMenu === MENU_CONNECTION_TYPES.link) {
-      return this.renderLink();
-    }
-
-    if (activeMenu === MENU_CONNECTION_TYPES.mapLink) {
-      return this.renderMapLink();
-    }*/
   };
 
   handleChange = (target, value) => {
@@ -359,21 +308,6 @@ class MenuConnectionSelector extends React.Component {
         this.getMenuConnectionTypeIcon(MENU_CONNECTION_TYPES.none)
       );
     }
-
-    /*if (this.state.value === MENU_CONNECTION_TYPES.link) {
-      return this.getRenderedSelectionText(
-        WEBLINK_TEXT,
-        this.getMenuConnectionTypeIcon(MENU_CONNECTION_TYPES.link)
-      );
-    }
-
-    if (this.state.value === MENU_CONNECTION_TYPES.mapLink) {
-      return this.getRenderedSelectionText(
-        MAP_TEXT,
-        this.getMenuConnectionTypeIcon(MENU_CONNECTION_TYPES.mapLink)
-      );
-    }*/
-
     return this.getRenderedSelectionText(NONE_TEXT);
   };
 
@@ -391,18 +325,13 @@ class MenuConnectionSelector extends React.Component {
 
   render = () => {
     const { value, open } = this.state;
-    //const { valid } = this.props;
 
     if (value) {
       return (
         <>
           <FormControl>
             <Grid alignItems="center" container>
-              {/*!valid && (
-                <Grid xs={2} item>
-                  {this.renderWarning()}
-                </Grid>
-              )*/}
+              {}
               <Grid xs={10} item>
                 <Select
                   MenuProps={{
