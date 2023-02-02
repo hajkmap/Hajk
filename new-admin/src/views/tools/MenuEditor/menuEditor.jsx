@@ -371,7 +371,6 @@ class ToolOptions extends Component {
             <ColorButtonBlue
               variant="contained"
               className="btn"
-              //disabled={!canSave}
               onClick={this.onSaveMenuEditsClick}
               startIcon={<SaveIcon />}
             >
