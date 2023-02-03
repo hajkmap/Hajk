@@ -13,7 +13,10 @@ import IconButton from "@mui/material/IconButton";
 import Typography from "@mui/material/Typography";
 
 import ConfirmationDialog from "../../components/ConfirmationDialog";
+
+// Hooks
 import useUpdateEffect from "hooks/useUpdateEffect";
+import useCookieStatus from "hooks/useCookieStatus";
 
 const List = styled("div")(() => ({
   display: "flex",
@@ -112,6 +115,9 @@ const StyledDeleteIcon = styled(DeleteIcon)(() => ({
 }));
 
 const BookmarksView = (props) => {
+  const { globalObserver } = props;
+  const { functionalCookiesOk } = useCookieStatus(globalObserver);
+
   const [name, setName] = React.useState("");
   const [error, setError] = React.useState(false);
   const [helperText, setHelperText] = React.useState(" ");
@@ -206,7 +212,7 @@ const BookmarksView = (props) => {
     );
   };
 
-  return (
+  return functionalCookiesOk ? (
     <div>
       <Typography sx={{ marginBottom: 1 }}>
         Skapa ett bokmärke med kartans synliga lager, aktuella zoomnivå och
@@ -274,6 +280,8 @@ const BookmarksView = (props) => {
         />
       </List>
     </div>
+  ) : (
+    renderCookiesWarning()
   );
 };
 
