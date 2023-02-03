@@ -70,12 +70,18 @@ class BreadCrumbs extends Component {
       visibleLayers: [],
       open: false,
     };
+    this.timer = null; // Timer used to buffer layer-state updates
     props.app.globalObserver.subscribe("informativeLoaded", (chapters) => {
       this.setState({
         chapters: chapters,
       });
     });
   }
+
+  #resetLayerBuffers = () => {
+    this.addedLayerBuffer = [];
+    this.removedLayerBuffer = [];
+  };
 
   bindLayerEvents = (visibleLayers) => (layer) => {
     if (layer.get("visible")) {
@@ -91,21 +97,29 @@ class BreadCrumbs extends Component {
 
     layer.on("change:visible", (e) => {
       const changedLayer = e.target;
-      setTimeout(() => {
-        var visibleLayers = [
+      // Since many layers might be activated at the same time, we have to buffer the state update!
+      // First, make sure to clear eventual earlier timer.
+      clearTimeout(this.timer);
+      // Then we'll create a new one...
+      this.timer = setTimeout(() => {
+        // The layers that are supposed to be shown are the visible layers from earlier combined with
+        // the layers that has been activated recently...
+        const allLayers = [
           ...this.state.visibleLayers,
           ...this.addedLayerBuffer,
         ];
-        visibleLayers = visibleLayers.filter((visibleLayer) => {
+        // ... minus the layers that has been deactivated recently!
+        const visibleLayers = allLayers.filter((l) => {
           return !this.removedLayerBuffer.some(
-            (removedLayer) => visibleLayer === removedLayer
+            (removedLayer) => l === removedLayer
           );
         });
+        // Let's update the state with the currently visible layers!
         this.setState({
           visibleLayers: visibleLayers,
         });
-        this.addedLayerBuffer = [];
-        this.removedLayerBuffer = [];
+        // Finally we have to make sure to reset the layer buffers.
+        this.#resetLayerBuffers();
       }, 0);
 
       if (this.props.model.clearing) {

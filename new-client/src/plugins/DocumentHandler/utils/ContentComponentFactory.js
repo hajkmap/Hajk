@@ -236,6 +236,41 @@ export const BlockQuote = ({ blockQuoteTag, defaultColors }) => {
   }
 };
 
+const getMediaPositionStyle = (position) => {
+  switch (position) {
+    case "right":
+      return {
+        alignItems: "flex-end",
+        display: "flex",
+        flexDirection: "column",
+      };
+    case "floatRight":
+      return {
+        float: "right",
+        marginLeft: 1,
+      };
+    case "left":
+      return {
+        alignItems: "flex-start",
+        display: "flex",
+        flexDirection: "column",
+      };
+    case "floatLeft":
+      return {
+        float: "left",
+        marginRight: 1,
+      };
+    case "center":
+      return {
+        alignItems: "center",
+        display: "flex",
+        flexDirection: "column",
+      };
+    default:
+      return {};
+  }
+};
+
 const getAccordionTextArea = (tag, defaultColors, expanded, setExpanded) => {
   const children = [...tag.childNodes];
   let textAreaContentArray = children.map((element, index) => {
@@ -329,41 +364,6 @@ export const Img = ({ imgTag, localObserver, componentId, baseUrl }) => {
         width: "100%",
         ...(image.popup && { marginBottom: 1, cursor: "pointer" }),
       };
-    }
-  };
-
-  const getMediaPositionStyle = (position) => {
-    switch (position) {
-      case "right":
-        return {
-          alignItems: "flex-end",
-          display: "flex",
-          flexDirection: "column",
-        };
-      case "floatRight":
-        return {
-          float: "right",
-          marginLeft: 1,
-        };
-      case "left":
-        return {
-          alignItems: "flex-start",
-          display: "flex",
-          flexDirection: "column",
-        };
-      case "floatLeft":
-        return {
-          float: "left",
-          marginRight: 1,
-        };
-      case "center":
-        return {
-          alignItems: "center",
-          display: "flex",
-          flexDirection: "column",
-        };
-      default:
-        return {};
     }
   };
 
@@ -506,7 +506,7 @@ export const Video = ({ imgTag, componentId, baseUrl }) => {
 
   return (
     <React.Fragment key={videoAttributes.id}>
-      <Box sx={this.getMediaPositionStyle(videoAttributes.position)}>
+      <Box sx={getMediaPositionStyle(videoAttributes.position)}>
         <video
           height={videoAttributes.height}
           width={videoAttributes.width}

@@ -222,10 +222,11 @@ class DialogWindowPlugin extends React.PureComponent {
       this.props.app.config.mapConfig.map.clean !== true && (
         <>
           {this.renderDialog()}
-          {/* Always render a Drawer button (it's a backup for plugins 
-              render elsewhere: we hide Widget and Control buttons on 
-              small screens and fall back to Drawer button). */}
-          {this.renderDrawerButton()}
+          {/* Always render a Drawer button unless its target is "hidden". 
+              It's a backup for plugins render elsewhere: we hide 
+              Widget and Control buttons on small screens and fall 
+              back to Drawer button). */}
+          {target !== "hidden" && this.renderDrawerButton()}
           {/* Widget buttons must also render a Widget */}
           {this.#pluginIsWidget(target) &&
             this.renderWidgetButton(`${target}-column`)}
