@@ -210,7 +210,7 @@ const getTextArea = (tag, defaultColors) => {
 
   const dividerColor =
     tag.attributes.getNamedItem("data-divider-color")?.value ||
-    defaultColors?.textAreaDividerColors;
+    defaultColors?.textAreaDividerColor;
 
   return (
     <TextArea
@@ -253,7 +253,7 @@ const getAccordionTextArea = (tag, defaultColors, expanded, setExpanded) => {
 
   const dividerColor =
     tag.attributes.getNamedItem("data-divider-color")?.value ||
-    defaultColors?.textAreaDividerColors;
+    defaultColors?.textAreaDividerColor;
 
   return (
     <StyledAccordion
