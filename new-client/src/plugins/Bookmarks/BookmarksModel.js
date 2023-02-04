@@ -11,17 +11,16 @@
  */
 
 import { isValidLayerId } from "../../utils/Validator";
-
-const bookmarksVersion = "1.0";
-const storageKey = `bookmarks_v${bookmarksVersion}`;
+import LocalStorageHelper from "../../utils/LocalStorageHelper";
 
 class BookmarksModel {
+  #storageKey;
+
   constructor(settings) {
     this.map = settings.map;
     this.app = settings.app;
-    this.bookmarks = [];
-
-    this.readFromStorage();
+    this.bookmarks = this.readFromStorage() || {};
+    this.#storageKey = settings.storageKey || "bookmarks";
   }
 
   getVisibleLayers() {
@@ -69,40 +68,65 @@ class BookmarksModel {
     };
   }
 
-  setMapStateFromBookmarkIndex(index) {
-    let bookmark = this.bookmarks[index];
-    if (bookmark) {
-      this.setMapState(bookmark);
-    }
-  }
-
   setMapState(bookmark) {
     if (!bookmark) {
       return;
     }
-
-    let bm = this.getDecodedBookmark(bookmark);
-    this.setVisibleLayers(bm.settings.l);
+    bookmark = this.getDecodedBookmark(bookmark);
+    this.setVisibleLayers(bookmark.settings.l);
     let view = this.map.getView();
-    view.setCenter([bm.settings.x, bm.settings.y]);
-    view.setZoom(bm.settings.z);
-    bm = null;
+    view.setCenter([bookmark.settings.x, bookmark.settings.y]);
+    view.setZoom(bookmark.settings.z);
+    bookmark = null;
   }
 
   readFromStorage() {
-    let storedBookmarks = localStorage.getItem(storageKey);
-    if (!storedBookmarks) {
-      let emptyJSONArr = "[]";
+    // Check if we have legacy bookmarks in localStorage.
+    if (localStorage.getItem("bookmarks_v1.0")) {
       // TODO: Describe in https://github.com/hajkmap/Hajk/wiki/Cookies-in-Hajk and add the functionalOk() hook
-      localStorage.setItem(storageKey, emptyJSONArr);
-      storedBookmarks = emptyJSONArr;
+      const legacyBookmarks = JSON.parse(
+        localStorage.getItem("bookmarks_v1.0")
+      );
+      const newBookmarks = {};
+      legacyBookmarks.forEach((bookmark) => {
+        const decodedBookmark = this.getDecodedBookmark(bookmark);
+        if (!decodedBookmark) return;
+        const keyName = decodedBookmark.settings.m || this.app.config.activeMap;
+        try {
+          LocalStorageHelper.setKeyName(keyName);
+        } catch (error) {
+          console.log(
+            `An error occurred while trying to set the bookmarks in localStorage: ${error}`
+          );
+        }
+
+        const inStorage = LocalStorageHelper.get(
+          this.#storageKey || "bookmarks"
+        );
+        newBookmarks[keyName] = inStorage || {};
+        newBookmarks[keyName][decodedBookmark.name] = {
+          settings: bookmark.settings,
+        };
+
+        LocalStorageHelper.set(
+          this.#storageKey || "bookmarks",
+          newBookmarks[keyName]
+        );
+      });
+
+      localStorage.removeItem("bookmarks_v1.0");
+
+      // Change back to current map.
+      LocalStorageHelper.setKeyName(this.app.config.activeMap);
     }
-    this.bookmarks = JSON.parse(storedBookmarks);
+
+    const inStorage = LocalStorageHelper.get(this.#storageKey);
+    this.bookmarks = inStorage || {};
   }
 
   writeToStorage() {
     // TODO: Describe in https://github.com/hajkmap/Hajk/wiki/Cookies-in-Hajk and add the functionalOk() hook
-    localStorage.setItem(storageKey, JSON.stringify(this.bookmarks));
+    LocalStorageHelper.set(this.#storageKey, this.bookmarks);
   }
 
   getDecodedBookmark(bookmark) {
@@ -115,7 +139,7 @@ class BookmarksModel {
   }
 
   bookmarkWithNameExists(name) {
-    return this.bookmarks.find((bookmark) => bookmark.name === name);
+    return Object.keys(this.bookmarks).includes(name);
   }
 
   replaceBookmark(bookmark) {
@@ -126,33 +150,21 @@ class BookmarksModel {
   }
 
   addBookmark(name, allowReplace = false) {
-    let bookmark = this.bookmarkWithNameExists(name);
-
-    if (bookmark) {
-      if (allowReplace === true) {
-        this.replaceBookmark(bookmark);
-      }
-      return false;
+    // Check if bookmark exist and if we should replace it.
+    if (this.bookmarkWithNameExists(name) && allowReplace) {
+      this.replaceBookmark(this.bookmarks[name]);
+      return;
     }
 
-    let settings = this.getMapState();
-    this.bookmarks.push({
-      name: name,
-      settings: btoa(JSON.stringify(settings)),
-      sortOrder: 0,
-      favorite: false,
-    });
+    this.bookmarks[name] = {
+      settings: btoa(JSON.stringify(this.getMapState())),
+    };
     this.writeToStorage();
-
-    return true;
   }
 
-  removeBookmark(bookmark) {
-    let index = this.bookmarks.indexOf(bookmark);
-    if (index > -1) {
-      this.bookmarks.splice(index, 1);
-      this.writeToStorage();
-    }
+  deleteBookmark(name) {
+    delete this.bookmarks[name];
+    this.writeToStorage();
   }
 }
 

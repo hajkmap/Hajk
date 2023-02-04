@@ -114,6 +114,8 @@ class Search extends React.PureComponent {
     this.searchModel = props.app.appModel.searchModel;
     this.globalObserver = props.app.globalObserver;
     this.disableAutocomplete = props.options.disableAutocomplete ?? false;
+    this.disableSearchCombinations =
+      props.options.disableSearchCombinations ?? false;
     this.initMapViewModel();
     this.initExportHandlers();
     this.bindSubscriptions();
@@ -499,7 +501,7 @@ class Search extends React.PureComponent {
     fetchSettings = {
       ...fetchSettings,
       wildcardAtStart: options.autocompleteWildcardAtStart || false,
-      getPossibleCombinations: true,
+      getPossibleCombinations: !this.disableSearchCombinations,
       initiator: "autocomplete",
     };
     return fetchSettings;
@@ -659,6 +661,7 @@ class Search extends React.PureComponent {
     if (searchStringIsEncapsuled) {
       fetchOptions = {
         ...fetchOptions,
+        getPossibleCombinations: false,
         wildcardAtStart: false,
         wildcardAtEnd: false,
       };
@@ -1023,7 +1026,10 @@ class Search extends React.PureComponent {
     return {
       ...searchOptionsFromModel,
       activeSpatialFilter: activeSpatialFilter,
-      getPossibleCombinations: this.state.searchFromAutoComplete ? false : true,
+      getPossibleCombinations:
+        this.disableSearchCombinations || this.state.searchFromAutoComplete
+          ? false
+          : true,
       featuresToFilter: this.featuresToFilter || [],
       matchCase: matchCase,
       wildcardAtStart: wildcardAtStart,
