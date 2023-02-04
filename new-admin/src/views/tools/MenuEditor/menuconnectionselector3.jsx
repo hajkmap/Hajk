@@ -326,7 +326,6 @@ class MenuConnectionSelector3 extends React.Component {
         <>
           <FormControl>
             <Grid alignItems="center" container>
-              {}
               <Grid xs={10} item>
                 <Select
                   MenuProps={{
