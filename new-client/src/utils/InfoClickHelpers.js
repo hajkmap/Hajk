@@ -40,7 +40,6 @@ function getSubLayerNameFromFeatureId(feature, layer) {
     return false;
   });
 
-
   // Temporary added ugly fix because it was urgent to get it working.
   if (
     subLayerName === undefined &&
