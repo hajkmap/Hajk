@@ -506,6 +506,11 @@ class App extends React.PureComponent {
           // the query and the hash parameters.
           const mergedParams = getMergedSearchAndHashParams();
 
+          // If map changed, do a full reload
+          if (mergedParams.get("m") !== this.props.config.activeMap) {
+            window.location.reload();
+          }
+
           // Act when view's zoom changes
           if (mergedParams.get("z")) {
             // Since we're dealing with a string, we're gonna need to parse it to a float
