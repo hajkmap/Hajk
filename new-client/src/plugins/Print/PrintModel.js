@@ -69,20 +69,20 @@ export default class PrintModel {
   }
 
   scaleBarLengths = {
-    100: 2.5,
-    200: 5,
+    100: 5,
+    200: 10,
     250: 10,
     400: 20,
-    500: 25,
+    500: 30,
     1000: 50,
-    2000: 75,
+    2000: 100,
     2500: 100,
-    5000: 250,
+    5000: 300,
     10000: 500,
     25000: 1000,
-    50000: 2500,
-    100000: 5000,
-    200000: 10000,
+    50000: 4000,
+    100000: 8000,
+    200000: 16000,
   };
 
   previewLayer = null;
@@ -396,6 +396,88 @@ export default class PrintModel {
     return `${Number(scaleBarLengthMeters).toLocaleString("sv-SE")} ${units}`;
   };
 
+  getDividerLinesAndTexts = (props) => {
+    this.getDividerLines(props);
+    this.getDividerTexts(props);
+  };
+
+  getDividerLines = ({ pdf, scaleBarPosition, scaleBarLength, color }) => {
+    pdf.setLineWidth(0.25).setDrawColor(color);
+
+    // Here we draw the starting-, finsh- and through-line of the scalebar:
+    // Like this: |--------|
+    pdf.line(
+      scaleBarPosition.x,
+      scaleBarPosition.y + 3,
+      scaleBarPosition.x + scaleBarLength,
+      scaleBarPosition.y + 3
+    );
+    pdf.line(
+      scaleBarPosition.x,
+      scaleBarPosition.y + 1,
+      scaleBarPosition.x,
+      scaleBarPosition.y + 5
+    );
+    pdf.line(
+      scaleBarPosition.x + scaleBarLength,
+      scaleBarPosition.y + 1,
+      scaleBarPosition.x + scaleBarLength,
+      scaleBarPosition.y + 5
+    );
+
+    // Here we set the distance number of the gap between the lines on the scalebar...
+    // so that the division lines are halves of each adjacent divison line.
+    const lineGap = 0.125;
+    // And here, we draw the individual division lines of the scalebar:
+    // Like this: |--I--I--|--I--I--|
+    for (let divLine = lineGap; divLine < 1; divLine += lineGap) {
+      pdf.line(
+        scaleBarPosition.x + scaleBarLength * divLine,
+        scaleBarPosition.y + (divLine === 0.5 ? 1.5 : 2),
+        scaleBarPosition.x + scaleBarLength * divLine,
+        scaleBarPosition.y + (divLine === 0.5 ? 4.5 : 4)
+      );
+    }
+  };
+
+  getDividerTexts = ({
+    pdf,
+    scaleBarPosition,
+    scaleBarLength,
+    scaleBarLengthMeters,
+    color,
+  }) => {
+    const calculatedScaleBarLength =
+      scaleBarLengthMeters > 1000
+        ? scaleBarLengthMeters / 1000
+        : scaleBarLengthMeters;
+    const position = scaleBarPosition;
+    let dividerText;
+
+    pdf.setFontSize(8);
+    pdf.setTextColor(color);
+    pdf.setLineWidth(0.25);
+
+    // Here we set the number 0 at the start of the scalebar
+    pdf.text("0", position.x - 0.7, position.y + 8);
+
+    // And here we set the division line numbers on the scalebar number line
+    // We use a for loop and an equation for the x posititon to set the...
+    // correct positions of the two halved values on the scalebar line.
+    for (let textGap = 2; textGap <= 4; textGap *= 2) {
+      dividerText = (calculatedScaleBarLength / textGap).toLocaleString(
+        "sv-SE"
+      );
+      // Here we calculate the x position of the division line number
+      // on the scalebar based on the length of the division line text,
+      // the length of the scalebar, and the gap between two halved values on the scalebar.
+      let positionX =
+        position.x - dividerText.length / 1.6 + scaleBarLength / textGap;
+
+      pdf.text(dividerText, positionX, position.y + 8);
+    }
+  };
+
   drawScaleBar = (
     pdf,
     scaleBarPosition,
@@ -415,6 +497,7 @@ export default class PrintModel {
       scaleBarPosition.x + scaleBarLength + 1,
       scaleBarPosition.y + 4
     );
+
     pdf.setFontSize(10);
     pdf.text(
       `Skala: ${this.getUserFriendlyScale(
@@ -423,34 +506,16 @@ export default class PrintModel {
         orientation === "landscape" ? "liggande" : "stående"
       })`,
       scaleBarPosition.x,
-      scaleBarPosition.y + 1
+      scaleBarPosition.y - 1
     );
 
-    pdf.setDrawColor(color);
-    pdf.line(
-      scaleBarPosition.x,
-      scaleBarPosition.y + 3,
-      scaleBarPosition.x + scaleBarLength,
-      scaleBarPosition.y + 3
-    );
-    pdf.line(
-      scaleBarPosition.x,
-      scaleBarPosition.y + 2,
-      scaleBarPosition.x,
-      scaleBarPosition.y + 4
-    );
-    pdf.line(
-      scaleBarPosition.x + scaleBarLength,
-      scaleBarPosition.y + 2,
-      scaleBarPosition.x + scaleBarLength,
-      scaleBarPosition.y + 4
-    );
-    pdf.line(
-      scaleBarPosition.x + scaleBarLength / 2,
-      scaleBarPosition.y + 2.5,
-      scaleBarPosition.x + scaleBarLength / 2,
-      scaleBarPosition.y + 3.5
-    );
+    this.getDividerLinesAndTexts({
+      pdf,
+      scaleBarLengthMeters,
+      scaleBarPosition,
+      scaleBarLength,
+      color,
+    });
   };
 
   addScaleBar = (
