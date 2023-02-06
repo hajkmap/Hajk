@@ -40,9 +40,11 @@ function getSubLayerNameFromFeatureId(feature, layer) {
     return false;
   });
 
+
+  // Temporary added ugly fix because it was urgent to get it working.
   if (
     subLayerName === undefined &&
-    feature.getId() === "" &&
+    (feature?.getId().indexOf("undefined") === 0 || feature.getId() === "") &&
     layer.subLayers.length === 1
   ) {
     // Let's assume that the layer's name is the name of the first layer
