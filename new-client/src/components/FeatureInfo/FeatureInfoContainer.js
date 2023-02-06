@@ -3,6 +3,8 @@ import propTypes from "prop-types";
 import { styled } from "@mui/material/styles";
 import ArrowLeftIcon from "@mui/icons-material/ArrowLeft";
 import ArrowRightIcon from "@mui/icons-material/ArrowRight";
+import FileCopyIcon from "@mui/icons-material/FileCopy";
+import { withSnackbar } from "notistack";
 import {
   Table,
   TableContainer,
@@ -13,6 +15,7 @@ import {
   Button,
   Typography,
   Grid,
+  Tooltip,
 } from "@mui/material";
 
 import FeaturePropsParsing from "./FeaturePropsParsing";
@@ -311,9 +314,25 @@ class FeatureInfoContainer extends React.PureComponent {
             <CircularProgress />
           )}
         </Grid>
+        <Tooltip title="Kopiera detta objekt till kartans urklipp">
+          <Button
+            sx={{ mx: 2 }}
+            endIcon={<FileCopyIcon />}
+            variant="contained"
+            onClick={() => {
+              this.props.onCopyFeature(features[this.state.selectedIndex]);
+              this.props.enqueueSnackbar("Kopierad till kartans urklipp", {
+                variant: "success",
+                autoHideDuration: 2000,
+              });
+            }}
+          >
+            Kopiera
+          </Button>
+        </Tooltip>
       </InfoContainer>
     );
   }
 }
 
-export default FeatureInfoContainer;
+export default withSnackbar(FeatureInfoContainer);

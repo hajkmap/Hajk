@@ -889,6 +889,9 @@ class App extends React.PureComponent {
           onDisplay={(feature) => {
             this.appModel.highlight(feature);
           }}
+          onCopyFeature={(feature) => {
+            this.appModel.setMapClipboardFeature(feature);
+          }}
           onClose={() => {
             this.appModel.highlight(false);
             this.setState({

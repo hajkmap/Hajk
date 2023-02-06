@@ -30,7 +30,7 @@ import WFSVectorLayer from "./layers/VectorLayer.js";
 // ZoomToExtent
 // } from "ol/control";
 
-import { Map as OLMap, View } from "ol";
+import { Map as OLMap, View, Feature } from "ol";
 import { defaults as defaultInteractions } from "ol/interaction";
 import { register } from "ol/proj/proj4";
 import VectorLayer from "ol/layer/Vector";
@@ -62,6 +62,11 @@ class AppModel {
       y: 0,
       zoom: 0,
     };
+
+    // The user has the ability to add a feature from the map into the clipboard, with the purpose of copying the feature
+    // when using another tool. For example, the user can use the optional 'copy feature' button in the infoclick box to add a feature to the clipboard.
+    // They could then in the edit tool, while creating a shape, paste this feature in, to get the geometry.
+    this.mapClipboardFeature = null;
   }
 
   init(settings) {
@@ -140,6 +145,22 @@ class AppModel {
       y: y,
       zoom: zoom,
     };
+  }
+
+  getMapClipboardFeature() {
+    return this.mapClipboardFeature;
+  }
+
+  setMapClipboardFeature(feature) {
+    const featureCopy = new Feature({
+      geometry: feature.getGeometry().clone(),
+    });
+
+    this.mapClipboardFeature = featureCopy;
+
+    // Let other tools know that a feature has been added to the clipboard.
+    // If something wants to get the feature, they can fetch it using getMapClipboardFeature() on the appModel;
+    this.globalObserver.publish("core.clipboard-feature-updated");
   }
 
   /**

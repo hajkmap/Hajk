@@ -11,6 +11,8 @@ import FormGroup from "@mui/material/FormGroup";
 import FormControlLabel from "@mui/material/FormControlLabel";
 import { Button, FormHelperText } from "@mui/material";
 import Chip from "@mui/material/Chip";
+import { functionalOk } from "models/Cookie";
+import LocalStorageHelper from "utils/LocalStorageHelper";
 
 const StyledGrid = styled(Grid)(({ theme }) => ({
   textAlign: "center",
@@ -84,8 +86,72 @@ class AttributeEditor extends React.Component {
         }
       }
     });
+    //Before we return the valueMap, let's check if we should set any properties from the mapProperties.
+    let setFieldFromGlobalMapValue = true; //This needs to come from config and default to false.
+
+    if (setFieldFromGlobalMapValue === true) {
+      valueMap = this.#getFieldPropertiesFromMapValues(valueMap, feature);
+    }
+
     return valueMap;
   };
+
+  #getFieldPropertiesFromMapValues(valueMap, feature) {
+    // We only want to (if configured to do so) pre-fill the attributes form with available map properties
+    // if it's a new feature. Existing features should keep their own properties.
+    let isNewFeature = Object.keys(feature.getProperties()).length === 1;
+
+    if (isNewFeature && functionalOk) {
+      const globalMapOptions = LocalStorageHelper.get("globalMapState", null);
+      const globalMapProperties = globalMapOptions.mapProperties;
+
+      Object.keys(valueMap).forEach((field) => {
+        if (globalMapProperties) {
+          const mapPropertyExists = globalMapProperties.hasOwnProperty(field);
+
+          if (mapPropertyExists) {
+            let fieldValue = globalMapProperties[field];
+            valueMap[field] = fieldValue;
+          }
+        }
+      });
+    }
+
+    return valueMap;
+  }
+
+  #checkSetOnlyByMap(field, feature) {
+    let isNewFeature = Object.keys(feature.getProperties()).length === 1;
+    let setOnlyByMap = false;
+
+    //Have we set that fields should be set by global map properties if matching properties exist?
+    const setFieldsFromMatchingGlobalMapValue =
+      this.props.model.options.setFieldsFromMatchingMapValues ?? false;
+
+    //Have we set that the user can override fields that are set by the map properties?
+    const allowUserOverride =
+      this.props.model.options.userOverrideMatchingMapValues ?? true;
+
+    if (
+      !isNewFeature ||
+      allowUserOverride ||
+      !setFieldsFromMatchingGlobalMapValue ||
+      !functionalOk
+    )
+      return false;
+
+    //If we reach here, then if the field is set by the map settings, then the field should not be changeable by the user.
+    const globalMapOptions = LocalStorageHelper.get("globalMapState", null);
+    const globalMapProperties = globalMapOptions.mapProperties;
+
+    if (globalMapProperties) {
+      if (globalMapProperties.hasOwnProperty(field.name)) {
+        setOnlyByMap = true;
+      }
+    }
+
+    return setOnlyByMap;
+  }
 
   updateFeature() {
     const featureProps = this.props.model.editFeature.getProperties();
@@ -141,15 +207,34 @@ class AttributeEditor extends React.Component {
     );
   }
 
-  checkBoolean(name, value) {
-    let formValues = Object.assign({}, this.state.formValues);
-    if (value === "ja") {
-      value = true;
-    } else if (value === "nej") {
-      value = false;
+  // Was not sure why we are switching booleans to "ja/nej" text or 0/1 instead of using true/false, but didn't want to
+  // risk changing too much. Did need to fix so that the initial value is set correctly, so have covered the text/int
+  // Types that were already being used as Booleans.
+  mapFromBooleanValue(field, value) {
+    if (field.dataType === "boolean") {
+      return value ? "ja" : "nej";
+    }
+    //Otherwise our 'boolean' type is integer...
+    else {
+      return value ? 1 : 0;
+    }
+  }
+
+  mapToBooleanValue(field, value) {
+    if (field.dataType === "boolean") {
+      let trueValues = ["ja", "true", true];
+      return trueValues.includes(value) ? true : false;
     }
 
-    formValues[name] = value;
+    //To cover the integer type
+    else {
+      return value === "0" || value === 0 ? false : true;
+    }
+  }
+
+  checkBoolean(field, value) {
+    let formValues = Object.assign({}, this.state.formValues);
+    formValues[field.name] = this.mapFromBooleanValue(field, value);
     this.setState(
       {
         formValues: formValues,
@@ -256,6 +341,33 @@ class AttributeEditor extends React.Component {
     );
   }
 
+  checkCustomValidation(name, validationRule, validationMessage, value) {
+    //Create regex from the property validationRule. Note that we should not include the encompassing '/' characters in the string itself, as converting to regex will add these.
+    const regex = new RegExp(validationRule);
+    const message = validationMessage ? validationMessage : "Ogiltigt värde";
+
+    let valid = regex.test(value);
+
+    let formValues = Object.assign({}, this.state.formValues);
+
+    if (valid) {
+      formValues[name] = value;
+      delete this.formErrors[name];
+    } else {
+      formValues[name] = "";
+      this.formErrors[name] = message;
+    }
+
+    this.setState(
+      {
+        formValues: formValues,
+      },
+      () => {
+        this.updateFeature();
+      }
+    );
+  }
+
   setChanged() {
     if (
       this.props.model.editFeature.modification !== "added" &&
@@ -304,6 +416,17 @@ class AttributeEditor extends React.Component {
       }
     }
 
+    // It is possible that the edit tool is configured so that certain fields are set automatically from
+    // properties within the map. In this case it may be set that these fields are not then changeable by
+    // the user, in which case they should be disabled.
+
+    let fieldSetOnlyByMapProperties = this.#checkSetOnlyByMap(
+      field,
+      this.state.feature
+    );
+
+    let isDisabled = !editable || fieldSetOnlyByMapProperties;
+
     switch (field.textType) {
       case "heltal":
         return (
@@ -313,7 +436,7 @@ class AttributeEditor extends React.Component {
             fullWidth={true}
             margin="normal"
             variant="outlined"
-            disabled={!editable}
+            disabled={isDisabled}
             value={value}
             error={this.formErrors.hasOwnProperty(field.name)}
             helperText={
@@ -336,7 +459,7 @@ class AttributeEditor extends React.Component {
             fullWidth={true}
             margin="normal"
             variant="outlined"
-            disabled={!editable}
+            disabled={isDisabled}
             value={value}
             error={this.formErrors.hasOwnProperty(field.name)}
             helperText={
@@ -360,7 +483,7 @@ class AttributeEditor extends React.Component {
             margin="normal"
             type="date"
             variant="outlined"
-            disabled={!editable}
+            disabled={isDisabled}
             value={value}
             error={this.formErrors.hasOwnProperty(field.name)}
             helperText={
@@ -387,7 +510,7 @@ class AttributeEditor extends React.Component {
             margin="normal"
             type="datetime-local"
             variant="outlined"
-            disabled={!editable}
+            disabled={isDisabled}
             value={value}
             error={this.formErrors.hasOwnProperty(field.name)}
             helperText={
@@ -415,7 +538,7 @@ class AttributeEditor extends React.Component {
               fullWidth={true}
               margin="normal"
               variant="outlined"
-              disabled={!editable}
+              disabled={isDisabled}
               error={this.formErrors.hasOwnProperty(field.name)}
               helperText={
                 this.formErrors[field.name]?.length >= 0
@@ -448,7 +571,7 @@ class AttributeEditor extends React.Component {
               fullWidth={true}
               margin="normal"
               variant="outlined"
-              disabled={!editable}
+              disabled={isDisabled}
               multiline
               error={this.formErrors.hasOwnProperty(field.name)}
               helperText={
@@ -466,6 +589,15 @@ class AttributeEditor extends React.Component {
                 this.setChanged();
                 if (field.textType === "url") {
                   this.checkUrl(field.name, e.target.value);
+                }
+                //If we have something in the customValidation field. We want to do a validity check on it.
+                if (field.customValidation) {
+                  this.checkCustomValidation(
+                    field.name,
+                    field.customValidation,
+                    field.customValidationMessage,
+                    e.target.value
+                  );
                 }
                 field.initialRender = false;
               }}
@@ -499,7 +631,7 @@ class AttributeEditor extends React.Component {
               control={
                 <Checkbox
                   checked={item.checked}
-                  disabled={!editable}
+                  disabled={isDisabled}
                   color="primary"
                   onChange={(e) => {
                     this.setChanged();
@@ -540,7 +672,7 @@ class AttributeEditor extends React.Component {
               <NativeSelect
                 value={value}
                 variant="outlined"
-                disabled={!editable}
+                disabled={isDisabled}
                 input={<Input name={field.name} id={field.name} />}
                 onChange={(e) => {
                   this.setChanged();
@@ -556,38 +688,29 @@ class AttributeEditor extends React.Component {
           </>
         );
       case "boolean":
+        //Make sure we set the initialValue for the checkbox, if the feature has a value for the property.
+        let initialValue = this.mapToBooleanValue(field, value);
+
         return (
           <FormControlLabel
             control={
               <Checkbox
                 checked={
-                  (field.dataType === "boolean" && field.value === "ja") ||
-                  (field.dataType === "int" && field.value === 1)
+                  field.initialRender
+                    ? initialValue
+                    : this.mapToBooleanValue(field, value)
                 }
                 color="primary"
-                disabled={!editable}
+                disabled={isDisabled}
                 onChange={(e) => {
+                  this.checkBoolean(field, e.target.checked);
                   this.setChanged();
-                  if (e.target.checked) {
-                    if (field.dataType === "boolean") {
-                      field.value = "ja";
-                    } else {
-                      field.value = 1;
-                    }
-                  } else {
-                    if (field.dataType === "boolean") {
-                      field.value = "nej";
-                    } else {
-                      field.value = 0;
-                    }
-                  }
                   field.initialRender = false;
-                  this.checkBoolean(field.name, field.value);
                   this.forceUpdate();
                 }}
               />
             }
-            label={field.name}
+            label={field.alias}
           />
         );
       case null:

@@ -43,7 +43,9 @@ class Edit extends React.PureComponent {
         <EditView
           app={this.props.app}
           model={this.editModel}
+          options={this.props.options}
           observer={this.localObserver}
+          globalObserver={this.props.app.globalObserver}
         />
       </BaseWindowPlugin>
     );
