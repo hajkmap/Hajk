@@ -610,6 +610,7 @@ class EditModel {
     });
     this.map.addInteraction(this.select);
     this.map.addInteraction(this.modify);
+    this.map.clickLock.add("edit");
   }
 
   activateAdd(geometryType) {
