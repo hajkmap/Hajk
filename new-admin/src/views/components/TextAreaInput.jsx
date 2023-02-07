@@ -39,6 +39,27 @@ const colorBox = (color) => {
   );
 };
 
+// Returns the accordion title
+const getAccordionTitle = (data) => {
+  return data.get("accordionTitle");
+};
+
+// Returns the content-block background-color
+const getBgColor = (data) => {
+  return data.get("backgroundColor");
+};
+
+// Returns the content-block divider-color
+const getDividerColor = (data) => {
+  return data.get("dividerColor");
+};
+
+// Returns wether the content-block is set to be a accordion or not.
+// If the content comes from a .json-file the key is saved as a string...
+const getIsAccordion = (data) => {
+  return data.get("isAccordion") === "true" || data.get("isAccordion") === true;
+};
+
 const TextAreaInput = ({ editorState, updateEditorState, onCancelClick }) => {
   const classes = useStyles();
 
@@ -50,24 +71,19 @@ const TextAreaInput = ({ editorState, updateEditorState, onCancelClick }) => {
   );
   const data = contentBlock.getData();
 
-  const currentBackgroundColor = data.get("backgroundColor");
-  const [backgroundColor, setBackgroundColor] = useState();
+  const [accordionTitle, setAccordionTitle] = useState(getAccordionTitle(data));
+  const [backgroundColor, setBackgroundColor] = useState(getBgColor(data));
+  const [dividerColor, setDividerColor] = useState(getDividerColor(data));
+  const [isAccordion, setIsAccordion] = useState(getIsAccordion(data));
 
-  const currentDividerColor = data.get("dividerColor");
-  const [dividerColor, setDividerColor] = useState();
-
-  const currentIsAccordion = data.get("isAccordion") === "true";
-  const [isAccordion, setIsAccordion] = useState(currentIsAccordion);
-
-  const currentAccordionTitle = data.get("accordionTitle");
-  const [accordionTitle, setAccordionTitle] = useState();
-
+  // Sync to eventual parent change...
+  // I don't really like state depending on props. This sync will lead to ghost renders...
   useEffect(() => {
-    setIsAccordion(currentIsAccordion);
-    setAccordionTitle(currentAccordionTitle);
-    setBackgroundColor(currentBackgroundColor);
-    setDividerColor(currentDividerColor);
-  }, [contentBlock]);
+    setAccordionTitle(getAccordionTitle(data));
+    setBackgroundColor(getBgColor(data));
+    setDividerColor(getDividerColor(data));
+    setIsAccordion(getIsAccordion(data));
+  }, [data]);
 
   const onConfirmClick = () => {
     const contentState = editorState.getCurrentContent();
@@ -194,11 +210,11 @@ const TextAreaInput = ({ editorState, updateEditorState, onCancelClick }) => {
           <Grid item>
             {hasFocus && (
               <div>
-                <p style={{ margin: currentBackgroundColor ? "0" : "" }}>
+                <p style={{ margin: backgroundColor ? "0" : "" }}>
                   {`Markerad faktaruta har data-background-color
-            ${currentBackgroundColor || "INGEN FÄRG"}`}
+            ${backgroundColor || "INGEN FÄRG"}`}
                 </p>
-                {colorBox(currentBackgroundColor)}
+                {colorBox(backgroundColor)}
               </div>
             )}
           </Grid>
@@ -206,17 +222,17 @@ const TextAreaInput = ({ editorState, updateEditorState, onCancelClick }) => {
             {hasFocus && (
               <div>
                 <p
-                  style={{ margin: currentDividerColor ? "0" : "" }}
+                  style={{ margin: dividerColor ? "0" : "" }}
                 >{`Markerad faktaruta har data-divider-color
-            ${currentDividerColor || "INGEN FÄRG"}`}</p>
-                {colorBox(currentDividerColor)}
+            ${dividerColor || "INGEN FÄRG"}`}</p>
+                {colorBox(dividerColor)}
               </div>
             )}
           </Grid>
           <Grid item>
             {hasFocus && (
               <p>{`Markerad faktaruta ${
-                currentIsAccordion ? "ÄR" : "ÄR INTE"
+                isAccordion ? "ÄR" : "ÄR INTE"
               } data-accordion
             `}</p>
             )}
@@ -224,7 +240,7 @@ const TextAreaInput = ({ editorState, updateEditorState, onCancelClick }) => {
           <Grid item>
             {hasFocus && (
               <p>{`Markerad faktaruta har data-accordion-title ${
-                currentAccordionTitle || "INGEN TITEL"
+                accordionTitle || "INGEN TITEL"
               }
             `}</p>
             )}
