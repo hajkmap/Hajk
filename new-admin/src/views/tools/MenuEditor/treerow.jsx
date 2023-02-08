@@ -9,8 +9,8 @@ import { IconButton } from "@material-ui/core";
 import Icon from "@material-ui/core/Icon";
 import SettingsPopover from "./settingspopover.jsx";
 import MenuConnectionSelector from "./menuconnectionselector.jsx";
-import MenuConnectionSelector2 from "./menuconnectionselector2.jsx";
-import MenuConnectionSelector3 from "./menuconnectionselector3.jsx";
+import MenuConnectionSelector2 from "./menuconnectionselector.jsx";
+import MenuConnectionSelector3 from "./menuconnectionselector.jsx";
 import WarningModal from "./warningModal.jsx";
 
 const getTextField = (value, onChangeFunction, variant) => {
@@ -58,12 +58,12 @@ class TreeRow extends React.Component {
 
     return (
       <MenuConnectionSelector
+        menuconnector={1}
         treeNodeId={treeNodeId}
         updateMenuItem={updateMenuItem}
         updateTreeValidation={this.updateTreeValidation}
         availableDocuments={availableDocuments}
         updateValidationForTreeNode={this.props.updateValidationForTreeNode}
-        valid={this.props.valid}
         model={model}
         menuItem={menuItem}
       ></MenuConnectionSelector>
@@ -76,12 +76,12 @@ class TreeRow extends React.Component {
 
     return (
       <MenuConnectionSelector2
+        menuconnector={2}
         treeNodeId={treeNodeId}
         updateMenuItem={updateMenuItem}
         updateTreeValidation={this.updateTreeValidation}
         availableDocuments={availableDocuments}
         updateValidationForTreeNode={this.props.updateValidationForTreeNode}
-        valid={this.props.valid}
         model={model}
         menuItem={menuItem}
       ></MenuConnectionSelector2>
@@ -94,12 +94,12 @@ class TreeRow extends React.Component {
 
     return (
       <MenuConnectionSelector3
+        menuconnector={3}
         treeNodeId={treeNodeId}
         updateMenuItem={updateMenuItem}
         updateTreeValidation={this.updateTreeValidation}
         availableDocuments={availableDocuments}
         updateValidationForTreeNode={this.props.updateValidationForTreeNode}
-        valid={this.props.valid}
         model={model}
         menuItem={menuItem}
       ></MenuConnectionSelector3>
