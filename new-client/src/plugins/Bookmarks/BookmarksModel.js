@@ -19,6 +19,7 @@ class BookmarksModel {
   constructor(settings) {
     this.map = settings.map;
     this.app = settings.app;
+    this.globalObserver = settings.app.globalObserver;
     this.bookmarks = this.readFromStorage() || {};
     this.#storageKey = settings.storageKey || "bookmarks";
   }
@@ -166,6 +167,10 @@ class BookmarksModel {
     delete this.bookmarks[name];
     this.writeToStorage();
   }
+
+  handleChangeCookieSettingsClick = () => {
+    this.globalObserver.publish("core.showCookieBanner");
+  };
 }
 
 export default BookmarksModel;

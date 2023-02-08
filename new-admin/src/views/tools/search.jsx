@@ -52,6 +52,7 @@ const defaultState = {
   enableLabelOnHighlight: true,
   showResultsLimitReachedWarning: true,
   enableFeatureToggler: true,
+  fitToResultMaxZoom: -1,
   showCorrespondingWMSLayers: false,
 
   // Used to style the spatial search polygon/circle feature
@@ -209,6 +210,8 @@ class ToolOptions extends Component {
           enableFeatureToggler:
             tool.options.enableFeatureToggler ??
             this.state.enableFeatureToggler,
+          fitToResultMaxZoom:
+            tool.options.fitToResultMaxZoom || this.state.fitToResultMaxZoom,
 
           drawFillColor: tool.options.drawFillColor || this.state.drawFillColor,
           drawStrokeColor:
@@ -393,6 +396,7 @@ class ToolOptions extends Component {
         showResultsLimitReachedWarning:
           this.state.showResultsLimitReachedWarning,
         enableFeatureToggler: this.state.enableFeatureToggler,
+        fitToResultMaxZoom: this.state.fitToResultMaxZoom,
 
         drawFillColor: this.state.drawFillColor,
         drawStrokeColor: this.state.drawStrokeColor,
@@ -1188,6 +1192,26 @@ class ToolOptions extends Component {
             &nbsp;
             <label className="long-label" htmlFor="enableFeatureToggler">
               Visa föregående/nästa-knapp för bläddring av resultat
+            </label>
+          </div>
+
+          <div>
+            <input
+              id="fitToResultMaxZoom"
+              value={this.state.fitToResultMaxZoom}
+              type="number"
+              min="-1"
+              max="20"
+              step="1"
+              name="fitToResultMaxZoom"
+              onChange={(e) => {
+                this.handleInputChange(e);
+              }}
+              checked={this.state.fitToResultMaxZoom}
+            />
+            &nbsp;
+            <label className="long-label" htmlFor="fitToResultMaxZoom">
+              Maximal zoomnivå vid zoomning till sökresultat (-1 för obegränsat)
             </label>
           </div>
 
