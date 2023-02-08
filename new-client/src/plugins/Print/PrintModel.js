@@ -29,6 +29,7 @@ export default class PrintModel {
     this.includeImageBorder = settings.options.includeImageBorder;
     this.northArrowMaxWidth = settings.options.northArrowMaxWidth;
     this.scales = settings.options.scales;
+    this.scaleMeters = settings.options.scaleMeters || this.scaleBarLengths;
     this.copyright = settings.options.copyright || "";
     this.date = settings.options.date || "";
     this.disclaimer = settings.options.disclaimer || "";
@@ -73,16 +74,17 @@ export default class PrintModel {
     200: 10,
     250: 10,
     400: 20,
-    500: 30,
-    1000: 50,
+    500: 40,
+    1000: 60,
     2000: 100,
     2500: 100,
     5000: 300,
-    10000: 500,
-    25000: 1000,
+    10000: 600,
+    25000: 2000,
     50000: 4000,
     100000: 8000,
-    200000: 16000,
+    200000: 10000,
+    300000: 16000,
   };
 
   previewLayer = null;
@@ -372,7 +374,7 @@ export default class PrintModel {
    * @returns {Float} Fitting number of meters for current scale.
    */
   getFittingScaleBarLength = (scale) => {
-    const length = this.scaleBarLengths[scale];
+    const length = this.scaleMeters[scale];
     if (length) {
       return length;
     } else {
@@ -396,12 +398,12 @@ export default class PrintModel {
     return `${Number(scaleBarLengthMeters).toLocaleString("sv-SE")} ${units}`;
   };
 
-  getDividerLinesAndTexts = (props) => {
-    this.getDividerLines(props);
-    this.getDividerTexts(props);
+  addDividerLinesAndTexts = (props) => {
+    this.drawDividerLines(props);
+    this.addDividerTexts(props);
   };
 
-  getDividerLines = ({ pdf, scaleBarPosition, scaleBarLength, color }) => {
+  drawDividerLines = ({ pdf, scaleBarPosition, scaleBarLength, color }) => {
     pdf.setLineWidth(0.25).setDrawColor(color);
 
     // Here we draw the starting-, finsh- and through-line of the scalebar:
@@ -440,7 +442,7 @@ export default class PrintModel {
     }
   };
 
-  getDividerTexts = ({
+  addDividerTexts = ({
     pdf,
     scaleBarPosition,
     scaleBarLength,
@@ -462,7 +464,7 @@ export default class PrintModel {
     pdf.text("0", position.x - 0.7, position.y + 8);
 
     // And here we set the division line numbers on the scalebar number line
-    // We use a for loop and an equation for the x posititon to set the...
+    // We use a for loop and an equation for the x position to set the...
     // correct positions of the two halved values on the scalebar line.
     for (let textGap = 2; textGap <= 4; textGap *= 2) {
       dividerText = (calculatedScaleBarLength / textGap).toLocaleString(
@@ -509,7 +511,7 @@ export default class PrintModel {
       scaleBarPosition.y - 1
     );
 
-    this.getDividerLinesAndTexts({
+    this.addDividerLinesAndTexts({
       pdf,
       scaleBarLengthMeters,
       scaleBarPosition,
