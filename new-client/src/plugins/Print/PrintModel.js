@@ -29,7 +29,12 @@ export default class PrintModel {
     this.includeImageBorder = settings.options.includeImageBorder;
     this.northArrowMaxWidth = settings.options.northArrowMaxWidth;
     this.scales = settings.options.scales;
-    this.scaleMeters = settings.options.scaleMeters || this.scaleBarLengths;
+    this.scaleMeters = settings.options.scaleMeters;
+    this.scaleBarLengths =
+      this.scales.reduce((acc, curr, index) => {
+        acc[curr] = this.scaleMeters[index];
+        return acc;
+      }, {}) || this.defaultScaleBarLengths;
     this.copyright = settings.options.copyright || "";
     this.date = settings.options.date || "";
     this.disclaimer = settings.options.disclaimer || "";
@@ -69,7 +74,7 @@ export default class PrintModel {
     });
   }
 
-  scaleBarLengths = {
+  defaultScaleBarLengths = {
     100: 5,
     200: 10,
     250: 10,
@@ -374,7 +379,8 @@ export default class PrintModel {
    * @returns {Float} Fitting number of meters for current scale.
    */
   getFittingScaleBarLength = (scale) => {
-    const length = this.scaleMeters[scale];
+    const length = this.scaleBarLengths[scale];
+
     if (length) {
       return length;
     } else {
@@ -399,8 +405,13 @@ export default class PrintModel {
   };
 
   addDividerLinesAndTexts = (props) => {
+    // Here we add divider lines between the starting- and ending-line.
     this.drawDividerLines(props);
-    this.addDividerTexts(props);
+
+    // Before we add the numbers to the halfway divider line and the quarterway divider line...
+    // we want to check if the user has set a custom scale by finding the scale in the scaleMeters property,
+    // and if we do not find it, we do not add divider texts.
+    if (this.scaleBarLengths[props.scale]) this.addDividerTexts(props);
   };
 
   drawDividerLines = ({ pdf, scaleBarPosition, scaleBarLength, color }) => {
@@ -513,6 +524,7 @@ export default class PrintModel {
 
     this.addDividerLinesAndTexts({
       pdf,
+      scale,
       scaleBarLengthMeters,
       scaleBarPosition,
       scaleBarLength,
