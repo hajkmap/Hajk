@@ -126,6 +126,16 @@ class LayerGroupItem extends Component {
     model.observer.subscribe("showLayer", this.setVisible);
     model.observer.subscribe("toggleGroup", this.toggleGroupVisible);
 
+    // Change listener for grouplayers, so that changes in grouplayer visibility
+    // by other components reflect the state in the legend
+    this.props.layer.on?.("change:visible", (e) => {
+      const visible = !e.oldValue;
+      this.setState({
+        visible: visible,
+        visibleSubLayers: visible ? this.props.layer.subLayers : [],
+      });
+    });
+
     // Set load status by subscribing to a global event. Expect ID (int) of layer
     // and status (string "ok"|"loaderror"). Also, once status was set to "loaderror",
     // don't change it back to "ok": we'll get a response for each tile, so most of

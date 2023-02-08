@@ -1,4 +1,4 @@
-import * as React from "react";
+import React, { useState } from "react";
 import { useSnackbar } from "notistack";
 
 import LocalStorageHelper from "utils/LocalStorageHelper";
@@ -10,16 +10,18 @@ import {
   ListItemText,
   Menu,
   MenuItem,
+  Tooltip,
 } from "@mui/material";
 import SettingsBackupRestoreOutlinedIcon from "@mui/icons-material/SettingsBackupRestoreOutlined";
-import GppMaybeOutlinedIcon from "@mui/icons-material/GppMaybeOutlined";
+import BuildOutlinedIcon from "@mui/icons-material/BuildOutlined";
 import SaveOutlinedIcon from "@mui/icons-material/SaveOutlined";
 import MoreVertOutlinedIcon from "@mui/icons-material/MoreVertOutlined";
+import LayersClearOutlinedIcon from "@mui/icons-material/LayersClearOutlined";
 
 export default function DrawOrderOptions({
   app,
-  filterList,
-  setFilterList,
+  setSystemFilter,
+  systemFilterActive,
   map,
 }) {
   // Prepare the Snackbar - we want to display nice messages when
@@ -29,7 +31,7 @@ export default function DrawOrderOptions({
   // Element that we will anchor the options menu to is
   // held in state. If it's null (unanchored), we can tell
   // that the menu should be hidden.
-  const [anchorEl, setAnchorEl] = React.useState(null);
+  const [anchorEl, setAnchorEl] = useState(null);
   const optionsMenuIsOpen = Boolean(anchorEl);
 
   // Show the options menu by setting an anchor element
@@ -40,6 +42,20 @@ export default function DrawOrderOptions({
   // Hides the options menu by resetting the anchor element
   const handleCloseOptionsMenu = () => {
     setAnchorEl(null);
+  };
+
+  // Removes all active layers from list, not applicable for "system" and "base" layers
+  const handleClearLayers = () => {
+    // Get all active layers
+    const activeLayers = map.getAllLayers().filter((l) => {
+      l.getZIndex() === undefined && l.setZIndex(-2);
+      return l.get("active") === true && l.get("layerType") !== "base";
+    });
+    // Deactivate layers = remove from list
+    activeLayers.forEach((l) => {
+      l.set("visible", false);
+      l.set("active", false);
+    });
   };
 
   /**
@@ -134,31 +150,37 @@ export default function DrawOrderOptions({
 
   // Handler function for the show/hide system layers toggle
   const handleSystemLayerSwitchChange = () => {
-    if (filterList.has("system")) {
-      filterList.delete("system");
-      setFilterList(new Set(filterList));
-    } else {
-      filterList.add("system");
-      setFilterList(new Set(filterList));
-    }
+    setSystemFilter();
   };
 
   return (
     <>
       <IconButton
-        edge="end"
         aria-controls={optionsMenuIsOpen ? "basic-menu" : undefined}
         aria-haspopup="true"
         aria-expanded={optionsMenuIsOpen ? "true" : undefined}
         onClick={handleShowMoreOptionsClick}
       >
-        <MoreVertOutlinedIcon />
+        <Tooltip title="Fler funktioner">
+          <MoreVertOutlinedIcon />
+        </Tooltip>
       </IconButton>
       <Menu
         anchorEl={anchorEl}
         open={optionsMenuIsOpen}
         onClose={handleCloseOptionsMenu}
       >
+        <MenuItem
+          onClick={() => {
+            handleClearLayers();
+            handleCloseOptionsMenu();
+          }}
+        >
+          <ListItemIcon>
+            <LayersClearOutlinedIcon fontSize="small" />
+          </ListItemIcon>
+          <ListItemText>Rensa alla</ListItemText>
+        </MenuItem>
         <MenuItem
           onClick={() => {
             handleSave();
@@ -189,10 +211,10 @@ export default function DrawOrderOptions({
           }}
         >
           <ListItemIcon>
-            <GppMaybeOutlinedIcon fontSize="small" />
+            <BuildOutlinedIcon fontSize="small" />
           </ListItemIcon>
           <ListItemText>{`${
-            filterList.has("system") ? "Dölj" : "Visa"
+            systemFilterActive ? "Dölj" : "Visa"
           } systemlager`}</ListItemText>
         </MenuItem>
       </Menu>

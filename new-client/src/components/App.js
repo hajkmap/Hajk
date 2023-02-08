@@ -596,7 +596,7 @@ class App extends React.PureComponent {
 
           // When a layers visible state changes, the active state should also change
           if (e.target.get("layerType") === "base") {
-            // For baselayers, the layers acive state always changes when visibility changes
+            // For baselayers, the layers active state always changes when visibility changes
             e.target.set("active", e.target.get("visible"));
           } else {
             // Layers that are not of type "base" are always true even if visibility changes to false.

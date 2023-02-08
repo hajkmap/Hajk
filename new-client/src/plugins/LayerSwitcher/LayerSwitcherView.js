@@ -42,7 +42,7 @@ class LayersSwitcherView extends React.PureComponent {
       chapters: [],
       baseLayers: props.model.getBaseLayers(),
       activeTab: 0,
-      activeLayers: this.getActiveLayers(),
+      activeLayersCount: 0,
     };
 
     props.app.globalObserver.subscribe("informativeLoaded", (chapters) => {
@@ -52,23 +52,18 @@ class LayersSwitcherView extends React.PureComponent {
         });
       }
     });
-
-    props.app.globalObserver.subscribe("core.layerVisibilityChanged", (l) => {
-      this.setState({
-        activeLayers: this.getActiveLayers(),
-      });
-    });
   }
 
-  getActiveLayers = () => {
-    const layerTypes = ["layer", "group"];
-    return this.props.map
-      .getAllLayers()
-      .filter(
-        (l) =>
-          l.get("active") === true &&
-          Array.from(layerTypes).includes(l.get("layerType"))
-      ).length;
+  /**
+   * This method handles layerupdates from DrawOrder component,
+   * sets activeLayersCount state
+   *
+   * @memberof LayersSwitcherView
+   */
+  handleLayerChange = (activeLayers) => {
+    this.setState({
+      activeLayersCount: activeLayers,
+    });
   };
 
   /**
@@ -181,7 +176,10 @@ class LayersSwitcherView extends React.PureComponent {
             {this.options.showActiveLayersView === true && (
               <Tab
                 label={
-                  <Badge badgeContent={this.state.activeLayers} color="primary">
+                  <Badge
+                    badgeContent={this.state.activeLayersCount}
+                    color="primary"
+                  >
                     Aktiva
                   </Badge>
                 }
@@ -202,10 +200,14 @@ class LayersSwitcherView extends React.PureComponent {
             map={this.props.map}
             app={this.props.app}
           />
-          {this.options.showActiveLayersView === true &&
-            this.state.activeTab === 1 && (
-              <DrawOrder map={this.props.map} app={this.props.app} />
-            )}
+          {this.options.showActiveLayersView === true && (
+            <DrawOrder
+              display={this.state.activeTab === 1}
+              map={this.props.map}
+              app={this.props.app}
+              onLayerChange={this.handleLayerChange}
+            />
+          )}
         </ContentWrapper>
         {this.renderBreadCrumbs()}
       </Root>

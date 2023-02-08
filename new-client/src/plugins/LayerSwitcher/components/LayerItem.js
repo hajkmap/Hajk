@@ -259,6 +259,8 @@ class LayerItem extends React.PureComponent {
             document.getElementById("map").style.backgroundColor = "#FFF";
             break;
         }
+        // Publish event to ensure active tab is updated with fakeMapLayer
+        this.props.app.globalObserver.publish("core.layerActiveChanged", e);
       } else {
         layer.setVisible(true);
       }
