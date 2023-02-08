@@ -335,7 +335,7 @@ class ToolOptions extends Component {
         className={classes.header}
         spacing={1}
         alignItems="center"
-        justify="flex-end"
+        justifyContent="flex-end"
         container
       >
         <Grid xs={1} item>
