@@ -1,44 +1,52 @@
 # Stage 1 - Building the backend
-FROM node:18-alpine as backendBuilder
-WORKDIR /usr/app
+FROM registry.redhat.io/rhel9/nodejs-18 as backendBuilder
 COPY /new-backend/package*.json ./
-RUN npm ci
+USER root
+RUN npm install npm@latest -g
+RUN npm install
 COPY ./new-backend .
 RUN npm run compile
 
 # Stage 2 - Building the client
-FROM node:18-alpine as clientBuilder
-WORKDIR /usr/app
+FROM registry.redhat.io/rhel9/nodejs-18 as clientBuilder
 COPY /new-client/package*.json ./
-RUN npm ci --ignore-scripts
+USER root
+RUN npm install npm@latest -g
+RUN npm install
 COPY ./new-client .
 RUN rm ./public/appConfig.json
 RUN mv ./public/appConfig.docker.json ./public/appConfig.json
 RUN npm run build --ignore-scripts
 
 # Stage 3 - Building the admin
-FROM node:18-alpine as adminBuilder
-WORKDIR /usr/app
+FROM registry.redhat.io/rhel9/nodejs-18 as adminBuilder
 COPY /new-admin/package*.json ./
-RUN npm ci --ignore-scripts
+USER root
+RUN npm install npm@latest -g
+RUN npm install
 COPY ./new-admin .
 RUN rm ./public/config.json
 RUN mv ./public/config.docker.json ./public/config.json 
 RUN npm run build --ignore-scripts
 
 # Stage 4 - Combine everything and fire it up
-FROM node:18-alpine
-WORKDIR /usr/app
+FROM registry.redhat.io/rhel9/nodejs-18-minimal
 COPY /new-backend/package*.json ./
-RUN npm ci --production
-COPY --from=backendBuilder /usr/app/dist ./
+USER root
+RUN npm install npm@latest -g
+RUN npm install --production
+USER 1001
+COPY --from=backendBuilder /opt/app-root/src/dist ./
 COPY /new-backend/.env .
-COPY /new-backend/App_Data ./App_Data
+COPY /new-backend/App_Data ./App_Data_tmp
 COPY /new-backend/static ./static
-COPY --from=clientBuilder /usr/app/build ./static/client
-COPY --from=adminBuilder /usr/app/build ./static/admin
-VOLUME /usr/app/App_Data
+COPY --from=clientBuilder /opt/app-root/src/build ./static/client
+COPY --from=adminBuilder /opt/app-root/src/build ./static/admin
+USER root
+RUN chown -R 1001 ./App_Data_tmp
 EXPOSE 3002
+USER 1001
 CMD node index.js
 
 # See HAJK Docker/README.md for example usage
+

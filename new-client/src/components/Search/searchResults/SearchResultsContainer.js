@@ -922,6 +922,7 @@ class SearchResultsContainer extends React.PureComponent {
                 sx={{ border: "none", cursor: "pointer" }}
                 color="textPrimary"
                 variant="caption"
+                component="span"
                 onClick={(e) => {
                   e.stopPropagation();
                   this.handleActiveFeatureChange();
@@ -943,6 +944,7 @@ class SearchResultsContainer extends React.PureComponent {
                 sx={{ border: "none", cursor: "pointer" }}
                 color="textPrimary"
                 variant="caption"
+                component="span"
                 onClick={(e) => {
                   e.stopPropagation();
                   this.setActiveFeature(undefined);

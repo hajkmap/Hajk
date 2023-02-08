@@ -91,7 +91,14 @@ class LayerGroupItem extends Component {
     this.state = {
       caption: layerInfo.caption,
       visible: props.layer.get("visible"),
-      visibleSubLayers: props.layer.get("visible") ? props.layer.subLayers : [],
+      // If layer is to be shown, check if there are some specified sublayers (if yes, we'll
+      // enable only those). Else, let's default to showing all sublayers, or finally fallback
+      // to an empty array.
+      visibleSubLayers: props.layer.get("visible")
+        ? props.layer.visibleAtStartSubLayers?.length > 0
+          ? props.layer.visibleAtStartSubLayers
+          : props.layer.subLayers
+        : [],
       expanded: false,
       name: props.layer.get("name"),
       legend: layerInfo.legend,
@@ -278,7 +285,8 @@ class LayerGroupItem extends Component {
 
   setHidden = (l) => {
     const { layer } = this.props;
-    if (l === layer) {
+
+    if (l.get("name") === layer.get("name")) {
       // Fix underlying source
       this.props.layer.getSource().updateParams({
         // Ensure that the list of sublayers is emptied (otherwise they'd be
@@ -427,8 +435,13 @@ class LayerGroupItem extends Component {
     return (
       <LayerInfo key={index}>
         <LayerSummaryContainer>
-          <Grid container alignItems="center" wrap="nowrap">
-            <CheckBoxWrapper onClick={this.toggleLayerVisible(subLayer)}>
+          <Grid
+            container
+            alignItems="center"
+            wrap="nowrap"
+            onClick={this.toggleLayerVisible(subLayer)}
+          >
+            <CheckBoxWrapper>
               {visible ? <CheckBoxIcon /> : <CheckBoxOutlineBlankIcon />}
             </CheckBoxWrapper>
             {legendIcon && this.renderLegendIcon(legendIcon)}

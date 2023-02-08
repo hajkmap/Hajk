@@ -19,7 +19,6 @@ import TileWMS from "ol/source/TileWMS";
 import ImageWMS from "ol/source/ImageWMS";
 
 import { ROBOTO_NORMAL } from "./constants";
-
 export default class PrintModel {
   constructor(settings) {
     this.map = settings.map;
@@ -27,6 +26,8 @@ export default class PrintModel {
     this.logoUrl = settings.options.logo || "";
     this.northArrowUrl = settings.options.northArrow || "";
     this.logoMaxWidth = settings.options.logoMaxWidth;
+    this.includeImageBorder = settings.options.includeImageBorder;
+    this.northArrowMaxWidth = settings.options.northArrowMaxWidth;
     this.scales = settings.options.scales;
     this.copyright = settings.options.copyright || "";
     this.date = settings.options.date || "";
@@ -41,7 +42,7 @@ export default class PrintModel {
     // limit Image-WMS requests. The size below is the maximum tile-size allowed.
     // This max-size is only used if the custom-tile-loaders are used.
     this.maxTileSize = settings.options.maxTileSize || 4096;
-
+    this.textColor = settings.options.mapTextColor;
     // Let's keep track of the original view, since we're gonna change the view
     // under the print-process. (And we want to be able to change back to the original one).
     this.originalView = this.map.getView();
@@ -197,20 +198,25 @@ export default class PrintModel {
     const defaultPixelSizeInMillimeter = 0.28;
 
     const dpi = inchInMillimeter / defaultPixelSizeInMillimeter; // ~90
-    // Here we set a special sizeMultiplier to use below when we calculate
-    // the preview window size. If format is a5 or if user wants text in margins
-    // the height is diminished
-    let sizeMultiplier =
-      options.useTextIconsInMargin && format === "a5"
-        ? 8
-        : options.useTextIconsInMargin
-        ? 6
-        : 2;
 
-    // Here we use sizeMultiplier to further diminish height of preview window
+    // Here we calculate height and width of preview window based on user and admin selection
+    // (ex. if admin wants image border or if user wants margins).
+    const calculatedWidth =
+      this.includeImageBorder && !options.useMargin ? 1 : this.margin * 2;
+
+    const calculatedHeight =
+      this.includeImageBorder && !options.useMargin
+        ? 1
+        : options.useTextIconsInMargin && format === "a5"
+        ? this.margin * 8
+        : options.useTextIconsInMargin
+        ? this.margin * 6
+        : this.margin * 2;
+
+    //We set the size of preview window based on the calculated heights and widths.
     const size = {
-      width: (dim[0] - this.margin * 2) / 25.4,
-      height: (dim[1] - this.margin * sizeMultiplier) / 25.4,
+      width: (dim[0] - calculatedWidth) / 25.4,
+      height: (dim[1] - calculatedHeight) / 25.4,
     };
 
     const paper = {
@@ -999,6 +1005,13 @@ export default class PrintModel {
       // Add our map canvas to the PDF, start at x/y=0/0 and stretch for entire width/height of the canvas
       pdf.addImage(mapCanvas, "JPEG", 0, 0, dim[0], dim[1]);
 
+      if (this.includeImageBorder) {
+        // Frame color is set to dark gray
+        pdf.setDrawColor(this.textColor);
+        pdf.setLineWidth(0.5);
+        pdf.rect(0.3, 0.3, dim[0] - 0.5, dim[1] - 0, "S");
+      }
+
       // Add potential margin around the image
       if (this.margin > 0) {
         // We always want a white margin
@@ -1012,6 +1025,19 @@ export default class PrintModel {
           pdf.setLineWidth(this.margin * 2);
           // Draw the border (margin) around the entire image
           pdf.rect(0, 0, dim[0], dim[1], "S");
+          // If selected as feature in Admin, we draw a frame around the map image
+          if (this.includeImageBorder) {
+            // Frame color is set to dark gray
+            pdf.setDrawColor(this.textColor);
+            pdf.setLineWidth(0.5);
+            pdf.rect(
+              this.margin,
+              this.margin,
+              dim[0] - this.margin * 2,
+              dim[1] - this.margin * 2,
+              "S"
+            );
+          }
           // Now we check if user did choose text in margins
         } else {
           // We do a special check for a5-format and set the dimValue
@@ -1023,9 +1049,21 @@ export default class PrintModel {
           // Draw the increased border (margin) around the entire image
           // here with special values for larger margins.
           pdf.rect(-(dimValue * 2), 0, dim[0] + dimValue * 4, dim[1], "S");
+          // If selected as feature in Admin, we draw a frame around the map image
+          if (this.includeImageBorder) {
+            // Frame color is set to dark gray
+            pdf.setDrawColor(this.textColor);
+            pdf.setLineWidth(0.5);
+            pdf.rect(
+              dimValue,
+              dimValue * 3,
+              dim[0] - dimValue * 2,
+              dim[1] - dimValue * 6,
+              "S"
+            );
+          }
         }
       }
-
       // If logo URL is provided, add the logo to the map
       if (options.includeLogo && this.logoUrl.trim().length >= 5) {
         try {
@@ -1063,7 +1101,10 @@ export default class PrintModel {
             data: arrowData,
             width: arrowWidth,
             height: arrowHeight,
-          } = await this.getImageForPdfFromUrl(this.northArrowUrl, 10);
+          } = await this.getImageForPdfFromUrl(
+            this.northArrowUrl,
+            this.northArrowMaxWidth
+          );
 
           const arrowPlacement = this.getPlacement(
             options.northArrowPlacement,

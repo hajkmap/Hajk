@@ -1,6 +1,6 @@
 {
   "name": "hajk-admin",
-  "version": "3.11.0-dev",
+  "version": "3.11.0-rc.1",
   "description": "Hajk Admin UI",
   "homepage": ".",
   "repository": {
@@ -10,7 +10,7 @@
   "license": "MIT",
   "scripts": {
     "start": "react-scripts start",
-    "build": "react-scripts build",
+    "build": "react-scripts --openssl-legacy-provider build",
     "test": "react-scripts test --env=jsdom",
     "eject": "react-scripts eject"
   },

@@ -19,7 +19,7 @@ class WMSLayer {
     this.layerInfo = new LayerInfo(config);
     this.subLayers = config.params["LAYERS"].split(",");
 
-    let source = {
+    const source = {
       url: config.url,
       params: config.params,
       projection: config.projection,
@@ -33,6 +33,19 @@ class WMSLayer {
 
     if (config.hidpi !== null) {
       source.hidpi = config.hidpi;
+    }
+
+    // If this is layer item has sublayers and only a subset of them
+    // should be visible at start, there will be a value in this property.
+    if (config.visibleAtStartSubLayers?.length > 0) {
+      // In that case, replace the previously prepared LAYERS value (which
+      // got set in ConfigMapper and contains all sublayers) with this
+      // subset of layers.
+      source.params["LAYERS"] = config.visibleAtStartSubLayers.join(",");
+      source.params["STYLES"] = Object.entries(config.layersInfo)
+        .filter((k) => config.visibleAtStartSubLayers.indexOf(k[0]) !== -1)
+        .map((l) => l[1].style)
+        .join(",");
     }
 
     overrideLayerSourceParams(source);
@@ -103,6 +116,7 @@ class WMSLayer {
     this.layer.set("active", config.visible);
     this.layer.layersInfo = config.layersInfo;
     this.layer.subLayers = this.subLayers;
+    this.layer.visibleAtStartSubLayers = config.visibleAtStartSubLayers;
     this.layer.getSource().set("url", config.url);
     this.type = "wms";
     this.bindHandlers();

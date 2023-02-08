@@ -28,31 +28,50 @@ const StyledTextField = styled(TextField)(({ theme }) => ({
 
 class AnchorView extends React.PureComponent {
   static propTypes = {
-    cleanUrl: PropTypes.bool.isRequired,
     closeSnackbar: PropTypes.func.isRequired,
     enqueueSnackbar: PropTypes.func.isRequired,
-    localObserver: PropTypes.object.isRequired,
+    globalObserver: PropTypes.object.isRequired,
     model: PropTypes.object.isRequired,
-    toggleCleanUrl: PropTypes.func.isRequired,
   };
 
   state = {
-    anchor: this.props.model.getAnchor(),
+    anchor: "",
+    cleanUrl: false,
   };
 
-  constructor(props) {
-    super(props);
-    this.model = this.props.model;
-    this.localObserver = this.props.localObserver;
+  async componentDidMount() {
+    // Set anchor URL initially
+    this.setState({
+      anchor: await this.props.model.getAnchor(),
+    });
+
+    // Subscribe to changes to anchor URL caused by other components. This ensure
+    // that we have a live update of the anchor whether user does anything in the map.
+    this.props.globalObserver.subscribe(
+      "core.mapUpdated",
+      ({ url, source }) => {
+        this.setState({
+          anchor: this.appendCleanModeIfActive(url),
+        });
+      }
+    );
   }
 
-  componentDidMount() {
-    this.localObserver.subscribe("mapUpdated", (anchor) => {
-      this.setState({
-        anchor: anchor,
-      });
-    });
-  }
+  appendCleanModeIfActive = (url) =>
+    this.state.cleanUrl ? (url += "&clean") : url;
+
+  toggleCleanUrl = () => {
+    const newCleanState = !this.state.cleanUrl;
+    this.setState(
+      {
+        cleanUrl: newCleanState,
+      },
+      async () => {
+        const newUrl = await this.props.model.getAnchor();
+        this.setState({ anchor: this.appendCleanModeIfActive(newUrl) });
+      }
+    );
+  };
 
   handleClickOnCopyToClipboard = (e) => {
     const input = document.getElementById("anchorUrl");
@@ -83,16 +102,16 @@ class AnchorView extends React.PureComponent {
                 <RadioGroup
                   aria-label="copy-url"
                   name="copy-url"
-                  onChange={this.props.toggleCleanUrl}
+                  onChange={this.toggleCleanUrl}
                 >
                   <FormControlLabel
-                    checked={!this.props.cleanUrl}
+                    checked={!this.state.cleanUrl}
                     value="default"
                     control={<Radio color="primary" />}
                     label="Skapa länk till karta"
                   />
                   <FormControlLabel
-                    checked={this.props.cleanUrl}
+                    checked={this.state.cleanUrl}
                     value="clean"
                     control={<Radio color="primary" />}
                     label="Skapa länk till karta utan verktyg etc."
