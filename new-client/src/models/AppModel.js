@@ -786,6 +786,18 @@ class AppModel {
       }
     }
 
+    // If enableAppStateInHash exists in params, let's override
+    // the corresponding setting from map config. This allows users
+    // to activate live hash params (#1252).
+    const enableAppStateInHash = Object.hasOwn(
+      paramsAsPlainObject,
+      "enableAppStateInHash"
+    );
+    if (enableAppStateInHash) {
+      console.info("Activating live updating of query parameters");
+      mapConfig.map.enableAppStateInHash = true;
+    }
+
     return mapConfig;
   }
   /**

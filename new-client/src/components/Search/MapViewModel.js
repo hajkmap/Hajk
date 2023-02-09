@@ -214,9 +214,18 @@ class MapViewModel {
 
   // Zooms and centers the map to the supplied extent
   fitMapToExtent = (extent) => {
+    // If fitToResultMaxZoom is not set, or is set to -1, we want to set it to undefined.
+    // undefined in that case will tell OL not to restrict the maxZoom. Any other value,
+    // (including -1 and 0) will limit the max zoom level.
+    // See #1265
+    const fitToResultMaxZoom =
+      this.options.fitToResultMaxZoom && this.options.fitToResultMaxZoom !== -1
+        ? this.options.fitToResultMaxZoom
+        : undefined;
     this.map.getView().fit(extent, {
       size: this.map.getSize(),
       padding: [20, 20, 20, 20],
+      maxZoom: fitToResultMaxZoom,
     });
   };
 
