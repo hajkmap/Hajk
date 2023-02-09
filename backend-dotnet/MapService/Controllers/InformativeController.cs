@@ -123,8 +123,8 @@ namespace MapService.Controllers
                     var adHandler = new AdHandler(_memoryCache, _logger);
 
                     userPrincipalName = adHandler.PickUserNameToUse(userPrincipalName);
-
-                    if (!adHandler.UserIsValid(userPrincipalName) || !AdHandler.UserHasAdAccess(userPrincipalName))
+                    
+                    if (userPrincipalName == null || !adHandler.UserIsValid(userPrincipalName))
                     {
                         return StatusCode(StatusCodes.Status403Forbidden, "Forbidden");
                     }
