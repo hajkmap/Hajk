@@ -472,7 +472,6 @@ export default class PrintModel {
         ? scaleBarLengthMeters / 1000
         : scaleBarLengthMeters;
     const position = scaleBarPosition;
-    let dividerText;
 
     pdf.setFontSize(8);
     pdf.setTextColor(color);
@@ -485,15 +484,14 @@ export default class PrintModel {
     // We use a for loop and an equation for the x position to set the...
     // correct positions of the two halved values on the scalebar line.
     for (let textGap = 2; textGap <= 4; textGap *= 2) {
-      dividerText = (calculatedScaleBarLength / textGap).toLocaleString(
+      // Here we calculate the text that will be written on the PDF.
+      let dividerText = (calculatedScaleBarLength / textGap).toLocaleString(
         "sv-SE"
       );
-      // Here we calculate the x position of the division line number
-      // on the scalebar based on the length of the division line text,
-      // the length of the scalebar, and the gap between two halved values on the scalebar.
+      // We calculate the X coordinate where the text will be drawn.
       let positionX =
         position.x - dividerText.length / 1.6 + scaleBarLength / textGap;
-
+      // And write the text on the PDF at the specified coordinates
       pdf.text(dividerText, positionX, position.y + 8);
     }
   };
