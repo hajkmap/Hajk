@@ -30,11 +30,7 @@ export default class PrintModel {
     this.northArrowMaxWidth = settings.options.northArrowMaxWidth;
     this.scales = settings.options.scales;
     this.scaleMeters = settings.options.scaleMeters;
-    this.scaleBarLengths =
-      this.scales.reduce((acc, curr, index) => {
-        acc[curr] = this.scaleMeters[index];
-        return acc;
-      }, {}) || this.defaultScaleBarLengths;
+    this.scaleBarLengths = this.calculateScaleBarLengths();
     this.copyright = settings.options.copyright || "";
     this.date = settings.options.date || "";
     this.disclaimer = settings.options.disclaimer || "";
@@ -75,12 +71,12 @@ export default class PrintModel {
   }
 
   defaultScaleBarLengths = {
-    100: 5,
-    200: 10,
-    250: 10,
-    400: 20,
-    500: 40,
-    1000: 60,
+    100: 20,
+    200: 40,
+    250: 100,
+    400: 200,
+    500: 400,
+    1000: 600,
     2000: 100,
     2500: 100,
     5000: 300,
@@ -105,6 +101,17 @@ export default class PrintModel {
 
   // A flag that's used in "rendercomplete" to ensure that user has not cancelled the request
   pdfCreationCancelled = null;
+
+  calculateScaleBarLengths() {
+    if (this.scales.length === this.scaleMeters.length) {
+      return this.scales.reduce((acc, curr, index) => {
+        acc[curr] = this.scaleMeters[index];
+        return acc;
+      }, {});
+    } else {
+      return this.defaultScaleBarLengths;
+    }
+  }
 
   addPreviewLayer() {
     this.previewLayer = new Vector({
