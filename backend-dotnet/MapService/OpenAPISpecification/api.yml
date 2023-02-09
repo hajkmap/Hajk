@@ -1047,7 +1047,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/toolsetting"
+              $ref: "#/components/schemas/specifictoolsettings"
         required: true
       parameters:
         - name: map
@@ -1807,6 +1807,23 @@ components:
                   maplink: ""
                   link: ""
                   menu: []
+    specifictoolsettings:
+      type: object
+      example:        
+          type: example-tool
+          options:
+            target: ""
+            displayPopup: false
+            markerImg: "/marker.png"
+            anchor:
+              - 0.5
+              - 1
+            imgSize:
+              - 32
+              - 32
+            popupOffsetY: 0
+            visibleForGroups: []
+          index: 1
     tools3:
       example:
         - type: layerswitcher
