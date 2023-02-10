@@ -2,7 +2,6 @@
 FROM registry.redhat.io/rhel9/nodejs-18 as backendBuilder
 COPY /new-backend/package*.json ./
 USER root
-RUN npm update -g
 RUN npm install npm@latest -g
 RUN npm install
 COPY ./new-backend .
@@ -12,7 +11,6 @@ RUN npm run compile
 FROM registry.redhat.io/rhel9/nodejs-18 as clientBuilder
 COPY /new-client/package*.json ./
 USER root
-RUN npm update -g
 RUN npm install npm@latest -g
 RUN npm install
 COPY ./new-client .
@@ -24,7 +22,6 @@ RUN npm run build --ignore-scripts
 FROM registry.redhat.io/rhel9/nodejs-18 as adminBuilder
 COPY /new-admin/package*.json ./
 USER root
-RUN npm update -g
 RUN npm install npm@latest -g
 RUN npm install
 COPY ./new-admin .
@@ -36,19 +33,17 @@ RUN npm run build --ignore-scripts
 FROM registry.redhat.io/rhel9/nodejs-18-minimal
 COPY /new-backend/package*.json ./
 USER root
-RUN npm update -g
 RUN npm install npm@latest -g
 RUN npm install --production
 USER 1001
 COPY --from=backendBuilder /opt/app-root/src/dist ./
 COPY /new-backend/.env .
-COPY /new-backend/App_Data ./App_Data
+COPY /new-backend/App_Data ./App_Data_tmp
 COPY /new-backend/static ./static
 COPY --from=clientBuilder /opt/app-root/src/build ./static/client
 COPY --from=adminBuilder /opt/app-root/src/build ./static/admin
 USER root
-RUN chown -R 1001 ./App_Data
-VOLUME /opt/app-root/src/App_Data
+RUN chown -R 1001 ./App_Data_tmp
 EXPOSE 3002
 USER 1001
 CMD node index.js

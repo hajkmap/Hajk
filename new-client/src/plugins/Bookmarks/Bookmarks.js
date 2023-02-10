@@ -46,7 +46,11 @@ const Bookmarks = (props) => {
         width: 400,
       }}
     >
-      <BookmarksView model={bookmarksModel} bookmarks={bookmarks} />
+      <BookmarksView
+        model={bookmarksModel}
+        bookmarks={bookmarks}
+        globalObserver={props.app.globalObserver}
+      />
     </BaseWindowPlugin>
   );
 };
