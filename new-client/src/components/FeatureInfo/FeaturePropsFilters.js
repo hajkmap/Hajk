@@ -130,7 +130,7 @@ filters.add("roundToDecimals", function (value, numDecimals) {
   if (isNaN(value) || isNaN(numDecimals)) {
     throw new Error("Arguments should be numbers");
   }
-  return parseFloat(value.toFixed(parseInt(numDecimals))).toLocaleString();
+  return parseFloat(value).toFixed(parseInt(numDecimals)).toLocaleString();
 });
 
 /*
