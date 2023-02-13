@@ -37,6 +37,8 @@ import VectorLayer from "ol/layer/Vector";
 import VectorSource from "ol/source/Vector";
 import { Icon, Fill, Stroke, Style } from "ol/style";
 
+import OLCesium from "olcs/OLCesium.js";
+
 class AppModel {
   /**
    * Initialize new AddModel
@@ -358,6 +360,11 @@ class AppModel {
         zoom: config.map.zoom,
       }),
     });
+
+    console.log("window.cesium", window.Cesium);
+
+    const ol3d = new OLCesium({ map: this.map }); // ol2dMap is the ol.Map instance
+    ol3d.setEnabled(true);
 
     // Create throttled zoomEnd event
     let currentZoom = this.map.getView().getZoom();
