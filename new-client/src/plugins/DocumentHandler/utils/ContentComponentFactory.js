@@ -287,14 +287,14 @@ const getAccordionTextArea = (tag, defaultColors, expanded, setExpanded) => {
     defaultColors?.textAreaBackgroundColor;
 
   const dividerColor =
-    tag.attributes.getNamedItem("data-divider-color")?.value || "";
+    tag.attributes.getNamedItem("data-divider-color")?.value || backgroundColor;
 
   return (
     <StyledAccordion
       className="blockQuoteAccordion"
       style={{
         backgroundColor: backgroundColor,
-        border: dividerColor ? `solid 2px ${dividerColor}` : "none",
+        border: `solid 2px ${dividerColor}`,
       }}
     >
       <StyledAccordionButton color="inherit" fullWidth>
