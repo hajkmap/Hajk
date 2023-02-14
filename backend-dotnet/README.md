@@ -152,6 +152,16 @@ The path to the map file template. This template is used when a new map file is 
 
 #### Proxy
 
+##### FMEProxy
+
+The FME Proxy endpoint will proxy the specified query to FME server REST API.
+To be able to use the FME Proxy the "FmeProxy" appsettings must be set, where "FmeServerBaseUrl" is the url to the FME server instance, "FmeServerUser" is an FME server user and "FmeServerPassword" the password for the supplied user.
+
+##### FB Proxy
+
+The FB Proxy endpoint will proxy the specified query to Sokigo's FB API.
+To be able to use the FB Proxy the "FbProxy" appsettings must be set, where "FbServiceBaseUrl" is the url to the FB service, "FbServiceDatabase" the name of the FB database, "FbServiceUser" is an FB user and "FbServicePassword" the password for the supplied user.
+
 #### AD 
 
 ### Client settings
