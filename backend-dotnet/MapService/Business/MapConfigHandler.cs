@@ -85,7 +85,7 @@ namespace MapService.Business.MapConfig
         internal static IEnumerable<string> GetListOfImages()
         {
             string mediaPath = GetMediaPath("Media:Image:Path");
-            IEnumerable<string> allowedExtentions = GetAllowedExtensions("Media:Image:AllowedExtentions");
+            IEnumerable<string> allowedExtentions = GetAllowedExtensions("Media:Image:AllowedExtensions");
 
             return GetMediaFiles(mediaPath, allowedExtentions);
         }
@@ -97,7 +97,7 @@ namespace MapService.Business.MapConfig
         internal static IEnumerable<string> GetListOfVideos()
         {
             string mediaPath = GetMediaPath("Media:Video:Path");
-            IEnumerable<string> allowedExtentions = GetAllowedExtensions("Media:Video:AllowedExtentions");
+            IEnumerable<string> allowedExtentions = GetAllowedExtensions("Media:Video:AllowedExtensions");
 
             return GetMediaFiles(mediaPath, allowedExtentions);
         }
@@ -109,7 +109,7 @@ namespace MapService.Business.MapConfig
         internal static IEnumerable<string> GetListOfAudioFiles()
         {
             string mediaPath = GetMediaPath("Media:Audio:Path");
-            IEnumerable<string> allowedExtentions = GetAllowedExtensions("Media:Audio:AllowedExtentions");
+            IEnumerable<string> allowedExtentions = GetAllowedExtensions("Media:Audio:AllowedExtensions");
 
             return GetMediaFiles(mediaPath, allowedExtentions);
         }

@@ -26,7 +26,7 @@
         /// <summary>
         /// Gets the settings item for a section. 
         /// </summary>
-        /// <param name="sectionKeyPath">The path in the configuration, i.e. Media:Image:AllowedExtentions</param>
+        /// <param name="sectionKeyPath">The path in the configuration, i.e. Media:Image:AllowedExtensions</param>
         /// <returns></returns>
         public static string GetSectionItem(string sectionKeyPath)
         {
@@ -37,7 +37,7 @@
         /// <summary>
         /// Gets the settings item for a section. 
         /// </summary>
-        /// <param name="sectionKeyPath">The path in the configuration, i.e. Media:Image:AllowedExtentions</param>
+        /// <param name="sectionKeyPath">The path in the configuration, i.e. Media:Image:AllowedExtensions</param>
         /// <returns></returns>
         public static string GetSectionItem(IConfiguration configuration, string sectionKeyPath)
         {
@@ -47,7 +47,7 @@
         /// <summary>
         /// Gets the settings array for a section. 
         /// </summary>
-        /// <param name="sectionKeyPath">The path in the configuration, i.e. Media:Image:AllowedExtentions</param>
+        /// <param name="sectionKeyPath">The path in the configuration, i.e. Media:Image:AllowedExtensions</param>
         /// <returns></returns>
         public static IEnumerable<string> GetSectionArray(string sectionKeyPath)
         {
@@ -58,7 +58,7 @@
         /// <summary>
         /// Gets the settings array for a section. 
         /// </summary>
-        /// <param name="sectionKeyPath">The path in the configuration, i.e. Media:Image:AllowedExtentions</param>
+        /// <param name="sectionKeyPath">The path in the configuration, i.e. Media:Image:AllowedExtensions</param>
         /// <returns></returns>
         public static IEnumerable<string> GetSectionArray(IConfiguration configuration, string sectionKeyPath)
         {
