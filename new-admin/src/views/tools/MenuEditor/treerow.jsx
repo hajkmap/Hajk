@@ -11,6 +11,21 @@ import SettingsPopover from "./settingspopover.jsx";
 import MenuConnectionSelector from "./menuconnectionselector.jsx";
 import WarningModal from "./warningModal.jsx";
 
+const CONNECTION_SELECTORS = [
+  {
+    id: "DOCUMENT",
+    gridSize: 4,
+  },
+  {
+    id: "MAP_LINK",
+    gridSize: 2,
+  },
+  {
+    id: "LINK",
+    gridSize: 2,
+  },
+];
+
 const getTextField = (value, onChangeFunction, variant) => {
   return (
     <TextField
@@ -48,24 +63,6 @@ class TreeRow extends React.Component {
   componentWillUnmount = () => {
     const { updateMenuItem, treeNodeId } = this.props;
     updateMenuItem(treeNodeId, { title: this.state.menuItemTitle });
-  };
-
-  renderConnectionSelect = () => {
-    const { model, treeNodeId, updateMenuItem, availableDocuments, menuItem } =
-      this.props;
-
-    return (
-      <MenuConnectionSelector
-        treeNodeId={treeNodeId}
-        updateMenuItem={updateMenuItem}
-        updateTreeValidation={this.updateTreeValidation}
-        availableDocuments={availableDocuments}
-        updateValidationForTreeNode={this.props.updateValidationForTreeNode}
-        valid={this.props.valid}
-        model={model}
-        menuItem={menuItem}
-      ></MenuConnectionSelector>
-    );
   };
 
   showWarning = () => {
@@ -137,14 +134,21 @@ class TreeRow extends React.Component {
   };
 
   render = () => {
-    const { classes, menuItem } = this.props;
+    const {
+      classes,
+      model,
+      treeNodeId,
+      updateMenuItem,
+      availableDocuments,
+      menuItem,
+    } = this.props;
     return (
       <>
         {this.dynamicallyImportIconFonts()}
         <Grid
           alignItems="center"
           className={classes.treeRowRoot}
-          justify="flex-end"
+          justifyContent="flex-end"
           container
         >
           <Grid xs={1} item>
@@ -160,9 +164,24 @@ class TreeRow extends React.Component {
             <Grid xs={3} item>
               {this.renderSettingsMenu()}
             </Grid>
-            <Grid xs={4} item>
-              {this.renderConnectionSelect()}
-            </Grid>
+            {CONNECTION_SELECTORS.map((cs) => {
+              return (
+                <Grid item key={cs.id} xs={cs.gridSize}>
+                  <MenuConnectionSelector
+                    treeNodeId={treeNodeId}
+                    updateMenuItem={updateMenuItem}
+                    updateTreeValidation={this.updateTreeValidation}
+                    availableDocuments={availableDocuments}
+                    updateValidationForTreeNode={
+                      this.props.updateValidationForTreeNode
+                    }
+                    model={model}
+                    type={cs.id}
+                    menuItem={menuItem}
+                  />
+                </Grid>
+              );
+            })}
             <Grid xs={1} item>
               {this.renderRemoveButton()}
             </Grid>
