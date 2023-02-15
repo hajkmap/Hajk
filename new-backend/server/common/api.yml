@@ -46,7 +46,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Error"
-  /informative/loaddocument/{folder}/{name}:
+  /informative/load/{folder}/{name}:
     get:
       tags:
         - Client-accessible
@@ -63,31 +63,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/DocumentBodyFolder"
-        5XX:
-          description: Example not found
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Error"
-  /informative/loaddocument/{name}:
-    get:
-      tags:
-        - Client-accessible
-      parameters:
-        - name: name
-          in: path
-          description: Name of the document to be fetched
-          required: true
-          schema:
-            type: string
-      responses:
-        200:
-          description: Return the JSON file
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/DocumentBodyFolder"
+                $ref: "#/components/schemas/DocumentBody"
         5XX:
           description: Example not found
           content:
@@ -95,40 +71,6 @@ paths:
               schema:
                 $ref: "#/components/schemas/Error"
   /informative/create:
-    post:
-      deprecated: true
-      tags:
-        - Admin - Informative/DocumentHandler
-      responses:
-        200:
-          description: Create a document connected to a specified map (OBSOLETE)
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/InformativeDocumentCreateBody"
-        5XX:
-          description: Internal server error
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Error"
-    put:
-      tags:
-        - Admin - Informative/DocumentHandler
-      responses:
-        200:
-          description: Create a document connected to a specified map
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/InformativeDocumentCreateBody"
-        5XX:
-          description: Internal server error
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Error"
-  /informative/createdoc:
     post:
       deprecated: true
       tags:
@@ -212,24 +154,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Error"
-  /informative/documentfolderlist:
-    get:
-      tags:
-        - Admin - Informative/DocumentHandler
-      responses:
-        200:
-          description: Return all available documents
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Informativedocumentfolderlist"
-        5XX:
-          description: Internal server error
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Error"
-  /informative/documentfolderlist/{name}:
+  /informative/list/{folder}:
     get:
       tags:
         - Admin - Informative/DocumentHandler
@@ -335,55 +260,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Error"
-  /informative/savedoc/{folder}/{name}:
-    post:
-      deprecated: true
-      tags:
-        - Admin - Informative/DocumentHandler
-      parameters:
-        - name: name
-          in: path
-          description: Document to be saved
-          required: true
-          schema:
-            type: string
-      responses:
-        200:
-          description: Return the saved document's body
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/DocumentsList"
-        5XX:
-          description: Internal server error
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Error"
-    put:
-      tags:
-        - Admin - Informative/DocumentHandler
-      parameters:
-        - name: name
-          in: path
-          description: Document to be saved
-          required: true
-          schema:
-            type: string
-      responses:
-        200:
-          description: Return the saved document's body
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/DocumentsList"
-        5XX:
-          description: Internal server error
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Error"
-  /informative/savedoc/{name}:
+  /informative/save/{folder}/{name}:
     post:
       deprecated: true
       tags:
@@ -455,31 +332,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Error"
-  /informative/deletedoc/{name}:
-    delete:
-      tags:
-        - Admin - Informative/DocumentHandler
-      parameters:
-        - name: name
-          in: path
-          description: Document to deleted
-          required: true
-          schema:
-            type: string
-      responses:
-        200:
-          description: Delete the specified document
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/DocumentsList"
-        5XX:
-          description: Internal server error
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Error"
-  /informative/deletedoc/{folder}/{name}:
+  /informative/delete/{folder}/{name}:
     delete:
       tags:
         - Admin - Informative/DocumentHandler
@@ -1029,26 +882,6 @@ components:
           type: string
           example: ENOENT
     DocumentBody:
-      type: object
-      properties:
-        chapters:
-          type: array
-          items:
-            type: object
-            properties:
-              header:
-                type: string
-              html:
-                type: string
-              expanded:
-                type: boolean
-              mapSettings:
-                type: object
-              chapters:
-                type: array
-                items:
-                  type: object
-    DocumentBodyFolder:
       type: object
       properties:
         chapters:

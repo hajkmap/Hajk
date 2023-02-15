@@ -25,22 +25,12 @@ var documentEditor = Model.extend({
     }
   },
 
-  delete: function (documentName, callback) {
-    var url = this.get("config").url_delete + "/" + documentName;
-    hfetch(url, {
-      method: "delete",
-    }).then((response) => {
-      callback(response);
-    });
-  },
-
-  deleteDoc: function (folder, documentName, callback) {
+  delete: function (folder, documentName, callback) {
     var url = "";
     if (folder) {
-      url =
-        this.get("config").url_deletedoc + "/" + folder + "/" + documentName;
+      url = this.get("config").url_delete + "/" + folder + "/" + documentName;
     } else {
-      url = this.get("config").url_deletedoc + "/" + documentName;
+      url = this.get("config").url_delete + "/" + documentName;
     }
 
     hfetch(url, {
@@ -50,33 +40,10 @@ var documentEditor = Model.extend({
     });
   },
 
-  save: function (documentName, data, callback) {
-    var url = this.get("config").url_save + "/" + documentName;
-    data.chapters.forEach((chapter) => {
-      this.deleteParentChapter(chapter, data.chapters);
-    });
-
-    data.chapters.map((chapter) => {
-      chapter.html = chapter.html
-        .replaceAll("&lt;", "<")
-        .replaceAll("&gt;", ">");
-      return false;
-    });
-
-    hfetch(url, {
-      method: "post",
-      body: JSON.stringify(data),
-    }).then((response) => {
-      response.text().then((text) => {
-        callback(text);
-      });
-    });
-  },
-
-  saveDoc: function (folder, documentName, data, callback) {
+  save: function (folder, documentName, data, callback) {
     var url = "";
     if (folder) {
-      url = this.get("config").url_savedoc + "/" + folder + "/" + documentName;
+      url = this.get("config").url_save + "/" + folder + "/" + documentName;
       data.chapters.forEach((chapter) => {
         this.deleteParentChapter(chapter, data.chapters);
       });
@@ -88,7 +55,7 @@ var documentEditor = Model.extend({
         return false;
       });
     } else {
-      url = this.get("config").url_savedoc + "/" + documentName;
+      url = this.get("config").url_save + "/" + documentName;
       data.chapters.forEach((chapter) => {
         this.deleteParentChapter(chapter, data.chapters);
       });
@@ -111,27 +78,12 @@ var documentEditor = Model.extend({
     });
   },
 
-  loadDocuments: async function (callback) {
-    var url = this.get("config").url_document_list;
-    try {
-      const response = await hfetch(url);
-      const text = await response.text();
-      const data = JSON.parse(text);
-      callback(data);
-    } catch (err) {
-      alert(
-        "Kunde inte ladda mappen med dokument. Verifiera att uppsättningen är korrekt utförd."
-      );
-      console.error(err);
-    }
-  },
-
-  loadDocumentsFromFolder: async function (folder, callback) {
+  loadDocuments: async function (folder, callback) {
     var url = "";
     if (folder) {
-      url = this.get("config").url_document_folder_list + "/" + folder;
+      url = this.get("config").url_document_list + "/" + folder;
     } else {
-      url = this.get("config").url_document_folder_list;
+      url = this.get("config").url_document_list;
     }
     try {
       const response = await hfetch(url);
@@ -173,18 +125,6 @@ var documentEditor = Model.extend({
     });
   },
 
-  createDF(data, callback) {
-    var url = this.get("config").url_createdoc;
-    hfetch(url, {
-      method: "post",
-      body: JSON.stringify(data),
-    }).then((response) => {
-      response.text().then((text) => {
-        callback(text);
-      });
-    });
-  },
-
   createFolder(data, callback) {
     var url = this.get("config").url_create_folder;
     hfetch(url, {
@@ -198,28 +138,10 @@ var documentEditor = Model.extend({
     });
   },
 
-  load: function (documentName, callback) {
-    var url = this.get("config").url_load + "/" + documentName;
-    hfetch(url).then((response) => {
-      response.status === 200 &&
-        response.json().then((data) => {
-          data.chapters.forEach((chapter) => {
-            this.setParentChapter(chapter, data.chapters);
-          });
-          callback(data);
-        });
-    });
-  },
-
-  loadD: function (folder, documentName, callback) {
+  load: function (folder, documentName, callback) {
     var url = "";
     if (folder) {
-      url =
-        this.get("config").url_load_document +
-        "/" +
-        folder +
-        "/" +
-        documentName;
+      url = this.get("config").url_load + "/" + folder + "/" + documentName;
       hfetch(url).then((response) => {
         response.status === 200 &&
           response.json().then((data) => {
@@ -230,7 +152,7 @@ var documentEditor = Model.extend({
           });
       });
     } else {
-      url = this.get("config").url_load_document + "/" + documentName;
+      url = this.get("config").url_load + "/" + documentName;
       hfetch(url).then((response) => {
         response.status === 200 &&
           response.json().then((data) => {

@@ -6,31 +6,15 @@ const ael = log4js.getLogger("adminEvent");
 
 export class Controller {
   create(req, res) {
-    const { documentName, mapName } = JSON.parse(req.body);
-    InformativeService.create(documentName, mapName).then((r) => {
-      // FIXME: The buggy admin expects 200 and this string on success,
-      // but I think that we'd do better with a meaningful JSON response.
+    const { documentName, mapName, folderName } = JSON.parse(req.body);
+    InformativeService.create(documentName, mapName, folderName).then((r) => {
       if (r && !r.error) {
         res.status(200).send("Document created");
         ael.info(
-          `${res.locals.authUser} created a new document, ${documentName}.json, and connected it to map ${mapName}.json`
+          `${res.locals.authUser} created a new document, ${documentName}.json, and connected it to map ${mapName}.json and ${folderName}`
         );
       } else res.status(500).send(r.error.message);
     });
-  }
-
-  createDoc(req, res) {
-    const { documentName, mapName, folderName } = JSON.parse(req.body);
-    InformativeService.createDoc(documentName, mapName, folderName).then(
-      (r) => {
-        if (r && !r.error) {
-          res.status(200).send("Document created");
-          ael.info(
-            `${res.locals.authUser} created a new document, ${documentName}.json, and connected it to map ${mapName}.json and ${folderName}`
-          );
-        } else res.status(500).send(r.error.message);
-      }
-    );
   }
 
   createFolder(req, res) {
@@ -44,125 +28,84 @@ export class Controller {
   }
 
   getByName(req, res) {
-    InformativeService.getByName(req.params.name).then((r) => {
-      if (r && !r.error) res.json(r);
-      else {
-        res
-          .status(404)
-          .send(`Document "${req.params.name}" could not be found`);
-      }
-    });
-  }
-
-  getByNameDoc(req, res) {
-    InformativeService.getByNameDocument("", req.params.name).then((r) => {
-      if (r && !r.error) res.json(r);
-      else {
-        res
-          .status(404)
-          .send(`Document "${req.params.name}" could not be found`);
-      }
-    });
-  }
-
-  getByNameDocFolder(req, res) {
-    const { folder } = req.params;
-    InformativeService.getByNameDocument(folder, req.params.name).then((r) => {
-      if (r && !r.error) res.json(r);
-      else {
-        res
-          .status(404)
-          .send(`Document "${req.params.name}" could not be found`);
-      }
-    });
+    if (req.params.folder) {
+      InformativeService.getByName(req.params.folder, req.params.name).then(
+        (r) => {
+          if (r && !r.error) res.json(r);
+          else {
+            res
+              .status(404)
+              .send(`Document "${req.params.name}" could not be found`);
+          }
+        }
+      );
+    } else {
+      InformativeService.getByName("", req.params.name).then((r) => {
+        if (r && !r.error) res.json(r);
+        else {
+          res
+            .status(404)
+            .send(`Document "${req.params.name}" could not be found`);
+        }
+      });
+    }
   }
 
   saveByName(req, res) {
-    InformativeService.saveByName(req.params.name, req.body).then((r) => {
-      if (r && !r.error) {
-        res.status(200).send("File saved");
-        ael.info(
-          `${res.locals.authUser} saved document ${req.params.name}.json`
-        );
-      } else res.status(500).send(r.error.message);
-    });
-  }
-
-  saveByNameDoc(req, res) {
-    InformativeService.saveByNameDoc("", req.params.name, req.body).then(
-      (r) => {
+    if (req.params.folder) {
+      InformativeService.saveByName(
+        req.params.folder,
+        req.params.name,
+        req.body
+      ).then((r) => {
         if (r && !r.error) {
           res.status(200).send("File saved");
           ael.info(
             `${res.locals.authUser} saved document ${req.params.name}.json`
           );
         } else res.status(500).send(r.error.message);
-      }
-    );
-  }
-
-  saveByNameDocFolder(req, res) {
-    const { folder } = req.params;
-    InformativeService.saveByNameDoc(folder, req.params.name, req.body).then(
-      (r) => {
+      });
+    } else {
+      InformativeService.saveByName("", req.params.name, req.body).then((r) => {
         if (r && !r.error) {
           res.status(200).send("File saved");
           ael.info(
             `${res.locals.authUser} saved document ${req.params.name}.json`
           );
         } else res.status(500).send(r.error.message);
-      }
-    );
+      });
+    }
   }
 
   deleteByName(req, res) {
-    InformativeService.deleteByName(req.params.name).then((r) => {
-      if (r && !r.error) {
-        res.status(200).send("File saved");
-        ael.info(
-          `${res.locals.authUser} deleted document ${req.params.name}.json`
-        );
-      } else res.status(500).send(r.error.message);
-    });
-  }
-
-  deleteByNameDoc(req, res) {
-    InformativeService.deleteByNameDoc("", req.params.name).then((r) => {
-      if (r && !r.error) {
-        res.status(200).send("File deleted");
-        ael.info(
-          `${res.locals.authUser} deleted document ${req.params.name}.json`
-        );
-      } else res.status(500).send(r.error.message);
-    });
-  }
-
-  deleteByNameDocFolder(req, res) {
-    const { folder } = req.params;
-    InformativeService.deleteByNameDoc(folder, req.params.name).then((r) => {
-      if (r && !r.error) {
-        res.status(200).send("File deleted");
-        ael.info(
-          `${res.locals.authUser} deleted document ${req.params.name}.json`
-        );
-      } else res.status(500).send(r.error.message);
-    });
+    if (req.params.folder) {
+      InformativeService.deleteByName(req.params.folder, req.params.name).then(
+        (r) => {
+          if (r && !r.error) {
+            res.status(200).send("File saved");
+            ael.info(
+              `${res.locals.authUser} deleted document ${req.params.name}.json`
+            );
+          } else res.status(500).send(r.error.message);
+        }
+      );
+    } else {
+      InformativeService.deleteByName("", req.params.name).then((r) => {
+        if (r && !r.error) {
+          res.status(200).send("File saved");
+          ael.info(
+            `${res.locals.authUser} deleted document ${req.params.name}.json`
+          );
+        } else res.status(500).send(r.error.message);
+      });
+    }
   }
 
   list(req, res) {
-    InformativeService.getAvailableDocuments().then((r) => {
+    InformativeService.getAvailableDocuments(req.params.folder).then((r) => {
       if (r && !r.error) res.json(r);
       else res.status(500).send(r.error.message);
     });
-  }
-
-  documentFolderList(req, res) {
-    InformativeService.getAvailableDocumentsFolder(req.params.name).then(
-      (r) => {
-        if (r && !r.error) res.json(r);
-        else res.status(500).send(r.error.message);
-      }
-    );
   }
 
   folderlist(req, res) {

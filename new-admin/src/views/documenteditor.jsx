@@ -146,69 +146,10 @@ class DocumentEditor extends Component {
     this.documentTitle = React.createRef();
   }
 
-  /*load(document) {
-    this.props.model.loadDocuments((documents) => {
+  load(folder, document) {
+    this.props.model.loadDocuments(folder, (documents) => {
       if (documents.length > 0) {
-        this.props.model.load(document || documents[0], (data) => {
-          this.setState(
-            {
-              data: data,
-              documents: documents,
-              documentTitle: data.title,
-              selectedDocument: document || "",
-              tableOfContents: {
-                expanded: data.tableOfContents
-                  ? data.tableOfContents.expanded
-                  : true,
-                active: data.tableOfContents
-                  ? data.tableOfContents.active
-                  : true,
-                chapterLevelsToShow: data.tableOfContents
-                  ? data.tableOfContents.chapterLevelsToShow
-                  : 100,
-                title: data.tableOfContents
-                  ? data.tableOfContents.title
-                  : "Innehållsförteckning",
-              },
-              newTableOfContentsExpanded: data.tableOfContents
-                ? data.tableOfContents.expanded
-                : true,
-              newTableOfContentsActive: data.tableOfContents
-                ? data.tableOfContents.active
-                : true,
-              newTableOfContentsLevels: data.tableOfContents
-                ? data.tableOfContents.chapterLevelsToShow
-                : 100,
-              newTableOfContentsTitle: data.tableOfContents
-                ? data.tableOfContents.title
-                : "Innehållsförteckning",
-            },
-            () => {
-              this.props.model.loadMaps((maps) => {
-                this.setState({
-                  maps: maps,
-                  map: data.map,
-                  newDocumentMap: maps[0],
-                });
-              });
-            }
-          );
-        });
-      } else {
-        this.props.model.loadMaps((maps) => {
-          this.setState({
-            maps: maps,
-            newDocumentMap: maps[0],
-          });
-        });
-      }
-    });
-  }*/
-
-  loadDoc(folder, document) {
-    this.props.model.loadDocumentsFromFolder(folder, (documents) => {
-      if (documents.length > 0) {
-        this.props.model.loadD(folder, document || documents[0], (data) => {
+        this.props.model.load(folder, document || documents[0], (data) => {
           this.setState(
             {
               data: data,
@@ -267,7 +208,7 @@ class DocumentEditor extends Component {
 
   changeDoc(event)
   {
-    this.props.model.loadDocumentsFromFolder(event.target.value, (documents) => {
+    this.props.model.loadDocuments(event.target.value, (documents) => {
       this.setState({ 
         documents: documents,
       });
@@ -308,7 +249,7 @@ class DocumentEditor extends Component {
 
   componentDidMount() {
     this.props.model.set("config", this.props.config);
-    this.loadDoc();
+    this.load();
     this.loadImageList();
     this.loadVideoList();
     this.loadAudioList();
@@ -316,7 +257,7 @@ class DocumentEditor extends Component {
   }
 
   save() {
-    this.props.model.saveDoc(
+    this.props.model.save(
       this.state.selectedFolder,
       this.state.selectedDocument,
       this.state.data,
@@ -346,8 +287,8 @@ class DocumentEditor extends Component {
       ),
       showAbortButton: true,
       modalConfirmCallback: () => {
-        this.props.model.deleteDoc(this.state.selectedFolder, this.state.selectedDocument, (result) => {
-          this.loadDoc();
+        this.props.model.delete(this.state.selectedFolder, this.state.selectedDocument, (result) => {
+          this.load();
           this.setState({
             selectedFolder: '',
           })
@@ -980,8 +921,8 @@ class DocumentEditor extends Component {
           mapName: this.state.newDocumentMap,
         };
         if (data.documentName !== "") {
-          this.props.model.createDF(data, (response) => {
-            this.loadDoc(data.folderName, data.documentName);
+          this.props.model.createDocument(data, (response) => {
+            this.load(data.folderName, data.documentName);
           });
           this.hideModal();
         }
@@ -1181,7 +1122,7 @@ class DocumentEditor extends Component {
               <FormControl>
                 <NativeSelect
                   onChange={(e) => {
-                    this.loadDoc(this.state.selectedFolder, e.target.value);
+                    this.load(this.state.selectedFolder, e.target.value);
                   }}
                   value={selectedDocument}
                 >
