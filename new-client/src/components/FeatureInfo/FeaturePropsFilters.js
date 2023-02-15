@@ -29,7 +29,7 @@ class PropFilters {
 
     // Handle different kind of arguments using this RegEx
     // Previously split(',') was used but that of course prevented ',' etc to be used in arguments.... (It broke the rendering)
-    const splitArgsRegEx = /^''|'[^']+'|(\d+(\.\d+))|\d|[a-z_0-9]+/gm;
+    const splitArgsRegEx = /^''|'[^']+'|^\d+\.?\d{1,}$|[a-z_0-9]+/gm;
 
     // Regex to match a property name when testing if it's a nested property.
     const isPropertyRegEx = /^[a-z][a-z_0-9]+$/gm;
