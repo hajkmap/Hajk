@@ -288,14 +288,14 @@ const getAccordionTextArea = (tag, defaultColors, expanded, setExpanded) => {
 
   const dividerColor =
     tag.attributes.getNamedItem("data-divider-color")?.value ||
-    defaultColors?.textAreaDividerColor;
+    defaultColors?.textAreaBackgroundColor;
 
   return (
     <StyledAccordion
       className="blockQuoteAccordion"
       style={{
         backgroundColor: backgroundColor,
-        border: `solid 2px ${dividerColor}`,
+        border: dividerColor && `solid 2px ${dividerColor}`,
       }}
     >
       <StyledAccordionButton color="inherit" fullWidth>
@@ -305,6 +305,7 @@ const getAccordionTextArea = (tag, defaultColors, expanded, setExpanded) => {
           onClick={() => setExpanded(!expanded)}
           style={{
             opacity: expanded ? 0.8 : 1,
+            padding: dividerColor && "0 15px",
           }}
         >
           <StyledAccordionTypography variant="body1">
