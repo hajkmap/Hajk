@@ -22,14 +22,18 @@ import {
   Tooltip,
 } from "@mui/material";
 
-const StyledAccordion = styled(Accordion)({
-  "&:before": {
-    backgroundColor: "white",
-  },
-  margin: "0px 0px 10px 0px",
-  borderRadius: "5px",
-  position: "inherit",
-});
+const StyledAccordion = styled(Accordion)(
+  ({ backgroundcolor, dividercolor }) => ({
+    "&:before": {
+      backgroundColor: "white",
+    },
+    margin: "0px 0px 10px 0px",
+    borderRadius: "5px",
+    position: "inherit",
+    backgroundColor: backgroundcolor,
+    border: dividercolor && `solid 2px ${dividercolor}`,
+  })
+);
 
 const StyledAccordionTypography = styled(Typography)({
   marginBottom: "0",
@@ -47,14 +51,18 @@ const StyledAccordionButton = styled(Button)({
   textTransform: "inherit",
 });
 
-const StyledAccordionSummary = styled(AccordionSummary)({
-  width: "100%",
-  transition: "opacity 0.2s ease-in-out",
-  justifyContent: "space-between",
-  "& .MuiAccordionSummary-content": {
-    maxWidth: "90%",
-  },
-});
+const StyledAccordionSummary = styled(AccordionSummary)(
+  ({ expanded, dividercolor }) => ({
+    width: "100%",
+    transition: "opacity 0.2s ease-in-out",
+    justifyContent: "space-between",
+    "& .MuiAccordionSummary-content": {
+      maxWidth: "90%",
+    },
+    opacity: expanded === "true" ? 0.6 : 1,
+    padding: dividercolor && "0 15px",
+  })
+);
 
 const ELEMENT_NODE = 1;
 const TEXT_NODE = 3;
@@ -293,20 +301,15 @@ const getAccordionTextArea = (tag, defaultColors, expanded, setExpanded) => {
   return (
     <StyledAccordion
       className="blockQuoteAccordion"
-      style={{
-        backgroundColor: backgroundColor,
-        border: dividerColor && `solid 2px ${dividerColor}`,
-      }}
+      backgroundcolor={backgroundColor}
+      dividercolor={dividerColor}
     >
       <StyledAccordionButton color="inherit" fullWidth>
         <StyledAccordionSummary
           expandIcon={<ExpandMoreIcon />}
           expanded={expanded.toString()}
           onClick={() => setExpanded(!expanded)}
-          style={{
-            opacity: expanded ? 0.8 : 1,
-            padding: dividerColor && "0 15px",
-          }}
+          dividercolor={dividerColor}
         >
           <StyledAccordionTypography variant="body1">
             {title}
