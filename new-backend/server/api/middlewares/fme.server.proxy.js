@@ -1,5 +1,6 @@
 import { createProxyMiddleware } from "http-proxy-middleware";
 import log4js from "log4js";
+import fs from "fs";
 
 // Value of process.env.LOG_LEVEL will be one of the allowed
 // log4js-values. We will customize HPM to use log4js too,
@@ -28,6 +29,7 @@ export default function fmeServerProxy(err, req, res, next) {
     logLevel: logLevels[process.env.LOG_LEVEL],
     logProvider: () => logger,
     changeOrigin: true,
+    secure: process.env.FME_SERVER_SECURE === "true", // should SSL certs be verified?
     onProxyReq: (proxyReq, req, res) => {
       // We have to add an authorization header to the request
       proxyReq.setHeader(
