@@ -6,13 +6,38 @@ var menuEditorModel = Model.extend({
     this.config = settings.config;
   },
 
-  async listAllAvailableDocuments() {
+  loadFolders: async function (callback) {
     try {
-      return hfetch(this.config.url_document_list).then((response) => {
+      return hfetch(this.config.url_folder_list).then((response) => {
         return response.text().then((text) => {
           return JSON.parse(text);
         });
       });
+    } catch (err) {
+      alert(
+        "Kunde inte ladda mappen med mappar. Verifiera att uppsättningen är korrekt utförd."
+      );
+      console.error(err);
+    }
+  },
+
+  async listAllAvailableDocuments(folder) {
+    try {
+      if (folder) {
+        return hfetch(this.config.url_document_list + "/" + folder).then(
+          (response) => {
+            return response.text().then((text) => {
+              return JSON.parse(text);
+            });
+          }
+        );
+      } else {
+        return hfetch(this.config.url_document_list).then((response) => {
+          return response.text().then((text) => {
+            return JSON.parse(text);
+          });
+        });
+      }
     } catch (err) {}
   },
 
@@ -187,6 +212,7 @@ var menuEditorModel = Model.extend({
     return {
       title: "",
       document: "",
+      folder: "",
       color: "",
       icon: {
         materialUiIconName: "",

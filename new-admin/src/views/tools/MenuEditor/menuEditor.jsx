@@ -56,6 +56,7 @@ const styles = (theme) => ({
 
 class ToolOptions extends Component {
   state = {
+    folder: "",
     textAreacolorpickerEnabled: false,
     active: false,
     index: 0,
@@ -103,14 +104,18 @@ class ToolOptions extends Component {
     menu: [],
   };
   availableDocuments = [];
+  folders = [];
 
   constructor(props) {
     super(props);
     this.type = "documenthandler";
     this.mapSettingsModel = props.model;
     this.menuEditorModel = this.getMenuEditorModel();
-    this.menuEditorModel.listAllAvailableDocuments().then((list) => {
+    this.menuEditorModel.listAllAvailableDocuments(this.state.folder).then((list) => {
       this.availableDocuments = list;
+    });
+    this.menuEditorModel.loadFolders().then((list) => {
+      this.folders = list;
     });
   }
 
@@ -454,6 +459,7 @@ class ToolOptions extends Component {
         options={this.state}
         model={this.menuEditorModel}
         availableDocuments={this.availableDocuments}
+        folders={this.folders}
         menuItem={menuItem}
         updateValidationForTreeNode={this.updateValidationForTreeNode}
         valid={this.menuEditorModel.isSelectionValid(menuItem, children)}

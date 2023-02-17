@@ -140,6 +140,7 @@ class TreeRow extends React.Component {
       treeNodeId,
       updateMenuItem,
       availableDocuments,
+      folders,
       menuItem,
     } = this.props;
     return (
@@ -172,6 +173,7 @@ class TreeRow extends React.Component {
                     updateMenuItem={updateMenuItem}
                     updateTreeValidation={this.updateTreeValidation}
                     availableDocuments={availableDocuments}
+                    folders={folders}
                     updateValidationForTreeNode={
                       this.props.updateValidationForTreeNode
                     }
