@@ -56,7 +56,9 @@ const styles = (theme) => ({
 
 class ToolOptions extends Component {
   state = {
+    availableDocuments: [],
     folder: "",
+    folders: [],
     textAreacolorpickerEnabled: false,
     active: false,
     index: 0,
@@ -103,8 +105,6 @@ class ToolOptions extends Component {
   menuConfig = {
     menu: [],
   };
-  availableDocuments = [];
-  folders = [];
 
   constructor(props) {
     super(props);
@@ -112,10 +112,26 @@ class ToolOptions extends Component {
     this.mapSettingsModel = props.model;
     this.menuEditorModel = this.getMenuEditorModel();
     this.menuEditorModel.listAllAvailableDocuments(this.state.folder).then((list) => {
-      this.availableDocuments = list;
+      this.setState({
+        availableDocuments: list,
+      })
     });
     this.menuEditorModel.loadFolders().then((list) => {
-      this.folders = list;
+      this.setState({
+        folders: list,
+      })
+    });
+  }
+
+  handleFolderSelection = (selectedFolder) => {
+    this.setState({folder: selectedFolder}, () => {
+      console.log(this.state.folder);
+      this.menuEditorModel.listAllAvailableDocuments(this.state.folder).then((list) => {
+        this.setState({
+        availableDocuments: list,
+      })
+        console.log(this.state.availableDocuments);
+      });
     });
   }
 
@@ -458,12 +474,13 @@ class ToolOptions extends Component {
         deleteMenuItem={this.deleteMenuItem}
         options={this.state}
         model={this.menuEditorModel}
-        availableDocuments={this.availableDocuments}
-        folders={this.folders}
+        availableDocuments={this.state.availableDocuments}
+        folders={this.state.folders}
         menuItem={menuItem}
         updateValidationForTreeNode={this.updateValidationForTreeNode}
         valid={this.menuEditorModel.isSelectionValid(menuItem, children)}
         treeNodeId={key}
+        onFolderSelection={this.handleFolderSelection}
       ></TreeRow>
     );
   };

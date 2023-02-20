@@ -180,6 +180,7 @@ class TreeRow extends React.Component {
                     model={model}
                     type={cs.id}
                     menuItem={menuItem}
+                    onFolderSelection={this.props.onFolderSelection}
                   />
                 </Grid>
               );

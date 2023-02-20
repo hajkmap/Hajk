@@ -197,17 +197,17 @@ class MenuConnectionSelector extends React.Component {
     this.setState({ documentValue: availableDocuments[index] });
   };
 
-  setSelectedFolder = (index) => {
-    const { folders } = this.props;
-    this.setState({ folder: folders[index] });
-  };
-
   renderFolders() {
     const { folders } = this.props;
     return folders.map((folder, i) => (
       <option key={i}>{folder}</option>
     ));
   }
+
+  handleFolderClick = (event) => {
+    const selectedFolder = event.target.value;
+    this.props.onFolderSelection(selectedFolder);
+}
 
   renderDocumentList = () => {
     const { availableDocuments, classes } = this.props;
@@ -216,7 +216,7 @@ class MenuConnectionSelector extends React.Component {
       <Grid item>
         <FormControl fullWidth>
           <NativeSelect
-            onChange={(event) => this.setSelectedFolder(event)}
+            onChange={(event) => this.handleFolderClick(event)}
             value={this.state.folder}
           >
             <option value="">
