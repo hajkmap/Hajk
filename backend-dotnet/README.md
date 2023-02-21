@@ -44,46 +44,42 @@ There are several different logging methods. A description of how to log a file 
 ##### Log level
 
 The log level set log information.
+
+```json
 "Serilog": {
-&nbsp;&nbsp; "Using": [],
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"MinimumLevel": {
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;**"Default": "Information",**
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"Override": {
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"Microsoft": "Warning",
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"System": "Warning"
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}
-&nbsp;&nbsp;&nbsp;&nbsp;},
-&nbsp;&nbsp;"WriteTo": [
-&nbsp;&nbsp;&nbsp;&nbsp;{
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"Name": "File",
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"Args": {
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"path": "Logs\\log.txt"
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}
-&nbsp;&nbsp;&nbsp;&nbsp;}
-&nbsp;&nbsp;]
-},
+   "Using": [],
+   "MinimumLevel": {
+   "Default": "Information",
+   "Override": {
+      "Microsoft": "Warning",
+      "System": "Warning"
+   }
+   },
+   "WriteTo": [
+   {
+      "Name": "File",
+      "Args": {
+         "path": "Logs\\log.txt"
+      }
+   }
+   ]
+}
+```
 
 ##### Write to file
 
-The path settings are in **bold**.The path can either be an absolute or a relative path.
-"Serilog": {
-&nbsp;&nbsp; "Using": [],
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"MinimumLevel": {
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"Default": "Information",
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"Override": {
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"Microsoft": "Warning",
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"System": "Warning"
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}
-&nbsp;&nbsp;&nbsp;&nbsp;},
-&nbsp;&nbsp;"WriteTo": [
-&nbsp;&nbsp;&nbsp;&nbsp;{
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"Name": "File",
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"Args": {
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;**"path": "Logs\\log.txt"**
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}
-&nbsp;&nbsp;&nbsp;&nbsp;}
-&nbsp;&nbsp;]
-},
+The path can either be an absolute or a relative path.
+
+```json
+"WriteTo": [
+{
+   "Name": "File",
+   "Args": {
+      "path": "Logs\\log.txt"
+   }
+}
+]
+```
 
 #### Paths to data
 
@@ -93,87 +89,160 @@ All data paths are configurable and can be given as an absolute or a relative pa
 
 The path to the root folder.
 
+```json
 "DataContent": {
-&nbsp;&nbsp;**"Path": "App_Data"**
-},
+   "Path": "App_Data"
+}
+```
 
 ##### Documents
 
 The path to all documents for the informative plugin.
 
+```json
 "Documents": {
-&nbsp;&nbsp;**"Path": "App_Data\\\\documents"**
-},
+   "Path": "App_Data\\documents"
+}
+```
 
 ##### Media
 
 Three paths for the image, video and audio files for the informative plugin.
 _Please note that this example the same path is used for all three media resources._
 
+```json
 "Media": {
-&nbsp;&nbsp;"Audio": {
-&nbsp;&nbsp;&nbsp;&nbsp;**"Path": "App_Data\\\\upload",**
-&nbsp;&nbsp;&nbsp;&nbsp;"AllowedExtensions": [ "mp3", "wav", "ogg" ]
-&nbsp;&nbsp;},
-&nbsp;&nbsp;"Image": {
-&nbsp;&nbsp;&nbsp;&nbsp;**"Path": "App_Data\\\\upload",**
-&nbsp;&nbsp;&nbsp;&nbsp;"AllowedExtensions": [ "jpg", "jpeg", "png" ]
-&nbsp;&nbsp;},
-&nbsp;&nbsp;"Video": {
-&nbsp;&nbsp;&nbsp;&nbsp;**"Path": "App_Data\\\\upload",**
-&nbsp;&nbsp;&nbsp;&nbsp;"AllowedExtensions": [ "mp4", "mov", "ogg" ]
-&nbsp;&nbsp;}
-},
+   "Audio": {
+      "Path": "App_Data\\upload",
+      "AllowedExtensions": [ "mp3", "wav", "ogg" ]
+   },
+   "Image": {
+      "Path": "App_Data\\upload",
+      "AllowedExtensions": [ "jpg", "jpeg", "png" ]
+   },
+   "Video": {
+      "Path": "App_Data\\upload",
+      "AllowedExtensions": [ "mp4", "mov", "ogg" ]
+   }
+}
+```
 
 The allowed extensions can be set individually for each media resource.
 _Please note that this example the ogg extension can be both an audio or a video file._
 
+```json
 "Media": {
-&nbsp;&nbsp;"Audio": {
-&nbsp;&nbsp;&nbsp;&nbsp;"Path": "App_Data\\\\upload",
-&nbsp;&nbsp;&nbsp;&nbsp;**"AllowedExtensions": [ "mp3", "wav", "ogg" ]**
-&nbsp;&nbsp;},
-&nbsp;&nbsp;"Image": {
-&nbsp;&nbsp;&nbsp;&nbsp;"Path": "App_Data\\\\upload",
-&nbsp;&nbsp;&nbsp;&nbsp;**"AllowedExtensions": [ "jpg", "jpeg", "png" ]**
-&nbsp;&nbsp;},
-&nbsp;&nbsp;"Video": {
-&nbsp;&nbsp;&nbsp;&nbsp;"Path": "App_Data\\\\upload",
-&nbsp;&nbsp;&nbsp;&nbsp;**"AllowedExtensions": [ "mp4", "mov", "ogg" ]**
-&nbsp;&nbsp;}
-},
+   "Audio": {
+      "Path": "App_Data\\upload",
+      "AllowedExtensions": [ "mp3", "wav", "ogg" ]
+   },
+   "Image": {
+      "Path": "App_Data\\upload",
+      "AllowedExtensions": [ "jpg", "jpeg", "png" ]
+   },
+   "Video": {
+      "Path": "App_Data\\upload",
+      "AllowedExtensions": [ "mp4", "mov", "ogg" ]
+   }
+}
+```
 
 ##### OpenAPISpecification
 
 The path and filename to the Open API specification of this backend.
 
+```json
 "OpenAPISpecification": {
-&nbsp;&nbsp;**"Path": "OpenAPISpecification",**
-&nbsp;&nbsp;**"File": "api.yml"**
-},
+   "Path": "OpenAPISpecification",
+   "File": "api.yml"
+}
+```
 
 ##### Templates
 
 The path and filename to the map file template. This template is used when a new map file is created.
 
+```json
 "Templates": {
-&nbsp;&nbsp;**"Path": "App_Data\\\\templates",**
-&nbsp;&nbsp;**"Name": "map.template"**
-},
+   "Path": "App_Data\\templates",
+   "Name": "map.template"
+}
+```
 
 #### Proxy
 
 ##### FMEProxy
 
 The FME Proxy endpoint will proxy the specified query to FME server REST API.
+
+```json
+"FmeProxy": {
+   "FmeServerBaseUrl": "https://fmeserver.some.domain.com",
+   "FmeServerUser": "someFmeUser",
+   "FmeServerPassword": "aGreatFmeUserPassword"
+}
+```
+
 To be able to use the FME Proxy the "FmeProxy" appsettings must be set, where "FmeServerBaseUrl" is the URL to the FME server instance, "FmeServerUser" is an FME server user and "FmeServerPassword" the password for the supplied user.
 
 ##### FB Proxy
 
 The FB Proxy endpoint will proxy the specified query to Sokigo's FB API.
+
+```json
+"FbProxy": {
+   "FbServiceBaseUrl": "https://fbserver.some.domain.com",
+   "FbServiceDatabase": "aDatabase",
+   "FbServiceUser": "someFbUser",
+   "FbServicePassword": "aGreatFbUserPassword"
+}
+```
+
 To be able to use the FB Proxy the "FbProxy" appsettings must be set, where "FbServiceBaseUrl" is the URL to the FB service, "FbServiceDatabase" the name of the FB database, "FbServiceUser" is an FB user and "FbServicePassword" the password for the supplied user.
 
-#### AD 
+#### Active Directory
+
+The backend has support for Active Directory, to activate the support fo Active Directory the parameters under ActiveDirectory must be set.
+
+```json
+"ActiveDirectory": {
+   "Active": true,
+   "IdentifyUserWithWindowsAuthenticationX": true,
+   "Groups": ["ADGroupsAllowedAccess"],
+   "Url": "ldap://",
+   "BaseDN": "OU=xxx,DC=xxx,DC=xx",
+   "UserName": "ADUserName",
+   "Password": "ADPassword"
+}
+```
+
+##### Active
+
+This property indicates whether the Active Directory configuration is currently active or not.
+
+##### IdentifyUserWithWindowsAuthenticationX
+
+This property indicates whether users should be identified using Windows authentication.
+
+##### Groups
+
+This property contains an array of Active Directory groups that are allowed to access AD supported endpoints.
+
+##### Url
+
+This property contains the URL of the LDAP server.
+
+##### BaseDN
+
+This property contains the distinguished name (DN) of the Active Directory domain or organizational unit (OU) that will be used as the base for searches.
+
+##### UserName
+
+This property contains the username of the Active Directory user that will be used to connect to the LDAP server
+
+##### Password
+
+This property contains the username of the Active Directory user that will be used to connect to the LDAP server
 
 ## Deploy
 
