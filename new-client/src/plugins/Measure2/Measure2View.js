@@ -67,14 +67,12 @@ function HelpDialog(props) {
       <DialogTitle>{"Hjälp"}</DialogTitle>
       <DialogContent>
         <DialogContentText>
-          <p>
-            För att avsluta en mätning, klicka igen på sista punkten eller tryck
-            på Esc/Enter-tangenten.
-          </p>
-          <p>
-            Vid ritning av sträckor och arealer är det möjligt att hålla ner
-            Shift-tangenten för att rita på fri hand.
-          </p>
+          För att avsluta en mätning, klicka igen på sista punkten eller tryck
+          på Esc/Enter-tangenten.
+          <br />
+          <br />
+          Vid ritning av sträckor och arealer är det möjligt att hålla ner
+          Shift-tangenten för att rita på fri hand.
         </DialogContentText>
       </DialogContent>
       <DialogActions>
