@@ -4,7 +4,7 @@ function svg2Base64(svg) {
   return "data:image/svg+xml;charset=utf-8," + encodeURIComponent(svg);
 }
 
-export function MeasureIcon(props) {
+export function MeasurerIcon(props) {
   const d = `M732.1,10L500.9,241.3l84.9,84.9l-34,34l-84.9-84.9l-91,91l84.9,84.9l-34,34l-84.9-84.9l-99.3,99.3l84.9,84.9l-34,34l-84.9-84.9L10,732.1L267.9,990L990,267.9L732.1,10z M230.8,819.7c-13.9,13.9-36.5,13.9-50.4,0c-13.9-13.9-13.9-36.5,0-50.4c13.9-13.9,36.5-13.9,50.4,0C244.7,783.2,244.7,805.8,230.8,819.7z`;
 
   return (

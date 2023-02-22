@@ -11,7 +11,7 @@ import {
   DialogTitle,
 } from "@mui/material";
 
-import { IconPolygon, IconPoint, IconLine, IconCircle } from "./MeasureIcons";
+import { IconPolygon, IconPoint, IconLine, IconCircle } from "./MeasurerIcons";
 import DeleteIcon from "@mui/icons-material/Delete";
 import ConfirmationDialog from "components/ConfirmationDialog";
 import { useEffect, useState } from "react";
@@ -90,7 +90,7 @@ function HelpDialog(props) {
   );
 }
 
-function Measure2View(props) {
+function MeasurerView(props) {
   const { handleDrawTypeChange, drawType, drawModel } = props;
   const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
   const [showHelp, setShowHelp] = useState(false);
@@ -169,4 +169,4 @@ function Measure2View(props) {
   );
 }
 
-export default Measure2View;
+export default MeasurerView;

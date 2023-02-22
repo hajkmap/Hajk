@@ -1,4 +1,4 @@
-export default class Measure2Model {
+export default class MeasurerModel {
   #map;
   #app;
   #localObserver;

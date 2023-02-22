@@ -2,18 +2,18 @@ import React, { useRef } from "react";
 import { useState, useCallback } from "react";
 import BaseWindowPlugin from "../BaseWindowPlugin";
 
-import Measure2Model from "./Measure2Model";
-import Measure2View from "./Measure2View";
+import MeasurerModel from "./MeasurerModel";
+import MeasurerView from "./MeasurerView";
 import Observer from "react-event-observer";
 
-import { MeasureIcon } from "./MeasureIcons";
+import { MeasurerIcon } from "./MeasurerIcons";
 
 import { DEFAULT_MEASUREMENT_SETTINGS } from "./constants";
 import DrawModel from "models/DrawModel";
 import { Circle, Fill, RegularShape, Stroke, Style } from "ol/style";
 import HelpIcon from "@mui/icons-material/Help";
 
-function Measure2(props) {
+function Measurer(props) {
   const [state] = React.useState({});
   const currentHoverFeature = useRef(null);
   const [localObserver] = React.useState(Observer());
@@ -24,7 +24,7 @@ function Measure2(props) {
 
   const [model] = React.useState(
     () =>
-      new Measure2Model({
+      new MeasurerModel({
         localObserver: localObserver,
         app: props.app,
         map: props.map,
@@ -241,10 +241,10 @@ function Measure2(props) {
   return (
     <BaseWindowPlugin
       {...props}
-      type="Measure2"
+      type="Measurer"
       custom={{
-        icon: <MeasureIcon />,
-        title: state.title || "Measure",
+        icon: <MeasurerIcon />,
+        title: state.title || "Measurer",
         description: "En kort beskrivning som visas i widgeten",
         height: "dynamic",
         width: 400,
@@ -254,7 +254,7 @@ function Measure2(props) {
         onWindowShow: onWindowShow,
       }}
     >
-      <Measure2View
+      <MeasurerView
         model={model}
         app={props.app}
         localObserver={localObserver}
@@ -267,4 +267,4 @@ function Measure2(props) {
   );
 }
 
-export default Measure2;
+export default Measurer;

@@ -2242,6 +2242,8 @@ class DrawModel {
   finishDraw = () => {
     if (this.#drawInteraction) {
       this.#drawInteraction.finishDrawing();
+
+      // console.log(this.#drawInteraction.getSource().features);
     }
   };
 
