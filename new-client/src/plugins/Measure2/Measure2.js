@@ -17,7 +17,7 @@ function Measure2(props) {
   const [state] = React.useState({});
   const currentHoverFeature = useRef(null);
   const [localObserver] = React.useState(Observer());
-  const [drawType, setDrawType] = useState("LineString"); // default to LineString
+  const [drawType, setDrawType] = useState("LineString"); // default to LineString as previous Measure tool
   const [pluginShown, setPluginShown] = React.useState(
     props.options.visibleAtStart ?? false
   );
@@ -62,15 +62,45 @@ function Measure2(props) {
       })
   );
 
-  const handleDrawEnd = (e) => {
+  const handleAddFeature = useCallback(
+    (e) => {
+      // This is used to clean up measurements that results in 0 (zero).
+      // We should not allow measurements with zero.
+      // The old Measure tool does not address this issue.
+
+      if (!e.feature) {
+        return;
+      }
+      const feature = e.feature;
+      const geom = feature.getGeometry();
+      const type = geom.getType();
+
+      let remove = false;
+
+      if (type === "LineString") {
+        remove = geom.getLength() === 0;
+      } else if (type === "Polygon") {
+        remove = geom.getArea() === 0;
+      }
+
+      if (remove) {
+        drawModel.removeFeature(feature);
+      }
+    },
+    [drawModel]
+  );
+
+  const handleDrawEnd = useCallback((e) => {
     if (!e.feature) return;
     const feature = e.feature;
+    const type = feature.getGeometry().getType();
+
     feature.set("USER_MEASUREMENT", true);
     let style = feature.getStyle();
 
     if (!style) return;
 
-    if (feature.getGeometry().getType() === "Point") {
+    if (type === "Point") {
       style = new Style({
         image: new Circle({
           radius: 6,
@@ -92,17 +122,18 @@ function Measure2(props) {
     }
 
     feature.setStyle(style);
-  };
+  }, []);
 
   const startInteractionWithDrawType = useCallback(
     (type) => {
       setDrawType(type);
       drawModel.toggleDrawInteraction(type, {
         handleDrawEnd: handleDrawEnd,
+        handleAddFeature: handleAddFeature,
         drawStyleSettings: { strokeStyle: { dash: null } },
       });
     },
-    [drawModel]
+    [drawModel, handleAddFeature, handleDrawEnd]
   );
 
   const handleDrawTypeChange = (e, value) => {
@@ -113,6 +144,9 @@ function Measure2(props) {
     }
   };
 
+  // Handle hover effect for DrawType Delete.
+  // We'll set the currently hovered features line to red to make selection visible.
+  // Otherwise you would need to guess what will be deleted.
   const handlePointerMove = useCallback(
     (e) => {
       if (currentHoverFeature.current) {
@@ -198,7 +232,7 @@ function Measure2(props) {
       icon: <HelpIcon />,
       description: "Hjälp",
       onClickCallback: () => {
-        console.log(666);
+        localObserver.publish("show-help");
       },
     },
   ];

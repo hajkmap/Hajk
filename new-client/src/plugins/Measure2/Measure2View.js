@@ -1,8 +1,20 @@
 import { styled } from "@mui/material/styles";
-import { ToggleButtonGroup, ToggleButton, Button, Grid } from "@mui/material";
+import {
+  ToggleButtonGroup,
+  ToggleButton,
+  Button,
+  Grid,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
+} from "@mui/material";
 
 import { IconPolygon, IconPoint, IconLine, IconCircle } from "./MeasureIcons";
 import DeleteIcon from "@mui/icons-material/Delete";
+import ConfirmationDialog from "components/ConfirmationDialog";
+import { useEffect, useState } from "react";
 
 // import useCookieStatus from "hooks/useCookieStatus";
 
@@ -42,12 +54,62 @@ const StyledToggleButtonGroup = styled(ToggleButtonGroup)(({ theme }) => ({
   },
 }));
 
+function HelpDialog(props) {
+  // const { children, onClose, ...other } = props;
+
+  return (
+    <Dialog
+      open={props.open}
+      onClose={() => {
+        props.setShowHelp(false);
+      }}
+    >
+      <DialogTitle>{"Hjälp"}</DialogTitle>
+      <DialogContent>
+        <DialogContentText>
+          <p>
+            För att avsluta en mätning, klicka igen på sista punkten eller tryck
+            på Esc/Enter-tangenten.
+          </p>
+          <p>
+            Vid ritning av sträckor och arealer är det möjligt att hålla ner
+            Shift-tangenten för att rita på fri hand.
+          </p>
+        </DialogContentText>
+      </DialogContent>
+      <DialogActions>
+        <Button
+          variant="contained"
+          onClick={() => {
+            props.setShowHelp(false);
+          }}
+          autoFocus
+        >
+          Agree
+        </Button>
+      </DialogActions>
+    </Dialog>
+  );
+}
+
 function Measure2View(props) {
   const { handleDrawTypeChange, drawType, drawModel } = props;
+  const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
+  const [showHelp, setShowHelp] = useState(false);
 
-  const DeleteAllClick = () => {
+  const deleteAll = () => {
+    setShowDeleteConfirmation(false);
     drawModel.removeDrawnFeatures();
   };
+
+  useEffect(() => {
+    props.localObserver.subscribe("show-help", () => {
+      setShowHelp(true);
+    });
+    return () => {
+      props.localObserver.unsubscribe("show-help");
+    };
+  }, [props.localObserver]);
 
   return (
     <>
@@ -79,11 +141,32 @@ function Measure2View(props) {
           </StyledToggleButtonGroup>
         </Grid>
         <Grid item xs={3}>
-          <Button variant="contained" fullWidth onClick={DeleteAllClick}>
+          <Button
+            variant="contained"
+            fullWidth
+            onClick={() => {
+              setShowDeleteConfirmation(true);
+            }}
+            title="Rensa bort alla mätningar"
+          >
             Rensa
           </Button>
         </Grid>
       </Grid>
+      <ConfirmationDialog
+        open={showDeleteConfirmation === true}
+        titleName={"Rensa"}
+        contentDescription={
+          "Är du säker på att du vill rensa bort alla mätningar?"
+        }
+        cancel={"Avbryt"}
+        confirm={"Ja rensa"}
+        handleConfirm={deleteAll}
+        handleAbort={() => {
+          setShowDeleteConfirmation(false);
+        }}
+      />
+      <HelpDialog open={showHelp} setShowHelp={setShowHelp} />
     </>
   );
 }
