@@ -167,7 +167,7 @@ class MenuConnectionSelector extends React.Component {
   };
 
   updateSelection = () => {
-    const { treeNodeId, menuItem, updateMenuItem, type } = this.props;
+    const { treeNodeId, menuItem, updateMenuItem, type, folder} = this.props;
     const { menuValue, documentValue, linkValue, mapLinkValue } = this.state;
     const { DOCUMENT, LINK, MAP_LINK, NONE } = CONNECTION_TYPE;
 
@@ -182,6 +182,7 @@ class MenuConnectionSelector extends React.Component {
       document: type === DOCUMENT ? newDocument : menuItem.document,
       link: type === LINK ? newLink : menuItem.link,
       maplink: type === MAP_LINK ? newMapLink : menuItem.maplink,
+      folder: folder,
     };
 
     updateMenuItem(treeNodeId, newMenuItem);
@@ -217,7 +218,7 @@ class MenuConnectionSelector extends React.Component {
         <FormControl fullWidth>
           <NativeSelect
             onChange={(event) => this.handleFolderClick(event)}
-            value={this.state.folder}
+            value={this.props.folder}
           >
             <option value="">
             Välj en mapp

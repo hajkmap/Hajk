@@ -509,6 +509,7 @@
             {
               "title": "Exempeldokument",
               "document": "exempeldokument",
+              "folder": "",
               "color": "",
               "icon": {
                 "materialUiIconName": "",
@@ -521,6 +522,7 @@
             {
               "title": "Exempeldokument2",
               "document": "exempeldokument2",
+              "folder": "",
               "color": "",
               "icon": {
                 "materialUiIconName": "",

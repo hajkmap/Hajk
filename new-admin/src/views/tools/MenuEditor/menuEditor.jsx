@@ -481,6 +481,7 @@ class ToolOptions extends Component {
         valid={this.menuEditorModel.isSelectionValid(menuItem, children)}
         treeNodeId={key}
         onFolderSelection={this.handleFolderSelection}
+        folder={this.state.folder}
       ></TreeRow>
     );
   };
