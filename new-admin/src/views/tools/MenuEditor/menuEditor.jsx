@@ -124,16 +124,23 @@ class ToolOptions extends Component {
   }
 
   handleFolderSelection = (selectedFolder) => {
-    this.setState({folder: selectedFolder}, () => {
-      console.log(this.state.folder);
-      this.menuEditorModel.listAllAvailableDocuments(this.state.folder).then((list) => {
-        this.setState({
-        availableDocuments: list,
-      })
-        console.log(this.state.availableDocuments);
-      });
+    this.setState({ folder: selectedFolder }, () => {
+      this.menuEditorModel
+        .listAllAvailableDocuments(this.state.folder)
+        .then((list) => {
+          this.setState(
+            {
+              availableDocuments: list,
+            },
+            () => {
+              this.updateTreeValidation(this.state.tree);
+              // I hate myself... This should be avoided at all costs!!!
+              this.forceUpdate();
+            }
+          );
+        });
     });
-  }
+  };
 
   handleColorChange = (target, color) => {
     this.setState((prevState) => ({
