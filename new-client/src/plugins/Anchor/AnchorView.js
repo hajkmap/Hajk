@@ -60,14 +60,14 @@ class AnchorView extends React.PureComponent {
   appendCleanModeIfActive = (url) =>
     this.state.cleanUrl ? (url += "&clean") : url;
 
-  toggleCleanUrl = async () => {
+  toggleCleanUrl = () => {
     const newCleanState = !this.state.cleanUrl;
-    const newUrl = await this.props.model.getAnchor();
     this.setState(
       {
         cleanUrl: newCleanState,
       },
-      () => {
+      async () => {
+        const newUrl = await this.props.model.getAnchor();
         this.setState({ anchor: this.appendCleanModeIfActive(newUrl) });
       }
     );

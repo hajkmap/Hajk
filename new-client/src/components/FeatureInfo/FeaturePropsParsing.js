@@ -10,6 +10,7 @@ import {
   setOptions, // a method that will allow us to send infoclick options from here to the module that defines custom components
   Paragraph, // special case - we want to override the Paragraph component here, so we import it separately
 } from "utils/customComponentsForReactMarkdown";
+import { isValidUrl } from "utils/Validator";
 
 export default class FeaturePropsParsing {
   constructor(settings) {
@@ -205,7 +206,12 @@ export default class FeaturePropsParsing {
         matched.content += "\n";
 
         // Handle <if foo="bar">, <if foo=bar> as well as <if foo!="bar"> and <if foo!=bar>
-        if (matched.attributes?.includes("=")) {
+        // Make sure that we don't handle URLs with "=". It's virtually impossible
+        // to know how to tell the "=" from the URL vs "=" from our conditional check, see #1277.
+        if (
+          matched.attributes?.includes("=") &&
+          !isValidUrl(matched.attributes)
+        ) {
           // We allow two comparers: "equal" ("=") and "not equal" ("!=")
           const comparer = matched.attributes.includes("!=") ? "!=" : "=";
 
