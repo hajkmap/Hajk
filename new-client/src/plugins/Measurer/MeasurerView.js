@@ -16,8 +16,6 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import ConfirmationDialog from "components/ConfirmationDialog";
 import { useEffect, useState } from "react";
 
-// import useCookieStatus from "hooks/useCookieStatus";
-
 const SvgImg = styled("img")(({ theme }) => ({
   height: "24px",
   width: "24px",
@@ -55,8 +53,6 @@ const StyledToggleButtonGroup = styled(ToggleButtonGroup)(({ theme }) => ({
 }));
 
 function HelpDialog(props) {
-  // const { children, onClose, ...other } = props;
-
   return (
     <Dialog
       open={props.open}
