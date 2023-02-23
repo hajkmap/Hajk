@@ -83,7 +83,7 @@ function HelpDialog(props) {
           }}
           autoFocus
         >
-          Agree
+          OK
         </Button>
       </DialogActions>
     </Dialog>

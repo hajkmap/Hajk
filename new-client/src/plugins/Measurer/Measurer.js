@@ -244,10 +244,10 @@ function Measurer(props) {
       type="Measurer"
       custom={{
         icon: <MeasurerIcon />,
-        title: state.title || "Measurer",
-        description: "En kort beskrivning som visas i widgeten",
+        title: state.title || "Mät",
+        description: "",
         height: "dynamic",
-        width: 400,
+        width: 360,
         customPanelHeaderButtons: customHeaderButtons,
 
         onWindowHide: onWindowHide,
