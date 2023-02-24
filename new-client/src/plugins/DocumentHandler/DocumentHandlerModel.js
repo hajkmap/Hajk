@@ -108,12 +108,15 @@ export default class DocumentHandlerModel {
       const menuItemsWithDocumentConnection = this.flattenMenu(
         this.settings.menu
       ).filter((menuItem) => {
-        return menuItem.document;
+        return menuItem;
       });
 
       Promise.all(
         menuItemsWithDocumentConnection.map((menuItem) => {
-          return this.fetchJsonDocument(menuItem.document).then((doc) => {
+          return this.fetchJsonDocument(
+            menuItem.folder,
+            menuItem.document
+          ).then((doc) => {
             if (!doc.title) {
               console.warn(
                 `The document ${menuItem.document} is missing a title`
@@ -140,6 +143,7 @@ export default class DocumentHandlerModel {
   }
 
   getDocuments(fileNames) {
+    console.log("getDocuments: " + fileNames);
     let documents = [];
     fileNames.forEach((fileName) => {
       let document = this.allDocuments.find(
@@ -235,12 +239,20 @@ export default class DocumentHandlerModel {
     }
   }
 
-  async fetchJsonDocument(title) {
+  async fetchJsonDocument(folder, title) {
+    console.log("fetchJson: " + title);
     let response;
     try {
-      response = await hfetch(
-        `${this.mapServiceUrl}/informative/load/${title}`
-      );
+      if (folder) {
+        response = await hfetch(
+          `${this.mapServiceUrl}/informative/load/${folder}/${title}`
+        );
+      } else {
+        response = await hfetch(
+          `${this.mapServiceUrl}/informative/load/${title}`
+        );
+      }
+
       const text = await response.text();
       if (text === "File not found") {
         throw new Error(
