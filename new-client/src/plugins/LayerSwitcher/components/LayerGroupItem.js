@@ -290,6 +290,8 @@ class LayerGroupItem extends Component {
       // Hide the layer in OL
       layer.setVisible(false);
 
+      this.props.closeSnackbar(this.zoomWarningSnack);
+
       // Update UI state
       this.setState({
         visible: false,
