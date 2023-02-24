@@ -22,6 +22,10 @@ import {
   Tab,
   Tabs,
   Tooltip,
+  List,
+  ListItem,
+  ListItemText,
+  Link,
 } from "@mui/material";
 import PrintIcon from "@mui/icons-material/Print";
 import SettingsIcon from "@mui/icons-material/Settings";
@@ -887,6 +891,9 @@ class PrintWindow extends React.PureComponent {
     const { menuInformation } = this.state;
     return (
       <>
+        <Typography align="center" variant="h6">
+          Skapa PDF
+        </Typography>
         <GridSettingsContainer container item>
           <Typography variant="h6">Inställningar</Typography>
 
@@ -926,34 +933,24 @@ class PrintWindow extends React.PureComponent {
   };
 
   renderPrintAttachments = () => {
-    const { localObserver, documentWindowMaximized } = this.props;
-    const { menuInformation } = this.state;
-    return (
-      <>
-        <GridSettingsContainer container item>
-          <Typography variant="h6">Inställningar</Typography>
+    const { pdfLinks } = this.props.options;
+    console.log(this.props.options.pdfLinks);
 
-          <Grid xs={12} item>
-            <FormControlLabel
-              value="Välj alla bilagor"
-              control={<Checkbox color="primary" />}
-              label="Välj alla bilagor"
-              labelPlacement="end"
-            />
-          </Grid>
-        </GridSettingsContainer>
-        <Typography variant="h6">Valt innehåll</Typography>
-        <GridMiddleContainer item container>
-          <PrintList
-            localObserver={localObserver}
-            documentMenu={menuInformation}
-            level={0}
-            handleTogglePrint={this.toggleChosenForPrint}
-          />
-        </GridMiddleContainer>
-        {documentWindowMaximized && this.renderCreatePDFButton()}
-        {this.renderLoadingDialog()}
-      </>
+    return (
+      <Grid>
+        <Typography align="center" variant="h6">
+          Bilagor
+        </Typography>
+        <List>
+          {pdfLinks.map((pdfLink, index) => (
+            <ListItem sx={{ display: "flex" }} key={index}>
+              <Link href={pdfLink.link} target="_blank">
+                {pdfLink.name}
+              </Link>
+            </ListItem>
+          ))}
+        </List>
+      </Grid>
     );
   };
 
@@ -972,11 +969,6 @@ class PrintWindow extends React.PureComponent {
             >
               <Typography justify="center">Tillbaka</Typography>
             </Button>
-          </Grid>
-          <Grid item xs={4}>
-            <Typography align="center" variant="h6">
-              Skapa PDF
-            </Typography>
           </Grid>
         </GridHeaderContainer>
 
