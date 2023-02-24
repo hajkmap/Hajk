@@ -1,6 +1,7 @@
 import React, { Component } from "react";
 import { Button, Tooltip, Typography, Grid, Box } from "@mui/material";
 import { styled } from "@mui/material/styles";
+import { withSnackbar } from "notistack";
 import IconWarning from "@mui/icons-material/Warning";
 import CallMadeIcon from "@mui/icons-material/CallMade";
 import InfoIcon from "@mui/icons-material/Info";
@@ -338,6 +339,35 @@ class LayerGroupItem extends Component {
           .join(","),
       });
 
+      // Check if the layer has minimum and maximum zoom levels set.
+      const layerProperties = this.props.layer.getProperties();
+      const minZoom = layerProperties.minZoom;
+      const maxZoom = layerProperties.maxZoom;
+      const currentZoom = this.props.model.olMap.getView().getZoom();
+
+      // If the current zoom level is outside the range of the layer's visibility, show a warning message.
+      if (
+        (minZoom && currentZoom < minZoom) ||
+        (maxZoom && currentZoom > maxZoom)
+      ) {
+        this.zoomWarningSnack = this.props.enqueueSnackbar(
+          `Lagret "${this.caption}" visas endast vid specifika skalor.`,
+          {
+            variant: "warning",
+            preventDuplicate: true,
+            onClose: () => {
+              this.zoomWarningSnack = null;
+            },
+          }
+        );
+      } else {
+        // If the layer is visible at the current zoom level, close any open warning message.
+        if (this.zoomWarningSnack) {
+          this.props.closeSnackbar(this.zoomWarningSnack);
+          this.zoomWarningSnack = null;
+        }
+      }
+
       this.setState({
         visible: true,
         visibleSubLayers: subLayersToShow,
@@ -662,4 +692,4 @@ class LayerGroupItem extends Component {
   }
 }
 
-export default LayerGroupItem;
+export default withSnackbar(LayerGroupItem);
