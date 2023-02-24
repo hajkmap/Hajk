@@ -365,10 +365,7 @@ export default class DocumentHandlerModel {
     allowedHtmlTags.push({
       tagType: "blockquote",
       callback: (e) => {
-        if (
-          e.attributes["data-accordion"] &&
-          e.attributes["data-accordion"].value === "true"
-        ) {
+        if (e.attributes["data-accordion"]?.value === "true") {
           return (
             <AccordionSection
               blockQuoteTag={e}

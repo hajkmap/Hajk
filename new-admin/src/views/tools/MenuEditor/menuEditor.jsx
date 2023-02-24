@@ -330,14 +330,15 @@ class ToolOptions extends Component {
     this.addNewItem();
   };
 
-  getHeader = (canSave) => {
+  //getHeader = (canSave) => {
+  getHeader = () => {
     const { classes } = this.props;
     return (
       <Grid
         className={classes.header}
         spacing={1}
         alignItems="center"
-        justify="flex-end"
+        justifyContent="flex-end"
         container
       >
         <Grid xs={1} item>
@@ -352,8 +353,14 @@ class ToolOptions extends Component {
           <Grid xs={3} item>
             <Typography variant="h5">Inställningar</Typography>
           </Grid>
+          <Grid xs={4} item>
+            <Typography variant="h5">Dokument</Typography>
+          </Grid>
           <Grid xs={2} item>
-            <Typography variant="h5">Koppling</Typography>
+            <Typography variant="h5">Kartlänk</Typography>
+          </Grid>
+          <Grid xs={2} item>
+            <Typography variant="h5">Extern länk</Typography>
           </Grid>
 
           <Grid ref={this.buttonHeaderRef} xs={4} item>
@@ -367,7 +374,6 @@ class ToolOptions extends Component {
             <ColorButtonBlue
               variant="contained"
               className="btn"
-              disabled={!canSave}
               onClick={this.onSaveMenuEditsClick}
               startIcon={<SaveIcon />}
             >
