@@ -18,7 +18,13 @@ import {
   Grid,
   LinearProgress,
   Typography,
+  AppBar,
+  Tab,
+  Tabs,
+  Tooltip,
 } from "@mui/material";
+import PrintIcon from "@mui/icons-material/Print";
+import SettingsIcon from "@mui/icons-material/Settings";
 
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import OpenInNewIcon from "@mui/icons-material/OpenInNew";
@@ -31,14 +37,32 @@ import { getNormalizedMenuState } from "../utils/stateConverter";
 import { hasSubMenu } from "../utils/helpers";
 
 const GridGridContainer = styled(Grid)(({ theme }) => ({
-  padding: theme.spacing(4),
+  padding: theme.spacing(3),
   height: "100%",
+  overflowX: "auto",
 }));
 
 const GridMiddleContainer = styled(Grid)(({ theme }) => ({
-  overflowX: "auto",
-  flexBasis: "100%",
   marginTop: theme.spacing(2),
+  overflowX: "auto",
+  "&::-webkit-scrollbar": {
+    width: "0.4em",
+    opacity: "0",
+  },
+  "&:hover": {
+    "&::-webkit-scrollbar": {
+      opacity: "1",
+    },
+    "&::-webkit-scrollbar-track": {
+      boxShadow: "inset 0 0 6px rgba(0,0,0,0.00)",
+      webkitBoxShadow: "inset 0 0 6px rgba(0,0,0,0.00)",
+    },
+    "&::-webkit-scrollbar-thumb": {
+      backgroundColor: "rgba(0,0,0,.1)",
+    },
+  },
+  flexBasis: "100%",
+  maxHeight: "400px",
 }));
 
 const GridHeaderContainer = styled(Grid)(({ theme }) => ({
@@ -50,6 +74,7 @@ const GridSettingsContainer = styled(Grid)(({ theme }) => ({
 }));
 
 const GridFooterContainer = styled(Grid)(({ theme }) => ({
+  marginTop: "10px",
   flexBasis: "10%",
 }));
 
@@ -74,6 +99,7 @@ class PrintWindow extends React.PureComponent {
     printContent: undefined,
     pdfLoading: false,
     isAnyDocumentSelected: false,
+    activeTab: 0,
   };
 
   internalId = 0;
@@ -839,30 +865,28 @@ class PrintWindow extends React.PureComponent {
     );
   };
 
-  render() {
-    const { togglePrintWindow, localObserver, documentWindowMaximized } =
-      this.props;
+  a11yProps(index) {
+    return {
+      id: `print-tab-${index}`,
+      "aria-controls": `print-tab-${index}`,
+    };
+  }
+
+  handleChangeTabs = (event, activeTab) => {
+    this.setState({ activeTab });
+  };
+
+  handleTabsMounted = (ref) => {
+    setTimeout(() => {
+      ref !== null && ref.updateIndicator();
+    }, 1);
+  };
+
+  renderPrintDocuments = () => {
+    const { localObserver, documentWindowMaximized } = this.props;
     const { menuInformation } = this.state;
     return (
-      <GridGridContainer container wrap="nowrap" direction="column">
-        <GridHeaderContainer alignItems="center" item container>
-          <Grid item xs={4}>
-            <Button
-              color="primary"
-              style={{ paddingLeft: 0 }}
-              startIcon={<ArrowBackIcon />}
-              onClick={togglePrintWindow}
-            >
-              <Typography justify="center">Tillbaka</Typography>
-            </Button>
-          </Grid>
-          <Grid item xs={4}>
-            <Typography align="center" variant="h6">
-              Skapa PDF
-            </Typography>
-          </Grid>
-        </GridHeaderContainer>
-
+      <>
         <GridSettingsContainer container item>
           <Typography variant="h6">Inställningar</Typography>
 
@@ -897,6 +921,85 @@ class PrintWindow extends React.PureComponent {
 
         {documentWindowMaximized && this.renderCreatePDFButton()}
         {this.renderLoadingDialog()}
+      </>
+    );
+  };
+
+  renderPrintAttachments = () => {
+    const { localObserver, documentWindowMaximized } = this.props;
+    const { menuInformation } = this.state;
+    return (
+      <>
+        <GridSettingsContainer container item>
+          <Typography variant="h6">Inställningar</Typography>
+
+          <Grid xs={12} item>
+            <FormControlLabel
+              value="Välj alla bilagor"
+              control={<Checkbox color="primary" />}
+              label="Välj alla bilagor"
+              labelPlacement="end"
+            />
+          </Grid>
+        </GridSettingsContainer>
+        <Typography variant="h6">Valt innehåll</Typography>
+        <GridMiddleContainer item container>
+          <PrintList
+            localObserver={localObserver}
+            documentMenu={menuInformation}
+            level={0}
+            handleTogglePrint={this.toggleChosenForPrint}
+          />
+        </GridMiddleContainer>
+        {documentWindowMaximized && this.renderCreatePDFButton()}
+        {this.renderLoadingDialog()}
+      </>
+    );
+  };
+
+  render() {
+    const { togglePrintWindow, windowVisible } = this.props;
+    const { activeTab } = this.state;
+    return (
+      <GridGridContainer container wrap="nowrap" direction="column">
+        <GridHeaderContainer alignItems="center" item container>
+          <Grid item xs={4}>
+            <Button
+              color="primary"
+              style={{ paddingLeft: 0 }}
+              startIcon={<ArrowBackIcon />}
+              onClick={togglePrintWindow}
+            >
+              <Typography justify="center">Tillbaka</Typography>
+            </Button>
+          </Grid>
+          <Grid item xs={4}>
+            <Typography align="center" variant="h6">
+              Skapa PDF
+            </Typography>
+          </Grid>
+        </GridHeaderContainer>
+
+        <AppBar position="sticky" color="default">
+          <Tabs
+            action={this.handleTabsMounted}
+            onChange={this.handleChangeTabs}
+            value={windowVisible ? activeTab : false} // If the window is not visible,
+            // we cannot send a proper value to the tabs-component. If we do, mui will throw an error.
+            // false is OK though, apparently.
+            variant="fullWidth"
+            textColor="inherit"
+          >
+            <Tooltip disableInteractive title="Generella inställningar">
+              <Tab icon={<PrintIcon />} {...this.a11yProps(0)} />
+            </Tooltip>
+            <Tooltip disableInteractive title="Avancerade inställningar">
+              <Tab icon={<SettingsIcon />} {...this.a11yProps(1)} />
+            </Tooltip>
+          </Tabs>
+        </AppBar>
+        {activeTab === 0 && this.renderPrintDocuments()}
+        {activeTab === 1 && this.renderPrintAttachments()}
       </GridGridContainer>
     );
   }

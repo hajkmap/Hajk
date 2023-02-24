@@ -83,6 +83,7 @@ class ToolOptions extends Component {
     draggingEnabled: false,
     searchImplemented: true,
     enablePrint: true,
+    pdfLink: "",
     closePanelOnMapLinkOpen: false,
     displayLoadingOnMapLinkOpen: false,
     tableOfContents: {
@@ -160,6 +161,7 @@ class ToolOptions extends Component {
         draggingEnabled: tool.options.draggingEnabled || false,
         searchImplemented: tool.options.searchImplemented,
         enablePrint: tool.options.enablePrint,
+        pdfLink: tool.options.pdfLink,
         closePanelOnMapLinkOpen: tool.options.closePanelOnMapLinkOpen,
         displayLoadingOnMapLinkOpen:
           tool.options.displayLoadingOnMapLinkOpen || false,
@@ -254,6 +256,7 @@ class ToolOptions extends Component {
         height: this.state.height,
         searchImplemented: this.state.searchImplemented,
         enablePrint: this.state.enablePrint,
+        pdfLink: this.state.pdfLink,
         closePanelOnMapLinkOpen: this.state.closePanelOnMapLinkOpen,
         displayLoadingOnMapLinkOpen: this.state.displayLoadingOnMapLinkOpen,
         documentOnStart: this.state.documentOnStart,
@@ -837,6 +840,27 @@ class ToolOptions extends Component {
             &nbsp;
             <label htmlFor="enablePrint">Utskrift aktiverad</label>
           </div>
+
+          <div>
+            <label htmlFor="pdfLink">
+              Pdf-länk{" "}
+              <i
+                className="fa fa-question-circle"
+                data-toggle="tooltip"
+                title="Textlänk till pdf"
+              />
+            </label>
+            <input
+              id="pdfLink"
+              value={this.state.pdfLink}
+              type="text"
+              name="pdfLink"
+              onChange={(e) => {
+                this.handleInputChange(e);
+              }}
+            />
+          </div>
+
           <div>
             <input
               id="closePanelOnMapLinkOpen"
