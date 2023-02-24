@@ -52,6 +52,7 @@ import { handleClick } from "./Click";
 class DrawModel {
   #map;
   #layerName;
+  #layerCaption;
   #geoJSONParser;
   #observer;
   #observerPrefix;
@@ -97,6 +98,7 @@ class DrawModel {
     // Make sure that we keep track of the supplied settings.
     this.#map = settings.map;
     this.#layerName = settings.layerName;
+    this.#layerCaption = settings.layerCaption;
     // We're gonna need a GeoJSON-parser with the maps projection set.
     this.#geoJSONParser = new GeoJSON({
       featureProjection: this.#map.getView().getProjection(),
@@ -1138,7 +1140,7 @@ class DrawModel {
       layerType: "system",
       ignoreInFeatureInfo: true,
       zIndex: 5000,
-      caption: "Draw model",
+      caption: this.#layerCaption || "Draw layer",
     });
   };
 
