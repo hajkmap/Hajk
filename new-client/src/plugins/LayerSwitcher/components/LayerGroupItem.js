@@ -298,7 +298,7 @@ class LayerGroupItem extends Component {
     }
   };
 
-  setVisible = (la) => {
+  setVisible = (la, subLayer) => {
     let l,
       subLayersToShow = null;
 
@@ -351,7 +351,11 @@ class LayerGroupItem extends Component {
         (maxZoom && currentZoom > maxZoom)
       ) {
         this.zoomWarningSnack = this.props.enqueueSnackbar(
-          `Lagret "${layerProperties.caption}" är inte synligt vid aktuell zoomnivå. Zooma in eller ut för att visa lagret.`,
+          `Lagret "${
+            subLayer
+              ? layerProperties.layerInfo.layersInfo[subLayer].caption
+              : layerProperties.caption
+          }" är inte synligt vid aktuell zoomnivå. Zooma in eller ut för att visa lagret.`,
           {
             variant: "warning",
             preventDuplicate: true,
@@ -404,10 +408,12 @@ class LayerGroupItem extends Component {
 
     if (!visible && visibleSubLayers.length > 0) {
       layerVisibility = true;
+      this.setVisible(this.props.layer, subLayer);
     }
 
     if (visibleSubLayers.length === 0) {
       layerVisibility = false;
+      this.setHidden(this.props.layer);
     }
 
     if (visibleSubLayers.length >= 1) {
