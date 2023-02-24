@@ -1167,7 +1167,7 @@ class DrawModel {
     this.#drawInteraction.un("drawabort", this.#handleDrawAbort);
     this.#map.un("pointermove", this.#handlePointerMove);
     this.#drawSource.un("addfeature", this.#handleDrawFeatureAdded);
-    document.removeEventListener("keyup", this.#handleKeyUp);
+    document.removeEventListener("keydown", this.#handleKeyDown);
     // Then we'll remove the custom listeners
     this.#removeCustomEventListeners();
   };
@@ -1189,7 +1189,7 @@ class DrawModel {
     this.#drawSource.on("addfeature", this.#handleDrawFeatureAdded);
     // We need a listener for keyboard input. For example, pressing the escape
     // key will allow the users to remove the last point.
-    document.addEventListener("keyup", this.#handleKeyUp);
+    document.addEventListener("keydown", this.#handleKeyDown);
   };
 
   // Adds listeners that might have been passed in the settings when
@@ -1338,14 +1338,14 @@ class DrawModel {
 
   // We want to handle key-up events so that we can let the user
   // remove the last drawn point by pressing the escape key. (And perhaps more...?)
-  #handleKeyUp = (e) => {
+  #handleKeyDown = (e) => {
     if (!this.#drawInteraction) return;
-    const { keyCode, ctrlKey } = e;
+    const { keyCode, ctrlKey, metaKey } = e;
     if (keyCode === 27 || keyCode === 13) {
       // escape or enter finishes drawing
       this.finishDraw();
-    } else if (ctrlKey === true && keyCode === 90) {
-      // ctrl + z removes last draw point
+    } else if ((ctrlKey === true || metaKey === true) && keyCode === 90) {
+      // Ctrl+Z or Cmd+Z removes last draw point
       this.#drawInteraction.removeLastPoint();
     }
   };
