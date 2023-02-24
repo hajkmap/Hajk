@@ -15,6 +15,8 @@
  *  - (string) The name of the sub-layer from which the supplied feature comes from
  */
 function getSubLayerNameFromFeatureId(feature, layer) {
+  const featureId = feature?.getId();
+
   let subLayerName = Object.keys(layer.layersInfo).find((id) => {
     // First, the layerName from config needs some cleaning, since different service providers want different layerNames.
     const layerName = id.split(":").length === 2 ? id.split(":")[1] : id;
@@ -27,7 +29,7 @@ function getSubLayerNameFromFeatureId(feature, layer) {
     // Instead, we split the featureId on dots (since the layerName and featureId-number(s) will always be separated by dots), and try to
     // create the layerName by combining the parts one by one.
     // First we'll split the featureId into it's parts...
-    const fidArray = feature?.getId()?.split?.(".") || [];
+    const fidArray = featureId?.split?.(".") || [];
     // ...then we'll loop over the parts...
     for (let i = fidArray.length - 1; i >= 0; i--) {
       // ...and create a layerName that can be matched against the layerName from config!
@@ -42,13 +44,15 @@ function getSubLayerNameFromFeatureId(feature, layer) {
 
   if (
     subLayerName === undefined &&
-    feature.getId() === "" &&
+    // This undefined-string check below is a temporary fix to make raster layers work better in legacy infoclick.
+    ((typeof featureId === "string" && featureId.startsWith("undefined")) ||
+      featureId === "") &&
     layer.subLayers.length === 1
   ) {
     // Let's assume that the layer's name is the name of the first layer
     subLayerName = layer.subLayers[0];
     // Make sure to set a feature ID - without it we won't be able to
-    // set/unset selected feature later on (an absolut requirement to
+    // set/unset selected feature later on (an absolute requirement to
     // properly render components that follow such as Pagination, Markdown).
     feature.setId("fakeFeatureIdIssue1090");
   }
