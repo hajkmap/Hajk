@@ -144,30 +144,38 @@ function Measurer(props) {
     }
   };
 
+  const restoreHoveredFeature = () => {
+    if (currentHoverFeature.current) {
+      // Restore previous hovered feature style
+      let style = currentHoverFeature.current.getStyle();
+      let stroke = style.getStroke();
+      if (stroke) {
+        stroke.setColor("#000000");
+        stroke.setWidth(1);
+        style.setStroke(stroke);
+      }
+      let imageStroke = style.getImage()?.getStroke();
+      if (imageStroke) {
+        // handle Point feature
+        imageStroke.setWidth(1);
+        imageStroke.setColor("#000000");
+        style.getImage().setStroke(imageStroke);
+      }
+      currentHoverFeature.current.setStyle(style);
+      currentHoverFeature.current = null;
+    }
+  };
+
   // Handle hover effect for DrawType Delete.
   // We'll set the currently hovered features line to red to make selection visible.
   // Otherwise you would need to guess what will be deleted.
   const handlePointerMove = useCallback(
     (e) => {
-      if (currentHoverFeature.current) {
-        // Restore previous hovered feature style
-        let style = currentHoverFeature.current.getStyle();
-        let stroke = style.getStroke();
-        if (stroke) {
-          stroke.setColor("#000000");
-          stroke.setWidth(1);
-          style.setStroke(stroke);
-        }
-        let imageStroke = style.getImage()?.getStroke();
-        if (imageStroke) {
-          // handle Point feature
-          imageStroke.setWidth(1);
-          imageStroke.setColor("#000000");
-          style.getImage().setStroke(imageStroke);
-        }
-        currentHoverFeature.current.setStyle(style);
-        currentHoverFeature.current = null;
+      if (!pluginShown) {
+        return;
       }
+
+      restoreHoveredFeature();
 
       if (drawType !== "Delete") {
         return;
@@ -201,7 +209,7 @@ function Measurer(props) {
         }
       });
     },
-    [drawType, currentHoverFeature, model]
+    [drawType, currentHoverFeature, model, pluginShown]
   );
 
   React.useEffect(() => {
@@ -220,6 +228,7 @@ function Measurer(props) {
   }, [pluginShown, drawType, drawModel, startInteractionWithDrawType]);
 
   const onWindowHide = () => {
+    restoreHoveredFeature();
     setPluginShown(false);
   };
 
