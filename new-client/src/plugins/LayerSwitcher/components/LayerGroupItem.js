@@ -351,7 +351,7 @@ class LayerGroupItem extends Component {
         (maxZoom && currentZoom > maxZoom)
       ) {
         this.zoomWarningSnack = this.props.enqueueSnackbar(
-          `Lagret "${this.caption}" visas endast vid specifika skalor.`,
+          `Lagret "${layerProperties.caption}" är inte synligt vid aktuell zoomnivå. Zooma in eller ut för att visa lagret.`,
           {
             variant: "warning",
             preventDuplicate: true,
