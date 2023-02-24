@@ -2,7 +2,6 @@ import React, { useRef } from "react";
 import { useState, useCallback } from "react";
 import BaseWindowPlugin from "../BaseWindowPlugin";
 
-import MeasurerModel from "./MeasurerModel";
 import MeasurerView from "./MeasurerView";
 import Observer from "react-event-observer";
 
@@ -14,6 +13,7 @@ import { Circle, Fill, RegularShape, Stroke, Style } from "ol/style";
 import HelpIcon from "@mui/icons-material/Help";
 
 function Measurer(props) {
+  const { map, app } = props;
   const [state] = React.useState({});
   const currentHoverFeature = useRef(null);
   const [localObserver] = React.useState(Observer());
@@ -22,20 +22,11 @@ function Measurer(props) {
     props.options.visibleAtStart ?? false
   );
 
-  const [model] = React.useState(
-    () =>
-      new MeasurerModel({
-        localObserver: localObserver,
-        app: props.app,
-        map: props.map,
-      })
-  );
-
   const [drawModel] = React.useState(
     () =>
       new DrawModel({
         layerName: "pluginMeasure",
-        map: props.map,
+        map: map,
         observer: localObserver,
         observerPrefix: "measure",
         measurementSettings: DEFAULT_MEASUREMENT_SETTINGS,
@@ -181,7 +172,7 @@ function Measurer(props) {
         return;
       }
 
-      model.getMap().forEachFeatureAtPixel(e.pixel, function (f) {
+      map.forEachFeatureAtPixel(e.pixel, function (f) {
         if (
           f.get("USER_DRAWN") === true &&
           f.get("USER_MEASUREMENT") === true
@@ -209,15 +200,15 @@ function Measurer(props) {
         }
       });
     },
-    [drawType, currentHoverFeature, model, pluginShown]
+    [drawType, currentHoverFeature, pluginShown, map]
   );
 
   React.useEffect(() => {
-    model.getMap().on("pointermove", handlePointerMove);
+    map.on("pointermove", handlePointerMove);
     return () => {
-      model.getMap().un("pointermove", handlePointerMove);
+      map.un("pointermove", handlePointerMove);
     };
-  }, [model, handlePointerMove]);
+  }, [map, handlePointerMove]);
 
   React.useEffect(() => {
     if (!pluginShown) {
@@ -264,9 +255,8 @@ function Measurer(props) {
       }}
     >
       <MeasurerView
-        app={props.app}
+        app={app}
         localObserver={localObserver}
-        globalObserver={props.app.globalObserver}
         drawType={drawType}
         drawModel={drawModel}
         handleDrawTypeChange={handleDrawTypeChange}
