@@ -264,7 +264,6 @@ function Measurer(props) {
       }}
     >
       <MeasurerView
-        model={model}
         app={props.app}
         localObserver={localObserver}
         globalObserver={props.app.globalObserver}
