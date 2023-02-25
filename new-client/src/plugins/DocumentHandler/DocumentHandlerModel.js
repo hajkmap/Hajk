@@ -108,7 +108,7 @@ export default class DocumentHandlerModel {
       const menuItemsWithDocumentConnection = this.flattenMenu(
         this.settings.menu
       ).filter((menuItem) => {
-        return menuItem;
+        return menuItem.document;
       });
 
       Promise.all(
@@ -143,7 +143,6 @@ export default class DocumentHandlerModel {
   }
 
   getDocuments(fileNames) {
-    console.log("getDocuments: " + fileNames);
     let documents = [];
     fileNames.forEach((fileName) => {
       let document = this.allDocuments.find(
@@ -240,7 +239,6 @@ export default class DocumentHandlerModel {
   }
 
   async fetchJsonDocument(folder, title) {
-    console.log("fetchJson: " + title);
     let response;
     try {
       if (folder) {
