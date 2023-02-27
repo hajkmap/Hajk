@@ -408,7 +408,7 @@ export default class PrintModel {
       scaleBarLengthMeters /= 1000;
       units = "km";
     }
-    return `${Number(scaleBarLengthMeters).toLocaleString("sv-SE")} ${units}`;
+    return `${Number(scaleBarLengthMeters).toLocaleString()} ${units}`;
   };
 
   addDividerLinesAndTexts = (props) => {
@@ -485,9 +485,7 @@ export default class PrintModel {
     // correct positions of the two halved values on the scalebar line.
     for (let textGap = 2; textGap <= 4; textGap *= 2) {
       // Here we calculate the text that will be written on the PDF.
-      let dividerText = (calculatedScaleBarLength / textGap).toLocaleString(
-        "sv-SE"
-      );
+      let dividerText = (calculatedScaleBarLength / textGap).toLocaleString();
       // We calculate the X coordinate where the text will be drawn.
       let positionX =
         position.x - dividerText.length / 1.6 + scaleBarLength / textGap;
@@ -1454,6 +1452,6 @@ export default class PrintModel {
    * @returns {string} Input parameter, prefixed by "1:" and with spaces as thousands separator, e.g "5000" -> "1:5 000".
    */
   getUserFriendlyScale = (scale) => {
-    return `1:${Number(scale).toLocaleString("sv-SE")}`;
+    return `1:${Number(scale).toLocaleString()}`;
   };
 }
