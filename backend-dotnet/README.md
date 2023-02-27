@@ -17,7 +17,7 @@ Backend (.NET or node.js)
 The easiest way to set up this .NET backend is to use IIS on Windows. Follow this step by step guide.
 
 1. Make sure that IIS is installed.
-2. Review the [Backend settings](#Settings).
+2. Review the [Backend settings](#backend-settings).
 3. [Publish .NET backend](#Publish).
 4. [Set up IIS](#IIS).
 5. [Run backend](#Run).
@@ -33,7 +33,7 @@ The easiest way to set up this .NET backend is to use IIS on Windows. Follow thi
 - Serilog AspNetCore (https://github.com/serilog/serilog-aspnetcore)
 - Swashbuckle AspNetCore (https://learn.microsoft.com/en-us/aspnet/core/tutorials/web-api-help-pages-using-swagger?view=aspnetcore-6.0)
 
-### <a id="Settings"></a> Backend settings
+### <a id="backend-settings"></a>Backend settings
 
 There are several settings for this backend, described below.
 
