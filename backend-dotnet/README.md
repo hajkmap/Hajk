@@ -261,7 +261,7 @@ The backend needs first to be "deployed", before it can be set up in IIS. Follow
    5.2 Choose a Site name, e.g. "mapservice".
    5.3 Press "Finish".
 
-### <a id="Set-up-IIS"></a> Set up IIS
+### <a id="Set-up-IIS"></a>Set up IIS
 
 The easiest way to set up the .NET backend is to use IIS on Windows. Follow this step by step guide.
 
@@ -273,7 +273,7 @@ The easiest way to set up the .NET backend is to use IIS on Windows. Follow this
    3.2 Give a port number on which the web service will run, it is recommended to use port 3002.
 4. Make sure that the service is running.
 
-### <a id="Run-backend"></a> Run backend
+### <a id="Run-backend"></a>Run backend
 
 The easiest way to set up the .NET backend is to use IIS on Windows. Follow this step by step guide.
 
