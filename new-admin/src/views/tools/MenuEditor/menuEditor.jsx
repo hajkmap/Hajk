@@ -907,7 +907,10 @@ class ToolOptions extends Component {
           <div>
             {this.state.pdfLinks &&
               this.state.pdfLinks.map((pdfLink, index) => (
-                <div key={index} style={{ display: "flex" }}>
+                <div
+                  key={`${index}_${pdfLink.name}_${pdfLink.link}`}
+                  style={{ display: "flex" }}
+                >
                   <div>
                     <label htmlFor="pdfLinkName">Bilaga</label>
                     <input
@@ -917,7 +920,7 @@ class ToolOptions extends Component {
                       defaultValue={pdfLink.name}
                       style={{ maxWidth: "150px" }}
                       placeholder="Namn..."
-                      onChange={(e) => {
+                      onBlur={(e) => {
                         this.handlePdfInputChange(e, pdfLink, "name");
                       }}
                     />
@@ -929,7 +932,7 @@ class ToolOptions extends Component {
                       defaultValue={pdfLink.link}
                       style={{ maxWidth: "250px" }}
                       placeholder="Länk..."
-                      onChange={(e) => {
+                      onBlur={(e) => {
                         this.handlePdfInputChange(e, pdfLink, "link");
                       }}
                     />
@@ -939,7 +942,7 @@ class ToolOptions extends Component {
                       style={{ fontWeight: "bold" }}
                       disabled={this.state.pdfLinks.length === 1}
                       onClick={(e) => {
-                        this.removePdfLinkRow(e, pdfLink);
+                        this.removePdfLinkRow(e, index);
                       }}
                     >
                       -
