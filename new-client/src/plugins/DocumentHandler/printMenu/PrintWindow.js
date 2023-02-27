@@ -24,13 +24,13 @@ import {
   Tooltip,
   List,
   ListItem,
-  ListItemText,
   Link,
 } from "@mui/material";
 import PrintIcon from "@mui/icons-material/Print";
 import SettingsIcon from "@mui/icons-material/Settings";
 
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import OpenInNewIcon from "@mui/icons-material/OpenInNew";
 
 import { deepMerge } from "utils/DeepMerge";
@@ -82,6 +82,11 @@ const GridFooterContainer = styled(Grid)(({ theme }) => ({
   flexBasis: "10%",
 }));
 
+const StyledGrid = styled(Grid)(({ theme }) => ({
+  display: "flex",
+  justifyContent: "flex-end",
+}));
+
 const maxHeight = 950;
 const imageResizeRatio = 0.7;
 
@@ -103,7 +108,7 @@ class PrintWindow extends React.PureComponent {
     printContent: undefined,
     pdfLoading: false,
     isAnyDocumentSelected: false,
-    activeTab: 0,
+    showAttachments: false,
   };
 
   internalId = 0;
@@ -869,21 +874,9 @@ class PrintWindow extends React.PureComponent {
     );
   };
 
-  a11yProps(index) {
-    return {
-      id: `print-tab-${index}`,
-      "aria-controls": `print-tab-${index}`,
-    };
-  }
-
-  handleChangeTabs = (event, activeTab) => {
-    this.setState({ activeTab });
-  };
-
-  handleTabsMounted = (ref) => {
-    setTimeout(() => {
-      ref !== null && ref.updateIndicator();
-    }, 1);
+  toggleDocumentsAttachments = () => {
+    let showAttachments = this.state.showAttachments;
+    this.setState({ showAttachments: !showAttachments });
   };
 
   renderPrintDocuments = () => {
@@ -934,7 +927,6 @@ class PrintWindow extends React.PureComponent {
 
   renderPrintAttachments = () => {
     const { pdfLinks } = this.props.options;
-    console.log(this.props.options.pdfLinks);
 
     return (
       <Grid>
@@ -955,44 +947,64 @@ class PrintWindow extends React.PureComponent {
   };
 
   render() {
-    const { togglePrintWindow, windowVisible } = this.props;
-    const { activeTab } = this.state;
+    const { togglePrintWindow } = this.props;
+    const { showAttachments } = this.state;
     return (
-      <GridGridContainer container wrap="nowrap" direction="column">
-        <GridHeaderContainer alignItems="center" item container>
-          <Grid item xs={4}>
-            <Button
-              color="primary"
-              style={{ paddingLeft: 0 }}
-              startIcon={<ArrowBackIcon />}
-              onClick={togglePrintWindow}
+      <>
+        {!showAttachments ? (
+          <GridGridContainer container wrap="nowrap" direction="column">
+            <GridHeaderContainer
+              alignItems="center"
+              justifyContent="space-between"
+              item
+              container
             >
-              <Typography justify="center">Tillbaka</Typography>
-            </Button>
-          </Grid>
-        </GridHeaderContainer>
-
-        <AppBar position="sticky" color="default">
-          <Tabs
-            action={this.handleTabsMounted}
-            onChange={this.handleChangeTabs}
-            value={windowVisible ? activeTab : false} // If the window is not visible,
-            // we cannot send a proper value to the tabs-component. If we do, mui will throw an error.
-            // false is OK though, apparently.
-            variant="fullWidth"
-            textColor="inherit"
-          >
-            <Tooltip disableInteractive title="Generella inställningar">
-              <Tab icon={<PrintIcon />} {...this.a11yProps(0)} />
-            </Tooltip>
-            <Tooltip disableInteractive title="Avancerade inställningar">
-              <Tab icon={<SettingsIcon />} {...this.a11yProps(1)} />
-            </Tooltip>
-          </Tabs>
-        </AppBar>
-        {activeTab === 0 && this.renderPrintDocuments()}
-        {activeTab === 1 && this.renderPrintAttachments()}
-      </GridGridContainer>
+              <Grid item xs={4}>
+                <Button
+                  color="primary"
+                  style={{ paddingLeft: 0 }}
+                  startIcon={<ArrowBackIcon />}
+                  onClick={togglePrintWindow}
+                >
+                  <Typography justify="center">Tillbaka</Typography>
+                </Button>
+              </Grid>
+              <StyledGrid item xs={4}>
+                <Button
+                  color="primary"
+                  style={{ paddingLeft: 0 }}
+                  endIcon={<ArrowForwardIcon />}
+                  onClick={() => this.toggleDocumentsAttachments()}
+                >
+                  <Typography justify="center">Bilagor</Typography>
+                </Button>
+              </StyledGrid>
+            </GridHeaderContainer>
+            {this.renderPrintDocuments()}
+          </GridGridContainer>
+        ) : (
+          <GridGridContainer container wrap="nowrap" direction="column">
+            <GridHeaderContainer
+              alignItems="center"
+              justifyContent="space-between"
+              item
+              container
+            >
+              <Grid item xs={4}>
+                <Button
+                  color="primary"
+                  style={{ paddingLeft: 0 }}
+                  startIcon={<ArrowBackIcon />}
+                  onClick={() => this.toggleDocumentsAttachments()}
+                >
+                  <Typography justify="center">Skapa Pdf</Typography>
+                </Button>
+              </Grid>
+            </GridHeaderContainer>
+            {this.renderPrintAttachments()}
+          </GridGridContainer>
+        )}
+      </>
     );
   }
 }
