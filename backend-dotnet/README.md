@@ -18,9 +18,9 @@ The easiest way to set up this .NET backend is to use IIS on Windows. Follow thi
 
 1. Make sure that IIS is installed.
 2. Review the [Backend settings](#backend-settings).
-3. [Publish .NET backend](#Publish).
-4. [Set up IIS](#IIS).
-5. [Run backend](#Run).
+3. [Publish .NET backend](#publish-net-backend).
+4. [Set up IIS](#Set-up-IIS).
+5. [Run backend](#Run-backend).
 6. Run Hajk the [Client](#Client) and [Admin](#Admin).
 
 ### Technical requirements 
@@ -246,9 +246,9 @@ This property contains the password of the Active Directory user that will be us
 
 ## Deploy
 
-To deploy this backend follow the [Publish .NET backend](#Publish), [Set up IIS](#IIS) and [Run backend](#Run) headings sequentially.
+To deploy this backend follow the [Publish .NET backend](#publish-net-backend), [Set up IIS](#Set-up-IIS) and [Run backend](#Run-backend) headings sequentially.
 
-### <a id="Publish"></a> Publish .NET backend
+### <a id="#publish-net-backend"></a>Publish .NET backend
 
 The backend needs first to be "deployed", before it can be set up in IIS. Follow this step by step guide only need to be done once.
 
@@ -261,11 +261,11 @@ The backend needs first to be "deployed", before it can be set up in IIS. Follow
    5.2 Choose a Site name, e.g. "mapservice".
    5.3 Press "Finish".
 
-### <a id="IIS"></a> Set up IIS
+### <a id="Set-up-IIS"></a> Set up IIS
 
 The easiest way to set up the .NET backend is to use IIS on Windows. Follow this step by step guide.
 
-1. Copy the deployed files from step above [Publish .NET backend](#Publish) if they are in the wrong folder.
+1. Copy the deployed files from step above [Publish .NET backend](#publish-net-backend) if they are in the wrong folder.
 2. Start IIS.
 3. Right click on "Sites" and click "Add Website...".
    3.1 Give the site a name in IIS, e.g. "mapservice".
@@ -273,7 +273,7 @@ The easiest way to set up the .NET backend is to use IIS on Windows. Follow this
    3.2 Give a port number on which the web service will run, it is recommended to use port 3002.
 4. Make sure that the service is running.
 
-### <a id="Run"></a> Run backend
+### <a id="Run-backend"></a> Run backend
 
 The easiest way to set up the .NET backend is to use IIS on Windows. Follow this step by step guide.
 
@@ -283,7 +283,7 @@ The easiest way to set up the .NET backend is to use IIS on Windows. Follow this
 
 Browse to the web service and add "/swagger" to the end of the URL.
 
-### <a id="Client"></a> Client
+### <a id="Client"></a>Client
 
 Now when Backend is up and running, it's time to start the Client (and optionally Admin) applications.
 
@@ -291,7 +291,7 @@ Now when Backend is up and running, it's time to start the Client (and optionall
 2. The client application resides inside new-client. Go there (cd new-client) and install the dependencies and start by typing: npm i && npm start.
 3. Verify that Client is running on http://localhost:3000.
 
-### <a id="Admin"></a> Admin
+### <a id="Admin"></a>Admin
 
 This optional process is similar to the Client app.
 
