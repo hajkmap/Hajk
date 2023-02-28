@@ -357,7 +357,7 @@ class LayerGroupItem extends Component {
             subLayer
               ? layerProperties.layerInfo.layersInfo[subLayer].caption
               : layerProperties.caption
-          }" är inte synligt vid aktuell zoomnivå. Zooma in eller ut för att visa lagret.`,
+          }" är inte synligt vid aktuell zoomnivå.`,
           {
             variant: "warning",
             preventDuplicate: true,
