@@ -250,7 +250,7 @@ To deploy this backend follow the [Publish .NET backend](#publish-net-backend), 
 
 ### <a id="#publish-net-backend"></a>Publish .NET backend
 
-The backend needs first to be "deployed", before it can be set up in IIS. Follow this step by step guide only need to be done once.
+Before the backend can be used, it must first be "deployed". Follow this step by step guide only need to be done once.
 
 1. Start Visual Studio and open the backend-dotnet solution file (backend-dotnet.sln).
 2. Right-click on the solution (MapService) and the left-click on Publish.
