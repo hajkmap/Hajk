@@ -87,12 +87,13 @@ var documentEditor = Model.extend({
   load: function (documentName, callback) {
     var url = this.get("config").url_load + "/" + documentName;
     hfetch(url).then((response) => {
-      response.json().then((data) => {
-        data.chapters.forEach((chapter) => {
-          this.setParentChapter(chapter, data.chapters);
+      response.status === 200 &&
+        response.json().then((data) => {
+          data.chapters.forEach((chapter) => {
+            this.setParentChapter(chapter, data.chapters);
+          });
+          callback(data);
         });
-        callback(data);
-      });
     });
   },
 

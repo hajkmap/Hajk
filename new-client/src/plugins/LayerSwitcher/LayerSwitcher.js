@@ -2,7 +2,7 @@ import React from "react";
 import propTypes from "prop-types";
 import BaseWindowPlugin from "../BaseWindowPlugin";
 
-import LayersIcon from "@material-ui/icons/Layers";
+import LayersIcon from "@mui/icons-material/Layers";
 
 import LayerSwitcherView from "./LayerSwitcherView.js";
 import LayerSwitcherModel from "./LayerSwitcherModel.js";

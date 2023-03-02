@@ -1,16 +1,24 @@
 import { ACTIVITIES, MAX_REMOVED_FEATURES } from "../constants";
 import LocalStorageHelper from "../../../utils/LocalStorageHelper";
-import { Circle, Fill, Stroke } from "ol/style";
+import { Circle, Fill, Stroke, Style } from "ol/style";
 import GeoJSON from "ol/format/GeoJSON";
 import { Circle as CircleGeometry, Point } from "ol/geom";
+import { Feature } from "ol";
 
-import { STROKE_DASHES, MAX_LS_CHARS, PROMPT_TEXTS } from "../constants";
+import {
+  DEFAULT_DRAW_STYLE_SETTINGS,
+  DEFAULT_TEXT_STYLE_SETTINGS,
+  STROKE_DASHES,
+  MAX_LS_CHARS,
+  PROMPT_TEXTS,
+} from "../constants";
 
 class SketchModel {
   #geoJSONParser;
   #storageKey;
   #dateTimeOptions;
   #drawModel;
+  #showHelperSnacks;
 
   constructor(settings) {
     this.#geoJSONParser = new GeoJSON();
@@ -24,22 +32,43 @@ class SketchModel {
       second: "numeric",
     };
     this.#drawModel = settings.drawModel;
+    this.#showHelperSnacks = this.#getDefaultShowHelperSnacks();
   }
+
+  // Returns the default value regarding wether helper-snacks should be shown or not.
+  // (Value from LS or defaults to true).
+  #getDefaultShowHelperSnacks = () => {
+    const inStorage = LocalStorageHelper.get(this.#storageKey);
+    return inStorage["showHelperSnacks"] ?? true;
+  };
+
+  #setSketchKeyInStorage = (key, value) => {
+    LocalStorageHelper.set(this.#storageKey, {
+      ...LocalStorageHelper.get(this.#storageKey),
+      [key]: value,
+    });
+  };
 
   // Updates the removed features in the local-storage
   #setStoredRemovedFeatures = (removedFeatures) => {
-    LocalStorageHelper.set(this.#storageKey, {
-      ...LocalStorageHelper.get(this.#storageKey),
-      removedFeatures: removedFeatures,
-    });
+    this.#setSketchKeyInStorage("removedFeatures", removedFeatures);
   };
 
   // Updates the stored sketches in the local-storage
   #setStoredSketches = (sketches) => {
-    LocalStorageHelper.set(this.#storageKey, {
-      ...LocalStorageHelper.get(this.#storageKey),
-      sketches: sketches,
-    });
+    this.#setSketchKeyInStorage("sketches", sketches);
+  };
+
+  // Updates the stored draw-style-settings in the local-storage.
+  // Exposed so direct calls from view is possible.
+  setStoredDrawStyleSettings = (settings) => {
+    this.#setSketchKeyInStorage("drawStyleSettings", settings);
+  };
+
+  // Updates the stored text-style-settings in the local-storage
+  // Exposed so direct calls from view is possible.
+  setStoredTextStyleSettings = (settings) => {
+    this.#setSketchKeyInStorage("textStyleSettings", settings);
   };
 
   // Creates an object containing all the supplied properties along with
@@ -70,6 +99,38 @@ class SketchModel {
     }
     // Then we'll create the geoJSON, and return that.
     return this.#geoJSONParser.writeFeature(f);
+  };
+
+  // Returns the helper text for the supplied activity and draw-type
+  getHelperSnackText = (activity, drawType) => {
+    // If we're nto supposed to show helper-snacks, let's return null so
+    // that no snack will be shown.
+    if (!this.#showHelperSnacks) {
+      return null;
+    }
+    // Otherwise we'll check the current activity and so on...
+    switch (activity) {
+      case "ADD":
+        // If we're in the add-view, we want to prompt the user with
+        // information regarding the current draw-type.
+        return PROMPT_TEXTS[`${drawType}Help`];
+      default:
+        // If we're not in the add-view, we want to prompt the user
+        // with information regarding the current view (activity).
+        return PROMPT_TEXTS[`${activity}Help`];
+    }
+  };
+
+  // Returns the draw-style-settings stored in LS, or the default draw-style-settings.
+  getDrawStyleSettings = () => {
+    const inStorage = LocalStorageHelper.get(this.#storageKey);
+    return inStorage["drawStyleSettings"] || DEFAULT_DRAW_STYLE_SETTINGS;
+  };
+
+  // Returns the text-style-settings stored in LS, or the default text-style-settings.
+  getTextStyleSettings = () => {
+    const inStorage = LocalStorageHelper.get(this.#storageKey);
+    return inStorage["textStyleSettings"] || DEFAULT_TEXT_STYLE_SETTINGS;
   };
 
   // Returns the activity-object connected to the supplied id
@@ -142,6 +203,18 @@ class SketchModel {
       }),
       fill: new Fill({
         color: settings.fillColor,
+      }),
+    });
+  };
+
+  #createHighlightStyle = () => {
+    return new Style({
+      stroke: new Stroke({
+        color: "rgba(255, 0, 0, 1)",
+        width: 3,
+      }),
+      fill: new Fill({
+        color: "rgba(255, 0, 0, 0.1)",
       }),
     });
   };
@@ -351,6 +424,10 @@ class SketchModel {
     const storedSketches = this.getSketchesFromStorage();
     // Then we'll update the stored sketches with the supplied one.
     this.#setStoredSketches([sketch, ...storedSketches]);
+    // Finally, we'll make sure to refresh the map by removing all drawn features,
+    // and re-add the current sketch.
+    this.#drawModel.removeDrawnFeatures();
+    this.addSketchToMap(sketch);
     return { status: "SUCCESS", message: PROMPT_TEXTS.saveSuccess };
   };
 
@@ -391,6 +468,44 @@ class SketchModel {
     }
     // Otherwise we'll return the result of a lowercase-compare.
     return s1.toLowerCase() === s2.toLowerCase();
+  };
+
+  // Creates a new feature with the same geometry as the supplied one. The new
+  // feature can be used an an highlight, to show where the supplied feature is.
+  createHighlightFeature = (feature) => {
+    // If no feature (or a feature with no get-geometry) is supplied, we abort.
+    if (feature && feature.getGeometry()) {
+      // Otherwise we create a new feature...
+      const highlightFeature = new Feature({
+        geometry: feature.getGeometry().clone(),
+      });
+      // ...set an id and a highlight-style...
+      highlightFeature.setId(this.generateRandomString());
+      highlightFeature.setStyle(this.#createHighlightStyle());
+      // Finally we return the feature so that we can add it to the map etc.
+      return highlightFeature;
+    }
+  };
+
+  // Returns wether helper-snacks should be shown or not
+  getShowHelperSnacks = () => {
+    return this.#showHelperSnacks;
+  };
+
+  // Set wether helper-snacks should be shown or not.
+  setShowHelperSnacks = (showSnacks) => {
+    this.#showHelperSnacks = showSnacks;
+  };
+
+  // Returns the value of the FEATURE_TITLE-attribute (or an empty string if the attribute is not set).
+  getFeatureTitle = (feature) => {
+    // If no feature was supplied, or if the supplied 'feature' is not
+    // a feature, we'll return an empty string.
+    if (!(feature instanceof Feature)) {
+      return "";
+    }
+    // Otherwise well return the value or an empty string.
+    return feature.get("FEATURE_TITLE") ?? "";
   };
 }
 export default SketchModel;

@@ -23,6 +23,7 @@ const defaultState = {
   index: 0,
   target: "toolbar",
   instruction: "",
+  requireConfirmOnSave: false,
   visibleAtStart: false,
   visibleForGroups: [],
   activeServices: [],
@@ -61,6 +62,7 @@ class ToolOptions extends Component {
           width: tool.options.width,
           height: tool.options.height,
           instruction: tool.options.instruction,
+          requireConfirmOnSave: tool.options.requireConfirmOnSave,
           activeServices: tool.options.activeServices || [],
           visibleAtStart: tool.options.visibleAtStart,
           visibleForGroups:
@@ -225,6 +227,7 @@ class ToolOptions extends Component {
         width: this.state.width,
         height: this.state.height,
         instruction: this.state.instruction,
+        requireConfirmOnSave: this.state.requireConfirmOnSave,
         activeServices: this.state.activeServices,
         visibleAtStart: this.state.visibleAtStart,
         visibleForGroups: this.state.visibleForGroups.map(
@@ -502,6 +505,21 @@ class ToolOptions extends Component {
             &nbsp;
             <label htmlFor="visibleAtStart">Synlig vid start</label>
           </div>
+
+          <div>
+            <input
+              id="requireConfirmOnSave"
+              name="requireConfirmOnSave"
+              type="checkbox"
+              onChange={(e) => {
+                this.handleInputChange(e);
+              }}
+              checked={this.state.requireConfirmOnSave}
+            />
+            &nbsp;
+            <label htmlFor="requireConfirmOnSave">Bekräfta ändringar vid sparande</label>
+          </div>
+
           <div>
             <label htmlFor="instruction">
               Instruktion{" "}

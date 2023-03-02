@@ -45,8 +45,11 @@ class CoordinatesModel {
 
     this.source = new VectorSource();
     this.vector = new Vector({
+      layerType: "system",
+      zIndex: 5000,
+      name: "pluginCoordinate",
+      caption: "Coordinate layer",
       source: this.source,
-      name: "coordinateLayer",
     });
     this.map.addLayer(this.vector);
     this.localObserver.subscribe("newCoordinates", (incomingCoords) => {
@@ -143,20 +146,35 @@ class CoordinatesModel {
    */
   goToUserLocation = () => {
     if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition((pos) => {
-        const point = new Point([pos.coords.longitude, pos.coords.latitude]);
-        point.transform(
-          "EPSG:4326",
-          this.map.getView().getProjection().getCode()
-        );
-        this.coordinates = point.getCoordinates();
-        this.localObserver.publish("newCoordinates", {
-          coordinates: this.coordinates,
-          proj: this.map.getView().getProjection().getCode(),
-          force: true,
-        });
-        this.map.getView().setCenter(point.getCoordinates());
-      });
+      const options = {
+        enableHighAccuracy: true,
+        timeout: 5000,
+        maximumAge: 30000,
+      };
+
+      navigator.geolocation.getCurrentPosition(
+        (pos) => {
+          const point = new Point([pos.coords.longitude, pos.coords.latitude]);
+          point.transform(
+            "EPSG:4326",
+            this.map.getView().getProjection().getCode()
+          );
+          this.coordinates = point.getCoordinates();
+          this.localObserver.publish("newCoordinates", {
+            coordinates: this.coordinates,
+            proj: this.map.getView().getProjection().getCode(),
+            force: true,
+          });
+          this.map.getView().setCenter(point.getCoordinates());
+        },
+        (error) => {
+          // If error code is 1 (User denied Geolocation), show Snackbar with instructions to enable it again
+          if (error.code === 1) {
+            this.localObserver.publish("location-permissions-denied");
+          }
+        },
+        options
+      );
     }
   };
 
@@ -218,6 +236,10 @@ class CoordinatesModel {
     this.map.snapHelper.delete("coordinates");
     this.map.removeInteraction(this.draw);
     this.map.clickLock.delete("coordinates");
+  }
+
+  closeSnackbar() {
+    this.localObserver.publish("hideSnackbar");
   }
 }
 

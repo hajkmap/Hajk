@@ -1,19 +1,19 @@
 import React from "react";
 import PropTypes from "prop-types";
-import { withStyles, Link } from "@material-ui/core";
+import { styled } from "@mui/material/styles";
+import Link from "@mui/material/Link";
 
-const styles = (theme) => ({
-  listItemContainer: {
-    paddingLeft: theme.spacing(1),
-    paddingTop: theme.spacing(1),
-    paddingBottom: theme.spacing(1),
-    borderBottom: `${theme.spacing(0.2)}px solid ${theme.palette.divider}`,
-  },
-  listItem: {
-    display: "flex",
-    justifyContent: "space-between",
-  },
-});
+const DivListItemContainer = styled("div")(({ theme }) => ({
+  paddingLeft: theme.spacing(1),
+  paddingTop: theme.spacing(1),
+  paddingBottom: theme.spacing(1),
+  borderBottom: `${theme.spacing(0.2)}px solid ${theme.palette.divider}`,
+}));
+
+const DivListItem = styled("div")(() => ({
+  display: "flex",
+  justifyContent: "space-between",
+}));
 
 class LinkItem extends React.PureComponent {
   static propTypes = {
@@ -21,21 +21,21 @@ class LinkItem extends React.PureComponent {
   };
 
   render() {
-    const { classes, link } = this.props;
+    const { link } = this.props;
 
     return (
       <>
-        <div key={link.id} className={classes.listItemContainer}>
-          <div className={classes.listItem}>
+        <DivListItemContainer key={link.id}>
+          <DivListItem>
             <Link
               href={link.link}
               target="_blank"
               rel="noreferrer"
             >{`${link.title}`}</Link>
-          </div>
-        </div>
+          </DivListItem>
+        </DivListItemContainer>
       </>
     );
   }
 }
-export default withStyles(styles)(LinkItem);
+export default LinkItem;

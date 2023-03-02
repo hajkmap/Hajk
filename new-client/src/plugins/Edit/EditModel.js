@@ -8,6 +8,8 @@ import { Select, Modify, Draw, Translate } from "ol/interaction";
 import { never } from "ol/events/condition";
 import X2JS from "x2js";
 import { hfetch } from "utils/FetchWrapper";
+import { functionalOk } from "models/Cookie";
+import LocalStorageHelper from "utils/LocalStorageHelper";
 
 class EditModel {
   constructor(settings) {
@@ -53,6 +55,7 @@ class EditModel {
   }
 
   write(features) {
+    let wfsVersion = this.options?.wfsVersion || "1.1.0";
     var format = new WFS(),
       lr = this.editSource.layers[0].split(":"),
       fp = lr.length === 2 ? lr[0] : "",
@@ -62,7 +65,7 @@ class EditModel {
         featurePrefix: fp,
         featureType: ft,
         hasZ: false,
-        version: "1.1.0", // or "1.0.0"
+        version: wfsVersion, // or "1.0.0"
         srsName: this.editSource.projection,
       };
 
@@ -155,7 +158,7 @@ class EditModel {
     }
   }
 
-  save(done) {
+  findUpdatedFeatures() {
     const find = (mode) =>
       this.vectorSource
         .getFeatures()
@@ -169,6 +172,41 @@ class EditModel {
       inserts: find("added"),
       deletes: find("removed"),
     };
+
+    return features;
+  }
+
+  checkPasteIsValid(feature) {
+    const editSource = this.editSource;
+
+    // Make sure that we have both a feature to paste and a source to paste into.
+    if (!feature || !editSource || !this.vectorSource)
+      return {
+        valid: false,
+        message: "Kopieringsobjekt eller mållager saknas.",
+      };
+
+    // Make sure that the geometry type of the pasted feature matches that of the edit source (e.g. polygon)
+    let pasteFeatureGeometryType = feature.getGeometry().getType();
+    let editSourceGeometryType =
+      this.vectorSource.getFeatures().length > 0
+        ? this.vectorSource.getFeatures()[0].getGeometry().getType()
+        : "empty";
+
+    if (pasteFeatureGeometryType !== editSourceGeometryType)
+      return {
+        valid: false,
+        message:
+          "Kopierad objektet och redigeringslagret har inte samma geometrityp",
+      };
+
+    // If we reach here, there are no clear reasons why we shouldn't be able to add the copied feature to the edit layer.
+    // Try to paste the feature.
+    return { valid: true, message: "" };
+  }
+
+  save(done) {
+    const features = this.findUpdatedFeatures();
 
     if (
       features.updates.length === 0 &&
@@ -310,6 +348,33 @@ class EditModel {
     });
   }
 
+  #filterByMapFilter(features) {
+    if (functionalOk) {
+      const globalMapState = LocalStorageHelper.get("globalMapState", null);
+      const globalFilter = globalMapState.mapFilter;
+
+      // If the current edit layer is marked by the global filter as a layer where the filter should be applied
+      // we will need to filter apply the filter to the incoming features.
+      if (globalFilter && globalFilter.filterLayers) {
+        if (globalFilter.filterLayers.includes(this.editSource.id)) {
+          //If it is then we need to apply a filter, on the filterProperty and filterValue
+          const filterProperty = globalFilter.filterProperty;
+          const filterValue = globalFilter.filterValue;
+          features = features.filter((feature) => {
+            if (
+              feature.getProperties()[filterProperty] === filterValue.toString()
+            ) {
+              return true;
+            }
+            return false;
+          });
+        }
+      }
+
+      return features;
+    }
+  }
+
   loadDataSuccess = (data) => {
     var format = new WFS();
     var features;
@@ -319,12 +384,17 @@ class EditModel {
       alert("Fel: data kan inte läsas in. Kontrollera koordinatsystem.");
     }
 
+    //If there is a global filter on the map, we take this into account. If there is no filter, all features will be returned.
+    features = this.#filterByMapFilter(features);
+
     // Make sure we have a name for geometry column. If there are features already,
     // take a look at the first one and get geometry field's name from that first feature.
     // If there are no features however, default to 'geom'. If we don't then OL will
     // fallback to its own default geometry field name, which happens to be 'geometry' and not 'geom.
     this.geometryName =
-      features.length > 0 ? features[0].getGeometryName() : "geom";
+      features.length > 0
+        ? features[0].getGeometryName()
+        : this.editSource.geometryField || "geom";
 
     if (this.editSource.editableFields.some((field) => field.hidden)) {
       features = this.filterByDefaultValue(features);
@@ -370,10 +440,11 @@ class EditModel {
     // Now we merge the possible existing params with the rest, defined
     // below. We can be confident that we won't have duplicates and that
     // our values "win", as they are defined last.
+
     const mergedSearchParams = {
       ...existingSearchParams,
       SERVICE: "WFS",
-      VERSION: "1.1.0",
+      version: "1.1.0", // or "1.0.0"
       REQUEST: "GetFeature",
       TYPENAME: source.layers[0],
       SRSNAME: source.projection,
@@ -459,7 +530,10 @@ class EditModel {
     });
 
     this.layer = new Vector({
+      layerType: "system",
+      zIndex: 5000,
       name: "pluginEdit",
+      caption: "Edit layer",
       source: this.vectorSource,
       style: this.getVectorStyle(),
     });
@@ -474,6 +548,50 @@ class EditModel {
     this.observer.publish("editSource", this.source);
     this.observer.publish("editFeature", null);
     this.observer.publish("layerChanged", this.layer);
+  }
+
+  #zoomToFeature = (feature) => {
+    if (!feature) {
+      return;
+    }
+
+    const extent = feature.getGeometry().getExtent();
+    this.map.getView().fit(extent);
+  };
+
+  pasteFeature(feature) {
+    // Here we are pasting into draw interaction layer being edited by the edit tool.
+    // The Geometry name was set when the draw interaction was created (as this.geometryName), so we need to make sure
+    // That when we paste in our feature, we give it the same geometry name as the draw interaction was given.
+
+    //If our geometry names differ, add a geometry property under the correct geometry name.
+    if (this.geometryName !== feature.getGeometryName()) {
+      const newGeometryName = this.geometryName;
+
+      let newGeomProperty = { [newGeometryName]: feature.getGeometry() };
+
+      feature.setProperties(newGeomProperty);
+      feature.setGeometryName(newGeometryName);
+    }
+
+    //Add our feature to the current edit drawing layer.
+    this.vectorSource.addFeature(feature);
+
+    //Center on or zoom the feature - as the user has not drawn the feature we need to make it clear which feature has been added.
+    this.#zoomToFeature(feature); //Call the zoomToFeature on the MapViewModel instead?
+
+    // Below we do some actions that usually happen when the 'add' draw interaction finishes, when a feature
+    // is being added by the draw, instead of being pasted in.
+
+    // Add the 'added' flag, so that The edit tool knows that it is changed.
+    feature.modification = "added";
+
+    // Call this.editAttributes otherwise we will never jump to the attribute step in the edit menu.
+    this.editAttributes(feature);
+
+    setTimeout(() => {
+      this.deactivateInteraction();
+    }, 1);
   }
 
   activateModify() {
@@ -492,6 +610,7 @@ class EditModel {
     });
     this.map.addInteraction(this.select);
     this.map.addInteraction(this.modify);
+    this.map.clickLock.add("edit");
   }
 
   activateAdd(geometryType) {
@@ -531,6 +650,16 @@ class EditModel {
     this.map.addInteraction(this.move);
   }
 
+  activateSnapping() {
+    this.map.snapHelper.add("edit");
+    this.observer.publish("edit-snap-changed", true);
+  }
+
+  deactivateSnapping() {
+    this.map.snapHelper.delete("edit");
+    this.observer.publish("edit-snap-changed", false);
+  }
+
   activateInteraction(type, geometryType) {
     if (type === "add") {
       this.activateAdd(geometryType);
@@ -546,8 +675,7 @@ class EditModel {
       this.activateRemove();
     }
 
-    // Add snap after all interactions have been added
-    this.map.snapHelper.add("measure");
+    this.activateSnapping();
   }
 
   removeSelected = (e) => {
@@ -565,7 +693,7 @@ class EditModel {
 
   deactivateInteraction() {
     // First remove the snap interaction
-    this.map.snapHelper.delete("measure");
+    this.deactivateSnapping();
 
     // Next, remove correct map interaction
     if (this.select) {

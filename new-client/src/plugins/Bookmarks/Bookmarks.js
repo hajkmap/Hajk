@@ -3,7 +3,10 @@ import PropTypes from "prop-types";
 import BaseWindowPlugin from "../BaseWindowPlugin";
 import BookmarksModel from "./BookmarksModel";
 import BookmarksView from "./BookmarksView";
-import BookmarksIcon from "@material-ui/icons/Bookmarks";
+import BookmarksIcon from "@mui/icons-material/Bookmarks";
+
+// Constants
+import { STORAGE_KEY } from "./constants";
 
 /**
  * @summary Main class for the Bookmarks plugin.
@@ -11,58 +14,51 @@ import BookmarksIcon from "@material-ui/icons/Bookmarks";
  * in localStorage. A bookmark contains the map, x,y, zoom level, visible layers etc.
  *
  * @class Bookmarks
- * @extends {React.PureComponent}
+ * @extends {React.Component}
  */
-class Bookmarks extends React.PureComponent {
-  state = {
-    title: "Bokmärken",
-    color: null,
-  };
 
-  static propTypes = {
-    app: PropTypes.object.isRequired,
-    map: PropTypes.object.isRequired,
-    options: PropTypes.object.isRequired,
-  };
+const Bookmarks = (props) => {
+  const [bookmarksModel] = React.useState(
+    () =>
+      new BookmarksModel({
+        app: props.app,
+        map: props.map,
+        storageKey: STORAGE_KEY,
+      })
+  );
+  const [bookmarks, setBookmarks] = React.useState(bookmarksModel.bookmarks);
 
-  static defaultProps = {
-    options: {},
-  };
+  // Read bookmarks from local storage on component mount
+  React.useEffect(() => {
+    bookmarksModel.readFromStorage();
+    setBookmarks(bookmarksModel.bookmarks);
+  }, [bookmarksModel]);
 
-  constructor(props) {
-    super(props);
-    this.bookmarksModel = new BookmarksModel({
-      app: props.app,
-      map: props.map,
-    });
-  }
+  return (
+    <BaseWindowPlugin
+      {...props}
+      type="Bookmarks"
+      custom={{
+        icon: <BookmarksIcon />,
+        title: "Bokmärken",
+        description: "Användarens bokmärken",
+        height: 450,
+        width: 400,
+      }}
+    >
+      <BookmarksView model={bookmarksModel} bookmarks={bookmarks} />
+    </BaseWindowPlugin>
+  );
+};
 
-  updateCustomProp = (prop, value) => {
-    this.setState({ [prop]: value });
-  };
+Bookmarks.propTypes = {
+  app: PropTypes.object.isRequired,
+  map: PropTypes.object.isRequired,
+  options: PropTypes.object,
+};
 
-  render() {
-    return (
-      <BaseWindowPlugin
-        {...this.props}
-        type="Bookmarks"
-        custom={{
-          icon: <BookmarksIcon />,
-          title: this.state.title,
-          color: this.state.color,
-          description: "Användarens bokmärken",
-          height: 450,
-          width: 400,
-        }}
-      >
-        <BookmarksView
-          model={this.bookmarksModel}
-          app={this.props.app}
-          updateCustomProp={this.updateCustomProp}
-        />
-      </BaseWindowPlugin>
-    );
-  }
-}
+Bookmarks.defaultProps = {
+  options: {},
+};
 
 export default Bookmarks;

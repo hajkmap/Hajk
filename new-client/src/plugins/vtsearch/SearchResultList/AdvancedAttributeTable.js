@@ -1,5 +1,5 @@
 import React from "react";
-import { withStyles } from "@material-ui/core/styles";
+import withStyles from "@mui/styles/withStyles";
 
 import AttributeTable from "./AttributeTable";
 import SummaryTable from "./SummaryTable";

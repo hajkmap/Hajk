@@ -1,6 +1,5 @@
 import React from "react";
 import { createPortal } from "react-dom";
-import { withStyles } from "@material-ui/core/styles";
 import { withSnackbar } from "notistack";
 
 import {
@@ -11,19 +10,13 @@ import {
   DialogContent,
   DialogActions,
   DialogContentText,
-} from "@material-ui/core";
-
-const styles = (theme) => {};
+} from "@mui/material";
 
 class PrintDialog extends React.PureComponent {
   render() {
     const { cancelPrint, open, saveAsType } = this.props;
     return createPortal(
-      <Dialog
-        disableBackdropClick={true}
-        disableEscapeKeyDown={true}
-        open={open}
-      >
+      <Dialog disableEscapeKeyDown={true} open={open}>
         <LinearProgress />
         <DialogTitle>Din {`${saveAsType}`} skapas</DialogTitle>
         <DialogContent>
@@ -48,4 +41,4 @@ class PrintDialog extends React.PureComponent {
   }
 }
 
-export default withStyles(styles)(withSnackbar(PrintDialog));
+export default withSnackbar(PrintDialog);

@@ -1,28 +1,29 @@
 import React, { Component } from "react";
-import CloseIcon from "@material-ui/icons/Close";
-import VisibilityIcon from "@material-ui/icons/Visibility";
-import VisibilityOffIcon from "@material-ui/icons/VisibilityOff";
-import LaunchIcon from "@material-ui/icons/Launch";
-import { Button, IconButton, Grid, Typography, Paper } from "@material-ui/core";
-import CallMadeIcon from "@material-ui/icons/CallMade";
-import { withStyles } from "@material-ui/core/styles";
-import Popover from "@material-ui/core/Popover";
+import CloseIcon from "@mui/icons-material/Close";
+import VisibilityIcon from "@mui/icons-material/Visibility";
+import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
+import LaunchIcon from "@mui/icons-material/Launch";
+import { Button, IconButton, Grid, Typography, Paper } from "@mui/material";
+import CallMadeIcon from "@mui/icons-material/CallMade";
+import { styled } from "@mui/material/styles";
+import Popover from "@mui/material/Popover";
 
-const styles = (theme) => ({
-  root: {
-    marginRight: theme.spacing(0.5),
-    border: `${theme.spacing(0.1)}px solid ${theme.palette.divider}`,
-  },
-  gridContainer: {
-    padding: theme.spacing(1),
-  },
-  titleContainer: {
-    paddingLeft: theme.spacing(0.5),
-  },
-  links: {
-    padding: theme.spacing(0.5),
-  },
-});
+const StyledPaper = styled(Paper)(({ theme }) => ({
+  marginRight: theme.spacing(0.5),
+  border: `${theme.spacing(0.1)} solid ${theme.palette.divider}`,
+}));
+
+const ContentGridContainer = styled(Grid)(({ theme }) => ({
+  padding: theme.spacing(1),
+}));
+
+const TitleGridContainer = styled(Grid)(({ theme }) => ({
+  paddingLeft: theme.spacing(0.5),
+}));
+
+const LinkContainer = styled("div")(({ theme }) => ({
+  padding: theme.spacing(0.5),
+}));
 
 class BreadCrumb extends Component {
   constructor(props) {
@@ -100,32 +101,29 @@ class BreadCrumb extends Component {
   }
 
   renderChapterLinks() {
-    const { classes } = this.props;
     if (this.chapters && this.chapters.length > 0) {
       if (this.chapters.length > 0) {
         return (
-          <div>
-            <div className={classes.links}>
-              {this.chapters.map((chapter, i) => {
-                return (
-                  <div key={i}>
-                    <Button
-                      size="small"
-                      onClick={() => {
-                        this.setState({
-                          popoverOpen: false,
-                        });
-                        this.openInformative(chapter);
-                      }}
-                    >
-                      {chapter.header}
-                      <CallMadeIcon />
-                    </Button>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
+          <LinkContainer>
+            {this.chapters.map((chapter, i) => {
+              return (
+                <div key={i}>
+                  <Button
+                    size="small"
+                    onClick={() => {
+                      this.setState({
+                        popoverOpen: false,
+                      });
+                      this.openInformative(chapter);
+                    }}
+                  >
+                    {chapter.header}
+                    <CallMadeIcon />
+                  </Button>
+                </div>
+              );
+            })}
+          </LinkContainer>
         );
       } else {
         return null;
@@ -179,15 +177,14 @@ class BreadCrumb extends Component {
   }
 
   render() {
-    const { classes, layer, title, type } = this.props;
+    const { layer, title, type } = this.props;
     const { hidden } = this.state;
     return (
-      <Paper className={classes.root} square={type === "flat"} elevation={0}>
-        <Grid
+      <StyledPaper square={type === "flat"} elevation={0}>
+        <ContentGridContainer
           container
-          className={classes.gridContainer}
           data-type="bread-crumb"
-          justify="space-between"
+          justifyContent="space-between"
           alignItems="center"
         >
           <Grid item>
@@ -200,11 +197,11 @@ class BreadCrumb extends Component {
             </IconButton>
           </Grid>
           {this.renderInformativeIcon()}
-          <Grid item className={classes.titleContainer}>
+          <TitleGridContainer item>
             <Typography variant="body2" noWrap>
               {title}
             </Typography>
-          </Grid>
+          </TitleGridContainer>
           <Grid item>
             <IconButton
               size="small"
@@ -214,7 +211,7 @@ class BreadCrumb extends Component {
               <CloseIcon />
             </IconButton>
           </Grid>
-        </Grid>
+        </ContentGridContainer>
         <Popover
           id="simple-popper"
           open={this.state.popoverOpen}
@@ -231,9 +228,9 @@ class BreadCrumb extends Component {
         >
           {this.renderChapterLinks()}
         </Popover>
-      </Paper>
+      </StyledPaper>
     );
   }
 }
 
-export default withStyles(styles)(BreadCrumb);
+export default BreadCrumb;

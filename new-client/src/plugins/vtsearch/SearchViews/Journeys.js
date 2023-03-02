@@ -1,11 +1,11 @@
 import React from "react";
 import PropTypes from "prop-types";
-import { withStyles } from "@material-ui/core/styles";
-import { Typography, Divider } from "@material-ui/core";
-import Grid from "@material-ui/core/Grid";
+import withStyles from "@mui/styles/withStyles";
+import { Typography, Divider } from "@mui/material";
+import Grid from "@mui/material/Grid";
 import DateFnsUtils from "@date-io/date-fns";
-import AccessTimeIcon from "@material-ui/icons/AccessTime";
-import EventIcon from "@material-ui/icons/Event";
+import AccessTimeIcon from "@mui/icons-material/AccessTime";
+import EventIcon from "@mui/icons-material/Event";
 import InactivePolygon from "../img/polygonmarkering.png";
 import InactiveRectangle from "../img/rektangelmarkering.png";
 import ActivePolygon from "../img/polygonmarkering-blue.png";
@@ -520,7 +520,7 @@ class Journeys extends React.PureComponent {
         <Grid item xs={12}>
           <Typography variant="body2">AVGRÄNSA SÖKOMRÅDE I KARTAN</Typography>
         </Grid>
-        <Grid justify="center" container>
+        <Grid justifyContent="center" container>
           <Grid item xs={4}>
             <div>
               <img

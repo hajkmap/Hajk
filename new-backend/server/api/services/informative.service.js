@@ -1,7 +1,13 @@
 import fs from "fs";
 import path from "path";
+import log4js from "log4js";
+const logger = log4js.getLogger("service.informative");
 
 class InformativeService {
+  constructor() {
+    logger.trace("Initiating InformativeService");
+  }
+
   /**
    * @summary Lists contents of a document as JSON
    *
@@ -19,6 +25,10 @@ class InformativeService {
       const json = await JSON.parse(text);
       return json;
     } catch (error) {
+      logger.warn(
+        `Error while opening informative document "${file}". Sent 404 Not Found as response. Original error below.`
+      );
+      logger.warn(error);
       return { error };
     }
   }

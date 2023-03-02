@@ -1,14 +1,16 @@
 import React from "react";
-import { Grid, Typography } from "@material-ui/core";
+import { Grid, Typography } from "@mui/material";
 
 import DrawTypeSelector from "../components/DrawTypeSelector";
 import Information from "../components/Information";
 import FeatureStyleSelector from "../components/featureStyle/FeatureStyleSelector";
 import FeatureTextSetter from "../components/FeatureTextSetter";
+import SelectFeaturesDialog from "../components/SelectFeaturesDialog";
 
 const AddView = (props) => {
   // Let's destruct some properties from the props
-  const { model, activeDrawType, setActiveDrawType } = props;
+  const { model, activeDrawType, setActiveDrawType, localObserver, drawModel } =
+    props;
   // We have to get some information about the current activity (view)
   const activity = model.getActivityFromId(props.id);
 
@@ -39,6 +41,11 @@ const AddView = (props) => {
       <FeatureTextSetter
         localObserver={props.localObserver}
         drawModel={props.drawModel}
+      />
+      <SelectFeaturesDialog
+        localObserver={localObserver}
+        drawModel={drawModel}
+        model={model}
       />
     </Grid>
   );

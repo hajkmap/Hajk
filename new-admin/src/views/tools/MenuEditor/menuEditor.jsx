@@ -8,8 +8,14 @@ import DragHandle from "@material-ui/icons/DragHandle";
 import TreeRow from "./treerow.jsx";
 import { withStyles } from "@material-ui/core/styles";
 import { SketchPicker } from "react-color";
+import OpenInNewIcon from "@material-ui/icons/OpenInNew";
 
-import { Typography, RadioGroup, Radio, FormControlLabel } from "@material-ui/core";
+import {
+  Typography,
+  RadioGroup,
+  Radio,
+  FormControlLabel,
+} from "@material-ui/core";
 
 import {
   ColorButtonBlue,
@@ -72,6 +78,9 @@ class ToolOptions extends Component {
     documentOnStart: "",
     drawerTitle: "",
     drawerButtonTitle: "",
+    drawerButtonIcon: "",
+    resizingEnabled: false,
+    draggingEnabled: false,
     searchImplemented: true,
     enablePrint: true,
     closePanelOnMapLinkOpen: false,
@@ -146,6 +155,9 @@ class ToolOptions extends Component {
         documentOnStart: tool.options.documentOnStart,
         drawerTitle: tool.options.drawerTitle,
         drawerButtonTitle: tool.options.drawerButtonTitle,
+        drawerButtonIcon: tool.options.drawerButtonIcon,
+        resizingEnabled: tool.options.resizingEnabled || false,
+        draggingEnabled: tool.options.draggingEnabled || false,
         searchImplemented: tool.options.searchImplemented,
         enablePrint: tool.options.enablePrint,
         closePanelOnMapLinkOpen: tool.options.closePanelOnMapLinkOpen,
@@ -247,6 +259,9 @@ class ToolOptions extends Component {
         documentOnStart: this.state.documentOnStart,
         drawerTitle: this.state.drawerTitle,
         drawerButtonTitle: this.state.drawerButtonTitle,
+        drawerButtonIcon: this.state.drawerButtonIcon,
+        resizingEnabled: this.state.resizingEnabled,
+        draggingEnabled: this.state.draggingEnabled,
         tableOfContents: this.state.tableOfContents,
         defaultDocumentColorSettings: this.state.defaultDocumentColorSettings,
         menuConfig: this.state.menuConfig,
@@ -738,6 +753,35 @@ class ToolOptions extends Component {
             />
           </div>
           <div>
+            <label htmlFor="drawerButtonIcon">
+              Knappikon{" "}
+              <i
+                className="fa fa-question-circle"
+                data-toggle="tooltip"
+                title="Ikon på knapp som öppnar verktyget. Skriv in ikonens namn i textfältet för att välja ikon. Hämtat från Material Symbols ikonbibliotek."
+              />
+            </label>
+            <input
+              id="drawerButtonIcon"
+              placeholder="Ange ikonens namn"
+              value={this.state.drawerButtonIcon}
+              type="text"
+              name="drawerButtonIcon"
+              onChange={(e) => {
+                this.handleInputChange(e);
+              }}
+            />
+            <ColorButtonBlue
+              variant="contained"
+              className="btn"
+              href="https://fonts.google.com/icons"
+              target="_blank"
+              startIcon={<OpenInNewIcon />}
+            >
+              <Typography variant="button">Visa ikoner</Typography>
+            </ColorButtonBlue>
+          </div>
+          <div>
             <input
               id="searchImplemented"
               name="searchImplemented"
@@ -749,6 +793,36 @@ class ToolOptions extends Component {
             />
             &nbsp;
             <label htmlFor="searchImplemented">Sökning aktiverad</label>
+          </div>
+          <div>
+            <input
+              id="resizingEnabled"
+              name="resizingEnabled"
+              type="checkbox"
+              onChange={(e) => {
+                this.handleInputChange(e);
+              }}
+              checked={this.state.resizingEnabled}
+            />
+            &nbsp;
+            <label htmlFor="resizingEnabled">
+              Tillåt att ändra storlek på dokumentfönstret
+            </label>
+          </div>
+          <div>
+            <input
+              id="draggingEnabled"
+              name="draggingEnabled"
+              type="checkbox"
+              onChange={(e) => {
+                this.handleInputChange(e);
+              }}
+              checked={this.state.draggingEnabled}
+            />
+            &nbsp;
+            <label htmlFor="draggingEnabled">
+              Tillåt att flytta på dokumentfönstret
+            </label>
           </div>
           <div>
             <input
@@ -891,17 +965,17 @@ class ToolOptions extends Component {
           </div>
           <div>
             <label htmlFor="tocPrintMode" style={{ width: "400px" }}>
-            Välj hur innehållsförteckningen skall skivas ut{" "}
-                <i
-                  className="fa fa-question-circle"
-                  data-toggle="tooltip"
-                  title="Välj hur innehållsförteckning ska skrivas ut"
-                />
+              Välj hur innehållsförteckningen skall skivas ut{" "}
+              <i
+                className="fa fa-question-circle"
+                data-toggle="tooltip"
+                title="Välj hur innehållsförteckning ska skrivas ut"
+              />
             </label>
-            <RadioGroup 
+            <RadioGroup
               id="printMode"
-              name="printMode" 
-              value={this.state.tableOfContents.printMode} 
+              name="printMode"
+              value={this.state.tableOfContents.printMode}
               onChange={(e) => {
                 const value = e.target.value;
                 this.setState((prevState) => ({
@@ -910,11 +984,24 @@ class ToolOptions extends Component {
                     printMode: value,
                   },
                 }));
-              }}>
-            <FormControlLabel value="full" control={<Radio color="primary" />} label="Hela" />
-            <FormControlLabel value="partial" control={<Radio color="primary" />} label="Valda" />
-            <FormControlLabel value="none" control={<Radio color="primary" />} label="Inga" />
-          </RadioGroup>
+              }}
+            >
+              <FormControlLabel
+                value="full"
+                control={<Radio color="primary" />}
+                label="Hela"
+              />
+              <FormControlLabel
+                value="partial"
+                control={<Radio color="primary" />}
+                label="Valda"
+              />
+              <FormControlLabel
+                value="none"
+                control={<Radio color="primary" />}
+                label="Inga"
+              />
+            </RadioGroup>
           </div>
           <div className="separator">Faktaruta</div>
           <div>

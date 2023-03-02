@@ -1,9 +1,14 @@
 import React, { useState } from "react";
-import { MuiThemeProvider, createMuiTheme } from "@material-ui/core/styles";
-import CssBaseline from "@material-ui/core/CssBaseline";
+import {
+  ThemeProvider,
+  StyledEngineProvider,
+  createTheme,
+} from "@mui/material/styles";
+import CssBaseline from "@mui/material/CssBaseline";
 import App from "./App";
 
 import { deepMerge } from "../utils/DeepMerge";
+import { functionalOk as functionalCookieOk } from "models/Cookie";
 
 /**
  * @summary Helper, used to determine if user's browser prefers dark mode.
@@ -16,7 +21,7 @@ function getColorScheme(preferredColorSchemeFromMapConfig, customTheme) {
   // the light/dark mode value is set. If it is, this will override any
   // other logic, which means we're not interested in user's or OS's preference.
   if (["light", "dark"].includes(customTheme?.palette?.type)) {
-    return customTheme.palette.type;
+    return customTheme.palette.mode;
   }
 
   // If there's no global override, we can go on and
@@ -45,8 +50,8 @@ function getColorScheme(preferredColorSchemeFromMapConfig, customTheme) {
         // If there's no preference yet in neither local storage nor admin…
         colorScheme =
           window?.matchMedia("(prefers-color-scheme: dark)").matches === true // …check if browser prefers dark mode…
-            ? "dark" // …if so, use dark mode…
-            : "light"; // … else go for light.
+            ? "dark" // …if so, use dark mode, else go for light.
+            : "light";
         break;
     }
   }
@@ -74,7 +79,7 @@ function getTheme(config, customTheme) {
   // Setup some app-wide defaults that differ from MUI's defaults:
   const hardCodedDefaults = {
     palette: {
-      type: colorScheme,
+      mode: colorScheme,
       action: {
         active: colorScheme === "dark" ? "#fff" : "rgba(0, 0, 0, 0.87)",
       },
@@ -88,7 +93,7 @@ function getTheme(config, customTheme) {
   const themeFromMapConfig = {
     palette: {
       primary: {
-        main: config.mapConfig.map.colors.primaryColor, // primary: blue // <- Can be done like this (don't forget to import blue from "@material-ui/core/colors/blue"!)
+        main: config.mapConfig.map.colors.primaryColor, // primary: blue // <- Can be done like this (don't forget to import blue from "@mui/material/colors/blue"!)
       },
       secondary: {
         main: config.mapConfig.map.colors.secondaryColor, // secondary: { main: "#11cb5f" } // <- Or like this
@@ -123,19 +128,21 @@ const HajkThemeProvider = ({ activeTools, config, customTheme }) => {
 
     // Toggle the current value from theme's palette
     let userPreferredColorScheme =
-      theme.palette.type === "light" ? "dark" : "light";
+      theme.palette.mode === "light" ? "dark" : "light";
 
     // Save for later in browser's local storage
-    window.localStorage.setItem(
-      "userPreferredColorScheme",
-      userPreferredColorScheme
-    );
+    if (functionalCookieOk()) {
+      window.localStorage.setItem(
+        "userPreferredColorScheme",
+        userPreferredColorScheme
+      );
+    }
 
     // Create a new theme object by taking the current theme
     // and merging with the latest theme type value
     const newTheme = deepMerge(theme, {
       palette: {
-        type: userPreferredColorScheme,
+        mode: userPreferredColorScheme,
         action: {
           active:
             userPreferredColorScheme === "dark"
@@ -160,20 +167,22 @@ const HajkThemeProvider = ({ activeTools, config, customTheme }) => {
   };
 
   // Take the theme object from state and generate a MUI-theme
-  const muiTheme = createMuiTheme(theme);
+  const muiTheme = createTheme(theme);
 
   // Render, pass through some stuff into App.
   return (
-    <MuiThemeProvider theme={muiTheme}>
-      <CssBaseline />
-      <App
-        activeTools={activeTools}
-        config={config}
-        theme={muiTheme}
-        toggleMUITheme={toggleMUITheme}
-        refreshMUITheme={refreshMUITheme}
-      />
-    </MuiThemeProvider>
+    <StyledEngineProvider injectFirst>
+      <ThemeProvider theme={muiTheme}>
+        <CssBaseline />
+        <App
+          activeTools={activeTools}
+          config={config}
+          theme={muiTheme}
+          toggleMUITheme={toggleMUITheme} // Pass the toggle handler, so we can call it from another component later on
+          refreshMUITheme={refreshMUITheme}
+        />
+      </ThemeProvider>
+    </StyledEngineProvider>
   );
 };
 

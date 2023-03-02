@@ -1,9 +1,9 @@
 import React from "react";
-import { styled } from "@material-ui/core";
-import { Button, IconButton, Zoom } from "@material-ui/core";
-import { Grid, Typography, Tooltip, Paper } from "@material-ui/core";
-import SettingsBackupRestoreIcon from "@material-ui/icons/SettingsBackupRestore";
-import DeleteIcon from "@material-ui/icons/Delete";
+import { styled } from "@mui/material";
+import { Button, IconButton, Zoom } from "@mui/material";
+import { Grid, Typography, Tooltip, Paper } from "@mui/material";
+import SettingsBackupRestoreIcon from "@mui/icons-material/SettingsBackupRestore";
+import DeleteIcon from "@mui/icons-material/Delete";
 
 import Information from "../components/Information";
 
@@ -11,8 +11,8 @@ const StyledPaper = styled(Paper)(({ theme }) => ({
   width: "100%",
   padding: theme.spacing(1),
   marginBottom: theme.spacing(1),
-  borderRight: `${theme.spacing(0.5)}px solid ${theme.palette.info.main}`,
-  borderLeft: `${theme.spacing(0.5)}px solid ${theme.palette.info.main}`,
+  borderRight: `${theme.spacing(0.5)} solid ${theme.palette.info.main}`,
+  borderLeft: `${theme.spacing(0.5)} solid ${theme.palette.info.main}`,
 }));
 
 // A component that is rendered if the user has selected not to accept functional
@@ -49,9 +49,12 @@ const RemovedFeatureItem = ({ onRestoreClick, title }) => {
   return (
     <Zoom in appear>
       <StyledPaper>
-        <Grid container justify="space-between" alignItems="center">
+        <Grid container justifyContent="space-between" alignItems="center">
           <Typography variant="button">{title}</Typography>
-          <Tooltip title="Klicka för att återställa ritobjektet.">
+          <Tooltip
+            disableInteractive
+            title="Klicka för att återställa ritobjektet."
+          >
             <IconButton size="small" onClick={onRestoreClick}>
               <SettingsBackupRestoreIcon />
             </IconButton>

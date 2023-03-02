@@ -1,7 +1,9 @@
+import Feature from "ol/Feature";
 import GeoJSON from "ol/format/GeoJSON";
+import WMSGetFeatureInfo from "ol/format/WMSGetFeatureInfo";
 import TileLayer from "ol/layer/Tile";
 import ImageLayer from "ol/layer/Image";
-import WMSGetFeatureInfo from "ol/format/WMSGetFeatureInfo";
+
 import { hfetch } from "utils/FetchWrapper";
 
 function query(map, layer, evt) {
@@ -109,7 +111,7 @@ function getSortMethod(options) {
   }
 }
 
-function sortFeatures(layer, features) {
+function sortAndMutateFeaturesArray(layer, features) {
   if (!features || features.length <= 1) {
     return;
   }
@@ -117,7 +119,6 @@ function sortFeatures(layer, features) {
   if (!layerInfo.infoClickSortProperty) {
     return;
   }
-
   const sortType = layerInfo.infoClickSortType || "string";
   const sortOptions = {
     type: sortType,
@@ -125,7 +126,6 @@ function sortFeatures(layer, features) {
     prop: layerInfo.infoClickSortProperty.trim(),
     parser: getSortParser(sortType),
   };
-
   features.sort(getSortMethod(sortOptions));
 }
 
@@ -171,31 +171,116 @@ function readJsonFeatures(jsonData, layerProjection, viewProjection) {
 function getFeaturesFromJson(response, jsonData) {
   const layerProjection = response.layer.getSource().getProjection();
   const viewProjection = response.viewProjection;
-  const parsed = readJsonFeatures(jsonData, layerProjection, viewProjection);
-  if (parsed && parsed.length > 0) {
-    parsed.forEach((f) => {
+  let features = readJsonFeatures(jsonData, layerProjection, viewProjection);
+  if (features && features.length > 0) {
+    features = features.map((f) => {
       f.layer = response.layer;
+      return f;
     });
-    sortFeatures(response.layer, parsed);
-    return parsed;
-  } else {
-    return [];
+    sortAndMutateFeaturesArray(response.layer, features);
   }
+  return features;
 }
 
 function getFeaturesFromGml(response, text) {
-  let wmsGetFeatureInfo = new WMSGetFeatureInfo();
-  //let doc = new DOMParser().parseFromString(text, "text/xml");
-  let parsed = wmsGetFeatureInfo.readFeatures(text);
-  if (parsed && parsed.length > 0) {
-    parsed.forEach((f) => {
+  const wmsGetFeatureInfo = new WMSGetFeatureInfo();
+  let features = wmsGetFeatureInfo.readFeatures(text);
+  if (features && features.length > 0) {
+    features = features.map((f) => {
       f.layer = response.layer;
+      return f;
     });
-    sortFeatures(response.layer, parsed);
-    return parsed;
-  } else {
-    return [];
+    sortAndMutateFeaturesArray(response.layer, features);
   }
+  return features;
+}
+
+function experimentalParseEsriWmsRawXml(response, xml) {
+  const parser = new DOMParser();
+  const xmlDoc = parser.parseFromString(xml, "text/xml");
+
+  // Consider making this a setting
+  const namespacePrefix = "esri_wms";
+
+  const collections = xmlDoc.getElementsByTagName(
+    `${namespacePrefix}:FeatureInfoCollection`
+  );
+
+  // Let's loop the collections using a flat map (the resulting object must
+  // be flat, not grouped by layer as this response).
+  let features = Array.from(collections).flatMap((c) => {
+    // First grab the layer name (it's an attribute to the collection DOM node)
+    const layerName = c.getAttribute("layername") || "unknownLayerName";
+
+    // Next, loop the collection's children to extract features
+    const featureInfos = Array.from(c.children).map((f, i) => {
+      // Create an OL Feature
+      const newFeature = new Feature();
+
+      // Ensure it has an ID
+      newFeature.setId(`${layerName}.fid${i}`);
+
+      // Extract "FIELDS", i.e. the attribute values of this feature
+      const fields = f.getElementsByTagName(`${namespacePrefix}:Field`);
+
+      // Loop the fields…
+      Array.from(fields).forEach((field) => {
+        // …grab the key…
+        const attributeName = field.getElementsByTagName(
+          `${namespacePrefix}:FieldName`
+        )[0].textContent;
+
+        // …and the value corresponding with this attribute…
+        const attributeValue = field.getElementsByTagName(
+          `${namespacePrefix}:FieldValue`
+        )[0].textContent;
+
+        // …and set as OL attributes on our OL Feature.
+        newFeature.set(attributeName, attributeValue);
+      });
+
+      newFeature.layer = response.layer;
+
+      return newFeature;
+    });
+
+    return featureInfos;
+  });
+
+  sortAndMutateFeaturesArray(response.layer, features);
+  return features;
+}
+
+function getFeaturesFromXmlOrGml(response, text) {
+  // In cases where the XML has no FIELDS element, the XML is assumed
+  // not to come from Esri and can be parsed as GML.
+  if (!text.includes("<FIELDS")) {
+    return getFeaturesFromGml(response, text);
+  }
+
+  // If we got this far, it looks like an Esri response and we can't use
+  // the standard GML parser. Instead we implement a custom solution.
+  const parser = new DOMParser();
+  const doc = parser.parseFromString(text, "text/xml");
+  let features = [];
+  const fields = doc.getElementsByTagName("FIELDS");
+  for (let i = 0; i < fields.length; i++) {
+    const feature = new Feature();
+    const attributes = fields[i].attributes;
+    for (let j = 0; j < attributes.length; j++) {
+      feature.set(attributes[j].name, attributes[j].value);
+    }
+    if (!feature.getId()) {
+      feature.setId(
+        `${response.layer.getProperties().layerInfo.name}.${feature.ol_uid}`
+      );
+    }
+    feature.layer = response.layer;
+    features.push(feature);
+  }
+
+  sortAndMutateFeaturesArray(response.layer, features);
+  return features;
 }
 
 /**
@@ -238,83 +323,126 @@ export function handleClick(evt, map, callback) {
       }
     });
 
-  Promise.all(promises).then((responses) => {
-    const featurePromises = [];
-    const features = [];
-    responses.forEach((response) => {
-      const type = response.requestResponse.headers
-        .get("Content-Type")
-        .split(";")[0];
-      switch (type) {
-        case "application/geojson":
-        case "application/json":
-          featurePromises.push(
-            response.requestResponse
-              .json()
-              .then((jsonData) => {
-                if (
-                  jsonData !== undefined &&
-                  jsonData &&
-                  jsonData.features &&
-                  jsonData.features.length > 0
-                ) {
-                  features.push(...getFeaturesFromJson(response, jsonData));
-                }
-              })
-              .catch((err) => {
-                console.error(
-                  "GetFeatureInfo couldn't retrieve correct data for the clicked object.",
-                  err
-                );
-              })
-          );
-          break;
-        case "text/xml":
-        case "application/vnd.ogc.gml": {
-          featurePromises.push(
-            response.requestResponse
-              .text()
-              .then((text) => {
-                features.push(...getFeaturesFromGml(response, text));
-              })
-              .catch((err) => {
-                console.error(
-                  "GetFeatureInfo couldn't retrieve correct data for the clicked object. "
-                );
-              })
-          );
-          break;
-        }
-        default:
-          break;
-      }
-    });
-
-    Promise.all(featurePromises).then(() => {
-      map.forEachFeatureAtPixel(
-        evt.pixel,
-        (feature, layer) => {
-          if (
-            layer &&
-            (layer.get("queryable") === true ||
-              layer.get("type") === "searchResultLayer")
-          ) {
-            feature.layer = layer;
-            features.push(feature);
+  Promise.allSettled(promises)
+    .then((responses) => {
+      const featurePromises = [];
+      const features = [];
+      responses.forEach((response) => {
+        // Ensure that the Promise is fulfilled - if not, we won't have any
+        // value to parse!
+        if (response.status === "fulfilled") {
+          const type = response.value.requestResponse.headers
+            .get("Content-Type")
+            ?.split(";")[0]; // If request failed, we might not have the Content-Type header
+          switch (type) {
+            case "application/geojson":
+            case "application/json":
+              featurePromises.push(
+                response.value.requestResponse
+                  .json()
+                  .then((jsonData) => {
+                    if (
+                      jsonData !== undefined &&
+                      jsonData &&
+                      jsonData.features &&
+                      jsonData.features.length > 0
+                    ) {
+                      features.push(
+                        ...getFeaturesFromJson(response.value, jsonData)
+                      );
+                    }
+                  })
+                  .catch((err) => {
+                    console.error(
+                      "GetFeatureInfo couldn't retrieve correct data for the clicked object.",
+                      err
+                    );
+                  })
+              );
+              break;
+            case "application/vnd.esri.wms_raw_xml":
+              featurePromises.push(
+                response.value.requestResponse
+                  .text()
+                  .then((text) => {
+                    features.push(
+                      ...experimentalParseEsriWmsRawXml(response.value, text)
+                    );
+                  })
+                  .catch((err) => {
+                    console.error(
+                      "GetFeatureInfo couldn't retrieve correct data for the clicked object. "
+                    );
+                  })
+              );
+              break;
+            case "text/xml":
+            case "application/vnd.ogc.gml":
+              featurePromises.push(
+                response.value.requestResponse
+                  .text()
+                  .then((text) => {
+                    features.push(
+                      ...getFeaturesFromXmlOrGml(response.value, text)
+                    );
+                  })
+                  .catch((err) => {
+                    console.error(
+                      "GetFeatureInfo couldn't retrieve correct data for the clicked object. "
+                    );
+                  })
+              );
+              break;
+            // For any other Content-Type, just ignore - we can't parse any
+            // features if we don't know the data format (or if it's simply missing)
+            default:
+              break;
           }
-        },
-        {
-          hitTolerance: 10,
+        } else {
+          // I'm adding this for pure readability. We don't want to throw any errors
+          // here, even if one of the Promises was rejected. The reason is that throwing
+          // an error here would abort the flow (by taking us straight to the catch() below).
+          // In that case, we'd miss any successfully parsed responses, and we don't want that.
+          // So we just go on, silently.
+          console.error("Couldn't parse GetFeatureInfo.", response.reason);
         }
-      );
-
-      document.querySelector("body").style.cursor = "initial";
-      callback({
-        features: features,
-        evt: evt,
       });
+
+      Promise.all(featurePromises)
+        .then(() => {
+          map.forEachFeatureAtPixel(
+            evt.pixel,
+            (feature, layer) => {
+              if (
+                layer &&
+                ((layer?.get("queryable") === true &&
+                  layer?.get("ignoreInFeatureInfo") !== true) ||
+                  layer.get("name") === "pluginSearchResults")
+              ) {
+                feature.layer = layer;
+                features.push(feature);
+              }
+            },
+            {
+              hitTolerance: 10,
+            }
+          );
+
+          document.querySelector("body").style.cursor = "initial";
+          callback({
+            features: features,
+            evt: evt,
+          });
+        })
+        .catch((err) => {
+          console.error("FeatureInfo failed:", err);
+          document.querySelector("body").style.cursor = "initial";
+        });
+    })
+    .catch((err) => {
+      console.error("Parsing response failed:", err);
+      document.querySelector("body").style.cursor = "initial";
     });
-  });
 }
 
 export function bindMapClickEvent(map, callback) {

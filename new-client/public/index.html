@@ -2,7 +2,10 @@
 <html lang="sv">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, maximum-scale=1"
+    />
     <meta name="theme-color" content="#000000" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-touch-fullscreen" content="yes" />
@@ -11,7 +14,11 @@
     <meta name="%REACT_APP_NAME%-git-hash" content="%REACT_APP_GIT_HASH%" />
     <meta name="%REACT_APP_NAME%-version" content="%REACT_APP_VERSION%" />
 
-    <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
+    <link
+      rel="manifest"
+      href="%PUBLIC_URL%/manifest.json"
+      crossorigin="use-credentials"
+    />
     <link rel="apple-touch-icon" href="%PUBLIC_URL%/logo192.png" />
     <link rel="stylesheet" type="text/css" href="%PUBLIC_URL%/index.css" />
     <title>Hajk - open source webGIS</title>

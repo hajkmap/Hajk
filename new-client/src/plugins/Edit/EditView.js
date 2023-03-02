@@ -1,17 +1,19 @@
 import React from "react";
 import Toolbar from "./components/Toolbar";
 import AttributeEditor from "./components/AttributeEditor";
-import FormControl from "@material-ui/core/FormControl";
-import FormHelperText from "@material-ui/core/FormHelperText";
-import { Step, StepContent, StepLabel, Stepper } from "@material-ui/core";
-import MenuItem from "@material-ui/core/MenuItem";
-import InputLabel from "@material-ui/core/InputLabel";
-import Grid from "@material-ui/core/Grid";
-import Button from "@material-ui/core/Button";
-import Select from "@material-ui/core/Select";
-import SaveIcon from "@material-ui/icons/Save";
-import CircularProgress from "@material-ui/core/CircularProgress";
-import Typography from "@material-ui/core/Typography/Typography";
+import FormControl from "@mui/material/FormControl";
+import FormHelperText from "@mui/material/FormHelperText";
+import { Step, StepContent, StepLabel, Stepper } from "@mui/material";
+import MenuItem from "@mui/material/MenuItem";
+import InputLabel from "@mui/material/InputLabel";
+import Grid from "@mui/material/Grid";
+import Button from "@mui/material/Button";
+import Select from "@mui/material/Select";
+import SaveIcon from "@mui/icons-material/Save";
+import CircularProgress from "@mui/material/CircularProgress";
+import Typography from "@mui/material/Typography";
+import ConfirmationDialog from "../../components/ConfirmationDialog";
+import { withSnackbar } from "notistack";
 
 class EditView extends React.PureComponent {
   constructor(props) {
@@ -22,6 +24,10 @@ class EditView extends React.PureComponent {
       editFeature: undefined,
       activeStep: 0,
       activeTool: undefined,
+      showSaveConfirmation: false,
+      editSummary: "",
+      snapOn: false,
+      isClipboardFeature: props.app.getMapClipboardFeature() !== null,
     };
     this.bindSubscriptions();
   }
@@ -44,6 +50,23 @@ class EditView extends React.PureComponent {
         activeTool: undefined,
       });
     });
+
+    this.props.observer.subscribe("edit-snap-changed", (snapEnabled) => {
+      this.setState({
+        snapOn: snapEnabled,
+      });
+    });
+
+    this.props.app.globalObserver.subscribe(
+      "core.clipboard-feature-updated",
+      () => {
+        this.setState({
+          isClipboardFeature: this.props.app.getMapClipboardFeature()
+            ? true
+            : false,
+        });
+      }
+    );
   };
 
   handleVectorLoadingDone = (status) => {
@@ -62,6 +85,13 @@ class EditView extends React.PureComponent {
     this.props.model.setLayer(serviceId, this.handleVectorLoadingDone);
   }
 
+  resetStepOne = () => {
+    // When we go back to step one after clicking to continue editing after saving a feature
+    // We need to reset the editLayer, otherwise if the database has done anything to the newly added/updated features
+    // (For example added an id) these won't be in our edit layer unless we reload it.
+    this.setLayer(this.state.editSource.id);
+  };
+
   handlePrev = () => {
     const activeStep = this.state.activeStep - 1;
     if (activeStep === 0) {
@@ -72,6 +102,9 @@ class EditView extends React.PureComponent {
         activeStep: 0,
         activeTool: undefined,
       });
+    }
+    if (activeStep === 1) {
+      this.resetStepOne();
     } else {
       this.setState({ activeStep });
     }
@@ -90,6 +123,11 @@ class EditView extends React.PureComponent {
     this.setState({
       activeTool: setTool,
     });
+  };
+
+  handleFeatureSaveFailure = (model) => {
+    //Add the feature back, otherwise subsequent attempts to edit it again will crash.
+    model.editFeature = model.editFeatureBackup;
   };
 
   getStatusMessage = (data) => {
@@ -142,6 +180,16 @@ class EditView extends React.PureComponent {
   };
 
   onSaveClicked = () => {
+    const { options } = this.props;
+    if (options.requireConfirmOnSave) {
+      let editSummary = this.createSummaryMessage();
+      this.setState({ showSaveConfirmation: true, editSummary: editSummary });
+    } else {
+      this.onSaveConfirmed();
+    }
+  };
+
+  onSaveConfirmed = () => {
     const { model, app } = this.props;
     model.save((response) => {
       if (
@@ -149,6 +197,7 @@ class EditView extends React.PureComponent {
         (response.ExceptionReport || !response.TransactionResponse)
       ) {
         this.props.observer.publish("editFeature", model.editFeatureBackup);
+        this.handleFeatureSaveFailure(model);
         app.globalObserver.publish(
           "core.alert",
           this.getStatusMessage(response)
@@ -168,13 +217,67 @@ class EditView extends React.PureComponent {
     });
   };
 
+  createSummaryMessage() {
+    const features = this.props.model.findUpdatedFeatures();
+    let totalInserts = features.inserts.length;
+    let totalUpdates = features.updates.length;
+    let totalDeletes = features.deletes.length;
+    const message = `Dina ändringar består av ${totalInserts} skapade objekt, ${totalUpdates} uppdaterade objekt och ${totalDeletes} borttagna objekt. Vill du spara?`;
+
+    return message;
+  }
+
+  handleSaveConfirmation() {
+    this.onSaveConfirmed();
+    this.setState({ showSaveConfirmation: false, editSummary: "" });
+  }
+
+  handleSaveConfirmationAbort() {
+    this.setState({ showSaveConfirmation: false, editSummary: "" });
+  }
+
+  toggleSnap() {
+    this.state.snapOn
+      ? this.props.model.deactivateSnapping()
+      : this.props.model.activateSnapping();
+  }
+
+  pasteFeature(feature) {
+    const featureValid = this.props.model.checkPasteIsValid(feature);
+
+    if (featureValid.valid) {
+      try {
+        //No obvious reasons why we shouldn't be able to add the feature to the edit layer. Try to add.
+        this.props.model.pasteFeature(feature);
+        this.props.enqueueSnackbar("Inklistringen lyckades", {
+          variant: "success",
+          autoHideDuration: 2000,
+        });
+      } catch (error) {
+        this.props.enqueueSnackbar(`Inklistring misslyckades`, {
+          variant: "warning",
+        });
+      }
+    } else {
+      this.props.enqueueSnackbar(
+        `Inklistring misslyckades: ${featureValid.message}`,
+        {
+          variant: "warning",
+        }
+      );
+    }
+  }
+
   renderSources() {
     const { loadingError, editSource } = this.state;
     return (
-      <FormControl error={loadingError} fullWidth>
-        <InputLabel id="select-source-label">Datakälla</InputLabel>
+      <FormControl variant="standard" error={loadingError} fullWidth>
+        <InputLabel variant="standard" id="select-source-label">
+          Datakälla
+        </InputLabel>
         <Select
           id="select-source"
+          variant="standard"
           value={editSource?.id || ""}
           onChange={(e) => {
             this.setLayer(e.target.value);
@@ -208,6 +311,10 @@ class EditView extends React.PureComponent {
         app={this.props.app}
         activeTool={this.state.activeTool}
         toggleActiveTool={(toolName) => this.toggleActiveTool(toolName)}
+        toggleSnap={() => this.toggleSnap()}
+        snapOn={this.state.snapOn}
+        isClipboardFeature={this.state.isClipboardFeature}
+        onPasteFeature={(feature) => this.pasteFeature(feature)}
       />
     );
   };
@@ -299,8 +406,17 @@ class EditView extends React.PureComponent {
             </StepContent>
           </Step>
         </Stepper>
+        <ConfirmationDialog
+          open={this.state.showSaveConfirmation === true}
+          titleName={"Bekräfta ändringar"}
+          contentDescription={this.state.editSummary}
+          cancel={"Avbryt"}
+          confirm={"Bekräfta"}
+          handleConfirm={() => this.handleSaveConfirmation()}
+          handleAbort={() => this.handleSaveConfirmationAbort()}
+        />
       </>
     );
   }
 }
-export default EditView;
+export default withSnackbar(EditView);

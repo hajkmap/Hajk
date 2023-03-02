@@ -1,6 +1,6 @@
 import React from "react";
 import Observer from "react-event-observer";
-import EditIcon from "@material-ui/icons/Edit";
+import EditIcon from "@mui/icons-material/Edit";
 
 // Helpers
 import LocalStorageHelper from "utils/LocalStorageHelper";
@@ -62,7 +62,7 @@ const Sketch = (props) => {
   const [drawModel] = React.useState(
     () =>
       new DrawModel({
-        layerName: "sketchLayer",
+        layerName: "pluginSketch",
         map: props.map,
         observer: localObserver,
         measurementSettings: measurementSettings,
@@ -87,7 +87,7 @@ const Sketch = (props) => {
   const [kmlModel] = React.useState(
     () =>
       new KmlModel({
-        layerName: "sketchLayer",
+        layerName: "pluginSketch",
         map: props.map,
         observer: localObserver,
         drawModel: drawModel,

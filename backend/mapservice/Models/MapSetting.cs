@@ -45,6 +45,8 @@ namespace MapService.Models
 
         public bool enableDownloadLink { get; set; }
 
+        public bool enableAppStateInHash { get; set; }
+
         public string logo { get; set; }
 
         public string logoLight { get; set; }
@@ -104,6 +106,8 @@ namespace MapService.Models
         public bool zoomDelta { get; set; }
 
         public bool zoomDuration { get; set; }
+
+        public bool showRecentlyUsedPlugins { get; set; }
 
     }
 }

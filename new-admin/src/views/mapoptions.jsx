@@ -44,13 +44,14 @@ class MapOptions extends Component {
         logoLight: config.logoLight || "logoLight.png",
         logoDark: config.logoDark || "logoDark.png",
         resolutions: config.resolutions,
-        extraPrintResolutions: config.extraPrintResolutions,
+        extraPrintResolutions: config.extraPrintResolutions || "",
         extent: config.extent,
         origin: config.origin,
         constrainOnlyCenter: config.constrainOnlyCenter,
         constrainResolution: config.constrainResolution,
-        constrainResolutionMobile: config.constrainResolutionMobile,
-        enableDownloadLink: config.enableDownloadLink,
+        constrainResolutionMobile: config.constrainResolutionMobile || false,
+        enableDownloadLink: config.enableDownloadLink || false,
+        enableAppStateInHash: config.enableAppStateInHash,
         altShiftDragRotate: config.altShiftDragRotate || true,
         onFocusOnly: config.onFocusOnly || false,
         doubleClickZoom: config.doubleClickZoom || true,
@@ -65,11 +66,17 @@ class MapOptions extends Component {
         mapresetter: config.mapresetter,
         showThemeToggler: config.showThemeToggler,
         showUserAvatar: config.showUserAvatar,
+        showRecentlyUsedPlugins: config.showRecentlyUsedPlugins,
+        introductionEnabled: config.introductionEnabled || false,
+        introductionShowControlButton:
+          config.introductionShowControlButton || false,
+        introductionSteps:
+          this.tryJsonStringify(config.introductionSteps) || "[]",
         drawerVisible: config.drawerVisible,
         drawerVisibleMobile: config.drawerVisibleMobile,
         drawerPermanent: config.drawerPermanent,
-        zoomDelta: config.zoomDelta,
-        zoomDuration: config.zoomDuration,
+        zoomDelta: config.zoomDelta || "",
+        zoomDuration: config.zoomDuration || "",
         title: config.title ? config.title : "",
         geoserverLegendOptions: config.geoserverLegendOptions
           ? config.geoserverLegendOptions
@@ -90,6 +97,27 @@ class MapOptions extends Component {
 
   componentWillUnmount() {
     this.props.model.off("change:mapConfig");
+  }
+
+  tryJsonStringify(v) {
+    try {
+      return JSON.stringify(v);
+    } catch (error) {
+      console.log(error);
+      return "";
+    }
+  }
+
+  isValidJson(v) {
+    try {
+      JSON.parse(v);
+      return true;
+    } catch (error) {
+      console.log(
+        'Invalid format for Introduction steps configuration, please see documentation at https://github.com/HiDeoo/intro.js-react#step. Or provide an empty Array, "[]", if you do not want to specify any Introduction steps.'
+      );
+      return false;
+    }
   }
 
   UNSAFE_componentWillMount() {
@@ -116,13 +144,14 @@ class MapOptions extends Component {
       logoLight: mapConfig.logoLight || "logoLight.png",
       logoDark: mapConfig.logoDark || "logoDark.png",
       resolutions: mapConfig.resolutions,
-      extraPrintResolutions: mapConfig.extraPrintResolutions,
+      extraPrintResolutions: mapConfig.extraPrintResolutions || "",
       extent: mapConfig.extent,
       origin: mapConfig.origin,
       constrainOnlyCenter: mapConfig.constrainOnlyCenter,
       constrainResolution: mapConfig.constrainResolution,
-      constrainResolutionMobile: mapConfig.constrainResolutionMobile,
+      constrainResolutionMobile: mapConfig.constrainResolutionMobile || false,
       enableDownloadLink: mapConfig.enableDownloadLink,
+      enableAppStateInHash: mapConfig.enableAppStateInHash,
       altShiftDragRotate: mapConfig.altShiftDragRotate,
       onFocusOnly: mapConfig.onFocusOnly,
       doubleClickZoom: mapConfig.doubleClickZoom,
@@ -132,13 +161,19 @@ class MapOptions extends Component {
       dragPan: mapConfig.dragPan,
       pinchRotate: mapConfig.pinchRotate,
       pinchZoom: mapConfig.pinchZoom,
-      zoomDelta: mapConfig.zoomDelta,
-      zoomDuration: mapConfig.zoomDuration,
+      zoomDelta: mapConfig.zoomDelta || "",
+      zoomDuration: mapConfig.zoomDuration || "",
       mapselector: mapConfig.mapselector,
       mapcleaner: mapConfig.mapcleaner,
       mapresetter: mapConfig.mapresetter,
       showThemeToggler: mapConfig.showThemeToggler,
       showUserAvatar: mapConfig.showUserAvatar,
+      showRecentlyUsedPlugins: mapConfig.showRecentlyUsedPlugins,
+      introductionEnabled: mapConfig.introductionEnabled || false,
+      introductionShowControlButton:
+        mapConfig.introductionShowControlButton || false,
+      introductionSteps:
+        this.tryJsonStringify(mapConfig.introductionSteps) || "[]",
       drawerVisible: mapConfig.drawerVisible,
       drawerVisibleMobile: mapConfig.drawerVisibleMobile,
       drawerPermanent: mapConfig.drawerPermanent,
@@ -198,6 +233,10 @@ class MapOptions extends Component {
       }
     }
 
+    if (fieldName === "introductionSteps") {
+      value = this.isValidJson(value) ? JSON.parse(value) : "";
+    }
+
     return value;
   }
 
@@ -211,6 +250,7 @@ class MapOptions extends Component {
         "zoomDelta",
         "zoomDuration",
         "center",
+        "introductionSteps",
       ],
       validationErrors = [];
 
@@ -262,6 +302,9 @@ class MapOptions extends Component {
     }
 
     switch (fieldName) {
+      case "introductionSteps":
+        valid = Array.isArray(value);
+        break;
       case "title":
         if (empty(value)) {
           valid = false;
@@ -306,6 +349,7 @@ class MapOptions extends Component {
       case "constrainResolution":
       case "constrainResolutionMobile":
       case "enableDownloadLink":
+      case "enableAppStateInHash":
       case "altShiftDragRotate":
       case "onFocusOnly":
       case "doubleClickZoom":
@@ -320,6 +364,9 @@ class MapOptions extends Component {
       case "mapresetter":
       case "showThemeToggler":
       case "showUserAvatar":
+      case "showRecentlyUsedPlugins":
+      case "introductionEnabled":
+      case "introductionShowControlButton":
       case "drawerVisible":
       case "drawVisibleMobile":
       case "drawerPermanent":
@@ -370,6 +417,7 @@ class MapOptions extends Component {
           "constrainResolutionMobile"
         );
         config.enableDownloadLink = this.getValue("enableDownloadLink");
+        config.enableAppStateInHash = this.getValue("enableAppStateInHash");
         config.altShiftDragRotate = this.getValue("altShiftDragRotate");
         config.onFocusOnly = this.getValue("onFocusOnly");
         config.doubleClickZoom = this.getValue("doubleClickZoom");
@@ -386,6 +434,14 @@ class MapOptions extends Component {
         config.mapresetter = this.getValue("mapresetter");
         config.showThemeToggler = this.getValue("showThemeToggler");
         config.showUserAvatar = this.getValue("showUserAvatar");
+        config.showRecentlyUsedPlugins = this.getValue(
+          "showRecentlyUsedPlugins"
+        );
+        config.introductionEnabled = this.getValue("introductionEnabled");
+        config.introductionShowControlButton = this.getValue(
+          "introductionShowControlButton"
+        );
+        config.introductionSteps = this.getValue("introductionSteps");
         config.drawerVisible = this.getValue("drawerVisible");
         config.drawerVisibleMobile = this.getValue("drawerVisibleMobile");
         config.drawerPermanent = this.getValue("drawerPermanent");
@@ -767,6 +823,29 @@ class MapOptions extends Component {
                   className="fa fa-question-circle"
                   data-toggle="tooltip"
                   title="Om aktivt kommer en nedladdningsknapp att visas brevid varje lager i Lagerhanteraren."
+                />
+              </label>
+            </div>
+            <div>
+              <input
+                id="input_enableAppStateInHash"
+                type="checkbox"
+                ref="input_enableAppStateInHash"
+                onChange={(e) => {
+                  this.setState({ enableAppStateInHash: e.target.checked });
+                }}
+                checked={this.state.enableAppStateInHash}
+              />
+              &nbsp;
+              <label
+                className="long-label"
+                htmlFor="input_enableAppStateInHash"
+              >
+                Beta: aktivera liveuppdatering av hashparametar i URL-fältet{" "}
+                <i
+                  className="fa fa-question-circle"
+                  data-toggle="tooltip"
+                  title="Kartans status hålls ständigt uppdaterad, som en del av URL:ens #-parametrar. Se även #1252."
                 />
               </label>
             </div>
@@ -1231,6 +1310,108 @@ class MapOptions extends Component {
                   title="Om AD-kopplingen är aktiv kommer en avatar-ikon bestående av användarens initialer att visas bland kartkontrollerna"
                 />
               </label>
+            </div>
+            <div>
+              <input
+                id="input_showRecentlyUsedPlugins"
+                type="checkbox"
+                ref="input_showRecentlyUsedPlugins"
+                onChange={(e) => {
+                  this.setState({ showRecentlyUsedPlugins: e.target.checked });
+                }}
+                checked={this.state.showRecentlyUsedPlugins}
+              />
+              &nbsp;
+              <label
+                className="long-label"
+                htmlFor="input_showRecentlyUsedPlugins"
+              >
+                Visa en snabbväljare med de senast använda verktygen{" "}
+                <i
+                  className="fa fa-question-circle"
+                  data-toggle="tooltip"
+                  title="Den här kontrollen visar en liten knapp som vid hover/touch visar de senast använda verktygen och låter användaren aktivera dessa. Snabbväljaren är särskild användbar i mobilläget."
+                />
+              </label>
+            </div>
+            <div className="separator">Introduktionsguide</div>
+            <div>
+              <input
+                id="input_introductionEnabled"
+                type="checkbox"
+                ref="input_introductionEnabled"
+                onChange={(e) => {
+                  this.setState({ introductionEnabled: e.target.checked });
+                }}
+                checked={this.state.introductionEnabled}
+              />
+              &nbsp;
+              <label className="long-label" htmlFor="input_introductionEnabled">
+                Starta introduktionsguiden automatiskt första gången användaren
+                besöker kartan{" "}
+                <i
+                  className="fa fa-question-circle"
+                  data-toggle="tooltip"
+                  title="Om aktivt kommer en introduktionsguide att visas för användaren vid första besöket"
+                />
+              </label>
+            </div>
+            <div>
+              <input
+                id="input_introductionShowControlButton"
+                type="checkbox"
+                ref="input_introductionShowControlButton"
+                disabled={!this.state.introductionEnabled}
+                onChange={(e) => {
+                  this.setState({
+                    introductionShowControlButton: e.target.checked,
+                  });
+                }}
+                checked={this.state.introductionShowControlButton}
+              />
+              &nbsp;
+              <label
+                className="long-label"
+                htmlFor="input_introductionShowControlButton"
+              >
+                Visa en knapp i kartan som låter användaren att starta guiden
+                manuellt{" "}
+                <i
+                  className="fa fa-question-circle"
+                  data-toggle="tooltip"
+                  title="Om aktivt kommer en knapp att visas intill zoom-knapparna. "
+                />
+              </label>
+            </div>
+            <div>
+              <label>
+                Steg som visas i introduktionsguiden{" "}
+                <a
+                  href="https://github.com/HiDeoo/intro.js-react#step"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  (se exempel)
+                </a>{" "}
+                <i
+                  className="fa fa-question-circle"
+                  data-toggle="tooltip"
+                  title="JSON-objekt som specificerar vilka element som highlightas i introduktionsguiden. OBS: kan lämnas tomt för att highlighta ett antal standardobjekt (sidopanelen, sökrutan, etc). "
+                />
+              </label>
+              <textarea
+                type="text"
+                placeholder="[]"
+                disabled={!this.state.introductionEnabled}
+                ref="input_introductionSteps"
+                value={this.state.introductionSteps}
+                className={this.getValidationClass("introductionSteps")}
+                onChange={(e) => {
+                  this.setState({ introductionSteps: e.target.value }, () =>
+                    this.validateField("introductionSteps")
+                  );
+                }}
+              />
             </div>
             <div className="separator">Inställningar för sidopanel</div>
             <div>

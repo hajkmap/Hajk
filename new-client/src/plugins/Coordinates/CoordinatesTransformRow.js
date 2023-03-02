@@ -1,33 +1,10 @@
 import React from "react";
-import { withStyles } from "@material-ui/core/styles";
-import TableCell from "@material-ui/core/TableCell";
-import TableRow from "@material-ui/core/TableRow";
-import Typography from "@material-ui/core/Typography";
-import TextField from "@material-ui/core/TextField";
+import Typography from "@mui/material/Typography";
+import TextField from "@mui/material/TextField";
 import NumberFormat from "react-number-format";
 import { transform } from "ol/proj";
 import { withSnackbar } from "notistack";
-
-const styles = (theme) => ({
-  root: {
-    display: "flex",
-    flexGrow: 1,
-    flexWrap: "wrap",
-  },
-  text: {
-    "& .ol-mouse-position": {
-      top: "unset",
-      right: "unset",
-      position: "unset",
-    },
-  },
-  table: {},
-  textField: {
-    marginLeft: theme.spacing(1),
-    marginRight: theme.spacing(1),
-    marginTop: theme.spacing(2),
-  },
-});
+import Grid from "@mui/material/Grid";
 
 class CoordinatesTransformRow extends React.PureComponent {
   state = {
@@ -189,8 +166,6 @@ class CoordinatesTransformRow extends React.PureComponent {
   componentWillUnmount() {}
 
   render() {
-    const { classes } = this.props;
-
     let xCoord = this.props.inverseAxis
       ? this.state.coordinateY
       : this.state.coordinateX;
@@ -200,21 +175,23 @@ class CoordinatesTransformRow extends React.PureComponent {
 
     if (this.model.showFieldsOnStart || this.state.wasModified) {
       return (
-        <TableRow key={this.props.transformation.code}>
-          <TableCell>
-            <Typography variant="body1" style={{ display: "flex" }}>
-              {this.props.transformation.title}
+        <Grid container item spacing={2} rowSpacing={1}>
+          <Grid item xs={12}>
+            <Typography variant="body2" style={{ fontWeight: 600 }}>
+              {this.transformation
+                ? this.transformation.title +
+                  " (" +
+                  this.transformation.code +
+                  ")"
+                : ""}
             </Typography>
-            <Typography variant="body2" style={{ display: "flex" }}>
-              ({this.props.transformation.code})
-            </Typography>
-          </TableCell>
-          <TableCell>
+          </Grid>
+          <Grid item xs={12} md={6}>
             <NumberFormat
               label={this.props.transformation.xtitle}
-              className={classes.textField}
               margin="dense"
               variant="outlined"
+              size="small"
               value={xCoord}
               name="numberformatX"
               type="text"
@@ -226,11 +203,14 @@ class CoordinatesTransformRow extends React.PureComponent {
               helperText={this.state.errorX}
               thousandSeparator={this.model.thousandSeparator ? " " : false}
               customInput={TextField}
+              fullWidth={true}
             />
+          </Grid>
+          <Grid item xs={12} md={6}>
             <NumberFormat
               label={this.props.transformation.ytitle}
-              className={classes.textField}
               margin="dense"
+              size="small"
               variant="outlined"
               value={yCoord}
               name="numberformatY"
@@ -243,9 +223,10 @@ class CoordinatesTransformRow extends React.PureComponent {
               helperText={this.state.errorY}
               thousandSeparator={this.model.thousandSeparator ? " " : false}
               customInput={TextField}
+              fullWidth={true}
             />
-          </TableCell>
-        </TableRow>
+          </Grid>
+        </Grid>
       );
     } else {
       return <></>;
@@ -253,4 +234,4 @@ class CoordinatesTransformRow extends React.PureComponent {
   }
 }
 
-export default withStyles(styles)(withSnackbar(CoordinatesTransformRow));
+export default withSnackbar(CoordinatesTransformRow);

@@ -1,11 +1,10 @@
 import React from "react";
 import propTypes from "prop-types";
-import { withStyles } from "@material-ui/core/styles";
-import ArrowLeftIcon from "@material-ui/icons/ArrowLeft";
-import ArrowRightIcon from "@material-ui/icons/ArrowRight";
-import FeaturePropsParsing from "./FeaturePropsParsing";
-// import Diagram from "../Diagram";
-// import HajkTable from "../Table";
+import { styled } from "@mui/material/styles";
+import ArrowLeftIcon from "@mui/icons-material/ArrowLeft";
+import ArrowRightIcon from "@mui/icons-material/ArrowRight";
+import FileCopyIcon from "@mui/icons-material/FileCopy";
+import { withSnackbar } from "notistack";
 import {
   Table,
   TableContainer,
@@ -16,39 +15,39 @@ import {
   Button,
   Typography,
   Grid,
-} from "@material-ui/core";
+  Tooltip,
+} from "@mui/material";
 
-const styles = (theme) => ({
-  toggler: {
-    backgroundColor: theme.palette.primary.main,
-  },
-  infoContainer: {
-    height: "100%",
-    cursor: "auto",
-    userSelect: "text",
-  },
-  typography: {
-    textAlign: "center",
-  },
-  columnValue: {
-    wordBreak: "break-all",
-  },
-  columnKey: {
-    verticalAlign: "top",
-  },
-  featureInfoContainer: {
-    flex: "auto",
-  },
-  featureInfo: {
-    width: "100%",
-  },
-  togglerButtonRightContainer: {
-    borderRight: `${theme.spacing(0.2)}px solid ${theme.palette.divider}`,
-  },
-  togglerButtonLeftContainer: {
-    borderLeft: `${theme.spacing(0.2)}px solid ${theme.palette.divider}`,
-  },
-});
+import FeaturePropsParsing from "./FeaturePropsParsing";
+import { getInfoClickInfoFromLayerConfig } from "utils/InfoClickHelpers.js";
+// import Diagram from "../Diagram";
+// import HajkTable from "../Table";
+
+const InfoContainer = styled(Grid)(() => ({
+  height: "100%",
+  cursor: "auto",
+  userSelect: "text",
+}));
+
+const StyledTableContainer = styled(TableContainer)(() => ({
+  marginBottom: "1.1rem",
+}));
+
+const TableCellKey = styled(TableCell)(() => ({
+  verticalAlign: "top",
+}));
+
+const TableCellValue = styled(TableCell)(() => ({
+  wordBreak: "break-all",
+}));
+
+const TogglerButtonRightContainer = styled(Grid)(({ theme }) => ({
+  borderRight: `${theme.spacing(0.2)} solid ${theme.palette.divider}`,
+}));
+
+const TogglerButtonLeftContainer = styled(Grid)(({ theme }) => ({
+  borderLeft: `${theme.spacing(0.2)} solid ${theme.palette.divider}`,
+}));
 
 class FeatureInfoContainer extends React.PureComponent {
   state = {
@@ -56,7 +55,6 @@ class FeatureInfoContainer extends React.PureComponent {
   };
 
   static propTypes = {
-    classes: propTypes.object.isRequired,
     features: propTypes.array.isRequired,
     onDisplay: propTypes.func.isRequired,
   };
@@ -94,51 +92,51 @@ class FeatureInfoContainer extends React.PureComponent {
   };
 
   getToggler = () => {
-    const { features, classes } = this.props;
+    const { features } = this.props;
     return (
       <Grid
         alignItems="center"
-        justify="space-between"
-        className={classes.toggler}
+        justifyContent="space-between"
+        sx={{ backgroundColor: "primary.main" }}
         container
       >
-        <Grid item className={classes.togglerButtonRightContainer}>
+        <TogglerButtonRightContainer item>
           <Button
             fullWidth
             disabled={this.state.selectedIndex - 1 < 0}
             onClick={this.stepLeft}
             aria-label="previous"
             id="step-left"
+            sx={{ color: "primary.contrastText" }}
           >
-            <ArrowLeftIcon color="secondary" />
+            <ArrowLeftIcon />
           </Button>
-        </Grid>
+        </TogglerButtonRightContainer>
         <Grid item>
           <Typography
             variant="button"
-            color="secondary"
-            className={classes.typography}
+            sx={{ textAlign: "center", color: "primary.contrastText" }}
           >
             {this.state.selectedIndex + 1} av {features.length}
           </Typography>
         </Grid>
-        <Grid item className={classes.togglerButtonLeftContainer}>
+        <TogglerButtonLeftContainer item>
           <Button
             fullWidth
             disabled={this.state.selectedIndex + 1 >= features.length}
             onClick={this.stepRight}
             aria-label="next"
             id="step-right"
+            sx={{ color: "primary.contrastText" }}
           >
-            <ArrowRightIcon color="secondary" />
+            <ArrowRightIcon />
           </Button>
-        </Grid>
+        </TogglerButtonLeftContainer>
       </Grid>
     );
   };
 
   getFeaturesAsDefaultTable(data, caption) {
-    const { classes } = this.props;
     // We can't use "i" for coloring every second row, as some rows
     // will be removed (Objects are not printed), so there's a need
     // for a separate counter of rows that actually get printed.
@@ -148,10 +146,8 @@ class FeatureInfoContainer extends React.PureComponent {
         ++j;
         return (
           <TableRow key={i} selected={j % 2 === 0}>
-            <TableCell className={classes.columnKey} variant="head">
-              {key}
-            </TableCell>
-            <TableCell className={classes.columnValue}>{data[key]}</TableCell>
+            <TableCellKey variant="head">{key}</TableCellKey>
+            <TableCellValue>{data[key]}</TableCellValue>
           </TableRow>
         );
       } else {
@@ -160,11 +156,11 @@ class FeatureInfoContainer extends React.PureComponent {
     });
 
     return (
-      <TableContainer component="div">
+      <StyledTableContainer component="div">
         <Table size="small" aria-label="Table with infoclick details">
           <TableBody>{tableBody}</TableBody>
         </Table>
-      </TableContainer>
+      </StyledTableContainer>
     );
   }
 
@@ -198,25 +194,6 @@ class FeatureInfoContainer extends React.PureComponent {
   //   }
   // }
 
-  getMarkdownFromLocalInfoBox = (feature, layer, markdown) => {
-    // Same goes for infobox, I'm shortening the code significantly using the optional chaining.
-    // Features coming from search result have infobox set on Feature instead of Layer due to
-    // different features sharing same vector layer.
-    return (
-      feature?.infobox ||
-      feature.layer?.layersInfo?.[layer]?.infobox ||
-      markdown
-    );
-  };
-
-  getAGSCompatibleLayer = (feature) => {
-    return Object.keys(feature.layer.layersInfo).find((id) => {
-      const fid = feature.getId().split(".")[0];
-      const layerId = id.split(":").length === 2 ? id.split(":")[1] : id;
-      return fid === layerId;
-    });
-  };
-
   getFeatureProperties = (feature) => {
     let properties = feature.getProperties();
     properties = this.featurePropsParsing.extractPropertiesFromJson(properties);
@@ -225,29 +202,18 @@ class FeatureInfoContainer extends React.PureComponent {
   };
 
   async updateFeatureInformation(newIndex) {
-    let feature = this.props.features[newIndex];
-    const layerInfo = feature.layer.get("layerInfo");
-
-    let markdown = layerInfo?.information,
-      caption = layerInfo?.caption,
-      layer,
-      shortcodes = [];
-
-    //Problem with geojson returned from AGS - Missing id on feature - how to handle?
-    if (feature.layer.layersInfo && feature.getId()) {
-      layer = this.getAGSCompatibleLayer(feature);
-    }
-
-    // Deal with layer groups that have a caption on sublayer. Layer groups will
-    // have a 'layersInfo' (NB pluralis on layerSInfo), and if it exists,
-    // let's overwrite the previously saved caption.
-    // Below I'm using the new optional chaining operator (
-    // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Optional_chaining),
-    // which will return the new caption, if exists, or a falsy value. If falsy value is returned,
-    // just fall back to the previous value of caption.
-    caption = feature.layer?.layersInfo?.[layer]?.caption || caption;
-    markdown = this.getMarkdownFromLocalInfoBox(feature, layer, markdown);
-
+    // Let's display to the user that we're working on something...
+    this.setState({ loading: true });
+    // We're gonna need the current feature...
+    const feature = this.props.features[newIndex];
+    // ...and the layer that the feature origins from.
+    const { layer } = feature;
+    // With the feature and it's layer we can grab information needed to create
+    // an informative feature-info.
+    const { displayName: caption, infoclickDefinition: markdown } =
+      getInfoClickInfoFromLayerConfig(feature, layer);
+    // TODO: shortCodes, remove?
+    const shortcodes = [];
     // Disabled shortcodes for now as they mess with Markdown tags
     // for Links and Imgs that use "[" and "]".
     // if (markdown) {
@@ -258,11 +224,12 @@ class FeatureInfoContainer extends React.PureComponent {
     //   }
     // }
 
-    this.setState({ loading: true });
-
-    let properties = this.getFeatureProperties(feature);
+    // When we've grabbed the markdown-definition for the layer, we can create the
+    // information that we want to display to the user by combining the definition with
+    // the feature properties.
+    const properties = this.getFeatureProperties(feature);
     const value = await this.getValue(markdown, properties, caption);
-
+    // Finally, we'll update the state, and highlight the feature in the map.
     this.setState(
       {
         value: value,
@@ -313,10 +280,9 @@ class FeatureInfoContainer extends React.PureComponent {
   renderFeatureInformation = () => {
     // const { caption, value, shortcodes, markdown } = this.state;
     const { caption, value } = this.state;
-    const { classes } = this.props;
 
     return (
-      <Grid className={classes.featureInfo} item>
+      <Grid sx={{ width: "100%" }} item>
         <Typography variant="button" align="center" component="h6" gutterBottom>
           {caption}
         </Typography>
@@ -326,24 +292,19 @@ class FeatureInfoContainer extends React.PureComponent {
   };
 
   render() {
-    const { classes, features } = this.props;
+    const { features } = this.props;
     const featureInfoLoaded = this.isReadyToShowInfo();
     return (
-      <Grid
-        alignContent="flex-start"
-        className={classes.infoContainer}
-        container
-        spacing={1}
-      >
+      <InfoContainer alignContent="flex-start" container spacing={1}>
         {features.length > 1 && (
           <Grid xs={12} item>
             {this.getToggler()}
           </Grid>
         )}
         <Grid
-          justify="center"
+          justifyContent="center"
           alignContent={featureInfoLoaded ? "flex-start" : "center"}
-          className={classes.featureInfoContainer}
+          sx={{ flex: "auto" }}
           item
           container
         >
@@ -353,9 +314,25 @@ class FeatureInfoContainer extends React.PureComponent {
             <CircularProgress />
           )}
         </Grid>
-      </Grid>
+        <Tooltip title="Kopiera detta objekt till kartans urklipp">
+          <Button
+            sx={{ mx: 2 }}
+            endIcon={<FileCopyIcon />}
+            variant="contained"
+            onClick={() => {
+              this.props.onCopyFeature(features[this.state.selectedIndex]);
+              this.props.enqueueSnackbar("Kopierad till kartans urklipp", {
+                variant: "success",
+                autoHideDuration: 2000,
+              });
+            }}
+          >
+            Kopiera
+          </Button>
+        </Tooltip>
+      </InfoContainer>
     );
   }
 }
 
-export default withStyles(styles)(FeatureInfoContainer);
+export default withSnackbar(FeatureInfoContainer);

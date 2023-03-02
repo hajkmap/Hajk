@@ -1,53 +1,68 @@
-import React from "react";
+import React, { useEffect } from "react";
+import { createRoot } from "react-dom/client";
 import { createPortal } from "react-dom";
-import { withStyles } from "@material-ui/core/styles";
 import { withSnackbar } from "notistack";
-import Grid from "@material-ui/core/Grid";
-import { Typography } from "@material-ui/core";
-import ReactDOM from "react-dom";
-import Button from "@material-ui/core/Button";
-import ArrowBackIcon from "@material-ui/icons/ArrowBack";
-import Checkbox from "@material-ui/core/Checkbox";
-import FormControlLabel from "@material-ui/core/FormControlLabel";
-import OpenInNewIcon from "@material-ui/icons/OpenInNew";
-import PrintList from "./PrintList";
-import TableOfContents from "./TableOfContents";
-import { ThemeProvider } from "@material-ui/styles";
-import { getNormalizedMenuState } from "../utils/stateConverter";
-import { hasSubMenu } from "../utils/helpers";
-import { deepMerge } from "utils/DeepMerge";
 
 import {
-  LinearProgress,
+  styled,
+  StyledEngineProvider,
+  ThemeProvider,
+} from "@mui/material/styles";
+
+import {
+  Button,
+  Checkbox,
   Dialog,
   DialogTitle,
   DialogContent,
   DialogContentText,
-} from "@material-ui/core";
+  FormControlLabel,
+  Grid,
+  LinearProgress,
+  Typography,
+} from "@mui/material";
 
-const styles = (theme) => ({
-  gridContainer: {
-    padding: theme.spacing(4),
-    height: "100%",
-  },
-  middleContainer: {
-    overflowX: "auto",
-    flexBasis: "100%",
-    marginTop: theme.spacing(2),
-  },
-  headerContainer: {
-    marginBottom: theme.spacing(2),
-  },
-  settingsContainer: {
-    marginBottom: theme.spacing(2),
-  },
-  footerContainer: {
-    flexBasis: "10%",
-  },
-});
+import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+import OpenInNewIcon from "@mui/icons-material/OpenInNew";
+
+import { deepMerge } from "utils/DeepMerge";
+
+import PrintList from "./PrintList";
+import TableOfContents from "./TableOfContents";
+import { getNormalizedMenuState } from "../utils/stateConverter";
+import { hasSubMenu } from "../utils/helpers";
+
+const GridGridContainer = styled(Grid)(({ theme }) => ({
+  padding: theme.spacing(4),
+  height: "100%",
+}));
+
+const GridMiddleContainer = styled(Grid)(({ theme }) => ({
+  overflowX: "auto",
+  flexBasis: "100%",
+  marginTop: theme.spacing(2),
+}));
+
+const GridHeaderContainer = styled(Grid)(({ theme }) => ({
+  marginBottom: theme.spacing(2),
+}));
+
+const GridSettingsContainer = styled(Grid)(({ theme }) => ({
+  marginBottom: theme.spacing(2),
+}));
+
+const GridFooterContainer = styled(Grid)(({ theme }) => ({
+  flexBasis: "10%",
+}));
 
 const maxHeight = 950;
 const imageResizeRatio = 0.7;
+
+function ComponentWithRenderCallback({ callback, children }) {
+  useEffect(() => callback());
+
+  return <div>{children}</div>;
+}
 
 class PrintWindow extends React.PureComponent {
   state = {
@@ -174,12 +189,19 @@ class PrintWindow extends React.PureComponent {
     const theme = deepMerge(this.props.customTheme || this.props.theme, {});
     // Make sure to render the components using the custom theme if it exists:
     return new Promise((resolve) => {
-      ReactDOM.render(
-        <ThemeProvider theme={theme}>{element}</ThemeProvider>,
-        container,
-        (e) => {
-          resolve();
-        }
+      const rootElement = createRoot(container);
+      rootElement.render(
+        <StyledEngineProvider>
+          <ThemeProvider theme={theme}>
+            <ComponentWithRenderCallback
+              callback={() => {
+                resolve();
+              }}
+            >
+              {element}
+            </ComponentWithRenderCallback>
+          </ThemeProvider>
+        </StyledEngineProvider>
       );
     });
   };
@@ -215,16 +237,6 @@ class PrintWindow extends React.PureComponent {
     );
   };
 
-  getCurrentStyleTags = () => {
-    const styleTags = [];
-    [...document.head.children].forEach((c) => {
-      if (c.nodeName === "STYLE") {
-        styleTags.push(c.cloneNode(true));
-      }
-    });
-    return styleTags;
-  };
-
   handleNewWindowBlocked = () => {
     window.alert(
       "Please allow opening of popup windows in order to print this document."
@@ -245,10 +257,6 @@ class PrintWindow extends React.PureComponent {
     if (printWindow === null) {
       return this.handleNewWindowBlocked();
     }
-
-    this.getCurrentStyleTags().forEach((tag) => {
-      printWindow.document.head.appendChild(tag);
-    });
 
     printWindow.document.head.insertAdjacentHTML(
       "beforeend",
@@ -272,7 +280,7 @@ class PrintWindow extends React.PureComponent {
             h6 {
               page-break-after: avoid;
             }
-            MuiTypography-body1 {
+            .MuiTypography-body1 {
               page-break-before: avoid;
             }
             .MuiBox-root {
@@ -294,7 +302,10 @@ class PrintWindow extends React.PureComponent {
     // Since we've altered the theme while printing, we must refresh to make sure
     // the original theme has the highest specificity when the printing is done.
     // Otherwise the entire application will follow the theming used in the print-contents.
-    this.props.app.refreshMUITheme();
+    // FIXME: This might not be needed after the upgrade to React 18. Let's ensure that's the
+    // case and remove if so.
+    // this.props.app.refreshMUITheme();
+
     // Then we'll update the view
     this.toggleAllDocuments(false);
     this.setState({
@@ -304,9 +315,11 @@ class PrintWindow extends React.PureComponent {
     });
   };
 
-  addPageBreaksBeforeHeadings = (printWindow) => {
-    const headings = printWindow.document.body.querySelectorAll(["h1", "h2"]);
-    //we don't want page breaks before a h2 if there is a h1 immediately before. In this case the H1 is the group parent heading.
+  addPageBreaksBeforeHeadings = (printContent) => {
+    const headings = printContent.querySelectorAll(["h1", "h2"]);
+
+    // We don't want page breaks before a H2 if there is a H1 immediately before.
+    // In this case the H1 is the group parent heading.
     let isAfterH1 = false;
     let isConsecutiveH1 = false;
 
@@ -339,20 +352,68 @@ class PrintWindow extends React.PureComponent {
     }
   };
 
+  // Creates a new window, appends all elements that should be printed, and invokes
+  // window.print(), allowing the user to save the document as a PDF (or print it straight away).
   printContents = () => {
+    // We're gonna want to make sure everything is rendered...
     Promise.all([
       this.state.tocPrintMode !== "none" && this.renderToc(),
       this.renderContent(),
     ]).then(() => {
+      // We're also gonna want to make sure all images has been loaded
       this.areAllImagesLoaded().then(() => {
-        const printWindow = this.createPrintWindow();
-        this.toc && printWindow.document.body.appendChild(this.toc);
-        printWindow.document.body.appendChild(this.content);
-        this.addPageBreaksBeforeHeadings(printWindow);
-        printWindow.document.close(); // necessary for IE >= 10
-        printWindow.focus(); // necessary for IE >= 10*/
-        printWindow.print();
-        printWindow.close();
+        // Then we can create an element that will hold our TOC and print-content...
+        const printContent = document.createElement("div");
+        // ...append the TOC to the element (only if applicable)...
+        this.toc && printContent.appendChild(this.toc);
+        // ...and append the actual content.
+        printContent.appendChild(this.content);
+        // Then we'll make sure to create page-breaks before headings to
+        // create a more appealing document.
+        this.addPageBreaksBeforeHeadings(printContent);
+        // Then we'll create and open a new window in the browser
+        const newWindow = this.createPrintWindow();
+
+        // We're gonna need to get all the styles into the new window...
+        // The styling is applied differently if we're in dev- or prod-mode.
+        // (Both are handled with this solution). Let's loop every emotion-style-tag
+        for (const style of document.querySelectorAll("[data-emotion]")) {
+          // Create a new style-tag
+          const s = document.createElement("style");
+          // Append an empty text-node (TODO: Why? :) )
+          s.appendChild(document.createTextNode(""));
+          // There's gonna be information in either the style-sheet or in the textContent
+          // depending on if we're in dev- or prod-mode.
+          const { textContent, sheet } = style;
+          // In development we'll have pure text styling the components...
+          if (textContent) {
+            // In that case we can just append a text-node with that text
+            s.appendChild(document.createTextNode(textContent));
+            newWindow.document.head.appendChild(s);
+            // While in prod, we'll have a stylesheet
+          } else {
+            // We have to append the new style to the document, otherwise the sheet will be null.
+            newWindow.document.head.appendChild(s);
+            for (const rule of sheet.cssRules) {
+              try {
+                s.sheet.insertRule(rule.cssText);
+              } catch (error) {
+                console.warn(`Could not insert rule: ${rule?.cssText}`);
+              }
+            }
+          }
+        }
+
+        // Add our recently-created DIV to the new window's document
+        newWindow.document.body.appendChild(printContent);
+
+        // Invoke browser's print dialog - this will block the thread
+        // until user does something with it.
+        newWindow.print();
+
+        // Once the print dialog has disappeared, let's close the new window
+        newWindow.close();
+
         // When the user closes the print-window we have to do some cleanup...
         this.handlePrintCompleted();
       });
@@ -417,7 +478,7 @@ class PrintWindow extends React.PureComponent {
 
   createMenu() {
     /* 
-    Create a normalised menu structure for the print menu, similar to that of the panel menu, but only for printable documents. 
+    Create a normalized menu structure for the print menu, similar to that of the panel menu, but only for printable documents. 
     */
     const { options } = this.props;
 
@@ -721,15 +782,13 @@ class PrintWindow extends React.PureComponent {
   };
 
   renderCreatePDFButton() {
-    const { classes } = this.props;
     return (
-      <Grid
+      <GridFooterContainer
         item
-        className={classes.footerContainer}
         container
         alignContent="center"
         alignItems="center"
-        justify="center"
+        justifyContent="center"
       >
         <Button
           color="primary"
@@ -745,7 +804,7 @@ class PrintWindow extends React.PureComponent {
             Skriv ut
           </Typography>
         </Button>
-      </Grid>
+      </GridFooterContainer>
     );
   }
 
@@ -753,11 +812,7 @@ class PrintWindow extends React.PureComponent {
     return (
       <>
         {createPortal(
-          <Dialog
-            disableBackdropClick={true}
-            disableEscapeKeyDown={true}
-            open={this.state.pdfLoading}
-          >
+          <Dialog disableEscapeKeyDown={true} open={this.state.pdfLoading}>
             <LinearProgress />
             <DialogTitle>Din PDF skapas</DialogTitle>
             <DialogContent>
@@ -776,26 +831,12 @@ class PrintWindow extends React.PureComponent {
   };
 
   render() {
-    const {
-      classes,
-      togglePrintWindow,
-      localObserver,
-      documentWindowMaximized,
-    } = this.props;
+    const { togglePrintWindow, localObserver, documentWindowMaximized } =
+      this.props;
     const { menuInformation } = this.state;
     return (
-      <Grid
-        container
-        className={classes.gridContainer}
-        wrap="nowrap"
-        direction="column"
-      >
-        <Grid
-          className={classes.headerContainer}
-          alignItems="center"
-          item
-          container
-        >
+      <GridGridContainer container wrap="nowrap" direction="column">
+        <GridHeaderContainer alignItems="center" item container>
           <Grid item xs={4}>
             <Button
               color="primary"
@@ -811,9 +852,9 @@ class PrintWindow extends React.PureComponent {
               Skapa PDF
             </Typography>
           </Grid>
-        </Grid>
+        </GridHeaderContainer>
 
-        <Grid container item className={classes.settingsContainer}>
+        <GridSettingsContainer container item>
           <Typography variant="h6">Inställningar</Typography>
 
           <Grid xs={12} item>
@@ -832,24 +873,24 @@ class PrintWindow extends React.PureComponent {
               labelPlacement="end"
             />
           </Grid>
-        </Grid>
+        </GridSettingsContainer>
 
         <Typography variant="h6">Valt innehåll</Typography>
 
-        <Grid className={classes.middleContainer} item container>
+        <GridMiddleContainer item container>
           <PrintList
             localObserver={localObserver}
             documentMenu={menuInformation}
             level={0}
             handleTogglePrint={this.toggleChosenForPrint}
           />
-        </Grid>
+        </GridMiddleContainer>
 
         {documentWindowMaximized && this.renderCreatePDFButton()}
         {this.renderLoadingDialog()}
-      </Grid>
+      </GridGridContainer>
     );
   }
 }
 
-export default withStyles(styles)(withSnackbar(PrintWindow));
+export default withSnackbar(PrintWindow);

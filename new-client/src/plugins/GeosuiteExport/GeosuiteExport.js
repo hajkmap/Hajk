@@ -4,7 +4,7 @@ import BaseWindowPlugin from "../BaseWindowPlugin";
 import GeosuiteExportModel from "./GeosuiteExportModel";
 import GeosuiteExportView from "./GeosuiteExportView";
 import Observer from "react-event-observer";
-import GetAppIcon from "@material-ui/icons/GetApp";
+import GetAppIcon from "@mui/icons-material/GetApp";
 
 class GeosuiteExport extends React.PureComponent {
   state = {

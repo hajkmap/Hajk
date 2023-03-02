@@ -1,6 +1,6 @@
 import React from "react";
-import { Grid, MenuItem, Paper } from "@material-ui/core";
-import { TextField, Tooltip, Typography } from "@material-ui/core";
+import { Grid, MenuItem, Paper } from "@mui/material";
+import { TextField, Tooltip, Typography } from "@mui/material";
 import { STROKE_TYPES } from "../../constants";
 
 const StrokeTypeSelector = (props) => {
@@ -27,7 +27,7 @@ const StrokeTypeSelector = (props) => {
           {STROKE_TYPES.map((option) => (
             <MenuItem key={option.type} value={option.type}>
               {
-                <Tooltip title={option.tooltip}>
+                <Tooltip disableInteractive title={option.tooltip}>
                   <span style={{ width: "100%" }}>{option.label}</span>
                 </Tooltip>
               }

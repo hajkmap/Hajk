@@ -1,6 +1,6 @@
 // Base
 import React from "react";
-import { Grid } from "@material-ui/core";
+import { Grid } from "@mui/material";
 // Constants
 import { PLUGIN_MARGIN, MAX_REMOVED_FEATURES } from "../constants";
 // Components
@@ -15,12 +15,15 @@ import EditView from "./EditView";
 import SettingsView from "./SettingsView";
 // Hooks
 import useCookieStatus from "hooks/useCookieStatus";
+import useUpdateEffect from "hooks/useUpdateEffect";
+
+import { useSnackbar } from "notistack";
 
 // The SketchView is the main view for the Sketch-plugin.
 const SketchView = (props) => {
   // We want to render the ActivityMenu on the same side as the plugin
   // is rendered (left or right). Let's grab the prop stating where it is rendered!
-  const { position: pluginPosition } = props.options ?? "left";
+  const pluginPosition = props.options?.position ?? "left";
   // We are going to be using the sketch-, kml-, and draw-model. Let's destruct them.
   const { model, drawModel, kmlModel } = props;
   // We are gonna need the local- and global-observer
@@ -29,19 +32,21 @@ const SketchView = (props) => {
   const { activeDrawType, setActiveDrawType } = props;
   // We're gonna need to keep track of the current chosen activity.
   const { activityId, setActivityId } = props;
+
+  // We're gonna need some snackbar functions so that we can prompt the user with information.
+  const { closeSnackbar, enqueueSnackbar } = useSnackbar();
+  // We don't want to prompt the user with more than one snack, so lets track the current one,
+  // so that we can close it when another one is about to open.
+  const helperSnack = React.useRef(null);
+
   // We're gonna need to keep track of some draw-styling...
-  const [drawStyle, setDrawStyle] = React.useState({
-    strokeColor: { r: 10, g: 10, b: 10, a: 1 },
-    fillColor: { r: 60, g: 60, b: 60, a: 0.3 },
-    strokeType: "solid",
-    strokeWidth: 1,
-  });
+  const [drawStyle, setDrawStyle] = React.useState(
+    model.getDrawStyleSettings()
+  );
   // ...and some text-styling.
-  const [textStyle, setTextStyle] = React.useState({
-    foregroundColor: "#FFFFFF",
-    backgroundColor: "#000000",
-    size: 14,
-  });
+  const [textStyle, setTextStyle] = React.useState(
+    model.getTextStyleSettings()
+  );
   // We want to keep track of the last removed features so that the user can restore
   // features that they potentially removed by mistake.
   const [removedFeatures, setRemovedFeatures] = React.useState(
@@ -185,6 +190,38 @@ const SketchView = (props) => {
     return drawModel.setTextStyleSettings(textStyle);
   }, [drawModel, textStyle]);
 
+  // This effect makes sure to save the draw-style-settings to the LS when it
+  // changes. (Only if functional cookies are allowed obviously).
+  React.useEffect(() => {
+    functionalCookiesOk && model.setStoredDrawStyleSettings(drawStyle);
+  }, [drawStyle, functionalCookiesOk, model]);
+
+  // This effect makes sure to save the text-style-settings to the LS when it
+  // changes. (Only if functional cookies are allowed obviously).
+  React.useEffect(() => {
+    functionalCookiesOk && model.setStoredTextStyleSettings(textStyle);
+  }, [textStyle, functionalCookiesOk, model]);
+
+  // This effect does not run on first render. (Otherwise the user would be
+  // prompted with information before they've even started using the plugin).
+  // If it's not the first render, the effect makes sure to prompt the user
+  // with information when they change the current activity or draw-type.
+  useUpdateEffect(() => {
+    // Let's check if there's some helper-text that we should prompt the user with.
+    const helperText = model.getHelperSnackText(activityId, activeDrawType);
+    // If there is, we can prompt the user with a snack.
+    if (helperText) {
+      helperSnack.current = enqueueSnackbar(helperText, {
+        variant: "default",
+        anchorOrigin: { vertical: "bottom", horizontal: "center" },
+      });
+    }
+    // Let's make sure to clean-up out current snack when un-mounting!
+    return () => {
+      closeSnackbar(helperSnack.current);
+    };
+  }, [activityId, activeDrawType, enqueueSnackbar, closeSnackbar]);
+
   // This effect makes sure to subscribe (and unsubscribe) to the observer-events that we care about.
   React.useEffect(() => {
     // Fires when a feature has been removed from the draw-source.
@@ -289,6 +326,7 @@ const SketchView = (props) => {
             functionalCookiesOk={functionalCookiesOk}
             measurementSettings={props.measurementSettings}
             setMeasurementSettings={props.setMeasurementSettings}
+            globalObserver={globalObserver}
           />
         );
       default:
@@ -321,7 +359,7 @@ const SketchView = (props) => {
       // The base plugin-window (in which we render the plugins) has a padding
       // of 10 set. In this plugin we want to render the <ActivityMenu /> at the
       // border of the window, hence we must set a negative margin-right of 10.
-      <Grid container justify="flex-end">
+      <Grid container justifyContent="flex-end">
         <Grid item xs={9}>
           {renderCurrentView()}
         </Grid>

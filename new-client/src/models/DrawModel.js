@@ -9,7 +9,9 @@ import { MultiPoint, Point } from "ol/geom";
 import Overlay from "ol/Overlay";
 import GeoJSON from "ol/format/GeoJSON";
 import transformTranslate from "@turf/transform-translate";
-import { getArea as getExtentArea } from "ol/extent";
+import { getArea as getExtentArea, getCenter, getWidth } from "ol/extent";
+import { Feature } from "ol";
+import { handleClick } from "./Click";
 
 /*
  * A model supplying useful Draw-functionality.
@@ -45,6 +47,7 @@ import { getArea as getExtentArea } from "ol/extent";
  * - get/set modifyActive(): Get or set wether the Modify-interaction should be active or not.
  * - get/set translateActive(): Get or set wether the Translate-interaction should be active or not.
  * - get/set measurementSettings(): Get or set the measurement-settings (units, show-area etc.)
+ * - get/set circleRadius(): Get or set the radius of the circle.
  */
 class DrawModel {
   #map;
@@ -73,13 +76,16 @@ class DrawModel {
   #modifyInteraction;
   #keepModifyActive;
   #keepTranslateActive;
-  #allowedLabelFormats;
   #customHandleDrawStart;
   #customHandleDrawEnd;
   #customHandlePointerMove;
   #customHandleAddFeature;
   #highlightFillColor;
   #highlightStrokeColor;
+  #circleRadius;
+  #circleInteractionActive;
+  #selectInteractionActive;
+  #lastZIndex;
 
   constructor(settings) {
     // Let's make sure that we don't allow initiation if required settings
@@ -100,7 +106,7 @@ class DrawModel {
     // which will act as a prefix on all messages published on the
     // supplied observer.
     this.#observerPrefix = this.#getObserverPrefix(settings);
-    this.measurementSettings =
+    this.#measurementSettings =
       settings.measurementSettings ?? this.#getDefaultMeasurementSettings();
     this.#drawStyleSettings =
       settings.drawStyleSettings ?? this.#getDefaultDrawStyleSettings();
@@ -136,6 +142,9 @@ class DrawModel {
     this.#customHandleAddFeature = null;
     this.#highlightFillColor = "rgba(35,119,252,1)";
     this.#highlightStrokeColor = "rgba(255,255,255,1)";
+    this.#circleRadius = 0;
+    this.#selectInteractionActive = false;
+    this.#lastZIndex = 1;
 
     // A Draw-model is not really useful without a vector-layer, let's initiate it
     // right away, either by creating a new layer, or connect to an existing layer.
@@ -242,7 +251,7 @@ class DrawModel {
   // the layerName supplied when initiating the model. Also makes
   // sure that the layer is a vectorLayer.
   #layerHasCorrectNameAndType = (layer) => {
-    return layer.get("type") === this.#layerName && this.#isVectorLayer(layer);
+    return layer.get("name") === this.#layerName && this.#isVectorLayer(layer);
   };
 
   // Checks wether the supplied layer is a vectorLayer or not.
@@ -270,11 +279,12 @@ class DrawModel {
     this.#drawSource = this.#getNewVectorSource();
     // Then we'll create the layer
     this.#drawLayer = this.#getNewVectorLayer(this.#drawSource);
-    // Make sure to set the layer type to something understandable.
-    this.#drawLayer.set("type", this.#layerName);
-    // FIXME: Remove "type", use only "name" throughout
-    // the application. Should be done as part of #883.
+    // Make sure to set a unique name
     this.#drawLayer.set("name", this.#layerName);
+    // We're also gonna have to set the queryable-property to true so that we can enable "Select" on the layer.
+    this.#drawLayer.set("queryable", true);
+    // We don't want drawn features to show in feature-info (the info-click-window)
+    this.#drawLayer.set("ignoreInFeatureInfo", true);
     // Then we can add the layer to the map.
     this.#map.addLayer(this.#drawLayer);
   };
@@ -317,8 +327,108 @@ class DrawModel {
     }
   };
 
+  // Find the highest zindex used and move on top of it.
+  moveFeatureZIndexToTop = (feature) => {
+    const indexes = this.#getAllZIndexes();
+    const topIndex = Math.max(...indexes);
+    if (isFinite(topIndex)) {
+      this.#setFeatureZIndex(feature, topIndex + 1);
+    }
+  };
+
+  // Find the closest zindex and move on top of it.
+  moveFeatureZIndexUp = (feature) => {
+    const zIndex = this.#findClosestZIndex(feature, true);
+    this.#setFeatureZIndex(feature, zIndex);
+  };
+
+  // Find the lowest zindex used and move below it.
+  moveFeatureZIndexToBottom = (feature) => {
+    const indexes = this.#getAllZIndexes();
+    const bottomIndex = Math.min(...indexes);
+    if (isFinite(bottomIndex)) {
+      this.#setFeatureZIndex(feature, bottomIndex - 1);
+    }
+  };
+
+  // Find the closest zindex and move below it.
+  moveFeatureZIndexDown = (feature) => {
+    const zIndex = this.#findClosestZIndex(feature, false);
+    this.#setFeatureZIndex(feature, zIndex);
+  };
+
+  // Find the closest zindex and move on top of it.
+  #getFeaturesSortedByZIndex = () => {
+    return this.#drawSource.getFeatures().sort((a, b) => {
+      return this.#getFeatureZIndex(a) < this.#getFeatureZIndex(b);
+    });
+  };
+
+  // Get an array of all zindexes
+  #getAllZIndexes = () => {
+    let indexes = [];
+    this.#getFeaturesSortedByZIndex().forEach((f) => {
+      indexes.push(this.#getFeatureZIndex(f));
+    });
+    return indexes;
+  };
+
+  // Find the closest valid zindex
+  #findClosestZIndex = (feature, up) => {
+    let zIndex = this.#getFeatureZIndex(feature);
+
+    const indexes = this.#getAllZIndexes().filter((index) => {
+      return up === true ? index > zIndex : index < zIndex;
+    });
+
+    let closest = Math.max(...indexes);
+    if (!isFinite(closest)) {
+      closest = up === true ? zIndex + 1 : zIndex - 1;
+    }
+
+    indexes.forEach((index) => {
+      if (
+        (up === true && index >= zIndex && index < closest) ||
+        (up === false && index <= zIndex && index > closest)
+      ) {
+        closest = index;
+      }
+    });
+
+    zIndex = up === true ? closest + 1 : closest - 1;
+
+    return zIndex;
+  };
+
+  #setFeatureZIndex = (feature, zIndex) => {
+    let style = feature.getStyle();
+    style = Array.isArray(style) ? style[0] : style;
+    if (style) {
+      style.setZIndex(zIndex);
+      feature.setStyle(style);
+    }
+  };
+
+  #getFeatureZIndex = (feature) => {
+    let style = feature.getStyle();
+    if (style) {
+      style = Array.isArray(style) ? style[0] : style;
+      return style.getZIndex() || 0;
+    }
+    return 0;
+  };
+
   // Returns the style that should be used on the drawn features
   #getFeatureStyle = (feature, settingsOverride) => {
+    if (feature.getStyle()) {
+      const currentZIndex = this.#getFeatureZIndex(feature);
+      if (currentZIndex === 0) {
+        // force a newly drawn feature to get a valid zindex.
+        this.#lastZIndex++;
+        this.#setFeatureZIndex(feature, this.#lastZIndex);
+      }
+    }
+
     if (feature.get("HIDDEN") === true) {
       !feature.get("STYLE_BEFORE_HIDE") &&
         feature.set("STYLE_BEFORE_HIDE", feature.getStyle());
@@ -406,6 +516,17 @@ class DrawModel {
     const featureIsPoint = feature?.getGeometry() instanceof Point;
     // We also have to check if we're dealing with a text-feature or not
     const featureIsTextType = feature?.get("DRAW_METHOD") === "Text";
+    // Let's grab the foreground (fill) and background (stroke) colors that we're supposed to use.
+    // First we'll try to grab the color from the feature style, then from the current settings, and lastly from the fallback.
+    const foregroundColor = featureIsTextType
+      ? feature.get("TEXT_SETTINGS")?.foregroundColor ??
+        this.#textStyleSettings.foregroundColor
+      : "#FFF";
+    // Same applies for the background
+    const backgroundColor = featureIsTextType
+      ? feature.get("TEXT_SETTINGS")?.backgroundColor ??
+        this.#textStyleSettings.backgroundColor
+      : "rgba(0, 0, 0, 0.5)";
     // Then we can create and return the style
     return new Text({
       textAlign: "center",
@@ -423,13 +544,17 @@ class DrawModel {
       }),
       text: this.#getFeatureLabelText(feature),
       overflow: true,
-      stroke: new Stroke({
-        color: featureIsTextType
-          ? feature.get("TEXT_SETTINGS")?.backgroundColor ??
-            this.#textStyleSettings.backgroundColor
-          : "rgba(0, 0, 0, 0.5)",
-        width: 3,
-      }),
+      stroke:
+        // If the foreground and the background are the same color, we don't need a stroke.
+        foregroundColor !== backgroundColor
+          ? new Stroke({
+              color: featureIsTextType
+                ? feature.get("TEXT_SETTINGS")?.backgroundColor ??
+                  this.#textStyleSettings.backgroundColor
+                : "rgba(0, 0, 0, 0.5)",
+              width: 3,
+            })
+          : null,
       offsetX: 0,
       offsetY: featureIsPoint && !featureIsTextType ? -15 : 0,
       rotation: 0,
@@ -589,7 +714,7 @@ class DrawModel {
     // the supplied type (if we're creating a tooltip, we're always showing everything!).
     const showMeasurement =
       labelType === "TOOLTIP" ||
-      type === "LENGTH" ||
+      (type === "LENGTH" && this.#measurementSettings.showLength) ||
       (type === "AREA" && this.#measurementSettings.showArea) ||
       (type === "PERIMETER" && this.#measurementSettings.showPerimeter);
     // If we're not supposed to be showing the measurement, lets return an empty string.
@@ -654,11 +779,19 @@ class DrawModel {
     if (feature.get("DRAW_METHOD") === "Text") {
       return feature.get("USER_TEXT") ?? "";
     }
-    // Otherwise we return the measurement-text (If we're supposed to
-    // show it)!
-    return this.#measurementSettings.showText
+    // There might be a title present on the feature, if there is, we'll want
+    // to display it.
+    const featureTitle = feature.get("FEATURE_TITLE") ?? "";
+    // We'll also have to grab the eventual measurement-label
+    const measurementLabel = this.#measurementSettings.showText
       ? this.#getFeatureMeasurementLabel(feature, "LABEL")
       : "";
+    // Finally, we can return the eventual title, and the eventual measurement-label combined.
+    return featureTitle.length > 0
+      ? `${featureTitle}${
+          measurementLabel.length > 0 ? "\n" : ""
+        }${measurementLabel}`
+      : measurementLabel;
   };
 
   // Returns the supplied measurement as a kilometer-formatted string.
@@ -744,8 +877,8 @@ class DrawModel {
         },
         {
           type: "PERIMETER",
-          value: 2 * radius * Math.PI,
-          prefix: "\n Omkrets:",
+          value: radius,
+          prefix: "\n Radie:",
         },
       ];
     }
@@ -797,6 +930,7 @@ class DrawModel {
       stroke: this.#getDrawStrokeStyle(settings),
       fill: this.#getDrawFillStyle(settings),
       image: this.#getDrawImageStyle(settings),
+      zIndex: this.#getDrawZIndex(settings),
     });
   };
 
@@ -822,6 +956,11 @@ class DrawModel {
         ? settings.fillStyle.color
         : this.#drawStyleSettings.fillColor,
     });
+  };
+
+  // Returns the feature zIndex
+  #getDrawZIndex = (settings) => {
+    return settings?.zIndex || 0;
   };
 
   // Returns the image style (based on the style settings)
@@ -934,11 +1073,21 @@ class DrawModel {
       const fillStyle = this.#getFillStyleInfo(featureStyle);
       const strokeStyle = this.#getStrokeStyleInfo(featureStyle);
       const imageStyle = this.#getImageStyleInfo(featureStyle);
+
+      const zIndex = (
+        Array.isArray(featureStyle) ? featureStyle[0] : featureStyle
+      ).getZIndex();
+
       // And return an object containing them
-      return { fillStyle, strokeStyle, imageStyle };
+      return { fillStyle, strokeStyle, imageStyle, zIndex };
     } catch (error) {
       console.error(`Failed to extract feature-style. Error: ${error}`);
-      return { fillStyle: null, strokeStyle: null, imageStyle: null };
+      return {
+        fillStyle: null,
+        strokeStyle: null,
+        imageStyle: null,
+        zIndex: 0,
+      };
     }
   };
 
@@ -974,6 +1123,10 @@ class DrawModel {
   #getNewVectorLayer = (source) => {
     return new VectorLayer({
       source: source,
+      layerType: "system",
+      ignoreInFeatureInfo: true,
+      zIndex: 5000,
+      caption: "Draw model",
     });
   };
 
@@ -1089,7 +1242,7 @@ class DrawModel {
     // of the user drawn features. We also set "DRAW_TYPE" so that we can
     // handle special features, such as arrows.
     feature.set("USER_DRAWN", true);
-    feature.set("DRAW_METHOD", this.#drawInteraction.get("DRAW_METHOD"));
+    feature.set("DRAW_METHOD", this.#drawInteraction?.get("DRAW_METHOD"));
     feature.set("TEXT_SETTINGS", this.#textStyleSettings);
     // And set a nice style on the feature to be added.
     feature.setStyle(this.#getFeatureStyle(feature));
@@ -1192,6 +1345,12 @@ class DrawModel {
     }
     if (this.#moveInteractionActive) {
       return this.#disableMoveInteraction();
+    }
+    if (this.#selectInteractionActive) {
+      this.#disableSelectInteraction();
+    }
+    if (this.#circleInteractionActive) {
+      this.#disableCircleInteraction();
     }
     // If there isn't an active draw interaction currently, we just return.
     if (!this.#drawInteraction) return;
@@ -1389,8 +1548,13 @@ class DrawModel {
   // Move-interaction.
   #enableMoveInteraction = (settings) => {
     // The Move-interaction will obviously need a Select-interaction so that the features to
-    // move can be selected.
-    this.#selectInteraction = new Select();
+    // move can be selected. We provide `null` as style - this will cancel the default OL Select
+    // interaction (which was problematic in some situations, see #1225).
+    this.#selectInteraction = new Select({
+      layers: [this.#drawLayer],
+      style: null,
+    });
+
     // We need a handler catching the "select"-events so that we can keep track of if any
     // features has been selected or not.
     this.#selectInteraction.on("select", this.#handleFeatureSelect);
@@ -1455,6 +1619,105 @@ class DrawModel {
       this.#map.removeInteraction(this.#translateInteraction);
       this.#translateInteraction = null;
     }
+  };
+
+  // Enables possibility to draw a circle with fixed radius by 'single-click'
+  #enableCircleInteraction = () => {
+    this.#map.clickLock.add("coreDrawModel");
+    this.#circleInteractionActive = true;
+    this.#map.on("singleclick", this.#createRadiusOnClick);
+  };
+
+  // Disables possibility to draw a circle with fixed radius by 'single-click'
+  #disableCircleInteraction = () => {
+    this.#map.clickLock.delete("coreDrawModel");
+    this.#map.un("singleclick", this.#createRadiusOnClick);
+    this.#circleInteractionActive = false;
+  };
+
+  // Enables functionality so that the user can select features from the map and
+  // create a "copy" of that feature.
+  #enableSelectInteraction = () => {
+    this.#map.clickLock.add("coreDrawModel");
+    this.#map.on("singleclick", this.#handleOnSelectClick);
+    this.#selectInteractionActive = true;
+  };
+
+  #disableSelectInteraction = () => {
+    this.#map.clickLock.delete("coreDrawModel");
+    this.#map.un("singleclick", this.#handleOnSelectClick);
+    this.#selectInteractionActive = true;
+  };
+
+  drawSelectedFeature = (feature) => {
+    try {
+      // We create a new feature with the same geometry as the supplied one. This way
+      // we ensure that the copy and the original feature are not connected.
+      const featureCopy = new Feature({
+        geometry: feature.getGeometry().clone(),
+      });
+      // We're gonna need to set some properties on the new feature... First, we'll set an ID.
+      featureCopy.setId(Math.random().toString(36).substring(2, 15));
+      // Then we'll set some draw-properties from the original feature.
+      featureCopy.set("USER_DRAWN", true);
+      featureCopy.set("DRAW_METHOD", feature.get("DRAW_METHOD"));
+      featureCopy.set("TEXT_SETTINGS", feature.get("TEXT_SETTINGS"));
+      // We're gonna need to set some styling on the feature as-well. Let's use the same
+      // styling as on the supplied feature.
+      featureCopy.setStyle(this.#getFeatureStyle(featureCopy));
+      // Then we can add the feature to the draw-layer!
+      this.#drawSource.addFeature(featureCopy);
+    } catch (error) {
+      console.error(`Failed to add selected feature. Error: ${error}`);
+    }
+  };
+
+  #handleOnSelectClick = async (event) => {
+    try {
+      // Try to fetch features from WMS-layers etc. (Also from all vector-layers).
+      const clickResult = await new Promise((resolve) =>
+        handleClick(event, event.map, resolve)
+      );
+      // The response should contain an array of features
+      const { features } = clickResult;
+      // Which might contain features without geometry. We have to make sure we remove those.
+      const featuresWithGeom = features.filter((feature) =>
+        feature.getGeometry()
+      );
+      // If we've fetched exactly one feature, we can add it straight away...
+      featuresWithGeom.length === 1 &&
+        this.drawSelectedFeature(featuresWithGeom[0]);
+      // If we have more than one feature, we'll have to let the user
+      // pick which features they want to add. Let's publish an event that the view can catch...
+      if (featuresWithGeom.length > 1) {
+        return this.#publishInformation({
+          subject: "drawModel.select.click",
+          payLoad: featuresWithGeom,
+        });
+      }
+    } catch (error) {
+      console.error(
+        `Failed to select features in drawModel... Error: ${error}`
+      );
+    }
+  };
+
+  // Creates a Feature with a circle geometry with fixed radius
+  // (If the radius is bigger than 0).
+  #createRadiusOnClick = (e) => {
+    // If the radius is zero we don't want to add a circle...
+    if (this.#circleRadius === 0) {
+      return;
+    }
+    // Create the feature
+    const feature = new Feature({
+      geometry: new CircleGeometry(e.coordinate, this.#circleRadius),
+    });
+    // Add the feature to the draw-source
+    this.#drawSource.addFeature(feature);
+    // Make sure to trigger the draw-end event so that all props etc. are
+    // set on the feature.
+    this.#handleDrawEnd({ feature });
   };
 
   // Handles the "select"-event that fires from the event-listener added when adding
@@ -1551,6 +1814,19 @@ class DrawModel {
     }
   };
 
+  // Creates an OpenLayers Circle geometry from a simplified circle geometry (polygon).
+  // Since the calculation from the extent does not seem to result in the exact radius,
+  // we allow for a optional radius to be passed.
+  #creteCircleGeomFromSimplified = (simplified, opt_radius) => {
+    // First we'll have to get the extent of the simplified circle
+    const simplifiedExtent = simplified.getExtent();
+    // Then we'll calculate the center and radius
+    const center = getCenter(simplifiedExtent);
+    const radius = opt_radius ?? getWidth(simplifiedExtent) / 2;
+    // Finally we'll return a circle geometry based on those:
+    return new CircleGeometry(center, radius);
+  };
+
   // Removes the property-change-listeners from all features and then adds
   // them again. Useful if a new feature is added to the draw-source, and you
   // have to make sure the new feature has a listener.
@@ -1585,8 +1861,19 @@ class DrawModel {
       // that has been set in an earlier session. Let's apply that style (if present)
       // before we add the feature to the source.
       const extractedStyle = feature.get("EXTRACTED_STYLE");
-      extractedStyle &&
-        feature.setStyle(this.#getFeatureStyle(feature, extractedStyle));
+
+      if (extractedStyle) {
+        // apply style
+        let style = this.#getFeatureStyle(feature, extractedStyle);
+        if (!style.getZIndex()) {
+          // getZIndex() returns 0 if not set
+          // force a zIndex if missing, for later use.
+          style.setZIndex(this.#lastZIndex);
+          this.#lastZIndex++;
+        }
+        feature.setStyle(style);
+      }
+
       // When we're done styling we can add the feature.
       this.#drawSource.addFeature(feature);
       // Then we'll publish some information about the addition. (If we're not supposed to be silent).
@@ -1692,18 +1979,37 @@ class DrawModel {
     try {
       // First we'll have to get a clone of the supplied feature
       const duplicate = this.#createDuplicateFeature(feature);
-      // Then we'll have to create a GeoJSON-feature from the ol-feature (since
-      // turf only accepts geoJSON).
+      // Then we'll have to check if we're dealing with a circle-geometry.
+      const isCircle = duplicate.getGeometry() instanceof CircleGeometry;
+      // We also have to make sure to store the eventual radius so that we can use
+      // that to create a 'real' circle later.
+      const radius = isCircle ? duplicate.getGeometry().getRadius() : 0;
+      // If we are dealing with a circle, we have to create a simplified geometry (since
+      // geoJSON does not like OpenLayers circles). Let's update the geometry if we are:
+      if (isCircle) {
+        duplicate.setGeometry(fromCircle(duplicate.getGeometry()));
+      }
+      // Then we'll have to create a GeoJSON-feature from the ol-feature (since turf only accepts geoJSON).
       const gjFeature = this.#geoJSONParser.writeFeatureObject(duplicate);
       // We want to add the cloned feature with an offset to the east. First, we'll
       // have to get the offset-amount.
       const offset = this.#getDuplicateOffsetAmount();
       // Then we'll translate (move) the geoJSON-feature slightly to the east.
       const translated = transformTranslate(gjFeature, offset, 140);
-      // When thats done, we'll update the duplicates geometry.
-      duplicate.setGeometry(
-        this.#geoJSONParser.readGeometry(translated.geometry)
+      // Then we have to read the geometry from the translated geoJSON
+      const translatedGeom = this.#geoJSONParser.readGeometry(
+        translated.geometry
       );
+      // When thats done, we'll update the duplicates geometry. If we are dealing
+      // with a circle, we have to create a "real" circle:
+      if (isCircle) {
+        duplicate.setGeometry(
+          this.#creteCircleGeomFromSimplified(translatedGeom, radius)
+        );
+      } else {
+        // Otherwise we can just set the geometry.
+        duplicate.setGeometry(translatedGeom);
+      }
       // Since the feature we are duplicating is probably selected for edit, we have to
       // make sure to toggle the edit-flag on the new feature to false.
       duplicate.set("EDIT_ACTIVE", false);
@@ -1725,13 +2031,34 @@ class DrawModel {
   translateSelectedFeatures = (length, angle) => {
     this.#selectInteraction.getFeatures().forEach((f) => {
       try {
-        // We'll have to create a GeoJSON-feature from the ol-feature (since
-        // turf only accepts geoJSON).
+        // Since geoJSON cannot handle OL's circle-geometries, we'll have to check
+        // if we're dealing with a circle before creating the geoJSON-feature...
+        const isCircle = f.getGeometry() instanceof CircleGeometry;
+        // We also have to make sure to store the eventual radius so that we can use that to create a 'real' circle later.
+        const radius = isCircle ? f.getGeometry().getRadius() : 0;
+        // If we are dealing with a circle, we have to set the feature-geometry to a
+        // simplified circle (Don't worry, we'll create a "real" circle again later).
+        if (isCircle) {
+          f.setGeometry(fromCircle(f.getGeometry()));
+        }
+        // Then we'll create a GeoJSON-feature from the ol-feature (since turf only accepts geoJSON).
         const gjFeature = this.#geoJSONParser.writeFeatureObject(f);
         // Then we'll translate the feature according to the supplied parameters
         const translated = transformTranslate(gjFeature, length / 1000, angle);
-        // When thats done, we'll update the duplicates geometry.
-        f.setGeometry(this.#geoJSONParser.readGeometry(translated.geometry));
+        // When thats done, we'll read the geometry from the translated geoJSON
+        const translatedGeometry = this.#geoJSONParser.readGeometry(
+          translated.geometry
+        );
+        // When thats done, we'll update the feature geometry to the translated one. If we are dealing
+        // with a circle, we have to create a "real" circle:
+        if (isCircle) {
+          f.setGeometry(
+            this.#creteCircleGeomFromSimplified(translatedGeometry, radius)
+          );
+        } else {
+          // Otherwise we can just set the geometry.
+          f.setGeometry(translatedGeometry);
+        }
       } catch (error) {
         console.error(`Failed to translate selected features. Error: ${error}`);
       }
@@ -1861,6 +2188,12 @@ class DrawModel {
     if (drawMethod === "Move") {
       return this.#enableMoveInteraction(settings);
     }
+    if (drawMethod === "Select") {
+      return this.#enableSelectInteraction(settings);
+    }
+    if (drawMethod === "Circle") {
+      this.#enableCircleInteraction();
+    }
     // If we've made it this far it's time to enable a new draw interaction!
     // First we must make sure to gather some settings and defaults.
     const type = this.#getDrawInteractionType(drawMethod);
@@ -1916,6 +2249,10 @@ class DrawModel {
       .forEach((feature) => {
         this.#drawSource.removeFeature(feature);
       });
+
+    // reset lastZIndex
+    this.#lastZIndex = 1;
+
     // When the drawn features has been removed, we have to make sure
     // to update the current extent.
     this.#currentExtent = this.#drawSource.getExtent();
@@ -2004,6 +2341,18 @@ class DrawModel {
     });
   };
 
+  // Updates the supplied features' <attribute> with the supplied <value>.
+  // When the attribute has been updated, the style is refreshed.
+  setFeatureAttribute = (feature, attribute, value) => {
+    // If no feature was supplied, or if the supplied 'feature' is not
+    // a feature, we'll abort.
+    if (!(feature instanceof Feature)) {
+      return;
+    }
+    // Otherwise we'll update the attribute.
+    feature.set(attribute, value);
+  };
+
   // Updates the Text-style-settings.
   setTextStyleSettings = (newStyleSettings) => {
     this.#textStyleSettings = newStyleSettings;
@@ -2028,6 +2377,14 @@ class DrawModel {
     this.#measurementSettings = settings;
     // Then we have to refresh the style so that the change is shown.
     this.#refreshFeaturesTextStyle();
+  };
+
+  setCircleRadius = (radius) => {
+    this.#circleRadius = parseInt(radius);
+    // Ensure is not NaN
+    if (Number.isNaN(this.#circleRadius)) {
+      this.#circleRadius = 0;
+    }
   };
 
   getMeasurementSettings = () => {
@@ -2070,8 +2427,13 @@ class DrawModel {
   };
 
   // Get:er returning the current text-style settings
-  getDrawStyleSettings = () => {
+  getTextStyleSettings = () => {
     return this.#textStyleSettings;
+  };
+
+  // Get:er returning circle radius
+  getCircleRadius = () => {
+    return this.#circleRadius;
   };
 }
 export default DrawModel;

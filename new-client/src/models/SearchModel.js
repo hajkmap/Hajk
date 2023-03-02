@@ -4,6 +4,7 @@ import GML3 from "ol/format/GML3";
 import GML32 from "ol/format/GML32";
 
 import IsLike from "ol/format/filter/IsLike";
+import EqualTo from "ol/format/filter/EqualTo";
 import Or from "ol/format/filter/Or";
 import And from "ol/format/filter/And";
 import Intersects from "ol/format/filter/Intersects";
@@ -13,6 +14,8 @@ import { fromCircle } from "ol/geom/Polygon";
 // import { arraySort } from "../utils/ArraySort";
 import { decodeCommas } from "../utils/StringCommaCoder";
 import { hfetch } from "utils/FetchWrapper";
+import { functionalOk } from "./Cookie";
+import LocalStorageHelper from "./../utils/LocalStorageHelper";
 
 const ESCAPE_CHAR = "!";
 const SINGLE_CHAR = ".";
@@ -39,6 +42,8 @@ class SearchModel {
   #controllers = []; // Holder Array for Promises' AbortControllers
   #wfsParser = new WFS();
   #possibleSearchCombinations = new Map(); // Will hold a set of possible search combinations, so we don't have to re-create them for each source
+
+  lastSearchPhrase = "";
 
   constructor(searchPluginOptions, map, app) {
     // Validate
@@ -67,11 +72,41 @@ class SearchModel {
     searchSources = this.getSources(),
     searchOptions = this.getSearchOptions()
   ) => {
+    searchString = searchString.trim();
+
+    // Save the latest search phrase for later use
+    this.lastSearchPhrase = searchString;
+
     const { featureCollections, errors } = await this.#getRawResults(
-      searchString.trim(), // Ensure that the search string isn't surrounded by whitespace
+      searchString, // Ensure that the search string isn't surrounded by whitespace
       searchSources,
       searchOptions
     );
+
+    // If the method was initiated by an actual search (not just autocomplete),
+    // let's send this to the analytics model.
+    if (searchOptions.initiator === "search" && searchString.length > 0) {
+      let totalHits = 0;
+      if (featureCollections) {
+        featureCollections.forEach((f) => {
+          totalHits += f.value.features.length;
+        });
+      }
+
+      // Lets focus on the first error.
+      const errorMessage = errors.length
+        ? `${errors[0].status}: ${errors[0].reason}`
+        : "";
+
+      // track!
+      this.#app.globalObserver.publish("analytics.trackEvent", {
+        eventName: "textualSearchPerformed",
+        query: searchString,
+        activeMap: this.#app.config.activeMap,
+        totalHits: totalHits,
+        errorMessage: errorMessage,
+      });
+    }
 
     return { featureCollections, errors };
   };
@@ -415,6 +450,7 @@ class SearchModel {
     const maxFeatures = searchOptions.maxResultsPerDataset;
     let comparisonFilters = null;
     let spatialFilters = null;
+    let globalCqlFilter = null;
     let finalFilters = null;
     let possibleSearchCombinations = [];
 
@@ -490,6 +526,30 @@ class SearchModel {
           : spatialFilters[0];
     }
 
+    // Check if we have a 'global' filter that is stored (for now) in localStorage.
+    // This can have been set by tools that want to apply a filter to many different map layers (for example to view a particular floor).
+    // If such a filter is set, we would take it into account in the search, by adding an additional And filter once the rest of the search filters are set up.
+    // We should potentially put the global filter in a better place as there is no real need to have it in localStorage and as a result unnecessarily be dependent on functional cookies being accepted.
+
+    //Example globalFilterOptions: {filter: 'LevelId = 155', filterProperty: "LevelId", filterValue: "155", layers: ["1", "2", "3"]}
+    if (functionalOk) {
+      const globalMapState = LocalStorageHelper.get("globalMapState", null);
+      const mapFilter = globalMapState?.mapFilter || null;
+
+      // If we have a globalFilterOptions object stored, and the layer being searched is in the list of layers where the globalFilter
+      // should be applied, we create an extra search filter. OBS. At the moment, the globalFilter is a simple EqualTo.
+      // We will later add this as an And filter to the final search filters, once they are prepared.
+      if (mapFilter && mapFilter?.filterLayers) {
+        if (mapFilter.filterLayers.includes(searchSource.id)) {
+          globalCqlFilter = new EqualTo(
+            mapFilter.filterProperty,
+            mapFilter.filterValue,
+            false
+          );
+        }
+      }
+    }
+
     // Finally, let's combine the text and spatial filters into
     // one filter that will be sent with the request.
     if (comparisonFilters !== null && spatialFilters !== null) {
@@ -499,6 +559,11 @@ class SearchModel {
       finalFilters = comparisonFilters;
     } else if (spatialFilters !== null) {
       finalFilters = spatialFilters;
+    }
+
+    //If we have a globalFilter, add this as an And filter to the final search filters.
+    if (globalCqlFilter !== null) {
+      finalFilters = new And(finalFilters, globalCqlFilter);
     }
 
     // Before we actually send a fetch request, we must ensure

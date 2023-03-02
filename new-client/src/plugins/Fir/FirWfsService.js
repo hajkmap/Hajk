@@ -120,7 +120,7 @@ class FirWfsService {
   }
 
   nestedSearch(data, params, resolve, reject) {
-    // Search by FNR
+    // Search by ID
 
     let ids = [];
     data.features.forEach((feature) => {

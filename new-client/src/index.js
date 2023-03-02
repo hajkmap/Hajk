@@ -1,16 +1,13 @@
-// IE 11 starts here.
-// If you don't need IE 11, comment out those lines line.
-// Also, change 'browserslist' in package.json to exclude ie11.
-import "react-app-polyfill/ie11";
+// Removing this causes some of the older but still common devices (e.g. iOS 12, 13)
+// to run into trouble.
 import "react-app-polyfill/stable";
-import "abortcontroller-polyfill/dist/polyfill-patch-fetch";
-import "allsettled-polyfill";
-// IE 11 ends here.
 
 // iOS 12 and other older touch devices need this polyfill to
 // support OpenLayers map interactions through Pointer Events API.
 // See: https://github.com/hajkmap/Hajk/issues/606
 import "elm-pep";
+// In order to support iOS 12 we need this polyfill too:
+import "core-js/features/promise/all-settled";
 
 // Since we don't want to download roboto from the Google CDN,
 // we use fontSource and import all subsets that MUI relies on here.
@@ -31,13 +28,13 @@ import "ol/ol.css";
 import "./custom-ol.css";
 
 import React from "react";
-import ReactDOM from "react-dom";
+import { createRoot } from "react-dom/client";
 import buildConfig from "./buildConfig.json";
-import ErrorIcon from "@material-ui/icons/Error";
+import ErrorIcon from "@mui/icons-material/Error";
 import HajkThemeProvider from "./components/HajkThemeProvider";
-import reportWebVitals from "./reportWebVitals";
 import { initHFetch, hfetch, initFetchWrapper } from "utils/FetchWrapper";
 import LocalStorageHelper from "utils/LocalStorageHelper";
+import { getMergedSearchAndHashParams } from "utils/getMergedSearchAndHashParams";
 
 initHFetch();
 
@@ -46,16 +43,17 @@ let networkErrorMessage =
 let parseErrorMessage =
   "Fel när applikationen skulle läsas in. Detta beror troligtvis på ett konfigurationsfel. Försök igen senare.";
 
+const domRoot = createRoot(document.getElementById("root"));
+
 const renderError = (message, err) => {
   console.error(err);
-  ReactDOM.render(
+  domRoot.render(
     <div className="start-error">
       <div>
         <ErrorIcon />
       </div>
       <div>{message}</div>
-    </div>,
-    document.getElementById("root")
+    </div>
   );
 };
 
@@ -78,13 +76,13 @@ hfetch("appConfig.json", { cacheBuster: true })
       if (appConfig.parseErrorMessage)
         parseErrorMessage = appConfig.parseErrorMessage;
 
-      // Grab URL params using the new URL API, save for later
-      const urlParams = new URL(window.location).searchParams;
+      // Grab URL params and save for later use
+      const initialURLParams = getMergedSearchAndHashParams();
 
       // If m param is supplied, try loading a map with that name
       // or else, fall back to default from appConfig.json
-      let activeMap = urlParams.has("m")
-        ? urlParams.get("m")
+      let activeMap = initialURLParams.has("m")
+        ? initialURLParams.get("m")
         : appConfig.defaultMap;
 
       // Check if mapserviceBase is set in appConfig. If it is not, we will
@@ -140,20 +138,41 @@ hfetch("appConfig.json", { cacheBuster: true })
                   mapConfig: mapConfig.mapConfig,
                   userDetails: mapConfig.userDetails,
                   userSpecificMaps: mapConfig.userSpecificMaps,
-                  urlParams,
+                  initialURLParams,
+                };
+
+                // TODO: Watchout - this can be a controversial introduction!
+                // Before we merge, ensure that we really want this!
+                // Why am I adding it? The examples/embedded.html shows Hajk running
+                // in an IFRAME and allows it to be controlled by changing the SRC
+                // attribute of the IFRAME. In that file, there are two buttons (one
+                // to increase and another one to decrease the zoom level). However,
+                // we don't want to zoom past map's zoom limits. At first I used some
+                // hard-coded values for min/max zoom, but these will vary depending on
+                // map config. So I figured out that we could expose some of Hajk's settings
+                // on the global object. That way, the IFRAME's parent document can read
+                // those values and use to check that we don't allow zooming past limits.
+                //
+                // We can of course add more things that can be "nice to have" for an
+                // embedded solution. In addition to parameters, we could expose some API
+                // that would control the map itself! But it should be carefully crafted.
+                //
+                // For the sake of this example, I'm committing this basic object:
+                window.hajkPublicApi = {
+                  maxZoom: config.mapConfig.map.maxZoom,
+                  minZoom: config.mapConfig.map.minZoom,
                 };
 
                 // At this stage, we know for sure what activeMap is, so we can initiate the LocalStorageHelper
                 LocalStorageHelper.setKeyName(config.activeMap);
 
                 // Invoke React's renderer. Render Theme. Theme will render App.
-                ReactDOM.render(
+                domRoot.render(
                   <HajkThemeProvider
                     activeTools={buildConfig.activeTools}
                     config={config}
                     customTheme={customTheme}
-                  />,
-                  document.getElementById("root")
+                  />
                 );
               })
               .catch((err) => renderError(parseErrorMessage, err));
@@ -197,7 +216,12 @@ hfetch("appConfig.json", { cacheBuster: true })
                     appConfig: appConfig,
                     layersConfig: layersConfig,
                     mapConfig: mapConfig,
-                    urlParams,
+                    initialURLParams,
+                  };
+
+                  window.hajkPublicApi = {
+                    maxZoom: config.mapConfig.map.maxZoom,
+                    minZoom: config.mapConfig.map.minZoom,
                   };
 
                   // At this stage, we know for sure what activeMap is, so we can initiate the LocalStorageHelper
@@ -217,13 +241,12 @@ hfetch("appConfig.json", { cacheBuster: true })
                   }
 
                   // Invoke React's renderer. Render Theme. Theme will render App.
-                  ReactDOM.render(
+                  domRoot.render(
                     <HajkThemeProvider
                       activeTools={buildConfig.activeTools}
                       config={config}
                       customTheme={customTheme}
-                    />,
-                    document.getElementById("root")
+                    />
                   );
                 })
                 .catch((err) => {
@@ -245,8 +268,3 @@ hfetch("appConfig.json", { cacheBuster: true })
   .catch((err) => {
     renderError(networkErrorMessage, err);
   });
-
-// If you want to start measuring performance in your app, pass a function
-// to log results (for example: reportWebVitals(console.log))
-// or send to an analytics endpoint. Learn more: https://bit.ly/CRA-vitals
-reportWebVitals();

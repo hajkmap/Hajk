@@ -1,16 +1,20 @@
+import AnchorModel from "./AnchorModel";
+import MapClickModel from "./MapClickModel";
 import SearchModel from "./SearchModel";
-import Plugin from "./Plugin.js";
-import ConfigMapper from "./../utils/ConfigMapper.js";
-import CoordinateSystemLoader from "./../utils/CoordinateSystemLoader.js";
-import { isMobile } from "./../utils/IsMobile.js";
+import Plugin from "./Plugin";
+import SnapHelper from "./SnapHelper";
+import { bindMapClickEvent } from "./Click";
+
+import ConfigMapper from "utils/ConfigMapper";
+import CoordinateSystemLoader from "utils/CoordinateSystemLoader";
+import { hfetch } from "utils/FetchWrapper";
+import { isMobile } from "utils/IsMobile";
+import { getMergedSearchAndHashParams } from "utils/getMergedSearchAndHashParams";
 // import ArcGISLayer from "./layers/ArcGISLayer.js";
 // import DataLayer from "./layers/DataLayer.js";
 import WMSLayer from "./layers/WMSLayer.js";
 import WMTSLayer from "./layers/WMTSLayer.js";
 import WFSVectorLayer from "./layers/VectorLayer.js";
-import { bindMapClickEvent } from "./Click.js";
-import { defaults as defaultInteractions } from "ol/interaction";
-import { Map, View } from "ol";
 // TODO: Uncomment and ensure they show as expected
 // import {
 // defaults as defaultControls,
@@ -25,12 +29,13 @@ import { Map, View } from "ol";
 // ZoomSlider,
 // ZoomToExtent
 // } from "ol/control";
+
+import { Map as OLMap, View, Feature } from "ol";
+import { defaults as defaultInteractions } from "ol/interaction";
 import { register } from "ol/proj/proj4";
 import VectorLayer from "ol/layer/Vector";
 import VectorSource from "ol/source/Vector";
-import { Icon, Fill, Stroke, Style } from "ol/style.js";
-import SnapHelper from "./SnapHelper";
-import { hfetch } from "utils/FetchWrapper";
+import { Icon, Fill, Stroke, Style } from "ol/style";
 
 class AppModel {
   /**
@@ -39,21 +44,47 @@ class AppModel {
    * @param Observer observer
    */
   constructor(settings) {
-    const { config, globalObserver, refreshMUITheme } = settings;
     this.map = undefined;
     this.windows = [];
     this.plugins = {};
     this.activeTool = undefined;
+    this.layersFromParams = [];
+    this.groupLayersFromParams = [];
+    this.cqlFiltersFromParams = {};
+    this.hfetch = hfetch;
+    this.pluginHistory = new Map();
+
+    // We store the click location data here for later use.
+    // Right now this is only used in the new infoClick but it will most likely be used in other parts of the program.
+    // Not optimal...
+    this.clickLocationData = {
+      x: 0,
+      y: 0,
+      zoom: 0,
+    };
+
+    // The user has the ability to add a feature from the map into the clipboard, with the purpose of copying the feature
+    // when using another tool. For example, the user can use the optional 'copy feature' button in the infoclick box to add a feature to the clipboard.
+    // They could then in the edit tool, while creating a shape, paste this feature in, to get the geometry.
+    this.mapClipboardFeature = null;
+  }
+
+  init(settings) {
+    // Lets prevent multiple instances...
+    if (this.initialized)
+      throw new Error("You should only initialize AppModel once!");
+
+    this.initialized = true;
+
+    const { config, globalObserver, refreshMUITheme } = settings;
+
     this.config = config;
     this.decorateConfig();
     this.coordinateSystemLoader = new CoordinateSystemLoader(
       config.mapConfig.projections
     );
     this.globalObserver = globalObserver;
-    this.layersFromParams = [];
-    this.cqlFiltersFromParams = {};
     register(this.coordinateSystemLoader.getProj4());
-    this.hfetch = hfetch;
     this.refreshMUITheme = refreshMUITheme;
   }
 
@@ -84,6 +115,52 @@ class AppModel {
           window.closeWindow();
         }
       });
+  }
+
+  pushPluginIntoHistory(plugin) {
+    // plugin is an object that will contain a 'type' as well as some
+    // other properties. We use the 'type' as a unique key in our Map.
+    const { type, ...rest } = plugin;
+    // If plugin already exists in set…
+    if (this.pluginHistory.has(type)) {
+      // …remove it first so that we don't have duplicates.
+      this.pluginHistory.delete(type);
+    }
+    this.pluginHistory.set(type, rest);
+
+    // Finally, announce to everyone who cares
+    this.globalObserver.publish(
+      "core.pluginHistoryChanged",
+      this.pluginHistory
+    );
+  }
+
+  getClickLocationData() {
+    return this.clickLocationData;
+  }
+
+  setClickLocationData(x, y, zoom) {
+    this.clickLocationData = {
+      x: x,
+      y: y,
+      zoom: zoom,
+    };
+  }
+
+  getMapClipboardFeature() {
+    return this.mapClipboardFeature;
+  }
+
+  setMapClipboardFeature(feature) {
+    const featureCopy = new Feature({
+      geometry: feature.getGeometry().clone(),
+    });
+
+    this.mapClipboardFeature = featureCopy;
+
+    // Let other tools know that a feature has been added to the clipboard.
+    // If something wants to get the feature, they can fetch it using getMapClipboardFeature() on the appModel;
+    this.globalObserver.publish("core.clipboard-feature-updated");
   }
 
   /**
@@ -155,6 +232,22 @@ class AppModel {
   getDrawerPlugins() {
     return this.getPlugins().filter((plugin) => {
       return ["toolbar"].includes(plugin.options.target);
+    });
+  }
+
+  /**
+   * @summary Return all plugins that might render in Drawer.
+   *
+   * @description There reason this functions exists is that we must
+   * have a way to determine whether the Drawer toggle button should be
+   * rendered. It's not as easy as checking for Drawer plugins only (i.e.
+   * those with target=toolbar) - this simple logic gets complicated by
+   * the fact that Widget plugins (target=left|right) also render Drawer
+   * buttons on small screens.
+   */
+  getPluginsThatMightRenderInDrawer() {
+    return this.getPlugins().filter((plugin) => {
+      return ["toolbar", "left", "right"].includes(plugin.options.target);
     });
   }
 
@@ -252,7 +345,7 @@ class AppModel {
       }),
     };
 
-    this.map = new Map({
+    this.map = new OLMap({
       controls: [
         // new FullScreen({ target: document.getElementById("controls-column") }),
         // new Rotate({ target: document.getElementById("controls-column") }),
@@ -313,23 +406,65 @@ class AppModel {
     // So, we create the Set no matter what:
     this.map.clickLock = new Set();
 
+    const infoclickOptions = config.tools.find(
+      (t) => t.type === "infoclick"
+    )?.options;
+    if (infoclickOptions?.useNewInfoclick === true) {
+      const mapClickModel = new MapClickModel(
+        this.map,
+        this.globalObserver,
+        infoclickOptions
+      );
+
+      mapClickModel.bindMapClick((featureCollections) => {
+        const featureCollectionsToBeHandledByMapClickViewer =
+          featureCollections.filter((fc) => fc.type !== "SearchResults");
+
+        // Publish the retrived collections, even if they're empty. We want the
+        // handling components to know, so they can act accordingly (e.g. close
+        // window if no features are to be shown).
+        this.globalObserver.publish(
+          "mapClick.featureCollections",
+          featureCollectionsToBeHandledByMapClickViewer
+        );
+
+        // Next, handle search results features.
+        // Check if we've got any features from the search layer,
+        // and if we do, announce it to the search component so it can
+        // show relevant feature in the search results list.
+        const searchResultFeatures = featureCollections.find(
+          (c) => c.type === "SearchResults"
+        )?.features;
+
+        if (searchResultFeatures?.length > 0) {
+          this.globalObserver.publish(
+            "infoClick.searchResultLayerClick",
+            searchResultFeatures // Clicked features sent to the search-component for display
+          );
+        }
+      });
+    }
+
     // FIXME: Potential miss here: don't we want to register click on search results
     // But we register the Infoclick handler only if the plugin exists in map config:
     // even if Infoclick plugin is inactive? Currently search won't register clicks in
     // map without infoclick, which seems as an unnecessary limitation.
-    if (config.tools.some((tool) => tool.type === "infoclick")) {
+    if (
+      config.tools.some((tool) => tool.type === "infoclick") &&
+      infoclickOptions?.useNewInfoclick !== true
+    ) {
       bindMapClickEvent(this.map, (mapClickDataResult) => {
         // We have to separate features coming from the searchResult-layer
         // from the rest, since we want to render this information in the
         // search-component rather than in the featureInfo-component.
         const searchResultFeatures = mapClickDataResult.features.filter(
           (feature) => {
-            return feature?.layer.get("type") === "searchResultLayer";
+            return feature?.layer.get("name") === "pluginSearchResults";
           }
         );
         const infoclickFeatures = mapClickDataResult.features.filter(
           (feature) => {
-            return feature?.layer.get("type") !== "searchResultLayer";
+            return feature?.layer.get("name") !== "pluginSearchResults";
           }
         );
 
@@ -379,23 +514,31 @@ class AppModel {
     return this;
   }
 
+  addAnchorModel() {
+    this.anchorModel = new AnchorModel({
+      app: this,
+      globalObserver: this.globalObserver,
+      map: this.map,
+    });
+
+    // Either way, return self, so we can go on and chain more methods on App model
+    return this;
+  }
+
   clear() {
     this.clearing = true;
     this.highlight(false);
     this.map
-      .getLayers()
-      .getArray()
-      .forEach((layer) => {
-        if (
-          layer.getProperties &&
-          layer.getProperties().layerInfo &&
-          layer.getProperties().layerInfo.layerType === "layer"
-        ) {
-          if (layer.layerType === "group") {
-            this.globalObserver.publish("layerswitcher.hideLayer", layer);
-          } else {
-            layer.setVisible(false);
-          }
+      .getAllLayers()
+      .filter(
+        (l) =>
+          l.getVisible() === true &&
+          ["layer", "group"].includes(l.get("layerType"))
+      )
+      .forEach((l) => {
+        l.setVisible(false);
+        if (l.get("layerType") === "group") {
+          this.globalObserver.publish("layerswitcher.hideLayer", l);
         }
       });
     setTimeout(() => {
@@ -448,11 +591,13 @@ class AppModel {
   }
 
   lookup(layers, type) {
-    var matchedLayers = [];
+    const matchedLayers = [];
     layers.forEach((layer) => {
       const layerConfig = this.config.layersConfig.find(
         (lookupLayer) => lookupLayer.id === layer.id
       );
+      // Note that "layer" below IS NOT an OL Layer, only a structure from our config.
+      // Hence, no layer.set("layerType"). Instead we do this:
       layer.layerType = type;
       // Use the general value for infobox if not present in map config.
       if (layerConfig !== undefined && layerConfig.type === "vector") {
@@ -498,19 +643,28 @@ class AppModel {
 
     // Prepare layers
     this.layers = this.flattern(layerSwitcherConfig);
-    // FIXME: Use map instead?
-    Object.keys(this.layers)
-      .sort((a, b) => this.layers[a].drawOrder - this.layers[b].drawOrder)
-      .map((sortedKey) => this.layers[sortedKey])
-      .forEach((layer) => {
-        if (this.layersFromParams.length > 0) {
-          layer.visibleAtStart = this.layersFromParams.some(
-            (layerId) => layerId === layer.id
-          );
-        }
-        layer.cqlFilter = this.cqlFiltersFromParams[layer.id] || null;
-        this.addMapLayer(layer);
-      });
+    // Loop the layers and add each of them to the map
+    this.layers.forEach((layer) => {
+      if (this.layersFromParams.length > 0) {
+        // Override the default visibleAtStart if a value was provided in URLSearchParams
+        layer.visibleAtStart = this.layersFromParams.some(
+          (layerId) => layerId === layer.id
+        );
+
+        // groupLayersFromParams is an object where keys are layer IDs and values are
+        // the sublayers that should be active for this given layer. A layer's key will
+        // only exist in groupLayersFromParams if there is a subset of sublayers to be shown
+        // at start (default behavior is to turn on all sublayers).
+        layer.visibleAtStartSubLayers = Object.hasOwn(
+          this.groupLayersFromParams,
+          layer.id
+        )
+          ? this.groupLayersFromParams[layer.id]?.split(",")
+          : [];
+      }
+      layer.cqlFilter = this.cqlFiltersFromParams[layer.id] || null;
+      this.addMapLayer(layer);
+    });
 
     // FIXME: Move to infoClick instead. All other plugins create their own layers.
     if (infoclickConfig !== undefined) {
@@ -536,6 +690,10 @@ class AppModel {
     ];
     this.highlightSource = new VectorSource();
     this.highlightLayer = new VectorLayer({
+      caption: "Infoclick layer",
+      name: "pluginInfoclick",
+      layerType: "system",
+      zIndex: 5001, // System layer's zIndex start at 5000, ensure click is above
       source: this.highlightSource,
       style: new Style({
         stroke: new Stroke({
@@ -578,27 +736,35 @@ class AppModel {
    * @summary Merges two objects.
    *
    * @param {*} mapConfig
-   * @param {*} urlSearchParams
+   * @param {*} paramsAsPlainObject
    * @returns {*} a Result of overwriting a with values from b
    * @memberof AppModel
    */
-  mergeConfig(mapConfig, urlSearchParams) {
+  mergeConfigWithValuesFromParams(mapConfig, paramsAsPlainObject) {
     // clean is used to strip the UI of all elements so we get a super clean viewport back, without any plugins
     const clean =
-      Boolean(urlSearchParams.hasOwnProperty("clean")) &&
-      urlSearchParams.clean !== "false" &&
-      urlSearchParams.clean !== "0";
-
-    // f contains our CQL Filters
-    const f = urlSearchParams.f;
+      Boolean(paramsAsPlainObject.hasOwnProperty("clean")) &&
+      paramsAsPlainObject.clean !== "false" &&
+      paramsAsPlainObject.clean !== "0";
 
     // Merge query params to the map config from JSON
-    let x = parseFloat(urlSearchParams.x),
-      y = parseFloat(urlSearchParams.y),
-      z = parseInt(urlSearchParams.z, 10),
-      l = undefined;
-    if (typeof urlSearchParams.l === "string") {
-      l = urlSearchParams.l.split(",");
+    let x = parseFloat(paramsAsPlainObject.x),
+      y = parseFloat(paramsAsPlainObject.y),
+      z = parseInt(paramsAsPlainObject.z, 10);
+
+    if (typeof paramsAsPlainObject.l === "string") {
+      this.layersFromParams = paramsAsPlainObject.l.split(",");
+    }
+
+    if (typeof paramsAsPlainObject.gl === "string") {
+      try {
+        this.groupLayersFromParams = JSON.parse(paramsAsPlainObject.gl);
+      } catch (error) {
+        console.error(
+          "Couldn't parse the group layers parameter. Attempted with this value:",
+          paramsAsPlainObject.gl
+        );
+      }
     }
 
     if (Number.isNaN(x)) {
@@ -616,13 +782,41 @@ class AppModel {
     mapConfig.map.center[1] = y;
     mapConfig.map.zoom = z;
 
-    if (l) {
-      this.layersFromParams = l;
-    }
-
+    // f contains our CQL Filters
+    const f = paramsAsPlainObject.f;
     if (f) {
       // Filters come as a URI encoded JSON object, so we must parse it first
       this.cqlFiltersFromParams = JSON.parse(decodeURIComponent(f));
+    }
+
+    // If the 'p' param exists, we want to modify which plugins are visible at start
+    const pluginsToShow = paramsAsPlainObject?.p?.split(",");
+    if (pluginsToShow) {
+      // If the value of 'p' is an empty string, it means that no plugin should be shown at start
+      if (pluginsToShow.length === 1 && pluginsToShow[0] === "") {
+        mapConfig.tools.forEach((t) => {
+          t.options.visibleAtStart = false;
+        });
+      }
+      // If 'p' exists but is not an empty string, we have a list of plugins that should be
+      // shown at start. All others should be hidden (no matter the setting in Admin).
+      else {
+        mapConfig.tools.forEach((t) => {
+          t.options.visibleAtStart = pluginsToShow.includes(t.type);
+        });
+      }
+    }
+
+    // If enableAppStateInHash exists in params, let's override
+    // the corresponding setting from map config. This allows users
+    // to activate live hash params (#1252).
+    const enableAppStateInHash = Object.hasOwn(
+      paramsAsPlainObject,
+      "enableAppStateInHash"
+    );
+    if (enableAppStateInHash) {
+      console.info("Activating live updating of query parameters");
+      mapConfig.map.enableAppStateInHash = true;
     }
 
     return mapConfig;
@@ -727,9 +921,17 @@ class AppModel {
           // Find the corresponding layer
           const layer = layers.wmslayers.find((l) => l.id === wmslayerId);
 
+          // Prevent crash if no layer was found, see #1206
+          if (layer === undefined) {
+            console.warn(
+              `WMS layer with ID "${wmslayerId}" does not exist and should be removed from config. Please contact the system administrator.`
+            );
+            return undefined;
+          }
+
           // Look into the layersInfo array - it will contain sublayers. We must
           // expose each one of them as a WFS service.
-          return layer.layersInfo.map((sl) => {
+          return layer?.layersInfo.map((sl) => {
             return {
               id: sl.id,
               pid: layer.id, // Relevant for group layers: will hold the actual OL layer name, not only current sublayer
@@ -737,17 +939,26 @@ class AppModel {
               url: sl.searchUrl || layer.url,
               layers: [sl.id],
               searchFields:
-                typeof sl.searchPropertyName === "string"
+                typeof sl.searchPropertyName === "string" &&
+                sl.searchPropertyName.length > 0
                   ? sl.searchPropertyName.split(",")
                   : [],
               infobox: sl.infobox || "",
+              infoclickIcon: sl.infoclickIcon || "",
               aliasDict: "",
               displayFields:
-                typeof sl.searchDisplayName === "string"
+                typeof sl.searchDisplayName === "string" &&
+                sl.searchDisplayName.length > 0
                   ? sl.searchDisplayName.split(",")
                   : [],
+              secondaryLabelFields:
+                typeof sl.secondaryLabelFields === "string" &&
+                sl.secondaryLabelFields.length > 0
+                  ? sl.secondaryLabelFields.split(",")
+                  : [],
               shortDisplayFields:
-                typeof sl.searchShortDisplayName === "string"
+                typeof sl.searchShortDisplayName === "string" &&
+                sl.searchShortDisplayName.length > 0
                   ? sl.searchShortDisplayName.split(",")
                   : [],
               geometryField: sl.searchGeometryField || "geom",
@@ -759,8 +970,9 @@ class AppModel {
       );
 
       // Spread the WMS search layers onto the array with WFS search sources,
-      // from now on they're equal to our code.
-      Array.isArray(wmslayers) && wfslayers.push(...wmslayers);
+      // from now on they're equal to our code. Before spreading, let's filter
+      // the wmslayers so we get rid of potential undefined values (see #1206).
+      Array.isArray(wmslayers) && wfslayers.push(...wmslayers.filter(Boolean));
 
       searchTool.options.sources = wfslayers;
     }
@@ -803,11 +1015,11 @@ class AppModel {
       }
     }
 
-    return this.mergeConfig(
+    return this.mergeConfigWithValuesFromParams(
       this.config.mapConfig,
-      Object.fromEntries(new URLSearchParams(document.location.search))
+      Object.fromEntries(getMergedSearchAndHashParams())
     );
   }
 }
 
-export default AppModel;
+export default new AppModel();

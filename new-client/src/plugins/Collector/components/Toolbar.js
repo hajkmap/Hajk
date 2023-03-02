@@ -1,31 +1,20 @@
 import React, { Component } from "react";
-import { withStyles } from "@material-ui/core/styles";
-import Button from "@material-ui/core/Button";
-import ScatterPlotIcon from "@material-ui/icons/ScatterPlot";
-import BorderStyleIcon from "@material-ui/icons/BorderStyle";
-import LinearScaleIcon from "@material-ui/icons/LinearScale";
-import Typography from "@material-ui/core/Typography/Typography";
+import { styled } from "@mui/material/styles";
+import Button from "@mui/material/Button";
+import ScatterPlotIcon from "@mui/icons-material/ScatterPlot";
+import BorderStyleIcon from "@mui/icons-material/BorderStyle";
+import LinearScaleIcon from "@mui/icons-material/LinearScale";
+import Typography from "@mui/material/Typography";
 import WKT from "ol/format/WKT";
 
-const styles = (theme) => ({
-  button: {
-    margin: theme.spacing(1),
-    width: "115px",
-  },
-  leftIcon: {
-    marginRight: theme.spacing(1),
-  },
-  rightIcon: {
-    marginLeft: theme.spacing(1),
-  },
-  iconSmall: {
-    fontSize: 20,
-  },
-  toolbar: {
-    margin: "5px",
-  },
-  toolbarRow: {},
-});
+const StyledButton = styled(Button)(({ theme }) => ({
+  margin: theme.spacing(1),
+  width: "115px",
+}));
+
+const ToolbarDiv = styled("div")(({ theme }) => ({
+  margin: "5px",
+}));
 
 class Toolbar extends Component {
   constructor(props) {
@@ -230,15 +219,13 @@ class Toolbar extends Component {
       editLine = source.editLine;
       editPolygon = source.editPolygon;
     }
-    const { classes } = this.props;
 
     return (
       <div>
-        <div className={classes.toolbar}>
-          <div className={classes.toolbarRow}>
-            <Button
-              variant="outlined"
-              className={classes.button}
+        <ToolbarDiv>
+          <div>
+            <StyledButton
+              variant="contained"
               disabled={disabled === false ? !editPoint : disabled}
               onClick={() => {
                 this.onAddPointClicked();
@@ -248,11 +235,10 @@ class Toolbar extends Component {
               style={this.getSelectedStyle("point")}
             >
               Plats
-              <ScatterPlotIcon className={classes.rightIcon} />
-            </Button>
-            <Button
-              variant="outlined"
-              className={classes.button}
+              <ScatterPlotIcon sx={{ marginLeft: 1 }} />
+            </StyledButton>
+            <StyledButton
+              variant="contained"
               disabled={disabled === false ? !editLine : disabled}
               onClick={() => {
                 this.onAddLineClicked();
@@ -262,11 +248,10 @@ class Toolbar extends Component {
               style={this.getSelectedStyle("linestring")}
             >
               Sträcka
-              <LinearScaleIcon className={classes.rightIcon} />
-            </Button>
-            <Button
-              variant="outlined"
-              className={classes.button}
+              <LinearScaleIcon sx={{ marginLeft: 1 }} />
+            </StyledButton>
+            <StyledButton
+              variant="contained"
               disabled={disabled === false ? !editPolygon : disabled}
               onClick={() => {
                 this.onAddPolygonClicked();
@@ -276,13 +261,13 @@ class Toolbar extends Component {
               style={this.getSelectedStyle("polygon")}
             >
               Område
-              <BorderStyleIcon className={classes.rightIcon} />
-            </Button>
+              <BorderStyleIcon sx={{ marginLeft: 1 }} />
+            </StyledButton>
           </div>
-        </div>
+        </ToolbarDiv>
       </div>
     );
   }
 }
 
-export default withStyles(styles)(Toolbar);
+export default Toolbar;

@@ -10,7 +10,7 @@ import FmeView from "./FmeView";
 import Observer from "react-event-observer";
 
 // All plugins will need to display an icon. Make sure to pick a relevant one from Material UI Icons.
-import FmeIcon from "@material-ui/icons/BrokenImage";
+import FmeIcon from "@mui/icons-material/BrokenImage";
 
 /**
  * @summary Main class for the Fme plugin.
@@ -123,7 +123,7 @@ class Fme extends React.PureComponent {
               onClickCallback: () => {},
             },
           ],
-          height: 450, // Custom height/width etc | Use "auto" for automatic or leave undefined
+          height: "dynamic",
           width: 400,
           onWindowHide: this.onWindowHide,
           onWindowShow: this.onWindowShow,

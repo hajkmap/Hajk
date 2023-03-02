@@ -1,5 +1,5 @@
 import React from "react";
-import { Grid, Typography, TextField } from "@material-ui/core";
+import { Grid, Typography, TextField } from "@mui/material";
 import { STROKE_DASHES } from "plugins/Sketch/constants";
 
 import FeatureStyleAccordion from "./FeatureStyleAccordion";
@@ -209,10 +209,36 @@ export default function FeatureStyleSelector(props) {
     }
   };
 
+  const renderCircleRadiusSelector = () => {
+    if (props.isEdit) {
+      return null;
+    }
+    return (
+      <Grid item xs={12} style={{ marginTop: 16 }}>
+        <Grid item xs={12} style={{ marginBottom: 4 }}>
+          <Typography align="center">Radie (m)</Typography>
+        </Grid>
+        <Grid item xs={12}>
+          <TextField
+            variant="outlined"
+            type="number"
+            size="small"
+            fullWidth
+            defaultValue={props.drawModel.getCircleRadius()}
+            onChange={(e) => {
+              props.drawModel.setCircleRadius(e.target.value);
+            }}
+          ></TextField>
+        </Grid>
+      </Grid>
+    );
+  };
+
   return (
     <Grid container>
       {props.activeDrawType === "LineString" && renderStrokeTypeSelector()}
       {props.activeDrawType === "Text" && renderTextSizeSelector()}
+      {props.activeDrawType === "Circle" && renderCircleRadiusSelector()}
       <Grid item xs={12} style={{ marginTop: 16 }}>
         <Grid item xs={12} style={{ marginBottom: 4 }}>
           <Typography align="center">Utseende</Typography>

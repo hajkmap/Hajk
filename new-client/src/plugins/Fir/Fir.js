@@ -2,12 +2,11 @@ import React from "react";
 import PropTypes from "prop-types";
 import BaseWindowPlugin from "../BaseWindowPlugin";
 import Observer from "react-event-observer";
-import PluginIcon from "@material-ui/icons/House";
+import PluginIcon from "@mui/icons-material/House";
 import FirModel from "./FirModel";
 import FirView from "./FirView";
 import FirLayerController from "./FirLayerController";
 import FirImport from "./FirImport";
-import styles from "./FirStyles";
 /* eslint-disable no-unused-vars */
 import FirWfsService from "./FirWfsService";
 /* eslint-enable no-unused-vars */
@@ -53,8 +52,6 @@ class Fir extends React.PureComponent {
       layerController: this.layerController,
       map: props.map,
     });
-
-    styles.setModel(this.model);
   }
 
   onWindowShow = () => {
@@ -77,7 +74,10 @@ class Fir extends React.PureComponent {
 
   loadFeatures = (features) => {
     this.layerController.clearBeforeSearch();
-    this.layerController.addFeatures(features, { zoomToLayer: true });
+    this.layerController.addFeatures(features, {
+      zoomToLayer: true,
+      clearPrevious: true,
+    });
     this.localObserver.publish("fir.search.completed", features);
   };
 

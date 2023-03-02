@@ -1,270 +1,266 @@
 import React from "react";
 import PropTypes from "prop-types";
-import { withStyles } from "@material-ui/core/styles";
-import Button from "@material-ui/core/Button";
-import TextField from "@material-ui/core/TextField";
+import { styled } from "@mui/material/styles";
+import Button from "@mui/material/Button";
+import TextField from "@mui/material/TextField";
+import Box from "@mui/material/Box";
 
-import AddCircleOutlineIcon from "@material-ui/icons/AddCircleOutline";
-import BookmarkIcon from "@material-ui/icons/Bookmark";
-import BookmarkOutlinedIcon from "@material-ui/icons/BookmarkBorderOutlined";
-import DeleteIcon from "@material-ui/icons/Delete";
-import IconButton from "@material-ui/core/IconButton";
-import Typography from "@material-ui/core/Typography";
+import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
+import BookmarkIcon from "@mui/icons-material/Bookmark";
+import BookmarkOutlinedIcon from "@mui/icons-material/BookmarkBorderOutlined";
+import DeleteIcon from "@mui/icons-material/Delete";
+import IconButton from "@mui/material/IconButton";
+import Typography from "@mui/material/Typography";
 
-class BookmarksView extends React.PureComponent {
-  state = {
-    name: "",
-    error: false,
-    helperText: " ",
-    bookmarks: [],
-  };
+import ConfirmationDialog from "../../components/ConfirmationDialog";
+import useUpdateEffect from "hooks/useUpdateEffect";
 
-  static propTypes = {
-    model: PropTypes.object.isRequired,
-    app: PropTypes.object.isRequired,
-    classes: PropTypes.object.isRequired,
-  };
+const List = styled("div")(() => ({
+  display: "flex",
+  flex: "1 0 100%",
+  flexFlow: "column nowrap",
+  marginTop: "10px",
+}));
 
-  static defaultProps = {};
+const ListItem = styled("div")(({ theme }) => ({
+  display: "flex",
+  position: "relative",
+  flex: "1 0 100%",
+  justifyContent: "flex-start",
+  border: `1px solid ${theme.palette.grey[400]}`,
+  transform: "translateZ(1px)",
+  borderBottom: "none",
+  "&:first-of-type": {
+    borderRadius: "3px 3px 0 0",
+  },
+  "&:last-child": {
+    borderBottom: `1px solid ${theme.palette.grey[400]}`,
+    borderRadius: "0 0 3px 3px",
+  },
+}));
 
-  constructor(props) {
-    super(props);
-    this.model = this.props.model;
-    this.state.bookmarks = [...this.model.bookmarks];
-    this.handleKeyUp = this.handleKeyUp.bind(this);
-  }
+const AddButton = styled(Button)(() => ({
+  flex: "1 0 auto",
+  whiteSpace: "nowrap",
+  height: "0%",
+  top: "-22px",
+  marginLeft: "10px",
+}));
 
-  btnAddBookmark = (e) => {
-    if (this.state.name.trim() === "") {
+const BookmarkButton = styled(Button)(({ theme }) => ({
+  display: "flex",
+  justifyContent: "flex-start",
+  flex: "1 0 100%",
+  transform: "translateZ(1px)",
+  "& svg": {
+    color: theme.palette.text.secondary,
+  },
+  "&:hover svg.on": {
+    opacity: 0.7,
+  },
+}));
+
+const DeleteButton = styled(IconButton)(({ theme }) => ({
+  display: "block",
+  position: "absolute",
+  top: 0,
+  right: 0,
+  padding: "5px",
+  width: "36px",
+  height: "36px",
+  borderRadius: "100% 0 0 100%",
+  "&:hover svg": {
+    color: theme.palette.error.dark,
+    stoke: theme.palette.error.dark,
+    fill: theme.palette.error.dark,
+  },
+}));
+
+const BookmarkIconSpan = styled("span")(({ theme }) => ({
+  display: "inline-block",
+  position: "relative",
+  width: "24px",
+  height: "24px",
+  marginRight: "8px",
+  "& .on": {
+    position: "absolute",
+    top: "0",
+    left: "0",
+    width: "24px",
+    height: "24px",
+    color: theme.palette.text.secondary,
+    stoke: theme.palette.text.secondary,
+    fill: theme.palette.text.secondary,
+    opacity: 0.001,
+    transition: "all 300ms",
+  },
+}));
+
+const ItemNameSpan = styled("span")(() => ({
+  whiteSpace: "nowrap",
+  overflow: "hidden",
+  textOverflow: "ellipsis",
+  maxWidth: "calc(100% - 71px)",
+  textTransform: "none",
+}));
+
+const StyledDeleteIcon = styled(DeleteIcon)(() => ({
+  display: "block",
+  width: "24px",
+  height: "24px",
+  transition: "all 300ms",
+}));
+
+const BookmarksView = (props) => {
+  const [name, setName] = React.useState("");
+  const [error, setError] = React.useState(false);
+  const [helperText, setHelperText] = React.useState(" ");
+  const [bookmarks, setBookmarks] = React.useState({});
+  const [showRemovalConfirmation, setShowRemovalConfirmation] =
+    React.useState(false);
+  const [bookmarkToDelete, setBookmarkToDelete] = React.useState(null);
+
+  // Update bookmarks when model changes.
+  useUpdateEffect(() => {
+    setBookmarks(props.model.bookmarks);
+  }, [props.model.bookmarks]);
+
+  const addBookmark = (e) => {
+    if (name.trim() === "") {
       return;
     }
+    props.model.addBookmark(name, true);
 
-    this.model.addBookmark(this.state.name, true);
-    this.setState({
-      name: "",
-      bookmarks: [...this.model.bookmarks],
-    });
-    this.checkBookmarkName("");
+    setName("");
+    checkBookmarkName("");
   };
 
-  btnOpenBookmark(bookmark) {
-    this.model.setMapState(bookmark);
-  }
+  const openBookmark = (bookmark) => {
+    props.model.setMapState(bookmark);
+  };
 
-  btnDeleteBookmark(bookmark) {
-    this.model.removeBookmark(bookmark);
-    this.setState({ bookmarks: [...this.model.bookmarks] });
-  }
+  const deleteBookmark = (id) => {
+    setShowRemovalConfirmation(true);
+    setBookmarkToDelete(id);
+  };
 
-  checkBookmarkName(name) {
+  const checkBookmarkName = (name) => {
     if (name.trim() === "") {
-      this.setState({
-        error: false,
-        helperText: " ",
-      });
+      setError(false);
+      setHelperText(" ");
       return false;
     }
 
-    let exists = this.model.bookmarkWithNameExists(name);
+    const exists = props.model.bookmarkWithNameExists(name);
 
-    this.setState({
-      error: exists ? true : false,
-      helperText: exists
-        ? `Namnet upptaget. Ersätt bokmärke "${this.state.name}"?`
-        : " ",
-    });
-
-    return exists ? false : true;
-  }
-
-  handleChange = (name) => (event) => {
-    this.setState({
-      [name]: event.target.value,
-    });
+    if (exists) {
+      setError(true);
+      setHelperText(`Namnet upptaget. Ersätt bokmärke "${name}"?`);
+      return false;
+    } else {
+      setError(false);
+      setHelperText(" ");
+      return true;
+    }
   };
 
-  handleKeyUp(e) {
-    this.checkBookmarkName(e.target.value);
+  const handleChange = (event) => {
+    setName(event.target.value);
+  };
+
+  const handleKeyUp = (e) => {
+    checkBookmarkName(e.target.value);
 
     if (e.nativeEvent.keyCode === 13 /* Enter, yes we all know... */) {
-      this.btnAddBookmark();
+      addBookmark();
     }
-  }
+  };
 
-  refreshBookmarks() {
-    this.setState({ bookmarks: [...this.model.bookmarks] });
-  }
+  const handleRemoveConfirmation = (result) => {
+    setShowRemovalConfirmation(false);
+    if (result) {
+      props.model.deleteBookmark(bookmarkToDelete);
+    }
+    setBookmarkToDelete(null);
+  };
 
-  render() {
-    const { classes } = this.props;
+  const handleRemoveConfirmationAbort = () => {
+    setShowRemovalConfirmation(false);
+  };
 
-    return (
-      <div className={classes.root}>
-        <Typography className={classes.intro}>
-          Skapa ett bokmärke med kartans synliga lager, aktuella zoomnivå och
-          utbredning.
-        </Typography>
-        <div className={classes.top}>
-          <TextField
-            placeholder="Skriv bokmärkets namn"
-            label="Namn"
-            value={this.state.name}
-            onChange={this.handleChange("name")}
-            onKeyUp={this.handleKeyUp}
-            error={this.state.error}
-            helperText={this.state.helperText}
-            className={classes.input}
-          ></TextField>
-          <Button
-            variant="contained"
-            color="primary"
-            size="small"
-            className={classes.btnAdd}
-            startIcon={this.state.error ? null : <AddCircleOutlineIcon />}
-            onClick={this.btnAddBookmark}
-          >
-            {this.state.error ? "Ersätt" : "Lägg till"}
-          </Button>
-        </div>
+  return (
+    <div>
+      <Typography sx={{ marginBottom: 1 }}>
+        Skapa ett bokmärke med kartans synliga lager, aktuella zoomnivå och
+        utbredning.
+      </Typography>
+      <Box
+        sx={{
+          display: "flex",
+          flexFlow: "row nowrap",
+          alignItems: "flex-end",
+        }}
+      >
+        <TextField
+          placeholder="Skriv bokmärkets namn"
+          label="Namn"
+          value={name}
+          onChange={handleChange}
+          onKeyUp={handleKeyUp}
+          error={error}
+          helperText={helperText}
+          sx={{ flex: "0 1 100%", height: "0%" }}
+          variant="standard"
+        ></TextField>
+        <AddButton
+          variant="contained"
+          color="primary"
+          size="small"
+          startIcon={error ? null : <AddCircleOutlineIcon />}
+          onClick={addBookmark}
+        >
+          {error ? "Ersätt" : "Lägg till"}
+        </AddButton>
+      </Box>
 
-        <div className={classes.list}>
-          {this.state.bookmarks.map((item, index) => (
-            <div className={classes.listItem} key={index + "_" + item.name}>
-              <Button
-                className={classes.btnBookmark}
-                onClick={() => {
-                  this.btnOpenBookmark(item);
-                }}
-              >
-                <span className={classes.bookmarkIcon}>
+      <List>
+        {Object.keys(bookmarks).map((id) => {
+          const bookmark = bookmarks[id];
+          return (
+            <ListItem key={id}>
+              <BookmarkButton onClick={() => openBookmark(bookmark)}>
+                <BookmarkIconSpan>
                   <BookmarkOutlinedIcon />
                   <BookmarkIcon className="on" />
-                </span>
-                <span className={classes.itemName}>{item.name}</span>
-              </Button>
-              <IconButton
+                </BookmarkIconSpan>
+                <ItemNameSpan>{id}</ItemNameSpan>
+              </BookmarkButton>
+              <DeleteButton
                 aria-label="Ta bort"
-                className={classes.btnDelete}
-                onClick={() => {
-                  this.btnDeleteBookmark(item);
-                }}
+                size="large"
+                onClick={() => deleteBookmark(id)}
               >
-                <DeleteIcon fontSize="small" className={classes.deleteIcon} />
-              </IconButton>
-            </div>
-          ))}
-        </div>
-      </div>
-    );
-  }
-}
-
-const styles = (theme) => {
-  // Tested and verified with dark-theme.
-  let iconColor = theme.palette.text.secondary;
-
-  return {
-    intro: {
-      marginBottom: theme.spacing(1),
-    },
-    top: {
-      display: "flex",
-      flexFlow: "row nowrap",
-      alignItems: "flex-end",
-    },
-    input: {
-      flex: "0 1 100%",
-      height: "0%",
-    },
-    btnAdd: {
-      flex: "1 0 auto",
-      whiteSpace: "nowrap",
-      height: "0%",
-      top: "-22px",
-      marginLeft: "10px",
-    },
-    list: {
-      display: "flex",
-      flex: "1 0 100%",
-      flexFlow: "column nowrap",
-      marginTop: "10px",
-    },
-    listItem: {
-      display: "flex",
-      position: "relative",
-      flex: "1 0 100%",
-      justifyContent: "flex-start",
-      border: `1px solid ${theme.palette.grey[400]}`,
-      transform: "translateZ(1px)",
-      borderBottom: "none",
-      "&:first-child": {
-        borderRadius: "3px 3px 0 0",
-      },
-      "&:last-child": {
-        borderBottom: `1px solid ${theme.palette.grey[400]}`,
-        borderRadius: "0 0 3px 3px",
-      },
-    },
-    itemName: {
-      whiteSpace: "nowrap",
-      overflow: "hidden",
-      textOverflow: "ellipsis",
-      maxWidth: "calc(100% - 71px)",
-      textTransform: "none",
-    },
-    btnBookmark: {
-      display: "flex",
-      flex: "1 0 100%",
-      justifyContent: "flex-start",
-      transform: "translateZ(1px)",
-      "& svg": {
-        color: iconColor,
-      },
-      "&:hover svg.on": {
-        opacity: 0.7,
-      },
-    },
-    bookmarkIcon: {
-      display: "inline-block",
-      position: "relative",
-      width: "24px",
-      height: "24px",
-      marginRight: "8px",
-      "& .on": {
-        position: "absolute",
-        top: "0",
-        left: "0",
-        width: "24px",
-        height: "24px",
-        color: iconColor,
-        stoke: iconColor,
-        fill: iconColor,
-        opacity: 0.001,
-        transition: "all 300ms",
-      },
-    },
-    btnDelete: {
-      display: "block",
-      position: "absolute",
-      top: 0,
-      right: 0,
-      padding: "5px",
-      width: "36px",
-      height: "36px",
-      borderRadius: "100% 0 0 100%",
-      "&:hover svg": {
-        color: theme.palette.error.dark,
-        stoke: theme.palette.error.dark,
-        fill: theme.palette.error.dark,
-      },
-    },
-    deleteIcon: {
-      display: "block",
-      width: "24px",
-      height: "24px",
-      transition: "all 300ms",
-    },
-  };
+                <StyledDeleteIcon fontSize="small" />
+              </DeleteButton>
+            </ListItem>
+          );
+        })}
+        <ConfirmationDialog
+          open={showRemovalConfirmation === true}
+          titleName={"Radera bokmärke"}
+          contentDescription={`Är du säker på att du vill radera bokmärket "${bookmarkToDelete}"?`}
+          cancel={"Avbryt"}
+          confirm={"Radera"}
+          handleConfirm={handleRemoveConfirmation}
+          handleAbort={handleRemoveConfirmationAbort}
+        />
+      </List>
+    </div>
+  );
 };
 
-export default withStyles(styles)(BookmarksView);
+BookmarksView.propTypes = {
+  model: PropTypes.object.isRequired,
+};
+
+export default BookmarksView;

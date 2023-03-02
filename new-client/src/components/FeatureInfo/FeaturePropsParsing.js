@@ -3,16 +3,25 @@ import ReactMarkdown from "react-markdown";
 import rehypeRaw from "rehype-raw";
 import gfm from "remark-gfm";
 import FeaturePropFilters from "./FeaturePropsFilters";
+import AppModel from "models/AppModel.js";
 
 import {
-  customComponentsForReactMarkdown,
-  Paragraph,
+  customComponentsForReactMarkdown, // the object with all custom components
+  setOptions, // a method that will allow us to send infoclick options from here to the module that defines custom components
+  Paragraph, // special case - we want to override the Paragraph component here, so we import it separately
 } from "utils/customComponentsForReactMarkdown";
+import { isValidUrl } from "utils/Validator";
 
 export default class FeaturePropsParsing {
   constructor(settings) {
     this.globalObserver = settings.globalObserver;
     this.options = settings.options;
+
+    // Send the options to our custom components module too. This is necessary
+    // and without it we won't be able to access Hajk's settings in customComponentsForReactMarkdown
+    // because it's not a class that we initiate (only a plain JS object).
+    // Also, see #1106.
+    setOptions(this.options);
 
     // Two arrays that will hold pending promises and their resolved values, respectively.
     this.pendingPromises = [];
@@ -139,14 +148,15 @@ export default class FeaturePropsParsing {
     else {
       // Attempt to grab the actual value from the Properties collection, if not found, fallback to empty string.
       // Note that we must replace equal sign in property value, else we'd run into trouble, see #812.
-
       return (
         // What you see on the next line is what we call "hängslen och livrem" in Sweden.
         // (The truth is it's all needed - this.properties may not be an Array, it may not have a key named
         // "placeholder", but if it does, we can't be sure that it will have the replace() method (as only Strings have it).)
         this.properties?.[placeholder]?.replace?.(/=/g, "&equal;") || // If replace() exists, it's a string, so we can revert our equal signs.
-        this.properties[placeholder] || // If not a string, return the value as-is…
-        "" // …unless it's undefined - in that case, return an empty string.
+          this.properties[placeholder] != null
+          ? this.properties[placeholder]
+          : "" // If not a string, return the value as-is…
+        // …unless it's undefined or null - in that case, return an empty string.
       );
     }
   };
@@ -195,19 +205,42 @@ export default class FeaturePropsParsing {
         // all ending new lines (after </if>) in the regex.
         matched.content += "\n";
 
-        // Handle <if foo="bar"> or <if foo=bar>
-        if (matched.attributes?.includes("=")) {
+        // Handle <if foo="bar">, <if foo=bar> as well as <if foo!="bar"> and <if foo!=bar>
+        // Make sure that we don't handle URLs with "=". It's virtually impossible
+        // to know how to tell the "=" from the URL vs "=" from our conditional check, see #1277.
+        if (
+          matched.attributes?.includes("=") &&
+          !isValidUrl(matched.attributes)
+        ) {
+          // We allow two comparers: "equal" ("=") and "not equal" ("!=")
+          const comparer = matched.attributes.includes("!=") ? "!=" : "=";
+
           // Turn "FOO=\"BAR\"" into k = "FOO" and v = "BAR"
-          let [k, v] = matched.attributes
-            .split("=") // Create an array
+          const [k, v] = matched.attributes
+            .split(comparer) // Create an array by splitting the attributes on our comparer string
             .map((e) => e.replaceAll('"', "").trim()); // Remove double quotes and whitespace
 
-          // Using truthy equal below: we want 2 and "2" to be seen as equal.
-          // eslint-disable-next-line eqeqeq
-          if (k == v) {
-            return matched.content;
-          } else {
-            return "";
+          switch (comparer) {
+            // See #669
+            case "=":
+              // Using truthy equal below: we want 2 and "2" to be seen as equal.
+              // eslint-disable-next-line eqeqeq
+              if (k == v) {
+                return matched.content;
+              } else {
+                return "";
+              }
+            // See #1128
+            case "!=":
+              // Using truthy not equal below: we want '2 is not equal "2"' to evaluate to false.
+              // eslint-disable-next-line eqeqeq
+              if (k != v) {
+                return matched.content;
+              } else {
+                return "";
+              }
+            default:
+              return "";
           }
         }
         // Handle <if foo> - if it exits, evaluate to true and show content
@@ -265,6 +298,12 @@ export default class FeaturePropsParsing {
     return r;
   };
 
+  #decorateProperties(prefix, kvData) {
+    Object.entries(kvData).forEach(([key, value]) => {
+      this.properties[`${prefix}:${key}`] = value;
+    });
+  }
+
   /**
    * Converts a JSON-string of properties into a properties object
    * @param {str} properties
@@ -284,6 +323,11 @@ export default class FeaturePropsParsing {
   setMarkdownAndProperties({ markdown, properties }) {
     this.markdown = markdown;
     this.properties = properties;
+
+    // Here we can decorate the incoming properties with data from the last click in the map.
+    // By decorating, these props can be used like any other prop.
+    this.#decorateProperties("click", AppModel.getClickLocationData());
+
     return this;
   }
 
@@ -312,7 +356,7 @@ export default class FeaturePropsParsing {
       // The loop below extracts all placeholders and replaces them with actual values
       // current feature's property collection.
       // Match any word character, range of unicode characters (åäö etc), @ sign, dash or dot
-      (this.markdown.match(/{[\s\w\u00C0-\u00ff@\-|,'.():]+}/g) || []).forEach(
+      (this.markdown.match(/{[\s\w\u00C0-\u00ff@\-|!,'.():]+}/g) || []).forEach(
         (placeholder) => {
           // placeholder is a string, e.g. "{intern_url_1@@documenthandler}" or "{foobar}"
           // Let's replace all occurrences of the placeholder like this:

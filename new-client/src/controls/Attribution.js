@@ -1,37 +1,42 @@
 import React from "react";
-import { withStyles } from "@material-ui/core/styles";
+import { styled } from "@mui/material/styles";
 import { Attribution } from "ol/control";
 
-const styles = (theme) => {
-  return {
-    attributions: {
-      "& .ol-control": {
-        position: "static",
-        maxWidth: "none",
-      },
-      "& .ol-attribution": {
-        background: theme.palette.background.paper,
-        boxShadow: theme.shadows[4],
-        borderRadius: theme.shape.borderRadius,
-        height: "25px",
-        overflow: "auto",
-        whiteSpace: "nowrap",
-        [theme.breakpoints.down("xs")]: {
-          maxWidth: "100px",
-        },
-      },
-      "& .ol-attribution ul": {
-        color: "unset",
-        textShadow: "unset",
-      },
-      "& button": {
-        cursor: "pointer",
-        boxShadow: "none",
-        outline: "none",
-      },
+const Root = styled("div")(({ theme }) => ({
+  background: theme.palette.background.paper,
+  borderRadius: "2px",
+  "& .ol-control": {
+    position: "static",
+    maxWidth: "none",
+    "& button": {
+      cursor: "pointer",
+      boxShadow: "none",
+      outline: "none",
     },
-  };
-};
+    "& :hover": {
+      background: theme.palette.background.paper,
+    },
+  },
+  "& .ol-attribution": {
+    background: theme.palette.background.paper,
+    boxShadow: theme.shadows[4],
+    borderRadius: theme.shape.borderRadius,
+    height: "25px",
+    overflow: "auto",
+    whiteSpace: "nowrap",
+    [theme.breakpoints.down("sm")]: {
+      maxWidth: "100px",
+    },
+    "& ul": {
+      fontSize: "0.7em",
+      color: "unset",
+      textShadow: "unset",
+    },
+  },
+  "& .ol-attribution:not(.ol-collapsed)": {
+    background: theme.palette.background.paper,
+  },
+}));
 
 class AttributionControl extends React.PureComponent {
   constructor(props) {
@@ -54,9 +59,8 @@ class AttributionControl extends React.PureComponent {
   }
 
   render() {
-    const { classes } = this.props;
-    return <div ref={this.ref} className={classes.attributions} />;
+    return <Root ref={this.ref} />;
   }
 }
 
-export default withStyles(styles)(AttributionControl);
+export default AttributionControl;

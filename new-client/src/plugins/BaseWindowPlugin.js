@@ -2,31 +2,18 @@ import React from "react";
 import propTypes from "prop-types";
 import { isMobile } from "./../utils/IsMobile";
 import { createPortal } from "react-dom";
-import { withStyles } from "@material-ui/core/styles";
-import { withTheme } from "@material-ui/styles";
-import {
-  Hidden,
-  ListItem,
-  ListItemIcon,
-  ListItemText,
-} from "@material-ui/core";
+import { Hidden, ListItem, ListItemIcon, ListItemText } from "@mui/material";
 import Window from "../components/Window.js";
 import Card from "../components/Card.js";
 import PluginControlButton from "../components/PluginControlButton";
-
-const styles = (theme) => {
-  return {};
-};
 
 class BaseWindowPlugin extends React.PureComponent {
   static propTypes = {
     app: propTypes.object.isRequired,
     children: propTypes.object.isRequired,
-    classes: propTypes.object.isRequired,
     custom: propTypes.object.isRequired,
     map: propTypes.object.isRequired,
     options: propTypes.object.isRequired,
-    theme: propTypes.object.isRequired,
     type: propTypes.string.isRequired,
   };
 
@@ -40,9 +27,22 @@ class BaseWindowPlugin extends React.PureComponent {
 
     // Should Window be visible at start?
     const visibleAtStart =
-      (isMobile
-        ? props.options.visibleAtStartMobile
-        : props.options.visibleAtStart) || false;
+      (this.props.app.config.mapConfig.map.clean === false && // Never show in clean mode
+        (isMobile
+          ? props.options.visibleAtStartMobile
+          : props.options.visibleAtStart)) ||
+      false;
+
+    // If plugin is shown at start, we want to register it as shown in the Analytics module too.
+    // Normally, the event would be sent when user clicks on the button that activates the plugin,
+    // but in this case there won't be any click as the window will be visible at start.
+    if (visibleAtStart) {
+      this.props.app.globalObserver.publish("analytics.trackEvent", {
+        eventName: "pluginShown",
+        pluginName: this.type,
+        activeMap: this.props.app.config.activeMap,
+      });
+    }
 
     // Title and Color are kept in state and not as class properties. Keeping them in state
     // ensures re-render when new props arrive and update the state variables (see componentDidUpdate() too).
@@ -105,12 +105,26 @@ class BaseWindowPlugin extends React.PureComponent {
     this.props.app.globalObserver.publish("core.onlyHideDrawerIfNeeded");
   };
 
-  showWindow = (opts) => {
+  showWindow = (opts = {}) => {
     const hideOtherPluginWindows = opts.hideOtherPluginWindows || true,
       runCallback = opts.runCallback || true;
-
     // Let the App know which tool is currently active
     this.props.app.activeTool = this.type;
+
+    // Tell the Analytics model about this
+    this.props.app.globalObserver.publish("analytics.trackEvent", {
+      eventName: "pluginShown",
+      pluginName: this.type,
+      activeMap: this.props.app.config.activeMap,
+    });
+
+    // AppModel keeps track of recently shown plugins.
+    this.props.app.pushPluginIntoHistory({
+      type: this.type,
+      icon: this.props.custom.icon,
+      title: this.title,
+      description: this.description,
+    });
 
     // Don't continue if visibility hasn't changed
     if (this.state.windowVisible === true) {
@@ -124,6 +138,9 @@ class BaseWindowPlugin extends React.PureComponent {
         windowVisible: true,
       },
       () => {
+        // Notify the app that a plugin's visibility has changed
+        this.props.app.globalObserver.publish("core.pluginVisibilityChanged");
+
         // If there's a callback defined in custom, run it
         runCallback === true &&
           typeof this.props.custom.onWindowShow === "function" &&
@@ -143,6 +160,9 @@ class BaseWindowPlugin extends React.PureComponent {
         windowVisible: false,
       },
       () => {
+        // Notify the app that a plugin's visibility has changed
+        this.props.app.globalObserver.publish("core.pluginVisibilityChanged");
+
         typeof this.props.custom.onWindowHide === "function" &&
           this.props.custom.onWindowHide();
       }
@@ -181,6 +201,7 @@ class BaseWindowPlugin extends React.PureComponent {
           resizingEnabled={this.props.custom.resizingEnabled}
           scrollable={this.props.custom.scrollable}
           allowMaximizedWindow={this.props.custom.allowMaximizedWindow}
+          disablePadding={this.props.custom.disablePadding}
           width={this.width}
           height={this.height}
           position={this.position}
@@ -189,11 +210,19 @@ class BaseWindowPlugin extends React.PureComponent {
             (t) => t.type === "layerswitcher"
           )}
         >
-          {this.props.children}
+          {/* We have to pass windowVisible down to the children so that we can conditionally render
+          the <Tabs /> component, since it does not accept components with display: "none". We use the
+          windowVisible-prop to make sure that we don't render the <Tabs /> when the window
+          is not visible.*/}
+          {React.cloneElement(this.props.children, {
+            windowVisible: this.state.windowVisible,
+          })}
         </Window>
-        {/* Drawer buttons and Widget buttons should render a Drawer button. */}
-        {(target === "toolbar" || this.pluginIsWidget(target)) &&
-          this.renderDrawerButton()}
+        {/* Always render a Drawer button unless its target is "hidden". 
+              It's a backup for plugins render elsewhere: we hide 
+              Widget and Control buttons on small screens and fall 
+              back to Drawer button). */}
+        {target !== "hidden" && this.renderDrawerButton()}
         {/* Widget buttons must also render a Widget */}
         {this.pluginIsWidget(target) &&
           this.renderWidgetButton(`${target}-column`)}
@@ -206,14 +235,19 @@ class BaseWindowPlugin extends React.PureComponent {
   /**
    * This is a bit of a special case. This method will render
    * not only plugins specified as Drawer plugins (target===toolbar),
-   * but it will also render Widget plugins - given some special condition.
+   * but it will also render Widget and Control plugins - given some special condition.
    *
    * Those special conditions are small screens, where there's no screen
    * estate to render the Widget button in Map Overlay.
    */
   renderDrawerButton() {
     return createPortal(
-      <Hidden mdUp={this.pluginIsWidget(this.props.options.target)}>
+      <Hidden
+        mdUp={
+          this.pluginIsWidget(this.props.options.target) ||
+          this.props.options.target === "control"
+        }
+      >
         <ListItem
           button
           divider={true}
@@ -231,7 +265,7 @@ class BaseWindowPlugin extends React.PureComponent {
   renderWidgetButton(id) {
     return createPortal(
       // Hide Widget button on small screens, see renderDrawerButton too
-      <Hidden smDown>
+      <Hidden mdDown>
         <Card
           icon={this.props.custom.icon}
           onClick={this.handleButtonClick}
@@ -245,12 +279,15 @@ class BaseWindowPlugin extends React.PureComponent {
 
   renderControlButton() {
     return createPortal(
-      <PluginControlButton
-        icon={this.props.custom.icon}
-        onClick={this.handleButtonClick}
-        title={this.title}
-        abstract={this.description}
-      />,
+      // Hide Control button on small screens, see renderDrawerButton too
+      <Hidden mdDown>
+        <PluginControlButton
+          icon={this.props.custom.icon}
+          onClick={this.handleButtonClick}
+          title={this.title}
+          abstract={this.description}
+        />
+      </Hidden>,
       document.getElementById("plugin-control-buttons")
     );
   }
@@ -264,4 +301,4 @@ class BaseWindowPlugin extends React.PureComponent {
   }
 }
 
-export default withStyles(styles)(withTheme(BaseWindowPlugin));
+export default BaseWindowPlugin;

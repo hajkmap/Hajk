@@ -229,16 +229,12 @@ class Edit extends Component {
   /**
    *
    */
-  getLayersWithFilter(filter) {
+  getLayersWithFilter() {
     return this.props.model.get("layers").filter((layer) => {
-      return (
-        new RegExp(this.state.filter.toLowerCase()).test(
-          layer.caption.toLowerCase()
-        ) ||
-        new RegExp(this.state.filter.toLowerCase()).test(
-          layer.internalLayerName?.toLowerCase()
-        )
-      );
+      const caption = layer.caption.toLowerCase();
+      const internalLayerName = layer.internalLayerName?.toLowerCase() || "";
+      const filter = this.state.filter.toLowerCase();
+      return caption.includes(filter) || internalLayerName.includes(filter);
     });
   }
   /**
@@ -302,6 +298,8 @@ class Edit extends Component {
         values: item.listValues || null,
         hidden: item.hidden,
         defaultValue: item.defaultValue,
+        customValidation: item.customValidation || "",
+        customValidationMessage: item.customValidationMessage || ""
       };
     };
 
@@ -326,6 +324,8 @@ class Edit extends Component {
         values: item.listValues || null,
         hidden: item.hidden,
         defaultValue: item.defaultValue,
+        customValidation: item.customValidation || "",
+        customValidationMessage: item.customValidationMessage || ""
       };
     };
 
@@ -420,6 +420,10 @@ class Edit extends Component {
               properties[editableField.index].hidden = editableField.hidden;
               properties[editableField.index].defaultValue =
                 editableField.defaultValue;
+              properties[editableField.index].customValidation =
+              editableField.customValidation;
+              properties[editableField.index].customValidationMessage =
+              editableField.customValidationMessage;
             });
         }
 
@@ -436,6 +440,8 @@ class Edit extends Component {
             properties[nonEditableField.index].hidden = nonEditableField.hidden;
             properties[nonEditableField.index].defaultValue =
               nonEditableField.defaultValue;
+            properties[nonEditableField.index].customValidation = nonEditableField.customValidation;
+            properties[nonEditableField.index].customValidationMessage = nonEditableField.customValidationMessage;
           });
         }
 
@@ -995,6 +1001,54 @@ class Edit extends Component {
         );
       };
 
+      var customValidationEditor = (type, value) => {
+        return (
+          <div className="grid  edit-fields-table-default">
+          <div className="row">
+            <div className="col-sm">
+            <input
+              defaultValue={value}
+              type="text"
+              onChange={(e) => {
+                property.customValidation = e.target.value;
+              }}
+            />
+            {"  "}
+            <i
+            className="fa fa-question-circle"
+            data-toggle="tooltip"
+            title={"En valfri regular expression för att validera input"}
+            />
+            </div>
+          </div>
+          </div>
+        );
+      };
+
+      var customValidationMessageEditor = (type, value) => {
+        return (
+          <div className="grid  edit-fields-table-default">
+          <div className="row">
+            <div className="col-sm">
+            <input
+              defaultValue={value}
+              type="text"
+              onChange={(e) => {
+                property.customValidationMessage = e.target.value;
+              }}
+            />
+            {"  "}
+            <i
+            className="fa fa-question-circle"
+            data-toggle="tooltip"
+            title={"Meddelande som visas om input som anges inte matcha fältets custom validation"}
+            />
+            </div>
+          </div>
+          </div>
+        );
+      };
+
       var descriptionEditor = (type, value) => {
         return (
           <div>
@@ -1049,6 +1103,8 @@ class Edit extends Component {
           <td>
             {defaultValueEditor(property.localType, property.defaultValue)}
           </td>
+          <td>{customValidationEditor(property.localType, property.customValidation)}</td>
+          <td>{customValidationMessageEditor(property.localType, property.customValidationMessage)}</td>
         </tr>
       );
     });
@@ -1066,6 +1122,8 @@ class Edit extends Component {
             <th>Datatyp</th>
             <th>Listvärden</th>
             <th>Standardvärde</th>
+            <th>Custom Validation</th> 
+            <th>Custom Meddelande</th>
           </tr>
         </thead>
         <tbody>{rows}</tbody>

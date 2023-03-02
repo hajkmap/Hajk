@@ -48,10 +48,11 @@ class MapViewModel {
     return new VectorSource({ wrapX: false });
   };
 
-  getNewVectorLayer = (source, style) => {
+  getNewVectorLayer = (source, style, props = {}) => {
     return new VectorLayer({
       source: source,
       style: style,
+      ...props,
     });
   };
 
@@ -90,18 +91,25 @@ class MapViewModel {
       this.resultSource,
       this.options.showResultFeaturesInMap ?? true
         ? this.featureStyle.getDefaultSearchResultStyle
-        : null
+        : null,
+      {
+        layerType: "system",
+        zIndex: 5000,
+        name: "pluginSearchResults",
+        caption: "Search results",
+      }
     );
-    // FIXME: Remove "type", use only "name" throughout
-    // the application. Should be done as part of #883.
-    this.resultsLayer.set("type", "searchResultLayer");
-    this.resultsLayer.set("name", "pluginSearchResults");
     this.drawSource = this.getNewVectorSource();
     this.drawLayer = this.getNewVectorLayer(
       this.drawSource,
-      this.getDrawStyle()
+      this.getDrawStyle(),
+      {
+        layerType: "system",
+        zIndex: 5000,
+        name: "pluginSearchDraw",
+        caption: "Search draw",
+      }
     );
-    this.drawLayer.set("name", "pluginSearchDraw");
     this.map.addLayer(this.drawLayer);
     this.map.addLayer(this.resultsLayer);
   };
@@ -115,6 +123,15 @@ class MapViewModel {
       this.addFeaturesToResultsLayer
     );
     this.localObserver.subscribe("map.setSelectedStyle", this.setSelectedStyle);
+
+    // Odd naming here, but we can't call it "setSelectedStyleForFeature"
+    // because of the way react-observer works: it would fire even
+    // when "setSelectedStyle" is published (it fires when begging of event
+    // name matches!).
+    this.localObserver.subscribe(
+      "map.setSelectedFeatureStyle",
+      this.setSelectedStyleForFeature
+    );
     this.localObserver.subscribe(
       "map.addAndHighlightFeatureInSearchResultLayer",
       this.addAndHighlightFeatureInSearchResultLayer
@@ -139,6 +156,15 @@ class MapViewModel {
         } else {
           this.toggleDraw(true, options.type);
         }
+
+        // Tell the analytics model about which spatial search
+        // modes are most important for our users by sending the
+        // type of search performed.
+        this.app.globalObserver.publish("analytics.trackEvent", {
+          eventName: "spatialSearchPerformed",
+          type: options.type?.toLowerCase(),
+          activeMap: this.app.props.config.activeMap,
+        });
 
         // At this stage, the Search input field could be in focus. On
         // mobile devices the on-screen keyboard will show up. We don't
@@ -165,18 +191,32 @@ class MapViewModel {
     this.zoomToFeatures(this.lastFeaturesInfo);
   };
 
+  // Used to fit the map to the current search-feature (like a search-polygon or a search extent) OR
+  // to the search-results if a text-search was performed.
   fitMapToSearchResult = () => {
-    const currentExtent = this.resultSource.getExtent();
+    // Let's create an empty extent that we can extend to the extent that we want to fit the map to...
+    const currentExtent = createEmpty();
+    // Then we'll check if a spatial search has been performed (if it has, we'll have a drawn feature
+    // in the search-draw-source).
+    const spatialSearchFeatures = this.drawSource.getFeatures();
+    // If we have a drawn feature, we'll extend the extent its extent
+    if (spatialSearchFeatures.length > 0) {
+      extend(currentExtent, this.drawSource.getExtent());
+    } else {
+      // Otherwise we'll extend the extent to the extent of the search-results
+      extend(currentExtent, this.resultSource.getExtent());
+    }
+    // Finally, we'll make sure we have a valid extent, and fit the map to it.
     if (currentExtent.map(Number.isFinite).includes(false) === false) {
       this.fitMapToExtent(currentExtent);
     }
   };
 
+  // Zooms and centers the map to the supplied extent
   fitMapToExtent = (extent) => {
     this.map.getView().fit(extent, {
       size: this.map.getSize(),
       padding: [20, 20, 20, 20],
-      maxZoom: 7,
     });
   };
 
@@ -224,6 +264,10 @@ class MapViewModel {
     return mapFeature?.setStyle(
       this.featureStyle.getFeatureStyle(mapFeature, "highlight")
     );
+  };
+
+  setSelectedStyleForFeature = (f) => {
+    return f?.setStyle(this.featureStyle.getFeatureStyle(f, "selection"));
   };
 
   zoomToFeature = (feature) => {

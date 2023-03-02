@@ -1,9 +1,8 @@
-[![Docker Status](https://img.shields.io/docker/cloud/build/hallbergs/hajk)](https://hub.docker.com/r/hallbergs/hajk/)
 [![Netlify Status](https://img.shields.io/netlify/fa0760e3-fd3a-43bf-a704-27e05cb901cc)](https://app.netlify.com/sites/hajk-demo/deploys)
 
 # Hajk
 
-_A full-fledged open source web GIS solution based on OpenLayers_
+_Hajk is an open source web GIS solution based on the latest technologies such as React, Material UI and OpenLayers. It is developed in Sweden and used by various municipalities and government agencies, as well as by public and private enterprises._
 
 ![alt text](https://user-images.githubusercontent.com/110222/96265856-42960000-0fc6-11eb-805e-9e41ec5d77f9.png "Hajk 3 with all tools visible")
 
@@ -11,10 +10,10 @@ _A full-fledged open source web GIS solution based on OpenLayers_
 
 ## New to Hajk and not a developer?
 
-If you are a new user of Hajk, please visit [our welcome page (Swedish only)](https://hajkmap.github.io/Hajk) for more information about Hajk.
+If you are a new user of Hajk, please visit [our welcome page (Swedish only)](https://www.hajkmap.se/) for more information about Hajk.
 
 ## Looking for support?
-You can easily reach out to our community using the [Dicussions on GitHub](https://github.com/hajkmap/Hajk/discussions). 
+You can easily reach out to our community using the [Discussions on GitHub](https://github.com/hajkmap/Hajk/discussions). 
 
 ## Live examples
 
@@ -66,7 +65,7 @@ npm install
 npm run dev
 ```
 
-4. Verify that the server is up and running by navigatig to `http://localhost:3002`. There's also a nice API explorer available on `http://localhost:3002/api-explorer/`.
+4. Verify that the server is up and running by navigating to `http://localhost:3002`. There's also a nice API explorer available on `http://localhost:3002/api-explorer/`.
 
 #### Alternative 2: .NET backend
 

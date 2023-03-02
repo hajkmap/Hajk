@@ -3,14 +3,15 @@ import {
   Button,
   Checkbox,
   Dialog,
+  DialogActions,
   DialogContent,
   DialogContentText,
   FormControlLabel,
-  Grid,
+  FormGroup,
   Link,
   Slide,
-} from "@material-ui/core";
-import { makeStyles } from "@material-ui/styles";
+} from "@mui/material";
+import { styled } from "@mui/material/styles";
 import { setLevel, shouldShowNotice } from "models/Cookie";
 
 // Default settings for the cookie-notice text and url if none is supplied from the configuration.
@@ -18,6 +19,15 @@ const DEFAULT_MESSAGE =
   "Vi använder nödvändiga kakor (cookies) för att webbplatsen ska fungera på ett bra sätt för dig. Vi använder också funktionella kakor för att ge dig bästa möjliga funktion om du godkänner användningen av dessa.";
 const DEFAULT_URL =
   "https://pts.se/sv/bransch/regler/lagar/lag-om-elektronisk-kommunikation/kakor-cookies/";
+
+const StyledDialog = styled(Dialog)(({ theme }) => ({
+  [theme.breakpoints.up("sm")]: {
+    "& .MuiDialog-container": {
+      alignItems: "flex-end",
+      padding: "16px 20px",
+    },
+  },
+}));
 
 // We're using several labeled checkboxes, let's create a component so that we keep DRY.
 const LabeledCheckbox = ({ checked, disabled, label, onChange }) => {
@@ -36,23 +46,11 @@ const LabeledCheckbox = ({ checked, disabled, label, onChange }) => {
   );
 };
 
-const useStyles = makeStyles((theme) => ({
-  dialogContainer: {
-    "& .MuiDialog-container": {
-      alignItems: "flex-end",
-    },
-  },
-  dialogText: {
-    color: theme.palette.text.primary,
-  },
-}));
-
 const Transition = React.forwardRef(function Transition(props, ref) {
   return <Slide direction="up" ref={ref} {...props} />;
 });
 
 function CookieNotice({ globalObserver, appModel }) {
-  const classes = useStyles();
   const { config } = appModel;
 
   // We should initialize the dialog:s open-state to whatever the manager states.
@@ -118,10 +116,9 @@ function CookieNotice({ globalObserver, appModel }) {
   }, [showThirdPartCheckbox]);
 
   return (
-    <Dialog
+    <StyledDialog
       fullWidth={true}
       maxWidth={"md"}
-      className={classes.dialogContainer}
       open={open}
       TransitionComponent={Transition}
       keepMounted
@@ -129,7 +126,7 @@ function CookieNotice({ globalObserver, appModel }) {
     >
       <DialogContent>
         <DialogContentText
-          className={classes.dialogText}
+          sx={{ color: "text.primary" }}
           id="cookie-dialog-content-text"
         >
           {`${defaultCookieNoticeMessage} `}
@@ -142,50 +139,57 @@ function CookieNotice({ globalObserver, appModel }) {
             {"Mer information om kakor"}
           </Link>
         </DialogContentText>
-        <Grid container direction="row" alignItems="center" justify="flex-end">
-          <Grid item>
-            <LabeledCheckbox
-              disabled={true}
-              checked={true}
-              label={"Nödvändiga"}
-            />
+      </DialogContent>
+
+      <DialogActions
+        sx={{
+          flexDirection: { xs: "column", sm: "row" },
+        }}
+      >
+        <FormGroup
+          sx={{
+            flexDirection: { xs: "column", sm: "row" },
+          }}
+        >
+          <LabeledCheckbox
+            disabled={true}
+            checked={true}
+            label={"Nödvändiga"}
+          />
+          <LabeledCheckbox
+            onChange={(event) => {
+              setFunctionalChecked(event.target.checked);
+            }}
+            checked={functionalChecked}
+            label={"Funktionella"}
+          />
+          {showThirdPartCheckbox && (
             <LabeledCheckbox
               onChange={(event) => {
-                setFunctionalChecked(event.target.checked);
+                setThirdPartChecked(event.target.checked);
               }}
-              checked={functionalChecked}
-              label={"Funktionella"}
+              checked={thirdPartChecked}
+              label={"Tredjepart"}
             />
-            {showThirdPartCheckbox && (
-              <LabeledCheckbox
-                onChange={(event) => {
-                  setThirdPartChecked(event.target.checked);
-                }}
-                checked={thirdPartChecked}
-                label={"Tredjepart"}
-              />
-            )}
-          </Grid>
-          <Grid item>
-            <Button
-              color="primary"
-              variant="contained"
-              onClick={handleAllowSelectedClick}
-            >
-              {"Tillåt valda"}
-            </Button>
-            <Button
-              color="primary"
-              variant="contained"
-              onClick={handleAllowAllClick}
-              style={{ marginLeft: 8 }}
-            >
-              {"Tillåt Alla"}
-            </Button>
-          </Grid>
-        </Grid>
-      </DialogContent>
-    </Dialog>
+          )}
+        </FormGroup>
+        <Button
+          color="primary"
+          variant="contained"
+          onClick={handleAllowSelectedClick}
+        >
+          {"Tillåt valda"}
+        </Button>
+        <Button
+          color="primary"
+          variant="contained"
+          onClick={handleAllowAllClick}
+          sx={{ margin: [1, 1] }}
+        >
+          {"Tillåt Alla"}
+        </Button>
+      </DialogActions>
+    </StyledDialog>
   );
 }
 

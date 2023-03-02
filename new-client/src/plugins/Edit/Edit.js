@@ -1,7 +1,7 @@
 import React from "react";
 import BaseWindowPlugin from "../BaseWindowPlugin";
 
-import FormatShapesIcon from "@material-ui/icons/FormatShapes";
+import FormatShapesIcon from "@mui/icons-material/FormatShapes";
 
 import EditView from "./EditView.js";
 import EditModel from "./EditModel.js";
@@ -43,7 +43,9 @@ class Edit extends React.PureComponent {
         <EditView
           app={this.props.app}
           model={this.editModel}
+          options={this.props.options}
           observer={this.localObserver}
+          globalObserver={this.props.app.globalObserver}
         />
       </BaseWindowPlugin>
     );
