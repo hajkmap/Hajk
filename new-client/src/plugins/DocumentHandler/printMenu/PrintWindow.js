@@ -939,6 +939,11 @@ class PrintWindow extends React.PureComponent {
               <Link href={pdfLink.link} target="_blank">
                 {pdfLink.name}
               </Link>
+              <Button
+                onClick={() => window.open(pdfLink.link, "_blank").print()}
+              >
+                Print
+              </Button>
             </ListItem>
           ))}
         </List>
