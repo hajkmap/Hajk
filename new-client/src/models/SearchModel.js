@@ -40,6 +40,8 @@ class SearchModel {
   #wfsParser = new WFS();
   #possibleSearchCombinations = new Map(); // Will hold a set of possible search combinations, so we don't have to re-create them for each source
 
+  lastSearchPhrase = "";
+
   constructor(searchPluginOptions, map, app) {
     // Validate
     if (!searchPluginOptions || !map || !app) {
@@ -68,6 +70,9 @@ class SearchModel {
     searchOptions = this.getSearchOptions()
   ) => {
     searchString = searchString.trim();
+
+    // Save the latest search phrase for later use
+    this.lastSearchPhrase = searchString;
 
     const { featureCollections, errors } = await this.#getRawResults(
       searchString, // Ensure that the search string isn't surrounded by whitespace

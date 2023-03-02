@@ -44,7 +44,7 @@ const Breadcrumbs = (props) => {
             underline="hover"
             color="text.primary"
             variant="caption"
-            href="#"
+            sx={{ cursor: "pointer" }}
           >
             Översikt
           </Link>
@@ -61,7 +61,7 @@ const Breadcrumbs = (props) => {
             underline="hover"
             color="text.primary"
             variant="caption"
-            href="#"
+            sx={{ cursor: "pointer" }}
           >
             {featureCollection.displayName}
           </Link>

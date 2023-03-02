@@ -52,6 +52,7 @@ import { handleClick } from "./Click";
 class DrawModel {
   #map;
   #layerName;
+  #layerCaption;
   #geoJSONParser;
   #observer;
   #observerPrefix;
@@ -80,6 +81,7 @@ class DrawModel {
   #customHandleDrawEnd;
   #customHandlePointerMove;
   #customHandleAddFeature;
+  #customGetDrawImageStyle;
   #highlightFillColor;
   #highlightStrokeColor;
   #circleRadius;
@@ -96,6 +98,7 @@ class DrawModel {
     // Make sure that we keep track of the supplied settings.
     this.#map = settings.map;
     this.#layerName = settings.layerName;
+    this.#layerCaption = settings.layerCaption;
     // We're gonna need a GeoJSON-parser with the maps projection set.
     this.#geoJSONParser = new GeoJSON({
       featureProjection: this.#map.getView().getProjection(),
@@ -106,6 +109,7 @@ class DrawModel {
     // which will act as a prefix on all messages published on the
     // supplied observer.
     this.#observerPrefix = this.#getObserverPrefix(settings);
+    this.#customGetDrawImageStyle = settings.customGetDrawImageStyle;
     this.#measurementSettings =
       settings.measurementSettings ?? this.#getDefaultMeasurementSettings();
     this.#drawStyleSettings =
@@ -281,9 +285,10 @@ class DrawModel {
     this.#drawLayer = this.#getNewVectorLayer(this.#drawSource);
     // Make sure to set a unique name
     this.#drawLayer.set("name", this.#layerName);
-    // We're also gonna have to set the queryable-property to true
-    // so that we can enable "Select" on the layer.
+    // We're also gonna have to set the queryable-property to true so that we can enable "Select" on the layer.
     this.#drawLayer.set("queryable", true);
+    // We don't want drawn features to show in feature-info (the info-click-window)
+    this.#drawLayer.set("ignoreInFeatureInfo", true);
     // Then we can add the layer to the map.
     this.#map.addLayer(this.#drawLayer);
   };
@@ -550,7 +555,7 @@ class DrawModel {
               color: featureIsTextType
                 ? feature.get("TEXT_SETTINGS")?.backgroundColor ??
                   this.#textStyleSettings.backgroundColor
-                : "rgba(0, 0, 0, 0.5)",
+                : "rgba(0, 0, 0, 0.7)",
               width: 3,
             })
           : null,
@@ -936,13 +941,13 @@ class DrawModel {
   // Returns the stroke style (based on the style settings)
   #getDrawStrokeStyle = (settings) => {
     return new Stroke({
-      color: settings
+      color: settings?.strokeStyle?.color
         ? settings.strokeStyle.color
         : this.#drawStyleSettings.strokeColor,
-      lineDash: settings
+      lineDash: settings?.strokeStyle
         ? settings.strokeStyle.dash
         : this.#drawStyleSettings.lineDash,
-      width: settings
+      width: settings?.strokeStyle?.width
         ? settings.strokeStyle.width
         : this.#drawStyleSettings.strokeWidth,
     });
@@ -951,7 +956,7 @@ class DrawModel {
   // Returns the fill style (based on the style settings)
   #getDrawFillStyle = (settings) => {
     return new Fill({
-      color: settings
+      color: settings?.fillStyle?.color
         ? settings.fillStyle.color
         : this.#drawStyleSettings.fillColor,
     });
@@ -964,23 +969,33 @@ class DrawModel {
 
   // Returns the image style (based on the style settings)
   #getDrawImageStyle = (settings) => {
+    if (this.#customGetDrawImageStyle) {
+      return this.#customGetDrawImageStyle();
+    }
+
+    // If image style is present we will use it
+    // Otherwise we need to fallback to default style (same as drawing) as it is used in Sketch plugin
+    const storedSettings = this.#drawStyleSettings.image
+      ? this.#drawStyleSettings.image
+      : this.#drawStyleSettings;
+
     return new Circle({
       radius: 6,
       stroke: new Stroke({
-        color: settings
+        color: settings?.strokeStyle?.color
           ? settings.strokeStyle.color
-          : this.#drawStyleSettings.strokeColor,
-        width: settings
+          : storedSettings.strokeColor,
+        width: settings?.strokeStyle?.width
           ? settings.strokeStyle.width
-          : this.#drawStyleSettings.strokeWidth,
-        lineDash: settings
+          : storedSettings.strokeWidth,
+        lineDash: settings?.strokeStyle
           ? settings.strokeStyle.dash
-          : this.#drawStyleSettings.lineDash,
+          : storedSettings.lineDash,
       }),
       fill: new Fill({
-        color: settings
+        color: settings?.fillStyle?.color
           ? settings.fillStyle.color
-          : this.#drawStyleSettings.fillColor,
+          : storedSettings.fillColor,
       }),
     });
   };
@@ -1125,7 +1140,7 @@ class DrawModel {
       layerType: "system",
       ignoreInFeatureInfo: true,
       zIndex: 5000,
-      caption: "Draw model",
+      caption: this.#layerCaption || "Draw layer",
     });
   };
 
@@ -1154,7 +1169,7 @@ class DrawModel {
     this.#drawInteraction.un("drawabort", this.#handleDrawAbort);
     this.#map.un("pointermove", this.#handlePointerMove);
     this.#drawSource.un("addfeature", this.#handleDrawFeatureAdded);
-    document.removeEventListener("keyup", this.#handleKeyUp);
+    document.removeEventListener("keydown", this.#handleKeyDown);
     // Then we'll remove the custom listeners
     this.#removeCustomEventListeners();
   };
@@ -1176,7 +1191,7 @@ class DrawModel {
     this.#drawSource.on("addfeature", this.#handleDrawFeatureAdded);
     // We need a listener for keyboard input. For example, pressing the escape
     // key will allow the users to remove the last point.
-    document.addEventListener("keyup", this.#handleKeyUp);
+    document.addEventListener("keydown", this.#handleKeyDown);
   };
 
   // Adds listeners that might have been passed in the settings when
@@ -1325,9 +1340,14 @@ class DrawModel {
 
   // We want to handle key-up events so that we can let the user
   // remove the last drawn point by pressing the escape key. (And perhaps more...?)
-  #handleKeyUp = (e) => {
-    const { keyCode } = e;
-    if (keyCode === 27) {
+  #handleKeyDown = (e) => {
+    if (!this.#drawInteraction) return;
+    const { keyCode, ctrlKey, metaKey } = e;
+    if (keyCode === 27 || keyCode === 13) {
+      // escape or enter finishes drawing
+      this.finishDraw();
+    } else if ((ctrlKey === true || metaKey === true) && keyCode === 90) {
+      // Ctrl+Z or Cmd+Z removes last draw point
       this.#drawInteraction.removeLastPoint();
     }
   };
@@ -2218,6 +2238,13 @@ class DrawModel {
     this.#map.clickLock.add("coreDrawModel");
     //  ...and snap-helper for the snap-functionality.
     this.#map.snapHelper.add("coreDrawModel");
+  };
+
+  // Finishes the currently active draw interaction.
+  finishDraw = () => {
+    if (this.#drawInteraction) {
+      this.#drawInteraction.finishDrawing();
+    }
   };
 
   // Fits the map to the extent of the drawn features in the draw-source

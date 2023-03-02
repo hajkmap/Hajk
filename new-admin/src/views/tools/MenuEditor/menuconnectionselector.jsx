@@ -1,5 +1,4 @@
 import React from "react";
-
 import Grid from "@material-ui/core/Grid";
 import ArrowRightIcon from "@material-ui/icons/ArrowRight";
 import DescriptionIcon from "@material-ui/icons/Description";
@@ -11,7 +10,6 @@ import ListItemText from "@material-ui/core/ListItemText";
 import FormControl from "@material-ui/core/FormControl";
 import Popover from "@material-ui/core/Popover";
 import TextField from "@material-ui/core/TextField";
-import WarningIcon from "@material-ui/icons/Warning";
 import ListItemIcon from "@material-ui/core/ListItemIcon";
 import BlockIcon from "@material-ui/icons/Block";
 import Select from "@material-ui/core/Select";
@@ -37,17 +35,41 @@ const getTextField = (value, onChangeFunction, variant) => {
   );
 };
 
-const MENU_CONNECTION_TYPES = {
-  documentConnection: "Koppla dokument",
-  mapLink: "Koppla karta och lager",
-  link: "Koppla webblänk",
-  none: "Inget valt",
+// Accepted type => "DOCUMENT", "LINK", "MAP_LINK" (props)
+
+const CONNECTION_TYPE = {
+  DOCUMENT: "DOCUMENT",
+  LINK: "LINK",
+  MAP_LINK: "MAP_LINK",
+  NONE: "NONE",
 };
 
-const MAPLINK_TEXT = "Kartlänk";
-const WEBLINK_TEXT = "Webblänk";
-const NONE_TEXT = "Inget valt";
-const MAP_TEXT = "Karta";
+const CONNECTION_INFO = [
+  {
+    id: CONNECTION_TYPE.DOCUMENT,
+    menuValue: "Koppla dokument",
+    infoHeader: "",
+    icon: <DescriptionIcon />,
+  },
+  {
+    id: CONNECTION_TYPE.LINK,
+    menuValue: "Koppla webblänk",
+    infoHeader: "Webblänk",
+    icon: <LanguageIcon />,
+  },
+  {
+    id: CONNECTION_TYPE.MAP_LINK,
+    menuValue: "Koppla karta och lager",
+    infoHeader: "Kartlänk",
+    icon: <RoomIcon />,
+  },
+  {
+    id: CONNECTION_TYPE.NONE,
+    menuValue: "Inget valt",
+    infoHeader: "",
+    icon: <BlockIcon />,
+  },
+];
 
 const styles = (theme) => ({
   menuItem: {
@@ -60,87 +82,49 @@ const styles = (theme) => ({
 
 class MenuConnectionSelector extends React.Component {
   state = {
+    anchorEl: null,
     open: false,
-    mapLinkValue: this.props.menuItem.maplink,
-    linkValue: this.props.menuItem.link,
-    documentValue: this.props.menuItem.document,
-    activeMenu: "",
   };
 
   componentDidMount = () => {
     this.setState({
-      value: this.getInitialValue(),
+      menuValue: this.getInitialMenuValue(),
+      mapLinkValue: this.props.menuItem.maplink,
+      linkValue: this.props.menuItem.link,
+      documentValue: this.props.menuItem.document,
     });
   };
 
-  getInitialValue = () => {
-    const { menuItem } = this.props;
+  getInitialMenuValue = () => {
+    const { menuItem, type } = this.props;
 
-    if (menuItem.document !== "") {
-      return MENU_CONNECTION_TYPES.documentConnection;
+    const typeInfo = this.getConnectionInfoFromId(type);
+    const noneInfo = this.getConnectionInfoFromId(CONNECTION_TYPE.NONE);
+
+    switch (type) {
+      case CONNECTION_TYPE.DOCUMENT:
+        return menuItem.document ? typeInfo.menuValue : noneInfo.menuValue;
+      case CONNECTION_TYPE.LINK:
+        return menuItem.link ? typeInfo.menuValue : noneInfo.menuValue;
+      case CONNECTION_TYPE.MAP_LINK:
+        return menuItem.maplink ? typeInfo.menuValue : noneInfo.menuValue;
+      default:
+        return noneInfo.menuValue;
     }
-
-    if (menuItem.link) {
-      return MENU_CONNECTION_TYPES.link;
-    }
-
-    if (menuItem.maplink) {
-      return MENU_CONNECTION_TYPES.mapLink;
-    }
-
-    return MENU_CONNECTION_TYPES.none;
   };
 
-  openConnectionsMenu = (e) => {
-    this.setState({
-      connectionsMenuAnchorEl: e.currentTarget,
-    });
+  getConnectionInfoFromId = (id) => {
+    return CONNECTION_INFO.find((i) => i.id === id);
   };
 
-  closeConnectionsMenu = () => {
-    this.setState({ connectionsMenuAnchorEl: null, open: false });
-  };
-
-  getMenuConnectionTypeIcon = (type) => {
-    return type === MENU_CONNECTION_TYPES.link ? (
-      <LanguageIcon></LanguageIcon>
-    ) : type === MENU_CONNECTION_TYPES.mapLink ? (
-      <RoomIcon></RoomIcon>
-    ) : type === MENU_CONNECTION_TYPES.documentConnection ? (
-      <DescriptionIcon></DescriptionIcon>
-    ) : type === MENU_CONNECTION_TYPES.none ? (
-      <BlockIcon></BlockIcon>
-    ) : (
-      <BlockIcon></BlockIcon>
-    );
-  };
-
-  renderConnectionMenuSelectOption = (value, index) => {
-    return (
-      <MenuItem
-        onClick={(e) => {
-          this.handleChange(e.currentTarget, value);
-        }}
-        key={index}
-        value={value}
-      >
-        <ListItemIcon>{this.getMenuConnectionTypeIcon(value)}</ListItemIcon>
-        <Typography>{value}</Typography>
-        {value !== MENU_CONNECTION_TYPES.none && (
-          <ArrowRightIcon></ArrowRightIcon>
-        )}
-      </MenuItem>
-    );
-  };
-
-  renderMenuConnectionSettings = () => {
-    const { connectionsMenuAnchorEl } = this.state;
+  renderMenuConnections = () => {
+    const { anchorEl } = this.state;
     const { classes } = this.props;
     return (
       <Popover
         PaperProps={{ className: classes.paper }}
-        open={Boolean(connectionsMenuAnchorEl)}
-        anchorEl={connectionsMenuAnchorEl}
+        open={Boolean(anchorEl)}
+        anchorEl={anchorEl}
         anchorOrigin={{
           vertical: "top",
           horizontal: "right",
@@ -177,47 +161,33 @@ class MenuConnectionSelector extends React.Component {
       mapLinkValue: menuItem.maplink,
       linkValue: menuItem.link,
       documentValue: menuItem.document,
-      connectionsMenuAnchorEl: null,
+      anchorEl: null,
     });
   };
 
   updateSelection = () => {
-    const { treeNodeId, updateMenuItem } = this.props;
-    const { activeMenu } = this.state;
-    let value = this.state.activeMenu;
-    let newMenuItem = {
-      maplink: "",
-      link: "",
-      document: "",
+    const { treeNodeId, menuItem, updateMenuItem, type } = this.props;
+    const { menuValue, documentValue, linkValue, mapLinkValue } = this.state;
+    const { DOCUMENT, LINK, MAP_LINK, NONE } = CONNECTION_TYPE;
+
+    const noneMenuValue = this.getConnectionInfoFromId(NONE).menuValue;
+
+    const newDocument = menuValue === noneMenuValue ? "" : documentValue;
+    const newLink = menuValue === noneMenuValue ? "" : linkValue;
+    const newMapLink = menuValue === noneMenuValue ? "" : mapLinkValue;
+
+    const newMenuItem = {
+      ...menuItem,
+      document: type === DOCUMENT ? newDocument : menuItem.document,
+      link: type === LINK ? newLink : menuItem.link,
+      maplink: type === MAP_LINK ? newMapLink : menuItem.maplink,
     };
-
-    if (activeMenu === MENU_CONNECTION_TYPES.documentConnection) {
-      if (!this.state.documentValue) {
-        value = MENU_CONNECTION_TYPES.none;
-      }
-      newMenuItem = { ...newMenuItem, document: this.state.documentValue };
-    }
-
-    if (activeMenu === MENU_CONNECTION_TYPES.link) {
-      if (!this.state.linkValue) {
-        value = MENU_CONNECTION_TYPES.none;
-      }
-      newMenuItem = { ...newMenuItem, link: this.state.linkValue };
-    }
-
-    if (activeMenu === MENU_CONNECTION_TYPES.mapLink) {
-      if (!this.state.mapLinkValue) {
-        value = MENU_CONNECTION_TYPES.none;
-      }
-      newMenuItem = { ...newMenuItem, maplink: this.state.mapLinkValue };
-    }
 
     updateMenuItem(treeNodeId, newMenuItem);
 
     this.setState({
-      connectionsMenuAnchorEl: null,
+      anchorEl: null,
       open: false,
-      value: value,
     });
   };
 
@@ -262,56 +232,56 @@ class MenuConnectionSelector extends React.Component {
   };
 
   renderMapLink = () => {
-    return this.getLink(MAPLINK_TEXT, this.state.mapLinkValue, (e) => {
+    const label = this.getConnectionInfoFromId(
+      CONNECTION_TYPE.MAP_LINK
+    ).infoHeader;
+    return this.getLink(label, this.state.mapLinkValue, (e) => {
       this.setState({ mapLinkValue: e.target.value });
     });
   };
 
   renderLink = () => {
-    return this.getLink(WEBLINK_TEXT, this.state.linkValue, (e) => {
+    const label = this.getConnectionInfoFromId(CONNECTION_TYPE.LINK).infoHeader;
+    return this.getLink(label, this.state.linkValue, (e) => {
       this.setState({ linkValue: e.target.value });
     });
   };
 
   renderPopoverContent = () => {
-    const { activeMenu } = this.state;
+    const { DOCUMENT, LINK, MAP_LINK } = CONNECTION_TYPE;
+    const documentMenuValue = this.getConnectionInfoFromId(DOCUMENT).menuValue;
+    const linkMenuValue = this.getConnectionInfoFromId(LINK).menuValue;
+    const mapLinkMenuValue = this.getConnectionInfoFromId(MAP_LINK).menuValue;
 
-    if (activeMenu === MENU_CONNECTION_TYPES.none) {
-      return null;
-    }
-    if (activeMenu === MENU_CONNECTION_TYPES.documentConnection) {
-      return this.renderDocumentList();
-    }
-
-    if (activeMenu === MENU_CONNECTION_TYPES.link) {
-      return this.renderLink();
-    }
-
-    if (activeMenu === MENU_CONNECTION_TYPES.mapLink) {
-      return this.renderMapLink();
+    switch (this.state.menuValue) {
+      case documentMenuValue:
+        return this.renderDocumentList();
+      case linkMenuValue:
+        return this.renderLink();
+      case mapLinkMenuValue:
+        return this.renderMapLink();
+      default:
+        return null;
     }
   };
 
   handleChange = (target, value) => {
-    console.log(this, "this");
     this.props.updateValidationForTreeNode(this.props.treeNodeId);
-    if (value !== MENU_CONNECTION_TYPES.none) {
-      this.setState({
-        activeMenu: value,
-        connectionsMenuAnchorEl: target,
-        open: true,
-      });
-    } else {
-      this.setState(
-        {
-          activeMenu: value,
-          value: value,
-        },
-        () => {
-          this.updateSelection();
-        }
-      );
-    }
+
+    const noneMenuValue = this.getConnectionInfoFromId(
+      CONNECTION_TYPE.NONE
+    ).menuValue;
+
+    this.setState(
+      {
+        menuValue: value,
+        anchorEl: value !== noneMenuValue ? target : null,
+        open: value !== noneMenuValue,
+      },
+      () => {
+        value === noneMenuValue && this.updateSelection();
+      }
+    );
   };
 
   getDropDownSelectionIcon = (icon) => {
@@ -324,109 +294,82 @@ class MenuConnectionSelector extends React.Component {
     );
   };
 
-  getRenderedSelectionText = (label, icon) => {
+  getRenderValue = () => {
+    const { menuValue } = this.state;
+    const info = this.getConnectionInfoFromId(this.props.type);
+
     return (
       <Grid wrap="nowrap" spacing={1} container>
-        <Grid item>{this.getDropDownSelectionIcon(icon)}</Grid>
+        <Grid item>{this.getDropDownSelectionIcon(info.icon)}</Grid>
         <Grid xs={8} item>
-          <Typography>{label}</Typography>
+          <Typography noWrap>{menuValue}</Typography>
         </Grid>
       </Grid>
     );
   };
 
-  getRenderValue = () => {
-    const { menuItem } = this.props;
-    if (this.state.value === MENU_CONNECTION_TYPES.documentConnection) {
-      return this.getRenderedSelectionText(
-        menuItem.document,
-        this.getMenuConnectionTypeIcon(MENU_CONNECTION_TYPES.documentConnection)
-      );
-    }
-
-    if (this.state.value === MENU_CONNECTION_TYPES.none) {
-      return this.getRenderedSelectionText(
-        NONE_TEXT,
-        this.getMenuConnectionTypeIcon(MENU_CONNECTION_TYPES.none)
-      );
-    }
-
-    if (this.state.value === MENU_CONNECTION_TYPES.link) {
-      return this.getRenderedSelectionText(
-        WEBLINK_TEXT,
-        this.getMenuConnectionTypeIcon(MENU_CONNECTION_TYPES.link)
-      );
-    }
-
-    if (this.state.value === MENU_CONNECTION_TYPES.mapLink) {
-      return this.getRenderedSelectionText(
-        MAP_TEXT,
-        this.getMenuConnectionTypeIcon(MENU_CONNECTION_TYPES.mapLink)
-      );
-    }
-
-    return this.getRenderedSelectionText(NONE_TEXT);
-  };
-
   openDropDown = () => {
-    this.setState({ open: true });
+    this.setState({
+      open: true,
+    });
   };
 
   closeDropDown = () => {
     this.setState({ open: false });
   };
 
-  renderWarning = () => {
-    return <WarningIcon color="error"></WarningIcon>;
-  };
-
   render = () => {
-    const { value, open } = this.state;
-    const { valid } = this.props;
+    const { open, menuValue } = this.state;
 
-    if (value) {
-      return (
-        <>
-          <FormControl>
-            <Grid alignItems="center" container>
-              {!valid && (
-                <Grid xs={2} item>
-                  {this.renderWarning()}
-                </Grid>
-              )}
-              <Grid xs={10} item>
-                <Select
-                  MenuProps={{
-                    disableScrollLock: true,
-                    anchorOrigin: {
-                      vertical: "bottom",
-                      horizontal: "left",
-                    },
-                    transformOrigin: {
-                      vertical: "top",
-                      horizontal: "left",
-                    },
-                    getContentAnchorEl: null,
-                  }}
-                  onOpen={this.openDropDown}
-                  onClose={this.closeDropDown}
-                  renderValue={this.getRenderValue}
-                  open={open}
-                  value={value}
-                >
-                  {Object.values(MENU_CONNECTION_TYPES).map((value, index) => {
-                    return this.renderConnectionMenuSelectOption(value, index);
-                  })}
-                </Select>
-                {this.renderMenuConnectionSettings()}
-              </Grid>
-            </Grid>
-          </FormControl>
-        </>
-      );
-    } else {
-      return null;
-    }
+    const selectOptions = CONNECTION_INFO.filter(
+      (ci) => ci.id === this.props.type || ci.id === CONNECTION_TYPE.NONE
+    );
+
+    return menuValue ? (
+      <FormControl style={{ maxWidth: "100%", width: "100%" }}>
+        <Grid alignItems="center" container>
+          <Grid xs={10} item>
+            <Select
+              style={{ maxWidth: "100%" }}
+              MenuProps={{
+                disableScrollLock: true,
+                anchorOrigin: {
+                  vertical: "bottom",
+                  horizontal: "left",
+                },
+                transformOrigin: {
+                  vertical: "top",
+                  horizontal: "left",
+                },
+                getContentAnchorEl: null,
+              }}
+              onOpen={this.openDropDown}
+              onClose={this.closeDropDown}
+              renderValue={this.getRenderValue}
+              open={open}
+              value={menuValue}
+            >
+              {selectOptions.map((so) => {
+                return (
+                  <MenuItem
+                    onClick={(e) => {
+                      this.handleChange(e.currentTarget, so.menuValue);
+                    }}
+                    key={so.id}
+                    value={so.menuValue}
+                  >
+                    <ListItemIcon>{so.icon}</ListItemIcon>
+                    <Typography noWrap>{so.menuValue}</Typography>
+                    {so.id !== CONNECTION_TYPE.NONE && <ArrowRightIcon />}
+                  </MenuItem>
+                );
+              })}
+            </Select>
+            {this.renderMenuConnections()}
+          </Grid>
+        </Grid>
+      </FormControl>
+    ) : null;
   };
 }
 

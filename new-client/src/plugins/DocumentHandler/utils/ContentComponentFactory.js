@@ -1,12 +1,17 @@
-import React from "react";
+import React, { useState } from "react";
 import MapIcon from "@mui/icons-material/Map";
 import DescriptionIcon from "@mui/icons-material/Description";
 import OpenInNewIcon from "@mui/icons-material/OpenInNew";
 import Box from "@mui/material/Box";
 import TextArea from "../documentWindow/TextArea";
 import { styled } from "@mui/material/styles";
-import { useTheme } from "@mui/material";
-
+import {
+  Accordion,
+  AccordionSummary,
+  AccordionDetails,
+  useTheme,
+} from "@mui/material";
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import {
   Button,
   Typography,
@@ -16,6 +21,48 @@ import {
   Grid,
   Tooltip,
 } from "@mui/material";
+
+const StyledAccordion = styled(Accordion)(
+  ({ backgroundcolor, dividercolor }) => ({
+    "&:before": {
+      backgroundColor: "white",
+    },
+    margin: "0px 0px 10px 0px",
+    borderRadius: "5px",
+    position: "inherit",
+    backgroundColor: backgroundcolor,
+    border: dividercolor && `solid 2px ${dividercolor}`,
+  })
+);
+
+const StyledAccordionTypography = styled(Typography)({
+  marginBottom: "0",
+  fontSize: "16px",
+  whiteSpace: "nowrap",
+  overflow: "hidden",
+  textOverflow: "ellipsis",
+  maxWidth: "100%",
+  display: "block",
+});
+
+const StyledAccordionButton = styled(Button)({
+  textAlign: "inherit",
+  padding: "0",
+  textTransform: "inherit",
+});
+
+const StyledAccordionSummary = styled(AccordionSummary)(
+  ({ expanded, dividercolor }) => ({
+    width: "100%",
+    transition: "opacity 0.2s ease-in-out",
+    justifyContent: "space-between",
+    "& .MuiAccordionSummary-content": {
+      maxWidth: "90%",
+    },
+    opacity: expanded === "true" ? 0.6 : 1,
+    padding: dividercolor && "0 15px",
+  })
+);
 
 const ELEMENT_NODE = 1;
 const TEXT_NODE = 3;
@@ -184,15 +231,106 @@ const getTextArea = (tag, defaultColors) => {
 
 export const BlockQuote = ({ blockQuoteTag, defaultColors }) => {
   // Grab the theme to determine current light/dark mode
+
   const theme = useTheme();
   if (blockQuoteTag.attributes.getNamedItem("data-text-section")) {
     return getTextArea(
       blockQuoteTag,
-      theme.palette.mode === "light" && defaultColors // Only supply defaultColors if we're in light mode
+      theme.palette.mode === "light" && defaultColors, // Only supply defaultColors if we're in light mode
+      false
     );
   } else {
     return null;
   }
+};
+
+const getMediaPositionStyle = (position) => {
+  switch (position) {
+    case "right":
+      return {
+        alignItems: "flex-end",
+        display: "flex",
+        flexDirection: "column",
+      };
+    case "floatRight":
+      return {
+        float: "right",
+        marginLeft: 1,
+      };
+    case "left":
+      return {
+        alignItems: "flex-start",
+        display: "flex",
+        flexDirection: "column",
+      };
+    case "floatLeft":
+      return {
+        float: "left",
+        marginRight: 1,
+      };
+    case "center":
+      return {
+        alignItems: "center",
+        display: "flex",
+        flexDirection: "column",
+      };
+    default:
+      return {};
+  }
+};
+
+const getAccordionTextArea = (tag, defaultColors, expanded, setExpanded) => {
+  const children = [...tag.childNodes];
+  let textAreaContentArray = children.map((element, index) => {
+    return <React.Fragment key={index}>{renderChild(element)}</React.Fragment>;
+  });
+
+  let title = tag.attributes["data-accordion-title"];
+  title = title
+    ? tag.attributes["data-accordion-title"].value
+    : (tag.innerText || tag.textContent).substring(0, 100);
+
+  const backgroundColor =
+    tag.attributes.getNamedItem("data-background-color")?.value ||
+    defaultColors?.textAreaBackgroundColor;
+
+  const dividerColor =
+    tag.attributes.getNamedItem("data-divider-color")?.value ||
+    defaultColors?.textAreaBackgroundColor;
+
+  return (
+    <StyledAccordion
+      className="blockQuoteAccordion"
+      backgroundcolor={backgroundColor}
+      dividercolor={dividerColor}
+    >
+      <StyledAccordionButton color="inherit" fullWidth>
+        <StyledAccordionSummary
+          expandIcon={<ExpandMoreIcon />}
+          expanded={expanded.toString()}
+          onClick={() => setExpanded(!expanded)}
+          dividercolor={dividerColor}
+        >
+          <StyledAccordionTypography variant="body1">
+            {title}
+          </StyledAccordionTypography>
+        </StyledAccordionSummary>
+      </StyledAccordionButton>
+      <AccordionDetails>{textAreaContentArray}</AccordionDetails>
+    </StyledAccordion>
+  );
+};
+
+export const AccordionSection = ({ blockQuoteTag, defaultColors }) => {
+  const theme = useTheme();
+  const [expanded, setExpanded] = useState(false);
+
+  return getAccordionTextArea(
+    blockQuoteTag,
+    theme.palette.mode === "light" && defaultColors,
+    expanded,
+    setExpanded
+  );
 };
 
 export const Figure = ({ figureTag }) => {
@@ -230,41 +368,6 @@ export const Img = ({ imgTag, localObserver, componentId, baseUrl }) => {
         width: "100%",
         ...(image.popup && { marginBottom: 1, cursor: "pointer" }),
       };
-    }
-  };
-
-  const getMediaPositionStyle = (position) => {
-    switch (position) {
-      case "right":
-        return {
-          alignItems: "flex-end",
-          display: "flex",
-          flexDirection: "column",
-        };
-      case "floatRight":
-        return {
-          float: "right",
-          marginLeft: 1,
-        };
-      case "left":
-        return {
-          alignItems: "flex-start",
-          display: "flex",
-          flexDirection: "column",
-        };
-      case "floatLeft":
-        return {
-          float: "left",
-          marginRight: 1,
-        };
-      case "center":
-        return {
-          alignItems: "center",
-          display: "flex",
-          flexDirection: "column",
-        };
-      default:
-        return {};
     }
   };
 
@@ -407,7 +510,7 @@ export const Video = ({ imgTag, componentId, baseUrl }) => {
 
   return (
     <React.Fragment key={videoAttributes.id}>
-      <Box sx={this.getMediaPositionStyle(videoAttributes.position)}>
+      <Box sx={getMediaPositionStyle(videoAttributes.position)}>
         <video
           height={videoAttributes.height}
           width={videoAttributes.width}

@@ -1,5 +1,6 @@
 export default class MapViewModel {
   constructor(settings) {
+    this.appModel = settings.appModel;
     this.localObserver = settings.localObserver;
     this.globalObserver = settings.globalObserver;
     this.map = settings.map;
@@ -19,6 +20,7 @@ export default class MapViewModel {
         center: center,
         zoom: params.get("z") || this.map.getView().getZoom(),
         layers: params.get("l"), // Allow 'null', we handle it later
+        groupLayers: params.get("gl") || "{}", // Default to an empty stringified JSON object
       };
     } catch (error) {
       console.error(error);
@@ -28,6 +30,7 @@ export default class MapViewModel {
         center: this.map.getView().getCenter(),
         zoom: this.map.getView().getZoom(),
         layers: null,
+        groupLayers: "{}", // Default to an empty stringified JSON object
       };
     }
   };
@@ -38,54 +41,19 @@ export default class MapViewModel {
       const mapSettings = this.convertMapSettingsUrlToOlSettings(url);
 
       if (mapSettings.layers !== null) {
-        const visibleLayers = mapSettings.layers.split(",");
-        const { layersToShow, layersToHide } =
-          this.getLayersToShowAndHide(visibleLayers);
-
-        this.setMapLayersVisibility(layersToShow, layersToHide);
+        // Let's use Hajk's generic layer visibility
+        // mechanism as exposed in AppModel
+        this.appModel.setLayerVisibilityFromParams(
+          mapSettings.layers,
+          mapSettings.groupLayers
+        );
       }
 
+      // Let's ensure we end up in the correct location, even
+      // if no layer's visibility was changed
       this.flyTo(this.map.getView(), mapSettings.center, mapSettings.zoom);
     });
   };
-
-  getLayersToShowAndHide = (visibleLayers) => {
-    const layersInMap = this.map.getLayers().getArray();
-    return layersInMap.reduce(
-      (layers, layer) => {
-        if (
-          layer.getProperties()["layerInfo"] &&
-          layer.getProperties()["layerInfo"]["layerType"]
-        ) {
-          if (visibleLayers.includes(layer.getProperties()["name"])) {
-            layers.layersToShow.push(layer);
-          } else {
-            layers.layersToHide.push(layer);
-          }
-        }
-        return layers;
-      },
-      { layersToShow: [], layersToHide: [] }
-    );
-  };
-
-  setMapLayersVisibility(layersToShow, layersToHide) {
-    layersToShow.forEach((mapLayerToShow) => {
-      if (mapLayerToShow.get("layerType") === "group") {
-        this.globalObserver.publish("layerswitcher.showLayer", mapLayerToShow);
-      } else if (!mapLayerToShow.getVisible()) {
-        mapLayerToShow.setVisible(true);
-      }
-    });
-
-    layersToHide.forEach((mapLayerToHide) => {
-      if (mapLayerToHide.get("layerType") === "group") {
-        this.globalObserver.publish("layerswitcher.hideLayer", mapLayerToHide);
-      } else if (mapLayerToHide.getVisible()) {
-        mapLayerToHide.setVisible(false);
-      }
-    });
-  }
 
   flyTo(view, center, zoom) {
     view.animate({

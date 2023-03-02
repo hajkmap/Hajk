@@ -1,10 +1,13 @@
 import React from "react";
 
+import { PLUGINS_TO_IGNORE_IN_HASH_APP_STATE } from "constants";
+
 import PropTypes from "prop-types";
 import { styled } from "@mui/material/styles";
 import { SnackbarProvider } from "notistack";
 import Observer from "react-event-observer";
 import { isMobile } from "../utils/IsMobile";
+import { getMergedSearchAndHashParams } from "../utils/getMergedSearchAndHashParams";
 import SrShortcuts from "../components/SrShortcuts/SrShortcuts";
 import Analytics from "../models/Analytics";
 import AppModel from "../models/AppModel.js";
@@ -418,6 +421,7 @@ class App extends React.PureComponent {
       .createMap()
       .addSearchModel()
       .addLayers()
+      .addAnchorModel() // Anchor model must be added after the layers
       .loadPlugins(this.props.activeTools);
 
     Promise.all(promises).then(() => {
@@ -471,6 +475,12 @@ class App extends React.PureComponent {
   componentDidCatch(error) {}
 
   bindHandlers() {
+    // Extend the hajkPublicApi with a couple of things that are available now
+    window.hajkPublicApi = {
+      ...window.hajkPublicApi,
+      olMap: this.appModel.map,
+    };
+
     // Register a handle to prevent pinch zoom on mobile devices.
     document.body.addEventListener(
       "touchmove",
@@ -488,6 +498,106 @@ class App extends React.PureComponent {
       { passive: false } // Explicitly tell the browser that we will preventDefault inside this handler,
       // which is important for smooth scrolling to work correctly.
     );
+
+    // This event is used to allow controlling Hajk programmatically, e.g in an embedded context, see #1252
+    this.props.config.mapConfig.map.enableAppStateInHash === true &&
+      window.addEventListener(
+        "hashchange",
+        () => {
+          // Extract existing params. Using this helper we will take into account both
+          // the query and the hash parameters.
+          const mergedParams = getMergedSearchAndHashParams();
+
+          // If map changed, do a full reload
+          if (mergedParams.get("m") !== this.props.config.activeMap) {
+            window.location.reload();
+          }
+
+          // Act when view's zoom changes
+          if (mergedParams.get("z")) {
+            // Since we're dealing with a string, we're gonna need to parse it to a float
+            const zoomInHash = parseFloat(mergedParams.get("z"));
+            if (this.appModel.map.getView().getZoom() !== zoomInHash) {
+              // …let's update our View's zoom.
+              this.appModel.map.getView().animate({ zoom: zoomInHash });
+            }
+          }
+
+          // Act when view's center coordinate changes
+          if (mergedParams.get("x") || mergedParams.get("y")) {
+            const [x, y] = this.appModel.map.getView().getCenter();
+
+            if (
+              mergedParams.get("x") !== x.toString() ||
+              mergedParams.get("y") !== y.toString()
+            ) {
+              this.appModel.map.getView().animate({
+                center: [mergedParams.get("x"), mergedParams.get("y")],
+              });
+            }
+          }
+
+          // Act when plugin window's visibility changes.
+          // p contains the list of plugins to show. It's important to check
+          // for null, as an empty string value is a valid value that indicates
+          // that no plugin should be shown, while a null value indicates that
+          // the parameter does not exist and default plugin visibility should
+          // be respected.
+          if (mergedParams.get("p") !== null) {
+            const currentlyVisiblePlugins = this.appModel.windows
+              .filter((w) => w.state.windowVisible)
+              .map((p) => p.type);
+
+            if (currentlyVisiblePlugins.join(",") !== mergedParams.get("p")) {
+              const pInParams = mergedParams.get("p").split(",");
+
+              // First hide if window not longer visible
+              currentlyVisiblePlugins.forEach((p) => {
+                if (
+                  !pInParams.includes(p) &&
+                  PLUGINS_TO_IGNORE_IN_HASH_APP_STATE.indexOf(p) === -1
+                ) {
+                  this.globalObserver.publish(`${p}.closeWindow`);
+                }
+              });
+
+              // Next, show any windows that are still hidden
+              mergedParams
+                .get("p")
+                .split(",")
+                .forEach((p) => {
+                  PLUGINS_TO_IGNORE_IN_HASH_APP_STATE.indexOf(p) === -1 &&
+                    this.globalObserver.publish(`${p}.showWindow`);
+                });
+            }
+          }
+
+          // Act when search string changes.
+          // Check if the q parameter exists and differs from
+          // the most recent search. If so, let's publish an event that
+          // the Search component listens to.
+          // TODO: Also handle sources change, the s parameter
+          if (
+            mergedParams.get("q") !==
+              this.appModel.searchModel.lastSearchPhrase &&
+            mergedParams.get("q") !== null
+          ) {
+            this.globalObserver.publish(
+              "search.setSearchPhrase",
+              mergedParams.get("q")
+            );
+          }
+
+          // Act when the l parameter changes
+          if (mergedParams.get("l") || mergedParams.get("gl")) {
+            this.appModel.setLayerVisibilityFromParams(
+              mergedParams.get("l"),
+              mergedParams.get("gl")
+            );
+          }
+        },
+        false
+      );
 
     // Register various global listeners.
     this.globalObserver.subscribe("infoClick.mapClick", (results) => {
