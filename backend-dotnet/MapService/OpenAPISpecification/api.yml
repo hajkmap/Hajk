@@ -1,0 +1,3076 @@
+openapi: 3.0.3
+info:
+  title: hajk-backend
+  description: Hajk backend
+  version: 1.1.0
+servers: []
+tags:
+  - name: Client-accessible
+    description: Resources necessary to load a working map in client
+  - name: Admin - Maps and layers
+    description: Perform CRUD operations on layers and maps configurations
+  - name: Admin - Informative/DocumentHandler
+    description: Resources for working with the "Documents API", used mainly by the Informative plugin
+  - name: Admin - ActiveDirectory
+    description: Resources for working with ActiveDirectory
+  - name: Sokigo FB Proxy
+    description: Proxy specified in working with Sokigo's FB API
+  - name: FME-server Proxy
+    description: Proxy for tunneling authenticated requests against FME server
+  - name: Specification
+    description: The OpenAPI specification
+paths:
+  /informative/load/{name}:
+    get:
+      tags:
+        - Client-accessible
+      parameters:
+        - name: name
+          in: path
+          description: Name of the document to be fetched
+          required: true
+          schema:
+            type: string
+        - in: header
+          name: X-Control-Header
+          description: User name that will be supplied to AD
+          schema:
+            type: string
+          required: false
+      description: Fetch contents of the whole document.
+      responses:
+        200:
+          description: Return the JSON file
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DocumentBody"
+        5XX:
+          description: Example not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /informative/create:
+    post:
+      deprecated: true
+      description: Create a new document.
+      tags:
+        - Admin - Informative/DocumentHandler
+      parameters:
+        - in: header
+          name: X-Control-Header
+          description: User name that will be supplied to AD
+          schema:
+            type: string
+          required: false
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/InformativeDocumentCreateBody"
+        required: true
+      responses:
+        200:
+          description: Document created
+          content: {}
+        5XX:
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+    put:
+      tags:
+        - Admin - Informative/DocumentHandler
+      description: Create a new document with the name given in the body, to the map given in the body.
+      parameters:
+        - in: header
+          name: X-Control-Header
+          description: User name that will be supplied to AD
+          schema:
+            type: string
+          required: false
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/InformativeDocumentCreateBody"
+        required: true
+      responses:
+        200:
+          description: Create a document connected to a specified map
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InformativeDocumentCreateBody"
+        5XX:
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /informative/list:
+    get:
+      tags:
+        - Admin - Informative/DocumentHandler
+      description: Return all available documents
+      parameters:
+        - in: header
+          name: X-Control-Header
+          description: User name that will be supplied to AD
+          schema:
+            type: string
+          required: false
+      responses:
+        200:
+          description: Return all available documents
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DocumentsList"
+        5XX:
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /informative/list/{name}:
+    get:
+      tags:
+        - Admin - Informative/DocumentHandler
+      description: Return available documents of a map
+      parameters:
+        - name: name
+          in: path
+          description: Name of the map of which the connected documents will be returned
+          required: true
+          schema:
+            type: string
+        - in: header
+          name: X-Control-Header
+          description: User name that will be supplied to AD
+          schema:
+            type: string
+          required: false
+      responses:
+        200:
+          description: Return available documents for the specified map
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DocumentsList"
+        5XX:
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /informative/save/{name}:
+    post:
+      deprecated: true
+      tags:
+        - Admin - Informative/DocumentHandler
+      description: Save a document
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SaveDocument"
+        required: true
+      parameters:
+        - name: name
+          in: path
+          description: Name of the document to be saved
+          required: true
+          schema:
+            type: string
+        - in: header
+          name: X-Control-Header
+          description: User name that will be supplied to AD
+          schema:
+            type: string
+          required: false
+      responses:
+        200:
+          description: Return the saved document's body
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SaveDocument"
+        5XX:
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+    put:
+      tags:
+        - Admin - Informative/DocumentHandler
+      description: Save a document
+      requestBody:
+        description: Save a document.
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SaveDocument"
+        required: true
+      parameters:
+        - name: name
+          in: path
+          description: Name of the document to be saved
+          required: true
+          schema:
+            type: string
+        - in: header
+          name: X-Control-Header
+          description: User name that will be supplied to AD
+          schema:
+            type: string
+          required: false
+      responses:
+        200:
+          description: Return the saved document's body
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SaveDocument"
+        5XX:
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /informative/delete/{name}:
+    delete:
+      tags:
+        - Admin - Informative/DocumentHandler
+      description: Delete a document
+      parameters:
+        - name: name
+          in: path
+          description: Name of the document to be deleted
+          required: true
+          schema:
+            type: string
+        - in: header
+          name: X-Control-Header
+          description: User name that will be supplied to AD
+          schema:
+            type: string
+          required: false
+      responses:
+        200:
+          description: Delete the specified document
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DocumentsList"
+        5XX:
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /config/layers:
+    get:
+      tags:
+        - Client-accessible
+      description: List available layers. If AD authentication is active, filter by user's permission.
+      parameters:
+        - in: header
+          name: X-Control-Header
+          description: User name that will be supplied to AD
+          schema:
+            type: string
+          required: false
+      responses:
+        200:
+          description: All layers were fetched successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ConfigLayers"
+  /mapconfig/layers:
+    get:
+      tags:
+        - Admin - Maps and layers
+      description: List available layers, do not apply any visibility restrictions (required for Admin UI).
+      parameters:
+        - in: header
+          name: X-Control-Header
+          description: User name that will be supplied to AD
+          schema:
+            type: string
+          required: false
+      responses:
+        200:
+          description: All layers were fetched successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ConfigLayers"
+  /mapconfig/list:
+    get:
+      tags:
+        - Admin - Maps and layers
+      description: List available map configurations
+      parameters:
+        - in: header
+          name: X-Control-Header
+          description: User name that will be supplied to AD
+          schema:
+            type: string
+          required: false
+      responses:
+        200:
+          description: Available maps were fetched successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ConfigList"
+  /config/list:
+    get:
+      deprecated: true
+      tags:
+        - Admin - Maps and layers
+      description: List available map configurations
+      parameters:
+        - in: header
+          name: X-Control-Header
+          description: User name that will be supplied to AD
+          schema:
+            type: string
+          required: false
+      responses:
+        200:
+          description: Available maps were fetched successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ConfigList"
+  /mapconfig/listimage:
+    get:
+      tags:
+        - Admin - Maps and layers
+      description: List available images in the upload folder
+      parameters:
+        - in: header
+          name: X-Control-Header
+          description: User name that will be supplied to AD
+          schema:
+            type: string
+          required: false
+      responses:
+        200:
+          description: Available images were fetched successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ListImage"
+  /config/listimage:
+    get:
+      deprecated: true
+      tags:
+        - Admin - Maps and layers
+      description: List available images in the upload folder
+      parameters:
+        - in: header
+          name: X-Control-Header
+          description: User name that will be supplied to AD
+          schema:
+            type: string
+          required: false
+      responses:
+        200:
+          description: Available images were fetched successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ListImage"
+  /mapconfig/listvideo:
+    get:
+      tags:
+        - Admin - Maps and layers
+      description: List available videos in the upload folder
+      parameters:
+        - in: header
+          name: X-Control-Header
+          description: User name that will be supplied to AD
+          schema:
+            type: string
+          required: false
+      responses:
+        200:
+          description: Available videos were fetched successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ListVideo"
+  /config/listvideo:
+    get:
+      deprecated: true
+      tags:
+        - Admin - Maps and layers
+      description: List available videos in the upload folder
+      parameters:
+        - in: header
+          name: X-Control-Header
+          description: User name that will be supplied to AD
+          schema:
+            type: string
+          required: false
+      responses:
+        200:
+          description: Available videos were fetched successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ListVideo"
+  /mapconfig/listaudio:
+    get:
+      tags:
+        - Admin - Maps and layers
+      description: List available audio files in the upload folder
+      parameters:
+        - in: header
+          name: X-Control-Header
+          description: User name that will be supplied to AD
+          schema:
+            type: string
+          required: false
+      responses:
+        200:
+          description: Available audio files were fetched successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ListAudio"
+  /config/listaudio:
+    get:
+      deprecated: true
+      tags:
+        - Admin - Maps and layers
+      description: List available audio files in the upload folder
+      parameters:
+        - in: header
+          name: X-Control-Header
+          description: User name that will be supplied to AD
+          schema:
+            type: string
+          required: false
+      responses:
+        200:
+          description: Available audio files were fetched successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ListAudio"
+  /mapconfig/{map}:
+    get:
+      tags:
+        - Admin - Maps and layers
+      description: Fetch contents of a map configuration. If AD authentication is active, filter by user's permission.
+      parameters:
+        - name: map
+          in: path
+          description: Name of the map configuration to fetch
+          required: true
+          schema:
+            type: string
+        - in: header
+          name: X-Control-Header
+          description: User name that will be supplied to AD
+          schema:
+            type: string
+          required: false
+      responses:
+        200:
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MapBody"
+  /config/{map}:
+    get:
+      deprecated: true
+      tags:
+        - Client-accessible
+      description: Fetch contents of a map configuration
+      parameters:
+        - name: map
+          in: path
+          description: Name of the map configuration to fetch
+          required: true
+          schema:
+            type: string
+        - in: header
+          name: X-Control-Header
+          description: User name that will be supplied to AD
+          schema:
+            type: string
+          required: false
+      responses:
+        200:
+          description: Success
+          content: {}
+  /mapconfig/export/{map}/{format}:
+    get:
+      tags:
+        - Admin - Maps and layers
+      description: Exports layers of the map in a human-readable format. If the parameter map is given the value 'layer.json', the layers of that file is returned. If the parameter map is given any other value, the base layers and group layers of that map configuration is returned.
+      parameters:
+        - name: map
+          in: path
+          description: Name of the map to fetch
+          required: true
+          schema:
+            type: string
+        - name: format
+          in: path
+          description: The format of what's exported. Always 'json'
+          required: true
+          schema:
+            type: string
+        - in: header
+          name: X-Control-Header
+          description: User name that will be supplied to AD
+          schema:
+            type: string
+          required: false
+      responses:
+        200:
+          description: Success
+          content: {}
+  /mapconfig/create/{name}:
+    get:
+      deprecated: true
+      tags:
+        - Admin - Maps and layers
+      description: Create a new map configuration
+      parameters:
+        - name: name
+          in: path
+          description: File name of the new map configuration
+          required: true
+          schema:
+            type: string
+        - in: header
+          name: X-Control-Header
+          description: User name that will be supplied to AD
+          schema:
+            type: string
+          required: false
+      responses:
+        200:
+          description: Success
+          content: {}
+    put:
+      tags:
+        - Admin - Maps and layers
+      description: Create a new map configuration
+      parameters:
+        - name: name
+          in: path
+          description: File name of the new map config
+          required: true
+          schema:
+            type: string
+        - in: header
+          name: X-Control-Header
+          description: User name that will be supplied to AD
+          schema:
+            type: string
+          required: false
+      responses:
+        200:
+          description: Success
+          content: {}
+  /config/create/{name}:
+    get:
+      deprecated: true
+      tags:
+        - Admin - Maps and layers
+      description: Create a new map configuration
+      parameters:
+        - name: name
+          in: path
+          description: File name of the new map configuration
+          required: true
+          schema:
+            type: string
+        - in: header
+          name: X-Control-Header
+          description: User name that will be supplied to AD
+          schema:
+            type: string
+          required: false
+      responses:
+        200:
+          description: Success
+          content: {}
+  /mapconfig/delete/{name}:
+    get:
+      deprecated: true
+      tags:
+        - Admin - Maps and layers
+      description: Delete an existing map configuration
+      parameters:
+        - name: name
+          in: path
+          description: Name of the map configuration to be deleted
+          required: true
+          schema:
+            type: string
+        - in: header
+          name: X-Control-Header
+          description: User name that will be supplied to AD
+          schema:
+            type: string
+          required: false
+      responses:
+        200:
+          description: Success
+          content: {}
+    delete:
+      tags:
+        - Admin - Maps and layers
+      description: Delete an existing map configuration
+      parameters:
+        - name: name
+          in: path
+          description: Name of the map configurationto be deleted
+          required: true
+          schema:
+            type: string
+        - in: header
+          name: X-Control-Header
+          description: User name that will be supplied to AD
+          schema:
+            type: string
+          required: false
+      responses:
+        200:
+          description: Success
+          content: {}
+  /config/delete/{name}:
+    get:
+      deprecated: true
+      tags:
+        - Admin - Maps and layers
+      description: Delete an existing map configuration
+      parameters:
+        - name: name
+          in: path
+          description: Name of the map configuration to be deleted
+          required: true
+          schema:
+            type: string
+        - in: header
+          name: X-Control-Header
+          description: User name that will be supplied to AD
+          schema:
+            type: string
+          required: false
+      responses:
+        200:
+          description: Success
+          content: {}
+  /mapconfig/duplicate/{nameFrom}/{nameTo}:
+    put:
+      tags:
+        - Admin - Maps and layers
+      description: Create a new map configuration by duplicating an existing one
+      parameters:
+        - name: nameFrom
+          in: path
+          description: Name of the map configuration to be duplicated
+          required: true
+          schema:
+            type: string
+        - name: nameTo
+          in: path
+          description: Name of the new map configuration (the duplicate)
+          required: true
+          schema:
+            type: string
+        - in: header
+          name: X-Control-Header
+          description: User name that will be supplied to AD
+          schema:
+            type: string
+          required: false
+      responses:
+        200:
+          description: Success
+          content: {}
+  /config/userspecificmaps:
+    get:
+      tags:
+        - Client-accessible
+      description: Get a list of maps that will be available in the MapSwitcher dropdown
+      parameters:
+        - in: header
+          name: X-Control-Header
+          description: User name that will be supplied to AD
+          schema:
+            type: string
+          required: false
+      responses:
+        200:
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserSpecificMaps"
+  /ad/availableadgroups:
+    get:
+      tags:
+        - Admin - ActiveDirectory
+      description: Get a list of all available AD groups to make it easier for admins to set map and layer permissions
+      parameters:
+        - in: header
+          name: X-Control-Header
+          description: User name that will be supplied to AD
+          schema:
+            type: string
+          required: false
+      responses:
+        200:
+          description: The list of available AD groups is returned. In the case of an empty Json, either there are no available AD groups or the AD is not enabled and/or unreachable
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
+                  description: The ad group
+                description: The list of available ad groups
+        500:
+          description: Internal server error
+          content:
+            plain/text:
+              schema:
+                type: string
+                example: Internal server error
+                description: The error message describing the error
+  /ad/findcommonadgroupsforusers:
+    get:
+      tags:
+        - Admin - ActiveDirectory
+      description: Find out which AD group membership is shared between specified users
+      parameters:
+        - in: query
+          name: users
+          description: Names of users to find shared AD group memberships of
+          schema:
+            type: array
+            items:
+              type: string
+          style: form
+          explode: false
+          allowReserved: true
+        - in: header
+          name: X-Control-Header
+          description: User name that will be supplied to AD
+          schema:
+            type: string
+          required: false
+      responses:
+        200:
+          description: The list of common AD groups is returned. In the case of an empty Json, either there are no common AD groups or the AD is not enabled and/or unreachable
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
+                  description: The ad group
+                description: The list of common ad groups
+        500:
+          description: Internal server error
+          content:
+            plain/text:
+              schema:
+                type: string
+                example: Internal server error
+                description: The error message describing the error
+  /ad/users:
+    get:
+      tags:
+        - Admin - ActiveDirectory
+      description: Get the current content of local AD Users store
+      parameters:
+        - in: header
+          name: X-Control-Header
+          description: User name that will be supplied to AD
+          schema:
+            type: string
+          required: false
+      responses:
+        200:
+          description: The list of users is returned
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
+                  description: The ad group
+                description: The list of users
+        500:
+          description: Internal server error. The AD might be disabled in settings
+          content:
+            plain/text:
+              schema:
+                type: string
+                example: "ActiveDirectoryError: Can't access AD methods because AD functionality is disabled in .env"
+                description: The error message describing the error
+  /ad/groups:
+    get:
+      tags:
+        - Admin - ActiveDirectory
+      description: Get the current content of local AD Groups store
+      parameters:
+        - in: header
+          name: X-Control-Header
+          description: User name that will be supplied to AD
+          schema:
+            type: string
+          required: false
+      responses:
+        200:
+          description: The list of users is returned
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
+                  description: The ad group
+                description: The list of groups
+        500:
+          description: Internal server error. The AD might be disabled in settings
+          content:
+            plain/text:
+              schema:
+                type: string
+                example: "ActiveDirectoryError: Can't access AD methods because AD functionality is disabled in .env"
+                description: The error message describing the error
+  /ad/groupsPerUser:
+    get:
+      tags:
+        - Admin - ActiveDirectory
+      description: Get the current content of local AD groups per user store
+      parameters:
+        - in: header
+          name: X-Control-Header
+          description: User name that will be supplied to AD
+          schema:
+            type: string
+          required: false
+      responses:
+        200:
+          description: Success
+          content: {}
+        500:
+          description: Internal server error. The AD might be disabled in settings
+          content:
+            plain/text:
+              schema:
+                type: string
+                example: "ActiveDirectoryError: Can't access AD methods because AD functionality is disabled in .env"
+                description: The error message describing the error
+  /ad/flushStores:
+    put:
+      tags:
+        - Admin - ActiveDirectory
+      description: Flush the contents of all local AD stores (removes the cached objects)
+      parameters:
+        - in: header
+          name: X-Control-Header
+          description: User name that will be supplied to AD
+          schema:
+            type: string
+          required: false
+      responses:
+        200:
+          description: Success
+          content:
+            plain/text:
+              schema:
+                type: string
+                example: All local caches successfully flushed
+        500:
+          description: Internal server error
+          content:
+            plain/text:
+              schema:
+                type: string
+                example: Internal server error
+                description: The error message describing the error
+  /fbproxy/{query}:
+    get:
+      tags:
+        - Sokigo FB Proxy
+      description: Proxy the specified query to Sokigo's FB API
+      parameters:
+        - name: query
+          in: path
+          description: The query to be proxied
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: Result will vary depending on response from the API
+          content: {}
+  /fmeproxy/{query}:
+    get:
+      tags:
+        - FME-server Proxy
+      description: Proxy the specified query to FME-server REST API. For information on available endpoints, checkout the [FME-server API documentation](https://docs.safe.com/fme/html/FME_REST/apidoc/v3/#). The proxy will forward all HTTP-methods, not only GET.
+      parameters:
+        - name: query
+          in: path
+          description: Path corresponding to an endpoint on the FME-server REST API.
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: Result will vary depending on response from the API.
+          content: {}
+  /spec:
+    get:
+      tags:
+        - Specification
+      description: Return the API specification
+      responses:
+        200:
+          description: Return the API specification
+          content: {}
+  /settings/layermenu:
+    put:
+      tags:
+        - Admin - Maps and layers
+      description: Update the LayerSwitcher component of a map.
+      requestBody:
+        description: Settings for given map's LayerSwitcher component
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LayerSwitcherBody"
+        required: true
+      parameters:
+        - name: mapFile
+          in: query
+          description: Name of the map of which the LayerSwitcher config should be written
+          required: true
+          schema:
+            type: string
+        - in: header
+          name: X-Control-Header
+          description: User name that will be supplied to AD
+          schema:
+            type: string
+          required: false
+      responses:
+        204:
+          description: All good
+          content: {}
+  /settings/mapsettings:
+    put:
+      tags:
+        - Admin - Maps and layers
+      description: Update the mapsettings of a map.
+      requestBody:
+        description: Settings for given map's mapsettings
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/mapsettings"
+        required: true
+      parameters:
+        - name: mapFile
+          in: query
+          description: Name of the map who's mapsettings config should be written
+          required: true
+          schema:
+            type: string
+        - in: header
+          name: X-Control-Header
+          description: User name that will be supplied to AD
+          schema:
+            type: string
+          required: false
+      responses:
+        204:
+          description: All good
+          content: {}
+  /settings/toolsettings:
+    put:
+      tags:
+        - Admin - Maps and layers
+      description: Update the tools configuration of a map.
+      requestBody:
+        description: Settings for given map's tools
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/toolsetting"
+        required: true
+      parameters:
+        - name: mapFile
+          in: query
+          description: Name of the map who's tools configuration should be written
+          required: true
+          schema:
+            type: string
+        - in: header
+          name: X-Control-Header
+          description: User name that will be supplied to AD
+          schema:
+            type: string
+          required: false
+      responses:
+        204:
+          description: All good
+          content: {}
+  /settings/update/{map}/{tool}:
+    put:
+      tags:
+        - Admin - Maps and layers
+      description: Update a tool configuration of a map.
+      requestBody:
+        description: Settings for given map's specific tool
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/specifictoolsettings"
+        required: true
+      parameters:
+        - name: map
+          in: path
+          description: Name of the map
+          required: true
+          schema:
+            type: string
+        - name: tool
+          in: path
+          description: Name of the tool to be edited
+          required: true
+          schema:
+            type: string
+        - in: header
+          name: X-Control-Header
+          description: User name that will be supplied to AD
+          schema:
+            type: string
+          required: false
+      responses:
+        201:
+          description: Created
+          content: {}
+        204:
+          description: Updated
+          content: {}
+  /settings/{layerType}:
+    post:
+      tags:
+        - Admin - Maps and layers
+      description: Add a new layer of specified type
+      requestBody:
+        description: Content of the layer to be added
+        content:
+          application/json:
+            schema:
+              anyOf:
+                - $ref: "#/components/schemas/wmslayer"
+                - $ref: "#/components/schemas/wmtslayer"
+                - $ref: "#/components/schemas/wfslayer"
+        required: true
+      parameters:
+        - name: layerType
+          in: path
+          description: The type of layer that will be added
+          required: true
+          schema:
+            type: string
+        - in: header
+          name: X-Control-Header
+          description: User name that will be supplied to AD
+          schema:
+            type: string
+          required: false
+      responses:
+        204:
+          description: All good
+          content: {}
+    put:
+      tags:
+        - Admin - Maps and layers
+      description: Replace a specific layer with supplied content
+      requestBody:
+        description: Layer to be added or updated
+        content:
+          application/json:
+            schema:
+              anyOf:
+                - $ref: "#/components/schemas/wmslayer"
+                - $ref: "#/components/schemas/wmtslayer"
+                - $ref: "#/components/schemas/wfslayer"
+        required: true
+      parameters:
+        - name: layerType
+          in: path
+          description: The type of layer that will be updated
+          required: true
+          schema:
+            type: string
+        - in: header
+          name: X-Control-Header
+          description: User name that will be supplied to AD
+          schema:
+            type: string
+          required: false
+      responses:
+        204:
+          description: All good
+          content: {}
+  /settings/{type}/{layerId}:
+    delete:
+      tags:
+        - Admin - Maps and layers
+      description: Delete a layer
+      parameters:
+        - name: type
+          in: path
+          description: The kind of layer to delete
+          required: true
+          schema:
+            type: string
+        - name: layerId
+          in: path
+          description: The ID of layer to delete
+          required: true
+          schema:
+            type: string
+        - in: header
+          name: X-Control-Header
+          description: User name that will be supplied to AD
+          schema:
+            type: string
+          required: false
+      responses:
+        200:
+          description: Layer deleted successfully
+          content: {}
+components:
+  schemas:
+    MapBody:
+      type: object
+      properties:
+        version:
+          type: string
+          example: 3.9.0
+        projections:
+          type: array
+          items:
+            type: object
+            properties:
+              code:
+                type: string
+                example: EPSG:3006
+              definition:
+                type: string
+                example: +proj=utm +zone=33 +ellps=GRS80 +towgs84=0000000 +units=m +no_defs
+              extent:
+                type: array
+                items:
+                  type: number
+                  example: 181896.33
+              units:
+                type: string
+                format: nullable
+        tools:
+          type: array
+          items:
+            type: object
+            properties:
+              type:
+                type: string
+                example: layerswitcher
+              options:
+                type: object
+                properties:
+                  baselayers:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                          example: 1
+                        visibleAtStart:
+                          type: boolean
+                          description: Show at start
+                        drawOrder:
+                          type: integer
+                          format: int32
+                          example: 0
+                        visibleForGroups:
+                          type: string
+                          format: nullable
+                        infobox:
+                          type: string
+                          example: null
+                  groups:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                          example: 8838c969-590c-8683-435c-1ecaca271096
+                        parent:
+                          type: string
+                          example: -1
+                        name:
+                          type: string
+                          example: Länstyrelsen
+                        toggled:
+                          type: boolean
+                        expanded:
+                          type: boolean
+                        layers:
+                          type: array
+                          items:
+                            type: object
+                            properties:
+                              id:
+                                type: string
+                                example: 7
+                              visibleAtStart:
+                                type: boolean
+                                description: Show at start
+                              drawOrder:
+                                type: integer
+                                format: int32
+                                example: 3
+                              visibleForGroups:
+                                type: string
+                                format: nullable
+                              infobox:
+                                type: string
+                                example: null
+                        groups:
+                          type: array
+                          items:
+                            type: object
+                  active:
+                    type: boolean
+                  visibleAtStart:
+                    type: boolean
+                    description: Show at start
+                  visibleAtStartMobile:
+                    type: boolean
+                    description: Show at start for mobile
+                  backgroundSwitcherBlack:
+                    type: boolean
+                    description: Show black background
+                  backgroundSwitcherWhite:
+                    type: boolean
+                    description: Show white background
+                  enableOSM:
+                    type: boolean
+                    description: Show OpenStreetMap
+                  showBreadcrumbs:
+                    type: boolean
+                    description: Show "breadcrumbs". When checked, small buttons will show at the bottom of the screen for each layer that is active.
+                  enableTransparencySlider:
+                    type: boolean
+                    description: Show transparency slider. Global setting to choose whether transparency slider is active or not. If the setting is active, then it's possible to configure individual layers if the transparency slider should show in the layer. If this is not checked, the transparency slider will not show on any layer.
+                  target:
+                    type: string
+                    example: left
+                  position:
+                    type: string
+                    example: left
+                  width:
+                    type: string
+                    example: null
+                  height:
+                    type: string
+                    example: null
+                  title:
+                    type: string
+                    example: Lagerhanterare
+                  description:
+                    type: string
+                    example: Välj vad du vill visa i kartan.
+                  dropdownThemeMaps:
+                    type: boolean
+                    description: Display the map in the list of available maps.
+                  themeMapHeaderCaption:
+                    type: string
+                    example: Standardkartan
+                    description: The map title as shown in the list of available maps.
+                  instruction:
+                    type: string
+                    example: null
+                  visibleForGroups:
+                    type: array
+                    items:
+                      type: string
+              index:
+                type: integer
+                format: int32
+                example: 1
+        map:
+          type: object
+          properties:
+            target:
+              type: string
+              example: map
+            center:
+              type: array
+              items:
+                type: integer
+                format: int32
+                example: 376357
+            title:
+              type: string
+              example: Kartan Map 1
+            projection:
+              type: string
+              example: EPSG:3006
+            zoom:
+              type: integer
+              format: int32
+              example: 5
+            maxZoom:
+              type: integer
+              format: int32
+              example: 8
+            minZoom:
+              type: integer
+              format: int32
+              example: 0
+            resolutions:
+              type: array
+              items:
+                type: integer
+                format: int32
+                example: 2048
+            extraPrintResolutions:
+              type: array
+              items:
+                type: string
+            origin:
+              type: array
+              items:
+                type: integer
+                format: int32
+                example: 0
+            extent:
+              type: array
+              items:
+                type: integer
+                format: int32
+                example: -1200000
+            constrainOnlyCenter:
+              type: boolean
+            constrainResolution:
+              type: boolean
+            constrainResolutionMobile:
+              type: boolean
+            enableDownloadLink:
+              type: boolean
+            logo:
+              type: string
+              example: /logoLight.png
+            logoLight:
+              type: string
+              example: logoLight.png
+            logoDark:
+              type: string
+              example: logoDark.png
+            geoserverLegendOptions:
+              type: string
+              example: null
+            mapselector:
+              type: boolean
+            mapcleaner:
+              type: boolean
+            mapresetter:
+              type: boolean
+            drawerVisible:
+              type: boolean
+            drawerVisibleMobile:
+              type: boolean
+            drawerPermanent:
+              type: boolean
+            activeDrawerOnStart:
+              type: string
+              example: plugins
+            colors:
+              type: object
+              properties:
+                primaryColor:
+                  type: string
+                  example: null
+                secondaryColor:
+                  type: string
+                  example: null
+                preferredColorScheme:
+                  type: string
+                  example: light
+            defaultCookieNoticeMessage:
+              type: string
+              example: Vi använder nödvändiga kakor (cookies) för att webbplatsen ska fungera på ett bra sätt för dig. Vi använder också funktionella kakor för att ge dig bästa möjliga funktion om du som användare har godkänt användningen av dessa.
+            defaultCookieNoticeUrl:
+              type: string
+              example: https://pts.se/sv/bransch/regler/lagar/lag-om-elektronisk-kommunikation/kakor-cookies/
+            crossOrigin:
+              type: string
+              example: anonymous
+            showCookieNotice:
+              type: boolean
+            cookieUse3dPart:
+              type: boolean
+            showThemeToggler:
+              type: boolean
+            showUserAvatar:
+              type: boolean
+            altShiftDragRotate:
+              type: boolean
+            onFocusOnly:
+              type: boolean
+            doubleClickZoom:
+              type: boolean
+            keyboard:
+              type: boolean
+            mouseWheelZoom:
+              type: boolean
+            shiftDragZoom:
+              type: boolean
+            dragPan:
+              type: boolean
+            pinchRotate:
+              type: boolean
+            pinchZoom:
+              type: boolean
+            zoomDelta:
+              type: boolean
+            zoomDuration:
+              type: boolean
+    ConfigList:
+      type: object
+      properties:
+        "0":
+          type: string
+          example: map_1
+        "1":
+          type: string
+          example: nytt
+        "2":
+          type: string
+          example: oversiktsplan
+        "3":
+          type: string
+          example: oversiktsplan_OLD
+    ListImage:
+      type: array
+      items:
+        type: string
+        example: geografiska_inriktningar_1.PNG
+    ListAudio:
+      type: array
+      items:
+        type: string
+        example: mixkit-arcade-retro-game-over-213.wav
+    ListVideo:
+      type: array
+      items:
+        type: string
+        example: file_example_OGG_480_1_7mg.ogg
+    FileNotFound:
+      type: string
+      example: File not found
+    FolderNotFound:
+      type: string
+      example: Folder not found
+    FileSaved:
+      type: string
+      example: File saved
+    DocumentDeleted:
+      type: string
+      example: Document deleted
+    UserSpecificMaps:
+      type: object
+      properties:
+        "0":
+          type: object
+          properties:
+            mapConfigurationName:
+              type: string
+              example: map_1
+            mapConfigurationTitle:
+              type: string
+              example: Kartan Map 1
+        "1":
+          type: object
+          properties:
+            mapConfigurationName:
+              type: string
+              example: nytt
+            mapConfigurationTitle:
+              type: string
+              example: Hajk 3 template
+    toolsetting:
+      type: object
+      example:
+        - type: layerswitcher
+          options:
+            baselayers:
+              - id: "1"
+                visibleAtStart: true
+                drawOrder: 0
+                visibleForGroups:
+                infobox:
+              - id: "2"
+                visibleAtStart: false
+                drawOrder: 0
+                visibleForGroups:
+                infobox:
+              - id: "3"
+                visibleAtStart: false
+                drawOrder: 0
+                visibleForGroups:
+                infobox:
+            groups:
+              - id: 8838c969-590c-8683-435c-1ecaca271096
+                parent: "-1"
+                name: Länstyrelsen
+                toggled: true
+                expanded: false
+                layers:
+                  - id: "7"
+                    visibleAtStart: false
+                    drawOrder: 3
+                    visibleForGroups:
+                    infobox:
+                  - id: "8"
+                    visibleAtStart: false
+                    drawOrder: 3
+                    visibleForGroups:
+                    infobox:
+                groups: []
+              - id: 9938c969-590c-8683-435c-1ecaca271096
+                parent: "-1"
+                name: Övrigt
+                toggled: true
+                expanded: false
+                layers:
+                  - id: "1352"
+                    visibleAtStart: true
+                    drawOrder: 4
+                    visibleForGroups:
+                    infobox:
+                groups: []
+            active: true
+            visibleAtStart: false
+            visibleAtStartMobile: false
+            backgroundSwitcherBlack: true
+            backgroundSwitcherWhite: true
+            enableOSM: true
+            showBreadcrumbs: true
+            target: left
+            position: left
+            width: 0
+            height: 0
+            title: Lagerhanterare
+            description: Välj vad du vill visa i kartan.
+            enableTransparencySlider: true
+            dropdownThemeMaps: true
+            themeMapHeaderCaption: Standardkartan
+            instruction: ""
+            visibleForGroups: []
+          index: 1
+        - type: infoclick
+          options:
+            target: ""
+            displayPopup: false
+            markerImg: "/marker.png"
+            anchor:
+              - 0.5
+              - 1
+            imgSize:
+              - 32
+              - 32
+            popupOffsetY: 0
+            visibleForGroups: []
+          index: 2
+        - type: sketch
+          options:
+            target: left
+            position: left
+            visibleForGroups: []
+          index: 3
+        - type: measure
+          options:
+            target: control
+            position: right
+            instruction: ""
+            icons: ""
+          index: 4
+        - type: streetview
+          options:
+            target: control
+            position: right
+            apiKey: AIzaSyCb-bvLmybNb4QSERR43eGlvvQyUrBAQG4
+            instruction: ""
+            visibleForGroups: []
+          index: 5
+        - type: anchor
+          options:
+            target: left
+            position: left
+            instruction: ""
+            visibleForGroups: []
+          index: 7
+        - type: search
+          options:
+            layers:
+              - id: "4"
+                visibleForGroups: []
+            selectedSources: []
+            visibleForGroups: []
+            maxResultsPerDataset: 100
+            anchor:
+              - ""
+              - ""
+            scale: ""
+            markerImg: ""
+            delayBeforeAutoSearch: 300
+            searchBarPlaceholder: Sök....
+            autocompleteWildcardAtStart: false
+            enablePolygonSearch: true
+            showCorrespondingWMSLayers: false
+            enableRadiusSearch: true
+            enableSelectSearch: true
+            enableExtentSearch: true
+            enableResultsFiltering: true
+            enableResultsSorting: true
+            enableResultsSelectionClearing: true
+            enableResultsDownloading: true
+            enableFeaturePreview: true
+            enableLabelOnHighlight: true
+            enableSelectedFeaturesCollection: true
+            showResultFeaturesInMap: true
+            showResultsLimitReachedWarning: true
+            enableFeatureToggler: true
+            drawFillColor: rgba(255,255,255,0.07)
+            drawStrokeColor: rgba(74,74,74,0.5)
+            displayFillColor: rgba(74,144,226,0.15)
+            displayStrokeColor: rgba(74,144,226,0.4)
+            selectionTextStroke: rgba(255,255,255,1)
+            selectionTextFill: rgba(63,122,190,1)
+            selectionFillColor: rgba(74,144,226,0.7)
+            selectionStrokeColor: rgba(74,144,226,0.8)
+            highlightTextStroke: rgba(255,255,255,1)
+            highlightTextFill: rgba(214,143,28,1)
+            highlightFillColor: rgba(245,166,35,0.7)
+            highlightStrokeColor: rgba(245,166,35,0.8)
+          index: 11
+        - type: routing
+          options:
+            target: toolbar
+            apiKey: AIzaSyCb-bvLmybNb4QSERR43eGlvvQyUrBAQG4
+            instruction: ""
+            visibleForGroups: []
+          index: 12
+        - type: location
+          options:
+            target: control
+            position: right
+            visibleForGroups: []
+          index: 13
+        - type: preset
+          options:
+            presetList:
+              - name: Halmstad
+                presetUrl: "?m=simpleMapConfig&x=368494.9197547268&y=6282312.7413127115&z=6.7339618545565125&l=1&f=%7B%7D&clean=false"
+              - name: Alingsås
+                presetUrl: "?m=simpleMapConfig&x=354049.24452326825&y=6424217.248216377&z=7.903686478656474&l=1&f=%7B%7D&clean=false"
+              - name: Göteborg
+                presetUrl: "?m=simpleMapConfig&x=315850.5321760868&y=6398503.693206446&z=6.502756678859521&l=1&f=%7B%7D&clean=false"
+              - name: Jönköping
+                presetUrl: "?m=simpleMapConfig&x=450214.34373580024&y=6403315.750951234&z=6.7931556775514546&l=1&f=%7B%7D&clean=false"
+              - name: Karlstad
+                presetUrl: "?m=simpleMapConfig&x=416370.6129169631&y=6583095.470395488&z=6.221222447365537&l=1&f=%7B%7D&clean=false"
+              - name: Stockholm
+                presetUrl: "?m=simpleMapConfig&x=671675.4989296548&y=6570377.474044046&z=4.9236065968776375&l=1&f=%7B%7D&clean=false"
+              - name: Umeå
+                presetUrl: "?m=simpleMapConfig&x=758454.9972847599&y=7084504.860998487&z=6.739288215480473&l=1&f=%7B%7D&clean=false"
+            visibleForGroups: []
+          index: 14
+        - type: coordinates
+          options:
+            target: control
+            position: right
+            instruction: ""
+            transformations:
+              - code: EPSG:3006
+                default: true
+                hint: Sweref99 TM
+                title: Sweref99 TM
+                xtitle: E
+                ytitle: N
+                inverseAxis: false
+            visibleForGroups: []
+          index: 15
+        - type: bookmark
+          options:
+            target: toolbar
+            instruction: ""
+            visibleForGroups: []
+          index: 16
+        - type: buffer
+          options:
+            target: toolbar
+            instruction: ""
+            varbergVer: false
+            geoserverUrl: ""
+            notFeatureLayers: []
+            visibleForGroups: []
+          index: 17
+        - type: print
+          options:
+            target: left
+            position: left
+            scales:
+              200, 400, 1000, 2000, 5000, 10000, 25000, 50000, 100000, 200000, 400000,
+              800000, 1000000, 5000000, 10000000
+            logo: "/logoLight.png"
+            northArrow: "/north_arrow.png"
+            instruction: ""
+            visibleAtStart: false
+            visibleForGroups: []
+          index: 2
+        - type: documenthandler
+          index: 0
+          options:
+            title: Visa informationsruta
+            target: hidden
+            showScrollButtonLimit: 400
+            dynamicImportUrls:
+              iconFonts: https://fonts.googleapis.com/icon?family=Material+Icons
+              customFont: https://fonts.googleapis.com/css?family=Open+Sans
+            iconLibraryLink: https://material.io/resources/icons/?style=baseline
+            customThemeUrl: "/documentHandlerTheme.json"
+            width: 600
+            height: 90vh
+            searchImplemented: true
+            enablePrint: true
+            closePanelOnMapLinkOpen: false
+            displayLoadingOnMapLinkOpen: false
+            documentOnStart: ""
+            drawerTitle: ""
+            drawerButtonTitle: Meny
+            tableOfContents:
+              active: false
+              expanded: false
+              chapterLevelsToShow: 2
+              title: Innehållsförteckning
+            defaultDocumentColorSettings:
+              textAreaBackgroundColor: "#ccc"
+              textAreaDividerColor: "#6A0DAD"
+            menuConfig:
+              menu:
+                - title: Exempeldokument
+                  document: exempeldokument
+                  color: ""
+                  icon:
+                    materialUiIconName: ""
+                    fontSize: large
+                  maplink: ""
+                  link: ""
+                  menu: []
+                - title: Exempeldokument2
+                  document: exempeldokument2
+                  color: ""
+                  icon:
+                    materialUiIconName: ""
+                    fontSize: large
+                  maplink: ""
+                  link: ""
+                  menu: []
+    specifictoolsettings:
+      type: object
+      example:        
+          type: example-tool
+          options:
+            target: ""
+            displayPopup: false
+            markerImg: "/marker.png"
+            anchor:
+              - 0.5
+              - 1
+            imgSize:
+              - 32
+              - 32
+            popupOffsetY: 0
+            visibleForGroups: []
+          index: 1
+    tools3:
+      example:
+        - type: layerswitcher
+          options: test
+    mapsettings:
+      type: object
+      properties:
+        activeDrawerOnStart:
+          type: string
+          example: plugins
+          description: Specify the drawer contents that should be active on start.
+        altShiftDragRotate:
+          type: boolean
+          description: Whether Alt-Shift-drag rotate is desired
+        center:
+          type: array
+          items:
+            type: integer
+            format: int32
+            example: 576357
+          description: The OpenLayer view 'center' parameter eg. '376357,6386049'
+        colors:
+          type: object
+          properties:
+            preferredColorScheme:
+              type: string
+              example: user
+              description: Either 'default' or 'user'. If 'user', the settings 'primaryColor' and 'secondaryColor' are used.
+            primaryColor:
+              type: string
+              example: null
+              description: The primary color in hex
+            secondaryColor:
+              type: string
+              example: null
+              description: The secondary color in hex.
+          description: The map color settings
+        constrainOnlyCenter:
+          type: boolean
+          description: If true, the center coordinate is locked to the extent
+        constrainResolution:
+          type: boolean
+          description: If true, zoom is locked to the given resolutions
+        constrainResolutionMobile:
+          type: boolean
+          description: If true, zoom is locked to the given resolutions
+        cookieUse3dPart:
+          type: boolean
+          description: If true, a checkbox regarding 3rd party cookies will show for new users.
+        crossOrigin:
+          type: string
+          example: anonymous
+          description: The cross origin parameter
+        defaultCookieNoticeMessage:
+          type: string
+          example: Vi använder nödvändiga kakor (cookies) för att webbplatsen ska fungera på ett bra sätt för dig. Vi använder också funktionella kakor för att ge dig bästa möjliga funktion om du som användare har godkänt användningen av dessa.
+          description: The cookie message
+        defaultCookieNoticeUrl:
+          type: string
+          example: https://pts.se/sv/bransch/regler/lagar/lag-om-elektronisk-kommunikation/kakor-cookies/
+          description: Url that is opened when the 'Mer information' button is pressed.
+        doubleClickZoom:
+          type: boolean
+          description: Whether double click zoom is desired.
+        dragPan:
+          type: boolean
+          description: Whether drag pan is desired.
+        drawerPermanent:
+          type: boolean
+          description: If true, the drawer is locked at start.
+        drawerVisible:
+          type: boolean
+          description: If true, the drawer is visible at start.
+        drawerVisibleMobile:
+          type: boolean
+          description: If true, the drawer is visible at start.
+        enableDownloadLink:
+          type: boolean
+          description: If true, a download button is displayed next to each layer in the layer window.
+        extent:
+          type: array
+          items:
+            type: integer
+            format: int32
+            example: -1200000
+          description: The OpenLayer view 'extent' parameter eg. '-1200000,4700000,2600000,8500000'
+        extraPrintResolutions:
+          type: array
+          items:
+            type: integer
+            format: int32
+          description: Extra resolutions that are added on printouts.
+        geoserverLegendOptions:
+          type: string
+          example: null
+        introductionEnabled:
+          type: boolean
+          description: If true, the introduction guide will start for new users.
+        introductionShowControlButton:
+          type: boolean
+          description: Show a button on the map that lets the user start the guide manually
+        introductionSteps:
+          type: array
+          items:
+            type: string
+          description: JSON object that defines what steps are highlighted in the introduction guide. (Se example https://github.com/HiDeoo/intro.js-react#step)
+        keyboard:
+          type: boolean
+          description: Whether keyboard interaction is desired.
+        logo:
+          type: string
+          example: /logoLight.png
+          description: File path to the logo to be used in the <img> tag. Can be either be relative to Hajk root or absolute.
+        logoDark:
+          type: string
+          example: logoDark.png
+          description: File path to the logo to be used in the <img> tag. Can be either be relative to Hajk root or absolute.
+        logoLight:
+          type: string
+          example: logoLight.png
+          description: File path to the logo to be used in the <img> tag. Can be either be relative to Hajk root or absolute.
+        mapcleaner:
+          type: boolean
+        mapresetter:
+          type: boolean
+        mapselector:
+          type: boolean
+        maxZoom:
+          type: integer
+          format: int32
+          example: 8
+          description: The max zoom of the OpenLayer view
+        minZoom:
+          type: integer
+          format: int32
+          example: 0
+          description: The max zoom of the OpenLayer view
+        mouseWheelZoom:
+          type: boolean
+          description: Whether mouse wheel zoom is desired.
+        onFocusOnly:
+          type: boolean
+          description: Interact only when the map has the focus (default is false).
+        origin:
+          type: array
+          items:
+            type: integer
+            format: int32
+            example: 0
+          description: The OpenLayer view 'origin' parameter eg. '0,0'
+        pinchRotate:
+          type: boolean
+          description: Whether pinch rotate is desired.
+        pinchZoom:
+          type: boolean
+          description: Whether pinch zoom is desired.
+        projection:
+          type: string
+          example: EPSG:3006
+        resolutions:
+          type: array
+          items:
+            type: integer
+            format: int32
+            example: 2048
+          description: The OpenLayer view 'resolution' parameter eg. 2048,1024,512,256,128,64,32,16,8
+        shiftDragZoom:
+          type: boolean
+          description: Whether Shift-drag zoom is desired.
+        showCookieNotice:
+          type: boolean
+          description: If true, the cookie message will show to new users.
+        showThemeToggler:
+          type: boolean
+        showUserAvatar:
+          type: boolean
+        target:
+          type: string
+          example: map
+        title:
+          type: string
+          example: Hajk 3
+          description: The map title
+        zoom:
+          type: integer
+          format: int32
+          example: 2
+          description: The start zoom of the OpenLayer view
+        zoomDelta:
+          type: string
+          format: nullable
+          description: Zoom level delta when using keyboard or double click zoom.
+        zoomDuration:
+          type: string
+          format: nullable
+          description: Duration of the zoom animation in milliseconds.
+    wmslayer:
+      type: object
+      properties:
+        id:
+          type: string
+          example: 2
+        caption:
+          type: string
+          example: Nedtonad stadskarta Göteborg
+        internalLayerName:
+          type: string
+          example: null
+        url:
+          type: string
+          example: https://opengeodata.goteborg.se/services/stadskarta/wms/v4
+        customGetMapUrl:
+          type: string
+          example: null
+        owner:
+          type: string
+          example: null
+        date:
+          type: string
+          example: 1663080021315
+        content:
+          type: string
+          example: null
+        legend:
+          type: string
+          example: null
+        legendIcon:
+          type: string
+          example: null
+        projection:
+          type: string
+          example: EPSG:3006
+        layers:
+          type: array
+          items:
+            type: string
+            example: stadskarta_nedtonad
+        layersInfo:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+                example: stadskarta_nedtonad
+              caption:
+                type: string
+                example: null
+              internalLayerName:
+                type: string
+                format: nullable
+              legend:
+                type: string
+                example: null
+              legendIcon:
+                type: string
+                format: nullable
+              infobox:
+                type: string
+                example: null
+              style:
+                type: string
+                example: null
+              queryable:
+                type: boolean
+              searchDisplayName:
+                type: string
+                format: nullable
+              searchGeometryField:
+                type: string
+                format: nullable
+              searchOutputFormat:
+                type: string
+                format: nullable
+              searchPropertyName:
+                type: string
+                format: nullable
+              searchUrl:
+                type: string
+                format: nullable
+        searchFields:
+          type: string
+          format: nullable
+        displayFields:
+          type: string
+          format: nullable
+        visibleAtStart:
+          type: boolean
+          description: Show at start
+        tiled:
+          type: boolean
+        showAttributeTableButton:
+          type: boolean
+        opacity:
+          type: integer
+          format: int32
+          example: 1
+        maxZoom:
+          type: integer
+          format: int32
+          example: -1
+        minZoom:
+          type: integer
+          format: int32
+          example: -1
+        minMaxZoomAlertOnToggleOnly:
+          type: boolean
+        singleTile:
+          type: boolean
+        hidpi:
+          type: boolean
+        customRatio:
+          type: integer
+          format: int32
+          example: 0
+        imageFormat:
+          type: string
+          example: image/png
+        serverType:
+          type: string
+          example: geoserver
+        attribution:
+          type: string
+          example: null
+        searchUrl:
+          type: string
+          example: null
+        searchPropertyName:
+          type: string
+          example: null
+        searchDisplayName:
+          type: string
+          example: null
+        secondaryLabelFields:
+          type: string
+          example: null
+        searchShortDisplayName:
+          type: string
+          example: null
+        searchOutputFormat:
+          type: string
+          example: null
+        searchGeometryField:
+          type: string
+          example: null
+        infoVisible:
+          type: boolean
+        infoTitle:
+          type: string
+          example: null
+        infoText:
+          type: string
+          example: Sammansatt bakgrundskarta i gråton.
+        infoUrl:
+          type: string
+          example: null
+        infoUrlText:
+          type: string
+          example: null
+        infoOwner:
+          type: string
+          example: Stadsbyggnadskontoret Göteborg
+        timeSliderVisible:
+          type: boolean
+        timeSliderStart:
+          type: string
+          example: null
+        timeSliderEnd:
+          type: string
+          example: null
+        version:
+          type: string
+          example: 1.3.0
+        infoFormat:
+          type: string
+          example: application/json
+        infoClickSortProperty:
+          type: string
+          example: null
+        infoClickSortDesc:
+          type: boolean
+        infoClickSortType:
+          type: string
+          example: string
+        hideExpandArrow:
+          type: boolean
+        zIndex:
+          type: string
+          format: nullable
+    ConfigLayers:
+      type: object
+      properties:
+        wmtslayers:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+                example: 1
+              caption:
+                type: string
+                example: Topografiska webbkartan öppna data1
+              internalLayerName:
+                type: string
+                format: nullable
+              url:
+                type: string
+                example: https://api.lantmateriet.se/open/topowebb-ccby/v1/wmts/token/b84e03e0-c917-313e-9f7d-fb5303034148/
+              owner:
+                type: string
+                format: nullable
+              date:
+                type: string
+                example: 1664201882947
+              content:
+                type: string
+                example: Topowebbkartan i WMTS-format
+              legend:
+                type: string
+                example: null
+              legendIcon:
+                type: string
+                example: null
+              projection:
+                type: string
+                example: EPSG:3006
+              visibleAtStart:
+                type: boolean
+                description: Show at start
+              layer:
+                type: string
+                example: topowebb_nedtonad
+              style:
+                type: string
+                example: default
+              matrixSet:
+                type: string
+                example: 3006
+              origin:
+                type: array
+                items:
+                  type: string
+                  example: -1200000
+              resolutions:
+                type: array
+                items:
+                  type: string
+                  example: 2048
+              matrixIds:
+                type: array
+                items:
+                  type: string
+                  example: 1
+              attribution:
+                type: string
+                example: Lantmäteriet
+              infoVisible:
+                type: boolean
+              infoTitle:
+                type: string
+                example: Topowebbkartan i WMTS-format
+              infoText:
+                type: string
+                example: Bakgrundskarta från Lantmäteriet i WMTS-format.
+              infoUrl:
+                type: string
+                example: https://www.lantmateriet.se/globalassets/kartor-och-geografisk-information/geodatatjanster/tb_twkvisningv1.0.4.pdf
+              infoUrlText:
+                type: string
+                example: Information om tjänsten
+              infoOwner:
+                type: string
+                example: Lantmäteriet
+              timeSliderVisible:
+                type: boolean
+              timeSliderStart:
+                type: string
+                example: null
+              timeSliderEnd:
+                type: string
+                example: null
+              infoClickSortType:
+                type: string
+                format: nullable
+              infoClickSortDesc:
+                type: boolean
+              infoClickSortProperty:
+                type: string
+                format: nullable
+              zIndex:
+                type: string
+                format: nullable
+              minZoom:
+                type: integer
+                format: int32
+                example: -1
+              maxZoom:
+                type: integer
+                format: int32
+                example: -1
+        wmslayers:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+                example: 2
+              caption:
+                type: string
+                example: Nedtonad stadskarta Göteborg
+              internalLayerName:
+                type: string
+                format: nullable
+              url:
+                type: string
+                example: https://opengeodata.goteborg.se/services/stadskarta/wms/v4
+              customGetMapUrl:
+                type: string
+                format: nullable
+              owner:
+                type: string
+                example: null
+              date:
+                type: string
+                example: 1580375228781
+              content:
+                type: string
+                example: null
+              legend:
+                type: string
+                example: null
+              legendIcon:
+                type: string
+                format: nullable
+              projection:
+                type: string
+                example: EPSG:3006
+              layers:
+                type: array
+                items:
+                  type: string
+                  example: stadskarta_nedtonad
+              layersInfo:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: string
+                      example: stadskarta_nedtonad
+                    caption:
+                      type: string
+                      example: null
+                    internalLayerName:
+                      type: string
+                      format: nullable
+                    legend:
+                      type: string
+                      example: null
+                    legendIcon:
+                      type: string
+                      format: nullable
+                    infobox:
+                      type: string
+                      example: null
+                    style:
+                      type: string
+                      example: null
+                    queryable:
+                      type: boolean
+                    searchDisplayName:
+                      type: string
+                      format: nullable
+                    searchGeometryField:
+                      type: string
+                      format: nullable
+                    searchOutputFormat:
+                      type: string
+                      format: nullable
+                    searchPropertyName:
+                      type: string
+                      format: nullable
+                    searchUrl:
+                      type: string
+                      format: nullable
+              searchFields:
+                type: string
+                format: nullable
+              displayFields:
+                type: string
+                format: nullable
+              visibleAtStart:
+                type: boolean
+                description: Show at start
+              hideExpandArrow:
+                type: boolean
+              tiled:
+                type: boolean
+              opacity:
+                type: integer
+                format: int32
+                example: 1
+              minZoom:
+                type: integer
+                format: int32
+                example: 0
+              maxZoom:
+                type: integer
+                format: int32
+                example: 0
+              minMaxZoomAlertOnToggleOnly:
+                type: boolean
+              singleTile:
+                type: boolean
+              imageFormat:
+                type: string
+                example: image/png
+              serverType:
+                type: string
+                example: geoserver
+              attribution:
+                type: string
+                example: null
+              searchUrl:
+                type: string
+                example: null
+              customRatio:
+                type: integer
+                format: int32
+                example: 0
+              hidpi:
+                type: boolean
+              searchPropertyName:
+                type: string
+                example: null
+              searchDisplayName:
+                type: string
+                example: null
+              searchOutputFormat:
+                type: string
+                example: null
+              searchGeometryField:
+                type: string
+                example: null
+              infoVisible:
+                type: boolean
+              infoTitle:
+                type: string
+                example: null
+              infoText:
+                type: string
+                example: Sammansatt bakgrundskarta i gråton.
+              infoUrl:
+                type: string
+                example: null
+              infoUrlText:
+                type: string
+                example: null
+              infoOwner:
+                type: string
+                example: Stadsbyggnadskontoret Göteborg
+              infoClickSortType:
+                type: string
+                format: nullable
+              infoClickSortDesc:
+                type: boolean
+              infoClickSortProperty:
+                type: string
+                format: nullable
+              version:
+                type: string
+                example: 1.3.0
+              infoFormat:
+                type: string
+                example: application/json
+              timeSliderVisible:
+                type: boolean
+              timeSliderStart:
+                type: string
+                format: nullable
+              timeSliderEnd:
+                type: string
+                format: nullable
+              zIndex:
+                type: string
+                format: nullable
+        wfslayers:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+                example: 4
+              caption:
+                type: string
+                example: Adresser Göteborg
+              internalLayerName:
+                type: string
+                example: Adresser Göteborg
+              url:
+                type: string
+                example: https://opengeodata.goteborg.se/services/adresser/wfs/v1
+              layers:
+                type: array
+                items:
+                  type: string
+                  example: adresser.wfs.v1:adresser
+              searchFields:
+                type: array
+                items:
+                  type: string
+                  example: adress
+              infobox:
+                type: string
+                example: adress
+              aliasDict:
+                type: string
+                example: null
+              displayFields:
+                type: array
+                items:
+                  type: string
+                  example: adress
+              geometryField:
+                type: string
+                example: geom
+              outputFormat:
+                type: string
+                example: GML2
+              infoVisible:
+                type: boolean
+              infoTitle:
+                type: string
+                format: nullable
+              infoText:
+                type: string
+                format: nullable
+              infoUrl:
+                type: string
+                format: nullable
+              infoUrlText:
+                type: string
+                format: nullable
+              infoOwner:
+                type: string
+                format: nullable
+              zIndex:
+                type: string
+                format: nullable
+        vectorlayers:
+          type: array
+          items:
+            type: object
+        wfstlayers:
+          type: array
+          items:
+            type: object
+        arcgislayers:
+          type: array
+          items:
+            type: object
+    wfslayer:
+      type: object
+      properties:
+        id:
+          type: string
+          example: 4
+        caption:
+          type: string
+          example: Adresser Göteborg
+        internalLayerName:
+          type: string
+          example: Adresser Göteborg
+        url:
+          type: string
+          example: https://opengeodata.goteborg.se/services/adresser/wfs/v1
+        layers:
+          type: array
+          items:
+            type: string
+            example: adresser.wfs.v1:adresser
+        searchFields:
+          type: array
+          items:
+            type: string
+            example: adress
+        infobox:
+          type: string
+          example: adress
+        aliasDict:
+          type: string
+          example: null
+        displayFields:
+          type: array
+          items:
+            type: string
+            example: adress
+        shortDisplayFields:
+          type: array
+          items:
+            type: string
+            example: null
+        geometryField:
+          type: string
+          example: geom
+        outputFormat:
+          type: string
+          example: GML2
+        serverType:
+          type: string
+          example: geoserver
+    wmtslayer:
+      type: object
+      properties:
+        attribution:
+          type: string
+          example: null
+        caption:
+          type: string
+          example: test2
+        content:
+          type: string
+          example: null
+        date:
+          type: string
+          example: 1663079401327
+        id:
+          type: string
+          format: nullable
+        infoOwner:
+          type: string
+          example: null
+        infoText:
+          type: string
+          example: null
+        infoTitle:
+          type: string
+          example: null
+        infoUrl:
+          type: string
+          example: null
+        infoUrlText:
+          type: string
+          example: null
+        infoVisible:
+          type: boolean
+        layer:
+          type: string
+          example: topowebb
+        legend:
+          type: string
+          example: null
+        legendIcon:
+          type: string
+          example: null
+        matrixIds:
+          type: array
+          items:
+            type: string
+            example: 0
+        matrixSet:
+          type: string
+          example: 3006
+        maxZoom:
+          type: integer
+          format: int32
+          example: -1
+        minZoom:
+          type: integer
+          format: int32
+          example: -1
+        origin:
+          type: array
+          items:
+            type: string
+            example: -1200000
+        projection:
+          type: string
+          example: EPSG:3006
+        resolutions:
+          type: array
+          items:
+            type: string
+            example: 4096
+        style:
+          type: string
+          example: default
+        timeSliderEnd:
+          type: string
+          example: null
+        timeSliderStart:
+          type: string
+          example: null
+        timeSliderVisible:
+          type: boolean
+        url:
+          type: string
+          example: https://geoservertest.halmstad.se/geoserver/wms
+    Error:
+      type: object
+      properties:
+        errno:
+          type: integer
+          example: -2
+        code:
+          type: string
+          example: ENOENT
+    DocumentBody:
+      type: object
+      properties:
+        chapters:
+          type: array
+          items:
+            type: object
+            properties:
+              chapters:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    chapters:
+                      type: array
+                      items:
+                        type: string
+                      description: Contains the chapters
+                    geoObjects:
+                      type: array
+                      items:
+                        type: string
+                      description: Contains the geoopbjects
+                    header:
+                      type: string
+                      example: Underrubrik 1
+                      description: The subheader
+                    headerIdentifier:
+                      type: string
+                      example: underubrik_1
+                      description: The subheader id
+                    html:
+                      type: string
+                      example: null
+                      description: The subheader text
+                    keywords:
+                      type: array
+                      items:
+                        type: string
+              expanded:
+                type: boolean
+              geoObjects:
+                type: array
+                items:
+                  type: string
+              header:
+                type: string
+                example: Rubrik 1
+                description: The header
+              headerIdentifier:
+                type: string
+                example: rubrik_1
+                description: The header id
+              html:
+                type: string
+                example: null
+                description: The header text
+              keywords:
+                type: array
+                items:
+                  type: string
+        map:
+          type: string
+          example: oversiktsplan
+          description: The map name
+        title:
+          type: string
+          example: Exempeldokument
+          description: The document name
+    DocumentsList:
+      type: array
+      items:
+        type: string
+      example:
+        - doc_1
+        - doc_2
+        - doc_3
+    SaveDocument:
+      type: object
+      properties:
+        chapters:
+          type: array
+          items:
+            type: object
+            properties:
+              header:
+                type: string
+              headerIdentifier:
+                type: string
+              html:
+                type: string
+              keywords:
+                type: array
+                items:
+                  type: string
+              geoObjects:
+                type: array
+                items:
+                  type: string
+              chapters:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    header:
+                      type: string
+                    headerIdentifier:
+                      type: string
+                    html:
+                      type: string
+                    keywords:
+                      type: array
+                      items:
+                        type: string
+                    geoObjects:
+                      type: array
+                      items:
+                        type: string
+                    chapters:
+                      type: array
+                      items:
+                        type: object
+                        properties:
+                          header:
+                            type: string
+                          headerIdentifier:
+                            type: string
+                          html:
+                            type: string
+                          keywords:
+                            type: array
+                            items:
+                              type: string
+                          geoObjects:
+                            type: array
+                            items:
+                              type: string
+                          chapters:
+                            type: array
+                            items:
+                              type: object
+              expanded:
+                type: boolean
+            example:
+              - header: Rubrik 1
+                headerIdentifier: rubrik_1
+                html: <p><u><strong>Kapiteltext för Rubrik 1. Reagerar på nyckelordet översikt</strong></u></p>
+                keywords: [översikt]
+                geoObjects: []
+                chapters:
+                  [
+                    {
+                      header: Underrubrik 1,
+                      headerIdentifier: underubrik_1,
+                      html: <p><u><strong>Kapiteltext för Underrubrik 1. Reagerar på nyckelordet underplan</strong></u></p>,
+                      keywords: [underplan],
+                      geoObjects: [],
+                      chapters: [],
+                    },
+                  ]
+                expanded: true
+              - header: Rubrik 2
+                headerIdentifier: rubrik_2
+                html: <p><u><strong>Kapiteltext för Rubrik 2. Reagerar på nyckelordet plan</strong></u></p>
+                keywords: [plan]
+                geoObjects: []
+                chapters:
+                  [
+                    {
+                      header: Underrubrik 2,
+                      headerIdentifier: underubrik_2,
+                      html: <p><u><strong>Kapiteltext för Underrubrik 2. Reagerar inte nyckelord</strong></u></p>,
+                      keywords: [],
+                      geoObjects: [],
+                      chapters:
+                        [
+                          {
+                            header: Underrubrik 3,
+                            headerIdentifier: underubrik_3,
+                            html: <p><u><strong>Kapiteltext för Underrubrik 3. Reagerar inte nyckelord</strong></u></p>,
+                            keywords: [],
+                            geoObjects: [],
+                            chapters: [],
+                          },
+                        ],
+                    },
+                  ]
+                expanded: true
+        map:
+          type: string
+          example: map_1
+        title:
+          type: string
+          example: Exempeldokument
+    InformativeDocumentCreateBody:
+      type: object
+      properties:
+        documentName:
+          type: string
+          description: The name of the document
+          example: Document
+        mapName:
+          type: string
+          description: The map name
+          example: map_1
+    LayerSwitcherBody:
+      title: LayerSwitcher body
+      properties:
+        baselayers:
+          type: array
+          items:
+            type: object
+            properties:
+              drawOrder:
+                type: integer
+                format: int32
+                example: 0
+                description: The layer Z-index
+              id:
+                type: string
+                example: 1
+                description: The layer id
+              infobox:
+                type: string
+                example: null
+                description: Text information
+              visibleAtStart:
+                type: boolean
+                description: Show layer at start
+        groups:
+          type: array
+          items:
+            type: object
+            properties:
+              expanded:
+                type: boolean
+                description: Show expanded
+              groups:
+                type: array
+                items:
+                  type: string
+              id:
+                type: string
+                example: 8838c969-590c-8683-435c-1ecaca271096
+                description: The group id (GUID)
+              layers:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    drawOrder:
+                      type: integer
+                      format: int32
+                      example: 3
+                      description: The layer Z-index
+                    id:
+                      type: string
+                      example: 7
+                      description: The layer id
+                    infobox:
+                      type: string
+                      example: null
+                      description: Info text
+                    visibleAtStart:
+                      type: boolean
+                      description: Show layer at start
+              name:
+                type: string
+                example: Länstyrelsen
+                description: The layer name
+              parent:
+                type: string
+                example: -1
+              toggled:
+                type: boolean
+                description: Show all toggled
+              type:
+                type: string
+                example: group
+        active:
+          type: boolean
+        backgroundSwitcherBlack:
+          type: boolean
+          description: Show black background
+        backgroundSwitcherWhite:
+          type: boolean
+          description: Show white background
+        description:
+          type: string
+          example: Välj vad du vill visa i kartan.
+          description: If the tool displays as a widget (the setting 'Verktygsplacering' is set to either 'left' or 'right') then this description will display inside the widget button
+        dropdownThemeMaps:
+          type: boolean
+          description: Display the map in the list of available maps.
+        enableOSM:
+          type: boolean
+          description: Show OpenStreetMap
+        enableTransparencySlider:
+          type: boolean
+          description: Show transparency slider. Global setting to choose whether transparency slider is active or not. If the setting is active, then it's possible to configure individual layers if the transparency slider should show in the layer. If this is not checked, the transparency slider will not show on any layer.
+        height:
+          type: string
+          example: null
+          description: The height in pixels of the tool window. Set either in number of pixels, 'dynamic' to automatically adjust the height to fit the contents or 'auto' to use max height.
+        instruction:
+          type: string
+          example: null
+        position:
+          type: string
+          example: right
+          description: The window placement. Either 'left' or 'right'.
+        showBreadcrumbs:
+          type: boolean
+          description: Show "breadcrumbs". When checked, small buttons will show at the bottom of the screen for each layer that is active.
+        target:
+          type: string
+          example: left
+          description: The tool placement. Determines if the tool will show as a Widget Plugin (if 'left' or 'right'), a Drawer Plugin (if 'toolbar') or a Control Button (if 'control')
+        themeMapHeaderCaption:
+          type: string
+          example: Standardkartan
+          description: The map title as shown in the list of available maps.
+        title:
+          type: string
+          example: Lagerhanterare
+          description: Title (Widget Plugin)
+        visibleAtStart:
+          type: boolean
+          description: Show at start
+        visibleAtStartMobile:
+          type: boolean
+          description: Show at start for mobile
+        visibleForGroups:
+          type: array
+          items:
+            type: string
+        width:
+          type: string
+          example: null
+          description: Width in pixels of the tool window. Set a numerical value or leave empty to use standard width.

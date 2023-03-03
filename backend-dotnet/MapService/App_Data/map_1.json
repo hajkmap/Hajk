@@ -1,0 +1,569 @@
+{
+  "version": "3.9.0",
+  "projections": [
+    {
+      "code": "EPSG:3006",
+      "definition": "+proj=utm +zone=33 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs",
+      "extent": [181896.33, 6101648.07, 864416, 7689478.3],
+      "units": null
+    },
+    {
+      "code": "http://www.opengis.net/gml/srs/epsg.xml#3006",
+      "definition": "+proj=utm +zone=33 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs",
+      "extent": [181896.33, 6101648.07, 864416, 7689478.3],
+      "units": null
+    },
+    {
+      "code": "EPSG:3007",
+      "definition": "+proj=tmerc +lat_0=0 +lon_0=12 +k=1 +x_0=150000 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs",
+      "extent": [60436.5084, 6192389.565, 217643.4713, 6682784.4276],
+      "units": null
+    },
+    {
+      "code": "http://www.opengis.net/gml/srs/epsg.xml#3007",
+      "definition": "+proj=tmerc +lat_0=0 +lon_0=12 +k=1 +x_0=150000 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs",
+      "extent": [60436.5084, 6192389.565, 217643.4713, 6682784.4276],
+      "units": null
+    },
+    {
+      "code": "EPSG:3008",
+      "definition": "+proj=tmerc +lat_0=0 +lon_0=13.5 +k=1 +x_0=150000 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs ",
+      "extent": [60857.4994, 6120098.8505, 223225.0217, 6906693.7888],
+      "units": null
+    },
+    {
+      "code": "http://www.opengis.net/gml/srs/epsg.xml#3008",
+      "definition": "+proj=tmerc +lat_0=0 +lon_0=13.5 +k=1 +x_0=150000 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs ",
+      "extent": [60857.4994, 6120098.8505, 223225.0217, 6906693.7888],
+      "units": null
+    },
+    {
+      "code": "EPSG:3009",
+      "definition": "+proj=tmerc +lat_0=0 +lon_0=15 +k=1 +x_0=150000 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs",
+      "extent": [56294.0365, 6203542.5282, 218719.0581, 6835499.2391],
+      "units": null
+    },
+    {
+      "code": "http://www.opengis.net/gml/srs/epsg.xml#3009",
+      "definition": "+proj=tmerc +lat_0=0 +lon_0=15 +k=1 +x_0=150000 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs",
+      "extent": [56294.0365, 6203542.5282, 218719.0581, 6835499.2391],
+      "units": null
+    },
+    {
+      "code": "EPSG:3010",
+      "definition": "+proj=tmerc +lat_0=0 +lon_0=16.5 +k=1 +x_0=150000 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs",
+      "extent": [97213.6352, 6228930.1419, 225141.8681, 6916524.0785],
+      "units": null
+    },
+    {
+      "code": "http://www.opengis.net/gml/srs/epsg.xml#3010",
+      "definition": "+proj=tmerc +lat_0=0 +lon_0=16.5 +k=1 +x_0=150000 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs",
+      "extent": [97213.6352, 6228930.1419, 225141.8681, 6916524.0785],
+      "units": null
+    },
+    {
+      "code": "EPSG:3011",
+      "definition": "+proj=tmerc +lat_0=0 +lon_0=18 +k=1 +x_0=150000 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs",
+      "extent": [96664.5565, 6509617.2232, 220146.6914, 6727103.5879],
+      "units": null
+    },
+    {
+      "code": "http://www.opengis.net/gml/srs/epsg.xml#3011",
+      "definition": "+proj=tmerc +lat_0=0 +lon_0=18 +k=1 +x_0=150000 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs",
+      "extent": [96664.5565, 6509617.2232, 220146.6914, 6727103.5879],
+      "units": null
+    },
+    {
+      "code": "EPSG:3012",
+      "definition": "+proj=tmerc +lat_0=0 +lon_0=14.25 +k=1 +x_0=150000 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs",
+      "extent": [30462.5263, 6829647.9842, 216416.1584, 7154168.0208],
+      "units": null
+    },
+    {
+      "code": "http://www.opengis.net/gml/srs/epsg.xml#3012",
+      "definition": "+proj=tmerc +lat_0=0 +lon_0=14.25 +k=1 +x_0=150000 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs",
+      "extent": [30462.5263, 6829647.9842, 216416.1584, 7154168.0208],
+      "units": null
+    },
+    {
+      "code": "EPSG:3013",
+      "definition": "+proj=tmerc +lat_0=0 +lon_0=15.75 +k=1 +x_0=150000 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs ",
+      "extent": [34056.6264, 6710433.2884, 218692.0214, 7224144.732],
+      "units": null
+    },
+    {
+      "code": "http://www.opengis.net/gml/srs/epsg.xml#3013",
+      "definition": "+proj=tmerc +lat_0=0 +lon_0=15.75 +k=1 +x_0=150000 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs ",
+      "extent": [34056.6264, 6710433.2884, 218692.0214, 7224144.732],
+      "units": null
+    },
+    {
+      "code": "EPSG:3014",
+      "definition": "+proj=tmerc +lat_0=0 +lon_0=17.25 +k=1 +x_0=150000 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs",
+      "extent": [-1420.28, 6888655.5779, 212669.1333, 7459585.3378],
+      "units": null
+    },
+    {
+      "code": "http://www.opengis.net/gml/srs/epsg.xml#3014",
+      "definition": "+proj=tmerc +lat_0=0 +lon_0=17.25 +k=1 +x_0=150000 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs",
+      "extent": [-1420.28, 6888655.5779, 212669.1333, 7459585.3378],
+      "units": null
+    },
+    {
+      "code": "EPSG:3015",
+      "definition": "+proj=tmerc +lat_0=0 +lon_0=18.75 +k=1 +x_0=150000 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs",
+      "extent": [58479.4774, 6304213.2147, 241520.5226, 7276832.4419],
+      "units": null
+    },
+    {
+      "code": "http://www.opengis.net/gml/srs/epsg.xml#3015",
+      "definition": "+proj=tmerc +lat_0=0 +lon_0=18.75 +k=1 +x_0=150000 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs",
+      "extent": [58479.4774, 6304213.2147, 241520.5226, 7276832.4419],
+      "units": null
+    },
+    {
+      "code": "EPSG:3016",
+      "definition": "+proj=tmerc +lat_0=0 +lon_0=20.25 +k=1 +x_0=150000 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs",
+      "extent": [-93218.3385, 7034909.8738, 261434.6246, 7676279.8691],
+      "units": null
+    },
+    {
+      "code": "http://www.opengis.net/gml/srs/epsg.xml#3016",
+      "definition": "+proj=tmerc +lat_0=0 +lon_0=20.25 +k=1 +x_0=150000 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs",
+      "extent": [-93218.3385, 7034909.8738, 261434.6246, 7676279.8691],
+      "units": null
+    },
+    {
+      "code": "EPSG:3017",
+      "definition": "+proj=tmerc +lat_0=0 +lon_0=21.75 +k=1 +x_0=150000 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs",
+      "extent": [67451.0699, 7211342.8483, 145349.5699, 7254837.254],
+      "units": null
+    },
+    {
+      "code": "http://www.opengis.net/gml/srs/epsg.xml#3017",
+      "definition": "+proj=tmerc +lat_0=0 +lon_0=21.75 +k=1 +x_0=150000 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs",
+      "extent": [67451.0699, 7211342.8483, 145349.5699, 7254837.254],
+      "units": null
+    },
+    {
+      "code": "EPSG:3018",
+      "definition": "+proj=tmerc +lat_0=0 +lon_0=23.25 +k=1 +x_0=150000 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs",
+      "extent": [38920.7048, 7267405.2323, 193050.246, 7597992.2419],
+      "units": null
+    },
+    {
+      "code": "http://www.opengis.net/gml/srs/epsg.xml#3018",
+      "definition": "+proj=tmerc +lat_0=0 +lon_0=23.25 +k=1 +x_0=150000 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs",
+      "extent": [38920.7048, 7267405.2323, 193050.246, 7597992.2419],
+      "units": null
+    },
+    {
+      "code": "EPSG:3021",
+      "definition": "+proj=tmerc +lat_0=0 +lon_0=15.80827777777778 +k=1 +x_0=1500000 +y_0=0 +ellps=bessel +units=m +no_defs",
+      "extent": [1392811.0743, 6208496.7665, 1570600.8906, 7546077.6984],
+      "units": null
+    },
+    {
+      "code": "http://www.opengis.net/gml/srs/epsg.xml#3021",
+      "definition": "+proj=tmerc +lat_0=0 +lon_0=15.80827777777778 +k=1 +x_0=1500000 +y_0=0 +ellps=bessel +units=m +no_defs",
+      "extent": [1392811.0743, 6208496.7665, 1570600.8906, 7546077.6984],
+      "units": null
+    }
+  ],
+  "tools": [
+    {
+      "type": "layerswitcher",
+      "options": {
+        "baselayers": [
+          {
+            "id": "1",
+            "visibleAtStart": true,
+            "drawOrder": 0,
+            "visibleForGroups": null,
+            "infobox": null
+          },
+          {
+            "id": "2",
+            "visibleAtStart": false,
+            "drawOrder": 0,
+            "visibleForGroups": null,
+            "infobox": null
+          },
+          {
+            "id": "3",
+            "visibleAtStart": false,
+            "drawOrder": 0,
+            "visibleForGroups": null,
+            "infobox": null
+          }
+        ],
+        "groups": [
+          {
+            "id": "8838c969-590c-8683-435c-1ecaca271096",
+            "parent": "-1",
+            "name": "Länstyrelsen",
+            "toggled": true,
+            "expanded": false,
+            "layers": [
+              {
+                "id": "7",
+                "visibleAtStart": false,
+                "drawOrder": 3,
+                "visibleForGroups": null,
+                "infobox": null
+              },
+              {
+                "id": "8",
+                "visibleAtStart": false,
+                "drawOrder": 3,
+                "visibleForGroups": null,
+                "infobox": null
+              }
+            ],
+            "groups": []
+          },
+          {
+            "id": "9938c969-590c-8683-435c-1ecaca271096",
+            "parent": "-1",
+            "name": "Övrigt",
+            "toggled": true,
+            "expanded": false,
+            "layers": [
+              {
+                "id": "1352",
+                "visibleAtStart": true,
+                "drawOrder": 4,
+                "visibleForGroups": null,
+                "infobox": null
+              }
+            ],
+            "groups": []
+          }
+        ],
+        "active": true,
+        "visibleAtStart": false,
+        "visibleAtStartMobile": false,
+        "backgroundSwitcherBlack": true,
+        "backgroundSwitcherWhite": true,
+        "enableOSM": true,
+        "showBreadcrumbs": true,
+        "target": "left",
+        "position": "left",
+        "width": 0,
+        "height": 0,
+        "title": "Lagerhanterare",
+        "description": "Välj vad du vill visa i kartan.",
+        "enableTransparencySlider": true,
+        "dropdownThemeMaps": true,
+        "themeMapHeaderCaption": "Standardkartan",
+        "instruction": "",
+        "visibleForGroups": []
+      },
+      "index": 1
+    },
+    {
+      "type": "infoclick",
+      "options": {
+        "target": "",
+        "displayPopup": false,
+        "markerImg": "/marker.png",
+        "anchor": [0.5, 1],
+        "imgSize": [32, 32],
+        "popupOffsetY": 0,
+        "visibleForGroups": []
+      },
+      "index": 2
+    },
+    {
+      "type": "sketch",
+      "options": {
+        "target": "left",
+        "position": "left",
+        "visibleForGroups": []
+      },
+      "index": 3
+    },
+    {
+      "type": "measure",
+      "options": {
+        "target": "control",
+        "position": "right",
+        "instruction": "",
+        "icons": ""
+      },
+      "index": 4
+    },
+    {
+      "type": "streetview",
+      "options": {
+        "target": "control",
+        "position": "right",
+        "apiKey": "AIzaSyCb-bvLmybNb4QSERR43eGlvvQyUrBAQG4",
+        "instruction": "",
+        "visibleForGroups": []
+      },
+      "index": 5
+    },
+    {
+      "type": "anchor",
+      "options": {
+        "target": "left",
+        "position": "left",
+        "instruction": "",
+        "visibleForGroups": []
+      },
+      "index": 7
+    },
+    {
+      "type": "search",
+      "options": {
+        "layers": [
+          {
+            "id": "4",
+            "visibleForGroups": []
+          }
+        ],
+        "visibleForGroups": [],
+        "maxResultsPerDataset": 100,
+        "anchor": ["", ""],
+        "scale": "",
+        "markerImg": "",
+        "delayBeforeAutoSearch": 300,
+        "searchBarPlaceholder": "Sök...",
+        "autocompleteWildcardAtStart": false,
+        "enablePolygonSearch": true,
+        "enableRadiusSearch": true,
+        "enableSelectSearch": true,
+        "enableExtentSearch": true,
+        "enableResultsFiltering": true,
+        "enableResultsSorting": true,
+        "enableResultsSelectionClearing": true,
+        "enableResultsDownloading": true,
+        "enableFeaturePreview": true,
+        "enableLabelOnHighlight": true,
+        "enableSelectedFeaturesCollection": true,
+        "showResultFeaturesInMap": true,
+        "enableFeatureToggler": true,
+        "drawFillColor": "rgba(255,255,255,0.07)",
+        "drawStrokeColor": "rgba(74,74,74,0.5)",
+        "displayFillColor": "rgba(74,144,226,0.15)",
+        "displayStrokeColor": "rgba(74,144,226,0.4)",
+        "selectionTextStroke": "rgba(255,255,255,1)",
+        "selectionTextFill": "rgba(63,122,190,1)",
+        "selectionFillColor": "rgba(74,144,226,0.7)",
+        "selectionStrokeColor": "rgba(74,144,226,0.8)",
+        "highlightTextStroke": "rgba(255,255,255,1)",
+        "highlightTextFill": "rgba(214,143,28,1)",
+        "highlightFillColor": "rgba(245,166,35,0.7)",
+        "highlightStrokeColor": "rgba(245,166,35,0.8)"
+      },
+      "index": 11
+    },
+    {
+      "type": "routing",
+      "options": {
+        "target": "toolbar",
+        "apiKey": "AIzaSyCb-bvLmybNb4QSERR43eGlvvQyUrBAQG4",
+        "instruction": "",
+        "visibleForGroups": []
+      },
+      "index": 12
+    },
+    {
+      "type": "location",
+      "options": {
+        "target": "control",
+        "position": "right",
+        "visibleForGroups": []
+      },
+      "index": 13
+    },
+    {
+      "type": "preset",
+      "options": {
+        "presetList": [
+          {
+            "name": "Halmstad",
+            "presetUrl": "?m=simpleMapConfig&x=368494.9197547268&y=6282312.7413127115&z=6.7339618545565125&l=1&f=%7B%7D&clean=false"
+          },
+          {
+            "name": "Alingsås",
+            "presetUrl": "?m=simpleMapConfig&x=354049.24452326825&y=6424217.248216377&z=7.903686478656474&l=1&f=%7B%7D&clean=false"
+          },
+          {
+            "name": "Göteborg",
+            "presetUrl": "?m=simpleMapConfig&x=315850.5321760868&y=6398503.693206446&z=6.502756678859521&l=1&f=%7B%7D&clean=false"
+          },
+          {
+            "name": "Jönköping",
+            "presetUrl": "?m=simpleMapConfig&x=450214.34373580024&y=6403315.750951234&z=6.7931556775514546&l=1&f=%7B%7D&clean=false"
+          },
+          {
+            "name": "Karlstad",
+            "presetUrl": "?m=simpleMapConfig&x=416370.6129169631&y=6583095.470395488&z=6.221222447365537&l=1&f=%7B%7D&clean=false"
+          },
+          {
+            "name": "Stockholm",
+            "presetUrl": "?m=simpleMapConfig&x=671675.4989296548&y=6570377.474044046&z=4.9236065968776375&l=1&f=%7B%7D&clean=false"
+          },
+          {
+            "name": "Umeå",
+            "presetUrl": "?m=simpleMapConfig&x=758454.9972847599&y=7084504.860998487&z=6.739288215480473&l=1&f=%7B%7D&clean=false"
+          }
+        ],
+        "visibleForGroups": []
+      },
+      "index": 14
+    },
+    {
+      "type": "coordinates",
+      "options": {
+        "target": "control",
+        "position": "right",
+        "instruction": "",
+        "transformations": [
+          {
+            "code": "EPSG:3006",
+            "default": true,
+            "hint": "Sweref99 TM",
+            "title": "Sweref99 TM",
+            "xtitle": "E",
+            "ytitle": "N",
+            "inverseAxis": false
+          }
+        ],
+        "visibleForGroups": []
+      },
+      "index": 15
+    },
+    {
+      "type": "bookmark",
+      "options": {
+        "target": "toolbar",
+        "instruction": "",
+        "visibleForGroups": []
+      },
+      "index": 16
+    },
+    {
+      "type": "buffer",
+      "options": {
+        "target": "toolbar",
+        "instruction": "",
+        "varbergVer": false,
+        "geoserverUrl": "",
+        "notFeatureLayers": [],
+        "visibleForGroups": []
+      },
+      "index": 17
+    },
+    {
+      "type": "print",
+      "options": {
+        "target": "left",
+        "position": "left",
+        "scales": "200, 400, 1000, 2000, 5000, 10000, 25000, 50000, 100000, 200000, 400000, 800000, 1000000, 5000000, 10000000",
+        "logo": "/logoLight.png",
+        "northArrow": "/north_arrow.png",
+        "instruction": "",
+        "visibleAtStart": false,
+        "visibleForGroups": []
+      },
+      "index": 2
+    },
+    {
+      "type": "documenthandler",
+      "index": 0,
+      "options": {
+        "title": "Visa informationsruta",
+        "target": "hidden",
+        "showScrollButtonLimit": 400,
+        "dynamicImportUrls": {
+          "iconFonts": "https://fonts.googleapis.com/icon?family=Material+Icons",
+          "customFont": "https://fonts.googleapis.com/css?family=Open+Sans"
+        },
+        "iconLibraryLink": "https://material.io/resources/icons/?style=baseline",
+        "customThemeUrl": "/documentHandlerTheme.json",
+        "width": 600,
+        "height": "90vh",
+        "searchImplemented": true,
+        "enablePrint": true,
+        "closePanelOnMapLinkOpen": false,
+        "displayLoadingOnMapLinkOpen": false,
+        "documentOnStart": "",
+        "drawerTitle": "",
+        "drawerButtonTitle": "Meny",
+        "tableOfContents": {
+          "active": false,
+          "expanded": false,
+          "chapterLevelsToShow": 2,
+          "title": "Innehållsförteckning"
+        },
+        "defaultDocumentColorSettings": {
+          "textAreaBackgroundColor": "#ccc",
+          "textAreaDividerColor": "#6A0DAD"
+        },
+        "menuConfig": {
+          "menu": [
+            {
+              "title": "Exempeldokument",
+              "document": "exempeldokument",
+              "color": "",
+              "icon": {
+                "materialUiIconName": "",
+                "fontSize": "large"
+              },
+              "maplink": "",
+              "link": "",
+              "menu": []
+            },
+            {
+              "title": "Exempeldokument2",
+              "document": "exempeldokument2",
+              "color": "",
+              "icon": {
+                "materialUiIconName": "",
+                "fontSize": "large"
+              },
+              "maplink": "",
+              "link": "",
+              "menu": []
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "map": {
+    "target": "map",
+    "center": [576357, 6386049],
+    "title": "Hajk 3",
+    "projection": "EPSG:3006",
+    "zoom": 1.33,
+    "maxZoom": 8,
+    "minZoom": 0,
+    "resolutions": [2048, 1024, 512, 256, 128, 64, 32, 16, 8],
+    "origin": [0, 0],
+    "extent": [-1200000, 4700000, 2600000, 8500000],
+    "constrainOnlyCenter": false,
+    "constrainResolution": false,
+    "logo": "/logoLight.png",
+    "geoserverLegendOptions": "",
+    "mapselector": false,
+    "mapcleaner": false,
+    "showUserAvatar": false,
+    "drawerVisible": false,
+    "drawerPermanent": false,
+    "drawerVisibleMobile": false,
+    "activeDrawerOnStart": "plugins",
+    "showThemeToggler": true,
+    "colors": {
+      "primaryColor": "#333333",
+      "secondaryColor": "#ffa000",
+      "preferredColorScheme": "user"
+    },
+    "defaultCookieNoticeMessage": "Vi använder cookies för att följa upp användandet och ge en bra upplevelse av kartan. Du kan blockera cookies i webbläsaren men då visas detta meddelande igen.",
+    "defaultCookieNoticeUrl": "https://pts.se/sv/bransch/regler/lagar/lag-om-elektronisk-kommunikation/kakor-cookies/",
+    "crossOrigin": "anonymous"
+  }
+}
