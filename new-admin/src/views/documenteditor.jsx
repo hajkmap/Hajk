@@ -1091,11 +1091,18 @@ class DocumentEditor extends Component {
     const { selectedFolder } = this.state;
 
     return (
-      <Grid className={classes.root} id="documentEditor" container>
+      <Grid className={classes.root} id="documentEditor" container xs={7}>
         <Grid className="inset-form" item container>
-          <Typography>
+          <Grid><Typography>
             <strong>Generella dokumentinställningar</strong>
           </Typography>
+          </Grid>
+          <Grid><Typography><strong>Hantera mappar</strong></Typography>
+              <Typography>Enskilda dokument till ”Dokumenthanteraren” kan sparas direkt i rot-katalogen ”documents” eller sparas i en undermapp till ”documents”. Observera att det endast går att gruppera undermappar i ett (1) steg.
+                          Vill du spara dokumenten i en undermapp till ”documents” väljer du vilken undermapp det är som du vill spara dokumenten i under ”Välj en mapp” nedan.
+                          Vill du skapa en ny undermapp under ”documents” klickar du på den gröna knappen ”NY MAPP”
+              </Typography>
+          </Grid>
 
           {this.renderModal()}
           <Grid
@@ -1104,7 +1111,7 @@ class DocumentEditor extends Component {
             container
             item
           >
-            <Grid className={classes.gridItem} item>
+            <Grid className={classes.gridItem} item xs={12}>
               <FormControl>
                 <NativeSelect
                   onChange={(event) => this.handleFolderChange(event)}
@@ -1117,7 +1124,27 @@ class DocumentEditor extends Component {
                 </NativeSelect>
                 <FormHelperText>Välj en befintlig mapp</FormHelperText>
               </FormControl>
+              </Grid>
+              <Grid>
+              <ColorButtonGreen
+                variant="contained"
+                className="btn"
+                onClick={() => this.renderCreateDialogFolder()}
+                startIcon={<AddBoxIcon />}
+              >
+                Ny mapp
+              </ColorButtonGreen>
             </Grid>
+            <Grid xs={12}>
+              <br></br>
+              <Typography><strong>Hantera dokument</strong></Typography>
+            </Grid>
+            <Grid>
+              <Typography>För att editera eller granska ett redan befintligt dokument väljer du ett dokument i rullgardinslistan ”Välj ett dokument”. Observera att de dokument som visas i listan är endast de dokument som finns sparade under den undermapp du valt ovan till i rot-katalogen ”documents”. Har ingen undermapp valts visas de dokument som finns sparade direkt i rot-katalogen ”documents”.
+              </Typography>
+            </Grid>
+            </Grid>
+            <Grid>
             <Grid className={classes.gridItem} item>
               <FormControl>
                 <NativeSelect
@@ -1155,16 +1182,7 @@ class DocumentEditor extends Component {
                 Nytt dokument
               </ColorButtonGreen>
             </Grid>
-            <Grid className={classes.gridItem} item>
-              <ColorButtonGreen
-                variant="contained"
-                className="btn"
-                onClick={() => this.renderCreateDialogFolder()}
-                startIcon={<AddBoxIcon />}
-              >
-                Ny mapp
-              </ColorButtonGreen>
-            </Grid>
+            
             {selectedDocument && (
               <Grid className={classes.gridItem}>
                 <ColorButtonRed

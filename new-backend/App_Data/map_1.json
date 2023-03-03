@@ -508,8 +508,8 @@
           "menu": [
             {
               "title": "Exempeldokument",
-              "document": "exempeldokument",
               "folder": "",
+              "document": "exempeldokument",
               "color": "",
               "icon": {
                 "materialUiIconName": "",
@@ -521,8 +521,8 @@
             },
             {
               "title": "Exempeldokument2",
-              "document": "exempeldokument2",
               "folder": "",
+              "document": "exempeldokument2",
               "color": "",
               "icon": {
                 "materialUiIconName": "",

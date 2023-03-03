@@ -211,8 +211,8 @@ var menuEditorModel = Model.extend({
   getNewMenuItemObject: function () {
     return {
       title: "",
-      document: "",
       folder: "",
+      document: "",
       color: "",
       icon: {
         materialUiIconName: "",
