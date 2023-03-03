@@ -215,17 +215,26 @@ class FirLayerController {
       this.previousFeatures = [];
     }
 
-    arr.forEach((feature) => {
-      if (
-        this.previousFeatures.indexOf(
-          feature.get(this.model.config.wmsRealEstateLayer.idField)
-        ) > -1
-      ) {
-        feature.setStyle(this.styles.getPreviousResultStyle());
+    if (arr.length === 1 && options.click === true) {
+      const clickFeature = arr[0];
+      if (this.model.layers.feature.getSource().getFeatures().length) {
+        clickFeature.setStyle(this.styles.getPreviousResultStyle());
       } else {
-        feature.setStyle(this.styles.getResultStyle());
+        clickFeature.setStyle(this.styles.getResultStyle());
       }
-    });
+    } else {
+      arr.forEach((feature) => {
+        if (
+          this.previousFeatures.indexOf(
+            feature.get(this.model.config.wmsRealEstateLayer.idField)
+          ) > -1
+        ) {
+          feature.setStyle(this.styles.getPreviousResultStyle());
+        } else {
+          feature.setStyle(this.styles.getResultStyle());
+        }
+      });
+    }
 
     this.model.layers.feature.getSource().addFeatures(arr);
     if (options.zoomToLayer) {
@@ -344,7 +353,8 @@ class FirLayerController {
               ? true
               : false;
           });
-          this.addFeatures(features, { zoomToLayer: false });
+
+          this.addFeatures(features, { zoomToLayer: false, click: true });
           this.observer.publish("fir.search.add", features);
         } catch (err) {
           console.warn(err);

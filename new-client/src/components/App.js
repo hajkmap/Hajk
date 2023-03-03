@@ -1,5 +1,7 @@
 import React from "react";
 
+import { PLUGINS_TO_IGNORE_IN_HASH_APP_STATE } from "constants";
+
 import PropTypes from "prop-types";
 import { styled } from "@mui/material/styles";
 import { SnackbarProvider } from "notistack";
@@ -551,7 +553,10 @@ class App extends React.PureComponent {
 
               // First hide if window not longer visible
               currentlyVisiblePlugins.forEach((p) => {
-                if (!pInParams.includes(p)) {
+                if (
+                  !pInParams.includes(p) &&
+                  PLUGINS_TO_IGNORE_IN_HASH_APP_STATE.indexOf(p) === -1
+                ) {
                   this.globalObserver.publish(`${p}.closeWindow`);
                 }
               });
@@ -561,7 +566,8 @@ class App extends React.PureComponent {
                 .get("p")
                 .split(",")
                 .forEach((p) => {
-                  this.globalObserver.publish(`${p}.showWindow`);
+                  PLUGINS_TO_IGNORE_IN_HASH_APP_STATE.indexOf(p) === -1 &&
+                    this.globalObserver.publish(`${p}.showWindow`);
                 });
             }
           }
