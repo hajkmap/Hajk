@@ -411,21 +411,33 @@ export default class PrintModel {
     return `${Number(scaleBarLengthMeters).toLocaleString("sv-SE")} ${units}`;
   };
 
+  getNumLinesAndDivider = (scaleBarLengthMeters, scaleBarLength) => {
+    const scaleBarLengthMetersStr = scaleBarLengthMeters.toString();
+    const scaleLength = scaleBarLengthMetersStr.startsWith("10")
+      ? scaleBarLengthMetersStr.length - 2
+      : scaleBarLengthMetersStr.length - 1;
+    const divider = scaleBarLengthMeters / Math.pow(10, scaleLength);
+    const numLines = scaleBarLength / divider;
+    return { numLines, divider };
+  };
+
   addDividerLinesAndTexts = (props) => {
-    // Here we add divider lines between the starting- and ending-line.
     this.drawDividerLines(props);
 
-    // Before we add the numbers to the halfway divider line and the quarterway divider line...
-    // we want to check if the user has set a custom scale by finding the scale in the scaleMeters property,
-    // and if we do not find it, we do not add divider texts.
     if (this.scaleBarLengths[props.scale]) this.addDividerTexts(props);
   };
 
-  drawDividerLines = ({ pdf, scaleBarPosition, scaleBarLength, color }) => {
+  drawDividerLines = ({
+    pdf,
+    scaleBarPosition,
+    scaleBarLength,
+    color,
+    scaleBarLengthMeters,
+  }) => {
     pdf.setLineWidth(0.25).setDrawColor(color);
 
-    // Here we draw the starting-, finsh- and through-line of the scalebar:
-    // Like this: |--------|
+    // Here we draw the starting-, finsh-, middle- and through-line of the scalebar:
+    // Like this: |----I----|
     pdf.line(
       scaleBarPosition.x,
       scaleBarPosition.y + 3,
@@ -445,17 +457,21 @@ export default class PrintModel {
       scaleBarPosition.y + 5
     );
 
-    // Here we set the distance number of the gap between the lines on the scalebar...
-    // so that the division lines are halves of each adjacent divison line.
-    const lineGap = 0.125;
-    // And here, we draw the individual division lines of the scalebar:
-    // Like this: |--I--I--|--I--I--|
-    for (let divLine = lineGap; divLine < 1; divLine += lineGap) {
+    const { numLines, divider } = this.getNumLinesAndDivider(
+      scaleBarLengthMeters,
+      scaleBarLength
+    );
+
+    for (
+      let divLine = numLines;
+      divLine <= scaleBarLength;
+      divLine += numLines
+    ) {
       pdf.line(
-        scaleBarPosition.x + scaleBarLength * divLine,
-        scaleBarPosition.y + (divLine === 0.5 ? 1.5 : 2),
-        scaleBarPosition.x + scaleBarLength * divLine,
-        scaleBarPosition.y + (divLine === 0.5 ? 4.5 : 4)
+        scaleBarPosition.x + divLine,
+        scaleBarPosition.y + 2,
+        scaleBarPosition.x + divLine,
+        scaleBarPosition.y + 4
       );
     }
   };
@@ -467,32 +483,44 @@ export default class PrintModel {
     scaleBarLengthMeters,
     color,
   }) => {
-    const calculatedScaleBarLength =
-      scaleBarLengthMeters > 1000
-        ? scaleBarLengthMeters / 1000
-        : scaleBarLengthMeters;
-    const position = scaleBarPosition;
-
     pdf.setFontSize(8);
     pdf.setTextColor(color);
-    pdf.setLineWidth(0.25);
 
     // Here we set the number 0 at the start of the scalebar
-    pdf.text("0", position.x - 0.7, position.y + 8);
+    pdf.text("0", scaleBarPosition.x - 0.7, scaleBarPosition.y + 8);
 
-    // And here we set the division line numbers on the scalebar number line
-    // We use a for loop and an equation for the x position to set the...
-    // correct positions of the two halved values on the scalebar line.
-    for (let textGap = 2; textGap <= 4; textGap *= 2) {
-      // Here we calculate the text that will be written on the PDF.
-      let dividerText = (calculatedScaleBarLength / textGap).toLocaleString(
-        "sv-SE"
+    if (scaleBarLength < 45) {
+      return;
+    } else {
+      const calculatedScaleBarLengthMeters =
+        scaleBarLengthMeters > 1000
+          ? (scaleBarLengthMeters / 1000).toString()
+          : scaleBarLengthMeters;
+      let dividerTextNumberCounter = 1;
+
+      const { numLines, divider } = this.getNumLinesAndDivider(
+        scaleBarLengthMeters,
+        scaleBarLength
       );
-      // We calculate the X coordinate where the text will be drawn.
-      let positionX =
-        position.x - dividerText.length / 1.6 + scaleBarLength / textGap;
-      // And write the text on the PDF at the specified coordinates
-      pdf.text(dividerText, positionX, position.y + 8);
+
+      for (
+        let divLine = numLines;
+        divLine <= scaleBarLength;
+        divLine += numLines
+      ) {
+        let dividerTextNumber =
+          (calculatedScaleBarLengthMeters / divider) * dividerTextNumberCounter;
+        let dividerText = dividerTextNumber.toLocaleString("sv-SE");
+
+        if (dividerText !== calculatedScaleBarLengthMeters) {
+          pdf.text(
+            dividerText,
+            scaleBarPosition.x + divLine - dividerText.length,
+            scaleBarPosition.y + 8
+          );
+          dividerTextNumberCounter++;
+        }
+      }
     }
   };
 
