@@ -384,9 +384,19 @@ export default class MapClickModel {
 
       // If we've got any results, let's highlight the clicked
       // pixel by placing a marker in that coordinate.
-      decoratedFeatureCollections.length > 0
-        ? this.#addMarker(this.map.getCoordinateFromPixel(e.pixel))
-        : this.#removeMarker();
+
+      let totalFeatures = 0;
+
+      decoratedFeatureCollections.forEach((item) => {
+        totalFeatures += item.features.length;
+      });
+
+      if (decoratedFeatureCollections.length > 0 && totalFeatures > 1) {
+        // We make sure that totalFeatures is > 1 to prevent double markers on single elements.
+        this.#addMarker(this.map.getCoordinateFromPixel(e.pixel));
+      } else {
+        this.#removeMarker();
+      }
     } catch (error) {
       console.error("Oops: ", error);
       document.querySelector("body").style.cursor = "initial";
