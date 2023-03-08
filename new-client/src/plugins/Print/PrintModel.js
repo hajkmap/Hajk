@@ -1482,6 +1482,6 @@ export default class PrintModel {
    * @returns {string} Input parameter, prefixed by "1:" and with spaces as thousands separator, e.g "5000" -> "1:5 000".
    */
   getUserFriendlyScale = (scale) => {
-    return `1:${Number(scale).toLocaleString("sv-SE")}`;
+    return `1:${Number(scale).toLocaleString()}`;
   };
 }
