@@ -28,77 +28,54 @@ export class Controller {
   }
 
   getByName(req, res) {
-    if (req.params.folder) {
-      InformativeService.getByName(req.params.folder, req.params.name).then(
-        (r) => {
-          if (r && !r.error) res.json(r);
-          else {
-            res
-              .status(404)
-              .send(`Document "${req.params.name}" could not be found`);
-          }
-        }
-      );
-    } else {
-      InformativeService.getByName("", req.params.name).then((r) => {
-        if (r && !r.error) res.json(r);
-        else {
-          res
-            .status(404)
-            .send(`Document "${req.params.name}" could not be found`);
-        }
-      });
-    }
+    const DEFAULT_FOLDER_NAME = "";
+
+    const folderName = req.params.folder || DEFAULT_FOLDER_NAME;
+
+    InformativeService.getByName(folderName, req.params.name).then((r) => {
+      if (r && !r.error) {
+        res.json(r);
+      } else {
+        const errorMessage = `Document "${req.params.name}" could not be found`;
+        res.status(404).send(errorMessage);
+      }
+    });
   }
 
   saveByName(req, res) {
-    if (req.params.folder) {
-      InformativeService.saveByName(
-        req.params.folder,
-        req.params.name,
-        req.body
-      ).then((r) => {
+    const DEFAULT_FOLDER_NAME = "";
+
+    const folderName = req.params.folder || DEFAULT_FOLDER_NAME;
+
+    InformativeService.saveByName(folderName, req.params.name, req.body).then(
+      (r) => {
         if (r && !r.error) {
           res.status(200).send("File saved");
           ael.info(
             `${res.locals.authUser} saved document ${req.params.name}.json`
           );
-        } else res.status(500).send(r.error.message);
-      });
-    } else {
-      InformativeService.saveByName("", req.params.name, req.body).then((r) => {
-        if (r && !r.error) {
-          res.status(200).send("File saved");
-          ael.info(
-            `${res.locals.authUser} saved document ${req.params.name}.json`
-          );
-        } else res.status(500).send(r.error.message);
-      });
-    }
+        } else {
+          res.status(500).send(r.error.message);
+        }
+      }
+    );
   }
 
   deleteByName(req, res) {
-    if (req.params.folder) {
-      InformativeService.deleteByName(req.params.folder, req.params.name).then(
-        (r) => {
-          if (r && !r.error) {
-            res.status(200).send("File saved");
-            ael.info(
-              `${res.locals.authUser} deleted document ${req.params.name}.json`
-            );
-          } else res.status(500).send(r.error.message);
-        }
-      );
-    } else {
-      InformativeService.deleteByName("", req.params.name).then((r) => {
-        if (r && !r.error) {
-          res.status(200).send("File saved");
-          ael.info(
-            `${res.locals.authUser} deleted document ${req.params.name}.json`
-          );
-        } else res.status(500).send(r.error.message);
-      });
-    }
+    const DEFAULT_FOLDER_NAME = "";
+
+    const folderName = req.params.folder || DEFAULT_FOLDER_NAME;
+
+    InformativeService.deleteByName(folderName, req.params.name).then((r) => {
+      if (r && !r.error) {
+        res.status(200).send("File deleted");
+        ael.info(
+          `${res.locals.authUser} deleted document ${req.params.name}.json`
+        );
+      } else {
+        res.status(500).send(r.error.message);
+      }
+    });
   }
 
   list(req, res) {

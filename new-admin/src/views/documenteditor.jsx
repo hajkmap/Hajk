@@ -1098,7 +1098,7 @@ class DocumentEditor extends Component {
           </Typography>
           </Grid>
           <Grid><Typography><strong>Hantera mappar</strong></Typography>
-              <Typography>Enskilda dokument till ”Dokumenthanteraren” kan sparas direkt i rot-katalogen ”documents” eller sparas i en undermapp till ”documents”. Observera att det endast går att gruppera undermappar i ett (1) steg.
+              <Typography style={{ fontStyle: 'italic', fontSize: 'smaller' }}>Enskilda dokument till ”Dokumenthanteraren” kan sparas direkt i rot-katalogen ”documents” eller sparas i en undermapp till ”documents”. Observera att det endast går att gruppera undermappar i ett (1) steg.
                           Vill du spara dokumenten i en undermapp till ”documents” väljer du vilken undermapp det är som du vill spara dokumenten i under ”Välj en mapp” nedan.
                           Vill du skapa en ny undermapp under ”documents” klickar du på den gröna knappen ”NY MAPP”
               </Typography>
@@ -1140,7 +1140,7 @@ class DocumentEditor extends Component {
               <Typography><strong>Hantera dokument</strong></Typography>
             </Grid>
             <Grid>
-              <Typography>För att editera eller granska ett redan befintligt dokument väljer du ett dokument i rullgardinslistan ”Välj ett dokument”. Observera att de dokument som visas i listan är endast de dokument som finns sparade under den undermapp du valt ovan till i rot-katalogen ”documents”. Har ingen undermapp valts visas de dokument som finns sparade direkt i rot-katalogen ”documents”.
+              <Typography style={{ fontStyle: 'italic', fontSize: 'smaller' }}>För att editera eller granska ett redan befintligt dokument väljer du ett dokument i rullgardinslistan ”Välj ett dokument”. Observera att de dokument som visas i listan är endast de dokument som finns sparade under den undermapp du valt ovan till i rot-katalogen ”documents”. Har ingen undermapp valts visas de dokument som finns sparade direkt i rot-katalogen ”documents”.
               </Typography>
             </Grid>
             </Grid>
