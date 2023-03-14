@@ -712,6 +712,16 @@ class VisionIntegrationModel {
     }
   };
 
+  // Handles when the cancel button in the edit view has been clicked.
+  // - Invokes "SendGeometry" passing null to make sure Vision cancels as well.
+  handleEditCancelClick = () => {
+    try {
+      this.#hubConnection.invoke("SendGeometry", null);
+    } catch (error) {
+      console.error(`Failed to pass null over "SendGeometry" Error: ${error}`);
+    }
+  };
+
   #handleSearchWithFeature = async (payload) => {
     const source =
       payload.interaction === MAP_INTERACTIONS.SELECT_ESTATE
