@@ -739,8 +739,12 @@ class VisionIntegrationModel {
     const sendObject = {};
     // And then add all the properties...
     fieldsToSend.forEach((field) => {
-      sendObject[field.key] =
-        field.overrideValue || f.get(field.featureProperty);
+      // KubbX expects the id-prop to be a string...
+      const sendValue =
+        field.key === "id"
+          ? f.get(field.featureProperty)?.toString()
+          : f.get(field.featureProperty);
+      sendObject[field.key] = field.overrideValue || sendValue;
     });
     // Then we can return the object!
     return sendObject;
