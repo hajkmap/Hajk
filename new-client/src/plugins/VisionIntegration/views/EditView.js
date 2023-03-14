@@ -78,8 +78,11 @@ function EditView(props) {
   };
 
   const handleCancelClick = () => {
+    // If a user cancel editing we have to make sure to provide Vision with that information
+    if (props.editState.mode !== EDIT_STATUS.SAVE_SUCCESS) {
+      props.model.handleEditCancelClick();
+    }
     setActiveMapInteraction(MAP_INTERACTIONS.EDIT_NONE);
-    props.model.handleEditCancelClick();
     props.setEditState((prev) => ({
       ...prev,
       mode: EDIT_STATUS.INACTIVE,
