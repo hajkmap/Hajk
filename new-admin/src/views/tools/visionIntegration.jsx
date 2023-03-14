@@ -83,6 +83,7 @@ const defaultState = {
   target: "toolbar",
   position: "left",
   visibleAtStart: false,
+  enableLogging: false,
   instruction: "",
   hubUrl: "https://some-fancy-signalr-hub.com/some-part-of-the-hub",
   userOverride: "",
@@ -149,6 +150,7 @@ class ToolOptions extends Component {
           width: tool.options.width,
           height: tool.options.height,
           visibleAtStart: tool.options.visibleAtStart,
+          enableLogging: tool.options.enableLogging || false,
           instruction: tool.options.instruction,
           hubUrl: tool.options.hubUrl || this.state.hubUrl,
           userOverride: tool.options.userOverride || this.state.userOverride,
@@ -276,6 +278,7 @@ class ToolOptions extends Component {
         target: this.state.target,
         position: this.state.position,
         visibleAtStart: this.state.visibleAtStart,
+        enableLogging: this.state.enableLogging,
         instruction: this.state.instruction,
         hubUrl: this.state.hubUrl,
         userOverride: this.state.userOverride,
@@ -677,6 +680,19 @@ class ToolOptions extends Component {
                 this.handleInputChange(e);
               }}
             />
+          </div>
+          <div>
+            <input
+              id="enableLogging"
+              name="enableLogging"
+              type="checkbox"
+              onChange={(e) => {
+                this.handleInputChange(e);
+              }}
+              checked={this.state.enableLogging}
+            />
+            &nbsp;
+            <label htmlFor="enableLogging">Aktivera loggning</label>
           </div>
           <div className="separator">Söktjänster</div>
           {this.state.tree}

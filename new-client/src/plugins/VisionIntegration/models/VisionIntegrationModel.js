@@ -28,6 +28,7 @@ class VisionIntegrationModel {
   #currentEnvironmentTypeId;
   #wktParser;
   #editEnabled;
+  #enableLogging;
 
   // There will probably not be many settings for this model... Options are required though!
   constructor(settings) {
@@ -40,6 +41,7 @@ class VisionIntegrationModel {
       );
     }
     // Then we'll initiate some private fields...
+    this.#enableLogging = options.enableLogging ?? false; // If enabled we add some information to the console
     this.#app = app;
     this.#map = map;
     this.#options = options; // We're probably gonna need the options...
@@ -60,6 +62,13 @@ class VisionIntegrationModel {
     this.#localObserver && this.#initiateObserverListeners(); // Initiate observer-listeners.
     this.#currentEnvironmentTypeId = settings.initialEnvironmentTypeId; // We're gonna need to keep track of the currently active environment-type...
   }
+
+  // Logs the supplied message to the console if enableLogging is set to true.
+  #log = (message) => {
+    if (this.#enableLogging) {
+      console.info(message);
+    }
+  };
 
   // Creates a connection to supplied hub-url. (Hub meaning a signalR-communication-hub).
   #createHubConnection = () => {
@@ -247,6 +256,7 @@ class VisionIntegrationModel {
   // Handles when Vision is asking for information regarding all currently selected real-estates.
   #handleVisionAskingForRealEstateIdentifiers = () => {
     try {
+      this.#log("HandleAskingForRealEstateIdentifiers caught!");
       // If the edit-mode is enabled, we don't want to let the user mess with anything else...
       if (this.#editEnabled) {
         return;
@@ -261,6 +271,11 @@ class VisionIntegrationModel {
       selectedEstates.forEach((estate) => {
         informationToSend.push(this.#createEstateSendObject(estate));
       });
+      this.#log(
+        `Invoking SendRealEstateIdentifiers! Payload: ${JSON.stringify(
+          informationToSend
+        )}`
+      );
       // Finally, we'll invoke a method on the hub, sending the estate-information to Vision
       this.#hubConnection.invoke(
         "SendRealEstateIdentifiers",
@@ -274,6 +289,7 @@ class VisionIntegrationModel {
   // Handles when Vision is asking for information regarding all currently selected coordinates.
   #handleVisionAskingForCoordinates = () => {
     try {
+      this.#log("HandleAskingForCoordinates caught!");
       // If the edit-mode is enabled, we don't want to let the user mess with anything else...
       if (this.#editEnabled) {
         return;
@@ -288,6 +304,11 @@ class VisionIntegrationModel {
       selectedCoordinates.forEach((coordinate) => {
         informationToSend.push(this.#createCoordinateSendObject(coordinate));
       });
+      this.#log(
+        `Invoking SendCoordinates! Payload: ${JSON.stringify(
+          informationToSend
+        )}`
+      );
       // Finally, we'll invoke a method on the hub, sending the coordinate-information to Vision
       this.#hubConnection.invoke("SendCoordinates", informationToSend);
     } catch (error) {
@@ -297,8 +318,12 @@ class VisionIntegrationModel {
 
   #handleVisionAskingForFeatures = () => {
     try {
+      this.#log("HandleAskingForFeatures caught!");
       // If the edit-mode is enabled, we don't want to let the user mess with anything else...
       if (this.#editEnabled) {
+        this.#log(
+          "handleVisionAskingForFeatures fired but editing is enabled... Aborting."
+        );
         return;
       }
       // First we'll get all the currently selected features. NOTE: We're only sending the
@@ -312,7 +337,9 @@ class VisionIntegrationModel {
       selectedFeatures.forEach((f) => {
         informationToSend.push(this.#createFeatureSendObject(f));
       });
-
+      this.#log(
+        `Invoking SendFeatures! Payload: ${JSON.stringify(informationToSend)}`
+      );
       // Finally, we'll invoke a method on the hub, sending the feature-information to Vision
       this.#hubConnection.invoke("SendFeatures", informationToSend);
     } catch (error) {
@@ -323,262 +350,298 @@ class VisionIntegrationModel {
   // Handles when Vision is asking the map to show the geometries connected to
   // the supplied real-estate-information.
   #handleVisionAskingToShowRealEstates = async (payload) => {
-    // If the edit-mode is enabled, we don't want to let the user mess with anything else...
-    if (this.#editEnabled) {
-      return;
-    }
-    // First we'll have to make sure we were supplied an array (we're expecting the payload
-    // to consist of an array with real-estate-information).
-    if (!Array.isArray(payload)) {
-      console.error(
-        `HandleRealEstateIdentifiers was invoked with incorrect parameters. Expecting an array with estate-information but got ${typeof payload}`
+    try {
+      this.#log(
+        `HandleRealEstateIdentifiers caught! Payload: ${JSON.stringify(
+          payload
+        )}`
       );
-      return null;
-    }
-    // We'll also have to check that we have an estate-search-source to search for the estates in
-    const estateSearchSource = this.getEstateSearchSource();
-    if (!estateSearchSource) {
-      console.error(
-        `HandleRealEstateIdentifiers was invoked but could not be handled. No estate-search-source is configured.`
+      // If the edit-mode is enabled, we don't want to let the user mess with anything else...
+      if (this.#editEnabled) {
+        return;
+      }
+      // First we'll have to make sure we were supplied an array (we're expecting the payload
+      // to consist of an array with real-estate-information).
+      if (!Array.isArray(payload)) {
+        console.error(
+          `HandleRealEstateIdentifiers was invoked with incorrect parameters. Expecting an array with estate-information but got ${typeof payload}`
+        );
+        return null;
+      }
+      // We'll also have to check that we have an estate-search-source to search for the estates in
+      const estateSearchSource = this.getEstateSearchSource();
+      if (!estateSearchSource) {
+        console.error(
+          `HandleRealEstateIdentifiers was invoked but could not be handled. No estate-search-source is configured.`
+        );
+        return null;
+      }
+      // We'll also have to get the settings for this part of the integration...
+      const estateIntegrationSettings = this.#getEstateIntegrationSettings();
+      // ...so that we can get the search-key...
+      const searchKey = estateIntegrationSettings?.searchKey || "uuid";
+      // If we we're supplied an array, we can try to construct an "or-separator"-separated search-string
+      // (Vision might be trying to show several estates, in that case we'll get the estate-key for each
+      // estate-object and construct a "or-separator"-separated string with these. The search-model will make sure
+      // to create an OR-filter for each key in the "or-separator"-separated string).
+      const searchString = payload
+        .map((estate) => estate[searchKey] || "")
+        .join(this.#orSeparator);
+      // When the string is constructed, we can conduct a search
+      const searchResult = await this.#searchModel.getResults(
+        searchString,
+        [estateSearchSource],
+        this.#searchOptions
       );
-      return null;
+      // When the search is done, we'll get two objects:
+      // 1: The feature-collections (one for each source)
+      // 2: The potential errors (one for each source)
+      // Since we know we're dealing with one source here, we can just grab the [0]th
+      const { featureCollections, errors } = searchResult;
+      // If we got an error, or if the results are missing, we have to prompt the user in some way...
+      if (errors[0] || !featureCollections[0]) {
+        this.#localObserver.publish("estate-search-failed");
+        return null;
+      }
+      // If we didn't, we can grab the first featureCollection, which will include our results
+      const estateCollection = featureCollections[0];
+      // Then we can grab the resulting features
+      const estateFeatures = estateCollection.value.features || [];
+      // We're gonna want to show a feature title in several places. Let's put the title
+      // directly on the feature so we don't have to construct it several times.
+      estateFeatures.forEach((estate) => {
+        this.#setFeatureTitle(estate, estateSearchSource.displayFields);
+      });
+      // Finally we'll publish an event with the features that were found
+      this.#localObserver.publish("estate-search-completed", estateFeatures);
+    } catch (error) {
+      console.error(`Could not show real estates. ${error}`);
     }
-    // We'll also have to get the settings for this part of the integration...
-    const estateIntegrationSettings = this.#getEstateIntegrationSettings();
-    // ...so that we can get the search-key...
-    const searchKey = estateIntegrationSettings?.searchKey || "uuid";
-    // If we we're supplied an array, we can try to construct an "or-separator"-separated search-string
-    // (Vision might be trying to show several estates, in that case we'll get the estate-key for each
-    // estate-object and construct a "or-separator"-separated string with these. The search-model will make sure
-    // to create an OR-filter for each key in the "or-separator"-separated string).
-    const searchString = payload
-      .map((estate) => estate[searchKey] || "")
-      .join(this.#orSeparator);
-    // When the string is constructed, we can conduct a search
-    const searchResult = await this.#searchModel.getResults(
-      searchString,
-      [estateSearchSource],
-      this.#searchOptions
-    );
-    // When the search is done, we'll get two objects:
-    // 1: The feature-collections (one for each source)
-    // 2: The potential errors (one for each source)
-    // Since we know we're dealing with one source here, we can just grab the [0]th
-    const { featureCollections, errors } = searchResult;
-    // If we got an error, or if the results are missing, we have to prompt the user in some way...
-    if (errors[0] || !featureCollections[0]) {
-      this.#localObserver.publish("estate-search-failed");
-      return null;
-    }
-    // If we didn't, we can grab the first featureCollection, which will include our results
-    const estateCollection = featureCollections[0];
-    // Then we can grab the resulting features
-    const estateFeatures = estateCollection.value.features || [];
-    // We're gonna want to show a feature title in several places. Let's put the title
-    // directly on the feature so we don't have to construct it several times.
-    estateFeatures.forEach((estate) => {
-      this.#setFeatureTitle(estate, estateSearchSource.displayFields);
-    });
-    // Finally we'll publish an event with the features that were found
-    this.#localObserver.publish("estate-search-completed", estateFeatures);
   };
 
   // Handles when Vision is asking the map to show the location connected to the supplied coordinate-information.
   #handleVisionAskingToShowCoordinates = (payload) => {
-    // If the edit-mode is enabled, we don't want to let the user mess with anything else...
-    if (this.#editEnabled) {
-      return;
-    }
-    // First we'll have to make sure we were supplied an array (we're expecting the payload
-    // to consist of an array with coordinate-information).
-    if (!Array.isArray(payload)) {
-      console.error(
-        `HandleVisionAskingToShowCoordinates was invoked with incorrect parameters. Expecting an array with coordinate-information but got ${typeof payload}`
+    try {
+      this.#log(
+        `HandleCoordinates caught! Payload: ${JSON.stringify(payload)}`
       );
-      return null;
-    }
-    // Otherwise, we'll initiate an array where we're gonna store coordinate features
-    const coordinateFeatures = [];
-    // Then we'll create an OL-feature for each coordinate-information-object and append it to the array
-    payload.forEach((coordinateInfo) => {
-      // The coordinates sent from vision are sent with northing on the X-axis and easting on the Y-axis...
-      const { northing, easting, label } = coordinateInfo;
-      coordinateFeatures.push(
-        new Feature({
-          geometry: new Point([northing, easting]),
-          VISION_TYPE: "COORDINATES",
-          VISION_LABEL: label || "",
-          FEATURE_TITLE: `Nord: ${parseInt(easting)}, Öst: ${parseInt(
-            northing
-          )}`,
-        })
+      // If the edit-mode is enabled, we don't want to let the user mess with anything else...
+      if (this.#editEnabled) {
+        return;
+      }
+      // First we'll have to make sure we were supplied an array (we're expecting the payload
+      // to consist of an array with coordinate-information).
+      if (!Array.isArray(payload)) {
+        console.error(
+          `HandleCoordinates was invoked with incorrect parameters. Expecting an array with coordinate-information but got ${typeof payload}`
+        );
+        return null;
+      }
+      // Otherwise, we'll initiate an array where we're gonna store coordinate features
+      const coordinateFeatures = [];
+      // Then we'll create an OL-feature for each coordinate-information-object and append it to the array
+      payload.forEach((coordinateInfo) => {
+        // The coordinates sent from vision are sent with northing on the X-axis and easting on the Y-axis...
+        const { northing, easting, label } = coordinateInfo;
+        coordinateFeatures.push(
+          new Feature({
+            geometry: new Point([northing, easting]),
+            VISION_TYPE: "COORDINATES",
+            VISION_LABEL: label || "",
+            FEATURE_TITLE: `Nord: ${parseInt(easting)}, Öst: ${parseInt(
+              northing
+            )}`,
+          })
+        );
+      });
+      // Then we have to set random id's on each feature (since OL doesn't...)
+      coordinateFeatures.forEach((f) => {
+        f.setId(generateRandomString());
+      });
+      // Finally, we'll publish a message with the array of coordinate-features
+      this.#localObserver.publish(
+        "coordinates-received-from-vision",
+        coordinateFeatures
       );
-    });
-    // Then we have to set random id's on each feature (since OL doesn't...)
-    coordinateFeatures.forEach((f) => {
-      f.setId(generateRandomString());
-    });
-    // Finally, we'll publish a message with the array of coordinate-features
-    this.#localObserver.publish(
-      "coordinates-received-from-vision",
-      coordinateFeatures
-    );
+    } catch (error) {
+      console.error(`Could not show coordinates. ${error}`);
+    }
   };
 
   // Handles when Vision is asking the map to show the features connected to the supplied id's.
   #handleVisionAskingToShowFeatures = async (payload) => {
-    // If the edit-mode is enabled, we don't want to let the user mess with anything else...
-    if (this.#editEnabled) {
-      return;
-    }
-    // First we'll have to make sure we were supplied an array (we're expecting the payload
-    // to consist of an array with feature-information).
-    if (!Array.isArray(payload)) {
-      console.error(
-        `HandleVisionAskingToShowFeatures was invoked with incorrect parameters. Expecting an array with feature-information but got ${typeof payload}`
+    try {
+      this.#log(`HandleFeatures caught! Payload: ${JSON.stringify(payload)}`);
+      // If the edit-mode is enabled, we don't want to let the user mess with anything else...
+      if (this.#editEnabled) {
+        this.#log(
+          "handleVisionAskingToShowFeatures fired but editing is enabled... Aborting."
+        );
+        return;
+      }
+      // First we'll have to make sure we were supplied an array (we're expecting the payload
+      // to consist of an array with feature-information).
+      if (!Array.isArray(payload)) {
+        console.error(
+          `HandleFeatures was invoked with incorrect parameters. Expecting an array with feature-information but got ${typeof payload}`
+        );
+        return null;
+      }
+      if (
+        payload.some((o) => {
+          return !o.type || !o.id || o.type !== payload[0].type;
+        })
+      ) {
+        console.error(
+          `HandleFeatures was invoked with incorrect parameters. 
+          Expecting an array with objects containing 'id' <string> and 'type' <integer>. 
+          All objects must have the same type. Got ${JSON.stringify(payload)}`
+        );
+        return null;
+      }
+      // Since the payload can only contain information connected to one type, we can get the type from the first entry...
+      // (The type is an integer which corresponds to an environment type, see the constants for more info).
+      const type = payload[0].type;
+      // Since 'features' are really environment-objects, we have to get the environment-settings.
+      // We can get the appropriate setting by providing the type (which should correspond to the correct settings).
+      const environmentSettings = this.getEnvironmentInfoFromId(type);
+      // When we have the settings, we can get the search-source etc. so that we can fetch the features connected to the provided id's.
+      const environmentSearchSource = this.getSearchSourceFromId(
+        environmentSettings.wfsId
       );
-      return null;
-    }
-    if (
-      payload.some((o) => {
-        return !o.type || !o.id || o.type !== payload[0].type;
-      })
-    ) {
-      console.error(
-        `HandleVisionAskingToShowFeatures was invoked with incorrect parameters. 
-        Expecting an array with objects containing 'id' <string> and 'type' <integer>. 
-        All objects must have the same type. Got ${JSON.stringify(payload)}`
+      // We have to make sure we have a proper search-source
+      if (!environmentSearchSource) {
+        console.error(
+          `HandleFeatures was invoked but could not be handled. No search-source is configured.`
+        );
+        return null;
+      }
+      // When we've got the search-source, we can go ahead and create the search-string.
+      // First, we'll need the search key...
+      const searchKey = environmentSettings.searchKey || "id";
+      // If we were supplied more than one feature-info, we can try to construct an "or-separator"-separated search-string
+      // (Vision might be trying to show several features, in that case we'll get the search-key for each
+      // feature-object and construct a "or-separator"-separated string with these. The search-model will make sure
+      // to create an OR-filter for each key in the "or-separator"-separated string).
+      const searchString = payload
+        .map((f) => f[searchKey] || "")
+        .join(this.#orSeparator);
+      // When the string is constructed, we can conduct a search
+      const searchResult = await this.#searchModel.getResults(
+        searchString,
+        [environmentSearchSource],
+        this.#searchOptions
       );
-      return null;
+      // When the search is done, we'll get two objects:
+      // 1: The feature-collections (one for each source)
+      // 2: The potential errors (one for each source)
+      // Since we know we're dealing with one source here, we can just grab the [0]th
+      const { featureCollections, errors } = searchResult;
+      // If we got an error, or if the results are missing, we have to prompt the user in some way...
+      if (errors[0] || !featureCollections[0]) {
+        // TODO: this.#localObserver.publish("estate-search-failed");
+        return null;
+      }
+      // If we didn't, we can grab the first featureCollection, which will include our results
+      const featureCollection = featureCollections[0];
+      // Then we can grab the resulting features
+      const features = featureCollection.value.features || [];
+      // We're gonna want to show a feature title in several places. Let's put the title
+      // directly on the feature so we don't have to construct it several times.
+      features.forEach((f) => {
+        this.#setFeatureTitle(f, environmentSearchSource.displayFields);
+      });
+      // Finally we'll publish an event with the features that were found
+      this.#localObserver.publish("environment-search-completed", {
+        features,
+        typeId: type,
+      });
+    } catch (error) {
+      console.error(`Could not environment features. ${error}`);
     }
-    // Since the payload can only contain information connected to one type, we can get the type from the first entry...
-    // (The type is an integer which corresponds to an environment type, see the constants for more info).
-    const type = payload[0].type;
-    // Since 'features' are really environment-objects, we have to get the environment-settings.
-    // We can get the appropriate setting by providing the type (which should correspond to the correct settings).
-    const environmentSettings = this.getEnvironmentInfoFromId(type);
-    // When we have the settings, we can get the search-source etc. so that we can fetch the features connected to the provided id's.
-    const environmentSearchSource = this.getSearchSourceFromId(
-      environmentSettings.wfsId
-    );
-    // We have to make sure we have a proper search-source
-    if (!environmentSearchSource) {
-      console.error(
-        `HandleVisionAskingToShowFeatures was invoked but could not be handled. No search-source is configured.`
-      );
-      return null;
-    }
-    // When we've got the search-source, we can go ahead and create the search-string.
-    // First, we'll need the search key...
-    const searchKey = environmentSettings.searchKey || "id";
-    // If we were supplied more than one feature-info, we can try to construct an "or-separator"-separated search-string
-    // (Vision might be trying to show several features, in that case we'll get the search-key for each
-    // feature-object and construct a "or-separator"-separated string with these. The search-model will make sure
-    // to create an OR-filter for each key in the "or-separator"-separated string).
-    const searchString = payload
-      .map((f) => f[searchKey] || "")
-      .join(this.#orSeparator);
-    // When the string is constructed, we can conduct a search
-    const searchResult = await this.#searchModel.getResults(
-      searchString,
-      [environmentSearchSource],
-      this.#searchOptions
-    );
-    // When the search is done, we'll get two objects:
-    // 1: The feature-collections (one for each source)
-    // 2: The potential errors (one for each source)
-    // Since we know we're dealing with one source here, we can just grab the [0]th
-    const { featureCollections, errors } = searchResult;
-    // If we got an error, or if the results are missing, we have to prompt the user in some way...
-    if (errors[0] || !featureCollections[0]) {
-      // TODO: this.#localObserver.publish("estate-search-failed");
-      return null;
-    }
-    // If we didn't, we can grab the first featureCollection, which will include our results
-    const featureCollection = featureCollections[0];
-    // Then we can grab the resulting features
-    const features = featureCollection.value.features || [];
-    // We're gonna want to show a feature title in several places. Let's put the title
-    // directly on the feature so we don't have to construct it several times.
-    features.forEach((f) => {
-      this.#setFeatureTitle(f, environmentSearchSource.displayFields);
-    });
-    // Finally we'll publish an event with the features that were found
-    this.#localObserver.publish("environment-search-completed", {
-      features,
-      typeId: type,
-    });
   };
 
   // Handler for when vision asks for a geometry to be connected to the supplied object.
   // (Vision asks for a geometry, we enable edit-mode, and return a geometry when the user is done drawing).
   #handleVisionAskingForFeatureGeometry = async (payload) => {
-    // If the edit-mode is enabled, we don't want to let the user mess with anything else...
-    if (this.#editEnabled) {
-      return;
-    }
-    // If no id and type is supplied, we cannot allow the user to start drawing...
-    const { id, type } = payload;
-    if (!id || !type) {
-      console.error(
-        `HandleAskForFeatureGeometry was invoked with bad parameters. 'id' and 'type' is required. Got: ${JSON.stringify(
+    try {
+      this.#log(
+        `HandleAskingForFeatureGeometry caught! Payload: ${JSON.stringify(
           payload
         )}`
       );
-      return null;
+      // If the edit-mode is enabled, we don't want to let the user mess with anything else...
+      if (this.#editEnabled) {
+        return;
+      }
+      // If no id and type is supplied, we cannot allow the user to start drawing...
+      const { id, type } = payload;
+      if (!id || !type) {
+        console.error(
+          `HandleAskForFeatureGeometry was invoked with bad parameters. 'id' and 'type' is required. Got: ${JSON.stringify(
+            payload
+          )}`
+        );
+        return null;
+      }
+      // If we got OK parameters, we can get the proper search-source to find eventual existing geometries
+      // First we'll have to get the settings so we can get the wfs-id etc.
+      const environmentSettings = this.getEnvironmentInfoFromId(type);
+      // Let's publish an event that will make sure the edit mode is activated...
+      // The first status will be "SEARCH_LOADING" since we always want to check if geometries
+      // already exists or not...
+      this.#localObserver.publish("set-edit-state", {
+        mode: EDIT_STATUS.SEARCH_LOADING,
+        features: [],
+        mapInteraction: MAP_INTERACTIONS.EDIT_NONE,
+        text: `Letar efter ${environmentSettings.name.toLowerCase()} med id: ${id}`,
+      });
+      // Then we can get the search-source...
+      const source = this.getSearchSourceFromId(environmentSettings.wfsId);
+      // We have to make sure we have a proper search-source
+      if (!source) {
+        console.error(
+          `HandleAskForFeatureGeometry was invoked but could not be handled. No search-source is configured.`
+        );
+        return null;
+      }
+      // When we've got the search-source, we can go ahead and conduct the search
+      const searchResult = await this.#searchModel.getResults(id, [source]);
+      const { featureCollections, errors } = searchResult;
+      // If we got an error, or if the results are missing, we have to prompt the user in some way...
+      if (errors[0] || !featureCollections[0]) {
+        // TODO: this.#localObserver.publish("edit-search-failed");
+        return null;
+      }
+      // If we didn't, we can grab the first featureCollection, which will include our results
+      const featureCollection = featureCollections[0];
+      // Then we can grab the resulting features
+      const features = featureCollection.value.features || [];
+      // Let's zoom to the potential features so that the user doesn't miss that they
+      // already have some features...
+      this.#mapViewModel.zoomToFeatures(features);
+      // Let's make sure to set unique ids on the edit-features so that they cannot be mixed up with
+      // "regular" features.
+      features.forEach((f) => {
+        f.setId(generateRandomString());
+      });
+      // When the search is done, we'll publish an event so that the view can update...
+      this.#localObserver.publish("set-edit-state", {
+        mode: EDIT_STATUS.ACTIVE,
+        features,
+        mapInteraction: MAP_INTERACTIONS.EDIT_NONE,
+        text: `Du uppdaterar geometrin för ${environmentSettings.name.toLowerCase()} med id: ${id}.`,
+      });
+    } catch (error) {
+      console.error(`Could not enable editing... Error: ${error}`);
     }
-    // If we got OK parameters, we can get the proper search-source to find eventual existing geometries
-    // First we'll have to get the settings so we can get the wfs-id etc.
-    const environmentSettings = this.getEnvironmentInfoFromId(type);
-    // Let's publish an event that will make sure the edit mode is activated...
-    // The first status will be "SEARCH_LOADING" since we always want to check if geometries
-    // already exists or not...
-    this.#localObserver.publish("set-edit-state", {
-      mode: EDIT_STATUS.SEARCH_LOADING,
-      features: [],
-      mapInteraction: MAP_INTERACTIONS.EDIT_NONE,
-      text: `Letar efter ${environmentSettings.name.toLowerCase()} med id: ${id}`,
-    });
-    // Then we can get the search-source...
-    const source = this.getSearchSourceFromId(environmentSettings.wfsId);
-    // We have to make sure we have a proper search-source
-    if (!source) {
-      console.error(
-        `HandleAskForFeatureGeometry was invoked but could not be handled. No search-source is configured.`
-      );
-      return null;
-    }
-    // When we've got the search-source, we can go ahead and conduct the search
-    const searchResult = await this.#searchModel.getResults(id, [source]);
-    const { featureCollections, errors } = searchResult;
-    // If we got an error, or if the results are missing, we have to prompt the user in some way...
-    if (errors[0] || !featureCollections[0]) {
-      // TODO: this.#localObserver.publish("edit-search-failed");
-      return null;
-    }
-    // If we didn't, we can grab the first featureCollection, which will include our results
-    const featureCollection = featureCollections[0];
-    // Then we can grab the resulting features
-    const features = featureCollection.value.features || [];
-    // Let's zoom to the potential features so that the user doesn't miss that they
-    // already have some features...
-    this.#mapViewModel.zoomToFeatures(features);
-    // Let's make sure to set unique ids on the edit-features so that they cannot be mixed up with
-    // "regular" features.
-    features.forEach((f) => {
-      f.setId(generateRandomString());
-    });
-    // When the search is done, we'll publish an event so that the view can update...
-    this.#localObserver.publish("set-edit-state", {
-      mode: EDIT_STATUS.ACTIVE,
-      features,
-      mapInteraction: MAP_INTERACTIONS.EDIT_NONE,
-      text: `Du uppdaterar geometrin för ${environmentSettings.name.toLowerCase()} med id: ${id}.`,
-    });
   };
 
   // Handler for when Vision sends feedback regarding the geometry that was recently saved
   #handleVisionSendingOperationFeedback = (payload) => {
+    this.#log(
+      `HandleOperationFeedback caught! Payload: ${JSON.stringify(payload)}`
+    );
     // First we'll make sure to update the view state
     this.#localObserver.publish("set-edit-state", {
       mode: EDIT_STATUS.SAVE_SUCCESS,
