@@ -15,7 +15,6 @@ import {
 import DrawOrderListItem from "./DrawOrderListItem";
 import DrawOrderOptions from "./DrawOrderOptions";
 
-import SourceOutlinedIcon from "@mui/icons-material/SourceOutlined";
 import VisibilityOffOutlinedIcon from "@mui/icons-material/VisibilityOffOutlined";
 import VisibilityOutlinedIcon from "@mui/icons-material/VisibilityOutlined";
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
@@ -293,7 +292,7 @@ function DrawOrder({ display, app, map, onLayerChange }) {
   };
 
   return (
-    <Box sx={{ display: display ? "block" : "none", mx: "-10px", mt: "-10px" }}>
+    <Box sx={{ display: display ? "block" : "none" }}>
       <Box
         sx={{
           pr: 2,
@@ -318,11 +317,6 @@ function DrawOrder({ display, app, map, onLayerChange }) {
           <IconButton onClick={handleInfoButtonClick}>
             <Tooltip title={infoIsActive ? "Dölj info" : "Visa info"}>
               <InfoOutlinedIcon />
-            </Tooltip>
-          </IconButton>
-          <IconButton>
-            <Tooltip title="Tema">
-              <SourceOutlinedIcon />
             </Tooltip>
           </IconButton>
           <DrawOrderOptions

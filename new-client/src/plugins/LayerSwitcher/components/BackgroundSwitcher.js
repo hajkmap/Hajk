@@ -283,7 +283,7 @@ class BackgroundSwitcher extends React.PureComponent {
 
   render() {
     return (
-      <Box sx={{ display: this.props.display ? "block" : "none" }}>
+      <Box sx={{ display: this.props.display ? "block" : "none", p: 1 }}>
         {this.renderBaseLayerComponents()}
       </Box>
     );
