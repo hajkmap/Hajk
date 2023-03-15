@@ -411,14 +411,23 @@ export default class PrintModel {
     return `${Number(scaleBarLengthMeters).toLocaleString("sv-SE")} ${units}`;
   };
 
-  getNumLinesAndDivider = (scaleBarLengthMeters, scaleBarLength) => {
-    const scaleBarLengthMetersStr = scaleBarLengthMeters.toString();
-    const scaleLength = scaleBarLengthMetersStr.startsWith("10")
-      ? scaleBarLengthMetersStr.length - 2
-      : scaleBarLengthMetersStr.length - 1;
+  getNumLinesArrayAndDivider = (scaleBarLengthMeters, scaleBarLength) => {
+    const scaleLength = scaleBarLengthMeters.toString().startsWith("5")
+      ? scaleBarLengthMeters.toString().length - 1
+      : scaleBarLengthMeters.toString().length - 2;
     const divider = scaleBarLengthMeters / Math.pow(10, scaleLength);
     const numLines = scaleBarLength / divider;
-    return { numLines, divider };
+
+    let numLinesArray = [];
+    for (
+      let divLine = numLines;
+      divLine < scaleBarLength;
+      divLine += numLines
+    ) {
+      numLinesArray.push(divLine);
+    }
+
+    return { numLinesArray, divider };
   };
 
   addDividerLinesAndTexts = (props) => {
@@ -427,17 +436,17 @@ export default class PrintModel {
     if (this.scaleBarLengths[props.scale]) this.addDividerTexts(props);
   };
 
-  drawDividerLines = ({
+  drawDividerLines({
     pdf,
     scaleBarPosition,
     scaleBarLength,
     color,
     scaleBarLengthMeters,
-  }) => {
+  }) {
+    // Set line width and color
     pdf.setLineWidth(0.25).setDrawColor(color);
 
-    // Here we draw the starting-, finsh-, middle- and through-line of the scalebar:
-    // Like this: |----I----|
+    // Draw starting, finish, and through lines
     pdf.line(
       scaleBarPosition.x,
       scaleBarPosition.y + 3,
@@ -457,24 +466,41 @@ export default class PrintModel {
       scaleBarPosition.y + 5
     );
 
-    const { numLines, divider } = this.getNumLinesAndDivider(
+    // Get number of lines we will draw below
+    const { numLinesArray, divider } = this.getNumLinesArrayAndDivider(
       scaleBarLengthMeters,
       scaleBarLength
     );
 
-    for (
-      let divLine = numLines;
-      divLine <= scaleBarLength;
-      divLine += numLines
-    ) {
+    // Here we draw the dividing lines marking 10 (or 100) meters each
+    numLinesArray.forEach((divLine) => {
+      const largerMiddleLineValue =
+        numLinesArray.length === 10 && divLine === numLinesArray[4] ? 0.7 : 0;
       pdf.line(
         scaleBarPosition.x + divLine,
-        scaleBarPosition.y + 2,
+        scaleBarPosition.y + 1.9 - largerMiddleLineValue,
         scaleBarPosition.x + divLine,
-        scaleBarPosition.y + 4
+        scaleBarPosition.y + 4.1 + largerMiddleLineValue
       );
+    });
+
+    // If scalebar is long enough, we draw added lines between 0 and the first number
+    if (scaleBarLength > 50) {
+      const numLine = numLinesArray[0] / 5;
+      for (
+        let divLine = numLine;
+        divLine < numLinesArray[0];
+        divLine += numLine
+      ) {
+        pdf.line(
+          scaleBarPosition.x + divLine,
+          scaleBarPosition.y + 2.25,
+          scaleBarPosition.x + divLine,
+          scaleBarPosition.y + 3.85
+        );
+      }
     }
-  };
+  }
 
   addDividerTexts = ({
     pdf,
@@ -487,39 +513,46 @@ export default class PrintModel {
     pdf.setTextColor(color);
 
     // Here we set the number 0 at the start of the scalebar
-    pdf.text("0", scaleBarPosition.x - 0.7, scaleBarPosition.y + 8);
+    pdf.text("0", scaleBarPosition.x - 0.7, scaleBarPosition.y + 9);
 
-    if (scaleBarLength < 45) {
-      return;
-    } else {
-      const calculatedScaleBarLengthMeters =
-        scaleBarLengthMeters > 1000
-          ? (scaleBarLengthMeters / 1000).toString()
-          : scaleBarLengthMeters;
-      let dividerTextNumberCounter = 1;
+    const calculatedScaleBarLengthMeters =
+      scaleBarLengthMeters > 1000
+        ? (scaleBarLengthMeters / 1000).toString()
+        : scaleBarLengthMeters;
 
-      const { numLines, divider } = this.getNumLinesAndDivider(
-        scaleBarLengthMeters,
-        scaleBarLength
-      );
+    const { numLinesArray, divider } = this.getNumLinesArrayAndDivider(
+      scaleBarLengthMeters,
+      scaleBarLength
+    );
 
-      for (
-        let divLine = numLines;
-        divLine <= scaleBarLength;
-        divLine += numLines
-      ) {
-        let dividerTextNumber =
-          (calculatedScaleBarLengthMeters / divider) * dividerTextNumberCounter;
-        let dividerText = dividerTextNumber.toLocaleString("sv-SE");
+    let dividerTextNumber = calculatedScaleBarLengthMeters / divider;
+    let dividerText = dividerTextNumber.toLocaleString("sv-SE");
+    pdf.text(
+      dividerText,
+      scaleBarPosition.x + numLinesArray[0] - dividerText.length,
+      scaleBarPosition.y + 9
+    );
 
-        if (dividerText !== calculatedScaleBarLengthMeters) {
-          pdf.text(
-            dividerText,
-            scaleBarPosition.x + divLine - dividerText.length,
-            scaleBarPosition.y + 8
-          );
-          dividerTextNumberCounter++;
-        }
+    const middleIndex = Math.floor(numLinesArray.length / 2);
+    dividerTextNumber =
+      (calculatedScaleBarLengthMeters / divider) * middleIndex;
+    dividerText = dividerTextNumber.toLocaleString("sv-SE");
+    pdf.text(
+      dividerText,
+      scaleBarPosition.x + numLinesArray[middleIndex - 1] - dividerText.length,
+      scaleBarPosition.y + 9
+    );
+
+    if (scaleBarLength > 50) {
+      if (scaleBarLengthMeters > 10 && scaleBarLengthMeters < 10000) {
+        const test = numLinesArray[0] / 5;
+        dividerTextNumber = calculatedScaleBarLengthMeters / divider / 5;
+        dividerText = dividerTextNumber.toLocaleString("sv-SE");
+        pdf.text(
+          dividerText,
+          scaleBarPosition.x + test - dividerText.length,
+          scaleBarPosition.y + 9
+        );
       }
     }
   };
