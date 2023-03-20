@@ -408,24 +408,32 @@ export default class PrintModel {
       scaleBarLengthMeters /= 1000;
       units = "km";
     }
-    return `${Number(scaleBarLengthMeters).toLocaleString("sv-SE")} ${units}`;
+    return `${Number(scaleBarLengthMeters).toLocaleString()} ${units}`;
   };
 
   getNumLinesArrayAndDivider = (scaleBarLengthMeters, scaleBarLength) => {
-    const scaleLength = scaleBarLengthMeters.toString().startsWith("5")
-      ? scaleBarLengthMeters.toString().length - 1
-      : scaleBarLengthMeters.toString().length - 2;
+    const scaleBarLengthMetersStr = scaleBarLengthMeters.toString();
+    const scaleBarFirstDigits = parseInt(
+      scaleBarLengthMetersStr.substring(0, 2)
+    );
+    const startsWithDoubleDigits =
+      scaleBarFirstDigits >= 10 && scaleBarFirstDigits <= 19;
+    const scaleLength = startsWithDoubleDigits
+      ? scaleBarLengthMetersStr.length - 2
+      : scaleBarLengthMetersStr.length - 1;
     const divider = scaleBarLengthMeters / Math.pow(10, scaleLength);
     const numLines = scaleBarLength / divider;
 
     let numLinesArray = [];
     for (
       let divLine = numLines;
-      divLine < scaleBarLength;
+      divLine <= scaleBarLength;
       divLine += numLines
     ) {
       numLinesArray.push(divLine);
     }
+
+    console.log(numLinesArray);
 
     return { numLinesArray, divider };
   };
@@ -433,6 +441,8 @@ export default class PrintModel {
   addDividerLinesAndTexts = (props) => {
     this.drawDividerLines(props);
 
+    // We want to make sure that given scale is a set scale in our admin settings...
+    // to ensure the text has correct spacing
     if (this.scaleBarLengths[props.scale]) this.addDividerTexts(props);
   };
 
@@ -466,7 +476,7 @@ export default class PrintModel {
       scaleBarPosition.y + 5
     );
 
-    // Get number of lines we will draw below
+    // Here we get number of lines we will draw below
     const { numLinesArray, divider } = this.getNumLinesArrayAndDivider(
       scaleBarLengthMeters,
       scaleBarLength
@@ -484,8 +494,8 @@ export default class PrintModel {
       );
     });
 
-    // If scalebar is long enough, we draw added lines between 0 and the first number
-    if (scaleBarLength > 50) {
+    // If scalebar is long enough, we draw additional lines between 0 and the first number
+    if (scaleBarLength > 60) {
       const numLine = numLinesArray[0] / 5;
       for (
         let divLine = numLine;
@@ -513,47 +523,58 @@ export default class PrintModel {
     pdf.setTextColor(color);
 
     // Here we set the number 0 at the start of the scalebar
-    pdf.text("0", scaleBarPosition.x - 0.7, scaleBarPosition.y + 9);
+    pdf.text("0", scaleBarPosition.x - 0.7, scaleBarPosition.y + 8);
 
+    const hasAdditionalDivLines =
+      scaleBarLength > 60 &&
+      scaleBarLengthMeters > 10 &&
+      scaleBarLengthMeters < 10000;
+
+    // Here we convert the scaleBarLengthMeters to km if above 1000
     const calculatedScaleBarLengthMeters =
       scaleBarLengthMeters > 1000
         ? (scaleBarLengthMeters / 1000).toString()
         : scaleBarLengthMeters;
 
+    // Here we get number of lines we will draw below
     const { numLinesArray, divider } = this.getNumLinesArrayAndDivider(
       scaleBarLengthMeters,
       scaleBarLength
     );
 
+    // Here we add the first number after 0
     let dividerTextNumber = calculatedScaleBarLengthMeters / divider;
-    let dividerText = dividerTextNumber.toLocaleString("sv-SE");
+    let dividerText = dividerTextNumber.toLocaleString();
     pdf.text(
       dividerText,
       scaleBarPosition.x + numLinesArray[0] - dividerText.length,
-      scaleBarPosition.y + 9
+      scaleBarPosition.y + 8
     );
 
+    // Here we add the middle number or if no middle exists...
+    // a number that lies before and close to the middle
     const middleIndex = Math.floor(numLinesArray.length / 2);
     dividerTextNumber =
       (calculatedScaleBarLengthMeters / divider) * middleIndex;
-    dividerText = dividerTextNumber.toLocaleString("sv-SE");
+    dividerText = dividerTextNumber.toLocaleString();
     pdf.text(
       dividerText,
       scaleBarPosition.x + numLinesArray[middleIndex - 1] - dividerText.length,
-      scaleBarPosition.y + 9
+      scaleBarPosition.y + 8
     );
 
-    if (scaleBarLength > 50) {
-      if (scaleBarLengthMeters > 10 && scaleBarLengthMeters < 10000) {
-        const test = numLinesArray[0] / 5;
-        dividerTextNumber = calculatedScaleBarLengthMeters / divider / 5;
-        dividerText = dividerTextNumber.toLocaleString("sv-SE");
-        pdf.text(
-          dividerText,
-          scaleBarPosition.x + test - dividerText.length,
-          scaleBarPosition.y + 9
-        );
-      }
+    // Here we add a number to the first additional division line but only if scalebar...
+    // is longer than 50 pixels and scalebarlengthMeters is larger than 10 and...
+    // smaller than 10000 to ensure we avoid decimals
+    if (hasAdditionalDivLines) {
+      const test = numLinesArray[0] / 5;
+      dividerTextNumber = calculatedScaleBarLengthMeters / divider / 5;
+      dividerText = dividerTextNumber.toLocaleString();
+      pdf.text(
+        dividerText,
+        scaleBarPosition.x + test - dividerText.length,
+        scaleBarPosition.y + 8
+      );
     }
   };
 
