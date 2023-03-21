@@ -433,8 +433,6 @@ export default class PrintModel {
       numLinesArray.push(divLine);
     }
 
-    console.log(numLinesArray);
-
     return { numLinesArray, divider };
   };
 
@@ -494,8 +492,9 @@ export default class PrintModel {
       );
     });
 
-    // If scalebar is long enough, we draw additional lines between 0 and the first number
-    if (scaleBarLength > 60) {
+    // If the space between 0 and the first number on the scalebar is long enough...
+    // we draw additional lines between 0 and the first number
+    if (numLinesArray[0] > 10) {
       const numLine = numLinesArray[0] / 5;
       for (
         let divLine = numLine;
@@ -525,11 +524,6 @@ export default class PrintModel {
     // Here we set the number 0 at the start of the scalebar
     pdf.text("0", scaleBarPosition.x - 0.7, scaleBarPosition.y + 8);
 
-    const hasAdditionalDivLines =
-      scaleBarLength > 60 &&
-      scaleBarLengthMeters > 10 &&
-      scaleBarLengthMeters < 10000;
-
     // Here we convert the scaleBarLengthMeters to km if above 1000
     const calculatedScaleBarLengthMeters =
       scaleBarLengthMeters > 1000
@@ -541,6 +535,8 @@ export default class PrintModel {
       scaleBarLengthMeters,
       scaleBarLength
     );
+
+    const scaleBarHasSpace = numLinesArray[0] > 10 && scaleBarLengthMeters > 10;
 
     // Here we add the first number after 0
     let dividerTextNumber = calculatedScaleBarLengthMeters / divider;
@@ -566,7 +562,7 @@ export default class PrintModel {
     // Here we add a number to the first additional division line but only if scalebar...
     // is longer than 50 pixels and scalebarlengthMeters is larger than 10 and...
     // smaller than 10000 to ensure we avoid decimals
-    if (hasAdditionalDivLines) {
+    if (scaleBarHasSpace) {
       const test = numLinesArray[0] / 5;
       dividerTextNumber = calculatedScaleBarLengthMeters / divider / 5;
       dividerText = dividerTextNumber.toLocaleString();
