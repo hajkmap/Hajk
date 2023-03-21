@@ -422,18 +422,18 @@ export default class PrintModel {
       ? scaleBarLengthMetersStr.length - 2
       : scaleBarLengthMetersStr.length - 1;
     const divider = scaleBarLengthMeters / Math.pow(10, scaleLength);
-    const numLines = scaleBarLength / divider;
+    const divLineDistance = scaleBarLength / divider;
 
-    let numLinesArray = [];
+    let divLinesArray = [];
     for (
-      let divLine = numLines;
+      let divLine = divLineDistance;
       divLine <= scaleBarLength;
-      divLine += numLines
+      divLine += divLineDistance
     ) {
-      numLinesArray.push(divLine);
+      divLinesArray.push(divLine);
     }
 
-    return { numLinesArray, divider };
+    return { numLinesArray: divLinesArray, divider };
   };
 
   addDividerLinesAndTexts = (props) => {
@@ -475,15 +475,15 @@ export default class PrintModel {
     );
 
     // Here we get number of lines we will draw below
-    const { numLinesArray, divider } = this.getNumLinesArrayAndDivider(
+    const { divLinesArray, divider } = this.getNumLinesArrayAndDivider(
       scaleBarLengthMeters,
       scaleBarLength
     );
 
     // Here we draw the dividing lines marking 10 (or 100) meters each
-    numLinesArray.forEach((divLine) => {
+    divLinesArray.forEach((divLine) => {
       const largerMiddleLineValue =
-        numLinesArray.length === 10 && divLine === numLinesArray[4] ? 0.7 : 0;
+        divLinesArray.length === 10 && divLine === divLinesArray[4] ? 0.7 : 0;
       pdf.line(
         scaleBarPosition.x + divLine,
         scaleBarPosition.y + 1.9 - largerMiddleLineValue,
@@ -494,11 +494,11 @@ export default class PrintModel {
 
     // If the space between 0 and the first number on the scalebar is long enough...
     // we draw additional lines between 0 and the first number
-    if (numLinesArray[0] > 10) {
-      const numLine = numLinesArray[0] / 5;
+    if (divLinesArray[0] > 10) {
+      const numLine = divLinesArray[0] / 5;
       for (
         let divLine = numLine;
-        divLine < numLinesArray[0];
+        divLine < divLinesArray[0];
         divLine += numLine
       ) {
         pdf.line(
@@ -531,44 +531,47 @@ export default class PrintModel {
         : scaleBarLengthMeters;
 
     // Here we get number of lines we will draw below
-    const { numLinesArray, divider } = this.getNumLinesArrayAndDivider(
+    const { divLinesArray, divider } = this.getNumLinesArrayAndDivider(
       scaleBarLengthMeters,
       scaleBarLength
     );
 
-    const scaleBarHasSpace = numLinesArray[0] > 10 && scaleBarLengthMeters > 10;
+    const scaleBarHasSpace = divLinesArray[0] > 10 && scaleBarLengthMeters > 10;
 
     // Here we add the first number after 0
-    let dividerTextNumber = calculatedScaleBarLengthMeters / divider;
-    let dividerText = dividerTextNumber.toLocaleString();
+    let divNr = calculatedScaleBarLengthMeters / divider;
+    let divNrString = divNr.toLocaleString();
     pdf.text(
-      dividerText,
-      scaleBarPosition.x + numLinesArray[0] - dividerText.length,
+      divNrString,
+      scaleBarPosition.x + divLinesArray[0] - divNrString.length,
       scaleBarPosition.y + 8
     );
 
     // Here we add the middle number or if no middle exists...
-    // a number that lies before and close to the middle
-    const middleIndex = Math.floor(numLinesArray.length / 2);
-    dividerTextNumber =
-      (calculatedScaleBarLengthMeters / divider) * middleIndex;
-    dividerText = dividerTextNumber.toLocaleString();
+    // a number thats close to the middle
+    const midIndex = Math.floor(divLinesArray.length / 2);
+    divNr = (calculatedScaleBarLengthMeters / divider) * midIndex;
+    divNrString = divNr.toLocaleString();
     pdf.text(
-      dividerText,
-      scaleBarPosition.x + numLinesArray[middleIndex - 1] - dividerText.length,
+      divNrString,
+      scaleBarPosition.x + divLinesArray[midIndex - 1] - divNrString.length,
       scaleBarPosition.y + 8
     );
 
-    // Here we add a number to the first additional division line but only if scalebar...
-    // is longer than 50 pixels and scalebarlengthMeters is larger than 10 and...
-    // smaller than 10000 to ensure we avoid decimals
+    // Here we add a number to the first additional division line but only if scaleBar has space
     if (scaleBarHasSpace) {
-      const test = numLinesArray[0] / 5;
-      dividerTextNumber = calculatedScaleBarLengthMeters / divider / 5;
-      dividerText = dividerTextNumber.toLocaleString();
+      const dividerNrPosition = divLinesArray[0] / 5;
+      divNr = calculatedScaleBarLengthMeters / divider / 5;
+      divNrString = divNr.toLocaleString();
+
+      // We need to make sure correct placement if dividerString is a fraction number
+      const dividerStrLength = divNrString.includes(",")
+        ? divNrString.length - 1
+        : divNrString.length;
+
       pdf.text(
-        dividerText,
-        scaleBarPosition.x + test - dividerText.length,
+        divNrString,
+        scaleBarPosition.x + dividerNrPosition - dividerStrLength,
         scaleBarPosition.y + 8
       );
     }
