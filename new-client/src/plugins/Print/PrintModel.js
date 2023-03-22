@@ -71,18 +71,13 @@ export default class PrintModel {
   }
 
   defaultScaleBarLengths = {
-    100: 10,
     200: 10,
-    250: 10,
-    400: 50,
     500: 50,
     1000: 100,
     2000: 200,
-    2500: 300,
     5000: 500,
     10000: 1000,
     20000: 2000,
-    25000: 2000,
     50000: 5000,
     100000: 10000,
     200000: 20000,
@@ -412,29 +407,45 @@ export default class PrintModel {
     return `${Number(scaleBarLengthMeters).toLocaleString()} ${units}`;
   };
 
-  getNumLinesArrayAndDivider = (scaleBarLengthMeters, scaleBarLength) => {
+  // Divides scaleBarLength with correct number to get divisions lines every 1, 10 or 100 m or km.
+  // Example 1: If scaleBarLengthMeters is 1000 we divide by 10 to get 10 division lines every 100 meters.
+  // Example 2: If _scaleBarLengthMeters is 500 we divide by 5 to get 5 division lines every 10 meters.
+  getDivLinesArrayAndDivider = (scaleBarLengthMeters, scaleBarLength) => {
     const scaleBarLengthMetersStr = scaleBarLengthMeters.toString();
+    // Here we get the lengthMeters first two numbers.
     const scaleBarFirstDigits = parseInt(
       scaleBarLengthMetersStr.substring(0, 2)
     );
+    // We want to check if lengthMeters starts with 10 through 19 to make sure we divide correctly later.
     const startsWithDoubleDigits =
       scaleBarFirstDigits >= 10 && scaleBarFirstDigits <= 19;
+
+    // Here we set the scaleLength variable to the length of lengthMeters.
+    // For example, if lengthMeters is 1000 we want the scaleLength to be 10.
+    // And if lengthMeters is 500 we want the scaleLength to be 5.
     const scaleLength = startsWithDoubleDigits
       ? scaleBarLengthMetersStr.length - 2
       : scaleBarLengthMetersStr.length - 1;
-    const divider = scaleBarLengthMeters / Math.pow(10, scaleLength);
-    const divLineDistance = scaleBarLength / divider;
 
+    // Here we set the divider by dividing lengthMeters with 10 to the power of scaleLength...
+    // For example, if lengthMeters is 500 we want to divide it by 5 to get 5 division lines, each 100 meters...
+    // and if lengthMeters is 1 000 we want to divide it by 100.
+    const divider = scaleBarLengthMeters / Math.pow(10, scaleLength);
+    // Finally, we want to calculate the number of pixels between each division line on the scalebar
+    const divLinePixelsCount = scaleBarLength / divider;
+
+    // We loop through and fill the divLinesArray with the divLinePixelsCount...
+    // to get the correct division line distribution on the scalebar
     let divLinesArray = [];
     for (
-      let divLine = divLineDistance;
+      let divLine = divLinePixelsCount;
       divLine <= scaleBarLength;
-      divLine += divLineDistance
+      divLine += divLinePixelsCount
     ) {
       divLinesArray.push(divLine);
     }
 
-    return { numLinesArray: divLinesArray, divider };
+    return { divLinesArray, divider };
   };
 
   addDividerLinesAndTexts = (props) => {
@@ -476,7 +487,7 @@ export default class PrintModel {
     );
 
     // Here we get number of lines we will draw below
-    const { divLinesArray, divider } = this.getNumLinesArrayAndDivider(
+    const { divLinesArray, divider } = this.getDivLinesArrayAndDivider(
       scaleBarLengthMeters,
       scaleBarLength
     );
@@ -532,7 +543,7 @@ export default class PrintModel {
         : scaleBarLengthMeters;
 
     // Here we get number of lines we will draw below
-    const { divLinesArray, divider } = this.getNumLinesArrayAndDivider(
+    const { divLinesArray, divider } = this.getDivLinesArrayAndDivider(
       scaleBarLengthMeters,
       scaleBarLength
     );
@@ -565,10 +576,9 @@ export default class PrintModel {
       divNr = calculatedScaleBarLengthMeters / divider / 5;
       divNrString = divNr.toLocaleString();
 
-      // We need to make sure correct placement if dividerString is a fraction number
-      const dividerStrLength = divNrString.includes(",")
-        ? divNrString.length - 1
-        : divNrString.length;
+      // We need to make sure correct placement if divNr is a decimal number
+      const dividerStrLength =
+        divNr % 1 !== 0 ? divNrString.length - 1 : divNrString.length;
 
       pdf.text(
         divNrString,
