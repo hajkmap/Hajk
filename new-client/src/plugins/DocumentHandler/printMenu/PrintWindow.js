@@ -18,20 +18,19 @@ import {
   Grid,
   LinearProgress,
   Typography,
-  AppBar,
-  Tab,
-  Tabs,
-  Tooltip,
   List,
-  ListItem,
+  Modal,
   Link,
+  ListItemButton,
+  Box,
+  IconButton,
+  Tooltip,
 } from "@mui/material";
-import PrintIcon from "@mui/icons-material/Print";
-import SettingsIcon from "@mui/icons-material/Settings";
 
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import OpenInNewIcon from "@mui/icons-material/OpenInNew";
+import CloseIcon from "@mui/icons-material/Close";
 
 import { deepMerge } from "utils/DeepMerge";
 
@@ -87,6 +86,24 @@ const StyledGrid = styled(Grid)(({ theme }) => ({
   justifyContent: "flex-end",
 }));
 
+const StyledListItemButton = styled(ListItemButton)(({ theme, index }) => ({
+  display: "flex",
+  justifyContent: "space-between",
+  padding: "16px 10px 16px 10px",
+  borderBottom: "1px solid lightgray",
+  borderLeft: index % 2 === 0 ? "4px solid lightGray" : "4px solid darkGray",
+}));
+
+const StyledBox = styled(Box)(({ theme }) => ({
+  position: "absolute",
+  width: "50%",
+  height: "80%",
+  backgroundColor: "white",
+  border: "2px solid #000",
+  boxShadow: 24,
+  p: 4,
+}));
+
 const maxHeight = 950;
 const imageResizeRatio = 0.7;
 
@@ -109,6 +126,8 @@ class PrintWindow extends React.PureComponent {
     pdfLoading: false,
     isAnyDocumentSelected: false,
     showAttachments: false,
+    selectedPdfIndex: null,
+    isModalOpen: false,
   };
 
   internalId = 0;
@@ -925,6 +944,63 @@ class PrintWindow extends React.PureComponent {
     );
   };
 
+  handleOpenModal = (index) => {
+    this.setState({
+      selectedPdfIndex: index,
+      isModalOpen: true,
+    });
+  };
+
+  handleCloseModal = () => {
+    this.setState({
+      selectedPdfIndex: null,
+      isModalOpen: false,
+    });
+  };
+
+  renderModal = (pdfLinks) => {
+    return (
+      <Modal
+        open={this.state.isModalOpen}
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+      >
+        <Box
+          sx={{
+            position: "absolute",
+            width: "50%",
+            height: "80%",
+            backgroundColor: "white",
+            border: "2px solid #000",
+            boxShadow: 24,
+            p: 4,
+          }}
+        >
+          <IconButton
+            aria-label="close"
+            onClick={() => this.handleCloseModal()}
+            sx={{
+              position: "absolute",
+              right: 1,
+              top: 1,
+            }}
+          >
+            <CloseIcon />
+          </IconButton>
+          <iframe
+            title={pdfLinks[this.state.selectedPdfIndex]?.name}
+            src={pdfLinks[this.state.selectedPdfIndex]?.link}
+            width="100%"
+            height="100%"
+          />
+        </Box>
+      </Modal>
+    );
+  };
+
   renderPrintAttachments = () => {
     const { pdfLinks } = this.props.options;
 
@@ -933,18 +1009,44 @@ class PrintWindow extends React.PureComponent {
         <Typography align="center" variant="h6">
           Bilagor
         </Typography>
+        <Typography variant="h6">Innehåll</Typography>
         <List>
           {pdfLinks.map((pdfLink, index) => (
-            <ListItem sx={{ display: "flex" }} key={index}>
-              <Link href={pdfLink.link} target="_blank">
-                {pdfLink.name}
-              </Link>
-              <Button
-                onClick={() => window.open(pdfLink.link, "_blank").print()}
+            <div key={index}>
+              <StyledListItemButton
+                index={index}
+                key={index}
+                onClick={() => this.handleOpenModal(index)}
               >
-                Print
-              </Button>
-            </ListItem>
+                <Tooltip title={"Gå till länk"}>
+                  <Link
+                    href={pdfLink.link}
+                    target="_blank"
+                    onClick={(event) => {
+                      event.stopPropagation();
+                      window.open(pdfLink.link, "_blank");
+                    }}
+                  >
+                    {pdfLink.name}
+                  </Link>
+                </Tooltip>
+                <Button
+                  sx={{ height: "28px", padding: "10px" }}
+                  color="primary"
+                  variant="contained"
+                  startIcon={<OpenInNewIcon sx={{ width: "15px" }} />}
+                  onClick={(event) => {
+                    event.stopPropagation();
+                    window.open(pdfLink.link).print();
+                  }}
+                >
+                  <Typography variant="body2" justify="center">
+                    Skriv ut
+                  </Typography>
+                </Button>
+              </StyledListItemButton>
+              {this.state.isModalOpen && this.renderModal(pdfLinks)}
+            </div>
           ))}
         </List>
       </Grid>
