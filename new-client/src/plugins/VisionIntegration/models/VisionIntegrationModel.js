@@ -12,6 +12,7 @@ import {
   MAP_INTERACTIONS,
   MAP_INTERACTION_INFO,
 } from "../constants";
+import { MultiPolygon } from "ol/geom";
 
 // A simple class containing functionality that is used in the VisionIntegration-plugin.
 class VisionIntegrationModel {
@@ -764,7 +765,28 @@ class VisionIntegrationModel {
     });
     const editFeatures = this.#mapViewModel.getDrawnEditFeatures();
     try {
-      const wktString = this.#wktParser.writeFeatures(editFeatures);
+      // TODO: Clean up...
+      // OL does not implement WKT properly so i had to do some funky stuff...
+      let wktString = "";
+      switch (editFeatures.length) {
+        case 0:
+          wktString = "POLYGON EMPTY";
+          break;
+        case 1:
+          wktString = this.#wktParser.writeFeature(editFeatures[0]);
+          break;
+        default:
+          const multiPolygon = new Feature({
+            geometry: new MultiPolygon(
+              editFeatures.map((f) => f.getGeometry())
+            ),
+          });
+          wktString = this.#wktParser.writeFeature(multiPolygon);
+          break;
+      }
+
+      this.#log(`Sending WKT to vision! WKT: ${wktString}`);
+
       this.#hubConnection.invoke("SendGeometry", {
         wkt: wktString,
         srsId: this.#getMapSrsAsInteger(),
