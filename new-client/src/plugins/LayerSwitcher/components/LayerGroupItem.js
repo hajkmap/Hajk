@@ -422,6 +422,19 @@ class LayerGroupItem extends Component {
     );
     const toggleSettings = this.toggleSubLayerSettings.bind(this, index);
     const legendIcon = layer.layersInfo[subLayer].legendIcon;
+    const currentZoom = this.props.model.olMap.getView().getZoom();
+
+    const layerProperties = this.props.layer.getProperties();
+    const minZoom = layerProperties.minZoom;
+    const maxZoom = layerProperties.maxZoom;
+
+    const checkBoxColor = (theme) =>
+      !visible ||
+      (minZoom && currentZoom < minZoom) ||
+      (maxZoom && currentZoom > maxZoom)
+        ? theme.palette.warning.dark
+        : "";
+
     return (
       <LayerInfo key={index}>
         <LayerSummaryContainer>
@@ -432,7 +445,11 @@ class LayerGroupItem extends Component {
             onClick={this.toggleLayerVisible(subLayer)}
           >
             <CheckBoxWrapper>
-              {visible ? <CheckBoxIcon /> : <CheckBoxOutlineBlankIcon />}
+              {!visible ? (
+                <CheckBoxOutlineBlankIcon />
+              ) : (
+                <CheckBoxIcon sx={{ fill: checkBoxColor }} />
+              )}
             </CheckBoxWrapper>
             {legendIcon && this.renderLegendIcon(legendIcon)}
             <Caption>{layer.layersInfo[subLayer].caption}</Caption>
