@@ -352,20 +352,7 @@ class LayerGroupItem extends Component {
         (minZoom && currentZoom < minZoom) ||
         (maxZoom && currentZoom > maxZoom)
       ) {
-        this.zoomWarningSnack = this.props.enqueueSnackbar(
-          `Lagret "${
-            subLayer
-              ? layerProperties.layerInfo.layersInfo[subLayer].caption
-              : layerProperties.caption
-          }" är inte synligt vid aktuell zoomnivå.`,
-          {
-            variant: "warning",
-            preventDuplicate: true,
-            onClose: () => {
-              this.zoomWarningSnack = null;
-            },
-          }
-        );
+        this.showZoomSnack(subLayer);
       } else {
         // If the layer is visible at the current zoom level, close any open warning message.
         if (this.zoomWarningSnack) {
@@ -444,6 +431,23 @@ class LayerGroupItem extends Component {
         visible: layerVisibility,
         visibleSubLayers: visibleSubLayers,
       });
+
+      // Display the Snackbar message when the following conditions are met:
+      // 1. A sublayer is being toggled on (i.e., made visible)
+      // 2. The current zoom level of the map is outside the sublayer's defined visibility range (minZoom and maxZoom)
+      if (!isVisible) {
+        const layerProperties = this.props.layer.getProperties();
+        const minZoom = layerProperties.minZoom;
+        const maxZoom = layerProperties.maxZoom;
+        const currentZoom = this.props.model.olMap.getView().getZoom();
+
+        if (
+          (minZoom && currentZoom < minZoom) ||
+          (maxZoom && currentZoom > maxZoom)
+        ) {
+          this.showZoomSnack(subLayer);
+        }
+      }
     } else {
       this.setHidden(this.props.layer);
     }
@@ -619,6 +623,26 @@ class LayerGroupItem extends Component {
       )
     );
   };
+
+  showZoomSnack(subLayer) {
+    if (this.zoomWarningSnack) return;
+
+    const layerProperties = this.props.layer.getProperties();
+    const layerCaption = subLayer
+      ? layerProperties.layerInfo.layersInfo[subLayer].caption
+      : layerProperties.caption;
+
+    this.zoomWarningSnack = this.props.enqueueSnackbar(
+      `Lagret "${layerCaption}" är inte synligt vid aktuell zoomnivå.`,
+      {
+        variant: "warning",
+        preventDuplicate: false,
+        onClose: () => {
+          this.zoomWarningSnack = null;
+        },
+      }
+    );
+  }
 
   render() {
     const { cqlFilterVisible, layer } = this.props;
