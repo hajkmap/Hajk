@@ -19,18 +19,16 @@ import {
   LinearProgress,
   Typography,
   List,
-  Modal,
   Link,
   ListItemButton,
   Box,
-  IconButton,
   Tooltip,
+  DialogActions,
 } from "@mui/material";
 
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import OpenInNewIcon from "@mui/icons-material/OpenInNew";
-import CloseIcon from "@mui/icons-material/Close";
 
 import { deepMerge } from "utils/DeepMerge";
 
@@ -944,111 +942,122 @@ class PrintWindow extends React.PureComponent {
     );
   };
 
-  handleOpenModal = (index) => {
+  openAttachmentModal = (index) => {
     this.setState({
       selectedPdfIndex: index,
       isModalOpen: true,
     });
   };
 
-  handleCloseModal = () => {
+  closeAttachmentModal = () => {
     this.setState({
       selectedPdfIndex: null,
       isModalOpen: false,
     });
   };
 
+  checkPdfLinks = (pdfLinks) => {
+    const updatedLinks = pdfLinks.filter(
+      (pdfLink) => pdfLink.link !== "" && pdfLink.name !== ""
+    );
+    return updatedLinks;
+  };
+
   renderModal = (pdfLinks) => {
     return (
-      <Modal
-        open={this.state.isModalOpen}
-        sx={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-        }}
-      >
-        <Box
-          sx={{
-            position: "absolute",
-            width: "50%",
-            height: "80%",
-            backgroundColor: "white",
-            border: "2px solid #000",
-            boxShadow: 24,
-            p: 4,
-          }}
-        >
-          <IconButton
-            aria-label="close"
-            onClick={() => this.handleCloseModal()}
-            sx={{
-              position: "absolute",
-              right: 1,
-              top: 1,
+      <>
+        {createPortal(
+          <Dialog
+            open={this.state.isModalOpen}
+            fullWidth
+            PaperProps={{
+              style: { height: "70%" },
+            }}
+            BackdropProps={{
+              style: { backgroundColor: "rgba(0, 0, 0, 0.25)" },
+            }}
+            onClose={(event, reason) => {
+              reason === "backdropClick" && this.closeAttachmentModal();
             }}
           >
-            <CloseIcon />
-          </IconButton>
-          <iframe
-            title={pdfLinks[this.state.selectedPdfIndex]?.name}
-            src={pdfLinks[this.state.selectedPdfIndex]?.link}
-            width="100%"
-            height="100%"
-          />
-        </Box>
-      </Modal>
+            <DialogContent>
+              <iframe
+                title={pdfLinks[this.state.selectedPdfIndex]?.name}
+                src={pdfLinks[this.state.selectedPdfIndex]?.link}
+                width="100%"
+                height="100%"
+              />
+            </DialogContent>
+            <DialogActions>
+              <Button
+                variant="contained"
+                onClick={() => this.closeAttachmentModal()}
+              >
+                <Typography variant="body2">Stäng</Typography>
+              </Button>
+            </DialogActions>
+          </Dialog>,
+          document.getElementById("root")
+        )}
+      </>
     );
   };
 
   renderPrintAttachments = () => {
     const { pdfLinks } = this.props.options;
+    const checkedPdfLinks = this.checkPdfLinks(pdfLinks);
+    const hasContentText =
+      checkedPdfLinks.length !== 0 ? "Innehåll" : "Inget innehåll";
+    console.log(pdfLinks);
 
     return (
       <Grid>
         <Typography align="center" variant="h6">
           Bilagor
         </Typography>
-        <Typography variant="h6">Innehåll</Typography>
-        <List>
-          {pdfLinks.map((pdfLink, index) => (
-            <div key={index}>
-              <StyledListItemButton
-                index={index}
-                key={index}
-                onClick={() => this.handleOpenModal(index)}
-              >
-                <Tooltip title={"Gå till länk"}>
-                  <Link
+        <Typography variant="h6">{hasContentText}</Typography>
+        {checkedPdfLinks.length !== 0 && (
+          <List>
+            {checkedPdfLinks.map((pdfLink, index) => (
+              <div key={index}>
+                <StyledListItemButton
+                  index={index}
+                  key={index}
+                  onClick={() => this.openAttachmentModal(index)}
+                >
+                  <Tooltip title={"Öppna länk i ny flik"}>
+                    <Link
+                      href={pdfLink.link}
+                      target="_blank"
+                      onClick={(event) => {
+                        event.stopPropagation();
+                        window.open(pdfLink.link, "_blank");
+                      }}
+                    >
+                      {pdfLink.name}
+                    </Link>
+                  </Tooltip>
+                  <Button
                     href={pdfLink.link}
                     target="_blank"
+                    sx={{ height: "28px", padding: "10px" }}
+                    color="primary"
+                    variant="contained"
+                    startIcon={<OpenInNewIcon sx={{ width: "15px" }} />}
                     onClick={(event) => {
                       event.stopPropagation();
-                      window.open(pdfLink.link, "_blank");
                     }}
                   >
-                    {pdfLink.name}
-                  </Link>
-                </Tooltip>
-                <Button
-                  sx={{ height: "28px", padding: "10px" }}
-                  color="primary"
-                  variant="contained"
-                  startIcon={<OpenInNewIcon sx={{ width: "15px" }} />}
-                  onClick={(event) => {
-                    event.stopPropagation();
-                    window.open(pdfLink.link).print();
-                  }}
-                >
-                  <Typography variant="body2" justify="center">
-                    Skriv ut
-                  </Typography>
-                </Button>
-              </StyledListItemButton>
-              {this.state.isModalOpen && this.renderModal(pdfLinks)}
-            </div>
-          ))}
-        </List>
+                    <Typography variant="body2" justify="center">
+                      Öppna
+                    </Typography>
+                  </Button>
+                </StyledListItemButton>
+                {this.state.isModalOpen && this.renderModal(pdfLinks)}
+              </div>
+            ))}
+          </List>
+        )}
       </Grid>
     );
   };
