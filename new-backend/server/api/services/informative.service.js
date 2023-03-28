@@ -146,6 +146,68 @@ class InformativeService {
       return { error };
     }
   }
+
+  /**
+   * @summary Lists uploaded files depending on the extension
+   *
+   * @returns {array} Names of files as array of strings
+   * @memberof InformativeService
+   */
+  async getUploadedFiles(type = "") {
+    try {
+      const extensions = [];
+
+      // Depending on the type of files we're interested in, we
+      // must specify some file extensions. The defaults are by
+      // no means well thought-out and the only reason why they've
+      // been chosen is to achieve the exactly same behavior as in the
+      // original .NET edition of this API.
+      switch (type) {
+        case "image":
+          extensions.push(".png", ".jpg", ".jpeg");
+          break;
+        case "audio":
+          extensions.push(".mp3", ".wav", ".ogg");
+          break;
+        case "video":
+          extensions.push(".mp4", ".mov", ".ogg");
+          break;
+
+        default:
+          break;
+      }
+
+      // Let's prepare another array of the same extensions,
+      // only this time in upper case
+      const extensionsUpperCase = extensions.map((e) => e.toUpperCase());
+
+      // Read the dir where files are supposed to be
+      const dir = path.join(process.cwd(), "App_Data", "upload");
+
+      // List dir contents, the second parameter will ensure we get Dirent objects
+      const dirContents = await fs.promises.readdir(dir, {
+        withFileTypes: true,
+      });
+
+      // Prepare the return files array by…
+      const files = dirContents
+        // …filtering the directory's contents.
+        .filter(
+          (dirent) =>
+            // Keep only real files…
+            dirent.isFile() &&
+            // …and only those with an extension matching our choice.
+            (extensions.includes(path.extname(dirent.name)) ||
+              extensionsUpperCase.includes(path.extname(dirent.name)))
+        )
+        // Finally, transform the Array of Dirent objects into a flat
+        // array of strings
+        .map((dirent) => dirent.name);
+      return files;
+    } catch (error) {
+      return { error };
+    }
+  }
 }
 
 export default new InformativeService();
