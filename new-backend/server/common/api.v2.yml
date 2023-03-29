@@ -1,10 +1,10 @@
 openapi: 3.0.3
 info:
-  title: hajk-backend
-  description: Hajk backend
-  version: 1.0.0
+  title: Hajk Backend API
+  description: The Hajk backend API specification is  the authoritative specification for the API to which all Hajk backend implementations must conform.
+  version: 2.0.0
 servers:
-  - url: /api/v1
+  - url: /api/v2
 tags:
   - name: Client-accessible
     description: Resources necessary to load a working map in client
@@ -21,12 +21,12 @@ tags:
   - name: Specification
     description: The OpenAPI specification
 paths:
-  /informative/load/{name}:
+  /informative/load/{document}:
     get:
       tags:
         - Client-accessible
       parameters:
-        - name: name
+        - name: document
           in: path
           description: Name of the document to be fetched
           required: true
@@ -46,12 +46,18 @@ paths:
               schema:
                 $ref: "#/components/schemas/Error"
   /informative/create:
-    post:
+    put:
       tags:
         - Admin - Informative/DocumentHandler
+      requestBody:
+        description: Settings for given map's LayerSwitcher component
+        content:
+          application/json:
+            schema:
+              type: string
       responses:
         200:
-          description: Create a document connected to a specified map (OBSOLETE)
+          description: Create a document connected to a specified map
           content:
             application/json:
               schema:
@@ -104,7 +110,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/Error"
   /informative/save/{name}:
-    post:
+    put:
       tags:
         - Admin - Informative/DocumentHandler
       parameters:
@@ -151,22 +157,6 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Error"
-  /config/layers:
-    get:
-      tags:
-        - Client-accessible
-      description: List available layers. If AD authentication is active, filter by user's permission.
-      parameters:
-        - in: header
-          name: X-Control-Header
-          description: User name that will be supplied to AD
-          schema:
-            type: string
-          required: false
-      responses:
-        200:
-          description: All layers were fetched successfully
-          content: {}
   /mapconfig/layers:
     get:
       tags:
@@ -243,6 +233,36 @@ paths:
         200:
           description: Success
           content: {}
+    put:
+      tags:
+        - Admin - Maps and layers
+      parameters:
+        - name: map
+          in: path
+          description: File name of the new map config
+          required: true
+          schema:
+            type: string
+      description: Create a new map configuration
+      responses:
+        200:
+          description: Success
+          content: {}
+    delete:
+      tags:
+        - Admin - Maps and layers
+      parameters:
+        - name: map
+          in: path
+          description: Name of the map to be deleted
+          required: true
+          schema:
+            type: string
+      description: Delete an existing map configuration
+      responses:
+        200:
+          description: Success
+          content: {}
   /config/{map}:
     get:
       tags:
@@ -287,37 +307,6 @@ paths:
         200:
           description: Success
           content: {}
-  /mapconfig/create/{name}:
-    get:
-      tags:
-        - Admin - Maps and layers
-      parameters:
-        - name: name
-          in: path
-          description: File name of the new map config
-          required: true
-          schema:
-            type: string
-      description: Create a new map configuration
-      responses:
-        200:
-          description: Success
-          content: {}
-    put:
-      tags:
-        - Admin - Maps and layers
-      parameters:
-        - name: name
-          in: path
-          description: File name of the new map config
-          required: true
-          schema:
-            type: string
-      description: Create a new map configuration
-      responses:
-        200:
-          description: Success
-          content: {}
   /mapconfig/duplicate/{nameFrom}/{nameTo}:
     put:
       tags:
@@ -336,22 +325,6 @@ paths:
           schema:
             type: string
       description: Create a new map configuration by duplicating an existing one
-      responses:
-        200:
-          description: Success
-          content: {}
-  /config/userspecificmaps:
-    get:
-      tags:
-        - Client-accessible
-      description: Get a list of maps that will be available in the MapSwitcher dropdown
-      parameters:
-        - in: header
-          name: X-Control-Header
-          description: User name that will be supplied to AD
-          schema:
-            type: string
-          required: false
       responses:
         200:
           description: Success
