@@ -21,7 +21,6 @@ import {
   List,
   Link,
   ListItemButton,
-  Box,
   Tooltip,
   DialogActions,
 } from "@mui/material";
@@ -90,16 +89,6 @@ const StyledListItemButton = styled(ListItemButton)(({ theme, index }) => ({
   padding: "16px 10px 16px 10px",
   borderBottom: "1px solid lightgray",
   borderLeft: index % 2 === 0 ? "4px solid lightGray" : "4px solid darkGray",
-}));
-
-const StyledBox = styled(Box)(({ theme }) => ({
-  position: "absolute",
-  width: "50%",
-  height: "80%",
-  backgroundColor: "white",
-  border: "2px solid #000",
-  boxShadow: 24,
-  p: 4,
 }));
 
 const maxHeight = 950;
@@ -963,7 +952,7 @@ class PrintWindow extends React.PureComponent {
     return updatedLinks;
   };
 
-  renderModal = (pdfLinks) => {
+  renderDialog = (pdfLink) => {
     return (
       <>
         {createPortal(
@@ -976,14 +965,17 @@ class PrintWindow extends React.PureComponent {
             BackdropProps={{
               style: { backgroundColor: "rgba(0, 0, 0, 0.25)" },
             }}
-            onClose={(event, reason) => {
-              reason === "backdropClick" && this.closeAttachmentModal();
-            }}
+            onClose={() => this.closeAttachmentModal()}
           >
-            <DialogContent>
+            <DialogContent
+              sx={{
+                overflowY: "clip",
+                padding: "20px 24px 0px",
+              }}
+            >
               <iframe
-                title={pdfLinks[this.state.selectedPdfIndex]?.name}
-                src={pdfLinks[this.state.selectedPdfIndex]?.link}
+                title={pdfLink?.name}
+                src={pdfLink?.link}
                 width="100%"
                 height="100%"
               />
@@ -1003,12 +995,9 @@ class PrintWindow extends React.PureComponent {
     );
   };
 
-  renderPrintAttachments = () => {
-    const { pdfLinks } = this.props.options;
-    const checkedPdfLinks = this.checkPdfLinks(pdfLinks);
+  renderPrintAttachments = (checkedPdfLinks) => {
     const hasContentText =
       checkedPdfLinks.length !== 0 ? "Innehåll" : "Inget innehåll";
-    console.log(pdfLinks);
 
     return (
       <Grid>
@@ -1016,55 +1005,55 @@ class PrintWindow extends React.PureComponent {
           Bilagor
         </Typography>
         <Typography variant="h6">{hasContentText}</Typography>
-        {checkedPdfLinks.length !== 0 && (
-          <List>
-            {checkedPdfLinks.map((pdfLink, index) => (
-              <div key={index}>
-                <StyledListItemButton
-                  index={index}
-                  key={index}
-                  onClick={() => this.openAttachmentModal(index)}
-                >
-                  <Tooltip title={"Öppna länk i ny flik"}>
-                    <Link
-                      href={pdfLink.link}
-                      target="_blank"
-                      onClick={(event) => {
-                        event.stopPropagation();
-                        window.open(pdfLink.link, "_blank");
-                      }}
-                    >
-                      {pdfLink.name}
-                    </Link>
-                  </Tooltip>
-                  <Button
+        <List>
+          {checkedPdfLinks.map((pdfLink, index) => (
+            <div key={index}>
+              <StyledListItemButton
+                index={index}
+                key={index}
+                onClick={() => this.openAttachmentModal(index)}
+              >
+                <Tooltip title={"Öppna länk i ny flik"}>
+                  <Link
                     href={pdfLink.link}
                     target="_blank"
-                    sx={{ height: "28px", padding: "10px" }}
-                    color="primary"
-                    variant="contained"
-                    startIcon={<OpenInNewIcon sx={{ width: "15px" }} />}
                     onClick={(event) => {
                       event.stopPropagation();
+                      window.open(pdfLink.link, "_blank");
                     }}
                   >
-                    <Typography variant="body2" justify="center">
-                      Öppna
-                    </Typography>
-                  </Button>
-                </StyledListItemButton>
-                {this.state.isModalOpen && this.renderModal(pdfLinks)}
-              </div>
-            ))}
-          </List>
-        )}
+                    {pdfLink.name}
+                  </Link>
+                </Tooltip>
+                <Button
+                  href={pdfLink.link}
+                  target="_blank"
+                  sx={{ height: "28px", padding: "10px" }}
+                  color="primary"
+                  variant="contained"
+                  startIcon={<OpenInNewIcon sx={{ width: "15px" }} />}
+                  onClick={(event) => {
+                    event.stopPropagation();
+                  }}
+                >
+                  <Typography variant="body2" justify="center">
+                    Öppna
+                  </Typography>
+                </Button>
+              </StyledListItemButton>
+              {this.state.isModalOpen && this.renderDialog(pdfLink)}
+            </div>
+          ))}
+        </List>
       </Grid>
     );
   };
 
   render() {
     const { togglePrintWindow } = this.props;
+    const checkedPdfLinks = this.checkPdfLinks(this.props.options.pdfLinks);
     const { showAttachments } = this.state;
+
     return (
       <>
         {!showAttachments ? (
@@ -1086,14 +1075,16 @@ class PrintWindow extends React.PureComponent {
                 </Button>
               </Grid>
               <StyledGrid item xs={4}>
-                <Button
-                  color="primary"
-                  style={{ paddingLeft: 0 }}
-                  endIcon={<ArrowForwardIcon />}
-                  onClick={() => this.toggleDocumentsAttachments()}
-                >
-                  <Typography justify="center">Bilagor</Typography>
-                </Button>
+                {checkedPdfLinks.length > 0 && (
+                  <Button
+                    color="primary"
+                    style={{ paddingLeft: 0 }}
+                    endIcon={<ArrowForwardIcon />}
+                    onClick={() => this.toggleDocumentsAttachments()}
+                  >
+                    <Typography justify="center">Bilagor</Typography>
+                  </Button>
+                )}
               </StyledGrid>
             </GridHeaderContainer>
             {this.renderPrintDocuments()}
@@ -1117,7 +1108,7 @@ class PrintWindow extends React.PureComponent {
                 </Button>
               </Grid>
             </GridHeaderContainer>
-            {this.renderPrintAttachments()}
+            {this.renderPrintAttachments(checkedPdfLinks)}
           </GridGridContainer>
         )}
       </>

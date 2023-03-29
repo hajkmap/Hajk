@@ -883,27 +883,6 @@ class ToolOptions extends Component {
             &nbsp;
             <label htmlFor="enablePrint">Utskrift aktiverad</label>
           </div>
-
-          {/* <div>
-            <label htmlFor="pdfLink">
-              Pdf-länk{" "}
-              <i
-                className="fa fa-question-circle"
-                data-toggle="tooltip"
-                title="Textlänk till pdf"
-              />
-            </label>
-            <input
-              id="pdfLink"
-              value={this.state.pdfLinks}
-              type="text"
-              name="pdfLink"
-              onChange={(e) => {
-                this.handleInputChange(e);
-              }}
-            />
-          </div> */}
-
           <div>
             {this.state.pdfLinks &&
               this.state.pdfLinks.map((pdfLink, index) => (
