@@ -1041,9 +1041,18 @@ class AppModel {
           .getAllLayers()
           .find((l) => l.get("name") === layer);
 
+        // First, ensure that we had a match. It is possible that pretty much
+        // anything shows up as layer id here (as it can come from multiple sources)
+        // and we can't assume that the requested layer actually exists in current
+        // map's config. In order to prevent a silent failure (see #1305), this check is added.
+        if (olLayer === undefined) {
+          console.warn(
+            `Attempt to show layer with id ${layer} failed: layer not found in current map`
+          );
+        }
         // If it's a group layer we can use the 'layerswitcher.showLayer' event
         // that each group layer listens to.
-        if (olLayer.get("layerType") === "group") {
+        else if (olLayer.get("layerType") === "group") {
           // We can publish the 'layerswitcher.showLayer' event with two different
           // sets of parameters, depending on whether the group layer has all
           // sublayers selected, or only a subset.
@@ -1082,7 +1091,11 @@ class AppModel {
           .getAllLayers()
           .find((l) => l.get("name") === layer);
 
-        if (olLayer.get("layerType") === "group") {
+        if (olLayer === undefined) {
+          console.warn(
+            `Attempt to hide layer with id ${layer} failed: layer not found in current map`
+          );
+        } else if (olLayer.get("layerType") === "group") {
           // Tell the LayerSwitcher about it
           this.globalObserver.publish("layerswitcher.hideLayer", olLayer);
         } else {
