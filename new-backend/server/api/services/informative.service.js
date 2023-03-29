@@ -155,7 +155,29 @@ class InformativeService {
    */
   async getUploadedFiles(type = "") {
     try {
+      // Helper that allows us to safely extract custom extensions from .env
+      const extractCustomExtensions = (str) => {
+        // If not a string, bail out
+        if (typeof str !== "string") return null;
+
+        str = str.trim();
+
+        // If too short to be an extension, bail out
+        if (str.length === 0) return null;
+
+        // Now that we have a string, attempt to split it
+        // on commas. Note that we might end up with just
+        // one element in the array and that's perfectly
+        // valid too: perhaps user wants to only include one
+        // file type.
+        const arr = str.split(",");
+        return arr;
+      };
+
+      // Prepare an array that will hold file extensions valid for
+      // the given type of files
       const extensions = [];
+      let customExt = null;
 
       // Depending on the type of files we're interested in, we
       // must specify some file extensions. The defaults are by
@@ -164,13 +186,31 @@ class InformativeService {
       // original .NET edition of this API.
       switch (type) {
         case "image":
-          extensions.push(".png", ".jpg", ".jpeg");
+          customExt = extractCustomExtensions(
+            process.env.INFORMATIVE_CUSTOM_IMAGE_EXTENSIONS
+          );
+
+          customExt !== null
+            ? extensions.push(...customExt)
+            : extensions.push(".png", ".jpg", ".jpeg");
           break;
         case "audio":
-          extensions.push(".mp3", ".wav", ".ogg");
+          customExt = extractCustomExtensions(
+            process.env.INFORMATIVE_CUSTOM_AUDIO_EXTENSIONS
+          );
+
+          customExt !== null
+            ? extensions.push(...customExt)
+            : extensions.push(".mp3", ".wav", ".ogg");
           break;
         case "video":
-          extensions.push(".mp4", ".mov", ".ogg");
+          customExt = extractCustomExtensions(
+            process.env.INFORMATIVE_CUSTOM_VIDEO_EXTENSIONS
+          );
+
+          customExt !== null
+            ? extensions.push(...customExt)
+            : extensions.push(".mp4", ".mov", ".ogg");
           break;
 
         default:
@@ -181,11 +221,29 @@ class InformativeService {
       // only this time in upper case
       const extensionsUpperCase = extensions.map((e) => e.toUpperCase());
 
-      // Read the dir where files are supposed to be
-      const dir = path.join(process.cwd(), "App_Data", "upload");
+      let uploadDirPath = "";
+      if (
+        path.isAbsolute(
+          process.env.INFORMATIVE_CUSTOM_UPLOAD_DIR_ABSOLUTE_PATH || "" // isAbsolut requires a string as param
+        )
+      ) {
+        uploadDirPath = process.env.INFORMATIVE_CUSTOM_UPLOAD_DIR_ABSOLUTE_PATH;
+      } else {
+        // Read the dir where files are supposed to be
+        uploadDirPath = path.join(process.cwd(), "App_Data", "Upload");
+      }
+
+      logger.trace(
+        `[getUploadedFiles] Attempting to read contents of "${uploadDirPath}".\nLooking for ${type} files.\nValid extensions are: ${[
+          ...extensions,
+          ...extensionsUpperCase,
+        ]
+          .map((e) => `"${e}"`)
+          .join()}.`
+      );
 
       // List dir contents, the second parameter will ensure we get Dirent objects
-      const dirContents = await fs.promises.readdir(dir, {
+      const dirContents = await fs.promises.readdir(uploadDirPath, {
         withFileTypes: true,
       });
 
@@ -205,6 +263,7 @@ class InformativeService {
         .map((dirent) => dirent.name);
       return files;
     } catch (error) {
+      logger.error("[getUploadedFiles] " + error.toString());
       return { error };
     }
   }
