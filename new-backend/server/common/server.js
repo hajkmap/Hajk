@@ -36,7 +36,12 @@ export default class ExpressServer {
     }
 
     logger.debug("Process's current working directory: ", process.cwd());
-    const apiSpec = path.join(__dirname, "api.yml");
+
+    // Grab paths to our OpenAPI specifications
+    const apiV1Spec = path.join(__dirname, "api.v1.yml");
+    const apiV2Spec = path.join(__dirname, "api.v2.yml");
+
+    // Check the setting in .env to see if validation is wanted
     const validateResponses = !!(
       process.env.OPENAPI_ENABLE_RESPONSE_VALIDATION &&
       process.env.OPENAPI_ENABLE_RESPONSE_VALIDATION.toLowerCase() === "true"
@@ -159,11 +164,29 @@ export default class ExpressServer {
     // Optionally, other directories placed in "static" can be exposed.
     this.setupStaticDirs();
 
-    // Finally, finish by running through the Validator and exposing the API specification
-    app.use(process.env.OPENAPI_SPEC || "/spec", Express.static(apiSpec));
+    // Finally, finish by statically exposing the API specifications…
+    app.use("/api/v1/spec", Express.static(apiV1Spec));
+    app.use("/api/v2/spec", Express.static(apiV2Spec));
+
+    // …and apply the Validator middlewares. We use one for each API version,
+    // in order to be able to serve both versions using one running instance.
+
+    // API V1
     app.use(
       OpenApiValidator.middleware({
-        apiSpec,
+        apiSpec: apiV1Spec,
+        validateResponses,
+        validateRequests: {
+          allowUnknownQueryParameters: true,
+        },
+        ignorePaths: /.*\/spec(\/|$)/,
+      })
+    );
+
+    // API V2
+    app.use(
+      OpenApiValidator.middleware({
+        apiSpec: apiV2Spec,
         validateResponses,
         validateRequests: {
           allowUnknownQueryParameters: true,
