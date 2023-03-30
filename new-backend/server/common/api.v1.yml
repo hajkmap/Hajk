@@ -2,9 +2,10 @@ openapi: 3.0.3
 info:
   title: hajk-backend
   description: Hajk backend
-  version: 1.0.0
+  version: 1.1.0
 servers:
   - url: /api/v1
+  - url: /api/v2
 tags:
   - name: Client-accessible
     description: Resources necessary to load a working map in client
@@ -45,13 +46,87 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Error"
+  /informative/load/{folder}/{name}:
+    get:
+      tags:
+        - Client-accessible
+      parameters:
+        - name: name
+          in: path
+          description: Name of the document to be fetched
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: Return the JSON file
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DocumentBody"
+        5XX:
+          description: Example not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
   /informative/create:
     post:
+      deprecated: true
       tags:
         - Admin - Informative/DocumentHandler
       responses:
         200:
           description: Create a document connected to a specified map (OBSOLETE)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InformativeDocumentCreateBody"
+        5XX:
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+    put:
+      tags:
+        - Admin - Informative/DocumentHandler
+      responses:
+        200:
+          description: Create a document connected to a specified map
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InformativeDocumentCreateBody"
+        5XX:
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /informative/createfolder:
+    post:
+      tags:
+        - Admin - Informative/DocumentHandler
+      responses:
+        200:
+          description: Create a folder
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InformativeCreateFolder"
+        5XX:
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+    put:
+      tags:
+        - Admin - Informative/DocumentHandler
+      responses:
+        200:
+          description: Create a document connected to a specified map
           content:
             application/json:
               schema:
@@ -73,6 +148,40 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/DocumentsList"
+        5XX:
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /informative/list/{folder}:
+    get:
+      tags:
+        - Admin - Informative/DocumentHandler
+      responses:
+        200:
+          description: Return all available documents
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Informativedocumentfolderlist"
+        5XX:
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /informative/folderlist:
+    get:
+      tags:
+        - Admin - Informative/DocumentHandler
+      responses:
+        200:
+          description: Return all available documents
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Informativelistfolders"
         5XX:
           description: Internal server error
           content:
@@ -105,6 +214,78 @@ paths:
                 $ref: "#/components/schemas/Error"
   /informative/save/{name}:
     post:
+      deprecated: true
+      tags:
+        - Admin - Informative/DocumentHandler
+      parameters:
+        - name: name
+          in: path
+          description: Document to be saved
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: Return the saved document's body
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DocumentsList"
+        5XX:
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+    put:
+      tags:
+        - Admin - Informative/DocumentHandler
+      parameters:
+        - name: name
+          in: path
+          description: Document to be saved
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: Return the saved document's body
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DocumentsList"
+        5XX:
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /informative/save/{folder}/{name}:
+    post:
+      deprecated: true
+      tags:
+        - Admin - Informative/DocumentHandler
+      parameters:
+        - name: name
+          in: path
+          description: Document to be saved
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: Return the saved document's body
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DocumentsList"
+        5XX:
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+    put:
       tags:
         - Admin - Informative/DocumentHandler
       parameters:
@@ -128,6 +309,30 @@ paths:
               schema:
                 $ref: "#/components/schemas/Error"
   /informative/delete/{name}:
+    delete:
+      tags:
+        - Admin - Informative/DocumentHandler
+      parameters:
+        - name: name
+          in: path
+          description: Document to deleted
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: Delete the specified document
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DocumentsList"
+        5XX:
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /informative/delete/{folder}/{name}:
     delete:
       tags:
         - Admin - Informative/DocumentHandler
@@ -289,6 +494,7 @@ paths:
           content: {}
   /mapconfig/create/{name}:
     get:
+      deprecated: true
       tags:
         - Admin - Maps and layers
       parameters:
@@ -314,6 +520,38 @@ paths:
           schema:
             type: string
       description: Create a new map configuration
+      responses:
+        200:
+          description: Success
+          content: {}
+  /mapconfig/delete/{name}:
+    get:
+      deprecated: true
+      tags:
+        - Admin - Maps and layers
+      parameters:
+        - name: name
+          in: path
+          description: Name of the map to be deleted
+          required: true
+          schema:
+            type: string
+      description: Delete an existing map configuration
+      responses:
+        200:
+          description: Success
+          content: {}
+    delete:
+      tags:
+        - Admin - Maps and layers
+      parameters:
+        - name: name
+          in: path
+          description: Name of the map to be deleted
+          required: true
+          schema:
+            type: string
+      description: Delete an existing map configuration
       responses:
         200:
           description: Success
@@ -674,6 +912,21 @@ components:
         documentName:
           type: string
         documentMap:
+          type: string
+    InformativeCreateFolder:
+      type: object
+      properties:
+        folderName:
+          type: string
+    Informativelistfolders:
+      type: object
+      properties:
+        folderName:
+          type: string
+    Informativedocumentfolderlist:
+      type: object
+      properties:
+        folderName:
           type: string
     ExampleBody:
       title: example
