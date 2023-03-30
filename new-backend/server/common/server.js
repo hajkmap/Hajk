@@ -8,18 +8,18 @@ import cors from "cors";
 import compression from "compression";
 import cookieParser from "cookie-parser";
 
-import log4js from "../api/utils/hajkLogger";
+import log4js from "../apis/v1/utils/hajkLogger";
 import clfDate from "clf-date";
 
 import { createProxyMiddleware } from "http-proxy-middleware";
 
-import sokigoFBProxy from "../api/middlewares/sokigo.fb.proxy";
-import fmeServerProxy from "../api/middlewares/fme.server.proxy";
-import restrictStatic from "../api/middlewares/restrict.static";
-import detailedRequestLogger from "../api/middlewares/detailed.request.logger";
+import sokigoFBProxy from "../apis/v1/middlewares/sokigo.fb.proxy";
+import fmeServerProxy from "../apis/v1/middlewares/fme.server.proxy";
+import restrictStatic from "../apis/v1/middlewares/restrict.static";
+import detailedRequestLogger from "../apis/v1/middlewares/detailed.request.logger";
 
 import * as OpenApiValidator from "express-openapi-validator";
-import errorHandler from "../api/middlewares/error.handler";
+import errorHandler from "../apis/v1/middlewares/error.handler";
 
 const app = new Express();
 
