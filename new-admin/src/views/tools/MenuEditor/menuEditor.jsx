@@ -891,7 +891,7 @@ class ToolOptions extends Component {
                   style={{ display: "flex" }}
                 >
                   <div>
-                    <label htmlFor="pdfLinkName">Bilaga</label>
+                    <label htmlFor="pdfLinkName">Bilaga {index + 1}</label>
                     <input
                       id="pdfLinkName"
                       name="name"
