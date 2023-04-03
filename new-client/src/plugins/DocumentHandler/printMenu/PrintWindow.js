@@ -6,6 +6,7 @@ import {
   styled,
   StyledEngineProvider,
   ThemeProvider,
+  useTheme,
 } from "@mui/material/styles";
 import {
   Button,
@@ -19,10 +20,10 @@ import {
   LinearProgress,
   Typography,
   List,
-  Link,
   ListItemButton,
   Tooltip,
   DialogActions,
+  useMediaQuery,
 } from "@mui/material";
 
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
@@ -91,6 +92,27 @@ const StyledListItemButton = styled(ListItemButton)(({ theme, index }) => ({
   borderLeft: index % 2 === 0 ? "4px solid lightGray" : "4px solid darkGray",
 }));
 
+const StyledDialogContent = styled(DialogContent)(({ theme }) => ({
+  overflowY: "clip",
+  position: "relative",
+  "&:before": {
+    display: "block",
+    content: `""`,
+    width: "100%",
+    paddingTop: "141.15%",
+    paddingLeft: "80%",
+  },
+}));
+
+const StyledIframe = styled("iframe")(({ theme }) => ({
+  position: "absolute",
+  width: "calc(100% - 40px)",
+  height: "100%",
+  top: "0",
+  left: "0",
+  margin: "20px",
+}));
+
 const maxHeight = 950;
 const imageResizeRatio = 0.7;
 
@@ -115,6 +137,7 @@ class PrintWindow extends React.PureComponent {
     showAttachments: false,
     selectedPdfIndex: null,
     isModalOpen: false,
+    pdfLinks: this.checkPdfLinks(this.props.options.pdfLinks),
   };
 
   internalId = 0;
@@ -945,114 +968,190 @@ class PrintWindow extends React.PureComponent {
     });
   };
 
-  checkPdfLinks = (pdfLinks) => {
+  checkPdfLinks(pdfLinks) {
     const updatedLinks = pdfLinks.filter(
-      (pdfLink) => pdfLink.link !== "" && pdfLink.name !== ""
+      (pdfLink) => pdfLink.name || pdfLink.link
     );
     return updatedLinks;
-  };
+  }
 
-  renderDialog = (pdfLink) => {
+  renderDialog = () => {
+    const { isModalOpen, pdfLinks, selectedPdfIndex } = this.state;
+    const closeAttachmentModal = this.closeAttachmentModal;
+
+    function ResponsiveDialog() {
+      const theme = useTheme();
+      const fullScreen = useMediaQuery(theme.breakpoints.down("sm"));
+
+      return (
+        <Dialog
+          fullScreen={fullScreen}
+          open={isModalOpen}
+          PaperProps={{ style: { width: !fullScreen && "30%" } }}
+          BackdropProps={{
+            style: { backgroundColor: "rgba(0, 0, 0, 0.25)" },
+          }}
+          onClose={() => closeAttachmentModal()}
+        >
+          <StyledDialogContent>
+            <StyledIframe
+              title={pdfLinks[selectedPdfIndex]?.name}
+              src={pdfLinks[selectedPdfIndex]?.link}
+            />
+          </StyledDialogContent>
+          <DialogActions>
+            <Button variant="contained" onClick={() => closeAttachmentModal()}>
+              <Typography variant="body2">Stäng</Typography>
+            </Button>
+          </DialogActions>
+        </Dialog>
+      );
+    }
     return (
       <>
         {createPortal(
-          <Dialog
-            open={this.state.isModalOpen}
-            fullWidth
-            PaperProps={{
-              style: { height: "70%" },
-            }}
-            BackdropProps={{
-              style: { backgroundColor: "rgba(0, 0, 0, 0.25)" },
-            }}
-            onClose={() => this.closeAttachmentModal()}
-          >
-            <DialogContent
-              sx={{
-                overflowY: "clip",
-                padding: "20px 24px 0px",
-              }}
-            >
-              <iframe
-                title={pdfLink?.name}
-                src={pdfLink?.link}
-                width="100%"
-                height="100%"
-              />
-            </DialogContent>
-            <DialogActions>
-              <Button
-                variant="contained"
-                onClick={() => this.closeAttachmentModal()}
-              >
-                <Typography variant="body2">Stäng</Typography>
-              </Button>
-            </DialogActions>
-          </Dialog>,
+          <ResponsiveDialog></ResponsiveDialog>,
           document.getElementById("root")
         )}
       </>
     );
   };
 
-  renderPrintAttachments = (checkedPdfLinks) => {
-    const hasContentText =
-      checkedPdfLinks.length !== 0 ? "Innehåll" : "Inget innehåll";
+  renderPrintAttachments = () => {
+    const { pdfLinks, isModalOpen } = this.state;
+
+    const renderAttachment = (pdfLink, index) => {
+      const hasName = pdfLink.name !== "";
+      const hasLink = pdfLink.link !== "";
+      const disabled = !hasLink;
+      const name = hasName ? pdfLink.name : "Namn saknas";
+      const linkText = hasLink ? "Öppna" : "Länk saknas";
+      const linkColor = hasLink ? "primary" : "text.secondary";
+      const linkIcon = hasLink ? (
+        <OpenInNewIcon sx={{ width: "15px" }} />
+      ) : null;
+
+      return (
+        <div key={index}>
+          <StyledListItemButton
+            disabled={disabled}
+            index={index}
+            onClick={() => this.openAttachmentModal(index)}
+          >
+            <Typography
+              sx={{
+                fontStyle: !hasName ? "italic" : "inherit",
+                color: !hasName ? "gray" : "inherit",
+              }}
+            >
+              {name}
+            </Typography>
+            {hasLink && (
+              <Button
+                href={pdfLink.link}
+                target="_blank"
+                sx={{ height: "28px", padding: "10px" }}
+                color={linkColor}
+                variant="contained"
+                startIcon={linkIcon}
+                onClick={(event) => event.stopPropagation()}
+              >
+                <Typography variant="body2" justify="center">
+                  {linkText}
+                </Typography>
+              </Button>
+            )}
+            {!hasLink && (
+              <Typography sx={{ fontStyle: "italic" }}>Länk saknas</Typography>
+            )}
+          </StyledListItemButton>
+        </div>
+      );
+    };
 
     return (
-      <Grid>
+      <>
         <Typography align="center" variant="h6">
           Bilagor
         </Typography>
-        <Typography variant="h6">{hasContentText}</Typography>
-        <List>
-          {checkedPdfLinks.map((pdfLink, index) => (
-            <div key={index}>
-              <StyledListItemButton
-                index={index}
-                key={index}
-                onClick={() => this.openAttachmentModal(index)}
-              >
-                <Tooltip title={"Öppna länk i ny flik"}>
-                  <Link
-                    href={pdfLink.link}
-                    target="_blank"
-                    onClick={(event) => {
-                      event.stopPropagation();
-                      window.open(pdfLink.link, "_blank");
-                    }}
-                  >
-                    {pdfLink.name}
-                  </Link>
-                </Tooltip>
-                <Button
-                  href={pdfLink.link}
-                  target="_blank"
-                  sx={{ height: "28px", padding: "10px" }}
-                  color="primary"
-                  variant="contained"
-                  startIcon={<OpenInNewIcon sx={{ width: "15px" }} />}
-                  onClick={(event) => {
-                    event.stopPropagation();
-                  }}
+        <Typography variant="h6">Innehåll</Typography>
+        <GridMiddleContainer>
+          <List>{pdfLinks.map(renderAttachment)}</List>
+        </GridMiddleContainer>
+        {isModalOpen && this.renderDialog()}
+      </>
+    );
+  };
+
+  renderPrintAttachments2 = () => {
+    const { pdfLinks } = this.state;
+
+    return (
+      <>
+        <Typography align="center" variant="h6">
+          Bilagor
+        </Typography>
+        <Typography variant="h6">{"Innehåll"}</Typography>
+        <GridMiddleContainer>
+          <List>
+            {pdfLinks.map((pdfLink, index) => (
+              <div key={index}>
+                <StyledListItemButton
+                  disabled={pdfLink.link === ""}
+                  index={index}
+                  key={index}
+                  onClick={() => this.openAttachmentModal(index)}
                 >
-                  <Typography variant="body2" justify="center">
-                    Öppna
-                  </Typography>
-                </Button>
-              </StyledListItemButton>
-              {this.state.isModalOpen && this.renderDialog(pdfLink)}
-            </div>
-          ))}
-        </List>
-      </Grid>
+                  {pdfLink.name !== "" ? (
+                    <Typography>{pdfLink.name}</Typography>
+                  ) : (
+                    <Typography
+                      sx={{
+                        color: "gray",
+                        fontStyle: "italic",
+                      }}
+                    >
+                      Namn saknas
+                    </Typography>
+                  )}
+                  {pdfLink.link !== "" ? (
+                    <Button
+                      href={pdfLink.link}
+                      target="_blank"
+                      sx={{ height: "28px", padding: "10px" }}
+                      color="primary"
+                      variant="contained"
+                      startIcon={<OpenInNewIcon sx={{ width: "15px" }} />}
+                      onClick={(event) => {
+                        event.stopPropagation();
+                      }}
+                    >
+                      <Typography variant="body2" justify="center">
+                        Öppna
+                      </Typography>
+                    </Button>
+                  ) : (
+                    <Typography
+                      sx={{
+                        fontStyle: "italic",
+                      }}
+                    >
+                      Länk saknas
+                    </Typography>
+                  )}
+                </StyledListItemButton>
+              </div>
+            ))}
+            {this.state.isModalOpen && this.renderDialog()}
+          </List>
+        </GridMiddleContainer>
+      </>
     );
   };
 
   render() {
     const { togglePrintWindow } = this.props;
-    const checkedPdfLinks = this.checkPdfLinks(this.props.options.pdfLinks);
-    const { showAttachments } = this.state;
+    const { showAttachments, pdfLinks } = this.state;
 
     return (
       <>
@@ -1075,7 +1174,7 @@ class PrintWindow extends React.PureComponent {
                 </Button>
               </Grid>
               <StyledGrid item xs={4}>
-                {checkedPdfLinks.length > 0 && (
+                {pdfLinks.length > 0 && (
                   <Button
                     color="primary"
                     style={{ paddingLeft: 0 }}
@@ -1108,7 +1207,7 @@ class PrintWindow extends React.PureComponent {
                 </Button>
               </Grid>
             </GridHeaderContainer>
-            {this.renderPrintAttachments(checkedPdfLinks)}
+            {this.renderPrintAttachments()}
           </GridGridContainer>
         )}
       </>
