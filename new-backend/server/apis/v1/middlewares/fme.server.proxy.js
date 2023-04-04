@@ -1,6 +1,5 @@
 import { createProxyMiddleware } from "http-proxy-middleware";
 import log4js from "log4js";
-import fs from "fs";
 
 // Value of process.env.LOG_LEVEL will be one of the allowed
 // log4js-values. We will customize HPM to use log4js too,
@@ -21,7 +20,7 @@ const logLevels = {
 };
 
 // Grab a logger
-const logger = log4js.getLogger("proxy.fmeServer");
+const logger = log4js.getLogger("proxy.fmeServer.v1");
 
 export default function fmeServerProxy(err, req, res, next) {
   return createProxyMiddleware({

@@ -1,6 +1,5 @@
 import { createProxyMiddleware } from "http-proxy-middleware";
 import log4js from "log4js";
-import fs from "fs";
 
 // Value of process.env.LOG_LEVEL will be one of the allowed
 // log4js-values. We will customize HPM to use log4js too,
@@ -41,9 +40,9 @@ export default function fmeServerProxy(err, req, res, next) {
     },
     pathRewrite: (originalPath, req) => {
       // Lets split on the proxy path so that we can remove that when forwarding
-      const segments = originalPath.split("/api/v1/fmeproxy");
+      const segments = originalPath.split("/api/v2/fmeproxy");
 
-      // We want to forward everything that is after /api/v1/fmeproxy
+      // We want to forward everything that is after /api/v2/fmeproxy
       const path = segments[1];
 
       logger.debug(`${req.method} ${originalPath} ~> ${path}`);

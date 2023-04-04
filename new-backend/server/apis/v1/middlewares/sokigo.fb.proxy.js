@@ -20,7 +20,7 @@ const logLevels = {
 };
 
 // Grab a logger
-const logger = log4js.getLogger("proxy.sokigo");
+const logger = log4js.getLogger("proxy.sokigo.v1");
 
 export default function sokigoFBProxy(err, req, res, next) {
   return createProxyMiddleware({

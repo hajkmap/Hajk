@@ -30,7 +30,7 @@ export default function sokigoFBProxy(err, req, res, next) {
     pathRewrite: (originalPath, req) => {
       // Remove the portion that shouldn't be there when we proxy the request
       // and split the remaining string on "?" to separate any query params
-      let segments = originalPath.replace("/api/v1/fbproxy", "").split("?");
+      let segments = originalPath.replace("/api/v2/fbproxy", "").split("?");
 
       // The path part is the first segment, prior "?"
       const path = segments[0];
