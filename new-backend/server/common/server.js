@@ -191,8 +191,9 @@ export default class ExpressServer {
         );
       } else
         logger.info(
-          "FB_SERVICE_ACTIVE is set to %o in .env. Not enabling Sokigo FB Proxy",
-          process.env.FB_SERVICE_ACTIVE
+          "FB_SERVICE_ACTIVE is set to %o in .env. Not enabling Sokigo FB Proxy for API V%s",
+          process.env.FB_SERVICE_ACTIVE,
+          v
         );
     }
   }
@@ -211,13 +212,15 @@ export default class ExpressServer {
 
         app.use(`/api/v${v}/fmeproxy`, fmeServerProxy());
         logger.info(
-          "FME_SERVER_ACTIVE is set to %o in .env. Enabling FME-server proxy",
-          process.env.FME_SERVER_ACTIVE
+          "FME_SERVER_ACTIVE is set to %o in .env. Enabling FME-server proxy for API V%s",
+          process.env.FME_SERVER_ACTIVE,
+          v
         );
       } else
         logger.info(
-          "FME_SERVER_ACTIVE is set to %o in .env. Not enabling FME-server proxy",
-          process.env.FME_SERVER_ACTIVE
+          "FME_SERVER_ACTIVE is set to %o in .env. Not enabling FME-server proxy for API V%s",
+          process.env.FME_SERVER_ACTIVE,
+          v
         );
     }
   }

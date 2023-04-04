@@ -44,7 +44,7 @@ export default function fmeServerProxy(err, req, res, next) {
       // We want to forward everything that is after /api/v2/fmeproxy
       const path = segments[1];
 
-      logger.debug(`!!!!${req.method} ${originalPath} ~> ${path}`);
+      logger.debug(`${req.method} ${originalPath} ~> ${path}`);
       return path;
     },
     onError: (err, req, res) => {
