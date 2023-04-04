@@ -271,8 +271,7 @@ export default class ExpressServer {
             pathRewrite: {
               [`^/api/v1/proxy/${context}`]: "", // remove base path
             },
-            logProvider: () => l,
-            logLevel: logLevels[process.env.LOG_LEVEL],
+            logLevel: "silent", // We don't care about logLevels[process.env.LOG_LEVEL] in this case as we log success and errors ourselves
           })
         );
       });

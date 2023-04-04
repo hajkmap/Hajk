@@ -25,8 +25,7 @@ const logger = log4js.getLogger("proxy.fmeServer.v2");
 export default function fmeServerProxy(err, req, res, next) {
   return createProxyMiddleware({
     target: process.env.FME_SERVER_BASE_URL,
-    logLevel: logLevels[process.env.LOG_LEVEL],
-    logProvider: () => logger,
+    logLevel: "silent", // We don't care about logLevels[process.env.LOG_LEVEL] in this case as we log success and errors ourselves
     changeOrigin: true,
     secure: process.env.FME_SERVER_SECURE === "true", // should SSL certs be verified?
     onProxyReq: (proxyReq, req, res) => {
@@ -45,7 +44,7 @@ export default function fmeServerProxy(err, req, res, next) {
       // We want to forward everything that is after /api/v2/fmeproxy
       const path = segments[1];
 
-      logger.debug(`${req.method} ${originalPath} ~> ${path}`);
+      logger.debug(`!!!!${req.method} ${originalPath} ~> ${path}`);
       return path;
     },
     onError: (err, req, res) => {
