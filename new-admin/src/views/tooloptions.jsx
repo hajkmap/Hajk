@@ -19,6 +19,7 @@ import Search from "./tools/search.jsx";
 import StreetView from "./tools/streetview.jsx";
 import Preset from "./tools/preset.jsx";
 import Measure from "./tools/measure.jsx";
+import Measurer from "./tools/measurer.jsx";
 import Routing from "./tools/routing.jsx";
 import Collector from "./tools/collector.jsx";
 import Dummy from "./tools/dummy.jsx";
@@ -110,6 +111,8 @@ class ToolOptions extends Component {
         return <ExternalLinks parent={this} model={this.props.model} />;
       case "measure":
         return <Measure parent={this} model={this.props.model} />;
+      case "measurer":
+        return <Measurer parent={this} model={this.props.model} />;
       case "routing":
         return <Routing parent={this} model={this.props.model} />;
       case "collector":
@@ -181,6 +184,7 @@ class ToolOptions extends Component {
       preset: "Snabbval",
       externalLinks: "Externa länkar",
       measure: "Mät",
+      measurer: "Mät (Version 2)",
       location: "Visa min position",
       routing: "Navigation",
       collector: "Tyck till",

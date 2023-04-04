@@ -165,11 +165,18 @@ class FirSearchView extends React.PureComponent {
                     this.setState({ searchTypeId: e.target.value });
                   }}
                 >
-                  {this.model.searchTypes.map((item, index) => (
-                    <MenuItem key={`fir-searchType-${item.id}`} value={item.id}>
-                      {item.caption}
-                    </MenuItem>
-                  ))}
+                  {this.model.searchTypes
+                    .filter((item) => {
+                      return item.visibleInDropDown !== false;
+                    })
+                    .map((item, index) => (
+                      <MenuItem
+                        key={`fir-searchType-${item.id}`}
+                        value={item.id}
+                      >
+                        {item.caption}
+                      </MenuItem>
+                    ))}
                 </Select>
               </StyledFormControl>
             </div>

@@ -786,6 +786,7 @@ export default class PrintModel {
       const imageLayer = new ImageLayer({
         opacity: layerOpacity,
         source: imageSource,
+        zIndex: layer.getZIndex(),
       });
       // Finally we add the new layer to the map... First we have to check where
       // the original layer was placed (so that it keeps its draw-order).
