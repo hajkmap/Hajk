@@ -13,8 +13,6 @@ import clfDate from "clf-date";
 
 import { createProxyMiddleware } from "http-proxy-middleware";
 
-import sokigoFBProxy from "../apis/v1/middlewares/sokigo.fb.proxy";
-import fmeServerProxy from "../apis/v1/middlewares/fme.server.proxy";
 import restrictStatic from "../apis/v1/middlewares/restrict.static";
 import detailedRequestLogger from "./middlewares/detailed.request.logger";
 
@@ -37,9 +35,20 @@ export default class ExpressServer {
 
     logger.debug("Process's current working directory: ", process.cwd());
 
-    // Grab paths to our OpenAPI specifications
-    const apiV1Spec = path.join(__dirname, "api.v1.yml");
-    const apiV2Spec = path.join(__dirname, "api.v2.yml");
+    // Check which API versions should be enabled.
+    // First, normalize the value and store in a const.
+    // Note that the fallback array at the end contains
+    // ALL CURRENTLY SUPPORTED VERSIONS OF THE API. This is
+    // the current default and should be kept updated.
+    const apiVersions = process.env.API_VERSIONS?.split(",") // split on comma
+      .map((v) => Number.parseInt(v)) // transform string to int
+      .filter((v) => Number.isInteger(v)) || [1, 2]; // keep only real integers. Fall back to all API versions.
+    // Also, store as an app variable for later use across the app
+    app.set("apiVersions", apiVersions);
+    logger.info(
+      "[API] Starting with the following API versions enabled:",
+      apiVersions
+    );
 
     // Check the setting in .env to see if validation is wanted
     const validateResponses = !!(
@@ -112,37 +121,9 @@ export default class ExpressServer {
 
     this.setupGenericProxy();
 
-    // Don't enable FB Proxy if necessary env variable isn't sat
-    if (
-      process.env.FB_SERVICE_ACTIVE === "true" &&
-      process.env.FB_SERVICE_BASE_URL !== undefined
-    ) {
-      app.use("/api/v1/fbproxy", sokigoFBProxy());
-      logger.info(
-        "FB_SERVICE_ACTIVE is set to %o in .env. Enabling Sokigo FB Proxy",
-        process.env.FB_SERVICE_ACTIVE
-      );
-    } else
-      logger.info(
-        "FB_SERVICE_ACTIVE is set to %o in .env. Not enabling Sokigo FB Proxy",
-        process.env.FB_SERVICE_ACTIVE
-      );
+    this.setupSokigoProxy();
 
-    // Don't enable FME-server Proxy if necessary env variable isn't sat
-    if (
-      process.env.FME_SERVER_ACTIVE === "true" &&
-      process.env.FME_SERVER_BASE_URL !== undefined
-    ) {
-      app.use("/api/v1/fmeproxy", fmeServerProxy());
-      logger.info(
-        "FME_SERVER_ACTIVE is set to %o in .env. Enabling FME-server proxy",
-        process.env.FME_SERVER_ACTIVE
-      );
-    } else
-      logger.info(
-        "FME_SERVER_ACTIVE is set to %o in .env. Not enabling FME-server proxy",
-        process.env.FME_SERVER_ACTIVE
-      );
+    this.setupFmeProxy();
 
     app.use(Express.json({ limit: process.env.REQUEST_LIMIT || "100kb" }));
     app.use(
@@ -164,36 +145,81 @@ export default class ExpressServer {
     // Optionally, other directories placed in "static" can be exposed.
     this.setupStaticDirs();
 
-    // Finally, finish by statically exposing the API specifications…
-    app.use("/api/v1/spec", Express.static(apiV1Spec));
-    app.use("/api/v2/spec", Express.static(apiV2Spec));
+    // Expose the OpenAPI specifications on /api/vN/spec and
+    // enabled the API validator middleware for all enabled
+    // API versions
+    apiVersions.forEach((v) => {
+      // Grab paths to our OpenAPI specifications
+      const openApiSpecification = path.join(__dirname, `api.v${v}.yml`);
 
-    // …and apply the Validator middlewares. We use one for each API version,
-    // in order to be able to serve both versions using one running instance.
+      // Expose the API specification as a simple static route…
+      logger.trace(
+        `[API] Exposing ${openApiSpecification} on route /api/v${v}/spec`
+      );
+      app.use(`/api/v${v}/spec`, Express.static(openApiSpecification));
 
-    // API V1
-    app.use(
-      OpenApiValidator.middleware({
-        apiSpec: apiV1Spec,
-        validateResponses,
-        validateRequests: {
-          allowUnknownQueryParameters: true,
-        },
-        ignorePaths: /.*\/spec(\/|$)/,
-      })
-    );
+      // …and apply the Validator middleware.
+      app.use(
+        OpenApiValidator.middleware({
+          apiSpec: openApiSpecification,
+          validateResponses,
+          validateRequests: {
+            allowUnknownQueryParameters: true,
+          },
+          ignorePaths: /.*\/spec(\/|$)/,
+        })
+      );
+    });
+  }
 
-    // API V2
-    app.use(
-      OpenApiValidator.middleware({
-        apiSpec: apiV2Spec,
-        validateResponses,
-        validateRequests: {
-          allowUnknownQueryParameters: true,
-        },
-        ignorePaths: /.*\/spec(\/|$)/,
-      })
-    );
+  async setupSokigoProxy() {
+    // Each API version has its own Sokigo proxy middleware. Let's iterate them.
+    for await (const v of app.get("apiVersions")) {
+      // Don't enable FB Proxy if necessary env variable isn't sat
+      if (
+        process.env.FB_SERVICE_ACTIVE === "true" &&
+        process.env.FB_SERVICE_BASE_URL !== undefined
+      ) {
+        const { default: sokigoFBProxy } = await import(
+          `../apis/v${v}/middlewares/sokigo.fb.proxy`
+        );
+        app.use(`/api/v${v}/fbproxy`, sokigoFBProxy());
+        logger.info(
+          "FB_SERVICE_ACTIVE is set to %o in .env. Enabling Sokigo FB Proxy for API V%s",
+          process.env.FB_SERVICE_ACTIVE,
+          v
+        );
+      } else
+        logger.info(
+          "FB_SERVICE_ACTIVE is set to %o in .env. Not enabling Sokigo FB Proxy",
+          process.env.FB_SERVICE_ACTIVE
+        );
+    }
+  }
+
+  async setupFmeProxy() {
+    // Each API version has its own FME proxy middleware. Let's iterate them.
+    for await (const v of app.get("apiVersions")) {
+      // Don't enable FME-server Proxy if necessary env variable isn't sat
+      if (
+        process.env.FME_SERVER_ACTIVE === "true" &&
+        process.env.FME_SERVER_BASE_URL !== undefined
+      ) {
+        const { default: fmeServerProxy } = await import(
+          `../apis/v${v}/middlewares/fme.server.proxy`
+        );
+
+        app.use(`/api/v${v}/fmeproxy`, fmeServerProxy());
+        logger.info(
+          "FME_SERVER_ACTIVE is set to %o in .env. Enabling FME-server proxy",
+          process.env.FME_SERVER_ACTIVE
+        );
+      } else
+        logger.info(
+          "FME_SERVER_ACTIVE is set to %o in .env. Not enabling FME-server proxy",
+          process.env.FME_SERVER_ACTIVE
+        );
+    }
   }
 
   /**
@@ -318,6 +344,7 @@ export default class ExpressServer {
           );
           // If there are restrictions, run a middleware that will enforce the restrictions,
           // if okay, expose - else return 403.
+          console.log("dir: ", dir);
           app.use(`/${dir}`, [
             restrictStatic,
             Express.static(path.join(process.cwd(), "static", dir)),
