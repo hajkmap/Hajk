@@ -215,8 +215,14 @@ class LayerItem extends React.PureComponent {
 
   showZoomSnack() {
     if (this.zoomWarningSnack) return;
+
+    // If the layer is a LayerGroupItem (meaning it contains more than one object in the "layersInfo" array),
+    // then no message should be displayed.
+    if (Object.keys(this.props.layer.get("layerInfo").layersInfo).length > 1)
+      return;
+
     this.zoomWarningSnack = this.props.enqueueSnackbar(
-      `Lagret "${this.caption}" visas endast vid specifika skalor.`,
+      `Lagret "${this.caption}"  är inte synligt vid aktuell zoomnivå.`,
       {
         variant: "warning",
         preventDuplicate: true,
