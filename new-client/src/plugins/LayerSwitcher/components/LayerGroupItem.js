@@ -1,4 +1,5 @@
 import React, { Component } from "react";
+import PropTypes from "prop-types";
 import { Button, Tooltip, Typography, Grid, Box } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import { withSnackbar } from "notistack";
@@ -86,8 +87,18 @@ const StyledList = styled("ul")(() => ({
 }));
 
 class LayerGroupItem extends Component {
+  static propTypes = {
+    options: PropTypes.object,
+    layer: PropTypes.object.isRequired,
+    cqlFilterVisible: PropTypes.bool,
+    model: PropTypes.object.isRequired,
+    observer: PropTypes.object,
+    chapters: PropTypes.array,
+  };
+
   constructor(props) {
     super(props);
+    const { layer } = props;
     const layerInfo = props.layer.get("layerInfo");
     this.state = {
       caption: layerInfo.caption,
@@ -121,6 +132,8 @@ class LayerGroupItem extends Component {
     this.renderSubLayer = this.renderSubLayer.bind(this);
 
     this.hideExpandArrow = layerInfo?.hideExpandArrow === true ? true : false;
+    this.usesMinMaxZoom = this.layerUsesMinMaxZoom();
+    this.minMaxZoomAlertOnToggleOnly = layer.get("minMaxZoomAlertOnToggleOnly");
   }
   /**
    * Triggered when the component is successfully mounted into the DOM.
@@ -134,6 +147,17 @@ class LayerGroupItem extends Component {
     model.observer.subscribe("showLayer", this.setVisible);
     model.observer.subscribe("toggleGroup", this.toggleGroupVisible);
 
+    this.props.layer.on?.("change:visible", (e) => {
+      const visible = !e.oldValue;
+      this.setState({
+        visible,
+      });
+
+      this.listenToZoomChange(visible);
+    });
+
+    this.listenToZoomChange(this.state.visible);
+
     // Set load status by subscribing to a global event. Expect ID (int) of layer
     // and status (string "ok"|"loaderror"). Also, once status was set to "loaderror",
     // don't change it back to "ok": we'll get a response for each tile, so most of
@@ -146,6 +170,64 @@ class LayerGroupItem extends Component {
           status: d.status,
         });
     });
+  }
+
+  layerUsesMinMaxZoom() {
+    const lprops = this.props.layer.getProperties();
+    const maxZ = lprops.maxZoom ?? 0;
+    const minZ = lprops.minZoom ?? 0;
+
+    return (maxZ > 0 && maxZ < Infinity) || (minZ > 0 && minZ < Infinity);
+  }
+
+  zoomEndHandler = (e) => {
+    // Display a Snackbar message if the layer is not visible at the current zoom level.
+    const zoom = this.props.model.olMap.getView().getZoom();
+    const lprops = this.props.layer.getProperties();
+    const layerIsZoomVisible = zoom > lprops.minZoom && zoom <= lprops.maxZoom;
+
+    let showSnack = false;
+
+    if (this.minMaxZoomAlertOnToggleOnly === true) {
+      if (!this.state.visible && !layerIsZoomVisible && e?.type === "click") {
+        showSnack = true;
+      }
+    } else {
+      if (
+        !layerIsZoomVisible &&
+        (this.state.zoomVisible || !this.state.visible)
+      ) {
+        showSnack = true;
+      }
+    }
+
+    if (showSnack === true) {
+      this.showZoomSnack();
+    }
+
+    this.setState({
+      zoomVisible: layerIsZoomVisible,
+    });
+    return layerIsZoomVisible;
+  };
+
+  listenToZoomChange(bListen) {
+    const { model } = this.props;
+
+    if (!this.usesMinMaxZoom) return;
+
+    const eventName = "core.zoomEnd";
+    if (bListen && !this.zoomEndListener) {
+      this.zoomEndListener = model.globalObserver.subscribe(
+        eventName,
+        this.zoomEndHandler
+      );
+    } else {
+      if (this.zoomEndListener) {
+        model.globalObserver.unsubscribe(eventName, this.zoomEndListener);
+        this.zoomEndListener = null;
+      }
+    }
   }
 
   /**
@@ -238,14 +320,6 @@ class LayerGroupItem extends Component {
       return null;
     }
   }
-
-  toggleVisible = (layer) => (e) => {
-    const visible = !this.state.visible;
-    this.setState({
-      visible: visible,
-    });
-    layer.setVisible(visible);
-  };
 
   toggle() {
     this.setState({
@@ -341,25 +415,26 @@ class LayerGroupItem extends Component {
           .join(","),
       });
 
-      // Check if the layer has minimum and maximum zoom levels set.
-      const layerProperties = this.props.layer.getProperties();
-      const minZoom = layerProperties.minZoom;
-      const maxZoom = layerProperties.maxZoom;
-      const currentZoom = this.props.model.olMap.getView().getZoom();
+      const { layer } = this.props;
+      const layerProperties = layer.getProperties();
+      const layerInfo = layerProperties.layerInfo || {};
+      const layersInfo = layerInfo.layersInfo || {};
 
-      // If the current zoom level is outside the range of the layer's visibility, show a warning message.
-      if (
-        (minZoom && currentZoom < minZoom) ||
-        (maxZoom && currentZoom > maxZoom)
-      ) {
-        this.showZoomSnack(subLayer);
-      } else {
-        // If the layer is visible at the current zoom level, close any open warning message.
-        if (this.zoomWarningSnack) {
-          this.props.closeSnackbar(this.zoomWarningSnack);
-          this.zoomWarningSnack = null;
-        }
+      let visibleLayers = [...subLayersToShow];
+      if (layer.get("layers") && layer.get("layers").length > 0) {
+        visibleLayers.push(layer.get("layers")[0]);
       }
+
+      const layerCaptions = visibleLayers.map((subLayer) => {
+        return layersInfo[subLayer]?.caption;
+      });
+
+      const layerCaption =
+        layerCaptions.length > 1
+          ? `Lagren "${layerCaptions[0]}" och ${
+              layerCaptions.length - 1
+            } andra lager`
+          : `Lagret "${layerCaptions[0]}"`;
 
       this.setState({
         visible: true,
@@ -372,6 +447,40 @@ class LayerGroupItem extends Component {
     const visible = !this.state.visible;
     if (visible) {
       this.setVisible(layer);
+
+      // Get all sublayers of the layer group.
+      const subLayers = Object.keys(layer.getProperties().layerInfo.layersInfo);
+
+      // Get the current zoom level.
+      const zoom = this.props.model.olMap.getView().getZoom();
+      const lprops = this.props.layer.getProperties();
+      const layerIsZoomVisible =
+        zoom > lprops.minZoom && zoom <= lprops.maxZoom;
+
+      let showSnack = false;
+
+      // If the layer is not visible at the current zoom level, show a Snackbar.
+      if (this.minMaxZoomAlertOnToggleOnly === true) {
+        if (!this.state.visible && !layerIsZoomVisible && e?.type === "click") {
+          showSnack = true;
+        }
+      } else {
+        if (
+          !layerIsZoomVisible &&
+          (this.state.zoomVisible || !this.state.visible)
+        ) {
+          showSnack = true;
+        }
+      }
+
+      if (showSnack === true) {
+        this.showZoomSnack(subLayers, true);
+      }
+
+      this.setState({
+        zoomVisible: layerIsZoomVisible,
+        visibleSubLayers: subLayers,
+      });
     } else {
       this.setHidden(layer);
     }
@@ -387,12 +496,15 @@ class LayerGroupItem extends Component {
     const { visible } = this.state;
     layerVisibility = visible;
 
+    let isNewSubLayer = false;
+
     if (isVisible) {
       visibleSubLayers = visibleSubLayers.filter(
         (visibleSubLayer) => visibleSubLayer !== subLayer
       );
     } else {
       visibleSubLayers.push(subLayer);
+      isNewSubLayer = true;
     }
 
     if (!visible && visibleSubLayers.length > 0) {
@@ -432,22 +544,38 @@ class LayerGroupItem extends Component {
         visibleSubLayers: visibleSubLayers,
       });
 
-      // Display the Snackbar message when the following conditions are met:
-      // 1. A sublayer is being toggled on (i.e., made visible)
-      // 2. The current zoom level of the map is outside the sublayer's defined visibility range (minZoom and maxZoom)
-      if (!isVisible) {
-        const layerProperties = this.props.layer.getProperties();
-        const minZoom = layerProperties.minZoom;
-        const maxZoom = layerProperties.maxZoom;
-        const currentZoom = this.props.model.olMap.getView().getZoom();
+      // Display a Snackbar message if the layer is not visible at the current zoom level.
+      const zoom = this.props.model.olMap.getView().getZoom();
+      const lprops = this.props.layer.getProperties();
+      const layerIsZoomVisible =
+        zoom > lprops.minZoom && zoom <= lprops.maxZoom;
 
+      let showSnack = false;
+
+      if (this.minMaxZoomAlertOnToggleOnly === true) {
+        if (!this.state.visible && !layerIsZoomVisible && e?.type === "click") {
+          showSnack = true;
+        }
+      } else {
         if (
-          (minZoom && currentZoom < minZoom) ||
-          (maxZoom && currentZoom > maxZoom)
+          !layerIsZoomVisible &&
+          (this.state.zoomVisible || !this.state.visible)
         ) {
-          this.showZoomSnack(subLayer);
+          showSnack = true;
         }
       }
+
+      if (isNewSubLayer && !layerIsZoomVisible) {
+        showSnack = true;
+      }
+
+      if (showSnack === true) {
+        this.showZoomSnack(subLayer, false);
+      }
+
+      this.setState({
+        zoomVisible: layerIsZoomVisible,
+      });
     } else {
       this.setHidden(this.props.layer);
     }
@@ -464,18 +592,6 @@ class LayerGroupItem extends Component {
     );
     const toggleSettings = this.toggleSubLayerSettings.bind(this, index);
     const legendIcon = layer.layersInfo[subLayer].legendIcon;
-    const currentZoom = this.props.model.olMap.getView().getZoom();
-
-    const layerProperties = this.props.layer.getProperties();
-    const minZoom = layerProperties.minZoom;
-    const maxZoom = layerProperties.maxZoom;
-
-    const checkBoxColor = (theme) =>
-      !visible ||
-      (minZoom && currentZoom < minZoom) ||
-      (maxZoom && currentZoom > maxZoom)
-        ? theme.palette.warning.dark
-        : "";
 
     return (
       <LayerInfo key={index}>
@@ -490,7 +606,14 @@ class LayerGroupItem extends Component {
               {!visible ? (
                 <CheckBoxOutlineBlankIcon />
               ) : (
-                <CheckBoxIcon sx={{ fill: checkBoxColor }} />
+                <CheckBoxIcon
+                  sx={{
+                    fill: (theme) =>
+                      !this.state.zoomVisible && this.state.visible
+                        ? theme.palette.warning.dark
+                        : "",
+                  }}
+                />
               )}
             </CheckBoxWrapper>
             {legendIcon && this.renderLegendIcon(legendIcon)}
@@ -641,44 +764,73 @@ class LayerGroupItem extends Component {
     );
   };
 
-  showZoomSnack(subLayer) {
+  showZoomSnack(sublayer, isGroupLayer) {
     if (this.zoomWarningSnack) return;
 
-    const layerProperties = this.props.layer.getProperties();
-    const layerCaption = subLayer
-      ? layerProperties.layerInfo.layersInfo[subLayer].caption
-      : layerProperties.caption;
+    const { layer } = this.props;
+    const layerProperties = layer.getProperties();
+    const layerInfo = layerProperties.layerInfo || {};
+    const layersInfo = layerInfo.layersInfo || {};
 
-    this.zoomWarningSnack = this.props.enqueueSnackbar(
-      `Lagret "${layerCaption}" är inte synligt vid aktuell zoomnivå.`,
-      {
-        variant: "warning",
-        preventDuplicate: false,
-        onClose: () => {
-          this.zoomWarningSnack = null;
-        },
+    let visibleLayers = [...this.state.visibleSubLayers];
+    if (layer.get("layers") && layer.get("layers").length > 0) {
+      visibleLayers.push(layer.get("layers")[0]);
+    }
+
+    const addSubLayerCaptions = (subLayer) => {
+      if (subLayer) {
+        const layerCaption = layersInfo[subLayer]?.caption;
+        if (layerCaption) {
+          const message = `Lagret "${layerCaption}" är inte synligt vid aktuell zoomnivå.`;
+
+          this.zoomWarningSnack = this.props.enqueueSnackbar(message, {
+            variant: "warning",
+            preventDuplicate: false,
+            onClose: () => {
+              this.zoomWarningSnack = null;
+            },
+          });
+        }
       }
+    };
+
+    // Check if isGroupLayer is true and sublayer is an array.
+    if (isGroupLayer && Array.isArray(sublayer)) {
+      // Iterate through the sublayer array and call addSubLayerCaptions for each subLayer.
+      sublayer.forEach((subLayer) => {
+        addSubLayerCaptions(subLayer);
+      });
+    } else if (sublayer) {
+      // Check if sublayer is defined (not undefined or null).
+      addSubLayerCaptions(sublayer);
+    } else {
+      // If sublayer is undefined, iterate through the visibleLayers array and call addSubLayerCaptions for each subLayer.
+      visibleLayers.forEach((subLayer) => {
+        addSubLayerCaptions(subLayer);
+      });
+    }
+  }
+
+  getCheckBox() {
+    const { layer } = this.props;
+    const { visible, visibleSubLayers } = this.state;
+    return (
+      <CheckBoxWrapper>
+        {!visible ? (
+          <CheckBoxOutlineBlankIcon />
+        ) : visibleSubLayers.length !== layer.subLayers.length ? (
+          <CheckBoxIcon sx={{ fill: "gray" }} />
+        ) : (
+          <CheckBoxIcon />
+        )}
+      </CheckBoxWrapper>
     );
   }
 
   render() {
     const { cqlFilterVisible, layer } = this.props;
-    const { open, visible, visibleSubLayers, toggleSettings, infoVisible } =
-      this.state;
+    const { open, toggleSettings, infoVisible } = this.state;
 
-    function getCheckBox() {
-      return (
-        <CheckBoxWrapper>
-          {!visible ? (
-            <CheckBoxOutlineBlankIcon />
-          ) : visibleSubLayers.length !== layer.subLayers.length ? (
-            <CheckBoxIcon sx={{ fill: "gray" }} />
-          ) : (
-            <CheckBoxIcon />
-          )}
-        </CheckBoxWrapper>
-      );
-    }
     const legendIcon = layer.get("layerInfo").legendIcon;
     return (
       <Grid
@@ -704,7 +856,7 @@ class LayerGroupItem extends Component {
                 wrap="nowrap"
                 onClick={this.toggleGroupVisible(layer)}
               >
-                {getCheckBox()}
+                <Grid item>{this.getCheckBox()}</Grid>
                 {legendIcon && this.renderLegendIcon(legendIcon)}
                 <Caption>{layer.get("caption")}</Caption>
               </Grid>
