@@ -1,6 +1,7 @@
 import React, { Component } from "react";
 import { Button, Tooltip, Typography, Grid, Box } from "@mui/material";
 import { styled } from "@mui/material/styles";
+import { withSnackbar } from "notistack";
 import IconWarning from "@mui/icons-material/Warning";
 import CallMadeIcon from "@mui/icons-material/CallMade";
 import InfoIcon from "@mui/icons-material/Info";
@@ -289,6 +290,8 @@ class LayerGroupItem extends Component {
       // Hide the layer in OL
       layer.setVisible(false);
 
+      this.props.closeSnackbar(this.zoomWarningSnack);
+
       // Update UI state
       this.setState({
         visible: false,
@@ -297,7 +300,7 @@ class LayerGroupItem extends Component {
     }
   };
 
-  setVisible = (la) => {
+  setVisible = (la, subLayer) => {
     let l,
       subLayersToShow = null;
 
@@ -338,6 +341,26 @@ class LayerGroupItem extends Component {
           .join(","),
       });
 
+      // Check if the layer has minimum and maximum zoom levels set.
+      const layerProperties = this.props.layer.getProperties();
+      const minZoom = layerProperties.minZoom;
+      const maxZoom = layerProperties.maxZoom;
+      const currentZoom = this.props.model.olMap.getView().getZoom();
+
+      // If the current zoom level is outside the range of the layer's visibility, show a warning message.
+      if (
+        (minZoom && currentZoom < minZoom) ||
+        (maxZoom && currentZoom > maxZoom)
+      ) {
+        this.showZoomSnack(subLayer);
+      } else {
+        // If the layer is visible at the current zoom level, close any open warning message.
+        if (this.zoomWarningSnack) {
+          this.props.closeSnackbar(this.zoomWarningSnack);
+          this.zoomWarningSnack = null;
+        }
+      }
+
       this.setState({
         visible: true,
         visibleSubLayers: subLayersToShow,
@@ -374,10 +397,12 @@ class LayerGroupItem extends Component {
 
     if (!visible && visibleSubLayers.length > 0) {
       layerVisibility = true;
+      this.setVisible(this.props.layer, subLayer);
     }
 
     if (visibleSubLayers.length === 0) {
       layerVisibility = false;
+      this.setHidden(this.props.layer);
     }
 
     if (visibleSubLayers.length >= 1) {
@@ -406,6 +431,23 @@ class LayerGroupItem extends Component {
         visible: layerVisibility,
         visibleSubLayers: visibleSubLayers,
       });
+
+      // Display the Snackbar message when the following conditions are met:
+      // 1. A sublayer is being toggled on (i.e., made visible)
+      // 2. The current zoom level of the map is outside the sublayer's defined visibility range (minZoom and maxZoom)
+      if (!isVisible) {
+        const layerProperties = this.props.layer.getProperties();
+        const minZoom = layerProperties.minZoom;
+        const maxZoom = layerProperties.maxZoom;
+        const currentZoom = this.props.model.olMap.getView().getZoom();
+
+        if (
+          (minZoom && currentZoom < minZoom) ||
+          (maxZoom && currentZoom > maxZoom)
+        ) {
+          this.showZoomSnack(subLayer);
+        }
+      }
     } else {
       this.setHidden(this.props.layer);
     }
@@ -599,6 +641,26 @@ class LayerGroupItem extends Component {
     );
   };
 
+  showZoomSnack(subLayer) {
+    if (this.zoomWarningSnack) return;
+
+    const layerProperties = this.props.layer.getProperties();
+    const layerCaption = subLayer
+      ? layerProperties.layerInfo.layersInfo[subLayer].caption
+      : layerProperties.caption;
+
+    this.zoomWarningSnack = this.props.enqueueSnackbar(
+      `Lagret "${layerCaption}" är inte synligt vid aktuell zoomnivå.`,
+      {
+        variant: "warning",
+        preventDuplicate: false,
+        onClose: () => {
+          this.zoomWarningSnack = null;
+        },
+      }
+    );
+  }
+
   render() {
     const { cqlFilterVisible, layer } = this.props;
     const { open, visible, visibleSubLayers, toggleSettings, infoVisible } =
@@ -679,4 +741,4 @@ class LayerGroupItem extends Component {
   }
 }
 
-export default LayerGroupItem;
+export default withSnackbar(LayerGroupItem);
