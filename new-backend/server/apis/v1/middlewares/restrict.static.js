@@ -1,7 +1,7 @@
 import log4js from "log4js";
 import ad from "../services/activedirectory.service";
 
-const logger = log4js.getLogger("hajk.static.restrict");
+const logger = log4js.getLogger("hajk.static.restrict.v1");
 /**
  * @summary Determine if current user is member in any of the required groups in order to access a given path.
  *
