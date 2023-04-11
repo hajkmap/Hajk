@@ -86,7 +86,8 @@
     "wms_layers": "topowebbkartan",
     "list_images": "http://localhost:55630/config/listimage",
     "list_videos": "http://localhost:55630/config/listvideo",
-    "list_audios": "http://localhost:55630/config/listaudio"
+    "list_audios": "http://localhost:55630/config/listaudio",
+    "use_document_folders": false
   },
   "router": [
     { "name": "layermanager", "title": "Lager", "default": true },
