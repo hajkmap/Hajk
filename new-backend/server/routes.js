@@ -1,3 +1,4 @@
+// FIXME: This imports ignore the supported API versions and initiate all versions!
 import v1Router from "./apis/v1/router";
 import v2Router from "./apis/v2/router";
 
