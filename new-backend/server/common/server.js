@@ -7,16 +7,14 @@ import helmet from "helmet";
 import cors from "cors";
 import compression from "compression";
 import cookieParser from "cookie-parser";
+import * as OpenApiValidator from "express-openapi-validator";
 
 import log4js from "./utils/hajkLogger";
 import clfDate from "clf-date";
 
 import { createProxyMiddleware } from "http-proxy-middleware";
 
-import restrictStatic from "../apis/v1/middlewares/restrict.static";
 import detailedRequestLogger from "./middlewares/detailed.request.logger";
-
-import * as OpenApiValidator from "express-openapi-validator";
 import errorHandler from "./middlewares/error.handler";
 
 const app = new Express();
@@ -316,11 +314,38 @@ export default class ExpressServer {
     }
   }
 
-  setupStaticDirs() {
+  async setupStaticDirs() {
     const l = log4js.getLogger("hajk.static");
 
-    l.trace("Setting up access to static directories…");
+    // Try to convert the value from config to an Int
+    let normalizedStaticExposerVersion = Number.parseInt(
+      process.env.STATIC_EXPOSER_VERSION?.trim?.()
+    );
+
+    // Grab active API versions
+    const apiVersions = app.set("apiVersions");
+
+    // If NaN, or if version required is not any of the active API versions,
+    // let's fall back to the highest active version
+    if (
+      Number.isNaN(normalizedStaticExposerVersion) ||
+      !apiVersions.includes(normalizedStaticExposerVersion)
+    ) {
+      normalizedStaticExposerVersion = Math.max(...apiVersions);
+    }
+
+    const apiVersion = normalizedStaticExposerVersion;
+
+    l.info(
+      `Attempting to expose static directories using Static Exposer from API V${apiVersion}`
+    );
+
     try {
+      // Dynamically import the required version of Static Restrictor
+      const { default: restrictStatic } = await import(
+        `../apis/v${apiVersion}/middlewares/restrict.static`
+      );
+
       const dir = path.join(process.cwd(), "static");
       // List dir contents, the second parameter will ensure we get Dirent objects
       const staticDirs = fs
