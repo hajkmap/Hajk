@@ -34,7 +34,7 @@ class ActiveDirectoryService {
       return;
     }
 
-    logger.trace("Initiating ActiveDirectoryService");
+    logger.trace("Initiating ActiveDirectoryService V2");
 
     // If .env says we should use AD but the configuration is missing, abort.
     if (

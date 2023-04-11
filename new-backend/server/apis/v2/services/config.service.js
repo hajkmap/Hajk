@@ -15,7 +15,7 @@ class ConfigServiceV2 {
     // We should also implement an update-store method, perhaps
     // have a global bus (using EventEmitter?), so we can trigger
     // re-reads from FS into our in-memory store.
-    logger.trace("Initiating ConfigServiceV2");
+    logger.trace("Initiating ConfigService V2");
   }
 
   /**

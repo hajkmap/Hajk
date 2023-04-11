@@ -5,7 +5,7 @@ const logger = log4js.getLogger("service.informative.v2");
 
 class InformativeService {
   constructor() {
-    logger.trace("Initiating InformativeService");
+    logger.trace("Initiating InformativeService V2");
   }
 
   /**
