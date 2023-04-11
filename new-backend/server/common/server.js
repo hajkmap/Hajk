@@ -431,7 +431,7 @@ export default class ExpressServer {
     // Startup handler
     const welcome = (p) => () =>
       logger.info(
-        `Server startup completed. Launched on port ${p}. (http://localhost:${p})`
+        `Server startup completed. Some services may still be initiating. Launched on port ${p}. (http://localhost:${p})`
       );
 
     // Shutdown handler

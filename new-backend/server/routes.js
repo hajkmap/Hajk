@@ -1,8 +1,10 @@
-// FIXME: This imports ignore the supported API versions and initiate all versions!
-import v1Router from "./apis/v1/router";
-import v2Router from "./apis/v2/router";
-
-export default function routes(app) {
-  app.use("/api/v1", v1Router);
-  app.use("/api/v2", v2Router);
+/**
+ * @summary Initiate the version-specific endpoint for each of the active API versions.
+ * @param {Express} app
+ */
+export default async function routes(app) {
+  for (const v of app.get("apiVersions")) {
+    const { default: router } = await import(`./apis/v${v}/router`);
+    app.use(`/api/v${v}`, router);
+  }
 }
