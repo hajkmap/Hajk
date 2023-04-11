@@ -23,6 +23,8 @@ const app = new Express();
 
 const logger = log4js.getLogger("hajk");
 
+const ALLOWED_API_VERSIONS = [1, 2];
+
 export default class ExpressServer {
   constructor() {
     // Check engine version and display notice if applicable
@@ -35,14 +37,47 @@ export default class ExpressServer {
 
     logger.debug("Process's current working directory: ", process.cwd());
 
-    // Check which API versions should be enabled.
-    // First, normalize the value and store in a const.
-    // Note that the fallback array at the end contains
-    // ALL CURRENTLY SUPPORTED VERSIONS OF THE API. This is
-    // the current default and should be kept updated.
-    const apiVersions = process.env.API_VERSIONS?.split(",") // split on comma
-      .map((v) => Number.parseInt(v)) // transform string to int
-      .filter((v) => Number.isInteger(v)) || [1, 2]; // keep only real integers. Fall back to all API versions.
+    // Check which API versions should be enabled. We must do some work to ensure
+    // that the value from .env is valid. But we have an early fallback, in case
+    // no value is provided.
+    let _apiVersions =
+      process.env.API_VERSIONS?.trim?.() || ALLOWED_API_VERSIONS.join(",");
+
+    // By now we'll always have a string, although it can be empty, or
+    // contain invalid characters. Let's remove those faulty entries.
+    _apiVersions = _apiVersions.split(",").filter((iv) => {
+      // Attempt to parse as integer
+      const v = Number.parseInt(iv);
+
+      // If not valid, ignore
+      if (Number.isInteger(v) === false) {
+        logger.warn(
+          `[API] Invalid version in .env. Ignoring entry: "${v}". Supported versions are: ${ALLOWED_API_VERSIONS.join(
+            ", "
+          )}`
+        );
+        return false;
+      }
+
+      // Check if the parsed integer really is a valid API version
+      if (ALLOWED_API_VERSIONS.includes(v) === false) {
+        logger.warn(
+          `[API] Version specified in .env not allowed. Ignoring entry: "${v}". Supported versions are: ${ALLOWED_API_VERSIONS.join(
+            ", "
+          )}`
+        );
+        return false;
+      }
+
+      // If we got this far, v is a valid API version and can be kept in the array
+      return v;
+    });
+
+    // One last check is needed: we could end up here with _apiVersions=[] (if the filtering above resulted
+    // in none valid entiries). Take care of it by checking that the array isn't empty, fallback to defaults
+    const apiVersions =
+      _apiVersions.length === 0 ? ALLOWED_API_VERSIONS : _apiVersions;
+
     // Also, store as an app variable for later use across the app
     app.set("apiVersions", apiVersions);
     logger.info(
@@ -227,29 +262,20 @@ export default class ExpressServer {
 
   /**
    * @summary Create proxies for endpoints specified in DOTENV as "PROXY_*".
+   * @description A proxy will be created for each of the active API versions.
+   * @example If admin configures a key named PROXY_GEOSERVER and enables
+   * version 1 and 2 of the API, the following endpoints will be made available:
+   * - /api/v1/proxy/geoserver
+   * - /api/v2/proxy/geoserver
    * @issue https://github.com/hajkmap/Hajk/issues/824
+   * @issue https://github.com/hajkmap/Hajk/issues/1390
    * @returns
    * @memberof ExpressServer
    */
   setupGenericProxy() {
+    // Prepare a logger
+    const l = log4js.getLogger("hajk.proxy");
     try {
-      // Prepare a logger
-      const l = log4js.getLogger("hajk.proxy");
-
-      // Prepare a mapping of log levels between those used by Log4JS and
-      // http-proxy-middleware's internal levels
-      const logLevels = {
-        ALL: "debug",
-        TRACE: "debug",
-        DEBUG: "debug",
-        INFO: "info",
-        WARN: "warn",
-        ERROR: "error",
-        FATAL: "error",
-        MARK: "error",
-        OFF: "silent",
-      };
-
       // Convert the settings from DOTENV to a nice Array of Objects.
       const proxyMap = Object.entries(process.env)
         .filter(([k]) => k.startsWith("PROXY_"))
@@ -259,26 +285,33 @@ export default class ExpressServer {
           return { context: k, target: v };
         });
 
-      proxyMap.forEach((v) => {
-        // Grab context and target from current element
-        const context = v.context;
-        const target = v.target;
-        l.trace(`Setting up Hajk proxy "${context}"`);
+      // Iterate enabled API versions and expose one proxy endpoint
+      // for each version.
+      for (const apiVersion of app.get("apiVersions")) {
+        proxyMap.forEach((v) => {
+          // Grab context and target from current element
+          const context = v.context;
+          const target = v.target;
+          l.trace(
+            `Setting up proxy: /api/v${apiVersion}/proxy/${context} -> ${target}`
+          );
 
-        // Create the proxy itself
-        app.use(
-          `/api/v1/proxy/${context}`,
-          createProxyMiddleware({
-            target: target,
-            changeOrigin: true,
-            pathRewrite: {
-              [`^/api/v1/proxy/${context}`]: "", // remove base path
-            },
-            logLevel: "silent", // We don't care about logLevels[process.env.LOG_LEVEL] in this case as we log success and errors ourselves
-          })
-        );
-      });
+          // Create the proxy itself
+          app.use(
+            `/api/v${apiVersion}/proxy/${context}`,
+            createProxyMiddleware({
+              logLevel: "silent",
+              target: target,
+              changeOrigin: true,
+              pathRewrite: {
+                [`^/api/v${apiVersion}/proxy/${context}`]: "", // remove base path
+              },
+            })
+          );
+        });
+      }
     } catch (error) {
+      l.error(error);
       return { error };
     }
   }
@@ -346,7 +379,6 @@ export default class ExpressServer {
           );
           // If there are restrictions, run a middleware that will enforce the restrictions,
           // if okay, expose - else return 403.
-          console.log("dir: ", dir);
           app.use(`/${dir}`, [
             restrictStatic,
             Express.static(path.join(process.cwd(), "static", dir)),
