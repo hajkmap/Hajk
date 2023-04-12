@@ -291,6 +291,8 @@ class App extends React.PureComponent {
         ? false
         : isMobile
         ? false
+        : props.config.mapConfig.map.drawerStatic
+        ? true
         : drawerPermanentFromLocalStorage !== null
         ? drawerPermanentFromLocalStorage
         : (props.config.mapConfig.map.drawerVisible &&
@@ -300,7 +302,7 @@ class App extends React.PureComponent {
     // First check if we have anything to render at all and in case we haven't -> do not show drawer
     // If on a mobile device, and a config property for if the drawer should initially be open is set, base the drawer state on this.
     // Otherwise if cookie for "drawerPermanent" is not null, use it to control Drawer visibility,
-    // If there a no cookie settings, use the config drawVisible setting.
+    // If there a no cookie settings, use the config drawVisible setting.drawerVisibletate === null
     // Finally, don't show the drawer.
     const drawerVisible =
       activeDrawerContentState === null
@@ -308,9 +310,20 @@ class App extends React.PureComponent {
         : isMobile &&
           props.config.mapConfig.map.drawerVisibleMobile !== undefined
         ? props.config.mapConfig.map.drawerVisibleMobile
+        : props.config.mapConfig.map.drawerStatic
+        ? true
         : drawerPermanentFromLocalStorage !== null
         ? drawerPermanentFromLocalStorage
         : props.config.mapConfig.map.drawerVisible || false;
+
+    const drawerStatic =
+      activeDrawerContentState === null
+        ? false
+        : isMobile
+        ? false
+        : props.config.mapConfig.map.drawerStatic !== undefined
+        ? props.config.mapConfig.map.drawerStatic
+        : false;
 
     this.state = {
       alert: false,
@@ -319,6 +332,7 @@ class App extends React.PureComponent {
       mapClickDataResult: {},
       drawerVisible: drawerVisible,
       drawerPermanent: drawerPermanent,
+      drawerStatic: drawerStatic,
       activeDrawerContent: activeDrawerContentState,
       drawerMouseOverLock: false,
     };
@@ -416,6 +430,13 @@ class App extends React.PureComponent {
 
   componentDidMount() {
     this.checkConfigForUnsupportedTools();
+
+    console.log(
+      "alwaysLocked:" + this.state.drawerStatic,
+      "permanent:" + this.state.drawerPermanent,
+      "visible:" + this.state.drawerVisible,
+      "activeDrawblabla:" + this.state.activeDrawerContent
+    );
 
     const promises = this.appModel
       .createMap()
@@ -892,37 +913,39 @@ class App extends React.PureComponent {
             <DrawerTitle variant="button">{drawerTitle}</DrawerTitle>
           </Grid>
           {/** Hide Lock button in mobile mode - there's not screen estate to permanently lock Drawer on mobile viewports*/}
-          <Grid item>
-            <Hidden mdDown>
-              <Tooltip
-                disableInteractive
-                title={
-                  (this.state.drawerPermanent ? "Lås upp" : "Lås fast") +
-                  " verktygspanelen"
-                }
-              >
-                <IconButton
-                  sx={{ margin: "-12px" }} // Ugh... However, it tightens everything up
-                  onClick={this.togglePermanent}
-                  onMouseEnter={this.handleMouseEnter}
-                  onMouseLeave={this.handleMouseLeave}
-                  size="large"
+          {!this.state.drawerStatic && (
+            <Grid item>
+              <Hidden mdDown>
+                <Tooltip
+                  disableInteractive
+                  title={
+                    (this.state.drawerPermanent ? "Lås upp" : "Lås fast") +
+                    " verktygspanelen"
+                  }
                 >
-                  {this.state.drawerPermanent ? (
-                    this.state.drawerMouseOverLock ? (
-                      <LockOpenIcon />
-                    ) : (
+                  <IconButton
+                    sx={{ margin: "-12px" }} // Ugh... However, it tightens everything up
+                    onClick={this.togglePermanent}
+                    onMouseEnter={this.handleMouseEnter}
+                    onMouseLeave={this.handleMouseLeave}
+                    size="large"
+                  >
+                    {this.state.drawerPermanent ? (
+                      this.state.drawerMouseOverLock ? (
+                        <LockOpenIcon />
+                      ) : (
+                        <LockIcon />
+                      )
+                    ) : this.state.drawerMouseOverLock ? (
                       <LockIcon />
-                    )
-                  ) : this.state.drawerMouseOverLock ? (
-                    <LockIcon />
-                  ) : (
-                    <LockOpenIcon />
-                  )}
-                </IconButton>
-              </Tooltip>
-            </Hidden>
-          </Grid>
+                    ) : (
+                      <LockOpenIcon />
+                    )}
+                  </IconButton>
+                </Tooltip>
+              </Hidden>
+            </Grid>
+          )}
         </DrawerHeaderGrid>
       </>
     );
@@ -1020,12 +1043,15 @@ class App extends React.PureComponent {
             <StyledHeader
               id="header"
               sx={{
+                justifyContent: this.state.drawerStatic
+                  ? "end"
+                  : "space-between",
                 "& > *": {
                   pointerEvents: "auto",
                 },
               }}
             >
-              {clean === false && (
+              {clean === false && !this.state.drawerStatic && (
                 <DrawerToggleButtons
                   drawerButtons={this.state.drawerButtons}
                   globalObserver={this.globalObserver}
