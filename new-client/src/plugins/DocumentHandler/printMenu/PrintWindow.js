@@ -259,6 +259,7 @@ class PrintWindow extends React.PureComponent {
     printWindow.document.head.insertAdjacentHTML(
       "beforeend",
       ` <title>${document.title}</title>
+        <base href="${document.location.protocol}//${document.location.host}/" />
         <style>
           @page {
             size: A4;
