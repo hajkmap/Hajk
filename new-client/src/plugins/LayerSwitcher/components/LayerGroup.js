@@ -1,16 +1,11 @@
 import React from "react";
 import propTypes from "prop-types";
-import LayerItem from "./LayerItem.js";
+import LayerItem from "./LayerItem";
+import GroupLayer from "./GroupLayer";
 import LayerGroupAccordion from "./LayerGroupAccordion.js";
 import CheckBoxIcon from "@mui/icons-material/CheckBox";
 import CheckBoxOutlineBlankIcon from "@mui/icons-material/CheckBoxOutlineBlank";
-
-const checkBoxIconStyle = {
-  cursor: "pointer",
-  float: "left",
-  marginRight: "5px",
-  padding: "0",
-};
+import { IconButton } from "@mui/material";
 
 class LayerGroup extends React.PureComponent {
   state = {
@@ -247,12 +242,12 @@ class LayerGroup extends React.PureComponent {
 
   getCheckbox = () => {
     if (this.isToggled()) {
-      return <CheckBoxIcon sx={checkBoxIconStyle} />;
+      return <CheckBoxIcon />;
     }
     if (this.isSemiToggled()) {
-      return <CheckBoxIcon sx={{ ...checkBoxIconStyle, color: "gray" }} />;
+      return <CheckBoxIcon sx={{ color: "gray" }} />;
     }
-    return <CheckBoxOutlineBlankIcon sx={checkBoxIconStyle} />;
+    return <CheckBoxOutlineBlankIcon />;
   };
   /**
    * If Group has "toggleable" property enabled, render the toggle all checkbox.
@@ -278,7 +273,9 @@ class LayerGroup extends React.PureComponent {
             }
           }}
         >
-          {this.getCheckbox()}
+          <IconButton sx={{ pl: 0 }} disableRipple size="small">
+            {this.getCheckbox()}
+          </IconButton>
         </div>
       );
     }
@@ -291,14 +288,28 @@ class LayerGroup extends React.PureComponent {
         {this.state.layers.map((layer, i) => {
           const mapLayer = this.model.layerMap[layer.id];
           if (mapLayer) {
+            if (mapLayer.get("layerType") === "group") {
+              return (
+                <GroupLayer
+                  key={mapLayer.get("name")}
+                  layer={mapLayer}
+                  app={this.props.app}
+                  model={this.props.model}
+                  toggleable={true}
+                  options={this.props.options}
+                  draggable={false}
+                ></GroupLayer>
+              );
+            }
             return (
               <LayerItem
                 key={mapLayer.get("name")}
                 layer={mapLayer}
-                model={this.props.model}
+                draggable={false}
+                toggleable={true}
+                app={this.props.app}
                 options={this.props.options}
                 chapters={this.props.chapters}
-                app={this.props.app}
                 onOpenChapter={(chapter) => {
                   const informativeWindow = this.props.app.windows.find(
                     (window) => window.type === "informative"
@@ -320,7 +331,6 @@ class LayerGroup extends React.PureComponent {
     const { expanded } = this.state;
     return (
       <LayerGroupAccordion
-        child={this.props.child}
         toggleable={this.props.group.toggled}
         expanded={expanded}
         name={this.state.name}

@@ -3,7 +3,7 @@ import { createPortal } from "react-dom";
 import propTypes from "prop-types";
 
 import { styled } from "@mui/material/styles";
-import { AppBar, Tab, Tabs, Badge, Box } from "@mui/material";
+import { AppBar, Tab, Tabs, Badge, Box, IconButton } from "@mui/material";
 
 import BackgroundSwitcher from "./components/BackgroundSwitcher.js";
 import LayerGroup from "./components/LayerGroup.js";
@@ -118,7 +118,6 @@ class LayersSwitcherView extends React.PureComponent {
     return (
       <Box
         sx={{
-          p: 1,
           display:
             shouldRender === true &&
             this.state.displayLoadLayerPackage === false
@@ -129,17 +128,24 @@ class LayersSwitcherView extends React.PureComponent {
         {/* TODO: configurable from admin */}
         {/* QuickAccess section */}
         <LayerGroupAccordion
-          expanded={true}
+          expanded={false}
           name={"Snabblager"}
-          quickAccess={<StarOutlineOutlinedIcon sx={{ marginRight: "5px" }} />}
+          quickAccess={
+            <IconButton sx={{ pl: 0 }} disableRipple size="small">
+              <StarOutlineOutlinedIcon />
+            </IconButton>
+          }
           layerGroupDetails={
             <>
-              <FolderOutlinedIcon
-                sx={{ mr: 1 }}
-                onClick={this.handleLayerPackageToggle}
-              ></FolderOutlinedIcon>
-              <PersonOutlinedIcon sx={{ mr: 1 }}></PersonOutlinedIcon>
-              <DeleteOutlinedIcon sx={{ mr: 1 }}></DeleteOutlinedIcon>
+              <IconButton onClick={this.handleLayerPackageToggle}>
+                <FolderOutlinedIcon fontSize="small"></FolderOutlinedIcon>
+              </IconButton>
+              <IconButton>
+                <PersonOutlinedIcon fontSize="small"></PersonOutlinedIcon>
+              </IconButton>
+              <IconButton>
+                <DeleteOutlinedIcon fontSize="small"></DeleteOutlinedIcon>
+              </IconButton>
             </>
           }
         ></LayerGroupAccordion>
@@ -239,9 +245,11 @@ class LayersSwitcherView extends React.PureComponent {
         />
         {this.options.showActiveLayersView === true && (
           <DrawOrder
+            model={this.props.model}
             display={this.state.activeTab === 2}
             map={this.props.map}
             app={this.props.app}
+            options={this.props.options}
             onLayerChange={this.handleLayerChange}
           ></DrawOrder>
         )}
