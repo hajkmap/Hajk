@@ -1440,7 +1440,7 @@ class MapOptions extends Component {
                 <i
                   className="fa fa-question-circle"
                   data-toggle="tooltip"
-                  title="Om aktiv kommer sidopanelen inte gå att göra osynlig"
+                  title="Om aktiv kommer sidopanelen vara permanent synlig och låst"
                 />
               </label>
             </div>

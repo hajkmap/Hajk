@@ -316,6 +316,12 @@ class App extends React.PureComponent {
         ? drawerPermanentFromLocalStorage
         : props.config.mapConfig.map.drawerVisible || false;
 
+    // This variable is used to make the drawer static (always visible and locked in place)...
+    // and for hiding the dynamic drawer buttons.
+    // We want to check if user has ticked drawerStatic in admin.
+    // We also make sure we have something to render.
+    // And if user is on mobile.
+    // And if the drawerStatic is being used at all.
     const drawerStatic =
       activeDrawerContentState === null
         ? false
@@ -906,6 +912,7 @@ class App extends React.PureComponent {
             <DrawerTitle variant="button">{drawerTitle}</DrawerTitle>
           </Grid>
           {/** Hide Lock button in mobile mode - there's not screen estate to permanently lock Drawer on mobile viewports*/}
+          {/** Hide Lock button if user has chosen static drawer*/}
           {!this.state.drawerStatic && (
             <Grid item>
               <Hidden mdDown>
