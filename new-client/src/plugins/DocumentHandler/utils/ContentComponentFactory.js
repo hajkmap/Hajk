@@ -442,7 +442,7 @@ export const Img = ({ imgTag, localObserver, componentId, baseUrl }) => {
         sx={{
           ...getImageStyle(image),
           ...(image.width && {
-            height: "auto", // Let the browser calculate the height, otherwise it will look shitty when maxWidth gets triggered.
+            height: "auto", // Let the browser calculate the height, otherwise it will look bad when maxWidth gets triggered.
             width: image.width,
             maxWidth: "100%",
           }),
