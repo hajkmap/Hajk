@@ -431,13 +431,6 @@ class App extends React.PureComponent {
   componentDidMount() {
     this.checkConfigForUnsupportedTools();
 
-    console.log(
-      "alwaysLocked:" + this.state.drawerStatic,
-      "permanent:" + this.state.drawerPermanent,
-      "visible:" + this.state.drawerVisible,
-      "activeDrawblabla:" + this.state.activeDrawerContent
-    );
-
     const promises = this.appModel
       .createMap()
       .addSearchModel()
