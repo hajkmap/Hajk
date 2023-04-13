@@ -968,7 +968,7 @@ class PrintWindow extends React.PureComponent {
   };
 
   checkPdfLinks(pdfLinks) {
-    const updatedLinks = pdfLinks.filter(
+    const updatedLinks = pdfLinks?.filter(
       (pdfLink) => pdfLink.name || pdfLink.link
     );
     return updatedLinks;
@@ -1173,7 +1173,7 @@ class PrintWindow extends React.PureComponent {
                 </Button>
               </Grid>
               <StyledGrid item xs={4}>
-                {pdfLinks.length > 0 && (
+                {pdfLinks?.length > 0 && (
                   <Button
                     color="primary"
                     style={{ paddingLeft: 0 }}
