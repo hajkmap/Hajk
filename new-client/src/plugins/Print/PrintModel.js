@@ -29,8 +29,6 @@ export default class PrintModel {
     this.includeImageBorder = settings.options.includeImageBorder;
     this.northArrowMaxWidth = settings.options.northArrowMaxWidth;
     this.scales = settings.options.scales;
-    this.scaleMeters = settings.options.scaleMeters;
-    this.scaleBarLengths = this.calculateScaleBarLengths();
     this.copyright = settings.options.copyright || "";
     this.date = settings.options.date || "";
     this.disclaimer = settings.options.disclaimer || "";
@@ -70,22 +68,21 @@ export default class PrintModel {
     });
   }
 
-  defaultScaleBarLengths = {
-    100: 10,
-    200: 10,
+  scaleBarLengths = {
+    100: 2.5,
+    200: 5,
     250: 10,
     400: 20,
-    500: 40,
-    1000: 60,
-    2000: 100,
+    500: 25,
+    1000: 50,
+    2000: 75,
     2500: 100,
-    5000: 400,
-    10000: 600,
-    25000: 800,
-    50000: 2000,
-    100000: 6000,
+    5000: 250,
+    10000: 500,
+    25000: 1000,
+    50000: 2500,
+    100000: 5000,
     200000: 10000,
-    300000: 16000,
   };
 
   previewLayer = null;
@@ -101,17 +98,6 @@ export default class PrintModel {
 
   // A flag that's used in "rendercomplete" to ensure that user has not cancelled the request
   pdfCreationCancelled = null;
-
-  calculateScaleBarLengths() {
-    if (this.scales.length === this.scaleMeters.length) {
-      return this.scales.reduce((acc, curr, index) => {
-        acc[curr] = this.scaleMeters[index];
-        return acc;
-      }, {});
-    } else {
-      return this.defaultScaleBarLengths;
-    }
-  }
 
   addPreviewLayer() {
     this.previewLayer = new Vector({
@@ -387,7 +373,6 @@ export default class PrintModel {
    */
   getFittingScaleBarLength = (scale) => {
     const length = this.scaleBarLengths[scale];
-
     if (length) {
       return length;
     } else {
@@ -411,91 +396,6 @@ export default class PrintModel {
     return `${Number(scaleBarLengthMeters).toLocaleString("sv-SE")} ${units}`;
   };
 
-  addDividerLinesAndTexts = (props) => {
-    // Here we add divider lines between the starting- and ending-line.
-    this.drawDividerLines(props);
-
-    // Before we add the numbers to the halfway divider line and the quarterway divider line...
-    // we want to check if the user has set a custom scale by finding the scale in the scaleMeters property,
-    // and if we do not find it, we do not add divider texts.
-    if (this.scaleBarLengths[props.scale]) this.addDividerTexts(props);
-  };
-
-  drawDividerLines = ({ pdf, scaleBarPosition, scaleBarLength, color }) => {
-    pdf.setLineWidth(0.25).setDrawColor(color);
-
-    // Here we draw the starting-, finsh- and through-line of the scalebar:
-    // Like this: |--------|
-    pdf.line(
-      scaleBarPosition.x,
-      scaleBarPosition.y + 3,
-      scaleBarPosition.x + scaleBarLength,
-      scaleBarPosition.y + 3
-    );
-    pdf.line(
-      scaleBarPosition.x,
-      scaleBarPosition.y + 1,
-      scaleBarPosition.x,
-      scaleBarPosition.y + 5
-    );
-    pdf.line(
-      scaleBarPosition.x + scaleBarLength,
-      scaleBarPosition.y + 1,
-      scaleBarPosition.x + scaleBarLength,
-      scaleBarPosition.y + 5
-    );
-
-    // Here we set the distance number of the gap between the lines on the scalebar...
-    // so that the division lines are halves of each adjacent divison line.
-    const lineGap = 0.125;
-    // And here, we draw the individual division lines of the scalebar:
-    // Like this: |--I--I--|--I--I--|
-    for (let divLine = lineGap; divLine < 1; divLine += lineGap) {
-      pdf.line(
-        scaleBarPosition.x + scaleBarLength * divLine,
-        scaleBarPosition.y + (divLine === 0.5 ? 1.5 : 2),
-        scaleBarPosition.x + scaleBarLength * divLine,
-        scaleBarPosition.y + (divLine === 0.5 ? 4.5 : 4)
-      );
-    }
-  };
-
-  addDividerTexts = ({
-    pdf,
-    scaleBarPosition,
-    scaleBarLength,
-    scaleBarLengthMeters,
-    color,
-  }) => {
-    const calculatedScaleBarLength =
-      scaleBarLengthMeters > 1000
-        ? scaleBarLengthMeters / 1000
-        : scaleBarLengthMeters;
-    const position = scaleBarPosition;
-
-    pdf.setFontSize(8);
-    pdf.setTextColor(color);
-    pdf.setLineWidth(0.25);
-
-    // Here we set the number 0 at the start of the scalebar
-    pdf.text("0", position.x - 0.7, position.y + 8);
-
-    // And here we set the division line numbers on the scalebar number line
-    // We use a for loop and an equation for the x position to set the...
-    // correct positions of the two halved values on the scalebar line.
-    for (let textGap = 2; textGap <= 4; textGap *= 2) {
-      // Here we calculate the text that will be written on the PDF.
-      let dividerText = (calculatedScaleBarLength / textGap).toLocaleString(
-        "sv-SE"
-      );
-      // We calculate the X coordinate where the text will be drawn.
-      let positionX =
-        position.x - dividerText.length / 1.6 + scaleBarLength / textGap;
-      // And write the text on the PDF at the specified coordinates
-      pdf.text(dividerText, positionX, position.y + 8);
-    }
-  };
-
   drawScaleBar = (
     pdf,
     scaleBarPosition,
@@ -515,7 +415,6 @@ export default class PrintModel {
       scaleBarPosition.x + scaleBarLength + 1,
       scaleBarPosition.y + 4
     );
-
     pdf.setFontSize(10);
     pdf.text(
       `Skala: ${this.getUserFriendlyScale(
@@ -524,17 +423,34 @@ export default class PrintModel {
         orientation === "landscape" ? "liggande" : "stående"
       })`,
       scaleBarPosition.x,
-      scaleBarPosition.y - 1
+      scaleBarPosition.y + 1
     );
 
-    this.addDividerLinesAndTexts({
-      pdf,
-      scale,
-      scaleBarLengthMeters,
-      scaleBarPosition,
-      scaleBarLength,
-      color,
-    });
+    pdf.setDrawColor(color);
+    pdf.line(
+      scaleBarPosition.x,
+      scaleBarPosition.y + 3,
+      scaleBarPosition.x + scaleBarLength,
+      scaleBarPosition.y + 3
+    );
+    pdf.line(
+      scaleBarPosition.x,
+      scaleBarPosition.y + 2,
+      scaleBarPosition.x,
+      scaleBarPosition.y + 4
+    );
+    pdf.line(
+      scaleBarPosition.x + scaleBarLength,
+      scaleBarPosition.y + 2,
+      scaleBarPosition.x + scaleBarLength,
+      scaleBarPosition.y + 4
+    );
+    pdf.line(
+      scaleBarPosition.x + scaleBarLength / 2,
+      scaleBarPosition.y + 2.5,
+      scaleBarPosition.x + scaleBarLength / 2,
+      scaleBarPosition.y + 3.5
+    );
   };
 
   addScaleBar = (

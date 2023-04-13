@@ -26,8 +26,6 @@ var defaultState = {
   disclaimer: "",
   date: "",
   scales: "200, 400, 1000, 2000, 5000, 10000, 25000, 50000, 100000, 200000",
-  scaleMeters:
-    "10, 10, 20, 40, 60, 100, 100, 300, 600, 2000, 4000, 8000, 10000, 160000",
   dpis: "72, 150, 300",
   paperFormats: "A2, A3, A4",
   logo: "https://github.com/hajkmap/Hajk/raw/master/design/logo_small.png",
@@ -75,7 +73,6 @@ class ToolOptions extends Component {
         height: tool.options.height,
         instruction: tool.options.instruction,
         scales: tool.options.scales || this.state.scales,
-        scaleMeters: tool.options.scaleMeters || this.state.scaleMeters,
         dpis: tool.options.dpis || this.state.dpis,
         paperFormats: tool.options.paperFormats || this.state.paperFormats,
         logo: tool.options.logo,
@@ -186,7 +183,6 @@ class ToolOptions extends Component {
         width: this.state.width,
         height: this.state.height,
         scales: this.state.scales,
-        scaleMeters: this.state.scaleMeters,
         logo: this.state.logo,
         logoMaxWidth: this.state.logoMaxWidth,
         northArrowMaxWidth: this.state.northArrowMaxWidth,
@@ -559,17 +555,6 @@ class ToolOptions extends Component {
               type="text"
               name="scales"
               value={this.state.scales}
-              onChange={(e) => {
-                this.handleInputChange(e);
-              }}
-            />
-          </div>
-          <div>
-            <label htmlFor="scaleMeters">Skalmeter</label>
-            <input
-              type="text"
-              name="scaleMeters"
-              value={this.state.scaleMeters}
               onChange={(e) => {
                 this.handleInputChange(e);
               }}
