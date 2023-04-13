@@ -1427,8 +1427,8 @@ class MapOptions extends Component {
                   this.setState({ drawerStatic: e.target.checked });
                   if (e.target.checked === true) {
                     this.setState({
-                      drawerPermanent: true,
-                      drawerVisible: true,
+                      drawerPermanent: false,
+                      drawerVisible: false,
                     });
                   }
                 }}

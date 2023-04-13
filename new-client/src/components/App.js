@@ -251,13 +251,81 @@ class App extends React.PureComponent {
       : null;
   };
 
-  constructor(props) {
-    super(props);
+  isDrawerPermanent = (props, activeDrawerContentState) => {
+    const { map } = props.config.mapConfig;
+    // First check if we have anything to render at all and in case we haven't -> do not show drawer
+    // If on a mobile device, the drawer should never be permanent.
+    if (activeDrawerContentState === null || isMobile) {
+      return false;
+    }
+    // If drawer is set to static we want the the drawer to be set to permanent
+    if (map.drawerStatic) {
+      return true;
+    }
 
     const drawerPermanentFromLocalStorage =
       this.getDrawerPermanentFromLocalStorage();
+
+    // If not on mobile, if cookie is not null, use it to show/hide Drawer.
+    // If cookie is not null, use it to show/hide Drawer.
+    // If cookie however is null, fall back to the values from config.
+    if (drawerPermanentFromLocalStorage !== null) {
+      return drawerPermanentFromLocalStorage;
+    }
+    // Finally, check if drawerVisible and drawerPermanent are both true, and return true if they are.
+    return map.drawerVisible && map.drawerPermanent;
+  };
+
+  isDrawerVisible = (props, activeDrawerContentState) => {
+    const { map } = props.config.mapConfig;
+    // First check if we have anything to render at all and in case we haven't -> do not show drawer
+    if (activeDrawerContentState === null) {
+      return false;
+    }
+    // If on a mobile device, the drawer should never be visible.
+    if (isMobile && map.drawerVisibleMobile !== undefined) {
+      return map.drawerVisibleMobile;
+    }
+    // If drawer is set to static we want the the drawer to be set to visible
+    if (map.drawerStatic) {
+      return true;
+    }
+
+    const drawerPermanentFromLocalStorage =
+      this.getDrawerPermanentFromLocalStorage();
+
+    // If not on mobile, if cookie is not null, use it to show/hide Drawer.
+    // If cookie is not null, use it to show/hide Drawer.
+    // If cookie however is null, fall back to the values from config.
+    if (drawerPermanentFromLocalStorage !== null) {
+      return drawerPermanentFromLocalStorage;
+    }
+    // Finally, we return true if drawerVisible is set, otherwise false
+    return map.drawerVisible || false;
+  };
+
+  isDrawerStatic = (props, activeDrawerContentState) => {
+    const { map } = props.config.mapConfig;
+    // We check if we have something to render or if user is on mobile.
+    if (activeDrawerContentState === null || isMobile) {
+      return false;
+    }
+    // And if the drawerStatic is being used at all.
+    if (map.drawerStatic !== undefined) {
+      return map.drawerStatic;
+    }
+    return map.drawerStatic || false;
+  };
+
+  constructor(props) {
+    super(props);
+
+    // const drawerPermanentFromLocalStorage =
+    //   this.getDrawerPermanentFromLocalStorage();
+
     const activeDrawerContentFromLocalStorage =
       this.getActiveDrawerContentFromLocalStorage();
+
     const canRenderDefaultDrawer = this.hasAnyToolbarTools();
 
     const canRenderCustomDrawer = this.canRenderCustomDrawer(
@@ -270,7 +338,6 @@ class App extends React.PureComponent {
     //if we cant render customContent fall back to mapconfig
     //Finally, fall back to 'plugins', the standard tools panel.
     //This fall back avoids rendering an empty drawer in the case that draw is set to visible but there is no drawer content in local storage.
-
     const activeDrawerContentState = canRenderCustomDrawer
       ? activeDrawerContentFromLocalStorage !== null &&
         activeDrawerContentFromLocalStorage !== "plugins"
@@ -280,56 +347,15 @@ class App extends React.PureComponent {
       ? "plugins"
       : null;
 
-    // First check if we have anything to render at all and in case we haven't -> do not show drawer
-    // If on a mobile device, the drawer should never be permanent.
-    // If not on mobile, if cookie is not null, use it to show/hide Drawer.
-    // If cookie is not null, use it to show/hide Drawer.
-    // If cookie however is null, fall back to the values from config.
-    // Finally, fall back to "false" if no cookie or config is found.
-    const drawerPermanent =
-      activeDrawerContentState === null
-        ? false
-        : isMobile
-        ? false
-        : props.config.mapConfig.map.drawerStatic
-        ? true
-        : drawerPermanentFromLocalStorage !== null
-        ? drawerPermanentFromLocalStorage
-        : (props.config.mapConfig.map.drawerVisible &&
-            props.config.mapConfig.map.drawerPermanent) ||
-          false;
-
-    // First check if we have anything to render at all and in case we haven't -> do not show drawer
-    // If on a mobile device, and a config property for if the drawer should initially be open is set, base the drawer state on this.
-    // Otherwise if cookie for "drawerPermanent" is not null, use it to control Drawer visibility,
-    // If there a no cookie settings, use the config drawVisible setting.drawerVisibletate === null
-    // Finally, don't show the drawer.
-    const drawerVisible =
-      activeDrawerContentState === null
-        ? false
-        : isMobile &&
-          props.config.mapConfig.map.drawerVisibleMobile !== undefined
-        ? props.config.mapConfig.map.drawerVisibleMobile
-        : props.config.mapConfig.map.drawerStatic
-        ? true
-        : drawerPermanentFromLocalStorage !== null
-        ? drawerPermanentFromLocalStorage
-        : props.config.mapConfig.map.drawerVisible || false;
-
-    // This variable is used to make the drawer static (always visible and locked in place)...
-    // and for hiding the dynamic drawer buttons.
-    // We want to check if user has ticked drawerStatic in admin.
-    // We also make sure we have something to render.
-    // And if user is on mobile.
-    // And if the drawerStatic is being used at all.
-    const drawerStatic =
-      activeDrawerContentState === null
-        ? false
-        : isMobile
-        ? false
-        : props.config.mapConfig.map.drawerStatic !== undefined
-        ? props.config.mapConfig.map.drawerStatic
-        : false;
+    // We check if drawer is set to permanent
+    const drawerPermanent = this.isDrawerPermanent(
+      props,
+      activeDrawerContentState
+    );
+    // We check if drawer is set to visible
+    const drawerVisible = this.isDrawerVisible(props, activeDrawerContentState);
+    // We check if drawer is set to static
+    const drawerStatic = this.isDrawerStatic(props, activeDrawerContentState);
 
     this.state = {
       alert: false,
