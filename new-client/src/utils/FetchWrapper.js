@@ -39,10 +39,12 @@ class FetchWrapper {
     this.options = {};
 
     // Hash is used for cacheBuster function.
-    //this.hash = process?.env?.REACT_APP_GIT_HASH || null;
-    this.hash = null;
-    //this.useCacheBuster = process?.env?.REACT_APP_USE_CACHE_BUSTER === "true" || false;
-    this.useCacheBuster = false;
+    // Lets get the values from generated meta-tags
+    this.hash = this.getMetaValue("hajk-client-git-hash") || "";
+    this.useCacheBuster =
+      this.getMetaValue("hajk-client-use-cache-buster") === "true"
+        ? true
+        : false;
   }
 
   matchesUrlPart(url, ruleWithWildCard) {
@@ -55,6 +57,14 @@ class FetchWrapper {
     return new RegExp(
       "^" + ruleWithWildCard.split("*").map(escapeRegex).join(".*") + "$"
     ).test(url);
+  }
+
+  getMetaValue(key) {
+    const el = document.getElementsByName(key);
+    if (el && el[0]) {
+      return el[0]?.attributes?.content?.value;
+    }
+    return null;
   }
 
   applyOptionOverrides() {
