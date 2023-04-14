@@ -66,14 +66,6 @@ class FetchWrapper {
     ).test(url);
   }
 
-  getMetaValue(key) {
-    const el = document.getElementsByName(key);
-    if (el && el[0]) {
-      return el[0]?.attributes?.content?.value;
-    }
-    return null;
-  }
-
   applyOptionOverrides() {
     if (!this.partKeys) {
       this.partKeys = Object.keys(this.config.hfetch.optionOverrides || {});
