@@ -38,13 +38,20 @@ class FetchWrapper {
     this.url = "";
     this.options = {};
 
-    // Hash is used for cacheBuster function.
     // Lets get the values from generated meta-tags
-    this.hash = this.getMetaValue("hajk-client-git-hash") || "";
+    // Hash is used for cacheBuster function.
+    const appName =
+      document
+        .querySelector(`meta[name='app-name']`)
+        ?.getAttribute("content") ?? "";
+    this.hash =
+      document
+        .querySelector(`meta[name='${appName}-git-hash']`)
+        ?.getAttribute("content") ?? "";
     this.useCacheBuster =
-      this.getMetaValue("hajk-client-use-cache-buster") === "true"
-        ? true
-        : false;
+      document
+        .querySelector(`meta[name='${appName}-use-cache-buster']`)
+        ?.getAttribute("content") === "true";
   }
 
   matchesUrlPart(url, ruleWithWildCard) {
