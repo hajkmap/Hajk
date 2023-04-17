@@ -38,11 +38,20 @@ class FetchWrapper {
     this.url = "";
     this.options = {};
 
+    // Lets get the values from generated meta-tags
     // Hash is used for cacheBuster function.
-    //this.hash = process?.env?.REACT_APP_GIT_HASH || null;
-    this.hash = null;
-    //this.useCacheBuster = process?.env?.REACT_APP_USE_CACHE_BUSTER === "true" || false;
-    this.useCacheBuster = false;
+    const appName =
+      document
+        .querySelector(`meta[name='app-name']`)
+        ?.getAttribute("content") || "";
+    this.hash =
+      document
+        .querySelector(`meta[name='${appName}-git-hash']`)
+        ?.getAttribute("content") || "";
+    this.useCacheBuster =
+      document
+        .querySelector(`meta[name='${appName}-use-cache-buster']`)
+        ?.getAttribute("content") === "true";
   }
 
   matchesUrlPart(url, ruleWithWildCard) {
