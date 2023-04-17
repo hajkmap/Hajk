@@ -615,18 +615,6 @@ class ToolOptions extends Component {
     });
   };
 
-  handleInputChange(event) {
-    const target = event.target;
-    const name = target.name;
-    var value = target.type === "checkbox" ? target.checked : target.value;
-    if (typeof value === "string" && value.trim() !== "") {
-      value = !isNaN(Number(value)) ? Number(value) : value;
-    }
-    this.setState({
-      [name]: value,
-    });
-  }
-
   handlePdfInputChange = (event, pdfLink, key) => {
     const value = event.target.value;
     const index = this.state.pdfLinks.findIndex((link) => link === pdfLink);

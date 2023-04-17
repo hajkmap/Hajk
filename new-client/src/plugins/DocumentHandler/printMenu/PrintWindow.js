@@ -62,7 +62,6 @@ const GridMiddleContainer = styled(Grid)(({ theme }) => ({
     },
   },
   flexBasis: "100%",
-  maxHeight: "400px",
 }));
 
 const GridHeaderContainer = styled(Grid)(({ theme }) => ({
@@ -74,7 +73,6 @@ const GridSettingsContainer = styled(Grid)(({ theme }) => ({
 }));
 
 const GridFooterContainer = styled(Grid)(({ theme }) => ({
-  marginTop: "10px",
   flexBasis: "10%",
 }));
 
@@ -904,8 +902,9 @@ class PrintWindow extends React.PureComponent {
   };
 
   toggleDocumentsAttachments = () => {
-    let showAttachments = this.state.showAttachments;
-    this.setState({ showAttachments: !showAttachments });
+    this.setState((prevState) => ({
+      showAttachments: !prevState.showAttachments,
+    }));
   };
 
   renderPrintDocuments = () => {
