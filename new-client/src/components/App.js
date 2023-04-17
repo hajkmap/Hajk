@@ -349,12 +349,18 @@ class App extends React.PureComponent {
       drawerPermanentFromLocalStorage,
     };
 
-    // We check if drawer is set to permanent
-    const drawerPermanent = this.isDrawerPermanent(drawerProps);
-    // We check if drawer is set to visible
-    const drawerVisible = this.isDrawerVisible(drawerProps);
     // We check if drawer is set to static
     const drawerStatic = this.isDrawerStatic(drawerProps);
+    // We check if drawer is set to permanent
+    // If drawerStatic is true, we do not need to check drawerPermanent
+    const drawerPermanent = drawerStatic
+      ? true
+      : this.isDrawerPermanent(drawerProps);
+    // We check if drawer is set to visible
+    // If drawerStatic is true, we do not need to check drawerVisible
+    const drawerVisible = drawerStatic
+      ? true
+      : this.isDrawerVisible(drawerProps);
 
     this.state = {
       alert: false,
