@@ -43,11 +43,11 @@ class FetchWrapper {
     const appName =
       document
         .querySelector(`meta[name='app-name']`)
-        ?.getAttribute("content") ?? "";
+        ?.getAttribute("content") || "";
     this.hash =
       document
         .querySelector(`meta[name='${appName}-git-hash']`)
-        ?.getAttribute("content") ?? "";
+        ?.getAttribute("content") || "";
     this.useCacheBuster =
       document
         .querySelector(`meta[name='${appName}-use-cache-buster']`)
