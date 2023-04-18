@@ -83,6 +83,7 @@ class ToolOptions extends Component {
     draggingEnabled: false,
     searchImplemented: true,
     enablePrint: true,
+    pdfLinks: [{ name: "", link: "" }],
     closePanelOnMapLinkOpen: false,
     displayLoadingOnMapLinkOpen: false,
     tableOfContents: {
@@ -160,6 +161,7 @@ class ToolOptions extends Component {
         draggingEnabled: tool.options.draggingEnabled || false,
         searchImplemented: tool.options.searchImplemented,
         enablePrint: tool.options.enablePrint,
+        pdfLinks: tool.options.pdfLinks || [{ name: "", link: "" }],
         closePanelOnMapLinkOpen: tool.options.closePanelOnMapLinkOpen,
         displayLoadingOnMapLinkOpen:
           tool.options.displayLoadingOnMapLinkOpen || false,
@@ -254,6 +256,7 @@ class ToolOptions extends Component {
         height: this.state.height,
         searchImplemented: this.state.searchImplemented,
         enablePrint: this.state.enablePrint,
+        pdfLinks: this.state.pdfLinks,
         closePanelOnMapLinkOpen: this.state.closePanelOnMapLinkOpen,
         displayLoadingOnMapLinkOpen: this.state.displayLoadingOnMapLinkOpen,
         documentOnStart: this.state.documentOnStart,
@@ -612,6 +615,31 @@ class ToolOptions extends Component {
     });
   };
 
+  handlePdfInputChange = (event, pdfLink, key) => {
+    const value = event.target.value;
+    const index = this.state.pdfLinks.findIndex((link) => link === pdfLink);
+    pdfLink[key] = value;
+
+    let newPdfLinks = [...this.state.pdfLinks];
+    newPdfLinks[index] = pdfLink;
+    this.setState({ pdfLinks: newPdfLinks });
+  };
+
+  addPdfLinkRow = () => {
+    let newPdfLinks = [...this.state.pdfLinks];
+    newPdfLinks.push({ name: "", link: "" });
+    this.setState({ pdfLinks: newPdfLinks });
+  };
+
+  removePdfLinkRow = (event, index) => {
+    if (this.state.pdfLinks.length <= 1) {
+      return;
+    }
+    let newPdfLinks = [...this.state.pdfLinks];
+    newPdfLinks.splice(index, 1);
+    this.setState({ pdfLinks: newPdfLinks });
+  };
+
   render() {
     const { classes } = this.props;
     let expandedKeys = this.treeKeys.map((key) => {
@@ -843,6 +871,70 @@ class ToolOptions extends Component {
             &nbsp;
             <label htmlFor="enablePrint">Utskrift aktiverad</label>
           </div>
+          <div>
+            {this.state.pdfLinks &&
+              this.state.pdfLinks.map((pdfLink, index) => (
+                <div
+                  key={`${index}_${pdfLink.name}_${pdfLink.link}`}
+                  style={{ display: "flex" }}
+                >
+                  <div>
+                    <label htmlFor={`pdfLink_${index}`}>
+                      Bilaga {index + 1}
+                    </label>
+                    <input
+                      id={`pdfLink_${index}`}
+                      name="name"
+                      type="text"
+                      defaultValue={pdfLink.name}
+                      style={{ maxWidth: "150px" }}
+                      placeholder="Namn..."
+                      onBlur={(e) => {
+                        this.handlePdfInputChange(e, pdfLink, "name");
+                      }}
+                    />
+                  </div>
+                  <div>
+                    <input
+                      type="text"
+                      name="link"
+                      defaultValue={pdfLink.link}
+                      style={{ maxWidth: "250px" }}
+                      placeholder="Länk..."
+                      onBlur={(e) => {
+                        this.handlePdfInputChange(e, pdfLink, "link");
+                      }}
+                    />
+                    <button
+                      type="button"
+                      className="btn btn-default"
+                      style={{ fontWeight: "bold" }}
+                      disabled={this.state.pdfLinks.length === 1}
+                      onClick={(e) => {
+                        this.removePdfLinkRow(e, index);
+                      }}
+                    >
+                      -
+                    </button>
+                    {index === this.state.pdfLinks.length - 1 ? (
+                      <button
+                        type="button"
+                        className="btn btn-default"
+                        style={{ fontWeight: "bold", marginLeft: "5px" }}
+                        onClick={(e) => {
+                          this.addPdfLinkRow();
+                        }}
+                      >
+                        +
+                      </button>
+                    ) : (
+                      ""
+                    )}
+                  </div>
+                </div>
+              ))}
+          </div>
+
           <div>
             <input
               id="closePanelOnMapLinkOpen"
