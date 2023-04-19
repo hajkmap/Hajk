@@ -572,6 +572,7 @@ ABORTING STARTUP.
         // our Promises in the store will be resolved either way - whether group membership
         // was found, or not.
         logger.error(error.message);
+        logger.error(error);
         resolve([]);
       }
     });
