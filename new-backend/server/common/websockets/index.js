@@ -1,7 +1,7 @@
 import crypto from "crypto";
 import WebSocket from "ws";
 import queryString from "query-string";
-import log4js from "../../api/utils/hajkLogger";
+import log4js from "../utils/hajkLogger";
 import WebSocketMessageHandler from "./WebSocketMessageHandler";
 
 // Just a small example of how we can handle sending synchronized
