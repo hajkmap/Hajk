@@ -1,15 +1,10 @@
-import configRouter from "./api/controllers/config/router";
-import configRouterV2 from "./api/controllers/configV2/router";
-import mapconfigRouter from "./api/controllers/mapconfig/router";
-import settingsRouter from "./api/controllers/settings/router";
-import informativeRouter from "./api/controllers/informative/router";
-import adRouter from "./api/controllers/ad/router";
-
-export default function routes(app) {
-  app.use("/api/v1/config", configRouter);
-  app.use("/api/v2/config", configRouterV2);
-  app.use("/api/v1/informative", informativeRouter);
-  app.use("/api/v1/mapconfig", mapconfigRouter);
-  app.use("/api/v1/settings", settingsRouter);
-  app.use("/api/v1/ad", adRouter);
+/**
+ * @summary Initiate the version-specific endpoint for each of the active API versions.
+ * @param {Express} app
+ */
+export default async function routes(app) {
+  for (const v of app.get("apiVersions")) {
+    const { default: router } = await import(`./apis/v${v}/router`);
+    app.use(`/api/v${v}`, router);
+  }
 }

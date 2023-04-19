@@ -1,4 +1,4 @@
-import ConfigServiceV2 from "../../services/config.service.v2";
+import ConfigService from "../../services/config.service";
 import ad from "../../services/activedirectory.service";
 import handleStandardResponse from "../../utils/handleStandardResponse";
 
@@ -12,7 +12,7 @@ export class Controller {
    * @memberof Controller
    */
   byMap(req, res) {
-    ConfigServiceV2.getMapWithLayers(
+    ConfigService.getMapWithLayers(
       req.params.map,
       ad.getUserFromRequestHeader(req)
     ).then((data) => handleStandardResponse(res, data));

@@ -1,7 +1,7 @@
 import log4js from "log4js";
 import ad from "../services/activedirectory.service";
 
-const logger = log4js.getLogger("router");
+const logger = log4js.getLogger("router.v2");
 
 export default async function restrictAdmin(req, res, next) {
   logger.trace("Attempt to access admin API methods");

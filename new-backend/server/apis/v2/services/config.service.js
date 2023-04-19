@@ -5,7 +5,7 @@ import asyncFilter from "../utils/asyncFilter";
 import log4js from "log4js";
 import getAnalyticsOptionsFromDotEnv from "../utils/getAnalyticsOptionsFromDotEnv";
 
-const logger = log4js.getLogger("service.config");
+const logger = log4js.getLogger("service.config.v2");
 
 class ConfigServiceV2 {
   constructor() {
@@ -15,7 +15,7 @@ class ConfigServiceV2 {
     // We should also implement an update-store method, perhaps
     // have a global bus (using EventEmitter?), so we can trigger
     // re-reads from FS into our in-memory store.
-    logger.trace("Initiating ConfigServiceV2");
+    logger.trace("Initiating ConfigService V2");
   }
 
   /**
@@ -566,6 +566,379 @@ class ConfigServiceV2 {
     }
   }
 
+  async #verifyOWSLayers({ type, layers }) {
+    const missingLayers = [];
+    const errors = [];
+
+    // We want to group layers by service URL. This object will keep track.
+    const getCapabilitiesUrls = {};
+
+    // Now, iterate the layers and group by URL to service
+    layers.forEach((l) => {
+      if (!Object.hasOwn(getCapabilitiesUrls, l.url)) {
+        // First time we encounter a given URL, we must create the property
+        getCapabilitiesUrls[l.url] = [
+          {
+            id: l.id,
+            caption: l.caption,
+            layers: [...l.layers],
+          },
+        ];
+      } else {
+        // If URL already exists as property, just push into existing array
+        getCapabilitiesUrls[l.url].push({
+          id: l.id,
+          caption: l.caption,
+          layers: [...l.layers],
+        });
+      }
+    });
+
+    // For each of the URLs…
+    for (const [url, layersObject] of Object.entries(getCapabilitiesUrls)) {
+      // … check if the URL already contains "?". If so, we want to append
+      // our remaining URL params.
+      const glue = url.includes("?") ? "&" : "?";
+
+      // Next, prepare the URL that we will fetch in order to GetCapabilities.
+      // This differs a little, depending on if it's WMS or WFS.
+      let params = {};
+      switch (type) {
+        case "wms":
+          params = {
+            SERVICE: "WMS",
+            VERSION: "1.3.0",
+            REQUEST: "GetCapabilities",
+          };
+          break;
+        case "wfs":
+          params = {
+            SERVICE: "WFS",
+            VERSION: "2.0.0",
+            REQUEST: "GetCapabilities",
+          };
+          break;
+
+        default:
+          throw "Unknown OWS type provided";
+      }
+      const getCapabilitiesUrl = url + glue + new URLSearchParams(params);
+
+      // A slight delay - too many requests to the same server can cause a block
+      await delay(100);
+
+      let response,
+        text,
+        json = "";
+      try {
+        // Go fetch
+        response = await fetch(getCapabilitiesUrl);
+
+        // Ensure that we got a correct response.
+        if (response.status !== 200) {
+          throw new Error(
+            `Error: expected response status 200. Got ${response.status}.`
+          );
+        } else {
+          // If the response was OK, we expect XML.
+          // Let's parse response as text…
+          text = await response.text();
+          // …next, let's parse the XML itself.
+          json = this.xmlParser.parse(text);
+        }
+      } catch (error) {
+        // We want to display all errors that ocurred during the loop,
+        // so we push this one to the array that will be appended to the
+        // response.
+        errors.push({
+          url: getCapabilitiesUrl,
+          message: error?.cause?.toString() || error.message,
+        });
+
+        // In addition (and this is important!), we skip the remaining code
+        // (by continuing the for-loop). If we didn't get the expected response,
+        // we don't have anything to compare our layers against - so there's no
+        // need to do it. The results would be misleading.
+        continue;
+      }
+
+      // If we got this far, it means that fetching and parsing were successful.
+
+      // The parsed response will contain service's available layers.
+      // Let's prepare a simple array (of strings) that will contain
+      // layer names that exist on this given WMS service.
+      let layersFromGetCapabilities = "";
+
+      // Depending on OWS service type (WMS or WFS), the actual layers will be
+      // found in slightly different locations in the response.
+      switch (type) {
+        case "wms":
+          layersFromGetCapabilities =
+            json?.WMS_Capabilities?.Capability?.Layer?.Layer?.map?.(
+              (l) => l.Name
+            );
+          break;
+        case "wfs":
+          layersFromGetCapabilities = json?.[
+            "wfs:WFS_Capabilities"
+          ]?.FeatureTypeList?.FeatureType?.map?.((l) => l.Name);
+          break;
+
+        default:
+          throw "Unknown OWS type provided";
+      }
+
+      // Compare reportedly existing layers with those from Hajk's repository
+      const missing = await Promise.allSettled(
+        layersObject.map(async (l) => {
+          // Filter the array by saving all layers that do not exist in GetCapabilities
+          const missingLayers = l.layers.filter(
+            (x) => !layersFromGetCapabilities?.includes(x)
+          );
+
+          // If we found something…
+          if (missingLayers.length > 0) {
+            // …ensure that the layer is really missing. We can have false positives
+            // here, because layers can be available but _not_ announced by the OWS service.
+            const problematic = [];
+
+            const reallyMissingLayers = await Promise.allSettled(
+              missingLayers.map(async (ml) => {
+                let describeParams = {};
+                switch (type) {
+                  case "wms":
+                    describeParams = {
+                      SERVICE: "WMS",
+                      VERSION: "1.1.1",
+                      SLD_VERSION: "1.1.0",
+                      REQUEST: "DescribeLayer",
+                      LAYERS: ml,
+                    };
+                    break;
+                  case "wfs":
+                    describeParams = {
+                      SERVICE: "WFS",
+                      VERSION: "1.1.1",
+                      REQUEST: "DescribeFeatureType",
+                      TYPENAME: ml,
+                    };
+                    break;
+
+                  default:
+                    break;
+                }
+
+                const describeLayerUrl =
+                  url + glue + new URLSearchParams(describeParams);
+
+                const response = await fetch(describeLayerUrl);
+
+                if (response.status !== 200) {
+                  errors.push({
+                    url: describeLayerUrl,
+                    message: `Error: expected response status 200. Got ${response.status}.`,
+                  });
+                  return ml;
+                } else {
+                  try {
+                    const text = await response.text();
+                    const xml = this.xmlParser.parse(text);
+
+                    // If XML does not contain any of the following:
+                    if (
+                      !Object.hasOwn(xml, "WMS_DescribeLayerResponse") && // GeoServer WMS
+                      !Object.hasOwn(xml, "DescribeLayerResponse") && // QGIS Server WMS
+                      !Object.hasOwn(xml, "xsd:complexType") && // GeoServer WFS
+                      !Object.hasOwn(xml, "complexType") // QGIS Server WFS
+                    ) {
+                      // … we can consider the layer missing (hence return it back to the missing array).
+                      return ml;
+                    } else {
+                      // Else, the layer seems OK according to DescribeLayer, but it did not
+                      // show up in GetCapabilities. This can be fully legit (i.e. layer not announced).
+                      // But it can also mean that there are other problems. Therefore, it's nice to collect
+                      // those problematic layers and return them as well.
+                      problematic.push({
+                        describeLayerUrl,
+                        layer: ml,
+                      });
+                      // Return a null value so we can wash the array further on.
+                      return null;
+                    }
+                  } catch (error) {
+                    // Push any errors to the errors array…
+                    errors.push({
+                      url: describeLayerUrl,
+                      message: error?.cause?.toString() || error.message,
+                    });
+                    // …and return null so we can wash empty values from the array.
+                    return null;
+                  }
+                }
+              })
+            );
+            // …prepare a nice return object that contains some
+            // handy properties (e.g. layer ID and caption).
+            return {
+              hajkCaption: l.caption,
+              hajkLayerId: l.id,
+              getCapabilitiesUrl,
+              missing: reallyMissingLayers.flatMap(
+                // flatMap will wash the array of Promises and extract
+                // only those with a value (removing empty elements from the array)
+                ({ value }) => (value === null ? [] : value) // Remember: returning an empty array from flatMap removes the element.
+              ),
+              problematic,
+            };
+          } else {
+            return null;
+          }
+        })
+      );
+
+      // Final filter to "remove" empty entries: we'll have an element for each
+      // settled promise, but we're only interested in those with a "value" property.
+      const washedMissingLayers = missing.flatMap(({ value }) =>
+        value === null ? [] : value
+      );
+
+      // Push only if we've got any missing layers
+      washedMissingLayers.length > 0 &&
+        missingLayers.push({
+          url,
+          hajkLayers: washedMissingLayers,
+        });
+    }
+
+    return { services: missingLayers, errors };
+  }
+
+  async verifyLayers(user) {
+    logger.info("[verifyLayers] invoked by user %s", user);
+
+    try {
+      if (typeof fetch !== "function") {
+        throw new Error(
+          `Function not supported. Please update your NodeJS runtime to at least v18.0.0. Current Node version: ${process.version}.`
+        );
+      }
+      // Read the JSON layers store without any restrictions (hence the parameters)
+      const layers = await this.getLayersStore(false, false);
+
+      // Extract layer stores that will be checked
+      const { wmslayers, wfslayers } = layers;
+
+      // Check WMS layers
+      const missingWMSLayers = await this.#verifyOWSLayers({
+        type: "wms",
+        layers: wmslayers,
+      });
+
+      // Check WFS layers
+      const missingWFSLayers = await this.#verifyOWSLayers({
+        type: "wfs",
+        layers: wfslayers,
+      });
+
+      logger.info("[verifyLayers] ended with a successful response");
+      return { wms: missingWMSLayers, wfs: missingWFSLayers };
+    } catch (error) {
+      return { error };
+    }
+  }
+
+  /**
+   * @summary Export baselayers, groups, and layers from a map configuration
+   * to the specified format (currently only JSON is supported, future options
+   * could include e.g. XLSX).
+   *
+   * @param {string} [map="layers"] Name of the map to be explained
+   * @param {string} [format="json"] Desired output format
+   * @param {*} next Callback, contain error object
+   * @returns Human-friendly description of layers used in the specified map
+   * @memberof ConfigService
+   */
+  async exportMapConfig(map = "layers", format = "json", user) {
+    try {
+      // Obtain layers definition as JSON. It will be needed
+      // both if we want to grab all available layers or
+      // describe a specific map config.
+      const layersConfig = await this.getLayersStore(user);
+
+      // Create a Map, indexed with each map's ID to allow
+      // fast lookup later on
+      const layersById = new Map();
+
+      // Populate the Map so we'll have {layerId: layerCaption}
+      for (const type in layersConfig) {
+        layersConfig[type].map((layer) =>
+          layersById.set(layer.id, {
+            name: layer.caption,
+            ...(layer.layers &&
+              layer.layers.length > 1 && { subLayers: layer.layers }),
+          })
+        );
+      }
+
+      // If a list of all available layers was requested, we're
+      // done here and can return the Map.
+      if (map === "layers") return Object.fromEntries(layersById); // TODO: Perhaps sort on layer name?
+
+      // If we got this far, we now need to grab the contents of
+      // the requested map config. Note that content washing is disabled:
+      // we will export the entire map config as-is.
+      const mapConfig = await this.getMapConfig(map, user, false);
+
+      // Reading map config can fail, e.g. the file can be missing
+      if (mapConfig.error) {
+        throw new Error(mapConfig.error);
+      }
+
+      // Grab LayerSwitcher's setup
+      const { groups, baselayers } = mapConfig.tools.find(
+        (tool) => tool.type === "layerswitcher"
+      ).options;
+
+      // Define a recursive function that will grab contents
+      // of a group (and possibly all groups beneath).
+      const decodeGroup = (group) => {
+        const g = {};
+        // First grab current group's name
+        if (group.name) g.name = group.name;
+
+        // Next assign names to all layers
+        if (Array.isArray(group.layers))
+          g.layers = group.layers.map((l) => layersById.get(l.id));
+
+        // Finally, go recursive if there are subgroups
+        if (group.groups && group.groups.length !== 0) {
+          g.groups = group.groups.map((gg) => decodeGroup(gg));
+        }
+
+        return g;
+      };
+
+      // Prepare the object that will be returned
+      const output = {
+        baselayers: [],
+        groups: [],
+      };
+
+      // Grab names for base layers and put into output
+      baselayers.map((l) => output.baselayers.push(layersById.get(l.id)));
+
+      // Take all groups and call our decode method on them
+      output.groups = groups.map((group) => decodeGroup(group));
+
+      if (format === "json") return output;
+
+      // Throw error if output is not yet implemented
+      throw new Error(`Output format ${format} is not implemented.`);
+    } catch (error) {
+      return { error };
+    }
+  }
+
   /**
    * @summary List all available map configurations files
    *
@@ -637,6 +1010,68 @@ class ConfigServiceV2 {
         }
       }
       return output;
+    } catch (error) {
+      return { error };
+    }
+  }
+
+  /**
+   * @summary Duplicate a specified map
+   *
+   * @param {*} src Map to be duplicated
+   * @param {*} dest Name of the new map, the duplicate
+   * @returns
+   * @memberof ConfigService
+   */
+  async duplicateMap(src, dest) {
+    try {
+      let srcPath = null;
+
+      if (src.endsWith(".template")) {
+        // If src ends with ".template", don't add the .json file extension,
+        // and look inside /templates directory.
+        srcPath = path.join(process.cwd(), "App_Data", "templates", src);
+      } else {
+        // Else it's a regular JSON file, add the extension and look in App_Data only
+        srcPath = path.join(process.cwd(), "App_Data", src + ".json");
+      }
+
+      // Destination will always need the extension added
+      const destPath = path.join(process.cwd(), "App_Data", dest + ".json");
+
+      // Copy!
+      await fs.promises.copyFile(srcPath, destPath);
+      // Sending a valid object will turn it into JSON which in turn will return
+      // status 200 and that empty object. I know it's not the best way and we
+      // should be more explicit about successful returns than just an empty object…
+      return {};
+    } catch (error) {
+      return { error };
+    }
+  }
+
+  /**
+   * @summary Create a new map, using supplied name, but duplicating the default map template
+   *
+   * @param {*} name Name given to the new map
+   * @memberof ConfigService
+   */
+  async createNewMap(name) {
+    return this.duplicateMap("map.template", name);
+  }
+
+  /**
+   * @summary Delete a map configuration
+   *
+   * @param {*} name Map configuration to be deleted
+   * @memberof ConfigService
+   */
+  async deleteMap(name) {
+    try {
+      // Prepare path
+      const filePath = path.join(process.cwd(), "App_Data", name + ".json");
+      await fs.promises.unlink(filePath);
+      return {};
     } catch (error) {
       return { error };
     }

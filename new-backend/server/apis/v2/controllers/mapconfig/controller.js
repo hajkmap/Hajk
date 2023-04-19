@@ -1,10 +1,11 @@
 import ConfigService from "../../services/config.service";
+import InformativeService from "../../services/informative.service";
 import ad from "../../services/activedirectory.service";
 import handleStandardResponse from "../../utils/handleStandardResponse";
 import log4js from "log4js";
 
 // Create a logger for admin events, those will be saved in a separate log file.
-const ael = log4js.getLogger("adminEvent");
+const ael = log4js.getLogger("adminEvent.v2");
 
 export class Controller {
   /**
@@ -75,20 +76,22 @@ export class Controller {
     );
   }
 
-  // FIXME: implement a real solution
   listimage(req, res) {
-    // Return an empty array as a mockup
-    handleStandardResponse(res, []);
+    InformativeService.getUploadedFiles("image").then((data) =>
+      handleStandardResponse(res, data)
+    );
   }
 
   listvideo(req, res) {
-    // Return an empty array as a mockup
-    handleStandardResponse(res, []);
+    InformativeService.getUploadedFiles("video").then((data) =>
+      handleStandardResponse(res, data)
+    );
   }
 
   listaudio(req, res) {
-    // Return an empty array as a mockup
-    handleStandardResponse(res, []);
+    InformativeService.getUploadedFiles("audio").then((data) =>
+      handleStandardResponse(res, data)
+    );
   }
 
   createNewMap(req, res) {

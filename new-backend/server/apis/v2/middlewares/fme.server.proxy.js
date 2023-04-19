@@ -1,6 +1,5 @@
 import { createProxyMiddleware } from "http-proxy-middleware";
 import log4js from "log4js";
-import fs from "fs";
 
 // Value of process.env.LOG_LEVEL will be one of the allowed
 // log4js-values. We will customize HPM to use log4js too,
@@ -21,13 +20,12 @@ const logLevels = {
 };
 
 // Grab a logger
-const logger = log4js.getLogger("proxy.fmeServer");
+const logger = log4js.getLogger("proxy.fmeServer.v2");
 
 export default function fmeServerProxy(err, req, res, next) {
   return createProxyMiddleware({
     target: process.env.FME_SERVER_BASE_URL,
-    logLevel: logLevels[process.env.LOG_LEVEL],
-    logProvider: () => logger,
+    logLevel: "silent", // We don't care about logLevels[process.env.LOG_LEVEL] in this case as we log success and errors ourselves
     changeOrigin: true,
     secure: process.env.FME_SERVER_SECURE === "true", // should SSL certs be verified?
     onProxyReq: (proxyReq, req, res) => {
@@ -41,9 +39,9 @@ export default function fmeServerProxy(err, req, res, next) {
     },
     pathRewrite: (originalPath, req) => {
       // Lets split on the proxy path so that we can remove that when forwarding
-      const segments = originalPath.split("/api/v1/fmeproxy");
+      const segments = originalPath.split("/api/v2/fmeproxy");
 
-      // We want to forward everything that is after /api/v1/fmeproxy
+      // We want to forward everything that is after /api/v2/fmeproxy
       const path = segments[1];
 
       logger.debug(`${req.method} ${originalPath} ~> ${path}`);
