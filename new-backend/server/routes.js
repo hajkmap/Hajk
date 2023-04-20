@@ -4,7 +4,7 @@
  */
 export default async function routes(app) {
   for (const v of app.get("apiVersions")) {
-    const { default: router } = await import(`./apis/v${v}/router`);
+    const { default: router } = await import(`./apis/v${v}/router.js`);
     app.use(`/api/v${v}`, router);
   }
 }
