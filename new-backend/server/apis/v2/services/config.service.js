@@ -7,6 +7,9 @@ import getAnalyticsOptionsFromDotEnv from "../utils/getAnalyticsOptionsFromDotEn
 
 const logger = log4js.getLogger("service.config.v2");
 
+// Prepare a delay utility - we don't want to send all fetch request simultaneously
+const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
 class ConfigServiceV2 {
   constructor() {
     // TODO: As reading files is expansive, we can read all
