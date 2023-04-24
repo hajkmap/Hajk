@@ -273,18 +273,24 @@ class TimeSliderView extends React.PureComponent {
     }
   };
 
+  // Handles when the user wants to step one step forwards.
+  // Sets the current time to the current time plus one step size
+  // If we've reached the end, we start from the beginning...
   stepOnesForward = () => {
     let nextUnixTime = this.state.currentUnixTime + this.state.stepSize;
     if (nextUnixTime >= this.endTime) {
-      nextUnixTime = this.endTime;
+      nextUnixTime = this.startTime;
     }
     this.handleSliderChange(nextUnixTime);
   };
 
+  // Handles when the user wants to step one step backwards.
+  // Sets the current time to the current time minus one step size
+  // If we've reached the start, we "jump" to the end...
   stepOnesBackward = () => {
     let nextUnixTime = this.state.currentUnixTime - this.state.stepSize;
     if (nextUnixTime <= this.startTime) {
-      nextUnixTime = this.startTime;
+      nextUnixTime = this.endTime;
     }
     this.handleSliderChange(nextUnixTime);
   };
@@ -556,16 +562,25 @@ class TimeSliderView extends React.PureComponent {
               </Tooltip>
             </Grid>
             <Grid item align="center" xs={2}>
-              <Tooltip disableInteractive title="Hoppa ett steg bakåt">
-                <Button
-                  variant="contained"
-                  onClick={() => {
-                    this.stepOnesBackward();
-                  }}
-                  disabled={playing}
-                >
-                  <ArrowBackIcon />
-                </Button>
+              <Tooltip
+                disableInteractive
+                title={
+                  playing
+                    ? "Du kan inte hoppa bakåt när spelaren är aktiv."
+                    : "Hoppa ett steg bakåt"
+                }
+              >
+                <span>
+                  <Button
+                    variant="contained"
+                    onClick={() => {
+                      this.stepOnesBackward();
+                    }}
+                    disabled={playing}
+                  >
+                    <ArrowBackIcon />
+                  </Button>
+                </span>
               </Tooltip>
             </Grid>
             <Grid item align="center" xs={2}>
@@ -584,16 +599,25 @@ class TimeSliderView extends React.PureComponent {
               </Tooltip>
             </Grid>
             <Grid item align="center" xs={2}>
-              <Tooltip disableInteractive title="Hoppa ett steg framåt">
-                <Button
-                  variant="contained"
-                  onClick={() => {
-                    this.stepOnesForward();
-                  }}
-                  disabled={playing}
-                >
-                  <ArrowForwardIcon />
-                </Button>
+              <Tooltip
+                disableInteractive
+                title={
+                  playing
+                    ? "Du kan inte hoppa framåt när spelaren är aktiv."
+                    : "Hoppa ett steg bakåt"
+                }
+              >
+                <span>
+                  <Button
+                    variant="contained"
+                    onClick={() => {
+                      this.stepOnesForward();
+                    }}
+                    disabled={playing}
+                  >
+                    <ArrowForwardIcon />
+                  </Button>
+                </span>
               </Tooltip>
             </Grid>
             <Grid item align="center" xs={2}>
