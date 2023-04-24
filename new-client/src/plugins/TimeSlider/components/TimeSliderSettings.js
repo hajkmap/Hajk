@@ -131,7 +131,7 @@ class TimeSliderSettings extends React.PureComponent {
             >
               <MenuItem value={"days"}>Dag</MenuItem>
               <MenuItem value={"months"}>Månad</MenuItem>
-              <MenuItem value={"quarter"}>Kvartal</MenuItem>
+              <MenuItem value={"quarters"}>Kvartal</MenuItem>
               <MenuItem value={"years"}>År</MenuItem>
             </Select>
           </FormControl>
