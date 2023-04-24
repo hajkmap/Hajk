@@ -24,8 +24,8 @@ class TimeSliderView extends React.PureComponent {
 
     this.state = {
       playing: false,
-      resolution: this.props.defaultResolution ?? "years",
-      stepSize: this.getStepSize(this.props.defaultResolution ?? "years"),
+      resolution: this.props.defaultResolution || "years",
+      stepSize: this.getStepSize(this.props.defaultResolution || "years"),
       loadingError: true,
       layerStatus: this.validateLayers(),
       settingsDialog: false,
