@@ -2,6 +2,7 @@ import Express from "express";
 import * as path from "path";
 import * as http from "http";
 import fs from "fs";
+import { fileURLToPath } from "url";
 
 import helmet from "helmet";
 import cors from "cors";
@@ -182,13 +183,14 @@ export default class ExpressServer {
     // enabled the API validator middleware for all enabled
     // API versions
     apiVersions.forEach((v) => {
-      // Grab paths to our OpenAPI specifications
-      const openApiSpecification = path.join(
-        process.cwd(),
-        "server",
-        "common",
-        `api.v${v}.yml`
-      );
+      // Grab paths to our OpenAPI specifications by…
+      // …grabbing the current file's full URL and making it a file path…
+      const __filename = fileURLToPath(import.meta.url);
+      // …and extracting the dir name from file's path.
+      const __dirname = path.dirname(__filename);
+      // Finally, put it together with the filename of the YAML file
+      // that holds the specification.
+      const openApiSpecification = path.join(__dirname, `api.v${v}.yml`);
 
       // Expose the API specification as a simple static route…
       logger.trace(
