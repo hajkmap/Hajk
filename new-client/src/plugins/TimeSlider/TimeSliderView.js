@@ -262,6 +262,8 @@ class TimeSliderView extends React.PureComponent {
     switch (resolution) {
       case "years":
         return day * 365;
+      case "quarter":
+        return day * 92; // Approx 92 days...
       case "months":
         return day * 31;
       default:
@@ -280,6 +282,20 @@ class TimeSliderView extends React.PureComponent {
         currentUnixTime <= nextUnixTime
           ? nextDate.setFullYear(currentDate.getFullYear() + 1)
           : nextDate.setFullYear(currentDate.getFullYear() - 1);
+      }
+    } else if (resolution === "quarter") {
+      // We want the month to land on a "quarter month" always...
+      const quarterMonths = [0, 3, 6, 9];
+      if (!quarterMonths.includes(nextDate.getMonth())) {
+        const closestQuarterMonth = quarterMonths.reduce((prev, curr) =>
+          Math.abs(curr - nextDate.getMonth()) <
+          Math.abs(prev - nextDate.getMonth())
+            ? curr
+            : prev
+        );
+        nextDate.setMonth(closestQuarterMonth);
+        // We also want to start on the first of the month each time...
+        nextDate.setDate(1);
       }
     } else if (resolution === "months") {
       if (currentDate.getMonth() === nextDate.getMonth()) {
@@ -321,6 +337,7 @@ class TimeSliderView extends React.PureComponent {
       case "years":
         options = { year: "numeric" };
         break;
+      case "quarter":
       case "months":
         options = { month: "long", year: "numeric" };
         break;
