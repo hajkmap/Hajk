@@ -9,6 +9,8 @@ import TimeSliderSettings from "./components/TimeSliderSettings.js";
 import Dialog from "../../components/Dialog/Dialog";
 
 import PlayArrowIcon from "@mui/icons-material/PlayArrow";
+import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
+import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import PauseIcon from "@mui/icons-material/Pause";
 import RotateLeftOutlinedIcon from "@mui/icons-material/RotateLeftOutlined";
 import SettingsOutlinedIcon from "@mui/icons-material/SettingsOutlined";
@@ -271,6 +273,22 @@ class TimeSliderView extends React.PureComponent {
     }
   };
 
+  stepOnesForward = () => {
+    let nextUnixTime = this.state.currentUnixTime + this.state.stepSize;
+    if (nextUnixTime >= this.endTime) {
+      nextUnixTime = this.endTime;
+    }
+    this.handleSliderChange(nextUnixTime);
+  };
+
+  stepOnesBackward = () => {
+    let nextUnixTime = this.state.currentUnixTime - this.state.stepSize;
+    if (nextUnixTime <= this.startTime) {
+      nextUnixTime = this.startTime;
+    }
+    this.handleSliderChange(nextUnixTime);
+  };
+
   setNextDate = (nextUnixTime) => {
     const { currentUnixTime, resolution } = this.state;
 
@@ -529,7 +547,27 @@ class TimeSliderView extends React.PureComponent {
             alignItems="center"
             spacing={2}
           >
-            <Grid item align="center" xs={4}>
+            <Grid item align="center" xs={2}>
+              <Tooltip disableInteractive title="Återställ tidslinjen">
+                <Button variant="contained" onClick={this.resetTimeSlider}>
+                  <RotateLeftOutlinedIcon />
+                </Button>
+              </Tooltip>
+            </Grid>
+            <Grid item align="center" xs={2}>
+              <Tooltip disableInteractive title="Hoppa ett steg bakåt">
+                <Button
+                  variant="contained"
+                  onClick={() => {
+                    this.stepOnesBackward();
+                  }}
+                  disabled={playing}
+                >
+                  <ArrowBackIcon />
+                </Button>
+              </Tooltip>
+            </Grid>
+            <Grid item align="center" xs={2}>
               <Tooltip
                 disableInteractive
                 title={playing ? "Stoppa tidslinjen" : "Starta tidslinjen"}
@@ -544,14 +582,20 @@ class TimeSliderView extends React.PureComponent {
                 </Button>
               </Tooltip>
             </Grid>
-            <Grid item align="center" xs={4}>
-              <Tooltip disableInteractive title="Återställ tidslinjen">
-                <Button variant="contained" onClick={this.resetTimeSlider}>
-                  <RotateLeftOutlinedIcon />
+            <Grid item align="center" xs={2}>
+              <Tooltip disableInteractive title="Hoppa ett steg framåt">
+                <Button
+                  variant="contained"
+                  onClick={() => {
+                    this.stepOnesForward();
+                  }}
+                  disabled={playing}
+                >
+                  <ArrowForwardIcon />
                 </Button>
               </Tooltip>
             </Grid>
-            <Grid item align="center" xs={4}>
+            <Grid item align="center" xs={2}>
               <Tooltip disableInteractive title="Inställningar">
                 {this.renderSettingsButton()}
               </Tooltip>
