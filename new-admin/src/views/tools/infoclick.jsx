@@ -25,7 +25,7 @@ var defaultState = {
   anchorY: 1,
   allowDangerousHtml: true,
   useNewInfoclick: false,
-  transformLinkUri: false,
+  transformLinkUri: true,
 };
 
 const ColorButtonBlue = withStyles((theme) => ({
@@ -402,8 +402,8 @@ class ToolOptions extends Component {
             />
             &nbsp;
             <label htmlFor="transformLinkUri" style={{ width: "auto" }}>
-              Avaktivera URL-verifiering. (Verifiering måste avaktiveras för att
-              kunna länka till desktop-program.)
+              URL-verifiering aktiverad. (Verifieringen måste avaktiveras för
+              att tillåta länkar till desktop-programvaror.)
             </label>
           </div>
           <div className="separator">Länkarnas utseende</div>
