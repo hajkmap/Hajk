@@ -604,7 +604,7 @@ class TimeSliderView extends React.PureComponent {
                 title={
                   playing
                     ? "Du kan inte hoppa framåt när spelaren är aktiv."
-                    : "Hoppa ett steg bakåt"
+                    : "Hoppa ett steg framåt"
                 }
               >
                 <span>
