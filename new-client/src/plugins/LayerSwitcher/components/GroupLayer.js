@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 
 import { Box, Collapse, IconButton } from "@mui/material";
 
@@ -12,41 +12,155 @@ import KeyboardArrowRightOutlinedIcon from "@mui/icons-material/KeyboardArrowRig
 export default function GroupLayer({
   layer,
   app,
-  model,
+  observer,
   toggleable,
   options,
   draggable,
+  quickAccessLayer,
 }) {
   // Keep the subLayers area active in state
   const [showSublayers, setShowSublayers] = useState(false);
   // Keep visible sublayers in state
   const [visibleSubLayers, setVisibleSubLayers] = useState(
     layer.get("visible")
-      ? layer.visibleAtStartSubLayers?.length > 0
+      ? quickAccessLayer
+        ? layer.get("subLayers")
+        : layer.visibleAtStartSubLayers?.length > 0
         ? layer.visibleAtStartSubLayers
         : layer.subLayers
       : []
   );
 
-  // When component is successfully mounted into the DOM.
-  useEffect(() => {
-    model.globalObserver.subscribe("layerswitcher.hideLayer", setGroupHidden);
-    model.globalObserver.subscribe("layerswitcher.showLayer", setGroupVisible);
-    model.observer.subscribe("hideLayer", setGroupHidden);
-    model.observer.subscribe("showLayer", setGroupVisible);
-  }, []);
+  const setGroupHidden = useCallback(
+    (l) => {
+      if (l.get("name") === layer.get("name")) {
+        // Update OL layer sublayers property
+        layer.set("subLayers", []);
+      }
+    },
+    [layer]
+  );
 
-  // Handles list item click
-  const handleLayerItemClick = () => {
-    if (layer.get("visible")) {
-      setGroupHidden(layer);
+  const setSubLayers = (visibleSubLayersArray) => {
+    // Check if layer is visible
+    let layerVisibility = layer.get("visible");
+    // If layer is not visible and remaining visible subLayers exists, layer should turn visible
+    if (!layerVisibility && visibleSubLayersArray.length > 0) {
+      layerVisibility = true;
+    }
+
+    // If remaining visible subLayers are zero, layer should turn not visible
+    if (visibleSubLayersArray.length === 0) {
+      layerVisibility = false;
+    }
+
+    // If remaining visible subLayers exists, set layer visibility and set visibleSubLayers state
+    if (visibleSubLayersArray.length >= 1) {
+      layer.setVisible(layerVisibility);
+      layer.set("subLayers", visibleSubLayersArray);
     } else {
-      setGroupVisible(layer);
+      // Otherwise, set OL layer subLayers property to empty array
+      layer.set("subLayers", []);
     }
   };
 
-  const setGroupHidden = (l) => {
-    if (l.get("name") === layer.get("name")) {
+  const setSubLayerVisible = (subLayer) => {
+    // Clone visibleSubLayers state
+    let visibleSubLayersArray = [...visibleSubLayers];
+    // Push subLayer to visibleSubLayersArray and set component state
+    visibleSubLayersArray.push(subLayer);
+    setSubLayers(visibleSubLayersArray);
+  };
+
+  // Gets added subLayers and removes the one that user clicked on, then passes the array to setSubLayers
+  const setSubLayerHidden = (subLayer) => {
+    // Clone visibleSubLayers state
+    let visibleSubLayersArray = [...visibleSubLayers];
+    // Get remaining visible subLayers
+    visibleSubLayersArray = visibleSubLayersArray.filter(
+      (visibleSubLayer) => visibleSubLayer !== subLayer
+    );
+    setSubLayers(visibleSubLayersArray);
+  };
+
+  const setGroupVisible = useCallback(
+    (la) => {
+      let l,
+        subLayersToShow = null;
+
+      // If the incoming parameter is an object that contains additional subLayersToShow,
+      // let's filter out the necessary objects from it
+      if (la.hasOwnProperty("layer") && la.hasOwnProperty("subLayersToShow")) {
+        subLayersToShow = la.subLayersToShow;
+        l = la.layer;
+      } else {
+        // In this case the incoming parameter is the actual OL Layer and there is
+        // no need to further filter. Just set subLayers to everything that's in this
+        // layer, and the incoming object itself as the working 'l' variable.
+        subLayersToShow = layer.subLayers;
+        l = la;
+      }
+
+      // Now we can be sure that we have the working 'l' variable and can compare
+      // it to the 'layer' object in current props. Note that this is necessary, as
+      // every single LayerGroupItem is subscribing to the event that calls this method,
+      // so without this check we'd end up running this for every LayerGroupItem, which
+      // is not intended.
+      if (l === layer) {
+        // Show the OL layer
+        layer.setVisible(true);
+        // Update OL layer subLayers property
+        layer.set("subLayers", subLayersToShow);
+      }
+    },
+    [layer]
+  );
+
+  // Register subscriptions for groupLayer.
+  useEffect(() => {
+    const subLayerChangedSubscription = app.globalObserver.subscribe(
+      "core.layerSubLayersChanged",
+      (l) => {
+        if (l.target.get("name") === layer.get("name")) {
+          setVisibleSubLayers(l.target.get("subLayers"));
+        }
+      }
+    );
+
+    const layerswitcherHideLayerSubscription = app.globalObserver.subscribe(
+      "layerswitcher.hideLayer",
+      setGroupHidden
+    );
+    const layerswitcherShowLayerSubscription = app.globalObserver.subscribe(
+      "layerswitcher.showLayer",
+      setGroupVisible
+    );
+    const hideLayerSubscription = observer.subscribe(
+      "hideLayer",
+      setGroupHidden
+    );
+    const showLayerSubscription = observer.subscribe(
+      "showLayer",
+      setGroupVisible
+    );
+
+    // Unsubscribe when component unmounts
+    return () => {
+      layerswitcherHideLayerSubscription.unsubscribe();
+      layerswitcherShowLayerSubscription.unsubscribe();
+      hideLayerSubscription.unsubscribe();
+      showLayerSubscription.unsubscribe();
+      subLayerChangedSubscription.unsubscribe();
+    };
+  }, [app.globalObserver, observer, setGroupHidden, setGroupVisible, layer]);
+
+  // When visibleSubLayers state changes, update layer params
+  useEffect(() => {
+    if (!toggleable) {
+      return;
+    }
+    const visibleSubLayersArray = [...visibleSubLayers];
+    if (visibleSubLayersArray.length === 0) {
       // Fix underlying source
       layer.getSource().updateParams({
         // Ensure that the list of sublayers is emptied (otherwise they'd be
@@ -58,88 +172,10 @@ export default function GroupLayer({
 
       // Hide the layer in OL
       layer.setVisible(false);
-
-      // Update UI state
-      setVisibleSubLayers([]);
-    }
-  };
-
-  const setGroupVisible = (la) => {
-    let l,
-      subLayersToShow = null;
-
-    // If the incoming parameter is an object that contains additional subLayersToShow,
-    // let's filter out the necessary objects from it
-    if (la.hasOwnProperty("layer") && la.hasOwnProperty("subLayersToShow")) {
-      subLayersToShow = la.subLayersToShow;
-      l = la.layer;
+      // layer.set("subLayers", []);
     } else {
-      // In this case the incoming parameter is the actual OL Layer and there is
-      // no need to further filter. Just set subLayers to everything that's in this
-      // layer, and the incoming object itself as the working 'l' variable.
-      subLayersToShow = layer.subLayers;
-      l = la;
-    }
-
-    // Now we can be sure that we have the working 'l' variable and can compare
-    // it to the 'layer' object in current props. Note that this is necessary, as
-    // every single LayerGroupItem is subscribing to the event that calls this method,
-    // so without this check we'd end up running this for every LayerGroupItem, which
-    // is not intended.
-    if (l === layer) {
-      // Show the OL layer
-      layer.setVisible(true);
-
       // Set LAYERS and STYLES so that the exact sublayers that are needed
       // will be visible
-      layer.getSource().updateParams({
-        // join(), so we always provide a string as value to LAYERS
-        LAYERS: subLayersToShow.join(),
-        CQL_FILTER: null,
-        // Extract .style property from each sub layer.
-        // Join them into a string that will be used to
-        // reset STYLES param for the GET request.
-        STYLES: Object.entries(layer.layersInfo)
-          .filter((k) => subLayersToShow.indexOf(k[0]) !== -1)
-          .map((l) => l[1].style)
-          .join(","),
-      });
-
-      setVisibleSubLayers(subLayersToShow);
-    }
-  };
-
-  const toggleSubLayer = (subLayer) => {
-    let visibleSubLayersArray = [...visibleSubLayers];
-    const isVisible = visibleSubLayersArray.some(
-      (visibleSubLayer) => visibleSubLayer === subLayer
-    );
-
-    let layerVisibility = layer.get("visible");
-
-    if (isVisible) {
-      visibleSubLayersArray = visibleSubLayersArray.filter(
-        (visibleSubLayer) => visibleSubLayer !== subLayer
-      );
-    } else {
-      visibleSubLayersArray.push(subLayer);
-    }
-
-    if (!layerVisibility && visibleSubLayersArray.length > 0) {
-      layerVisibility = true;
-    }
-
-    if (visibleSubLayersArray.length === 0) {
-      layerVisibility = false;
-    }
-
-    if (visibleSubLayersArray.length >= 1) {
-      // Create an Array to be used as STYLES param, it should only contain selected sublayers' styles
-      let visibleSubLayersStyles = [];
-      visibleSubLayersArray.forEach((subLayer) => {
-        visibleSubLayersStyles.push(layer.layersInfo[subLayer].style);
-      });
-
       layer.getSource().updateParams({
         // join(), so we always provide a string as value to LAYERS
         LAYERS: visibleSubLayersArray.join(),
@@ -152,10 +188,24 @@ export default function GroupLayer({
           .join(","),
         CQL_FILTER: null,
       });
-      layer.setVisible(layerVisibility);
-      setVisibleSubLayers(visibleSubLayersArray);
-    } else {
+    }
+  }, [visibleSubLayers, layer, toggleable]);
+
+  // Handles list item click
+  const handleLayerItemClick = () => {
+    if (layer.get("visible")) {
       setGroupHidden(layer);
+    } else {
+      setGroupVisible(layer);
+    }
+  };
+
+  // Toogles a subLayer
+  const toggleSubLayer = (subLayer, visible) => {
+    if (visible) {
+      setSubLayerHidden(subLayer);
+    } else {
+      setSubLayerVisible(subLayer);
     }
   };
 

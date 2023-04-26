@@ -48,7 +48,7 @@ export default function SubLayerItem({
     <div>
       <ListItemButton
         disableRipple
-        onClick={() => (toggleable ? toggleSubLayer(subLayer) : null)}
+        onClick={() => (toggleable ? toggleSubLayer(subLayer, visible) : null)}
         sx={{
           borderBottom: (theme) =>
             !settingIsActive
@@ -77,6 +77,7 @@ export default function SubLayerItem({
             layer={layer}
             app={app}
             subLayerIndex={subLayerIndex}
+            subLayer={true}
           />
           <IconButton size="small" onClick={(e) => toggleSettings(e)}>
             <ExpandMoreOutlinedIcon

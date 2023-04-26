@@ -1,10 +1,10 @@
 {
   "appName": "Hajk",
-  "version": "3.11.0-rc.1",
-  "mapserviceBase": "",
+  "version": "3.11.0-dev",
+  "mapserviceBase": "http://localhost:3002/api/v1",
   "proxy": "",
   "searchProxy": "",
-  "defaultMap": "map_1",
+  "defaultMap": "goteborg",
   "experimentalNewApi": false,
   "noLayerSwitcherMessage": "This map has no layer switcher, which indicates that you are not allowed to use this map!",
   "networkErrorMessage": "Nätverksfel. Försök att ladda om sidan genom att trycka på F5.",

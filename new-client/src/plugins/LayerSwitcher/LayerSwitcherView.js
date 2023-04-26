@@ -3,7 +3,7 @@ import { createPortal } from "react-dom";
 import propTypes from "prop-types";
 
 import { styled } from "@mui/material/styles";
-import { AppBar, Tab, Tabs, Badge, Box, IconButton } from "@mui/material";
+import { AppBar, Tab, Tabs, Box, IconButton } from "@mui/material";
 
 import BackgroundSwitcher from "./components/BackgroundSwitcher.js";
 import LayerGroup from "./components/LayerGroup.js";
@@ -16,6 +16,7 @@ import StarOutlineOutlinedIcon from "@mui/icons-material/StarOutlineOutlined";
 import PersonOutlinedIcon from "@mui/icons-material/PersonOutlined";
 import DeleteOutlinedIcon from "@mui/icons-material/DeleteOutlined";
 import FolderOutlinedIcon from "@mui/icons-material/FolderOutlined";
+import QuickAccessLayers from "./components/QuickAccessLayers.js";
 
 // The styled-component below might seem unnecessary since we are using the sx-prop
 // on it as well. However, since we cannot use the sx-prop on a non-MUI-component
@@ -63,6 +64,14 @@ class LayersSwitcherView extends React.PureComponent {
     this.setState({
       displayLoadLayerPackage: !this.state.displayLoadLayerPackage,
     });
+  };
+
+  // Handles click on clear quickAccess button
+  handleClearQuickAccessLayers = () => {
+    this.props.map
+      .getAllLayers()
+      .filter((l) => l.get("quickAccess") === true)
+      .map((l) => l.set("quickAccess", false));
   };
 
   /**
@@ -143,10 +152,18 @@ class LayersSwitcherView extends React.PureComponent {
               <IconButton>
                 <PersonOutlinedIcon fontSize="small"></PersonOutlinedIcon>
               </IconButton>
-              <IconButton>
+              <IconButton onClick={this.handleClearQuickAccessLayers}>
                 <DeleteOutlinedIcon fontSize="small"></DeleteOutlinedIcon>
               </IconButton>
             </>
+          }
+          children={
+            <QuickAccessLayers
+              model={this.props.model}
+              options={this.props.options}
+              map={this.props.map}
+              app={this.props.app}
+            ></QuickAccessLayers>
           }
         ></LayerGroupAccordion>
         {this.options.groups.map((group, i) => {
@@ -229,9 +246,11 @@ class LayersSwitcherView extends React.PureComponent {
         </StyledAppBar>
         {this.renderLayerGroups(this.state.activeTab === 0)}
         <LayerPackage
-          quickLayerPresets={this.options.quickLayerPresets}
+          quickLayerPresets={this.options.quickLayersPresets}
           display={this.state.displayLoadLayerPackage}
           backButtonCallback={this.handleLayerPackageToggle}
+          map={this.props.map}
+          globalObserver={this.props.model.globalObserver}
         ></LayerPackage>
         <BackgroundSwitcher
           display={this.state.activeTab === 1}

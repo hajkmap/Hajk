@@ -23,7 +23,7 @@ export default function BackgroundLayer({ layer, app, toggleable, draggable }) {
         setBackgroundVisible(false);
       }
     });
-  }, []);
+  }, [layer]);
 
   // Handles list item click
   const handleLayerItemClick = () => {

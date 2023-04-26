@@ -22,6 +22,8 @@ import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import FileDownloadOutlinedIcon from "@mui/icons-material/FileDownloadOutlined";
 import TableViewOutlinedIcon from "@mui/icons-material/TableViewOutlined";
 import CallMadeIcon from "@mui/icons-material/CallMade";
+import AddOutlinedIcon from "@mui/icons-material/AddOutlined";
+import RemoveOutlinedIcon from "@mui/icons-material/RemoveOutlined";
 
 export default function LayerItemOptions({
   layer,
@@ -30,6 +32,7 @@ export default function LayerItemOptions({
   onOpenChapter,
   enqueueSnackbar,
   subLayerIndex = 0,
+  subLayer,
 }) {
   // Element that we will anchor the options menu to is
   // held in state. If it's null (unanchored), we can tell
@@ -94,11 +97,17 @@ export default function LayerItemOptions({
     return result;
   };
 
+  // Check that layer is downloadable
   const isDownloadable = () => {
     return (
       app.config.mapConfig.map.enableDownloadLink &&
       Array.isArray(layer.subLayers)
     );
+  };
+
+  // Check that layer is elligible for quickAccess option
+  const isQuickAccessEnabled = () => {
+    return layer.get("layerType") !== "base" && !subLayer;
   };
 
   // Handle download action
@@ -112,6 +121,14 @@ export default function LayerItemOptions({
     const wmsUrl = layer.get("url");
     const downloadUrl = `${wmsUrl}/kml?layers=${layerName}&mode=download`;
     document.location = downloadUrl;
+  };
+
+  // Handle quickacces action
+  const handleQuickAccess = (e) => {
+    e.stopPropagation();
+    setAnchorEl(null);
+    // Set quicklayer access flag
+    layer.set("quickAccess", !layer.get("quickAccess"));
   };
 
   // Shows attribute table
@@ -202,95 +219,123 @@ export default function LayerItemOptions({
 
   return (
     <>
-      <IconButton
-        size="small"
-        aria-controls={optionsMenuIsOpen ? "basic-menu" : undefined}
-        aria-haspopup="true"
-        aria-expanded={optionsMenuIsOpen ? "true" : undefined}
-        onClick={handleShowMoreOptionsClick}
-      >
-        <Tooltip title="Val för lager">
-          <MoreVertOutlinedIcon />
-        </Tooltip>
-      </IconButton>
-      <Menu
-        anchorEl={anchorEl}
-        open={optionsMenuIsOpen}
-        onClose={onOptionsMenuClose}
-        variant={"menu"}
-      >
-        {hasInfo() && (
-          <MenuItem onClick={handleInfo}>
-            <ListItemIcon>
-              <InfoOutlinedIcon fontSize="small" />
-            </ListItemIcon>
-            <ListItemText>Info</ListItemText>
-          </MenuItem>
-        )}
-        {hasInfo() && <Divider />}
-        {layerInfo.showAttributeTableButton && (
-          <MenuItem onClick={handleAttributeTable}>
-            <ListItemIcon>
-              <TableViewOutlinedIcon fontSize="small" />
-            </ListItemIcon>
-            <ListItemText>Visa attributtabell</ListItemText>
-          </MenuItem>
-        )}
-        {isDownloadable && (
-          <MenuItem onClick={handleDownload}>
-            <ListItemIcon>
-              <FileDownloadOutlinedIcon fontSize="small" />
-            </ListItemIcon>
-            <ListItemText>Ladda ner</ListItemText>
-          </MenuItem>
-        )}
-      </Menu>
-      {/* TODO: Create a new component for this dialog or use alertview? */}
-      <Dialog
-        open={infoOpen}
-        onClose={() => setInfoOpen(false)}
-        aria-labelledby="info-dialog-title"
-        aria-describedby="info-dialog-description"
-      >
-        <DialogTitle id="info-dialog-title">{layer.get("caption")}</DialogTitle>
-        <DialogContent>
-          {/* Infotext */}
-          {layerInfo.infoText && (
-            <>
-              <Typography variant="subtitle2">{layerInfo.infoTitle}</Typography>
-              <Typography
-                variant="body2"
-                dangerouslySetInnerHTML={{
-                  __html: layerInfo.infoText,
-                }}
-              ></Typography>
-            </>
-          )}
-          {/* MetadataLink */}
-          {layerInfo.infoUrl && (
-            <a
-              href={layerInfo.infoUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              {layerInfo.infoUrlText || layerInfo.infoUrl}
-            </a>
-          )}
-          {/* Owner */}
-          {layerInfo.infoOwner && (
-            <Typography
-              variant="body2"
-              dangerouslySetInnerHTML={{ __html: layerInfo.infoOwner }}
-            />
-          )}
-          {renderChapterLinks()}
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setInfoOpen(false)} color="primary" autoFocus>
-            Stäng
-          </Button>
-        </DialogActions>
-      </Dialog>
+      {!hasInfo() && !isDownloadable() && !isQuickAccessEnabled() ? null : (
+        <>
+          <IconButton
+            size="small"
+            aria-controls={optionsMenuIsOpen ? "basic-menu" : undefined}
+            aria-haspopup="true"
+            aria-expanded={optionsMenuIsOpen ? "true" : undefined}
+            onClick={handleShowMoreOptionsClick}
+          >
+            <Tooltip title="Val för lager">
+              <MoreVertOutlinedIcon />
+            </Tooltip>
+          </IconButton>
+          <Menu
+            anchorEl={anchorEl}
+            open={optionsMenuIsOpen}
+            onClose={onOptionsMenuClose}
+            variant={"menu"}
+          >
+            {hasInfo() && (
+              <MenuItem onClick={handleInfo}>
+                <ListItemIcon>
+                  <InfoOutlinedIcon fontSize="small" />
+                </ListItemIcon>
+                <ListItemText>Info</ListItemText>
+              </MenuItem>
+            )}
+            {hasInfo() && <Divider />}
+            {layerInfo.showAttributeTableButton && (
+              <MenuItem onClick={handleAttributeTable}>
+                <ListItemIcon>
+                  <TableViewOutlinedIcon fontSize="small" />
+                </ListItemIcon>
+                <ListItemText>Visa attributtabell</ListItemText>
+              </MenuItem>
+            )}
+            {isQuickAccessEnabled() && (
+              <MenuItem onClick={handleQuickAccess}>
+                <ListItemIcon>
+                  {layer.get("quickAccess") ? (
+                    <RemoveOutlinedIcon fontSize="small" />
+                  ) : (
+                    <AddOutlinedIcon fontSize="small" />
+                  )}
+                </ListItemIcon>
+                <ListItemText>
+                  {layer.get("quickAccess")
+                    ? "Ta bort från snabblager"
+                    : "Lägg till i snabblager"}
+                </ListItemText>
+              </MenuItem>
+            )}
+            {isDownloadable() && (
+              <MenuItem onClick={handleDownload}>
+                <ListItemIcon>
+                  <FileDownloadOutlinedIcon fontSize="small" />
+                </ListItemIcon>
+                <ListItemText>Ladda ner</ListItemText>
+              </MenuItem>
+            )}
+          </Menu>
+          {/* TODO: Create a new component for this dialog or use alertview? */}
+          <Dialog
+            open={infoOpen}
+            onClose={() => setInfoOpen(false)}
+            aria-labelledby="info-dialog-title"
+            aria-describedby="info-dialog-description"
+          >
+            <DialogTitle id="info-dialog-title">
+              {layer.get("caption")}
+            </DialogTitle>
+            <DialogContent>
+              {/* Infotext */}
+              {layerInfo.infoText && (
+                <>
+                  <Typography variant="subtitle2">
+                    {layerInfo.infoTitle}
+                  </Typography>
+                  <Typography
+                    variant="body2"
+                    dangerouslySetInnerHTML={{
+                      __html: layerInfo.infoText,
+                    }}
+                  ></Typography>
+                </>
+              )}
+              {/* MetadataLink */}
+              {layerInfo.infoUrl && (
+                <a
+                  href={layerInfo.infoUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  {layerInfo.infoUrlText || layerInfo.infoUrl}
+                </a>
+              )}
+              {/* Owner */}
+              {layerInfo.infoOwner && (
+                <Typography
+                  variant="body2"
+                  dangerouslySetInnerHTML={{ __html: layerInfo.infoOwner }}
+                />
+              )}
+              {renderChapterLinks()}
+            </DialogContent>
+            <DialogActions>
+              <Button
+                onClick={() => setInfoOpen(false)}
+                color="primary"
+                autoFocus
+              >
+                Stäng
+              </Button>
+            </DialogActions>
+          </Dialog>
+        </>
+      )}
     </>
   );
 }

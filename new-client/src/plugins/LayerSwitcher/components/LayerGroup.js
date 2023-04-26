@@ -294,7 +294,7 @@ class LayerGroup extends React.PureComponent {
                   key={mapLayer.get("name")}
                   layer={mapLayer}
                   app={this.props.app}
-                  model={this.props.model}
+                  observer={this.props.model.observer}
                   toggleable={true}
                   options={this.props.options}
                   draggable={false}

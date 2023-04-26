@@ -15,10 +15,10 @@ import {
 } from "@mui/material";
 
 import LayerItem from "./LayerItem";
-
-import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import BackgroundLayer from "./BackgroundLayer";
 import GroupLayer from "./GroupLayer";
+
+import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 
 function DrawOrder({ display, app, map, onLayerChange, model, options }) {
   // A Set that will hold type of OL layers that should be shown.
@@ -263,7 +263,7 @@ function DrawOrder({ display, app, map, onLayerChange, model, options }) {
                   key={l.ol_uid}
                   layer={l}
                   app={app}
-                  model={model}
+                  observer={model.observer}
                   toggleable={false}
                   options={options}
                   draggable={true}

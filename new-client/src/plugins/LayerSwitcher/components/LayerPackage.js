@@ -31,12 +31,20 @@ import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import LayersOutlinedIcon from "@mui/icons-material/LayersOutlined";
 
-function LayerPackage({ display, backButtonCallback, quickLayerPresets }) {
+function LayerPackage({
+  display,
+  backButtonCallback,
+  quickLayerPresets,
+  map,
+  globalObserver,
+}) {
   // State that toggles info collapse
   const [infoIsActive, setInfoIsActive] = useState(false);
   // Confirmation dialogs
   const [loadLpConfirmation, setLoadLpConfirmation] = useState(null);
   const [loadLpInfoConfirmation, setLoadLpInfoConfirmation] = useState(null);
+  const [clearExistingQuickAccessLayers, setClearExistingQuickAccessLayers] =
+    useState(true);
 
   // Because of a warning in dev console, we need special handling of tooltip for backbutton.
   // When a user clicks back, the tooltip of the button needs to be closed before this view hides.
@@ -92,10 +100,47 @@ function LayerPackage({ display, backButtonCallback, quickLayerPresets }) {
 
   // Fires when the user confirms the confirmation-window.
   const handleLoadConfirmation = () => {
+    const lpInfo = { ...loadLpConfirmation };
     setLoadLpConfirmation(null);
     setLoadLpInfoConfirmation(null);
-    // TODO: Actually load package
-    console.log("Ladda lagerpaket!");
+
+    if (clearExistingQuickAccessLayers) {
+      clearQuickAccessLayers();
+    }
+
+    map.getAllLayers().forEach((layer) => {
+      const info = lpInfo.layers.find((l) => l.id === layer.get("name"));
+      if (info) {
+        // Set quickaccess property
+        layer.set("quickAccess", true);
+        // Special handling for layerGroups
+        if (layer.get("layerType") === "group") {
+          if (info.visible === true) {
+            const subLayersToShow = info.subLayers
+              ? info.subLayers.split(",")
+              : [];
+            globalObserver.publish("layerswitcher.showLayer", {
+              layer,
+              subLayersToShow,
+            });
+          } else {
+            globalObserver.publish("layerswitcher.hideLayer", layer);
+          }
+        } else {
+          layer.set("visible", info.visible);
+        }
+        layer.set("opacity", info.opacity);
+        layer.setZIndex(info.drawOrder);
+      }
+    });
+  };
+
+  // Clear quickaccessLayers
+  const clearQuickAccessLayers = () => {
+    map
+      .getAllLayers()
+      .filter((l) => l.get("quickAccess") === true)
+      .map((l) => l.set("quickAccess", false));
   };
 
   // Fires when the user closes the confirmation-window.
@@ -143,7 +188,16 @@ function LayerPackage({ display, backButtonCallback, quickLayerPresets }) {
           </Typography>
           <FormGroup>
             <FormControlLabel
-              control={<Checkbox defaultChecked />}
+              control={
+                <Checkbox
+                  checked={clearExistingQuickAccessLayers}
+                  onChange={() =>
+                    setClearExistingQuickAccessLayers(
+                      !clearExistingQuickAccessLayers
+                    )
+                  }
+                />
+              }
               label="Ersätt lager vid laddning"
             />
           </FormGroup>
@@ -177,7 +231,16 @@ function LayerPackage({ display, backButtonCallback, quickLayerPresets }) {
           </Typography>
           <FormGroup>
             <FormControlLabel
-              control={<Checkbox defaultChecked />}
+              control={
+                <Checkbox
+                  checked={clearExistingQuickAccessLayers}
+                  onChange={() =>
+                    setClearExistingQuickAccessLayers(
+                      !clearExistingQuickAccessLayers
+                    )
+                  }
+                />
+              }
               label="Ersätt lager vid laddning"
             />
           </FormGroup>
