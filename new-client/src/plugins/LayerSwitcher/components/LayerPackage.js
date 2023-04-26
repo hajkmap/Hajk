@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { createPortal } from "react-dom";
+import { useSnackbar } from "notistack";
 
 import {
   Button,
@@ -38,6 +39,7 @@ function LayerPackage({
   map,
   globalObserver,
 }) {
+  const { closeSnackbar, enqueueSnackbar } = useSnackbar();
   // State that toggles info collapse
   const [infoIsActive, setInfoIsActive] = useState(false);
   // Confirmation dialogs
@@ -99,8 +101,11 @@ function LayerPackage({
   };
 
   // Fires when the user confirms the confirmation-window.
-  const handleLoadConfirmation = () => {
-    const lpInfo = { ...loadLpConfirmation };
+  const handleLoadConfirmation = (infoType) => {
+    let lpInfo = infoType
+      ? { ...loadLpInfoConfirmation }
+      : { ...loadLpConfirmation };
+
     setLoadLpConfirmation(null);
     setLoadLpInfoConfirmation(null);
 
@@ -132,6 +137,10 @@ function LayerPackage({
         layer.set("opacity", info.opacity);
         layer.setZIndex(info.drawOrder);
       }
+    });
+
+    enqueueSnackbar(`Snabblager har nu laddats med "${lpInfo.title}"`, {
+      variant: "success",
     });
   };
 
@@ -203,7 +212,7 @@ function LayerPackage({
           </FormGroup>
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleLoadConfirmation}>Ladda</Button>
+          <Button onClick={() => handleLoadConfirmation(true)}>Ladda</Button>
           <Button onClick={handleLoadConfirmationAbort} variant="contained">
             Avbryt
           </Button>
@@ -246,7 +255,7 @@ function LayerPackage({
           </FormGroup>
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleLoadConfirmation}>Ladda</Button>
+          <Button onClick={() => handleLoadConfirmation(false)}>Ladda</Button>
           <Button onClick={handleLoadConfirmationAbort} variant="contained">
             Avbryt
           </Button>
