@@ -320,7 +320,17 @@ class PrintWindow extends React.PureComponent {
     printWindow.document.head.insertAdjacentHTML(
       "beforeend",
       ` <title>${document.title}</title>
-        <base href="${document.location.protocol}//${document.location.host}/" />
+        <base href="${document.location.protocol}//${
+        document.location.host
+      }/" />
+        ${
+          this.props.options.dynamicImportUrls.customFont
+            ? `<link
+            rel="stylesheet"
+            type="text/css"
+            href="${this.props.options.dynamicImportUrls.customFont}"/>`
+            : ""
+        }        
         <style>
           @page {
             size: A4;
@@ -478,15 +488,16 @@ class PrintWindow extends React.PureComponent {
         // Add our recently-created DIV to the new window's document
         newWindow.document.body.appendChild(printContent);
 
-        // Invoke browser's print dialog - this will block the thread
-        // until user does something with it.
-        newWindow.print();
-
-        // Once the print dialog has disappeared, let's close the new window
-        newWindow.close();
-
-        // When the user closes the print-window we have to do some cleanup...
-        this.handlePrintCompleted();
+        // We force print to the next upcoming render. Let it render in peace.
+        setTimeout(() => {
+          // Invoke browser's print dialog - this will block the thread
+          // until user does something with it.
+          newWindow.print();
+          // Once the print dialog has disappeared, let's close the new window
+          newWindow.close();
+          // When the user closes the print-window we have to do some cleanup...
+          this.handlePrintCompleted();
+        }, 25);
       });
     });
   };

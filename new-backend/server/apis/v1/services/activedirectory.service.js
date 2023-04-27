@@ -1,5 +1,5 @@
 import ActiveDirectory from "activedirectory2";
-import ActiveDirectoryError from "../utils/ActiveDirectoryError";
+import ActiveDirectoryError from "../utils/ActiveDirectoryError.js";
 import log4js from "log4js";
 import fs from "fs";
 

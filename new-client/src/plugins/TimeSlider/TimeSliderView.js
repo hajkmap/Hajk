@@ -9,6 +9,8 @@ import TimeSliderSettings from "./components/TimeSliderSettings.js";
 import Dialog from "../../components/Dialog/Dialog";
 
 import PlayArrowIcon from "@mui/icons-material/PlayArrow";
+import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
+import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import PauseIcon from "@mui/icons-material/Pause";
 import RotateLeftOutlinedIcon from "@mui/icons-material/RotateLeftOutlined";
 import SettingsOutlinedIcon from "@mui/icons-material/SettingsOutlined";
@@ -24,8 +26,8 @@ class TimeSliderView extends React.PureComponent {
 
     this.state = {
       playing: false,
-      resolution: this.props.defaultResolution ?? "years",
-      stepSize: this.getStepSize(this.props.defaultResolution ?? "years"),
+      resolution: this.props.defaultResolution || "years",
+      stepSize: this.getStepSize(this.props.defaultResolution || "years"),
       loadingError: true,
       layerStatus: this.validateLayers(),
       settingsDialog: false,
@@ -262,11 +264,35 @@ class TimeSliderView extends React.PureComponent {
     switch (resolution) {
       case "years":
         return day * 365;
+      case "quarters":
+        return day * 92; // Approx 92 days...
       case "months":
         return day * 31;
       default:
         return day;
     }
+  };
+
+  // Handles when the user wants to step one step forwards.
+  // Sets the current time to the current time plus one step size
+  // If we've reached the end, we start from the beginning...
+  stepOnesForward = () => {
+    let nextUnixTime = this.state.currentUnixTime + this.state.stepSize;
+    if (nextUnixTime >= this.endTime) {
+      nextUnixTime = this.startTime;
+    }
+    this.handleSliderChange(nextUnixTime);
+  };
+
+  // Handles when the user wants to step one step backwards.
+  // Sets the current time to the current time minus one step size
+  // If we've reached the start, we "jump" to the end...
+  stepOnesBackward = () => {
+    let nextUnixTime = this.state.currentUnixTime - this.state.stepSize;
+    if (nextUnixTime <= this.startTime) {
+      nextUnixTime = this.endTime;
+    }
+    this.handleSliderChange(nextUnixTime);
   };
 
   setNextDate = (nextUnixTime) => {
@@ -280,6 +306,21 @@ class TimeSliderView extends React.PureComponent {
         currentUnixTime <= nextUnixTime
           ? nextDate.setFullYear(currentDate.getFullYear() + 1)
           : nextDate.setFullYear(currentDate.getFullYear() - 1);
+      }
+    } else if (resolution === "quarters") {
+      // We always want the month to land on a "quarter month"...
+      // (Jan, April, July, October)
+      const quarterMonths = [0, 3, 6, 9];
+      if (!quarterMonths.includes(nextDate.getMonth())) {
+        const closestQuarterMonth = quarterMonths.reduce((prev, curr) =>
+          Math.abs(curr - nextDate.getMonth()) <
+          Math.abs(prev - nextDate.getMonth())
+            ? curr
+            : prev
+        );
+        nextDate.setMonth(closestQuarterMonth);
+        // We also want to start on the first of the month each time...
+        nextDate.setDate(1);
       }
     } else if (resolution === "months") {
       if (currentDate.getMonth() === nextDate.getMonth()) {
@@ -321,6 +362,7 @@ class TimeSliderView extends React.PureComponent {
       case "years":
         options = { year: "numeric" };
         break;
+      case "quarters":
       case "months":
         options = { month: "long", year: "numeric" };
         break;
@@ -512,7 +554,36 @@ class TimeSliderView extends React.PureComponent {
             alignItems="center"
             spacing={2}
           >
-            <Grid item align="center" xs={4}>
+            <Grid item align="center" xs={2}>
+              <Tooltip disableInteractive title="Återställ tidslinjen">
+                <Button variant="contained" onClick={this.resetTimeSlider}>
+                  <RotateLeftOutlinedIcon />
+                </Button>
+              </Tooltip>
+            </Grid>
+            <Grid item align="center" xs={2}>
+              <Tooltip
+                disableInteractive
+                title={
+                  playing
+                    ? "Du kan inte hoppa bakåt när spelaren är aktiv."
+                    : "Hoppa ett steg bakåt"
+                }
+              >
+                <span>
+                  <Button
+                    variant="contained"
+                    onClick={() => {
+                      this.stepOnesBackward();
+                    }}
+                    disabled={playing}
+                  >
+                    <ArrowBackIcon />
+                  </Button>
+                </span>
+              </Tooltip>
+            </Grid>
+            <Grid item align="center" xs={2}>
               <Tooltip
                 disableInteractive
                 title={playing ? "Stoppa tidslinjen" : "Starta tidslinjen"}
@@ -527,14 +598,29 @@ class TimeSliderView extends React.PureComponent {
                 </Button>
               </Tooltip>
             </Grid>
-            <Grid item align="center" xs={4}>
-              <Tooltip disableInteractive title="Återställ tidslinjen">
-                <Button variant="contained" onClick={this.resetTimeSlider}>
-                  <RotateLeftOutlinedIcon />
-                </Button>
+            <Grid item align="center" xs={2}>
+              <Tooltip
+                disableInteractive
+                title={
+                  playing
+                    ? "Du kan inte hoppa framåt när spelaren är aktiv."
+                    : "Hoppa ett steg framåt"
+                }
+              >
+                <span>
+                  <Button
+                    variant="contained"
+                    onClick={() => {
+                      this.stepOnesForward();
+                    }}
+                    disabled={playing}
+                  >
+                    <ArrowForwardIcon />
+                  </Button>
+                </span>
               </Tooltip>
             </Grid>
-            <Grid item align="center" xs={4}>
+            <Grid item align="center" xs={2}>
               <Tooltip disableInteractive title="Inställningar">
                 {this.renderSettingsButton()}
               </Tooltip>

@@ -1,6 +1,6 @@
 import * as express from "express";
-import controller from "./controller";
-import restrictAdmin from "../../middlewares/restrict.admin";
+import controller from "./controller.js";
+import restrictAdmin from "../../middlewares/restrict.admin.js";
 
 export default express
   .Router()
