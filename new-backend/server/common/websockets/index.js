@@ -1,8 +1,8 @@
 import crypto from "crypto";
 import WebSocket from "ws";
 import queryString from "query-string";
-import log4js from "../utils/hajkLogger";
-import WebSocketMessageHandler from "./WebSocketMessageHandler";
+import log4js from "../utils/hajkLogger.js";
+import WebSocketMessageHandler from "./WebSocketMessageHandler.js";
 
 // Just a small example of how we can handle sending synchronized
 // messages to all connected clients.

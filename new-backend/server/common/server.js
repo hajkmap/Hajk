@@ -13,7 +13,7 @@ import * as OpenApiValidator from "express-openapi-validator";
 import log4js from "./utils/hajkLogger.js";
 import clfDate from "clf-date";
 
-import websockets from "./websockets";
+import websockets from "./websockets/index.js";
 
 import { createProxyMiddleware } from "http-proxy-middleware";
 
