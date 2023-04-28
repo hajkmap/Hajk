@@ -1049,7 +1049,7 @@ class PrintWindow extends React.PureComponent {
               <Button
                 href={pdfLink.link}
                 target="_blank"
-                sx={{ height: "28px", padding: "10px" }}
+                sx={{ height: "28px", padding: "10px", minWidth: "auto" }}
                 color={linkColor}
                 variant="contained"
                 startIcon={linkIcon}
