@@ -198,17 +198,27 @@ export default class ExpressServer {
       );
       app.use(`/api/v${v}/spec`, Express.static(openApiSpecification));
 
-      // …and apply the Validator middleware.
-      app.use(
-        OpenApiValidator.middleware({
-          apiSpec: openApiSpecification,
-          validateResponses,
-          validateRequests: {
-            allowUnknownQueryParameters: true,
-          },
-          ignorePaths: /.*\/spec(\/|$)/,
-        })
-      );
+      // …and apply the Validator middleware. We do it inside a timeout,
+      // which isn't optimal. The reasoning behind is that we must "wait
+      // a second or two" before we setup this middleware, to allow the
+      // async imports (which are initiated earlier) to finish so that those
+      // routes are set up when OAV runs its middleware. If we were to apply
+      // the middleware directly, any non-existing routes (such as those being
+      // created in async parts of the code) would render a 404 in the middleware.
+      // Related to #1309. Discovered during PR in #1332.
+      setTimeout(() => {
+        logger.trace(`[VALIDATOR] Setting up OpenApiValidator for /api/v${v}`);
+        app.use(
+          OpenApiValidator.middleware({
+            apiSpec: openApiSpecification,
+            validateResponses,
+            validateRequests: {
+              allowUnknownQueryParameters: true,
+            },
+            ignorePaths: /.*\/spec(\/|$)/,
+          })
+        );
+      }, 2000);
     });
   }
 
