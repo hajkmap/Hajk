@@ -43,7 +43,8 @@
     "url_folder_list": "http://localhost:3002/api/v1/informative/folderlist",
     "url_document_list": "http://localhost:55630/informative/list",
     "url_client_ui": "http://localhost:3000/",
-    "authentication_active": false
+    "authentication_active": false,
+    "use_document_folders": false
   },
   "informative": {
     "url_proxy": "",
