@@ -20,17 +20,16 @@ const logLevels = {
 };
 
 // Grab a logger
-const logger = log4js.getLogger("proxy.sokigo");
+const logger = log4js.getLogger("proxy.sokigo.v2");
 
 export default function sokigoFBProxy(err, req, res, next) {
   return createProxyMiddleware({
     target: process.env.FB_SERVICE_BASE_URL,
-    logLevel: logLevels[process.env.LOG_LEVEL],
-    logProvider: () => logger,
+    logLevel: "silent", // We don't care about logLevels[process.env.LOG_LEVEL] in this case as we log success and errors ourselves
     pathRewrite: (originalPath, req) => {
       // Remove the portion that shouldn't be there when we proxy the request
       // and split the remaining string on "?" to separate any query params
-      let segments = originalPath.replace("/api/v1/fbproxy", "").split("?");
+      let segments = originalPath.replace("/api/v2/fbproxy", "").split("?");
 
       // The path part is the first segment, prior "?"
       const path = segments[0];
