@@ -178,8 +178,18 @@ class LayerGroupItem extends Component {
     });
   }
 
-  // Checks if the layer has minZoom and maxZoom properties defined.
-  // Example: If the layer has minZoom = 5 and maxZoom = 10, it will only be visible when the map's zoom level is between 5 and 10.
+  /**
+   * Determines if the layer has minimum and maximum zoom level restrictions.
+   *
+   * This function checks the layer properties to see if the layer has minimum and/or maximum
+   * zoom levels defined. If either minZoom or maxZoom is within the valid range (0 to Infinity),
+   * the function returns true, indicating that the layer has zoom restrictions.
+   *
+   * Example: If the layer has minZoom = 5 and maxZoom = 10, it will only be visible
+   * when the map's zoom level is between 5 and 10.
+   *
+   * @returns {boolean} - True if the layer has zoom restrictions, false otherwise.
+   */
   layerUsesMinMaxZoom() {
     // Retrieve the layer properties from the layer object.
     const lprops = this.props.layer.getProperties();
@@ -193,7 +203,18 @@ class LayerGroupItem extends Component {
     return (maxZ > 0 && maxZ < Infinity) || (minZ > 0 && minZ < Infinity);
   }
 
-  // Handles the zoom end event and displays a Snackbar message if the layer is not visible at the current zoom level.
+  /**
+   * Handles the zoom end event to check if the layer should be visible at the current zoom level.
+   *
+   * This function is triggered when the map's zoom level changes. It checks if the layer's
+   * visibility is within the specified minZoom and maxZoom range. If the layer is not visible
+   * at the current zoom level and the conditions to show a Snackbar message are met, it calls
+   * the showZoomSnack() function to display a message. The function also updates the
+   * state.zoomVisible property accordingly.
+   *
+   * @param {Object} e - The event object (optional).
+   * @returns {boolean} - True if the layer is visible at the current zoom level, false otherwise.
+   */
   zoomEndHandler = (e) => {
     // Get the current map zoom level.
     const zoom = this.props.model.olMap.getView().getZoom();
@@ -230,8 +251,18 @@ class LayerGroupItem extends Component {
     return layerIsZoomVisible;
   };
 
-  // Subscribes or unsubscribes to zoom change events.
-  // Example: If the layer is visible, subscribe to the map's "moveend" event to listen for zoom changes; if it's not visible, unsubscribe from the event.
+  /**
+   * Subscribes or unsubscribes to the zoom end event based on the provided parameter.
+   *
+   * This function either subscribes or unsubscribes the zoomEndHandler() function to the
+   * 'core.zoomEnd' event, depending on the value of the bListen parameter. If the layer
+   * doesn't have any zoom restrictions, the function returns without doing anything.
+   *
+   * Example: If the layer is visible, subscribe to the map's "moveend" event to listen for
+   * zoom changes; if it's not visible, unsubscribe from the event.
+   *
+   * @param {boolean} bListen - If true, subscribes to the zoom end event; if false, unsubscribes.
+   */
   listenToZoomChange(bListen) {
     const { model } = this.props;
 
@@ -469,13 +500,28 @@ class LayerGroupItem extends Component {
     }
   };
 
-  // Toggles the visibility of the layer group and displays a Snackbar message if any
-  // of the layers within the group are not visible at the current zoom level.
-  // Example: If a layer group has 3 sublayers, clicking the checkbox will show or hide all 3 sublayers at once.
+  /**
+   * Toggles the visibility of a group layer and handles Snackbar messages for sublayers.
+   *
+   * This function toggles the visibility of the provided group layer. If the layer becomes visible,
+   * it calls setVisible() and checks the current zoom level to see if the layer should be visible.
+   * If the layer is not visible at the current zoom level and the conditions to show a Snackbar
+   * message are met, it calls the showZoomSnack() function to display a message. The function
+   * also updates the state.zoomVisible and state.visibleSubLayers properties accordingly.
+   * If the layer becomes hidden, it calls setHidden().
+   *
+   * Example: If a layer group has 3 sublayers, clicking the checkbox will show
+   * or hide all 3 sublayers at once.
+   *
+   * @param {Object} layer - The group layer to toggle visibility for.
+   * @returns {function} - A function to handle the onClick event for the group layer.
+   */
   toggleGroupVisible = (layer) => (e) => {
-    // Toggle the visibility state of the layer.
     const visible = !this.state.visible;
+
+    // If the layer is becoming visible.
     if (visible) {
+      // Set the layer as visible.
       this.setVisible(layer);
 
       // Get all sublayers of the layer group.
@@ -490,11 +536,15 @@ class LayerGroupItem extends Component {
       let showSnack = false;
 
       // If the layer is not visible at the current zoom level, show a Snackbar.
+      // Example: If minMaxZoomAlertOnToggleOnly is set to true, a Snackbar will only be shown
+      // when the layer is toggled on and is not visible at the current zoom level.
       if (this.minMaxZoomAlertOnToggleOnly === true) {
         if (!this.state.visible && !layerIsZoomVisible && e?.type === "click") {
           showSnack = true;
         }
       } else {
+        // If the layer is not visible at the current zoom level and either
+        // state.zoomVisible is true or state.visible is false, a Snackbar will be shown.
         if (
           !layerIsZoomVisible &&
           (this.state.zoomVisible || !this.state.visible)
@@ -504,6 +554,8 @@ class LayerGroupItem extends Component {
       }
 
       // If a Snackbar should be shown, call the showZoomSnack function with the subLayers array and set isGroupLayer to true.
+      // Example: If a group layer has 3 sublayers and none are visible at the current zoom level,
+      // the Snackbar will display a message for each sublayer.
       if (showSnack === true) {
         this.showZoomSnack(subLayers, true);
       }
@@ -514,6 +566,7 @@ class LayerGroupItem extends Component {
         visibleSubLayers: subLayers,
       });
     } else {
+      // If the layer is becoming hidden, call setHidden() to set the layer as hidden.
       this.setHidden(layer);
     }
   };
@@ -796,7 +849,16 @@ class LayerGroupItem extends Component {
     );
   };
 
-  // Displays a snackbar warning message if the layer is not visible at the current zoom level.
+  /**
+   * Displays a Snackbar message to inform the user about the layer's visibility at the current zoom level.
+   *
+   * This function shows a Snackbar message for each visible sublayer that is not visible at the
+   * current zoom level, informing the user that the layer is not visible. If the layer is a
+   * group layer, it handles the Snackbar messages for all sublayers within the group.
+   *
+   * @param {Array|string} sublayer - The sublayer or an array of sublayers to show the Snackbar message for.
+   * @param {boolean} isGroupLayer - True if the layer is a group layer, false otherwise.
+   */
   showZoomSnack(sublayer, isGroupLayer) {
     // If a zoom warning snackbar is already displayed, return without doing anything.
     // This method ensures that only one Snackbar notification is displayed at a time, preventing multiple notifications from overlapping.
@@ -812,6 +874,15 @@ class LayerGroupItem extends Component {
       visibleLayers.push(layer.get("layers")[0]);
     }
 
+    /**
+     * Adds captions to sublayers for display in a Snackbar message.
+     *
+     * This function receives a sublayer and retrieves the corresponding layer caption from the
+     * layerInfo object. It then creates a message string and enqueues a Snackbar with the message.
+     * The Snackbar will be displayed with a "warning" variant and will be removed when closed.
+     *
+     * @param {Object} subLayer - The sublayer for which to add captions.
+     */
     const addSubLayerCaptions = (subLayer) => {
       if (subLayer) {
         const layerCaption = layersInfo[subLayer]?.caption;
@@ -846,6 +917,14 @@ class LayerGroupItem extends Component {
     }
   }
 
+  /**
+   * Returns a checkbox element for the layer group.
+   *
+   * This function creates and returns a checkbox element for the layer group. The checkbox
+   * will toggle the visibility of the layer group when clicked.
+   *
+   * @returns {ReactElement} - A checkbox element for the layer group.
+   */
   getCheckBox() {
     const { layer } = this.props;
     const { visible, visibleSubLayers } = this.state;
