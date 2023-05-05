@@ -132,7 +132,9 @@ class LayerGroupItem extends Component {
     this.renderSubLayer = this.renderSubLayer.bind(this);
 
     this.hideExpandArrow = layerInfo?.hideExpandArrow === true ? true : false;
+    // Check if the layer uses min and max zoom levels.
     this.usesMinMaxZoom = this.layerUsesMinMaxZoom();
+    // Get the minMaxZoomAlertOnToggleOnly property from the layer.
     this.minMaxZoomAlertOnToggleOnly = layer.get("minMaxZoomAlertOnToggleOnly");
   }
   /**
@@ -147,15 +149,19 @@ class LayerGroupItem extends Component {
     model.observer.subscribe("showLayer", this.setVisible);
     model.observer.subscribe("toggleGroup", this.toggleGroupVisible);
 
+    // Listen for changes in the layer's visibility.
     this.props.layer.on?.("change:visible", (e) => {
+      // Update the 'visible' state based on the layer's new visibility.
       const visible = !e.oldValue;
       this.setState({
         visible,
       });
 
+      // Listen to zoom changes if the layer is visible.
       this.listenToZoomChange(visible);
     });
 
+    // Initially listen to zoom changes if the layer is visible.
     this.listenToZoomChange(this.state.visible);
 
     // Set load status by subscribing to a global event. Expect ID (int) of layer
@@ -172,22 +178,33 @@ class LayerGroupItem extends Component {
     });
   }
 
+  // Checks if the layer has minZoom and maxZoom properties defined.
+  // Example: If the layer has minZoom = 5 and maxZoom = 10, it will only be visible when the map's zoom level is between 5 and 10.
   layerUsesMinMaxZoom() {
+    // Retrieve the layer properties from the layer object.
     const lprops = this.props.layer.getProperties();
+
+    // Get the maxZoom and minZoom properties if they exist, otherwise set them to 0.
     const maxZ = lprops.maxZoom ?? 0;
     const minZ = lprops.minZoom ?? 0;
 
+    // Check if either minZoom or maxZoom is within a valid range (0 < value < Infinity).
+    // Return true if any of them are within the valid range, otherwise return false.
     return (maxZ > 0 && maxZ < Infinity) || (minZ > 0 && minZ < Infinity);
   }
 
+  // Handles the zoom end event and displays a Snackbar message if the layer is not visible at the current zoom level.
   zoomEndHandler = (e) => {
-    // Display a Snackbar message if the layer is not visible at the current zoom level.
+    // Get the current map zoom level.
     const zoom = this.props.model.olMap.getView().getZoom();
+    // Retrieve the layer properties.
     const lprops = this.props.layer.getProperties();
+    // Check if the current zoom level is within the allowed range of minZoom and maxZoom.
     const layerIsZoomVisible = zoom > lprops.minZoom && zoom <= lprops.maxZoom;
 
     let showSnack = false;
 
+    // Determine if the Snackbar message should be shown based on the layer visibility and zoom level conditions.
     if (this.minMaxZoomAlertOnToggleOnly === true) {
       if (!this.state.visible && !layerIsZoomVisible && e?.type === "click") {
         showSnack = true;
@@ -201,22 +218,30 @@ class LayerGroupItem extends Component {
       }
     }
 
+    // If the Snackbar message should be shown, call the showZoomSnack function.
     if (showSnack === true) {
       this.showZoomSnack();
     }
 
+    // Update the state with the new value for zoomVisible.
     this.setState({
       zoomVisible: layerIsZoomVisible,
     });
     return layerIsZoomVisible;
   };
 
+  // Subscribes or unsubscribes to zoom change events.
+  // Example: If the layer is visible, subscribe to the map's "moveend" event to listen for zoom changes; if it's not visible, unsubscribe from the event.
   listenToZoomChange(bListen) {
     const { model } = this.props;
 
+    // If the layer doesn't use minZoom and maxZoom properties, return without doing anything.
     if (!this.usesMinMaxZoom) return;
 
+    // Define the event name for zoom change events.
     const eventName = "core.zoomEnd";
+
+    // Subscribe or unsubscribe to the zoom change event based on the 'bListen' parameter.
     if (bListen && !this.zoomEndListener) {
       this.zoomEndListener = model.globalObserver.subscribe(
         eventName,
@@ -364,6 +389,7 @@ class LayerGroupItem extends Component {
       // Hide the layer in OL
       layer.setVisible(false);
 
+      // Close any existing zoom warning Snackbars.
       this.props.closeSnackbar(this.zoomWarningSnack);
 
       // Update UI state
@@ -443,7 +469,11 @@ class LayerGroupItem extends Component {
     }
   };
 
+  // Toggles the visibility of the layer group and displays a Snackbar message if any
+  // of the layers within the group are not visible at the current zoom level.
+  // Example: If a layer group has 3 sublayers, clicking the checkbox will show or hide all 3 sublayers at once.
   toggleGroupVisible = (layer) => (e) => {
+    // Toggle the visibility state of the layer.
     const visible = !this.state.visible;
     if (visible) {
       this.setVisible(layer);
@@ -473,10 +503,12 @@ class LayerGroupItem extends Component {
         }
       }
 
+      // If a Snackbar should be shown, call the showZoomSnack function with the subLayers array and set isGroupLayer to true.
       if (showSnack === true) {
         this.showZoomSnack(subLayers, true);
       }
 
+      // Update the state with the new values for zoomVisible and visibleSubLayers.
       this.setState({
         zoomVisible: layerIsZoomVisible,
         visibleSubLayers: subLayers,
@@ -764,7 +796,10 @@ class LayerGroupItem extends Component {
     );
   };
 
+  // Displays a snackbar warning message if the layer is not visible at the current zoom level.
   showZoomSnack(sublayer, isGroupLayer) {
+    // If a zoom warning snackbar is already displayed, return without doing anything.
+    // This method ensures that only one Snackbar notification is displayed at a time, preventing multiple notifications from overlapping.
     if (this.zoomWarningSnack) return;
 
     const { layer } = this.props;
