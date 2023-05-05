@@ -473,25 +473,11 @@ class LayerGroupItem extends Component {
       });
 
       const { layer } = this.props;
-      const layerProperties = layer.getProperties();
-      const layerInfo = layerProperties.layerInfo || {};
-      const layersInfo = layerInfo.layersInfo || {};
 
       let visibleLayers = [...subLayersToShow];
       if (layer.get("layers") && layer.get("layers").length > 0) {
         visibleLayers.push(layer.get("layers")[0]);
       }
-
-      const layerCaptions = visibleLayers.map((subLayer) => {
-        return layersInfo[subLayer]?.caption;
-      });
-
-      const layerCaption =
-        layerCaptions.length > 1
-          ? `Lagren "${layerCaptions[0]}" och ${
-              layerCaptions.length - 1
-            } andra lager`
-          : `Lagret "${layerCaptions[0]}"`;
 
       this.setState({
         visible: true,
