@@ -3,12 +3,20 @@ import { createPortal } from "react-dom";
 import propTypes from "prop-types";
 
 import { styled } from "@mui/material/styles";
-import { AppBar, Tab, Tabs } from "@mui/material";
+import { AppBar, Tab, Tabs, Box, IconButton } from "@mui/material";
 
 import BackgroundSwitcher from "./components/BackgroundSwitcher.js";
 import LayerGroup from "./components/LayerGroup.js";
 import BreadCrumbs from "./components/BreadCrumbs.js";
 import DrawOrder from "./components/DrawOrder.js";
+import LayerPackage from "./components/LayerPackage";
+import LayerGroupAccordion from "./components/LayerGroupAccordion.js";
+
+import StarOutlineOutlinedIcon from "@mui/icons-material/StarOutlineOutlined";
+import PersonOutlinedIcon from "@mui/icons-material/PersonOutlined";
+import DeleteOutlinedIcon from "@mui/icons-material/DeleteOutlined";
+import FolderOutlinedIcon from "@mui/icons-material/FolderOutlined";
+import QuickAccessLayers from "./components/QuickAccessLayers.js";
 
 // The styled-component below might seem unnecessary since we are using the sx-prop
 // on it as well. However, since we cannot use the sx-prop on a non-MUI-component
@@ -20,10 +28,6 @@ const Root = styled("div")(() => ({
 
 const StyledAppBar = styled(AppBar)(() => ({
   top: -10,
-}));
-
-const ContentWrapper = styled("div")(() => ({
-  padding: 10,
 }));
 
 class LayersSwitcherView extends React.PureComponent {
@@ -42,6 +46,8 @@ class LayersSwitcherView extends React.PureComponent {
       chapters: [],
       baseLayers: props.model.getBaseLayers(),
       activeTab: 0,
+      activeLayersCount: 0,
+      displayLoadLayerPackage: false,
     };
 
     props.app.globalObserver.subscribe("informativeLoaded", (chapters) => {
@@ -53,17 +59,44 @@ class LayersSwitcherView extends React.PureComponent {
     });
   }
 
+  // Handles click on Layerpackage button and backbutton
+  handleLayerPackageToggle = () => {
+    this.setState({
+      displayLoadLayerPackage: !this.state.displayLoadLayerPackage,
+    });
+  };
+
+  // Handles click on clear quickAccess button
+  handleClearQuickAccessLayers = () => {
+    this.props.map
+      .getAllLayers()
+      .filter((l) => l.get("quickAccess") === true)
+      .map((l) => l.set("quickAccess", false));
+  };
+
+  /**
+   * This method handles layerupdates from DrawOrder component,
+   * sets activeLayersCount state
+   *
+   * @memberof LayersSwitcherView
+   */
+  handleLayerChange = (activeLayers) => {
+    this.setState({
+      activeLayersCount: activeLayers,
+    });
+  };
+
   /**
    * LayerSwitcher consists of two Tabs: one shows
    * "regular" layers (as checkboxes, multi select), and the
    * other shows background layers (as radio buttons, one-at-at-time).
    *
-   * This method controls which of the two Tabs is visible.
+   * This method controls which of the two Tabs is visible and hides LayerPackage view.
    *
    * @memberof LayersSwitcherView
    */
   handleChangeTabs = (event, activeTab) => {
-    this.setState({ activeTab });
+    this.setState({ activeTab, displayLoadLayerPackage: false });
   };
 
   /**
@@ -92,11 +125,47 @@ class LayersSwitcherView extends React.PureComponent {
    */
   renderLayerGroups = (shouldRender = true) => {
     return (
-      <div
-        style={{
-          display: shouldRender === true ? "block" : "none",
+      <Box
+        sx={{
+          display:
+            shouldRender === true &&
+            this.state.displayLoadLayerPackage === false
+              ? "block"
+              : "none",
         }}
       >
+        {/* TODO: configurable from admin */}
+        {/* QuickAccess section */}
+        <LayerGroupAccordion
+          expanded={false}
+          name={"Snabblager"}
+          quickAccess={
+            <IconButton sx={{ pl: 0 }} disableRipple size="small">
+              <StarOutlineOutlinedIcon />
+            </IconButton>
+          }
+          layerGroupDetails={
+            <>
+              <IconButton onClick={this.handleLayerPackageToggle}>
+                <FolderOutlinedIcon fontSize="small"></FolderOutlinedIcon>
+              </IconButton>
+              <IconButton>
+                <PersonOutlinedIcon fontSize="small"></PersonOutlinedIcon>
+              </IconButton>
+              <IconButton onClick={this.handleClearQuickAccessLayers}>
+                <DeleteOutlinedIcon fontSize="small"></DeleteOutlinedIcon>
+              </IconButton>
+            </>
+          }
+          children={
+            <QuickAccessLayers
+              model={this.props.model}
+              options={this.props.options}
+              map={this.props.map}
+              app={this.props.app}
+            ></QuickAccessLayers>
+          }
+        ></LayerGroupAccordion>
         {this.options.groups.map((group, i) => {
           return (
             <LayerGroup
@@ -109,7 +178,7 @@ class LayersSwitcherView extends React.PureComponent {
             />
           );
         })}
-      </div>
+      </Box>
     );
   };
 
@@ -157,31 +226,52 @@ class LayersSwitcherView extends React.PureComponent {
             // false is OK though, apparently.
             variant="fullWidth"
             textColor="inherit"
+            sx={{ "& .MuiBadge-badge": { right: -16, top: 8 } }}
           >
             <Tab label="Kartlager" />
             <Tab label="Bakgrund" />
             {this.options.showActiveLayersView === true && (
-              <Tab label="Aktiva lager" />
+              <Tab
+                label={
+                  // <Badge
+                  //   badgeContent={this.state.activeLayersCount}
+                  //   color="primary"
+                  // >
+                  "Ritordning"
+                  // </Badge>
+                }
+              />
             )}
           </Tabs>
         </StyledAppBar>
-        <ContentWrapper>
-          {this.renderLayerGroups(this.state.activeTab === 0)}
-          <BackgroundSwitcher
-            display={this.state.activeTab === 1}
-            layers={this.state.baseLayers}
-            layerMap={this.props.model.layerMap}
-            backgroundSwitcherBlack={this.options.backgroundSwitcherBlack}
-            backgroundSwitcherWhite={this.options.backgroundSwitcherWhite}
-            enableOSM={this.options.enableOSM}
+        {this.renderLayerGroups(this.state.activeTab === 0)}
+        <LayerPackage
+          quickLayerPresets={this.options.quickLayersPresets}
+          display={this.state.displayLoadLayerPackage}
+          backButtonCallback={this.handleLayerPackageToggle}
+          map={this.props.map}
+          globalObserver={this.props.model.globalObserver}
+        ></LayerPackage>
+        <BackgroundSwitcher
+          display={this.state.activeTab === 1}
+          layers={this.state.baseLayers}
+          layerMap={this.props.model.layerMap}
+          backgroundSwitcherBlack={this.options.backgroundSwitcherBlack}
+          backgroundSwitcherWhite={this.options.backgroundSwitcherWhite}
+          enableOSM={this.options.enableOSM}
+          map={this.props.map}
+          app={this.props.app}
+        />
+        {this.options.showActiveLayersView === true && (
+          <DrawOrder
+            model={this.props.model}
+            display={this.state.activeTab === 2}
             map={this.props.map}
             app={this.props.app}
-          />
-          {this.options.showActiveLayersView === true &&
-            this.state.activeTab === 2 && (
-              <DrawOrder map={this.props.map} app={this.props.app} />
-            )}
-        </ContentWrapper>
+            options={this.props.options}
+            onLayerChange={this.handleLayerChange}
+          ></DrawOrder>
+        )}
         {this.renderBreadCrumbs()}
       </Root>
     );
