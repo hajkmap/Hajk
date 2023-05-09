@@ -156,7 +156,16 @@ export default class ExpressServer {
     );
 
     // Enable compression early so that responses that follow will get gziped
-    app.use(compression());
+    if (process.env.ENABLE_GZIP_COMPRESSION !== "false") {
+      logger.trace("[HTTP] Enabling Hajk's built-in GZIP compression");
+      app.use(compression());
+    } else {
+      logger.warn(
+        `[HTTP] Not enabling GZIP compression. If this is a production environment 
+you should make sure that you implement a reverse proxy that enables content compression. Alternatively, enable Hajk's 
+built-it compression by setting the ENABLE_GZIP_COMPRESSION option to "true" in .env.`
+      );
+    }
 
     this.setupGenericProxy();
 
