@@ -26,7 +26,7 @@ function Measurer(props) {
     () =>
       new DrawModel({
         layerName: "pluginMeasure",
-        layerCaption: "Meausure layer",
+        layerCaption: "Measure layer",
         map: map,
         observer: localObserver,
         observerPrefix: "measure",

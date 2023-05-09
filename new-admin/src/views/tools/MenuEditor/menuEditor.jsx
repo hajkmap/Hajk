@@ -887,7 +887,7 @@ class ToolOptions extends Component {
                       name="name"
                       type="text"
                       defaultValue={pdfLink.name}
-                      style={{ maxWidth: "150px" }}
+                      style={{ maxWidth: "220px" }}
                       placeholder="Namn..."
                       onBlur={(e) => {
                         this.handlePdfInputChange(e, pdfLink, "name");
