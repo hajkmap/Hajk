@@ -117,11 +117,17 @@ class ToolOptions extends Component {
         availableDocuments: list,
       })
     });
-    this.menuEditorModel.loadFolders().then((list) => {
-      this.setState({
-        folders: list,
-      })
-    });
+    
+    this.useDocumentFolders = this.menuEditorModel.config.use_document_folders ?? false;
+      console.log(this.useDocumentFolders);
+
+    if (this.useDocumentFolders) {
+      this.menuEditorModel.loadFolders().then((list) => {
+        this.setState({
+          folders: list,
+        })
+      });
+    }
   }
 
   handleFolderSelection = (selectedFolder) => {
@@ -492,6 +498,7 @@ class ToolOptions extends Component {
         treeNodeId={key}
         onFolderSelection={this.handleFolderSelection}
         folder={this.state.folder}
+        useDocumentFolders={this.useDocumentFolders}
       ></TreeRow>
     );
   };

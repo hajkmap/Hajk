@@ -94,6 +94,7 @@ class MenuConnectionSelector extends React.Component {
       linkValue: this.props.menuItem.link,
       documentValue: this.props.menuItem.document,
     });
+    this.useDocumentFolders = this.props.useDocumentFolders ?? false;
   };
 
   getInitialMenuValue = () => {
@@ -215,6 +216,7 @@ class MenuConnectionSelector extends React.Component {
     const { documentValue } = this.state;
     return (
       <Grid item>
+        {this.useDocumentFolders ? (
         <FormControl fullWidth>
           <NativeSelect
             onChange={(event) => this.handleFolderClick(event)}
@@ -226,6 +228,7 @@ class MenuConnectionSelector extends React.Component {
             {this.renderFolders()}
           </NativeSelect>
         </FormControl>
+        ):null}
         <List component="nav">
           {availableDocuments.map((availableDocument, index) => {
             return (

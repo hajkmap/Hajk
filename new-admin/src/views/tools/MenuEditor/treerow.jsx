@@ -182,6 +182,7 @@ class TreeRow extends React.Component {
                     menuItem={menuItem}
                     onFolderSelection={this.props.onFolderSelection}
                     folder={this.props.folder}
+                    useDocumentFolders={this.props.useDocumentFolders}
                   />
                 </Grid>
               );
