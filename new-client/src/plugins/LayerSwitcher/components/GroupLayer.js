@@ -36,6 +36,8 @@ export default function GroupLayer({
       if (l.get("name") === layer.get("name")) {
         // Update OL layer sublayers property
         layer.set("subLayers", []);
+        // Update visibleSubLayers state
+        setVisibleSubLayers([]);
       }
     },
     [layer]
@@ -111,6 +113,8 @@ export default function GroupLayer({
         layer.setVisible(true);
         // Update OL layer subLayers property
         layer.set("subLayers", subLayersToShow);
+        // Update visibleSubLayers state
+        setVisibleSubLayers(subLayersToShow);
       }
     },
     [layer]
