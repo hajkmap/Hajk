@@ -26,7 +26,9 @@ const ALLOWED_API_VERSIONS = [1, 2];
 
 export default class ExpressServer {
   constructor() {
-    // Check engine version and display notice if applicable
+    // Check engine version and display notice if applicable. The current recommendation
+    // is based on the fact that `verifyLayers` uses `fetch`, which isn't available prior v18.
+    // See also https://nodejs.org/dist/latest-v18.x/docs/api/globals.html#fetch
     const recommendedMajorVersion = 18;
     if (process.versions.node.split(".")[0] < recommendedMajorVersion) {
       logger.warn(
