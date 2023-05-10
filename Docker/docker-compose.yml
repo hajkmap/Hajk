@@ -1,0 +1,51 @@
+version: "3"
+
+volumes:
+  backend-appdata:
+  geo-db-data:
+  geoserver-data:
+
+services:
+  hajk:
+    image: hajk-backend-with-client-and-admin:1.0.0
+    volumes:
+      - backend-appdata:/usr/app/App_Data
+    expose:
+      - 3002
+  nginx:
+    build: ./nginx
+    ports:
+      - 1337:1337
+    depends_on:
+      - hajk
+      - geoserver
+  db:
+    image: kartoza/postgis:latest
+    volumes:
+      - geo-db-data:/var/lib/postgresql
+    ports:
+      - 5432:5432
+    environment:
+      - POSTGRES_DB=hajkGeoData
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASS=onepasswordtorulethemall
+    restart: on-failure
+    healthcheck:
+      test: "exit 0"
+  geoserver:
+    image: kartoza/geoserver:2.18.0
+    volumes:
+      - geoserver-data:/opt/geoserver/data_dir
+    ports:
+      - 8080:8080
+    restart: on-failure
+    environment:
+      - GEOSERVER_DATA_DIR=/opt/geoserver/data_dir
+      - GEOWEBCACHE_CACHE_DIR=/opt/geoserver/data_dir/gwc
+      - GEOSERVER_ADMIN_PASSWORD=onepasswordtorulethemall
+      - GEOSERVER_ADMIN_USER=admin
+      - INITIAL_MEMORY=2G
+      - MAXIMUM_MEMORY=4G
+    depends_on:
+      db:
+        condition: service_healthy

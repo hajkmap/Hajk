@@ -1,14 +1,24 @@
 import React from "react";
 import PropTypes from "prop-types";
 import DocumentWindowBase from "./documentWindow/DocumentWindowBase";
-import MenuIcon from "@material-ui/icons/Menu";
+import MenuIcon from "@mui/icons-material/Menu";
+import { styled } from "@mui/material/styles";
 
 import DocumentHandlerModel from "./DocumentHandlerModel";
 import PanelMenuContainerView from "./panelMenu/PanelMenuContainerView";
 import Observer from "react-event-observer";
 import MapViewModel from "./MapViewModel";
-import { withTheme, createMuiTheme } from "@material-ui/core/styles";
+import { createTheme } from "@mui/material/styles";
+import { withTheme } from "@emotion/react";
 import { deepMerge } from "../../utils/DeepMerge";
+
+const StyledIconContainer = styled("div")(({ theme }) => ({
+  display: "inline-flex",
+  alignItems: "center",
+  [theme.breakpoints.up("md")]: {
+    marginRight: theme.spacing(1),
+  },
+}));
 
 class DocumentHandler extends React.PureComponent {
   static propTypes = {
@@ -31,6 +41,7 @@ class DocumentHandler extends React.PureComponent {
     this.localObserver = Observer();
 
     this.mapViewModel = new MapViewModel({
+      appModel: props.app,
       localObserver: this.localObserver,
       globalObserver: props.app.globalObserver,
       map: props.map,
@@ -66,8 +77,8 @@ class DocumentHandler extends React.PureComponent {
 
   componentDidUpdate = (prevProps) => {
     const { theme } = this.props;
-    //We need to update the palette.type in the nested customTheme with dark/light from the main theme
-    if (prevProps.theme.palette.type !== theme.palette.type) {
+    //We need to update the palette.mode in the nested customTheme with dark/light from the main theme
+    if (prevProps.theme.palette.mode !== theme.palette.mode) {
       //Spread to not mutate
       this.setState((prevState) => {
         return {
@@ -75,7 +86,7 @@ class DocumentHandler extends React.PureComponent {
             ...prevState.customTheme,
             palette: {
               ...prevState.customTheme.palette,
-              type: theme.palette.type,
+              mode: theme.palette.mode,
             },
           },
         };
@@ -88,7 +99,7 @@ class DocumentHandler extends React.PureComponent {
     if (customTheme.typography) {
       this.setBottomMarginsForTypographyVariants(customTheme);
     }
-    return createMuiTheme(deepMerge(theme, customTheme));
+    return createTheme(deepMerge(theme, customTheme));
   };
 
   /**
@@ -151,7 +162,9 @@ class DocumentHandler extends React.PureComponent {
     ]);
     app.globalObserver.publish("core.addDrawerToggleButton", {
       value: "documenthandler",
-      ButtonIcon: MenuIcon,
+      ButtonIcon: options.drawerButtonIcon
+        ? this.getIcon(options.drawerButtonIcon)
+        : MenuIcon,
       caption: options.drawerButtonTitle || "Meny",
       drawerTitle: options.drawerTitle || "Översiktsplan",
       order: 100,
@@ -213,6 +226,21 @@ class DocumentHandler extends React.PureComponent {
     });
   };
 
+  getIcon = (iconName) => {
+    const { dynamicImportUrls } = this.props.options;
+    if (dynamicImportUrls.iconFonts) {
+      return (props) => (
+        <StyledIconContainer>
+          <span className={`material-icons ${props.className}`}>
+            {iconName}
+          </span>
+        </StyledIconContainer>
+      );
+    } else {
+      return null;
+    }
+  };
+
   render() {
     return (
       <>
@@ -233,7 +261,7 @@ class DocumentHandler extends React.PureComponent {
           chapters={this.state.chapters}
           model={this.state.model}
           localObserver={this.localObserver}
-        ></DocumentWindowBase>
+        />
       </>
     );
   }

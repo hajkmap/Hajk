@@ -30,7 +30,18 @@ namespace MapService.Controllers
     public class EdpController : Controller
     {
         ILog _log = LogManager.GetLogger(typeof(EdpController));
-        static private Dictionary<string, ImplEdpConnectorPublic> _dictEdpConnections = new Dictionary<string, ImplEdpConnectorPublic>();
+        static private Dictionary<string, ImplEdpConnectorPublic> _dictEdpConnection = new Dictionary<string, ImplEdpConnectorPublic>();
+
+        public static void CloseEdpConnections()
+        {
+            ILog _log = LogManager.GetLogger(typeof(EdpController));
+            foreach (KeyValuePair<string, ImplEdpConnectorPublic> entry in _dictEdpConnection)
+            {
+                _log.DebugFormat("EdpController: Disconnecting user: {0}", entry.Key);
+                entry.Value.Disconnect();
+            }
+            _dictEdpConnection.Clear();
+        }
 
         // json = [{"Fnr":"130121047","Fastbet":"BLÅKLINTEN 1"},{"Fnr":"130125494","Fastbet":"GETAKÄRR 4:1"},{"Fnr":"130127043","Fastbet":"GULMÅRAN 1"},{"Fnr":"130125494","Fastbet":"GETAKÄRR 4:1"},{"Fnr":"130125494","Fastbet":"GETAKÄRR 4:1"}]
         [HttpPost]
@@ -67,39 +78,37 @@ namespace MapService.Controllers
                     userName = userName.Split('\\')[1];
                 }
 
-                // Save real estate identifiers for this user
-                if (_dictEdpConnections.ContainsKey(userName))
+                // Make sure we reconnect each time the user sends data to Edp
+                ImplEdpConnectorPublic edpCon = null;
+                if (_dictEdpConnection.TryGetValue(userName, out edpCon))
                 {
-                    _log.DebugFormat("Found user '{0}' in queue.", userName);
+                    _log.DebugFormat("Found user '{0}' in cache, disconnecting...", userName);
 
-                    var edpCon = _dictEdpConnections[userName];
-                    edpCon.SetRealEstateIdentifiersToSend(realEstateIdentifiersToSend);
+                    edpCon.Disconnect();
+                    _dictEdpConnection.Remove(userName);
+                }
+
+                _log.DebugFormat("Adding user '{0}' to cache.", userName);
+
+                var edpUUID = ConfigurationManager.AppSettings["edpUUID"];
+                var edpClientName = ConfigurationManager.AppSettings["edpClientName"];
+                var edpServerUrl = ConfigurationManager.AppSettings["edpServerUrl"];
+
+                if (string.IsNullOrEmpty(edpUUID) || string.IsNullOrEmpty(edpClientName) || string.IsNullOrEmpty(edpServerUrl))
+                {
+                    _log.Error("EDP is not configured in Web.config.");
                 }
                 else
                 {
-                    _log.DebugFormat("Adding new user '{0}' to queue.", userName);
+                    _log.DebugFormat("Using config params, edpUUID: {0}, edpClientName: {1}, edpServerUrl: {2}", edpUUID, edpClientName, edpServerUrl);
 
-                    var edpUUID = ConfigurationManager.AppSettings["edpUUID"];
-                    var edpClientName = ConfigurationManager.AppSettings["edpClientName"];
-                    var edpServerUrl = ConfigurationManager.AppSettings["edpServerUrl"];
+                    edpCon = new ImplEdpConnectorPublic(userName, edpUUID, edpClientName, edpServerUrl);
 
-                    if (string.IsNullOrEmpty(edpUUID) || string.IsNullOrEmpty(edpClientName) || string.IsNullOrEmpty(edpServerUrl))
-                    {
-                        _log.Error("EDP is not configured in Web.config.");
-                    }
-                    else
-                    {
-                        _log.DebugFormat("Using config params, edpUUID: {0}, edpClientName: {1}, edpServerUrl: {2}", edpUUID, edpClientName, edpServerUrl);
-
-                        var edpCon = new ImplEdpConnectorPublic(userName, edpUUID, edpClientName, edpServerUrl);
-
-                        edpCon.SetRealEstateIdentifiersToSend(realEstateIdentifiersToSend);
-                        _dictEdpConnections.Add(userName, edpCon);
-                    }
+                    edpCon.SetRealEstateIdentifiersToSend(realEstateIdentifiersToSend);
+                    _dictEdpConnection.Add(userName, edpCon);
                 }
 
-                var res = new HttpStatusCodeResult(HttpStatusCode.OK);
-                return res;
+                return new HttpStatusCodeResult(HttpStatusCode.OK);
             }
             catch (Exception e)
             {
@@ -117,8 +126,7 @@ namespace MapService.Controllers
 
                 // DO nothing in this version
 
-                var res = new HttpStatusCodeResult(HttpStatusCode.OK);
-                return res;
+                return new HttpStatusCodeResult(HttpStatusCode.OK);
             }
             catch (Exception e)
             {

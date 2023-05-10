@@ -1,10 +1,16 @@
 import React, { useEffect } from "react";
 import { detect } from "detect-browser";
 
+import ReactMarkdown from "react-markdown";
+import rehypeRaw from "rehype-raw";
 import { useSnackbar } from "notistack";
 
-import { IconButton } from "@material-ui/core";
-import CloseIcon from "@material-ui/icons/Close";
+import { IconButton, Link, Typography } from "@mui/material";
+import CloseIcon from "@mui/icons-material/Close";
+
+import {
+  customComponentsForReactMarkdown, // the object with all custom components
+} from "utils/customComponentsForReactMarkdown";
 
 /**
  * You should have something like this in your appConfig.json in
@@ -13,7 +19,7 @@ import CloseIcon from "@material-ui/icons/Close";
  * "announcements": [
       {
         "id": 1, // Numeric. Must be a unique ID for this item in array of objects.
-        "text": "Message to show to the user. Keep it short.", // String. Self-documenting. 
+        "text": "Message to show to the user. _MarkDown_ and <i>HTML</i> are allowed.", // String. Self-documenting. 
         "active": true, // Boolean. Makes it possible to turn off messages completely without removing them.
         "showOnlyOnce": true, // Boolean. If true, a cookie will be saved on users browser and message will show only once.
         "maps": ["jw", "map_1"], // Array. Only specified maps will show message.
@@ -141,7 +147,7 @@ function Announcement({ announcements = [], currentMap }) {
      * all checks will be mapped to this render method.
      */
     const renderSnackbar = (f) => {
-      if (!f?.text) return; // A text is required. If there's nothing to display, get out of here
+      if (typeof f.text !== "string") return; // A string is required. If there's nothing to display, get out of here.
 
       // Persistent snackbars will need an action that displays a close button.
       const action = (key) => {
@@ -157,11 +163,48 @@ function Announcement({ announcements = [], currentMap }) {
         );
       };
 
-      enqueueSnackbar(f?.text, {
-        variant: f?.type || "default", // Allowed variants are "default", "info", "warning", "success" and "error"
-        ...(Number.isFinite(f?.timeout) && { autoHideDuration: f?.timeout }), // If timeout is Numeric, auto hide
-        ...(!Number.isFinite(f?.timeout) && { persist: true, action }), // If timeout isn't Numeric, snackbar is persistent
-      });
+      enqueueSnackbar(
+        // This <div> is absolutely necessary because this component will render inside a Flexbox.
+        // ReactMarkdown may produce multiple elements (e.g. <p>s), which would then end up next
+        // to each other (because of the flexbox), unless they have a common parent element like this.
+        <div>
+          <ReactMarkdown
+            children={f.text} // Our MD, as a text string
+            rehypePlugins={[rehypeRaw]}
+            components={{
+              ...customComponentsForReactMarkdown,
+              // Override P: we don't want an actual paragraph with margin-bottom
+              // and all here. Just a plain MUI Typography will do.
+              p: ({ children }) => {
+                return !children ? null : (
+                  <Typography variant="body2">{children}</Typography>
+                );
+              },
+              // Override Link to force the same color as for the rest of the text. We
+              // can't know for sure which Link color would work best here as it depends
+              // on the variant of our current Snackbar. So let's just use text color.
+              a: ({ children, href, title }) => {
+                return children ? (
+                  <Link
+                    href={href}
+                    title={title}
+                    target="_blank"
+                    color="inherit"
+                    underline="always"
+                  >
+                    {children}
+                  </Link>
+                ) : null;
+              },
+            }}
+          />
+        </div>,
+        {
+          variant: f?.type || "default", // Allowed variants are "default", "info", "warning", "success" and "error"
+          ...(Number.isFinite(f?.timeout) && { autoHideDuration: f?.timeout }), // If timeout is Numeric, auto hide
+          ...(!Number.isFinite(f?.timeout) && { persist: true, action }), // If timeout isn't Numeric, snackbar is persistent
+        }
+      );
     };
 
     // Now we're done defining helpers and can proceed with the actual filtration.

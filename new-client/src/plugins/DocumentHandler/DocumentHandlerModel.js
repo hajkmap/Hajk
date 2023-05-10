@@ -14,6 +14,10 @@ import {
   Img,
   BlockQuote,
   LineBreak,
+  Video,
+  Audio,
+  Source,
+  AccordionSection,
 } from "./utils/ContentComponentFactory";
 
 import DocumentSearchModel from "./documentSearch/DocumentSearchModel";
@@ -101,14 +105,14 @@ export default class DocumentHandlerModel {
         resolve(this.allDocuments);
       }
 
-      const menuItemsWithDocumentConnetion = this.flattenMenu(
+      const menuItemsWithDocumentConnection = this.flattenMenu(
         this.settings.menu
       ).filter((menuItem) => {
         return menuItem.document;
       });
 
       Promise.all(
-        menuItemsWithDocumentConnetion.map((menuItem) => {
+        menuItemsWithDocumentConnection.map((menuItem) => {
           return this.fetchJsonDocument(menuItem.document).then((doc) => {
             if (!doc.title) {
               console.warn(
@@ -121,6 +125,7 @@ export default class DocumentHandlerModel {
               documentColor: menuItem.color,
               documentFileName: menuItem.document,
               documentTitle: doc.title,
+              menuItemId: menuItem.id,
             };
           });
         })
@@ -150,7 +155,12 @@ export default class DocumentHandlerModel {
     if (this.chapterInfo.length === 0) {
       this.allDocuments.forEach((document, index) => {
         document.chapters.forEach((mainChapter) => {
-          this.setChapterInfo(mainChapter, 0, document.documentColor);
+          this.setChapterInfo(
+            mainChapter,
+            0,
+            document.documentColor,
+            document.documentFileName
+          );
         });
       });
       this.mergeChapterInfo();
@@ -167,9 +177,10 @@ export default class DocumentHandlerModel {
     }
   }
 
-  setChapterInfo(chapter, level, color) {
+  setChapterInfo(chapter, level, color, documentFileName) {
     let getParentIdentifier = this.getParentIdentifier(chapter);
     let chapterInfo = {};
+    chapterInfo.documentFileName = documentFileName;
     chapterInfo.id = ++this.chapterNumber;
     chapterInfo.level = level;
     chapterInfo.html = chapter.html;
@@ -185,7 +196,12 @@ export default class DocumentHandlerModel {
       this.chapterInfo = [...this.chapterInfo, chapterInfo];
       level = level + 1;
       chapter.chapters.forEach((subChapter) => {
-        subChapter = this.setChapterInfo(subChapter, level, color);
+        subChapter = this.setChapterInfo(
+          subChapter,
+          level,
+          color,
+          documentFileName
+        );
       });
     } else {
       chapterInfo.hasSubChapters = false;
@@ -314,7 +330,7 @@ export default class DocumentHandlerModel {
       <CustomLink
         aTag={e}
         localObserver={this.localObserver}
-        bottomMargin
+        bottomMargin={true}
       ></CustomLink>
     );
   };
@@ -349,12 +365,21 @@ export default class DocumentHandlerModel {
     allowedHtmlTags.push({
       tagType: "blockquote",
       callback: (e) => {
-        return (
-          <BlockQuote
-            blockQuoteTag={e}
-            defaultColors={this.options.defaultDocumentColorSettings}
-          ></BlockQuote>
-        );
+        if (e.attributes["data-accordion"]?.value === "true") {
+          return (
+            <AccordionSection
+              blockQuoteTag={e}
+              defaultColors={this.options.defaultDocumentColorSettings}
+            />
+          );
+        } else {
+          return (
+            <BlockQuote
+              blockQuoteTag={e}
+              defaultColors={this.options.defaultDocumentColorSettings}
+            />
+          );
+        }
       },
     });
     allowedHtmlTags.push({
@@ -395,18 +420,46 @@ export default class DocumentHandlerModel {
     });
     allowedHtmlTags.push({
       tagType: "a",
-      callback: this.getCustomLink.bind(this),
+      callback: (e) => {
+        this.getCustomLink.bind(this);
+        return this.getCustomLink(e);
+      },
     });
     allowedHtmlTags.push({
       tagType: "img",
       callback: (e) => {
-        return (
-          <Img
-            componentId={e.componentId}
-            imgTag={e}
-            localObserver={this.localObserver}
-          ></Img>
-        );
+        const dataType = e.dataset.type || "image";
+        if (dataType === "image")
+          return (
+            <Img
+              componentId={e.componentId}
+              imgTag={e}
+              localObserver={this.localObserver}
+              baseUrl={this.mapServiceUrl}
+            ></Img>
+          );
+        else if (dataType === "video")
+          return (
+            <Video
+              imgTag={e}
+              componentId={e.componentId}
+              baseUrl={this.mapServiceUrl}
+            ></Video>
+          );
+        else if (dataType === "audio")
+          return (
+            <Audio
+              imgTag={e}
+              componentId={e.componentId}
+              baseUrl={this.mapServiceUrl}
+            ></Audio>
+          );
+      },
+    });
+    allowedHtmlTags.push({
+      tagType: "source",
+      callback: (e) => {
+        return <Source sourceTag={e}></Source>;
       },
     });
     allowedHtmlTags.push({
@@ -439,6 +492,7 @@ export default class DocumentHandlerModel {
         return <Italic emTag={e}></Italic>;
       },
     });
+
     return allowedHtmlTags;
   };
 
@@ -465,7 +519,9 @@ export default class DocumentHandlerModel {
         }
       });
     }
-    chapter.components = this.getMaterialUIComponentsForChapter(chapter);
+
+    let chapterComponents = this.getMaterialUIComponentsForChapter(chapter);
+    chapter.components = chapterComponents;
   };
 
   appendParsedComponentsToDocument = () => {

@@ -1,5 +1,5 @@
 {
-  "version": "3.5.0",
+  "version": "3.9.0",
   "projections": [
     {
       "code": "EPSG:3006",
@@ -220,6 +220,22 @@
                 "infobox": null
               }
             ]
+          },
+          {
+            "id": "9938c969-590c-8683-435c-1ecaca271096",
+            "parent": "-1",
+            "name": "Övrigt",
+            "toggled": true,
+            "expanded": false,
+            "layers": [
+              {
+                "id": "1352",
+                "visibleAtStart": true,
+                "drawOrder": 4,
+                "visibleForGroups": null,
+                "infobox": null
+              }
+            ]
           }
         ],
         "active": true,
@@ -257,17 +273,10 @@
       "index": 2
     },
     {
-      "type": "draw",
+      "type": "sketch",
       "options": {
         "target": "left",
         "position": "left",
-        "height": 650,
-        "exportUrl": "",
-        "importUrl": "",
-        "base64Encode": false,
-        "instruction": "",
-        "icons": "",
-        "proxyUrl": "",
         "visibleForGroups": []
       },
       "index": 3
@@ -448,6 +457,7 @@
     {
       "type": "print",
       "options": {
+        "date": "Utskriftsdatum: {date}",
         "target": "left",
         "position": "left",
         "scales": "200, 400, 1000, 2000, 5000, 10000, 25000, 50000, 100000, 200000, 400000, 800000, 1000000, 5000000, 10000000",
@@ -524,14 +534,14 @@
   ],
   "map": {
     "target": "map",
-    "center": [-740000, 6920000],
+    "center": [576357, 6386049],
     "title": "Hajk 3",
     "projection": "EPSG:3006",
-    "zoom": 0.67,
+    "zoom": 2,
     "maxZoom": 8,
     "minZoom": 0,
     "resolutions": [2048, 1024, 512, 256, 128, 64, 32, 16, 8],
-    "origin": [-1200000.0, 8500000.0],
+    "origin": [0, 0],
     "extent": [-1200000.0, 4700000.0, 2600000.0, 8500000.0],
     "constrainOnlyCenter": false,
     "constrainResolution": false,
@@ -549,8 +559,10 @@
       "secondaryColor": "#ffa000",
       "preferredColorScheme": "user"
     },
-    "defaultCookieNoticeMessage": "Vi använder cookies för att följa upp användandet och ge en bra upplevelse av kartan. Du kan blockera cookies i webbläsaren men då visas detta meddelande igen.",
+    "defaultCookieNoticeMessage": "Vi använder nödvändiga kakor (cookies) för att webbplatsen ska fungera på ett bra sätt för dig. Vi använder också funktionella kakor för att ge dig bästa möjliga funktion om du som användare har godkänt användningen av dessa.",
     "defaultCookieNoticeUrl": "https://pts.se/sv/bransch/regler/lagar/lag-om-elektronisk-kommunikation/kakor-cookies/",
-    "crossOrigin": "anonymous"
+    "crossOrigin": "anonymous",
+    "cookieUse3dPart": false,
+    "showRecentlyUsedPlugins": false
   }
 }

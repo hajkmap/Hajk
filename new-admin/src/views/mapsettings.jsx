@@ -1,25 +1,3 @@
-// Copyright (C) 2016 Göteborgs Stad
-//
-// Denna programvara är fri mjukvara: den är tillåten att distribuera och modifiera
-// under villkoren för licensen CC-BY-NC-SA 4.0.
-//
-// This program is free software: you can redistribute it and/or modify
-// it under the terms of the CC-BY-NC-SA 4.0 licence.
-//
-// http://creativecommons.org/licenses/by-nc-sa/4.0/
-//
-// Det är fritt att dela och anpassa programvaran för valfritt syfte
-// med förbehåll att följande villkor följs:
-// * Copyright till upphovsmannen inte modifieras.
-// * Programvaran används i icke-kommersiellt syfte.
-// * Licenstypen inte modifieras.
-//
-// Den här programvaran är öppen i syfte att den skall vara till nytta för andra
-// men UTAN NÅGRA GARANTIER; även utan underförstådd garanti för
-// SÄLJBARHET eller LÄMPLIGHET FÖR ETT VISST SYFTE.
-//
-// https://github.com/hajkmap/Hajk
-
 import React from "react";
 import { Component } from "react";
 import MapOptions from "./mapoptions.jsx";
@@ -33,6 +11,7 @@ import DeleteIcon from "@material-ui/icons/DeleteForever";
 import AddIcon from "@material-ui/icons/Add";
 import SaveIcon from "@material-ui/icons/SaveSharp";
 import CreateNewFolderIcon from "@material-ui/icons/CreateNewFolder";
+import OpenInNewIcon from "@material-ui/icons/OpenInNew";
 import LayersIcon from "@material-ui/icons/Layers";
 import SwapVertIcon from "@material-ui/icons/SwapVert";
 import SettingsIcon from "@material-ui/icons/Settings";
@@ -182,13 +161,16 @@ $.fn.editable = function (component) {
     });
 
     if (node.parent().attr("data-expanded")) {
-      checkbox.attr("checked", "checked");
+      checkbox.attr("checked", JSON.parse(node.parent().attr("data-expanded")));
     }
     if (node.parent().attr("data-toggled")) {
-      checkbox2.attr("checked", "checked");
+      checkbox2.attr("checked", JSON.parse(node.parent().attr("data-toggled")));
     }
     if (node.parent().attr("data-visibleatstart")) {
-      checkbox3.attr("checked", "checked");
+      checkbox3.attr(
+        "checked",
+        JSON.parse(node.parent().attr("data-visibleatstart"))
+      );
     }
     if (node.parent().attr("data-visibleforgroups")) {
       input3.val(node.parent().attr("data-visibleforgroups"));
@@ -295,39 +277,34 @@ $.fn.editable = function (component) {
  *
  */
 class Menu extends Component {
-  /**
-   *
-   */
-  constructor() {
-    super();
-    this.state = {
-      adGroups: [],
-      isHidden: true,
-      drawOrder: false,
-      layerMenu: true,
-      addedLayers: [],
-      maps: [],
-      active: true,
-      visibleAtStart: true,
-      visibleAtStartMobile: false,
-      backgroundSwitcherBlack: true,
-      backgroundSwitcherWhite: true,
-      enableOSM: false,
-      showBreadcrumbs: false,
-      enableTransparencySlider: true,
-      instruction: "",
-      dropdownThemeMaps: false,
-      themeMapHeaderCaption: "Temakartor",
-      visibleForGroups: [],
-      adList: null,
-      target: "toolbar",
-      position: "left",
-      width: "",
-      height: "",
-      title: "Innehåll",
-      description: "Välj innehåll att visa i kartan",
-    };
-  }
+  state = {
+    adGroups: [],
+    isHidden: true,
+    drawOrder: false,
+    layerMenu: true,
+    addedLayers: [],
+    maps: [],
+    active: true,
+    visibleAtStart: true,
+    visibleAtStartMobile: false,
+    backgroundSwitcherBlack: true,
+    backgroundSwitcherWhite: true,
+    enableOSM: false,
+    showBreadcrumbs: false,
+    showActiveLayersView: false,
+    enableTransparencySlider: true,
+    instruction: "",
+    dropdownThemeMaps: false,
+    themeMapHeaderCaption: "Temakartor",
+    visibleForGroups: [],
+    adList: null,
+    target: "toolbar",
+    position: "left",
+    width: "",
+    height: "",
+    title: "Innehåll",
+    description: "Välj innehåll att visa i kartan",
+  };
 
   /**
    *
@@ -344,38 +321,43 @@ class Menu extends Component {
       });
 
       this.load("layermenu", () => {
+        const existingConfig = this.props.model.get("layerMenuConfig");
         this.setState({
           reset: false,
-          active: this.props.model.get("layerMenuConfig").active,
+          active: existingConfig.active,
           visibleAtStart:
-            this.props.model.get("layerMenuConfig").visibleAtStart,
+            existingConfig.visibleAtStart ?? this.state.visibleAtStart,
           visibleAtStartMobile:
-            this.props.model.get("layerMenuConfig").visibleAtStartMobile,
+            existingConfig.visibleAtStartMobile ??
+            this.state.visibleAtStartMobile,
           backgroundSwitcherBlack:
-            this.props.model.get("layerMenuConfig").backgroundSwitcherBlack,
+            existingConfig.backgroundSwitcherBlack ??
+            this.state.backgroundSwitcherBlack,
           backgroundSwitcherWhite:
-            this.props.model.get("layerMenuConfig").backgroundSwitcherWhite,
-          enableOSM: this.props.model.get("layerMenuConfig").enableOSM,
+            existingConfig.backgroundSwitcherWhite ??
+            this.state.backgroundSwitcherWhite,
+          enableOSM: existingConfig.enableOSM ?? this.state.enableOSM,
           showBreadcrumbs:
-            this.props.model.get("layerMenuConfig").showBreadcrumbs,
+            existingConfig.showBreadcrumbs ?? this.state.showBreadcrumbs,
+          showActiveLayersView:
+            existingConfig.showActiveLayersView ??
+            this.state.showActiveLayersView,
           enableTransparencySlider:
-            this.props.model.get("layerMenuConfig").enableTransparencySlider,
-          instruction: this.props.model.get("layerMenuConfig").instruction,
+            existingConfig.enableTransparencySlider ??
+            this.state.enableTransparencySlider,
+          instruction: existingConfig.instruction,
           dropdownThemeMaps:
-            this.props.model.get("layerMenuConfig").dropdownThemeMaps,
-          themeMapHeaderCaption:
-            this.props.model.get("layerMenuConfig").themeMapHeaderCaption,
-          visibleForGroups: this.props.model.get("layerMenuConfig")
-            .visibleForGroups
-            ? this.props.model.get("layerMenuConfig").visibleForGroups
+            existingConfig.dropdownThemeMaps ?? this.state.dropdownThemeMaps,
+          themeMapHeaderCaption: existingConfig.themeMapHeaderCaption,
+          visibleForGroups: existingConfig.visibleForGroups
+            ? existingConfig.visibleForGroups
             : [],
-          target: this.props.model.get("layerMenuConfig").target || "toolbar",
-          position: this.props.model.get("layerMenuConfig").position || "left",
-          width: this.props.model.get("layerMenuConfig").width || "",
-          height: this.props.model.get("layerMenuConfig").height || "",
-          title: this.props.model.get("layerMenuConfig").title || "",
-          description:
-            this.props.model.get("layerMenuConfig").description || "",
+          target: existingConfig.target || "toolbar",
+          position: existingConfig.position || "left",
+          width: existingConfig.width || "",
+          height: existingConfig.height || "",
+          title: existingConfig.title || "",
+          description: existingConfig.description || "",
         });
         $(".tree-view li").editable(this);
         $(".tree-view > ul").sortable();
@@ -425,7 +407,6 @@ class Menu extends Component {
   /**
    *
    */
-  componentWillMount() {}
 
   /**
    *
@@ -542,18 +523,31 @@ class Menu extends Component {
   /**
    *
    */
-  getLayersWithFilter(filter) {
+  getLayersWithFilter() {
     return this.props.model.get("layers").filter((layer) => {
-      return new RegExp(this.state.filter).test(layer.caption.toLowerCase());
+      const caption = layer.caption.toLowerCase();
+      const internalLayerName = layer.internalLayerName?.toLowerCase() || "";
+      const filter = this.state.filter.toLowerCase();
+      return caption.includes(filter) || internalLayerName.includes(filter);
     });
   }
 
   /**
    *
    */
-  getLayerNameFromId(id) {
+  getLayerNameFromIdForDisplay(id) {
     var layer = this.props.model.get("layers").find((layer) => layer.id === id);
-    return layer ? layer.caption : `---[layer id ${id} not found]---`;
+    let ret = "";
+    if (layer) {
+      if (layer.internalLayerName?.length > 0) {
+        ret = layer.internalLayerName;
+      } else {
+        ret = layer.caption;
+      }
+    } else {
+      ret = `---[layer id ${id} not found]---`;
+    }
+    return ret;
   }
 
   /**
@@ -570,6 +564,7 @@ class Menu extends Component {
       backgroundSwitcherWhite: this.state.backgroundSwitcherWhite,
       enableOSM: this.state.enableOSM,
       showBreadcrumbs: this.state.showBreadcrumbs,
+      showActiveLayersView: this.state.showActiveLayersView,
       enableTransparencySlider: this.state.enableTransparencySlider,
       instruction: this.state.instruction,
       dropdownThemeMaps: this.state.dropdownThemeMaps,
@@ -797,7 +792,7 @@ class Menu extends Component {
   }
 
   createLayer(id) {
-    var layerName = this.getLayerNameFromId(id);
+    var layerName = this.getLayerNameFromIdForDisplay(id);
 
     var layer = $(`
       <li
@@ -864,20 +859,32 @@ class Menu extends Component {
 
     if (this.state.filter) {
       layers.forEach((layer) => {
-        layer.caption.toLowerCase().indexOf(this.state.filter) === 0
+        layer.caption.toLowerCase().indexOf(this.state.filter.toLowerCase()) ===
+          0 ||
+        layer.internalLayerName
+          ?.toLowerCase()
+          .indexOf(this.state.filter.toLowerCase()) === 0
           ? startsWith.push(layer)
           : alphabetically.push(layer);
       });
 
       startsWith.sort(function (a, b) {
-        if (a.caption.toLowerCase() < b.caption.toLowerCase()) return -1;
-        if (a.caption.toLowerCase() > b.caption.toLowerCase()) return 1;
+        let aName = a.internalLayerName ? a.internalLayerName : a.caption;
+        aName = aName.toLowerCase();
+        let bName = b.internalLayerName ? b.internalLayerName : b.caption;
+        bName = bName.toLowerCase();
+        if (aName < bName) return -1;
+        if (aName > bName) return 1;
         return 0;
       });
 
       alphabetically.sort(function (a, b) {
-        if (a.caption.toLowerCase() < b.caption.toLowerCase()) return -1;
-        if (a.caption.toLowerCase() > b.caption.toLowerCase()) return 1;
+        let aName = a.internalLayerName ? a.internalLayerName : a.caption;
+        aName = aName.toLowerCase();
+        let bName = b.internalLayerName ? b.internalLayerName : b.caption;
+        bName = bName.toLowerCase();
+        if (aName < bName) return -1;
+        if (aName > bName) return 1;
         return 0;
       });
 
@@ -920,7 +927,10 @@ class Menu extends Component {
           <span className={cls} />
           &nbsp;
           <span className="main-box">
-            {layer.caption} {displayType}
+            {layer.internalLayerName?.length > 0
+              ? layer.internalLayerName
+              : layer.caption}{" "}
+            {displayType}
           </span>
         </li>
       );
@@ -972,7 +982,7 @@ class Menu extends Component {
                 data-infobox={infobox}
               >
                 <span className="layer-name">
-                  {that.getLayerNameFromId(
+                  {that.getLayerNameFromIdForDisplay(
                     typeof layer === "object" ? layer.id : layer
                   )}
                 </span>
@@ -990,7 +1000,7 @@ class Menu extends Component {
                 data-infobox={infobox}
               >
                 <span className="layer-name">
-                  {that.getLayerNameFromId(
+                  {that.getLayerNameFromIdForDisplay(
                     typeof layer === "object" ? layer.id : layer
                   )}
                 </span>
@@ -998,7 +1008,7 @@ class Menu extends Component {
             );
           }
         });
-        if (group.hasOwnProperty("groups")) {
+        if (group.hasOwnProperty("groups") && group.groups) {
           leafs.push(roots(group.groups));
         }
         return leafs;
@@ -1113,13 +1123,15 @@ class Menu extends Component {
     function flatten(config) {
       var layerList = [];
       function fromGroups(groups) {
-        return groups.reduce((list, n, index, array) => {
-          var g = array[index];
-          if (g.hasOwnProperty("groups")) {
-            list = list.concat(fromGroups(g.groups));
-          }
-          return list.concat(g.layers);
-        }, []);
+        if (groups) {
+          return groups.reduce((list, n, index, array) => {
+            var g = array[index];
+            if (g.hasOwnProperty("groups") && g.groups) {
+              list = list.concat(fromGroups(g.groups));
+            }
+            return list.concat(g.layers);
+          }, []);
+        }
       }
       layerList = layerList.concat(fromGroups(config.groups));
       return layerList;
@@ -1133,7 +1145,7 @@ class Menu extends Component {
     layers = layers.reverse();
 
     return layers.map((layer, i) => {
-      var name = this.getLayerNameFromId(layer.id);
+      var name = this.getLayerNameFromIdForDisplay(layer.id);
       return (
         <li
           className="layer-node"
@@ -1516,7 +1528,7 @@ class Menu extends Component {
                   />
                 </div>
               </div>
-              <div className="separator">Inställningar för plugins</div>
+              <div className="separator">Inställningar för Lagerhanteraren</div>
               <div>
                 <input
                   id="visibleAtStart"
@@ -1540,7 +1552,7 @@ class Menu extends Component {
                 />
                 &nbsp;
                 <label className="long-label" htmlFor="visibleAtStartMobile">
-                  Synlig vid start - Mobil
+                  Synlig vid start (mobil)
                 </label>
               </div>
               <div>
@@ -1553,11 +1565,29 @@ class Menu extends Component {
                 />
                 &nbsp;
                 <label className="long-label" htmlFor="showBreadcrumbs">
-                  Visa "brödsmulor"{" "}
+                  Visa brödsmulor{" "}
                   <i
                     className="fa fa-question-circle"
                     data-toggle="tooltip"
                     title="När rutan är ikryssad visas små kort längst ned på skärmen, ett för varje lager som är aktivt"
+                  />
+                </label>
+              </div>
+              <div>
+                <input
+                  id="showActiveLayersView"
+                  name="showActiveLayersView"
+                  type="checkbox"
+                  onChange={this.handleInputChange}
+                  checked={this.state.showActiveLayersView}
+                />
+                &nbsp;
+                <label className="long-label" htmlFor="showActiveLayersView">
+                  Visa en flik med aktiva lager (beta){" "}
+                  <i
+                    className="fa fa-question-circle"
+                    data-toggle="tooltip"
+                    title="När rutan är ikryssad visas en tredje flik i Lagerhanteraren. Där kan användaren bland annat styra ritordningen av aktiva lager."
                   />
                 </label>
               </div>
@@ -1789,6 +1819,14 @@ class Menu extends Component {
               >
                 {options}
               </select>
+              &nbsp;
+              <ColorButtonBlue
+                startIcon={<OpenInNewIcon />}
+                href={`${this.props.config.url_client_ui}?m=${this.props.model.attributes.mapFile}`}
+                target="_blank"
+              >
+                Öppna i nytt fönster
+              </ColorButtonBlue>
               &nbsp;
               <ColorButtonRed
                 variant="contained"

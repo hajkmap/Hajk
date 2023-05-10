@@ -38,10 +38,20 @@ class FetchWrapper {
     this.url = "";
     this.options = {};
 
+    // Lets get the values from generated meta-tags
     // Hash is used for cacheBuster function.
-    this.hash = process?.env?.REACT_APP_GIT_HASH || null;
+    const appName =
+      document
+        .querySelector(`meta[name='app-name']`)
+        ?.getAttribute("content") || "";
+    this.hash =
+      document
+        .querySelector(`meta[name='${appName}-git-hash']`)
+        ?.getAttribute("content") || "";
     this.useCacheBuster =
-      process?.env?.REACT_APP_USE_CACHE_BUSTER === "true" || false;
+      document
+        .querySelector(`meta[name='${appName}-use-cache-buster']`)
+        ?.getAttribute("content") === "true";
   }
 
   matchesUrlPart(url, ruleWithWildCard) {
@@ -171,9 +181,25 @@ function overrideLayerSourceParams(source) {
 function hfetch(...args) {
   let fw = fetchWrapper;
   fw.reset();
-  fw.url = args[0];
 
   fw.options = args[1] || {};
+
+  // Handle all types that the original fetch accepts. The next 2 comment are from fetch documentation.
+  // "A string or any other object with a stringifier — including a URL object — that provides the URL of the resource you want to fetch."
+  // "A Request object."
+
+  if (typeof args[0] === "string") {
+    fw.url = args[0];
+  } else if (args[0] instanceof URL) {
+    fw.url = args[0].href;
+  } else if (args[0] instanceof Request) {
+    // The Request object is deconstructed then reconstructed by original fetch. Not perfect...
+    fw.url = args[0].url;
+    fw.options = args[0];
+  } else {
+    fw.url = args[0].toString();
+  }
+
   fw.overrideOptions();
   //console.log("hfetch", fw.url, fw.options);
   return originalFetch(fw.url, fw.options);

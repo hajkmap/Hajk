@@ -28,8 +28,11 @@ class DrawModel {
 
     this.source = new VectorSource();
     this.vector = new VectorLayer({
+      layerType: "system",
+      zIndex: 5000,
+      name: "pluginDraw",
+      caption: "Draw layer",
       source: this.source,
-      name: "drawLayer",
     });
 
     this.map.addLayer(this.vector);
@@ -610,7 +613,7 @@ class DrawModel {
         new Blob([postData], {
           type: "application/vnd.google-earth.kml+xml;charset=utf-8",
         }),
-        `Hajk - ${new Date().toLocaleString()}.kml`
+        `Ritexport - ${new Date().toLocaleString()}.kml`
       );
     }
   };

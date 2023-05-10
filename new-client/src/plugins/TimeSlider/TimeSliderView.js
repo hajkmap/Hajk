@@ -1,42 +1,24 @@
 import React from "react";
 import { createPortal } from "react-dom";
 import PropTypes from "prop-types";
-import { withStyles } from "@material-ui/core/styles";
 
-import { Slider, Button, Badge, Grid, Tooltip } from "@material-ui/core";
+import { Slider, Button, Badge, Grid, Tooltip } from "@mui/material";
 import { Vector as VectorLayer } from "ol/layer";
 
 import TimeSliderSettings from "./components/TimeSliderSettings.js";
-import Dialog from "../../components/Dialog.js";
+import Dialog from "../../components/Dialog/Dialog";
 
-import PlayArrowIcon from "@material-ui/icons/PlayArrow";
-import PauseIcon from "@material-ui/icons/Pause";
-import RotateLeftOutlinedIcon from "@material-ui/icons/RotateLeftOutlined";
-import SettingsOutlinedIcon from "@material-ui/icons/SettingsOutlined";
-
-const styles = (theme) => ({
-  gridContainer: {
-    padding: theme.spacing(2),
-  },
-  yearSlider: {
-    paddingRight: theme.spacing(2),
-    paddingLeft: theme.spacing(2),
-  },
-  monthSlider: {
-    paddingRight: theme.spacing(4),
-    paddingLeft: theme.spacing(4),
-  },
-  daySlider: {
-    paddingRight: theme.spacing(6),
-    paddingLeft: theme.spacing(6),
-  },
-});
+import PlayArrowIcon from "@mui/icons-material/PlayArrow";
+import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
+import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+import PauseIcon from "@mui/icons-material/Pause";
+import RotateLeftOutlinedIcon from "@mui/icons-material/RotateLeftOutlined";
+import SettingsOutlinedIcon from "@mui/icons-material/SettingsOutlined";
 
 class TimeSliderView extends React.PureComponent {
   static propTypes = {
     map: PropTypes.object.isRequired,
     localObserver: PropTypes.object.isRequired,
-    classes: PropTypes.object.isRequired,
   };
 
   constructor(props) {
@@ -44,8 +26,8 @@ class TimeSliderView extends React.PureComponent {
 
     this.state = {
       playing: false,
-      resolution: this.props.defaultResolution ?? "years",
-      stepSize: this.getStepSize(this.props.defaultResolution ?? "years"),
+      resolution: this.props.defaultResolution || "years",
+      stepSize: this.getStepSize(this.props.defaultResolution || "years"),
       loadingError: true,
       layerStatus: this.validateLayers(),
       settingsDialog: false,
@@ -60,6 +42,12 @@ class TimeSliderView extends React.PureComponent {
     this.markResolution = "";
     this.localObserver = props.localObserver;
     this.bindSubscriptions();
+  }
+
+  componentDidMount() {
+    if (this.props.visibleAtStart === true) {
+      this.initiateTimeSliderView();
+    }
   }
 
   bindSubscriptions = () => {
@@ -276,11 +264,35 @@ class TimeSliderView extends React.PureComponent {
     switch (resolution) {
       case "years":
         return day * 365;
+      case "quarters":
+        return day * 92; // Approx 92 days...
       case "months":
         return day * 31;
       default:
         return day;
     }
+  };
+
+  // Handles when the user wants to step one step forwards.
+  // Sets the current time to the current time plus one step size
+  // If we've reached the end, we start from the beginning...
+  stepOnesForward = () => {
+    let nextUnixTime = this.state.currentUnixTime + this.state.stepSize;
+    if (nextUnixTime >= this.endTime) {
+      nextUnixTime = this.startTime;
+    }
+    this.handleSliderChange(nextUnixTime);
+  };
+
+  // Handles when the user wants to step one step backwards.
+  // Sets the current time to the current time minus one step size
+  // If we've reached the start, we "jump" to the end...
+  stepOnesBackward = () => {
+    let nextUnixTime = this.state.currentUnixTime - this.state.stepSize;
+    if (nextUnixTime <= this.startTime) {
+      nextUnixTime = this.endTime;
+    }
+    this.handleSliderChange(nextUnixTime);
   };
 
   setNextDate = (nextUnixTime) => {
@@ -294,6 +306,21 @@ class TimeSliderView extends React.PureComponent {
         currentUnixTime <= nextUnixTime
           ? nextDate.setFullYear(currentDate.getFullYear() + 1)
           : nextDate.setFullYear(currentDate.getFullYear() - 1);
+      }
+    } else if (resolution === "quarters") {
+      // We always want the month to land on a "quarter month"...
+      // (Jan, April, July, October)
+      const quarterMonths = [0, 3, 6, 9];
+      if (!quarterMonths.includes(nextDate.getMonth())) {
+        const closestQuarterMonth = quarterMonths.reduce((prev, curr) =>
+          Math.abs(curr - nextDate.getMonth()) <
+          Math.abs(prev - nextDate.getMonth())
+            ? curr
+            : prev
+        );
+        nextDate.setMonth(closestQuarterMonth);
+        // We also want to start on the first of the month each time...
+        nextDate.setDate(1);
       }
     } else if (resolution === "months") {
       if (currentDate.getMonth() === nextDate.getMonth()) {
@@ -335,6 +362,7 @@ class TimeSliderView extends React.PureComponent {
       case "years":
         options = { year: "numeric" };
         break;
+      case "quarters":
       case "months":
         options = { month: "long", year: "numeric" };
         break;
@@ -440,6 +468,7 @@ class TimeSliderView extends React.PureComponent {
             ),
             headerText: "Tidslinjeinställningar",
             buttonText: "OK",
+            useLegacyNonMarkdownRenderer: true,
           }}
           open={settingsDialog}
           onClose={() => {
@@ -468,7 +497,7 @@ class TimeSliderView extends React.PureComponent {
         }`}
       >
         <Button
-          variant="outlined"
+          variant="contained"
           onClick={() => {
             this.setState({ settingsDialog: !this.state.settingsDialog });
           }}
@@ -481,24 +510,31 @@ class TimeSliderView extends React.PureComponent {
 
   render() {
     const { currentUnixTime, stepSize, playing } = this.state;
-    const { classes } = this.props;
 
     if (currentUnixTime) {
       return (
-        <Grid container className={classes.gridContainer}>
+        <Grid container sx={{ padding: 2 }}>
           <>{this.renderSettingsDialog()}</>
           <Grid
             item
             xs={12}
-            className={
-              this.markResolution === "years"
-                ? classes.yearSlider
-                : this.markResolution === "months"
-                ? classes.monthSlider
-                : classes.daySlider
-            }
+            sx={{
+              paddingLeft:
+                this.markResolution === "years"
+                  ? 2
+                  : this.markResolution === "months"
+                  ? 4
+                  : 6,
+              paddingRight:
+                this.markResolution === "years"
+                  ? 2
+                  : this.markResolution === "months"
+                  ? 4
+                  : 6,
+            }}
           >
             <Slider
+              size="small"
               value={currentUnixTime}
               min={this.startTime}
               max={this.endTime}
@@ -514,16 +550,46 @@ class TimeSliderView extends React.PureComponent {
           <Grid
             container
             direction="row"
-            justify="center"
+            justifyContent="center"
             alignItems="center"
             spacing={2}
           >
-            <Grid item align="center" xs={4}>
+            <Grid item align="center" xs={2}>
+              <Tooltip disableInteractive title="Återställ tidslinjen">
+                <Button variant="contained" onClick={this.resetTimeSlider}>
+                  <RotateLeftOutlinedIcon />
+                </Button>
+              </Tooltip>
+            </Grid>
+            <Grid item align="center" xs={2}>
               <Tooltip
+                disableInteractive
+                title={
+                  playing
+                    ? "Du kan inte hoppa bakåt när spelaren är aktiv."
+                    : "Hoppa ett steg bakåt"
+                }
+              >
+                <span>
+                  <Button
+                    variant="contained"
+                    onClick={() => {
+                      this.stepOnesBackward();
+                    }}
+                    disabled={playing}
+                  >
+                    <ArrowBackIcon />
+                  </Button>
+                </span>
+              </Tooltip>
+            </Grid>
+            <Grid item align="center" xs={2}>
+              <Tooltip
+                disableInteractive
                 title={playing ? "Stoppa tidslinjen" : "Starta tidslinjen"}
               >
                 <Button
-                  variant="outlined"
+                  variant="contained"
                   onClick={() => {
                     this.toggleSlider(!playing);
                   }}
@@ -532,15 +598,30 @@ class TimeSliderView extends React.PureComponent {
                 </Button>
               </Tooltip>
             </Grid>
-            <Grid item align="center" xs={4}>
-              <Tooltip title="Återställ tidslinjen">
-                <Button variant="outlined" onClick={this.resetTimeSlider}>
-                  <RotateLeftOutlinedIcon />
-                </Button>
+            <Grid item align="center" xs={2}>
+              <Tooltip
+                disableInteractive
+                title={
+                  playing
+                    ? "Du kan inte hoppa framåt när spelaren är aktiv."
+                    : "Hoppa ett steg framåt"
+                }
+              >
+                <span>
+                  <Button
+                    variant="contained"
+                    onClick={() => {
+                      this.stepOnesForward();
+                    }}
+                    disabled={playing}
+                  >
+                    <ArrowForwardIcon />
+                  </Button>
+                </span>
               </Tooltip>
             </Grid>
-            <Grid item align="center" xs={4}>
-              <Tooltip title="Inställningar">
+            <Grid item align="center" xs={2}>
+              <Tooltip disableInteractive title="Inställningar">
                 {this.renderSettingsButton()}
               </Tooltip>
             </Grid>
@@ -552,8 +633,8 @@ class TimeSliderView extends React.PureComponent {
         <Grid
           container
           alignItems="center"
-          justify="center"
-          style={{ width: "100%", height: "100%" }}
+          justifyContent="center"
+          sx={{ width: "100%", height: "100%" }}
         >
           <>{this.renderSettingsDialog()}</>
           <Grid item>{this.renderSettingsButton()}</Grid>
@@ -563,4 +644,4 @@ class TimeSliderView extends React.PureComponent {
   }
 }
 
-export default withStyles(styles)(TimeSliderView);
+export default TimeSliderView;

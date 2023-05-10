@@ -1,17 +1,16 @@
 import React from "react";
-import { Button, Menu, MenuItem, Paper, Tooltip } from "@material-ui/core";
-import { withStyles } from "@material-ui/core/styles";
-import SwitchCameraIcon from "@material-ui/icons/SwitchCamera";
+import { IconButton, Menu, MenuItem, Paper, Tooltip } from "@mui/material";
+import { styled } from "@mui/material/styles";
+import SwitchCameraIcon from "@mui/icons-material/SwitchCamera";
 import { hfetch } from "utils/FetchWrapper";
 
-const styles = (theme) => ({
-  paper: {
-    marginBottom: theme.spacing(1),
-  },
-  button: {
-    minWidth: "unset",
-  },
-});
+const StyledPaper = styled(Paper)(({ theme }) => ({
+  marginBottom: theme.spacing(1),
+}));
+
+const StyledIconButton = styled(IconButton)(({ theme }) => ({
+  minWidth: "unset",
+}));
 
 class MapSwitcher extends React.PureComponent {
   // Will hold map configs
@@ -30,6 +29,11 @@ class MapSwitcher extends React.PureComponent {
 
   handleLoading(maps) {
     let { activeMap } = this.appModel.config;
+
+    maps.sort((a, b) =>
+      a.mapConfigurationTitle.localeCompare(b.mapConfigurationTitle)
+    );
+
     // Save fetched map configs to global variable
     this.maps = maps;
 
@@ -60,20 +64,16 @@ class MapSwitcher extends React.PureComponent {
   }
 
   renderMenuItems = () => {
-    let menuItems = [];
-    this.maps.forEach((item, index) => {
-      menuItems.push(
-        <MenuItem
-          key={index}
-          // disabled={index === this.state.selectedIndex}
-          selected={index === this.state.selectedIndex}
-          onClick={(event) => this.handleMenuItemClick(event, index)}
-        >
-          {item.mapConfigurationTitle}
-        </MenuItem>
-      );
-    });
-    return menuItems;
+    return this.maps.map((item, index) => (
+      <MenuItem
+        key={index}
+        // disabled={index === this.state.selectedIndex}
+        selected={index === this.state.selectedIndex}
+        onClick={(event) => this.handleMenuItemClick(event, index)}
+      >
+        {item.mapConfigurationTitle}
+      </MenuItem>
+    ));
   };
 
   // Show dropdown menu, anchored to the element clicked
@@ -83,20 +83,49 @@ class MapSwitcher extends React.PureComponent {
 
   handleMenuItemClick = (event, index) => {
     const selectedMap = this.maps[index].mapConfigurationName;
-    const x = this.map.getView().getCenter()[0];
-    const y = this.map.getView().getCenter()[1];
-    const z = this.map.getView().getZoom();
-    // TODO: A better solution then redirecting is needed. It requires more
-    // work in the App component, so that changing the value of this.appModel.config.activeMap
-    // would dynamically reload configuration as needed.
-    // But for now, simple redirection will do.
-    window.location.assign(
-      `${window.location.origin}${window.location.pathname}?m=${selectedMap}&x=${x}&y=${y}&z=${z}`
-    );
+    if (this.appModel.config.mapConfig.map?.enableAppStateInHash === true) {
+      // If live changing of hash params is enabled, grab the old hash
+      const oldHash = new URLSearchParams(
+        window.location.hash.replaceAll("#", "")
+      );
 
-    // Not used as we change window.location. But in a better solution, we wouldn't reload the app,
-    // and then code below would be needed to hide the dropdown menu.
-    // this.setState({ anchorEl: null, selectedIndex: index });
+      // Set the m param to the new map's name
+      oldHash.set("m", selectedMap);
+
+      // We must remove layer and group layer keys as it's really
+      // dangerous to keep them. If a layer, specified in l, wouldn't
+      // be available in the new map we're changing to, we would end up
+      // with no layers at all. (The reason for that is that _if_ the l param
+      // is present, the visibleAtStart value for layers from map config are
+      // ignored. We don't want to do that when changing map, so be sure and
+      // remove them.)
+      // TODO: Consider removing more keys, if issues come up. Candidates include
+      // "q", "s" and "p".
+      oldHash.delete("l");
+      oldHash.delete("gl");
+
+      // Set the modified hash to our location bar
+      window.location.hash = "#" + oldHash.toString();
+
+      // Force the browser to reload
+      window.location.reload();
+
+      // Not needed, but if we will ever go towards hot reload,
+      // don't forget to hide the dropdown menu
+      // this.setState({ anchorEl: null, selectedIndex: index });
+    } else {
+      // If live hash params are disabled, fall back to the old and tried
+      // method of setting query params. This will also reload the page
+      // so no need to take care of component state here. But we want to ensure
+      // that user ends up in the same place, so we grab the x, y and z too.
+      const x = this.map.getView().getCenter()[0];
+      const y = this.map.getView().getCenter()[1];
+      const z = this.map.getView().getZoom();
+
+      window.location.assign(
+        `${window.location.origin}${window.location.pathname}?m=${selectedMap}&x=${x}&y=${y}&z=${z}`
+      );
+    }
   };
 
   handleClose = () => {
@@ -105,7 +134,6 @@ class MapSwitcher extends React.PureComponent {
 
   render() {
     const { anchorEl } = this.state;
-    const { classes } = this.props;
     const open = Boolean(anchorEl);
 
     const title =
@@ -115,17 +143,17 @@ class MapSwitcher extends React.PureComponent {
       // Render only if config says so
       this.props.appModel.config.mapConfig.map.mapselector && (
         <>
-          <Tooltip title={`Nuvarande karta: ${title}`}>
-            <Paper className={classes.paper}>
-              <Button
+          <Tooltip disableInteractive title={`Nuvarande karta: ${title}`}>
+            <StyledPaper>
+              <StyledIconButton
+                aria-label="Byt karta"
                 aria-owns={open ? "render-props-menu" : undefined}
                 aria-haspopup="true"
-                className={classes.button}
                 onClick={this.handleClick}
               >
                 <SwitchCameraIcon />
-              </Button>
-            </Paper>
+              </StyledIconButton>
+            </StyledPaper>
           </Tooltip>
           <Menu
             id="render-props-menu"
@@ -141,4 +169,4 @@ class MapSwitcher extends React.PureComponent {
   }
 }
 
-export default withStyles(styles)(MapSwitcher);
+export default MapSwitcher;

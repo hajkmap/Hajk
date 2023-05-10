@@ -1,7 +1,7 @@
 import React from "react";
 import BaseWindowPlugin from "../BaseWindowPlugin";
 
-import SvgIcon from "@material-ui/core/SvgIcon";
+import SvgIcon from "@mui/material/SvgIcon";
 
 import MeasureView from "./MeasureView";
 import MeasureModel from "./MeasureModel";
@@ -48,7 +48,7 @@ class Measure extends React.PureComponent {
           icon: <MeasureIcon />,
           title: "Mät",
           description: "Mät längder och ytor",
-          height: 400,
+          height: "dynamic",
           width: 300,
           top: undefined,
           left: undefined,

@@ -336,6 +336,10 @@ class CollectorModel {
     });
 
     this.layer = new Vector({
+      layerType: "system",
+      zIndex: 5000,
+      name: "pluginCollector",
+      caption: "Collector layer",
       source: this.vectorSource,
       style: this.getVectorStyle(),
     });

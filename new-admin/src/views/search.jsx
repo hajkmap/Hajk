@@ -1,25 +1,3 @@
-// Copyright (C) 2016 Göteborgs Stad
-//
-// Denna programvara är fri mjukvara: den är tillåten att distribuera och modifiera
-// under villkoren för licensen CC-BY-NC-SA 4.0.
-//
-// This program is free software: you can redistribute it and/or modify
-// it under the terms of the CC-BY-NC-SA 4.0 licence.
-//
-// http://creativecommons.org/licenses/by-nc-sa/4.0/
-//
-// Det är fritt att dela och anpassa programvaran för valfritt syfte
-// med förbehåll att följande villkor följs:
-// * Copyright till upphovsmannen inte modifieras.
-// * Programvaran används i icke-kommersiellt syfte.
-// * Licenstypen inte modifieras.
-//
-// Den här programvaran är öppen i syfte att den skall vara till nytta för andra
-// men UTAN NÅGRA GARANTIER; även utan underförstådd garanti för
-// SÄLJBARHET eller LÄMPLIGHET FÖR ETT VISST SYFTE.
-//
-// https://github.com/hajkmap/Hajk
-
 import React from "react";
 import { Component } from "react";
 import Alert from "../views/alert.jsx";
@@ -69,14 +47,18 @@ const defaultState = {
   addedLayers: [],
   id: "",
   caption: "",
+  internalLayerName: "",
   date: "Fylls i per automatik",
   searchFields: "",
   infobox: "",
   aliasDict: "",
   displayFields: "",
+  secondaryLabelFields: "",
+  shortDisplayFields: "",
   geometryField: "",
   url: "",
   outputFormat: undefined,
+  serverType: "geoserver",
   alert: false,
   corfirm: false,
   alertMessage: "",
@@ -155,12 +137,16 @@ class Search extends Component {
       mode: "edit",
       id: layer.id,
       caption: layer.caption,
+      internalLayerName: layer.internalLayerName || layer.caption,
       searchFields: layer.searchFields,
       infobox: layer.infobox,
       aliasDict: layer.aliasDict,
       displayFields: layer.displayFields,
+      secondaryLabelFields: layer.secondaryLabelFields,
+      shortDisplayFields: layer.shortDisplayFields,
       geometryField: layer.geometryField,
       outputFormat: layer.outputFormat || "GML3",
+      serverType: layer.serverType || "geoserver",
       url: layer.url,
       addedLayers: [],
     });
@@ -169,8 +155,11 @@ class Search extends Component {
       this.validateField("url", true);
       this.validateField("searchFields", true);
       this.validateField("displayFields", true);
+      this.validateField("secondaryLabelFields", true);
+      this.validateField("shortDisplayFields", true);
       this.validateField("geometryField", true);
       this.validateField("outputFormat", true);
+      this.validateField("serverType", true);
 
       this.loadWMSCapabilities(undefined, () => {
         this.setState({
@@ -186,7 +175,8 @@ class Search extends Component {
         });
 
         layer.layers.forEach((layer) => {
-          this.refs[layer].checked = true;
+          if (this && this.refs && this.refs[layer])
+            this.refs[layer].checked = true;
         });
       });
     }, 0);
@@ -290,9 +280,12 @@ class Search extends Component {
   /**
    *
    */
-  getLayersWithFilter(filter) {
+  getLayersWithFilter() {
     return this.props.model.get("layers").filter((layer) => {
-      return new RegExp(this.state.filter).test(layer.caption.toLowerCase());
+      const caption = layer.caption.toLowerCase();
+      const internalLayerName = layer.internalLayerName?.toLowerCase() || "";
+      const filter = this.state.filter.toLowerCase();
+      return caption.includes(filter) || internalLayerName.includes(filter);
     });
   }
   /**
@@ -308,20 +301,32 @@ class Search extends Component {
 
     if (this.state.filter) {
       layers.forEach((layer) => {
-        layer.caption.toLowerCase().indexOf(this.state.filter) === 0
+        layer.caption.toLowerCase().indexOf(this.state.filter.toLowerCase()) ===
+          0 ||
+        layer.internalLayerName
+          ?.toLowerCase()
+          .indexOf(this.state.filter.toLowerCase()) === 0
           ? startsWith.push(layer)
           : alphabetically.push(layer);
       });
 
       startsWith.sort(function (a, b) {
-        if (a.caption.toLowerCase() < b.caption.toLowerCase()) return -1;
-        if (a.caption.toLowerCase() > b.caption.toLowerCase()) return 1;
+        let aName = a.internalLayerName ? a.internalLayerName : a.caption;
+        aName = aName.toLowerCase();
+        let bName = b.internalLayerName ? b.internalLayerName : b.caption;
+        bName = bName.toLowerCase();
+        if (aName < bName) return -1;
+        if (aName > bName) return 1;
         return 0;
       });
 
       alphabetically.sort(function (a, b) {
-        if (a.caption.toLowerCase() < b.caption.toLowerCase()) return -1;
-        if (a.caption.toLowerCase() > b.caption.toLowerCase()) return 1;
+        let aName = a.internalLayerName ? a.internalLayerName : a.caption;
+        aName = aName.toLowerCase();
+        let bName = b.internalLayerName ? b.internalLayerName : b.caption;
+        bName = bName.toLowerCase();
+        if (aName < bName) return -1;
+        if (aName > bName) return 1;
         return 0;
       });
 
@@ -329,7 +334,11 @@ class Search extends Component {
     }
     return layers.map((layer, i) => (
       <li onClick={(e) => this.loadLayer(e, layer)} key={Math.random()}>
-        <span>{layer.caption}</span>
+        <span>
+          {layer.internalLayerName?.length > 0
+            ? layer.internalLayerName
+            : layer.caption}
+        </span>
         <i
           title="Radera lager"
           onClick={(e) => this.removeLayer(e, layer)}
@@ -351,12 +360,21 @@ class Search extends Component {
 
     switch (fieldName) {
       case "displayFields":
+      case "secondaryLabelFields":
+      case "shortDisplayFields":
       case "searchFields":
-        valid = value.every((val) => /^\w+$/.test(val));
+        valid = value.every((val) =>
+          // Ensure that we allow most glyphs from most languages but prevent some "invalid"
+          // characters such as ` or ^ or %. See #1187.
+          /^[\p{L}\u0590-\u05fe_-]+[\p{L}\p{N}\u0590-\u05fe_\-.]+(\s+[\p{L}\p{N}\u0590-\u05fe_-]+)*$/gu.test(
+            val
+          )
+        );
+
+        // Completely empty strings are valid too
         if (value.length === 1 && value[0] === "") {
           valid = true;
         }
-
         break;
       case "layers":
         if (value.length === 0) {
@@ -371,6 +389,7 @@ class Search extends Component {
         }
         break;
       case "outputFormat":
+      case "serverType":
         if (value === "") {
           valid = false;
         }
@@ -415,6 +434,8 @@ class Search extends Component {
     if (fieldName === "layers") value = format_layers(this.state.addedLayers);
     if (fieldName === "searchFields") value = value.split(",");
     if (fieldName === "displayFields") value = value.split(",");
+    if (fieldName === "secondaryLabelFields") value = value.split(",");
+    if (fieldName === "shortDisplayFields") value = value.split(",");
 
     return value;
   }
@@ -453,8 +474,11 @@ class Search extends Component {
         "layers",
         "searchFields",
         "displayFields",
+        "secondaryLabelFields",
+        "shortDisplayFields",
         "geometryField",
         "outputFormat",
+        "serverType",
       ];
 
     validationFields.forEach((fieldName) => {
@@ -471,14 +495,18 @@ class Search extends Component {
       let layer = {
         id: this.state.id,
         caption: this.getValue("caption"),
+        internalLayerName: this.getValue("internalLayerName"),
         url: this.getValue("url"),
         layers: this.getValue("layers"),
         searchFields: this.getValue("searchFields"),
         infobox: this.getValue("infobox"),
         aliasDict: this.getValue("aliasDict"),
         displayFields: this.getValue("displayFields"),
+        secondaryLabelFields: this.getValue("secondaryLabelFields"),
+        shortDisplayFields: this.getValue("shortDisplayFields"),
         geometryField: this.getValue("geometryField"),
         outputFormat: this.getValue("outputFormat"),
+        serverType: this.getValue("serverType"),
       };
 
       if (this.state.mode === "add") {
@@ -756,8 +784,33 @@ class Search extends Component {
                     );
                   }}
                 >
+                  <option value="application/json">application/json</option>
+                  <option value="application/vnd.geo+json">
+                    application/vnd.geo+json
+                  </option>
                   <option value="GML3">GML3</option>
                   <option value="GML2">GML2</option>
+                </select>
+              </div>
+              <div>
+                <label>Servertyp</label>
+                <select
+                  ref="input_serverType"
+                  value={this.state.serverType}
+                  className="control-fixed-width"
+                  onChange={(e) => {
+                    this.setState(
+                      {
+                        serverType: e.target.value,
+                      },
+                      () => this.validateField("serverType", true)
+                    );
+                  }}
+                >
+                  <option value="geoserver">GeoServer</option>
+                  <option value="qgis">QGIS Server</option>
+                  <option value="arcgis">ArcGIS Server</option>
+                  <option value="mapserver">MapServer</option>
                 </select>
               </div>
               <div className="separator">Tillgängliga lager</div>
@@ -778,7 +831,12 @@ class Search extends Component {
                 </div>
               </div>
               <div>
-                <label>Visningsnamn*</label>
+                <label>
+                  Visningsnamn*{" "}
+                  <abbr title="Visas för användaren i bland annat sökresultatlistan som namnet på datamängden man söker i.">
+                    (?)
+                  </abbr>
+                </label>
                 <input
                   type="text"
                   ref="input_caption"
@@ -794,9 +852,30 @@ class Search extends Component {
                   className={this.getValidationClass("caption")}
                 />
               </div>
-
               <div>
-                <label>Inforuta</label>
+                <label>
+                  Visningsnamn Admin UI{" "}
+                  <abbr title="Visas INTE för användaren. Lokalt namn som endast visas i administrationsgränssnittet och kan användas för att särskilja om flera lager behöver ha samma Visningsnamn utåt.">
+                    (?)
+                  </abbr>
+                </label>
+                <input
+                  type="text"
+                  ref="input_internalLayerName"
+                  value={this.state.internalLayerName || ""}
+                  onChange={(e) => {
+                    this.setState({ internalLayerName: e.target.value });
+                    this.validateField("internalLayerName");
+                  }}
+                />
+              </div>
+              <div>
+                <label>
+                  Inforuta{" "}
+                  <abbr title="Styr hur resultatet visas i detaljvyn. Referera till dokumentationen för Sökverktyget samt Infoclick (för tillåten syntax i infoboxen). Se Hajks Wiki på GitHub.">
+                    (?)
+                  </abbr>
+                </label>
                 <textarea
                   ref="input_infobox"
                   value={this.state.infobox}
@@ -814,7 +893,12 @@ class Search extends Component {
                 />
               </div>
               <div>
-                <label>Sökfält</label>
+                <label>
+                  Sökfält{" "}
+                  <abbr title="Styr vilka attribut (kolumner i tabellen) som sökning sker mot. Anges som kommaseparerad lista.">
+                    (?)
+                  </abbr>
+                </label>
                 <input
                   type="text"
                   ref="input_searchFields"
@@ -831,7 +915,12 @@ class Search extends Component {
                 />
               </div>
               <div>
-                <label>Visningsfält</label>
+                <label>
+                  Primära visningsfält{" "}
+                  <abbr title="Visas i sökresultatlistan. Dessutom kan visas som etikett i kartan när användaren selekterat ett sökresultat, om 'Visa resultat i kartan' är aktivt för sökverktyget. Anges som kommaseparerad lista.">
+                    (?)
+                  </abbr>
+                </label>
                 <input
                   type="text"
                   ref="input_displayFields"
@@ -845,6 +934,50 @@ class Search extends Component {
                   }}
                   value={this.state.displayFields}
                   className={this.getValidationClass("displayFields")}
+                />
+              </div>
+              <div>
+                <label>
+                  Sekundära visningsfält{" "}
+                  <abbr title="Visas i sökresultat med något mindre text, under de primära visningsfälten. Anges som kommaseparerad lista.">
+                    (?)
+                  </abbr>
+                </label>
+                <input
+                  type="text"
+                  ref="input_secondaryLabelFields"
+                  onChange={(e) => {
+                    this.setState(
+                      {
+                        secondaryLabelFields: e.target.value,
+                      },
+                      () => this.validateField("secondaryLabelFields", true)
+                    );
+                  }}
+                  value={this.state.secondaryLabelFields}
+                  className={this.getValidationClass("secondaryLabelFields")}
+                />
+              </div>
+              <div>
+                <label>
+                  Visningsfält i kartan{" "}
+                  <abbr title="Visas som etikett bredvid sökresultat i ett första läge, om 'Visa resultat i kartan' är aktivt för sökverktyget. Anges som kommaseparerad lista.">
+                    (?)
+                  </abbr>
+                </label>
+                <input
+                  type="text"
+                  ref="input_shortDisplayFields"
+                  onChange={(e) => {
+                    this.setState(
+                      {
+                        shortDisplayFields: e.target.value,
+                      },
+                      () => this.validateField("shortDisplayFields", true)
+                    );
+                  }}
+                  value={this.state.shortDisplayFields}
+                  className={this.getValidationClass("shortDisplayFields")}
                 />
               </div>
               <div>

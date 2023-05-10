@@ -1,25 +1,3 @@
-// Copyright (C) 2016 Göteborgs Stad
-//
-// Denna programvara är fri mjukvara: den är tillåten att distribuera och modifiera
-// under villkoren för licensen CC-BY-NC-SA 4.0.
-//
-// This program is free software: you can redistribute it and/or modify
-// it under the terms of the CC-BY-NC-SA 4.0 licence.
-//
-// http://creativecommons.org/licenses/by-nc-sa/4.0/
-//
-// Det är fritt att dela och anpassa programvaran för valfritt syfte
-// med förbehåll att följande villkor följs:
-// * Copyright till upphovsmannen inte modifieras.
-// * Programvaran används i icke-kommersiellt syfte.
-// * Licenstypen inte modifieras.
-//
-// Den här programvaran är öppen i syfte att den skall vara till nytta för andra
-// men UTAN NÅGRA GARANTIER; även utan underförstådd garanti för
-// SÄLJBARHET eller LÄMPLIGHET FÖR ETT VISST SYFTE.
-//
-// https://github.com/hajkmap/Hajk
-
 import React from "react";
 import { Component } from "react";
 import Button from "@material-ui/core/Button";
@@ -44,6 +22,7 @@ var defaultState = {
   target: "toolbar",
   instruction: "",
   visibleAtStart: false,
+  allowCreatingCleanUrls: true,
   visibleForGroups: [],
 };
 
@@ -69,6 +48,7 @@ class ToolOptions extends Component {
         height: tool.options.height,
         instruction: tool.options.instruction,
         visibleAtStart: tool.options.visibleAtStart,
+        allowCreatingCleanUrls: tool.options.allowCreatingCleanUrls,
         visibleForGroups: tool.options.visibleForGroups
           ? tool.options.visibleForGroups
           : [],
@@ -80,11 +60,9 @@ class ToolOptions extends Component {
     }
   }
 
-  componentWillUnmount() {}
   /**
    *
    */
-  componentWillMount() {}
 
   handleInputChange(event) {
     var target = event.target;
@@ -140,6 +118,7 @@ class ToolOptions extends Component {
         height: this.state.height,
         instruction: this.state.instruction,
         visibleAtStart: this.state.visibleAtStart,
+        allowCreatingCleanUrls: this.state.allowCreatingCleanUrls,
         visibleForGroups: this.state.visibleForGroups.map(
           Function.prototype.call,
           String.prototype.trim
@@ -366,6 +345,22 @@ class ToolOptions extends Component {
             />
             &nbsp;
             <label htmlFor="visibleAtStart">Synlig vid start</label>
+          </div>
+          <div>
+            <input
+              id="allowCreatingCleanUrls"
+              name="allowCreatingCleanUrls"
+              type="checkbox"
+              onChange={(e) => {
+                this.handleInputChange(e);
+              }}
+              checked={this.state.allowCreatingCleanUrls}
+            />
+            &nbsp;
+            <label htmlFor="allowCreatingCleanUrls">
+              Visa väljare som låter användare skapa "rena" länkar
+              (`clean=true`)
+            </label>
           </div>
           <div>
             <label htmlFor="instruction">

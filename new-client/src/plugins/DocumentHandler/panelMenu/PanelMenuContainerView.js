@@ -1,9 +1,9 @@
 import React from "react";
 import PanelList from "./PanelList";
+import Box from "@mui/material/Box";
 import { getIsMobile } from "../../../utils/IsMobile";
 import { delay } from "../../../utils/Delay";
 import { animateScroll as scroll } from "react-scroll";
-import { withStyles } from "@material-ui/core/styles";
 import { hasSubMenu } from "../utils/helpers";
 import { getNormalizedMenuState } from "../utils/stateConverter";
 import {
@@ -11,14 +11,6 @@ import {
   getItemIdsToColor,
   findMenuItemWithDocumentName,
 } from "../panelMenu/panelMenuUtils";
-
-const styles = () => ({
-  panelListWrapper: {
-    maxHeight: "100%",
-    position: "relative",
-    overflow: "auto",
-  },
-});
 
 class PanelMenuView extends React.PureComponent {
   constructor(props) {
@@ -41,10 +33,7 @@ class PanelMenuView extends React.PureComponent {
       "document-link-clicked",
       this.#handleOpenDocumentFromLink
     );
-    localObserver.subscribe(
-      "document-clicked",
-      this.#handleOpenDocumentFromPanelMenu
-    );
+    localObserver.subscribe("document-clicked", this.#openEventualConnections);
     localObserver.subscribe("link-clicked", this.#handleExternalLinkClicked);
     localObserver.subscribe(
       "document-maplink-clicked",
@@ -63,11 +52,19 @@ class PanelMenuView extends React.PureComponent {
     this.setState(getNormalizedMenuState(options.menuConfig.menu));
   };
 
+  // Adds highlighting on the selected document by checking if the provided
+  // document (from props) matches the current menu-item.
   #setInitialMenuItemProperties = (menuItem) => {
-    const { document } = this.props;
+    const { document, options = {} } = this.props;
+    // Since this code only runs on mount, we should be allowed to check
+    // for the selected document by using "documentOnStart" instead of the supplied
+    // document. Added this fallback since the document from props is not always
+    // defined, probably because of timing issues...
     const itemMatchesOpenDocument =
-      document && menuItem.document === document.documentFileName;
-    //Do not use spread because we are mutating original item
+      (document && menuItem.document === document.documentFileName) ||
+      (options.documentOnStart !== "" &&
+        options.documentOnStart === menuItem.document);
+    // Do not use spread because we are mutating original item
     Object.assign(menuItem, {
       id: this.#getNextUniqueId(),
       selected: itemMatchesOpenDocument,
@@ -93,10 +90,22 @@ class PanelMenuView extends React.PureComponent {
 
   #handleOpenDocumentFromPanelMenu = (id) => {
     const { app } = this.props;
-    this.#setDocument(this.state[id].document, null);
-    this.#setItemStateProperties(id).then(() => {
-      app.globalObserver.publish("core.onlyHideDrawerIfNeeded");
-    });
+    const { document } = this.state[id];
+    if (document) {
+      this.#setDocument(document, null);
+      this.#setItemStateProperties(id).then(() => {
+        app.globalObserver.publish("core.onlyHideDrawerIfNeeded");
+      });
+    }
+  };
+
+  // The panel-menu buttons can contain several "connections" (external-link, map-link, and document)
+  // Make sure to fire each handler, the handler itself checks if a connection is present.
+  #openEventualConnections = (id) => {
+    // Remember, the handlers below wont do anything if the connection value is nullish.
+    this.#handleOpenDocumentFromPanelMenu(id);
+    this.#handleExternalLinkClicked(id);
+    this.#handleShowMapLayersFromPanelMenu(id);
   };
 
   #handleShowMapLayers = (mapLink) => {
@@ -123,28 +132,40 @@ class PanelMenuView extends React.PureComponent {
 
   #handleShowMapLayersFromPanelMenu = (id) => {
     const { options } = this.props;
-    // If we're on small screen, or the admin option is set (no matter screen size),
-    // let's close the DocumentHandler window
-    if (getIsMobile() || options.closePanelOnMapLinkOpen) {
-      this.#closeDocumentWindow();
+    const { maplink } = this.state[id];
+    if (maplink) {
+      // If we're on small screen, or the admin option is set (no matter screen size),
+      // let's close the DocumentHandler window
+      if (getIsMobile() || options.closePanelOnMapLinkOpen) {
+        this.#closeDocumentWindow();
+      }
+      this.#handleShowMapLayers(this.state[id].maplink);
     }
-    this.#handleShowMapLayers(this.state[id].maplink);
   };
 
+  // The panel-menu buttons can contain several "connections" (external-link, map-link, and document)
+  // Make sure to fire each handler, the handler itself checks if a connection is present.
   #handleSubMenuClicked = (id) => {
+    // Remember, the handlers below wont do anything if the connection value is nullish.
+    this.#handleOpenDocumentFromPanelMenu(id);
+    this.#handleExternalLinkClicked(id);
+    this.#handleShowMapLayersFromPanelMenu(id);
     this.#setItemStateProperties(id);
   };
 
   #handleExternalLinkClicked = (id) => {
     const { app } = this.props;
-    window.open(this.state[id].link, "_blank");
-    app.globalObserver.publish("core.onlyHideDrawerIfNeeded");
+    const { link } = this.state[id];
+    if (link) {
+      window.open(this.state[id].link, "_blank");
+      app.globalObserver.publish("core.onlyHideDrawerIfNeeded");
+    }
   };
 
   //---------------------------------------------------
 
   #setClickedItemProperties = (clickedItem) => {
-    let newItem = { ...clickedItem }; //
+    let newItem = { ...clickedItem };
     return {
       ...clickedItem,
       colored: !isExpandedTopLevelItem(newItem),
@@ -240,18 +261,21 @@ class PanelMenuView extends React.PureComponent {
   };
 
   render() {
-    const { classes, app, localObserver } = this.props;
+    const { app, localObserver } = this.props;
     return (
-      <div className={classes.panelListWrapper} id="panelListWrapper">
+      <Box
+        id="panelListWrapper"
+        sx={{ maxHeight: "100%", position: "relative", overflow: "auto" }}
+      >
         <PanelList
           app={app}
           localObserver={localObserver}
           level={0}
           items={this.state}
         ></PanelList>
-      </div>
+      </Box>
     );
   }
 }
 
-export default withStyles(styles)(PanelMenuView);
+export default PanelMenuView;

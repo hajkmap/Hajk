@@ -39,6 +39,14 @@ var documentEditor = Model.extend({
     data.chapters.forEach((chapter) => {
       this.deleteParentChapter(chapter, data.chapters);
     });
+
+    data.chapters.map((chapter) => {
+      chapter.html = chapter.html
+        .replaceAll("&lt;", "<")
+        .replaceAll("&gt;", ">");
+      return false;
+    });
+
     hfetch(url, {
       method: "post",
       body: JSON.stringify(data),
@@ -79,12 +87,13 @@ var documentEditor = Model.extend({
   load: function (documentName, callback) {
     var url = this.get("config").url_load + "/" + documentName;
     hfetch(url).then((response) => {
-      response.json().then((data) => {
-        data.chapters.forEach((chapter) => {
-          this.setParentChapter(chapter, data.chapters);
+      response.status === 200 &&
+        response.json().then((data) => {
+          data.chapters.forEach((chapter) => {
+            this.setParentChapter(chapter, data.chapters);
+          });
+          callback(data);
         });
-        callback(data);
-      });
     });
   },
 
@@ -108,6 +117,24 @@ var documentEditor = Model.extend({
 
   listImages: function (callback) {
     var url = this.get("config").list_images;
+    hfetch(url).then((response) => {
+      response.json().then((data) => {
+        callback(data);
+      });
+    });
+  },
+
+  listVideos: function (callback) {
+    var url = this.get("config").list_videos;
+    hfetch(url).then((response) => {
+      response.json().then((data) => {
+        callback(data);
+      });
+    });
+  },
+
+  listAudios: function (callback) {
+    var url = this.get("config").list_audios;
     hfetch(url).then((response) => {
       response.json().then((data) => {
         callback(data);

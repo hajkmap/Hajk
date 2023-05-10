@@ -11,7 +11,9 @@ namespace MapService.Models.Config
         string id { get; set; }
 
         string caption { get; set; }
-        
+
+        string internalLayerName { get; set; }
+
         bool infoVisible { get; set; }
 
         string infoTitle { get; set; }

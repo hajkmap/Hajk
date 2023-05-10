@@ -1,25 +1,3 @@
-// Copyright (C) 2016 Göteborgs Stad
-//
-// Denna programvara är fri mjukvara: den är tillåten att distribuera och modifiera
-// under villkoren för licensen CC-BY-NC-SA 4.0.
-//
-// This program is free software: you can redistribute it and/or modify
-// it under the terms of the CC-BY-NC-SA 4.0 licence.
-//
-// http://creativecommons.org/licenses/by-nc-sa/4.0/
-//
-// Det är fritt att dela och anpassa programvaran för valfritt syfte
-// med förbehåll att följande villkor följs:
-// * Copyright till upphovsmannen inte modifieras.
-// * Programvaran används i icke-kommersiellt syfte.
-// * Licenstypen inte modifieras.
-//
-// Den här programvaran är öppen i syfte att den skall vara till nytta för andra
-// men UTAN NÅGRA GARANTIER; även utan underförstådd garanti för
-// SÄLJBARHET eller LÄMPLIGHET FÖR ETT VISST SYFTE.
-//
-// https://github.com/hajkmap/Hajk
-
 import React, { Component } from "react";
 import { SketchPicker } from "react-color";
 import Tree from "../tree.jsx";
@@ -51,6 +29,8 @@ const defaultState = {
   scale: "",
   markerImg: "",
   delayBeforeAutoSearch: 500,
+  disableAutocomplete: false,
+  disableSearchCombinations: false,
   searchBarPlaceholder: "Sök...",
   autocompleteWildcardAtStart: false,
   enablePolygonSearch: true,
@@ -62,11 +42,17 @@ const defaultState = {
   enableResultsSelectionClearing: true,
   enableResultsDownloading: true,
   enableFeaturePreview: true,
-  enableLabelOnHighlight: true,
   enableSelectedFeaturesCollection: true,
   showResultFeaturesInMap: true,
+  searchInVisibleLayers: false,
+  wildcardAtStart: false,
+  wildcardAtEnd: true,
+  matchCase: false,
+  activeSpatialFilter: "intersects",
+  enableLabelOnHighlight: true,
   showResultsLimitReachedWarning: true,
   enableFeatureToggler: true,
+  fitToResultMaxZoom: -1,
   showCorrespondingWMSLayers: false,
 
   // Used to style the spatial search polygon/circle feature
@@ -163,6 +149,11 @@ class ToolOptions extends Component {
           delayBeforeAutoSearch:
             tool.options.delayBeforeAutoSearch ||
             this.state.delayBeforeAutoSearch,
+          disableAutocomplete:
+            tool.options.disableAutocomplete ?? this.state.disableAutocomplete,
+          disableSearchCombinations:
+            tool.options.disableSearchCombinations ??
+            this.state.disableSearchCombinations,
           autocompleteWildcardAtStart:
             tool.options.autocompleteWildcardAtStart ||
             this.state.autocompleteWildcardAtStart,
@@ -204,12 +195,23 @@ class ToolOptions extends Component {
           showResultFeaturesInMap:
             tool.options.showResultFeaturesInMap ??
             this.state.showResultFeaturesInMap,
+          searchInVisibleLayers:
+            tool.options.searchInVisibleLayers ??
+            this.state.searchInVisibleLayers,
+          wildcardAtStart:
+            tool.options.wildcardAtStart ?? this.state.wildcardAtStart,
+          wildcardAtEnd: tool.options.wildcardAtEnd ?? this.state.wildcardAtEnd,
+          matchCase: tool.options.matchCase ?? this.state.matchCase,
+          activeSpatialFilter:
+            tool.options.activeSpatialFilter ?? this.state.activeSpatialFilter,
           showResultsLimitReachedWarning:
             tool.options.showResultsLimitReachedWarning ??
             this.state.showResultsLimitReachedWarning,
           enableFeatureToggler:
             tool.options.enableFeatureToggler ??
             this.state.enableFeatureToggler,
+          fitToResultMaxZoom:
+            tool.options.fitToResultMaxZoom || this.state.fitToResultMaxZoom,
 
           drawFillColor: tool.options.drawFillColor || this.state.drawFillColor,
           drawStrokeColor:
@@ -285,9 +287,18 @@ class ToolOptions extends Component {
     if (typeof value === "string" && value.trim() !== "") {
       value = !isNaN(Number(value)) ? Number(value) : value;
     }
-    this.setState({
-      [name]: value,
-    });
+    // Special case: activeSpatialFilter is a checkbox but we want
+    // it to save string values
+    if (t.name === "activeSpatialFilter") {
+      console.log(value);
+      this.setState({
+        activeSpatialFilter: value === false ? "intersects" : "within",
+      });
+    } else {
+      this.setState({
+        [name]: value,
+      });
+    }
   }
 
   loadSearchableLayers() {
@@ -358,6 +369,8 @@ class ToolOptions extends Component {
         scale: this.state.scale,
         markerImg: this.state.markerImg,
         delayBeforeAutoSearch: this.state.delayBeforeAutoSearch,
+        disableAutocomplete: this.state.disableAutocomplete,
+        disableSearchCombinations: this.state.disableSearchCombinations,
         searchBarPlaceholder: this.state.searchBarPlaceholder,
         autocompleteWildcardAtStart: this.state.autocompleteWildcardAtStart,
         enablePolygonSearch: this.state.enablePolygonSearch,
@@ -375,9 +388,15 @@ class ToolOptions extends Component {
         enableSelectedFeaturesCollection:
           this.state.enableSelectedFeaturesCollection,
         showResultFeaturesInMap: this.state.showResultFeaturesInMap,
+        searchInVisibleLayers: this.state.searchInVisibleLayers,
+        wildcardAtStart: this.state.wildcardAtStart,
+        wildcardAtEnd: this.state.wildcardAtEnd,
+        matchCase: this.state.matchCase,
+        activeSpatialFilter: this.state.activeSpatialFilter,
         showResultsLimitReachedWarning:
           this.state.showResultsLimitReachedWarning,
         enableFeatureToggler: this.state.enableFeatureToggler,
+        fitToResultMaxZoom: this.state.fitToResultMaxZoom,
 
         drawFillColor: this.state.drawFillColor,
         drawStrokeColor: this.state.drawStrokeColor,
@@ -534,9 +553,12 @@ class ToolOptions extends Component {
   }
 
   flattern(groups) {
+    if (!groups) {
+      return [];
+    }
     return groups.reduce((i, group) => {
       var layers = [];
-      if (group.groups.length !== 0) {
+      if (group.groups?.length !== 0) {
         layers = [...this.flattern(group.groups)];
       }
       return [...i, ...group.layers, ...layers];
@@ -551,7 +573,9 @@ class ToolOptions extends Component {
         // We want to compare Numbers and Strings, hence the use of == operator.
         // eslint-disable-next-line
         if (layersConfig[layerTypes[i]][j].id == layerId) {
-          found = layersConfig[layerTypes[i]][j].caption;
+          found =
+            layersConfig[layerTypes[i]][j]?.internalLayerName ||
+            layersConfig[layerTypes[i]][j].caption;
           break;
         }
       }
@@ -719,8 +743,47 @@ class ToolOptions extends Component {
           </div>
 
           <div>
+            <input
+              id="disableAutocomplete"
+              name="disableAutocomplete"
+              type="checkbox"
+              onChange={(e) => {
+                this.handleInputChange(e);
+              }}
+              checked={this.state.disableAutocomplete}
+            />
+            &nbsp;
+            <label className="long-label" htmlFor="disableAutocomplete">
+              Avaktivera autocomplete (visa sökresultat direkt).
+            </label>
+          </div>
+          <div>
+            <input
+              id="disableSearchCombinations"
+              name="disableSearchCombinations"
+              type="checkbox"
+              onChange={(e) => {
+                this.handleInputChange(e);
+              }}
+              checked={this.state.disableSearchCombinations}
+            />
+            &nbsp;
+            <label htmlFor="disableSearchCombinations" className="long-label">
+              Avaktivera automatiska sök-kombinationer{" "}
+              <i
+                className="fa fa-question-circle"
+                data-toggle="tooltip"
+                title="Låt inte sökmotorn skapa automatiska sök-kombinationer.
+                (Kombinationerna kan öka möjligheten att användarna hittar vad de
+                letar efter, men det kan ta längre tid för servern att bearbeta
+                sökningen.)"
+              />
+            </label>
+          </div>
+
+          <div>
             <label htmlFor="delayBeforeAutoSearch">
-              Fördröjning innan autocomplete (i millisekunder)
+              Fördröjning innan auto-sök (i millisekunder)
             </label>
             <input
               value={this.state.delayBeforeAutoSearch}
@@ -877,6 +940,116 @@ class ToolOptions extends Component {
             />
           </div>
 
+          <div className="separator">Förvalda användarinställningar</div>
+
+          <p>
+            De här inställningarna påverkar endast <i>förval</i> i användarens
+            sökinställningar. Användaren kommer kunna anpassa dessa utifrån sina
+            önskemål under pågående session.
+          </p>
+
+          <div>
+            <input
+              id="searchInVisibleLayers"
+              value={this.state.searchInVisibleLayers}
+              type="checkbox"
+              name="searchInVisibleLayers"
+              onChange={(e) => {
+                this.handleInputChange(e);
+              }}
+              checked={this.state.searchInVisibleLayers}
+            />
+            &nbsp;
+            <label className="long-label" htmlFor="searchInVisibleLayers">
+              Sök endast i synliga lager
+            </label>
+          </div>
+
+          <div>
+            <input
+              id="wildcardAtStart"
+              value={this.state.wildcardAtStart}
+              type="checkbox"
+              name="wildcardAtStart"
+              onChange={(e) => {
+                this.handleInputChange(e);
+              }}
+              checked={this.state.wildcardAtStart}
+            />
+            &nbsp;
+            <label className="long-label" htmlFor="wildcardAtStart">
+              Wildcard före
+            </label>
+          </div>
+
+          <div>
+            <input
+              id="wildcardAtEnd"
+              value={this.state.wildcardAtEnd}
+              type="checkbox"
+              name="wildcardAtEnd"
+              onChange={(e) => {
+                this.handleInputChange(e);
+              }}
+              checked={this.state.wildcardAtEnd}
+            />
+            &nbsp;
+            <label className="long-label" htmlFor="wildcardAtEnd">
+              Wildcard efter
+            </label>
+          </div>
+
+          <div>
+            <input
+              id="matchCase"
+              value={this.state.matchCase}
+              type="checkbox"
+              name="matchCase"
+              onChange={(e) => {
+                this.handleInputChange(e);
+              }}
+              checked={this.state.matchCase}
+            />
+            &nbsp;
+            <label className="long-label" htmlFor="matchCase">
+              Skiftlägeskänslighet
+            </label>
+          </div>
+
+          <div>
+            <input
+              id="activeSpatialFilter"
+              value={this.state.activeSpatialFilter === "within"}
+              type="checkbox"
+              name="activeSpatialFilter"
+              onChange={(e) => {
+                this.handleInputChange(e);
+              }}
+              checked={this.state.activeSpatialFilter === "within"}
+            />
+            &nbsp;
+            <label className="long-label" htmlFor="activeSpatialFilter">
+              Kräv att hela objektet ryms inom sökområde
+            </label>
+          </div>
+
+          <div>
+            <input
+              id="enableLabelOnHighlight"
+              value={this.state.enableLabelOnHighlight}
+              type="checkbox"
+              name="enableLabelOnHighlight"
+              onChange={(e) => {
+                this.handleInputChange(e);
+              }}
+              checked={this.state.enableLabelOnHighlight}
+            />
+            &nbsp;
+            <label className="long-label" htmlFor="enableLabelOnHighlight">
+              Visa etikett för valda resultat i kartan
+            </label>
+          </div>
+
           <div className="separator">Alternativ för visning av resultat</div>
 
           <div>
@@ -980,24 +1153,7 @@ class ToolOptions extends Component {
             />
             &nbsp;
             <label className="long-label" htmlFor="enableFeaturePreview">
-              Visa förhandvisning vid mouse over
-            </label>
-          </div>
-
-          <div>
-            <input
-              id="enableLabelOnHighlight"
-              value={this.state.enableLabelOnHighlight}
-              type="checkbox"
-              name="enableLabelOnHighlight"
-              onChange={(e) => {
-                this.handleInputChange(e);
-              }}
-              checked={this.state.enableLabelOnHighlight}
-            />
-            &nbsp;
-            <label className="long-label" htmlFor="enableLabelOnHighlight">
-              Visa etikett för valda resultat i kartan
+              Visa förhandsvisning vid mouse over
             </label>
           </div>
 
@@ -1036,6 +1192,26 @@ class ToolOptions extends Component {
             &nbsp;
             <label className="long-label" htmlFor="enableFeatureToggler">
               Visa föregående/nästa-knapp för bläddring av resultat
+            </label>
+          </div>
+
+          <div>
+            <input
+              id="fitToResultMaxZoom"
+              value={this.state.fitToResultMaxZoom}
+              type="number"
+              min="-1"
+              max="20"
+              step="1"
+              name="fitToResultMaxZoom"
+              onChange={(e) => {
+                this.handleInputChange(e);
+              }}
+              checked={this.state.fitToResultMaxZoom}
+            />
+            &nbsp;
+            <label className="long-label" htmlFor="fitToResultMaxZoom">
+              Maximal zoomnivå vid zoomning till sökresultat (-1 för obegränsat)
             </label>
           </div>
 

@@ -1,6 +1,4 @@
 import React from "react";
-
-import { withStyles } from "@material-ui/core/styles";
 import {
   Tooltip,
   Grid,
@@ -13,17 +11,13 @@ import {
   Chip,
   MenuItem,
   Input,
-} from "@material-ui/core";
+} from "@mui/material";
+import { styled } from "@mui/material/styles";
 
-const styles = (theme) => ({
-  chips: {
-    display: "flex",
-    flexWrap: "wrap",
-  },
-  chip: {
-    margin: 2,
-  },
-});
+const ChipsWrapper = styled("div")(({ theme }) => ({
+  display: "flex",
+  flexWrap: "wrap",
+}));
 
 class SearchSettings extends React.PureComponent {
   state = {
@@ -37,14 +31,17 @@ class SearchSettings extends React.PureComponent {
   };
 
   render() {
-    const { classes, searchOptions, searchSources, searchModel } = this.props;
+    const { searchOptions, searchSources, searchModel } = this.props;
     return (
       <Grid container spacing={2} direction="column">
         <Grid item xs>
           <FormControl component="fieldset">
             <FormLabel component="legend">Generella sökinställningar</FormLabel>
             <FormGroup>
-              <Tooltip title="Slå på för att välja vilka datakällor som sökningen kommer göras i. Om reglaget är i off-läget kommer sökningen att ske i alla tillgänliga sökkällor.">
+              <Tooltip
+                disableInteractive
+                title="Slå på för att välja vilka datakällor som sökningen kommer göras i. Om reglaget är i off-läget kommer sökningen att ske i alla tillgänliga sökkällor."
+              >
                 <FormControlLabel
                   label="Begränsa sökkällor"
                   control={
@@ -82,30 +79,48 @@ class SearchSettings extends React.PureComponent {
                       }
                       input={<Input id="select-multiple-chip" />}
                       renderValue={(selected) => (
-                        <div className={classes.chips}>
+                        <ChipsWrapper>
                           {selected.map((option) => (
                             <Chip
                               key={option.id}
                               label={option.caption}
-                              className={classes.chip}
+                              sx={{ margin: 0.25 }}
                             />
                           ))}
-                        </div>
+                        </ChipsWrapper>
                       )}
                     >
-                      {searchModel.getSources().map((source) => (
-                        <MenuItem
-                          key={source.id}
-                          value={source}
-                          // style={getStyles(name, personName, theme)}
-                        >
-                          {source.caption}
-                        </MenuItem>
-                      ))}
+                      {searchModel
+                        .getSources()
+                        .sort((a, b) => a.caption.localeCompare(b.caption))
+                        .map((source) => (
+                          <MenuItem key={source.id} value={source}>
+                            {source.caption}
+                          </MenuItem>
+                        ))}
                     </Select>
                   </Grid>
                 </Grid>
               )}
+            </FormGroup>
+            <FormGroup>
+              <Tooltip title="Om aktivt kommer sökningen att ske i lager som är inställda för sökning av systemadministratören och som är synliga.">
+                <FormControlLabel
+                  label="Sök endast i synliga lager"
+                  control={
+                    <Switch
+                      checked={searchOptions.searchInVisibleLayers}
+                      onChange={() => {
+                        this.localUpdateSearchOptions(
+                          "searchInVisibleLayers",
+                          !searchOptions.searchInVisibleLayers
+                        );
+                      }}
+                      color="primary"
+                    />
+                  }
+                />
+              </Tooltip>
             </FormGroup>
           </FormControl>
         </Grid>
@@ -116,7 +131,10 @@ class SearchSettings extends React.PureComponent {
               Inställningar för textsökning
             </FormLabel>
             <FormGroup>
-              <Tooltip title="Om aktivt kommer en sökning på 'väg' även ge träffar på exempelvis 'storväg'.">
+              <Tooltip
+                disableInteractive
+                title="Om aktivt kommer en sökning på 'väg' även ge träffar på exempelvis 'storväg'."
+              >
                 <FormControlLabel
                   label="Wildcard före"
                   control={
@@ -133,7 +151,10 @@ class SearchSettings extends React.PureComponent {
                   }
                 />
               </Tooltip>
-              <Tooltip title="Om aktivt kommer en sökning på 'väg' även ge träffar på exempelvis 'vägen'.">
+              <Tooltip
+                disableInteractive
+                title="Om aktivt kommer en sökning på 'väg' även ge träffar på exempelvis 'vägen'."
+              >
                 <FormControlLabel
                   label="Wildcard efter"
                   control={
@@ -150,7 +171,10 @@ class SearchSettings extends React.PureComponent {
                   }
                 />
               </Tooltip>
-              <Tooltip title="Om aktivt kommer en sökning på 'a' inte ge träffar på 'A'. Inaktivera för att söka oberoende av gemener/versaler.">
+              <Tooltip
+                disableInteractive
+                title="Om aktivt kommer en sökning på 'a' inte ge träffar på 'A'. Inaktivera för att söka oberoende av gemener/versaler."
+              >
                 <FormControlLabel
                   label="Skiftlägeskänslighet"
                   control={
@@ -175,7 +199,10 @@ class SearchSettings extends React.PureComponent {
           <FormControl component="fieldset">
             <FormLabel component="legend">Spatiala sökinställningar</FormLabel>
             <FormGroup>
-              <Tooltip title="Om aktivt kommer hela objektet (exempelvis en fastigheten) behöva rymmas inom sökområdet för att komma med i resultatet. Om inaktivt räcker det att endast en liten del av objektet ryms inom, eller nuddar vid, sökområdet.">
+              <Tooltip
+                disableInteractive
+                title="Om aktivt kommer hela objektet (exempelvis en fastigheten) behöva rymmas inom sökområdet för att komma med i resultatet. Om inaktivt räcker det att endast en liten del av objektet ryms inom, eller nuddar vid, sökområdet."
+              >
                 <FormControlLabel
                   label="Kräv att hela objektet ryms inom sökområde"
                   control={
@@ -202,7 +229,10 @@ class SearchSettings extends React.PureComponent {
           <FormControl component="fieldset">
             <FormLabel component="legend">Visning av resultat</FormLabel>
             <FormGroup>
-              <Tooltip title="Om aktivt kommer en etikett att visas i kartan intill det markerade sökresultatet">
+              <Tooltip
+                disableInteractive
+                title="Om aktivt kommer en etikett att visas i kartan intill det markerade sökresultatet"
+              >
                 <FormControlLabel
                   label="Visa textetikett i kartan"
                   control={
@@ -227,4 +257,4 @@ class SearchSettings extends React.PureComponent {
   }
 }
 
-export default withStyles(styles)(SearchSettings);
+export default SearchSettings;

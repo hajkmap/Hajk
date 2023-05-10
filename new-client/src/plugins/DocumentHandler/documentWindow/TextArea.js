@@ -1,82 +1,55 @@
 import React from "react";
-import { withStyles } from "@material-ui/core/styles";
-import Divider from "@material-ui/core/Divider";
-import Grid from "@material-ui/core/Grid";
+import { styled } from "@mui/material/styles";
+import Divider from "@mui/material/Divider";
+import Grid from "@mui/material/Grid";
 
-const styles = (theme) => {
-  return {
-    typography: {
-      overflowWrap: "break-word",
-    },
-    containerContent: {
-      //Need to manually change color when switching between dark/light-mode
-      backgroundColor:
-        theme.palette.type === "dark"
-          ? theme.palette.grey[700]
-          : theme.palette.grey[200],
-    },
-    typographyContainer: {
-      padding: theme.spacing(1),
-    },
-    container: {
-      marginBottom: theme.spacing(1),
-    },
-    divider: {
-      //Need to manually change color when switching between dark/light-mode
-      backgroundColor:
-        theme.palette.type === "dark"
-          ? theme.palette.grey[200]
-          : theme.palette.grey[400],
-      height: "2px",
-    },
-  };
-};
+const GridContainer = styled(Grid)(({ theme }) => ({
+  marginBottom: theme.spacing(1),
+}));
+
+const GridContainerContent = styled(Grid)(({ theme }) => ({
+  //Need to manually change color when switching between dark/light-mode
+  backgroundColor:
+    theme.palette.mode === "dark"
+      ? theme.palette.grey[700]
+      : theme.palette.grey[200],
+}));
+
+const GridTypographyContainer = styled(Grid)(({ theme }) => ({
+  padding: theme.spacing(1),
+}));
+
+const StyledDivider = styled(Divider)(({ theme }) => ({
+  //Need to manually change color when switching between dark/light-mode
+  backgroundColor:
+    theme.palette.mode === "dark"
+      ? theme.palette.grey[200]
+      : theme.palette.grey[400],
+  height: "2px",
+}));
 
 class TextArea extends React.PureComponent {
-  renderDivider = () => {
-    const { classes, dividerColor } = this.props;
-    return (
-      <Divider
-        className={classes.divider}
-        style={{ backgroundColor: dividerColor }}
-      ></Divider>
-    );
-  };
-
-  render = () => {
-    const { classes, textAreaContentArray, backgroundColor } = this.props;
+  render() {
+    const { backgroundColor, dividerColor, textAreaContentArray } = this.props;
 
     return (
-      <>
-        <Grid
-          id="text-area-content"
-          className={classes.container}
-          justify="center"
-          container
+      <GridContainer id="text-area-content" justifyContent="center" container>
+        <GridContainerContent
+          xs={12}
+          style={{ backgroundColor: backgroundColor }}
+          item
         >
-          <Grid
-            xs={12}
-            className={classes.containerContent}
-            style={{ backgroundColor: backgroundColor }}
-            item
-          >
-            {this.renderDivider()}
-            <Grid justify="center" container>
-              <Grid
-                component="blockquote"
-                className={classes.typographyContainer}
-                xs={12}
-                item
-              >
-                {textAreaContentArray}
-              </Grid>
-            </Grid>
-            {this.renderDivider()}
+          <StyledDivider sx={{ backgroundColor: dividerColor }} />
+          <Grid justifyContent="center" container>
+            <GridTypographyContainer component="blockquote" xs={12} item>
+              {textAreaContentArray}
+            </GridTypographyContainer>
           </Grid>
-        </Grid>
-      </>
+          <StyledDivider sx={{ backgroundColor: dividerColor }} />
+        </GridContainerContent>
+      </GridContainer>
     );
-  };
+  }
 }
 
-export default withStyles(styles)(TextArea);
+export default TextArea;

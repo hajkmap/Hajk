@@ -1,141 +1,88 @@
 import React, { Component } from "react";
-import cslx from "clsx";
-import { Button, Tooltip, Typography, Grid } from "@material-ui/core";
-import { withStyles } from "@material-ui/core/styles";
-import IconWarning from "@material-ui/icons/Warning";
-import CallMadeIcon from "@material-ui/icons/CallMade";
-import InfoIcon from "@material-ui/icons/Info";
-import RemoveCircleIcon from "@material-ui/icons/RemoveCircle";
-import CheckBoxIcon from "@material-ui/icons/CheckBox";
-import CheckBoxOutlineBlankIcon from "@material-ui/icons/CheckBoxOutlineBlank";
-import MoreHorizIcon from "@material-ui/icons/MoreHoriz";
-import CloseIcon from "@material-ui/icons/Close";
-import ArrowRightIcon from "@material-ui/icons/ArrowRight";
-import ArrowDropDownIcon from "@material-ui/icons/ArrowDropDown";
+import { Button, Tooltip, Typography, Grid, Box } from "@mui/material";
+import { styled } from "@mui/material/styles";
+import IconWarning from "@mui/icons-material/Warning";
+import CallMadeIcon from "@mui/icons-material/CallMade";
+import InfoIcon from "@mui/icons-material/Info";
+import RemoveCircleIcon from "@mui/icons-material/RemoveCircle";
+import CheckBoxIcon from "@mui/icons-material/CheckBox";
+import CheckBoxOutlineBlankIcon from "@mui/icons-material/CheckBoxOutlineBlank";
+import MoreHorizIcon from "@mui/icons-material/MoreHoriz";
+import CloseIcon from "@mui/icons-material/Close";
 import LayerSettings from "./LayerSettings.js";
 import DownloadLink from "./DownloadLink";
+import KeyboardArrowRightIcon from "@mui/icons-material/KeyboardArrowRight";
+import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 
-const styles = (theme) => ({
-  button: {
-    cursor: "pointer",
-  },
-  caption: {
-    display: "flex",
-    justifyContent: "space-between",
-  },
-  captionText: {
-    top: "-6px",
-    cursor: "pointer",
-    fontSize: theme.typography.pxToRem(15),
-  },
-  image: {},
-  links: {
-    padding: 0,
-    margin: 0,
-    listStyle: "none",
-  },
-  layerGroupTypography: {
-    display: "flex",
-    alignItems: "center",
-  },
-  layerItem: {
-    justifyContent: "space-between",
-    borderBottom: `${theme.spacing(0.2)}px solid ${theme.palette.divider}`,
-    margin: "5px 0",
-  },
-  layerItemContainer: {
-    borderTopRightRadius: "10px",
-    boxShadow:
-      "0px 1px 3px 0px rgba(0, 0, 0, 0.2), 0px 1px 1px 0px rgba(0, 0, 0, 0.14), 0px 2px 1px -1px rgba(0, 0, 0, 0.12)",
-  },
-  layerItemInfo: {
-    display: "flex",
-  },
-  rightIcon: {
-    marginLeft: theme.spacing(1),
-    fontSize: "16px",
-  },
-  layerInfo: {
-    display: "flex",
-    alignItems: "center",
-    padding: "3px",
-    border: `${theme.spacing(0.2)}px solid ${theme.palette.divider}`,
-  },
-  infoContainer: {},
-  infoButton: {
-    cursor: "pointer",
-  },
-  infoTextContainer: {
-    margin: "10px 45px",
-  },
-  layerGroupWrapper: {
-    display: "flex",
-    alignItems: "center",
-  },
-  layerGroup: {
-    paddingTop: "5px",
-    paddingBottom: "5px",
-    marginLeft: "21px",
-  },
-  layerGroupWithoutExpandArrow: {
-    marginLeft: "45px",
-  },
-  layerGroupContainer: {
-    marginTop: "0",
-    marginBottom: "-5px",
-  },
-  layerGroupHeader: {
-    width: "100%",
-    display: "flex",
-    justifyContent: "space-between",
-    borderBottom: `${theme.spacing(0.2)}px solid ${theme.palette.divider}`,
-  },
-  layerGroupLayers: {
-    marginLeft: "45px",
-  },
-  layerGroupItem: {
-    display: "flex",
-  },
-  legendImage: {
-    maxWidth: "250px",
-  },
-  slider: {
-    padding: "30px",
-    overflow: "hidden",
-  },
-  settingsButton: {
-    cursor: "pointer",
-  },
-  subtitle2: {
-    fontWeight: 500,
-  },
-  layerButtons: {
-    display: "flex",
-    alignItems: "center",
-  },
-  layerButton: {
-    cursor: "pointer",
-    fontSize: "15pt",
-    width: "32px",
-  },
-  checkBoxIcon: {
-    cursor: "pointer",
-    float: "left",
-    marginRight: "5px",
-  },
-  legendIcon: {
-    width: theme.typography.pxToRem(18),
-    height: theme.typography.pxToRem(18),
-    marginRight: "5px",
-  },
-  legendIconContainer: {
-    display: "flex",
-  },
-  arrowIcon: {
-    display: "flex",
-    float: "left",
-  },
-});
+const ExpandButtonWrapper = styled("div")(() => ({
+  display: "flex",
+  float: "left",
+  cursor: "pointer",
+}));
+
+const LayerInfo = styled("div")(({ theme }) => ({
+  width: "100%",
+  borderBottom: `${theme.spacing(0.2)} solid ${theme.palette.divider}`,
+}));
+
+const LayerSummaryContainer = styled((props) => (
+  <Grid
+    justifyContent="space-between"
+    container
+    alignItems="center"
+    wrap="nowrap"
+    {...props}
+  />
+))(({ theme }) => ({
+  width: "100%",
+}));
+
+const SummaryButtonsContainer = styled("div")(() => ({
+  display: "flex",
+  alignItems: "center",
+}));
+
+const SummaryButtonWrapper = styled("div")(() => ({
+  display: "flex",
+  alignItems: "center",
+  width: 35,
+  height: 35,
+  cursor: "pointer",
+}));
+
+const Caption = styled(Typography)(({ theme }) => ({
+  cursor: "pointer",
+  fontSize: theme.typography.pxToRem(15),
+}));
+
+const CheckBoxWrapper = styled("div")(() => ({
+  display: "flex",
+  alignItems: "center",
+  cursor: "pointer",
+  float: "left",
+  marginRight: "5px",
+}));
+
+const LegendImage = styled("img")(({ theme }) => ({
+  marginLeft: theme.spacing(0.4),
+  maxWidth: "250px",
+}));
+
+const LegendIcon = styled("img")(({ theme }) => ({
+  width: theme.typography.pxToRem(18),
+  height: theme.typography.pxToRem(18),
+  marginRight: "5px",
+}));
+
+const InfoTextContainer = styled("div")(() => ({
+  margin: "10px 45px",
+}));
+
+const StyledList = styled("ul")(() => ({
+  padding: 0,
+  margin: 0,
+  listStyle: "none",
+}));
 
 class LayerGroupItem extends Component {
   constructor(props) {
@@ -144,7 +91,14 @@ class LayerGroupItem extends Component {
     this.state = {
       caption: layerInfo.caption,
       visible: props.layer.get("visible"),
-      visibleSubLayers: props.layer.get("visible") ? props.layer.subLayers : [],
+      // If layer is to be shown, check if there are some specified sublayers (if yes, we'll
+      // enable only those). Else, let's default to showing all sublayers, or finally fallback
+      // to an empty array.
+      visibleSubLayers: props.layer.get("visible")
+        ? props.layer.visibleAtStartSubLayers?.length > 0
+          ? props.layer.visibleAtStartSubLayers
+          : props.layer.subLayers
+        : [],
       expanded: false,
       name: props.layer.get("name"),
       legend: layerInfo.legend,
@@ -199,20 +153,22 @@ class LayerGroupItem extends Component {
    * @return {external:ReactElement}
    */
   renderStatus() {
-    const { classes } = this.props;
     return (
       this.state.status === "loaderror" && (
-        <div className={classes.layerButton}>
-          <Tooltip title="Lagret kunde inte laddas in. Kartservern svarar inte.">
+        <Tooltip
+          disableInteractive
+          title="Lagret kunde inte laddas in. Kartservern svarar inte."
+        >
+          <SummaryButtonWrapper>
             <IconWarning />
-          </Tooltip>
-        </div>
+          </SummaryButtonWrapper>
+        </Tooltip>
       )
     );
   }
 
   renderLegendImage() {
-    var src =
+    const src =
       this.state.legend[0] && this.state.legend[0].url
         ? this.state.legend[0].url
         : "";
@@ -245,20 +201,19 @@ class LayerGroupItem extends Component {
   }
 
   renderChapterLinks(chapters) {
-    const { classes } = this.props;
     if (chapters && chapters.length > 0) {
-      let chaptersWithLayer = this.findChapters(
+      const chaptersWithLayer = this.findChapters(
         this.props.layer.get("name"),
         chapters
       );
       if (chaptersWithLayer.length > 0) {
         return (
-          <div className={classes.infoTextContainer}>
+          <InfoTextContainer>
             <Typography>
               Innehåll från denna kategori finns benämnt i följande kapitel i
               översiktsplanen:
             </Typography>
-            <ul className={classes.links}>
+            <StyledList>
               {chaptersWithLayer.map((chapter, i) => {
                 return (
                   <li key={i}>
@@ -267,13 +222,13 @@ class LayerGroupItem extends Component {
                       onClick={this.openInformative(chapter)}
                     >
                       {chapter.header}
-                      <CallMadeIcon className={classes.rightIcon} />
+                      <CallMadeIcon sx={{ marginLeft: 1, fontSize: "16px" }} />
                     </Button>
                   </li>
                 );
               })}
-            </ul>
-          </div>
+            </StyledList>
+          </InfoTextContainer>
         );
       } else {
         return null;
@@ -284,7 +239,7 @@ class LayerGroupItem extends Component {
   }
 
   toggleVisible = (layer) => (e) => {
-    var visible = !this.state.visible;
+    const visible = !this.state.visible;
     this.setState({
       visible: visible,
     });
@@ -304,7 +259,7 @@ class LayerGroupItem extends Component {
   }
 
   isInfoEmpty() {
-    let chaptersWithLayer = this.findChapters(
+    const chaptersWithLayer = this.findChapters(
       this.props.layer.get("name"),
       this.props.chapters
     );
@@ -320,8 +275,9 @@ class LayerGroupItem extends Component {
 
   setHidden = (l) => {
     const { layer } = this.props;
-    if (l === layer) {
-      // Fix underlaying source
+
+    if (l.get("name") === layer.get("name")) {
+      // Fix underlying source
       this.props.layer.getSource().updateParams({
         // Ensure that the list of sublayers is emptied (otherwise they'd be
         // "remembered" the next time user toggles group)
@@ -390,7 +346,7 @@ class LayerGroupItem extends Component {
   };
 
   toggleGroupVisible = (layer) => (e) => {
-    var visible = !this.state.visible;
+    const visible = !this.state.visible;
     if (visible) {
       this.setVisible(layer);
     } else {
@@ -456,100 +412,71 @@ class LayerGroupItem extends Component {
   };
 
   renderLegendIcon(url) {
-    const { classes } = this.props;
-    return (
-      <Grid item>
-        <div className={classes.legendIconContainer}>
-          <img
-            className={classes.legendIcon}
-            alt="Teckenförklaring"
-            src={url}
-          />
-        </div>
-      </Grid>
-    );
+    return <LegendIcon alt="Teckenförklaringsikon" src={url} />;
   }
 
   renderSubLayer(layer, subLayer, index) {
     const { visibleSubLayers } = this.state;
-    const { classes } = this.props;
-
-    var visible = visibleSubLayers.some(
+    const visible = visibleSubLayers.some(
       (visibleSubLayer) => visibleSubLayer === subLayer
     );
-    var toggleSettings = this.toggleSubLayerSettings.bind(this, index);
+    const toggleSettings = this.toggleSubLayerSettings.bind(this, index);
     const legendIcon = layer.layersInfo[subLayer].legendIcon;
     return (
-      <div key={index} className={classes.layerItem}>
-        <div className={classes.caption}>
+      <LayerInfo key={index}>
+        <LayerSummaryContainer>
           <Grid
-            wrap="nowrap"
             container
             alignItems="center"
+            wrap="nowrap"
             onClick={this.toggleLayerVisible(subLayer)}
           >
-            {visible ? (
-              <CheckBoxIcon className={classes.checkBoxIcon} />
-            ) : (
-              <CheckBoxOutlineBlankIcon className={classes.checkBoxIcon} />
-            )}
-
+            <CheckBoxWrapper>
+              {visible ? <CheckBoxIcon /> : <CheckBoxOutlineBlankIcon />}
+            </CheckBoxWrapper>
             {legendIcon && this.renderLegendIcon(legendIcon)}
-            <Grid item>
-              <Typography className={classes.captionText}>
-                {layer.layersInfo[subLayer].caption}
-              </Typography>
-            </Grid>
+            <Caption>{layer.layersInfo[subLayer].caption}</Caption>
           </Grid>
-          <div className={classes.layerButtons}>
-            <div className={classes.layerButton}>
+          <SummaryButtonsContainer>
+            <SummaryButtonWrapper>
               <DownloadLink
                 index={index}
                 layer={this.props.layer}
                 enableDownloadLink={this.props.mapConfig.map.enableDownloadLink}
               />
-            </div>
-            <div className={classes.layerButton}>
+            </SummaryButtonWrapper>
+            <SummaryButtonWrapper>
               {this.state.toggleSubLayerSettings[index] ? (
-                <CloseIcon
-                  className={classes.settingsButton}
-                  onClick={toggleSettings}
-                />
+                <CloseIcon onClick={() => toggleSettings()} />
               ) : (
-                <MoreHorizIcon
-                  className={classes.settingsButton}
-                  onClick={toggleSettings}
-                />
+                <MoreHorizIcon onClick={() => toggleSettings()} />
               )}
-            </div>
-          </div>
-        </div>
-        <div>
-          {this.state.toggleSubLayerSettings[index] ? (
-            <div>
-              <img
-                alt="Teckenförklaring"
-                src={this.props.layer.layersInfo[subLayer].legend}
-                className={classes.legendImage}
-              />
-            </div>
-          ) : null}
-        </div>
-      </div>
+            </SummaryButtonWrapper>
+          </SummaryButtonsContainer>
+        </LayerSummaryContainer>
+        {this.state.toggleSubLayerSettings[index] ? (
+          <Grid item xs={12}>
+            <LegendImage
+              alt="Teckenförklaring"
+              src={this.props.layer.layersInfo[subLayer].legend}
+            />
+          </Grid>
+        ) : null}
+      </LayerInfo>
     );
   }
 
   renderSubLayers() {
     const { open } = this.state;
-    const { layer, classes } = this.props;
+    const { layer } = this.props;
 
     if (open) {
       return (
-        <div className={classes.layerGroupLayers}>
+        <Box sx={{ marginLeft: "45px" }}>
           {layer.subLayers.map((subLayer, index) =>
             this.renderSubLayer(layer, subLayer, index)
           )}
-        </div>
+        </Box>
       );
     } else {
       return null;
@@ -558,10 +485,9 @@ class LayerGroupItem extends Component {
 
   renderInfo() {
     const { infoTitle, infoText } = this.state;
-    const { classes } = this.props;
     if (infoText) {
       return (
-        <div className={classes.infoTextContainer}>
+        <InfoTextContainer>
           <Typography variant="subtitle2">{infoTitle}</Typography>
           <Typography
             variant="body2"
@@ -569,7 +495,7 @@ class LayerGroupItem extends Component {
               __html: infoText,
             }}
           />
-        </div>
+        </InfoTextContainer>
       );
     } else {
       return null;
@@ -578,14 +504,13 @@ class LayerGroupItem extends Component {
 
   renderMetadataLink() {
     const { infoUrl, infoUrlText } = this.state;
-    const { classes } = this.props;
     if (infoUrl) {
       return (
-        <div className={classes.infoTextContainer}>
+        <InfoTextContainer>
           <a href={infoUrl} target="_blank" rel="noopener noreferrer">
             {infoUrlText || infoUrl}
           </a>
-        </div>
+        </InfoTextContainer>
       );
     } else {
       return null;
@@ -594,15 +519,14 @@ class LayerGroupItem extends Component {
 
   renderOwner() {
     const { infoOwner } = this.state;
-    const { classes } = this.props;
     if (infoOwner) {
       return (
-        <div className={classes.infoTextContainer}>
+        <InfoTextContainer>
           <Typography
             variant="body2"
             dangerouslySetInnerHTML={{ __html: infoOwner }}
           ></Typography>
-        </div>
+        </InfoTextContainer>
       );
     } else {
       return null;
@@ -637,139 +561,105 @@ class LayerGroupItem extends Component {
   }
 
   renderInfoToggler = () => {
-    const { classes } = this.props;
-
     return (
       !this.isInfoEmpty() && (
-        <div className={classes.layerButton}>
-          <div className={classes.infoContainer}>
-            {this.state.infoVisible ? (
-              <RemoveCircleIcon
-                className={classes.infoButton}
-                onClick={() => this.toggleInfo()}
-              />
-            ) : (
-              <InfoIcon
-                onClick={() => this.toggleInfo()}
-                className={classes.infoButton}
-                style={{
-                  boxShadow: this.state.infoVisible
-                    ? "rgb(204, 204, 204) 2px 3px 1px"
-                    : "inherit",
-                  borderRadius: "100%",
-                }}
-              />
-            )}
-          </div>
-        </div>
+        <SummaryButtonWrapper>
+          {this.state.infoVisible ? (
+            <RemoveCircleIcon onClick={() => this.toggleInfo()} />
+          ) : (
+            <InfoIcon
+              onClick={() => this.toggleInfo()}
+              style={{
+                boxShadow: this.state.infoVisible
+                  ? "rgb(204, 204, 204) 2px 3px 1px"
+                  : "inherit",
+                borderRadius: "100%",
+              }}
+            />
+          )}
+        </SummaryButtonWrapper>
       )
     );
   };
 
   render() {
-    const { classes, cqlFilterVisible, layer } = this.props;
-    const { open, visible, visibleSubLayers } = this.state;
+    const { cqlFilterVisible, layer } = this.props;
+    const { open, visible, visibleSubLayers, toggleSettings, infoVisible } =
+      this.state;
 
-    function getIcon() {
-      if (visible) {
-        if (visibleSubLayers.length === layer.subLayers.length) {
-          return <CheckBoxIcon className={classes.checkBoxIcon} />;
-        } else {
-          return (
-            <CheckBoxIcon
-              style={{ fill: "gray" }}
-              className={classes.checkBoxIcon}
-            />
-          );
-        }
-      } else {
-        return <CheckBoxOutlineBlankIcon className={classes.checkBoxIcon} />;
-      }
+    function getCheckBox() {
+      return (
+        <CheckBoxWrapper>
+          {!visible ? (
+            <CheckBoxOutlineBlankIcon />
+          ) : visibleSubLayers.length !== layer.subLayers.length ? (
+            <CheckBoxIcon sx={{ fill: "gray" }} />
+          ) : (
+            <CheckBoxIcon />
+          )}
+        </CheckBoxWrapper>
+      );
     }
     const legendIcon = layer.get("layerInfo").legendIcon;
     return (
-      <div
-        className={cslx(classes.layerGroup, {
-          [classes.layerGroupWithoutExpandArrow]: this.hideExpandArrow === true,
-        })}
+      <Grid
+        sx={{
+          marginLeft: this.hideExpandArrow ? "45px" : "21px",
+        }}
       >
-        <div className={classes.layerGroupContainer}>
-          <div className={classes.layerGroupWrapper}>
-            {this.hideExpandArrow === false && (
-              <div className={classes.arrowIcon}>
-                {open ? (
-                  <ArrowDropDownIcon
-                    className={classes.button}
-                    onClick={() => this.toggle()}
-                  />
-                ) : (
-                  <ArrowRightIcon
-                    className={classes.button}
-                    onClick={() => this.toggle()}
-                  />
-                )}
-              </div>
-            )}
-            <div className={classes.layerGroupHeader}>
-              <div className={classes.layerItemInfo}>
-                <div
-                  className={classes.caption}
-                  onClick={this.toggleVisible(this.props.layer)}
-                >
-                  <div
-                    onClick={this.toggleGroupVisible(layer)}
-                    className={classes.caption}
-                  >
-                    <div style={{ display: "flex", alignItems: "center" }}>
-                      {getIcon()}
-                      {legendIcon && this.renderLegendIcon(legendIcon)}
-                      <Typography className={classes.layerGroupTypography}>
-                        <label className={classes.captionText}>
-                          {layer.get("caption")}
-                        </label>
-                      </Typography>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <div className={classes.layerButtons}>
+        <Grid container alignItems="center" wrap="nowrap">
+          {this.hideExpandArrow === false && (
+            <ExpandButtonWrapper>
+              {open ? (
+                <KeyboardArrowDownIcon onClick={() => this.toggle()} />
+              ) : (
+                <KeyboardArrowRightIcon onClick={() => this.toggle()} />
+              )}
+            </ExpandButtonWrapper>
+          )}
+          <LayerInfo>
+            <LayerSummaryContainer>
+              <Grid
+                container
+                alignItems="center"
+                wrap="nowrap"
+                onClick={this.toggleGroupVisible(layer)}
+              >
+                {getCheckBox()}
+                {legendIcon && this.renderLegendIcon(legendIcon)}
+                <Caption>{layer.get("caption")}</Caption>
+              </Grid>
+              <SummaryButtonsContainer>
                 {this.renderStatus()}
                 {this.renderInfoToggler()}
-                <div className={classes.layerButton}>
-                  {this.state.toggleSettings ? (
+                <SummaryButtonWrapper>
+                  {toggleSettings ? (
                     <CloseIcon onClick={() => this.toggleSettings()} />
                   ) : (
-                    <MoreHorizIcon
-                      onClick={() => this.toggleSettings()}
-                      className={classes.settingsButton}
-                    />
+                    <MoreHorizIcon onClick={() => this.toggleSettings()} />
                   )}
-                </div>
-              </div>
-            </div>
-          </div>
-          {this.renderDetails()}
-          {this.state.toggleSettings &&
-          this.state.infoVisible &&
-          !this.isInfoEmpty() ? (
-            <hr />
-          ) : null}
-          <div>
-            <LayerSettings
-              options={this.props.options}
-              layer={layer}
-              cqlFilterVisible={cqlFilterVisible}
-              observer={this.props.model.observer}
-              toggled={this.state.toggleSettings}
-              showOpacity={true}
-              showLegend={false}
-            />
-          </div>
-          {this.renderSubLayers()}
+                </SummaryButtonWrapper>
+              </SummaryButtonsContainer>
+            </LayerSummaryContainer>
+          </LayerInfo>
+        </Grid>
+        {this.renderDetails()}
+        {toggleSettings && infoVisible && !this.isInfoEmpty() ? <hr /> : null}
+        <div>
+          <LayerSettings
+            options={this.props.options}
+            layer={layer}
+            cqlFilterVisible={cqlFilterVisible}
+            observer={this.props.model.observer}
+            toggled={toggleSettings}
+            showOpacity={true}
+            showLegend={false}
+          />
         </div>
-      </div>
+        {this.renderSubLayers()}
+      </Grid>
     );
   }
 }
 
-export default withStyles(styles)(LayerGroupItem);
+export default LayerGroupItem;

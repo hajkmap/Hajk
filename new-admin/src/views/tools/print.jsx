@@ -1,25 +1,3 @@
-// Copyright (C) 2016 Göteborgs Stad
-//
-// Denna programvara är fri mjukvara: den är tillåten att distribuera och modifiera
-// under villkoren för licensen CC-BY-NC-SA 4.0.
-//
-// This program is free software: you can redistribute it and/or modify
-// it under the terms of the CC-BY-NC-SA 4.0 licence.
-//
-// http://creativecommons.org/licenses/by-nc-sa/4.0/
-//
-// Det är fritt att dela och anpassa programvaran för valfritt syfte
-// med förbehåll att följande villkor följs:
-// * Copyright till upphovsmannen inte modifieras.
-// * Programvaran används i icke-kommersiellt syfte.
-// * Licenstypen inte modifieras.
-//
-// Den här programvaran är öppen i syfte att den skall vara till nytta för andra
-// men UTAN NÅGRA GARANTIER; även utan underförstådd garanti för
-// SÄLJBARHET eller LÄMPLIGHET FÖR ETT VISST SYFTE.
-//
-// https://github.com/hajkmap/Hajk
-
 import React, { Component } from "react";
 import Button from "@material-ui/core/Button";
 import SaveIcon from "@material-ui/icons/SaveSharp";
@@ -46,11 +24,15 @@ var defaultState = {
   instruction: "",
   copyright: "",
   disclaimer: "",
+  date: "",
   scales: "200, 400, 1000, 2000, 5000, 10000, 25000, 50000, 100000, 200000",
+  scaleMeters:
+    "10, 10, 20, 40, 60, 100, 100, 300, 600, 2000, 4000, 8000, 10000, 160000",
   dpis: "72, 150, 300",
   paperFormats: "A2, A3, A4",
   logo: "https://github.com/hajkmap/Hajk/raw/master/design/logo_small.png",
   logoMaxWidth: 40,
+  northArrowMaxWidth: 10,
   northArrow: "",
   visibleForGroups: [],
   visibleAtStart: false,
@@ -61,7 +43,11 @@ var defaultState = {
   includeNorthArrow: true,
   northArrowPlacement: "topLeft",
   useMargin: false,
+  useTextIconsInMargin: false,
   mapTextColor: "#000000",
+  useCustomTileLoaders: true,
+  includeImageBorder: false,
+  maxTileSize: 4096,
 };
 
 class ToolOptions extends Component {
@@ -83,20 +69,28 @@ class ToolOptions extends Component {
         target: tool.options.target || "toolbar",
         copyright: tool.options.copyright || this.state.copyright,
         disclaimer: tool.options.disclaimer || this.state.disclaimer,
+        date: tool.options.date || this.state.date,
         position: tool.options.position,
         width: tool.options.width,
         height: tool.options.height,
         instruction: tool.options.instruction,
         scales: tool.options.scales || this.state.scales,
+        scaleMeters: tool.options.scaleMeters || this.state.scaleMeters,
         dpis: tool.options.dpis || this.state.dpis,
         paperFormats: tool.options.paperFormats || this.state.paperFormats,
         logo: tool.options.logo,
         logoMaxWidth: tool.options.logoMaxWidth || this.state.logoMaxWidth,
+        northArrowMaxWidth:
+          tool.options.northArrowMaxWidth || this.state.northArrowMaxWidth,
         northArrow: tool.options.northArrow || this.state.northArrow,
         useMargin:
           typeof tool.options.useMargin !== "undefined"
             ? tool.options.useMargin
             : this.state.useMargin,
+        useTextIconsInMargin:
+          typeof tool.options.useTextIconsInMargin !== "undefined"
+            ? tool.options.useTextIconsInMargin
+            : this.state.useTextIconsInMargin,
         mapTextColor: tool.options.mapTextColor || this.state.mapTextColor,
         visibleAtStart: tool.options.visibleAtStart,
         visibleForGroups: tool.options.visibleForGroups
@@ -119,6 +113,11 @@ class ToolOptions extends Component {
             : this.state.includeNorthArrow,
         northArrowPlacement:
           tool.options.northArrowPlacement || this.state.northArrowPlacement,
+        includeImageBorder:
+          tool.options.includeImageBorder || this.state.includeImageBorder,
+        useCustomTileLoaders:
+          tool.options.useCustomTileLoaders ?? this.state.useCustomTileLoaders,
+        maxTileSize: tool.options.maxTileSize || this.state.maxTileSize,
       });
     } else {
       this.setState({
@@ -127,11 +126,9 @@ class ToolOptions extends Component {
     }
   }
 
-  componentWillUnmount() {}
   /**
    *
    */
-  componentWillMount() {}
 
   handleInputChange(event) {
     var target = event.target;
@@ -185,15 +182,19 @@ class ToolOptions extends Component {
         position: this.state.position,
         copyright: this.state.copyright,
         disclaimer: this.state.disclaimer,
+        date: this.state.date,
         width: this.state.width,
         height: this.state.height,
         scales: this.state.scales,
+        scaleMeters: this.state.scaleMeters,
         logo: this.state.logo,
         logoMaxWidth: this.state.logoMaxWidth,
+        northArrowMaxWidth: this.state.northArrowMaxWidth,
         dpis: this.state.dpis,
         paperFormats: this.state.paperFormats,
         northArrow: this.state.northArrow,
         useMargin: this.state.useMargin,
+        useTextIconsInMargin: this.state.useTextIconsInMargin,
         mapTextColor: this.state.mapTextColor,
         instruction: this.state.instruction,
         visibleAtStart: this.state.visibleAtStart,
@@ -207,6 +208,9 @@ class ToolOptions extends Component {
         scaleBarPlacement: this.state.scaleBarPlacement,
         includeNorthArrow: this.state.includeNorthArrow,
         northArrowPlacement: this.state.northArrowPlacement,
+        includeImageBorder: this.state.includeImageBorder,
+        useCustomTileLoaders: this.state.useCustomTileLoaders,
+        maxTileSize: this.state.maxTileSize,
       },
     };
 
@@ -308,6 +312,23 @@ class ToolOptions extends Component {
   };
 
   renderIncludeSelect = (currentValue, name) => {
+    return (
+      <Select
+        id={name}
+        name={name}
+        value={currentValue}
+        className="control-fixed-width"
+        onChange={(e) => {
+          this.handleInputChange(e);
+        }}
+      >
+        <MenuItem value={true}>Ja</MenuItem>
+        <MenuItem value={false}>Nej</MenuItem>
+      </Select>
+    );
+  };
+
+  renderUseCustomTileLoadersSelect = (currentValue, name) => {
     return (
       <Select
         id={name}
@@ -462,6 +483,42 @@ class ToolOptions extends Component {
               value={this.state.height}
             />
           </div>
+          <div className="separator">Inställningar för bildhantering</div>
+          <div>
+            <label htmlFor="includeLogo">
+              Aktivera beräknad bildladdning{" "}
+              <i
+                className="fa fa-question-circle"
+                data-toggle="tooltip"
+                title="Om aktivt kommer verktyget se till att förfrågningar mot WMS-servern inte överstiger serverns minesgräns. Denna inställning gör också att bilderna kommer efterfrågas med korrekt DPI."
+              />
+            </label>
+            {this.renderUseCustomTileLoadersSelect(
+              this.state.useCustomTileLoaders,
+              "useCustomTileLoaders"
+            )}
+          </div>
+          <div>
+            <label htmlFor="disclaimer">
+              Maximal Tile-storlek{" "}
+              <i
+                className="fa fa-question-circle"
+                data-toggle="tooltip"
+                title="Om automatisk bildberäkning är satt till aktivt måste en maximal storlek på de framtagna bilderna anges. Värdet bör vara runt 4096."
+              />
+            </label>
+            <input
+              type="number"
+              name="maxTileSize"
+              value={this.state.maxTileSize}
+              min={256}
+              max={16384}
+              step={1}
+              onChange={(e) => {
+                this.handleInputChange(e);
+              }}
+            />
+          </div>
           <div className="separator">Inställningar för utskrift</div>
           <div>
             <label htmlFor="copyright">Copyright</label>
@@ -486,11 +543,33 @@ class ToolOptions extends Component {
             />
           </div>
           <div>
+            <label htmlFor="date">Date</label>
+            <input
+              type="text"
+              name="date"
+              value={this.state.date}
+              onChange={(e) => {
+                this.handleInputChange(e);
+              }}
+            />
+          </div>
+          <div>
             <label htmlFor="scales">Skalor</label>
             <input
               type="text"
               name="scales"
               value={this.state.scales}
+              onChange={(e) => {
+                this.handleInputChange(e);
+              }}
+            />
+          </div>
+          <div>
+            <label htmlFor="scaleMeters">Skalmeter</label>
+            <input
+              type="text"
+              name="scaleMeters"
+              value={this.state.scaleMeters}
               onChange={(e) => {
                 this.handleInputChange(e);
               }}
@@ -628,6 +707,29 @@ class ToolOptions extends Component {
               "northArrowPlacement"
             )}
           </div>
+
+          <div>
+            <label htmlFor="northArrowMaxWidth">
+              Norrpil maxbredd{" "}
+              <i
+                className="fa fa-question-circle"
+                data-toggle="tooltip"
+                title="0 betyder att storleken på loggans bild används"
+              />
+            </label>
+            <input
+              id="northArrowMaxWidth"
+              name="northArrowMaxWidth"
+              type="number"
+              min="0"
+              className="control-fixed-width"
+              onChange={(e) => {
+                this.handleInputChange(e);
+              }}
+              value={this.state.northArrowMaxWidth}
+            />
+          </div>
+
           <div>
             <label htmlFor="includeScaleBar">
               Inkludera skalstock{" "}
@@ -657,6 +759,20 @@ class ToolOptions extends Component {
             )}
           </div>
           <div>
+            <label htmlFor="includeImageBorder">
+              Inkludera bildram{" "}
+              <i
+                className="fa fa-question-circle"
+                data-toggle="tooltip"
+                title="Inställning för om kartbildsram skall inkluderas som standard."
+              />
+            </label>
+            {this.renderIncludeSelect(
+              this.state.includeImageBorder,
+              "includeImageBorder"
+            )}
+          </div>
+          <div>
             <input
               id="useMargin"
               name="useMargin"
@@ -668,6 +784,21 @@ class ToolOptions extends Component {
             />
             &nbsp;
             <label htmlFor="useMargin">Marginal runt karta (förval)</label>
+          </div>
+          <div>
+            <input
+              id="useTextIconsInMargin"
+              name="useTextIconsInMargin"
+              type="checkbox"
+              onChange={(e) => {
+                this.handleInputChange(e);
+              }}
+              checked={this.state.useTextIconsInMargin}
+            />
+            &nbsp;
+            <label htmlFor="useMargin">
+              Rubriktext m.m. i marginalerna (förval)
+            </label>
           </div>
           <div>
             <div>
