@@ -1,5 +1,5 @@
-import ActiveDirectoryService from "../../services/activedirectory.service";
-import handleStandardResponse from "../../utils/handleStandardResponse";
+import ActiveDirectoryService from "../../services/activedirectory.service.js";
+import handleStandardResponse from "../../utils/handleStandardResponse.js";
 import log4js from "log4js";
 
 // Create a logger for admin events, those will be saved in a separate log file.

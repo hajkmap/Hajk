@@ -2,6 +2,7 @@ import Express from "express";
 import * as path from "path";
 import * as http from "http";
 import fs from "fs";
+import { fileURLToPath } from "url";
 
 import helmet from "helmet";
 import cors from "cors";
@@ -9,13 +10,13 @@ import compression from "compression";
 import cookieParser from "cookie-parser";
 import * as OpenApiValidator from "express-openapi-validator";
 
-import log4js from "./utils/hajkLogger";
+import log4js from "./utils/hajkLogger.js";
 import clfDate from "clf-date";
 
 import { createProxyMiddleware } from "http-proxy-middleware";
 
-import detailedRequestLogger from "./middlewares/detailed.request.logger";
-import errorHandler from "./middlewares/error.handler";
+import detailedRequestLogger from "./middlewares/detailed.request.logger.js";
+import errorHandler from "./middlewares/error.handler.js";
 
 const app = new Express();
 
@@ -25,7 +26,9 @@ const ALLOWED_API_VERSIONS = [1, 2];
 
 export default class ExpressServer {
   constructor() {
-    // Check engine version and display notice if applicable
+    // Check engine version and display notice if applicable. The current recommendation
+    // is based on the fact that `verifyLayers` uses `fetch`, which isn't available prior v18.
+    // See also https://nodejs.org/dist/latest-v18.x/docs/api/globals.html#fetch
     const recommendedMajorVersion = 18;
     if (process.versions.node.split(".")[0] < recommendedMajorVersion) {
       logger.warn(
@@ -150,7 +153,16 @@ export default class ExpressServer {
     );
 
     // Enable compression early so that responses that follow will get gziped
-    app.use(compression());
+    if (process.env.ENABLE_GZIP_COMPRESSION !== "false") {
+      logger.trace("[HTTP] Enabling Hajk's built-in GZIP compression");
+      app.use(compression());
+    } else {
+      logger.warn(
+        `[HTTP] Not enabling GZIP compression. If this is a production environment 
+you should make sure that you implement a reverse proxy that enables content compression. Alternatively, enable Hajk's 
+built-it compression by setting the ENABLE_GZIP_COMPRESSION option to "true" in .env.`
+      );
+    }
 
     this.setupGenericProxy();
 
@@ -182,7 +194,13 @@ export default class ExpressServer {
     // enabled the API validator middleware for all enabled
     // API versions
     apiVersions.forEach((v) => {
-      // Grab paths to our OpenAPI specifications
+      // Grab paths to our OpenAPI specifications by…
+      // …grabbing the current file's full URL and making it a file path…
+      const __filename = fileURLToPath(import.meta.url);
+      // …and extracting the dir name from file's path.
+      const __dirname = path.dirname(__filename);
+      // Finally, put it together with the filename of the YAML file
+      // that holds the specification.
       const openApiSpecification = path.join(__dirname, `api.v${v}.yml`);
 
       // Expose the API specification as a simple static route…
@@ -191,17 +209,27 @@ export default class ExpressServer {
       );
       app.use(`/api/v${v}/spec`, Express.static(openApiSpecification));
 
-      // …and apply the Validator middleware.
-      app.use(
-        OpenApiValidator.middleware({
-          apiSpec: openApiSpecification,
-          validateResponses,
-          validateRequests: {
-            allowUnknownQueryParameters: true,
-          },
-          ignorePaths: /.*\/spec(\/|$)/,
-        })
-      );
+      // …and apply the Validator middleware. We do it inside a timeout,
+      // which isn't optimal. The reasoning behind is that we must "wait
+      // a second or two" before we setup this middleware, to allow the
+      // async imports (which are initiated earlier) to finish so that those
+      // routes are set up when OAV runs its middleware. If we were to apply
+      // the middleware directly, any non-existing routes (such as those being
+      // created in async parts of the code) would render a 404 in the middleware.
+      // Related to #1309. Discovered during PR in #1332.
+      setTimeout(() => {
+        logger.trace(`[VALIDATOR] Setting up OpenApiValidator for /api/v${v}`);
+        app.use(
+          OpenApiValidator.middleware({
+            apiSpec: openApiSpecification,
+            validateResponses,
+            validateRequests: {
+              allowUnknownQueryParameters: true,
+            },
+            ignorePaths: /.*\/spec(\/|$)/,
+          })
+        );
+      }, 2000);
     });
   }
 
@@ -214,7 +242,7 @@ export default class ExpressServer {
         process.env.FB_SERVICE_BASE_URL !== undefined
       ) {
         const { default: sokigoFBProxy } = await import(
-          `../apis/v${v}/middlewares/sokigo.fb.proxy`
+          `../apis/v${v}/middlewares/sokigo.fb.proxy.js`
         );
         app.use(`/api/v${v}/fbproxy`, sokigoFBProxy());
         logger.info(
@@ -240,7 +268,7 @@ export default class ExpressServer {
         process.env.FME_SERVER_BASE_URL !== undefined
       ) {
         const { default: fmeServerProxy } = await import(
-          `../apis/v${v}/middlewares/fme.server.proxy`
+          `../apis/v${v}/middlewares/fme.server.proxy.js`
         );
 
         app.use(`/api/v${v}/fmeproxy`, fmeServerProxy());
@@ -343,7 +371,7 @@ export default class ExpressServer {
     try {
       // Dynamically import the required version of Static Restrictor
       const { default: restrictStatic } = await import(
-        `../apis/v${apiVersion}/middlewares/restrict.static`
+        `../apis/v${apiVersion}/middlewares/restrict.static.js`
       );
 
       const dir = path.join(process.cwd(), "static");
