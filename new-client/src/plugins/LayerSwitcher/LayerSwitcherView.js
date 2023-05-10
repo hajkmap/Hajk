@@ -10,6 +10,7 @@ import LayerGroup from "./components/LayerGroup.js";
 import BreadCrumbs from "./components/BreadCrumbs.js";
 import DrawOrder from "./components/DrawOrder.js";
 import LayerPackage from "./components/LayerPackage";
+import PersonalLayerPackage from "./components/PersonalLayerPackage";
 import LayerGroupAccordion from "./components/LayerGroupAccordion.js";
 
 import StarOutlineOutlinedIcon from "@mui/icons-material/StarOutlineOutlined";
@@ -48,6 +49,7 @@ class LayersSwitcherView extends React.PureComponent {
       activeTab: 0,
       activeLayersCount: 0,
       displayLoadLayerPackage: false,
+      displayPersonalLayerPackage: false,
     };
 
     props.app.globalObserver.subscribe("informativeLoaded", (chapters) => {
@@ -63,6 +65,13 @@ class LayersSwitcherView extends React.PureComponent {
   handleLayerPackageToggle = () => {
     this.setState({
       displayLoadLayerPackage: !this.state.displayLoadLayerPackage,
+    });
+  };
+
+  // Handles click on PersonalLayerpackage button and backbutton
+  handlePersonalLayerPackageToggle = () => {
+    this.setState({
+      displayPersonalLayerPackage: !this.state.displayPersonalLayerPackage,
     });
   };
 
@@ -96,7 +105,11 @@ class LayersSwitcherView extends React.PureComponent {
    * @memberof LayersSwitcherView
    */
   handleChangeTabs = (event, activeTab) => {
-    this.setState({ activeTab, displayLoadLayerPackage: false });
+    this.setState({
+      activeTab,
+      displayLoadLayerPackage: false,
+      displayPersonalLayerPackage: false,
+    });
   };
 
   /**
@@ -129,7 +142,8 @@ class LayersSwitcherView extends React.PureComponent {
         sx={{
           display:
             shouldRender === true &&
-            this.state.displayLoadLayerPackage === false
+            this.state.displayLoadLayerPackage === false &&
+            this.state.displayPersonalLayerPackage === false
               ? "block"
               : "none",
         }}
@@ -149,7 +163,7 @@ class LayersSwitcherView extends React.PureComponent {
               <IconButton onClick={this.handleLayerPackageToggle}>
                 <FolderOutlinedIcon fontSize="small"></FolderOutlinedIcon>
               </IconButton>
-              <IconButton>
+              <IconButton onClick={this.handlePersonalLayerPackageToggle}>
                 <PersonOutlinedIcon fontSize="small"></PersonOutlinedIcon>
               </IconButton>
               <IconButton onClick={this.handleClearQuickAccessLayers}>
@@ -252,6 +266,13 @@ class LayersSwitcherView extends React.PureComponent {
           map={this.props.map}
           globalObserver={this.props.model.globalObserver}
         ></LayerPackage>
+        <PersonalLayerPackage
+          display={this.state.displayPersonalLayerPackage}
+          backButtonCallback={this.handlePersonalLayerPackageToggle}
+          map={this.props.map}
+          app={this.props.app}
+          globalObserver={this.props.model.globalObserver}
+        ></PersonalLayerPackage>
         <BackgroundSwitcher
           display={this.state.activeTab === 1}
           layers={this.state.baseLayers}

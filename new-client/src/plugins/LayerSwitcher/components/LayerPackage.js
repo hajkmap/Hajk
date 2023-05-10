@@ -39,7 +39,7 @@ function LayerPackage({
   map,
   globalObserver,
 }) {
-  const { closeSnackbar, enqueueSnackbar } = useSnackbar();
+  const { enqueueSnackbar } = useSnackbar();
   // State that toggles info collapse
   const [infoIsActive, setInfoIsActive] = useState(false);
   // Confirmation dialogs
