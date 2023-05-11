@@ -189,17 +189,17 @@ nav.MuiBox-root .MuiSvgIcon-root {
   margin: 0 0 1rem;
 }
 
-.MuiAccordionSummary,
-.MuiAccordionDetails,
-.MuiAccordionSummary p.MuiTypography-root,
-.MuiAccordionDetails p.MuiTypography-root {
+.MuiAccordionSummary-content,
+.MuiAccordionDetails-root,
+.MuiAccordionSummary-content p.MuiTypography-root,
+.MuiAccordionDetails-root p.MuiTypography-root {
   font-family: "Avenir Next Medium" !important;
   font-size: 0.875rem !important;
   font-weight: 500 !important;
 }
 
-.MuiAccordionSummary div,
-.MuiAccordionDetails div
+.MuiAccordionSummary-content div,
+.MuiAccordionDetails-root div
 {
   border-bottom-width: 1px !important;
 }
