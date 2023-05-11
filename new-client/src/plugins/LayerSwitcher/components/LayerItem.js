@@ -216,10 +216,21 @@ class LayerItem extends React.PureComponent {
   showZoomSnack() {
     if (this.zoomWarningSnack) return;
 
+    // We're fetching layerInfo object from the layer object.
+    const layerInfo = this.props.layer.get("layerInfo");
+
+    // If layerInfo is defined, we get layersInfo from it.
+    // Otherwise, layersInfo is set as undefined.
+    const layersInfo = layerInfo ? layerInfo.layersInfo : undefined;
+
     // If the layer is a LayerGroupItem (meaning it contains more than one object in the "layersInfo" array),
     // then no message should be displayed.
-    if (Object.keys(this.props.layer.get("layerInfo").layersInfo).length > 1)
+    // Here we also ensure that layersInfo is defined and contains more than one layer
+    // before trying to access its keys. This prevents a TypeError when layersInfo
+    // is undefined.
+    if (layersInfo && Object.keys(layersInfo).length > 1) {
       return;
+    }
 
     this.zoomWarningSnack = this.props.enqueueSnackbar(
       `Lagret "${this.caption}"  är inte synligt vid aktuell zoomnivå.`,
