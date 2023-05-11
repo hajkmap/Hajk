@@ -1,1 +1,249 @@
-{}
+{
+    "typography": {
+        "fontFamily": "Avenir Next",
+        "fontWeight": "700",
+        "button": {
+            "fontFamily": "Avenir Next Medium",
+            "fontWeight": "500",
+            "textTransform": "none"
+        },
+        "paragraph": {
+            "fontFamily": "Avenir Next",
+            "fontWeight": "700",
+            "fontSize": "1rem",
+            "marginTop": "0",
+            "marginBottom": "1rem"
+        },
+        "h1": {
+            "fontFamily": "Gill Sans MT for Nacka",
+            "fontWeight": "300",
+            "fontSize": "2.5rem",
+            "marginTop": "0",
+            "marginBottom": "1rem"
+        },
+        "h2": {
+            "fontFamily": "Gill Sans MT for Nacka",
+            "fontWeight": "300",
+            "fontSize": "2rem",
+            "marginTop": "0",
+            "marginBottom": "1rem"
+        },
+        "h3": {
+            "fontFamily": "Gill Sans MT for Nacka",
+            "fontWeight": "400",
+            "fontSize": "1.5rem",
+            "marginTop": "0",
+            "marginBottom": "1rem"
+        },
+        "h4": {
+            "fontFamily": "Gill Sans MT for Nacka",
+            "fontWeight": "400",
+            "fontSize": "1.5rem",
+            "marginTop": "0",
+            "marginBottom": "1rem"
+        },
+        "h5": {
+            "fontFamily": "Gill Sans MT for Nacka",
+            "fontWeight": "400",
+            "fontSize": "1rem",
+            "marginTop": "0",
+            "marginBottom": "1rem"
+        },
+        "h6": {
+            "fontFamily": "Gill Sans MT for Nacka",
+            "fontWeight": "400",
+            "fontSize": "0.875rem",
+            "marginTop": "0",
+            "marginBottom": "1rem"
+        }
+    },
+    "palette": {
+        "primary": {
+            "main": "#0077b7",
+            "light": "#0077b7",
+            "dark": "#0077b7"
+        },
+        "secondary": {
+            "main": "#c65300",
+            "light": "#c65300",
+            "dark": "#c65300"
+        },
+        "info": {
+            "main": "#0077B7",
+            "light": "#0077B7",
+            "dark": "#0077B7"
+        },
+        "error": {
+            "main": "#cd0019",
+            "light": "#cd0019",
+            "dark": "#cd0019"
+        },
+        "success": {
+            "main": "#608028",
+            "light": "#608028",
+            "dark": "#608028"
+        },
+        "text": {
+            "primary": "#000000",
+            "secondary": "#000000",
+            "disabled": "#767676",
+            "hint": "#767676"
+        },
+        "warning": {
+            "main": "#C65300",
+            "light": "#C65300",
+            "dark": "#C65300"
+        },
+        "divider": "#e6e6e6"
+    },
+    "components": {
+        "MuiButtonBase": {
+            "defaultProps": {
+                "disableRipple": "true"
+            }
+        },
+        "MuiButton": {
+            "styleOverrides": {
+                "root": {
+                    "fontFamily": "Avenir Next Medium",
+                    "fontSize": "1rem",
+                    "fontWeight": "500",
+                    "textTransform": "none",
+                    "height": "3rem",
+                    "paddingTop": "0.835em",
+                    "paddingBottom": "0.835em",
+                    "borderRadius": "9999px",
+                    "&:hover": {
+                        "textDecoration": "underline"
+                    },
+                    "&:focus": {
+                        "textDecoration": "underline"
+                    }
+                },
+                "contained": {
+                    "boxShadow": "none",
+                    "&:hover": {
+                        "boxShadow": "none",
+                        "textDecoration": "underline"
+                    },
+                    "&:focus": {
+                        "boxShadow": "none",
+                        "textDecoration": "underline"
+                    }
+                },
+                "containedPrimary": {
+                    "&:hover": {
+                        "backgroundColor": "#4da0cd"
+                    },
+                    "&:focus": {
+                        "backgroundColor": "#4da0cd"
+                    }
+                },
+                "outlinedPrimary": {
+                    "&:hover": {
+                        "backgroundColor": "#e6e6e6"
+                    },
+                    "&:focus": {
+                        "backgroundColor": "#e6e6e6"
+                    }
+                }
+            }
+        },
+        "MuiTextField": {
+            "styleOverrides": {
+                "root": {
+                    "& .MuiOutlinedInput-root": {
+                        "& fieldset": {
+                            "borderColor": "#000000"
+                        },
+                        "&:hover fieldset": {
+                            "border": "2px solid #0077B7"
+                        },
+                        "&.Mui-focused fieldset": {
+                            "borderColor": "#0077B7",
+                            "borderLeft": "8px solid #0077B7"
+                        }
+                    }
+                }
+            }
+        },
+        "MuiInputLabel": {
+            "styleOverrides": {
+                "root": {
+                    "color": "#40444a",
+                    "&.Mui-focused": {
+                        "color": "#40444a"
+                    }
+                },
+                "outlined": {
+                    "paddingLeft": "12px",
+                    "&.Mui-focused": {
+                        "paddingLeft": "12px"
+                    }
+                }
+            }
+        },
+        "MuiCardHeader": {
+            "styleOverrides": {
+                "root": {
+                    "fontFamily": "Avenir Next Medium",
+                    "fontSize": "1rem",
+                    "fontWeight": "500"
+                },
+                "title": {
+                    "fontFamily": "Avenir Next Medium",
+                    "fontSize": "1rem",
+                    "fontWeight": "500"
+                },
+                "subheader": {
+                    "fontFamily": "Avenir Next Medium",
+                    "fontSize": "0.875rem",
+                    "fontWeight": "500"
+                }
+            }
+        },
+        "MuiAvatar": {
+            "styleOverrides": {
+                "root": {
+                    "backgroundColor": "#0077b7"
+                },
+                "colorDefault": {
+                    "color": "#fff"
+                }
+            }
+        },
+        "MuiAppBar": {
+            "styleOverrides": {
+                "root": {
+                    "backgroundColor": "#F7F7F7"
+                },
+                "colorDefault": {
+                    "backgroundColor": "#F7F7F7"
+                }
+            }
+        },
+        "MuiAccordionSummary": {
+            "styleOverrides": {
+                "content": {
+                    "fontFamily": "Avenir Next Medium",
+                    "fontSize": "0.875rem",
+                    "fontWeight": "500",
+                    "color": "#0077b7"
+                }
+            }
+        },
+        "MuiAccordionDetails": {
+            "styleOverrides": {
+                "root": {
+                    "fontFamily": "Avenir Next Medium",
+                    "fontSize": "0.875rem",
+                    "fontWeight": "500",
+                    "color": "#0077b7"
+                }
+            }
+        }
+    },
+    "shape": {
+        "borderRadius": "0"
+    }
+}

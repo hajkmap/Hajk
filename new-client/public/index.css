@@ -1,3 +1,27 @@
+@font-face {
+  font-family: "Avenir Next";
+  src: url("fonts/avenirnext-regular.woff2") format("woff2"),
+       url("fonts/avenirnext-regular.woff") format("woff");
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "Avenir Next Medium";
+  src: url("fonts/avenirnext-medium.woff2") format("woff2"),
+       url("fonts/avenirnext-medium.woff") format("woff");
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Gill Sans MT for Nacka';
+  src: url('fonts/gillsans-nacka.woff2') format('woff2'),
+       url('fonts/gillsans-nacka.woff') format('woff');
+  font-weight: normal;
+  font-style: normal;
+}
+
 html,
 body {
   margin: 0;
@@ -11,7 +35,8 @@ html {
 }
 
 body {
-  font-family: "Roboto", sans-serif;
+  font-family: "Avenir Next", sans-serif;
+  font-weight: 700;
   width: 100vw;
   height: 100vh;
   overflow-y: scroll;
@@ -27,7 +52,6 @@ body {
 }
 
 .app-start {
-  font-family: Helvetica, Arial, sans-serif;
   position: absolute;
   top: 0;
   bottom: 0;
@@ -35,21 +59,21 @@ body {
   right: 0;
   display: flex;
   flex-direction: column;
-  color: black !important;
-  line-height: 1.4 !important;
-  font-weight: 300 !important;
-  font-size: 2rem !important;
   justify-content: center;
   align-items: center;
-  background: rgb(63, 63, 63);
-  color: white !important;
-  fill: white;
+
+  font-family: "Avenir Next Medium", sans-serif;
+  font-size: 2rem;
+  font-weight: 500;
+  color: #fff;
+  fill: #fff;
+  background: #0077b7;
 }
 
 .sr-only {
   /*Same style attributes as MaterialUI SrOnly*/
-  width: 1px;
-  height: 1px;
+  width: 0;
+  height: 0;
   overflow: hidden;
   position: absolute;
 }
@@ -57,6 +81,7 @@ body {
 .compass {
   animation: compass 1.2s cubic-bezier(0.51, 0.41, 0.17, 1.1) infinite;
   height: 80px;
+  margin-bottom: 2rem;
 }
 
 @keyframes compass {
@@ -69,23 +94,21 @@ body {
 }
 
 .app-name {
-  font-size: 5rem;
-  font-variant-caps: all-small-caps;
-  font-style: italic;
+  font-size: 2rem;
 }
 
 .app-version {
-  font-size: 0.8rem;
-  line-height: 5rem;
+  font-size: 0.75rem;
+  line-height: 2rem;
 }
 
 /* Used only for displaying error if nothing loaded (and we don't have any MUI yet) */
 .start-error {
-  color: red;
-  background: rgb(255, 200, 200);
-  border: 1px solid red;
-  border-radius: 5px;
-  padding: 15px;
+  color: #cd0019;
+  border: 1px solid #cd0019;
+  background: #Fdefee;
+  border-radius: 0.5rem;
+  padding: 1rem;
   margin: 0 auto;
   width: 50%;
   text-align: center;
@@ -94,4 +117,89 @@ body {
 
 .introjs-tooltip {
   min-width: 280px !important;
+}
+
+/* Nacka kommun logotype */
+.MuiDrawer-paper.MuiDrawer-paperAnchorLeft > .MuiBox-root {
+  padding: 1rem !important;
+  height: 5rem !important;
+  display: flex;
+  justify-content: center;
+}
+
+.MuiDrawer-paper.MuiDrawer-paperAnchorLeft > .MuiBox-root img {
+  height: 3rem !important;
+}
+
+/* Nacka kommun menu */
+.MuiDrawer-paper.MuiDrawer-paperAnchorLeft .MuiListItem-button,
+.MuiDrawer-paper.MuiDrawer-paperAnchorLeft .MuiListItemText-primary {
+  font-family: "Avenir Next Medium" !important;
+  font-weight: 500 !important;
+  color: #0077b7 !important;
+}
+
+.MuiDrawer-paper.MuiDrawer-paperAnchorLeft .MuiListItem-button {
+  border-left: 6px solid transparent !important;
+  padding-left: 10px !important;
+}
+
+.MuiDrawer-paper.MuiDrawer-paperAnchorLeft .MuiListItem-button.Mui-selected {
+  background: #f0f0f0 !important;
+  border-left: 6px solid #0077b7 !important;
+}
+
+.MuiDrawer-paper.MuiDrawer-paperAnchorLeft .MuiListItem-button .MuiListItemIcon-root {
+  width: 2rem !important;
+  min-width: 2rem !important;
+}
+
+.MuiDrawer-paper.MuiDrawer-paperAnchorLeft .MuiSvgIcon-root,
+#header .MuiSvgIcon-root,
+nav.MuiBox-root .MuiSvgIcon-root {
+  fill: #0077b7 !important;
+}
+
+.MuiDrawer-paper.MuiDrawer-paperAnchorLeft .MuiIcon-root {
+  color: #0077b7 !important;
+}
+
+.MuiAvatar-root.MuiAvatar-circular {
+  background: #0077b7 !important;
+}
+
+/* Nacka kommun search */
+#searchInputField {
+  padding-left: 1rem;
+}
+
+/* Nacka kommun modal */
+.react-draggable {
+  min-height: 3.5rem !important;
+}
+.react-draggable header:not(.MuiAppBar-root) {
+  border-bottom: 1px solid #e6e6e6 !important;
+  min-height: 3.5rem !important;
+}
+
+#documentViewer p.MuiTypography-body1 {
+  font-family: "Avenir Next";
+  font-weight: 700;
+  font-size: 1rem;
+  margin: 0 0 1rem;
+}
+
+.MuiAccordionSummary,
+.MuiAccordionDetails,
+.MuiAccordionSummary p.MuiTypography-root,
+.MuiAccordionDetails p.MuiTypography-root {
+  font-family: "Avenir Next Medium" !important;
+  font-size: 0.875rem !important;
+  font-weight: 500 !important;
+}
+
+.MuiAccordionSummary div,
+.MuiAccordionDetails div
+{
+  border-bottom-width: 1px !important;
 }

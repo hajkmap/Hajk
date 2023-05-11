@@ -253,7 +253,7 @@
         "height": 0,
         "title": "Lagerhanterare",
         "description": "Välj vad du vill visa i kartan.",
-        "enableTransparencySlider": true,
+        "enableTransparencySlider": false,
         "dropdownThemeMaps": true,
         "themeMapHeaderCaption": "Standardkartan",
         "instruction": "",
@@ -329,7 +329,7 @@
         "scale": "",
         "markerImg": "",
         "delayBeforeAutoSearch": 300,
-        "searchBarPlaceholder": "Sök...",
+        "searchBarPlaceholder": "Vad letar du efter?",
         "autocompleteWildcardAtStart": false,
         "enablePolygonSearch": true,
         "enableRadiusSearch": true,
@@ -345,17 +345,17 @@
         "showResultFeaturesInMap": true,
         "enableFeatureToggler": true,
         "drawFillColor": "rgba(255,255,255,0.07)",
-        "drawStrokeColor": "rgba(74,74,74,0.5)",
-        "displayFillColor": "rgba(74,144,226,0.15)",
-        "displayStrokeColor": "rgba(74,144,226,0.4)",
+        "drawStrokeColor": "rgba(198,83,0,0.5)",
+        "displayFillColor": "rgba(198,83,0,0.15)",
+        "displayStrokeColor": "rgba(198,83,0,0.4)",
         "selectionTextStroke": "rgba(255,255,255,1)",
-        "selectionTextFill": "rgba(63,122,190,1)",
-        "selectionFillColor": "rgba(74,144,226,0.7)",
-        "selectionStrokeColor": "rgba(74,144,226,0.8)",
+        "selectionTextFill": "rgba(198,83,0,1)",
+        "selectionFillColor": "rgba(198,83,0.7)",
+        "selectionStrokeColor": "rgba(198,83,0,0.8)",
         "highlightTextStroke": "rgba(255,255,255,1)",
-        "highlightTextFill": "rgba(214,143,28,1)",
-        "highlightFillColor": "rgba(245,166,35,0.7)",
-        "highlightStrokeColor": "rgba(245,166,35,0.8)"
+        "highlightTextFill": "rgba(198,83,0,1)",
+        "highlightFillColor": "rgba(198,83,0,0.7)",
+        "highlightStrokeColor": "rgba(198,83,0,0.8)"
       },
       "index": 11
     },
@@ -480,10 +480,10 @@
         "target": "hidden",
         "showScrollButtonLimit": 400,
         "dynamicImportUrls": {
-          "iconFonts": "https://fonts.googleapis.com/icon?family=Material+Icons",
-          "customFont": "https://fonts.googleapis.com/css?family=Open+Sans"
+          "iconFonts": "https://fonts.googleapis.com/icon?family=Material+Icons+Outlined",
+          "customFont": "https://fonts.googleapis.com/css?family=Roboto"
         },
-        "iconLibraryLink": "https://material.io/resources/icons/?style=baseline",
+        "iconLibraryLink": "https://fonts.google.com/icons?icon.style=Outlined",
         "customThemeUrl": "/documentHandlerTheme.json",
         "width": 600,
         "height": "90vh",
@@ -501,8 +501,8 @@
           "title": "Innehållsförteckning"
         },
         "defaultDocumentColorSettings": {
-          "textAreaBackgroundColor": "#ccc",
-          "textAreaDividerColor": "#6A0DAD"
+          "textAreaBackgroundColor": "#f7f7f7",
+          "textAreaDividerColor": "#e6e6e6"
         },
         "menuConfig": {
           "menu": [
@@ -511,8 +511,7 @@
               "document": "exempeldokument",
               "color": "",
               "icon": {
-                "materialUiIconName": "",
-                "fontSize": "large"
+                "materialUiIconName": "description"
               },
               "maplink": "",
               "link": "",
@@ -523,8 +522,7 @@
               "document": "exempeldokument2",
               "color": "",
               "icon": {
-                "materialUiIconName": "",
-                "fontSize": "large"
+                "materialUiIconName": "description"
               },
               "maplink": "",
               "link": "",
@@ -538,7 +536,6 @@
   "map": {
     "target": "map",
     "center": [576357, 6386049],
-    "title": "Hajk 3",
     "projection": "EPSG:3006",
     "zoom": 1.33,
     "maxZoom": 8,
@@ -548,7 +545,6 @@
     "extent": [-1200000, 4700000, 2600000, 8500000],
     "constrainOnlyCenter": false,
     "constrainResolution": false,
-    "logo": "/logoLight.png",
     "geoserverLegendOptions": "",
     "mapselector": false,
     "mapcleaner": false,
@@ -557,15 +553,17 @@
     "drawerPermanent": false,
     "drawerVisibleMobile": false,
     "activeDrawerOnStart": "plugins",
-    "showThemeToggler": true,
-    "colors": {
-      "primaryColor": "#333333",
-      "secondaryColor": "#ffa000",
-      "preferredColorScheme": "user"
-    },
+    "showThemeToggler": false,
     "defaultCookieNoticeMessage": "Vi använder cookies för att följa upp användandet och ge en bra upplevelse av kartan. Du kan blockera cookies i webbläsaren men då visas detta meddelande igen.",
     "defaultCookieNoticeUrl": "https://pts.se/sv/bransch/regler/lagar/lag-om-elektronisk-kommunikation/kakor-cookies/",
     "crossOrigin": "anonymous",
-    "showRecentlyUsedPlugins": false
+    "showRecentlyUsedPlugins": false,
+    "colors": {
+      "primaryColor": "#0077b7",
+      "secondaryColor": "#c65300",
+      "preferredColorScheme": "light"
+    },
+    "logo": "/nacka.svg",
+    "title": "Nacka kommun - Webbkarta"
   }
 }
