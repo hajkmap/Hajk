@@ -1,15 +1,16 @@
 {
     "typography": {
         "fontFamily": "Avenir Next",
-        "fontWeight": "700",
+        "fontWeight": "400",
         "button": {
             "fontFamily": "Avenir Next Medium",
             "fontWeight": "500",
+            "fontSize": "1rem",
             "textTransform": "none"
         },
         "paragraph": {
             "fontFamily": "Avenir Next",
-            "fontWeight": "700",
+            "fontWeight": "400",
             "fontSize": "1rem",
             "marginTop": "0",
             "marginBottom": "1rem"
@@ -43,16 +44,16 @@
             "marginBottom": "1rem"
         },
         "h5": {
-            "fontFamily": "Gill Sans MT for Nacka",
-            "fontWeight": "400",
+            "fontFamily": "Avenir Next Medium",
+            "fontWeight": "500",
             "fontSize": "1rem",
             "marginTop": "0",
             "marginBottom": "1rem"
         },
         "h6": {
-            "fontFamily": "Gill Sans MT for Nacka",
-            "fontWeight": "400",
-            "fontSize": "0.875rem",
+            "fontFamily": "Avenir Next Medium",
+            "fontWeight": "500",
+            "fontSize": "1rem",
             "marginTop": "0",
             "marginBottom": "1rem"
         }
@@ -146,6 +147,19 @@
                     "&:focus": {
                         "backgroundColor": "#e6e6e6"
                     }
+                },
+                "text": {
+                    "paddingTop": "0",
+                    "paddingBottom": "0",
+                    "marginBottom": "0",
+                    "height": "auto",
+                    "min-height": "auto",
+                    "&:hover": {
+                        "backgroundColor": "transparent"
+                    },
+                    "&:focus": {
+                        "backgroundColor": "transparent"
+                    }
                 }
             }
         },
@@ -173,12 +187,6 @@
                     "color": "#40444a",
                     "&.Mui-focused": {
                         "color": "#40444a"
-                    }
-                },
-                "outlined": {
-                    "paddingLeft": "12px",
-                    "&.Mui-focused": {
-                        "paddingLeft": "12px"
                     }
                 }
             }
@@ -235,6 +243,16 @@
         "MuiAccordionDetails": {
             "styleOverrides": {
                 "root": {
+                    "fontFamily": "Avenir Next Medium",
+                    "fontSize": "0.875rem",
+                    "fontWeight": "500",
+                    "color": "#0077b7"
+                }
+            }
+        },
+        "MuiFormControlLabel": {
+            "styleOverrides": {
+                "label": {
                     "fontFamily": "Avenir Next Medium",
                     "fontSize": "0.875rem",
                     "fontWeight": "500",

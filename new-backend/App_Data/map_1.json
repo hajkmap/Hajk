@@ -518,7 +518,7 @@
               "menu": []
             },
             {
-              "title": "Exempeldokument2",
+              "title": "Exempeldokument två",
               "document": "exempeldokument2",
               "color": "",
               "icon": {
@@ -550,7 +550,7 @@
     "mapcleaner": false,
     "showUserAvatar": false,
     "drawerVisible": false,
-    "drawerPermanent": false,
+    "drawerPermanent": true,
     "drawerVisibleMobile": false,
     "activeDrawerOnStart": "plugins",
     "showThemeToggler": false,

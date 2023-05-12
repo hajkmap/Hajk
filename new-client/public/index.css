@@ -36,7 +36,7 @@ html {
 
 body {
   font-family: "Avenir Next", sans-serif;
-  font-weight: 700;
+  font-weight: normal;
   width: 100vw;
   height: 100vh;
   overflow-y: scroll;
@@ -135,6 +135,7 @@ body {
 .MuiDrawer-paper.MuiDrawer-paperAnchorLeft .MuiListItem-button,
 .MuiDrawer-paper.MuiDrawer-paperAnchorLeft .MuiListItemText-primary {
   font-family: "Avenir Next Medium" !important;
+  font-size: 0.875rem !important;
   font-weight: 500 !important;
   color: #0077b7 !important;
 }
@@ -155,13 +156,24 @@ body {
 }
 
 .MuiDrawer-paper.MuiDrawer-paperAnchorLeft .MuiSvgIcon-root,
-#header .MuiSvgIcon-root,
-nav.MuiBox-root .MuiSvgIcon-root {
+.MuiAutocomplete-root .MuiButtonBase-root .MuiSvgIcon-root,
+.MuiMenuItem-root .MuiSvgIcon-root,
+.react-draggable .MuiButtonBase-root .MuiSvgIcon-root {
   fill: #0077b7 !important;
 }
 
-.MuiDrawer-paper.MuiDrawer-paperAnchorLeft .MuiIcon-root {
+.MuiMenuItem-root {
   color: #0077b7 !important;
+}
+
+.react-draggable section .MuiTypography-subtitle2,
+.react-draggable section .MuiTypography-body2 {
+  color: #000000 !important;
+}
+
+.react-draggable section .MuiTypography-body2 {
+  font-family: "Avenir Next";
+  font-weight: 400;
 }
 
 .MuiAvatar-root.MuiAvatar-circular {
@@ -184,22 +196,88 @@ nav.MuiBox-root .MuiSvgIcon-root {
 
 #documentViewer p.MuiTypography-body1 {
   font-family: "Avenir Next";
-  font-weight: 700;
+  font-weight: 400;
   font-size: 1rem;
   margin: 0 0 1rem;
 }
 
 .MuiAccordionSummary-content,
 .MuiAccordionDetails-root,
+.MuiMenuItem-root,
 .MuiAccordionSummary-content p.MuiTypography-root,
-.MuiAccordionDetails-root p.MuiTypography-root {
+.MuiAccordionDetails-root p.MuiTypography-root,
+.react-draggable section .MuiBox-root .MuiGrid-wrap-xs-nowrap p.MuiTypography-body1 {
   font-family: "Avenir Next Medium" !important;
   font-size: 0.875rem !important;
   font-weight: 500 !important;
 }
 
 .MuiAccordionSummary-content div,
-.MuiAccordionDetails-root div
-{
+.MuiAccordionDetails-root div,
+.MuiBox-root > div {
   border-bottom-width: 1px !important;
+}
+
+/* Nacka kommun map control btn:s */
+#controls-column .MuiPaper-root,
+#header > .MuiPaper-root:first-child {
+  border-radius: 9999px !important;
+  background: transparent !important;
+  color: #fff !important;
+  box-shadow: none !important;
+  border: 0 !important;
+}
+
+#controls-column .MuiPaper-root button + button {
+  margin-top: 0.5rem !important;
+}
+
+#controls-column .MuiPaper-root button {
+  width: 48px !important;
+  height: 48px !important;
+}
+
+#controls-column .MuiPaper-root button {
+  background: #0077b7 !important;
+  color: #fff !important;
+  border-radius: 9999px !important;
+  border: 0 !important;
+  box-shadow: rgba(0, 0, 0, 0.2) 0px 2px 1px -1px, rgba(0, 0, 0, 0.14) 0px 1px 1px 0px, rgba(0, 0, 0, 0.12) 0px 1px 3px 0px;
+}
+
+#controls-column .MuiPaper-root button:hover {
+  background: #4da0cd !important;
+}
+
+#controls-column .MuiPaper-root button:focus {
+  background: #4da0cd !important;
+}
+
+
+@media only screen and (max-width: 599.95px) {
+  #header .MuiButtonBase-root .MuiSvgIcon-root {
+    fill: #0077b7 !important;
+  }
+}
+
+@media only screen and (min-width: 599.95px) {
+  #header .MuiToggleButtonGroup-root button + button {
+    margin-left: 0.5rem !important;
+  }
+  #header .MuiToggleButtonGroup-root button {
+    font-size: 1rem !important;
+    background: #0077b7 !important;
+    color: #fff !important;
+    border-radius: 9999px !important;
+    border: 0 !important;
+    box-shadow: rgba(0, 0, 0, 0.2) 0px 2px 1px -1px, rgba(0, 0, 0, 0.14) 0px 1px 1px 0px, rgba(0, 0, 0, 0.12) 0px 1px 3px 0px;
+    padding: 8px 22px !important;
+    height: 48px !important;
+  }
+  #header .MuiToggleButtonGroup-root button:hover {
+    background: #4da0cd !important;
+  }
+  #header .MuiToggleButtonGroup-root button:focus {
+    background: #4da0cd !important;
+  }
 }
