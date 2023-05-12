@@ -162,7 +162,12 @@ body {
   fill: #0077b7 !important;
 }
 
-.MuiMenuItem-root {
+.react-draggable .MuiButton-containedPrimary .MuiSvgIcon-root {
+  fill: #fff !important;
+}
+
+.MuiMenuItem-root,
+.MuiIcon-root {
   color: #0077b7 !important;
 }
 
