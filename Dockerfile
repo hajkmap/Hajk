@@ -23,7 +23,7 @@ COPY /new-admin/package*.json ./
 RUN npm ci --ignore-scripts
 COPY ./new-admin .
 RUN rm ./public/config.json
-RUN mv ./public/config.docker.json ./public/config.json 
+RUN mv ./public/config.docker.json ./public/config.json
 RUN npm run build --ignore-scripts
 
 # Stage 4 - Combine everything and fire it up
@@ -37,6 +37,7 @@ COPY /new-backend/App_Data ./App_Data
 COPY /new-backend/static ./static
 COPY --from=clientBuilder /usr/app/build ./static/client
 COPY --from=adminBuilder /usr/app/build ./static/admin
+VOLUME /usr/app/static/client
 VOLUME /usr/app/App_Data
 EXPOSE 3002
 CMD node index.js
