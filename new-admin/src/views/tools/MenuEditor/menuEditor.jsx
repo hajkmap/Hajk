@@ -119,7 +119,7 @@ class ToolOptions extends Component {
     });
     
     this.useDocumentFolders = this.menuEditorModel.config.use_document_folders ?? false;
-      console.log(this.useDocumentFolders);
+      //console.log(this.useDocumentFolders);
 
     if (this.useDocumentFolders) {
       this.menuEditorModel.loadFolders().then((list) => {

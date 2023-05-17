@@ -254,7 +254,9 @@ class DocumentEditor extends Component {
     this.loadImageList();
     this.loadVideoList();
     this.loadAudioList();
-    this.loadFolderList();
+    if(this.useDocumentFolders){
+      this.loadFolderList();
+    }
   }
 
   save() {
