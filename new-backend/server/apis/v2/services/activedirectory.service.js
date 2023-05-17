@@ -98,6 +98,19 @@ class ActiveDirectoryService {
       );
     }
 
+    // Grab some more options from .env regarding auto-reconnect and timeout
+    // and transform to valid config constants. See also: http://ldapjs.org/client.html
+    // and #1320.
+
+    // Try to reconnect when the connection gets lost (Default is false)
+    const optReconnect = Boolean(process.env.AD_RECONNECT);
+    // Milliseconds client should wait before timing out on TCP connections (Default: OS default)
+    const optConnectTimeout = Number.parseInt(process.env.AD_CONNECTTIMEOUT); // ms
+    // Milliseconds after last activity before client emits idle event
+    const optIdleTimeout = Number.parseInt(process.env.AD_IDLETIMEOUT); // ms
+    // Milliseconds client should let operations live for before timing out (Default: Infinity)
+    const optTimeout = Number.parseInt(process.env.AD_TIMEOUT);
+
     // Now we have the AD options and - optionally - the TLS options.
     // We're ready to prepare the config object for AD.
     const config = {
@@ -105,11 +118,25 @@ class ActiveDirectoryService {
       baseDN: process.env.AD_BASE_DN,
       username: process.env.AD_USERNAME,
       password: process.env.AD_PASSWORD,
-      ...(this.tlsOptions && { tlsOptions: this.tlsOptions }), // Assign only if exists
+      reconnect: optReconnect,
+      // Assign the various timeout options only if value isn't NaN
+      ...(!Number.isNaN(optConnectTimeout) && {
+        connectTimeout: optConnectTimeout,
+      }),
+      ...(!Number.isNaN(optIdleTimeout) && { idleTimeout: optIdleTimeout }),
+      ...(!Number.isNaN(optTimeout) && { timeout: optTimeout }),
+      // Assign some TLS options only if they exists
+      ...(this.tlsOptions && { tlsOptions: this.tlsOptions }),
     };
 
     // The main AD object that will handle communication
-    logger.trace(`Setting up AD connection to: ${process.env.AD_URL}`);
+    logger.trace(
+      `Setting up AD connection to using the following options (\`password\` and \`tlsOptions\` are obfuscated from this log message):`
+    );
+    // eslint-disable-next-line no-unused-vars
+    const { password, tlsOptions, ...obfuscatedConfig } = config;
+    logger.trace("%o", obfuscatedConfig);
+
     this._ad = new ActiveDirectory(config);
 
     logger.info(`Testing the AD connection to ${process.env.AD_URL}…`);
