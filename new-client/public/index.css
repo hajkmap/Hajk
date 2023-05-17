@@ -80,8 +80,7 @@ body {
 
 .compass {
   animation: compass 1.2s cubic-bezier(0.51, 0.41, 0.17, 1.1) infinite;
-  height: 80px;
-  margin-bottom: 2rem;
+  height: 56px;
 }
 
 @keyframes compass {
@@ -95,6 +94,8 @@ body {
 
 .app-name {
   font-size: 2rem;
+  height: 76px;
+  margin-bottom: 4rem;
 }
 
 .app-version {
