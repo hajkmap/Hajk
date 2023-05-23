@@ -3,7 +3,15 @@ import { createPortal } from "react-dom";
 import propTypes from "prop-types";
 
 import { styled } from "@mui/material/styles";
-import { AppBar, Tab, Tabs, Box, IconButton } from "@mui/material";
+import {
+  AppBar,
+  Divider,
+  Tab,
+  Tabs,
+  Box,
+  IconButton,
+  Tooltip,
+} from "@mui/material";
 
 import BackgroundSwitcher from "./components/BackgroundSwitcher.js";
 import LayerGroup from "./components/LayerGroup.js";
@@ -14,10 +22,9 @@ import PersonalLayerPackage from "./components/PersonalLayerPackage";
 import LayerGroupAccordion from "./components/LayerGroupAccordion.js";
 
 import StarOutlineOutlinedIcon from "@mui/icons-material/StarOutlineOutlined";
-import PersonOutlinedIcon from "@mui/icons-material/PersonOutlined";
-import DeleteOutlinedIcon from "@mui/icons-material/DeleteOutlined";
-import FolderOutlinedIcon from "@mui/icons-material/FolderOutlined";
+import CloudDownloadOutlinedIcon from "@mui/icons-material/CloudDownloadOutlined";
 import QuickAccessLayers from "./components/QuickAccessLayers.js";
+import QuickAccessOptions from "./components/QuickAccessOptions.js";
 
 // The styled-component below might seem unnecessary since we are using the sx-prop
 // on it as well. However, since we cannot use the sx-prop on a non-MUI-component
@@ -62,21 +69,24 @@ class LayersSwitcherView extends React.PureComponent {
   }
 
   // Handles click on Layerpackage button and backbutton
-  handleLayerPackageToggle = () => {
+  handleLayerPackageToggle = (e) => {
+    e?.stopPropagation();
     this.setState({
       displayLoadLayerPackage: !this.state.displayLoadLayerPackage,
     });
   };
 
   // Handles click on PersonalLayerpackage button and backbutton
-  handlePersonalLayerPackageToggle = () => {
+  handlePersonalLayerPackageToggle = (e) => {
+    e?.stopPropagation();
     this.setState({
       displayPersonalLayerPackage: !this.state.displayPersonalLayerPackage,
     });
   };
 
   // Handles click on clear quickAccess button
-  handleClearQuickAccessLayers = () => {
+  handleClearQuickAccessLayers = (e) => {
+    e.stopPropagation();
     this.props.map
       .getAllLayers()
       .filter((l) => l.get("quickAccess") === true)
@@ -160,15 +170,17 @@ class LayersSwitcherView extends React.PureComponent {
           }
           layerGroupDetails={
             <>
-              <IconButton onClick={this.handleLayerPackageToggle}>
-                <FolderOutlinedIcon fontSize="small"></FolderOutlinedIcon>
+              <IconButton onClick={(e) => this.handleLayerPackageToggle(e)}>
+                <Tooltip title="Ladda lagerpaket">
+                  <CloudDownloadOutlinedIcon fontSize="small"></CloudDownloadOutlinedIcon>
+                </Tooltip>
               </IconButton>
-              <IconButton onClick={this.handlePersonalLayerPackageToggle}>
-                <PersonOutlinedIcon fontSize="small"></PersonOutlinedIcon>
-              </IconButton>
-              <IconButton onClick={this.handleClearQuickAccessLayers}>
-                <DeleteOutlinedIcon fontSize="small"></DeleteOutlinedIcon>
-              </IconButton>
+              <QuickAccessOptions
+                handlePersonalLayerPackageToggle={
+                  this.handlePersonalLayerPackageToggle
+                }
+                handleClearQuickAccessLayers={this.handleClearQuickAccessLayers}
+              ></QuickAccessOptions>
             </>
           }
           children={
@@ -180,6 +192,7 @@ class LayersSwitcherView extends React.PureComponent {
             ></QuickAccessLayers>
           }
         ></LayerGroupAccordion>
+        <Divider></Divider>
         {this.options.groups.map((group, i) => {
           return (
             <LayerGroup

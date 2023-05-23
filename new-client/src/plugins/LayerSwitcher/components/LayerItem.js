@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useSnackbar } from "notistack";
 
 import {
+  Box,
   IconButton,
   ListItemButton,
   ListItemSecondaryAction,
@@ -219,7 +220,7 @@ export default function LayerItem({
   const cqlFilterVisible = app.config.mapConfig.map?.cqlFilterVisible || false;
 
   return (
-    <div>
+    <div className="layer-item">
       <ListItemButton
         disableRipple
         onClick={toggleable ? handleLayerItemClick : null}
@@ -227,12 +228,8 @@ export default function LayerItem({
           "&:hover .dragInidcatorIcon": {
             opacity: draggable ? 1 : 0,
           },
-          px: 1,
+          p: 0,
           pl: draggable ? 2 : 1,
-          borderBottom: (theme) =>
-            !settingIsActive
-              ? `${theme.spacing(0.2)} solid ${theme.palette.divider}`
-              : `${theme.spacing(0.2)} solid transparent`,
         }}
         dense
       >
@@ -253,48 +250,63 @@ export default function LayerItem({
           </IconButton>
         )}
         {expandableSection && expandableSection}
-        {toggleable && (
-          <IconButton
-            sx={{ pl: expandableSection ? 0 : "5px" }}
-            disableRipple
-            size="small"
-          >
-            {getLayerToggleIcon()}
-          </IconButton>
-        )}
-        {isBackgroundLayer && draggable ? (
-          layer.isFakeMapLayer ? (
-            <WallpaperIcon sx={{ mr: "5px" }} />
-          ) : (
-            <PublicOutlinedIcon sx={{ mr: "5px" }} />
-          )
-        ) : (
-          getIconFromLayer()
-        )}
-        <ListItemText primary={layer.get("caption")} />
-        <ListItemSecondaryAction>
-          {renderStatusButton()}
-          {hasListItemOptions() && (
-            <LayerItemOptions
-              layer={layer}
-              app={app}
-              chapters={chapters}
-              enqueueSnackbar={enqueueSnackbar}
-              onOpenChapter={onOpenChapter}
-            />
+        <Box
+          sx={{
+            display: "flex",
+            position: "relative",
+            width: "100%",
+            alignItems: "center",
+            py: 0.5,
+            pr: 1,
+            borderBottom: (theme) =>
+              !settingIsActive
+                ? `${theme.spacing(0.2)} solid ${theme.palette.divider}`
+                : `${theme.spacing(0.2)} solid transparent`,
+          }}
+        >
+          {toggleable && (
+            <IconButton
+              sx={{ pl: expandableSection ? 0 : "5px" }}
+              disableRipple
+              size="small"
+            >
+              {getLayerToggleIcon()}
+            </IconButton>
           )}
-          {layer.isFakeMapLayer !== true &&
-            layer.get("layerType") !== "system" && (
-              <IconButton size="small" onClick={(e) => toggleSettings(e)}>
-                <ExpandMoreOutlinedIcon
-                  sx={{
-                    transform: settingIsActive ? "rotate(180deg)" : "",
-                    transition: "transform 300ms ease",
-                  }}
-                ></ExpandMoreOutlinedIcon>
-              </IconButton>
+          {isBackgroundLayer && draggable ? (
+            layer.isFakeMapLayer ? (
+              <WallpaperIcon sx={{ mr: "5px" }} />
+            ) : (
+              <PublicOutlinedIcon sx={{ mr: "5px" }} />
+            )
+          ) : (
+            getIconFromLayer()
+          )}
+          <ListItemText primary={layer.get("caption")} />
+          <ListItemSecondaryAction>
+            {renderStatusButton()}
+            {hasListItemOptions() && (
+              <LayerItemOptions
+                layer={layer}
+                app={app}
+                chapters={chapters}
+                enqueueSnackbar={enqueueSnackbar}
+                onOpenChapter={onOpenChapter}
+              />
             )}
-        </ListItemSecondaryAction>
+            {layer.isFakeMapLayer !== true &&
+              layer.get("layerType") !== "system" && (
+                <IconButton size="small" onClick={(e) => toggleSettings(e)}>
+                  <ExpandMoreOutlinedIcon
+                    sx={{
+                      transform: settingIsActive ? "rotate(180deg)" : "",
+                      transition: "transform 300ms ease",
+                    }}
+                  ></ExpandMoreOutlinedIcon>
+                </IconButton>
+              )}
+          </ListItemSecondaryAction>
+        </Box>
       </ListItemButton>
       {!layer.isFakeMapLayer && layer.get("layerType") !== "system" && (
         <LayerItemCollapse

@@ -3,6 +3,7 @@ import React, { useCallback, useEffect, useState } from "react";
 import LayerItem from "./LayerItem";
 import BackgroundLayer from "./BackgroundLayer";
 import GroupLayer from "./GroupLayer";
+import { Box } from "@mui/material";
 
 export default function QuickAccessLayers({ app, map, model, options }) {
   // State that contains the layers that are currently visible
@@ -34,7 +35,13 @@ export default function QuickAccessLayers({ app, map, model, options }) {
   }, [app.globalObserver, getQuickAccessLayers]);
 
   return (
-    <>
+    <Box
+      sx={{
+        ".layer-item:last-child .MuiBox-root": {
+          borderBottom: "none",
+        },
+      }}
+    >
       {quickAccessLayers.map((l) => {
         return l.get("layerType") === "base" ? (
           <BackgroundLayer
@@ -65,6 +72,6 @@ export default function QuickAccessLayers({ app, map, model, options }) {
           />
         );
       })}
-    </>
+    </Box>
   );
 }
