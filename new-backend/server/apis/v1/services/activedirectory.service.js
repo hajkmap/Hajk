@@ -103,7 +103,7 @@ class ActiveDirectoryService {
     // and #1320.
 
     // Try to reconnect when the connection gets lost (Default is false)
-    const optReconnect = Boolean(process.env.AD_RECONNECT);
+    const optReconnect = process.env.AD_RECONNECT === "true";
     // Milliseconds client should wait before timing out on TCP connections (Default: OS default)
     const optConnectTimeout = Number.parseInt(process.env.AD_CONNECTTIMEOUT); // ms
     // Milliseconds after last activity before client emits idle event
