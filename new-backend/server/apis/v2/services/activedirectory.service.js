@@ -3,7 +3,10 @@ import ActiveDirectoryError from "../utils/ActiveDirectoryError.js";
 import log4js from "log4js";
 import fs from "fs";
 
+// Create a logger for this Service
 const logger = log4js.getLogger("service.auth.v2");
+// Let's create another logger to separate internal logging from the ActiveDirectory2 library
+const internalADLogger = log4js.getLogger("service.auth.v2.activedirectory2");
 
 /**
  * @description Proposed setup:
@@ -114,6 +117,7 @@ class ActiveDirectoryService {
     // Now we have the AD options and - optionally - the TLS options.
     // We're ready to prepare the config object for AD.
     const config = {
+      logging: internalADLogger,
       url: process.env.AD_URL,
       baseDN: process.env.AD_BASE_DN,
       username: process.env.AD_USERNAME,
@@ -131,10 +135,10 @@ class ActiveDirectoryService {
 
     // The main AD object that will handle communication
     logger.trace(
-      `Setting up AD connection to using the following options (\`password\` and \`tlsOptions\` are obfuscated from this log message):`
+      `Setting up AD connection to using the following options (\`logging\`, \`password\` and \`tlsOptions\` are obfuscated from this log message):`
     );
     // eslint-disable-next-line no-unused-vars
-    const { password, tlsOptions, ...obfuscatedConfig } = config;
+    const { password, tlsOptions, logging, ...obfuscatedConfig } = config;
     logger.trace("%o", obfuscatedConfig);
 
     this._ad = new ActiveDirectory(config);
