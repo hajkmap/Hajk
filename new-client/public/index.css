@@ -251,14 +251,16 @@ body {
   box-shadow: rgba(0, 0, 0, 0.2) 0px 2px 1px -1px, rgba(0, 0, 0, 0.14) 0px 1px 1px 0px, rgba(0, 0, 0, 0.12) 0px 1px 3px 0px;
 }
 
-#controls-column .MuiPaper-root button:hover {
-  background: #4da0cd !important;
+.MuiDialogActions-root .MuiButton-containedPrimary {
+  background: #0077b7 !important;
 }
 
-#controls-column .MuiPaper-root button:focus {
+#controls-column .MuiPaper-root button:hover,
+#controls-column .MuiPaper-root button:focus,
+.MuiDialogActions-root .MuiButton-containedPrimary:hover,
+.MuiDialogActions-root .MuiButton-containedPrimary:focus {
   background: #4da0cd !important;
 }
-
 
 @media only screen and (max-width: 599.95px) {
   #header .MuiButtonBase-root .MuiSvgIcon-root {
