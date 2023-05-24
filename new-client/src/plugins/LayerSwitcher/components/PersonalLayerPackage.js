@@ -93,10 +93,12 @@ function PersonalLayerPackage({
   }, [personalLayerPackages]);
 
   // Handles click on back button in header
-  const handleBackButtonClick = () => {
+  const handleBackButtonClick = (setQuickAccessSectionExpanded) => {
     setTooltipOpen(false);
     setTimeout(() => {
-      backButtonCallback();
+      setQuickAccessSectionExpanded
+        ? backButtonCallback({ setQuickAccessSectionExpanded: true })
+        : backButtonCallback();
     }, 100);
   };
 
@@ -263,6 +265,9 @@ function PersonalLayerPackage({
         variant: "success",
       }
     );
+
+    // Close personalLayerPackage view on load
+    handleBackButtonClick(true);
   };
 
   // Fires when the user closes the confirmation-window.
@@ -362,9 +367,12 @@ function PersonalLayerPackage({
           </FormGroup>
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => handleLoadConfirmation(false)}>Ladda</Button>
-          <Button onClick={handleLoadConfirmationAbort} variant="contained">
-            Avbryt
+          <Button onClick={handleLoadConfirmationAbort}>Avbryt</Button>
+          <Button
+            onClick={() => handleLoadConfirmation(false)}
+            variant="contained"
+          >
+            Ladda
           </Button>
         </DialogActions>
       </Dialog>,
@@ -379,6 +387,8 @@ function PersonalLayerPackage({
           sx={{
             p: 1,
             backgroundColor: (theme) => theme.palette.grey[100],
+            borderBottom: (theme) =>
+              `${theme.spacing(0.2)} solid ${theme.palette.divider}`,
           }}
         >
           <Stack direction="row" alignItems="center">
@@ -394,7 +404,7 @@ function PersonalLayerPackage({
               </IconButton>
             </Tooltip>
             <Box sx={{ flexGrow: 1, textAlign: "center" }}>
-              <Typography variant="h6">Mina snabblager</Typography>
+              <Typography variant="subtitle1">Mina snabblager</Typography>
             </Box>
             <input
               ref={fileInputRef}
@@ -423,9 +433,11 @@ function PersonalLayerPackage({
             <Box
               sx={{
                 px: 1,
+                pt: 1,
+                borderTop: (theme) =>
+                  `${theme.spacing(0.2)} solid ${theme.palette.divider}`,
               }}
             >
-              <hr></hr>
               <Typography variant="subtitle2">
                 Här kan du ladda in sparade paket med lager. Välj om innehållet
                 ska ersätta befintliga snabblager eller endast adderas vid
@@ -441,7 +453,8 @@ function PersonalLayerPackage({
         >
           <Card
             sx={{
-              border: "1px solid gray",
+              border: (theme) =>
+                `${theme.spacing(0.2)} solid ${theme.palette.divider}`,
               borderRadius: "8px",
               boxShadow: "none",
               mb: 1,
@@ -527,7 +540,8 @@ function PersonalLayerPackage({
                 return (
                   <Card
                     sx={{
-                      border: "1px solid gray",
+                      border: (theme) =>
+                        `${theme.spacing(0.2)} solid ${theme.palette.divider}`,
                       borderRadius: "8px",
                       boxShadow: "none",
                       mb: 1,
@@ -676,11 +690,13 @@ function PersonalLayerPackage({
           />
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => handleEditPackageItem()} autoFocus>
+          <Button onClick={() => setEditAlert(!editAlert)}>Avbryt</Button>
+          <Button
+            variant="contained"
+            onClick={() => handleEditPackageItem()}
+            autoFocus
+          >
             Spara
-          </Button>
-          <Button onClick={() => setEditAlert(!editAlert)} variant="contained">
-            Avbryt
           </Button>
         </DialogActions>
       </Dialog>

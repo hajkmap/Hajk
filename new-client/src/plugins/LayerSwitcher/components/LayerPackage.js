@@ -60,10 +60,12 @@ function LayerPackage({
   });
 
   // Handles click on back button in header
-  const handleBackButtonClick = () => {
+  const handleBackButtonClick = (setQuickAccessSectionExpanded) => {
     setTooltipOpen(false);
     setTimeout(() => {
-      backButtonCallback();
+      setQuickAccessSectionExpanded
+        ? backButtonCallback({ setQuickAccessSectionExpanded: true })
+        : backButtonCallback();
     }, 100);
   };
 
@@ -139,9 +141,12 @@ function LayerPackage({
       }
     });
 
-    enqueueSnackbar(`Snabblager har nu laddats med "${lpInfo.title}"`, {
+    enqueueSnackbar(`${lpInfo.title} har nu laddats till snabblager.`, {
       variant: "success",
     });
+
+    // Close layerPackage view on load
+    handleBackButtonClick(true);
   };
 
   // Clear quickaccessLayers
@@ -180,7 +185,7 @@ function LayerPackage({
         </DialogTitle>
         <DialogContent>
           <DialogContentText sx={{ pb: 2 }}>
-            Stadsbyggnadsförvaltningen
+            {loadLpInfoConfirmation ? loadLpInfoConfirmation.author : ""}
           </DialogContentText>
           <Typography>
             {loadLpInfoConfirmation ? loadLpInfoConfirmation.description : ""}
@@ -191,10 +196,6 @@ function LayerPackage({
               : ""}
           </Typography>
           <hr></hr>
-          <Typography>
-            Ange om paketet ska ersätta eller komplettera befintliga snabblager
-            vid laddning.
-          </Typography>
           <FormGroup>
             <FormControlLabel
               control={
@@ -207,14 +208,17 @@ function LayerPackage({
                   }
                 />
               }
-              label="Ersätt lager vid laddning"
+              label="Ersätt allt i snabblager vid laddning"
             />
           </FormGroup>
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => handleLoadConfirmation(true)}>Ladda</Button>
-          <Button onClick={handleLoadConfirmationAbort} variant="contained">
-            Avbryt
+          <Button onClick={handleLoadConfirmationAbort}>Avbryt</Button>
+          <Button
+            onClick={() => handleLoadConfirmation(true)}
+            variant="contained"
+          >
+            Ladda
           </Button>
         </DialogActions>
       </Dialog>,
@@ -229,12 +233,11 @@ function LayerPackage({
         open={loadLpConfirmation ? true : false}
         onClose={handleLoadConfirmationAbort}
       >
-        <DialogTitle>Ladda lager</DialogTitle>
+        <DialogTitle>Ladda lagerpaket</DialogTitle>
         <DialogContent>
           <Typography>
             {loadLpConfirmation
-              ? loadLpConfirmation.title +
-                " kommer nu att laddas. Ange om paketet ska ersätta eller komplettera befintliga snabblager."
+              ? `Lagerpaketet ${loadLpConfirmation.title} kommer nu att laddas till snabblager.`
               : ""}
             <br></br>
           </Typography>
@@ -250,14 +253,17 @@ function LayerPackage({
                   }
                 />
               }
-              label="Ersätt lager vid laddning"
+              label="Ersätt allt i snabblager vid laddning"
             />
           </FormGroup>
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => handleLoadConfirmation(false)}>Ladda</Button>
-          <Button onClick={handleLoadConfirmationAbort} variant="contained">
-            Avbryt
+          <Button onClick={handleLoadConfirmationAbort}>Avbryt</Button>
+          <Button
+            onClick={() => handleLoadConfirmation(false)}
+            variant="contained"
+          >
+            Ladda
           </Button>
         </DialogActions>
       </Dialog>,
@@ -272,6 +278,8 @@ function LayerPackage({
           sx={{
             p: 1,
             backgroundColor: (theme) => theme.palette.grey[100],
+            borderBottom: (theme) =>
+              `${theme.spacing(0.2)} solid ${theme.palette.divider}`,
           }}
         >
           <Stack direction="row" alignItems="center">
@@ -287,7 +295,7 @@ function LayerPackage({
               </IconButton>
             </Tooltip>
             <Box sx={{ flexGrow: 1, textAlign: "center" }}>
-              <Typography variant="h6">Ladda lager</Typography>
+              <Typography variant="subtitle1">Ladda lager</Typography>
             </Box>
             <IconButton onClick={handleInfoButtonClick}>
               <Tooltip title={infoIsActive ? "Dölj info" : "Visa info"}>
@@ -304,13 +312,15 @@ function LayerPackage({
             <Box
               sx={{
                 px: 1,
+                pt: 1,
+                borderTop: (theme) =>
+                  `${theme.spacing(0.2)} solid ${theme.palette.divider}`,
               }}
             >
-              <hr></hr>
               <Typography variant="subtitle2">
-                Här kan du ladda in fördefinierade paket med lager och
-                inställningar. Välj om innehållet ska ersätta befintliga
-                snabblager eller endast adderas vid laddningen.
+                Här kan du ladda fördefinierade lagerpaket till snabblager.
+                Paketen innehåller lager med synlighet, ritordning och
+                inställningar.
               </Typography>
             </Box>
           </Collapse>
@@ -335,6 +345,7 @@ function LayerPackage({
               fullWidth
               placeholder="Filtrera"
               variant="outlined"
+              sx={{ background: "#fff" }}
             />
           </Box>
         </Box>
@@ -353,7 +364,10 @@ function LayerPackage({
                       dense
                       key={l.id}
                       sx={{
-                        border: "1px solid gray",
+                        border: (theme) =>
+                          `${theme.spacing(0.2)} solid ${
+                            theme.palette.divider
+                          }`,
                         borderRadius: "8px",
                         mb: 1,
                       }}

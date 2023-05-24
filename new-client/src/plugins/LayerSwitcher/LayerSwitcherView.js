@@ -57,6 +57,7 @@ class LayersSwitcherView extends React.PureComponent {
       activeLayersCount: 0,
       displayLoadLayerPackage: false,
       displayPersonalLayerPackage: false,
+      quickAccessSectionExpanded: false,
     };
 
     props.app.globalObserver.subscribe("informativeLoaded", (chapters) => {
@@ -69,19 +70,29 @@ class LayersSwitcherView extends React.PureComponent {
   }
 
   // Handles click on Layerpackage button and backbutton
-  handleLayerPackageToggle = (e) => {
-    e?.stopPropagation();
+  handleLayerPackageToggle = (layerPackageState) => {
+    layerPackageState?.event?.stopPropagation();
     this.setState({
       displayLoadLayerPackage: !this.state.displayLoadLayerPackage,
     });
+    if (layerPackageState?.setQuickAccessSectionExpanded) {
+      this.setState({
+        quickAccessSectionExpanded: true,
+      });
+    }
   };
 
   // Handles click on PersonalLayerpackage button and backbutton
-  handlePersonalLayerPackageToggle = (e) => {
-    e?.stopPropagation();
+  handlePersonalLayerPackageToggle = (layerPackageState) => {
+    layerPackageState?.event?.stopPropagation();
     this.setState({
       displayPersonalLayerPackage: !this.state.displayPersonalLayerPackage,
     });
+    if (layerPackageState?.setQuickAccessSectionExpanded) {
+      this.setState({
+        quickAccessSectionExpanded: true,
+      });
+    }
   };
 
   // Handles click on clear quickAccess button
@@ -161,7 +172,7 @@ class LayersSwitcherView extends React.PureComponent {
         {/* TODO: configurable from admin */}
         {/* QuickAccess section */}
         <LayerGroupAccordion
-          expanded={false}
+          expanded={this.state.quickAccessSectionExpanded}
           name={"Snabblager"}
           quickAccess={
             <IconButton sx={{ pl: 0 }} disableRipple size="small">
@@ -170,7 +181,9 @@ class LayersSwitcherView extends React.PureComponent {
           }
           layerGroupDetails={
             <>
-              <IconButton onClick={(e) => this.handleLayerPackageToggle(e)}>
+              <IconButton
+                onClick={(e) => this.handleLayerPackageToggle({ event: e })}
+              >
                 <Tooltip title="Ladda lagerpaket">
                   <CloudDownloadOutlinedIcon fontSize="small"></CloudDownloadOutlinedIcon>
                 </Tooltip>
