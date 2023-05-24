@@ -45,6 +45,8 @@ function LayerPackage({
   // Confirmation dialogs
   const [loadLpConfirmation, setLoadLpConfirmation] = useState(null);
   const [loadLpInfoConfirmation, setLoadLpInfoConfirmation] = useState(null);
+  const [missingLayersConfirmation, setMissingLayersConfirmation] =
+    useState(null);
   const [clearExistingQuickAccessLayers, setClearExistingQuickAccessLayers] =
     useState(true);
 
@@ -111,12 +113,30 @@ function LayerPackage({
     setLoadLpConfirmation(null);
     setLoadLpInfoConfirmation(null);
 
+    // Check if layers from layerpackage exists in map
+    const missingLayers = checkForMissingLayers(lpInfo.layers);
+    if (missingLayers.length > 0) {
+      // Show missing layers dialog
+      setMissingLayersConfirmation({
+        missingLayers: missingLayers,
+        layers: lpInfo.layers,
+        title: lpInfo.title,
+      });
+    } else {
+      loadLayers(lpInfo.layers, lpInfo.title);
+    }
+  };
+
+  // Load layers to quickAccess section
+  const loadLayers = (layers, title) => {
     if (clearExistingQuickAccessLayers) {
       clearQuickAccessLayers();
     }
 
+    setMissingLayersConfirmation(null);
+
     map.getAllLayers().forEach((layer) => {
-      const info = lpInfo.layers.find((l) => l.id === layer.get("name"));
+      const info = layers.find((l) => l.id === layer.get("name"));
       if (info) {
         // Set quickaccess property
         layer.set("quickAccess", true);
@@ -141,12 +161,25 @@ function LayerPackage({
       }
     });
 
-    enqueueSnackbar(`${lpInfo.title} har nu laddats till snabblager.`, {
+    enqueueSnackbar(`${title} har nu laddats till snabblager.`, {
       variant: "success",
     });
 
     // Close layerPackage view on load
     handleBackButtonClick(true);
+  };
+
+  // Check if all layers in package exist in map
+  const checkForMissingLayers = (layers) => {
+    map.getAllLayers().forEach((layer) => {
+      const existingLayer = layers.find((l) => l.id === layer.get("name"));
+      if (existingLayer) {
+        // Remove the layer from the layers array once it's found
+        layers = layers.filter((l) => l.id !== existingLayer.id);
+      }
+    });
+    // At this point, the layers array will only contain the layers that don't exist in map.getAllLayers()
+    return layers;
   };
 
   // Clear quickaccessLayers
@@ -161,6 +194,11 @@ function LayerPackage({
   const handleLoadConfirmationAbort = () => {
     setLoadLpConfirmation(null);
     setLoadLpInfoConfirmation(null);
+  };
+
+  // Fires when the user closes the missing layers-window.
+  const handleMissingLayersConfirmationAbort = () => {
+    setMissingLayersConfirmation(null);
   };
 
   // Handles backbutton tooltip close event
@@ -264,6 +302,50 @@ function LayerPackage({
             variant="contained"
           >
             Ladda
+          </Button>
+        </DialogActions>
+      </Dialog>,
+      document.getElementById("windows-container")
+    );
+  };
+
+  // Render dialog with missing layers information
+  const renderMissingLayersDialog = () => {
+    return createPortal(
+      <Dialog
+        open={missingLayersConfirmation ? true : false}
+        onClose={handleMissingLayersConfirmationAbort}
+      >
+        <DialogTitle>Lager saknas</DialogTitle>
+        <DialogContent>
+          <Typography>
+            {missingLayersConfirmation &&
+              `Följande lagerid:n kan inte hittas i kartans lagerlista:`}
+            <br></br>
+          </Typography>
+          <ul>
+            {missingLayersConfirmation?.missingLayers.map((l) => {
+              return <li key={l.id}>{l.id}</li>;
+            })}
+          </ul>
+          <Typography>
+            {missingLayersConfirmation &&
+              `Det kan bero på att lagret har utgått. Vänligen kontrollera och uppdatera lagerpaketet.`}
+            <br></br>
+          </Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleMissingLayersConfirmationAbort}>Avbryt</Button>
+          <Button
+            onClick={() =>
+              loadLayers(
+                missingLayersConfirmation.layers,
+                missingLayersConfirmation.title
+              )
+            }
+            variant="contained"
+          >
+            Fortsätt
           </Button>
         </DialogActions>
       </Dialog>,
@@ -398,6 +480,7 @@ function LayerPackage({
       </Box>
       {renderLoadDialog()}
       {renderInfoDialog()}
+      {renderMissingLayersDialog()}
     </>
   );
 }

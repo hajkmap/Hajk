@@ -51,6 +51,8 @@ function PersonalLayerPackage({
   const [infoIsActive, setInfoIsActive] = useState(false);
   // Confirmation dialog
   const [loadLpConfirmation, setLoadLpConfirmation] = useState(null);
+  const [missingLayersConfirmation, setMissingLayersConfirmation] =
+    useState(null);
   const [clearExistingQuickAccessLayers, setClearExistingQuickAccessLayers] =
     useState(true);
   const [addWsIsActive, setAddWsIsActive] = useState(null);
@@ -105,6 +107,11 @@ function PersonalLayerPackage({
   // Handles click on info button in header
   const handleInfoButtonClick = () => {
     setInfoIsActive(!infoIsActive);
+  };
+
+  // Fires when the user closes the missing layers-window.
+  const handleMissingLayersConfirmationAbort = () => {
+    setMissingLayersConfirmation(null);
   };
 
   // Handles click on upload button in header
@@ -231,14 +238,34 @@ function PersonalLayerPackage({
   // Fires when the user confirms the confirmation-window.
   const handleLoadConfirmation = () => {
     let lpInfo = { ...loadLpConfirmation };
+
     setLoadLpConfirmation(null);
 
+    // Check if layers from layerpackage exists in map
+    const missingLayers = checkForMissingLayers(lpInfo.layers);
+    console.log(missingLayers);
+    if (missingLayers.length > 0) {
+      // Show missing layers dialog
+      setMissingLayersConfirmation({
+        missingLayers: missingLayers,
+        layers: lpInfo.layers,
+        title: lpInfo.metadata.title,
+      });
+    } else {
+      loadLayers(lpInfo.layers, lpInfo.metadata.title);
+    }
+  };
+
+  // Load layers to quickAccess section
+  const loadLayers = (layers, title) => {
     if (clearExistingQuickAccessLayers) {
       clearQuickAccessLayers();
     }
 
+    setMissingLayersConfirmation(null);
+
     map.getAllLayers().forEach((layer) => {
-      const info = lpInfo.layers.find((l) => l.i === layer.get("name"));
+      const info = layers.find((l) => l.i === layer.get("name"));
       if (info) {
         // Set quickaccess property
         layer.set("quickAccess", true);
@@ -259,15 +286,25 @@ function PersonalLayerPackage({
       }
     });
 
-    enqueueSnackbar(
-      `Snabblager har nu laddats med "${lpInfo.metadata.title}"`,
-      {
-        variant: "success",
-      }
-    );
+    enqueueSnackbar(`${title} har nu laddats till snabblager.`, {
+      variant: "success",
+    });
 
     // Close personalLayerPackage view on load
     handleBackButtonClick(true);
+  };
+
+  // Check if all layers in package exist in map
+  const checkForMissingLayers = (layers) => {
+    map.getAllLayers().forEach((layer) => {
+      const existingLayer = layers.find((l) => l.i === layer.get("name"));
+      if (existingLayer) {
+        // Remove the layer from the layers array once it's found
+        layers = layers.filter((l) => l.i !== existingLayer.i);
+      }
+    });
+    // At this point, the layers array will only contain the layers that don't exist in map.getAllLayers()
+    return layers;
   };
 
   // Fires when the user closes the confirmation-window.
@@ -334,6 +371,50 @@ function PersonalLayerPackage({
     });
   };
 
+  // Render dialog with missing layers information
+  const renderMissingLayersDialog = () => {
+    return createPortal(
+      <Dialog
+        open={missingLayersConfirmation ? true : false}
+        onClose={handleMissingLayersConfirmationAbort}
+      >
+        <DialogTitle>Lager saknas</DialogTitle>
+        <DialogContent>
+          <Typography>
+            {missingLayersConfirmation &&
+              `Följande lagerid:n kan inte hittas i kartans lagerlista:`}
+            <br></br>
+          </Typography>
+          <ul>
+            {missingLayersConfirmation?.missingLayers.map((l) => {
+              return <li key={l.i}>{l.i}</li>;
+            })}
+          </ul>
+          <Typography>
+            {missingLayersConfirmation &&
+              `Det kan bero på att lagret har utgått. Vänligen kontrollera och uppdatera lagerpaketet.`}
+            <br></br>
+          </Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleMissingLayersConfirmationAbort}>Avbryt</Button>
+          <Button
+            onClick={() =>
+              loadLayers(
+                missingLayersConfirmation.layers,
+                missingLayersConfirmation.title
+              )
+            }
+            variant="contained"
+          >
+            Fortsätt
+          </Button>
+        </DialogActions>
+      </Dialog>,
+      document.getElementById("windows-container")
+    );
+  };
+
   // Render dialog to load layerpackage
   const renderLoadDialog = () => {
     return createPortal(
@@ -362,7 +443,7 @@ function PersonalLayerPackage({
                   }
                 />
               }
-              label="Ersätt lager vid laddning"
+              label="Ersätt allt i snabblager vid laddning"
             />
           </FormGroup>
         </DialogContent>
@@ -641,6 +722,7 @@ function PersonalLayerPackage({
         </Box>
       </Box>
       {renderLoadDialog()}
+      {renderMissingLayersDialog()}
       <Dialog
         open={removeAlert}
         aria-labelledby="removealert-dialog-title"
