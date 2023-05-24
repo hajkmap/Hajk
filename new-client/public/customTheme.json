@@ -133,6 +133,7 @@
                     }
                 },
                 "containedPrimary": {
+                    "backgroundColor": "#0077b7",
                     "&:hover": {
                         "backgroundColor": "#4da0cd"
                     },
