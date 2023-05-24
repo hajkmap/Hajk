@@ -255,7 +255,7 @@ function DrawOrder({ display, app, map, onLayerChange, model, options }) {
                   key={l.isFakeMapLayer ? l.get("caption") : l.ol_uid}
                   layer={l}
                   app={app}
-                  draggable={true}
+                  draggable={!options.lockedBackgroundInDraworder}
                   toggleable={false}
                 ></BackgroundLayer>
               ) : l.get("layerType") === "group" ? (

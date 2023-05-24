@@ -22,6 +22,7 @@ import CheckBoxOutlineBlankIcon from "@mui/icons-material/CheckBoxOutlineBlank";
 import CheckBoxIcon from "@mui/icons-material/CheckBox";
 import ExpandMoreOutlinedIcon from "@mui/icons-material/ExpandMoreOutlined";
 import WarningAmberOutlinedIcon from "@mui/icons-material/WarningAmberOutlined";
+import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
 
 export default function LayerItem({
   layer,
@@ -273,17 +274,31 @@ export default function LayerItem({
               {getLayerToggleIcon()}
             </IconButton>
           )}
-          {isBackgroundLayer && draggable ? (
+          {isBackgroundLayer && !toggleable ? (
             layer.isFakeMapLayer ? (
-              <WallpaperIcon sx={{ mr: "5px" }} />
+              <WallpaperIcon sx={{ mr: "5px", ml: draggable ? 0 : "16px" }} />
             ) : (
-              <PublicOutlinedIcon sx={{ mr: "5px" }} />
+              <PublicOutlinedIcon
+                sx={{ mr: "5px", ml: draggable ? 0 : "16px" }}
+              />
             )
           ) : (
             getIconFromLayer()
           )}
           <ListItemText primary={layer.get("caption")} />
           <ListItemSecondaryAction>
+            {isBackgroundLayer && !toggleable && !draggable ? (
+              <IconButton
+                size="small"
+                disableTouchRipple
+                disableFocusRipple
+                disableRipple
+              >
+                <Tooltip title="Bakgrundskartan ligger låst längst ner i ritordningen">
+                  <LockOutlinedIcon />
+                </Tooltip>
+              </IconButton>
+            ) : null}
             {renderStatusButton()}
             {hasListItemOptions() && (
               <LayerItemOptions

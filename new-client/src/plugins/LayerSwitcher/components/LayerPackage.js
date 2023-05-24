@@ -330,7 +330,7 @@ function LayerPackage({
           </ul>
           <Typography>
             {missingLayersConfirmation &&
-              `Det kan bero på att lagret har utgått. Vänligen kontrollera och uppdatera lagerpaketet.`}
+              `Det kan bero på att lagret har utgått. Vänligen kontrollera och uppdatera lagerpaketet eller kontakta administratören av kartan.`}
             <br></br>
           </Typography>
         </DialogContent>
