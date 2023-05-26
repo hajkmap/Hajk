@@ -39,11 +39,20 @@ class AnchorView extends React.PureComponent {
     cleanUrl: false,
   };
 
-  async componentDidMount() {
-    // Set anchor URL initially
-    this.setState({
-      anchor: await this.props.model.getAnchor(),
-    });
+  componentDidMount() {
+    // We check if anchor is a string, to avoid error in render() below.
+    // This because the getAnchor() sometimes returns a Promise instead,
+    // of a string.
+    typeof anchor === "string" &&
+      this.setState({ anchor: this.props.model.getAnchor() });
+
+    // const anchor = this.props.model.getAnchor();
+
+    // if (typeof anchor === "string") {
+    //   this.setState({
+    //     anchor: anchor,
+    //   });
+    // }
 
     // Subscribe to changes to anchor URL caused by other components. This ensure
     // that we have a live update of the anchor whether user does anything in the map.
