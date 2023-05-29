@@ -1,6 +1,6 @@
 import fs from "fs";
 import path from "path";
-import ConfigService from "./config.service";
+import ConfigService from "./config.service.js";
 
 class SettingsService {
   /**

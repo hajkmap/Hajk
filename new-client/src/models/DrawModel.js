@@ -175,7 +175,7 @@ class DrawModel {
     // Otherwise we create the prefixed-subject to send. (The drawModel might have
     // been initiated with a prefix that should be added on all subjects).
     const prefixedSubject = this.#observerPrefix
-      ? `${this.observerPrefix}.${subject}`
+      ? `${this.#observerPrefix}.${subject}`
       : subject;
     // Then we publish the event!
     this.#observer.publish(prefixedSubject, payLoad);

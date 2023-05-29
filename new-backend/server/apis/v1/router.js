@@ -1,10 +1,10 @@
 import * as express from "express";
 
-import configRouter from "./controllers/config/router";
-import mapconfigRouter from "./controllers/mapconfig/router";
-import settingsRouter from "./controllers/settings/router";
-import informativeRouter from "./controllers/informative/router";
-import adRouter from "./controllers/ad/router";
+import configRouter from "./controllers/config/router.js";
+import mapconfigRouter from "./controllers/mapconfig/router.js";
+import settingsRouter from "./controllers/settings/router.js";
+import informativeRouter from "./controllers/informative/router.js";
+import adRouter from "./controllers/ad/router.js";
 
 export default express
   .Router()
