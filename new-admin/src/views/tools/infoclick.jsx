@@ -72,7 +72,7 @@ class ToolOptions extends Component {
         useNewInfoclick:
           tool.options.useNewInfoclick || this.state.useNewInfoclick,
         transformLinkUri:
-          tool.options.transformLinkUri || this.state.transformLinkUri,
+          tool.options.transformLinkUri ?? this.state.transformLinkUri,
         visibleForGroups: tool.options.visibleForGroups
           ? tool.options.visibleForGroups
           : [],
