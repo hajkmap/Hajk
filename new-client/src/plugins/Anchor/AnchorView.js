@@ -39,22 +39,18 @@ class AnchorView extends React.PureComponent {
     cleanUrl: false,
   };
 
-  componentDidMount() {
-    // We check if anchor is a string, to avoid error in render() below.
-    // This because the getAnchor() sometimes returns a Promise instead of a string.
-    typeof anchor === "string" &&
-      this.setState({ anchor: this.props.model.getAnchor() });
-
+  async componentDidMount() {
     // Subscribe to changes to anchor URL caused by other components. This ensure
     // that we have a live update of the anchor whether user does anything in the map.
-    this.props.globalObserver.subscribe(
-      "core.mapUpdated",
-      ({ url, source }) => {
-        this.setState({
-          anchor: this.appendCleanModeIfActive(url),
-        });
-      }
-    );
+    this.props.globalObserver.subscribe("core.mapUpdated", ({ url }) => {
+      this.setState({
+        anchor: this.appendCleanModeIfActive(url),
+      });
+    });
+
+    // Initiate the anchor-url on mount
+    const a = await this.props.model.getAnchor();
+    this.setState({ anchor: a });
   }
 
   appendCleanModeIfActive = (url) =>
