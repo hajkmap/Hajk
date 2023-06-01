@@ -239,46 +239,62 @@ function DrawOrder({ display, app, map, onLayerChange, model, options }) {
           </Box>
         </Collapse>
       </Box>
-      <List dense sx={{ pt: 0 }}>
+      <List sx={{ pt: 0 }}>
         <Container
           lockAxis="y"
           getChildPayload={(i) => sortedLayers[i]}
           animationDuration={500}
           onDrop={onDrop}
           getGhostParent={getGhostParent}
-          nonDragAreaSelector=".settingsCollapse"
         >
-          {sortedLayers.map((l) => (
-            <Draggable key={"draggable" + l.ol_uid}>
-              {l.get("layerType") === "base" ? (
+          {sortedLayers.map((l) => {
+            if (
+              l.get("layerType") === "base" &&
+              options.lockedBackgroundInDraworder
+            ) {
+              return (
                 <BackgroundLayer
                   key={l.isFakeMapLayer ? l.get("caption") : l.ol_uid}
                   layer={l}
                   app={app}
                   draggable={!options.lockedBackgroundInDraworder}
                   toggleable={false}
-                ></BackgroundLayer>
-              ) : l.get("layerType") === "group" ? (
-                <GroupLayer
-                  key={l.ol_uid}
-                  layer={l}
-                  app={app}
-                  observer={model.observer}
-                  toggleable={false}
-                  options={options}
-                  draggable={true}
-                ></GroupLayer>
-              ) : (
-                <LayerItem
-                  key={l.ol_uid}
-                  layer={l}
-                  draggable={true}
-                  toggleable={false}
-                  app={app}
                 />
-              )}
-            </Draggable>
-          ))}
+              );
+            } else {
+              return (
+                <Draggable key={"draggable" + l.ol_uid}>
+                  {l.get("layerType") === "base" ? (
+                    <BackgroundLayer
+                      key={l.isFakeMapLayer ? l.get("caption") : l.ol_uid}
+                      layer={l}
+                      app={app}
+                      draggable={!options.lockedBackgroundInDraworder}
+                      toggleable={false}
+                    />
+                  ) : l.get("layerType") === "group" ? (
+                    <GroupLayer
+                      key={l.ol_uid}
+                      layer={l}
+                      app={app}
+                      observer={model.observer}
+                      toggleable={false}
+                      options={options}
+                      draggable={true}
+                    />
+                  ) : (
+                    <LayerItem
+                      key={l.ol_uid}
+                      layer={l}
+                      draggable={true}
+                      toggleable={false}
+                      app={app}
+                    />
+                  )}
+                </Draggable>
+              );
+            }
+          })}
         </Container>
       </List>
     </Box>

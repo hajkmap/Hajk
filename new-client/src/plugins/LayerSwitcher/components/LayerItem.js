@@ -11,8 +11,6 @@ import {
 } from "@mui/material";
 
 import LegendIcon from "./LegendIcon";
-import LayerItemOptions from "./LayerItemOptions";
-import LayerItemCollapse from "./LayerItemCollapse";
 
 import DragIndicatorOutlinedIcon from "@mui/icons-material/DragIndicatorOutlined";
 import PublicOutlinedIcon from "@mui/icons-material/PublicOutlined";
@@ -20,9 +18,9 @@ import WallpaperIcon from "@mui/icons-material/Wallpaper";
 import BuildOutlinedIcon from "@mui/icons-material/BuildOutlined";
 import CheckBoxOutlineBlankIcon from "@mui/icons-material/CheckBoxOutlineBlank";
 import CheckBoxIcon from "@mui/icons-material/CheckBox";
-import ExpandMoreOutlinedIcon from "@mui/icons-material/ExpandMoreOutlined";
 import WarningAmberOutlinedIcon from "@mui/icons-material/WarningAmberOutlined";
 import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
+import KeyboardArrowRightOutlinedIcon from "@mui/icons-material/KeyboardArrowRightOutlined";
 
 export default function LayerItem({
   layer,
@@ -32,15 +30,10 @@ export default function LayerItem({
   draggable,
   toggleable,
   app,
-  chapters,
-  onOpenChapter,
-  options,
   subLayersSection,
   visibleSubLayers,
   expandableSection,
 }) {
-  // Keep the settingsarea active in state
-  const [settingIsActive, setSettingIsActive] = useState(false);
   // WmsLayer load status, shows warning icon if !ok
   const [wmsLayerLoadStatus, setWmsLayerLoadStatus] = useState("ok");
   // State for layer zoom visibility
@@ -192,7 +185,7 @@ export default function LayerItem({
    * @instance
    * @return {external:ReactElement}
    */
-  const renderStatusButton = () => {
+  const renderStatusIcon = () => {
     return (
       wmsLayerLoadStatus === "loaderror" && (
         <IconButton disableRipple>
@@ -207,18 +200,11 @@ export default function LayerItem({
     );
   };
 
-  // Toogles settings area
-  const toggleSettings = (e) => {
+  // Show layer details action
+  const showLayerDetails = (e) => {
     e.stopPropagation();
-    setSettingIsActive(!settingIsActive);
+    app.globalObserver.publish("setLayerDetails", { layer: layer });
   };
-
-  // Checks if layer is enabled for options
-  const hasListItemOptions = () => {
-    return layer.get("layerType") !== "system" && layer.isFakeMapLayer !== true;
-  };
-
-  const cqlFilterVisible = app.config.mapConfig.map?.cqlFilterVisible || false;
 
   return (
     <div className="layer-item">
@@ -260,9 +246,7 @@ export default function LayerItem({
             py: 0.5,
             pr: 1,
             borderBottom: (theme) =>
-              !settingIsActive
-                ? `${theme.spacing(0.2)} solid ${theme.palette.divider}`
-                : `${theme.spacing(0.2)} solid transparent`,
+              `${theme.spacing(0.2)} solid ${theme.palette.divider}`,
           }}
         >
           {toggleable && (
@@ -287,6 +271,7 @@ export default function LayerItem({
           )}
           <ListItemText primary={layer.get("caption")} />
           <ListItemSecondaryAction>
+            {renderStatusIcon()}
             {isBackgroundLayer && !toggleable && !draggable ? (
               <IconButton
                 size="small"
@@ -299,40 +284,19 @@ export default function LayerItem({
                 </Tooltip>
               </IconButton>
             ) : null}
-            {renderStatusButton()}
-            {hasListItemOptions() && (
-              <LayerItemOptions
-                layer={layer}
-                app={app}
-                chapters={chapters}
-                enqueueSnackbar={enqueueSnackbar}
-                onOpenChapter={onOpenChapter}
-              />
-            )}
             {layer.isFakeMapLayer !== true &&
               layer.get("layerType") !== "system" && (
-                <IconButton size="small" onClick={(e) => toggleSettings(e)}>
-                  <ExpandMoreOutlinedIcon
+                <IconButton size="small" onClick={(e) => showLayerDetails(e)}>
+                  <KeyboardArrowRightOutlinedIcon
                     sx={{
-                      transform: settingIsActive ? "rotate(180deg)" : "",
-                      transition: "transform 300ms ease",
+                      color: (theme) => theme.palette.grey[500],
                     }}
-                  ></ExpandMoreOutlinedIcon>
+                  ></KeyboardArrowRightOutlinedIcon>
                 </IconButton>
               )}
           </ListItemSecondaryAction>
         </Box>
       </ListItemButton>
-      {!layer.isFakeMapLayer && layer.get("layerType") !== "system" && (
-        <LayerItemCollapse
-          options={options}
-          layer={layer}
-          collapsed={settingIsActive}
-          cqlFilterVisible={cqlFilterVisible}
-          showOpacity={true}
-          showLegend={layer.get("layerType") === "group" ? false : true}
-        ></LayerItemCollapse>
-      )}
       {subLayersSection && subLayersSection}
     </div>
   );

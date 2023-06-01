@@ -247,6 +247,7 @@ export default function GroupLayer({
               sx={{
                 transform: showSublayers ? "rotate(90deg)" : "",
                 transition: "transform 300ms ease",
+                color: (theme) => theme.palette.grey[500],
               }}
             ></KeyboardArrowRightOutlinedIcon>
           </IconButton>
@@ -260,7 +261,6 @@ export default function GroupLayer({
                 showSublayer(subLayer) && (
                   <SubLayerItem
                     key={subLayer}
-                    options={options}
                     subLayer={subLayer}
                     subLayerIndex={index}
                     layer={layer}

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 
 import {
   IconButton,
@@ -8,11 +8,9 @@ import {
 } from "@mui/material";
 
 import LegendIcon from "./LegendIcon";
-import LayerItemOptions from "./LayerItemOptions";
-import LayerItemCollapse from "./LayerItemCollapse";
 import CheckBoxOutlineBlankIcon from "@mui/icons-material/CheckBoxOutlineBlank";
 import CheckBoxIcon from "@mui/icons-material/CheckBox";
-import ExpandMoreOutlinedIcon from "@mui/icons-material/ExpandMoreOutlined";
+import KeyboardArrowRightOutlinedIcon from "@mui/icons-material/KeyboardArrowRightOutlined";
 
 export default function SubLayerItem({
   layer,
@@ -22,27 +20,20 @@ export default function SubLayerItem({
   visible,
   toggleSubLayer,
   subLayerIndex,
-  options,
 }) {
-  // Keep the settingsarea active in state
-  const [settingIsActive, setSettingIsActive] = useState(false);
-
   // Render method for checkbox icon
   const getLayerToggleIcon = () => {
-    return visible ? (
-      <CheckBoxIcon fontSize="small" />
-    ) : (
-      <CheckBoxOutlineBlankIcon fontSize="small" />
-    );
+    return visible ? <CheckBoxIcon /> : <CheckBoxOutlineBlankIcon />;
   };
 
-  // Toogles settings area
-  const toggleSettings = (e) => {
+  // Show layer details action
+  const showLayerDetails = (e) => {
     e.stopPropagation();
-    setSettingIsActive(!settingIsActive);
+    app.globalObserver.publish("setLayerDetails", {
+      layer: layer,
+      subLayerIndex: subLayerIndex,
+    });
   };
-
-  const cqlFilterVisible = app.config.mapConfig.map?.cqlFilterVisible || false;
 
   return (
     <div>
@@ -51,9 +42,7 @@ export default function SubLayerItem({
         onClick={() => (toggleable ? toggleSubLayer(subLayer, visible) : null)}
         sx={{
           borderBottom: (theme) =>
-            !settingIsActive
-              ? `${theme.spacing(0.2)} solid ${theme.palette.divider}`
-              : `${theme.spacing(0.2)} solid transparent`,
+            `${theme.spacing(0.2)} solid ${theme.palette.divider}`,
         }}
         dense
       >
@@ -73,31 +62,15 @@ export default function SubLayerItem({
         )}
         <ListItemText primary={layer.layersInfo[subLayer].caption} />
         <ListItemSecondaryAction>
-          <LayerItemOptions
-            layer={layer}
-            app={app}
-            subLayerIndex={subLayerIndex}
-            subLayer={true}
-          />
-          <IconButton size="small" onClick={(e) => toggleSettings(e)}>
-            <ExpandMoreOutlinedIcon
+          <IconButton size="small" onClick={(e) => showLayerDetails(e)}>
+            <KeyboardArrowRightOutlinedIcon
               sx={{
-                transform: settingIsActive ? "rotate(180deg)" : "",
-                transition: "transform 300ms ease",
+                color: (theme) => theme.palette.grey[500],
               }}
-            ></ExpandMoreOutlinedIcon>
+            ></KeyboardArrowRightOutlinedIcon>
           </IconButton>
         </ListItemSecondaryAction>
       </ListItemButton>
-      <LayerItemCollapse
-        layer={layer}
-        options={options}
-        collapsed={settingIsActive}
-        cqlFilterVisible={cqlFilterVisible}
-        showOpacity={false}
-        showLegend={true}
-        subLayerIndex={subLayerIndex}
-      ></LayerItemCollapse>
     </div>
   );
 }

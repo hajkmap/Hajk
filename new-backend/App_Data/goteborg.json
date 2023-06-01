@@ -246,7 +246,7 @@
         "showBreadcrumbs": false,
 				"lockedBackgroundInDraworder": true, 
 		"showActiveLayersView": true,
-        "enableTransparencySlider": false,
+        "enableTransparencySlider": true,
         "target": "control",
         "position": "right",
         "width": "",

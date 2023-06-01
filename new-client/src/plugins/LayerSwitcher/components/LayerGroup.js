@@ -15,7 +15,6 @@ class LayerGroup extends React.PureComponent {
     name: "",
     parent: "-1",
     toggled: false,
-    chapters: [],
   };
 
   static defaultProps = {
@@ -25,7 +24,6 @@ class LayerGroup extends React.PureComponent {
 
   static propTypes = {
     app: propTypes.object.isRequired,
-    chapters: propTypes.array.isRequired,
     child: propTypes.bool.isRequired,
     expanded: propTypes.bool.isRequired,
     group: propTypes.object.isRequired,
@@ -115,7 +113,6 @@ class LayerGroup extends React.PureComponent {
           handleChange={this.handleChange}
           app={this.props.app}
           child={true}
-          chapters={this.props.chapters}
           options={this.props.options}
         />
       );
@@ -308,14 +305,6 @@ class LayerGroup extends React.PureComponent {
                 draggable={false}
                 toggleable={true}
                 app={this.props.app}
-                options={this.props.options}
-                chapters={this.props.chapters}
-                onOpenChapter={(chapter) => {
-                  const informativeWindow = this.props.app.windows.find(
-                    (window) => window.type === "informative"
-                  );
-                  informativeWindow.props.custom.open(chapter);
-                }}
               />
             );
           } else {
