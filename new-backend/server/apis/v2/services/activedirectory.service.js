@@ -245,7 +245,8 @@ class ActiveDirectoryService {
             const e = new ActiveDirectoryError(
               ` AD CONNECTION FAILED!
 Connection to ${process.env.AD_URL} failed. Control your AD_* settings
-in .env. There could be an issue with the certificates, CA, passphrase.
+in .env. There could be an issue with the certificates, CA, passphrase,
+and/or user credentials (see original error below).
 Also, make sure that the machine that runs this process can access the 
 specified server (no firewalls etc that block the request). 
 
