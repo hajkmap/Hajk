@@ -2,6 +2,7 @@ import React from "react";
 import { createPortal } from "react-dom";
 import IconButton from "@mui/material/IconButton";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
+import { withTranslation } from "react-i18next";
 import {
   ListItemIcon,
   Menu,
@@ -63,7 +64,7 @@ class SearchTools extends React.PureComponent {
                 searchModel={searchModel}
               />
             ),
-            headerText: "Sökinställningar",
+            headerText: "core.search.settings.title",
             buttonText: "OK",
             useLegacyNonMarkdownRenderer: true,
           }}
@@ -82,12 +83,16 @@ class SearchTools extends React.PureComponent {
   };
 
   render() {
+    const { t } = this.props;
     const { anchorEl } = this.state;
     const enabledTools = this.getEnabledTools();
     return (
       <>
         {this.renderSettingsDialog()}
-        <Tooltip disableInteractive title="Fler sökverktyg och inställningar">
+        <Tooltip
+          disableInteractive
+          title={t("core.search.searchBar.moreButton.toolTip")}
+        >
           <IconButton
             aria-haspopup="true"
             aria-controls="lock-menu"
@@ -100,7 +105,7 @@ class SearchTools extends React.PureComponent {
             }
           >
             <span style={visuallyHidden}>
-              Öppna dialog med fler inställningar
+              {t("core.search.searchBar.moreButton.srText")}
             </span>
             <MoreVertIcon />
           </IconButton>
@@ -124,7 +129,7 @@ class SearchTools extends React.PureComponent {
               <Tooltip
                 disableInteractive
                 key={index}
-                title={option.toolTipTitle ?? ""}
+                title={t(option.toolTipTitle) ?? ""}
               >
                 <MenuItem
                   onClick={(event) =>
@@ -134,9 +139,9 @@ class SearchTools extends React.PureComponent {
                   {option.icon ? (
                     <ListItemIcon>{option.icon}</ListItemIcon>
                   ) : null}
-                  <span style={visuallyHidden}>{option.name}</span>
+                  <span style={visuallyHidden}>{t(option.name)}</span>
                   <Typography variant="inherit" noWrap>
-                    {option.name}
+                    {t(option.name)}
                   </Typography>
                 </MenuItem>
               </Tooltip>
@@ -148,4 +153,4 @@ class SearchTools extends React.PureComponent {
   }
 }
 
-export default SearchTools;
+export default withTranslation()(SearchTools);

@@ -8,6 +8,7 @@ import { AppBar, Tab, Tabs } from "@mui/material";
 import BackgroundSwitcher from "./components/BackgroundSwitcher.js";
 import LayerGroup from "./components/LayerGroup.js";
 import BreadCrumbs from "./components/BreadCrumbs.js";
+import { withTranslation } from "react-i18next";
 import DrawOrder from "./components/DrawOrder.js";
 
 // The styled-component below might seem unnecessary since we are using the sx-prop
@@ -142,7 +143,8 @@ class LayersSwitcherView extends React.PureComponent {
   };
 
   render() {
-    const { windowVisible } = this.props;
+    const { windowVisible, t } = this.props;
+
     return (
       <Root sx={{ display: windowVisible ? "block" : "none" }}>
         <StyledAppBar
@@ -158,10 +160,18 @@ class LayersSwitcherView extends React.PureComponent {
             variant="fullWidth"
             textColor="inherit"
           >
-            <Tab label="Kartlager" />
-            <Tab label="Bakgrund" />
+            <Tab
+              label={t("plugins.layerSwitcher.window.appBar.tabMapLayers")}
+            />
+            <Tab
+              label={t(
+                "plugins.layerSwitcher.window.appBar.tabBackgroundLayers"
+              )}
+            />
             {this.options.showActiveLayersView === true && (
-              <Tab label="Aktiva lager" />
+              <Tab
+                label={t("plugins.layerSwitcher.window.appBar.tabActiveLayers")}
+              />
             )}
           </Tabs>
         </StyledAppBar>
@@ -188,4 +198,4 @@ class LayersSwitcherView extends React.PureComponent {
   }
 }
 
-export default LayersSwitcherView;
+export default withTranslation()(LayersSwitcherView);

@@ -15,6 +15,7 @@ import FolderOpen from "@mui/icons-material/FolderOpen";
 import GppMaybeIcon from "@mui/icons-material/GppMaybe";
 import Save from "@mui/icons-material/Save";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
+import { useTranslation } from "react-i18next";
 
 export default function DrawOrderOptions({
   app,
@@ -25,6 +26,8 @@ export default function DrawOrderOptions({
   // Prepare the Snackbar - we want to display nice messages when
   // user saves/restores layers.
   const { enqueueSnackbar } = useSnackbar();
+
+  const { t } = useTranslation();
 
   // Element that we will anchor the options menu to is
   // held in state. If it's null (unanchored), we can tell
@@ -89,9 +92,14 @@ export default function DrawOrderOptions({
       savedLayers: objectToSave,
     });
 
-    enqueueSnackbar(`${metadata.numberOfLayers} lager sparades utan problem`, {
-      variant: "success",
-    });
+    enqueueSnackbar(
+      `${metadata.numberOfLayers} ${t(
+        "plugins.layerSwitcher.window.activeLayers.layersSaved"
+      )}`,
+      {
+        variant: "success",
+      }
+    );
   };
 
   const handleRestore = () => {
@@ -120,14 +128,16 @@ export default function DrawOrderOptions({
         });
 
       enqueueSnackbar(
-        `${metadata.numberOfLayers} lager återställdes från tidigare session`,
+        `${metadata.numberOfLayers} ${t(
+          "plugins.layerSwitcher.window.activeLayers.numOfLayersRestored"
+        )}`,
         {
           variant: "success",
         }
       );
     } catch (error) {
       enqueueSnackbar(
-        "Innan du kan återställa måste du spara dina befintliga lager först."
+        t("plugins.layerSwitcher.window.activeLayers.nothingToRestore")
       );
     }
   };
@@ -152,7 +162,7 @@ export default function DrawOrderOptions({
         onClick={handleShowMoreOptionsClick}
         endIcon={<KeyboardArrowDownIcon />}
       >
-        Fler alternativ
+        {t("plugins.layerSwitcher.window.activeLayers.moreOptions")}
       </Button>
       <Menu
         anchorEl={anchorEl}
@@ -168,7 +178,9 @@ export default function DrawOrderOptions({
           <ListItemIcon>
             <Save fontSize="small" />
           </ListItemIcon>
-          <ListItemText>Spara aktiva lager</ListItemText>
+          <ListItemText>
+            {t("plugins.layerSwitcher.window.activeLayers.saveActiveLayers")}
+          </ListItemText>
         </MenuItem>
         <MenuItem
           onClick={() => {
@@ -179,7 +191,9 @@ export default function DrawOrderOptions({
           <ListItemIcon>
             <FolderOpen fontSize="small" />
           </ListItemIcon>
-          <ListItemText>Återställ sparade lager</ListItemText>
+          <ListItemText>
+            {t("plugins.layerSwitcher.window.activeLayers.restoreSavedLayers")}
+          </ListItemText>
         </MenuItem>
         <Divider />
         <MenuItem
@@ -192,8 +206,10 @@ export default function DrawOrderOptions({
             <GppMaybeIcon fontSize="small" />
           </ListItemIcon>
           <ListItemText>{`${
-            filterList.has("system") ? "Dölj" : "Visa"
-          } systemlager`}</ListItemText>
+            filterList.has("system") ? t("common.hide") : t("common.show")
+          } ${t(
+            "plugins.layerSwitcher.window.activeLayers.systemLayers"
+          )}`}</ListItemText>
         </MenuItem>
       </Menu>
     </>

@@ -3,12 +3,13 @@ import { IconButton, Paper, Tooltip } from "@mui/material";
 import HomeIcon from "@mui/icons-material/Home";
 
 import { styled } from "@mui/material/styles";
+import { withTranslation } from "react-i18next";
 
 const StyledPaper = styled(Paper)(({ theme }) => ({
   marginBottom: theme.spacing(1),
 }));
 
-const StyledIconButton = styled(IconButton)(({ theme }) => ({
+const StyledIconButton = styled(IconButton)(() => ({
   minWidth: "unset",
 }));
 
@@ -30,11 +31,12 @@ class MapResetter extends React.PureComponent {
   };
 
   render() {
+    const { t } = this.props;
     return (
-      <Tooltip disableInteractive title="Återställ kartan till startläget">
+      <Tooltip disableInteractive title={t("controls.mapResetter.toolTip")}>
         <StyledPaper>
           <StyledIconButton
-            aria-label="Återställ kartan till startläget"
+            aria-label={t("controls.mapResetter.toolTip")}
             onClick={this.handleClick}
           >
             <HomeIcon />
@@ -45,4 +47,4 @@ class MapResetter extends React.PureComponent {
   }
 }
 
-export default MapResetter;
+export default withTranslation()(MapResetter);

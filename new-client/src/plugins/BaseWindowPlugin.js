@@ -6,6 +6,7 @@ import { Hidden, ListItem, ListItemIcon, ListItemText } from "@mui/material";
 import Window from "../components/Window.js";
 import Card from "../components/Card.js";
 import PluginControlButton from "../components/PluginControlButton";
+import { withTranslation } from "react-i18next";
 
 class BaseWindowPlugin extends React.PureComponent {
   static propTypes = {
@@ -46,8 +47,12 @@ class BaseWindowPlugin extends React.PureComponent {
 
     // Title and Color are kept in state and not as class properties. Keeping them in state
     // ensures re-render when new props arrive and update the state variables (see componentDidUpdate() too).
+    //
+    // Due to I18N, we ignore the value of `props.options.title` for now: it will always have a value
+    // (because of bugs in old Admin UI), and that would have precedence over `props.custom.title`, which
+    // is the object that holds our I18N string.
     this.state = {
-      title: props.options.title || props.custom.title || "Unnamed plugin",
+      title: props.custom.title || "Unnamed plugin",
       color: props.options.color || props.custom.color || null,
       windowVisible: visibleAtStart,
     };
@@ -55,7 +60,7 @@ class BaseWindowPlugin extends React.PureComponent {
     // Title is a special case: we want to use the state.title and pass on to Window in order
     // to update Window's title dynamically. At the same time, we want all other occurrences,
     // e.g. Widget or Drawer button's label to remain the same.
-    this.title = props.options.title || props.custom.title || "Unnamed plugin";
+    this.title = props.custom.title || "Unnamed plugin";
 
     // Try to get values from admin's option. Fallback to customs from Plugin defaults, or finally to hard-coded values.
     this.width = props.options.width || props.custom.width || 400;
@@ -235,6 +240,7 @@ class BaseWindowPlugin extends React.PureComponent {
    * estate to render the Widget button in Map Overlay.
    */
   renderDrawerButton() {
+    const { t } = this.props;
     return createPortal(
       <Hidden
         mdUp={
@@ -249,7 +255,7 @@ class BaseWindowPlugin extends React.PureComponent {
           onClick={this.handleButtonClick}
         >
           <ListItemIcon>{this.props.custom.icon}</ListItemIcon>
-          <ListItemText primary={this.title} />
+          <ListItemText primary={t(this.title)} />
         </ListItem>
       </Hidden>,
       document.getElementById("plugin-buttons")
@@ -257,14 +263,15 @@ class BaseWindowPlugin extends React.PureComponent {
   }
 
   renderWidgetButton(id) {
+    const { t } = this.props;
     return createPortal(
       // Hide Widget button on small screens, see renderDrawerButton too
       <Hidden mdDown>
         <Card
           icon={this.props.custom.icon}
           onClick={this.handleButtonClick}
-          title={this.title}
-          abstract={this.description}
+          title={t(this.title)}
+          abstract={t(this.description)}
         />
       </Hidden>,
       document.getElementById(id)
@@ -272,6 +279,7 @@ class BaseWindowPlugin extends React.PureComponent {
   }
 
   renderControlButton() {
+    const { t } = this.props;
     return createPortal(
       // Hide Control button on small screens, see renderDrawerButton too
       <Hidden mdDown>
@@ -295,4 +303,4 @@ class BaseWindowPlugin extends React.PureComponent {
   }
 }
 
-export default BaseWindowPlugin;
+export default withTranslation()(BaseWindowPlugin);

@@ -12,12 +12,16 @@ import CloseIcon from "@mui/icons-material/Close";
 
 import { functionalOk } from "models/Cookie";
 
+import { useTranslation } from "react-i18next";
+
 const FeaturePagination = (props) => {
   const {
     paginationCollection, // An Array of feature IDs
     selectedFeatureId, // ID of currently selected feature
     setSelectedFeatureId, // State setter
   } = props;
+
+  const { t } = useTranslation();
 
   // Two helpers to compensate for the fact that the paginationCollection array
   // starts at index 0, while the pagination expects page 1 as the first page.
@@ -111,8 +115,7 @@ const FeaturePagination = (props) => {
             }
             sx={{ mb: 2 }}
           >
-            Tips: du kan bläddra bland resultaten med knapparna &#8592; och
-            &#8594; på tangentbordet
+            {t("core.mapClickViewer.navigation.helpText")}
           </Alert>
         </Collapse>
       )}

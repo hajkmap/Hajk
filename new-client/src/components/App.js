@@ -39,6 +39,8 @@ import RecentlyUsedPlugins from "../controls/RecentlyUsedPlugins";
 
 import DrawerToggleButtons from "../components/Drawer/DrawerToggleButtons";
 
+import { withTranslation } from "react-i18next";
+
 import {
   Box,
   Divider,
@@ -54,6 +56,7 @@ import LockIcon from "@mui/icons-material/Lock";
 import LockOpenIcon from "@mui/icons-material/LockOpen";
 import MapIcon from "@mui/icons-material/Map";
 import ThemeToggler from "../controls/ThemeToggler";
+import LanguageSwitcher from "../controls/LanguageSwitcher";
 
 // A global that holds our windows, for use see components/Window.js
 document.windows = [];
@@ -443,8 +446,8 @@ class App extends React.PureComponent {
             this.globalObserver.publish("core.addDrawerToggleButton", {
               value: "plugins",
               ButtonIcon: MapIcon,
-              caption: "Kartverktyg",
-              drawerTitle: "Kartverktyg",
+              caption: "core.drawer.toggleButtons.plugins",
+              drawerTitle: "core.drawer.toggleButtons.plugins",
               order: 0,
               // If no plugins render **directly** in Drawer, but some **might**
               // render there occasionally, let's ensure to hide the Tools button on
@@ -745,7 +748,7 @@ class App extends React.PureComponent {
   }
 
   renderDrawerHeader = () => {
-    const { config } = this.props;
+    const { config, t } = this.props;
     const drawerTitle = this.state.drawerButtons.find(
       (db) => db.value === this.state.activeDrawerContent
     )?.drawerTitle;
@@ -779,7 +782,7 @@ class App extends React.PureComponent {
           alignItems="center"
         >
           <Grid item>
-            <DrawerTitle variant="button">{drawerTitle}</DrawerTitle>
+            <DrawerTitle variant="button">{t(drawerTitle)}</DrawerTitle>
           </Grid>
           {/** Hide Lock button in mobile mode - there's not screen estate to permanently lock Drawer on mobile viewports*/}
           <Grid item>
@@ -986,6 +989,14 @@ class App extends React.PureComponent {
                     toggleMUITheme={this.props.toggleMUITheme}
                   />
                 )}
+                {clean === false && (
+                  <LanguageSwitcher
+                    showExperimentalLanguageSwitcher={
+                      this.appModel.config.appConfig
+                        .showExperimentalLanguageSwitcher
+                    }
+                  />
+                )}
                 {clean === false && this.renderInformationPlugin()}
                 {clean === false && (
                   <RecentlyUsedPlugins
@@ -1090,4 +1101,4 @@ class App extends React.PureComponent {
   }
 }
 
-export default App;
+export default withTranslation()(App);

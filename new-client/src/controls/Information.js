@@ -9,11 +9,13 @@ import InfoIcon from "@mui/icons-material/Info";
 import Dialog from "../components/Dialog/Dialog";
 import { functionalOk as functionalCookieOk } from "models/Cookie";
 
+import { withTranslation } from "react-i18next";
+
 const StyledPaper = styled(Paper)(({ theme }) => ({
   marginBottom: theme.spacing(1),
 }));
 
-const StyledIconButton = styled(IconButton)(({ theme }) => ({
+const StyledIconButton = styled(IconButton)(() => ({
   minWidth: "unset",
 }));
 
@@ -26,7 +28,6 @@ class Information extends React.PureComponent {
     super(props);
     this.type = "Information"; // Special case - plugins that don't use BaseWindowPlugin must specify .type here
     this.options = props.options;
-    this.title = this.options.title || "Om kartan";
     this.state = {
       dialogOpen: false,
     };
@@ -89,13 +90,17 @@ class Information extends React.PureComponent {
   }
 
   render() {
+    const { t } = this.props;
     return (
       <>
         {this.renderDialog()}
-        <Tooltip disableInteractive title={this.title}>
+        <Tooltip
+          disableInteractive
+          title={this.options.title || t("controls.information.title")}
+        >
           <StyledPaper>
             <StyledIconButton
-              aria-label={this.title}
+              aria-label={this.options.title || t("controls.information.title")}
               onClick={this.handleOnClick}
             >
               <InfoIcon />
@@ -107,4 +112,4 @@ class Information extends React.PureComponent {
   }
 }
 
-export default Information;
+export default withTranslation()(Information);

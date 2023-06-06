@@ -3,12 +3,13 @@ import { IconButton, Menu, MenuItem, Paper, Tooltip } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import SwitchCameraIcon from "@mui/icons-material/SwitchCamera";
 import { hfetch } from "utils/FetchWrapper";
+import { withTranslation } from "react-i18next";
 
 const StyledPaper = styled(Paper)(({ theme }) => ({
   marginBottom: theme.spacing(1),
 }));
 
-const StyledIconButton = styled(IconButton)(({ theme }) => ({
+const StyledIconButton = styled(IconButton)(() => ({
   minWidth: "unset",
 }));
 
@@ -104,20 +105,25 @@ class MapSwitcher extends React.PureComponent {
   };
 
   render() {
+    const { t } = this.props;
     const { anchorEl } = this.state;
     const open = Boolean(anchorEl);
 
     const title =
-      this.props.appModel.config.mapConfig.map.title || "Karta utan titel";
+      this.props.appModel.config.mapConfig.map.title ||
+      t("controls.mapSwitcher.title");
 
     return (
       // Render only if config says so
       this.props.appModel.config.mapConfig.map.mapselector && (
         <>
-          <Tooltip disableInteractive title={`Nuvarande karta: ${title}`}>
+          <Tooltip
+            disableInteractive
+            title={`${t("controls.mapSwitcher.activeMap")} ${title}`}
+          >
             <StyledPaper>
               <StyledIconButton
-                aria-label="Byt karta"
+                aria-label={t("controls.mapSwitcher.switchMap")}
                 aria-owns={open ? "render-props-menu" : undefined}
                 aria-haspopup="true"
                 onClick={this.handleClick}
@@ -140,4 +146,4 @@ class MapSwitcher extends React.PureComponent {
   }
 }
 
-export default MapSwitcher;
+export default withTranslation()(MapSwitcher);

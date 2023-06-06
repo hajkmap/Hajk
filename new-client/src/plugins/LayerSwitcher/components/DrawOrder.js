@@ -4,8 +4,11 @@ import List from "@mui/material/List";
 import DrawOrderListItem from "./DrawOrderListItem";
 import DrawOrderOptions from "./DrawOrderOptions";
 import { Chip, Divider } from "@mui/material";
+import { useTranslation } from "react-i18next";
 
 function DrawOrder({ app, map }) {
+  const { t } = useTranslation();
+
   // A Set that will hold type of OL layers that should be shown.
   // This is a user setting, changed by toggling a switch control.
   const [filterList, setFilterList] = useState(
@@ -106,7 +109,9 @@ function DrawOrder({ app, map }) {
   const getLabelFromNumber = () =>
     sortedLayers.length.toString() +
     " " +
-    (sortedLayers.length === 1 ? "AKTIVT LAGER" : "AKTIVA LAGER");
+    (sortedLayers.length === 1
+      ? t("plugins.layerSwitcher.window.activeLayers.oneActiveLayer")
+      : t("plugins.layerSwitcher.window.activeLayers.manyActiveLayers"));
 
   return (
     <Box>

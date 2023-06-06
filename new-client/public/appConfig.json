@@ -2,6 +2,8 @@
   "appName": "Hajk",
   "version": "3.11.0",
   "mapserviceBase": "",
+  "showExperimentalLanguageSwitcher": true,
+  "lang": "en",
   "proxy": "",
   "searchProxy": "",
   "defaultMap": "map_1",

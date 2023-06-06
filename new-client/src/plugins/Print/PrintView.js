@@ -7,6 +7,7 @@ import { AppBar, Tab, Tabs } from "@mui/material";
 import PrintIcon from "@mui/icons-material/Print";
 import SettingsIcon from "@mui/icons-material/Settings";
 import { Tooltip, Button } from "@mui/material";
+import { withTranslation } from "react-i18next";
 
 import GeneralOptions from "./GeneralOptions";
 import AdvancedOptions from "./AdvancedOptions";
@@ -297,7 +298,7 @@ class PrintView extends React.PureComponent {
   }
 
   render() {
-    const { windowVisible } = this.props;
+    const { windowVisible, t } = this.props;
     const {
       previewLayerVisible,
       scale,
@@ -332,10 +333,16 @@ class PrintView extends React.PureComponent {
               variant="fullWidth"
               textColor="inherit"
             >
-              <Tooltip disableInteractive title="Generella inställningar">
+              <Tooltip
+                disableInteractive
+                title={t("plugins.print.window.appBar.tabGeneral")}
+              >
                 <Tab icon={<PrintIcon />} {...this.a11yProps(0)} />
               </Tooltip>
-              <Tooltip disableInteractive title="Avancerade inställningar">
+              <Tooltip
+                disableInteractive
+                title={t("plugins.print.window.appBar.tabAdvanced")}
+              >
                 <Tab icon={<SettingsIcon />} {...this.a11yProps(1)} />
               </Tooltip>
             </Tabs>
@@ -366,4 +373,4 @@ class PrintView extends React.PureComponent {
   }
 }
 
-export default withSnackbar(PrintView);
+export default withTranslation()(withSnackbar(PrintView));

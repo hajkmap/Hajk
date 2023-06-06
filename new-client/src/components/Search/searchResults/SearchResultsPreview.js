@@ -1,5 +1,6 @@
 import React from "react";
 import { Grid, Popover, Typography, alpha } from "@mui/material";
+import { withTranslation } from "react-i18next";
 import SearchResultsDatasetFeatureDetails from "./SearchResultsDatasetFeatureDetails";
 import { styled } from "@mui/material/styles";
 
@@ -23,7 +24,7 @@ const ContentContainer = styled(Grid)(({ theme }) => ({
 
 class SearchResultsPreview extends React.PureComponent {
   renderFeaturePreview = () => {
-    const { activeFeatureCollection, previewFeature, anchorEl, app } =
+    const { activeFeatureCollection, previewFeature, anchorEl, app, t } =
       this.props;
 
     return (
@@ -43,7 +44,9 @@ class SearchResultsPreview extends React.PureComponent {
       >
         <Grid container>
           <HeaderContainer item align="center" xs={12}>
-            <Typography variant="button">Förhandsvisning</Typography>
+            <Typography variant="button">
+              {t("core.search.searchResults.previewTitle")}
+            </Typography>
           </HeaderContainer>
           <ContentContainer item xs={12}>
             <SearchResultsDatasetFeatureDetails
@@ -63,4 +66,4 @@ class SearchResultsPreview extends React.PureComponent {
   }
 }
 
-export default SearchResultsPreview;
+export default withTranslation()(SearchResultsPreview);

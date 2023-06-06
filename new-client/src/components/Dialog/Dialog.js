@@ -12,6 +12,7 @@ import {
   TextField,
 } from "@mui/material";
 import { useMediaQuery, useTheme } from "@mui/material";
+import { useTranslation } from "react-i18next";
 
 import LegacyNonMarkdownRenderer from "./LegacyNonMarkdownRenderer";
 import { customComponentsForReactMarkdown } from "utils/customComponentsForReactMarkdown";
@@ -36,6 +37,8 @@ export default function ResponsiveDialog(props) {
       useLegacyNonMarkdownRenderer, // Admin can choose to pass-by the ReactMarkdown and just use dangerouslySetInnerHtml
     },
   } = props;
+
+  const { t } = useTranslation();
 
   // Will hold a return value for those Dialogs that are ment to be
   // used as prompt input fields.
@@ -63,7 +66,7 @@ export default function ResponsiveDialog(props) {
       }}
     >
       {headerText && (
-        <DialogTitle id="responsive-dialog-title">{headerText}</DialogTitle>
+        <DialogTitle id="responsive-dialog-title">{t(headerText)}</DialogTitle>
       )}
       <DialogContent>
         {children}
@@ -103,11 +106,11 @@ export default function ResponsiveDialog(props) {
       </DialogContent>
       <DialogActions>
         <Button onClick={handleClose} variant={primaryButtonVariant || "text"}>
-          {buttonText}
+          {t(buttonText)}
         </Button>
         {abortText && (
           <Button onClick={handleAbort} sx={{ color: "text.primary" }}>
-            {abortText}
+            {t(abortText)}
           </Button>
         )}
       </DialogActions>

@@ -13,6 +13,7 @@ import InputLabel from "@mui/material/InputLabel";
 import FormControlLabel from "@mui/material/FormControlLabel";
 import Typography from "@mui/material/Typography";
 import Checkbox from "@mui/material/Checkbox";
+import { withTranslation } from "react-i18next";
 import { withSnackbar } from "notistack";
 import Dialog from "../../components/Dialog/Dialog";
 import Symbology from "./components/Symbology.js";
@@ -54,8 +55,8 @@ class DrawView extends React.PureComponent {
         dialog: true,
         dialogPrompt: true,
         dialogText: "",
-        dialogButtonText: "OK",
-        dialogAbortText: "Avbryt",
+        dialogButtonText: "common.ok",
+        dialogAbortText: "common.cancel",
         dialogCloseCallback: this.onCloseTextDialog,
         dialogAbortCallback: this.onAbortTextDialog,
       });
@@ -80,7 +81,7 @@ class DrawView extends React.PureComponent {
 
   handleDragEnter = (e) => {
     this.snackbarKey = this.props.enqueueSnackbar(
-      "Släpp en KML-fil i kartan för att importera!",
+      this.props.t("plugins.draw.dragAndDrop.onDragEnter"),
       { preventDuplicate: true }
     );
   };
@@ -100,12 +101,24 @@ class DrawView extends React.PureComponent {
             hideOtherPlugins: false,
           });
           this.addDroppedKmlToMap(file);
+        } else {
+          this.props.enqueueSnackbar(
+            `${fileType} ${this.props.t(
+              "plugins.draw.dragAndDrop.notSupportedError"
+            )}`,
+            {
+              variant: "error",
+            }
+          );
         }
       }
     } catch (error) {
-      this.props.enqueueSnackbar("KML-filen kunde inte importeras.", {
-        variant: "error",
-      });
+      this.props.enqueueSnackbar(
+        this.props.t("plugins.draw.dragAndDrop.onDropError"),
+        {
+          variant: "error",
+        }
+      );
       console.error(`Error importing KML-file... ${error}`);
     }
   };
@@ -127,9 +140,12 @@ class DrawView extends React.PureComponent {
 
   handleImportError = (error) => {
     if (error === "no-features-found") {
-      this.props.enqueueSnackbar("Inga ritobjekt hittades i KML-filen.", {
-        variant: "warning",
-      });
+      this.props.enqueueSnackbar(
+        this.props.t("plugins.draw.import.kml.error"),
+        {
+          variant: "warning",
+        }
+      );
     } else {
       throw error;
     }
@@ -179,7 +195,7 @@ class DrawView extends React.PureComponent {
             text: this.state.dialogText,
             prompt: this.state.dialogPrompt,
             headerText: this.state.dialogHeaderText || "Ange text",
-            buttonText: this.state.dialogButtonText || "OK",
+            buttonText: this.state.dialogButtonText || "common.ok",
             abortText: this.state.dialogAbortText,
             useLegacyNonMarkdownRenderer: true,
           }}
@@ -288,9 +304,9 @@ class DrawView extends React.PureComponent {
     this.setState({
       dialog: true,
       dialogPrompt: false,
-      dialogHeaderText: "Ladda upp innehåll",
+      dialogHeaderText: "plugins.draw.import.kml.dialog.header",
       dialogText: this.renderImport(),
-      dialogButtonText: "Avbryt",
+      dialogButtonText: "common.cancel",
       dialogCloseCallback: this.onCloseUploadDialog,
     });
   };
@@ -303,9 +319,12 @@ class DrawView extends React.PureComponent {
   };
 
   renderImport() {
+    const { t } = this.props;
     return (
       <div>
-        <Typography>Välj KML-fil att importera:</Typography>
+        <Typography>
+          {t("plugins.draw.import.kml.dialog.mainArea.title")}
+        </Typography>
         <Row>
           <input
             type="file"
@@ -320,7 +339,7 @@ class DrawView extends React.PureComponent {
             variant="contained"
             color="primary"
             type="submit"
-            value="Ladda upp"
+            value="Upload"
             onClick={() => {
               var fileUploader = document.getElementById("file-uploader");
               var file = fileUploader.files[0];
@@ -340,7 +359,7 @@ class DrawView extends React.PureComponent {
               }
             }}
           >
-            Ladda upp
+            {t("plugins.draw.import.kml.dialog.mainArea.uploadButton")}
           </Button>
         </Row>
       </div>
@@ -405,4 +424,4 @@ class DrawView extends React.PureComponent {
   }
 }
 
-export default withSnackbar(DrawView);
+export default withTranslation()(withSnackbar(DrawView));

@@ -14,6 +14,7 @@ import {
 import ArrowLeftIcon from "@mui/icons-material/ArrowLeft";
 import ArrowRightIcon from "@mui/icons-material/ArrowRight";
 import { styled } from "@mui/material/styles";
+import { withTranslation } from "react-i18next";
 
 const StyledTableCell = styled(TableCell)(() => ({
   paddingLeft: 0,
@@ -160,7 +161,7 @@ class SearchResultsDatasetFeatureDetails extends React.PureComponent {
   };
 
   renderFeatureToggler = () => {
-    const { feature, features } = this.props;
+    const { feature, features, t } = this.props;
     const numFeaturesInCollection = features.length;
     const currentFeatureIndex = this.getFeatureIndex(feature, features);
 
@@ -175,7 +176,7 @@ class SearchResultsDatasetFeatureDetails extends React.PureComponent {
             disableInteractive
             title={
               !buttonLeftDisabled
-                ? "Visa föregående objekt i resultatlistan"
+                ? t("core.search.searchResults.featureDetails.showPrevious")
                 : ""
             }
           >
@@ -202,7 +203,9 @@ class SearchResultsDatasetFeatureDetails extends React.PureComponent {
           <Tooltip
             disableInteractive
             title={
-              !buttonRightDisabled ? "Visa nästa objekt i resultatlistan" : ""
+              !buttonRightDisabled
+                ? t("core.search.searchResults.featureDetails.showNext")
+                : ""
             }
           >
             <span>
@@ -267,4 +270,4 @@ class SearchResultsDatasetFeatureDetails extends React.PureComponent {
     );
   }
 }
-export default SearchResultsDatasetFeatureDetails;
+export default withTranslation()(SearchResultsDatasetFeatureDetails);

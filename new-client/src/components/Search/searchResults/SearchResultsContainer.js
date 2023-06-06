@@ -20,6 +20,7 @@ import {
   Tooltip,
   Typography,
 } from "@mui/material";
+import { withTranslation } from "react-i18next";
 
 import FilterListIcon from "@mui/icons-material/FilterList";
 import SortIcon from "@mui/icons-material/Sort";
@@ -84,25 +85,21 @@ class SearchResultsContainer extends React.PureComponent {
 
   searchResultTools = [
     {
-      name: "Filtrera",
       type: "filter",
       render: () => this.renderFilterTool(),
       enabled: this.props.options.enableResultsFiltering ?? true,
     },
     {
-      name: "Sortera",
       type: "sort",
       render: () => this.renderSortTool(),
       enabled: this.props.options.enableResultsSorting ?? true,
     },
     {
-      name: "Rensa",
       type: "clear",
       render: () => this.renderClearTool(),
       enabled: this.props.options.enableResultsSelectionClearing ?? true,
     },
     {
-      name: "Ladda ner",
       type: "download",
       render: () => this.renderDownloadTool(),
       enabled: this.props.options.enableResultsDownloading ?? true,
@@ -112,17 +109,17 @@ class SearchResultsContainer extends React.PureComponent {
   sortingStrategies = [
     {
       type: "AtoZ",
-      name: "alfabetisk stigande",
+      name: "core.search.searchResults.tools.sort.strategies.AtoZ",
       appliesTo: ["featureCollections", "features"],
     },
     {
       type: "ZtoA",
-      name: "alfabetisk fallande",
+      name: "core.search.searchResults.tools.sort.strategies.ZtoA",
       appliesTo: ["featureCollections", "features"],
     },
     {
       type: "numHits",
-      name: "antal träffar",
+      name: "core.search.searchResults.tools.sort.strategies.numHits",
       appliesTo: ["featureCollections"],
     },
   ];
@@ -461,6 +458,7 @@ class SearchResultsContainer extends React.PureComponent {
   };
 
   renderSortingMenu = () => {
+    const { t } = this.props;
     const {
       featureCollectionSortingStrategy,
       featureSortingStrategy,
@@ -478,6 +476,7 @@ class SearchResultsContainer extends React.PureComponent {
         onClose={() => this.setState({ sortingMenuAnchorEl: null })}
       >
         {currentSortingStrategies.map((strategy, index) => {
+          const strategyName = t(strategy.name);
           return (
             <MenuItem
               selected={
@@ -490,8 +489,8 @@ class SearchResultsContainer extends React.PureComponent {
               key={index}
               value={strategy.type}
             >
-              {`${strategy.name[0].toUpperCase()}${strategy.name.slice(1)}`}
-            </MenuItem>
+              {`${strategyName[0].toUpperCase()}${strategyName.slice(1)}`}
+            </MenuItem> // ^The translation of strategy.name returns the name in lowercase. Here we want the first char to be uppercase.
           );
         })}
       </Menu>
@@ -499,10 +498,11 @@ class SearchResultsContainer extends React.PureComponent {
   };
 
   renderFilterTool = () => {
+    const { t } = this.props;
     const filterActive = this.isFilterActive();
     const filterHelpText = filterActive
-      ? "Filtret är aktivt"
-      : "Filtrera resultatet";
+      ? t("core.search.searchResults.tools.filter.toolTipActive")
+      : t("core.search.searchResults.tools.filter.toolTipInActive");
     return (
       <Tooltip disableInteractive title={filterHelpText}>
         <IconButton
@@ -527,26 +527,31 @@ class SearchResultsContainer extends React.PureComponent {
   };
 
   renderSortTool = () => {
+    const { t } = this.props;
     const {
       activeFeatureCollection,
       featureCollectionSortingStrategy,
       featureSortingStrategy,
     } = this.state;
 
-    const sortHelpText = `Sortera resultatet, sorterar nu enligt ${
-      // Get current sorting strategy from the array of strategies
-      this.sortingStrategies.find(
-        // by finding...
-        (strategy) =>
-          // the strategy with the "type"-value...
-          strategy.type ===
-          // corresponding to either the current feature or featureCollection
-          // sorting strategy (depending on if we have an active collection or not)
-          (activeFeatureCollection
-            ? featureSortingStrategy
-            : featureCollectionSortingStrategy)
-      ).name // And it is the name value of the strategy we want to show
-    }`;
+    const sortHelpText = `${t(
+      "core.search.searchResults.tools.sort.toolTip"
+    )} ${
+      t(
+        // Get current sorting strategy from the array of strategies
+        this.sortingStrategies.find(
+          // by finding...
+          (strategy) =>
+            // the strategy with the "type"-value...
+            strategy.type ===
+            // corresponding to either the current feature or featureCollection
+            // sorting strategy (depending on if we have an active collection or not)
+            (activeFeatureCollection
+              ? featureSortingStrategy
+              : featureCollectionSortingStrategy)
+        ).name
+      ) // And it is the name property of the strategy we want send to the translator to get the
+    }`; // translated sort strategy.
 
     return (
       <Tooltip disableInteractive title={sortHelpText}>
@@ -563,8 +568,12 @@ class SearchResultsContainer extends React.PureComponent {
   };
 
   renderClearTool = () => {
+    const { t } = this.props;
     return (
-      <Tooltip disableInteractive title="Rensa alla selekterade objekt">
+      <Tooltip
+        disableInteractive
+        title={t("core.search.searchResults.tools.clear.toolTip")}
+      >
         <IconButton
           sx={{ minWidth: 30 }}
           onClick={this.clearAllSelectedFeaturesInView}
@@ -621,6 +630,7 @@ class SearchResultsContainer extends React.PureComponent {
   };
 
   renderSearchResultListTools = () => {
+    const { t } = this.props;
     if (this.allToolsDisabled()) {
       return null;
     } else {
@@ -640,7 +650,11 @@ class SearchResultsContainer extends React.PureComponent {
           <Grid item>
             <Tooltip
               disableInteractive
-              title={`${this.state.showTools ? "Dölj" : "Visa"} verktyg`}
+              title={t(
+                `core.search.searchResults.tools.${
+                  this.state.showTools ? "toolTipOpened" : "toolTipClosed"
+                }`
+              )}
             >
               <IconButton
                 sx={{ minWidth: 30 }}
@@ -890,6 +904,7 @@ class SearchResultsContainer extends React.PureComponent {
   };
 
   renderBreadCrumbs = (featureCollectionTitle, featureTitle) => {
+    const { t } = this.props;
     const { activeFeatureCollection, activeFeature } = this.state;
     const shouldRenderFeatureCollectionDetails =
       activeFeatureCollection && !activeFeatureCollection.source.onClickName;
@@ -911,11 +926,16 @@ class SearchResultsContainer extends React.PureComponent {
               );
             }}
           >
-            Gå till föregående vy
+            {t("core.search.searchResults.breadCrumbs.toPreviousView")}
           </Button>
           <Divider />
           <Breadcrumbs aria-label="breadcrumb" separator="/">
-            <Tooltip disableInteractive title="Tillbaka till alla sökresultat">
+            <Tooltip
+              disableInteractive
+              title={t(
+                "core.search.searchResults.breadCrumbs.searchResults.toolTip"
+              )}
+            >
               <Link
                 tabIndex={0}
                 underline="hover"
@@ -933,7 +953,7 @@ class SearchResultsContainer extends React.PureComponent {
                 }}
                 onChange={this.handleActiveFeatureChange}
               >
-                Sökresultat
+                {t("core.search.searchResults.headerTitle")}
               </Link>
             </Tooltip>
             <Tooltip disableInteractive title={featureCollectionTitle}>
@@ -980,6 +1000,7 @@ class SearchResultsContainer extends React.PureComponent {
 
   renderHeaderInfoBar = (featureCollectionTitle) => {
     const { activeFeatureCollection } = this.state;
+    const { t } = this.props;
     return (
       <Grid
         container
@@ -999,7 +1020,9 @@ class SearchResultsContainer extends React.PureComponent {
           <Tooltip
             disableInteractive
             title={
-              activeFeatureCollection ? featureCollectionTitle : "Sökresultat"
+              activeFeatureCollection
+                ? featureCollectionTitle
+                : t("core.search.searchResults.headerTitle")
             }
           >
             <Typography
@@ -1009,7 +1032,9 @@ class SearchResultsContainer extends React.PureComponent {
               sx={{ maxWidth: "100%", fontSize: 18 }}
             >
               {`${
-                activeFeatureCollection ? featureCollectionTitle : "Sökresultat"
+                activeFeatureCollection
+                  ? featureCollectionTitle
+                  : t("core.search.searchResults.headerTitle")
               }`}
             </Typography>
           </Tooltip>
@@ -1063,8 +1088,14 @@ class SearchResultsContainer extends React.PureComponent {
   };
 
   render() {
-    const { app, getOriginBasedIcon, localObserver, panelCollapsed, options } =
-      this.props;
+    const {
+      app,
+      getOriginBasedIcon,
+      localObserver,
+      panelCollapsed,
+      options,
+      t,
+    } = this.props;
     const {
       sumOfResults,
       activeFeatureCollection,
@@ -1099,7 +1130,9 @@ class SearchResultsContainer extends React.PureComponent {
       <Collapse in={!panelCollapsed}>
         {sumOfResults === null ? null : sumOfResults === 0 ? (
           <StyledPaper>
-            <Alert severity="warning">Sökningen gav inget resultat.</Alert>
+            <Alert severity="warning">
+              {t("core.search.searchResults.noResultsWarning")}
+            </Alert>
           </StyledPaper>
         ) : (
           <StyledPaper>
@@ -1143,4 +1176,4 @@ class SearchResultsContainer extends React.PureComponent {
   }
 }
 
-export default SearchResultsContainer;
+export default withTranslation()(SearchResultsContainer);

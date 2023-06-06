@@ -6,6 +6,7 @@ import {
 } from "@mui/material/styles";
 import CssBaseline from "@mui/material/CssBaseline";
 import App from "./App";
+import HajkLanguageProvider from "./HajkLanguageProvider";
 
 import { deepMerge } from "../utils/DeepMerge";
 import { functionalOk as functionalCookieOk } from "models/Cookie";
@@ -174,6 +175,7 @@ const HajkThemeProvider = ({ activeTools, config, customTheme }) => {
     <StyledEngineProvider injectFirst>
       <ThemeProvider theme={muiTheme}>
         <CssBaseline />
+        <HajkLanguageProvider config={config} />
         <App
           activeTools={activeTools}
           config={config}

@@ -1,0 +1,346 @@
+{
+  "common": {
+    "backgroundLayers": "Background layers",
+    "cancel": "Cancel",
+    "closeWindow": "Close",
+    "done": "Done!",
+    "hide": "Hide",
+    "key": "Key",
+    "layers": "Layers",
+    "maximizeWindow": "Maximize",
+    "minimizeWindow": "Minimize",
+    "next": "Next",
+    "of": "Of",
+    "ok": "Ok",
+    "overview": "Overview",
+    "previous": "Previous",
+    "results": "Results",
+    "show": "Show",
+    "showing": "Showing",
+    "value": "Value"
+  },
+  "controls": {
+    "attribution": {
+      "label": "©",
+      "tipLabel": "Show/hide map copyright information"
+    },
+    "externalLinks": {
+      "title": "Open coordinate in external application"
+    },
+    "information": {
+      "title": "About the map"
+    },
+    "languageSwitcher": {
+      "iconButton": {
+        "ariaLabel": "Change language",
+        "tooltip": "Change language"
+      },
+      "menu": {
+        "menuItems": {
+          "english": "English",
+          "swedish": "Swedish",
+          "bulgarian": "Bulgarian"
+        }
+      }
+    },
+    "mapCleaner": {
+      "ariaLabel": "Clear map",
+      "toolTip": "Hide all active layers"
+    },
+    "mapResetter": {
+      "toolTip": "Reset the map to default state"
+    },
+    "mapSwitcher": {
+      "activeMap": "Active map:",
+      "switchMap": "Change map",
+      "title": "Map title missing"
+    },
+    "presetLinks": {
+      "dialog": {
+        "header": "Show quick select layers",
+        "text": "All map layers will be turned off. The quick select pre defined layers will be activated instead."
+      },
+      "error": "The map-link contains errors. Reach out to the system administrator.",
+      "title": "Quick select"
+    },
+    "recentlyUsedPlugins": {
+      "ariaLabel": "Recently used plugins quick selector"
+    },
+    "rotate": {
+      "ariaLabel": "Reset rotation",
+      "title": "Reset rotation"
+    },
+    "scaleLine": {
+      "toolTip": "Current scale"
+    },
+    "themeToggler": {
+      "ariaLabel": "Change color theme",
+      "title": "Toggle between dark and light theme"
+    },
+    "zoom": {
+      "zoomIn": "Zoom in",
+      "zoomOut": "Zoom out"
+    }
+  },
+  "core": {
+    "drawer": {
+      "toggleButtons": {
+        "plugins": "Tools"
+      }
+    },
+    "introduction": {
+      "abstract": "Open guided tour",
+      "steps": {
+        "controls": {
+          "intro": "At the far right on the screen there are some controls that are used to navigate the map.",
+          "title": "Map controls"
+        },
+        "searchBar": {
+          "intro": "Here's the search bar.<br /><br /> The search tool can help you find what you're looking for.",
+          "moreOptions": {
+            "intro": "This button will show you more search tools.",
+            "title": "More search tools"
+          },
+          "title": "Search bar"
+        },
+        "toolPanel": {
+          "intro": "This button will open the tool panel.",
+          "title": "Tool panel"
+        },
+        "welcome": {
+          "intro": "Here's a short guided tour showing you around the application! <br /><br /> Follow along!",
+          "title": "Welcome to Hajk! 👋"
+        },
+        "widget": {
+          "intro": "This is a widget button. Clicking it will open its corresponding tool. <br><br> Thats it! We hope that you'll like Hajk!",
+          "title": "Widget button"
+        },
+        "window": {
+          "intro": "Every tool draws their own window. You can move and resize the window to your liking.",
+          "title": "Window"
+        }
+      },
+      "title": "Introduction guide"
+    },
+    "mapClickViewer": {
+      "hits": "Hits",
+      "navigation": {
+        "helpText": "Tip: You can scroll trough the results using the arrow keys on your keyboard."
+      }
+    },
+    "search": {
+      "searchBar": {
+        "clearButton": {
+          "srText": "Clear search",
+          "toolTip": "Clear search"
+        },
+        "expandButton": {
+          "collapsed": "Show the search results",
+          "open": "Hide the search results"
+        },
+        "moreButton": {
+          "srText": "Open dialog with more settings",
+          "toolTip": "More search tools and settings"
+        },
+        "onlyVisibleLayersPostfix": " (only in visible layers)",
+        "placeHolders": {
+          "defaultSearch": "Search...",
+          "extentSearch": "Searching in the area...",
+          "objectSearch": "Searching with objects..."
+        },
+        "searchButton": {
+          "srText": "Perform search",
+          "toolTip": "Perform search"
+        },
+        "srText": "Search the content of the website",
+        "visibilityButton": {
+          "hide": "Hide search results from map",
+          "show": "Show search results in map"
+        }
+      },
+      "searchResults": {
+        "breadCrumbs": {
+          "searchResults": {
+            "toolTip": "Back to all search results"
+          },
+          "toPreviousView": "To previous view"
+        },
+        "datasetSummary": {
+          "maxWarning": "Maximum number of search hits has been reached. Refine your search to ensure that important information is not missed."
+        },
+        "feature": {
+          "addToSelection": "Add to selection",
+          "removeFromSelection": "Remove from selection"
+        },
+        "featureDetails": {
+          "showNext": "Show the next object from the results list",
+          "showPrevious": "Show the previous object from the results list"
+        },
+        "headerTitle": "Search results",
+        "noResultsWarning": "The search generated no results.",
+        "previewTitle": "Preview",
+        "tools": {
+          "clear": {
+            "toolTip": "Clear all selected objects"
+          },
+          "download": {
+            "options": {
+              "kml": "Download to KML",
+              "xlsx": "Download to Excel"
+            },
+            "toolTip": "Download the objects"
+          },
+          "filter": {
+            "toolTipActive": "The filter is active",
+            "toolTipInActive": "Filter the results"
+          },
+          "sort": {
+            "strategies": {
+              "AtoZ": "alphabetically ascending",
+              "ZtoA": "alphabetically descending",
+              "numHits": "number of hits"
+            },
+            "toolTip": "Sort the results, currently sorting after "
+          },
+          "toolTipClosed": "Show tools",
+          "toolTipOpened": "Hide tools"
+        }
+      },
+      "settings": {
+        "general": {
+          "limitSources": {
+            "title": "Limit sources",
+            "toolTip": "Enable to select which sources the search will be performed in. If the toggle is in it's off position, the search will be performed in all available sources."
+          },
+          "title": "General settings",
+          "useVisibleSources": {
+            "title": "Search in visible layers",
+            "toolTip": "If active, searching will only be perfomed in visible layers."
+          }
+        },
+        "resultsDisplay": {
+          "mapLabels": {
+            "title": "Show feature labels",
+            "toolTip": "If active, a label will be shown in the map next to the highlighted search result."
+          },
+          "title": "Results display"
+        },
+        "spatial": {
+          "activeFilter": {
+            "title": "Demand that the whole feature must fit in the search area.",
+            "toolTip": "If active, the whole feature (for example an estate polygon) must fit within the search area to be shown in the search results. If inactive, only a small part of the polygon must be in the search area to be shown in the search results."
+          },
+          "title": "Spatial settings"
+        },
+        "text": {
+          "matchCase": {
+            "title": "Case sensitivity",
+            "toolTip": "If active, a search for 'a' won't match features containing 'A'. Disable to search regardless of lowercase / uppercase."
+          },
+          "title": "Text settings",
+          "wildcardAtEnd": {
+            "title": "Wildcard after",
+            "toolTip": "If active, a search for 'road' will also return hits on 'road block'."
+          },
+          "wildcardAtStart": {
+            "title": "Wildcard before",
+            "toolTip": "If active, a search for 'road' will also return hits on 'big road'."
+          }
+        },
+        "title": "Search settings"
+      },
+      "tools": {
+        "extentSearch": {
+          "title": "View search",
+          "toolTip": "Perform a search throughout the current map area."
+        },
+        "objectSearch": {
+          "snackBarText": "Select an object in the map where you want to perform a search. Hold down CTRL to select multiple objects.",
+          "title": "Object search",
+          "toolTip": "Perform a search by selecting one or more areas in the map."
+        },
+        "polygonSearch": {
+          "snackBarText": "Tap the map once for each node in the polygon. Perform the search by pressing the last node again.",
+          "title": "Polygon search",
+          "toolTip": "Perform a search in an area by drawing a polygon."
+        },
+        "radiusSearch": {
+          "snackBarText": "Tap the map to place a center point, then drag outwards and release.",
+          "title": "Radius search",
+          "toolTip": "Perform a search in an area by drawing a circle."
+        },
+        "searchSettings": {
+          "title": "Search settings",
+          "toolTip": "Change the search settings."
+        }
+      }
+    }
+  },
+  "plugins": {
+    "draw": {
+      "description": "Draw, measure, import and export.",
+      "dragAndDrop": {
+        "notSupportedError": "files can not be imported.",
+        "onDragEnter": "Drop a KML file to import it!",
+        "onDropError": "The KML file could not be imported."
+      },
+      "import": {
+        "kml": {
+          "dialog": {
+            "header": "Upload content",
+            "mainArea": {
+              "title": "Choose KML file to import:",
+              "uploadButton": "Upload"
+            }
+          },
+          "error": "No objects were found in the KML file."
+        }
+      },
+      "title": "Draw"
+    },
+    "layerComparer": {
+      "closeCompareMode": "Close the compare mode by pushing the button",
+      "compare": "Compare",
+      "compareSideBySide": "Compare layers side-by-side",
+      "leftSide": "Left side",
+      "noLayerSelected": "No layer selected",
+      "resetAndClose": "Reset & close",
+      "rightSide": "Right side",
+      "selectTwoLayersAndPressCompare": "Select two layers and press",
+      "stopComparing": "Close",
+      "title": "Layer Comparer"
+    },
+    "layerSwitcher": {
+      "description": "Choose what to show in the map",
+      "title": "Layer Manager",
+      "window": {
+        "activeLayers": {
+          "layersSaved": "layers saved successfully",
+          "manyActiveLayers": "ACTIVE LAYERS",
+          "moreOptions": "More options",
+          "nothingToRestore": "Please save some layers before restoring.",
+          "numOfLayersRestored": "layers restored from previous session",
+          "oneActiveLayer": "ACTIVE LAYER",
+          "restoreSavedLayers": "Restore saved layers",
+          "saveActiveLayers": "Save active layers",
+          "systemLayers": "system layers"
+        },
+        "appBar": {
+          "tabActiveLayers": "Active layers",
+          "tabBackgroundLayers": "Background",
+          "tabMapLayers": "Map layers"
+        }
+      }
+    },
+    "print": {
+      "description": "Save the map as a PDF",
+      "title": "Print",
+      "window": {
+        "appBar": {
+          "tabAdvanced": "Advanced settings",
+          "tabGeneral": "General settings"
+        }
+      }
+    }
+  }
+}

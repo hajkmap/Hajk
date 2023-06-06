@@ -1,6 +1,7 @@
 import React from "react";
 import { Typography, Chip, Tooltip, Grid } from "@mui/material";
 import { styled } from "@mui/material/styles";
+import { withTranslation } from "react-i18next";
 
 const SummaryContainer = styled(Grid)(({ theme }) => ({
   minHeight: 42,
@@ -49,12 +50,14 @@ class SearchResultsDatasetSummary extends React.PureComponent {
 
   renderDatasetSummary = () => {
     const { numberOfResultsToDisplay } = this.state;
-    const { featureCollection, getOriginBasedIcon } = this.props;
+    const { featureCollection, getOriginBasedIcon, t } = this.props;
 
     const displayWarning = this.shouldDisplayWarning();
     const toolTipTitle = displayWarning
-      ? `Maximalt antal sökträffar har uppnåtts. Förfina sökningen för att säkerställa att viktig information inte missas.`
-      : `Visar ${numberOfResultsToDisplay} resultat`;
+      ? t("core.search.searchResults.datasetSummary.maxWarning")
+      : `${t("common.showing")} ${numberOfResultsToDisplay} ${t(
+          "common.results"
+        ).toLowerCase()}`;
 
     return (
       <>
@@ -105,4 +108,4 @@ class SearchResultsDatasetSummary extends React.PureComponent {
   }
 }
 
-export default SearchResultsDatasetSummary;
+export default withTranslation()(SearchResultsDatasetSummary);

@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { List, ListItem, Link } from "@mui/material";
+import { useTranslation } from "react-i18next";
 
 /*
  * @summary Small component to render a shortcut-menu high up in the DOM for screen readers
@@ -13,9 +14,18 @@ import { List, ListItem, Link } from "@mui/material";
  * @class SrShortcuts
  */
 const SrShortcuts = ({ globalObserver }) => {
+  const { t } = useTranslation();
+
   const [shortcuts, setShortcuts] = useState([]);
+
   useEffect(() => {
-    globalObserver.subscribe("core.addSrShortcuts", addShortCuts);
+    const addSrShortcutsListener = globalObserver.subscribe(
+      "core.addSrShortcuts",
+      addShortCuts
+    );
+    return () => {
+      addSrShortcutsListener.unsubscribe();
+    };
   });
 
   const addShortCuts = (shortcutsArray) => {
@@ -27,7 +37,7 @@ const SrShortcuts = ({ globalObserver }) => {
       {shortcuts.map((shortcut) => {
         return (
           <ListItem key={shortcut.link}>
-            <Link href={shortcut.link}>{shortcut.title}</Link>
+            <Link href={shortcut.link}>{t(shortcut.title)}</Link>
           </ListItem>
         );
       })}

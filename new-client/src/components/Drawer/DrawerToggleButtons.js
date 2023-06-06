@@ -8,6 +8,7 @@ import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";
 import CloseIcon from "@mui/icons-material/Close";
 import { Paper, Hidden } from "@mui/material";
 import { functionalOk as functionalCookieOk } from "models/Cookie";
+import { useTranslation } from "react-i18next";
 
 const StyledPaper = styled(Paper)(({ theme }) => ({
   marginRight: theme.spacing(1),
@@ -38,6 +39,8 @@ function DrawerToggleButtons({
   globalObserver,
   initialActiveButton,
 }) {
+  const { t } = useTranslation();
+
   //Set initial active button state based on the initially active drawer, received from App.js
   //This will either be a drawer button name such as "plugins" or null, depending on whether there
   //is an active drawer when the map starts (set either from the cookie or config).
@@ -107,7 +110,7 @@ function DrawerToggleButtons({
       >
         {icon}
         {/* Caption should be hidden on small screens*/}
-        <Hidden mdDown>{caption}</Hidden>
+        <Hidden mdDown>{t(caption)}</Hidden>
       </StyledToggleButton>
     );
   };

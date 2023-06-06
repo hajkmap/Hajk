@@ -3,6 +3,7 @@ import { Checkbox, Typography, Tooltip, Grid } from "@mui/material";
 import StarIcon from "@mui/icons-material/Star";
 import StarBorderIcon from "@mui/icons-material/StarBorder";
 import { styled } from "@mui/material/styles";
+import { withTranslation } from "react-i18next";
 
 const IconWrapper = styled("div")(({ theme }) => ({
   display: "flex",
@@ -26,8 +27,10 @@ const StyledTypography = styled(Typography)(() => ({
 
 class SearchResultsDatasetFeature extends React.PureComponent {
   renderShowInMapCheckbox = () => {
-    const { visibleInMap } = this.props;
-    const helpText = !visibleInMap ? "Lägg till i urval" : "Ta bort från urval";
+    const { visibleInMap, t } = this.props;
+    const helpText = !visibleInMap
+      ? t("core.search.searchResults.feature.addToSelection")
+      : t("core.search.searchResults.feature.removeFromSelection");
 
     return (
       <Tooltip disableInteractive title={helpText}>
@@ -101,4 +104,4 @@ class SearchResultsDatasetFeature extends React.PureComponent {
     }
   }
 }
-export default SearchResultsDatasetFeature;
+export default withTranslation()(SearchResultsDatasetFeature);

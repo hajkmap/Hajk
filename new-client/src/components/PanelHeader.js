@@ -7,6 +7,7 @@ import FullscreenExitIcon from "@mui/icons-material/FullscreenExit";
 import AspectRatioIcon from "@mui/icons-material/AspectRatio";
 import { Hidden, Typography, IconButton, Box } from "@mui/material";
 import { visuallyHidden } from "@mui/utils";
+import { withTranslation } from "react-i18next";
 
 const StyledHeader = styled("header")(({ mode, theme }) => ({
   padding: `${
@@ -55,14 +56,14 @@ class PanelHeader extends Component {
   };
 
   render() {
-    const { allowMaximizedWindow, mode } = this.props;
+    const { allowMaximizedWindow, mode, t } = this.props;
     return (
       <StyledHeader
         style={{ borderColor: this.props.color }} // Allow for dynamic override of accent border color
         mode={this.props.mode}
       >
         <Typography component="h1" variant="button" align="left" noWrap={true}>
-          {this.props.title}
+          {t(this.props.title)}
         </Typography>
         <Box display="flex" component="nav">
           {this.shouldRenderCustomHeaderButtons() &&
@@ -70,28 +71,28 @@ class PanelHeader extends Component {
           {mode !== "maximized" && // If window isn't in fit screen mode currently…
             (mode === "minimized" ? ( // … but it's minimized…
               <IconButton size="small" onClick={this.props.onMaximize}>
-                <span style={visuallyHidden}>Maximera fönster</span>
+                <span style={visuallyHidden}>{t("common.maximizeWindow")}</span>
                 <FullscreenIcon // …render the maximize icon.
                 />
               </IconButton>
             ) : (
               // If it's already in "window" mode though, render the minimize icon.
               <IconButton size="small" onClick={this.props.onMinimize}>
-                <span style={visuallyHidden}>Minimera fönster</span>
+                <span style={visuallyHidden}>{t("common.minimizeWindow")}</span>
                 <FullscreenExitIcon />
               </IconButton>
             ))}
           <Hidden smDown>
             {allowMaximizedWindow && ( // If we're not on mobile and config allows fit-to-screen…
               <IconButton size="small" onClick={this.props.onMaximize}>
-                <span style={visuallyHidden}>Maximera fönster</span>
+                <span style={visuallyHidden}>{t("common.maximizeWindow")}</span>
                 <AspectRatioIcon // … render the action button. Note: it will remain the same…
                 />
               </IconButton>
             )}
           </Hidden>
           <IconButton size="small" onClick={this.props.onClose}>
-            <span style={visuallyHidden}>Stäng fönster</span>
+            <span style={visuallyHidden}>{t("common.closeWindow")}</span>
             <CloseIcon />
           </IconButton>
         </Box>
@@ -100,4 +101,4 @@ class PanelHeader extends Component {
   }
 }
 
-export default PanelHeader;
+export default withTranslation()(PanelHeader);

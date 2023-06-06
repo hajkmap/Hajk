@@ -6,8 +6,11 @@ import { useSnackbar } from "notistack";
 
 import SelectDropdown from "./SelectDropdown.js";
 import SDSControl from "./CustomOLControl.js";
+import { useTranslation } from "react-i18next";
 
 const LayerComparer = (props) => {
+  const { t } = useTranslation();
+
   const [layer1, setLayer1] = useState("");
   const [layer2, setLayer2] = useState("");
 
@@ -97,7 +100,7 @@ const LayerComparer = (props) => {
       // Show the snackbar, but ensure that only one snackbar exists
       closeSnackbar(helperSnack.current);
       helperSnack.current = enqueueSnackbar(
-        "Avsluta jämföringsläget genom att trycka på knappen",
+        t("plugins.layerComparer.closeCompareMode"),
         {
           variant: "default",
           persist: true,
@@ -118,13 +121,13 @@ const LayerComparer = (props) => {
                 closeSnackbar(key);
               }}
             >
-              Sluta jämföra
+              {t("plugins.layerComparer.stopComparing")}
             </Button>
           ),
         }
       );
     }
-  }, [layer1, layer2, props.map, closeSnackbar, enqueueSnackbar]);
+  }, [layer1, layer2, props.map, closeSnackbar, enqueueSnackbar, t]);
 
   // User can at any time abort the comparer, here's a handler
   // that resets the UI.
@@ -144,18 +147,19 @@ const LayerComparer = (props) => {
       defaults={{
         // Some defaults to fall back to in case instanceOptions doesn't provide them.
         icon: <CompareIcon />, // Default icon for this plugin
-        title: "Lagerjämförare",
-        description: "Jämför lager sida vid sida", // Shown on Widget button as well as Tooltip for Control button
-        headerText: "Jämför lager sida vid sida",
-        buttonText: "Jämför",
+        title: t("plugins.layerComparer.title"),
+        description: t("plugins.layerComparer.compareSideBySide"), // Shown on Widget button as well as Tooltip for Control button
+        headerText: t("plugins.layerComparer.compareSideBySide"),
+        buttonText: t("plugins.layerComparer.compare"),
         primaryButtonVariant: "contained",
-        abortText: "Nollställ & stäng",
+        abortText: t("plugins.layerComparer.resetAndClose"),
         onAbort: onAbort,
       }}
     >
       <Stack spacing={2}>
         <Alert icon={<CompareIcon />} variant="info">
-          Välj två lager att jämföra och tryck på <i>Jämför</i>.
+          {t("plugins.layerComparer.selectTwoLayersAndPressCompare")}{" "}
+          <i>{t("plugins.layerComparer.compare")}</i>.
         </Alert>
 
         <SelectDropdown
@@ -164,7 +168,8 @@ const LayerComparer = (props) => {
           counterValue={layer2}
           baseLayers={baseLayers}
           layers={layers}
-          label="Vänster sida"
+          label={t("plugins.layerComparer.leftSide")}
+          labelId="layer-1-label"
         />
         <SelectDropdown
           setter={setLayer2}
@@ -172,7 +177,8 @@ const LayerComparer = (props) => {
           counterValue={layer1}
           baseLayers={baseLayers}
           layers={layers}
-          label="Höger sida"
+          label={t("plugins.layerComparer.rightSide")}
+          labelId="layer-2-label"
         />
       </Stack>
     </DialogWindowPlugin>

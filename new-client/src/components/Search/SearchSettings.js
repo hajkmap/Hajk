@@ -13,6 +13,7 @@ import {
   Input,
 } from "@mui/material";
 import { styled } from "@mui/material/styles";
+import { withTranslation } from "react-i18next";
 
 const ChipsWrapper = styled("div")(({ theme }) => ({
   display: "flex",
@@ -31,19 +32,21 @@ class SearchSettings extends React.PureComponent {
   };
 
   render() {
-    const { searchOptions, searchSources, searchModel } = this.props;
+    const { searchOptions, searchSources, searchModel, t } = this.props;
     return (
       <Grid container spacing={2} direction="column">
         <Grid item xs>
           <FormControl component="fieldset">
-            <FormLabel component="legend">Generella sökinställningar</FormLabel>
+            <FormLabel component="legend">
+              {t("core.search.settings.general.title")}
+            </FormLabel>
             <FormGroup>
               <Tooltip
                 disableInteractive
-                title="Slå på för att välja vilka datakällor som sökningen kommer göras i. Om reglaget är i off-läget kommer sökningen att ske i alla tillgänliga sökkällor."
+                title={t("core.search.settings.general.limitSources.toolTip")}
               >
                 <FormControlLabel
-                  label="Begränsa sökkällor"
+                  label={t("core.search.settings.general.limitSources.title")}
                   control={
                     <Switch
                       checked={this.state.showSearchSourcesFilter}
@@ -104,9 +107,15 @@ class SearchSettings extends React.PureComponent {
               )}
             </FormGroup>
             <FormGroup>
-              <Tooltip title="Om aktivt kommer sökningen att ske i lager som är inställda för sökning av systemadministratören och som är synliga.">
+              <Tooltip
+                title={t(
+                  "core.search.settings.general.useVisibleSources.toolTip"
+                )}
+              >
                 <FormControlLabel
-                  label="Sök endast i synliga lager"
+                  label={t(
+                    "core.search.settings.general.useVisibleSources.title"
+                  )}
                   control={
                     <Switch
                       checked={searchOptions.searchInVisibleLayers}
@@ -128,15 +137,15 @@ class SearchSettings extends React.PureComponent {
         <Grid item xs>
           <FormControl component="fieldset">
             <FormLabel component="legend">
-              Inställningar för textsökning
+              {t("core.search.settings.text.title")}
             </FormLabel>
             <FormGroup>
               <Tooltip
                 disableInteractive
-                title="Om aktivt kommer en sökning på 'väg' även ge träffar på exempelvis 'storväg'."
+                title={t("core.search.settings.text.wildcardAtStart.toolTip")}
               >
                 <FormControlLabel
-                  label="Wildcard före"
+                  label={t("core.search.settings.text.wildcardAtStart.title")}
                   control={
                     <Switch
                       checked={searchOptions.wildcardAtStart}
@@ -153,10 +162,10 @@ class SearchSettings extends React.PureComponent {
               </Tooltip>
               <Tooltip
                 disableInteractive
-                title="Om aktivt kommer en sökning på 'väg' även ge träffar på exempelvis 'vägen'."
+                title={t("core.search.settings.text.wildcardAtEnd.toolTip")}
               >
                 <FormControlLabel
-                  label="Wildcard efter"
+                  label={t("core.search.settings.text.wildcardAtEnd.title")}
                   control={
                     <Switch
                       checked={searchOptions.wildcardAtEnd}
@@ -173,10 +182,10 @@ class SearchSettings extends React.PureComponent {
               </Tooltip>
               <Tooltip
                 disableInteractive
-                title="Om aktivt kommer en sökning på 'a' inte ge träffar på 'A'. Inaktivera för att söka oberoende av gemener/versaler."
+                title={t("core.search.settings.text.matchCase.toolTip")}
               >
                 <FormControlLabel
-                  label="Skiftlägeskänslighet"
+                  label={t("core.search.settings.text.matchCase.title")}
                   control={
                     <Switch
                       checked={searchOptions.matchCase}
@@ -197,14 +206,16 @@ class SearchSettings extends React.PureComponent {
 
         <Grid item xs>
           <FormControl component="fieldset">
-            <FormLabel component="legend">Spatiala sökinställningar</FormLabel>
+            <FormLabel component="legend">
+              {t("core.search.settings.spatial.title")}
+            </FormLabel>
             <FormGroup>
               <Tooltip
                 disableInteractive
-                title="Om aktivt kommer hela objektet (exempelvis en fastigheten) behöva rymmas inom sökområdet för att komma med i resultatet. Om inaktivt räcker det att endast en liten del av objektet ryms inom, eller nuddar vid, sökområdet."
+                title={t("core.search.settings.spatial.activeFilter.toolTip")}
               >
                 <FormControlLabel
-                  label="Kräv att hela objektet ryms inom sökområde"
+                  label={t("core.search.settings.spatial.activeFilter.title")}
                   control={
                     <Switch
                       checked={searchOptions.activeSpatialFilter === "within"}
@@ -227,14 +238,20 @@ class SearchSettings extends React.PureComponent {
 
         <Grid item xs>
           <FormControl component="fieldset">
-            <FormLabel component="legend">Visning av resultat</FormLabel>
+            <FormLabel component="legend">
+              {t("core.search.settings.resultsDisplay.title")}
+            </FormLabel>
             <FormGroup>
               <Tooltip
                 disableInteractive
-                title="Om aktivt kommer en etikett att visas i kartan intill det markerade sökresultatet"
+                title={t(
+                  "core.search.settings.resultsDisplay.mapLabels.toolTip"
+                )}
               >
                 <FormControlLabel
-                  label="Visa textetikett i kartan"
+                  label={t(
+                    "core.search.settings.resultsDisplay.mapLabels.title"
+                  )}
                   control={
                     <Switch
                       checked={searchOptions.enableLabelOnHighlight}
@@ -257,4 +274,4 @@ class SearchSettings extends React.PureComponent {
   }
 }
 
-export default SearchSettings;
+export default withTranslation()(SearchSettings);

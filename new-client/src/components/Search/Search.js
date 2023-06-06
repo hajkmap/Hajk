@@ -1,6 +1,7 @@
 import React from "react";
 import SearchBar from "./SearchBar";
 import { withSnackbar } from "notistack";
+import { withTranslation } from "react-i18next";
 import Observer from "react-event-observer";
 import EditIcon from "@mui/icons-material/Edit";
 import Crop54Icon from "@mui/icons-material/Crop54";
@@ -66,44 +67,42 @@ class Search extends React.PureComponent {
 
   defaultSearchTools = [
     {
-      name: "Sök med polygon",
+      name: "core.search.tools.polygonSearch.title",
       icon: <EditIcon />,
       type: "Polygon",
       enabled: this.props.options.enablePolygonSearch ?? true,
-      toolTipTitle:
-        "Genomför en sökning i ett område genom att rita en polygon.",
+      toolTipTitle: "core.search.tools.polygonSearch.toolTip",
       onClickEventName: "search.spatialSearchActivated",
     },
     {
-      name: "Sök med radie",
+      name: "core.search.tools.radiusSearch.title",
       icon: <RadioButtonUncheckedIcon />,
       type: "Circle",
       enabled: this.props.options.enableRadiusSearch ?? true,
-      toolTipTitle: "Genomför en sökning i ett område genom att rita en cirkel",
+      toolTipTitle: "core.search.tools.radiusSearch.toolTip",
       onClickEventName: "search.spatialSearchActivated",
     },
     {
-      name: "Sök med objekt",
+      name: "core.search.tools.objectSearch.title",
       icon: <TouchAppIcon />,
       type: "Select",
       enabled: this.props.options.enableSelectSearch ?? true,
-      toolTipTitle:
-        "Genomför en sökning genom att välja en eller flera områden i kartan.",
+      toolTipTitle: "core.search.tools.objectSearch.toolTip",
       onClickEventName: "search.spatialSearchActivated",
     },
     {
-      name: "Sök inom vyn",
+      name: "core.search.tools.extentSearch.title",
       icon: <Crop54Icon />,
       type: "Extent",
       enabled: this.props.options.enableExtentSearch ?? true,
-      toolTipTitle: "Genomför en sökning i hela det område som kartan visar.",
+      toolTipTitle: "core.search.tools.extentSearch.toolTip",
       onClickEventName: "search.spatialSearchActivated",
     },
     {
-      name: "Sökinställningar",
+      name: "core.search.tools.searchSettings.title",
       icon: <SettingsIcon />,
       type: "SETTINGS",
-      toolTipTitle: "Ändra sökinställningarna.",
+      toolTipTitle: "core.search.tools.searchSettings.toolTip",
       onClickEventName: "",
     },
   ];
@@ -155,10 +154,11 @@ class Search extends React.PureComponent {
   };
 
   bindSubscriptions = () => {
+    const { t } = this.props;
     this.localObserver.subscribe("on-draw-start", (type) => {
       if (type === "Circle") {
         this.snackbarKey = this.props.enqueueSnackbar(
-          "Tryck i kartan där du vill ha centrumpunkten, dra sedan utåt och släpp.",
+          t("core.search.tools.radiusSearch.snackBarText"),
           {
             variant: "information",
             anchorOrigin: { vertical: "bottom", horizontal: "center" },
@@ -166,7 +166,7 @@ class Search extends React.PureComponent {
         );
       } else if (type === "Polygon") {
         this.snackbarKey = this.props.enqueueSnackbar(
-          "Tryck en gång i kartan för varje nod i polygonen. Genomför sökningen genom att trycka på den sista noden en gång till.",
+          t("core.search.tools.polygonSearch.snackBarText"),
           {
             variant: "information",
             anchorOrigin: { vertical: "bottom", horizontal: "center" },
@@ -180,7 +180,7 @@ class Search extends React.PureComponent {
     });
     this.localObserver.subscribe("on-select-search-start", () => {
       this.snackbarKey = this.props.enqueueSnackbar(
-        "Tryck på den yta i kartan där du vill genomföra en sökning. Håll in CTRL för att välja flera ytor.",
+        t("core.search.tools.objectSearch.snackBarText"),
         {
           variant: "information",
           anchorOrigin: { vertical: "bottom", horizontal: "center" },
@@ -1074,4 +1074,4 @@ class Search extends React.PureComponent {
     );
   }
 }
-export default withSnackbar(Search);
+export default withTranslation()(withSnackbar(Search));

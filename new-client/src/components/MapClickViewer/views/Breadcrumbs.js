@@ -10,6 +10,8 @@ import {
 
 import ArrowBack from "@mui/icons-material/ArrowBack";
 
+import { useTranslation } from "react-i18next";
+
 const Breadcrumbs = (props) => {
   const {
     feature,
@@ -17,6 +19,8 @@ const Breadcrumbs = (props) => {
     setSelectedFeatureId,
     setSelectedFeatureCollection,
   } = props;
+
+  const { t } = useTranslation();
 
   return (
     <>
@@ -34,7 +38,7 @@ const Breadcrumbs = (props) => {
             : setSelectedFeatureCollection(null);
         }}
       >
-        Gå till föregående vy
+        {t("core.search.searchResults.breadCrumbs.toPreviousView")}
       </Button>
       <Divider />
       <MUIBreadcrumbs separator="/" aria-label="breadcrumb">
@@ -46,7 +50,7 @@ const Breadcrumbs = (props) => {
             variant="caption"
             href="#"
           >
-            Översikt
+            {t("common.overview")}
           </Link>
         )}
         {setSelectedFeatureCollection && !setSelectedFeatureId && (

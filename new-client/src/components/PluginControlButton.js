@@ -1,6 +1,7 @@
 import React from "react";
 import { IconButton, Paper, Tooltip } from "@mui/material";
 import { styled } from "@mui/material/styles";
+import { useTranslation } from "react-i18next";
 
 const StyledPaper = styled(Paper)(({ theme }) => ({
   marginBottom: theme.spacing(1),
@@ -16,10 +17,12 @@ export default function PluginControlButton({
   title,
   abstract,
 }) {
+  const { t } = useTranslation();
+
   return (
-    <Tooltip disableInteractive title={`${title}: ${abstract}`}>
+    <Tooltip disableInteractive title={`${t(title)}: ${t(abstract)}`}>
       <StyledPaper>
-        <StyledButton aria-label={title} onClick={onClick}>
+        <StyledButton aria-label={t(title)} onClick={onClick}>
           {icon}
         </StyledButton>
       </StyledPaper>

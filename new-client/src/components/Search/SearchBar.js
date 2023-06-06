@@ -27,6 +27,7 @@ import {
 import { visuallyHidden } from "@mui/utils";
 import { styled } from "@mui/material/styles";
 import { Visibility, VisibilityOff } from "@mui/icons-material";
+import { withTranslation } from "react-i18next";
 
 // A HOC that pipes isMobile to the children. See this as a proposed
 // solution. It is not pretty, but if we move this to a separate file
@@ -85,9 +86,9 @@ const CustomPaper = (props) => {
   const smallScreen = useMediaQuery(theme.breakpoints.down("sm"));
   const style = smallScreen
     ? {
-        margin: 0,
-        borderTop: `${theme.spacing(0.2)} solid ${theme.palette.divider}`,
-      }
+      margin: 0,
+      borderTop: `${theme.spacing(0.2)} solid ${theme.palette.divider}`,
+    }
     : { margin: 0 };
   return <Paper {...props} style={style} />;
 };
@@ -219,9 +220,9 @@ class SearchBar extends React.PureComponent {
       <Typography noWrap={true} sx={{ maxWidth: "100%" }}>
         {highlightInformation.length > 0
           ? this.renderHighlightedAutocompleteEntry(
-              highlightInformation,
-              autocompleteEntry
-            )
+            highlightInformation,
+            autocompleteEntry
+          )
           : autocompleteEntry}
       </Typography>
     );
@@ -236,19 +237,22 @@ class SearchBar extends React.PureComponent {
       options,
       searchActive,
       searchOptions: { searchInVisibleLayers },
+      t,
     } = this.props;
 
     const labelPostfix = searchInVisibleLayers
-      ? " (endast i synliga lager)"
+      ? t("core.search.searchBar.onlyVisibleLayersPostfix")
       : "";
 
     return searchActive === "selectSearch" || searchActive === "draw"
-      ? `Söker med objekt${labelPostfix}`
+      ? `${t("core.search.searchBar.placeHolders.objectSearch")}${labelPostfix}`
       : searchActive === "extentSearch"
-      ? `Söker i området${labelPostfix}`
-      : options.searchBarPlaceholder
-      ? `${options.searchBarPlaceholder}${labelPostfix}`
-      : `Sök${labelPostfix}`;
+        ? `${t("core.search.searchBar.placeHolders.extentSearch")}${labelPostfix}`
+        : options.searchBarPlaceholder
+          ? `${options.searchBarPlaceholder}${labelPostfix}`
+          : `${t(
+            "core.search.searchBar.placeHolders.defaultSearch"
+          )}${labelPostfix}`;
   };
 
   renderSearchResultList = () => {
@@ -377,6 +381,7 @@ class SearchBar extends React.PureComponent {
       handleOnClickOrKeyboardSearch,
       setSearchSources,
       failedWFSFetchMessage,
+      t,
       isMobile,
     } = this.props;
     const disableUnderline = isMobile ? { disableUnderline: true } : null;
@@ -384,18 +389,22 @@ class SearchBar extends React.PureComponent {
       failedWFSFetchMessage.length > 0 && showSearchResults;
 
     const expandMessage = resultPanelCollapsed
-      ? "Visa lista med sökresultat"
-      : "Dölj lista med sökresultat";
+      ? t("core.search.searchBar.expandButton.collapsed")
+      : t("core.search.searchBar.expandButton.open");
 
     const toggleResultsLayerVisibilityMessage = this.state.resultsLayerVisible
-      ? "Dölj sökresultat i kartan"
-      : "Visa sökresultat i kartan";
+      ? t("core.search.searchBar.visibilityButton.hide")
+      : t("core.search.searchBar.visibilityButton.show");
 
     const placeholder = this.getPlaceholder();
     return (
       <TextField
         {...params}
-        label={<span style={visuallyHidden}>Sök i webbplatsens innehåll</span>}
+        label={
+          <span style={visuallyHidden}>
+            {t("core.search.searchBar.srText")}
+          </span>
+        }
         variant={isMobile ? "standard" : "outlined"}
         placeholder={placeholder}
         onKeyPress={handleSearchBarKeyPress}
@@ -412,12 +421,17 @@ class SearchBar extends React.PureComponent {
               {showFailedWFSMessage &&
                 this.renderFailedWFSFetchWarning(failedWFSFetchMessage)}
               {!showSearchResults ? (
-                <Tooltip disableInteractive title="Utför sökning">
+                <Tooltip
+                  disableInteractive
+                  title={t("core.search.searchBar.searchButton.toolTip")}
+                >
                   <IconButton
                     size="small"
                     onClick={handleOnClickOrKeyboardSearch}
                   >
-                    <span style={visuallyHidden}>Utför sökning</span>
+                    <span style={visuallyHidden}>
+                      {t("core.search.searchBar.searchButton.srText")}
+                    </span>
                     <SearchIcon />
                   </IconButton>
                 </Tooltip>
@@ -463,11 +477,16 @@ class SearchBar extends React.PureComponent {
                 </>
               )}
               {searchString.length > 0 ||
-              showSearchResults ||
-              searchActive !== "" ? (
-                <Tooltip disableInteractive title="Rensa sökning">
+                showSearchResults ||
+                searchActive !== "" ? (
+                <Tooltip
+                  disableInteractive
+                  title={t("core.search.searchBar.clearButton.toolTip")}
+                >
                   <IconButton onClick={handleOnClear} size="small">
-                    <span style={visuallyHidden}>Rensa sökning</span>
+                    <span style={visuallyHidden}>
+                      {t("core.search.searchBar.clearButton.srText")}
+                    </span>
                     <ClearIcon />
                   </IconButton>
                 </Tooltip>
@@ -494,7 +513,10 @@ class SearchBar extends React.PureComponent {
     const { showSearchResults, isMobile } = this.props;
 
     return (
-      <Grid sx={{ width: 400, height: (theme) => theme.spacing(6) }}>
+      <Grid
+        sx={{ width: 400, height: (theme) => theme.spacing(6) }}
+        name="searchBar"
+      >
         <Grid item>
           <Paper elevation={isMobile ? 0 : 1}>
             {this.renderAutoComplete()}
@@ -506,4 +528,4 @@ class SearchBar extends React.PureComponent {
   }
 }
 
-export default withIsMobile()(SearchBar);
+export default withTranslation()(withIsMobile()(SearchBar));

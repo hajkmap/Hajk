@@ -3,6 +3,7 @@ import { easeOut } from "ol/easing";
 import { IconButton, Paper, Tooltip } from "@mui/material";
 import NavigationIcon from "@mui/icons-material/Navigation";
 import { styled } from "@mui/material/styles";
+import { useTranslation } from "react-i18next";
 
 const StyledPaper = styled(Paper)(({ theme }) => ({
   marginBottom: theme.spacing(1),
@@ -13,6 +14,7 @@ const StyledIconButton = styled(IconButton)(({ theme }) => ({
 }));
 
 const RotateControl = React.memo((props) => {
+  const { t } = useTranslation();
   const view = useRef();
   const [rotation, setRotation] = useState(view.current?.getRotation() || 0);
 
@@ -63,10 +65,10 @@ const RotateControl = React.memo((props) => {
 
   return (
     (props.map && rotation !== 0 && (
-      <Tooltip disableInteractive title="Återställ rotation">
+      <Tooltip disableInteractive title={t("controls.rotate.title")}>
         <StyledPaper>
           <StyledIconButton
-            aria-label="Återställ rotation"
+            aria-label={t("controls.rotate.ariaLabel")}
             onClick={rotateNorth}
           >
             <NavigationIcon style={{ transform: `rotate(${rotation}rad)` }} />
