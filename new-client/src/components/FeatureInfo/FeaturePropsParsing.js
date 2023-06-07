@@ -32,6 +32,9 @@ export default class FeaturePropsParsing {
 
     // Default to true to ensure backwards compatibility with old configs that predominately use HTML
     this.allowDangerousHtml = this.options.allowDangerousHtml ?? true;
+    // Do we want the markdown-renderer to transform the provided uri's or not? Defaults to true to make sure un-safe uri's are not passed by mistake.
+    // Disabling the transformer could be used to allow for links to desktop applications, for example app://open.
+    this.transformLinkUri = this.options.transformLinkUri ?? true;
 
     // Here we define the components used by ReactMarkdown, see https://github.com/remarkjs/react-markdown#appendix-b-components
     // Note that we import customComponentsForReactMarkdown from our shared library, spread those
@@ -423,6 +426,7 @@ export default class FeaturePropsParsing {
       // will make use of the results in this.resolvedPromises, so that's why we had to wait.
       return (
         <ReactMarkdown
+          transformLinkUri={this.transformLinkUri ? undefined : (x) => x} // If transformLinksUri is set to false, we pass a function that simply returns the uri as-is.
           remarkPlugins={[gfm]} // GitHub Formatted Markdown adds support for Tables in MD
           rehypePlugins={rehypePlugins} // Needed to parse HTML, activated in admin
           components={this.components} // Custom renderers for components, see definition in this.components

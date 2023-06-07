@@ -49,6 +49,7 @@ import {
   Grid,
   Hidden,
   IconButton,
+  Link,
   Tooltip,
   Typography,
 } from "@mui/material";
@@ -1127,7 +1128,10 @@ class App extends React.PureComponent {
                   },
                 }}
               >
-                <Zoom map={this.appModel.getMap()} />
+                <Zoom
+                  map={this.appModel.getMap()}
+                  mapConfig={this.appModel.config.mapConfig.map}
+                />
                 {clean === false &&
                   this.appModel.config.mapConfig.map.showUserAvatar ===
                     true && (
@@ -1235,6 +1239,32 @@ class App extends React.PureComponent {
               {this.renderDrawerHeader()}
               <Divider />
               {this.renderAllDrawerContent()}
+              {
+                // See #1336
+                config.mapConfig.map.linkInDrawer &&
+                  typeof config.mapConfig.map.linkInDrawer?.text === "string" &&
+                  typeof config.mapConfig.map.linkInDrawer?.href ===
+                    "string" && (
+                    <>
+                      <Divider />
+                      <Link
+                        align="center"
+                        variant="button"
+                        href={config.mapConfig.map.linkInDrawer.href}
+                        target={
+                          config.mapConfig.map.linkInDrawer.newWindow === true
+                            ? "_blank"
+                            : "_self"
+                        }
+                        sx={{
+                          p: 1,
+                        }}
+                      >
+                        {config.mapConfig.map.linkInDrawer.text}
+                      </Link>
+                    </>
+                  )
+              }
             </Drawer>
           )}
           {clean === false && (
