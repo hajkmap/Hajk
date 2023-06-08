@@ -4,7 +4,6 @@ import { PLUGINS_TO_IGNORE_IN_HASH_APP_STATE } from "constants";
 
 import PropTypes from "prop-types";
 import { styled } from "@mui/material/styles";
-import { SnackbarProvider } from "notistack";
 import Observer from "react-event-observer";
 import { isMobile } from "../utils/IsMobile";
 import { getMergedSearchAndHashParams } from "../utils/getMergedSearchAndHashParams";
@@ -24,6 +23,7 @@ import Alert from "./Alert";
 import PluginWindows from "./PluginWindows";
 import SimpleDialog from "./SimpleDialog";
 import MapClickViewer from "./MapClickViewer/MapClickViewer";
+import SnackbarProvider from "./SnackbarProvider";
 
 import Search from "./Search/Search.js";
 
