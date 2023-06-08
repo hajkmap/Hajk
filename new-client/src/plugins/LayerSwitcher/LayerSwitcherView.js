@@ -80,7 +80,7 @@ class LayersSwitcherView extends React.PureComponent {
     layerPackageState?.event?.stopPropagation();
     this.setState({
       displayContentOverlay:
-        this.state.displayLoadLayerPackage === "layerPackage"
+        this.state.displayContentOverlay === "layerPackage"
           ? null
           : "layerPackage",
     });
