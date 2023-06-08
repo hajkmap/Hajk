@@ -708,6 +708,18 @@ class App extends React.PureComponent {
           // to anyone wanting to act on layer visibility change.
           this.globalObserver.publish("core.layerVisibilityChanged", e);
         });
+        // Listener for "quickAccess" changes
+        layer.on("change:quickAccess", (e) => {
+          // Send an event on the global observer
+          // to anyone wanting to act on layer quickAccess change.
+          this.globalObserver.publish("core.layerQuickAccessChanged", e);
+        });
+        // Listener for "subLayers" changes
+        layer.on("change:subLayers", (e) => {
+          // Send an event on the global observer
+          // to anyone wanting to act on layer subLayers change.
+          this.globalObserver.publish("core.layerSubLayersChanged", e);
+        });
       });
   }
 

@@ -1,0 +1,348 @@
+import React, { useState, useEffect } from "react";
+import { useSnackbar } from "notistack";
+
+import LayerItemOptions from "./LayerItemOptions";
+import VectorFilter from "./VectorFilter";
+import CQLFilter from "./CQLFilter";
+
+import {
+  Button,
+  Box,
+  IconButton,
+  Slider,
+  Tooltip,
+  Collapse,
+  Typography,
+  Stack,
+} from "@mui/material";
+
+import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
+import FormatListBulletedOutlinedIcon from "@mui/icons-material/FormatListBulletedOutlined";
+import SettingsOutlinedIcon from "@mui/icons-material/SettingsOutlined";
+import StarOutlineOutlinedIcon from "@mui/icons-material/StarOutlineOutlined";
+import DeleteOutlinedIcon from "@mui/icons-material/DeleteOutlined";
+import LayerItemInfo from "./LayerItemInfo";
+
+function LayerItemDetails({
+  display,
+  layerItemDetails,
+  chapters,
+  map,
+  app,
+  showOpacitySlider,
+}) {
+  const { enqueueSnackbar } = useSnackbar();
+  // State that toggles legend collapse
+  const [legendIsActive, setLegendIsActive] = useState(false);
+  // Keep the layer opacity in state
+  const [opacity, setOpacity] = useState(0);
+  // Keep the layer quickAccess property in state
+  const [quickAccess, setQuickAccess] = useState(false);
+
+  // Because of a warning in dev console, we need special handling of tooltip for backbutton.
+  // When a user clicks back, the tooltip of the button needs to be closed before this view hides.
+  // TODO: Needs a better way to handle this
+  const [tooltipOpen, setTooltipOpen] = useState(false);
+
+  const cqlFilterVisible = app.config.mapConfig.map?.cqlFilterVisible || false;
+  const subLayerIndex =
+    layerItemDetails?.subLayerIndex === undefined
+      ? null
+      : layerItemDetails?.subLayerIndex;
+  const showOpacity = subLayerIndex !== null ? false : true;
+  const showLegend =
+    layerItemDetails?.layer.get("layerType") === "group" &&
+    subLayerIndex === null
+      ? false
+      : true;
+
+  // Handle opacity slider changes
+  const handleOpacitySliderChange = (e, newValue) => {
+    layerItemDetails.layer.set("opacity", newValue);
+  };
+
+  // Callback for change:opacity listeners
+  const setOpacityCallback = (e) => {
+    setOpacity(e.target.get("opacity"));
+  };
+
+  // Setup listeners when component is mounted
+  useEffect(() => {
+    if (layerItemDetails?.layer) {
+      // Register a listener: when layer's opacity changes make sure
+      // to update opacity state. Not applicable for fakeMapLayers
+      if (!layerItemDetails.layer.isFakeMapLayer) {
+        setOpacity(layerItemDetails.layer.get("opacity"));
+        setQuickAccess(layerItemDetails.layer.get("quickAccess"));
+        layerItemDetails.layer.on("change:opacity", setOpacityCallback);
+      }
+    }
+    return function () {
+      layerItemDetails?.layer.un("change:opacity", setOpacityCallback);
+    };
+  }, [layerItemDetails]);
+
+  // Format slider label
+  const valueLabelFormat = (value) => {
+    return `${Math.trunc(value * 100)} %`;
+  };
+
+  // Handles click on back button in header
+  const handleBackButtonClick = () => {
+    setTooltipOpen(false);
+    setLegendIsActive(false);
+    setTimeout(() => {
+      app.globalObserver.publish("setLayerDetails", null);
+    }, 100);
+  };
+
+  // Handles backbutton tooltip close event
+  const handleClose = () => {
+    setTooltipOpen(false);
+  };
+
+  // Handles backbutton tooltip open event
+  const handleOpen = () => {
+    setTooltipOpen(true);
+  };
+
+  // Checks if layer is enabled for options
+  const hasListItemOptions = () => {
+    return (
+      layerItemDetails.layer.get("layerType") !== "system" &&
+      layerItemDetails.layer.isFakeMapLayer !== true
+    );
+  };
+
+  // Check that layer is elligible for quickAccess option
+  const isQuickAccessEnabled = () => {
+    return (
+      layerItemDetails.layer.get("layerType") !== "base" &&
+      subLayerIndex === null
+    );
+  };
+
+  // Handle quickacces action
+  const handleQuickAccess = () => {
+    setQuickAccess(!quickAccess);
+    // Set quicklayer access flag
+    layerItemDetails.layer.set(
+      "quickAccess",
+      !layerItemDetails.layer.get("quickAccess")
+    );
+  };
+
+  // Render legend image
+  const renderLegendImage = () => {
+    const index = layerItemDetails.subLayerIndex
+      ? layerItemDetails.subLayerIndex
+      : 0;
+    const layerInfo = layerItemDetails.layer.get("layerInfo");
+    const src = layerInfo.legend?.[index]?.url ?? "";
+
+    return src ? (
+      <div>
+        <img max-width="250px" alt="Teckenförklaring" src={src} />
+      </div>
+    ) : null;
+  };
+
+  // Render title
+  const renderDetailTitle = () => {
+    if (subLayerIndex !== null) {
+      return layerItemDetails.layer.layersInfo[
+        layerItemDetails.layer.subLayers[subLayerIndex]
+      ].caption;
+    } else {
+      return layerItemDetails.layer.get("caption");
+    }
+  };
+
+  return (
+    <>
+      {layerItemDetails && (
+        <Box
+          sx={{
+            display: display ? "block" : "none",
+            position: "absolute",
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: "#fff",
+          }}
+        >
+          <Box
+            sx={{
+              p: 1,
+              backgroundColor: (theme) => theme.palette.grey[100],
+              borderBottom: (theme) =>
+                `${theme.spacing(0.2)} solid ${theme.palette.divider}`,
+            }}
+          >
+            <Stack direction="row" alignItems="center">
+              <Tooltip
+                open={tooltipOpen}
+                onClose={handleClose}
+                onOpen={handleOpen}
+                title="Tillbaka"
+                TransitionProps={{ timeout: 0 }}
+              >
+                <IconButton onClick={handleBackButtonClick}>
+                  <ArrowBackIcon />
+                </IconButton>
+              </Tooltip>
+              <Box sx={{ flexGrow: 1, textAlign: "center" }}>
+                <Typography variant="subtitle1">
+                  {renderDetailTitle()}
+                </Typography>
+              </Box>
+              {hasListItemOptions() && (
+                <LayerItemOptions
+                  layer={layerItemDetails.layer}
+                  app={app}
+                  subLayerIndex={subLayerIndex}
+                  enqueueSnackbar={enqueueSnackbar}
+                />
+              )}
+            </Stack>
+          </Box>
+          <Box
+            sx={{
+              p: 1,
+            }}
+          >
+            <Stack direction="row" alignItems="center">
+              <IconButton
+                sx={{ cursor: "default" }}
+                disableFocusRipple
+                disableRipple
+                disableTouchRipple
+              >
+                <InfoOutlinedIcon />
+              </IconButton>
+              <Box sx={{ flexGrow: 1 }}>
+                <Typography variant="subtitle1">Info</Typography>
+              </Box>
+              {showLegend && (
+                <Tooltip title="Teckenförklaring">
+                  <IconButton
+                    onClick={() => setLegendIsActive(!legendIsActive)}
+                  >
+                    <FormatListBulletedOutlinedIcon fontSize="small" />
+                  </IconButton>
+                </Tooltip>
+              )}
+            </Stack>
+            <Box
+              sx={{
+                py: 1,
+                px: 2,
+                borderBottom: (theme) =>
+                  `${theme.spacing(0.2)} solid ${theme.palette.divider}`,
+              }}
+            >
+              <LayerItemInfo
+                chapters={chapters}
+                app={app}
+                layer={layerItemDetails.layer}
+              ></LayerItemInfo>
+              <Collapse sx={{ pt: 1 }} in={legendIsActive}>
+                {renderLegendImage()}
+              </Collapse>
+            </Box>
+            <Stack direction="row" alignItems="center">
+              <IconButton
+                sx={{ cursor: "default" }}
+                disableFocusRipple
+                disableRipple
+                disableTouchRipple
+              >
+                <SettingsOutlinedIcon />
+              </IconButton>
+              <Box sx={{ flexGrow: 1 }}>
+                <Typography variant="subtitle1">Inställningar</Typography>
+              </Box>
+            </Stack>
+            {showOpacitySlider !== false && showOpacity ? (
+              <Box
+                sx={{
+                  px: 2,
+                  pr: 3,
+                  pb: 2,
+                }}
+              >
+                <Stack direction="row" spacing={2} alignItems="center">
+                  <Typography
+                    variant="subtitle2"
+                    sx={{ flexGrow: 1, flexBasis: "20%" }}
+                  >
+                    Opacitet
+                  </Typography>
+                  <Slider
+                    aria-label="Layer opacity"
+                    value={opacity}
+                    onChange={handleOpacitySliderChange}
+                    getAriaValueText={valueLabelFormat}
+                    valueLabelFormat={valueLabelFormat}
+                    min={0}
+                    max={1}
+                    step={0.01}
+                    valueLabelDisplay="auto"
+                  />
+                </Stack>
+              </Box>
+            ) : null}
+            {layerItemDetails.layer.getProperties().filterable ||
+              (cqlFilterVisible && (
+                <Box
+                  sx={{
+                    px: 2,
+                    pr: 2,
+                    pb: 2,
+                  }}
+                >
+                  {cqlFilterVisible && (
+                    <CQLFilter layer={layerItemDetails.layer} />
+                  )}
+                  {layerItemDetails.layer.getProperties().filterable && (
+                    <VectorFilter layer={layerItemDetails.layer} />
+                  )}
+                </Box>
+              ))}
+            {isQuickAccessEnabled() && (
+              <Box
+                sx={{
+                  borderTop: (theme) =>
+                    `${theme.spacing(0.2)} solid ${theme.palette.divider}`,
+                  p: 2,
+                }}
+              >
+                <Button
+                  fullWidth
+                  variant="outlined"
+                  onClick={handleQuickAccess}
+                >
+                  {!quickAccess ? (
+                    <>
+                      <StarOutlineOutlinedIcon sx={{ marginRight: 1 }} />
+                      Lägg till i snabblager
+                    </>
+                  ) : (
+                    <>
+                      <DeleteOutlinedIcon sx={{ marginRight: 1 }} />
+                      Ta bort från snabblager
+                    </>
+                  )}
+                </Button>
+              </Box>
+            )}
+          </Box>
+        </Box>
+      )}
+    </>
+  );
+}
+
+export default LayerItemDetails;
