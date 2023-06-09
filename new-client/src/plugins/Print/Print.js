@@ -29,6 +29,8 @@ class Print extends React.PureComponent {
     500000,
   ];
 
+  scaleMeters = [20, 40, 40, 100, 200, 200, 400, 600, 2000, 4000, 10000, 20000];
+
   static propTypes = {
     app: PropTypes.object.isRequired,
     map: PropTypes.object.isRequired,
@@ -43,6 +45,15 @@ class Print extends React.PureComponent {
       props.options.scales = props.options.scales.replace(/\s/g, "").split(",");
     } else {
       props.options.scales = this.scales;
+    }
+
+    // Prepare scaleMeters from admin options, fallback to default if needed
+    if (props?.options?.scaleMeters?.split(",").length > 1) {
+      props.options.scaleMeters = props.options.scaleMeters
+        .replace(/\s/g, "")
+        .split(",");
+    } else {
+      props.options.scaleMeters = this.scaleMeters;
     }
 
     // Prepare dpis from admin options, fallback to default if needed
@@ -82,6 +93,11 @@ class Print extends React.PureComponent {
 
     // If no path to north-arrow image is supplied, use fallback
     props.options.northArrow = props.options.northArrow || "/north_arrow.png";
+
+    props.options.includeImageBorder =
+      typeof props.options?.includeImageBorder === "boolean"
+        ? props.options.includeImageBorder
+        : false;
 
     // Ensure we have a value for the crossOrigin parameter
     props.options.crossOrigin =

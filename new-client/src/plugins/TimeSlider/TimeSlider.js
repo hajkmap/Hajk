@@ -12,7 +12,7 @@ import PauseIcon from "@mui/icons-material/Pause";
 
 class TimeSlider extends React.PureComponent {
   state = {
-    title: this.props.options.title ?? "Tidslinje",
+    title: this.props.options.title || "Tidslinje",
     color: null,
     playing: false,
   };
@@ -26,8 +26,8 @@ class TimeSlider extends React.PureComponent {
     super(props);
     this.localObserver = Observer();
     this.layers = this.getLayers(props.options.layers);
-    this.defaultResolution = props.options.defaultResolution ?? "years";
-    this.originalTitle = this.props.options.title ?? "Tidslinje";
+    this.defaultResolution = props.options.defaultResolution || "years";
+    this.originalTitle = this.props.options.title || "Tidslinje";
     this.bindSubscriptions();
   }
 

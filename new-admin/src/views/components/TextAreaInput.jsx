@@ -1,10 +1,10 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { makeStyles } from "@material-ui/core/styles";
 import Grid from "@material-ui/core/Grid";
 import { red, green } from "@material-ui/core/colors";
 import { withStyles } from "@material-ui/core/styles";
 import { EditorState, Modifier } from "draft-js";
-import { Typography, Button } from "@material-ui/core";
+import { Typography, Button, Checkbox } from "@material-ui/core";
 
 const ColorButtonRed = withStyles((theme) => ({
   root: {
@@ -26,21 +26,64 @@ const ColorButtonGreen = withStyles((theme) => ({
   },
 }))(Button);
 
+const colorBox = (color) => {
+  return (
+    <p
+      style={{
+        width: "30px",
+        height: "20px",
+        backgroundColor: color,
+        display: color ? "inherit" : "none",
+      }}
+    ></p>
+  );
+};
+
+// Returns the accordion title
+const getAccordionTitle = (data) => {
+  return data.get("accordionTitle");
+};
+
+// Returns the content-block background-color
+const getBgColor = (data) => {
+  return data.get("backgroundColor");
+};
+
+// Returns the content-block divider-color
+const getDividerColor = (data) => {
+  return data.get("dividerColor");
+};
+
+// Returns wether the content-block is set to be a accordion or not.
+// If the content comes from a .json-file the key is saved as a string...
+const getIsAccordion = (data) => {
+  return data.get("isAccordion") === "true" || data.get("isAccordion") === true;
+};
+
 const TextAreaInput = ({ editorState, updateEditorState, onCancelClick }) => {
   const classes = useStyles();
-  const [backgroundColor, setBackgroundColor] = useState();
-  const [dividerColor, setDividerColor] = useState();
 
   const selectionState = editorState.getSelection();
   const hasFocus = selectionState.get("hasFocus");
-
   const contentState = editorState.getCurrentContent();
   const contentBlock = contentState.getBlockForKey(
     selectionState.getAnchorKey()
   );
   const data = contentBlock.getData();
-  const focusedBackgroundColor = data.get("backgroundColor") || "INGEN FÄRG";
-  const focusedDividerColor = data.get("dividerColor") || "INGEN FÄRG";
+
+  const [accordionTitle, setAccordionTitle] = useState(getAccordionTitle(data));
+  const [backgroundColor, setBackgroundColor] = useState(getBgColor(data));
+  const [dividerColor, setDividerColor] = useState(getDividerColor(data));
+  const [isAccordion, setIsAccordion] = useState(getIsAccordion(data));
+
+  // Sync to eventual parent change...
+  // I don't really like state depending on props. This sync will lead to ghost renders...
+  useEffect(() => {
+    setAccordionTitle(getAccordionTitle(data));
+    setBackgroundColor(getBgColor(data));
+    setDividerColor(getDividerColor(data));
+    setIsAccordion(getIsAccordion(data));
+  }, [data]);
 
   const onConfirmClick = () => {
     const contentState = editorState.getCurrentContent();
@@ -49,6 +92,8 @@ const TextAreaInput = ({ editorState, updateEditorState, onCancelClick }) => {
     data.set("backgroundColor", backgroundColor);
     data.set("dividerColor", dividerColor);
     data.set("textSection", "");
+    data.set("isAccordion", isAccordion);
+    isAccordion && data.set("accordionTitle", accordionTitle);
     updateEditorState(
       EditorState.push(
         editorState,
@@ -92,7 +137,7 @@ const TextAreaInput = ({ editorState, updateEditorState, onCancelClick }) => {
                   }}
                   type="text"
                   value={backgroundColor || ""}
-                  placeholder="#ccc"
+                  placeholder="Ex. #ccc"
                 />
               </Grid>
               <Grid item>
@@ -108,8 +153,37 @@ const TextAreaInput = ({ editorState, updateEditorState, onCancelClick }) => {
                   }}
                   type="text"
                   value={dividerColor || ""}
-                  placeholder="#6A0DAD"
+                  placeholder="Ex. #6A0DAD"
                 />
+              </Grid>
+              <Grid item>
+                <label style={{ margin: 0 }}>
+                  Hopfällbar faktaruta (data-accordion)
+                </label>
+              </Grid>
+              <Grid container direction="row" item>
+                <Grid item>
+                  <Checkbox
+                    style={{ padding: "0 10px 0px 10px" }}
+                    id="data-accordion"
+                    onChange={(e) => {
+                      setIsAccordion(!isAccordion);
+                    }}
+                    checked={isAccordion}
+                  />
+                </Grid>
+                <Grid item>
+                  <input
+                    id="data-accordion-title"
+                    onChange={(e) => {
+                      setAccordionTitle(e.target.value);
+                    }}
+                    type="text"
+                    value={accordionTitle || ""}
+                    placeholder={"Titel..."}
+                    disabled={!isAccordion}
+                  />
+                </Grid>
               </Grid>
             </Grid>
             <Grid container direction="column" item></Grid>
@@ -131,18 +205,44 @@ const TextAreaInput = ({ editorState, updateEditorState, onCancelClick }) => {
           </ColorButtonRed>
         </Grid>
       </Grid>
-      <Grid className={classes.textAreaInput} item xs={4}>
+      <Grid className={classes.textAreaInput} item xs={5}>
         <Grid direction="column" container item>
           <Grid item>
             {hasFocus && (
-              <p>{`Markerad faktaruta har data-background-color
-            ${focusedBackgroundColor}`}</p>
+              <div>
+                <p style={{ margin: backgroundColor ? "0" : "" }}>
+                  {`Markerad faktaruta har data-background-color
+            ${backgroundColor || "INGEN FÄRG"}`}
+                </p>
+                {colorBox(backgroundColor)}
+              </div>
             )}
           </Grid>
           <Grid item>
             {hasFocus && (
-              <p>{`Markerad faktaruta har data-divider-color
-            ${focusedDividerColor}`}</p>
+              <div>
+                <p
+                  style={{ margin: dividerColor ? "0" : "" }}
+                >{`Markerad faktaruta har data-divider-color
+            ${dividerColor || "INGEN FÄRG"}`}</p>
+                {colorBox(dividerColor)}
+              </div>
+            )}
+          </Grid>
+          <Grid item>
+            {hasFocus && (
+              <p>{`Markerad faktaruta ${
+                isAccordion ? "ÄR" : "ÄR INTE"
+              } data-accordion
+            `}</p>
+            )}
+          </Grid>
+          <Grid item>
+            {hasFocus && (
+              <p>{`Markerad faktaruta har data-accordion-title ${
+                accordionTitle || "INGEN TITEL"
+              }
+            `}</p>
             )}
           </Grid>
         </Grid>

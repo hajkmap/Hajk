@@ -26,8 +26,7 @@ const ZoomControl = React.memo((props) => {
     if (currentZoom !== undefined) {
       const newZoom = currentZoom + delta;
 
-      // TODO: Duration could be an option from map config, allowing admin to disable zoom animation
-      const duration = 200;
+      const duration = props.mapConfig.zoomDuration ?? 200; // ?? because 0 is an allowed value
       if (duration > 0) {
         if (view.getAnimating()) {
           view.cancelAnimations();

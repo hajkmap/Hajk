@@ -30,6 +30,7 @@ const defaultState = {
   markerImg: "",
   delayBeforeAutoSearch: 500,
   disableAutocomplete: false,
+  disableSearchCombinations: false,
   searchBarPlaceholder: "Sök...",
   autocompleteWildcardAtStart: false,
   enablePolygonSearch: true,
@@ -51,6 +52,7 @@ const defaultState = {
   enableLabelOnHighlight: true,
   showResultsLimitReachedWarning: true,
   enableFeatureToggler: true,
+  fitToResultMaxZoom: -1,
   showCorrespondingWMSLayers: false,
 
   // Used to style the spatial search polygon/circle feature
@@ -149,6 +151,9 @@ class ToolOptions extends Component {
             this.state.delayBeforeAutoSearch,
           disableAutocomplete:
             tool.options.disableAutocomplete ?? this.state.disableAutocomplete,
+          disableSearchCombinations:
+            tool.options.disableSearchCombinations ??
+            this.state.disableSearchCombinations,
           autocompleteWildcardAtStart:
             tool.options.autocompleteWildcardAtStart ||
             this.state.autocompleteWildcardAtStart,
@@ -205,6 +210,8 @@ class ToolOptions extends Component {
           enableFeatureToggler:
             tool.options.enableFeatureToggler ??
             this.state.enableFeatureToggler,
+          fitToResultMaxZoom:
+            tool.options.fitToResultMaxZoom || this.state.fitToResultMaxZoom,
 
           drawFillColor: tool.options.drawFillColor || this.state.drawFillColor,
           drawStrokeColor:
@@ -363,6 +370,7 @@ class ToolOptions extends Component {
         markerImg: this.state.markerImg,
         delayBeforeAutoSearch: this.state.delayBeforeAutoSearch,
         disableAutocomplete: this.state.disableAutocomplete,
+        disableSearchCombinations: this.state.disableSearchCombinations,
         searchBarPlaceholder: this.state.searchBarPlaceholder,
         autocompleteWildcardAtStart: this.state.autocompleteWildcardAtStart,
         enablePolygonSearch: this.state.enablePolygonSearch,
@@ -388,6 +396,7 @@ class ToolOptions extends Component {
         showResultsLimitReachedWarning:
           this.state.showResultsLimitReachedWarning,
         enableFeatureToggler: this.state.enableFeatureToggler,
+        fitToResultMaxZoom: this.state.fitToResultMaxZoom,
 
         drawFillColor: this.state.drawFillColor,
         drawStrokeColor: this.state.drawStrokeColor,
@@ -746,6 +755,29 @@ class ToolOptions extends Component {
             &nbsp;
             <label className="long-label" htmlFor="disableAutocomplete">
               Avaktivera autocomplete (visa sökresultat direkt).
+            </label>
+          </div>
+          <div>
+            <input
+              id="disableSearchCombinations"
+              name="disableSearchCombinations"
+              type="checkbox"
+              onChange={(e) => {
+                this.handleInputChange(e);
+              }}
+              checked={this.state.disableSearchCombinations}
+            />
+            &nbsp;
+            <label htmlFor="disableSearchCombinations" className="long-label">
+              Avaktivera automatiska sök-kombinationer{" "}
+              <i
+                className="fa fa-question-circle"
+                data-toggle="tooltip"
+                title="Låt inte sökmotorn skapa automatiska sök-kombinationer.
+                (Kombinationerna kan öka möjligheten att användarna hittar vad de
+                letar efter, men det kan ta längre tid för servern att bearbeta
+                sökningen.)"
+              />
             </label>
           </div>
 
@@ -1160,6 +1192,26 @@ class ToolOptions extends Component {
             &nbsp;
             <label className="long-label" htmlFor="enableFeatureToggler">
               Visa föregående/nästa-knapp för bläddring av resultat
+            </label>
+          </div>
+
+          <div>
+            <input
+              id="fitToResultMaxZoom"
+              value={this.state.fitToResultMaxZoom}
+              type="number"
+              min="-1"
+              max="20"
+              step="1"
+              name="fitToResultMaxZoom"
+              onChange={(e) => {
+                this.handleInputChange(e);
+              }}
+              checked={this.state.fitToResultMaxZoom}
+            />
+            &nbsp;
+            <label className="long-label" htmlFor="fitToResultMaxZoom">
+              Maximal zoomnivå vid zoomning till sökresultat (-1 för obegränsat)
             </label>
           </div>
 

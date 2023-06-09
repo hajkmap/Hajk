@@ -1,17 +1,20 @@
+import AnchorModel from "./AnchorModel";
+import MapClickModel from "./MapClickModel";
 import SearchModel from "./SearchModel";
-import Plugin from "./Plugin.js";
-import ConfigMapper from "./../utils/ConfigMapper.js";
-import CoordinateSystemLoader from "./../utils/CoordinateSystemLoader.js";
-import { isMobile } from "./../utils/IsMobile.js";
+import Plugin from "./Plugin";
+import SnapHelper from "./SnapHelper";
+import { bindMapClickEvent } from "./Click";
+
+import ConfigMapper from "utils/ConfigMapper";
+import CoordinateSystemLoader from "utils/CoordinateSystemLoader";
+import { hfetch } from "utils/FetchWrapper";
+import { isMobile } from "utils/IsMobile";
+import { getMergedSearchAndHashParams } from "utils/getMergedSearchAndHashParams";
 // import ArcGISLayer from "./layers/ArcGISLayer.js";
 // import DataLayer from "./layers/DataLayer.js";
 import WMSLayer from "./layers/WMSLayer.js";
 import WMTSLayer from "./layers/WMTSLayer.js";
 import WFSVectorLayer from "./layers/VectorLayer.js";
-import { bindMapClickEvent } from "./Click.js";
-import MapClickModel from "./MapClickModel";
-import { defaults as defaultInteractions } from "ol/interaction";
-import { Map as OLMap, View } from "ol";
 // TODO: Uncomment and ensure they show as expected
 // import {
 // defaults as defaultControls,
@@ -26,12 +29,13 @@ import { Map as OLMap, View } from "ol";
 // ZoomSlider,
 // ZoomToExtent
 // } from "ol/control";
+
+import { Map as OLMap, View } from "ol";
+import { defaults as defaultInteractions } from "ol/interaction";
 import { register } from "ol/proj/proj4";
 import VectorLayer from "ol/layer/Vector";
 import VectorSource from "ol/source/Vector";
-import { Icon, Fill, Stroke, Style } from "ol/style.js";
-import SnapHelper from "./SnapHelper";
-import { hfetch } from "utils/FetchWrapper";
+import { Icon, Fill, Stroke, Style } from "ol/style";
 
 class AppModel {
   /**
@@ -489,6 +493,17 @@ class AppModel {
     return this;
   }
 
+  addAnchorModel() {
+    this.anchorModel = new AnchorModel({
+      app: this,
+      globalObserver: this.globalObserver,
+      map: this.map,
+    });
+
+    // Either way, return self, so we can go on and chain more methods on App model
+    return this;
+  }
+
   clear() {
     this.clearing = true;
     this.highlight(false);
@@ -700,36 +715,33 @@ class AppModel {
    * @summary Merges two objects.
    *
    * @param {*} mapConfig
-   * @param {*} urlSearchParams
+   * @param {*} paramsAsPlainObject
    * @returns {*} a Result of overwriting a with values from b
    * @memberof AppModel
    */
-  mergeConfig(mapConfig, urlSearchParams) {
+  mergeConfigWithValuesFromParams(mapConfig, paramsAsPlainObject) {
     // clean is used to strip the UI of all elements so we get a super clean viewport back, without any plugins
     const clean =
-      Boolean(urlSearchParams.hasOwnProperty("clean")) &&
-      urlSearchParams.clean !== "false" &&
-      urlSearchParams.clean !== "0";
-
-    // f contains our CQL Filters
-    const f = urlSearchParams.f;
+      Boolean(paramsAsPlainObject.hasOwnProperty("clean")) &&
+      paramsAsPlainObject.clean !== "false" &&
+      paramsAsPlainObject.clean !== "0";
 
     // Merge query params to the map config from JSON
-    let x = parseFloat(urlSearchParams.x),
-      y = parseFloat(urlSearchParams.y),
-      z = parseInt(urlSearchParams.z, 10);
+    let x = parseFloat(paramsAsPlainObject.x),
+      y = parseFloat(paramsAsPlainObject.y),
+      z = parseInt(paramsAsPlainObject.z, 10);
 
-    if (typeof urlSearchParams.l === "string") {
-      this.layersFromParams = urlSearchParams.l.split(",");
+    if (typeof paramsAsPlainObject.l === "string") {
+      this.layersFromParams = paramsAsPlainObject.l.split(",");
     }
 
-    if (typeof urlSearchParams.gl === "string") {
+    if (typeof paramsAsPlainObject.gl === "string") {
       try {
-        this.groupLayersFromParams = JSON.parse(urlSearchParams.gl);
+        this.groupLayersFromParams = JSON.parse(paramsAsPlainObject.gl);
       } catch (error) {
         console.error(
           "Couldn't parse the group layers parameter. Attempted with this value:",
-          urlSearchParams.gl
+          paramsAsPlainObject.gl
         );
       }
     }
@@ -749,9 +761,41 @@ class AppModel {
     mapConfig.map.center[1] = y;
     mapConfig.map.zoom = z;
 
+    // f contains our CQL Filters
+    const f = paramsAsPlainObject.f;
     if (f) {
       // Filters come as a URI encoded JSON object, so we must parse it first
       this.cqlFiltersFromParams = JSON.parse(decodeURIComponent(f));
+    }
+
+    // If the 'p' param exists, we want to modify which plugins are visible at start
+    const pluginsToShow = paramsAsPlainObject?.p?.split(",");
+    if (pluginsToShow) {
+      // If the value of 'p' is an empty string, it means that no plugin should be shown at start
+      if (pluginsToShow.length === 1 && pluginsToShow[0] === "") {
+        mapConfig.tools.forEach((t) => {
+          t.options.visibleAtStart = false;
+        });
+      }
+      // If 'p' exists but is not an empty string, we have a list of plugins that should be
+      // shown at start. All others should be hidden (no matter the setting in Admin).
+      else {
+        mapConfig.tools.forEach((t) => {
+          t.options.visibleAtStart = pluginsToShow.includes(t.type);
+        });
+      }
+    }
+
+    // If enableAppStateInHash exists in params, let's override
+    // the corresponding setting from map config. This allows users
+    // to activate live hash params (#1252).
+    const enableAppStateInHash = Object.hasOwn(
+      paramsAsPlainObject,
+      "enableAppStateInHash"
+    );
+    if (enableAppStateInHash) {
+      console.info("Activating live updating of query parameters");
+      mapConfig.map.enableAppStateInHash = true;
     }
 
     return mapConfig;
@@ -950,10 +994,165 @@ class AppModel {
       }
     }
 
-    return this.mergeConfig(
+    return this.mergeConfigWithValuesFromParams(
       this.config.mapConfig,
-      Object.fromEntries(new URLSearchParams(document.location.search))
+      Object.fromEntries(getMergedSearchAndHashParams())
     );
+  }
+
+  /**
+   * @param {string} layers: Comma-separated list of layers to be shown
+   * @param {string} groupLayers: A stringified JSON object specifing sublayer
+   * visibility. E.g. "{"1242"%3A"name_of_sublayer_a, name_of_sublayer_b"}".
+   */
+  setLayerVisibilityFromParams(layers = null, groupLayers = "{}") {
+    // Grab the wanted values from params
+    const l = layers;
+    const gl = groupLayers ?? "{}"; // Default to a stringified empty object, as that's what we'll compare against
+
+    // Find out what's currently visible
+    const visibleLayers = this.anchorModel.getVisibleLayers();
+    const partlyToggledGroupLayers =
+      this.anchorModel.getPartlyToggledGroupLayers();
+
+    // Compare these two
+    if (
+      l === visibleLayers &&
+      JSON.stringify(partlyToggledGroupLayers) === gl
+    ) {
+      // console.log("No changes");
+    } else {
+      // It's easier to work on the values if we parse them first
+      const wantedL = l.split(",");
+      const wantedGl = JSON.parse(gl);
+      const currentL = visibleLayers.split(",");
+      const currentGl = partlyToggledGroupLayers; // This is already an object, no need to parse
+
+      // Get what should be shown
+      const lToShow = wantedL.filter((a) => !currentL.includes(a));
+
+      // Get what should be hidden
+      const lToHide = currentL.filter((a) => !wantedL.includes(a));
+
+      // Act!
+      lToShow.forEach((layer) => {
+        // Grab the corresponding OL layer from Map
+        const olLayer = this.map
+          .getAllLayers()
+          .find((l) => l.get("name") === layer);
+
+        // First, ensure that we had a match. It is possible that pretty much
+        // anything shows up as layer id here (as it can come from multiple sources)
+        // and we can't assume that the requested layer actually exists in current
+        // map's config. In order to prevent a silent failure (see #1305), this check is added.
+        if (olLayer === undefined) {
+          console.warn(
+            `Attempt to show layer with id ${layer} failed: layer not found in current map`
+          );
+        }
+        // If it's a group layer we can use the 'layerswitcher.showLayer' event
+        // that each group layer listens to.
+        else if (olLayer.get("layerType") === "group") {
+          // We can publish the 'layerswitcher.showLayer' event with two different
+          // sets of parameters, depending on whether the group layer has all
+          // sublayers selected, or only a subset.
+
+          // If only a subset is selected, we will find the sublayers in our 'wantedGl' object.
+          // Anything else than 'undefined' here means that we want to publish
+          // the showLayer event and supply the sub-selection of sublayers too.
+          if (wantedGl[layer]) {
+            // In addition, this looks like a group layer that has
+            // its sublayers specified and we should take care of that too
+            this.globalObserver.publish("layerswitcher.showLayer", {
+              layer: olLayer,
+              subLayersToShow: wantedGl[layer]?.split(","),
+            });
+          }
+          // On the other hand, if the layer to be shown does not exist in 'wantedGl',
+          // it means that we should show ALL the sublayers.
+          // For that we must publish the event slightly differently. (Also, see
+          // where we subscribe to layerswitcher.showLayer for further understanding.)
+          else {
+            this.globalObserver.publish("layerswitcher.showLayer", olLayer);
+          }
+        }
+        // That's it for group layer. The other layers, the "normal"
+        // ones, are easier: just show them.
+        else {
+          // Each layer has a listener that will take care of toggling
+          // the checkbox in LayerSwitcher.
+          olLayer.setVisible(true);
+        }
+      });
+
+      // Next, let's take care of layers that should be hidden.
+      lToHide.forEach((layer) => {
+        const olLayer = this.map
+          .getAllLayers()
+          .find((l) => l.get("name") === layer);
+
+        if (olLayer === undefined) {
+          console.warn(
+            `Attempt to hide layer with id ${layer} failed: layer not found in current map`
+          );
+        } else if (olLayer.get("layerType") === "group") {
+          // Tell the LayerSwitcher about it
+          this.globalObserver.publish("layerswitcher.hideLayer", olLayer);
+        } else {
+          olLayer.setVisible(false);
+        }
+      });
+
+      // One more special case must be taken care of. lToShow and lToHide can be empty
+      // if user toggled only a sublayer WITHIN a group layer. In that case we
+      // won't need to change visibility for any OL layers, but we must still fix the group
+      // layer's components' visibility.
+      // We start by looping the wantedGl and comparing to currentGl.
+      for (const key of Object.keys(wantedGl)) {
+        // If the currently visible groups object has the layer's key…
+        // …and it's value differs from the wantedGl's corresponding value…
+        if (Object.hasOwn(currentGl, key) && currentGl[key] !== wantedGl[key]) {
+          const olLayer = this.map
+            .getAllLayers()
+            .find((l) => l.get("name") === key);
+          this.globalObserver.publish("layerswitcher.showLayer", {
+            layer: olLayer,
+            subLayersToShow: wantedGl[key]?.split(","),
+          });
+        }
+      }
+
+      // Super-special case:
+      // If a partly-toggled group layer becomes fully toggled it will
+      // not show up as a diff in wanted vs current layers. Neither will
+      // we see anything in 'wantedGl' (it will be empty, as that's what we
+      // expect for fully toggled group layers [no sub-selection]).
+      // So what can we do?
+      // One solution is to loop through our visible layers (again). Any of them
+      // that are of type 'groupLayer', and where a wantedGl key is missing should
+      // be toggled on completely.
+      wantedL.forEach((layer) => {
+        const olLayer = this.map
+          .getAllLayers()
+          .find(
+            (l) => l.get("name") === layer && l.get("layerType") === "group"
+          );
+
+        if (olLayer !== undefined) {
+          // Determine how we should call the layerswitcher.showLayer event.
+          // A: No sublayers specified for layer in 'wantedGl'. That means show ALL sublayers.
+          // B: Sublayers found in 'wantedGl'. Set visibility accordingly.
+          const param =
+            wantedGl[layer] === undefined
+              ? olLayer
+              : {
+                  layer: olLayer,
+                  subLayersToShow: wantedGl[layer]?.split(","),
+                };
+          this.globalObserver.publish("layerswitcher.showLayer", param);
+        }
+      });
+    }
   }
 }
 

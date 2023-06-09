@@ -1,28 +1,11 @@
 {
-  "parser": "@babel/eslint-parser",
-  "parserOptions": {
-    "sourceType": "module",
-    "requireConfigFile": false
-  },
-  "extends": ["eslint:recommended", "plugin:node/recommended", "plugin:prettier/recommended"],
   "env": {
+    "es2022": true,
+    "node": true,
     "mocha": true
   },
-  "plugins": ["prettier", "node"],
-  "rules": {
-    "no-unused-vars": 2,
-    "node/no-unsupported-features/es-syntax": 0,
-    "node/no-unpublished-import": ["off"],
-    "prettier/prettier": [
-      "error",
-      {
-        "singleQuote": false,
-        "trailingComma": "es5",
-        "bracketSpacing": true,
-        "jsxBracketSameLine": true,
-        "printWidth": 80,
-        "endOfLine": "auto"
-      }
-    ]
+  "extends": "eslint:recommended",
+  "parserOptions": {
+    "sourceType": "module"
   }
 }
