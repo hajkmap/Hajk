@@ -1,5 +1,4 @@
 import React, { useEffect } from "react";
-import { detect } from "detect-browser";
 
 import ReactMarkdown from "react-markdown";
 import rehypeRaw from "rehype-raw";
@@ -26,7 +25,6 @@ import {
         "timeout": null, // null or Numeric. Snackbar will auto hide after specified amount of millisecond, or be persistent (if null).
         "startTime": "2020-01-01", // DateTime. Earliest timestamp for this to be visible. Must be a string parsable by Date.parse().
         "stopTime": "2020-12-31", // DateTime. Last timestamp when this will be visible.
-        "browsers": ["ie"], // Array of browsers (see https://github.com/DamonOehlman/detect-browser for valid names)
         "type": "info" // String. See Notistack docs for allowed options, usually "default", "info", "warning", "success" and "error".
       }, {
         "id": 2, 
@@ -129,20 +127,6 @@ function Announcement({ announcements = [], currentMap }) {
     };
 
     /**
-     * If "browsers" property exists and is an Array, return true only
-     * if current browsers is included in the array.
-     * If "browsers" is a string with value "all", or if it's undefined,
-     * return true too.
-     * For any other (invalid) value, return false.
-     */
-    const browserFilter = (a) => {
-      const browsers = a?.browsers;
-      if (browsers === undefined || browsers === "all") return true;
-      if (Array.isArray(browsers)) return browsers.includes(detect().name);
-      return false;
-    };
-
-    /**
      * Helper method: whatever is left in the announcements array after
      * all checks will be mapped to this render method.
      */
@@ -213,7 +197,6 @@ function Announcement({ announcements = [], currentMap }) {
     const filtered = announcements
       .filter((a) => mapFilter(a)) // Show only announcements for the current map
       .filter((a) => a.active === true) // Only active announcements
-      .filter((a) => browserFilter(a)) // Show only for some browsers if admin said so
       .filter((a) => timeFilter(a)) // Respect possible date/time restrictions
       .filter((a) => localStorageFilter(a)); // Show only once if admin said so, by checking a local storage setting
 
