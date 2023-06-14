@@ -1,34 +1,42 @@
 {
-  "appName": "Hajk",
-  "version": "3.12.0-dev",
-  "mapserviceBase": "",
-  "proxy": "",
-  "searchProxy": "",
-  "defaultMap": "map_1",
-  "experimentalNewApi": false,
-  "noLayerSwitcherMessage": "This map has no layer switcher, which indicates that you are not allowed to use this map!",
-  "networkErrorMessage": "Nätverksfel. Försök att ladda om sidan genom att trycka på F5.",
-  "parseErrorMessage": "Konfigurationsfel. Försök att ladda om sidan genom att trycka på F5.",
-  "announcements": [
+  "chapters": [
     {
-      "id": 1,
-      "active": true,
-      "text": "This demo message from Hajk will show only once.",
-      "showOnlyOnce": true,
-      "maps": ["map_1"],
-      "timeout": 5000,
-      "startTime": "2020-06-29",
-      "stopTime": "2099-12-31",
-      "type": "info",
-      "browsers": "all"
+      "header": "Rubrik",
+      "headerIdentifier": "rubrik_2",
+      "html": "<p>I detta dokument har vi styrt så att innehållsförteckningen endast visar en nivå av rubriker och den är inte expanderad vid start.</p>\n<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Cras pulvinar nibh augue, vitae congue sapien gravida vitae. Sed eleifend sollicitudin lectus, quis porta turpis volutpat ut. Sed faucibus felis non vulputate suscipit. Cras scelerisque metus eget neque fringilla finibus. Curabitur tristique cursus mi. Nulla id dapibus diam. Duis aliquam erat magna, auctor euismod libero eleifend id. Nunc varius posuere bibendum. Maecenas dapibus tortor velit, id ullamcorper mauris fringilla nec.</p>\n<p>Donec tempor ligula eu lectus tempor, blandit efficitur odio malesuada. Etiam sed facilisis velit, sed euismod tortor. Vestibulum cursus mi at magna pretium pellentesque. Sed lobortis orci dui, quis convallis mi consequat quis. Cras ut diam odio. Nunc id finibus mi. Donec lobortis eleifend ipsum, at placerat ex aliquam eget. Etiam gravida dictum erat in blandit. Integer euismod lectus eu sollicitudin volutpat. Donec id ligula eget neque tempus dignissim.</p><p>\nLorem ipsum dolor sit amet, consectetur adipiscing elit. Cras pulvinar nibh augue, vitae congue sapien gravida vitae. Sed eleifend sollicitudin lectus, quis porta turpis volutpat ut. Sed faucibus felis non vulputate suscipit. Cras scelerisque metus eget neque fringilla finibus. Curabitur tristique cursus mi. Nulla id dapibus diam. Duis aliquam erat magna, auctor euismod libero eleifend id. Nunc varius posuere bibendum. Maecenas dapibus tortor velit, id ullamcorper mauris fringilla nec.</p>\n<p>Donec tempor ligula eu lectus tempor, blandit efficitur odio malesuada. Etiam sed facilisis velit, sed euismod tortor. Vestibulum cursus mi at magna pretium pellentesque. Sed lobortis orci dui, quis convallis mi consequat quis. Cras ut diam odio. Nunc id finibus mi. Donec lobortis eleifend ipsum, at placerat ex aliquam eget. Etiam gravida dictum erat in blandit. Integer euismod lectus eu sollicitudin volutpat. Donec id ligula eget neque tempus dignissim.</p><p>\nLorem ipsum dolor sit amet, consectetur adipiscing elit. Cras pulvinar nibh augue, vitae congue sapien gravida vitae. Sed eleifend sollicitudin lectus, quis porta turpis volutpat ut. Sed faucibus felis non vulputate suscipit. Cras scelerisque metus eget neque fringilla finibus. Curabitur tristique cursus mi. Nulla id dapibus diam. Duis aliquam erat magna, auctor euismod libero eleifend id. Nunc varius posuere bibendum. Maecenas dapibus tortor velit, id ullamcorper mauris fringilla nec.</p>\n<p>Donec tempor ligula eu lectus tempor, blandit efficitur odio malesuada. Etiam sed facilisis velit, sed euismod tortor. Vestibulum cursus mi at magna pretium pellentesque. Sed lobortis orci dui, quis convallis mi consequat quis. Cras ut diam odio. Nunc id finibus mi. Donec lobortis eleifend ipsum, at placerat ex aliquam eget. Etiam gravida dictum erat in blandit. Integer euismod lectus eu sollicitudin volutpat. Donec id ligula eget neque tempus dignissim.</p><p>\nLorem ipsum dolor sit amet, consectetur adipiscing elit. Cras pulvinar nibh augue, vitae congue sapien gravida vitae. Sed eleifend sollicitudin lectus, quis porta turpis volutpat ut. Sed faucibus felis non vulputate suscipit. Cras scelerisque metus eget neque fringilla finibus. Curabitur tristique cursus mi. Nulla id dapibus diam. Duis aliquam erat magna, auctor euismod libero eleifend id. Nunc varius posuere bibendum. Maecenas dapibus tortor velit, id ullamcorper mauris fringilla nec.</p>\n<p>Donec tempor ligula eu lectus tempor, blandit efficitur odio malesuada. Etiam sed facilisis velit, sed euismod tortor. Vestibulum cursus mi at magna pretium pellentesque. Sed lobortis orci dui, quis convallis mi consequat quis. Cras ut diam odio. Nunc id finibus mi. Donec lobortis eleifend ipsum, at placerat ex aliquam eget. Etiam gravida dictum erat in blandit. Integer euismod lectus eu sollicitudin volutpat. Donec id ligula eget neque tempus dignissim.</p><p>\nLorem ipsum dolor sit amet, consectetur adipiscing elit. Cras pulvinar nibh augue, vitae congue sapien gravida vitae. Sed eleifend sollicitudin lectus, quis porta turpis volutpat ut. Sed faucibus felis non vulputate suscipit. Cras scelerisque metus eget neque fringilla finibus. Curabitur tristique cursus mi. Nulla id dapibus diam. Duis aliquam erat magna, auctor euismod libero eleifend id. Nunc varius posuere bibendum. Maecenas dapibus tortor velit, id ullamcorper mauris fringilla nec.</p>\n<p>Donec tempor ligula eu lectus tempor, blandit efficitur odio malesuada. Etiam sed facilisis velit, sed euismod tortor. Vestibulum cursus mi at magna pretium pellentesque. Sed lobortis orci dui, quis convallis mi consequat quis. Cras ut diam odio. Nunc id finibus mi. Donec lobortis eleifend ipsum, at placerat ex aliquam eget. Etiam gravida dictum erat in blandit. Integer euismod lectus eu sollicitudin volutpat. Donec id ligula eget neque tempus dignissim.</p>",
+      "keywords": [],
+      "geoObjects": [],
+      "chapters": []
     },
     {
-      "id": 2,
-      "active": true,
-      "text": "Your browser is not supported anymore. Please update to a modern browser.",
-      "showOnlyOnce": false,
-      "type": "warning",
-      "browsers": ["ie"]
+      "header": "Rubrik",
+      "headerIdentifier": "rubrik_2",
+      "html": "<p>Hit länkas användaren från exempeldokument1</p>",
+      "keywords": [],
+      "geoObjects": [],
+      "chapters": [
+        {
+          "header": "Underrubrik",
+          "headerIdentifier": "underrubrik_1",
+          "html": "<p>Det går även att lägga till länkar till kartan för att öppna specifika lager och ställa in zoom-nivån. Detta kräver dock att det finns lager uppsatt i kartan och länken nedan är endast för att visa hur en kartlänk i ett dokument ser ut.<br>\n</p>\n<p><a href=\"test\" data-maplink=\"test\">Visa lager i kartan</a></p>",
+          "keywords": [],
+          "geoObjects": [],
+          "chapters": []
+        }
+      ],
+      "expanded": true
+    },
+    {
+      "header": "Rubrik",
+      "headerIdentifier": "rubrik_3",
+      "html": "<p>Denna rubrik har nyckelord kopplade till sig och kommer därför vara sökbar genom Hajks sökverktyg. Som administratör kan man lägga till nyckelord för en rubrik och dessa kommer därför vara sökbara om administratören valt att aktivera sökning för dokumenthanteraren.</p>",
+      "keywords": [
+        "Rubrik 3, Sökbart nyckelord"
+      ],
+      "geoObjects": [],
+      "chapters": []
     }
-  ]
+  ],
+  "map": "oversiktsplan",
+  "title": "Exempeldokument två"
 }

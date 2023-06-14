@@ -30,7 +30,9 @@
       "header": "Rubrik",
       "headerIdentifier": "rubrik_3",
       "html": "<p>Denna rubrik har nyckelord kopplade till sig och kommer därför vara sökbar genom Hajks sökverktyg. Som administratör kan man lägga till nyckelord för en rubrik och dessa kommer därför vara sökbara om administratören valt att aktivera sökning för dokumenthanteraren.</p>",
-      "keywords": ["Rubrik 3, Sökbart nyckelord"],
+      "keywords": [
+        "Rubrik 3, Sökbart nyckelord"
+      ],
       "geoObjects": [],
       "chapters": []
     }
