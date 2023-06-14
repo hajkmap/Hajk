@@ -591,9 +591,9 @@
         "dropdownThemeMaps": true,
         "themeMapHeaderCaption": "Webbkartan",
         "visibleForGroups": [],
-        "target": "toolbar",
+        "target": "control",
         "position": "left",
-        "width": "",
+        "width": 320,
         "height": "",
         "title": "Kartinnehåll",
         "description": "Välj vad du vill visa i kartan."
@@ -603,9 +603,7 @@
     {
       "type": "infoclick",
       "options": {
-        "target": "",
-        "displayPopup": false,
-        "markerImg": "/marker.png",
+        "title": "Information",
         "anchor": [
           0.5,
           1
