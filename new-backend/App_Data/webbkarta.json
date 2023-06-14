@@ -578,7 +578,7 @@
             "infobox": ""
           }
         ],
-        "active": false,
+        "active": true,
         "visibleAtStart": true,
         "visibleAtStartMobile": false,
         "backgroundSwitcherBlack": false,
@@ -586,7 +586,7 @@
         "enableOSM": false,
         "showBreadcrumbs": false,
         "showActiveLayersView": false,
-        "enableTransparencySlider": false,
+        "enableTransparencySlider": true,
         "instruction": "",
         "dropdownThemeMaps": true,
         "themeMapHeaderCaption": "Webbkartan",
