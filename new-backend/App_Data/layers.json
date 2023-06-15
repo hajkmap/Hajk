@@ -226,7 +226,7 @@
           "caption": "",
           "legend": "",
           "legendIcon": "",
-          "infobox": "",
+          "infobox": "{{if {namn}}}<h1>{namn}</h1>{{/if}}{{if {bildnamn}}}<p><img style=\"width: 100%; object-fit: cover\" src=\"https://infobank.nacka.se/Ext/webbkarta/{bildnamn}\" alt=\"Bild på {namn}\" title=\"Bild på {namn}\"></p>{{/if}}<table class=\"attribute-table\" summary=\"Fakta\"><tbody><tr><th><span>Typ</span></th><td>{typ}</td></tr></tbody></table>{{if {lank}}}<p><a href=\"{lank}\" target=\"_blank\" class=\"btn btn-primary\">Läs mer</a>{{/if}}</p>",
           "style": "",
           "queryable": true,
           "infoclickIcon": ""
