@@ -608,7 +608,7 @@
           0.5,
           1
         ],
-        "scale": 0.15,
+        "scale": 0.3,
         "strokeColor": {
           "r": 200,
           "b": 0,
@@ -697,7 +697,7 @@
           "",
           ""
         ],
-        "scale": "",
+        "scale": 0.35,
         "markerImg": "/marker.png",
         "delayBeforeAutoSearch": 300,
         "disableAutocomplete": false,
