@@ -10,6 +10,8 @@ import {
   Tabs,
   Box,
   IconButton,
+  InputAdornment,
+  TextField,
   Tooltip,
 } from "@mui/material";
 
@@ -23,6 +25,7 @@ import LayerGroupAccordion from "./components/LayerGroupAccordion.js";
 
 import StarOutlineOutlinedIcon from "@mui/icons-material/StarOutlineOutlined";
 import CloudDownloadOutlinedIcon from "@mui/icons-material/CloudDownloadOutlined";
+import SearchIcon from "@mui/icons-material/Search";
 import QuickAccessLayers from "./components/QuickAccessLayers.js";
 import QuickAccessOptions from "./components/QuickAccessOptions.js";
 import LayerItemDetails from "./components/LayerItemDetails.js";
@@ -51,6 +54,7 @@ class LayersSwitcherView extends React.PureComponent {
       displayContentOverlay: null, // 'layerPackage' | 'personalLayerPackage' | 'layerItemDetails'
       layerItemDetails: null,
       quickAccessSectionExpanded: false,
+      layerFilter: "",
     };
 
     props.app.globalObserver.subscribe("informativeLoaded", (chapters) => {
@@ -116,6 +120,13 @@ class LayersSwitcherView extends React.PureComponent {
       .map((l) => l.set("quickAccess", false));
   };
 
+  // Handles filter functionality
+  handleLayerFilterChange = (value) => {
+    this.setState({
+      layerFilter: value,
+    });
+  };
+
   /**
    * This method handles layerupdates from DrawOrder component,
    * sets activeLayersCount state
@@ -179,6 +190,41 @@ class LayersSwitcherView extends React.PureComponent {
               : "none",
         }}
       >
+        <Box
+          sx={{
+            p: 1,
+            backgroundColor: (theme) => theme.palette.grey[100],
+            borderBottom: (theme) =>
+              `${theme.spacing(0.2)} solid ${theme.palette.divider}`,
+          }}
+        >
+          <Box
+            sx={{
+              width: 500,
+              maxWidth: "100%",
+              p: 1,
+            }}
+          >
+            <TextField
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <SearchIcon />
+                  </InputAdornment>
+                ),
+              }}
+              size="small"
+              value={this.state.layerFilter}
+              onChange={(event) =>
+                this.handleLayerFilterChange(event.target.value)
+              }
+              fullWidth
+              placeholder="Filtrera"
+              variant="outlined"
+              sx={{ background: "#fff" }}
+            />
+          </Box>
+        </Box>
         {/* TODO: configurable from admin */}
         {/* QuickAccess section */}
         <LayerGroupAccordion
@@ -209,7 +255,6 @@ class LayersSwitcherView extends React.PureComponent {
           children={
             <QuickAccessLayers
               model={this.props.model}
-              options={this.props.options}
               map={this.props.map}
               app={this.props.app}
             ></QuickAccessLayers>
@@ -219,6 +264,7 @@ class LayersSwitcherView extends React.PureComponent {
         {this.options.groups.map((group, i) => {
           return (
             <LayerGroup
+              layerFilter={this.state.layerFilter}
               key={i}
               group={group}
               model={this.props.model}

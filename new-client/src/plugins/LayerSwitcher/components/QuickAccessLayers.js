@@ -5,7 +5,7 @@ import BackgroundLayer from "./BackgroundLayer";
 import GroupLayer from "./GroupLayer";
 import { Box } from "@mui/material";
 
-export default function QuickAccessLayers({ app, map, model, options }) {
+export default function QuickAccessLayers({ app, map, model }) {
   // State that contains the layers that are currently visible
   const [quickAccessLayers, setQuickAccessLayers] = useState([]);
   // A helper that grabs all OL layers with state quickAccess
@@ -58,7 +58,6 @@ export default function QuickAccessLayers({ app, map, model, options }) {
             app={app}
             observer={model.observer}
             toggleable={true}
-            options={options}
             draggable={false}
             quickAccessLayer={true}
           ></GroupLayer>

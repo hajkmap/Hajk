@@ -15,6 +15,7 @@ class LayerGroup extends React.PureComponent {
     name: "",
     parent: "-1",
     toggled: false,
+    groupHasLayers: false,
   };
 
   static defaultProps = {
@@ -46,6 +47,14 @@ class LayerGroup extends React.PureComponent {
   componentWillUnmount() {
     //LayerGroup is never unmounted atm but we remove listener in case this changes in the future
     this.unbindVisibleChangeForLayersInGroup();
+  }
+
+  componentDidUpdate() {
+    this.setState({ groupHasLayers: false });
+    this.state.layers.map((layer, i) => {
+      const mapLayer = this.model.layerMap[layer.id];
+      this.checkFilter(mapLayer, true);
+    });
   }
 
   //We force update when a layer in this group has changed visibility to
@@ -246,6 +255,28 @@ class LayerGroup extends React.PureComponent {
     }
     return <CheckBoxOutlineBlankIcon />;
   };
+
+  checkFilter = (mapLayer, setState) => {
+    if (this.props.layerFilter === "") {
+      if (setState) {
+        this.setState({ groupHasLayers: true });
+      }
+      return true;
+    } else if (
+      mapLayer
+        .get("caption")
+        .toLowerCase()
+        .includes(this.props.layerFilter?.toLowerCase())
+    ) {
+      if (setState) {
+        this.setState({ groupHasLayers: true });
+      }
+      return true;
+    } else {
+      return false;
+    }
+  };
+
   /**
    * If Group has "toggleable" property enabled, render the toggle all checkbox.
    *
@@ -284,7 +315,7 @@ class LayerGroup extends React.PureComponent {
       <div>
         {this.state.layers.map((layer, i) => {
           const mapLayer = this.model.layerMap[layer.id];
-          if (mapLayer) {
+          if (mapLayer && this.checkFilter(mapLayer)) {
             if (mapLayer.get("layerType") === "group") {
               return (
                 <GroupLayer
@@ -293,7 +324,6 @@ class LayerGroup extends React.PureComponent {
                   app={this.props.app}
                   observer={this.props.model.observer}
                   toggleable={true}
-                  options={this.props.options}
                   draggable={false}
                 ></GroupLayer>
               );
@@ -318,15 +348,19 @@ class LayerGroup extends React.PureComponent {
 
   render() {
     const { expanded } = this.state;
-    return (
-      <LayerGroupAccordion
-        toggleable={this.props.group.toggled}
-        expanded={expanded}
-        name={this.state.name}
-        toggleDetails={this.renderToggleAll()}
-        children={this.renderChildren()}
-      ></LayerGroupAccordion>
-    );
+    if (this.state.groupHasLayers) {
+      return (
+        <LayerGroupAccordion
+          toggleable={this.props.group.toggled}
+          expanded={expanded}
+          name={this.state.name}
+          toggleDetails={this.renderToggleAll()}
+          children={this.renderChildren()}
+        ></LayerGroupAccordion>
+      );
+    } else {
+      return null;
+    }
   }
 }
 

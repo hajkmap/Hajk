@@ -14,7 +14,6 @@ export default function GroupLayer({
   app,
   observer,
   toggleable,
-  options,
   draggable,
   quickAccessLayer,
 }) {
