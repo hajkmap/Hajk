@@ -1,3 +1,4 @@
+import { PLUGINS_TO_IGNORE_IN_HASH_APP_STATE } from "constants";
 import { isValidLayerId } from "utils/Validator";
 import { debounce } from "utils/debounce";
 
@@ -141,8 +142,15 @@ class AnchorModel {
   }
 
   #getVisiblePlugins = () =>
+    // Get visible plugins but make sure to ignore
+    // some specific that should NEVER be part of the
+    // p-param. See #1294.
     this.#app.windows
-      .filter((w) => w.state.windowVisible)
+      .filter(
+        (w) =>
+          w.state.windowVisible && // Is visible and…
+          PLUGINS_TO_IGNORE_IN_HASH_APP_STATE.indexOf(w.type) === -1 // …is not in the list of excluded plugins
+      )
       .map((p) => p.type)
       .join();
 

@@ -2,13 +2,11 @@ import React, { useEffect } from "react";
 import { createRoot } from "react-dom/client";
 import { createPortal } from "react-dom";
 import { withSnackbar } from "notistack";
-
 import {
   styled,
   StyledEngineProvider,
   ThemeProvider,
 } from "@mui/material/styles";
-
 import {
   Button,
   Checkbox,
@@ -285,6 +283,17 @@ class PrintWindow extends React.PureComponent {
             }
             .MuiBox-root {
               page-break-inside: avoid;
+            }
+            body .blockQuoteAccordion {
+              box-shadow: none;
+              border: 4px solid #edf2f7;
+            }
+            .blockQuoteAccordion .MuiCollapse-root {
+              height: auto;
+              visibility: visible;
+            }
+            .blockQuoteAccordion .MuiAccordionSummary-expandIconWrapper {
+              display: none;
             }
           }        
         </style>`
