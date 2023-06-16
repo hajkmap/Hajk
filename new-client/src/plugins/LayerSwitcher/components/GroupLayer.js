@@ -7,6 +7,9 @@ import SubLayerItem from "./SubLayerItem";
 
 import KeyboardArrowRightOutlinedIcon from "@mui/icons-material/KeyboardArrowRightOutlined";
 
+// Custom hooks
+import useSnackbar from "../../../hooks/useSnackbar";
+
 /* A grouplayer is a layer configured with multiple layers in admin, NOT a group in layerswitcher */
 
 export default function GroupLayer({
@@ -30,6 +33,21 @@ export default function GroupLayer({
         : layer.subLayers
       : []
   );
+  const [zoomVisible, setZoomVisible] = useState(true);
+
+  const { removeFromSnackbar } = useSnackbar();
+
+  // Special case for removing layer captions from snackbar message when being toggled
+  // through the LayerGroup component.
+  useEffect(() => {
+    if (visibleSubLayers.length === 0) {
+      const removeLayerCaptions = layer.subLayers.map(
+        (subLayer) => layer.layersInfo[subLayer]?.caption || ""
+      );
+      // Remove layer caption from snackbar message.
+      removeFromSnackbar(removeLayerCaptions);
+    }
+  }, [visibleSubLayers]);
 
   const setGroupHidden = useCallback(
     (l) => {
@@ -198,8 +216,16 @@ export default function GroupLayer({
   // Handles list item click
   const handleLayerItemClick = () => {
     if (layer.get("visible")) {
+      const removeLayerCaptions = layer.subLayers.map(
+        (subLayer) => layer.layersInfo[subLayer]?.caption || ""
+      );
+
+      // Remove layer caption from snackbar message.
+      removeFromSnackbar(removeLayerCaptions);
+      // Hide the layer.
       setGroupHidden(layer);
     } else {
+      // Show the layer.
       setGroupVisible(layer);
     }
   };
@@ -227,6 +253,15 @@ export default function GroupLayer({
       toggleable={toggleable}
       clickCallback={handleLayerItemClick}
       visibleSubLayers={visibleSubLayers}
+      // An array of sublayer captions that does not change, i.e. the total list
+      // of sublayers for the group.
+      allSubLayersCaption={layer.subLayers.map(
+        (subLayer) => layer.layersInfo[subLayer]?.caption || ""
+      )}
+      visibleSubLayersCaption={visibleSubLayers.map(
+        (subLayer) => layer.layersInfo[subLayer]?.caption || ""
+      )}
+      onSetZoomVisible={setZoomVisible}
       expandableSection={
         layer.get("layerInfo").hideExpandArrow !== true && (
           <IconButton
@@ -257,6 +292,7 @@ export default function GroupLayer({
                 app={app}
                 visible={visibleSubLayers.some((s) => s === subLayer)}
                 toggleSubLayer={toggleSubLayer}
+                zoomVisible={zoomVisible}
               ></SubLayerItem>
             ))}
           </Box>

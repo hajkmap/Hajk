@@ -23,6 +23,8 @@ export default function SubLayerItem({
   toggleSubLayer,
   subLayerIndex,
   options,
+  zoomVisible,
+  ...props
 }) {
   // Keep the settingsarea active in state
   const [settingIsActive, setSettingIsActive] = useState(false);
@@ -30,9 +32,14 @@ export default function SubLayerItem({
   // Render method for checkbox icon
   const getLayerToggleIcon = () => {
     return visible ? (
-      <CheckBoxIcon fontSize="small" />
+      <CheckBoxIcon
+        sx={{
+          fill: (theme) =>
+            !zoomVisible ? theme.palette.warning.dark : theme.palette.primary,
+        }}
+      />
     ) : (
-      <CheckBoxOutlineBlankIcon fontSize="small" />
+      <CheckBoxOutlineBlankIcon />
     );
   };
 
@@ -48,7 +55,15 @@ export default function SubLayerItem({
     <div>
       <ListItemButton
         disableRipple
-        onClick={() => (toggleable ? toggleSubLayer(subLayer, visible) : null)}
+        onClick={() =>
+          toggleable
+            ? toggleSubLayer(
+                subLayer,
+                visible,
+                layer.layersInfo[subLayer].caption
+              )
+            : null
+        }
         sx={{
           borderBottom: (theme) =>
             !settingIsActive
