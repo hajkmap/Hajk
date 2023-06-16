@@ -17,6 +17,9 @@ const useSnackbar = () => {
   const snackbarKey = useRef(null);
   const messageQueue = useRef([]);
 
+  // Create a ref to store state update functions that need to be processed in order.
+  const updateQueue = useRef([]);
+
   // Create ref for previous messageItems value
   const prevMessageItemsRef = useRef();
 
@@ -27,6 +30,16 @@ const useSnackbar = () => {
       showSnackbar({}, messageItems, true);
     }
   }, [messageItems]);
+
+  // Function that processes the updates in the queue.
+  // It is used to ensure that state updates are processed in order.
+  const processQueue = () => {
+    const nextUpdate = updateQueue.current.shift();
+    if (nextUpdate) {
+      nextUpdate();
+      setTimeout(processQueue, 0);
+    }
+  };
 
   // Function that displays the snackbar message.
   // It takes in an options object, an updated list of messages, and a boolean indicating whether the message is a group or layer, i.e. initialized from the LayerSwitcher.
@@ -96,60 +109,71 @@ const useSnackbar = () => {
   };
 
   // Function to add a new message to the snackbar.
+  // It pushes a state update function into the queue instead of updating the state directly.
+  // Then, it calls processQueue to execute the state updates in the queue in sequence.
   const addToSnackbar = (
     newMessage,
     allowDuplicates = false,
     isGroupOrLayer = false
   ) => {
-    setMessageItems((prevItems) => {
-      let updatedItems;
-
-      if (Array.isArray(newMessage)) {
-        if (allowDuplicates) {
-          updatedItems = [...prevItems, ...newMessage];
+    updateQueue.current.push(() => {
+      setMessageItems((prevItems) => {
+        let updatedItems;
+        if (Array.isArray(newMessage)) {
+          if (allowDuplicates) {
+            updatedItems = [...prevItems, ...newMessage];
+          } else {
+            updatedItems = Array.from(new Set([...prevItems, ...newMessage]));
+          }
+          newMessage.forEach((nm) => {
+            if (!messageQueue.current.includes(nm)) {
+              messageQueue.current.push(nm);
+            }
+          });
         } else {
-          updatedItems = Array.from(new Set([...prevItems, ...newMessage]));
+          if (!messageQueue.current.includes(newMessage)) {
+            messageQueue.current.push(newMessage);
+          }
+          if (allowDuplicates) {
+            updatedItems = [...prevItems, newMessage];
+          } else {
+            updatedItems = Array.from(new Set([...prevItems, newMessage]));
+          }
         }
-
-        newMessage.forEach((message) => {
-          messageQueue.current.push(message);
-        });
-      } else {
-        if (allowDuplicates || !prevItems.includes(newMessage)) {
-          updatedItems = [...prevItems, newMessage];
-        } else {
-          updatedItems = prevItems;
-        }
-
-        messageQueue.current.push(newMessage);
-      }
-
-      // If a snackbar is currently displayed, dismiss it.
-      if (snackbarKey.current !== null) {
-        hideSnackbar(snackbarKey.current);
-      }
-
-      return updatedItems;
+        return updatedItems;
+      });
     });
+    processQueue();
   };
 
   // Function to remove a specific message from the snackbar.
+  // It pushes a state update function into the queue instead of updating the state directly.
+  // Then, it calls processQueue to execute the state updates in the queue in sequence.
   const removeFromSnackbar = (messageToRemove) => {
-    setMessageItems((prevItems) => {
-      let updatedItems;
-
-      if (Array.isArray(messageToRemove)) {
-        updatedItems = prevItems.filter(
-          (message) => !messageToRemove.includes(message)
-        );
-      } else {
-        updatedItems = prevItems.filter(
-          (message) => message !== messageToRemove
-        );
-      }
-
-      return updatedItems;
+    updateQueue.current.push(() => {
+      setMessageItems((prevItems) => {
+        let updatedItems;
+        if (Array.isArray(messageToRemove)) {
+          updatedItems = prevItems.filter(
+            (item) => !messageToRemove.includes(item)
+          );
+          messageToRemove.forEach((mtr) => {
+            const index = messageQueue.current.indexOf(mtr);
+            if (index > -1) {
+              messageQueue.current.splice(index, 1);
+            }
+          });
+        } else {
+          updatedItems = prevItems.filter((item) => item !== messageToRemove);
+          const index = messageQueue.current.indexOf(messageToRemove);
+          if (index > -1) {
+            messageQueue.current.splice(index, 1);
+          }
+        }
+        return updatedItems;
+      });
     });
+    processQueue();
   };
 
   // Function to hide the snackbar.
