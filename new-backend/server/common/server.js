@@ -164,21 +164,19 @@ built-it compression by setting the ENABLE_GZIP_COMPRESSION option to "true" in 
       );
     }
 
-    this.setupGenericProxy();
-
-    this.setupSokigoProxy();
-
-    this.setupFmeProxy();
-
-    app.use(Express.json({ limit: process.env.REQUEST_LIMIT || "100kb" }));
-    app.use(
-      Express.urlencoded({
-        extended: true,
-        limit: process.env.REQUEST_LIMIT || "100kb",
-      })
-    );
-    app.use(Express.text({ limit: process.env.REQUEST_LIMIT || "100kb" }));
-    app.use(cookieParser(process.env.SESSION_SECRET));
+    // We have to make sure to add the json-parsers etc. after the proxies has been initiated.
+    // If they are added before, eventual payload trough the proxies will not be handled correctly.
+    this.setupProxies().then(() => {
+      app.use(Express.json({ limit: process.env.REQUEST_LIMIT || "100kb" }));
+      app.use(
+        Express.urlencoded({
+          extended: true,
+          limit: process.env.REQUEST_LIMIT || "100kb",
+        })
+      );
+      app.use(Express.text({ limit: process.env.REQUEST_LIMIT || "100kb" }));
+      app.use(cookieParser(process.env.SESSION_SECRET));
+    });
 
     // Optionally, expose the Hajk client app directly under root (/)
     process.env.EXPOSE_CLIENT === "true" &&
@@ -340,6 +338,14 @@ built-it compression by setting the ENABLE_GZIP_COMPRESSION option to "true" in 
       l.error(error);
       return { error };
     }
+  }
+
+  // Since we have to await the setup of the proxies (so that the JSON-parser etc. initiates after the proxies),
+  // we'll gather the all the setups here so they are easy to call.
+  async setupProxies() {
+    await this.setupSokigoProxy();
+    await this.setupFmeProxy();
+    this.setupGenericProxy();
   }
 
   async setupStaticDirs() {
