@@ -487,6 +487,7 @@ export default class MapClickModel {
   #getResponsePromises(e) {
     const r = [];
     const viewProjection = this.map.getView().getProjection().getCode();
+    const currentZoom = this.map.getView().getZoom();
 
     this.map
       .getLayers()
@@ -499,7 +500,9 @@ export default class MapClickModel {
             layer instanceof ImageLayer ||
             layer instanceof VectorLayer) && // What about VectorLayer, shouldn't they be queried too?
           // And only if they're currently visible (no reason to query hidden layers)
-          layer.get("visible") === true
+          layer.get("visible") === true &&
+          currentZoom > layer.getMinZoom() &&
+          currentZoom <= layer.getMaxZoom()
       )
       // For each layer that's left in the array
       .forEach((layer) => {
@@ -527,18 +530,13 @@ export default class MapClickModel {
   #query(layer, e) {
     const coordinate = e.coordinate;
     const resolution = this.map.getView().getResolution();
-    const currentZoom = this.map.getView().getZoom();
     const referenceSystem = this.map.getView().getProjection().getCode();
     let subLayersToQuery = [];
 
     // Query only those layers that a) have a layersInfo property, and
     // b) are currently displayed. Please note that checking for visibility
     // is not enough, we must also respect the min/max zoom level settings, #836.
-    if (
-      layer.layersInfo &&
-      layer.getMinZoom() <= currentZoom &&
-      currentZoom <= layer.getMaxZoom()
-    ) {
+    if (layer.layersInfo) {
       const subLayers = Object.values(layer.layersInfo);
       // First we must get the string containing the active sub-layers in this
       // group-layer.

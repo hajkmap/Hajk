@@ -16,11 +16,7 @@ function query(map, layer, evt) {
   // Query only those layers that a) have a layersInfo property, and
   // b) are currently displayed. Please note that checking for visibility
   // is not enough, we must also respect the min/max zoom level settings, #836.
-  if (
-    layer.layersInfo &&
-    layer.getMinZoom() <= currentZoom &&
-    currentZoom <= layer.getMaxZoom()
-  ) {
+  if (layer.layersInfo) {
     const subLayers = Object.values(layer.layersInfo);
     // First we must get the string containing the active sub-layers in this
     // group-layer.
@@ -293,6 +289,8 @@ export function handleClick(evt, map, callback) {
   document.querySelector("body").style.cursor = "progress";
   const promises = [];
   const viewProjection = map.getView().getProjection().getCode();
+  const currentZoom = map.getView().getZoom();
+
   map
     .getLayers()
     .getArray()
@@ -302,7 +300,9 @@ export function handleClick(evt, map, callback) {
         // Only certain layer types are relevant
         (layer instanceof TileLayer || layer instanceof ImageLayer) &&
         // And only if they're currently visible (no reason to query hidden layers)
-        layer.get("visible") === true
+        layer.get("visible") === true &&
+        currentZoom > layer.getMinZoom() &&
+        currentZoom <= layer.getMaxZoom()
     )
     // For each layer that's left in the array
     .forEach((layer) => {
