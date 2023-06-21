@@ -1,6 +1,6 @@
 {
   "appName": "Hajk",
-  "version": "3.12.5",
+  "version": "3.13.0",
   "mapserviceBase": "",
   "proxy": "",
   "searchProxy": "",
@@ -21,18 +21,7 @@
       "timeout": 5000,
       "startTime": "2020-06-29",
       "stopTime": "2099-12-31",
-      "type": "info",
-      "browsers": "all"
-    },
-    {
-      "id": 2,
-      "active": true,
-      "text": "Your browser is not supported anymore. Please update to a modern browser.",
-      "showOnlyOnce": false,
-      "type": "warning",
-      "browsers": [
-        "ie"
-      ]
+      "type": "info"
     }
   ]
 }
