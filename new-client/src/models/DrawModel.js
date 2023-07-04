@@ -646,7 +646,7 @@ class DrawModel {
           stroke: new Stroke({ color: this.#highlightStrokeColor, width: 2 }),
         }),
         geometry: () => {
-          const coordinates = this.#getFeatureCoordinates(feature);
+          const coordinates = this.getFeatureCoordinates(feature);
           return new MultiPoint(coordinates);
         },
       });
@@ -657,7 +657,7 @@ class DrawModel {
   };
 
   // Returns an array of arrays with the coordinates of the supplied feature
-  #getFeatureCoordinates = (feature) => {
+  getFeatureCoordinates = (feature) => {
     // First, we have to extract the feature geometry
     const geometry = feature.getGeometry();
     // Then we'll have to extract the feature type, since we have to extract the
