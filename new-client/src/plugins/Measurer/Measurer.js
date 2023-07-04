@@ -364,18 +364,6 @@ function Measurer(props) {
     [drawType, currentHoverFeature, pluginShown, map]
   );
 
-  // const mapClick = useCallback((e) => {
-  //   console.log("click");
-  // }, []);
-
-  // React.useEffect(() => {
-  //   console.log("hej", map);
-  //   // map.on("singleclick", mapClick);
-  //   // return () => {
-  //   //   map.un("singleclick", mapClick);
-  //   // };
-  // }, [map, mapClick]);
-
   React.useEffect(() => {
     map.on("pointermove", handlePointerMove);
 
