@@ -1,6 +1,7 @@
 import React from "react";
 import Typography from "@mui/material/Typography";
 import TextField from "@mui/material/TextField";
+import Button from "@mui/material/Button";
 import NumberFormat from "react-number-format";
 import { transform } from "ol/proj";
 import { withSnackbar } from "notistack";
@@ -166,6 +167,16 @@ class CoordinatesTransformRow extends React.PureComponent {
   componentWillUnmount() {}
 
   render() {
+    async function copyToClipboard(text) {
+      try {
+        await navigator.clipboard.writeText(text);
+      } catch (err) {
+        console.error("Failed to copy text: ", err);
+      }
+    }
+    const styling = {
+      marginTop: "10px",
+    };
     let xCoord = this.props.inverseAxis
       ? this.state.coordinateY
       : this.state.coordinateX;
@@ -175,7 +186,7 @@ class CoordinatesTransformRow extends React.PureComponent {
 
     if (this.model.showFieldsOnStart || this.state.wasModified) {
       return (
-        <Grid container item spacing={2} rowSpacing={1}>
+        <Grid container item spacing={3} rowSpacing={1}>
           <Grid item xs={12}>
             <Typography variant="body2" style={{ fontWeight: 600 }}>
               {this.transformation
@@ -186,7 +197,7 @@ class CoordinatesTransformRow extends React.PureComponent {
                 : ""}
             </Typography>
           </Grid>
-          <Grid item xs={12} md={6}>
+          <Grid item xs={12} md={4.5}>
             <NumberFormat
               label={this.props.transformation.xtitle}
               margin="dense"
@@ -206,7 +217,7 @@ class CoordinatesTransformRow extends React.PureComponent {
               fullWidth={true}
             />
           </Grid>
-          <Grid item xs={12} md={6}>
+          <Grid item xs={12} md={4.5}>
             <NumberFormat
               label={this.props.transformation.ytitle}
               margin="dense"
@@ -225,6 +236,14 @@ class CoordinatesTransformRow extends React.PureComponent {
               customInput={TextField}
               fullWidth={true}
             />
+          </Grid>
+          <Grid item xs={12} md={1} style={styling}>
+            <Button
+              variant="contained"
+              onClick={() => copyToClipboard(xCoord + "," + yCoord)}
+            >
+              Copy
+            </Button>
           </Grid>
         </Grid>
       );
