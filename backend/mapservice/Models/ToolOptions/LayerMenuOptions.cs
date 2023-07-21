@@ -29,6 +29,8 @@ namespace MapService.Models.ToolOptions
 
         public List<LayerGroup> groups { get; set; }
 
+        public List<QuickLayerPreset> quickLayersPresets { get; set; }
+
         public bool active { get; set; }
 
         public bool visibleAtStart { get; set; }
