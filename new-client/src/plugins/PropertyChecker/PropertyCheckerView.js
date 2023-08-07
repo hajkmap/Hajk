@@ -34,6 +34,10 @@ function PropertyCheckerView(props) {
   // const { closeSnackbar, enqueueSnackbar } = useSnackbar();
   const [groupedFeatures, setGroupedFeatures] = useState({});
 
+  // We want to keep track of the clicked point's coordinates, to be able
+  // to pass them down to child components
+  const [clickedPointsCoordinates, setClickedPointsCoordinates] = useState([]);
+
   // We're gonna need to use the event observers. Let's destruct them so that we can
   // get a hold of them easily. The observers can be accessed directly via the props:
   const { globalObserver, localObserver, drawModel } = props;
@@ -57,12 +61,13 @@ function PropertyCheckerView(props) {
 
   // This effect makes sure to subscribe (and unsubscribe) to the observer-events that we care about.
   React.useEffect(() => {
-    const handleFeatureAdded = () => {
+    const handleFeatureAdded = (feature) => {
       // First we'll get the current draw interaction and its setter from props
       const { drawInteraction, setDrawInteraction } = props;
       // If the draw-interaction is currently disabled (set to ""), we activate it (by setting it to "Polygon").
       // If it is currently active (not set to ""), we disable it.
       setDrawInteraction(drawInteraction === "" ? "Point" : "");
+      setClickedPointsCoordinates(feature.getGeometry().getFlatCoordinates());
     };
 
     const handleNewGetFeatureInfoFeatures = (groupedFeatures) => {
@@ -83,6 +88,10 @@ function PropertyCheckerView(props) {
       // localObserver.unsubscribe("drawModel.featureRemoved");
       // localObserver.unsubscribe("drawModel.featuresRemoved");
       localObserver.unsubscribe("drawModel.featureAdded", handleFeatureAdded);
+      localObserver.unsubscribe(
+        "getFeatureInfoFeatures",
+        handleNewGetFeatureInfoFeatures
+      );
       // localObserver.unsubscribe("kmlModel.fileImported");
     };
   }, [localObserver, props]);
@@ -114,6 +123,7 @@ function PropertyCheckerView(props) {
             </Typography>
             {features.features.map((f, j) => (
               <FeatureItem
+                clickedPointsCoordinates={clickedPointsCoordinates}
                 feature={f}
                 key={j}
                 olMap={props.app.map}
