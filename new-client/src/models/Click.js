@@ -18,7 +18,7 @@ function query(map, layer, evt) {
   // is not enough, we must also respect the min/max zoom level settings, #836.
   if (
     layer.layersInfo &&
-    layer.getMinZoom() <= currentZoom &&
+    currentZoom > layer.getMinZoom() &&
     currentZoom <= layer.getMaxZoom()
   ) {
     const subLayers = Object.values(layer.layersInfo);
