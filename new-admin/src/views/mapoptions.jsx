@@ -75,7 +75,6 @@ class MapOptions extends Component {
         drawerVisible: config.drawerVisible,
         drawerVisibleMobile: config.drawerVisibleMobile,
         drawerPermanent: config.drawerPermanent,
-        drawerStatic: config.drawerStatic,
         zoomDelta: config.zoomDelta || "",
         zoomDuration: config.zoomDuration || "",
         title: config.title ? config.title : "",
@@ -178,7 +177,6 @@ class MapOptions extends Component {
       drawerVisible: mapConfig.drawerVisible,
       drawerVisibleMobile: mapConfig.drawerVisibleMobile,
       drawerPermanent: mapConfig.drawerPermanent,
-      drawerStatic: mapConfig.drawerStatic,
       activeDrawerOnStart: mapConfig.activeDrawerOnStart
         ? mapConfig.activeDrawerOnStart
         : "plugins",
@@ -369,7 +367,6 @@ class MapOptions extends Component {
       case "showRecentlyUsedPlugins":
       case "introductionEnabled":
       case "introductionShowControlButton":
-      case "drawerStatic":
       case "drawerVisible":
       case "drawVisibleMobile":
       case "drawerPermanent":
@@ -448,7 +445,6 @@ class MapOptions extends Component {
         config.drawerVisible = this.getValue("drawerVisible");
         config.drawerVisibleMobile = this.getValue("drawerVisibleMobile");
         config.drawerPermanent = this.getValue("drawerPermanent");
-        config.drawerStatic = this.getValue("drawerStatic");
         config.activeDrawerOnStart = this.getValue("activeDrawerOnStart");
         config.geoserverLegendOptions = this.getValue("geoserverLegendOptions");
         config.defaultCookieNoticeMessage = this.getValue(
@@ -1420,32 +1416,6 @@ class MapOptions extends Component {
             <div className="separator">Inställningar för sidopanel</div>
             <div>
               <input
-                id="input_drawerStatic"
-                type="checkbox"
-                ref="input_drawerStatic"
-                onChange={(e) => {
-                  this.setState({ drawerStatic: e.target.checked });
-                  if (e.target.checked === true) {
-                    this.setState({
-                      drawerPermanent: false,
-                      drawerVisible: false,
-                    });
-                  }
-                }}
-                checked={this.state.drawerStatic}
-              />
-              &nbsp;
-              <label className="long-label" htmlFor="input_drawerStatic">
-                Låt sidopanelen vara permanent synlig{" "}
-                <i
-                  className="fa fa-question-circle"
-                  data-toggle="tooltip"
-                  title="Om aktiv kommer sidopanelen vara permanent synlig och låst"
-                />
-              </label>
-            </div>
-            <div>
-              <input
                 id="input_drawerVisible"
                 type="checkbox"
                 ref="input_drawerVisible"
@@ -1459,7 +1429,6 @@ class MapOptions extends Component {
                   }
                 }}
                 checked={this.state.drawerVisible}
-                disabled={this.state.drawerStatic === true}
               />
               &nbsp;
               <label className="long-label" htmlFor="input_drawerVisible">
@@ -1480,7 +1449,6 @@ class MapOptions extends Component {
                   this.setState({ drawerVisibleMobile: e.target.checked });
                 }}
                 checked={this.state.drawerVisibleMobile}
-                disabled={this.state.drawerStatic === true}
               />
               &nbsp;
               <label className="long-label" htmlFor="input_drawerVisibleMobile">
@@ -1501,10 +1469,7 @@ class MapOptions extends Component {
                   this.setState({ drawerPermanent: e.target.checked });
                 }}
                 checked={this.state.drawerPermanent}
-                disabled={
-                  this.state.drawerVisible !== true ||
-                  this.state.drawerStatic === true
-                }
+                disabled={this.state.drawerVisible !== true}
               />
               &nbsp;
               <label className="long-label" htmlFor="input_drawerPermanent">
