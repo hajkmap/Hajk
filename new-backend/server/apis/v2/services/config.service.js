@@ -4,6 +4,7 @@ import ad from "./activedirectory.service.js";
 import asyncFilter from "../utils/asyncFilter.js";
 import log4js from "log4js";
 import getAnalyticsOptionsFromDotEnv from "../utils/getAnalyticsOptionsFromDotEnv.js";
+import { XMLParser } from "fast-xml-parser";
 
 const logger = log4js.getLogger("service.config.v2");
 
@@ -19,6 +20,8 @@ class ConfigServiceV2 {
     // have a global bus (using EventEmitter?), so we can trigger
     // re-reads from FS into our in-memory store.
     logger.trace("Initiating ConfigService V2");
+    // Prepare the XML parser
+    this.xmlParser = new XMLParser();
   }
 
   /**
@@ -52,7 +55,7 @@ class ConfigServiceV2 {
 
       if (washContent === false) {
         logger.trace(
-          "[getMapConfig] invoked with 'washContent=false' for user %s. Returning the entire%s map config.",
+          "[getMapConfig] invoked with 'washContent=false' for user %s. Returning the entire %s map config.",
           user,
           map
         );
@@ -483,6 +486,7 @@ class ConfigServiceV2 {
             `WFST edit layer "${layer.id}"`
           )
       );
+
       mapConfig.tools[editIndexInTools].options.activeServices = activeServices;
     }
 
