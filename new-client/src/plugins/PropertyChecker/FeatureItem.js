@@ -1,16 +1,21 @@
 import React, { useEffect } from "react";
-import { ListItem, ToggleButton, Typography } from "@mui/material";
+import { Button, ListItem, ToggleButton, Typography } from "@mui/material";
 import CheckIcon from "@mui/icons-material/Check";
 
 const FeatureItem = (props) => {
   console.log("props: ", props);
   const id = props.feature.get("id");
   const caption = props.feature.get("caption");
-  const { globalObserver } = props;
+
+  const { clickedPointsCoordinates, globalObserver } = props;
 
   const [olLayer] = React.useState(() =>
     props.olMap.getAllLayers().find((l) => l.get("name") === id)
   );
+
+  const triggerGetFeatureInfo = () => {
+    console.log("Will trigger GetFeatureInfo for ", clickedPointsCoordinates);
+  };
 
   const isLayerVisible = () => {
     return props.olMap
@@ -42,10 +47,11 @@ const FeatureItem = (props) => {
 
   useEffect(() => {
     console.log("selected is now", selected);
+    console.log("clickedPointsCoordinates: ", clickedPointsCoordinates);
     selected === true
       ? globalObserver.publish("layerswitcher.showLayer", olLayer)
       : globalObserver.publish("layerswitcher.hideLayer", olLayer);
-  }, [globalObserver, olLayer, selected]);
+  }, [clickedPointsCoordinates, globalObserver, olLayer, selected]);
 
   return (
     <ListItem>
@@ -59,6 +65,9 @@ const FeatureItem = (props) => {
         <CheckIcon />
       </ToggleButton>
       <Typography>{caption}</Typography>
+      <Button onClick={triggerGetFeatureInfo}>
+        <CheckIcon />
+      </Button>
     </ListItem>
   );
 };
