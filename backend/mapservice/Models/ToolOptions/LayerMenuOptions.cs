@@ -45,6 +45,8 @@ namespace MapService.Models.ToolOptions
 
         public bool showBreadcrumbs { get; set; }
 
+        public bool showActiveLayersView { get; set; }
+
         public bool enableTransparencySlider { get; set; }
 
         public string target { get; set; }
