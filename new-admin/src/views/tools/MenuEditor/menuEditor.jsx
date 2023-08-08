@@ -8,8 +8,14 @@ import DragHandle from "@material-ui/icons/DragHandle";
 import TreeRow from "./treerow.jsx";
 import { withStyles } from "@material-ui/core/styles";
 import { SketchPicker } from "react-color";
+import OpenInNewIcon from "@material-ui/icons/OpenInNew";
 
-import { Typography, RadioGroup, Radio, FormControlLabel } from "@material-ui/core";
+import {
+  Typography,
+  RadioGroup,
+  Radio,
+  FormControlLabel,
+} from "@material-ui/core";
 
 import {
   ColorButtonBlue,
@@ -72,8 +78,12 @@ class ToolOptions extends Component {
     documentOnStart: "",
     drawerTitle: "",
     drawerButtonTitle: "",
+    drawerButtonIcon: "",
+    resizingEnabled: false,
+    draggingEnabled: false,
     searchImplemented: true,
     enablePrint: true,
+    pdfLinks: [{ name: "", link: "" }],
     closePanelOnMapLinkOpen: false,
     displayLoadingOnMapLinkOpen: false,
     tableOfContents: {
@@ -146,8 +156,12 @@ class ToolOptions extends Component {
         documentOnStart: tool.options.documentOnStart,
         drawerTitle: tool.options.drawerTitle,
         drawerButtonTitle: tool.options.drawerButtonTitle,
+        drawerButtonIcon: tool.options.drawerButtonIcon,
+        resizingEnabled: tool.options.resizingEnabled || false,
+        draggingEnabled: tool.options.draggingEnabled || false,
         searchImplemented: tool.options.searchImplemented,
         enablePrint: tool.options.enablePrint,
+        pdfLinks: tool.options.pdfLinks || [{ name: "", link: "" }],
         closePanelOnMapLinkOpen: tool.options.closePanelOnMapLinkOpen,
         displayLoadingOnMapLinkOpen:
           tool.options.displayLoadingOnMapLinkOpen || false,
@@ -242,11 +256,15 @@ class ToolOptions extends Component {
         height: this.state.height,
         searchImplemented: this.state.searchImplemented,
         enablePrint: this.state.enablePrint,
+        pdfLinks: this.state.pdfLinks,
         closePanelOnMapLinkOpen: this.state.closePanelOnMapLinkOpen,
         displayLoadingOnMapLinkOpen: this.state.displayLoadingOnMapLinkOpen,
         documentOnStart: this.state.documentOnStart,
         drawerTitle: this.state.drawerTitle,
         drawerButtonTitle: this.state.drawerButtonTitle,
+        drawerButtonIcon: this.state.drawerButtonIcon,
+        resizingEnabled: this.state.resizingEnabled,
+        draggingEnabled: this.state.draggingEnabled,
         tableOfContents: this.state.tableOfContents,
         defaultDocumentColorSettings: this.state.defaultDocumentColorSettings,
         menuConfig: this.state.menuConfig,
@@ -312,14 +330,15 @@ class ToolOptions extends Component {
     this.addNewItem();
   };
 
-  getHeader = (canSave) => {
+  //getHeader = (canSave) => {
+  getHeader = () => {
     const { classes } = this.props;
     return (
       <Grid
         className={classes.header}
         spacing={1}
         alignItems="center"
-        justify="flex-end"
+        justifyContent="flex-end"
         container
       >
         <Grid xs={1} item>
@@ -334,8 +353,14 @@ class ToolOptions extends Component {
           <Grid xs={3} item>
             <Typography variant="h5">Inställningar</Typography>
           </Grid>
+          <Grid xs={4} item>
+            <Typography variant="h5">Dokument</Typography>
+          </Grid>
           <Grid xs={2} item>
-            <Typography variant="h5">Koppling</Typography>
+            <Typography variant="h5">Kartlänk</Typography>
+          </Grid>
+          <Grid xs={2} item>
+            <Typography variant="h5">Extern länk</Typography>
           </Grid>
 
           <Grid ref={this.buttonHeaderRef} xs={4} item>
@@ -349,7 +374,6 @@ class ToolOptions extends Component {
             <ColorButtonBlue
               variant="contained"
               className="btn"
-              disabled={!canSave}
               onClick={this.onSaveMenuEditsClick}
               startIcon={<SaveIcon />}
             >
@@ -591,6 +615,31 @@ class ToolOptions extends Component {
     });
   };
 
+  handlePdfInputChange = (event, pdfLink, key) => {
+    const value = event.target.value;
+    const index = this.state.pdfLinks.findIndex((link) => link === pdfLink);
+    pdfLink[key] = value;
+
+    let newPdfLinks = [...this.state.pdfLinks];
+    newPdfLinks[index] = pdfLink;
+    this.setState({ pdfLinks: newPdfLinks });
+  };
+
+  addPdfLinkRow = () => {
+    let newPdfLinks = [...this.state.pdfLinks];
+    newPdfLinks.push({ name: "", link: "" });
+    this.setState({ pdfLinks: newPdfLinks });
+  };
+
+  removePdfLinkRow = (event, index) => {
+    if (this.state.pdfLinks.length <= 1) {
+      return;
+    }
+    let newPdfLinks = [...this.state.pdfLinks];
+    newPdfLinks.splice(index, 1);
+    this.setState({ pdfLinks: newPdfLinks });
+  };
+
   render() {
     const { classes } = this.props;
     let expandedKeys = this.treeKeys.map((key) => {
@@ -738,6 +787,35 @@ class ToolOptions extends Component {
             />
           </div>
           <div>
+            <label htmlFor="drawerButtonIcon">
+              Knappikon{" "}
+              <i
+                className="fa fa-question-circle"
+                data-toggle="tooltip"
+                title="Ikon på knapp som öppnar verktyget. Skriv in ikonens namn i textfältet för att välja ikon. Hämtat från Material Symbols ikonbibliotek."
+              />
+            </label>
+            <input
+              id="drawerButtonIcon"
+              placeholder="Ange ikonens namn"
+              value={this.state.drawerButtonIcon}
+              type="text"
+              name="drawerButtonIcon"
+              onChange={(e) => {
+                this.handleInputChange(e);
+              }}
+            />
+            <ColorButtonBlue
+              variant="contained"
+              className="btn"
+              href="https://fonts.google.com/icons"
+              target="_blank"
+              startIcon={<OpenInNewIcon />}
+            >
+              <Typography variant="button">Visa ikoner</Typography>
+            </ColorButtonBlue>
+          </div>
+          <div>
             <input
               id="searchImplemented"
               name="searchImplemented"
@@ -752,6 +830,36 @@ class ToolOptions extends Component {
           </div>
           <div>
             <input
+              id="resizingEnabled"
+              name="resizingEnabled"
+              type="checkbox"
+              onChange={(e) => {
+                this.handleInputChange(e);
+              }}
+              checked={this.state.resizingEnabled}
+            />
+            &nbsp;
+            <label htmlFor="resizingEnabled">
+              Tillåt att ändra storlek på dokumentfönstret
+            </label>
+          </div>
+          <div>
+            <input
+              id="draggingEnabled"
+              name="draggingEnabled"
+              type="checkbox"
+              onChange={(e) => {
+                this.handleInputChange(e);
+              }}
+              checked={this.state.draggingEnabled}
+            />
+            &nbsp;
+            <label htmlFor="draggingEnabled">
+              Tillåt att flytta på dokumentfönstret
+            </label>
+          </div>
+          <div>
+            <input
               id="enablePrint"
               name="enablePrint"
               type="checkbox"
@@ -763,6 +871,70 @@ class ToolOptions extends Component {
             &nbsp;
             <label htmlFor="enablePrint">Utskrift aktiverad</label>
           </div>
+          <div>
+            {this.state.pdfLinks &&
+              this.state.pdfLinks.map((pdfLink, index) => (
+                <div
+                  key={`${index}_${pdfLink.name}_${pdfLink.link}`}
+                  style={{ display: "flex" }}
+                >
+                  <div>
+                    <label htmlFor={`pdfLink_${index}`}>
+                      Bilaga {index + 1}
+                    </label>
+                    <input
+                      id={`pdfLink_${index}`}
+                      name="name"
+                      type="text"
+                      defaultValue={pdfLink.name}
+                      style={{ maxWidth: "220px" }}
+                      placeholder="Namn..."
+                      onBlur={(e) => {
+                        this.handlePdfInputChange(e, pdfLink, "name");
+                      }}
+                    />
+                  </div>
+                  <div>
+                    <input
+                      type="text"
+                      name="link"
+                      defaultValue={pdfLink.link}
+                      style={{ maxWidth: "250px" }}
+                      placeholder="Länk..."
+                      onBlur={(e) => {
+                        this.handlePdfInputChange(e, pdfLink, "link");
+                      }}
+                    />
+                    <button
+                      type="button"
+                      className="btn btn-default"
+                      style={{ fontWeight: "bold" }}
+                      disabled={this.state.pdfLinks.length === 1}
+                      onClick={(e) => {
+                        this.removePdfLinkRow(e, index);
+                      }}
+                    >
+                      -
+                    </button>
+                    {index === this.state.pdfLinks.length - 1 ? (
+                      <button
+                        type="button"
+                        className="btn btn-default"
+                        style={{ fontWeight: "bold", marginLeft: "5px" }}
+                        onClick={(e) => {
+                          this.addPdfLinkRow();
+                        }}
+                      >
+                        +
+                      </button>
+                    ) : (
+                      ""
+                    )}
+                  </div>
+                </div>
+              ))}
+          </div>
+
           <div>
             <input
               id="closePanelOnMapLinkOpen"
@@ -891,17 +1063,17 @@ class ToolOptions extends Component {
           </div>
           <div>
             <label htmlFor="tocPrintMode" style={{ width: "400px" }}>
-            Välj hur innehållsförteckningen skall skivas ut{" "}
-                <i
-                  className="fa fa-question-circle"
-                  data-toggle="tooltip"
-                  title="Välj hur innehållsförteckning ska skrivas ut"
-                />
+              Välj hur innehållsförteckningen skall skivas ut{" "}
+              <i
+                className="fa fa-question-circle"
+                data-toggle="tooltip"
+                title="Välj hur innehållsförteckning ska skrivas ut"
+              />
             </label>
-            <RadioGroup 
+            <RadioGroup
               id="printMode"
-              name="printMode" 
-              value={this.state.tableOfContents.printMode} 
+              name="printMode"
+              value={this.state.tableOfContents.printMode}
               onChange={(e) => {
                 const value = e.target.value;
                 this.setState((prevState) => ({
@@ -910,11 +1082,24 @@ class ToolOptions extends Component {
                     printMode: value,
                   },
                 }));
-              }}>
-            <FormControlLabel value="full" control={<Radio color="primary" />} label="Hela" />
-            <FormControlLabel value="partial" control={<Radio color="primary" />} label="Valda" />
-            <FormControlLabel value="none" control={<Radio color="primary" />} label="Inga" />
-          </RadioGroup>
+              }}
+            >
+              <FormControlLabel
+                value="full"
+                control={<Radio color="primary" />}
+                label="Hela"
+              />
+              <FormControlLabel
+                value="partial"
+                control={<Radio color="primary" />}
+                label="Valda"
+              />
+              <FormControlLabel
+                value="none"
+                control={<Radio color="primary" />}
+                label="Inga"
+              />
+            </RadioGroup>
           </div>
           <div className="separator">Faktaruta</div>
           <div>

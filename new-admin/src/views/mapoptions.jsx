@@ -50,7 +50,8 @@ class MapOptions extends Component {
         constrainOnlyCenter: config.constrainOnlyCenter,
         constrainResolution: config.constrainResolution,
         constrainResolutionMobile: config.constrainResolutionMobile || false,
-        enableDownloadLink: config.enableDownloadLink,
+        enableDownloadLink: config.enableDownloadLink || false,
+        enableAppStateInHash: config.enableAppStateInHash,
         altShiftDragRotate: config.altShiftDragRotate || true,
         onFocusOnly: config.onFocusOnly || false,
         doubleClickZoom: config.doubleClickZoom || true,
@@ -74,6 +75,7 @@ class MapOptions extends Component {
         drawerVisible: config.drawerVisible,
         drawerVisibleMobile: config.drawerVisibleMobile,
         drawerPermanent: config.drawerPermanent,
+        drawerStatic: config.drawerStatic,
         zoomDelta: config.zoomDelta || "",
         zoomDuration: config.zoomDuration || "",
         title: config.title ? config.title : "",
@@ -150,6 +152,7 @@ class MapOptions extends Component {
       constrainResolution: mapConfig.constrainResolution,
       constrainResolutionMobile: mapConfig.constrainResolutionMobile || false,
       enableDownloadLink: mapConfig.enableDownloadLink,
+      enableAppStateInHash: mapConfig.enableAppStateInHash,
       altShiftDragRotate: mapConfig.altShiftDragRotate,
       onFocusOnly: mapConfig.onFocusOnly,
       doubleClickZoom: mapConfig.doubleClickZoom,
@@ -175,6 +178,7 @@ class MapOptions extends Component {
       drawerVisible: mapConfig.drawerVisible,
       drawerVisibleMobile: mapConfig.drawerVisibleMobile,
       drawerPermanent: mapConfig.drawerPermanent,
+      drawerStatic: mapConfig.drawerStatic,
       activeDrawerOnStart: mapConfig.activeDrawerOnStart
         ? mapConfig.activeDrawerOnStart
         : "plugins",
@@ -347,6 +351,7 @@ class MapOptions extends Component {
       case "constrainResolution":
       case "constrainResolutionMobile":
       case "enableDownloadLink":
+      case "enableAppStateInHash":
       case "altShiftDragRotate":
       case "onFocusOnly":
       case "doubleClickZoom":
@@ -364,6 +369,7 @@ class MapOptions extends Component {
       case "showRecentlyUsedPlugins":
       case "introductionEnabled":
       case "introductionShowControlButton":
+      case "drawerStatic":
       case "drawerVisible":
       case "drawVisibleMobile":
       case "drawerPermanent":
@@ -414,6 +420,7 @@ class MapOptions extends Component {
           "constrainResolutionMobile"
         );
         config.enableDownloadLink = this.getValue("enableDownloadLink");
+        config.enableAppStateInHash = this.getValue("enableAppStateInHash");
         config.altShiftDragRotate = this.getValue("altShiftDragRotate");
         config.onFocusOnly = this.getValue("onFocusOnly");
         config.doubleClickZoom = this.getValue("doubleClickZoom");
@@ -441,6 +448,7 @@ class MapOptions extends Component {
         config.drawerVisible = this.getValue("drawerVisible");
         config.drawerVisibleMobile = this.getValue("drawerVisibleMobile");
         config.drawerPermanent = this.getValue("drawerPermanent");
+        config.drawerStatic = this.getValue("drawerStatic");
         config.activeDrawerOnStart = this.getValue("activeDrawerOnStart");
         config.geoserverLegendOptions = this.getValue("geoserverLegendOptions");
         config.defaultCookieNoticeMessage = this.getValue(
@@ -819,6 +827,29 @@ class MapOptions extends Component {
                   className="fa fa-question-circle"
                   data-toggle="tooltip"
                   title="Om aktivt kommer en nedladdningsknapp att visas brevid varje lager i Lagerhanteraren."
+                />
+              </label>
+            </div>
+            <div>
+              <input
+                id="input_enableAppStateInHash"
+                type="checkbox"
+                ref="input_enableAppStateInHash"
+                onChange={(e) => {
+                  this.setState({ enableAppStateInHash: e.target.checked });
+                }}
+                checked={this.state.enableAppStateInHash}
+              />
+              &nbsp;
+              <label
+                className="long-label"
+                htmlFor="input_enableAppStateInHash"
+              >
+                Beta: aktivera liveuppdatering av hashparametar i URL-fältet{" "}
+                <i
+                  className="fa fa-question-circle"
+                  data-toggle="tooltip"
+                  title="Kartans status hålls ständigt uppdaterad, som en del av URL:ens #-parametrar. Se även #1252."
                 />
               </label>
             </div>
@@ -1389,6 +1420,32 @@ class MapOptions extends Component {
             <div className="separator">Inställningar för sidopanel</div>
             <div>
               <input
+                id="input_drawerStatic"
+                type="checkbox"
+                ref="input_drawerStatic"
+                onChange={(e) => {
+                  this.setState({ drawerStatic: e.target.checked });
+                  if (e.target.checked === true) {
+                    this.setState({
+                      drawerPermanent: false,
+                      drawerVisible: false,
+                    });
+                  }
+                }}
+                checked={this.state.drawerStatic}
+              />
+              &nbsp;
+              <label className="long-label" htmlFor="input_drawerStatic">
+                Låt sidopanelen vara permanent synlig{" "}
+                <i
+                  className="fa fa-question-circle"
+                  data-toggle="tooltip"
+                  title="Om aktiv kommer sidopanelen vara permanent synlig och låst"
+                />
+              </label>
+            </div>
+            <div>
+              <input
                 id="input_drawerVisible"
                 type="checkbox"
                 ref="input_drawerVisible"
@@ -1402,6 +1459,7 @@ class MapOptions extends Component {
                   }
                 }}
                 checked={this.state.drawerVisible}
+                disabled={this.state.drawerStatic === true}
               />
               &nbsp;
               <label className="long-label" htmlFor="input_drawerVisible">
@@ -1422,6 +1480,7 @@ class MapOptions extends Component {
                   this.setState({ drawerVisibleMobile: e.target.checked });
                 }}
                 checked={this.state.drawerVisibleMobile}
+                disabled={this.state.drawerStatic === true}
               />
               &nbsp;
               <label className="long-label" htmlFor="input_drawerVisibleMobile">
@@ -1442,7 +1501,10 @@ class MapOptions extends Component {
                   this.setState({ drawerPermanent: e.target.checked });
                 }}
                 checked={this.state.drawerPermanent}
-                disabled={this.state.drawerVisible !== true}
+                disabled={
+                  this.state.drawerVisible !== true ||
+                  this.state.drawerStatic === true
+                }
               />
               &nbsp;
               <label className="long-label" htmlFor="input_drawerPermanent">

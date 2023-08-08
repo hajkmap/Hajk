@@ -2,13 +2,12 @@ import React, { useEffect } from "react";
 import { createRoot } from "react-dom/client";
 import { createPortal } from "react-dom";
 import { withSnackbar } from "notistack";
-
 import {
   styled,
   StyledEngineProvider,
   ThemeProvider,
+  useTheme,
 } from "@mui/material/styles";
-
 import {
   Button,
   Checkbox,
@@ -20,9 +19,14 @@ import {
   Grid,
   LinearProgress,
   Typography,
+  List,
+  ListItemButton,
+  DialogActions,
+  useMediaQuery,
 } from "@mui/material";
 
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import OpenInNewIcon from "@mui/icons-material/OpenInNew";
 
 import { deepMerge } from "utils/DeepMerge";
@@ -33,14 +37,31 @@ import { getNormalizedMenuState } from "../utils/stateConverter";
 import { hasSubMenu } from "../utils/helpers";
 
 const GridGridContainer = styled(Grid)(({ theme }) => ({
-  padding: theme.spacing(4),
+  padding: theme.spacing(3),
   height: "100%",
+  overflowX: "auto",
 }));
 
 const GridMiddleContainer = styled(Grid)(({ theme }) => ({
-  overflowX: "auto",
-  flexBasis: "100%",
   marginTop: theme.spacing(2),
+  overflowX: "auto",
+  "&::-webkit-scrollbar": {
+    width: "0.4em",
+    opacity: "0",
+  },
+  "&:hover": {
+    "&::-webkit-scrollbar": {
+      opacity: "1",
+    },
+    "&::-webkit-scrollbar-track": {
+      boxShadow: "inset 0 0 6px rgba(0,0,0,0.00)",
+      webkitBoxShadow: "inset 0 0 6px rgba(0,0,0,0.00)",
+    },
+    "&::-webkit-scrollbar-thumb": {
+      backgroundColor: "rgba(0,0,0,.1)",
+    },
+  },
+  flexBasis: "100%",
 }));
 
 const GridHeaderContainer = styled(Grid)(({ theme }) => ({
@@ -53,6 +74,40 @@ const GridSettingsContainer = styled(Grid)(({ theme }) => ({
 
 const GridFooterContainer = styled(Grid)(({ theme }) => ({
   flexBasis: "10%",
+}));
+
+const StyledGrid = styled(Grid)(({ theme }) => ({
+  display: "flex",
+  justifyContent: "flex-end",
+}));
+
+const StyledListItemButton = styled(ListItemButton)(({ theme, index }) => ({
+  display: "flex",
+  justifyContent: "space-between",
+  padding: "16px 10px 16px 10px",
+  borderBottom: "1px solid lightgray",
+  borderLeft: index % 2 === 0 ? "4px solid lightGray" : "4px solid darkGray",
+}));
+
+const StyledDialogContent = styled(DialogContent)(({ theme }) => ({
+  overflowY: "clip",
+  position: "relative",
+  "&:before": {
+    display: "block",
+    content: `""`,
+    width: "100%",
+    paddingTop: "141.15%",
+    paddingLeft: "80%",
+  },
+}));
+
+const StyledIframe = styled("iframe")(({ theme }) => ({
+  position: "absolute",
+  width: "calc(100% - 40px)",
+  height: "100%",
+  top: "0",
+  left: "0",
+  margin: "20px",
 }));
 
 const maxHeight = 950;
@@ -76,6 +131,10 @@ class PrintWindow extends React.PureComponent {
     printContent: undefined,
     pdfLoading: false,
     isAnyDocumentSelected: false,
+    showAttachments: false,
+    selectedPdfIndex: null,
+    isModalOpen: false,
+    pdfLinks: this.checkPdfLinks(this.props.options.pdfLinks),
   };
 
   internalId = 0;
@@ -261,6 +320,17 @@ class PrintWindow extends React.PureComponent {
     printWindow.document.head.insertAdjacentHTML(
       "beforeend",
       ` <title>${document.title}</title>
+        <base href="${document.location.protocol}//${
+        document.location.host
+      }/" />
+        ${
+          this.props.options.dynamicImportUrls.customFont
+            ? `<link
+            rel="stylesheet"
+            type="text/css"
+            href="${this.props.options.dynamicImportUrls.customFont}"/>`
+            : ""
+        }        
         <style>
           @page {
             size: A4;
@@ -285,6 +355,17 @@ class PrintWindow extends React.PureComponent {
             }
             .MuiBox-root {
               page-break-inside: avoid;
+            }
+            body .blockQuoteAccordion {
+              box-shadow: none;
+              border: 4px solid #edf2f7;
+            }
+            .blockQuoteAccordion .MuiCollapse-root {
+              height: auto;
+              visibility: visible;
+            }
+            .blockQuoteAccordion .MuiAccordionSummary-expandIconWrapper {
+              display: none;
             }
           }        
         </style>`
@@ -407,15 +488,16 @@ class PrintWindow extends React.PureComponent {
         // Add our recently-created DIV to the new window's document
         newWindow.document.body.appendChild(printContent);
 
-        // Invoke browser's print dialog - this will block the thread
-        // until user does something with it.
-        newWindow.print();
-
-        // Once the print dialog has disappeared, let's close the new window
-        newWindow.close();
-
-        // When the user closes the print-window we have to do some cleanup...
-        this.handlePrintCompleted();
+        // We force print to the next upcoming render. Let it render in peace.
+        setTimeout(() => {
+          // Invoke browser's print dialog - this will block the thread
+          // until user does something with it.
+          newWindow.print();
+          // Once the print dialog has disappeared, let's close the new window
+          newWindow.close();
+          // When the user closes the print-window we have to do some cleanup...
+          this.handlePrintCompleted();
+        }, 25);
       });
     });
   };
@@ -830,30 +912,20 @@ class PrintWindow extends React.PureComponent {
     );
   };
 
-  render() {
-    const { togglePrintWindow, localObserver, documentWindowMaximized } =
-      this.props;
+  toggleDocumentsAttachments = () => {
+    this.setState((prevState) => ({
+      showAttachments: !prevState.showAttachments,
+    }));
+  };
+
+  renderPrintDocuments = () => {
+    const { localObserver, documentWindowMaximized } = this.props;
     const { menuInformation } = this.state;
     return (
-      <GridGridContainer container wrap="nowrap" direction="column">
-        <GridHeaderContainer alignItems="center" item container>
-          <Grid item xs={4}>
-            <Button
-              color="primary"
-              style={{ paddingLeft: 0 }}
-              startIcon={<ArrowBackIcon />}
-              onClick={togglePrintWindow}
-            >
-              <Typography justify="center">Tillbaka</Typography>
-            </Button>
-          </Grid>
-          <Grid item xs={4}>
-            <Typography align="center" variant="h6">
-              Skapa PDF
-            </Typography>
-          </Grid>
-        </GridHeaderContainer>
-
+      <>
+        <Typography align="center" variant="h6">
+          Skapa PDF
+        </Typography>
         <GridSettingsContainer container item>
           <Typography variant="h6">Inställningar</Typography>
 
@@ -888,7 +960,201 @@ class PrintWindow extends React.PureComponent {
 
         {documentWindowMaximized && this.renderCreatePDFButton()}
         {this.renderLoadingDialog()}
-      </GridGridContainer>
+      </>
+    );
+  };
+
+  openAttachmentModal = (index) => {
+    this.setState({
+      selectedPdfIndex: index,
+      isModalOpen: true,
+    });
+  };
+
+  closeAttachmentModal = () => {
+    this.setState({
+      selectedPdfIndex: null,
+      isModalOpen: false,
+    });
+  };
+
+  checkPdfLinks(pdfLinks) {
+    const updatedLinks = pdfLinks?.filter(
+      (pdfLink) => pdfLink.name || pdfLink.link
+    );
+    return updatedLinks;
+  }
+
+  renderDialog = () => {
+    const { isModalOpen, pdfLinks, selectedPdfIndex } = this.state;
+    const closeAttachmentModal = this.closeAttachmentModal;
+
+    function ResponsiveDialog() {
+      const theme = useTheme();
+      const fullScreen = useMediaQuery(theme.breakpoints.down("sm"));
+
+      return (
+        <Dialog
+          fullScreen={fullScreen}
+          open={isModalOpen}
+          PaperProps={{ style: { width: !fullScreen && "30%" } }}
+          BackdropProps={{
+            style: { backgroundColor: "rgba(0, 0, 0, 0.25)" },
+          }}
+          onClose={() => closeAttachmentModal()}
+        >
+          <StyledDialogContent>
+            <StyledIframe
+              title={pdfLinks[selectedPdfIndex]?.name}
+              src={pdfLinks[selectedPdfIndex]?.link}
+            />
+          </StyledDialogContent>
+          <DialogActions>
+            <Button variant="contained" onClick={() => closeAttachmentModal()}>
+              <Typography variant="body2">Stäng</Typography>
+            </Button>
+          </DialogActions>
+        </Dialog>
+      );
+    }
+    return (
+      <>
+        {createPortal(
+          <ResponsiveDialog></ResponsiveDialog>,
+          document.getElementById("root")
+        )}
+      </>
+    );
+  };
+
+  renderPrintAttachments = () => {
+    const { pdfLinks, isModalOpen } = this.state;
+
+    const renderAttachment = (pdfLink, index) => {
+      const hasName = pdfLink.name !== "";
+      const hasLink = pdfLink.link !== "";
+      const disabled = !hasLink;
+      const name = hasName ? pdfLink.name : "Namn saknas";
+      const linkText = hasLink ? "Öppna" : "Länk saknas";
+      const linkColor = hasLink ? "primary" : "text.secondary";
+      const linkIcon = hasLink ? (
+        <OpenInNewIcon sx={{ width: "15px" }} />
+      ) : null;
+
+      return (
+        <div key={index}>
+          <StyledListItemButton
+            disabled={disabled}
+            index={index}
+            onClick={() => this.openAttachmentModal(index)}
+          >
+            <Typography
+              sx={{
+                fontStyle: !hasName ? "italic" : "inherit",
+                color: !hasName ? "gray" : "inherit",
+              }}
+            >
+              {name}
+            </Typography>
+            {hasLink && (
+              <Button
+                href={pdfLink.link}
+                target="_blank"
+                sx={{ height: "28px", padding: "10px", minWidth: "auto" }}
+                color={linkColor}
+                variant="contained"
+                startIcon={linkIcon}
+                onClick={(event) => event.stopPropagation()}
+              >
+                <Typography variant="body2" justify="center">
+                  {linkText}
+                </Typography>
+              </Button>
+            )}
+            {!hasLink && (
+              <Typography sx={{ fontStyle: "italic" }}>Länk saknas</Typography>
+            )}
+          </StyledListItemButton>
+        </div>
+      );
+    };
+
+    return (
+      <>
+        <Typography align="center" variant="h6">
+          Bilagor
+        </Typography>
+        <Typography variant="h6">Innehåll</Typography>
+        <GridMiddleContainer>
+          <List>{pdfLinks.map(renderAttachment)}</List>
+        </GridMiddleContainer>
+        {isModalOpen && this.renderDialog()}
+      </>
+    );
+  };
+
+  render() {
+    const { togglePrintWindow } = this.props;
+    const { showAttachments, pdfLinks } = this.state;
+
+    return (
+      <>
+        {!showAttachments ? (
+          <GridGridContainer container wrap="nowrap" direction="column">
+            <GridHeaderContainer
+              alignItems="center"
+              justifyContent="space-between"
+              item
+              container
+            >
+              <Grid item xs={4}>
+                <Button
+                  color="primary"
+                  style={{ paddingLeft: 0 }}
+                  startIcon={<ArrowBackIcon />}
+                  onClick={togglePrintWindow}
+                >
+                  <Typography justify="center">Tillbaka</Typography>
+                </Button>
+              </Grid>
+              <StyledGrid item xs={4}>
+                {pdfLinks?.length > 0 && (
+                  <Button
+                    color="primary"
+                    style={{ paddingLeft: 0 }}
+                    endIcon={<ArrowForwardIcon />}
+                    onClick={() => this.toggleDocumentsAttachments()}
+                  >
+                    <Typography justify="center">Bilagor</Typography>
+                  </Button>
+                )}
+              </StyledGrid>
+            </GridHeaderContainer>
+            {this.renderPrintDocuments()}
+          </GridGridContainer>
+        ) : (
+          <GridGridContainer container wrap="nowrap" direction="column">
+            <GridHeaderContainer
+              alignItems="center"
+              justifyContent="space-between"
+              item
+              container
+            >
+              <Grid item xs={4}>
+                <Button
+                  color="primary"
+                  style={{ paddingLeft: 0 }}
+                  startIcon={<ArrowBackIcon />}
+                  onClick={() => this.toggleDocumentsAttachments()}
+                >
+                  <Typography justify="center">Skapa Pdf</Typography>
+                </Button>
+              </Grid>
+            </GridHeaderContainer>
+            {this.renderPrintAttachments()}
+          </GridGridContainer>
+        )}
+      </>
     );
   }
 }

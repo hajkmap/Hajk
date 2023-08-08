@@ -18,6 +18,7 @@ class FirLayerController {
     this.bufferValue = 0;
     this.removeIsActive = false;
     this.ctrlKeyIsDown = false;
+    this.previousFeatures = [];
 
     this.#HT = new HajkTransformer({
       projection: this.model.app.map.getView().getProjection().getCode(),
@@ -108,10 +109,10 @@ class FirLayerController {
       visible: true,
     });
 
-    this.model.map.addLayer(this.model.layers.feature);
-    this.model.map.addLayer(this.model.layers.highlight);
     this.model.map.addLayer(this.model.layers.buffer);
+    this.model.map.addLayer(this.model.layers.feature);
     this.model.map.addLayer(this.model.layers.draw);
+    this.model.map.addLayer(this.model.layers.highlight);
     this.model.map.addLayer(this.model.layers.label);
     this.model.map.addLayer(this.model.layers.marker);
 
@@ -197,7 +198,7 @@ class FirLayerController {
       image: new Icon({
         anchor: [0.5, 1.18],
         scale: 0.15,
-        src: IconMarker(),
+        src: IconMarker(this.styles.getColor("highlightStroke")),
       }),
     });
     this.markerFeature.setStyle(styleMarker);
@@ -210,9 +211,30 @@ class FirLayerController {
       return;
     }
 
-    arr.forEach((feature) => {
-      feature.setStyle(this.styles.getResultStyle());
-    });
+    if (options.clearPrevious === true) {
+      this.previousFeatures = [];
+    }
+
+    if (arr.length === 1 && options.click === true) {
+      const clickFeature = arr[0];
+      if (this.model.layers.feature.getSource().getFeatures().length) {
+        clickFeature.setStyle(this.styles.getPreviousResultStyle());
+      } else {
+        clickFeature.setStyle(this.styles.getResultStyle());
+      }
+    } else {
+      arr.forEach((feature) => {
+        if (
+          this.previousFeatures.indexOf(
+            feature.get(this.model.config.wmsRealEstateLayer.idField)
+          ) > -1
+        ) {
+          feature.setStyle(this.styles.getPreviousResultStyle());
+        } else {
+          feature.setStyle(this.styles.getResultStyle());
+        }
+      });
+    }
 
     this.model.layers.feature.getSource().addFeatures(arr);
     if (options.zoomToLayer) {
@@ -249,6 +271,20 @@ class FirLayerController {
   };
 
   clearBeforeSearch = (options = { keepNeighborBuffer: false }) => {
+    let previousFeatures = [];
+
+    if (options.keepNeighborBuffer === true) {
+      this.model.layers.feature
+        .getSource()
+        .getFeatures()
+        .forEach((o) => {
+          previousFeatures.push(
+            o.get(this.model.config.wmsRealEstateLayer.idField)
+          );
+        });
+    }
+
+    this.previousFeatures = previousFeatures;
     this.model.layers.feature.getSource().clear();
     this.model.layers.highlight.getSource().clear();
     this.model.layers.label.getSource().clear();
@@ -317,7 +353,8 @@ class FirLayerController {
               ? true
               : false;
           });
-          this.addFeatures(features, { zoomToLayer: false });
+
+          this.addFeatures(features, { zoomToLayer: false, click: true });
           this.observer.publish("fir.search.add", features);
         } catch (err) {
           console.warn(err);

@@ -45,6 +45,8 @@ namespace MapService.Models
 
         public bool enableDownloadLink { get; set; }
 
+        public bool enableAppStateInHash { get; set; }
+
         public string logo { get; set; }
 
         public string logoLight { get; set; }
@@ -64,6 +66,8 @@ namespace MapService.Models
         public bool drawerVisibleMobile { get; set; }
 
         public bool drawerPermanent { get; set; }
+        
+        public bool drawerStatic { get; set; }
 
         public string activeDrawerOnStart { get; set; }
 

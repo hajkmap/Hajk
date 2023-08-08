@@ -461,7 +461,11 @@ class Manager extends Component {
       const caption = layer.caption.toLowerCase();
       const internalLayerName = layer.internalLayerName?.toLowerCase() || "";
       const filter = this.state.filter.toLowerCase();
-      return caption.includes(filter) || internalLayerName.includes(filter);
+      return (
+        caption.includes(filter) ||
+        internalLayerName.includes(filter) ||
+        layer.id.includes(filter)
+      );
     });
   }
 

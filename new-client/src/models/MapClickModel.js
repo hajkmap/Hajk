@@ -1,23 +1,30 @@
-import { hfetch } from "utils/FetchWrapper";
-
-import GeoJSON from "ol/format/GeoJSON";
-import WMSGetFeatureInfo from "ol/format/WMSGetFeatureInfo";
-import TileLayer from "ol/layer/Tile";
-import ImageLayer from "ol/layer/Image";
-import VectorLayer from "ol/layer/Vector";
-import VectorSource from "ol/source/Vector";
-import { Style, Icon, Fill, Stroke, Circle } from "ol/style";
 import Feature from "ol/Feature";
 import Point from "ol/geom/Point";
-import AppModel from "../models/AppModel.js";
+
+import ImageLayer from "ol/layer/Image";
+import TileLayer from "ol/layer/Tile";
+import VectorLayer from "ol/layer/Vector";
+import VectorSource from "ol/source/Vector";
+
+import { Style, Icon, Fill, Stroke, Circle } from "ol/style";
+
+import AppModel from "models/AppModel";
+import { hfetch } from "utils/FetchWrapper";
+import { getInfoClickInfoFromLayerConfig } from "utils/InfoClickHelpers";
+import {
+  parseGMLFeatures,
+  parseGeoJsonFeatures,
+  experimentalParseEsriWmsRawXml,
+  parseWmsGetFeatureInfoXml,
+} from "utils/wmsFeatureParsers";
 
 const convertRGBAtoString = (color) => {
   if (
     typeof color === "object" &&
-    Object.hasOwn(color, "r") &&
-    Object.hasOwn(color, "g") &&
-    Object.hasOwn(color, "b") &&
-    Object.hasOwn(color, "a")
+    color.hasOwnProperty("r") &&
+    color.hasOwnProperty("g") &&
+    color.hasOwnProperty("b") &&
+    color.hasOwnProperty("a")
   ) {
     return `rgba(${color.r},${color.g},${color.b},${color.a})`;
   } else {
@@ -34,10 +41,6 @@ export default class MapClickModel {
     this.map = map;
     this.globalObserver = globalObserver;
     this.infoclickOptions = infoclickOptions;
-
-    // Setup the parsers once and for all
-    this.geoJsonParser = new GeoJSON();
-    this.wmsGetFeatureInfoParser = new WMSGetFeatureInfo();
 
     // Setup the OL style used to indicate where mouse click
     // ocurred. We do it once, as it's kind of expensive.
@@ -61,7 +64,7 @@ export default class MapClickModel {
 
   #prepareMarkerStyle = () => {
     // If Admin UI provided a SRC for the marker icon, let's use it
-    if (this.infoclickOptions.src !== "") {
+    if (this.infoclickOptions.src) {
       const { anchor, fillColor, scale, src } = this.infoclickOptions;
       // fillColor is an object with r, g, b and a properties. OL
       // wants a string. Use this handy converter:
@@ -127,25 +130,6 @@ export default class MapClickModel {
     });
   }
   /**
-   * @summary Determine the sublayer's name by looking at the feature's id
-   * @description We must know which of the queried sublayers a given feature comes
-   * from and the best way to determine that is by looking at the feature ID (FID).
-   * It looks like WMS services set the FID using this formula:
-   * [<workspaceName>:]<layerName>.<numericFeatureId>
-   * where the part inside "[" and "]" is optional (not used by GeoServer nor QGIS,
-   * but other WMSes might use it).
-   * @param {Feature} feature
-   * @param {Layer} layer
-   * @return {string} layerName
-   */
-  #getLayerNameFromFeatureAndLayer = (feature, layer) => {
-    return Object.keys(layer.layersInfo).find((id) => {
-      const fid = feature.getId().split(".")[0];
-      const layerId = id.split(":").length === 2 ? id.split(":")[1] : id;
-      return fid === layerId;
-    });
-  };
-  /**
    * @summary Get the name of a layer by taking a look at the first part of a feature's name.
    *
    * @param {Feature} feature
@@ -183,107 +167,56 @@ export default class MapClickModel {
             ?.split(";")[0];
 
           // Prepare an object to hold the features to be parsed.
-          let olFeatures = null;
+          let olFeatures = [];
 
           // Depending on the response type, parse accordingly
           switch (responseContentType) {
             case "application/geojson":
             case "application/json": {
-              olFeatures = this.#parseGeoJsonFeatures(
+              olFeatures = parseGeoJsonFeatures(
                 await response.value.requestResponse.json()
               );
               break;
             }
-            case "text/xml":
+            case "text/xml": {
+              olFeatures = parseWmsGetFeatureInfoXml(
+                await response.value.requestResponse.text()
+              );
+              break;
+            }
             case "application/vnd.ogc.gml": {
-              // (See comments for GeoJSON parser - this is similar.)
-              olFeatures = this.#parseGMLFeatures(
+              olFeatures = parseGMLFeatures(
+                await response.value.requestResponse.text()
+              );
+              break;
+            }
+            case "application/vnd.esri.wms_raw_xml": {
+              olFeatures = experimentalParseEsriWmsRawXml(
                 await response.value.requestResponse.text()
               );
               break;
             }
             default:
+              console.warn(
+                "Unsupported response type for GetFeatureInfo request:",
+                responseContentType
+              );
               break;
           }
 
           // Next, loop through the features (if we managed to parse any).
           for (const feature of olFeatures) {
-            // First we need the sublayer's name in order to grab
-            // the relevant caption, infobox definition, etc.
-            // The only way to get it now is by looking into
-            // the feature id, because it includes the layer's
-            // name as a part of the id itself.
-            let layerName = this.#getLayerNameFromFeatureAndLayer(
+            // We're gonna need a lot of information from each layer that each feature
+            // is coming from. Let's extract all that information
+            const infoClickInformation = getInfoClickInfoFromLayerConfig(
               feature,
               response.value.layer
             );
-
-            // Special case that can happen occur for WMS raster responses,
-            // see also #1090.
-            if (
-              layerName === undefined &&
-              feature.getId() === "" &&
-              response.value.layer.subLayers.length === 1
-            ) {
-              // Let's assume that the layer's name is the name of the first layer
-              layerName = response.value.layer.subLayers[0];
-
-              // Make sure to set a feature ID - without it we won't be able to
-              // set/unset selected feature later on (an absolut requirement to
-              // properly render components that follow such as Pagination, Markdown).
-              feature.setId("fakeFeatureIdIssue1090");
-            }
-
-            // Having just the layer's name as an ID is not safe - multiple
-            // WFS's may use the same name for two totally different layers.
-            // So we need something more. Luckily, we can use the UID property
-            // of our OL layer.
-            const layerId =
-              layerName +
-              (response.value.layer?.ol_uid &&
-                "." + response.value.layer?.ol_uid);
-
-            // Get caption for this dataset
-            const displayName =
-              response.value.layer?.layersInfo?.[layerName]?.caption ||
-              response.value.layer?.get("caption") ||
-              "Unnamed dataset";
-
-            // Get infoclick definition for this dataset
-            const infoclickDefinition =
-              response.value.layer?.layersInfo?.[layerName]?.infobox || "";
-
-            // Prepare the infoclick icon string
-            const infoclickIcon =
-              response.value.layer?.layersInfo?.[layerName]?.infoclickIcon ||
-              "";
-
-            // Prepare displayFields, shortDisplayFields and secondaryLabelFields.
-            // We need them to determine what should be displayed
-            // in the features list view.
-            const displayFields =
-              response.value.layer?.layersInfo?.[layerName]?.searchDisplayName
-                ?.split(",")
-                .map((df) => df.trim()) || [];
-            const shortDisplayFields =
-              response.value.layer?.layersInfo?.[
-                layerName
-              ]?.searchShortDisplayName
-                ?.split(",")
-                .map((df) => df.trim()) || [];
-            const secondaryLabelFields =
-              response.value.layer?.layersInfo?.[
-                layerName
-              ]?.secondaryLabelFields
-                ?.split(",")
-                .map((df) => df.trim()) || [];
-
             // Before we create the feature collection, ensure that
             // it doesn't exist already.
             const existingLayer = getFeatureInfoResults.find(
-              (f) => f.layerId === layerId
+              (f) => f.layerId === infoClickInformation.layerId
             );
-
             // If it exists…
             if (existingLayer) {
               // …push the current feature…
@@ -294,16 +227,10 @@ export default class MapClickModel {
               // If this is the first feature from this layer…
               // …prepare the return object…
               const r = {
-                layerId: layerId,
                 type: "GetFeatureInfoResults",
                 features: [feature],
                 numHits: 1,
-                displayName,
-                infoclickDefinition,
-                infoclickIcon,
-                displayFields,
-                shortDisplayFields,
-                secondaryLabelFields,
+                ...infoClickInformation,
               };
               // …and push onto the array.
               getFeatureInfoResults.push(r);
@@ -609,7 +536,7 @@ export default class MapClickModel {
     // is not enough, we must also respect the min/max zoom level settings, #836.
     if (
       layer.layersInfo &&
-      layer.getMinZoom() <= currentZoom &&
+      currentZoom > layer.getMinZoom() &&
       currentZoom <= layer.getMaxZoom()
     ) {
       const subLayers = Object.values(layer.layersInfo);
@@ -642,18 +569,22 @@ export default class MapClickModel {
         QUERY_LAYERS: subLayersToQuery.join(","),
       };
 
-      // See #852. Without this, it's almost impossible to get a result from QGIS Server.
-      // TODO: This could be expanded and made an admin setting - I'm not sure that 50 px
-      // will work for everyone.
-      // The WITH_GEOMETRY is necessary to make QGIS Server send back the feature's geometry
-      // in the response.
-      // See: https://docs.qgis.org/3.16/en/docs/server_manual/services.html#wms-withgeometry.
+      // Some extra settings for GetFeatureInfo from QGIS Server
       if (layer.getSource().serverType_ === "qgis") {
         params = {
+          // First, spread the existing params that are common for all servers.
           ...params,
-          FI_POINT_TOLERANCE: 50,
-          FI_LINE_TOLERANCE: 50,
-          FI_POLYGON_TOLERANCE: 50,
+          // Next do some QGIS-specific overrides.
+          // Fix click tolerance. See #852. Without this, it's almost impossible to get a result from QGIS Server.
+          // Also, see #885 which made it clear that we must allow customizing this setting.
+          // TODO: The one lacking part is Admin UI - for now this must be configured in the JSON file.
+          FI_POINT_TOLERANCE: this.infoclickOptions?.qgis?.pointTolerance || 50,
+          FI_LINE_TOLERANCE: this.infoclickOptions?.qgis?.lineTolerance || 50,
+          FI_POLYGON_TOLERANCE:
+            this.infoclickOptions?.qgis?.polygonTolerance || 50,
+          // The WITH_GEOMETRY is necessary to make QGIS Server send back the feature's geometry
+          // in the response.
+          // See: https://docs.qgis.org/3.16/en/docs/server_manual/services.html#wms-withgeometry.
           WITH_GEOMETRY: true,
         };
       }
@@ -665,13 +596,5 @@ export default class MapClickModel {
     } else {
       return false;
     }
-  }
-
-  #parseGeoJsonFeatures(json) {
-    return this.geoJsonParser.readFeatures(json);
-  }
-
-  #parseGMLFeatures(gml) {
-    return this.wmsGetFeatureInfoParser.readFeatures(gml);
   }
 }

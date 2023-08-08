@@ -1,5 +1,4 @@
-[![Docker Status](https://img.shields.io/docker/cloud/build/hallbergs/hajk)](https://hub.docker.com/r/hallbergs/hajk/)
-[![Netlify Status](https://img.shields.io/netlify/fa0760e3-fd3a-43bf-a704-27e05cb901cc)](https://app.netlify.com/sites/hajk-demo/deploys)
+[![Netlify Status](https://api.netlify.com/api/v1/badges/fa0760e3-fd3a-43bf-a704-27e05cb901cc/deploy-status)](https://app.netlify.com/sites/hajk-demo/deploys)
 
 # Hajk
 
@@ -11,10 +10,11 @@ _Hajk is an open source web GIS solution based on the latest technologies such a
 
 ## New to Hajk and not a developer?
 
-If you are a new user of Hajk, please visit [our welcome page (Swedish only)](https://hajkmap.github.io/Hajk) for more information about Hajk.
+If you are a new user of Hajk, please visit [our welcome page (Swedish only)](https://www.hajkmap.se/) for more information about Hajk.
 
 ## Looking for support?
-You can easily reach out to our community using the [Discussions on GitHub](https://github.com/hajkmap/Hajk/discussions). 
+
+You can easily reach out to our community using the [Discussions on GitHub](https://github.com/hajkmap/Hajk/discussions).
 
 ## Live examples
 
@@ -92,9 +92,9 @@ Now when Backend is up and running, it's time to start the Client (and optionall
 This process is similar to the Client app.
 
 1. Set the correct URL to Backend by editing `new-admin/public/config.json`.  
-*Map operations have moved to mapconfig so `"url_map", "url_map_list", "url_map_create", "url_map_delete"` needs to point toward `"http://localhost:3002/api/v1/mapconfig..."`, the rest is the same as for `new-client`*
-3. The admin application is located in `new-admin`. To get it running do `cd new-admin && npm i && npm start`.
-4. Verify that Admin is running on `http://localhost:3001`.
+   _Map operations have moved to mapconfig so `"url_map", "url_map_list", "url_map_create", "url_map_delete"` needs to point toward `"http://localhost:3002/api/v1/mapconfig..."`, the rest is the same as for `new-client`_
+2. The admin application is located in `new-admin`. To get it running do `cd new-admin && npm i && npm start`.
+3. Verify that Admin is running on `http://localhost:3001`.
 
 ## Deploying
 

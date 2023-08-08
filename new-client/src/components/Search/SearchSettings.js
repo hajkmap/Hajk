@@ -90,15 +90,14 @@ class SearchSettings extends React.PureComponent {
                         </ChipsWrapper>
                       )}
                     >
-                      {searchModel.getSources().map((source) => (
-                        <MenuItem
-                          key={source.id}
-                          value={source}
-                          // style={getStyles(name, personName, theme)}
-                        >
-                          {source.caption}
-                        </MenuItem>
-                      ))}
+                      {searchModel
+                        .getSources()
+                        .sort((a, b) => a.caption.localeCompare(b.caption))
+                        .map((source) => (
+                          <MenuItem key={source.id} value={source}>
+                            {source.caption}
+                          </MenuItem>
+                        ))}
                     </Select>
                   </Grid>
                 </Grid>

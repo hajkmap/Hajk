@@ -1,10 +1,13 @@
 import React from "react";
 
+import { PLUGINS_TO_IGNORE_IN_HASH_APP_STATE } from "constants";
+
 import PropTypes from "prop-types";
 import { styled } from "@mui/material/styles";
 import { SnackbarProvider } from "notistack";
 import Observer from "react-event-observer";
 import { isMobile } from "../utils/IsMobile";
+import { getMergedSearchAndHashParams } from "../utils/getMergedSearchAndHashParams";
 import SrShortcuts from "../components/SrShortcuts/SrShortcuts";
 import Analytics from "../models/Analytics";
 import AppModel from "../models/AppModel.js";
@@ -46,6 +49,7 @@ import {
   Grid,
   Hidden,
   IconButton,
+  Link,
   Tooltip,
   Typography,
 } from "@mui/material";
@@ -248,13 +252,77 @@ class App extends React.PureComponent {
       : null;
   };
 
+  isDrawerPermanent = (drawerProps) => {
+    const { props, activeDrawerContentState, drawerPermanentFromLocalStorage } =
+      drawerProps;
+    const { map } = props.config.mapConfig;
+    // First check if we have anything to render at all and in case we haven't -> do not show drawer
+    // If on a mobile device, the drawer should never be permanent.
+    if (activeDrawerContentState === null || isMobile) {
+      return false;
+    }
+    // If drawer is set to static we want the the drawer to be set to permanent
+    if (map.drawerStatic) {
+      return true;
+    }
+    // If not on mobile, if cookie is not null, use it to show/hide Drawer.
+    // If cookie is not null, use it to show/hide Drawer.
+    // If cookie however is null, fall back to the values from config.
+    if (drawerPermanentFromLocalStorage !== null) {
+      return drawerPermanentFromLocalStorage;
+    }
+    // Finally, check if drawerVisible and drawerPermanent are both true, and return true if they are.
+    return map.drawerVisible && map.drawerPermanent;
+  };
+
+  isDrawerVisible = (drawerProps) => {
+    const { props, activeDrawerContentState, drawerPermanentFromLocalStorage } =
+      drawerProps;
+    const { map } = props.config.mapConfig;
+    // First check if we have anything to render at all and in case we haven't -> do not show drawer
+    if (activeDrawerContentState === null) {
+      return false;
+    }
+    // If on a mobile device, the drawer should never be visible.
+    if (isMobile && map.drawerVisibleMobile !== undefined) {
+      return map.drawerVisibleMobile;
+    }
+    // If drawer is set to static we want the the drawer to be set to visible
+    if (map.drawerStatic) {
+      return true;
+    }
+    // If not on mobile, if cookie is not null, use it to show/hide Drawer.
+    // If cookie is not null, use it to show/hide Drawer.
+    // If cookie however is null, fall back to the values from config.
+    if (drawerPermanentFromLocalStorage !== null) {
+      return drawerPermanentFromLocalStorage;
+    }
+    // Finally, we return true if drawerVisible is set, otherwise false
+    return map.drawerVisible || false;
+  };
+
+  isDrawerStatic = (drawerProps) => {
+    const { drawerStatic } = drawerProps.props.config.mapConfig.map;
+    // We check if we have something to render or if user is on mobile.
+    if (drawerProps.activeDrawerContentState === null || isMobile) {
+      return false;
+    }
+    // And if the drawerStatic is being used at all.
+    if (drawerStatic !== undefined) {
+      return drawerStatic;
+    }
+    return drawerStatic || false;
+  };
+
   constructor(props) {
     super(props);
 
     const drawerPermanentFromLocalStorage =
       this.getDrawerPermanentFromLocalStorage();
+
     const activeDrawerContentFromLocalStorage =
       this.getActiveDrawerContentFromLocalStorage();
+
     const canRenderDefaultDrawer = this.hasAnyToolbarTools();
 
     const canRenderCustomDrawer = this.canRenderCustomDrawer(
@@ -267,7 +335,6 @@ class App extends React.PureComponent {
     //if we cant render customContent fall back to mapconfig
     //Finally, fall back to 'plugins', the standard tools panel.
     //This fall back avoids rendering an empty drawer in the case that draw is set to visible but there is no drawer content in local storage.
-
     const activeDrawerContentState = canRenderCustomDrawer
       ? activeDrawerContentFromLocalStorage !== null &&
         activeDrawerContentFromLocalStorage !== "plugins"
@@ -277,37 +344,24 @@ class App extends React.PureComponent {
       ? "plugins"
       : null;
 
-    // First check if we have anything to render at all and in case we haven't -> do not show drawer
-    // If on a mobile device, the drawer should never be permanent.
-    // If not on mobile, if cookie is not null, use it to show/hide Drawer.
-    // If cookie is not null, use it to show/hide Drawer.
-    // If cookie however is null, fall back to the values from config.
-    // Finally, fall back to "false" if no cookie or config is found.
-    const drawerPermanent =
-      activeDrawerContentState === null
-        ? false
-        : isMobile
-        ? false
-        : drawerPermanentFromLocalStorage !== null
-        ? drawerPermanentFromLocalStorage
-        : (props.config.mapConfig.map.drawerVisible &&
-            props.config.mapConfig.map.drawerPermanent) ||
-          false;
+    const drawerProps = {
+      props,
+      activeDrawerContentState,
+      drawerPermanentFromLocalStorage,
+    };
 
-    // First check if we have anything to render at all and in case we haven't -> do not show drawer
-    // If on a mobile device, and a config property for if the drawer should initially be open is set, base the drawer state on this.
-    // Otherwise if cookie for "drawerPermanent" is not null, use it to control Drawer visibility,
-    // If there a no cookie settings, use the config drawVisible setting.
-    // Finally, don't show the drawer.
-    const drawerVisible =
-      activeDrawerContentState === null
-        ? false
-        : isMobile &&
-          props.config.mapConfig.map.drawerVisibleMobile !== undefined
-        ? props.config.mapConfig.map.drawerVisibleMobile
-        : drawerPermanentFromLocalStorage !== null
-        ? drawerPermanentFromLocalStorage
-        : props.config.mapConfig.map.drawerVisible || false;
+    // We check if drawer is set to static
+    const drawerStatic = this.isDrawerStatic(drawerProps);
+    // We check if drawer is set to permanent
+    // If drawerStatic is true, we do not need to check drawerPermanent
+    const drawerPermanent = drawerStatic
+      ? true
+      : this.isDrawerPermanent(drawerProps);
+    // We check if drawer is set to visible
+    // If drawerStatic is true, we do not need to check drawerVisible
+    const drawerVisible = drawerStatic
+      ? true
+      : this.isDrawerVisible(drawerProps);
 
     this.state = {
       alert: false,
@@ -316,6 +370,7 @@ class App extends React.PureComponent {
       mapClickDataResult: {},
       drawerVisible: drawerVisible,
       drawerPermanent: drawerPermanent,
+      drawerStatic: drawerStatic,
       activeDrawerContent: activeDrawerContentState,
       drawerMouseOverLock: false,
     };
@@ -418,6 +473,7 @@ class App extends React.PureComponent {
       .createMap()
       .addSearchModel()
       .addLayers()
+      .addAnchorModel() // Anchor model must be added after the layers
       .loadPlugins(this.props.activeTools);
 
     Promise.all(promises).then(() => {
@@ -471,6 +527,12 @@ class App extends React.PureComponent {
   componentDidCatch(error) {}
 
   bindHandlers() {
+    // Extend the hajkPublicApi with a couple of things that are available now
+    window.hajkPublicApi = {
+      ...window.hajkPublicApi,
+      olMap: this.appModel.map,
+    };
+
     // Register a handle to prevent pinch zoom on mobile devices.
     document.body.addEventListener(
       "touchmove",
@@ -488,6 +550,106 @@ class App extends React.PureComponent {
       { passive: false } // Explicitly tell the browser that we will preventDefault inside this handler,
       // which is important for smooth scrolling to work correctly.
     );
+
+    // This event is used to allow controlling Hajk programmatically, e.g in an embedded context, see #1252
+    this.props.config.mapConfig.map.enableAppStateInHash === true &&
+      window.addEventListener(
+        "hashchange",
+        () => {
+          // Extract existing params. Using this helper we will take into account both
+          // the query and the hash parameters.
+          const mergedParams = getMergedSearchAndHashParams();
+
+          // If map changed, do a full reload
+          if (mergedParams.get("m") !== this.props.config.activeMap) {
+            window.location.reload();
+          }
+
+          // Act when view's zoom changes
+          if (mergedParams.get("z")) {
+            // Since we're dealing with a string, we're gonna need to parse it to a float
+            const zoomInHash = parseFloat(mergedParams.get("z"));
+            if (this.appModel.map.getView().getZoom() !== zoomInHash) {
+              // …let's update our View's zoom.
+              this.appModel.map.getView().animate({ zoom: zoomInHash });
+            }
+          }
+
+          // Act when view's center coordinate changes
+          if (mergedParams.get("x") || mergedParams.get("y")) {
+            const [x, y] = this.appModel.map.getView().getCenter();
+
+            if (
+              mergedParams.get("x") !== x.toString() ||
+              mergedParams.get("y") !== y.toString()
+            ) {
+              this.appModel.map.getView().animate({
+                center: [mergedParams.get("x"), mergedParams.get("y")],
+              });
+            }
+          }
+
+          // Act when plugin window's visibility changes.
+          // p contains the list of plugins to show. It's important to check
+          // for null, as an empty string value is a valid value that indicates
+          // that no plugin should be shown, while a null value indicates that
+          // the parameter does not exist and default plugin visibility should
+          // be respected.
+          if (mergedParams.get("p") !== null) {
+            const currentlyVisiblePlugins = this.appModel.windows
+              .filter((w) => w.state.windowVisible)
+              .map((p) => p.type);
+
+            if (currentlyVisiblePlugins.join(",") !== mergedParams.get("p")) {
+              const pInParams = mergedParams.get("p").split(",");
+
+              // First hide if window not longer visible
+              currentlyVisiblePlugins.forEach((p) => {
+                if (
+                  !pInParams.includes(p) &&
+                  PLUGINS_TO_IGNORE_IN_HASH_APP_STATE.indexOf(p) === -1
+                ) {
+                  this.globalObserver.publish(`${p}.closeWindow`);
+                }
+              });
+
+              // Next, show any windows that are still hidden
+              mergedParams
+                .get("p")
+                .split(",")
+                .forEach((p) => {
+                  PLUGINS_TO_IGNORE_IN_HASH_APP_STATE.indexOf(p) === -1 &&
+                    this.globalObserver.publish(`${p}.showWindow`);
+                });
+            }
+          }
+
+          // Act when search string changes.
+          // Check if the q parameter exists and differs from
+          // the most recent search. If so, let's publish an event that
+          // the Search component listens to.
+          // TODO: Also handle sources change, the s parameter
+          if (
+            mergedParams.get("q") !==
+              this.appModel.searchModel.lastSearchPhrase &&
+            mergedParams.get("q") !== null
+          ) {
+            this.globalObserver.publish(
+              "search.setSearchPhrase",
+              mergedParams.get("q")
+            );
+          }
+
+          // Act when the l parameter changes
+          if (mergedParams.get("l") || mergedParams.get("gl")) {
+            this.appModel.setLayerVisibilityFromParams(
+              mergedParams.get("l"),
+              mergedParams.get("gl")
+            );
+          }
+        },
+        false
+      );
 
     // Register various global listeners.
     this.globalObserver.subscribe("infoClick.mapClick", (results) => {
@@ -782,37 +944,40 @@ class App extends React.PureComponent {
             <DrawerTitle variant="button">{drawerTitle}</DrawerTitle>
           </Grid>
           {/** Hide Lock button in mobile mode - there's not screen estate to permanently lock Drawer on mobile viewports*/}
-          <Grid item>
-            <Hidden mdDown>
-              <Tooltip
-                disableInteractive
-                title={
-                  (this.state.drawerPermanent ? "Lås upp" : "Lås fast") +
-                  " verktygspanelen"
-                }
-              >
-                <IconButton
-                  sx={{ margin: "-12px" }} // Ugh... However, it tightens everything up
-                  onClick={this.togglePermanent}
-                  onMouseEnter={this.handleMouseEnter}
-                  onMouseLeave={this.handleMouseLeave}
-                  size="large"
+          {/** Hide Lock button if user has chosen static drawer*/}
+          {!this.state.drawerStatic && (
+            <Grid item>
+              <Hidden mdDown>
+                <Tooltip
+                  disableInteractive
+                  title={
+                    (this.state.drawerPermanent ? "Lås upp" : "Lås fast") +
+                    " verktygspanelen"
+                  }
                 >
-                  {this.state.drawerPermanent ? (
-                    this.state.drawerMouseOverLock ? (
-                      <LockOpenIcon />
-                    ) : (
+                  <IconButton
+                    sx={{ margin: "-12px" }} // Ugh... However, it tightens everything up
+                    onClick={this.togglePermanent}
+                    onMouseEnter={this.handleMouseEnter}
+                    onMouseLeave={this.handleMouseLeave}
+                    size="large"
+                  >
+                    {this.state.drawerPermanent ? (
+                      this.state.drawerMouseOverLock ? (
+                        <LockOpenIcon />
+                      ) : (
+                        <LockIcon />
+                      )
+                    ) : this.state.drawerMouseOverLock ? (
                       <LockIcon />
-                    )
-                  ) : this.state.drawerMouseOverLock ? (
-                    <LockIcon />
-                  ) : (
-                    <LockOpenIcon />
-                  )}
-                </IconButton>
-              </Tooltip>
-            </Hidden>
-          </Grid>
+                    ) : (
+                      <LockOpenIcon />
+                    )}
+                  </IconButton>
+                </Tooltip>
+              </Hidden>
+            </Grid>
+          )}
         </DrawerHeaderGrid>
       </>
     );
@@ -910,12 +1075,15 @@ class App extends React.PureComponent {
             <StyledHeader
               id="header"
               sx={{
+                justifyContent: this.state.drawerStatic
+                  ? "end"
+                  : "space-between",
                 "& > *": {
                   pointerEvents: "auto",
                 },
               }}
             >
-              {clean === false && (
+              {clean === false && !this.state.drawerStatic && (
                 <DrawerToggleButtons
                   drawerButtons={this.state.drawerButtons}
                   globalObserver={this.globalObserver}
@@ -960,7 +1128,10 @@ class App extends React.PureComponent {
                   },
                 }}
               >
-                <Zoom map={this.appModel.getMap()} />
+                <Zoom
+                  map={this.appModel.getMap()}
+                  mapConfig={this.appModel.config.mapConfig.map}
+                />
                 {clean === false &&
                   this.appModel.config.mapConfig.map.showUserAvatar ===
                     true && (
@@ -1068,6 +1239,32 @@ class App extends React.PureComponent {
               {this.renderDrawerHeader()}
               <Divider />
               {this.renderAllDrawerContent()}
+              {
+                // See #1336
+                config.mapConfig.map.linkInDrawer &&
+                  typeof config.mapConfig.map.linkInDrawer?.text === "string" &&
+                  typeof config.mapConfig.map.linkInDrawer?.href ===
+                    "string" && (
+                    <>
+                      <Divider />
+                      <Link
+                        align="center"
+                        variant="button"
+                        href={config.mapConfig.map.linkInDrawer.href}
+                        target={
+                          config.mapConfig.map.linkInDrawer.newWindow === true
+                            ? "_blank"
+                            : "_self"
+                        }
+                        sx={{
+                          p: 1,
+                        }}
+                      >
+                        {config.mapConfig.map.linkInDrawer.text}
+                      </Link>
+                    </>
+                  )
+              }
             </Drawer>
           )}
           {clean === false && (

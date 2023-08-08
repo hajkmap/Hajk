@@ -33,10 +33,7 @@ class PanelMenuView extends React.PureComponent {
       "document-link-clicked",
       this.#handleOpenDocumentFromLink
     );
-    localObserver.subscribe(
-      "document-clicked",
-      this.#handleOpenDocumentFromPanelMenu
-    );
+    localObserver.subscribe("document-clicked", this.#openEventualConnections);
     localObserver.subscribe("link-clicked", this.#handleExternalLinkClicked);
     localObserver.subscribe(
       "document-maplink-clicked",
@@ -65,7 +62,7 @@ class PanelMenuView extends React.PureComponent {
     // defined, probably because of timing issues...
     const itemMatchesOpenDocument =
       (document && menuItem.document === document.documentFileName) ||
-      (options.documentOnStart &&
+      (options.documentOnStart !== "" &&
         options.documentOnStart === menuItem.document);
     // Do not use spread because we are mutating original item
     Object.assign(menuItem, {
@@ -93,10 +90,22 @@ class PanelMenuView extends React.PureComponent {
 
   #handleOpenDocumentFromPanelMenu = (id) => {
     const { app } = this.props;
-    this.#setDocument(this.state[id].document, null);
-    this.#setItemStateProperties(id).then(() => {
-      app.globalObserver.publish("core.onlyHideDrawerIfNeeded");
-    });
+    const { document } = this.state[id];
+    if (document) {
+      this.#setDocument(document, null);
+      this.#setItemStateProperties(id).then(() => {
+        app.globalObserver.publish("core.onlyHideDrawerIfNeeded");
+      });
+    }
+  };
+
+  // The panel-menu buttons can contain several "connections" (external-link, map-link, and document)
+  // Make sure to fire each handler, the handler itself checks if a connection is present.
+  #openEventualConnections = (id) => {
+    // Remember, the handlers below wont do anything if the connection value is nullish.
+    this.#handleOpenDocumentFromPanelMenu(id);
+    this.#handleExternalLinkClicked(id);
+    this.#handleShowMapLayersFromPanelMenu(id);
   };
 
   #handleShowMapLayers = (mapLink) => {
@@ -123,22 +132,34 @@ class PanelMenuView extends React.PureComponent {
 
   #handleShowMapLayersFromPanelMenu = (id) => {
     const { options } = this.props;
-    // If we're on small screen, or the admin option is set (no matter screen size),
-    // let's close the DocumentHandler window
-    if (getIsMobile() || options.closePanelOnMapLinkOpen) {
-      this.#closeDocumentWindow();
+    const { maplink } = this.state[id];
+    if (maplink) {
+      // If we're on small screen, or the admin option is set (no matter screen size),
+      // let's close the DocumentHandler window
+      if (getIsMobile() || options.closePanelOnMapLinkOpen) {
+        this.#closeDocumentWindow();
+      }
+      this.#handleShowMapLayers(this.state[id].maplink);
     }
-    this.#handleShowMapLayers(this.state[id].maplink);
   };
 
+  // The panel-menu buttons can contain several "connections" (external-link, map-link, and document)
+  // Make sure to fire each handler, the handler itself checks if a connection is present.
   #handleSubMenuClicked = (id) => {
+    // Remember, the handlers below wont do anything if the connection value is nullish.
+    this.#handleOpenDocumentFromPanelMenu(id);
+    this.#handleExternalLinkClicked(id);
+    this.#handleShowMapLayersFromPanelMenu(id);
     this.#setItemStateProperties(id);
   };
 
   #handleExternalLinkClicked = (id) => {
     const { app } = this.props;
-    window.open(this.state[id].link, "_blank");
-    app.globalObserver.publish("core.onlyHideDrawerIfNeeded");
+    const { link } = this.state[id];
+    if (link) {
+      window.open(this.state[id].link, "_blank");
+      app.globalObserver.publish("core.onlyHideDrawerIfNeeded");
+    }
   };
 
   //---------------------------------------------------

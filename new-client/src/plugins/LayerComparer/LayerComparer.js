@@ -102,6 +102,13 @@ const LayerComparer = (props) => {
           variant: "default",
           persist: true,
           anchorOrigin: { vertical: "bottom", horizontal: "center" },
+          sx: {
+            // Custom styling to follow Material Design guidelines for Snackbar.
+            // Placing the close button to the right of the text.
+            ".SnackbarItem-contentRoot": {
+              flexWrap: "inherit !important",
+            },
+          },
           action: (key) => (
             <Button
               variant="contained"

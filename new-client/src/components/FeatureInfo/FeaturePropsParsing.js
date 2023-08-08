@@ -10,6 +10,7 @@ import {
   setOptions, // a method that will allow us to send infoclick options from here to the module that defines custom components
   Paragraph, // special case - we want to override the Paragraph component here, so we import it separately
 } from "utils/customComponentsForReactMarkdown";
+import { isValidUrl } from "utils/Validator";
 
 export default class FeaturePropsParsing {
   constructor(settings) {
@@ -31,6 +32,9 @@ export default class FeaturePropsParsing {
 
     // Default to true to ensure backwards compatibility with old configs that predominately use HTML
     this.allowDangerousHtml = this.options.allowDangerousHtml ?? true;
+    // Do we want the markdown-renderer to transform the provided uri's or not? Defaults to true to make sure un-safe uri's are not passed by mistake.
+    // Disabling the transformer could be used to allow for links to desktop applications, for example app://open.
+    this.transformLinkUri = this.options.transformLinkUri ?? true;
 
     // Here we define the components used by ReactMarkdown, see https://github.com/remarkjs/react-markdown#appendix-b-components
     // Note that we import customComponentsForReactMarkdown from our shared library, spread those
@@ -152,8 +156,10 @@ export default class FeaturePropsParsing {
         // (The truth is it's all needed - this.properties may not be an Array, it may not have a key named
         // "placeholder", but if it does, we can't be sure that it will have the replace() method (as only Strings have it).)
         this.properties?.[placeholder]?.replace?.(/=/g, "&equal;") || // If replace() exists, it's a string, so we can revert our equal signs.
-        this.properties[placeholder] || // If not a string, return the value as-is…
-        "" // …unless it's undefined - in that case, return an empty string.
+          this.properties[placeholder] != null
+          ? this.properties[placeholder]
+          : "" // If not a string, return the value as-is…
+        // …unless it's undefined or null - in that case, return an empty string.
       );
     }
   };
@@ -203,7 +209,12 @@ export default class FeaturePropsParsing {
         matched.content += "\n";
 
         // Handle <if foo="bar">, <if foo=bar> as well as <if foo!="bar"> and <if foo!=bar>
-        if (matched.attributes?.includes("=")) {
+        // Make sure that we don't handle URLs with "=". It's virtually impossible
+        // to know how to tell the "=" from the URL vs "=" from our conditional check, see #1277.
+        if (
+          matched.attributes?.includes("=") &&
+          !isValidUrl(matched.attributes)
+        ) {
           // We allow two comparers: "equal" ("=") and "not equal" ("!=")
           const comparer = matched.attributes.includes("!=") ? "!=" : "=";
 
@@ -348,7 +359,7 @@ export default class FeaturePropsParsing {
       // The loop below extracts all placeholders and replaces them with actual values
       // current feature's property collection.
       // Match any word character, range of unicode characters (åäö etc), @ sign, dash or dot
-      (this.markdown.match(/{[\s\w\u00C0-\u00ff@\-|,'.():]+}/g) || []).forEach(
+      (this.markdown.match(/{[\s\w\u00C0-\u00ff@\-|!,'.():]+}/g) || []).forEach(
         (placeholder) => {
           // placeholder is a string, e.g. "{intern_url_1@@documenthandler}" or "{foobar}"
           // Let's replace all occurrences of the placeholder like this:
@@ -415,6 +426,7 @@ export default class FeaturePropsParsing {
       // will make use of the results in this.resolvedPromises, so that's why we had to wait.
       return (
         <ReactMarkdown
+          transformLinkUri={this.transformLinkUri ? undefined : (x) => x} // If transformLinksUri is set to false, we pass a function that simply returns the uri as-is.
           remarkPlugins={[gfm]} // GitHub Formatted Markdown adds support for Tables in MD
           rehypePlugins={rehypePlugins} // Needed to parse HTML, activated in admin
           components={this.components} // Custom renderers for components, see definition in this.components

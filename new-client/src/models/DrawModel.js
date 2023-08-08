@@ -52,6 +52,7 @@ import { handleClick } from "./Click";
 class DrawModel {
   #map;
   #layerName;
+  #layerCaption;
   #geoJSONParser;
   #observer;
   #observerPrefix;
@@ -80,11 +81,13 @@ class DrawModel {
   #customHandleDrawEnd;
   #customHandlePointerMove;
   #customHandleAddFeature;
+  #customGetDrawImageStyle;
   #highlightFillColor;
   #highlightStrokeColor;
   #circleRadius;
   #circleInteractionActive;
   #selectInteractionActive;
+  #lastZIndex;
 
   constructor(settings) {
     // Let's make sure that we don't allow initiation if required settings
@@ -95,6 +98,7 @@ class DrawModel {
     // Make sure that we keep track of the supplied settings.
     this.#map = settings.map;
     this.#layerName = settings.layerName;
+    this.#layerCaption = settings.layerCaption;
     // We're gonna need a GeoJSON-parser with the maps projection set.
     this.#geoJSONParser = new GeoJSON({
       featureProjection: this.#map.getView().getProjection(),
@@ -105,6 +109,7 @@ class DrawModel {
     // which will act as a prefix on all messages published on the
     // supplied observer.
     this.#observerPrefix = this.#getObserverPrefix(settings);
+    this.#customGetDrawImageStyle = settings.customGetDrawImageStyle;
     this.#measurementSettings =
       settings.measurementSettings ?? this.#getDefaultMeasurementSettings();
     this.#drawStyleSettings =
@@ -143,6 +148,7 @@ class DrawModel {
     this.#highlightStrokeColor = "rgba(255,255,255,1)";
     this.#circleRadius = 0;
     this.#selectInteractionActive = false;
+    this.#lastZIndex = 1;
 
     // A Draw-model is not really useful without a vector-layer, let's initiate it
     // right away, either by creating a new layer, or connect to an existing layer.
@@ -169,7 +175,7 @@ class DrawModel {
     // Otherwise we create the prefixed-subject to send. (The drawModel might have
     // been initiated with a prefix that should be added on all subjects).
     const prefixedSubject = this.#observerPrefix
-      ? `${this.observerPrefix}.${subject}`
+      ? `${this.#observerPrefix}.${subject}`
       : subject;
     // Then we publish the event!
     this.#observer.publish(prefixedSubject, payLoad);
@@ -279,9 +285,10 @@ class DrawModel {
     this.#drawLayer = this.#getNewVectorLayer(this.#drawSource);
     // Make sure to set a unique name
     this.#drawLayer.set("name", this.#layerName);
-    // We're also gonna have to set the queryable-property to true
-    // so that we can enable "Select" on the layer.
+    // We're also gonna have to set the queryable-property to true so that we can enable "Select" on the layer.
     this.#drawLayer.set("queryable", true);
+    // We don't want drawn features to show in feature-info (the info-click-window)
+    this.#drawLayer.set("ignoreInFeatureInfo", true);
     // Then we can add the layer to the map.
     this.#map.addLayer(this.#drawLayer);
   };
@@ -324,8 +331,108 @@ class DrawModel {
     }
   };
 
+  // Find the highest zindex used and move on top of it.
+  moveFeatureZIndexToTop = (feature) => {
+    const indexes = this.#getAllZIndexes();
+    const topIndex = Math.max(...indexes);
+    if (isFinite(topIndex)) {
+      this.#setFeatureZIndex(feature, topIndex + 1);
+    }
+  };
+
+  // Find the closest zindex and move on top of it.
+  moveFeatureZIndexUp = (feature) => {
+    const zIndex = this.#findClosestZIndex(feature, true);
+    this.#setFeatureZIndex(feature, zIndex);
+  };
+
+  // Find the lowest zindex used and move below it.
+  moveFeatureZIndexToBottom = (feature) => {
+    const indexes = this.#getAllZIndexes();
+    const bottomIndex = Math.min(...indexes);
+    if (isFinite(bottomIndex)) {
+      this.#setFeatureZIndex(feature, bottomIndex - 1);
+    }
+  };
+
+  // Find the closest zindex and move below it.
+  moveFeatureZIndexDown = (feature) => {
+    const zIndex = this.#findClosestZIndex(feature, false);
+    this.#setFeatureZIndex(feature, zIndex);
+  };
+
+  // Find the closest zindex and move on top of it.
+  #getFeaturesSortedByZIndex = () => {
+    return this.#drawSource.getFeatures().sort((a, b) => {
+      return this.#getFeatureZIndex(a) < this.#getFeatureZIndex(b);
+    });
+  };
+
+  // Get an array of all zindexes
+  #getAllZIndexes = () => {
+    let indexes = [];
+    this.#getFeaturesSortedByZIndex().forEach((f) => {
+      indexes.push(this.#getFeatureZIndex(f));
+    });
+    return indexes;
+  };
+
+  // Find the closest valid zindex
+  #findClosestZIndex = (feature, up) => {
+    let zIndex = this.#getFeatureZIndex(feature);
+
+    const indexes = this.#getAllZIndexes().filter((index) => {
+      return up === true ? index > zIndex : index < zIndex;
+    });
+
+    let closest = Math.max(...indexes);
+    if (!isFinite(closest)) {
+      closest = up === true ? zIndex + 1 : zIndex - 1;
+    }
+
+    indexes.forEach((index) => {
+      if (
+        (up === true && index >= zIndex && index < closest) ||
+        (up === false && index <= zIndex && index > closest)
+      ) {
+        closest = index;
+      }
+    });
+
+    zIndex = up === true ? closest + 1 : closest - 1;
+
+    return zIndex;
+  };
+
+  #setFeatureZIndex = (feature, zIndex) => {
+    let style = feature.getStyle();
+    style = Array.isArray(style) ? style[0] : style;
+    if (style) {
+      style.setZIndex(zIndex);
+      feature.setStyle(style);
+    }
+  };
+
+  #getFeatureZIndex = (feature) => {
+    let style = feature.getStyle();
+    if (style) {
+      style = Array.isArray(style) ? style[0] : style;
+      return style.getZIndex() || 0;
+    }
+    return 0;
+  };
+
   // Returns the style that should be used on the drawn features
   #getFeatureStyle = (feature, settingsOverride) => {
+    if (feature.getStyle()) {
+      const currentZIndex = this.#getFeatureZIndex(feature);
+      if (currentZIndex === 0) {
+        // force a newly drawn feature to get a valid zindex.
+        this.#lastZIndex++;
+        this.#setFeatureZIndex(feature, this.#lastZIndex);
+      }
+    }
+
     if (feature.get("HIDDEN") === true) {
       !feature.get("STYLE_BEFORE_HIDE") &&
         feature.set("STYLE_BEFORE_HIDE", feature.getStyle());
@@ -448,7 +555,7 @@ class DrawModel {
               color: featureIsTextType
                 ? feature.get("TEXT_SETTINGS")?.backgroundColor ??
                   this.#textStyleSettings.backgroundColor
-                : "rgba(0, 0, 0, 0.5)",
+                : "rgba(0, 0, 0, 0.7)",
               width: 3,
             })
           : null,
@@ -827,19 +934,20 @@ class DrawModel {
       stroke: this.#getDrawStrokeStyle(settings),
       fill: this.#getDrawFillStyle(settings),
       image: this.#getDrawImageStyle(settings),
+      zIndex: this.#getDrawZIndex(settings),
     });
   };
 
   // Returns the stroke style (based on the style settings)
   #getDrawStrokeStyle = (settings) => {
     return new Stroke({
-      color: settings
+      color: settings?.strokeStyle?.color
         ? settings.strokeStyle.color
         : this.#drawStyleSettings.strokeColor,
-      lineDash: settings
+      lineDash: settings?.strokeStyle
         ? settings.strokeStyle.dash
         : this.#drawStyleSettings.lineDash,
-      width: settings
+      width: settings?.strokeStyle?.width
         ? settings.strokeStyle.width
         : this.#drawStyleSettings.strokeWidth,
     });
@@ -848,31 +956,46 @@ class DrawModel {
   // Returns the fill style (based on the style settings)
   #getDrawFillStyle = (settings) => {
     return new Fill({
-      color: settings
+      color: settings?.fillStyle?.color
         ? settings.fillStyle.color
         : this.#drawStyleSettings.fillColor,
     });
   };
 
+  // Returns the feature zIndex
+  #getDrawZIndex = (settings) => {
+    return settings?.zIndex || 0;
+  };
+
   // Returns the image style (based on the style settings)
   #getDrawImageStyle = (settings) => {
+    if (this.#customGetDrawImageStyle) {
+      return this.#customGetDrawImageStyle();
+    }
+
+    // If image style is present we will use it
+    // Otherwise we need to fallback to default style (same as drawing) as it is used in Sketch plugin
+    const storedSettings = this.#drawStyleSettings.image
+      ? this.#drawStyleSettings.image
+      : this.#drawStyleSettings;
+
     return new Circle({
       radius: 6,
       stroke: new Stroke({
-        color: settings
+        color: settings?.strokeStyle?.color
           ? settings.strokeStyle.color
-          : this.#drawStyleSettings.strokeColor,
-        width: settings
+          : storedSettings.strokeColor,
+        width: settings?.strokeStyle?.width
           ? settings.strokeStyle.width
-          : this.#drawStyleSettings.strokeWidth,
-        lineDash: settings
+          : storedSettings.strokeWidth,
+        lineDash: settings?.strokeStyle
           ? settings.strokeStyle.dash
-          : this.#drawStyleSettings.lineDash,
+          : storedSettings.lineDash,
       }),
       fill: new Fill({
-        color: settings
+        color: settings?.fillStyle?.color
           ? settings.fillStyle.color
-          : this.#drawStyleSettings.fillColor,
+          : storedSettings.fillColor,
       }),
     });
   };
@@ -964,11 +1087,21 @@ class DrawModel {
       const fillStyle = this.#getFillStyleInfo(featureStyle);
       const strokeStyle = this.#getStrokeStyleInfo(featureStyle);
       const imageStyle = this.#getImageStyleInfo(featureStyle);
+
+      const zIndex = (
+        Array.isArray(featureStyle) ? featureStyle[0] : featureStyle
+      ).getZIndex();
+
       // And return an object containing them
-      return { fillStyle, strokeStyle, imageStyle };
+      return { fillStyle, strokeStyle, imageStyle, zIndex };
     } catch (error) {
       console.error(`Failed to extract feature-style. Error: ${error}`);
-      return { fillStyle: null, strokeStyle: null, imageStyle: null };
+      return {
+        fillStyle: null,
+        strokeStyle: null,
+        imageStyle: null,
+        zIndex: 0,
+      };
     }
   };
 
@@ -1007,7 +1140,7 @@ class DrawModel {
       layerType: "system",
       ignoreInFeatureInfo: true,
       zIndex: 5000,
-      caption: "Draw model",
+      caption: this.#layerCaption || "Draw layer",
     });
   };
 
@@ -1036,7 +1169,7 @@ class DrawModel {
     this.#drawInteraction.un("drawabort", this.#handleDrawAbort);
     this.#map.un("pointermove", this.#handlePointerMove);
     this.#drawSource.un("addfeature", this.#handleDrawFeatureAdded);
-    document.removeEventListener("keyup", this.#handleKeyUp);
+    document.removeEventListener("keydown", this.#handleKeyDown);
     // Then we'll remove the custom listeners
     this.#removeCustomEventListeners();
   };
@@ -1058,7 +1191,7 @@ class DrawModel {
     this.#drawSource.on("addfeature", this.#handleDrawFeatureAdded);
     // We need a listener for keyboard input. For example, pressing the escape
     // key will allow the users to remove the last point.
-    document.addEventListener("keyup", this.#handleKeyUp);
+    document.addEventListener("keydown", this.#handleKeyDown);
   };
 
   // Adds listeners that might have been passed in the settings when
@@ -1207,9 +1340,14 @@ class DrawModel {
 
   // We want to handle key-up events so that we can let the user
   // remove the last drawn point by pressing the escape key. (And perhaps more...?)
-  #handleKeyUp = (e) => {
-    const { keyCode } = e;
-    if (keyCode === 27) {
+  #handleKeyDown = (e) => {
+    if (!this.#drawInteraction) return;
+    const { keyCode, ctrlKey, metaKey } = e;
+    if (keyCode === 27 || keyCode === 13) {
+      // escape or enter finishes drawing
+      this.finishDraw();
+    } else if ((ctrlKey === true || metaKey === true) && keyCode === 90) {
+      // Ctrl+Z or Cmd+Z removes last draw point
       this.#drawInteraction.removeLastPoint();
     }
   };
@@ -1429,8 +1567,13 @@ class DrawModel {
   // Move-interaction.
   #enableMoveInteraction = (settings) => {
     // The Move-interaction will obviously need a Select-interaction so that the features to
-    // move can be selected.
-    this.#selectInteraction = new Select({ layers: [this.#drawLayer] });
+    // move can be selected. We provide `null` as style - this will cancel the default OL Select
+    // interaction (which was problematic in some situations, see #1225).
+    this.#selectInteraction = new Select({
+      layers: [this.#drawLayer],
+      style: null,
+    });
+
     // We need a handler catching the "select"-events so that we can keep track of if any
     // features has been selected or not.
     this.#selectInteraction.on("select", this.#handleFeatureSelect);
@@ -1737,8 +1880,19 @@ class DrawModel {
       // that has been set in an earlier session. Let's apply that style (if present)
       // before we add the feature to the source.
       const extractedStyle = feature.get("EXTRACTED_STYLE");
-      extractedStyle &&
-        feature.setStyle(this.#getFeatureStyle(feature, extractedStyle));
+
+      if (extractedStyle) {
+        // apply style
+        let style = this.#getFeatureStyle(feature, extractedStyle);
+        if (!style.getZIndex()) {
+          // getZIndex() returns 0 if not set
+          // force a zIndex if missing, for later use.
+          style.setZIndex(this.#lastZIndex);
+          this.#lastZIndex++;
+        }
+        feature.setStyle(style);
+      }
+
       // When we're done styling we can add the feature.
       this.#drawSource.addFeature(feature);
       // Then we'll publish some information about the addition. (If we're not supposed to be silent).
@@ -2086,6 +2240,13 @@ class DrawModel {
     this.#map.snapHelper.add("coreDrawModel");
   };
 
+  // Finishes the currently active draw interaction.
+  finishDraw = () => {
+    if (this.#drawInteraction) {
+      this.#drawInteraction.finishDrawing();
+    }
+  };
+
   // Fits the map to the extent of the drawn features in the draw-source
   zoomToCurrentExtent = () => {
     // Let's make sure that the current extent is not null.
@@ -2114,6 +2275,10 @@ class DrawModel {
       .forEach((feature) => {
         this.#drawSource.removeFeature(feature);
       });
+
+    // reset lastZIndex
+    this.#lastZIndex = 1;
+
     // When the drawn features has been removed, we have to make sure
     // to update the current extent.
     this.#currentExtent = this.#drawSource.getExtent();

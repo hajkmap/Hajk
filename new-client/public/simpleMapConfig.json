@@ -1,5 +1,5 @@
 {
-  "version": "3.11.0-dev",
+  "version": "3.13.0-dev",
   "projections": [
     {
       "code": "EPSG:3006",
@@ -439,7 +439,7 @@
       "index": 15
     },
     {
-      "type": "bookmark",
+      "type": "bookmarks",
       "options": {
         "target": "toolbar",
         "instruction": "",
@@ -476,6 +476,7 @@
         "scaleBarPlacement": "bottomLeft",
         "includeLogo": true,
         "logoPlacement": "topRight",
+        "date": "Utskriftsdatum: {date}",
         "instruction": "",
         "visibleAtStart": false,
         "visibleForGroups": []

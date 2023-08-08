@@ -138,6 +138,9 @@ class BaseWindowPlugin extends React.PureComponent {
         windowVisible: true,
       },
       () => {
+        // Notify the app that a plugin's visibility has changed
+        this.props.app.globalObserver.publish("core.pluginVisibilityChanged");
+
         // If there's a callback defined in custom, run it
         runCallback === true &&
           typeof this.props.custom.onWindowShow === "function" &&
@@ -157,6 +160,9 @@ class BaseWindowPlugin extends React.PureComponent {
         windowVisible: false,
       },
       () => {
+        // Notify the app that a plugin's visibility has changed
+        this.props.app.globalObserver.publish("core.pluginVisibilityChanged");
+
         typeof this.props.custom.onWindowHide === "function" &&
           this.props.custom.onWindowHide();
       }
@@ -212,9 +218,11 @@ class BaseWindowPlugin extends React.PureComponent {
             windowVisible: this.state.windowVisible,
           })}
         </Window>
-        {/* Drawer buttons and Widget buttons should render a Drawer button. */}
-        {(target === "toolbar" || this.pluginIsWidget(target)) &&
-          this.renderDrawerButton()}
+        {/* Always render a Drawer button unless its target is "hidden". 
+              It's a backup for plugins render elsewhere: we hide 
+              Widget and Control buttons on small screens and fall 
+              back to Drawer button). */}
+        {target !== "hidden" && this.renderDrawerButton()}
         {/* Widget buttons must also render a Widget */}
         {this.pluginIsWidget(target) &&
           this.renderWidgetButton(`${target}-column`)}
@@ -227,14 +235,19 @@ class BaseWindowPlugin extends React.PureComponent {
   /**
    * This is a bit of a special case. This method will render
    * not only plugins specified as Drawer plugins (target===toolbar),
-   * but it will also render Widget plugins - given some special condition.
+   * but it will also render Widget and Control plugins - given some special condition.
    *
    * Those special conditions are small screens, where there's no screen
    * estate to render the Widget button in Map Overlay.
    */
   renderDrawerButton() {
     return createPortal(
-      <Hidden mdUp={this.pluginIsWidget(this.props.options.target)}>
+      <Hidden
+        mdUp={
+          this.pluginIsWidget(this.props.options.target) ||
+          this.props.options.target === "control"
+        }
+      >
         <ListItem
           button
           divider={true}
@@ -266,12 +279,15 @@ class BaseWindowPlugin extends React.PureComponent {
 
   renderControlButton() {
     return createPortal(
-      <PluginControlButton
-        icon={this.props.custom.icon}
-        onClick={this.handleButtonClick}
-        title={this.title}
-        abstract={this.description}
-      />,
+      // Hide Control button on small screens, see renderDrawerButton too
+      <Hidden mdDown>
+        <PluginControlButton
+          icon={this.props.custom.icon}
+          onClick={this.handleButtonClick}
+          title={this.title}
+          abstract={this.description}
+        />
+      </Hidden>,
       document.getElementById("plugin-control-buttons")
     );
   }

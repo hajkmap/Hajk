@@ -3,9 +3,6 @@ import propTypes from "prop-types";
 import { styled } from "@mui/material/styles";
 import ArrowLeftIcon from "@mui/icons-material/ArrowLeft";
 import ArrowRightIcon from "@mui/icons-material/ArrowRight";
-import FeaturePropsParsing from "./FeaturePropsParsing";
-// import Diagram from "../Diagram";
-// import HajkTable from "../Table";
 import {
   Table,
   TableContainer,
@@ -17,6 +14,11 @@ import {
   Typography,
   Grid,
 } from "@mui/material";
+
+import FeaturePropsParsing from "./FeaturePropsParsing";
+import { getInfoClickInfoFromLayerConfig } from "utils/InfoClickHelpers.js";
+// import Diagram from "../Diagram";
+// import HajkTable from "../Table";
 
 const InfoContainer = styled(Grid)(() => ({
   height: "100%",
@@ -189,25 +191,6 @@ class FeatureInfoContainer extends React.PureComponent {
   //   }
   // }
 
-  getMarkdownFromLocalInfoBox = (feature, layer, markdown) => {
-    // Same goes for infobox, I'm shortening the code significantly using the optional chaining.
-    // Features coming from search result have infobox set on Feature instead of Layer due to
-    // different features sharing same vector layer.
-    return (
-      feature?.infobox ||
-      feature.layer?.layersInfo?.[layer]?.infobox ||
-      markdown
-    );
-  };
-
-  getAGSCompatibleLayer = (feature) => {
-    return Object.keys(feature.layer.layersInfo).find((id) => {
-      const fid = feature.getId().split(".")[0];
-      const layerId = id.split(":").length === 2 ? id.split(":")[1] : id;
-      return fid === layerId;
-    });
-  };
-
   getFeatureProperties = (feature) => {
     let properties = feature.getProperties();
     properties = this.featurePropsParsing.extractPropertiesFromJson(properties);
@@ -216,29 +199,18 @@ class FeatureInfoContainer extends React.PureComponent {
   };
 
   async updateFeatureInformation(newIndex) {
-    let feature = this.props.features[newIndex];
-    const layerInfo = feature.layer.get("layerInfo");
-
-    let markdown = layerInfo?.information,
-      caption = layerInfo?.caption,
-      layer,
-      shortcodes = [];
-
-    //Problem with geojson returned from AGS - Missing id on feature - how to handle?
-    if (feature.layer.layersInfo && feature.getId()) {
-      layer = this.getAGSCompatibleLayer(feature);
-    }
-
-    // Deal with layer groups that have a caption on sublayer. Layer groups will
-    // have a 'layersInfo' (NB pluralis on layerSInfo), and if it exists,
-    // let's overwrite the previously saved caption.
-    // Below I'm using the new optional chaining operator (
-    // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Optional_chaining),
-    // which will return the new caption, if exists, or a falsy value. If falsy value is returned,
-    // just fall back to the previous value of caption.
-    caption = feature.layer?.layersInfo?.[layer]?.caption || caption;
-    markdown = this.getMarkdownFromLocalInfoBox(feature, layer, markdown);
-
+    // Let's display to the user that we're working on something...
+    this.setState({ loading: true });
+    // We're gonna need the current feature...
+    const feature = this.props.features[newIndex];
+    // ...and the layer that the feature origins from.
+    const { layer } = feature;
+    // With the feature and it's layer we can grab information needed to create
+    // an informative feature-info.
+    const { displayName: caption, infoclickDefinition: markdown } =
+      getInfoClickInfoFromLayerConfig(feature, layer);
+    // TODO: shortCodes, remove?
+    const shortcodes = [];
     // Disabled shortcodes for now as they mess with Markdown tags
     // for Links and Imgs that use "[" and "]".
     // if (markdown) {
@@ -249,11 +221,12 @@ class FeatureInfoContainer extends React.PureComponent {
     //   }
     // }
 
-    this.setState({ loading: true });
-
-    let properties = this.getFeatureProperties(feature);
+    // When we've grabbed the markdown-definition for the layer, we can create the
+    // information that we want to display to the user by combining the definition with
+    // the feature properties.
+    const properties = this.getFeatureProperties(feature);
     const value = await this.getValue(markdown, properties, caption);
-
+    // Finally, we'll update the state, and highlight the feature in the map.
     this.setState(
       {
         value: value,

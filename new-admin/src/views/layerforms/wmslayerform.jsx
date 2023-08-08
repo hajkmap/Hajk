@@ -13,6 +13,7 @@ const defaultState = {
   layers: [],
   addedLayers: [],
   addedLayersInfo: {},
+  layerOpts: {},
   id: "",
   caption: "",
   internalLayerName: "",
@@ -86,9 +87,11 @@ const supportedProjections = [
 ];
 
 const supportedInfoFormats = [
-  "application/json",
-  "text/xml",
   "application/geojson",
+  "application/json",
+  "application/vnd.esri.wms_raw_xml",
+  "application/vnd.ogc.gml",
+  "text/xml",
 ];
 
 const supportedImageFormats = [
@@ -158,6 +161,7 @@ class WMSLayerForm extends Component {
 
   renderLayerList() {
     let layers = this.renderLayersFromCapabilites();
+
     let tr =
       layers === null ? (
         <tr>
@@ -220,56 +224,6 @@ class WMSLayerForm extends Component {
         this.setState({ projection });
       }
 
-      if (opts.children) {
-        /**
-         * TODO: If we're dealing with Named Tree type, we must ensure
-         * that the group itself is unchecked (not added to the "green list"),
-         * while its children must be checked and added. Vice versa on uncheck.
-         * Below is an attempt:
-         **/
-        /**
-         * The approach below didn't work out due to a racing scenario (setState
-         * is async). Before we're done setting state, the loop is done, resulting
-         * in only the last <input> being checked.
-         *
-         * This must be solved, but to get this working for now, we can inform the
-         * user to perform the correct selection manually.
-         **/
-        // // Fake event
-        // let e = {
-        //   target: {
-        //     checked: true
-        //   }
-        // };
-        // opts.children.forEach(childLayer => {
-        //   let trueTitle = childLayer.hasOwnProperty("Title")
-        //     ? childLayer.Title
-        //     : "";
-        //   let abstract = childLayer.hasOwnProperty("Abstract")
-        //     ? childLayer.Abstract
-        //     : "";
-        //   let o = {
-        //     title: trueTitle,
-        //     abstract: abstract,
-        //     children: childLayer.Layer
-        //   };
-        //   this.appendLayer(e, childLayer.Name, o);
-        // });
-
-        // Temporary solution, until we manage it properly
-        let message = `Det valda lagret (${checkedLayer}) är en lagergrupp som består av följande underlager:\n
-        ${opts.children.map((ch) => ch.Title).join(", ")}\n
-        I dagsläget saknar Hajk funktionaliteten att automatiskt lägga till underlagren, men du kan enkelt göra det själv genom att kryssa för underlagren vars namn du ser ovan. \n
-        Se även till att avmarkera själva lagergruppen (${checkedLayer}), för den behöver du inte ha om du lägger till dess underlager.`;
-
-        this.props.parent.setState({
-          alert: true,
-          alertMessage: message,
-          caption: "Valt lager är en lagergrupp",
-        });
-        // End of temporary solution
-      }
-
       addedLayersInfo[checkedLayer] = {
         id: checkedLayer,
         caption: "",
@@ -277,9 +231,26 @@ class WMSLayerForm extends Component {
         legendIcon: "",
         infobox: "",
         style: "",
-        queryable: "",
+        queryable: false,
         infoclickIcon: "",
       };
+
+      if (opts.children) {
+        // Handle grouplayers (named tree in geoserver)
+        opts.children.forEach((subLayer) => {
+          addedLayersInfo[subLayer.Name] = {
+            id: subLayer.Name,
+            caption: "",
+            legend: "",
+            legendIcon: "",
+            infobox: "",
+            style: "",
+            queryable: true,
+            infoclickIcon: "",
+          };
+        });
+      }
+
       this.setState(
         {
           addedLayers: [...this.state.addedLayers, checkedLayer],
@@ -288,8 +259,20 @@ class WMSLayerForm extends Component {
         () => this.validateLayers(opts)
       );
     } else {
+      // unchecked..
       let addedLayersInfo = { ...this.state.addedLayersInfo };
+
+      // clean up group layer children
+      const children = this.state.layerOpts[checkedLayer]?.children;
+      if (children) {
+        children.forEach((child) => {
+          // clean up sublayers
+          delete addedLayersInfo[child.Name];
+        });
+      }
+
       delete addedLayersInfo[checkedLayer];
+
       this.setState(
         {
           addedLayersInfo: addedLayersInfo,
@@ -328,7 +311,7 @@ class WMSLayerForm extends Component {
 
   renderLayerInfoInput(layerInfo) {
     var currentLayer = this.findInCapabilities(layerInfo.id);
-    console.log("currentLayer: ", currentLayer);
+
     var imageLoader = this.state.imageLoad ? (
       <i className="fa fa-refresh fa-spin" />
     ) : null;
@@ -362,6 +345,9 @@ class WMSLayerForm extends Component {
               style={{ width: "100%" }}
               value={layerInfo.caption}
               onChange={(e) => {
+                // Note: This is soooo slow.........
+                // Hopefully nobody will ever do like this in 2023 version of Admin!
+                // It is like this for every input in the dialog
                 let addedLayersInfo = this.state.addedLayersInfo;
                 addedLayersInfo[layerInfo.id].caption = e.target.value;
                 this.setState(
@@ -776,17 +762,26 @@ class WMSLayerForm extends Component {
       this.validateField("layers");
     }
 
-    return this.state.addedLayers.map((layer, i) => (
-      <li className="layer" key={"addedLayer_" + i}>
+    // Note that we're now iterating thru addedLayersInfo instead of addedLayers.
+    // This is for adding GeoServer group layer sublayers.
+    // But we will only allow to remove the group itself.
+
+    return Object.keys(this.state.addedLayersInfo).map((key, i) => (
+      <li className="layer" key={"addedLayer_" + i + key}>
         <span
           onClick={() => {
-            this.renderLayerInfoDialog(this.state.addedLayersInfo[layer]);
+            this.renderLayerInfoDialog(this.state.addedLayersInfo[key]);
           }}
         >
-          {layer}
+          {key}
         </span>
         &nbsp;
-        <i className="fa fa-times" onClick={uncheck.bind(this, layer)} />
+        {this.state.addedLayers.indexOf(key) > -1 && ( // Only allow "real" layers to be removed.
+          <i
+            className="fa fa-times"
+            onClick={uncheck.bind(this, this.state.addedLayersInfo[key].id)}
+          />
+        )}
       </li>
     ));
   }
@@ -797,25 +792,64 @@ class WMSLayerForm extends Component {
       .substring(1);
   }
 
+  addAllSublayers(opts) {
+    let subLayers = opts.children;
+    let layerNames = [...this.state.addedLayers];
+    let addedLayersInfo = { ...this.state.addedLayersInfo };
+
+    subLayers.forEach((layer) => {
+      if (subLayers.indexOf(layer.Name) === -1) {
+        layerNames.push(layer.Name);
+        addedLayersInfo[layer.Name] = {
+          id: layer.Name,
+          caption: layer.Title,
+          legend: "",
+          legendIcon: "",
+          infobox: "",
+          style: "",
+          queryable: true,
+          infoclickIcon: "",
+        };
+      }
+    });
+
+    this.setState(
+      {
+        addedLayers: [...layerNames],
+        addedLayersInfo: addedLayersInfo,
+      },
+      () => this.validateLayers(opts)
+    );
+  }
+
   renderLayersFromCapabilites() {
     if (this.state && this.state.capabilities) {
       var layers = [];
+      const subLayerInfo = (opts) => {
+        if (opts?.children) {
+          return (
+            <a
+              href="about:blank"
+              onClick={(e) => {
+                e.preventDefault();
+                this.addAllSublayers(opts);
+              }}
+            >
+              {"[Lägg till alla "}
+              {opts?.children?.length}
+              {" sublager separat]"}
+            </a>
+          );
+        }
 
+        return "";
+      };
       const append = (layer, parentGuid) => {
         const guid = this.createGuid();
 
         let trueTitle = layer.hasOwnProperty("Title") ? layer.Title : "";
-        let abstract = layer.hasOwnProperty("Abstract") ? layer.Abstract : "";
 
-        let opts = {
-          title: trueTitle,
-          abstract: abstract,
-          // Ensure that there's a sublayer before pushing children, see #1182
-          ...(layer.Layer && {
-            // In addition, we always want an Array here, even if it's just one element. See #1182.
-            children: Array.isArray(layer.Layer) ? layer.Layer : [layer.Layer],
-          }),
-        };
+        const opts = this.state.layerOpts[layer.Name];
 
         let queryableIcon =
           layer.queryable === "1" ? "fa fa-check" : "fa fa-remove";
@@ -838,7 +872,9 @@ class WMSLayerForm extends Component {
               &nbsp;
               <label htmlFor={"layer" + guid}>{trueTitle}</label>
             </td>
-            <td>{layer.Name}</td>
+            <td>
+              {layer.Name} {subLayerInfo(this.state.layerOpts[layer.Name])}
+            </td>
             <td>
               <i className={isGroupIcon} />
             </td>
@@ -880,10 +916,11 @@ class WMSLayerForm extends Component {
         }
       };
 
-      this.state.capabilities?.Capability?.Layer?.Layer &&
+      if (this.state.capabilities?.Capability?.Layer?.Layer) {
         this.state.capabilities.Capability.Layer.Layer.forEach((layer) => {
           recursivePushLayer(layer);
         });
+      }
 
       return layers;
     } else {
@@ -896,6 +933,7 @@ class WMSLayerForm extends Component {
       // We can not assume that layer.version exists, because the
       // previous implementation of WMS in Hajk2 assumed it was "1.1.1"
       // and did not add "version" property.
+
       layer.version = layer.version || "1.1.1";
 
       var addedLayersInfo = {};
@@ -912,16 +950,18 @@ class WMSLayerForm extends Component {
         layer.layers.forEach((layer) => {
           addedLayersInfo[layer] = {
             id: layer,
-            caption: "",
+            caption: layer,
             legend: "",
             legendIcon: "",
             infobox: "",
             style: "",
-            queryable: "",
+            queryable: false,
             infoclickIcon: "",
           };
         });
       }
+
+      this.setLayerOpts(capabilities);
 
       this.setState(
         {
@@ -943,7 +983,6 @@ class WMSLayerForm extends Component {
               : [
                   { pxRatio: 0, dpi: 90 },
                   { pxRatio: 2, dpi: 180 },
-                  { pxRatio: 3, dpi: 270 },
                 ],
         },
         () => {
@@ -956,6 +995,28 @@ class WMSLayerForm extends Component {
     });
   }
 
+  setLayerOpts(capabilities) {
+    // Lets prepare layer opts with children etc before we start to render.
+    // Previously this was done while rendering.
+
+    let layerOpts = {};
+    capabilities.Capability.Layer.Layer.forEach((_layer) => {
+      let trueTitle = _layer.hasOwnProperty("Title") ? _layer.Title : "";
+      let abstract = _layer.hasOwnProperty("Abstract") ? _layer.Abstract : "";
+      let opts = {
+        title: trueTitle,
+        abstract: abstract,
+        // Ensure that there's a sublayer before pushing children, see #1182
+        ...(_layer.Layer && {
+          // In addition, we always want an Array here, even if it's just one element. See #1182.
+          children: Array.isArray(_layer.Layer) ? _layer.Layer : [_layer.Layer],
+        }),
+      };
+      layerOpts[_layer.Name] = opts;
+    });
+    this.setState({ layerOpts: layerOpts });
+  }
+
   loadWMSCapabilities(e, callback) {
     if (e) {
       e.preventDefault();
@@ -965,6 +1026,7 @@ class WMSLayerForm extends Component {
       load: true,
       addedLayers: [],
       addedLayersInfo: {},
+      layerOpts: {},
       capabilities: false,
       layerProperties: undefined,
       layerPropertiesName: undefined,
@@ -1000,6 +1062,7 @@ class WMSLayerForm extends Component {
                   version: capabilities.version,
                 },
                 () => {
+                  this.setLayerOpts(capabilities);
                   this.setServerType();
                 }
               );
@@ -1085,7 +1148,14 @@ class WMSLayerForm extends Component {
       projections = this.state.capabilities.Capability.Layer[RS];
     }
 
+    // We expect projections to be an array,
+    // but are also ready for a string (see below).
     if (projections) {
+      // First, ensure we have an array, see #1352
+      if (!Array.isArray(projections)) {
+        projections = [projections];
+      }
+
       projections = projections.map((projection) => {
         return projection.toUpperCase();
       });

@@ -1,0 +1,29 @@
+openapi: 3.0.3
+info:
+  title: Hajk Backend API
+  description: The Hajk backend API specification is  the authoritative specification for the API to which all Hajk backend implementations must conform.
+  version: 3.0.0
+servers:
+  - url: /api/v3
+tags:
+  - name: Client-accessible
+    description: Resources necessary to load a working map in client
+  - name: Specification
+    description: The OpenAPI specification
+paths:
+  /maps/{mapName}:
+    get:
+      tags:
+        - Client-accessible
+      parameters:
+        - name: mapName
+          in: path
+          description: Name of the map to be fetched
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: Return the map config
+        5XX:
+          description: Example not found

@@ -11,6 +11,7 @@ import DeleteIcon from "@material-ui/icons/DeleteForever";
 import AddIcon from "@material-ui/icons/Add";
 import SaveIcon from "@material-ui/icons/SaveSharp";
 import CreateNewFolderIcon from "@material-ui/icons/CreateNewFolder";
+import OpenInNewIcon from "@material-ui/icons/OpenInNew";
 import LayersIcon from "@material-ui/icons/Layers";
 import SwapVertIcon from "@material-ui/icons/SwapVert";
 import SettingsIcon from "@material-ui/icons/Settings";
@@ -1818,6 +1819,14 @@ class Menu extends Component {
               >
                 {options}
               </select>
+              &nbsp;
+              <ColorButtonBlue
+                startIcon={<OpenInNewIcon />}
+                href={`${this.props.config.url_client_ui}?m=${this.props.model.attributes.mapFile}`}
+                target="_blank"
+              >
+                Öppna i nytt fönster
+              </ColorButtonBlue>
               &nbsp;
               <ColorButtonRed
                 variant="contained"

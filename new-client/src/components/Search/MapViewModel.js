@@ -191,18 +191,41 @@ class MapViewModel {
     this.zoomToFeatures(this.lastFeaturesInfo);
   };
 
+  // Used to fit the map to the current search-feature (like a search-polygon or a search extent) OR
+  // to the search-results if a text-search was performed.
   fitMapToSearchResult = () => {
-    const currentExtent = this.resultSource.getExtent();
+    // Let's create an empty extent that we can extend to the extent that we want to fit the map to...
+    const currentExtent = createEmpty();
+    // Then we'll check if a spatial search has been performed (if it has, we'll have a drawn feature
+    // in the search-draw-source).
+    const spatialSearchFeatures = this.drawSource.getFeatures();
+    // If we have a drawn feature, we'll extend the extent its extent
+    if (spatialSearchFeatures.length > 0) {
+      extend(currentExtent, this.drawSource.getExtent());
+    } else {
+      // Otherwise we'll extend the extent to the extent of the search-results
+      extend(currentExtent, this.resultSource.getExtent());
+    }
+    // Finally, we'll make sure we have a valid extent, and fit the map to it.
     if (currentExtent.map(Number.isFinite).includes(false) === false) {
       this.fitMapToExtent(currentExtent);
     }
   };
 
+  // Zooms and centers the map to the supplied extent
   fitMapToExtent = (extent) => {
+    // If fitToResultMaxZoom is not set, or is set to -1, we want to set it to undefined.
+    // undefined in that case will tell OL not to restrict the maxZoom. Any other value,
+    // (including -1 and 0) will limit the max zoom level.
+    // See #1265
+    const fitToResultMaxZoom =
+      this.options.fitToResultMaxZoom && this.options.fitToResultMaxZoom !== -1
+        ? this.options.fitToResultMaxZoom
+        : undefined;
     this.map.getView().fit(extent, {
       size: this.map.getSize(),
       padding: [20, 20, 20, 20],
-      maxZoom: 7,
+      maxZoom: fitToResultMaxZoom,
     });
   };
 

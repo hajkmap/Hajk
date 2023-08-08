@@ -83,20 +83,49 @@ class MapSwitcher extends React.PureComponent {
 
   handleMenuItemClick = (event, index) => {
     const selectedMap = this.maps[index].mapConfigurationName;
-    const x = this.map.getView().getCenter()[0];
-    const y = this.map.getView().getCenter()[1];
-    const z = this.map.getView().getZoom();
-    // TODO: A better solution then redirecting is needed. It requires more
-    // work in the App component, so that changing the value of this.appModel.config.activeMap
-    // would dynamically reload configuration as needed.
-    // But for now, simple redirection will do.
-    window.location.assign(
-      `${window.location.origin}${window.location.pathname}?m=${selectedMap}&x=${x}&y=${y}&z=${z}`
-    );
+    if (this.appModel.config.mapConfig.map?.enableAppStateInHash === true) {
+      // If live changing of hash params is enabled, grab the old hash
+      const oldHash = new URLSearchParams(
+        window.location.hash.replaceAll("#", "")
+      );
 
-    // Not used as we change window.location. But in a better solution, we wouldn't reload the app,
-    // and then code below would be needed to hide the dropdown menu.
-    // this.setState({ anchorEl: null, selectedIndex: index });
+      // Set the m param to the new map's name
+      oldHash.set("m", selectedMap);
+
+      // We must remove layer and group layer keys as it's really
+      // dangerous to keep them. If a layer, specified in l, wouldn't
+      // be available in the new map we're changing to, we would end up
+      // with no layers at all. (The reason for that is that _if_ the l param
+      // is present, the visibleAtStart value for layers from map config are
+      // ignored. We don't want to do that when changing map, so be sure and
+      // remove them.)
+      // TODO: Consider removing more keys, if issues come up. Candidates include
+      // "q", "s" and "p".
+      oldHash.delete("l");
+      oldHash.delete("gl");
+
+      // Set the modified hash to our location bar
+      window.location.hash = "#" + oldHash.toString();
+
+      // Force the browser to reload
+      window.location.reload();
+
+      // Not needed, but if we will ever go towards hot reload,
+      // don't forget to hide the dropdown menu
+      // this.setState({ anchorEl: null, selectedIndex: index });
+    } else {
+      // If live hash params are disabled, fall back to the old and tried
+      // method of setting query params. This will also reload the page
+      // so no need to take care of component state here. But we want to ensure
+      // that user ends up in the same place, so we grab the x, y and z too.
+      const x = this.map.getView().getCenter()[0];
+      const y = this.map.getView().getCenter()[1];
+      const z = this.map.getView().getZoom();
+
+      window.location.assign(
+        `${window.location.origin}${window.location.pathname}?m=${selectedMap}&x=${x}&y=${y}&z=${z}`
+      );
+    }
   };
 
   handleClose = () => {
