@@ -28,7 +28,7 @@
     "seed": "node prisma/seed.js"
   },
   "dependencies": {
-    "@prisma/client": "^4.4.0",
+    "@prisma/client": "^5.1.1",
     "activedirectory2": "^2.1.0",
     "clf-date": "^0.2.1",
     "compression": "^1.7.4",
@@ -54,7 +54,7 @@
     "mocha": "^10.2.0",
     "nodemon": "^2.0.22",
     "prettier": "^2.8.8",
-    "prisma": "^4.4.0",
+    "prisma": "^5.1.1",
     "supertest": "^6.3.3"
   },
   "author": "Jacob Wodzyński <jacob.wodzynski@halmstad.se> (https://github.com/hajkmap)"
