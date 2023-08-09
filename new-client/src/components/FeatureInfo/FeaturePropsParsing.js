@@ -32,9 +32,18 @@ export default class FeaturePropsParsing {
 
     // Default to true to ensure backwards compatibility with old configs that predominately use HTML
     this.allowDangerousHtml = this.options.allowDangerousHtml ?? true;
+
     // Do we want the markdown-renderer to transform the provided uri's or not? Defaults to true to make sure un-safe uri's are not passed by mistake.
     // Disabling the transformer could be used to allow for links to desktop applications, for example app://open.
     this.transformLinkUri = this.options.transformLinkUri ?? true;
+
+    // Let's define which regex to use when looking for placeholders in the infoclick definition. There's the
+    // old (and proved) solution and a new one (see #1368). This is an admin setting for now, as this change does
+    // affect existing setups.
+    this.placeholderMatchingRegex =
+      this.options.useNewPlaceholderMatching === true
+        ? /{[\s\w\u00C0-\u00ff@\-|!,'.():*#=?[\]/]+}/g // Let's allow some common Markdown and URL characters
+        : /{[\s\w\u00C0-\u00ff@\-|!,'.():]+}/g; // Let's only use the old and well-tested regex
 
     // Here we define the components used by ReactMarkdown, see https://github.com/remarkjs/react-markdown#appendix-b-components
     // Note that we import customComponentsForReactMarkdown from our shared library, spread those
@@ -358,8 +367,10 @@ export default class FeaturePropsParsing {
       // The regex below will match all placeholders.
       // The loop below extracts all placeholders and replaces them with actual values
       // current feature's property collection.
-      // Match any word character, range of unicode characters (åäö etc), @ sign, dash or dot
-      (this.markdown.match(/{[\s\w\u00C0-\u00ff@\-|!,'.():]+}/g) || []).forEach(
+      // Match any word character, range of unicode characters (åäö etc), @ sign, dash, dot
+      // as well as some common Markdown and URL characters (as Markdown and URLs can be a part
+      // of the placeholder, see #1277 and 1368).
+      (this.markdown.match(this.placeholderMatchingRegex) || []).forEach(
         (placeholder) => {
           // placeholder is a string, e.g. "{intern_url_1@@documenthandler}" or "{foobar}"
           // Let's replace all occurrences of the placeholder like this:
