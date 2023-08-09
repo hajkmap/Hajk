@@ -47,6 +47,18 @@ namespace MapService.Models.ToolOptions
 
         public bool showActiveLayersView { get; set; }
 
+        public bool showActiveLayerSwitch { get; set; }
+
+        public bool showQuickLayers { get; set; }
+
+        public bool enableQuickLayerLoading { get; set; }
+
+        public string quickLayerLoadingInfoText { get; set; }
+
+        public bool enableUserQuickLayers { get; set; }
+
+        public string userQuickLayersInfoText { get; set; }
+
         public bool enableTransparencySlider { get; set; }
 
         public string target { get; set; }

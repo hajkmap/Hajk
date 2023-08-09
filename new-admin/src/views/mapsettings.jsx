@@ -298,6 +298,12 @@ class Menu extends Component {
       enableOSM: false,
       showBreadcrumbs: false,
       showActiveLayersView: false,
+      showActiveLayerSwitch: false,
+      showQuickLayers: false,
+      enableQuickLayerLoading: false,
+      quickLayerLoadingInfoText: "",
+      enableUserQuickLayers: false,
+      userQuickLayersInfoText: "",
       enableTransparencySlider: true,
       instruction: "",
       dropdownThemeMaps: false,
@@ -357,6 +363,23 @@ class Menu extends Component {
           showActiveLayersView:
             existingConfig.showActiveLayersView ??
             this.state.showActiveLayersView,
+          showActiveLayerSwitch:
+            existingConfig.showActiveLayerSwitch ??
+            this.state.showActiveLayerSwitch,
+          showQuickLayers:
+            existingConfig.showQuickLayers ?? this.state.showQuickLayers,
+          enableQuickLayerLoading:
+            existingConfig.enableQuickLayerLoading ??
+            this.state.enableQuickLayerLoading,
+          quickLayerLoadingInfoText:
+            existingConfig.quickLayerLoadingInfoText ??
+            this.state.quickLayerLoadingInfoText,
+          enableUserQuickLayers:
+            existingConfig.enableUserQuickLayers ??
+            this.state.enableUserQuickLayers,
+          userQuickLayersInfoText:
+            existingConfig.userQuickLayersInfoText ??
+            this.state.userQuickLayersInfoText,
           enableTransparencySlider:
             existingConfig.enableTransparencySlider ??
             this.state.enableTransparencySlider,
@@ -582,6 +605,12 @@ class Menu extends Component {
       enableOSM: this.state.enableOSM,
       showBreadcrumbs: this.state.showBreadcrumbs,
       showActiveLayersView: this.state.showActiveLayersView,
+      showActiveLayerSwitch: this.state.showActiveLayerSwitch,
+      showQuickLayers: this.state.showQuickLayers,
+      enableQuickLayerLoading: this.state.enableQuickLayerLoading,
+      quickLayerLoadingInfoText: this.state.quickLayerLoadingInfoText,
+      enableUserQuickLayers: this.state.enableUserQuickLayers,
+      userQuickLayersInfoText: this.state.userQuickLayersInfoText,
       enableTransparencySlider: this.state.enableTransparencySlider,
       instruction: this.state.instruction,
       dropdownThemeMaps: this.state.dropdownThemeMaps,
@@ -1813,6 +1842,24 @@ class Menu extends Component {
               </div>
               <div>
                 <input
+                  id="showSystemLayers"
+                  name="showSystemLayers"
+                  type="checkbox"
+                  onChange={this.handleInputChange}
+                  checked={this.state.showSystemLayers}
+                />
+                &nbsp;
+                <label className="long-label" htmlFor="showSystemLayers">
+                  Visa systemlager vid ritordning{" "}
+                  <i
+                    className="fa fa-question-circle"
+                    data-toggle="tooltip"
+                    title="När rutan är ikryssad visas systemlager i listan över aktiva lager."
+                  />
+                </label>
+              </div>
+              <div>
+                <input
                   id="showActiveLayersView"
                   name="showActiveLayersView"
                   type="checkbox"
@@ -1827,6 +1874,32 @@ class Menu extends Component {
                     data-toggle="tooltip"
                     title="När rutan är ikryssad visas en tredje flik i Lagerhanteraren. Där kan användaren bland annat styra ritordningen av aktiva lager."
                   />
+                </label>
+              </div>
+              <div>
+                <input
+                  id="showActiveLayerSwitch"
+                  name="showActiveLayerSwitch"
+                  type="checkbox"
+                  onChange={this.handleInputChange}
+                  checked={this.state.showActiveLayerSwitch}
+                />
+                &nbsp;
+                <label className="long-label" htmlFor="showActiveLayerSwitch">
+                  Visa systemlager vid ritordning
+                </label>
+              </div>
+              <div>
+                <input
+                  id="showQuickLayers"
+                  name="showQuickLayers"
+                  type="checkbox"
+                  onChange={this.handleInputChange}
+                  checked={this.state.showQuickLayers}
+                />
+                &nbsp;
+                <label className="long-label" htmlFor="showQuickLayers">
+                  Visa en grupp med snabblager
                 </label>
               </div>
               <div>
@@ -1865,6 +1938,77 @@ class Menu extends Component {
                 </div>
               </div>
               <div className="row">{this.renderAuthGrps()}</div>
+              <div className="separator">
+                Inställningar för grupp med snabblager
+              </div>
+              <div>
+                <input
+                  id="enableQuickLayerLoading"
+                  name="enableQuickLayerLoading"
+                  type="checkbox"
+                  onChange={this.handleInputChange}
+                  checked={this.state.enableQuickLayerLoading}
+                />
+                &nbsp;
+                <label className="long-label" htmlFor="enableQuickLayerLoading">
+                  Ladda snabblager{" "}
+                  <i
+                    className="fa fa-question-circle"
+                    data-toggle="tooltip"
+                    title="Om denna ruta är ikryssad kan användaren ladda in fördefinierade snabblager."
+                  />
+                </label>
+              </div>
+              <div className="text-input-label">
+                Ladda snabblager infotext{" "}
+                <i
+                  className="fa fa-question-circle"
+                  data-toggle="tooltip"
+                  title="Ange en text som ska visas i panelen för att ladda snabblager."
+                />
+                &nbsp;
+                <input
+                  id="quickLayerLoadingInfoText"
+                  name="quickLayerLoadingInfoText"
+                  type="text"
+                  onChange={this.handleInputChange}
+                  value={this.state.quickLayerLoadingInfoText}
+                />
+              </div>
+              <div>
+                <input
+                  id="enableUserQuickLayers"
+                  name="enableUserQuickLayers"
+                  type="checkbox"
+                  onChange={this.handleInputChange}
+                  checked={this.state.enableUserQuickLayers}
+                />
+                &nbsp;
+                <label className="long-label" htmlFor="enableUserQuickLayers">
+                  Mina snabblager{" "}
+                  <i
+                    className="fa fa-question-circle"
+                    data-toggle="tooltip"
+                    title="Om denna ruta är ikryssad kan användaren spara sina egna snabblager."
+                  />
+                </label>
+              </div>
+              <div className="text-input-label">
+                Mina snabblager infotext{" "}
+                <i
+                  className="fa fa-question-circle"
+                  data-toggle="tooltip"
+                  title="Ange en text som ska visas i panelen för att spara snabblager."
+                />
+                &nbsp;
+                <input
+                  id="userQuickLayersInfoText"
+                  name="userQuickLayersInfoText"
+                  type="text"
+                  onChange={this.handleInputChange}
+                  value={this.state.userQuickLayersInfoText}
+                />
+              </div>
               <div className="separator">Kartinställningar</div>
               {this.renderThemeMapCheckbox()}
               {this.renderThemeMapHeaderInput()}
