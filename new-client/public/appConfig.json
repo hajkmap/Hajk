@@ -1,11 +1,11 @@
 {
-  "appName": "Hajk",
-  "version": "3.13.0-dev",
   "mapserviceBase": "",
+  "experimentalNewApi": false,
   "proxy": "",
   "searchProxy": "",
   "defaultMap": "map_1",
-  "experimentalNewApi": false,
+  "showExperimentalLanguageSwitcher": false,
+  "lang": "en",
   "noLayerSwitcherMessage": "This map has no layer switcher, which indicates that you are not allowed to use this map!",
   "networkErrorMessage": "Nätverksfel. Försök att ladda om sidan genom att trycka på F5.",
   "parseErrorMessage": "Konfigurationsfel. Försök att ladda om sidan genom att trycka på F5.",
@@ -13,22 +13,16 @@
     {
       "id": 1,
       "active": true,
-      "text": "This demo message from Hajk will show only once.",
-      "showOnlyOnce": true,
-      "maps": ["map_1"],
+      "text": "Hi, this is **Hajk**! 😃 \n\nWe hope you enjoy it. 🚀💯",
+      "showOnlyOnce": false,
+      "maps": [
+        "map_1",
+        "simpleMapConfig"
+      ],
       "timeout": 5000,
       "startTime": "2020-06-29",
       "stopTime": "2099-12-31",
-      "type": "info",
-      "browsers": "all"
-    },
-    {
-      "id": 2,
-      "active": true,
-      "text": "Your browser is not supported anymore. Please update to a modern browser.",
-      "showOnlyOnce": false,
-      "type": "warning",
-      "browsers": ["ie"]
+      "type": "info"
     }
   ]
 }
