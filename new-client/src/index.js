@@ -87,8 +87,7 @@ hfetch("appConfig.json", { cacheBuster: true })
 
       // Check if mapserviceBase is set in appConfig. If it is not, we will
       // fall back on the simple map and layer configurations found in /public.
-      const useMapService =
-        appConfig.mapserviceBase && appConfig.mapserviceBase.trim().length > 0;
+      const useMapService = appConfig.mapserviceBase?.trim().length > 0;
 
       const useNewApi = appConfig.experimentalNewApi === true;
 
@@ -123,7 +122,11 @@ hfetch("appConfig.json", { cacheBuster: true })
         }
       };
 
-      if (useNewApi === true) {
+      // Use the consolidated loading if useNewApi flag is true. Also,
+      // require the use of mapservice (if mapservice is false, there's no
+      // URL base path and we can not fetch anything - in that case we'll fall back
+      // to the static simpleLayerConfig).
+      if (useNewApi === true && useMapService === true) {
         Promise.all([
           fetchMapConfig(),
           hfetch("customTheme.json", { cacheBuster: true }),
