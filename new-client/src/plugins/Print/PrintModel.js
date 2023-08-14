@@ -19,10 +19,19 @@ import TileWMS from "ol/source/TileWMS";
 import ImageWMS from "ol/source/ImageWMS";
 
 import { ROBOTO_NORMAL } from "./constants";
+
+const DEFAULT_DIMS = {
+  a0: [1189, 841],
+  a1: [841, 594],
+  a2: [594, 420],
+  a3: [420, 297],
+  a4: [297, 210],
+  a5: [210, 148],
+};
 export default class PrintModel {
   constructor(settings) {
     this.map = settings.map;
-    this.dims = settings.dims;
+    this.dims = settings.dims || DEFAULT_DIMS;
     this.logoUrl = settings.options.logo || "";
     this.northArrowUrl = settings.options.northArrow || "";
     this.logoMaxWidth = settings.options.logoMaxWidth;
