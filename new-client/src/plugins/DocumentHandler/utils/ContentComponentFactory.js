@@ -815,9 +815,8 @@ export const CustomLink = ({ aTag, localObserver, bottomMargin }) => {
           },
           ...(bottomMargin && { marginBottom: 1 }),
         }}
-        href="#"
         key="document-link"
-        component={isPrintMode ? "span" : "button"}
+        component={isPrintMode ? "span" : "a"}
         underline="hover"
         onClick={() => {
           localObserver.publish("document-link-clicked", {

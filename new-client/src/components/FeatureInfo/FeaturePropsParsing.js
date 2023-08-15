@@ -33,6 +33,18 @@ export default class FeaturePropsParsing {
     // Default to true to ensure backwards compatibility with old configs that predominately use HTML
     this.allowDangerousHtml = this.options.allowDangerousHtml ?? true;
 
+    // Do we want the markdown-renderer to transform the provided uri's or not? Defaults to true to make sure un-safe uri's are not passed by mistake.
+    // Disabling the transformer could be used to allow for links to desktop applications, for example app://open.
+    this.transformLinkUri = this.options.transformLinkUri ?? true;
+
+    // Let's define which regex to use when looking for placeholders in the infoclick definition. There's the
+    // old (and proved) solution and a new one (see #1368). This is an admin setting for now, as this change does
+    // affect existing setups.
+    this.placeholderMatchingRegex =
+      this.options.useNewPlaceholderMatching === true
+        ? /{[^}]*}/g // Capture all curly bracket content, see #1277 and #1368
+        : /{[\s\w\u00C0-\u00ff@\-|!,'.():]+}/g; // Let's only use the old and well-tested regex
+
     // Here we define the components used by ReactMarkdown, see https://github.com/remarkjs/react-markdown#appendix-b-components
     // Note that we import customComponentsForReactMarkdown from our shared library, spread those
     // objects and finally override the definition of "p", as it differs in this case (we want to
@@ -350,24 +362,29 @@ export default class FeaturePropsParsing {
    */
   mergeFeaturePropsWithMarkdown = async () => {
     if (this.markdown && typeof this.markdown === "string") {
-      // this.markdown is a string that contains placeholders for our future values.
-      // The placeholders are surrounded by curly brackets ({ & }).
-      // The regex below will match all placeholders.
-      // The loop below extracts all placeholders and replaces them with actual values
-      // current feature's property collection.
-      // Match any word character, range of unicode characters (åäö etc), @ sign, dash or dot
-      (this.markdown.match(/{[\s\w\u00C0-\u00ff@\-|!,'.():]+}/g) || []).forEach(
-        (placeholder) => {
-          // placeholder is a string, e.g. "{intern_url_1@@documenthandler}" or "{foobar}"
+      // this.markdown is a string that contains placeholders and conditionals for our future values.
+      // The placeholders are surrounded by single curly brackets ({ & }) while conditionals are
+      // surrounded by double curly brackets, e.g. "{{if ...}}".
+      // The regex below attempts to match all the placeholders.
+      // The loop below extracts all matched placeholders and replaces them with actual values
+      // from current feature's property collection.
+      // Conditionals are ignored for now and will be taken of in the next step, once placeholders
+      // are replaced with real values.
+      (this.markdown.match(this.placeholderMatchingRegex) || [])
+        .map((match) => match.replace("{{if ", "")) // There's a risk that the regex matched "{{if...", see #1368
+        .filter((match) => match !== "{{/if}") // Same as above
+        .forEach((placeholder) => {
+          // placeholder is a string either a basic string, "{foobar}" or a more complicated one
+          // such as "{intern_url_1@@documenthandler}" or "{foobar|hasValue("Value exists", "No value found")}"
           // Let's replace all occurrences of the placeholder like this:
           // {foobar} -> Some nice FoobarValue
+          // {foobar|hasValue("Value exists", "No value found")} -> Will be taken care of by props filters
           // {intern_url_1@@documenthandler} -> {n} // n is element index in the array that will hold Promises from external components
           this.markdown = this.markdown.replace(
             placeholder,
             this.#getPropertyValueForPlaceholder(placeholder)
           );
-        }
-      );
+        });
 
       // this.markdown will now contain actual values instead of properties, OR
       // references to elements in the this.resolvedPromises array. The latter will
@@ -423,6 +440,7 @@ export default class FeaturePropsParsing {
       // will make use of the results in this.resolvedPromises, so that's why we had to wait.
       return (
         <ReactMarkdown
+          transformLinkUri={this.transformLinkUri ? undefined : (x) => x} // If transformLinksUri is set to false, we pass a function that simply returns the uri as-is.
           remarkPlugins={[gfm]} // GitHub Formatted Markdown adds support for Tables in MD
           rehypePlugins={rehypePlugins} // Needed to parse HTML, activated in admin
           components={this.components} // Custom renderers for components, see definition in this.components

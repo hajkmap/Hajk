@@ -536,7 +536,7 @@ export default class MapClickModel {
     // is not enough, we must also respect the min/max zoom level settings, #836.
     if (
       layer.layersInfo &&
-      layer.getMinZoom() <= currentZoom &&
+      currentZoom > layer.getMinZoom() &&
       currentZoom <= layer.getMaxZoom()
     ) {
       const subLayers = Object.values(layer.layersInfo);
@@ -569,18 +569,22 @@ export default class MapClickModel {
         QUERY_LAYERS: subLayersToQuery.join(","),
       };
 
-      // See #852. Without this, it's almost impossible to get a result from QGIS Server.
-      // TODO: This could be expanded and made an admin setting - I'm not sure that 50 px
-      // will work for everyone.
-      // The WITH_GEOMETRY is necessary to make QGIS Server send back the feature's geometry
-      // in the response.
-      // See: https://docs.qgis.org/3.16/en/docs/server_manual/services.html#wms-withgeometry.
+      // Some extra settings for GetFeatureInfo from QGIS Server
       if (layer.getSource().serverType_ === "qgis") {
         params = {
+          // First, spread the existing params that are common for all servers.
           ...params,
-          FI_POINT_TOLERANCE: 50,
-          FI_LINE_TOLERANCE: 50,
-          FI_POLYGON_TOLERANCE: 50,
+          // Next do some QGIS-specific overrides.
+          // Fix click tolerance. See #852. Without this, it's almost impossible to get a result from QGIS Server.
+          // Also, see #885 which made it clear that we must allow customizing this setting.
+          // TODO: The one lacking part is Admin UI - for now this must be configured in the JSON file.
+          FI_POINT_TOLERANCE: this.infoclickOptions?.qgis?.pointTolerance || 50,
+          FI_LINE_TOLERANCE: this.infoclickOptions?.qgis?.lineTolerance || 50,
+          FI_POLYGON_TOLERANCE:
+            this.infoclickOptions?.qgis?.polygonTolerance || 50,
+          // The WITH_GEOMETRY is necessary to make QGIS Server send back the feature's geometry
+          // in the response.
+          // See: https://docs.qgis.org/3.16/en/docs/server_manual/services.html#wms-withgeometry.
           WITH_GEOMETRY: true,
         };
       }

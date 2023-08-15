@@ -28,6 +28,8 @@ const internalADLogger = log4js.getLogger("service.auth.v2.activedirectory2");
  * @class ActiveDirectoryService
  */
 class ActiveDirectoryService {
+  #config; // Will hold AD connection parameters
+
   constructor() {
     if (process.env.AD_LOOKUP_ACTIVE !== "true") {
       logger.info(
@@ -116,7 +118,7 @@ class ActiveDirectoryService {
 
     // Now we have the AD options and - optionally - the TLS options.
     // We're ready to prepare the config object for AD.
-    const config = {
+    this.#config = {
       logging: internalADLogger,
       url: process.env.AD_URL,
       baseDN: process.env.AD_BASE_DN,
@@ -138,10 +140,10 @@ class ActiveDirectoryService {
       `Setting up AD connection to using the following options (\`logging\`, \`password\` and \`tlsOptions\` are obfuscated from this log message):`
     );
     // eslint-disable-next-line no-unused-vars
-    const { password, tlsOptions, logging, ...obfuscatedConfig } = config;
+    const { password, tlsOptions, logging, ...obfuscatedConfig } = this.#config;
     logger.trace("%o", obfuscatedConfig);
 
-    this._ad = new ActiveDirectory(config);
+    this._ad = new ActiveDirectory(this.#config);
 
     logger.info(`Testing the AD connection to ${process.env.AD_URL}…`);
 
@@ -149,7 +151,9 @@ class ActiveDirectoryService {
     // can't be established. Ideally, we'd want to await the return value here, but
     // we're in a constructor so it can't be done. Still, we achieve the goal of
     // aborting the startup if connection fails, so it doesn't really matter in the end.
-    this.#checkConnection();
+    if (process.env.AD_CHECK_CONNECTION === "true") {
+      this.#checkConnection();
+    }
 
     // Initiate 3 local stores to cache the results from AD.
     // One will hold user details, the other will hold groups
@@ -213,21 +217,36 @@ class ActiveDirectoryService {
    * @memberof ActiveDirectoryService
    */
   #checkConnection() {
-    // Prepare the query that will be sent to AD. Admin can set a specific
+    logger.info(`Attempting to connect to ${process.env.AD_URL}…`);
+
+    // In order to check that the AD connection parameters are valid, we
+    // create a new, separate ActiveDirectory instance. The reason for this
+    // is that this basic check fails if AD_RECONNECT is set to `true` (rather
+    // it fails silently, so it seems like everything's fine, when it's not).
+    // This separate instance will _always_ have AD_RECONNECT disabled, so
+    // the check will work as intended.
+    const connectionCheckerConfig = { ...this.#config, reconnect: false };
+    const connectionChecker = new ActiveDirectory(connectionCheckerConfig);
+
+    // Prepare the query that will be sent to the AD. Admin can set a specific
     // query or leave it empty to just ask for "everything". Either way,
     // we'll limit the results to 1 item, so it won't be heavy on the AD.
     const query = process.env.AD_CHECK_CONNECTION_QUERY || undefined;
 
-    // Wrap the call to _ad.find() in a try/catch, as we want to catch
+    // Wrap the call to find() in a try/catch, as we want to catch
     // internal errors that might occur inside the AD component. One
-    // reason could be that the query string is malformed.
+    // reason could be that the query string is malformed. Another common
+    // source of issues are TLS certificates and their format.
     try {
-      this._ad.find({ filter: query, sizeLimit: 1 }, function (err, res) {
-        if (err || !res) {
-          const e = new ActiveDirectoryError(
-            ` AD CONNECTION FAILED!
+      connectionChecker.find(
+        { filter: query, sizeLimit: 1 },
+        function (err, res) {
+          if (err || !res) {
+            const e = new ActiveDirectoryError(
+              ` AD CONNECTION FAILED!
 Connection to ${process.env.AD_URL} failed. Control your AD_* settings
-in .env. There could be an issue with the certificates, CA, passphrase.
+in .env. There could be an issue with the certificates, CA, passphrase,
+and/or user credentials (see original error below).
 Also, make sure that the machine that runs this process can access the 
 specified server (no firewalls etc that block the request). 
 
@@ -239,24 +258,25 @@ ${err.stack}
 
 ABORTING STARTUP.
             `
-          );
-          // Write the error to log file
-          logger.fatal(e.message);
+            );
+            // Write the error to log file
+            logger.fatal(e.message);
 
-          // Now, abort startup by throwing an _uncaught_ error. Note that this
-          // wil NOT be caught by the try/catch we're inside, as we're NOT inside
-          // of it. We are in fact inside a callback, and that callback, and I haven't
-          // defined any try/catch here on purpose. From the NodeJS docs:
-          //
-          // "If it is necessary to terminate the Node.js process due to an error condition,
-          // throwing an uncaught error and allowing the process to terminate accordingly
-          //is safer than calling process.exit()."
-          throw e;
-        } else {
-          logger.info(`Connection to ${process.env.AD_URL} succeeded.`);
-          return true;
+            // Now, abort startup by throwing an _uncaught_ error. Note that this
+            // wil NOT be caught by the try/catch we're inside, as we're NOT inside
+            // of it. We are in fact inside a callback, and that callback, and I haven't
+            // defined any try/catch here on purpose. From the NodeJS docs:
+            //
+            // "If it is necessary to terminate the Node.js process due to an error condition,
+            // throwing an uncaught error and allowing the process to terminate accordingly
+            // is safer than calling process.exit()."
+            throw e;
+          } else {
+            logger.info(`Connection to ${process.env.AD_URL} succeeded.`);
+            return true;
+          }
         }
-      });
+      );
     } catch (error) {
       const e = new ActiveDirectoryError(`
       Couldn't test AD connection to ${process.env.AD_URL} due to malformed query value: "${process.env.AD_CHECK_CONNECTION_QUERY}". 

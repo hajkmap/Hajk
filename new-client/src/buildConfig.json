@@ -10,6 +10,7 @@
     "Edit",
     "Export",
     "FmeServer",
+    "GeosuiteExport",
     "InfoDialog",
     "LayerComparer",
     "LayerSwitcher",

@@ -1,6 +1,6 @@
 {
   "name": "hajk-backend",
-  "version": "3.12.0-dev",
+  "version": "3.13.0-dev",
   "description": "Hajk Backend",
   "homepage": ".",
   "repository": {
@@ -24,30 +24,30 @@
     "lint:fix": "eslint --fix ."
   },
   "dependencies": {
-    "activedirectory2": "^2.1.0",
+    "activedirectory2": "^2.2.0",
     "clf-date": "^0.2.1",
     "compression": "^1.7.4",
     "cookie-parser": "^1.4.6",
     "cors": "^2.8.5",
-    "dotenv": "^16.0.3",
+    "dotenv": "^16.3.1",
     "express": "^4.18.2",
-    "express-openapi-validator": "^5.0.3",
-    "fast-xml-parser": "^4.2.2",
-    "helmet": "^6.1.5",
+    "express-openapi-validator": "^5.0.4",
+    "fast-xml-parser": "^4.2.7",
+    "helmet": "^7.0.0",
     "http-proxy-middleware": "^2.0.6",
     "log4js": "^6.9.1",
     "node-windows": "^1.0.0-beta.8"
   },
   "devDependencies": {
     "chai": "^4.3.7",
-    "eslint": "^8.38.0",
-    "eslint-config-prettier": "^8.8.0",
-    "eslint-plugin-import": "^2.27.5",
+    "eslint": "^8.46.0",
+    "eslint-config-prettier": "^9.0.0",
+    "eslint-plugin-import": "^2.28.0",
     "eslint-plugin-node": "^11.1.0",
-    "eslint-plugin-prettier": "^4.2.1",
+    "eslint-plugin-prettier": "^5.0.0",
     "mocha": "^10.2.0",
-    "nodemon": "^2.0.22",
-    "prettier": "^2.8.7",
+    "nodemon": "^3.0.1",
+    "prettier": "^3.0.1",
     "supertest": "^6.3.3"
   },
   "author": "Jacob Wodzyński <jacob.wodzynski@halmstad.se> (https://github.com/hajkmap)"
