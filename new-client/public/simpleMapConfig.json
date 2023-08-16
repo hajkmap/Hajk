@@ -428,7 +428,7 @@
       "index": 3
     },
     {
-      "type": "measure",
+      "type": "measurer",
       "options": {
         "target": "control",
         "position": "right",

@@ -13,7 +13,6 @@
     "LayerComparer",
     "LayerSwitcher",
     "Location",
-    "Measure",
     "Measurer",
     "Print",
     "Routing",
@@ -29,7 +28,6 @@
     "Collector",
     "Coordinates",
     "DocumentHandler",
-    "Draw",
     "Dummy",
     "Edit",
     "Export",
@@ -43,14 +41,12 @@
     "LayerComparer",
     "LayerSwitcher",
     "Location",
-    "Measure",
     "Measurer",
     "Print",
     "Routing",
     "Search",
     "Sketch",
     "StreetView",
-    "TimeSlider",
-    "vtsearch"
+    "TimeSlider"
   ]
 }
