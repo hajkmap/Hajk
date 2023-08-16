@@ -32,11 +32,14 @@
   ],
   "devDependencies": {
     "eslint-config-prettier": "^8.8.0",
+    "eslint-config-react-app": "^7.0.1",
     "eslint-plugin-prettier": "^4.2.1",
     "prettier": "^2.8.7",
+    "prop-types": "^15.8.1",
     "react-app-rewired": "^2.2.1",
     "react-scripts": "5.0.1",
-    "source-map-explorer": "^2.5.3"
+    "source-map-explorer": "^2.5.3",
+    "webpack": "^5.88.2"
   },
   "dependencies": {
     "@emotion/react": "^11.11.1",
@@ -46,17 +49,21 @@
     "@jonkoops/matomo-tracker": "^0.7.0",
     "@mui/icons-material": "^5.11.16",
     "@mui/material": "^5.13.6",
+    "@mui/system": "^5.14.5",
+    "@mui/utils": "^5.14.5",
     "@mui/x-data-grid": "^5.17.14",
     "@nieuwlandgeo/sldreader": "^0.2.17",
     "@turf/buffer": "^6.5.0",
     "@turf/transform-translate": "^6.5.0",
     "@turf/union": "^6.5.0",
+    "core-js": "^3.32.0",
     "elm-pep": "^1.0.6",
     "file-saver": "^2.0.5",
     "html2json": "^1.0.2",
     "intro.js": "^6.0.0",
     "intro.js-react": "^0.7.1",
     "jspdf": "^2.5.1",
+    "jszip": "^3.10.1",
     "load-google-maps-api": "^2.0.2",
     "notistack": "^2.0.8",
     "ol": "^7.3.0",
@@ -64,6 +71,7 @@
     "plausible-tracker": "^0.3.8",
     "proj4": "^2.9.0",
     "react": "^18.2.0",
+    "react-app-polyfill": "^3.0.0",
     "react-color": "^2.19.3",
     "react-dom": "^18.2.0",
     "react-event-observer": "^0.5.11",
@@ -74,6 +82,7 @@
     "react-scroll": "^1.8.9",
     "rehype-raw": "^6.1.1",
     "remark-gfm": "^3.0.1",
+    "uuid": "^8.3.2",
     "x2js": "^3.4.4",
     "xlsx": "^0.18.5"
   }
