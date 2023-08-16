@@ -15,7 +15,7 @@ import Checkbox from "@mui/material/Checkbox";
 import DownloadIcon from "@mui/icons-material/GetApp";
 import Collapse from "@mui/material/Collapse";
 import CircularProgress from "@mui/material/CircularProgress";
-import { hfetch } from "utils/FetchWrapper";
+import { hfetch } from "../../utils/FetchWrapper";
 
 const ButtonWithLoader = styled(Button)(({ theme, loading }) => ({
   "& img": {

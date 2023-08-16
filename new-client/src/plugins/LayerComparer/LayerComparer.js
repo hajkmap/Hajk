@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import { Alert, Button, Stack } from "@mui/material";
-import DialogWindowPlugin from "plugins/DialogWindowPlugin";
+import DialogWindowPlugin from "../../plugins/DialogWindowPlugin";
 import CompareIcon from "@mui/icons-material/Compare";
 import { useSnackbar } from "notistack";
 

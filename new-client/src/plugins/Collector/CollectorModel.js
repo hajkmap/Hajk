@@ -7,7 +7,7 @@ import VectorSource from "ol/source/Vector";
 import { all as strategyAll } from "ol/loadingstrategy";
 import { Draw } from "ol/interaction";
 import X2JS from "x2js";
-import { hfetch } from "utils/FetchWrapper";
+import { hfetch } from "../../utils/FetchWrapper";
 
 class CollectorModel {
   constructor(settings) {

@@ -8,7 +8,7 @@ import Observer from "react-event-observer";
 import { MeasurerIcon } from "./MeasurerIcons";
 
 import { DEFAULT_MEASUREMENT_SETTINGS } from "./constants";
-import DrawModel from "models/DrawModel";
+import DrawModel from "../../models/DrawModel";
 import { Circle, Fill, RegularShape, Stroke, Style } from "ol/style";
 import HelpIcon from "@mui/icons-material/Help";
 

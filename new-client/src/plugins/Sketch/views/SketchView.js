@@ -14,8 +14,8 @@ import MoveView from "./MoveView";
 import EditView from "./EditView";
 import SettingsView from "./SettingsView";
 // Hooks
-import useCookieStatus from "hooks/useCookieStatus";
-import useUpdateEffect from "hooks/useUpdateEffect";
+import useCookieStatus from "../../../hooks/useCookieStatus";
+import useUpdateEffect from "../../../hooks/useUpdateEffect";
 
 import { useSnackbar } from "notistack";
 

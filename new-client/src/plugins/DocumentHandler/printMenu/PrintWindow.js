@@ -29,7 +29,7 @@ import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import OpenInNewIcon from "@mui/icons-material/OpenInNew";
 
-import { deepMerge } from "utils/DeepMerge";
+import { deepMerge } from "../../../utils/DeepMerge";
 
 import PrintList from "./PrintList";
 import TableOfContents from "./TableOfContents";

@@ -28,9 +28,9 @@ import { createRoot } from "react-dom/client";
 import buildConfig from "./buildConfig.json";
 import ErrorIcon from "@mui/icons-material/Error";
 import HajkThemeProvider from "./components/HajkThemeProvider";
-import { initHFetch, hfetch, initFetchWrapper } from "utils/FetchWrapper";
-import LocalStorageHelper from "utils/LocalStorageHelper";
-import { getMergedSearchAndHashParams } from "utils/getMergedSearchAndHashParams";
+import { initHFetch, hfetch, initFetchWrapper } from "./utils/FetchWrapper";
+import LocalStorageHelper from "./utils/LocalStorageHelper";
+import { getMergedSearchAndHashParams } from "./utils/getMergedSearchAndHashParams";
 
 initHFetch();
 

@@ -14,7 +14,7 @@ import AppModel from "../models/AppModel.js";
 import {
   setConfig as setCookieConfig,
   functionalOk as functionalCookieOk,
-} from "models/Cookie";
+} from "../models/Cookie";
 
 import Window from "./Window.js";
 import CookieNotice from "./CookieNotice";

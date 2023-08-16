@@ -15,8 +15,8 @@ import Typography from "@mui/material/Typography";
 import ConfirmationDialog from "../../components/ConfirmationDialog";
 
 // Hooks
-import useUpdateEffect from "hooks/useUpdateEffect";
-import useCookieStatus from "hooks/useCookieStatus";
+import useUpdateEffect from "../../hooks/useUpdateEffect";
+import useCookieStatus from "../../hooks/useCookieStatus";
 
 const List = styled("div")(() => ({
   display: "flex",

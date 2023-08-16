@@ -3,14 +3,14 @@ import ReactMarkdown from "react-markdown";
 import rehypeRaw from "rehype-raw";
 import gfm from "remark-gfm";
 import FeaturePropFilters from "./FeaturePropsFilters";
-import AppModel from "models/AppModel.js";
+import AppModel from "../../models/AppModel.js";
 
 import {
   customComponentsForReactMarkdown, // the object with all custom components
   setOptions, // a method that will allow us to send infoclick options from here to the module that defines custom components
   Paragraph, // special case - we want to override the Paragraph component here, so we import it separately
-} from "utils/customComponentsForReactMarkdown";
-import { isValidUrl } from "utils/Validator";
+} from "../../utils/customComponentsForReactMarkdown";
+import { isValidUrl } from "../../utils/Validator";
 
 export default class FeaturePropsParsing {
   constructor(settings) {

@@ -1,5 +1,5 @@
-import AppModel from "models/AppModel";
-import HajkTransformer from "utils/HajkTransformer";
+import AppModel from "../../models/AppModel";
+import HajkTransformer from "../../utils/HajkTransformer";
 
 class PropFilters {
   constructor() {

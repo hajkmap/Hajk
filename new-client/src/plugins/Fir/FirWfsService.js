@@ -6,7 +6,7 @@ import {
   like as likeFilter,
   intersects as intersectsFilter,
 } from "ol/format/filter";
-import { hfetch } from "utils/FetchWrapper";
+import { hfetch } from "../../utils/FetchWrapper";
 
 class FirWfsService {
   constructor(defaultOptions, model) {

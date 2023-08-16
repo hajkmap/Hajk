@@ -123,4 +123,5 @@ class LocalStorageHelper {
 }
 
 // Export singleton instance
+/* eslint import/no-anonymous-default-export: [2, {"allowNew": true}] */
 export default new LocalStorageHelper();

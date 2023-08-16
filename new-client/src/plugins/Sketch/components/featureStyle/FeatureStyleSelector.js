@@ -1,6 +1,6 @@
 import React from "react";
 import { Grid, Typography, TextField } from "@mui/material";
-import { STROKE_DASHES } from "plugins/Sketch/constants";
+import { STROKE_DASHES } from "../../constants";
 
 import FeatureStyleAccordion from "./FeatureStyleAccordion";
 import StrokeTypeSelector from "./StrokeTypeSelector";

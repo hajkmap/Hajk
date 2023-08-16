@@ -7,7 +7,7 @@ import { all as strategyAll } from "ol/loadingstrategy";
 import { Select, Modify, Draw, Translate } from "ol/interaction";
 import { never } from "ol/events/condition";
 import X2JS from "x2js";
-import { hfetch } from "utils/FetchWrapper";
+import { hfetch } from "../../utils/FetchWrapper";
 
 class EditModel {
   constructor(settings) {

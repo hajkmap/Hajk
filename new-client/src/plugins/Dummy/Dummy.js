@@ -13,7 +13,7 @@ import BugReportIcon from "@mui/icons-material/BugReport";
 
 // We might want to import some other classes or constants etc.
 import { DEFAULT_MEASUREMENT_SETTINGS } from "./constants";
-import DrawModel from "models/DrawModel";
+import DrawModel from "../../models/DrawModel";
 
 /**
  * @summary Main component for the Dummy-plugin.

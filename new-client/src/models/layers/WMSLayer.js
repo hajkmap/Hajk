@@ -7,7 +7,7 @@ import GeoJSON from "ol/format/GeoJSON";
 import LayerInfo from "./LayerInfo.js";
 import { equals } from "ol/extent";
 import { delay } from "../../utils/Delay";
-import { hfetch, overrideLayerSourceParams } from "utils/FetchWrapper";
+import { hfetch, overrideLayerSourceParams } from "../../utils/FetchWrapper";
 
 class WMSLayer {
   constructor(config, proxyUrl, globalObserver) {

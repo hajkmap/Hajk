@@ -16,9 +16,7 @@ import {
 } from "@mui/material";
 
 import FeaturePropsParsing from "./FeaturePropsParsing";
-import { getInfoClickInfoFromLayerConfig } from "utils/InfoClickHelpers.js";
-// import Diagram from "../Diagram";
-// import HajkTable from "../Table";
+import { getInfoClickInfoFromLayerConfig } from "../../utils/InfoClickHelpers";
 
 const InfoContainer = styled(Grid)(() => ({
   height: "100%",

@@ -11,7 +11,7 @@ import Within from "ol/format/filter/Within";
 import { fromCircle } from "ol/geom/Polygon";
 
 import { decodeCommas } from "../utils/StringCommaCoder";
-import { hfetch } from "utils/FetchWrapper";
+import { hfetch } from "../utils/FetchWrapper";
 
 const ESCAPE_CHAR = "!";
 const SINGLE_CHAR = ".";

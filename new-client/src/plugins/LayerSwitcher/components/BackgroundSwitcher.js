@@ -1,6 +1,6 @@
 import React from "react";
 import propTypes from "prop-types";
-import { isValidLayerId } from "utils/Validator";
+import { isValidLayerId } from "../../../utils/Validator";
 import OSM from "ol/source/OSM";
 import TileLayer from "ol/layer/Tile";
 import LayerItem from "./LayerItem.js";
