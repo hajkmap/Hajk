@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Grid } from "@mui/material";
+import { FormControl, Grid, InputLabel, MenuItem, Select } from "@mui/material";
 
 import PrintDialog from "./components/PrintDialog";
 import RangeSlider from "./components/RangeSlider";
@@ -15,7 +15,8 @@ import {
 export default function PrintView(props) {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [printStatus, setPrintStatus] = useState(PRINT_STATUS.IDLE);
-  const [resolution] = useState(props.resolution);
+  const [resolution, setResolution] = useState(props.resolution);
+  const [stepSize, setStepSize] = useState(props.stepSize);
   const [dateRange, setDateRange] = useState([props.startTime, props.endTime]);
 
   useEffect(() => {
@@ -50,8 +51,14 @@ export default function PrintView(props) {
     setPrintStatus(PRINT_STATUS.ABORT);
   };
 
+  const handleResolutionChange = (e) => {
+    const { value } = e.target;
+    setResolution(value);
+    setStepSize(props.getStepSize(value));
+  };
+
   // We want to keep track of the number of images that are about to be printed with the current settings so that we can warn the user etc.
-  const numImages = Math.floor((dateRange[1] - dateRange[0]) / props.stepSize);
+  const numImages = Math.floor((dateRange[1] - dateRange[0]) / stepSize);
   // We don't want to allow the user to print to many images... Every image takes a couple of seconds...
   const printDisabled = numImages > MAX_IMAGES_FOR_PRINT;
   // We also want to warn the user by highlighting the information panel if we are close (or over) the maximum number of images...
@@ -80,9 +87,28 @@ export default function PrintView(props) {
         valueLabelFormat={(v) => props.getDateLabel(v, resolution)}
         min={props.startTime}
         max={props.endTime}
-        step={props.stepSize}
+        step={stepSize}
         marks={props.marks}
       />
+      <Grid container item xs={12} sx={{ p: 2 }} spacing={2}>
+        <Grid item xs={6}>
+          <FormControl fullWidth={true}>
+            <InputLabel variant="standard" htmlFor="resolution">
+              Upplösning
+            </InputLabel>
+            <Select
+              variant="standard"
+              value={resolution}
+              onChange={handleResolutionChange}
+            >
+              <MenuItem value={"days"}>Dag</MenuItem>
+              <MenuItem value={"months"}>Månad</MenuItem>
+              <MenuItem value={"quarters"}>Kvartal</MenuItem>
+              <MenuItem value={"years"}>År</MenuItem>
+            </Select>
+          </FormControl>
+        </Grid>
+      </Grid>
       <PrintButton onClick={print} disabled={printDisabled} />
       <PrintDialog open={dialogOpen} cancelPrint={cancel} />
     </Grid>

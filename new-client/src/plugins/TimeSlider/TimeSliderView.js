@@ -479,6 +479,7 @@ class TimeSliderView extends React.PureComponent {
         resolution={resolution}
         stepSize={stepSize}
         printModel={printModel}
+        getStepSize={this.getStepSize}
         getDateLabel={this.getDateLabel}
       />
     ) : (
