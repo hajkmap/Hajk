@@ -1397,7 +1397,7 @@
     "shiftDragZoom": true,
     "dragPan": true,
     "pinchRotate": false,
-    "pinchZoom": false,
+    "pinchZoom": true,
     "zoomDelta": 1,
     "zoomDuration": null,
     "mapresetter": true,
