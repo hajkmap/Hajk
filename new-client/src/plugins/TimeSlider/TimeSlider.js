@@ -121,7 +121,7 @@ class TimeSlider extends React.PureComponent {
               },
             },
           ],
-          height: 200,
+          height: "dynamic",
           width: 650,
           onWindowShow: this.onWindowShow,
           onWindowHide: this.onWindowHide,
