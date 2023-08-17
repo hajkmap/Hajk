@@ -5,6 +5,7 @@ import PrintDialog from "./components/PrintDialog";
 import RangeSlider from "./components/RangeSlider";
 
 import {
+  INFORMATION_PANEL_MODES,
   MAX_IMAGES_FOR_PRINT,
   PRINT_DISABLED_TOOLTIP,
   PRINT_ENABLED_TOOLTIP,
@@ -66,6 +67,13 @@ export default function PrintView(props) {
 
   // We don't want to allow the user to print to many images... Every image takes a couple of seconds...
   const printDisabled = numImages > MAX_IMAGES_FOR_PRINT;
+  // We also want to warn the user by highlighting the information panel if we are close (or over) the maximum number of images...
+  const informationPanelMode =
+    numImages > MAX_IMAGES_FOR_PRINT // More than max images= Highlight error...
+      ? INFORMATION_PANEL_MODES.ERROR
+      : numImages > 0.8 * MAX_IMAGES_FOR_PRINT // More than 80% of max images? Highlight warning....
+      ? INFORMATION_PANEL_MODES.WARNING
+      : INFORMATION_PANEL_MODES.OK; // Otherwise we're OK!
 
   return (
     <Grid
@@ -73,12 +81,12 @@ export default function PrintView(props) {
       justifyContent="center"
       sx={{ width: "100%", height: "100%" }}
     >
-      <PrintInformationPanel message={message} />
+      <PrintInformationPanel message={message} mode={informationPanelMode} />
 
       <RangeSlider
-        title="Välj datumintervall:"
+        title="Välj utskriftsintervall:"
         value={dateRange}
-        getAriaLabel={() => "Datumintervall"}
+        getAriaLabel={() => "Utskriftsintervall"}
         onChange={(e, v) => setDateRange(v)}
         valueLabelFormat={(v) => props.getDateLabel(v, resolution)}
         min={props.startTime}

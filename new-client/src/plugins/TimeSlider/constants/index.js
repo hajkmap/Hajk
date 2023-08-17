@@ -18,3 +18,9 @@ export const MAX_IMAGES_FOR_PRINT = 100;
 export const PRINT_ENABLED_TOOLTIP = "Starta utskriften";
 export const PRINT_DISABLED_TOOLTIP =
   "Nuvarande inställningar gör att för många bilder kommer skrivas ut. Minska datumintervallet eller ändra upplösningen. ";
+
+export const INFORMATION_PANEL_MODES = Object.freeze({
+  OK: "OK",
+  WARNING: "WARNING",
+  ERROR: "ERROR",
+});
