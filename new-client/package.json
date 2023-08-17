@@ -67,7 +67,7 @@
     "load-google-maps-api": "^2.0.2",
     "notistack": "^2.0.8",
     "ol": "^7.5.1",
-    "pdfjs-dist": "^2.16.105",
+    "pdfjs-dist": "^3.9.179",
     "plausible-tracker": "^0.3.8",
     "proj4": "^2.9.0",
     "react": "^18.2.0",
