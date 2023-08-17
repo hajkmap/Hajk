@@ -321,8 +321,8 @@ class PrintWindow extends React.PureComponent {
       "beforeend",
       ` <title>${document.title}</title>
         <base href="${document.location.protocol}//${
-        document.location.host
-      }/" />
+          document.location.host
+        }/" />
         ${
           this.props.options.dynamicImportUrls.customFont
             ? `<link

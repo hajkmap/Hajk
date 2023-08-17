@@ -883,9 +883,8 @@ class Search extends React.PureComponent {
 
   updateAutocompleteList = async () => {
     let fetchOptions = this.getAutoCompleteFetchSettings();
-    let autoCompleteResult = await this.fetchResultFromSearchModel(
-      fetchOptions
-    );
+    let autoCompleteResult =
+      await this.fetchResultFromSearchModel(fetchOptions);
 
     this.setState({
       autocompleteList: this.prepareAutocompleteList(autoCompleteResult),
