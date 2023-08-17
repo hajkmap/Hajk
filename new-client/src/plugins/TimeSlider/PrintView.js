@@ -54,9 +54,7 @@ export default function PrintView(props) {
     setPrintStatus(PRINT_STATUS.ABORT);
   };
 
-  const numSteps = Math.floor(
-    (props.endTime - props.startTime) / props.stepSize
-  );
+  const numSteps = Math.floor((dateRange[1] - dateRange[0]) / props.stepSize);
 
   const message = `Vid utskrift så kommer en bild skapas för varje "steg" i tidslinjen. Nuvarande inställningar kommer resultera i ${numSteps} bilder.`;
 
