@@ -4,3 +4,11 @@ export const DEFAULT_PRINT_OPTIONS = Object.freeze({
   includeScaleBar: true,
   scaleBarPlacement: "bottomLeft",
 });
+
+export const PRINT_STATUS = Object.freeze({
+  IDLE: "IDLE",
+  BUSY: "BUSY",
+  ABORT: "ABORT",
+  ERROR: "ERROR",
+  SUCCESS: "SUCCESS",
+});

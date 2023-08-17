@@ -461,15 +461,25 @@ class TimeSliderView extends React.PureComponent {
   };
 
   render() {
-    const { currentUnixTime, stepSize, playing, settingsDialog, layerStatus } =
-      this.state;
-    const { printActive } = this.props;
+    const {
+      currentUnixTime,
+      stepSize,
+      playing,
+      settingsDialog,
+      layerStatus,
+      resolution,
+    } = this.state;
+    const { printActive, printModel } = this.props;
 
     return printActive ? (
       <PrintView
         startTime={this.startTime}
         endTime={this.endTime}
+        marks={this.marks}
+        resolution={resolution}
         stepSize={stepSize}
+        printModel={printModel}
+        getDateLabel={this.getDateLabel}
       />
     ) : (
       <>

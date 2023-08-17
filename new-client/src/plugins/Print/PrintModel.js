@@ -192,6 +192,7 @@ export default class PrintModel {
   };
 
   addPreview(options) {
+    console.log("options: ", options);
     const scale = options.scale;
     const format = options.format;
     const orientation = options.orientation;
@@ -1103,7 +1104,8 @@ export default class PrintModel {
     }
   };
 
-  print = (options) => {
+  print = async (options) => {
+    console.log("options: ", options);
     const format = options.format;
     const orientation = options.orientation;
     const resolution = options.resolution;
@@ -1416,10 +1418,12 @@ export default class PrintModel {
       this.saveToFile(pdf, width, options.saveAsType)
         .then(() => {
           this.localObserver.publish("print-completed");
+          return { result: "OK" };
         })
         .catch((error) => {
           console.warn(error);
           this.localObserver.publish("print-failed-to-save");
+          return null;
         })
         .finally(() => {
           // Reset map to how it was before print

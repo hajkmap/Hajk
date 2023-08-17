@@ -134,6 +134,7 @@ class TimeSlider extends React.PureComponent {
           defaultResolution={this.defaultResolution} //"years", "months", or "days"
           visibleAtStart={this.props.options.visibleAtStart}
           printActive={this.state.printActive}
+          printModel={this.printModel}
         />
       </BaseWindowPlugin>
     );
