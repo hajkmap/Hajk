@@ -6,10 +6,23 @@ import booleanPointOnLine from "@turf/boolean-point-on-line";
 
 export default class AngleSnapping {
   #snapGuides;
+  #angleSnappingIsActive;
 
   constructor() {
     this.#snapGuides = [];
+    this.#angleSnappingIsActive = false;
   }
+
+  #handleKeyDownToggle = (e) => {
+    this.#angleSnappingIsActive = e.ctrlKey === true;
+  };
+
+  setActive = (active) => {
+    const fName = active ? "addEventListener" : "removeEventListener";
+    window[fName]("keydown", this.#handleKeyDownToggle);
+    window[fName]("keyup", this.#handleKeyDownToggle);
+    this.#angleSnappingIsActive = false;
+  };
 
   clearSnapGuides = (drawModel) => {
     this.#snapGuides.forEach((guideFeature) => {
@@ -19,6 +32,11 @@ export default class AngleSnapping {
   };
 
   handleDrawStartEvent = (drawStartEvent, map, drawModel) => {
+    this.clearSnapGuides(drawModel);
+    if (!this.#angleSnappingIsActive) {
+      return;
+    }
+
     if (!drawStartEvent.feature) {
       return;
     }
@@ -54,7 +72,10 @@ export default class AngleSnapping {
           return f !== measureFeature && allowedTypes.includes(type);
         });
 
-      if (clickedFeatures.length === 0) {
+      if (
+        clickedFeatures.length === 0 ||
+        clickedFeatures[0].get("USER_MEASUREMENT_GUIDE") === true
+      ) {
         // No useful features found
         return;
       }
@@ -147,6 +168,7 @@ export default class AngleSnapping {
           feature.setStyle(guideStyle);
 
           guides.push(feature);
+          feature.set("USER_MEASUREMENT_GUIDE", true);
           drawModel.addFeature(feature);
         });
 

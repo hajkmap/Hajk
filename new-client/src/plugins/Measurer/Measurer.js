@@ -26,6 +26,8 @@ function Measurer(props) {
     return new AngleSnapping();
   }, []);
 
+  angleSnapping.setActive(true);
+
   const [drawModel] = React.useState(
     () =>
       new DrawModel({
@@ -240,10 +242,13 @@ function Measurer(props) {
 
   const onWindowHide = () => {
     restoreHoveredFeature();
+    angleSnapping.setActive(false);
+    angleSnapping.clearSnapGuides(drawModel);
     setPluginShown(false);
   };
 
   const onWindowShow = () => {
+    angleSnapping.setActive(true);
     setPluginShown(true);
   };
 

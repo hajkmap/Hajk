@@ -12,6 +12,7 @@ import transformTranslate from "@turf/transform-translate";
 import { getArea as getExtentArea, getCenter, getWidth } from "ol/extent";
 import { Feature } from "ol";
 import { handleClick } from "./Click";
+import { noModifierKeys, platformModifierKeyOnly } from "ol/events/condition";
 
 /*
  * A model supplying useful Draw-functionality.
@@ -2226,6 +2227,9 @@ class DrawModel {
       stopClick: true,
       geometryFunction: drawMethod === "Rectangle" ? createBox() : null,
       style: this.#getDrawStyle(),
+      condition: (e) => {
+        return platformModifierKeyOnly(e) || noModifierKeys(e);
+      },
     });
     // Let's set the supplied draw-method as a property on the draw-interaction
     // so that we can keep track of if we're creating special features (arrows etc).

@@ -117,7 +117,7 @@ function MeasurerView(props) {
             variant="contained"
             aria-label="outlined button group"
           >
-            <StyledToggleButton value="Point" title="Punkt">
+            <StyledToggleButton value="Point" title="Punkt (Visar koordinat)">
               <SvgImg src={IconPoint()} />
             </StyledToggleButton>
             <StyledToggleButton value="LineString" title="Sträcka">
