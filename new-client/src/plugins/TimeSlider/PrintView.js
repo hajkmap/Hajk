@@ -1,10 +1,16 @@
 import React, { useState, useEffect } from "react";
-import { Button, Grid, Typography } from "@mui/material";
+import { Button, Grid, Tooltip, Typography } from "@mui/material";
 
 import PrintDialog from "./components/PrintDialog";
 import RangeSlider from "./components/RangeSlider";
 
-import { PRINT_STATUS } from "./constants";
+import {
+  MAX_IMAGES_FOR_PRINT,
+  PRINT_DISABLED_TOOLTIP,
+  PRINT_ENABLED_TOOLTIP,
+  PRINT_STATUS,
+} from "./constants";
+import PrintInformationPanel from "./components/PrintInformationPanel";
 
 export default function PrintView(props) {
   // We might want custom print settings?
@@ -54,9 +60,12 @@ export default function PrintView(props) {
     setPrintStatus(PRINT_STATUS.ABORT);
   };
 
-  const numSteps = Math.floor((dateRange[1] - dateRange[0]) / props.stepSize);
+  const numImages = Math.floor((dateRange[1] - dateRange[0]) / props.stepSize);
 
-  const message = `Vid utskrift så kommer en bild skapas för varje "steg" i tidslinjen. Nuvarande inställningar kommer resultera i ${numSteps} bilder.`;
+  const message = `Vid utskrift så kommer en bild skapas för varje "steg" i tidslinjen. Nuvarande inställningar kommer resultera i ${numImages} bilder.`;
+
+  // We don't want to allow the user to print to many images... Every image takes a couple of seconds...
+  const printDisabled = numImages > MAX_IMAGES_FOR_PRINT;
 
   return (
     <Grid
@@ -64,9 +73,8 @@ export default function PrintView(props) {
       justifyContent="center"
       sx={{ width: "100%", height: "100%" }}
     >
-      <Grid item xs={12}>
-        <Typography align="center">{message}</Typography>
-      </Grid>
+      <PrintInformationPanel message={message} />
+
       <RangeSlider
         title="Välj datumintervall:"
         value={dateRange}
@@ -85,9 +93,19 @@ export default function PrintView(props) {
         justifyContent="center"
         alignContent="center"
       >
-        <Button variant="contained" onClick={print}>
-          Skriv ut
-        </Button>
+        <Tooltip
+          title={printDisabled ? PRINT_DISABLED_TOOLTIP : PRINT_ENABLED_TOOLTIP}
+        >
+          <span>
+            <Button
+              variant="contained"
+              onClick={print}
+              disabled={printDisabled}
+            >
+              Skriv ut
+            </Button>
+          </span>
+        </Tooltip>
       </Grid>
       <PrintDialog open={dialogOpen} cancelPrint={cancel} />
     </Grid>

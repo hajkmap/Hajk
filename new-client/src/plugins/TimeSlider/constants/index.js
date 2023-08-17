@@ -12,3 +12,9 @@ export const PRINT_STATUS = Object.freeze({
   ERROR: "ERROR",
   SUCCESS: "SUCCESS",
 });
+
+export const MAX_IMAGES_FOR_PRINT = 100;
+
+export const PRINT_ENABLED_TOOLTIP = "Starta utskriften";
+export const PRINT_DISABLED_TOOLTIP =
+  "Nuvarande inställningar gör att för många bilder kommer skrivas ut. Minska datumintervallet eller ändra upplösningen. ";
