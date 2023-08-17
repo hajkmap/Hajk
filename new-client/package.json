@@ -31,6 +31,7 @@
     "ios > 12"
   ],
   "devDependencies": {
+    "@babel/plugin-proposal-private-property-in-object": "^7.21.11",
     "eslint-config-prettier": "^9.0.0",
     "eslint-config-react-app": "^7.0.1",
     "eslint-plugin-prettier": "^5.0.0",
