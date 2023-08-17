@@ -192,7 +192,6 @@ export default class PrintModel {
   };
 
   addPreview(options) {
-    console.log("options: ", options);
     const scale = options.scale;
     const format = options.format;
     const orientation = options.orientation;

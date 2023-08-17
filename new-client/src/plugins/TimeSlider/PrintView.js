@@ -7,6 +7,7 @@ import PrintInformationPanel from "./components/PrintInformationPanel";
 import PrintButton from "./components/PrintButton";
 
 import {
+  DEFAULT_PRINT_OPTIONS,
   INFORMATION_PANEL_MODES,
   MAX_IMAGES_FOR_PRINT,
   PRINT_STATUS,
@@ -15,26 +16,27 @@ import {
 export default function PrintView(props) {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [printStatus, setPrintStatus] = useState(PRINT_STATUS.IDLE);
+  const [scale, setScale] = useState(props.printModel.getFittingScale());
   const [resolution, setResolution] = useState(props.resolution);
   const [stepSize, setStepSize] = useState(props.stepSize);
   const [dateRange, setDateRange] = useState([props.startTime, props.endTime]);
 
   useEffect(() => {
-    props.printModel.addPreviewLayer();
+    !props.printModel.previewLayer && props.printModel.addPreviewLayer();
     props.printModel.addPreview({
       format: "a4",
       orientation: "landscape",
-      scale: "5000",
+      scale: scale,
       useMargin: false,
       useTextIconsInMargin: false,
     });
-  }, [props.printModel]);
+  }, [scale, props.printModel]);
 
   const print = async () => {
     setDialogOpen(true);
     setPrintStatus(PRINT_STATUS.BUSY);
     const result = await props.printModel.print({
-      scale: "5000",
+      scale: scale,
       resolution: "150",
       format: "a4",
       orientation: "landscape",
@@ -55,6 +57,11 @@ export default function PrintView(props) {
     const { value } = e.target;
     setResolution(value);
     setStepSize(props.getStepSize(value));
+  };
+
+  const handleScaleChange = (e) => {
+    const { value } = e.target;
+    setScale(value);
   };
 
   // We want to keep track of the number of images that are about to be printed with the current settings so that we can warn the user etc.
@@ -105,6 +112,24 @@ export default function PrintView(props) {
               <MenuItem value={"months"}>Månad</MenuItem>
               <MenuItem value={"quarters"}>Kvartal</MenuItem>
               <MenuItem value={"years"}>År</MenuItem>
+            </Select>
+          </FormControl>
+        </Grid>
+        <Grid item xs={6}>
+          <FormControl fullWidth={true}>
+            <InputLabel variant="standard" htmlFor="scale">
+              Skala
+            </InputLabel>
+            <Select
+              variant="standard"
+              value={scale}
+              onChange={handleScaleChange}
+            >
+              {DEFAULT_PRINT_OPTIONS.scales.map((s) => (
+                <MenuItem value={s} key={s}>
+                  {props.printModel.getUserFriendlyScale(s)}
+                </MenuItem>
+              ))}
             </Select>
           </FormControl>
         </Grid>
