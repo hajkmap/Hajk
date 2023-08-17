@@ -1,26 +1,18 @@
 import React, { useState, useEffect } from "react";
-import { Button, Grid, Tooltip, Typography } from "@mui/material";
+import { Grid } from "@mui/material";
 
 import PrintDialog from "./components/PrintDialog";
 import RangeSlider from "./components/RangeSlider";
+import PrintInformationPanel from "./components/PrintInformationPanel";
+import PrintButton from "./components/PrintButton";
 
 import {
   INFORMATION_PANEL_MODES,
   MAX_IMAGES_FOR_PRINT,
-  PRINT_DISABLED_TOOLTIP,
-  PRINT_ENABLED_TOOLTIP,
   PRINT_STATUS,
 } from "./constants";
-import PrintInformationPanel from "./components/PrintInformationPanel";
 
 export default function PrintView(props) {
-  // We might want custom print settings?
-  // const [printSettings, setPrintSetting] = useState({
-  //   start: props.startTime,
-  //   end: props.endTime,
-  //   stepSize: props.stepSize,
-  // });
-
   const [dialogOpen, setDialogOpen] = useState(false);
   const [printStatus, setPrintStatus] = useState(PRINT_STATUS.IDLE);
   const [resolution] = useState(props.resolution);
@@ -38,9 +30,6 @@ export default function PrintView(props) {
   }, [props.printModel]);
 
   const print = async () => {
-    // Show dialog
-    // Stop and reset slider
-    // Create one print for each time-section
     setDialogOpen(true);
     setPrintStatus(PRINT_STATUS.BUSY);
     const result = await props.printModel.print({
@@ -53,7 +42,7 @@ export default function PrintView(props) {
       mapTitle: "",
       printComment: "",
     });
-    console.log("result: ", result);
+    console.log("result: ", result, "printStatus: ", printStatus);
   };
 
   const cancel = () => {
@@ -61,10 +50,8 @@ export default function PrintView(props) {
     setPrintStatus(PRINT_STATUS.ABORT);
   };
 
+  // We want to keep track of the number of images that are about to be printed with the current settings so that we can warn the user etc.
   const numImages = Math.floor((dateRange[1] - dateRange[0]) / props.stepSize);
-
-  const message = `Vid utskrift så kommer en bild skapas för varje "steg" i tidslinjen. Nuvarande inställningar kommer resultera i ${numImages} bilder.`;
-
   // We don't want to allow the user to print to many images... Every image takes a couple of seconds...
   const printDisabled = numImages > MAX_IMAGES_FOR_PRINT;
   // We also want to warn the user by highlighting the information panel if we are close (or over) the maximum number of images...
@@ -81,8 +68,10 @@ export default function PrintView(props) {
       justifyContent="center"
       sx={{ width: "100%", height: "100%" }}
     >
-      <PrintInformationPanel message={message} mode={informationPanelMode} />
-
+      <PrintInformationPanel
+        message={`Vid utskrift så kommer en bild skapas för varje "steg" i tidslinjen. Nuvarande inställningar kommer resultera i ${numImages} bilder.`}
+        mode={informationPanelMode}
+      />
       <RangeSlider
         title="Välj utskriftsintervall:"
         value={dateRange}
@@ -94,27 +83,7 @@ export default function PrintView(props) {
         step={props.stepSize}
         marks={props.marks}
       />
-      <Grid
-        container
-        item
-        xs={12}
-        justifyContent="center"
-        alignContent="center"
-      >
-        <Tooltip
-          title={printDisabled ? PRINT_DISABLED_TOOLTIP : PRINT_ENABLED_TOOLTIP}
-        >
-          <span>
-            <Button
-              variant="contained"
-              onClick={print}
-              disabled={printDisabled}
-            >
-              Skriv ut
-            </Button>
-          </span>
-        </Tooltip>
-      </Grid>
+      <PrintButton onClick={print} disabled={printDisabled} />
       <PrintDialog open={dialogOpen} cancelPrint={cancel} />
     </Grid>
   );
