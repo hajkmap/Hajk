@@ -10,14 +10,15 @@ export default function Error({
     <Box
       sx={{
         display: "flex",
-        p: 10,
+        pl: { xs: 0, sm: 10 },
+        pr: { xs: 0, sm: 10 },
         justifyContent: "center",
         alignItems: "center",
         flexDirection: "column",
         minHeight: "100vh",
       }}
     >
-      <Alert severity="error">
+      <Alert severity="error" sx={{ mt: -30 }}>
         <AlertTitle>{loadErrorTitle}</AlertTitle>
         {loadErrorMessage}
       </Alert>
