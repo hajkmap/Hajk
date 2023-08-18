@@ -53,6 +53,13 @@ try {
   });
   appConfig = await appConfigResponse.json();
 
+  // Legacy code expects certain keys to be existent in appConfig.
+  // They should in fact be optional. Let's ensure they exist on
+  // the object further down the code, even if they don't exist
+  // in the config file itself.
+  appConfig.proxy = appConfig.proxy || "";
+  appConfig.searchProxy = appConfig.searchProxy || "";
+
   // Update hfetch with loaded config.
   initFetchWrapper(appConfig);
 
