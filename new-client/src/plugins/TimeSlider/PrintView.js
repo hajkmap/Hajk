@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { saveAs } from "file-saver";
 import { FormControl, Grid, InputLabel, MenuItem, Select } from "@mui/material";
 
 import PrintDialog from "./components/PrintDialog";
@@ -35,7 +36,7 @@ export default function PrintView(props) {
   const print = async () => {
     setDialogOpen(true);
     setPrintStatus(PRINT_STATUS.BUSY);
-    const result = await props.printModel.print({
+    const blob = await props.printModel.print({
       scale: scale,
       resolution: "150",
       format: "a4",
@@ -44,8 +45,12 @@ export default function PrintView(props) {
       useTextIconsInMargin: false,
       mapTitle: "",
       printComment: "",
+      saveAsType: "BLOB",
     });
-    console.log("result: ", result, "printStatus: ", printStatus);
+
+    saveAs(blob, `${"test"}.png`);
+    setDialogOpen(false);
+    setPrintStatus(PRINT_STATUS.IDLE);
   };
 
   const cancel = () => {

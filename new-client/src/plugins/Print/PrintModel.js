@@ -1104,347 +1104,354 @@ export default class PrintModel {
   };
 
   print = async (options) => {
-    console.log("options: ", options);
-    const format = options.format;
-    const orientation = options.orientation;
-    const resolution = options.resolution;
-    const scale = options.scale / 1000;
+    return new Promise((resolve, reject) => {
+      const format = options.format;
+      const orientation = options.orientation;
+      const resolution = options.resolution;
+      const scale = options.scale / 1000;
 
-    // Our dimensions are for landscape orientation by default. Flip the values if portrait orientation requested.
-    const dim =
-      orientation === "portrait"
-        ? [...this.dims[format]].reverse()
-        : this.dims[format];
+      // Our dimensions are for landscape orientation by default. Flip the values if portrait orientation requested.
+      const dim =
+        orientation === "portrait"
+          ? [...this.dims[format]].reverse()
+          : this.dims[format];
 
-    const width = Math.round((dim[0] * resolution) / 25.4);
-    const height = Math.round((dim[1] * resolution) / 25.4);
+      const width = Math.round((dim[0] * resolution) / 25.4);
+      const height = Math.round((dim[1] * resolution) / 25.4);
 
-    // Since we're allowing the users to choose which DPI they want to print the map
-    // in, we have to make sure to prepare the layers so that they are fetched with
-    // the correct DPI-settings! We're only doing this if we're supposed to. An admin
-    // might choose not to use this functionality (useCustomTileLoaders set to false).
-    this.useCustomTileLoaders && this.prepareActiveLayersForPrint(options);
+      // Since we're allowing the users to choose which DPI they want to print the map
+      // in, we have to make sure to prepare the layers so that they are fetched with
+      // the correct DPI-settings! We're only doing this if we're supposed to. An admin
+      // might choose not to use this functionality (useCustomTileLoaders set to false).
+      this.useCustomTileLoaders && this.prepareActiveLayersForPrint(options);
 
-    // Before we're printing we must make sure to change the map-view from the
-    // original one, to the print-view.
-    this.printView.setCenter(this.originalView.getCenter());
-    this.map.setView(this.printView);
+      // Before we're printing we must make sure to change the map-view from the
+      // original one, to the print-view.
+      this.printView.setCenter(this.originalView.getCenter());
+      this.map.setView(this.printView);
 
-    // Store mapsize, it's needed when map is restored after print or cancel.
-    this.originalMapSize = this.map.getSize();
+      // Store mapsize, it's needed when map is restored after print or cancel.
+      this.originalMapSize = this.map.getSize();
 
-    const scaleResolution = this.getScaleResolution(
-      scale,
-      resolution,
-      this.map.getView().getCenter()
-    );
+      const scaleResolution = this.getScaleResolution(
+        scale,
+        resolution,
+        this.map.getView().getCenter()
+      );
 
-    // Save some of our values that are necessary to use if user want to cancel the process
+      // Save some of our values that are necessary to use if user want to cancel the process
 
-    this.map.once("rendercomplete", async () => {
-      if (this.pdfCreationCancelled === true) {
-        this.pdfCreationCancelled = false;
-        return false;
-      }
+      this.map.once("rendercomplete", async () => {
+        if (this.pdfCreationCancelled === true) {
+          this.pdfCreationCancelled = false;
+          resolve(null);
+        }
 
-      // This is needed to prevent some buggy output from some browsers
-      // when a lot of tiles are being rendered (it could result in black
-      // canvas PDF)
-      await delay(500);
+        // This is needed to prevent some buggy output from some browsers
+        // when a lot of tiles are being rendered (it could result in black
+        // canvas PDF)
+        await delay(500);
 
-      // Create the map canvas that will hold all of our map tiles
-      const mapCanvas = document.createElement("canvas");
+        // Create the map canvas that will hold all of our map tiles
+        const mapCanvas = document.createElement("canvas");
 
-      // Set canvas dimensions to the newly calculated ones that take user's desired resolution etc into account
-      mapCanvas.width = width;
-      mapCanvas.height = height;
+        // Set canvas dimensions to the newly calculated ones that take user's desired resolution etc into account
+        mapCanvas.width = width;
+        mapCanvas.height = height;
 
-      const mapContext = mapCanvas.getContext("2d");
-      const backgroundColor = this.getMapBackgroundColor(); // Make sure we use the same background-color as the map
-      mapContext.fillStyle = backgroundColor;
-      mapContext.fillRect(0, 0, width, height);
+        const mapContext = mapCanvas.getContext("2d");
+        const backgroundColor = this.getMapBackgroundColor(); // Make sure we use the same background-color as the map
+        mapContext.fillStyle = backgroundColor;
+        mapContext.fillRect(0, 0, width, height);
 
-      // Each canvas element inside OpenLayer's viewport should get printed
-      document.querySelectorAll(".ol-viewport canvas").forEach((canvas) => {
-        if (canvas.width > 0) {
-          const opacity = canvas.parentNode.style.opacity;
-          mapContext.globalAlpha = opacity === "" ? 1 : Number(opacity);
-          // Get the transform parameters from the style's transform matrix
-          if (canvas.style.transform) {
-            const matrix = canvas.style.transform
-              .match(/^matrix\(([^(]*)\)$/)[1]
-              .split(",")
-              .map(Number);
-            // Apply the transform to the export map context
-            CanvasRenderingContext2D.prototype.setTransform.apply(
-              mapContext,
-              matrix
-            );
+        // Each canvas element inside OpenLayer's viewport should get printed
+        document.querySelectorAll(".ol-viewport canvas").forEach((canvas) => {
+          if (canvas.width > 0) {
+            const opacity = canvas.parentNode.style.opacity;
+            mapContext.globalAlpha = opacity === "" ? 1 : Number(opacity);
+            // Get the transform parameters from the style's transform matrix
+            if (canvas.style.transform) {
+              const matrix = canvas.style.transform
+                .match(/^matrix\(([^(]*)\)$/)[1]
+                .split(",")
+                .map(Number);
+              // Apply the transform to the export map context
+              CanvasRenderingContext2D.prototype.setTransform.apply(
+                mapContext,
+                matrix
+              );
+            }
+            mapContext.drawImage(canvas, 0, 0);
           }
-          mapContext.drawImage(canvas, 0, 0);
+        });
+
+        // Initiate the PDF object
+        const pdf = new jsPDF({
+          orientation,
+          format,
+          putOnlyUsedFonts: true,
+          compress: true,
+        });
+
+        // Make sure to add necessary fonts and enable the font we want to use.
+        this.setupFonts(pdf, "ROBOTO_NORMAL");
+
+        // Add our map canvas to the PDF, start at x/y=0/0 and stretch for entire width/height of the canvas
+        pdf.addImage(mapCanvas, "JPEG", 0, 0, dim[0], dim[1]);
+
+        if (this.includeImageBorder) {
+          // Frame color is set to dark gray
+          pdf.setDrawColor(this.textColor);
+          pdf.setLineWidth(0.5);
+          pdf.rect(0.3, 0.3, dim[0] - 0.5, dim[1] - 0, "S");
         }
-      });
 
-      // Initiate the PDF object
-      const pdf = new jsPDF({
-        orientation,
-        format,
-        putOnlyUsedFonts: true,
-        compress: true,
-      });
-
-      // Make sure to add necessary fonts and enable the font we want to use.
-      this.setupFonts(pdf, "ROBOTO_NORMAL");
-
-      // Add our map canvas to the PDF, start at x/y=0/0 and stretch for entire width/height of the canvas
-      pdf.addImage(mapCanvas, "JPEG", 0, 0, dim[0], dim[1]);
-
-      if (this.includeImageBorder) {
-        // Frame color is set to dark gray
-        pdf.setDrawColor(this.textColor);
-        pdf.setLineWidth(0.5);
-        pdf.rect(0.3, 0.3, dim[0] - 0.5, dim[1] - 0, "S");
-      }
-
-      // Add potential margin around the image
-      if (this.margin > 0) {
-        // We always want a white margin
-        pdf.setDrawColor("white");
-        // We want to check if user has chosen to put icons and text
-        // in the margins, which if so, must be larger than usual
-        // Note that we first check if user has NOT chosen this (!).
-        if (!options.useTextIconsInMargin) {
-          // The lineWidth increases the line width equally to "both sides",
-          // therefore, we must have a line width two times the margin we want.
-          pdf.setLineWidth(this.margin * 2);
-          // Draw the border (margin) around the entire image
-          pdf.rect(0, 0, dim[0], dim[1], "S");
-          // If selected as feature in Admin, we draw a frame around the map image
-          if (this.includeImageBorder) {
-            // Frame color is set to dark gray
-            pdf.setDrawColor(this.textColor);
-            pdf.setLineWidth(0.5);
-            pdf.rect(
-              this.margin,
-              this.margin,
-              dim[0] - this.margin * 2,
-              dim[1] - this.margin * 2,
-              "S"
-            );
+        // Add potential margin around the image
+        if (this.margin > 0) {
+          // We always want a white margin
+          pdf.setDrawColor("white");
+          // We want to check if user has chosen to put icons and text
+          // in the margins, which if so, must be larger than usual
+          // Note that we first check if user has NOT chosen this (!).
+          if (!options.useTextIconsInMargin) {
+            // The lineWidth increases the line width equally to "both sides",
+            // therefore, we must have a line width two times the margin we want.
+            pdf.setLineWidth(this.margin * 2);
+            // Draw the border (margin) around the entire image
+            pdf.rect(0, 0, dim[0], dim[1], "S");
+            // If selected as feature in Admin, we draw a frame around the map image
+            if (this.includeImageBorder) {
+              // Frame color is set to dark gray
+              pdf.setDrawColor(this.textColor);
+              pdf.setLineWidth(0.5);
+              pdf.rect(
+                this.margin,
+                this.margin,
+                dim[0] - this.margin * 2,
+                dim[1] - this.margin * 2,
+                "S"
+              );
+            }
+            // Now we check if user did choose text in margins
+          } else {
+            // We do a special check for a5-format and set the dimValue
+            // to get the correct margin values when drawing the rectangle
+            let dimValue =
+              options.format === "a5" ? this.margin + 2 : this.margin;
+            // This lineWidth needs to be larger if user has chosen text in margins
+            pdf.setLineWidth(dimValue * 6);
+            // Draw the increased border (margin) around the entire image
+            // here with special values for larger margins.
+            pdf.rect(-(dimValue * 2), 0, dim[0] + dimValue * 4, dim[1], "S");
+            // If selected as feature in Admin, we draw a frame around the map image
+            if (this.includeImageBorder) {
+              // Frame color is set to dark gray
+              pdf.setDrawColor(this.textColor);
+              pdf.setLineWidth(0.5);
+              pdf.rect(
+                dimValue,
+                dimValue * 3,
+                dim[0] - dimValue * 2,
+                dim[1] - dimValue * 6,
+                "S"
+              );
+            }
           }
-          // Now we check if user did choose text in margins
-        } else {
-          // We do a special check for a5-format and set the dimValue
-          // to get the correct margin values when drawing the rectangle
-          let dimValue =
-            options.format === "a5" ? this.margin + 2 : this.margin;
-          // This lineWidth needs to be larger if user has chosen text in margins
-          pdf.setLineWidth(dimValue * 6);
-          // Draw the increased border (margin) around the entire image
-          // here with special values for larger margins.
-          pdf.rect(-(dimValue * 2), 0, dim[0] + dimValue * 4, dim[1], "S");
-          // If selected as feature in Admin, we draw a frame around the map image
-          if (this.includeImageBorder) {
-            // Frame color is set to dark gray
-            pdf.setDrawColor(this.textColor);
-            pdf.setLineWidth(0.5);
-            pdf.rect(
-              dimValue,
-              dimValue * 3,
-              dim[0] - dimValue * 2,
-              dim[1] - dimValue * 6,
-              "S"
+        }
+        // If logo URL is provided, add the logo to the map
+        if (options.includeLogo && this.logoUrl.trim().length >= 5) {
+          try {
+            const {
+              data: logoData,
+              width: logoWidth,
+              height: logoHeight,
+            } = await this.getImageForPdfFromUrl(
+              this.logoUrl,
+              this.logoMaxWidth
             );
+
+            let logoPlacement = this.getPlacement(
+              options.logoPlacement,
+              logoWidth,
+              logoHeight,
+              dim[0],
+              dim[1]
+            );
+
+            pdf.addImage(
+              logoData,
+              "PNG",
+              logoPlacement.x,
+              logoPlacement.y,
+              logoWidth,
+              logoHeight
+            );
+          } catch (error) {
+            // The image loading may fail due to e.g. wrong URL, so let's catch the rejected Promise
+            this.localObserver.publish("error-loading-logo-image");
           }
         }
-      }
-      // If logo URL is provided, add the logo to the map
-      if (options.includeLogo && this.logoUrl.trim().length >= 5) {
-        try {
-          const {
-            data: logoData,
-            width: logoWidth,
-            height: logoHeight,
-          } = await this.getImageForPdfFromUrl(this.logoUrl, this.logoMaxWidth);
 
-          let logoPlacement = this.getPlacement(
-            options.logoPlacement,
-            logoWidth,
-            logoHeight,
-            dim[0],
-            dim[1]
-          );
+        if (
+          options.includeNorthArrow &&
+          this.northArrowUrl.trim().length >= 5
+        ) {
+          try {
+            const {
+              data: arrowData,
+              width: arrowWidth,
+              height: arrowHeight,
+            } = await this.getImageForPdfFromUrl(
+              this.northArrowUrl,
+              this.northArrowMaxWidth
+            );
 
-          pdf.addImage(
-            logoData,
-            "PNG",
-            logoPlacement.x,
-            logoPlacement.y,
-            logoWidth,
-            logoHeight
-          );
-        } catch (error) {
-          // The image loading may fail due to e.g. wrong URL, so let's catch the rejected Promise
-          this.localObserver.publish("error-loading-logo-image");
+            const arrowPlacement = this.getPlacement(
+              options.northArrowPlacement,
+              arrowWidth,
+              arrowHeight,
+              dim[0],
+              dim[1]
+            );
+
+            pdf.addImage(
+              arrowData,
+              "PNG",
+              arrowPlacement.x,
+              arrowPlacement.y,
+              arrowWidth,
+              arrowHeight
+            );
+          } catch (error) {
+            // The image loading may fail due to e.g. wrong URL, so let's catch the rejected Promise
+            this.localObserver.publish("error-loading-arrow-image");
+          }
         }
-      }
 
-      if (options.includeNorthArrow && this.northArrowUrl.trim().length >= 5) {
-        try {
-          const {
-            data: arrowData,
-            width: arrowWidth,
-            height: arrowHeight,
-          } = await this.getImageForPdfFromUrl(
-            this.northArrowUrl,
-            this.northArrowMaxWidth
+        if (options.includeScaleBar) {
+          this.addScaleBar(
+            pdf,
+            options.mapTextColor,
+            options.scale,
+            options.resolution,
+            options.scaleBarPlacement,
+            scaleResolution,
+            options.format,
+            options.orientation
           );
-
-          const arrowPlacement = this.getPlacement(
-            options.northArrowPlacement,
-            arrowWidth,
-            arrowHeight,
-            dim[0],
-            dim[1]
-          );
-
-          pdf.addImage(
-            arrowData,
-            "PNG",
-            arrowPlacement.x,
-            arrowPlacement.y,
-            arrowWidth,
-            arrowHeight
-          );
-        } catch (error) {
-          // The image loading may fail due to e.g. wrong URL, so let's catch the rejected Promise
-          this.localObserver.publish("error-loading-arrow-image");
         }
-      }
 
-      if (options.includeScaleBar) {
-        this.addScaleBar(
-          pdf,
-          options.mapTextColor,
-          options.scale,
-          options.resolution,
-          options.scaleBarPlacement,
-          scaleResolution,
-          options.format,
-          options.orientation
-        );
-      }
+        // Add map title if user supplied one
+        if (options.mapTitle.trim().length > 0) {
+          let verticalMargin = options.useTextIconsInMargin
+            ? 8 + this.margin
+            : 12 + this.margin;
+          pdf.setFontSize(24);
+          pdf.setTextColor(options.mapTextColor);
+          pdf.text(options.mapTitle, dim[0] / 2, verticalMargin, {
+            align: "center",
+          });
+        }
 
-      // Add map title if user supplied one
-      if (options.mapTitle.trim().length > 0) {
-        let verticalMargin = options.useTextIconsInMargin
-          ? 8 + this.margin
-          : 12 + this.margin;
-        pdf.setFontSize(24);
-        pdf.setTextColor(options.mapTextColor);
-        pdf.text(options.mapTitle, dim[0] / 2, verticalMargin, {
-          align: "center",
-        });
-      }
+        // Add print comment if user supplied one
+        if (options.printComment.trim().length > 0) {
+          let yPos = options.useTextIconsInMargin
+            ? 13 + this.margin
+            : 18 + this.margin;
+          pdf.setFontSize(11);
+          pdf.setTextColor(options.mapTextColor);
+          pdf.text(options.printComment, dim[0] / 2, yPos, {
+            align: "center",
+          });
+        }
 
-      // Add print comment if user supplied one
-      if (options.printComment.trim().length > 0) {
-        let yPos = options.useTextIconsInMargin
-          ? 13 + this.margin
-          : 18 + this.margin;
-        pdf.setFontSize(11);
-        pdf.setTextColor(options.mapTextColor);
-        pdf.text(options.printComment, dim[0] / 2, yPos, {
-          align: "center",
-        });
-      }
-
-      // Add potential copyright text
-      if (this.copyright.length > 0) {
-        let yPos = options.useTextIconsInMargin
-          ? this.textIconsMargin + this.margin / 2
-          : this.margin;
-        pdf.setFontSize(8);
-        pdf.setTextColor(options.mapTextColor);
-        pdf.text(this.copyright, dim[0] - 4 - yPos, dim[1] - 5.5 - yPos, {
-          align: "right",
-        });
-      }
-
-      // Add potential date text
-      if (this.date.length > 0) {
-        const date = this.date.replace(
-          "{date}",
-          new Date().toLocaleDateString()
-        );
-        let yPos = options.useTextIconsInMargin
-          ? this.textIconsMargin + this.margin / 2
-          : this.margin;
-        pdf.setFontSize(8);
-        pdf.setTextColor(options.mapTextColor);
-        pdf.text(date, dim[0] - 4 - yPos, dim[1] - 2 - yPos, {
-          align: "right",
-        });
-      }
-
-      // Add potential disclaimer text
-      if (this.disclaimer.length > 0) {
-        let yPos = options.useTextIconsInMargin
-          ? this.textIconsMargin + this.margin / 2
-          : this.margin;
-        pdf.setFontSize(8);
-        pdf.setTextColor(options.mapTextColor);
-        let textLines = pdf.splitTextToSize(
-          this.disclaimer,
-          dim[0] / 2 - this.margin - 8
-        );
-        let textLinesDims = pdf.getTextDimensions(textLines, { fontSize: 8 });
-        pdf.text(
-          textLines,
-          dim[0] - 4 - yPos,
-          dim[1] - 6 - yPos - textLinesDims.h,
-          {
+        // Add potential copyright text
+        if (this.copyright.length > 0) {
+          let yPos = options.useTextIconsInMargin
+            ? this.textIconsMargin + this.margin / 2
+            : this.margin;
+          pdf.setFontSize(8);
+          pdf.setTextColor(options.mapTextColor);
+          pdf.text(this.copyright, dim[0] - 4 - yPos, dim[1] - 5.5 - yPos, {
             align: "right",
-          }
-        );
-      }
+          });
+        }
 
-      // Since we've been messing with the layer-settings while printing, we have to
-      // make sure to reset these settings. (Should only be done if custom loaders has been used).
-      this.useCustomTileLoaders && this.resetPrintLayers();
+        // Add potential date text
+        if (this.date.length > 0) {
+          const date = this.date.replace(
+            "{date}",
+            new Date().toLocaleDateString()
+          );
+          let yPos = options.useTextIconsInMargin
+            ? this.textIconsMargin + this.margin / 2
+            : this.margin;
+          pdf.setFontSize(8);
+          pdf.setTextColor(options.mapTextColor);
+          pdf.text(date, dim[0] - 4 - yPos, dim[1] - 2 - yPos, {
+            align: "right",
+          });
+        }
 
-      // Finally, save the PDF (or PNG)
-      this.saveToFile(pdf, width, options.saveAsType)
-        .then(() => {
-          this.localObserver.publish("print-completed");
-          return { result: "OK" };
-        })
-        .catch((error) => {
-          console.warn(error);
-          this.localObserver.publish("print-failed-to-save");
-          return null;
-        })
-        .finally(() => {
-          // Reset map to how it was before print
-          this.restoreOriginalView();
-        });
+        // Add potential disclaimer text
+        if (this.disclaimer.length > 0) {
+          let yPos = options.useTextIconsInMargin
+            ? this.textIconsMargin + this.margin / 2
+            : this.margin;
+          pdf.setFontSize(8);
+          pdf.setTextColor(options.mapTextColor);
+          let textLines = pdf.splitTextToSize(
+            this.disclaimer,
+            dim[0] / 2 - this.margin - 8
+          );
+          let textLinesDims = pdf.getTextDimensions(textLines, { fontSize: 8 });
+          pdf.text(
+            textLines,
+            dim[0] - 4 - yPos,
+            dim[1] - 6 - yPos - textLinesDims.h,
+            {
+              align: "right",
+            }
+          );
+        }
+
+        // Since we've been messing with the layer-settings while printing, we have to
+        // make sure to reset these settings. (Should only be done if custom loaders has been used).
+        this.useCustomTileLoaders && this.resetPrintLayers();
+
+        // Finally, save the PDF (or PNG)
+        this.saveToFile(pdf, width, options.saveAsType)
+          .then((blob) => {
+            this.localObserver.publish("print-completed");
+            resolve(blob);
+          })
+          .catch((error) => {
+            console.warn(error);
+            this.localObserver.publish("print-failed-to-save");
+            reject(error);
+          })
+          .finally(() => {
+            // Reset map to how it was before print
+            this.restoreOriginalView();
+          });
+      });
+
+      // Get print center from preview feature's center coordinate
+      const printCenter = getCenter(
+        this.previewFeature.getGeometry().getExtent()
+      );
+
+      // Hide our preview feature so it won't get printed
+      this.previewLayer.setVisible(false);
+
+      // Set map size and resolution, this will initiate print, as we have a listener for renderComplete.
+      // (Which will fire when the new size and resolution has been set and the new tiles has been loaded).
+      this.map.getTargetElement().style.width = `${width}px`;
+      this.map.getTargetElement().style.height = `${height}px`;
+      this.map.updateSize();
+      this.map.getView().setCenter(printCenter);
+      this.map.getView().setResolution(scaleResolution);
     });
-
-    // Get print center from preview feature's center coordinate
-    const printCenter = getCenter(
-      this.previewFeature.getGeometry().getExtent()
-    );
-
-    // Hide our preview feature so it won't get printed
-    this.previewLayer.setVisible(false);
-
-    // Set map size and resolution, this will initiate print, as we have a listener for renderComplete.
-    // (Which will fire when the new size and resolution has been set and the new tiles has been loaded).
-    this.map.getTargetElement().style.width = `${width}px`;
-    this.map.getTargetElement().style.height = `${height}px`;
-    this.map.updateSize();
-    this.map.getView().setCenter(printCenter);
-    this.map.getView().setResolution(scaleResolution);
   };
 
   restoreOriginalView = () => {
@@ -1480,7 +1487,7 @@ export default class PrintModel {
   // Saves the supplied PDF *as a PNG* with the supplied file-name.
   // The width of the document has to be supplied since some calculations
   // must be done in order to create a PNG with the correct resolution etc.
-  #saveToPng = async (pdf, fileName, width) => {
+  #saveToPng = async (pdf, fileName, width, type) => {
     try {
       // First we'll dynamically import the required dependencies.
       const { pdfjs } = await this.#getPngDependencies();
@@ -1495,29 +1502,32 @@ export default class PrintModel {
       // - PDF-JS: Pro => Can export to PNG, Con: Cannot create as nice of an image as JS-PDF.
       // - JS-PDF: Pro => Creates good-looking PDFs, Con: Cannot export to PNG.
       // - Conclusion: We use both...
-      pdfjs.getDocument({ data: ab }).promise.then((pdf) => {
-        // So, when the PDF-JS-PDF is created, we get the first page, and then render
-        // it on a canvas so that we can export it as a PNG.
-        pdf.getPage(1).then((page) => {
-          // We're gonna need a canvas and its context.
-          let canvas = document.createElement("canvas");
-          let ctx = canvas.getContext("2d");
-          // Scale the viewport to match current resolution
-          const viewport = page.getViewport({ scale: 1 });
-          const scale = width / viewport.width;
-          const scaledViewport = page.getViewport({ scale: scale });
-          // Create the render-context-object.
-          const renderContext = {
-            canvasContext: ctx,
-            viewport: scaledViewport,
-          };
-          // Set the canvas dimensions to the correct width and height.
-          canvas.height = scaledViewport.height;
-          canvas.width = scaledViewport.width;
-          // Then we'll render and save!
-          page.render(renderContext).promise.then(() => {
-            canvas.toBlob((blob) => {
-              saveAs(blob, `${fileName}.png`);
+      return new Promise((resolve) => {
+        pdfjs.getDocument({ data: ab }).promise.then((pdf) => {
+          // So, when the PDF-JS-PDF is created, we get the first page, and then render
+          // it on a canvas so that we can export it as a PNG.
+          pdf.getPage(1).then((page) => {
+            // We're gonna need a canvas and its context.
+            let canvas = document.createElement("canvas");
+            let ctx = canvas.getContext("2d");
+            // Scale the viewport to match current resolution
+            const viewport = page.getViewport({ scale: 1 });
+            const scale = width / viewport.width;
+            const scaledViewport = page.getViewport({ scale: scale });
+            // Create the render-context-object.
+            const renderContext = {
+              canvasContext: ctx,
+              viewport: scaledViewport,
+            };
+            // Set the canvas dimensions to the correct width and height.
+            canvas.height = scaledViewport.height;
+            canvas.width = scaledViewport.width;
+            // Then we'll render and save!
+            page.render(renderContext).promise.then(() => {
+              canvas.toBlob((blob) => {
+                type !== "BLOB" && saveAs(blob, `${fileName}.png`);
+                resolve(blob);
+              });
             });
           });
         });
@@ -1529,23 +1539,27 @@ export default class PrintModel {
 
   // Saves the print-contents to file, either PDF, or PNG (depending on supplied type).
   saveToFile = async (pdf, width, type) => {
-    // We're gonna need to create a file-name.
-    const fileName = `Kartexport - ${new Date().toLocaleString()}`;
-    // Then we'll try to save the contents in the format the user requested.
-    try {
-      switch (type) {
-        case "PDF":
-          return this.#saveToPdf(pdf, fileName);
-        case "PNG":
-          return this.#saveToPng(pdf, fileName, width);
-        default:
-          throw new Error(
-            `Supplied type could not be handled. The supplied type was ${type} and currently only PDF and PNG is supported.`
-          );
+    return new Promise((resolve) => {
+      // We're gonna need to create a file-name.
+      const fileName = `Kartexport - ${new Date().toLocaleString()}`;
+      // Then we'll try to save the contents in the format the user requested.
+      try {
+        switch (type) {
+          case "PDF":
+            return this.#saveToPdf(pdf, fileName);
+          case "PNG":
+          case "BLOB":
+            console.log("in correct switch");
+            return resolve(this.#saveToPng(pdf, fileName, width, type));
+          default:
+            throw new Error(
+              `Supplied type could not be handled. The supplied type was ${type} and currently only PDF and PNG is supported.`
+            );
+        }
+      } catch (error) {
+        throw new Error(`Failed to save file... ${error}`);
       }
-    } catch (error) {
-      throw new Error(`Failed to save file... ${error}`);
-    }
+    });
   };
 
   cancelPrint = () => {
