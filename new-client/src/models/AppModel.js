@@ -399,7 +399,7 @@ class AppModel {
         const featureCollectionsToBeHandledByMapClickViewer =
           featureCollections.filter((fc) => fc.type !== "SearchResults");
 
-        // Publish the retrived collections, even if they're empty. We want the
+        // Publish the retrieved collections, even if they're empty. We want the
         // handling components to know, so they can act accordingly (e.g. close
         // window if no features are to be shown).
         this.globalObserver.publish(
