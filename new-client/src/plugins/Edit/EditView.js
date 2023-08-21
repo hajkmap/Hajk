@@ -52,6 +52,15 @@ class EditView extends React.PureComponent {
       loadingError: status === "data-load-error" ? true : false,
       activeStep: status === "data-load-error" ? 0 : 1,
     });
+    // If the selected source only allows simple edit, let's
+    // activate the "modify" tool automatically.
+    if (this.state.editSource?.simpleEditWorkflow === true) {
+      // Toggle state in View
+      this.toggleActiveTool("modify");
+
+      // Activate interaction in model
+      this.props.model.activateModify();
+    }
   };
 
   setLayer(serviceId) {
@@ -253,8 +262,14 @@ class EditView extends React.PureComponent {
             <StepContent>
               <Grid container spacing={2} direction="row">
                 <Grid item xs={12}>
-                  {this.renderAttributeEditor()}
-                  {this.renderToolbar()}
+                  {editSource?.simpleEditWorkflow !== true && (
+                    <>
+                      {this.renderAttributeEditor()}
+                      {this.renderToolbar()}
+                    </>
+                  )}
+                  {editSource?.simpleEditWorkflow === true &&
+                    this.renderAttributeEditor()}
                 </Grid>
                 {!editFeature && (
                   <>
