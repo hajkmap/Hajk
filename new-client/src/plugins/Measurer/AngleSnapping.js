@@ -94,10 +94,13 @@ export default class AngleSnapping {
       // We'll use the segment later to get the relevant angle.
       while (
         !clickedSegment &&
-        i < allCoordinates.length &&
+        i < allCoordinates.length - 1 &&
         i <= maxSegmentsToCheck
       ) {
-        const segment = [allCoordinates[i], allCoordinates[i + 1]];
+        const segment = [
+          allCoordinates[i],
+          allCoordinates[i + 1] || allCoordinates[0],
+        ];
 
         // getClosestPoint did not work as expected so I used methods from turf
         const foundClickedSegment = booleanPointOnLine(

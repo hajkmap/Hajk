@@ -682,6 +682,7 @@ class DrawModel {
         // so we have to wrap that array in an array before returning.
         return [geometry.getCoordinates()];
       case "MultiPolygon":
+        // We'll need to flatten the data from MultiPolygon. It's the coordinates we want.
         let coords = [];
         geometry.getCoordinates()[0].forEach((a) => {
           a.forEach((b) => {
