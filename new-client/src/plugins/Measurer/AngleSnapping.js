@@ -14,7 +14,7 @@ export default class AngleSnapping {
   }
 
   #handleKeyDownToggle = (e) => {
-    this.#angleSnappingIsActive = e.ctrlKey === true;
+    this.#angleSnappingIsActive = e.ctrlKey === true || e.metaKey === true;
   };
 
   setActive = (active) => {
@@ -48,7 +48,7 @@ export default class AngleSnapping {
     const anglesToGenerate = [0, 90, 180, 270];
 
     // We can only create perpendicular snapping for these types.
-    const allowedTypes = ["Polygon", "LineString"];
+    const allowedTypes = ["Polygon", "MultiPolygon", "LineString"];
     const featureType = measureFeature.getGeometry().getType();
 
     if (!allowedTypes.includes(featureType)) {

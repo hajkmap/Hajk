@@ -681,6 +681,14 @@ class DrawModel {
         // GetCoordinates returns an array with the coordinates for points,
         // so we have to wrap that array in an array before returning.
         return [geometry.getCoordinates()];
+      case "MultiPolygon":
+        let coords = [];
+        geometry.getCoordinates()[0].forEach((a) => {
+          a.forEach((b) => {
+            coords.push(b);
+          });
+        });
+        return coords;
       default:
         // The default catches Polygons, which are wrapped in an "extra" array, so let's
         // return the first element.
