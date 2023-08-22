@@ -22,11 +22,6 @@ function Measurer(props) {
   const [pluginShown, setPluginShown] = React.useState(
     props.options.visibleAtStart ?? false
   );
-  const angleSnapping = useMemo(() => {
-    return new AngleSnapping();
-  }, []);
-
-  angleSnapping.setActive(true);
 
   const [drawModel] = React.useState(
     () =>
@@ -59,6 +54,12 @@ function Measurer(props) {
         },
       })
   );
+
+  const angleSnapping = useMemo(() => {
+    return new AngleSnapping(drawModel, map);
+  }, [drawModel, map]);
+
+  angleSnapping.setActive(true);
 
   const handleDrawStart = useCallback(
     (e) => {

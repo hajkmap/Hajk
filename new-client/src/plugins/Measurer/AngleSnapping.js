@@ -7,10 +7,22 @@ import booleanPointOnLine from "@turf/boolean-point-on-line";
 export default class AngleSnapping {
   #snapGuides;
   #angleSnappingIsActive;
+  #allowedTypes;
+  #anglesToGenerate;
 
-  constructor() {
+  #drawModel;
+  #map;
+
+  constructor(drawModel, map) {
+    this.#drawModel = drawModel;
+    this.#map = map;
     this.#snapGuides = [];
     this.#angleSnappingIsActive = false;
+    // We can only create perpendicular snapping for these types.
+    this.#allowedTypes = ["Polygon", "MultiPolygon", "LineString"];
+    // The snapping angles
+    // Maybe we should be able to configure these in the future
+    this.#anglesToGenerate = [0, 90, 180, 270];
   }
 
   #handleKeyDownToggle = (e) => {
@@ -24,15 +36,93 @@ export default class AngleSnapping {
     this.#angleSnappingIsActive = false;
   };
 
-  clearSnapGuides = (drawModel) => {
+  clearSnapGuides = () => {
     this.#snapGuides.forEach((guideFeature) => {
-      drawModel.removeFeature(guideFeature);
+      this.#drawModel.removeFeature(guideFeature);
     });
     this.#snapGuides = [];
   };
 
-  handleDrawStartEvent = (drawStartEvent, map, drawModel) => {
-    this.clearSnapGuides(drawModel);
+  #lookForSegmentInFeature = (feature, coordinate) => {
+    let allCoordinates = this.#drawModel.getFeatureCoordinates(feature);
+
+    let i = 0;
+    let clickedSegment = null;
+
+    // If a geometry is too complex we might choke the browser....
+    // We'll prevent this by limiting this functionality to more simple geometries.
+    const maxSegmentsToCheck = 500; // 500 is still allot....
+
+    // Now it's time to look for the specific clicked segment of the feature we clicked.
+    // We'll use the segment later to get the relevant angle.
+    while (
+      !clickedSegment &&
+      i < allCoordinates.length - 1 &&
+      i <= maxSegmentsToCheck
+    ) {
+      const segment = [
+        allCoordinates[i],
+        allCoordinates[i + 1] || allCoordinates[0], // Handle broken MultiPolygons
+      ];
+
+      // getClosestPoint did not work as expected so I used methods from turf
+      const foundClickedSegment = booleanPointOnLine(
+        coordinate,
+        new TurfLineString(segment),
+        {
+          ignoreEndVertices: false,
+          epsilon: 0.001, // I got no matches without a value here (hitTolerance/fuzziness)
+        }
+      );
+
+      if (foundClickedSegment) {
+        clickedSegment = segment;
+      }
+
+      i++;
+    }
+    return clickedSegment;
+  };
+
+  #getClickedSegment = (measureFeature, coordinate) => {
+    // Unfortunately we need to convert to pixel because there is no "getFeaturesAtCoordinate" at this point
+    const px = this.#map.getPixelFromCoordinate(coordinate);
+    const clickedFeatures = this.#map
+      .getFeaturesAtPixel(px, {
+        hitTolerance: 0,
+      })
+      .filter((f) => {
+        // Filter out our draw feature and circles, points etc.
+        const type = f.getGeometry().getType();
+        return (
+          f !== measureFeature &&
+          !f.get("USER_MEASUREMENT_GUIDE") === true && // We should not trigger when clicking the green Guides.
+          this.#allowedTypes.includes(type)
+        );
+      });
+
+    if (clickedFeatures.length === 0) {
+      // No useful features found
+      return;
+    }
+
+    let clickedSegment = null;
+
+    for (let i = 0; i < clickedFeatures.length; i++) {
+      clickedSegment = this.#lookForSegmentInFeature(
+        clickedFeatures[i],
+        coordinate
+      );
+      if (clickedSegment) {
+        break;
+      }
+    }
+
+    return clickedSegment;
+  };
+
+  handleDrawStartEvent = (drawStartEvent) => {
+    this.clearSnapGuides();
     if (!this.#angleSnappingIsActive) {
       return;
     }
@@ -43,81 +133,18 @@ export default class AngleSnapping {
 
     const measureFeature = drawStartEvent.feature;
 
-    // The snapping angles
-    // Maybe we should be able to configure these in the future
-    const anglesToGenerate = [0, 90, 180, 270];
-
-    // We can only create perpendicular snapping for these types.
-    const allowedTypes = ["Polygon", "MultiPolygon", "LineString"];
     const featureType = measureFeature.getGeometry().getType();
 
-    if (!allowedTypes.includes(featureType)) {
+    if (!this.#allowedTypes.includes(featureType)) {
       // Lets escape, this does not feel right
       return;
     }
 
     // We'll need the clicked coordinate for lookup
-    const coord = drawModel.getFeatureCoordinates(measureFeature)[0];
+    const coord = this.#drawModel.getFeatureCoordinates(measureFeature)[0];
 
     if (coord) {
-      // Unfortunately we need to convert to pixel because there is no "getFeaturesAtCoordinate" at this point
-      const px = map.getPixelFromCoordinate(coord);
-      const clickedFeatures = map
-        .getFeaturesAtPixel(px, {
-          hitTolerance: 0,
-        })
-        .filter((f) => {
-          // Filter out our draw feature and circles, points etc.
-          const type = f.getGeometry().getType();
-          return f !== measureFeature && allowedTypes.includes(type);
-        });
-
-      if (
-        clickedFeatures.length === 0 ||
-        clickedFeatures[0].get("USER_MEASUREMENT_GUIDE") === true
-      ) {
-        // No useful features found
-        return;
-      }
-
-      // Lets use the first available feature and get all its coordinates
-      let allCoordinates = drawModel.getFeatureCoordinates(clickedFeatures[0]);
-
-      let i = 0;
-      let clickedSegment = null;
-
-      // If a geometry is too complex we might choke the browser....
-      // We'll prevent this by limiting this functionality to more simple geometries.
-      const maxSegmentsToCheck = 500; // 500 is still allot....
-
-      // Now it's time to look for the specific clicked segment of the feature we clicked.
-      // We'll use the segment later to get the relevant angle.
-      while (
-        !clickedSegment &&
-        i < allCoordinates.length - 1 &&
-        i <= maxSegmentsToCheck
-      ) {
-        const segment = [
-          allCoordinates[i],
-          allCoordinates[i + 1] || allCoordinates[0],
-        ];
-
-        // getClosestPoint did not work as expected so I used methods from turf
-        const foundClickedSegment = booleanPointOnLine(
-          coord,
-          new TurfLineString(segment),
-          {
-            ignoreEndVertices: false,
-            epsilon: 0.001, // I got no matches without a value here (hitTolerance/fuzziness)
-          }
-        );
-
-        if (foundClickedSegment) {
-          clickedSegment = segment;
-        }
-
-        i++;
-      }
+      const clickedSegment = this.#getClickedSegment(measureFeature, coord);
 
       if (clickedSegment) {
         const segmentLine = new LineString(clickedSegment);
@@ -143,7 +170,7 @@ export default class AngleSnapping {
           })
         );
 
-        drawModel.addFeature(segmentFeature);
+        this.#drawModel.addFeature(segmentFeature);
 
         // We'll use this style for all added snapping lines.
         const guideStyle = new Style({
@@ -156,7 +183,7 @@ export default class AngleSnapping {
 
         let guides = [];
 
-        anglesToGenerate.forEach((angle) => {
+        this.#anglesToGenerate.forEach((angle) => {
           angle = (angle * Math.PI) / 180; // Degrees to radians
           let targetX = coord[0] + 100000 * Math.cos(angle);
           let targetY = coord[1] + 100000 * Math.sin(angle);
@@ -172,7 +199,7 @@ export default class AngleSnapping {
 
           guides.push(feature);
           feature.set("USER_MEASUREMENT_GUIDE", true);
-          drawModel.addFeature(feature);
+          this.#drawModel.addFeature(feature);
         });
 
         // Add the guides etc to ref arr so we can remove them
