@@ -101,6 +101,7 @@ class LayerGroupItem extends Component {
     const { layer } = props;
     const layerInfo = props.layer.get("layerInfo");
     this.state = {
+      subLayers: props.layer.subLayers,
       caption: layerInfo.caption,
       visible: props.layer.get("visible"),
       // If layer is to be shown, check if there are some specified sublayers (if yes, we'll
@@ -575,6 +576,12 @@ class LayerGroupItem extends Component {
       );
     } else {
       visibleSubLayers.push(subLayer);
+      // Restore order to its former glory. Sort using original sublayer array.
+      visibleSubLayers.sort((a, b) => {
+        return (
+          this.state.subLayers.indexOf(a) - this.state.subLayers.indexOf(b)
+        );
+      });
       isNewSubLayer = true;
     }
 
