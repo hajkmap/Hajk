@@ -132,7 +132,7 @@ function Measurer(props) {
 
       feature.setStyle(style);
     },
-    [angleSnapping, drawModel]
+    [angleSnapping]
   );
 
   const startInteractionWithDrawType = useCallback(
