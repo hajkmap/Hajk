@@ -99,7 +99,7 @@ function Measurer(props) {
 
   const handleDrawEnd = useCallback(
     (e) => {
-      angleSnapping.clearSnapGuides(drawModel);
+      angleSnapping.clearSnapGuides();
       if (!e.feature) return;
       const feature = e.feature;
       const type = feature.getGeometry().getType();
@@ -244,7 +244,7 @@ function Measurer(props) {
   const onWindowHide = () => {
     restoreHoveredFeature();
     angleSnapping.setActive(false);
-    angleSnapping.clearSnapGuides(drawModel);
+    angleSnapping.clearSnapGuides();
     setPluginShown(false);
   };
 
