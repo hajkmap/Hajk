@@ -77,9 +77,9 @@ function HelpDialog(props) {
           <br />
           <strong>Vinkelrät mätning</strong>
           <br />
-          Håll nere Ctrl-tangenten och klicka på en linje så kan du göra
-          vinkelräta mätningar från den linjen. Observera: Linjen du klickar på
-          måste vara en vektorlinje som du snäpper mot.
+          Håll ner Ctrl på Windows eller Cmd (⌘) på Mac och klicka på en linje
+          så kan du göra vinkelräta mätningar från den linjen. Observera: Linjen
+          du klickar på måste vara en vektorlinje som du snäpper mot.
         </DialogContentText>
       </DialogContent>
       <DialogActions>
