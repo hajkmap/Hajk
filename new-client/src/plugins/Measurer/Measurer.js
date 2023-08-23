@@ -1,4 +1,4 @@
-import React, { useRef } from "react";
+import React, { useRef, useMemo } from "react";
 import { useState, useCallback } from "react";
 import BaseWindowPlugin from "../BaseWindowPlugin";
 
@@ -11,6 +11,7 @@ import { DEFAULT_MEASUREMENT_SETTINGS } from "./constants";
 import DrawModel from "models/DrawModel";
 import { Circle, Fill, RegularShape, Stroke, Style } from "ol/style";
 import HelpIcon from "@mui/icons-material/Help";
+import AngleSnapping from "./AngleSnapping";
 
 function Measurer(props) {
   const { map, app } = props;
@@ -54,6 +55,20 @@ function Measurer(props) {
       })
   );
 
+  const angleSnapping = useMemo(() => {
+    return new AngleSnapping(drawModel, map);
+  }, [drawModel, map]);
+
+  angleSnapping.setActive(true);
+
+  const handleDrawStart = useCallback(
+    (e) => {
+      // Forward drawstart event etc. to angle snapper.
+      angleSnapping.handleDrawStartEvent(e, map, drawModel);
+    },
+    [angleSnapping, map, drawModel]
+  );
+
   const handleAddFeature = useCallback(
     (e) => {
       // This is used to clean up measurements that results in 0 (zero).
@@ -82,50 +97,55 @@ function Measurer(props) {
     [drawModel]
   );
 
-  const handleDrawEnd = useCallback((e) => {
-    if (!e.feature) return;
-    const feature = e.feature;
-    const type = feature.getGeometry().getType();
+  const handleDrawEnd = useCallback(
+    (e) => {
+      angleSnapping.clearSnapGuides();
+      if (!e.feature) return;
+      const feature = e.feature;
+      const type = feature.getGeometry().getType();
 
-    feature.set("USER_MEASUREMENT", true);
-    let style = feature.getStyle();
+      feature.set("USER_MEASUREMENT", true);
+      let style = feature.getStyle();
 
-    if (!style) return;
+      if (!style) return;
 
-    if (type === "Point") {
-      style = new Style({
-        image: new Circle({
-          radius: 6,
-          stroke: new Stroke({
-            color: "#000000",
-            width: 1,
-            lineDash: null,
+      if (type === "Point") {
+        style = new Style({
+          image: new Circle({
+            radius: 6,
+            stroke: new Stroke({
+              color: "#000000",
+              width: 1,
+              lineDash: null,
+            }),
+            fill: new Fill({
+              color: "rgba(255,255,255,0.05)",
+            }),
           }),
-          fill: new Fill({
-            color: "rgba(255,255,255,0.05)",
-          }),
-        }),
-      });
-    } else {
-      let stroke = style.getStroke();
-      // remove the line dash, we only want that while measuring.
-      stroke.setLineDash(null);
-      style.setStroke(stroke);
-    }
+        });
+      } else {
+        let stroke = style.getStroke();
+        // remove the line dash, we only want that while measuring.
+        stroke.setLineDash(null);
+        style.setStroke(stroke);
+      }
 
-    feature.setStyle(style);
-  }, []);
+      feature.setStyle(style);
+    },
+    [angleSnapping, drawModel]
+  );
 
   const startInteractionWithDrawType = useCallback(
     (type) => {
       setDrawType(type);
       drawModel.toggleDrawInteraction(type, {
         handleDrawEnd: handleDrawEnd,
+        handleDrawStart: handleDrawStart,
         handleAddFeature: handleAddFeature,
         drawStyleSettings: { strokeStyle: { dash: null } },
       });
     },
-    [drawModel, handleAddFeature, handleDrawEnd]
+    [drawModel, handleAddFeature, handleDrawEnd, handleDrawStart]
   );
 
   const handleDrawTypeChange = (e, value) => {
@@ -206,25 +226,30 @@ function Measurer(props) {
 
   React.useEffect(() => {
     map.on("pointermove", handlePointerMove);
+
     return () => {
       map.un("pointermove", handlePointerMove);
     };
-  }, [map, handlePointerMove]);
+  }, [map, handlePointerMove, drawModel]);
 
   React.useEffect(() => {
     if (!pluginShown) {
       drawModel.toggleDrawInteraction("");
       return;
     }
+
     startInteractionWithDrawType(drawType);
   }, [pluginShown, drawType, drawModel, startInteractionWithDrawType]);
 
   const onWindowHide = () => {
     restoreHoveredFeature();
+    angleSnapping.setActive(false);
+    angleSnapping.clearSnapGuides();
     setPluginShown(false);
   };
 
   const onWindowShow = () => {
+    angleSnapping.setActive(true);
     setPluginShown(true);
   };
 
