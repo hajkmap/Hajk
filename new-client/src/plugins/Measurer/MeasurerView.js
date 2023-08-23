@@ -63,12 +63,23 @@ function HelpDialog(props) {
       <DialogTitle>{"Hjälp"}</DialogTitle>
       <DialogContent>
         <DialogContentText>
-          För att avsluta en mätning, klicka igen på sista punkten eller tryck
-          på Esc/Enter-tangenten.
+          <strong>Avsluta mätning</strong>
+          <br />
+          Tryck på Esc/Enter-tangenten eller klicka igen på sista punkten för
+          att avsluta mätning.
           <br />
           <br />
-          Vid ritning av sträckor och arealer är det möjligt att hålla ner
-          Shift-tangenten för att rita på fri hand.
+          <strong>Rita på fri hand</strong>
+          <br />
+          Håll ner Shift-tangenten för att rita på fri hand. Det här är möjligt
+          när du ritar sträckor eller arealer.
+          <br />
+          <br />
+          <strong>Vinkelrät mätning</strong>
+          <br />
+          Håll ner Ctrl på Windows eller Cmd (⌘) på Mac och klicka på en linje
+          så kan du göra vinkelräta mätningar från den linjen. Observera: Linjen
+          du klickar på måste vara en vektorlinje som du snäpper mot.
         </DialogContentText>
       </DialogContent>
       <DialogActions>
@@ -117,7 +128,7 @@ function MeasurerView(props) {
             variant="contained"
             aria-label="outlined button group"
           >
-            <StyledToggleButton value="Point" title="Punkt">
+            <StyledToggleButton value="Point" title="Punkt (Visar koordinat)">
               <SvgImg src={IconPoint()} />
             </StyledToggleButton>
             <StyledToggleButton value="LineString" title="Sträcka">

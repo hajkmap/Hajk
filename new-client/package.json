@@ -54,6 +54,7 @@
     "@mui/utils": "^5.14.5",
     "@mui/x-data-grid": "^6.11.2",
     "@nieuwlandgeo/sldreader": "^0.3.1",
+    "@turf/boolean-point-on-line": "^6.5.0",
     "@turf/buffer": "^6.5.0",
     "@turf/transform-translate": "^6.5.0",
     "@turf/union": "^6.5.0",
