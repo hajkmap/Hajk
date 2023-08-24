@@ -52,6 +52,19 @@ class EditView extends React.PureComponent {
       loadingError: status === "data-load-error" ? true : false,
       activeStep: status === "data-load-error" ? 0 : 1,
     });
+    this.potentiallyAutoActivateModify();
+  };
+
+  potentiallyAutoActivateModify = () => {
+    // If the selected source only allows simple edit, let's
+    // activate the "modify" tool automatically.
+    if (this.state.editSource?.simpleEditWorkflow === true) {
+      // Toggle state in View
+      this.toggleActiveTool("modify");
+
+      // Activate interaction in model
+      this.props.model.activateModify();
+    }
   };
 
   setLayer(serviceId) {
@@ -72,6 +85,14 @@ class EditView extends React.PureComponent {
         activeStep: 0,
         activeTool: undefined,
       });
+    } else if (activeStep === 1) {
+      this.setState({ activeStep });
+      // If we end up on step 1 again, it means that user has
+      // clicked on "Continue editing" button after a save has
+      // been completed. In that case, we must check again if
+      // the simple edit workflow is active and in that case
+      // auto-activate the modify tool.
+      this.potentiallyAutoActivateModify();
     } else {
       this.setState({ activeStep });
     }
@@ -253,8 +274,14 @@ class EditView extends React.PureComponent {
             <StepContent>
               <Grid container spacing={2} direction="row">
                 <Grid item xs={12}>
-                  {this.renderAttributeEditor()}
-                  {this.renderToolbar()}
+                  {editSource?.simpleEditWorkflow !== true && (
+                    <>
+                      {this.renderAttributeEditor()}
+                      {this.renderToolbar()}
+                    </>
+                  )}
+                  {editSource?.simpleEditWorkflow === true &&
+                    this.renderAttributeEditor()}
                 </Grid>
                 {!editFeature && (
                   <>

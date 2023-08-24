@@ -208,13 +208,6 @@ const FmeServerView = (props) => {
     localObserver.publish("view.activeProductChange", product);
   }, [activeGroup, activeProduct, localObserver, model]);
 
-  // This effect makes sure that we clear the map when the activeProduct
-  // changes. We don't want to keep geometries between products, that
-  // might lead to weird effects.
-  React.useEffect(() => {
-    handleResetDraw();
-  }, [activeProduct, handleResetDraw]);
-
   // This effect makes sure that we clear the active product when
   // the activeGroup changes.
   React.useEffect(() => {
@@ -228,7 +221,6 @@ const FmeServerView = (props) => {
     setActiveGroup("");
     setActiveProduct("");
     resetOrderInformation();
-    handleResetDraw();
   }
 
   // If the user chooses to reset the stepper, we must make sure
