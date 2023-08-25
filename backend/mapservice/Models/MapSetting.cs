@@ -107,7 +107,9 @@ namespace MapService.Models
 
         public bool zoomDelta { get; set; }
 
-        public bool zoomDuration { get; set; }
+        public Nullable<int> zoomDuration { get; set; }
+
+        public object linkInDrawer { get; set; }
 
         public bool showRecentlyUsedPlugins { get; set; }
 

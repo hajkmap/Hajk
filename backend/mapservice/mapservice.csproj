@@ -193,7 +193,6 @@
     <Content Include="App_Data\map_1.json" />
     <Content Include="App_Data\templates\projections.template" />
     <Content Include="App_Data\templates\map.template" />
-    <Content Include="libman.json" />
     <None Include="Properties\PublishProfiles\File.pubxml" />
   </ItemGroup>
   <ItemGroup>
