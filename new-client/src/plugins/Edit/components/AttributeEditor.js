@@ -589,7 +589,7 @@ class AttributeEditor extends React.Component {
                 }}
               />
             }
-            label={field.name}
+            label={field.alias || field.name}
           />
         );
       case null:
