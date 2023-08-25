@@ -382,7 +382,7 @@ class AttributeEditor extends React.Component {
         return (
           <TextField
             id={field.id}
-            label={field.name}
+            label={field.alias || field.name}
             fullWidth={true}
             margin="normal"
             type="datetime-local"
