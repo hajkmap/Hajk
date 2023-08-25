@@ -29,7 +29,6 @@ const ButtonWithBottomMargin = styled(Button)(({ theme }) => ({
 }));
 
 function PropertyCheckerView(props) {
-  console.log("PropertyCheckerView: ", props);
   // We're gonna need to access the snackbar methods. Let's use the provided hook.
   // const { closeSnackbar, enqueueSnackbar } = useSnackbar();
   const [groupedFeatures, setGroupedFeatures] = useState({});
@@ -63,7 +62,8 @@ function PropertyCheckerView(props) {
   React.useEffect(() => {
     const handleFeatureAdded = (feature) => {
       // First we'll get the current draw interaction and its setter from props
-      const { drawInteraction, setDrawInteraction } = props;
+      const drawInteraction = props.drawInteraction;
+      const setDrawInteraction = props.setDrawInteraction;
       // If the draw-interaction is currently disabled (set to ""), we activate it (by setting it to "Polygon").
       // If it is currently active (not set to ""), we disable it.
       setDrawInteraction(drawInteraction === "" ? "Point" : "");
@@ -71,7 +71,6 @@ function PropertyCheckerView(props) {
     };
 
     const handleNewGetFeatureInfoFeatures = (groupedFeatures) => {
-      console.log("groupedFeatures", groupedFeatures);
       setGroupedFeatures(groupedFeatures);
     };
 
@@ -94,7 +93,7 @@ function PropertyCheckerView(props) {
       );
       // localObserver.unsubscribe("kmlModel.fileImported");
     };
-  }, [localObserver, props]);
+  }, [localObserver, props.drawInteraction, props.setDrawInteraction]);
 
   return (
     <>

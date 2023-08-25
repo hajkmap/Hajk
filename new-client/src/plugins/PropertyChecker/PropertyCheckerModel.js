@@ -17,7 +17,6 @@ export default class PropertyCheckerModel {
   #viewProjection;
 
   constructor(settings) {
-    console.log("PropertyCheckerModel: ", settings);
     // Set some private fields
     this.#app = settings.app;
     this.#attributeNameToGroupBy = settings.attributeNameToGroupBy;
@@ -39,20 +38,23 @@ export default class PropertyCheckerModel {
       const l = this.#map
         .getAllLayers()
         .find((l) => l.get("name") === this.#checkLayerId);
+      if (l === undefined) {
+        throw new Error(
+          `PropertyChecker error: Couldn't find layer with ID ${
+            this.#checkLayerId
+          }. Please contact system administrator.`
+        );
+      }
       return l;
     } catch (error) {
-      console.error(
-        `Couldn't find layer with ID ${
-          this.#checkLayerId
-        }. Please contact system administrator.`
-      );
+      console.error(error.message);
     }
   };
 
   #getOLFeaturesForCoords = async (coords) => {
     // Ensure we have a layer setup so we can create the URL
     if (!this.#checkLayer) {
-      console.warning("Creating check layer again");
+      console.warn("Creating check layer again");
       this.#checkLayer = this.#getCheckLayer();
     }
 
@@ -164,7 +166,7 @@ export default class PropertyCheckerModel {
       features,
       this.#attributeNameToGroupBy // the attribute name that we wish to group on
     );
-    console.log("groupedFeatures: ", groupedFeatures);
+    console.log("groupedFeatures in Model: ", groupedFeatures);
     // If we've got at least one feature in the response
     if (Object.keys(groupedFeatures).length > 0) {
       // Tell the rest of the plugin that we've got feature. The View
