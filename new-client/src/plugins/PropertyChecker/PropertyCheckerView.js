@@ -2,7 +2,18 @@
 import React, { useCallback, useEffect, useState } from "react";
 
 import { styled } from "@mui/material/styles";
-import { Button, Typography } from "@mui/material";
+import {
+  Button,
+  CardActions,
+  CardContent,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
+  Divider,
+  Typography,
+} from "@mui/material";
 
 // import { useSnackbar } from "notistack";
 
@@ -37,6 +48,8 @@ function PropertyCheckerView(props) {
   // to pass them down to child components
   const [clickedPointsCoordinates, setClickedPointsCoordinates] = useState([]);
 
+  const [clearDialogVisible, setClearDialogVisible] = useState(false);
+
   // We're gonna need to use the event observers. Let's destruct them so that we can
   // get a hold of them easily. The observers can be accessed directly via the props:
   const { globalObserver, localObserver, drawModel } = props;
@@ -54,6 +67,7 @@ function PropertyCheckerView(props) {
   };
 
   const handleCleanClick = () => {
+    setClearDialogVisible(false);
     setGroupedFeatures({});
     drawModel.removeDrawnFeatures();
   };
@@ -95,8 +109,32 @@ function PropertyCheckerView(props) {
     };
   }, [localObserver, props.drawInteraction, props.setDrawInteraction]);
 
+  const handleShowConfirmationDialog = () => {
+    setClearDialogVisible(true);
+  };
+
+  const handleCloseConfirmationDialog = () => {
+    setClearDialogVisible(false);
+  };
+
   return (
     <>
+      <Dialog open={clearDialogVisible} onClose={handleCloseConfirmationDialog}>
+        <DialogTitle>{"Är du säker på att du vill rensa listan?"}</DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            När du rensar resultatlistan försvinner markören för respektive
+            lager. Du kommer inte längre kunna se vilka lager som påverkar
+            fastigheten eller vilken fastighet du fick träff på.
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseConfirmationDialog}>Avbryt</Button>
+          <Button onClick={handleCleanClick} autoFocus>
+            Ja, rensa
+          </Button>
+        </DialogActions>
+      </Dialog>
       <ButtonWithBottomMargin
         variant="contained"
         fullWidth={true}
@@ -105,21 +143,42 @@ function PropertyCheckerView(props) {
       >
         {props.drawInteraction === "" ? "Välj ny fastighet" : "Avbryt"}
       </ButtonWithBottomMargin>
-      <ButtonWithBottomMargin
-        variant="contained"
-        fullWidth={true}
-        color="secondary"
-        onClick={handleCleanClick}
-      >
-        Rensa
-      </ButtonWithBottomMargin>
+      {Object.keys(groupedFeatures).length > 0 && (
+        <ButtonWithBottomMargin
+          variant="contained"
+          fullWidth={true}
+          color="secondary"
+          onClick={handleShowConfirmationDialog}
+        >
+          Rensa
+        </ButtonWithBottomMargin>
+      )}
       {Object.keys(groupedFeatures).length > 0 &&
         Object.entries(groupedFeatures).map(([k, features], i) => (
           <React.Fragment key={i}>
-            <Typography>
-              {features.features.length} lager påverkar fastigheten{" "}
-              {features.markerFeature.get("fastighet")}
-            </Typography>
+            <CardContent>
+              <Typography
+                sx={{ fontSize: 14 }}
+                color="text.secondary"
+                gutterBottom
+              >
+                Du klickade på:
+              </Typography>
+              <Typography variant="h5" component="div">
+                {features.markerFeature.get("fastighet")}
+              </Typography>
+              <Typography sx={{ mb: 1.5 }} color="text.secondary">
+                {features.features.length} lager påverkar fastigheten
+              </Typography>
+              <Typography variant="body2">
+                Kontrollera lager i listan och objekt i dessa lager då de ligger
+                på eller i anslutning till fastigheten som du fick träff på.
+              </Typography>
+            </CardContent>
+            <CardActions>
+              <Button size="small">Läs mer i Bygglovsmanualen</Button>
+            </CardActions>
+            <Divider />
             {features.features.map((f, j) => (
               <FeatureItem
                 clickedPointsCoordinates={clickedPointsCoordinates}
