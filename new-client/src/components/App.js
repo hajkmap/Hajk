@@ -1019,12 +1019,10 @@ class App extends React.PureComponent {
   };
 
   checkDrawerButtons() {
-    if (
+    return (
       !this.state.drawerStatic ||
       (this.state.drawerStatic && this.state.drawerButtons.length > 1)
-    )
-      return true;
-    else return false;
+    );
   }
 
   render() {
