@@ -1085,8 +1085,12 @@ class DocumentEditor extends Component {
 
   handleFolderChangeNew = (event) => {
     this.setState({
-    newFolderName: event.target.value
-    });
+      newFolderName: event.target.value
+  }, () => {
+      this.setState({
+          modalContent: this.renderCreateForm()
+      });
+  });
   }
 
   render() {
