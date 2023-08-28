@@ -45,8 +45,8 @@ const FeatureItem = (props) => {
   const layerVisibilityChanged = (e) => setSelected(!e.oldValue);
 
   const getInfoclickIcon = (l) =>
-    l.get("layerInfo").layersInfo[layer].infoclickIcon ||
-    l.get("layerInfo").infoclickIcon;
+    l.get("layerInfo")?.layersInfo[layer]?.infoclickIcon ||
+    l.get("layerInfo")?.infoclickIcon;
 
   // Let's listen to layer's own onChange event. This allows
   // us to reflect the current visibility state in our list.
@@ -87,8 +87,11 @@ const FeatureItem = (props) => {
         <Icon>{getInfoclickIcon(olLayer)}</Icon>
       </ListItemIcon>
       <ListItemText
-        primary={olLayer.get("caption")}
-        secondary={olLayer.get("caption") !== caption && caption}
+        primary={caption}
+        secondary={
+          olLayer.get("caption") !== caption &&
+          `Del av: ${olLayer.get("caption")}`
+        }
       />
 
       {/* <Button onClick={triggerGetFeatureInfo}>

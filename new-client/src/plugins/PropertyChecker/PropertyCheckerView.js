@@ -3,7 +3,11 @@ import React, { useCallback, useEffect, useState } from "react";
 
 import { styled } from "@mui/material/styles";
 import {
+  Accordion,
+  AccordionDetails,
+  AccordionSummary,
   Button,
+  Card,
   CardActions,
   CardContent,
   Dialog,
@@ -12,14 +16,18 @@ import {
   DialogContentText,
   DialogTitle,
   Divider,
+  ToggleButton,
+  ToggleButtonGroup,
   Typography,
 } from "@mui/material";
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 
 // import { useSnackbar } from "notistack";
 
 // import useCookieStatus from "hooks/useCookieStatus";
 
-import FeatureItem from "./FeatureItem";
+import FeatureItem from "./views/FeatureItem.js";
+import QuickLayerToggleButtons from "./views/QuickLayerToggleButtons.js";
 
 // Hajk components are primarily styled in two ways:
 // - Using the styled-utility, see: https://mui.com/system/styled/
@@ -135,59 +143,64 @@ function PropertyCheckerView(props) {
           </Button>
         </DialogActions>
       </Dialog>
-      <ButtonWithBottomMargin
-        variant="contained"
-        fullWidth={true}
-        color="primary"
-        onClick={handleToggleDrawClick}
-      >
-        {props.drawInteraction === "" ? "Välj ny fastighet" : "Avbryt"}
-      </ButtonWithBottomMargin>
-      {Object.keys(groupedFeatures).length > 0 && (
+      {Object.keys(groupedFeatures).length === 0 && (
         <ButtonWithBottomMargin
           variant="contained"
           fullWidth={true}
-          color="secondary"
-          onClick={handleShowConfirmationDialog}
+          color="primary"
+          onClick={handleToggleDrawClick}
         >
-          Rensa
+          {props.drawInteraction === "" ? "Välj fastighet" : "Avbryt"}
         </ButtonWithBottomMargin>
+      )}
+      {Object.keys(groupedFeatures).length > 0 && (
+        <React.Fragment>
+          <ButtonWithBottomMargin
+            variant="contained"
+            fullWidth={true}
+            color="secondary"
+            onClick={handleShowConfirmationDialog}
+          >
+            Rensa
+          </ButtonWithBottomMargin>
+
+          <Card sx={{ minWidth: 275 }}>
+            <CardActions>
+              <QuickLayerToggleButtons
+                options={props.options}
+                map={props.map}
+              />
+            </CardActions>
+          </Card>
+        </React.Fragment>
       )}
       {Object.keys(groupedFeatures).length > 0 &&
         Object.entries(groupedFeatures).map(([k, features], i) => (
           <React.Fragment key={i}>
-            <CardContent>
-              <Typography
-                sx={{ fontSize: 14 }}
-                color="text.secondary"
-                gutterBottom
-              >
-                Du klickade på:
-              </Typography>
-              <Typography variant="h5" component="div">
-                {features.markerFeature.get("fastighet")}
-              </Typography>
-              <Typography sx={{ mb: 1.5 }} color="text.secondary">
-                {features.features.length} lager påverkar fastigheten
-              </Typography>
-              <Typography variant="body2">
-                Kontrollera lager i listan och objekt i dessa lager då de ligger
-                på eller i anslutning till fastigheten som du fick träff på.
-              </Typography>
-            </CardContent>
-            <CardActions>
-              <Button size="small">Läs mer i Bygglovsmanualen</Button>
-            </CardActions>
-            <Divider />
-            {features.features.map((f, j) => (
-              <FeatureItem
-                clickedPointsCoordinates={clickedPointsCoordinates}
-                feature={f}
-                key={j}
-                olMap={props.app.map}
-                globalObserver={globalObserver}
-              />
-            ))}
+            <Accordion
+              defaultExpanded={Object.keys(groupedFeatures).length === 1} // Start with expanded by default if only one item exists
+            >
+              <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+                <Typography>
+                  {features.markerFeature.get("fastighet")}
+                </Typography>
+              </AccordionSummary>
+              <AccordionDetails>
+                <Typography sx={{ color: "text.secondary" }}>
+                  {features.features.length} lager påverkar fastigheten
+                </Typography>
+                <Divider />
+                {features.features.map((f, j) => (
+                  <FeatureItem
+                    clickedPointsCoordinates={clickedPointsCoordinates}
+                    feature={f}
+                    key={j}
+                    olMap={props.app.map}
+                    globalObserver={globalObserver}
+                  />
+                ))}
+              </AccordionDetails>
+            </Accordion>
           </React.Fragment>
         ))}
     </>

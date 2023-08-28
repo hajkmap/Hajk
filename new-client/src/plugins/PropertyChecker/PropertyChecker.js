@@ -2,15 +2,18 @@ import React from "react";
 import BaseWindowPlugin from "../BaseWindowPlugin";
 
 // Plugin-specific imports. Most plugins will need a Model, View and Observer but make sure to only create and import whatever you need.
-import PropertyCheckerModel from "./PropertyCheckerModel";
-import PropertyCheckerView from "./PropertyCheckerView";
+import PropertyCheckerModel from "./PropertyCheckerModel.js";
+import PropertyCheckerView from "./PropertyCheckerView.js";
 import Observer from "react-event-observer";
 
 import ChecklistIcon from "@mui/icons-material/Checklist";
+import HelpIcon from "@mui/icons-material/Help";
 
 // We might want to import some other classes or constants etc.
 import { DEFAULT_MEASUREMENT_SETTINGS } from "./constants";
 import DrawModel from "models/DrawModel";
+
+import InfoDialog from "./views/InfoDialog.js";
 
 /**
  * @summary Main component for the Dummy-plugin.
@@ -18,6 +21,7 @@ import DrawModel from "models/DrawModel";
  * and document how plugins should be constructed in Hajk.
  */
 function PropertyChecker(props) {
+  console.log("props: ", props);
   // Used to keep track of the plugin's current visibility.
   // We will want to do some cleanup later on when the window is hidden.
   const [pluginShown, setPluginShown] = React.useState(
@@ -110,6 +114,10 @@ function PropertyChecker(props) {
     setPluginShown(true);
   };
 
+  const showInfoDialog = () => {
+    localObserver.publish("showInfoDialog");
+  };
+
   // Render is now super-simplified compared to previous versions of Hajk.
   // All common functionality that has to do with showing a Window, and rendering
   // Drawer or Widget buttons, as well as keeping the state of Window, are now
@@ -132,8 +140,8 @@ function PropertyChecker(props) {
         // Do you want to add buttons to the plugin-header? That can be done as follows:
         customPanelHeaderButtons: [
           {
-            icon: <ChecklistIcon />, // Specify which icon the button should use...
-            // onClickCallback: panelHeaderButtonCallback, // ...and which callback should run on click.
+            icon: <HelpIcon />, // Specify which icon the button should use...
+            onClickCallback: showInfoDialog, // ...and which callback should run on click.
           },
         ],
         height: "dynamic", // The height of the plugin-window in px. "dynamic" resizes the window so all content fits, "auto" uses all available space.
@@ -152,9 +160,12 @@ function PropertyChecker(props) {
         drawModel={drawModel}
         globalObserver={props.app.globalObserver} // ... and the global-observer (handling communication within the entire application).
         localObserver={localObserver} // And also the local-observer (handling communication within the plugin)...
+        map={props.map}
         model={propertyCheckerModel} // We can supply our model
+        options={props.options}
         setDrawInteraction={setDrawInteraction} // Finally, we'll pass the updater for the draw-interaction state (so that we can toggle draw on/off).
       />
+      {/* <InfoDialog localObserver={localObserver} /> */}
     </BaseWindowPlugin>
   );
 }
