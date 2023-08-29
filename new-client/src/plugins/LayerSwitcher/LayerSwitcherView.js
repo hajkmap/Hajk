@@ -26,6 +26,7 @@ import LayerGroupAccordion from "./components/LayerGroupAccordion.js";
 import StarOutlineOutlinedIcon from "@mui/icons-material/StarOutlineOutlined";
 import CloudDownloadOutlinedIcon from "@mui/icons-material/CloudDownloadOutlined";
 import SearchIcon from "@mui/icons-material/Search";
+import ClearIcon from "@mui/icons-material/Clear";
 import QuickAccessLayers from "./components/QuickAccessLayers.js";
 import QuickAccessOptions from "./components/QuickAccessOptions.js";
 import LayerItemDetails from "./components/LayerItemDetails.js";
@@ -46,6 +47,7 @@ class LayersSwitcherView extends React.PureComponent {
   constructor(props) {
     super(props);
     this.options = props.options;
+    this.layerTree = this.addLayerNames(this.options.groups);
     this.state = {
       chapters: [],
       baseLayers: props.model.getBaseLayers(),
@@ -54,7 +56,8 @@ class LayersSwitcherView extends React.PureComponent {
       displayContentOverlay: null, // 'layerPackage' | 'personalLayerPackage' | 'layerItemDetails'
       layerItemDetails: null,
       quickAccessSectionExpanded: false,
-      layerFilter: "",
+      filterValue: "",
+      treeData: this.layerTree,
     };
 
     props.app.globalObserver.subscribe("informativeLoaded", (chapters) => {
@@ -79,6 +82,36 @@ class LayersSwitcherView extends React.PureComponent {
     });
   }
 
+  // Prepare tree data for filtering
+  addLayerNames = (data) => {
+    data.forEach((item) => {
+      if (item.layers) {
+        item.layers.forEach((layer) => {
+          const mapLayer = this.props.model.layerMap[layer.id];
+          layer.name = mapLayer.get("caption");
+          // Check if layer is a group
+          if (mapLayer.get("layerType") === "group") {
+            layer.subLayers = [];
+            const subLayers = mapLayer.get("subLayers");
+            subLayers.forEach((subLayer) => {
+              const subLayerMapLayer = mapLayer.layersInfo[subLayer].caption;
+              layer.subLayers.push({
+                id: subLayer,
+                name: subLayerMapLayer,
+              });
+            });
+          }
+        });
+      }
+
+      if (item.groups) {
+        // Call recursevly for subgroups
+        this.addLayerNames(item.groups);
+      }
+    });
+    return data;
+  };
+
   // Handles click on Layerpackage button and backbutton
   handleLayerPackageToggle = (layerPackageState) => {
     layerPackageState?.event?.stopPropagation();
@@ -91,6 +124,64 @@ class LayersSwitcherView extends React.PureComponent {
     if (layerPackageState?.setQuickAccessSectionExpanded) {
       this.setState({
         quickAccessSectionExpanded: true,
+      });
+    }
+  };
+
+  // Filter tree data
+  filterTree = (node, filterText) => {
+    if (
+      node.name.toLocaleLowerCase().includes(filterText.toLocaleLowerCase())
+    ) {
+      node.isFiltered = true;
+      this.setChildrenFiltered(node, true);
+      return;
+    } else {
+      node.isFiltered = false;
+    }
+
+    if (node.layers) {
+      node.layers.forEach((layer) => this.filterTree(layer, filterText));
+      if (node.layers.some((layer) => layer.isFiltered)) {
+        node.isFiltered = true;
+      }
+    }
+
+    if (node.groups) {
+      node.groups.forEach((group) => this.filterTree(group, filterText));
+      if (node.groups.some((group) => group.isFiltered)) {
+        node.isFiltered = true;
+      }
+    }
+
+    if (node.subLayers) {
+      node.subLayers.forEach((subLayer) =>
+        this.filterTree(subLayer, filterText)
+      );
+      if (node.subLayers.some((subLayer) => subLayer.isFiltered)) {
+        node.isFiltered = true;
+      }
+    }
+  };
+
+  setChildrenFiltered = (node, value) => {
+    if (node.layers) {
+      node.layers.forEach((layer) => {
+        layer.isFiltered = value;
+        this.setChildrenFiltered(layer, value);
+      });
+    }
+
+    if (node.groups) {
+      node.groups.forEach((group) => {
+        group.isFiltered = value;
+        this.setChildrenFiltered(group, value);
+      });
+    }
+
+    if (node.subLayers) {
+      node.subLayers.forEach((subLayer) => {
+        subLayer.isFiltered = value;
       });
     }
   };
@@ -121,9 +212,13 @@ class LayersSwitcherView extends React.PureComponent {
   };
 
   // Handles filter functionality
-  handleLayerFilterChange = (value) => {
+  handleFilterValueChange = (value) => {
     this.setState({
-      layerFilter: value,
+      filterValue: value,
+    });
+    this.layerTree.forEach((item) => this.filterTree(item, value));
+    this.setState({
+      treeData: this.layerTree,
     });
   };
 
@@ -212,11 +307,23 @@ class LayersSwitcherView extends React.PureComponent {
                     <SearchIcon />
                   </InputAdornment>
                 ),
+                endAdornment: (
+                  <InputAdornment position="end">
+                    {this.state.filterValue && (
+                      <IconButton
+                        onClick={() => this.handleFilterValueChange("")}
+                        size="small"
+                      >
+                        <ClearIcon />
+                      </IconButton>
+                    )}
+                  </InputAdornment>
+                ),
               }}
               size="small"
-              value={this.state.layerFilter}
+              value={this.state.filterValue}
               onChange={(event) =>
-                this.handleLayerFilterChange(event.target.value)
+                this.handleFilterValueChange(event.target.value)
               }
               fullWidth
               placeholder="Filtrera"
@@ -254,6 +361,8 @@ class LayersSwitcherView extends React.PureComponent {
           }
           children={
             <QuickAccessLayers
+              treeData={this.state.treeData}
+              filterValue={this.state.filterValue}
               model={this.props.model}
               map={this.props.map}
               app={this.props.app}
@@ -261,10 +370,10 @@ class LayersSwitcherView extends React.PureComponent {
           }
         ></LayerGroupAccordion>
         <Divider></Divider>
-        {this.options.groups.map((group, i) => {
+        {this.state.treeData.map((group, i) => {
           return (
             <LayerGroup
-              layerFilter={this.state.layerFilter}
+              filterValue={this.state.filterValue}
               key={i}
               group={group}
               model={this.props.model}

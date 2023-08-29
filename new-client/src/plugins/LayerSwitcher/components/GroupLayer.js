@@ -16,6 +16,8 @@ export default function GroupLayer({
   toggleable,
   draggable,
   quickAccessLayer,
+  filterValue,
+  groupLayer,
 }) {
   // Keep the subLayers area active in state
   const [showSublayers, setShowSublayers] = useState(false);
@@ -220,9 +222,17 @@ export default function GroupLayer({
   // then the sublayer should only be visible if it's included in visibleSubLayers
   const showSublayer = (subLayer) => {
     if (toggleable) {
-      return true;
+      if (filterValue && filterValue !== "") {
+        return groupLayer.subLayers.find((sl) => sl.id === subLayer).isFiltered;
+      } else {
+        return true;
+      }
     } else if (visibleSubLayers.some((s) => s === subLayer)) {
-      return true;
+      if (filterValue && filterValue !== "") {
+        return groupLayer.subLayers.find((sl) => sl.id === subLayer).isFiltered;
+      } else {
+        return true;
+      }
     }
     return false;
   };
