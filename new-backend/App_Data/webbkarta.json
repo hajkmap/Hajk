@@ -312,6 +312,127 @@
   ],
   "tools": [
     {
+      "type": "infoclick",
+      "options": {
+        "title": "Information",
+        "height": "dynamic",
+        "anchor": [
+          0.5,
+          1
+        ],
+        "scale": 0.3,
+        "strokeColor": {
+          "r": 200,
+          "b": 0,
+          "g": 0,
+          "a": 0.7
+        },
+        "strokeWidth": 4,
+        "fillColor": {
+          "r": 255,
+          "b": 0,
+          "g": 0,
+          "a": 0.1
+        },
+        "allowDangerousHtml": true,
+        "useNewInfoclick": false,
+        "visibleForGroups": []
+      },
+      "index": 1
+    },
+    {
+      "type": "search",
+      "options": {
+        "layers": [
+          {
+            "id": "1f699526-c5fd-e5c6-d81d-799b97ff9a04",
+            "visibleForGroups": []
+          },
+          {
+            "id": "ef66690e-15b3-fcd0-e944-6fd1df4cc606",
+            "visibleForGroups": []
+          },
+          {
+            "id": "2731de46-bf36-cdae-e294-1ac3650e3ebb",
+            "visibleForGroups": []
+          },
+          {
+            "id": "6f81c393-c48a-601b-33fe-0f46b6830a5e",
+            "visibleForGroups": []
+          },
+          {
+            "id": "09aff48f-517c-3849-cd9f-79b0ac0d5dae",
+            "visibleForGroups": []
+          },
+          {
+            "id": "2e0a62fa-03e8-866b-3cb6-4cf71fb33c21",
+            "visibleForGroups": []
+          },
+          {
+            "id": "dd462375-677e-8bc1-577c-51fb1b67d661",
+            "visibleForGroups": []
+          }
+        ],
+        "selectedSources": [],
+        "visibleForGroups": [],
+        "maxResultsPerDataset": 10,
+        "anchor": [
+          "",
+          ""
+        ],
+        "scale": 0.35,
+        "markerImg": "/marker.png",
+        "delayBeforeAutoSearch": 300,
+        "disableAutocomplete": false,
+        "disableSearchCombinations": false,
+        "searchBarPlaceholder": "Adress, fastighet, platser, skola/förskola",
+        "autocompleteWildcardAtStart": false,
+        "enablePolygonSearch": true,
+        "showCorrespondingWMSLayers": false,
+        "enableRadiusSearch": true,
+        "enableSelectSearch": true,
+        "enableExtentSearch": true,
+        "enableResultsFiltering": true,
+        "enableResultsSorting": true,
+        "enableResultsSelectionClearing": true,
+        "enableResultsDownloading": false,
+        "enableFeaturePreview": true,
+        "enableLabelOnHighlight": true,
+        "enableSelectedFeaturesCollection": true,
+        "showResultFeaturesInMap": true,
+        "searchInVisibleLayers": false,
+        "wildcardAtStart": false,
+        "wildcardAtEnd": true,
+        "matchCase": false,
+        "activeSpatialFilter": "intersects",
+        "showResultsLimitReachedWarning": true,
+        "enableFeatureToggler": true,
+        "fitToResultMaxZoom": -1,
+        "drawFillColor": "rgba(246,140,6,0.07)",
+        "drawStrokeColor": "rgba(249,131,2,0.5)",
+        "displayFillColor": "rgba(230,114,3,0.15)",
+        "displayStrokeColor": "rgba(247,123,4,0.4)",
+        "selectionTextStroke": "rgba(197,130,16,1)",
+        "selectionTextFill": "rgba(253,116,3,1)",
+        "selectionFillColor": "rgba(253,143,4,1)",
+        "selectionStrokeColor": "rgba(253,116,3,0.8)",
+        "highlightTextStroke": "rgba(255,255,255,1)",
+        "highlightTextFill": "rgba(198,83,0,1)",
+        "highlightFillColor": "rgba(198,83,0,0.7)",
+        "highlightStrokeColor": "rgba(198,83,0,0.8)"
+      },
+      "index": 2
+    },
+    {
+      "type": "location",
+      "options": {
+        "target": "control",
+        "position": "right",
+        "visibleForGroups": []
+      },
+      "index": 3
+    },
+    {
       "type": "layerswitcher",
       "options": {
         "groups": [
@@ -1098,36 +1219,41 @@
         "title": "Kartinnehåll",
         "description": "Välj vad du vill visa i kartan."
       },
-      "index": 1
+      "index": 4
     },
     {
-      "type": "infoclick",
+      "type": "print",
       "options": {
-        "title": "Information",
-        "height": "dynamic",
-        "anchor": [
-          0.5,
-          1
-        ],
-        "scale": 0.3,
-        "strokeColor": {
-          "r": 200,
-          "b": 0,
-          "g": 0,
-          "a": 0.7
-        },
-        "strokeWidth": 4,
-        "fillColor": {
-          "r": 255,
-          "b": 0,
-          "g": 0,
-          "a": 0.1
-        },
-        "allowDangerousHtml": true,
-        "useNewInfoclick": false,
-        "visibleForGroups": []
+        "target": "toolbar",
+        "position": "left",
+        "copyright": "",
+        "disclaimer": "",
+        "date": "Utskriftsdatum: {date}",
+        "scales": "200, 400, 1000, 2000, 5000, 10000, 25000, 50000, 100000, 200000, 400000, 800000, 1000000, 5000000, 10000000",
+        "scaleMeters": "10, 10, 20, 40, 60, 100, 100, 300, 600, 2000, 4000, 8000, 10000, 160000",
+        "logo": "/nacka.svg",
+        "logoMaxWidth": 40,
+        "northArrowMaxWidth": 10,
+        "dpis": "72, 150, 300",
+        "paperFormats": "A2, A3, A4",
+        "northArrow": "/north_arrow.png",
+        "useMargin": false,
+        "useTextIconsInMargin": false,
+        "mapTextColor": "#000000",
+        "instruction": "",
+        "visibleAtStart": false,
+        "visibleForGroups": [],
+        "includeLogo": true,
+        "logoPlacement": "topLeft",
+        "includeScaleBar": true,
+        "scaleBarPlacement": "bottomLeft",
+        "includeNorthArrow": true,
+        "northArrowPlacement": "topRight",
+        "includeImageBorder": false,
+        "useCustomTileLoaders": true,
+        "maxTileSize": 4096
       },
-      "index": 2
+      "index": 5
     },
     {
       "type": "sketch",
@@ -1136,7 +1262,7 @@
         "position": "left",
         "visibleForGroups": []
       },
-      "index": 3
+      "index": 6
     },
     {
       "type": "measure",
@@ -1146,7 +1272,7 @@
         "instruction": "",
         "icons": ""
       },
-      "index": 4
+      "index": 7
     },
     {
       "type": "anchor",
@@ -1156,99 +1282,7 @@
         "instruction": "",
         "visibleForGroups": []
       },
-      "index": 7
-    },
-    {
-      "type": "search",
-      "options": {
-        "layers": [
-          {
-            "id": "1f699526-c5fd-e5c6-d81d-799b97ff9a04",
-            "visibleForGroups": []
-          },
-          {
-            "id": "ef66690e-15b3-fcd0-e944-6fd1df4cc606",
-            "visibleForGroups": []
-          },
-          {
-            "id": "2731de46-bf36-cdae-e294-1ac3650e3ebb",
-            "visibleForGroups": []
-          },
-          {
-            "id": "6f81c393-c48a-601b-33fe-0f46b6830a5e",
-            "visibleForGroups": []
-          },
-          {
-            "id": "09aff48f-517c-3849-cd9f-79b0ac0d5dae",
-            "visibleForGroups": []
-          },
-          {
-            "id": "2e0a62fa-03e8-866b-3cb6-4cf71fb33c21",
-            "visibleForGroups": []
-          },
-          {
-            "id": "dd462375-677e-8bc1-577c-51fb1b67d661",
-            "visibleForGroups": []
-          }
-        ],
-        "selectedSources": [],
-        "visibleForGroups": [],
-        "maxResultsPerDataset": 10,
-        "anchor": [
-          "",
-          ""
-        ],
-        "scale": 0.35,
-        "markerImg": "/marker.png",
-        "delayBeforeAutoSearch": 300,
-        "disableAutocomplete": false,
-        "disableSearchCombinations": false,
-        "searchBarPlaceholder": "Adress, fastighet, platser, skola/förskola",
-        "autocompleteWildcardAtStart": false,
-        "enablePolygonSearch": true,
-        "showCorrespondingWMSLayers": false,
-        "enableRadiusSearch": true,
-        "enableSelectSearch": true,
-        "enableExtentSearch": true,
-        "enableResultsFiltering": true,
-        "enableResultsSorting": true,
-        "enableResultsSelectionClearing": true,
-        "enableResultsDownloading": false,
-        "enableFeaturePreview": true,
-        "enableLabelOnHighlight": true,
-        "enableSelectedFeaturesCollection": true,
-        "showResultFeaturesInMap": true,
-        "searchInVisibleLayers": false,
-        "wildcardAtStart": false,
-        "wildcardAtEnd": true,
-        "matchCase": false,
-        "activeSpatialFilter": "intersects",
-        "showResultsLimitReachedWarning": true,
-        "enableFeatureToggler": true,
-        "fitToResultMaxZoom": -1,
-        "drawFillColor": "rgba(246,140,6,0.07)",
-        "drawStrokeColor": "rgba(249,131,2,0.5)",
-        "displayFillColor": "rgba(230,114,3,0.15)",
-        "displayStrokeColor": "rgba(247,123,4,0.4)",
-        "selectionTextStroke": "rgba(197,130,16,1)",
-        "selectionTextFill": "rgba(253,116,3,1)",
-        "selectionFillColor": "rgba(253,143,4,1)",
-        "selectionStrokeColor": "rgba(253,116,3,0.8)",
-        "highlightTextStroke": "rgba(255,255,255,1)",
-        "highlightTextFill": "rgba(198,83,0,1)",
-        "highlightFillColor": "rgba(198,83,0,0.7)",
-        "highlightStrokeColor": "rgba(198,83,0,0.8)"
-      },
-      "index": 11
-    },
-    {
-      "type": "location",
-      "options": {
-        "target": "control",
-        "position": "right",
-        "visibleForGroups": []
-      },
-      "index": 13
+      "index": 8
     },
     {
       "type": "coordinates",
@@ -1290,50 +1324,7 @@
         ],
         "visibleForGroups": []
       },
-      "index": 15
-    },
-    {
-      "type": "bookmark",
-      "options": {
-        "target": "toolbar",
-        "instruction": "",
-        "visibleForGroups": []
-      },
-      "index": 16
-    },
-    {
-      "type": "print",
-      "options": {
-        "target": "toolbar",
-        "position": "left",
-        "copyright": "",
-        "disclaimer": "",
-        "date": "Utskriftsdatum: {date}",
-        "scales": "200, 400, 1000, 2000, 5000, 10000, 25000, 50000, 100000, 200000, 400000, 800000, 1000000, 5000000, 10000000",
-        "scaleMeters": "10, 10, 20, 40, 60, 100, 100, 300, 600, 2000, 4000, 8000, 10000, 160000",
-        "logo": "/nacka.svg",
-        "logoMaxWidth": 40,
-        "northArrowMaxWidth": 10,
-        "dpis": "72, 150, 300",
-        "paperFormats": "A2, A3, A4",
-        "northArrow": "/north_arrow.png",
-        "useMargin": false,
-        "useTextIconsInMargin": false,
-        "mapTextColor": "#000000",
-        "instruction": "",
-        "visibleAtStart": false,
-        "visibleForGroups": [],
-        "includeLogo": true,
-        "logoPlacement": "topLeft",
-        "includeScaleBar": true,
-        "scaleBarPlacement": "bottomLeft",
-        "includeNorthArrow": true,
-        "northArrowPlacement": "topRight",
-        "includeImageBorder": false,
-        "useCustomTileLoaders": true,
-        "maxTileSize": 4096
-      },
-      "index": 2
+      "index": 9
     }
   ],
   "map": {
