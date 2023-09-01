@@ -279,7 +279,6 @@ function DrawOrder({ display, app, map, onLayerChange, model, options }) {
                       app={app}
                       observer={model.observer}
                       toggleable={false}
-                      options={options}
                       draggable={true}
                     />
                   ) : (

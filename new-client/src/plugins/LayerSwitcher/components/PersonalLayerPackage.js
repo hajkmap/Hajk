@@ -565,7 +565,7 @@ function PersonalLayerPackage({
                 </IconButton>
               }
               title={
-                <Typography variant="subtitle1">Spara arbetsyta</Typography>
+                <Typography variant="subtitle1">Spara snabblager</Typography>
               }
             />
             <Collapse in={addWsIsActive} timeout="auto" unmountOnExit>
@@ -684,9 +684,9 @@ function PersonalLayerPackage({
                         disableSpacing
                         sx={{ justifyContent: "flex-end" }}
                       >
-                        <Tooltip title="Ladda ner">
+                        <Tooltip title="Exportera">
                           <IconButton
-                            aria-label="Ladda ner"
+                            aria-label="Exportera"
                             onClick={handleExportJsonClick}
                           >
                             <FileDownloadOutlinedIcon />
