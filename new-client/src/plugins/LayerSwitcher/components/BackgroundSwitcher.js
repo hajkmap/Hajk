@@ -3,7 +3,7 @@ import propTypes from "prop-types";
 import { isValidLayerId } from "utils/Validator";
 import OSM from "ol/source/OSM";
 import TileLayer from "ol/layer/Tile";
-import LayerItem from "./LayerItem.js";
+import BackgroundLayer from "./BackgroundLayer";
 import Observer from "react-event-observer";
 import Box from "@mui/material/Box";
 
@@ -49,10 +49,8 @@ class BackgroundSwitcher extends React.PureComponent {
         },
       });
       this.osmLayer.on("change:visible", (e) => {
-        // osmLayer active state always changes when visibility changes
-        e.target.set("active", e.target.get("visible"));
-        // Publish event to ensure active tab is updated with osmLayer changes
-        this.props.app.globalObserver.publish("core.layerActiveChanged", e);
+        // Publish event to ensure DrawOrder tab is updated with osmLayer changes
+        this.props.app.globalObserver.publish("core.layerVisibilityChanged", e);
       });
     }
   }
@@ -174,6 +172,7 @@ class BackgroundSwitcher extends React.PureComponent {
         properties: {
           name: config.name,
           visible: checked,
+          caption: config.caption,
           layerInfo: {
             caption: config.caption,
             name: config.name,
@@ -199,13 +198,14 @@ class BackgroundSwitcher extends React.PureComponent {
 
     // Finally, let's render the component
     return (
-      <LayerItem
+      <BackgroundLayer
         key={index}
         layer={mapLayer}
         model={this.props.model}
-        options={this.props.options}
         app={this.props.app}
-      />
+        draggable={false}
+        toggleable={true}
+      ></BackgroundLayer>
     );
   }
 

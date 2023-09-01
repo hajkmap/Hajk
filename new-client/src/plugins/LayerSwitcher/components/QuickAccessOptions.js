@@ -9,15 +9,19 @@ import {
   Tooltip,
 } from "@mui/material";
 
-import DeleteOutlinedIcon from "@mui/icons-material/DeleteOutlined";
 import MoreVertOutlinedIcon from "@mui/icons-material/MoreVertOutlined";
-import SettingsOutlinedIcon from "@mui/icons-material/SettingsOutlined";
+import PersonOutlinedIcon from "@mui/icons-material/PersonOutlined";
+import DeleteOutlinedIcon from "@mui/icons-material/DeleteOutlined";
 
-export default function DrawOrderListItemOptions({ layer, toggleSettings }) {
+export default function QuickAccessOptions({
+  handlePersonalLayerPackageToggle,
+  handleClearQuickAccessLayers,
+}) {
   // Element that we will anchor the options menu to is
   // held in state. If it's null (unanchored), we can tell
   // that the menu should be hidden.
   const [anchorEl, setAnchorEl] = React.useState(null);
+
   const optionsMenuIsOpen = Boolean(anchorEl);
 
   // Show the options menu by setting an anchor element
@@ -34,37 +38,16 @@ export default function DrawOrderListItemOptions({ layer, toggleSettings }) {
     setAnchorEl(null);
   };
 
-  // Remove the layer from list by setting it's visible and active state.
-  const handleDelete = (e) => {
-    e.stopPropagation();
-    layer.set("visible", false);
-    layer.set("active", false);
-    setAnchorEl(null);
-  };
-
-  // Toggles the settings area for drawlayeritem.
-  const handleSettings = (e) => {
-    e.stopPropagation();
-    toggleSettings();
-    setAnchorEl(null);
-  };
-
-  // Checks if layer is enabled for removal
-  const hasMenuItemDelete = () => {
-    return (
-      layer.get("layerType") !== "system" && layer.get("layerType") !== "base"
-    );
-  };
-
   return (
     <>
       <IconButton
+        size="small"
         aria-controls={optionsMenuIsOpen ? "basic-menu" : undefined}
         aria-haspopup="true"
         aria-expanded={optionsMenuIsOpen ? "true" : undefined}
         onClick={handleShowMoreOptionsClick}
       >
-        <Tooltip title="Val för lager">
+        <Tooltip title="Val för snabblager">
           <MoreVertOutlinedIcon />
         </Tooltip>
       </IconButton>
@@ -74,19 +57,29 @@ export default function DrawOrderListItemOptions({ layer, toggleSettings }) {
         onClose={onOptionsMenuClose}
         variant={"menu"}
       >
-        {hasMenuItemDelete() ? (
-          <MenuItem onClick={handleDelete}>
-            <ListItemIcon>
-              <DeleteOutlinedIcon fontSize="small" />
-            </ListItemIcon>
-            <ListItemText>Ta bort</ListItemText>
-          </MenuItem>
-        ) : null}
-        <MenuItem onClick={handleSettings}>
+        <MenuItem
+          onClick={(e) => {
+            e.stopPropagation();
+            setAnchorEl(null);
+            handlePersonalLayerPackageToggle(e);
+          }}
+        >
           <ListItemIcon>
-            <SettingsOutlinedIcon fontSize="small" />
+            <PersonOutlinedIcon fontSize="small" />
           </ListItemIcon>
-          <ListItemText>Inställningar</ListItemText>
+          <ListItemText>Mina snabblager</ListItemText>
+        </MenuItem>
+        <MenuItem
+          onClick={(e) => {
+            e.stopPropagation();
+            setAnchorEl(null);
+            handleClearQuickAccessLayers(e);
+          }}
+        >
+          <ListItemIcon>
+            <DeleteOutlinedIcon fontSize="small" />
+          </ListItemIcon>
+          <ListItemText>Rensa snabblager</ListItemText>
         </MenuItem>
       </Menu>
     </>

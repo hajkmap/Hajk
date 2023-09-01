@@ -4,101 +4,53 @@ import { Container, Draggable } from "react-smooth-dnd";
 import {
   IconButton,
   Box,
+  FormGroup,
+  FormControlLabel,
   List,
-  ListSubheader,
+  Switch,
   Tooltip,
   Collapse,
   Typography,
   Stack,
 } from "@mui/material";
 
-import DrawOrderListItem from "./DrawOrderListItem";
-import DrawOrderOptions from "./DrawOrderOptions";
+import LayerItem from "./LayerItem";
+import BackgroundLayer from "./BackgroundLayer";
+import GroupLayer from "./GroupLayer";
 
-import SourceOutlinedIcon from "@mui/icons-material/SourceOutlined";
-import VisibilityOffOutlinedIcon from "@mui/icons-material/VisibilityOffOutlined";
-import VisibilityOutlinedIcon from "@mui/icons-material/VisibilityOutlined";
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 
-function DrawOrder({ display, app, map, onLayerChange }) {
+function DrawOrder({ display, app, map, onLayerChange, model, options }) {
   // A Set that will hold type of OL layers that should be shown.
   // This is a user setting, changed by toggling a switch control.
   const [filterList, setFilterList] = useState(
     ["layer", "group", "base"] // Also "system" is available, but let's start without it
   );
-  // This handles the collapsible settings area for each list item, makes sure that only one settings area can be opened
-  const [activeSetting, setActiveSetting] = useState();
-  // State that contains the layers that are currently active
+  // State that contains the layers that are currently visible
   const [sortedLayers, setSortedLayers] = useState([]);
-  // State that toggles functionality of the set visibility tool
-  const [layerVisibleToggle, setLayerVisibleToggle] = useState(true);
   // State that toggles info collapse
   const [infoIsActive, setInfoIsActive] = useState(false);
   // State that keeps track if system filter is active
   const [systemFilterActive, setSystemFilterActive] = useState(false);
 
-  // Toggles the settings area
-  const toggleSettings = (layerId) => {
-    setActiveSetting(activeSetting === layerId ? "" : layerId);
-  };
-
-  // A helper that grabs all OL layers with state active, filters so that
+  // A helper that grabs all OL layers with state visible, filters so that
   // only the selected layer types are shown and sorts them
   // in reverse numerical order (highest zIndex at top of the list).
   const getSortedLayers = useCallback(() => {
-    // Get all active layers
-    let activeLayers = map.getAllLayers().filter((l) => {
+    // Get all visible layers
+    let visibleLayers = map.getAllLayers().filter((l) => {
       l.getZIndex() === undefined && l.setZIndex(-2);
       return (
-        l.get("active") === true && filterList.includes(l.get("layerType"))
+        l.get("visible") === true && filterList.includes(l.get("layerType"))
       );
     });
 
-    // Check if a baselayer is active
-    const hasActiveBackground = activeLayers.some(
-      (l) => l.get("layerType") === "base"
-    );
-    // If not, white or black background is active and we have to manually add it to the array of active layers
-    if (!hasActiveBackground) {
-      activeLayers.push({
-        isFakeMapLayer: true,
-        properties: {
-          caption:
-            document.getElementById("map").style.backgroundColor ===
-            "rgb(0, 0, 0)"
-              ? "Svart"
-              : "Vit",
-          layerType: "base",
-        },
-        get(key) {
-          return this.properties[key];
-        },
-        set(key, value) {
-          this.properties[key] = value;
-        },
-        getZIndex() {
-          return -2;
-        },
-      });
-    }
-
-    // Special handling of "system" layers. System layers do not have "active" state,
-    // their active state are handled by visibility
-    if (filterList.includes("system")) {
-      const systemLayers = map.getAllLayers().filter((l) => {
-        l.getZIndex() === undefined && l.setZIndex(-2);
-        return l.get("visible") === true && l.get("layerType") === "system";
-      });
-      // Add to activeLayers list
-      activeLayers = activeLayers.concat(systemLayers);
-    }
-
-    // Return active layers in reversed numerical order
-    return activeLayers.sort((a, b) => b.getZIndex() - a.getZIndex());
+    // Return layers in reversed numerical order
+    return visibleLayers.sort((a, b) => b.getZIndex() - a.getZIndex());
   }, [filterList, map]);
 
   // A helper that grabs all OL layers, filters on selected layer types.
-  // This is needed for the z-index ordering to be correct with all layers in map
+  // This is needed for the z-index ordering to be correct with all layers added to map
   const getAllLayers = useCallback(() => {
     return (
       map
@@ -112,8 +64,7 @@ function DrawOrder({ display, app, map, onLayerChange }) {
     );
   }, [filterList, map]);
 
-  // When values of the sortedLayers set changes, let's update the counter for active layers.
-  // And set the visibilityTools state depending on if there's at least one layer visible
+  // When values of the sortedLayers set changes, let's update the counter for visible layers.
   useEffect(() => {
     onLayerChange(
       sortedLayers.filter((l) => {
@@ -121,23 +72,20 @@ function DrawOrder({ display, app, map, onLayerChange }) {
       }).length
     );
 
-    const checkVisibilityCount = () => {
-      const visibleLayers = sortedLayers.filter((l) => {
-        return (
-          l.get("visible") === true &&
-          l.get("layerType") !== "system" &&
-          l.get("layerType") !== "base"
-        );
-      });
+    // const checkVisibilityCount = () => {
+    //   const visibleLayers = sortedLayers.filter((l) => {
+    //     return (
+    //       l.get("visible") === true &&
+    //       l.get("layerType") !== "system" &&
+    //       l.get("layerType") !== "base"
+    //     );
+    //   });
 
-      const visibleSystemLayers = sortedLayers.filter((l) => {
-        return l.get("opacity") !== 0 && l.get("layerType") === "system";
-      });
-      return visibleSystemLayers.length + visibleLayers.length;
-    };
-
-    const visibleLayers = checkVisibilityCount();
-    setLayerVisibleToggle(visibleLayers === 0 ? false : true);
+    //   const visibleSystemLayers = sortedLayers.filter((l) => {
+    //     return l.get("opacity") !== 0 && l.get("layerType") === "system";
+    //   });
+    //   return visibleSystemLayers.length + visibleLayers.length;
+    // };
   }, [sortedLayers, onLayerChange]);
 
   // When values of the filterList set changes, let's update the list and subscribe to events
@@ -150,20 +98,11 @@ function DrawOrder({ display, app, map, onLayerChange }) {
         setSortedLayers(getSortedLayers());
       }
     );
-    // Register a listener: when any layer's active state changes make sure
-    // to update the list.
-    const activeChangedSubscription = app.globalObserver.subscribe(
-      "core.layerActiveChanged",
-      (l) => {
-        setSortedLayers(getSortedLayers());
-      }
-    );
     // Update list of layers
     setSortedLayers(getSortedLayers());
     // Unsubscribe when component unmounts
     return function () {
       visibilityChangedSubscription.unsubscribe();
-      activeChangedSubscription.unsubscribe();
     };
   }, [filterList, app.globalObserver, getSortedLayers]);
 
@@ -229,20 +168,6 @@ function DrawOrder({ display, app, map, onLayerChange }) {
     setSortedLayers(getSortedLayers());
   };
 
-  // Handles click on visibility button in header
-  const handleVisibilityButtonClick = () => {
-    sortedLayers.forEach((l) => {
-      if (l.get("layerType") === "group" || l.get("layerType") === "layer") {
-        // For layers of type "layer" and "group", set visible property
-        l.set("visible", layerVisibleToggle ? false : true);
-      } else if (l.get("layerType") === "system") {
-        // For layers of type "system", set opacity property
-        l.set("opacity", layerVisibleToggle ? 0 : 1);
-      }
-      // Do not affect layers of type "base"
-    });
-  };
-
   // Handles click on info button in header
   const handleInfoButtonClick = () => {
     setInfoIsActive(!infoIsActive);
@@ -267,70 +192,36 @@ function DrawOrder({ display, app, map, onLayerChange }) {
     setSystemFilterActive(!systemFilterActive);
   };
 
-  // Render method for background layers
-  const renderBackgroundLayer = () => {
-    const backgroundLayer = sortedLayers.find(
-      (l) => l.get("layerType") === "base"
-    );
-
-    if (!backgroundLayer) {
-      return;
-    }
-
-    const key = backgroundLayer.isFakeMapLayer
-      ? backgroundLayer.get("caption")
-      : backgroundLayer.ol_uid;
-
-    return (
-      <DrawOrderListItem
-        key={key}
-        layer={backgroundLayer}
-        isBackgroundLayer={true}
-        settingIsActive={activeSetting === key}
-        settingClickCallback={toggleSettings}
-      />
-    );
-  };
-
   return (
-    <Box sx={{ display: display ? "block" : "none", mx: "-10px", mt: "-10px" }}>
+    <Box sx={{ display: display ? "block" : "none" }}>
       <Box
         sx={{
           pr: 2,
           pl: 2,
           py: 1,
           backgroundColor: (theme) => theme.palette.grey[100],
+          borderBottom: (theme) =>
+            `${theme.spacing(0.2)} solid ${theme.palette.divider}`,
         }}
       >
         <Stack direction="row" alignItems="center">
-          <Tooltip
-            title={`${layerVisibleToggle ? "Släck" : "Tänd"} alla lager`}
-          >
-            <IconButton onClick={handleVisibilityButtonClick}>
-              {layerVisibleToggle ? (
-                <VisibilityOffOutlinedIcon />
-              ) : (
-                <VisibilityOutlinedIcon />
-              )}
-            </IconButton>
-          </Tooltip>
+          <FormGroup>
+            <FormControlLabel
+              control={
+                <Switch
+                  checked={systemFilterActive}
+                  onChange={setSystemFilter}
+                />
+              }
+              label="Systemlager"
+            />
+          </FormGroup>
           <Box sx={{ flexGrow: 1 }} />
           <IconButton onClick={handleInfoButtonClick}>
             <Tooltip title={infoIsActive ? "Dölj info" : "Visa info"}>
               <InfoOutlinedIcon />
             </Tooltip>
           </IconButton>
-          <IconButton>
-            <Tooltip title="Tema">
-              <SourceOutlinedIcon />
-            </Tooltip>
-          </IconButton>
-          <DrawOrderOptions
-            app={app}
-            setSystemFilter={setSystemFilter}
-            systemFilterActive={systemFilterActive}
-            map={map}
-          />
         </Stack>
         <Collapse
           in={infoIsActive}
@@ -348,39 +239,63 @@ function DrawOrder({ display, app, map, onLayerChange }) {
           </Box>
         </Collapse>
       </Box>
-      <List>
+      <List sx={{ pt: 0 }}>
         <Container
           lockAxis="y"
           getChildPayload={(i) => sortedLayers[i]}
           animationDuration={500}
           onDrop={onDrop}
           getGhostParent={getGhostParent}
-          nonDragAreaSelector=".settingsCollapse"
         >
-          {sortedLayers
-            .filter((l) => l.get("layerType") !== "base")
-            .map((l) => (
-              <Draggable key={"draggable" + l.ol_uid}>
-                <DrawOrderListItem
-                  key={l.ol_uid}
+          {sortedLayers.map((l) => {
+            if (
+              l.get("layerType") === "base" &&
+              options.lockedBackgroundInDraworder
+            ) {
+              return (
+                <BackgroundLayer
+                  key={l.isFakeMapLayer ? l.get("caption") : l.ol_uid}
                   layer={l}
-                  isBackgroundLayer={false}
-                  settingIsActive={activeSetting === l.ol_uid}
-                  settingClickCallback={toggleSettings}
+                  app={app}
+                  draggable={!options.lockedBackgroundInDraworder}
+                  toggleable={false}
                 />
-              </Draggable>
-            ))}
+              );
+            } else {
+              return (
+                <Draggable key={"draggable" + l.ol_uid}>
+                  {l.get("layerType") === "base" ? (
+                    <BackgroundLayer
+                      key={l.isFakeMapLayer ? l.get("caption") : l.ol_uid}
+                      layer={l}
+                      app={app}
+                      draggable={!options.lockedBackgroundInDraworder}
+                      toggleable={false}
+                    />
+                  ) : l.get("layerType") === "group" ? (
+                    <GroupLayer
+                      key={l.ol_uid}
+                      layer={l}
+                      app={app}
+                      observer={model.observer}
+                      toggleable={false}
+                      options={options}
+                      draggable={true}
+                    />
+                  ) : (
+                    <LayerItem
+                      key={l.ol_uid}
+                      layer={l}
+                      draggable={true}
+                      toggleable={false}
+                      app={app}
+                    />
+                  )}
+                </Draggable>
+              );
+            }
+          })}
         </Container>
-        <ListSubheader
-          sx={{
-            backgroundColor: "#f5f5f5",
-            fontWeight: "bold",
-            lineHeight: "32px",
-          }}
-        >
-          Bakgrund
-        </ListSubheader>
-        {renderBackgroundLayer()}
       </List>
     </Box>
   );

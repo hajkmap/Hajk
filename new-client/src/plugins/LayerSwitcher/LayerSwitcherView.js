@@ -3,27 +3,32 @@ import { createPortal } from "react-dom";
 import propTypes from "prop-types";
 
 import { styled } from "@mui/material/styles";
-import { AppBar, Tab, Tabs, Badge } from "@mui/material";
+import {
+  AppBar,
+  Divider,
+  Tab,
+  Tabs,
+  Box,
+  IconButton,
+  Tooltip,
+} from "@mui/material";
 
 import BackgroundSwitcher from "./components/BackgroundSwitcher.js";
 import LayerGroup from "./components/LayerGroup.js";
 import BreadCrumbs from "./components/BreadCrumbs.js";
 import DrawOrder from "./components/DrawOrder.js";
+import LayerPackage from "./components/LayerPackage";
+import PersonalLayerPackage from "./components/PersonalLayerPackage";
+import LayerGroupAccordion from "./components/LayerGroupAccordion.js";
 
-// The styled-component below might seem unnecessary since we are using the sx-prop
-// on it as well. However, since we cannot use the sx-prop on a non-MUI-component
-// (which would force us to change the <div> to a <Box>) this felt OK in this
-// particular occasion.
-const Root = styled("div")(() => ({
-  margin: -10, // special case, we need to "unset" the padding for Window content that's set in Window.js
-}));
+import StarOutlineOutlinedIcon from "@mui/icons-material/StarOutlineOutlined";
+import CloudDownloadOutlinedIcon from "@mui/icons-material/CloudDownloadOutlined";
+import QuickAccessLayers from "./components/QuickAccessLayers.js";
+import QuickAccessOptions from "./components/QuickAccessOptions.js";
+import LayerItemDetails from "./components/LayerItemDetails.js";
 
 const StyledAppBar = styled(AppBar)(() => ({
   top: -10,
-}));
-
-const ContentWrapper = styled("div")(() => ({
-  padding: 10,
 }));
 
 class LayersSwitcherView extends React.PureComponent {
@@ -43,6 +48,9 @@ class LayersSwitcherView extends React.PureComponent {
       baseLayers: props.model.getBaseLayers(),
       activeTab: 0,
       activeLayersCount: 0,
+      displayContentOverlay: null, // 'layerPackage' | 'personalLayerPackage' | 'layerItemDetails'
+      layerItemDetails: null,
+      quickAccessSectionExpanded: false,
     };
 
     props.app.globalObserver.subscribe("informativeLoaded", (chapters) => {
@@ -52,7 +60,61 @@ class LayersSwitcherView extends React.PureComponent {
         });
       }
     });
+
+    props.app.globalObserver.subscribe("setLayerDetails", (details) => {
+      if (details) {
+        this.setState({
+          displayContentOverlay: "layerItemDetails",
+          layerItemDetails: details,
+        });
+      } else {
+        this.setState({
+          displayContentOverlay: null,
+        });
+      }
+    });
   }
+
+  // Handles click on Layerpackage button and backbutton
+  handleLayerPackageToggle = (layerPackageState) => {
+    layerPackageState?.event?.stopPropagation();
+    this.setState({
+      displayContentOverlay:
+        this.state.displayContentOverlay === "layerPackage"
+          ? null
+          : "layerPackage",
+    });
+    if (layerPackageState?.setQuickAccessSectionExpanded) {
+      this.setState({
+        quickAccessSectionExpanded: true,
+      });
+    }
+  };
+
+  // Handles click on PersonalLayerpackage button and backbutton
+  handlePersonalLayerPackageToggle = (layerPackageState) => {
+    layerPackageState?.event?.stopPropagation();
+    this.setState({
+      displayContentOverlay:
+        this.state.displayContentOverlay === "personalLayerPackage"
+          ? null
+          : "personalLayerPackage",
+    });
+    if (layerPackageState?.setQuickAccessSectionExpanded) {
+      this.setState({
+        quickAccessSectionExpanded: true,
+      });
+    }
+  };
+
+  // Handles click on clear quickAccess button
+  handleClearQuickAccessLayers = (e) => {
+    e.stopPropagation();
+    this.props.map
+      .getAllLayers()
+      .filter((l) => l.get("quickAccess") === true)
+      .map((l) => l.set("quickAccess", false));
+  };
 
   /**
    * This method handles layerupdates from DrawOrder component,
@@ -71,12 +133,15 @@ class LayersSwitcherView extends React.PureComponent {
    * "regular" layers (as checkboxes, multi select), and the
    * other shows background layers (as radio buttons, one-at-at-time).
    *
-   * This method controls which of the two Tabs is visible.
+   * This method controls which of the two Tabs is visible and hides LayerPackage view.
    *
    * @memberof LayersSwitcherView
    */
   handleChangeTabs = (event, activeTab) => {
-    this.setState({ activeTab });
+    this.setState({
+      activeTab,
+      displayContentOverlay: null,
+    });
   };
 
   /**
@@ -105,24 +170,64 @@ class LayersSwitcherView extends React.PureComponent {
    */
   renderLayerGroups = (shouldRender = true) => {
     return (
-      <div
-        style={{
-          display: shouldRender === true ? "block" : "none",
+      <Box
+        sx={{
+          mb: "48px",
+          display:
+            shouldRender === true && this.state.displayContentOverlay === null
+              ? "block"
+              : "none",
         }}
       >
+        {/* TODO: configurable from admin */}
+        {/* QuickAccess section */}
+        <LayerGroupAccordion
+          expanded={this.state.quickAccessSectionExpanded}
+          name={"Snabblager"}
+          quickAccess={
+            <IconButton sx={{ pl: 0 }} disableRipple size="small">
+              <StarOutlineOutlinedIcon />
+            </IconButton>
+          }
+          layerGroupDetails={
+            <>
+              <IconButton
+                onClick={(e) => this.handleLayerPackageToggle({ event: e })}
+              >
+                <Tooltip title="Ladda lagerpaket">
+                  <CloudDownloadOutlinedIcon fontSize="small"></CloudDownloadOutlinedIcon>
+                </Tooltip>
+              </IconButton>
+              <QuickAccessOptions
+                handlePersonalLayerPackageToggle={
+                  this.handlePersonalLayerPackageToggle
+                }
+                handleClearQuickAccessLayers={this.handleClearQuickAccessLayers}
+              ></QuickAccessOptions>
+            </>
+          }
+          children={
+            <QuickAccessLayers
+              model={this.props.model}
+              options={this.props.options}
+              map={this.props.map}
+              app={this.props.app}
+            ></QuickAccessLayers>
+          }
+        ></LayerGroupAccordion>
+        <Divider></Divider>
         {this.options.groups.map((group, i) => {
           return (
             <LayerGroup
               key={i}
               group={group}
               model={this.props.model}
-              chapters={this.state.chapters}
               app={this.props.app}
               options={this.props.options}
             />
           );
         })}
-      </div>
+      </Box>
     );
   };
 
@@ -157,7 +262,9 @@ class LayersSwitcherView extends React.PureComponent {
   render() {
     const { windowVisible } = this.props;
     return (
-      <Root sx={{ display: windowVisible ? "block" : "none" }}>
+      <div
+        style={{ display: windowVisible ? "block" : "none", height: "100%" }}
+      >
         <StyledAppBar
           position="sticky" // Does not work in IE11
           color="default"
@@ -173,25 +280,54 @@ class LayersSwitcherView extends React.PureComponent {
             sx={{ "& .MuiBadge-badge": { right: -16, top: 8 } }}
           >
             <Tab label="Kartlager" />
+            <Tab label="Bakgrund" />
             {this.options.showActiveLayersView === true && (
               <Tab
                 label={
-                  <Badge
-                    badgeContent={this.state.activeLayersCount}
-                    color="primary"
-                  >
-                    Aktiva
-                  </Badge>
+                  // <Badge
+                  //   badgeContent={this.state.activeLayersCount}
+                  //   color="primary"
+                  // >
+                  "Ritordning"
+                  // </Badge>
                 }
               />
             )}
-            <Tab label="Bakgrund" />
           </Tabs>
         </StyledAppBar>
-        <ContentWrapper>
+        <div
+          style={{ position: "relative", height: "100%", overflowY: "auto" }}
+        >
           {this.renderLayerGroups(this.state.activeTab === 0)}
+          <LayerPackage
+            quickLayerPresets={this.options.quickLayersPresets}
+            display={this.state.displayContentOverlay === "layerPackage"}
+            backButtonCallback={this.handleLayerPackageToggle}
+            map={this.props.map}
+            globalObserver={this.props.model.globalObserver}
+          ></LayerPackage>
+          <PersonalLayerPackage
+            display={
+              this.state.displayContentOverlay === "personalLayerPackage"
+            }
+            backButtonCallback={this.handlePersonalLayerPackageToggle}
+            map={this.props.map}
+            app={this.props.app}
+            globalObserver={this.props.model.globalObserver}
+          ></PersonalLayerPackage>
+          <LayerItemDetails
+            display={this.state.displayContentOverlay === "layerItemDetails"}
+            layerItemDetails={this.state.layerItemDetails}
+            map={this.props.map}
+            app={this.props.app}
+            chapters={this.state.chapters}
+            showOpacitySlider={this.props.options.enableTransparencySlider}
+          ></LayerItemDetails>
           <BackgroundSwitcher
-            display={this.state.activeTab === 2}
+            display={
+              this.state.activeTab === 1 &&
+              this.state.displayContentOverlay === null
+            }
             layers={this.state.baseLayers}
             layerMap={this.props.model.layerMap}
             backgroundSwitcherBlack={this.options.backgroundSwitcherBlack}
@@ -202,15 +338,20 @@ class LayersSwitcherView extends React.PureComponent {
           />
           {this.options.showActiveLayersView === true && (
             <DrawOrder
-              display={this.state.activeTab === 1}
+              model={this.props.model}
+              display={
+                this.state.activeTab === 2 &&
+                this.state.displayContentOverlay === null
+              }
               map={this.props.map}
               app={this.props.app}
+              options={this.props.options}
               onLayerChange={this.handleLayerChange}
-            />
+            ></DrawOrder>
           )}
-        </ContentWrapper>
-        {this.renderBreadCrumbs()}
-      </Root>
+          {this.renderBreadCrumbs()}
+        </div>
+      </div>
     );
   }
 }
