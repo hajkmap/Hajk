@@ -24,7 +24,7 @@ import PersonalLayerPackage from "./components/PersonalLayerPackage";
 import LayerGroupAccordion from "./components/LayerGroupAccordion.js";
 
 import StarOutlineOutlinedIcon from "@mui/icons-material/StarOutlineOutlined";
-import CloudDownloadOutlinedIcon from "@mui/icons-material/CloudDownloadOutlined";
+import AddOutlinedIcon from "@mui/icons-material/AddOutlined";
 import SearchIcon from "@mui/icons-material/Search";
 import ClearIcon from "@mui/icons-material/Clear";
 import QuickAccessLayers from "./components/QuickAccessLayers.js";
@@ -347,8 +347,8 @@ class LayersSwitcherView extends React.PureComponent {
               <IconButton
                 onClick={(e) => this.handleLayerPackageToggle({ event: e })}
               >
-                <Tooltip title="Ladda lagerpaket">
-                  <CloudDownloadOutlinedIcon fontSize="small"></CloudDownloadOutlinedIcon>
+                <Tooltip title="Lägg till lagerpaket">
+                  <AddOutlinedIcon fontSize="small"></AddOutlinedIcon>
                 </Tooltip>
               </IconButton>
               <QuickAccessOptions
