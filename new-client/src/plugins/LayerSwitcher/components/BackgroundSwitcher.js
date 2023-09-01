@@ -4,7 +4,6 @@ import { isValidLayerId } from "utils/Validator";
 import OSM from "ol/source/OSM";
 import TileLayer from "ol/layer/Tile";
 import BackgroundLayer from "./BackgroundLayer";
-import Observer from "react-event-observer";
 import Box from "@mui/material/Box";
 
 const WHITE_BACKROUND_LAYER_ID = "-1";
@@ -31,7 +30,6 @@ class BackgroundSwitcher extends React.PureComponent {
   };
   constructor(props) {
     super(props);
-    this.localObserver = Observer();
     if (props.enableOSM) {
       this.osmSource = new OSM({
         reprojectionErrorThreshold: 5,
@@ -191,10 +189,6 @@ class BackgroundSwitcher extends React.PureComponent {
         },
       };
     }
-
-    // No matter the type of 'mapLayer', we want to append these
-    // properties:
-    mapLayer["localObserver"] = this.localObserver;
 
     // Finally, let's render the component
     return (
