@@ -705,9 +705,27 @@ class App extends React.PureComponent {
             this.globalObserver.publish("analytics.trackEvent", opts);
           }
 
+          // When a layers visible state changes, the active state should also change
+          if (e.target.get("layerType") === "base") {
+            // For baselayers, the layers active state always changes when visibility changes
+            e.target.set("active", e.target.get("visible"));
+          } else {
+            // Layers that are not of type "base" are always true even if visibility changes to false.
+            // Beacuse if the layer once become visible it's active for the rest of the session
+            if (e.target.get("visible")) {
+              e.target.set("active", true);
+            }
+          }
+
           // Not related to Analytics: send an event on the global observer
           // to anyone wanting to act on layer visibility change.
           this.globalObserver.publish("core.layerVisibilityChanged", e);
+        });
+        // Listener for "active" changes
+        layer.on("change:active", (e) => {
+          // Send an event on the global observer
+          // to anyone wanting to act on layer active change.
+          this.globalObserver.publish("core.layerActiveChanged", e);
         });
       });
   }

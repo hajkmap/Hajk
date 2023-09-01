@@ -48,6 +48,12 @@ class BackgroundSwitcher extends React.PureComponent {
           layerType: "base",
         },
       });
+      this.osmLayer.on("change:visible", (e) => {
+        // osmLayer active state always changes when visibility changes
+        e.target.set("active", e.target.get("visible"));
+        // Publish event to ensure active tab is updated with osmLayer changes
+        this.props.app.globalObserver.publish("core.layerActiveChanged", e);
+      });
     }
   }
 

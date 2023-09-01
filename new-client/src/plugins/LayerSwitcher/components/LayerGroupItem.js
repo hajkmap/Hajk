@@ -149,20 +149,15 @@ class LayerGroupItem extends Component {
     model.observer.subscribe("showLayer", this.setVisible);
     model.observer.subscribe("toggleGroup", this.toggleGroupVisible);
 
-    // Listen for changes in the layer's visibility.
+    // Change listener for grouplayers, so that changes in grouplayer visibility
+    // by other components reflect the state in the legend
     this.props.layer.on?.("change:visible", (e) => {
-      // Update the 'visible' state based on the layer's new visibility.
       const visible = !e.oldValue;
       this.setState({
-        visible,
+        visible: visible,
+        visibleSubLayers: visible ? this.props.layer.subLayers : [],
       });
-
-      // Listen to zoom changes if the layer is visible.
-      this.listenToZoomChange(visible);
     });
-
-    // Initially listen to zoom changes if the layer is visible.
-    this.listenToZoomChange(this.state.visible);
 
     // Set load status by subscribing to a global event. Expect ID (int) of layer
     // and status (string "ok"|"loaderror"). Also, once status was set to "loaderror",

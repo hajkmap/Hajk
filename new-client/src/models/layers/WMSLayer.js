@@ -113,6 +113,7 @@ class WMSLayer {
       }
     }
 
+    this.layer.set("active", config.visible);
     this.layer.layersInfo = config.layersInfo;
     this.layer.subLayers = this.subLayers;
     this.layer.visibleAtStartSubLayers = config.visibleAtStartSubLayers;
