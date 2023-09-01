@@ -237,6 +237,9 @@
     <Compile Include="Models\Tool.cs" />
     <Compile Include="Models\ToolOptions\LayerMenuOptions.cs" />
     <Compile Include="Models\ToolOptions\MapWMSLayerInfo.cs" />
+    <Compile Include="Models\ToolOptions\QuickLayer.cs" />
+    <Compile Include="Models\ToolOptions\QuickLayerMetadata.cs" />
+    <Compile Include="Models\ToolOptions\QuickLayerPreset.cs" />
     <Compile Include="Components\KMLCreator.cs" />
     <Compile Include="Components\PDFCreator.cs" />
     <Compile Include="Components\ExcelCreator.cs" />
