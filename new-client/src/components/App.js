@@ -431,6 +431,10 @@ class App extends React.PureComponent {
       t.toLowerCase()
     );
 
+    // Let's push some built-in core elements, that previously were plugins
+    // and that still have their config there.
+    lowerCaseActiveTools.push("preset");
+
     // Check which plugins defined in mapConfig don't exist in buildConfig
     const unsupportedToolsFoundInMapConfig = this.props.config.mapConfig.tools
       .map((t) => t.type.toLowerCase())
@@ -445,11 +449,12 @@ class App extends React.PureComponent {
       });
 
     // Display a silent info message in console
-    console.log(
-      `The map configuration contains unavailable plugins: ${unsupportedToolsFoundInMapConfig.join(
-        ", "
-      )}. Please check your map config and buildConfig.json.  `
-    );
+    unsupportedToolsFoundInMapConfig.length > 0 &&
+      console.info(
+        `The map configuration contains unavailable plugins: ${unsupportedToolsFoundInMapConfig.join(
+          ", "
+        )}. Please check your map config and buildConfig.json.  `
+      );
   };
   /**
    * @summary Initiates the wanted analytics model (if any).
