@@ -37,6 +37,7 @@ function DrawerToggleButtons({
   drawerButtons,
   globalObserver,
   initialActiveButton,
+  drawerStatic,
 }) {
   //Set initial active button state based on the initially active drawer, received from App.js
   //This will either be a drawer button name such as "plugins" or null, depending on whether there
@@ -82,11 +83,13 @@ function DrawerToggleButtons({
   }) => {
     // Currently active toggle button should have a "Close" icon
     const icon =
-      value === activeButton ? (
+      value === activeButton && !drawerStatic ? (
         <CloseIcon sx={{ marginRight: { md: 1 } }} />
       ) : (
         <ButtonIcon sx={{ marginRight: { md: 1 } }} />
       );
+
+    const disabled = drawerStatic && value === activeButton ? true : false;
 
     return (
       <StyledToggleButton
@@ -104,6 +107,7 @@ function DrawerToggleButtons({
             },
           }),
         }}
+        disabled={disabled}
       >
         {icon}
         {/* Caption should be hidden on small screens*/}

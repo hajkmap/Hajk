@@ -771,9 +771,11 @@ class LayerGroupItem extends Component {
     if (infoUrl) {
       return (
         <InfoTextContainer>
-          <a href={infoUrl} target="_blank" rel="noopener noreferrer">
-            {infoUrlText || infoUrl}
-          </a>
+          <Typography variant="body2" component="div">
+            <a href={infoUrl} target="_blank" rel="noopener noreferrer">
+              {infoUrlText || infoUrl}
+            </a>
+          </Typography>
         </InfoTextContainer>
       );
     } else {
