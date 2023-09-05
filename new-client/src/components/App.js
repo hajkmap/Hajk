@@ -383,6 +383,7 @@ class App extends React.PureComponent {
     // Let's push some built-in core elements, that previously were plugins
     // and that still have their config there.
     lowerCaseActiveTools.push("preset");
+    lowerCaseActiveTools.push("externallinks");
 
     // Check which plugins defined in mapConfig don't exist in buildConfig
     const unsupportedToolsFoundInMapConfig = this.props.config.mapConfig.tools
