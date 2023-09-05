@@ -455,9 +455,11 @@ class LayerItem extends React.PureComponent {
     if (this.infoUrl) {
       return (
         <InfoTextContainer>
-          <a href={this.infoUrl} target="_blank" rel="noopener noreferrer">
-            {this.infoUrlText || this.infoUrl}
-          </a>
+          <Typography variant="body2" component="div">
+            <a href={this.infoUrl} target="_blank" rel="noopener noreferrer">
+              {this.infoUrlText || this.infoUrl}
+            </a>
+          </Typography>
         </InfoTextContainer>
       );
     } else {
