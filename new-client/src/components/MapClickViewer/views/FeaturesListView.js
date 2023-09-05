@@ -60,6 +60,9 @@ const FeaturesListView = (props) => {
           sx={{ width: "100%", maxWidth: 360, bgcolor: "background.paper" }}
         >
           {featureCollection.features.map((f, i) => {
+            // Let's see if there's a property with the special name (non-configurable for now).
+            // If yes, we'll use the color to style the feature's background color in list. See #1385.
+            const iconBgColor = f.get("_hajkiconbgcolor");
             return (
               <ListItemButton
                 key={i}
@@ -69,7 +72,11 @@ const FeaturesListView = (props) => {
                 component="li"
               >
                 <ListItemAvatar>
-                  <Avatar>
+                  <Avatar
+                    sx={{
+                      ...(iconBgColor && { bgcolor: iconBgColor }),
+                    }}
+                  >
                     {featureCollection.infoclickIcon.trim().length > 0 ? (
                       <Icon>{featureCollection.infoclickIcon}</Icon>
                     ) : (
