@@ -655,7 +655,9 @@ class App extends React.PureComponent {
       if (v !== null) {
         this.setState({ drawerVisible: true, activeDrawerContent: v });
       } else {
-        this.globalObserver.publish("core.hideDrawer");
+        if (!this.state.drawerStatic) {
+          this.globalObserver.publish("core.hideDrawer");
+        }
       }
     });
 
@@ -968,6 +970,13 @@ class App extends React.PureComponent {
     );
   };
 
+  checkDrawerButtons() {
+    return (
+      !this.state.drawerStatic ||
+      (this.state.drawerStatic && this.state.drawerButtons.length > 1)
+    );
+  }
+
   render() {
     const { config } = this.props;
 
@@ -1027,12 +1036,15 @@ class App extends React.PureComponent {
             <StyledHeader
               id="header"
               sx={{
+                justifyContent: this.checkDrawerButtons()
+                  ? "space-between"
+                  : "end",
                 "& > *": {
                   pointerEvents: "auto",
                 },
               }}
             >
-              {clean === false && (
+              {clean === false && this.checkDrawerButtons() && (
                 <DrawerToggleButtons
                   drawerButtons={this.state.drawerButtons}
                   globalObserver={this.globalObserver}
@@ -1041,6 +1053,7 @@ class App extends React.PureComponent {
                       ? this.state.activeDrawerContent
                       : null
                   }
+                  drawerStatic={this.state.drawerStatic}
                 />
               )}
               {/* Render Search even if clean === false: Search contains logic to handle clean inside the component. */}
