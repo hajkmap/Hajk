@@ -29,6 +29,7 @@ const defaultState = {
   infoText: "",
   infoUrl: "",
   infoUrlText: "",
+  infoOpenDataLink: "",
   infoOwner: "",
 };
 
@@ -133,6 +134,7 @@ class ArcGISLayerForm extends Component {
       infoText: this.getValue("infoText"),
       infoUrl: this.getValue("infoUrl"),
       infoUrlText: this.getValue("infoUrlText"),
+      infoOpenDataLink: this.getValue("infoOpenDataLink"),
       infoOwner: this.getValue("infoOwner"),
     };
   }
@@ -665,18 +667,18 @@ class ArcGISLayerForm extends Component {
             />
           </div>
           <div className={infoClass}>
-            <label>Länktext</label>
+            <label>Länk till öppna data</label>
             <input
               type="text"
-              ref="input_infoUrlText"
+              ref="input_infoOpenDataLink"
               onChange={(e) => {
                 const v = e.target.value;
-                this.setState({ infoUrlText: v }, () =>
-                  this.validateField("infoUrlText", v)
+                this.setState({ infoOpenDataLink: v }, () =>
+                  this.validateField("infoOpenDataLink", v)
                 );
               }}
-              value={this.state.infoUrlText}
-              className={this.getValidationClass("infoUrlText")}
+              value={this.state.infoOpenDataLink}
+              className={this.getValidationClass("infoOpenDataLink")}
             />
           </div>
           <div className={infoClass}>
