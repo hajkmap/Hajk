@@ -786,7 +786,6 @@ class LayerGroupItem extends Component {
       return (
         <InfoTextContainer>
           <Typography variant="body2" component="div">
-            <p>Öppna data:</p>
             <a
               href={this.infoOpenDataLink}
               target="_blank"
