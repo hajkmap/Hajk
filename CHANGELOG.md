@@ -7,13 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-- Upcoming features will be added here prior a release is made
+- Added CHANGELOG.md to the project
+
+## [3.13.11] - 2023-09-05
+
+### Added
+
+- Client UI: It is now possible for admins to make the side drawer permanent (i.e. not hidable by user). [#1316](https://github.com/hajkmap/Hajk/issues/1316), [#1367](https://github.com/hajkmap/Hajk/issues/1367).
 
 ## [3.13.10] - 2023-09-05
 
 ### Added
 
-- Measurer plugin: It is now possible to perform perpendicular measurements by using a modifier key (Ctrl or Cmd, depending on the OS)[#1361](https://github.com/hajkmap/Hajk/issues/1361)
+- Measurer plugin: It is now possible to perform perpendicular measurements by using a modifier key (Ctrl or Cmd, depending on the OS) [#1361](https://github.com/hajkmap/Hajk/issues/1361)
 - The HTML `target` attribute is now accepted and rendered correctly if specified, [#1389](https://github.com/hajkmap/Hajk/pull/1389)
 - Added the possibility to change icon background in feature list, [#1385](https://github.com/hajkmap/Hajk/issues/1385)
 
@@ -92,6 +98,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [3.12.0-rc.2] - 2023-06-19
 
 [unreleased]: https://github.com/hajkmap/Hajk/compare/v3.13.11...hstd-main
+[3.13.11]: https://github.com/hajkmap/Hajk/compare/v3.13.10...v3.13.11
 [3.13.10]: https://github.com/hajkmap/Hajk/compare/v3.13.9...v3.13.10
 [3.13.9]: https://github.com/hajkmap/Hajk/compare/v3.13.8...v3.13.9
 [3.13.8]: https://github.com/hajkmap/Hajk/compare/v3.13.7...v3.13.8
