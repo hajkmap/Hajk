@@ -2,7 +2,7 @@
   "appName": "Hajk",
   "version": "3.12.0-dev",
   "mapserviceBase": "/api/v1",
-  "proxy": "",
+  "proxy": "https://test-webbkarta.nacka.se",
   "searchProxy": "",
   "defaultMap": "webbkarta",
   "experimentalNewApi": false,
