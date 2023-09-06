@@ -1703,8 +1703,8 @@
     },
     {
       "id": "6gkexq",
-      "caption": "Gymnasiesarskolor",
-      "internalLayerName": "Förskola och skola/Gymnasiesärskolor",
+      "caption": "Anpassade gymnasieskolor",
+      "internalLayerName": "Förskola och skola/Anpassade gymnasieskolor",
       "url": "/geoserver/nacka/wms",
       "customGetMapUrl": "",
       "owner": "",
@@ -1714,11 +1714,11 @@
       "legendIcon": "",
       "projection": "EPSG:3011",
       "layers": [
-        "gymnasiesarskola"
+        "anpassade_gymnasieskolor"
       ],
       "layersInfo": [
         {
-          "id": "gymnasiesarskola",
+          "id": "anpassade_gymnasieskolor",
           "caption": "",
           "legend": "",
           "legendIcon": "",
@@ -1839,7 +1839,7 @@
     },
     {
       "id": "hv8fjj",
-      "caption": "Hembyggdsgård",
+      "caption": "Hembygdsgård",
       "internalLayerName": "Uppleva & göra/Hembygdsgård",
       "url": "/geoserver/nacka/wms",
       "customGetMapUrl": "",
@@ -1850,11 +1850,11 @@
       "legendIcon": "",
       "projection": "EPSG:3011",
       "layers": [
-        "hembyggdsgard"
+        "hembygdsgard"
       ],
       "layersInfo": [
         {
-          "id": "hembyggdsgard",
+          "id": "hembygdsgard",
           "caption": "",
           "legend": "",
           "legendIcon": "",
@@ -2180,7 +2180,7 @@
     {
       "id": "iriwna",
       "caption": "Konsthall",
-      "internalLayerName": "Uppleva & göra/Museér och konsthallar/Konsthallar",
+      "internalLayerName": "Uppleva & göra/Museer och konsthallar/Konsthallar",
       "url": "/geoserver/nacka/wms",
       "customGetMapUrl": "",
       "owner": "",
@@ -2655,8 +2655,8 @@
     },
     {
       "id": "gwuohn",
-      "caption": "Museér",
-      "internalLayerName": "Uppleva & göra/Museér och konsthallar/Museér",
+      "caption": "Museer",
+      "internalLayerName": "Uppleva & göra/Museer och konsthallar/Museer",
       "url": "/geoserver/nacka/wms",
       "customGetMapUrl": "",
       "owner": "",
@@ -5966,11 +5966,11 @@
     },
     {
       "id": "2e0a62fa-03e8-866b-3cb6-4cf71fb33c21",
-      "caption": "Gymnasiesärskola",
-      "internalLayerName": "Gymnasiesärskola",
+      "caption": "Anpassad gymnasieskola",
+      "internalLayerName": "Anpassad gymnasieskola",
       "url": "/geoserver/nacka/wfs?SERVICE=WFS&REQUEST=GetCapabilities&VERSION=1.1.0",
       "layers": [
-        "nacka:gymnasiesarskola"
+        "nacka:anpassade_gymnasieskolor"
       ],
       "searchFields": [
         "namn"
