@@ -443,33 +443,103 @@
             "toggled": false,
             "expanded": false,
             "parent": "-1",
-            "layers": [
-              {
-                "id": "gc8s01",
-                "drawOrder": 0,
-                "visibleAtStart": false,
-                "infobox": ""
-              },
-              {
-                "id": "8knvhx",
-                "drawOrder": 0,
-                "visibleAtStart": false,
-                "infobox": ""
-              },
-              {
-                "id": "e8rr4x",
-                "drawOrder": 0,
-                "visibleAtStart": false,
-                "infobox": ""
-              },
-              {
-                "id": "nvipse",
-                "drawOrder": 0,
-                "visibleAtStart": false,
-                "infobox": ""
-              }
-            ],
+            "layers": [],
             "groups": [
+              {
+                "id": "0e75ef5d-fc5c-9e77-ad35-4cb3fbb3b058",
+                "type": "group",
+                "name": "Bestämmelser",
+                "toggled": false,
+                "expanded": false,
+                "parent": "9938c969-590c-8683-435c-1ecaca271096",
+                "layers": [
+                  {
+                    "id": "gc8s01",
+                    "drawOrder": 0,
+                    "visibleAtStart": false,
+                    "infobox": ""
+                  },
+                  {
+                    "id": "8knvhx",
+                    "drawOrder": 0,
+                    "visibleAtStart": false,
+                    "infobox": ""
+                  },
+                  {
+                    "id": "e8rr4x",
+                    "drawOrder": 0,
+                    "visibleAtStart": false,
+                    "infobox": ""
+                  },
+                  {
+                    "id": "nvipse",
+                    "drawOrder": 0,
+                    "visibleAtStart": false,
+                    "infobox": ""
+                  },
+                  {
+                    "id": "jz35ob",
+                    "drawOrder": 0,
+                    "visibleAtStart": false,
+                    "infobox": ""
+                  },
+                  {
+                    "id": "pdgqyc",
+                    "drawOrder": 0,
+                    "visibleAtStart": false,
+                    "infobox": ""
+                  },
+                  {
+                    "id": "mk2vfb",
+                    "drawOrder": 0,
+                    "visibleAtStart": false,
+                    "infobox": ""
+                  },
+                  {
+                    "id": "hpyx5h",
+                    "drawOrder": 0,
+                    "visibleAtStart": false,
+                    "infobox": ""
+                  },
+                  {
+                    "id": "8ooze1",
+                    "drawOrder": 0,
+                    "visibleAtStart": false,
+                    "infobox": ""
+                  },
+                  {
+                    "id": "jq6s2i",
+                    "drawOrder": 0,
+                    "visibleAtStart": false,
+                    "infobox": ""
+                  },
+                  {
+                    "id": "qpoew9",
+                    "drawOrder": 1000,
+                    "visibleAtStart": false,
+                    "infobox": ""
+                  },
+                  {
+                    "id": "st72uk",
+                    "drawOrder": 0,
+                    "visibleAtStart": false,
+                    "infobox": ""
+                  },
+                  {
+                    "id": "opqm61",
+                    "drawOrder": 0,
+                    "visibleAtStart": false,
+                    "infobox": ""
+                  },
+                  {
+                    "id": "bgohsw",
+                    "drawOrder": 0,
+                    "visibleAtStart": false,
+                    "infobox": ""
+                  }
+                ],
+                "groups": []
+              },
               {
                 "id": "28cedd51-916a-1cd7-9f74-fde901180c8b",
                 "type": "group",
@@ -521,122 +591,6 @@
                   },
                   {
                     "id": "l8gcrd",
-                    "drawOrder": 0,
-                    "visibleAtStart": false,
-                    "infobox": ""
-                  }
-                ],
-                "groups": []
-              },
-              {
-                "id": "2bd9f633-27f8-b896-0a47-fec74986e38a",
-                "type": "group",
-                "name": "Fastighetsplaner & tomtindelning",
-                "toggled": false,
-                "expanded": false,
-                "parent": "9938c969-590c-8683-435c-1ecaca271096",
-                "layers": [
-                  {
-                    "id": "jz35ob",
-                    "drawOrder": 0,
-                    "visibleAtStart": false,
-                    "infobox": ""
-                  },
-                  {
-                    "id": "pdgqyc",
-                    "drawOrder": 0,
-                    "visibleAtStart": false,
-                    "infobox": ""
-                  }
-                ],
-                "groups": []
-              },
-              {
-                "id": "adba5dbe-ddef-8fa6-8001-3bf7bc3a86d4",
-                "type": "group",
-                "name": "Kulturmiljö - Lovplikt",
-                "toggled": false,
-                "expanded": false,
-                "parent": "9938c969-590c-8683-435c-1ecaca271096",
-                "layers": [
-                  {
-                    "id": "mk2vfb",
-                    "drawOrder": 0,
-                    "visibleAtStart": false,
-                    "infobox": ""
-                  },
-                  {
-                    "id": "hpyx5h",
-                    "drawOrder": 0,
-                    "visibleAtStart": false,
-                    "infobox": ""
-                  },
-                  {
-                    "id": "8ooze1",
-                    "drawOrder": 0,
-                    "visibleAtStart": false,
-                    "infobox": ""
-                  },
-                  {
-                    "id": "jq6s2i",
-                    "drawOrder": 0,
-                    "visibleAtStart": false,
-                    "infobox": ""
-                  },
-                  {
-                    "id": "qpoew9",
-                    "drawOrder": 1000,
-                    "visibleAtStart": false,
-                    "infobox": ""
-                  }
-                ],
-                "groups": []
-              },
-              {
-                "id": "16ad8613-8787-3124-f5fb-48a9a439d173",
-                "type": "group",
-                "name": "Stadsbyggnadsprojekt",
-                "toggled": true,
-                "expanded": false,
-                "parent": "9938c969-590c-8683-435c-1ecaca271096",
-                "layers": [
-                  {
-                    "id": "fofl1x",
-                    "drawOrder": 0,
-                    "visibleAtStart": false,
-                    "infobox": ""
-                  },
-                  {
-                    "id": "lcnlpf",
-                    "drawOrder": 0,
-                    "visibleAtStart": false,
-                    "infobox": ""
-                  },
-                  {
-                    "id": "asktlk",
-                    "drawOrder": 0,
-                    "visibleAtStart": false,
-                    "infobox": ""
-                  }
-                ],
-                "groups": []
-              },
-              {
-                "id": "d3101fd5-c99e-bdaa-2a8c-20b8181b39f5",
-                "type": "group",
-                "name": "Naturvärden",
-                "toggled": false,
-                "expanded": false,
-                "parent": "9938c969-590c-8683-435c-1ecaca271096",
-                "layers": [
-                  {
-                    "id": "st72uk",
-                    "drawOrder": 0,
-                    "visibleAtStart": false,
-                    "infobox": ""
-                  },
-                  {
-                    "id": "opqm61",
                     "drawOrder": 0,
                     "visibleAtStart": false,
                     "infobox": ""
@@ -700,15 +654,38 @@
                 "drawOrder": 0,
                 "visibleAtStart": false,
                 "infobox": ""
-              },
-              {
-                "id": "bgohsw",
-                "drawOrder": 0,
-                "visibleAtStart": false,
-                "infobox": ""
               }
             ],
             "groups": [
+              {
+                "id": "16ad8613-8787-3124-f5fb-48a9a439d173",
+                "type": "group",
+                "name": "Stadsbyggnadsprojekt",
+                "toggled": true,
+                "expanded": false,
+                "parent": "304ea5f8-5b22-fa8f-eeb3-e68c8545aa5c",
+                "layers": [
+                  {
+                    "id": "fofl1x",
+                    "drawOrder": 0,
+                    "visibleAtStart": false,
+                    "infobox": ""
+                  },
+                  {
+                    "id": "lcnlpf",
+                    "drawOrder": 0,
+                    "visibleAtStart": false,
+                    "infobox": ""
+                  },
+                  {
+                    "id": "asktlk",
+                    "drawOrder": 0,
+                    "visibleAtStart": false,
+                    "infobox": ""
+                  }
+                ],
+                "groups": []
+              },
               {
                 "id": "dc183c7b-cc49-1ea1-fdb6-d4b37580aaf4",
                 "type": "group",
