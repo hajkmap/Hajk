@@ -1094,7 +1094,7 @@
       "caption": "Cykelstråk",
       "internalLayerName": "Uppleva & göra/Cykelstråk via ISYroad",
       "url": "/geoserver/nacka_isyroad/wms",
-      "customGetMapUrl": "https://test-webbkarta.nacka.se/geoserver/nacka_isyroad/wms",
+      "customGetMapUrl": "",
       "owner": "",
       "date": "1687958980739",
       "content": "",
@@ -5871,7 +5871,7 @@
       "searchFields": [
         "namn"
       ],
-      "infobox": "**Namn:** {namn}  \n{{if {foo}}}<a href={lank}>Länk</a>{{/if}}\n",
+      "infobox": "**Namn:** {namn}{{if {lank}}}\n<a href={lank}>Länk</a>{{/if}}",
       "aliasDict": "",
       "displayFields": [
         "namn"
@@ -5897,7 +5897,7 @@
       "searchFields": [
         "namn"
       ],
-      "infobox": "{driftsform} {typ}  \n<a href=\"{lank}\">Länk</a>",
+      "infobox": "**Driftsform:** {driftsform}\n**Typ:** {typ}\n{{if {lank}}}\n<a href=\"{lank}\">Länk</a>{{/if}}",
       "aliasDict": "",
       "displayFields": [
         "namn"
@@ -5923,7 +5923,7 @@
       "searchFields": [
         "namn"
       ],
-      "infobox": "{driftsform} {typ}  \n<a href=\"{lank}\">Länk</a>",
+      "infobox": "**Driftsform:** {driftsform}\n**Typ:** {typ}\n{{if {lank}}}\n<a href=\"{lank}\">Länk</a>{{/if}}",
       "aliasDict": "",
       "displayFields": [
         "namn"
@@ -5949,7 +5949,7 @@
       "searchFields": [
         "namn"
       ],
-      "infobox": "{driftsform} {typ}  \n<a href=\"{lank}\">Länk</a>",
+      "infobox": "**Driftsform:** {driftsform}\n**Typ:** {typ}\n{{if {lank}}}\n<a href=\"{lank}\">Länk</a>{{/if}}",
       "aliasDict": "",
       "displayFields": [
         "namn"
@@ -5975,7 +5975,7 @@
       "searchFields": [
         "namn"
       ],
-      "infobox": "{driftsform} {typ}  \n<a href=\"{lank}\">Länk</a>",
+      "infobox": "**Driftsform:** {driftsform}\n**Typ:** {typ}\n{{if {lank}}}\n<a href=\"{lank}\">Länk</a>{{/if}}",
       "aliasDict": "",
       "displayFields": [
         "namn"
