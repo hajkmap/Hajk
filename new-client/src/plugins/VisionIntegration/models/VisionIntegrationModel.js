@@ -776,10 +776,18 @@ class VisionIntegrationModel {
           wktString = this.#wktParser.writeFeature(editFeatures[0]);
           break;
         default:
+          const geometries = [];
+          for (const f of editFeatures) {
+            const geom = f.getGeometry();
+            if (geom.getType() === "MultiPolygon") {
+              // We have to make sure to destructure eventual multi-polygons to regular polygons....
+              geom.getPolygons().forEach((g) => geometries.push(g));
+            } else {
+              geometries.push(geom);
+            }
+          }
           const multiPolygon = new Feature({
-            geometry: new MultiPolygon(
-              editFeatures.map((f) => f.getGeometry())
-            ),
+            geometry: new MultiPolygon(geometries),
           });
           wktString = this.#wktParser.writeFeature(multiPolygon);
           break;
