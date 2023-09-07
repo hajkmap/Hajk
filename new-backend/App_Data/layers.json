@@ -207,8 +207,8 @@
     },
     {
       "id": "bkx8hq",
-      "caption": "Flygfoto - 2022 (proxy)",
-      "internalLayerName": "",
+      "caption": "Flygfoto - 2022",
+      "internalLayerName": "Ortofoto - 2022 (proxy)",
       "url": "/geoserver/nacka/wms",
       "customGetMapUrl": "",
       "owner": "",
