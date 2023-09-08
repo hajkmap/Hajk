@@ -266,7 +266,7 @@ export default class ExpressServer {
    * - /api/v1/proxy/geoserver
    * - /api/v2/proxy/geoserver
    * @issue https://github.com/hajkmap/Hajk/issues/824
-   * @issue https://github.com/hajkmap/Hajk/issues/1390
+   * @issue https://github.com/hajkmap/Hajk/issues/1309
    * @returns
    * @memberof ExpressServer
    */
