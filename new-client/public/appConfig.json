@@ -1,12 +1,12 @@
 {
   "appName": "Hajk",
-  "version": "3.12.0-dev",
+  "version": "3.12.0-dev+1399",
   "mapserviceBase": "/api/v1",
-  "proxy": "https://webbkarta.nacka.se",
+  "experimentalNewApi": false,
+  "proxy": "",
   "searchProxy": "",
   "defaultMap": "webbkarta",
-  "experimentalNewApi": false,
-  "noLayerSwitcherMessage": "Den här kartan har inga valbara lager, vilket tyder du på att din användare saknar behörighet.",
+  "noLayerSwitcherMessage": "Dritftstörning. Vänta en minut och försök ladda om sidan.",
   "networkErrorMessage": "Nätverksfel. Försök att ladda om sidan när du har en uppkoppling.",
   "parseErrorMessage": "Konfigurationsfel. Vänta en minut och försök ladda om sidan.",
   "announcements": [
