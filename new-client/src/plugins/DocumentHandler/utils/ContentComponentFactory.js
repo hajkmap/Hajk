@@ -441,11 +441,11 @@ export const Img = ({ imgTag, localObserver, componentId, baseUrl }) => {
         image={imgUrl}
         sx={{
           ...getImageStyle(image),
-          ...(image.width && {
-            height: "auto", // Let the browser calculate the height, otherwise it will look shitty when maxWidth gets triggered.
-            width: image.width,
-            maxWidth: "100%",
-          }),
+          ...(image.height &&
+            image.width && {
+              height: image.height,
+              width: image.width,
+            }),
           ".MuiCardMedia-media": {
             width: "auto",
             maxWidth: "100%",
