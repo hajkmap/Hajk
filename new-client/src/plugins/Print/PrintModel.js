@@ -1478,7 +1478,7 @@ export default class PrintModel {
   // Saves the supplied PDF with the supplied file-name.
   #saveToPdf = async (pdf, fileName) => {
     try {
-      pdf.save(`${fileName}.pdf`);
+      return await pdf.save(`${fileName}.pdf`);
     } catch (error) {
       throw new Error(`Failed to save PDF. Error: ${error}`);
     }
@@ -1539,27 +1539,24 @@ export default class PrintModel {
 
   // Saves the print-contents to file, either PDF, or PNG (depending on supplied type).
   saveToFile = async (pdf, width, type) => {
-    return new Promise((resolve) => {
-      // We're gonna need to create a file-name.
-      const fileName = `Kartexport - ${new Date().toLocaleString()}`;
-      // Then we'll try to save the contents in the format the user requested.
-      try {
-        switch (type) {
-          case "PDF":
-            return this.#saveToPdf(pdf, fileName);
-          case "PNG":
-          case "BLOB":
-            console.log("in correct switch");
-            return resolve(this.#saveToPng(pdf, fileName, width, type));
-          default:
-            throw new Error(
-              `Supplied type could not be handled. The supplied type was ${type} and currently only PDF and PNG is supported.`
-            );
-        }
-      } catch (error) {
-        throw new Error(`Failed to save file... ${error}`);
+    // We're gonna need to create a file-name.
+    const fileName = `Kartexport - ${new Date().toLocaleString()}`;
+    // Then we'll try to save the contents in the format the user requested.
+    try {
+      switch (type) {
+        case "PDF":
+          return await this.#saveToPdf(pdf, fileName);
+        case "PNG":
+        case "BLOB":
+          return await this.#saveToPng(pdf, fileName, width, type);
+        default:
+          throw new Error(
+            `Supplied type could not be handled. The supplied type was ${type} and currently only PDF, PNG, and BLOB is supported.`
+          );
       }
-    });
+    } catch (error) {
+      throw new Error(`Failed to save file... ${error}`);
+    }
   };
 
   cancelPrint = () => {
