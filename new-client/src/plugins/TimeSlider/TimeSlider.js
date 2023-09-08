@@ -17,6 +17,7 @@ import { DEFAULT_PRINT_OPTIONS } from "./constants";
 class TimeSlider extends React.PureComponent {
   state = {
     title: this.props.options.title || "Tidslinje",
+    windowHidden: false,
     color: null,
     playing: false,
     printActive: false,
@@ -65,10 +66,12 @@ class TimeSlider extends React.PureComponent {
   };
 
   onWindowShow = () => {
+    this.setState({ windowHidden: false });
     this.localObserver.publish("initiateTimeSliderView");
   };
 
   onWindowHide = () => {
+    this.setState({ windowHidden: true });
     this.localObserver.publish("resetTimeSliderView");
   };
 
@@ -133,6 +136,7 @@ class TimeSlider extends React.PureComponent {
           layers={this.layers} //The layers to be used
           defaultResolution={this.defaultResolution} //"years", "months", or "days"
           visibleAtStart={this.props.options.visibleAtStart}
+          windowHidden={this.state.windowHidden}
           printActive={this.state.printActive}
           printModel={this.printModel}
         />

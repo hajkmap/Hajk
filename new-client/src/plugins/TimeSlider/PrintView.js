@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { saveAs } from "file-saver";
 import { FormControl, Grid, InputLabel, MenuItem, Select } from "@mui/material";
 
@@ -11,51 +11,53 @@ import {
   DEFAULT_PRINT_OPTIONS,
   INFORMATION_PANEL_MODES,
   MAX_IMAGES_FOR_PRINT,
-  PRINT_STATUS,
 } from "./constants";
 
 export default function PrintView(props) {
   const [dialogOpen, setDialogOpen] = useState(false);
-  const [printStatus, setPrintStatus] = useState(PRINT_STATUS.IDLE);
   const [scale, setScale] = useState(props.printModel.getFittingScale());
   const [resolution, setResolution] = useState(props.resolution);
   const [stepSize, setStepSize] = useState(props.stepSize);
   const [dateRange, setDateRange] = useState([props.startTime, props.endTime]);
 
-  useEffect(() => {
-    !props.printModel.previewLayer && props.printModel.addPreviewLayer();
-    props.printModel.addPreview({
-      format: "a4",
-      orientation: "landscape",
-      scale: scale,
+  const printOptions = useMemo(
+    () => ({
       useMargin: false,
       useTextIconsInMargin: false,
-    });
-  }, [scale, props.printModel]);
+      format: "a4",
+      orientation: "landscape",
+      resolution: 150,
+      scale: scale,
+      mapTitle: "",
+      printComment: "",
+      mapTextColor: "#000000",
+      includeLogo: false,
+      includeNorthArrow: false,
+      includeScaleBar: true,
+      scaleBarPlacement: "bottomLeft",
+      saveAsType: "BLOB",
+    }),
+    [scale]
+  );
+
+  useEffect(() => {
+    !props.printModel.previewLayer && props.printModel.addPreviewLayer();
+    props.printModel.renderPreviewFeature(!props.windowHidden, printOptions);
+
+    return () => props.printModel.renderPreviewFeature(false, printOptions);
+  }, [printOptions, props.windowHidden, props.printModel]);
 
   const print = async () => {
     setDialogOpen(true);
-    setPrintStatus(PRINT_STATUS.BUSY);
-    const blob = await props.printModel.print({
-      scale: scale,
-      resolution: "150",
-      format: "a4",
-      orientation: "landscape",
-      useMargin: false,
-      useTextIconsInMargin: false,
-      mapTitle: "",
-      printComment: "",
-      saveAsType: "BLOB",
-    });
+    const blob = await props.printModel.print(printOptions);
 
     saveAs(blob, `${"test"}.png`);
     setDialogOpen(false);
-    setPrintStatus(PRINT_STATUS.IDLE);
   };
 
   const cancel = () => {
+    props.model.cancelPrint();
     setDialogOpen(false);
-    setPrintStatus(PRINT_STATUS.ABORT);
   };
 
   const handleResolutionChange = (e) => {

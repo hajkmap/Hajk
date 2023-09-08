@@ -481,6 +481,7 @@ class TimeSliderView extends React.PureComponent {
         printModel={printModel}
         getStepSize={this.getStepSize}
         getDateLabel={this.getDateLabel}
+        windowHidden={this.props.windowHidden}
       />
     ) : (
       <>
