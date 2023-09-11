@@ -110,6 +110,7 @@ class Print extends React.PureComponent {
       map: props.map,
       options: props.options,
       dims: this.dims,
+      proxy: props.app.config.proxy,
       mapConfig: props.app.config.mapConfig.map,
     });
   }
