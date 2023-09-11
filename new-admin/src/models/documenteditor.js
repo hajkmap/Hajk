@@ -41,49 +41,35 @@ var documentEditor = Model.extend({
   },
 
   save: function (folder, documentName, data, callback) {
-    var url = "";
+    let url = this.get("config").url_save;
+
     if (folder) {
-      url = this.get("config").url_save + "/" + folder + "/" + documentName;
-      data.chapters.forEach((chapter) => {
-        this.deleteParentChapter(chapter, data.chapters);
-      });
-
-      data.chapters.map((chapter) => {
-        chapter.html = chapter.html
-          .replaceAll("&lt;", "<")
-          .replaceAll("&gt;", ">");
-        return false;
-      });
-    } else {
-      url = this.get("config").url_save + "/" + documentName;
-      data.chapters.forEach((chapter) => {
-        this.deleteParentChapter(chapter, data.chapters);
-      });
-
-      data.chapters.map((chapter) => {
-        chapter.html = chapter.html
-          .replaceAll("&lt;", "<")
-          .replaceAll("&gt;", ">");
-        return false;
-      });
+      url += "/" + folder;
     }
+    url += "/" + documentName;
+
+    data.chapters.forEach((chapter) => {
+      this.deleteParentChapter(chapter, data.chapters);
+    });
+
+    data.chapters.forEach((chapter) => {
+      chapter.html = chapter.html
+        .replaceAll("&lt;", "<")
+        .replaceAll("&gt;", ">");
+    });
 
     hfetch(url, {
       method: "post",
       body: JSON.stringify(data),
-    }).then((response) => {
-      response.text().then((text) => {
-        callback(text);
-      });
-    });
+    })
+      .then((response) => response.text())
+      .then(callback);
   },
 
   loadDocuments: async function (folder, callback) {
-    var url = "";
+    let url = this.get("config").url_document_list;
     if (folder) {
-      url = this.get("config").url_document_list + "/" + folder;
-    } else {
-      url = this.get("config").url_document_list;
+      url += "/" + folder;
     }
     try {
       const response = await hfetch(url);
@@ -126,7 +112,7 @@ var documentEditor = Model.extend({
   },
 
   createFolder(data, callback) {
-    var url = this.get("config").url_create_folder;
+    let url = this.get("config").url_create_folder;
     hfetch(url, {
       method: "post",
       body: JSON.stringify(data),
@@ -139,30 +125,23 @@ var documentEditor = Model.extend({
   },
 
   load: function (folder, documentName, callback) {
-    var url = "";
+    let url = this.get("config").url_load;
+
     if (folder) {
-      url = this.get("config").url_load + "/" + folder + "/" + documentName;
-      hfetch(url).then((response) => {
-        response.status === 200 &&
-          response.json().then((data) => {
-            data.chapters.forEach((chapter) => {
-              this.setParentChapter(chapter, data.chapters);
-            });
-            callback(data);
-          });
-      });
-    } else {
-      url = this.get("config").url_load + "/" + documentName;
-      hfetch(url).then((response) => {
-        response.status === 200 &&
-          response.json().then((data) => {
-            data.chapters.forEach((chapter) => {
-              this.setParentChapter(chapter, data.chapters);
-            });
-            callback(data);
-          });
-      });
+      url += "/" + folder;
     }
+    url += "/" + documentName;
+
+    hfetch(url).then((response) => {
+      if (response.status === 200) {
+        response.json().then((data) => {
+          data.chapters.forEach((chapter) => {
+            this.setParentChapter(chapter, data.chapters);
+          });
+          callback(data);
+        });
+      }
+    });
   },
 
   loadMaps: function (callback) {

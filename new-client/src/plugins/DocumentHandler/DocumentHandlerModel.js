@@ -239,24 +239,25 @@ export default class DocumentHandlerModel {
   }
 
   async fetchJsonDocument(folder, title) {
-    let response;
     try {
+      let url = this.mapServiceUrl + "/informative/load";
+
       if (folder) {
-        response = await hfetch(
-          `${this.mapServiceUrl}/informative/load/${folder}/${title}`
-        );
-      } else {
-        response = await hfetch(
-          `${this.mapServiceUrl}/informative/load/${title}`
+        url += "/" + folder;
+      }
+      url += "/" + title;
+
+      const response = await hfetch(url);
+      const text = await response.text();
+
+      if (text === "File not found") {
+        throw new Error(
+          "Could not find document with title " +
+            title +
+            " in folder with documents"
         );
       }
 
-      const text = await response.text();
-      if (text === "File not found") {
-        throw new Error(
-          `Could not find document with title ${title} in folder with documents`
-        );
-      }
       const document = await JSON.parse(text);
       this.internalId = 0;
       document.chapters.forEach((chapter) => {
@@ -270,7 +271,9 @@ export default class DocumentHandlerModel {
       return document;
     } catch (err) {
       console.warn(
-        `Kunde inte parsa JSON-dokumentet ${document}, kontrollera så att filen finns och är en .json-fil `
+        "Kunde inte parsa JSON-dokumentet " +
+          title +
+          ", kontrollera så att filen finns och är en .json-fil"
       );
       throw new Error(err);
     }

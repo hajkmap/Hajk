@@ -23,22 +23,20 @@ var menuEditorModel = Model.extend({
 
   async listAllAvailableDocuments(folder) {
     try {
+      let url = this.config.url_document_list;
+
       if (folder) {
-        return hfetch(this.config.url_document_list + "/" + folder).then(
-          (response) => {
-            return response.text().then((text) => {
-              return JSON.parse(text);
-            });
-          }
-        );
-      } else {
-        return hfetch(this.config.url_document_list).then((response) => {
-          return response.text().then((text) => {
-            return JSON.parse(text);
-          });
-        });
+        url += "/" + folder;
       }
-    } catch (err) {}
+
+      return hfetch(url).then((response) => {
+        return response.text().then((text) => {
+          return JSON.parse(text);
+        });
+      });
+    } catch (err) {
+      console.error(err);
+    }
   },
 
   isParentRootOfTree: function (parent) {

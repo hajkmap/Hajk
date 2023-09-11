@@ -783,7 +783,6 @@ class DocumentEditor extends Component {
   }
 
   renderDocuments(folder) {
-    //if (!folder) return;
     return this.state.documents
     .filter(document => document.folder === folder)
     .map((document, i) => (<option key={i}>{document}</option>));
@@ -801,7 +800,7 @@ class DocumentEditor extends Component {
   }
 
   validateNewFolderName(value) {
-    var valid = value === "" || /^[A-Za-z0-9_]+$/.test(value);
+    let valid = value === "" || /^[A-Za-z0-9_]+$/.test(value);
     return valid;
   }
 
@@ -874,7 +873,7 @@ class DocumentEditor extends Component {
 
   renderCreateFormFolder() {
     setTimeout(() => {
-      var i = document.getElementById("new-folder-name");
+      let i = document.getElementById("new-folder-name");
       if (i) {
         i.focus();
       }
