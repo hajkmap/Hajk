@@ -161,6 +161,9 @@ class DocumentEditor extends Component {
                 chapterLevelsToShow: data.tableOfContents
                   ? data.tableOfContents.chapterLevelsToShow
                   : 100,
+                chapterLevelsToShowForPrint: data.tableOfContents
+                  ? data.tableOfContents.chapterLevelsToShowForPrint
+                  : 100,
                 title: data.tableOfContents
                   ? data.tableOfContents.title
                   : "Innehållsförteckning",
@@ -173,6 +176,9 @@ class DocumentEditor extends Component {
                 : true,
               newTableOfContentsLevels: data.tableOfContents
                 ? data.tableOfContents.chapterLevelsToShow
+                : 100,
+              newTableOfContentsLevelsForPrint: data.tableOfContents
+                ? data.tableOfContents.chapterLevelsToShowForPrint
                 : 100,
               newTableOfContentsTitle: data.tableOfContents
                 ? data.tableOfContents.title
@@ -842,6 +848,7 @@ class DocumentEditor extends Component {
       expanded: this.state.newTableOfContentsExpanded,
       active: this.state.newTableOfContentsActive,
       chapterLevelsToShow: this.state.newTableOfContentsLevels,
+      chapterLevelsToShow: this.state.newTableOfContentsLevelsForPrint,
       title: this.state.newTableOfContentsTitle,
     };
 

@@ -595,11 +595,15 @@ class PrintWindow extends React.PureComponent {
 
       //add the table of contents settings from the document json.
       if (document.document) {
-        let modelDoc = modelDocuments.find(
-          (modelDoc) => modelDoc.documentFileName === document.document
-        );
+        // let modelDoc = modelDocuments.find(
+        //   (modelDoc) => modelDoc.documentFileName === document.document
+        // );
+        // document.tocChapterLevels =
+        //   modelDoc?.tableOfContents?.chapterLevelsToShow || 100;
+
         document.tocChapterLevels =
-          modelDoc?.tableOfContents?.chapterLevelsToShow || 100;
+          this.props.options?.tableOfContents?.chapterLevelsToShowForPrint ||
+          100;
       }
       if (document.document) {
         document.chapters = [];
