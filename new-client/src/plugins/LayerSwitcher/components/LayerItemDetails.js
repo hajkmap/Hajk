@@ -11,7 +11,6 @@ import {
   IconButton,
   Slider,
   Tooltip,
-  Collapse,
   Typography,
   Stack,
 } from "@mui/material";
@@ -23,6 +22,7 @@ import SettingsOutlinedIcon from "@mui/icons-material/SettingsOutlined";
 import StarOutlineOutlinedIcon from "@mui/icons-material/StarOutlineOutlined";
 import DeleteOutlinedIcon from "@mui/icons-material/DeleteOutlined";
 import LayerItemInfo from "./LayerItemInfo";
+import LegendImage from "./LegendImage";
 
 function LayerItemDetails({
   display,
@@ -133,21 +133,6 @@ function LayerItemDetails({
     );
   };
 
-  // Render legend image
-  const renderLegendImage = () => {
-    const index = layerItemDetails.subLayerIndex
-      ? layerItemDetails.subLayerIndex
-      : 0;
-    const layerInfo = layerItemDetails.layer.get("layerInfo");
-    const src = layerInfo.legend?.[index]?.url ?? "";
-
-    return src ? (
-      <div>
-        <img max-width="250px" alt="Teckenförklaring" src={src} />
-      </div>
-    ) : null;
-  };
-
   // Render title
   const renderDetailTitle = () => {
     if (subLayerIndex !== null) {
@@ -226,7 +211,13 @@ function LayerItemDetails({
                 <Typography variant="subtitle1">Info</Typography>
               </Box>
               {showLegend && (
-                <Tooltip title="Teckenförklaring">
+                <Tooltip
+                  title={
+                    legendIsActive
+                      ? "Dölj teckenförklaring"
+                      : "Visa teckenförklaring"
+                  }
+                >
                   <IconButton
                     onClick={() => setLegendIsActive(!legendIsActive)}
                   >
@@ -248,9 +239,11 @@ function LayerItemDetails({
                 app={app}
                 layer={layerItemDetails.layer}
               ></LayerItemInfo>
-              <Collapse sx={{ pt: 1 }} in={legendIsActive}>
-                {renderLegendImage()}
-              </Collapse>
+              <LegendImage
+                layerItemDetails={layerItemDetails}
+                open={legendIsActive}
+                subLayerIndex={subLayerIndex}
+              ></LegendImage>
             </Box>
             <Stack direction="row" alignItems="center">
               <IconButton
