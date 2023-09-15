@@ -337,7 +337,7 @@ export default function LayerItem({
       layer.get("layerType") === "base" ||
       layer.isFakeMapLayer ||
       layer.get("layerType") === "system" ? null : (
-        <Box sx={{ pl: draggable ? 4 : 6 }}>
+        <Box sx={{ pl: draggable ? 3.5 : 5.5 }}>
           <LegendImage
             layerItemDetails={{ layer: layer }}
             open={legendIsActive}

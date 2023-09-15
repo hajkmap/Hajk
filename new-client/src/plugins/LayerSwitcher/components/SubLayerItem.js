@@ -104,7 +104,7 @@ export default function SubLayerItem({
         </ListItemSecondaryAction>
       </ListItemButton>
       {layer.layersInfo[subLayer].legendIcon ? null : (
-        <Box sx={{ pl: toggleable ? 4 : 6 }}>
+        <Box sx={{ pl: toggleable ? 3.5 : 5.5 }}>
           <LegendImage
             layerItemDetails={{ layer: layer }}
             open={legendIsActive}
