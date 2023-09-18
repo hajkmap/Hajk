@@ -11,6 +11,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Added CHANGELOG.md to the project
 
+### Fixed
+
+- Support for relative URLs [#1399](https://github.com/hajkmap/Hajk/issues/1399)
+
 ### Security
 
 - Upgraded Client dependencies. The main change here is OpenLayer 8.0.0.
