@@ -62,9 +62,7 @@ export default class ConfigMapper {
         legendUrl = args.legend;
       }
 
-      // If 'legend' URL doesn't start with "http", add "https://" prior 'legend', else let it be as is
-      const protocol = /^http/.test(legendUrl) ? "" : "https://";
-      return protocol + legendUrl;
+      return legendUrl;
     }
 
     function getLegends() {

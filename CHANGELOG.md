@@ -7,7 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
 - Added CHANGELOG.md to the project
+
+### Security
+
+- Upgraded Client dependencies. The main change here is OpenLayer 8.0.0.
+- Upgraded Backend dependencies.
 
 ## [3.13.11] - 2023-09-05
 
