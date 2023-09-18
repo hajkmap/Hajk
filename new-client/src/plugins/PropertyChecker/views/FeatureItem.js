@@ -1,18 +1,13 @@
 import React, { useEffect } from "react";
 import {
   Button,
-  Checkbox,
   Icon,
   ListItem,
-  ListItemButton,
   ListItemIcon,
   ListItemText,
   Switch,
-  ToggleButton,
-  Typography,
 } from "@mui/material";
-import CheckIcon from "@mui/icons-material/Check";
-import { getMergedSearchAndHashParams } from "utils/getMergedSearchAndHashParams";
+import { CheckCircleOutline } from "@mui/icons-material";
 
 const FeatureItem = (props) => {
   const id = props.feature.get("id");
@@ -50,7 +45,7 @@ const FeatureItem = (props) => {
 
   // Let's listen to layer's own onChange event. This allows
   // us to reflect the current visibility state in our list.
-  React.useEffect(() => {
+  useEffect(() => {
     olLayer?.on("change:visible", layerVisibilityChanged);
     return () => {
       olLayer?.un("change:visible", layerVisibilityChanged);
@@ -94,9 +89,9 @@ const FeatureItem = (props) => {
         }
       />
 
-      {/* <Button onClick={triggerGetFeatureInfo}>
-        <CheckIcon />
-      </Button> */}
+      <Button onClick={triggerGetFeatureInfo}>
+        <CheckCircleOutline />
+      </Button>
     </ListItem>
   ) : (
     <ListItem>

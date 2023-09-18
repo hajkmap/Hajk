@@ -172,6 +172,8 @@ export default class PropertyCheckerModel {
       // Tell the rest of the plugin that we've got feature. The View
       // subscribes to this and will update itself accordingly.
       this.#localObserver.publish("getFeatureInfoFeatures", groupedFeatures);
+    } else {
+      this.#localObserver.publish("noFeaturesInResult");
     }
   };
 

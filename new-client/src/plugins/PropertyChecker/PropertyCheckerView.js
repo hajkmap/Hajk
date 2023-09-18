@@ -1,5 +1,5 @@
 // Make sure to only import the hooks you intend to use
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 
 import { styled } from "@mui/material/styles";
 import {
@@ -9,68 +9,60 @@ import {
   Button,
   Card,
   CardActions,
-  CardContent,
   Dialog,
   DialogActions,
   DialogContent,
   DialogContentText,
   DialogTitle,
   Divider,
-  ToggleButton,
-  ToggleButtonGroup,
   Typography,
 } from "@mui/material";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 
-// import { useSnackbar } from "notistack";
+import { useSnackbar } from "notistack";
 
 // import useCookieStatus from "hooks/useCookieStatus";
 
 import FeatureItem from "./views/FeatureItem.js";
 import QuickLayerToggleButtons from "./views/QuickLayerToggleButtons.js";
 
-// Hajk components are primarily styled in two ways:
-// - Using the styled-utility, see: https://mui.com/system/styled/
-// - Using the sx-prop, see: https://mui.com/system/basics/#the-sx-prop
-// The styled-utility creates a reusable component, and might be the
-// best choice if the style is to be applied in several places.
-
-// The styled components should be created at the top of the document
-// (but after imports) for consistency. Hajk does not have a naming
-// convention for the styled components, but keep in mind to use names
-// that does not collide with regular components. (E.g. a styled div
-// should not be called Box).
-
-// The example below shows how a <Button /> with a bottom margin can be created.
-// Notice that we are also accessing the application theme.
 const ButtonWithBottomMargin = styled(Button)(({ theme }) => ({
   marginBottom: theme.spacing(2),
 }));
 
 function PropertyCheckerView(props) {
-  // We're gonna need to access the snackbar methods. Let's use the provided hook.
-  // const { closeSnackbar, enqueueSnackbar } = useSnackbar();
+  const {
+    drawModel,
+    globalObserver,
+    localObserver,
+    drawInteraction,
+    setDrawInteraction,
+  } = props;
+
+  const { enqueueSnackbar } = useSnackbar();
+
   const [groupedFeatures, setGroupedFeatures] = useState({});
 
   // We want to keep track of the clicked point's coordinates, to be able
-  // to pass them down to child components
+  // to pass them down to child components.
   const [clickedPointsCoordinates, setClickedPointsCoordinates] = useState([]);
 
+  // Keep visibility state for the dialog that we'll show to the user
+  // when user clicks on the Clear button.
   const [clearDialogVisible, setClearDialogVisible] = useState(false);
 
-  // We're gonna need to use the event observers. Let's destruct them so that we can
-  // get a hold of them easily. The observers can be accessed directly via the props:
-  const { globalObserver, localObserver, drawModel } = props;
+  const handleShowConfirmationDialog = () => {
+    setClearDialogVisible(true);
+  };
+
+  const handleCloseConfirmationDialog = () => {
+    setClearDialogVisible(false);
+  };
 
   // We're gonna need to keep track of if we're allowed to save stuff in LS. Let's use the hook.
   // const { functionalCookiesOk } = useCookieStatus(globalObserver);
 
-  // Handles when user clicks the "Toggle draw interaction"-button
   const handleToggleDrawClick = () => {
-    // First we'll get the current draw interaction and its setter from props
-    const { drawInteraction, setDrawInteraction } = props;
-    // If the draw-interaction is currently disabled (set to ""), we activate it (by setting it to "Polygon").
-    // If it is currently active (not set to ""), we disable it.
     setDrawInteraction(drawInteraction === "" ? "Point" : "");
   };
 
@@ -80,50 +72,50 @@ function PropertyCheckerView(props) {
     drawModel.removeDrawnFeatures();
   };
 
-  // This effect makes sure to subscribe (and unsubscribe) to the observer-events that we care about.
-  React.useEffect(() => {
+  // Subscribe and unsubscribe to events
+  useEffect(() => {
+    // Triggered when a feature is added to the Draw Model (in this case: when
+    // user clicks a point on the map). We want to know when this happens so that
+    // we can a) disable the draw interaction and b) grab the coordinates of the
+    // clicked point.
     const handleFeatureAdded = (feature) => {
-      // First we'll get the current draw interaction and its setter from props
-      const drawInteraction = props.drawInteraction;
-      const setDrawInteraction = props.setDrawInteraction;
-      // If the draw-interaction is currently disabled (set to ""), we activate it (by setting it to "Polygon").
-      // If it is currently active (not set to ""), we disable it.
-      setDrawInteraction(drawInteraction === "" ? "Point" : "");
+      setDrawInteraction("");
       setClickedPointsCoordinates(feature.getGeometry().getFlatCoordinates());
     };
 
+    // This runs when our model has successfully fetched features and there's
+    // at least one result.
     const handleNewGetFeatureInfoFeatures = (groupedFeatures) => {
       setGroupedFeatures(groupedFeatures);
     };
 
-    // Fires when a feature has been removed from the draw-source.
-    // localObserver.subscribe("drawModel.featureRemoved", handleFeatureRemoved);
-    // localObserver.subscribe("drawModel.featuresRemoved", handleFeaturesRemoved);
+    // Sometimes we won't get a result for the clicked point, but we still want
+    // to inform the user about it. We should also remove the clicked point feature
+    // from map, otherwise we'd end up with multiple points as user clicks next time.
+    const handleNoFeaturesInResult = () => {
+      enqueueSnackbar("Den klickade ytan gav inga träffar", {
+        variant: "info",
+      });
+      drawModel.removeDrawnFeatures();
+    };
+
+    // Subscriptions. See each handler for more comments.
     localObserver.subscribe("drawModel.featureAdded", handleFeatureAdded);
     localObserver.subscribe(
       "getFeatureInfoFeatures",
       handleNewGetFeatureInfoFeatures
     );
-    // localObserver.subscribe("kmlModel.fileImported", handleKmlFileImported);
+    localObserver.subscribe("noFeaturesInResult", handleNoFeaturesInResult);
     return () => {
-      // localObserver.unsubscribe("drawModel.featureRemoved");
-      // localObserver.unsubscribe("drawModel.featuresRemoved");
+      // Unsubscriptions.
       localObserver.unsubscribe("drawModel.featureAdded", handleFeatureAdded);
       localObserver.unsubscribe(
         "getFeatureInfoFeatures",
         handleNewGetFeatureInfoFeatures
       );
-      // localObserver.unsubscribe("kmlModel.fileImported");
+      localObserver.unsubscribe("noFeaturesInResult", handleNoFeaturesInResult);
     };
-  }, [localObserver, props.drawInteraction, props.setDrawInteraction]);
-
-  const handleShowConfirmationDialog = () => {
-    setClearDialogVisible(true);
-  };
-
-  const handleCloseConfirmationDialog = () => {
-    setClearDialogVisible(false);
-  };
+  }, [drawModel, enqueueSnackbar, localObserver, setDrawInteraction]);
 
   return (
     <>
@@ -144,36 +136,32 @@ function PropertyCheckerView(props) {
         </DialogActions>
       </Dialog>
       {Object.keys(groupedFeatures).length === 0 && (
-        <ButtonWithBottomMargin
-          variant="contained"
-          fullWidth={true}
-          color="primary"
-          onClick={handleToggleDrawClick}
-        >
-          {props.drawInteraction === "" ? "Välj fastighet" : "Avbryt"}
-        </ButtonWithBottomMargin>
-      )}
-      {Object.keys(groupedFeatures).length > 0 && (
         <React.Fragment>
           <ButtonWithBottomMargin
             variant="contained"
             fullWidth={true}
-            color="secondary"
-            onClick={handleShowConfirmationDialog}
+            color="primary"
+            onClick={handleToggleDrawClick}
           >
-            Rensa
+            {drawInteraction === "" ? "Välj fastighet" : "Avbryt"}
           </ButtonWithBottomMargin>
-
-          <Card sx={{ minWidth: 275 }}>
-            <CardActions>
-              <QuickLayerToggleButtons
-                options={props.options}
-                map={props.map}
-              />
-            </CardActions>
-          </Card>
         </React.Fragment>
       )}
+      {Object.keys(groupedFeatures).length > 0 && (
+        <ButtonWithBottomMargin
+          variant="contained"
+          fullWidth={true}
+          color="secondary"
+          onClick={handleShowConfirmationDialog}
+        >
+          Rensa
+        </ButtonWithBottomMargin>
+      )}
+      <Card sx={{ minWidth: 275 }}>
+        <CardActions>
+          <QuickLayerToggleButtons options={props.options} map={props.map} />
+        </CardActions>
+      </Card>
       {Object.keys(groupedFeatures).length > 0 &&
         Object.entries(groupedFeatures).map(([k, features], i) => (
           <React.Fragment key={i}>

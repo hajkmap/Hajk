@@ -1,6 +1,6 @@
 import React, { useEffect } from "react";
 
-import { ToggleButton, ToggleButtonGroup } from "@mui/material";
+import { ToggleButton, ToggleButtonGroup, Tooltip } from "@mui/material";
 
 import LocationCityIcon from "@mui/icons-material/LocationCity";
 import BorderInnerIcon from "@mui/icons-material/BorderInner";
@@ -52,18 +52,20 @@ function QuickLayerTogglerButtons({ map, options }) {
       onChange={handleToggleButtons}
       fullWidth
     >
-      <ToggleButton
-        value="buildings"
-        size="small"
-        placeholder="Visa/dölj byggnader"
-      >
-        <LocationCityIcon />
+      <ToggleButton value="buildings" size="small">
+        <Tooltip title="Visa/dölj byggnader">
+          <LocationCityIcon />
+        </Tooltip>
       </ToggleButton>
       <ToggleButton value="borders" size="small">
-        <BorderInnerIcon />
+        <Tooltip title="Visa/dölj gränser">
+          <BorderInnerIcon />
+        </Tooltip>
       </ToggleButton>
       <ToggleButton value="plans" size="small">
-        <TravelExploreIcon />
+        <Tooltip title="Visa/dölj planer">
+          <TravelExploreIcon />
+        </Tooltip>
       </ToggleButton>
     </ToggleButtonGroup>
   );
