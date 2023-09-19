@@ -564,7 +564,6 @@ class PrintWindow extends React.PureComponent {
     */
     const { options } = this.props;
 
-    const modelDocuments = this.props.model.allDocuments;
     const newOptions = { ...options };
     const menuConfig = { ...newOptions }.menuConfig;
     const menuConfigClone = JSON.parse(JSON.stringify(menuConfig));
