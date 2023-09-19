@@ -848,7 +848,7 @@ class DocumentEditor extends Component {
       expanded: this.state.newTableOfContentsExpanded,
       active: this.state.newTableOfContentsActive,
       chapterLevelsToShow: this.state.newTableOfContentsLevels,
-      chapterLevelsToShow: this.state.newTableOfContentsLevelsForPrint,
+      chapterLevelsToShowForPrint: this.state.newTableOfContentsLevelsForPrint,
       title: this.state.newTableOfContentsTitle,
     };
 
