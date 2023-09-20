@@ -206,15 +206,17 @@ function DrawOrder({ display, app, map, onLayerChange, model, options }) {
       >
         <Stack direction="row" alignItems="center">
           <FormGroup>
-            <FormControlLabel
-              control={
-                <Switch
-                  checked={systemFilterActive}
-                  onChange={setSystemFilter}
-                />
-              }
-              label="Systemlager"
-            />
+            {options.showActiveLayerSwitch && (
+              <FormControlLabel
+                control={
+                  <Switch
+                    checked={systemFilterActive}
+                    onChange={setSystemFilter}
+                  />
+                }
+                label="Systemlager"
+              />
+            )}
           </FormGroup>
           <Box sx={{ flexGrow: 1 }} />
           <IconButton onClick={handleInfoButtonClick}>
