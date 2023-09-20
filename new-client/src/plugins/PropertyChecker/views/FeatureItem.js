@@ -4,6 +4,7 @@ import {
   Checkbox,
   Icon,
   ListItem,
+  ListItemButton,
   ListItemIcon,
   ListItemText,
   Switch,
@@ -63,38 +64,39 @@ const FeatureItem = (props) => {
     olLayer.setVisible(newVal);
   };
 
+  const handleLayerToggle = () => {
+    const newVal = !selected;
+    setSelected(newVal);
+    handleToggle(newVal);
+  };
+
   return (
     <ListItem
-    // secondaryAction={
-    //     <Checkbox
-    //       edge="start"
-    //       onChange={() => setControlled(!controlled)}
-    //       checked={controlled}
-    //     />
-    //     <Button onClick={triggerGetFeatureInfo}>
-    //       <CheckCircleOutline />
-    //     </Button>
-    // }
+      disablePadding
+      // secondaryAction={
+      //     <Checkbox
+      //       edge="start"
+      //       onChange={() => setControlled(!controlled)}
+      //       checked={controlled}
+      //     />
+      //     <Button onClick={triggerGetFeatureInfo}>
+      //       <CheckCircleOutline />
+      //     </Button>
+      // }
     >
-      <ListItemIcon>
-        <Icon>{getInfoclickIcon(olLayer)}</Icon>
-      </ListItemIcon>
-      <ListItemText
-        primary={caption}
-        secondary={
-          olLayer.get("caption") !== caption &&
-          `Del av: ${olLayer.get("caption")}`
-        }
-      />
-      <Switch
-        edge="end"
-        onChange={() => {
-          const newVal = !selected;
-          setSelected(newVal);
-          handleToggle(newVal);
-        }}
-        checked={selected}
-      />
+      <ListItemButton onClick={handleLayerToggle} disableRipple>
+        <ListItemIcon>
+          <Icon>{getInfoclickIcon(olLayer)}</Icon>
+        </ListItemIcon>
+        <ListItemText
+          primary={caption}
+          secondary={
+            olLayer.get("caption") !== caption &&
+            `Del av: ${olLayer.get("caption")}`
+          }
+        />
+        <Switch edge="end" onChange={handleLayerToggle} checked={selected} />
+      </ListItemButton>
     </ListItem>
   );
 };
