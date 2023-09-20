@@ -3,7 +3,6 @@ import {
   Collapse,
   ListItemSecondaryAction,
   Box,
-  ListItemText,
   IconButton,
   ListItemButton,
 } from "@mui/material";
@@ -13,8 +12,8 @@ export default function LayerGroupAccordion({
   expanded,
   toggleable,
   children,
+  layerGroupTitle,
   toggleDetails,
-  name,
   layerGroupDetails,
   quickAccess,
 }) {
@@ -66,7 +65,7 @@ export default function LayerGroupAccordion({
         >
           {toggleable && toggleDetails}
           {quickAccess && quickAccess}
-          <ListItemText primary={name} />
+          {layerGroupTitle}
           {layerGroupDetails && (
             <ListItemSecondaryAction>
               {layerGroupDetails}

@@ -11,6 +11,7 @@ import {
   Box,
   IconButton,
   InputAdornment,
+  ListItemText,
   TextField,
   Tooltip,
 } from "@mui/material";
@@ -336,7 +337,7 @@ class LayersSwitcherView extends React.PureComponent {
         {/* QuickAccess section */}
         <LayerGroupAccordion
           expanded={this.state.quickAccessSectionExpanded}
-          name={"Snabblager"}
+          layerGroupTitle={<ListItemText primary={"Snabblager"} />}
           quickAccess={
             <IconButton sx={{ pl: 0 }} disableRipple size="small">
               <StarOutlineOutlinedIcon />

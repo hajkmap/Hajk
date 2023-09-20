@@ -92,7 +92,12 @@ export default function SubLayerItem({
           </IconButton>
         )}
         {getIconFromLayer()}
-        <ListItemText primary={layer.layersInfo[subLayer].caption} />
+        <ListItemText
+          primary={layer.layersInfo[subLayer].caption}
+          primaryTypographyProps={{
+            fontWeight: visible ? (toggleable ? "bold" : "inherit") : "inherit",
+          }}
+        />
         <ListItemSecondaryAction>
           <IconButton size="small" onClick={(e) => showLayerDetails(e)}>
             <KeyboardArrowRightOutlinedIcon
