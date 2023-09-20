@@ -26,6 +26,8 @@ import { useSnackbar } from "notistack";
 
 import FeatureItem from "./views/FeatureItem.js";
 import QuickLayerToggleButtons from "./views/QuickLayerToggleButtons.js";
+import useUpdateEffect from "hooks/useUpdateEffect.js";
+import { useRef } from "react";
 
 const ButtonWithBottomMargin = styled(Button)(({ theme }) => ({
   marginBottom: theme.spacing(2),
@@ -40,7 +42,9 @@ function PropertyCheckerView(props) {
     setDrawInteraction,
   } = props;
 
-  const { enqueueSnackbar } = useSnackbar();
+  const { enqueueSnackbar, closeSnackbar } = useSnackbar();
+
+  const snackbarId = useRef(null);
 
   const [groupedFeatures, setGroupedFeatures] = useState({});
 
@@ -117,6 +121,22 @@ function PropertyCheckerView(props) {
       localObserver.unsubscribe("noFeaturesInResult", handleNoFeaturesInResult);
     };
   }, [drawModel, enqueueSnackbar, localObserver, setDrawInteraction]);
+
+  // useUpdateEffect ignores the first render, which is exactly what
+  // we want.
+  useUpdateEffect(() => {
+    // If draw interaction is active…
+    if (drawInteraction === "Point") {
+      // …show the snackbar and save ID for later.
+      snackbarId.current = enqueueSnackbar(
+        "Klicka i kartan för att välja fastighet",
+        { variant: "info", persist: true }
+      );
+    } else {
+      // Hide the snackbar when draw interaction is inactivated.
+      closeSnackbar(snackbarId.current);
+    }
+  }, [drawInteraction]);
 
   return (
     <>
