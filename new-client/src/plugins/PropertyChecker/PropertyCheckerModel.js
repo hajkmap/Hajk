@@ -66,7 +66,6 @@ export default class PropertyCheckerModel {
       });
 
     const response = await fetch(url);
-    console.log("response: ", response);
 
     // If the response succeeded…
     if (response.status === 200) {
@@ -75,7 +74,6 @@ export default class PropertyCheckerModel {
         .get("content-type")
         ?.split(";")[0];
 
-      console.log("responseContentType: ", responseContentType);
       // Prepare an object to hold the features to be parsed.
       let olFeatures = [];
 
@@ -124,10 +122,17 @@ export default class PropertyCheckerModel {
     );
   };
 
-  #groupFeaturesByAttributeName = (features, propertyName) => {
+  #groupFeaturesByAttributeName = (features, attributeName) => {
+    // Features that arrive from the WMS service will be in a flat
+    // array. For our use case, we want to group features that correspond
+    // to a specific property. The attribute name that holds the properties
+    // will however differ, between setups. So it's a Admin setting.
+    //
+    // Let's grab the attribute's name and loop through our results, pushing
+    // each feature into a new object, one for each property.
     const groupedFeatures = {};
     features.forEach((f) => {
-      const identifier = f.get(propertyName);
+      const identifier = f.get(attributeName);
       // Ensure that we have a category to push into
       if (!Object.hasOwn(groupedFeatures, identifier)) {
         // Prepare an object that will contain to things:

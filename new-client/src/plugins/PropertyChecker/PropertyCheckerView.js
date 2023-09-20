@@ -14,7 +14,8 @@ import {
   DialogContent,
   DialogContentText,
   DialogTitle,
-  Divider,
+  List,
+  ListSubheader,
   Typography,
 } from "@mui/material";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
@@ -167,26 +168,57 @@ function PropertyCheckerView(props) {
           <React.Fragment key={i}>
             <Accordion
               defaultExpanded={Object.keys(groupedFeatures).length === 1} // Start with expanded by default if only one item exists
+              disableGutters
             >
               <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-                <Typography>
+                <Typography variant="button">
                   {features.markerFeature.get("fastighet")}
                 </Typography>
               </AccordionSummary>
               <AccordionDetails>
-                <Typography sx={{ color: "text.secondary" }}>
-                  {features.features.length} lager påverkar fastigheten
-                </Typography>
-                <Divider />
-                {features.features.map((f, j) => (
-                  <FeatureItem
-                    clickedPointsCoordinates={clickedPointsCoordinates}
-                    feature={f}
-                    key={j}
-                    olMap={props.app.map}
-                    globalObserver={globalObserver}
-                  />
-                ))}
+                <List
+                  sx={{
+                    width: "100%",
+                    maxWidth: 400,
+                    bgcolor: "background.paper",
+                  }}
+                  subheader={
+                    <ListSubheader>
+                      {features.features.length} lager påverkar fastigheten
+                    </ListSubheader>
+                  }
+                >
+                  {features.features
+                    // Sort. We want sublayers from same layer to show up next to each other.
+                    .sort((a, b) => {
+                      const aid = a.get("id");
+                      const bid = b.get("id");
+                      // If we've got nice strings, let's user localeCompare to sort. Else
+                      // just assume the elements are equal.
+                      return typeof aid === "string" && typeof bid === "string"
+                        ? aid.localeCompare(bid)
+                        : 0;
+                    })
+                    .map((f, j) => {
+                      const olLayer = props.app.map
+                        .getAllLayers()
+                        .find((l) => l.get("name") === f.get("id"));
+                      // Render FeatureItem only if we found the related
+                      // layer in olMap
+                      return (
+                        olLayer && (
+                          <FeatureItem
+                            clickedPointsCoordinates={clickedPointsCoordinates}
+                            feature={f}
+                            key={j}
+                            olLayer={olLayer}
+                            olMap={props.app.map}
+                            globalObserver={globalObserver}
+                          />
+                        )
+                      );
+                    })}
+                </List>
               </AccordionDetails>
             </Accordion>
           </React.Fragment>
