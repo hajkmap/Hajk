@@ -11,9 +11,7 @@ import HelpIcon from "@mui/icons-material/Help";
 
 // We might want to import some other classes or constants etc.
 import { DEFAULT_MEASUREMENT_SETTINGS } from "./constants";
-import DrawModel from "models/DrawModel";
-
-import InfoDialog from "./views/InfoDialog.js";
+import DrawModel from "../../models/DrawModel.js";
 
 /**
  * @summary Main component for the Dummy-plugin.
@@ -21,7 +19,7 @@ import InfoDialog from "./views/InfoDialog.js";
  * and document how plugins should be constructed in Hajk.
  */
 function PropertyChecker(props) {
-  console.log("props: ", props);
+  console.log("PropertyChecker render: ", props);
   // Used to keep track of the plugin's current visibility.
   // We will want to do some cleanup later on when the window is hidden.
   const [pluginShown, setPluginShown] = React.useState(
@@ -145,7 +143,7 @@ function PropertyChecker(props) {
           },
         ],
         height: "dynamic", // The height of the plugin-window in px. "dynamic" resizes the window so all content fits, "auto" uses all available space.
-        width: 400, // The width of the plugin-window in px.
+        width: 440, // The width of the plugin-window in px.
         onWindowHide: onWindowHide, // Handler for when user closes window.
         onWindowShow: onWindowShow, // Handler for when user shows window.
       }}
@@ -165,7 +163,6 @@ function PropertyChecker(props) {
         options={props.options}
         setDrawInteraction={setDrawInteraction} // Finally, we'll pass the updater for the draw-interaction state (so that we can toggle draw on/off).
       />
-      {/* <InfoDialog localObserver={localObserver} /> */}
     </BaseWindowPlugin>
   );
 }

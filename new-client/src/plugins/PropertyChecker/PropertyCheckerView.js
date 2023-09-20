@@ -1,5 +1,7 @@
 // Make sure to only import the hooks you intend to use
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
+
+import useUpdateEffect from "../../hooks/useUpdateEffect.js";
 
 import { styled } from "@mui/material/styles";
 import {
@@ -24,10 +26,9 @@ import { useSnackbar } from "notistack";
 
 // import useCookieStatus from "hooks/useCookieStatus";
 
+import InfoDialog from "./views/InfoDialog.js";
 import FeatureItem from "./views/FeatureItem.js";
 import QuickLayerToggleButtons from "./views/QuickLayerToggleButtons.js";
-import useUpdateEffect from "hooks/useUpdateEffect.js";
-import { useRef } from "react";
 
 const ButtonWithBottomMargin = styled(Button)(({ theme }) => ({
   marginBottom: theme.spacing(2),
@@ -140,6 +141,7 @@ function PropertyCheckerView(props) {
 
   return (
     <>
+      <InfoDialog localObserver={localObserver} />
       <Dialog open={clearDialogVisible} onClose={handleCloseConfirmationDialog}>
         <DialogTitle>{"Är du säker på att du vill rensa listan?"}</DialogTitle>
         <DialogContent>
