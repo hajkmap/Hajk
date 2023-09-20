@@ -1842,24 +1842,6 @@ class Menu extends Component {
               </div>
               <div>
                 <input
-                  id="showSystemLayers"
-                  name="showSystemLayers"
-                  type="checkbox"
-                  onChange={this.handleInputChange}
-                  checked={this.state.showSystemLayers}
-                />
-                &nbsp;
-                <label className="long-label" htmlFor="showSystemLayers">
-                  Visa systemlager vid ritordning{" "}
-                  <i
-                    className="fa fa-question-circle"
-                    data-toggle="tooltip"
-                    title="När rutan är ikryssad visas systemlager i listan över aktiva lager."
-                  />
-                </label>
-              </div>
-              <div>
-                <input
                   id="showActiveLayersView"
                   name="showActiveLayersView"
                   type="checkbox"
