@@ -11,6 +11,7 @@ import {
 } from "@mui/material";
 
 import LegendIcon from "./LegendIcon";
+import LegendImage from "./LegendImage";
 
 import DragIndicatorOutlinedIcon from "@mui/icons-material/DragIndicatorOutlined";
 import PublicOutlinedIcon from "@mui/icons-material/PublicOutlined";
@@ -21,6 +22,7 @@ import CheckBoxIcon from "@mui/icons-material/CheckBox";
 import WarningAmberOutlinedIcon from "@mui/icons-material/WarningAmberOutlined";
 import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
 import KeyboardArrowRightOutlinedIcon from "@mui/icons-material/KeyboardArrowRightOutlined";
+import FormatListBulletedOutlinedIcon from "@mui/icons-material/FormatListBulletedOutlined";
 
 export default function LayerItem({
   layer,
@@ -40,6 +42,8 @@ export default function LayerItem({
   const [zoomVisible, setZoomVisible] = useState(true);
   // Keep zoomend listener in state
   const [zoomEndListener, setZoomEndListener] = useState();
+  // State that toggles legend collapse
+  const [legendIsActive, setLegendIsActive] = useState(false);
 
   // We're gonna need to access the snackbar methods. Let's use the provided hook.
   const { closeSnackbar, enqueueSnackbar } = useSnackbar();
@@ -155,7 +159,37 @@ export default function LayerItem({
     } else if (layer.get("layerType") === "system") {
       return <BuildOutlinedIcon sx={{ mr: "5px" }} />;
     }
-    return null;
+    return renderLegendIcon();
+  };
+
+  const renderLegendIcon = () => {
+    if (
+      layer.get("layerType") === "group" ||
+      layer.get("layerType") === "base" ||
+      layer.isFakeMapLayer ||
+      layer.get("layerType") === "system"
+    ) {
+      return null;
+    }
+    return (
+      <Tooltip
+        placement="left"
+        title={
+          legendIsActive ? "Dölj teckenförklaring" : "Visa teckenförklaring"
+        }
+      >
+        <IconButton
+          sx={{ p: 0.25, mr: "5px" }}
+          size="small"
+          onClick={(e) => {
+            e.stopPropagation();
+            setLegendIsActive(!legendIsActive);
+          }}
+        >
+          <FormatListBulletedOutlinedIcon fontSize="small" />
+        </IconButton>
+      </Tooltip>
+    );
   };
 
   // Render method for checkbox icon
@@ -246,7 +280,9 @@ export default function LayerItem({
             py: 0.5,
             pr: 1,
             borderBottom: (theme) =>
-              `${theme.spacing(0.2)} solid ${theme.palette.divider}`,
+              legendIsActive
+                ? `${theme.spacing(0.2)} solid transparent`
+                : `${theme.spacing(0.2)} solid ${theme.palette.divider}`,
           }}
         >
           {toggleable && (
@@ -297,6 +333,18 @@ export default function LayerItem({
           </ListItemSecondaryAction>
         </Box>
       </ListItemButton>
+      {layer.get("layerType") === "group" ||
+      layer.get("layerType") === "base" ||
+      layer.isFakeMapLayer ||
+      layer.get("layerType") === "system" ? null : (
+        <Box sx={{ pl: draggable ? 3.5 : 5.5 }}>
+          <LegendImage
+            layerItemDetails={{ layer: layer }}
+            open={legendIsActive}
+            subLayerIndex={null}
+          ></LegendImage>
+        </Box>
+      )}
       {subLayersSection && subLayersSection}
     </div>
   );

@@ -1,16 +1,20 @@
-import React from "react";
+import React, { useState } from "react";
 
 import {
+  Box,
   IconButton,
   ListItemButton,
   ListItemSecondaryAction,
   ListItemText,
+  Tooltip,
 } from "@mui/material";
 
 import LegendIcon from "./LegendIcon";
+import LegendImage from "./LegendImage";
 import CheckBoxOutlineBlankIcon from "@mui/icons-material/CheckBoxOutlineBlank";
 import CheckBoxIcon from "@mui/icons-material/CheckBox";
 import KeyboardArrowRightOutlinedIcon from "@mui/icons-material/KeyboardArrowRightOutlined";
+import FormatListBulletedOutlinedIcon from "@mui/icons-material/FormatListBulletedOutlined";
 
 export default function SubLayerItem({
   layer,
@@ -21,6 +25,8 @@ export default function SubLayerItem({
   toggleSubLayer,
   subLayerIndex,
 }) {
+  // State that toggles legend collapse
+  const [legendIsActive, setLegendIsActive] = useState(false);
   // Render method for checkbox icon
   const getLayerToggleIcon = () => {
     return visible ? <CheckBoxIcon /> : <CheckBoxOutlineBlankIcon />;
@@ -33,6 +39,34 @@ export default function SubLayerItem({
       layer: layer,
       subLayerIndex: subLayerIndex,
     });
+  };
+
+  // Render method for legend icon
+  const getIconFromLayer = () => {
+    if (layer.layersInfo[subLayer].legendIcon) {
+      return <LegendIcon url={layer.layersInfo[subLayer].legendIcon} />;
+    }
+    return renderLegendIcon();
+  };
+
+  const renderLegendIcon = () => {
+    return (
+      <Tooltip
+        placement="left"
+        title={
+          legendIsActive ? "Dölj teckenförklaring" : "Visa teckenförklaring"
+        }
+      >
+        <IconButton
+          onClick={(e) => {
+            e.stopPropagation();
+            setLegendIsActive(!legendIsActive);
+          }}
+        >
+          <FormatListBulletedOutlinedIcon fontSize="small" />
+        </IconButton>
+      </Tooltip>
+    );
   };
 
   return (
@@ -57,9 +91,7 @@ export default function SubLayerItem({
             {getLayerToggleIcon()}
           </IconButton>
         )}
-        {layer.layersInfo[subLayer].legendIcon && (
-          <LegendIcon url={layer.layersInfo[subLayer].legendIcon} />
-        )}
+        {getIconFromLayer()}
         <ListItemText primary={layer.layersInfo[subLayer].caption} />
         <ListItemSecondaryAction>
           <IconButton size="small" onClick={(e) => showLayerDetails(e)}>
@@ -71,6 +103,15 @@ export default function SubLayerItem({
           </IconButton>
         </ListItemSecondaryAction>
       </ListItemButton>
+      {layer.layersInfo[subLayer].legendIcon ? null : (
+        <Box sx={{ pl: toggleable ? 3.5 : 5.5 }}>
+          <LegendImage
+            layerItemDetails={{ layer: layer }}
+            open={legendIsActive}
+            subLayerIndex={subLayerIndex}
+          ></LegendImage>
+        </Box>
+      )}
     </div>
   );
 }
