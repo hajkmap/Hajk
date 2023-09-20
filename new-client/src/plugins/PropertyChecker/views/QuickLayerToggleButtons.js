@@ -74,10 +74,10 @@ function QuickLayerTogglerButtons({ map, options }) {
         </Tooltip>
       </ToggleButton>
       <ToggleButton value="borders" size="small">
-        <Tooltip title="Visa/dölj gränser">
+        <Tooltip title="Visa/dölj fastigheter">
           <StyledBox>
             <BorderInnerIcon />
-            <Typography variant="button">Gränser</Typography>
+            <Typography variant="button">Fastigheter</Typography>
           </StyledBox>
         </Tooltip>
       </ToggleButton>
