@@ -169,6 +169,16 @@ class DrawModel {
   // - subject: (string): The subject to be published on the observer
   // - payLoad: (any): The payload to send when publishing.
   #publishInformation = ({ subject, payLoad }) => {
+    // We utilize the fact that this method runs on important changes, such
+    // as feature add/remove. We check if there are any features in the draw
+    // layer and save that information in the Public API. This is later
+    // read in a handler for "onbeforeunload". See #1403.
+    if (this.getAllDrawnFeatures().length > 0) {
+      window.hajkPublicApi.dirtyLayers[this.#layerName] = true;
+    } else {
+      delete window.hajkPublicApi.dirtyLayers[this.#layerName];
+    }
+
     // If no observer has been set-up, or if the subject is missing, we abort
     if (!this.#observer || !subject) {
       return;
