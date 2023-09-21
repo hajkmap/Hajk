@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - Added CHANGELOG.md to the project
+- Added a confirmation dialog that shows on window close. It informs the user about unsaved changes (in e.g. Measurer or Sketch) that will be lost. [#1403](https://github.com/hajkmap/Hajk/issues/1403)
 
 ### Fixed
 
