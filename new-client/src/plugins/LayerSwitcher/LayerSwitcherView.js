@@ -59,6 +59,11 @@ class LayersSwitcherView extends React.PureComponent {
       quickAccessSectionExpanded: false,
       filterValue: "",
       treeData: this.layerTree,
+      scrollPositions: {
+        tab0: 0,
+        tab1: 0,
+        tab2: 0,
+      },
     };
 
     props.app.globalObserver.subscribe("informativeLoaded", (chapters) => {
@@ -71,10 +76,16 @@ class LayersSwitcherView extends React.PureComponent {
 
     props.app.globalObserver.subscribe("setLayerDetails", (details) => {
       if (details) {
-        this.setState({
-          displayContentOverlay: "layerItemDetails",
+        // Set scroll position state when layer details is opened
+        const currentScrollPosition = this.getScrollPosition();
+        this.setState((prevState) => ({
           layerItemDetails: details,
-        });
+          displayContentOverlay: "layerItemDetails",
+          scrollPositions: {
+            ...prevState.scrollPositions,
+            [`tab${prevState.activeTab}`]: currentScrollPosition,
+          },
+        }));
       } else {
         this.setState({
           displayContentOverlay: null,
@@ -116,12 +127,18 @@ class LayersSwitcherView extends React.PureComponent {
   // Handles click on Layerpackage button and backbutton
   handleLayerPackageToggle = (layerPackageState) => {
     layerPackageState?.event?.stopPropagation();
-    this.setState({
+    // Set scroll position state when layer package is opened
+    const currentScrollPosition = this.getScrollPosition();
+    this.setState((prevState) => ({
       displayContentOverlay:
         this.state.displayContentOverlay === "layerPackage"
           ? null
           : "layerPackage",
-    });
+      scrollPositions: {
+        ...prevState.scrollPositions,
+        [`tab${prevState.activeTab}`]: currentScrollPosition,
+      },
+    }));
     if (layerPackageState?.setQuickAccessSectionExpanded) {
       this.setState({
         quickAccessSectionExpanded: true,
@@ -190,12 +207,18 @@ class LayersSwitcherView extends React.PureComponent {
   // Handles click on PersonalLayerpackage button and backbutton
   handlePersonalLayerPackageToggle = (layerPackageState) => {
     layerPackageState?.event?.stopPropagation();
-    this.setState({
+    // Set scroll position state when personal layer package is opened
+    const currentScrollPosition = this.getScrollPosition();
+    this.setState((prevState) => ({
       displayContentOverlay:
         this.state.displayContentOverlay === "personalLayerPackage"
           ? null
           : "personalLayerPackage",
-    });
+      scrollPositions: {
+        ...prevState.scrollPositions,
+        [`tab${prevState.activeTab}`]: currentScrollPosition,
+      },
+    }));
     if (layerPackageState?.setQuickAccessSectionExpanded) {
       this.setState({
         quickAccessSectionExpanded: true,
@@ -245,10 +268,48 @@ class LayersSwitcherView extends React.PureComponent {
    * @memberof LayersSwitcherView
    */
   handleChangeTabs = (event, activeTab) => {
-    this.setState({
+    // Set scroll position state when tab is changed
+    const currentScrollPosition = this.getScrollPosition();
+    this.setState((prevState) => ({
       activeTab,
       displayContentOverlay: null,
-    });
+      scrollPositions: {
+        ...prevState.scrollPositions,
+        [`tab${prevState.activeTab}`]: currentScrollPosition,
+      },
+    }));
+  };
+
+  /**
+   * This method resets scrollposition when component updates,
+   * but only when tab is changed or content overlay is opened.
+   *
+   * @memberof LayersSwitcherView
+   */
+  componentDidUpdate(prevProps, prevState) {
+    if (
+      prevState.activeTab !== this.state.activeTab ||
+      prevState.displayContentOverlay !== this.state.displayContentOverlay
+    ) {
+      // Reset scroll position when tab is changed, or when content overlay is opened
+      const { scrollPositions } = this.state;
+      const currentScrollPosition =
+        scrollPositions[`tab${this.state.activeTab}`];
+      if (currentScrollPosition !== undefined) {
+        const scrollContainer = document.getElementById("scroll-container");
+        scrollContainer.scrollTop = currentScrollPosition;
+      }
+    }
+  }
+
+  /**
+   * This method gets scrollposition of container
+   *
+   * @memberof LayersSwitcherView
+   */
+  getScrollPosition = () => {
+    const scrollContainer = document.getElementById("scroll-container"); // Byt ut mot din scroll-container ID
+    return scrollContainer.scrollTop;
   };
 
   /**
@@ -452,6 +513,7 @@ class LayersSwitcherView extends React.PureComponent {
           </Tabs>
         </StyledAppBar>
         <div
+          id="scroll-container"
           style={{ position: "relative", height: "100%", overflowY: "auto" }}
         >
           {this.renderLayerGroups(this.state.activeTab === 0)}
