@@ -64,6 +64,8 @@ class PrintView extends React.PureComponent {
     scaleBarPlacement: this.props.options.scaleBarPlacement || "bottomLeft",
     includeLogo: this.props.options.includeLogo ?? true,
     logoPlacement: this.props.options.logoPlacement || "topRight",
+    includeQrCode: this.props.options.includeQrCode ?? false,
+    qrCodePlacement: this.props.options.qrCodePlacement || "topRight",
     saveAsType: "PDF",
     printOptionsOk: false,
   };
@@ -162,6 +164,8 @@ class PrintView extends React.PureComponent {
       mapTextColor: this.state.mapTextColor,
       includeLogo: this.state.includeLogo,
       logoPlacement: this.state.logoPlacement,
+      includeQrCode: this.state.includeQrCode,
+      qrCodePlacement: this.state.qrCodePlacement,
       includeScaleBar: this.state.includeScaleBar,
       scaleBarPlacement: this.state.scaleBarPlacement,
       includeNorthArrow: this.state.includeNorthArrow,
@@ -264,6 +268,8 @@ class PrintView extends React.PureComponent {
       scaleBarPlacement,
       includeLogo,
       logoPlacement,
+      includeQrCode,
+      qrCodePlacement,
       printOptionsOk,
     } = this.state;
 
@@ -283,6 +289,8 @@ class PrintView extends React.PureComponent {
         scaleBarPlacement={scaleBarPlacement}
         includeLogo={includeLogo}
         logoPlacement={logoPlacement}
+        includeQrCode={includeQrCode}
+        qrCodePlacement={qrCodePlacement}
         printOptionsOk={printOptionsOk}
         options={this.props.options}
       ></AdvancedOptions>

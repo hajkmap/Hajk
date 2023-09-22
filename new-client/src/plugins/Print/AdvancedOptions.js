@@ -56,6 +56,7 @@ class AdvancedOptions extends React.PureComponent {
     northArrow: false,
     scaleBar: false,
     logoType: false,
+    qrCode: false,
   };
 
   toggleColorPicker = (e) => {
@@ -95,21 +96,28 @@ class AdvancedOptions extends React.PureComponent {
     const logo = this.props.includeLogo
       ? this.props.logoPlacement
       : "logoDisabled";
+    const qrCode = this.props.includeQrCode
+      ? this.props.qrCodePlacement
+      : "qrCodeDisabled";
 
     // We check if any given value is the same as the other two placement values.
     // If so, they are stored as booleans in "placementOverlaps"
     this.placementOverlaps.northArrow =
-      northArrow === scaleBar || northArrow === logo;
+      northArrow === scaleBar || northArrow === logo || northArrow === qrCode;
     this.placementOverlaps.scaleBar =
-      scaleBar === northArrow || scaleBar === logo;
-    this.placementOverlaps.logoType = logo === northArrow || logo === scaleBar;
+      scaleBar === northArrow || scaleBar === logo || scaleBar === qrCode;
+    this.placementOverlaps.logoType =
+      logo === northArrow || logo === scaleBar || logo === qrCode;
+    this.placementOverlaps.qrCode =
+      qrCode === northArrow || qrCode === scaleBar || qrCode === logo;
 
     // If any placement values are the same we return true and use it to display
     // error-message in render()
     return (
       this.placementOverlaps.northArrow ||
       this.placementOverlaps.scaleBar ||
-      this.placementOverlaps.logoType
+      this.placementOverlaps.logoType ||
+      this.placementOverlaps.qrCode
     );
   }
 
@@ -166,6 +174,8 @@ class AdvancedOptions extends React.PureComponent {
       scaleBarPlacement,
       includeLogo,
       logoPlacement,
+      includeQrCode,
+      qrCodePlacement,
       printOptionsOk,
     } = this.props;
     return (
@@ -347,6 +357,37 @@ class AdvancedOptions extends React.PureComponent {
                   "logoPlacement",
                   handleChange,
                   !includeLogo
+                )}
+              </FormControl>
+            </Grid>
+            <Grid item xs={12}></Grid>
+          </FormControlContainer>
+          <FormControlContainer container item>
+            <Grid item xs={6} sx={{ paddingRight: "10px" }}>
+              <FormControl fullWidth={true}>
+                <InputLabel variant="standard" htmlFor="includeQrCode">
+                  Inkludera qr-kod
+                </InputLabel>
+                {this.renderIncludeSelect(
+                  includeQrCode,
+                  "includeQrCode",
+                  handleChange
+                )}
+              </FormControl>
+            </Grid>
+            <Grid item xs={6}>
+              <FormControl
+                fullWidth={true}
+                error={this.placementOverlaps.qrCode}
+              >
+                <InputLabel variant="standard" htmlFor="qrCodePlacement">
+                  Placering
+                </InputLabel>
+                {this.renderPlacementSelect(
+                  qrCodePlacement,
+                  "qrCodePlacement",
+                  handleChange,
+                  !includeQrCode
                 )}
               </FormControl>
             </Grid>

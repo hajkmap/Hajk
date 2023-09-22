@@ -1265,12 +1265,12 @@ export default class PrintModel {
       }
 
       //If-statement will be altered with logic for "includeQR"
-      if (true) {
+      if (options.includeQrCode) {
         try {
           const qrCodeImageData = await this.generateQR(this.qrUrl);
 
-          let qrPlacement = this.getPlacement(
-            options.logoPlacement,
+          let qrCodePlacement = this.getPlacement(
+            options.qrCodePlacement,
             20,
             20,
             dim[0],
@@ -1280,8 +1280,8 @@ export default class PrintModel {
           pdf.addImage(
             qrCodeImageData,
             "PNG",
-            qrPlacement.x,
-            qrPlacement.y,
+            qrCodePlacement.x,
+            qrCodePlacement.y,
             20,
             20
           );
