@@ -105,6 +105,14 @@ export default class PrintModel {
   // A flag that's used in "rendercomplete" to ensure that user has not cancelled the request
   pdfCreationCancelled = null;
 
+  generateQR = async (url) => {
+    try {
+      return await QRCode.toDataURL(url);
+    } catch (err) {
+      return "";
+    }
+  };
+
   calculateScaleBarLengths() {
     if (this.scales.length === this.scaleMeters.length) {
       return this.scales.reduce((acc, curr, index) => {
@@ -1256,15 +1264,32 @@ export default class PrintModel {
         }
       }
 
-      const generateQR = async (text) => {
+      //If-statement will be altered with logic for "includeQR"
+      if (true) {
         try {
-          return await QRCode.toDataURL(text);
-        } catch (err) {
-          return "";
+          const qrCodeImageData = await this.generateQR(this.qrUrl);
+
+          let qrPlacement = this.getPlacement(
+            options.logoPlacement,
+            20,
+            20,
+            dim[0],
+            dim[1]
+          );
+
+          pdf.addImage(
+            qrCodeImageData,
+            "PNG",
+            qrPlacement.x,
+            qrPlacement.y,
+            20,
+            20
+          );
+        } catch (error) {
+          // The image loading may fail due to e.g. wrong URL, so let's catch the rejected Promise
+          this.localObserver.publish("error-loading-qr-image");
         }
-      };
-      const qrCodeImageData = await generateQR(this.qrUrl);
-      pdf.addImage(qrCodeImageData, "PNG", 0, 0, 0, 0);
+      }
 
       // If logo URL is provided, add the logo to the map
       if (options.includeLogo && this.logoUrl.trim().length >= 5) {
