@@ -213,6 +213,46 @@ class AnchorModel {
     }
     return url.toString();
   });
+
+  getAnchor2 = () => {
+    const q = document.getElementById("searchInputField")?.value.trim() || "";
+    const f = this.#cqlFilters;
+
+    // Split current URL on the "?" and just get the first part. This
+    // way we'll get rid of any unwanted search params, without messing
+    // up the remaining portion of URL (protocol, host, path, hash).
+    const url = new URL(document.location.href.split("?")[0]);
+
+    // The following params are always appended
+    url.searchParams.append("m", this.#app.config.activeMap);
+    url.searchParams.append("x", this.#map.getView().getCenter()[0]);
+    url.searchParams.append("y", this.#map.getView().getCenter()[1]);
+    url.searchParams.append("z", this.#map.getView().getZoom());
+    url.searchParams.append("l", this.getVisibleLayers());
+    url.searchParams.append("p", this.#getVisiblePlugins());
+
+    // Only add gl if there are group layers with a subset of selected layers
+    const partlyToggledGroupLayers = this.getPartlyToggledGroupLayers();
+    Object.keys(partlyToggledGroupLayers).length > 0 &&
+      url.searchParams.append("gl", JSON.stringify(partlyToggledGroupLayers));
+
+    // Only add 'f' if it isn't an empty object
+    Object.keys(f).length > 0 &&
+      url.searchParams.append("f", JSON.stringify(f));
+
+    // Only add 'q' if it isn't empty
+    q.length > 0 && url.searchParams.append("q", q);
+
+    // Occasionally we may want to prevent hash update, but it's off by default
+
+    if (this.#app.config.mapConfig.map.enableAppStateInHash === true) {
+      // Finalize by setting hash value by using all search params AND
+      // removing all search params. I.e.: no more ?, only # in our URL.
+      url.hash = url.searchParams.toString();
+      url.search = "";
+    }
+    return url.toString();
+  };
 }
 
 export default AnchorModel;

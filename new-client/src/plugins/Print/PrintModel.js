@@ -12,13 +12,18 @@ import Feature from "ol/Feature.js";
 import { Translate } from "ol/interaction.js";
 import Collection from "ol/Collection";
 import { Style, Stroke, Fill } from "ol/style.js";
+import AppModel from "models/AppModel";
 
 import ImageLayer from "ol/layer/Image";
 import TileLayer from "ol/layer/Tile";
 import TileWMS from "ol/source/TileWMS";
 import ImageWMS from "ol/source/ImageWMS";
 
+import QRCode from "qrcode";
+
 import { ROBOTO_NORMAL } from "./constants";
+import { createRef } from "react";
+
 export default class PrintModel {
   constructor(settings) {
     this.map = settings.map;
@@ -68,6 +73,8 @@ export default class PrintModel {
       resolutions: this.mapConfig.allResolutions, // allResolutions includes the "hidden" resolutions
       zoom: this.originalView.getZoom(),
     });
+    this.qrUrl = AppModel.anchorModel.getAnchor2();
+    console.log(this.qrUrl);
   }
 
   defaultScaleBarLengths = {
@@ -1248,6 +1255,17 @@ export default class PrintModel {
           }
         }
       }
+
+      const generateQR = async (text) => {
+        try {
+          return await QRCode.toDataURL(text);
+        } catch (err) {
+          return "";
+        }
+      };
+      const qrCodeImageData = await generateQR(this.qrUrl);
+      pdf.addImage(qrCodeImageData, "PNG", 0, 0, 0, 0);
+
       // If logo URL is provided, add the logo to the map
       if (options.includeLogo && this.logoUrl.trim().length >= 5) {
         try {
