@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [3.13.12] - 2023-09-22
+
 ### Added
 
 - Added CHANGELOG.md to the project
@@ -109,7 +111,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [3.12.0-rc.2] - 2023-06-19
 
-[unreleased]: https://github.com/hajkmap/Hajk/compare/v3.13.11...hstd-main
+[unreleased]: https://github.com/hajkmap/Hajk/compare/v3.13.12...hstd-main
+[3.13.12]: https://github.com/hajkmap/Hajk/compare/v3.13.11...v3.13.12
 [3.13.11]: https://github.com/hajkmap/Hajk/compare/v3.13.10...v3.13.11
 [3.13.10]: https://github.com/hajkmap/Hajk/compare/v3.13.9...v3.13.10
 [3.13.9]: https://github.com/hajkmap/Hajk/compare/v3.13.8...v3.13.9
