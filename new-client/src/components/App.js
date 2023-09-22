@@ -537,6 +537,7 @@ class App extends React.PureComponent {
     window.hajkPublicApi = {
       ...window.hajkPublicApi,
       olMap: this.appModel.map,
+      dirtyLayers: {},
     };
 
     // Register a handle to prevent pinch zoom on mobile devices.
@@ -556,6 +557,19 @@ class App extends React.PureComponent {
       { passive: false } // Explicitly tell the browser that we will preventDefault inside this handler,
       // which is important for smooth scrolling to work correctly.
     );
+
+    // Some tools (such as those that use the DrawModel) will tell
+    // the Public API if user has made any changes that would be lost
+    // on a window close/reload. We listen to the appropriate event
+    // and check with the "dirtyLayers" object in order to determine
+    // whether to show the confirmation dialog. See #1403.
+    this.appModel.config.mapConfig.map.confirmOnWindowClose !== false &&
+      window.addEventListener("beforeunload", function (event) {
+        if (Object.keys(window.hajkPublicApi.dirtyLayers).length > 0) {
+          event.preventDefault();
+          return (event.returnValue = "");
+        }
+      });
 
     // This event is used to allow controlling Hajk programmatically, e.g in an embedded context, see #1252
     this.props.config.mapConfig.map.enableAppStateInHash === true &&
