@@ -478,7 +478,7 @@ class LayerItem extends React.PureComponent {
               target="_blank"
               rel="noopener noreferrer"
             >
-              Öpnna data för {this.caption}
+              Öppna data för {this.caption}
             </a>
           </Typography>
         </InfoTextContainer>
