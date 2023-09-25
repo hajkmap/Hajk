@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useCallback, useEffect, useMemo } from "react";
 import { styled } from "@mui/material/styles";
 
 import {
@@ -20,33 +20,72 @@ const StyledBox = styled(Box)(({ theme }) => ({
 }));
 
 function QuickLayerTogglerButtons({ map, options }) {
-  const [selectedButtons, setSelectedButtons] = React.useState(() => []);
-  const handleToggleButtons = (event, newStates) => {
-    setSelectedButtons(newStates);
-  };
+  // Grab relevant layers IDs from options
+  const { buildingsLayerIds, bordersLayerIds, plansLayerIds } = options;
 
-  useEffect(() => {
-    // Helper: convert the string of IDs that comes from Admin into an Array
-    // of real OL Layers.
-    const getOlLayersFromIds = (ids) =>
+  // Helper: Convert the string of IDs that comes from Admin into an Array
+  // of real OL Layers.
+  const getOlLayersFromIds = useCallback(
+    (ids) =>
       ids
         .split(",")
         .map((id) => map.getAllLayers().find((l) => l.get("name") === id))
-        .filter((l) => l !== undefined);
+        .filter((l) => l !== undefined),
+    [map]
+  );
 
-    // Helper: set visibility for Array of OL Layers
-    const setVisibilityForOlLayers = (layers, visibility) =>
-      layers.forEach((l) => l.setVisible(visibility));
-
-    // Grab relevant layers IDs from options
-    const { buildingsLayerIds, bordersLayerIds, plansLayerIds } = options;
-
-    // Prepare a collection for each type of layer that should be toggleble
-    const layersCollection = {
+  // Prepare a collection for each type of layer that should be toggleble.
+  // Memorize it as the values won't change through app's runtime.
+  const layersCollection = useMemo(() => {
+    return {
       buildings: getOlLayersFromIds(buildingsLayerIds),
       borders: getOlLayersFromIds(bordersLayerIds),
       plans: getOlLayersFromIds(plansLayerIds),
     };
+  }, [buildingsLayerIds, bordersLayerIds, plansLayerIds, getOlLayersFromIds]);
+
+  // Helper: Gets the initial state for our toggle buttons. It's possible
+  // that the app starts with some of our quick layers already visible and
+  // in that case, the toggle buttons should reflect that by already being enabled.
+  const initialVisibilityForLayers = useMemo(() => {
+    const initValue = [];
+
+    Object.entries(layersCollection).forEach(([type, layer]) => {
+      layer.map((l) => l.getVisible()).includes(true) && initValue.push(type);
+    });
+
+    return initValue;
+  }, [layersCollection]);
+
+  // Could be good to listen to the visibility change event too.
+  // l.on("change:visible", (e) => {
+  //   const newValue = !e.oldValue;
+  //   if (newValue === true && !selectedButtons.includes(type)) {
+  //     // Layer is to be switched on and isn't currently visible
+  //     console.log(
+  //       "selectedButtons.push(type): ",
+  //       selectedButtons.push(type)
+  //     );
+  //     setSelectedButtons(selectedButtons.push(type));
+  //   } else if (newValue === false && selectedButtons.includes(type)) {
+  //     // Layer is to be hidden and is currently switched on
+  //     setSelectedButtons(selectedButtons.filter((t) => t !== type));
+  //   }
+  // });
+
+  const [selectedButtons, setSelectedButtons] = React.useState(
+    initialVisibilityForLayers
+  );
+
+  const handleToggleButtons = (event, newStates) => {
+    setSelectedButtons(newStates);
+  };
+
+  // When toggle button state changes, let's update layer's visibility.
+  useEffect(() => {
+    // Helper: Set visibility for Array of OL Layers.
+    const setVisibilityForOlLayers = (layers, visibility) =>
+      layers.forEach((l) => l.setVisible(visibility));
 
     // Let's loop the keys of layersCollection. Each key effectively
     // corresponds to a toggle button.
@@ -57,7 +96,7 @@ function QuickLayerTogglerButtons({ map, options }) {
         selectedButtons.includes(button) // Visibility is determined by toggle button status
       );
     });
-  }, [map, options, selectedButtons]);
+  }, [layersCollection, selectedButtons]);
 
   return (
     <ToggleButtonGroup
