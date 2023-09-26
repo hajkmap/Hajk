@@ -29,7 +29,16 @@ function InfoDialog({ localObserver }) {
   }, [localObserver]);
 
   return (
-    <Dialog open={clearDialogVisible} onClose={handleClose} scroll="body">
+    <Dialog
+      open={clearDialogVisible}
+      onClose={handleClose}
+      scroll="body"
+      onMouseDown={(e) => {
+        // Needed to disabled unwanted dragging of the underlying Window component
+        // and allow text selection in Dialog.
+        e.stopPropagation();
+      }}
+    >
       <DialogTitle>Hjälp</DialogTitle>
       <DialogContent>
         <Typography variant="subtitle1">Allmänt</Typography>
