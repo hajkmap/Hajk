@@ -27,6 +27,7 @@ import { useSnackbar } from "notistack";
 // import useCookieStatus from "hooks/useCookieStatus";
 
 import InfoDialog from "./views/InfoDialog.js";
+import ReportDialog from "./views/ReportDialog.js";
 import FeatureItem from "./views/FeatureItem.js";
 import QuickLayerToggleButtons from "./views/QuickLayerToggleButtons.js";
 
@@ -65,6 +66,13 @@ function PropertyCheckerView(props) {
     setClearDialogVisible(false);
   };
 
+  const [reportDialogVisible, setReportDialogVisible] = useState(false);
+
+  const handleShowReportDialog = (propertyName) => {
+    setCurrentPropertyName(propertyName);
+    setReportDialogVisible(true);
+  };
+
   // We're gonna need to keep track of if we're allowed to save stuff in LS. Let's use the hook.
   // const { functionalCookiesOk } = useCookieStatus(globalObserver);
 
@@ -77,6 +85,9 @@ function PropertyCheckerView(props) {
     setGroupedFeatures({});
     drawModel.removeDrawnFeatures();
   };
+
+  const [controlledLayers, setControlledLayers] = useState([]);
+  const [currentPropertyName, setCurrentPropertyName] = useState("");
 
   // Subscribe and unsubscribe to events
   useEffect(() => {
@@ -139,8 +150,15 @@ function PropertyCheckerView(props) {
     }
   }, [drawInteraction]);
 
+  console.log("controlledLayers: ", controlledLayers);
   return (
     <>
+      <ReportDialog
+        reportDialogVisible={reportDialogVisible}
+        setReportDialogVisible={setReportDialogVisible}
+        currentPropertyName={currentPropertyName}
+        controlledLayers={controlledLayers}
+      />
       <InfoDialog localObserver={localObserver} />
       <Dialog open={clearDialogVisible} onClose={handleCloseConfirmationDialog}>
         <DialogTitle>{"Är du säker på att du vill rensa listan?"}</DialogTitle>
@@ -205,8 +223,30 @@ function PropertyCheckerView(props) {
                     bgcolor: "background.paper",
                   }}
                   subheader={
-                    <ListSubheader>
-                      {features.features.length} lager påverkar fastigheten
+                    <ListSubheader
+                      sx={{
+                        display: "flex",
+                        justifyContent: "space-between",
+                      }}
+                    >
+                      {features.features.length} lager påverkar fastigheten{" "}
+                      <Button
+                        size="small"
+                        disabled={
+                          controlledLayers.filter(
+                            (l) =>
+                              l.propertyName ===
+                              features.markerFeature.get("fastighet")
+                          ).length === 0
+                        }
+                        onClick={() => {
+                          handleShowReportDialog(
+                            features.markerFeature.get("fastighet")
+                          );
+                        }}
+                      >
+                        Generera rapport
+                      </Button>
                     </ListSubheader>
                   }
                 >
@@ -236,6 +276,11 @@ function PropertyCheckerView(props) {
                             olLayer={olLayer}
                             olMap={props.app.map}
                             globalObserver={globalObserver}
+                            controlledLayers={controlledLayers}
+                            propertyName={features.markerFeature.get(
+                              "fastighet"
+                            )}
+                            setControlledLayers={setControlledLayers}
                           />
                         )
                       );
