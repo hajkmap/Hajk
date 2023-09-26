@@ -53,9 +53,9 @@ function InfoDialog({ localObserver }) {
       <DialogContent>
         <Typography variant="subtitle1">Snabblager</Typography>
         <DialogContentText>
-          Direkt under Huvudknappen hittar du tre snabbknappar. De hjälper dig
-          att visa och släcka tre lager som är vanliga vid den här typen av
-          arbete.
+          Direkt under Huvudknappen hittar du tre snabbknappar. Där hittar
+          snabbval för att synliggöra lagren Byggnader, Fastighetsinformation
+          samt Detaljplaner.
         </DialogContentText>
       </DialogContent>
       <DialogContent>
@@ -68,9 +68,10 @@ function InfoDialog({ localObserver }) {
           </b>
           <br />
           <br />
-          Resultaten presenteras i en listvy. Om du klickade i närheten av en
-          fasitghetsgräns kan det hända att du får resultat för flera
-          fastigheter.
+          Resultaten presenteras i en listvy. Om du klickar i närheten av en
+          fastighetsgräns kan det hända att du får resultatet för flera
+          fastigheter. Om det finns flera val, tänk då på att notera vilken
+          fastighet du valt att granska mot i listan.
         </DialogContentText>
       </DialogContent>
       <DialogActions>
