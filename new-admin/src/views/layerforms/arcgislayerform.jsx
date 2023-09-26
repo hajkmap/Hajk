@@ -667,6 +667,21 @@ class ArcGISLayerForm extends Component {
             />
           </div>
           <div className={infoClass}>
+            <label>Länktext</label>
+            <input
+              type="text"
+              ref="input_infoUrlText"
+              onChange={(e) => {
+                const v = e.target.value;
+                this.setState({ infoUrlText: v }, () =>
+                  this.validateField("infoUrlText", v)
+                );
+              }}
+              value={this.state.infoUrlText}
+              className={this.getValidationClass("infoUrlText")}
+            />
+          </div>
+          <div className={infoClass}>
             <label>Länk till öppna data</label>
             <input
               type="text"
