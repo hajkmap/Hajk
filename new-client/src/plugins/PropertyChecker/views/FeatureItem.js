@@ -28,7 +28,7 @@ const FeatureItem = (props) => {
   // text saying that "this layer is part of group layer X".
   const subcaption =
     olLayer.get("caption") !== caption
-      ? `Del av: ${olLayer.get("caption")}`
+      ? `del av: ${olLayer.get("caption")}`
       : null;
 
   // Define an object that will be used when keeping track

@@ -150,7 +150,6 @@ function PropertyCheckerView(props) {
     }
   }, [drawInteraction]);
 
-  console.log("controlledLayers: ", controlledLayers);
   return (
     <>
       <ReportDialog
@@ -158,6 +157,7 @@ function PropertyCheckerView(props) {
         setReportDialogVisible={setReportDialogVisible}
         currentPropertyName={currentPropertyName}
         controlledLayers={controlledLayers}
+        userDetails={props.app.config?.userDetails}
       />
       <InfoDialog localObserver={localObserver} />
       <Dialog open={clearDialogVisible} onClose={handleCloseConfirmationDialog}>
