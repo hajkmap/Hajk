@@ -292,20 +292,20 @@ function LayerPackage({
           <Typography>
             {loadLpInfoConfirmation ? loadLpInfoConfirmation.description : ""}
           </Typography>
-          {loadLpInfoConfirmation ? (
-            <Stack sx={{ mt: 2 }} direction="row" spacing={1}>
-              {loadLpInfoConfirmation.keywords.map((k) => (
-                <Chip
-                  key={`chip-${k}`}
-                  label={k}
-                  size="small"
-                  variant="outlined"
-                />
-              ))}
-            </Stack>
-          ) : (
-            ""
-          )}
+          {loadLpInfoConfirmation
+            ? loadLpInfoConfirmation.keywords.length > 0 && (
+                <Stack sx={{ mt: 2 }} direction="row" spacing={1}>
+                  {loadLpInfoConfirmation.keywords.map((k) => (
+                    <Chip
+                      key={`chip-${k}`}
+                      label={k}
+                      size="small"
+                      variant="outlined"
+                    />
+                  ))}
+                </Stack>
+              )
+            : null}
           <DialogContentText sx={{ mt: 2, mb: 1 }}>Bakgrund</DialogContentText>
           <Stack direction="row" spacing={1}>
             <PublicOutlinedIcon fontSize="small"></PublicOutlinedIcon>
