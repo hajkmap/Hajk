@@ -22,7 +22,8 @@
     "Search",
     "Sketch",
     "StreetView",
-    "TimeSlider"
+    "TimeSlider",
+    "Citizendialogue"
   ],
   "allTools": [
     "Anchor",
@@ -53,6 +54,7 @@
     "Sketch",
     "StreetView",
     "TimeSlider",
-    "vtsearch"
+    "vtsearch",
+    "Citizendialogue"
   ]
 }
