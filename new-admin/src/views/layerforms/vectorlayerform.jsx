@@ -1229,7 +1229,7 @@ class VectorLayerForm extends React.Component {
                   this.validateField("infoOpenDataLink", v)
                 );
               }}
-              value={this.state.infoUrlText}
+              value={this.state.infoOpenDataLink}
               className={this.getValidationClass("infoOpenDataLink")}
             />
           </div>
