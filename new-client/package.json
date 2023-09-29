@@ -83,6 +83,7 @@
     "recharts": "^2.1.16",
     "rehype-raw": "^6.1.1",
     "remark-gfm": "^3.0.1",
+    "survey-react": "^1.9.110",
     "x2js": "^3.4.4",
     "xlsx": "^0.18.5"
   }

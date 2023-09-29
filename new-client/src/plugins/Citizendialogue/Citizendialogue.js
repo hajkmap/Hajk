@@ -26,7 +26,7 @@ function Citizendialogue(props) {
   // There is a more thorough explanation regarding state in ./CitizendialogueView.js
   // Here is an example where we keep track of a state object (kind of like class-based components).
   const [state, setState] = React.useState({
-    title: "Citizendialogue",
+    title: "Medborgardialog",
     color: null,
   });
   // But we can also keep just one variable, allowing us to keep naming etc. clean. The pluginShown state
