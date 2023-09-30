@@ -1,11 +1,14 @@
 // Generic imports – all plugins need these.
 // (BaseWindowPlugin can be substituted with DialogWindowPlugin though.)
+//import React from "react";
 import React from "react";
 import BaseWindowPlugin from "../BaseWindowPlugin";
 
 // Plugin-specific imports. Most plugins will need a Model, View and Observer but make sure to only create and import whatever you need.
 import CitizendialogueModel from "./CitizendialogueModel";
 import CitizendialogueView from "./CitizendialogueView";
+//import EditView from "./EditView.js";
+//import EditModel from "./EditModel.js";
 import Observer from "react-event-observer";
 
 // All plugins will need to display an icon. Make sure to pick a relevant one from MUI Icons.
@@ -136,6 +139,21 @@ function Citizendialogue(props) {
     setPluginShown(true);
   };
 
+  /* const defaultOptions = {
+    sources: [],
+    // ... other default properties you might want
+  };
+
+  const [editModel] = React.useState(
+    () =>
+      new EditModel({
+        map: props.map,
+        app: props.app,
+        observer: localObserver,
+        options: { ...defaultOptions, ...props.options },
+      })
+  );*/
+
   // Render is now super-simplified compared to previous versions of Hajk.
   // All common functionality that has to do with showing a Window, and rendering
   // Drawer or Widget buttons, as well as keeping the state of Window, are now
@@ -167,19 +185,22 @@ function Citizendialogue(props) {
         onWindowShow: onWindowShow, // Handler for when user shows window.
       }}
     >
-      {/* This is the child object of BaseWindowPlugin. It will be displayed
+      <div>
+        {/* This is the child object of BaseWindowPlugin. It will be displayed
             as content inside the plugin's window. */}
-      <CitizendialogueView
-        // Here we send some props to the plugin's View.
-        // Make sure to ONLY include props that are ACTUALLY USED in the View.
-        model={citizendialogueModel} // We can supply our model
-        app={props.app} // Or even the whole App
-        localObserver={localObserver} // And also the local-observer (handling communication within the plugin)...
-        globalObserver={props.app.globalObserver} // ... and the global-observer (handling communication within the entire application).
-        updateCustomProp={updateCustomProp} // We're also gonna pass a function that we can use to update the state in this (the parent) component.
-        drawInteraction={drawInteraction} // We want to show what the current draw-interaction is in the view.
-        setDrawInteraction={setDrawInteraction} // Finally, we'll pass the updater for the draw-interaction state (so that we can toggle draw on/off).
-      />
+        <CitizendialogueView
+          // Here we send some props to the plugin's View.
+          // Make sure to ONLY include props that are ACTUALLY USED in the View.
+          model={citizendialogueModel} // We can supply our model
+          app={props.app} // Or even the whole App
+          localObserver={localObserver} // And also the local-observer (handling communication within the plugin)...
+          globalObserver={props.app.globalObserver} // ... and the global-observer (handling communication within the entire application).
+          updateCustomProp={updateCustomProp} // We're also gonna pass a function that we can use to update the state in this (the parent) component.
+          drawInteraction={drawInteraction} // We want to show what the current draw-interaction is in the view.
+          setDrawInteraction={setDrawInteraction} // Finally, we'll pass the updater for the draw-interaction state (so that we can toggle draw on/off).
+        />
+        {/*<EditView app={props.app} model={editModel} observer={localObserver} />*/}
+      </div>
     </BaseWindowPlugin>
   );
 }

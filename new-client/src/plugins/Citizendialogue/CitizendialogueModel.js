@@ -40,6 +40,10 @@ export default class CitizendialogueModel {
     });
   };
 
+  handleOnComplete = (survey, options) => {
+    console.log("Enkätsvar: ", survey.data);
+  };
+
   // Example of public method, returns the map instance
   getMap = () => {
     return this.#map;

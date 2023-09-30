@@ -6,6 +6,13 @@ import "survey-react/survey.css"; // standard-styling
 import { Box, Typography } from "@mui/material";
 import AppRegistrationIcon from "@mui/icons-material/AppRegistration";
 
+import EditView from "./EditView.js";
+import EditModel from "./EditModel.js";
+
+import Observer from "react-event-observer";
+
+import ReactDOM from "react-dom";
+
 // Hajk components are primarily styled in two ways:
 // - Using the styled-utility, see: https://mui.com/system/styled/
 // - Using the sx-prop, see: https://mui.com/system/basics/#the-sx-prop
@@ -25,6 +32,7 @@ function CitizendialogueView(props) {
   // We're gonna need to use the event observers. Let's destruct them so that we can
   // get a hold of them easily. The observers can be accessed directly via the props:
   const { globalObserver } = props;
+  const [localObserver] = React.useState(Observer());
 
   // You don’t have to use many state variables. State variables can hold objects and arrays just fine,
   // so you can still group related data together. However, unlike this.setState in a class, updating a
@@ -86,11 +94,12 @@ function CitizendialogueView(props) {
       order: 100,
       renderDrawerContent: renderDrawerContent,
     });
-  }, [globalObserver, renderDrawerContent]); // <-- The dependency array. Since we reference the global observer and 'renderDrawerContent' we have to include these.
+  }, [globalObserver, renderDrawerContent]);
+
+  // <-- The dependency array. Since we reference the global observer and 'renderDrawerContent' we have to include these.
   // There is a lot more to say regarding the useEffect hook, but I'll leave that to you to read up on. Just a couple of tips:
   // - Remember the cleanup-function! Especially when you're working with subscriptions.
   // - Remember that you can use several useEffect hooks! Maybe you want to do something when 'counter' changes?
-
   const surveyJSON = {
     title: "Enkel enkät",
     pages: [
@@ -126,18 +135,68 @@ function CitizendialogueView(props) {
           },
         ],
       },
+      {
+        name: "page3",
+        elements: [
+          {
+            type: "editComponent",
+            name: "customEdit",
+          },
+        ],
+      },
     ],
   };
 
-  const handleOnComplete = (survey, options) => {
-    console.log("Enkätsvar: ", survey.data);
+  const defaultOptions = {
+    sources: [],
+    // ... other default properties you might want
   };
+
+  const [editModel] = React.useState(
+    () =>
+      new EditModel({
+        map: props.map,
+        app: props.app,
+        observer: localObserver,
+        options: { ...defaultOptions, ...props.options },
+      })
+  );
+
+  Survey.Serializer.addProperty("question", {
+    name: "renderEdit:bool",
+    default: false,
+  });
+
+  Survey.CustomWidgetCollection.Instance.addCustomWidget({
+    name: "editComponent",
+    isFit: function (question) {
+      return question.getType() === "editComponent";
+    },
+    isDefaultRender: true,
+    activatedByChanged: function (activatedBy) {
+      Survey.JsonObject.metaData.addClass("editComponent", [], null, "empty");
+    },
+    htmlTemplate: "<div id='edit-view-container'></div>",
+    afterRender: function (question, el) {
+      ReactDOM.render(
+        <EditView app={props.app} model={editModel} observer={localObserver} />,
+        el
+      );
+    },
+    willUnmount: function (question, el) {
+      ReactDOM.unmountComponentAtNode(el);
+    },
+  });
 
   Survey.surveyLocalization.defaultLocale = "sv";
 
   return (
     <>
-      <Survey.Survey json={surveyJSON} onComplete={handleOnComplete} />
+      <Survey.Survey
+        json={surveyJSON}
+        onComplete={props.model.handleOnComplete}
+      />
+      <EditView app={props.app} model={editModel} observer={localObserver} />
     </>
   );
 }
