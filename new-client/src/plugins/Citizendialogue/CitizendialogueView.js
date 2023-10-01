@@ -1,9 +1,9 @@
 // Make sure to only import the hooks you intend to use
-import React, { useCallback, useEffect } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import * as Survey from "survey-react";
 import "survey-react/survey.css"; // standard-styling
 
-import { Box, Typography } from "@mui/material";
+import { Box, Typography, Button } from "@mui/material";
 import AppRegistrationIcon from "@mui/icons-material/AppRegistration";
 
 import EditView from "./EditView.js";
@@ -11,7 +11,7 @@ import EditModel from "./EditModel.js";
 
 import Observer from "react-event-observer";
 
-import ReactDOM from "react-dom";
+import ReactDOM from "react-dom/client";
 
 // Hajk components are primarily styled in two ways:
 // - Using the styled-utility, see: https://mui.com/system/styled/
@@ -100,12 +100,23 @@ function CitizendialogueView(props) {
   // There is a lot more to say regarding the useEffect hook, but I'll leave that to you to read up on. Just a couple of tips:
   // - Remember the cleanup-function! Especially when you're working with subscriptions.
   // - Remember that you can use several useEffect hooks! Maybe you want to do something when 'counter' changes?
+
   const surveyJSON = {
     title: "Enkel enkät",
     pages: [
       {
         name: "page1",
         elements: [
+          {
+            type: "text",
+            name: "enkatnamn",
+            visible: false,
+          },
+          {
+            type: "text",
+            name: "svarsID",
+            visible: false,
+          },
           {
             type: "text",
             name: "question1",
@@ -139,14 +150,21 @@ function CitizendialogueView(props) {
         name: "page3",
         elements: [
           {
-            type: "editComponent",
-            name: "customEdit",
+            type: "html",
+            name: "placeholderForEditView",
+            html: "<div id='edit-view-container'></div>",
+          },
+          {
+            type: "html",
+            name: "renderEditViewButton",
+            html: "<button id='btnRenderEditView'>Render EditView</button>",
           },
         ],
       },
     ],
   };
 
+  //Default options for editModel----------------------
   const defaultOptions = {
     sources: [],
     // ... other default properties you might want
@@ -162,41 +180,70 @@ function CitizendialogueView(props) {
       })
   );
 
-  Survey.Serializer.addProperty("question", {
-    name: "renderEdit:bool",
-    default: false,
+  //Handlebutton
+  function handleButtonClick() {
+    console.log("Button clicked");
+    const container = document.getElementById("edit-view-container");
+    if (container) {
+      try {
+        ReactDOM.createRoot(
+          <EditView
+            app={props.app}
+            model={editModel}
+            observer={localObserver}
+          />,
+          container
+        );
+      } catch (error) {
+        console.error("Error rendering EditView:", error);
+      }
+    } else {
+      console.error("Cannot find 'edit-view-container' element.");
+    }
+  }
+
+  const renderEditViewButton = document.getElementById("btnRenderEditView");
+  if (renderEditViewButton) {
+    renderEditViewButton.addEventListener("click", handleButtonClick);
+  }
+
+  //Unique ID and name on survey
+  function generateUniqueID() {
+    return (
+      new Date().getTime().toString() +
+      "-" +
+      Math.random().toString(36).substring(2, 9)
+    );
+  }
+
+  const [enkätData] = React.useState({
+    enkatnamn: "Rynningeviken1",
+    svarsID: generateUniqueID(),
   });
 
-  Survey.CustomWidgetCollection.Instance.addCustomWidget({
-    name: "editComponent",
-    isFit: function (question) {
-      return question.getType() === "editComponent";
-    },
-    isDefaultRender: true,
-    activatedByChanged: function (activatedBy) {
-      Survey.JsonObject.metaData.addClass("editComponent", [], null, "empty");
-    },
-    htmlTemplate: "<div id='edit-view-container'></div>",
-    afterRender: function (question, el) {
-      ReactDOM.render(
-        <EditView app={props.app} model={editModel} observer={localObserver} />,
-        el
-      );
-    },
-    willUnmount: function (question, el) {
-      ReactDOM.unmountComponentAtNode(el);
-    },
-  });
+  //Combine ID/Name and surveydata
+  const handleOnComplete = (survey) => {
+    const combinedData = { ...enkätData, ...survey.data };
+    props.model.handleOnComplete(combinedData);
+  };
 
   Survey.surveyLocalization.defaultLocale = "sv";
 
+  //Show hide edittool
+  const [showEditView, setShowEditView] = useState(false);
+
   return (
     <>
-      <Survey.Survey
-        json={surveyJSON}
-        onComplete={props.model.handleOnComplete}
-      />
-      <EditView app={props.app} model={editModel} observer={localObserver} />
+      <Survey.Survey json={surveyJSON} onComplete={handleOnComplete} />
+      {/*<EditView app={props.app} model={editModel} observer={localObserver} />*/}
+
+      <Button onClick={() => setShowEditView(!showEditView)}>
+        Klicka här för att markera koordinater i kartan
+      </Button>
+
+      {showEditView && (
+        <EditView app={props.app} model={editModel} observer={localObserver} />
+      )}
     </>
   );
 }
