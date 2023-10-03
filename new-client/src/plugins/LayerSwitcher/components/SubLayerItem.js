@@ -21,6 +21,7 @@ export default function SubLayerItem({
   subLayer,
   toggleable,
   app,
+  display,
   visible,
   toggleSubLayer,
   subLayerIndex,
@@ -70,7 +71,7 @@ export default function SubLayerItem({
   };
 
   return (
-    <div>
+    <div style={{ display: display }}>
       <ListItemButton
         disableRipple
         onClick={() => (toggleable ? toggleSubLayer(subLayer, visible) : null)}

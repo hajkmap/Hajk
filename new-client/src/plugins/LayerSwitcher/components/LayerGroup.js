@@ -104,23 +104,19 @@ class LayerGroup extends React.PureComponent {
       expanded = this.state.groups[0].id;
     }
     return this.state.groups.map((group, i) => {
-      if (this.props.filterValue !== "" && !group.isFiltered) {
-        return null;
-      } else {
-        return (
-          <LayerGroup
-            filterValue={this.props.filterValue}
-            expanded={expanded === group.id}
-            key={i}
-            group={group}
-            model={this.props.model}
-            handleChange={this.handleChange}
-            app={this.props.app}
-            child={true}
-            options={this.props.options}
-          />
-        );
-      }
+      return (
+        <LayerGroup
+          filterChangeIndicator={group.changeIndicator}
+          expanded={expanded === group.id}
+          key={i}
+          group={group}
+          model={this.props.model}
+          handleChange={this.handleChange}
+          app={this.props.app}
+          child={true}
+          options={this.props.options}
+        />
+      );
     });
   }
 
@@ -290,13 +286,8 @@ class LayerGroup extends React.PureComponent {
       <div>
         {this.props.group.layers.map((layer, i) => {
           const mapLayer = this.model.layerMap[layer.id];
-
-          // If mapLayer doesn't exist or if filtering is active and the layer shouldn't be displayed,
-          // return null to prevent rendering the layer
-          if (
-            !mapLayer ||
-            (this.props.filterValue !== "" && !layer.isFiltered)
-          ) {
+          // If mapLayer doesn't exist, the layer shouldn't be displayed
+          if (!mapLayer) {
             return null;
           }
 
@@ -307,11 +298,11 @@ class LayerGroup extends React.PureComponent {
           // Render the component with the appropriate attributes
           return (
             <Component
+              display={!layer.isFiltered ? "none" : "block"}
               key={mapLayer.get("name")}
               layer={mapLayer}
               draggable={false}
               toggleable={true}
-              filterValue={this.props.filterValue}
               app={this.props.app}
               observer={this.props.model.observer}
               groupLayer={layer}
@@ -325,11 +316,9 @@ class LayerGroup extends React.PureComponent {
 
   render() {
     const { expanded } = this.state;
-    if (this.props.filterValue !== "" && !this.props.group.isFiltered) {
-      return null;
-    }
     return (
       <LayerGroupAccordion
+        display={!this.props.group.isFiltered ? "none" : "block"}
         toggleable={this.props.group.toggled}
         expanded={expanded}
         toggleDetails={this.renderToggleAll()}

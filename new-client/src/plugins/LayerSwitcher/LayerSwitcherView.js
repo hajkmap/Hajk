@@ -97,10 +97,14 @@ class LayersSwitcherView extends React.PureComponent {
   // Prepare tree data for filtering
   addLayerNames = (data) => {
     data.forEach((item) => {
+      item.isFiltered = true;
+      item.changeIndicator = new Date();
       if (item.layers) {
         item.layers.forEach((layer) => {
           const mapLayer = this.props.model.layerMap[layer.id];
           layer.name = mapLayer.get("caption");
+          layer.isFiltered = true;
+          item.changeIndicator = new Date();
           // Check if layer is a group
           if (mapLayer.get("layerType") === "group") {
             layer.subLayers = [];
@@ -110,6 +114,8 @@ class LayersSwitcherView extends React.PureComponent {
               layer.subLayers.push({
                 id: subLayer,
                 name: subLayerMapLayer,
+                isFiltered: true,
+                changeIndicator: new Date(),
               });
             });
           }
@@ -149,26 +155,28 @@ class LayersSwitcherView extends React.PureComponent {
   // Filter tree data
   filterTree = (node, filterText) => {
     if (
+      filterText === "" ||
       node.name.toLocaleLowerCase().includes(filterText.toLocaleLowerCase())
     ) {
-      node.isFiltered = true;
+      this.updateNode(node, true, false);
+      // Set all the nodes children to filtered = true
       this.setChildrenFiltered(node, true);
       return;
     } else {
-      node.isFiltered = false;
+      this.updateNode(node, false, true);
     }
 
     if (node.layers) {
       node.layers.forEach((layer) => this.filterTree(layer, filterText));
       if (node.layers.some((layer) => layer.isFiltered)) {
-        node.isFiltered = true;
+        this.updateNode(node, true, true);
       }
     }
 
     if (node.groups) {
       node.groups.forEach((group) => this.filterTree(group, filterText));
       if (node.groups.some((group) => group.isFiltered)) {
-        node.isFiltered = true;
+        this.updateNode(node, true, true);
       }
     }
 
@@ -177,7 +185,7 @@ class LayersSwitcherView extends React.PureComponent {
         this.filterTree(subLayer, filterText)
       );
       if (node.subLayers.some((subLayer) => subLayer.isFiltered)) {
-        node.isFiltered = true;
+        this.updateNode(node, true, true);
       }
     }
   };
@@ -185,23 +193,35 @@ class LayersSwitcherView extends React.PureComponent {
   setChildrenFiltered = (node, value) => {
     if (node.layers) {
       node.layers.forEach((layer) => {
-        layer.isFiltered = value;
+        this.updateNode(layer, value, true);
         this.setChildrenFiltered(layer, value);
       });
     }
 
     if (node.groups) {
       node.groups.forEach((group) => {
-        group.isFiltered = value;
+        this.updateNode(group, value, true);
         this.setChildrenFiltered(group, value);
       });
     }
 
     if (node.subLayers) {
       node.subLayers.forEach((subLayer) => {
+        this.updateNode(subLayer, value, true);
         subLayer.isFiltered = value;
       });
     }
+  };
+
+  updateNode = (node, isFiltered, compare) => {
+    if (!compare) {
+      // Indicate that node has changed
+      node.changeIndicator = new Date();
+    } else if (node.isFiltered !== isFiltered) {
+      // Indicate that node has changed
+      node.changeIndicator = new Date();
+    }
+    node.isFiltered = isFiltered;
   };
 
   // Handles click on PersonalLayerpackage button and backbutton
@@ -397,6 +417,7 @@ class LayersSwitcherView extends React.PureComponent {
         {/* TODO: configurable from admin */}
         {/* QuickAccess section */}
         <LayerGroupAccordion
+          display={"block"}
           expanded={this.state.quickAccessSectionExpanded}
           layerGroupTitle={<ListItemText primary={"Snabblager"} />}
           quickAccess={
@@ -435,7 +456,7 @@ class LayersSwitcherView extends React.PureComponent {
         {this.state.treeData.map((group, i) => {
           return (
             <LayerGroup
-              filterValue={this.state.filterValue}
+              filterChangeIndicator={group.changeIndicator}
               key={i}
               group={group}
               model={this.props.model}
