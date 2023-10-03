@@ -62,9 +62,7 @@ export default class ConfigMapper {
         legendUrl = args.legend;
       }
 
-      // If 'legend' URL doesn't start with "http", add "https://" prior 'legend', else let it be as is
-      const protocol = /^http/.test(legendUrl) ? "" : "https://";
-      return protocol + legendUrl;
+      return legendUrl;
     }
 
     function getLegends() {
@@ -185,6 +183,7 @@ export default class ConfigMapper {
         infoText: args.infoText,
         infoUrl: args.infoUrl,
         infoUrlText: args.infoUrlText,
+        infoOpenDataLink: args.infoOpenDataLink,
         infoOwner: args.infoOwner,
         hideExpandArrow: args.hideExpandArrow,
         timeSliderStart: args.timeSliderStart,
@@ -256,6 +255,7 @@ export default class ConfigMapper {
         infoText: args.infoText,
         infoUrl: args.infoUrl,
         infoUrlText: args.infoUrlText,
+        infoOpenDataLink: args.infoOpenDataLink,
         infoOwner: args.infoOwner,
         hideExpandArrow: args.hideExpandArrow,
         timeSliderStart: args.timeSliderStart,
@@ -311,6 +311,7 @@ export default class ConfigMapper {
         infoTitle: args.infoTitle,
         infoUrl: args.infoUrl,
         infoUrlText: args.infoUrlText,
+        infoOpenDataLink: args.infoOpenDataLink,
         infoVisible: args.infoVisible || false,
         infoClickSortType: args.infoClickSortType,
         infoClickSortDesc: args.infoClickSortDesc,
@@ -405,6 +406,7 @@ export default class ConfigMapper {
         infoText: args.infoText,
         infoUrl: args.infoUrl,
         infoUrlText: args.infoUrlText,
+        infoOpenDataLink: args.infoOpenDataLink,
         infoOwner: args.infoOwner,
         hideExpandArrow: args.hideExpandArrow,
         timeSliderStart: args.timeSliderStart,

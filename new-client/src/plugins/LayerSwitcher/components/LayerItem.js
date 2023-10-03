@@ -87,6 +87,7 @@ class LayerItem extends React.PureComponent {
     this.infoText = layerInfo.infoText;
     this.infoUrl = layerInfo.infoUrl;
     this.infoUrlText = layerInfo.infoUrlText;
+    this.infoOpenDataLink = layerInfo.infoOpenDataLink;
     this.infoOwner = layerInfo.infoOwner;
     this.localObserver = layer.localObserver;
     this.showAttributeTableButton = layerInfo.showAttributeTableButton || false;
@@ -455,9 +456,31 @@ class LayerItem extends React.PureComponent {
     if (this.infoUrl) {
       return (
         <InfoTextContainer>
-          <a href={this.infoUrl} target="_blank" rel="noopener noreferrer">
-            {this.infoUrlText || this.infoUrl}
-          </a>
+          <Typography variant="body2" component="div" sx={{ fontWeight: 500 }}>
+            <a href={this.infoUrl} target="_blank" rel="noopener noreferrer">
+              {this.infoUrlText || this.infoUrl}
+            </a>
+          </Typography>
+        </InfoTextContainer>
+      );
+    } else {
+      return null;
+    }
+  }
+
+  renderOpenDataLink() {
+    if (this.infoOpenDataLink) {
+      return (
+        <InfoTextContainer>
+          <Typography variant="body2" component="div" sx={{ fontWeight: 500 }}>
+            <a
+              href={this.infoOpenDataLink}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              Öppna data: {this.caption}
+            </a>
+          </Typography>
         </InfoTextContainer>
       );
     } else {
@@ -486,6 +509,7 @@ class LayerItem extends React.PureComponent {
         <div>
           {this.renderInfo()}
           {this.renderMetadataLink()}
+          {this.renderOpenDataLink()}
           {this.renderOwner()}
           <div>{this.renderChapterLinks(this.props.chapters || [])}</div>
         </div>

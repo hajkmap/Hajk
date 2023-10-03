@@ -431,6 +431,11 @@ class App extends React.PureComponent {
       t.toLowerCase()
     );
 
+    // Let's push some built-in core elements, that previously were plugins
+    // and that still have their config there.
+    lowerCaseActiveTools.push("preset");
+    lowerCaseActiveTools.push("externallinks");
+
     // Check which plugins defined in mapConfig don't exist in buildConfig
     const unsupportedToolsFoundInMapConfig = this.props.config.mapConfig.tools
       .map((t) => t.type.toLowerCase())
@@ -445,11 +450,12 @@ class App extends React.PureComponent {
       });
 
     // Display a silent info message in console
-    console.log(
-      `The map configuration contains unavailable plugins: ${unsupportedToolsFoundInMapConfig.join(
-        ", "
-      )}. Please check your map config and buildConfig.json.  `
-    );
+    unsupportedToolsFoundInMapConfig.length > 0 &&
+      console.info(
+        `The map configuration contains unavailable plugins: ${unsupportedToolsFoundInMapConfig.join(
+          ", "
+        )}. Please check your map config and buildConfig.json.  `
+      );
   };
   /**
    * @summary Initiates the wanted analytics model (if any).
@@ -531,6 +537,7 @@ class App extends React.PureComponent {
     window.hajkPublicApi = {
       ...window.hajkPublicApi,
       olMap: this.appModel.map,
+      dirtyLayers: {},
     };
 
     // Register a handle to prevent pinch zoom on mobile devices.
@@ -550,6 +557,19 @@ class App extends React.PureComponent {
       { passive: false } // Explicitly tell the browser that we will preventDefault inside this handler,
       // which is important for smooth scrolling to work correctly.
     );
+
+    // Some tools (such as those that use the DrawModel) will tell
+    // the Public API if user has made any changes that would be lost
+    // on a window close/reload. We listen to the appropriate event
+    // and check with the "dirtyLayers" object in order to determine
+    // whether to show the confirmation dialog. See #1403.
+    this.appModel.config.mapConfig.map.confirmOnWindowClose !== false &&
+      window.addEventListener("beforeunload", function (event) {
+        if (Object.keys(window.hajkPublicApi.dirtyLayers).length > 0) {
+          event.preventDefault();
+          return (event.returnValue = "");
+        }
+      });
 
     // This event is used to allow controlling Hajk programmatically, e.g in an embedded context, see #1252
     this.props.config.mapConfig.map.enableAppStateInHash === true &&
@@ -700,7 +720,9 @@ class App extends React.PureComponent {
       if (v !== null) {
         this.setState({ drawerVisible: true, activeDrawerContent: v });
       } else {
-        this.globalObserver.publish("core.hideDrawer");
+        if (!this.state.drawerStatic) {
+          this.globalObserver.publish("core.hideDrawer");
+        }
       }
     });
 
@@ -1016,6 +1038,13 @@ class App extends React.PureComponent {
     );
   };
 
+  checkDrawerButtons() {
+    return (
+      !this.state.drawerStatic ||
+      (this.state.drawerStatic && this.state.drawerButtons.length > 1)
+    );
+  }
+
   render() {
     const { config } = this.props;
 
@@ -1075,15 +1104,15 @@ class App extends React.PureComponent {
             <StyledHeader
               id="header"
               sx={{
-                justifyContent: this.state.drawerStatic
-                  ? "end"
-                  : "space-between",
+                justifyContent: this.checkDrawerButtons()
+                  ? "space-between"
+                  : "end",
                 "& > *": {
                   pointerEvents: "auto",
                 },
               }}
             >
-              {clean === false && !this.state.drawerStatic && (
+              {clean === false && this.checkDrawerButtons() && (
                 <DrawerToggleButtons
                   drawerButtons={this.state.drawerButtons}
                   globalObserver={this.globalObserver}
@@ -1092,6 +1121,7 @@ class App extends React.PureComponent {
                       ? this.state.activeDrawerContent
                       : null
                   }
+                  drawerStatic={this.state.drawerStatic}
                 />
               )}
               {/* Render Search even if clean === false: Search contains logic to handle clean inside the component. */}

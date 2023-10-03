@@ -9,7 +9,7 @@ import FormLabel from "@mui/material/FormLabel";
 import FormControl from "@mui/material/FormControl";
 import FormGroup from "@mui/material/FormGroup";
 import FormControlLabel from "@mui/material/FormControlLabel";
-import { Button, FormHelperText } from "@mui/material";
+import { Button, FormHelperText, Typography } from "@mui/material";
 import Chip from "@mui/material/Chip";
 
 const StyledGrid = styled(Grid)(({ theme }) => ({
@@ -382,7 +382,7 @@ class AttributeEditor extends React.Component {
         return (
           <TextField
             id={field.id}
-            label={field.name}
+            label={field.alias || field.name}
             fullWidth={true}
             margin="normal"
             type="datetime-local"
@@ -548,7 +548,9 @@ class AttributeEditor extends React.Component {
                   field.initialRender = false;
                 }}
               >
-                <option value="">-Välj värde-</option>
+                <option value="" disabled>
+                  -Välj värde-
+                </option>
                 {options}
               </NativeSelect>
               <FormHelperText>{field.description}</FormHelperText>
@@ -587,7 +589,7 @@ class AttributeEditor extends React.Component {
                 }}
               />
             }
-            label={field.name}
+            label={field.alias || field.name}
           />
         );
       case null:
@@ -601,12 +603,28 @@ class AttributeEditor extends React.Component {
     const { formValues } = this.state;
     const { model } = this.props;
 
-    if (!formValues || this.props.editSource === undefined) return null;
+    // If no source is selected, don't render anything
+    if (
+      (!formValues && this.props.editSource?.simpleEditWorkflow !== true) ||
+      this.props.editSource === undefined
+    )
+      return null;
+
+    // If source is selected and the source does not allow editing the
+    // geometries, it means that we're in a "Simple Edit mode". If so,
+    // let's render a label that tells user to click on a feature to start
+    // editing its attributes.
+    if (!formValues && this.props.editSource?.simpleEditWorkflow === true)
+      return (
+        <Typography>
+          Klicka på ett objekt i kartan för att redigera dess attribut
+        </Typography>
+      );
 
     const markup = this.props.editSource?.editableFields?.map((field, i) => {
       const valueMarkup = this.getValueMarkup(field, true);
       return (
-        <Grid item xs={12} key={i} ref={field.name}>
+        <Grid item xs={12} key={i} ref={field.name} sx={{ textAlign: "left" }}>
           {valueMarkup}
         </Grid>
       );
