@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Admins can configure a link for each layer. The link will be visible in LayerSwitcher's metadata part. [#1387](https://github.com/hajkmap/Hajk/issues/1387)
+
+### Fixed
+
+- It's now possible to have other target than `_blank` for links in infoclick. [#1388](https://github.com/hajkmap/Hajk/issues/1388)
+
 ## [3.13.12] - 2023-09-22
 
 ### Added
