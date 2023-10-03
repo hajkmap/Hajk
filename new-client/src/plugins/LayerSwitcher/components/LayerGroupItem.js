@@ -121,6 +121,7 @@ class LayerGroupItem extends Component {
       infoText: layerInfo.infoText,
       infoUrl: layerInfo.infoUrl,
       infoUrlText: layerInfo.infoUrlText,
+      infoOpenDataLink: layerInfo.infoOpenDataLink,
       infoOwner: layerInfo.infoOwner,
       infoExpanded: false,
       instruction: layerInfo.instruction,
@@ -783,6 +784,27 @@ class LayerGroupItem extends Component {
     }
   }
 
+  renderOpenDataLink() {
+    const { infoOpenDataLink } = this.state;
+    if (infoOpenDataLink) {
+      return (
+        <InfoTextContainer>
+          <Typography variant="body2" component="div">
+            <a
+              href={this.infoOpenDataLink}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              {this.infoOpenDataLink}
+            </a>
+          </Typography>
+        </InfoTextContainer>
+      );
+    } else {
+      return null;
+    }
+  }
+
   renderOwner() {
     const { infoOwner } = this.state;
     if (infoOwner) {
@@ -805,6 +827,7 @@ class LayerGroupItem extends Component {
         <div>
           {this.renderInfo()}
           {this.renderMetadataLink()}
+          {this.renderOpenDataLink()}
           {this.renderOwner()}
           <div>{this.renderChapterLinks(this.props.chapters || [])}</div>
         </div>
