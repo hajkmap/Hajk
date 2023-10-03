@@ -73,8 +73,6 @@ export default class PrintModel {
       resolutions: this.mapConfig.allResolutions, // allResolutions includes the "hidden" resolutions
       zoom: this.originalView.getZoom(),
     });
-    this.qrUrl = AppModel.anchorModel.getAnchor2();
-    console.log(this.qrUrl);
   }
 
   defaultScaleBarLengths = {
@@ -105,8 +103,10 @@ export default class PrintModel {
   // A flag that's used in "rendercomplete" to ensure that user has not cancelled the request
   pdfCreationCancelled = null;
 
-  generateQR = async (url) => {
+  generateQR = async () => {
     try {
+      const url = AppModel.anchorModel.getAnchor2();
+      console.log(url);
       return await QRCode.toDataURL(url);
     } catch (err) {
       return "";
@@ -1267,7 +1267,8 @@ export default class PrintModel {
       //If-statement will be altered with logic for "includeQR"
       if (options.includeQrCode) {
         try {
-          const qrCodeImageData = await this.generateQR(this.qrUrl);
+          const qrCodeImageData = await this.generateQR();
+          console.log(qrCodeImageData);
 
           let qrCodePlacement = this.getPlacement(
             options.qrCodePlacement,
