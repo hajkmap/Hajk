@@ -18,7 +18,7 @@ So, here is a brief specification of this required WMS layer.
 
    1.3 `layer` - - corresponds to Hajk layer's sublayer name in `layers.json`. Not required for non-group layers.
 
-   1.4 Any field you wish to group on. For example, if we're creating some property checker (which was the main intention of this plugin), we may want to group the results per _per property_ (in Swedish, _fastighet_). You specify the WMS layer's attribute name you wish to group by using the `attributeNameToGroupBy` setting for this plugin. In our example, it is set to `fastighet`.
+   1.4 Any field you wish to group on. For example, if we're creating some property checker (which was the main intention of this plugin), we may want to group the results per _property_ (in Swedish, _fastighet_). You specify the WMS layer's attribute name you wish to group by using the `attributeNameToGroupBy` setting for this plugin. In our example, it is set to `fastighet`.
 
 ### Example configuration
 
