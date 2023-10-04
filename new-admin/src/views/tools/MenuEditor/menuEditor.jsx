@@ -56,6 +56,9 @@ const styles = (theme) => ({
 
 class ToolOptions extends Component {
   state = {
+    availableDocuments: [],
+    folder: "",
+    folders: [],
     textAreacolorpickerEnabled: false,
     active: false,
     index: 0,
@@ -103,17 +106,47 @@ class ToolOptions extends Component {
   menuConfig = {
     menu: [],
   };
-  availableDocuments = [];
 
   constructor(props) {
     super(props);
     this.type = "documenthandler";
     this.mapSettingsModel = props.model;
     this.menuEditorModel = this.getMenuEditorModel();
-    this.menuEditorModel.listAllAvailableDocuments().then((list) => {
-      this.availableDocuments = list;
+    this.menuEditorModel.listAllAvailableDocuments(this.state.folder).then((list) => {
+      this.setState({
+        availableDocuments: list,
+      })
     });
+    
+    this.useDocumentFolders = this.menuEditorModel.config.use_document_folders ?? false;
+
+    if (this.useDocumentFolders) {
+      this.menuEditorModel.loadFolders().then((list) => {
+        this.setState({
+          folders: list,
+        })
+      });
+    }
   }
+
+  handleFolderSelection = (selectedFolder) => {
+    this.setState({ folder: selectedFolder }, () => {
+      this.menuEditorModel
+        .listAllAvailableDocuments(this.state.folder)
+        .then((list) => {
+          this.setState(
+            {
+              availableDocuments: list,
+            },
+            () => {
+              this.updateTreeValidation(this.state.tree);
+              // I hate myself... This should be avoided at all costs!!!
+              this.forceUpdate();
+            }
+          );
+        });
+    });
+  };
 
   handleColorChange = (target, color) => {
     this.setState((prevState) => ({
@@ -456,11 +489,15 @@ class ToolOptions extends Component {
         deleteMenuItem={this.deleteMenuItem}
         options={this.state}
         model={this.menuEditorModel}
-        availableDocuments={this.availableDocuments}
+        availableDocuments={this.state.availableDocuments}
+        folders={this.state.folders}
         menuItem={menuItem}
         updateValidationForTreeNode={this.updateValidationForTreeNode}
         valid={this.menuEditorModel.isSelectionValid(menuItem, children)}
         treeNodeId={key}
+        onFolderSelection={this.handleFolderSelection}
+        folder={this.state.folder}
+        useDocumentFolders={this.useDocumentFolders}
       ></TreeRow>
     );
   };

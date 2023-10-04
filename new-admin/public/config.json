@@ -40,9 +40,11 @@
     "url_layermenu_settings": "http://localhost:55630/settings/layermenu",
     "url_map_settings": "http://localhost:55630/settings/mapsettings",
     "url_tool_settings": "http://localhost:55630/settings/toolsettings",
+    "url_folder_list": "http://localhost:3002/api/v1/informative/folderlist",
     "url_document_list": "http://localhost:55630/informative/list",
     "url_client_ui": "http://localhost:3000/",
-    "authentication_active": false
+    "authentication_active": false,
+    "use_document_folders": false
   },
   "informative": {
     "url_proxy": "",
@@ -50,6 +52,7 @@
     "url_map_list": "http://localhost:55630/config/list",
     "url_layers": "http://localhost:55630/config/layers",
     "url_document_list": "http://localhost:55630/informative/list",
+    "url_folder_list": "http://localhost:3002/api/v1/informative/folderlist",
     "url_load": "http://localhost:55630/informative/load",
     "url_save": "http://localhost:55630/informative/save",
     "url_create": "http://localhost:55630/informative/create",
@@ -64,6 +67,7 @@
     "url_map_list": "http://localhost:55630/config/list",
     "url_layers": "http://localhost:55630/config/layers",
     "url_tool_settings": "http://localhost:55630/settings/toolsettings",
+    "url_folder_list": "http://localhost:3002/api/v1/informative/folderlist",
     "url_document_list": "http://localhost:55630/informative/list"
   },
   "documenthandler": {
@@ -75,13 +79,16 @@
     "url_load": "http://localhost:55630/informative/load",
     "url_save": "http://localhost:55630/informative/save",
     "url_create": "http://localhost:55630/informative/create",
+    "url_create_folder": "http://localhost:3002/api/v1/informative/createfolder",
+    "url_folder_list": "http://localhost:3002/api/v1/informative/folderlist",
     "url_delete": "http://localhost:55630/informative/delete",
     "default_coordinate": [320564, 6471766],
     "wms_url": "http://giscloud.se/mapservice/lmproxy/wms/topowebb",
     "wms_layers": "topowebbkartan",
     "list_images": "http://localhost:55630/config/listimage",
     "list_videos": "http://localhost:55630/config/listvideo",
-    "list_audios": "http://localhost:55630/config/listaudio"
+    "list_audios": "http://localhost:55630/config/listaudio",
+    "use_document_folders": false
   },
   "router": [
     { "name": "layermanager", "title": "Lager", "default": true },

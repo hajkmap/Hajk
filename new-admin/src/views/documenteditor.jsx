@@ -115,16 +115,21 @@ class Chapter {
 }
 
 class DocumentEditor extends Component {
-  constructor() {
-    super();
+  constructor(props) {
+    super(props);
     this.state = {
       showModal: false,
       data: undefined,
+      folderData: undefined,
       newChapterName: "",
       newDocumentName: "",
+      newFolderName: "",
       newDocumentMap: "",
       newHeaderIdentifier: "",
+      selectedFolder: '',
+      selectedDocument: '',
       documents: [],
+      folders: [],
       keywords: [],
       geoObjects: [],
       imageList: undefined,
@@ -139,18 +144,20 @@ class DocumentEditor extends Component {
     };
     this.editors = [];
     this.documentTitle = React.createRef();
+    this.useDocumentFolders = this.props.config.use_document_folders ?? false;
   }
 
-  load(document) {
-    this.props.model.loadDocuments((documents) => {
+  load(folder, document) {
+    this.props.model.loadDocuments(folder, (documents) => {
       if (documents.length > 0) {
-        this.props.model.load(document || documents[0], (data) => {
+        this.props.model.load(folder, document || documents[0], (data) => {
           this.setState(
             {
               data: data,
               documents: documents,
               documentTitle: data.title,
               selectedDocument: document || "",
+              selectedFolder: folder,
               tableOfContents: {
                 expanded: data.tableOfContents
                   ? data.tableOfContents.expanded
@@ -200,6 +207,23 @@ class DocumentEditor extends Component {
     });
   }
 
+  changeDoc(event)
+  {
+    this.props.model.loadDocuments(event.target.value, (documents) => {
+      this.setState({ 
+        documents: documents,
+      });
+    })
+  }
+
+  loadFolderList() {
+    this.props.model.loadFolders((data) => {
+      this.setState({ 
+        folders: data,
+      });
+    });
+  }
+
   loadImageList() {
     this.props.model.listImages((data) => {
       this.setState({
@@ -230,10 +254,14 @@ class DocumentEditor extends Component {
     this.loadImageList();
     this.loadVideoList();
     this.loadAudioList();
+    if(this.useDocumentFolders){
+      this.loadFolderList();
+    }
   }
 
   save() {
     this.props.model.save(
+      this.state.selectedFolder,
       this.state.selectedDocument,
       this.state.data,
       (result) => {
@@ -262,8 +290,11 @@ class DocumentEditor extends Component {
       ),
       showAbortButton: true,
       modalConfirmCallback: () => {
-        this.props.model.delete(this.state.selectedDocument, (result) => {
+        this.props.model.delete(this.state.selectedFolder, this.state.selectedDocument, (result) => {
           this.load();
+          this.setState({
+            selectedFolder: '',
+          })
         });
       },
     });
@@ -751,14 +782,25 @@ class DocumentEditor extends Component {
     }
   }
 
-  renderDocuments() {
-    return this.state.documents.map((document, i) => (
-      <option key={i}>{document}</option>
+  renderDocuments(folder) {
+    return this.state.documents
+    .filter(document => document.folder === folder)
+    .map((document, i) => (<option key={i}>{document}</option>));
+  }
+
+   renderFolders() {
+    return this.state.folders.map((folder, i) => (
+      <option key={i}>{folder}</option>
     ));
   }
 
   validateNewDocumentName(value) {
     var valid = value === "" || /^[A-Za-z0-9_]+$/.test(value);
+    return valid;
+  }
+
+  validateNewFolderName(value) {
+    let valid = value === "" || /^[A-Za-z0-9_]+$/.test(value);
     return valid;
   }
 
@@ -797,6 +839,20 @@ class DocumentEditor extends Component {
             }
           }}
         />
+        {this.useDocumentFolders ? (
+        <FormControl fullWidth>
+          <InputLabel shrink>Välj mapp</InputLabel>
+          <NativeSelect
+            onChange={(event) => this.handleFolderChangeNew(event)}
+            value={this.state.newFolderName}
+          >
+            <option value="">
+            Välj en mapp
+            </option>
+            {this.renderFolders()}
+          </NativeSelect>
+        </FormControl>
+        ):null}
 
         <FormControl fullWidth>
           <InputLabel shrink>Välj Karta</InputLabel>
@@ -815,6 +871,45 @@ class DocumentEditor extends Component {
     );
   }
 
+  renderCreateFormFolder() {
+    setTimeout(() => {
+      let i = document.getElementById("new-folder-name");
+      if (i) {
+        i.focus();
+      }
+    }, 50);
+    return (
+      <>
+        <TextField
+          autoFocus
+          id="new-folder-name"
+          label="Mappnamn"
+          margin="normal"
+          InputLabelProps={{
+            shrink: true,
+          }}
+          type="text"
+          defaultValue={this.state.newFolderName}
+          fullWidth
+          onChange={(e) => {
+            if (this.validateNewFolderName(e.target.value)) {
+              this.setState(
+                {
+                  newFolderName: e.target.value,
+                },
+                () => {
+                  this.setState({
+                    modalContent: this.renderCreateFormFolder(),
+                  });
+                }
+              );
+            }
+          }}
+        />
+      </>
+    );
+  }
+
   renderCreateDialog(chapter, parentChapters, index) {
     this.setState({
       showModal: true,
@@ -824,13 +919,36 @@ class DocumentEditor extends Component {
       okButtonText: "Spara",
       modalConfirmCallback: () => {
         var data = {
+          folderName: this.state.newFolderName,
           documentName: this.state.newDocumentName,
           mapName: this.state.newDocumentMap,
         };
         if (data.documentName !== "") {
           this.props.model.createDocument(data, (response) => {
-            this.load(data.documentName);
+            this.load(data.folderName, data.documentName);
           });
+          this.hideModal();
+        }
+      },
+    });
+  }
+
+  renderCreateDialogFolder() {
+    this.setState({
+      showModal: true,
+      showAbortButton: true,
+      modalTitle: "Skapa ny mapp",
+      modalContent: this.renderCreateFormFolder(),
+      okButtonText: "Spara",
+      modalConfirmCallback: () => {
+        var data = {
+          folderName: this.state.newFolderName,
+        };
+        if (data.folderName !== "") {
+          this.props.model.createFolder(data, (response) => {
+            
+          });
+          this.loadFolderList();
           this.hideModal();
         }
       },
@@ -957,29 +1075,102 @@ class DocumentEditor extends Component {
     );
   }
 
+  handleFolderChange = (event) => {
+    this.setState({
+     selectedFolder: event.target.value
+    });
+    this.changeDoc(event);
+ }
+
+  handleFolderChangeNew = (event) => {
+    this.setState({
+      newFolderName: event.target.value
+  }, () => {
+      this.setState({
+          modalContent: this.renderCreateForm()
+      });
+  });
+  }
+
   render() {
     const { classes } = this.props;
     const { selectedDocument, data } = this.state;
+    const { selectedFolder } = this.state;
 
     return (
-      <Grid className={classes.root} id="documentEditor" container>
+      <Grid className={classes.root} id="documentEditor" container xs={7}>
         <Grid className="inset-form" item container>
-          <Typography>
+          <Grid><Typography>
             <strong>Generella dokumentinställningar</strong>
           </Typography>
+          </Grid>
+
+          {this.useDocumentFolders ? (
+          <Grid><Typography><strong>Hantera mappar</strong></Typography>
+              <Typography style={{ fontStyle: 'italic', fontSize: 'smaller' }}>Enskilda dokument till ”Dokumenthanteraren” kan sparas direkt i rot-katalogen ”documents” eller sparas i en undermapp till ”documents”. Observera att det endast går att gruppera undermappar i ett (1) steg.
+                          Vill du spara dokumenten i en undermapp till ”documents” väljer du vilken undermapp det är som du vill spara dokumenten i under ”Välj en mapp” nedan.
+                          Vill du skapa en ny undermapp under ”documents” klickar du på den gröna knappen ”NY MAPP”
+              </Typography>
+          </Grid>
+          ):null}
 
           {this.renderModal()}
+          
+          
           <Grid
             className={classes.gridItemContainer}
             alignContent="center"
             container
             item
           >
+            <Grid className={classes.gridItem} item xs={12}>
+              {this.useDocumentFolders ? (
+              <FormControl>
+                <NativeSelect
+                  onChange={(event) => this.handleFolderChange(event)}
+                  value={selectedFolder}
+                >
+                  <option value="">
+                  Välj en mapp
+                  </option>
+                  {this.renderFolders()}
+                </NativeSelect>
+                <FormHelperText>Välj en befintlig mapp</FormHelperText>
+              </FormControl>
+              ):null}
+              </Grid>
+              <Grid>
+              {this.useDocumentFolders ? (
+              <ColorButtonGreen
+                variant="contained"
+                className="btn"
+                onClick={() => this.renderCreateDialogFolder()}
+                startIcon={<AddBoxIcon />}
+              >
+                Ny mapp
+              </ColorButtonGreen>
+              ):null}
+            </Grid>
+
+            
+
+            <Grid xs={12}>
+              <br></br>
+              <Typography><strong>Hantera dokument</strong></Typography>
+            </Grid>
+            <Grid>
+            {this.useDocumentFolders ? (
+              <Typography style={{ fontStyle: 'italic', fontSize: 'smaller' }}>För att editera eller granska ett redan befintligt dokument väljer du ett dokument i rullgardinslistan ”Välj ett dokument”. Observera att de dokument som visas i listan är endast de dokument som finns sparade under den undermapp du valt ovan till i rot-katalogen ”documents”. Har ingen undermapp valts visas de dokument som finns sparade direkt i rot-katalogen ”documents”.
+              </Typography>
+            ):null}
+            </Grid>
+            </Grid>
+            <Grid>
             <Grid className={classes.gridItem} item>
               <FormControl>
                 <NativeSelect
                   onChange={(e) => {
-                    this.load(e.target.value);
+                    this.load(this.state.selectedFolder, e.target.value);
                   }}
                   value={selectedDocument}
                 >
@@ -1012,6 +1203,7 @@ class DocumentEditor extends Component {
                 Nytt dokument
               </ColorButtonGreen>
             </Grid>
+            
             {selectedDocument && (
               <Grid className={classes.gridItem}>
                 <ColorButtonRed
