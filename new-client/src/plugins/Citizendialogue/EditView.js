@@ -22,6 +22,7 @@ class EditView extends React.PureComponent {
       editFeature: undefined,
       activeStep: 0,
       activeTool: undefined,
+      surveyname: this.props.surveyname,
     };
     this.bindSubscriptions();
   }
@@ -164,7 +165,8 @@ class EditView extends React.PureComponent {
 
   onSaveClicked = () => {
     const { model, app } = this.props;
-    model.save((response) => {
+    const surveyname = this.props;
+    model.save(surveyname, (response) => {
       if (
         response &&
         (response.ExceptionReport || !response.TransactionResponse)

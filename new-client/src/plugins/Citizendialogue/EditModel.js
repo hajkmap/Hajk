@@ -159,7 +159,8 @@ class EditModel {
     }
   }
 
-  save(done) {
+  save(surveyname, done) {
+    console.log(surveyname);
     const find = (mode) =>
       this.vectorSource
         .getFeatures()

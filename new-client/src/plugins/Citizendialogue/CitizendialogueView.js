@@ -169,7 +169,7 @@ function CitizendialogueView(props) {
     sources: [],
     // ... other default properties you might want
   };
-
+  console.log(props.options);
   const [editModel] = React.useState(
     () =>
       new EditModel({
@@ -216,14 +216,14 @@ function CitizendialogueView(props) {
     );
   }
 
-  const [enkätData] = React.useState({
+  const [surveyjsData] = React.useState({
     enkatnamn: "Rynningeviken1",
     svarsID: generateUniqueID(),
   });
 
   //Combine ID/Name and surveydata
   const handleOnComplete = (survey) => {
-    const combinedData = { ...enkätData, ...survey.data };
+    const combinedData = { ...surveyjsData, ...survey.data };
     props.model.handleOnComplete(combinedData);
   };
 
@@ -242,7 +242,12 @@ function CitizendialogueView(props) {
       </Button>
 
       {showEditView && (
-        <EditView app={props.app} model={editModel} observer={localObserver} />
+        <EditView
+          app={props.app}
+          model={editModel}
+          observer={localObserver}
+          surveyname={surveyjsData.enkatnamn}
+        />
       )}
     </>
   );

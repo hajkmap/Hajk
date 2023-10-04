@@ -189,6 +189,7 @@ function Citizendialogue(props) {
         {/* This is the child object of BaseWindowPlugin. It will be displayed
             as content inside the plugin's window. */}
         <CitizendialogueView
+          {...props}
           // Here we send some props to the plugin's View.
           // Make sure to ONLY include props that are ACTUALLY USED in the View.
           model={citizendialogueModel} // We can supply our model
