@@ -56,9 +56,7 @@ const FeaturesListView = (props) => {
           {featureCollection.displayName}
         </Typography>
         <Divider />
-        <List
-          sx={{ width: "100%", maxWidth: 360, bgcolor: "background.paper" }}
-        >
+        <List>
           {featureCollection.features.map((f, i) => {
             // Let's see if there's a property with the special name (non-configurable for now).
             // If yes, we'll use the color to style the feature's background color in list. See #1385.
