@@ -9,9 +9,12 @@ import {
   DialogTitle,
   List,
   ListItem,
+  ListItemIcon,
   ListItemText,
   Typography,
 } from "@mui/material";
+
+import CheckBoxIcon from "@mui/icons-material/CheckBox";
 
 export default function ReportDialog({
   reportDialogVisible,
@@ -124,14 +127,17 @@ export default function ReportDialog({
       >
         <DialogTitle>Granskningsrapport {currentPropertyName}</DialogTitle>
         <DialogContent>
-          <DialogContentText>
+          <Typography gutterBottom>
             Granskning har gjorts mot följande kartlager:
-          </DialogContentText>
+          </Typography>
           <List>
             {controlledLayers.map((l, key) => {
               return (
                 l.propertyName === currentPropertyName && (
                   <ListItem key={key}>
+                    <ListItemIcon>
+                      <CheckBoxIcon />
+                    </ListItemIcon>
                     <ListItemText secondary={l.subcaption}>
                       {l.caption}
                     </ListItemText>
@@ -140,11 +146,11 @@ export default function ReportDialog({
               );
             })}
           </List>
-          <DialogContentText>{getUserDetailsText()}</DialogContentText>
-          <DialogContentText>
+          <Typography gutterBottom>{getUserDetailsText()}</Typography>
+          <Typography gutterBottom>
             Rapporten utgår från data som var känd per{" "}
             {new Date().toLocaleDateString("sv-SE")}.
-          </DialogContentText>
+          </Typography>
         </DialogContent>
         <DialogActions>
           <Button color="success" variant="contained" onClick={copyToClipboard}>
