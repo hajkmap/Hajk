@@ -15,15 +15,29 @@ class InformativeService {
    * @returns {object} JSON representation of document
    * @memberof InformativeService
    */
-  async getByName(file) {
+  async getByName(folder, file) {
     try {
-      file += ".json";
-      // Open file containing our store
-      const pathToFile = path.join(process.cwd(), "App_Data/documents", file);
-      const text = await fs.promises.readFile(pathToFile, "utf-8");
-      // Parse the file content so we get an object
-      const json = await JSON.parse(text);
-      return json;
+      if (folder) {
+        file += ".json";
+        // Open file containing our store
+        const pathToFile = path.join(
+          process.cwd(),
+          "App_Data/documents/" + folder,
+          file
+        );
+        const text = await fs.promises.readFile(pathToFile, "utf-8");
+        // Parse the file content so we get an object
+        const json = await JSON.parse(text);
+        return json;
+      } else {
+        file += ".json";
+        // Open file containing our store
+        const pathToFile = path.join(process.cwd(), "App_Data/documents", file);
+        const text = await fs.promises.readFile(pathToFile, "utf-8");
+        // Parse the file content so we get an object
+        const json = await JSON.parse(text);
+        return json;
+      }
     } catch (error) {
       logger.warn(
         `Error while opening informative document "${file}". Sent 404 Not Found as response. Original error below.`
@@ -41,17 +55,26 @@ class InformativeService {
    * @returns
    * @memberof InformativeService
    */
-  async create(documentName, mapName) {
+  async create(documentName, mapName, folderName) {
     try {
       // Add desired file extension to our file's name…
       documentName += ".json";
 
       // …and create a new path to that file.
-      const pathToFile = path.join(
-        process.cwd(),
-        "App_Data/documents",
-        documentName
-      );
+      var pathToFile = "";
+      if (folderName) {
+        pathToFile = path.join(
+          process.cwd(),
+          "App_Data/documents" + "/" + folderName,
+          documentName
+        );
+      } else {
+        pathToFile = path.join(
+          process.cwd(),
+          "App_Data/documents",
+          documentName
+        );
+      }
 
       // Prepare the contents of our new documents file
       const json = {
@@ -72,6 +95,36 @@ class InformativeService {
   }
 
   /**
+   * @summary Create a new, empty folder.
+   *
+   * @param {*} folderName to be created
+   * @returns
+   * @memberof InformativeService
+   */
+  async createFolder(folderName) {
+    try {
+      const foldern = {
+        foldername: folderName, // Return
+      };
+      // …and create a new path to that folder.
+      const pathToFolder = path.join(
+        process.cwd(),
+        "App_Data/documents",
+        folderName
+      );
+      console.log(pathToFolder);
+      if (!fs.existsSync(pathToFolder)) {
+        fs.promises.mkdir(pathToFolder);
+        return foldern;
+      } else {
+        return foldern;
+      }
+    } catch (error) {
+      return { error };
+    }
+  }
+
+  /**
    * @summary Replace contents of the specified documents file with the incoming body.
    *
    * @param {*} file Name of the document to be replaced (without file extension)
@@ -79,35 +132,68 @@ class InformativeService {
    * @returns
    * @memberof InformativeService
    */
-  async saveByName(file, body) {
+  async saveByName(folder, file, body) {
     try {
-      file += ".json";
-      // Prepare the path to our file
-      const pathToFile = path.join(process.cwd(), "App_Data/documents", file);
+      if (folder) {
+        file += ".json";
+        // Prepare the path to our file
+        const pathToFile = path.join(
+          process.cwd(),
+          "App_Data/documents/" + folder,
+          file
+        );
 
-      // Simple way to verify we've got valid JSON: try parsing it.
-      const json = JSON.parse(body);
+        // Simple way to verify we've got valid JSON: try parsing it.
+        const json = JSON.parse(body);
 
-      // If parsing was successful, convert back to string,
-      // using 2 spaces as indentation
-      const jsonString = JSON.stringify(json, null, 2);
+        // If parsing was successful, convert back to string,
+        // using 2 spaces as indentation
+        const jsonString = JSON.stringify(json, null, 2);
 
-      // Write to file
-      await fs.promises.writeFile(pathToFile, jsonString);
+        // Write to file
+        await fs.promises.writeFile(pathToFile, jsonString);
 
-      // Return the parsed JSON object
-      return jsonString;
+        // Return the parsed JSON object
+        return jsonString;
+      } else {
+        file += ".json";
+        // Prepare the path to our file
+        const pathToFile = path.join(process.cwd(), "App_Data/documents", file);
+
+        // Simple way to verify we've got valid JSON: try parsing it.
+        const json = JSON.parse(body);
+
+        // If parsing was successful, convert back to string,
+        // using 2 spaces as indentation
+        const jsonString = JSON.stringify(json, null, 2);
+
+        // Write to file
+        await fs.promises.writeFile(pathToFile, jsonString);
+
+        // Return the parsed JSON object
+        return jsonString;
+      }
     } catch (error) {
       return { error };
     }
   }
 
-  async deleteByName(file) {
+  async deleteByName(folder, file) {
     try {
-      file += ".json";
-      // Prepare the path to our file
-      const pathToFile = path.join(process.cwd(), "App_Data/documents", file);
-
+      var pathToFile = "";
+      if (folder) {
+        file += ".json";
+        // Prepare the path to our file
+        pathToFile = path.join(
+          process.cwd(),
+          "App_Data/documents/" + folder,
+          file
+        );
+      } else {
+        file += ".json";
+        // Prepare the path to our file
+        pathToFile = path.join(process.cwd(), "App_Data/documents", file);
+      }
       // Just drop the specified file…
       await fs.promises.unlink(pathToFile);
 
@@ -124,10 +210,16 @@ class InformativeService {
    * @returns {array} Names of files as array of strings
    * @memberof InformativeService
    */
-  async getAvailableDocuments() {
+  async getAvailableDocuments(foldername) {
     try {
-      const dir = path.join(process.cwd(), "App_Data", "documents");
-      // List dir contents, the second parameter will ensure we get Dirent objects
+      var dir = "";
+      if (foldername) {
+        dir = path.join(process.cwd(), "App_Data", "documents", foldername);
+      } else {
+        dir = path.join(process.cwd(), "App_Data", "documents");
+      }
+      //const dir = path.join(process.cwd(), "App_Data", "documents", "Tomas");
+
       const dirContents = await fs.promises.readdir(dir, {
         withFileTypes: true,
       });
@@ -142,6 +234,21 @@ class InformativeService {
         // Create an array using name of each Dirent object, remove file extension
         .map((entry) => entry.name.replace(".json", ""));
       return availableDocuments;
+    } catch (error) {
+      return { error };
+    }
+  }
+
+  async getAvailableFolders() {
+    try {
+      const dir = path.join(process.cwd(), "App_Data", "documents");
+      const dirContents = await fs.promises.readdir(dir, {
+        withFileTypes: true,
+      });
+      const availableFolders = dirContents
+        .filter((entry) => entry.isDirectory())
+        .map((entry) => entry.name);
+      return availableFolders;
     } catch (error) {
       return { error };
     }
