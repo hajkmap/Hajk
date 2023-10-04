@@ -78,9 +78,9 @@ namespace MapService.Business.Ad
             get { return ConfigurationUtility.GetSectionArray("ActiveDirectory:TrustedProxyIPs"); }
         }
 
-        private static string BaseDN
+        private static IEnumerable<string> BaseDNs
         {
-            get { return ConfigurationUtility.GetSectionItem("ActiveDirectory:BaseDN"); }
+            get { return ConfigurationUtility.GetSectionArray("ActiveDirectory:BaseDNs"); }
         }
 
         private static IEnumerable<string> Groups
@@ -93,9 +93,9 @@ namespace MapService.Business.Ad
             get { return ConfigurationUtility.GetSectionItem("ActiveDirectory:UsernameKey"); }
         }
 
-        private static DirectorySearcher CreateDirectorySearcher()
+        private static DirectorySearcher CreateDirectorySearcher(string baseDN)
         {
-            var path = Url + @"/" + BaseDN;
+            var path = Url + @"/" + baseDN;
 
             var directoryEntry = new DirectoryEntry(path, Username, Password);
             var directorySearcher = new DirectorySearcher(directoryEntry);
@@ -109,11 +109,11 @@ namespace MapService.Business.Ad
 
             if (!_adCache.GetAdUsers().ContainsKey(userIdentity))
             {
-                var adUser = GetUserFromAd(userIdentity);
+                var adUser = GetUserFromAd(userIdentity, _logger);
 
                 _adCache.SetUser(userIdentity, adUser);
 
-                var adGroupsForUser = GetGroupsForUserFromAd(adUser.DistinguishedName);
+                var adGroupsForUser = GetGroupsForUserFromAd(adUser.DistinguishedName, _logger);
 
                 _adCache.SetGroupsPerUser(userIdentity, adGroupsForUser);
             }
@@ -123,36 +123,43 @@ namespace MapService.Business.Ad
             return user;
         }
 
-        private static AdUser GetUserFromAd(string? userIdentity)
+        private static AdUser GetUserFromAd(string? userIdentity, ILogger _logger)
         {
             var user = new AdUser();
 
             if (string.IsNullOrEmpty(userIdentity)) { return user; }
 
-            var directorySearcher = CreateDirectorySearcher();
-
-            directorySearcher.Filter = string.Format("(&(objectClass=user)(" + UserNameKey + "={0}))", userIdentity);
-
-            directorySearcher.PropertiesToLoad.Add("distinguishedname");
-            directorySearcher.PropertiesToLoad.Add("userprincipalname");
-            directorySearcher.PropertiesToLoad.Add("samaccountname");
-            directorySearcher.PropertiesToLoad.Add("mail");
-            directorySearcher.PropertiesToLoad.Add("whencreated");
-            directorySearcher.PropertiesToLoad.Add("pwdlastset");
-            directorySearcher.PropertiesToLoad.Add("useraccountcontrol");
-            directorySearcher.PropertiesToLoad.Add("sn");
-            directorySearcher.PropertiesToLoad.Add("givenname");
-            directorySearcher.PropertiesToLoad.Add("cn");
-            directorySearcher.PropertiesToLoad.Add("displayname");
-
             SearchResult? searchResultUser = null;
 
-            try
+            foreach (var baseDN in BaseDNs)
             {
-                searchResultUser = directorySearcher.FindOne();
-            }
-            catch
-            {
+                var directorySearcher = CreateDirectorySearcher(baseDN);
+                _logger.LogDebug(string.Format("Searching '{0}' to find user '{1}'", baseDN, userIdentity));
+
+                directorySearcher.Filter = string.Format("(&(objectClass=user)(" + UserNameKey + "={0}))", userIdentity);
+
+                directorySearcher.PropertiesToLoad.Add("distinguishedname");
+                directorySearcher.PropertiesToLoad.Add("userprincipalname");
+                directorySearcher.PropertiesToLoad.Add("samaccountname");
+                directorySearcher.PropertiesToLoad.Add("mail");
+                directorySearcher.PropertiesToLoad.Add("whencreated");
+                directorySearcher.PropertiesToLoad.Add("pwdlastset");
+                directorySearcher.PropertiesToLoad.Add("useraccountcontrol");
+                directorySearcher.PropertiesToLoad.Add("sn");
+                directorySearcher.PropertiesToLoad.Add("givenname");
+                directorySearcher.PropertiesToLoad.Add("cn");
+                directorySearcher.PropertiesToLoad.Add("displayname");
+
+                try
+                {
+                    searchResultUser = directorySearcher.FindOne();
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogDebug(string.Format( "Error looking for user '{0}' in BaseDN '{1}': {2}", userIdentity, baseDN, ex.Message));
+                }
+                if (searchResultUser != null)
+                    break;
             }
 
             if (searchResultUser != null)
@@ -173,72 +180,103 @@ namespace MapService.Business.Ad
                     DisplayName = searchResultUser.Properties["displayname"][0].ToString(),
                 };
             }
+            else
+                _logger.LogError(string.Format("User '{0}' not found in any BaseDNs. Increase logging to 'Debug' to see error messages.", userIdentity));
 
             return user;
         }
 
-        private static IEnumerable<AdGroup> GetGroupsFromAd()
+        private static IEnumerable<AdGroup> GetGroupsFromAd(ILogger _logger)
         {
             var groups = new List<AdGroup>();
 
-            var directorySearcher = CreateDirectorySearcher();
-
-            directorySearcher.Sort = new SortOption("cn", SortDirection.Ascending);
-
-            directorySearcher.PropertiesToLoad.Add("cn");
-            directorySearcher.PropertiesToLoad.Add("distinguishedname");
-
-            directorySearcher.Filter = "(&(objectCategory=Group))";
-
-            var results = directorySearcher.FindAll();
-
-            if (results != null)
+            foreach (var baseDN in BaseDNs)
             {
-                foreach (SearchResult searchResult in results)
-                {
-                    var adGroup = new AdGroup
-                    {
-                        Dn = searchResult.Properties["distinguishedname"][0].ToString(),
-                        Cn = searchResult.Properties["cn"][0].ToString(),
-                        DistinguishedName = searchResult.Properties["distinguishedname"][0].ToString(),
-                    };
+                var directorySearcher = CreateDirectorySearcher(baseDN);
+                _logger.LogDebug(string.Format("Searching '{0}' for groups", baseDN));
 
-                    groups.Add(adGroup);
+                directorySearcher.Sort = new SortOption("cn", SortDirection.Ascending);
+
+                directorySearcher.PropertiesToLoad.Add("cn");
+                directorySearcher.PropertiesToLoad.Add("distinguishedname");
+
+                directorySearcher.Filter = "(&(objectCategory=Group))";
+
+                SearchResultCollection? results = null;
+                try
+                {
+                    results = directorySearcher.FindAll();
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogDebug(string.Format("Error searching for groups in BaseDN '{0}': {1}", baseDN, ex.Message));
+                }
+
+                if (results != null)
+                {
+                    foreach (SearchResult searchResult in results)
+                    {
+                        var adGroup = new AdGroup
+                        {
+                            Dn = searchResult.Properties["distinguishedname"][0].ToString(),
+                            Cn = searchResult.Properties["cn"][0].ToString(),
+                            DistinguishedName = searchResult.Properties["distinguishedname"][0].ToString(),
+                        };
+
+                        groups.Add(adGroup);
+                    }
                 }
             }
 
             return groups;
         }
 
-        private static IEnumerable<AdGroup> GetGroupsForUserFromAd(string? distinguishedName)
+        private static IEnumerable<AdGroup> GetGroupsForUserFromAd(string? distinguishedName, ILogger _logger)
         {
             var groups = new List<AdGroup>();
 
             if (string.IsNullOrEmpty(distinguishedName)) { return groups; }
 
-            var directorySearcher = CreateDirectorySearcher();
-
-            directorySearcher.Sort = new SortOption("cn", SortDirection.Ascending);
-
-            directorySearcher.PropertiesToLoad.Add("cn");
-            directorySearcher.PropertiesToLoad.Add("distinguishedname");
-
-            directorySearcher.Filter = string.Format("(&(objectCategory=Group)(member={0}))", distinguishedName);
-
-            var results = directorySearcher.FindAll();
-
-            if (results != null)
+            foreach (var baseDN in BaseDNs)
             {
-                foreach (SearchResult searchResult in results)
-                {
-                    var adGroup = new AdGroup
-                    {
-                        Dn = searchResult.Properties["distinguishedname"][0].ToString(),
-                        Cn = searchResult.Properties["cn"][0].ToString(),
-                        DistinguishedName = searchResult.Properties["distinguishedname"][0].ToString(),
-                    };
+                var directorySearcher = CreateDirectorySearcher(baseDN);
+                _logger.LogDebug(string.Format("Searching '{0}' for groups for user '{1}", baseDN, distinguishedName));
 
-                    groups.Add(adGroup);
+                directorySearcher.Sort = new SortOption("cn", SortDirection.Ascending);
+
+                directorySearcher.PropertiesToLoad.Add("cn");
+                directorySearcher.PropertiesToLoad.Add("distinguishedname");
+
+                directorySearcher.Filter = string.Format("(&(objectCategory=Group)(member={0}))", distinguishedName);
+
+                SearchResultCollection? results = null;                    
+
+                try
+                {
+                    results = directorySearcher.FindAll();
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogDebug(string.Format("Error searching for groups for user '{0}' in BaseDN '{1}': {2}", distinguishedName, baseDN, ex.Message));
+                }
+
+                if (results != null)
+                {
+                    _logger.LogDebug(string.Format("User '{0}' has following groups:", distinguishedName));
+
+                    foreach (SearchResult searchResult in results)
+                    {
+                        var adGroup = new AdGroup
+                        {
+                            Dn = searchResult.Properties["distinguishedname"][0].ToString(),
+                            Cn = searchResult.Properties["cn"][0].ToString(),
+                            DistinguishedName = searchResult.Properties["distinguishedname"][0].ToString(),
+                        };
+
+                        _logger.LogDebug(string.Format("Group '{0}'", adGroup.Cn));
+
+                        groups.Add(adGroup);
+                    }
                 }
             }
 
@@ -320,34 +358,38 @@ namespace MapService.Business.Ad
             return false;
         }
 
-        internal static bool UserHasAdAccess(string? userIdentity)
+        internal static bool UserHasAdAccess(string? userIdentity, ILogger _logger)
         {
             if (string.IsNullOrEmpty(userIdentity)) { return false; }
 
-            var directorySearcher = CreateDirectorySearcher();
-
-            directorySearcher.PropertiesToLoad.Add("distinguishedname");
-
-            foreach (var group in Groups)
+            foreach (var baseDN in BaseDNs)
             {
-                directorySearcher.Filter = string.Format("(&(objectCategory=Group)(name={0}))", group);
+                var directorySearcher = CreateDirectorySearcher(baseDN);
+                _logger.LogDebug(string.Format("Searching '{0}' to see if {1} is a member", baseDN, userIdentity));
 
-                var searchResultGroup = directorySearcher.FindOne();
+                directorySearcher.PropertiesToLoad.Add("distinguishedname");
 
-                if (searchResultGroup != null)
+                foreach (var group in Groups)
                 {
-                    var distinguishedGroupName = searchResultGroup.Properties["distinguishedname"][0].ToString();
+                    directorySearcher.Filter = string.Format("(&(objectCategory=Group)(name={0}))", group);
 
-                    directorySearcher.Filter = string.Format("(&(objectClass=user)(" + UserNameKey + "={0})(memberOf={1}))", userIdentity, distinguishedGroupName);
-                    directorySearcher.PropertiesToLoad.Add("userprincipalname");
+                    var searchResultGroup = directorySearcher.FindOne();
 
-                    var searchResultUserInGroup = directorySearcher.FindOne();
-
-                    if (searchResultUserInGroup != null)
+                    if (searchResultGroup != null)
                     {
-                        if (searchResultUserInGroup.Properties[UserNameKey][0].ToString() == userIdentity)
+                        var distinguishedGroupName = searchResultGroup.Properties["distinguishedname"][0].ToString();
+
+                        directorySearcher.Filter = string.Format("(&(objectClass=user)(" + UserNameKey + "={0})(memberOf={1}))", userIdentity, distinguishedGroupName);
+                        directorySearcher.PropertiesToLoad.Add("userprincipalname");
+
+                        var searchResultUserInGroup = directorySearcher.FindOne();
+
+                        if (searchResultUserInGroup != null)
                         {
-                            return true;
+                            if (searchResultUserInGroup.Properties[UserNameKey][0].ToString() == userIdentity)
+                            {
+                                return true;
+                            }
                         }
                     }
                 }
@@ -362,7 +404,7 @@ namespace MapService.Business.Ad
 
             if (!adGroups.Any())
             {
-                adGroups = GetGroupsFromAd();
+                adGroups = GetGroupsFromAd(_logger);
 
                 _adCache.SetGroups(adGroups);
             }

@@ -253,7 +253,7 @@ namespace MapService.Controllers
 
                     userPrincipalName = adHandler.PickUserNameToUse(Request, userPrincipalName);
 
-                    if (!adHandler.UserIsValid(userPrincipalName) || !AdHandler.UserHasAdAccess(userPrincipalName))
+                    if (!adHandler.UserIsValid(userPrincipalName) || !AdHandler.UserHasAdAccess(userPrincipalName, _logger))
                     {
                         return StatusCode(StatusCodes.Status403Forbidden, "Forbidden");
                     }
@@ -365,7 +365,7 @@ namespace MapService.Controllers
 
                     userPrincipalName = adHandler.PickUserNameToUse(Request, userPrincipalName);
 
-                    if (!adHandler.UserIsValid(userPrincipalName) || !AdHandler.UserHasAdAccess(userPrincipalName))
+                    if (!adHandler.UserIsValid(userPrincipalName) || !AdHandler.UserHasAdAccess(userPrincipalName, _logger))
                     {
                         return StatusCode(StatusCodes.Status403Forbidden, "Forbidden");
                     }
@@ -419,7 +419,7 @@ namespace MapService.Controllers
 
                     userPrincipalName = adHandler.PickUserNameToUse(Request, userPrincipalName);
 
-                    if (!adHandler.UserIsValid(userPrincipalName) || !AdHandler.UserHasAdAccess(userPrincipalName))
+                    if (!adHandler.UserIsValid(userPrincipalName) || !AdHandler.UserHasAdAccess(userPrincipalName, _logger))
                     {
                         return StatusCode(StatusCodes.Status403Forbidden, "Forbidden");
                     }
@@ -474,7 +474,7 @@ namespace MapService.Controllers
 
                     userPrincipalName = adHandler.PickUserNameToUse(Request, userPrincipalName);
 
-                    if (!adHandler.UserIsValid(userPrincipalName) || !AdHandler.UserHasAdAccess(userPrincipalName))
+                    if (!adHandler.UserIsValid(userPrincipalName) || !AdHandler.UserHasAdAccess(userPrincipalName, _logger))
                     {
                         return StatusCode(StatusCodes.Status403Forbidden, "Forbidden");
                     }
@@ -529,7 +529,7 @@ namespace MapService.Controllers
 
                     userPrincipalName = adHandler.PickUserNameToUse(Request, userPrincipalName);
 
-                    if (!adHandler.UserIsValid(userPrincipalName) || !AdHandler.UserHasAdAccess(userPrincipalName))
+                    if (!adHandler.UserIsValid(userPrincipalName) || !AdHandler.UserHasAdAccess(userPrincipalName, _logger))
                     {
                         return StatusCode(StatusCodes.Status403Forbidden, "Forbidden");
                     }
@@ -583,7 +583,7 @@ namespace MapService.Controllers
 
                     userPrincipalName = adHandler.PickUserNameToUse(Request, userPrincipalName);
 
-                    if (!adHandler.UserIsValid(userPrincipalName) || !AdHandler.UserHasAdAccess(userPrincipalName))
+                    if (!adHandler.UserIsValid(userPrincipalName) || !AdHandler.UserHasAdAccess(userPrincipalName, _logger))
                     {
                         return StatusCode(StatusCodes.Status403Forbidden, "Forbidden");
                     }
