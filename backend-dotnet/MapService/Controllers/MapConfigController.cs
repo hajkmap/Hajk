@@ -83,9 +83,9 @@ namespace MapService.Controllers
         }
 
         /// <remarks>
-        /// Gets a map as a JsonObject
+        /// Fetch contents of a map configuration.
         /// </remarks>
-        /// <param name="map">The name of the map including the file ending</param>
+        /// <param name="map">The name of the map</param>
         /// <param name="userPrincipalName">User name that will be supplied to AD. This header can be configured by the administrator to be named something other than X-Control-Header.</param>
         /// <returns>Returns a map as a JsonObject</returns>
         /// <response code="200">The map object fetched successfully</response>
@@ -521,10 +521,10 @@ namespace MapService.Controllers
         }
 
         /// <remarks>
-        /// Exports a map with all available layers in a human-readable format
+        /// Exports layers of the map in a human-readable format. If the parameter map is given the value 'layer.json', the layers of that file is returned. If the parameter map is given any other value, the base layers and group layers of that map configuration is returned.
         /// </remarks>
-        /// <param name="map">The name of the map excluding the file ending</param>
-        /// <param name="format">Only Json-format is supported</param>
+        /// <param name="map">Name of the map to fetch</param>
+        /// <param name="format">The format of what's exported. Always 'json'</param>
         /// <param name="userPrincipalName">User name that will be supplied to AD. This header can be configured by the administrator to be named something other than X-Control-Header.</param>
         /// <returns>Returns a map as a JsonObject</returns>
         /// <response code="200">The map object fetched successfully</response>

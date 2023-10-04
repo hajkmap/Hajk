@@ -24,6 +24,9 @@ namespace MapService.Controllers
             _logger = logger;
         }
 
+        /// <remarks>
+        /// Return all available documents
+        /// </remarks>
         /// <param name="userPrincipalName">User name that will be supplied to AD. This header can be configured by the administrator to be named something other than X-Control-Header.</param>
         /// <response code="200">Return all available documents</response>
         /// <response code="403">Forbidden</response>
@@ -77,6 +80,9 @@ namespace MapService.Controllers
             return StatusCode(StatusCodes.Status200OK, documentList);
         }
 
+        /// <remarks>
+        /// Return available documents of a map
+        /// </remarks>
         /// <param name="name">Name of the map for which connected documents will be returned</param>
         /// <param name="userPrincipalName">User name that will be supplied to AD. This header can be configured by the administrator to be named something other than X-Control-Header.</param>
         /// <response code="200">Return available documents for the specified map</response>
@@ -131,6 +137,9 @@ namespace MapService.Controllers
             return StatusCode(StatusCodes.Status200OK, documentList);
         }
 
+        /// <remarks>
+        /// Fetch contents of the whole document.
+        /// </remarks>
         /// <param name="document">Name of the document to be fetched</param>
         /// <param name="userPrincipalName">User name that will be supplied to AD. This header can be configured by the administrator to be named something other than X-Control-Header.</param>
         /// <response code="200">Return the JSON file</response>
@@ -183,6 +192,9 @@ namespace MapService.Controllers
             return StatusCode(StatusCodes.Status200OK, documentAsJson);
         }
 
+        /// <remarks>
+        /// Create a new map configuration
+        /// </remarks>
         /// <param name="requestBody">The name of the document and the map</param>
         /// <param name="userPrincipalName">User name that will be supplied to AD. This header can be configured by the administrator to be named something other than X-Control-Header.</param>
         /// <response code="204">All good</response>
@@ -235,6 +247,9 @@ namespace MapService.Controllers
             return StatusCode(StatusCodes.Status204NoContent);
         }
 
+        /// <remarks>
+        /// Create a new map configuration
+        /// </remarks>
         /// <param name="requestBody">The name of the document and the map</param>
         /// <param name="userPrincipalName">User name that will be supplied to AD. This header can be configured by the administrator to be named something other than X-Control-Header.</param>
         /// <response code="204">All good</response>
