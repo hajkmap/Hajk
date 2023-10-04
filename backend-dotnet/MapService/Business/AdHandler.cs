@@ -299,6 +299,8 @@ namespace MapService.Business.Ad
 
         public bool RequestComesFromAcceptedIp(HttpContext httpContext)
         {
+            if (IdentifyUserWithWindowsAuthentication) // Allow access from any IP if Windows Authentication is used
+                return true;
             string? remoteIpAddress = GetRemoteIpAddress(httpContext);
             if (TrustedProxyIPs.Contains(remoteIpAddress))
             {
@@ -309,6 +311,8 @@ namespace MapService.Business.Ad
 
         internal bool IpRangeRestrictionIsSet()
         {
+            if (IdentifyUserWithWindowsAuthentication) // Don't bother if Windows Authentication is used
+                return true;
             if (TrustedProxyIPs != null)
             {
                 return true;
