@@ -22,7 +22,9 @@ class InformativeService {
         // Open file containing our store
         const pathToFile = path.join(
           process.cwd(),
-          "App_Data/documents/" + folder,
+          "App_Data",
+          "documents",
+          folder,
           file
         );
         const text = await fs.promises.readFile(pathToFile, "utf-8");
@@ -32,7 +34,12 @@ class InformativeService {
       } else {
         file += ".json";
         // Open file containing our store
-        const pathToFile = path.join(process.cwd(), "App_Data/documents", file);
+        const pathToFile = path.join(
+          process.cwd(),
+          "App_Data",
+          "documents",
+          file
+        );
         const text = await fs.promises.readFile(pathToFile, "utf-8");
         // Parse the file content so we get an object
         const json = await JSON.parse(text);
@@ -65,13 +72,16 @@ class InformativeService {
       if (folderName) {
         pathToFile = path.join(
           process.cwd(),
-          "App_Data/documents" + "/" + folderName,
+          "App_Data",
+          "documents",
+          folderName,
           documentName
         );
       } else {
         pathToFile = path.join(
           process.cwd(),
-          "App_Data/documents",
+          "App_Data",
+          "documents",
           documentName
         );
       }
@@ -109,7 +119,8 @@ class InformativeService {
       // …and create a new path to that folder.
       const pathToFolder = path.join(
         process.cwd(),
-        "App_Data/documents",
+        "App_Data",
+        "documents",
         folderName
       );
       console.log(pathToFolder);
@@ -139,7 +150,9 @@ class InformativeService {
         // Prepare the path to our file
         const pathToFile = path.join(
           process.cwd(),
-          "App_Data/documents/" + folder,
+          "App_Data",
+          "documents",
+          folder,
           file
         );
 
@@ -186,13 +199,15 @@ class InformativeService {
         // Prepare the path to our file
         pathToFile = path.join(
           process.cwd(),
-          "App_Data/documents/" + folder,
+          "App_Data",
+          "documents",
+          folder,
           file
         );
       } else {
         file += ".json";
         // Prepare the path to our file
-        pathToFile = path.join(process.cwd(), "App_Data/documents", file);
+        pathToFile = path.join(process.cwd(), "App_Data", "documents", file);
       }
       // Just drop the specified file…
       await fs.promises.unlink(pathToFile);
