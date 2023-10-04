@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - It's now possible to have other target than `_blank` for links in infoclick. [#1388](https://github.com/hajkmap/Hajk/issues/1388)
+- Removed the 360px width limit in MapClickViewer lists. [#1411](https://github.com/hajkmap/Hajk/issues/1411)
 
 ## [3.13.12] - 2023-09-22
 
