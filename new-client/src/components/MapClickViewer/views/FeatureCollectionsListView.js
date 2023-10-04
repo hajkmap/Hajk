@@ -15,7 +15,7 @@ const FeatureCollectionsListView = (props) => {
   } = props;
 
   return (
-    <List sx={{ width: "100%", maxWidth: 360, bgcolor: "background.paper" }}>
+    <List>
       {featureCollections.map((fc, i) => {
         return (
           <ListItemButton
