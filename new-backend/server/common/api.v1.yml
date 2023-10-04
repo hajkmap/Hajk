@@ -45,30 +45,6 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Error"
-  /informative/load/{folder}/{name}:
-    get:
-      tags:
-        - Client-accessible
-      parameters:
-        - name: name
-          in: path
-          description: Name of the document to be fetched
-          required: true
-          schema:
-            type: string
-      responses:
-        200:
-          description: Return the JSON file
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/DocumentBody"
-        5XX:
-          description: Example not found
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Error"
   /informative/create:
     post:
       tags:
@@ -76,39 +52,6 @@ paths:
       responses:
         200:
           description: Create a document connected to a specified map (OBSOLETE)
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/InformativeDocumentCreateBody"
-        5XX:
-          description: Internal server error
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Error"
-  /informative/createfolder:
-    post:
-      tags:
-        - Admin - Informative/DocumentHandler
-      responses:
-        200:
-          description: Create a folder
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/InformativeCreateFolder"
-        5XX:
-          description: Internal server error
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Error"
-    put:
-      tags:
-        - Admin - Informative/DocumentHandler
-      responses:
-        200:
-          description: Create a document connected to a specified map
           content:
             application/json:
               schema:
@@ -130,40 +73,6 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/DocumentsList"
-        5XX:
-          description: Internal server error
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Error"
-  /informative/list/{folder}:
-    get:
-      tags:
-        - Admin - Informative/DocumentHandler
-      responses:
-        200:
-          description: Return all available documents
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Informativedocumentfolderlist"
-        5XX:
-          description: Internal server error
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Error"
-  /informative/folderlist:
-    get:
-      tags:
-        - Admin - Informative/DocumentHandler
-      responses:
-        200:
-          description: Return all available documents
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Informativelistfolders"
         5XX:
           description: Internal server error
           content:
@@ -218,79 +127,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Error"
-  /informative/save/{folder}/{name}:
-    post:
-      deprecated: true
-      tags:
-        - Admin - Informative/DocumentHandler
-      parameters:
-        - name: name
-          in: path
-          description: Document to be saved
-          required: true
-          schema:
-            type: string
-      responses:
-        200:
-          description: Return the saved document's body
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/DocumentsList"
-        5XX:
-          description: Internal server error
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Error"
-    put:
-      tags:
-        - Admin - Informative/DocumentHandler
-      parameters:
-        - name: name
-          in: path
-          description: Document to be saved
-          required: true
-          schema:
-            type: string
-      responses:
-        200:
-          description: Return the saved document's body
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/DocumentsList"
-        5XX:
-          description: Internal server error
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Error"
   /informative/delete/{name}:
-    delete:
-      tags:
-        - Admin - Informative/DocumentHandler
-      parameters:
-        - name: name
-          in: path
-          description: Document to deleted
-          required: true
-          schema:
-            type: string
-      responses:
-        200:
-          description: Delete the specified document
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/DocumentsList"
-        5XX:
-          description: Internal server error
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Error"
-  /informative/delete/{folder}/{name}:
     delete:
       tags:
         - Admin - Informative/DocumentHandler
@@ -837,21 +674,6 @@ components:
         documentName:
           type: string
         documentMap:
-          type: string
-    InformativeCreateFolder:
-      type: object
-      properties:
-        folderName:
-          type: string
-    Informativelistfolders:
-      type: object
-      properties:
-        folderName:
-          type: string
-    Informativedocumentfolderlist:
-      type: object
-      properties:
-        folderName:
           type: string
     ExampleBody:
       title: example

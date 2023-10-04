@@ -81,7 +81,7 @@ export class Controller {
   }
 
   list(req, res) {
-    InformativeService.getAvailableDocuments().then((r) => {
+    InformativeService.getAvailableDocuments(req.params.folder).then((r) => {
       if (r && !r.error) res.json(r);
       else res.status(500).send(r.error.message);
     });
