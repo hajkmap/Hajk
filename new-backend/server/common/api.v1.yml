@@ -303,17 +303,18 @@ paths:
         200:
           description: Success
           content: {}
-    put:
+  /mapconfig/delete/{name}:
+    get:
       tags:
         - Admin - Maps and layers
       parameters:
         - name: name
           in: path
-          description: File name of the new map config
+          description: Name of the map to be deleted
           required: true
           schema:
             type: string
-      description: Create a new map configuration
+      description: Delete an existing map configuration
       responses:
         200:
           description: Success
