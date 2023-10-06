@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [3.13.14] - 2023-10-06
+
+### Fixed
+
+- The `/ad/findCommonADGroupsForUsers` endpoint works again. [#1415](https://github.com/hajkmap/Hajk/issues/1415)
+
 ## [3.13.13] - 2023-10-05
 
 ### Added
@@ -123,7 +129,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [3.12.0-rc.2] - 2023-06-19
 
-[unreleased]: https://github.com/hajkmap/Hajk/compare/v3.13.12...hstd-main
+[unreleased]: https://github.com/hajkmap/Hajk/compare/v3.13.14...hstd-main
+[3.13.14]: https://github.com/hajkmap/Hajk/compare/v3.13.13...v3.13.14
 [3.13.13]: https://github.com/hajkmap/Hajk/compare/v3.13.12...v3.13.13
 [3.13.12]: https://github.com/hajkmap/Hajk/compare/v3.13.11...v3.13.12
 [3.13.11]: https://github.com/hajkmap/Hajk/compare/v3.13.10...v3.13.11
