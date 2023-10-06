@@ -12,7 +12,6 @@ import Feature from "ol/Feature.js";
 import { Translate } from "ol/interaction.js";
 import Collection from "ol/Collection";
 import { Style, Stroke, Fill } from "ol/style.js";
-import AppModel from "models/AppModel";
 
 import ImageLayer from "ol/layer/Image";
 import TileLayer from "ol/layer/Tile";
@@ -22,7 +21,6 @@ import ImageWMS from "ol/source/ImageWMS";
 import QRCode from "qrcode";
 
 import { ROBOTO_NORMAL } from "./constants";
-import { createRef } from "react";
 
 export default class PrintModel {
   constructor(settings) {
@@ -103,10 +101,8 @@ export default class PrintModel {
   // A flag that's used in "rendercomplete" to ensure that user has not cancelled the request
   pdfCreationCancelled = null;
 
-  generateQR = async () => {
+  generateQR = async (url) => {
     try {
-      const url = AppModel.anchorModel.getAnchor2();
-      console.log(url);
       return await QRCode.toDataURL(url);
     } catch (err) {
       return "";
@@ -1110,6 +1106,7 @@ export default class PrintModel {
   };
 
   print = (options) => {
+    const url = window.location.href;
     const format = options.format;
     const orientation = options.orientation;
     const resolution = options.resolution;
@@ -1267,8 +1264,7 @@ export default class PrintModel {
       //If-statement will be altered with logic for "includeQR"
       if (options.includeQrCode) {
         try {
-          const qrCodeImageData = await this.generateQR();
-          console.log(qrCodeImageData);
+          const qrCodeImageData = await this.generateQR(url);
 
           let qrCodePlacement = this.getPlacement(
             options.qrCodePlacement,
