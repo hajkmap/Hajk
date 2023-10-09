@@ -1,17 +1,10 @@
 // Make sure to only import the hooks you intend to use
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect } from "react";
 import * as Survey from "survey-react";
 import "survey-react/survey.css"; // standard-styling
 
-import { Box, Typography, Button } from "@mui/material";
+import { Box, Typography } from "@mui/material";
 import AppRegistrationIcon from "@mui/icons-material/AppRegistration";
-
-import EditView from "./EditView.js";
-import EditModel from "./EditModel.js";
-
-import Observer from "react-event-observer";
-
-import ReactDOM from "react-dom/client";
 
 // Hajk components are primarily styled in two ways:
 // - Using the styled-utility, see: https://mui.com/system/styled/
@@ -32,7 +25,6 @@ function CitizendialogueView(props) {
   // We're gonna need to use the event observers. Let's destruct them so that we can
   // get a hold of them easily. The observers can be accessed directly via the props:
   const { globalObserver } = props;
-  const [localObserver] = React.useState(Observer());
 
   // You don’t have to use many state variables. State variables can hold objects and arrays just fine,
   // so you can still group related data together. However, unlike this.setState in a class, updating a
@@ -157,55 +149,12 @@ function CitizendialogueView(props) {
           {
             type: "html",
             name: "renderEditViewButton",
-            html: "<button id='btnRenderEditView'>Render EditView</button>",
+            html: "<button id='btnRenderEditView'>Klicka här för att markera koordinater i kartan</button>",
           },
         ],
       },
     ],
   };
-
-  //Default options for editModel----------------------
-  const defaultOptions = {
-    sources: [],
-    // ... other default properties you might want
-  };
-  console.log(props.options);
-  const [editModel] = React.useState(
-    () =>
-      new EditModel({
-        map: props.map,
-        app: props.app,
-        observer: localObserver,
-        options: { ...defaultOptions, ...props.options },
-      })
-  );
-
-  //Handlebutton
-  function handleButtonClick() {
-    console.log("Button clicked");
-    const container = document.getElementById("edit-view-container");
-    if (container) {
-      try {
-        ReactDOM.createRoot(
-          <EditView
-            app={props.app}
-            model={editModel}
-            observer={localObserver}
-          />,
-          container
-        );
-      } catch (error) {
-        console.error("Error rendering EditView:", error);
-      }
-    } else {
-      console.error("Cannot find 'edit-view-container' element.");
-    }
-  }
-
-  const renderEditViewButton = document.getElementById("btnRenderEditView");
-  if (renderEditViewButton) {
-    renderEditViewButton.addEventListener("click", handleButtonClick);
-  }
 
   //Unique ID and name on survey
   function generateUniqueID() {
@@ -229,26 +178,9 @@ function CitizendialogueView(props) {
 
   Survey.surveyLocalization.defaultLocale = "sv";
 
-  //Show hide edittool
-  const [showEditView, setShowEditView] = useState(false);
-
   return (
     <>
       <Survey.Survey json={surveyJSON} onComplete={handleOnComplete} />
-      {/*<EditView app={props.app} model={editModel} observer={localObserver} />*/}
-
-      <Button onClick={() => setShowEditView(!showEditView)}>
-        Klicka här för att markera koordinater i kartan
-      </Button>
-
-      {showEditView && (
-        <EditView
-          app={props.app}
-          model={editModel}
-          observer={localObserver}
-          surveyname={surveyjsData.enkatnamn}
-        />
-      )}
     </>
   );
 }

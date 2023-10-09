@@ -1,18 +1,19 @@
 // Generic imports – all plugins need these.
 // (BaseWindowPlugin can be substituted with DialogWindowPlugin though.)
 //import React from "react";
-import React from "react";
+import React, { useState } from "react";
 import BaseWindowPlugin from "../BaseWindowPlugin";
 
 // Plugin-specific imports. Most plugins will need a Model, View and Observer but make sure to only create and import whatever you need.
 import CitizendialogueModel from "./CitizendialogueModel";
 import CitizendialogueView from "./CitizendialogueView";
-//import EditView from "./EditView.js";
-//import EditModel from "./EditModel.js";
+import EditView from "./EditView.js";
+import EditModel from "./EditModel.js";
 import Observer from "react-event-observer";
 
 // All plugins will need to display an icon. Make sure to pick a relevant one from MUI Icons.
 import AppRegistrationIcon from "@mui/icons-material/AppRegistration";
+import { Button } from "@mui/material";
 
 // We might want to import some other classes or constants etc.
 import { DEFAULT_MEASUREMENT_SETTINGS } from "./constants";
@@ -132,17 +133,13 @@ function Citizendialogue(props) {
     setPluginShown(false);
   };
 
-  // We're gonna need to catch if the user opens the window, and make sure to
-  // update the local state so that the effect making sure to activate eventual tools
-  // (such as draw) that were active before closing the window.
   const onWindowShow = () => {
     setPluginShown(true);
   };
 
-  /* const defaultOptions = {
+  /*const defaultOptions = {
     sources: [],
-    // ... other default properties you might want
-  };
+  };*/
 
   const [editModel] = React.useState(
     () =>
@@ -150,10 +147,27 @@ function Citizendialogue(props) {
         map: props.map,
         app: props.app,
         observer: localObserver,
-        options: { ...defaultOptions, ...props.options },
+        options: props.options,
       })
-  );*/
+  );
 
+  /*const [editModel, setEditModel] = React.useState(null);
+
+  React.useEffect(() => {
+    if (props.options) {
+      const model = new EditModel({
+        map: props.map,
+        app: props.app,
+        observer: localObserver,
+        options: props.options,
+      });
+      setEditModel(model);
+    }
+  }, [props.options, props.map, props.app, localObserver]);*/
+
+  //console.log(props.options);
+
+  const [showEditView, setShowEditView] = useState(false);
   // Render is now super-simplified compared to previous versions of Hajk.
   // All common functionality that has to do with showing a Window, and rendering
   // Drawer or Widget buttons, as well as keeping the state of Window, are now
@@ -188,6 +202,19 @@ function Citizendialogue(props) {
       <div>
         {/* This is the child object of BaseWindowPlugin. It will be displayed
             as content inside the plugin's window. */}
+
+        <Button onClick={() => setShowEditView(!showEditView)}>
+          Klicka här för att markera koordinater i kartan
+        </Button>
+
+        {showEditView && (
+          <EditView
+            app={props.app}
+            model={editModel}
+            observer={localObserver}
+          />
+        )}
+
         <CitizendialogueView
           {...props}
           // Here we send some props to the plugin's View.
@@ -200,7 +227,6 @@ function Citizendialogue(props) {
           drawInteraction={drawInteraction} // We want to show what the current draw-interaction is in the view.
           setDrawInteraction={setDrawInteraction} // Finally, we'll pass the updater for the draw-interaction state (so that we can toggle draw on/off).
         />
-        {/*<EditView app={props.app} model={editModel} observer={localObserver} />*/}
       </div>
     </BaseWindowPlugin>
   );
