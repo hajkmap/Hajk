@@ -156,23 +156,9 @@ function CitizendialogueView(props) {
     ],
   };
 
-  //Unique ID and name on survey
-  function generateUniqueID() {
-    return (
-      new Date().getTime().toString() +
-      "-" +
-      Math.random().toString(36).substring(2, 9)
-    );
-  }
-
-  const [surveyjsData] = React.useState({
-    enkatnamn: "Rynningeviken1",
-    svarsID: generateUniqueID(),
-  });
-
   //Combine ID/Name and surveydata
   const handleOnComplete = (survey) => {
-    const combinedData = { ...surveyjsData, ...survey.data };
+    const combinedData = { ...props.surveyJsData, ...survey.data };
     props.model.handleOnComplete(combinedData);
   };
 

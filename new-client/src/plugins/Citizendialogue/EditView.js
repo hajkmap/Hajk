@@ -22,7 +22,7 @@ class EditView extends React.PureComponent {
       editFeature: undefined,
       activeStep: 0,
       activeTool: undefined,
-      surveyname: this.props.surveyname,
+      surveyname: this.props.surveyJsData,
     };
     this.bindSubscriptions();
   }
@@ -248,6 +248,7 @@ class EditView extends React.PureComponent {
         model={model}
         observer={observer}
         panel={this}
+        surveyname={this.state.surveyname}
       />
     );
   };

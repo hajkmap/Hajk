@@ -855,6 +855,10 @@ class AppModel {
       return tool.type === "edit";
     });
 
+    const citizendialogueTool = this.config.mapConfig.tools.find((tool) => {
+      return tool.type === "citizendialogue";
+    });
+
     let layers = {};
 
     if (layerSwitcherTool) {
@@ -990,6 +994,48 @@ class AppModel {
           layers.wfstlayers = wfstlayers;
         } else {
           editTool.options.sources = [];
+        }
+      }
+    }
+
+    // This is for backwards compatibility prior to adding locking WFST edit layers with AD.
+    // This code handles if activeServices does not have an object with "id", "visibleForGroups"
+    if (citizendialogueTool) {
+      if (citizendialogueTool.options.activeServices === null) {
+        citizendialogueTool.options.sources = [];
+      } else {
+        if (
+          citizendialogueTool.options.activeServices &&
+          citizendialogueTool.options.activeServices.length !== 0
+        ) {
+          if (
+            typeof citizendialogueTool.options.activeServices[0]
+              .visibleForGroups === "undefined"
+          ) {
+            // If activeService does not have an object with "id", "visibleForGroups", add it
+            let as = [];
+            for (
+              let i = 0;
+              i < citizendialogueTool.options.activeServices.length;
+              i++
+            ) {
+              let service = {
+                id: citizendialogueTool.options.activeServices[i],
+                visibleForGroups: [],
+              };
+              as.push(service);
+            }
+            citizendialogueTool.options.activeServices = as;
+          }
+
+          let wfstlayers = this.overrideGlobalEditConfig(
+            citizendialogueTool,
+            layers.wfstlayers
+          );
+          citizendialogueTool.options.sources = wfstlayers;
+          layers.wfstlayers = wfstlayers;
+        } else {
+          citizendialogueTool.options.sources = [];
         }
       }
     }

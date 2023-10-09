@@ -137,10 +137,6 @@ function Citizendialogue(props) {
     setPluginShown(true);
   };
 
-  /*const defaultOptions = {
-    sources: [],
-  };*/
-
   const [editModel] = React.useState(
     () =>
       new EditModel({
@@ -151,21 +147,19 @@ function Citizendialogue(props) {
       })
   );
 
-  /*const [editModel, setEditModel] = React.useState(null);
+  //Unique ID and name on survey
+  function generateUniqueID() {
+    return (
+      new Date().getTime().toString() +
+      "-" +
+      Math.random().toString(36).substring(2, 9)
+    );
+  }
 
-  React.useEffect(() => {
-    if (props.options) {
-      const model = new EditModel({
-        map: props.map,
-        app: props.app,
-        observer: localObserver,
-        options: props.options,
-      });
-      setEditModel(model);
-    }
-  }, [props.options, props.map, props.app, localObserver]);*/
-
-  //console.log(props.options);
+  const [surveyjsData] = React.useState({
+    enkatnamn: "Rynningeviken1",
+    svarsID: generateUniqueID(),
+  });
 
   const [showEditView, setShowEditView] = useState(false);
   // Render is now super-simplified compared to previous versions of Hajk.
@@ -212,6 +206,7 @@ function Citizendialogue(props) {
             app={props.app}
             model={editModel}
             observer={localObserver}
+            surveyJsData={surveyjsData}
           />
         )}
 
@@ -226,6 +221,7 @@ function Citizendialogue(props) {
           updateCustomProp={updateCustomProp} // We're also gonna pass a function that we can use to update the state in this (the parent) component.
           drawInteraction={drawInteraction} // We want to show what the current draw-interaction is in the view.
           setDrawInteraction={setDrawInteraction} // Finally, we'll pass the updater for the draw-interaction state (so that we can toggle draw on/off).
+          surveyJsData={surveyjsData}
         />
       </div>
     </BaseWindowPlugin>
