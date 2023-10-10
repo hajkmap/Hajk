@@ -1038,11 +1038,19 @@ class App extends React.PureComponent {
     );
   };
 
-  checkDrawerButtons() {
-    return (
-      !this.state.drawerStatic ||
-      (this.state.drawerStatic && this.state.drawerButtons.length > 1)
+  showDrawerButtons() {
+    // We check if the plugin button (or any button) is empty and then subsequently hidden
+    const hasHiddenPlugin = this.state.drawerButtons.some(
+      (db) => db.hideOnMdScreensAndAbove
     );
+
+    // We want to check if there's only one visible drawerButton
+    const hasSingleVisibleButton =
+      this.state.drawerButtons.length === 1 ||
+      (this.state.drawerButtons.length === 2 && hasHiddenPlugin);
+
+    // And then check if drawer is static AND has a single visible button
+    return this.state.drawerStatic && hasSingleVisibleButton ? false : true;
   }
 
   render() {
@@ -1104,7 +1112,7 @@ class App extends React.PureComponent {
             <StyledHeader
               id="header"
               sx={{
-                justifyContent: this.checkDrawerButtons()
+                justifyContent: this.showDrawerButtons()
                   ? "space-between"
                   : "end",
                 "& > *": {
@@ -1112,7 +1120,7 @@ class App extends React.PureComponent {
                 },
               }}
             >
-              {clean === false && this.checkDrawerButtons() && (
+              {clean === false && this.showDrawerButtons() && (
                 <DrawerToggleButtons
                   drawerButtons={this.state.drawerButtons}
                   globalObserver={this.globalObserver}
