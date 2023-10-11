@@ -305,7 +305,15 @@ export default function LayerItem({
           ) : (
             getIconFromLayer()
           )}
-          <ListItemText primary={layer.get("caption")} />
+          <ListItemText
+            primary={layer.get("caption")}
+            primaryTypographyProps={{
+              fontWeight:
+                layer.get("visible") && !draggable && !isBackgroundLayer
+                  ? "bold"
+                  : "inherit",
+            }}
+          />
           <ListItemSecondaryAction>
             {renderStatusIcon()}
             {isBackgroundLayer && !toggleable && !draggable ? (

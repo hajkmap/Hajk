@@ -5,7 +5,7 @@ import GroupLayer from "./GroupLayer";
 import LayerGroupAccordion from "./LayerGroupAccordion.js";
 import CheckBoxIcon from "@mui/icons-material/CheckBox";
 import CheckBoxOutlineBlankIcon from "@mui/icons-material/CheckBoxOutlineBlank";
-import { IconButton } from "@mui/material";
+import { IconButton, ListItemText } from "@mui/material";
 
 class LayerGroup extends React.PureComponent {
   state = {
@@ -332,8 +332,16 @@ class LayerGroup extends React.PureComponent {
       <LayerGroupAccordion
         toggleable={this.props.group.toggled}
         expanded={expanded}
-        name={this.state.name}
         toggleDetails={this.renderToggleAll()}
+        layerGroupTitle={
+          <ListItemText
+            primaryTypographyProps={{
+              fontWeight:
+                this.isToggled() || this.isSemiToggled() ? "bold" : "inherit",
+            }}
+            primary={this.state.name}
+          />
+        }
         children={this.renderChildren()}
       ></LayerGroupAccordion>
     );

@@ -142,51 +142,48 @@ function LayerPackage({
     setMissingLayersConfirmation(null);
 
     const allMapLayers = map.getAllLayers();
-    layers.forEach((layer) => {
-      const mapLayer = allMapLayers.find((l) => l.get("name") === layer.id);
-      if (mapLayer) {
+    layers.forEach((l) => {
+      const layer = allMapLayers.find((la) => la.get("name") === l.id);
+      if (layer) {
         // Set quickaccess property
-        if (mapLayer.get("layerType") !== "base") {
-          mapLayer.set("quickAccess", true);
+        if (layer.get("layerType") !== "base") {
+          layer.set("quickAccess", true);
         }
         // Set drawOrder (zIndex)
-        mapLayer.setZIndex(layer.drawOrder);
+        layer.setZIndex(l.drawOrder);
         // Set opacity
-        mapLayer.setOpacity(layer.opacity);
+        layer.setOpacity(l.opacity);
         // Special handling for layerGroups and baselayers
-        if (mapLayer.get("layerType") === "group") {
-          if (layer.visible === true) {
-            const subLayersToShow = layer.subLayers ? layer.subLayers : [];
+        if (layer.get("layerType") === "group") {
+          if (l.visible === true) {
+            const subLayersToShow = l.subLayers ? l.subLayers : [];
             globalObserver.publish("layerswitcher.showLayer", {
-              mapLayer,
+              layer,
               subLayersToShow,
             });
           } else {
-            globalObserver.publish("layerswitcher.hideLayer", mapLayer);
+            globalObserver.publish("layerswitcher.hideLayer", layer);
           }
         } else if (
-          mapLayer.get("layerType") === "base" &&
+          layer.get("layerType") === "base" &&
           replaceExistingBackgroundLayer
         ) {
           // Hide all other background layers
           globalObserver.publish(
             "layerswitcher.backgroundLayerChanged",
-            mapLayer.get("name")
+            layer.get("name")
           );
           // Set visibility
-          mapLayer.set("visible", layer.visible);
+          layer.set("visible", l.visible);
         } else {
-          mapLayer.set("visible", layer.visible);
+          layer.set("visible", l.visible);
         }
-      } else if (layer.id < 0 && replaceExistingBackgroundLayer) {
+      } else if (l.id < 0 && replaceExistingBackgroundLayer) {
         // A fake maplayer is in the package
         // Hide all other background layers
-        globalObserver.publish(
-          "layerswitcher.backgroundLayerChanged",
-          layer.id
-        );
+        globalObserver.publish("layerswitcher.backgroundLayerChanged", l.id);
         // And set background color to map
-        switch (layer.id) {
+        switch (l.id) {
           case "-2":
             document.getElementById("map").style.backgroundColor = "#000";
             break;
@@ -295,20 +292,20 @@ function LayerPackage({
           <Typography>
             {loadLpInfoConfirmation ? loadLpInfoConfirmation.description : ""}
           </Typography>
-          {loadLpInfoConfirmation ? (
-            <Stack sx={{ mt: 2 }} direction="row" spacing={1}>
-              {loadLpInfoConfirmation.keywords.map((k) => (
-                <Chip
-                  key={`chip-${k}`}
-                  label={k}
-                  size="small"
-                  variant="outlined"
-                />
-              ))}
-            </Stack>
-          ) : (
-            ""
-          )}
+          {loadLpInfoConfirmation
+            ? loadLpInfoConfirmation.keywords.length > 0 && (
+                <Stack sx={{ mt: 2 }} direction="row" spacing={1}>
+                  {loadLpInfoConfirmation.keywords.map((k) => (
+                    <Chip
+                      key={`chip-${k}`}
+                      label={k}
+                      size="small"
+                      variant="outlined"
+                    />
+                  ))}
+                </Stack>
+              )
+            : null}
           <DialogContentText sx={{ mt: 2, mb: 1 }}>Bakgrund</DialogContentText>
           <Stack direction="row" spacing={1}>
             <PublicOutlinedIcon fontSize="small"></PublicOutlinedIcon>
