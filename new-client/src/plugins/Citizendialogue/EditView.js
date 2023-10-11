@@ -165,8 +165,7 @@ class EditView extends React.PureComponent {
 
   onSaveClicked = () => {
     const { model, app } = this.props;
-    const surveyname = this.props;
-    model.save(surveyname, (response) => {
+    model.save((response) => {
       if (
         response &&
         (response.ExceptionReport || !response.TransactionResponse)

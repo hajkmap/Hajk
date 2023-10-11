@@ -304,6 +304,14 @@ class AttributeEditor extends React.Component {
       }
     }
 
+    if (field.name === "SURVEYID" && field.initialRender) {
+      value = this.props.surveyname.enkatnamn;
+    }
+
+    if (field.name === "SURVEYANSWERID" && field.initialRender) {
+      value = this.props.surveyname.svarsID;
+    }
+
     switch (field.textType) {
       case "heltal":
         return (
