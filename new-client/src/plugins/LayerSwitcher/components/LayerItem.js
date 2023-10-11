@@ -32,6 +32,7 @@ export default function LayerItem({
   draggable,
   toggleable,
   app,
+  display,
   subLayersSection,
   visibleSubLayers,
   expandableSection,
@@ -241,7 +242,7 @@ export default function LayerItem({
   };
 
   return (
-    <div className="layer-item">
+    <div className="layer-item" style={{ display: display }}>
       <ListItemButton
         disableRipple
         onClick={toggleable ? handleLayerItemClick : null}

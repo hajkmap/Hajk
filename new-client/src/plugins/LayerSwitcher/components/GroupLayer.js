@@ -16,7 +16,7 @@ export default function GroupLayer({
   toggleable,
   draggable,
   quickAccessLayer,
-  filterValue,
+  display,
   groupLayer,
 }) {
   // Keep the subLayers area active in state
@@ -222,23 +222,21 @@ export default function GroupLayer({
   // then the sublayer should only be visible if it's included in visibleSubLayers
   const showSublayer = (subLayer) => {
     if (toggleable) {
-      if (filterValue && filterValue !== "") {
-        return groupLayer.subLayers.find((sl) => sl.id === subLayer).isFiltered;
-      } else {
-        return true;
-      }
-    } else if (visibleSubLayers.some((s) => s === subLayer)) {
-      if (filterValue && filterValue !== "") {
-        return groupLayer.subLayers.find((sl) => sl.id === subLayer).isFiltered;
-      } else {
-        return true;
-      }
+      return isSubLayerFiltered(subLayer);
+    } else if (visibleSubLayers.includes(subLayer)) {
+      return isSubLayerFiltered(subLayer);
     }
     return false;
   };
 
+  const isSubLayerFiltered = (subLayer) => {
+    const foundSubLayer = groupLayer.subLayers.find((sl) => sl.id === subLayer);
+    return foundSubLayer ? foundSubLayer.isFiltered : false;
+  };
+
   return (
     <LayerItem
+      display={display}
       layer={layer}
       app={app}
       draggable={draggable}
@@ -265,21 +263,19 @@ export default function GroupLayer({
       subLayersSection={
         <Collapse in={showSublayers}>
           <Box sx={{ marginLeft: "40px" }}>
-            {layer.subLayers.map(
-              (subLayer, index) =>
-                showSublayer(subLayer) && (
-                  <SubLayerItem
-                    key={subLayer}
-                    subLayer={subLayer}
-                    subLayerIndex={index}
-                    layer={layer}
-                    toggleable={toggleable}
-                    app={app}
-                    visible={visibleSubLayers.some((s) => s === subLayer)}
-                    toggleSubLayer={toggleSubLayer}
-                  ></SubLayerItem>
-                )
-            )}
+            {layer.subLayers.map((subLayer, index) => (
+              <SubLayerItem
+                display={showSublayer(subLayer) ? "block" : "none"}
+                key={subLayer}
+                subLayer={subLayer}
+                subLayerIndex={index}
+                layer={layer}
+                toggleable={toggleable}
+                app={app}
+                visible={visibleSubLayers.some((s) => s === subLayer)}
+                toggleSubLayer={toggleSubLayer}
+              ></SubLayerItem>
+            ))}
           </Box>
         </Collapse>
       }

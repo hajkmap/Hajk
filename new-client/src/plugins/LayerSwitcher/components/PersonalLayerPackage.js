@@ -626,9 +626,9 @@ function PersonalLayerPackage({
               }}
             >
               <Typography variant="subtitle2">
-                Här kan du ladda in sparade paket med lager. Välj om innehållet
-                ska ersätta befintliga snabblager eller endast adderas vid
-                laddningen.
+                Här kan du spara aktuella snabblager som lagerpaket lokalt på
+                din egen enhet. För att ladda till snabblager, klicka på sparat
+                paket.
               </Typography>
             </Box>
           </Collapse>

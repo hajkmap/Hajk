@@ -16,6 +16,7 @@ export default function LayerGroupAccordion({
   toggleDetails,
   layerGroupDetails,
   quickAccess,
+  display,
 }) {
   const [state, setState] = React.useState({ expanded: expanded });
 
@@ -28,7 +29,7 @@ export default function LayerGroupAccordion({
   };
 
   return (
-    <>
+    <div style={{ display: display }}>
       <ListItemButton
         disableRipple
         onClick={() => updateCustomProp("expanded", !state.expanded)}
@@ -76,6 +77,6 @@ export default function LayerGroupAccordion({
       <Collapse in={state.expanded}>
         <Box sx={{ marginLeft: "40px" }}>{children}</Box>
       </Collapse>
-    </>
+    </div>
   );
 }

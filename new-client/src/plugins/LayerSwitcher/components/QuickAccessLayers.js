@@ -90,7 +90,6 @@ export default function QuickAccessLayers({
             observer={model.observer}
             toggleable={true}
             draggable={false}
-            filterValue={filterValue}
             groupLayer={findLayerById(treeData, l.get("name"))}
             quickAccessLayer={true}
           ></GroupLayer>
