@@ -5,6 +5,7 @@ import mapconfigRouter from "./controllers/mapconfig/router.js";
 import settingsRouter from "./controllers/settings/router.js";
 import informativeRouter from "./controllers/informative/router.js";
 import adRouter from "./controllers/ad/router.js";
+import fir from "./controllers/fir/router.js";
 
 export default express
   .Router()
@@ -12,4 +13,5 @@ export default express
   .use("/informative", informativeRouter)
   .use("/mapconfig", mapconfigRouter)
   .use("/settings", settingsRouter)
-  .use("/ad", adRouter);
+  .use("/ad", adRouter)
+  .use("/fir", fir);
