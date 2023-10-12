@@ -596,6 +596,50 @@ paths:
         200:
           description: Layer deleted successfully
           content: {}
+  /fir/realestateownerreport:
+    post:
+      tags:
+        - FIR
+      description: Generates a realestate owner report using a myCarta FR Direkt endpoint. Returns an url to the generated report.
+      responses:
+        200:
+          description: FIR
+          content: {}
+      parameters:
+        - in: header
+          name: X-Control-Header
+          description: User name that will be supplied to AD
+          schema:
+            type: string
+          required: false
+      requestBody:
+        description: Json with UUID's and function parameters
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: "#/components/schemas/ExampleBody"
+  /fir/residentreport:
+    post:
+      tags:
+        - FIR
+      description: Generates a resident report. Returns an url to the generated xlsx report.
+      responses:
+        200:
+          description: FIR
+          content: {}
+      parameters:
+        - in: header
+          name: X-Control-Header
+          description: User name that will be supplied to AD
+          schema:
+            type: string
+          required: false
+      requestBody:
+        description: Json with table data
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: "#/components/schemas/ExampleBody"
 components:
   schemas:
     Example:
