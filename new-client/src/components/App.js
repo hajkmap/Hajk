@@ -1039,18 +1039,22 @@ class App extends React.PureComponent {
   };
 
   showDrawerButtons() {
+    const drawerButtons = this.state.drawerButtons;
+
+    if (!drawerButtons) return false;
+
     // We check if the plugin button (or any button) is empty and then subsequently hidden
-    const hasHiddenPlugin = this.state.drawerButtons.some(
-      (db) => db.hideOnMdScreensAndAbove
+    const isHiddenPluginPresent = drawerButtons.some(
+      (button) => button.hideOnMdScreensAndAbove
     );
 
     // We want to check if there's only one visible drawerButton
-    const hasSingleVisibleButton =
-      this.state.drawerButtons.length === 1 ||
-      (this.state.drawerButtons.length === 2 && hasHiddenPlugin);
+    const isOnlyOneButtonVisible =
+      drawerButtons.length === 1 ||
+      (drawerButtons.length === 2 && isHiddenPluginPresent);
 
     // And then check if drawer is static AND has a single visible button
-    return this.state.drawerStatic && hasSingleVisibleButton ? false : true;
+    return this.state.drawerStatic && isOnlyOneButtonVisible ? false : true;
   }
 
   render() {
