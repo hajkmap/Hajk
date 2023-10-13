@@ -358,7 +358,9 @@ class EditModel {
       features = this.filterByDefaultValue(features);
     }
 
-    this.vectorSource.addFeatures(features);
+    // Draws geometries in the map
+    //this.vectorSource.addFeatures(features);
+
     this.vectorSource.getFeatures().forEach((feature) => {
       feature.on("propertychange", (e) => {
         if (feature.modification === "removed") {

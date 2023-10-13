@@ -27,6 +27,15 @@ class EditView extends React.PureComponent {
     this.bindSubscriptions();
   }
 
+  /* componentDidMount() {
+    const { sources } = this.state;
+    if (sources && sources.length > 0) {
+      console.log("Setting layer to:", sources[0].id);
+      this.setLayer(sources[0].id);
+      this.setState({ activeStep: 1 });
+    }
+  }*/
+
   bindSubscriptions = () => {
     this.props.observer.subscribe("editFeature", (feature) => {
       this.props.observer.publish("feature-to-update-view", feature);

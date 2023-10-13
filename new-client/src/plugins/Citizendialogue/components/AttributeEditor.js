@@ -265,7 +265,9 @@ class AttributeEditor extends React.Component {
     }
   }
 
-  getValueMarkup(field, editable) {
+  getValueMarkup(field, editable, index) {
+    const specialValues = ["enkatnamn", "svarsID"];
+
     if (typeof field.alias === "undefined" || field.alias === "") {
       field.alias = field.name;
     }
@@ -303,13 +305,17 @@ class AttributeEditor extends React.Component {
         value = field.defaultValue;
       }
     }
-
+    /*
     if (field.name === "SURVEYID" && field.initialRender) {
       value = this.props.surveyname.enkatnamn;
     }
 
     if (field.name === "SURVEYANSWERID" && field.initialRender) {
       value = this.props.surveyname.svarsID;
+    }*/
+
+    if (field.initialRender && specialValues[index]) {
+      value = this.props.surveyname[specialValues[index]];
     }
 
     switch (field.textType) {
@@ -630,7 +636,7 @@ class AttributeEditor extends React.Component {
       );
 
     const markup = this.props.editSource?.editableFields?.map((field, i) => {
-      const valueMarkup = this.getValueMarkup(field, true);
+      const valueMarkup = this.getValueMarkup(field, true, i);
       return (
         <Grid item xs={12} key={i} ref={field.name} sx={{ textAlign: "left" }}>
           {valueMarkup}
