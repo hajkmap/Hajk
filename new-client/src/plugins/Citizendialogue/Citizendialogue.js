@@ -137,16 +137,6 @@ function Citizendialogue(props) {
     setPluginShown(true);
   };
 
-  const [editModel] = React.useState(
-    () =>
-      new EditModel({
-        map: props.map,
-        app: props.app,
-        observer: localObserver,
-        options: props.options,
-      })
-  );
-
   //Unique ID and name on survey
   function generateUniqueID() {
     return (
@@ -160,6 +150,17 @@ function Citizendialogue(props) {
     enkatnamn: "Rynningeviken1",
     svarsID: generateUniqueID(),
   });
+
+  const [editModel] = React.useState(
+    () =>
+      new EditModel({
+        map: props.map,
+        app: props.app,
+        observer: localObserver,
+        options: props.options,
+        surveyJsData: surveyjsData,
+      })
+  );
 
   const [showEditView, setShowEditView] = useState(false);
   const [editViewKey, setEditViewKey] = useState(Date.now());

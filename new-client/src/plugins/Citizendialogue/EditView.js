@@ -30,7 +30,6 @@ class EditView extends React.PureComponent {
   componentDidMount() {
     const { sources } = this.state;
     if (sources && sources.length > 0) {
-      console.log("Setting layer to:", sources[0].id);
       this.setLayer(sources[0].id);
       this.setState({ activeStep: 0 });
     }
@@ -322,7 +321,7 @@ class EditView extends React.PureComponent {
               </Grid>
             </StepContent>
           </Step>
-          <Step key="3">
+          {/*<Step key="3">
             <StepLabel>Klart!</StepLabel>
             <StepContent>
               <Grid container spacing={2} direction="row">
@@ -338,7 +337,7 @@ class EditView extends React.PureComponent {
                 </Grid>
               </Grid>
             </StepContent>
-          </Step>
+              </Step>*/}
         </Stepper>
       </>
     );

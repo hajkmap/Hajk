@@ -15,6 +15,7 @@ class EditModel {
     this.app = settings.app;
     this.observer = settings.observer;
     this.options = settings.options;
+    this.surveyJsData = settings.surveyJsData;
 
     this.activeServices = this.options.activeServices;
     this.sources = this.options.sources;
@@ -347,10 +348,6 @@ class EditModel {
       alert("Fel: data kan inte läsas in. Kontrollera koordinatsystem.");
     }
 
-    // Make sure we have a name for geometry column. If there are features already,
-    // take a look at the first one and get geometry field's name from that first feature.
-    // If there are no features however, default to 'geom'. If we don't then OL will
-    // fallback to its own default geometry field name, which happens to be 'geometry' and not 'geom.
     this.geometryName =
       features.length > 0 ? features[0].getGeometryName() : "geom";
 
@@ -358,7 +355,23 @@ class EditModel {
       features = this.filterByDefaultValue(features);
     }
 
-    // Draws geometries in the map
+    // Features filtered by SURVEYANSWERID to show in map
+    const filteredFeatures = features.filter((feature) => {
+      const properties = feature.getProperties();
+      const fieldNames = Object.keys(properties);
+      const surveyAnswerId = String(properties[fieldNames[3]] || "");
+      return surveyAnswerId.trim() === this.surveyJsData.svarsID.trim();
+    });
+
+    /*const filteredFeatures = features.filter((feature) => {
+      const surveyAnswerId = String(feature.get("SURVEYANSWERID") || "");
+      return surveyAnswerId.trim() === this.surveyJsData.svarsID.trim();
+    });*/
+
+    // Draws geometries in the map filtered
+    this.vectorSource.addFeatures(filteredFeatures);
+
+    // Show all geometries
     //this.vectorSource.addFeatures(features);
 
     this.vectorSource.getFeatures().forEach((feature) => {
