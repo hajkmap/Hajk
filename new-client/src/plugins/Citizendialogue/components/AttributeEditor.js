@@ -314,7 +314,7 @@ class AttributeEditor extends React.Component {
       value = this.props.surveyname.svarsID;
     }*/
 
-    if (field.initialRender && specialValues[index]) {
+    if (specialValues[index]) {
       value = this.props.surveyname[specialValues[index]];
     }
 

@@ -162,6 +162,10 @@ function Citizendialogue(props) {
   });
 
   const [showEditView, setShowEditView] = useState(false);
+  const [editViewKey, setEditViewKey] = useState(Date.now());
+  const resetEditView = () => {
+    setEditViewKey(Date.now());
+  };
   // Render is now super-simplified compared to previous versions of Hajk.
   // All common functionality that has to do with showing a Window, and rendering
   // Drawer or Widget buttons, as well as keeping the state of Window, are now
@@ -203,10 +207,12 @@ function Citizendialogue(props) {
 
         {showEditView && (
           <EditView
+            key={editViewKey}
             app={props.app}
             model={editModel}
             observer={localObserver}
             surveyJsData={surveyjsData}
+            resetView={resetEditView}
           />
         )}
 

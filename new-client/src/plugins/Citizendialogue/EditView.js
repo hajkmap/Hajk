@@ -27,14 +27,14 @@ class EditView extends React.PureComponent {
     this.bindSubscriptions();
   }
 
-  /* componentDidMount() {
+  componentDidMount() {
     const { sources } = this.state;
     if (sources && sources.length > 0) {
       console.log("Setting layer to:", sources[0].id);
       this.setLayer(sources[0].id);
-      this.setState({ activeStep: 1 });
+      this.setState({ activeStep: 0 });
     }
-  }*/
+  }
 
   bindSubscriptions = () => {
     this.props.observer.subscribe("editFeature", (feature) => {
@@ -88,10 +88,10 @@ class EditView extends React.PureComponent {
   handlePrev = () => {
     const activeStep = this.state.activeStep - 1;
     if (activeStep === 0) {
-      this.props.model.reset();
+      //this.props.model.reset();
       this.setState({
         editFeature: undefined,
-        editSource: undefined,
+        editSource: this.props.model.editSource,
         activeStep: 0,
         activeTool: undefined,
       });
@@ -196,6 +196,7 @@ class EditView extends React.PureComponent {
         this.toggleActiveTool(undefined);
         model.deactivateInteraction();
       }
+      this.props.resetView();
     });
   };
 
@@ -236,7 +237,7 @@ class EditView extends React.PureComponent {
     return (
       <Toolbar
         ref="toolbar"
-        editSource={this.state.editSource}
+        editSource={this.props.model.editSource}
         model={this.props.model}
         observer={this.props.observer}
         app={this.props.app}
@@ -247,16 +248,15 @@ class EditView extends React.PureComponent {
   };
 
   renderAttributeEditor = () => {
-    const { editSource } = this.state;
     const { model, observer } = this.props;
     return (
       <AttributeEditor
         ref="attributeEditor"
-        editSource={editSource}
+        editSource={this.props.model.editSource}
         model={model}
         observer={observer}
         panel={this}
-        surveyname={this.state.surveyname}
+        surveyname={this.props.surveyJsData}
       />
     );
   };
@@ -296,7 +296,7 @@ class EditView extends React.PureComponent {
                 </Grid>
                 {!editFeature && (
                   <>
-                    <Grid item xs={6}>
+                    {/*<Grid item xs={6}>
                       <Button
                         fullWidth
                         onClick={this.handlePrev}
@@ -304,7 +304,7 @@ class EditView extends React.PureComponent {
                       >
                         Bakåt
                       </Button>
-                    </Grid>
+                </Grid>*/}
                     <Grid item xs={6}>
                       <Button
                         fullWidth
