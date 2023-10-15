@@ -246,6 +246,10 @@ class EditView extends React.PureComponent {
     );
   };
 
+  handleOkButtonClick = () => {
+    this.toggleActiveTool(undefined);
+  };
+
   renderAttributeEditor = () => {
     const { model, observer } = this.props;
     return (
@@ -256,6 +260,7 @@ class EditView extends React.PureComponent {
         observer={observer}
         panel={this}
         surveyname={this.props.surveyJsData}
+        onOkButtonClick={this.handleOkButtonClick}
       />
     );
   };

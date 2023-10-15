@@ -613,9 +613,16 @@ class AttributeEditor extends React.Component {
     }
   }
 
+  handleButtonClick = () => {
+    const { model, onOkButtonClick } = this.props;
+    model.resetEditFeature();
+    if (typeof onOkButtonClick === "function") {
+      onOkButtonClick();
+    }
+  };
+
   render() {
     const { formValues } = this.state;
-    const { model } = this.props;
 
     // If no source is selected, don't render anything
     if (
@@ -675,7 +682,7 @@ class AttributeEditor extends React.Component {
             color="primary"
             sx={{ width: "100px" }}
             variant="contained"
-            onClick={model.resetEditFeature}
+            onClick={this.handleButtonClick}
           >
             OK
           </Button>
