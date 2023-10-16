@@ -721,7 +721,9 @@ ABORTING STARTUP.
         );
 
       // Grab Promises that will contain all users' groups
-      const promises = users.map((u) => this.getGroupMembershipForUser(u));
+      const promises = users
+        .split(",")
+        .map((u) => this.getGroupMembershipForUser(u));
 
       // Wait for all promises to resolve
       const userGroups = await Promise.all(promises);

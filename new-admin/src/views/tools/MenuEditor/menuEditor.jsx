@@ -91,6 +91,7 @@ class ToolOptions extends Component {
       expanded: false,
       printMode: "none",
       chapterLevelsToShow: 2,
+      chapterLevelsToShowForPrint: 2,
       title: "Innehållsförteckning",
     },
     defaultDocumentColorSettings: {
@@ -1059,6 +1060,33 @@ class ToolOptions extends Component {
                 }));
               }}
               value={this.state.tableOfContents.chapterLevelsToShow}
+            />
+          </div>
+          <div>
+            <label htmlFor="chapterLevelsToShowForPrint">
+              Antal kapitelnivår för utskrift{" "}
+              <i
+                className="fa fa-question-circle"
+                data-toggle="tooltip"
+                title="Antal kapitelnivåer som ska ingå i innehållsförteckningen för utskritft"
+              />
+            </label>
+            <input
+              id="chapterLevelsToShowForPrint"
+              name="chapterLevelsToShowForPrint"
+              type="number"
+              min="0"
+              className="control-fixed-width"
+              onChange={(e) => {
+                const value = e.target.value;
+                this.setState((prevState) => ({
+                  tableOfContents: {
+                    ...prevState.tableOfContents,
+                    chapterLevelsToShowForPrint: value,
+                  },
+                }));
+              }}
+              value={this.state.tableOfContents.chapterLevelsToShowForPrint}
             />
           </div>
           <div>

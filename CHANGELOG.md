@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [3.13.14] - 2023-10-06
+
+### Fixed
+
+- The `/ad/findCommonADGroupsForUsers` endpoint works again. [#1415](https://github.com/hajkmap/Hajk/issues/1415)
+
+## [3.13.13] - 2023-10-05
+
 ### Added
 
 - Admins can configure a link for each layer. The link will be visible in LayerSwitcher's metadata part. [#1387](https://github.com/hajkmap/Hajk/issues/1387)
@@ -14,6 +22,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - It's now possible to have other target than `_blank` for links in infoclick. [#1388](https://github.com/hajkmap/Hajk/issues/1388)
+- Removed the 360px width limit in MapClickViewer lists. [#1411](https://github.com/hajkmap/Hajk/issues/1411)
+- Minor bug in DocumentHandler [#1404](https://github.com/hajkmap/Hajk/issues/1404)
 
 ## [3.13.12] - 2023-09-22
 
@@ -119,7 +129,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [3.12.0-rc.2] - 2023-06-19
 
-[unreleased]: https://github.com/hajkmap/Hajk/compare/v3.13.12...hstd-main
+[unreleased]: https://github.com/hajkmap/Hajk/compare/v3.13.14...hstd-main
+[3.13.14]: https://github.com/hajkmap/Hajk/compare/v3.13.13...v3.13.14
+[3.13.13]: https://github.com/hajkmap/Hajk/compare/v3.13.12...v3.13.13
 [3.13.12]: https://github.com/hajkmap/Hajk/compare/v3.13.11...v3.13.12
 [3.13.11]: https://github.com/hajkmap/Hajk/compare/v3.13.10...v3.13.11
 [3.13.10]: https://github.com/hajkmap/Hajk/compare/v3.13.9...v3.13.10

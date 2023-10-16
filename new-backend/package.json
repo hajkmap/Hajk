@@ -1,6 +1,6 @@
 {
   "name": "hajk-backend",
-  "version": "3.13.12",
+  "version": "3.13.14",
   "description": "Hajk Backend",
   "homepage": ".",
   "repository": {
@@ -37,6 +37,7 @@
     "http-proxy-middleware": "^2.0.6",
     "log4js": "^6.9.1",
     "query-string": "^8.1.0",
+    "write-excel-file": "^1.4.27",
     "ws": "^8.14.2"
   },
   "devDependencies": {
