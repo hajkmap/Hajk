@@ -160,7 +160,7 @@ class EditModel {
     }
   }
 
-  save(done) {
+  save(editValues, done) {
     const find = (mode) =>
       this.vectorSource
         .getFeatures()
@@ -174,6 +174,16 @@ class EditModel {
       inserts: find("added"),
       deletes: find("removed"),
     };
+
+    if (editValues) {
+      [...features.updates, ...features.inserts, ...features.deletes].forEach(
+        (feature) => {
+          for (const key in editValues) {
+            feature.set(key, editValues[key]);
+          }
+        }
+      );
+    }
 
     if (
       features.updates.length === 0 &&

@@ -203,7 +203,9 @@ function Citizendialogue(props) {
             as content inside the plugin's window. */}
 
         <Button onClick={() => setShowEditView(!showEditView)}>
-          Klicka här för att markera koordinater i kartan
+          {showEditView
+            ? "Stäng verktyget redigering av karta"
+            : "Klicka här för att markera koordinater i kartan"}
         </Button>
 
         {showEditView && (

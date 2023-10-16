@@ -1,6 +1,5 @@
 import React from "react";
 import Toolbar from "./components/Toolbar";
-import AttributeEditor from "./components/AttributeEditor";
 import FormControl from "@mui/material/FormControl";
 import FormHelperText from "@mui/material/FormHelperText";
 import { Step, StepContent, StepLabel, Stepper } from "@mui/material";
@@ -173,7 +172,13 @@ class EditView extends React.PureComponent {
 
   onSaveClicked = () => {
     const { model, app } = this.props;
-    model.save((response) => {
+    const editValues = {
+      SURVEYID: this.props.surveyJsData.enkatnamn,
+      SURVEYANSWERID: this.props.surveyJsData.svarsID,
+      //... (other values you want to pass)
+    };
+
+    model.save(editValues, (response) => {
       if (
         response &&
         (response.ExceptionReport || !response.TransactionResponse)
@@ -246,23 +251,8 @@ class EditView extends React.PureComponent {
     );
   };
 
-  handleOkButtonClick = () => {
-    this.toggleActiveTool(undefined);
-  };
-
-  renderAttributeEditor = () => {
-    const { model, observer } = this.props;
-    return (
-      <AttributeEditor
-        ref="attributeEditor"
-        editSource={this.props.model.editSource}
-        model={model}
-        observer={observer}
-        panel={this}
-        surveyname={this.props.surveyJsData}
-        onOkButtonClick={this.handleOkButtonClick}
-      />
-    );
+  resetEditFeatureInModel = () => {
+    this.props.model.resetEditFeature();
   };
 
   render() {
@@ -291,12 +281,12 @@ class EditView extends React.PureComponent {
                 <Grid item xs={12}>
                   {editSource?.simpleEditWorkflow !== true && (
                     <>
-                      {this.renderAttributeEditor()}
+                      {this.resetEditFeatureInModel()}
                       {this.renderToolbar()}
                     </>
                   )}
                   {editSource?.simpleEditWorkflow === true &&
-                    this.renderAttributeEditor()}
+                    this.resetEditFeatureInModel()}
                 </Grid>
                 {!editFeature && (
                   <>
