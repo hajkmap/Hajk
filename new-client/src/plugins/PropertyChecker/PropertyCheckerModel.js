@@ -10,6 +10,8 @@ export default class PropertyCheckerModel {
   #attributeNameToGroupBy;
   #checkLayer;
   #checkLayerId;
+  #digitalPlansLayer;
+  #digitalPlansLayerId;
   #drawModel;
   #localObserver;
   #map;
@@ -21,6 +23,7 @@ export default class PropertyCheckerModel {
     this.#app = settings.app;
     this.#attributeNameToGroupBy = settings.attributeNameToGroupBy;
     this.#checkLayerId = settings.checkLayerId;
+    this.#digitalPlansLayerId = settings.digitalPlansLayerId;
     this.#drawModel = settings.drawModel;
     this.#localObserver = settings.localObserver;
     this.#map = settings.map;
@@ -30,19 +33,16 @@ export default class PropertyCheckerModel {
     this.#initSubscriptions(); // Initiate listeners on observer(s)
 
     // Finding the correct layer in our OL Map is an expensive operation. Let's do it once.
-    this.#checkLayer = this.#getCheckLayer();
+    this.#checkLayer = this.#getOlLayer(this.#checkLayerId);
+    this.#digitalPlansLayer = this.#getOlLayer(this.#digitalPlansLayerId);
   }
 
-  #getCheckLayer = () => {
+  #getOlLayer = (layerId) => {
     try {
-      const l = this.#map
-        .getAllLayers()
-        .find((l) => l.get("name") === this.#checkLayerId);
+      const l = this.#map.getAllLayers().find((l) => l.get("name") === layerId);
       if (l === undefined) {
         throw new Error(
-          `PropertyChecker error: Couldn't find layer with ID ${
-            this.#checkLayerId
-          }. Please contact system administrator.`
+          `PropertyChecker error: Couldn't find layer with ID ${layerId}. Please contact system administrator.`
         );
       }
       return l;
@@ -51,18 +51,12 @@ export default class PropertyCheckerModel {
     }
   };
 
-  #getOLFeaturesForCoords = async (coords) => {
-    // Ensure we have a layer setup so we can create the URL
-    if (!this.#checkLayer) {
-      console.warn("Creating check layer again");
-      this.#checkLayer = this.#getCheckLayer();
-    }
-
-    const url = this.#checkLayer
+  #getOlFeaturesForCoordsAndOlLayer = async (coords, olLayer) => {
+    const url = olLayer
       .getSource()
       .getFeatureInfoUrl(coords, this.#viewResolution, this.#viewProjection, {
         INFO_FORMAT: "application/json",
-        FEATURE_COUNT: 100, // Without this, only first feature is returned
+        FEATURE_COUNT: 300, // Without this, only first feature is returned
       });
 
     const response = await fetch(url);
@@ -166,9 +160,26 @@ export default class PropertyCheckerModel {
 
   #handleFeatureAdded = async (feature) => {
     const coords = feature.getGeometry().getCoordinates();
-    const features = await this.#getOLFeaturesForCoords(coords);
+
+    // We will do two GetFeatureInfo requests here: one to the check layer and
+    // one to the digital plans layer. Each result will be used in its own View
+    // as we've noticed that the administrators often want to see those aspects
+    // in separate views but still relateted to each other.
+
+    // TODO: Add new view and show the results of this response.
+    const digitalPlanFeatures = await this.#getOlFeaturesForCoordsAndOlLayer(
+      coords,
+      this.#digitalPlansLayer
+    );
+    console.log("digitalPlanFeatures: ", digitalPlanFeatures);
+
+    // Let's grab the features from our check layer
+    const checkLayerFeatures = await this.#getOlFeaturesForCoordsAndOlLayer(
+      coords,
+      this.#checkLayer
+    );
     const groupedFeatures = this.#groupFeaturesByAttributeName(
-      features,
+      checkLayerFeatures,
       this.#attributeNameToGroupBy // the attribute name that we wish to group on
     );
     console.log("groupedFeatures in Model: ", groupedFeatures);

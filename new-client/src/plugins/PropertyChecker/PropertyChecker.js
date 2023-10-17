@@ -54,6 +54,7 @@ function PropertyChecker(props) {
         app: props.app,
         attributeNameToGroupBy: props.options.attributeNameToGroupBy,
         checkLayerId: props.options.checkLayerId,
+        digitalPlansLayerId: props.options.digitalPlansLayerId,
         drawModel: drawModel,
         localObserver: localObserver,
         map: props.map,

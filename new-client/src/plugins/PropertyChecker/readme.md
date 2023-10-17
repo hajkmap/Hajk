@@ -6,6 +6,8 @@ So one way to see this is that this plugin is a kind of permanent infoclick wind
 
 ### Requirements
 
+#### The Check Layer
+
 You must prepare a proper WMS layer to query in order to use this plugin. Currently, you must also add that layer to LayerSwitcher (so it gets added to the map). This way you'll get an ID (from `layers.json`) – you must next provide this id as part of this plugin's configuration (see [example](#example-configuration)).
 
 So, here is a brief specification of this required WMS layer.
@@ -27,11 +29,15 @@ So, here is a brief specification of this required WMS layer.
     "type": "propertychecker",
     "options": {
         "visibleAtStart": true,
-        "checkLayerId": "ar8q1v", // Our WMS layer that we'll query
-        "attributeNameToGroupBy": "fastighet", // The attribute name we wish to group by
+        "checkLayerId": "ar8q1v", // ID of the WMS layer that will act as the "Check Layer".
+        "attributeNameToGroupBy": "fastighet", // The attribute name we wish to group by, normally something related to the property.
+        "digitalPlansLayerId": "s5viu8", // ID of the WMS layer that will act as "Digital Plans Layer"
+        "buildingsLayerIds": "1328", // ID(s) of layers to toggle when user clicks the buildings shortcut button
+        "bordersLayerIds": "1329,1358,1439,1357", // ID(s) of layers to toggle when user clicks the borders shortcut button
+        "plansLayerIds": "j77k2s,7vmhc3,tpgv5m,aoxhlq,h91wc9,s5viu8", // ID(s) of layers to toggle when user clicks the plans shortcut button
         "target": "right",
         "position": "left",
-        "height": "dynamic"
+        "height": "dynamic",
     },
     "index": 1
 },
