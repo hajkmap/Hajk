@@ -228,6 +228,8 @@ article fieldset > span > div {
 .config-layer-list .main-box {
   width: 230px;
   padding-right: 5px;
+  display: flex;
+  flex-direction: column;
 }
 
 .config-layer-list .options-box,
@@ -896,55 +898,54 @@ figure img {
   background: rgba(0, 0, 0, 0.4);
 }
 
-.modal-dialog{
+.modal-dialog {
   margin-top: 1rem;
   margin-bottom: 1rem;
 }
 
-.modal-content{
+.modal-content {
   max-height: calc(100vh - 2rem);
   overflow-y: scroll;
 }
 
 .layerDialog label,
-.layerDialog input{
+.layerDialog input {
   margin: 0;
   margin-bottom: 0;
   margin-top: 0;
 }
 
-.layerDialog textarea.infoClick{
+.layerDialog textarea.infoClick {
   font-family: monospace;
   font-size: 0.8rem;
   height: 180px;
 }
 
-.layerDialog .form-row{
+.layerDialog .form-row {
   margin-bottom: 0.8rem;
 }
 
-
-.layerDialog div[class*="split"]{
+.layerDialog div[class*="split"] {
   display: flex;
   align-items: center;
 }
 
-.layerDialog div[class*="split"] > div:first-child{
+.layerDialog div[class*="split"] > div:first-child {
   padding-right: 1rem;
 }
 
-.layerDialog .split50 > div{
+.layerDialog .split50 > div {
   flex: 0 0 50%;
 }
 
-.layerDialog .split0 > div{
+.layerDialog .split0 > div {
   flex: 0 0 auto;
 }
 
-.layerDialog .split3070 > div:first-child{
+.layerDialog .split3070 > div:first-child {
   flex: 0 0 30%;
 }
 
-.layerDialog .split3070 > div:last-child{
+.layerDialog .split3070 > div:last-child {
   flex: 0 0 70%;
 }

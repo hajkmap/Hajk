@@ -543,6 +543,7 @@ class Manager extends Component {
                 : layer.caption}{" "}
               {displayType}
             </span>
+            <span style={{ fontSize: "x-small" }}>{layer.id}</span>
           </div>
           <div className="options-box">
             <i
