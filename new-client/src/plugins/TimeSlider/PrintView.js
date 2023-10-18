@@ -15,7 +15,7 @@ import {
 
 export default function PrintView(props) {
   const [dialogOpen, setDialogOpen] = useState(false);
-  const [scale, setScale] = useState(props.printModel.getFittingScale());
+  const [scale, setScale] = useState(() => props.printModel.getFittingScale());
   const [resolution, setResolution] = useState(props.resolution);
   const [stepSize, setStepSize] = useState(props.stepSize);
   const [dateRange, setDateRange] = useState([props.startTime, props.endTime]);
