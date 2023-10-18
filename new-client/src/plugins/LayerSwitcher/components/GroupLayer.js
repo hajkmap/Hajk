@@ -230,8 +230,14 @@ export default function GroupLayer({
   };
 
   const isSubLayerFiltered = (subLayer) => {
-    const foundSubLayer = groupLayer.subLayers.find((sl) => sl.id === subLayer);
-    return foundSubLayer ? foundSubLayer.isFiltered : false;
+    if (groupLayer && groupLayer.subLayers) {
+      const foundSubLayer = groupLayer.subLayers.find(
+        (sl) => sl.id === subLayer
+      );
+      return foundSubLayer ? foundSubLayer.isFiltered : false;
+    } else {
+      return false;
+    }
   };
 
   return (
