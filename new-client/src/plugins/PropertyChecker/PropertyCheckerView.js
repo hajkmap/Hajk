@@ -3,11 +3,7 @@ import React, { useEffect, useRef, useState } from "react";
 
 import useUpdateEffect from "../../hooks/useUpdateEffect.js";
 
-import { styled } from "@mui/material/styles";
 import {
-  Accordion,
-  AccordionDetails,
-  AccordionSummary,
   Button,
   Card,
   CardActions,
@@ -16,23 +12,16 @@ import {
   DialogContent,
   DialogContentText,
   DialogTitle,
-  List,
-  ListSubheader,
-  Tab,
-  Tabs,
-  Typography,
 } from "@mui/material";
-import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import { styled } from "@mui/material/styles";
 
 import { useSnackbar } from "notistack";
 
 // import useCookieStatus from "hooks/useCookieStatus";
 
 import InfoDialog from "./views/InfoDialog.js";
-import ReportDialog from "./views/ReportDialog.js";
-import FeatureItem from "./views/FeatureItem.js";
+import PropertyItem from "./views/PropertyItem.js";
 import QuickLayerToggleButtons from "./views/QuickLayerToggleButtons.js";
-import { Box } from "@mui/system";
 
 const ButtonWithBottomMargin = styled(Button)(({ theme }) => ({
   marginBottom: theme.spacing(2),
@@ -53,7 +42,6 @@ function PropertyCheckerView(props) {
 
   const [groupedFeatures, setGroupedFeatures] = useState({});
   const [digitalPlanFeatures, setDigitalPlanFeatures] = useState([]);
-  const [selectedTab, setSelectedTab] = useState(0);
 
   // We want to keep track of the clicked point's coordinates, to be able
   // to pass them down to child components.
@@ -71,13 +59,6 @@ function PropertyCheckerView(props) {
     setClearDialogVisible(false);
   };
 
-  const [reportDialogVisible, setReportDialogVisible] = useState(false);
-
-  const handleShowReportDialog = (propertyName) => {
-    setCurrentPropertyName(propertyName);
-    setReportDialogVisible(true);
-  };
-
   // We're gonna need to keep track of if we're allowed to save stuff in LS. Let's use the hook.
   // const { functionalCookiesOk } = useCookieStatus(globalObserver);
 
@@ -93,7 +74,6 @@ function PropertyCheckerView(props) {
   };
 
   const [controlledLayers, setControlledLayers] = useState([]);
-  const [currentPropertyName, setCurrentPropertyName] = useState("");
 
   // Subscribe and unsubscribe to events
   useEffect(() => {
@@ -162,13 +142,6 @@ function PropertyCheckerView(props) {
 
   return (
     <>
-      <ReportDialog
-        reportDialogVisible={reportDialogVisible}
-        setReportDialogVisible={setReportDialogVisible}
-        currentPropertyName={currentPropertyName}
-        controlledLayers={controlledLayers}
-        userDetails={props.app.config?.userDetails}
-      />
       <InfoDialog localObserver={localObserver} />
       <Dialog open={clearDialogVisible} onClose={handleCloseConfirmationDialog}>
         <DialogTitle>{"Är du säker på att du vill rensa listan?"}</DialogTitle>
@@ -213,89 +186,18 @@ function PropertyCheckerView(props) {
       </Card>
       {Object.keys(groupedFeatures).length > 0 &&
         Object.entries(groupedFeatures).map(([k, features], i) => (
-          <React.Fragment key={i}>
-            <Accordion
-              defaultExpanded={Object.keys(groupedFeatures).length === 1} // Start with expanded by default if only one item exists
-              disableGutters
-            >
-              <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-                <Typography variant="button">
-                  {features.markerFeature.get("fastighet")}
-                </Typography>
-              </AccordionSummary>
-              <AccordionDetails>
-                <Button
-                  size="small"
-                  disabled={
-                    controlledLayers.filter(
-                      (l) =>
-                        l.propertyName ===
-                        features.markerFeature.get("fastighet")
-                    ).length === 0
-                  }
-                  onClick={() => {
-                    handleShowReportDialog(
-                      features.markerFeature.get("fastighet")
-                    );
-                  }}
-                >
-                  Generera rapport
-                </Button>
-                <Tabs
-                  onChange={(e, v) => {
-                    setSelectedTab(v);
-                  }}
-                  value={selectedTab}
-                  variant="fullWidth"
-                >
-                  <Tab label={`${features.features.length} lager`} />
-                  <Tab
-                    label={`${digitalPlanFeatures.length} planbestämmelser`}
-                  />
-                </Tabs>
-                <Box hidden={selectedTab !== 0}>
-                  {features.features
-                    // Sort. We want sublayers from same layer to show up next to each other.
-                    .sort((a, b) => {
-                      const aid = a.get("id");
-                      const bid = b.get("id");
-                      // If we've got nice strings, let's user localeCompare to sort. Else
-                      // just assume the elements are equal.
-                      return typeof aid === "string" && typeof bid === "string"
-                        ? aid.localeCompare(bid)
-                        : 0;
-                    })
-                    .map((f, j) => {
-                      const olLayer = props.app.map
-                        .getAllLayers()
-                        .find((l) => l.get("name") === f.get("id"));
-                      // Render FeatureItem only if we found the related
-                      // layer in olMap
-                      return (
-                        olLayer && (
-                          <FeatureItem
-                            clickedPointsCoordinates={clickedPointsCoordinates}
-                            feature={f}
-                            key={j}
-                            olLayer={olLayer}
-                            olMap={props.app.map}
-                            globalObserver={globalObserver}
-                            controlledLayers={controlledLayers}
-                            propertyName={features.markerFeature.get(
-                              "fastighet"
-                            )}
-                            setControlledLayers={setControlledLayers}
-                          />
-                        )
-                      );
-                    })}
-                </Box>
-                <Box hidden={selectedTab !== 1}>
-                  <Typography>Planbestämmelser</Typography>
-                </Box>
-              </AccordionDetails>
-            </Accordion>
-          </React.Fragment>
+          <PropertyItem
+            key={i}
+            controlledLayers={controlledLayers}
+            setControlledLayers={setControlledLayers}
+            startExpanded={Object.keys(groupedFeatures).length === 1} // Start with expanded by default if only one item exists}
+            features={features}
+            digitalPlanFeatures={digitalPlanFeatures}
+            userDetails={props.app.config?.userDetails}
+            olMap={props.app.map}
+            clickedPointsCoordinates={clickedPointsCoordinates}
+            globalObserver={globalObserver}
+          />
         ))}
     </>
   );
