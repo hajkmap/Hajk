@@ -49,9 +49,20 @@ export default function PrintView(props) {
 
   const print = async () => {
     setDialogOpen(true);
-    const blob = await props.printModel.print(printOptions);
+    const dates = Array.from(
+      { length: (dateRange[1] - dateRange[0]) / stepSize + 1 },
+      (_, index) => dateRange[0] + index * stepSize
+    );
 
-    saveAs(blob, `${"test"}.png`);
+    for await (const date of dates) {
+      const dateLabel = props.getDateLabel(date, resolution);
+      printOptions.mapTitle = dateLabel;
+      printOptions.mapTextColor = "#FFFFFF";
+      props.renderLayersAtTime(date);
+      const blob = await props.printModel.print(printOptions);
+      saveAs(blob, `${dateLabel}.png`);
+    }
+
     setDialogOpen(false);
   };
 

@@ -26,6 +26,7 @@ class TimeSliderView extends React.PureComponent {
       layerStatus: this.validateLayers(),
       settingsDialog: false,
       sliderSpeed: 1000,
+      unixTimeBeforePrint: null,
     };
 
     this.map = props.map;
@@ -426,6 +427,16 @@ class TimeSliderView extends React.PureComponent {
     this.setState({ settingsDialog: sd });
   };
 
+  setUnixTimeBeforePrint = (unixTime) => {
+    this.setState({ unixTimeBeforePrint: unixTime });
+  };
+
+  renderLayersAtTime = (unixTime) => {
+    this.setState({ currentUnixTime: unixTime }, () => {
+      this.updateLayers();
+    });
+  };
+
   renderSettingsDialog = () => {
     const { settingsDialog, resolution, sliderSpeed, layerStatus } = this.state;
     if (settingsDialog) {
@@ -482,6 +493,8 @@ class TimeSliderView extends React.PureComponent {
         getStepSize={this.getStepSize}
         getDateLabel={this.getDateLabel}
         windowHidden={this.props.windowHidden}
+        setUnixTimeBeforePrint={this.setUnixTimeBeforePrint}
+        renderLayersAtTime={this.renderLayersAtTime}
       />
     ) : (
       <>
