@@ -1,5 +1,8 @@
 import React, { useEffect, useId } from "react";
 import {
+  Accordion,
+  AccordionDetails,
+  AccordionSummary,
   Button,
   Checkbox,
   Icon,
@@ -8,8 +11,10 @@ import {
   ListItemIcon,
   ListItemText,
   Switch,
+  TextField,
+  Typography,
 } from "@mui/material";
-import { CheckCircleOutline } from "@mui/icons-material";
+import { ExpandMore, CheckCircleOutline } from "@mui/icons-material";
 
 const FeatureItem = (props) => {
   const {
@@ -94,9 +99,12 @@ const FeatureItem = (props) => {
     controlledLayers.filter((l) => l.id === selectionFormat.id).length > 0;
 
   return (
-    <ListItem
-      disablePadding
-      secondaryAction={
+    <Accordion
+      // defaultExpanded={Object.keys(groupedFeatures).length === 1} // Start with expanded by default if only one item exists
+      disableGutters
+    >
+      <AccordionSummary expandIcon={<ExpandMore />}>
+        <Switch edge="start" onChange={handleLayerToggle} checked={visible} />
         <Checkbox
           edge="start"
           onChange={(e) => {
@@ -113,19 +121,45 @@ const FeatureItem = (props) => {
           }}
           checked={isSelected()}
         />
-        // <Button onClick={triggerGetFeatureInfo}>
-        //   <CheckCircleOutline />
-        // </Button>
-      }
-    >
-      <ListItemButton onClick={handleLayerToggle} disableRipple>
-        <ListItemIcon>
-          <Icon>{getInfoclickIcon(olLayer)}</Icon>
-        </ListItemIcon>
-        <ListItemText primary={caption} secondary={subcaption} />
-        <Switch edge="end" onChange={handleLayerToggle} checked={visible} />
-      </ListItemButton>
-    </ListItem>
+        <Typography variant="button" paragraph>
+          {caption}
+        </Typography>
+        {subcaption && (
+          <Typography paragraph variant="caption">
+            {subcaption}
+          </Typography>
+        )}
+        {/* <ListItem
+          disablePadding
+          secondaryAction={
+            <>
+              <Button onClick={triggerGetFeatureInfo}>
+                <CheckCircleOutline />
+              </Button> }
+            </>
+          }
+        >
+          <ListItemButton onClick={handleLayerToggle} disableRipple>
+            <ListItemIcon>
+            <Icon>{getInfoclickIcon(olLayer)}</Icon>
+          </ListItemIcon>
+            <ListItemText primary={caption} secondary={subcaption} />
+          </ListItemButton>
+        </ListItem> */}
+      </AccordionSummary>
+      <AccordionDetails>
+        {/* <ListItem> */}
+        <TextField
+          id="outlined-multiline-flexible"
+          label="Notering"
+          multiline
+          fullWidth
+          size="small"
+          maxRows={4}
+        />
+        {/* </ListItem> */}
+      </AccordionDetails>
+    </Accordion>
   );
 };
 

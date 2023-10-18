@@ -184,10 +184,16 @@ export default class PropertyCheckerModel {
     );
     console.log("groupedFeatures in Model: ", groupedFeatures);
     // If we've got at least one feature in the response
-    if (Object.keys(groupedFeatures).length > 0) {
+    if (
+      Object.keys(groupedFeatures).length > 0 ||
+      Object.keys(digitalPlanFeatures).length > 0
+    ) {
       // Tell the rest of the plugin that we've got feature. The View
       // subscribes to this and will update itself accordingly.
-      this.#localObserver.publish("getFeatureInfoFeatures", groupedFeatures);
+      this.#localObserver.publish("getFeatureInfoFeatures", {
+        groupedFeatures,
+        digitalPlanFeatures,
+      });
     } else {
       this.#localObserver.publish("noFeaturesInResult");
     }

@@ -18,6 +18,8 @@ import {
   DialogTitle,
   List,
   ListSubheader,
+  Tab,
+  Tabs,
   Typography,
 } from "@mui/material";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
@@ -30,6 +32,7 @@ import InfoDialog from "./views/InfoDialog.js";
 import ReportDialog from "./views/ReportDialog.js";
 import FeatureItem from "./views/FeatureItem.js";
 import QuickLayerToggleButtons from "./views/QuickLayerToggleButtons.js";
+import { Box } from "@mui/system";
 
 const ButtonWithBottomMargin = styled(Button)(({ theme }) => ({
   marginBottom: theme.spacing(2),
@@ -49,6 +52,8 @@ function PropertyCheckerView(props) {
   const snackbarId = useRef(null);
 
   const [groupedFeatures, setGroupedFeatures] = useState({});
+  const [digitalPlanFeatures, setDigitalPlanFeatures] = useState([]);
+  const [selectedTab, setSelectedTab] = useState(0);
 
   // We want to keep track of the clicked point's coordinates, to be able
   // to pass them down to child components.
@@ -83,6 +88,7 @@ function PropertyCheckerView(props) {
   const handleCleanClick = () => {
     setClearDialogVisible(false);
     setGroupedFeatures({});
+    setDigitalPlanFeatures([]);
     drawModel.removeDrawnFeatures();
   };
 
@@ -102,8 +108,12 @@ function PropertyCheckerView(props) {
 
     // This runs when our model has successfully fetched features and there's
     // at least one result.
-    const handleNewGetFeatureInfoFeatures = (groupedFeatures) => {
+    const handleNewGetFeatureInfoFeatures = ({
+      digitalPlanFeatures,
+      groupedFeatures,
+    }) => {
       setGroupedFeatures(groupedFeatures);
+      setDigitalPlanFeatures(digitalPlanFeatures);
     };
 
     // Sometimes we won't get a result for the clicked point, but we still want
@@ -177,16 +187,14 @@ function PropertyCheckerView(props) {
         </DialogActions>
       </Dialog>
       {Object.keys(groupedFeatures).length === 0 && (
-        <React.Fragment>
-          <ButtonWithBottomMargin
-            variant="contained"
-            fullWidth={true}
-            color="primary"
-            onClick={handleToggleDrawClick}
-          >
-            {drawInteraction === "" ? "Välj fastighet" : "Avbryt"}
-          </ButtonWithBottomMargin>
-        </React.Fragment>
+        <ButtonWithBottomMargin
+          variant="contained"
+          fullWidth={true}
+          color="primary"
+          onClick={handleToggleDrawClick}
+        >
+          {drawInteraction === "" ? "Välj fastighet" : "Avbryt"}
+        </ButtonWithBottomMargin>
       )}
       {Object.keys(groupedFeatures).length > 0 && (
         <ButtonWithBottomMargin
@@ -216,40 +224,36 @@ function PropertyCheckerView(props) {
                 </Typography>
               </AccordionSummary>
               <AccordionDetails>
-                <List
-                  sx={{
-                    width: "100%",
-                    maxWidth: 400,
-                    bgcolor: "background.paper",
-                  }}
-                  subheader={
-                    <ListSubheader
-                      sx={{
-                        display: "flex",
-                        justifyContent: "space-between",
-                      }}
-                    >
-                      {features.features.length} lager påverkar fastigheten{" "}
-                      <Button
-                        size="small"
-                        disabled={
-                          controlledLayers.filter(
-                            (l) =>
-                              l.propertyName ===
-                              features.markerFeature.get("fastighet")
-                          ).length === 0
-                        }
-                        onClick={() => {
-                          handleShowReportDialog(
-                            features.markerFeature.get("fastighet")
-                          );
-                        }}
-                      >
-                        Generera rapport
-                      </Button>
-                    </ListSubheader>
+                <Button
+                  size="small"
+                  disabled={
+                    controlledLayers.filter(
+                      (l) =>
+                        l.propertyName ===
+                        features.markerFeature.get("fastighet")
+                    ).length === 0
                   }
+                  onClick={() => {
+                    handleShowReportDialog(
+                      features.markerFeature.get("fastighet")
+                    );
+                  }}
                 >
+                  Generera rapport
+                </Button>
+                <Tabs
+                  onChange={(e, v) => {
+                    setSelectedTab(v);
+                  }}
+                  value={selectedTab}
+                  variant="fullWidth"
+                >
+                  <Tab label={`${features.features.length} lager`} />
+                  <Tab
+                    label={`${digitalPlanFeatures.length} planbestämmelser`}
+                  />
+                </Tabs>
+                <Box hidden={selectedTab !== 0}>
                   {features.features
                     // Sort. We want sublayers from same layer to show up next to each other.
                     .sort((a, b) => {
@@ -285,7 +289,10 @@ function PropertyCheckerView(props) {
                         )
                       );
                     })}
-                </List>
+                </Box>
+                <Box hidden={selectedTab !== 1}>
+                  <Typography>Planbestämmelser</Typography>
+                </Box>
               </AccordionDetails>
             </Accordion>
           </React.Fragment>
