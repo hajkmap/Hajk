@@ -7,7 +7,8 @@ import {
 
 export default class PropertyCheckerModel {
   #app;
-  #attributeNameToGroupBy;
+  #groupCheckLayerByAttribute;
+  #groupDigitalPlansLayerByAttribute;
   #checkLayer;
   #checkLayerId;
   #digitalPlansLayer;
@@ -21,7 +22,9 @@ export default class PropertyCheckerModel {
   constructor(settings) {
     // Set some private fields
     this.#app = settings.app;
-    this.#attributeNameToGroupBy = settings.attributeNameToGroupBy;
+    this.#groupCheckLayerByAttribute = settings.groupCheckLayerByAttribute;
+    this.#groupDigitalPlansLayerByAttribute =
+      settings.groupDigitalPlansLayerByAttribute;
     this.#checkLayerId = settings.checkLayerId;
     this.#digitalPlansLayerId = settings.digitalPlansLayerId;
     this.#drawModel = settings.drawModel;
@@ -158,6 +161,19 @@ export default class PropertyCheckerModel {
     return groupedFeatures;
   };
 
+  // Start with the flatArray and group it according to the value of one of
+  // its properties. The exact value is admin-controllable.
+  #groupedMap = (flatArray) =>
+    flatArray.reduce(
+      (entryMap, e) =>
+        entryMap.set(e.get(this.#groupDigitalPlansLayerByAttribute), [
+          ...(entryMap.get(e.get(this.#groupDigitalPlansLayerByAttribute)) ||
+            []),
+          e,
+        ]),
+      new Map()
+    );
+
   #handleFeatureAdded = async (feature) => {
     const coords = feature.getGeometry().getCoordinates();
 
@@ -171,7 +187,10 @@ export default class PropertyCheckerModel {
       coords,
       this.#digitalPlansLayer
     );
-    console.log("digitalPlanFeatures: ", digitalPlanFeatures);
+    const groupedDigitalPlanFeatures = Object.fromEntries(
+      this.#groupedMap(digitalPlanFeatures)
+    );
+    console.log("groupedDigitalPlanFeatures: ", groupedDigitalPlanFeatures);
 
     // Let's grab the features from our check layer
     const checkLayerFeatures = await this.#getOlFeaturesForCoordsAndOlLayer(
@@ -180,7 +199,7 @@ export default class PropertyCheckerModel {
     );
     const groupedFeatures = this.#groupFeaturesByAttributeName(
       checkLayerFeatures,
-      this.#attributeNameToGroupBy // the attribute name that we wish to group on
+      this.#groupCheckLayerByAttribute // the attribute name that we wish to group on
     );
     console.log("groupedFeatures in Model: ", groupedFeatures);
     // If we've got at least one feature in the response

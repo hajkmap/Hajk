@@ -22,6 +22,7 @@ import {
 
 import { Box } from "@mui/system";
 import FeatureItem from "./FeatureItem.js";
+import DigitalPlanItem from "./DigitalPlanItem.js";
 import ReportDialog from "./ReportDialog.js";
 
 function PropertyItem({
@@ -44,6 +45,10 @@ function PropertyItem({
   const [currentPropertyName, setCurrentPropertyName] = useState("");
   const [selectedTab, setSelectedTab] = useState(0);
 
+  // This map will hold values for user's own notes that can be written
+  // for each layer in the list.
+  const [layerNotes, setLayerNotes] = useState({});
+
   return (
     <React.Fragment>
       <ReportDialog
@@ -51,6 +56,7 @@ function PropertyItem({
         setReportDialogVisible={setReportDialogVisible}
         currentPropertyName={currentPropertyName}
         controlledLayers={controlledLayers}
+        layerNotes={layerNotes}
         userDetails={userDetails}
       />
       <Accordion disableGutters defaultExpanded={startExpanded}>
@@ -114,15 +120,24 @@ function PropertyItem({
                       olMap={olMap}
                       globalObserver={globalObserver}
                       controlledLayers={controlledLayers}
-                      propertyName={features.markerFeature.get("fastighet")}
                       setControlledLayers={setControlledLayers}
+                      layerNotes={layerNotes}
+                      setLayerNotes={setLayerNotes}
+                      propertyName={features.markerFeature.get("fastighet")}
                     />
                   )
                 );
               })}
           </Box>
           <Box hidden={selectedTab !== 1}>
-            <Typography>Planbestämmelser</Typography>
+            <Typography variant="button" paragraph gutterBottom>
+              Granskning har gjorts mot följande planbestämmelser:
+            </Typography>
+            <List>
+              {digitalPlanFeatures.map((f, j) => {
+                return <DigitalPlanItem feature={f} key={j} />;
+              })}
+            </List>
           </Box>
         </AccordionDetails>
       </Accordion>

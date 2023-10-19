@@ -52,7 +52,9 @@ function PropertyChecker(props) {
     () =>
       new PropertyCheckerModel({
         app: props.app,
-        attributeNameToGroupBy: props.options.attributeNameToGroupBy,
+        groupCheckLayerByAttribute: props.options.groupCheckLayerByAttribute,
+        groupDigitalPlansLayerByAttribute:
+          props.options.groupDigitalPlansLayerByAttribute,
         checkLayerId: props.options.checkLayerId,
         digitalPlansLayerId: props.options.digitalPlansLayerId,
         drawModel: drawModel,

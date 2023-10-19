@@ -9,18 +9,21 @@ import {
   DialogTitle,
   List,
   ListItem,
+  ListItemAvatar,
   ListItemIcon,
   ListItemText,
   Typography,
 } from "@mui/material";
 
 import CheckBoxIcon from "@mui/icons-material/CheckBox";
+import { Box } from "@mui/system";
 
 export default function ReportDialog({
   reportDialogVisible,
   setReportDialogVisible,
   currentPropertyName,
   controlledLayers,
+  layerNotes,
   userDetails,
 }) {
   // Helper: Prepare plain text version of the report, used for clipboard.
@@ -38,7 +41,8 @@ export default function ReportDialog({
             // to look like a list, so let's start with an indentation and a dash.
             // Next, print layer's caption and subcaption (if it exists).
             ` - ${l.caption}` +
-              (l.subcaption !== null ? ` (${l.subcaption})` : "")
+              (l.subcaption !== null ? ` (${l.subcaption})` : "") +
+              `\n    ${getLayerNotesAsArray(l.id)?.join("      \n")}`
         )
         .join("\n") + // Finally, join the array into a string using new line as join character.
       "\n\n" +
@@ -112,6 +116,16 @@ export default function ReportDialog({
     }
   };
 
+  const getLayerNotesAsArray = (lid) => {
+    // Let's use the 'lid' (layer ID) to find a corresponding
+    // value in layerNotes. Next, split on new lines and remove
+    // duplicate new lines. Finally, put it all together to an array
+    // of strings. This way, each element will hold its own paragraph
+    // and we'll be able to style these paragraphs however we want,
+    // depending on the rendering method (MUI? Html? Plain text?).
+    return layerNotes?.[lid]?.split("\n").filter((s) => s.length > 0) || [];
+  };
+
   return (
     reportDialogVisible && (
       <Dialog
@@ -134,13 +148,36 @@ export default function ReportDialog({
             {controlledLayers.map((l, key) => {
               return (
                 l.propertyName === currentPropertyName && (
-                  <ListItem key={key}>
-                    <ListItemIcon>
+                  <ListItem key={key} alignItems="flex-start">
+                    <ListItemAvatar>
                       <CheckBoxIcon />
-                    </ListItemIcon>
-                    <ListItemText secondary={l.subcaption}>
-                      {l.caption}
-                    </ListItemText>
+                    </ListItemAvatar>
+                    <ListItemText
+                      disableTypography
+                      primary={
+                        <Box sx={{ mb: 1 }}>
+                          <Typography variant="h6" element="div">
+                            {l.caption}
+                          </Typography>
+                          <Typography variant="body2" element="div">
+                            {l.subcaption}
+                          </Typography>
+                        </Box>
+                      }
+                      secondary={
+                        <>
+                          {getLayerNotesAsArray(l.id).map((s, i) => (
+                            <Typography
+                              key={i}
+                              variant="caption"
+                              sx={{ display: "block" }}
+                            >
+                              {s}
+                            </Typography>
+                          ))}
+                        </>
+                      }
+                    />
                   </ListItem>
                 )
               );

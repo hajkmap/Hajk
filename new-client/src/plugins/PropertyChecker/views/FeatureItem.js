@@ -1,28 +1,37 @@
 import React, { useEffect, useId } from "react";
+import { styled } from "@mui/material/styles";
+
 import {
-  Accordion,
-  AccordionDetails,
-  AccordionSummary,
-  Button,
+  Card,
+  CardContent,
+  CardHeader,
   Checkbox,
-  Icon,
-  ListItem,
-  ListItemButton,
-  ListItemIcon,
-  ListItemText,
+  Collapse,
+  IconButton,
   Switch,
   TextField,
-  Typography,
 } from "@mui/material";
-import { ExpandMore, CheckCircleOutline } from "@mui/icons-material";
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+
+const ExpandMore = styled((props) => {
+  const { expand, ...other } = props;
+  return <IconButton {...other} />;
+})(({ theme, expand }) => ({
+  transform: !expand ? "rotate(0deg)" : "rotate(180deg)",
+  marginLeft: "auto",
+  transition: theme.transitions.create("transform", {
+    duration: theme.transitions.duration.shortest,
+  }),
+}));
 
 const FeatureItem = (props) => {
   const {
-    clickedPointsCoordinates,
+    layerNotes,
+    setLayerNotes,
     controlledLayers,
+    setControlledLayers,
     olLayer,
     propertyName,
-    setControlledLayers,
   } = props;
 
   // Some commonly used properties that we want to extract.
@@ -51,34 +60,38 @@ const FeatureItem = (props) => {
   const [visible, setVisible] = React.useState(olLayer.getVisible());
   const layerVisibilityChanged = (e) => setVisible(!e.oldValue);
 
-  // Prepare some consts, needed for GetFeatureInfoUrl.
-  const resolution = olLayer.getMapInternal().getView().getResolution();
-  const referenceSystem = olLayer
-    .getMapInternal()
-    .getView()
-    .getProjection()
-    .getCode();
+  // Used to keep track of the expansion area below the main layer item
+  const [expanded, setExpanded] = React.useState(false);
+  const handleExpandClick = () => setExpanded(!expanded);
 
-  const triggerGetFeatureInfo = () => {
-    // TODO: Instead of this, I could rather reuse
-    // MapClickModel#query(olLayer, {coordinate: clickedPointsCoordinates})
-    const params = { INFO_FORMAT: olLayer.getSource().getParams().INFO_FORMAT };
-    const getFeatureInfoUrl = olLayer
-      .getSource()
-      .getFeatureInfoUrl(
-        clickedPointsCoordinates,
-        resolution,
-        referenceSystem,
-        params
-      );
-    console.log("Will trigger GetFeatureInfo for ", clickedPointsCoordinates);
-    console.log("getFeatureInfoUrl: ", getFeatureInfoUrl);
-  };
+  // // Prepare some consts, needed for GetFeatureInfoUrl.
+  // const resolution = olLayer.getMapInternal().getView().getResolution();
+  // const referenceSystem = olLayer
+  //   .getMapInternal()
+  //   .getView()
+  //   .getProjection()
+  //   .getCode();
 
-  // Helper to get layer's infoclick icon, as configured in Admin
-  const getInfoclickIcon = (l) =>
-    l.get("layerInfo")?.layersInfo[layer]?.infoclickIcon ||
-    l.get("layerInfo")?.infoclickIcon;
+  // const triggerGetFeatureInfo = () => {
+  //   // TODO: Instead of this, I could rather reuse
+  //   // MapClickModel#query(olLayer, {coordinate: clickedPointsCoordinates})
+  //   const params = { INFO_FORMAT: olLayer.getSource().getParams().INFO_FORMAT };
+  //   const getFeatureInfoUrl = olLayer
+  //     .getSource()
+  //     .getFeatureInfoUrl(
+  //       clickedPointsCoordinates,
+  //       resolution,
+  //       referenceSystem,
+  //       params
+  //     );
+  //   console.log("Will trigger GetFeatureInfo for ", clickedPointsCoordinates);
+  //   console.log("getFeatureInfoUrl: ", getFeatureInfoUrl);
+  // };
+
+  // // Helper to get layer's infoclick icon, as configured in Admin
+  // const getInfoclickIcon = (l) =>
+  //   l.get("layerInfo")?.layersInfo[layer]?.infoclickIcon ||
+  //   l.get("layerInfo")?.infoclickIcon;
 
   // Let's listen to layer's own onChange event. This allows
   // us to reflect the current visibility state in our list.
@@ -98,68 +111,61 @@ const FeatureItem = (props) => {
   const isSelected = () =>
     controlledLayers.filter((l) => l.id === selectionFormat.id).length > 0;
 
+  const handleLayerNoteChange = (e) => {
+    setLayerNotes({ ...layerNotes, ...{ [id]: e.target.value } });
+  };
+
   return (
-    <Accordion
-      // defaultExpanded={Object.keys(groupedFeatures).length === 1} // Start with expanded by default if only one item exists
-      disableGutters
-    >
-      <AccordionSummary expandIcon={<ExpandMore />}>
-        <Switch edge="start" onChange={handleLayerToggle} checked={visible} />
-        <Checkbox
-          edge="start"
-          onChange={(e) => {
-            setControlledLayers((prev) => {
-              // If layer is already selected using the checkbox…
-              if (isSelected()) {
-                // … let's uncheck the box by the removing element with current layer's ID.
-                return prev.filter((l) => l.id !== selectionFormat.id);
-              } else {
-                // Else, let's check the box by adding the new element.
-                return [...prev, selectionFormat];
-              }
-            });
-          }}
-          checked={isSelected()}
-        />
-        <Typography variant="button" paragraph>
-          {caption}
-        </Typography>
-        {subcaption && (
-          <Typography paragraph variant="caption">
-            {subcaption}
-          </Typography>
-        )}
-        {/* <ListItem
-          disablePadding
-          secondaryAction={
-            <>
-              <Button onClick={triggerGetFeatureInfo}>
-                <CheckCircleOutline />
-              </Button> }
-            </>
-          }
-        >
-          <ListItemButton onClick={handleLayerToggle} disableRipple>
-            <ListItemIcon>
-            <Icon>{getInfoclickIcon(olLayer)}</Icon>
-          </ListItemIcon>
-            <ListItemText primary={caption} secondary={subcaption} />
-          </ListItemButton>
-        </ListItem> */}
-      </AccordionSummary>
-      <AccordionDetails>
-        {/* <ListItem> */}
-        <TextField
-          id="outlined-multiline-flexible"
-          label="Notering"
-          multiline
-          fullWidth
-          size="small"
-          maxRows={4}
-        />
-        {/* </ListItem> */}
-      </AccordionDetails>
-    </Accordion>
+    <Card variant="outlined">
+      <CardHeader
+        avatar={
+          <Switch edge="start" onChange={handleLayerToggle} checked={visible} />
+        }
+        action={
+          <>
+            <Checkbox
+              onChange={(e) => {
+                setControlledLayers((prev) => {
+                  // If layer is already selected using the checkbox…
+                  if (isSelected()) {
+                    // … let's uncheck the box by the removing element with current layer's ID.
+                    return prev.filter((l) => l.id !== selectionFormat.id);
+                  } else {
+                    // Else, let's check the box by adding the new element.
+                    return [...prev, selectionFormat];
+                  }
+                });
+              }}
+              checked={isSelected()}
+            />
+            <ExpandMore
+              expand={expanded}
+              onClick={handleExpandClick}
+              aria-expanded={expanded}
+              aria-label="show more"
+            >
+              <ExpandMoreIcon />
+            </ExpandMore>
+          </>
+        }
+        title={caption}
+        subheader={subcaption}
+      />
+
+      <Collapse in={expanded} timeout="auto">
+        <CardContent>
+          <TextField
+            label="Notering"
+            multiline
+            fullWidth
+            size="small"
+            maxRows={4}
+            onChange={handleLayerNoteChange}
+            value={layerNotes?.id}
+          />
+        </CardContent>
+      </Collapse>
+    </Card>
   );
 };
 
