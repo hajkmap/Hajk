@@ -83,7 +83,7 @@ export default function PrintView(props) {
   };
 
   // We want to keep track of the number of images that are about to be printed with the current settings so that we can warn the user etc.
-  const numImages = Math.floor((dateRange[1] - dateRange[0]) / stepSize);
+  const numImages = Math.floor((dateRange[1] - dateRange[0]) / stepSize + 1);
   // We don't want to allow the user to print to many images... Every image takes a couple of seconds...
   const printDisabled = numImages > MAX_IMAGES_FOR_PRINT;
   // We also want to warn the user by highlighting the information panel if we are close (or over) the maximum number of images...
