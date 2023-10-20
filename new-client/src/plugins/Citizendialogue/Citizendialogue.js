@@ -1,15 +1,12 @@
 // Generic imports – all plugins need these.
 // (BaseWindowPlugin can be substituted with DialogWindowPlugin though.)
-import React, { useState } from "react";
+import React from "react";
 import BaseWindowPlugin from "../BaseWindowPlugin";
 
 // Plugin-specific imports. Most plugins will need a Model, View and Observer but make sure to only create and import whatever you need.
 import CitizendialogueModel from "./CitizendialogueModel";
 import CitizendialogueView from "./CitizendialogueView";
-import EditView from "./EditView.js";
-import EditModel from "./EditModel.js";
 import Observer from "react-event-observer";
-import { Button } from "@mui/material";
 
 // All plugins will need to display an icon. Make sure to pick a relevant one from MUI Icons.
 import AppRegistrationIcon from "@mui/icons-material/AppRegistration";
@@ -126,22 +123,6 @@ function Citizendialogue(props) {
     surveyAnswerId: generateUniqueID(),
   });
 
-  const [editModel] = React.useState(
-    () =>
-      new EditModel({
-        map: props.map,
-        app: props.app,
-        observer: localObserver,
-        options: props.options,
-        surveyJsData: surveyjsData,
-      })
-  );
-
-  const [showEditView, setShowEditView] = useState(false);
-  const [editViewKey, setEditViewKey] = useState(Date.now());
-  const resetEditView = () => {
-    setEditViewKey(Date.now());
-  };
   // Render is now super-simplified compared to previous versions of Hajk.
   // All common functionality that has to do with showing a Window, and rendering
   // Drawer or Widget buttons, as well as keeping the state of Window, are now
@@ -176,23 +157,6 @@ function Citizendialogue(props) {
       <div>
         {/* This is the child object of BaseWindowPlugin. It will be displayed
             as content inside the plugin's window. */}
-
-        <Button onClick={() => setShowEditView(!showEditView)}>
-          {showEditView
-            ? "Stäng verktyget redigering av karta"
-            : "Klicka här för att markera koordinater i kartan"}
-        </Button>
-
-        {showEditView && (
-          <EditView
-            key={editViewKey}
-            app={props.app}
-            model={editModel}
-            observer={localObserver}
-            surveyJsData={surveyjsData}
-            resetView={resetEditView}
-          />
-        )}
 
         <CitizendialogueView
           {...props}

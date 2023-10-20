@@ -1,8 +1,11 @@
 // Make sure to only import the hooks you intend to use
-import React, { useCallback, useEffect } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import * as Survey from "survey-react-ui";
 import "survey-core/defaultV2.min.css";
 import "survey-core/i18n/swedish";
+
+import EditView from "./EditView.js";
+import EditModel from "./EditModel.js";
 
 import { Box, Typography } from "@mui/material";
 import AppRegistrationIcon from "@mui/icons-material/AppRegistration";
@@ -94,6 +97,17 @@ function CitizendialogueView(props) {
   // - Remember the cleanup-function! Especially when you're working with subscriptions.
   // - Remember that you can use several useEffect hooks! Maybe you want to do something when 'counter' changes?
 
+  const [editModel] = React.useState(
+    () =>
+      new EditModel({
+        map: props.map,
+        app: props.app,
+        observer: props.localObserver,
+        options: props.options,
+        surveyJsData: props.surveyJsData,
+      })
+  );
+
   const surveyJSON = {
     title: "Enkel enkät",
     language: "sv",
@@ -146,20 +160,34 @@ function CitizendialogueView(props) {
           {
             type: "html",
             name: "placeholderForEditView",
-            html: "<div id='edit-view-container'></div>",
+            html: "<p>Klicka på knappen nedan så kommer det fram ett verktyg som du kan använda för att redigera kartan</p>",
           },
           {
             type: "html",
-            name: "renderEditViewButton",
-            html: "<button id='btnRenderEditView'>Klicka här för att markera koordinater i kartan</button>",
+            name: "customButton",
+            html: "<button onClick='showEditComponent()'>Klicka här för att markera koordinater i kartan</button>",
           },
         ],
       },
     ],
   };
 
+  const [showEditView, setShowEditView] = useState(false);
+  const [editViewKey, setEditViewKey] = useState(Date.now());
+  const resetEditView = () => {
+    setEditViewKey(Date.now());
+  };
+
+  useEffect(() => {
+    window.showEditComponent = () => setShowEditView(true);
+    return () => {
+      window.showEditComponent = null;
+    };
+  }, []);
+
   //Combine ID/Name and surveydata
   const handleOnComplete = (survey) => {
+    setShowEditView(false);
     const combinedData = { ...props.surveyJsData, ...survey.data };
     props.model.handleOnComplete(combinedData);
   };
@@ -169,6 +197,17 @@ function CitizendialogueView(props) {
   return (
     <>
       <Survey.Survey json={surveyJSON} onComplete={handleOnComplete} />
+
+      {showEditView && (
+        <EditView
+          key={editViewKey}
+          app={props.app}
+          model={editModel}
+          observer={props.localObserver}
+          surveyJsData={props.surveyJsData}
+          resetView={resetEditView}
+        />
+      )}
     </>
   );
 }
