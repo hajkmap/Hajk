@@ -370,7 +370,7 @@ class EditModel {
       const properties = feature.getProperties();
       const fieldNames = Object.keys(properties);
       const surveyAnswerId = String(properties[fieldNames[3]] || "");
-      return surveyAnswerId.trim() === this.surveyJsData.svarsID.trim();
+      return surveyAnswerId.trim() === this.surveyJsData.surveyAnswerId.trim();
     });
 
     /*const filteredFeatures = features.filter((feature) => {

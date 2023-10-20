@@ -173,9 +173,8 @@ class EditView extends React.PureComponent {
   onSaveClicked = () => {
     const { model, app } = this.props;
     const editValues = {
-      SURVEYID: this.props.surveyJsData.enkatnamn,
-      SURVEYANSWERID: this.props.surveyJsData.svarsID,
-      //... (other values you want to pass)
+      SURVEYID: this.props.surveyJsData.surveyId,
+      SURVEYANSWERID: this.props.surveyJsData.surveyAnswerId,
     };
 
     model.save(editValues, (response) => {

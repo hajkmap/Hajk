@@ -1,7 +1,8 @@
 // Make sure to only import the hooks you intend to use
 import React, { useCallback, useEffect } from "react";
-import * as Survey from "survey-react";
-import "survey-react/survey.css"; // standard-styling
+import * as Survey from "survey-react-ui";
+import "survey-core/defaultV2.min.css";
+import "survey-core/i18n/swedish";
 
 import { Box, Typography } from "@mui/material";
 import AppRegistrationIcon from "@mui/icons-material/AppRegistration";
@@ -95,6 +96,7 @@ function CitizendialogueView(props) {
 
   const surveyJSON = {
     title: "Enkel enkät",
+    language: "sv",
     pages: [
       {
         name: "page1",

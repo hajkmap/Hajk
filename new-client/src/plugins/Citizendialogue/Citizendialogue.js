@@ -1,6 +1,5 @@
 // Generic imports – all plugins need these.
 // (BaseWindowPlugin can be substituted with DialogWindowPlugin though.)
-//import React from "react";
 import React, { useState } from "react";
 import BaseWindowPlugin from "../BaseWindowPlugin";
 
@@ -10,14 +9,10 @@ import CitizendialogueView from "./CitizendialogueView";
 import EditView from "./EditView.js";
 import EditModel from "./EditModel.js";
 import Observer from "react-event-observer";
+import { Button } from "@mui/material";
 
 // All plugins will need to display an icon. Make sure to pick a relevant one from MUI Icons.
 import AppRegistrationIcon from "@mui/icons-material/AppRegistration";
-import { Button } from "@mui/material";
-
-// We might want to import some other classes or constants etc.
-import { DEFAULT_MEASUREMENT_SETTINGS } from "./constants";
-import DrawModel from "models/DrawModel";
 
 /**
  * @summary Main component for the Citizendialogue-plugin.
@@ -38,9 +33,12 @@ function Citizendialogue(props) {
   const [pluginShown, setPluginShown] = React.useState(
     props.options.visibleAtStart ?? false
   );
+  if (pluginShown) {
+    // Do something if value are true
+  }
   // Another state variable we need to keep track off is the current draw-interaction. (Used to tell the drawModel
   // what we want to draw). Since this is an example, we'll keep it simple: It will either be set to "Polygon" or "" (off).
-  const [drawInteraction, setDrawInteraction] = React.useState("");
+  // -> const [drawInteraction, setDrawInteraction] = React.useState("");
   // We're gonna want to initiate an observer which can be used for communication within the component.
   // We must remember that in functional components all code within the component runs on every render.
   // This means that if we would initiate the observer as follow:
@@ -72,18 +70,6 @@ function Citizendialogue(props) {
         map: props.map,
       })
   );
-  // There are some core models that can be used as well. The core models take care of logic that is used in several places in the application.
-  // Some example core models are: SearchModel (for searching in WFS etc.), DrawModel (for drawing on the map), KmlModel (for importing/exporting .kml).
-  // Let's initiate the DrawModel!
-  const [drawModel] = React.useState(
-    () =>
-      new DrawModel({
-        layerName: "pluginCitizendialogue",
-        map: props.map,
-        observer: localObserver,
-        measurementSettings: DEFAULT_MEASUREMENT_SETTINGS,
-      })
-  );
 
   // Subscriptions to events etc. should be done in the useEffect hooks. Pay attention to the
   // return (cleanup) function which makes sure to unsubscribe from the event when the component unmounts.
@@ -100,17 +86,6 @@ function Citizendialogue(props) {
       localObserver.unsubscribe(citizendialogueEvent);
     };
   }, [localObserver]); // <-- Dependency array, specifies which objects changes will trigger the effect to run
-
-  // Here's an affect that fires when the pluginShown or activeDrawType state changes. It makes sure to toggle the
-  // draw-interaction (either off if the plugin-window has been closed, or to whatever the currentDrawInteraction is set to.
-  React.useEffect(() => {
-    // If pluginShown is set to false, we toggle the draw-interaction to "" (off).
-    if (!pluginShown) {
-      return drawModel.toggleDrawInteraction("");
-    }
-    // Otherwise we'll set it to whatever the current draw-interaction is.
-    return drawModel.toggleDrawInteraction(drawInteraction);
-  }, [drawModel, drawInteraction, pluginShown]); // We need to keep the drawModel in the dep. arr. since it _could_ change.
 
   // Used to update title/color (or any other state variable…). Title and color are passed on to BaseWindowPlugin as props,
   // and will result in updating the Window's color/title. Note that we put this method here, in Citizendialogue.js, and then pass it on
@@ -147,8 +122,8 @@ function Citizendialogue(props) {
   }
 
   const [surveyjsData] = React.useState({
-    enkatnamn: "Rynningeviken1",
-    svarsID: generateUniqueID(),
+    surveyId: "Rynningeviken1",
+    surveyAnswerId: generateUniqueID(),
   });
 
   const [editModel] = React.useState(
@@ -228,8 +203,6 @@ function Citizendialogue(props) {
           localObserver={localObserver} // And also the local-observer (handling communication within the plugin)...
           globalObserver={props.app.globalObserver} // ... and the global-observer (handling communication within the entire application).
           updateCustomProp={updateCustomProp} // We're also gonna pass a function that we can use to update the state in this (the parent) component.
-          drawInteraction={drawInteraction} // We want to show what the current draw-interaction is in the view.
-          setDrawInteraction={setDrawInteraction} // Finally, we'll pass the updater for the draw-interaction state (so that we can toggle draw on/off).
           surveyJsData={surveyjsData}
         />
       </div>
