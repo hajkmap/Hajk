@@ -6,9 +6,7 @@ import { Step, StepContent, StepLabel, Stepper } from "@mui/material";
 import MenuItem from "@mui/material/MenuItem";
 import InputLabel from "@mui/material/InputLabel";
 import Grid from "@mui/material/Grid";
-import Button from "@mui/material/Button";
 import Select from "@mui/material/Select";
-import SaveIcon from "@mui/icons-material/Save";
 import CircularProgress from "@mui/material/CircularProgress";
 import Typography from "@mui/material/Typography";
 
@@ -22,6 +20,7 @@ class EditView extends React.PureComponent {
       activeStep: 0,
       activeTool: undefined,
       surveyname: this.props.surveyJsData,
+      isHidden: true,
     };
     this.bindSubscriptions();
   }
@@ -183,6 +182,7 @@ class EditView extends React.PureComponent {
         (response.ExceptionReport || !response.TransactionResponse)
       ) {
         this.props.observer.publish("editFeature", model.editFeatureBackup);
+        // Send an alert only when there's an error.
         app.globalObserver.publish(
           "core.alert",
           this.getStatusMessage(response)
@@ -192,10 +192,6 @@ class EditView extends React.PureComponent {
         model.refreshEditingLayer();
         model.editFeatureBackup = undefined;
         this.handleNext();
-        app.globalObserver.publish(
-          "core.alert",
-          this.getStatusMessage(response)
-        );
         this.toggleActiveTool(undefined);
         model.deactivateInteraction();
       }
@@ -260,7 +256,6 @@ class EditView extends React.PureComponent {
       <>
         <Stepper activeStep={activeStep} orientation="vertical">
           <Step key="1">
-            <StepLabel>Välj datamängd att redigera</StepLabel>
             <StepContent>
               <Grid container spacing={2} direction="row">
                 <Grid item xs={12}>
@@ -287,51 +282,10 @@ class EditView extends React.PureComponent {
                   {editSource?.simpleEditWorkflow === true &&
                     this.resetEditFeatureInModel()}
                 </Grid>
-                {!editFeature && (
-                  <>
-                    {/*<Grid item xs={6}>
-                      <Button
-                        fullWidth
-                        onClick={this.handlePrev}
-                        variant="contained"
-                      >
-                        Bakåt
-                      </Button>
-                </Grid>*/}
-                    <Grid item xs={6}>
-                      <Button
-                        fullWidth
-                        variant="contained"
-                        endIcon={<SaveIcon></SaveIcon>}
-                        disabled={!editSource}
-                        color="primary"
-                        onClick={this.onSaveClicked}
-                      >
-                        Spara
-                      </Button>
-                    </Grid>
-                  </>
-                )}
+                {!editFeature && <></>}
               </Grid>
             </StepContent>
           </Step>
-          {/*<Step key="3">
-            <StepLabel>Klart!</StepLabel>
-            <StepContent>
-              <Grid container spacing={2} direction="row">
-                <Grid item xs={12}>
-                  <Button
-                    fullWidth
-                    variant="contained"
-                    color="primary"
-                    onClick={this.handlePrev}
-                  >
-                    Fortsätt redigera
-                  </Button>
-                </Grid>
-              </Grid>
-            </StepContent>
-              </Step>*/}
         </Stepper>
       </>
     );

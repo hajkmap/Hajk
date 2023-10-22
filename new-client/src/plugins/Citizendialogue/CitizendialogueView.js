@@ -1,5 +1,5 @@
 // Make sure to only import the hooks you intend to use
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState, useRef } from "react";
 import * as Survey from "survey-react-ui";
 import "survey-core/defaultV2.min.css";
 import "survey-core/i18n/swedish";
@@ -159,13 +159,13 @@ function CitizendialogueView(props) {
         elements: [
           {
             type: "html",
-            name: "placeholderForEditView",
-            html: "<p>Klicka på knappen nedan så kommer det fram ett verktyg som du kan använda för att redigera kartan</p>",
+            name: "geometri1-question5",
+            html: "<button id='editButton'>Klicka här för att markera koordinater i kartan</button>",
           },
           {
-            type: "html",
-            name: "geometri1",
-            html: "<button id='editButton'>Klicka här för att markera koordinater i kartan</button>",
+            type: "comment",
+            name: "question5",
+            title: "Kommentarer om platsen som du markerat i kartan?",
           },
         ],
       },
@@ -193,12 +193,17 @@ function CitizendialogueView(props) {
   const resetEditView = () => {
     setEditViewKey(Date.now());
   };
+  const editViewRef = useRef(null);
 
   //Combine ID/Name and surveydata
   const handleOnComplete = (survey) => {
     setShowEditView(false);
     const combinedData = { ...props.surveyJsData, ...survey.data };
     props.model.handleOnComplete(combinedData);
+
+    if (editViewRef.current) {
+      editViewRef.current.onSaveClicked();
+    }
   };
 
   const handleAfterRenderQuestion = (sender, options) => {
@@ -217,6 +222,9 @@ function CitizendialogueView(props) {
 
   const handlePageChange = () => {
     setShowEditView(false);
+    if (editViewRef.current) {
+      editViewRef.current.onSaveClicked();
+    }
   };
 
   Survey.surveyLocalization.defaultLocale = "sv";
@@ -239,6 +247,8 @@ function CitizendialogueView(props) {
           surveyJsData={props.surveyJsData}
           resetView={resetEditView}
           currentQuestionName={currentQuestionName}
+          onSaveCallback={handleOnComplete}
+          ref={editViewRef}
         />
       )}
     </>
