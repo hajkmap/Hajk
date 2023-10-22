@@ -164,26 +164,35 @@ function CitizendialogueView(props) {
           },
           {
             type: "html",
-            name: "customButton",
-            html: "<button onClick='showEditComponent()'>Klicka här för att markera koordinater i kartan</button>",
+            name: "geometri1",
+            html: "<button id='editButton'>Klicka här för att markera koordinater i kartan</button>",
+          },
+        ],
+      },
+      {
+        name: "page4",
+        elements: [
+          {
+            type: "html",
+            name: "placeholderForEditView",
+            html: "<p>Klicka på knappen nedan så kommer det fram ett verktyg som du kan använda för att redigera kartan</p>",
+          },
+          {
+            type: "html",
+            name: "geometri2",
+            html: "<button id='editButton'>Klicka här för att markera koordinater i kartan</button>",
           },
         ],
       },
     ],
   };
 
+  const [currentQuestionName, setCurrentQuestionName] = useState(null);
   const [showEditView, setShowEditView] = useState(false);
   const [editViewKey, setEditViewKey] = useState(Date.now());
   const resetEditView = () => {
     setEditViewKey(Date.now());
   };
-
-  useEffect(() => {
-    window.showEditComponent = () => setShowEditView(true);
-    return () => {
-      window.showEditComponent = null;
-    };
-  }, []);
 
   //Combine ID/Name and surveydata
   const handleOnComplete = (survey) => {
@@ -196,7 +205,26 @@ function CitizendialogueView(props) {
 
   return (
     <>
-      <Survey.Survey json={surveyJSON} onComplete={handleOnComplete} />
+      <Survey.Survey
+        json={surveyJSON}
+        onComplete={handleOnComplete}
+        onAfterRenderQuestion={(sender, options) => {
+          const currentQuestion = options.question;
+          if (currentQuestion.name.startsWith("geom")) {
+            setCurrentQuestionName(currentQuestion.name);
+            const editButton = document.getElementById("editButton");
+            if (editButton) {
+              editButton.onclick = (e) => {
+                e.preventDefault();
+                setShowEditView(true);
+              };
+            }
+          }
+        }}
+        onCurrentPageChanged={() => {
+          setShowEditView(false);
+        }}
+      />
 
       {showEditView && (
         <EditView
@@ -206,6 +234,7 @@ function CitizendialogueView(props) {
           observer={props.localObserver}
           surveyJsData={props.surveyJsData}
           resetView={resetEditView}
+          currentQuestionName={currentQuestionName}
         />
       )}
     </>
