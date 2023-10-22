@@ -1,12 +1,6 @@
 import React from "react";
 import Toolbar from "./components/Toolbar";
-import FormControl from "@mui/material/FormControl";
-import FormHelperText from "@mui/material/FormHelperText";
-import { Step, StepContent, StepLabel, Stepper } from "@mui/material";
-import MenuItem from "@mui/material/MenuItem";
-import InputLabel from "@mui/material/InputLabel";
 import Grid from "@mui/material/Grid";
-import Select from "@mui/material/Select";
 import CircularProgress from "@mui/material/CircularProgress";
 import Typography from "@mui/material/Typography";
 
@@ -31,6 +25,7 @@ class EditView extends React.PureComponent {
       this.setLayer(sources[0].id);
       this.setState({ activeStep: 0 });
     }
+    console.log(this.props);
   }
 
   bindSubscriptions = () => {
@@ -174,6 +169,7 @@ class EditView extends React.PureComponent {
     const editValues = {
       SURVEYID: this.props.surveyJsData.surveyId,
       SURVEYANSWERID: this.props.surveyJsData.surveyAnswerId,
+      SURVEYANSWERDATE: this.props.surveyJsData.surveyAnswerDate,
     };
 
     model.save(editValues, (response) => {
@@ -199,39 +195,6 @@ class EditView extends React.PureComponent {
     });
   };
 
-  renderSources() {
-    const { loadingError, editSource } = this.state;
-    return (
-      <FormControl variant="standard" error={loadingError} fullWidth>
-        <InputLabel variant="standard" id="select-source-label">
-          Datakälla
-        </InputLabel>
-        <Select
-          id="select-source"
-          variant="standard"
-          value={editSource?.id || ""}
-          onChange={(e) => {
-            this.setLayer(e.target.value);
-          }}
-        >
-          {this.state.sources.map((source, index) => {
-            return (
-              <MenuItem
-                key={index}
-                value={source.id}
-              >{`${source.caption}`}</MenuItem>
-            );
-          })}
-        </Select>
-        {loadingError && (
-          <FormHelperText>
-            Fel vid laddning av data. Kontakta systemadministratören.
-          </FormHelperText>
-        )}
-      </FormControl>
-    );
-  }
-
   renderToolbar = () => {
     return (
       <Toolbar
@@ -251,42 +214,26 @@ class EditView extends React.PureComponent {
   };
 
   render() {
-    const { activeStep, editSource, editFeature, loading } = this.state;
+    const { editSource, loading } = this.state;
     return (
       <>
-        <Stepper activeStep={activeStep} orientation="vertical">
-          <Step key="1">
-            <StepContent>
-              <Grid container spacing={2} direction="row">
-                <Grid item xs={12}>
-                  {loading ? <CircularProgress /> : this.renderSources()}
-                </Grid>
-              </Grid>
-            </StepContent>
-          </Step>
-          <Step key="2">
-            <StepLabel>
-              {activeStep === 1
-                ? `Redigerar ${editSource?.caption}`
-                : `Redigera`}
-            </StepLabel>
-            <StepContent>
-              <Grid container spacing={2} direction="row">
-                <Grid item xs={12}>
-                  {editSource?.simpleEditWorkflow !== true && (
-                    <>
-                      {this.resetEditFeatureInModel()}
-                      {this.renderToolbar()}
-                    </>
-                  )}
-                  {editSource?.simpleEditWorkflow === true &&
-                    this.resetEditFeatureInModel()}
-                </Grid>
-                {!editFeature && <></>}
-              </Grid>
-            </StepContent>
-          </Step>
-        </Stepper>
+        <Grid container spacing={2} direction="row">
+          <Grid item xs={12}>
+            {loading ? <CircularProgress /> : null}
+          </Grid>
+        </Grid>
+        <Grid container spacing={2} direction="row">
+          <Grid item xs={12}>
+            {editSource?.simpleEditWorkflow !== true && (
+              <>
+                {this.resetEditFeatureInModel()}
+                {this.renderToolbar()}
+              </>
+            )}
+            {editSource?.simpleEditWorkflow === true &&
+              this.resetEditFeatureInModel()}
+          </Grid>
+        </Grid>
       </>
     );
   }

@@ -121,6 +121,9 @@ function Citizendialogue(props) {
   const [surveyjsData] = React.useState({
     surveyId: "Rynningeviken1",
     surveyAnswerId: generateUniqueID(),
+    surveyAnswerDate: `${new Date().getFullYear()}-${String(
+      new Date().getMonth() + 1
+    ).padStart(2, "0")}-${String(new Date().getDate()).padStart(2, "0")}`,
   });
 
   // Render is now super-simplified compared to previous versions of Hajk.

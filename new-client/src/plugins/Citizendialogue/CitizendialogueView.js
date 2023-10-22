@@ -159,7 +159,7 @@ function CitizendialogueView(props) {
         elements: [
           {
             type: "html",
-            name: "geometri1-question5",
+            name: "Geometri1-question5",
             html: "<button id='editButton'>Klicka här för att markera koordinater i kartan</button>",
           },
           {
@@ -179,7 +179,7 @@ function CitizendialogueView(props) {
           },
           {
             type: "html",
-            name: "geometri2",
+            name: "Geometri2",
             html: "<button id='editButton'>Klicka här för att markera koordinater i kartan</button>",
           },
         ],
@@ -208,7 +208,7 @@ function CitizendialogueView(props) {
 
   const handleAfterRenderQuestion = (sender, options) => {
     const currentQuestion = options.question;
-    if (currentQuestion.name.startsWith("geom")) {
+    if (currentQuestion.name.toLowerCase().includes("geom".toLowerCase())) {
       setCurrentQuestionName(currentQuestion.name);
       const editButton = document.getElementById("editButton");
       if (editButton) {
