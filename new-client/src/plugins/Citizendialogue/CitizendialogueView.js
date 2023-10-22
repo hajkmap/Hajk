@@ -201,6 +201,24 @@ function CitizendialogueView(props) {
     props.model.handleOnComplete(combinedData);
   };
 
+  const handleAfterRenderQuestion = (sender, options) => {
+    const currentQuestion = options.question;
+    if (currentQuestion.name.startsWith("geom")) {
+      setCurrentQuestionName(currentQuestion.name);
+      const editButton = document.getElementById("editButton");
+      if (editButton) {
+        editButton.onclick = (e) => {
+          e.preventDefault();
+          setShowEditView(true);
+        };
+      }
+    }
+  };
+
+  const handlePageChange = () => {
+    setShowEditView(false);
+  };
+
   Survey.surveyLocalization.defaultLocale = "sv";
 
   return (
@@ -208,22 +226,8 @@ function CitizendialogueView(props) {
       <Survey.Survey
         json={surveyJSON}
         onComplete={handleOnComplete}
-        onAfterRenderQuestion={(sender, options) => {
-          const currentQuestion = options.question;
-          if (currentQuestion.name.startsWith("geom")) {
-            setCurrentQuestionName(currentQuestion.name);
-            const editButton = document.getElementById("editButton");
-            if (editButton) {
-              editButton.onclick = (e) => {
-                e.preventDefault();
-                setShowEditView(true);
-              };
-            }
-          }
-        }}
-        onCurrentPageChanged={() => {
-          setShowEditView(false);
-        }}
+        onAfterRenderQuestion={handleAfterRenderQuestion}
+        onCurrentPageChanged={handlePageChange}
       />
 
       {showEditView && (
