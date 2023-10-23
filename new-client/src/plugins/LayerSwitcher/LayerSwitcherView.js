@@ -617,7 +617,6 @@ class LayersSwitcherView extends React.PureComponent {
           <LayerItemDetails
             display={this.state.displayContentOverlay === "layerItemDetails"}
             layerItemDetails={this.state.layerItemDetails}
-            map={this.props.map}
             app={this.props.app}
             chapters={this.state.chapters}
             showOpacitySlider={this.props.options.enableTransparencySlider}
