@@ -224,20 +224,14 @@ export default function GroupLayer({
     if (toggleable) {
       return isSubLayerFiltered(subLayer);
     } else if (visibleSubLayers.includes(subLayer)) {
-      return isSubLayerFiltered(subLayer);
+      return true;
     }
     return false;
   };
 
   const isSubLayerFiltered = (subLayer) => {
-    if (groupLayer && groupLayer.subLayers) {
-      const foundSubLayer = groupLayer.subLayers.find(
-        (sl) => sl.id === subLayer
-      );
-      return foundSubLayer ? foundSubLayer.isFiltered : false;
-    } else {
-      return false;
-    }
+    const foundSubLayer = groupLayer.subLayers.find((sl) => sl.id === subLayer);
+    return foundSubLayer ? foundSubLayer.isFiltered : false;
   };
 
   return (

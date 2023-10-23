@@ -13,28 +13,24 @@ import {
   DialogContentText,
   IconButton,
   InputAdornment,
-  InputLabel,
-  FormControl,
-  FormGroup,
   List,
   ListItemButton,
   ListItemIcon,
   ListItemSecondaryAction,
   ListItemText,
-  MenuItem,
   Tooltip,
   Collapse,
   TextField,
   Typography,
-  Select,
   Stack,
+  Divider,
 } from "@mui/material";
 
 import PublicOutlinedIcon from "@mui/icons-material/PublicOutlined";
 import SearchIcon from "@mui/icons-material/Search";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
-import LayersOutlinedIcon from "@mui/icons-material/LayersOutlined";
+import TopicOutlinedIcon from "@mui/icons-material/TopicOutlined";
 
 function LayerPackage({
   display,
@@ -51,10 +47,6 @@ function LayerPackage({
   const [loadLpInfoConfirmation, setLoadLpInfoConfirmation] = useState(null);
   const [missingLayersConfirmation, setMissingLayersConfirmation] =
     useState(null);
-  const [clearExistingQuickAccessLayers, setClearExistingQuickAccessLayers] =
-    useState(true);
-  const [replaceExistingBackgroundLayer, setReplaceExistingBackgroundLayer] =
-    useState(true);
 
   // Because of a warning in dev console, we need special handling of tooltip for backbutton.
   // When a user clicks back, the tooltip of the button needs to be closed before this view hides.
@@ -135,10 +127,8 @@ function LayerPackage({
 
   // Load layers to quickAccess section
   const loadLayers = (layers, title) => {
-    if (clearExistingQuickAccessLayers) {
-      clearQuickAccessLayers();
-    }
-
+    clearQuickAccessLayers();
+    resetVisibleLayers();
     setMissingLayersConfirmation(null);
 
     const allMapLayers = map.getAllLayers();
@@ -164,10 +154,7 @@ function LayerPackage({
           } else {
             globalObserver.publish("layerswitcher.hideLayer", layer);
           }
-        } else if (
-          layer.get("layerType") === "base" &&
-          replaceExistingBackgroundLayer
-        ) {
+        } else if (layer.get("layerType") === "base") {
           // Hide all other background layers
           globalObserver.publish(
             "layerswitcher.backgroundLayerChanged",
@@ -178,7 +165,7 @@ function LayerPackage({
         } else {
           layer.set("visible", l.visible);
         }
-      } else if (l.id < 0 && replaceExistingBackgroundLayer) {
+      } else if (l.id < 0) {
         // A fake maplayer is in the package
         // Hide all other background layers
         globalObserver.publish("layerswitcher.backgroundLayerChanged", l.id);
@@ -195,8 +182,9 @@ function LayerPackage({
       }
     });
 
-    enqueueSnackbar(`${title} har nu lagts till i snabblager.`, {
+    enqueueSnackbar(`${title} har nu laddats till snabbåtkomst.`, {
       variant: "success",
+      anchorOrigin: { vertical: "bottom", horizontal: "center" },
     });
 
     // Close layerPackage view on load
@@ -227,6 +215,20 @@ function LayerPackage({
       .getAllLayers()
       .filter((l) => l.get("quickAccess") === true)
       .map((l) => l.set("quickAccess", false));
+  };
+
+  // Reset visible layers
+  const resetVisibleLayers = () => {
+    map
+      .getAllLayers()
+      .filter((l) => l.get("visible") === true)
+      .forEach((l) => {
+        if (l.get("layerType") === "group") {
+          globalObserver.publish("layerswitcher.hideLayer", l);
+        } else {
+          l.set("visible", false);
+        }
+      });
   };
 
   // Fires when the user closes the confirmation-window.
@@ -314,55 +316,12 @@ function LayerPackage({
                 getBaseLayerName(loadLpInfoConfirmation.layers)}
             </Typography>
           </Stack>
-          <DialogContentText sx={{ mt: 2, mb: 1 }}>
-            Alternativ vid laddning
-          </DialogContentText>
-          <FormGroup>
-            <FormControl
-              sx={{ my: 1, minWidth: 120, maxWidth: 300 }}
-              size="small"
-            >
-              <InputLabel
-                shrink
-                htmlFor="clearExistingQuickAccessLayers-select"
-              >
-                Snabblager
-              </InputLabel>
-              <Select
-                value={clearExistingQuickAccessLayers}
-                onChange={(event) =>
-                  setClearExistingQuickAccessLayers(event.target.value)
-                }
-                label="Snabblager"
-                id="clearExistingQuickAccessLayers-select"
-              >
-                <MenuItem value={true}>Ersätt befintliga lager</MenuItem>
-                <MenuItem value={false}>Behåll befintliga lager</MenuItem>
-              </Select>
-            </FormControl>
-            <FormControl
-              sx={{ mb: 1, mt: 2, minWidth: 120, maxWidth: 300 }}
-              size="small"
-            >
-              <InputLabel
-                shrink
-                htmlFor="replaceExistingBackgroundLayer-select"
-              >
-                Bakgrund
-              </InputLabel>
-              <Select
-                value={replaceExistingBackgroundLayer}
-                onChange={(event) =>
-                  setReplaceExistingBackgroundLayer(event.target.value)
-                }
-                label="Snabblager"
-                id="replaceExistingBackgroundLayer-select"
-              >
-                <MenuItem value={true}>Ersätt bakgrund</MenuItem>
-                <MenuItem value={false}>Behåll bakgrund</MenuItem>
-              </Select>
-            </FormControl>
-          </FormGroup>
+          <Divider sx={{ mt: 2 }} />
+          <Typography sx={{ mt: 2, mb: 1 }}>
+            Vid laddning kommer aktuella lager i snabbåtkomst att ersättas med
+            temat. Alla tända lager i kartan släcks och ersätts med temats tända
+            lager.
+          </Typography>
         </DialogContent>
         <DialogActions>
           <Button onClick={handleLoadConfirmationAbort}>Avbryt</Button>
@@ -370,7 +329,7 @@ function LayerPackage({
             onClick={() => handleLoadConfirmation(true)}
             variant="contained"
           >
-            Lägg till
+            Ladda
           </Button>
         </DialogActions>
       </Dialog>,
@@ -385,63 +344,14 @@ function LayerPackage({
         open={loadLpConfirmation ? true : false}
         onClose={handleLoadConfirmationAbort}
       >
-        <DialogTitle>Lägg till lagerpaket</DialogTitle>
+        <DialogTitle>Ladda tema</DialogTitle>
         <DialogContent>
           <Typography>
             {loadLpConfirmation
-              ? `Lagerpaketet ${loadLpConfirmation.title} läggs nu till i snabblager.`
+              ? `Aktuella lager i snabbåtkomst kommer nu att ersättas med tema "${loadLpConfirmation.title}". Alla tända lager i kartan släcks och ersätts med temats tända lager.`
               : ""}
             <br></br>
           </Typography>
-          <DialogContentText sx={{ mt: 2, mb: 1 }}>
-            Alternativ vid laddning
-          </DialogContentText>
-          <FormGroup>
-            <FormControl
-              sx={{ my: 1, minWidth: 120, maxWidth: 300 }}
-              size="small"
-            >
-              <InputLabel
-                shrink
-                htmlFor="clearExistingQuickAccessLayers-select"
-              >
-                Snabblager
-              </InputLabel>
-              <Select
-                value={clearExistingQuickAccessLayers}
-                onChange={(event) =>
-                  setClearExistingQuickAccessLayers(event.target.value)
-                }
-                label="Snabblager"
-                id="clearExistingQuickAccessLayers-select"
-              >
-                <MenuItem value={true}>Ersätt befintliga lager</MenuItem>
-                <MenuItem value={false}>Behåll befintliga lager</MenuItem>
-              </Select>
-            </FormControl>
-            <FormControl
-              sx={{ mb: 1, mt: 2, minWidth: 120, maxWidth: 300 }}
-              size="small"
-            >
-              <InputLabel
-                shrink
-                htmlFor="replaceExistingBackgroundLayer-select"
-              >
-                Bakgrund
-              </InputLabel>
-              <Select
-                value={replaceExistingBackgroundLayer}
-                onChange={(event) =>
-                  setReplaceExistingBackgroundLayer(event.target.value)
-                }
-                label="Snabblager"
-                id="replaceExistingBackgroundLayer-select"
-              >
-                <MenuItem value={true}>Ersätt bakgrund</MenuItem>
-                <MenuItem value={false}>Behåll bakgrund</MenuItem>
-              </Select>
-            </FormControl>
-          </FormGroup>
         </DialogContent>
         <DialogActions>
           <Button onClick={handleLoadConfirmationAbort}>Avbryt</Button>
@@ -449,7 +359,7 @@ function LayerPackage({
             onClick={() => handleLoadConfirmation(false)}
             variant="contained"
           >
-            Lägg till
+            Ladda
           </Button>
         </DialogActions>
       </Dialog>,
@@ -525,7 +435,7 @@ function LayerPackage({
               </IconButton>
             </Tooltip>
             <Box sx={{ flexGrow: 1, textAlign: "center" }}>
-              <Typography variant="subtitle1">Lägg till lagerpaket</Typography>
+              <Typography variant="subtitle1">Teman</Typography>
             </Box>
             <IconButton onClick={handleInfoButtonClick}>
               <Tooltip title={infoIsActive ? "Dölj info" : "Visa info"}>
@@ -548,9 +458,8 @@ function LayerPackage({
               }}
             >
               <Typography variant="subtitle2">
-                Här kan du lägga till fördefinierade lagerpaket till snabblager.
-                Paketen innehåller tända och släckta lager med en
-                bakgrundskarta.
+                Här kan du ladda färdiga teman till snabbåtkomst. Teman
+                innehåller tända och släckta lager, samt bakgrund.
               </Typography>
             </Box>
           </Collapse>
@@ -579,50 +488,42 @@ function LayerPackage({
             />
           </Box>
         </Box>
-        <Box
-          sx={{
-            pt: 1,
-            px: 2,
-          }}
-        >
-          <List dense>
-            {!filter.list.length
-              ? "Din filtrering gav inga resultat"
-              : filter.list.map((l) => {
-                  return (
-                    <ListItemButton
-                      dense
-                      key={l.id}
-                      sx={{
-                        border: (theme) =>
-                          `${theme.spacing(0.2)} solid ${
-                            theme.palette.divider
-                          }`,
-                        borderRadius: "8px",
-                        mb: 1,
-                      }}
-                      onClick={() => handleLpClick(l)}
-                    >
-                      <ListItemIcon sx={{ px: 0, minWidth: "34px" }}>
-                        <LayersOutlinedIcon fontSize="small" />
-                      </ListItemIcon>
-                      <ListItemText primary={l.title} secondary={l.author} />
-                      <ListItemSecondaryAction>
-                        <IconButton
-                          onClick={(e) => {
-                            e.preventDefault();
-                            e.stopPropagation();
-                            handleLpInfoClick(l);
-                          }}
-                        >
-                          <Tooltip title={"Information om " + l.title}>
-                            <InfoOutlinedIcon fontSize="small" />
-                          </Tooltip>
-                        </IconButton>
-                      </ListItemSecondaryAction>
-                    </ListItemButton>
-                  );
-                })}
+        <Box>
+          <List dense sx={{ p: 0 }}>
+            {!filter.list.length ? (
+              <Typography sx={{ p: 2 }}>
+                Din filtrering gav inga resultat
+              </Typography>
+            ) : (
+              filter.list.map((l) => {
+                return (
+                  <ListItemButton
+                    dense
+                    key={l.id}
+                    divider
+                    onClick={() => handleLpClick(l)}
+                  >
+                    <ListItemIcon sx={{ px: 0, minWidth: "34px" }}>
+                      <TopicOutlinedIcon fontSize="small" />
+                    </ListItemIcon>
+                    <ListItemText primary={l.title} secondary={l.author} />
+                    <ListItemSecondaryAction>
+                      <IconButton
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          handleLpInfoClick(l);
+                        }}
+                      >
+                        <Tooltip title={"Information om " + l.title}>
+                          <InfoOutlinedIcon fontSize="small" />
+                        </Tooltip>
+                      </IconButton>
+                    </ListItemSecondaryAction>
+                  </ListItemButton>
+                );
+              })
+            )}
           </List>
         </Box>
       </Box>
