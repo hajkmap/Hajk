@@ -11,6 +11,8 @@ import Typography from "@mui/material/Typography";
 import Grid from "@mui/material/Grid";
 
 const StyledButton = styled(Button)(({ selected, theme }) => ({
+  backgroundColor: "white",
+  color: "black",
   borderTop: `${theme.spacing(0.5)} solid transparent`,
   borderBottom: selected
     ? `${theme.spacing(0.5)} solid ${theme.palette.secondary.main}`

@@ -3,6 +3,7 @@ import React, { useCallback, useEffect, useState, useRef } from "react";
 import * as Survey from "survey-react-ui";
 import "survey-core/defaultV2.min.css";
 import "survey-core/i18n/swedish";
+import ReactDOM from "react-dom/client";
 
 import EditView from "./EditView.js";
 import EditModel from "./EditModel.js";
@@ -163,6 +164,11 @@ function CitizendialogueView(props) {
             html: "<button id='editButton'>Klicka här för att markera koordinater i kartan</button>",
           },
           {
+            type: "html",
+            name: "editViewPlaceholder",
+            html: "<div id='editViewContainer'></div>",
+          },
+          {
             type: "comment",
             name: "question5",
             title: "Kommentarer om platsen som du markerat i kartan?",
@@ -182,13 +188,18 @@ function CitizendialogueView(props) {
             name: "Geometri2",
             html: "<button id='editButton'>Klicka här för att markera koordinater i kartan</button>",
           },
+          {
+            type: "html",
+            name: "editViewPlaceholder",
+            html: "<div id='editViewContainer'></div>",
+          },
         ],
       },
     ],
   };
 
-  const [currentQuestionName, setCurrentQuestionName] = useState(null);
   const [showEditView, setShowEditView] = useState(false);
+  const [currentQuestionName, setCurrentQuestionName] = useState(null);
   const [editViewKey, setEditViewKey] = useState(Date.now());
   const resetEditView = () => {
     setEditViewKey(Date.now());
@@ -196,15 +207,18 @@ function CitizendialogueView(props) {
   const editViewRef = useRef(null);
 
   //Combine ID/Name and surveydata
-  const handleOnComplete = (survey) => {
-    setShowEditView(false);
-    const combinedData = { ...props.surveyJsData, ...survey.data };
-    props.model.handleOnComplete(combinedData);
+  const handleOnComplete = React.useCallback(
+    (survey) => {
+      setShowEditView(false);
+      const combinedData = { ...props.surveyJsData, ...survey.data };
+      props.model.handleOnComplete(combinedData);
 
-    if (editViewRef.current) {
-      editViewRef.current.onSaveClicked();
-    }
-  };
+      if (editViewRef.current) {
+        editViewRef.current.onSaveClicked();
+      }
+    },
+    [props.surveyJsData, props.model]
+  );
 
   const handleAfterRenderQuestion = (sender, options) => {
     const currentQuestion = options.question;
@@ -229,16 +243,11 @@ function CitizendialogueView(props) {
 
   Survey.surveyLocalization.defaultLocale = "sv";
 
-  return (
-    <>
-      <Survey.Survey
-        json={surveyJSON}
-        onComplete={handleOnComplete}
-        onAfterRenderQuestion={handleAfterRenderQuestion}
-        onCurrentPageChanged={handlePageChange}
-      />
-
-      {showEditView && (
+  React.useEffect(() => {
+    const container = document.getElementById("editViewContainer");
+    if (showEditView && container) {
+      const root = ReactDOM.createRoot(container);
+      root.render(
         <EditView
           key={editViewKey}
           app={props.app}
@@ -250,7 +259,18 @@ function CitizendialogueView(props) {
           onSaveCallback={handleOnComplete}
           ref={editViewRef}
         />
-      )}
+      );
+    }
+  });
+
+  return (
+    <>
+      <Survey.Survey
+        json={surveyJSON}
+        onComplete={handleOnComplete}
+        onAfterRenderQuestion={handleAfterRenderQuestion}
+        onCurrentPageChanged={handlePageChange}
+      />
     </>
   );
 }

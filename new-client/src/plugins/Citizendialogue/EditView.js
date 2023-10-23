@@ -25,7 +25,6 @@ class EditView extends React.PureComponent {
       this.setLayer(sources[0].id);
       this.setState({ activeStep: 0 });
     }
-    console.log(this.props);
   }
 
   bindSubscriptions = () => {
