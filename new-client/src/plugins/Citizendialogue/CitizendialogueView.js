@@ -165,8 +165,8 @@ function CitizendialogueView(props) {
           },
           {
             type: "html",
-            name: "editViewPlaceholder",
-            html: "<div id='editViewContainer'></div>",
+            name: "editViewContainerPlaceholder1",
+            html: "<div class='editViewContainer'></div>",
           },
           {
             type: "comment",
@@ -190,14 +190,15 @@ function CitizendialogueView(props) {
           },
           {
             type: "html",
-            name: "editViewPlaceholder",
-            html: "<div id='editViewContainer'></div>",
+            name: "editViewContainerPlaceholder2",
+            html: "<div class='editViewContainer'></div>",
           },
         ],
       },
     ],
   };
 
+  const rootMap = useRef(new Map());
   const [showEditView, setShowEditView] = useState(false);
   const [currentQuestionName, setCurrentQuestionName] = useState(null);
   const [editViewKey, setEditViewKey] = useState(Date.now());
@@ -244,22 +245,38 @@ function CitizendialogueView(props) {
   Survey.surveyLocalization.defaultLocale = "sv";
 
   React.useEffect(() => {
-    const container = document.getElementById("editViewContainer");
-    if (showEditView && container) {
-      const root = ReactDOM.createRoot(container);
-      root.render(
-        <EditView
-          key={editViewKey}
-          app={props.app}
-          model={editModel}
-          observer={props.localObserver}
-          surveyJsData={props.surveyJsData}
-          resetView={resetEditView}
-          currentQuestionName={currentQuestionName}
-          onSaveCallback={handleOnComplete}
-          ref={editViewRef}
-        />
-      );
+    const containers = document.querySelectorAll(".editViewContainer");
+
+    if (showEditView) {
+      containers.forEach((container) => {
+        let root = rootMap.current.get(container);
+
+        if (!root) {
+          root = ReactDOM.createRoot(container);
+          rootMap.current.set(container, root);
+        }
+
+        root.render(
+          <EditView
+            key={editViewKey}
+            app={props.app}
+            model={editModel}
+            observer={props.localObserver}
+            surveyJsData={props.surveyJsData}
+            resetView={resetEditView}
+            currentQuestionName={currentQuestionName}
+            onSaveCallback={handleOnComplete}
+            ref={editViewRef}
+          />
+        );
+      });
+    } else {
+      containers.forEach((container) => {
+        const root = rootMap.current.get(container);
+        if (root) {
+          root.render(null);
+        }
+      });
     }
   });
 
