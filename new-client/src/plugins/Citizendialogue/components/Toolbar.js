@@ -12,7 +12,7 @@ import Grid from "@mui/material/Grid";
 
 const StyledButton = styled(Button)(({ selected, theme }) => ({
   backgroundColor: "white",
-  color: "black",
+  color: selected ? "red" : "black", // Ändra här
   borderTop: `${theme.spacing(0.5)} solid transparent`,
   borderBottom: selected
     ? `${theme.spacing(0.5)} solid ${theme.palette.secondary.main}`
