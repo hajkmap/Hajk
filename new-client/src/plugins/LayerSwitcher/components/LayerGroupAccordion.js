@@ -3,7 +3,6 @@ import {
   Collapse,
   ListItemSecondaryAction,
   Box,
-  ListItemText,
   IconButton,
   ListItemButton,
 } from "@mui/material";
@@ -13,10 +12,11 @@ export default function LayerGroupAccordion({
   expanded,
   toggleable,
   children,
+  layerGroupTitle,
   toggleDetails,
-  name,
   layerGroupDetails,
   quickAccess,
+  display,
 }) {
   const [state, setState] = React.useState({ expanded: expanded });
 
@@ -29,14 +29,12 @@ export default function LayerGroupAccordion({
   };
 
   return (
-    <>
+    <div style={{ display: display }}>
       <ListItemButton
         disableRipple
         onClick={() => updateCustomProp("expanded", !state.expanded)}
         sx={{
-          px: 1,
-          borderBottom: (theme) =>
-            `${theme.spacing(0.2)} solid ${theme.palette.divider}`,
+          p: 0,
         }}
         dense
       >
@@ -52,16 +50,33 @@ export default function LayerGroupAccordion({
             }}
           ></KeyboardArrowRightOutlinedIcon>
         </IconButton>
-        {toggleable && toggleDetails}
-        {quickAccess && quickAccess}
-        <ListItemText primary={name} />
-        {layerGroupDetails && (
-          <ListItemSecondaryAction>{layerGroupDetails}</ListItemSecondaryAction>
-        )}
+        <Box
+          sx={{
+            display: "flex",
+            position: "relative",
+            width: "100%",
+            alignItems: "center",
+            py: 0.5,
+            pr: 1,
+            borderBottom: (theme) =>
+              quickAccess && !state.expanded
+                ? `${theme.spacing(0.2)} solid transparent`
+                : `${theme.spacing(0.2)} solid ${theme.palette.divider}`,
+          }}
+        >
+          {toggleable && toggleDetails}
+          {quickAccess && quickAccess}
+          {layerGroupTitle}
+          {layerGroupDetails && (
+            <ListItemSecondaryAction>
+              {layerGroupDetails}
+            </ListItemSecondaryAction>
+          )}
+        </Box>
       </ListItemButton>
       <Collapse in={state.expanded}>
         <Box sx={{ marginLeft: "40px" }}>{children}</Box>
       </Collapse>
-    </>
+    </div>
   );
 }

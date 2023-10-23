@@ -1,45 +1,28 @@
 import * as React from "react";
 
 import {
-  Button,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  Divider,
   IconButton,
-  List,
   ListItemIcon,
   ListItemText,
   Menu,
   MenuItem,
   Tooltip,
-  Typography,
 } from "@mui/material";
 
 import MoreVertOutlinedIcon from "@mui/icons-material/MoreVertOutlined";
-import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import FileDownloadOutlinedIcon from "@mui/icons-material/FileDownloadOutlined";
 import TableViewOutlinedIcon from "@mui/icons-material/TableViewOutlined";
-import CallMadeIcon from "@mui/icons-material/CallMade";
-import AddOutlinedIcon from "@mui/icons-material/AddOutlined";
-import RemoveOutlinedIcon from "@mui/icons-material/RemoveOutlined";
 
 export default function LayerItemOptions({
   layer,
   app,
-  chapters,
-  onOpenChapter,
   enqueueSnackbar,
   subLayerIndex = 0,
-  subLayer,
 }) {
   // Element that we will anchor the options menu to is
   // held in state. If it's null (unanchored), we can tell
   // that the menu should be hidden.
   const [anchorEl, setAnchorEl] = React.useState(null);
-
-  const [infoOpen, setInfoOpen] = React.useState(false);
 
   const optionsMenuIsOpen = Boolean(anchorEl);
   const layerInfo = layer.get("layerInfo");
@@ -58,56 +41,12 @@ export default function LayerItemOptions({
     setAnchorEl(null);
   };
 
-  // Shows info dialog
-  const handleInfo = (e) => {
-    e.stopPropagation();
-    setAnchorEl(null);
-    setInfoOpen(true);
-  };
-
-  const hasInfo = () => {
-    const chaptersWithLayer = findChapters(layer.get("name"), chapters);
-    return (
-      layerInfo.infoCaption ||
-      layerInfo.infoUrl ||
-      layerInfo.infoOwner ||
-      layerInfo.infoText ||
-      chaptersWithLayer.length > 0
-    );
-  };
-
-  const findChapters = (id, incomingChapters) => {
-    let result = [];
-    if (Array.isArray(incomingChapters)) {
-      result = incomingChapters.reduce((chaptersWithLayer, chapter) => {
-        if (Array.isArray(chapter.layers)) {
-          if (chapter.layers.some((layerId) => layerId === id)) {
-            chaptersWithLayer = [...chaptersWithLayer, chapter];
-          }
-          if (chapter.chapters.length > 0) {
-            chaptersWithLayer = [
-              ...chaptersWithLayer,
-              ...findChapters(id, chapter.chapters),
-            ];
-          }
-        }
-        return chaptersWithLayer;
-      }, []);
-    }
-    return result;
-  };
-
   // Check that layer is downloadable
   const isDownloadable = () => {
     return (
       app.config.mapConfig.map.enableDownloadLink &&
       Array.isArray(layer.subLayers)
     );
-  };
-
-  // Check that layer is elligible for quickAccess option
-  const isQuickAccessEnabled = () => {
-    return layer.get("layerType") !== "base" && !subLayer;
   };
 
   // Handle download action
@@ -121,14 +60,6 @@ export default function LayerItemOptions({
     const wmsUrl = layer.get("url");
     const downloadUrl = `${wmsUrl}/kml?layers=${layerName}&mode=download`;
     document.location = downloadUrl;
-  };
-
-  // Handle quickacces action
-  const handleQuickAccess = (e) => {
-    e.stopPropagation();
-    setAnchorEl(null);
-    // Set quicklayer access flag
-    layer.set("quickAccess", !layer.get("quickAccess"));
   };
 
   // Shows attribute table
@@ -183,159 +114,42 @@ export default function LayerItemOptions({
     }
   };
 
-  const renderChapterLinks = () => {
-    if (chapters && chapters.length > 0) {
-      let chaptersWithLayer = findChapters(this.name, chapters);
-      if (chaptersWithLayer.length > 0) {
-        return (
-          // <InfoTextContainer>
-          <>
-            <Typography>
-              Innehåll från denna kategori finns benämnt i följande kapitel i
-              översiktsplanen:
-            </Typography>
-            <List>
-              {chaptersWithLayer.map((chapter, i) => {
-                return (
-                  <li key={i}>
-                    <Button size="small" onClick={onOpenChapter(chapter)}>
-                      {chapter.header}
-                      <CallMadeIcon sx={{ marginLeft: 1, fontSize: "16px" }} />
-                    </Button>
-                  </li>
-                );
-              })}
-            </List>
-          </>
-          // </InfoTextContainer>
-        );
-      } else {
-        return null;
-      }
-    } else {
-      return null;
-    }
-  };
-
-  return (
+  return !layerInfo.showAttributeTableButton && !isDownloadable() ? null : (
     <>
-      {!hasInfo() && !isDownloadable() && !isQuickAccessEnabled() ? null : (
-        <>
-          <IconButton
-            size="small"
-            aria-controls={optionsMenuIsOpen ? "basic-menu" : undefined}
-            aria-haspopup="true"
-            aria-expanded={optionsMenuIsOpen ? "true" : undefined}
-            onClick={handleShowMoreOptionsClick}
-          >
-            <Tooltip title="Val för lager">
-              <MoreVertOutlinedIcon />
-            </Tooltip>
-          </IconButton>
-          <Menu
-            anchorEl={anchorEl}
-            open={optionsMenuIsOpen}
-            onClose={onOptionsMenuClose}
-            variant={"menu"}
-          >
-            {hasInfo() && (
-              <MenuItem onClick={handleInfo}>
-                <ListItemIcon>
-                  <InfoOutlinedIcon fontSize="small" />
-                </ListItemIcon>
-                <ListItemText>Info</ListItemText>
-              </MenuItem>
-            )}
-            {hasInfo() && <Divider />}
-            {layerInfo.showAttributeTableButton && (
-              <MenuItem onClick={handleAttributeTable}>
-                <ListItemIcon>
-                  <TableViewOutlinedIcon fontSize="small" />
-                </ListItemIcon>
-                <ListItemText>Visa attributtabell</ListItemText>
-              </MenuItem>
-            )}
-            {isQuickAccessEnabled() && (
-              <MenuItem onClick={handleQuickAccess}>
-                <ListItemIcon>
-                  {layer.get("quickAccess") ? (
-                    <RemoveOutlinedIcon fontSize="small" />
-                  ) : (
-                    <AddOutlinedIcon fontSize="small" />
-                  )}
-                </ListItemIcon>
-                <ListItemText>
-                  {layer.get("quickAccess")
-                    ? "Ta bort från snabblager"
-                    : "Lägg till i snabblager"}
-                </ListItemText>
-              </MenuItem>
-            )}
-            {isDownloadable() && (
-              <MenuItem onClick={handleDownload}>
-                <ListItemIcon>
-                  <FileDownloadOutlinedIcon fontSize="small" />
-                </ListItemIcon>
-                <ListItemText>Ladda ner</ListItemText>
-              </MenuItem>
-            )}
-          </Menu>
-          {/* TODO: Create a new component for this dialog or use alertview? */}
-          <Dialog
-            open={infoOpen}
-            onClose={() => setInfoOpen(false)}
-            aria-labelledby="info-dialog-title"
-            aria-describedby="info-dialog-description"
-          >
-            <DialogTitle id="info-dialog-title">
-              {layer.get("caption")}
-            </DialogTitle>
-            <DialogContent>
-              {/* Infotext */}
-              {layerInfo.infoText && (
-                <>
-                  <Typography variant="subtitle2">
-                    {layerInfo.infoTitle}
-                  </Typography>
-                  <Typography
-                    variant="body2"
-                    dangerouslySetInnerHTML={{
-                      __html: layerInfo.infoText,
-                    }}
-                  ></Typography>
-                </>
-              )}
-              {/* MetadataLink */}
-              {layerInfo.infoUrl && (
-                <a
-                  href={layerInfo.infoUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  {layerInfo.infoUrlText || layerInfo.infoUrl}
-                </a>
-              )}
-              {/* Owner */}
-              {layerInfo.infoOwner && (
-                <Typography
-                  variant="body2"
-                  dangerouslySetInnerHTML={{ __html: layerInfo.infoOwner }}
-                />
-              )}
-              {renderChapterLinks()}
-            </DialogContent>
-            <DialogActions>
-              <Button
-                onClick={() => setInfoOpen(false)}
-                color="primary"
-                autoFocus
-              >
-                Stäng
-              </Button>
-            </DialogActions>
-          </Dialog>
-        </>
-      )}
+      <IconButton
+        size="small"
+        aria-controls={optionsMenuIsOpen ? "basic-menu" : undefined}
+        aria-haspopup="true"
+        aria-expanded={optionsMenuIsOpen ? "true" : undefined}
+        onClick={handleShowMoreOptionsClick}
+      >
+        <Tooltip title="Val för lager">
+          <MoreVertOutlinedIcon />
+        </Tooltip>
+      </IconButton>
+      <Menu
+        anchorEl={anchorEl}
+        open={optionsMenuIsOpen}
+        onClose={onOptionsMenuClose}
+        variant={"menu"}
+      >
+        {layerInfo.showAttributeTableButton && (
+          <MenuItem onClick={handleAttributeTable}>
+            <ListItemIcon>
+              <TableViewOutlinedIcon fontSize="small" />
+            </ListItemIcon>
+            <ListItemText>Visa attributtabell</ListItemText>
+          </MenuItem>
+        )}
+        {isDownloadable() && (
+          <MenuItem onClick={handleDownload}>
+            <ListItemIcon>
+              <FileDownloadOutlinedIcon fontSize="small" />
+            </ListItemIcon>
+            <ListItemText>Ladda ner</ListItemText>
+          </MenuItem>
+        )}
+      </Menu>
     </>
   );
 }

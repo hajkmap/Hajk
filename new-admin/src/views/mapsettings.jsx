@@ -16,8 +16,12 @@ import LayersIcon from "@material-ui/icons/Layers";
 import SwapVertIcon from "@material-ui/icons/SwapVert";
 import SettingsIcon from "@material-ui/icons/Settings";
 import BuildIcon from "@material-ui/icons/Build";
+import StarIcon from "@material-ui/icons/Star";
+import HighlightOffIcon from "@material-ui/icons/HighlightOff";
+import CheckCircleOutline from "@material-ui/icons/CheckCircleOutline";
 import { withStyles } from "@material-ui/core/styles";
 import { red, green, blue } from "@material-ui/core/colors";
+import { v4 as uuidv4 } from "uuid";
 
 var defaultState = {
   alert: false,
@@ -277,34 +281,51 @@ $.fn.editable = function (component) {
  *
  */
 class Menu extends Component {
-  state = {
-    adGroups: [],
-    isHidden: true,
-    drawOrder: false,
-    layerMenu: true,
-    addedLayers: [],
-    maps: [],
-    active: true,
-    visibleAtStart: true,
-    visibleAtStartMobile: false,
-    backgroundSwitcherBlack: true,
-    backgroundSwitcherWhite: true,
-    enableOSM: false,
-    showBreadcrumbs: false,
-    showActiveLayersView: false,
-    enableTransparencySlider: true,
-    instruction: "",
-    dropdownThemeMaps: false,
-    themeMapHeaderCaption: "Temakartor",
-    visibleForGroups: [],
-    adList: null,
-    target: "toolbar",
-    position: "left",
-    width: "",
-    height: "",
-    title: "Innehåll",
-    description: "Välj innehåll att visa i kartan",
-  };
+  constructor() {
+    super();
+    this.state = {
+      adGroups: [],
+      isHidden: true,
+      drawOrder: false,
+      layerMenu: true,
+      addedLayers: [],
+      maps: [],
+      active: true,
+      visibleAtStart: true,
+      visibleAtStartMobile: false,
+      backgroundSwitcherBlack: true,
+      backgroundSwitcherWhite: true,
+      enableOSM: false,
+      showBreadcrumbs: false,
+      showActiveLayersView: false,
+      showActiveLayerSwitch: false,
+      showQuickLayers: false,
+      enableQuickLayerLoading: false,
+      quickLayerLoadingInfoText: "",
+      enableUserQuickLayers: false,
+      userQuickLayersInfoText: "",
+      enableTransparencySlider: true,
+      instruction: "",
+      dropdownThemeMaps: false,
+      themeMapHeaderCaption: "Temakartor",
+      visibleForGroups: [],
+      adList: null,
+      target: "toolbar",
+      position: "left",
+      width: "",
+      height: "",
+      title: "Innehåll",
+      description: "Välj innehåll att visa i kartan",
+      quickLayersPresets: [],
+      importedLayers: [],
+      importedMetadata: {},
+    };
+    this.titleRef = React.createRef();
+    this.authorRef = React.createRef();
+    this.descriptionRef = React.createRef();
+    this.keywordsRef = React.createRef();
+    this.fileInputRef = React.createRef();
+  }
 
   /**
    *
@@ -342,6 +363,23 @@ class Menu extends Component {
           showActiveLayersView:
             existingConfig.showActiveLayersView ??
             this.state.showActiveLayersView,
+          showActiveLayerSwitch:
+            existingConfig.showActiveLayerSwitch ??
+            this.state.showActiveLayerSwitch,
+          showQuickLayers:
+            existingConfig.showQuickLayers ?? this.state.showQuickLayers,
+          enableQuickLayerLoading:
+            existingConfig.enableQuickLayerLoading ??
+            this.state.enableQuickLayerLoading,
+          quickLayerLoadingInfoText:
+            existingConfig.quickLayerLoadingInfoText ??
+            this.state.quickLayerLoadingInfoText,
+          enableUserQuickLayers:
+            existingConfig.enableUserQuickLayers ??
+            this.state.enableUserQuickLayers,
+          userQuickLayersInfoText:
+            existingConfig.userQuickLayersInfoText ??
+            this.state.userQuickLayersInfoText,
           enableTransparencySlider:
             existingConfig.enableTransparencySlider ??
             this.state.enableTransparencySlider,
@@ -358,6 +396,7 @@ class Menu extends Component {
           height: existingConfig.height || "",
           title: existingConfig.title || "",
           description: existingConfig.description || "",
+          quickLayersPresets: existingConfig.quickLayersPresets || [],
         });
         $(".tree-view li").editable(this);
         $(".tree-view > ul").sortable();
@@ -557,6 +596,7 @@ class Menu extends Component {
     var settings = {
       groups: [],
       baselayers: [],
+      quickLayersPresets: this.state.quickLayersPresets,
       active: this.state.active,
       visibleAtStart: this.state.visibleAtStart,
       visibleAtStartMobile: this.state.visibleAtStartMobile,
@@ -565,6 +605,12 @@ class Menu extends Component {
       enableOSM: this.state.enableOSM,
       showBreadcrumbs: this.state.showBreadcrumbs,
       showActiveLayersView: this.state.showActiveLayersView,
+      showActiveLayerSwitch: this.state.showActiveLayerSwitch,
+      showQuickLayers: this.state.showQuickLayers,
+      enableQuickLayerLoading: this.state.enableQuickLayerLoading,
+      quickLayerLoadingInfoText: this.state.quickLayerLoadingInfoText,
+      enableUserQuickLayers: this.state.enableUserQuickLayers,
+      userQuickLayersInfoText: this.state.userQuickLayersInfoText,
       enableTransparencySlider: this.state.enableTransparencySlider,
       instruction: this.state.instruction,
       dropdownThemeMaps: this.state.dropdownThemeMaps,
@@ -767,6 +813,34 @@ class Menu extends Component {
 
     var config = this.props.model.get("layerMenuConfig");
 
+    this.props.model.updateConfig(config, (success) => {
+      if (success) {
+        this.setState({
+          content: "mapsettings",
+          alert: true,
+          alertMessage: "Uppdateringen lyckades.",
+        });
+        this.forceUpdate();
+      } else {
+        this.setState({
+          alert: true,
+          alertMessage: "Uppdateringen misslyckades.",
+        });
+      }
+    });
+  }
+
+  /**
+   *
+   */
+  saveQuickLayersPresets() {
+    // Get the current configuration.
+    var config = this.props.model.get("layerMenuConfig");
+
+    // Update the quickLayersPresets property in the configuration.
+    config.quickLayersPresets = this.state.quickLayersPresets;
+
+    // Save the updated configuration.
     this.props.model.updateConfig(config, (success) => {
       if (success) {
         this.setState({
@@ -1057,6 +1131,7 @@ class Menu extends Component {
       layerMenu: false,
       mapOptions: false,
       toolOptions: false,
+      quickLayers: false,
     });
 
     setTimeout(() => {
@@ -1076,6 +1151,7 @@ class Menu extends Component {
       drawOrder: false,
       mapOptions: false,
       toolOptions: false,
+      quickLayers: false,
     });
 
     setTimeout(() => {
@@ -1094,6 +1170,7 @@ class Menu extends Component {
       layerMenu: false,
       mapOptions: true,
       toolOptions: false,
+      quickLayers: false,
     });
   }
   /**
@@ -1105,6 +1182,19 @@ class Menu extends Component {
       layerMenu: false,
       mapOptions: false,
       toolOptions: true,
+      quickLayers: false,
+    });
+  }
+  /**
+   *
+   */
+  togglequickLayers() {
+    this.setState({
+      drawOrder: false,
+      layerMenu: false,
+      mapOptions: false,
+      toolOptions: false,
+      quickLayers: true,
     });
   }
 
@@ -1313,6 +1403,183 @@ class Menu extends Component {
         </div>
       </div>
     );
+  }
+
+  /**
+   * Renders method for adding and removing quick layers.
+   */
+  renderQuickLayers() {
+    let filteredLayers = this.state.quickLayersPresets;
+
+    // Apply filter only when filterString is not empty.
+    if (this.state.filterString) {
+      filteredLayers = filteredLayers.filter((layer) =>
+        layer.title.includes(this.state.filterString)
+      );
+    }
+
+    return filteredLayers.map((layer, i) => {
+      return (
+        <li className="layer-item" key={i}>
+          <span className="main-box">{layer.title}</span>
+          <i
+            className="fa fa-trash"
+            onClick={(event) => {
+              event.stopPropagation();
+              this.deleteQuickLayerFromList(layer.id);
+            }}
+          />
+        </li>
+      );
+    });
+  }
+
+  filterQuickLayers(e) {
+    this.setState({
+      filterString: e.target.value,
+    });
+  }
+
+  cancelInput = () => {
+    // Clear the input fields.
+    this.titleRef.current.value = "";
+    this.authorRef.current.value = "";
+    this.descriptionRef.current.value = "";
+    this.keywordsRef.current.value = "";
+
+    // Clear the file input.
+    this.fileInputRef.current.value = "";
+
+    // Clear the state.
+    this.setState({
+      importMessage: "",
+      importedLayers: [],
+      importedMetadata: {},
+    });
+  };
+
+  deleteQuickLayerFromList(id) {
+    this.setState((prevState) => ({
+      quickLayersPresets: prevState.quickLayersPresets.filter(
+        (layer) => layer.id !== id
+      ),
+    }));
+  }
+
+  addQuickLayer = () => {
+    const title = this.titleRef.current.value;
+    const author = this.authorRef.current.value;
+    const description = this.descriptionRef.current.value;
+    const keywords = this.keywordsRef.current.value.split(",");
+
+    // Check if title and importedLayers are filled.
+    if (
+      title === "" ||
+      this.state.importedLayers.length === 0 ||
+      !this.state.importStatus
+    ) {
+      alert(
+        "Ange titel och importera en giltig JSON-fil innan du lägger till ett nytt snabblager."
+      );
+      return;
+    }
+
+    const newLayer = {
+      id: uuidv4(),
+      title: title,
+      author: author,
+      description: description,
+      keywords: keywords,
+      layers: this.state.importedLayers,
+      metadata: this.state.importedMetadata,
+    };
+
+    // Update the state.
+    this.setState((prevState) => ({
+      quickLayersPresets: [...prevState.quickLayersPresets, newLayer],
+      importedLayers: [],
+      importedMetadata: {},
+      importStatus: false,
+      importMessage: "",
+    }));
+
+    // Clear the input fields.
+    this.titleRef.current.value = "";
+    this.authorRef.current.value = "";
+    this.descriptionRef.current.value = "";
+    this.keywordsRef.current.value = "";
+
+    // Clear the file input.
+    this.fileInputRef.current.value = "";
+  };
+
+  importJSON = (event) => {
+    const fileReader = new FileReader();
+    fileReader.readAsText(event.target.files[0], "UTF-8");
+    fileReader.onload = (e) => {
+      try {
+        const result = JSON.parse(e.target.result);
+        if (!this.validateImportedJSON(result)) {
+          this.setState({
+            importStatus: false,
+            importMessage: "Filen är felaktig och kunde inte läsas in.",
+          });
+        } else {
+          this.setState({
+            importedLayers: result.layers,
+            importedMetadata: result.metadata,
+            importStatus: true,
+            importMessage: "Filen är korrekt och fungerar.",
+          });
+        }
+      } catch (error) {
+        this.setState({
+          importStatus: false,
+          importMessage: "Filen är felaktig och kunde inte läsas in.",
+        });
+      }
+    };
+  };
+
+  validateImportedJSON(json) {
+    if (!json) return false;
+
+    // Check metadata properties.
+    if (!json.metadata || typeof json.metadata !== "object") {
+      return false;
+    }
+    const requiredMetadataProps = [
+      "savedAt",
+      "numberOfLayers",
+      "title",
+      "description",
+    ];
+    if (
+      !requiredMetadataProps.every((prop) => json.metadata.hasOwnProperty(prop))
+    ) {
+      return false;
+    }
+
+    // Check layers properties.
+    if (!json.layers || !Array.isArray(json.layers)) {
+      return false;
+    }
+    const requiredLayerProps = [
+      "id",
+      "visible",
+      "subLayers",
+      "opacity",
+      "drawOrder",
+    ];
+    if (
+      !json.layers.every((layer) =>
+        requiredLayerProps.every((prop) => layer.hasOwnProperty(prop))
+      )
+    ) {
+      return false;
+    }
+
+    return true;
   }
 
   /**
@@ -1593,6 +1860,32 @@ class Menu extends Component {
               </div>
               <div>
                 <input
+                  id="showActiveLayerSwitch"
+                  name="showActiveLayerSwitch"
+                  type="checkbox"
+                  onChange={this.handleInputChange}
+                  checked={this.state.showActiveLayerSwitch}
+                />
+                &nbsp;
+                <label className="long-label" htmlFor="showActiveLayerSwitch">
+                  Visa systemlager vid ritordning
+                </label>
+              </div>
+              <div>
+                <input
+                  id="showQuickLayers"
+                  name="showQuickLayers"
+                  type="checkbox"
+                  onChange={this.handleInputChange}
+                  checked={this.state.showQuickLayers}
+                />
+                &nbsp;
+                <label className="long-label" htmlFor="showQuickLayers">
+                  Visa en grupp med snabblager
+                </label>
+              </div>
+              <div>
+                <input
                   id="enableTransparencySlider"
                   name="enableTransparencySlider"
                   type="checkbox"
@@ -1627,6 +1920,77 @@ class Menu extends Component {
                 </div>
               </div>
               <div className="row">{this.renderAuthGrps()}</div>
+              <div className="separator">
+                Inställningar för grupp med snabblager
+              </div>
+              <div>
+                <input
+                  id="enableQuickLayerLoading"
+                  name="enableQuickLayerLoading"
+                  type="checkbox"
+                  onChange={this.handleInputChange}
+                  checked={this.state.enableQuickLayerLoading}
+                />
+                &nbsp;
+                <label className="long-label" htmlFor="enableQuickLayerLoading">
+                  Ladda snabblager{" "}
+                  <i
+                    className="fa fa-question-circle"
+                    data-toggle="tooltip"
+                    title="Om denna ruta är ikryssad kan användaren ladda in fördefinierade snabblager."
+                  />
+                </label>
+              </div>
+              <div className="text-input-label">
+                Ladda snabblager infotext{" "}
+                <i
+                  className="fa fa-question-circle"
+                  data-toggle="tooltip"
+                  title="Ange en text som ska visas i panelen för att ladda snabblager."
+                />
+                &nbsp;
+                <input
+                  id="quickLayerLoadingInfoText"
+                  name="quickLayerLoadingInfoText"
+                  type="text"
+                  onChange={this.handleInputChange}
+                  value={this.state.quickLayerLoadingInfoText}
+                />
+              </div>
+              <div>
+                <input
+                  id="enableUserQuickLayers"
+                  name="enableUserQuickLayers"
+                  type="checkbox"
+                  onChange={this.handleInputChange}
+                  checked={this.state.enableUserQuickLayers}
+                />
+                &nbsp;
+                <label className="long-label" htmlFor="enableUserQuickLayers">
+                  Mina snabblager{" "}
+                  <i
+                    className="fa fa-question-circle"
+                    data-toggle="tooltip"
+                    title="Om denna ruta är ikryssad kan användaren spara sina egna snabblager."
+                  />
+                </label>
+              </div>
+              <div className="text-input-label">
+                Mina snabblager infotext{" "}
+                <i
+                  className="fa fa-question-circle"
+                  data-toggle="tooltip"
+                  title="Ange en text som ska visas i panelen för att spara snabblager."
+                />
+                &nbsp;
+                <input
+                  id="userQuickLayersInfoText"
+                  name="userQuickLayersInfoText"
+                  type="text"
+                  onChange={this.handleInputChange}
+                  value={this.state.userQuickLayersInfoText}
+                />
+              </div>
               <div className="separator">Kartinställningar</div>
               {this.renderThemeMapCheckbox()}
               {this.renderThemeMapHeaderInput()}
@@ -1702,6 +2066,166 @@ class Menu extends Component {
             </fieldset>
           </article>
           {this.state.adList}
+        </div>
+      );
+    }
+
+    if (this.state.quickLayers) {
+      return (
+        <div>
+          <aside>
+            <input
+              placeholder="filtrera"
+              type="text"
+              onChange={(e) => this.filterQuickLayers(e)}
+            />
+            <ul className="config-layer-list">{this.renderQuickLayers()}</ul>
+          </aside>
+          <article>
+            <fieldset className="tree-view">
+              <legend>Hantera snabblager</legend>
+              <div className="row">
+                <div className="col-sm-12">
+                  <label htmlFor="title">
+                    Titel*{" "}
+                    <i
+                      className="fa fa-question-circle"
+                      data-toggle="tooltip"
+                      title="Titel på snabblagret visas i kartans lagerhanterare."
+                    />
+                  </label>
+                  <input type="text" name="title" ref={this.titleRef} />
+                </div>
+              </div>
+              <div className="row">
+                <div className="col-sm-12">
+                  <label htmlFor="title">
+                    Ägare{" "}
+                    <i
+                      className="fa fa-question-circle"
+                      data-toggle="tooltip"
+                      title="Ägare av snabblagret visas i kartans lagerhanterare."
+                    />
+                  </label>
+                  <input type="text" name="author" ref={this.authorRef} />
+                </div>
+              </div>
+              <div className="row">
+                <div className="col-sm-12">
+                  <label htmlFor="title">
+                    Beskrivning{" "}
+                    <i
+                      className="fa fa-question-circle"
+                      data-toggle="tooltip"
+                      title="Beskrivning av snabblagret visas i kartans lagerhanterare."
+                    />
+                  </label>
+                  <input
+                    type="text"
+                    name="description"
+                    ref={this.descriptionRef}
+                  />
+                </div>
+              </div>
+              <div className="row">
+                <div className="col-sm-12">
+                  <label htmlFor="title">
+                    Nyckelord{" "}
+                    <i
+                      className="fa fa-question-circle"
+                      data-toggle="tooltip"
+                      title="Nyckelord för snabblagret visas i kartans lagerhanterare."
+                    />
+                  </label>
+                  <input type="text" name="keywords" ref={this.keywordsRef} />
+                </div>
+              </div>
+              <div className="row">
+                <div className="col-sm-12">
+                  <label htmlFor="title">
+                    JSON-fil*{" "}
+                    <i
+                      className="fa fa-question-circle"
+                      data-toggle="tooltip"
+                      title="JSON-fil som innehåller lagerdefinitioner för snabblagret."
+                    />
+                  </label>
+                  <input
+                    type="file"
+                    accept=".json"
+                    ref={this.fileInputRef}
+                    onChange={this.importJSON}
+                  />
+                </div>
+              </div>
+              <div className="row">
+                <div
+                  className="col-sm-12"
+                  style={{
+                    display: "flex",
+                    justifyContent: "flex-end",
+                    alignItems: "center",
+                  }}
+                >
+                  {this.state.importMessage ? (
+                    this.state.importStatus ? (
+                      <span>
+                        <CheckCircleOutline />
+                        &nbsp;
+                        <span
+                          style={{
+                            float: "right",
+                          }}
+                        >
+                          {this.state.importMessage}
+                        </span>
+                      </span>
+                    ) : (
+                      <span>
+                        <HighlightOffIcon />
+                        &nbsp;
+                        <span
+                          style={{
+                            float: "right",
+                          }}
+                        >
+                          {this.state.importMessage}
+                        </span>
+                      </span>
+                    )
+                  ) : null}
+                </div>
+              </div>
+              <div style={{ display: "flex", justifyContent: "flex-end" }}>
+                <ColorButtonBlue
+                  variant="contained"
+                  className="btn"
+                  onClick={this.cancelInput}
+                  startIcon={<HighlightOffIcon />}
+                >
+                  Avbryt
+                </ColorButtonBlue>
+                &nbsp;
+                <ColorButtonBlue
+                  variant="contained"
+                  className="btn"
+                  onClick={(e) => this.saveQuickLayersPresets(e)}
+                  startIcon={<SaveIcon />}
+                >
+                  Spara
+                </ColorButtonBlue>
+                &nbsp;
+                <ColorButtonBlue
+                  variant="contained"
+                  className="btn"
+                  onClick={this.addQuickLayer}
+                  startIcon={<AddIcon />}
+                >
+                  Lägg till
+                </ColorButtonBlue>
+              </div>
+            </fieldset>
+          </article>
         </div>
       );
     }
@@ -1901,6 +2425,15 @@ class Menu extends Component {
               startIcon={<BuildIcon />}
             >
               Verktyg
+            </ColorButtonBlue>
+            &nbsp;
+            <ColorButtonBlue
+              variant="contained"
+              className="btn"
+              onClick={(e) => this.togglequickLayers()}
+              startIcon={<StarIcon />}
+            >
+              Snabblager
             </ColorButtonBlue>
           </div>
           {this.renderArticleContent()}

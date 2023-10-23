@@ -2,6 +2,7 @@ import React, { useEffect, useState, useRef } from "react";
 
 // Material UI components
 import {
+  Box,
   IconButton,
   ListItemButton,
   ListItemSecondaryAction,
@@ -9,18 +10,20 @@ import {
   Tooltip,
 } from "@mui/material";
 
-// Material UI icons
 import DragIndicatorOutlinedIcon from "@mui/icons-material/DragIndicatorOutlined";
 import PublicOutlinedIcon from "@mui/icons-material/PublicOutlined";
 import WallpaperIcon from "@mui/icons-material/Wallpaper";
 import BuildOutlinedIcon from "@mui/icons-material/BuildOutlined";
 import CheckBoxOutlineBlankIcon from "@mui/icons-material/CheckBoxOutlineBlank";
 import CheckBoxIcon from "@mui/icons-material/CheckBox";
-import ExpandMoreOutlinedIcon from "@mui/icons-material/ExpandMoreOutlined";
 import WarningAmberOutlinedIcon from "@mui/icons-material/WarningAmberOutlined";
+import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
+import KeyboardArrowRightOutlinedIcon from "@mui/icons-material/KeyboardArrowRightOutlined";
+import FormatListBulletedOutlinedIcon from "@mui/icons-material/FormatListBulletedOutlined";
 
 // Custom components
 import LegendIcon from "./LegendIcon";
+import LegendImage from "./LegendImage";
 import LayerItemOptions from "./LayerItemOptions";
 import LayerItemCollapse from "./LayerItemCollapse";
 
@@ -35,9 +38,7 @@ export default function LayerItem({
   draggable,
   toggleable,
   app,
-  chapters,
-  onOpenChapter,
-  options,
+  display,
   subLayersSection,
   visibleSubLayers,
   visibleSubLayersCaption,
@@ -45,14 +46,14 @@ export default function LayerItem({
   expandableSection,
   onSetZoomVisible,
 }) {
-  // Keep the settingsarea active in state
-  const [settingIsActive, setSettingIsActive] = useState(false);
   // WmsLayer load status, shows warning icon if !ok
   const [wmsLayerLoadStatus, setWmsLayerLoadStatus] = useState("ok");
   // State for layer zoom visibility
   const [zoomVisible, setZoomVisible] = useState(true);
   // Keep zoomend listener in state
   const [zoomEndListener, setZoomEndListener] = useState();
+  // State that toggles legend collapse
+  const [legendIsActive, setLegendIsActive] = useState(false);
 
   const visibleSubLayersCaptionRef = useRef(visibleSubLayersCaption);
 
@@ -242,7 +243,37 @@ export default function LayerItem({
     } else if (layer.get("layerType") === "system") {
       return <BuildOutlinedIcon sx={{ mr: "5px" }} />;
     }
-    return null;
+    return renderLegendIcon();
+  };
+
+  const renderLegendIcon = () => {
+    if (
+      layer.get("layerType") === "group" ||
+      layer.get("layerType") === "base" ||
+      layer.isFakeMapLayer ||
+      layer.get("layerType") === "system"
+    ) {
+      return null;
+    }
+    return (
+      <Tooltip
+        placement="left"
+        title={
+          legendIsActive ? "Dölj teckenförklaring" : "Visa teckenförklaring"
+        }
+      >
+        <IconButton
+          sx={{ p: 0.25, mr: "5px" }}
+          size="small"
+          onClick={(e) => {
+            e.stopPropagation();
+            setLegendIsActive(!legendIsActive);
+          }}
+        >
+          <FormatListBulletedOutlinedIcon fontSize="small" />
+        </IconButton>
+      </Tooltip>
+    );
   };
 
   // Render method for checkbox icon
@@ -274,7 +305,7 @@ export default function LayerItem({
    * @instance
    * @return {external:ReactElement}
    */
-  const renderStatusButton = () => {
+  const renderStatusIcon = () => {
     return (
       wmsLayerLoadStatus === "loaderror" && (
         <IconButton disableRipple>
@@ -289,21 +320,14 @@ export default function LayerItem({
     );
   };
 
-  // Toogles settings area
-  const toggleSettings = (e) => {
+  // Show layer details action
+  const showLayerDetails = (e) => {
     e.stopPropagation();
-    setSettingIsActive(!settingIsActive);
+    app.globalObserver.publish("setLayerDetails", { layer: layer });
   };
-
-  // Checks if layer is enabled for options
-  const hasListItemOptions = () => {
-    return layer.get("layerType") !== "system" && layer.isFakeMapLayer !== true;
-  };
-
-  const cqlFilterVisible = app.config.mapConfig.map?.cqlFilterVisible || false;
 
   return (
-    <div>
+    <div className="layer-item" style={{ display: display }}>
       <ListItemButton
         disableRipple
         onClick={toggleable ? handleLayerItemClick : null}
@@ -311,12 +335,8 @@ export default function LayerItem({
           "&:hover .dragInidcatorIcon": {
             opacity: draggable ? 1 : 0,
           },
-          px: 1,
+          p: 0,
           pl: draggable ? 2 : 1,
-          borderBottom: (theme) =>
-            !settingIsActive
-              ? `${theme.spacing(0.2)} solid ${theme.palette.divider}`
-              : `${theme.spacing(0.2)} solid transparent`,
         }}
         dense
       >
@@ -337,58 +357,87 @@ export default function LayerItem({
           </IconButton>
         )}
         {expandableSection && expandableSection}
-        {toggleable && (
-          <IconButton
-            sx={{ pl: expandableSection ? 0 : "5px" }}
-            disableRipple
-            size="small"
-          >
-            {getLayerToggleIcon()}
-          </IconButton>
-        )}
-        {isBackgroundLayer && draggable ? (
-          layer.isFakeMapLayer ? (
-            <WallpaperIcon sx={{ mr: "5px" }} />
-          ) : (
-            <PublicOutlinedIcon sx={{ mr: "5px" }} />
-          )
-        ) : (
-          getIconFromLayer()
-        )}
-        <ListItemText primary={layer.get("caption")} />
-        <ListItemSecondaryAction>
-          {renderStatusButton()}
-          {hasListItemOptions() && (
-            <LayerItemOptions
-              layer={layer}
-              app={app}
-              chapters={chapters}
-              enqueueSnackbar={displaySnackbar}
-              onOpenChapter={onOpenChapter}
-            />
+        <Box
+          sx={{
+            display: "flex",
+            position: "relative",
+            width: "100%",
+            alignItems: "center",
+            py: 0.5,
+            pr: 1,
+            borderBottom: (theme) =>
+              legendIsActive
+                ? `${theme.spacing(0.2)} solid transparent`
+                : `${theme.spacing(0.2)} solid ${theme.palette.divider}`,
+          }}
+        >
+          {toggleable && (
+            <IconButton
+              sx={{ pl: expandableSection ? 0 : "5px" }}
+              disableRipple
+              size="small"
+            >
+              {getLayerToggleIcon()}
+            </IconButton>
           )}
-          {layer.isFakeMapLayer !== true &&
-            layer.get("layerType") !== "system" && (
-              <IconButton size="small" onClick={(e) => toggleSettings(e)}>
-                <ExpandMoreOutlinedIcon
-                  sx={{
-                    transform: settingIsActive ? "rotate(180deg)" : "",
-                    transition: "transform 300ms ease",
-                  }}
-                ></ExpandMoreOutlinedIcon>
+          {isBackgroundLayer && !toggleable ? (
+            layer.isFakeMapLayer ? (
+              <WallpaperIcon sx={{ mr: "5px", ml: draggable ? 0 : "16px" }} />
+            ) : (
+              <PublicOutlinedIcon
+                sx={{ mr: "5px", ml: draggable ? 0 : "16px" }}
+              />
+            )
+          ) : (
+            getIconFromLayer()
+          )}
+          <ListItemText
+            primary={layer.get("caption")}
+            primaryTypographyProps={{
+              fontWeight:
+                layer.get("visible") && !draggable && !isBackgroundLayer
+                  ? "bold"
+                  : "inherit",
+            }}
+          />
+          <ListItemSecondaryAction>
+            {renderStatusIcon()}
+            {isBackgroundLayer && !toggleable && !draggable ? (
+              <IconButton
+                size="small"
+                disableTouchRipple
+                disableFocusRipple
+                disableRipple
+              >
+                <Tooltip title="Bakgrundskartan ligger låst längst ner i ritordningen">
+                  <LockOutlinedIcon />
+                </Tooltip>
               </IconButton>
-            )}
-        </ListItemSecondaryAction>
+            ) : null}
+            {layer.isFakeMapLayer !== true &&
+              layer.get("layerType") !== "system" && (
+                <IconButton size="small" onClick={(e) => showLayerDetails(e)}>
+                  <KeyboardArrowRightOutlinedIcon
+                    sx={{
+                      color: (theme) => theme.palette.grey[500],
+                    }}
+                  ></KeyboardArrowRightOutlinedIcon>
+                </IconButton>
+              )}
+          </ListItemSecondaryAction>
+        </Box>
       </ListItemButton>
-      {!layer.isFakeMapLayer && layer.get("layerType") !== "system" && (
-        <LayerItemCollapse
-          options={options}
-          layer={layer}
-          collapsed={settingIsActive}
-          cqlFilterVisible={cqlFilterVisible}
-          showOpacity={true}
-          showLegend={layer.get("layerType") === "group" ? false : true}
-        ></LayerItemCollapse>
+      {layer.get("layerType") === "group" ||
+      layer.get("layerType") === "base" ||
+      layer.isFakeMapLayer ||
+      layer.get("layerType") === "system" ? null : (
+        <Box sx={{ pl: draggable ? 3.5 : 5.5 }}>
+          <LegendImage
+            layerItemDetails={{ layer: layer }}
+            open={legendIsActive}
+            subLayerIndex={null}
+          ></LegendImage>
+        </Box>
       )}
       {subLayersSection && subLayersSection}
     </div>

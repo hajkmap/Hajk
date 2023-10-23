@@ -11,18 +11,21 @@ import {
   CardActions,
   CardContent,
   CardHeader,
-  Checkbox,
   Dialog,
   DialogTitle,
   DialogContent,
+  DialogContentText,
   DialogActions,
   IconButton,
-  FormControlLabel,
+  InputLabel,
   FormGroup,
+  FormControl,
+  MenuItem,
   TextField,
   Tooltip,
   Collapse,
   Typography,
+  Select,
   Stack,
   Divider,
 } from "@mui/material";
@@ -51,7 +54,11 @@ function PersonalLayerPackage({
   const [infoIsActive, setInfoIsActive] = useState(false);
   // Confirmation dialog
   const [loadLpConfirmation, setLoadLpConfirmation] = useState(null);
+  const [missingLayersConfirmation, setMissingLayersConfirmation] =
+    useState(null);
   const [clearExistingQuickAccessLayers, setClearExistingQuickAccessLayers] =
+    useState(true);
+  const [replaceExistingBackgroundLayer, setReplaceExistingBackgroundLayer] =
     useState(true);
   const [addWsIsActive, setAddWsIsActive] = useState(null);
   const [description, setDescription] = useState("");
@@ -79,30 +86,34 @@ function PersonalLayerPackage({
 
   useEffect(() => {
     // Save to storage when state changes occur
-    if (personalLayerPackages.length > 0) {
-      // Save to storage
-      const currentLsSettings = LocalStorageHelper.get("layerswitcher");
+    const currentLsSettings = LocalStorageHelper.get("layerswitcher");
 
-      // TODO: Determine whether this should be a functional or required cookie,
-      // add the appropriate hook and describe here https://github.com/hajkmap/Hajk/wiki/Cookies-in-Hajk.
-      LocalStorageHelper.set("layerswitcher", {
-        ...currentLsSettings,
-        savedLayers: personalLayerPackages,
-      });
-    }
+    // TODO: Determine whether this should be a functional or required cookie,
+    // add the appropriate hook and describe here https://github.com/hajkmap/Hajk/wiki/Cookies-in-Hajk.
+    LocalStorageHelper.set("layerswitcher", {
+      ...currentLsSettings,
+      savedLayers: personalLayerPackages,
+    });
   }, [personalLayerPackages]);
 
   // Handles click on back button in header
-  const handleBackButtonClick = () => {
+  const handleBackButtonClick = (setQuickAccessSectionExpanded) => {
     setTooltipOpen(false);
     setTimeout(() => {
-      backButtonCallback();
+      setQuickAccessSectionExpanded
+        ? backButtonCallback({ setQuickAccessSectionExpanded: true })
+        : backButtonCallback();
     }, 100);
   };
 
   // Handles click on info button in header
   const handleInfoButtonClick = () => {
     setInfoIsActive(!infoIsActive);
+  };
+
+  // Fires when the user closes the missing layers-window.
+  const handleMissingLayersConfirmationAbort = () => {
+    setMissingLayersConfirmation(null);
   };
 
   // Handles click on upload button in header
@@ -172,9 +183,11 @@ function PersonalLayerPackage({
       .map((l) => {
         // Create an array of objects. For each layer, we want to read its…
         return {
-          i: l.get("name"),
-          d: l.getVisible(),
-          sl: l.get("layerType") === "group" ? l.get("subLayers") : [],
+          id: l.get("name"),
+          visible: l.getVisible(),
+          subLayers: l.get("layerType") === "group" ? l.get("subLayers") : [],
+          opacity: l.getOpacity(),
+          drawOrder: l.getZIndex(),
         }; // …name as id, visibility and potentially sublayers.
       });
 
@@ -183,6 +196,38 @@ function PersonalLayerPackage({
         variant: "warning",
       });
       return;
+    }
+
+    // Also, grab current baselayer and add it to the layers array.
+    const baseLayer = map
+      .getLayers()
+      .getArray()
+      .find((l) => l.get("layerType") === "base" && l.getVisible());
+
+    if (baseLayer) {
+      layers.push({
+        id: baseLayer.get("name"),
+        visible: true,
+        subLayers: [],
+        opacity: baseLayer.getOpacity(),
+        drawOrder: baseLayer.getZIndex(),
+      });
+    } else {
+      // No "real" base layer is visible, so we need to check for a fake one (black or white).
+      const currentBackgroundColor =
+        document.getElementById("map").style.backgroundColor;
+      const WHITE_BACKROUND_LAYER_ID = "-1";
+      const BLACK_BACKROUND_LAYER_ID = "-2";
+      layers.push({
+        id:
+          currentBackgroundColor === "rgb(0, 0, 0)"
+            ? BLACK_BACKROUND_LAYER_ID
+            : WHITE_BACKROUND_LAYER_ID,
+        visible: true,
+        subLayers: [],
+        opacity: 1,
+        drawOrder: -1,
+      });
     }
 
     // Let's create some metadata about our saved layers. User might want to know
@@ -229,21 +274,47 @@ function PersonalLayerPackage({
   // Fires when the user confirms the confirmation-window.
   const handleLoadConfirmation = () => {
     let lpInfo = { ...loadLpConfirmation };
+
     setLoadLpConfirmation(null);
 
+    // Check if layers from layerpackage exists in map
+    const missingLayers = checkForMissingLayers(lpInfo.layers);
+    if (missingLayers.length > 0) {
+      // Show missing layers dialog
+      setMissingLayersConfirmation({
+        missingLayers: missingLayers,
+        layers: lpInfo.layers,
+        title: lpInfo.metadata.title,
+      });
+    } else {
+      loadLayers(lpInfo.layers, lpInfo.metadata.title);
+    }
+  };
+
+  // Load layers to quickAccess section
+  const loadLayers = (layers, title) => {
     if (clearExistingQuickAccessLayers) {
       clearQuickAccessLayers();
     }
 
-    map.getAllLayers().forEach((layer) => {
-      const info = lpInfo.layers.find((l) => l.i === layer.get("name"));
-      if (info) {
+    setMissingLayersConfirmation(null);
+
+    const allMapLayers = map.getAllLayers();
+    layers.forEach((l) => {
+      const layer = allMapLayers.find((la) => la.get("name") === l.id);
+      if (layer) {
         // Set quickaccess property
-        layer.set("quickAccess", true);
-        // Special handling for layerGroups
+        if (layer.get("layerType") !== "base") {
+          layer.set("quickAccess", true);
+        }
+        // Set drawOrder (zIndex)
+        layer.setZIndex(l.drawOrder);
+        // Set opacity
+        layer.setOpacity(l.opacity);
+        // Special handling for layerGroups and baselayers
         if (layer.get("layerType") === "group") {
-          if (info.d === true) {
-            const subLayersToShow = info.sl ? info.sl : [];
+          if (l.visible === true) {
+            const subLayersToShow = l.subLayers ? l.subLayers : [];
             globalObserver.publish("layerswitcher.showLayer", {
               layer,
               subLayersToShow,
@@ -251,18 +322,61 @@ function PersonalLayerPackage({
           } else {
             globalObserver.publish("layerswitcher.hideLayer", layer);
           }
+        } else if (
+          layer.get("layerType") === "base" &&
+          replaceExistingBackgroundLayer
+        ) {
+          // Hide all other background layers
+          globalObserver.publish(
+            "layerswitcher.backgroundLayerChanged",
+            layer.get("name")
+          );
+          // Set visibility
+          layer.set("visible", l.visible);
         } else {
-          layer.set("visible", info.d);
+          layer.set("visible", l.visible);
+        }
+      } else if (l.id < 0 && replaceExistingBackgroundLayer) {
+        // A fake maplayer is in the package
+        // Hide all other background layers
+        globalObserver.publish("layerswitcher.backgroundLayerChanged", l.id);
+        // And set background color to map
+        switch (l.id) {
+          case "-2":
+            document.getElementById("map").style.backgroundColor = "#000";
+            break;
+          case "-1":
+          default:
+            document.getElementById("map").style.backgroundColor = "#FFF";
+            break;
         }
       }
     });
 
-    enqueueSnackbar(
-      `Snabblager har nu laddats med "${lpInfo.metadata.title}"`,
-      {
-        variant: "success",
+    enqueueSnackbar(`${title} har nu lagts till i snabblager.`, {
+      variant: "success",
+    });
+
+    // Close personalLayerPackage view on load
+    handleBackButtonClick(true);
+  };
+
+  // Check if all layers in package exist in map
+  const checkForMissingLayers = (layers) => {
+    map.getAllLayers().forEach((layer) => {
+      const existingLayer = layers.find((l) => l.id === layer.get("name"));
+      if (existingLayer) {
+        // Remove the layer from the layers array once it's found
+        layers = layers.filter((l) => l.id !== existingLayer.id);
       }
-    );
+    });
+    // Also, remove potential fake background layers included in the package
+    if (layers.length > 0) {
+      // Fake maplayers have id below 0
+      layers = layers.filter((l) => l.id > 0);
+    }
+    // At this point, the layers array will only contain the layers that don't exist in map.getAllLayers() or is a fake mapLayer
+    return layers;
   };
 
   // Fires when the user closes the confirmation-window.
@@ -329,6 +443,50 @@ function PersonalLayerPackage({
     });
   };
 
+  // Render dialog with missing layers information
+  const renderMissingLayersDialog = () => {
+    return createPortal(
+      <Dialog
+        open={missingLayersConfirmation ? true : false}
+        onClose={handleMissingLayersConfirmationAbort}
+      >
+        <DialogTitle>Lager saknas</DialogTitle>
+        <DialogContent>
+          <Typography>
+            {missingLayersConfirmation &&
+              `Följande lagerid:n kan inte hittas i kartans lagerlista:`}
+            <br></br>
+          </Typography>
+          <ul>
+            {missingLayersConfirmation?.missingLayers.map((l) => {
+              return <li key={l.id}>{l.id}</li>;
+            })}
+          </ul>
+          <Typography>
+            {missingLayersConfirmation &&
+              `Det kan bero på att lagret har utgått. Vänligen kontrollera och uppdatera lagerpaketet.`}
+            <br></br>
+          </Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleMissingLayersConfirmationAbort}>Avbryt</Button>
+          <Button
+            onClick={() =>
+              loadLayers(
+                missingLayersConfirmation.layers,
+                missingLayersConfirmation.title
+              )
+            }
+            variant="contained"
+          >
+            Fortsätt
+          </Button>
+        </DialogActions>
+      </Dialog>,
+      document.getElementById("windows-container")
+    );
+  };
+
   // Render dialog to load layerpackage
   const renderLoadDialog = () => {
     return createPortal(
@@ -336,35 +494,72 @@ function PersonalLayerPackage({
         open={loadLpConfirmation ? true : false}
         onClose={handleLoadConfirmationAbort}
       >
-        <DialogTitle>Ladda lager</DialogTitle>
+        <DialogTitle>Lägg till lager</DialogTitle>
         <DialogContent>
           <Typography>
             {loadLpConfirmation
               ? loadLpConfirmation.metadata.title +
-                " kommer nu att laddas. Ange om paketet ska ersätta eller komplettera befintliga snabblager."
+                " läggs nu till i snabblager."
               : ""}
             <br></br>
           </Typography>
+          <DialogContentText sx={{ mt: 2, mb: 1 }}>
+            Alternativ vid laddning
+          </DialogContentText>
           <FormGroup>
-            <FormControlLabel
-              control={
-                <Checkbox
-                  checked={clearExistingQuickAccessLayers}
-                  onChange={() =>
-                    setClearExistingQuickAccessLayers(
-                      !clearExistingQuickAccessLayers
-                    )
-                  }
-                />
-              }
-              label="Ersätt lager vid laddning"
-            />
+            <FormControl
+              sx={{ my: 1, minWidth: 120, maxWidth: 300 }}
+              size="small"
+            >
+              <InputLabel
+                shrink
+                htmlFor="clearExistingQuickAccessLayers-select"
+              >
+                Snabblager
+              </InputLabel>
+              <Select
+                value={clearExistingQuickAccessLayers}
+                onChange={(event) =>
+                  setClearExistingQuickAccessLayers(event.target.value)
+                }
+                label="Snabblager"
+                id="clearExistingQuickAccessLayers-select"
+              >
+                <MenuItem value={true}>Ersätt befintliga lager</MenuItem>
+                <MenuItem value={false}>Behåll befintliga lager</MenuItem>
+              </Select>
+            </FormControl>
+            <FormControl
+              sx={{ mb: 1, mt: 2, minWidth: 120, maxWidth: 300 }}
+              size="small"
+            >
+              <InputLabel
+                shrink
+                htmlFor="replaceExistingBackgroundLayer-select"
+              >
+                Bakgrund
+              </InputLabel>
+              <Select
+                value={replaceExistingBackgroundLayer}
+                onChange={(event) =>
+                  setReplaceExistingBackgroundLayer(event.target.value)
+                }
+                label="Snabblager"
+                id="replaceExistingBackgroundLayer-select"
+              >
+                <MenuItem value={true}>Ersätt bakgrund</MenuItem>
+                <MenuItem value={false}>Behåll bakgrund</MenuItem>
+              </Select>
+            </FormControl>
           </FormGroup>
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => handleLoadConfirmation(false)}>Ladda</Button>
-          <Button onClick={handleLoadConfirmationAbort} variant="contained">
-            Avbryt
+          <Button onClick={handleLoadConfirmationAbort}>Avbryt</Button>
+          <Button
+            onClick={() => handleLoadConfirmation(false)}
+            variant="contained"
+          >
+            Lägg till
           </Button>
         </DialogActions>
       </Dialog>,
@@ -379,6 +574,8 @@ function PersonalLayerPackage({
           sx={{
             p: 1,
             backgroundColor: (theme) => theme.palette.grey[100],
+            borderBottom: (theme) =>
+              `${theme.spacing(0.2)} solid ${theme.palette.divider}`,
           }}
         >
           <Stack direction="row" alignItems="center">
@@ -394,7 +591,7 @@ function PersonalLayerPackage({
               </IconButton>
             </Tooltip>
             <Box sx={{ flexGrow: 1, textAlign: "center" }}>
-              <Typography variant="h6">Mina snabblager</Typography>
+              <Typography variant="subtitle1">Mina snabblager</Typography>
             </Box>
             <input
               ref={fileInputRef}
@@ -423,13 +620,15 @@ function PersonalLayerPackage({
             <Box
               sx={{
                 px: 1,
+                pt: 1,
+                borderTop: (theme) =>
+                  `${theme.spacing(0.2)} solid ${theme.palette.divider}`,
               }}
             >
-              <hr></hr>
               <Typography variant="subtitle2">
-                Här kan du ladda in sparade paket med lager. Välj om innehållet
-                ska ersätta befintliga snabblager eller endast adderas vid
-                laddningen.
+                Här kan du spara aktuella snabblager som lagerpaket lokalt på
+                din egen enhet. För att ladda till snabblager, klicka på sparat
+                paket.
               </Typography>
             </Box>
           </Collapse>
@@ -441,7 +640,8 @@ function PersonalLayerPackage({
         >
           <Card
             sx={{
-              border: "1px solid gray",
+              border: (theme) =>
+                `${theme.spacing(0.2)} solid ${theme.palette.divider}`,
               borderRadius: "8px",
               boxShadow: "none",
               mb: 1,
@@ -471,7 +671,7 @@ function PersonalLayerPackage({
                 </IconButton>
               }
               title={
-                <Typography variant="subtitle1">Spara arbetsyta</Typography>
+                <Typography variant="subtitle1">Spara snabblager</Typography>
               }
             />
             <Collapse in={addWsIsActive} timeout="auto" unmountOnExit>
@@ -527,7 +727,8 @@ function PersonalLayerPackage({
                 return (
                   <Card
                     sx={{
-                      border: "1px solid gray",
+                      border: (theme) =>
+                        `${theme.spacing(0.2)} solid ${theme.palette.divider}`,
                       borderRadius: "8px",
                       boxShadow: "none",
                       mb: 1,
@@ -589,9 +790,9 @@ function PersonalLayerPackage({
                         disableSpacing
                         sx={{ justifyContent: "flex-end" }}
                       >
-                        <Tooltip title="Ladda ner">
+                        <Tooltip title="Exportera">
                           <IconButton
-                            aria-label="Ladda ner"
+                            aria-label="Exportera"
                             onClick={handleExportJsonClick}
                           >
                             <FileDownloadOutlinedIcon />
@@ -627,6 +828,7 @@ function PersonalLayerPackage({
         </Box>
       </Box>
       {renderLoadDialog()}
+      {renderMissingLayersDialog()}
       <Dialog
         open={removeAlert}
         aria-labelledby="removealert-dialog-title"
@@ -676,11 +878,13 @@ function PersonalLayerPackage({
           />
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => handleEditPackageItem()} autoFocus>
+          <Button onClick={() => setEditAlert(!editAlert)}>Avbryt</Button>
+          <Button
+            variant="contained"
+            onClick={() => handleEditPackageItem()}
+            autoFocus
+          >
             Spara
-          </Button>
-          <Button onClick={() => setEditAlert(!editAlert)} variant="contained">
-            Avbryt
           </Button>
         </DialogActions>
       </Dialog>

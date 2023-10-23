@@ -34,12 +34,14 @@
             "visibleAtStart": true,
             "drawOrder": 0,
             "visibleForGroups": null,
+						"draggable": true,
             "infobox": ""
           },
           {
             "id": "2",
             "visibleAtStart": false,
             "drawOrder": 0,
+						"draggable": false,
             "visibleForGroups": null,
             "infobox": ""
           }
@@ -208,6 +210,11 @@
               	"visible": false,
               	"opacity": 0.5,
 				"drawOrder": 6
+              },{
+              	"id": "9099",
+              	"visible": false,
+              	"opacity": 0.5,
+				"drawOrder": 1
               }, 
 			  {
               	"id": "4",
@@ -237,8 +244,9 @@
         "backgroundSwitcherWhite": true,
         "enableOSM": true,
         "showBreadcrumbs": false,
+				"lockedBackgroundInDraworder": true, 
 		"showActiveLayersView": true,
-        "enableTransparencySlider": false,
+        "enableTransparencySlider": true,
         "target": "control",
         "position": "right",
         "width": "",

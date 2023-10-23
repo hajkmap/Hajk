@@ -25,6 +25,7 @@ var defaultState = {
   anchorY: 1,
   allowDangerousHtml: true,
   useNewInfoclick: false,
+  transformLinkUri: true,
 };
 
 const ColorButtonBlue = withStyles((theme) => ({
@@ -70,6 +71,8 @@ class ToolOptions extends Component {
           tool.options.allowDangerousHtml || this.state.allowDangerousHtml,
         useNewInfoclick:
           tool.options.useNewInfoclick || this.state.useNewInfoclick,
+        transformLinkUri:
+          tool.options.transformLinkUri ?? this.state.transformLinkUri,
         visibleForGroups: tool.options.visibleForGroups
           ? tool.options.visibleForGroups
           : [],
@@ -143,6 +146,7 @@ class ToolOptions extends Component {
         fillColor: this.state.fillColor,
         allowDangerousHtml: this.state.allowDangerousHtml,
         useNewInfoclick: this.state.useNewInfoclick,
+        transformLinkUri: this.state.transformLinkUri,
         visibleForGroups: this.state.visibleForGroups.map(
           Function.prototype.call,
           String.prototype.trim
@@ -384,6 +388,22 @@ class ToolOptions extends Component {
             &nbsp;
             <label htmlFor="useNewInfoclick" style={{ width: "auto" }}>
               Använd ny Infoclick-variant (se GitHub issue #1034)
+            </label>
+          </div>
+          <div>
+            <input
+              id="transformLinkUri"
+              name="transformLinkUri"
+              type="checkbox"
+              onChange={(e) => {
+                this.handleInputChange(e);
+              }}
+              checked={this.state.transformLinkUri}
+            />
+            &nbsp;
+            <label htmlFor="transformLinkUri" style={{ width: "auto" }}>
+              URL-verifiering aktiverad. (Verifieringen måste avaktiveras för
+              att tillåta länkar till desktop-programvaror.)
             </label>
           </div>
           <div className="separator">Länkarnas utseende</div>

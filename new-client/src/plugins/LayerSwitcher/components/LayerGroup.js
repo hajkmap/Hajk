@@ -5,7 +5,7 @@ import GroupLayer from "./GroupLayer";
 import LayerGroupAccordion from "./LayerGroupAccordion.js";
 import CheckBoxIcon from "@mui/icons-material/CheckBox";
 import CheckBoxOutlineBlankIcon from "@mui/icons-material/CheckBoxOutlineBlank";
-import { IconButton } from "@mui/material";
+import { IconButton, ListItemText } from "@mui/material";
 
 class LayerGroup extends React.PureComponent {
   state = {
@@ -15,7 +15,6 @@ class LayerGroup extends React.PureComponent {
     name: "",
     parent: "-1",
     toggled: false,
-    chapters: [],
   };
 
   static defaultProps = {
@@ -25,7 +24,6 @@ class LayerGroup extends React.PureComponent {
 
   static propTypes = {
     app: propTypes.object.isRequired,
-    chapters: propTypes.array.isRequired,
     child: propTypes.bool.isRequired,
     expanded: propTypes.bool.isRequired,
     group: propTypes.object.isRequired,
@@ -108,6 +106,7 @@ class LayerGroup extends React.PureComponent {
     return this.state.groups.map((group, i) => {
       return (
         <LayerGroup
+          filterChangeIndicator={group.changeIndicator}
           expanded={expanded === group.id}
           key={i}
           group={group}
@@ -115,7 +114,6 @@ class LayerGroup extends React.PureComponent {
           handleChange={this.handleChange}
           app={this.props.app}
           child={true}
-          chapters={this.props.chapters}
           options={this.props.options}
         />
       );
@@ -249,6 +247,7 @@ class LayerGroup extends React.PureComponent {
     }
     return <CheckBoxOutlineBlankIcon />;
   };
+
   /**
    * If Group has "toggleable" property enabled, render the toggle all checkbox.
    *
@@ -285,42 +284,30 @@ class LayerGroup extends React.PureComponent {
   renderChildren() {
     return (
       <div>
-        {this.state.layers.map((layer, i) => {
+        {this.props.group.layers.map((layer, i) => {
           const mapLayer = this.model.layerMap[layer.id];
-          if (mapLayer) {
-            if (mapLayer.get("layerType") === "group") {
-              return (
-                <GroupLayer
-                  key={mapLayer.get("name")}
-                  layer={mapLayer}
-                  app={this.props.app}
-                  observer={this.props.model.observer}
-                  toggleable={true}
-                  options={this.props.options}
-                  draggable={false}
-                ></GroupLayer>
-              );
-            }
-            return (
-              <LayerItem
-                key={mapLayer.get("name")}
-                layer={mapLayer}
-                draggable={false}
-                toggleable={true}
-                app={this.props.app}
-                options={this.props.options}
-                chapters={this.props.chapters}
-                onOpenChapter={(chapter) => {
-                  const informativeWindow = this.props.app.windows.find(
-                    (window) => window.type === "informative"
-                  );
-                  informativeWindow.props.custom.open(chapter);
-                }}
-              />
-            );
-          } else {
+          // If mapLayer doesn't exist, the layer shouldn't be displayed
+          if (!mapLayer) {
             return null;
           }
+
+          // Check if it's a group or a regular layer
+          const isGroup = mapLayer.get("layerType") === "group";
+          const Component = isGroup ? GroupLayer : LayerItem;
+
+          // Render the component with the appropriate attributes
+          return (
+            <Component
+              display={!layer.isFiltered ? "none" : "block"}
+              key={mapLayer.get("name")}
+              layer={mapLayer}
+              draggable={false}
+              toggleable={true}
+              app={this.props.app}
+              observer={this.props.model.observer}
+              groupLayer={layer}
+            />
+          );
         })}
         {this.renderLayerGroups()}
       </div>
@@ -331,10 +318,19 @@ class LayerGroup extends React.PureComponent {
     const { expanded } = this.state;
     return (
       <LayerGroupAccordion
+        display={!this.props.group.isFiltered ? "none" : "block"}
         toggleable={this.props.group.toggled}
         expanded={expanded}
-        name={this.state.name}
         toggleDetails={this.renderToggleAll()}
+        layerGroupTitle={
+          <ListItemText
+            primaryTypographyProps={{
+              fontWeight:
+                this.isToggled() || this.isSemiToggled() ? "bold" : "inherit",
+            }}
+            primary={this.state.name}
+          />
+        }
         children={this.renderChildren()}
       ></LayerGroupAccordion>
     );

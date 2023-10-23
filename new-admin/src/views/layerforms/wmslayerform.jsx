@@ -1148,7 +1148,14 @@ class WMSLayerForm extends Component {
       projections = this.state.capabilities.Capability.Layer[RS];
     }
 
+    // We expect projections to be an array,
+    // but are also ready for a string (see below).
     if (projections) {
+      // First, ensure we have an array, see #1352
+      if (!Array.isArray(projections)) {
+        projections = [projections];
+      }
+
       projections = projections.map((projection) => {
         return projection.toUpperCase();
       });

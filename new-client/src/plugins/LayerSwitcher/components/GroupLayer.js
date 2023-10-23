@@ -17,16 +17,17 @@ export default function GroupLayer({
   app,
   observer,
   toggleable,
-  options,
   draggable,
   quickAccessLayer,
+  display,
+  groupLayer,
 }) {
   // Keep the subLayers area active in state
   const [showSublayers, setShowSublayers] = useState(false);
   // Keep visible sublayers in state
   const [visibleSubLayers, setVisibleSubLayers] = useState(
     layer.get("visible")
-      ? quickAccessLayer
+      ? quickAccessLayer || draggable
         ? layer.get("subLayers")
         : layer.visibleAtStartSubLayers?.length > 0
         ? layer.visibleAtStartSubLayers
@@ -178,9 +179,6 @@ export default function GroupLayer({
 
   // When visibleSubLayers state changes, update layer params
   useEffect(() => {
-    if (!toggleable) {
-      return;
-    }
     const visibleSubLayersArray = [...visibleSubLayers];
     if (visibleSubLayersArray.length === 0) {
       // Fix underlying source
@@ -211,7 +209,7 @@ export default function GroupLayer({
         CQL_FILTER: null,
       });
     }
-  }, [visibleSubLayers, layer, toggleable]);
+  }, [visibleSubLayers, layer]);
 
   // Handles list item click
   const handleLayerItemClick = () => {
@@ -245,8 +243,26 @@ export default function GroupLayer({
     setShowSublayers(!showSublayers);
   };
 
+  // Determines visibility of subLayer
+  // If the groupLayer is not toggleable
+  // then the sublayer should only be visible if it's included in visibleSubLayers
+  const showSublayer = (subLayer) => {
+    if (toggleable) {
+      return isSubLayerFiltered(subLayer);
+    } else if (visibleSubLayers.includes(subLayer)) {
+      return isSubLayerFiltered(subLayer);
+    }
+    return false;
+  };
+
+  const isSubLayerFiltered = (subLayer) => {
+    const foundSubLayer = groupLayer.subLayers.find((sl) => sl.id === subLayer);
+    return foundSubLayer ? foundSubLayer.isFiltered : false;
+  };
+
   return (
     <LayerItem
+      display={display}
       layer={layer}
       app={app}
       draggable={draggable}
@@ -273,6 +289,7 @@ export default function GroupLayer({
               sx={{
                 transform: showSublayers ? "rotate(90deg)" : "",
                 transition: "transform 300ms ease",
+                color: (theme) => theme.palette.grey[500],
               }}
             ></KeyboardArrowRightOutlinedIcon>
           </IconButton>
@@ -283,8 +300,8 @@ export default function GroupLayer({
           <Box sx={{ marginLeft: "40px" }}>
             {layer.subLayers.map((subLayer, index) => (
               <SubLayerItem
+                display={showSublayer(subLayer) ? "block" : "none"}
                 key={subLayer}
-                options={options}
                 subLayer={subLayer}
                 subLayerIndex={index}
                 layer={layer}

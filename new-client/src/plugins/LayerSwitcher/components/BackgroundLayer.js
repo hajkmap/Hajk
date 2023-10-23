@@ -15,15 +15,20 @@ export default function BackgroundLayer({ layer, app, toggleable, draggable }) {
 
   // When component is successfully mounted into the DOM.
   useEffect(() => {
-    layer.localObserver.subscribe("backgroundLayerChanged", (activeLayer) => {
-      if (activeLayer !== layer.get("name")) {
-        if (!layer.isFakeMapLayer) {
-          layer.setVisible(false);
+    app.globalObserver.subscribe(
+      "layerswitcher.backgroundLayerChanged",
+      (activeLayer) => {
+        if (activeLayer !== layer.get("name")) {
+          if (!layer.isFakeMapLayer) {
+            layer.setVisible(false);
+          }
+          setBackgroundVisible(false);
+        } else {
+          setBackgroundVisible(true);
         }
-        setBackgroundVisible(false);
       }
-    });
-  }, [layer]);
+    );
+  }, [layer, app.globalObserver]);
 
   // Handles list item click
   const handleLayerItemClick = () => {
@@ -42,9 +47,8 @@ export default function BackgroundLayer({ layer, app, toggleable, draggable }) {
     } else {
       layer.setVisible(true);
     }
-    setBackgroundVisible(true);
     // Publish event to ensure all other background layers are disabled
-    layer.localObserver.publish("backgroundLayerChanged", name);
+    app.globalObserver.publish("layerswitcher.backgroundLayerChanged", name);
   };
 
   // Render method for backgroundlayer icon
