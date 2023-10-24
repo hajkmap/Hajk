@@ -31,6 +31,7 @@ export default class PropertyCheckerModel {
     this.#localObserver = settings.localObserver;
     this.#map = settings.map;
     this.#viewResolution = this.#map.getView().getResolution();
+    //this.#viewProjection = this.#map.getView().getProjection().getCode();
     this.#viewProjection = this.#map.getView().getProjection();
 
     this.#initSubscriptions(); // Initiate listeners on observer(s)
@@ -55,11 +56,13 @@ export default class PropertyCheckerModel {
   };
 
   #getOlFeaturesForCoordsAndOlLayer = async (coords, olLayer) => {
+    // Ensure to grab the current zoom level's resolution
+    this.#viewResolution = this.#map.getView().getResolution();
     const url = olLayer
       .getSource()
       .getFeatureInfoUrl(coords, this.#viewResolution, this.#viewProjection, {
         INFO_FORMAT: "application/json",
-        FEATURE_COUNT: 300, // Without this, only first feature is returned
+        FEATURE_COUNT: 300, // Without this, only first feature is returned,
       });
 
     const response = await fetch(url);
