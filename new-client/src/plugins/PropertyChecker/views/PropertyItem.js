@@ -133,11 +133,14 @@ function PropertyItem({
             <Typography variant="button" paragraph gutterBottom>
               Granskning har gjorts mot följande planbestämmelser:
             </Typography>
-            <List>
+            <Typography color="error">
+              Kommer implementeras i senare version av verktyget.
+            </Typography>
+            {/* <List>
               {digitalPlanFeatures.map((f, j) => {
                 return <DigitalPlanItem feature={f} key={j} />;
               })}
-            </List>
+            </List> */}
           </Box>
         </AccordionDetails>
       </Accordion>

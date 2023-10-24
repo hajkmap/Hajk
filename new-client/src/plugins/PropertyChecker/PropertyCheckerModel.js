@@ -190,7 +190,7 @@ export default class PropertyCheckerModel {
     const groupedDigitalPlanFeatures = Object.fromEntries(
       this.#groupedMap(digitalPlanFeatures)
     );
-    console.log("groupedDigitalPlanFeatures: ", groupedDigitalPlanFeatures);
+    // console.log("groupedDigitalPlanFeatures: ", groupedDigitalPlanFeatures);
 
     // Let's grab the features from our check layer
     const checkLayerFeatures = await this.#getOlFeaturesForCoordsAndOlLayer(
@@ -201,7 +201,7 @@ export default class PropertyCheckerModel {
       checkLayerFeatures,
       this.#groupCheckLayerByAttribute // the attribute name that we wish to group on
     );
-    console.log("groupedFeatures in Model: ", groupedFeatures);
+    // console.log("groupedFeatures in Model: ", groupedFeatures);
     // If we've got at least one feature in the response
     if (
       Object.keys(groupedFeatures).length > 0 ||

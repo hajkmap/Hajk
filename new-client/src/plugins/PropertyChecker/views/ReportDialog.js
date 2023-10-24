@@ -42,7 +42,9 @@ export default function ReportDialog({
             // Next, print layer's caption and subcaption (if it exists).
             ` - ${l.caption}` +
               (l.subcaption !== null ? ` (${l.subcaption})` : "") +
-              `\n    ${getLayerNotesAsArray(l.id)?.join("      \n")}`
+              (getLayerNotesAsArray(l.id).length > 0
+                ? `\n   Notering: ${getLayerNotesAsArray(l.id)?.join(" ")}`
+                : "")
         )
         .join("\n") + // Finally, join the array into a string using new line as join character.
       "\n\n" +
@@ -70,6 +72,10 @@ export default function ReportDialog({
               "<li>" +
               l.caption +
               (l.subcaption !== null ? ` (${l.subcaption})` : "") +
+              (getLayerNotesAsArray(l.id).length > 0 ? "<br>Notering: " : "") +
+              getLayerNotesAsArray(l.id)
+                .map((s) => s)
+                .join("<br>") +
               "</li>"
             : ""
         )
@@ -172,7 +178,7 @@ export default function ReportDialog({
                               variant="caption"
                               sx={{ display: "block" }}
                             >
-                              {s}
+                              {i === 0 && "Notering: "} {s}
                             </Typography>
                           ))}
                         </>

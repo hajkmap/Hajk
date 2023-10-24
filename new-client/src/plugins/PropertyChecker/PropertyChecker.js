@@ -19,7 +19,7 @@ import DrawModel from "../../models/DrawModel.js";
  * and document how plugins should be constructed in Hajk.
  */
 function PropertyChecker(props) {
-  console.log("PropertyChecker render: ", props);
+  // console.log("PropertyChecker render: ", props);
   // Used to keep track of the plugin's current visibility.
   // We will want to do some cleanup later on when the window is hidden.
   const [pluginShown, setPluginShown] = React.useState(

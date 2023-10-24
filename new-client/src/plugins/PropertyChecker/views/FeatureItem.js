@@ -142,7 +142,7 @@ const FeatureItem = (props) => {
               expand={expanded}
               onClick={handleExpandClick}
               aria-expanded={expanded}
-              aria-label="show more"
+              aria-label="Visa noteringar"
             >
               <ExpandMoreIcon />
             </ExpandMore>

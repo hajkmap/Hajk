@@ -31,10 +31,11 @@ So, here is a brief specification of this required WMS layer.
         "visibleAtStart": true,
         "checkLayerId": "ar8q1v", // ID of the WMS layer that will act as the "Check Layer".
         "groupCheckLayerByAttribute": "fastighet", // The attribute name we wish to group by, normally something related to the property.
-        "digitalPlansLayerId": "s5viu8", // ID of the WMS layer that will act as "Digital Plans Layer"
-        "buildingsLayerIds": "1328", // ID(s) of layers to toggle when user clicks the buildings shortcut button
-        "bordersLayerIds": "1329,1358,1439,1357", // ID(s) of layers to toggle when user clicks the borders shortcut button
-        "plansLayerIds": "j77k2s,7vmhc3,tpgv5m,aoxhlq,h91wc9,s5viu8", // ID(s) of layers to toggle when user clicks the plans shortcut button
+        "digitalPlansLayerId": "s5viu8", // ID of the WMS layer that holds the "Digital Plans".
+        "groupDigitalPlansLayerByAttribute": "dokument", // The attribute name that response from Digital Plans layer will be grouped by.
+        "buildingsLayerIds": "1328", // ID(s) of layers to toggle when user clicks the buildings shortcut button.
+        "bordersLayerIds": "1329,1358,1439,1357", // ID(s) of layers to toggle when user clicks the borders shortcut button.
+        "plansLayerIds": "j77k2s,7vmhc3,tpgv5m,aoxhlq,h91wc9,s5viu8", // ID(s) of layers to toggle when user clicks the plans shortcut button.
         "target": "right",
         "position": "left",
         "height": "dynamic",
