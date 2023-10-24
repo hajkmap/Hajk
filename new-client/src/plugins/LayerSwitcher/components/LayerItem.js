@@ -25,7 +25,6 @@ import FormatListBulletedOutlinedIcon from "@mui/icons-material/FormatListBullet
 import LegendIcon from "./LegendIcon";
 import LegendImage from "./LegendImage";
 import LayerItemOptions from "./LayerItemOptions";
-import LayerItemCollapse from "./LayerItemCollapse";
 
 // Custom hooks
 import useSnackbar from "../../../hooks/useSnackbar";
@@ -41,9 +40,8 @@ export default function LayerItem({
   display,
   subLayersSection,
   visibleSubLayers,
-  visibleSubLayersCaption,
-  allSubLayersCaption,
   expandableSection,
+  visibleSubLayersCaption,
   onSetZoomVisible,
 }) {
   // WmsLayer load status, shows warning icon if !ok
@@ -54,26 +52,20 @@ export default function LayerItem({
   const [zoomEndListener, setZoomEndListener] = useState();
   // State that toggles legend collapse
   const [legendIsActive, setLegendIsActive] = useState(false);
+  const [snackbarState, setSnackbarState] = useState({});
+  const prevSnackbarStateRef = useRef({});
+  const [visibleMinMaxZoomLayers, setVisibleMinMaxZoomLayers] = useState([]);
+  const prevVisibleMinMaxZoomLayersRef = useRef([]);
+  const prevLayerIsZoomVisible = useRef(null);
+  const [isGroupHidden, setIsGroupHidden] = useState(false);
 
-  const visibleSubLayersCaptionRef = useRef(visibleSubLayersCaption);
-
-  // Use the custom useSnackbar hook.
-  const { addToSnackbar, removeFromSnackbar, displaySnackbar } = useSnackbar();
+  const { addToSnackbar, removeFromSnackbar, showSnackbar } = useSnackbar();
 
   useEffect(() => {
-    visibleSubLayersCaptionRef.current = visibleSubLayersCaption;
-  }, [visibleSubLayersCaption, visibleSubLayersCaptionRef.current]);
-
-  useEffect(() => {
-    // Check if the layer is currently visible.
     if (layer.get("visible")) {
-      // Trigger zoom check.
       triggerZoomCheck(false, true);
-      listenToZoomChange(layer.get("visible"));
-    } else {
-      // Remove the layer from the snackbar message.
-      removeFromSnackbar(layer.get("caption"));
     }
+    listenToZoomChange(layer.get("visible"));
 
     // Handler for zoom change event.
     const handleChange = () => {
@@ -83,6 +75,17 @@ export default function LayerItem({
         triggerZoomCheck(false, true);
       }
     };
+
+    if (
+      (visibleSubLayers !== undefined &&
+        !visibleSubLayers &&
+        visibleMinMaxZoomLayers.length > 0) ||
+      (layer.get("visible") !== undefined &&
+        !layer.get("visible") &&
+        visibleMinMaxZoomLayers.length > 0)
+    ) {
+      setIsGroupHidden(true);
+    }
 
     // Subscribe to zoom changes.
     const zoomChangeSubscription = app.globalObserver.subscribe(
@@ -113,21 +116,52 @@ export default function LayerItem({
     };
   }, [visibleSubLayers, layer.get("visible"), wmsLayerLoadStatus]);
 
-  // This function listens to changes in the zoom level of the map and updates the layer accordingly.
-  const listenToZoomChange = (shouldListen) => {
-    // If the layer does not use min/max zoom levels, return early.
+  useEffect(() => {
+    if (isGroupHidden) {
+      visibleMinMaxZoomLayers.forEach((value) => {
+        removeValue(value);
+      });
+      setIsGroupHidden(false);
+    }
+
+    const prevVisibleMinMaxZoomLayers = prevVisibleMinMaxZoomLayersRef.current;
+
+    const addedValues = visibleMinMaxZoomLayers.filter(
+      (value) => !prevVisibleMinMaxZoomLayers.includes(value)
+    );
+
+    const removedValues = prevVisibleMinMaxZoomLayers.filter(
+      (value) => !visibleMinMaxZoomLayers.includes(value)
+    );
+
+    addedValues.forEach((value) => {
+      addValue(value);
+    });
+
+    removedValues.forEach((value) => {
+      removeValue(value);
+    });
+
+    if (
+      addedValues.length === 0 &&
+      removedValues.length === 0 &&
+      !zoomVisible
+    ) {
+      //showSnackbar();
+    }
+
+    prevVisibleMinMaxZoomLayersRef.current = visibleMinMaxZoomLayers;
+  }, [visibleMinMaxZoomLayers, isGroupHidden]);
+
+  const listenToZoomChange = (bListen) => {
     if (!layerUsesMinMaxZoom()) return;
 
-    // Define the event name to listen for.
     const eventName = "core.zoomEnd";
-
-    // If we are listening for zoom changes and there is no existing listener, subscribe to the event.
-    if (shouldListen && !zoomEndListener) {
+    if (bListen && !zoomEndListener) {
       setZoomEndListener(
         app.globalObserver.subscribe(eventName, zoomEndHandler)
       );
     } else {
-      // If we are not listening for zoom changes and there is an existing listener, unsubscribe from the event.
       if (zoomEndListener) {
         app.globalObserver.unsubscribe(eventName, zoomEndListener);
         setZoomEndListener(null);
@@ -138,11 +172,11 @@ export default function LayerItem({
   const triggerZoomCheck = (click, visible) => {
     if (!layerUsesMinMaxZoom()) return;
 
-    zoomEndHandler(click);
+    zoomEndHandler(click, visible);
 
     if (visible === false) {
       // Remove the layer from the snackbar message.
-      removeFromSnackbar(layer.get("caption"));
+      removeValue(layer.get("caption"));
     }
   };
 
@@ -151,55 +185,77 @@ export default function LayerItem({
    * @param {boolean} wasClicked - True if the zoom button was clicked, false otherwise.
    * @returns {boolean} - True if the layer is visible at the current zoom level, false otherwise.
    */
-  const zoomEndHandler = (wasClicked) => {
+  const zoomEndHandler = (click) => {
     const zoom = app.map.getView().getZoom();
-    const layerProperties = layer.getProperties();
-    const layerIsZoomVisible =
-      zoom > layerProperties.minZoom && zoom <= layerProperties.maxZoom;
+    const lprops = layer.getProperties();
+    const layerIsZoomVisible = zoom > lprops.minZoom && zoom <= lprops.maxZoom;
+    const minMaxZoomAlertOnToggleOnly = false;
 
-    // Callback to parent component to update the zoom visibility state.
-    if (typeof onSetZoomVisible === "function") {
-      onSetZoomVisible(layerIsZoomVisible);
-    }
+    const prevVisibleMinMaxZoomLayers = prevVisibleMinMaxZoomLayersRef.current;
+    const isGroupLayer = Array.isArray(visibleSubLayersCaption);
 
-    if (layer.get("visible")) {
-      if (!layerIsZoomVisible) {
-        // Check for group layers by checking if the prop `allSubLayersCaption` from GroupLayer is set.
-        if (allSubLayersCaption && allSubLayersCaption.length > 0) {
-          // Check if atleast one layer is visible.
-          if (
-            visibleSubLayersCaptionRef.current &&
-            visibleSubLayersCaptionRef.current.length > 0
-          ) {
-            // To ensure that the message is updated correctly, we need to remove the sublayers that are not visible.
-            const subLayersToRemove = allSubLayersCaption
-              .filter(
-                (item) =>
-                  visibleSubLayersCaptionRef.current.includes(item) === false
-              )
-              .map((item) => item);
-
-            removeFromSnackbar(subLayersToRemove);
-            addToSnackbar(visibleSubLayersCaptionRef.current, false, true);
-          } else {
-            // Otherwise we remove all layers from the message.
-            removeFromSnackbar(allSubLayersCaption);
-          }
-        } else {
-          addToSnackbar(layer.get("caption"), false, true);
+    const arraysAreEqual = (a, b) => {
+      if (a.length !== b.length) {
+        return false;
+      }
+      for (let i = 0; i < a.length; i++) {
+        if (a[i] !== b[i]) {
+          return false;
         }
+      }
+      return true;
+    };
+
+    if (minMaxZoomAlertOnToggleOnly === true) {
+      if (!layer.get("visible") && !layerIsZoomVisible && click === true) {
+        setVisibleMinMaxZoomLayers(
+          isGroupLayer ? visibleSubLayersCaption : [layer.get("caption")]
+        );
       } else {
-        if (allSubLayersCaption && allSubLayersCaption.length > 0) {
-          // If no sublayers are visible, remove the layer captions from the message.
-          removeFromSnackbar(allSubLayersCaption);
+        setVisibleMinMaxZoomLayers([]);
+      }
+    } else {
+      if (
+        layerIsZoomVisible !== prevLayerIsZoomVisible.current ||
+        isGroupLayer
+      ) {
+        if (!layerIsZoomVisible && (zoomVisible || !layer.get("visible"))) {
+          setVisibleMinMaxZoomLayers(
+            isGroupLayer ? visibleSubLayersCaption : [layer.get("caption")]
+          );
+        } else if (
+          !layerIsZoomVisible &&
+          layer.get("visible") &&
+          isGroupLayer
+        ) {
+          setVisibleMinMaxZoomLayers(
+            isGroupLayer ? visibleSubLayersCaption : [layer.get("caption")]
+          );
+        } else if (
+          !arraysAreEqual(visibleMinMaxZoomLayers, prevVisibleMinMaxZoomLayers)
+        ) {
+          setVisibleMinMaxZoomLayers([]);
         } else {
-          removeFromSnackbar(layer.get("caption"));
+          setVisibleMinMaxZoomLayers([]);
         }
+
+        if (isGroupLayer) {
+          onSetZoomVisible(layerIsZoomVisible);
+        }
+        prevLayerIsZoomVisible.current = layerIsZoomVisible;
       }
     }
 
     setZoomVisible(layerIsZoomVisible);
     return layerIsZoomVisible;
+  };
+
+  const addValue = (value) => {
+    addToSnackbar(layer.get("name"), value);
+  };
+
+  const removeValue = (value) => {
+    removeFromSnackbar(layer.get("name"), value);
   };
 
   const layerUsesMinMaxZoom = () => {
@@ -213,24 +269,13 @@ export default function LayerItem({
   const handleLayerItemClick = () => {
     // If a clickCallback is defined, call it.
     if (clickCallback) {
-      removeFromSnackbar(layer.get("caption"));
       clickCallback();
       return;
     }
+    triggerZoomCheck(true, !layer.get("visible"));
 
-    // Check if layer is currently visible.
-    const isVisible = layer.get("visible");
-
-    // Toggle layer visibility.
-    const newVisibility = !isVisible;
-    layer.set("visible", newVisibility);
-
-    if (isVisible && !newVisibility) {
-      // Remove the layer from the snackbar message.
-      removeFromSnackbar(layer.get("caption"));
-    } else if (layer.get("layerType") !== "system") {
-      // If the layer is not a system layer, trigger a zoom check.
-      triggerZoomCheck(true, newVisibility);
+    if (layer.get("layerType") !== "system") {
+      layer.set("visible", !layer.get("visible"));
     }
   };
 
@@ -284,16 +329,14 @@ export default function LayerItem({
     return !layer.get("visible") ? (
       <CheckBoxOutlineBlankIcon />
     ) : layer.get("layerType") === "group" &&
-      visibleSubLayersCaption.length !== layer.subLayers.length ? (
+      visibleSubLayers.length !== layer.subLayers.length ? (
       <CheckBoxIcon sx={{ fill: "gray" }} />
     ) : (
       <CheckBoxIcon
         sx={{
           fill: (theme) =>
-            !zoomVisible && layer.get("visible") && !visibleSubLayersCaption
+            !zoomVisible && layer.get("visible") && !visibleSubLayers
               ? theme.palette.warning.dark
-              : zoomVisible && layer.get("visible")
-              ? theme.palette.primary
               : "",
         }}
       />

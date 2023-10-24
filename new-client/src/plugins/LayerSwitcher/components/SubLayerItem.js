@@ -25,15 +25,22 @@ export default function SubLayerItem({
   visible,
   toggleSubLayer,
   subLayerIndex,
-  options,
   zoomVisible,
-  ...props
 }) {
   // State that toggles legend collapse
   const [legendIsActive, setLegendIsActive] = useState(false);
   // Render method for checkbox icon
   const getLayerToggleIcon = () => {
-    return visible ? <CheckBoxIcon /> : <CheckBoxOutlineBlankIcon />;
+    return visible ? (
+      <CheckBoxIcon
+        sx={{
+          fill: (theme) =>
+            !zoomVisible ? theme.palette.warning.dark : theme.palette.primary,
+        }}
+      />
+    ) : (
+      <CheckBoxOutlineBlankIcon />
+    );
   };
 
   // Show layer details action
@@ -77,15 +84,7 @@ export default function SubLayerItem({
     <div style={{ display: display }}>
       <ListItemButton
         disableRipple
-        onClick={() =>
-          toggleable
-            ? toggleSubLayer(
-                subLayer,
-                visible,
-                layer.layersInfo[subLayer].caption
-              )
-            : null
-        }
+        onClick={() => (toggleable ? toggleSubLayer(subLayer, visible) : null)}
         sx={{
           borderBottom: (theme) =>
             `${theme.spacing(0.2)} solid ${theme.palette.divider}`,

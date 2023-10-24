@@ -20,6 +20,7 @@ export default function GroupLayer({
   draggable,
   quickAccessLayer,
   display,
+  filterValue,
   groupLayer,
 }) {
   // Keep the subLayers area active in state
@@ -248,16 +249,19 @@ export default function GroupLayer({
   // then the sublayer should only be visible if it's included in visibleSubLayers
   const showSublayer = (subLayer) => {
     if (toggleable) {
-      return isSubLayerFiltered(subLayer);
-    } else if (visibleSubLayers.includes(subLayer)) {
-      return isSubLayerFiltered(subLayer);
+      if (filterValue && filterValue !== "") {
+        return groupLayer.subLayers.find((sl) => sl.id === subLayer).isFiltered;
+      } else {
+        return true;
+      }
+    } else if (visibleSubLayers.some((s) => s === subLayer)) {
+      if (filterValue && filterValue !== "") {
+        return groupLayer.subLayers.find((sl) => sl.id === subLayer).isFiltered;
+      } else {
+        return true;
+      }
     }
     return false;
-  };
-
-  const isSubLayerFiltered = (subLayer) => {
-    const foundSubLayer = groupLayer.subLayers.find((sl) => sl.id === subLayer);
-    return foundSubLayer ? foundSubLayer.isFiltered : false;
   };
 
   return (
@@ -269,11 +273,6 @@ export default function GroupLayer({
       toggleable={toggleable}
       clickCallback={handleLayerItemClick}
       visibleSubLayers={visibleSubLayers}
-      // An array of sublayer captions that does not change, i.e. the total list
-      // of sublayers for the group.
-      allSubLayersCaption={layer.subLayers.map(
-        (subLayer) => layer.layersInfo[subLayer]?.caption || ""
-      )}
       visibleSubLayersCaption={visibleSubLayers.map(
         (subLayer) => layer.layersInfo[subLayer]?.caption || ""
       )}

@@ -23,7 +23,7 @@ const StyledIconButton = styled(IconButton)(({ theme }) => ({
 const MapCleaner = React.memo((props) => {
   // Import the clearAllMessages function from the useSnackbar hook.
   // This allows us to clear the Snackbar's state when the button is clicked.
-  const { clearAllMessages } = useSnackbar();
+  const { clearSnackbar } = useSnackbar();
 
   return (
     props.appModel.config.mapConfig.map.mapcleaner && (
@@ -37,7 +37,7 @@ const MapCleaner = React.memo((props) => {
               // Call the clearAllMessages function from the useCustomSnackbar hook.
               // This clears the state of messageItems in the Snackbar,
               // ensuring it stays in sync with the actual visibility of the layers.
-              clearAllMessages();
+              clearSnackbar();
             }}
           >
             <VisibilityOffIcon />
