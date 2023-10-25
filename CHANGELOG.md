@@ -7,9 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
--
+## [3.13.16] - 2023-10-25
+
+### Added
+
+- Backend: More logging options in `.env`. Also, we now save 14 old log files by default (was 1 before). [#1421](https://github.com/hajkmap/Hajk/issues/1421)
+
+### Fixed
+
+- Client: Drawer Toggle Button could sometimes disappear in certain map configurations. Fixed in #1414. [#1414](https://github.com/hajkmap/Hajk/issues/1414)
 
 ## [3.13.15] - 2023-10-24
+
+### Added
 
 - New plugin: **this release marks the first Public Beta of _PropertyChecker_.** See [#1360](https://github.com/hajkmap/Hajk/issues/1360). There's also a README included in the plugin's directory, make sure to read it in order to successfully setup this plugin.
 - Backend: added `/fir` endpoints. This functionality requires the _myCarta FR Direkt_ service. [#1416](https://github.com/hajkmap/Hajk/issues/1416)
@@ -136,7 +146,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [3.12.0-rc.2] - 2023-06-19
 
-[unreleased]: https://github.com/hajkmap/Hajk/compare/v3.13.15...hstd-main
+[unreleased]: https://github.com/hajkmap/Hajk/compare/v3.13.16...hstd-main
+[3.13.16]: https://github.com/hajkmap/Hajk/compare/v3.13.15...v3.13.16
 [3.13.15]: https://github.com/hajkmap/Hajk/compare/v3.13.14...v3.13.15
 [3.13.14]: https://github.com/hajkmap/Hajk/compare/v3.13.13...v3.13.14
 [3.13.13]: https://github.com/hajkmap/Hajk/compare/v3.13.12...v3.13.13
