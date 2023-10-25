@@ -431,9 +431,20 @@ class TimeSliderView extends React.PureComponent {
     this.setState({ unixTimeBeforePrint: unixTime });
   };
 
-  renderLayersAtTime = (unixTime) => {
-    this.setState({ currentUnixTime: unixTime }, () => {
-      this.updateLayers();
+  // Updates the slider and renders the layers at the supplied time
+  updateSliderAndRenderLayersAtTime = async (unixTime) => {
+    // We want to make sure not to resolve before the layers has rendered - otherwise we might
+    // get strange side-effects if the caller thinks that the map is ready right away...
+    return new Promise((resolve) => {
+      // Let's bind a listener that fires when the rendering is completed...
+      this.map.once("rendercomplete", () => {
+        // ... and resolve when that happens.
+        resolve();
+      });
+      // Update the slider time and refresh the layers
+      this.setState({ currentUnixTime: unixTime }, () => {
+        this.updateLayers();
+      });
     });
   };
 
@@ -494,7 +505,9 @@ class TimeSliderView extends React.PureComponent {
         getDateLabel={this.getDateLabel}
         windowHidden={this.props.windowHidden}
         setUnixTimeBeforePrint={this.setUnixTimeBeforePrint}
-        renderLayersAtTime={this.renderLayersAtTime}
+        updateSliderAndRenderLayersAtTime={
+          this.updateSliderAndRenderLayersAtTime
+        }
       />
     ) : (
       <>

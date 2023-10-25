@@ -56,10 +56,12 @@ export default function PrintView(props) {
 
     for await (const date of dates) {
       const dateLabel = props.getDateLabel(date, resolution);
-      printOptions.mapTitle = dateLabel;
-      printOptions.mapTextColor = "#FFFFFF";
-      props.renderLayersAtTime(date);
-      const blob = await props.printModel.print(printOptions);
+      await props.updateSliderAndRenderLayersAtTime(date);
+      const blob = await props.printModel.print({
+        ...printOptions,
+        mapTitle: dateLabel,
+        mapTextColor: "#FFFFFF",
+      });
       saveAs(blob, `${dateLabel}.png`);
     }
 
