@@ -24,7 +24,6 @@ import FormatListBulletedOutlinedIcon from "@mui/icons-material/FormatListBullet
 // Custom components
 import LegendIcon from "./LegendIcon";
 import LegendImage from "./LegendImage";
-import LayerItemOptions from "./LayerItemOptions";
 
 // Custom hooks
 import useSnackbar from "../../../hooks/useSnackbar";
@@ -52,14 +51,12 @@ export default function LayerItem({
   const [zoomEndListener, setZoomEndListener] = useState();
   // State that toggles legend collapse
   const [legendIsActive, setLegendIsActive] = useState(false);
-  const [snackbarState, setSnackbarState] = useState({});
-  const prevSnackbarStateRef = useRef({});
   const [visibleMinMaxZoomLayers, setVisibleMinMaxZoomLayers] = useState([]);
   const prevVisibleMinMaxZoomLayersRef = useRef([]);
   const prevLayerIsZoomVisible = useRef(null);
   const [isGroupHidden, setIsGroupHidden] = useState(false);
 
-  const { addToSnackbar, removeFromSnackbar, showSnackbar } = useSnackbar();
+  const { addToSnackbar, removeFromSnackbar } = useSnackbar();
 
   useEffect(() => {
     if (layer.get("visible")) {
