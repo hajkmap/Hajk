@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+-
+
+## [3.13.17] - 2023-10-25
+
+### Security
+
+- Backend: Tightened security: if AD_LOOKUP_ACTIVE is 'false' but RESTRICT_ADMIN_ACCESS_TO_AD_GROUPS has a value, access to admin-only endpoints will be restricted (to everyone).
+
 ## [3.13.16] - 2023-10-25
 
 ### Added
@@ -146,7 +154,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [3.12.0-rc.2] - 2023-06-19
 
-[unreleased]: https://github.com/hajkmap/Hajk/compare/v3.13.16...hstd-main
+[unreleased]: https://github.com/hajkmap/Hajk/compare/v3.13.17...hstd-main
+[3.13.17]: https://github.com/hajkmap/Hajk/compare/v3.13.17...v3.13.17
 [3.13.16]: https://github.com/hajkmap/Hajk/compare/v3.13.15...v3.13.16
 [3.13.15]: https://github.com/hajkmap/Hajk/compare/v3.13.14...v3.13.15
 [3.13.14]: https://github.com/hajkmap/Hajk/compare/v3.13.13...v3.13.14
