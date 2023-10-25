@@ -8,6 +8,14 @@ const uniqueInstance =
     ? `_${process.env.HAJK_INSTANCE_ID}`
     : "";
 
+const commonDateFileOptions = {
+  compress: process.env.LOG_COMPRESS_BACKUPS === "true", // Should the backups be gzipped?
+  numBackups: !isNaN(Number.parseInt(process.env.LOG_NUM_BACKUPS)) // Number of backup files to keep. Backups rotate on a daily basis.
+    ? Number.parseInt(process.env.LOG_NUM_BACKUPS)
+    : 14,
+  mode: 0o644, // The mode in octal format. We want to give the read permission to everyone, hence 644.
+};
+
 // Next, configure the log4js singleton. Those settings will be available for
 // all other imports of log4js in this project.
 log4js.configure({
@@ -16,7 +24,11 @@ log4js.configure({
     // Console appender will print to stdout
     console: { type: "stdout" },
     // File appender will print to a log file, rotating it each day.
-    file: { type: "dateFile", filename: `logs/output${uniqueInstance}.log` },
+    file: {
+      type: "dateFile",
+      filename: `logs/output${uniqueInstance}.log`,
+      ...commonDateFileOptions,
+    },
     // Another file appender, specifically to log events that modify Hajk's layers/maps
     adminEventLog: {
       type: "dateFile",
@@ -27,12 +39,14 @@ log4js.configure({
         type: "pattern",
         pattern: "[%d] %m",
       },
+      ...commonDateFileOptions,
     },
     // Appender used for writing access logs. Rotates daily.
     accessLog: {
       type: "dateFile",
       filename: `logs/access${uniqueInstance}.log`,
       layout: { type: "messagePassThrough" },
+      ...commonDateFileOptions,
     },
   },
   // Categories specify _which appender is used with respective logger_. E.g., if we create
