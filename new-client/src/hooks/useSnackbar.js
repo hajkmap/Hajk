@@ -62,6 +62,10 @@ const useSnackbar = () => {
       variant: "warning",
       autoHideDuration: 5000,
       action,
+      anchorOrigin: {
+        vertical: "bottom",
+        horizontal: "center",
+      },
     });
   }, [enqueueSnackbar, closeSnackbar]);
 
