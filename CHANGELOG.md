@@ -7,7 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
--
+### Fixed
+
+- Client: avoid long floating values for the `z` parameter in URL hash. [#1422](https://github.com/hajkmap/Hajk/issues/1422)
 
 ## [3.13.17] - 2023-10-25
 
