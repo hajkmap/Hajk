@@ -32,8 +32,8 @@ class ActiveDirectoryService {
 
   constructor() {
     if (process.env.AD_LOOKUP_ACTIVE !== "true") {
-      logger.info(
-        "AD_LOOKUP_ACTIVE is set to %o in .env. Not enabling ActiveDirectory authentication.",
+      logger.warn(
+        "AD_LOOKUP_ACTIVE is set to %o in .env. Not enabling ActiveDirectory authentication.\nIf you run this in production, you can still restrict access to admin-only endpoints by setting RESTRICT_ADMIN_ACCESS_TO_AD_GROUPS to any value.",
         process.env.AD_LOOKUP_ACTIVE
       );
       return;
