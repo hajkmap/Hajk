@@ -835,6 +835,18 @@ class AppModel {
     return editLayers;
   }
 
+  overrideGlobalEditConfigCitizen(citizendialogueTool, wfstlayers) {
+    const configSpecificEditLayers = citizendialogueTool.options.activeServices;
+    const editLayers = wfstlayers.filter((layer) => {
+      if (configSpecificEditLayers.find((x) => x.id === layer.id)) {
+        return layer;
+      } else {
+        return undefined;
+      }
+    });
+    return editLayers;
+  }
+
   translateConfig() {
     if (
       this.config.mapConfig.hasOwnProperty("map") &&
@@ -1028,7 +1040,7 @@ class AppModel {
             citizendialogueTool.options.activeServices = as;
           }
 
-          let wfstlayers = this.overrideGlobalEditConfig(
+          let wfstlayers = this.overrideGlobalEditConfigCitizen(
             citizendialogueTool,
             layers.wfstlayers
           );

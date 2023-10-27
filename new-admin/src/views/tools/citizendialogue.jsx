@@ -1,6 +1,6 @@
 import React from "react";
 import { Component } from "react";
-import EditModel from "./../../models/edit.js";
+import EditModel from "./../../models/citizendialogue.js";
 import Button from "@material-ui/core/Button";
 import SaveIcon from "@material-ui/icons/SaveSharp";
 import { withStyles } from "@material-ui/core/styles";
