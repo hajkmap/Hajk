@@ -33,6 +33,7 @@ const defaultState = {
   disableSearchCombinations: false,
   searchBarPlaceholder: "Sök...",
   autocompleteWildcardAtStart: false,
+  autofocusOnStart: false,
   enablePolygonSearch: true,
   enableRadiusSearch: true,
   enableSelectSearch: true,
@@ -155,8 +156,10 @@ class ToolOptions extends Component {
             tool.options.disableSearchCombinations ??
             this.state.disableSearchCombinations,
           autocompleteWildcardAtStart:
-            tool.options.autocompleteWildcardAtStart ||
+            tool.options.autocompleteWildcardAtStart ??
             this.state.autocompleteWildcardAtStart,
+          autofocusOnStart:
+            tool.options.autofocusOnStart ?? this.state.autofocusOnStart,
           searchBarPlaceholder:
             tool.options.searchBarPlaceholder ||
             this.state.searchBarPlaceholder,
@@ -373,6 +376,7 @@ class ToolOptions extends Component {
         disableSearchCombinations: this.state.disableSearchCombinations,
         searchBarPlaceholder: this.state.searchBarPlaceholder,
         autocompleteWildcardAtStart: this.state.autocompleteWildcardAtStart,
+        autofocusOnStart: this.state.autofocusOnStart,
         enablePolygonSearch: this.state.enablePolygonSearch,
         showCorrespondingWMSLayers: this.state.showCorrespondingWMSLayers,
         enableRadiusSearch: this.state.enableRadiusSearch,
@@ -811,6 +815,21 @@ class ToolOptions extends Component {
             />{" "}
             <label className="long-label" htmlFor="autocompleteWildcardAtStart">
               Använd wildcard före sökord för autocomplete
+            </label>
+          </div>
+          <div>
+            <input
+              id="autofocusOnStart"
+              name="autofocusOnStart"
+              value={this.state.autofocusOnStart}
+              type="checkbox"
+              checked={this.state.autofocusOnStart}
+              onChange={(e) => {
+                this.handleInputChange(e);
+              }}
+            />{" "}
+            <label className="long-label" htmlFor="autofocusOnStart">
+              Sätt fokus i sökrutan automatiskt när Hajk startar
             </label>
           </div>
 

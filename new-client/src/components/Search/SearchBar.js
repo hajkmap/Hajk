@@ -398,6 +398,7 @@ class SearchBar extends React.PureComponent {
         label={<span style={visuallyHidden}>Sök i webbplatsens innehåll</span>}
         variant={isMobile ? "standard" : "outlined"}
         placeholder={placeholder}
+        autoFocus={this.props.options?.autofocusOnStart ?? false}
         onKeyPress={handleSearchBarKeyPress}
         InputLabelProps={{ shrink: true }}
         InputProps={{
