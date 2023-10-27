@@ -83,6 +83,11 @@
     "list_videos": "http://localhost:55630/config/listvideo",
     "list_audios": "http://localhost:55630/config/listaudio"
   },
+  "citizendialogue": {
+    "url_proxy": "",
+    "url_survey_list": "http://localhost:3002/api/v2/informative/surveylist",
+    "url_survey_load": "http://localhost:3002/api/v2/informative/surveyload"
+  },
   "router": [
     { "name": "layermanager", "title": "Lager", "default": true },
     { "name": "search", "title": "Söktjänster" },
