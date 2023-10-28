@@ -46,7 +46,7 @@ class ToolOptions extends Component {
     this.handleAddEditableLayer = this.handleAddEditableLayer.bind(this);
     this.loadLayers = this.loadLayers.bind(this);
 
-    this.availableSurveys = null;
+    this.availableSurveys = [];
 
     this.listAllAvailableSurveys().then((list) => {
       this.availableSurveys = list;
@@ -176,7 +176,6 @@ class ToolOptions extends Component {
         method: "GET",
         dataType: "json",
         success: (data) => {
-          console.log(data);
           resolve(data);
         },
         error: (error) => {
@@ -546,19 +545,18 @@ class ToolOptions extends Component {
         <Select
           labelId="select-survey"
           id="simple-select-survey"
-          value={this.state.selectedSurvey}
+          value={this.availableSurveys && this.availableSurveys.length > 0 ? this.state.selectedSurvey : ''}
           onChange={this.handleChange}
         >
-        <MenuItem value="">
-          <em>Inget valt</em>
-        </MenuItem>
-        {this.availableSurveys && this.availableSurveys.map((surveyName, index) => (
-        <MenuItem key={index} value={surveyName}>
-          {surveyName}
-        </MenuItem>
-        ))}
+          <MenuItem value="">
+            <em>Inget valt</em>
+          </MenuItem>
+          {this.availableSurveys && this.availableSurveys.map((surveyName, index) => (
+          <MenuItem key={index} value={surveyName}>
+            {surveyName}
+          </MenuItem>
+          ))}
         </Select>
-
       </div>
           <div>
             <label htmlFor="instruction">
