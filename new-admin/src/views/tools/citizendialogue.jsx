@@ -6,6 +6,8 @@ import SaveIcon from "@material-ui/icons/SaveSharp";
 import { withStyles } from "@material-ui/core/styles";
 import { blue } from "@material-ui/core/colors";
 import Tree from "../treeEdit.jsx";
+import $ from "jquery";
+import { Select, MenuItem } from "@material-ui/core";
 
 const ColorButtonBlue = withStyles((theme) => ({
   root: {
@@ -27,6 +29,7 @@ const defaultState = {
   visibleForGroups: [],
   activeServices: [],
   editableLayers: {},
+  selectedSurvey: "",
   tree: "",
 };
 
@@ -34,14 +37,23 @@ class ToolOptions extends Component {
   /**
    *
    */
-  constructor() {
-    super();
+  constructor(props) {
+    super(props);
     this.state = defaultState;
     this.type = "citizendialogue";
     this.editModel = new EditModel();
 
     this.handleAddEditableLayer = this.handleAddEditableLayer.bind(this);
     this.loadLayers = this.loadLayers.bind(this);
+
+    this.availableSurveys = null;
+
+    this.listAllAvailableSurveys().then((list) => {
+      this.availableSurveys = list;
+    }).catch(error => {
+      console.error("Error:", error);
+    });
+    
   }
 
   componentDidMount() {
@@ -63,6 +75,7 @@ class ToolOptions extends Component {
           instruction: tool.options.instruction,
           activeServices: tool.options.activeServices || [],
           visibleAtStart: tool.options.visibleAtStart,
+          selectedSurvey: tool.options.selectedSurvey,
           visibleForGroups:
             tool.options.visibleForGroups || this.state.visibleForGroups,
         },
@@ -156,6 +169,25 @@ class ToolOptions extends Component {
     }
   }
 
+  listAllAvailableSurveys() {
+    return new Promise((resolve, reject) => {
+      $.ajax({
+        url: this.props.model.get("config").url_survey_list,
+        method: "GET",
+        dataType: "json",
+        success: (data) => {
+          console.log(data);
+          resolve(data);
+        },
+        error: (error) => {
+          console.error("Error fetching surveys:", error);
+          reject(error);
+        },
+      });
+    });
+  }
+  
+
   loadEditableLayers() {
     this.props.model.getConfig(
       this.props.model.get("config").url_layers,
@@ -227,6 +259,7 @@ class ToolOptions extends Component {
         instruction: this.state.instruction,
         activeServices: this.state.activeServices,
         visibleAtStart: this.state.visibleAtStart,
+        selectedSurvey: this.state.selectedSurvey,
         visibleForGroups: this.state.visibleForGroups.map(
           Function.prototype.call,
           String.prototype.trim
@@ -359,6 +392,12 @@ class ToolOptions extends Component {
       });
     }
   }
+
+  handleChange = (event) => {
+    this.setState({
+      selectedSurvey: event.target.value,
+    });
+  };
 
   /**
    *
@@ -502,6 +541,25 @@ class ToolOptions extends Component {
             &nbsp;
             <label htmlFor="visibleAtStart">Synlig vid start</label>
           </div>
+          <div>
+        <label>Välj enkät:</label>
+        <Select
+          labelId="select-survey"
+          id="simple-select-survey"
+          value={this.state.selectedSurvey}
+          onChange={this.handleChange}
+        >
+        <MenuItem value="">
+          <em>Inget valt</em>
+        </MenuItem>
+        {this.availableSurveys && this.availableSurveys.map((surveyName, index) => (
+        <MenuItem key={index} value={surveyName}>
+          {surveyName}
+        </MenuItem>
+        ))}
+        </Select>
+
+      </div>
           <div>
             <label htmlFor="instruction">
               Instruktion{" "}
