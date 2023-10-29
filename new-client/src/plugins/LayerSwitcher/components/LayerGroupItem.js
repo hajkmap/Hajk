@@ -696,7 +696,9 @@ class LayerGroupItem extends Component {
               )}
             </CheckBoxWrapper>
             {legendIcon && this.renderLegendIcon(legendIcon)}
-            {this.getCaption(layer.layersInfo[subLayer].caption, visible)}
+            <Caption sx={{ fontWeight: visible ? "bold" : "normal" }}>
+              {layer.layersInfo[subLayer].caption}
+            </Caption>
           </Grid>
           <SummaryButtonsContainer>
             <SummaryButtonWrapper>
