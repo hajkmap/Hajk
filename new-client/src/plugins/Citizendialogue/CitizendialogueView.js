@@ -119,9 +119,8 @@ function CitizendialogueView(props) {
     // eslint-disable-next-line
   }, []);
 
-  const rootMap = useRef(new Map());
   const [showEditView, setShowEditView] = useState(false);
-  const [currentQuestionName, setCurrentQuestionName] = useState(null);
+
   const [editViewKey, setEditViewKey] = useState(Date.now());
   const resetEditView = () => {
     setEditViewKey(Date.now());
@@ -141,6 +140,8 @@ function CitizendialogueView(props) {
     },
     [props.surveyJsData, props.model]
   );
+
+  const [currentQuestionName, setCurrentQuestionName] = useState(null);
 
   const handleAfterRenderQuestion = (sender, options) => {
     const currentQuestion = options.question;
@@ -163,7 +164,7 @@ function CitizendialogueView(props) {
     }
   };
 
-  Survey.surveyLocalization.defaultLocale = "sv";
+  const rootMap = useRef(new Map());
 
   React.useEffect(() => {
     const containers = document.querySelectorAll(".editViewContainer");
@@ -200,6 +201,8 @@ function CitizendialogueView(props) {
       });
     }
   });
+
+  Survey.surveyLocalization.defaultLocale = "sv";
 
   return (
     <>
