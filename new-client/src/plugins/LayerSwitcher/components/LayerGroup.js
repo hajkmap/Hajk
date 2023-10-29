@@ -330,7 +330,10 @@ class LayerGroup extends React.PureComponent {
         >
           <div>{this.getCheckbox()}</div>
           <HeadingTypography
-            sx={{ fontWeight: this.isToggled() ? "bold" : "normal" }}
+            sx={{
+              fontWeight:
+                this.isToggled() || this.isSemiToggled() ? "bold" : "normal",
+            }}
           >
             {this.state.name}
           </HeadingTypography>
