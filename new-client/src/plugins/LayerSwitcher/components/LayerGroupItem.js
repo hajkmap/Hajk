@@ -958,21 +958,6 @@ class LayerGroupItem extends Component {
       </CheckBoxWrapper>
     );
   }
-  /**
-   * Returns a caption for a layer group item based on its visibility.
-   *
-   * @param {string} layerCaption - The caption of the layer group item.
-   * @param {boolean} visible - Whether the layer group item is visible or not.
-   * @returns {JSX.Element} - The caption element with appropriate styling.
-   */
-  getCaption(layerCaption, visible) {
-    const caption = visible ? (
-      <Caption style={{ fontWeight: "bold" }}>{layerCaption}</Caption>
-    ) : (
-      <Caption>{layerCaption}</Caption>
-    );
-    return caption;
-  }
 
   render() {
     const { cqlFilterVisible, layer } = this.props;
@@ -1005,7 +990,9 @@ class LayerGroupItem extends Component {
               >
                 <Grid item>{this.getCheckBox()}</Grid>
                 {legendIcon && this.renderLegendIcon(legendIcon)}
-                {this.getCaption(layer.get("caption"), visible)}
+                <Caption sx={{ fontWeight: visible ? "bold" : "normal" }}>
+                  {layer.get("caption")}
+                </Caption>
               </Grid>
               <SummaryButtonsContainer>
                 {this.renderStatus()}
