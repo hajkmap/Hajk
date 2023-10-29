@@ -1,5 +1,5 @@
 import LocalStorageHelper from "utils/LocalStorageHelper";
-
+import { hfetch } from "utils/FetchWrapper";
 export default class CitizendialogueModel {
   #map;
   #app;
@@ -8,6 +8,9 @@ export default class CitizendialogueModel {
 
   constructor(settings) {
     // Set some private fields
+    this.mapServiceUrl =
+      settings.app.config.appConfig.proxy +
+      settings.app.config.appConfig.mapserviceBase;
     this.#map = settings.map;
     this.#app = settings.app;
     this.#localObserver = settings.localObserver;
@@ -39,6 +42,24 @@ export default class CitizendialogueModel {
       [key]: value,
     });
   };
+
+  async loadSurvey(title) {
+    try {
+      const response = await hfetch(
+        `${this.mapServiceUrl}/informative/surveyload/${title}`
+      );
+
+      if (!response || !response.ok) {
+        throw new Error("Error loading survey");
+      }
+
+      const data = await response.json();
+      return data;
+    } catch (error) {
+      console.error("Error loading survey:", error);
+      throw error;
+    }
+  }
 
   handleOnComplete = (data) => {
     console.log("Enkätsvar: ", data);

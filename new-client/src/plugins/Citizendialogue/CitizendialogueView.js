@@ -109,94 +109,15 @@ function CitizendialogueView(props) {
       })
   );
 
-  const surveyJSON = {
-    title: "Enkel enkät",
-    language: "sv",
-    pages: [
-      {
-        name: "page1",
-        elements: [
-          {
-            type: "text",
-            name: "enkatnamn",
-            visible: false,
-          },
-          {
-            type: "text",
-            name: "svarsID",
-            visible: false,
-          },
-          {
-            type: "text",
-            name: "question1",
-            title: "Vad är ditt namn?",
-          },
-          {
-            type: "radiogroup",
-            name: "question2",
-            title: "Vilken färg föredrar du?",
-            choices: ["Röd", "Blå", "Gul"],
-          },
-        ],
-      },
-      {
-        name: "page2",
-        elements: [
-          {
-            type: "checkbox",
-            name: "question3",
-            title: "Vilka sporter gillar du?",
-            choices: ["Fotboll", "Basket", "Tennis", "Ishockey"],
-          },
-          {
-            type: "comment",
-            name: "question4",
-            title: "Några ytterligare kommentarer?",
-          },
-        ],
-      },
-      {
-        name: "page3",
-        elements: [
-          {
-            type: "html",
-            name: "Geometri1-question5",
-            html: "<button id='editButton'>Klicka här för att markera koordinater i kartan</button>",
-          },
-          {
-            type: "html",
-            name: "editViewContainerPlaceholder1",
-            html: "<div class='editViewContainer'></div>",
-          },
-          {
-            type: "comment",
-            name: "question5",
-            title: "Kommentarer om platsen som du markerat i kartan?",
-          },
-        ],
-      },
-      {
-        name: "page4",
-        elements: [
-          {
-            type: "html",
-            name: "placeholderForEditView",
-            html: "<p>Klicka på knappen nedan så kommer det fram ett verktyg som du kan använda för att redigera kartan</p>",
-          },
-          {
-            type: "html",
-            name: "Geometri2",
-            html: "<button id='editButton'>Klicka här för att markera koordinater i kartan</button>",
-          },
-          {
-            type: "html",
-            name: "editViewContainerPlaceholder2",
-            html: "<div class='editViewContainer'></div>",
-          },
-        ],
-      },
-    ],
-  };
+  const [surveyJSON, setSurveyJSON] = useState(null);
+
+  useEffect(() => {
+    props.model
+      .loadSurvey(props.options.selectedSurvey)
+      .then((data) => setSurveyJSON(data))
+      .catch((error) => console.error("Failed to load survey:", error));
+    // eslint-disable-next-line
+  }, []);
 
   const rootMap = useRef(new Map());
   const [showEditView, setShowEditView] = useState(false);
@@ -282,12 +203,14 @@ function CitizendialogueView(props) {
 
   return (
     <>
-      <Survey.Survey
-        json={surveyJSON}
-        onComplete={handleOnComplete}
-        onAfterRenderQuestion={handleAfterRenderQuestion}
-        onCurrentPageChanged={handlePageChange}
-      />
+      {surveyJSON && (
+        <Survey.Survey
+          json={surveyJSON}
+          onComplete={handleOnComplete}
+          onAfterRenderQuestion={handleAfterRenderQuestion}
+          onCurrentPageChanged={handlePageChange}
+        />
+      )}
     </>
   );
 }

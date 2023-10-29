@@ -6,7 +6,6 @@ import SaveIcon from "@material-ui/icons/SaveSharp";
 import { withStyles } from "@material-ui/core/styles";
 import { blue } from "@material-ui/core/colors";
 import Tree from "../treeEdit.jsx";
-import $ from "jquery";
 import { Select, MenuItem } from "@material-ui/core";
 
 const ColorButtonBlue = withStyles((theme) => ({
@@ -48,12 +47,11 @@ class ToolOptions extends Component {
 
     this.availableSurveys = [];
 
-    this.listAllAvailableSurveys().then((list) => {
+    this.listAllAvailableSurveys((list) => {
       this.availableSurveys = list;
-    }).catch(error => {
+    }, (error) => {
       console.error("Error:", error);
     });
-    
   }
 
   componentDidMount() {
@@ -169,24 +167,18 @@ class ToolOptions extends Component {
     }
   }
 
-  listAllAvailableSurveys() {
-    return new Promise((resolve, reject) => {
-      $.ajax({
-        url: this.props.model.get("config").url_survey_list,
-        method: "GET",
-        dataType: "json",
-        success: (data) => {
-          resolve(data);
-        },
-        error: (error) => {
-          console.error("Error fetching surveys:", error);
-          reject(error);
-        },
-      });
-    });
+  listAllAvailableSurveys(callback) {
+    this.props.model.getConfig(
+      this.props.model.get("config").url_survey_list,
+      (data) => {
+        callback(data);
+      },
+      (error) => {
+        console.error("Error fetching surveys:", error);
+      }
+    );
   }
   
-
   loadEditableLayers() {
     this.props.model.getConfig(
       this.props.model.get("config").url_layers,

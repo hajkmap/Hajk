@@ -119,7 +119,7 @@ function Citizendialogue(props) {
   }
 
   const [surveyjsData] = React.useState({
-    surveyId: "Rynningeviken1",
+    surveyId: props.options.selectedSurvey,
     surveyAnswerId: generateUniqueID(),
     surveyAnswerDate: `${new Date().getFullYear()}-${String(
       new Date().getMonth() + 1
