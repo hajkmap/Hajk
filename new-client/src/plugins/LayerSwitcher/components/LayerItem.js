@@ -556,21 +556,6 @@ class LayerItem extends React.PureComponent {
     return <LayerTogglerButtonWrapper>{icon}</LayerTogglerButtonWrapper>;
   };
 
-  /**
-   * Returns a caption for a layer based on its visibility.
-   *
-   * @param {string} layerCaption - The caption of the layer.
-   * @param {boolean} visible - Whether the layer is visible or not.
-   * @returns {JSX.Element} - The caption element with appropriate styling.
-   */
-  getCaption(layerCaption, visible) {
-    const caption = visible ? (
-      <Caption style={{ fontWeight: "bold" }}>{layerCaption}</Caption>
-    ) : (
-      <Caption>{layerCaption}</Caption>
-    );
-    return caption;
-  }
   #showAttributeTable = async () => {
     try {
       const url = this.props.layer.getSource().get("url").replace("wms", "wfs");
@@ -663,7 +648,11 @@ class LayerItem extends React.PureComponent {
           >
             <Grid item>{this.getLayerToggler()}</Grid>
             {this.legendIcon && this.renderLegendIcon()}
-            {this.getCaption(this.caption, this.state.visible)}
+            <Caption
+              sx={{ fontWeight: this.state.visible ? "bold" : "normal" }}
+            >
+              {this.caption}
+            </Caption>
           </Grid>
           <LayerButtonsContainer>
             {layer.isFakeMapLayer ? null : (
