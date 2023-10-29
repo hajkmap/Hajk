@@ -303,16 +303,7 @@ class LayerGroup extends React.PureComponent {
     }
     return <CheckBoxOutlineBlankIcon sx={checkBoxIconStyle} />;
   };
-  getHeadingTypography = () => {
-    if (this.isToggled()) {
-      return (
-        <HeadingTypography style={{ fontWeight: "bold" }}>
-          {this.state.name}
-        </HeadingTypography>
-      );
-    }
-    return <HeadingTypography>{this.state.name}</HeadingTypography>;
-  };
+
   /**
    * If Group has "toggleable" property enabled, render the toggle all checkbox.
    *
@@ -338,7 +329,11 @@ class LayerGroup extends React.PureComponent {
           }}
         >
           <div>{this.getCheckbox()}</div>
-          {this.getHeadingTypography()}
+          <HeadingTypography
+            sx={{ fontWeight: this.isToggled() ? "bold" : "normal" }}
+          >
+            {this.state.name}
+          </HeadingTypography>
         </SummaryContainer>
       );
     } else {
