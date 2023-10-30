@@ -76,5 +76,16 @@ export class Controller {
       }
     });
   }
+
+  saveByNameSurvey(req, res) {
+    InformativeService.saveByNameSurvey(req.params.name, req.body).then((r) => {
+      if (r && !r.error) {
+        res.status(200).send("File saved");
+        ael.info(
+          `${res.locals.authUser} saved document ${req.params.name}.json`
+        );
+      } else res.status(500).send(r.error.message);
+    });
+  }
 }
 export default new Controller();

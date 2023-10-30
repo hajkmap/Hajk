@@ -202,6 +202,40 @@ class InformativeService {
   }
 
   /**
+   * @summary
+   * @returns
+   * @memberof InformativeService
+   */
+  async saveByNameSurvey(file, body) {
+    try {
+      file += ".json";
+      // Prepare the path to our file
+      const pathToFile = path.join(
+        process.cwd(),
+        "App_Data",
+        "surveys",
+        "surveyanswers",
+        file
+      );
+
+      // Simple way to verify we've got valid JSON: try parsing it.
+      const json = JSON.parse(body);
+
+      // If parsing was successful, convert back to string,
+      // using 2 spaces as indentation
+      const jsonString = JSON.stringify(json, null, 2);
+
+      // Write to file
+      await fs.promises.writeFile(pathToFile, jsonString);
+
+      // Return the parsed JSON object
+      return jsonString;
+    } catch (error) {
+      return { error };
+    }
+  }
+
+  /**
    * @summary Lists uploaded files depending on the extension
    *
    * @returns {array} Names of files as array of strings

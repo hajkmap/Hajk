@@ -61,8 +61,58 @@ export default class CitizendialogueModel {
     }
   }
 
-  handleOnComplete = (data) => {
-    console.log("Enkätsvar: ", data);
+  /* handleOnComplete = (data) => {
+    //console.log("Enkätsvar: ", data);
+    console.log(data.surveyId);
+  };*/
+
+  async saveSurveyAnswer(surveyId, surveyData) {
+    try {
+      // Serialize surveyData to a JSON string
+      console.log("Data som ska skickas:", surveyData);
+      const body = JSON.stringify(surveyData);
+      console.log("JSON stringifierad body:", body);
+
+      // Make the PUT request to the server
+      const response = await hfetch(
+        `${this.mapServiceUrl}/informative/surveyanswersave/${surveyId}`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json", // Tell the server we're sending JSON
+          },
+          body: body, // The body is a JSON string
+        }
+      );
+
+      // Check if the request was successful
+      if (!response.ok) {
+        // If the response is not ok, get the text of the response to see the detailed error
+        const errorText = await response.text();
+        throw new Error(`Server responded with error: ${errorText}`);
+      }
+
+      // If the request was successful, parse the response body to JSON
+      const responseData = await response.json();
+      console.log("Survey answer saved:", responseData);
+      return responseData;
+    } catch (error) {
+      // If there's an error, log it and re-throw
+      console.error("Error saving survey answer:", error);
+      throw error;
+    }
+  }
+
+  handleOnComplete = async (data) => {
+    //console.log("Enkätsvar: ", data);
+    console.log(data.surveyId);
+
+    try {
+      const saveResult = await this.saveSurveyAnswer(data.surveyId, data);
+      console.log("Enkät svarad och sparad:", saveResult);
+    } catch (error) {
+      console.error("Kunde inte spara enkätsvaret:", error);
+    }
   };
 
   // Example of public method, returns the map instance
