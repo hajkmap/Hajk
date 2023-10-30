@@ -198,7 +198,11 @@ class BreadCrumb extends Component {
           </Grid>
           {this.renderInformativeIcon()}
           <TitleGridContainer item>
-            <Typography variant="body2" noWrap>
+            <Typography
+              variant="body2"
+              noWrap
+              style={{ fontWeight: hidden ? "normal" : "bold" }}
+            >
               {title}
             </Typography>
           </TitleGridContainer>

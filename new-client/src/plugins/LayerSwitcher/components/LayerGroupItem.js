@@ -696,7 +696,9 @@ class LayerGroupItem extends Component {
               )}
             </CheckBoxWrapper>
             {legendIcon && this.renderLegendIcon(legendIcon)}
-            <Caption>{layer.layersInfo[subLayer].caption}</Caption>
+            <Caption sx={{ fontWeight: visible ? "bold" : "normal" }}>
+              {layer.layersInfo[subLayer].caption}
+            </Caption>
           </Grid>
           <SummaryButtonsContainer>
             <SummaryButtonWrapper>
@@ -961,7 +963,7 @@ class LayerGroupItem extends Component {
 
   render() {
     const { cqlFilterVisible, layer } = this.props;
-    const { open, toggleSettings, infoVisible } = this.state;
+    const { open, toggleSettings, infoVisible, visible } = this.state;
 
     const legendIcon = layer.get("layerInfo").legendIcon;
     return (
@@ -990,7 +992,9 @@ class LayerGroupItem extends Component {
               >
                 <Grid item>{this.getCheckBox()}</Grid>
                 {legendIcon && this.renderLegendIcon(legendIcon)}
-                <Caption>{layer.get("caption")}</Caption>
+                <Caption sx={{ fontWeight: visible ? "bold" : "normal" }}>
+                  {layer.get("caption")}
+                </Caption>
               </Grid>
               <SummaryButtonsContainer>
                 {this.renderStatus()}
