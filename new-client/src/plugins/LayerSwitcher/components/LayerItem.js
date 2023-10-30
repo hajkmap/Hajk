@@ -648,7 +648,11 @@ class LayerItem extends React.PureComponent {
           >
             <Grid item>{this.getLayerToggler()}</Grid>
             {this.legendIcon && this.renderLegendIcon()}
-            <Caption>{this.caption}</Caption>
+            <Caption
+              sx={{ fontWeight: this.state.visible ? "bold" : "normal" }}
+            >
+              {this.caption}
+            </Caption>
           </Grid>
           <LayerButtonsContainer>
             {layer.isFakeMapLayer ? null : (

@@ -303,6 +303,7 @@ class LayerGroup extends React.PureComponent {
     }
     return <CheckBoxOutlineBlankIcon sx={checkBoxIconStyle} />;
   };
+
   /**
    * If Group has "toggleable" property enabled, render the toggle all checkbox.
    *
@@ -328,7 +329,14 @@ class LayerGroup extends React.PureComponent {
           }}
         >
           <div>{this.getCheckbox()}</div>
-          <HeadingTypography>{this.state.name}</HeadingTypography>
+          <HeadingTypography
+            sx={{
+              fontWeight:
+                this.isToggled() || this.isSemiToggled() ? "bold" : "normal",
+            }}
+          >
+            {this.state.name}
+          </HeadingTypography>
         </SummaryContainer>
       );
     } else {
