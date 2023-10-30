@@ -202,6 +202,37 @@ class InformativeService {
   }
 
   /**
+   * @summary Lists contents of a survey as JSON
+   *
+   * @param {*} file
+   * @returns {object} JSON representation of surveys
+   * @memberof InformativeService
+   */
+  async getByNameSurveyLoad(file) {
+    try {
+      file += ".json";
+      // Open file containing our store
+      const pathToFile = path.join(
+        process.cwd(),
+        "App_Data",
+        "surveys",
+        "surveyanswers",
+        file
+      );
+      const text = await fs.promises.readFile(pathToFile, "utf-8");
+      // Parse the file content so we get an object
+      const json = await JSON.parse(text);
+      return json;
+    } catch (error) {
+      logger.warn(
+        `Error while opening informative document "${file}". Sent 404 Not Found as response. Original error below.`
+      );
+      logger.warn(error);
+      return { error };
+    }
+  }
+
+  /**
    * @summary
    * @returns
    * @memberof InformativeService

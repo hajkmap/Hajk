@@ -77,6 +77,17 @@ export class Controller {
     });
   }
 
+  getByNameSurveyLoad(req, res) {
+    InformativeService.getByNameSurveyLoad(req.params.name).then((r) => {
+      if (r && !r.error) res.json(r);
+      else {
+        res
+          .status(404)
+          .send(`Document "${req.params.name}" could not be found`);
+      }
+    });
+  }
+
   saveByNameSurvey(req, res) {
     InformativeService.saveByNameSurvey(req.params.surveyId, req.body).then(
       (r) => {

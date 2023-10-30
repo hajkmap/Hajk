@@ -198,6 +198,30 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Error"
+  /informative/surveyanswerload/{survey}:
+    get:
+      tags:
+        - Client-accessible
+      parameters:
+        - name: survey
+          in: path
+          description: Name of the survey to be fetched
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: Return the JSON file
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SurveyBody"
+        5XX:
+          description: Example not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
   /informative/surveyanswersave/{surveyId}:
     put:
       tags:
