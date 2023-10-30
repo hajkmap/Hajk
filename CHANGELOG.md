@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [3.13.19] - 2023-10-29
+
+### Added
+
+- Client: LayerSwitcher now indicates which groups have enabled layers by styling those groups with a bold font. [#1257](https://github.com/hajkmap/Hajk/issues/1257)
+
 ## [3.13.18] - 2023-10-27
 
 ### Added
@@ -162,7 +168,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [3.12.0-rc.2] - 2023-06-19
 
-[unreleased]: https://github.com/hajkmap/Hajk/compare/v3.13.18...hstd-main
+[unreleased]: https://github.com/hajkmap/Hajk/compare/v3.13.19...hstd-main
+[3.13.19]: https://github.com/hajkmap/Hajk/compare/v3.13.18...v3.13.19
 [3.13.18]: https://github.com/hajkmap/Hajk/compare/v3.13.17...v3.13.18
 [3.13.17]: https://github.com/hajkmap/Hajk/compare/v3.13.16...v3.13.17
 [3.13.16]: https://github.com/hajkmap/Hajk/compare/v3.13.15...v3.13.16
