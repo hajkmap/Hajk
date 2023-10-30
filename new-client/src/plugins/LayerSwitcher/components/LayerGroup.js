@@ -342,7 +342,14 @@ class LayerGroup extends React.PureComponent {
     } else {
       return (
         <SummaryContainer>
-          <HeadingTypography>{this.state.name}</HeadingTypography>
+          <HeadingTypography
+            sx={{
+              fontWeight:
+                this.isToggled() || this.isSemiToggled() ? "bold" : "normal",
+            }}
+          >
+            {this.state.name}
+          </HeadingTypography>
         </SummaryContainer>
       );
     }
