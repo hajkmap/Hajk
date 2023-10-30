@@ -201,7 +201,7 @@ class BreadCrumb extends Component {
             <Typography
               variant="body2"
               noWrap
-              style={{ fontWeight: hidden ? "normal" : "bold" }}
+              sx={{ fontWeight: hidden ? "normal" : "bold" }}
             >
               {title}
             </Typography>
