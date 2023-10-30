@@ -66,10 +66,12 @@ var menu = Model.extend({
   },
 
   updateToolConfig: function (config, callback) {
+    const mapFile = this.get("mapFile");
+    const jsonExtension = mapFile.endsWith(".json") ? "" : ".json";
     $.ajax({
-      url: `${this.get("config").url_tool_settings}?mapFile=${this.get(
-        "mapFile"
-      )}.json`,
+      url: `${
+        this.get("config").url_tool_settings
+      }?mapFile=${mapFile}${jsonExtension}`,
       method: "PUT",
       contentType: "application/json",
       data: JSON.stringify(config),
@@ -83,10 +85,12 @@ var menu = Model.extend({
   },
 
   updateMapConfig: function (config, callback) {
+    const mapFile = this.get("mapFile");
+    const jsonExtension = mapFile.endsWith(".json") ? "" : ".json";
     $.ajax({
-      url: `${this.get("config").url_map_settings}?mapFile=${this.get(
-        "mapFile"
-      )}.json`,
+      url: `${
+        this.get("config").url_map_settings
+      }?mapFile=${mapFile}${jsonExtension}`,
       method: "PUT",
       contentType: "application/json",
       data: JSON.stringify(config),
@@ -134,10 +138,12 @@ var menu = Model.extend({
   },
 
   updateConfig: function (config, callback) {
+    const mapFile = this.get("mapFile");
+    const jsonExtension = mapFile.endsWith(".json") ? "" : ".json";
     $.ajax({
-      url: `${this.get("config").url_layermenu_settings}?mapFile=${this.get(
-        "mapFile"
-      )}.json`,
+      url: `${
+        this.get("config").url_layermenu_settings
+      }?mapFile=${mapFile}${jsonExtension}`,
       method: "PUT",
       contentType: "application/json",
       data: JSON.stringify(config),
