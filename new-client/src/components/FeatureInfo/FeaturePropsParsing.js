@@ -57,6 +57,11 @@ export default class FeaturePropsParsing {
           return null;
         }
 
+        // Fix for #1425
+        if (!Array.isArray(children)) {
+          children = [children];
+        }
+
         return (
           <Paragraph variant="body2">
             {children.map((child, index) => {
@@ -440,7 +445,7 @@ export default class FeaturePropsParsing {
       // will make use of the results in this.resolvedPromises, so that's why we had to wait.
       return (
         <ReactMarkdown
-          transformLinkUri={this.transformLinkUri ? undefined : (x) => x} // If transformLinksUri is set to false, we pass a function that simply returns the uri as-is.
+          urlTransform={this.transformLinkUri ? undefined : (x) => x} // If transformLinksUri is set to false, we pass a function that simply returns the uri as-is.
           remarkPlugins={[gfm]} // GitHub Formatted Markdown adds support for Tables in MD
           rehypePlugins={rehypePlugins} // Needed to parse HTML, activated in admin
           components={this.components} // Custom renderers for components, see definition in this.components
