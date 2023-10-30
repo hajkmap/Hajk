@@ -208,8 +208,7 @@ class InformativeService {
    */
   async saveByNameSurvey(file, body) {
     try {
-      file += ".json";
-      // Prepare the path to our file
+      file += "SVAR.json";
       const pathToFile = path.join(
         process.cwd(),
         "App_Data",
@@ -218,20 +217,36 @@ class InformativeService {
         file
       );
 
-      // Simple way to verify we've got valid JSON: try parsing it.
-      const json = JSON.parse(body);
+      let fileData;
 
-      // If parsing was successful, convert back to string,
-      // using 2 spaces as indentation
-      const jsonString = JSON.stringify(json, null, 2);
+      try {
+        // Try to read the existing file
+        const rawData = await fs.promises.readFile(pathToFile, "utf8");
+        fileData = JSON.parse(rawData);
 
-      // Write to file
+        // If the file's content is not an array, initialize it as an empty array
+        if (!Array.isArray(fileData)) {
+          fileData = [];
+        }
+      } catch (readOrParseError) {
+        // If reading or parsing fails, assume the file does not exist or is not valid JSON
+        fileData = [];
+      }
+
+      // Add the new data to our array
+      fileData.push(body);
+
+      // Stringify the updated array
+      const jsonString = JSON.stringify(fileData, null, 2);
+
+      // Write the updated content back to the file
       await fs.promises.writeFile(pathToFile, jsonString);
 
-      // Return the parsed JSON object
-      return jsonString;
-    } catch (error) {
-      return { error };
+      // Return a success message
+      return { message: "Survey data added to file" };
+    } catch (writeError) {
+      console.error("Error in saveByNameSurvey:", writeError);
+      return { error: writeError.message };
     }
   }
 

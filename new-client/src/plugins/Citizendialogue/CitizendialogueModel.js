@@ -69,9 +69,7 @@ export default class CitizendialogueModel {
   async saveSurveyAnswer(surveyId, surveyData) {
     try {
       // Serialize surveyData to a JSON string
-      console.log("Data som ska skickas:", surveyData);
       const body = JSON.stringify(surveyData);
-      console.log("JSON stringifierad body:", body);
 
       // Make the PUT request to the server
       const response = await hfetch(
@@ -94,7 +92,6 @@ export default class CitizendialogueModel {
 
       // If the request was successful, parse the response body to JSON
       const responseData = await response.json();
-      console.log("Survey answer saved:", responseData);
       return responseData;
     } catch (error) {
       // If there's an error, log it and re-throw
@@ -104,9 +101,6 @@ export default class CitizendialogueModel {
   }
 
   handleOnComplete = async (data) => {
-    //console.log("Enkätsvar: ", data);
-    console.log(data.surveyId);
-
     try {
       const saveResult = await this.saveSurveyAnswer(data.surveyId, data);
       console.log("Enkät svarad och sparad:", saveResult);

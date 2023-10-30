@@ -198,7 +198,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Error"
-  /informative/surveyanswersave/{name}:
+  /informative/surveyanswersave/{surveyId}:
     put:
       tags:
         - Admin - Informative/DocumentHandler
