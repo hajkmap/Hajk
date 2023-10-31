@@ -1,6 +1,7 @@
 {
   "activeTools": [
     "Anchor",
+    "AudioGuide",
     "Bookmarks",
     "Buffer",
     "Collector",
@@ -24,6 +25,7 @@
   ],
   "allTools": [
     "Anchor",
+    "AudioGuide",
     "Bookmarks",
     "Buffer",
     "Collector",
