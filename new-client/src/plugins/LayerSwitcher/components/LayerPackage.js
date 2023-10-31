@@ -74,7 +74,7 @@ function LayerPackage({
     setInfoIsActive(!infoIsActive);
   };
 
-  // Handles click on info button in header
+  // Handles click on info button in list
   const handleLpInfoClick = (qlp) => {
     setLoadLpInfoConfirmation(qlp);
   };

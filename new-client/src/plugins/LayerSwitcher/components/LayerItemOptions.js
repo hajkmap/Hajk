@@ -109,7 +109,10 @@ export default function LayerItemOptions({
       const caption = layer.get("caption");
       enqueueSnackbar(
         `Serverfel: attributtabellen för lagret "${caption}" kunde inte visas`,
-        { variant: "error" }
+        {
+          variant: "error",
+          anchorOrigin: { vertical: "bottom", horizontal: "center" },
+        }
       );
     }
   };

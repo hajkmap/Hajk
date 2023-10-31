@@ -22,16 +22,15 @@ import LayerGroup from "./components/LayerGroup.js";
 import BreadCrumbs from "./components/BreadCrumbs.js";
 import DrawOrder from "./components/DrawOrder.js";
 import LayerPackage from "./components/LayerPackage";
-import PersonalLayerPackage from "./components/PersonalLayerPackage";
 import LayerGroupAccordion from "./components/LayerGroupAccordion.js";
 import ConfirmationDialog from "../../components/ConfirmationDialog.js";
 import QuickAccessLayers from "./components/QuickAccessLayers.js";
 import QuickAccessOptions from "./components/QuickAccessOptions.js";
 import LayerItemDetails from "./components/LayerItemDetails.js";
+import Favorites from "./components/Favorites/Favorites.js";
 
 import StarOutlineOutlinedIcon from "@mui/icons-material/StarOutlineOutlined";
 import TopicOutlinedIcon from "@mui/icons-material/TopicOutlined";
-import PersonOutlinedIcon from "@mui/icons-material/PersonOutlined";
 import SearchIcon from "@mui/icons-material/Search";
 import ClearIcon from "@mui/icons-material/Clear";
 
@@ -58,7 +57,7 @@ class LayersSwitcherView extends React.PureComponent {
       baseLayers: props.model.getBaseLayers(),
       activeTab: 0,
       activeLayersCount: 0,
-      displayContentOverlay: null, // 'layerPackage' | 'personalLayerPackage' | 'layerItemDetails'
+      displayContentOverlay: null, // 'layerPackage' | 'favorites' | 'layerItemDetails'
       layerItemDetails: null,
       quickAccessSectionExpanded: false,
       filterValue: "",
@@ -229,16 +228,14 @@ class LayersSwitcherView extends React.PureComponent {
     node.isFiltered = isFiltered;
   };
 
-  // Handles click on PersonalLayerpackage button and backbutton
-  handlePersonalLayerPackageToggle = (layerPackageState) => {
+  // Handles click on Favorites button and backbutton
+  handleFavoritesViewToggle = (layerPackageState) => {
     layerPackageState?.event?.stopPropagation();
-    // Set scroll position state when personal layer package is opened
+    // Set scroll position state when favorites view is opened
     const currentScrollPosition = this.getScrollPosition();
     this.setState((prevState) => ({
       displayContentOverlay:
-        this.state.displayContentOverlay === "personalLayerPackage"
-          ? null
-          : "personalLayerPackage",
+        this.state.displayContentOverlay === "favorites" ? null : "favorites",
       scrollPositions: {
         ...prevState.scrollPositions,
         [`tab${prevState.activeTab}`]: currentScrollPosition,
@@ -271,6 +268,7 @@ class LayersSwitcherView extends React.PureComponent {
       `Tända lager har nu lagts till i snabbåtkomst.`,
       {
         variant: "success",
+        anchorOrigin: { vertical: "bottom", horizontal: "center" },
       }
     );
   };
@@ -487,15 +485,15 @@ class LayersSwitcherView extends React.PureComponent {
                   <TopicOutlinedIcon fontSize="small"></TopicOutlinedIcon>
                 </Tooltip>
               </IconButton>
-              <IconButton
-                onClick={(e) =>
-                  this.handlePersonalLayerPackageToggle({ event: e })
+              <Favorites
+                favoriteViewDisplay={
+                  this.state.displayContentOverlay === "favorites"
                 }
-              >
-                <Tooltip title="Mina favoriter">
-                  <PersonOutlinedIcon fontSize="small"></PersonOutlinedIcon>
-                </Tooltip>
-              </IconButton>
+                app={this.props.app}
+                map={this.props.map}
+                handleFavoritesViewToggle={this.handleFavoritesViewToggle}
+                globalObserver={this.props.model.globalObserver}
+              ></Favorites>
               <QuickAccessOptions
                 handleAddLayersToQuickAccess={this.handleAddLayersToQuickAccess}
                 handleClearQuickAccessLayers={this.handleShowDeleteConfirmation}
@@ -605,15 +603,6 @@ class LayersSwitcherView extends React.PureComponent {
             map={this.props.map}
             globalObserver={this.props.model.globalObserver}
           ></LayerPackage>
-          <PersonalLayerPackage
-            display={
-              this.state.displayContentOverlay === "personalLayerPackage"
-            }
-            backButtonCallback={this.handlePersonalLayerPackageToggle}
-            map={this.props.map}
-            app={this.props.app}
-            globalObserver={this.props.model.globalObserver}
-          ></PersonalLayerPackage>
           <LayerItemDetails
             display={this.state.displayContentOverlay === "layerItemDetails"}
             layerItemDetails={this.state.layerItemDetails}

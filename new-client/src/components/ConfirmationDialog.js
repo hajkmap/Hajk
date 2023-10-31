@@ -32,8 +32,21 @@ const ConfirmationDialog = ({
         <Typography>{contentDescription}</Typography>
       </DialogContent>
       <DialogActions>
-        <Button onClick={handleAbort}>{cancel}</Button>
-        <Button onClick={handleConfirm} variant="contained">
+        <Button
+          onClick={(e) => {
+            e.stopPropagation();
+            handleAbort();
+          }}
+        >
+          {cancel}
+        </Button>
+        <Button
+          onClick={(e) => {
+            e.stopPropagation();
+            handleConfirm();
+          }}
+          variant="contained"
+        >
           {confirm}
         </Button>
       </DialogActions>
