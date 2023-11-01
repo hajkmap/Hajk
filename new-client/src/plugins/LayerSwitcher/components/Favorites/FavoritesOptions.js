@@ -20,6 +20,7 @@ export default function FavoritesOptions({
   loadFavoriteCallback,
   addFavoriteCallback,
   favorites,
+  functionalCookiesOk,
 }) {
   // Element that we will anchor the options menu to is
   // held in state. If it's null (unanchored), we can tell
@@ -71,7 +72,9 @@ export default function FavoritesOptions({
         aria-controls={optionsMenuIsOpen ? "favorites-menu" : undefined}
         aria-haspopup="true"
         aria-expanded={optionsMenuIsOpen ? "true" : undefined}
-        onClick={handleShowMoreOptionsClick}
+        onClick={
+          functionalCookiesOk ? handleShowMoreOptionsClick : handleEditFavorites
+        }
       >
         <Tooltip title="Mina favoriter">
           <PersonOutlinedIcon />

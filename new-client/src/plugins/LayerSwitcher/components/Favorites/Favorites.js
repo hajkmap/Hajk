@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { createPortal } from "react-dom";
 import { useSnackbar } from "notistack";
+import useCookieStatus from "hooks/useCookieStatus";
 
 import LocalStorageHelper from "utils/LocalStorageHelper";
 import FavoritesList from "./FavoritesList.js";
@@ -37,6 +38,8 @@ function Favorites({
   const [missingLayersConfirmation, setMissingLayersConfirmation] =
     useState(null);
   const [toggleFavoritesView, setToggleFavoritesView] = useState(false);
+  // We're gonna need to keep track of if we're allowed to save stuff in LS. Let's use the hook.
+  const { functionalCookiesOk } = useCookieStatus(globalObserver);
 
   useEffect(() => {
     // Set state from localstorage on component load
@@ -182,6 +185,12 @@ function Favorites({
           l.set("visible", false);
         }
       });
+  };
+
+  const changeCookieSetting = () => {
+    // Handles clicks on the "change-cookie-settings-button". Simply emits an event
+    // on the global-observer, stating that the cookie-banner should be shown again.
+    globalObserver.publish("core.showCookieBanner");
   };
 
   // Check if all layers in favorite package exist in map
@@ -351,6 +360,7 @@ function Favorites({
         <FavoritesViewHeader
           importFavoritesCallback={handleImportFavorites}
           backButtonCallback={handleFavoritesViewToggle}
+          functionalCookiesOk={functionalCookiesOk}
         ></FavoritesViewHeader>
         <Box>
           <FavoritesList
@@ -359,6 +369,8 @@ function Favorites({
             editCallback={handleEditFavorite}
             loadFavoriteCallback={handleLoadFavorite}
             removeCallback={handleRemoveFavorite}
+            functionalCookiesOk={functionalCookiesOk}
+            cookieSettingCallback={changeCookieSetting}
           ></FavoritesList>
         </Box>
       </Box>,
@@ -498,6 +510,7 @@ function Favorites({
         handleFavoritesViewToggle={handleFavoritesViewToggle}
         addFavoriteCallback={handleAddFavoriteClick}
         loadFavoriteCallback={handleLoadFavorite}
+        functionalCookiesOk={functionalCookiesOk}
       ></FavoritesOptions>
       {domReady && renderFavoritesView()}
       <ConfirmationDialog

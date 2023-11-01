@@ -32,6 +32,8 @@ function FavoritesList({
   map,
   removeCallback,
   editCallback,
+  functionalCookiesOk,
+  cookieSettingCallback,
 }) {
   const [selectedItem, setSelectedItem] = useState(null);
   const [removeAlert, setRemoveAlert] = useState(false);
@@ -254,45 +256,76 @@ function FavoritesList({
     );
   };
 
+  // A view that is rendered if the user has selected not to accept functional
+  // cookies. (Functional cookies has to be accepted)
+  const notSupportedView = () => {
+    return (
+      <Stack spacing={2} sx={{ p: 2 }}>
+        <Typography variant="body2">
+          Det ser ut som att du har valt att inte tillåta funktionella kakor. På
+          grund av detta så kan du inte se dina sparade favoriter eller lägga
+          till nya.
+        </Typography>
+        <Typography variant="body2">
+          Klicka nedan för att ändra inställningarna.
+        </Typography>
+        <Button
+          fullWidth
+          variant="contained"
+          onClick={(e) => {
+            e.stopPropagation();
+            cookieSettingCallback();
+          }}
+        >
+          Cookie-inställningar
+        </Button>
+      </Stack>
+    );
+  };
+
   return (
     <>
-      <List dense sx={{ p: 0 }}>
-        {!favorites.length ? (
-          <Typography sx={{ p: 2 }}>"Inga favoriter finns sparade"</Typography>
-        ) : (
-          favorites.map((favorite, index) => {
-            return (
-              <ListItemButton
-                disableRipple
-                dense
-                key={`lp${favorite.metadata.title}-${index}`}
-                divider
-                onClick={(e) => {
-                  e.stopPropagation();
-                  loadFavoriteCallback(favorite, true, true);
-                }}
-              >
-                <ListItemIcon sx={{ px: 0, minWidth: "34px" }}>
-                  <LayersOutlinedIcon fontSize="small" />
-                </ListItemIcon>
-                <ListItemText
-                  primary={favorite.metadata.title}
-                  secondary={parseDate(favorite.metadata.savedAt)}
-                />
-                <ListItemSecondaryAction>
-                  <FavoritePackageOptions
-                    infoCallback={handleInfo}
-                    deleteCallback={handleDelete}
-                    editCallback={handleEdit}
-                    downloadCallback={handleDownload}
-                    favorite={favorite}
-                  ></FavoritePackageOptions>
-                </ListItemSecondaryAction>
-              </ListItemButton>
-            );
-          })
-        )}
-      </List>
+      {functionalCookiesOk ? (
+        <List dense sx={{ p: 0 }}>
+          {!favorites.length ? (
+            <Typography sx={{ p: 2 }}>Inga favoriter finns sparade</Typography>
+          ) : (
+            favorites.map((favorite, index) => {
+              return (
+                <ListItemButton
+                  disableRipple
+                  dense
+                  key={`lp${favorite.metadata.title}-${index}`}
+                  divider
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    loadFavoriteCallback(favorite, true, true);
+                  }}
+                >
+                  <ListItemIcon sx={{ px: 0, minWidth: "34px" }}>
+                    <LayersOutlinedIcon fontSize="small" />
+                  </ListItemIcon>
+                  <ListItemText
+                    primary={favorite.metadata.title}
+                    secondary={parseDate(favorite.metadata.savedAt)}
+                  />
+                  <ListItemSecondaryAction>
+                    <FavoritePackageOptions
+                      infoCallback={handleInfo}
+                      deleteCallback={handleDelete}
+                      editCallback={handleEdit}
+                      downloadCallback={handleDownload}
+                      favorite={favorite}
+                    ></FavoritePackageOptions>
+                  </ListItemSecondaryAction>
+                </ListItemButton>
+              );
+            })
+          )}
+        </List>
+      ) : (
+        notSupportedView()
+      )}
       <ConfirmationDialog
         open={removeAlert}
         titleName={"Ta bort"}

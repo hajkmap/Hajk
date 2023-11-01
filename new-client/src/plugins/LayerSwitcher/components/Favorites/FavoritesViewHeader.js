@@ -14,7 +14,11 @@ import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import FileUploadOutlinedIcon from "@mui/icons-material/FileUploadOutlined";
 
-function FavoritesViewHeader({ backButtonCallback, importFavoritesCallback }) {
+function FavoritesViewHeader({
+  backButtonCallback,
+  importFavoritesCallback,
+  functionalCookiesOk,
+}) {
   const { enqueueSnackbar } = useSnackbar();
   const fileInputRef = useRef(null);
   // State that toggles info collapse
@@ -119,7 +123,10 @@ function FavoritesViewHeader({ backButtonCallback, importFavoritesCallback }) {
           style={{ display: "none" }}
           onChange={handleFileInputChange}
         />
-        <IconButton onClick={handleImportButtonClick}>
+        <IconButton
+          disabled={!functionalCookiesOk}
+          onClick={handleImportButtonClick}
+        >
           <Tooltip title={"Importera"}>
             <FileUploadOutlinedIcon />
           </Tooltip>
