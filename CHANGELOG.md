@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- Upgraded deps, among those `react-markdown`, which required some work. See [#1425](https://github.com/hajkmap/Hajk/issues/1425).
+
 ## [3.13.19] - 2023-10-29
 
 ### Added
