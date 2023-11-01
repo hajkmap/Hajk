@@ -5,6 +5,9 @@ export default class AudioGuideModel {
   #localObserver;
   #options;
   #map;
+  #allLines;
+  #allPoints;
+  #filters = new Set();
 
   constructor(settings) {
     // Set some private fields
@@ -12,7 +15,27 @@ export default class AudioGuideModel {
     this.#localObserver = settings.localObserver;
     this.#map = settings.map;
     this.#options = settings.options;
+    this.init();
   }
+
+  getFilters = () => this.#filters || [];
+
+  init = async () => {
+    // Grab features from WFSs
+    this.#allLines = await this.fetchFromService("line");
+    this.#allPoints = await this.fetchFromService("point");
+
+    // Extract available filters. We want all "categories" that
+    // exist on the line service.
+    this.#allLines.forEach((l) => {
+      l.get("categories")
+        ?.split(",")
+        .forEach((c) => this.#filters.add(c));
+    });
+
+    console.log("Init done");
+    console.log(this.#allLines, this.#allPoints, this.#filters);
+  };
 
   fetchFromService = async (type = "line") => {
     const { srsName, featureNS, featurePrefix, url } =
@@ -38,7 +61,7 @@ export default class AudioGuideModel {
 
     const json = await response.json();
     const features = new GeoJSON().readFeatures(json);
-    console.log("features: ", features);
+    return features;
     // vectorSource.addFeatures(features);
     // map.getView().fit(vectorSource.getExtent());
   };
