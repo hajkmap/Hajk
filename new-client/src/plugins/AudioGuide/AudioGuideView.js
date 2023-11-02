@@ -27,7 +27,16 @@ const ButtonWithBottomMargin = styled(Button)(({ theme }) => ({
 }));
 
 function AudioGuideView(props) {
-  const { app, globalObserver, localObserver, map, model, options } = props;
+  const {
+    app,
+    globalObserver,
+    localObserver,
+    map: olMap,
+    model,
+    options,
+  } = props;
+
+  const { initialURLParams } = app.config;
 
   const { enqueueSnackbar, closeSnackbar } = useSnackbar();
 
@@ -36,7 +45,7 @@ function AudioGuideView(props) {
   const [availableCategories, setAvailableCategories] = useState([]);
   const [fetchError, setFetchError] = useState(null);
 
-  const [selectedCategories, setSelectedCategories] = useState(false);
+  const [selectedCategories, setSelectedCategories] = useState([]);
   // Subscribe and unsubscribe to events
   useEffect(() => {
     localObserver.subscribe("fetchError", (e) =>
@@ -46,19 +55,38 @@ function AudioGuideView(props) {
 
   // Let's attempt to initiate the model
   useEffect(() => {
+    // The async method must live inside the useEffect hook
     const initModel = async () => {
       await model.init();
 
-      setAvailableCategories(Array.from(model.getAvailableCategories()));
+      const availableCategories = model.getAvailableCategories();
+
+      // Let's check if the "ag_c" param has a value. If so, use it
+      // to determine which categories should be pre-selected.
+      const initiallyEnabledCategories = initialURLParams.get("ag_c");
+
+      if (typeof initiallyEnabledCategories === "string") {
+        setSelectedCategories(initiallyEnabledCategories.split(","));
+      } else {
+        // Let's make all categories selected by default
+        setSelectedCategories(availableCategories);
+      }
+
+      // Finally, set categories in state so that we can render properly
+      setAvailableCategories(availableCategories);
     };
+
+    // Invoke the method defined above
     initModel();
-  }, [model]);
+  }, [initialURLParams, model]);
 
   const handleCategoryChange = (e) => {
-    console.log("selectedCategories: ", selectedCategories);
-    setSelectedCategories({
-      ...selectedCategories,
-      [e.target.name]: e.target.checked,
+    setSelectedCategories((prev) => {
+      if (e.target.checked === true && !prev.includes(e.target.name)) {
+        return [...prev, e.target.name];
+      } else if (e.target.checked === false && prev.includes(e.target.name)) {
+        return prev.filter((el) => el !== e.target.name);
+      }
     });
   };
 
@@ -106,9 +134,9 @@ function AudioGuideView(props) {
                 key={i}
                 control={
                   <Checkbox
-                    checked={selectedCategories[i]}
+                    checked={selectedCategories.includes(c)}
                     onChange={handleCategoryChange}
-                    name={i.toString()}
+                    name={c}
                   />
                 }
                 label={c}

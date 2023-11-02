@@ -83,7 +83,7 @@ Publish the tables described above using a WFS service can output features as `a
 
 Ensure to note the _workspace_, workspace's _namespace_, layers' _SRS_ as well the _URL_ to the WFS service.
 
-### Example configuration
+## Example configuration
 
 ```jsonc
 {
@@ -103,3 +103,13 @@ Ensure to note the _workspace_, workspace's _namespace_, layers' _SRS_ as well t
       }
     },
 ```
+
+## Available options
+
+There are some parameters that can be sent to Hajk that'll affect this plugin's initial settings. Send them using the query string. Here's the list:
+
+- `ag_c`: the _category_ that will be pre-selected.
+  - Use can pre-select multiple categories, just ensure to send a comma-separated list.
+  - You must encode the strings properly. E.g. a category called `Sport & Ö-liv` should become `Sport%20%26%20%C3%96-liv`, while `The Foo/Bar Category` is `The%20Foo%2FBar%20category`.
+- `ag_gid`: the _guide ID_. (TBA)
+- `ag_pid`: the _point ID_. (TBA)

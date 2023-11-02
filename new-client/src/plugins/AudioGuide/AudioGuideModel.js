@@ -1,4 +1,7 @@
 import { GeoJSON, WFS } from "ol/format.js";
+import VectorLayer from "ol/layer/Vector";
+import VectorSource from "ol/source/Vector";
+import { Stroke, Style } from "ol/style";
 
 export default class AudioGuideModel {
   #app;
@@ -8,15 +11,39 @@ export default class AudioGuideModel {
   #allLines;
   #allPoints;
   #availableCategories = new Set();
+  #vectorLayer;
+  #vectorSource;
 
   constructor(settings) {
     this.#app = settings.app;
     this.#localObserver = settings.localObserver;
     this.#map = settings.map;
     this.#options = settings.options;
+
+    this.#vectorSource = new VectorSource();
+    this.#vectorLayer = new VectorLayer({
+      source: this.#vectorSource,
+      layerType: "system",
+      zIndex: 5000,
+      name: "pluginAudioGuide",
+      caption: "AudioGuide layer",
+      // style: new Style({
+      //   stroke: new Stroke({
+      //     color: "rgba(0, 0, 255, 1.0)",
+      //     width: 2,
+      //   }),
+      // }),
+    });
+
+    this.#map.addLayer(this.#vectorLayer);
   }
 
-  getAvailableCategories = () => this.#availableCategories || [];
+  addFeaturesToLayer = (features) => {
+    this.#vectorSource.addFeatures(features);
+    this.#map.getView().fit(this.#vectorSource.getExtent());
+  };
+
+  getAvailableCategories = () => Array.from(this.#availableCategories);
 
   init = async () => {
     // Grab features from WFSs
@@ -33,6 +60,12 @@ export default class AudioGuideModel {
 
     console.log("Init done");
     console.log(this.#allLines, this.#allPoints, this.#availableCategories);
+
+    // This would add all features to the map, but it's not what we want
+    // on init. We'd rather use the filtering and enable only those features
+    // whose category has been selected.
+    // this.addFeaturesToLayer(this.#allLines);
+    // this.addFeaturesToLayer(this.#allPoints);
   };
 
   fetchFromService = async (type = "line") => {
