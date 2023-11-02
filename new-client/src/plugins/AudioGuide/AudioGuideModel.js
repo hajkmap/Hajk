@@ -1,7 +1,27 @@
-import { GeoJSON, WFS } from "ol/format.js";
+import { GeoJSON, WFS } from "ol/format";
 import VectorLayer from "ol/layer/Vector";
 import VectorSource from "ol/source/Vector";
-import { Stroke, Style } from "ol/style";
+import Select from "ol/interaction/Select";
+import { Circle, Fill, Stroke, Style } from "ol/style";
+
+const fill = new Fill({
+  color: "rgba(255,255,255,0.4)",
+});
+const stroke = new Stroke({
+  color: "red",
+  width: 3,
+});
+const selectedStyle = [
+  new Style({
+    image: new Circle({
+      fill: fill,
+      stroke: stroke,
+      radius: 5,
+    }),
+    fill: fill,
+    stroke: stroke,
+  }),
+];
 
 export default class AudioGuideModel {
   #app;
@@ -11,6 +31,7 @@ export default class AudioGuideModel {
   #allLines;
   #allPoints;
   #availableCategories = new Set();
+  #selectInteraction;
   #vectorLayer;
   #vectorSource;
 
@@ -20,6 +41,7 @@ export default class AudioGuideModel {
     this.#map = settings.map;
     this.#options = settings.options;
 
+    // Setup source and layers
     this.#vectorSource = new VectorSource();
     this.#vectorLayer = new VectorLayer({
       source: this.#vectorSource,
@@ -35,7 +57,21 @@ export default class AudioGuideModel {
       // }),
     });
 
+    // Setup interaction and interaction handler
+    this.#selectInteraction = new Select({
+      hitTolerance: 20,
+      style: selectedStyle,
+    });
+
+    this.#selectInteraction.on("select", (e) => {
+      this.#localObserver.publish("featureSelected", e.selected);
+    });
+
+    // Add layer and interaction
     this.#map.addLayer(this.#vectorLayer);
+    this.#map.addInteraction(this.#selectInteraction);
+
+    console.log("AudioGuideModel initiated!");
   }
 
   addFeaturesToLayer = (features) => {
@@ -47,8 +83,8 @@ export default class AudioGuideModel {
 
   init = async () => {
     // Grab features from WFSs
-    this.#allLines = await this.fetchFromService("line");
-    this.#allPoints = await this.fetchFromService("point");
+    this.#allLines = await this.#fetchFromService("line");
+    this.#allPoints = await this.#fetchFromService("point");
 
     // Extract available categories. We want all categories that
     // exist on the line service.
@@ -64,11 +100,11 @@ export default class AudioGuideModel {
     // This would add all features to the map, but it's not what we want
     // on init. We'd rather use the filtering and enable only those features
     // whose category has been selected.
-    // this.addFeaturesToLayer(this.#allLines);
-    // this.addFeaturesToLayer(this.#allPoints);
+    this.addFeaturesToLayer(this.#allLines);
+    this.addFeaturesToLayer(this.#allPoints);
   };
 
-  fetchFromService = async (type = "line") => {
+  #fetchFromService = async (type = "line", filter) => {
     const { srsName, featureNS, featurePrefix, url } =
       this.#options.serviceSettings;
     // generate a GetFeature request
@@ -100,7 +136,5 @@ export default class AudioGuideModel {
       console.error(error);
       return [];
     }
-    // vectorSource.addFeatures(features);
-    // map.getView().fit(vectorSource.getExtent());
   };
 }

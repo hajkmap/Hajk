@@ -19,6 +19,7 @@ import { styled } from "@mui/material/styles";
 import { useSnackbar } from "notistack";
 
 import InfoDialog from "./views/InfoDialog.js";
+import FeatureView from "./views/FeatureView.js";
 
 import BugReportIcon from "@mui/icons-material/BugReport";
 
@@ -46,11 +47,24 @@ function AudioGuideView(props) {
   const [fetchError, setFetchError] = useState(null);
 
   const [selectedCategories, setSelectedCategories] = useState([]);
+
+  const [selectedFeature, setSelectedFeature] = useState([]);
   // Subscribe and unsubscribe to events
   useEffect(() => {
     localObserver.subscribe("fetchError", (e) =>
       setFetchError(e?.message || null)
     );
+
+    localObserver.subscribe("featureSelected", (f) => {
+      setSelectedFeature(f);
+
+      // This should not happen, we're only prepared for one feature a time.
+      if (f.length > 1)
+        console.warn(
+          "More than 1 feature was returned, displaying only the topmost feature. Complete array is:",
+          f
+        );
+    });
   }, [localObserver]);
 
   // Let's attempt to initiate the model
@@ -125,6 +139,7 @@ function AudioGuideView(props) {
           {fetchError} <Button onClick={() => model.init()}>Retry</Button>
         </Alert>
       )}
+      {selectedFeature && <FeatureView selectedFeature={selectedFeature} />}
       <FormControl sx={{ m: 3 }} component="fieldset" variant="standard">
         <FormLabel component="legend">Filtrera</FormLabel>
         <FormGroup>
