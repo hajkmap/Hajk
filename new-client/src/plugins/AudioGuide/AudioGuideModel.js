@@ -7,34 +7,32 @@ export default class AudioGuideModel {
   #map;
   #allLines;
   #allPoints;
-  #filters = new Set();
+  #availableCategories = new Set();
 
   constructor(settings) {
-    // Set some private fields
     this.#app = settings.app;
     this.#localObserver = settings.localObserver;
     this.#map = settings.map;
     this.#options = settings.options;
-    this.init();
   }
 
-  getFilters = () => this.#filters || [];
+  getAvailableCategories = () => this.#availableCategories || [];
 
   init = async () => {
     // Grab features from WFSs
     this.#allLines = await this.fetchFromService("line");
     this.#allPoints = await this.fetchFromService("point");
 
-    // Extract available filters. We want all "categories" that
+    // Extract available categories. We want all categories that
     // exist on the line service.
     this.#allLines.forEach((l) => {
       l.get("categories")
         ?.split(",")
-        .forEach((c) => this.#filters.add(c));
+        .forEach((c) => this.#availableCategories.add(c));
     });
 
     console.log("Init done");
-    console.log(this.#allLines, this.#allPoints, this.#filters);
+    console.log(this.#allLines, this.#allPoints, this.#availableCategories);
   };
 
   fetchFromService = async (type = "line") => {
@@ -53,15 +51,22 @@ export default class AudioGuideModel {
       // ),
     });
 
-    // then post the request and add the received features to a layer
-    const response = await fetch(url, {
-      method: "POST",
-      body: new XMLSerializer().serializeToString(featureRequest),
-    });
+    try {
+      // then post the request and add the received features to a layer
+      const response = await fetch(url, {
+        method: "POST",
+        body: new XMLSerializer().serializeToString(featureRequest),
+      });
 
-    const json = await response.json();
-    const features = new GeoJSON().readFeatures(json);
-    return features;
+      const json = await response.json();
+      const features = new GeoJSON().readFeatures(json);
+      this.#localObserver.publish("fetchError", null);
+      return features;
+    } catch (error) {
+      this.#localObserver.publish("fetchError", error);
+      console.error(error);
+      return [];
+    }
     // vectorSource.addFeatures(features);
     // map.getView().fit(vectorSource.getExtent());
   };

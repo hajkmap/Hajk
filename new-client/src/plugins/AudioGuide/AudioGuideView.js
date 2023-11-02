@@ -2,6 +2,7 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
 
 import {
+  Alert,
   Box,
   Button,
   Checkbox,
@@ -10,6 +11,7 @@ import {
   FormGroup,
   FormHelperText,
   FormLabel,
+  Snackbar,
   Typography,
 } from "@mui/material";
 import { styled } from "@mui/material/styles";
@@ -31,9 +33,29 @@ function AudioGuideView(props) {
 
   const snackbarId = useRef(null);
 
-  const [selectedCategories, setSelectedCategories] = useState({});
+  const [availableCategories, setAvailableCategories] = useState([]);
+  const [fetchError, setFetchError] = useState(null);
+
+  const [selectedCategories, setSelectedCategories] = useState(false);
+  // Subscribe and unsubscribe to events
+  useEffect(() => {
+    localObserver.subscribe("fetchError", (e) =>
+      setFetchError(e?.message || null)
+    );
+  }, [localObserver]);
+
+  // Let's attempt to initiate the model
+  useEffect(() => {
+    const initModel = async () => {
+      await model.init();
+
+      setAvailableCategories(Array.from(model.getAvailableCategories()));
+    };
+    initModel();
+  }, [model]);
 
   const handleCategoryChange = (e) => {
+    console.log("selectedCategories: ", selectedCategories);
     setSelectedCategories({
       ...selectedCategories,
       [e.target.name]: e.target.checked,
@@ -41,8 +63,6 @@ function AudioGuideView(props) {
   };
 
   const renderDrawerContent = useCallback(() => {
-    const f = model.getFilters();
-    console.log("f: ", f);
     return (
       // The sx-prop gives us some shorthand commands, for example, the paddings below
       // will be set to theme.spacing(2), and not 2px! Make sure to read up on how the sx-prop
@@ -54,30 +74,9 @@ function AudioGuideView(props) {
           knapp uppe i headern. När du trycker på knappen visas det här
           innehållet i sidopanelen.
         </Typography>
-        <FormControl sx={{ m: 3 }} component="fieldset" variant="standard">
-          <FormLabel component="legend">Filtrera</FormLabel>
-          <FormGroup>
-            {Array.from(model.getFilters()).map((c, i) => {
-              return (
-                <FormControlLabel
-                  key={i}
-                  control={
-                    <Checkbox
-                      checked={selectedCategories[i]}
-                      onChange={handleCategoryChange}
-                      name={i.toString()}
-                    />
-                  }
-                  label={c}
-                />
-              );
-            })}
-          </FormGroup>
-          <FormHelperText>Du kan välja flera kategorier</FormHelperText>
-        </FormControl>
       </Box>
     );
-  }, [model]);
+  }, []);
 
   useEffect(() => {
     globalObserver.publish("core.addDrawerToggleButton", {
@@ -90,16 +89,35 @@ function AudioGuideView(props) {
     });
   }, [globalObserver, renderDrawerContent]);
 
-  console.log("selectedCategories: ", selectedCategories);
   return (
     <>
       <InfoDialog localObserver={localObserver} />
-      <ButtonWithBottomMargin onClick={() => model.fetchFromService("line")}>
-        Get lines
-      </ButtonWithBottomMargin>
-      <ButtonWithBottomMargin onClick={() => model.fetchFromService("point")}>
-        Get points
-      </ButtonWithBottomMargin>
+      {fetchError !== null && (
+        <Alert severity="error">
+          {fetchError} <Button onClick={() => model.init()}>Retry</Button>
+        </Alert>
+      )}
+      <FormControl sx={{ m: 3 }} component="fieldset" variant="standard">
+        <FormLabel component="legend">Filtrera</FormLabel>
+        <FormGroup>
+          {availableCategories.map((c, i) => {
+            return (
+              <FormControlLabel
+                key={i}
+                control={
+                  <Checkbox
+                    checked={selectedCategories[i]}
+                    onChange={handleCategoryChange}
+                    name={i.toString()}
+                  />
+                }
+                label={c}
+              />
+            );
+          })}
+        </FormGroup>
+        <FormHelperText>Du kan välja flera kategorier</FormHelperText>
+      </FormControl>
     </>
   );
 }
