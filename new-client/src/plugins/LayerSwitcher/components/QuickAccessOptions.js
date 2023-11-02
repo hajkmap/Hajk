@@ -10,11 +10,11 @@ import {
 } from "@mui/material";
 
 import MoreVertOutlinedIcon from "@mui/icons-material/MoreVertOutlined";
-import PersonOutlinedIcon from "@mui/icons-material/PersonOutlined";
+import AddOutlinedIcon from "@mui/icons-material/AddOutlined";
 import DeleteOutlinedIcon from "@mui/icons-material/DeleteOutlined";
 
 export default function QuickAccessOptions({
-  handlePersonalLayerPackageToggle,
+  handleAddLayersToQuickAccess,
   handleClearQuickAccessLayers,
 }) {
   // Element that we will anchor the options menu to is
@@ -47,7 +47,7 @@ export default function QuickAccessOptions({
         aria-expanded={optionsMenuIsOpen ? "true" : undefined}
         onClick={handleShowMoreOptionsClick}
       >
-        <Tooltip title="Val för snabblager">
+        <Tooltip title="Fler val för snabbåtkomst">
           <MoreVertOutlinedIcon />
         </Tooltip>
       </IconButton>
@@ -61,13 +61,13 @@ export default function QuickAccessOptions({
           onClick={(e) => {
             e.stopPropagation();
             setAnchorEl(null);
-            handlePersonalLayerPackageToggle(e);
+            handleAddLayersToQuickAccess(e);
           }}
         >
           <ListItemIcon>
-            <PersonOutlinedIcon fontSize="small" />
+            <AddOutlinedIcon fontSize="small" />
           </ListItemIcon>
-          <ListItemText>Mina snabblager</ListItemText>
+          <ListItemText>Lägg till tända lager</ListItemText>
         </MenuItem>
         <MenuItem
           onClick={(e) => {
@@ -79,7 +79,7 @@ export default function QuickAccessOptions({
           <ListItemIcon>
             <DeleteOutlinedIcon fontSize="small" />
           </ListItemIcon>
-          <ListItemText>Rensa snabblager</ListItemText>
+          <ListItemText>Rensa allt</ListItemText>
         </MenuItem>
       </Menu>
     </>

@@ -3,6 +3,7 @@ import { createPortal } from "react-dom";
 import propTypes from "prop-types";
 
 import { styled } from "@mui/material/styles";
+import { withSnackbar } from "notistack";
 import {
   AppBar,
   Divider,
@@ -21,16 +22,17 @@ import LayerGroup from "./components/LayerGroup.js";
 import BreadCrumbs from "./components/BreadCrumbs.js";
 import DrawOrder from "./components/DrawOrder.js";
 import LayerPackage from "./components/LayerPackage";
-import PersonalLayerPackage from "./components/PersonalLayerPackage";
 import LayerGroupAccordion from "./components/LayerGroupAccordion.js";
-
-import StarOutlineOutlinedIcon from "@mui/icons-material/StarOutlineOutlined";
-import AddOutlinedIcon from "@mui/icons-material/AddOutlined";
-import SearchIcon from "@mui/icons-material/Search";
-import ClearIcon from "@mui/icons-material/Clear";
+import ConfirmationDialog from "../../components/ConfirmationDialog.js";
 import QuickAccessLayers from "./components/QuickAccessLayers.js";
 import QuickAccessOptions from "./components/QuickAccessOptions.js";
 import LayerItemDetails from "./components/LayerItemDetails.js";
+import Favorites from "./components/Favorites/Favorites.js";
+
+import StarOutlineOutlinedIcon from "@mui/icons-material/StarOutlineOutlined";
+import TopicOutlinedIcon from "@mui/icons-material/TopicOutlined";
+import SearchIcon from "@mui/icons-material/Search";
+import ClearIcon from "@mui/icons-material/Clear";
 
 const StyledAppBar = styled(AppBar)(() => ({
   top: -10,
@@ -43,6 +45,7 @@ class LayersSwitcherView extends React.PureComponent {
     model: propTypes.object.isRequired,
     observer: propTypes.object.isRequired,
     options: propTypes.object.isRequired,
+    enqueueSnackbar: propTypes.func.isRequired,
   };
 
   constructor(props) {
@@ -54,11 +57,12 @@ class LayersSwitcherView extends React.PureComponent {
       baseLayers: props.model.getBaseLayers(),
       activeTab: 0,
       activeLayersCount: 0,
-      displayContentOverlay: null, // 'layerPackage' | 'personalLayerPackage' | 'layerItemDetails'
+      displayContentOverlay: null, // 'layerPackage' | 'favorites' | 'layerItemDetails'
       layerItemDetails: null,
       quickAccessSectionExpanded: false,
       filterValue: "",
       treeData: this.layerTree,
+      showDeleteConfirmation: false,
       scrollPositions: {
         tab0: 0,
         tab1: 0,
@@ -224,16 +228,14 @@ class LayersSwitcherView extends React.PureComponent {
     node.isFiltered = isFiltered;
   };
 
-  // Handles click on PersonalLayerpackage button and backbutton
-  handlePersonalLayerPackageToggle = (layerPackageState) => {
+  // Handles click on Favorites button and backbutton
+  handleFavoritesViewToggle = (layerPackageState) => {
     layerPackageState?.event?.stopPropagation();
-    // Set scroll position state when personal layer package is opened
+    // Set scroll position state when favorites view is opened
     const currentScrollPosition = this.getScrollPosition();
     this.setState((prevState) => ({
       displayContentOverlay:
-        this.state.displayContentOverlay === "personalLayerPackage"
-          ? null
-          : "personalLayerPackage",
+        this.state.displayContentOverlay === "favorites" ? null : "favorites",
       scrollPositions: {
         ...prevState.scrollPositions,
         [`tab${prevState.activeTab}`]: currentScrollPosition,
@@ -246,13 +248,55 @@ class LayersSwitcherView extends React.PureComponent {
     }
   };
 
-  // Handles click on clear quickAccess button
-  handleClearQuickAccessLayers = (e) => {
+  // Handles click on AddLayersToQuickAccess menu item
+  handleAddLayersToQuickAccess = (e) => {
     e.stopPropagation();
+    // Add visible layers to quickAccess section
+    this.props.map
+      .getAllLayers()
+      .filter(
+        (l) =>
+          l.get("visible") === true &&
+          l.get("layerType") !== "base" &&
+          l.get("layerType") !== "system"
+      )
+      .map((l) => l.set("quickAccess", true));
+    // Force update
+    this.forceUpdate();
+    // Show snackbar
+    this.props.enqueueSnackbar(
+      `Tända lager har nu lagts till i snabbåtkomst.`,
+      {
+        variant: "success",
+        anchorOrigin: { vertical: "bottom", horizontal: "center" },
+      }
+    );
+  };
+
+  // Handles click on clear quickAccess menu item
+  handleShowDeleteConfirmation = (e) => {
+    e.stopPropagation();
+    this.setState({ showDeleteConfirmation: true });
+  };
+
+  // Handles click on confirm clear quickAccess button
+  handleClearQuickAccessLayers = () => {
+    this.setState({ showDeleteConfirmation: false });
     this.props.map
       .getAllLayers()
       .filter((l) => l.get("quickAccess") === true)
       .map((l) => l.set("quickAccess", false));
+  };
+
+  // Checks if quickAccess section has visible layers
+  hasVisibleLayers = () => {
+    return (
+      this.props.map
+        .getAllLayers()
+        .filter(
+          (l) => l.get("quickAccess") === true && l.get("visible") === true
+        ).length > 0
+    );
   };
 
   // Handles filter functionality
@@ -419,7 +463,14 @@ class LayersSwitcherView extends React.PureComponent {
         <LayerGroupAccordion
           display={"block"}
           expanded={this.state.quickAccessSectionExpanded}
-          layerGroupTitle={<ListItemText primary={"Snabblager"} />}
+          layerGroupTitle={
+            <ListItemText
+              primaryTypographyProps={{
+                fontWeight: this.hasVisibleLayers() ? "bold" : "inherit",
+              }}
+              primary={"Snabbåtkomst"}
+            />
+          }
           quickAccess={
             <IconButton sx={{ pl: 0 }} disableRipple size="small">
               <StarOutlineOutlinedIcon />
@@ -430,15 +481,22 @@ class LayersSwitcherView extends React.PureComponent {
               <IconButton
                 onClick={(e) => this.handleLayerPackageToggle({ event: e })}
               >
-                <Tooltip title="Lägg till lagerpaket">
-                  <AddOutlinedIcon fontSize="small"></AddOutlinedIcon>
+                <Tooltip title="Teman">
+                  <TopicOutlinedIcon fontSize="small"></TopicOutlinedIcon>
                 </Tooltip>
               </IconButton>
-              <QuickAccessOptions
-                handlePersonalLayerPackageToggle={
-                  this.handlePersonalLayerPackageToggle
+              <Favorites
+                favoriteViewDisplay={
+                  this.state.displayContentOverlay === "favorites"
                 }
-                handleClearQuickAccessLayers={this.handleClearQuickAccessLayers}
+                app={this.props.app}
+                map={this.props.map}
+                handleFavoritesViewToggle={this.handleFavoritesViewToggle}
+                globalObserver={this.props.model.globalObserver}
+              ></Favorites>
+              <QuickAccessOptions
+                handleAddLayersToQuickAccess={this.handleAddLayersToQuickAccess}
+                handleClearQuickAccessLayers={this.handleShowDeleteConfirmation}
               ></QuickAccessOptions>
             </>
           }
@@ -545,19 +603,9 @@ class LayersSwitcherView extends React.PureComponent {
             map={this.props.map}
             globalObserver={this.props.model.globalObserver}
           ></LayerPackage>
-          <PersonalLayerPackage
-            display={
-              this.state.displayContentOverlay === "personalLayerPackage"
-            }
-            backButtonCallback={this.handlePersonalLayerPackageToggle}
-            map={this.props.map}
-            app={this.props.app}
-            globalObserver={this.props.model.globalObserver}
-          ></PersonalLayerPackage>
           <LayerItemDetails
             display={this.state.displayContentOverlay === "layerItemDetails"}
             layerItemDetails={this.state.layerItemDetails}
-            map={this.props.map}
             app={this.props.app}
             chapters={this.state.chapters}
             showOpacitySlider={this.props.options.enableTransparencySlider}
@@ -589,10 +637,23 @@ class LayersSwitcherView extends React.PureComponent {
             ></DrawOrder>
           )}
           {this.renderBreadCrumbs()}
+          <ConfirmationDialog
+            open={this.state.showDeleteConfirmation === true}
+            titleName={"Rensa allt"}
+            contentDescription={
+              "Alla lager i snabbåtkomst kommer nu att tas bort."
+            }
+            cancel={"Avbryt"}
+            confirm={"Rensa"}
+            handleConfirm={this.handleClearQuickAccessLayers}
+            handleAbort={() => {
+              this.setState({ showDeleteConfirmation: false });
+            }}
+          />
         </div>
       </div>
     );
   }
 }
 
-export default LayersSwitcherView;
+export default withSnackbar(LayersSwitcherView);

@@ -28,7 +28,6 @@ function LayerItemDetails({
   display,
   layerItemDetails,
   chapters,
-  map,
   app,
   showOpacitySlider,
 }) {
@@ -125,6 +124,16 @@ function LayerItemDetails({
 
   // Handle quickacces action
   const handleQuickAccess = () => {
+    let snackbarMessage = "";
+    if (!quickAccess) {
+      snackbarMessage = `${renderDetailTitle()} har nu lagts till i snabbåtkomst.`;
+    } else {
+      snackbarMessage = `${renderDetailTitle()} har nu tagits bort från snabbåtkomst.`;
+    }
+    enqueueSnackbar(snackbarMessage, {
+      variant: "success",
+      anchorOrigin: { vertical: "bottom", horizontal: "center" },
+    });
     setQuickAccess(!quickAccess);
     // Set quicklayer access flag
     layerItemDetails.layer.set(

@@ -224,7 +224,7 @@ export default function GroupLayer({
     if (toggleable) {
       return isSubLayerFiltered(subLayer);
     } else if (visibleSubLayers.includes(subLayer)) {
-      return isSubLayerFiltered(subLayer);
+      return true;
     }
     return false;
   };
