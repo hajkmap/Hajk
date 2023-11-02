@@ -1463,7 +1463,7 @@ class MapOptions extends Component {
               />
               &nbsp;
               <label className="long-label" htmlFor="input_drawerStatic">
-                Låt sidopanelen vara permanent synlig{" "}
+                Låt sidopanelen vara permanent synlig och låst{" "}
                 <i
                   className="fa fa-question-circle"
                   data-toggle="tooltip"

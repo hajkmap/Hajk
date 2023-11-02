@@ -587,9 +587,14 @@ class App extends React.PureComponent {
 
           // Act when view's zoom changes
           if (mergedParams.get("z")) {
-            // Since we're dealing with a string, we're gonna need to parse it to a float
-            const zoomInHash = parseFloat(mergedParams.get("z"));
-            if (this.appModel.map.getView().getZoom() !== zoomInHash) {
+            // Since we're dealing with a string, we have to parse it to a float.
+            // We must also round it to the nearest integer in order to avoid bouncing in View:
+            // View's getZoom() returns a float, but our hash param is always an integer.
+            // See also: #1422.
+            const zoomInHash = Math.round(parseFloat(mergedParams.get("z")));
+            if (
+              Math.round(this.appModel.map.getView().getZoom()) !== zoomInHash
+            ) {
               // …let's update our View's zoom.
               this.appModel.map.getView().animate({ zoom: zoomInHash });
             }
@@ -1038,11 +1043,23 @@ class App extends React.PureComponent {
     );
   };
 
-  checkDrawerButtons() {
-    return (
-      !this.state.drawerStatic ||
-      (this.state.drawerStatic && this.state.drawerButtons.length > 1)
+  showDrawerButtons() {
+    const drawerButtons = this.state.drawerButtons;
+
+    if (!drawerButtons) return false;
+
+    // We check if the plugin button (or any button) is empty and then subsequently hidden
+    const isHiddenPluginPresent = drawerButtons.some(
+      (button) => button.hideOnMdScreensAndAbove
     );
+
+    // We want to check if there's only one visible drawerButton
+    const isOnlyOneButtonVisible =
+      drawerButtons.length === 1 ||
+      (drawerButtons.length === 2 && isHiddenPluginPresent);
+
+    // And then check if drawer is static AND has a single visible button
+    return this.state.drawerStatic && isOnlyOneButtonVisible ? false : true;
   }
 
   render() {
@@ -1104,7 +1121,7 @@ class App extends React.PureComponent {
             <StyledHeader
               id="header"
               sx={{
-                justifyContent: this.checkDrawerButtons()
+                justifyContent: this.showDrawerButtons()
                   ? "space-between"
                   : "end",
                 "& > *": {
@@ -1112,7 +1129,7 @@ class App extends React.PureComponent {
                 },
               }}
             >
-              {clean === false && this.checkDrawerButtons() && (
+              {clean === false && this.showDrawerButtons() && (
                 <DrawerToggleButtons
                   drawerButtons={this.state.drawerButtons}
                   globalObserver={this.globalObserver}
