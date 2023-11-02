@@ -17,40 +17,30 @@ class InformativeService {
    */
   async getByName(folder, file) {
     try {
-      if (folder) {
-        file += ".json";
-        // Open file containing our store
-        const pathToFile = path.join(
-          process.cwd(),
-          "App_Data",
-          "documents",
-          folder,
-          file
-        );
-        const text = await fs.promises.readFile(pathToFile, "utf-8");
-        // Parse the file content so we get an object
-        const json = await JSON.parse(text);
-        return json;
-      } else {
-        file += ".json";
-        // Open file containing our store
-        const pathToFile = path.join(
-          process.cwd(),
-          "App_Data",
-          "documents",
-          file
-        );
-        const text = await fs.promises.readFile(pathToFile, "utf-8");
-        // Parse the file content so we get an object
-        const json = await JSON.parse(text);
-        return json;
+      if (typeof folder === "undefined") {
+        throw new Error("Folder is undefined");
       }
+
+      file += ".json"; // Add file extension
+
+      // Construct the path depending on whether a folder was provided
+      const pathToFile = path.join(
+        process.cwd(),
+        "App_Data",
+        "documents",
+        folder ? folder : "",
+        file
+      );
+
+      const text = await fs.promises.readFile(pathToFile, "utf-8");
+      const json = JSON.parse(text);
+      return json;
     } catch (error) {
       logger.warn(
         `Error while opening informative document "${file}". Sent 404 Not Found as response. Original error below.`
       );
       logger.warn(error);
-      return { error };
+      return { error: error.message };
     }
   }
 
@@ -64,27 +54,21 @@ class InformativeService {
    */
   async create(documentName, mapName, folderName) {
     try {
+      if (typeof folderName === "undefined") {
+        throw new Error("Folder name is undefined");
+      }
+
       // Add desired file extension to our file's name…
       documentName += ".json";
 
       // …and create a new path to that file.
-      var pathToFile = "";
-      if (folderName) {
-        pathToFile = path.join(
-          process.cwd(),
-          "App_Data",
-          "documents",
-          folderName,
-          documentName
-        );
-      } else {
-        pathToFile = path.join(
-          process.cwd(),
-          "App_Data",
-          "documents",
-          documentName
-        );
-      }
+      const pathToFile = path.join(
+        process.cwd(),
+        "App_Data",
+        "documents",
+        folderName ? folderName : "",
+        documentName
+      );
 
       // Prepare the contents of our new documents file
       const json = {
@@ -100,7 +84,10 @@ class InformativeService {
 
       return json;
     } catch (error) {
-      return { error };
+      logger.error(
+        `Error while creating document "${documentName}". Original error: ${error.message}`
+      );
+      return { error: error.message };
     }
   }
 
@@ -113,7 +100,7 @@ class InformativeService {
    */
   async createFolder(folderName) {
     try {
-      const foldern = {
+      const folder = {
         foldername: folderName, // Return
       };
       // …and create a new path to that folder.
@@ -123,12 +110,11 @@ class InformativeService {
         "documents",
         folderName
       );
-      console.log(pathToFolder);
       if (!fs.existsSync(pathToFolder)) {
         fs.promises.mkdir(pathToFolder);
-        return foldern;
+        return folder;
       } else {
-        return foldern;
+        return folder;
       }
     } catch (error) {
       return { error };
@@ -145,77 +131,70 @@ class InformativeService {
    */
   async saveByName(folder, file, body) {
     try {
-      if (folder) {
-        file += ".json";
-        // Prepare the path to our file
-        const pathToFile = path.join(
-          process.cwd(),
-          "App_Data",
-          "documents",
-          folder,
-          file
-        );
-
-        // Simple way to verify we've got valid JSON: try parsing it.
-        const json = JSON.parse(body);
-
-        // If parsing was successful, convert back to string,
-        // using 2 spaces as indentation
-        const jsonString = JSON.stringify(json, null, 2);
-
-        // Write to file
-        await fs.promises.writeFile(pathToFile, jsonString);
-
-        // Return the parsed JSON object
-        return jsonString;
-      } else {
-        file += ".json";
-        // Prepare the path to our file
-        const pathToFile = path.join(process.cwd(), "App_Data/documents", file);
-
-        // Simple way to verify we've got valid JSON: try parsing it.
-        const json = JSON.parse(body);
-
-        // If parsing was successful, convert back to string,
-        // using 2 spaces as indentation
-        const jsonString = JSON.stringify(json, null, 2);
-
-        // Write to file
-        await fs.promises.writeFile(pathToFile, jsonString);
-
-        // Return the parsed JSON object
-        return jsonString;
+      if (typeof folder === "undefined") {
+        throw new Error("Folder parameter is undefined");
       }
+
+      file += ".json"; // Add file extension.
+
+      // Prepare the path to our file.
+      const pathToFile = path.join(
+        process.cwd(),
+        "App_Data",
+        "documents",
+        folder ? folder : "",
+        file
+      );
+
+      // Simple way to verify we've got valid JSON: try parsing it.
+      const json = JSON.parse(body); // Ensure body is valid JSON
+
+      // If parsing was successful, convert back to string with indentation
+      const jsonString = JSON.stringify(json, null, 2);
+
+      // Write to file
+      await fs.promises.writeFile(pathToFile, jsonString);
+
+      // Return the JSON string
+      return jsonString;
     } catch (error) {
-      return { error };
+      logger.error(`Error saving file "${file}": ${error.message}`);
+      return { error: error.message };
     }
   }
 
+  /**
+   * @summary Delete file
+   *
+   * @returns {array} Names of files as array of strings
+   * @memberof InformativeService
+   */
   async deleteByName(folder, file) {
     try {
-      var pathToFile = "";
-      if (folder) {
-        file += ".json";
-        // Prepare the path to our file
-        pathToFile = path.join(
-          process.cwd(),
-          "App_Data",
-          "documents",
-          folder,
-          file
-        );
-      } else {
-        file += ".json";
-        // Prepare the path to our file
-        pathToFile = path.join(process.cwd(), "App_Data", "documents", file);
+      if (typeof folder === "undefined") {
+        throw new Error("Folder parameter is undefined");
       }
-      // Just drop the specified file…
+
+      // Append .json extension to the file.
+      file += ".json";
+
+      // Prepare the path to our file.
+      const pathToFile = path.join(
+        process.cwd(),
+        "App_Data",
+        "documents",
+        folder ? folder : "",
+        file
+      );
+
+      // Attempt to delete the specified file
       await fs.promises.unlink(pathToFile);
 
-      // Return an empty JSON object
+      // Return an empty object on success
       return {};
     } catch (error) {
-      return { error };
+      logger.error(`Error deleting file "${file}": ${error.message}`);
+      return { error: error.message };
     }
   }
 
@@ -233,7 +212,6 @@ class InformativeService {
       } else {
         dir = path.join(process.cwd(), "App_Data", "documents");
       }
-      //const dir = path.join(process.cwd(), "App_Data", "documents", "Tomas");
 
       const dirContents = await fs.promises.readdir(dir, {
         withFileTypes: true,
