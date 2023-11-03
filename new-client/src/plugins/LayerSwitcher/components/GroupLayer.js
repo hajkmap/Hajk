@@ -36,6 +36,7 @@ export default function GroupLayer({
       : []
   );
   const [zoomVisible, setZoomVisible] = useState(true);
+  const [subLayerClicked, setSubLayerClicked] = useState(false);
 
   const { removeFromSnackbar } = useSnackbar();
 
@@ -229,16 +230,17 @@ export default function GroupLayer({
     }
   };
 
-  // Toogles a subLayer
+  // Toggles a subLayer
   const toggleSubLayer = (subLayer, visible) => {
     if (visible) {
       setSubLayerHidden(subLayer);
     } else {
       setSubLayerVisible(subLayer);
     }
+    setSubLayerClicked(!visible);
   };
 
-  // Toogles sublayers section
+  // Toggles sublayers section
   const toggleShowSublayers = (e) => {
     e.stopPropagation();
     setShowSublayers(!showSublayers);
@@ -277,6 +279,8 @@ export default function GroupLayer({
         (subLayer) => layer.layersInfo[subLayer]?.caption || ""
       )}
       onSetZoomVisible={setZoomVisible}
+      subLayerClicked={subLayerClicked}
+      toggleSubLayer={toggleSubLayer}
       expandableSection={
         layer.get("layerInfo").hideExpandArrow !== true && (
           <IconButton

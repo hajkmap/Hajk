@@ -42,6 +42,7 @@ export default function LayerItem({
   expandableSection,
   visibleSubLayersCaption,
   onSetZoomVisible,
+  subLayerClicked,
 }) {
   // WmsLayer load status, shows warning icon if !ok
   const [wmsLayerLoadStatus, setWmsLayerLoadStatus] = useState("ok");
@@ -55,8 +56,15 @@ export default function LayerItem({
   const prevVisibleMinMaxZoomLayersRef = useRef([]);
   const prevLayerIsZoomVisible = useRef(null);
   const [isGroupHidden, setIsGroupHidden] = useState(false);
+  const [showSnackbarOnClick, setShowSnackbarOnClick] = useState(false);
 
   const { addToSnackbar, removeFromSnackbar } = useSnackbar();
+
+  const layerSwitcherConfig = app.config.mapConfig.tools.find(
+    (tool) => tool.type === "layerswitcher"
+  );
+  const minMaxZoomAlertOnToggleOnly =
+    layerSwitcherConfig?.options?.minMaxZoomAlertOnToggleOnly ?? false;
 
   useEffect(() => {
     if (layer.get("visible")) {
@@ -82,6 +90,17 @@ export default function LayerItem({
         visibleMinMaxZoomLayers.length > 0)
     ) {
       setIsGroupHidden(true);
+    }
+
+    const zoom = app.map.getView().getZoom();
+    const lprops = layer.getProperties();
+    const layerIsZoomVisible = zoom > lprops.minZoom && zoom <= lprops.maxZoom;
+    if (
+      !layerIsZoomVisible &&
+      minMaxZoomAlertOnToggleOnly &&
+      (subLayerClicked || layer.get("visible"))
+    ) {
+      setShowSnackbarOnClick(true);
     }
 
     // Subscribe to zoom changes.
@@ -139,14 +158,6 @@ export default function LayerItem({
       removeValue(value);
     });
 
-    if (
-      addedValues.length === 0 &&
-      removedValues.length === 0 &&
-      !zoomVisible
-    ) {
-      //showSnackbar();
-    }
-
     prevVisibleMinMaxZoomLayersRef.current = visibleMinMaxZoomLayers;
   }, [visibleMinMaxZoomLayers, isGroupHidden]);
 
@@ -186,7 +197,6 @@ export default function LayerItem({
     const zoom = app.map.getView().getZoom();
     const lprops = layer.getProperties();
     const layerIsZoomVisible = zoom > lprops.minZoom && zoom <= lprops.maxZoom;
-    const minMaxZoomAlertOnToggleOnly = false;
 
     const prevVisibleMinMaxZoomLayers = prevVisibleMinMaxZoomLayersRef.current;
     const isGroupLayer = Array.isArray(visibleSubLayersCaption);
@@ -203,44 +213,27 @@ export default function LayerItem({
       return true;
     };
 
-    if (minMaxZoomAlertOnToggleOnly === true) {
-      if (!layer.get("visible") && !layerIsZoomVisible && click === true) {
+    if (layerIsZoomVisible !== prevLayerIsZoomVisible.current || isGroupLayer) {
+      if (!layerIsZoomVisible && (zoomVisible || !layer.get("visible"))) {
         setVisibleMinMaxZoomLayers(
           isGroupLayer ? visibleSubLayersCaption : [layer.get("caption")]
         );
+      } else if (!layerIsZoomVisible && layer.get("visible") && isGroupLayer) {
+        setVisibleMinMaxZoomLayers(
+          isGroupLayer ? visibleSubLayersCaption : [layer.get("caption")]
+        );
+      } else if (
+        !arraysAreEqual(visibleMinMaxZoomLayers, prevVisibleMinMaxZoomLayers)
+      ) {
+        setVisibleMinMaxZoomLayers([]);
       } else {
         setVisibleMinMaxZoomLayers([]);
       }
-    } else {
-      if (
-        layerIsZoomVisible !== prevLayerIsZoomVisible.current ||
-        isGroupLayer
-      ) {
-        if (!layerIsZoomVisible && (zoomVisible || !layer.get("visible"))) {
-          setVisibleMinMaxZoomLayers(
-            isGroupLayer ? visibleSubLayersCaption : [layer.get("caption")]
-          );
-        } else if (
-          !layerIsZoomVisible &&
-          layer.get("visible") &&
-          isGroupLayer
-        ) {
-          setVisibleMinMaxZoomLayers(
-            isGroupLayer ? visibleSubLayersCaption : [layer.get("caption")]
-          );
-        } else if (
-          !arraysAreEqual(visibleMinMaxZoomLayers, prevVisibleMinMaxZoomLayers)
-        ) {
-          setVisibleMinMaxZoomLayers([]);
-        } else {
-          setVisibleMinMaxZoomLayers([]);
-        }
 
-        if (isGroupLayer) {
-          onSetZoomVisible(layerIsZoomVisible);
-        }
-        prevLayerIsZoomVisible.current = layerIsZoomVisible;
+      if (isGroupLayer) {
+        onSetZoomVisible(layerIsZoomVisible);
       }
+      prevLayerIsZoomVisible.current = layerIsZoomVisible;
     }
 
     setZoomVisible(layerIsZoomVisible);
@@ -248,7 +241,18 @@ export default function LayerItem({
   };
 
   const addValue = (value) => {
-    addToSnackbar(layer.get("name"), value);
+    if (minMaxZoomAlertOnToggleOnly) {
+      if (showSnackbarOnClick) {
+        // Add layer caption and show snackbar message on click.
+        addToSnackbar(layer.get("name"), value);
+      } else {
+        // Add layer caption to snackbar message, but don't show it.
+        addToSnackbar(layer.get("name"), value, true);
+      }
+      setShowSnackbarOnClick(false);
+    } else {
+      addToSnackbar(layer.get("name"), value);
+    }
   };
 
   const removeValue = (value) => {
