@@ -21,7 +21,7 @@ import { useSnackbar } from "notistack";
 import InfoDialog from "./views/InfoDialog.js";
 import FeatureView from "./views/FeatureView.js";
 
-import BugReportIcon from "@mui/icons-material/BugReport";
+import HeadsetIcon from "@mui/icons-material/Headset";
 
 const ButtonWithBottomMargin = styled(Button)(({ theme }) => ({
   marginBottom: theme.spacing(2),
@@ -123,7 +123,7 @@ function AudioGuideView(props) {
   useEffect(() => {
     globalObserver.publish("core.addDrawerToggleButton", {
       value: "audioguide",
-      ButtonIcon: BugReportIcon,
+      ButtonIcon: HeadsetIcon,
       caption: "AudioGuide",
       drawerTitle: "AudioGuide",
       order: 100,

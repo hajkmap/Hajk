@@ -6,7 +6,7 @@ import AudioGuideModel from "./AudioGuideModel.js";
 import AudioGuideView from "./AudioGuideView.js";
 import Observer from "react-event-observer";
 
-import ChecklistIcon from "@mui/icons-material/Checklist";
+import HeadsetIcon from "@mui/icons-material/Headset";
 import HelpIcon from "@mui/icons-material/Help";
 
 /**
@@ -64,7 +64,7 @@ function AudioGuide(props) {
       {...props} // Pass on all the props...
       type="audioguide" // Unique name - each plugin needs one. Upper-case first letter, must be valid JS variable name.
       custom={{
-        icon: <ChecklistIcon />, // Custom icon for this plugin
+        icon: <HeadsetIcon />, // Custom icon for this plugin
         title: props.options.title || "AudioGuide", // By keeping title and color in Dummy's state we can pass on
         description:
           props.options.description ||
