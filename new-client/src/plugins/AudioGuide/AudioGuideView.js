@@ -122,7 +122,7 @@ function AudioGuideView(props) {
 
   useEffect(() => {
     globalObserver.publish("core.addDrawerToggleButton", {
-      value: "dummy",
+      value: "audioguide",
       ButtonIcon: BugReportIcon,
       caption: "AudioGuide",
       drawerTitle: "AudioGuide",
