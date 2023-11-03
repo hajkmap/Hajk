@@ -319,6 +319,7 @@ class Menu extends Component {
       quickLayersPresets: [],
       importedLayers: [],
       importedMetadata: {},
+      minMaxZoomAlertOnToggleOnly: false,
     };
     this.titleRef = React.createRef();
     this.authorRef = React.createRef();
@@ -397,6 +398,9 @@ class Menu extends Component {
           title: existingConfig.title || "",
           description: existingConfig.description || "",
           quickLayersPresets: existingConfig.quickLayersPresets || [],
+          minMaxZoomAlertOnToggleOnly:
+            existingConfig.minMaxZoomAlertOnToggleOnly ??
+            this.state.minMaxZoomAlertOnToggleOnly,
         });
         $(".tree-view li").editable(this);
         $(".tree-view > ul").sortable();
@@ -612,6 +616,7 @@ class Menu extends Component {
       enableUserQuickLayers: this.state.enableUserQuickLayers,
       userQuickLayersInfoText: this.state.userQuickLayersInfoText,
       enableTransparencySlider: this.state.enableTransparencySlider,
+      minMaxZoomAlertOnToggleOnly: this.state.minMaxZoomAlertOnToggleOnly,
       instruction: this.state.instruction,
       dropdownThemeMaps: this.state.dropdownThemeMaps,
       themeMapHeaderCaption: this.state.themeMapHeaderCaption,
@@ -1994,6 +1999,30 @@ class Menu extends Component {
               <div className="separator">Kartinställningar</div>
               {this.renderThemeMapCheckbox()}
               {this.renderThemeMapHeaderInput()}
+              <div className="separator">
+                Inställningar för varning vid zoombegränsning
+              </div>
+              <div>
+                <input
+                  id="minMaxZoomAlertOnToggleOnly"
+                  name="minMaxZoomAlertOnToggleOnly"
+                  type="checkbox"
+                  onChange={this.handleInputChange}
+                  checked={this.state.minMaxZoomAlertOnToggleOnly}
+                />
+                &nbsp;
+                <label
+                  className="long-label"
+                  htmlFor="minMaxZoomAlertOnToggleOnly"
+                >
+                  Visa varningsruta endast när man tänder lager{" "}
+                  <i
+                    className="fa fa-question-circle"
+                    data-toggle="tooltip"
+                    title="Som standard visas även varningsruta när lagret blir dolt p.g.a. zoombegränsningen (Min zoom och Max zoom)."
+                  />
+                </label>
+              </div>
               <div className="separator">Inställningar för bakgrundslager</div>
               <div>
                 <input
