@@ -8,6 +8,7 @@ import { SnackbarContext } from "../components/SnackbarProvider";
 const ADD = "ADD";
 const SHOW = "SHOW";
 const REMOVE = "REMOVE";
+const ADD_ONLY = "ADD_ONLY";
 
 // Function to generate a composite key for identifying message items.
 const generateCompositeKey = (id, caption) => `${id}-${caption}`;
@@ -88,20 +89,24 @@ const useSnackbar = () => {
       const key = generateCompositeKey(id, caption);
 
       setMessageItems((prevItems) => {
-        if (type === ADD) {
+        if ([ADD, ADD_ONLY].includes(type)) {
           return { ...prevItems, [key]: caption };
         }
         const { [key]: _, ...rest } = prevItems;
         return rest;
       });
 
-      setOperationType(type);
+      if (type !== ADD_ONLY) {
+        setOperationType(type);
+      }
     },
     [setMessageItems]
   );
 
   // Function to add a new message to the snackbar.
-  const addToSnackbar = (id, caption) => updateSnackbar(ADD, id, caption);
+  const addToSnackbar = (id, caption, addOnly = false) => {
+    updateSnackbar(addOnly ? ADD_ONLY : ADD, id, caption);
+  };
 
   // Function to remove a message from the snackbar.
   const removeFromSnackbar = (id, caption) =>
