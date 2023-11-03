@@ -61,6 +61,8 @@ namespace MapService.Models.ToolOptions
 
         public bool enableTransparencySlider { get; set; }
 
+        public bool minMaxZoomAlertOnToggleOnly { get; set; }
+
         public string target { get; set; }
 
         public string position { get; set; }
