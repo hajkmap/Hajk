@@ -61,11 +61,6 @@ export default class CitizendialogueModel {
     }
   }
 
-  /* handleOnComplete = (data) => {
-    //console.log("Enkätsvar: ", data);
-    console.log(data.surveyId);
-  };*/
-
   async saveSurveyAnswer(surveyId, surveyData) {
     try {
       // Serialize surveyData to a JSON string

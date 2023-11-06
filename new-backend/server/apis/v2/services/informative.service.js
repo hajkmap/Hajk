@@ -239,7 +239,7 @@ class InformativeService {
    */
   async saveByNameSurvey(file, body) {
     try {
-      file += "SVAR.json";
+      file += "Answer.json";
       const pathToFile = path.join(
         process.cwd(),
         "App_Data",

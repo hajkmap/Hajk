@@ -367,16 +367,9 @@ class EditModel {
 
     // Features filtered by SURVEYANSWERID to show in map
     const filteredFeatures = features.filter((feature) => {
-      const properties = feature.getProperties();
-      const fieldNames = Object.keys(properties);
-      const surveyAnswerId = String(properties[fieldNames[3]] || "");
+      const surveyAnswerId = String(feature.get("SURVEYANSWERID") || "");
       return surveyAnswerId.trim() === this.surveyJsData.surveyAnswerId.trim();
     });
-
-    /*const filteredFeatures = features.filter((feature) => {
-      const surveyAnswerId = String(feature.get("SURVEYANSWERID") || "");
-      return surveyAnswerId.trim() === this.surveyJsData.svarsID.trim();
-    });*/
 
     // Draws geometries in the map filtered
     this.vectorSource.addFeatures(filteredFeatures);

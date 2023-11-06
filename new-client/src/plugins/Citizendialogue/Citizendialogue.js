@@ -1,5 +1,3 @@
-// Generic imports – all plugins need these.
-// (BaseWindowPlugin can be substituted with DialogWindowPlugin though.)
 import React from "react";
 import BaseWindowPlugin from "../BaseWindowPlugin";
 
