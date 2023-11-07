@@ -58,47 +58,5 @@ export class Controller {
       else res.status(500).send(r.error.message);
     });
   }
-
-  surveylist(req, res) {
-    InformativeService.getAvailableSurveys().then((r) => {
-      if (r && !r.error) res.json(r);
-      else res.status(500).send(r.error.message);
-    });
-  }
-
-  getByNameSurvey(req, res) {
-    InformativeService.getByNameSurvey(req.params.name).then((r) => {
-      if (r && !r.error) res.json(r);
-      else {
-        res
-          .status(404)
-          .send(`Document "${req.params.name}" could not be found`);
-      }
-    });
-  }
-
-  getByNameSurveyLoad(req, res) {
-    InformativeService.getByNameSurveyLoad(req.params.name).then((r) => {
-      if (r && !r.error) res.json(r);
-      else {
-        res
-          .status(404)
-          .send(`Document "${req.params.name}" could not be found`);
-      }
-    });
-  }
-
-  saveByNameSurvey(req, res) {
-    InformativeService.saveByNameSurvey(req.params.surveyId, req.body).then(
-      (r) => {
-        if (r && !r.error) {
-          res.status(200).json({ message: "File saved" }); // Send back a JSON response
-          ael.info(
-            `${res.locals.authUser} saved document ${req.params.name}.json`
-          );
-        } else res.status(500).json({ error: r.error.message }); // Send back a JSON response
-      }
-    );
-  }
 }
 export default new Controller();

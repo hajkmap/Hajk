@@ -5,10 +5,6 @@ import restrictAdmin from "../../middlewares/restrict.admin.js";
 export default express
   .Router()
   .get("/load/:name", controller.getByName)
-  .get("/surveylist", controller.surveylist)
-  .get("/surveyload/:name", controller.getByNameSurvey)
-  .get("/surveyanswerload/:name", controller.getByNameSurveyLoad)
-  .put("/surveyanswersave/:surveyId", controller.saveByNameSurvey)
   .use(restrictAdmin) // All routes that follow are admin-only!
   .put("/create", controller.create) // PUT is correct here, as this operation is idempotent
   .delete("/delete/:name", controller.deleteByName)
