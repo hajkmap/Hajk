@@ -46,7 +46,7 @@ export default class CitizendialogueModel {
   async loadSurvey(title) {
     try {
       const response = await hfetch(
-        `${this.mapServiceUrl}/informative/surveyload/${title}`
+        `${this.mapServiceUrl}/survey/load/${title}`
       );
 
       if (!response || !response.ok) {
@@ -68,7 +68,7 @@ export default class CitizendialogueModel {
 
       // Make the PUT request to the server
       const response = await hfetch(
-        `${this.mapServiceUrl}/informative/surveyanswersave/${surveyId}`,
+        `${this.mapServiceUrl}/survey/answer/save/${surveyId}`,
         {
           method: "PUT",
           headers: {
