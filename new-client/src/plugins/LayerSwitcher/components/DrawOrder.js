@@ -192,6 +192,21 @@ function DrawOrder({ display, app, map, onLayerChange, model, options }) {
     setSystemFilterActive(!systemFilterActive);
   };
 
+  const renderLockedBaseLayerItem = () => {
+    if (!options.lockedBackgroundInDraworder) return null;
+    const l = sortedLayers.find((l) => l.get("layerType") === "base");
+    if (!l) return null;
+    return (
+      <BackgroundLayer
+        key={l.isFakeMapLayer ? l.get("caption") : l.ol_uid}
+        layer={l}
+        app={app}
+        draggable={!options.lockedBackgroundInDraworder}
+        toggleable={false}
+      />
+    );
+  };
+
   return (
     <Box sx={{ display: display ? "block" : "none" }}>
       <Box
@@ -252,15 +267,7 @@ function DrawOrder({ display, app, map, onLayerChange, model, options }) {
               l.get("layerType") === "base" &&
               options.lockedBackgroundInDraworder
             ) {
-              return (
-                <BackgroundLayer
-                  key={l.isFakeMapLayer ? l.get("caption") : l.ol_uid}
-                  layer={l}
-                  app={app}
-                  draggable={!options.lockedBackgroundInDraworder}
-                  toggleable={false}
-                />
-              );
+              return null;
             } else {
               return (
                 <Draggable key={"draggable" + l.ol_uid}>
@@ -295,6 +302,7 @@ function DrawOrder({ display, app, map, onLayerChange, model, options }) {
             }
           })}
         </Container>
+        {renderLockedBaseLayerItem()}
       </List>
     </Box>
   );
