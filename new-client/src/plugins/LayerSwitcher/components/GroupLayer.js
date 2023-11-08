@@ -239,30 +239,38 @@ export default function GroupLayer({
       display={display}
       layer={layer}
       app={app}
+      showSublayers={showSublayers}
       draggable={draggable}
       toggleable={toggleable}
       clickCallback={handleLayerItemClick}
       visibleSubLayers={visibleSubLayers}
       expandableSection={
         layer.get("layerInfo").hideExpandArrow !== true && (
-          <IconButton
-            sx={{ p: draggable ? 0 : "5px", mr: draggable ? "5px" : 0 }}
-            size="small"
-            onClick={(e) => toggleShowSublayers(e)}
-          >
-            <KeyboardArrowRightOutlinedIcon
+          <Box>
+            <IconButton
               sx={{
-                transform: showSublayers ? "rotate(90deg)" : "",
-                transition: "transform 300ms ease",
-                color: (theme) => theme.palette.grey[500],
+                p: draggable ? 0 : "3px",
+                pr: draggable ? 0 : "4px",
+                top: "50%",
+                mt: "-25px",
+                mr: draggable ? "5px" : 0,
               }}
-            ></KeyboardArrowRightOutlinedIcon>
-          </IconButton>
+              size="small"
+              onClick={(e) => toggleShowSublayers(e)}
+            >
+              <KeyboardArrowRightOutlinedIcon
+                sx={{
+                  transform: showSublayers ? "rotate(90deg)" : "",
+                  transition: "transform 300ms ease",
+                }}
+              ></KeyboardArrowRightOutlinedIcon>
+            </IconButton>
+          </Box>
         )
       }
       subLayersSection={
         <Collapse in={showSublayers}>
-          <Box sx={{ marginLeft: "40px" }}>
+          <Box sx={{ marginLeft: 3 }}>
             {layer.subLayers.map((subLayer, index) => (
               <SubLayerItem
                 display={showSublayer(subLayer) ? "block" : "none"}

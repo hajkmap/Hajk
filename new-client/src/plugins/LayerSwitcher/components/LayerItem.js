@@ -36,6 +36,7 @@ export default function LayerItem({
   subLayersSection,
   visibleSubLayers,
   expandableSection,
+  showSublayers,
 }) {
   // WmsLayer load status, shows warning icon if !ok
   const [wmsLayerLoadStatus, setWmsLayerLoadStatus] = useState("ok");
@@ -241,23 +242,51 @@ export default function LayerItem({
     app.globalObserver.publish("setLayerDetails", { layer: layer });
   };
 
+  const drawOrderItem = () => {
+    if (draggable) {
+      return true;
+    }
+    if (isBackgroundLayer && !toggleable) {
+      return true;
+    }
+    return false;
+  };
+
+  const renderBorder = (theme) => {
+    if (drawOrderItem()) {
+      return "none";
+    }
+    if (legendIsActive) {
+      return `${theme.spacing(0.2)} solid transparent`;
+    }
+    return `${theme.spacing(0.2)} solid ${theme.palette.divider}`;
+  };
+
   return (
-    <div className="layer-item" style={{ display: display }}>
-      <ListItemButton
-        disableRipple
-        onClick={toggleable ? handleLayerItemClick : null}
+    <div
+      className="layer-item"
+      style={{
+        display: display,
+        marginLeft:
+          expandableSection || isBackgroundLayer || draggable ? 0 : "31px",
+      }}
+    >
+      <Box
         sx={{
+          borderBottom: (theme) =>
+            drawOrderItem() && showSublayers
+              ? `${theme.spacing(0.2)} solid transparent`
+              : drawOrderItem()
+              ? `${theme.spacing(0.2)} solid ${theme.palette.divider}`
+              : "none",
+          display: "flex",
           "&:hover .dragInidcatorIcon": {
             opacity: draggable ? 1 : 0,
           },
-          p: 0,
-          pl: draggable ? 2 : 1,
         }}
-        dense
       >
         {draggable && (
           <IconButton
-            edge="start"
             disableRipple
             sx={{
               px: 0,
@@ -266,93 +295,93 @@ export default function LayerItem({
             }}
             className="dragInidcatorIcon"
           >
-            <Tooltip title="Dra för att ändra ritordning">
+            <Tooltip placement="left" title="Dra för att ändra ritordning">
               <DragIndicatorOutlinedIcon fontSize={"small"} />
             </Tooltip>
           </IconButton>
         )}
         {expandableSection && expandableSection}
-        <Box
+        <ListItemButton
+          disableRipple
+          onClick={toggleable ? handleLayerItemClick : null}
           sx={{
-            display: "flex",
-            position: "relative",
-            width: "100%",
-            alignItems: "center",
-            py: 0.5,
-            pr: 1,
-            borderBottom: (theme) =>
-              legendIsActive
-                ? `${theme.spacing(0.2)} solid transparent`
-                : `${theme.spacing(0.2)} solid ${theme.palette.divider}`,
+            p: 0,
+            ml: isBackgroundLayer && !toggleable ? (draggable ? 0 : "20px") : 0,
           }}
+          dense
         >
-          {toggleable && (
-            <IconButton
-              sx={{ pl: expandableSection ? 0 : "5px" }}
-              disableRipple
-              size="small"
-            >
-              {getLayerToggleIcon()}
-            </IconButton>
-          )}
-          {isBackgroundLayer && !toggleable ? (
-            layer.isFakeMapLayer ? (
-              <WallpaperIcon sx={{ mr: "5px", ml: draggable ? 0 : "16px" }} />
-            ) : (
-              <PublicOutlinedIcon
-                sx={{ mr: "5px", ml: draggable ? 0 : "16px" }}
-              />
-            )
-          ) : (
-            getIconFromLayer()
-          )}
-          <ListItemText
-            primary={layer.get("caption")}
-            primaryTypographyProps={{
-              fontWeight:
-                layer.get("visible") && !draggable && !isBackgroundLayer
-                  ? "bold"
-                  : "inherit",
+          <Box
+            sx={{
+              display: "flex",
+              position: "relative",
+              width: "100%",
+              alignItems: "center",
+              py: 0.5,
+              pr: 1,
+              borderBottom: (theme) => renderBorder(theme),
             }}
-          />
-          <ListItemSecondaryAction>
-            {renderStatusIcon()}
-            {isBackgroundLayer && !toggleable && !draggable ? (
-              <IconButton
-                size="small"
-                disableTouchRipple
-                disableFocusRipple
-                disableRipple
-              >
-                <Tooltip title="Bakgrundskartan ligger låst längst ner i ritordningen">
-                  <LockOutlinedIcon />
-                </Tooltip>
+          >
+            {toggleable && (
+              <IconButton disableRipple size="small" sx={{ pl: 0 }}>
+                {getLayerToggleIcon()}
               </IconButton>
-            ) : null}
-            {layer.isFakeMapLayer !== true &&
-              layer.get("layerType") !== "system" && (
-                <IconButton size="small" onClick={(e) => showLayerDetails(e)}>
-                  <KeyboardArrowRightOutlinedIcon
-                    sx={{
-                      color: (theme) => theme.palette.grey[500],
-                    }}
-                  ></KeyboardArrowRightOutlinedIcon>
+            )}
+            {isBackgroundLayer && !toggleable ? (
+              layer.isFakeMapLayer ? (
+                <WallpaperIcon sx={{ mr: "5px", ml: 0 }} />
+              ) : (
+                <PublicOutlinedIcon sx={{ mr: "5px", ml: 0 }} />
+              )
+            ) : (
+              getIconFromLayer()
+            )}
+            <ListItemText
+              primary={layer.get("caption")}
+              primaryTypographyProps={{
+                pr: 5,
+                fontWeight:
+                  layer.get("visible") && !draggable && !isBackgroundLayer
+                    ? "bold"
+                    : "inherit",
+              }}
+            />
+            <ListItemSecondaryAction>
+              {renderStatusIcon()}
+              {isBackgroundLayer && !toggleable && !draggable ? (
+                <IconButton
+                  size="small"
+                  disableTouchRipple
+                  disableFocusRipple
+                  disableRipple
+                >
+                  <Tooltip title="Bakgrundskartan ligger låst längst ner i ritordningen">
+                    <LockOutlinedIcon />
+                  </Tooltip>
                 </IconButton>
-              )}
-          </ListItemSecondaryAction>
-        </Box>
-      </ListItemButton>
+              ) : null}
+              {layer.isFakeMapLayer !== true &&
+                layer.get("layerType") !== "system" && (
+                  <IconButton size="small" onClick={(e) => showLayerDetails(e)}>
+                    <KeyboardArrowRightOutlinedIcon
+                      sx={{
+                        color: (theme) => theme.palette.grey[500],
+                      }}
+                    ></KeyboardArrowRightOutlinedIcon>
+                  </IconButton>
+                )}
+            </ListItemSecondaryAction>
+          </Box>
+        </ListItemButton>
+      </Box>
       {layer.get("layerType") === "group" ||
       layer.get("layerType") === "base" ||
       layer.isFakeMapLayer ||
       layer.get("layerType") === "system" ? null : (
-        <Box sx={{ pl: draggable ? 3.5 : 5.5 }}>
-          <LegendImage
-            layerItemDetails={{ layer: layer }}
-            open={legendIsActive}
-            subLayerIndex={null}
-          ></LegendImage>
-        </Box>
+        <LegendImage
+          layerItemDetails={{ layer: layer }}
+          open={legendIsActive}
+          subLayerIndex={null}
+        ></LegendImage>
       )}
       {subLayersSection && subLayersSection}
     </div>

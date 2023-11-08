@@ -510,7 +510,9 @@ class LayersSwitcherView extends React.PureComponent {
             ></QuickAccessLayers>
           }
         ></LayerGroupAccordion>
-        <Divider></Divider>
+        <Divider
+          sx={{ backgroundColor: (theme) => theme.palette.grey[500] }}
+        ></Divider>
         {this.state.treeData.map((group, i) => {
           return (
             <LayerGroup

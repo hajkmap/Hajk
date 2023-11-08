@@ -40,7 +40,7 @@ export default function LayerGroupAccordion({
       >
         <IconButton
           size="small"
-          sx={{ pr: !toggleable && !quickAccess ? "5px" : 0 }}
+          sx={{ pl: "3px", pr: "4px", py: 0 }}
           disableRipple
         >
           <KeyboardArrowRightOutlinedIcon
@@ -75,7 +75,7 @@ export default function LayerGroupAccordion({
         </Box>
       </ListItemButton>
       <Collapse in={state.expanded}>
-        <Box sx={{ marginLeft: "40px" }}>{children}</Box>
+        <Box sx={{ marginLeft: "26px" }}>{children}</Box>
       </Collapse>
     </div>
   );
