@@ -126,6 +126,7 @@ export default function LayerItem({
       {
         variant: "warning",
         preventDuplicate: true,
+        anchorOrigin: { vertical: "bottom", horizontal: "center" },
       }
     );
   };

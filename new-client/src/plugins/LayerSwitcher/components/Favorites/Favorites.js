@@ -154,6 +154,7 @@ function Favorites({
 
     enqueueSnackbar(`${title} har nu laddats till snabbåtkomst.`, {
       variant: "success",
+      anchorOrigin: { vertical: "bottom", horizontal: "center" },
     });
 
     const doToggleView =
