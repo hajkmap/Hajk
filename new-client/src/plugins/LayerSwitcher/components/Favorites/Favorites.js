@@ -45,7 +45,7 @@ function Favorites({
     // Set state from localstorage on component load
     const currentLsSettings = LocalStorageHelper.get("layerswitcher");
     if (currentLsSettings.savedLayers?.length > 0) {
-      setFavorites(currentLsSettings.savedLayers);
+      handleSetFavorites(currentLsSettings.savedLayers);
     }
     // Set dom ready flag to true
     setDomReady(true);
@@ -295,11 +295,11 @@ function Favorites({
     const objectToSave = { layers, metadata };
     const newFavorites = [...favorites];
     newFavorites.push(objectToSave);
-    setFavorites(newFavorites);
+    handleSetFavorites(newFavorites);
     setTitle("");
     setDescription("");
 
-    enqueueSnackbar(`Favoriten sparades utan problem`, {
+    enqueueSnackbar(`${metadata.title} har lagts till i favoriter.`, {
       variant: "success",
       anchorOrigin: { vertical: "bottom", horizontal: "center" },
     });
@@ -311,7 +311,26 @@ function Favorites({
     // Get remaining favorites
     favoritesArray = favoritesArray.filter((f) => f !== selectedFavorite);
     // And set to state
-    setFavorites(favoritesArray);
+    handleSetFavorites(favoritesArray);
+    enqueueSnackbar(`${selectedFavorite.metadata.title} har tagits bort.`, {
+      variant: "success",
+      anchorOrigin: { vertical: "bottom", horizontal: "center" },
+    });
+  };
+
+  const handleSetFavorites = (newFavorites) => {
+    // Sort favorites by title and saved date
+    const sortedFavorites = newFavorites.sort((a, b) => {
+      // Compare titles
+      const titleComparison = a.metadata.title.localeCompare(b.metadata.title);
+      // If titles are equal, compare saved dates
+      if (titleComparison === 0) {
+        return new Date(b.metadata.savedAt) - new Date(a.metadata.savedAt);
+      }
+      return titleComparison;
+    });
+    // And set to state
+    setFavorites(sortedFavorites);
   };
 
   // Handles edit favorite title and description
@@ -332,7 +351,7 @@ function Favorites({
     favoritesArray[index] = updatedObject;
 
     // And set to state
-    setFavorites(favoritesArray);
+    handleSetFavorites(favoritesArray);
 
     enqueueSnackbar(`Favoriten uppdaterades utan problem`, {
       variant: "success",
@@ -348,7 +367,7 @@ function Favorites({
   const handleImportFavorites = (parsedFavorites) => {
     const favoritesArray = [...favorites];
     favoritesArray.push(parsedFavorites);
-    setFavorites(favoritesArray);
+    handleSetFavorites(favoritesArray);
     enqueueSnackbar(`Favoriten importerades utan problem`, {
       variant: "success",
       anchorOrigin: { vertical: "bottom", horizontal: "center" },
