@@ -38,6 +38,7 @@ function Favorites({
   const [missingLayersConfirmation, setMissingLayersConfirmation] =
     useState(null);
   const [toggleFavoritesView, setToggleFavoritesView] = useState(false);
+  const [openNoLayersAlert, setOpenNoLayersAlert] = useState(false);
   // We're gonna need to keep track of if we're allowed to save stuff in LS. Let's use the hook.
   const { functionalCookiesOk } = useCookieStatus(globalObserver);
 
@@ -65,7 +66,11 @@ function Favorites({
 
   // Handles click on add favorite button in menu
   const handleAddFavoriteClick = () => {
-    setSaveFavoriteDialog(!saveFavoriteDialog);
+    if (getQuickAccessLayers().length > 0) {
+      setSaveFavoriteDialog(!saveFavoriteDialog);
+    } else {
+      setOpenNoLayersAlert(true);
+    }
   };
 
   const handleLoadFavorite = (favorite, showDialog, toggleView) => {
@@ -168,10 +173,7 @@ function Favorites({
 
   // Clear quickaccessLayers
   const clearQuickAccessLayers = () => {
-    map
-      .getAllLayers()
-      .filter((l) => l.get("quickAccess") === true)
-      .map((l) => l.set("quickAccess", false));
+    getQuickAccessLayers().map((l) => l.set("quickAccess", false));
   };
 
   // Reset visible layers
@@ -186,6 +188,11 @@ function Favorites({
           l.set("visible", false);
         }
       });
+  };
+
+  // Get quickaccess layers
+  const getQuickAccessLayers = () => {
+    return map.getAllLayers().filter((l) => l.get("quickAccess") === true);
   };
 
   const changeCookieSetting = () => {
@@ -215,19 +222,16 @@ function Favorites({
   // Handles save favorite
   const handleSaveFavorite = () => {
     // Grab layers to be saved by…
-    const layers = map
-      .getAllLayers() //
-      .filter((l) => l.get("quickAccess") === true)
-      .map((l) => {
-        // Create an array of objects. For each layer, we want to read its…
-        return {
-          id: l.get("name"),
-          visible: l.getVisible(),
-          subLayers: l.get("layerType") === "group" ? l.get("subLayers") : [],
-          opacity: l.getOpacity(),
-          drawOrder: l.getZIndex(),
-        }; // …name as id, visibility and potentially sublayers.
-      });
+    const layers = getQuickAccessLayers().map((l) => {
+      // Create an array of objects. For each layer, we want to read its…
+      return {
+        id: l.get("name"),
+        visible: l.getVisible(),
+        subLayers: l.get("layerType") === "group" ? l.get("subLayers") : [],
+        opacity: l.getOpacity(),
+        drawOrder: l.getZIndex(),
+      }; // …name as id, visibility and potentially sublayers.
+    });
 
     if (layers.length === 0) {
       enqueueSnackbar(
@@ -545,6 +549,15 @@ function Favorites({
           setLoadDialog(!loadDialog);
         }}
       />
+      <ConfirmationDialog
+        open={openNoLayersAlert}
+        titleName={"Spara favorit"}
+        contentDescription="Det finns inga lager i snabbåtkomst. Vänligen lägg till lager för att spara favorit."
+        cancel={"Stäng"}
+        handleAbort={() => {
+          setOpenNoLayersAlert(false);
+        }}
+      ></ConfirmationDialog>
       {renderAddFavoriteDialog()}
       {renderMissingLayersDialog()}
     </>
