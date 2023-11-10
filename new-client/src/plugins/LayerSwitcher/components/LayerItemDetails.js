@@ -329,12 +329,12 @@ function LayerItemDetails({
                   {!quickAccess ? (
                     <>
                       <StarOutlineOutlinedIcon sx={{ marginRight: 1 }} />
-                      Lägg till i snabblager
+                      Lägg till i snabbåtkomst
                     </>
                   ) : (
                     <>
                       <DeleteOutlinedIcon sx={{ marginRight: 1 }} />
-                      Ta bort från snabblager
+                      Ta bort från snabbåtkomst
                     </>
                   )}
                 </Button>

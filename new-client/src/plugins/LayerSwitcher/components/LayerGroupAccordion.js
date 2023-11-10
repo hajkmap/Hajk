@@ -10,6 +10,7 @@ import KeyboardArrowRightOutlinedIcon from "@mui/icons-material/KeyboardArrowRig
 
 export default function LayerGroupAccordion({
   expanded,
+  setExpandedCallback,
   toggleable,
   children,
   layerGroupTitle,
@@ -25,7 +26,11 @@ export default function LayerGroupAccordion({
   }, [expanded]);
 
   const updateCustomProp = (prop, value) => {
-    setState((prevState) => ({ ...prevState, [prop]: value }));
+    if (setExpandedCallback) {
+      setExpandedCallback(value);
+    } else {
+      setState((prevState) => ({ ...prevState, [prop]: value }));
+    }
   };
 
   return (

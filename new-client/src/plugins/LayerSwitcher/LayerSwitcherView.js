@@ -271,6 +271,10 @@ class LayersSwitcherView extends React.PureComponent {
         anchorOrigin: { vertical: "bottom", horizontal: "center" },
       }
     );
+    // Expand quickAccess section
+    this.setState({
+      quickAccessSectionExpanded: true,
+    });
   };
 
   // Handles click on clear quickAccess menu item
@@ -463,6 +467,9 @@ class LayersSwitcherView extends React.PureComponent {
         <LayerGroupAccordion
           display={"block"}
           expanded={this.state.quickAccessSectionExpanded}
+          setExpandedCallback={(value) => {
+            this.setState({ quickAccessSectionExpanded: value });
+          }}
           layerGroupTitle={
             <ListItemText
               primaryTypographyProps={{
