@@ -1,6 +1,7 @@
 // Make sure to only import the hooks you intend to use
 import React, { useCallback, useEffect, useState, useRef } from "react";
 import * as Survey from "survey-react-ui";
+import { ComponentCollection } from "survey-core";
 import "survey-core/defaultV2.min.css";
 import "survey-core/i18n/swedish";
 import ReactDOM from "react-dom/client";
@@ -11,6 +12,18 @@ import EditModel from "./EditModel.js";
 import { Box, Typography } from "@mui/material";
 import AppRegistrationIcon from "@mui/icons-material/AppRegistration";
 
+//Register new "geometry" component
+ComponentCollection.Instance.add({
+  //Unique component name. It becomes a new question type. Please note, it should be written in lowercase.
+  name: "geometry",
+  //The text that shows on toolbox
+  title: "Geometry",
+  //The actual question that will do the job
+  questionJSON: {
+    type: "html",
+    html: "<button id='editButton'>Klicka här för att ta fram kartverktyg</button><div class='editViewContainer'></div>",
+  },
+});
 // Hajk components are primarily styled in two ways:
 // - Using the styled-utility, see: https://mui.com/system/styled/
 // - Using the sx-prop, see: https://mui.com/system/basics/#the-sx-prop
