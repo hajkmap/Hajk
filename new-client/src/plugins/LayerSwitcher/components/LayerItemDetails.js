@@ -30,6 +30,7 @@ function LayerItemDetails({
   chapters,
   app,
   showOpacitySlider,
+  showQuickAccess,
 }) {
   const { enqueueSnackbar } = useSnackbar();
   // State that toggles legend collapse
@@ -118,7 +119,8 @@ function LayerItemDetails({
   const isQuickAccessEnabled = () => {
     return (
       layerItemDetails.layer.get("layerType") !== "base" &&
-      subLayerIndex === null
+      subLayerIndex === null &&
+      showQuickAccess
     );
   };
 

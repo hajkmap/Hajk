@@ -462,64 +462,79 @@ class LayersSwitcherView extends React.PureComponent {
             />
           </Box>
         </Box>
-        {/* TODO: configurable from admin */}
-        {/* QuickAccess section */}
-        <LayerGroupAccordion
-          display={"block"}
-          expanded={this.state.quickAccessSectionExpanded}
-          setExpandedCallback={(value) => {
-            this.setState({ quickAccessSectionExpanded: value });
-          }}
-          layerGroupTitle={
-            <ListItemText
-              primaryTypographyProps={{
-                fontWeight: this.hasVisibleLayers() ? "bold" : "inherit",
+        {this.props.options.showQuickAccess && (
+          <>
+            <LayerGroupAccordion
+              display={"block"}
+              expanded={this.state.quickAccessSectionExpanded}
+              setExpandedCallback={(value) => {
+                this.setState({ quickAccessSectionExpanded: value });
               }}
-              primary={"Snabbåtkomst"}
-            />
-          }
-          quickAccess={
-            <IconButton sx={{ pl: 0 }} disableRipple size="small">
-              <StarOutlineOutlinedIcon />
-            </IconButton>
-          }
-          layerGroupDetails={
-            <>
-              <IconButton
-                onClick={(e) => this.handleLayerPackageToggle({ event: e })}
-              >
-                <Tooltip title="Teman">
-                  <TopicOutlinedIcon fontSize="small"></TopicOutlinedIcon>
-                </Tooltip>
-              </IconButton>
-              <Favorites
-                favoriteViewDisplay={
-                  this.state.displayContentOverlay === "favorites"
-                }
-                app={this.props.app}
-                map={this.props.map}
-                handleFavoritesViewToggle={this.handleFavoritesViewToggle}
-                globalObserver={this.props.model.globalObserver}
-              ></Favorites>
-              <QuickAccessOptions
-                handleAddLayersToQuickAccess={this.handleAddLayersToQuickAccess}
-                handleClearQuickAccessLayers={this.handleShowDeleteConfirmation}
-              ></QuickAccessOptions>
-            </>
-          }
-          children={
-            <QuickAccessLayers
-              treeData={this.state.treeData}
-              filterValue={this.state.filterValue}
-              model={this.props.model}
-              map={this.props.map}
-              app={this.props.app}
-            ></QuickAccessLayers>
-          }
-        ></LayerGroupAccordion>
-        <Divider
-          sx={{ backgroundColor: (theme) => theme.palette.grey[500] }}
-        ></Divider>
+              layerGroupTitle={
+                <ListItemText
+                  primaryTypographyProps={{
+                    fontWeight: this.hasVisibleLayers() ? "bold" : "inherit",
+                  }}
+                  primary={"Snabbåtkomst"}
+                />
+              }
+              quickAccess={
+                <IconButton sx={{ pl: 0 }} disableRipple size="small">
+                  <StarOutlineOutlinedIcon />
+                </IconButton>
+              }
+              layerGroupDetails={
+                <>
+                  {this.props.options.enableQuickAccessTopics && (
+                    <IconButton
+                      onClick={(e) =>
+                        this.handleLayerPackageToggle({ event: e })
+                      }
+                    >
+                      <Tooltip title="Teman">
+                        <TopicOutlinedIcon fontSize="small"></TopicOutlinedIcon>
+                      </Tooltip>
+                    </IconButton>
+                  )}
+                  {this.props.options.enableUserQuickAccessFavorites && (
+                    <Favorites
+                      favoriteViewDisplay={
+                        this.state.displayContentOverlay === "favorites"
+                      }
+                      app={this.props.app}
+                      map={this.props.map}
+                      handleFavoritesViewToggle={this.handleFavoritesViewToggle}
+                      globalObserver={this.props.model.globalObserver}
+                      favoritesInfoText={
+                        this.options.userQuickAccessFavoritesInfoText
+                      }
+                    ></Favorites>
+                  )}
+                  <QuickAccessOptions
+                    handleAddLayersToQuickAccess={
+                      this.handleAddLayersToQuickAccess
+                    }
+                    handleClearQuickAccessLayers={
+                      this.handleShowDeleteConfirmation
+                    }
+                  ></QuickAccessOptions>
+                </>
+              }
+              children={
+                <QuickAccessLayers
+                  treeData={this.state.treeData}
+                  filterValue={this.state.filterValue}
+                  model={this.props.model}
+                  map={this.props.map}
+                  app={this.props.app}
+                ></QuickAccessLayers>
+              }
+            ></LayerGroupAccordion>
+            <Divider
+              sx={{ backgroundColor: (theme) => theme.palette.grey[500] }}
+            ></Divider>
+          </>
+        )}
         {this.state.treeData.map((group, i) => {
           return (
             <LayerGroup
@@ -586,7 +601,7 @@ class LayersSwitcherView extends React.PureComponent {
           >
             <Tab label="Kartlager" />
             <Tab label="Bakgrund" />
-            {this.options.showActiveLayersView === true && (
+            {this.options.showDrawOrderView === true && (
               <Tab
                 label={
                   // <Badge
@@ -605,19 +620,23 @@ class LayersSwitcherView extends React.PureComponent {
           style={{ position: "relative", height: "100%", overflowY: "auto" }}
         >
           {this.renderLayerGroups(this.state.activeTab === 0)}
-          <LayerPackage
-            quickLayerPresets={this.options.quickLayersPresets}
-            display={this.state.displayContentOverlay === "layerPackage"}
-            backButtonCallback={this.handleLayerPackageToggle}
-            map={this.props.map}
-            globalObserver={this.props.model.globalObserver}
-          ></LayerPackage>
+          {this.props.options.enableQuickAccessTopics && (
+            <LayerPackage
+              quickLayerPresets={this.options.quickLayersPresets}
+              display={this.state.displayContentOverlay === "layerPackage"}
+              backButtonCallback={this.handleLayerPackageToggle}
+              map={this.props.map}
+              globalObserver={this.props.model.globalObserver}
+              layerPackageInfoText={this.options.quickAccessTopicsInfoText}
+            ></LayerPackage>
+          )}
           <LayerItemDetails
             display={this.state.displayContentOverlay === "layerItemDetails"}
             layerItemDetails={this.state.layerItemDetails}
             app={this.props.app}
             chapters={this.state.chapters}
             showOpacitySlider={this.props.options.enableTransparencySlider}
+            showQuickAccess={this.props.options.showQuickAccess}
           ></LayerItemDetails>
           <BackgroundSwitcher
             display={
@@ -632,7 +651,7 @@ class LayersSwitcherView extends React.PureComponent {
             map={this.props.map}
             app={this.props.app}
           />
-          {this.options.showActiveLayersView === true && (
+          {this.options.showDrawOrderView === true && (
             <DrawOrder
               model={this.props.model}
               display={

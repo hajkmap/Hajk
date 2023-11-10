@@ -18,6 +18,7 @@ function FavoritesViewHeader({
   backButtonCallback,
   importFavoritesCallback,
   functionalCookiesOk,
+  favoritesInfoText,
 }) {
   const { enqueueSnackbar } = useSnackbar();
   const fileInputRef = useRef(null);
@@ -151,9 +152,7 @@ function FavoritesViewHeader({
               `${theme.spacing(0.2)} solid ${theme.palette.divider}`,
           }}
         >
-          <Typography variant="subtitle2">
-            Här kan du hantera och redigera dina sparade favoriter.
-          </Typography>
+          <Typography variant="subtitle2">{favoritesInfoText}</Typography>
         </Box>
       </Collapse>
     </Box>

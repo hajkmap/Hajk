@@ -26,6 +26,7 @@ function Favorites({
   map,
   favoriteViewDisplay,
   globalObserver,
+  favoritesInfoText,
 }) {
   const { enqueueSnackbar } = useSnackbar();
   const [domReady, setDomReady] = useState(false);
@@ -385,6 +386,7 @@ function Favorites({
           importFavoritesCallback={handleImportFavorites}
           backButtonCallback={handleFavoritesViewToggle}
           functionalCookiesOk={functionalCookiesOk}
+          favoritesInfoText={favoritesInfoText}
         ></FavoritesViewHeader>
         <Box>
           <FavoritesList

@@ -38,6 +38,7 @@ function LayerPackage({
   quickLayerPresets,
   map,
   globalObserver,
+  layerPackageInfoText,
 }) {
   const { enqueueSnackbar } = useSnackbar();
   // State that toggles info collapse
@@ -476,8 +477,7 @@ function LayerPackage({
               }}
             >
               <Typography variant="subtitle2">
-                Här kan du ladda färdiga teman till snabbåtkomst. Teman
-                innehåller tända och släckta lager, samt bakgrund.
+                {layerPackageInfoText}
               </Typography>
             </Box>
           </Collapse>
