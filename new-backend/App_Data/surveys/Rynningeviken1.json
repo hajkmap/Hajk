@@ -52,18 +52,12 @@
         "name": "page3",
         "elements": [
           {
-            "type": "html",
-            "name": "Geometri1-question5",
-            "html": "<button id='editButton'>Klicka här för att ta fram kartverktyg</button>"
-          },
-          {
-            "type": "html",
-            "name": "editViewContainerPlaceholder1",
-            "html": "<div class='editViewContainer'></div>"
+            "type": "geometry",
+            "name": "Rita i kartan (Geometri1)"
           },
           {
             "type": "comment",
-            "name": "question5",
+            "name": "question6",
             "title": "Kommentarer om platsen som du markerat i kartan?"
           }
         ]
@@ -77,7 +71,7 @@
           },
           {
             "type": "comment",
-            "name": "question7",
+            "name": "question8",
             "title": "Kommentarer om platsen som du markerat i kartan?"
           }
         ]

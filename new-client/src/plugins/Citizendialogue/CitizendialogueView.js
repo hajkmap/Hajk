@@ -158,7 +158,7 @@ function CitizendialogueView(props) {
 
   const handleAfterRenderQuestion = (sender, options) => {
     const currentQuestion = options.question;
-    if (currentQuestion.name.toLowerCase().includes("geom".toLowerCase())) {
+    if (currentQuestion.jsonObj.type === "geometry") {
       setCurrentQuestionName(currentQuestion.name);
       const editButton = document.getElementById("editButton");
       if (editButton) {
