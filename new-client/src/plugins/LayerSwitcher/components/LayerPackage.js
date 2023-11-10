@@ -277,6 +277,35 @@ function LayerPackage({
     return backgroundLayerName;
   };
 
+  // Render layerpackage keywords
+  const renderKeywords = (keywords) => {
+    // Check if keywords is an array and if it contains any items
+    if (Array.isArray(keywords) && keywords.length > 0) {
+      // Check if keywords contains any empty strings
+      const nonEmptyKeywords = keywords.filter(
+        (keyword) => keyword.trim() !== ""
+      );
+      if (nonEmptyKeywords.length > 0) {
+        return (
+          <Stack sx={{ mt: 2 }} direction="row" spacing={1}>
+            {nonEmptyKeywords.map((k) => (
+              <Chip
+                key={`chip-${k}`}
+                label={k}
+                size="small"
+                variant="outlined"
+              />
+            ))}
+          </Stack>
+        );
+      } else {
+        return null;
+      }
+    } else {
+      return null;
+    }
+  };
+
   // Render dialog with layerpackage information
   const renderInfoDialog = () => {
     return createPortal(
@@ -295,18 +324,7 @@ function LayerPackage({
             {loadLpInfoConfirmation ? loadLpInfoConfirmation.description : ""}
           </Typography>
           {loadLpInfoConfirmation
-            ? loadLpInfoConfirmation.keywords.length > 0 && (
-                <Stack sx={{ mt: 2 }} direction="row" spacing={1}>
-                  {loadLpInfoConfirmation.keywords.map((k) => (
-                    <Chip
-                      key={`chip-${k}`}
-                      label={k}
-                      size="small"
-                      variant="outlined"
-                    />
-                  ))}
-                </Stack>
-              )
+            ? renderKeywords(loadLpInfoConfirmation.keywords)
             : null}
           <DialogContentText sx={{ mt: 2, mb: 1 }}>Bakgrund</DialogContentText>
           <Stack direction="row" spacing={1}>
