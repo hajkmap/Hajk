@@ -45,19 +45,23 @@ namespace MapService.Models.ToolOptions
 
         public bool showBreadcrumbs { get; set; }
 
-        public bool showActiveLayersView { get; set; }
+        public bool showDrawOrderView { get; set; }
 
-        public bool showActiveLayerSwitch { get; set; }
+        public bool showQuickAccess { get; set; }
 
-        public bool showQuickLayers { get; set; }
+        public bool enableSystemLayersSwitch { get; set; }
 
-        public bool enableQuickLayerLoading { get; set; }
+        public bool lockDrawOrderBaselayer { get; set; }
 
-        public string quickLayerLoadingInfoText { get; set; }
+        public string drawOrderViewInfoText { get; set; }
 
-        public bool enableUserQuickLayers { get; set; }
+        public bool enableQuickAccessTopics { get; set; }
 
-        public string userQuickLayersInfoText { get; set; }
+        public string quickAccessTopicsInfoText { get; set; }
+
+        public bool enableUserQuickAccessFavorites { get; set; }
+
+        public string userQuickAccessFavoritesInfoText { get; set; }
 
         public bool enableTransparencySlider { get; set; }
 

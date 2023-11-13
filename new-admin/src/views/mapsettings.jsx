@@ -297,13 +297,15 @@ class Menu extends Component {
       backgroundSwitcherWhite: true,
       enableOSM: false,
       showBreadcrumbs: false,
-      showActiveLayersView: false,
-      showActiveLayerSwitch: false,
-      showQuickLayers: false,
-      enableQuickLayerLoading: false,
-      quickLayerLoadingInfoText: "",
-      enableUserQuickLayers: false,
-      userQuickLayersInfoText: "",
+      showDrawOrderView: false,
+      showQuickAccess: false,
+      enableSystemLayersSwitch: false,
+      lockDrawOrderBaselayer: false,
+      drawOrderViewInfoText: "",
+      enableQuickAccessTopics: false,
+      quickAccessTopicsInfoText: "",
+      enableUserQuickAccessFavorites: false,
+      userQuickAccessFavoritesInfoText: "",
       enableTransparencySlider: true,
       instruction: "",
       dropdownThemeMaps: false,
@@ -360,26 +362,31 @@ class Menu extends Component {
           enableOSM: existingConfig.enableOSM ?? this.state.enableOSM,
           showBreadcrumbs:
             existingConfig.showBreadcrumbs ?? this.state.showBreadcrumbs,
-          showActiveLayersView:
-            existingConfig.showActiveLayersView ??
-            this.state.showActiveLayersView,
-          showActiveLayerSwitch:
-            existingConfig.showActiveLayerSwitch ??
-            this.state.showActiveLayerSwitch,
-          showQuickLayers:
-            existingConfig.showQuickLayers ?? this.state.showQuickLayers,
-          enableQuickLayerLoading:
-            existingConfig.enableQuickLayerLoading ??
-            this.state.enableQuickLayerLoading,
-          quickLayerLoadingInfoText:
-            existingConfig.quickLayerLoadingInfoText ??
-            this.state.quickLayerLoadingInfoText,
-          enableUserQuickLayers:
-            existingConfig.enableUserQuickLayers ??
-            this.state.enableUserQuickLayers,
-          userQuickLayersInfoText:
-            existingConfig.userQuickLayersInfoText ??
-            this.state.userQuickLayersInfoText,
+          showDrawOrderView:
+            existingConfig.showDrawOrderView ?? this.state.showDrawOrderView,
+          showQuickAccess:
+            existingConfig.showQuickAccess ?? this.state.showQuickAccess,
+          enableSystemLayersSwitch:
+            existingConfig.enableSystemLayersSwitch ??
+            this.state.enableSystemLayersSwitch,
+          lockDrawOrderBaselayer:
+            existingConfig.lockDrawOrderBaselayer ??
+            this.state.lockDrawOrderBaselayer,
+          drawOrderViewInfoText:
+            existingConfig.drawOrderViewInfoText ??
+            this.state.drawOrderViewInfoText,
+          enableQuickAccessTopics:
+            existingConfig.enableQuickAccessTopics ??
+            this.state.enableQuickAccessTopics,
+          quickAccessTopicsInfoText:
+            existingConfig.quickAccessTopicsInfoText ??
+            this.state.quickAccessTopicsInfoText,
+          enableUserQuickAccessFavorites:
+            existingConfig.enableUserQuickAccessFavorites ??
+            this.state.enableUserQuickAccessFavorites,
+          userQuickAccessFavoritesInfoText:
+            existingConfig.userQuickAccessFavoritesInfoText ??
+            this.state.userQuickAccessFavoritesInfoText,
           enableTransparencySlider:
             existingConfig.enableTransparencySlider ??
             this.state.enableTransparencySlider,
@@ -604,14 +611,16 @@ class Menu extends Component {
       backgroundSwitcherWhite: this.state.backgroundSwitcherWhite,
       enableOSM: this.state.enableOSM,
       showBreadcrumbs: this.state.showBreadcrumbs,
-      showActiveLayersView: this.state.showActiveLayersView,
-      showActiveLayerSwitch: this.state.showActiveLayerSwitch,
-      showQuickLayers: this.state.showQuickLayers,
-      enableQuickLayerLoading: this.state.enableQuickLayerLoading,
-      quickLayerLoadingInfoText: this.state.quickLayerLoadingInfoText,
-      enableUserQuickLayers: this.state.enableUserQuickLayers,
-      userQuickLayersInfoText: this.state.userQuickLayersInfoText,
-      enableTransparencySlider: this.state.enableTransparencySlider,
+      showDrawOrderView: this.state.showDrawOrderView,
+      showQuickAccess: this.state.showQuickAccess,
+      enableSystemLayersSwitch: this.state.enableSystemLayersSwitch,
+      lockDrawOrderBaselayer: this.state.lockDrawOrderBaselayer,
+      drawOrderViewInfoText: this.state.drawOrderViewInfoText,
+      enableQuickAccessTopics: this.state.enableQuickAccessTopics,
+      quickAccessTopicsInfoText: this.state.quickAccessTopicsInfoText,
+      enableUserQuickAccessFavorites: this.state.enableUserQuickAccessFavorites,
+      userQuickAccessFavoritesInfoText:
+        this.state.userQuickAccessFavoritesInfoText,
       instruction: this.state.instruction,
       dropdownThemeMaps: this.state.dropdownThemeMaps,
       themeMapHeaderCaption: this.state.themeMapHeaderCaption,
@@ -1842,46 +1851,38 @@ class Menu extends Component {
               </div>
               <div>
                 <input
-                  id="showActiveLayersView"
-                  name="showActiveLayersView"
+                  id="showDrawOrderView"
+                  name="showDrawOrderView"
                   type="checkbox"
                   onChange={this.handleInputChange}
-                  checked={this.state.showActiveLayersView}
+                  checked={this.state.showDrawOrderView}
                 />
                 &nbsp;
-                <label className="long-label" htmlFor="showActiveLayersView">
-                  Visa en flik med aktiva lager (beta){" "}
+                <label className="long-label" htmlFor="showDrawOrderView">
+                  Visa en flik med ritordning{" "}
                   <i
                     className="fa fa-question-circle"
                     data-toggle="tooltip"
-                    title="När rutan är ikryssad visas en tredje flik i Lagerhanteraren. Där kan användaren bland annat styra ritordningen av aktiva lager."
+                    title="När rutan är ikryssad visas en flik i lagerhanteraren för hantering av ritordning."
                   />
                 </label>
               </div>
               <div>
                 <input
-                  id="showActiveLayerSwitch"
-                  name="showActiveLayerSwitch"
+                  id="showQuickAccess"
+                  name="showQuickAccess"
                   type="checkbox"
                   onChange={this.handleInputChange}
-                  checked={this.state.showActiveLayerSwitch}
+                  checked={this.state.showQuickAccess}
                 />
                 &nbsp;
-                <label className="long-label" htmlFor="showActiveLayerSwitch">
-                  Visa systemlager vid ritordning
-                </label>
-              </div>
-              <div>
-                <input
-                  id="showQuickLayers"
-                  name="showQuickLayers"
-                  type="checkbox"
-                  onChange={this.handleInputChange}
-                  checked={this.state.showQuickLayers}
-                />
-                &nbsp;
-                <label className="long-label" htmlFor="showQuickLayers">
-                  Visa en grupp med snabblager
+                <label className="long-label" htmlFor="showQuickAccess">
+                  Visa en grupp med snabbåtkomst{" "}
+                  <i
+                    className="fa fa-question-circle"
+                    data-toggle="tooltip"
+                    title="När rutan är ikryssad visas en grupp för snabbåtkomst i lagerhanteraren."
+                  />
                 </label>
               </div>
               <div>
@@ -1921,74 +1922,135 @@ class Menu extends Component {
               </div>
               <div className="row">{this.renderAuthGrps()}</div>
               <div className="separator">
-                Inställningar för grupp med snabblager
+                Inställningar för flik med ritordning
               </div>
               <div>
                 <input
-                  id="enableQuickLayerLoading"
-                  name="enableQuickLayerLoading"
+                  id="enableSystemLayersSwitch"
+                  name="enableSystemLayersSwitch"
                   type="checkbox"
                   onChange={this.handleInputChange}
-                  checked={this.state.enableQuickLayerLoading}
+                  checked={this.state.enableSystemLayersSwitch}
                 />
                 &nbsp;
-                <label className="long-label" htmlFor="enableQuickLayerLoading">
-                  Ladda snabblager{" "}
+                <label
+                  className="long-label"
+                  htmlFor="enableSystemLayersSwitch"
+                >
+                  Visa reglage för systemlager{" "}
                   <i
                     className="fa fa-question-circle"
                     data-toggle="tooltip"
-                    title="Om denna ruta är ikryssad kan användaren ladda in fördefinierade snabblager."
+                    title="När rutan är ikryssad visas ett reglage för att slå på och av visningen av systemlager i ritordningslistan."
+                  />
+                </label>
+              </div>
+              <div>
+                <input
+                  id="lockDrawOrderBaselayer"
+                  name="lockDrawOrderBaselayer"
+                  type="checkbox"
+                  onChange={this.handleInputChange}
+                  checked={this.state.lockDrawOrderBaselayer}
+                />
+                &nbsp;
+                <label className="long-label" htmlFor="lockDrawOrderBaselayer">
+                  Lås ritordning för bakgrundskartor{" "}
+                  <i
+                    className="fa fa-question-circle"
+                    data-toggle="tooltip"
+                    title="När rutan är ikryssad är ritordningen för bakgrundskartor låst så att de alltid ligger längst ner. En lås-ikon visas på lagret."
                   />
                 </label>
               </div>
               <div className="text-input-label">
-                Ladda snabblager infotext{" "}
+                Infotext Flik med ritordning{" "}
                 <i
                   className="fa fa-question-circle"
                   data-toggle="tooltip"
-                  title="Ange en text som ska visas i panelen för att ladda snabblager."
+                  title="Ange en text som ska visas i panelen för ritordning."
                 />
                 &nbsp;
                 <input
-                  id="quickLayerLoadingInfoText"
-                  name="quickLayerLoadingInfoText"
+                  id="drawOrderViewInfoText"
+                  name="drawOrderViewInfoText"
                   type="text"
                   onChange={this.handleInputChange}
-                  value={this.state.quickLayerLoadingInfoText}
+                  value={this.state.drawOrderViewInfoText}
                 />
+              </div>
+              <div className="separator">
+                Inställningar för grupp med snabbåtkomst
               </div>
               <div>
                 <input
-                  id="enableUserQuickLayers"
-                  name="enableUserQuickLayers"
+                  id="enableQuickAccessTopics"
+                  name="enableQuickAccessTopics"
                   type="checkbox"
                   onChange={this.handleInputChange}
-                  checked={this.state.enableUserQuickLayers}
+                  checked={this.state.enableQuickAccessTopics}
                 />
                 &nbsp;
-                <label className="long-label" htmlFor="enableUserQuickLayers">
-                  Mina snabblager{" "}
+                <label className="long-label" htmlFor="enableQuickAccessTopics">
+                  Ladda tema{" "}
                   <i
                     className="fa fa-question-circle"
                     data-toggle="tooltip"
-                    title="Om denna ruta är ikryssad kan användaren spara sina egna snabblager."
+                    title="När rutan är ikryssad kan användaren ladda fördefinierade teman till snabbåtkomst."
                   />
                 </label>
               </div>
               <div className="text-input-label">
-                Mina snabblager infotext{" "}
+                Infotext Ladda tema{" "}
                 <i
                   className="fa fa-question-circle"
                   data-toggle="tooltip"
-                  title="Ange en text som ska visas i panelen för att spara snabblager."
+                  title="Ange en text som ska visas i panelen för att ladda tema."
                 />
                 &nbsp;
                 <input
-                  id="userQuickLayersInfoText"
-                  name="userQuickLayersInfoText"
+                  id="quickAccessTopicsInfoText"
+                  name="quickAccessTopicsInfoText"
                   type="text"
                   onChange={this.handleInputChange}
-                  value={this.state.userQuickLayersInfoText}
+                  value={this.state.quickAccessTopicsInfoText}
+                />
+              </div>
+              <div>
+                <input
+                  id="enableUserQuickAccessFavorites"
+                  name="enableUserQuickAccessFavorites"
+                  type="checkbox"
+                  onChange={this.handleInputChange}
+                  checked={this.state.enableUserQuickAccessFavorites}
+                />
+                &nbsp;
+                <label
+                  className="long-label"
+                  htmlFor="enableUserQuickAccessFavorites"
+                >
+                  Mina favoriter{" "}
+                  <i
+                    className="fa fa-question-circle"
+                    data-toggle="tooltip"
+                    title="När rutan är ikryssad kan användaren spara snabbåtkomst till mina favoriter för att kunna ladda vid senare tillfälle."
+                  />
+                </label>
+              </div>
+              <div className="text-input-label">
+                Infotext Mina favoriter{" "}
+                <i
+                  className="fa fa-question-circle"
+                  data-toggle="tooltip"
+                  title="Ange en text som ska visas i panelen för mina favoriter."
+                />
+                &nbsp;
+                <input
+                  id="userQuickAccessFavoritesInfoText"
+                  name="userQuickAccessFavoritesInfoText"
+                  type="text"
+                  onChange={this.handleInputChange}
+                  value={this.state.userQuickAccessFavoritesInfoText}
                 />
               </div>
               <div className="separator">Kartinställningar</div>
@@ -2433,7 +2495,7 @@ class Menu extends Component {
               onClick={(e) => this.togglequickLayers()}
               startIcon={<StarIcon />}
             >
-              Snabblager
+              Snabbåtkomst
             </ColorButtonBlue>
           </div>
           {this.renderArticleContent()}
