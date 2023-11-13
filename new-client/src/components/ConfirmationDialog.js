@@ -40,15 +40,17 @@ const ConfirmationDialog = ({
         >
           {cancel}
         </Button>
-        <Button
-          onClick={(e) => {
-            e.stopPropagation();
-            handleConfirm();
-          }}
-          variant="contained"
-        >
-          {confirm}
-        </Button>
+        {confirm && (
+          <Button
+            onClick={(e) => {
+              e.stopPropagation();
+              handleConfirm();
+            }}
+            variant="contained"
+          >
+            {confirm}
+          </Button>
+        )}
       </DialogActions>
     </Dialog>,
     document.getElementById("map")

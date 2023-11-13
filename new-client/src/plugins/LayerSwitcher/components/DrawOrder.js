@@ -192,6 +192,21 @@ function DrawOrder({ display, app, map, onLayerChange, model, options }) {
     setSystemFilterActive(!systemFilterActive);
   };
 
+  const renderLockedBaseLayerItem = () => {
+    if (!options.lockDrawOrderBaselayer) return null;
+    const l = sortedLayers.find((l) => l.get("layerType") === "base");
+    if (!l) return null;
+    return (
+      <BackgroundLayer
+        key={l.isFakeMapLayer ? l.get("caption") : l.ol_uid}
+        layer={l}
+        app={app}
+        draggable={!options.lockDrawOrderBaselayer}
+        toggleable={false}
+      />
+    );
+  };
+
   return (
     <Box sx={{ display: display ? "block" : "none" }}>
       <Box
@@ -205,8 +220,8 @@ function DrawOrder({ display, app, map, onLayerChange, model, options }) {
         }}
       >
         <Stack direction="row" alignItems="center">
-          <FormGroup>
-            {options.showActiveLayerSwitch && (
+          {options.enableSystemLayersSwitch && (
+            <FormGroup>
               <FormControlLabel
                 control={
                   <Switch
@@ -216,8 +231,8 @@ function DrawOrder({ display, app, map, onLayerChange, model, options }) {
                 }
                 label="Systemlager"
               />
-            )}
-          </FormGroup>
+            </FormGroup>
+          )}
           <Box sx={{ flexGrow: 1 }} />
           <IconButton onClick={handleInfoButtonClick}>
             <Tooltip title={infoIsActive ? "Dölj info" : "Visa info"}>
@@ -234,9 +249,7 @@ function DrawOrder({ display, app, map, onLayerChange, model, options }) {
           <Box sx={{ p: 1, pt: 0 }}>
             <hr></hr>
             <Typography variant="subtitle2">
-              Lorem ipsum is placeholder text commonly used in the graphic,
-              print, and publishing industries for previewing layouts and visual
-              mockups.
+              {options.drawOrderViewInfoText}
             </Typography>
           </Box>
         </Collapse>
@@ -252,17 +265,9 @@ function DrawOrder({ display, app, map, onLayerChange, model, options }) {
           {sortedLayers.map((l) => {
             if (
               l.get("layerType") === "base" &&
-              options.lockedBackgroundInDraworder
+              options.lockDrawOrderBaselayer
             ) {
-              return (
-                <BackgroundLayer
-                  key={l.isFakeMapLayer ? l.get("caption") : l.ol_uid}
-                  layer={l}
-                  app={app}
-                  draggable={!options.lockedBackgroundInDraworder}
-                  toggleable={false}
-                />
-              );
+              return null;
             } else {
               return (
                 <Draggable key={"draggable" + l.ol_uid}>
@@ -271,7 +276,7 @@ function DrawOrder({ display, app, map, onLayerChange, model, options }) {
                       key={l.isFakeMapLayer ? l.get("caption") : l.ol_uid}
                       layer={l}
                       app={app}
-                      draggable={!options.lockedBackgroundInDraworder}
+                      draggable={!options.lockDrawOrderBaselayer}
                       toggleable={false}
                     />
                   ) : l.get("layerType") === "group" ? (
@@ -297,6 +302,7 @@ function DrawOrder({ display, app, map, onLayerChange, model, options }) {
             }
           })}
         </Container>
+        {renderLockedBaseLayerItem()}
       </List>
     </Box>
   );

@@ -26,6 +26,7 @@ function Favorites({
   map,
   favoriteViewDisplay,
   globalObserver,
+  favoritesInfoText,
 }) {
   const { enqueueSnackbar } = useSnackbar();
   const [domReady, setDomReady] = useState(false);
@@ -38,6 +39,7 @@ function Favorites({
   const [missingLayersConfirmation, setMissingLayersConfirmation] =
     useState(null);
   const [toggleFavoritesView, setToggleFavoritesView] = useState(false);
+  const [openNoLayersAlert, setOpenNoLayersAlert] = useState(false);
   // We're gonna need to keep track of if we're allowed to save stuff in LS. Let's use the hook.
   const { functionalCookiesOk } = useCookieStatus(globalObserver);
 
@@ -45,7 +47,7 @@ function Favorites({
     // Set state from localstorage on component load
     const currentLsSettings = LocalStorageHelper.get("layerswitcher");
     if (currentLsSettings.savedLayers?.length > 0) {
-      setFavorites(currentLsSettings.savedLayers);
+      handleSetFavorites(currentLsSettings.savedLayers);
     }
     // Set dom ready flag to true
     setDomReady(true);
@@ -65,7 +67,11 @@ function Favorites({
 
   // Handles click on add favorite button in menu
   const handleAddFavoriteClick = () => {
-    setSaveFavoriteDialog(!saveFavoriteDialog);
+    if (getQuickAccessLayers().length > 0) {
+      setSaveFavoriteDialog(!saveFavoriteDialog);
+    } else {
+      setOpenNoLayersAlert(true);
+    }
   };
 
   const handleLoadFavorite = (favorite, showDialog, toggleView) => {
@@ -154,6 +160,7 @@ function Favorites({
 
     enqueueSnackbar(`${title} har nu laddats till snabbåtkomst.`, {
       variant: "success",
+      anchorOrigin: { vertical: "bottom", horizontal: "center" },
     });
 
     const doToggleView =
@@ -167,10 +174,7 @@ function Favorites({
 
   // Clear quickaccessLayers
   const clearQuickAccessLayers = () => {
-    map
-      .getAllLayers()
-      .filter((l) => l.get("quickAccess") === true)
-      .map((l) => l.set("quickAccess", false));
+    getQuickAccessLayers().map((l) => l.set("quickAccess", false));
   };
 
   // Reset visible layers
@@ -185,6 +189,11 @@ function Favorites({
           l.set("visible", false);
         }
       });
+  };
+
+  // Get quickaccess layers
+  const getQuickAccessLayers = () => {
+    return map.getAllLayers().filter((l) => l.get("quickAccess") === true);
   };
 
   const changeCookieSetting = () => {
@@ -214,19 +223,16 @@ function Favorites({
   // Handles save favorite
   const handleSaveFavorite = () => {
     // Grab layers to be saved by…
-    const layers = map
-      .getAllLayers() //
-      .filter((l) => l.get("quickAccess") === true)
-      .map((l) => {
-        // Create an array of objects. For each layer, we want to read its…
-        return {
-          id: l.get("name"),
-          visible: l.getVisible(),
-          subLayers: l.get("layerType") === "group" ? l.get("subLayers") : [],
-          opacity: l.getOpacity(),
-          drawOrder: l.getZIndex(),
-        }; // …name as id, visibility and potentially sublayers.
-      });
+    const layers = getQuickAccessLayers().map((l) => {
+      // Create an array of objects. For each layer, we want to read its…
+      return {
+        id: l.get("name"),
+        visible: l.getVisible(),
+        subLayers: l.get("layerType") === "group" ? l.get("subLayers") : [],
+        opacity: l.getOpacity(),
+        drawOrder: l.getZIndex(),
+      }; // …name as id, visibility and potentially sublayers.
+    });
 
     if (layers.length === 0) {
       enqueueSnackbar(
@@ -294,11 +300,11 @@ function Favorites({
     const objectToSave = { layers, metadata };
     const newFavorites = [...favorites];
     newFavorites.push(objectToSave);
-    setFavorites(newFavorites);
+    handleSetFavorites(newFavorites);
     setTitle("");
     setDescription("");
 
-    enqueueSnackbar(`Favoriten sparades utan problem`, {
+    enqueueSnackbar(`${metadata.title} har lagts till i favoriter.`, {
       variant: "success",
       anchorOrigin: { vertical: "bottom", horizontal: "center" },
     });
@@ -310,7 +316,26 @@ function Favorites({
     // Get remaining favorites
     favoritesArray = favoritesArray.filter((f) => f !== selectedFavorite);
     // And set to state
-    setFavorites(favoritesArray);
+    handleSetFavorites(favoritesArray);
+    enqueueSnackbar(`${selectedFavorite.metadata.title} har tagits bort.`, {
+      variant: "success",
+      anchorOrigin: { vertical: "bottom", horizontal: "center" },
+    });
+  };
+
+  const handleSetFavorites = (newFavorites) => {
+    // Sort favorites by title and saved date
+    const sortedFavorites = newFavorites.sort((a, b) => {
+      // Compare titles
+      const titleComparison = a.metadata.title.localeCompare(b.metadata.title);
+      // If titles are equal, compare saved dates
+      if (titleComparison === 0) {
+        return new Date(b.metadata.savedAt) - new Date(a.metadata.savedAt);
+      }
+      return titleComparison;
+    });
+    // And set to state
+    setFavorites(sortedFavorites);
   };
 
   // Handles edit favorite title and description
@@ -331,7 +356,7 @@ function Favorites({
     favoritesArray[index] = updatedObject;
 
     // And set to state
-    setFavorites(favoritesArray);
+    handleSetFavorites(favoritesArray);
 
     enqueueSnackbar(`Favoriten uppdaterades utan problem`, {
       variant: "success",
@@ -347,7 +372,7 @@ function Favorites({
   const handleImportFavorites = (parsedFavorites) => {
     const favoritesArray = [...favorites];
     favoritesArray.push(parsedFavorites);
-    setFavorites(favoritesArray);
+    handleSetFavorites(favoritesArray);
     enqueueSnackbar(`Favoriten importerades utan problem`, {
       variant: "success",
       anchorOrigin: { vertical: "bottom", horizontal: "center" },
@@ -361,6 +386,7 @@ function Favorites({
           importFavoritesCallback={handleImportFavorites}
           backButtonCallback={handleFavoritesViewToggle}
           functionalCookiesOk={functionalCookiesOk}
+          favoritesInfoText={favoritesInfoText}
         ></FavoritesViewHeader>
         <Box>
           <FavoritesList
@@ -525,6 +551,15 @@ function Favorites({
           setLoadDialog(!loadDialog);
         }}
       />
+      <ConfirmationDialog
+        open={openNoLayersAlert}
+        titleName={"Spara favorit"}
+        contentDescription="Det finns inga lager i snabbåtkomst. Vänligen lägg till lager för att spara favorit."
+        cancel={"Stäng"}
+        handleAbort={() => {
+          setOpenNoLayersAlert(false);
+        }}
+      ></ConfirmationDialog>
       {renderAddFavoriteDialog()}
       {renderMissingLayersDialog()}
     </>

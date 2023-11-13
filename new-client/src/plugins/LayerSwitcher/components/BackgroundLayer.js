@@ -55,9 +55,9 @@ export default function BackgroundLayer({ layer, app, toggleable, draggable }) {
   const getLayerToggleIcon = () => {
     if (toggleable) {
       return !backgroundVisible ? (
-        <RadioButtonUnchecked />
+        <RadioButtonUnchecked sx={{ ml: 2 }} />
       ) : (
-        <RadioButtonChecked />
+        <RadioButtonChecked sx={{ ml: 2 }} />
       );
     }
     return layer.isFakeMapLayer ? (

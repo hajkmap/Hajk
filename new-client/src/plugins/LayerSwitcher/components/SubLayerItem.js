@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 
 import {
-  Box,
   IconButton,
   ListItemButton,
   ListItemSecondaryAction,
@@ -69,6 +68,8 @@ export default function SubLayerItem({
         }
       >
         <IconButton
+          sx={{ p: 0.25, mr: "5px" }}
+          size="small"
           onClick={(e) => {
             e.stopPropagation();
             setLegendIsActive(!legendIsActive);
@@ -81,22 +82,25 @@ export default function SubLayerItem({
   };
 
   return (
-    <div style={{ display: display }}>
+    <div style={{ display: display, marginLeft: "32px" }}>
       <ListItemButton
         disableRipple
         onClick={() => (toggleable ? toggleSubLayer(subLayer, visible) : null)}
         sx={{
+          pl: 0,
           borderBottom: (theme) =>
-            `${theme.spacing(0.2)} solid ${theme.palette.divider}`,
+            toggleable
+              ? `${theme.spacing(0.2)} solid ${theme.palette.divider}`
+              : "none",
         }}
         dense
       >
         {toggleable && (
           <IconButton
             disableRipple
+            size="small"
             sx={{
               pl: 0,
-              pr: "5px",
             }}
           >
             {getLayerToggleIcon()}
@@ -106,6 +110,7 @@ export default function SubLayerItem({
         <ListItemText
           primary={layer.layersInfo[subLayer].caption}
           primaryTypographyProps={{
+            pr: 5,
             fontWeight: visible ? (toggleable ? "bold" : "inherit") : "inherit",
           }}
         />
@@ -120,13 +125,11 @@ export default function SubLayerItem({
         </ListItemSecondaryAction>
       </ListItemButton>
       {layer.layersInfo[subLayer].legendIcon ? null : (
-        <Box sx={{ pl: toggleable ? 3.5 : 5.5 }}>
-          <LegendImage
-            layerItemDetails={{ layer: layer }}
-            open={legendIsActive}
-            subLayerIndex={subLayerIndex}
-          ></LegendImage>
-        </Box>
+        <LegendImage
+          layerItemDetails={{ layer: layer }}
+          open={legendIsActive}
+          subLayerIndex={subLayerIndex}
+        ></LegendImage>
       )}
     </div>
   );

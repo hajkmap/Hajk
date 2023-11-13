@@ -325,6 +325,8 @@ class LayerGroup extends React.PureComponent {
         layerGroupTitle={
           <ListItemText
             primaryTypographyProps={{
+              py: this.props.group.toggled ? 0 : "3px",
+              pl: this.props.group.toggled ? 0 : "3px",
               fontWeight:
                 this.isToggled() || this.isSemiToggled() ? "bold" : "inherit",
             }}

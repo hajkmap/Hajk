@@ -30,6 +30,7 @@ function LayerItemDetails({
   chapters,
   app,
   showOpacitySlider,
+  showQuickAccess,
 }) {
   const { enqueueSnackbar } = useSnackbar();
   // State that toggles legend collapse
@@ -118,7 +119,8 @@ function LayerItemDetails({
   const isQuickAccessEnabled = () => {
     return (
       layerItemDetails.layer.get("layerType") !== "base" &&
-      subLayerIndex === null
+      subLayerIndex === null &&
+      showQuickAccess
     );
   };
 
@@ -329,12 +331,12 @@ function LayerItemDetails({
                   {!quickAccess ? (
                     <>
                       <StarOutlineOutlinedIcon sx={{ marginRight: 1 }} />
-                      Lägg till i snabblager
+                      Lägg till i snabbåtkomst
                     </>
                   ) : (
                     <>
                       <DeleteOutlinedIcon sx={{ marginRight: 1 }} />
-                      Ta bort från snabblager
+                      Ta bort från snabbåtkomst
                     </>
                   )}
                 </Button>

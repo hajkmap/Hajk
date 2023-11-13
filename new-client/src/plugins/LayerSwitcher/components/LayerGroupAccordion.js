@@ -10,6 +10,7 @@ import KeyboardArrowRightOutlinedIcon from "@mui/icons-material/KeyboardArrowRig
 
 export default function LayerGroupAccordion({
   expanded,
+  setExpandedCallback,
   toggleable,
   children,
   layerGroupTitle,
@@ -25,7 +26,11 @@ export default function LayerGroupAccordion({
   }, [expanded]);
 
   const updateCustomProp = (prop, value) => {
-    setState((prevState) => ({ ...prevState, [prop]: value }));
+    if (setExpandedCallback) {
+      setExpandedCallback(value);
+    } else {
+      setState((prevState) => ({ ...prevState, [prop]: value }));
+    }
   };
 
   return (
@@ -40,7 +45,7 @@ export default function LayerGroupAccordion({
       >
         <IconButton
           size="small"
-          sx={{ pr: !toggleable && !quickAccess ? "5px" : 0 }}
+          sx={{ pl: "3px", pr: "4px", py: 0 }}
           disableRipple
         >
           <KeyboardArrowRightOutlinedIcon
@@ -75,7 +80,7 @@ export default function LayerGroupAccordion({
         </Box>
       </ListItemButton>
       <Collapse in={state.expanded}>
-        <Box sx={{ marginLeft: "40px" }}>{children}</Box>
+        <Box sx={{ marginLeft: "26px" }}>{children}</Box>
       </Collapse>
     </div>
   );
