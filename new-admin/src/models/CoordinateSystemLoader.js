@@ -109,6 +109,14 @@ const definitions = [
     extent: [38920.7048, 7267405.2323, 193050.246, 7597992.2419],
     units: null,
   },
+  {
+    code: "EPSG:5847",
+    name: "SWEREF99 13 30 + RH2000 height",
+    definition:
+      "+proj=tmerc +lat_0=0 +lon_0=13.5 +k=1 +x_0=150000 +y_0=0 +ellps=GRS80 +units=m +vunits=m +no_defs +type=crs",
+    extent: [62307.13, 6128402.55, 231974.13, 6908900.11],
+    units: null,
+  },
 ];
 
 export default class CoordinateSystemLoader {

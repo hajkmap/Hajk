@@ -84,6 +84,7 @@ const supportedProjections = [
   "EPSG:3021",
   "EPSG:4326",
   "EPSG:3857",
+  "EPSG:5847",
   "CRS:84",
 ];
 
