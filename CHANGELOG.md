@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [3.13.20] - 2023-11-14
+
+### Added
+
+- Support for the EPSG:5847 in Admin UI. Keep in mind that you still need to add appropriate projection definitions to each map config.
+- It is now possible to disable unused tabs in LayerSwitcher, e.g. only show the Background layers tab. [#1431](https://github.com/hajkmap/Hajk/issues/1431)
+
 ### Fixed
 
 - Upgraded deps, among those `react-markdown`, which required some work. See [#1425](https://github.com/hajkmap/Hajk/issues/1425).
@@ -172,7 +179,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [3.12.0-rc.2] - 2023-06-19
 
-[unreleased]: https://github.com/hajkmap/Hajk/compare/v3.13.19...hstd-main
+[unreleased]: https://github.com/hajkmap/Hajk/compare/v3.13.20...hstd-main
+[3.13.20]: https://github.com/hajkmap/Hajk/compare/v3.13.19...v3.13.20
 [3.13.19]: https://github.com/hajkmap/Hajk/compare/v3.13.18...v3.13.19
 [3.13.18]: https://github.com/hajkmap/Hajk/compare/v3.13.17...v3.13.18
 [3.13.17]: https://github.com/hajkmap/Hajk/compare/v3.13.16...v3.13.17
