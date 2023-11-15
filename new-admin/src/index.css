@@ -948,3 +948,11 @@ figure img {
 .layerDialog .split3070 > div:last-child{
   flex: 0 0 70%;
 }
+
+.keywords-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  max-width: 500px;
+  margin-left: 160px;
+}
