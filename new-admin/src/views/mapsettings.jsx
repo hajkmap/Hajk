@@ -16,9 +16,10 @@ import LayersIcon from "@material-ui/icons/Layers";
 import SwapVertIcon from "@material-ui/icons/SwapVert";
 import SettingsIcon from "@material-ui/icons/Settings";
 import BuildIcon from "@material-ui/icons/Build";
-import StarIcon from "@material-ui/icons/Star";
+import FolderIcon from "@material-ui/icons/Folder";
 import HighlightOffIcon from "@material-ui/icons/HighlightOff";
 import CheckCircleOutline from "@material-ui/icons/CheckCircleOutline";
+import { Chip } from "@material-ui/core";
 import { withStyles } from "@material-ui/core/styles";
 import { red, green, blue } from "@material-ui/core/colors";
 import { v4 as uuidv4 } from "uuid";
@@ -29,6 +30,8 @@ var defaultState = {
   alertMessage: "",
   content: "",
   maps: [],
+  mode: "add",
+  currentEditingLayer: null,
   confirmAction: () => {},
   denyAction: () => {},
 };
@@ -322,11 +325,12 @@ class Menu extends Component {
       importedLayers: [],
       importedMetadata: {},
       minMaxZoomAlertOnToggleOnly: false,
+      keywords: [],
+      keywordInput: "",
     };
     this.titleRef = React.createRef();
     this.authorRef = React.createRef();
     this.descriptionRef = React.createRef();
-    this.keywordsRef = React.createRef();
     this.fileInputRef = React.createRef();
   }
 
@@ -870,6 +874,39 @@ class Menu extends Component {
       }
     });
   }
+
+  /**
+   *
+   */
+  saveLayerEdits = () => {
+    const { currentEditingLayer, keywords } = this.state;
+    const updatedTitle = this.titleRef.current.value;
+    const updatedAuthor = this.authorRef.current.value;
+    const updatedDescription = this.descriptionRef.current.value;
+
+    this.setState(
+      (prevState) => {
+        const updatedLayers = prevState.quickLayersPresets.map((layer) => {
+          if (layer.id === currentEditingLayer.id) {
+            return {
+              ...layer,
+              title: updatedTitle,
+              author: updatedAuthor,
+              description: updatedDescription,
+              keywords: keywords,
+            };
+          }
+          return layer;
+        });
+
+        return { quickLayersPresets: updatedLayers, mode: "add" };
+      },
+      () => {
+        this.saveQuickLayersPresets(); // Save the configuration after the update.
+        this.cancelInput(); // Clear the input fields and reset the state.
+      }
+    );
+  };
 
   /**
    *
@@ -1427,19 +1464,25 @@ class Menu extends Component {
     // Apply filter only when filterString is not empty.
     if (this.state.filterString) {
       filteredLayers = filteredLayers.filter((layer) =>
-        layer.title.includes(this.state.filterString)
+        layer.title
+          .toLowerCase()
+          .includes(this.state.filterString.toLowerCase())
       );
     }
 
     return filteredLayers.map((layer, i) => {
       return (
-        <li className="layer-item" key={i}>
+        <li
+          className="layer-item"
+          key={i}
+          onClick={() => this.enterEditMode(layer)}
+        >
           <span className="main-box">{layer.title}</span>
           <i
             className="fa fa-trash"
             onClick={(event) => {
-              event.stopPropagation();
-              this.deleteQuickLayerFromList(layer.id);
+              event.stopPropagation(); // Prevents the edit mode activation when clicking the delete icon
+              this.showDeleteConfirmation(layer.id, layer.title);
             }}
           />
         </li>
@@ -1447,50 +1490,106 @@ class Menu extends Component {
     });
   }
 
+  /**
+   *
+   */
   filterQuickLayers(e) {
     this.setState({
       filterString: e.target.value,
     });
   }
 
+  /**
+   *
+   */
+  enterEditMode(layer) {
+    this.setState(
+      {
+        mode: "edit",
+        currentEditingLayer: layer,
+        keywords: layer.keywords || [],
+        keywordInput: "",
+      },
+      () => {
+        this.titleRef.current.value = layer.title || "";
+        this.authorRef.current.value = layer.author || "";
+        this.descriptionRef.current.value = layer.description || "";
+      }
+    );
+  }
+
+  /**
+   *
+   */
   cancelInput = () => {
-    // Clear the input fields.
     this.titleRef.current.value = "";
     this.authorRef.current.value = "";
     this.descriptionRef.current.value = "";
-    this.keywordsRef.current.value = "";
 
-    // Clear the file input.
     this.fileInputRef.current.value = "";
 
-    // Clear the state.
     this.setState({
       importMessage: "",
       importedLayers: [],
       importedMetadata: {},
+      mode: "add",
+      keywords: [],
+      keywordInput: "",
     });
   };
 
+  /**
+   *
+   */
   deleteQuickLayerFromList(id) {
-    this.setState((prevState) => ({
-      quickLayersPresets: prevState.quickLayersPresets.filter(
-        (layer) => layer.id !== id
-      ),
-    }));
+    this.setState(
+      (prevState) => ({
+        quickLayersPresets: prevState.quickLayersPresets.filter(
+          (layer) => layer.id !== id
+        ),
+      }),
+      () => {
+        // After state is updated, save the configuration.
+        this.saveQuickLayersPresets();
+        this.hideConfirmation();
+      }
+    );
   }
 
+  /**
+   *
+   */
+  showDeleteConfirmation = (id, title) => {
+    this.setState({
+      alert: true,
+      confirm: true,
+      alertMessage: `Du kommer att radera tema "${title}" permanent.`,
+      confirmAction: () => this.deleteQuickLayerFromList(id),
+      denyAction: this.hideConfirmation,
+    });
+  };
+
+  /**
+   *
+   */
+  hideConfirmation = () => {
+    this.setState({
+      alert: false,
+      confirm: false,
+      alertMessage: "",
+    });
+  };
+
+  /**
+   *
+   */
   addQuickLayer = () => {
     const title = this.titleRef.current.value;
     const author = this.authorRef.current.value;
     const description = this.descriptionRef.current.value;
-    const keywords = this.keywordsRef.current.value.split(",");
+    const { keywords, importedLayers, importStatus } = this.state;
 
-    // Check if title and importedLayers are filled.
-    if (
-      title === "" ||
-      this.state.importedLayers.length === 0 ||
-      !this.state.importStatus
-    ) {
+    if (title === "" || importedLayers.length === 0 || !importStatus) {
       alert(
         "Ange titel och importera en giltig JSON-fil innan du lägger till ett nytt snabblager."
       );
@@ -1503,29 +1602,29 @@ class Menu extends Component {
       author: author,
       description: description,
       keywords: keywords,
-      layers: this.state.importedLayers,
+      layers: importedLayers,
       metadata: this.state.importedMetadata,
     };
 
-    // Update the state.
-    this.setState((prevState) => ({
-      quickLayersPresets: [...prevState.quickLayersPresets, newLayer],
-      importedLayers: [],
-      importedMetadata: {},
-      importStatus: false,
-      importMessage: "",
-    }));
+    this.setState(
+      (prevState) => ({
+        quickLayersPresets: [...prevState.quickLayersPresets, newLayer],
+        importedLayers: [],
+        importedMetadata: {},
+        importStatus: false,
+        importMessage: "",
+      }),
+      () => {
+        this.saveQuickLayersPresets();
+      }
+    );
 
-    // Clear the input fields.
-    this.titleRef.current.value = "";
-    this.authorRef.current.value = "";
-    this.descriptionRef.current.value = "";
-    this.keywordsRef.current.value = "";
-
-    // Clear the file input.
-    this.fileInputRef.current.value = "";
+    this.cancelInput(); // Clear the input fields and reset the state.
   };
 
+  /**
+   *
+   */
   importJSON = (event) => {
     const fileReader = new FileReader();
     fileReader.readAsText(event.target.files[0], "UTF-8");
@@ -1538,12 +1637,23 @@ class Menu extends Component {
             importMessage: "Filen är felaktig och kunde inte läsas in.",
           });
         } else {
+          // Set state with imported data.
           this.setState({
             importedLayers: result.layers,
             importedMetadata: result.metadata,
             importStatus: true,
             importMessage: "Filen är korrekt och fungerar.",
           });
+
+          // Update refs if metadata and its properties exist.
+          if (result.metadata) {
+            if (result.metadata.title && this.titleRef.current) {
+              this.titleRef.current.value = result.metadata.title;
+            }
+            if (result.metadata.description && this.descriptionRef.current) {
+              this.descriptionRef.current.value = result.metadata.description;
+            }
+          }
         }
       } catch (error) {
         this.setState({
@@ -1554,6 +1664,9 @@ class Menu extends Component {
     };
   };
 
+  /**
+   *
+   */
   validateImportedJSON(json) {
     if (!json) return false;
 
@@ -1594,6 +1707,35 @@ class Menu extends Component {
 
     return true;
   }
+
+  /**
+   *
+   */
+  addKeyword = () => {
+    const newKeyword = this.state.keywordInput.trim();
+    if (newKeyword) {
+      this.setState((prevState) => ({
+        keywords: [...prevState.keywords, newKeyword],
+        keywordInput: "",
+      }));
+    }
+  };
+
+  /**
+   *
+   */
+  handleKeywordChange = (e) => {
+    this.setState({ keywordInput: e.target.value });
+  };
+
+  /**
+   *
+   */
+  removeKeyword = (index) => {
+    this.setState((prevState) => ({
+      keywords: prevState.keywords.filter((_, i) => i !== index),
+    }));
+  };
 
   /**
    *
@@ -2173,7 +2315,25 @@ class Menu extends Component {
           </aside>
           <article>
             <fieldset className="tree-view">
-              <legend>Hantera snabblager</legend>
+              <legend>Hantera teman för snabbåtkomst</legend>
+              <div className="row">
+                <div className="col-sm-12">
+                  <label htmlFor="title">
+                    JSON-fil*{" "}
+                    <i
+                      className="fa fa-question-circle"
+                      data-toggle="tooltip"
+                      title="JSON-fil som innehåller lagerdefinitioner för snabblagret."
+                    />
+                  </label>
+                  <input
+                    type="file"
+                    accept=".json"
+                    ref={this.fileInputRef}
+                    onChange={this.importJSON}
+                  />
+                </div>
+              </div>
               <div className="row">
                 <div className="col-sm-12">
                   <label htmlFor="title">
@@ -2227,25 +2387,33 @@ class Menu extends Component {
                       title="Nyckelord för snabblagret visas i kartans lagerhanterare."
                     />
                   </label>
-                  <input type="text" name="keywords" ref={this.keywordsRef} />
+                  <input
+                    type="text"
+                    name="keywords"
+                    value={this.state.keywordInput}
+                    onKeyPress={(e) => {
+                      if (e.key === "Enter") {
+                        this.addKeyword();
+                      }
+                    }}
+                    onChange={this.handleKeywordChange}
+                  />
+                  <span onClick={this.addKeyword} className="btn btn-default">
+                    Lägg till
+                  </span>
                 </div>
               </div>
               <div className="row">
                 <div className="col-sm-12">
-                  <label htmlFor="title">
-                    JSON-fil*{" "}
-                    <i
-                      className="fa fa-question-circle"
-                      data-toggle="tooltip"
-                      title="JSON-fil som innehåller lagerdefinitioner för snabblagret."
-                    />
-                  </label>
-                  <input
-                    type="file"
-                    accept=".json"
-                    ref={this.fileInputRef}
-                    onChange={this.importJSON}
-                  />
+                  <div className="keywords-container">
+                    {this.state.keywords.map((keyword, i) => (
+                      <Chip
+                        key={i}
+                        label={keyword}
+                        onDelete={() => this.removeKeyword(i)}
+                      />
+                    ))}
+                  </div>
                 </div>
               </div>
               <div className="row">
@@ -2287,32 +2455,38 @@ class Menu extends Component {
                 </div>
               </div>
               <div style={{ display: "flex", justifyContent: "flex-end" }}>
-                <ColorButtonBlue
-                  variant="contained"
-                  className="btn"
-                  onClick={this.cancelInput}
-                  startIcon={<HighlightOffIcon />}
-                >
-                  Avbryt
-                </ColorButtonBlue>
-                &nbsp;
-                <ColorButtonBlue
-                  variant="contained"
-                  className="btn"
-                  onClick={(e) => this.saveQuickLayersPresets(e)}
-                  startIcon={<SaveIcon />}
-                >
-                  Spara
-                </ColorButtonBlue>
-                &nbsp;
-                <ColorButtonBlue
-                  variant="contained"
-                  className="btn"
-                  onClick={this.addQuickLayer}
-                  startIcon={<AddIcon />}
-                >
-                  Lägg till
-                </ColorButtonBlue>
+                {this.state.mode === "edit" && (
+                  <>
+                    <ColorButtonRed
+                      variant="contained"
+                      className="btn"
+                      onClick={this.cancelInput}
+                      startIcon={<HighlightOffIcon />}
+                    >
+                      Avbryt
+                    </ColorButtonRed>
+                    &nbsp;
+                    <ColorButtonBlue
+                      variant="contained"
+                      className="btn"
+                      onClick={(e) => this.saveLayerEdits(e)}
+                      startIcon={<SaveIcon />}
+                    >
+                      Spara
+                    </ColorButtonBlue>
+                  </>
+                )}
+
+                {this.state.mode === "add" && (
+                  <ColorButtonGreen
+                    variant="contained"
+                    className="btn"
+                    onClick={this.addQuickLayer}
+                    startIcon={<AddIcon />}
+                  >
+                    Lägg till
+                  </ColorButtonGreen>
+                )}
               </div>
             </fieldset>
           </article>
@@ -2521,9 +2695,9 @@ class Menu extends Component {
               variant="contained"
               className="btn"
               onClick={(e) => this.togglequickLayers()}
-              startIcon={<StarIcon />}
+              startIcon={<FolderIcon />}
             >
-              Snabbåtkomst
+              Teman
             </ColorButtonBlue>
           </div>
           {this.renderArticleContent()}
