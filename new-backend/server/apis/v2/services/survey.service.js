@@ -138,11 +138,10 @@ class SurveyService {
       //Mail answer
       let bodyHtml = "<html><body>";
       bodyHtml += "<h1>Svar från undersökningen</h1>";
-      bodyHtml += "<ul>";
       for (const key in body) {
         bodyHtml += `<br><b>${key}</b>: ${body[key]}`;
       }
-      bodyHtml += "</ul></body></html>";
+      bodyHtml += "</body></html>";
       await this.mailNodemailer(bodyHtml);
 
       // Return a success message
