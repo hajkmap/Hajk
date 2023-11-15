@@ -441,11 +441,11 @@ export const Img = ({ imgTag, localObserver, componentId, baseUrl }) => {
         image={imgUrl}
         sx={{
           ...getImageStyle(image),
-          ...(image.height &&
-            image.width && {
-              height: image.height,
-              width: image.width,
-            }),
+          ...(image.width && {
+            height: "auto", // Let the browser calculate the height, otherwise it will look bad when maxWidth gets triggered.
+            width: image.width,
+            maxWidth: "100%",
+          }),
           ".MuiCardMedia-media": {
             width: "auto",
             maxWidth: "100%",
@@ -815,9 +815,8 @@ export const CustomLink = ({ aTag, localObserver, bottomMargin }) => {
           },
           ...(bottomMargin && { marginBottom: 1 }),
         }}
-        href="#"
         key="document-link"
-        component={isPrintMode ? "span" : "button"}
+        component={isPrintMode ? "span" : "a"}
         underline="hover"
         onClick={() => {
           localObserver.publish("document-link-clicked", {

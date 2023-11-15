@@ -26,7 +26,7 @@ function Measurer(props) {
     () =>
       new DrawModel({
         layerName: "pluginMeasure",
-        layerCaption: "Meausure layer",
+        layerCaption: "Measure layer",
         map: map,
         observer: localObserver,
         observerPrefix: "measure",
@@ -246,7 +246,7 @@ function Measurer(props) {
       custom={{
         icon: <MeasurerIcon />,
         title: state.title || "Mät",
-        description: "",
+        description: "Mät längder och ytor",
         height: "dynamic",
         width: 360,
         customPanelHeaderButtons: customHeaderButtons,

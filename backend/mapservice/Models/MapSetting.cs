@@ -66,6 +66,8 @@ namespace MapService.Models
         public bool drawerVisibleMobile { get; set; }
 
         public bool drawerPermanent { get; set; }
+        
+        public bool drawerStatic { get; set; }
 
         public string activeDrawerOnStart { get; set; }
 

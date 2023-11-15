@@ -24,12 +24,22 @@ export default function SubLayerItem({
   visible,
   toggleSubLayer,
   subLayerIndex,
+  zoomVisible,
 }) {
   // State that toggles legend collapse
   const [legendIsActive, setLegendIsActive] = useState(false);
   // Render method for checkbox icon
   const getLayerToggleIcon = () => {
-    return visible ? <CheckBoxIcon /> : <CheckBoxOutlineBlankIcon />;
+    return visible ? (
+      <CheckBoxIcon
+        sx={{
+          fill: (theme) =>
+            !zoomVisible ? theme.palette.warning.dark : theme.palette.primary,
+        }}
+      />
+    ) : (
+      <CheckBoxOutlineBlankIcon />
+    );
   };
 
   // Show layer details action

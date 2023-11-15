@@ -29,6 +29,8 @@ namespace MapService.Models.ToolOptions
 
         public List<LayerGroup> groups { get; set; }
 
+        public List<QuickLayerPreset> quickLayersPresets { get; set; }
+
         public bool active { get; set; }
 
         public bool visibleAtStart { get; set; }
@@ -43,7 +45,27 @@ namespace MapService.Models.ToolOptions
 
         public bool showBreadcrumbs { get; set; }
 
+        public bool showDrawOrderView { get; set; }
+
+        public bool showQuickAccess { get; set; }
+
+        public bool enableSystemLayersSwitch { get; set; }
+
+        public bool lockDrawOrderBaselayer { get; set; }
+
+        public string drawOrderViewInfoText { get; set; }
+
+        public bool enableQuickAccessTopics { get; set; }
+
+        public string quickAccessTopicsInfoText { get; set; }
+
+        public bool enableUserQuickAccessFavorites { get; set; }
+
+        public string userQuickAccessFavoritesInfoText { get; set; }
+
         public bool enableTransparencySlider { get; set; }
+
+        public bool minMaxZoomAlertOnToggleOnly { get; set; }
 
         public string target { get; set; }
 
