@@ -280,7 +280,7 @@ function LayerItemDetails({
                 <Stack direction="row" spacing={2} alignItems="center">
                   <Typography
                     variant="subtitle2"
-                    sx={{ flexGrow: 1, flexBasis: "20%" }}
+                    sx={{ flexGrow: 1, flexBasis: "25%" }}
                   >
                     Opacitet
                   </Typography>
@@ -298,23 +298,28 @@ function LayerItemDetails({
                 </Stack>
               </Box>
             ) : null}
-            {layerItemDetails.layer.getProperties().filterable ||
-              (cqlFilterVisible && (
-                <Box
-                  sx={{
-                    px: 2,
-                    pr: 2,
-                    pb: 2,
-                  }}
-                >
-                  {cqlFilterVisible && (
-                    <CQLFilter layer={layerItemDetails.layer} />
-                  )}
-                  {layerItemDetails.layer.getProperties().filterable && (
-                    <VectorFilter layer={layerItemDetails.layer} />
-                  )}
-                </Box>
-              ))}
+            {layerItemDetails.layer.getProperties().filterable && (
+              <Box
+                sx={{
+                  px: 2,
+                  pr: 2,
+                  pb: 2,
+                }}
+              >
+                <VectorFilter layer={layerItemDetails.layer} />
+              </Box>
+            )}
+            {cqlFilterVisible && (
+              <Box
+                sx={{
+                  px: 2,
+                  pr: 2,
+                  pb: 2,
+                }}
+              >
+                <CQLFilter layer={layerItemDetails.layer} />
+              </Box>
+            )}
             {isQuickAccessEnabled() && (
               <Box
                 sx={{
