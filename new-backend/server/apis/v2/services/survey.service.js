@@ -1,6 +1,7 @@
 import fs from "fs";
 import path from "path";
 import log4js from "log4js";
+import nodemailer from "nodemailer";
 const logger = log4js.getLogger("service.survey.v2");
 
 class SurveyService {
@@ -134,11 +135,65 @@ class SurveyService {
       // Write the updated content back to the file
       await fs.promises.writeFile(pathToFile, jsonString);
 
+      //Mail answer
+      let bodyHtml = "<html><body>";
+      bodyHtml += "<h1>Svar från undersökningen</h1>";
+      bodyHtml += "<ul>";
+      for (const key in body) {
+        bodyHtml += `<br><b>${key}</b>: ${body[key]}`;
+      }
+      bodyHtml += "</ul></body></html>";
+      await this.mailNodemailer(bodyHtml);
+
       // Return a success message
       return { message: "Survey data added to file" };
     } catch (writeError) {
       console.error("Error in saveByNameSurvey:", writeError);
       return { error: writeError.message };
+    }
+  }
+
+  /**
+   * @summary
+   * @returns
+   * @memberof SurveyService
+   */
+  async mailNodemailer(body) {
+    try {
+      let transporterOptions = {
+        host: process.env.CITIZEN_DIALOGUE_MAIL_HOST,
+        port: process.env.CITIZEN_DIALOGUE_MAIL_PORT,
+        secure: process.env.CITIZEN_DIALOGUE_MAIL_SECURE === "true",
+        tls: {
+          rejectUnauthorized: false,
+        },
+      };
+
+      // Check user and pass
+      if (
+        process.env.CITIZEN_DIALOGUE_MAIL_USER &&
+        process.env.CITIZEN_DIALOGUE_MAIL_PASSWORD
+      ) {
+        transporterOptions.auth = {
+          user: process.env.CITIZEN_DIALOGUE_MAIL_USER,
+          pass: process.env.CITIZEN_DIALOGUE_MAIL_PASSWORD,
+        };
+      }
+
+      // Create transport
+      const transporter = nodemailer.createTransport(transporterOptions);
+
+      const options = {
+        from: process.env.CITIZEN_DIALOGUE_MAIL_FROM,
+        to: process.env.CITIZEN_DIALOGUE_MAIL_TO,
+        subject: process.env.CITIZEN_DIALOGUE_MAIL_SUBJECT,
+        html: body,
+      };
+
+      await transporter.sendMail(options);
+    } catch (error) {
+      console.error("Error in mailNodemailer:", error);
+      throw error;
     }
   }
 }

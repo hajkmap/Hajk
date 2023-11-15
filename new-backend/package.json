@@ -37,6 +37,7 @@
     "http-proxy-middleware": "^2.0.6",
     "log4js": "^6.9.1",
     "node-windows": "^1.0.0-beta.8",
+    "nodemailer": "^6.9.7",
     "write-excel-file": "^1.4.27"
   },
   "devDependencies": {
