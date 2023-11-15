@@ -42,8 +42,17 @@ class KirExportView extends React.PureComponent {
       <>
         <div>
           <ContainerInfo>
-            <SpanNum>{this.state.results.length}</SpanNum> objekt finns
-            tillgängliga för export.
+            {this.model.app.plugins["kir"].options.residentList ===
+              undefined && (
+              <div>Otillräcklig behörighet för att exportera resultat</div>
+            )}
+            {this.model.app.plugins["kir"].options.residentList !==
+              undefined && (
+              <div>
+                <SpanNum>{this.state.results.length}</SpanNum> objekt finns
+                tillgängliga för export.
+              </div>
+            )}
           </ContainerInfo>
           <FirExportResidentListView
             results={this.state.results}

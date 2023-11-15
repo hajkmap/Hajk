@@ -372,9 +372,14 @@ class FirExportResidentListView extends React.PureComponent {
     return (
       <>
         <Accordion
-          disabled={this.props.results.length === 0}
+          disabled={
+            this.props.results.length === 0 ||
+            this.options.residentList === undefined
+          }
           expanded={
-            this.state.accordionExpanded && this.props.results.length > 0
+            this.state.accordionExpanded &&
+            this.props.results.length > 0 &&
+            this.options.residentList !== undefined
           }
           onChange={() => {
             this.setState({
