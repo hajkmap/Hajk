@@ -626,6 +626,7 @@ class Menu extends Component {
       enableUserQuickAccessFavorites: this.state.enableUserQuickAccessFavorites,
       userQuickAccessFavoritesInfoText:
         this.state.userQuickAccessFavoritesInfoText,
+      enableTransparencySlider: this.state.enableTransparencySlider,
       instruction: this.state.instruction,
       dropdownThemeMaps: this.state.dropdownThemeMaps,
       themeMapHeaderCaption: this.state.themeMapHeaderCaption,
