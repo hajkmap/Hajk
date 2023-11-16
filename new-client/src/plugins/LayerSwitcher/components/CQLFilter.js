@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   OutlinedInput,
   IconButton,
@@ -10,13 +10,16 @@ import {
 import RefreshIcon from "@mui/icons-material/Refresh";
 
 const CQLFilter = ({ layer }) => {
-  const source = layer.getSource();
-  const currentCqlFilterValue =
-    (typeof source.getParams === "function" &&
-      source.getParams()?.CQL_FILTER) ||
-    "";
+  const [cqlFilter, setCqlFilter] = useState("");
 
-  const [cqlFilter, setCqlFilter] = useState(currentCqlFilterValue);
+  useEffect(() => {
+    const source = layer.getSource();
+    const currentCqlFilterValue =
+      (typeof source.getParams === "function" &&
+        source.getParams()?.CQL_FILTER) ||
+      "";
+    setCqlFilter(currentCqlFilterValue);
+  }, [layer]);
 
   const updateFilter = () => {
     let filter = cqlFilter.trim();
