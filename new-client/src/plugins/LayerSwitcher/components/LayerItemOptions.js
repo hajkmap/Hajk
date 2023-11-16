@@ -17,7 +17,7 @@ export default function LayerItemOptions({
   layer,
   app,
   enqueueSnackbar,
-  subLayerIndex = 0,
+  subLayerIndex,
 }) {
   // Element that we will anchor the options menu to is
   // held in state. If it's null (unanchored), we can tell
@@ -53,6 +53,9 @@ export default function LayerItemOptions({
   const handleDownload = (e) => {
     e.stopPropagation();
     setAnchorEl(null);
+    if (!subLayerIndex) {
+      subLayerIndex = 0;
+    }
     // Construct link
     const layerName = Array.isArray(layer.subLayers)
       ? encodeURI(layer.subLayers[subLayerIndex])

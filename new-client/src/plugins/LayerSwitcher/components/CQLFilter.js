@@ -26,8 +26,8 @@ const CQLFilter = ({ layer }) => {
 
   return (
     <Stack direction="row" spacing={2} alignItems="center">
-      <Typography sx={{ flexGrow: 1, flexBasis: "20%" }} variant="subtitle2">
-        Filter
+      <Typography sx={{ flexGrow: 1, flexBasis: "25%" }} variant="subtitle2">
+        CQL-filter
       </Typography>
       <OutlinedInput
         id="cqlfilter"
