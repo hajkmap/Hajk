@@ -92,7 +92,7 @@ namespace MapService.Business.Settings
             if (id == null)
             {
                 idValue = GenerateLayerId();
-                layerSettings.Add(new KeyValuePair<string, JsonNode?>("id", idValue));
+                layerSettings["id"] = idValue;
             }
             else
             {
