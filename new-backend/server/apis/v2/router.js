@@ -6,7 +6,7 @@ import settingsRouter from "./controllers/settings/router.js";
 import informativeRouter from "./controllers/informative/router.js";
 import adRouter from "./controllers/ad/router.js";
 import firRouter from "./controllers/fir/router.js";
-import surveyRouter from "./controllers/survey/router.js";
+import surveyRouter from "./controllers/surveys/router.js";
 
 export default express
   .Router()
@@ -16,4 +16,4 @@ export default express
   .use("/settings", settingsRouter)
   .use("/ad", adRouter)
   .use("/fir", firRouter)
-  .use("/survey", surveyRouter);
+  .use("/surveys", surveyRouter);

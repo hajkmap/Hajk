@@ -157,7 +157,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Error"
-  /survey/list:
+  /surveys/list:
     get:
       tags:
         - Admin - Informative/DocumentHandler
@@ -174,7 +174,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Error"
-  /survey/load/{survey}:
+  /surveys/{survey}:
     get:
       tags:
         - Client-accessible
@@ -198,7 +198,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Error"
-  /survey/answer/load/{survey}:
+  /surveys/answers/{survey}:
     get:
       tags:
         - Client-accessible
@@ -222,7 +222,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Error"
-  /survey/answer/save/{surveyId}:
+  /surveys/answers/{surveyId}:
     put:
       tags:
         - Admin - Informative/DocumentHandler

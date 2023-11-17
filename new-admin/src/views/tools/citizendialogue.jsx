@@ -169,7 +169,7 @@ class ToolOptions extends Component {
 
   listAllAvailableSurveys(callback) {
     this.props.model.getConfig(
-      this.props.model.get("config").url_survey_list,
+      this.props.model.get("config").url_surveys_list,
       (data) => {
         callback(data);
       },

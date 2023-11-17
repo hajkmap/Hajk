@@ -45,9 +45,7 @@ export default class CitizendialogueModel {
 
   async loadSurvey(title) {
     try {
-      const response = await hfetch(
-        `${this.mapServiceUrl}/survey/load/${title}`
-      );
+      const response = await hfetch(`${this.mapServiceUrl}/surveys/${title}`);
 
       if (!response || !response.ok) {
         throw new Error("Error loading survey");
@@ -68,7 +66,7 @@ export default class CitizendialogueModel {
 
       // Make the PUT request to the server
       const response = await hfetch(
-        `${this.mapServiceUrl}/survey/answer/save/${surveyId}`,
+        `${this.mapServiceUrl}/surveys/answers/${surveyId}`,
         {
           method: "PUT",
           headers: {
