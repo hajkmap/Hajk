@@ -56,7 +56,15 @@ namespace MapService.Business.MapConfig
         /// <returns>Return all map names.</returns>
         internal static IEnumerable<string> GetMaps()
         {
-            return JsonFileDataAccess.GetMapConfigFiles();
+            var mapConfigurationFiles = JsonFileDataAccess.GetMapConfigFiles();
+            var mapConfigurationNames = new List<string>();
+            foreach (string mapConfigurationFile in mapConfigurationFiles)
+            {
+                mapConfigurationNames.Add(Path.GetFileNameWithoutExtension(mapConfigurationFile));
+            }
+
+            return mapConfigurationNames;
+                
         }
 
         /// <summary>
