@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [3.13.21] - 2023-11-17
+
+### Fixed
+
+- The tools list in Admin is now refreshed: only current tools are available, sorting is alphabetical.
+
 ## [3.13.20] - 2023-11-14
 
 ### Added
@@ -179,7 +185,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [3.12.0-rc.2] - 2023-06-19
 
-[unreleased]: https://github.com/hajkmap/Hajk/compare/v3.13.20...hstd-main
+[unreleased]: https://github.com/hajkmap/Hajk/compare/v3.13.21...hstd-main
+[3.13.21]: https://github.com/hajkmap/Hajk/compare/v3.13.20...v3.13.21
 [3.13.20]: https://github.com/hajkmap/Hajk/compare/v3.13.19...v3.13.20
 [3.13.19]: https://github.com/hajkmap/Hajk/compare/v3.13.18...v3.13.19
 [3.13.18]: https://github.com/hajkmap/Hajk/compare/v3.13.17...v3.13.18
