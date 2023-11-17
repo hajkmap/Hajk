@@ -1595,7 +1595,7 @@ class Menu extends Component {
 
     if (title === "" || importedLayers.length === 0 || !importStatus) {
       alert(
-        "Ange titel och importera en giltig JSON-fil innan du lägger till ett nytt snabblager."
+        "Ange titel och importera en giltig JSON-fil innan du lägger till ett nytt tema."
       );
       return;
     }
@@ -2327,7 +2327,7 @@ class Menu extends Component {
                     <i
                       className="fa fa-question-circle"
                       data-toggle="tooltip"
-                      title="JSON-fil som innehåller lagerdefinitioner för snabblagret."
+                      title="JSON-fil som innehåller lagerdefinitioner för temat."
                     />
                   </label>
                   <input
@@ -2345,7 +2345,7 @@ class Menu extends Component {
                     <i
                       className="fa fa-question-circle"
                       data-toggle="tooltip"
-                      title="Titel på snabblagret visas i kartans lagerhanterare."
+                      title="Titel på temat visas i kartans lagerhanterare."
                     />
                   </label>
                   <input type="text" name="title" ref={this.titleRef} />
@@ -2358,7 +2358,7 @@ class Menu extends Component {
                     <i
                       className="fa fa-question-circle"
                       data-toggle="tooltip"
-                      title="Ägare av snabblagret visas i kartans lagerhanterare."
+                      title="Ägare av temat visas i kartans lagerhanterare."
                     />
                   </label>
                   <input type="text" name="author" ref={this.authorRef} />
@@ -2371,7 +2371,7 @@ class Menu extends Component {
                     <i
                       className="fa fa-question-circle"
                       data-toggle="tooltip"
-                      title="Beskrivning av snabblagret visas i kartans lagerhanterare."
+                      title="Beskrivning av temat visas i kartans lagerhanterare."
                     />
                   </label>
                   <input
@@ -2388,7 +2388,7 @@ class Menu extends Component {
                     <i
                       className="fa fa-question-circle"
                       data-toggle="tooltip"
-                      title="Nyckelord för snabblagret visas i kartans lagerhanterare."
+                      title="Nyckelord för temat visas i kartans lagerhanterare."
                     />
                   </label>
                   <input
