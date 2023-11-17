@@ -142,7 +142,16 @@ class SurveyService {
         bodyHtml += `<br><b>${key}</b>: ${body[key]}`;
       }
       bodyHtml += "</body></html>";
-      await this.mailNodemailer(bodyHtml);
+
+      let emailAddress = body.email;
+      if (!(await this.isValidEmail(emailAddress))) {
+        console.error("Ogiltig e-postadress: ", emailAddress);
+        emailAddress = "";
+      } else {
+        emailAddress = body.email;
+      }
+
+      await this.mailNodemailer(emailAddress, bodyHtml);
 
       // Return a success message
       return { message: "Survey data added to file" };
@@ -157,7 +166,7 @@ class SurveyService {
    * @returns
    * @memberof SurveyService
    */
-  async mailNodemailer(body) {
+  async mailNodemailer(emailAddress, body) {
     try {
       let transporterOptions = {
         host: process.env.CITIZEN_DIALOGUE_MAIL_HOST,
@@ -182,9 +191,16 @@ class SurveyService {
       // Create transport
       const transporter = nodemailer.createTransport(transporterOptions);
 
+      let recipients;
+      if (emailAddress) {
+        recipients = `${emailAddress}, ${process.env.CITIZEN_DIALOGUE_MAIL_TO}`;
+      } else {
+        recipients = process.env.CITIZEN_DIALOGUE_MAIL_TO;
+      }
+
       const options = {
         from: process.env.CITIZEN_DIALOGUE_MAIL_FROM,
-        to: process.env.CITIZEN_DIALOGUE_MAIL_TO,
+        to: recipients,
         subject: process.env.CITIZEN_DIALOGUE_MAIL_SUBJECT,
         html: body,
       };
@@ -194,6 +210,11 @@ class SurveyService {
       console.error("Error in mailNodemailer:", error);
       throw error;
     }
+  }
+
+  async isValidEmail(email) {
+    const emailRegex = /^\S+@\S+\.\S+$/;
+    return emailRegex.test(email);
   }
 }
 
