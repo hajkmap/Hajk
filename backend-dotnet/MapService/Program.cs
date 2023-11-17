@@ -85,17 +85,9 @@ app.UseSwagger();
 
 app.UseSwaggerUI(c =>
 {
-    //c.SwaggerEndpoint("/api/v1/spec", "HAJK Backend");    
-    if (app.Environment.IsDevelopment()) // Development (i.e installed in the root of the site)
-    {
-        c.SwaggerEndpoint("/swagger/v2/swagger.yml", "HAJK .NET Backend v2");
-        c.SwaggerEndpoint("/swagger/v1/swagger.yml", "HAJK .NET Backend v1");
-    }
-    else // Release (i.e installed in folder mapservice in Hajk deployment)
-    {
-        c.SwaggerEndpoint("/mapservice/swagger/v2/swagger.yml", "HAJK .NET Backend v2");
-        c.SwaggerEndpoint("/mapservice/swagger/v1/swagger.yml", "HAJK .NET Backend v1");
-    }
+    //c.SwaggerEndpoint("/api/v1/spec", "HAJK Backend");
+    c.SwaggerEndpoint("v2/swagger.yml", "HAJK .NET Backend v2");
+    c.SwaggerEndpoint("v1/swagger.yml", "HAJK .NET Backend v1");
 });
 //}
 
