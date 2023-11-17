@@ -10,15 +10,15 @@
         "name": "page1",
         "elements": [
           {
-            "type": "text",
-            "name": "enkatnamn",
-            "visible": false
-          },
-          {
-            "type": "text",
-            "name": "svarsID",
-            "visible": false
-          },
+            "type": "html",
+            "name": "info",
+            "html": "<div style='margin: 0px; font-size: 18px; font-weight: bold;'>Bidra till utvecklingen av rynningeviken</div><div style='margin: 0px; font-size: 12px;'>Fritidsområdet Rynningeviken ska utvecklas och förbättras. Vi vill höra vad som fungerar bra och vad som kan bli bättre i området.</div><div style='margin: 0px; font-size: 12px;'>Du kommer att få svara på några frågor i denna enkät. I en del kommer du även att få markera punkter i en karta.</div><div style='margin: 0px; font-size: 12px;'>Om du har frågor om denna enkät så kontakta Anna Andersson på 019-xxxxxxx</div>"
+          }
+        ]
+      },
+      {
+        "name": "page2",
+        "elements": [
           {
             "type": "text",
             "name": "question1",
@@ -33,7 +33,7 @@
         ]
       },
       {
-        "name": "page2",
+        "name": "page3",
         "elements": [
           {
             "type": "checkbox",
@@ -49,7 +49,7 @@
         ]
       },
       {
-        "name": "page3",
+        "name": "page4",
         "elements": [
           {
             "type": "geometry",
@@ -63,7 +63,7 @@
         ]
       },
       {
-        "name": "page4",
+        "name": "page5",
         "elements": [
           {
             "type": "geometry",
@@ -77,7 +77,7 @@
         ]
       },
       {
-        "name": "page5",
+        "name": "page6",
         "elements": [
           {
             "name": "email",
