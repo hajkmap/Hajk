@@ -304,11 +304,14 @@ class Menu extends Component {
       showQuickAccess: false,
       enableSystemLayersSwitch: false,
       lockDrawOrderBaselayer: false,
-      drawOrderViewInfoText: "",
+      drawOrderViewInfoText:
+        "Här kan du ändra ritordning på tända lager i kartan. Dra lagret upp eller ner i listan och släpp på önskad plats.",
       enableQuickAccessTopics: false,
-      quickAccessTopicsInfoText: "",
+      quickAccessTopicsInfoText:
+        "Här kan du ladda färdiga teman till snabbåtkomst. Teman innehåller tända och släckta lager, samt bakgrund.",
       enableUserQuickAccessFavorites: false,
-      userQuickAccessFavoritesInfoText: "",
+      userQuickAccessFavoritesInfoText:
+        "Här kan du hantera och redigera dina sparade favoriter.",
       enableTransparencySlider: true,
       instruction: "",
       dropdownThemeMaps: false,
@@ -378,20 +381,20 @@ class Menu extends Component {
             existingConfig.lockDrawOrderBaselayer ??
             this.state.lockDrawOrderBaselayer,
           drawOrderViewInfoText:
-            existingConfig.drawOrderViewInfoText ??
-            this.state.drawOrderViewInfoText,
+            existingConfig.drawOrderViewInfoText ||
+            "Här kan du ändra ritordning på tända lager i kartan. Dra lagret upp eller ner i listan och släpp på önskad plats.",
           enableQuickAccessTopics:
             existingConfig.enableQuickAccessTopics ??
             this.state.enableQuickAccessTopics,
           quickAccessTopicsInfoText:
-            existingConfig.quickAccessTopicsInfoText ??
-            this.state.quickAccessTopicsInfoText,
+            existingConfig.quickAccessTopicsInfoText ||
+            "Här kan du ladda färdiga teman till snabbåtkomst. Teman innehåller tända och släckta lager, samt bakgrund.",
           enableUserQuickAccessFavorites:
             existingConfig.enableUserQuickAccessFavorites ??
             this.state.enableUserQuickAccessFavorites,
           userQuickAccessFavoritesInfoText:
-            existingConfig.userQuickAccessFavoritesInfoText ??
-            this.state.userQuickAccessFavoritesInfoText,
+            existingConfig.userQuickAccessFavoritesInfoText ||
+            "Här kan du hantera och redigera dina sparade favoriter.",
           enableTransparencySlider:
             existingConfig.enableTransparencySlider ??
             this.state.enableTransparencySlider,
