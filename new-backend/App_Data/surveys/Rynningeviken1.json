@@ -75,6 +75,20 @@
             "title": "Kommentarer om platsen som du markerat i kartan?"
           }
         ]
+      },
+      {
+        "name": "page5",
+        "elements": [
+          {
+            "name": "email",
+            "type": "text",
+            "title": "Vill du ha återkoppling från oss, ange din epostadress",
+            "inputType": "email",
+            "placeholder": "namn@exempel.se",
+            "isRequired": false,
+            "autocomplete": "email"
+          }
+        ]
       } 
     ]
 }

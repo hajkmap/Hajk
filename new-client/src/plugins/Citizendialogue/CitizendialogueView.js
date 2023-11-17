@@ -2,6 +2,7 @@
 import React, { useCallback, useEffect, useState, useRef } from "react";
 import * as Survey from "survey-react-ui";
 import { ComponentCollection } from "survey-core";
+import { Model } from "survey-core";
 import "survey-core/defaultV2.min.css";
 import "survey-core/i18n/swedish";
 import ReactDOM from "react-dom/client";
@@ -215,13 +216,19 @@ function CitizendialogueView(props) {
     }
   });
 
+  const [mySurvey, setMySurvey] = useState({});
+
+  useEffect(() => {
+    setMySurvey(new Model(surveyJSON));
+  }, [surveyJSON]);
+
   Survey.surveyLocalization.defaultLocale = "sv";
 
   return (
     <>
       {surveyJSON && (
         <Survey.Survey
-          json={surveyJSON}
+          model={mySurvey}
           onComplete={handleOnComplete}
           onAfterRenderQuestion={handleAfterRenderQuestion}
           onCurrentPageChanged={handlePageChange}
