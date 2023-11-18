@@ -184,7 +184,7 @@ function CitizendialogueView(props) {
       setCoordinates((prevCoords) => {
         const existingCoordinates = prevCoords[currentQuestionName] || [];
         let newCoordinatesToAdd;
-
+        //Remove duplicate geometry
         if (Array.isArray(temporaryCoordinates[0])) {
           newCoordinatesToAdd = temporaryCoordinates.filter(
             (tempCoord) =>
