@@ -34,7 +34,10 @@ class EditView extends React.PureComponent {
         editFeature: feature,
         editSource: this.props.model.editSource,
       });
-      this.props.onCoordinatesChange(feature.getGeometry().getCoordinates());
+      this.props.onCoordinatesChange(
+        this.props.currentQuestionName,
+        feature.getGeometry().getCoordinates()
+      );
     });
 
     this.props.observer.subscribe("resetView", () => {

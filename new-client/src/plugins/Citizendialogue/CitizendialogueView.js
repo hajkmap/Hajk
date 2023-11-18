@@ -123,18 +123,6 @@ function CitizendialogueView(props) {
       })
   );
 
-  const [coordinates, setCoordinates] = React.useState({});
-
-  const handleCoordinatesChange = (newCoordinates) => {
-    setCoordinates((prevCoords) => {
-      const existingCoordinates = prevCoords[currentQuestionName] || [];
-      return {
-        ...prevCoords,
-        [currentQuestionName]: [...existingCoordinates, newCoordinates],
-      };
-    });
-  };
-
   const [surveyJSON, setSurveyJSON] = useState(null);
 
   useEffect(() => {
@@ -152,6 +140,8 @@ function CitizendialogueView(props) {
     setEditViewKey(Date.now());
   };
   const editViewRef = useRef(null);
+
+  const [coordinates, setCoordinates] = React.useState({});
 
   //Combine ID/Name and surveydata and coordinates
   const handleOnComplete = React.useCallback(
@@ -187,6 +177,49 @@ function CitizendialogueView(props) {
     }
   };
 
+  const [temporaryCoordinates, setTemporaryCoordinates] = useState(null);
+
+  useEffect(() => {
+    if (temporaryCoordinates && currentQuestionName) {
+      setCoordinates((prevCoords) => {
+        const existingCoordinates = prevCoords[currentQuestionName] || [];
+        let newCoordinatesToAdd;
+
+        if (Array.isArray(temporaryCoordinates[0])) {
+          newCoordinatesToAdd = temporaryCoordinates.filter(
+            (tempCoord) =>
+              !existingCoordinates.some(
+                (existingCoord) =>
+                  existingCoord[0] === tempCoord[0] &&
+                  existingCoord[1] === tempCoord[1]
+              )
+          );
+        } else {
+          const isDuplicate = existingCoordinates.some(
+            (coord) =>
+              coord[0] === temporaryCoordinates[0] &&
+              coord[1] === temporaryCoordinates[1]
+          );
+          newCoordinatesToAdd = isDuplicate ? [] : [temporaryCoordinates];
+        }
+
+        return {
+          ...prevCoords,
+          [currentQuestionName]: [
+            ...existingCoordinates,
+            ...newCoordinatesToAdd,
+          ],
+        };
+      });
+
+      setTemporaryCoordinates(null);
+    }
+  }, [temporaryCoordinates, currentQuestionName]);
+
+  const handleSelectedCoordinatesChange = (questionName, newCoordinate) => {
+    setTemporaryCoordinates(newCoordinate);
+  };
+
   const handlePageChange = () => {
     setShowEditView(false);
     if (editViewRef.current) {
@@ -219,7 +252,7 @@ function CitizendialogueView(props) {
             currentQuestionName={currentQuestionName}
             onSaveCallback={handleOnComplete}
             ref={editViewRef}
-            onCoordinatesChange={handleCoordinatesChange}
+            onCoordinatesChange={handleSelectedCoordinatesChange}
           />
         );
       });
