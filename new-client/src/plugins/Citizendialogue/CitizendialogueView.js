@@ -123,6 +123,18 @@ function CitizendialogueView(props) {
       })
   );
 
+  const [coordinates, setCoordinates] = React.useState({});
+
+  const handleCoordinatesChange = (newCoordinates) => {
+    setCoordinates((prevCoords) => {
+      const existingCoordinates = prevCoords[currentQuestionName] || [];
+      return {
+        ...prevCoords,
+        [currentQuestionName]: [...existingCoordinates, newCoordinates],
+      };
+    });
+  };
+
   const [surveyJSON, setSurveyJSON] = useState(null);
 
   useEffect(() => {
@@ -141,18 +153,22 @@ function CitizendialogueView(props) {
   };
   const editViewRef = useRef(null);
 
-  //Combine ID/Name and surveydata
+  //Combine ID/Name and surveydata and coordinates
   const handleOnComplete = React.useCallback(
     (survey) => {
       setShowEditView(false);
-      const combinedData = { ...props.surveyJsData, ...survey.data };
+      const combinedData = {
+        ...props.surveyJsData,
+        ...survey.data,
+        coordinates,
+      };
       props.model.handleOnComplete(combinedData);
 
       if (editViewRef.current) {
         editViewRef.current.onSaveClicked();
       }
     },
-    [props.surveyJsData, props.model]
+    [props.surveyJsData, props.model, coordinates]
   );
 
   const [currentQuestionName, setCurrentQuestionName] = useState(null);
@@ -203,6 +219,7 @@ function CitizendialogueView(props) {
             currentQuestionName={currentQuestionName}
             onSaveCallback={handleOnComplete}
             ref={editViewRef}
+            onCoordinatesChange={handleCoordinatesChange}
           />
         );
       });
