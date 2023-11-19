@@ -185,6 +185,11 @@ class EditModel {
       );
     }
 
+    let combinedFeatures = [...features.inserts, ...features.updates];
+    let coordinates = combinedFeatures.map((feature) =>
+      feature.getGeometry().getCoordinates()
+    );
+
     if (
       features.updates.length === 0 &&
       features.inserts.length === 0 &&
@@ -193,7 +198,9 @@ class EditModel {
       return done();
     }
 
-    this.transact(features, done);
+    this.transact(features, (response) => {
+      done(response, coordinates);
+    });
   }
 
   getSelectStyle() {

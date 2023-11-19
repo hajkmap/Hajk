@@ -180,6 +180,7 @@ function CitizendialogueView(props) {
   const [temporaryCoordinates, setTemporaryCoordinates] = useState(null);
 
   useEffect(() => {
+    console.log(temporaryCoordinates, currentQuestionName);
     if (temporaryCoordinates && currentQuestionName) {
       setCoordinates((prevCoords) => {
         const existingCoordinates = prevCoords[currentQuestionName] || [];
