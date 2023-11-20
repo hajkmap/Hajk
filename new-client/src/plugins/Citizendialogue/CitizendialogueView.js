@@ -177,6 +177,8 @@ function CitizendialogueView(props) {
     }
   };
 
+  // A useEffect that sets coordinates as well as the current question used by handleOnComplete
+  // To display coordinates in answerfile.
   const [temporaryCoordinates, setTemporaryCoordinates] = useState(null);
   const [temporaryQuestionNameCoords, setTemporaryQuestionNameCoords] =
     useState(null);
