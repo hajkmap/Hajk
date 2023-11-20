@@ -178,12 +178,14 @@ function CitizendialogueView(props) {
   };
 
   const [temporaryCoordinates, setTemporaryCoordinates] = useState(null);
+  const [temporaryQuestionNameCoords, setTemporaryQuestionNameCoords] =
+    useState(null);
 
   useEffect(() => {
-    console.log(temporaryCoordinates, currentQuestionName);
-    if (temporaryCoordinates && currentQuestionName) {
+    if (temporaryCoordinates && temporaryQuestionNameCoords) {
       setCoordinates((prevCoords) => {
-        const existingCoordinates = prevCoords[currentQuestionName] || [];
+        const existingCoordinates =
+          prevCoords[temporaryQuestionNameCoords] || [];
         let newCoordinatesToAdd;
         //Remove duplicate geometry
         if (Array.isArray(temporaryCoordinates[0])) {
@@ -206,7 +208,7 @@ function CitizendialogueView(props) {
 
         return {
           ...prevCoords,
-          [currentQuestionName]: [
+          [temporaryQuestionNameCoords]: [
             ...existingCoordinates,
             ...newCoordinatesToAdd,
           ],
@@ -215,10 +217,11 @@ function CitizendialogueView(props) {
 
       setTemporaryCoordinates(null);
     }
-  }, [temporaryCoordinates, currentQuestionName]);
+  }, [temporaryCoordinates, temporaryQuestionNameCoords]);
 
   const handleSelectedCoordinatesChange = (questionName, newCoordinate) => {
     setTemporaryCoordinates(newCoordinate);
+    setTemporaryQuestionNameCoords(questionName);
   };
 
   const handlePageChange = () => {
