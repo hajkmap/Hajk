@@ -13,7 +13,9 @@ export class Controller {
       if (r && !r.error) {
         res.status(200).send("Document created");
         ael.info(
-          `${res.locals.authUser} created a new document, ${documentName}.json, and connected it to map ${mapName}.json and ${folderName}`
+          `${res.locals.authUser} created a new document ${
+            folderName && `${folderName}/`
+          }${documentName}.json, and connected it to map ${mapName}.json.`
         );
       } else res.status(500).send(r.error.message);
     });
@@ -30,49 +32,42 @@ export class Controller {
   }
 
   getByName(req, res) {
-    const DEFAULT_FOLDER_NAME = "";
-
-    const folderName = req.params.folder || DEFAULT_FOLDER_NAME;
-
-    InformativeService.getByName(folderName, req.params.name).then((r) => {
+    const { folder, name } = req.params;
+    InformativeService.getByName(folder, name).then((r) => {
       if (r && !r.error) {
         res.json(r);
       } else {
-        const errorMessage = `Document "${req.params.name}" could not be found`;
+        const errorMessage = `${folder && `${folder}/`}${name}`;
         res.status(404).send(errorMessage);
       }
     });
   }
 
   saveByName(req, res) {
-    const DEFAULT_FOLDER_NAME = "";
-
-    const folderName = req.params.folder || DEFAULT_FOLDER_NAME;
-
-    InformativeService.saveByName(folderName, req.params.name, req.body).then(
-      (r) => {
-        if (r && !r.error) {
-          res.status(200).send("File saved");
-          ael.info(
-            `${res.locals.authUser} saved document ${req.params.name}.json`
-          );
-        } else {
-          res.status(500).send(r.error.message);
-        }
+    const { folder, name } = req.params;
+    InformativeService.saveByName(folder, name, req.body).then((r) => {
+      if (r && !r.error) {
+        res.status(200).send("File saved");
+        ael.info(
+          `${res.locals.authUser} saved document ${
+            folder && `${folder}/`
+          }${name}.json`
+        );
+      } else {
+        res.status(500).send(r.error.message);
       }
-    );
+    });
   }
 
   deleteByName(req, res) {
-    const DEFAULT_FOLDER_NAME = "";
-
-    const folderName = req.params.folder || DEFAULT_FOLDER_NAME;
-
-    InformativeService.deleteByName(folderName, req.params.name).then((r) => {
+    const { folder, name } = req.params;
+    InformativeService.deleteByName(folder, name).then((r) => {
       if (r && !r.error) {
         res.status(200).send("File deleted");
         ael.info(
-          `${res.locals.authUser} deleted document ${req.params.name}.json`
+          `${res.locals.authUser} deleted document ${
+            folder && `${folder}/`
+          }${name}.json`
         );
       } else {
         res.status(500).send(r.error.message);

@@ -15,12 +15,8 @@ class InformativeService {
    * @returns {object} JSON representation of document
    * @memberof InformativeService
    */
-  async getByName(folder, file) {
+  async getByName(folder = "", file) {
     try {
-      if (typeof folder === "undefined") {
-        throw new Error("Folder is undefined");
-      }
-
       file += ".json"; // Add file extension
 
       // Construct the path depending on whether a folder was provided
@@ -28,7 +24,7 @@ class InformativeService {
         process.cwd(),
         "App_Data",
         "documents",
-        folder ? folder : "",
+        folder,
         file
       );
 
@@ -40,7 +36,7 @@ class InformativeService {
         `Error while opening informative document "${file}". Sent 404 Not Found as response. Original error below.`
       );
       logger.warn(error);
-      return { error: error.message };
+      return { error };
     }
   }
 
@@ -52,12 +48,8 @@ class InformativeService {
    * @returns
    * @memberof InformativeService
    */
-  async create(documentName, mapName, folderName) {
+  async create(documentName, mapName, folderName = "") {
     try {
-      if (typeof folderName === "undefined") {
-        throw new Error("Folder name is undefined");
-      }
-
       // Add desired file extension to our file's name…
       documentName += ".json";
 
@@ -66,7 +58,7 @@ class InformativeService {
         process.cwd(),
         "App_Data",
         "documents",
-        folderName ? folderName : "",
+        folderName,
         documentName
       );
 
@@ -87,7 +79,7 @@ class InformativeService {
       logger.error(
         `Error while creating document "${documentName}". Original error: ${error.message}`
       );
-      return { error: error.message };
+      return { error };
     }
   }
 
@@ -129,12 +121,8 @@ class InformativeService {
    * @returns
    * @memberof InformativeService
    */
-  async saveByName(folder, file, body) {
+  async saveByName(folder = "", file, body) {
     try {
-      if (typeof folder === "undefined") {
-        throw new Error("Folder parameter is undefined");
-      }
-
       file += ".json"; // Add file extension.
 
       // Prepare the path to our file.
@@ -142,7 +130,7 @@ class InformativeService {
         process.cwd(),
         "App_Data",
         "documents",
-        folder ? folder : "",
+        folder,
         file
       );
 
@@ -159,7 +147,7 @@ class InformativeService {
       return jsonString;
     } catch (error) {
       logger.error(`Error saving file "${file}": ${error.message}`);
-      return { error: error.message };
+      return { error };
     }
   }
 
@@ -169,12 +157,8 @@ class InformativeService {
    * @returns {array} Names of files as array of strings
    * @memberof InformativeService
    */
-  async deleteByName(folder, file) {
+  async deleteByName(folder = "", file) {
     try {
-      if (typeof folder === "undefined") {
-        throw new Error("Folder parameter is undefined");
-      }
-
       // Append .json extension to the file.
       file += ".json";
 
@@ -183,7 +167,7 @@ class InformativeService {
         process.cwd(),
         "App_Data",
         "documents",
-        folder ? folder : "",
+        folder,
         file
       );
 
@@ -194,7 +178,7 @@ class InformativeService {
       return {};
     } catch (error) {
       logger.error(`Error deleting file "${file}": ${error.message}`);
-      return { error: error.message };
+      return { error };
     }
   }
 
@@ -204,15 +188,9 @@ class InformativeService {
    * @returns {array} Names of files as array of strings
    * @memberof InformativeService
    */
-  async getAvailableDocuments(foldername) {
+  async getAvailableDocuments(folder = "") {
     try {
-      var dir = "";
-      if (foldername) {
-        dir = path.join(process.cwd(), "App_Data", "documents", foldername);
-      } else {
-        dir = path.join(process.cwd(), "App_Data", "documents");
-      }
-
+      const dir = path.join(process.cwd(), "App_Data", "documents", folder);
       const dirContents = await fs.promises.readdir(dir, {
         withFileTypes: true,
       });
