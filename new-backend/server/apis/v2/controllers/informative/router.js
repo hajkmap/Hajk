@@ -5,9 +5,17 @@ import restrictAdmin from "../../middlewares/restrict.admin.js";
 export default express
   .Router()
   .get("/load/:name", controller.getByName)
+  .get("/load/:folder/:name", controller.getByName)
   .use(restrictAdmin) // All routes that follow are admin-only!
-  .put("/create", controller.create) // PUT is correct here, as this operation is idempotent
+  .post("/create", controller.create)
+  .put("/create", controller.create)
+  .post("/createfolder", controller.createFolder)
+  .get("/folderlist", controller.folderlist)
   .delete("/delete/:name", controller.deleteByName)
+  .delete("/delete/:folder/:name", controller.deleteByName)
   .get("/list", controller.list)
-  .get("/list/:name", controller.list) // FIXME: For now, the name paramter is ignored - should list only documents connected to specified map
-  .put("/save/:name", controller.saveByName); // PUT is correct here, as this operation is idempotent
+  .get("/list/:folder", controller.list)
+  .post("/save/:name", controller.saveByName) // FIXME: Remove POST
+  .put("/save/:name", controller.saveByName) // PUT is correct here, as this operation is idempotent
+  .post("/save/:folder/:name", controller.saveByName) // FIXME: Remove POST
+  .put("/save/:folder/:name", controller.saveByName); // PUT is correct here, as this operation is idempotent

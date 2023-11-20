@@ -508,6 +508,7 @@
           "menu": [
             {
               "title": "Exempeldokument",
+              "folder": "",
               "document": "exempeldokument",
               "color": "",
               "icon": {
@@ -520,6 +521,7 @@
             },
             {
               "title": "Exempeldokument2",
+              "folder": "",
               "document": "exempeldokument2",
               "color": "",
               "icon": {
