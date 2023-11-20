@@ -320,6 +320,95 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Error"
+  /surveys/list:
+    get:
+      tags:
+        - Admin - Informative/DocumentHandler
+      responses:
+        200:
+          description: Return all available documents
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SurveyList"
+        5XX:
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /surveys/{survey}:
+    get:
+      tags:
+        - Client-accessible
+      parameters:
+        - name: survey
+          in: path
+          description: Name of the survey to be fetched
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: Return the JSON file
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SurveyBody"
+        5XX:
+          description: Example not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /surveys/answers/{survey}:
+    get:
+      tags:
+        - Client-accessible
+      parameters:
+        - name: survey
+          in: path
+          description: Name of the survey to be fetched
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: Return the JSON file
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SurveyBody"
+        5XX:
+          description: Example not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /surveys/answers/{surveyId}:
+    put:
+      tags:
+        - Admin - Informative/DocumentHandler
+      parameters:
+        - name: name
+          in: path
+          description: Document to be saved
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: Return the saved document's body
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DocumentsList"
+        5XX:
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
   /mapconfig/layers:
     get:
       tags:
@@ -843,7 +932,21 @@ components:
                 type: array
                 items:
                   type: object
+    SurveyBody:
+      type: object
+      properties:
+        title:
+          type: string
+        language:
+          type: string
+        pages:
+          type: array
     DocumentsList:
+      type: array
+      items:
+        type: string
+      example: ["doc_1", "doc_2", "doc_3"]
+    SurveyList:
       type: array
       items:
         type: string
