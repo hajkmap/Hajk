@@ -13,6 +13,7 @@ import TextField from "@material-ui/core/TextField";
 import ListItemIcon from "@material-ui/core/ListItemIcon";
 import BlockIcon from "@material-ui/icons/Block";
 import Select from "@material-ui/core/Select";
+import NativeSelect from "@material-ui/core/NativeSelect";
 import MenuItem from "@material-ui/core/MenuItem";
 import { Typography } from "@material-ui/core";
 import { withStyles } from "@material-ui/core/styles";
@@ -93,6 +94,7 @@ class MenuConnectionSelector extends React.Component {
       linkValue: this.props.menuItem.link,
       documentValue: this.props.menuItem.document,
     });
+    this.useDocumentFolders = this.props.useDocumentFolders ?? false;
   };
 
   getInitialMenuValue = () => {
@@ -166,7 +168,7 @@ class MenuConnectionSelector extends React.Component {
   };
 
   updateSelection = () => {
-    const { treeNodeId, menuItem, updateMenuItem, type } = this.props;
+    const { treeNodeId, menuItem, updateMenuItem, type, folder} = this.props;
     const { menuValue, documentValue, linkValue, mapLinkValue } = this.state;
     const { DOCUMENT, LINK, MAP_LINK, NONE } = CONNECTION_TYPE;
 
@@ -181,6 +183,7 @@ class MenuConnectionSelector extends React.Component {
       document: type === DOCUMENT ? newDocument : menuItem.document,
       link: type === LINK ? newLink : menuItem.link,
       maplink: type === MAP_LINK ? newMapLink : menuItem.maplink,
+      folder: folder,
     };
 
     updateMenuItem(treeNodeId, newMenuItem);
@@ -196,11 +199,36 @@ class MenuConnectionSelector extends React.Component {
     this.setState({ documentValue: availableDocuments[index] });
   };
 
+  renderFolders() {
+    const { folders } = this.props;
+    return folders.map((folder, i) => (
+      <option key={i}>{folder}</option>
+    ));
+  }
+
+  handleFolderClick = (event) => {
+    const selectedFolder = event.target.value;
+    this.props.onFolderSelection(selectedFolder);
+}
+
   renderDocumentList = () => {
     const { availableDocuments, classes } = this.props;
     const { documentValue } = this.state;
     return (
       <Grid item>
+        {this.useDocumentFolders ? (
+        <FormControl fullWidth>
+          <NativeSelect
+            onChange={(event) => this.handleFolderClick(event)}
+            value={this.props.folder}
+          >
+            <option value="">
+            Välj en mapp
+            </option>
+            {this.renderFolders()}
+          </NativeSelect>
+        </FormControl>
+        ):null}
         <List component="nav">
           {availableDocuments.map((availableDocument, index) => {
             return (
