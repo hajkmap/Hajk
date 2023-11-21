@@ -89,6 +89,24 @@
             "autocomplete": "email"
           }
         ]
+      },
+      {
+        "name": "page7",
+        "elements": [
+          {
+            "type": "ranking",
+            "name": "smartphone-features",
+            "title": "Vänligen rangordna följande funktioner i en smartphone från viktigast till minst viktig",
+            "isRequired": false,
+            "choices": [
+              "Batteritid",
+              "Bra kamera",
+              "Kraftfull CPU",
+              "Stor skärm",
+              "Lågt pris"
+            ]
+          }
+        ]
       } 
     ]
 }

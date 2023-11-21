@@ -3,6 +3,7 @@ import React, { useCallback, useEffect, useState, useRef } from "react";
 import * as Survey from "survey-react-ui";
 import { ComponentCollection } from "survey-core";
 import { Model } from "survey-core";
+import * as SurveyTheme from "survey-core/themes";
 import "survey-core/defaultV2.min.css";
 import "survey-core/i18n/swedish";
 import ReactDOM from "react-dom/client";
@@ -272,10 +273,13 @@ function CitizendialogueView(props) {
     }
   });
 
-  const [mySurvey, setMySurvey] = useState({});
+  const [survey, setSurvey] = useState(null);
 
   useEffect(() => {
-    setMySurvey(new Model(surveyJSON));
+    const newSurvey = new Model(surveyJSON);
+    newSurvey.applyTheme(SurveyTheme.DefaultDark);
+    setSurvey(newSurvey);
+    return () => {};
   }, [surveyJSON]);
 
   Survey.surveyLocalization.defaultLocale = "sv";
@@ -284,7 +288,7 @@ function CitizendialogueView(props) {
     <>
       {surveyJSON && (
         <Survey.Survey
-          model={mySurvey}
+          model={survey}
           onComplete={handleOnComplete}
           onAfterRenderQuestion={handleAfterRenderQuestion}
           onCurrentPageChanged={handlePageChange}
