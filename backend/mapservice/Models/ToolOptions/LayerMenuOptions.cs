@@ -67,6 +67,8 @@ namespace MapService.Models.ToolOptions
 
         public bool minMaxZoomAlertOnToggleOnly { get; set; }
 
+        public bool cqlFilterVisible { get; set; }
+
         public string target { get; set; }
 
         public string position { get; set; }

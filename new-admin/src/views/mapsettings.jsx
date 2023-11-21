@@ -330,6 +330,7 @@ class Menu extends Component {
       minMaxZoomAlertOnToggleOnly: false,
       keywords: [],
       keywordInput: "",
+      cqlFilterVisible: false,
     };
     this.titleRef = React.createRef();
     this.authorRef = React.createRef();
@@ -415,6 +416,8 @@ class Menu extends Component {
           minMaxZoomAlertOnToggleOnly:
             existingConfig.minMaxZoomAlertOnToggleOnly ??
             this.state.minMaxZoomAlertOnToggleOnly,
+          cqlFilterVisible:
+            existingConfig.cqlFilterVisible ?? this.state.cqlFilterVisible,
         });
         $(".tree-view li").editable(this);
         $(".tree-view > ul").sortable();
@@ -634,6 +637,7 @@ class Menu extends Component {
         this.state.userQuickAccessFavoritesInfoText,
       enableTransparencySlider: this.state.enableTransparencySlider,
       instruction: this.state.instruction,
+      cqlFilterVisible: this.state.cqlFilterVisible,
       dropdownThemeMaps: this.state.dropdownThemeMaps,
       themeMapHeaderCaption: this.state.themeMapHeaderCaption,
       visibleForGroups: this.state.visibleForGroups.map(
@@ -2053,6 +2057,24 @@ class Menu extends Component {
                     className="fa fa-question-circle"
                     data-toggle="tooltip"
                     title="Global inställning för att välja om transparensreglage ska vara aktiv eller inte. Om inställningen är aktiv går det då att konfigurera individer lager om transparensreglage ska visas till lagret.  Om denna ruta inte är ikryssad kommer transparensreglage inte visas till någon lager."
+                  />
+                </label>
+              </div>
+              <div>
+                <input
+                  id="cqlFilterVisible"
+                  name="cqlFilterVisible"
+                  type="checkbox"
+                  onChange={this.handleInputChange}
+                  checked={this.state.cqlFilterVisible}
+                />
+                &nbsp;
+                <label className="long-label" htmlFor="cqlFilterVisible">
+                  Visa filter med CQL{" "}
+                  <i
+                    className="fa fa-question-circle"
+                    data-toggle="tooltip"
+                    title="När rutan är ikryssad visas ett fält för CQL-filter. Inställningen är global och visas för alla lager när rutan är ikryssad."
                   />
                 </label>
               </div>

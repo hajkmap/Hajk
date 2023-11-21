@@ -45,7 +45,11 @@ function LayerItemDetails({
   // TODO: Needs a better way to handle this
   const [tooltipOpen, setTooltipOpen] = useState(false);
 
-  const cqlFilterVisible = app.config.mapConfig.map?.cqlFilterVisible || false;
+  const layerSwitcherConfig = app.config.mapConfig.tools.find(
+    (tool) => tool.type === "layerswitcher"
+  );
+  const cqlFilterVisible =
+    layerSwitcherConfig?.options.cqlFilterVisible || false;
   const subLayerIndex =
     layerItemDetails?.subLayerIndex === undefined
       ? null
