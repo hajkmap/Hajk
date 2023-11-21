@@ -508,6 +508,9 @@ class LayersSwitcherView extends React.PureComponent {
                       favoritesInfoText={
                         this.options.userQuickAccessFavoritesInfoText
                       }
+                      handleQuickAccessSectionExpanded={() =>
+                        this.setState({ quickAccessSectionExpanded: true })
+                      }
                     ></Favorites>
                   )}
                   <QuickAccessOptions

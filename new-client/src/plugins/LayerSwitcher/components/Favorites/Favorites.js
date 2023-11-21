@@ -27,6 +27,7 @@ function Favorites({
   favoriteViewDisplay,
   globalObserver,
   favoritesInfoText,
+  handleQuickAccessSectionExpanded,
 }) {
   const { enqueueSnackbar } = useSnackbar();
   const [domReady, setDomReady] = useState(false);
@@ -169,6 +170,8 @@ function Favorites({
     if (doToggleView) {
       // Close favorites view on load
       handleFavoritesViewToggle({ setQuickAccessSectionExpanded: true });
+    } else {
+      handleQuickAccessSectionExpanded();
     }
   };
 
