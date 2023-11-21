@@ -479,7 +479,7 @@ function Favorites({
         }}
       >
         <DialogTitle id="saveFavorite-dialog-title">
-          Lägg till favorit
+          Spara till favoriter
         </DialogTitle>
         <DialogContent>
           <Typography id="save-favorite-dialog-description" sx={{ mb: 1 }}>
@@ -556,8 +556,8 @@ function Favorites({
       />
       <ConfirmationDialog
         open={openNoLayersAlert}
-        titleName={"Spara favorit"}
-        contentDescription="Det finns inga lager i snabbåtkomst. Vänligen lägg till lager för att spara favorit."
+        titleName={"Spara till favoriter"}
+        contentDescription="Det finns inga lager i snabbåtkomst. Vänligen lägg till lager för att spara till favoriter."
         cancel={"Stäng"}
         handleAbort={() => {
           setOpenNoLayersAlert(false);
