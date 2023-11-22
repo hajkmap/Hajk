@@ -96,7 +96,8 @@ function FavoritesViewHeader({
     <Box
       sx={{
         p: 1,
-        backgroundColor: (theme) => theme.palette.grey[100],
+        backgroundColor: (theme) =>
+          theme.palette.mode === "dark" ? "#373737" : theme.palette.grey[100],
         borderBottom: (theme) =>
           `${theme.spacing(0.2)} solid ${theme.palette.divider}`,
       }}

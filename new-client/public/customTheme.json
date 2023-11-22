@@ -1,7 +1,2 @@
 {
-  "typography": {
-    "fontFamily": "'Open Sans',Arial,sans-serif",
-	"body1": { "fontSize": "0.88rem" }
-  },
-  "palette": { "type": "light" }
 }
