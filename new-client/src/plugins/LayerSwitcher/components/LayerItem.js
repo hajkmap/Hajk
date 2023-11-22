@@ -8,6 +8,7 @@ import {
   ListItemSecondaryAction,
   ListItemText,
   Tooltip,
+  useTheme,
 } from "@mui/material";
 
 import DragIndicatorOutlinedIcon from "@mui/icons-material/DragIndicatorOutlined";
@@ -60,6 +61,7 @@ export default function LayerItem({
   const [showSnackbarOnClick, setShowSnackbarOnClick] = useState(false);
 
   const { addToSnackbar, removeFromSnackbar } = useSnackbar();
+  const theme = useTheme();
 
   const layerSwitcherConfig = app.config.mapConfig.tools.find(
     (tool) => tool.type === "layerswitcher"
@@ -398,14 +400,18 @@ export default function LayerItem({
         display: display,
         marginLeft:
           expandableSection || isBackgroundLayer || draggable ? 0 : "31px",
+        borderBottom:
+          legendIsActive || (drawOrderItem() && showSublayers)
+            ? `${theme.spacing(0.2)} solid ${theme.palette.divider}`
+            : "none",
       }}
     >
       <Box
         sx={{
           borderBottom: (theme) =>
             drawOrderItem() && showSublayers
-              ? `${theme.spacing(0.2)} solid transparent`
-              : drawOrderItem()
+              ? "none"
+              : drawOrderItem() && !legendIsActive
               ? `${theme.spacing(0.2)} solid ${theme.palette.divider}`
               : "none",
           display: "flex",
@@ -468,6 +474,8 @@ export default function LayerItem({
               primary={layer.get("caption")}
               primaryTypographyProps={{
                 pr: 5,
+                overflow: "hidden",
+                textOverflow: "ellipsis",
                 fontWeight:
                   layer.get("visible") && !draggable && !isBackgroundLayer
                     ? "bold"

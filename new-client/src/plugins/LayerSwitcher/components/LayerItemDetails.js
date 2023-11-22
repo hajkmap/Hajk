@@ -9,6 +9,7 @@ import {
   Button,
   Box,
   IconButton,
+  Divider,
   Slider,
   Tooltip,
   Typography,
@@ -21,6 +22,7 @@ import FormatListBulletedOutlinedIcon from "@mui/icons-material/FormatListBullet
 import SettingsOutlinedIcon from "@mui/icons-material/SettingsOutlined";
 import StarOutlineOutlinedIcon from "@mui/icons-material/StarOutlineOutlined";
 import DeleteOutlinedIcon from "@mui/icons-material/DeleteOutlined";
+import FilterAltOutlinedIcon from "@mui/icons-material/FilterAltOutlined";
 import LayerItemInfo from "./LayerItemInfo";
 import LegendImage from "./LegendImage";
 
@@ -170,13 +172,17 @@ function LayerItemDetails({
             left: 0,
             right: 0,
             bottom: 0,
-            backgroundColor: "#fff",
+            backgroundColor: (theme) =>
+              theme.palette.mode === "dark" ? "rgb(18,18,18)" : "#fff",
           }}
         >
           <Box
             sx={{
               p: 1,
-              backgroundColor: (theme) => theme.palette.grey[100],
+              backgroundColor: (theme) =>
+                theme.palette.mode === "dark"
+                  ? "#373737"
+                  : theme.palette.grey[100],
               borderBottom: (theme) =>
                 `${theme.spacing(0.2)} solid ${theme.palette.divider}`,
             }}
@@ -302,17 +308,6 @@ function LayerItemDetails({
                 </Stack>
               </Box>
             ) : null}
-            {layerItemDetails.layer.getProperties().filterable && (
-              <Box
-                sx={{
-                  px: 2,
-                  pr: 2,
-                  pb: 2,
-                }}
-              >
-                <VectorFilter layer={layerItemDetails.layer} />
-              </Box>
-            )}
             {cqlFilterVisible && (
               <Box
                 sx={{
@@ -323,6 +318,33 @@ function LayerItemDetails({
               >
                 <CQLFilter layer={layerItemDetails.layer} />
               </Box>
+            )}
+            {layerItemDetails.layer.getProperties().filterable && (
+              <>
+                <Divider />
+                <Stack direction="row" alignItems="center">
+                  <IconButton
+                    sx={{ cursor: "default" }}
+                    disableFocusRipple
+                    disableRipple
+                    disableTouchRipple
+                  >
+                    <FilterAltOutlinedIcon />
+                  </IconButton>
+                  <Box sx={{ flexGrow: 1 }}>
+                    <Typography variant="subtitle1">Filter</Typography>
+                  </Box>
+                </Stack>
+                <Box
+                  sx={{
+                    px: 2,
+                    pr: 2,
+                    pb: 2,
+                  }}
+                >
+                  <VectorFilter layer={layerItemDetails.layer} />
+                </Box>
+              </>
             )}
             {isQuickAccessEnabled() && (
               <Box

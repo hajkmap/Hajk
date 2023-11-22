@@ -101,9 +101,9 @@ export default function LayerItemOptions({
       const rows = features.features.map((r, i) => {
         return { ...r.properties, id: i };
       });
-
+      const caption = layer.get("caption");
       app.globalObserver.publish("core.showAttributeTable", {
-        title: `${this.caption} (${LAYERS})`,
+        title: `${caption} (${LAYERS})`,
         content: { columns, rows },
       });
     } catch (error) {

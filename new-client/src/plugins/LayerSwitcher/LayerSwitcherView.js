@@ -6,7 +6,6 @@ import { styled } from "@mui/material/styles";
 import { withSnackbar } from "notistack";
 import {
   AppBar,
-  Divider,
   Tab,
   Tabs,
   Box,
@@ -28,6 +27,7 @@ import QuickAccessLayers from "./components/QuickAccessLayers.js";
 import QuickAccessOptions from "./components/QuickAccessOptions.js";
 import LayerItemDetails from "./components/LayerItemDetails.js";
 import Favorites from "./components/Favorites/Favorites.js";
+import { debounce } from "utils/debounce";
 
 import StarOutlineOutlinedIcon from "@mui/icons-material/StarOutlineOutlined";
 import TopicOutlinedIcon from "@mui/icons-material/TopicOutlined";
@@ -304,7 +304,7 @@ class LayersSwitcherView extends React.PureComponent {
   };
 
   // Handles filter functionality
-  handleFilterValueChange = (value) => {
+  handleFilterValueChange = debounce((value) => {
     this.setState({
       filterValue: value,
     });
@@ -312,7 +312,7 @@ class LayersSwitcherView extends React.PureComponent {
     this.setState({
       treeData: this.layerTree,
     });
-  };
+  }, 200);
 
   /**
    * This method handles layerupdates from DrawOrder component,
@@ -418,7 +418,10 @@ class LayersSwitcherView extends React.PureComponent {
         <Box
           sx={{
             p: 1,
-            backgroundColor: (theme) => theme.palette.grey[100],
+            backgroundColor: (theme) =>
+              theme.palette.mode === "dark"
+                ? "#373737"
+                : theme.palette.grey[100],
             borderBottom: (theme) =>
               `${theme.spacing(0.2)} solid ${theme.palette.divider}`,
           }}
@@ -451,19 +454,26 @@ class LayersSwitcherView extends React.PureComponent {
                 ),
               }}
               size="small"
-              value={this.state.filterValue}
               onChange={(event) =>
                 this.handleFilterValueChange(event.target.value)
               }
               fullWidth
               placeholder="Filtrera"
               variant="outlined"
-              sx={{ background: "#fff" }}
+              sx={{
+                background: (theme) =>
+                  theme.palette.mode === "dark" ? "inherit" : "#fff",
+              }}
             />
           </Box>
         </Box>
         {this.props.options.showQuickAccess && (
-          <>
+          <Box
+            sx={{
+              borderBottom: (theme) =>
+                `${theme.spacing(0.2)} solid ${theme.palette.divider}`,
+            }}
+          >
             <LayerGroupAccordion
               display={"block"}
               expanded={this.state.quickAccessSectionExpanded}
@@ -508,6 +518,9 @@ class LayersSwitcherView extends React.PureComponent {
                       favoritesInfoText={
                         this.options.userQuickAccessFavoritesInfoText
                       }
+                      handleQuickAccessSectionExpanded={() =>
+                        this.setState({ quickAccessSectionExpanded: true })
+                      }
                     ></Favorites>
                   )}
                   <QuickAccessOptions
@@ -530,10 +543,7 @@ class LayersSwitcherView extends React.PureComponent {
                 ></QuickAccessLayers>
               }
             ></LayerGroupAccordion>
-            <Divider
-              sx={{ backgroundColor: (theme) => theme.palette.grey[500] }}
-            ></Divider>
-          </>
+          </Box>
         )}
         {this.state.treeData.map((group, i) => {
           return (

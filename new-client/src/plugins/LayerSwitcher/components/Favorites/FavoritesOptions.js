@@ -11,7 +11,7 @@ import {
 } from "@mui/material";
 
 import PersonOutlinedIcon from "@mui/icons-material/PersonOutlined";
-import AddOutlinedIcon from "@mui/icons-material/AddOutlined";
+import LibraryAddOutlinedIcon from "@mui/icons-material/LibraryAddOutlined";
 import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
 import LayersOutlinedIcon from "@mui/icons-material/LayersOutlined";
 
@@ -91,9 +91,9 @@ export default function FavoritesOptions({
       >
         <MenuItem onClick={handleAdd}>
           <ListItemIcon>
-            <AddOutlinedIcon fontSize="small" />
+            <LibraryAddOutlinedIcon fontSize="small" />
           </ListItemIcon>
-          <ListItemText>Lägg till favorit</ListItemText>
+          <ListItemText>Spara till favoriter</ListItemText>
         </MenuItem>
         <MenuItem onClick={handleEditFavorites}>
           <ListItemIcon>

@@ -214,7 +214,8 @@ function DrawOrder({ display, app, map, onLayerChange, model, options }) {
           pr: 2,
           pl: 2,
           py: 1,
-          backgroundColor: (theme) => theme.palette.grey[100],
+          backgroundColor: (theme) =>
+            theme.palette.mode === "dark" ? "#373737" : theme.palette.grey[100],
           borderBottom: (theme) =>
             `${theme.spacing(0.2)} solid ${theme.palette.divider}`,
         }}
