@@ -52,6 +52,11 @@
         "name": "page4",
         "elements": [
           {
+            "type": "html",
+            "name": "infogeometri",
+            "html": "<div style='margin: 0px; font-size: 12px;'>Information om verktygsfältet nedan...</div>"
+          },
+          {
             "type": "geometry",
             "name": "Rita i kartan (Geometri1)"
           },

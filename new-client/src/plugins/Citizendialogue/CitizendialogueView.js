@@ -23,7 +23,7 @@ ComponentCollection.Instance.add({
   //The actual question that will do the job
   questionJSON: {
     type: "html",
-    html: "<button id='editButton'>Klicka här för att ta fram kartverktyg</button><div class='editViewContainer'></div>",
+    html: "<div class='editViewContainer'></div>",
   },
 });
 // Hajk components are primarily styled in two ways:
@@ -168,13 +168,7 @@ function CitizendialogueView(props) {
     const currentQuestion = options.question;
     if (currentQuestion.jsonObj.type === "geometry") {
       setCurrentQuestionName(currentQuestion.name);
-      const editButton = document.getElementById("editButton");
-      if (editButton) {
-        editButton.onclick = (e) => {
-          e.preventDefault();
-          setShowEditView(true);
-        };
-      }
+      setShowEditView(true);
     }
   };
 
