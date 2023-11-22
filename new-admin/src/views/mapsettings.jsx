@@ -637,6 +637,7 @@ class Menu extends Component {
         this.state.userQuickAccessFavoritesInfoText,
       enableTransparencySlider: this.state.enableTransparencySlider,
       instruction: this.state.instruction,
+      minMaxZoomAlertOnToggleOnly: this.state.minMaxZoomAlertOnToggleOnly,
       cqlFilterVisible: this.state.cqlFilterVisible,
       dropdownThemeMaps: this.state.dropdownThemeMaps,
       themeMapHeaderCaption: this.state.themeMapHeaderCaption,
