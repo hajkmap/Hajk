@@ -10,8 +10,10 @@ import {
   IconButton,
   Switch,
   TextField,
+  Tooltip,
 } from "@mui/material";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import IconWarning from "@mui/icons-material/Warning";
 
 const ExpandMore = styled((props) => {
   const { expand, ...other } = props;
@@ -26,6 +28,7 @@ const ExpandMore = styled((props) => {
 
 const FeatureItem = (props) => {
   const {
+    globalObserver,
     layerNotes,
     setLayerNotes,
     controlledLayers,
@@ -55,6 +58,10 @@ const FeatureItem = (props) => {
     subcaption,
     propertyName, // We want to keep track of which property a given layer belongs to, print only current selected property's.
   };
+
+  // If layer loading failed, we want to replace the toggle switch
+  // with a warning triangle.
+  const [loadStatus, setLoadStatus] = React.useState("ok");
 
   // Used to keep track of OL Layer's current visibility.
   const [visible, setVisible] = React.useState(olLayer.getVisible());
@@ -102,6 +109,28 @@ const FeatureItem = (props) => {
     };
   }, [olLayer]);
 
+  const layerLoadErrorHandler = React.useCallback(
+    (d) => {
+      loadStatus !== "loaderror" &&
+        olLayer.get("name") === d.id &&
+        setLoadStatus(d.status);
+    },
+    [loadStatus, olLayer]
+  );
+
+  useEffect(() => {
+    globalObserver.subscribe(
+      "layerswitcher.wmsLayerLoadStatus",
+      layerLoadErrorHandler
+    );
+    return () => {
+      globalObserver.unsubscribe(
+        "layerswitcher.wmsLayerLoadStatus",
+        layerLoadErrorHandler
+      );
+    };
+  }, [layerLoadErrorHandler, globalObserver]);
+
   const handleLayerToggle = () => {
     const newVal = !visible;
     setVisible(newVal);
@@ -119,7 +148,29 @@ const FeatureItem = (props) => {
     <Card variant="outlined">
       <CardHeader
         avatar={
-          <Switch edge="start" onChange={handleLayerToggle} checked={visible} />
+          <>
+            {loadStatus === "loaderror" ? (
+              <Tooltip
+                disableInteractive
+                title="Lagret kunde inte laddas in. Kartservern svarar inte."
+              >
+                <IconButton
+                  disableFocusRipple
+                  disableRipple
+                  disableTouchRipple
+                  sx={{ cursor: "not-allowed" }}
+                >
+                  <IconWarning />
+                </IconButton>
+              </Tooltip>
+            ) : (
+              <Switch
+                edge="start"
+                onChange={handleLayerToggle}
+                checked={visible}
+              />
+            )}
+          </>
         }
         action={
           <>
