@@ -432,10 +432,14 @@ class TimeSliderView extends React.PureComponent {
   };
 
   // Updates the slider and renders the layers at the supplied time
-  updateSliderAndRenderLayersAtTime = async (unixTime) => {
+  updateSliderAndRenderLayersAtTime = (unixTime) => {
     // We want to make sure not to resolve before the layers has rendered - otherwise we might
     // get strange side-effects if the caller thinks that the map is ready right away...
     return new Promise((resolve) => {
+      // If the supplied time is already set, we can resolve right away...
+      if (this.state.currentUnixTime === unixTime) {
+        resolve();
+      }
       // Let's bind a listener that fires when the rendering is completed...
       this.map.once("rendercomplete", () => {
         // ... and resolve when that happens.
