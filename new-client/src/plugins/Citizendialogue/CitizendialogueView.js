@@ -3,8 +3,8 @@ import React, { useCallback, useEffect, useState, useRef } from "react";
 import * as Survey from "survey-react-ui";
 import { ComponentCollection } from "survey-core";
 import { Model } from "survey-core";
-import * as SurveyTheme from "survey-core/themes";
-import "survey-core/defaultV2.min.css";
+//import * as SurveyTheme from "survey-core/themes";
+//import "survey-core/defaultV2.min.css";
 import "survey-core/i18n/swedish";
 import ReactDOM from "react-dom/client";
 
@@ -112,6 +112,27 @@ function CitizendialogueView(props) {
   // There is a lot more to say regarding the useEffect hook, but I'll leave that to you to read up on. Just a couple of tips:
   // - Remember the cleanup-function! Especially when you're working with subscriptions.
   // - Remember that you can use several useEffect hooks! Maybe you want to do something when 'counter' changes?
+
+  useEffect(() => {
+    fetch("/survey-style.css")
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error("Network response was not ok");
+        }
+        return response.text();
+      })
+      .then((css) => {
+        const style = document.createElement("style");
+        style.textContent = css;
+        document.head.appendChild(style);
+      })
+      .catch((error) => {
+        console.error(
+          "There has been a problem with your fetch operation:",
+          error
+        );
+      });
+  }, []);
 
   const [editModel] = React.useState(
     () =>
@@ -271,7 +292,7 @@ function CitizendialogueView(props) {
 
   useEffect(() => {
     const newSurvey = new Model(surveyJSON);
-    newSurvey.applyTheme(SurveyTheme.DefaultDark);
+    //newSurvey.applyTheme(SurveyTheme.DefaultDark);
     setSurvey(newSurvey);
     return () => {};
   }, [surveyJSON]);
