@@ -46,15 +46,6 @@ class TimeSlider extends React.PureComponent {
     });
   }
 
-  // // The print model requires some options, lets try to fetch the options from the regular print tool.
-  // // If the regular print tool is not active, we use a fallback.
-  // getPrintOptions = () => {
-  //   return (
-  //     this.props.app.config.mapConfig.tools.find((t) => t.type === "print")
-  //       ?.options || DEFAULT_PRINT_OPTIONS
-  //   );
-  // };
-
   bindSubscriptions = () => {
     this.localObserver.subscribe("toggleHeaderPlayButton", (playing) => {
       this.setState({ playing: playing });
