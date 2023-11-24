@@ -194,6 +194,7 @@ class Manager extends Component {
           infoText: layer.infoText,
           infoUrl: layer.infoUrl,
           infoUrlText: layer.infoUrlText,
+          infoOpenDataLink: layer.infoOpenDataLink,
           infoOwner: layer.infoOwner,
         });
 
@@ -265,6 +266,7 @@ class Manager extends Component {
           infoText: layer.infoText,
           infoUrl: layer.infoUrl,
           infoUrlText: layer.infoUrlText,
+          infoOpenDataLink: layer.infoOpenDataLink,
           infoOwner: layer.infoOwner,
           timeSliderVisible: layer.timeSliderVisible,
           timeSliderStart: layer.timeSliderStart,
@@ -326,6 +328,7 @@ class Manager extends Component {
           infoText: layer.infoText,
           infoUrl: layer.infoUrl,
           infoUrlText: layer.infoUrlText,
+          infoOpenDataLink: layer.infoOpenDataLink,
           infoOwner: layer.infoOwner,
           timeSliderVisible: layer.timeSliderVisible,
           timeSliderStart: layer.timeSliderStart,
@@ -370,6 +373,7 @@ class Manager extends Component {
           infoText: layer.infoText,
           infoUrl: layer.infoUrl,
           infoUrlText: layer.infoUrlText,
+          infoOpenDataLink: layer.infoOpenDataLink,
           infoOwner: layer.infoOwner,
           timeSliderVisible: layer.timeSliderVisible,
           timeSliderStart: layer.timeSliderStart,

@@ -434,7 +434,7 @@
       "index": 15
     },
     {
-      "type": "bookmark",
+      "type": "bookmarks",
       "options": {
         "target": "toolbar",
         "instruction": "",

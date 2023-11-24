@@ -398,6 +398,7 @@ class SearchBar extends React.PureComponent {
         label={<span style={visuallyHidden}>Sök i webbplatsens innehåll</span>}
         variant={isMobile ? "standard" : "outlined"}
         placeholder={placeholder}
+        autoFocus={this.props.options?.autofocusOnStart ?? false}
         onKeyPress={handleSearchBarKeyPress}
         InputLabelProps={{ shrink: true }}
         InputProps={{
@@ -492,9 +493,15 @@ class SearchBar extends React.PureComponent {
 
   render() {
     const { showSearchResults, isMobile } = this.props;
+    const { renderElsewhere } = this.props.options;
 
     return (
-      <Grid sx={{ width: 400, height: (theme) => theme.spacing(6) }}>
+      <Grid
+        sx={{
+          width: 400,
+          height: (theme) => (renderElsewhere ? "auto" : theme.spacing(6)),
+        }}
+      >
         <Grid item>
           <Paper elevation={isMobile ? 0 : 1}>
             {this.renderAutoComplete()}

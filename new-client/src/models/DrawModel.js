@@ -12,6 +12,7 @@ import transformTranslate from "@turf/transform-translate";
 import { getArea as getExtentArea, getCenter, getWidth } from "ol/extent";
 import { Feature } from "ol";
 import { handleClick } from "./Click";
+import { noModifierKeys, platformModifierKeyOnly } from "ol/events/condition";
 
 /*
  * A model supplying useful Draw-functionality.
@@ -168,6 +169,16 @@ class DrawModel {
   // - subject: (string): The subject to be published on the observer
   // - payLoad: (any): The payload to send when publishing.
   #publishInformation = ({ subject, payLoad }) => {
+    // We utilize the fact that this method runs on important changes, such
+    // as feature add/remove. We check if there are any features in the draw
+    // layer and save that information in the Public API. This is later
+    // read in a handler for "onbeforeunload". See #1403.
+    if (this.getAllDrawnFeatures().length > 0) {
+      window.hajkPublicApi.dirtyLayers[this.#layerName] = true;
+    } else {
+      delete window.hajkPublicApi.dirtyLayers[this.#layerName];
+    }
+
     // If no observer has been set-up, or if the subject is missing, we abort
     if (!this.#observer || !subject) {
       return;
@@ -646,7 +657,7 @@ class DrawModel {
           stroke: new Stroke({ color: this.#highlightStrokeColor, width: 2 }),
         }),
         geometry: () => {
-          const coordinates = this.#getFeatureCoordinates(feature);
+          const coordinates = this.getFeatureCoordinates(feature);
           return new MultiPoint(coordinates);
         },
       });
@@ -657,7 +668,7 @@ class DrawModel {
   };
 
   // Returns an array of arrays with the coordinates of the supplied feature
-  #getFeatureCoordinates = (feature) => {
+  getFeatureCoordinates = (feature) => {
     // First, we have to extract the feature geometry
     const geometry = feature.getGeometry();
     // Then we'll have to extract the feature type, since we have to extract the
@@ -680,6 +691,15 @@ class DrawModel {
         // GetCoordinates returns an array with the coordinates for points,
         // so we have to wrap that array in an array before returning.
         return [geometry.getCoordinates()];
+      case "MultiPolygon":
+        // We'll need to flatten the data from MultiPolygon. It's the coordinates we want.
+        let coords = [];
+        geometry.getCoordinates()[0].forEach((a) => {
+          a.forEach((b) => {
+            coords.push(b);
+          });
+        });
+        return coords;
       default:
         // The default catches Polygons, which are wrapped in an "extra" array, so let's
         // return the first element.
@@ -2226,6 +2246,9 @@ class DrawModel {
       stopClick: true,
       geometryFunction: drawMethod === "Rectangle" ? createBox() : null,
       style: this.#getDrawStyle(),
+      condition: (e) => {
+        return platformModifierKeyOnly(e) || noModifierKeys(e);
+      },
     });
     // Let's set the supplied draw-method as a property on the draw-interaction
     // so that we can keep track of if we're creating special features (arrows etc).

@@ -4,15 +4,32 @@ import ad from "../services/activedirectory.service.js";
 const logger = log4js.getLogger("router.v1");
 
 export default async function restrictAdmin(req, res, next) {
-  logger.trace("Attempt to access admin API methods");
+  logger.trace("Attempt to access admin-only API endpoint");
 
   // If AD lookup isn't active, there's no way for us to find
-  // out if access should be granted. Warn and allow access for everyone.
-  if (process.env.AD_LOOKUP_ACTIVE !== "true") {
+  // out if access should be granted. If there are no access group
+  // restrictions, allow access to anyone.
+  if (
+    process.env.AD_LOOKUP_ACTIVE !== "true" &&
+    !process.env.RESTRICT_ADMIN_ACCESS_TO_AD_GROUPS
+  ) {
     logger.warn(
-      "AD lookup disabled! Anyone will have access to all admin-only endpoints! Please be aware that this scenario is insecure."
+      "Access to admin-only endpoint allowed because AD lookup is disabled! Please be aware that this scenario is highly insecure.\n\nIf you run this in production, you can still restrict access to admin-only endpoints by setting RESTRICT_ADMIN_ACCESS_TO_AD_GROUPS to any value."
     );
     return next();
+  }
+
+  // If AD lookup is disabled but there's a value in RESTRICT_ADMIN_ACCESS_TO_AD_GROUPS,
+  // it looks as if sysadmin tries to restrict access to critical admin-only endpoints.
+  // Let's restrict access in this case.
+  if (
+    process.env.AD_LOOKUP_ACTIVE !== "true" &&
+    process.env.RESTRICT_ADMIN_ACCESS_TO_AD_GROUPS
+  ) {
+    logger.warn(
+      "Access to admin-only endpoint restricted even though AD lookup is disabled.\nReason: RESTRICT_ADMIN_ACCESS_TO_AD_GROUPS has a value, which indicates that sysadmin wants to restrict admin access."
+    );
+    return res.sendStatus(403);
   }
 
   // Looks like AD auth is active. But before we can see if current user

@@ -431,6 +431,11 @@ class App extends React.PureComponent {
       t.toLowerCase()
     );
 
+    // Let's push some built-in core elements, that previously were plugins
+    // and that still have their config there.
+    lowerCaseActiveTools.push("preset");
+    lowerCaseActiveTools.push("externallinks");
+
     // Check which plugins defined in mapConfig don't exist in buildConfig
     const unsupportedToolsFoundInMapConfig = this.props.config.mapConfig.tools
       .map((t) => t.type.toLowerCase())
@@ -445,11 +450,12 @@ class App extends React.PureComponent {
       });
 
     // Display a silent info message in console
-    console.log(
-      `The map configuration contains unavailable plugins: ${unsupportedToolsFoundInMapConfig.join(
-        ", "
-      )}. Please check your map config and buildConfig.json.  `
-    );
+    unsupportedToolsFoundInMapConfig.length > 0 &&
+      console.info(
+        `The map configuration contains unavailable plugins: ${unsupportedToolsFoundInMapConfig.join(
+          ", "
+        )}. Please check your map config and buildConfig.json.  `
+      );
   };
   /**
    * @summary Initiates the wanted analytics model (if any).
@@ -531,6 +537,7 @@ class App extends React.PureComponent {
     window.hajkPublicApi = {
       ...window.hajkPublicApi,
       olMap: this.appModel.map,
+      dirtyLayers: {},
     };
 
     // Register a handle to prevent pinch zoom on mobile devices.
@@ -551,6 +558,19 @@ class App extends React.PureComponent {
       // which is important for smooth scrolling to work correctly.
     );
 
+    // Some tools (such as those that use the DrawModel) will tell
+    // the Public API if user has made any changes that would be lost
+    // on a window close/reload. We listen to the appropriate event
+    // and check with the "dirtyLayers" object in order to determine
+    // whether to show the confirmation dialog. See #1403.
+    this.appModel.config.mapConfig.map.confirmOnWindowClose !== false &&
+      window.addEventListener("beforeunload", function (event) {
+        if (Object.keys(window.hajkPublicApi.dirtyLayers).length > 0) {
+          event.preventDefault();
+          return (event.returnValue = "");
+        }
+      });
+
     // This event is used to allow controlling Hajk programmatically, e.g in an embedded context, see #1252
     this.props.config.mapConfig.map.enableAppStateInHash === true &&
       window.addEventListener(
@@ -567,9 +587,14 @@ class App extends React.PureComponent {
 
           // Act when view's zoom changes
           if (mergedParams.get("z")) {
-            // Since we're dealing with a string, we're gonna need to parse it to a float
-            const zoomInHash = parseFloat(mergedParams.get("z"));
-            if (this.appModel.map.getView().getZoom() !== zoomInHash) {
+            // Since we're dealing with a string, we have to parse it to a float.
+            // We must also round it to the nearest integer in order to avoid bouncing in View:
+            // View's getZoom() returns a float, but our hash param is always an integer.
+            // See also: #1422.
+            const zoomInHash = Math.round(parseFloat(mergedParams.get("z")));
+            if (
+              Math.round(this.appModel.map.getView().getZoom()) !== zoomInHash
+            ) {
               // …let's update our View's zoom.
               this.appModel.map.getView().animate({ zoom: zoomInHash });
             }
@@ -700,7 +725,9 @@ class App extends React.PureComponent {
       if (v !== null) {
         this.setState({ drawerVisible: true, activeDrawerContent: v });
       } else {
-        this.globalObserver.publish("core.hideDrawer");
+        if (!this.state.drawerStatic) {
+          this.globalObserver.publish("core.hideDrawer");
+        }
       }
     });
 
@@ -1028,6 +1055,25 @@ class App extends React.PureComponent {
     );
   };
 
+  showDrawerButtons() {
+    const drawerButtons = this.state.drawerButtons;
+
+    if (!drawerButtons) return false;
+
+    // We check if the plugin button (or any button) is empty and then subsequently hidden
+    const isHiddenPluginPresent = drawerButtons.some(
+      (button) => button.hideOnMdScreensAndAbove
+    );
+
+    // We want to check if there's only one visible drawerButton
+    const isOnlyOneButtonVisible =
+      drawerButtons.length === 1 ||
+      (drawerButtons.length === 2 && isHiddenPluginPresent);
+
+    // And then check if drawer is static AND has a single visible button
+    return this.state.drawerStatic && isOnlyOneButtonVisible ? false : true;
+  }
+
   render() {
     const { config } = this.props;
 
@@ -1087,15 +1133,15 @@ class App extends React.PureComponent {
             <StyledHeader
               id="header"
               sx={{
-                justifyContent: this.state.drawerStatic
-                  ? "end"
-                  : "space-between",
+                justifyContent: this.showDrawerButtons()
+                  ? "space-between"
+                  : "end",
                 "& > *": {
                   pointerEvents: "auto",
                 },
               }}
             >
-              {clean === false && !this.state.drawerStatic && (
+              {clean === false && this.showDrawerButtons() && (
                 <DrawerToggleButtons
                   drawerButtons={this.state.drawerButtons}
                   globalObserver={this.globalObserver}
@@ -1104,6 +1150,7 @@ class App extends React.PureComponent {
                       ? this.state.activeDrawerContent
                       : null
                   }
+                  drawerStatic={this.state.drawerStatic}
                 />
               )}
               {/* Render Search even if clean === false: Search contains logic to handle clean inside the component. */}

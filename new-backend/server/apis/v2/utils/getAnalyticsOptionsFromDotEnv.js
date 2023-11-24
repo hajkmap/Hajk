@@ -38,15 +38,15 @@ export default function getAnalyticsOptionsFromDotEnv() {
           trackLocalhost: parsedOptions.option_tracklocalhost,
         },
       };
-    // TODO: Adding support for Matomo should be as simple as…
-    // case "matomo":
-    //   return {
-    //     type: "matomo",
-    //     options: {
-    //       siteId: parsedOptions.option_siteid,
-    //       trackerUrl: parsedOptions.option_trackerurl,
-    //     },
-    //   };
+
+    case "matomo":
+      return {
+        type: "matomo",
+        options: {
+          siteId: parsedOptions.option_siteid,
+          trackerUrl: parsedOptions.option_trackerurl,
+        },
+      };
 
     default:
       break;

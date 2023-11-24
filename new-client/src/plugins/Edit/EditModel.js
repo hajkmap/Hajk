@@ -181,7 +181,7 @@ class EditModel {
     this.transact(features, done);
   }
 
-  getSelectStyle(feature) {
+  getSelectStyle() {
     return [
       new Style({
         stroke: new Stroke({
@@ -226,7 +226,7 @@ class EditModel {
     ];
   }
 
-  getVectorStyle(feature) {
+  getVectorStyle() {
     return [
       new Style({
         stroke: new Stroke({
@@ -250,7 +250,31 @@ class EditModel {
     ];
   }
 
-  getHiddenStyle(feature) {
+  getTransparentStyle() {
+    return [
+      new Style({
+        stroke: new Stroke({
+          color: "rgba(0, 0, 0, 0)",
+          width: 3,
+        }),
+        fill: new Fill({
+          color: "rgba(0, 0, 0, 0)",
+        }),
+        image: new Circle({
+          fill: new Fill({
+            color: "rgba(0, 0, 0, 0)",
+          }),
+          stroke: new Stroke({
+            color: "rgba(0, 0, 0, 0)",
+            width: 3,
+          }),
+          radius: 4,
+        }),
+      }),
+    ];
+  }
+
+  getHiddenStyle() {
     return [
       new Style({
         stroke: new Stroke({
@@ -450,7 +474,17 @@ class EditModel {
   }
 
   setLayer(serviceId, done) {
+    // Find the source by id
     this.source = this.sources.find((source) => source.id === serviceId);
+
+    // Also, let's check if there are source-specific options for this
+    // map configuration and…
+    const sourceSpecificOptions = this.options.activeServices.find(
+      (l) => l.id === serviceId
+    );
+    // …spread them on the retrieved source object.
+    this.source = { ...this.source, ...sourceSpecificOptions };
+
     this.filty = true;
     this.vectorSource = new VectorSource({
       loader: (extent) => this.loadData(this.source, extent, done),
@@ -464,7 +498,10 @@ class EditModel {
       name: "pluginEdit",
       caption: "Edit layer",
       source: this.vectorSource,
-      style: this.getVectorStyle(),
+      style:
+        this.source?.simpleEditWorkflow === true // If only simple edit is allowed…
+          ? this.getTransparentStyle() // let's get a transparent style (user will see WMS layer anyway).
+          : this.getVectorStyle(), // Else, get normal vector style (all features are grey).
     });
 
     if (this.layer) {
@@ -493,8 +530,40 @@ class EditModel {
     this.modify = new Modify({
       features: this.select.getFeatures(),
     });
+
+    // The "select" interaction should be allowed in both the
+    // regular and simple edit workflows.
     this.map.addInteraction(this.select);
-    this.map.addInteraction(this.modify);
+
+    // The "modify" interaction (which allows moving the feature in
+    // map) should, however, only be allowed in the regular workflow.
+    if (this.source?.simpleEditWorkflow !== true) {
+      this.map.addInteraction(this.modify);
+    }
+
+    // Some special actions must take place if source
+    // uses the simple edit workflow.
+    if (this.source?.simpleEditWorkflow === true) {
+      // We must take care of activating clickLock and snapHelper
+      // manually in this method (because the normal activation
+      // takes place in `activateInteraction`, which never runs in
+      // in this flow).
+
+      // Enable clickLock, which prevents infoclick from triggering
+      this.map.clickLock.add("edit");
+
+      // Add snap after all interactions have been added
+      this.map.snapHelper.add("edit");
+
+      // If a corresponding WMS layer is specified, let's show it to the user
+      if (this.source?.correspondingWMSLayerId) {
+        // Try to show the corresponding WMS layer
+        const layerToShow = this.map
+          .getAllLayers()
+          .find((l) => l.get("name") === this.source.correspondingWMSLayerId);
+        layerToShow.setVisible(true);
+      }
+    }
   }
 
   activateAdd(geometryType) {
@@ -519,7 +588,6 @@ class EditModel {
       }, 1);
     });
     this.map.addInteraction(this.draw);
-    this.map.clickLock.add("edit");
   }
 
   activateRemove() {
@@ -545,12 +613,14 @@ class EditModel {
       this.activateModify();
     }
     if (type === "remove") {
-      this.map.clickLock.add("edit");
       this.activateRemove();
     }
 
+    // Enable clickLock, which prevents infoclick from triggering
+    this.map.clickLock.add("edit");
+
     // Add snap after all interactions have been added
-    this.map.snapHelper.add("measure");
+    this.map.snapHelper.add("edit");
   }
 
   removeSelected = (e) => {
@@ -568,7 +638,10 @@ class EditModel {
 
   deactivateInteraction() {
     // First remove the snap interaction
-    this.map.snapHelper.delete("measure");
+    this.map.snapHelper.delete("edit");
+
+    // Remove clickLock
+    this.map.clickLock.delete("edit");
 
     // Next, remove correct map interaction
     if (this.select) {
@@ -585,7 +658,6 @@ class EditModel {
     }
     if (this.remove) {
       this.remove = false;
-      this.map.clickLock.delete("edit");
       this.map.un("singleclick", this.removeSelected);
     }
   }
@@ -596,7 +668,6 @@ class EditModel {
     this.removeFeature = undefined;
     this.removalToolMode = "off";
     this.filty = false;
-    this.map.clickLock.delete("edit");
 
     if (this.layer) {
       this.map.removeLayer(this.layer);
@@ -610,13 +681,6 @@ class EditModel {
     this.editFeature = undefined;
     this.observer.publish("editFeature", this.editFeature);
   };
-
-  deactivate() {
-    this.reset();
-    this.observer.publish("editFeature", this.editFeature);
-    this.observer.publish("editSource", this.editSource);
-    this.observer.publish("deactivate");
-  }
 
   getSources() {
     return this.options.sources;

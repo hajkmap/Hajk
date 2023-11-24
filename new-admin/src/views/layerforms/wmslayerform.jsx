@@ -47,6 +47,7 @@ const defaultState = {
   infoText: "",
   infoUrl: "",
   infoUrlText: "",
+  infoOpenDataLink: "",
   infoOwner: "",
   timeSliderVisible: false,
   timeSliderStart: "",
@@ -1286,6 +1287,7 @@ class WMSLayerForm extends Component {
       infoText: this.getValue("infoText"),
       infoUrl: this.getValue("infoUrl"),
       infoUrlText: this.getValue("infoUrlText"),
+      infoOpenDataLink: this.getValue("infoOpenDataLink"),
       infoOwner: this.getValue("infoOwner"),
       timeSliderVisible: this.getValue("timeSliderVisible"),
       timeSliderStart: this.getValue("timeSliderStart"),
@@ -2164,6 +2166,19 @@ class WMSLayerForm extends Component {
               }}
               value={this.state.infoUrlText}
               className={this.getValidationClass("infoUrlText")}
+            />
+          </div>
+          <div className={infoClass}>
+            <label>Länk till öppna data</label>
+            <input
+              type="text"
+              ref="input_infoOpenDataLink"
+              onChange={(e) => {
+                this.setState({ infoOpenDataLink: e.target.value });
+                this.validateField("infoOpenDataLink", e);
+              }}
+              value={this.state.infoOpenDataLink}
+              className={this.getValidationClass("infoOpenDataLink")}
             />
           </div>
           <div className={infoClass}>
