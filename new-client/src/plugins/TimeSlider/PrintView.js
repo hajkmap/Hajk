@@ -1,5 +1,7 @@
 import React, { useState, useEffect, useMemo } from "react";
 import { FormControl, Grid, InputLabel, MenuItem, Select } from "@mui/material";
+import { saveAs } from "file-saver";
+import JSZip from "jszip";
 
 import PrintDialog from "./components/PrintDialog";
 import RangeSlider from "./components/RangeSlider";
@@ -57,12 +59,25 @@ export default function PrintView(props) {
     );
   };
 
+  // Returns a string on format "Properly formatted start-date - properly formatted end-date".zip
+  const getZipFileNameFromDateArray = (dates) => {
+    const { getDateLabel } = props;
+    return dates.length > 1
+      ? `${getDateLabel(dates[0], resolution)} - ${getDateLabel(
+          dates[dates.length - 1],
+          resolution
+        )}.zip`
+      : dates.length > 0
+      ? `${dates[0]}.zip`
+      : `missing-dates.zip`;
+  };
+
   // Creates images based on the current range and resolution set by the user in the ui
   const printAllImagesInRange = async () => {
     // Create an array containing the dates to be printed
     const dates = getDateArrayFromCurrentRange();
-    // The images are to be saved as a zip, let's store them in an array for now...
-    const blobs = [];
+    // The images are to be saved as a zip, let's initialize a zip-object
+    const zip = new JSZip();
     // For every date, update the map and create an image
     for await (const date of dates) {
       // We have to update the map so that it represents the current date
@@ -78,7 +93,7 @@ export default function PrintView(props) {
         // If they've cancelled, we break the loop
         break;
       }
-      blobs.push(blob);
+      zip.file(`${props.getDateLabel(date, resolution)}.png`, blob);
     }
     // Before we return anything, we have to check for cancellation again...
     if (token.cancelled) {
@@ -87,8 +102,15 @@ export default function PrintView(props) {
       // ... and return nothing!
       return null;
     } else {
-      // Otherwise, we can return the images!
-      return blobs;
+      // Otherwise, we can save the zip!
+      try {
+        const zipBlob = await zip.generateAsync({
+          type: "blob",
+        });
+        saveAs(zipBlob, getZipFileNameFromDateArray(dates));
+      } catch (error) {
+        console.error("Failed to save zip-file... Error:", error);
+      }
     }
   };
 
