@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- PropertyChecker: Better sorting and layer loading failed indicator in layers list.
+
 ## [3.13.21] - 2023-11-17
 
 ### Fixed
