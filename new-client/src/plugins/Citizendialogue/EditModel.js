@@ -186,9 +186,28 @@ class EditModel {
     }
 
     let combinedFeatures = [...features.inserts, ...features.updates];
-    let coordinates = combinedFeatures.map((feature) =>
-      feature.getGeometry().getCoordinates()
-    );
+    let wktGeometries = combinedFeatures.map((feature) => {
+      let geometry = feature.getGeometry();
+      let type = geometry.getType();
+      let coords = geometry.getCoordinates();
+
+      switch (type) {
+        case "Point":
+          return `POINT(${coords[0]} ${coords[1]})`;
+        case "LineString":
+          return `LINESTRING(${coords
+            .map((coord) => `${coord[0]} ${coord[1]}`)
+            .join(", ")})`;
+        case "Polygon":
+          return `POLYGON((${coords[0]
+            .map((coord) => `${coord[0]} ${coord[1]}`)
+            .join(", ")}))`;
+        default:
+          return null;
+      }
+    });
+
+    wktGeometries = wktGeometries.filter((geometry) => geometry !== null);
 
     if (
       features.updates.length === 0 &&
@@ -199,7 +218,7 @@ class EditModel {
     }
 
     this.transact(features, (response) => {
-      done(response, coordinates);
+      done(response, wktGeometries);
     });
   }
 
