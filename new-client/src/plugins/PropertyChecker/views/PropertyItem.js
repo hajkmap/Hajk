@@ -100,9 +100,12 @@ function PropertyItem({
                 const bid = b.get("id");
                 // If we've got nice strings, let's user localeCompare to sort. Else
                 // just assume the elements are equal.
-                return typeof aid === "string" && typeof bid === "string"
-                  ? aid.localeCompare(bid)
-                  : 0;
+                return (
+                  a.get("caption").localeCompare(b.get("caption")) || // First, sort on caption.
+                  (typeof aid === "string" && typeof bid === "string" // Next, group by layer ID.
+                    ? aid.localeCompare(bid)
+                    : 0)
+                );
               })
               .map((f, j) => {
                 const olLayer = olMap
