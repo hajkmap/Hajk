@@ -142,16 +142,16 @@ function CitizendialogueView(props) {
   };
   const editViewRef = useRef(null);
 
-  const [coordinates, setCoordinates] = React.useState({});
+  const [geometry, setGeometry] = React.useState({});
 
-  //Combine ID/Name and surveydata and coordinates
+  //Combine ID/Name and surveydata and geometry
   const handleOnComplete = React.useCallback(
     (survey) => {
       setShowEditView(false);
       const combinedData = {
         ...props.surveyJsData,
         ...survey.data,
-        coordinates,
+        geometry,
       };
       props.model.handleOnComplete(combinedData);
 
@@ -159,7 +159,7 @@ function CitizendialogueView(props) {
         editViewRef.current.onSaveClicked();
       }
     },
-    [props.surveyJsData, props.model, coordinates]
+    [props.surveyJsData, props.model, geometry]
   );
 
   const [currentQuestionName, setCurrentQuestionName] = useState(null);
@@ -172,15 +172,15 @@ function CitizendialogueView(props) {
     }
   };
 
-  // A useEffect that sets coordinates as well as the current question used by handleOnComplete
-  // To display coordinates in answerfile.
+  // A useEffect that sets geometry as well as the current question used by handleOnComplete
+  // To display geometry in answerfile.
   const [temporaryCoordinates, setTemporaryCoordinates] = useState(null);
   const [temporaryQuestionNameCoords, setTemporaryQuestionNameCoords] =
     useState(null);
 
   useEffect(() => {
     if (temporaryCoordinates && temporaryQuestionNameCoords) {
-      setCoordinates((prevCoords) => {
+      setGeometry((prevCoords) => {
         const existingCoordinates =
           prevCoords[temporaryQuestionNameCoords] || [];
         let newCoordinatesToAdd;

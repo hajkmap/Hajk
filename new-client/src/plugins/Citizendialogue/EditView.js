@@ -177,7 +177,7 @@ class EditView extends React.PureComponent {
       SURVEYQUESTION: this.props.currentQuestionName,
     };
 
-    model.save(editValues, (response, coordinates) => {
+    model.save(editValues, (response, wktGeometries) => {
       if (
         response &&
         (response.ExceptionReport || !response.TransactionResponse)
@@ -188,10 +188,10 @@ class EditView extends React.PureComponent {
           this.getStatusMessage(response)
         );
       } else {
-        if (coordinates && coordinates.length > 0) {
+        if (wktGeometries && wktGeometries.length > 0) {
           this.props.onCoordinatesChange(
             this.props.currentQuestionName,
-            coordinates
+            wktGeometries
           );
         }
         model.filty = false;
