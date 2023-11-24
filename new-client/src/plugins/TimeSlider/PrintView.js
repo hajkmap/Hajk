@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useMemo } from "react";
-import { saveAs } from "file-saver";
 import { FormControl, Grid, InputLabel, MenuItem, Select } from "@mui/material";
 
 import PrintDialog from "./components/PrintDialog";
@@ -12,6 +11,7 @@ import {
   INFORMATION_PANEL_MODES,
   MAX_IMAGES_FOR_PRINT,
 } from "./constants";
+import useCancelToken from "hooks/useCancelToken";
 
 export default function PrintView(props) {
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -19,6 +19,8 @@ export default function PrintView(props) {
   const [resolution, setResolution] = useState(props.resolution);
   const [stepSize, setStepSize] = useState(props.stepSize);
   const [dateRange, setDateRange] = useState([props.startTime, props.endTime]);
+  // We need a way to cancel the async image creation...
+  const [token, cancel, reset] = useCancelToken();
 
   const printOptions = useMemo(
     () => ({
@@ -47,30 +49,58 @@ export default function PrintView(props) {
     return () => props.printModel.renderPreviewFeature(false, printOptions);
   }, [printOptions, props.windowHidden, props.printModel]);
 
-  const print = async () => {
-    setDialogOpen(true);
-    const dates = Array.from(
+  // Creates an array containing dates withing the current range, separated by the current resolution
+  const getDateArrayFromCurrentRange = () => {
+    return Array.from(
       { length: (dateRange[1] - dateRange[0]) / stepSize + 1 },
       (_, index) => dateRange[0] + index * stepSize
     );
+  };
 
+  // Creates images based on the current range and resolution set by the user in the ui
+  const printAllImagesInRange = async () => {
+    // Create an array containing the dates to be printed
+    const dates = getDateArrayFromCurrentRange();
+    // The images are to be saved as a zip, let's store them in an array for now...
+    const blobs = [];
+    // For every date, update the map and create an image
     for await (const date of dates) {
-      const dateLabel = props.getDateLabel(date, resolution);
+      // We have to update the map so that it represents the current date
       await props.updateSliderAndRenderLayersAtTime(date);
+      // Then we can create the image
       const blob = await props.printModel.print({
         ...printOptions,
-        mapTitle: dateLabel,
+        mapTitle: props.getDateLabel(date, resolution),
         mapTextColor: "#FFFFFF",
       });
-      saveAs(blob, `${dateLabel}.png`);
+      // We have to keep track of wether the user has cancelled or not...
+      if (token.cancelled) {
+        // If they've cancelled, we break the loop
+        break;
+      }
+      blobs.push(blob);
     }
+    // Before we return anything, we have to check for cancellation again...
+    if (token.cancelled) {
+      // If we've been cancelled, we have to make sure to reset the cancellation-token...
+      reset();
+      // ... and return nothing!
+      return null;
+    } else {
+      // Otherwise, we can return the images!
+      return blobs;
+    }
+  };
 
+  const handleOnPrintClick = async () => {
+    setDialogOpen(true);
+    await printAllImagesInRange();
     setDialogOpen(false);
   };
 
-  const cancel = () => {
-    props.model.cancelPrint();
+  const handleOnCancelClick = () => {
     setDialogOpen(false);
+    cancel();
   };
 
   const handleResolutionChange = (e) => {
@@ -154,8 +184,8 @@ export default function PrintView(props) {
           </FormControl>
         </Grid>
       </Grid>
-      <PrintButton onClick={print} disabled={printDisabled} />
-      <PrintDialog open={dialogOpen} cancelPrint={cancel} />
+      <PrintButton onClick={handleOnPrintClick} disabled={printDisabled} />
+      <PrintDialog open={dialogOpen} cancelPrint={handleOnCancelClick} />
     </Grid>
   );
 }
