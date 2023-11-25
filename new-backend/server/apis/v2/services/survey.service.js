@@ -136,10 +136,14 @@ class SurveyService {
       await fs.promises.writeFile(pathToFile, jsonString);
 
       //Mail answer
+      let subject = "";
       let bodyHtml = "<html><body>";
       bodyHtml += "<h1>Svar från undersökningen</h1>";
       for (const key in body) {
         bodyHtml += `<br><b>${key}</b>: ${body[key]}`;
+        if (`${key}` === "surveyId") {
+          subject = `${body[key]}`;
+        }
       }
       bodyHtml += "</body></html>";
 
@@ -151,7 +155,7 @@ class SurveyService {
         emailAddress = body.email;
       }
 
-      await this.mailNodemailer(emailAddress, bodyHtml);
+      await this.mailNodemailer(emailAddress, bodyHtml, subject);
 
       // Return a success message
       return { message: "Survey data added to file" };
@@ -166,7 +170,7 @@ class SurveyService {
    * @returns
    * @memberof SurveyService
    */
-  async mailNodemailer(emailAddress, body) {
+  async mailNodemailer(emailAddress, body, subject) {
     try {
       let transporterOptions = {
         host: process.env.CITIZEN_DIALOGUE_MAIL_HOST,
@@ -198,10 +202,12 @@ class SurveyService {
         recipients = process.env.CITIZEN_DIALOGUE_MAIL_TO;
       }
 
+      const emailSubject = process.env.CITIZEN_DIALOGUE_MAIL_SUBJECT || subject;
+
       const options = {
         from: process.env.CITIZEN_DIALOGUE_MAIL_FROM,
         to: recipients,
-        subject: process.env.CITIZEN_DIALOGUE_MAIL_SUBJECT,
+        subject: emailSubject,
         html: body,
       };
 
