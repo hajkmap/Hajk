@@ -114,24 +114,8 @@ function CitizendialogueView(props) {
   // - Remember that you can use several useEffect hooks! Maybe you want to do something when 'counter' changes?
 
   useEffect(() => {
-    fetch("/survey-style.css")
-      .then((response) => {
-        if (!response.ok) {
-          throw new Error("Network response was not ok");
-        }
-        return response.text();
-      })
-      .then((css) => {
-        const style = document.createElement("style");
-        style.textContent = css;
-        document.head.appendChild(style);
-      })
-      .catch((error) => {
-        console.error(
-          "There has been a problem with your fetch operation:",
-          error
-        );
-      });
+    props.model.fetchStyle();
+    // eslint-disable-next-line
   }, []);
 
   const [editModel] = React.useState(
@@ -146,7 +130,6 @@ function CitizendialogueView(props) {
   );
 
   const [surveyJSON, setSurveyJSON] = useState(null);
-
   useEffect(() => {
     props.model
       .loadSurvey(props.options.selectedSurvey)
@@ -184,7 +167,6 @@ function CitizendialogueView(props) {
   );
 
   const [currentQuestionName, setCurrentQuestionName] = useState(null);
-
   const handleAfterRenderQuestion = (sender, options) => {
     const currentQuestion = options.question;
     if (currentQuestion.jsonObj.type === "geometry") {
@@ -250,7 +232,6 @@ function CitizendialogueView(props) {
   };
 
   const rootMap = useRef(new Map());
-
   React.useEffect(() => {
     const containers = document.querySelectorAll(".editViewContainer");
 
@@ -289,7 +270,6 @@ function CitizendialogueView(props) {
   });
 
   const [survey, setSurvey] = useState(null);
-
   useEffect(() => {
     const newSurvey = new Model(surveyJSON);
     //newSurvey.applyTheme(SurveyTheme.DefaultDark);

@@ -102,6 +102,27 @@ export default class CitizendialogueModel {
     }
   };
 
+  fetchStyle = () => {
+    fetch("/survey-style.css")
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error("Network response was not ok");
+        }
+        return response.text();
+      })
+      .then((css) => {
+        const style = document.createElement("style");
+        style.textContent = css;
+        document.head.appendChild(style);
+      })
+      .catch((error) => {
+        console.error(
+          "There has been a problem with your fetch operation:",
+          error
+        );
+      });
+  };
+
   // Example of public method, returns the map instance
   getMap = () => {
     return this.#map;
