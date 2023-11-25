@@ -71,7 +71,7 @@
         "name": "page5",
         "elements": [
           {
-            "type": "geometry",
+            "type": "geometrypolygon",
             "name": "Rita i kartan (Geometri2)"
           },
           {
@@ -85,6 +85,20 @@
         "name": "page6",
         "elements": [
           {
+            "type": "geometrylinestring",
+            "name": "Rita i kartan (Geometri3)"
+          },
+          {
+            "type": "comment",
+            "name": "question9",
+            "title": "Kommentarer om platsen som du markerat i kartan?"
+          }
+        ]
+      },
+      {
+        "name": "page7",
+        "elements": [
+          {
             "name": "email",
             "type": "text",
             "title": "Vill du ha återkoppling från oss, ange din epostadress",
@@ -96,7 +110,7 @@
         ]
       },
       {
-        "name": "page7",
+        "name": "page8",
         "elements": [
           {
             "type": "ranking",

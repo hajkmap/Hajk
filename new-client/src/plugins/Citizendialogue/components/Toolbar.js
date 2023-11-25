@@ -31,6 +31,7 @@ class Toolbar extends Component {
         editFeature: feature,
       });
     });
+    this.toolbarOptions = this.props.toolbarOptions ?? "all";
   }
 
   componentWillUnmount() {
@@ -121,53 +122,68 @@ class Toolbar extends Component {
         <Grid item xs={12}>
           <Typography>Lägg till</Typography>
         </Grid>
-        <Grid item xs={4}>
-          <StyledButton
-            variant="contained"
-            fullWidth
-            disabled={!editSource.editPoint && !editSource.editMultiPoint}
-            onClick={() => {
-              this.onAddPointClicked();
-            }}
-            selected={this.props.activeTool === "point"}
-            type="button"
-            title="Lägg till punkt"
-          >
-            Punkt
-            <ScatterPlotIcon sx={{ marginLeft: 1 }} />
-          </StyledButton>
-        </Grid>
-        <Grid item xs={4}>
-          <StyledButton
-            variant="contained"
-            fullWidth
-            disabled={!editSource.editLine && !editSource.editMultiLine}
-            onClick={() => {
-              this.onAddLineClicked();
-            }}
-            type="button"
-            title="Lägg till linje"
-            selected={this.props.activeTool === "linestring"}
-          >
-            Linje
-            <LinearScaleIcon sx={{ marginLeft: 1 }} />
-          </StyledButton>
-        </Grid>
-        <Grid item xs={4}>
-          <StyledButton
-            variant="contained"
-            fullWidth
-            disabled={!editSource.editPolygon && !editSource.editMultiPolygon}
-            onClick={() => {
-              this.onAddPolygonClicked();
-            }}
-            type="button"
-            title="Lägg till yta"
-            selected={this.props.activeTool === "polygon"}
-          >
-            Yta
-            <BorderStyleIcon sx={{ marginLeft: 1 }} />
-          </StyledButton>
+        <Grid container spacing={2}>
+          {(this.toolbarOptions === "all" ||
+            this.toolbarOptions === "point") && (
+            <Grid item xs={4}>
+              <StyledButton
+                variant="contained"
+                fullWidth
+                disabled={!editSource.editPoint && !editSource.editMultiPoint}
+                onClick={() => {
+                  this.onAddPointClicked();
+                }}
+                selected={this.props.activeTool === "point"}
+                type="button"
+                title="Lägg till punkt"
+              >
+                Punkt
+                <ScatterPlotIcon sx={{ marginLeft: 1 }} />
+              </StyledButton>
+            </Grid>
+          )}
+
+          {(this.toolbarOptions === "all" ||
+            this.toolbarOptions === "linestring") && (
+            <Grid item xs={4}>
+              <StyledButton
+                variant="contained"
+                fullWidth
+                disabled={!editSource.editLine && !editSource.editMultiLine}
+                onClick={() => {
+                  this.onAddLineClicked();
+                }}
+                type="button"
+                title="Lägg till linje"
+                selected={this.props.activeTool === "linestring"}
+              >
+                Linje
+                <LinearScaleIcon sx={{ marginLeft: 1 }} />
+              </StyledButton>
+            </Grid>
+          )}
+
+          {(this.toolbarOptions === "all" ||
+            this.toolbarOptions === "polygon") && (
+            <Grid item xs={4}>
+              <StyledButton
+                variant="contained"
+                fullWidth
+                disabled={
+                  !editSource.editPolygon && !editSource.editMultiPolygon
+                }
+                onClick={() => {
+                  this.onAddPolygonClicked();
+                }}
+                type="button"
+                title="Lägg till yta"
+                selected={this.props.activeTool === "polygon"}
+              >
+                Yta
+                <BorderStyleIcon sx={{ marginLeft: 1 }} />
+              </StyledButton>
+            </Grid>
+          )}
         </Grid>
 
         <Grid item xs={12}>

@@ -26,6 +26,46 @@ ComponentCollection.Instance.add({
     html: "<div class='editViewContainer'></div>",
   },
 });
+
+//Register new "geometrypoint" component
+ComponentCollection.Instance.add({
+  //Unique component name. It becomes a new question type. Please note, it should be written in lowercase.
+  name: "geometrypoint",
+  //The text that shows on toolbox
+  title: "GeometryPoint",
+  //The actual question that will do the job
+  questionJSON: {
+    type: "html",
+    html: "<div class='editViewContainer'></div>",
+  },
+});
+
+//Register new "geometrylinestring" component
+ComponentCollection.Instance.add({
+  //Unique component name. It becomes a new question type. Please note, it should be written in lowercase.
+  name: "geometrylinestring",
+  //The text that shows on toolbox
+  title: "GeometryLinestring",
+  //The actual question that will do the job
+  questionJSON: {
+    type: "html",
+    html: "<div class='editViewContainer'></div>",
+  },
+});
+
+//Register new "geometrypolygon" component
+ComponentCollection.Instance.add({
+  //Unique component name. It becomes a new question type. Please note, it should be written in lowercase.
+  name: "geometrypolygon",
+  //The text that shows on toolbox
+  title: "geometryPolygon",
+  //The actual question that will do the job
+  questionJSON: {
+    type: "html",
+    html: "<div class='editViewContainer'></div>",
+  },
+});
+
 // Hajk components are primarily styled in two ways:
 // - Using the styled-utility, see: https://mui.com/system/styled/
 // - Using the sx-prop, see: https://mui.com/system/basics/#the-sx-prop
@@ -171,7 +211,19 @@ function CitizendialogueView(props) {
     const currentQuestion = options.question;
     if (currentQuestion.jsonObj.type === "geometry") {
       setCurrentQuestionName(currentQuestion.name);
-      setShowEditView(true);
+      setShowEditView({ show: true, toolbarOptions: "all" });
+    }
+    if (currentQuestion.jsonObj.type === "geometrypoint") {
+      setCurrentQuestionName(currentQuestion.name);
+      setShowEditView({ show: true, toolbarOptions: "point" });
+    }
+    if (currentQuestion.jsonObj.type === "geometrylinestring") {
+      setCurrentQuestionName(currentQuestion.name);
+      setShowEditView({ show: true, toolbarOptions: "linestring" });
+    }
+    if (currentQuestion.jsonObj.type === "geometrypolygon") {
+      setCurrentQuestionName(currentQuestion.name);
+      setShowEditView({ show: true, toolbarOptions: "polygon" });
     }
   };
 
@@ -235,7 +287,7 @@ function CitizendialogueView(props) {
   React.useEffect(() => {
     const containers = document.querySelectorAll(".editViewContainer");
 
-    if (showEditView) {
+    if (showEditView.show) {
       containers.forEach((container) => {
         let root = rootMap.current.get(container);
 
@@ -256,6 +308,7 @@ function CitizendialogueView(props) {
             onSaveCallback={handleOnComplete}
             ref={editViewRef}
             onCoordinatesChange={handleSelectedCoordinatesChange}
+            toolbarOptions={showEditView.toolbarOptions}
           />
         );
       });
