@@ -10,6 +10,7 @@ import Info from "../views/info.jsx";
 import Release from "../views/release.jsx";
 import Search from "../views/search.jsx";
 import DocumentEditor from "../views/documenteditor.jsx";
+import SurveyHandler from "../views/surveyhandler.jsx";
 
 import editModel from "../models/edit.js";
 import layerManagerModel from "../models/layermanager.js";
@@ -134,6 +135,8 @@ class Application extends Component {
         return Search;
       case "documenthandler":
         return DocumentEditor;
+      case "surveyhandler":
+        return SurveyHandler;
       default:
         return null;
     }
