@@ -13,7 +13,7 @@ function SurveyHandler() {
     if (field === 'type' && value === 'checkbox') {
       updatedQuestion.choices = updatedQuestion.choices || [];
     } else if (field === 'type' && value === 'rating') {
-      updatedQuestion = { ...updatedQuestion, rateCount: 10, rateMax: 10, rateType: "smileys", scaleColorMode: "colored", displayMode: "buttons" };
+      updatedQuestion = { ...updatedQuestion, rateCount: 8, rateMax: 8, rateType: "smileys", scaleColorMode: "colored", displayMode: "buttons" };
     } else if (field === 'type' && value !== 'checkbox' && value !== 'rating') {
       delete updatedQuestion.choices;
     }
@@ -72,7 +72,7 @@ function SurveyHandler() {
 
   return (
     <div>
-      <h1>Enkätskapare</h1>
+      <h1>Enkäthanterare</h1>
       <button onClick={addQuestion}>Lägg till Fråga</button>
       <button onClick={saveSurvey}>Spara Enkät</button>
       <div>
