@@ -191,7 +191,7 @@ function CitizendialogueView(props) {
   //Combine ID/Name and surveydata and geometry
   const handleOnComplete = React.useCallback(
     (survey) => {
-      setShowEditView(false);
+      setShowEditView({ show: false });
       const combinedData = {
         ...props.surveyJsData,
         ...survey.data,
@@ -277,7 +277,7 @@ function CitizendialogueView(props) {
   };
 
   const handlePageChange = () => {
-    setShowEditView(false);
+    setShowEditView({ show: false });
     if (editViewRef.current) {
       editViewRef.current.onSaveClicked();
     }
