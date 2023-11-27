@@ -58,7 +58,7 @@
           },
           {
             "type": "geometry",
-            "name": "Rita i kartan (Geometri1)"
+            "title": "Rita i kartan (Geometri1)"
           },
           {
             "type": "comment",
@@ -72,7 +72,7 @@
         "elements": [
           {
             "type": "geometrypolygon",
-            "name": "Rita i kartan (Geometri2)"
+            "title": "Rita i kartan (Geometri2)"
           },
           {
             "type": "comment",
@@ -86,7 +86,7 @@
         "elements": [
           {
             "type": "geometrylinestring",
-            "name": "Rita i kartan (Geometri3)"
+            "title": "Rita i kartan (Geometri3)"
           },
           {
             "type": "comment",

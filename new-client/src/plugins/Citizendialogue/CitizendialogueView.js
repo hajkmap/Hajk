@@ -210,19 +210,19 @@ function CitizendialogueView(props) {
   const handleAfterRenderQuestion = (sender, options) => {
     const currentQuestion = options.question;
     if (currentQuestion.jsonObj.type === "geometry") {
-      setCurrentQuestionName(currentQuestion.name);
+      setCurrentQuestionName(currentQuestion.title);
       setShowEditView({ show: true, toolbarOptions: "all" });
     }
     if (currentQuestion.jsonObj.type === "geometrypoint") {
-      setCurrentQuestionName(currentQuestion.name);
+      setCurrentQuestionName(currentQuestion.title);
       setShowEditView({ show: true, toolbarOptions: "point" });
     }
     if (currentQuestion.jsonObj.type === "geometrylinestring") {
-      setCurrentQuestionName(currentQuestion.name);
+      setCurrentQuestionName(currentQuestion.title);
       setShowEditView({ show: true, toolbarOptions: "linestring" });
     }
     if (currentQuestion.jsonObj.type === "geometrypolygon") {
-      setCurrentQuestionName(currentQuestion.name);
+      setCurrentQuestionName(currentQuestion.title);
       setShowEditView({ show: true, toolbarOptions: "polygon" });
     }
   };

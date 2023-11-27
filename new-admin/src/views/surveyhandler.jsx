@@ -20,12 +20,14 @@ function SurveyHandler() {
     }));
   };
 
-  const addQuestion = (pageIndex, type = "text") => {
+  const addQuestion = (pageIndex, type = "text", inputType = null) => {
     let newQuestion = { title: "", type };
     if (type === "checkbox" || type === "radiogroup") {
       newQuestion.choices = [];
     } else if (type === "html") {
       newQuestion.html = "";
+    } else if (type === "text" && inputType === "email") {
+      newQuestion.inputType = "email";
     }
     const newPages = survey.pages.map((page, index) => {
       if (index === pageIndex) {
@@ -36,7 +38,27 @@ function SurveyHandler() {
     setSurvey({ ...survey, pages: newPages });
   };
   
-
+  const toggleEmailInputType = (pageIndex, questionIndex) => {
+    const newPages = survey.pages.map((page, pIndex) => {
+      if (pIndex === pageIndex) {
+        const newQuestions = page.questions.map((q, qIndex) => {
+          if (qIndex === questionIndex && q.type === "text") {
+            const isEmailType = q.inputType === "email";
+            return {
+              ...q,
+              inputType: isEmailType ? null : "email",
+              name: isEmailType ? null : "email"
+            };
+          }
+          return q;
+        });
+        return { ...page, questions: newQuestions };
+      }
+      return page;
+    });
+    setSurvey({ ...survey, pages: newPages });
+  };  
+  
   const updateQuestion = (pageIndex, questionIndex, field, value) => {
     const newPages = survey.pages.map((page, pIndex) => {
       if (pIndex === pageIndex) {
@@ -191,10 +213,16 @@ function SurveyHandler() {
                 <option value="text">Text</option>
                 <option value="html">Info</option>
                 <option value="checkbox">Flerval</option>
-                <option value="radiogroup">Enval (radioknapp)</option>
+                <option value="radiogroup">Enkelval (radioknapp)</option>
                 <option value="rating">Betyg</option>
-                <option value="geometry">Geometri (Rita i kartan)</option>
+                <option value="geometry">Alla geometriverktyg</option>
+                <option value="geometrypoint">Geometriverktyget punkt</option>
               </select>
+              {question.type === "text" && (
+                <button onClick={() => toggleEmailInputType(pageIndex, questionIndex)}>
+                {question.inputType === "email" ? "Ställ in som Text" : "Ställ in som Email"}
+                </button>
+              )}
               {question.type === "html" && (
               <div style={{ marginTop: '10px' }}>
                 <textarea
