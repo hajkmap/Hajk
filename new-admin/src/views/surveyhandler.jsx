@@ -20,16 +20,22 @@ function SurveyHandler() {
     }));
   };
 
-  const addQuestion = (pageIndex) => {
+  const addQuestion = (pageIndex, type = "text") => {
+    let newQuestion = { title: "", type };
+    if (type === "checkbox" || type === "radiogroup") {
+      newQuestion.choices = [];
+    } else if (type === "html") {
+      newQuestion.html = "";
+    }
     const newPages = survey.pages.map((page, index) => {
       if (index === pageIndex) {
-        return { ...page, questions: [...page.questions, { title: "", type: "text" }] };
+        return { ...page, questions: [...page.questions, newQuestion] };
       }
       return page;
     });
-
     setSurvey({ ...survey, pages: newPages });
   };
+  
 
   const updateQuestion = (pageIndex, questionIndex, field, value) => {
     const newPages = survey.pages.map((page, pIndex) => {
@@ -171,6 +177,7 @@ function SurveyHandler() {
   
           {page.questions.map((question, questionIndex) => (
             <div key={questionIndex} style={questionStyle}>
+              <button onClick={() => deleteQuestion(pageIndex, questionIndex)}>Ta bort Fråga</button>
               <input
                 type="text"
                 placeholder="Frågetitel"
@@ -182,11 +189,24 @@ function SurveyHandler() {
                 onChange={(e) => updateQuestion(pageIndex, questionIndex, 'type', e.target.value)}
               >
                 <option value="text">Text</option>
+                <option value="html">Info</option>
                 <option value="checkbox">Flerval</option>
+                <option value="radiogroup">Enval (radioknapp)</option>
                 <option value="rating">Betyg</option>
                 <option value="geometry">Geometri (Rita i kartan)</option>
               </select>
-              {question.type === "checkbox" && (
+              {question.type === "html" && (
+              <div style={{ marginTop: '10px' }}>
+                <textarea
+                  style={{ width: '100%', height: '100px' }}  // Justera dessa värden efter behov
+                  value={question.html}
+                  onChange={(e) => updateQuestion(pageIndex, questionIndex, 'html', e.target.value)}
+                  placeholder="Skriv HTML-kod här"
+                />
+              </div>
+              )}
+
+              {question.type === "checkbox" || question.type === "radiogroup" ? (
                 <div>
                   {question.choices && question.choices.map((choice, choiceIndex) => (
                     <input
@@ -199,7 +219,7 @@ function SurveyHandler() {
                   ))}
                   <button onClick={() => addChoice(pageIndex, questionIndex)}>Lägg till Val</button>
                 </div>
-              )}
+              ): null}
               {question.type === "rating" && (
                 <div>
                   <input
@@ -216,7 +236,6 @@ function SurveyHandler() {
                   />
                 </div>
               )}
-              <button onClick={() => deleteQuestion(pageIndex, questionIndex)}>Ta bort Fråga</button>
             </div>
           ))}
   
