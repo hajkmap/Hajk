@@ -1,66 +1,111 @@
 import React, { useState } from 'react';
 
 function SurveyHandler() {
-  const [questions, setQuestions] = useState([]);
+  const [survey, setSurvey] = useState({
+    title: "Rynningeviken",
+    language: "sv",
+    logo: "https://www.orebro.se/images/18.242f1fb1556288bfbf1594c/1467796106738/Orebro_se-logo.png",
+    logoWidth: 60,
+    logoHeight: 60,
+    logoPosition: "left",
+    pages: [{ questions: [] }]
+  });
 
-  const addQuestion = () => {
-    setQuestions([...questions, { title: "", type: "text" }]);
+  const addPage = () => {
+    setSurvey(prevSurvey => ({
+      ...prevSurvey,
+      pages: [...prevSurvey.pages, { questions: [] }]
+    }));
   };
 
-  const updateQuestion = (index, field, value) => {
-    let updatedQuestion = { ...questions[index], [field]: value };
-
-    if (field === 'type' && value === 'checkbox') {
-      updatedQuestion.choices = updatedQuestion.choices || [];
-    } else if (field === 'type' && value === 'rating') {
-      updatedQuestion = { ...updatedQuestion, rateCount: 8, rateMax: 8, rateType: "smileys", scaleColorMode: "colored", displayMode: "buttons" };
-    } else if (field === 'type' && value !== 'checkbox' && value !== 'rating') {
-      delete updatedQuestion.choices;
-    }
-
-    const newQuestions = questions.map((q, i) => {
-      if (i === index) {
-        return updatedQuestion;
+  const addQuestion = (pageIndex) => {
+    const newPages = survey.pages.map((page, index) => {
+      if (index === pageIndex) {
+        return { ...page, questions: [...page.questions, { title: "", type: "text" }] };
       }
-      return q;
+      return page;
     });
-    setQuestions(newQuestions);
+
+    setSurvey({ ...survey, pages: newPages });
   };
 
-  const updateChoice = (questionIndex, choiceIndex, value) => {
-    const newQuestions = questions.map((q, i) => {
-      if (i === questionIndex) {
-        const newChoices = q.choices.map((choice, j) => {
-          if (j === choiceIndex) {
-            return value;
+  const updateQuestion = (pageIndex, questionIndex, field, value) => {
+    const newPages = survey.pages.map((page, pIndex) => {
+      if (pIndex === pageIndex) {
+        const newQuestions = page.questions.map((question, qIndex) => {
+          if (qIndex === questionIndex) {
+            return { ...question, [field]: value };
           }
-          return choice;
+          return question;
         });
-        return { ...q, choices: newChoices };
+        return { ...page, questions: newQuestions };
       }
-      return q;
+      return page;
     });
-    setQuestions(newQuestions);
+
+    setSurvey({ ...survey, pages: newPages });
   };
 
-  const addChoice = (questionIndex) => {
-    const newQuestions = questions.map((q, i) => {
-      if (i === questionIndex) {
-        const newChoices = q.choices ? [...q.choices, ""] : [""];
-        return { ...q, choices: newChoices };
+  const addChoice = (pageIndex, questionIndex) => {
+    const newPages = survey.pages.map((page, pIndex) => {
+      if (pIndex === pageIndex) {
+        const newQuestions = page.questions.map((question, qIndex) => {
+          if (qIndex === questionIndex) {
+            const newChoices = question.choices ? [...question.choices, ""] : [""];
+            return { ...question, choices: newChoices };
+          }
+          return question;
+        });
+        return { ...page, questions: newQuestions };
       }
-      return q;
+      return page;
     });
-    setQuestions(newQuestions);
+
+    setSurvey({ ...survey, pages: newPages });
   };
 
-  const deleteQuestion = (index) => {
-    const newQuestions = questions.filter((_, i) => i !== index);
-    setQuestions(newQuestions);
+  const updateChoice = (pageIndex, questionIndex, choiceIndex, value) => {
+    const newPages = survey.pages.map((page, pIndex) => {
+      if (pIndex === pageIndex) {
+        const newQuestions = page.questions.map((question, qIndex) => {
+          if (qIndex === questionIndex) {
+            const newChoices = question.choices.map((choice, cIndex) => {
+              if (cIndex === choiceIndex) {
+                return value;
+              }
+              return choice;
+            });
+            return { ...question, choices: newChoices };
+          }
+          return question;
+        });
+        return { ...page, questions: newQuestions };
+      }
+      return page;
+    });
+
+    setSurvey({ ...survey, pages: newPages });
+  };
+
+  const deleteQuestion = (pageIndex, questionIndex) => {
+    const newPages = survey.pages.map((page, pIndex) => {
+      if (pIndex === pageIndex) {
+        const newQuestions = page.questions.filter((_, qIndex) => qIndex !== questionIndex);
+        return { ...page, questions: newQuestions };
+      }
+      return page;
+    });
+
+    setSurvey({ ...survey, pages: newPages });
+  };
+
+  const deletePage = (pageIndex) => {
+    const newPages = survey.pages.filter((_, index) => index !== pageIndex);
+    setSurvey({ ...survey, pages: newPages });
   };
 
   const saveSurvey = () => {
-    const surveyJson = JSON.stringify({ questions });
+    const surveyJson = JSON.stringify(survey);
     console.log(surveyJson);
   };
 
@@ -72,60 +117,73 @@ function SurveyHandler() {
 
   return (
     <div>
-      <h1>Enkäthanterare</h1>
-      <button onClick={addQuestion}>Lägg till Fråga</button>
-      <button onClick={saveSurvey}>Spara Enkät</button>
-      <div>
-        {questions.map((question, index) => (
-          <div key={index} style={questionStyle}>
-            <input
-              type="text"
-              placeholder="Frågetitel"
-              value={question.title}
-              onChange={(e) => updateQuestion(index, 'title', e.target.value)}
-            />
-            <select
-              value={question.type}
-              onChange={(e) => updateQuestion(index, 'type', e.target.value)}
-            >
-              <option value="text">Text</option>
-              <option value="checkbox">Flerval</option>
-              <option value="rating">Betyg</option>
-            </select>
-            {question.type === "checkbox" && (
-              <div>
-                {question.choices.map((choice, choiceIndex) => (
-                  <input
-                    key={choiceIndex}
-                    type="text"
-                    placeholder="Val"
-                    value={choice}
-                    onChange={(e) => updateChoice(index, choiceIndex, e.target.value)}
-                  />
-                ))}
-                <button onClick={() => addChoice(index)}>Lägg till Val</button>
-              </div>
-            )}
-            {question.type === "rating" && (
-              <div>
-                <input
-                  type="number"
-                  placeholder="Rate Count"
-                  value={question.rateCount || ''}
-                  onChange={(e) => updateQuestion(index, 'rateCount', e.target.value)}
-                />
-                <input
-                  type="number"
-                  placeholder="Rate Max"
-                  value={question.rateMax || ''}
-                  onChange={(e) => updateQuestion(index, 'rateMax', e.target.value)}
-                />
-              </div>
-            )}
-            <button onClick={() => deleteQuestion(index)}>Ta bort Fråga</button>
-          </div>
-        ))}
+      <h1>Enkätskapare</h1>
+      <div style={{ marginBottom: '20px' }}>
+        <button onClick={addPage}>Lägg till Sida</button>
+        <button onClick={saveSurvey} style={{ marginLeft: '20px' }}>Spara Enkät</button>
       </div>
+      
+      {survey.pages.map((page, pageIndex) => (
+        <div key={pageIndex} style={{ marginBottom: '40px', border: '1px solid #ccc', padding: '20px' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
+            <h2>Sida {pageIndex + 1}</h2>
+            <button onClick={() => deletePage(pageIndex)}>Ta bort Sida</button>
+          </div>
+  
+          {page.questions.map((question, questionIndex) => (
+            <div key={questionIndex} style={questionStyle}>
+              <input
+                type="text"
+                placeholder="Frågetitel"
+                value={question.title}
+                onChange={(e) => updateQuestion(pageIndex, questionIndex, 'title', e.target.value)}
+              />
+              <select
+                value={question.type}
+                onChange={(e) => updateQuestion(pageIndex, questionIndex, 'type', e.target.value)}
+              >
+                <option value="text">Text</option>
+                <option value="checkbox">Flerval</option>
+                <option value="rating">Betyg</option>
+                <option value="geometry">Geometri (Rita i kartan)</option>
+              </select>
+              {question.type === "checkbox" && (
+                <div>
+                  {question.choices && question.choices.map((choice, choiceIndex) => (
+                    <input
+                      key={choiceIndex}
+                      type="text"
+                      placeholder="Val"
+                      value={choice}
+                      onChange={(e) => updateChoice(pageIndex, questionIndex, choiceIndex, e.target.value)}
+                    />
+                  ))}
+                  <button onClick={() => addChoice(pageIndex, questionIndex)}>Lägg till Val</button>
+                </div>
+              )}
+              {question.type === "rating" && (
+                <div>
+                  <input
+                    type="number"
+                    placeholder="Rate Count"
+                    value={question.rateCount || ''}
+                    onChange={(e) => updateQuestion(pageIndex, questionIndex, 'rateCount', e.target.value)}
+                  />
+                  <input
+                    type="number"
+                    placeholder="Rate Max"
+                    value={question.rateMax || ''}
+                    onChange={(e) => updateQuestion(pageIndex, questionIndex, 'rateMax', e.target.value)}
+                  />
+                </div>
+              )}
+              <button onClick={() => deleteQuestion(pageIndex, questionIndex)}>Ta bort Fråga</button>
+            </div>
+          ))}
+  
+          <button onClick={() => addQuestion(pageIndex)} style={{ marginTop: '10px' }}>Lägg till Fråga</button>
+        </div>
+      ))}
     </div>
   );
 }
