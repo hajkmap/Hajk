@@ -198,7 +198,7 @@ function SurveyHandler() {
               {question.type === "html" && (
               <div style={{ marginTop: '10px' }}>
                 <textarea
-                  style={{ width: '100%', height: '100px' }}  // Justera dessa värden efter behov
+                  style={{ width: '100%', height: '100px' }}
                   value={question.html}
                   onChange={(e) => updateQuestion(pageIndex, questionIndex, 'html', e.target.value)}
                   placeholder="Skriv HTML-kod här"
