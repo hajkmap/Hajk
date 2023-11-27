@@ -1,4 +1,6 @@
 import React, { useState } from 'react';
+import Grid from '@material-ui/core/Grid';
+import TextField from '@material-ui/core/TextField';
 
 function SurveyHandler() {
   const [survey, setSurvey] = useState({
@@ -117,14 +119,51 @@ function SurveyHandler() {
 
   return (
     <div>
-      <h1>Enkätskapare</h1>
-      <div style={{ marginBottom: '20px' }}>
+      <h1>Enkäthanterare</h1>
+    
+      <Grid container spacing={2} style={{ marginBottom: '50px' }}>
+        <Grid item>
+          <TextField
+            label="Enkätens Titel"
+            value={survey.title}
+            onChange={(e) => setSurvey({ ...survey, title: e.target.value })}
+            style={{ marginRight: '10px' }}
+          />
+        </Grid>
+        <Grid item>
+          <TextField
+            label="Logo URL"
+            value={survey.logo}
+            onChange={(e) => setSurvey({ ...survey, logo: e.target.value })}
+            style={{ marginRight: '10px' }}
+          />
+        </Grid>
+        <Grid item>
+          <TextField
+            label="Logo Bredd"
+            type="number"
+            value={survey.logoWidth}
+            onChange={(e) => setSurvey({ ...survey, logoWidth: parseInt(e.target.value, 10) })}
+            style={{ marginRight: '10px' }}
+          />
+        </Grid>
+        <Grid item>
+          <TextField
+            label="Logo Höjd"
+            type="number"
+            value={survey.logoHeight}
+            onChange={(e) => setSurvey({ ...survey, logoHeight: parseInt(e.target.value, 10) })}
+          />
+        </Grid>
+      </Grid>
+
+      <div style={{ marginBottom: '10px' }}>
         <button onClick={addPage}>Lägg till Sida</button>
         <button onClick={saveSurvey} style={{ marginLeft: '20px' }}>Spara Enkät</button>
       </div>
       
       {survey.pages.map((page, pageIndex) => (
-        <div key={pageIndex} style={{ marginBottom: '40px', border: '1px solid #ccc', padding: '20px' }}>
+        <div key={pageIndex} style={{ marginBottom: '40px', border: '1px solid #ccc', padding: '20px', backgroundColor: '#f0f0f0' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
             <h2>Sida {pageIndex + 1}</h2>
             <button onClick={() => deletePage(pageIndex)}>Ta bort Sida</button>
