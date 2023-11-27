@@ -20,14 +20,12 @@ function SurveyHandler() {
     }));
   };
 
-  const addQuestion = (pageIndex, type = "text", inputType = null) => {
+  const addQuestion = (pageIndex, type = "text") => {
     let newQuestion = { title: "", type };
     if (type === "checkbox" || type === "radiogroup") {
       newQuestion.choices = [];
     } else if (type === "html") {
       newQuestion.html = "";
-    } else if (type === "text" && inputType === "email") {
-      newQuestion.inputType = "email";
     }
     const newPages = survey.pages.map((page, index) => {
       if (index === pageIndex) {
@@ -38,33 +36,28 @@ function SurveyHandler() {
     setSurvey({ ...survey, pages: newPages });
   };
   
-  const toggleEmailInputType = (pageIndex, questionIndex) => {
-    const newPages = survey.pages.map((page, pIndex) => {
-      if (pIndex === pageIndex) {
-        const newQuestions = page.questions.map((q, qIndex) => {
-          if (qIndex === questionIndex && q.type === "text") {
-            const isEmailType = q.inputType === "email";
-            return {
-              ...q,
-              inputType: isEmailType ? null : "email",
-              name: isEmailType ? null : "email"
-            };
-          }
-          return q;
-        });
-        return { ...page, questions: newQuestions };
-      }
-      return page;
-    });
-    setSurvey({ ...survey, pages: newPages });
-  };  
-  
   const updateQuestion = (pageIndex, questionIndex, field, value) => {
     const newPages = survey.pages.map((page, pIndex) => {
       if (pIndex === pageIndex) {
         const newQuestions = page.questions.map((question, qIndex) => {
           if (qIndex === questionIndex) {
-            return { ...question, [field]: value };
+            let updatedQuestion = { ...question };
+            if (value === "email") {
+              updatedQuestion = {
+                ...updatedQuestion,
+                type: "text",
+                inputType: "email",
+                name: "email",
+                placeholder: "namn@exempel.se"
+              };
+            } else {
+              updatedQuestion = { ...updatedQuestion, [field]: value };
+              if (field === "type" && value !== "text") {
+                delete updatedQuestion.inputType;
+                delete updatedQuestion.name;
+              }
+            }
+            return updatedQuestion;
           }
           return question;
         });
@@ -72,9 +65,9 @@ function SurveyHandler() {
       }
       return page;
     });
-
     setSurvey({ ...survey, pages: newPages });
   };
+  
 
   const addChoice = (pageIndex, questionIndex) => {
     const newPages = survey.pages.map((page, pIndex) => {
@@ -207,10 +200,11 @@ function SurveyHandler() {
                 onChange={(e) => updateQuestion(pageIndex, questionIndex, 'title', e.target.value)}
               />
               <select
-                value={question.type}
+                value={question.inputType === "email" ? "email" : question.type}
                 onChange={(e) => updateQuestion(pageIndex, questionIndex, 'type', e.target.value)}
               >
                 <option value="text">Text</option>
+                <option value="email">E-post</option>
                 <option value="html">Info</option>
                 <option value="checkbox">Flerval</option>
                 <option value="radiogroup">Enkelval (radioknapp)</option>
@@ -220,11 +214,6 @@ function SurveyHandler() {
                 <option value="geometrylinestring">Geometriverktyget linje</option>
                 <option value="geometrypolygon">Geometriverktyget yta</option>
               </select>
-              {question.type === "text" && (
-                <button onClick={() => toggleEmailInputType(pageIndex, questionIndex)}>
-                {question.inputType === "email" ? "Ställ in som Text" : "Ställ in som Email"}
-                </button>
-              )}
               {question.type === "html" && (
               <div style={{ marginTop: '10px' }}>
                 <textarea
