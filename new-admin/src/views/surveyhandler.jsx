@@ -217,6 +217,8 @@ function SurveyHandler() {
                 <option value="rating">Betyg</option>
                 <option value="geometry">Alla geometriverktyg</option>
                 <option value="geometrypoint">Geometriverktyget punkt</option>
+                <option value="geometrylinestring">Geometriverktyget linje</option>
+                <option value="geometrypolygon">Geometriverktyget yta</option>
               </select>
               {question.type === "text" && (
                 <button onClick={() => toggleEmailInputType(pageIndex, questionIndex)}>
