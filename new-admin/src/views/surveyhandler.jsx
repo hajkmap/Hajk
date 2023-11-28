@@ -55,7 +55,7 @@ function SurveyHandler() {
         <option value="geometrylinestring">Geometriverktyget linje</option>
         <option value="geometrypolygon">Geometriverktyget yta</option>
         </select>
-        {question.type === "checkbox" && (
+        {question.type === "checkbox" || question.type === "radiogroup" ? (
         <div>
           {question.choices && question.choices.map((choice, index) => (
             <div key={index}>
@@ -68,7 +68,7 @@ function SurveyHandler() {
           ))}
           <button onClick={() => addChoice(selectedQuestion.pageIndex, selectedQuestion.questionIndex)}>Lägg till val</button>
         </div>
-      )}
+      ): null}
 
       {question.type === "html" && (
         <textarea
