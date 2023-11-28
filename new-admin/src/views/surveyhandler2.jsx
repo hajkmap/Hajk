@@ -5,6 +5,7 @@ import Select from '@material-ui/core/Select';
 import MenuItem from '@material-ui/core/MenuItem';
 import IconButton from '@material-ui/core/IconButton';
 import DeleteIcon from '@material-ui/icons/Delete';
+import TextField from '@material-ui/core/TextField';
 
 function SurveyHandler() {
   const [survey, setSurvey] = useState({
@@ -148,7 +149,7 @@ function SurveyHandler() {
     
       <Grid container spacing={2} style={{ marginBottom: '50px' }}>
         <Grid item>
-          <input
+          <TextField
             label="Enkätens Titel"
             value={survey.title}
             onChange={(e) => setSurvey({ ...survey, title: e.target.value })}
@@ -156,7 +157,7 @@ function SurveyHandler() {
           />
         </Grid>
         <Grid item>
-          <input
+          <TextField
             label="Logo URL"
             value={survey.logo}
             onChange={(e) => setSurvey({ ...survey, logo: e.target.value })}
@@ -164,7 +165,7 @@ function SurveyHandler() {
           />
         </Grid>
         <Grid item>
-          <input
+          <TextField
             label="Logo Bredd"
             type="number"
             value={survey.logoWidth}
@@ -173,7 +174,7 @@ function SurveyHandler() {
           />
         </Grid>
         <Grid item>
-          <input
+          <TextField
             label="Logo Höjd"
             type="number"
             value={survey.logoHeight}
