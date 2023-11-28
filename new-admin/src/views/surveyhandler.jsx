@@ -13,6 +13,97 @@ function SurveyHandler() {
     pages: [{ questions: [] }]
   });
 
+  const [selectedQuestion, setSelectedQuestion] = useState(null);
+
+  const handleQuestionClick = (pageIndex, questionIndex) => {
+    setSelectedQuestion({ pageIndex, questionIndex });
+  };
+
+  const renderSelectedQuestionForm = () => {
+    if (selectedQuestion === null) return null;
+    const question = survey.pages[selectedQuestion.pageIndex].questions[selectedQuestion.questionIndex];
+    return (
+      <div>
+        <input
+          type="text"
+          value={question.title}
+          onChange={(e) => updateQuestion(selectedQuestion.pageIndex, selectedQuestion.questionIndex, 'title', e.target.value)}
+        />
+        <select
+          value={question.inputType === "email" ? "email" : question.type}
+          onChange={(e) => {
+            const newType = e.target.value;
+            if (newType === "email") {
+              updateQuestion(selectedQuestion.pageIndex, selectedQuestion.questionIndex, 'type', 'text');
+              updateQuestion(selectedQuestion.pageIndex, selectedQuestion.questionIndex, 'inputType', 'email');
+            } else {
+              updateQuestion(selectedQuestion.pageIndex, selectedQuestion.questionIndex, 'type', newType);
+              if (question.inputType) {
+                updateQuestion(selectedQuestion.pageIndex, selectedQuestion.questionIndex, 'inputType', undefined);
+              }
+            }
+          }}
+        >
+        <option value="text">Text</option>
+        <option value="email">E-post</option>
+        <option value="html">Info</option>
+        <option value="checkbox">Flerval</option>
+        <option value="radiogroup">Enkelval (radioknapp)</option>
+        <option value="rating">Betyg</option>
+        <option value="geometry">Alla geometriverktyg</option>
+        <option value="geometrypoint">Geometriverktyget punkt</option>
+        <option value="geometrylinestring">Geometriverktyget linje</option>
+        <option value="geometrypolygon">Geometriverktyget yta</option>
+        </select>
+        {question.type === "checkbox" && (
+        <div>
+          {question.choices && question.choices.map((choice, index) => (
+            <div key={index}>
+              <input
+                type="text"
+                value={choice}
+                onChange={(e) => updateChoice(selectedQuestion.pageIndex, selectedQuestion.questionIndex, index, e.target.value)}
+              />
+            </div>
+          ))}
+          <button onClick={() => addChoice(selectedQuestion.pageIndex, selectedQuestion.questionIndex)}>Lägg till val</button>
+        </div>
+      )}
+
+      {question.type === "html" && (
+        <textarea
+          value={question.html}
+          onChange={(e) => updateQuestion(selectedQuestion.pageIndex, selectedQuestion.questionIndex, 'html', e.target.value)}
+        />
+      )}
+
+      {question.type === "rating" && (
+        <div>
+          <input
+            type="number"
+            placeholder="Rate Count"
+            value={question.rateCount || ''}
+            onChange={(e) => updateQuestion(selectedQuestion.pageIndex, selectedQuestion.questionIndex, 'rateCount', e.target.value)}
+          />
+          <input
+            type="number"
+            placeholder="Rate Max"
+            value={question.rateMax || ''}
+            onChange={(e) => updateQuestion(selectedQuestion.pageIndex, selectedQuestion.questionIndex, 'rateMax', e.target.value)}
+          />
+        </div>
+      )}
+        <button onClick={deleteSelectedQuestion}>Ta bort Fråga</button>
+      </div>
+    );
+  };
+
+  const deleteSelectedQuestion = () => {
+    if (selectedQuestion === null) return;
+    deleteQuestion(selectedQuestion.pageIndex, selectedQuestion.questionIndex);
+    setSelectedQuestion(null); // Nollställ vald fråga efter borttagning
+  };
+
   const addPage = () => {
     setSurvey(prevSurvey => ({
       ...prevSurvey,
@@ -118,24 +209,24 @@ function SurveyHandler() {
       }
       return page;
     });
-
     setSurvey({ ...survey, pages: newPages });
+    if (selectedQuestion && selectedQuestion.pageIndex === pageIndex && selectedQuestion.questionIndex === questionIndex) {
+      setSelectedQuestion(null);
+    }
   };
+  
 
   const deletePage = (pageIndex) => {
     const newPages = survey.pages.filter((_, index) => index !== pageIndex);
     setSurvey({ ...survey, pages: newPages });
+    if (selectedQuestion && selectedQuestion.pageIndex === pageIndex) {
+      setSelectedQuestion(null);
+    }
   };
 
   const saveSurvey = () => {
     const surveyJson = JSON.stringify(survey);
     console.log(surveyJson);
-  };
-
-  const questionStyle = {
-    marginBottom: '20px',
-    paddingBottom: '10px',
-    borderBottom: '1px solid #ccc'
   };
 
   return (
@@ -182,86 +273,40 @@ function SurveyHandler() {
         <button onClick={addPage}>Lägg till Sida</button>
         <button onClick={saveSurvey} style={{ marginLeft: '20px' }}>Spara Enkät</button>
       </div>
-      
-      {survey.pages.map((page, pageIndex) => (
-        <div key={pageIndex} style={{ marginBottom: '40px', border: '1px solid #ccc', padding: '20px', backgroundColor: '#f0f0f0' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
-            <h2>Sida {pageIndex + 1}</h2>
-            <button onClick={() => deletePage(pageIndex)}>Ta bort Sida</button>
-          </div>
-  
-          {page.questions.map((question, questionIndex) => (
-            <div key={questionIndex} style={questionStyle}>
-              <button onClick={() => deleteQuestion(pageIndex, questionIndex)}>Ta bort Fråga</button>
-              <input
-                type="text"
-                placeholder="Frågetitel"
-                value={question.title}
-                onChange={(e) => updateQuestion(pageIndex, questionIndex, 'title', e.target.value)}
-              />
-              <select
-                value={question.inputType === "email" ? "email" : question.type}
-                onChange={(e) => updateQuestion(pageIndex, questionIndex, 'type', e.target.value)}
-              >
-                <option value="text">Text</option>
-                <option value="email">E-post</option>
-                <option value="html">Info</option>
-                <option value="checkbox">Flerval</option>
-                <option value="radiogroup">Enkelval (radioknapp)</option>
-                <option value="rating">Betyg</option>
-                <option value="geometry">Alla geometriverktyg</option>
-                <option value="geometrypoint">Geometriverktyget punkt</option>
-                <option value="geometrylinestring">Geometriverktyget linje</option>
-                <option value="geometrypolygon">Geometriverktyget yta</option>
-              </select>
-              {question.type === "html" && (
-              <div style={{ marginTop: '10px' }}>
-                <textarea
-                  style={{ width: '100%', height: '100px' }}
-                  value={question.html}
-                  onChange={(e) => updateQuestion(pageIndex, questionIndex, 'html', e.target.value)}
-                  placeholder="Skriv HTML-kod här"
-                />
-              </div>
-              )}
-
-              {question.type === "checkbox" || question.type === "radiogroup" ? (
-                <div>
-                  {question.choices && question.choices.map((choice, choiceIndex) => (
-                    <input
-                      key={choiceIndex}
-                      type="text"
-                      placeholder="Val"
-                      value={choice}
-                      onChange={(e) => updateChoice(pageIndex, questionIndex, choiceIndex, e.target.value)}
-                    />
-                  ))}
-                  <button onClick={() => addChoice(pageIndex, questionIndex)}>Lägg till Val</button>
-                </div>
-              ): null}
-              {question.type === "rating" && (
-                <div>
-                  <input
-                    type="number"
-                    placeholder="Rate Count"
-                    value={question.rateCount || ''}
-                    onChange={(e) => updateQuestion(pageIndex, questionIndex, 'rateCount', e.target.value)}
-                  />
-                  <input
-                    type="number"
-                    placeholder="Rate Max"
-                    value={question.rateMax || ''}
-                    onChange={(e) => updateQuestion(pageIndex, questionIndex, 'rateMax', e.target.value)}
-                  />
-                </div>
-              )}
+      <Grid container spacing={2} style={{ marginBottom: '50px' }}>
+      <Grid item xs={12} sm={6}>
+    <div style={{ backgroundColor: '#f0f0f0', padding: '20px' }}>
+      <div className="App">
+        {survey.pages.map((page, pageIndex) => (
+          <div key={pageIndex} style={{ marginBottom: '40px', border: '1px solid #ccc', padding: '20px', backgroundColor: '#f0f0f0' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
+              <h4>Sida {pageIndex + 1}</h4>
+              <button onClick={() => deletePage(pageIndex)}>Ta bort Sida</button>
             </div>
-          ))}
-  
-          <button onClick={() => addQuestion(pageIndex)} style={{ marginTop: '10px' }}>Lägg till Fråga</button>
-        </div>
-      ))}
+            {page.questions.map((question, questionIndex) => (
+              <p key={questionIndex} onClick={() => handleQuestionClick(pageIndex, questionIndex)}>
+                {question.title || `Fråga ${questionIndex + 1}`}
+              </p>
+            ))}
+            <button onClick={() => addQuestion(pageIndex)} style={{ marginTop: '10px' }}>Lägg till Fråga</button>
+          </div>
+        ))}
+      </div>
     </div>
+  </Grid>
+
+  <Grid item xs={12} sm={6}>
+    <div style={{ backgroundColor: '#f0f0f0', padding: '20px' }}>
+      <div>
+        <h4>Redigera vald fråga</h4>
+        {renderSelectedQuestionForm()}
+      </div>
+    </div>
+  </Grid>
+</Grid>
+
+    </div>
+    
   );
 }
 
