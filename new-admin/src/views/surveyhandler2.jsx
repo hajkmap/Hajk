@@ -198,8 +198,8 @@ function SurveyHandler() {
           {page.questions.map((question, questionIndex) => (
             <div key={questionIndex} style={questionStyle}>
               <IconButton onClick={() => deleteQuestion(pageIndex, questionIndex)} aria-label="delete">
-  <DeleteIcon />
-</IconButton>
+                <DeleteIcon />
+                </IconButton>
               <input
                 type="text"
                 placeholder="Frågetitel"

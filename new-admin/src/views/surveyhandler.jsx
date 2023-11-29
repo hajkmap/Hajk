@@ -285,7 +285,10 @@ function SurveyHandler() {
             </div>
             {page.questions.map((question, questionIndex) => (
               <p key={questionIndex} onClick={() => handleQuestionClick(pageIndex, questionIndex)}>
-                {question.title || `Fråga ${questionIndex + 1}`}
+                {question.title ? 
+                  `${question.title} (${question.inputType === 'email' ? 'Epost' : question.type})` : 
+                  `Fråga ${questionIndex + 1} (${question.inputType === 'email' ? 'Epost' : question.type})`}
+
               </p>
             ))}
             <button onClick={() => addQuestion(pageIndex)} style={{ marginTop: '10px' }}>Lägg till Fråga</button>
