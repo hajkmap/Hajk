@@ -1,4 +1,4 @@
-import React from "react";
+import React, { createRef } from "react";
 import { createPortal } from "react-dom";
 import propTypes from "prop-types";
 
@@ -52,6 +52,8 @@ class LayersSwitcherView extends React.PureComponent {
     super(props);
     this.options = props.options;
     this.layerTree = this.addLayerNames(this.options.groups);
+    // Create a ref to store a reference to the search layer input element
+    this.inputRef = createRef();
     this.state = {
       chapters: [],
       baseLayers: props.model.getBaseLayers(),
@@ -314,6 +316,15 @@ class LayersSwitcherView extends React.PureComponent {
     });
   }, 200);
 
+  // Reset input value
+  resetInput = () => {
+    // Access the input element using the ref and set its value to an empty string
+    if (this.inputRef.current) {
+      this.inputRef.current.value = "";
+      this.handleFilterValueChange("");
+    }
+  };
+
   /**
    * This method handles layerupdates from DrawOrder component,
    * sets activeLayersCount state
@@ -444,7 +455,7 @@ class LayersSwitcherView extends React.PureComponent {
                   <InputAdornment position="end">
                     {this.state.filterValue && (
                       <IconButton
-                        onClick={() => this.handleFilterValueChange("")}
+                        onClick={() => this.resetInput()}
                         size="small"
                       >
                         <ClearIcon />
@@ -458,7 +469,8 @@ class LayersSwitcherView extends React.PureComponent {
                 this.handleFilterValueChange(event.target.value)
               }
               fullWidth
-              placeholder="Filtrera"
+              placeholder="Sök lager och grupper"
+              inputRef={this.inputRef}
               variant="outlined"
               sx={{
                 background: (theme) =>
