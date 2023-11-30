@@ -111,6 +111,8 @@ export default function SubLayerItem({
           primary={layer.layersInfo[subLayer].caption}
           primaryTypographyProps={{
             pr: 5,
+            overflow: "hidden",
+            textOverflow: "ellipsis",
             fontWeight: visible ? (toggleable ? "bold" : "inherit") : "inherit",
           }}
         />
