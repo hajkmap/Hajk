@@ -74,6 +74,7 @@ function SurveyHandler() {
               <input
                 type="text"
                 value={choice}
+                placeholder="Val"
                 onChange={(e) => updateChoice(selectedQuestion.pageIndex, selectedQuestion.questionIndex, index, e.target.value)}
               />
             </div>
