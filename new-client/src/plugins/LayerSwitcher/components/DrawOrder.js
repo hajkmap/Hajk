@@ -88,22 +88,17 @@ function DrawOrder({ display, app, map, onLayerChange, model, options }) {
     // };
   }, [sortedLayers, onLayerChange]);
 
-  // When values of the filterList set changes, let's update the list and subscribe to events
+  // When values of display changes to true, let's update the list
   useEffect(() => {
-    // Register a listener: when any layer's visibility changes make sure
-    // to update the list.
-    const visibilityChangedSubscription = app.globalObserver.subscribe(
-      "core.layerVisibilityChanged",
-      (l) => {
-        setSortedLayers(getSortedLayers());
-      }
-    );
+    if (display) {
+      setSortedLayers(getSortedLayers());
+    }
+  }, [display, getSortedLayers]);
+
+  // When values of the filterList set changes, let's update the list
+  useEffect(() => {
     // Update list of layers
     setSortedLayers(getSortedLayers());
-    // Unsubscribe when component unmounts
-    return function () {
-      visibilityChangedSubscription.unsubscribe();
-    };
   }, [filterList, app.globalObserver, getSortedLayers]);
 
   // Handler that takes care of the layer zIndex ordering.
