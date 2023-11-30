@@ -30,7 +30,9 @@ function SurveyHandler() {
   };
 
   const renderSelectedQuestionForm = () => {
-    if (selectedQuestion === null) return null;
+    if (selectedQuestion === null || !survey.pages[selectedQuestion.pageIndex]) {
+      return null;
+    }
     const question = survey.pages[selectedQuestion.pageIndex].questions[selectedQuestion.questionIndex];
     return (
       <div>
