@@ -41,6 +41,7 @@ class LayerGroup extends React.PureComponent {
     this.setState({
       ...this.props.group,
     });
+    this.allLayers = this.props.app.getMap().getAllLayers();
   }
 
   componentWillUnmount() {
@@ -220,9 +221,7 @@ class LayerGroup extends React.PureComponent {
   }
 
   toggleLayers(visibility, layers) {
-    this.props.app
-      .getMap()
-      .getAllLayers()
+    this.allLayers
       .filter((mapLayer) => {
         return layers.some((layer) => layer.id === mapLayer.get("name"));
       })
@@ -233,8 +232,9 @@ class LayerGroup extends React.PureComponent {
           } else {
             this.model.observer.publish("hideLayer", mapLayer);
           }
+        } else {
+          mapLayer.setVisible(visibility);
         }
-        mapLayer.setVisible(visibility);
       });
   }
 
