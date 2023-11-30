@@ -85,6 +85,7 @@ function SurveyHandler() {
           style={{ width: '100%', height: '100px', display: 'block' }}
           value={question.html}
           onChange={(e) => updateQuestion(selectedQuestion.pageIndex, selectedQuestion.questionIndex, 'html', e.target.value)}
+          placeholder="Skriv HTML-kod här"
         />
         </div>
       )}
