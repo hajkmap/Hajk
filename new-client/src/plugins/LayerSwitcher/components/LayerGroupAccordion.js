@@ -64,7 +64,7 @@ export default function LayerGroupAccordion({
             py: 0.5,
             pr: 1,
             borderBottom: (theme) =>
-              quickAccess && !state.expanded
+              quickAccess
                 ? `${theme.spacing(0.2)} solid transparent`
                 : `${theme.spacing(0.2)} solid ${theme.palette.divider}`,
           }}
@@ -80,7 +80,7 @@ export default function LayerGroupAccordion({
         </Box>
       </ListItemButton>
       <Collapse in={state.expanded}>
-        <Box sx={{ marginLeft: "26px" }}>{children}</Box>
+        <Box sx={{ marginLeft: quickAccess ? "31px" : "26px" }}>{children}</Box>
       </Collapse>
     </div>
   );
