@@ -1,6 +1,9 @@
 import React, { useState } from 'react';
 import Grid from '@material-ui/core/Grid';
 import TextField from '@material-ui/core/TextField';
+import Button from '@material-ui/core/Button';
+import Select from '@material-ui/core/Select';
+import MenuItem from '@material-ui/core/MenuItem';
 
 function SurveyHandler() {
   const [survey, setSurvey] = useState({
@@ -17,6 +20,13 @@ function SurveyHandler() {
 
   const handleQuestionClick = (pageIndex, questionIndex) => {
     setSelectedQuestion({ pageIndex, questionIndex });
+    setSelectedPageIndex(pageIndex);
+  };
+
+  const [selectedPageIndex, setSelectedPageIndex] = useState(0);
+
+  const handlePageSelection = (pageIndex) => {
+    setSelectedPageIndex(pageIndex);
   };
 
   const renderSelectedQuestionForm = () => {
@@ -29,7 +39,7 @@ function SurveyHandler() {
           value={question.title}
           onChange={(e) => updateQuestion(selectedQuestion.pageIndex, selectedQuestion.questionIndex, 'title', e.target.value)}
         />
-        <select
+        <Select
           value={question.inputType === "email" ? "email" : question.type}
           onChange={(e) => {
             const newType = e.target.value;
@@ -44,17 +54,17 @@ function SurveyHandler() {
             }
           }}
         >
-        <option value="text">Text</option>
-        <option value="email">E-post</option>
-        <option value="html">Info</option>
-        <option value="checkbox">Flerval</option>
-        <option value="radiogroup">Enkelval (radioknapp)</option>
-        <option value="rating">Betyg</option>
-        <option value="geometry">Alla geometriverktyg</option>
-        <option value="geometrypoint">Geometriverktyget punkt</option>
-        <option value="geometrylinestring">Geometriverktyget linje</option>
-        <option value="geometrypolygon">Geometriverktyget yta</option>
-        </select>
+        <MenuItem value="text">Text</MenuItem>
+        <MenuItem value="email">E-post</MenuItem>
+        <MenuItem value="html">Info</MenuItem>
+        <MenuItem value="checkbox">Flerval</MenuItem>
+        <MenuItem value="radiogroup">Enkelval (radioknapp)</MenuItem>
+        <MenuItem value="rating">Betyg</MenuItem>
+        <MenuItem value="geometry">Alla geometriverktyg</MenuItem>
+        <MenuItem value="geometrypoint">Geometriverktyget punkt</MenuItem>
+        <MenuItem value="geometrylinestring">Geometriverktyget linje</MenuItem>
+        <MenuItem value="geometrypolygon">Geometriverktyget yta</MenuItem>
+        </Select>
         {question.type === "checkbox" || question.type === "radiogroup" ? (
         <div>
           {question.choices && question.choices.map((choice, index) => (
@@ -66,15 +76,17 @@ function SurveyHandler() {
               />
             </div>
           ))}
-          <button onClick={() => addChoice(selectedQuestion.pageIndex, selectedQuestion.questionIndex)}>Lägg till val</button>
+          <Button variant="contained" color="primary" onClick={() => addChoice(selectedQuestion.pageIndex, selectedQuestion.questionIndex)}>Lägg till val</Button>
         </div>
       ): null}
 
       {question.type === "html" && (
-        <textarea
+        <div><textarea
+          style={{ width: '100%', height: '100px', display: 'block' }}
           value={question.html}
           onChange={(e) => updateQuestion(selectedQuestion.pageIndex, selectedQuestion.questionIndex, 'html', e.target.value)}
         />
+        </div>
       )}
 
       {question.type === "rating" && (
@@ -93,7 +105,7 @@ function SurveyHandler() {
           />
         </div>
       )}
-        <button onClick={deleteSelectedQuestion}>Ta bort Fråga</button>
+        <Button variant="contained" color="secondary" onClick={deleteSelectedQuestion}>Ta bort Fråga</Button>
       </div>
     );
   };
@@ -101,7 +113,7 @@ function SurveyHandler() {
   const deleteSelectedQuestion = () => {
     if (selectedQuestion === null) return;
     deleteQuestion(selectedQuestion.pageIndex, selectedQuestion.questionIndex);
-    setSelectedQuestion(null); // Nollställ vald fråga efter borttagning
+    setSelectedQuestion(null);
   };
 
   const addPage = () => {
@@ -124,6 +136,8 @@ function SurveyHandler() {
       }
       return page;
     });
+    const newQuestionIndex = newPages[pageIndex].questions.length - 1;
+    setSelectedQuestion({ pageIndex, questionIndex: newQuestionIndex });
     setSurvey({ ...survey, pages: newPages });
   };
   
@@ -270,18 +284,18 @@ function SurveyHandler() {
       </Grid>
 
       <div style={{ marginBottom: '10px' }}>
-        <button onClick={addPage}>Lägg till Sida</button>
-        <button onClick={saveSurvey} style={{ marginLeft: '20px' }}>Spara Enkät</button>
+        <Button variant="contained" color="primary" onClick={addPage}>Lägg till Sida</Button>
+        <Button variant="contained" style={{ backgroundColor: 'green', color: 'white',  marginLeft: '20px' }} onClick={saveSurvey}>Spara Enkät</Button>
       </div>
       <Grid container spacing={2} style={{ marginBottom: '50px' }}>
       <Grid item xs={12} sm={6}>
     <div style={{ backgroundColor: '#f0f0f0', padding: '20px' }}>
       <div className="App">
         {survey.pages.map((page, pageIndex) => (
-          <div key={pageIndex} style={{ marginBottom: '40px', border: '1px solid #ccc', padding: '20px', backgroundColor: '#f0f0f0' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
+          <div key={pageIndex} style={{ marginBottom: '0px', border: '1px solid #ccc', padding: '0px', backgroundColor: '#f0f0f0' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0px' }}>
               <h4>Sida {pageIndex + 1}</h4>
-              <button onClick={() => deletePage(pageIndex)}>Ta bort Sida</button>
+              <Button variant="contained" color="secondary" onClick={() => deletePage(pageIndex)}>Ta bort Sida</Button>
             </div>
             {page.questions.map((question, questionIndex) => (
               <p key={questionIndex} onClick={() => handleQuestionClick(pageIndex, questionIndex)}>
@@ -291,7 +305,6 @@ function SurveyHandler() {
 
               </p>
             ))}
-            <button onClick={() => addQuestion(pageIndex)} style={{ marginTop: '10px' }}>Lägg till Fråga</button>
           </div>
         ))}
       </div>
@@ -302,6 +315,18 @@ function SurveyHandler() {
     <div style={{ backgroundColor: '#f0f0f0', padding: '20px' }}>
       <div>
         <h4>Redigera vald fråga</h4>
+        
+        <Select 
+          value={selectedPageIndex} 
+          onChange={(e) => handlePageSelection(parseInt(e.target.value, 10))}
+        >
+          {survey.pages.map((_, index) => (
+            <MenuItem key={index} value={index}>Sida {index + 1}</MenuItem>
+          ))}
+        </Select>
+
+        <Button variant="contained" color="primary" onClick={() => addQuestion(selectedPageIndex)} style={{ marginTop: '10px' }}>Lägg till Fråga</Button>
+        <hr></hr>
         {renderSelectedQuestionForm()}
       </div>
     </div>
