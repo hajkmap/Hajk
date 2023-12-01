@@ -4,7 +4,7 @@ import * as Survey from "survey-react-ui";
 import { ComponentCollection } from "survey-core";
 import { Model } from "survey-core";
 //import * as SurveyTheme from "survey-core/themes";
-//import "survey-core/defaultV2.min.css";
+import "survey-core/defaultV2.min.css";
 import "survey-core/i18n/swedish";
 import ReactDOM from "react-dom/client";
 
