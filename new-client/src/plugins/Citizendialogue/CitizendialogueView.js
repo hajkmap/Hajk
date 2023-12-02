@@ -227,53 +227,34 @@ function CitizendialogueView(props) {
     }
   };
 
-  // A useEffect that sets geometry as well as the current question used by handleOnComplete
   // To display geometry in answerfile.
-  const [temporaryCoordinates, setTemporaryCoordinates] = useState(null);
-  const [temporaryQuestionNameCoords, setTemporaryQuestionNameCoords] =
-    useState(null);
-
-  useEffect(() => {
-    if (temporaryCoordinates && temporaryQuestionNameCoords) {
-      setGeometry((prevCoords) => {
-        const existingCoordinates =
-          prevCoords[temporaryQuestionNameCoords] || [];
-        let newCoordinatesToAdd;
-        //Remove duplicate geometry
-        if (Array.isArray(temporaryCoordinates[0])) {
-          newCoordinatesToAdd = temporaryCoordinates.filter(
-            (tempCoord) =>
-              !existingCoordinates.some(
-                (existingCoord) =>
-                  existingCoord[0] === tempCoord[0] &&
-                  existingCoord[1] === tempCoord[1]
-              )
-          );
-        } else {
-          const isDuplicate = existingCoordinates.some(
-            (coord) =>
-              coord[0] === temporaryCoordinates[0] &&
-              coord[1] === temporaryCoordinates[1]
-          );
-          newCoordinatesToAdd = isDuplicate ? [] : [temporaryCoordinates];
-        }
-
-        return {
-          ...prevCoords,
-          [temporaryQuestionNameCoords]: [
-            ...existingCoordinates,
-            ...newCoordinatesToAdd,
-          ],
-        };
-      });
-
-      setTemporaryCoordinates(null);
-    }
-  }, [temporaryCoordinates, temporaryQuestionNameCoords]);
-
   const handleSelectedCoordinatesChange = (questionName, newCoordinate) => {
-    setTemporaryCoordinates(newCoordinate);
-    setTemporaryQuestionNameCoords(questionName);
+    setGeometry((prevCoords) => {
+      const existingCoordinates = prevCoords[questionName] || [];
+      let newCoordinatesToAdd;
+      // Remove duplicate geometry
+      if (Array.isArray(newCoordinate[0])) {
+        newCoordinatesToAdd = newCoordinate.filter(
+          (tempCoord) =>
+            !existingCoordinates.some(
+              (existingCoord) =>
+                existingCoord[0] === tempCoord[0] &&
+                existingCoord[1] === tempCoord[1]
+            )
+        );
+      } else {
+        const isDuplicate = existingCoordinates.some(
+          (coord) =>
+            coord[0] === newCoordinate[0] && coord[1] === newCoordinate[1]
+        );
+        newCoordinatesToAdd = isDuplicate ? [] : [newCoordinate];
+      }
+
+      return {
+        ...prevCoords,
+        [questionName]: [...existingCoordinates, ...newCoordinatesToAdd],
+      };
+    });
   };
 
   const handlePageChange = () => {
