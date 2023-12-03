@@ -34,11 +34,6 @@ class EditView extends React.PureComponent {
         editFeature: feature,
         editSource: this.props.model.editSource,
       });
-      //Return coordinates
-      /* this.props.onCoordinatesChange(
-        this.props.currentQuestionName,
-        feature.getGeometry().getCoordinates()
-      );*/
     });
 
     this.props.observer.subscribe("resetView", () => {
@@ -177,7 +172,7 @@ class EditView extends React.PureComponent {
       SURVEYQUESTION: this.props.currentQuestionName,
     };
 
-    model.save(editValues, (response, wktGeometries) => {
+    model.save(editValues, (response) => {
       if (
         response &&
         (response.ExceptionReport || !response.TransactionResponse)
@@ -188,12 +183,6 @@ class EditView extends React.PureComponent {
           this.getStatusMessage(response)
         );
       } else {
-        if (wktGeometries && wktGeometries.length > 0) {
-          this.props.onCoordinatesChange(
-            this.props.currentQuestionName,
-            wktGeometries
-          );
-        }
         model.filty = false;
         model.refreshEditingLayer();
         model.editFeatureBackup = undefined;

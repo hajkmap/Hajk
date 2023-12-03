@@ -16,6 +16,8 @@ class EditModel {
     this.observer = settings.observer;
     this.options = settings.options;
     this.surveyJsData = settings.surveyJsData;
+    this.onCoordinatesChange = settings.onCoordinatesChange;
+    this.currentQuestionName = settings.currentQuestionName;
 
     this.activeServices = this.options.activeServices;
     this.sources = this.options.sources;
@@ -209,6 +211,10 @@ class EditModel {
 
     wktGeometries = wktGeometries.filter((geometry) => geometry !== null);
 
+    if (wktGeometries && wktGeometries.length > 0) {
+      this.onCoordinatesChange(this.currentQuestionName, wktGeometries);
+    }
+
     if (
       features.updates.length === 0 &&
       features.inserts.length === 0 &&
@@ -218,7 +224,7 @@ class EditModel {
     }
 
     this.transact(features, (response) => {
-      done(response, wktGeometries);
+      done(response);
     });
   }
 

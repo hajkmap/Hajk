@@ -158,17 +158,6 @@ function CitizendialogueView(props) {
     // eslint-disable-next-line
   }, []);
 
-  const [editModel] = React.useState(
-    () =>
-      new EditModel({
-        map: props.map,
-        app: props.app,
-        observer: props.localObserver,
-        options: props.options,
-        surveyJsData: props.surveyJsData,
-      })
-  );
-
   const [surveyJSON, setSurveyJSON] = useState(null);
   useEffect(() => {
     props.model
@@ -188,6 +177,10 @@ function CitizendialogueView(props) {
 
   const [geometry, setGeometry] = React.useState({});
 
+  const handleOnCompleting = () => {
+    editViewRef.current.onSaveClicked();
+  };
+
   //Combine ID/Name and surveydata and geometry
   const handleOnComplete = React.useCallback(
     (survey) => {
@@ -198,10 +191,6 @@ function CitizendialogueView(props) {
         geometry,
       };
       props.model.handleOnComplete(combinedData);
-
-      if (editViewRef.current) {
-        editViewRef.current.onSaveClicked();
-      }
     },
     [props.surveyJsData, props.model, geometry]
   );
@@ -264,6 +253,19 @@ function CitizendialogueView(props) {
     }
   };
 
+  const [editModel] = React.useState(
+    () =>
+      new EditModel({
+        map: props.map,
+        app: props.app,
+        observer: props.localObserver,
+        options: props.options,
+        surveyJsData: props.surveyJsData,
+        currentQuestionName: currentQuestionName,
+        onCoordinatesChange: handleSelectedCoordinatesChange,
+      })
+  );
+
   const rootMap = useRef(new Map());
   React.useEffect(() => {
     const containers = document.querySelectorAll(".editViewContainer");
@@ -288,7 +290,6 @@ function CitizendialogueView(props) {
             currentQuestionName={currentQuestionName}
             onSaveCallback={handleOnComplete}
             ref={editViewRef}
-            onCoordinatesChange={handleSelectedCoordinatesChange}
             toolbarOptions={showEditView.toolbarOptions}
           />
         );
@@ -319,6 +320,7 @@ function CitizendialogueView(props) {
         <Survey.Survey
           model={survey}
           onComplete={handleOnComplete}
+          onCompleting={handleOnCompleting}
           onAfterRenderQuestion={handleAfterRenderQuestion}
           onCurrentPageChanged={handlePageChange}
         />
