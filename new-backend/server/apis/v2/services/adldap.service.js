@@ -2,11 +2,7 @@ import ActiveDirectory from "activedirectory2";
 import ActiveDirectoryError from "../utils/ActiveDirectoryError.js";
 import log4js from "log4js";
 import fs from "fs";
-
-// Create a logger for this Service
-const logger = log4js.getLogger("service.auth.v2");
-// Let's create another logger to separate internal logging from the ActiveDirectory2 library
-const internalADLogger = log4js.getLogger("service.auth.v2.activedirectory2");
+import AdBaseService from "./base/adbase.service.js";
 
 /**
  * @description Proposed setup:
@@ -27,19 +23,27 @@ const internalADLogger = log4js.getLogger("service.auth.v2.activedirectory2");
  *
  * @class ActiveDirectoryService
  */
-class ActiveDirectoryService {
+class AdLdapService extends AdBaseService {
   #config; // Will hold AD connection parameters
 
   constructor() {
+    super();
+    // Let's create another logger to separate internal logging from the ActiveDirectory2 library
+    this.internalADLogger = log4js.getLogger(
+      "service.auth.v2.activedirectory2"
+    );
+  }
+
+  init() {
     if (process.env.AD_LOOKUP_ACTIVE !== "true") {
-      logger.warn(
+      this.logger.warn(
         "AD_LOOKUP_ACTIVE is set to %o in .env. Not enabling ActiveDirectory authentication.\nIf you run this in production, you can still restrict access to admin-only endpoints by setting RESTRICT_ADMIN_ACCESS_TO_AD_GROUPS to any value.",
         process.env.AD_LOOKUP_ACTIVE
       );
       return;
     }
 
-    logger.trace("Initiating ActiveDirectoryService V2");
+    this.logger.trace("Initiating ActiveDirectoryService V2");
 
     // If .env says we should use AD but the configuration is missing, abort.
     if (
@@ -52,7 +56,7 @@ class ActiveDirectoryService {
         `One or more AD configuration parameters is missing. Check the AD_* options. 
         If you want to run backend without the AD functionality, set AD_LOOKUP_ACTIVE=false.`
       );
-      logger.fatal(e.message);
+      this.logger.fatal(e.message);
       throw e;
     }
 
@@ -82,7 +86,7 @@ class ActiveDirectoryService {
           Control your AD_TLS_* options or disable TLS by providing a ldap:// URL to the service. 
           ${error.message}`
         );
-        logger.fatal(e.message);
+        this.logger.fatal(e.message);
       }
 
       this.tlsOptions = {
@@ -98,7 +102,7 @@ class ActiveDirectoryService {
     // AD_URL seems to point to LDAPS server, let the log know, as it's probably
     // a mistake.
     else if (process.env.AD_URL.includes("ldaps://")) {
-      logger.warn(
+      this.logger.warn(
         `Caution: the configured AD_URL parameter contains "ldaps://" but you have not provided any TLS certificates!`
       );
     }
@@ -119,7 +123,7 @@ class ActiveDirectoryService {
     // Now we have the AD options and - optionally - the TLS options.
     // We're ready to prepare the config object for AD.
     this.#config = {
-      logging: internalADLogger,
+      logging: this.internalADLogger,
       url: process.env.AD_URL,
       baseDN: process.env.AD_BASE_DN,
       username: process.env.AD_USERNAME,
@@ -136,16 +140,16 @@ class ActiveDirectoryService {
     };
 
     // The main AD object that will handle communication
-    logger.trace(
+    this.logger.trace(
       `Setting up AD connection to using the following options (\`logging\`, \`password\` and \`tlsOptions\` are obfuscated from this log message):`
     );
     // eslint-disable-next-line no-unused-vars
     const { password, tlsOptions, logging, ...obfuscatedConfig } = this.#config;
-    logger.trace("%o", obfuscatedConfig);
+    this.logger.trace("%o", obfuscatedConfig);
 
     this._ad = new ActiveDirectory(this.#config);
 
-    logger.info(`Testing the AD connection to ${process.env.AD_URL}…`);
+    this.logger.info(`Testing the AD connection to ${process.env.AD_URL}…`);
 
     // Check the LDAP(S) connection. It will return true if OK or throw an error if connection
     // can't be established. Ideally, we'd want to await the return value here, but
@@ -206,7 +210,7 @@ class ActiveDirectoryService {
         ABORTING STARTUP.
         `
       );
-      logger.fatal(e.message);
+      this.logger.fatal(e.message);
       throw e;
     }
   }
@@ -217,7 +221,7 @@ class ActiveDirectoryService {
    * @memberof ActiveDirectoryService
    */
   #checkConnection() {
-    logger.info(`Attempting to connect to ${process.env.AD_URL}…`);
+    this.logger.info(`Attempting to connect to ${process.env.AD_URL}…`);
 
     // In order to check that the AD connection parameters are valid, we
     // create a new, separate ActiveDirectory instance. The reason for this
@@ -260,7 +264,7 @@ ABORTING STARTUP.
             `
             );
             // Write the error to log file
-            logger.fatal(e.message);
+            this.logger.fatal(e.message);
 
             // Now, abort startup by throwing an _uncaught_ error. Note that this
             // wil NOT be caught by the try/catch we're inside, as we're NOT inside
@@ -272,7 +276,7 @@ ABORTING STARTUP.
             // is safer than calling process.exit()."
             throw e;
           } else {
-            logger.info(`Connection to ${process.env.AD_URL} succeeded.`);
+            this.logger.info(`Connection to ${process.env.AD_URL} succeeded.`);
             return true;
           }
         }
@@ -282,7 +286,7 @@ ABORTING STARTUP.
       Couldn't test AD connection to ${process.env.AD_URL} due to malformed query value: "${process.env.AD_CHECK_CONNECTION_QUERY}". 
       Check the AD_CHECK_CONNECTION_QUERY parameter in .env.
       ABORTING STARTUP.`);
-      logger.fatal(e);
+      this.logger.fatal(e);
       throw e;
     }
   }
@@ -298,7 +302,7 @@ ABORTING STARTUP.
     try {
       // Exit early if someone tries to call this endpoint on a setup with disabled AD
       if (!this._ad) {
-        logger.trace(
+        this.logger.trace(
           "Attempt to access AD functionality failed – AD is disabled in .env"
         );
         throw new ActiveDirectoryError(
@@ -354,13 +358,13 @@ ABORTING STARTUP.
    */
   async flushStores() {
     try {
-      logger.trace("Flushing local cache stores…");
+      this.logger.trace("Flushing local cache stores…");
       this._users.clear();
       this._groups.clear();
       this._groupsPerUser.clear();
       return "All local caches successfully flushed.";
     } catch (error) {
-      logger.error("[flushStores] %s", error.message);
+      this.logger.error("[flushStores] %s", error.message);
       return { error };
     }
   }
@@ -382,113 +386,9 @@ ABORTING STARTUP.
    * @returns User as specified in configured request header or undefined if checks weren't met.
    * @memberof ActiveDirectoryService
    */
-  getUserFromRequestHeader(req) {
-    if (process.env.AD_LOOKUP_ACTIVE !== "true") {
-      // If AD_LOOKUP_ACTIVE is anything else than "true", we don't care
-      // about doing any username checks. Just return undefined as username.
-      return undefined;
-    } else {
-      // AD authentication is active.
-      //
-      // First see if webmaster wants to override the header value (useful for developing and testing)
-      if (
-        process.env.AD_OVERRIDE_USER_WITH_VALUE !== undefined &&
-        process.env.AD_OVERRIDE_USER_WITH_VALUE.trim().length !== 0
-      ) {
-        logger.warn(
-          'AD_OVERRIDE_USER_WITH_VALUE is set in .env! Will use "%s" as user name for all AD functions. DON\'T USE THIS IN PRODUCTION!',
-          process.env.AD_OVERRIDE_USER_WITH_VALUE
-        );
-
-        return process.env.AD_OVERRIDE_USER_WITH_VALUE;
-      }
-
-      // Now it's time to take care of the _real_ AD authentication!
-      //
-      // AD_LOOKUP_ACTIVE is "true" so let's find out a couple of things.
-      // 1. Do we only accept requests from certain IPs? If so, check that
-      // request comes from accepted IP. If not, abort.
-      // 2. If we passed the first check (either because request comes from
-      // accepted IP, or because we accept any IPs (dangerous!)) we can now
-      // take care of finding out the user name. It will be read from a REQ
-      // header.
-      //
-      // Implementation follows.
-
-      // Step 1: See if the current req IP is within the accepted IPs range
-      //
-      // Note that we'll be using req.connection.remoteAddress and not req.ip,
-      // because we're really interested of the last node that makes the actual
-      // request to this service (because it can modify the X-Control-Header).
-      // req.ip will render different values, depending on "trust proxy" setting,
-      // and it can in fact contain the value of X-Forwarded-For, which we don't care
-      // about in this case. We _really_ want to know who's the last node on the line
-      // and req.connection.remoteAddress gives us that.
-      const requestComesFromAcceptedIP =
-        process.env.AD_TRUSTED_PROXY_IPS === undefined || // If no IPs are specified, because variable isn't set,
-        process.env.AD_TRUSTED_PROXY_IPS.trim().length === 0 || // or because it's an empty string, it means that we accept any IP (dangerous!).
-        process.env.AD_TRUSTED_PROXY_IPS?.split(",").includes(
-          req.connection.remoteAddress
-        ); // Else, if specified, split on comma and see if IP exists in list
-
-      // Abort if request comes from unaccepted IP range
-      if (requestComesFromAcceptedIP === false) {
-        const e = new Error(
-          `[getUserFromRequestHeader] AD authentication does not allow requests from ${req.connection.remoteAddress}. Aborting.`
-        );
-        logger.error(e.message);
-        throw e;
-      }
-
-      // If we got this far, we've got through the check above. But we should ensure
-      // that IP range really is configured - if not we should print an additional
-      // warning in the log, so that admin is aware of this possible misconfiguration.
-      if (
-        process.env.AD_TRUSTED_PROXY_IPS === undefined ||
-        process.env.AD_TRUSTED_PROXY_IPS.trim().length === 0
-      ) {
-        logger.warn(
-          `[getUserFromRequestHeader] AD authentication is active but no IP range restriction is set in .env. 
-                          ***This means that you accept the value of X-Control-Header from any request, which is potentially a huge security risk!***`
-        );
-      }
-
-      logger.trace(
-        `[getUserFromRequestHeader] Request from ${req.connection.remoteAddress} accepted by AD`
-      );
-
-      // See which header we should be looking into
-      const xControlHeader =
-        process.env.AD_TRUSTED_HEADER || "X-Control-Header";
-
-      // The user will only be set only if request comes from accepted IP.
-      // Else, we'll send undefined as user parameter, which will in turn lead
-      // to errors being thrown (if AD auth is required in .env)
-      const user =
-        (requestComesFromAcceptedIP && req.get(xControlHeader)) || undefined;
-      logger.trace(
-        "[getUserFromRequestHeader] Header %s has value: %o",
-        process.env.AD_TRUSTED_HEADER,
-        user
-      );
-      // Check if the user-value contains backslash (we might get DOMAIN\userName in the header, and if we do
-      // we want to remove the domain).
-      if (user?.match(/\\/)) {
-        logger.trace(
-          "[getUserFromRequestHeader] Username from header contains backslash. Removing everything before the last backslash."
-        );
-        // Split the string on \
-        const userParts = user.split("\\");
-        // Return the string after the last \
-        return userParts[userParts.length - 1];
-      }
-      // If not, remove the user as-is.
-      return user;
-    }
-  }
 
   async isUserValid(sAMAccountName) {
-    logger.trace(
+    this.logger.trace(
       "[isUserValid] Checking if %o is a valid user in AD",
       sAMAccountName
     );
@@ -503,7 +403,7 @@ ABORTING STARTUP.
       user,
       "sAMAccountName"
     );
-    logger.trace(
+    this.logger.trace(
       "[isUserValid] %o is %sa valid user in AD",
       sAMAccountName,
       isValid ? "" : "NOT "
@@ -538,11 +438,14 @@ ABORTING STARTUP.
 
       // Check if user entry already exists in store
       if (!this._users.has(sAMAccountName)) {
-        logger.trace("[findUser] Looking up %o in real AD", sAMAccountName);
+        this.logger.trace(
+          "[findUser] Looking up %o in real AD",
+          sAMAccountName
+        );
         // If store didn't contain the requested user, get it from AD
         const user = await this._findUser(sAMAccountName);
 
-        logger.trace(
+        this.logger.trace(
           "[findUser] Saving %o in user store with value: \n%O",
           sAMAccountName,
           user
@@ -554,7 +457,7 @@ ABORTING STARTUP.
 
       return this._users.get(sAMAccountName);
     } catch (error) {
-      logger.error("[findUser] %s", error.message);
+      this.logger.error("[findUser] %s", error.message);
       // Save to Users Store to prevent subsequential lookups - we already
       // know that this user doesn't exist.
       this._users.set(sAMAccountName, {});
@@ -575,14 +478,14 @@ ABORTING STARTUP.
     // or else we'd just get the Promise itself!
     let groups = await this._groupsPerUser.get(sAMAccountName);
     if (groups !== undefined) {
-      logger.trace(
+      this.logger.trace(
         "[getGroupMembershipForUser] %o groups already found in groups-per-users store",
         sAMAccountName
       );
       return groups;
     }
 
-    logger.trace(
+    this.logger.trace(
       "[getGroupMembershipForUser] No entry for %o in the groups-per-users store yet. Populating…",
       sAMAccountName
     );
@@ -606,7 +509,7 @@ ABORTING STARTUP.
         // We only care about the shortname (CN)
         groups = groups.map((g) => g.cn).sort();
 
-        logger.trace(
+        this.logger.trace(
           "[getGroupMembershipForUser] Done. Setting groups-per-users store key %o to value: %O",
           sAMAccountName,
           groups
@@ -622,8 +525,8 @@ ABORTING STARTUP.
         // _groupsPerUser, so we resolve with an empty array. Note that this means that
         // our Promises in the store will be resolved either way - whether group membership
         // was found, or not.
-        logger.error(error.message);
-        logger.error(error);
+        this.logger.error(error.message);
+        this.logger.error(error);
         resolve([]);
       }
     });
@@ -652,7 +555,7 @@ ABORTING STARTUP.
 
       // If we haven't cached the requested user's groups yet…
       if (!this._groupsPerUser.has(sAMAccountName)) {
-        logger.trace(
+        this.logger.trace(
           "[isUserMemberOf] Can't find %o in groups-per-users store. Will need to populate.",
           sAMAccountName
         );
@@ -666,7 +569,7 @@ ABORTING STARTUP.
       const usersGroups = await this._groupsPerUser.get(sAMAccountName);
       return usersGroups.includes(groupCN);
     } catch (error) {
-      logger.error(error.message);
+      this.logger.error(error.message);
       // If an error was thrown above (e.g because user wasn't found
       // in AD), we return false (because a non-existing user isn't
       // a member of the specified group).
@@ -701,7 +604,7 @@ ABORTING STARTUP.
       // Spread the Set into an Array, which is the expected output format
       return [...this._groups];
     } catch (error) {
-      logger.error(error.message);
+      this.logger.error(error.message);
       return [];
     }
   }
@@ -736,7 +639,7 @@ ABORTING STARTUP.
 
       return commonGroups;
     } catch (error) {
-      logger.error(error.message);
+      this.logger.error(error.message);
       return [];
     }
   }
@@ -790,4 +693,4 @@ ABORTING STARTUP.
   }
 }
 
-export default new ActiveDirectoryService();
+export default AdLdapService;
