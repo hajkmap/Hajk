@@ -113,7 +113,10 @@ export default class DocumentHandlerModel {
 
       Promise.all(
         menuItemsWithDocumentConnection.map((menuItem) => {
-          return this.fetchJsonDocument(menuItem.document).then((doc) => {
+          return this.fetchJsonDocument(
+            menuItem.folder,
+            menuItem.document
+          ).then((doc) => {
             if (!doc.title) {
               console.warn(
                 `The document ${menuItem.document} is missing a title`
@@ -235,18 +238,21 @@ export default class DocumentHandlerModel {
     }
   }
 
-  async fetchJsonDocument(title) {
-    let response;
+  async fetchJsonDocument(folder = "", title) {
     try {
-      response = await hfetch(
-        `${this.mapServiceUrl}/informative/load/${title}`
-      );
+      const url = `${this.mapServiceUrl}/informative/load${
+        folder && `/${folder}`
+      }/${title}`;
+
+      const response = await hfetch(url);
       const text = await response.text();
+
       if (text === "File not found") {
         throw new Error(
           `Could not find document with title ${title} in folder with documents`
         );
       }
+
       const document = await JSON.parse(text);
       this.internalId = 0;
       document.chapters.forEach((chapter) => {
@@ -260,7 +266,7 @@ export default class DocumentHandlerModel {
       return document;
     } catch (err) {
       console.warn(
-        `Kunde inte parsa JSON-dokumentet ${document}, kontrollera så att filen finns och är en .json-fil `
+        `Kunde inte parsa JSON-dokumentet ${title}, kontrollera så att filen finns och är en .json-fil `
       );
       throw new Error(err);
     }
