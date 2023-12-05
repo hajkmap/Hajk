@@ -14,6 +14,10 @@ export default function QuickAccessLayers({
 }) {
   // State that contains the layers that are currently visible
   const [quickAccessLayers, setQuickAccessLayers] = useState([]);
+  const [, setForceState] = useState(false);
+
+  // Function that forces a rerender of the component
+  const forceUpdate = () => setForceState((prevState) => !prevState);
 
   // Function that finds a layer by id in the treeData
   const findLayerById = useCallback((groups, targetId) => {
@@ -54,6 +58,14 @@ export default function QuickAccessLayers({
     const quickAccessChangedSubscription = app.globalObserver.subscribe(
       "core.layerQuickAccessChanged",
       (l) => {
+        if (l.target.get("quickAccess") === true) {
+          // We force update when a layer changed visibility to
+          // be able to sync togglebuttons in GUI
+          l.target.on("change:visible", forceUpdate);
+        } else {
+          // Remove listener when layer is removed from quickaccess
+          l.target.un("change:visible", forceUpdate);
+        }
         setQuickAccessLayers(getQuickAccessLayers());
       }
     );

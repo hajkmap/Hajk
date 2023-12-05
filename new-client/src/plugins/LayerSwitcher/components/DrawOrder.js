@@ -90,10 +90,29 @@ function DrawOrder({ display, app, map, onLayerChange, model, options }) {
 
   // When values of display changes to true, let's update the list
   useEffect(() => {
+    let visibilityChangedSubscription;
+
     if (display) {
+      // Subscribe to the layerVisibilityChanged event when display sets to true
+      visibilityChangedSubscription = app.globalObserver.subscribe(
+        "core.layerVisibilityChanged",
+        (l) => {
+          // Update list of layers
+          setSortedLayers(getSortedLayers());
+        }
+      );
+
+      // Update list of layers when display sets to true
       setSortedLayers(getSortedLayers());
     }
-  }, [display, getSortedLayers]);
+
+    // Unsubscribe from the layerVisibilityChanged event
+    return function () {
+      if (visibilityChangedSubscription) {
+        visibilityChangedSubscription.unsubscribe();
+      }
+    };
+  }, [display, getSortedLayers, app.globalObserver]);
 
   // When values of the filterList set changes, let's update the list
   useEffect(() => {

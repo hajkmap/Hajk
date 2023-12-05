@@ -143,19 +143,13 @@ export default function GroupLayer({
 
   // Register subscriptions for groupLayer.
   useEffect(() => {
-    const subLayerChangedSubscription = app.globalObserver.subscribe(
-      "core.layerSubLayersChanged",
-      (l) => {
-        if (l.target.get("name") === layer.get("name")) {
-          setVisibleSubLayers(l.target.get("subLayers"));
-        }
+    app.globalObserver.subscribe("core.layerSubLayersChanged", (l) => {
+      if (l.target.get("name") === layer.get("name")) {
+        setVisibleSubLayers(l.target.get("subLayers"));
       }
-    );
+    });
 
-    const layerswitcherHideLayerSubscription = app.globalObserver.subscribe(
-      "layerswitcher.hideLayer",
-      setGroupHidden
-    );
+    app.globalObserver.subscribe("layerswitcher.hideLayer", setGroupHidden);
     const layerswitcherShowLayerSubscription = app.globalObserver.subscribe(
       "layerswitcher.showLayer",
       setGroupVisible
@@ -171,11 +165,9 @@ export default function GroupLayer({
 
     // Unsubscribe when component unmounts
     return () => {
-      layerswitcherHideLayerSubscription.unsubscribe();
       layerswitcherShowLayerSubscription.unsubscribe();
       hideLayerSubscription.unsubscribe();
       showLayerSubscription.unsubscribe();
-      subLayerChangedSubscription.unsubscribe();
     };
   }, [app.globalObserver, observer, setGroupHidden, setGroupVisible, layer]);
 
