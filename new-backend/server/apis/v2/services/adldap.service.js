@@ -223,6 +223,12 @@ class AdLdapService extends AdBaseService {
   #checkConnection() {
     this.logger.info(`Attempting to connect to ${process.env.AD_URL}…`);
 
+    // We will want to call logger from inside a callback of an instance
+    // to ActiveDirectory. Inside that instance, `this` will refer to the
+    // instance itself, rather than to _this_ class, hence making our
+    // logger unavailable. So let's save a reference to it inside a variable.
+    const serviceInstanceLogger = this.logger;
+
     // In order to check that the AD connection parameters are valid, we
     // create a new, separate ActiveDirectory instance. The reason for this
     // is that this basic check fails if AD_RECONNECT is set to `true` (rather
@@ -264,7 +270,7 @@ ABORTING STARTUP.
             `
             );
             // Write the error to log file
-            this.logger.fatal(e.message);
+            serviceInstanceLogger.fatal(e.message);
 
             // Now, abort startup by throwing an _uncaught_ error. Note that this
             // wil NOT be caught by the try/catch we're inside, as we're NOT inside
@@ -276,7 +282,9 @@ ABORTING STARTUP.
             // is safer than calling process.exit()."
             throw e;
           } else {
-            this.logger.info(`Connection to ${process.env.AD_URL} succeeded.`);
+            serviceInstanceLogger.info(
+              `Connection to ${process.env.AD_URL} succeeded.`
+            );
             return true;
           }
         }
@@ -286,7 +294,7 @@ ABORTING STARTUP.
       Couldn't test AD connection to ${process.env.AD_URL} due to malformed query value: "${process.env.AD_CHECK_CONNECTION_QUERY}". 
       Check the AD_CHECK_CONNECTION_QUERY parameter in .env.
       ABORTING STARTUP.`);
-      this.logger.fatal(e);
+      serviceInstanceLogger.fatal(e);
       throw e;
     }
   }
