@@ -10,6 +10,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - PropertyChecker: Better sorting and layer loading failed indicator in layers list.
+- PR: DocumentHandler - possible to save documents inside subfolders. [#1402](https://github.com/hajkmap/Hajk/pull/1402)
+
+### Fixed
+
+- PR: Fix layout issue with hidden DrawerToggleButtons [#1436](https://github.com/hajkmap/Hajk/pull/1436)
 
 ## [3.13.21] - 2023-11-17
 
