@@ -40,16 +40,21 @@ export default function QuickAccessLayers({
   // A helper that grabs all OL layers with state quickAccess
   const getQuickAccessLayers = useCallback(() => {
     // Get all quickaccess layers
-    return map.getAllLayers().filter((l) => {
-      if (filterValue === "") {
-        return l.get("quickAccess") === true;
-      } else {
-        // If filter is applied, make sure that the quickaccess layer is also visible in the tree
-        const layerInTree = findLayerById(treeData, l.get("name"));
-        return layerInTree?.isFiltered && l.get("quickAccess") === true;
-      }
+    const layers = map.getAllLayers().filter((l) => {
+      return l.get("quickAccess") === true;
     });
-  }, [map, filterValue, treeData, findLayerById]);
+    if (filterValue === "") {
+      return layers;
+    } else {
+      // If filter is applied, only show layers that match the filter
+      return layers.filter((l) => {
+        return l
+          .get("caption")
+          .toLocaleLowerCase()
+          .includes(filterValue.toLocaleLowerCase());
+      });
+    }
+  }, [map, filterValue]);
 
   // On component mount, update the list and subscribe to events
   useEffect(() => {
