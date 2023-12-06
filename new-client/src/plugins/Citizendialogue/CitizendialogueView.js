@@ -153,8 +153,18 @@ function CitizendialogueView(props) {
   // - Remember the cleanup-function! Especially when you're working with subscriptions.
   // - Remember that you can use several useEffect hooks! Maybe you want to do something when 'counter' changes?
 
-  useEffect(() => {
+  /*useEffect(() => {
     props.model.fetchStyle();
+    // eslint-disable-next-line
+  }, []);*/
+
+  const [surveyTheme, setSurveyTheme] = useState(null);
+  useEffect(() => {
+    async function fetchAndSetTheme() {
+      const theme = await props.model.fetchTheme();
+      setSurveyTheme(theme);
+    }
+    fetchAndSetTheme();
     // eslint-disable-next-line
   }, []);
 
@@ -307,10 +317,10 @@ function CitizendialogueView(props) {
   const [survey, setSurvey] = useState(null);
   useEffect(() => {
     const newSurvey = new Model(surveyJSON);
-    //newSurvey.applyTheme(SurveyTheme.DefaultDark);
+    newSurvey.applyTheme(surveyTheme);
     setSurvey(newSurvey);
     return () => {};
-  }, [surveyJSON]);
+  }, [surveyJSON, surveyTheme]);
 
   Survey.surveyLocalization.defaultLocale = "sv";
 

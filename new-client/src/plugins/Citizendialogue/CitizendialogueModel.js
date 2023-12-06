@@ -123,6 +123,22 @@ export default class CitizendialogueModel {
       });
   };
 
+  fetchTheme = () => {
+    return fetch("/survey_theme.json")
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error("Network response was not ok");
+        }
+        return response.json();
+      })
+      .catch((error) => {
+        console.error(
+          "There has been a problem with your fetch operation:",
+          error
+        );
+      });
+  };
+
   // Example of public method, returns the map instance
   getMap = () => {
     return this.#map;
