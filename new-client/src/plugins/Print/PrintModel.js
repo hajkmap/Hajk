@@ -777,7 +777,7 @@ export default class PrintModel {
       const imageSource = new ImageWMS({
         ...source.getProperties(),
         projection: source.getProjection(),
-        crossOrigin: source.crossOrigin ?? "anonymous",
+        crossOrigin: source.crossOrigin_ || "anonymous",
         params: { ...source.getParams() },
         ratio: 1,
         hidpi: false,
