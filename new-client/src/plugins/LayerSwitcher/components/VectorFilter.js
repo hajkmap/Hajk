@@ -10,6 +10,8 @@ import {
   Stack,
 } from "@mui/material";
 
+import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
+
 import { hfetch } from "utils/FetchWrapper";
 
 function VectorFilter({ layer }) {
@@ -158,6 +160,7 @@ function VectorFilter({ layer }) {
             justifyContent: "space-between",
           }}
           onDelete={() => setCurrentFilter("")}
+          deleteIcon={<EditOutlinedIcon />}
         />
       ) : (
         <>
