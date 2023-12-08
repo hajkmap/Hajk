@@ -187,34 +187,6 @@ class EditModel {
       );
     }
 
-    let combinedFeatures = [...features.inserts, ...features.updates];
-    let wktGeometries = combinedFeatures.map((feature) => {
-      let geometry = feature.getGeometry();
-      let type = geometry.getType();
-      let coords = geometry.getCoordinates();
-
-      switch (type) {
-        case "Point":
-          return `POINT(${coords[0]} ${coords[1]})`;
-        case "LineString":
-          return `LINESTRING(${coords
-            .map((coord) => `${coord[0]} ${coord[1]}`)
-            .join(", ")})`;
-        case "Polygon":
-          return `POLYGON((${coords[0]
-            .map((coord) => `${coord[0]} ${coord[1]}`)
-            .join(", ")}))`;
-        default:
-          return null;
-      }
-    });
-
-    wktGeometries = wktGeometries.filter((geometry) => geometry !== null);
-
-    if (wktGeometries && wktGeometries.length > 0) {
-      this.onCoordinatesChange(this.currentQuestionName, wktGeometries);
-    }
-
     if (
       features.updates.length === 0 &&
       features.inserts.length === 0 &&

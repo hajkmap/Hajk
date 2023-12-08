@@ -184,8 +184,6 @@ function CitizendialogueView(props) {
   };
   const editViewRef = useRef(null);
 
-  const [geometry, setGeometry] = React.useState({});
-
   const handleOnCompleting = () => {
     editViewRef.current.onSaveClicked();
   };
@@ -217,7 +215,7 @@ function CitizendialogueView(props) {
       };
       props.model.handleOnComplete(combinedData);
     }, // eslint-disable-next-line
-    [props.surveyJsData, props.model, geometry]
+    [props.surveyJsData, props.model]
   );
 
   // Sets currentQuestionName after rendering question
@@ -244,36 +242,6 @@ function CitizendialogueView(props) {
     }
   };
 
-  // To display geometry in answerfile.
-  const handleSelectedCoordinatesChange = (questionName, newCoordinate) => {
-    setGeometry((prevCoords) => {
-      const existingCoordinates = prevCoords[questionName] || [];
-      let newCoordinatesToAdd;
-      // Remove duplicate geometry
-      if (Array.isArray(newCoordinate[0])) {
-        newCoordinatesToAdd = newCoordinate.filter(
-          (tempCoord) =>
-            !existingCoordinates.some(
-              (existingCoord) =>
-                existingCoord[0] === tempCoord[0] &&
-                existingCoord[1] === tempCoord[1]
-            )
-        );
-      } else {
-        const isDuplicate = existingCoordinates.some(
-          (coord) =>
-            coord[0] === newCoordinate[0] && coord[1] === newCoordinate[1]
-        );
-        newCoordinatesToAdd = isDuplicate ? [] : [newCoordinate];
-      }
-
-      return {
-        ...prevCoords,
-        [questionName]: [...existingCoordinates, ...newCoordinatesToAdd],
-      };
-    });
-  };
-
   const handlePageChange = () => {
     setShowEditView({ show: false });
     if (editViewRef.current) {
@@ -289,8 +257,6 @@ function CitizendialogueView(props) {
         observer: props.localObserver,
         options: props.options,
         surveyJsData: props.surveyJsData,
-        currentQuestionName: currentQuestionName,
-        onCoordinatesChange: handleSelectedCoordinatesChange,
       })
   );
 
