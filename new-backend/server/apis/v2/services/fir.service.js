@@ -129,7 +129,7 @@ class FirService {
     data.rows.forEach((row) => {
       let _row = [];
       row.forEach((col, index) => {
-        const notANumber = isNaN(col);
+        const notANumber = (col?.trim && col.trim() === "") || isNaN(col);
         if (notANumber) {
           // Do we need more space for the column?
           if (headers[index].width < col.length + extraCharSpace) {
