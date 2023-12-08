@@ -7,6 +7,7 @@ import { Model } from "survey-core";
 import "survey-core/defaultV2.min.css";
 import "survey-core/i18n/swedish";
 import ReactDOM from "react-dom/client";
+import WKT from "ol/format/WKT";
 
 import EditView from "./EditView.js";
 import EditModel from "./EditModel.js";
@@ -192,14 +193,30 @@ function CitizendialogueView(props) {
   //Combine ID/Name and surveydata and geometry
   const handleOnComplete = React.useCallback(
     (survey) => {
+      const specificSurveyAnswerId = props.surveyJsData.surveyAnswerId;
+      const wktFormatter = new WKT();
+      const filteredFeatures = editModel.layer
+        .getSource()
+        .getFeatures()
+        .filter((feature) => {
+          const surveyAnswerId = feature.get("SURVEYANSWERID");
+          return surveyAnswerId === specificSurveyAnswerId;
+        });
+      const featureData = filteredFeatures.map((feature) => {
+        const geometry = feature.getGeometry();
+        const wktGeometry = wktFormatter.writeGeometry(geometry);
+        const surveyQuestion = feature.get("SURVEYQUESTION");
+        return { surveyQuestion, wktGeometry };
+      });
+
       setShowEditView({ show: false });
       const combinedData = {
         ...props.surveyJsData,
         ...survey.data,
-        geometry,
+        featureData,
       };
       props.model.handleOnComplete(combinedData);
-    },
+    }, // eslint-disable-next-line
     [props.surveyJsData, props.model, geometry]
   );
 
