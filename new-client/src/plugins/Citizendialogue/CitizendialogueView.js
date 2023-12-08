@@ -153,21 +153,18 @@ function CitizendialogueView(props) {
   // - Remember the cleanup-function! Especially when you're working with subscriptions.
   // - Remember that you can use several useEffect hooks! Maybe you want to do something when 'counter' changes?
 
-  /*useEffect(() => {
-    props.model.fetchStyle();
-    // eslint-disable-next-line
-  }, []);*/
-
   const [surveyTheme, setSurveyTheme] = useState(null);
   useEffect(() => {
-    async function fetchAndSetTheme() {
+    // an asynchronous function that runs directly inside a useEffect
+    (async () => {
       const theme = await props.model.fetchTheme();
+      // The surveyTheme state is used later in the component for creating surveyModel.
       setSurveyTheme(theme);
-    }
-    fetchAndSetTheme();
+    })();
     // eslint-disable-next-line
   }, []);
 
+  // Here we create and retrieve the JSON content for the survey, which is loaded when we create the surveyModel.
   const [surveyJSON, setSurveyJSON] = useState(null);
   useEffect(() => {
     props.model
@@ -177,6 +174,7 @@ function CitizendialogueView(props) {
     // eslint-disable-next-line
   }, []);
 
+  // showEditView is used to render EditView in a editViewContainer-class
   const [showEditView, setShowEditView] = useState(false);
 
   const [editViewKey, setEditViewKey] = useState(Date.now());
@@ -205,9 +203,12 @@ function CitizendialogueView(props) {
     [props.surveyJsData, props.model, geometry]
   );
 
+  // Sets currentQuestionName after rendering question
   const [currentQuestionName, setCurrentQuestionName] = useState(null);
   const handleAfterRenderQuestion = (sender, options) => {
     const currentQuestion = options.question;
+    // If type is custom question geometry, it shows EditView with the prop toolbarOption set.
+    // The Toolbar is filtered to show different sets of tools.
     if (currentQuestion.jsonObj.type === "geometry") {
       setCurrentQuestionName(currentQuestion.title);
       setShowEditView({ show: true, toolbarOptions: "all" });
