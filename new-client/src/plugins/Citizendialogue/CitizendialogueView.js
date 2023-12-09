@@ -185,7 +185,9 @@ function CitizendialogueView(props) {
   const editViewRef = useRef(null);
 
   const handleOnCompleting = () => {
-    editViewRef.current.onSaveClicked();
+    if (showEditView.show) {
+      editViewRef.current.onSaveClicked();
+    }
   };
 
   //Combine ID/Name and surveydata and geometry
@@ -262,10 +264,10 @@ function CitizendialogueView(props) {
   };
 
   const handlePageChange = () => {
-    setShowEditView({ show: false });
-    if (editViewRef.current) {
+    if (showEditView.show) {
       editViewRef.current.onSaveClicked();
     }
+    setShowEditView({ show: false });
   };
 
   const [editModel] = React.useState(
