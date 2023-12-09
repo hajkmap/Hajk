@@ -24,6 +24,9 @@ class EditView extends React.PureComponent {
     if (sources && sources.length > 0) {
       this.setLayer(sources[0].id);
       this.setState({ activeStep: 0 });
+    } else {
+      this.setLayer("");
+      this.setState({ activeStep: 0 });
     }
   }
 

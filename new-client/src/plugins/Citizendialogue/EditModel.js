@@ -8,6 +8,7 @@ import { Select, Modify, Draw, Translate } from "ol/interaction";
 import { never } from "ol/events/condition";
 import X2JS from "x2js";
 import { hfetch } from "utils/FetchWrapper";
+import WKT from "ol/format/WKT";
 
 class EditModel {
   constructor(settings) {
@@ -185,6 +186,31 @@ class EditModel {
           }
         }
       );
+    }
+
+    if (this.source.id === "simulated") {
+      const wktFormatter = new WKT();
+      const existingSavedFeaturesString = localStorage.getItem("savedFeatures");
+      const existingSavedFeatures = existingSavedFeaturesString
+        ? JSON.parse(existingSavedFeaturesString)
+        : [];
+      const newSavedFeatures = features.inserts.map((feature) => {
+        return {
+          surveyQuestion: feature.get("SURVEYQUESTION"),
+          surveyAnswerId: feature.get("SURVEYANSWERID"),
+          wktGeometry: wktFormatter.writeGeometry(feature.getGeometry()),
+        };
+      });
+      const combinedSavedFeatures = [
+        ...existingSavedFeatures,
+        ...newSavedFeatures,
+      ];
+      localStorage.setItem(
+        "savedFeatures",
+        JSON.stringify(combinedSavedFeatures)
+      );
+      done();
+      return;
     }
 
     if (
@@ -500,18 +526,58 @@ class EditModel {
   }
 
   setLayer(serviceId, done) {
-    // Find the source by id
-    this.source = this.sources.find((source) => source.id === serviceId);
+    const isSimulated = !serviceId || !this.sources || !this.sources.length;
+    if (isSimulated) {
+      this.source = {
+        id: "simulated",
+        caption: "Simulerad Medborgardialog",
+        internalLayerName: "Simulerad Medborgardialog",
+        url: "http://localhost:3000/simulated",
+        uri: "http://www.opengis.net/wfs",
+        projection: "EPSG:3009",
+        type: "edit",
+        layers: ["SIMULATED_LAYER"],
+        editLine: true,
+        editMultiLine: false,
+        editMultiPoint: false,
+        editMultiPolygon: false,
+        editPoint: true,
+        editPolygon: true,
+        editableFields: [
+          { index: 1, name: "SURVEYID", alias: "SURVEYID", dataType: "string" },
+          {
+            index: 2,
+            name: "SURVEYANSWERID",
+            alias: "SURVEYANSWERID",
+            dataType: "string",
+          },
+          {
+            index: 3,
+            name: "SURVEYANSWERDATE",
+            alias: "SURVEYANSWERDATE",
+            dataType: "dateTime",
+          },
+          {
+            index: 4,
+            name: "SURVEYQUESTION",
+            alias: "SURVEYQUESTION",
+            dataType: "string",
+          },
+        ],
+        nonEditableFields: [],
+        visibleForGroups: [],
+      };
+    } else {
+      this.source = this.sources.find((source) => source.id === serviceId);
+      const sourceSpecificOptions = this.options.activeServices.find(
+        (l) => l.id === serviceId
+      );
 
-    // Also, let's check if there are source-specific options for this
-    // map configuration and…
-    const sourceSpecificOptions = this.options.activeServices.find(
-      (l) => l.id === serviceId
-    );
-    // …spread them on the retrieved source object.
-    this.source = { ...this.source, ...sourceSpecificOptions };
+      this.source = { ...this.source, ...sourceSpecificOptions };
+    }
 
     this.filty = true;
+
     this.vectorSource = new VectorSource({
       loader: (extent) => this.loadData(this.source, extent, done),
       strategy: strategyAll,
@@ -525,9 +591,9 @@ class EditModel {
       caption: "Edit layer",
       source: this.vectorSource,
       style:
-        this.source?.simpleEditWorkflow === true // If only simple edit is allowed…
-          ? this.getTransparentStyle() // let's get a transparent style (user will see WMS layer anyway).
-          : this.getVectorStyle(), // Else, get normal vector style (all features are grey).
+        this.source?.simpleEditWorkflow === true
+          ? this.getTransparentStyle()
+          : this.getVectorStyle(),
     });
 
     if (this.layer) {
@@ -537,6 +603,7 @@ class EditModel {
     this.map.addLayer(this.layer);
     this.editSource = this.source;
     this.editFeature = null;
+
     this.observer.publish("editSource", this.source);
     this.observer.publish("editFeature", null);
     this.observer.publish("layerChanged", this.layer);

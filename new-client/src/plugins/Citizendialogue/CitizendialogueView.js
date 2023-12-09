@@ -192,20 +192,38 @@ function CitizendialogueView(props) {
   const handleOnComplete = React.useCallback(
     (survey) => {
       const specificSurveyAnswerId = props.surveyJsData.surveyAnswerId;
-      const wktFormatter = new WKT();
-      const filteredFeatures = editModel.layer
-        .getSource()
-        .getFeatures()
-        .filter((feature) => {
-          const surveyAnswerId = feature.get("SURVEYANSWERID");
-          return surveyAnswerId === specificSurveyAnswerId;
+      let featureData = [];
+
+      if (editModel.source.id === "simulated") {
+        const savedFeaturesString = localStorage.getItem("savedFeatures");
+        if (savedFeaturesString) {
+          const savedFeatures = JSON.parse(savedFeaturesString);
+          featureData = savedFeatures
+            .filter(
+              (feature) => feature.surveyAnswerId === specificSurveyAnswerId
+            )
+            .map((feature) => {
+              return {
+                surveyQuestion: feature.surveyQuestion,
+                wktGeometry: feature.wktGeometry,
+              };
+            });
+        }
+      } else {
+        const filteredFeatures = editModel.layer
+          .getSource()
+          .getFeatures()
+          .filter(
+            (feature) =>
+              feature.get("SURVEYANSWERID") === specificSurveyAnswerId
+          );
+        featureData = filteredFeatures.map((feature) => {
+          const geometry = feature.getGeometry();
+          const wktGeometry = new WKT().writeGeometry(geometry);
+          const surveyQuestion = feature.get("SURVEYQUESTION");
+          return { surveyQuestion, wktGeometry };
         });
-      const featureData = filteredFeatures.map((feature) => {
-        const geometry = feature.getGeometry();
-        const wktGeometry = wktFormatter.writeGeometry(geometry);
-        const surveyQuestion = feature.get("SURVEYQUESTION");
-        return { surveyQuestion, wktGeometry };
-      });
+      }
 
       setShowEditView({ show: false });
       const combinedData = {
@@ -214,7 +232,8 @@ function CitizendialogueView(props) {
         featureData,
       };
       props.model.handleOnComplete(combinedData);
-    }, // eslint-disable-next-line
+    },
+    // eslint-disable-next-line
     [props.surveyJsData, props.model]
   );
 
