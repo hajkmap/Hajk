@@ -426,59 +426,61 @@ class LayersSwitcherView extends React.PureComponent {
               : "none",
         }}
       >
-        <Box
-          sx={{
-            p: 1,
-            backgroundColor: (theme) =>
-              theme.palette.mode === "dark"
-                ? "#373737"
-                : theme.palette.grey[100],
-            borderBottom: (theme) =>
-              `${theme.spacing(0.2)} solid ${theme.palette.divider}`,
-          }}
-        >
+        {this.options.enableLayerListSearch && (
           <Box
             sx={{
-              width: 500,
-              maxWidth: "100%",
               p: 1,
+              backgroundColor: (theme) =>
+                theme.palette.mode === "dark"
+                  ? "#373737"
+                  : theme.palette.grey[100],
+              borderBottom: (theme) =>
+                `${theme.spacing(0.2)} solid ${theme.palette.divider}`,
             }}
           >
-            <TextField
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <SearchIcon />
-                  </InputAdornment>
-                ),
-                endAdornment: (
-                  <InputAdornment position="end">
-                    {this.state.filterValue && (
-                      <IconButton
-                        onClick={() => this.resetInput()}
-                        size="small"
-                      >
-                        <ClearIcon />
-                      </IconButton>
-                    )}
-                  </InputAdornment>
-                ),
-              }}
-              size="small"
-              onChange={(event) =>
-                this.handleFilterValueChange(event.target.value)
-              }
-              fullWidth
-              placeholder="Sök lager och grupper"
-              inputRef={this.inputRef}
-              variant="outlined"
+            <Box
               sx={{
-                background: (theme) =>
-                  theme.palette.mode === "dark" ? "inherit" : "#fff",
+                width: 500,
+                maxWidth: "100%",
+                p: 1,
               }}
-            />
+            >
+              <TextField
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <SearchIcon />
+                    </InputAdornment>
+                  ),
+                  endAdornment: (
+                    <InputAdornment position="end">
+                      {this.state.filterValue && (
+                        <IconButton
+                          onClick={() => this.resetInput()}
+                          size="small"
+                        >
+                          <ClearIcon />
+                        </IconButton>
+                      )}
+                    </InputAdornment>
+                  ),
+                }}
+                size="small"
+                onChange={(event) =>
+                  this.handleFilterValueChange(event.target.value)
+                }
+                fullWidth
+                placeholder="Sök lager och grupper"
+                inputRef={this.inputRef}
+                variant="outlined"
+                sx={{
+                  background: (theme) =>
+                    theme.palette.mode === "dark" ? "inherit" : "#fff",
+                }}
+              />
+            </Box>
           </Box>
-        </Box>
+        )}
         {this.props.options.showQuickAccess && (
           <Box
             sx={{
