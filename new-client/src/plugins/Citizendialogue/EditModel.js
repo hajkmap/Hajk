@@ -19,12 +19,11 @@ class EditModel {
     this.surveyJsData = settings.surveyJsData;
     this.onCoordinatesChange = settings.onCoordinatesChange;
     this.currentQuestionName = settings.currentQuestionName;
-    this.mapData = settings.mapData;
-    this.updateMapData = settings.updateMapData;
 
     this.activeServices = this.options.activeServices;
     this.sources = this.options.sources;
 
+    this.newMapData = [];
     this.vectorSource = undefined;
     this.layer = undefined;
     this.select = undefined;
@@ -199,7 +198,7 @@ class EditModel {
         wktGeometry: wktFormatter.writeGeometry(feature.getGeometry()),
       }));
 
-      this.updateMapData(newSavedFeatures);
+      this.newMapData = [...this.newMapData, ...newSavedFeatures];
 
       done();
       return;

@@ -5,7 +5,6 @@ import BaseWindowPlugin from "../BaseWindowPlugin";
 import CitizendialogueModel from "./CitizendialogueModel";
 import CitizendialogueView from "./CitizendialogueView";
 import Observer from "react-event-observer";
-import { MapDataProvider } from "./MapDataContext";
 
 // All plugins will need to display an icon. Make sure to pick a relevant one from MUI Icons.
 import AppRegistrationIcon from "@mui/icons-material/AppRegistration";
@@ -156,24 +155,22 @@ function Citizendialogue(props) {
         onWindowShow: onWindowShow, // Handler for when user shows window.
       }}
     >
-      <MapDataProvider>
-        <div>
-          {/* This is the child object of BaseWindowPlugin. It will be displayed
+      <div>
+        {/* This is the child object of BaseWindowPlugin. It will be displayed
             as content inside the plugin's window. */}
 
-          <CitizendialogueView
-            {...props}
-            // Here we send some props to the plugin's View.
-            // Make sure to ONLY include props that are ACTUALLY USED in the View.
-            model={citizendialogueModel} // We can supply our model
-            app={props.app} // Or even the whole App
-            localObserver={localObserver} // And also the local-observer (handling communication within the plugin)...
-            globalObserver={props.app.globalObserver} // ... and the global-observer (handling communication within the entire application).
-            updateCustomProp={updateCustomProp} // We're also gonna pass a function that we can use to update the state in this (the parent) component.
-            surveyJsData={surveyjsData}
-          />
-        </div>
-      </MapDataProvider>
+        <CitizendialogueView
+          {...props}
+          // Here we send some props to the plugin's View.
+          // Make sure to ONLY include props that are ACTUALLY USED in the View.
+          model={citizendialogueModel} // We can supply our model
+          app={props.app} // Or even the whole App
+          localObserver={localObserver} // And also the local-observer (handling communication within the plugin)...
+          globalObserver={props.app.globalObserver} // ... and the global-observer (handling communication within the entire application).
+          updateCustomProp={updateCustomProp} // We're also gonna pass a function that we can use to update the state in this (the parent) component.
+          surveyJsData={surveyjsData}
+        />
+      </div>
     </BaseWindowPlugin>
   );
 }
