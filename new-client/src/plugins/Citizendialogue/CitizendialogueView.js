@@ -1,5 +1,11 @@
 // Make sure to only import the hooks you intend to use
-import React, { useCallback, useEffect, useState, useRef } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useState,
+  useRef,
+  useContext,
+} from "react";
 import * as Survey from "survey-react-ui";
 import { ComponentCollection } from "survey-core";
 import { Model } from "survey-core";
@@ -8,6 +14,7 @@ import "survey-core/defaultV2.min.css";
 import "survey-core/i18n/swedish";
 import ReactDOM from "react-dom/client";
 import WKT from "ol/format/WKT";
+import MapDataContext from "./MapDataContext";
 
 import EditView from "./EditView.js";
 import EditModel from "./EditModel.js";
@@ -190,6 +197,8 @@ function CitizendialogueView(props) {
     }
   };
 
+  const { mapData, updateMapData } = useContext(MapDataContext);
+
   //Combine ID/Name and surveydata and geometry
   const handleOnComplete = React.useCallback(
     (survey) => {
@@ -197,20 +206,14 @@ function CitizendialogueView(props) {
       let featureData = [];
 
       if (editModel.source.id === "simulated") {
-        const savedFeaturesString = localStorage.getItem("savedFeatures");
-        if (savedFeaturesString) {
-          const savedFeatures = JSON.parse(savedFeaturesString);
-          featureData = savedFeatures
-            .filter(
-              (feature) => feature.surveyAnswerId === specificSurveyAnswerId
-            )
-            .map((feature) => {
-              return {
-                surveyQuestion: feature.surveyQuestion,
-                wktGeometry: feature.wktGeometry,
-              };
-            });
-        }
+        featureData = mapData
+          .filter(
+            (feature) => feature.surveyAnswerId === specificSurveyAnswerId
+          )
+          .map((feature) => ({
+            surveyQuestion: feature.surveyQuestion,
+            wktGeometry: feature.wktGeometry,
+          }));
       } else {
         const filteredFeatures = editModel.layer
           .getSource()
@@ -236,7 +239,7 @@ function CitizendialogueView(props) {
       props.model.handleOnComplete(combinedData);
     },
     // eslint-disable-next-line
-    [props.surveyJsData, props.model]
+    [props.surveyJsData, props.model, mapData]
   );
 
   // Sets currentQuestionName after rendering question
@@ -278,6 +281,8 @@ function CitizendialogueView(props) {
         observer: props.localObserver,
         options: props.options,
         surveyJsData: props.surveyJsData,
+        mapData: mapData,
+        updateMapData: updateMapData,
       })
   );
 

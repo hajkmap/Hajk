@@ -19,6 +19,8 @@ class EditModel {
     this.surveyJsData = settings.surveyJsData;
     this.onCoordinatesChange = settings.onCoordinatesChange;
     this.currentQuestionName = settings.currentQuestionName;
+    this.mapData = settings.mapData;
+    this.updateMapData = settings.updateMapData;
 
     this.activeServices = this.options.activeServices;
     this.sources = this.options.sources;
@@ -190,25 +192,15 @@ class EditModel {
 
     if (this.source.id === "simulated") {
       const wktFormatter = new WKT();
-      const existingSavedFeaturesString = localStorage.getItem("savedFeatures");
-      const existingSavedFeatures = existingSavedFeaturesString
-        ? JSON.parse(existingSavedFeaturesString)
-        : [];
-      const newSavedFeatures = features.inserts.map((feature) => {
-        return {
-          surveyQuestion: feature.get("SURVEYQUESTION"),
-          surveyAnswerId: feature.get("SURVEYANSWERID"),
-          wktGeometry: wktFormatter.writeGeometry(feature.getGeometry()),
-        };
-      });
-      const combinedSavedFeatures = [
-        ...existingSavedFeatures,
-        ...newSavedFeatures,
-      ];
-      localStorage.setItem(
-        "savedFeatures",
-        JSON.stringify(combinedSavedFeatures)
-      );
+
+      const newSavedFeatures = features.inserts.map((feature) => ({
+        surveyQuestion: feature.get("SURVEYQUESTION"),
+        surveyAnswerId: feature.get("SURVEYANSWERID"),
+        wktGeometry: wktFormatter.writeGeometry(feature.getGeometry()),
+      }));
+
+      this.updateMapData(newSavedFeatures);
+
       done();
       return;
     }
