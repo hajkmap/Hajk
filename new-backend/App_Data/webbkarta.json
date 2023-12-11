@@ -1,5 +1,5 @@
 {
-  "version": "3.12.0-dev",
+  "version": "3.12.0-sweco",
   "projections": [
     {
       "code": "EPSG:3006",
@@ -439,103 +439,38 @@
           {
             "id": "9938c969-590c-8683-435c-1ecaca271096",
             "type": "group",
-            "name": "Bo & bygga",
+            "name": "Bo, bygga & miljö",
             "toggled": false,
             "expanded": false,
             "parent": "-1",
-            "layers": [],
+            "layers": [
+              {
+                "id": "gc8s01",
+                "drawOrder": 1,
+                "visibleAtStart": false,
+                "infobox": "Mark som ägs av Nacka kommun"
+              }
+            ],
             "groups": [
               {
-                "id": "0e75ef5d-fc5c-9e77-ad35-4cb3fbb3b058",
+                "id": "716557cd-8bb8-7356-970c-3f0b472f7f42",
                 "type": "group",
-                "name": "Bestämmelser",
-                "toggled": false,
+                "name": "Väghållare",
+                "toggled": true,
                 "expanded": false,
                 "parent": "9938c969-590c-8683-435c-1ecaca271096",
                 "layers": [
                   {
-                    "id": "gc8s01",
-                    "drawOrder": 1,
+                    "id": "g7pz73",
+                    "drawOrder": 0,
                     "visibleAtStart": false,
-                    "infobox": ""
+                    "infobox": "Vägar där Nacka kommun är väghållare"
                   },
                   {
-                    "id": "8knvhx",
-                    "drawOrder": 1,
+                    "id": "g8nl3c",
+                    "drawOrder": 0,
                     "visibleAtStart": false,
-                    "infobox": ""
-                  },
-                  {
-                    "id": "e8rr4x",
-                    "drawOrder": 1,
-                    "visibleAtStart": false,
-                    "infobox": ""
-                  },
-                  {
-                    "id": "nvipse",
-                    "drawOrder": 1,
-                    "visibleAtStart": false,
-                    "infobox": ""
-                  },
-                  {
-                    "id": "jz35ob",
-                    "drawOrder": 1,
-                    "visibleAtStart": false,
-                    "infobox": ""
-                  },
-                  {
-                    "id": "pdgqyc",
-                    "drawOrder": 1,
-                    "visibleAtStart": false,
-                    "infobox": ""
-                  },
-                  {
-                    "id": "mk2vfb",
-                    "drawOrder": 1,
-                    "visibleAtStart": false,
-                    "infobox": ""
-                  },
-                  {
-                    "id": "hpyx5h",
-                    "drawOrder": 1,
-                    "visibleAtStart": false,
-                    "infobox": ""
-                  },
-                  {
-                    "id": "8ooze1",
-                    "drawOrder": 1,
-                    "visibleAtStart": false,
-                    "infobox": ""
-                  },
-                  {
-                    "id": "jq6s2i",
-                    "drawOrder": 1,
-                    "visibleAtStart": false,
-                    "infobox": ""
-                  },
-                  {
-                    "id": "qpoew9",
-                    "drawOrder": 1000,
-                    "visibleAtStart": false,
-                    "infobox": ""
-                  },
-                  {
-                    "id": "st72uk",
-                    "drawOrder": 1,
-                    "visibleAtStart": false,
-                    "infobox": ""
-                  },
-                  {
-                    "id": "opqm61",
-                    "drawOrder": 1,
-                    "visibleAtStart": false,
-                    "infobox": ""
-                  },
-                  {
-                    "id": "bgohsw",
-                    "drawOrder": 1,
-                    "visibleAtStart": false,
-                    "infobox": ""
+                    "infobox": "Stat, samfällighet eller privat väghållare"
                   }
                 ],
                 "groups": []
@@ -548,18 +483,6 @@
                 "expanded": false,
                 "parent": "9938c969-590c-8683-435c-1ecaca271096",
                 "layers": [
-                  {
-                    "id": "aagun1",
-                    "drawOrder": 1,
-                    "visibleAtStart": false,
-                    "infobox": ""
-                  },
-                  {
-                    "id": "r9dapl",
-                    "drawOrder": 1,
-                    "visibleAtStart": false,
-                    "infobox": ""
-                  },
                   {
                     "id": "m13qrm",
                     "drawOrder": 1,
@@ -576,27 +499,236 @@
                 "groups": []
               },
               {
-                "id": "fe1449c6-64c2-47ee-9434-8e0b10836561",
+                "id": "0e75ef5d-fc5c-9e77-ad35-4cb3fbb3b058",
                 "type": "group",
-                "name": "Invasiva växter",
+                "name": "Bestämmelser",
                 "toggled": false,
                 "expanded": false,
                 "parent": "9938c969-590c-8683-435c-1ecaca271096",
-                "layers": [
+                "layers": [],
+                "groups": [
                   {
-                    "id": "dal45a",
-                    "drawOrder": 1,
-                    "visibleAtStart": false,
-                    "infobox": ""
+                    "id": "f03b6587-d48f-1be9-70fe-55d7a4245e12",
+                    "type": "group",
+                    "name": "Planer",
+                    "toggled": true,
+                    "expanded": false,
+                    "parent": "0e75ef5d-fc5c-9e77-ad35-4cb3fbb3b058",
+                    "layers": [
+                      {
+                        "id": "v1d8eh",
+                        "drawOrder": 1000,
+                        "visibleAtStart": false,
+                        "infobox": ""
+                      },
+                      {
+                        "id": "jz35ob",
+                        "drawOrder": 1,
+                        "visibleAtStart": false,
+                        "infobox": ""
+                      },
+                      {
+                        "id": "pdgqyc",
+                        "drawOrder": 1,
+                        "visibleAtStart": false,
+                        "infobox": ""
+                      }
+                    ],
+                    "groups": []
                   },
                   {
-                    "id": "l8gcrd",
-                    "drawOrder": 1,
-                    "visibleAtStart": false,
-                    "infobox": ""
+                    "id": "831959a5-3ea2-1e4b-e040-950a16b95d3b",
+                    "type": "group",
+                    "name": "Riksintressen & skyddad natur",
+                    "toggled": true,
+                    "expanded": false,
+                    "parent": "0e75ef5d-fc5c-9e77-ad35-4cb3fbb3b058",
+                    "layers": [
+                      {
+                        "id": "pu9f74",
+                        "drawOrder": 1000,
+                        "visibleAtStart": false,
+                        "infobox": ""
+                      },
+                      {
+                        "id": "rkxo9i",
+                        "drawOrder": 1000,
+                        "visibleAtStart": false,
+                        "infobox": ""
+                      },
+                      {
+                        "id": "opqm61",
+                        "drawOrder": 1,
+                        "visibleAtStart": false,
+                        "infobox": ""
+                      },
+                      {
+                        "id": "st72uk",
+                        "drawOrder": 1,
+                        "visibleAtStart": false,
+                        "infobox": ""
+                      },
+                      {
+                        "id": "e8rr4x",
+                        "drawOrder": 1,
+                        "visibleAtStart": false,
+                        "infobox": ""
+                      },
+                      {
+                        "id": "8knvhx",
+                        "drawOrder": 1,
+                        "visibleAtStart": false,
+                        "infobox": ""
+                      },
+                      {
+                        "id": "jq6s2i",
+                        "drawOrder": 1,
+                        "visibleAtStart": false,
+                        "infobox": ""
+                      },
+                      {
+                        "id": "bgohsw",
+                        "drawOrder": 1,
+                        "visibleAtStart": false,
+                        "infobox": ""
+                      },
+                      {
+                        "id": "nvipse",
+                        "drawOrder": 1,
+                        "visibleAtStart": false,
+                        "infobox": ""
+                      }
+                    ],
+                    "groups": []
+                  },
+                  {
+                    "id": "dc6b9d6c-13e6-edb3-b91c-b5dfac24c8f3",
+                    "type": "group",
+                    "name": "Övrig lovplikt ",
+                    "toggled": true,
+                    "expanded": false,
+                    "parent": "0e75ef5d-fc5c-9e77-ad35-4cb3fbb3b058",
+                    "layers": [
+                      {
+                        "id": "mk2vfb",
+                        "drawOrder": 1,
+                        "visibleAtStart": false,
+                        "infobox": ""
+                      },
+                      {
+                        "id": "qpoew9",
+                        "drawOrder": 1000,
+                        "visibleAtStart": false,
+                        "infobox": ""
+                      },
+                      {
+                        "id": "hpyx5h",
+                        "drawOrder": 1,
+                        "visibleAtStart": false,
+                        "infobox": ""
+                      },
+                      {
+                        "id": "8ooze1",
+                        "drawOrder": 1,
+                        "visibleAtStart": false,
+                        "infobox": ""
+                      }
+                    ],
+                    "groups": []
                   }
-                ],
-                "groups": []
+                ]
+              },
+              {
+                "id": "22c04dab-f738-6c9c-ea16-8e1d0da75d9b",
+                "type": "group",
+                "name": "Miljö",
+                "toggled": false,
+                "expanded": false,
+                "parent": "9938c969-590c-8683-435c-1ecaca271096",
+                "layers": [],
+                "groups": [
+                  {
+                    "id": "fe1449c6-64c2-47ee-9434-8e0b10836561",
+                    "type": "group",
+                    "name": "Invasiva växter",
+                    "toggled": true,
+                    "expanded": false,
+                    "parent": "22c04dab-f738-6c9c-ea16-8e1d0da75d9b",
+                    "layers": [
+                      {
+                        "id": "dal45a",
+                        "drawOrder": 1,
+                        "visibleAtStart": false,
+                        "infobox": ""
+                      },
+                      {
+                        "id": "l8gcrd",
+                        "drawOrder": 1,
+                        "visibleAtStart": false,
+                        "infobox": ""
+                      }
+                    ],
+                    "groups": []
+                  },
+                  {
+                    "id": "d33a53f6-8363-f174-dd89-a77c7bbf7095",
+                    "type": "group",
+                    "name": "Naturstädning",
+                    "toggled": true,
+                    "expanded": false,
+                    "parent": "22c04dab-f738-6c9c-ea16-8e1d0da75d9b",
+                    "layers": [
+                      {
+                        "id": "ucule8",
+                        "drawOrder": 1,
+                        "visibleAtStart": false,
+                        "infobox": ""
+                      },
+                      {
+                        "id": "hcormg",
+                        "drawOrder": 1,
+                        "visibleAtStart": false,
+                        "infobox": ""
+                      }
+                    ],
+                    "groups": []
+                  },
+                  {
+                    "id": "ed7b8b9d-e7db-5bb3-0d77-840a823a76b0",
+                    "type": "group",
+                    "name": "Skärgårdsmiljö",
+                    "toggled": true,
+                    "expanded": false,
+                    "parent": "22c04dab-f738-6c9c-ea16-8e1d0da75d9b",
+                    "layers": [
+                      {
+                        "id": "kukij2",
+                        "drawOrder": 1000,
+                        "visibleAtStart": false,
+                        "infobox": ""
+                      },
+                      {
+                        "id": "wjvy3h",
+                        "drawOrder": 0,
+                        "visibleAtStart": false,
+                        "infobox": ""
+                      },
+                      {
+                        "id": "ko9ior",
+                        "drawOrder": 0,
+                        "visibleAtStart": false,
+                        "infobox": ""
+                      },
+                      {
+                        "id": "8ju287",
+                        "drawOrder": 0,
+                        "visibleAtStart": false,
+                        "infobox": ""
+                      }
+                    ],
+                    "groups": []
+                  }
+                ]
               }
             ]
           },
@@ -644,71 +776,13 @@
             "parent": "-1",
             "layers": [
               {
-                "id": "fpgjv3",
-                "drawOrder": 1,
-                "visibleAtStart": false,
-                "infobox": ""
-              },
-              {
-                "id": "74invt",
-                "drawOrder": 1,
+                "id": "wjlwyd",
+                "drawOrder": 0,
                 "visibleAtStart": false,
                 "infobox": ""
               }
             ],
             "groups": [
-              {
-                "id": "16ad8613-8787-3124-f5fb-48a9a439d173",
-                "type": "group",
-                "name": "Stadsbyggnadsprojekt",
-                "toggled": true,
-                "expanded": false,
-                "parent": "304ea5f8-5b22-fa8f-eeb3-e68c8545aa5c",
-                "layers": [
-                  {
-                    "id": "fofl1x",
-                    "drawOrder": 1,
-                    "visibleAtStart": false,
-                    "infobox": ""
-                  },
-                  {
-                    "id": "lcnlpf",
-                    "drawOrder": 1,
-                    "visibleAtStart": false,
-                    "infobox": ""
-                  },
-                  {
-                    "id": "asktlk",
-                    "drawOrder": 1,
-                    "visibleAtStart": false,
-                    "infobox": ""
-                  }
-                ],
-                "groups": []
-              },
-              {
-                "id": "dc183c7b-cc49-1ea1-fdb6-d4b37580aaf4",
-                "type": "group",
-                "name": "Infartsparkeringar",
-                "toggled": false,
-                "expanded": false,
-                "parent": "304ea5f8-5b22-fa8f-eeb3-e68c8545aa5c",
-                "layers": [
-                  {
-                    "id": "thntg9",
-                    "drawOrder": 1,
-                    "visibleAtStart": false,
-                    "infobox": ""
-                  },
-                  {
-                    "id": "e2e48e",
-                    "drawOrder": 1,
-                    "visibleAtStart": false,
-                    "infobox": ""
-                  }
-                ],
-                "groups": []
-              },
               {
                 "id": "1b199e65-433b-828c-176d-6a3ac4bf719d",
                 "type": "group",
@@ -731,6 +805,128 @@
                   }
                 ],
                 "groups": []
+              },
+              {
+                "id": "43dddf4c-f46f-1c10-e228-9d9adcf29a90",
+                "type": "group",
+                "name": "Trafik",
+                "toggled": false,
+                "expanded": false,
+                "parent": "304ea5f8-5b22-fa8f-eeb3-e68c8545aa5c",
+                "layers": [
+                  {
+                    "id": "1sc2vf",
+                    "drawOrder": 1,
+                    "visibleAtStart": false,
+                    "infobox": ""
+                  },
+                  {
+                    "id": "um6dp6",
+                    "drawOrder": 1,
+                    "visibleAtStart": false,
+                    "infobox": ""
+                  },
+                  {
+                    "id": "74invt",
+                    "drawOrder": 1,
+                    "visibleAtStart": false,
+                    "infobox": ""
+                  },
+                  {
+                    "id": "fpgjv3",
+                    "drawOrder": 1,
+                    "visibleAtStart": false,
+                    "infobox": ""
+                  }
+                ],
+                "groups": [
+                  {
+                    "id": "dc183c7b-cc49-1ea1-fdb6-d4b37580aaf4",
+                    "type": "group",
+                    "name": "Parkeringar",
+                    "toggled": true,
+                    "expanded": false,
+                    "parent": "43dddf4c-f46f-1c10-e228-9d9adcf29a90",
+                    "layers": [
+                      {
+                        "id": "uufedm",
+                        "drawOrder": 1000,
+                        "visibleAtStart": false,
+                        "infobox": ""
+                      },
+                      {
+                        "id": "thntg9",
+                        "drawOrder": 1,
+                        "visibleAtStart": false,
+                        "infobox": ""
+                      },
+                      {
+                        "id": "e2e48e",
+                        "drawOrder": 1,
+                        "visibleAtStart": false,
+                        "infobox": ""
+                      }
+                    ],
+                    "groups": []
+                  },
+                  {
+                    "id": "71003960-fcd3-e22d-b5a3-d11db295baf0",
+                    "type": "group",
+                    "name": "Pågående & planerade trafikarbeten",
+                    "toggled": false,
+                    "expanded": false,
+                    "parent": "43dddf4c-f46f-1c10-e228-9d9adcf29a90",
+                    "layers": [],
+                    "groups": []
+                  }
+                ]
+              },
+              {
+                "id": "f537907b-e468-3694-90b2-c6ba630f85e3",
+                "type": "group",
+                "name": "Stadsutveckling",
+                "toggled": false,
+                "expanded": false,
+                "parent": "304ea5f8-5b22-fa8f-eeb3-e68c8545aa5c",
+                "layers": [
+                  {
+                    "id": "7jpptv",
+                    "drawOrder": 1000,
+                    "visibleAtStart": false,
+                    "infobox": ""
+                  }
+                ],
+                "groups": [
+                  {
+                    "id": "16ad8613-8787-3124-f5fb-48a9a439d173",
+                    "type": "group",
+                    "name": "Stadsbyggnadsprojekt",
+                    "toggled": false,
+                    "expanded": false,
+                    "parent": "f537907b-e468-3694-90b2-c6ba630f85e3",
+                    "layers": [
+                      {
+                        "id": "asktlk",
+                        "drawOrder": 1,
+                        "visibleAtStart": false,
+                        "infobox": ""
+                      },
+                      {
+                        "id": "fofl1x",
+                        "drawOrder": 1,
+                        "visibleAtStart": false,
+                        "infobox": ""
+                      },
+                      {
+                        "id": "lcnlpf",
+                        "drawOrder": 1,
+                        "visibleAtStart": false,
+                        "infobox": ""
+                      }
+                    ],
+                    "groups": []
+                  }
+                ]
               }
             ]
           },
@@ -751,6 +947,12 @@
               {
                 "id": "0zu7mq",
                 "drawOrder": 1,
+                "visibleAtStart": false,
+                "infobox": ""
+              },
+              {
+                "id": "hv4rrq",
+                "drawOrder": 1000,
                 "visibleAtStart": false,
                 "infobox": ""
               },
@@ -778,73 +980,7 @@
                 "infobox": ""
               },
               {
-                "id": "1sc2vf",
-                "drawOrder": 1,
-                "visibleAtStart": false,
-                "infobox": ""
-              },
-              {
-                "id": "um6dp6",
-                "drawOrder": 1,
-                "visibleAtStart": false,
-                "infobox": ""
-              },
-              {
-                "id": "hv8fjj",
-                "drawOrder": 1,
-                "visibleAtStart": false,
-                "infobox": ""
-              },
-              {
-                "id": "vogm8w",
-                "drawOrder": 1,
-                "visibleAtStart": false,
-                "infobox": ""
-              },
-              {
-                "id": "6zvxuv",
-                "drawOrder": 1,
-                "visibleAtStart": false,
-                "infobox": ""
-              },
-              {
-                "id": "z84tj1",
-                "drawOrder": 1,
-                "visibleAtStart": false,
-                "infobox": ""
-              },
-              {
                 "id": "bnwa3e",
-                "drawOrder": 1,
-                "visibleAtStart": false,
-                "infobox": ""
-              },
-              {
-                "id": "if2tzp",
-                "drawOrder": 1,
-                "visibleAtStart": false,
-                "infobox": ""
-              },
-              {
-                "id": "k2jg1p",
-                "drawOrder": 1,
-                "visibleAtStart": false,
-                "infobox": ""
-              },
-              {
-                "id": "5ms742",
-                "drawOrder": 1,
-                "visibleAtStart": false,
-                "infobox": ""
-              },
-              {
-                "id": "udlobp",
-                "drawOrder": 1,
-                "visibleAtStart": false,
-                "infobox": ""
-              },
-              {
-                "id": "tsjd6e",
                 "drawOrder": 1,
                 "visibleAtStart": false,
                 "infobox": ""
@@ -852,27 +988,151 @@
             ],
             "groups": [
               {
-                "id": "6b39d8be-da2c-d904-c17a-540e3df3ec1d",
+                "id": "209e0c04-79ab-0d75-45b2-7825a92f9669",
                 "type": "group",
-                "name": "Badplatser",
+                "name": "Idrottsanläggning",
                 "toggled": false,
                 "expanded": false,
                 "parent": "08406840-e615-9996-88df-006a6f6761dc",
                 "layers": [
                   {
-                    "id": "h56oxa",
+                    "id": "2ivcnz",
                     "drawOrder": 1,
                     "visibleAtStart": false,
                     "infobox": ""
                   },
                   {
-                    "id": "4omxs7",
+                    "id": "5ms742",
                     "drawOrder": 1,
                     "visibleAtStart": false,
                     "infobox": ""
                   },
                   {
-                    "id": "6v0bc2",
+                    "id": "tsjd6e",
+                    "drawOrder": 1000,
+                    "visibleAtStart": false,
+                    "infobox": ""
+                  },
+                  {
+                    "id": "bt8vb3",
+                    "drawOrder": 1,
+                    "visibleAtStart": false,
+                    "infobox": ""
+                  }
+                ],
+                "groups": [
+                  {
+                    "id": "ffc55781-0dc2-4e4d-00a5-4bb60b722ea4",
+                    "type": "group",
+                    "name": "Fotbollsplaner",
+                    "toggled": true,
+                    "expanded": false,
+                    "parent": "209e0c04-79ab-0d75-45b2-7825a92f9669",
+                    "layers": [
+                      {
+                        "id": "qekdg3",
+                        "drawOrder": 1000,
+                        "visibleAtStart": false,
+                        "infobox": ""
+                      },
+                      {
+                        "id": "d51xh7",
+                        "drawOrder": 1000,
+                        "visibleAtStart": false,
+                        "infobox": ""
+                      },
+                      {
+                        "id": "0d1tt7",
+                        "drawOrder": 1000,
+                        "visibleAtStart": false,
+                        "infobox": ""
+                      },
+                      {
+                        "id": "d42heu",
+                        "drawOrder": 1000,
+                        "visibleAtStart": false,
+                        "infobox": ""
+                      }
+                    ],
+                    "groups": []
+                  },
+                  {
+                    "id": "f5e820b5-59c6-e616-98bc-e421053d4873",
+                    "type": "group",
+                    "name": "Spontanidrott  ",
+                    "toggled": false,
+                    "expanded": false,
+                    "parent": "209e0c04-79ab-0d75-45b2-7825a92f9669",
+                    "layers": [
+                      {
+                        "id": "ophrmc",
+                        "drawOrder": 1,
+                        "visibleAtStart": false,
+                        "infobox": ""
+                      },
+                      {
+                        "id": "j0a09q",
+                        "drawOrder": 1,
+                        "visibleAtStart": false,
+                        "infobox": ""
+                      },
+                      {
+                        "id": "7m8n46",
+                        "drawOrder": 1,
+                        "visibleAtStart": false,
+                        "infobox": ""
+                      },
+                      {
+                        "id": "ilsyw9",
+                        "drawOrder": 1,
+                        "visibleAtStart": false,
+                        "infobox": ""
+                      },
+                      {
+                        "id": "hd56on",
+                        "drawOrder": 1,
+                        "visibleAtStart": false,
+                        "infobox": ""
+                      },
+                      {
+                        "id": "qv9tjj",
+                        "drawOrder": 1,
+                        "visibleAtStart": false,
+                        "infobox": ""
+                      }
+                    ],
+                    "groups": []
+                  }
+                ]
+              },
+              {
+                "id": "17b67e97-6ae0-75f9-f11a-b27f251581f5",
+                "type": "group",
+                "name": "Museum & konst",
+                "toggled": false,
+                "expanded": false,
+                "parent": "08406840-e615-9996-88df-006a6f6761dc",
+                "layers": [
+                  {
+                    "id": "hv8fjj",
+                    "drawOrder": 1,
+                    "visibleAtStart": false,
+                    "infobox": ""
+                  },
+                  {
+                    "id": "iriwna",
+                    "drawOrder": 1,
+                    "visibleAtStart": false,
+                    "infobox": ""
+                  },
+                  {
+                    "id": "z84tj1",
+                    "drawOrder": 1,
+                    "visibleAtStart": false,
+                    "infobox": ""
+                  },
+                  {
+                    "id": "gwuohn",
                     "drawOrder": 1,
                     "visibleAtStart": false,
                     "infobox": ""
@@ -881,131 +1141,9 @@
                 "groups": []
               },
               {
-                "id": "de2c3c52-c527-3f01-72eb-7689744d55a6",
+                "id": "d6bb00b9-3efc-34a0-6ed9-d4b026ab7243",
                 "type": "group",
-                "name": "Båtliv",
-                "toggled": false,
-                "expanded": false,
-                "parent": "08406840-e615-9996-88df-006a6f6761dc",
-                "layers": [
-                  {
-                    "id": "p02k1i",
-                    "drawOrder": 1,
-                    "visibleAtStart": false,
-                    "infobox": ""
-                  },
-                  {
-                    "id": "ds6w34",
-                    "drawOrder": 1,
-                    "visibleAtStart": false,
-                    "infobox": ""
-                  },
-                  {
-                    "id": "bzvhlz",
-                    "drawOrder": 1,
-                    "visibleAtStart": false,
-                    "infobox": ""
-                  },
-                  {
-                    "id": "iu62za",
-                    "drawOrder": 1,
-                    "visibleAtStart": false,
-                    "infobox": ""
-                  },
-                  {
-                    "id": "f0qsdx",
-                    "drawOrder": 1,
-                    "visibleAtStart": false,
-                    "infobox": ""
-                  },
-                  {
-                    "id": "x0vi6o",
-                    "drawOrder": 1,
-                    "visibleAtStart": false,
-                    "infobox": ""
-                  },
-                  {
-                    "id": "efyv2a",
-                    "drawOrder": 1,
-                    "visibleAtStart": false,
-                    "infobox": ""
-                  },
-                  {
-                    "id": "wn6m67",
-                    "drawOrder": 1,
-                    "visibleAtStart": false,
-                    "infobox": ""
-                  },
-                  {
-                    "id": "0g72xx",
-                    "drawOrder": 1,
-                    "visibleAtStart": false,
-                    "infobox": ""
-                  }
-                ],
-                "groups": []
-              },
-              {
-                "id": "f0727d61-591f-016f-e962-18fe7b0a68fb",
-                "type": "group",
-                "name": "Natur & friluftsområde",
-                "toggled": false,
-                "expanded": false,
-                "parent": "08406840-e615-9996-88df-006a6f6761dc",
-                "layers": [
-                  {
-                    "id": "hsdvmh",
-                    "drawOrder": 1,
-                    "visibleAtStart": false,
-                    "infobox": ""
-                  }
-                ],
-                "groups": []
-              },
-              {
-                "id": "724b164d-64d7-4a57-6920-069629c9c281",
-                "type": "group",
-                "name": "Naturvärden",
-                "toggled": false,
-                "expanded": false,
-                "parent": "08406840-e615-9996-88df-006a6f6761dc",
-                "layers": [
-                  {
-                    "id": "7oug0u",
-                    "drawOrder": 1,
-                    "visibleAtStart": false,
-                    "infobox": ""
-                  }
-                ],
-                "groups": []
-              },
-              {
-                "id": "d33a53f6-8363-f174-dd89-a77c7bbf7095",
-                "type": "group",
-                "name": "Naturstädning",
-                "toggled": false,
-                "expanded": false,
-                "parent": "08406840-e615-9996-88df-006a6f6761dc",
-                "layers": [
-                  {
-                    "id": "ucule8",
-                    "drawOrder": 1,
-                    "visibleAtStart": false,
-                    "infobox": ""
-                  },
-                  {
-                    "id": "hcormg",
-                    "drawOrder": 1,
-                    "visibleAtStart": false,
-                    "infobox": ""
-                  }
-                ],
-                "groups": []
-              },
-              {
-                "id": "f5e820b5-59c6-e616-98bc-e421053d4873",
-                "type": "group",
-                "name": "Lekplatser, utegym & hundrastgårdar",
+                "name": "Utomhus ",
                 "toggled": false,
                 "expanded": false,
                 "parent": "08406840-e615-9996-88df-006a6f6761dc",
@@ -1023,135 +1161,194 @@
                     "infobox": ""
                   },
                   {
-                    "id": "ophrmc",
-                    "drawOrder": 1,
-                    "visibleAtStart": false,
-                    "infobox": ""
-                  },
-                  {
-                    "id": "j0a09q",
-                    "drawOrder": 1,
-                    "visibleAtStart": false,
-                    "infobox": ""
-                  },
-                  {
-                    "id": "7m8n46",
-                    "drawOrder": 1,
-                    "visibleAtStart": false,
-                    "infobox": ""
-                  },
-                  {
-                    "id": "ilsyw9",
-                    "drawOrder": 1,
-                    "visibleAtStart": false,
-                    "infobox": ""
-                  },
-                  {
-                    "id": "hd56on",
-                    "drawOrder": 1,
-                    "visibleAtStart": false,
-                    "infobox": ""
-                  },
-                  {
-                    "id": "qv9tjj",
-                    "drawOrder": 1,
-                    "visibleAtStart": false,
-                    "infobox": ""
-                  },
-                  {
                     "id": "cyvxnp",
                     "drawOrder": 1,
                     "visibleAtStart": false,
                     "infobox": ""
                   }
                 ],
-                "groups": []
-              },
-              {
-                "id": "71003960-fcd3-e22d-b5a3-d11db295baf0",
-                "type": "group",
-                "name": "Motion & vandring",
-                "toggled": false,
-                "expanded": false,
-                "parent": "08406840-e615-9996-88df-006a6f6761dc",
-                "layers": [
+                "groups": [
                   {
-                    "id": "s0gppt",
-                    "drawOrder": 1,
-                    "visibleAtStart": false,
-                    "infobox": ""
-                  }
-                ],
-                "groups": []
-              },
-              {
-                "id": "fe727206-e2bb-7359-6fb4-e5829d5979ca",
-                "type": "group",
-                "name": "Museér & konsthallar",
-                "toggled": false,
-                "expanded": false,
-                "parent": "08406840-e615-9996-88df-006a6f6761dc",
-                "layers": [
-                  {
-                    "id": "iriwna",
-                    "drawOrder": 1,
-                    "visibleAtStart": false,
-                    "infobox": ""
+                    "id": "6b39d8be-da2c-d904-c17a-540e3df3ec1d",
+                    "type": "group",
+                    "name": "Badplatser",
+                    "toggled": true,
+                    "expanded": false,
+                    "parent": "d6bb00b9-3efc-34a0-6ed9-d4b026ab7243",
+                    "layers": [
+                      {
+                        "id": "h56oxa",
+                        "drawOrder": 1,
+                        "visibleAtStart": false,
+                        "infobox": ""
+                      },
+                      {
+                        "id": "4omxs7",
+                        "drawOrder": 1,
+                        "visibleAtStart": false,
+                        "infobox": ""
+                      },
+                      {
+                        "id": "6v0bc2",
+                        "drawOrder": 1,
+                        "visibleAtStart": false,
+                        "infobox": ""
+                      }
+                    ],
+                    "groups": []
                   },
                   {
-                    "id": "gwuohn",
-                    "drawOrder": 1,
-                    "visibleAtStart": false,
-                    "infobox": ""
-                  }
-                ],
-                "groups": []
-              },
-              {
-                "id": "f8d2a978-4e77-a188-65df-e307428d34b2",
-                "type": "group",
-                "name": "Ridsport",
-                "toggled": false,
-                "expanded": false,
-                "parent": "08406840-e615-9996-88df-006a6f6761dc",
-                "layers": [
-                  {
-                    "id": "2ivcnz",
-                    "drawOrder": 1,
-                    "visibleAtStart": false,
-                    "infobox": ""
+                    "id": "de2c3c52-c527-3f01-72eb-7689744d55a6",
+                    "type": "group",
+                    "name": "Båtliv",
+                    "toggled": true,
+                    "expanded": false,
+                    "parent": "d6bb00b9-3efc-34a0-6ed9-d4b026ab7243",
+                    "layers": [
+                      {
+                        "id": "p02k1i",
+                        "drawOrder": 1,
+                        "visibleAtStart": false,
+                        "infobox": ""
+                      },
+                      {
+                        "id": "ds6w34",
+                        "drawOrder": 1,
+                        "visibleAtStart": false,
+                        "infobox": ""
+                      },
+                      {
+                        "id": "bzvhlz",
+                        "drawOrder": 1,
+                        "visibleAtStart": false,
+                        "infobox": ""
+                      },
+                      {
+                        "id": "iu62za",
+                        "drawOrder": 1,
+                        "visibleAtStart": false,
+                        "infobox": ""
+                      },
+                      {
+                        "id": "f0qsdx",
+                        "drawOrder": 1,
+                        "visibleAtStart": false,
+                        "infobox": ""
+                      },
+                      {
+                        "id": "x0vi6o",
+                        "drawOrder": 1,
+                        "visibleAtStart": false,
+                        "infobox": ""
+                      },
+                      {
+                        "id": "efyv2a",
+                        "drawOrder": 1,
+                        "visibleAtStart": false,
+                        "infobox": ""
+                      },
+                      {
+                        "id": "wn6m67",
+                        "drawOrder": 1,
+                        "visibleAtStart": false,
+                        "infobox": ""
+                      },
+                      {
+                        "id": "0g72xx",
+                        "drawOrder": 1,
+                        "visibleAtStart": false,
+                        "infobox": ""
+                      }
+                    ],
+                    "groups": []
                   },
                   {
-                    "id": "9zd354",
-                    "drawOrder": 1,
-                    "visibleAtStart": false,
-                    "infobox": ""
-                  }
-                ],
-                "groups": []
-              },
-              {
-                "id": "31206651-5cb3-b5c4-d974-56cbb90e242c",
-                "type": "group",
-                "name": "Vintersport",
-                "toggled": false,
-                "expanded": false,
-                "parent": "08406840-e615-9996-88df-006a6f6761dc",
-                "layers": [
-                  {
-                    "id": "bt8vb3",
-                    "drawOrder": 1,
-                    "visibleAtStart": false,
-                    "infobox": ""
+                    "id": "f0727d61-591f-016f-e962-18fe7b0a68fb",
+                    "type": "group",
+                    "name": "Kulturpromenader",
+                    "toggled": true,
+                    "expanded": false,
+                    "parent": "d6bb00b9-3efc-34a0-6ed9-d4b026ab7243",
+                    "layers": [
+                      {
+                        "id": "if2tzp",
+                        "drawOrder": 1,
+                        "visibleAtStart": false,
+                        "infobox": ""
+                      },
+                      {
+                        "id": "6zvxuv",
+                        "drawOrder": 1,
+                        "visibleAtStart": false,
+                        "infobox": ""
+                      }
+                    ],
+                    "groups": []
                   },
                   {
-                    "id": "uy8w8q",
-                    "drawOrder": 1,
-                    "visibleAtStart": false,
-                    "infobox": ""
+                    "id": "724b164d-64d7-4a57-6920-069629c9c281",
+                    "type": "group",
+                    "name": "Naturområden & naturvärden",
+                    "toggled": true,
+                    "expanded": false,
+                    "parent": "d6bb00b9-3efc-34a0-6ed9-d4b026ab7243",
+                    "layers": [
+                      {
+                        "id": "7oug0u",
+                        "drawOrder": 1,
+                        "visibleAtStart": false,
+                        "infobox": ""
+                      },
+                      {
+                        "id": "hsdvmh",
+                        "drawOrder": 1,
+                        "visibleAtStart": false,
+                        "infobox": ""
+                      }
+                    ],
+                    "groups": []
+                  },
+                  {
+                    "id": "8a2b05c2-eb47-a616-0ddb-62f022cfe4f4",
+                    "type": "group",
+                    "name": "Motion & vandring",
+                    "toggled": true,
+                    "expanded": false,
+                    "parent": "d6bb00b9-3efc-34a0-6ed9-d4b026ab7243",
+                    "layers": [
+                      {
+                        "id": "s0gppt",
+                        "drawOrder": 1,
+                        "visibleAtStart": false,
+                        "infobox": ""
+                      }
+                    ],
+                    "groups": []
+                  },
+                  {
+                    "id": "39023444-5217-dd28-c7a3-4db7d385253d",
+                    "type": "group",
+                    "name": "Vintersport",
+                    "toggled": true,
+                    "expanded": false,
+                    "parent": "d6bb00b9-3efc-34a0-6ed9-d4b026ab7243",
+                    "layers": [
+                      {
+                        "id": "5l1pq7",
+                        "drawOrder": 1000,
+                        "visibleAtStart": false,
+                        "infobox": ""
+                      },
+                      {
+                        "id": "uy8w8q",
+                        "drawOrder": 1,
+                        "visibleAtStart": false,
+                        "infobox": ""
+                      }
+                    ],
+                    "groups": []
                   }
-                ],
-                "groups": []
+                ]
               }
             ]
           }
