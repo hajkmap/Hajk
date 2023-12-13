@@ -187,6 +187,35 @@ filters.add("lt", function (value, test, lessValue, greaterValue) {
 });
 
 /*
+  gt - greaterThan
+  If lessValue or greaterValue is an empty string the original value will be returned
+  Example:
+  {10.3|gt('9.2', 'GreaterThan', 'LessThan')}
+  outputs: 'GreaterThan'
+  {10.3|gt('9.2', '', 'LessThan')}
+  outputs: 10.3
+*/
+filters.add("gt", function (value, test, greaterValue, lessValue) {
+  if (isNaN(value) || isNaN(test)) {
+    return value;
+  }
+  const val = typeof value === "string" ? parseFloat(value) : value;
+  const t = typeof test === "string" ? parseFloat(test) : test;
+
+  if (val > t) {
+    return (typeof greaterValue === "string" && greaterValue.length === 0) ||
+      !greaterValue
+      ? value
+      : greaterValue;
+  } else {
+    return (typeof lessValue === "string" && lessValue.length === 0) ||
+      !lessValue
+      ? value
+      : lessValue;
+  }
+});
+
+/*
   hasValue
   Example:
   {'test'|hasValue('It has a value', 'Sorry, no value here.')}
