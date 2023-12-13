@@ -216,6 +216,23 @@ filters.add("gt", function (value, test, greaterValue, lessValue) {
 });
 
 /*
+  naNToNum
+  If value is NaN or undef returns num as a number, otherwise returns value
+  Example:
+  {NaN|naNToNum('-1000')}
+  outputs: -1000
+  {10.3|naNToNum('-1000')}
+  outputs: 10.3
+*/
+filters.add("naNToNum", function (value, num) {
+  if (!value || isNaN(value)) {
+    return parseFloat(num);
+  } else {
+    return value;
+  }
+});
+
+/*
   hasValue
   Example:
   {'test'|hasValue('It has a value', 'Sorry, no value here.')}
