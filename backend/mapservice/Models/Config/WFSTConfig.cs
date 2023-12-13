@@ -27,6 +27,8 @@ namespace MapService.Models.Config
 
 		public string projection { get; set; }
 
+        public string geometryField { get; set; }
+
         public List<string> layers { get; set; }
 
         public List<EditableField> editableFields { get; set; }

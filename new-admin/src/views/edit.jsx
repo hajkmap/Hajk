@@ -42,6 +42,7 @@ const defaultState = {
   url: "",
   uri: "",
   projection: "",
+  geometryField: "",
   point: false,
   multipoint: false,
   linestring: false,
@@ -132,6 +133,7 @@ class Edit extends Component {
       url: layer.url,
       uri: layer.uri,
       projection: layer.projection || "EPSG:3006",
+      geometryField: layer.geometryField || "",
       addedLayers: [],
       point: layer.editPoint,
       multipoint: layer.editMultiPoint,
@@ -650,6 +652,7 @@ class Edit extends Component {
         uri: this.getValue("uri"),
         layers: this.getValue("layers"),
         projection: this.getValue("projection"),
+        geometryField: this.getValue("geometryField"),
         editableFields: this.getValue("editableFields"),
         nonEditableFields: this.getNonEditableFields(),
         editPoint: this.getValue("point"),
@@ -1298,6 +1301,26 @@ class Edit extends Component {
               <div>
                 <label>Projektion</label>
                 {this.renderProjections()}
+              </div>
+              <div>
+                <div style={{display: "inline-block", width: "160px"}}>
+                  <label style={{width: "auto"}}>Geometrifält</label>
+                  <i
+                  style={{marginLeft: "4px"}}
+                  className="fa fa-question-circle"
+                  data-toggle="tooltip"
+                  title="Geometrifält som används ifall det finns inga befintliga features. om inte inställd 'geom' används"
+                  />
+                </div>
+                <input
+                  type="text"
+                  ref="input_geometryField"
+                  value={this.state.geometryField || ""}
+                  onChange={(e) => {
+                    this.setState({geometryField: e.target.value});
+                    this.validateField("geometryField");
+                  }}>
+                </input>
               </div>
               <div>
                 <label>Geometrityper</label>
