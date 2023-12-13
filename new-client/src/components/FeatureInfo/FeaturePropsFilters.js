@@ -161,9 +161,9 @@ filters.addAlias("fallback", "default");
   lt - lessThan
   If lessValue or greaterValue is an empty string the original value will be returned
   Example:
-  {10.3|lt(11, 'LessThan', 'GreaterThan')}
+  {10.3|lt('11', 'LessThan', 'GreaterThan')}
   outputs: 'LessThan'
-  {10.3|lt(11, '', 'GreaterThan')}
+  {10.3|lt('11', '', 'GreaterThan')}
   outputs: 10.3
 */
 filters.add("lt", function (value, test, lessValue, greaterValue) {
@@ -174,11 +174,13 @@ filters.add("lt", function (value, test, lessValue, greaterValue) {
   const t = typeof test === "string" ? parseFloat(test) : test;
 
   if (val < t) {
-    return typeof lessValue === "string" && lessValue.length === 0
+    return (typeof lessValue === "string" && lessValue.length === 0) ||
+      !lessValue
       ? value
       : lessValue;
   } else {
-    return typeof greaterValue === "string" && greaterValue.length === 0
+    return (typeof greaterValue === "string" && greaterValue.length === 0) ||
+      !greaterValue
       ? value
       : greaterValue;
   }
