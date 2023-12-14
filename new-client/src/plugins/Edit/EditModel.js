@@ -347,7 +347,7 @@ class EditModel {
     // take a look at the first one and get geometry field's name from that first feature.
     // If there are no features however, check if the edit layer has a 'geometryField' property and use this.
     // this enables users using databases that do not default to 'geom' to set their own standard geometry name.
-    // Lastly, detfault to 'geom'. If we don't then OL will fallback to its own default geometry field name,
+    // Lastly, default to 'geom'. If we don't then OL will fallback to its own default geometry field name,
     // which happens to be 'geometry' and not 'geom.
     this.geometryName =
       features.length > 0

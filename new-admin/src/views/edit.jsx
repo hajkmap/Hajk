@@ -1309,7 +1309,7 @@ class Edit extends Component {
                   style={{marginLeft: "4px"}}
                   className="fa fa-question-circle"
                   data-toggle="tooltip"
-                  title="Geometrifält som används ifall det finns inga befintliga features. om inte inställd 'geom' används"
+                  title="Geometrifält som används om fältet inte kan hämtas genom WFS-tjänsten. Om inställningen saknas så kommer 'geom' att användas."
                   />
                 </div>
                 <input
