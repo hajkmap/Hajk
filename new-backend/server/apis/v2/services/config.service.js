@@ -418,6 +418,27 @@ class ConfigServiceV2 {
         ) // Call the predicate
     );
 
+    // Filter out nested visibleForGroups within tool options.
+    const userGroups = await ad.getGroupMembershipForUser(user);
+
+    for (const toolRef in mapConfig.tools) {
+      const options = mapConfig.tools[toolRef].options;
+      for (const optionRef in options) {
+        const groups = options[optionRef].visibleForGroups;
+        if (groups && groups.length > 0) {
+          const accessGranted = groups.some((group) => {
+            if (userGroups.indexOf(group) > -1) {
+              return true;
+            }
+          });
+
+          if (!accessGranted) {
+            delete mapConfig.tools[toolRef].options[optionRef];
+          }
+        }
+      }
+    }
+
     // Part 2: Remove groups/layers/baselayers that user lacks access to
     const lsIndexInTools = mapConfig.tools.findIndex(
       (t) => t.type === "layerswitcher"
