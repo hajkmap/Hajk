@@ -9,16 +9,21 @@ class AdBaseService {
   }
 
   initEnvOverrides() {
-    if (process.env.NODE_ENV === "production") {
-      // Not possible to override user or groups when production env is set.
-      return;
-    }
-
     // set for later use and warn if they are set as this should not be used in production.
     this.overrideUser = this.getEnv(process.env.AD_OVERRIDE_USER_WITH_VALUE);
     this.overrideUserGroups = this.getEnv(
       process.env.AD_OVERRIDE_USER_GROUPS_WITH_VALUE
     );
+
+    if (process.env.NODE_ENV === "production") {
+      // Not possible to override user or groups when production env is set.
+      if (this.overrideUser || this.overrideUserGroups) {
+        this.logger.info(
+          "You are trying to override user/groups using AD_OVERRIDE_USER_WITH_VALUE/AD_OVERRIDE_USER_GROUPS_WITH_VALUE in .env, this is ignored in production mode. Change to development mode by setting NODE_ENV=development in order to allow overrides."
+        );
+      }
+      return;
+    }
 
     if (this.overrideUserGroups) {
       this.overrideUserGroups = this.overrideUserGroups
