@@ -9,6 +9,11 @@ class AdBaseService {
   }
 
   initEnvOverrides() {
+    if (process.env.NODE_ENV === "production") {
+      // Not possible to override user or groups when production env is set.
+      return;
+    }
+
     // set for later use and warn if they are set as this should not be used in production.
     this.overrideUser = this.getEnv(process.env.AD_OVERRIDE_USER_WITH_VALUE);
     this.overrideUserGroups = this.getEnv(
