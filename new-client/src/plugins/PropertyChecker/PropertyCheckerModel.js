@@ -185,14 +185,15 @@ export default class PropertyCheckerModel {
     // as we've noticed that the administrators often want to see those aspects
     // in separate views but still relateted to each other.
 
-    // TODO: Add new view and show the results of this response.
     const digitalPlanFeatures = await this.#getOlFeaturesForCoordsAndOlLayer(
       coords,
       this.#digitalPlansLayer
     );
-    const groupedDigitalPlanFeatures = Object.fromEntries(
-      this.#groupedMap(digitalPlanFeatures)
-    );
+    // TODO: Ensure that we use the groupedDigitalPlanFeatures in all Views that follow
+    // const groupedDigitalPlanFeatures = Object.fromEntries(
+    //   this.#groupedMap(digitalPlanFeatures)
+    // );
+    // console.log("digitalPlanFeatures: ", digitalPlanFeatures);
     // console.log("groupedDigitalPlanFeatures: ", groupedDigitalPlanFeatures);
 
     // Let's grab the features from our check layer

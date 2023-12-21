@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import {
@@ -6,15 +6,7 @@ import {
   AccordionDetails,
   AccordionSummary,
   Button,
-  Card,
-  CardActions,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogContentText,
-  DialogTitle,
   List,
-  ListSubheader,
   Tab,
   Tabs,
   Typography,
@@ -133,17 +125,17 @@ function PropertyItem({
               })}
           </Box>
           <Box hidden={selectedTab !== 1}>
-            <Typography variant="button" paragraph gutterBottom>
-              Granskning har gjorts mot följande planbestämmelser:
-            </Typography>
-            <Typography color="error">
+            <Typography color="error" paragraph gutterBottom>
               Kommer implementeras i senare version av verktyget.
             </Typography>
-            {/* <List>
+            <Typography variant="button" paragraph>
+              Granskning har gjorts mot följande planbestämmelser:
+            </Typography>
+            <List>
               {digitalPlanFeatures.map((f, j) => {
                 return <DigitalPlanItem feature={f} key={j} />;
               })}
-            </List> */}
+            </List>
           </Box>
         </AccordionDetails>
       </Accordion>

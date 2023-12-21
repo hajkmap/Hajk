@@ -1,16 +1,14 @@
-import React, { useState } from "react";
+import React from "react";
 
 import {
   Button,
   Dialog,
   DialogActions,
   DialogContent,
-  DialogContentText,
   DialogTitle,
   List,
   ListItem,
   ListItemAvatar,
-  ListItemIcon,
   ListItemText,
   Typography,
 } from "@mui/material";

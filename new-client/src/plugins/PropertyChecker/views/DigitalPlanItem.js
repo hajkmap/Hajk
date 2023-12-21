@@ -1,32 +1,19 @@
-import React, { useEffect, useId } from "react";
-import {
-  Accordion,
-  AccordionDetails,
-  AccordionSummary,
-  Button,
-  Checkbox,
-  Icon,
-  ListItem,
-  ListItemButton,
-  ListItemIcon,
-  ListItemText,
-  Switch,
-  TextField,
-  Typography,
-} from "@mui/material";
-import { ExpandMore, CheckCircleOutline } from "@mui/icons-material";
+import React from "react";
+import { ListItem, ListItemText } from "@mui/material";
 
 const DigitalPlanItem = ({ feature }) => {
   return (
     <ListItem>
-      <ListItemText>
-        {feature.get("plan_beteckning")}
+      <ListItemText
+        primary={feature.get("label_text")}
+        secondary={feature.get("formulering")}
+      />
+      {/* {feature.get("plan_beteckning")}
         {feature.get("bestammelsetyp")}
         {feature.get("label_text")}
         {feature.get("formulering")}
         {feature.get("plan_planstatus")}
-        {feature.get("plan_statusdatum")}
-      </ListItemText>
+        {feature.get("plan_statusdatum")} */}
     </ListItem>
   );
 };
