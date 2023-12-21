@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - DocumentHandler - possible to save documents inside subfolders. [#1402](https://github.com/hajkmap/Hajk/pull/1402)
 - Backend: Another method of gaining AD groups has been added. It's possible to circumvent the current solution (where Backend talks to the LDAP server) if one's setup allows for getting the AD groups elsewhere (i.e. from a proxy if setup on IIS). [#1439](https://github.com/hajkmap/Hajk/issues/1439)
 - Backend: Respect nested `visibleForGroups` within tool options[#1438](https://github.com/hajkmap/Hajk/issues/1438)
+- Backend: show 403 Forbidden rather than 500 if access was not allowed. [90b1725](https://github.com/hajkmap/Hajk/commit/90b172595c16078053c2d03130971e89091511aa)
 - Edit: Allow setting a `geometryField` for edit layers with no features. [[#1447](https://github.com/hajkmap/Hajk/issues/1447)]
 
 ### Fixed
