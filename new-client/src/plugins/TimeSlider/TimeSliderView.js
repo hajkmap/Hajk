@@ -523,14 +523,14 @@ class TimeSliderView extends React.PureComponent {
                 this.markResolution === "years"
                   ? 2
                   : this.markResolution === "months"
-                  ? 4
-                  : 6,
+                    ? 4
+                    : 6,
               paddingRight:
                 this.markResolution === "years"
                   ? 2
                   : this.markResolution === "months"
-                  ? 4
-                  : 6,
+                    ? 4
+                    : 6,
             }}
           >
             <Slider

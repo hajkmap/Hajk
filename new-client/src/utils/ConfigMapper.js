@@ -339,8 +339,8 @@ export default class ConfigMapper {
             args.dataFormat === "GeoJSON" // If GeoJSON,
               ? "application/json" // set correct outputFormat (see https://docs.geoserver.org/latest/en/user/services/wfs/outputformats.html)
               : args.version === "1.0.0" // else (if dataFormat is not GeoJSON), check which WFS version we have and
-              ? "GML2" // use the GML2 parser for WFS 1.0.0, or
-              : "GML3", // GML3 for version > 1.0.0 (again, see above link).
+                ? "GML2" // use the GML2 parser for WFS 1.0.0, or
+                : "GML3", // GML3 for version > 1.0.0 (again, see above link).
           typename: args.layer,
           srsname: args.projection,
           bbox: "",

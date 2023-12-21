@@ -341,8 +341,8 @@ class App extends React.PureComponent {
         ? activeDrawerContentFromLocalStorage
         : this.props.config.mapConfig.map.activeDrawerOnStart
       : canRenderDefaultDrawer
-      ? "plugins"
-      : null;
+        ? "plugins"
+        : null;
 
     const drawerProps = {
       props,

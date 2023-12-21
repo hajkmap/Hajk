@@ -194,8 +194,8 @@ class WMSLayer {
     return layerType === "base"
       ? "base"
       : this.subLayers.length > 1
-      ? "group"
-      : "layer";
+        ? "group"
+        : "layer";
   }
 
   /**

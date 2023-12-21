@@ -245,10 +245,10 @@ class SearchBar extends React.PureComponent {
     return searchActive === "selectSearch" || searchActive === "draw"
       ? `Söker med objekt${labelPostfix}`
       : searchActive === "extentSearch"
-      ? `Söker i området${labelPostfix}`
-      : options.searchBarPlaceholder
-      ? `${options.searchBarPlaceholder}${labelPostfix}`
-      : `Sök${labelPostfix}`;
+        ? `Söker i området${labelPostfix}`
+        : options.searchBarPlaceholder
+          ? `${options.searchBarPlaceholder}${labelPostfix}`
+          : `Sök${labelPostfix}`;
   };
 
   renderSearchResultList = () => {
