@@ -12,21 +12,24 @@ class AdGroupHeaderService extends AdBaseService {
   }
 
   postRequestHandler(request, user) {
-    const xControlGroupHeader =
-      process.env.AD_TRUSTED_GROUP_HEADER || "X-Control-Group-Header";
-
-    const groups = [];
+    let groups = [];
     if (user) {
-      const groupString = request.get(xControlGroupHeader);
-      if (groupString) {
-        groupString.split(",").forEach((group) => {
-          groups.push(group.trim());
-        });
+      // Use override groups or get groups from header.
+      if (this.overrideUserGroups) {
+        groups = this.overrideUserGroups;
+      } else {
+        const xControlGroupHeader =
+          process.env.AD_TRUSTED_GROUP_HEADER || "X-Control-Group-Header";
+        const groupString =
+          this.overrideUserGroups || request.get(xControlGroupHeader);
+        if (groupString) {
+          groups = groupString.split(",").map((group) => group.trim());
+        }
       }
       this.logger2.trace(
         "[getUserFromRequestHeader] Group Header %s has value: %o",
         process.env.AD_TRUSTED_GROUP_HEADER,
-        groupString
+        groups
       );
     }
 
@@ -83,7 +86,7 @@ class AdGroupHeaderService extends AdBaseService {
 
   async isUserMemberOf(userName, group) {
     if (this.userExists(userName)) {
-      const groups = this.getUserGroups(userName);
+      const groups = this.getUserGroups(userName) || [];
       return groups.includes(group);
     }
     return false;

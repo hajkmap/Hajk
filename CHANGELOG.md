@@ -9,13 +9,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- PropertyChecker: Better sorting and layer loading failed indicator in layers list.
 - DocumentHandler - possible to save documents inside subfolders. [#1402](https://github.com/hajkmap/Hajk/pull/1402)
-- Backend: Another method of gaining AD groups has been added. It's possible to circumvent the current solution (where Backend talks to the LDAP server) if one's setup allows for getting the AD groups elsewhere (i.e. from a proxy if setup on IIS). [[#1439](https://github.com/hajkmap/Hajk/issues/1439)]
+- Backend: Another method of gaining AD groups has been added. It's possible to circumvent the current solution (where Backend talks to the LDAP server) if one's setup allows for getting the AD groups elsewhere (i.e. from a proxy if setup on IIS). [#1439](https://github.com/hajkmap/Hajk/issues/1439)
+- Backend: Respect nested `visibleForGroups` within tool options[#1438](https://github.com/hajkmap/Hajk/issues/1438)
+- Edit: Allow setting a `geometryField` for edit layers with no features. [[#1447](https://github.com/hajkmap/Hajk/issues/1447)]
 
 ### Fixed
 
-- Fix layout issue with hidden DrawerToggleButtons [#1436](https://github.com/hajkmap/Hajk/pull/1436)
+- Client core: Fix layout issue with hidden DrawerToggleButtons [#1436](https://github.com/hajkmap/Hajk/pull/1436)
+- PropertyChecker: Better sorting and layer loading failed indicator in layers list. [8df1b92](https://github.com/hajkmap/Hajk/commit/8df1b9253aae06c8b42a37b36100a595e4e7c74b)
+- Bookmark: Fixed removal issue. [0f1172f](https://github.com/hajkmap/Hajk/commit/0f1172f108d57575dbe8e8ecabb20aa8b8a15c4e)
+- Print: Print tool does not print WMS layers that requires credentials[#1442](https://github.com/hajkmap/Hajk/issues/1442)
 
 ## [3.13.21] - 2023-11-17
 

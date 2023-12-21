@@ -345,10 +345,14 @@ class EditModel {
 
     // Make sure we have a name for geometry column. If there are features already,
     // take a look at the first one and get geometry field's name from that first feature.
-    // If there are no features however, default to 'geom'. If we don't then OL will
-    // fallback to its own default geometry field name, which happens to be 'geometry' and not 'geom.
+    // If there are no features however, check if the edit layer has a 'geometryField' property and use this.
+    // this enables users using databases that do not default to 'geom' to set their own standard geometry name.
+    // Lastly, default to 'geom'. If we don't then OL will fallback to its own default geometry field name,
+    // which happens to be 'geometry' and not 'geom.
     this.geometryName =
-      features.length > 0 ? features[0].getGeometryName() : "geom";
+      features.length > 0
+        ? features[0].getGeometryName()
+        : this.editSource.geometryField || "geom";
 
     if (this.editSource.editableFields.some((field) => field.hidden)) {
       features = this.filterByDefaultValue(features);

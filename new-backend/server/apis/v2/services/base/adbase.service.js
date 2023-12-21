@@ -5,6 +5,41 @@ const ErrorNotImplemented = "The method '{name}' is not implemented!";
 class AdBaseService {
   constructor() {
     this.logger = log4js.getLogger("service.auth.v2");
+    this.initEnvOverrides();
+  }
+
+  initEnvOverrides() {
+    // set for later use and warn if they are set as this should not be used in production.
+    this.overrideUser = this.getEnv(process.env.AD_OVERRIDE_USER_WITH_VALUE);
+    this.overrideUserGroups = this.getEnv(
+      process.env.AD_OVERRIDE_USER_GROUPS_WITH_VALUE
+    );
+
+    if (process.env.NODE_ENV === "production") {
+      // Not possible to override user or groups when production env is set.
+      if (this.overrideUser || this.overrideUserGroups) {
+        this.logger.info(
+          "You are trying to override user/groups using AD_OVERRIDE_USER_WITH_VALUE/AD_OVERRIDE_USER_GROUPS_WITH_VALUE in .env, this is ignored in production mode. Change to development mode by setting NODE_ENV=development in order to allow overrides."
+        );
+      }
+      return;
+    }
+
+    if (this.overrideUserGroups) {
+      this.overrideUserGroups = this.overrideUserGroups
+        .split(",")
+        .map((group) => group.trim());
+      this.logger.warn(
+        'AD_OVERRIDE_USER_GROUPS_WITH_VALUE is set in .env! Will use "%s" as groups for all AD functions. DON\'T USE THIS IN PRODUCTION!',
+        this.overrideUserGroups
+      );
+    }
+    if (this.overrideUser) {
+      this.logger.warn(
+        'AD_OVERRIDE_USER_WITH_VALUE is set in .env! Will use "%s" as user name for all AD functions. DON\'T USE THIS IN PRODUCTION!',
+        this.overrideUser
+      );
+    }
   }
 
   init() {
@@ -58,6 +93,13 @@ class AdBaseService {
     return [];
   }
 
+  getEnv(env) {
+    if (env !== undefined && ("" + env).trim().length > 0) {
+      return env;
+    }
+    return null;
+  }
+
   getUserFromRequestHeader(req) {
     if (process.env.AD_LOOKUP_ACTIVE !== "true") {
       // If AD_LOOKUP_ACTIVE is anything else than "true", we don't care
@@ -67,16 +109,14 @@ class AdBaseService {
       // AD authentication is active.
       //
       // First see if webmaster wants to override the header value (useful for developing and testing)
-      if (
-        process.env.AD_OVERRIDE_USER_WITH_VALUE !== undefined &&
-        process.env.AD_OVERRIDE_USER_WITH_VALUE.trim().length !== 0
-      ) {
-        this.logger.warn(
-          'AD_OVERRIDE_USER_WITH_VALUE is set in .env! Will use "%s" as user name for all AD functions. DON\'T USE THIS IN PRODUCTION!',
-          process.env.AD_OVERRIDE_USER_WITH_VALUE
-        );
 
-        return process.env.AD_OVERRIDE_USER_WITH_VALUE;
+      if (this.overrideUser) {
+        if (this.postRequestHandler) {
+          this.postRequestHandler(req, this.overrideUser);
+        }
+
+        // user is overridden in .env, return it!
+        return this.overrideUser;
       }
 
       // Now it's time to take care of the _real_ AD authentication!
