@@ -47,6 +47,8 @@ namespace MapService.Models.ToolOptions
 
         public bool showDrawOrderView { get; set; }
 
+        public bool showFilter { get; set; }
+
         public bool showQuickAccess { get; set; }
 
         public bool enableSystemLayersSwitch { get; set; }

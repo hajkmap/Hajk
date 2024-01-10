@@ -301,6 +301,7 @@ class Menu extends Component {
       enableOSM: false,
       showBreadcrumbs: false,
       showDrawOrderView: false,
+      showFilter: false,
       showQuickAccess: false,
       enableSystemLayersSwitch: false,
       lockDrawOrderBaselayer: false,
@@ -373,6 +374,7 @@ class Menu extends Component {
             existingConfig.showBreadcrumbs ?? this.state.showBreadcrumbs,
           showDrawOrderView:
             existingConfig.showDrawOrderView ?? this.state.showDrawOrderView,
+          showFilter: existingConfig.showFilter ?? this.state.showFilter,
           showQuickAccess:
             existingConfig.showQuickAccess ?? this.state.showQuickAccess,
           enableSystemLayersSwitch:
@@ -626,6 +628,7 @@ class Menu extends Component {
       enableOSM: this.state.enableOSM,
       showBreadcrumbs: this.state.showBreadcrumbs,
       showDrawOrderView: this.state.showDrawOrderView,
+      showFilter: this.state.showFilter,
       showQuickAccess: this.state.showQuickAccess,
       enableSystemLayersSwitch: this.state.enableSystemLayersSwitch,
       lockDrawOrderBaselayer: this.state.lockDrawOrderBaselayer,
@@ -2019,6 +2022,24 @@ class Menu extends Component {
                     className="fa fa-question-circle"
                     data-toggle="tooltip"
                     title="När rutan är ikryssad visas en flik i lagerhanteraren för hantering av ritordning."
+                  />
+                </label>
+              </div>
+              <div>
+                <input
+                  id="showFilter"
+                  name="showFilter"
+                  type="checkbox"
+                  onChange={this.handleInputChange}
+                  checked={this.state.showFilter}
+                />
+                &nbsp;
+                <label className="long-label" htmlFor="showFilter">
+                  Visa filter{" "}
+                  <i
+                    className="fa fa-question-circle"
+                    data-toggle="tooltip"
+                    title="När rutan är ikryssad visas ett fält i lagerhanteraren för filter."
                   />
                 </label>
               </div>
