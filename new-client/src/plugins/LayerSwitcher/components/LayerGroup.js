@@ -7,7 +7,7 @@ import CheckBoxIcon from "@mui/icons-material/CheckBox";
 import CheckBoxOutlineBlankIcon from "@mui/icons-material/CheckBoxOutlineBlank";
 import { IconButton, ListItemText } from "@mui/material";
 
-class LayerGroup extends React.PureComponent {
+class LayerGroup extends React.Component {
   state = {
     expanded: false,
     groups: [],
