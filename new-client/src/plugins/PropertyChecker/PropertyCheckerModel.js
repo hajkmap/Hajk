@@ -166,12 +166,11 @@ export default class PropertyCheckerModel {
 
   // Start with the flatArray and group it according to the value of one of
   // its properties. The exact value is admin-controllable.
-  #groupedMap = (flatArray) =>
-    flatArray.reduce(
+  #groupedMap = (features, attributeName) =>
+    features.reduce(
       (entryMap, e) =>
-        entryMap.set(e.get(this.#groupDigitalPlansLayerByAttribute), [
-          ...(entryMap.get(e.get(this.#groupDigitalPlansLayerByAttribute)) ||
-            []),
+        entryMap.set(e.get(attributeName), [
+          ...(entryMap.get(e.get(attributeName)) || []),
           e,
         ]),
       new Map()
@@ -183,39 +182,59 @@ export default class PropertyCheckerModel {
     // We will do two GetFeatureInfo requests here: one to the check layer and
     // one to the digital plans layer. Each result will be used in its own View
     // as we've noticed that the administrators often want to see those aspects
-    // in separate views but still relateted to each other.
+    // in separate views but still related to each other.
 
-    const digitalPlanFeatures = await this.#getOlFeaturesForCoordsAndOlLayer(
-      coords,
-      this.#digitalPlansLayer
-    );
-    // TODO: Ensure that we use the groupedDigitalPlanFeatures in all Views that follow
-    // const groupedDigitalPlanFeatures = Object.fromEntries(
-    //   this.#groupedMap(digitalPlanFeatures)
-    // );
-    // console.log("digitalPlanFeatures: ", digitalPlanFeatures);
-    // console.log("groupedDigitalPlanFeatures: ", groupedDigitalPlanFeatures);
-
-    // Let's grab the features from our check layer
+    // Check Layer features
     const checkLayerFeatures = await this.#getOlFeaturesForCoordsAndOlLayer(
       coords,
       this.#checkLayer
     );
-    const groupedFeatures = this.#groupFeaturesByAttributeName(
+
+    // Let's group the flat array of objects into an array where key is
+    // the property ID (or whatever is configured in the Admin).
+    const groupedCheckLayerFeatures = this.#groupFeaturesByAttributeName(
       checkLayerFeatures,
       this.#groupCheckLayerByAttribute // the attribute name that we wish to group on
     );
-    // console.log("groupedFeatures in Model: ", groupedFeatures);
+    console.log("Check Layer features: ", groupedCheckLayerFeatures);
+
+    // Digital Plans features
+    const digitalPlanFeatures = await this.#getOlFeaturesForCoordsAndOlLayer(
+      coords,
+      this.#digitalPlansLayer
+    );
+    const groupedDigitalPlanFeatures = this.#groupFeaturesByAttributeName(
+      digitalPlanFeatures,
+      this.#groupDigitalPlansLayerByAttribute
+    );
+    console.log("Digital Plans features: ", groupedDigitalPlanFeatures);
+
+    const groupedDigitalPlanFeaturesWithGroupedUseType = {};
+
+    // Digital plans must be further grouped by use type:
+    for (const key in groupedDigitalPlanFeatures) {
+      if (Object.hasOwnProperty.call(groupedDigitalPlanFeatures, key)) {
+        const element = groupedDigitalPlanFeatures[key];
+        groupedDigitalPlanFeaturesWithGroupedUseType[key] = {
+          ...element, // Spread whatever already exists…
+          features: Object.fromEntries(
+            // but replace "features" with the grouped results.
+            this.#groupedMap(element.features, "bestammelsetyp")
+          ),
+        };
+      }
+    }
+
     // If we've got at least one feature in the response
     if (
-      Object.keys(groupedFeatures).length > 0 ||
-      Object.keys(digitalPlanFeatures).length > 0
+      Object.keys(groupedCheckLayerFeatures).length > 0 ||
+      Object.keys(groupedDigitalPlanFeaturesWithGroupedUseType).length > 0
     ) {
       // Tell the rest of the plugin that we've got feature. The View
       // subscribes to this and will update itself accordingly.
       this.#localObserver.publish("getFeatureInfoFeatures", {
-        groupedFeatures,
-        digitalPlanFeatures,
+        groupedFeatures: groupedCheckLayerFeatures,
+        digitalPlanFeatures: groupedDigitalPlanFeaturesWithGroupedUseType,
       });
     } else {
       this.#localObserver.publish("noFeaturesInResult");

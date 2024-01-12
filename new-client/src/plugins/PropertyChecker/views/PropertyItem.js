@@ -49,7 +49,7 @@ function PropertyItem({
             variant="fullWidth"
           >
             <Tab label={`${features.features.length} lager`} />
-            <Tab label={`${digitalPlanFeatures.length} planbestämmelser`} />
+            <Tab label={`Planbestämmelser`} />
           </Tabs>
           <Box hidden={selectedTab !== 0}>
             <TabContentLayerChecker
