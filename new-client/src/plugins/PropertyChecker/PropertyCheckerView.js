@@ -187,16 +187,16 @@ function PropertyCheckerView(props) {
       {Object.keys(groupedFeatures).length > 0 &&
         Object.entries(groupedFeatures).map(([k, features], i) => (
           <PropertyItem
-            key={i}
+            clickedPointsCoordinates={clickedPointsCoordinates}
             controlledLayers={controlledLayers}
+            digitalPlanFeatures={digitalPlanFeatures}
+            features={features}
+            globalObserver={globalObserver}
+            key={i}
+            olMap={props.app.map}
             setControlledLayers={setControlledLayers}
             startExpanded={Object.keys(groupedFeatures).length === 1} // Start with expanded by default if only one item exists}
-            features={features}
-            digitalPlanFeatures={digitalPlanFeatures}
             userDetails={props.app.config?.userDetails}
-            olMap={props.app.map}
-            clickedPointsCoordinates={clickedPointsCoordinates}
-            globalObserver={globalObserver}
           />
         ))}
     </>

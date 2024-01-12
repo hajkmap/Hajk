@@ -5,17 +5,15 @@ import {
   Accordion,
   AccordionDetails,
   AccordionSummary,
-  Button,
-  List,
   Tab,
   Tabs,
   Typography,
 } from "@mui/material";
 
 import { Box } from "@mui/system";
-import FeatureItem from "./FeatureItem.js";
-import DigitalPlanItem from "./DigitalPlanItem.js";
-import ReportDialog from "./ReportDialog.js";
+
+import TabContentLayerChecker from "./LayerChecker/TabContentView.js";
+import TabContentDigitalPlanChecker from "./DigitalPlanChecker/TabContentView.js";
 
 function PropertyItem({
   clickedPointsCoordinates,
@@ -28,13 +26,6 @@ function PropertyItem({
   startExpanded,
   userDetails,
 }) {
-  const [reportDialogVisible, setReportDialogVisible] = useState(false);
-
-  const handleShowReportDialog = (propertyName) => {
-    setCurrentPropertyName(propertyName);
-    setReportDialogVisible(true);
-  };
-  const [currentPropertyName, setCurrentPropertyName] = useState("");
   const [selectedTab, setSelectedTab] = useState(0);
 
   // This map will hold values for user's own notes that can be written
@@ -43,14 +34,6 @@ function PropertyItem({
 
   return (
     <React.Fragment>
-      <ReportDialog
-        reportDialogVisible={reportDialogVisible}
-        setReportDialogVisible={setReportDialogVisible}
-        currentPropertyName={currentPropertyName}
-        controlledLayers={controlledLayers}
-        layerNotes={layerNotes}
-        userDetails={userDetails}
-      />
       <Accordion disableGutters defaultExpanded={startExpanded}>
         <AccordionSummary expandIcon={<ExpandMoreIcon />}>
           <Typography variant="button">
@@ -58,22 +41,6 @@ function PropertyItem({
           </Typography>
         </AccordionSummary>
         <AccordionDetails>
-          <Button
-            fullWidth
-            variant="outlined"
-            size="small"
-            disabled={
-              controlledLayers.filter(
-                (l) =>
-                  l.propertyName === features.markerFeature.get("fastighet")
-              ).length === 0
-            }
-            onClick={() => {
-              handleShowReportDialog(features.markerFeature.get("fastighet"));
-            }}
-          >
-            Generera rapport
-          </Button>
           <Tabs
             onChange={(e, v) => {
               setSelectedTab(v);
@@ -85,57 +52,22 @@ function PropertyItem({
             <Tab label={`${digitalPlanFeatures.length} planbestämmelser`} />
           </Tabs>
           <Box hidden={selectedTab !== 0}>
-            {features.features
-              // Sort. We want sublayers from same layer to show up next to each other.
-              .sort((a, b) => {
-                const aid = a.get("id");
-                const bid = b.get("id");
-                // If we've got nice strings, let's user localeCompare to sort. Else
-                // just assume the elements are equal.
-                return (
-                  a.get("caption").localeCompare(b.get("caption")) || // First, sort on caption.
-                  (typeof aid === "string" && typeof bid === "string" // Next, group by layer ID.
-                    ? aid.localeCompare(bid)
-                    : 0)
-                );
-              })
-              .map((f, j) => {
-                const olLayer = olMap
-                  .getAllLayers()
-                  .find((l) => l.get("name") === f.get("id"));
-                // Render FeatureItem only if we found the related
-                // layer in olMap
-                return (
-                  olLayer && (
-                    <FeatureItem
-                      clickedPointsCoordinates={clickedPointsCoordinates}
-                      feature={f}
-                      key={j}
-                      olLayer={olLayer}
-                      olMap={olMap}
-                      globalObserver={globalObserver}
-                      controlledLayers={controlledLayers}
-                      setControlledLayers={setControlledLayers}
-                      layerNotes={layerNotes}
-                      setLayerNotes={setLayerNotes}
-                      propertyName={features.markerFeature.get("fastighet")}
-                    />
-                  )
-                );
-              })}
+            <TabContentLayerChecker
+              clickedPointsCoordinates={clickedPointsCoordinates}
+              controlledLayers={controlledLayers}
+              features={features}
+              globalObserver={globalObserver}
+              layerNotes={layerNotes}
+              olMap={olMap}
+              setControlledLayers={setControlledLayers}
+              setLayerNotes={setLayerNotes}
+              userDetails={userDetails}
+            />
           </Box>
           <Box hidden={selectedTab !== 1}>
-            <Typography color="error" paragraph gutterBottom>
-              Kommer implementeras i senare version av verktyget.
-            </Typography>
-            <Typography variant="button" paragraph>
-              Granskning har gjorts mot följande planbestämmelser:
-            </Typography>
-            <List>
-              {digitalPlanFeatures.map((f, j) => {
-                return <DigitalPlanItem feature={f} key={j} />;
-              })}
-            </List>
+            <TabContentDigitalPlanChecker
+              digitalPlanFeatures={digitalPlanFeatures}
+            />
           </Box>
         </AccordionDetails>
       </Accordion>
