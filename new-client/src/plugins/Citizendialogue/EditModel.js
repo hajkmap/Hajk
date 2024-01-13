@@ -9,6 +9,7 @@ import { never } from "ol/events/condition";
 import X2JS from "x2js";
 import { hfetch } from "utils/FetchWrapper";
 import WKT from "ol/format/WKT";
+import Feature from "ol/Feature";
 
 class EditModel {
   constructor(settings) {
@@ -192,13 +193,38 @@ class EditModel {
     if (this.source.id === "simulated") {
       const wktFormatter = new WKT();
 
+      // Inserts
       const newSavedFeatures = features.inserts.map((feature) => ({
+        ol_uid: feature.ol_uid,
         surveyQuestion: feature.get("SURVEYQUESTION"),
         surveyAnswerId: feature.get("SURVEYANSWERID"),
         wktGeometry: wktFormatter.writeGeometry(feature.getGeometry()),
       }));
 
+      // Add new features
       this.newMapData = [...this.newMapData, ...newSavedFeatures];
+
+      // Updated features
+      features.updates.forEach((feature) => {
+        const featureUid = feature.ol_uid;
+        const updatedFeatureIndex = this.newMapData.findIndex(
+          (f) => f.ol_uid === featureUid
+        );
+        if (updatedFeatureIndex !== -1) {
+          this.newMapData[updatedFeatureIndex] = {
+            ...this.newMapData[updatedFeatureIndex],
+            wktGeometry: wktFormatter.writeGeometry(feature.getGeometry()),
+          };
+        }
+      });
+
+      // Remove features
+      features.deletes.forEach((feature) => {
+        const wktToRemove = wktFormatter.writeGeometry(feature.getGeometry());
+        this.newMapData = this.newMapData.filter(
+          (savedFeature) => savedFeature.wktGeometry !== wktToRemove
+        );
+      });
 
       done();
       return;
@@ -371,53 +397,73 @@ class EditModel {
   }
 
   loadDataSuccess = (data) => {
-    var format = new WFS();
-    var features;
-    try {
-      features = format.readFeatures(data);
-    } catch (e) {
-      alert("Fel: data kan inte läsas in. Kontrollera koordinatsystem.");
-    }
+    if (this.editSource.id === "simulated") {
+      const wktFormatter = new WKT();
 
-    this.geometryName =
-      features.length > 0 ? features[0].getGeometryName() : "geom";
+      // Filter saved features based on SURVEYANSWERID
+      const filteredFeatures = this.newMapData.filter(
+        (feature) => feature.surveyAnswerId === this.surveyJsData.surveyAnswerId
+      );
 
-    if (this.editSource.editableFields.some((field) => field.hidden)) {
-      features = this.filterByDefaultValue(features);
-    }
-
-    // Features filtered by SURVEYANSWERID to show in map
-    const filteredFeatures = features.filter((feature) => {
-      const surveyAnswerId = String(feature.get("SURVEYANSWERID") || "");
-      return surveyAnswerId.trim() === this.surveyJsData.surveyAnswerId.trim();
-    });
-
-    // Draws geometries in the map filtered
-    this.vectorSource.addFeatures(filteredFeatures);
-
-    // Show all geometries
-    //this.vectorSource.addFeatures(features);
-
-    this.vectorSource.getFeatures().forEach((feature) => {
-      feature.on("propertychange", (e) => {
-        if (feature.modification === "removed") {
-          return;
-        }
-        if (feature.modification === "added") {
-          return;
-        }
-        feature.modification = "updated";
+      const features = filteredFeatures.map((savedFeature) => {
+        const geometry = wktFormatter.readGeometry(savedFeature.wktGeometry);
+        return new Feature({
+          geometry: geometry,
+          SURVEYQUESTION: savedFeature.surveyQuestion,
+          SURVEYANSWERID: savedFeature.surveyAnswerId,
+        });
       });
-      feature.on("change", (e) => {
-        if (feature.modification === "removed") {
-          return;
-        }
-        if (feature.modification === "added") {
-          return;
-        }
-        feature.modification = "updated";
+
+      this.vectorSource.addFeatures(features);
+    } else {
+      var format = new WFS();
+      var features;
+      try {
+        features = format.readFeatures(data);
+      } catch (e) {
+        alert("Fel: data kan inte läsas in. Kontrollera koordinatsystem.");
+        return;
+      }
+
+      this.geometryName =
+        features.length > 0 ? features[0].getGeometryName() : "geom";
+
+      if (this.editSource.editableFields.some((field) => field.hidden)) {
+        features = this.filterByDefaultValue(features);
+      }
+
+      // Features filtered by SURVEYANSWERID to show in map
+      const filteredFeatures = features.filter((feature) => {
+        const surveyAnswerId = String(feature.get("SURVEYANSWERID") || "");
+        return (
+          surveyAnswerId.trim() === this.surveyJsData.surveyAnswerId.trim()
+        );
       });
-    });
+
+      // Draws geometries in the map filtered
+      this.vectorSource.addFeatures(filteredFeatures);
+
+      this.vectorSource.getFeatures().forEach((feature) => {
+        feature.on("propertychange", (e) => {
+          if (feature.modification === "removed") {
+            return;
+          }
+          if (feature.modification === "added") {
+            return;
+          }
+          feature.modification = "updated";
+        });
+        feature.on("change", (e) => {
+          if (feature.modification === "removed") {
+            return;
+          }
+          if (feature.modification === "added") {
+            return;
+          }
+          feature.modification = "updated";
+        });
+      });
+    }
   };
 
   loadData(source, extent, done) {
