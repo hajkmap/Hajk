@@ -182,11 +182,9 @@ const BookmarksView = (props) => {
     }
   };
 
-  const handleRemoveConfirmation = (result) => {
+  const handleRemoveConfirmation = () => {
     setShowRemovalConfirmation(false);
-    if (result) {
-      props.model.deleteBookmark(bookmarkToDelete);
-    }
+    props.model.deleteBookmark(bookmarkToDelete);
     setBookmarkToDelete(null);
   };
 
