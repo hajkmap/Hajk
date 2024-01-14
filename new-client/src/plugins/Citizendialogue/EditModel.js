@@ -195,7 +195,6 @@ class EditModel {
 
       // Inserts
       const newSavedFeatures = features.inserts.map((feature) => ({
-        ol_uid: feature.ol_uid,
         surveyQuestion: feature.get("SURVEYQUESTION"),
         surveyAnswerId: feature.get("SURVEYANSWERID"),
         wktGeometry: wktFormatter.writeGeometry(feature.getGeometry()),
@@ -205,7 +204,7 @@ class EditModel {
       this.newMapData = [...this.newMapData, ...newSavedFeatures];
 
       // Updated features
-      features.updates.forEach((feature) => {
+      /*features.updates.forEach((feature) => {
         const featureUid = feature.ol_uid;
         const updatedFeatureIndex = this.newMapData.findIndex(
           (f) => f.ol_uid === featureUid
@@ -216,7 +215,7 @@ class EditModel {
             wktGeometry: wktFormatter.writeGeometry(feature.getGeometry()),
           };
         }
-      });
+      });*/
 
       // Remove features
       features.deletes.forEach((feature) => {
