@@ -7,15 +7,17 @@ import MenuItem from '@material-ui/core/MenuItem';
 
 function SurveyHandler(props) {
 
+  const [availableSurveys, setAvailableSurveys] = useState([]);
+
   useEffect(() => {
     props.model.listAllAvailableSurveys((data) => {
-        console.log('Surveys:', data);
+        setAvailableSurveys(data);
     });
     // eslint-disable-next-line
 }, []);
 
   const [survey, setSurvey] = useState({
-    title: "Rynningeviken",
+    title: "ny_enkät",
     language: "sv",
     logo: "https://www.orebro.se/images/18.242f1fb1556288bfbf1594c/1467796106738/Orebro_se-logo.png",
     logoWidth: 60,
@@ -255,10 +257,33 @@ function SurveyHandler(props) {
     console.log(surveyJson);
   };
 
+  const handleSurveySelection = (e) => {
+    const selectedSurveyId = e.target.value;
+    if (selectedSurveyId) {
+        props.model.loadSurvey(selectedSurveyId, (surveyData) => {
+            console.log("Laddad undersökning:", surveyData);
+        });
+    }
+};
+
+
   return (
     <div>
       <h1>Enkäthanterare</h1>
     
+      <Grid container spacing={2} style={{ marginBottom: '50px' }}>
+      <Grid item>
+        <select onChange={handleSurveySelection}>
+        <option></option>
+        {availableSurveys.map((survey, index) => (
+            <option key={index} value={survey.id}>
+                {survey}
+            </option>
+        ))}
+        
+    </select>
+        </Grid>
+        </Grid>
       <Grid container spacing={2} style={{ marginBottom: '50px' }}>
         <Grid item>
           <TextField
