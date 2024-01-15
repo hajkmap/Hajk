@@ -20,6 +20,7 @@ import infoModel from "../models/info.js";
 import releaseModel from "../models/release.js";
 import searchModel from "../models/search.js";
 import documentEditorModel from "../models/documenteditor.js";
+import surveyHandlerModel from "../models/surveyhandler.js";
 
 var defaultState = {
   alert: false,
@@ -143,6 +144,7 @@ class Application extends Component {
   }
 
   getModel(name) {
+    const config = this.props.config[name];
     switch (name) {
       case "edit":
         return new editModel();
@@ -160,6 +162,8 @@ class Application extends Component {
         return new searchModel();
       case "documenthandler":
         return new documentEditorModel();
+      case "surveyhandler":
+        return new surveyHandlerModel({ config });
       default:
         return undefined;
     }

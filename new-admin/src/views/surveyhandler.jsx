@@ -1,11 +1,19 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Grid from '@material-ui/core/Grid';
 import TextField from '@material-ui/core/TextField';
 import Button from '@material-ui/core/Button';
 import Select from '@material-ui/core/Select';
 import MenuItem from '@material-ui/core/MenuItem';
 
-function SurveyHandler() {
+function SurveyHandler(props) {
+
+  useEffect(() => {
+    props.model.listAllAvailableSurveys((data) => {
+        console.log('Surveys:', data);
+    });
+    // eslint-disable-next-line
+}, []);
+
   const [survey, setSurvey] = useState({
     title: "Rynningeviken",
     language: "sv",

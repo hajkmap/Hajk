@@ -94,6 +94,12 @@
     "list_audios": "http://localhost:3002/api/v1/mapconfig/listaudio",
     "use_document_folders": true
   },
+  "surveyhandler": {
+    "url_surveys_list": "http://localhost:3002/api/v2/surveys/list/",
+    "url_surveys_load": "http://localhost:3002/api/v2/surveys/",
+    "url_surveys_answers_save": "http://localhost:3002/api/v2/surveys/answers/",
+    "url_surveys_answers_load": "http://localhost:3002/api/v2/survey/answers/"
+  },
   "router": [
     { "name": "layermanager", "title": "Lager", "default": true },
     { "name": "search", "title": "Söktjänster" },
