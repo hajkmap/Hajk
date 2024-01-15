@@ -194,6 +194,7 @@ function PropertyCheckerView(props) {
             globalObserver={globalObserver}
             key={i}
             olMap={props.app.map}
+            options={props.options}
             setControlledLayers={setControlledLayers}
             startExpanded={Object.keys(groupedFeatures).length === 1} // Start with expanded by default if only one item exists}
             userDetails={props.app.config?.userDetails}

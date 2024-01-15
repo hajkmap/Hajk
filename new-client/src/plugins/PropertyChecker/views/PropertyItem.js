@@ -22,6 +22,7 @@ function PropertyItem({
   features,
   globalObserver,
   olMap,
+  options,
   setControlledLayers,
   startExpanded,
   userDetails,
@@ -59,6 +60,7 @@ function PropertyItem({
               globalObserver={globalObserver}
               layerNotes={layerNotes}
               olMap={olMap}
+              options={options}
               setControlledLayers={setControlledLayers}
               setLayerNotes={setLayerNotes}
               userDetails={userDetails}
@@ -67,6 +69,7 @@ function PropertyItem({
           <Box hidden={selectedTab !== 1}>
             <TabContentDigitalPlanChecker
               digitalPlanFeatures={digitalPlanFeatures}
+              options={options}
             />
           </Box>
         </AccordionDetails>

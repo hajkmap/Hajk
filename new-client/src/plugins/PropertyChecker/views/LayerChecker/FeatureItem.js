@@ -33,6 +33,7 @@ const FeatureItem = (props) => {
     setLayerNotes,
     controlledLayers,
     setControlledLayers,
+    options,
     olLayer,
     propertyName,
   } = props;
@@ -173,49 +174,54 @@ const FeatureItem = (props) => {
           </>
         }
         action={
-          <>
-            <Checkbox
-              onChange={(e) => {
-                setControlledLayers((prev) => {
-                  // If layer is already selected using the checkbox…
-                  if (isSelected()) {
-                    // … let's uncheck the box by the removing element with current layer's ID.
-                    return prev.filter((l) => l.id !== selectionFormat.id);
-                  } else {
-                    // Else, let's check the box by adding the new element.
-                    return [...prev, selectionFormat];
-                  }
-                });
-              }}
-              checked={isSelected()}
-            />
-            <ExpandMore
-              expand={expanded}
-              onClick={handleExpandClick}
-              aria-expanded={expanded}
-              aria-label="Visa noteringar"
-            >
-              <ExpandMoreIcon />
-            </ExpandMore>
-          </>
+          options.enableCheckLayerReport && (
+            <>
+              <Checkbox
+                onChange={(e) => {
+                  setControlledLayers((prev) => {
+                    // If layer is already selected using the checkbox…
+                    if (isSelected()) {
+                      // … let's uncheck the box by the removing element with current layer's ID.
+                      return prev.filter((l) => l.id !== selectionFormat.id);
+                    } else {
+                      // Else, let's check the box by adding the new element.
+                      return [...prev, selectionFormat];
+                    }
+                  });
+                }}
+                checked={isSelected()}
+              />
+
+              <ExpandMore
+                expand={expanded}
+                onClick={handleExpandClick}
+                aria-expanded={expanded}
+                aria-label="Visa noteringar"
+              >
+                <ExpandMoreIcon />
+              </ExpandMore>
+            </>
+          )
         }
         title={caption}
         subheader={subcaption}
       />
 
-      <Collapse in={expanded} timeout="auto">
-        <CardContent>
-          <TextField
-            label="Notering"
-            multiline
-            fullWidth
-            size="small"
-            maxRows={4}
-            onChange={handleLayerNoteChange}
-            value={layerNotes?.id}
-          />
-        </CardContent>
-      </Collapse>
+      {options.enableCheckLayerReport && (
+        <Collapse in={expanded} timeout="auto">
+          <CardContent>
+            <TextField
+              label="Notering"
+              multiline
+              fullWidth
+              size="small"
+              maxRows={4}
+              onChange={handleLayerNoteChange}
+              value={layerNotes?.id}
+            />
+          </CardContent>
+        </Collapse>
+      )}
     </Card>
   );
 };

@@ -11,6 +11,7 @@ function TabContentView({
   globalObserver,
   layerNotes,
   olMap,
+  options,
   setControlledLayers,
   setLayerNotes,
   userDetails,
@@ -24,29 +25,34 @@ function TabContentView({
   const [currentPropertyName, setCurrentPropertyName] = useState("");
   return (
     <>
-      <ReportDialog
-        reportDialogVisible={reportDialogVisible}
-        setReportDialogVisible={setReportDialogVisible}
-        currentPropertyName={currentPropertyName}
-        controlledLayers={controlledLayers}
-        layerNotes={layerNotes}
-        userDetails={userDetails}
-      />
-      <Button
-        fullWidth
-        variant="outlined"
-        size="small"
-        disabled={
-          controlledLayers.filter(
-            (l) => l.propertyName === features.markerFeature.get("fastighet")
-          ).length === 0
-        }
-        onClick={() => {
-          handleShowReportDialog(features.markerFeature.get("fastighet"));
-        }}
-      >
-        Generera rapport
-      </Button>
+      {options.enableCheckLayerReport && (
+        <>
+          <ReportDialog
+            reportDialogVisible={reportDialogVisible}
+            setReportDialogVisible={setReportDialogVisible}
+            currentPropertyName={currentPropertyName}
+            controlledLayers={controlledLayers}
+            layerNotes={layerNotes}
+            userDetails={userDetails}
+          />
+          <Button
+            fullWidth
+            variant="outlined"
+            size="small"
+            disabled={
+              controlledLayers.filter(
+                (l) =>
+                  l.propertyName === features.markerFeature.get("fastighet")
+              ).length === 0
+            }
+            onClick={() => {
+              handleShowReportDialog(features.markerFeature.get("fastighet"));
+            }}
+          >
+            Generera rapport
+          </Button>
+        </>
+      )}
       {features.features
         // Sort. We want sublayers from same layer to show up next to each other.
         .sort((a, b) => {
@@ -75,6 +81,7 @@ function TabContentView({
                 key={j}
                 olLayer={olLayer}
                 olMap={olMap}
+                options={options}
                 globalObserver={globalObserver}
                 controlledLayers={controlledLayers}
                 setControlledLayers={setControlledLayers}

@@ -36,6 +36,8 @@ So, here is a brief specification of this required WMS layer.
         "buildingsLayerIds": "1328", // ID(s) of layers to toggle when user clicks the buildings shortcut button.
         "bordersLayerIds": "1329,1358,1439,1357", // ID(s) of layers to toggle when user clicks the borders shortcut button.
         "plansLayerIds": "j77k2s,7vmhc3,tpgv5m,aoxhlq,h91wc9,s5viu8", // ID(s) of layers to toggle when user clicks the plans shortcut button.
+        "enableCheckLayerReport": true, // Allow generating reports for the "Check Layer" tab?
+        "enableDigitalPlansReport": true, // Allow generating reports for the "Digital Plans" tab?
         "target": "right",
         "position": "left",
         "height": "dynamic",
