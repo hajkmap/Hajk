@@ -48,9 +48,7 @@ export default function ReportDialog({
       "\n\n" +
       getUserDetailsText() +
       "\n\n" +
-      `Rapporten utgår från data som var känd per ${new Date().toLocaleDateString(
-        "sv-SE"
-      )}.`
+      `Rapporten utgår från data som var känd per ${new Date().toLocaleDateString()}.`
     );
   };
 
@@ -80,9 +78,7 @@ export default function ReportDialog({
         .join("") + // Finally, join the array into a string using new line as join character.
       "</ul>" +
       `<p>${getUserDetailsText()}</p>` +
-      `<p>Rapporten utgår från data som var känd per ${new Date().toLocaleDateString(
-        "sv-SE"
-      )}.</p>`
+      `<p>Rapporten utgår från data som var känd per ${new Date().toLocaleDateString()}.</p>`
     );
   };
 
@@ -190,7 +186,7 @@ export default function ReportDialog({
           <Typography gutterBottom>{getUserDetailsText()}</Typography>
           <Typography gutterBottom>
             Rapporten utgår från data som var känd per{" "}
-            {new Date().toLocaleDateString("sv-SE")}.
+            {new Date().toLocaleDateString()}.
           </Typography>
         </DialogContent>
         <DialogActions>

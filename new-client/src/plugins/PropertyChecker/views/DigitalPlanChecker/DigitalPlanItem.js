@@ -39,8 +39,10 @@ const DigitalPlanItem = ({
   const handleExpandClick = () => setExpanded(!expanded);
 
   const id = useId();
-  const regulationName = feature.get("label_text");
-  const regulationCaption = feature.get("formulering");
+  const regulationName = feature.get(options.digitalPlanItemTitleAttribute);
+  const regulationCaption = feature.get(
+    options.digitalPlanItemDescriptionAttribute
+  );
 
   // Define an object that will be used when keeping track
   // of user-selected layers that should be printed inside the

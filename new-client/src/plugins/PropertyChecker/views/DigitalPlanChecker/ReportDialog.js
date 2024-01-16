@@ -26,16 +26,16 @@ export default function ReportDialog(props) {
     userDetails,
     options,
   } = props;
-  const { digitalPlansReportUseTypeOrder } = options;
+  const { digitalPlansLayerSecondLevelOrder } = options;
   // Helper: Prepare plain text version of the report, used for clipboard.
   const getPlainTextForClipboard = () => {
     return (
       `DETALJPLAN ${digitalPlanKey}\n\n` +
-      `${markerFeature.get("plan_planstatus")}: ${new Date(
-        markerFeature.get("plan_statusdatum")
+      `${markerFeature.get(options.digitalPlanStatusAttribute)}: ${new Date(
+        markerFeature.get(options.digitalPlanStatusDateAttribute)
       ).toLocaleDateString()}\n\n` +
       "Granskning har gjorts mot följande planbestämmelser:\n\n" +
-      digitalPlansReportUseTypeOrder
+      digitalPlansLayerSecondLevelOrder
         .map((useType, i) => {
           return (
             useType.toUpperCase() +
@@ -63,13 +63,11 @@ export default function ReportDialog(props) {
         .join("\n\n") + // Finally, join the array into a string using new line as join character.
       "\n\n" +
       "PLANENS SYFTE\n" +
-      markerFeature.get("plan_syfte") +
+      markerFeature.get(options.digitalPlanDescriptionAttribute) +
       "\n\n" +
       getUserDetailsText() +
       "\n\n" +
-      `Rapporten utgår från data som var känd per ${new Date().toLocaleDateString(
-        "sv-SE"
-      )}.`
+      `Rapporten utgår från data som var känd per ${new Date().toLocaleDateString()}.`
     );
   };
 
@@ -77,11 +75,11 @@ export default function ReportDialog(props) {
   const getHtmlFormattedTextForClipboard = () => {
     return (
       `<h1>Detaljplan: ${digitalPlanKey}</h1>` +
-      `<p>${markerFeature.get("plan_planstatus")}: ${new Date(
-        markerFeature.get("plan_statusdatum")
+      `<p>${markerFeature.get(options.digitalPlanStatusAttribute)}: ${new Date(
+        markerFeature.get(options.digitalPlanStatusDateAttribute)
       ).toLocaleDateString()}</p>` +
       "<h2>Granskning har gjorts mot följande planbestämmelser:</h2>" +
-      digitalPlansReportUseTypeOrder
+      digitalPlansLayerSecondLevelOrder
         .map((useType, i) => {
           return (
             `<h3>${useType.toUpperCase()}</h3>` +
@@ -114,7 +112,7 @@ export default function ReportDialog(props) {
         .join("") +
       "<h2>Planens syfte</h2>" +
       "<p>" +
-      markerFeature.get("plan_syfte") +
+      markerFeature.get(options.digitalPlanDescriptionAttribute) +
       "</p>" +
       `<p>${getUserDetailsText()}</p>` +
       `<p>Rapporten utgår från data som var känd per ${new Date().toLocaleDateString()}.</p>`
@@ -185,14 +183,16 @@ export default function ReportDialog(props) {
         <DialogTitle variant="h4">Detaljplan {digitalPlanKey}</DialogTitle>
         <DialogContent>
           <TextParagraph>
-            {`${markerFeature.get("plan_planstatus")}: ${new Date(
-              markerFeature.get("plan_statusdatum")
+            {`${markerFeature.get(
+              options.digitalPlanStatusAttribute
+            )}: ${new Date(
+              markerFeature.get(options.digitalPlanStatusDateAttribute)
             ).toLocaleDateString()}`}
           </TextParagraph>
           <Typography gutterBottom variant="h5">
             Granskning har gjorts mot följande planbestämmelser:
           </Typography>
-          {digitalPlansReportUseTypeOrder.map((useType, i) => {
+          {digitalPlansLayerSecondLevelOrder.map((useType, i) => {
             const filteredRegulations = controlledRegulations.filter(
               (r) => r.useType === useType
             );
@@ -248,7 +248,9 @@ export default function ReportDialog(props) {
             Planens syfte
           </Typography>
 
-          <TextParagraph>{markerFeature.get("plan_syfte")}</TextParagraph>
+          <TextParagraph>
+            {markerFeature.get(options.digitalPlanDescriptionAttribute)}
+          </TextParagraph>
 
           <Typography gutterBottom variant="h5">
             Om rapporten

@@ -7,7 +7,7 @@ import {
 
 export default class PropertyCheckerModel {
   #app;
-  #groupCheckLayerByAttribute;
+  #checkLayerPropertyAttribute;
   #groupDigitalPlansLayerByAttribute;
   #groupDigitalPlansLayerSecondLevelByAttribute;
   #checkLayer;
@@ -23,7 +23,7 @@ export default class PropertyCheckerModel {
   constructor(settings) {
     // Set some private fields
     this.#app = settings.app;
-    this.#groupCheckLayerByAttribute = settings.groupCheckLayerByAttribute;
+    this.#checkLayerPropertyAttribute = settings.checkLayerPropertyAttribute;
     this.#groupDigitalPlansLayerByAttribute =
       settings.groupDigitalPlansLayerByAttribute;
     this.#groupDigitalPlansLayerSecondLevelByAttribute =
@@ -135,6 +135,11 @@ export default class PropertyCheckerModel {
     const groupedFeatures = {};
     features.forEach((f) => {
       const identifier = f.get(attributeName);
+      if (identifier === undefined) {
+        console.error(
+          `Could not group by property due to tool misconfiguration: attribute "${attributeName}" does not exist.`
+        );
+      }
       // Ensure that we have a category to push into
       if (!Object.hasOwn(groupedFeatures, identifier)) {
         // Prepare an object that will contain to things:
@@ -196,7 +201,7 @@ export default class PropertyCheckerModel {
     // the property ID (or whatever is configured in the Admin).
     const groupedCheckLayerFeatures = this.#groupFeaturesByAttributeName(
       checkLayerFeatures,
-      this.#groupCheckLayerByAttribute // the attribute name that we wish to group on
+      this.#checkLayerPropertyAttribute // the attribute name that we wish to group on
     );
 
     // Digital Plans features
@@ -213,10 +218,6 @@ export default class PropertyCheckerModel {
 
     // Digital plans must be further grouped by use type. The attribute
     // is specified by the admin setting groupDigitalPlansLayerSecondLevelByAttribute.
-    console.log(
-      "GROUPING BY",
-      this.#groupDigitalPlansLayerSecondLevelByAttribute
-    );
     for (const key in groupedDigitalPlanFeatures) {
       if (Object.hasOwnProperty.call(groupedDigitalPlanFeatures, key)) {
         const element = groupedDigitalPlanFeatures[key];

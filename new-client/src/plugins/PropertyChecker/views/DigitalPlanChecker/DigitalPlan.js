@@ -64,9 +64,11 @@ function DigitalPlan(props) {
               {}
             </Typography>
             {type
-              .sort((a, b) =>
-                a.get("label_text").localeCompare(b.get("label_text"))
-              )
+              .sort((a, b) => {
+                return a
+                  .get(options.digitalPlanItemTitleAttribute)
+                  ?.localeCompare(b.get(options.digitalPlanItemTitleAttribute));
+              })
               .map((f, index) => (
                 <DigitalPlanItem
                   feature={f}

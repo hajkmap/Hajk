@@ -42,11 +42,16 @@ function TabContentView({
             disabled={
               controlledLayers.filter(
                 (l) =>
-                  l.propertyName === features.markerFeature.get("fastighet")
+                  l.propertyName ===
+                  features.markerFeature.get(
+                    options.checkLayerPropertyAttribute
+                  )
               ).length === 0
             }
             onClick={() => {
-              handleShowReportDialog(features.markerFeature.get("fastighet"));
+              handleShowReportDialog(
+                features.markerFeature.get(options.checkLayerPropertyAttribute)
+              );
             }}
           >
             Generera rapport
@@ -87,7 +92,9 @@ function TabContentView({
                 setControlledLayers={setControlledLayers}
                 layerNotes={layerNotes}
                 setLayerNotes={setLayerNotes}
-                propertyName={features.markerFeature.get("fastighet")}
+                propertyName={features.markerFeature.get(
+                  options.checkLayerPropertyAttribute
+                )}
               />
             )
           );
