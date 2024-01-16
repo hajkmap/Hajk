@@ -73,31 +73,33 @@ const DigitalPlanItem = ({
           </>
         }
         action={
-          <>
-            <Checkbox
-              onChange={(e) => {
-                setControlledRegulations((prev) => {
-                  // If layer is already selected using the checkbox…
-                  if (isSelected()) {
-                    // … let's uncheck the box by the removing element with current layer's ID.
-                    return prev.filter((l) => l.id !== selectionFormat.id);
-                  } else {
-                    // Else, let's check the box by adding the new element.
-                    return [...prev, selectionFormat];
-                  }
-                });
-              }}
-              checked={isSelected()}
-            />
-            <ExpandMore
-              expand={expanded}
-              onClick={handleExpandClick}
-              aria-expanded={expanded}
-              aria-label="Visa noteringar"
-            >
-              <ExpandMoreIcon />
-            </ExpandMore>
-          </>
+          options.enableDigitalPlansReport && (
+            <>
+              <Checkbox
+                onChange={(e) => {
+                  setControlledRegulations((prev) => {
+                    // If layer is already selected using the checkbox…
+                    if (isSelected()) {
+                      // … let's uncheck the box by the removing element with current layer's ID.
+                      return prev.filter((l) => l.id !== selectionFormat.id);
+                    } else {
+                      // Else, let's check the box by adding the new element.
+                      return [...prev, selectionFormat];
+                    }
+                  });
+                }}
+                checked={isSelected()}
+              />
+              <ExpandMore
+                expand={expanded}
+                onClick={handleExpandClick}
+                aria-expanded={expanded}
+                aria-label="Visa noteringar"
+              >
+                <ExpandMoreIcon />
+              </ExpandMore>
+            </>
+          )
         }
       />
       <Collapse in={expanded} timeout="auto">
