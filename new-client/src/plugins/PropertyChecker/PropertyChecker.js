@@ -19,7 +19,7 @@ import DrawModel from "../../models/DrawModel.js";
  * and document how plugins should be constructed in Hajk.
  */
 function PropertyChecker(props) {
-  // console.log("PropertyChecker render: ", props);
+  //
   // Used to keep track of the plugin's current visibility.
   // We will want to do some cleanup later on when the window is hidden.
   const [pluginShown, setPluginShown] = React.useState(
@@ -52,14 +52,10 @@ function PropertyChecker(props) {
     () =>
       new PropertyCheckerModel({
         app: props.app,
-        groupCheckLayerByAttribute: props.options.groupCheckLayerByAttribute,
-        groupDigitalPlansLayerByAttribute:
-          props.options.groupDigitalPlansLayerByAttribute,
-        checkLayerId: props.options.checkLayerId,
-        digitalPlansLayerId: props.options.digitalPlansLayerId,
         drawModel: drawModel,
         localObserver: localObserver,
         map: props.map,
+        ...props.options,
       })
   );
 
@@ -73,33 +69,6 @@ function PropertyChecker(props) {
     // Otherwise we'll set it to whatever the current draw-interaction is.
     return drawModel.toggleDrawInteraction(drawInteraction);
   }, [drawModel, drawInteraction, pluginShown]); // We need to keep the drawModel in the dep. arr. since it _could_ change.
-
-  // As soon as a feature is added, disable the draw interaction. We don't want multiple
-  // points.
-  // const handleFeatureAdded = React.useCallback(
-  //   (feature) => {
-  //     drawModel.toggleDrawInteraction("");
-  //   },
-  //   [drawModel]
-  // );
-
-  // This effect makes sure to subscribe (and unsubscribe) to the observer-events that we care about.
-  // React.useEffect(() => {
-  //   // Fires when a feature has been removed from the draw-source.
-  //   // localObserver.subscribe("drawModel.featureRemoved", handleFeatureAdded);
-  //   // localObserver.subscribe("drawModel.featuresRemoved", handleFeatureAdded);
-  //   localObserver.subscribe("drawModel.featureAdded", handleFeatureAdded);
-  //   return () => {
-  //     // localObserver.unsubscribe("drawModel.featureRemoved");
-  //     // localObserver.unsubscribe("drawModel.featuresRemoved");
-  //     localObserver.unsubscribe("drawModel.featureAdded", handleFeatureAdded);
-  //   };
-  // }, [localObserver, handleFeatureAdded]);
-
-  // Fires when the custom header-panel button is clicked. Add more logic and see what happens!
-  // const panelHeaderButtonCallback = () => {
-  //   console.log("You just clicked the panel-header button!");
-  // };
 
   // We're gonna need to catch if the user closes the window, and make sure to
   // update the local state so that the effect making sure to disable eventual active tools

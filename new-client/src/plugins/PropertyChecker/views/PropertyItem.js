@@ -70,6 +70,7 @@ function PropertyItem({
             <TabContentDigitalPlanChecker
               digitalPlanFeatures={digitalPlanFeatures}
               options={options}
+              userDetails={userDetails}
             />
           </Box>
         </AccordionDetails>

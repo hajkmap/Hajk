@@ -9,6 +9,7 @@ export default class PropertyCheckerModel {
   #app;
   #groupCheckLayerByAttribute;
   #groupDigitalPlansLayerByAttribute;
+  #groupDigitalPlansLayerSecondLevelByAttribute;
   #checkLayer;
   #checkLayerId;
   #digitalPlansLayer;
@@ -25,13 +26,14 @@ export default class PropertyCheckerModel {
     this.#groupCheckLayerByAttribute = settings.groupCheckLayerByAttribute;
     this.#groupDigitalPlansLayerByAttribute =
       settings.groupDigitalPlansLayerByAttribute;
+    this.#groupDigitalPlansLayerSecondLevelByAttribute =
+      settings.groupDigitalPlansLayerSecondLevelByAttribute;
     this.#checkLayerId = settings.checkLayerId;
     this.#digitalPlansLayerId = settings.digitalPlansLayerId;
     this.#drawModel = settings.drawModel;
     this.#localObserver = settings.localObserver;
     this.#map = settings.map;
     this.#viewResolution = this.#map.getView().getResolution();
-    //this.#viewProjection = this.#map.getView().getProjection().getCode();
     this.#viewProjection = this.#map.getView().getProjection();
 
     this.#initSubscriptions(); // Initiate listeners on observer(s)
@@ -196,7 +198,6 @@ export default class PropertyCheckerModel {
       checkLayerFeatures,
       this.#groupCheckLayerByAttribute // the attribute name that we wish to group on
     );
-    console.log("Check Layer features: ", groupedCheckLayerFeatures);
 
     // Digital Plans features
     const digitalPlanFeatures = await this.#getOlFeaturesForCoordsAndOlLayer(
@@ -207,11 +208,15 @@ export default class PropertyCheckerModel {
       digitalPlanFeatures,
       this.#groupDigitalPlansLayerByAttribute
     );
-    console.log("Digital Plans features: ", groupedDigitalPlanFeatures);
 
     const groupedDigitalPlanFeaturesWithGroupedUseType = {};
 
-    // Digital plans must be further grouped by use type:
+    // Digital plans must be further grouped by use type. The attribute
+    // is specified by the admin setting groupDigitalPlansLayerSecondLevelByAttribute.
+    console.log(
+      "GROUPING BY",
+      this.#groupDigitalPlansLayerSecondLevelByAttribute
+    );
     for (const key in groupedDigitalPlanFeatures) {
       if (Object.hasOwnProperty.call(groupedDigitalPlanFeatures, key)) {
         const element = groupedDigitalPlanFeatures[key];
@@ -219,7 +224,10 @@ export default class PropertyCheckerModel {
           ...element, // Spread whatever already exists…
           features: Object.fromEntries(
             // but replace "features" with the grouped results.
-            this.#groupedMap(element.features, "bestammelsetyp")
+            this.#groupedMap(
+              element.features,
+              this.#groupDigitalPlansLayerSecondLevelByAttribute
+            )
           ),
         };
       }
