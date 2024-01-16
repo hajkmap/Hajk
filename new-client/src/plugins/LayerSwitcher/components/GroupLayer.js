@@ -50,7 +50,7 @@ export default function GroupLayer({
       // Remove layer caption from snackbar message.
       removeFromSnackbar(removeLayerCaptions);
     }
-  }, [visibleSubLayers]);
+  }, [visibleSubLayers, layer.layersInfo, layer.subLayers, removeFromSnackbar]);
 
   const setGroupHidden = useCallback(
     (l) => {
