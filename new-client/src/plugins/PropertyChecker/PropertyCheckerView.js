@@ -99,11 +99,33 @@ function PropertyCheckerView(props) {
     // Sometimes we won't get a result for the clicked point, but we still want
     // to inform the user about it. We should also remove the clicked point feature
     // from map, otherwise we'd end up with multiple points as user clicks next time.
-    const handleNoFeaturesInResult = () => {
-      enqueueSnackbar("Den klickade ytan gav inga träffar", {
-        variant: "info",
-      });
+    const handleNoFeaturesInResult = ({
+      amountOfProperties,
+      amountOfDigitalPlans,
+    }) => {
       drawModel.removeDrawnFeatures();
+      if (amountOfProperties === 0) {
+        enqueueSnackbar(
+          "Den klickade fastigheten gav inga träffar i Fastighetskontrollens databas",
+          {
+            variant: "info",
+          }
+        );
+      } else if (amountOfProperties > 1) {
+        enqueueSnackbar(
+          "Du klickade på fler än en fastighet. Vänligen prova igen. Tips: slå på fastighetsgränser och håll dig en bit från gränsen när du klickar.",
+          {
+            variant: "warning",
+          }
+        );
+      } else if (amountOfDigitalPlans > 1) {
+        enqueueSnackbar(
+          "Du klickade på fler än en detaljplan. Vänligen prova igen. Tips: slå på detaljplaner och titta var gränserna går. Håll dig en bit från gränsen när du klickar.",
+          {
+            variant: "warning",
+          }
+        );
+      }
     };
 
     // Subscriptions. See each handler for more comments.

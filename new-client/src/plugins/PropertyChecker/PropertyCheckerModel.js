@@ -124,7 +124,11 @@ export default class PropertyCheckerModel {
     );
   };
 
-  #groupFeaturesByAttributeName = (features, attributeName) => {
+  #groupFeaturesByAttributeName = (
+    features,
+    attributeName,
+    addMarkerFeatureToMap = false
+  ) => {
     // Features that arrive from the WMS service will be in a flat
     // array. For our use case, we want to group features that correspond
     // to a specific property. The attribute name that holds the properties
@@ -154,8 +158,9 @@ export default class PropertyCheckerModel {
         // Without this, drawModel.removeFeatures won't take care of this geometry.
         markerFeature.set("USER_DRAWN", true);
 
-        // Add the marker feature to map, don't send any events from DrawModel
-        this.#drawModel.addFeature(markerFeature, { silent: true });
+        // Check if we should add the marker feature to map. Don't send any events from DrawModel
+        addMarkerFeatureToMap === true &&
+          this.#drawModel.addFeature(markerFeature, { silent: true });
 
         // Finally, initialize the object for the current identifier, don't add
         // any features to the features array yet (it'll be taken care of next).
@@ -201,7 +206,8 @@ export default class PropertyCheckerModel {
     // the property ID (or whatever is configured in the Admin).
     const groupedCheckLayerFeatures = this.#groupFeaturesByAttributeName(
       checkLayerFeatures,
-      this.#checkLayerPropertyAttribute // the attribute name that we wish to group on
+      this.#checkLayerPropertyAttribute, // the attribute name that we wish to group on
+      true // we want to add the marker feature to the map
     );
 
     // Digital Plans features
@@ -234,19 +240,28 @@ export default class PropertyCheckerModel {
       }
     }
 
-    // If we've got at least one feature in the response
+    // Let's find out how many results of each type we've got.
+    const amountOfProperties = Object.keys(groupedCheckLayerFeatures).length;
+    const amountOfDigitalPlans = Object.keys(
+      groupedDigitalPlanFeaturesWithGroupedUseType
+    ).length;
+
+    // When user clicks, check that the click was valid by controlling that…
     if (
-      Object.keys(groupedCheckLayerFeatures).length > 0 ||
-      Object.keys(groupedDigitalPlanFeaturesWithGroupedUseType).length > 0
+      amountOfProperties === 1 && // …we've got exactly one property in the response…
+      amountOfDigitalPlans < 2 // …and there are no or one digital plan. (I.e. don't allow results in places with more than one digital plan)
     ) {
-      // Tell the rest of the plugin that we've got feature. The View
+      // Tell the rest of the plugin that we've got features. The View
       // subscribes to this and will update itself accordingly.
       this.#localObserver.publish("getFeatureInfoFeatures", {
         groupedFeatures: groupedCheckLayerFeatures,
         digitalPlanFeatures: groupedDigitalPlanFeaturesWithGroupedUseType,
       });
     } else {
-      this.#localObserver.publish("noFeaturesInResult");
+      this.#localObserver.publish("noFeaturesInResult", {
+        amountOfProperties,
+        amountOfDigitalPlans,
+      });
     }
   };
 

@@ -39,6 +39,7 @@ function TabContentView({
             fullWidth
             variant="outlined"
             size="small"
+            sx={{ mt: 2, mb: 2 }}
             disabled={
               controlledLayers.filter(
                 (l) =>

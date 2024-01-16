@@ -1,10 +1,11 @@
 import React from "react";
+import { Paper, Typography } from "@mui/material";
 
 import DigitalPlan from "./DigitalPlan.js";
 
 function DigitalPlanList({ digitalPlanFeatures, options, userDetails }) {
-  return Object.entries(digitalPlanFeatures).map(
-    ([digitalPlanKey, plan], i) => (
+  return Object.entries(digitalPlanFeatures).length > 0 ? (
+    Object.entries(digitalPlanFeatures).map(([digitalPlanKey, plan], i) => (
       <DigitalPlan
         digitalPlanKey={digitalPlanKey}
         plan={plan}
@@ -12,7 +13,13 @@ function DigitalPlanList({ digitalPlanFeatures, options, userDetails }) {
         options={options}
         userDetails={userDetails}
       />
-    )
+    ))
+  ) : (
+    <Typography sx={{ p: 2 }}>
+      Inga digitala plan hittades på den klickade punkten. Observera att det
+      fortfarande kan finnas en detaljplan på ytan och du ska kontrollera det
+      genom att titta i lagret med detaljplaner.
+    </Typography>
   );
 }
 

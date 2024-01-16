@@ -14,11 +14,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Backend: Respect nested `visibleForGroups` within tool options[#1438](https://github.com/hajkmap/Hajk/issues/1438)
 - Backend: show 403 Forbidden rather than 500 if access was not allowed. [90b1725](https://github.com/hajkmap/Hajk/commit/90b172595c16078053c2d03130971e89091511aa)
 - Edit: Allow setting a `geometryField` for edit layers with no features. [[#1447](https://github.com/hajkmap/Hajk/issues/1447)]
+- PropertyChecker: Expanded the plugin to also utilize _Digital Plans_ by adding a second tab with an own list as well as another report.
 
 ### Fixed
 
 - Client core: Fix layout issue with hidden DrawerToggleButtons [#1436](https://github.com/hajkmap/Hajk/pull/1436)
 - PropertyChecker: Better sorting and layer loading failed indicator in layers list. [8df1b92](https://github.com/hajkmap/Hajk/commit/8df1b9253aae06c8b42a37b36100a595e4e7c74b)
+- PropertyChecker: Don't allow clicking on points that'd result in response from multiple properties. User is informed when such a click occurs and told to click further away from the property border.
 - Bookmark: Fixed removal issue. [0f1172f](https://github.com/hajkmap/Hajk/commit/0f1172f108d57575dbe8e8ecabb20aa8b8a15c4e)
 - Print: Print tool does not print WMS layers that requires credentials[#1442](https://github.com/hajkmap/Hajk/issues/1442)
 
