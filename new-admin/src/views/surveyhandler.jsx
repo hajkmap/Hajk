@@ -261,7 +261,7 @@ function SurveyHandler(props) {
     const selectedSurveyId = e.target.value;
     if (selectedSurveyId) {
         props.model.loadSurvey(selectedSurveyId, (surveyData) => {
-            console.log("Laddad undersökning:", surveyData);
+            setSurvey(surveyData);
         });
     }
 };
