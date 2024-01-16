@@ -1000,7 +1000,9 @@ class DrawModel {
       : this.#drawStyleSettings;
 
     return new Circle({
-      radius: 6,
+      radius: settings?.imageStyle?.radius
+        ? settings.imageStyle.radius
+        : storedSettings.radius,
       stroke: new Stroke({
         color: settings?.strokeStyle?.color
           ? settings.strokeStyle.color
@@ -1039,9 +1041,6 @@ class DrawModel {
   // Extracts the stroke-style from the supplied feature-style
   #getStrokeStyleInfo = (featureStyle) => {
     try {
-      // Since we might be dealing with a style-array instead of a style-object
-      // (in case of the special Arrow feature-type) we have to make sure to get
-      // the actual base-style (which is located at position 0 in the style-array).
       const s = Array.isArray(featureStyle)
         ? featureStyle[0]?.getStroke()
         : featureStyle?.getStroke();
@@ -1077,17 +1076,20 @@ class DrawModel {
         strokeColor: null,
         strokeWidth: null,
         dash: null,
+        radius: null,
       };
     }
     const fillColor = fillStyle.getColor();
     const strokeColor = strokeStyle.getColor();
     const strokeWidth = strokeStyle.getWidth();
     const dash = strokeStyle.getLineDash();
+    const radius = s.getRadius();
     return {
       fillColor: this.getRGBAString(fillColor),
       strokeColor: this.getRGBAString(strokeColor),
       strokeWidth,
       dash,
+      radius,
     };
   };
 

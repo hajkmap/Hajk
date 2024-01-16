@@ -181,7 +181,7 @@ class SketchModel {
   // Extract the style settings from the supplied object and returns an object
   // with the color settings converted to string to comply with OL.
   #extractStyleSettings = (settings) => {
-    const { strokeColor, fillColor, strokeWidth, lineDash } = settings;
+    const { strokeColor, fillColor, strokeWidth, lineDash, radius } = settings;
     const strokeColorString = this.#drawModel.getRGBAString(strokeColor);
     const fillColorString = this.#drawModel.getRGBAString(fillColor);
     return {
@@ -189,13 +189,14 @@ class SketchModel {
       fillColor: fillColorString,
       strokeWidth,
       lineDash,
+      radius,
     };
   };
 
   // Creates a circle-style that can be used within an image-style.
   #createImageStyle = (settings) => {
     return new Circle({
-      radius: 6,
+      radius: settings.radius,
       stroke: new Stroke({
         color: settings.strokeColor,
         width: settings.strokeWidth,
@@ -270,6 +271,7 @@ class SketchModel {
         lineDash: featureBaseStyle?.strokeStyle.dash,
         strokeWidth: featureBaseStyle?.strokeStyle.width,
         strokeType: this.#getStrokeType(featureBaseStyle?.strokeStyle.dash),
+        radius: featureBaseStyle?.imageStyle.radius,
         fillColor: this.#drawModel.parseColorString(
           featureBaseStyle?.fillStyle.color
         ),
@@ -297,13 +299,14 @@ class SketchModel {
       const strokeStyle = featureStyle.getStroke();
       const imageStyle = featureStyle.getImage();
 
-      const { fillColor, strokeColor, strokeWidth, lineDash } =
+      const { fillColor, strokeColor, strokeWidth, lineDash, radius } =
         this.#extractStyleSettings(styleSettings);
 
       fillStyle.setColor(fillColor);
       strokeStyle.setColor(strokeColor);
       strokeStyle.setWidth(strokeWidth);
       strokeStyle.setLineDash(lineDash);
+      imageStyle && imageStyle.setRadius(radius);
       // Unfortunately, the feature-image-style does not update by re-setting the
       // stroke- and fill-settings within the image-style. Instead, a new image-style
       // has to be created.
@@ -314,6 +317,7 @@ class SketchModel {
             strokeColor,
             strokeWidth,
             lineDash,
+            radius,
           })
         );
 

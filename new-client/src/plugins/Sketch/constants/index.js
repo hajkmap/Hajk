@@ -217,6 +217,7 @@ export const DEFAULT_DRAW_STYLE_SETTINGS = {
   fillColor: { r: 60, g: 60, b: 60, a: 0.3 },
   strokeType: "solid",
   strokeWidth: 1,
+  radius: 6,
 };
 
 export const DEFAULT_TEXT_STYLE_SETTINGS = {
