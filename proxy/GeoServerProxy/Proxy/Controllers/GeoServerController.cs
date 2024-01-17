@@ -139,8 +139,11 @@ namespace Proxy.Controllers
                     using (var resp = await request.GetResponseAsync())
                     {
                         using (var stream = resp.GetResponseStream())
-                        {                            
-                            if (GetProxyBaseUrl().Length > 0 && (resp.ContentType.StartsWith("application/vnd.ogc.wms_xml") || resp.ContentType.StartsWith( "text/xml")))
+                        {
+                            if (GetProxyBaseUrl().Length > 0 && 
+                                (resp.ContentType.StartsWith("application/vnd.ogc.wms_xml") || 
+                                resp.ContentType.StartsWith( "text/xml") || 
+                                resp.ContentType.StartsWith("application/xml")))
                             {
                                 var ms = new MemoryStream();
                                 stream.CopyTo(ms);
