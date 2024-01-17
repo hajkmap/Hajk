@@ -193,37 +193,49 @@ class EditModel {
     if (this.source.id === "simulated") {
       const wktFormatter = new WKT();
 
-      // Inserts
-      const newSavedFeatures = features.inserts.map((feature) => ({
-        surveyQuestion: feature.get("SURVEYQUESTION"),
-        surveyAnswerId: feature.get("SURVEYANSWERID"),
-        wktGeometry: wktFormatter.writeGeometry(feature.getGeometry()),
-      }));
+      const allFeatures = this.vectorSource.getFeatures();
+      console.log("All features:", allFeatures);
 
-      // Add new features
-      this.newMapData = [...this.newMapData, ...newSavedFeatures];
+      allFeatures.forEach((feature) => {
+        console.log("Current feature modification:", feature.modification);
 
-      // Updated features
-      /*features.updates.forEach((feature) => {
-        const featureUid = feature.ol_uid;
-        const updatedFeatureIndex = this.newMapData.findIndex(
-          (f) => f.ol_uid === featureUid
-        );
-        if (updatedFeatureIndex !== -1) {
-          this.newMapData[updatedFeatureIndex] = {
-            ...this.newMapData[updatedFeatureIndex],
-            wktGeometry: wktFormatter.writeGeometry(feature.getGeometry()),
-          };
+        const featureData = {
+          surveyQuestion: feature.get("SURVEYQUESTION"),
+          surveyAnswerId: feature.get("SURVEYANSWERID"),
+          wktGeometry: wktFormatter.writeGeometry(feature.getGeometry()),
+        };
+
+        console.log("Feature data:", featureData);
+
+        switch (feature.modification) {
+          case "added":
+            // Inserts
+            this.newMapData.push(featureData);
+            break;
+          case "updated":
+            // Updates
+            const indexToUpdate = this.newMapData.findIndex(
+              (f) => f.surveyQuestion === featureData.surveyQuestion
+            );
+            if (indexToUpdate !== -1) {
+              this.newMapData[indexToUpdate] = featureData;
+            }
+            break;
+          case "removed":
+            // Remove
+            const wktToRemove = wktFormatter.writeGeometry(
+              feature.getGeometry()
+            );
+            this.newMapData = this.newMapData.filter(
+              (f) => f.wktGeometry !== wktToRemove
+            );
+            break;
+          default:
+            break;
         }
-      });*/
-
-      // Remove features
-      features.deletes.forEach((feature) => {
-        const wktToRemove = wktFormatter.writeGeometry(feature.getGeometry());
-        this.newMapData = this.newMapData.filter(
-          (savedFeature) => savedFeature.wktGeometry !== wktToRemove
-        );
       });
+
+      console.log("newMapData after processing:", this.newMapData);
 
       done();
       return;
