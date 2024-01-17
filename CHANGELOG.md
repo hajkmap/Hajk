@@ -5,7 +5,23 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+<!--## [Unreleased]-->
+
+## [3.13.23] - 2024-01-17
+
+_A quick follow-up to 3.13.22, that had some issues with certain map configurations._
+
+### Fixed
+
+- Backend: Solved an issue that could stop certain maps from loading if a tool's option's property value was `null`. Introduced in [#1438](https://github.com/hajkmap/Hajk/issues/1438), fixed in [77503ee](https://github.com/hajkmap/Hajk/commit/77503ee617b1579970cb2ea95c7b95143d024df0).
+
+### Added
+
+- FeatureInfo: New filters, [#1443](https://github.com/hajkmap/Hajk/issues/1443)
+
+### Changed
+
+- Backend: show 403 Forbidden rather than 500 if access was not allowed. [98b9280](https://github.com/hajkmap/Hajk/commit/98b9280b56a05eaa2a037359341329ed5fc46f8e)
 
 ## [3.13.22] - 2024-01-16
 
@@ -15,7 +31,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Backend: Another method of gaining AD groups has been added. It's possible to circumvent the current solution (where Backend talks to the LDAP server) if one's setup allows for getting the AD groups elsewhere (i.e. from a proxy if setup on IIS). [#1439](https://github.com/hajkmap/Hajk/issues/1439)
 - Backend: Respect nested `visibleForGroups` within tool options[#1438](https://github.com/hajkmap/Hajk/issues/1438)
 - Backend: show 403 Forbidden rather than 500 if access was not allowed. [90b1725](https://github.com/hajkmap/Hajk/commit/90b172595c16078053c2d03130971e89091511aa)
-- Edit: Allow setting a `geometryField` for edit layers with no features. [[#1447](https://github.com/hajkmap/Hajk/issues/1447)]
+- Edit: Allow setting a `geometryField` for edit layers with no features. [#1447](https://github.com/hajkmap/Hajk/issues/1447)
 - PropertyChecker: Expanded the plugin to also utilize _Digital Plans_ by adding a second tab with an own list as well as another report.
 
 ### Fixed
@@ -204,7 +220,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [3.12.0-rc.2] - 2023-06-19
 
-[unreleased]: https://github.com/hajkmap/Hajk/compare/v3.13.22...hstd-main
+[unreleased]: https://github.com/hajkmap/Hajk/compare/v3.13.23...hstd-main
+[3.13.23]: https://github.com/hajkmap/Hajk/compare/v3.13.22...v3.13.23
 [3.13.22]: https://github.com/hajkmap/Hajk/compare/v3.13.21...v3.13.22
 [3.13.21]: https://github.com/hajkmap/Hajk/compare/v3.13.20...v3.13.21
 [3.13.20]: https://github.com/hajkmap/Hajk/compare/v3.13.19...v3.13.20
