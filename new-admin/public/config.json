@@ -46,7 +46,7 @@
     "url_surveys_list": "http://localhost:3002/api/v2/surveys/list/",
     "url_surveys_load": "http://localhost:3002/api/v2/surveys/",
     "url_surveys_answers_save": "http://localhost:3002/api/v2/surveys/answers/",
-    "url_surveys_answers_load": "http://localhost:3002/api/v2/survey/answers/",
+    "url_surveys_answers_load": "http://localhost:3002/api/v2/surveys/answers/",
     "authentication_active": false,
     "use_document_folders": true
   },
@@ -98,7 +98,7 @@
     "url_surveys_list": "http://localhost:3002/api/v2/surveys/list/",
     "url_surveys_load": "http://localhost:3002/api/v2/surveys/",
     "url_surveys_answers_save": "http://localhost:3002/api/v2/surveys/answers/",
-    "url_surveys_answers_load": "http://localhost:3002/api/v2/survey/answers/"
+    "url_surveys_answers_load": "http://localhost:3002/api/v2/surveys/answers/"
   },
   "router": [
     { "name": "layermanager", "title": "Lager", "default": true },
