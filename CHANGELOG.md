@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 <!--## [Unreleased]-->
 
+## [3.13.24] - 2024-01-17
+
+### Added
+
+- LayerSwitcher: It is now possible to auto-rotate the Map to a admin-specified value. Useful for layers with photos taken in different directions. [#1451](https://github.com/hajkmap/Hajk/issues/1451)
+
 ## [3.13.23] - 2024-01-17
 
 _A quick follow-up to 3.13.22, that had some issues with certain map configurations._
@@ -220,7 +226,8 @@ _A quick follow-up to 3.13.22, that had some issues with certain map configurati
 
 ## [3.12.0-rc.2] - 2023-06-19
 
-[unreleased]: https://github.com/hajkmap/Hajk/compare/v3.13.23...hstd-main
+[unreleased]: https://github.com/hajkmap/Hajk/compare/v3.13.24...hstd-main
+[3.13.24]: https://github.com/hajkmap/Hajk/compare/v3.13.23...v3.13.24
 [3.13.23]: https://github.com/hajkmap/Hajk/compare/v3.13.22...v3.13.23
 [3.13.22]: https://github.com/hajkmap/Hajk/compare/v3.13.21...v3.13.22
 [3.13.21]: https://github.com/hajkmap/Hajk/compare/v3.13.20...v3.13.21
