@@ -41,6 +41,7 @@ class BackgroundSwitcher extends React.PureComponent {
         source: this.osmSource,
         zIndex: -1,
         layerType: "base",
+        rotateMap: "n", // OpenStreetMap should be rotated to North
         name: "osm-layer",
         caption: "OpenStreetMap",
         layerInfo: {

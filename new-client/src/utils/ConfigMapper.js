@@ -189,6 +189,7 @@ export default class ConfigMapper {
         timeSliderStart: args.timeSliderStart,
         timeSliderEnd: args.timeSliderEnd,
         visibleAtStartSubLayers: args.visibleAtStartSubLayers,
+        rotateMap: args.rotateMap || "n",
       },
     };
 
@@ -260,6 +261,7 @@ export default class ConfigMapper {
         hideExpandArrow: args.hideExpandArrow,
         timeSliderStart: args.timeSliderStart,
         timeSliderEnd: args.timeSliderEnd,
+        rotateMap: args.rotateMap || "n",
       },
     };
     return config;
@@ -280,6 +282,7 @@ export default class ConfigMapper {
         queryable: args.queryable !== false,
         extent: args.extent,
         projection: args.projection,
+        rotateMap: args.rotateMap || "n",
       },
     };
 
@@ -358,6 +361,7 @@ export default class ConfigMapper {
         timeSliderStart: args.timeSliderStart,
         timeSliderEnd: args.timeSliderEnd,
         zIndex: args.drawOrder || 0,
+        rotateMap: args.rotateMap || "n",
       },
     };
 
@@ -412,6 +416,7 @@ export default class ConfigMapper {
         timeSliderStart: args.timeSliderStart,
         timeSliderEnd: args.timeSliderEnd,
         zIndex: args.drawOrder || 0,
+        rotateMap: args.rotateMap || "n",
       },
     };
 
