@@ -462,7 +462,6 @@ class DrawModel {
     }
     // If we're dealing with "Arrow" we'll return a special style array
     if (feature?.get("DRAW_METHOD") === "Arrow") {
-      console.log(this.#getArrowStyle(feature, settingsOverride));
       return this.#getArrowStyle(feature, settingsOverride);
     }
     // Otherwise we'll grab the 'current' style. The 'current' style might be
