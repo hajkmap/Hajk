@@ -306,7 +306,7 @@ class SketchModel {
       strokeStyle.setColor(strokeColor);
       strokeStyle.setWidth(strokeWidth);
       strokeStyle.setLineDash(lineDash);
-      imageStyle && imageStyle.setRadius(radius);
+      imageStyle.setRadius(radius);
       // Unfortunately, the feature-image-style does not update by re-setting the
       // stroke- and fill-settings within the image-style. Instead, a new image-style
       // has to be created.
