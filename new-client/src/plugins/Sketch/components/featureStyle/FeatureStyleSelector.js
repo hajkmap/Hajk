@@ -1,6 +1,12 @@
 import React from "react";
-import { Grid, Typography, TextField } from "@mui/material";
-import { STROKE_DASHES } from "plugins/Sketch/constants";
+import { Grid, Typography, TextField, IconButton, Box } from "@mui/material";
+import ToolTip from "@mui/material/Tooltip";
+import RestartAltIcon from "@mui/icons-material/RestartAlt";
+import {
+  STROKE_DASHES,
+  DEFAULT_DRAW_STYLE_SETTINGS,
+  DEFAULT_TEXT_STYLE_SETTINGS,
+} from "plugins/Sketch/constants";
 
 import FeatureStyleAccordion from "./FeatureStyleAccordion";
 import StrokeTypeSelector from "./StrokeTypeSelector";
@@ -20,6 +26,16 @@ export default function FeatureStyleSelector(props) {
       strokeType: strokeType,
       lineDash: lineDash,
     });
+  };
+
+  // Reset the draw-style to the default values.
+  const resetDrawStyle = () => {
+    props.setDrawStyle(DEFAULT_DRAW_STYLE_SETTINGS);
+  };
+
+  // Reset the text-style to the default values.
+  const resetTextStyle = () => {
+    props.setTextStyle(DEFAULT_TEXT_STYLE_SETTINGS);
   };
 
   // We need a handler that can update the text-size setting
@@ -240,8 +256,39 @@ export default function FeatureStyleSelector(props) {
       {props.activeDrawType === "Text" && renderTextSizeSelector()}
       {props.activeDrawType === "Circle" && renderCircleRadiusSelector()}
       <Grid item xs={12} style={{ marginTop: 16 }}>
-        <Grid item xs={12} style={{ marginBottom: 4 }}>
-          <Typography align="center">Utseende</Typography>
+        <Grid item xs={12} style={{ marginBottom: 6 }}>
+          <Box
+            sx={{
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+            }}
+          >
+            <Typography sx={{ flex: 1, textAlign: "center", ml: 5 }}>
+              Utseende
+            </Typography>
+
+            <ToolTip
+              disableInteractive
+              title="Återställ utseende till standardinställningar"
+            >
+              <IconButton
+                sx={{ mr: 1 }}
+                size="small"
+                onClick={
+                  props.activeDrawType === "Text"
+                    ? resetTextStyle
+                    : resetDrawStyle
+                }
+              >
+                <RestartAltIcon
+                  sx={{
+                    transform: "rotate(-60deg)",
+                  }}
+                />
+              </IconButton>
+            </ToolTip>
+          </Box>
         </Grid>
         <Grid item xs={12}>
           {renderColorSelectors()}
