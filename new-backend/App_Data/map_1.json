@@ -1,16 +1,16 @@
 {
-  "version": "3.9.0",
+  "version": null,
   "projections": [
     {
       "code": "EPSG:3006",
       "definition": "+proj=utm +zone=33 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs",
-      "extent": [181896.33, 6101648.07, 864416, 7689478.3],
+      "extent": [181896.33, 6101648.07, 864416.0, 7689478.3],
       "units": null
     },
     {
       "code": "http://www.opengis.net/gml/srs/epsg.xml#3006",
       "definition": "+proj=utm +zone=33 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs",
-      "extent": [181896.33, 6101648.07, 864416, 7689478.3],
+      "extent": [181896.33, 6101648.07, 864416.0, 7689478.3],
       "units": null
     },
     {
@@ -180,21 +180,21 @@
             "visibleAtStart": true,
             "drawOrder": 0,
             "visibleForGroups": null,
-            "infobox": null
+            "infobox": ""
           },
           {
             "id": "2",
             "visibleAtStart": false,
             "drawOrder": 0,
             "visibleForGroups": null,
-            "infobox": null
+            "infobox": ""
           },
           {
             "id": "3",
             "visibleAtStart": false,
             "drawOrder": 0,
             "visibleForGroups": null,
-            "infobox": null
+            "infobox": ""
           }
         ],
         "groups": [
@@ -210,14 +210,14 @@
                 "visibleAtStart": false,
                 "drawOrder": 3,
                 "visibleForGroups": null,
-                "infobox": null
+                "infobox": ""
               },
               {
                 "id": "8",
                 "visibleAtStart": false,
                 "drawOrder": 3,
                 "visibleForGroups": null,
-                "infobox": null
+                "infobox": ""
               }
             ],
             "groups": []
@@ -234,10 +234,41 @@
                 "visibleAtStart": true,
                 "drawOrder": 4,
                 "visibleForGroups": null,
-                "infobox": null
+                "infobox": ""
               }
             ],
             "groups": []
+          }
+        ],
+        "quickLayersPresets": [
+          {
+            "id": "ac122e3f-8720-4b66-a780-5bd6ca19c3de",
+            "title": "Exempel",
+            "author": "Hajk",
+            "description": "Beskrivning",
+            "keywords": ["Nyckelord"],
+            "layers": [
+              {
+                "id": "1352",
+                "visible": true,
+                "subLayers": [],
+                "opacity": 1.0,
+                "drawOrder": 4
+              },
+              {
+                "id": "1",
+                "visible": true,
+                "subLayers": [],
+                "opacity": 1.0,
+                "drawOrder": 0
+              }
+            ],
+            "metadata": {
+              "savedAt": "",
+              "numberOfLayers": 2,
+              "title": "Exempel",
+              "description": "Beskrivning"
+            }
           }
         ],
         "active": true,
@@ -247,13 +278,25 @@
         "backgroundSwitcherWhite": true,
         "enableOSM": true,
         "showBreadcrumbs": true,
+        "showDrawOrderView": true,
+        "showFilter": true,
+        "showQuickAccess": true,
+        "enableSystemLayersSwitch": false,
+        "lockDrawOrderBaselayer": true,
+        "drawOrderViewInfoText": "Här kan du ändra ritordning på tända lager i kartan. Dra lagret upp eller ner i listan och släpp på önskad plats.",
+        "enableQuickAccessTopics": true,
+        "quickAccessTopicsInfoText": "Här kan du ladda färdiga teman till snabbåtkomst. Teman innehåller tända och släckta lager, samt bakgrund.",
+        "enableUserQuickAccessFavorites": true,
+        "userQuickAccessFavoritesInfoText": "Här kan du hantera och redigera dina sparade favoriter.",
+        "enableTransparencySlider": true,
+        "minMaxZoomAlertOnToggleOnly": false,
+        "cqlFilterVisible": false,
         "target": "left",
         "position": "left",
-        "width": 0,
-        "height": 0,
+        "width": "",
+        "height": "",
         "title": "Lagerhanterare",
         "description": "Välj vad du vill visa i kartan.",
-        "enableTransparencySlider": true,
         "dropdownThemeMaps": true,
         "themeMapHeaderCaption": "Standardkartan",
         "instruction": "",
@@ -264,12 +307,32 @@
     {
       "type": "infoclick",
       "options": {
-        "target": "",
-        "displayPopup": false,
-        "markerImg": "/marker.png",
+        "title": "Infoclick",
+        "position": "right",
+        "linksColor": "primary",
+        "linksUnderline": "always",
+        "width": 400,
+        "height": 300,
         "anchor": [0.5, 1],
-        "imgSize": [32, 32],
-        "popupOffsetY": 0,
+        "scale": 0.15,
+        "src": "marker.png",
+        "strokeColor": {
+          "r": 200,
+          "b": 0,
+          "g": 0,
+          "a": 0.7
+        },
+        "strokeWidth": 4,
+        "fillColor": {
+          "r": 255,
+          "b": 0,
+          "g": 0,
+          "a": 0.1
+        },
+        "allowDangerousHtml": true,
+        "useNewInfoclick": false,
+        "useNewPlaceholderMatching": false,
+        "transformLinkUri": true,
         "visibleForGroups": []
       },
       "index": 2
@@ -312,7 +375,7 @@
         "instruction": "",
         "visibleForGroups": []
       },
-      "index": 7
+      "index": 6
     },
     {
       "type": "search",
@@ -323,15 +386,20 @@
             "visibleForGroups": []
           }
         ],
+        "selectedSources": [],
         "visibleForGroups": [],
         "maxResultsPerDataset": 100,
         "anchor": ["", ""],
         "scale": "",
         "markerImg": "",
         "delayBeforeAutoSearch": 300,
+        "disableAutocomplete": false,
+        "disableSearchCombinations": false,
         "searchBarPlaceholder": "Sök...",
         "autocompleteWildcardAtStart": false,
+        "autofocusOnStart": false,
         "enablePolygonSearch": true,
+        "showCorrespondingWMSLayers": false,
         "enableRadiusSearch": true,
         "enableSelectSearch": true,
         "enableExtentSearch": true,
@@ -343,7 +411,14 @@
         "enableLabelOnHighlight": true,
         "enableSelectedFeaturesCollection": true,
         "showResultFeaturesInMap": true,
+        "searchInVisibleLayers": false,
+        "wildcardAtStart": false,
+        "wildcardAtEnd": true,
+        "matchCase": false,
+        "activeSpatialFilter": "intersects",
+        "showResultsLimitReachedWarning": true,
         "enableFeatureToggler": true,
+        "fitToResultMaxZoom": -1,
         "drawFillColor": "rgba(255,255,255,0.07)",
         "drawStrokeColor": "rgba(74,74,74,0.5)",
         "displayFillColor": "rgba(74,144,226,0.15)",
@@ -357,7 +432,7 @@
         "highlightFillColor": "rgba(245,166,35,0.7)",
         "highlightStrokeColor": "rgba(245,166,35,0.8)"
       },
-      "index": 11
+      "index": 7
     },
     {
       "type": "routing",
@@ -367,16 +442,17 @@
         "instruction": "",
         "visibleForGroups": []
       },
-      "index": 12
+      "index": 8
     },
     {
       "type": "location",
       "options": {
         "target": "control",
         "position": "right",
+        "visibleAtStart": false,
         "visibleForGroups": []
       },
-      "index": 13
+      "index": 9
     },
     {
       "type": "preset",
@@ -413,7 +489,7 @@
         ],
         "visibleForGroups": []
       },
-      "index": 14
+      "index": 10
     },
     {
       "type": "coordinates",
@@ -434,7 +510,7 @@
         ],
         "visibleForGroups": []
       },
-      "index": 15
+      "index": 11
     },
     {
       "type": "bookmarks",
@@ -443,7 +519,7 @@
         "instruction": "",
         "visibleForGroups": []
       },
-      "index": 16
+      "index": 12
     },
     {
       "type": "buffer",
@@ -455,28 +531,45 @@
         "notFeatureLayers": [],
         "visibleForGroups": []
       },
-      "index": 17
+      "index": 13
     },
     {
       "type": "print",
       "options": {
-        "date": "Utskriftsdatum: {date}",
-        "target": "left",
-        "position": "left",
-        "scales": "200, 400, 1000, 2000, 5000, 10000, 25000, 50000, 100000, 200000, 400000, 800000, 1000000, 5000000, 10000000",
-        "logo": "/logoLight.png",
-        "northArrow": "/north_arrow.png",
+        "target": "toolbar",
+        "copyright": "",
+        "disclaimer": "",
+        "date": "",
+        "scales": "200, 400, 1000, 2000, 5000, 10000, 25000, 50000, 100000, 200000",
+        "scaleMeters": "10, 10, 20, 40, 60, 100, 100, 300, 600, 2000, 4000, 8000, 10000, 160000",
+        "logo": "logoLight.png",
+        "logoMaxWidth": 40,
+        "northArrowMaxWidth": 10,
+        "dpis": "72, 150, 300",
+        "paperFormats": "A2, A3, A4",
+        "northArrow": "",
+        "useMargin": false,
+        "useTextIconsInMargin": false,
+        "mapTextColor": "#000000",
         "instruction": "",
         "visibleAtStart": false,
-        "visibleForGroups": []
+        "visibleForGroups": [],
+        "includeLogo": true,
+        "logoPlacement": "topRight",
+        "includeScaleBar": true,
+        "scaleBarPlacement": "bottomLeft",
+        "includeNorthArrow": true,
+        "northArrowPlacement": "topLeft",
+        "includeImageBorder": false,
+        "useCustomTileLoaders": true,
+        "maxTileSize": 4096
       },
-      "index": 2
+      "index": 14
     },
     {
       "type": "documenthandler",
-      "index": 0,
       "options": {
-        "title": "Visa informationsruta",
+        "title": "Dokumenthanterare",
         "target": "hidden",
         "showScrollButtonLimit": 400,
         "dynamicImportUrls": {
@@ -489,20 +582,31 @@
         "height": "90vh",
         "searchImplemented": true,
         "enablePrint": true,
+        "pdfLinks": [
+          {
+            "name": "",
+            "link": ""
+          }
+        ],
         "closePanelOnMapLinkOpen": false,
         "displayLoadingOnMapLinkOpen": false,
         "documentOnStart": "",
         "drawerTitle": "",
-        "drawerButtonTitle": "Meny",
+        "drawerButtonTitle": "",
+        "drawerButtonIcon": "",
+        "resizingEnabled": false,
+        "draggingEnabled": false,
         "tableOfContents": {
           "active": false,
           "expanded": false,
+          "printMode": "none",
           "chapterLevelsToShow": 2,
+          "chapterLevelsToShowForPrint": 2,
           "title": "Innehållsförteckning"
         },
         "defaultDocumentColorSettings": {
-          "textAreaBackgroundColor": "#ccc",
-          "textAreaDividerColor": "#6A0DAD"
+          "textAreaBackgroundColor": "",
+          "textAreaDividerColor": ""
         },
         "menuConfig": {
           "menu": [
@@ -534,7 +638,8 @@
             }
           ]
         }
-      }
+      },
+      "index": 15
     }
   ],
   "map": {
@@ -542,32 +647,55 @@
     "center": [576357, 6386049],
     "title": "Hajk 3",
     "projection": "EPSG:3006",
-    "zoom": 1.33,
+    "zoom": 1,
     "maxZoom": 8,
     "minZoom": 0,
-    "resolutions": [2048, 1024, 512, 256, 128, 64, 32, 16, 8],
-    "origin": [0, 0],
-    "extent": [-1200000, 4700000, 2600000, 8500000],
+    "resolutions": [2048.0, 1024.0, 512.0, 256.0, 128.0, 64.0, 32.0, 16.0, 8.0],
+    "extraPrintResolutions": [],
+    "origin": [0.0, 0.0],
+    "extent": [-1200000.0, 4700000.0, 2600000.0, 8500000.0],
     "constrainOnlyCenter": false,
     "constrainResolution": false,
-    "logo": "/logoLight.png",
+    "constrainResolutionMobile": false,
+    "enableDownloadLink": false,
+    "enableAppStateInHash": false,
+    "logo": "logoLight.png",
+    "logoLight": "logoLight.png",
+    "logoDark": "logoDark.png",
     "geoserverLegendOptions": "",
     "mapselector": false,
-    "mapcleaner": false,
-    "showUserAvatar": false,
+    "mapcleaner": true,
+    "mapresetter": false,
     "drawerVisible": false,
-    "drawerPermanent": false,
     "drawerVisibleMobile": false,
-    "activeDrawerOnStart": "plugins",
-    "showThemeToggler": true,
+    "drawerPermanent": false,
+    "drawerStatic": false,
+    "activeDrawerOnStart": null,
     "colors": {
       "primaryColor": "#333333",
-      "secondaryColor": "#ffa000",
+      "secondaryColor": "#ffffff",
       "preferredColorScheme": "user"
     },
     "defaultCookieNoticeMessage": "Vi använder cookies för att följa upp användandet och ge en bra upplevelse av kartan. Du kan blockera cookies i webbläsaren men då visas detta meddelande igen.",
     "defaultCookieNoticeUrl": "https://pts.se/sv/bransch/regler/lagar/lag-om-elektronisk-kommunikation/kakor-cookies/",
     "crossOrigin": "anonymous",
+    "showCookieNotice": false,
+    "cookieUse3dPart": false,
+    "showThemeToggler": false,
+    "showUserAvatar": false,
+    "altShiftDragRotate": false,
+    "onFocusOnly": false,
+    "doubleClickZoom": true,
+    "keyboard": false,
+    "mouseWheelZoom": true,
+    "shiftDragZoom": true,
+    "dragPan": true,
+    "pinchRotate": false,
+    "pinchZoom": false,
+    "zoomDelta": false,
+    "zoomDuration": null,
+    "linkInDrawer": null,
     "showRecentlyUsedPlugins": false
-  }
+  },
+  "analytics": null
 }
