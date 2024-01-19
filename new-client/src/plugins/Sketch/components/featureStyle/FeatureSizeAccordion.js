@@ -30,14 +30,22 @@ const StrokeSizeSlider = ({ radius, handleRadiusChange }) => {
         <Slider
           sx={{ maxWidth: "170px", marginLeft: "12px" }}
           size="small"
-          min={6}
-          max={30}
+          min={2}
+          max={22}
           value={radius}
           onChange={handleRadiusChange}
           marks={[
-            { value: 6, label: "Liten" },
-            { value: 18, label: "Mellan" },
-            { value: 30, label: "Stor" },
+            { value: 2, label: "Liten" },
+            { value: 4 },
+            { value: 6 },
+            { value: 8 },
+            { value: 10 },
+            { value: 12, label: "Mellan" },
+            { value: 14 },
+            { value: 16 },
+            { value: 18 },
+            { value: 20 },
+            { value: 22, label: "Stor" },
           ]}
           step={null}
         />

@@ -123,8 +123,21 @@ class SketchModel {
 
   // Returns the draw-style-settings stored in LS, or the default draw-style-settings.
   getDrawStyleSettings = () => {
+    // Retrieve data from local storage using a helper method
     const inStorage = LocalStorageHelper.get(this.#storageKey);
-    return inStorage["drawStyleSettings"] || DEFAULT_DRAW_STYLE_SETTINGS;
+    // Check if inStorage and inStorage.drawStyleSettings are truthy
+    return inStorage && inStorage.drawStyleSettings
+      ? {
+          // Spread all properties from inStorage.drawStyleSettings
+          ...inStorage.drawStyleSettings,
+          // Set the 'radius' property to either the existing value in inStorage.drawStyleSettings
+          // or use the default value from DEFAULT_DRAW_STYLE_SETTINGS if it's undefined
+          radius:
+            inStorage.drawStyleSettings.radius ??
+            DEFAULT_DRAW_STYLE_SETTINGS.radius,
+        }
+      : // If data is not present, return default settings
+        DEFAULT_DRAW_STYLE_SETTINGS;
   };
 
   // Returns the text-style-settings stored in LS, or the default text-style-settings.
