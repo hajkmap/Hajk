@@ -130,11 +130,8 @@ class SketchModel {
       ? {
           // Spread all properties from inStorage.drawStyleSettings
           ...inStorage.drawStyleSettings,
-          // Set the 'radius' property to either the existing value in inStorage.drawStyleSettings
-          // or use the default value from DEFAULT_DRAW_STYLE_SETTINGS if it's undefined
-          radius:
-            inStorage.drawStyleSettings.radius ??
-            DEFAULT_DRAW_STYLE_SETTINGS.radius,
+          // use the default value from DEFAULT_DRAW_STYLE_SETTINGS if it's undefined
+          radius: DEFAULT_DRAW_STYLE_SETTINGS.radius,
         }
       : // If data is not present, return default settings
         DEFAULT_DRAW_STYLE_SETTINGS;
