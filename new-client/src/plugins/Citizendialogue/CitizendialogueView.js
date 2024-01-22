@@ -275,6 +275,8 @@ function CitizendialogueView(props) {
       })
   );
 
+  editModel.currentQuestionName = currentQuestionName;
+
   const rootMap = useRef(new Map());
   React.useEffect(() => {
     const containers = document.querySelectorAll(".editViewContainer");

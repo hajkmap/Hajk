@@ -194,18 +194,13 @@ class EditModel {
       const wktFormatter = new WKT();
 
       const allFeatures = this.vectorSource.getFeatures();
-      console.log("All features:", allFeatures);
 
       allFeatures.forEach((feature) => {
-        console.log("Current feature modification:", feature.modification);
-
         const featureData = {
           surveyQuestion: feature.get("SURVEYQUESTION"),
           surveyAnswerId: feature.get("SURVEYANSWERID"),
           wktGeometry: wktFormatter.writeGeometry(feature.getGeometry()),
         };
-
-        console.log("Feature data:", featureData);
 
         switch (feature.modification) {
           case "added":
@@ -214,12 +209,7 @@ class EditModel {
             break;
           case "updated":
             // Updates
-            const indexToUpdate = this.newMapData.findIndex(
-              (f) => f.surveyQuestion === featureData.surveyQuestion
-            );
-            if (indexToUpdate !== -1) {
-              this.newMapData[indexToUpdate] = featureData;
-            }
+
             break;
           case "removed":
             // Remove
@@ -234,8 +224,6 @@ class EditModel {
             break;
         }
       });
-
-      console.log("newMapData after processing:", this.newMapData);
 
       done();
       return;
@@ -411,9 +399,11 @@ class EditModel {
     if (this.editSource.id === "simulated") {
       const wktFormatter = new WKT();
 
-      // Filter saved features based on SURVEYANSWERID
+      // Filter saved features based on SURVEYANSWERID and SURVEYQUESTION
       const filteredFeatures = this.newMapData.filter(
-        (feature) => feature.surveyAnswerId === this.surveyJsData.surveyAnswerId
+        (feature) =>
+          feature.surveyAnswerId === this.surveyJsData.surveyAnswerId &&
+          feature.surveyQuestion === this.currentQuestionName
       );
 
       const features = filteredFeatures.map((savedFeature) => {
@@ -446,8 +436,10 @@ class EditModel {
       // Features filtered by SURVEYANSWERID to show in map
       const filteredFeatures = features.filter((feature) => {
         const surveyAnswerId = String(feature.get("SURVEYANSWERID") || "");
+        const surveyQuestion = String(feature.get("SURVEYQUESTION") || "");
         return (
-          surveyAnswerId.trim() === this.surveyJsData.surveyAnswerId.trim()
+          surveyAnswerId.trim() === this.surveyJsData.surveyAnswerId.trim() &&
+          surveyQuestion.trim() === this.currentQuestionName.trim()
         );
       });
 
