@@ -416,21 +416,32 @@ class DrawModel {
   };
 
   #setFeatureZIndex = (feature, zIndex) => {
-    let style = feature.getStyle();
-    style = Array.isArray(style) ? style[0] : style;
-    if (style) {
-      style.setZIndex(zIndex);
-      feature.setStyle(style);
+    let styles = feature.getStyle();
+
+    if (styles) {
+      styles = Array.isArray(styles) ? styles : [styles];
+      styles.map((style) => {
+        style.setZIndex(zIndex);
+        return style;
+      });
+
+      feature.setStyle(styles);
     }
   };
 
   #getFeatureZIndex = (feature) => {
-    let style = feature.getStyle();
-    if (style) {
-      style = Array.isArray(style) ? style[0] : style;
-      return style.getZIndex() || 0;
+    let styles = feature.getStyle();
+    let zIndex = 0;
+    if (styles) {
+      styles = Array.isArray(styles) ? styles : [styles];
+      styles.forEach((style) => {
+        let zi = style.getZIndex() || 0;
+        if (zi > zIndex) {
+          zIndex = zi;
+        }
+      });
     }
-    return 0;
+    return zIndex;
   };
 
   // Returns the style that should be used on the drawn features
@@ -641,6 +652,14 @@ class DrawModel {
         })
       );
     });
+
+    const zIndex = this.#getFeatureZIndex(feature);
+    styles.map((style) => {
+      // make sure we get the correct zIndex for all styles.
+      style.setZIndex(zIndex);
+      return style;
+    });
+
     // And finally return the style-array.
     return styles;
   };
@@ -1102,7 +1121,12 @@ class DrawModel {
       // If no feature was supplied, or if we're unable to extract the style,
       // we return null.
       if (!featureStyle) {
-        return { fillStyle: null, strokeStyle: null, imageStyle: null };
+        return {
+          fillStyle: null,
+          strokeStyle: null,
+          imageStyle: null,
+          zIndex: 0,
+        };
       }
       // If we were able to extract the style we can continue by extracting
       // the fill- and stroke-style.
@@ -1906,13 +1930,9 @@ class DrawModel {
       if (extractedStyle) {
         // apply style
         let style = this.#getFeatureStyle(feature, extractedStyle);
-        if (!style.getZIndex()) {
-          // getZIndex() returns 0 if not set
-          // force a zIndex if missing, for later use.
-          style.setZIndex(this.#lastZIndex);
-          this.#lastZIndex++;
-        }
         feature.setStyle(style);
+        // Set correct zIndex or fallback to 0.
+        this.#setFeatureZIndex(feature, extractedStyle.zIndex || 0);
       }
 
       // When we're done styling we can add the feature.
