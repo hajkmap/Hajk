@@ -19,7 +19,7 @@ function SurveyHandler(props) {
   const [survey, setSurvey] = useState({
     title: "ny_enkät",
     language: "sv",
-    logo: "https://www.orebro.se/images/18.242f1fb1556288bfbf1594c/1467796106738/Orebro_se-logo.png",
+    logo: "",
     logoWidth: 60,
     logoHeight: 60,
     logoPosition: "left",
@@ -266,6 +266,19 @@ function SurveyHandler(props) {
     }
 };
 
+  const emptySurvey = {
+    title: "ny_enkät",
+    language: "sv",
+    logo: "",
+    logoWidth: 60,
+    logoHeight: 60,
+    logoPosition: "left",
+    pages: [{ questions: [] }]
+  };
+
+  const newSurvey = () => {
+    setSurvey(emptySurvey);
+  }
 
   return (
     <div>
@@ -283,6 +296,7 @@ function SurveyHandler(props) {
         
     </select>
         </Grid>
+        <Grid item><Button variant="contained" color="primary" onClick={newSurvey}>Ny enkät</Button></Grid>
         </Grid>
       <Grid container spacing={2} style={{ marginBottom: '50px' }}>
         <Grid item>
