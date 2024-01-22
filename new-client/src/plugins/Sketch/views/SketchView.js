@@ -9,7 +9,6 @@ import {
 } from "../constants";
 // Components
 import ActivityMenu from "../components/ActivityMenu";
-import LocalStorageHelper from "utils/LocalStorageHelper";
 // Views
 import AddView from "./AddView";
 import SaveView from "./SaveView";
