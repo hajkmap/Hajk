@@ -453,7 +453,10 @@ class ConfigServiceV2 {
     for (const toolRef in mapConfig.tools) {
       const options = mapConfig.tools[toolRef].options;
       for (const optionRef in options) {
-        const groups = options[optionRef].visibleForGroups;
+        const groups =
+          options[optionRef] && typeof options[optionRef] === "object"
+            ? options[optionRef]?.visibleForGroups
+            : null;
         if (groups && groups.length > 0) {
           const accessGranted = groups.some((group) => {
             if (userGroups.indexOf(group) > -1) {
