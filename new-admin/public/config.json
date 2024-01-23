@@ -107,6 +107,7 @@
     { "name": "edit", "title": "Redigeringstjänster" },
     { "name": "mapsettings", "title": "Kartor" },
     { "name": "informative", "title": "Dokumenthanterare" },
-    { "name": "documenthandler", "title": "Dokumenthanterare 2.0" }
+    { "name": "documenthandler", "title": "Dokumenthanterare 2.0" },
+    { "name": "surveyhandler", "title": "Enkäthanterare" }
   ]
 }
