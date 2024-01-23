@@ -99,7 +99,7 @@ class SurveyService {
    * @returns
    * @memberof SurveyService
    */
-  async saveByNameSurvey(file, body) {
+  async saveByNameSurveyAnswer(file, body) {
     try {
       file += "Answers.json";
       const pathToFile = path.join(

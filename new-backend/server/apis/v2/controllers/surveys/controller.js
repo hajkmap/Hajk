@@ -34,15 +34,17 @@ export class Controller {
     });
   }
 
-  saveByNameSurvey(req, res) {
-    SurveyService.saveByNameSurvey(req.params.surveyId, req.body).then((r) => {
-      if (r && !r.error) {
-        res.status(200).json({ message: "File saved" }); // Send back a JSON response
-        ael.info(
-          `${res.locals.authUser} saved document ${req.params.name}.json`
-        );
-      } else res.status(500).json({ error: r.error.message }); // Send back a JSON response
-    });
+  saveByNameSurveyAnswer(req, res) {
+    SurveyService.saveByNameSurveyAnswer(req.params.surveyId, req.body).then(
+      (r) => {
+        if (r && !r.error) {
+          res.status(200).json({ message: "File saved" }); // Send back a JSON response
+          ael.info(
+            `${res.locals.authUser} saved document ${req.params.name}.json`
+          );
+        } else res.status(500).json({ error: r.error.message }); // Send back a JSON response
+      }
+    );
   }
 }
 export default new Controller();
