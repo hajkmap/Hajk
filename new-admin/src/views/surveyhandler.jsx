@@ -72,6 +72,7 @@ function SurveyHandler(props) {
         <MenuItem value="checkbox">Flerval</MenuItem>
         <MenuItem value="radiogroup">Enkelval (radioknapp)</MenuItem>
         <MenuItem value="rating">Betyg</MenuItem>
+        <MenuItem value="comment">Kommentar</MenuItem>
         <MenuItem value="geometry">Alla geometriverktyg</MenuItem>
         <MenuItem value="geometrypoint">Geometriverktyget punkt</MenuItem>
         <MenuItem value="geometrylinestring">Geometriverktyget linje</MenuItem>
