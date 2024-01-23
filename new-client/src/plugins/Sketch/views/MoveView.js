@@ -1,6 +1,18 @@
 import React from "react";
-import { Button, Grid, Paper, TextField } from "@mui/material";
-import { Tooltip, Typography, Switch } from "@mui/material";
+import {
+  Button,
+  Grid,
+  InputAdornment,
+  Paper,
+  TextField,
+  OutlinedInput,
+  Tooltip,
+  Typography,
+  Switch,
+} from "@mui/material";
+
+import RotateRightIcon from "@mui/icons-material/RotateRight";
+import RotateLeftIcon from "@mui/icons-material/RotateLeft";
 import Information from "../components/Information";
 
 const TranslateToggler = ({ translateEnabled, setTranslateEnabled }) => {
@@ -139,6 +151,109 @@ const FeatureMoveSelector = (props) => {
   );
 };
 
+// Handles the Rotation functionality
+const FeatureRotateSelector = (props) => {
+  let rotationTimeout = 0;
+
+  // Force input to 0-360 degrees.
+  const handleRotationChange = (e) => {
+    let degrees = Math.floor(e.target.value);
+    degrees = degrees < 1 ? 1 : degrees > 360 ? 360 : degrees;
+    props.setRotationDegrees(degrees);
+  };
+
+  // Handle both single click rotation and continuous rotation
+  const handleRotationClick = (clockwise = true, continuous = false) => {
+    props.drawModel.rotateSelectedFeatures(props.rotationDegrees, clockwise);
+    if (continuous) {
+      rotationTimeout = setTimeout(() => {
+        handleRotationClick(clockwise, true);
+      }, 60);
+    } else {
+      handleMouseUp();
+    }
+  };
+
+  // If you keep the mouse down for a while, continuous rotation begins.
+  const handleMouseDown = (clockwise) => {
+    // Add window event to handle mouseUp outside the button.
+    window.addEventListener("mouseup", handleMouseUp);
+
+    // Trigger continuous rotation
+    rotationTimeout = setTimeout(() => {
+      handleRotationClick(clockwise, true);
+    }, 800);
+  };
+
+  // Make sure continuous rotation is stopped and remove the added window event.
+  const handleMouseUp = () => {
+    clearTimeout(rotationTimeout);
+    window.removeEventListener("mouseup", handleMouseUp);
+  };
+
+  return (
+    <Paper style={{ padding: 8, marginTop: 8 }}>
+      <Grid container item justifyContent="center" alignItems="center">
+        <Grid item xs={12} style={{ marginBottom: 16 }}>
+          <Typography variant="body2" align="center">
+            Rotera
+          </Typography>
+        </Grid>
+
+        <Grid item xs={6} style={{ paddingRight: "4px" }}>
+          <Tooltip
+            disableInteractive
+            title="Ange hur många grader du ska rotera objekten."
+          >
+            <OutlinedInput
+              variant="outlined"
+              fullWidth
+              type="number"
+              size="small"
+              // inputProps={{ min: 1, max: 360 }}
+              endAdornment={<InputAdornment position="end">°</InputAdornment>}
+              value={props.rotationDegrees}
+              onChange={handleRotationChange}
+            />
+          </Tooltip>
+        </Grid>
+        <Grid item xs={3}>
+          <Button
+            variant="contained"
+            fullWidth
+            size="small"
+            style={{ minWidth: "initial" }}
+            onClick={() => {
+              handleRotationClick(false);
+            }}
+            onMouseDown={() => {
+              handleMouseDown(false);
+            }}
+          >
+            <RotateLeftIcon />
+          </Button>
+        </Grid>
+        <Grid item xs={3}>
+          <Button
+            variant="contained"
+            fullWidth
+            size="small"
+            style={{ minWidth: "initial" }}
+            onClick={() => {
+              handleRotationClick(true);
+            }}
+            onMouseDown={() => {
+              handleMouseDown(true);
+            }}
+          >
+            <RotateRightIcon />
+          </Button>
+        </Grid>
+      </Grid>
+    </Paper>
+  );
+};
+
 const MoveView = (props) => {
   // We're gonna need to keep track of the movement length and angle
   const [movementLength, setMovementLength] = React.useState(100);
@@ -147,6 +262,9 @@ const MoveView = (props) => {
   // can be used so that the user can disregard moves if they happened to move
   // something in the wrong direction.
   const [lastMoves, setLastMoves] = React.useState([]);
+
+  // Keep track of degrees for rotation tool.
+  const [rotationDegrees, setRotationDegrees] = React.useState(15);
   // Let's destruct some props
   const { drawModel, moveFeatures, translateEnabled, setTranslateEnabled } =
     props;
@@ -170,15 +288,22 @@ const MoveView = (props) => {
           setTranslateEnabled={setTranslateEnabled}
         />
         {moveFeatures.length > 0 && (
-          <FeatureMoveSelector
-            drawModel={drawModel}
-            lastMoves={lastMoves}
-            setLastMoves={setLastMoves}
-            movementLength={movementLength}
-            setMovementLength={setMovementLength}
-            movementAngle={movementAngle}
-            setMovementAngle={setMovementAngle}
-          />
+          <>
+            <FeatureMoveSelector
+              drawModel={drawModel}
+              lastMoves={lastMoves}
+              setLastMoves={setLastMoves}
+              movementLength={movementLength}
+              setMovementLength={setMovementLength}
+              movementAngle={movementAngle}
+              setMovementAngle={setMovementAngle}
+            />
+            <FeatureRotateSelector
+              drawModel={drawModel}
+              rotationDegrees={rotationDegrees}
+              setRotationDegrees={setRotationDegrees}
+            />
+          </>
         )}
       </Grid>
     </Grid>

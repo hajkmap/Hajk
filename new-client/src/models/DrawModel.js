@@ -13,6 +13,7 @@ import { getArea as getExtentArea, getCenter, getWidth } from "ol/extent";
 import { Feature } from "ol";
 import { handleClick } from "./Click";
 import { noModifierKeys, platformModifierKeyOnly } from "ol/events/condition";
+import { ROTATABLE_DRAW_TYPES } from "plugins/Sketch/constants";
 
 /*
  * A model supplying useful Draw-functionality.
@@ -2102,6 +2103,27 @@ class DrawModel {
         console.error(`Failed to translate selected features. Error: ${error}`);
       }
     });
+  };
+
+  rotateSelectedFeatures = (degrees, clockwise) => {
+    degrees = clockwise ? -degrees : degrees;
+
+    this.#selectInteraction
+      .getFeatures()
+      .getArray()
+      .filter((f) => {
+        return ROTATABLE_DRAW_TYPES.indexOf(f.get("DRAW_METHOD")) > -1;
+      })
+      .forEach((f) => {
+        try {
+          const geom = f.getGeometry();
+          const centerCoordinates = getCenter(geom.getExtent());
+          geom.rotate(degrees * (Math.PI / 180), centerCoordinates);
+          f.setGeometry(geom);
+        } catch (error) {
+          console.error(`Failed to rotate selected features. Error: ${error}`);
+        }
+      });
   };
 
   // Returns a clone of the supplied feature. Makes sure to clone both
