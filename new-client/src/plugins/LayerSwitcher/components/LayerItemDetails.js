@@ -125,8 +125,16 @@ function LayerItemDetails({
   const isQuickAccessEnabled = () => {
     return (
       layerItemDetails.layer.get("layerType") !== "base" &&
+      layerItemDetails.layer.get("layerType") !== "system" && // Exclude system layers
       subLayerIndex === null &&
       showQuickAccess
+    );
+  };
+
+  // Add a check for CQL filter visibility and exclude system layers
+  const isCqlFilterEnabled = () => {
+    return (
+      cqlFilterVisible && layerItemDetails.layer.get("layerType") !== "system" // Exclude system layers
     );
   };
 
@@ -308,7 +316,7 @@ function LayerItemDetails({
                 </Stack>
               </Box>
             ) : null}
-            {cqlFilterVisible && (
+            {isCqlFilterEnabled() && (
               <Box
                 sx={{
                   px: 2,

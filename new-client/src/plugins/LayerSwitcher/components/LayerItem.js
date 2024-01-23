@@ -314,16 +314,25 @@ export default function LayerItem({
   }, [visibleMinMaxZoomLayers, isGroupHidden, addValue, removeValue]);
 
   // Handles list item click
-  const handleLayerItemClick = () => {
+  const handleLayerItemClick = (e) => {
     // If a clickCallback is defined, call it.
     if (clickCallback) {
       clickCallback();
       return;
     }
 
+    // Handle system layers by showing layer details directly
+    if (layer.get("layerType") === "system") {
+      showLayerDetails(e);
+      return;
+    }
+
+    // Continue with existing functionality for non-system layers
     triggerZoomCheck(true, !layer.get("visible"));
 
+    // Toggle visibility for non-system layers
     if (layer.get("layerType") !== "system") {
+      // This check is technically redundant now but left for clarity
       layer.set("visible", !layer.get("visible"));
     }
   };
@@ -413,9 +422,9 @@ export default function LayerItem({
   };
 
   // Show layer details action
-  const showLayerDetails = (e) => {
+  const showLayerDetails = (e, specificLayer = layer) => {
     e.stopPropagation();
-    app.globalObserver.publish("setLayerDetails", { layer: layer });
+    app.globalObserver.publish("setLayerDetails", { layer: specificLayer });
   };
 
   const drawOrderItem = () => {
@@ -541,16 +550,15 @@ export default function LayerItem({
                   </Tooltip>
                 </IconButton>
               ) : null}
-              {layer.isFakeMapLayer !== true &&
-                layer.get("layerType") !== "system" && (
-                  <IconButton size="small" onClick={(e) => showLayerDetails(e)}>
-                    <KeyboardArrowRightOutlinedIcon
-                      sx={{
-                        color: (theme) => theme.palette.grey[500],
-                      }}
-                    ></KeyboardArrowRightOutlinedIcon>
-                  </IconButton>
-                )}
+              {layer.isFakeMapLayer !== true && (
+                <IconButton size="small" onClick={(e) => showLayerDetails(e)}>
+                  <KeyboardArrowRightOutlinedIcon
+                    sx={{
+                      color: (theme) => theme.palette.grey[500],
+                    }}
+                  ></KeyboardArrowRightOutlinedIcon>
+                </IconButton>
+              )}
             </ListItemSecondaryAction>
           </Box>
         </ListItemButton>
