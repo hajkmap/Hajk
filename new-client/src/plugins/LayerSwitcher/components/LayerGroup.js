@@ -40,6 +40,7 @@ class LayerGroup extends React.Component {
   componentDidMount() {
     this.setState({
       ...this.props.group,
+      expanded: this.props.group.isExpanded,
     });
     this.allLayers = this.props.app.getMap().getAllLayers();
   }
@@ -93,9 +94,10 @@ class LayerGroup extends React.Component {
     });
   };
 
-  handleChange = (panel) => (event, expanded) => {
+  handleChange = (panel) => (event, isExpanded) => {
     this.setState({
-      expanded: expanded ? panel : false,
+      expanded: isExpanded ? panel : false,
+      isExpanded: isExpanded,
     });
   };
 
@@ -282,6 +284,7 @@ class LayerGroup extends React.Component {
   }
 
   renderChildren() {
+    const { expanded } = this.state;
     return (
       <div>
         {this.props.group.layers.map((layer, i) => {
@@ -312,6 +315,17 @@ class LayerGroup extends React.Component {
         {this.renderLayerGroups()}
       </div>
     );
+  }
+
+  static getDerivedStateFromProps(nextProps, prevState) {
+    // Check if the isExpanded property has changed
+    if (nextProps.group.isExpanded !== prevState.isExpanded) {
+      return {
+        expanded: nextProps.group.isExpanded,
+        isExpanded: nextProps.group.isExpanded, // Keep a copy of isExpanded in state for comparison
+      };
+    }
+    return null;
   }
 
   render() {

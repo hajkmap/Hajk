@@ -104,6 +104,7 @@ class LayersSwitcherView extends React.PureComponent {
   addLayerNames = (data) => {
     data.forEach((item) => {
       item.isFiltered = true;
+      item.isExpanded = false;
       item.changeIndicator = new Date();
       if (item.layers) {
         item.layers.forEach((layer) => {
@@ -160,40 +161,42 @@ class LayersSwitcherView extends React.PureComponent {
 
   // Filter tree data
   filterTree = (node, filterText) => {
+    let foundInChild = false;
+
     if (
       filterText === "" ||
       node.name.toLocaleLowerCase().includes(filterText.toLocaleLowerCase())
     ) {
-      this.updateNode(node, true, false);
-      // Set all the nodes children to filtered = true
-      this.setChildrenFiltered(node, true);
-      return;
+      this.updateNode(node, true, false); // Update node and its children
+      foundInChild = true;
     } else {
-      this.updateNode(node, false, true);
+      this.updateNode(node, false, true); // Update node only
     }
 
     if (node.layers) {
-      node.layers.forEach((layer) => this.filterTree(layer, filterText));
-      if (node.layers.some((layer) => layer.isFiltered)) {
-        this.updateNode(node, true, true);
-      }
+      node.layers.forEach((layer) => {
+        foundInChild = this.filterTree(layer, filterText) || foundInChild;
+      });
     }
 
     if (node.groups) {
-      node.groups.forEach((group) => this.filterTree(group, filterText));
-      if (node.groups.some((group) => group.isFiltered)) {
-        this.updateNode(node, true, true);
-      }
+      node.groups.forEach((group) => {
+        foundInChild = this.filterTree(group, filterText) || foundInChild;
+      });
     }
 
     if (node.subLayers) {
-      node.subLayers.forEach((subLayer) =>
-        this.filterTree(subLayer, filterText)
-      );
-      if (node.subLayers.some((subLayer) => subLayer.isFiltered)) {
-        this.updateNode(node, true, true);
-      }
+      node.subLayers.forEach((subLayer) => {
+        foundInChild = this.filterTree(subLayer, filterText) || foundInChild;
+      });
     }
+
+    if (foundInChild) {
+      node.isFiltered = true; // Mark node as filtered if any child is filtered
+      node.isExpanded = true; // Expand the group if a child is filtered
+    }
+
+    return foundInChild;
   };
 
   setChildrenFiltered = (node, value) => {
@@ -305,14 +308,57 @@ class LayersSwitcherView extends React.PureComponent {
     );
   };
 
+  collapseAllGroups = () => {
+    const collapseGroups = (groups) => {
+      groups.forEach((group) => {
+        group.isExpanded = false;
+        if (group.groups && group.groups.length > 0) {
+          collapseGroups(group.groups);
+        }
+      });
+    };
+
+    collapseGroups(this.layerTree);
+  };
+
+  resetFilterStatus = (node) => {
+    node.isFiltered = true; // Mark node as filtered
+    node.isExpanded = false; // Collapse all groups by default
+
+    if (node.layers) {
+      node.layers.forEach((layer) => this.resetFilterStatus(layer));
+    }
+
+    if (node.groups) {
+      node.groups.forEach((group) => this.resetFilterStatus(group));
+    }
+
+    if (node.subLayers) {
+      node.subLayers.forEach((subLayer) => this.resetFilterStatus(subLayer));
+    }
+  };
+
+  // Call this method for each root node in the tree when the filter is cleared
+  if(filterCleared) {
+    this.layerTree.forEach((node) => this.resetFilterStatus(node));
+  }
+
   // Handles filter functionality
   handleFilterValueChange = debounce((value) => {
+    const filterCleared = value === "" && this.state.filterValue !== "";
+
     this.setState({
       filterValue: value,
     });
-    this.layerTree.forEach((item) => this.filterTree(item, value));
+
+    if (filterCleared) {
+      this.layerTree.forEach((node) => this.resetFilterStatus(node)); // Reset filter status for all nodes
+    } else {
+      this.layerTree.forEach((node) => this.filterTree(node, value)); // Apply filter
+    }
+
     this.setState({
-      treeData: this.layerTree,
+      treeData: [...this.layerTree], // Update treeData to trigger re-render
     });
   }, 200);
 
@@ -509,16 +555,22 @@ class LayersSwitcherView extends React.PureComponent {
               }
               layerGroupDetails={
                 <>
-                  {this.props.options.enableQuickAccessTopics && (
-                    <IconButton
-                      onClick={(e) =>
-                        this.handleLayerPackageToggle({ event: e })
-                      }
-                    >
-                      <Tooltip title="Teman">
+                  {this.props.options.enableQuickAccessTopics ? (
+                    <Tooltip title="Teman">
+                      <IconButton
+                        onClick={(e) =>
+                          this.handleLayerPackageToggle({ event: e })
+                        }
+                      >
                         <TopicOutlinedIcon fontSize="small"></TopicOutlinedIcon>
-                      </Tooltip>
-                    </IconButton>
+                      </IconButton>
+                    </Tooltip>
+                  ) : (
+                    <div style={{ display: "none" }}>
+                      <IconButton>
+                        <TopicOutlinedIcon fontSize="small"></TopicOutlinedIcon>
+                      </IconButton>
+                    </div>
                   )}
                   {this.props.options.enableUserQuickAccessFavorites && (
                     <Favorites
