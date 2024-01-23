@@ -254,9 +254,14 @@ function SurveyHandler(props) {
   };
 
   const saveSurvey = () => {
+    const surveyName = survey.title;
     const surveyJson = JSON.stringify(survey);
-    console.log(surveyJson);
+    
+    props.model.saveSurvey(surveyName, surveyJson, (response) => {
+        console.log('Survey saved successfully:', response);
+    });
   };
+
 
   const handleSurveySelection = (e) => {
     const selectedSurveyId = e.target.value;
@@ -287,6 +292,7 @@ function SurveyHandler(props) {
     
       <Grid container spacing={2} style={{ marginBottom: '50px' }}>
       <Grid item>
+      Välj en befintlig enkät: 
         <select onChange={handleSurveySelection}>
         <option></option>
         {availableSurveys.map((survey, index) => (
@@ -302,7 +308,7 @@ function SurveyHandler(props) {
       <Grid container spacing={2} style={{ marginBottom: '50px' }}>
         <Grid item>
           <TextField
-            label="Enkätens Titel"
+            label="Enkätens Titel/filnamn"
             value={survey.title}
             onChange={(e) => setSurvey({ ...survey, title: e.target.value })}
             style={{ marginRight: '10px' }}

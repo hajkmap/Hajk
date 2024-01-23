@@ -409,6 +409,30 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Error"
+  /surveys/{surveyId}:
+    put:
+      tags:
+        - Admin - Informative/DocumentHandler
+      parameters:
+        - name: name
+          in: path
+          description: Document to be saved
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: Return the saved document's body
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DocumentsList"
+        5XX:
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
   /mapconfig/layers:
     get:
       tags:

@@ -170,6 +170,35 @@ class SurveyService {
    * @returns
    * @memberof SurveyService
    */
+  async saveByNameSurvey(file, body) {
+    try {
+      file += ".json";
+      const pathToFile = path.join(process.cwd(), "App_Data", "surveys", file);
+
+      let json;
+      if (typeof body === "string") {
+        json = JSON.parse(body);
+      } else {
+        json = body;
+        logger.info("Received body is already an object, no need to parse it.");
+      }
+
+      const jsonString = JSON.stringify(json, null, 2);
+
+      await fs.promises.writeFile(pathToFile, jsonString);
+
+      return jsonString;
+    } catch (error) {
+      logger.error(`Error saving file "${file}": ${error.message}`);
+      return { error: error.message };
+    }
+  }
+
+  /**
+   * @summary
+   * @returns
+   * @memberof SurveyService
+   */
   async mailNodemailer(emailAddress, body, subject) {
     try {
       let transporterOptions = {

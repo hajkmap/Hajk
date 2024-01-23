@@ -33,6 +33,31 @@ var surveyHandler = Model.extend({
         console.error("Error loading survey:", error);
       });
   },
+
+  saveSurvey: function (surveyName, data, callback) {
+    const surveySaveUrl = this.get("config").url_surveys_save + surveyName;
+    const requestBody = data;
+
+    hfetch(surveySaveUrl, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: requestBody,
+    })
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error("Network response was not ok");
+        }
+        return response.json();
+      })
+      .then((responseData) => {
+        callback(responseData);
+      })
+      .catch((error) => {
+        console.error("Error saving or updating survey:", error);
+      });
+  },
 });
 
 export default surveyHandler;

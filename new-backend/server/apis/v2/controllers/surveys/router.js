@@ -8,4 +8,5 @@ export default express
   .get("/:name", controller.getByNameSurvey)
   .get("/answers/:name", controller.getByNameSurveyLoad)
   .put("/answers/:surveyId", controller.saveByNameSurveyAnswer)
+  .put("/:surveyId", controller.saveByNameSurvey)
   .use(restrictAdmin); // All routes that follow are admin-only!
