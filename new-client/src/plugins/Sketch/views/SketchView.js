@@ -256,7 +256,7 @@ const SketchView = (props) => {
   ]);
 
   // The current view depends on which tab the user has
-  // selected. Tab 0: The "create-view", Tab 1: The "save-upload-view"..
+  // selected. Tab 0: The "create-view", Tab 1: The "save-upload-view".
   const renderCurrentView = () => {
     // Let's check which activity we're supposed to render!
     switch (activityId) {
