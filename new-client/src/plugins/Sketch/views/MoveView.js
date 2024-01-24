@@ -210,7 +210,6 @@ const FeatureRotateSelector = (props) => {
               fullWidth
               type="number"
               size="small"
-              // inputProps={{ min: 1, max: 360 }}
               endAdornment={<InputAdornment position="end">°</InputAdornment>}
               value={props.rotationDegrees}
               onChange={handleRotationChange}

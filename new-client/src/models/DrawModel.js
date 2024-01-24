@@ -2105,7 +2105,9 @@ class DrawModel {
     });
   };
 
+  // Rotate the currently selected features
   rotateSelectedFeatures = (degrees, clockwise) => {
+    // Handle both CW and CCW rotation
     degrees = clockwise ? -degrees : degrees;
 
     this.#selectInteraction
@@ -2117,8 +2119,10 @@ class DrawModel {
       .forEach((f) => {
         try {
           const geom = f.getGeometry();
-          const centerCoordinates = getCenter(geom.getExtent());
-          geom.rotate(degrees * (Math.PI / 180), centerCoordinates);
+          // Lets use the center coordinate as anchor point when rotating
+          const centerCoordinate = getCenter(geom.getExtent());
+          // Convert to radians and rotate.
+          geom.rotate(degrees * (Math.PI / 180), centerCoordinate);
           f.setGeometry(geom);
         } catch (error) {
           console.error(`Failed to rotate selected features. Error: ${error}`);
