@@ -30,19 +30,24 @@ Hajk is built using **Material Design** components from the [Material UI](https:
 
 Hajk strictly enforces the use of **Git Feature Branch Workflow** as described in [this document](https://www.atlassian.com/git/tutorials/comparing-workflows/feature-branch-workflow).
 
+#### Pre-requirements
+
+**Create an issue on GitHub.** You will need the issue number to give your branch a good name in the steps that follow.
+
+#### Steps in `git`
 In short, developing a new feature, would look something like:
 
 1. Always fetch latest with `git fetch`.
 1. Make sure you are in the develop branch by `git checkout develop`.
 1. Make sure that you've pulled all latest changes with `git pull`.
-1. Create a new branch, let's say `feature/foobar`, by running `git checkout -b feature/foobar`
-1. Don't forget to set upstream so that your newly created branch is pushed to GitHub: `git push --set-upstream origin feature/foobar`
+1. Create a new branch and give it a name that relates to the issue you created on GitHub. E.g. if you created an issue called _"Add a blue button"_ and it has issue number #1234, your branch should be called `feature/1234-blue-button`. You create this branch  by running `git checkout -b feature/1234-blue-button`
+1. Don't forget to set upstream so that your newly created branch is pushed to GitHub: `git push --set-upstream origin feature/1234-blue-button`
 1. Code… :neckbeard:
 1. Regularly commit changes to your branch with `git commit -S -m "A good comment, can be multiline."`. (Note, the `-S` flag [signs your commit](https://help.github.com/en/articles/signing-commits), and signing commits is something you really should be doing.)
 1. Regularly push your changes to GitHub with `git push`
-1. Regularly merge changes from develop into your branch. That means that you will incorporate recent changes in develop and your local branch will stay up-to-date with latest developments. **This is the really important part.** You can do it like this: `git checkout develop && git fetch && git pull && git checkout feature/foobar && git merge develop`
+1. Regularly merge changes from develop into your branch. That means that you will incorporate recent changes in develop and your local branch will stay up-to-date with latest developments. **This is the really important part.** You can do it like this: `git checkout develop && git fetch && git pull && git checkout feature/1234-blue-button && git merge develop`
 1. When you're done coding, go to GitHub and create a new pull request. Make sure that you want to merge your branch into `develop`.
-1. Administrators overlooking the project will get notified when you create your PR, take a look at the code and if everything looks fine merge it into `develop` and delete your feature branch from GitHub. You will still have a copy of your feature branch locally, but it can be safely removed by running `git branch -d feature/foobar`.
+1. Administrators overlooking the project will get notified when you create your PR, take a look at the code and if everything looks fine merge it into `develop` and delete your feature branch from GitHub. You will still have a copy of your feature branch locally, but it can be safely removed by running `git branch -d feature/1234-blue-button`.
 
 ### Code standard
 

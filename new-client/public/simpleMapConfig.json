@@ -1,5 +1,5 @@
 {
-  "version": "1.0.0",
+  "version": "3.13.0-dev",
   "projections": [
     {
       "code": "EPSG:3006",
@@ -180,21 +180,21 @@
             "visibleAtStart": true,
             "drawOrder": 0,
             "visibleForGroups": null,
-            "infobox": ""
+            "infobox": null
           },
           {
             "id": "2",
             "visibleAtStart": false,
             "drawOrder": 0,
             "visibleForGroups": null,
-            "infobox": ""
+            "infobox": null
           },
           {
             "id": "3",
             "visibleAtStart": false,
             "drawOrder": 0,
             "visibleForGroups": null,
-            "infobox": ""
+            "infobox": null
           }
         ],
         "groups": [
@@ -210,17 +210,16 @@
                 "visibleAtStart": false,
                 "drawOrder": 3,
                 "visibleForGroups": null,
-                "infobox": ""
+                "infobox": null
               },
               {
                 "id": "8",
                 "visibleAtStart": false,
                 "drawOrder": 3,
                 "visibleForGroups": null,
-                "infobox": ""
+                "infobox": null
               }
-            ],
-            "groups": []
+            ]
           },
           {
             "id": "9938c969-590c-8683-435c-1ecaca271096",
@@ -234,41 +233,9 @@
                 "visibleAtStart": true,
                 "drawOrder": 4,
                 "visibleForGroups": null,
-                "infobox": ""
+                "infobox": null
               }
-            ],
-            "groups": []
-          }
-        ],
-        "quickLayersPresets": [
-          {
-            "id": "ac122e3f-8720-4b66-a780-5bd6ca19c3de",
-            "title": "Exempel",
-            "author": "Hajk",
-            "description": "Beskrivning",
-            "keywords": ["Nyckelord"],
-            "layers": [
-              {
-                "id": "1352",
-                "visible": true,
-                "subLayers": [],
-                "opacity": 1.0,
-                "drawOrder": 4
-              },
-              {
-                "id": "1",
-                "visible": true,
-                "subLayers": [],
-                "opacity": 1.0,
-                "drawOrder": 0
-              }
-            ],
-            "metadata": {
-              "savedAt": "",
-              "numberOfLayers": 2,
-              "title": "Exempel",
-              "description": "Beskrivning"
-            }
+            ]
           }
         ],
         "active": true,
@@ -278,25 +245,13 @@
         "backgroundSwitcherWhite": true,
         "enableOSM": true,
         "showBreadcrumbs": true,
-        "showDrawOrderView": true,
-        "showFilter": true,
-        "showQuickAccess": true,
-        "enableSystemLayersSwitch": false,
-        "lockDrawOrderBaselayer": true,
-        "drawOrderViewInfoText": "Här kan du ändra ritordning på tända lager i kartan. Dra lagret upp eller ner i listan och släpp på önskad plats.",
-        "enableQuickAccessTopics": true,
-        "quickAccessTopicsInfoText": "Här kan du ladda färdiga teman till snabbåtkomst. Teman innehåller tända och släckta lager, samt bakgrund.",
-        "enableUserQuickAccessFavorites": true,
-        "userQuickAccessFavoritesInfoText": "Här kan du hantera och redigera dina sparade favoriter.",
-        "enableTransparencySlider": true,
-        "minMaxZoomAlertOnToggleOnly": false,
-        "cqlFilterVisible": false,
         "target": "left",
         "position": "left",
-        "width": "",
-        "height": "",
+        "width": 0,
+        "height": 0,
         "title": "Lagerhanterare",
         "description": "Välj vad du vill visa i kartan.",
+        "enableTransparencySlider": true,
         "dropdownThemeMaps": true,
         "themeMapHeaderCaption": "Standardkartan",
         "instruction": "",
@@ -530,6 +485,7 @@
     },
     {
       "type": "infodialog",
+      "index": 3,
       "options": [
         {
           "target": "control",
@@ -559,8 +515,7 @@
           "showOnlyOnce": true,
           "visibleForGroups": []
         }
-      ],
-      "index": 3
+      ]
     }
   ],
   "map": {
@@ -568,30 +523,24 @@
     "center": [576357, 6386049],
     "title": "Hajk 3",
     "projection": "EPSG:3006",
-    "zoom": 1,
+    "zoom": 1.33,
     "maxZoom": 8,
     "minZoom": 0,
-    "resolutions": [2048.0, 1024.0, 512.0, 256.0, 128.0, 64.0, 32.0, 16.0, 8.0],
+    "resolutions": [2048, 1024, 512, 256, 128, 64, 32, 16, 8],
     "extraPrintResolutions": [],
-    "origin": [0.0, 0.0],
+    "origin": [0, 0],
     "extent": [-1200000.0, 4700000.0, 2600000.0, 8500000.0],
     "constrainOnlyCenter": false,
     "constrainResolution": false,
-    "constrainResolutionMobile": false,
-    "enableDownloadLink": false,
-    "enableAppStateInHash": false,
-    "logo": "logoLight.png",
-    "logoLight": "logoLight.png",
-    "logoDark": "logoDark.png",
+    "logo": "/logoLight.png",
     "geoserverLegendOptions": "",
     "mapselector": false,
     "mapcleaner": false,
-    "mapresetter": false,
     "drawerVisible": false,
-    "drawerVisibleMobile": false,
     "drawerPermanent": false,
-    "drawerStatic": false,
+    "drawerVisibleMobile": false,
     "activeDrawerOnStart": "plugins",
+    "showThemeToggler": true,
     "colors": {
       "primaryColor": "#333333",
       "secondaryColor": "#ffa000",
@@ -599,27 +548,12 @@
     },
     "defaultCookieNoticeMessage": "Vi använder cookies för att följa upp användandet och ge en bra upplevelse av kartan. Du kan blockera cookies i webbläsaren men då visas detta meddelande igen.",
     "defaultCookieNoticeUrl": "https://pts.se/sv/bransch/regler/lagar/lag-om-elektronisk-kommunikation/kakor-cookies/",
-    "crossOrigin": "anonymous",
     "showCookieNotice": false,
     "cookieUse3dPart": false,
-    "showThemeToggler": true,
-    "showUserAvatar": false,
+    "crossOrigin": "anonymous",
     "introductionEnabled": true,
     "introductionShowControlButton": true,
     "introductionSteps": [],
-    "altShiftDragRotate": false,
-    "onFocusOnly": false,
-    "doubleClickZoom": false,
-    "keyboard": false,
-    "mouseWheelZoom": true,
-    "shiftDragZoom": false,
-    "dragPan": true,
-    "pinchRotate": false,
-    "pinchZoom": false,
-    "zoomDelta": false,
-    "zoomDuration": null,
-    "linkInDrawer": null,
     "showRecentlyUsedPlugins": false
-  },
-  "analytics": null
+  }
 }
