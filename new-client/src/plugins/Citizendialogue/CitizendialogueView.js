@@ -7,7 +7,7 @@ import { Model } from "survey-core";
 import "survey-core/defaultV2.min.css";
 import "survey-core/i18n/swedish";
 import ReactDOM from "react-dom/client";
-import WKT from "ol/format/WKT";
+//import WKT from "ol/format/WKT";
 
 import EditView from "./EditView.js";
 import EditModel from "./EditModel.js";
@@ -206,19 +206,14 @@ function CitizendialogueView(props) {
             wktGeometry: feature.wktGeometry,
           }));
       } else {
-        const filteredFeatures = editModel.layer
-          .getSource()
-          .getFeatures()
+        featureData = editModel.newMapData
           .filter(
-            (feature) =>
-              feature.get("SURVEYANSWERID") === specificSurveyAnswerId
-          );
-        featureData = filteredFeatures.map((feature) => {
-          const geometry = feature.getGeometry();
-          const wktGeometry = new WKT().writeGeometry(geometry);
-          const surveyQuestion = feature.get("SURVEYQUESTION");
-          return { surveyQuestion, wktGeometry };
-        });
+            (feature) => feature.surveyAnswerId === specificSurveyAnswerId
+          )
+          .map((feature) => ({
+            surveyQuestion: feature.surveyQuestion,
+            wktGeometry: feature.wktGeometry,
+          }));
       }
 
       setShowEditView({ show: false });
