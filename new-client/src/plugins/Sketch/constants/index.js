@@ -121,6 +121,8 @@ export const DRAW_TYPES = [
   },
 ];
 
+export const ROTATABLE_DRAW_TYPES = ["Polygon", "Rectangle", "LineString"];
+
 export const MAX_REMOVED_FEATURES = 4;
 export const PLUGIN_MARGIN = 10;
 
