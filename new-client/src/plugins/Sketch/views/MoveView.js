@@ -17,7 +17,7 @@ import Information from "../components/Information";
 
 const TranslateToggler = ({ translateEnabled, setTranslateEnabled }) => {
   return (
-    <Paper style={{ padding: 8, marginTop: 8 }}>
+    <Paper sx={{ p: 1, mt: 1 }}>
       <Grid container justifyContent="space-between" alignItems="center">
         <Typography variant="body2">Tillåt fri förflyttning</Typography>
         <Tooltip
@@ -84,14 +84,14 @@ const FeatureMoveSelector = (props) => {
   };
 
   return (
-    <Paper style={{ padding: 8, marginTop: 8 }}>
+    <Paper sx={{ p: 1, mt: 1 }}>
       <Grid container item justifyContent="center" alignItems="center">
-        <Grid item xs={12}>
+        <Grid item xs={12} sx={{ mb: 2 }}>
           <Typography variant="body2" align="center">
             Fast förflyttning
           </Typography>
         </Grid>
-        <Grid item xs={12} style={{ marginTop: 16 }}>
+        <Grid item xs={12} sx={{ mb: 2 }}>
           <Tooltip
             disableInteractive
             title="Ange hur många meter du vill flytta objekten."
@@ -107,7 +107,7 @@ const FeatureMoveSelector = (props) => {
             />
           </Tooltip>
         </Grid>
-        <Grid item xs={12} style={{ marginTop: 16 }}>
+        <Grid item xs={12}>
           <Tooltip
             disableInteractive
             title="Ange i vilken riktning du vill flytta objekten. 0 grader är rakt norrut, 90 grader är rakt åt öster, osv."
@@ -123,7 +123,7 @@ const FeatureMoveSelector = (props) => {
             />
           </Tooltip>
         </Grid>
-        <Grid container spacing={1} style={{ marginTop: 8 }}>
+        <Grid container spacing={1} sx={{ mt: 1 }}>
           <Grid item xs={6}>
             <Button
               variant="contained"
@@ -192,15 +192,15 @@ const FeatureRotateSelector = (props) => {
   };
 
   return (
-    <Paper style={{ padding: 8, marginTop: 8 }}>
+    <Paper sx={{ p: 1, mt: 1 }}>
       <Grid container item justifyContent="center" alignItems="center">
-        <Grid item xs={12} style={{ marginBottom: 16 }}>
+        <Grid item xs={12} sx={{ mb: 1 }}>
           <Typography variant="body2" align="center">
             Rotera
           </Typography>
         </Grid>
 
-        <Grid item xs={6} style={{ paddingRight: "4px" }}>
+        <Grid item xs={6} sx={{ pr: 1 }}>
           <Tooltip
             disableInteractive
             title="Ange hur många grader du ska rotera objekten."
@@ -216,12 +216,12 @@ const FeatureRotateSelector = (props) => {
             />
           </Tooltip>
         </Grid>
-        <Grid item xs={3}>
+        <Grid item xs={3} sx={{ pr: 1 / 4 }}>
           <Button
             variant="contained"
             fullWidth
             size="small"
-            style={{ minWidth: "initial" }}
+            sx={{ minWidth: "initial" }}
             onClick={() => {
               handleRotationClick(false);
             }}
@@ -232,12 +232,12 @@ const FeatureRotateSelector = (props) => {
             <RotateLeftIcon />
           </Button>
         </Grid>
-        <Grid item xs={3}>
+        <Grid item xs={3} sx={{ pl: 1 / 4 }}>
           <Button
             variant="contained"
             fullWidth
             size="small"
-            style={{ minWidth: "initial" }}
+            sx={{ minWidth: "initial" }}
             onClick={() => {
               handleRotationClick(true);
             }}
