@@ -21,7 +21,11 @@ import SettingsView from "./SettingsView";
 import useCookieStatus from "hooks/useCookieStatus";
 import useUpdateEffect from "hooks/useUpdateEffect";
 
+//Snackbar
 import { useSnackbar } from "notistack";
+
+// Context
+import { useSketchLayer } from "../SketchContext";
 
 // The SketchView is the main view for the Sketch-plugin.
 const SketchView = (props) => {
@@ -255,6 +259,34 @@ const SketchView = (props) => {
     handleKmlFileImported,
   ]);
 
+  const {
+    setHighlightLayer,
+    isHighlightLayerAdded,
+    localObserver: highlightLocalObserver,
+    highlightSource,
+  } = useSketchLayer();
+
+  React.useEffect(() => {
+    if (
+      activityId === "EDIT" ||
+      activityId === "MOVE" ||
+      activityId === "DELETE" ||
+      activityId === "UPLOAD" ||
+      activityId === "SAVE" ||
+      activityId === "SETTINGS"
+    ) {
+      highlightLocalObserver.publish("resetViews");
+      highlightSource.clear();
+      setHighlightLayer(false);
+    }
+  }, [
+    setHighlightLayer,
+    isHighlightLayerAdded,
+    activityId,
+    highlightLocalObserver,
+    highlightSource,
+  ]);
+
   // The current view depends on which tab the user has
   // selected. Tab 0: The "create-view", Tab 1: The "save-upload-view".
   const renderCurrentView = () => {
@@ -264,8 +296,10 @@ const SketchView = (props) => {
         return (
           <AddView
             id={activityId}
+            setPluginShown={props.setPluginShown}
             model={model}
             localObserver={localObserver}
+            globalObserver={globalObserver}
             drawModel={drawModel}
             activeDrawType={activeDrawType}
             setActiveDrawType={setActiveDrawType}
@@ -273,6 +307,11 @@ const SketchView = (props) => {
             setDrawStyle={setDrawStyle}
             textStyle={textStyle}
             setTextStyle={setTextStyle}
+            map={props.map}
+            app={props.app}
+            pluginShown={props.pluginShown}
+            toggleObjectButton={props.toggleObjectButton}
+            setToggleObjectButton={props.setToggleObjectButton}
           />
         );
       case "DELETE":

@@ -20,6 +20,9 @@ import { STORAGE_KEY, DEFAULT_MEASUREMENT_SETTINGS } from "./constants";
 // Hooks
 import useCookieStatus from "hooks/useCookieStatus";
 
+// Contexts
+import { SketchProvider } from "./SketchContext";
+
 // Returns the measurement-settings-object from LS if it exists, otherwise it returns
 // the default measurement-settings. The LS might be empty since the user might have chosen
 // not to accept functional cookies.
@@ -49,6 +52,10 @@ const Sketch = (props) => {
   const [pluginShown, setPluginShown] = React.useState(
     props.options.visibleAtStart ?? false
   );
+
+  // A toggle-button that allows the user to toggle the choose-object-button in the functional Bufferview comp.
+  const [toggleObjectButton, setToggleObjectButton] = React.useState(true);
+
   // We have to keep track of some measurement-settings
   const [measurementSettings, setMeasurementSettings] = React.useState(
     getMeasurementSettings()
@@ -126,7 +133,7 @@ const Sketch = (props) => {
   React.useEffect(() => {
     // If the plugin is not shown, we have to make sure to disable
     // the potential draw-interaction.
-    if (!pluginShown) {
+    if (!pluginShown || !toggleObjectButton) {
       return drawModel.toggleDrawInteraction("");
     }
     // Otherwise, we make sure to toggle the draw-interaction to the correct one.
@@ -142,7 +149,7 @@ const Sketch = (props) => {
       default:
         return drawModel.toggleDrawInteraction("");
     }
-  }, [activeDrawType, activityId, drawModel, pluginShown]);
+  }, [activeDrawType, activityId, drawModel, pluginShown, toggleObjectButton]);
 
   // This effect makes sure to reset the edit- and move-feature if the window is closed,
   // or if the user changes activity. (We don't want to keep the features selected
@@ -150,7 +157,7 @@ const Sketch = (props) => {
   React.useEffect(() => {
     setEditFeature(null);
     setMoveFeatures([]);
-  }, [activityId, pluginShown]);
+  }, [activityId, pluginShown, toggleObjectButton]);
 
   // An effect that makes sure to set the modify-interaction in the model
   // when the modify-state changes.
@@ -191,40 +198,48 @@ const Sketch = (props) => {
   // We're rendering the view in a BaseWindowPlugin, since this is a
   // "standard" plugin.
   return (
-    <BaseWindowPlugin
-      {...props}
-      type="Sketch"
-      custom={{
-        icon: <EditIcon />,
-        title: "Rita",
-        description: "Skapa dina helt egna geometrier!",
-        height: "dynamic",
-        width: 350,
-        onWindowHide: onWindowHide,
-        onWindowShow: onWindowShow,
-      }}
-    >
-      <SketchView
-        model={sketchModel}
-        drawModel={drawModel}
-        kmlModel={kmlModel}
-        options={props.options}
-        localObserver={localObserver}
-        globalObserver={props.app.globalObserver}
-        activeDrawType={activeDrawType}
-        activityId={activityId}
-        setActivityId={setActivityId}
-        setActiveDrawType={setActiveDrawType}
-        modifyEnabled={modifyEnabled}
-        setModifyEnabled={setModifyEnabled}
-        translateEnabled={translateEnabled}
-        setTranslateEnabled={setTranslateEnabled}
-        editFeature={editFeature}
-        moveFeatures={moveFeatures}
-        measurementSettings={measurementSettings}
-        setMeasurementSettings={setMeasurementSettings}
-      />
-    </BaseWindowPlugin>
+    <SketchProvider>
+      <BaseWindowPlugin
+        {...props}
+        type="Sketch"
+        custom={{
+          icon: <EditIcon />,
+          title: "Rita",
+          description: "Skapa dina helt egna geometrier!",
+          height: "dynamic",
+          width: 350,
+          onWindowHide: onWindowHide,
+          onWindowShow: onWindowShow,
+        }}
+      >
+        <SketchView
+          model={sketchModel}
+          drawModel={drawModel}
+          kmlModel={kmlModel}
+          options={props.options}
+          localObserver={localObserver}
+          globalObserver={props.app.globalObserver}
+          activeDrawType={activeDrawType}
+          activityId={activityId}
+          setActivityId={setActivityId}
+          setPluginShown={setPluginShown}
+          setActiveDrawType={setActiveDrawType}
+          modifyEnabled={modifyEnabled}
+          setModifyEnabled={setModifyEnabled}
+          translateEnabled={translateEnabled}
+          setTranslateEnabled={setTranslateEnabled}
+          editFeature={editFeature}
+          moveFeatures={moveFeatures}
+          measurementSettings={measurementSettings}
+          setMeasurementSettings={setMeasurementSettings}
+          map={props.map}
+          app={props.app}
+          pluginShown={pluginShown}
+          toggleObjectButton={toggleObjectButton}
+          setToggleObjectButton={setToggleObjectButton}
+        />
+      </BaseWindowPlugin>
+    </SketchProvider>
   );
 };
 

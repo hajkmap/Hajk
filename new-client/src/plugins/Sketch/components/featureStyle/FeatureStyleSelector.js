@@ -5,6 +5,7 @@ import { STROKE_DASHES } from "plugins/Sketch/constants";
 import FeatureStyleAccordion from "./FeatureStyleAccordion";
 import FeaturePointSizeAccordion from "./FeatureSizeAccordion";
 import StrokeTypeSelector from "./StrokeTypeSelector";
+import FeatureBufferAccordion from "./FeatureBufferAccordion";
 
 export default function FeatureStyleSelector(props) {
   // We need a handler that can update the stroke-dash setting
@@ -213,6 +214,24 @@ export default function FeatureStyleSelector(props) {
     );
   };
 
+  const renderBufferStyleSettings = () => {
+    return (
+      <FeatureBufferAccordion
+        title="Buffra"
+        showBufferSlider
+        drawModel={props.drawModel}
+        map={props.map}
+        setPluginShown={props.setPluginShown}
+        app={props.app}
+        localObserver={props.localObserver}
+        globalObserver={props.globalObserver}
+        pluginShown={props.pluginShown}
+        toggleObjectButton={props.toggleObjectButton}
+        setToggleObjectButton={props.setToggleObjectButton}
+      />
+    );
+  };
+
   // We want to display different settings depending on what the user is drawing!
   // Let's check and render the appropriate settings.
   const renderColorSelectors = () => {
@@ -265,6 +284,7 @@ export default function FeatureStyleSelector(props) {
         <Grid item xs={12}>
           {renderColorSelectors()}
           {props.activeDrawType === "Point" && renderPointStyleSettings()}
+          {renderBufferStyleSettings()}
         </Grid>
       </Grid>
     </Grid>

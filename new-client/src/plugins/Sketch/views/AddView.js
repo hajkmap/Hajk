@@ -13,7 +13,6 @@ const AddView = (props) => {
     props;
   // We have to get some information about the current activity (view)
   const activity = model.getActivityFromId(props.id);
-
   return (
     <Grid container>
       <Grid item xs={12}>
@@ -37,6 +36,14 @@ const AddView = (props) => {
         setDrawStyle={props.setDrawStyle}
         textStyle={props.textStyle}
         setTextStyle={props.setTextStyle}
+        map={props.map}
+        setPluginShown={props.setPluginShown}
+        app={props.app}
+        localObserver={props.localObserver}
+        globalObserver={props.globalObserver}
+        pluginShown={props.pluginShown}
+        toggleObjectButton={props.toggleObjectButton}
+        setToggleObjectButton={props.setToggleObjectButton}
       />
       <FeatureTextSetter
         localObserver={props.localObserver}
