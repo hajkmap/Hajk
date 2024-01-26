@@ -30,13 +30,17 @@ const StyledDivider = styled(Divider)(({ theme }) => ({
 
 class TextArea extends React.PureComponent {
   render() {
-    const { backgroundColor, dividerColor, textAreaContentArray } = this.props;
+    const { backgroundColor, dividerColor, textAreaContentArray, textColor } =
+      this.props;
 
     return (
       <GridContainer id="text-area-content" justifyContent="center" container>
         <GridContainerContent
           xs={12}
-          style={{ backgroundColor: backgroundColor }}
+          sx={{
+            backgroundColor: backgroundColor,
+            color: textColor,
+          }}
           item
         >
           <StyledDivider sx={{ backgroundColor: dividerColor }} />
