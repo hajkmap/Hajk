@@ -253,12 +253,30 @@ function SurveyHandler(props) {
     }
   };
 
+  const validateNewSurveyName = (value) => {
+    var valid = value === "" || /^[A-Za-z0-9_]+$/.test(value);
+    return valid;
+};
+
   const saveSurvey = () => {
     const surveyName = survey.title;
     const surveyJson = JSON.stringify(survey);
     
+    if (!validateNewSurveyName(surveyName)) {
+      alert('Invalid survey name. Only letters, numbers, and underscores are allowed.');
+      return;
+  }
+
     props.model.saveSurvey(surveyName, surveyJson, (response) => {
-        console.log('Survey saved successfully:', response);
+      if (typeof response === 'object' && response !== null) {
+        let responseString = '';
+        for (const [key, value] of Object.entries(response)) {
+            responseString += `${key}: ${value}\n`;
+        }
+        alert(responseString);
+    } else {
+        alert(response);
+    }
     });
   };
 
