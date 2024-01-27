@@ -13,6 +13,7 @@ import { getArea as getExtentArea, getCenter, getWidth } from "ol/extent";
 import { Feature } from "ol";
 import { handleClick } from "./Click";
 import { noModifierKeys, platformModifierKeyOnly } from "ol/events/condition";
+import { ROTATABLE_DRAW_TYPES } from "plugins/Sketch/constants";
 
 /*
  * A model supplying useful Draw-functionality.
@@ -1019,7 +1020,9 @@ class DrawModel {
       : this.#drawStyleSettings;
 
     return new Circle({
-      radius: 6,
+      radius: settings?.imageStyle?.radius
+        ? settings.imageStyle.radius
+        : storedSettings.radius,
       stroke: new Stroke({
         color: settings?.strokeStyle?.color
           ? settings.strokeStyle.color
@@ -1058,9 +1061,6 @@ class DrawModel {
   // Extracts the stroke-style from the supplied feature-style
   #getStrokeStyleInfo = (featureStyle) => {
     try {
-      // Since we might be dealing with a style-array instead of a style-object
-      // (in case of the special Arrow feature-type) we have to make sure to get
-      // the actual base-style (which is located at position 0 in the style-array).
       const s = Array.isArray(featureStyle)
         ? featureStyle[0]?.getStroke()
         : featureStyle?.getStroke();
@@ -1096,17 +1096,20 @@ class DrawModel {
         strokeColor: null,
         strokeWidth: null,
         dash: null,
+        radius: null,
       };
     }
     const fillColor = fillStyle.getColor();
     const strokeColor = strokeStyle.getColor();
     const strokeWidth = strokeStyle.getWidth();
     const dash = strokeStyle.getLineDash();
+    const radius = s.getRadius();
     return {
       fillColor: this.getRGBAString(fillColor),
       strokeColor: this.getRGBAString(strokeColor),
       strokeWidth,
       dash,
+      radius,
     };
   };
 
@@ -2122,6 +2125,31 @@ class DrawModel {
         console.error(`Failed to translate selected features. Error: ${error}`);
       }
     });
+  };
+
+  // Rotate the currently selected features
+  rotateSelectedFeatures = (degrees, clockwise) => {
+    // Handle both CW and CCW rotation
+    degrees = clockwise ? -degrees : degrees;
+
+    this.#selectInteraction
+      .getFeatures()
+      .getArray()
+      .filter((f) => {
+        return ROTATABLE_DRAW_TYPES.indexOf(f.get("DRAW_METHOD")) > -1;
+      })
+      .forEach((f) => {
+        try {
+          const geom = f.getGeometry();
+          // Lets use the center coordinate as anchor point when rotating
+          const centerCoordinate = getCenter(geom.getExtent());
+          // Convert to radians and rotate.
+          geom.rotate(degrees * (Math.PI / 180), centerCoordinate);
+          f.setGeometry(geom);
+        } catch (error) {
+          console.error(`Failed to rotate selected features. Error: ${error}`);
+        }
+      });
   };
 
   // Returns a clone of the supplied feature. Makes sure to clone both
