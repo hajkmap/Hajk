@@ -5,8 +5,8 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import ScatterPlotIcon from "@mui/icons-material/ScatterPlot";
 import BorderStyleIcon from "@mui/icons-material/BorderStyle";
 import LinearScaleIcon from "@mui/icons-material/LinearScale";
-import ZoomOutMapIcon from "@mui/icons-material/ZoomOutMap";
-import FormatShapesIcon from "@mui/icons-material/FormatShapes";
+//import ZoomOutMapIcon from "@mui/icons-material/ZoomOutMap";
+//import FormatShapesIcon from "@mui/icons-material/FormatShapes";
 import Typography from "@mui/material/Typography";
 import Grid from "@mui/material/Grid";
 
@@ -75,6 +75,13 @@ class Toolbar extends Component {
       "add",
       this.props.editSource.editMultiPoint ? "MultiPoint" : "Point"
     );
+    /*const targetPlugin = this.props.app.windows.find(
+      (window) => window.title === "Medborgardialog"
+    );
+    if (targetPlugin) {
+      targetPlugin.closeWindow();
+    }
+    console.log(this.props.app.windows);*/
   }
 
   onAddLineClicked() {
@@ -189,8 +196,23 @@ class Toolbar extends Component {
         <Grid item xs={12}>
           <Typography>Editera</Typography>
         </Grid>
-        <Grid item xs={4}>
+        <Grid item xs={6}>
           <StyledButton
+            variant="contained"
+            fullWidth
+            onClick={() => {
+              this.onRemoveClicked();
+            }}
+            type="button"
+            title="Ta bort geometri"
+            selected={this.props.activeTool === "remove"}
+          >
+            Radera geometri
+            <DeleteIcon sx={{ marginLeft: 1 }} />
+          </StyledButton>
+        </Grid>
+        <Grid item xs={4}>
+          {/* <StyledButton
             variant="contained"
             fullWidth
             onClick={() => {
@@ -203,24 +225,10 @@ class Toolbar extends Component {
             Flytta
             <ZoomOutMapIcon sx={{ marginLeft: 1 }} />
           </StyledButton>
+          */}
         </Grid>
         <Grid item xs={4}>
-          <StyledButton
-            variant="contained"
-            fullWidth
-            onClick={() => {
-              this.onRemoveClicked();
-            }}
-            type="button"
-            title="Ta bort geometri"
-            selected={this.props.activeTool === "remove"}
-          >
-            Radera
-            <DeleteIcon sx={{ marginLeft: 1 }} />
-          </StyledButton>
-        </Grid>
-        <Grid item xs={4}>
-          <StyledButton
+          {/*<StyledButton
             variant="contained"
             fullWidth
             onClick={() => {
@@ -232,7 +240,7 @@ class Toolbar extends Component {
           >
             Ändra
             <FormatShapesIcon sx={{ marginLeft: 1 }} />
-          </StyledButton>
+          </StyledButton>*/}
         </Grid>
       </Grid>
     );
