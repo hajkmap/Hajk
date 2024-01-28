@@ -323,10 +323,10 @@ paths:
   /surveys/list:
     get:
       tags:
-        - Admin - Informative/DocumentHandler
+        - Admin - SurveyService/SurveyHandler
       responses:
         200:
-          description: Return all available documents
+          description: Return all available surveys
           content:
             application/json:
               schema:
@@ -368,7 +368,7 @@ paths:
       parameters:
         - name: survey
           in: path
-          description: Name of the survey to be fetched
+          description: Name of the surveyanswer to be fetched
           required: true
           schema:
             type: string
@@ -388,17 +388,17 @@ paths:
   /surveys/answers/{surveyId}:
     put:
       tags:
-        - Admin - Informative/DocumentHandler
+        - Admin - SurveyService/SurveyHandler
       parameters:
         - name: name
           in: path
-          description: Document to be saved
+          description: Surveyanswer to be saved
           required: true
           schema:
             type: string
       responses:
         200:
-          description: Return the saved document's body
+          description: Return the saved surveyanswers body
           content:
             application/json:
               schema:
@@ -412,17 +412,17 @@ paths:
   /surveys/{surveyId}:
     put:
       tags:
-        - Admin - Informative/DocumentHandler
+        - Admin - SurveyService/SurveyHandler
       parameters:
         - name: name
           in: path
-          description: Document to be saved
+          description: Survey to be saved
           required: true
           schema:
             type: string
       responses:
         200:
-          description: Return the saved document's body
+          description: Return the saved surveys body
           content:
             application/json:
               schema:
