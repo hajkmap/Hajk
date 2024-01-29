@@ -259,23 +259,20 @@ const SketchView = (props) => {
     handleKmlFileImported,
   ]);
 
+  // React context, used to keep track of the highlight-layer, localObserver for sketch buffer,
+  // the isSelecting, distance and activeSteps globally in the component tree.
   const {
     setHighlightLayer,
     isHighlightLayerAdded,
-    localObserver: highlightLocalObserver,
     highlightSource,
+    contextValue,
   } = useSketchLayer();
 
+  // This useEffect makes sure to clear the highlight-layer when the user changes the activity.
+
   React.useEffect(() => {
-    if (
-      activityId === "EDIT" ||
-      activityId === "MOVE" ||
-      activityId === "DELETE" ||
-      activityId === "UPLOAD" ||
-      activityId === "SAVE" ||
-      activityId === "SETTINGS"
-    ) {
-      highlightLocalObserver.publish("resetViews");
+    if (activityId !== "ADD") {
+      localObserver.publish("resetViews");
       highlightSource.clear();
       setHighlightLayer(false);
     }
@@ -283,9 +280,23 @@ const SketchView = (props) => {
     setHighlightLayer,
     isHighlightLayerAdded,
     activityId,
-    highlightLocalObserver,
+    localObserver,
     highlightSource,
   ]);
+
+  // This useEffect makes sure to always set the possibility to draw each time the user
+  // changes back to the activityId to "ADD".
+
+  React.useEffect(() => {
+    if (activityId === "ADD") {
+      props.setToggleObjectButton(true);
+      contextValue.setState((prevState) => ({
+        ...prevState,
+        isSelecting: false,
+      }));
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activityId]);
 
   // The current view depends on which tab the user has
   // selected. Tab 0: The "create-view", Tab 1: The "save-upload-view".

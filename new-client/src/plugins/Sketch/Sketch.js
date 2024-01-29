@@ -53,7 +53,7 @@ const Sketch = (props) => {
     props.options.visibleAtStart ?? false
   );
 
-  // A toggle-button that allows the user to toggle the choose-object-button in the functional Bufferview comp.
+  // A toggle-button that allows the user to toggle the choose-object-button in the functional Bufferview comp/buffer sketch component.
   const [toggleObjectButton, setToggleObjectButton] = React.useState(true);
 
   // We have to keep track of some measurement-settings
@@ -187,12 +187,14 @@ const Sketch = (props) => {
   // update the state so that the effect handling the draw-interaction-toggling fires.
   const onWindowHide = () => {
     setPluginShown(false);
+    setToggleObjectButton(false);
   };
 
   // We're gonna need to catch if the user opens the window, and make sure to
   // update the state so that the effect handling the draw-interaction-toggling fires.
   const onWindowShow = () => {
     setPluginShown(true);
+    setToggleObjectButton(true);
   };
 
   // We're rendering the view in a BaseWindowPlugin, since this is a

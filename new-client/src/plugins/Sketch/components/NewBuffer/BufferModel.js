@@ -4,7 +4,7 @@ import createTransformer from "./Transformer.js";
 import { hfetch } from "utils/FetchWrapper";
 import { useSketchLayer } from "plugins/Sketch/SketchContext.js";
 
-const BufferFuncModel = (settings) => {
+const BufferModel = (settings) => {
   const {
     isHighlightLayerAdded,
     setHighlightLayer,
@@ -144,16 +144,6 @@ const BufferFuncModel = (settings) => {
         map.addLayer(bufferLayer);
         setIsBufferLayerAdded(true);
       }
-    } else {
-      removeClickEvent();
-
-      if (
-        isHighlightLayerAdded &&
-        map.getLayers().getArray().includes(highlightLayer)
-      ) {
-        map.removeLayer(highlightLayer);
-        setHighlightLayer(false);
-      }
     }
 
     return () => {
@@ -190,9 +180,8 @@ const BufferFuncModel = (settings) => {
     bufferLayer,
     map,
     HT,
-
     setActive,
   };
 };
 
-export default BufferFuncModel;
+export default BufferModel;

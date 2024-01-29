@@ -22,7 +22,8 @@ const StyledToggleButton = styled(ToggleButton)(({ theme }) => ({
 }));
 
 const BufferView = (props) => {
-  const { model, localObserver, setToggleObjectButton } = props;
+  const { model, localObserver, setToggleObjectButton, toggleObjectButton } =
+    props;
   const { contextValue } = useSketchLayer();
   const { enqueueSnackbar } = useSnackbar();
 
@@ -74,7 +75,6 @@ const BufferView = (props) => {
     }
 
     const activeStep = contextValue.state.activeStep + 1;
-    setToggleObjectButton(false);
     contextValue.setState((prevState) => ({
       ...prevState,
       activeStep,
@@ -147,16 +147,22 @@ const BufferView = (props) => {
             <Grid container spacing={2} direction="row">
               {renderClearButton()}
               <Grid item xs={12}>
-                <Tooltip title="Markera flera objekt">
+                <Tooltip
+                  title={
+                    !toggleObjectButton
+                      ? "Klicka här för att rita objekt"
+                      : "Klicka här för att välja objekt"
+                  }
+                >
                   <StyledToggleButton
                     onChange={setSelecting}
                     selected={contextValue.state.isSelecting}
                     value="isSelecting"
                   >
-                    {contextValue.state.isSelecting ? (
+                    {!toggleObjectButton ? (
                       <>
                         <RemoveCircleIcon />{" "}
-                        <Box sx={{ mt: 0.4, ml: 0.2 }}>Avvisa</Box>
+                        <Box sx={{ mt: 0.4, ml: 0.2 }}>Slå av</Box>
                       </>
                     ) : (
                       <>
@@ -230,6 +236,26 @@ const BufferView = (props) => {
                   }}
                 >
                   Rensa
+                </Button>
+              </Grid>
+              <Grid item xs={12}>
+                <Button
+                  fullWidth
+                  variant="contained"
+                  color="primary"
+                  onClick={() => {
+                    contextValue.setState((prevState) => ({
+                      ...prevState,
+                      activeStep: 0,
+                    }));
+                    setToggleObjectButton(true);
+                    contextValue.setState((prevState) => ({
+                      ...prevState,
+                      isSelecting: false,
+                    }));
+                  }}
+                >
+                  Börja om
                 </Button>
               </Grid>
             </Grid>

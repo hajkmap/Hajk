@@ -284,7 +284,9 @@ export default function FeatureStyleSelector(props) {
         <Grid item xs={12}>
           {renderColorSelectors()}
           {props.activeDrawType === "Point" && renderPointStyleSettings()}
-          {renderBufferStyleSettings()}
+          {props.activityId === "ADD" &&
+            props.activeDrawType !== "Circle" &&
+            renderBufferStyleSettings()}
         </Grid>
       </Grid>
     </Grid>

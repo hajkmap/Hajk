@@ -1,14 +1,14 @@
 import React, { useEffect } from "react";
-
 import BufferView from "./BufferView";
-import BufferFuncModel from "./BufferModel";
-import { useSketchLayer } from "plugins/Sketch/SketchContext.js";
+import BufferModel from "./BufferModel";
+
+// Buffer is the main component for the Buffer sketch accordion.
+// It includes and follows the same structure as the Bufferplugin with a BufferView and a BufferModel.
 
 function Buffer(props) {
-  const { localObserver } = useSketchLayer();
-  const map = props.map;
+  const { localObserver, map } = props;
 
-  const bufferModel = BufferFuncModel({
+  const bufferModel = BufferModel({
     map: map,
     localObserver: localObserver,
     pluginShown: props.pluginShown,
@@ -28,6 +28,7 @@ function Buffer(props) {
       app={props.app}
       localObserver={localObserver}
       setToggleObjectButton={props.setToggleObjectButton}
+      toggleObjectButton={props.toggleObjectButton}
     />
   );
 }

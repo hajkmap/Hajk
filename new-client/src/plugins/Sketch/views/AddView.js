@@ -30,6 +30,7 @@ const AddView = (props) => {
         </Grid>
       </Grid>
       <FeatureStyleSelector
+        activityId={props.id}
         activeDrawType={activeDrawType}
         drawStyle={props.drawStyle}
         drawModel={props.drawModel}
