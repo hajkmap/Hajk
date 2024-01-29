@@ -205,15 +205,6 @@ function CitizendialogueView(props) {
             surveyQuestion: feature.surveyQuestion,
             wktGeometry: feature.wktGeometry,
           }));
-      } else {
-        featureData = editModel.newMapData
-          .filter(
-            (feature) => feature.surveyAnswerId === specificSurveyAnswerId
-          )
-          .map((feature) => ({
-            surveyQuestion: feature.surveyQuestion,
-            wktGeometry: feature.wktGeometry,
-          }));
       }
 
       setShowEditView({ show: false });

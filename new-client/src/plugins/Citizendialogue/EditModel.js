@@ -237,51 +237,6 @@ class EditModel {
       return done();
     }
 
-    function normalizeWkt(wkt) {
-      return wkt.replace(
-        /POINT Z\((\d+(\.\d+)?) (\d+(\.\d+)?) \d+(\.\d+)?\)/,
-        "POINT($1 $3)"
-      );
-    }
-
-    const wktFormatter = new WKT();
-
-    const allFeatures = this.vectorSource.getFeatures();
-
-    allFeatures.forEach((feature) => {
-      const featureData = {
-        surveyQuestion: feature.get("SURVEYQUESTION"),
-        surveyAnswerId: feature.get("SURVEYANSWERID"),
-        wktGeometry: wktFormatter.writeGeometry(feature.getGeometry()),
-      };
-
-      switch (feature.modification) {
-        case "added":
-          // Inserts
-          this.newMapData.push(featureData);
-          break;
-        case "updated":
-          // Updates
-
-          break;
-        case "removed":
-          console.log("Innan borttagning - newMapData:", this.newMapData);
-          const wktToRemove = normalizeWkt(
-            wktFormatter.writeGeometry(feature.getGeometry())
-          );
-          console.log("WKT att ta bort:", wktToRemove);
-          this.newMapData = this.newMapData.filter(
-            (savedFeature) =>
-              normalizeWkt(savedFeature.wktGeometry) !== wktToRemove
-          );
-          console.log("Efter borttagning - newMapData:", this.newMapData);
-          break;
-
-        default:
-          break;
-      }
-    });
-
     this.transact(features, (response) => {
       done(response);
     });
