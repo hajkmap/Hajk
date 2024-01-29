@@ -10,8 +10,8 @@ const SketchContext = createContext();
 /* The SketchProvider is the main provider for the Sketch plugin and provides data to pass through the sketch plugin
 component tree without having to pass props down manually at every component.
 The SketchProvider includes the following:
-- state: The state of the plugin (isSelecting, distance, activeStep)
-- setState: The function to set the state of the plugin (isSelecting, distance, activeStep)
+- state: The state variable of isSelecting, distance and activeStep 
+- setState: The function to set the state of isSelecting, distance, activeStep
 - isHighlightLayerAdded: Boolean to check if the highlight layer is added 
 - setHighlightLayer: Function to set the highlight layer 
 - highlightSource: The source for the highlight layer

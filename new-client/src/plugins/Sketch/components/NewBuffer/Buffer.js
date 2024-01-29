@@ -12,6 +12,7 @@ function Buffer(props) {
     map: map,
     localObserver: localObserver,
     pluginShown: props.pluginShown,
+    toggleObjectButton: props.toggleObjectButton,
   });
 
   useEffect(() => {

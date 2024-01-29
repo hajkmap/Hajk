@@ -53,7 +53,7 @@ const Sketch = (props) => {
     props.options.visibleAtStart ?? false
   );
 
-  // A toggle-button that allows the user to toggle the choose-object-button in the functional Bufferview comp/buffer sketch component.
+  // A toggle-button that allows the user to toggle the choose-object-button in the new Buffer sketch component.
   const [toggleObjectButton, setToggleObjectButton] = React.useState(true);
 
   // We have to keep track of some measurement-settings
