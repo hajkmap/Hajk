@@ -139,6 +139,38 @@ class FirSearchView extends React.PureComponent {
     }
   };
 
+  handleMultilinePaste = (text) => {
+    debugger;
+    const emptyFilter = (s) => {
+      return s.trim() !== "";
+    };
+    const realEstateNames = text
+      .split("\n")
+      .filter(emptyFilter)
+      .map((line) => {
+        return line.trim().split("  ")[0];
+      })
+      .filter(emptyFilter)
+      .join(", ");
+
+    this.setState({ searchText: realEstateNames });
+    this.search_tm = setTimeout(() => {
+      this.handleSearch({ zoomToLayer: false });
+    }, 500);
+  };
+
+  handlePaste = (e) => {
+    try {
+      const cbText = e?.clipboardData?.getData("text").trim();
+      if (cbText && cbText.indexOf("\n") > -1) {
+        e.preventDefault();
+        this.handleMultilinePaste(cbText);
+      }
+    } catch (error) {
+      console.log("Error when pasting: ", error);
+    }
+  };
+
   render() {
     return (
       <>
@@ -192,6 +224,7 @@ class FirSearchView extends React.PureComponent {
                       e.preventDefault();
                     }
                   }}
+                  onPaste={this.handlePaste}
                   value={this.state.searchText}
                   startAdornment={
                     <InputAdornment position="start">

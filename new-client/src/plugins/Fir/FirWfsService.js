@@ -31,7 +31,6 @@ class FirWfsService {
   #getFiltersForStringAndGeometrySearch(params) {
     let rootFilter = null;
     let geometryFilters = null;
-    let stringFilter = null;
 
     if (params.features.length > 0) {
       geometryFilters = this.getGeometryFilters(params.features, params);
@@ -44,26 +43,37 @@ class FirWfsService {
       geometryFilters = geometryFilters[0];
     }
 
-    if (params.text.trim() !== "") {
-      if (!params.exactMatch) {
-        params.text += "*";
-      }
-      stringFilter = likeFilter(
-        params.searchType.searchProp,
-        params.text,
-        "*",
-        ".",
-        "!",
-        false
-      );
+    if (!params.exactMatch) {
+      params.text += "*";
     }
 
-    if (stringFilter && !geometryFilters) {
-      rootFilter = stringFilter;
-    } else if (geometryFilters && !stringFilter) {
+    // lets handle text input, including comma separated strings.
+    const stringFiltersArr = [];
+    params.text.split(",").forEach((s) => {
+      stringFiltersArr.push(
+        likeFilter(
+          params.searchType.searchProp,
+          s.trim() + (!params.exactMatch ? "*" : ""),
+          "*",
+          ".",
+          "!",
+          false
+        )
+      );
+    });
+
+    // Escape array if 1 and wrap when more than 1
+    const stringFilters =
+      stringFiltersArr.length > 1
+        ? orFilter(...stringFiltersArr)
+        : stringFiltersArr[0];
+
+    if (stringFiltersArr.length && !geometryFilters) {
+      rootFilter = stringFilters;
+    } else if (geometryFilters && stringFiltersArr.length === 0) {
       rootFilter = geometryFilters;
-    } else if (stringFilter && geometryFilters) {
-      rootFilter = andFilter(stringFilter, geometryFilters);
+    } else if (stringFiltersArr.length && geometryFilters) {
+      rootFilter = andFilter(stringFilters, geometryFilters);
     }
 
     return rootFilter;
