@@ -157,7 +157,7 @@ const Sketch = (props) => {
   React.useEffect(() => {
     setEditFeature(null);
     setMoveFeatures([]);
-  }, [activityId, pluginShown, toggleObjectButton]);
+  }, [activityId, pluginShown]);
 
   // An effect that makes sure to set the modify-interaction in the model
   // when the modify-state changes.
