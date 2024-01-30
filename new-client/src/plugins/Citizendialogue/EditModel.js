@@ -719,6 +719,16 @@ class EditModel {
       setTimeout(() => {
         //this.deactivateInteraction();
       }, 1);
+
+      const isMobile = window.innerWidth <= 768;
+      if (isMobile) {
+        const targetPlugin = this.app.windows.find(
+          (window) => window.title === "Medborgardialog"
+        );
+        if (targetPlugin) {
+          targetPlugin.showWindow();
+        }
+      }
     });
     this.map.addInteraction(this.draw);
   }
@@ -765,6 +775,16 @@ class EditModel {
           feature.modification = "removed";
         }
         feature.setStyle(this.getHiddenStyle());
+
+        const isMobile = window.innerWidth <= 768;
+        if (isMobile) {
+          const targetPlugin = this.app.windows.find(
+            (window) => window.title === "Medborgardialog"
+          );
+          if (targetPlugin) {
+            targetPlugin.showWindow();
+          }
+        }
       }
     });
   };

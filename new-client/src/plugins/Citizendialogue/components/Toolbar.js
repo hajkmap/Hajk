@@ -75,13 +75,16 @@ class Toolbar extends Component {
       "add",
       this.props.editSource.editMultiPoint ? "MultiPoint" : "Point"
     );
-    /*const targetPlugin = this.props.app.windows.find(
-      (window) => window.title === "Medborgardialog"
-    );
-    if (targetPlugin) {
-      targetPlugin.closeWindow();
+    const isMobile = window.innerWidth <= 768;
+    if (isMobile) {
+      const targetPlugin = this.props.app.windows.find(
+        (window) => window.title === "Medborgardialog"
+      );
+      if (targetPlugin) {
+        targetPlugin.closeWindow();
+        this.props.toggleActiveTool("");
+      }
     }
-    console.log(this.props.app.windows);*/
   }
 
   onAddLineClicked() {
@@ -105,6 +108,16 @@ class Toolbar extends Component {
   onRemoveClicked() {
     this.props.toggleActiveTool("remove");
     this.changeTool("remove");
+    const isMobile = window.innerWidth <= 768;
+    if (isMobile) {
+      const targetPlugin = this.props.app.windows.find(
+        (window) => window.title === "Medborgardialog"
+      );
+      if (targetPlugin) {
+        targetPlugin.closeWindow();
+        this.props.toggleActiveTool("");
+      }
+    }
   }
 
   onModifyClicked() {
