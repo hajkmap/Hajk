@@ -21,7 +21,7 @@ The SketchProvider includes the following:
 - contextValue: The context value for the plugin and it's using the useMemo hook to prevent infinite loops inside BufferView
 
 This is a temporary solution due to the fact that this new Buffer in the Sketch plugin is affecting the Buffer plugin.
-This can be changed in the future when the Buffer plugin is removed or there are any sort of replacement.
+This can be changed in the future if we ever decide to remove/change the Buffer plugin.
 */
 
 export function SketchProvider({ children }) {

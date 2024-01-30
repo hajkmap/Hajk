@@ -285,10 +285,10 @@ const SketchView = (props) => {
   ]);
 
   // This useEffect makes sure to always set the possibility to draw each time the user
-  // changes back to the activityId to "ADD".
+  // changes back the activityId to "ADD" or closes the plugin window.
 
   React.useEffect(() => {
-    if (activityId === "ADD") {
+    if (activityId === "ADD" || !props.pluginShown) {
       props.setToggleObjectButton(true);
       contextValue.setState((prevState) => ({
         ...prevState,
@@ -296,7 +296,7 @@ const SketchView = (props) => {
       }));
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activityId]);
+  }, [activityId, props.pluginShown]);
 
   // The current view depends on which tab the user has
   // selected. Tab 0: The "create-view", Tab 1: The "save-upload-view".
