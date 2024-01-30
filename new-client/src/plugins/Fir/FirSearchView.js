@@ -140,19 +140,19 @@ class FirSearchView extends React.PureComponent {
   };
 
   handleMultilinePaste = (text) => {
-    const emptyFilter = (s) => {
+    const notEmptyFilter = (s) => {
       return s.trim() !== "";
     };
-    const realEstateNames = text
+    const texts = text
       .split("\n")
-      .filter(emptyFilter)
+      .filter(notEmptyFilter)
       .map((line) => {
         return line.trim().split("  ")[0];
       })
-      .filter(emptyFilter)
+      .filter(notEmptyFilter)
       .join(", ");
 
-    this.setState({ searchText: realEstateNames });
+    this.setState({ searchText: texts });
     this.search_tm = setTimeout(() => {
       this.handleSearch({ zoomToLayer: false });
     }, 500);
