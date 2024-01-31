@@ -228,6 +228,16 @@ export default function FeatureStyleSelector(props) {
         pluginShown={props.pluginShown}
         toggleObjectButton={props.toggleObjectButton}
         setToggleObjectButton={props.setToggleObjectButton}
+        setBufferState={props.setBufferState}
+        bufferState={props.bufferState}
+        setHighlightLayer={props.setHighlightLayer}
+        isHighlightLayerAdded={props.isHighlightLayerAdded}
+        setIsBufferLayerAdded={props.setIsBufferLayerAdded}
+        isBufferLayerAdded={props.isBufferLayerAdded}
+        highlightSource={props.highlightSource}
+        bufferSource={props.bufferSource}
+        highlightLayer={props.highlightLayer}
+        bufferLayer={props.bufferLayer}
       />
     );
   };

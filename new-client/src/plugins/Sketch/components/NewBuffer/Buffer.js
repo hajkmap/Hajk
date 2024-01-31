@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React from "react";
 import BufferView from "./BufferView";
 import BufferModel from "./BufferModel";
 
@@ -13,15 +13,15 @@ function Buffer(props) {
     localObserver: localObserver,
     pluginShown: props.pluginShown,
     toggleObjectButton: props.toggleObjectButton,
+    setHighlightLayer: props.setHighlightLayer,
+    isHighlightLayerAdded: props.isHighlightLayerAdded,
+    setIsBufferLayerAdded: props.setIsBufferLayerAdded,
+    isBufferLayerAdded: props.isBufferLayerAdded,
+    highlightSource: props.highlightSource,
+    bufferSource: props.bufferSource,
+    highlightLayer: props.highlightLayer,
+    bufferLayer: props.bufferLayer,
   });
-
-  useEffect(() => {
-    if (!props.pluginShown) {
-      bufferModel.setActive(false);
-      localObserver.publish("resetViews");
-      bufferModel.highlightSource.clear();
-    }
-  }, [props.pluginShown, bufferModel, localObserver]);
 
   return (
     <BufferView
@@ -30,6 +30,8 @@ function Buffer(props) {
       localObserver={localObserver}
       setToggleObjectButton={props.setToggleObjectButton}
       toggleObjectButton={props.toggleObjectButton}
+      setState={props.setBufferState}
+      state={props.bufferState}
     />
   );
 }

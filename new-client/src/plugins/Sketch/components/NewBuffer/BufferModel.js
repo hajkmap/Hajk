@@ -1,21 +1,22 @@
-import { useState, useEffect } from "react";
+import { useEffect } from "react";
 import GeoJSON from "ol/format/GeoJSON.js";
 import HajkTransformer from "utils/HajkTransformer";
 import { hfetch } from "utils/FetchWrapper";
-import { useSketchLayer } from "plugins/Sketch/SketchContext.js";
 
 const BufferModel = (settings) => {
   const {
-    isHighlightLayerAdded,
+    map,
+    pluginShown,
+    toggleObjectButton,
     setHighlightLayer,
+    isHighlightLayerAdded,
     highlightSource,
-    highlightLayer,
     bufferSource,
+    setIsBufferLayerAdded,
+    isBufferLayerAdded,
+    highlightLayer,
     bufferLayer,
-  } = useSketchLayer();
-
-  const [isBufferLayerAdded, setIsBufferLayerAdded] = useState(false);
-  const { map, pluginShown, toggleObjectButton } = settings;
+  } = settings;
 
   const HT = new HajkTransformer({
     projection: map?.getView()?.getProjection()?.getCode(),
@@ -151,7 +152,6 @@ const BufferModel = (settings) => {
 
     return () => {
       removeClickEvent();
-
       if (
         isHighlightLayerAdded &&
         map.getLayers().getArray().includes(highlightLayer)

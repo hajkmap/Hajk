@@ -1,4 +1,4 @@
-import React, { useEffect, useCallback } from "react";
+import React, { useEffect, useCallback, useMemo } from "react";
 import { styled } from "@mui/material/styles";
 import Grid from "@mui/material/Grid";
 import AddIcon from "@mui/icons-material/AddBox";
@@ -11,7 +11,6 @@ import ToggleButton from "@mui/material/ToggleButton";
 import Tooltip from "@mui/material/Tooltip";
 import { Step, StepContent, StepLabel, Stepper } from "@mui/material";
 import { withSnackbar, useSnackbar } from "notistack";
-import { useSketchLayer } from "plugins/Sketch/SketchContext";
 
 const StyledToggleButton = styled(ToggleButton)(({ theme }) => ({
   width: "100%",
@@ -22,10 +21,16 @@ const StyledToggleButton = styled(ToggleButton)(({ theme }) => ({
 }));
 
 const BufferView = (props) => {
-  const { model, localObserver, setToggleObjectButton, toggleObjectButton } =
-    props;
-  const { contextValue } = useSketchLayer();
+  const {
+    model,
+    localObserver,
+    setToggleObjectButton,
+    toggleObjectButton,
+    setState,
+    state,
+  } = props;
   const { enqueueSnackbar } = useSnackbar();
+  const contextValue = useMemo(() => ({ state, setState }), [state, setState]);
 
   const handleResetViews = useCallback(() => {
     return () => {

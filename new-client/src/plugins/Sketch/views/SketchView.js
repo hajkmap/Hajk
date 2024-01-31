@@ -23,9 +23,12 @@ import useUpdateEffect from "hooks/useUpdateEffect";
 
 //Snackbar
 import { useSnackbar } from "notistack";
+import { Vector as VectorSource } from "ol/source.js";
+import { Vector as VectorLayer } from "ol/layer.js";
+import { Circle, Stroke, Fill, Style } from "ol/style.js";
 
 // Context
-import { useSketchLayer } from "../SketchContext";
+// import { useSketchLayer } from "../SketchContext";
 
 // The SketchView is the main view for the Sketch-plugin.
 const SketchView = (props) => {
@@ -259,29 +262,90 @@ const SketchView = (props) => {
     handleKmlFileImported,
   ]);
 
-  // React context, used to keep track of the highlight-layer, localObserver for sketch buffer,
-  // the isSelecting, distance and activeSteps globally in the component tree.
-  const {
-    setHighlightLayer,
-    isHighlightLayerAdded,
-    highlightSource,
-    contextValue,
-  } = useSketchLayer();
+  // State for the buffer sketch component
+  const [bufferState, setBufferState] = React.useState({
+    isSelecting: false,
+    distance: 1000,
+    activeStep: 0,
+  });
+  const [isHighlightLayerAdded, setIsHighlightLayerAdded] =
+    React.useState(false);
+  const [isBufferLayerAdded, setIsBufferLayerAdded] = React.useState(false);
+  const [highlightSource] = React.useState(new VectorSource());
+  const [bufferSource] = React.useState(new VectorSource());
+  const [highlightLayer] = React.useState(
+    new VectorLayer({
+      source: highlightSource,
+      layerType: "system",
+      zIndex: 5000,
+      name: "pluginBufferSelections",
+      caption: "Buffer selection layers",
+      style: new Style({
+        fill: new Fill({
+          color: "rgba(255, 168, 231, 0.47)",
+        }),
+        stroke: new Stroke({
+          color: "rgba(255, 168, 231, 1)",
+          width: 4,
+        }),
+        image: new Circle({
+          radius: 6,
+          fill: new Fill({
+            color: "rgba(255, 168, 231, 0.47)",
+          }),
+          stroke: new Stroke({
+            color: "rgba(255, 168, 231, 1)",
+            width: 1,
+          }),
+        }),
+      }),
+    })
+  );
+  const [bufferLayer] = React.useState(
+    new VectorLayer({
+      source: bufferSource,
+      layerType: "system",
+      zIndex: 5000,
+      name: "pluginBuffers",
+      caption: "Buffer layer",
+      style: new Style({
+        fill: new Fill({
+          color: "rgba(255, 255, 255, 0.5)",
+        }),
+        stroke: new Stroke({
+          color: "rgba(75, 100, 115, 1.5)",
+          width: 4,
+        }),
+        image: new Circle({
+          radius: 6,
+          fill: new Fill({
+            color: "rgba(255, 255, 255, 0.5)",
+          }),
+          stroke: new Stroke({
+            color: "rgba(75, 100, 115, 1.5)",
+            width: 2,
+          }),
+        }),
+      }),
+    })
+  );
 
-  // This useEffect makes sure to clear the highlight-layer when the user changes the activity.
-
+  // This useEffect makes sure to clear the highlight-source when the user changes the activity.
+  const setHighlightLayer = (added) => {
+    setIsHighlightLayerAdded(added);
+  };
   React.useEffect(() => {
-    if (activityId !== "ADD") {
+    if (activityId !== "ADD" || !props.pluginShown) {
       localObserver.publish("resetViews");
       highlightSource.clear();
       setHighlightLayer(false);
     }
   }, [
-    setHighlightLayer,
     isHighlightLayerAdded,
     activityId,
     localObserver,
     highlightSource,
+    props.pluginShown,
   ]);
 
   // This useEffect makes sure to always set the possibility to draw each time the user
@@ -290,7 +354,7 @@ const SketchView = (props) => {
   React.useEffect(() => {
     if (activityId === "ADD" || !props.pluginShown) {
       props.setToggleObjectButton(true);
-      contextValue.setState((prevState) => ({
+      setBufferState((prevState) => ({
         ...prevState,
         isSelecting: false,
       }));
@@ -323,6 +387,16 @@ const SketchView = (props) => {
             pluginShown={props.pluginShown}
             toggleObjectButton={props.toggleObjectButton}
             setToggleObjectButton={props.setToggleObjectButton}
+            setBufferState={setBufferState}
+            bufferState={bufferState}
+            setHighlightLayer={setHighlightLayer}
+            isHighlightLayerAdded={isHighlightLayerAdded}
+            setIsBufferLayerAdded={setIsBufferLayerAdded}
+            isBufferLayerAdded={isBufferLayerAdded}
+            highlightSource={highlightSource}
+            bufferSource={bufferSource}
+            highlightLayer={highlightLayer}
+            bufferLayer={bufferLayer}
           />
         );
       case "DELETE":

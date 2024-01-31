@@ -20,9 +20,6 @@ import { STORAGE_KEY, DEFAULT_MEASUREMENT_SETTINGS } from "./constants";
 // Hooks
 import useCookieStatus from "hooks/useCookieStatus";
 
-// Contexts
-import { SketchProvider } from "./SketchContext";
-
 // Returns the measurement-settings-object from LS if it exists, otherwise it returns
 // the default measurement-settings. The LS might be empty since the user might have chosen
 // not to accept functional cookies.
@@ -200,48 +197,46 @@ const Sketch = (props) => {
   // We're rendering the view in a BaseWindowPlugin, since this is a
   // "standard" plugin.
   return (
-    <SketchProvider>
-      <BaseWindowPlugin
-        {...props}
-        type="Sketch"
-        custom={{
-          icon: <EditIcon />,
-          title: "Rita",
-          description: "Skapa dina helt egna geometrier!",
-          height: "dynamic",
-          width: 350,
-          onWindowHide: onWindowHide,
-          onWindowShow: onWindowShow,
-        }}
-      >
-        <SketchView
-          model={sketchModel}
-          drawModel={drawModel}
-          kmlModel={kmlModel}
-          options={props.options}
-          localObserver={localObserver}
-          globalObserver={props.app.globalObserver}
-          activeDrawType={activeDrawType}
-          activityId={activityId}
-          setActivityId={setActivityId}
-          setPluginShown={setPluginShown}
-          setActiveDrawType={setActiveDrawType}
-          modifyEnabled={modifyEnabled}
-          setModifyEnabled={setModifyEnabled}
-          translateEnabled={translateEnabled}
-          setTranslateEnabled={setTranslateEnabled}
-          editFeature={editFeature}
-          moveFeatures={moveFeatures}
-          measurementSettings={measurementSettings}
-          setMeasurementSettings={setMeasurementSettings}
-          map={props.map}
-          app={props.app}
-          pluginShown={pluginShown}
-          toggleObjectButton={toggleObjectButton}
-          setToggleObjectButton={setToggleObjectButton}
-        />
-      </BaseWindowPlugin>
-    </SketchProvider>
+    <BaseWindowPlugin
+      {...props}
+      type="Sketch"
+      custom={{
+        icon: <EditIcon />,
+        title: "Rita",
+        description: "Skapa dina helt egna geometrier!",
+        height: "dynamic",
+        width: 350,
+        onWindowHide: onWindowHide,
+        onWindowShow: onWindowShow,
+      }}
+    >
+      <SketchView
+        model={sketchModel}
+        drawModel={drawModel}
+        kmlModel={kmlModel}
+        options={props.options}
+        localObserver={localObserver}
+        globalObserver={props.app.globalObserver}
+        activeDrawType={activeDrawType}
+        activityId={activityId}
+        setActivityId={setActivityId}
+        setPluginShown={setPluginShown}
+        setActiveDrawType={setActiveDrawType}
+        modifyEnabled={modifyEnabled}
+        setModifyEnabled={setModifyEnabled}
+        translateEnabled={translateEnabled}
+        setTranslateEnabled={setTranslateEnabled}
+        editFeature={editFeature}
+        moveFeatures={moveFeatures}
+        measurementSettings={measurementSettings}
+        setMeasurementSettings={setMeasurementSettings}
+        map={props.map}
+        app={props.app}
+        pluginShown={pluginShown}
+        toggleObjectButton={toggleObjectButton}
+        setToggleObjectButton={setToggleObjectButton}
+      />
+    </BaseWindowPlugin>
   );
 };
 
