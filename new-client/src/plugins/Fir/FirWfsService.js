@@ -43,10 +43,6 @@ class FirWfsService {
       geometryFilters = geometryFilters[0];
     }
 
-    if (!params.exactMatch) {
-      params.text += "*";
-    }
-
     // lets handle text input, including comma separated strings.
     const stringFiltersArr = [];
     params.text.split(",").forEach((s) => {
