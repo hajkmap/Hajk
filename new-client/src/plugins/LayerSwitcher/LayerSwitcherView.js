@@ -321,27 +321,30 @@ class LayersSwitcherView extends React.PureComponent {
     collapseGroups(this.layerTree);
   };
 
+  // Call this method for each root node in the tree when the filter is cleared
   resetFilterStatus = (node) => {
     node.isFiltered = true; // Mark node as filtered
     node.isExpanded = false; // Collapse all groups by default
+    node.changeIndicator = new Date(); // Update change indicator
 
     if (node.layers) {
-      node.layers.forEach((layer) => this.resetFilterStatus(layer));
+      node.layers.forEach((layer) => {
+        this.resetFilterStatus(layer); // Recursively reset layers
+      });
     }
 
     if (node.groups) {
-      node.groups.forEach((group) => this.resetFilterStatus(group));
+      node.groups.forEach((group) => {
+        this.resetFilterStatus(group); // Recursively reset subgroups
+      });
     }
 
     if (node.subLayers) {
-      node.subLayers.forEach((subLayer) => this.resetFilterStatus(subLayer));
+      node.subLayers.forEach((subLayer) => {
+        this.resetFilterStatus(subLayer); // Recursively reset subLayers
+      });
     }
   };
-
-  // Call this method for each root node in the tree when the filter is cleared
-  if(filterCleared) {
-    this.layerTree.forEach((node) => this.resetFilterStatus(node));
-  }
 
   // Handles filter functionality
   handleFilterValueChange = debounce((value) => {
@@ -352,14 +355,20 @@ class LayersSwitcherView extends React.PureComponent {
     });
 
     if (filterCleared) {
-      this.layerTree.forEach((node) => this.resetFilterStatus(node)); // Reset filter status for all nodes
+      const newLayerTree = this.layerTree.map((node) => {
+        const newNode = { ...node };
+        this.resetFilterStatus(newNode);
+        return newNode;
+      });
+      this.setState({
+        treeData: newLayerTree, // Pass a new object to ensure PureComponent re-renders
+      });
     } else {
-      this.layerTree.forEach((node) => this.filterTree(node, value)); // Apply filter
+      this.layerTree.forEach((node) => this.filterTree(node, value));
+      this.setState({
+        treeData: [...this.layerTree], // Pass a new object to ensure PureComponent re-renders
+      });
     }
-
-    this.setState({
-      treeData: [...this.layerTree], // Update treeData to trigger re-render
-    });
   }, 200);
 
   // Reset input value
