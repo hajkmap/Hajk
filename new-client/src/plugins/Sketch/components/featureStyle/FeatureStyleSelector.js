@@ -226,8 +226,8 @@ export default function FeatureStyleSelector(props) {
         localObserver={props.localObserver}
         globalObserver={props.globalObserver}
         pluginShown={props.pluginShown}
-        toggleObjectButton={props.toggleObjectButton}
-        setToggleObjectButton={props.setToggleObjectButton}
+        toggleObjectBufferBtn={props.toggleObjectBufferBtn}
+        setToggleObjectBufferBtn={props.setToggleObjectBufferBtn}
         setBufferState={props.setBufferState}
         bufferState={props.bufferState}
         setHighlightLayer={props.setHighlightLayer}

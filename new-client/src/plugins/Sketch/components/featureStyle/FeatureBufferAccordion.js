@@ -64,8 +64,8 @@ const FeatureBufferAccordion = (props) => {
                 app={props.app}
                 pluginShown={props.pluginShown}
                 showBufferSlider={props.showBufferSlider}
-                toggleObjectButton={props.toggleObjectButton}
-                setToggleObjectButton={props.setToggleObjectButton}
+                toggleObjectBufferBtn={props.toggleObjectBufferBtn}
+                setToggleObjectBufferBtn={props.setToggleObjectBufferBtn}
                 setBufferState={props.setBufferState}
                 bufferState={props.bufferState}
                 setHighlightLayer={props.setHighlightLayer}

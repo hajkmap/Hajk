@@ -50,8 +50,9 @@ const Sketch = (props) => {
     props.options.visibleAtStart ?? false
   );
 
-  // A toggle-button that allows the user to toggle the choose-object-button in the new Buffer sketch component.
-  const [toggleObjectButton, setToggleObjectButton] = React.useState(true);
+  // A toggle-button that allows the user to toggle the choose-object-button in the new Buffer sketch accordion component.
+  const [toggleObjectBufferBtn, setToggleObjectBufferBtn] =
+    React.useState(true);
 
   // We have to keep track of some measurement-settings
   const [measurementSettings, setMeasurementSettings] = React.useState(
@@ -130,7 +131,7 @@ const Sketch = (props) => {
   React.useEffect(() => {
     // If the plugin is not shown, we have to make sure to disable
     // the potential draw-interaction.
-    if (!pluginShown || !toggleObjectButton) {
+    if (!pluginShown || !toggleObjectBufferBtn) {
       return drawModel.toggleDrawInteraction("");
     }
     // Otherwise, we make sure to toggle the draw-interaction to the correct one.
@@ -146,7 +147,13 @@ const Sketch = (props) => {
       default:
         return drawModel.toggleDrawInteraction("");
     }
-  }, [activeDrawType, activityId, drawModel, pluginShown, toggleObjectButton]);
+  }, [
+    activeDrawType,
+    activityId,
+    drawModel,
+    pluginShown,
+    toggleObjectBufferBtn,
+  ]);
 
   // This effect makes sure to reset the edit- and move-feature if the window is closed,
   // or if the user changes activity. (We don't want to keep the features selected
@@ -184,14 +191,14 @@ const Sketch = (props) => {
   // update the state so that the effect handling the draw-interaction-toggling fires.
   const onWindowHide = () => {
     setPluginShown(false);
-    setToggleObjectButton(false);
+    setToggleObjectBufferBtn(false);
   };
 
   // We're gonna need to catch if the user opens the window, and make sure to
   // update the state so that the effect handling the draw-interaction-toggling fires.
   const onWindowShow = () => {
     setPluginShown(true);
-    setToggleObjectButton(true);
+    setToggleObjectBufferBtn(true);
   };
 
   // We're rendering the view in a BaseWindowPlugin, since this is a
@@ -233,8 +240,8 @@ const Sketch = (props) => {
         map={props.map}
         app={props.app}
         pluginShown={pluginShown}
-        toggleObjectButton={toggleObjectButton}
-        setToggleObjectButton={setToggleObjectButton}
+        toggleObjectBufferBtn={toggleObjectBufferBtn}
+        setToggleObjectBufferBtn={setToggleObjectBufferBtn}
       />
     </BaseWindowPlugin>
   );

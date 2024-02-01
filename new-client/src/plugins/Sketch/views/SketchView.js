@@ -27,9 +27,6 @@ import { Vector as VectorSource } from "ol/source.js";
 import { Vector as VectorLayer } from "ol/layer.js";
 import { Circle, Stroke, Fill, Style } from "ol/style.js";
 
-// Context
-// import { useSketchLayer } from "../SketchContext";
-
 // The SketchView is the main view for the Sketch-plugin.
 const SketchView = (props) => {
   // We want to render the ActivityMenu on the same side as the plugin
@@ -262,7 +259,14 @@ const SketchView = (props) => {
     handleKmlFileImported,
   ]);
 
-  // State for the buffer sketch component
+  /* State for the buffer sketch component
+  - isSelecting: boolean - true if the user is currently selecting features to buffer
+  - distance: number - the distance to buffer the selected features
+  - activeStep: number - the current step in the buffer stepper
+  - isHighlightLayerAdded: boolean - checks if the highlight layer is added to the map
+  - isBufferLayerAdded: boolean - checks if the buffer layer is added to the map
+  - Vector sources and layers for the highlight and buffer layers
+  */
   const [bufferState, setBufferState] = React.useState({
     isSelecting: false,
     distance: 1000,
@@ -330,10 +334,10 @@ const SketchView = (props) => {
     })
   );
 
-  // This useEffect makes sure to clear the highlight-source when the user changes the activity.
   const setHighlightLayer = (added) => {
     setIsHighlightLayerAdded(added);
   };
+  // This useEffect makes sure to clear the highlight-source when the user changes the activity.
   React.useEffect(() => {
     if (activityId !== "ADD" || !props.pluginShown) {
       localObserver.publish("resetViews");
@@ -348,12 +352,11 @@ const SketchView = (props) => {
     props.pluginShown,
   ]);
 
-  // This useEffect makes sure to always set the possibility to draw each time the user
-  // changes back the activityId to "ADD" or closes the plugin window.
+  // This useEffect makes sure to always enable drawing objects every time the draw-tool is opened.
 
   React.useEffect(() => {
     if (activityId === "ADD" || !props.pluginShown) {
-      props.setToggleObjectButton(true);
+      props.setToggleObjectBufferBtn(true);
       setBufferState((prevState) => ({
         ...prevState,
         isSelecting: false,
@@ -385,8 +388,8 @@ const SketchView = (props) => {
             map={props.map}
             app={props.app}
             pluginShown={props.pluginShown}
-            toggleObjectButton={props.toggleObjectButton}
-            setToggleObjectButton={props.setToggleObjectButton}
+            toggleObjectBufferBtn={props.toggleObjectBufferBtn}
+            setToggleObjectBufferBtn={props.setToggleObjectBufferBtn}
             setBufferState={setBufferState}
             bufferState={bufferState}
             setHighlightLayer={setHighlightLayer}

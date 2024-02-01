@@ -2,7 +2,7 @@ import React from "react";
 import BufferView from "./BufferView";
 import BufferModel from "./BufferModel";
 
-// Buffer is the main component for the Buffer sketch accordion.
+// Buffer is the main component for the Buffer sketch.
 // It includes and follows the same structure as the Bufferplugin with a BufferView and a BufferModel.
 
 function Buffer(props) {
@@ -12,7 +12,7 @@ function Buffer(props) {
     map: map,
     localObserver: localObserver,
     pluginShown: props.pluginShown,
-    toggleObjectButton: props.toggleObjectButton,
+    toggleObjectBufferBtn: props.toggleObjectBufferBtn,
     setHighlightLayer: props.setHighlightLayer,
     isHighlightLayerAdded: props.isHighlightLayerAdded,
     setIsBufferLayerAdded: props.setIsBufferLayerAdded,
@@ -28,8 +28,8 @@ function Buffer(props) {
       model={bufferModel}
       app={props.app}
       localObserver={localObserver}
-      setToggleObjectButton={props.setToggleObjectButton}
-      toggleObjectButton={props.toggleObjectButton}
+      toggleObjectBufferBtn={props.toggleObjectBufferBtn}
+      setToggleObjectBufferBtn={props.setToggleObjectBufferBtn}
       setState={props.setBufferState}
       state={props.bufferState}
     />

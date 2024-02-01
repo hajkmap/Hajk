@@ -7,7 +7,7 @@ const BufferModel = (settings) => {
   const {
     map,
     pluginShown,
-    toggleObjectButton,
+    toggleObjectBufferBtn,
     setHighlightLayer,
     isHighlightLayerAdded,
     highlightSource,
@@ -130,7 +130,7 @@ const BufferModel = (settings) => {
     };
 
     if (pluginShown) {
-      if (!toggleObjectButton) {
+      if (!toggleObjectBufferBtn) {
         setupClickEvent();
       }
 

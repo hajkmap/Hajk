@@ -24,8 +24,8 @@ const BufferView = (props) => {
   const {
     model,
     localObserver,
-    setToggleObjectButton,
-    toggleObjectButton,
+    setToggleObjectBufferBtn,
+    toggleObjectBufferBtn,
     setState,
     state,
   } = props;
@@ -49,9 +49,9 @@ const BufferView = (props) => {
         isSelecting: !prevState.isSelecting,
       };
       if (!nextState.isSelecting) {
-        setToggleObjectButton(true);
+        setToggleObjectBufferBtn(true);
       } else {
-        setToggleObjectButton(false);
+        setToggleObjectBufferBtn(false);
       }
 
       return nextState;
@@ -154,7 +154,7 @@ const BufferView = (props) => {
               <Grid item xs={12}>
                 <Tooltip
                   title={
-                    !toggleObjectButton
+                    !toggleObjectBufferBtn
                       ? "Klicka här för att rita objekt"
                       : "Klicka här för att välja objekt"
                   }
@@ -164,7 +164,7 @@ const BufferView = (props) => {
                     selected={contextValue.state.isSelecting}
                     value="isSelecting"
                   >
-                    {!toggleObjectButton ? (
+                    {!toggleObjectBufferBtn ? (
                       <>
                         <RemoveCircleIcon />{" "}
                         <Box sx={{ mt: 0.4, ml: 0.2 }}>Slå av</Box>
@@ -253,7 +253,7 @@ const BufferView = (props) => {
                       ...prevState,
                       activeStep: 0,
                     }));
-                    setToggleObjectButton(true);
+                    setToggleObjectBufferBtn(true);
                     contextValue.setState((prevState) => ({
                       ...prevState,
                       isSelecting: false,
