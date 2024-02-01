@@ -130,8 +130,6 @@ const HajkThemeProvider = ({ activeTools, config, customTheme }) => {
   // to the original one (which requires a re-render).
   const [themeUID, setThemeUID] = useState(Math.random());
 
-  console.log(customTheme);
-
   // Handles theme toggling
   const toggleMUITheme = () => {
     // If there's a override in customTheme.json, toggling is not possible.
