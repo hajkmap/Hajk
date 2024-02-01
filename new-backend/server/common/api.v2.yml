@@ -402,7 +402,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/DocumentsList"
+                $ref: "#/components/schemas/SurveyList"
         5XX:
           description: Internal server error
           content:
@@ -426,7 +426,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/DocumentsList"
+                $ref: "#/components/schemas/SurveyList"
         5XX:
           description: Internal server error
           content:
