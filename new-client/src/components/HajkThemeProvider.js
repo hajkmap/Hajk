@@ -87,6 +87,15 @@ function getTheme(config, customTheme) {
     shape: {
       borderRadius: 2,
     },
+    components: {
+      MuiTooltip: {
+        styleOverrides: {
+          popper: {
+            pointerEvents: "none",
+          },
+        },
+      },
+    },
   };
 
   // Allow even more customization by reading values from each map config
@@ -120,6 +129,8 @@ const HajkThemeProvider = ({ activeTools, config, customTheme }) => {
   // when invoking the document-handler-print we must be able to reset the theme back
   // to the original one (which requires a re-render).
   const [themeUID, setThemeUID] = useState(Math.random());
+
+  console.log(customTheme);
 
   // Handles theme toggling
   const toggleMUITheme = () => {
