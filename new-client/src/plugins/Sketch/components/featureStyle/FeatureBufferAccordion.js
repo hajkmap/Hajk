@@ -2,7 +2,7 @@ import React from "react";
 import { styled } from "@mui/material/styles";
 import { Grid, Typography, Tooltip } from "@mui/material";
 import { Accordion, AccordionDetails, AccordionSummary } from "@mui/material";
-import Buffer from "plugins/Sketch/components/NewBuffer/Buffer";
+import Buffer from "plugins/Sketch/components/SketchBuffer/Buffer";
 
 const StyledAccordionSummary = styled(AccordionSummary)(() => ({
   minHeight: 35,
