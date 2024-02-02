@@ -25,6 +25,7 @@ const defaultState = {
   target: "toolbar",
   instruction: "",
   visibleAtStart: false,
+  visibleAtStartMobile: false,
   visibleForGroups: [],
   activeServices: [],
   editableLayers: {},
@@ -73,6 +74,7 @@ class ToolOptions extends Component {
           instruction: tool.options.instruction,
           activeServices: tool.options.activeServices || [],
           visibleAtStart: tool.options.visibleAtStart,
+          visibleAtStartMobile: tool.options.visibleAtStartMobile,
           selectedSurvey: tool.options.selectedSurvey,
           visibleForGroups:
             tool.options.visibleForGroups || this.state.visibleForGroups,
@@ -250,6 +252,7 @@ class ToolOptions extends Component {
         instruction: this.state.instruction,
         activeServices: this.state.activeServices,
         visibleAtStart: this.state.visibleAtStart,
+        visibleAtStartMobile: this.state.visibleAtStartMobile,
         selectedSurvey: this.state.selectedSurvey,
         visibleForGroups: this.state.visibleForGroups.map(
           Function.prototype.call,
@@ -531,6 +534,19 @@ class ToolOptions extends Component {
             />
             &nbsp;
             <label htmlFor="visibleAtStart">Synlig vid start</label>
+          </div>
+          <div>
+            <input
+              id="visibleAtStartMobile"
+              name="visibleAtStartMobile"
+              type="checkbox"
+              onChange={(e) => {
+                this.handleInputChange(e);
+              }}
+              checked={this.state.visibleAtStartMobile}
+            />
+            &nbsp;
+            <label htmlFor="visibleAtStart">Synlig vid start (mobil)</label>
           </div>
           <div>
         <label>Välj enkät:</label>
