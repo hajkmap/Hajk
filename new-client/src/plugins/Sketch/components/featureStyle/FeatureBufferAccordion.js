@@ -1,10 +1,7 @@
 import React from "react";
 import { styled } from "@mui/material/styles";
-
 import { Grid, Typography, Tooltip } from "@mui/material";
-
 import { Accordion, AccordionDetails, AccordionSummary } from "@mui/material";
-
 import Buffer from "plugins/Sketch/components/NewBuffer/Buffer";
 
 const StyledAccordionSummary = styled(AccordionSummary)(() => ({
@@ -23,20 +20,6 @@ const StyledAccordionSummary = styled(AccordionSummary)(() => ({
   },
 }));
 
-const AccordionSummaryContents = (props) => {
-  // We need to get the string-representation of the supplied color-object
-  // to be used in the color badge... (If it not already a string).
-
-  // Then we'll render everything!
-  return (
-    <Grid container justifyContent="space-between" alignItems="center">
-      <Typography variant="button">{props.title}</Typography>
-    </Grid>
-  );
-};
-
-// The draw-style-accordion includes a summary showing the current draw-style-settings.
-// It also includes tools to update the current style.
 const FeatureBufferAccordion = (props) => {
   return (
     <Accordion size="small" style={{ marginBottom: 8 }}>
@@ -45,10 +28,9 @@ const FeatureBufferAccordion = (props) => {
         title={`Klicka här för att ändra ${props.title.toLowerCase()}.`}
       >
         <StyledAccordionSummary>
-          <AccordionSummaryContents
-            title={props.title}
-            drawModel={props.drawModel}
-          />
+          <Grid container justifyContent="space-between" alignItems="center">
+            <Typography variant="button">{props.title}</Typography>
+          </Grid>
         </StyledAccordionSummary>
       </Tooltip>
       <AccordionDetails style={{ maxWidth: "100%" }}>
