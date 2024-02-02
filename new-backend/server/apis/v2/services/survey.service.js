@@ -135,28 +135,29 @@ class SurveyService {
       // Write the updated content back to the file
       await fs.promises.writeFile(pathToFile, jsonString);
 
-      //Mail answer
-      let subject = "";
-      let bodyHtml = "<html><body>";
-      bodyHtml += "<h1>Svar från undersökningen</h1>";
-      for (const key in body) {
-        bodyHtml += `<br><b>${key}</b>: ${body[key]}`;
-        if (`${key}` === "surveyId") {
-          subject = `${body[key]}`;
+      if (process.env.CITIZEN_DIALOGUE_MAIL_ENABLED === "true") {
+        //Mail answer
+        let subject = "";
+        let bodyHtml = "<html><body>";
+        bodyHtml += "<h1>Svar från undersökningen</h1>";
+        for (const key in body) {
+          bodyHtml += `<br><b>${key}</b>: ${body[key]}`;
+          if (`${key}` === "surveyId") {
+            subject = `${body[key]}`;
+          }
         }
+        bodyHtml += "</body></html>";
+
+        let emailAddress = body.email;
+        if (!(await this.isValidEmail(emailAddress))) {
+          console.error("Ogiltig e-postadress: ", emailAddress);
+          emailAddress = "";
+        } else {
+          emailAddress = body.email;
+        }
+
+        await this.mailNodemailer(emailAddress, bodyHtml, subject);
       }
-      bodyHtml += "</body></html>";
-
-      let emailAddress = body.email;
-      if (!(await this.isValidEmail(emailAddress))) {
-        console.error("Ogiltig e-postadress: ", emailAddress);
-        emailAddress = "";
-      } else {
-        emailAddress = body.email;
-      }
-
-      await this.mailNodemailer(emailAddress, bodyHtml, subject);
-
       // Return a success message
       return { message: "Survey data added to file" };
     } catch (writeError) {
