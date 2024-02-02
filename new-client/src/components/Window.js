@@ -562,6 +562,7 @@ class Window extends React.PureComponent {
                 this.props.scrollable && this.props.disablePadding !== true
                   ? "10px"
                   : "0px",
+              height: "calc(100% - 54px)", // Fix to force correct height.. 54px is unfortunately hardcoded, it's the height of the <header>.
               maxHeight:
                 this.getMaxWindowHeight() - (isMobile === false ? 50 : -30), // Super-hack special case for small screens
             }}
