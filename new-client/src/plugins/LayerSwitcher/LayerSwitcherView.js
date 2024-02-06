@@ -668,7 +668,11 @@ class LayersSwitcherView extends React.PureComponent {
     const { windowVisible } = this.props;
     return (
       <div
-        style={{ display: windowVisible ? "block" : "none", height: "100%" }}
+        style={{
+          display: windowVisible ? "block" : "none",
+          height: "100%",
+          paddingBottom: "48px",
+        }}
       >
         <StyledAppBar
           position="sticky" // Does not work in IE11
