@@ -700,6 +700,11 @@ class EditModel {
   }
 
   activateAdd(geometryType) {
+    this.vectorSource.getFeatures().forEach((feature) => {
+      feature.modification = "removed";
+      feature.setStyle(this.getHiddenStyle());
+    });
+
     this.draw = new Draw({
       source: this.vectorSource,
       style: this.getSketchStyle(),
