@@ -140,14 +140,16 @@ class FirSearchView extends React.PureComponent {
   };
 
   handleMultilinePaste = (text) => {
+    const separationChar = text.indexOf("  ") > -1 ? "  " : "\t";
+
     const notEmptyFilter = (s) => {
-      return s.indexOf("  ") !== 0 && s.trim() !== "";
+      return s.indexOf(separationChar) !== 0 && s.trim() !== "";
     };
     const texts = text
       .split("\n")
       .filter(notEmptyFilter)
       .map((line) => {
-        return line.trim().split("  ")[0];
+        return line.trim().split(separationChar)[0];
       })
       .filter(notEmptyFilter)
       .reduce((acc, text) => {
