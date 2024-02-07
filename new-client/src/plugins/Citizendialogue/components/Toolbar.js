@@ -1,7 +1,7 @@
 import React, { Component } from "react";
 import { styled } from "@mui/material/styles";
 import Button from "@mui/material/Button";
-import DeleteIcon from "@mui/icons-material/Delete";
+//import DeleteIcon from "@mui/icons-material/Delete";
 import ScatterPlotIcon from "@mui/icons-material/ScatterPlot";
 import BorderStyleIcon from "@mui/icons-material/BorderStyle";
 import LinearScaleIcon from "@mui/icons-material/LinearScale";
@@ -207,10 +207,10 @@ class Toolbar extends Component {
         </Grid>
 
         <Grid item xs={12}>
-          <Typography>Editera</Typography>
+          {/*<Typography>Editera</Typography>*/}
         </Grid>
         <Grid item xs={6}>
-          <StyledButton
+          {/*<StyledButton
             variant="contained"
             fullWidth
             onClick={() => {
@@ -222,7 +222,7 @@ class Toolbar extends Component {
           >
             Radera geometri
             <DeleteIcon sx={{ marginLeft: 1 }} />
-          </StyledButton>
+          </StyledButton>*/}
         </Grid>
         <Grid item xs={4}>
           {/* <StyledButton

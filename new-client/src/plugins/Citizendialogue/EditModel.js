@@ -722,7 +722,7 @@ class EditModel {
       // If this is not added, the user will get a zoom-event when closing
       // a polygon drawing.
       setTimeout(() => {
-        //this.deactivateInteraction();
+        this.deactivateInteraction();
       }, 1);
 
       const isMobile = window.innerWidth <= 768;
