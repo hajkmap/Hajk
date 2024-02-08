@@ -17,7 +17,7 @@ function SurveyHandler(props) {
 }, []);
 
   const [survey, setSurvey] = useState({
-    title: "ny_enkät",
+    title: "",
     language: "sv",
     logo: "",
     logoWidth: 60,
@@ -254,7 +254,7 @@ function SurveyHandler(props) {
   };
 
   const validateNewSurveyName = (value) => {
-    var valid = value === "" || /^[A-Za-z0-9_]+$/.test(value);
+    var valid = value === "" || /^[A-Za-z0-9]+$/.test(value);
     return valid;
 };
 
@@ -263,7 +263,7 @@ function SurveyHandler(props) {
     const surveyJson = JSON.stringify(survey);
     
     if (!validateNewSurveyName(surveyName)) {
-      alert('Invalid survey name. Only letters, numbers, and underscores are allowed.');
+      alert('Invalid survey name. Only letters and numbers are allowed.');
       return;
   }
 
@@ -291,7 +291,7 @@ function SurveyHandler(props) {
 };
 
   const emptySurvey = {
-    title: "ny_enkät",
+    title: "",
     language: "sv",
     logo: "",
     logoWidth: 60,
@@ -301,6 +301,7 @@ function SurveyHandler(props) {
   };
 
   const newSurvey = () => {
+    setSelectedQuestion(null);
     setSurvey(emptySurvey);
   }
 
