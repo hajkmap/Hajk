@@ -4,6 +4,11 @@ import { TextField, Tooltip, Typography } from "@mui/material";
 import { STROKE_TYPES } from "../../constants";
 
 const StrokeTypeSelector = (props) => {
+  const filteredStrokeTypes =
+    props.activeDrawType === "Circle" || props.activeDrawType === "Polygon"
+      ? STROKE_TYPES
+      : STROKE_TYPES.filter((strokeType) => strokeType.type !== "none");
+
   return (
     <Paper
       style={{ padding: props.includeContainer !== false ? 8 : 0 }}
@@ -24,15 +29,17 @@ const StrokeTypeSelector = (props) => {
           value={props.strokeType}
           onChange={props.handleStrokeTypeChange}
         >
-          {STROKE_TYPES.map((option) => (
-            <MenuItem key={option.type} value={option.type}>
-              {
-                <Tooltip disableInteractive title={option.tooltip}>
-                  <span style={{ width: "100%" }}>{option.label}</span>
-                </Tooltip>
-              }
-            </MenuItem>
-          ))}
+          {filteredStrokeTypes.map((option) => {
+            return (
+              <MenuItem key={option.type} value={option.type}>
+                {
+                  <Tooltip disableInteractive title={option.tooltip}>
+                    <span style={{ width: "100%" }}>{option.label}</span>
+                  </Tooltip>
+                }
+              </MenuItem>
+            );
+          })}
         </TextField>
       </Grid>
     </Paper>

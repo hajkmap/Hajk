@@ -173,6 +173,9 @@ const FeatureStyleAccordion = (props) => {
               <StrokeTypeSelector
                 handleStrokeTypeChange={props.handleStrokeTypeChange}
                 strokeType={props.strokeType}
+                activeDrawType={props.activeDrawType}
+                setDrawStyle={props.setDrawStyle}
+                drawStyle={props.drawStyle}
               />
             </Grid>
           )}
