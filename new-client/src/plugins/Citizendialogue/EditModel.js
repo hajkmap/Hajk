@@ -731,7 +731,9 @@ class EditModel {
           (window) => window.title === "Medborgardialog"
         );
         if (targetPlugin) {
-          targetPlugin.showWindow();
+          setTimeout(() => {
+            targetPlugin.showWindow();
+          }, 2000);
         }
       }
     });
