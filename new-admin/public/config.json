@@ -27,7 +27,7 @@
     "url_layers": "http://localhost:3002/api/v1/mapconfig/layers",
     "url_layer_settings": "http://localhost:3002/api/v1/settings/wfstlayer",
     "url_default_server": "https://giscloud.se/geoserver/wfs",
-    "projections": ["EPSG:3006", "EPSG:3007", "EPSG:3008"]
+    "projections": ["EPSG:3006", "EPSG:3007", "EPSG:3008", "EPSG:3009"]
   },
   "mapsettings": {
     "url_proxy": "",
@@ -47,6 +47,7 @@
     "url_surveys_load": "http://localhost:3002/api/v2/surveys/",
     "url_surveys_answers_save": "http://localhost:3002/api/v2/surveys/answers/",
     "url_surveys_answers_load": "http://localhost:3002/api/v2/surveys/answers/",
+    "projections": ["EPSG:3006", "EPSG:3007", "EPSG:3008", "EPSG:3009"],
     "authentication_active": false,
     "use_document_folders": true
   },
