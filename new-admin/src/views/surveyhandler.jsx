@@ -258,16 +258,17 @@ function SurveyHandler(props) {
     return valid;
 };
 
+  const [filename, setFilename] = useState("");
+
   const saveSurvey = () => {
-    const surveyName = survey.title;
     const surveyJson = JSON.stringify(survey);
     
-    if (!validateNewSurveyName(surveyName)) {
+    if (!validateNewSurveyName(filename)) {
       alert('Invalid survey name. Only letters and numbers are allowed.');
       return;
   }
 
-    props.model.saveSurvey(surveyName, surveyJson, (response) => {
+    props.model.saveSurvey(filename, surveyJson, (response) => {
       if (typeof response === 'object' && response !== null) {
         let responseString = '';
         for (const [key, value] of Object.entries(response)) {
@@ -286,6 +287,7 @@ function SurveyHandler(props) {
     if (selectedSurveyId) {
         props.model.loadSurvey(selectedSurveyId, (surveyData) => {
             setSurvey(surveyData);
+            setFilename(selectedSurveyId);
         });
     }
 };
@@ -302,6 +304,7 @@ function SurveyHandler(props) {
 
   const newSurvey = () => {
     setSelectedQuestion(null);
+    setFilename("");
     setSurvey(emptySurvey);
   }
 
@@ -323,6 +326,14 @@ function SurveyHandler(props) {
     </select>
         </Grid>
         <Grid item><Button variant="contained" color="primary" onClick={newSurvey}>Ny enkät</Button></Grid>
+        </Grid>
+        <Grid container spacing={2} style={{ marginBottom: '50px' }}>
+        <Grid item><TextField
+          label="Enkätens Filnamn"
+          value={filename}
+          onChange={(e) => setFilename(e.target.value)}
+          style={{ marginRight: '10px' }}
+        /></Grid>
         </Grid>
       <Grid container spacing={2} style={{ marginBottom: '50px' }}>
         <Grid item>

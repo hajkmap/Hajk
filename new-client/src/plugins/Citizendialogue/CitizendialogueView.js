@@ -196,7 +196,11 @@ function CitizendialogueView(props) {
       const specificSurveyAnswerId = props.surveyJsData.surveyAnswerId;
       let featureData = [];
 
-      if (editModel.source.id === "simulated") {
+      if (
+        editModel &&
+        editModel.source &&
+        editModel.source.id === "simulated"
+      ) {
         featureData = editModel.newMapData
           .filter(
             (feature) => feature.surveyAnswerId === specificSurveyAnswerId
