@@ -193,7 +193,7 @@ class LayersSwitcherView extends React.PureComponent {
 
     if (foundInChild) {
       node.isFiltered = true; // Mark node as filtered if any child is filtered
-      node.isExpanded = true; // Expand the group if a child is filtered
+      node.isExpanded = this.options.expandFilteredResults; // Expand the group if a child is filtered
     }
 
     return foundInChild;
