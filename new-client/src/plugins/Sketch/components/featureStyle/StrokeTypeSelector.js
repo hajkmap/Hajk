@@ -9,6 +9,12 @@ const StrokeTypeSelector = (props) => {
       ? STROKE_TYPES
       : STROKE_TYPES.filter((strokeType) => strokeType.type !== "none");
 
+  const initialStrokeType = filteredStrokeTypes.find(
+    (option) => option.type === props.strokeType
+  )
+    ? props.strokeType
+    : filteredStrokeTypes[0]?.type;
+
   return (
     <Paper
       style={{ padding: props.includeContainer !== false ? 8 : 0 }}
@@ -26,7 +32,7 @@ const StrokeTypeSelector = (props) => {
           variant="outlined"
           size="small"
           select
-          value={props.strokeType}
+          value={initialStrokeType}
           onChange={props.handleStrokeTypeChange}
         >
           {filteredStrokeTypes.map((option) => {

@@ -22,7 +22,7 @@ export default function FeatureStyleSelector(props) {
       props.setDrawStyle((prevDrawStyle) => ({
         ...prevDrawStyle,
         strokeType: DEFAULT_DRAW_STYLE_SETTINGS.strokeType,
-        lineDash: STROKE_DASHES.get("solid"),
+        lineDash: STROKE_DASHES.get(DEFAULT_DRAW_STYLE_SETTINGS.strokeType),
         strokeColor: {
           ...props.drawStyle.strokeColor,
           a: DEFAULT_DRAW_STYLE_SETTINGS.strokeColor.a,
