@@ -30,6 +30,7 @@ const defaultState = {
   activeServices: [],
   editableLayers: {},
   selectedSurvey: "",
+  selectedProjection: [],
   tree: "",
 };
 
@@ -581,9 +582,6 @@ class ToolOptions extends Component {
     value={this.state.selectedProjection}
     onChange={this.handleChangeProjections}
   >
-    <MenuItem value="">
-      <em>Inget valt</em>
-    </MenuItem>
     {this.projections.map((projectionCode, index) => (
       <MenuItem key={index} value={projectionCode}>
         {projectionCode}
