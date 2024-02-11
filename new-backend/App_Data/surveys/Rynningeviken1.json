@@ -8,7 +8,7 @@
     "pages": [
       {
         "name": "page1",
-        "elements": [
+        "questions": [
           {
             "type": "html",
             "name": "info",
@@ -18,7 +18,7 @@
       },
       {
         "name": "page2",
-        "elements": [
+        "questions": [
           {
             "type": "text",
             "name": "question1",
@@ -34,7 +34,7 @@
       },
       {
         "name": "page3",
-        "elements": [
+        "questions": [
           {
             "type": "checkbox",
             "name": "question3",
@@ -50,7 +50,7 @@
       },
       {
         "name": "page4",
-        "elements": [
+        "questions": [
           {
             "type": "html",
             "name": "infogeometri",
@@ -69,7 +69,7 @@
       },
       {
         "name": "page5",
-        "elements": [
+        "questions": [
           {
             "type": "geometrypolygon",
             "title": "Rita i kartan (Geometri2)"
@@ -83,7 +83,7 @@
       },
       {
         "name": "page6",
-        "elements": [
+        "questions": [
           {
             "type": "geometrylinestring",
             "title": "Rita i kartan (Geometri3)"
@@ -97,7 +97,7 @@
       },
       {
         "name": "page7",
-        "elements": [
+        "questions": [
           {
             "name": "email",
             "type": "text",
@@ -111,7 +111,7 @@
       },
       {
         "name": "page8",
-        "elements": [
+        "questions": [
           {
             "type": "ranking",
             "name": "smartphone-features",
