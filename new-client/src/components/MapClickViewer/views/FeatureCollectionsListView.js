@@ -23,7 +23,7 @@ const FeatureCollectionsListView = (props) => {
   let highlightTimeout = null;
 
   const handleCollectionClicked = (layerId) => {
-    clearTimeout(highlightTimeout);
+    endHighlight();
     setSelectedFeatureCollection(layerId);
   };
 
