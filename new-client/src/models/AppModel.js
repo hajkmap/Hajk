@@ -696,13 +696,17 @@ class AppModel {
     return [e[0] + Math.abs(e[2] - e[0]) / 2, e[1] + Math.abs(e[3] - e[1]) / 2];
   }
 
-  highlight(feature) {
+  highlight(features) {
     if (this.highlightSource) {
       this.highlightSource.clear();
-      if (feature) {
-        this.highlightSource.addFeature(feature);
+      if (features) {
+        // Let's handle multiple features as array and keep backward compatibility with single features.
+        features = Array.isArray(features) ? features : [features];
+        this.highlightSource.addFeatures(features);
+
         if (window.innerWidth < 600) {
-          let geom = feature.getGeometry();
+          // use first incoming feature to pick center.
+          let geom = features[0].getGeometry();
           if (geom) {
             this.map.getView().setCenter(this.getCenter(geom.getExtent()));
           }
