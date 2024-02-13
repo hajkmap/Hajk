@@ -705,10 +705,12 @@ class AppModel {
         this.highlightSource.addFeatures(features);
 
         if (window.innerWidth < 600) {
-          // use first incoming feature to pick center.
-          let geom = features[0].getGeometry();
-          if (geom) {
-            this.map.getView().setCenter(this.getCenter(geom.getExtent()));
+          // Do we have any geometries? It's needed if you want to get a center.
+          if (features[0].getGeometry()) {
+            // Use the source extent to get a good center.
+            this.map
+              .getView()
+              .setCenter(this.getCenter(this.highlightSource.getExtent()));
           }
         }
       }
