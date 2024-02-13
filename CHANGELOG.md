@@ -5,7 +5,25 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-<!--## [Unreleased]-->
+## [Unreleased]
+
+### Added
+
+- Sketch: Rotate drawn objects [#1455](https://github.com/hajkmap/Hajk/issues/1455)
+- Sketch: Allow changing point size [#1373](https://github.com/hajkmap/Hajk/issues/1373)
+- FIR: Allow comma separated search and multiline search [#1461](https://github.com/hajkmap/Hajk/issues/1461)
+- Infoclick: Highlight in collection view. [#1472](https://github.com/hajkmap/Hajk/issues/1472)
+
+### Fixed
+
+- Sketch: Save error with arrow object [#1450](https://github.com/hajkmap/Hajk/issues/1450)
+- Document Handler: Blockquote and Accordion issues in dark mode [#1457](https://github.com/hajkmap/Hajk/issues/1457)
+- KIR: Now checks if export is allowed [#1441](https://github.com/hajkmap/Hajk/issues/1441)
+- Infoclick: Resize breaks scroll [#1428](https://github.com/hajkmap/Hajk/issues/1428)
+
+### Changed
+
+- Infoclick: Enhance `roundToDecimals` filter [#1445](https://github.com/hajkmap/Hajk/issues/1445)
 
 ## [3.13.24] - 2024-01-17
 
