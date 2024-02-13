@@ -9,16 +9,19 @@ echo "Backend…"
 cd new-backend
 rm -rf node_modules
 npm i
+npm audit fix
 
 echo "Admin…"
 cd ../new-admin
 rm -rf node_modules
 npm i
+npm audit fix
 
 echo "Client…"
 cd ../new-client
 rm -rf node_modules
 npm i
+npm audit fix
 
 cd ..
 
