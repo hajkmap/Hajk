@@ -3,6 +3,7 @@ import { Grid, Typography, TextField } from "@mui/material";
 import { STROKE_DASHES } from "../../constants";
 
 import FeatureStyleAccordion from "./FeatureStyleAccordion";
+import FeaturePointSizeAccordion from "./FeatureSizeAccordion";
 import StrokeTypeSelector from "./StrokeTypeSelector";
 
 export default function FeatureStyleSelector(props) {
@@ -56,6 +57,9 @@ export default function FeatureStyleSelector(props) {
     props.setDrawStyle({ ...props.drawStyle, strokeWidth: value });
   };
 
+  const handleRadiusChange = (event, value) => {
+    props.setDrawStyle({ ...props.drawStyle, radius: value });
+  };
   // We need a handler that can update the text-foreground-color change
   const handleForegroundColorChange = (e) => {
     props.setTextStyle({
@@ -141,6 +145,21 @@ export default function FeatureStyleSelector(props) {
     );
   };
 
+  const renderPointStyleSettings = () => {
+    return (
+      <Grid container>
+        <Grid item xs={12}>
+          <FeaturePointSizeAccordion
+            title="Storlek"
+            showPointSizeSlider
+            drawModel={props.drawModel}
+            radius={props.drawStyle.radius}
+            handleRadiusChange={handleRadiusChange}
+          />
+        </Grid>
+      </Grid>
+    );
+  };
   // The style settings for text-drawings!
   const renderTextStyleSettings = () => {
     return (
@@ -245,6 +264,7 @@ export default function FeatureStyleSelector(props) {
         </Grid>
         <Grid item xs={12}>
           {renderColorSelectors()}
+          {props.activeDrawType === "Point" && renderPointStyleSettings()}
         </Grid>
       </Grid>
     </Grid>

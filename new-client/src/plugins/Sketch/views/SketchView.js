@@ -2,7 +2,11 @@
 import React from "react";
 import { Grid } from "@mui/material";
 // Constants
-import { PLUGIN_MARGIN, MAX_REMOVED_FEATURES } from "../constants";
+import {
+  PLUGIN_MARGIN,
+  MAX_REMOVED_FEATURES,
+  DEFAULT_DRAW_STYLE_SETTINGS,
+} from "../constants";
 // Components
 import ActivityMenu from "../components/ActivityMenu";
 // Views
@@ -214,6 +218,13 @@ const SketchView = (props) => {
       helperSnack.current = enqueueSnackbar(helperText, {
         variant: "default",
         anchorOrigin: { vertical: "bottom", horizontal: "center" },
+      });
+    }
+
+    if (activeDrawType !== "Point") {
+      setDrawStyle({
+        ...drawStyle,
+        radius: DEFAULT_DRAW_STYLE_SETTINGS.radius,
       });
     }
     // Let's make sure to clean-up out current snack when un-mounting!
