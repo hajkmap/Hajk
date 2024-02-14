@@ -504,7 +504,10 @@ class WMSLayerForm extends Component {
             >
               lista
             </a>
-            )
+            ){" "}
+            <abbr title="Använd namnet på en material-icon eller ange url:en till svg ikon.">
+              (?)
+            </abbr>
           </div>
           <div>
             <input
