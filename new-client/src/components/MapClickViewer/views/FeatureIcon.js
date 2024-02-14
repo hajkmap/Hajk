@@ -12,15 +12,33 @@ const FeatureIcon = (props) => {
 
   const swapImgWithSvg = (img) => {
     hfetch(img.src)
-      .then((response) => response.text())
+      .then((response) => {
+        try {
+          return response.text();
+        } catch (error) {
+          console.warn("FeatureIcon swapImgWithSvg", error);
+        }
+      })
       .then((svg) => {
-        const tmpContainer = document.createElement("div");
-        tmpContainer.innerHTML = svg;
-        const svgElement = tmpContainer.querySelector("svg");
-        const placeholderSvg = img.parentElement.querySelector("svg");
-        svgElement.setAttribute("class", placeholderSvg.getAttribute("class"));
-        img.parentElement.replaceChild(svgElement, placeholderSvg);
-        img.remove();
+        try {
+          const tmpContainer = document.createElement("div");
+          tmpContainer.innerHTML = svg;
+          const svgElement = tmpContainer.querySelector("svg");
+          const placeholderSvg = img.parentElement.querySelector("svg");
+          svgElement.setAttribute(
+            "class",
+            placeholderSvg.getAttribute("class")
+          );
+          svgElement.setAttribute(
+            "viewBox",
+            placeholderSvg.getAttribute("viewBox")
+          );
+          img.parentElement.replaceChild(svgElement, placeholderSvg);
+        } catch (error) {
+          console.warn("FeatureIcon swapImgWithSvg", error);
+        } finally {
+          img.remove();
+        }
       });
   };
 
