@@ -1,0 +1,125 @@
+{
+  "title": "SnackaÖrebro",
+  "language": "sv",
+  "logo": "https://www.orebro.se/images/18.242f1fb1556288bfbf1594c/1467796106738/Orebro_se-logo.png",
+  "logoWidth": 60,
+  "logoHeight": 60,
+  "logoPosition": "left",
+  "pages": [
+    {
+      "questions": [
+        {
+          "title": "Startsida",
+          "type": "html",
+          "html": "<p><strong>Välkommen till dialogen SnackaÖrebro!</strong></p>\n\n<p>Vilka är dina favoritplatser? Vad vill du bevara? Vilka platser är mindre bra och vilka tycker du borde utvecklas? Markera dessa platser i kartan och var med att påverka den framtida utvecklingen av Örebro kommun.</p>\n\n<p><strong>Tack för att du är med och utvecklar Örebro kommun!</strong></p>\n\n<p><a href=\"#\">Vill du veta mera om hur enkäten fungerar, klicka här</a></p>\n\n<p>Har du funderingar kring enkäten eller bara vill ”Snacka Örebro” är du välkommen att kontakta oss via e-post: <a href=\"mailto:oversiktligplanering@orebro.se\">oversiktligplanering@orebro.se</a></p>\n"
+        }
+      ]
+    },
+    {
+      "questions": [
+        {
+          "title": "Startbild",
+          "type": "html",
+          "html": "<img src=\"https://www.orebro.se/images/18.7b583e0e18d824c9b2b1ac5/1707816775578/Symboler_%C3%96Pkarta-hj%C3%A4rta.png\" style=\"width: 60px; height: auto; float: left;\"><span style=\"color: green; font-style: italic;\">Favoritplats eller plats att bevara</span>\n\n\n"
+        },
+        {
+          "title": "Lägg till en favoritplats i kartan (geometri1)",
+          "type": "geometrypoint"
+        },
+        {
+          "title": "Vad gillar du med platsen?",
+          "type": "checkbox",
+          "choices": [
+            "Naturen",
+            "Kulturmiljön",
+            "Sport och idrott",
+            "Lugn och ro",
+            "Utflyktsmål",
+            "Bebyggelsen",
+            "Mötesplats och folkliv",
+            "Vardagsmotion",
+            "Lekplats",
+            "Service",
+            "Vill ej uppge"
+          ]
+        },
+        {
+          "title": "Annat du gillar med platsen?",
+          "type": "comment"
+        },
+        {
+          "title": "Varför är platsen viktig för dig?",
+          "type": "comment"
+        }
+      ]
+    },
+    {
+      "questions": [
+        {
+          "title": "Sida3info",
+          "type": "html",
+          "html": "<img src=\"https://www.orebro.se/images/18.7b583e0e18d824c9b2b1ac4/1707816775552/Symboler_%C3%96Pkarta_gl%C3%B6dlampa.png\" style=\"width: 60px; height: auto; float: left;\"><span style=\"color: orange; font-style: italic;\">Plats för utveckling</span>\n\n\n"
+        },
+        {
+          "title": "Lägg till en plats att utveckla (geometri2)",
+          "type": "geometrypoint"
+        },
+        {
+          "title": "På vilket sätt skulle du vilja att platsen utvecklas?",
+          "type": "checkbox",
+          "choices": [
+            "Bostäder",
+            "Skola eller förskola",
+            "Service",
+            "Trafiksäkerhet",
+            "Gång- och cykelförbindelser",
+            "Biltrafik",
+            "Samlingsplatser eller aktivitetsytor",
+            "Friluftsliv",
+            "Park eller grönområde",
+            "Vill ej uppge"
+          ]
+        },
+        {
+          "title": "Har du valt bostäder, vilken typ av bostäder vill du se?",
+          "type": "checkbox",
+          "choices": [
+            "Hyresrätter",
+            "Bostadsrätter",
+            "Seniorbostäder",
+            "Bostäder för unga",
+            "Enfamiljshus",
+            "Radhus/Parhus",
+            "Fritidshus",
+            "Vill ej uppge"
+          ]
+        },
+        {
+          "title": "Annat du vill ska utvecklas på platsen?",
+          "type": "comment"
+        },
+        {
+          "title": "Varför är platsen lämplig för utveckling?",
+          "type": "comment"
+        }
+      ]
+    },
+    {
+      "questions": [
+        {
+          "title": "Sida4info",
+          "type": "html",
+          "html": "<img src=\"https://www.orebro.se/images/18.7b583e0e18d824c9b2b1ac6/1707816775598/Symboler_%C3%96Pkarta-sur%20gubbe.png\" style=\"width: 60px; height: auto; float: left;\"><span style=\"color: red; font-style: italic;\">Mindre bra plats</span>\n\n\n"
+        },
+        {
+          "title": "Lägg till en mindre bra plats i kartan (geometri3)",
+          "type": "geometrypoint"
+        },
+        {
+          "title": "Varför är det en mindre bra plats?",
+          "type": "comment"
+        }
+      ]
+    }
+  ]
+}
