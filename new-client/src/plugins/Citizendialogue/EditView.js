@@ -47,6 +47,9 @@ class EditView extends React.PureComponent {
         activeTool: undefined,
       });
     });
+    this.props.observer.subscribe("deactivateEditInteraction", () => {
+      this.toggleActiveTool("");
+    });
   };
 
   handleVectorLoadingDone = (status) => {

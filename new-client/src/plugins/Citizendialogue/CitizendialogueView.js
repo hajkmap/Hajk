@@ -15,6 +15,8 @@ import EditModel from "./EditModel.js";
 import { Box, Typography } from "@mui/material";
 import AppRegistrationIcon from "@mui/icons-material/AppRegistration";
 
+import { useSnackbar } from "notistack";
+
 //Register new "geometry" component
 ComponentCollection.Instance.add({
   //Unique component name. It becomes a new question type. Please note, it should be written in lowercase.
@@ -85,7 +87,9 @@ ComponentCollection.Instance.add({
 function CitizendialogueView(props) {
   // We're gonna need to use the event observers. Let's destruct them so that we can
   // get a hold of them easily. The observers can be accessed directly via the props:
-  const { globalObserver } = props;
+  const { globalObserver, localObserver } = props;
+
+  const { enqueueSnackbar } = useSnackbar();
 
   // You don’t have to use many state variables. State variables can hold objects and arrays just fine,
   // so you can still group related data together. However, unlike this.setState in a class, updating a
@@ -164,6 +168,16 @@ function CitizendialogueView(props) {
     })();
     // eslint-disable-next-line
   }, []);
+
+  React.useEffect(() => {
+    const snackbarEvent = localObserver.subscribe("showSnackbar", (message) => {
+      enqueueSnackbar(message, { variant: "info" });
+    });
+    // Cleanup function can be created as follows:
+    return () => {
+      localObserver.unsubscribe(snackbarEvent);
+    };
+  }, [localObserver, enqueueSnackbar]);
 
   // Here we create and retrieve the JSON content for the survey, which is loaded when we create the surveyModel.
   const [surveyJSON, setSurveyJSON] = useState(null);

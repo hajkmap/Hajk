@@ -723,6 +723,8 @@ class EditModel {
       // a polygon drawing.
       setTimeout(() => {
         this.deactivateInteraction();
+        this.observer.publish("deactivateEditInteraction");
+        this.observer.publish("showSnackbar", "Geometri tillagd");
       }, 1);
 
       const isMobile = window.innerWidth <= 768;
