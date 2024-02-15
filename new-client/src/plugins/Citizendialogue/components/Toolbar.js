@@ -94,6 +94,16 @@ class Toolbar extends Component {
       "add",
       this.props.editSource.editMultiLine ? "MultiLineString" : "LineString"
     );
+    const isMobile = window.innerWidth <= 768;
+    if (isMobile) {
+      const targetPlugin = this.props.app.windows.find(
+        (window) => window.title === "Medborgardialog"
+      );
+      if (targetPlugin) {
+        targetPlugin.closeWindow();
+        this.props.toggleActiveTool("");
+      }
+    }
   }
 
   onAddPolygonClicked() {
@@ -103,6 +113,16 @@ class Toolbar extends Component {
       "add",
       this.props.editSource.editMultiPolygon ? "MultiPolygon" : "Polygon"
     );
+    const isMobile = window.innerWidth <= 768;
+    if (isMobile) {
+      const targetPlugin = this.props.app.windows.find(
+        (window) => window.title === "Medborgardialog"
+      );
+      if (targetPlugin) {
+        targetPlugin.closeWindow();
+        this.props.toggleActiveTool("");
+      }
+    }
   }
 
   onRemoveClicked() {
