@@ -56,6 +56,7 @@ const BufferView = (props) => {
 
       return nextState;
     });
+    model.activateSelecting(!contextValue.state.isSelecting);
   };
 
   const setDistance = (e) => {
