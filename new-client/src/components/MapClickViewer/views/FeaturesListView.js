@@ -4,14 +4,13 @@ import ListItemButton from "@mui/material/ListItemButton";
 import ListItemText from "@mui/material/ListItemText";
 import ListItemAvatar from "@mui/material/ListItemAvatar";
 import Avatar from "@mui/material/Avatar";
-import Icon from "@mui/material/Icon";
-import ImageIcon from "@mui/icons-material/MapTwoTone";
 import { Divider, Typography } from "@mui/material";
 
 import { useMapClickViewerContext } from "../MapClickViewerContext";
 
 import Breadcrumbs from "./Breadcrumbs";
 import FeatureDetailView from "./FeatureDetailView";
+import FeatureIcon from "./FeatureIcon";
 
 const FeaturesListView = (props) => {
   const {
@@ -75,11 +74,9 @@ const FeaturesListView = (props) => {
                       ...(iconBgColor && { bgcolor: iconBgColor }),
                     }}
                   >
-                    {featureCollection.infoclickIcon.trim().length > 0 ? (
-                      <Icon>{featureCollection.infoclickIcon}</Icon>
-                    ) : (
-                      <ImageIcon />
-                    )}
+                    <FeatureIcon
+                      iconNameOrUrl={featureCollection.infoclickIcon}
+                    />
                   </Avatar>
                 </ListItemAvatar>
                 <ListItemText
