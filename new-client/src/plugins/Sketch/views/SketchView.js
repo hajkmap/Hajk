@@ -271,15 +271,14 @@ const SketchView = (props) => {
     isSelecting: false,
     distance: 1000,
     activeStep: 0,
+    highlightSource: new VectorSource(),
+    bufferSource: new VectorSource(),
+    isHighlightLayerAdded: false,
+    isBufferLayerAdded: false,
   });
-  const [isHighlightLayerAdded, setIsHighlightLayerAdded] =
-    React.useState(false);
-  const [isBufferLayerAdded, setIsBufferLayerAdded] = React.useState(false);
-  const [highlightSource] = React.useState(new VectorSource());
-  const [bufferSource] = React.useState(new VectorSource());
   const [highlightLayer] = React.useState(
     new VectorLayer({
-      source: highlightSource,
+      source: bufferState.highlightSource,
       layerType: "system",
       zIndex: 5000,
       name: "pluginBufferSelections",
@@ -307,7 +306,7 @@ const SketchView = (props) => {
   );
   const [bufferLayer] = React.useState(
     new VectorLayer({
-      source: bufferSource,
+      source: bufferState.bufferSource,
       layerType: "system",
       zIndex: 5000,
       name: "pluginBuffers",
@@ -334,29 +333,30 @@ const SketchView = (props) => {
     })
   );
 
-  const setHighlightLayer = (added) => {
-    setIsHighlightLayerAdded(added);
-  };
   // This useEffect makes sure to clear the highlight-source when the user changes the activity.
   React.useEffect(() => {
     if (activityId !== "ADD" || !props.pluginShown) {
       localObserver.publish("resetViews");
-      highlightSource.clear();
-      setHighlightLayer(false);
+      bufferState.highlightSource.clear();
+      setBufferState({
+        ...bufferState,
+        isHighlightLayerAdded: false,
+      });
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
-    isHighlightLayerAdded,
+    bufferState.isHighlightLayerAdded,
     activityId,
     localObserver,
-    highlightSource,
+    bufferState.highlightSource,
     props.pluginShown,
   ]);
 
-  // This useEffect makes sure to always enable drawing objects every time the draw-tool is opened.
+  // This useEffect makes sure to always enable the possibility to draw every time the draw-tool is opened.
 
   React.useEffect(() => {
     if (activityId === "ADD" || !props.pluginShown) {
-      props.setToggleObjectBufferBtn(true);
+      props.setToggleBufferBtn({ ...props.toggleBufferBtn, toggle: true });
       setBufferState((prevState) => ({
         ...prevState,
         isSelecting: false,
@@ -385,21 +385,13 @@ const SketchView = (props) => {
             setDrawStyle={setDrawStyle}
             textStyle={textStyle}
             setTextStyle={setTextStyle}
-            map={props.map}
-            app={props.app}
             pluginShown={props.pluginShown}
-            toggleObjectBufferBtn={props.toggleObjectBufferBtn}
-            setToggleObjectBufferBtn={props.setToggleObjectBufferBtn}
-            setBufferState={setBufferState}
             bufferState={bufferState}
-            setHighlightLayer={setHighlightLayer}
-            isHighlightLayerAdded={isHighlightLayerAdded}
-            setIsBufferLayerAdded={setIsBufferLayerAdded}
-            isBufferLayerAdded={isBufferLayerAdded}
-            highlightSource={highlightSource}
-            bufferSource={bufferSource}
+            setBufferState={setBufferState}
             highlightLayer={highlightLayer}
             bufferLayer={bufferLayer}
+            toggleBufferBtn={props.toggleBufferBtn}
+            setToggleBufferBtn={props.setToggleBufferBtn}
           />
         );
       case "DELETE":

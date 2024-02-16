@@ -37,24 +37,16 @@ const AddView = (props) => {
         setDrawStyle={props.setDrawStyle}
         textStyle={props.textStyle}
         setTextStyle={props.setTextStyle}
-        map={props.map}
         setPluginShown={props.setPluginShown}
-        app={props.app}
         localObserver={props.localObserver}
         globalObserver={props.globalObserver}
         pluginShown={props.pluginShown}
-        toggleObjectBufferBtn={props.toggleObjectBufferBtn}
-        setToggleObjectBufferBtn={props.setToggleObjectBufferBtn}
-        setBufferState={props.setBufferState}
         bufferState={props.bufferState}
-        setHighlightLayer={props.setHighlightLayer}
-        isHighlightLayerAdded={props.isHighlightLayerAdded}
-        setIsBufferLayerAdded={props.setIsBufferLayerAdded}
-        isBufferLayerAdded={props.isBufferLayerAdded}
-        highlightSource={props.highlightSource}
-        bufferSource={props.bufferSource}
+        setBufferState={props.setBufferState}
         highlightLayer={props.highlightLayer}
         bufferLayer={props.bufferLayer}
+        toggleBufferBtn={props.toggleBufferBtn}
+        setToggleBufferBtn={props.setToggleBufferBtn}
       />
       <FeatureTextSetter
         localObserver={props.localObserver}

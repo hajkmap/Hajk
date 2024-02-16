@@ -3,62 +3,50 @@ import GeoJSON from "ol/format/GeoJSON.js";
 import HajkTransformer from "utils/HajkTransformer";
 import { hfetch } from "utils/FetchWrapper";
 
-const BufferModel = (settings) => {
+const BufferModel = (props) => {
   const {
-    map,
+    toggleBufferBtn,
     pluginShown,
-    toggleObjectBufferBtn,
-    setHighlightLayer,
-    isHighlightLayerAdded,
-    highlightSource,
-    bufferSource,
-    setIsBufferLayerAdded,
-    isBufferLayerAdded,
+    bufferState,
+    setBufferState,
     highlightLayer,
     bufferLayer,
-  } = settings;
-
+  } = props;
   const HT = new HajkTransformer({
-    projection: map?.getView()?.getProjection()?.getCode(),
+    projection: toggleBufferBtn.map?.getView()?.getProjection()?.getCode(),
   });
-
-  const setActive = (active) => {
-    if (active) {
-      activateSelecting(false);
-    }
-  };
 
   const activateSelecting = (v) => {
     if (v === true) {
-      map.clickLock.add("buffer");
+      toggleBufferBtn.map.clickLock.add("buffer");
     } else {
-      map.clickLock.delete("buffer");
+      toggleBufferBtn.map.clickLock.delete("buffer");
     }
   };
 
   const bufferFeatures = (distance) => {
     const arr = [];
 
-    for (const f of highlightSource.getFeatures()) {
+    for (const f of bufferState.highlightSource.getFeatures()) {
       const bufferedFeature = HT.getBuffered(f, distance);
 
       arr.push(bufferedFeature);
     }
-    bufferSource.addFeatures(arr);
+    bufferState.bufferSource.addFeatures(arr);
   };
 
   const clear = () => {
-    highlightSource.clear();
-    bufferSource.clear();
+    bufferState.highlightSource.clear();
+    bufferState.bufferSource.clear();
   };
 
   const handleClick = async (e) => {
     try {
-      if (!map || !map.getView()) {
+      if (!toggleBufferBtn.map || !toggleBufferBtn.map.getView()) {
         return;
       }
 
-      map
+      toggleBufferBtn.map
         .getFeaturesAtPixel(e.pixel, {
           layerFilter: function (l) {
             const name = l.get("name");
@@ -70,10 +58,10 @@ const BufferModel = (settings) => {
         .forEach((f) => {
           const clonedFeature = f.clone();
           clonedFeature.setStyle();
-          highlightSource.addFeature(clonedFeature);
+          bufferState.highlightSource.addFeature(clonedFeature);
         });
 
-      const layers = map.getLayers();
+      const layers = toggleBufferBtn.map.getLayers();
       if (!layers) {
         return;
       }
@@ -89,7 +77,7 @@ const BufferModel = (settings) => {
               .map((queryableSubLayer) => queryableSubLayer.id);
 
             if (e.coordinate !== undefined) {
-              const view = map.getView();
+              const view = toggleBufferBtn.map.getView();
               if (!view) {
                 return;
               }
@@ -110,7 +98,7 @@ const BufferModel = (settings) => {
               const json = await response.json();
               const features = new GeoJSON().readFeatures(json);
 
-              highlightSource.addFeatures(features);
+              bufferState.highlightSource.addFeatures(features);
             }
           } catch (error) {
             console.error("Error in feature info request:", error);
@@ -122,68 +110,57 @@ const BufferModel = (settings) => {
   };
   useEffect(() => {
     const setupClickEvent = () => {
-      map.on("click", handleClick);
+      toggleBufferBtn.map.on("click", handleClick);
     };
 
     const removeClickEvent = () => {
-      map.un("click", handleClick);
+      toggleBufferBtn.map.un("click", handleClick);
     };
 
     if (pluginShown) {
-      if (!toggleObjectBufferBtn) {
+      if (!toggleBufferBtn.toggle) {
         setupClickEvent();
       }
 
       if (
-        !isHighlightLayerAdded &&
-        !map.getLayers().getArray().includes(highlightLayer)
+        !bufferState.isHighlightLayerAdded &&
+        !toggleBufferBtn.map.getLayers().getArray().includes(highlightLayer)
       ) {
-        map.addLayer(highlightLayer);
+        toggleBufferBtn.map.addLayer(highlightLayer);
       }
 
       if (
-        !isBufferLayerAdded &&
-        !map.getLayers().getArray().includes(bufferLayer)
+        !bufferState.isBufferLayerAdded &&
+        !toggleBufferBtn.map.getLayers().getArray().includes(bufferLayer)
       ) {
-        map.addLayer(bufferLayer);
-        setIsBufferLayerAdded(true);
+        toggleBufferBtn.map.addLayer(bufferLayer);
+        setBufferState({ ...bufferState, isBufferLayerAdded: true });
       }
     }
 
     return () => {
       removeClickEvent();
       if (
-        isHighlightLayerAdded &&
-        map.getLayers().getArray().includes(highlightLayer)
+        bufferState.isHighlightLayerAdded &&
+        toggleBufferBtn.map.getLayers().getArray().includes(highlightLayer)
       ) {
-        map.removeLayer(highlightLayer);
-        setHighlightLayer(false);
+        toggleBufferBtn.map.removeLayer(highlightLayer);
+        setBufferState({ ...bufferState, isHighlightLayerAdded: false });
       }
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
-    map,
+    toggleBufferBtn.map,
     highlightLayer,
-    highlightSource,
+    bufferState,
     bufferLayer,
-    bufferSource,
     pluginShown,
-    isHighlightLayerAdded,
-    isBufferLayerAdded,
-    setHighlightLayer,
   ]);
 
   return {
     activateSelecting,
     bufferFeatures,
     clear,
-    highlightSource,
-    bufferSource,
-    highlightLayer,
-    bufferLayer,
-    map,
-    HT,
-    setActive,
   };
 };
 

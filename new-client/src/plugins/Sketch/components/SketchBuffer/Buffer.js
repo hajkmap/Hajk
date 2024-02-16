@@ -6,19 +6,12 @@ import BufferModel from "./BufferModel";
 // It includes and follows the same structure as the Bufferplugin with a BufferView and a BufferModel.
 
 function Buffer(props) {
-  const { localObserver, map } = props;
-
   const bufferModel = BufferModel({
-    map: map,
-    localObserver: localObserver,
+    localObserver: props.localObserver,
     pluginShown: props.pluginShown,
-    toggleObjectBufferBtn: props.toggleObjectBufferBtn,
-    setHighlightLayer: props.setHighlightLayer,
-    isHighlightLayerAdded: props.isHighlightLayerAdded,
-    setIsBufferLayerAdded: props.setIsBufferLayerAdded,
-    isBufferLayerAdded: props.isBufferLayerAdded,
-    highlightSource: props.highlightSource,
-    bufferSource: props.bufferSource,
+    toggleBufferBtn: props.toggleBufferBtn,
+    bufferState: props.bufferState,
+    setBufferState: props.setBufferState,
     highlightLayer: props.highlightLayer,
     bufferLayer: props.bufferLayer,
   });
@@ -27,9 +20,9 @@ function Buffer(props) {
     <BufferView
       model={bufferModel}
       app={props.app}
-      localObserver={localObserver}
-      toggleObjectBufferBtn={props.toggleObjectBufferBtn}
-      setToggleObjectBufferBtn={props.setToggleObjectBufferBtn}
+      localObserver={props.localObserver}
+      toggleBufferBtn={props.toggleBufferBtn}
+      setToggleBufferBtn={props.setToggleBufferBtn}
       setState={props.setBufferState}
       state={props.bufferState}
     />

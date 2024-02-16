@@ -39,25 +39,17 @@ const FeatureBufferAccordion = (props) => {
             <Grid item xs={12} style={{ marginTop: 8 }}>
               <Buffer
                 drawModel={props.drawModel}
-                map={props.map}
                 localObserver={props.localObserver}
                 globalObserver={props.globalObserver}
                 setPluginShown={props.setPluginShown}
-                app={props.app}
                 pluginShown={props.pluginShown}
                 showBufferSlider={props.showBufferSlider}
-                toggleObjectBufferBtn={props.toggleObjectBufferBtn}
-                setToggleObjectBufferBtn={props.setToggleObjectBufferBtn}
-                setBufferState={props.setBufferState}
                 bufferState={props.bufferState}
-                setHighlightLayer={props.setHighlightLayer}
-                isHighlightLayerAdded={props.isHighlightLayerAdded}
-                setIsBufferLayerAdded={props.setIsBufferLayerAdded}
-                isBufferLayerAdded={props.isBufferLayerAdded}
-                highlightSource={props.highlightSource}
-                bufferSource={props.bufferSource}
+                setBufferState={props.setBufferState}
                 highlightLayer={props.highlightLayer}
                 bufferLayer={props.bufferLayer}
+                toggleBufferBtn={props.toggleBufferBtn}
+                setToggleBufferBtn={props.setToggleBufferBtn}
               />
             </Grid>
           )}

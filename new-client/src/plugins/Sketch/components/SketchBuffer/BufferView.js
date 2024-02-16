@@ -24,8 +24,8 @@ const BufferView = (props) => {
   const {
     model,
     localObserver,
-    setToggleObjectBufferBtn,
-    toggleObjectBufferBtn,
+    setToggleBufferBtn,
+    toggleBufferBtn,
     setState,
     state,
   } = props;
@@ -49,9 +49,9 @@ const BufferView = (props) => {
         isSelecting: !prevState.isSelecting,
       };
       if (!nextState.isSelecting) {
-        setToggleObjectBufferBtn(true);
+        setToggleBufferBtn({ ...toggleBufferBtn, toggle: true });
       } else {
-        setToggleObjectBufferBtn(false);
+        setToggleBufferBtn({ ...toggleBufferBtn, toggle: false });
       }
 
       return nextState;
@@ -68,7 +68,7 @@ const BufferView = (props) => {
 
   const handleNext = () => {
     if (contextValue.state.activeStep === 0) {
-      if (model.highlightSource.getFeatures().length === 0) {
+      if (state.highlightSource.getFeatures().length === 0) {
         enqueueSnackbar(
           "Du måste markera minst ett objekt i kartan för att kunna buffra",
           {
@@ -125,8 +125,8 @@ const BufferView = (props) => {
 
   const renderClearButton = () => {
     return (
-      (model.highlightSource.getFeatures().length !== 0 ||
-        model.bufferSource.getFeatures().length !== 0) && (
+      (state.highlightSource.getFeatures().length !== 0 ||
+        state.bufferSource.getFeatures().length !== 0) && (
         <Grid item xs={12}>
           <Button
             fullWidth
@@ -155,7 +155,7 @@ const BufferView = (props) => {
               <Grid item xs={12}>
                 <Tooltip
                   title={
-                    !toggleObjectBufferBtn
+                    !toggleBufferBtn.toggle
                       ? "Klicka här för att rita objekt"
                       : "Klicka här för att välja objekt"
                   }
@@ -165,7 +165,7 @@ const BufferView = (props) => {
                     selected={contextValue.state.isSelecting}
                     value="isSelecting"
                   >
-                    {!toggleObjectBufferBtn ? (
+                    {!toggleBufferBtn.toggle ? (
                       <>
                         <RemoveCircleIcon />{" "}
                         <Box sx={{ mt: 0.4, ml: 0.2 }}>Slå av</Box>
@@ -254,7 +254,10 @@ const BufferView = (props) => {
                       ...prevState,
                       activeStep: 0,
                     }));
-                    setToggleObjectBufferBtn(true);
+                    setToggleBufferBtn({
+                      ...toggleBufferBtn,
+                      toggle: true,
+                    });
                     contextValue.setState((prevState) => ({
                       ...prevState,
                       isSelecting: false,
