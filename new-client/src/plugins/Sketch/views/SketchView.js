@@ -259,7 +259,7 @@ const SketchView = (props) => {
     handleKmlFileImported,
   ]);
 
-  /* State for the buffer sketch component
+  /* State object for the buffer sketch component
   - isSelecting: boolean - true if the user is currently selecting steps in the buffer stepper
   - distance: number - the distance to buffer the selected features
   - activeStep: number - the current step in the buffer stepper

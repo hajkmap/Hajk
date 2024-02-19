@@ -50,11 +50,11 @@ const Sketch = (props) => {
     props.options.visibleAtStart ?? false
   );
 
-  // A toggle-button that allows the user to toggle the choose-object-button in the new Buffer sketch accordion component.
+  // A toggle-button that allows the user to toggle between turn off & choose-object to buffer in the new sketch buffer accordion component.
   const [toggleBufferBtn, setToggleBufferBtn] = React.useState({
-    toggle: false,
-    map: props.map,
-    app: props.app,
+    toggle: false, // Represents the state whether the button is currently toggled on or off
+    map: props.map, // Reference to the map object passed as a prop
+    app: props.app, // Reference to the app object passed as a prop
   });
 
   // We have to keep track of some measurement-settings
@@ -134,6 +134,7 @@ const Sketch = (props) => {
   React.useEffect(() => {
     // If the plugin is not shown, we have to make sure to disable
     // the potential draw-interaction.
+    // If the toggleBufferBtn is not toggled on, we have to make sure to disable the potential draw-interaction to be able to buffer an object.
     if (!pluginShown || !toggleBufferBtn.toggle) {
       return drawModel.toggleDrawInteraction("");
     }
