@@ -10,12 +10,11 @@ import FeaturePointSizeAccordion from "./FeatureSizeAccordion";
 import StrokeTypeSelector from "./StrokeTypeSelector";
 
 export default function FeatureStyleSelector(props) {
-  // set the strokeType automatically to the default value "solid" if activeDrawType is not "Circle" or "Polygon"
+  // Since the strokeType value "none" is only available for the activeDrawType "Circle" and "Polygon" we Automatically want to set the strokeType to the default value "solid"
+  // if activeDrawType is neither "Circle" or "Polygon" and strokeType is "none"
   React.useEffect(() => {
-    // Check if activeDrawType is not "Circle" or "Polygon" and strokeType is not already "solid"
     if (
       !["Circle", "Polygon"]?.includes(props.activeDrawType) &&
-      props.drawStyle.strokeType !== "solid" &&
       props.drawStyle.strokeType === "none"
     ) {
       // Update drawStyle with solid strokeType
