@@ -1,24 +1,10 @@
 {
-  "mapserviceBase": "/api/v1",
-  "proxy": "",
-  "searchProxy": "",
+  "mapserviceBase": "/api/v2",
   "defaultMap": "map_1",
   "showExperimentalLanguageSwitcher": false,
   "lang": "en",
-  "noLayerSwitcherMessage": "This map has no layer switcher, which indicates that you are not allowed to use this map!",
-  "networkErrorMessage": "Nätverksfel. Försök att ladda om sidan genom att trycka på F5.",
-  "parseErrorMessage": "Konfigurationsfel. Försök att ladda om sidan genom att trycka på F5.",
-  "announcements": [
-    {
-      "id": 1,
-      "active": true,
-      "text": "Hi, this is **Hajk**! 😃 \n\nWe hope you enjoy it. 🚀💯",
-      "showOnlyOnce": false,
-      "maps": ["map_1", "simpleMapConfig"],
-      "timeout": 5000,
-      "startTime": "2020-06-29",
-      "stopTime": "2099-12-31",
-      "type": "info"
-    }
-  ]
+  "loadErrorTitle": "Ett fel har inträffat",
+  "loadErrorMessage": "Fel när applikationen skulle läsas in. Du kan försöka att återställa applikationen genom att trycka på knappen nedan. Om felet kvarstår kan du kontakta systemansvarig.",
+  "loadErrorReloadButtonText": "Återställ applikationen",
+  "announcements": []
 }
