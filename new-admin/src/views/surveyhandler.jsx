@@ -23,6 +23,7 @@ function SurveyHandler(props) {
     logoWidth: 60,
     logoHeight: 60,
     logoPosition: "left",
+    showQuestionNumbers: "false",
     pages: [{ questions: [] }]
   });
 
@@ -299,6 +300,7 @@ function SurveyHandler(props) {
     logoWidth: 60,
     logoHeight: 60,
     logoPosition: "left",
+    showQuestionNumbers: "false",
     pages: [{ questions: [] }]
   };
 

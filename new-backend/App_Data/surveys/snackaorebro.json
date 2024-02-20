@@ -5,6 +5,7 @@
   "logoWidth": 60,
   "logoHeight": 60,
   "logoPosition": "left",
+  "showQuestionNumbers": "false",
   "pages": [
     {
       "questions": [
@@ -118,6 +119,59 @@
         {
           "title": "Varför är det en mindre bra plats?",
           "type": "comment"
+        }
+      ]
+    },
+    {
+      "questions": [
+        {
+          "title": "Personliga frågor",
+          "type": "html",
+          "html": "<h4>Personliga frågor</h4>"
+        },
+        {
+          "title": "Kön",
+          "type": "radiogroup",
+          "choices": [
+            "Kvinna",
+            "Man",
+            "Hen",
+            "Inget av alternativen passar mig",
+            "Vill ej uppge"
+          ]
+        },
+        {
+          "title": "Ålder",
+          "type": "radiogroup",
+          "choices": [
+            "Under 13",
+            "13 – 17",
+            "18 – 24",
+            "25 – 34",
+            "35 – 44",
+            "45 – 54",
+            "55 – 64",
+            "65 – 74",
+            "75 – 84",
+            "85 +",
+            "Vill ej uppge"
+          ]
+        },
+        {
+          "title": "Var bor du?",
+          "type": "radiogroup",
+          "choices": [
+            "Hovsta",
+            "Ekeby-Almby",
+            "Övriga Örebro kommun",
+            "Utanför Örebro kommun",
+            "Vill ej uppge"
+          ]
+        },
+        {
+          "title": "Övrigt",
+          "type": "html",
+          "html": "Information om hur Örebro kommun behandlar personuppgifter hittar du på <a href=\"https://www.orebro.se/gdpr\" target=\"_blank\">www.orebro.se/gdpr</a> Dina svar är anonyma så tänk på att inte ange personuppgifter på dig eller någon annan när du besvara enkäten.   "
         }
       ]
     }
