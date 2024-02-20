@@ -187,27 +187,6 @@ export default function LayerItem({
   );
 
   useEffect(() => {
-    const listenToZoomChange = (bListen) => {
-      if (!layerUsesMinMaxZoom()) return;
-
-      const eventName = "core.zoomEnd";
-      if (bListen && !zoomEndListener) {
-        setZoomEndListener(
-          app.globalObserver.subscribe(eventName, zoomEndHandler)
-        );
-      } else {
-        if (zoomEndListener) {
-          app.globalObserver.unsubscribe(eventName, zoomEndListener);
-          setZoomEndListener(null);
-        }
-      }
-    };
-
-    if (layer.get("visible")) {
-      triggerZoomCheck(false, true);
-    }
-    listenToZoomChange(layer.get("visible"));
-
     // Handler for zoom change event.
     const handleChange = () => {
       // Check if the layer is currently visible.
@@ -217,20 +196,25 @@ export default function LayerItem({
       }
     };
 
-    if (
-      (visibleSubLayers !== undefined &&
-        !visibleSubLayers &&
-        visibleMinMaxZoomLayers.length > 0) ||
-      (layer.get("visible") !== undefined &&
-        !layer.get("visible") &&
-        visibleMinMaxZoomLayers.length > 0)
-    ) {
-      setIsGroupHidden(true);
-    }
+    // Subscribe to zoom changes.
+    const zoomChangeSubscription = app.globalObserver.subscribe(
+      "core.zoomEnd",
+      handleChange
+    );
 
+    // Call handleChange immediately to ensure initial state is correct.
+    handleChange();
+
+    // Cleanup function to unsubscribe when the component unmounts or dependencies change.
+    return () =>
+      app.globalObserver.unsubscribe("core.zoomEnd", zoomChangeSubscription);
+  }, [app.globalObserver, layer, triggerZoomCheck]);
+
+  useEffect(() => {
     const zoom = app.map.getView().getZoom();
     const lprops = layer.getProperties();
     const layerIsZoomVisible = zoom > lprops.minZoom && zoom <= lprops.maxZoom;
+
     if (
       !layerIsZoomVisible &&
       minMaxZoomAlertOnToggleOnly &&
@@ -239,50 +223,43 @@ export default function LayerItem({
       setShowSnackbarOnClick(true);
     }
 
-    // Subscribe to zoom changes.
-    const zoomChangeSubscription = app.globalObserver.subscribe(
-      "core.zoomEnd",
-      handleChange
-    );
-
-    // Subscribe to layer load status.
-    const loadStatusSubscription = app.globalObserver.subscribe(
-      "layerswitcher.wmsLayerLoadStatus",
-      (d) => {
-        wmsLayerLoadStatus !== "loaderror" &&
-          layer.get("name") === d.id &&
-          setWmsLayerLoadStatus(d.status);
-      }
-    );
-
-    // Call handleChange immediately.
-    handleChange();
-
-    // Clean up by unsubscribing when the component unmounts.
-    return () => {
-      app.globalObserver.unsubscribe("core.zoomEnd", zoomChangeSubscription);
-      app.globalObserver.unsubscribe(
-        "layerswitcher.wmsLayerLoadStatus",
-        loadStatusSubscription
-      );
-    };
+    if (
+      (visibleSubLayers !== undefined &&
+        !visibleSubLayers &&
+        visibleMinMaxZoomLayers.length > 0) ||
+      (!layer.get("visible") && visibleMinMaxZoomLayers.length > 0)
+    ) {
+      setIsGroupHidden(true);
+    }
   }, [
-    app.globalObserver,
     app.map,
     layer,
     minMaxZoomAlertOnToggleOnly,
     subLayerClicked,
-    visibleMinMaxZoomLayers.length,
     visibleSubLayers,
-    wmsLayerLoadStatus,
-    removeFromSnackbar,
-    zoomEndListener,
-    layerUsesMinMaxZoom,
-    triggerZoomCheck,
-    zoomEndHandler,
-    addValue,
-    removeValue,
+    visibleMinMaxZoomLayers.length,
   ]);
+
+  useEffect(() => {
+    const handleLoadStatusChange = (d) => {
+      if (wmsLayerLoadStatus !== "loaderror" && layer.get("name") === d.id) {
+        setWmsLayerLoadStatus(d.status);
+      }
+    };
+
+    // Subscribe to layer load status.
+    const loadStatusSubscription = app.globalObserver.subscribe(
+      "layerswitcher.wmsLayerLoadStatus",
+      handleLoadStatusChange
+    );
+
+    // Cleanup function to unsubscribe when the component unmounts or if the relevant dependencies change.
+    return () =>
+      app.globalObserver.unsubscribe(
+        "layerswitcher.wmsLayerLoadStatus",
+        loadStatusSubscription
+      );
+  }, [app.globalObserver, layer, wmsLayerLoadStatus]);
 
   useEffect(() => {
     if (isGroupHidden) {
