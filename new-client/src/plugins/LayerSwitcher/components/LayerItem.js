@@ -50,8 +50,6 @@ export default function LayerItem({
   const [wmsLayerLoadStatus, setWmsLayerLoadStatus] = useState("ok");
   // State for layer zoom visibility
   const [zoomVisible, setZoomVisible] = useState(true);
-  // Keep zoomend listener in state
-  const [zoomEndListener, setZoomEndListener] = useState();
   // State that toggles legend collapse
   const [legendIsActive, setLegendIsActive] = useState(false);
   const [visibleMinMaxZoomLayers, setVisibleMinMaxZoomLayers] = useState([]);

@@ -241,17 +241,6 @@ class LayersSwitcherView extends React.PureComponent {
     }
   };
 
-  updateNode = (node, isFiltered, compare) => {
-    if (!compare) {
-      // Indicate that node has changed
-      node.changeIndicator = new Date();
-    } else if (node.isFiltered !== isFiltered) {
-      // Indicate that node has changed
-      node.changeIndicator = new Date();
-    }
-    node.isFiltered = isFiltered;
-  };
-
   // Handles click on Favorites button and backbutton
   handleFavoritesViewToggle = (layerPackageState) => {
     layerPackageState?.event?.stopPropagation();
