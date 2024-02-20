@@ -160,43 +160,62 @@ class LayersSwitcherView extends React.PureComponent {
   };
 
   // Filter tree data
-  filterTree = (node, filterText) => {
+  filterTree = (node, filterText, parentMatch = false) => {
     let foundInChild = false;
 
-    if (
+    // Determine if the current node matches the filter
+    const selfMatch =
       filterText === "" ||
-      node.name.toLocaleLowerCase().includes(filterText.toLocaleLowerCase())
-    ) {
-      this.updateNode(node, true, false); // Update node and its children
+      node.name.toLocaleLowerCase().includes(filterText.toLocaleLowerCase());
+
+    // If the current node matches the filter criteria or if there is a parent match, mark it as filtered
+    if (parentMatch || selfMatch) {
+      this.updateNode(node, true, true); // Update node to be visible
       foundInChild = true;
-    } else {
-      this.updateNode(node, false, true); // Update node only
     }
 
+    // Process child layers
     if (node.layers) {
       node.layers.forEach((layer) => {
-        foundInChild = this.filterTree(layer, filterText) || foundInChild;
+        // Pass true if either parent matches, or this node itself matches
+        foundInChild =
+          this.filterTree(layer, filterText, parentMatch || selfMatch) ||
+          foundInChild;
       });
     }
 
+    // Process child groups
     if (node.groups) {
       node.groups.forEach((group) => {
-        foundInChild = this.filterTree(group, filterText) || foundInChild;
+        // Pass true if either parent matches, or this node itself matches
+        foundInChild =
+          this.filterTree(group, filterText, parentMatch || selfMatch) ||
+          foundInChild;
       });
     }
 
-    if (node.subLayers) {
-      node.subLayers.forEach((subLayer) => {
-        foundInChild = this.filterTree(subLayer, filterText) || foundInChild;
-      });
+    // Update the current node based on child findings or its own match status
+    this.updateNode(node, foundInChild || selfMatch, false);
+
+    // If a parentMatch exists or the current node itself is a match, check the expandFilteredResults setting to determine if the node should be expanded
+    if (foundInChild || selfMatch) {
+      if (this.options.expandFilteredResults) {
+        node.isExpanded = true; // Expand the node if expandFilteredResults is true
+      }
     }
 
-    if (foundInChild) {
-      node.isFiltered = true; // Mark node as filtered if any child is filtered
-      node.isExpanded = this.options.expandFilteredResults; // Expand the group if a child is filtered
-    }
+    return foundInChild || selfMatch;
+  };
 
-    return foundInChild;
+  updateNode = (node, isFiltered, compare) => {
+    if (!compare) {
+      // Indicate that node has changed
+      node.changeIndicator = new Date();
+    } else if (node.isFiltered !== isFiltered) {
+      // Indicate that node has changed
+      node.changeIndicator = new Date();
+    }
+    node.isFiltered = isFiltered;
   };
 
   setChildrenFiltered = (node, value) => {
@@ -327,48 +346,33 @@ class LayersSwitcherView extends React.PureComponent {
     node.isExpanded = false; // Collapse all groups by default
     node.changeIndicator = new Date(); // Update change indicator
 
+    // Recursively reset status for layers, groups, and subLayers
     if (node.layers) {
-      node.layers.forEach((layer) => {
-        this.resetFilterStatus(layer); // Recursively reset layers
-      });
+      node.layers.forEach((layer) => this.resetFilterStatus(layer));
     }
-
     if (node.groups) {
-      node.groups.forEach((group) => {
-        this.resetFilterStatus(group); // Recursively reset subgroups
-      });
+      node.groups.forEach((group) => this.resetFilterStatus(group));
     }
-
     if (node.subLayers) {
-      node.subLayers.forEach((subLayer) => {
-        this.resetFilterStatus(subLayer); // Recursively reset subLayers
-      });
+      node.subLayers.forEach((subLayer) => this.resetFilterStatus(subLayer));
     }
   };
 
   // Handles filter functionality
   handleFilterValueChange = debounce((value) => {
     const filterCleared = value === "" && this.state.filterValue !== "";
-
-    this.setState({
-      filterValue: value,
-    });
+    this.setState({ filterValue: value });
 
     if (filterCleared) {
-      const newLayerTree = this.layerTree.map((node) => {
-        const newNode = { ...node };
-        this.resetFilterStatus(newNode);
-        return newNode;
-      });
-      this.setState({
-        treeData: newLayerTree, // Pass a new object to ensure PureComponent re-renders
-      });
+      // Reset filter status when filter is cleared
+      this.layerTree.forEach((node) => this.resetFilterStatus(node));
     } else {
+      // Apply filter and propagate matches
       this.layerTree.forEach((node) => this.filterTree(node, value));
-      this.setState({
-        treeData: [...this.layerTree], // Pass a new object to ensure PureComponent re-renders
-      });
     }
+
+    // Trigger re-render
+    this.setState({ treeData: [...this.layerTree] });
   }, 200);
 
   // Reset input value
