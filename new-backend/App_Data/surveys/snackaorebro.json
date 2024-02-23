@@ -138,7 +138,8 @@
             "Hen",
             "Inget av alternativen passar mig",
             "Vill ej uppge"
-          ]
+          ],
+          "isRequired": true
         },
         {
           "title": "Ålder",
@@ -155,7 +156,8 @@
             "75 – 84",
             "85 +",
             "Vill ej uppge"
-          ]
+          ],
+          "isRequired": true
         },
         {
           "title": "Var bor du?",
@@ -166,7 +168,8 @@
             "Övriga Örebro kommun",
             "Utanför Örebro kommun",
             "Vill ej uppge"
-          ]
+          ],
+          "isRequired": true
         },
         {
           "title": "Övrigt",

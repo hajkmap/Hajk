@@ -79,6 +79,16 @@ function SurveyHandler(props) {
         <MenuItem value="geometrylinestring">Geometriverktyget linje</MenuItem>
         <MenuItem value="geometrypolygon">Geometriverktyget yta</MenuItem>
         </Select>
+        <div>
+        <label>
+          Obligatorisk:
+            <input
+            type="checkbox"
+            checked={question.isRequired || false}
+            onChange={(e) => updateQuestion(selectedQuestion.pageIndex, selectedQuestion.questionIndex, 'isRequired', e.target.checked)}
+            />
+        </label>
+        </div>
         {question.type === "checkbox" || question.type === "radiogroup" ? (
         <div>
           {question.choices && question.choices.map((choice, index) => (
@@ -140,7 +150,7 @@ function SurveyHandler(props) {
   };
 
   const addQuestion = (pageIndex, type = "text") => {
-    let newQuestion = { title: "", type };
+    let newQuestion = { title: "", type, isRequired: false };
     if (type === "checkbox" || type === "radiogroup") {
       newQuestion.choices = [];
     } else if (type === "html") {
@@ -156,38 +166,39 @@ function SurveyHandler(props) {
     setSelectedQuestion({ pageIndex, questionIndex: newQuestionIndex });
     setSurvey({ ...survey, pages: newPages });
   };
-  
+
   const updateQuestion = (pageIndex, questionIndex, field, value) => {
     const newPages = survey.pages.map((page, pIndex) => {
-      if (pIndex === pageIndex) {
-        const newQuestions = page.questions.map((question, qIndex) => {
-          if (qIndex === questionIndex) {
-            let updatedQuestion = { ...question };
-            if (value === "email") {
-              updatedQuestion = {
-                ...updatedQuestion,
-                type: "text",
-                inputType: "email",
-                name: "email",
-                placeholder: "namn@exempel.se"
-              };
-            } else {
-              updatedQuestion = { ...updatedQuestion, [field]: value };
-              if (field === "type" && value !== "text") {
-                delete updatedQuestion.inputType;
-                delete updatedQuestion.name;
-              }
-            }
-            return updatedQuestion;
-          }
-          return question;
-        });
-        return { ...page, questions: newQuestions };
-      }
-      return page;
+        if (pIndex === pageIndex) {
+            const newQuestions = page.questions.map((question, qIndex) => {
+                if (qIndex === questionIndex) {
+                    let updatedQuestion = { ...question, [field]: value };
+                    if (field === "type") {
+                        if (value === "email") {
+                            updatedQuestion = {
+                                ...updatedQuestion,
+                                type: "text",
+                                inputType: "email",
+                                name: "email",
+                                placeholder: "namn@exempel.se"
+                            };
+                        } else {
+                            delete updatedQuestion.inputType;
+                            delete updatedQuestion.name;
+                        }
+                    }
+
+                    return updatedQuestion;
+                }
+                return question;
+            });
+            return { ...page, questions: newQuestions };
+        }
+        return page;
     });
     setSurvey({ ...survey, pages: newPages });
-  };
+};
+
   
 
   const addChoice = (pageIndex, questionIndex) => {
@@ -265,7 +276,7 @@ function SurveyHandler(props) {
     const surveyJson = JSON.stringify(survey);
     
     if (!validateNewSurveyName(filename)) {
-      alert('Invalid survey name. Only letters and numbers are allowed.');
+      alert('Fel filnamn. Endast siffror och bokstäver.');
       return;
   }
 
