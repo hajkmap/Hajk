@@ -169,37 +169,35 @@ function SurveyHandler(props) {
 
   const updateQuestion = (pageIndex, questionIndex, field, value) => {
     const newPages = survey.pages.map((page, pIndex) => {
-        if (pIndex === pageIndex) {
-            const newQuestions = page.questions.map((question, qIndex) => {
-                if (qIndex === questionIndex) {
-                    let updatedQuestion = { ...question, [field]: value };
-                    if (field === "type") {
-                        if (value === "email") {
-                            updatedQuestion = {
-                                ...updatedQuestion,
-                                type: "text",
-                                inputType: "email",
-                                name: "email",
-                                placeholder: "namn@exempel.se"
-                            };
-                        } else {
-                            delete updatedQuestion.inputType;
-                            delete updatedQuestion.name;
-                        }
-                    }
-
-                    return updatedQuestion;
+      if (pIndex === pageIndex) {
+        const newQuestions = page.questions.map((question, qIndex) => {
+          if (qIndex === questionIndex) {
+            let updatedQuestion = { ...question, [field]: value };
+              if (field === "type") {
+                if (value === "email") {
+                  updatedQuestion = {
+                  ...updatedQuestion,
+                  type: "text",
+                  inputType: "email",
+                  name: "email",
+                  placeholder: "namn@exempel.se"
+                  };
+                } else {
+                  delete updatedQuestion.inputType;
+                  delete updatedQuestion.name;
                 }
-                return question;
-            });
-            return { ...page, questions: newQuestions };
-        }
-        return page;
+              }
+
+              return updatedQuestion;
+          }
+        return question;
+      });
+      return { ...page, questions: newQuestions };
+      }
+      return page;
     });
     setSurvey({ ...survey, pages: newPages });
-};
-
-  
+  };
 
   const addChoice = (pageIndex, questionIndex) => {
     const newPages = survey.pages.map((page, pIndex) => {
