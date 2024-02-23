@@ -30,7 +30,6 @@ const defaultState = {
   activeServices: [],
   editableLayers: {},
   selectedSurvey: "",
-  selectedProjection: [],
   tree: "",
 };
 
@@ -48,7 +47,6 @@ class ToolOptions extends Component {
     this.loadLayers = this.loadLayers.bind(this);
 
     this.availableSurveys = [];
-    this.projections = this.props.model.attributes.config.projections || [];
 
     this.listAllAvailableSurveys((list) => {
       this.availableSurveys = list;
@@ -78,7 +76,6 @@ class ToolOptions extends Component {
           visibleAtStart: tool.options.visibleAtStart,
           visibleAtStartMobile: tool.options.visibleAtStartMobile,
           selectedSurvey: tool.options.selectedSurvey,
-          selectedProjection: tool.options.selectedProjection,
           visibleForGroups:
             tool.options.visibleForGroups || this.state.visibleForGroups,
         },
@@ -257,7 +254,6 @@ class ToolOptions extends Component {
         visibleAtStart: this.state.visibleAtStart,
         visibleAtStartMobile: this.state.visibleAtStartMobile,
         selectedSurvey: this.state.selectedSurvey,
-        selectedProjection: this.state.selectedProjection,
         visibleForGroups: this.state.visibleForGroups.map(
           Function.prototype.call,
           String.prototype.trim
@@ -395,10 +391,6 @@ class ToolOptions extends Component {
     this.setState({
       selectedSurvey: event.target.value,
     });
-  };
-
-  handleChangeProjections = (event) => {
-    this.setState({ selectedProjection: event.target.value });
   };
 
   /**
@@ -574,22 +566,6 @@ class ToolOptions extends Component {
           ))}
         </Select>
       </div>
-      <div>
-  <label>Välj projektion:</label>
-  <Select
-    labelId="select-projection"
-    id="simple-select-projection"
-    value={this.state.selectedProjection}
-    onChange={this.handleChangeProjections}
-  >
-    {this.projections.map((projectionCode, index) => (
-      <MenuItem key={index} value={projectionCode}>
-        {projectionCode}
-      </MenuItem>
-    ))}
-  </Select>
-</div>
-
           <div>
             <label htmlFor="instruction">
               Instruktion{" "}

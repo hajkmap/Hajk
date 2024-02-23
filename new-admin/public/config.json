@@ -47,7 +47,6 @@
     "url_surveys_load": "http://localhost:3002/api/v2/surveys/",
     "url_surveys_answers_save": "http://localhost:3002/api/v2/surveys/answers/",
     "url_surveys_answers_load": "http://localhost:3002/api/v2/surveys/answers/",
-    "projections": ["EPSG:3006", "EPSG:3007", "EPSG:3008", "EPSG:3009"],
     "authentication_active": false,
     "use_document_folders": true
   },

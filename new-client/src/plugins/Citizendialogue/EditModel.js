@@ -574,7 +574,7 @@ class EditModel {
         internalLayerName: "Simulerad Medborgardialog",
         url: "http://localhost:3000/simulated",
         uri: "http://www.opengis.net/wfs",
-        projection: this.options.selectedProjection,
+        projection: this.map.getView().getProjection().getCode(),
         type: "edit",
         layers: ["SIMULATED_LAYER"],
         editLine: true,
