@@ -136,14 +136,18 @@ class SurveyService {
       await fs.promises.writeFile(pathToFile, jsonString);
 
       if (process.env.CITIZEN_DIALOGUE_MAIL_ENABLED === "true") {
-        //Mail answer
+        // Mail answer
         let subject = "";
         let bodyHtml = "<html><body>";
         bodyHtml += "<h1>Svar från undersökningen</h1>";
         for (const key in body) {
-          bodyHtml += `<br><b>${key}</b>: ${body[key]}`;
-          if (`${key}` === "surveyId") {
-            subject = `${body[key]}`;
+          const value =
+            typeof body[key] === "object" && body[key] !== null
+              ? JSON.stringify(body[key])
+              : body[key];
+          bodyHtml += `<br><b>${key}</b>: ${value}`;
+          if (key === "surveyId") {
+            subject = value;
           }
         }
         bodyHtml += "</body></html>";
@@ -158,6 +162,7 @@ class SurveyService {
 
         await this.mailNodemailer(emailAddress, bodyHtml, subject);
       }
+
       // Return a success message
       return { message: "Survey data added to file" };
     } catch (writeError) {

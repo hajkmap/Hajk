@@ -226,9 +226,26 @@ function CitizendialogueView(props) {
       }
 
       setShowEditView({ show: false });
+
+      const resultData = [];
+      for (const key in survey.data) {
+        const question = survey.getQuestionByName(key);
+        if (!!question) {
+          const item = {
+            //name: key,
+            title: question.title,
+            value: question.value,
+            //title: question.title,
+            //displayValue: question.displayValue,
+          };
+          resultData.push(item);
+        }
+      }
+
       const combinedData = {
         ...props.surveyJsData,
-        ...survey.data,
+        //...survey.data,
+        ...resultData,
         featureData,
       };
       props.model.handleOnComplete(combinedData);
