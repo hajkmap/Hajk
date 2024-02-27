@@ -136,18 +136,27 @@ class SurveyService {
       await fs.promises.writeFile(pathToFile, jsonString);
 
       if (process.env.CITIZEN_DIALOGUE_MAIL_ENABLED === "true") {
-        // Mail answer
         let subject = "";
         let bodyHtml = "<html><body>";
         bodyHtml += "<h1>Svar från undersökningen</h1>";
         for (const key in body) {
-          const value =
-            typeof body[key] === "object" && body[key] !== null
-              ? JSON.stringify(body[key])
-              : body[key];
-          bodyHtml += `<br><b>${key}</b>: ${value}`;
+          const item = body[key];
+
           if (key === "surveyId") {
-            subject = value;
+            subject = item;
+            bodyHtml += `<br><b>${key}</b>: ${item}`;
+          } else if (
+            key === "surveyAnswerId" ||
+            key === "surveyAnswerDate" ||
+            key === "featureData"
+          ) {
+            let valueDisplay = Array.isArray(item) ? item.join(", ") : item;
+            bodyHtml += `<br><b>${key}</b>: ${valueDisplay}`;
+          } else if (item.title && item.value) {
+            let valueDisplay = Array.isArray(item.value)
+              ? item.value.join(", ")
+              : item.value;
+            bodyHtml += `<br><b>${item.title}</b>: ${valueDisplay}`;
           }
         }
         bodyHtml += "</body></html>";
