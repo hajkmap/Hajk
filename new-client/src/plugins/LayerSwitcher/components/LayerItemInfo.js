@@ -93,9 +93,7 @@ export default function LayerItemInfo({ layer, app, chapters }) {
           {/* Infotext */}
           {layerInfo.infoText && (
             <>
-              <Typography variant="subtitle2">
-                {layerInfo.infoTitle || "Title"}
-              </Typography>
+              <Typography variant="subtitle2">{layerInfo.infoTitle}</Typography>
               <Typography
                 variant="body2"
                 dangerouslySetInnerHTML={{
