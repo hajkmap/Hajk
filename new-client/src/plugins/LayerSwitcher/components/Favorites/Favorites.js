@@ -188,7 +188,7 @@ function Favorites({
       .forEach((l) => {
         if (l.get("layerType") === "group") {
           globalObserver.publish("layerswitcher.hideLayer", l);
-        } else {
+        } else if (l.get("layerType") !== "system") {
           l.set("visible", false);
         }
       });
