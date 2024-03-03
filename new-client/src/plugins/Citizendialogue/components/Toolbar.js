@@ -177,7 +177,7 @@ class Toolbar extends Component {
                 type="button"
                 title="Lägg till punkt"
               >
-                Markera plats
+                Markera en plats
                 <ScatterPlotIcon sx={{ marginLeft: 1 }} />
               </StyledButton>
             </Grid>
@@ -197,7 +197,7 @@ class Toolbar extends Component {
                 title="Lägg till linje"
                 selected={this.props.activeTool === "linestring"}
               >
-                Markera sträcka
+                Markera en sträcka
                 <LinearScaleIcon sx={{ marginLeft: 1 }} />
               </StyledButton>
             </Grid>
@@ -219,7 +219,7 @@ class Toolbar extends Component {
                 title="Lägg till yta"
                 selected={this.props.activeTool === "polygon"}
               >
-                Markera område
+                Markera ett område
                 <BorderStyleIcon sx={{ marginLeft: 1 }} />
               </StyledButton>
             </Grid>
