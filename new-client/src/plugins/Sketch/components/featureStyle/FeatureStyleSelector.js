@@ -19,7 +19,7 @@ export default function FeatureStyleSelector(props) {
       !["Circle", "Polygon"]?.includes(activeDrawType) &&
       drawStyle.strokeType === "none"
     ) {
-      // Update drawStyle with solid strokeType
+      // We want to update the drawStyle with the default values
       setDrawStyle((prevDrawStyle) => ({
         ...prevDrawStyle,
         strokeType: DEFAULT_DRAW_STYLE_SETTINGS.strokeType,
