@@ -10,26 +10,27 @@ import FeaturePointSizeAccordion from "./FeatureSizeAccordion";
 import StrokeTypeSelector from "./StrokeTypeSelector";
 
 export default function FeatureStyleSelector(props) {
-  // Since the strokeType value "none" is only available for the activeDrawType "Circle" and "Polygon" we Automatically want to set the strokeType to the default value "solid"
-  // if activeDrawType is neither "Circle" or "Polygon" and strokeType is "none"
+  const { activeDrawType, drawStyle, setDrawStyle } = props;
+  // Since the strokeType value "none" is only available for the activeDrawTypes "Circle" and "Polygon"
+  // we automatically want to set the strokeType to the default value "solid"
+  // if the activeDrawType is neither "Circle" or "Polygon" and if the strokeType is "none"
   React.useEffect(() => {
     if (
-      !["Circle", "Polygon"]?.includes(props.activeDrawType) &&
-      props.drawStyle.strokeType === "none"
+      !["Circle", "Polygon"]?.includes(activeDrawType) &&
+      drawStyle.strokeType === "none"
     ) {
       // Update drawStyle with solid strokeType
-      props.setDrawStyle((prevDrawStyle) => ({
+      setDrawStyle((prevDrawStyle) => ({
         ...prevDrawStyle,
         strokeType: DEFAULT_DRAW_STYLE_SETTINGS.strokeType,
         lineDash: STROKE_DASHES.get(DEFAULT_DRAW_STYLE_SETTINGS.strokeType),
         strokeColor: {
-          ...props.drawStyle.strokeColor,
+          ...drawStyle.strokeColor,
           a: DEFAULT_DRAW_STYLE_SETTINGS.strokeColor.a,
         },
       }));
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [props.activeDrawType, props.drawStyle]);
+  }, [activeDrawType, drawStyle, setDrawStyle]);
 
   // We need a handler that can update the stroke-dash setting
   const handleStrokeTypeChange = (e) => {
