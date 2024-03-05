@@ -4,9 +4,8 @@ import ListItemButton from "@mui/material/ListItemButton";
 import ListItemText from "@mui/material/ListItemText";
 import ListItemAvatar from "@mui/material/ListItemAvatar";
 import Avatar from "@mui/material/Avatar";
-import ImageIcon from "@mui/icons-material/MapTwoTone";
-import Icon from "@mui/material/Icon";
 import { useMapClickViewerContext } from "../MapClickViewerContext";
+import FeatureIcon from "./FeatureIcon";
 
 const FeatureCollectionsListView = (props) => {
   const {
@@ -67,11 +66,7 @@ const FeatureCollectionsListView = (props) => {
           >
             <ListItemAvatar>
               <Avatar>
-                {fc.infoclickIcon.trim().length > 0 ? (
-                  <Icon>{fc.infoclickIcon}</Icon>
-                ) : (
-                  <ImageIcon />
-                )}
+                <FeatureIcon iconNameOrUrl={fc.infoclickIcon} />
               </Avatar>
             </ListItemAvatar>
             <ListItemText

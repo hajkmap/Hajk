@@ -278,9 +278,14 @@ class BaseWindowPlugin extends React.PureComponent {
   }
 
   renderControlButton() {
+    // Special case: if there are no plugins with target "toolbar", we want to render the Control button on small screens
+    const hasToolbarTarget = this.props.app.config.mapConfig.tools.filter(
+      (tool) => tool.options && tool.options.target === "toolbar"
+    );
+
     return createPortal(
       // Hide Control button on small screens, see renderDrawerButton too
-      <Hidden mdDown>
+      <Hidden mdDown={hasToolbarTarget.length > 0}>
         <PluginControlButton
           icon={this.props.custom.icon}
           onClick={this.handleButtonClick}

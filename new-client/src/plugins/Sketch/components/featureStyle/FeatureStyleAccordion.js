@@ -111,7 +111,9 @@ const AccordionSummaryContents = (props) => {
           }%`}</Typography>
         )}
         {typeof props.strokeWidth === "number" && (
-          <Typography variant="caption">{`${props.strokeWidth}px`}</Typography>
+          <Typography variant="caption">
+            {props.strokeType !== "none" ? `${props.strokeWidth}px` : null}
+          </Typography>
         )}
         <ColorBadge color={colorString} />
       </Grid>
@@ -135,46 +137,52 @@ const FeatureStyleAccordion = (props) => {
             showOpacitySlider={props.showOpacitySlider}
             strokeWidth={props.strokeWidth}
             drawModel={props.drawModel}
+            strokeType={props.strokeType}
           />
         </StyledAccordionSummary>
       </Tooltip>
       <AccordionDetails style={{ maxWidth: "100%" }}>
         <Grid container>
-          <Grid item xs={12}>
-            <TwitterPicker
-              colors={DRAW_COLORS}
-              triangle="hide"
-              onChange={props.handleColorChange}
-              styles={{
-                default: {
-                  card: {
-                    maxWidth: "100%",
-                    background: "unset", // Hard-coded to white, we don't want that.
+          {props.showStrokeTypeSelector && (
+            <Grid item xs={12} sx={{ mb: 1 }}>
+              <StrokeTypeSelector
+                handleStrokeTypeChange={props.handleStrokeTypeChange}
+                strokeType={props.strokeType}
+                activeDrawType={props.activeDrawType}
+                setDrawStyle={props.setDrawStyle}
+                drawStyle={props.drawStyle}
+              />
+            </Grid>
+          )}
+          {props.strokeType !== "none" && (
+            <Grid item xs={12}>
+              <TwitterPicker
+                colors={DRAW_COLORS}
+                triangle="hide"
+                onChange={props.handleColorChange}
+                styles={{
+                  default: {
+                    card: {
+                      maxWidth: "100%",
+                      background: "unset", // Hard-coded to white, we don't want that.
+                    },
                   },
-                },
-              }}
-              color={props.color}
-            />
-          </Grid>
-          {props.showOpacitySlider && (
+                }}
+                color={props.color}
+              />
+            </Grid>
+          )}
+          {props.showOpacitySlider && props.strokeType !== "none" && (
             <OpacitySlider
               handleOpacityChange={props.handleOpacityChange}
               opacity={isNaN(props.color?.a) ? 1 : props.color.a}
             />
           )}
-          {props.showStrokeWidthSlider && (
+          {props.showStrokeWidthSlider && props.strokeType !== "none" && (
             <StrokeWidthSlider
               handleStrokeWidthChange={props.handleStrokeWidthChange}
               strokeWidth={props.strokeWidth}
             />
-          )}
-          {props.showStrokeTypeSelector && (
-            <Grid item xs={12} style={{ marginTop: 8 }}>
-              <StrokeTypeSelector
-                handleStrokeTypeChange={props.handleStrokeTypeChange}
-                strokeType={props.strokeType}
-              />
-            </Grid>
           )}
         </Grid>
       </AccordionDetails>

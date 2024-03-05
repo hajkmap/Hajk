@@ -4,6 +4,21 @@ import { TextField, Tooltip, Typography } from "@mui/material";
 import { STROKE_TYPES } from "../../constants";
 
 const StrokeTypeSelector = (props) => {
+  // This filter is used to remove the "none" strokeType from the select when the activeDrawType is anything but "Circle" or "Polygon"
+  // This is because the "none" strokeType is only available for the activeDrawTypes "Circle" and "Polygon"
+  const filteredStrokeTypes =
+    props.activeDrawType === "Circle" || props.activeDrawType === "Polygon"
+      ? STROKE_TYPES
+      : STROKE_TYPES.filter((strokeType) => strokeType.type !== "none");
+
+  // We want to set the initial strokeType to the current strokeType if it's available in the filteredStrokeTypes
+  // Otherwise we want to set it to the first available strokeType ("none").
+  const initialStrokeType = filteredStrokeTypes.find(
+    (option) => option.type === props.strokeType
+  )
+    ? props.strokeType
+    : filteredStrokeTypes[0]?.type;
+
   return (
     <Paper
       style={{ padding: props.includeContainer !== false ? 8 : 0 }}
@@ -21,18 +36,20 @@ const StrokeTypeSelector = (props) => {
           variant="outlined"
           size="small"
           select
-          value={props.strokeType}
+          value={initialStrokeType}
           onChange={props.handleStrokeTypeChange}
         >
-          {STROKE_TYPES.map((option) => (
-            <MenuItem key={option.type} value={option.type}>
-              {
-                <Tooltip disableInteractive title={option.tooltip}>
-                  <span style={{ width: "100%" }}>{option.label}</span>
-                </Tooltip>
-              }
-            </MenuItem>
-          ))}
+          {filteredStrokeTypes.map((option) => {
+            return (
+              <MenuItem key={option.type} value={option.type}>
+                {
+                  <Tooltip disableInteractive title={option.tooltip}>
+                    <span style={{ width: "100%" }}>{option.label}</span>
+                  </Tooltip>
+                }
+              </MenuItem>
+            );
+          })}
         </TextField>
       </Grid>
     </Paper>
