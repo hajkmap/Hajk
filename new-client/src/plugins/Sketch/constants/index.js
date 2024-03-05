@@ -128,6 +128,11 @@ export const PLUGIN_MARGIN = 10;
 
 export const STROKE_TYPES = [
   {
+    type: "none",
+    label: "Ingen",
+    tooltip: "Ingen linje.",
+  },
+  {
     type: "solid",
     label: "Heldragen",
     tooltip: "Heldragen linje.",
