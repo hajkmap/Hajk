@@ -10,10 +10,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - Sketch: It's now possible to disable stroke for polygons and circles [#1177](https://github.com/hajkmap/Hajk/issues/1177)
+- The new .NET 6 backend. Issue: [#1210](https://github.com/hajkmap/Hajk/issues/1210). PR: [#1395](https://github.com/hajkmap/Hajk/pull/1395)
 
 ### Fixed
 
 - Add conditional rendering for Control button [commit](https://github.com/hajkmap/Hajk/commit/b34def3249b368de336a5c4eadd86318103e78fb)
+
+### Security
+
+- Bumped dependencies in Client.
+
+### Removed
+
+- The legacy .NET 4.5 backend. For reference, check out the https://github.com/hajkmap/Hajk/tree/legacy-dotnet-4.5-backend branch.
 
 ## [3.13.25] - 2024-02-13
 
