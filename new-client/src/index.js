@@ -79,8 +79,9 @@ try {
   // Prepare a helper function that fetches config files
   const fetchConfig = async () => {
     if (useBackend === false) {
-      // No backend specified, let's return static config
-      return await hfetch("simpleMapAndLayersConfig.json", {
+      // Load the user specified consolidated map and layers config, or fall back to default one
+      const simpleConfig = `${initialURLParams.get("m") || "simpleMapAndLayersConfig"}.json`;
+      return await hfetch(simpleConfig, {
         cacheBuster: true,
       });
     } else {
