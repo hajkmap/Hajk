@@ -409,12 +409,12 @@ class SearchResultsContainer extends React.PureComponent {
     return activeFeatureCollection && featureFilter.length > 0
       ? true
       : // If we do not have an active featureCollection (meaning that
-      // we are viewing _featureCollections_, and the featureCollection-
-      // filter is set, the filter is active.
-      !activeFeatureCollection && featureCollectionFilter.length > 0
-      ? true
-      : // Otherwise, the filter is not active.
-        false;
+        // we are viewing _featureCollections_, and the featureCollection-
+        // filter is set, the filter is active.
+        !activeFeatureCollection && featureCollectionFilter.length > 0
+        ? true
+        : // Otherwise, the filter is not active.
+          false;
   };
 
   getSortingStrategiesApplyingToView = (view) => {
@@ -1094,8 +1094,8 @@ class SearchResultsContainer extends React.PureComponent {
     const collectionsToRender = activeFeatureCollection
       ? [activeFeatureCollection]
       : shouldRenderSelectedCollection
-      ? this.appendSelectedFeaturesCollection(sortedFeatureCollections)
-      : sortedFeatureCollections;
+        ? this.appendSelectedFeaturesCollection(sortedFeatureCollections)
+        : sortedFeatureCollections;
 
     return (
       <Collapse in={!panelCollapsed}>

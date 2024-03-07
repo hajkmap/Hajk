@@ -21,7 +21,7 @@ import {
 } from "./utils/ContentComponentFactory";
 
 import DocumentSearchModel from "./documentSearch/DocumentSearchModel";
-import { hfetch } from "utils/FetchWrapper";
+import { hfetch } from "../../utils/FetchWrapper";
 
 /**
  * @summary  DocumentHandler model that doesn't do much.

@@ -433,6 +433,7 @@ class LayerGroupItem extends Component {
     }
   };
 
+  // FIXME: The second parameter, `subLayer` is never used.
   setVisible = (la, subLayer) => {
     let l,
       subLayersToShow = null;
@@ -588,6 +589,9 @@ class LayerGroupItem extends Component {
 
     if (!visible && visibleSubLayers.length > 0) {
       layerVisibility = true;
+      // FIXME: `subLayer` below doesn't do anything since
+      // setVisible only makes use of its first parameter
+      // (see its implementation).
       this.setVisible(this.props.layer, subLayer);
     }
 

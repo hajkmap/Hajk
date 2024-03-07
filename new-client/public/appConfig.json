@@ -1,14 +1,9 @@
 {
   "mapserviceBase": "",
-  "experimentalNewApi": false,
-  "proxy": "",
-  "searchProxy": "",
   "defaultMap": "map_1",
-  "showExperimentalLanguageSwitcher": false,
-  "lang": "en",
-  "noLayerSwitcherMessage": "This map has no layer switcher, which indicates that you are not allowed to use this map!",
-  "networkErrorMessage": "Nätverksfel. Försök att ladda om sidan genom att trycka på F5.",
-  "parseErrorMessage": "Konfigurationsfel. Försök att ladda om sidan genom att trycka på F5.",
+  "loadErrorTitle": "Ett fel har inträffat",
+  "loadErrorMessage": "Fel när applikationen skulle läsas in. Du kan försöka att återställa applikationen genom att trycka på knappen nedan. Om felet kvarstår kan du kontakta systemansvarig.",
+  "loadErrorReloadButtonText": "Återställ applikationen",
   "announcements": [
     {
       "id": 1,

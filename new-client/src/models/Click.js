@@ -4,7 +4,7 @@ import WMSGetFeatureInfo from "ol/format/WMSGetFeatureInfo";
 import TileLayer from "ol/layer/Tile";
 import ImageLayer from "ol/layer/Image";
 
-import { hfetch } from "utils/FetchWrapper";
+import { hfetch } from "../utils/FetchWrapper";
 
 function query(map, layer, evt) {
   const coordinate = evt.coordinate;

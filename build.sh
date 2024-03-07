@@ -26,6 +26,17 @@ show_usage() {
 	exit 1
 }
 
+prompt() {
+	read -p "Warning: This will RESET ALL LOCAL CHANGES with those in origin.
+
+Press (y) to continue or any other key to abort." -n 1 -r
+	echo
+	if [[ ! $REPLY =~ ^[Yy]$ ]]
+	then
+			exit 1
+	fi
+}
+
 # Main program starts here
 
 if [ $# -ne 2 ]; then
@@ -55,12 +66,19 @@ echo "Building from git directory: ${GIT_DIR}"
 echo "Deploying build to destination: ${DEST_DIR}"
 
 # Got to our repo dir and grab the latest from Git
+echo "On branch $(git rev-parse --abbrev-ref HEAD)"
+
+# Let's ensure that user wants to overrite local changes
+prompt
 echo "Downloading the latest code..." 
+
 cd $GIT_DIR
-git fetch
+git fetch --all
+git reset --hard
 git pull
 
 # BACKEND
+echo "Part 1: Backend"
 echo "Installing backend dependencies..."
 cd $GIT_DIR/new-backend
 # Before we can compile, we need to install NPM deps. 
@@ -90,13 +108,14 @@ npm ci
 mkdir -p $DEST_DIR/static
 
 # CLIENT
+echo "Part 2: Client UI"
 echo "Preparing to install client dependencies..."
 cd $GIT_DIR/new-client
 rm -rf node_modules/
 echo "Installing client dependencies..."
 npm ci
 
-echo "Building client..."
+echo "Building Client UI..."
 npm run build
 rm -rf $DEST_DIR/static/client/static
 echo "Copying client to destination..."
@@ -107,6 +126,7 @@ cp index.* $DEST_DIR/static/client
 cp manifest.json $DEST_DIR/static/client
 
 # ADMIN
+echo "Part 3: Admin UI"
 echo "Preparing to install admin dependencies..."
 cd $GIT_DIR/new-admin
 rm -rf node_modules/

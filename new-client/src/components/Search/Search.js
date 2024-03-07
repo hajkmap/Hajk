@@ -12,7 +12,7 @@ import KmlExport from "./utils/KmlExport";
 import XLSXExport from "./utils/XLSXExport";
 import { encodeCommas, decodeCommas } from "../../utils/StringCommaCoder";
 import LocalStorageHelper from "../../utils/LocalStorageHelper";
-import { functionalOk as functionalCookieOk } from "models/Cookie";
+import { functionalOk as functionalCookieOk } from "../../models/Cookie";
 
 class Search extends React.PureComponent {
   defaultSearchOptions = {
@@ -883,9 +883,8 @@ class Search extends React.PureComponent {
 
   updateAutocompleteList = async () => {
     let fetchOptions = this.getAutoCompleteFetchSettings();
-    let autoCompleteResult = await this.fetchResultFromSearchModel(
-      fetchOptions
-    );
+    let autoCompleteResult =
+      await this.fetchResultFromSearchModel(fetchOptions);
 
     this.setState({
       autocompleteList: this.prepareAutocompleteList(autoCompleteResult),

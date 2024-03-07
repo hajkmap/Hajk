@@ -7,7 +7,7 @@ import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";
 
 import CloseIcon from "@mui/icons-material/Close";
 import { Paper, Hidden } from "@mui/material";
-import { functionalOk as functionalCookieOk } from "models/Cookie";
+import { functionalOk as functionalCookieOk } from "../../models/Cookie";
 
 const StyledPaper = styled(Paper)(({ theme }) => ({
   marginRight: theme.spacing(1),

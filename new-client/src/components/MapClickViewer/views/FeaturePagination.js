@@ -10,7 +10,7 @@ import {
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 
-import { functionalOk } from "models/Cookie";
+import { functionalOk } from "../../../models/Cookie";
 
 const FeaturePagination = (props) => {
   const {

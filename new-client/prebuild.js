@@ -7,15 +7,10 @@ function cleanUpNewlines() {
   data = data.replace(/[\n]{2,}/g, "\n");
 }
 
-let data =
-  fs.readFileSync(envLocalFile, { flag: "a+" }).toString().trim() + "\n";
-cleanUpNewlines();
-
-function updateGitHash(params) {
+function updateGitHash() {
   const key = "REACT_APP_GIT_HASH";
   const regex = new RegExp(`${key}=.*`);
-
-  let gitHash = execSync("git rev-parse HEAD").toString();
+  const gitHash = execSync("git rev-parse HEAD").toString();
 
   if (data.indexOf(key) === -1) {
     data += `${key}=0`;
@@ -38,6 +33,10 @@ function writeToEnvLocal() {
   fs.writeFileSync(envLocalFile, data);
 }
 
+let data =
+  fs.readFileSync(envLocalFile, { flag: "a+" }).toString().trim() + "\n";
+
+cleanUpNewlines();
 updateBuildDate();
 updateGitHash();
 writeToEnvLocal();

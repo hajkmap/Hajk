@@ -16,9 +16,7 @@ import {
 } from "@mui/material";
 
 import FeaturePropsParsing from "./FeaturePropsParsing";
-import { getInfoClickInfoFromLayerConfig } from "utils/InfoClickHelpers.js";
-// import Diagram from "../Diagram";
-// import HajkTable from "../Table";
+import { getInfoClickInfoFromLayerConfig } from "../../utils/InfoClickHelpers";
 
 const InfoContainer = styled(Grid)(() => ({
   height: "100%",
@@ -161,36 +159,6 @@ class FeatureInfoContainer extends React.PureComponent {
     );
   }
 
-  // shortcode(str) {
-  //   const codes = [];
-  //   let shortcodes = str.match(/\[(.*?)\]/g);
-  //   shortcodes = shortcodes === null ? [] : shortcodes;
-
-  //   if (shortcodes) {
-  //     shortcodes.forEach((code) => {
-  //       str = str.replace(code, "");
-  //       var params = code.replace("[", "").replace("]", "").split(" ");
-  //       var c = {};
-
-  //       params.forEach((param, i) => {
-  //         if (i === 0) {
-  //           c.shortcode = param;
-  //         } else {
-  //           let parts = param.split("=");
-  //           c[parts[0]] = param.replace(parts[0] + "=", "").replace(/"/g, "");
-  //         }
-  //       });
-  //       codes.push(c);
-  //     });
-  //     return {
-  //       str: str,
-  //       codes: codes,
-  //     };
-  //   } else {
-  //     return;
-  //   }
-  // }
-
   getFeatureProperties = (feature) => {
     let properties = feature.getProperties();
     properties = this.featurePropsParsing.extractPropertiesFromJson(properties);
@@ -209,17 +177,6 @@ class FeatureInfoContainer extends React.PureComponent {
     // an informative feature-info.
     const { displayName: caption, infoclickDefinition: markdown } =
       getInfoClickInfoFromLayerConfig(feature, layer);
-    // TODO: shortCodes, remove?
-    const shortcodes = [];
-    // Disabled shortcodes for now as they mess with Markdown tags
-    // for Links and Imgs that use "[" and "]".
-    // if (markdown) {
-    //   let transformed = this.shortcode(markdown);
-    //   if (transformed) {
-    //     shortcodes = transformed.codes;
-    //     markdown = transformed.str;
-    //   }
-    // }
 
     // When we've grabbed the markdown-definition for the layer, we can create the
     // information that we want to display to the user by combining the definition with
@@ -232,7 +189,6 @@ class FeatureInfoContainer extends React.PureComponent {
         value: value,
         loading: false,
         caption: caption,
-        shortcodes: shortcodes,
         selectedIndex: newIndex,
         markdown: markdown,
       },
@@ -252,30 +208,12 @@ class FeatureInfoContainer extends React.PureComponent {
     }
   };
 
-  // renderShortcodes(shortcodes, feature) {
-  //   return shortcodes.map((shortcode, i) => {
-  //     switch (shortcode.shortcode) {
-  //       case "diagram":
-  //         return (
-  //           <Diagram key={i} source={shortcode.source} feature={feature} />
-  //         );
-  //       case "table":
-  //         return (
-  //           <HajkTable key={i} source={shortcode.source} feature={feature} />
-  //         );
-  //       default:
-  //         return null;
-  //     }
-  //   });
-  // }
-
   isReadyToShowInfo = () => {
-    const { caption, value, loading, shortcodes } = this.state;
-    return caption && !loading && value && shortcodes;
+    const { caption, value, loading } = this.state;
+    return caption && !loading && value;
   };
 
   renderFeatureInformation = () => {
-    // const { caption, value, shortcodes, markdown } = this.state;
     const { caption, value } = this.state;
 
     return (

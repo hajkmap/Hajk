@@ -10,9 +10,9 @@ import {
   ListItemText,
 } from "@mui/material";
 
-import Card from "components/Card";
-import Dialog from "components/Dialog/Dialog";
-import PluginControlButton from "components/PluginControlButton";
+import Card from "../components/Card";
+import Dialog from "../components/Dialog/Dialog";
+import PluginControlButton from "../components/PluginControlButton";
 
 class DialogWindowPlugin extends React.PureComponent {
   state = {

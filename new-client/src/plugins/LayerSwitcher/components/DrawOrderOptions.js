@@ -1,7 +1,7 @@
 import * as React from "react";
 import { useSnackbar } from "notistack";
 
-import LocalStorageHelper from "utils/LocalStorageHelper";
+import LocalStorageHelper from "../../../utils/LocalStorageHelper";
 
 import {
   Button,

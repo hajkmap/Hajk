@@ -3,7 +3,7 @@ import TileLayer from "ol/layer/Tile";
 import WMTS from "ol/source/WMTS";
 import WMTSTileGrid from "ol/tilegrid/WMTS";
 import LayerInfo from "./LayerInfo.js";
-import { overrideLayerSourceParams } from "utils/FetchWrapper";
+import { overrideLayerSourceParams } from "../../utils/FetchWrapper";
 
 var wmtsLayerProperties = {
   url: "",
