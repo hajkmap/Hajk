@@ -8,15 +8,15 @@ import VectorSource from "ol/source/Vector";
 
 import { Style, Icon, Fill, Stroke, Circle } from "ol/style";
 
-import AppModel from "models/AppModel";
-import { hfetch } from "utils/FetchWrapper";
-import { getInfoClickInfoFromLayerConfig } from "utils/InfoClickHelpers";
+import AppModel from "./AppModel";
+import { hfetch } from "../utils/FetchWrapper";
+import { getInfoClickInfoFromLayerConfig } from "../utils/InfoClickHelpers";
 import {
   parseGMLFeatures,
   parseGeoJsonFeatures,
   experimentalParseEsriWmsRawXml,
   parseWmsGetFeatureInfoXml,
-} from "utils/wmsFeatureParsers";
+} from "../utils/wmsFeatureParsers";
 
 const convertRGBAtoString = (color) => {
   if (

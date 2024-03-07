@@ -5,11 +5,11 @@ import Plugin from "./Plugin";
 import SnapHelper from "./SnapHelper";
 import { bindMapClickEvent } from "./Click";
 
-import ConfigMapper from "utils/ConfigMapper";
-import CoordinateSystemLoader from "utils/CoordinateSystemLoader";
-import { hfetch } from "utils/FetchWrapper";
-import { isMobile } from "utils/IsMobile";
-import { getMergedSearchAndHashParams } from "utils/getMergedSearchAndHashParams";
+import ConfigMapper from "../utils/ConfigMapper";
+import CoordinateSystemLoader from "../utils/CoordinateSystemLoader";
+import { hfetch } from "../utils/FetchWrapper";
+import { isMobile } from "../utils/IsMobile";
+import { getMergedSearchAndHashParams } from "../utils/getMergedSearchAndHashParams";
 // import ArcGISLayer from "./layers/ArcGISLayer.js";
 // import DataLayer from "./layers/DataLayer.js";
 import WMSLayer from "./layers/WMSLayer.js";
@@ -399,7 +399,7 @@ class AppModel {
         const featureCollectionsToBeHandledByMapClickViewer =
           featureCollections.filter((fc) => fc.type !== "SearchResults");
 
-        // Publish the retrived collections, even if they're empty. We want the
+        // Publish the retrieved collections, even if they're empty. We want the
         // handling components to know, so they can act accordingly (e.g. close
         // window if no features are to be shown).
         this.globalObserver.publish(
@@ -1162,4 +1162,5 @@ class AppModel {
   }
 }
 
+/* eslint import/no-anonymous-default-export: [2, {"allowNew": true}] */
 export default new AppModel();

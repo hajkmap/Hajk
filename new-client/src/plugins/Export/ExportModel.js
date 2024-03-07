@@ -13,7 +13,7 @@ import { Translate } from "ol/interaction.js";
 import WMTS from "ol/source/WMTS";
 import TileArcGISRest from "ol/source/TileArcGISRest";
 import Collection from "ol/Collection";
-import { hfetch } from "utils/FetchWrapper";
+import { hfetch } from "../../utils/FetchWrapper";
 
 var toHex = function (str) {
   if (/^#/.test(str)) return str;

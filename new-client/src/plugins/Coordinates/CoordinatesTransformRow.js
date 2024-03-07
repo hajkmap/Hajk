@@ -1,7 +1,7 @@
 import React from "react";
 import Typography from "@mui/material/Typography";
 import TextField from "@mui/material/TextField";
-import NumberFormat from "react-number-format";
+import { NumericFormat } from "react-number-format";
 import { transform } from "ol/proj";
 import { withSnackbar } from "notistack";
 import Grid from "@mui/material/Grid";
@@ -187,7 +187,7 @@ class CoordinatesTransformRow extends React.PureComponent {
             </Typography>
           </Grid>
           <Grid item xs={12} md={6}>
-            <NumberFormat
+            <NumericFormat
               label={this.props.transformation.xtitle}
               margin="dense"
               variant="outlined"
@@ -207,7 +207,7 @@ class CoordinatesTransformRow extends React.PureComponent {
             />
           </Grid>
           <Grid item xs={12} md={6}>
-            <NumberFormat
+            <NumericFormat
               label={this.props.transformation.ytitle}
               margin="dense"
               size="small"

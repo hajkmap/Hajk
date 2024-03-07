@@ -13,7 +13,7 @@ import {
 
 import { IconPolygon, IconPoint, IconLine, IconCircle } from "./MeasurerIcons";
 import DeleteIcon from "@mui/icons-material/Delete";
-import ConfirmationDialog from "components/ConfirmationDialog";
+import ConfirmationDialog from "../../components/ConfirmationDialog";
 import { useEffect, useState } from "react";
 
 const SvgImg = styled("img")(({ theme }) => ({

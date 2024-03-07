@@ -259,8 +259,8 @@ class MapViewModel {
           drawMethod === "Rectangle"
             ? createBox()
             : drawMethod === "Circle"
-            ? createRegularPolygon()
-            : null,
+              ? createRegularPolygon()
+              : null,
         style: this.#getDrawStyle(),
       });
       // Let's add the clickLock to avoid the featureInfo

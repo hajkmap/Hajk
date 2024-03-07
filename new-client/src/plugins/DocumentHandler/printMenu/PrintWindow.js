@@ -29,7 +29,7 @@ import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import OpenInNewIcon from "@mui/icons-material/OpenInNew";
 
-import { deepMerge } from "utils/DeepMerge";
+import { deepMerge } from "../../../utils/DeepMerge";
 
 import PrintList from "./PrintList";
 import TableOfContents from "./TableOfContents";
@@ -321,8 +321,8 @@ class PrintWindow extends React.PureComponent {
       "beforeend",
       ` <title>${document.title}</title>
         <base href="${document.location.protocol}//${
-        document.location.host
-      }/" />
+          document.location.host
+        }/" />
         ${
           this.props.options.dynamicImportUrls.customFont
             ? `<link
