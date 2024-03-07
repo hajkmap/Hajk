@@ -483,6 +483,10 @@ class App extends React.PureComponent {
       .addAnchorModel() // Anchor model must be added after the layers
       .loadPlugins(this.props.activeTools);
 
+    const layerSwitcherTool = this.props.config.mapConfig.tools.find(
+      (t) => t.type === "layerswitcher"
+    );
+
     Promise.all(promises).then(() => {
       // Track the page view
       this.globalObserver.publish("analytics.trackPageView");
@@ -506,8 +510,9 @@ class App extends React.PureComponent {
             this.globalObserver.publish("core.addDrawerToggleButton", {
               value: "plugins",
               ButtonIcon: MapIcon,
-              caption: "Kartverktyg",
-              drawerTitle: "Kartverktyg",
+              caption: layerSwitcherTool?.options?.drawerTitle ?? "Kartverktyg",
+              drawerTitle:
+                layerSwitcherTool?.options?.drawerTitle ?? "Kartverktyg",
               order: 0,
               // If no plugins render **directly** in Drawer, but some **might**
               // render there occasionally, let's ensure to hide the Tools button on
