@@ -101,9 +101,13 @@ export default class PrintModel {
   // A flag that's used in "rendercomplete" to ensure that user has not cancelled the request
   pdfCreationCancelled = null;
 
-  generateQR = async (url) => {
+  generateQR = async (url, qrSize) => {
     try {
-      return await QRCode.toDataURL(url);
+      return {
+        data: await QRCode.toDataURL(url),
+        width: qrSize,
+        height: qrSize,
+      };
     } catch (err) {
       return "";
     }
@@ -358,6 +362,7 @@ export default class PrintModel {
    * @returns {Object} x-axis and y-axis placement in mm
    */
   getPlacement = (
+    contentType,
     placement,
     contentWidth,
     contentHeight,
@@ -365,22 +370,27 @@ export default class PrintModel {
     pdfHeight
   ) => {
     // We must take the potential margin around the map-image into account (this.margin)
-
+    // And the extra margin for textIconsMargin.
+    // And the extra extra margin for qrcode image
     const margin = this.textIconsMargin + this.margin;
+    // Here we simply say if content that is going to be placed is a qr code...
+    // we need to adjust it slightly because the qr code is bigger than the other icons.
+    const qrMargin =
+      (contentType === "qrCode" && this.textIconsMargin) === 0 ? 3 : 0;
 
     let pdfPlacement = { x: 0, y: 0 };
     if (placement === "topLeft") {
       pdfPlacement.x = margin;
-      pdfPlacement.y = margin;
+      pdfPlacement.y = margin - qrMargin;
     } else if (placement === "topRight") {
       pdfPlacement.x = pdfWidth - contentWidth - margin;
-      pdfPlacement.y = margin;
+      pdfPlacement.y = margin - qrMargin;
     } else if (placement === "bottomRight") {
       pdfPlacement.x = pdfWidth - contentWidth - margin;
-      pdfPlacement.y = pdfHeight - contentHeight - margin;
+      pdfPlacement.y = pdfHeight - contentHeight - margin + qrMargin;
     } else {
       pdfPlacement.x = margin;
-      pdfPlacement.y = pdfHeight - contentHeight - margin;
+      pdfPlacement.y = pdfHeight - contentHeight - margin + qrMargin;
     }
     return pdfPlacement;
   };
@@ -1262,25 +1272,26 @@ export default class PrintModel {
       }
 
       //If-statement will be altered with logic for "includeQR"
-      if (options.includeQrCode) {
+      if (options.includeQrCode && this.mapConfig.enableAppStateInHash) {
         try {
-          const qrCodeImageData = await this.generateQR(url);
+          const qrCode = await this.generateQR(url, 20);
 
           let qrCodePlacement = this.getPlacement(
+            "qrCode",
             options.qrCodePlacement,
-            20,
-            20,
+            qrCode.width,
+            qrCode.height,
             dim[0],
             dim[1]
           );
 
           pdf.addImage(
-            qrCodeImageData,
+            qrCode.data,
             "PNG",
             qrCodePlacement.x,
             qrCodePlacement.y,
-            20,
-            20
+            qrCode.width,
+            qrCode.height
           );
         } catch (error) {
           // The image loading may fail due to e.g. wrong URL, so let's catch the rejected Promise
