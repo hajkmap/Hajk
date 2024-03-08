@@ -362,12 +362,12 @@ export default class PrintModel {
    * @returns {Object} x-axis and y-axis placement in mm
    */
   getPlacement = (
-    contentType,
     placement,
     contentWidth,
     contentHeight,
     pdfWidth,
-    pdfHeight
+    pdfHeight,
+    contentType
   ) => {
     // We must take the potential margin around the map-image into account (this.margin)
     // And the extra margin for textIconsMargin.
@@ -1277,12 +1277,12 @@ export default class PrintModel {
           const qrCode = await this.generateQR(url, 20);
 
           let qrCodePlacement = this.getPlacement(
-            "qrCode",
             options.qrCodePlacement,
             qrCode.width,
             qrCode.height,
             dim[0],
-            dim[1]
+            dim[1],
+            "qrCode"
           );
 
           pdf.addImage(
