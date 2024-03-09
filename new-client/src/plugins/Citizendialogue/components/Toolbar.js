@@ -160,7 +160,7 @@ class Toolbar extends Component {
     return (
       <Grid container spacing={1}>
         <Grid item xs={12}>
-          <Typography>Rita i kartan</Typography>
+          <Typography>Markera i kartan</Typography>
         </Grid>
         <Grid container spacing={2}>
           {(this.toolbarOptions === "all" ||

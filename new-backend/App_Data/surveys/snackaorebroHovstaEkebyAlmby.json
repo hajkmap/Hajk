@@ -12,7 +12,7 @@
         {
           "title": "Startsida",
           "type": "html",
-          "html": "<p><strong>Välkommen till dialogen SnackaÖrebro!</strong></p>\n\n<p>Vilka är dina favoritplatser? Vad vill du bevara? Vilka platser är mindre bra och vilka tycker du borde utvecklas? Markera dessa platser i kartan och var med att påverka den framtida utvecklingen av Örebro kommun.</p>\n\n<p><strong>Tack för att du är med och utvecklar Örebro kommun!</strong></p>\n\n<p><a href=\"#\">Vill du veta mera om hur enkäten fungerar, klicka här</a></p>\n\n<p>Har du funderingar kring enkäten eller bara vill ”Snacka Örebro” är du välkommen att kontakta oss via e-post: <a href=\"mailto:oversiktligplanering@orebro.se\">oversiktligplanering@orebro.se</a></p>\n"
+          "html": "<p><strong>Välkommen till dialogen SnackaÖrebro!</strong></p>\n\n<p>Hur vill du att Ekeby-Almby ska utvecklas i framtiden? Var med och tyck till i ett tidigt skede av arbetet med den nya översiktsplanen. Det är nu du har störst möjlighet att påverka utvecklingen eftersom dina synpunkter samlas in innan förslaget till den nya översiktsplanen är klart.</p>\n<p>Dina svar är anonyma så tänk på att inte ange personuppgifter på dig eller någon annan när du svarar på enkäten.</p>\n\n<p>Enkäten är öppen <strong>22 april–5 maj</strong>.<br>\nÖversiktsplanen är en planering för hela Örebro kommuns utveckling de närmaste 25 åren. Det kommer därför ta lång tid innan du kan se några förändringar.</p>\n\n<p><strong>Har du andra synpunkter?</strong></p>\n<p>Vi har bara möjlighet att hantera svar inom ramen för arbetet med översiktsplanen, har du andra synpunkter är du alltid välkommen att lämna synpunkter till Örebro kommun via formuläret <a href=\"https://www.orebro.se/ovrigt/synpunkter.html\" target=\"_blank\">”Lämna en synpunkt”</a>. Vi har inte möjlighet att återkoppla eller svara på frågor du lämnar i enkäten eftersom du är anonym.</p>\n\n<p><strong>Information om behandling av personuppgifter</strong></p>\n<p>Markplanerings- och exploateringsnämnden behandlar dina personuppgifter i syfte att XX, med stöd av dataskyddsförordningen artikel 6.1e. <strong><a href=\"https://www.orebro.se/ovrigt/om-webbplatsen/behandling-av-personuppgifter.html\" target=\"_blank\">Mer information om Örebro kommuns behandling av personuppgifter</a></strong>.</p>\n\n<p>Har du funderingar kring enkäten eller bara vill ”Snacka Örebro” är du välkommen att kontakta oss via e-post: <a href=\"mailto:oversiktligplanering@orebro.se\">oversiktligplanering@orebro.se</a></p>\n"
         }
       ]
     },
@@ -24,7 +24,7 @@
           "html": "<img src=\"https://www.orebro.se/images/18.7b583e0e18d824c9b2b1ac5/1707816775578/Symboler_%C3%96Pkarta-hj%C3%A4rta.png\" style=\"width: 60px; height: auto; float: left;\"><span style=\"color: green; font-style: italic;\">Favoritplats eller plats att bevara</span>\n\n\n"
         },
         {
-          "title": "Lägg till en favoritplats i kartan (geometri1)",
+          "title": "Lägg till din favoritplats i kartan.",
           "type": "geometrypoint"
         },
         {
@@ -62,7 +62,7 @@
           "html": "<img src=\"https://www.orebro.se/images/18.7b583e0e18d824c9b2b1ac4/1707816775552/Symboler_%C3%96Pkarta_gl%C3%B6dlampa.png\" style=\"width: 60px; height: auto; float: left;\"><span style=\"color: orange; font-style: italic;\">Plats för utveckling</span>\n\n\n"
         },
         {
-          "title": "Lägg till en plats att utveckla (geometri2)",
+          "title": "Lägg till en plats att utveckla.",
           "type": "geometrypoint"
         },
         {
@@ -113,7 +113,7 @@
           "html": "<img src=\"https://www.orebro.se/images/18.7b583e0e18d824c9b2b1ac6/1707816775598/Symboler_%C3%96Pkarta-sur%20gubbe.png\" style=\"width: 60px; height: auto; float: left;\"><span style=\"color: red; font-style: italic;\">Mindre bra plats</span>\n\n\n"
         },
         {
-          "title": "Lägg till en mindre bra plats i kartan (geometri3)",
+          "title": "Lägg till en mindre bra plats i kartan.",
           "type": "geometrypoint"
         },
         {
@@ -127,7 +127,7 @@
         {
           "title": "Personliga frågor",
           "type": "html",
-          "html": "<h4>Personliga frågor</h4>"
+          "html": "<h4>Personliga frågor</h4>\n<p>Sverige har i dagsläget två juridiska kön, men det utesluter inte att individer identifierar sig på annat sätt. Frågan ställs på grund av lagkrav om könsuppdelad statistik.</p>"
         },
         {
           "title": "Kön",
@@ -163,7 +163,6 @@
           "title": "Var bor du?",
           "type": "radiogroup",
           "choices": [
-            "Hovsta",
             "Ekeby-Almby",
             "Övriga Örebro kommun",
             "Utanför Örebro kommun",
@@ -172,9 +171,9 @@
           "isRequired": true
         },
         {
-          "title": "Övrigt",
-          "type": "html",
-          "html": "Information om hur Örebro kommun behandlar personuppgifter hittar du på <a href=\"https://www.orebro.se/gdpr\" target=\"_blank\">www.orebro.se/gdpr</a> Dina svar är anonyma så tänk på att inte ange personuppgifter på dig eller någon annan när du besvara enkäten.   "
+          "title": "Har du ytterligare synpunkter inom ramen för arbetet med översiktsplanen?",
+          "type": "comment",
+          "isRequired": false
         }
       ]
     }
