@@ -45,7 +45,6 @@ class AnchorView extends React.PureComponent {
   };
 
   async componentDidMount() {
-    console.log(this.props.mapConfig.map.enableAppStateInHash);
     // Subscribe to changes to anchor URL caused by other components. This ensure
     // that we have a live update of the anchor whether user does anything in the map.
     this.props.globalObserver.subscribe("core.mapUpdated", ({ url }) => {
