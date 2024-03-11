@@ -37,7 +37,9 @@ class Anchor extends React.PureComponent {
           globalObserver={this.props.app.globalObserver}
           model={this.props.app.anchorModel}
           options={this.props.options}
-          mapConfig={this.props.app.config.mapConfig}
+          enableAppStateInHash={
+            this.props.app.config.mapConfig.map.enableAppStateInHash
+          }
         />
       </BaseWindowPlugin>
     );

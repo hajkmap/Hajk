@@ -191,7 +191,7 @@ class AnchorView extends React.PureComponent {
             mt: 2,
           }}
         >
-          {this.props.mapConfig.map.enableAppStateInHash && (
+          {this.props.enableAppStateInHash && (
             <Grid container item spacing={2} columns={12}>
               <Grid item xs={12}>
                 <Paper sx={{ p: 1, mb: 2 }}>
@@ -220,16 +220,10 @@ class AnchorView extends React.PureComponent {
                           sx={{
                             ml: { xs: 0, sm: 7 },
                             mr: { xs: 0, sm: 7 },
-                            display: "flex",
-                            justifyContent: "center",
-                            alignItems: "center",
                           }}
+                          textAlign={"center"}
                         >
-                          <img
-                            src={this.state.qrCode}
-                            alt=""
-                            style={{ width: "auto" }}
-                          />
+                          <img src={this.state.qrCode} alt="" />
                         </Box>
                       </Grid>
                     )}

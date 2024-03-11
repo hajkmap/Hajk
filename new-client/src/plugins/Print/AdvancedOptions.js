@@ -162,7 +162,6 @@ class AdvancedOptions extends React.PureComponent {
 
   render() {
     let showOverlapWarning = this.hasPlacementOverlap();
-    console.log(this.props.mapConfig.enableAppStateInHash);
     const {
       resolution,
       handleChange,
@@ -363,7 +362,7 @@ class AdvancedOptions extends React.PureComponent {
             </Grid>
             <Grid item xs={12}></Grid>
           </FormControlContainer>
-          {this.props.mapConfig.enableAppStateInHash && (
+          {this.props.enableAppStateInHash && (
             <FormControlContainer container item>
               <Grid item xs={6} sx={{ paddingRight: "10px" }}>
                 <FormControl fullWidth={true}>
