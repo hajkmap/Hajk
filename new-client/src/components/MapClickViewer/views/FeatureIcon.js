@@ -21,23 +21,12 @@ const FeatureIcon = (props) => {
       })
       .then((svg) => {
         try {
-          const tmpContainer = document.createElement("div");
-          tmpContainer.innerHTML = svg;
-          const svgElement = tmpContainer.querySelector("svg");
           const placeholderSvg = img.parentElement.querySelector("svg");
-          svgElement.setAttribute(
-            "class",
-            placeholderSvg.getAttribute("class")
-          );
-          svgElement.setAttribute(
-            "viewBox",
-            placeholderSvg.getAttribute("viewBox")
-          );
-          img.parentElement.replaceChild(svgElement, placeholderSvg);
+          placeholderSvg.innerHTML = svg;
         } catch (error) {
           console.warn("FeatureIcon swapImgWithSvg", error);
         } finally {
-          img.remove();
+          img.onLoad = () => {};
         }
       });
   };
@@ -66,13 +55,7 @@ const FeatureIcon = (props) => {
                   swapImgWithSvg(e.target);
                 }}
               />
-              <SvgIcon>
-                {
-                  // This empty svg-tag is here to be rendered with correct classes etc
-                  // that we'll later copy to the newly loaded svg.
-                }
-                <svg />
-              </SvgIcon>
+              <SvgIcon></SvgIcon>
             </>
           );
         } else {
