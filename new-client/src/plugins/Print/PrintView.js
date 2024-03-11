@@ -293,6 +293,7 @@ class PrintView extends React.PureComponent {
         qrCodePlacement={qrCodePlacement}
         printOptionsOk={printOptionsOk}
         options={this.props.options}
+        mapConfig={this.props.mapConfig.map}
       ></AdvancedOptions>
     );
   };

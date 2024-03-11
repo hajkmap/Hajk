@@ -162,6 +162,7 @@ class AdvancedOptions extends React.PureComponent {
 
   render() {
     let showOverlapWarning = this.hasPlacementOverlap();
+    console.log(this.props.mapConfig.enableAppStateInHash);
     const {
       resolution,
       handleChange,
@@ -362,44 +363,46 @@ class AdvancedOptions extends React.PureComponent {
             </Grid>
             <Grid item xs={12}></Grid>
           </FormControlContainer>
-          <FormControlContainer container item>
-            <Grid item xs={6} sx={{ paddingRight: "10px" }}>
-              <FormControl fullWidth={true}>
-                <InputLabel variant="standard" htmlFor="includeQrCode">
-                  Inkludera qr-kod
-                </InputLabel>
-                {this.renderIncludeSelect(
-                  includeQrCode,
-                  "includeQrCode",
-                  handleChange
+          {this.props.mapConfig.enableAppStateInHash && (
+            <FormControlContainer container item>
+              <Grid item xs={6} sx={{ paddingRight: "10px" }}>
+                <FormControl fullWidth={true}>
+                  <InputLabel variant="standard" htmlFor="includeQrCode">
+                    Inkludera qr-kod
+                  </InputLabel>
+                  {this.renderIncludeSelect(
+                    includeQrCode,
+                    "includeQrCode",
+                    handleChange
+                  )}
+                </FormControl>
+              </Grid>
+              <Grid item xs={6}>
+                <FormControl
+                  fullWidth={true}
+                  error={this.placementOverlaps.qrCode}
+                >
+                  <InputLabel variant="standard" htmlFor="qrCodePlacement">
+                    Placering
+                  </InputLabel>
+                  {this.renderPlacementSelect(
+                    qrCodePlacement,
+                    "qrCodePlacement",
+                    handleChange,
+                    !includeQrCode
+                  )}
+                </FormControl>
+              </Grid>
+              <Grid item xs={12}>
+                {showOverlapWarning && (
+                  <FormHelperText error={true}>
+                    Bilden kommer inte kunna skrivas ut korrekt. Placeringsvalen
+                    överlappar.
+                  </FormHelperText>
                 )}
-              </FormControl>
-            </Grid>
-            <Grid item xs={6}>
-              <FormControl
-                fullWidth={true}
-                error={this.placementOverlaps.qrCode}
-              >
-                <InputLabel variant="standard" htmlFor="qrCodePlacement">
-                  Placering
-                </InputLabel>
-                {this.renderPlacementSelect(
-                  qrCodePlacement,
-                  "qrCodePlacement",
-                  handleChange,
-                  !includeQrCode
-                )}
-              </FormControl>
-            </Grid>
-            <Grid item xs={12}>
-              {showOverlapWarning && (
-                <FormHelperText error={true}>
-                  Bilden kommer inte kunna skrivas ut korrekt. Placeringsvalen
-                  överlappar.
-                </FormHelperText>
-              )}
-            </Grid>
-          </FormControlContainer>
+              </Grid>
+            </FormControlContainer>
+          )}
           <Popover
             id="color-picker-menu"
             anchorEl={this.state.anchorEl}

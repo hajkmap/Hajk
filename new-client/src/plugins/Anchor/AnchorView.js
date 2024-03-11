@@ -45,6 +45,7 @@ class AnchorView extends React.PureComponent {
   };
 
   async componentDidMount() {
+    console.log(this.props.mapConfig.map.enableAppStateInHash);
     // Subscribe to changes to anchor URL caused by other components. This ensure
     // that we have a live update of the anchor whether user does anything in the map.
     this.props.globalObserver.subscribe("core.mapUpdated", ({ url }) => {
@@ -191,51 +192,53 @@ class AnchorView extends React.PureComponent {
             mt: 2,
           }}
         >
-          <Grid container item spacing={2} columns={12}>
-            <Grid item xs={12}>
-              <Paper sx={{ p: 1, mb: 2 }}>
-                <Grid
-                  container
-                  columns={12}
-                  alignItems="center"
-                  justifyContent="space-between"
-                >
-                  <Grid item xs={6}>
-                    Generera QR-kod
-                  </Grid>
-                  <Grid item xs={6} textAlign="end">
-                    <Tooltip title="Kopiera länk till urklipp">
-                      <Switch
-                        variant="contained"
-                        color="primary"
-                        endIcon={<QrCodeIcon />}
-                        onClick={this.toggleShowQr}
-                      ></Switch>
-                    </Tooltip>
-                  </Grid>
-                  {this.state.showQr && (
-                    <Grid item xs={12}>
-                      <Box
-                        sx={{
-                          ml: { xs: 0, sm: 7 },
-                          mr: { xs: 0, sm: 7 },
-                          display: "flex",
-                          justifyContent: "center",
-                          alignItems: "center",
-                        }}
-                      >
-                        <img
-                          src={this.state.qrCode}
-                          alt=""
-                          style={{ width: "auto" }}
-                        />
-                      </Box>
+          {this.props.mapConfig.map.enableAppStateInHash && (
+            <Grid container item spacing={2} columns={12}>
+              <Grid item xs={12}>
+                <Paper sx={{ p: 1, mb: 2 }}>
+                  <Grid
+                    container
+                    columns={12}
+                    alignItems="center"
+                    justifyContent="space-between"
+                  >
+                    <Grid item xs={6}>
+                      Slå på QR-kod
                     </Grid>
-                  )}
-                </Grid>
-              </Paper>
+                    <Grid item xs={6} textAlign="end">
+                      <Tooltip title="Slå på QR-kod">
+                        <Switch
+                          variant="contained"
+                          color="primary"
+                          endIcon={<QrCodeIcon />}
+                          onClick={this.toggleShowQr}
+                        ></Switch>
+                      </Tooltip>
+                    </Grid>
+                    {this.state.showQr && (
+                      <Grid item xs={12}>
+                        <Box
+                          sx={{
+                            ml: { xs: 0, sm: 7 },
+                            mr: { xs: 0, sm: 7 },
+                            display: "flex",
+                            justifyContent: "center",
+                            alignItems: "center",
+                          }}
+                        >
+                          <img
+                            src={this.state.qrCode}
+                            alt=""
+                            style={{ width: "auto" }}
+                          />
+                        </Box>
+                      </Grid>
+                    )}
+                  </Grid>
+                </Paper>
+              </Grid>
             </Grid>
-          </Grid>
+          )}
         </Box>
       </Box>
     );

@@ -144,6 +144,7 @@ class Print extends React.PureComponent {
           scales={this.props.options.scales}
           visibleAtStart={this.props.options.visibleAtStart}
           dims={this.dims}
+          mapConfig={this.props.app.config.mapConfig}
         />
       </BaseWindowPlugin>
     );
