@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### BREAKING
+
+- This release marks the removal of the legacy V1 API in both the NodeJS backend and the old .NET 4.5 backend (refer to the _Removed_ section below). Client UI is now V2-compatible only, as it requires the consolidated loading method. This means that you may need to update your configuration. Refer to `docs/migrate-to-v2-api.md` for details.
+
 ### Added
 
 - Sketch: It's now possible to disable stroke for polygons and circles [#1177](https://github.com/hajkmap/Hajk/issues/1177)
@@ -16,6 +20,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - Add conditional rendering for Control button [commit](https://github.com/hajkmap/Hajk/commit/b34def3249b368de336a5c4eadd86318103e78fb)
+- Restore cross-platform build for NodeJS backend [#1484](https://github.com/hajkmap/Hajk/pull/1484)
+- Bug fix associated to #1468 [#1485](https://github.com/hajkmap/Hajk/pull/1485)
 
 ### Security
 
@@ -24,6 +30,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Removed
 
 - The legacy .NET 4.5 backend. For reference, check out the https://github.com/hajkmap/Hajk/tree/legacy-dotnet-4.5-backend branch.
+- V1 API in NodeJS Backend.
 
 ## [3.13.25] - 2024-02-13
 
