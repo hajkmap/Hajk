@@ -7,7 +7,7 @@ COPY ./new-client .
 RUN npm run build --ignore-scripts
 
 FROM nginx:alpine
-COPY default.conf /etc/nginx/conf.d/
+COPY /Docker/hajk-simple/default.conf /etc/nginx/conf.d/
 WORKDIR /var/www/html
 COPY --from=clientBuilder /opt/app-root/src/build .
 EXPOSE 8080
