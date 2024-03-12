@@ -1,0 +1,15 @@
+# Build the client
+FROM registry.redhat.io/rhel9/nodejs-18 as clientBuilder
+COPY /new-client/package*.json ./
+USER root
+RUN npm install
+COPY ./new-client .
+RUN npm run build --ignore-scripts
+
+FROM nginx:alpine
+COPY default.conf /etc/nginx/nginx.conf
+WORKDIR /var/www/html
+COPY --from=clientBuilder /opt/app-root/src/build .
+EXPOSE 8080
+USER 1001
+CMD ["nginx", "-g", "daemon off;"]
