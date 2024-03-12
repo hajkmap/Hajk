@@ -6,9 +6,11 @@ RUN npm install
 COPY ./new-client .
 RUN npm run build --ignore-scripts
 
-FROM nginx:alpine
-WORKDIR /usr/share/nginx/html
-COPY --from=clientBuilder /opt/app-root/src/build .
-EXPOSE 80
+FROM registry.access.redhat.com/ubi8/nginx-122
+USER 0
+COPY --from=clientBuilder /opt/app-root/src/build /tmp/src
+RUN chown -R 1001:0 /tmp/src
 USER 1001
-CMD ["nginx", "-g", "daemon off;"]
+
+RUN /usr/libexec/s2i/assemble
+CMD /usr/libexec/s2i/run
