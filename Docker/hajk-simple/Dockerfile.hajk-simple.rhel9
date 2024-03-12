@@ -1,9 +1,9 @@
 # Build the client
 FROM registry.redhat.io/rhel9/nodejs-18 as clientBuilder
-COPY ../../new-client/package*.json ./
+COPY /new-client/package*.json ./
 USER root
 RUN npm install
-COPY ../../new-client .
+COPY ./new-client .
 RUN npm run build --ignore-scripts
 
 FROM nginx:alpine
