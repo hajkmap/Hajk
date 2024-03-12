@@ -22,7 +22,14 @@ const FeatureTextEditor = ({ text, onChange }) => {
 };
 
 // This is used to update the style on the supplied feature
-const FeatureStyleEditor = ({ feature, model, drawModel }) => {
+const FeatureStyleEditor = ({
+  feature,
+  model,
+  drawModel,
+  bufferLayer,
+  bufferState,
+  setBufferState,
+}) => {
   // We're gonna need to keep track of the feature-style
   const [featureStyle, setFeatureStyle] = React.useState(
     model.getFeatureStyle(feature)
@@ -47,6 +54,36 @@ const FeatureStyleEditor = ({ feature, model, drawModel }) => {
       drawModel.refreshDrawLayer();
     }
   }, [featureStyle, feature, drawModel, model]);
+
+  // Variable to check if the drawn object is a buffered-object
+  const isBufferFeature =
+    feature && bufferState.bufferSource.getFeatures().includes(feature);
+
+  // Effect to set the isBufferStyle to true if the feature is a buffered-feature
+  // This is used to make sure that the change size accordion is disabled for the point draw type when editing.
+  React.useEffect(() => {
+    if (isBufferFeature) {
+      setBufferState((prevState) => ({
+        ...prevState,
+        isBufferStyle: true,
+      }));
+    } else {
+      setBufferState((prevState) => ({
+        ...prevState,
+        isBufferStyle: false,
+      }));
+    }
+  }, [isBufferFeature, setBufferState]);
+
+  // Effect to set the bufferLayer style to the featureStyle when the featureStyle changes.
+  React.useEffect(() => {
+    if (isBufferFeature) {
+      bufferLayer.setStyle((feature) => {
+        const style = model.getFeatureStyle(feature);
+        return style;
+      });
+    }
+  }, [featureStyle, bufferLayer, model, isBufferFeature]);
 
   // Effect making sure the feature-text is set to the actual text of the feature.
   React.useEffect(() => {
@@ -103,6 +140,8 @@ const FeatureStyleEditor = ({ feature, model, drawModel }) => {
         drawModel={drawModel}
         setDrawStyle={setFeatureStyle}
         setTextStyle={setTextStyle}
+        setBufferState={setBufferState}
+        bufferState={bufferState}
       />
     </Grid>
   );

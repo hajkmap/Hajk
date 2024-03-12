@@ -41,7 +41,6 @@ const FeatureBufferAccordion = (props) => {
                 drawModel={props.drawModel}
                 localObserver={props.localObserver}
                 globalObserver={props.globalObserver}
-                setPluginShown={props.setPluginShown}
                 pluginShown={props.pluginShown}
                 showBufferSlider={props.showBufferSlider}
                 bufferState={props.bufferState}

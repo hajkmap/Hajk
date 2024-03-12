@@ -150,6 +150,7 @@ export const STROKE_TYPES = [
 ];
 
 export const STROKE_DASHES = new Map([
+  ["none", [null, null]],
   ["solid", null],
   ["dotted", [2, 7]],
   ["dashed", [12, 7]],

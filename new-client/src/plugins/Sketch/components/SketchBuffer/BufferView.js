@@ -20,6 +20,8 @@ const StyledToggleButton = styled(ToggleButton)(({ theme }) => ({
   backgroundColor: theme.palette.primary,
 }));
 
+// This is the view for the buffer sketch plugin.
+// It almost contains the same logic as the BufferView.js for the Buffer plugin, with some minimal changes.
 const BufferView = (props) => {
   const {
     model,

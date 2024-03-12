@@ -50,7 +50,7 @@ const Sketch = (props) => {
     props.options.visibleAtStart ?? false
   );
 
-  // A toggle-button that allows the user to toggle between turn off & choose-object to buffer in the new sketch buffer accordion component.
+  // A toggle-button that allows the user to toggle between turn off & choose-drawn-object to buffer in the new buffer sketch accordion.
   const [toggleBufferBtn, setToggleBufferBtn] = React.useState({
     toggle: false, // Represents the state whether the button is currently toggled on or off
     map: props.map, // Reference to the map object passed as a prop
@@ -225,7 +225,6 @@ const Sketch = (props) => {
         activeDrawType={activeDrawType}
         activityId={activityId}
         setActivityId={setActivityId}
-        setPluginShown={setPluginShown}
         setActiveDrawType={setActiveDrawType}
         modifyEnabled={modifyEnabled}
         setModifyEnabled={setModifyEnabled}

@@ -163,7 +163,7 @@ class SketchModel {
 
   // Accepts an array containing the line-dash, and returns the line (stroke) type
   // that corresponds to that value.
-  #getStrokeType = (lineDash) => {
+  #getStrokeType = (lineDash = null) => {
     for (const [key, value] of STROKE_DASHES.entries()) {
       // The value and actual line-dash might be null, lets check if they
       // both are: (If they are, the line-type is "solid").
@@ -276,14 +276,14 @@ class SketchModel {
       // Then we'll construct the feature-style-object and return it.
       return {
         strokeColor: this.#drawModel.parseColorString(
-          featureBaseStyle?.strokeStyle.color
+          featureBaseStyle?.strokeStyle?.color
         ),
-        lineDash: featureBaseStyle?.strokeStyle.dash,
-        strokeWidth: featureBaseStyle?.strokeStyle.width,
-        strokeType: this.#getStrokeType(featureBaseStyle?.strokeStyle.dash),
-        radius: featureBaseStyle?.imageStyle.radius,
+        lineDash: featureBaseStyle?.strokeStyle?.dash,
+        strokeWidth: featureBaseStyle?.strokeStyle?.width,
+        strokeType: this.#getStrokeType(featureBaseStyle?.strokeStyle?.dash),
+        radius: featureBaseStyle?.imageStyle?.radius,
         fillColor: this.#drawModel.parseColorString(
-          featureBaseStyle?.fillStyle.color
+          featureBaseStyle?.fillStyle?.color
         ),
         textForegroundColor: featureTextStyle?.foregroundColor,
         textBackgroundColor: featureTextStyle?.backgroundColor,

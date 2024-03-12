@@ -23,9 +23,8 @@ import useUpdateEffect from "../../../hooks/useUpdateEffect";
 
 //Snackbar
 import { useSnackbar } from "notistack";
-import { Vector as VectorSource } from "ol/source.js";
-import { Vector as VectorLayer } from "ol/layer.js";
-import { Circle, Stroke, Fill, Style } from "ol/style.js";
+import { Vector as VectorSource } from "ol/source";
+import { Vector as VectorLayer } from "ol/layer";
 
 // The SketchView is the main view for the Sketch-plugin.
 const SketchView = (props) => {
@@ -40,6 +39,8 @@ const SketchView = (props) => {
   const { activeDrawType, setActiveDrawType } = props;
   // We're gonna need to keep track of the current chosen activity.
   const { activityId, setActivityId } = props;
+  // We're gonna need to keep track of the current plugin-shown-state and the toggle-buffer-button.
+  const { pluginShown, setToggleBufferBtn, toggleBufferBtn } = props;
 
   // We're gonna need some snackbar functions so that we can prompt the user with information.
   const { closeSnackbar, enqueueSnackbar } = useSnackbar();
@@ -260,12 +261,12 @@ const SketchView = (props) => {
   ]);
 
   /* State object for the buffer sketch component
-  - isSelecting: boolean - true if the user is currently selecting steps in the buffer stepper
-  - distance: number - the distance to buffer the selected features
-  - activeStep: number - the current step in the buffer stepper
-  - isHighlightLayerAdded: boolean - checks if the highlight layer is added to the map
-  - isBufferLayerAdded: boolean - checks if the buffer layer is added to the map
-  - Vector sources and layers for the highlight and buffer layers
+  - isSelecting: boolean - true if the user is currently selecting objects to buffer.
+  - distance: number - the distance to buffer the selected drawn object.
+  - activeStep: number - the current step in the buffer stepper.
+  - isHighlightLayerAdded: boolean - checks if the highlight layer is added to the map.
+  - isBufferLayerAdded: boolean - checks if the buffer layer is added to the map.
+  - Vector sources for the highlight and buffer layers.
   */
   const [bufferState, setBufferState] = React.useState({
     isSelecting: false,
@@ -275,6 +276,7 @@ const SketchView = (props) => {
     bufferSource: new VectorSource(),
     isHighlightLayerAdded: false,
     isBufferLayerAdded: false,
+    isBufferStyle: false,
   });
   const [highlightLayer] = React.useState(
     new VectorLayer({
@@ -283,25 +285,6 @@ const SketchView = (props) => {
       zIndex: 5000,
       name: "pluginBufferSelections",
       caption: "Buffer selection layers",
-      style: new Style({
-        fill: new Fill({
-          color: "rgba(255, 168, 231, 0.47)",
-        }),
-        stroke: new Stroke({
-          color: "rgba(255, 168, 231, 1)",
-          width: 4,
-        }),
-        image: new Circle({
-          radius: 6,
-          fill: new Fill({
-            color: "rgba(255, 168, 231, 0.47)",
-          }),
-          stroke: new Stroke({
-            color: "rgba(255, 168, 231, 1)",
-            width: 1,
-          }),
-        }),
-      }),
     })
   );
   const [bufferLayer] = React.useState(
@@ -311,60 +294,52 @@ const SketchView = (props) => {
       zIndex: 5000,
       name: "pluginBuffers",
       caption: "Buffer layer",
-      style: new Style({
-        fill: new Fill({
-          color: "rgba(255, 255, 255, 0.5)",
-        }),
-        stroke: new Stroke({
-          color: "rgba(75, 100, 115, 1.5)",
-          width: 4,
-        }),
-        image: new Circle({
-          radius: 6,
-          fill: new Fill({
-            color: "rgba(255, 255, 255, 0.5)",
-          }),
-          stroke: new Stroke({
-            color: "rgba(75, 100, 115, 1.5)",
-            width: 2,
-          }),
-        }),
-      }),
     })
   );
-
   // This useEffect makes sure to clear the highlight-source when the user changes the activity.
   React.useEffect(() => {
-    if (activityId !== "ADD" || !props.pluginShown) {
+    if (activityId !== "ADD" || !pluginShown) {
       localObserver.publish("resetViews");
       bufferState.highlightSource.clear();
-      setBufferState({
-        ...bufferState,
+      setBufferState((prevState) => ({
+        ...prevState,
         isHighlightLayerAdded: false,
-      });
+      }));
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     bufferState.isHighlightLayerAdded,
     activityId,
     localObserver,
     bufferState.highlightSource,
-    props.pluginShown,
+    pluginShown,
   ]);
 
-  // This useEffect makes sure to always enable the possibility to draw every time the draw-tool is opened.
+  const memoizedSetToggleBufferBtn = React.useCallback(
+    (newToggleBufferBtn) => {
+      setToggleBufferBtn((prevToggleBufferBtn) => ({
+        ...prevToggleBufferBtn,
+        ...newToggleBufferBtn,
+      }));
+    },
+    [setToggleBufferBtn]
+  );
 
+  // This useEffect makes sure to always enable the possibility to draw every time the draw-tool is opened.
   React.useEffect(() => {
-    if (activityId === "ADD" || !props.pluginShown) {
-      props.setToggleBufferBtn({ ...props.toggleBufferBtn, toggle: true });
+    if (activityId || !pluginShown || activeDrawType === "Circle") {
+      memoizedSetToggleBufferBtn({ toggle: true });
       setBufferState((prevState) => ({
         ...prevState,
         isSelecting: false,
       }));
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activityId, props.pluginShown]);
-
+    if (activityId === "ADD") {
+      setBufferState((prevState) => ({
+        ...prevState,
+        isBufferStyle: false,
+      }));
+    }
+  }, [activityId, pluginShown, memoizedSetToggleBufferBtn, activeDrawType]);
   // The current view depends on which tab the user has
   // selected. Tab 0: The "create-view", Tab 1: The "save-upload-view".
   const renderCurrentView = () => {
@@ -374,7 +349,6 @@ const SketchView = (props) => {
         return (
           <AddView
             id={activityId}
-            setPluginShown={props.setPluginShown}
             model={model}
             localObserver={localObserver}
             globalObserver={globalObserver}
@@ -385,13 +359,13 @@ const SketchView = (props) => {
             setDrawStyle={setDrawStyle}
             textStyle={textStyle}
             setTextStyle={setTextStyle}
-            pluginShown={props.pluginShown}
+            pluginShown={pluginShown}
             bufferState={bufferState}
             setBufferState={setBufferState}
             highlightLayer={highlightLayer}
             bufferLayer={bufferLayer}
-            toggleBufferBtn={props.toggleBufferBtn}
-            setToggleBufferBtn={props.setToggleBufferBtn}
+            toggleBufferBtn={toggleBufferBtn}
+            setToggleBufferBtn={setToggleBufferBtn}
           />
         );
       case "DELETE":
@@ -414,6 +388,9 @@ const SketchView = (props) => {
             editFeature={props.editFeature}
             modifyEnabled={props.modifyEnabled}
             setModifyEnabled={props.setModifyEnabled}
+            setBufferState={setBufferState}
+            bufferLayer={bufferLayer}
+            bufferState={bufferState}
           />
         );
       case "MOVE":

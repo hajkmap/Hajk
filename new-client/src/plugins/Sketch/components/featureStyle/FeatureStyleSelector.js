@@ -178,6 +178,10 @@ export default function FeatureStyleSelector(props) {
   };
 
   const renderPointStyleSettings = () => {
+    // If the isBufferStyle is true, we don't want to show the point-size-slider on edit.
+    if (props.bufferState.isBufferStyle) {
+      return null;
+    }
     return (
       <Grid container>
         <Grid item xs={12}>
@@ -251,7 +255,6 @@ export default function FeatureStyleSelector(props) {
         title="Buffra"
         showBufferSlider
         drawModel={props.drawModel}
-        setPluginShown={props.setPluginShown}
         localObserver={props.localObserver}
         globalObserver={props.globalObserver}
         pluginShown={props.pluginShown}

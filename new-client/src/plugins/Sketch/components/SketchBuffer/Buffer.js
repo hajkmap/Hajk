@@ -2,8 +2,8 @@ import React from "react";
 import BufferView from "./BufferView";
 import BufferModel from "./BufferModel";
 
-// Buffer is the main component for the Buffer sketch.
-// It includes and follows the same structure as the Bufferplugin with a BufferView and a BufferModel.
+// Buffer is the parent component for the Buffer sketch.
+// It includes and follows the same structure as the Bufferplugin with a BufferView and a BufferModel as children.
 
 function Buffer(props) {
   const bufferModel = BufferModel({

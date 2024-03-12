@@ -37,7 +37,6 @@ const AddView = (props) => {
         setDrawStyle={props.setDrawStyle}
         textStyle={props.textStyle}
         setTextStyle={props.setTextStyle}
-        setPluginShown={props.setPluginShown}
         localObserver={props.localObserver}
         globalObserver={props.globalObserver}
         pluginShown={props.pluginShown}
