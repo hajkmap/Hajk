@@ -9,6 +9,16 @@
  * @param {*} data The data Promise that our various services return
  */
 export default function handleStandardResponse(res, data, successStatus = 200) {
-  if (data.error) res.status(500).send(data.error.toString());
-  else res.status(successStatus).json(data);
+  // If we encountered a error…
+  if (data.error) {
+    // Check if it's AccessError. If so, send a 403 Forbidden.
+    // Otherwise, send a generic status 500.
+    res
+      .status(data.error.name === "AccessError" ? 403 : 500)
+      .send(data.error.toString());
+  }
+  // If there's no error, send the response
+  else {
+    res.status(successStatus).json(data);
+  }
 }

@@ -35,13 +35,40 @@ class LayersSwitcherView extends React.PureComponent {
     options: propTypes.object.isRequired,
   };
 
+  // Static members to determine which Tabs should be rendered.
+  #renderRegularLayersView;
+  #renderBackgroundLayersView;
+  #renderActiveLayersView;
+
   constructor(props) {
     super(props);
     this.options = props.options;
+
+    // Let's prepare some constants that will be used to determine which
+    // tabs should be rendered.
+
+    // Regular layers are straightforward.
+    this.#renderRegularLayersView = this.options.groups.length > 0;
+
+    // The Backgrounds tab should be visible if there are baselayers in
+    // config or if any of the special layers is enabled.
+    this.#renderBackgroundLayersView =
+      this.options.baselayers.length > 0 ||
+      this.options.enableOSM === true ||
+      this.options.backgroundSwitcherBlack ||
+      this.options.backgroundSwitcherWhite;
+
+    // The Active layers tab is straightforward too.
+    this.#renderActiveLayersView = this.options.showActiveLayersView ?? false;
+
     this.state = {
       chapters: [],
       baseLayers: props.model.getBaseLayers(),
-      activeTab: 0,
+      activeTab: this.#renderRegularLayersView // Let's calculate which
+        ? "regularLayers" // view should be visible on start, given
+        : this.#renderBackgroundLayersView // that we must find out which
+          ? "backgroundLayers" // tabs are available.
+          : false,
     };
 
     props.app.globalObserver.subscribe("informativeLoaded", (chapters) => {
@@ -54,11 +81,12 @@ class LayersSwitcherView extends React.PureComponent {
   }
 
   /**
-   * LayerSwitcher consists of two Tabs: one shows
-   * "regular" layers (as checkboxes, multi select), and the
-   * other shows background layers (as radio buttons, one-at-at-time).
+   * LayerSwitcher consists of one to three Tabs:
+   * - one shows regular layers (as checkboxes, multi select)
+   * - one show the background layers (as radio buttons, one-at-at-time)
+   * - there's also an option to show a tab with active layers only.
    *
-   * This method controls which of the two Tabs is visible.
+   * This method handles switching to the selected tab's content.
    *
    * @memberof LayersSwitcherView
    */
@@ -158,27 +186,34 @@ class LayersSwitcherView extends React.PureComponent {
             variant="fullWidth"
             textColor="inherit"
           >
-            <Tab label="Kartlager" />
-            <Tab label="Bakgrund" />
-            {this.options.showActiveLayersView === true && (
-              <Tab label="Aktiva lager" />
+            {this.#renderRegularLayersView && (
+              <Tab label="Kartlager" value="regularLayers" />
+            )}
+            {this.#renderBackgroundLayersView && (
+              <Tab label="Bakgrund" value="backgroundLayers" />
+            )}
+            {this.#renderActiveLayersView && (
+              <Tab label="Aktiva lager" value="activeLayers" />
             )}
           </Tabs>
         </StyledAppBar>
         <ContentWrapper>
-          {this.renderLayerGroups(this.state.activeTab === 0)}
-          <BackgroundSwitcher
-            display={this.state.activeTab === 1}
-            layers={this.state.baseLayers}
-            layerMap={this.props.model.layerMap}
-            backgroundSwitcherBlack={this.options.backgroundSwitcherBlack}
-            backgroundSwitcherWhite={this.options.backgroundSwitcherWhite}
-            enableOSM={this.options.enableOSM}
-            map={this.props.map}
-            app={this.props.app}
-          />
-          {this.options.showActiveLayersView === true &&
-            this.state.activeTab === 2 && (
+          {this.#renderRegularLayersView &&
+            this.renderLayerGroups(this.state.activeTab === "regularLayers")}
+          {this.#renderBackgroundLayersView && (
+            <BackgroundSwitcher
+              display={this.state.activeTab === "backgroundLayers"}
+              layers={this.state.baseLayers}
+              layerMap={this.props.model.layerMap}
+              backgroundSwitcherBlack={this.options.backgroundSwitcherBlack}
+              backgroundSwitcherWhite={this.options.backgroundSwitcherWhite}
+              enableOSM={this.options.enableOSM}
+              map={this.props.map}
+              app={this.props.app}
+            />
+          )}
+          {this.#renderActiveLayersView &&
+            this.state.activeTab === "activeLayers" && (
               <DrawOrder map={this.props.map} app={this.props.app} />
             )}
         </ContentWrapper>

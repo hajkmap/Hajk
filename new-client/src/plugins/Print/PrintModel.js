@@ -24,6 +24,7 @@ import { ROBOTO_NORMAL } from "./constants";
 
 export default class PrintModel {
   constructor(settings) {
+    this.proxy = settings.proxy;
     this.map = settings.map;
     this.dims = settings.dims;
     this.logoUrl = settings.options.logo || "";
@@ -86,6 +87,8 @@ export default class PrintModel {
     200000: 20000,
     300000: 20000,
   };
+
+  fakeBase = "https://hajk.js.internal";
 
   previewLayer = null;
   previewFeature = null;
@@ -233,10 +236,10 @@ export default class PrintModel {
       this.includeImageBorder && !options.useMargin
         ? 1
         : options.useTextIconsInMargin && format === "a5"
-        ? this.margin * 8
-        : options.useTextIconsInMargin
-        ? this.margin * 6
-        : this.margin * 2;
+          ? this.margin * 8
+          : options.useTextIconsInMargin
+            ? this.margin * 6
+            : this.margin * 2;
 
     //We set the size of preview window based on the calculated heights and widths.
     const size = {
@@ -795,7 +798,7 @@ export default class PrintModel {
       const imageSource = new ImageWMS({
         ...source.getProperties(),
         projection: source.getProjection(),
-        crossOrigin: source.crossOrigin ?? "anonymous",
+        crossOrigin: source.crossOrigin || source.crossOrigin_ || "anonymous", // `crossOrigin` is not always publicly available for some reason... Had to use the private property as fallback
         params: { ...source.getParams() },
         ratio: 1,
         hidpi: false,
@@ -952,6 +955,21 @@ export default class PrintModel {
     }
   };
 
+  // Returns an URL object from the src string, prepended with proxy if any.
+  // Uses a fake base for resolving relative URL:s so we can detect this when
+  // resolving the final URL to string (and remove it).
+  // This let's us work with NodeJS URL API with relative URL:s.
+  getURL = (src) => {
+    const location = (this.proxy || "") + src;
+    return new URL(location, this.fakeBase);
+  };
+
+  // Returns a string with the complete URL, removing fake base if any.
+  toURLString = (url) => {
+    const urlString = url.toString();
+    return urlString.replace(this.fakeBase, "");
+  };
+
   // Returns an array of objects containing information regarding the tiles
   // that should be created to comply with the supplied 'MAX_TILE_SIZE' and
   // also 'fill' the image.
@@ -1002,7 +1020,7 @@ export default class PrintModel {
       // into consideration).
       source.setImageLoadFunction((image, src) => {
         // Let's create an URL-object so that we can easily grab and alter search-parameters.
-        const url = new URL(src);
+        const url = this.getURL(src);
         const searchParams = url.searchParams;
         // We have to make sure to update the search-parameters to include dpi-settings.
         searchParams.set("DPI", options.resolution);
@@ -1031,13 +1049,16 @@ export default class PrintModel {
           // Then, for each tile-information-object, we'll create a request-url containing the
           // information that we've gathered (such as the size and bounding-box).
           for (const tile of tiles) {
-            const tileUrl = new URL(url.toString());
+            const tileUrl = this.getURL(url.toString());
             tileUrl.searchParams.set("BBOX", tile.bBox);
             tileUrl.searchParams.set("HEIGHT", tile.tileHeight);
             tileUrl.searchParams.set("WIDTH", tile.tileWidth);
             // Then we'll fetch the images from the WMS-server
             promises.push(
-              this.loadImageTile(canvas, { ...tile, url: tileUrl.toString() })
+              this.loadImageTile(canvas, {
+                ...tile,
+                url: this.toURLString(tileUrl),
+              })
             );
           }
           // When all image-promises has settled, we can set the image to the canvas on which we've
@@ -1047,7 +1068,7 @@ export default class PrintModel {
           });
         } else {
           // If the request is not too complex, we can fetch it right away.
-          image.getImage().src = url.toString();
+          image.getImage().src = this.toURLString(url);
         }
       });
     } catch (error) {

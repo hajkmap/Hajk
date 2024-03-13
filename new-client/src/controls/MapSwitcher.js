@@ -2,7 +2,7 @@ import React from "react";
 import { IconButton, Menu, MenuItem, Paper, Tooltip } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import SwitchCameraIcon from "@mui/icons-material/SwitchCamera";
-import { hfetch } from "utils/FetchWrapper";
+import { hfetch } from "../utils/FetchWrapper";
 
 const StyledPaper = styled(Paper)(({ theme }) => ({
   marginBottom: theme.spacing(1),

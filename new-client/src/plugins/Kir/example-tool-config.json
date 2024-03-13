@@ -51,6 +51,6 @@
       "excelExportUrl": "https://x/mapservice/fir/residentlist",
       "minAge": 0,
       "visibleForGroups": []
-    },    
+    }
   }
 }

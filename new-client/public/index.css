@@ -72,24 +72,12 @@ body {
   font-size: 5rem;
   font-variant-caps: all-small-caps;
   font-style: italic;
+  text-align: center;
 }
 
 .app-version {
   font-size: 0.8rem;
   line-height: 5rem;
-}
-
-/* Used only for displaying error if nothing loaded (and we don't have any MUI yet) */
-.start-error {
-  color: red;
-  background: rgb(255, 200, 200);
-  border: 1px solid red;
-  border-radius: 5px;
-  padding: 15px;
-  margin: 0 auto;
-  width: 50%;
-  text-align: center;
-  margin-top: 5%;
 }
 
 .introjs-tooltip {

@@ -3,7 +3,7 @@ import { Vector as VectorSource } from "ol/source";
 import { IconMarker } from "../Fir/FirIcons";
 import { Fill, Stroke, Style, Circle, Icon } from "ol/style";
 import Feature from "ol/Feature.js";
-import HajkTransformer from "utils/HajkTransformer";
+import HajkTransformer from "../../utils/HajkTransformer";
 import { Point } from "ol/geom.js";
 import FirStyles from "../Fir/FirStyles";
 

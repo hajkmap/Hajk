@@ -7,7 +7,7 @@ import GeoJSON from "ol/format/GeoJSON";
 import LayerInfo from "./LayerInfo.js";
 import { equals } from "ol/extent";
 import { delay } from "../../utils/Delay";
-import { hfetch, overrideLayerSourceParams } from "utils/FetchWrapper";
+import { hfetch, overrideLayerSourceParams } from "../../utils/FetchWrapper";
 
 class WMSLayer {
   constructor(config, proxyUrl, globalObserver) {
@@ -77,6 +77,7 @@ class WMSLayer {
         caption: config.caption,
         opacity: config.opacity,
         zIndex: config.zIndex,
+        rotateMap: config.rotateMap,
         source: new ImageWMS(source),
         layerInfo: this.layerInfo,
         url: config.url,
@@ -95,6 +96,7 @@ class WMSLayer {
         caption: config.caption,
         opacity: config.opacity,
         zIndex: config.zIndex,
+        rotateMap: config.rotateMap,
         source: new TileWMS(source),
         layerInfo: this.layerInfo,
         url: config.url,
@@ -194,8 +196,8 @@ class WMSLayer {
     return layerType === "base"
       ? "base"
       : this.subLayers.length > 1
-      ? "group"
-      : "layer";
+        ? "group"
+        : "layer";
   }
 
   /**
@@ -241,6 +243,10 @@ class WMSLayer {
    * @instance
    */
   onImageError = async (e) => {
+    this.globalObserver.publish("layerswitcher.wmsLayerLoadStatus", {
+      id: this.layer.get("name"),
+      status: "loaderror",
+    });
     const layerSource = this.layer.getSource();
     const previousErrorExtent = e.target.get("previousErrorExtent") || [];
     const currentErrorExtent = e.image.extent;

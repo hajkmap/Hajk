@@ -52,6 +52,7 @@ class MapOptions extends Component {
         constrainResolutionMobile: config.constrainResolutionMobile || false,
         enableDownloadLink: config.enableDownloadLink || false,
         enableAppStateInHash: config.enableAppStateInHash,
+        confirmOnWindowClose: config.confirmOnWindowClose ?? true,
         altShiftDragRotate: config.altShiftDragRotate || true,
         onFocusOnly: config.onFocusOnly || false,
         doubleClickZoom: config.doubleClickZoom || true,
@@ -153,6 +154,7 @@ class MapOptions extends Component {
       constrainResolutionMobile: mapConfig.constrainResolutionMobile || false,
       enableDownloadLink: mapConfig.enableDownloadLink,
       enableAppStateInHash: mapConfig.enableAppStateInHash,
+      confirmOnWindowClose: mapConfig.confirmOnWindowClose ?? true,
       altShiftDragRotate: mapConfig.altShiftDragRotate,
       onFocusOnly: mapConfig.onFocusOnly,
       doubleClickZoom: mapConfig.doubleClickZoom,
@@ -352,6 +354,7 @@ class MapOptions extends Component {
       case "constrainResolutionMobile":
       case "enableDownloadLink":
       case "enableAppStateInHash":
+      case "confirmOnWindowClose":
       case "altShiftDragRotate":
       case "onFocusOnly":
       case "doubleClickZoom":
@@ -421,6 +424,7 @@ class MapOptions extends Component {
         );
         config.enableDownloadLink = this.getValue("enableDownloadLink");
         config.enableAppStateInHash = this.getValue("enableAppStateInHash");
+        config.confirmOnWindowClose = this.getValue("confirmOnWindowClose");
         config.altShiftDragRotate = this.getValue("altShiftDragRotate");
         config.onFocusOnly = this.getValue("onFocusOnly");
         config.doubleClickZoom = this.getValue("doubleClickZoom");
@@ -850,6 +854,29 @@ class MapOptions extends Component {
                   className="fa fa-question-circle"
                   data-toggle="tooltip"
                   title="Kartans status hålls ständigt uppdaterad, som en del av URL:ens #-parametrar. Se även #1252."
+                />
+              </label>
+            </div>
+            <div>
+              <input
+                id="input_confirmOnWindowClose"
+                type="checkbox"
+                ref="input_confirmOnWindowClose"
+                onChange={(e) => {
+                  this.setState({ confirmOnWindowClose: e.target.checked });
+                }}
+                checked={this.state.confirmOnWindowClose}
+              />
+              &nbsp;
+              <label
+                className="long-label"
+                htmlFor="input_confirmOnWindowClose"
+              >
+                Beta: fråga användaren om Hajk verkligen ska stängas
+                <i
+                  className="fa fa-question-circle"
+                  data-toggle="tooltip"
+                  title="Om aktivt kommer en konfirmationsruta att visas, om ändringar i Hajk finns (ex. pågående ritning eller mätning). I rutan som visas får användaren bekräfta om fönstret ska stängas eller ej. Se #1403."
                 />
               </label>
             </div>
@@ -1436,7 +1463,7 @@ class MapOptions extends Component {
               />
               &nbsp;
               <label className="long-label" htmlFor="input_drawerStatic">
-                Låt sidopanelen vara permanent synlig{" "}
+                Låt sidopanelen vara permanent synlig och låst{" "}
                 <i
                   className="fa fa-question-circle"
                   data-toggle="tooltip"

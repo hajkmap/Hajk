@@ -1,6 +1,6 @@
 import { PLUGINS_TO_IGNORE_IN_HASH_APP_STATE } from "constants";
-import { isValidLayerId } from "utils/Validator";
-import { debounce } from "utils/debounce";
+import { isValidLayerId } from "../utils/Validator";
+import { debounce } from "../utils/debounce";
 
 class AnchorModel {
   #app;
@@ -175,7 +175,7 @@ class AnchorModel {
     url.searchParams.append("m", this.#app.config.activeMap);
     url.searchParams.append("x", this.#map.getView().getCenter()[0]);
     url.searchParams.append("y", this.#map.getView().getCenter()[1]);
-    url.searchParams.append("z", this.#map.getView().getZoom());
+    url.searchParams.append("z", Math.round(this.#map.getView().getZoom())); // Avoid floats in z. See #1422.
     url.searchParams.append("l", this.getVisibleLayers());
     url.searchParams.append("p", this.#getVisiblePlugins());
 

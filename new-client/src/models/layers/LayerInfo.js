@@ -11,6 +11,7 @@ export default class LayerInfo {
     this.infoTitle = properties.infoTitle;
     this.infoUrl = properties.infoUrl;
     this.infoUrlText = properties.infoUrlText;
+    this.infoOpenDataLink = properties.infoOpenDataLink;
     this.infoVisible = properties.infoVisible;
     this.infoClickSortType = properties.infoClickSortType;
     this.infoClickSortDesc = properties.infoClickSortDesc;

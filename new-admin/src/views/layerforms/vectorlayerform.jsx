@@ -24,6 +24,7 @@ class VectorLayerForm extends React.Component {
     infoTitle: "",
     infoUrl: "",
     infoUrlText: "",
+    infoOpenDataLink: "",
     infoVisible: false,
     infobox: "",
     displayFields: "",
@@ -129,6 +130,7 @@ class VectorLayerForm extends React.Component {
       infoTitle: this.getValue("infoTitle"),
       infoUrl: this.getValue("infoUrl"),
       infoUrlText: this.getValue("infoUrlText"),
+      infoOpenDataLink: this.getValue("infoOpenDataLink"),
       infoVisible: this.getValue("infoVisible"),
       infobox: this.getValue("infobox"),
       displayFields: this.getValue("displayFields"),
@@ -1214,6 +1216,21 @@ class VectorLayerForm extends React.Component {
               }}
               value={this.state.infoUrlText}
               className={this.getValidationClass("infoUrlText")}
+            />
+          </div>
+          <div className={infoClass}>
+            <label>Länk till öppna data</label>
+            <input
+              type="text"
+              ref="input_infoOpenDataLink"
+              onChange={(e) => {
+                const v = e.target.value;
+                this.setState({ infoOpenDataLink: v }, () =>
+                  this.validateField("infoOpenDataLink", v)
+                );
+              }}
+              value={this.state.infoOpenDataLink}
+              className={this.getValidationClass("infoOpenDataLink")}
             />
           </div>
           <div className={infoClass}>

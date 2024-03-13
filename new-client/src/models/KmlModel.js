@@ -339,7 +339,7 @@ class KmlModel {
     // If the settings has the imageStyle-property, we create the style from that one.
     if (imageStyle) {
       return new CircleStyle({
-        radius: 6,
+        radius: imageStyle.radius,
         stroke: new Stroke({
           color: imageStyle.strokeColor,
           width: imageStyle.strokeWidth,

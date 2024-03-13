@@ -194,6 +194,7 @@ class Manager extends Component {
           infoText: layer.infoText,
           infoUrl: layer.infoUrl,
           infoUrlText: layer.infoUrlText,
+          infoOpenDataLink: layer.infoOpenDataLink,
           infoOwner: layer.infoOwner,
         });
 
@@ -239,6 +240,7 @@ class Manager extends Component {
           maxZoom: layer.maxZoom,
           infoClickSortProperty: layer.infoClickSortProperty || "",
           infoClickSortType: layer.infoClickSortType || "string",
+          rotateMap: layer.rotateMap || "n",
           infoClickSortDesc: layer.infoClickSortDesc ?? true,
           sldUrl: layer.sldUrl,
           sldText: layer.sldText,
@@ -265,6 +267,7 @@ class Manager extends Component {
           infoText: layer.infoText,
           infoUrl: layer.infoUrl,
           infoUrlText: layer.infoUrlText,
+          infoOpenDataLink: layer.infoOpenDataLink,
           infoOwner: layer.infoOwner,
           timeSliderVisible: layer.timeSliderVisible,
           timeSliderStart: layer.timeSliderStart,
@@ -303,6 +306,7 @@ class Manager extends Component {
           maxZoom: layer.maxZoom,
           infoClickSortProperty: layer.infoClickSortProperty || "",
           infoClickSortType: layer.infoClickSortType || "string",
+          rotateMap: layer.rotateMap || "n",
           infoClickSortDesc: layer.infoClickSortDesc ?? true,
           tiled: layer.tiled,
           singleTile: layer.singleTile,
@@ -326,6 +330,7 @@ class Manager extends Component {
           infoText: layer.infoText,
           infoUrl: layer.infoUrl,
           infoUrlText: layer.infoUrlText,
+          infoOpenDataLink: layer.infoOpenDataLink,
           infoOwner: layer.infoOwner,
           timeSliderVisible: layer.timeSliderVisible,
           timeSliderStart: layer.timeSliderStart,
@@ -370,6 +375,7 @@ class Manager extends Component {
           infoText: layer.infoText,
           infoUrl: layer.infoUrl,
           infoUrlText: layer.infoUrlText,
+          infoOpenDataLink: layer.infoOpenDataLink,
           infoOwner: layer.infoOwner,
           timeSliderVisible: layer.timeSliderVisible,
           timeSliderStart: layer.timeSliderStart,
@@ -539,6 +545,7 @@ class Manager extends Component {
                 : layer.caption}{" "}
               {displayType}
             </span>
+            <span style={{ fontSize: "x-small" }}>{layer.id}</span>
           </div>
           <div className="options-box">
             <i

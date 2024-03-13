@@ -22,7 +22,7 @@ import {
   or as orFilter,
   intersects as intersectsFilter,
 } from "ol/format/filter";
-import { hfetch } from "utils/FetchWrapper";
+import { hfetch } from "../../utils/FetchWrapper";
 
 const TypographyHeading = styled(Typography)(({ theme }) => ({
   fontWeight: 500,
@@ -372,9 +372,13 @@ class FirExportResidentListView extends React.PureComponent {
     return (
       <>
         <Accordion
-          disabled={this.props.results.length === 0}
+          disabled={
+            this.props.results.length === 0 || !this.options.residentList
+          }
           expanded={
-            this.state.accordionExpanded && this.props.results.length > 0
+            this.state.accordionExpanded &&
+            this.props.results.length > 0 &&
+            this.options.residentList !== null
           }
           onChange={() => {
             this.setState({

@@ -220,8 +220,11 @@ const getTextArea = (tag, defaultColors) => {
     tag.attributes.getNamedItem("data-divider-color")?.value ||
     defaultColors?.textAreaDividerColor;
 
+  const textColor = tag.attributes.getNamedItem("data-text-color")?.value;
+
   return (
     <TextArea
+      textColor={textColor}
       backgroundColor={backgroundColor}
       dividerColor={dividerColor}
       textAreaContentArray={textAreaContentArray}
@@ -231,9 +234,20 @@ const getTextArea = (tag, defaultColors) => {
 
 export const BlockQuote = ({ blockQuoteTag, defaultColors }) => {
   // Grab the theme to determine current light/dark mode
-
   const theme = useTheme();
+
+  //
   if (blockQuoteTag.attributes.getNamedItem("data-text-section")) {
+    if (theme.palette.mode === "dark") {
+      // Lets try to get a better color for the text.
+      const bgColorItem = blockQuoteTag.attributes.getNamedItem(
+        "data-background-color"
+      );
+      if (bgColorItem) {
+        const textColor = theme.palette.getContrastText(bgColorItem.value);
+        blockQuoteTag.setAttribute("data-text-color", textColor);
+      }
+    }
     return getTextArea(
       blockQuoteTag,
       theme.palette.mode === "light" && defaultColors, // Only supply defaultColors if we're in light mode
@@ -298,11 +312,14 @@ const getAccordionTextArea = (tag, defaultColors, expanded, setExpanded) => {
     tag.attributes.getNamedItem("data-divider-color")?.value ||
     defaultColors?.textAreaBackgroundColor;
 
+  const textColor = tag.attributes.getNamedItem("data-text-color")?.value;
+
   return (
     <StyledAccordion
       className="blockQuoteAccordion"
       backgroundcolor={backgroundColor}
       dividercolor={dividerColor}
+      sx={{ color: textColor }}
     >
       <StyledAccordionButton color="inherit" fullWidth>
         <StyledAccordionSummary
@@ -324,6 +341,17 @@ const getAccordionTextArea = (tag, defaultColors, expanded, setExpanded) => {
 export const AccordionSection = ({ blockQuoteTag, defaultColors }) => {
   const theme = useTheme();
   const [expanded, setExpanded] = useState(false);
+
+  if (theme.palette.mode === "dark") {
+    // Lets try to get a better color for the text.
+    const bgColorItem = blockQuoteTag.attributes.getNamedItem(
+      "data-background-color"
+    );
+    if (bgColorItem) {
+      const textColor = theme.palette.getContrastText(bgColorItem.value);
+      blockQuoteTag.setAttribute("data-text-color", textColor);
+    }
+  }
 
   return getAccordionTextArea(
     blockQuoteTag,
@@ -441,11 +469,11 @@ export const Img = ({ imgTag, localObserver, componentId, baseUrl }) => {
         image={imgUrl}
         sx={{
           ...getImageStyle(image),
-          ...(image.width && {
-            height: "auto", // Let the browser calculate the height, otherwise it will look bad when maxWidth gets triggered.
-            width: image.width,
-            maxWidth: "100%",
-          }),
+          ...(image.height &&
+            image.width && {
+              height: image.height,
+              width: image.width,
+            }),
           ".MuiCardMedia-media": {
             width: "auto",
             maxWidth: "100%",

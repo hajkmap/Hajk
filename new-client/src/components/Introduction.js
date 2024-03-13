@@ -9,7 +9,7 @@ import PluginControlButton from "../components/PluginControlButton";
 import "intro.js/introjs.css";
 import "intro.js/themes/introjs-modern.css";
 
-import { functionalOk as functionalCookieOk } from "models/Cookie";
+import { functionalOk as functionalCookieOk } from "../models/Cookie";
 
 /**
  * @summary Renders a guide that introduces new users to features present in Hajk.

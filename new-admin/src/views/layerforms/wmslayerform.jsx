@@ -48,6 +48,7 @@ const defaultState = {
   infoText: "",
   infoUrl: "",
   infoUrlText: "",
+  infoOpenDataLink: "",
   infoOwner: "",
   timeSliderVisible: false,
   timeSliderStart: "",
@@ -61,6 +62,7 @@ const defaultState = {
   infoClickSortType: "string",
   infoClickSortDesc: true,
   infoclickIcon: "",
+  rotateMap: "n",
   hideExpandArrow: false,
   style: [],
   workspaceList: [],
@@ -83,6 +85,7 @@ const supportedProjections = [
   "EPSG:3021",
   "EPSG:4326",
   "EPSG:3857",
+  "EPSG:5847",
   "CRS:84",
 ];
 
@@ -503,7 +506,10 @@ class WMSLayerForm extends Component {
             >
               lista
             </a>
-            )
+            ){" "}
+            <abbr title="Använd namnet på en material-icon eller ange url:en till en svg-ikon. Svg-ikonen ska vara kvadratisk.">
+              (?)
+            </abbr>
           </div>
           <div>
             <input
@@ -973,6 +979,7 @@ class WMSLayerForm extends Component {
           infoFormat: layer.infoFormat,
           infoClickSortProperty: layer.infoClickSortProperty ?? "",
           infoClickSortType: layer.infoClickSortType ?? "string",
+          rotateMap: layer.rotateMap ?? "n",
           hideExpandArrow: layer.hideExpandArrow ?? false,
           minMaxZoomAlertOnToggleOnly:
             layer.minMaxZoomAlertOnToggleOnly ?? false,
@@ -1290,6 +1297,7 @@ class WMSLayerForm extends Component {
       infoText: this.getValue("infoText"),
       infoUrl: this.getValue("infoUrl"),
       infoUrlText: this.getValue("infoUrlText"),
+      infoOpenDataLink: this.getValue("infoOpenDataLink"),
       infoOwner: this.getValue("infoOwner"),
       timeSliderVisible: this.getValue("timeSliderVisible"),
       timeSliderStart: this.getValue("timeSliderStart"),
@@ -1300,6 +1308,7 @@ class WMSLayerForm extends Component {
       infoClickSortProperty: this.getValue("infoClickSortProperty"),
       infoClickSortDesc: this.getValue("infoClickSortDesc"),
       infoClickSortType: this.getValue("infoClickSortType"),
+      rotateMap: this.getValue("rotateMap"),
       // infoclickIcon: this.getValue("infoclickIcon"),
       hideExpandArrow: this.getValue("hideExpandArrow"),
       // style: this.getValue("style"),
@@ -2091,6 +2100,22 @@ class WMSLayerForm extends Component {
             checked={this.state.minMaxZoomAlertOnToggleOnly}
           />
         </div>
+        <div>
+          <label>Uppåt i kartan är:</label>
+          <select
+            className="control-fixed-width"
+            ref="input_rotateMap"
+            value={this.state.rotateMap}
+            onChange={(e) => {
+              this.setState({ rotateMap: e.target.value });
+            }}
+          >
+            <option value="n">Norr</option>
+            <option value="e">Öst</option>
+            <option value="s">Syd</option>
+            <option value="w">Väst</option>
+          </select>
+        </div>
         <div className="separator">Metadata</div>
         <div>
           <label>Innehåll</label>
@@ -2185,6 +2210,19 @@ class WMSLayerForm extends Component {
               }}
               value={this.state.infoUrlText}
               className={this.getValidationClass("infoUrlText")}
+            />
+          </div>
+          <div className={infoClass}>
+            <label>Länk till öppna data</label>
+            <input
+              type="text"
+              ref="input_infoOpenDataLink"
+              onChange={(e) => {
+                this.setState({ infoOpenDataLink: e.target.value });
+                this.validateField("infoOpenDataLink", e);
+              }}
+              value={this.state.infoOpenDataLink}
+              className={this.getValidationClass("infoOpenDataLink")}
             />
           </div>
           <div className={infoClass}>
