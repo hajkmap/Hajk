@@ -223,7 +223,11 @@ class AnchorView extends React.PureComponent {
                           }}
                           textAlign={"center"}
                         >
-                          <img src={this.state.qrCode} alt="" />
+                          <img
+                            src={this.state.qrCode}
+                            alt=""
+                            style={{ width: "250px" }}
+                          />
                         </Box>
                       </Grid>
                     )}
