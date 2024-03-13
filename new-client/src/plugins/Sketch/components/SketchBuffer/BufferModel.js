@@ -7,7 +7,7 @@ import { Circle, Stroke, Fill, Style } from "ol/style";
 // This is the model for the buffer sketch plugin.
 // It almost contains the same logic as the BufferModel.js for the Buffer plugin, with some slight changes.
 // The main difference is that we use isHighlightLayerAdded and isBufferLayerAdded to keep track of the layers added to the map.
-// It helps with the logic to add and remove the layers from the map and not make duplicates.
+// It helps with the logic to add and remove the layers from the map and avoid making duplicates.
 const BufferModel = (props) => {
   const {
     toggleBufferBtn,
