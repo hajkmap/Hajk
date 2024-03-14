@@ -161,7 +161,8 @@ class AdvancedOptions extends React.PureComponent {
   };
 
   render() {
-    let showOverlapWarning = this.hasPlacementOverlap();
+    const showOverlapWarning = this.hasPlacementOverlap();
+
     const {
       resolution,
       handleChange,

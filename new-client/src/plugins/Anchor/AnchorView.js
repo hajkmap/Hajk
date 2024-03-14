@@ -66,8 +66,7 @@ class AnchorView extends React.PureComponent {
   };
 
   toggleShowQr = () => {
-    const currentQrDisplay = !this.state.showQr;
-    this.setState({ showQr: currentQrDisplay });
+    this.setState({ showQr: !this.state.showQr });
   };
 
   appendCleanModeIfActive = (url) =>
@@ -100,7 +99,7 @@ class AnchorView extends React.PureComponent {
       this.props.options.allowCreatingCleanUrls ?? true;
     return (
       <Box sx={{ width: "100%", height: "100%" }}>
-        <Grid container item spacing={2} columns={12}>
+        <Grid container spacing={2} columns={12}>
           <Grid item xs={12}>
             <Typography>
               Skapa en länk med kartans synliga lager, aktuella zoomnivå och
@@ -110,7 +109,7 @@ class AnchorView extends React.PureComponent {
         </Grid>
         {allowCreatingCleanUrls && (
           <Box sx={{ ml: { xs: 0, sm: 3 } }}>
-            <Grid container item spacing={2} columns={12}>
+            <Grid container spacing={2} columns={12}>
               <Grid item xs={12}>
                 <RadioGroup
                   aria-label="copy-url"
@@ -135,7 +134,7 @@ class AnchorView extends React.PureComponent {
           </Box>
         )}
         <Box sx={{ ml: { xs: 0, sm: 7 }, mr: { xs: 0, sm: 7 } }}>
-          <Grid container item spacing={2} columns={12}>
+          <Grid container spacing={2} columns={12}>
             <Grid item xs={12}>
               <StyledTextField
                 fullWidth={true}
@@ -152,7 +151,7 @@ class AnchorView extends React.PureComponent {
         </Box>
         {document.queryCommandSupported("copy") && (
           <Box sx={{ ml: { xs: 0, sm: 7 }, mr: { xs: 0, sm: 7 } }}>
-            <Grid container item spacing={2} columns={12}>
+            <Grid container spacing={2} columns={12}>
               <Grid item xs={6}>
                 <Tooltip title="Kopiera länk till urklipp">
                   <Button
@@ -184,15 +183,15 @@ class AnchorView extends React.PureComponent {
             </Grid>
           </Box>
         )}
-        <Box
-          sx={{
-            ml: { xs: 0, sm: 7 },
-            mr: { xs: 0, sm: 7 },
-            mt: 2,
-          }}
-        >
-          {this.props.enableAppStateInHash && (
-            <Grid container item spacing={2} columns={12}>
+        {this.props.enableAppStateInHash && (
+          <Box
+            sx={{
+              ml: { xs: 0, sm: 7 },
+              mr: { xs: 0, sm: 7 },
+              mt: 2,
+            }}
+          >
+            <Grid container spacing={2} columns={12}>
               <Grid item xs={12}>
                 <Paper sx={{ p: 1, mb: 2 }}>
                   <Grid
@@ -235,8 +234,8 @@ class AnchorView extends React.PureComponent {
                 </Paper>
               </Grid>
             </Grid>
-          )}
-        </Box>
+          </Box>
+        )}
       </Box>
     );
   }

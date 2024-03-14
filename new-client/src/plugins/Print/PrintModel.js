@@ -112,6 +112,7 @@ export default class PrintModel {
         height: qrSize,
       };
     } catch (err) {
+      console.warn(err);
       return "";
     }
   };
@@ -1292,7 +1293,6 @@ export default class PrintModel {
         }
       }
 
-      //If-statement will be altered with logic for "includeQR"
       if (options.includeQrCode && this.mapConfig.enableAppStateInHash) {
         try {
           const qrCode = await this.generateQR(url, 20);
