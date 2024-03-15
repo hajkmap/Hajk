@@ -1,6 +1,6 @@
 import React from "react";
 import propTypes from "prop-types";
-import { isValidLayerId } from "utils/Validator";
+import { isValidLayerId } from "../../../utils/Validator";
 import OSM from "ol/source/OSM";
 import TileLayer from "ol/layer/Tile";
 import LayerItem from "./LayerItem.js";
@@ -41,6 +41,7 @@ class BackgroundSwitcher extends React.PureComponent {
         source: this.osmSource,
         zIndex: -1,
         layerType: "base",
+        rotateMap: "n", // OpenStreetMap should be rotated to North
         name: "osm-layer",
         caption: "OpenStreetMap",
         layerInfo: {

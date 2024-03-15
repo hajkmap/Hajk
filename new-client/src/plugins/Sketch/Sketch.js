@@ -3,7 +3,7 @@ import Observer from "react-event-observer";
 import EditIcon from "@mui/icons-material/Edit";
 
 // Helpers
-import LocalStorageHelper from "utils/LocalStorageHelper";
+import LocalStorageHelper from "../../utils/LocalStorageHelper";
 
 // Views
 import BaseWindowPlugin from "../BaseWindowPlugin";
@@ -12,13 +12,13 @@ import SketchView from "./views/SketchView";
 // Models
 import SketchModel from "./models/SketchModel";
 import DrawModel from "../../models/DrawModel";
-import KmlModel from "models/KmlModel";
+import KmlModel from "../../models/KmlModel";
 
 // Constants
 import { STORAGE_KEY, DEFAULT_MEASUREMENT_SETTINGS } from "./constants";
 
 // Hooks
-import useCookieStatus from "hooks/useCookieStatus";
+import useCookieStatus from "../../hooks/useCookieStatus";
 
 // Returns the measurement-settings-object from LS if it exists, otherwise it returns
 // the default measurement-settings. The LS might be empty since the user might have chosen

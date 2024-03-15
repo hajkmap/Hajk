@@ -1,5 +1,5 @@
 import React from "react";
-import DialogWindowPlugin from "plugins/DialogWindowPlugin";
+import DialogWindowPlugin from "../DialogWindowPlugin";
 import DefaultIcon from "@mui/icons-material/InfoTwoTone";
 
 const InfoDialog = (props) => {

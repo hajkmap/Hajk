@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Box } from "@mui/system";
 
-import { useMapClickViewerContext } from "components/MapClickViewer/MapClickViewerContext";
+import { useMapClickViewerContext } from "../../MapClickViewerContext";
 
 const Markdown = (props) => {
   const { feature, featureCollection } = props;

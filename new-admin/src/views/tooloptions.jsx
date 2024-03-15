@@ -4,21 +4,21 @@ import Anchor from "./tools/anchor.jsx";
 import Buffer from "./tools/buffer.jsx";
 import Bookmarks from "./tools/bookmarks.jsx";
 import Coordinates from "./tools/coordinates.jsx";
-import Draw from "./tools/draw.jsx";
+// import Draw from "./tools/draw.jsx";
 import LayerComparer from "./tools/layercomparer.jsx";
 import Sketch from "./tools/sketch.jsx";
 import Edit from "./tools/edit.jsx";
-import Export from "./tools/export.jsx";
+// import Export from "./tools/export.jsx";
 import FmeServer from "./tools/fmeServer.jsx";
 import Print from "./tools/print.jsx";
 import Infoclick from "./tools/infoclick.jsx";
 import Information from "./tools/information.jsx";
-import Informative from "./tools/informative.jsx";
+// import Informative from "./tools/informative.jsx";
 import Location from "./tools/location.jsx";
 import Search from "./tools/search.jsx";
 import StreetView from "./tools/streetview.jsx";
 import Preset from "./tools/preset.jsx";
-import Measure from "./tools/measure.jsx";
+// import Measure from "./tools/measure.jsx";
 import Measurer from "./tools/measurer.jsx";
 import Routing from "./tools/routing.jsx";
 import Collector from "./tools/collector.jsx";
@@ -26,7 +26,7 @@ import Dummy from "./tools/dummy.jsx";
 import Citizendialogue from "./tools/citizendialogue.jsx";
 import MenuEditor from "./tools/MenuEditor/menuEditor.jsx";
 import TimeSlider from "./tools/timeslider.jsx";
-import GeosuiteExport from "./tools/geosuiteExport.jsx";
+// import GeosuiteExport from "./tools/geosuiteExport.jsx";
 import ExternalLinks from "./tools/externalLink.jsx";
 
 var defaultState = {
@@ -78,16 +78,16 @@ class ToolOptions extends Component {
         return <Bookmarks parent={this} model={this.props.model} />;
       case "coordinates":
         return <Coordinates parent={this} model={this.props.model} />;
-      case "draw":
-        return <Draw parent={this} model={this.props.model} />;
+      // case "draw":
+      //   return <Draw parent={this} model={this.props.model} />;
       case "layercomparer":
         return <LayerComparer parent={this} model={this.props.model} />;
       case "sketch":
         return <Sketch parent={this} model={this.props.model} />;
       case "edit":
         return <Edit parent={this} model={this.props.model} />;
-      case "export":
-        return <Export parent={this} model={this.props.model} />;
+      // case "export":
+      //   return <Export parent={this} model={this.props.model} />;
       case "fmeServer":
         return <FmeServer parent={this} model={this.props.model} />;
       case "print":
@@ -96,8 +96,8 @@ class ToolOptions extends Component {
         return <Infoclick parent={this} model={this.props.model} />;
       case "information":
         return <Information parent={this} model={this.props.model} />;
-      case "informative":
-        return <Informative parent={this} model={this.props.model} />;
+      // case "informative":
+      //   return <Informative parent={this} model={this.props.model} />;
       case "dummy":
         return <Dummy parent={this} model={this.props.model} />;
       case "citizendialogue":
@@ -112,8 +112,8 @@ class ToolOptions extends Component {
         return <Preset parent={this} model={this.props.model} />;
       case "externalLinks":
         return <ExternalLinks parent={this} model={this.props.model} />;
-      case "measure":
-        return <Measure parent={this} model={this.props.model} />;
+      // case "measure":
+      //   return <Measure parent={this} model={this.props.model} />;
       case "measurer":
         return <Measurer parent={this} model={this.props.model} />;
       case "routing":
@@ -124,8 +124,8 @@ class ToolOptions extends Component {
         return <TimeSlider parent={this} model={this.props.model} />;
       case "documenthandler":
         return <MenuEditor parent={this} model={this.props.model} />;
-      case "geosuiteexport":
-        return <GeosuiteExport parent={this} model={this.props.model} />;
+      // case "geosuiteexport":
+      //   return <GeosuiteExport parent={this} model={this.props.model} />;
       default:
         return null;
     }
@@ -168,34 +168,34 @@ class ToolOptions extends Component {
 
   render() {
     var toolTypes = {
-      anchor: "Länk till kartan",
-      buffer: "Skapa buffertzon",
       bookmarks: "Bokmärken",
-      coordinates: "Fånga koordinat",
-      draw: "Rita och mäta",
-      layercomparer: "Jämför lager sida vid sida",
-      sketch: "Rita och mäta (Version 2)",
-      edit: "Editering",
-      export: "Utskrift",
-      fmeServer: "FME-server",
-      print: "Utskrift (på klienten)",
-      infoclick: "Infoklick",
-      information: "Om kartan",
-      informative: "Dokumenthanterare",
-      search: "Sök",
-      streetview: "Google Street View",
-      preset: "Snabbval",
+      buffer: "Buffra",
+      anchor: "Dela",
+      documenthandler: "Dokumenthanterare",
+      dummy: "Dummy (testplugin)",
       externalLinks: "Externa länkar",
-      measure: "Mät",
-      measurer: "Mät (Version 2)",
-      location: "Visa min position",
+      fmeServer: "FME-server",
+      streetview: "Gatuvy",
+      infoclick: "Infoklick",
+      layercomparer: "Lagerjämförare",
+      measurer: "Mät",
       routing: "Navigation",
-      collector: "Tyck till",
-      dummy: "Dummy plugin",
+      information: "Om kartan",
+      location: "Positionera",
+      edit: "Redigera",
+      sketch: "Rita",
+      preset: "Snabbval",
+      search: "Sök",
       citizendialogue: "Medborgardialog",
       timeslider: "Tidslinje",
-      documenthandler: "Dokumenthanterare 2.0",
-      geosuiteexport: "GeoSuite export",
+      collector: "Tyck till",
+      print: "Utskrift",
+      coordinates: "Visa koordinat",
+      // draw: "Rita och mäta",
+      // export: "Utskrift",
+      // informative: "Dokumenthanterare",
+      // measure: "Mät",
+      // geosuiteexport: "GeoSuite export",
     };
 
     return (

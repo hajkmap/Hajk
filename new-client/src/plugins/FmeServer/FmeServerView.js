@@ -393,10 +393,10 @@ const FmeServerView = (props) => {
               {button.type === "back"
                 ? "Tillbaka"
                 : button.type === "next"
-                ? "Nästa"
-                : button.type === "order"
-                ? "Beställ!"
-                : "Börja om!"}
+                  ? "Nästa"
+                  : button.type === "order"
+                    ? "Beställ!"
+                    : "Börja om!"}
             </Button>
           );
         })}

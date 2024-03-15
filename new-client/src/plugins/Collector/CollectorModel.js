@@ -7,7 +7,7 @@ import VectorSource from "ol/source/Vector";
 import { all as strategyAll } from "ol/loadingstrategy";
 import { Draw } from "ol/interaction";
 import X2JS from "x2js";
-import { hfetch } from "utils/FetchWrapper";
+import { hfetch } from "../../utils/FetchWrapper";
 
 class CollectorModel {
   constructor(settings) {
@@ -247,7 +247,7 @@ class CollectorModel {
           anchor: [0.5, 1],
           anchorXUnits: "fraction",
           anchorYUnits: "fraction",
-          src: "marker_x2.png",
+          src: "marker.png",
         }),
       }),
     ];

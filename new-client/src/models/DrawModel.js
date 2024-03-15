@@ -479,10 +479,10 @@ class DrawModel {
     const baseLineStyle = settingsOverride
       ? this.#getDrawStyle(settingsOverride)
       : currentStyle
-      ? Array.isArray(currentStyle)
-        ? currentStyle[0]
-        : currentStyle
-      : this.#getDrawStyle();
+        ? Array.isArray(currentStyle)
+          ? currentStyle[0]
+          : currentStyle
+        : this.#getDrawStyle();
     // If we're dealing with a text-feature, we don't want an image-style.
     feature.get("DRAW_METHOD") === "Text" && baseLineStyle.setImage(null);
     // ILet's create a text-style. (Remember that this might be null, depending
@@ -620,8 +620,8 @@ class DrawModel {
     const baseStyle = settings
       ? this.#getArrowBaseStyle(settings)
       : currentStyle
-      ? currentStyle[0]
-      : this.#getArrowBaseStyle();
+        ? currentStyle[0]
+        : this.#getArrowBaseStyle();
     // We have to extract the base-color as well, so that we can create an arrow-head with
     // the correct color.
     const baseColor = baseStyle.getStroke()?.getColor() ?? null;
@@ -643,8 +643,8 @@ class DrawModel {
               settings
                 ? settings.strokeStyle.color
                 : baseColor
-                ? baseColor
-                : this.#drawStyleSettings.strokeColor
+                  ? baseColor
+                  : this.#drawStyleSettings.strokeColor
             ),
             anchor: [0.38, 0.53],
             rotateWithView: true,
@@ -2164,8 +2164,8 @@ class DrawModel {
       feature.get("DRAW_METHOD") === "Arrow"
         ? feature.getStyle().map((style) => style.clone())
         : Array.isArray(feature.getStyle())
-        ? feature.getStyle()[0].clone()
-        : feature.getStyle().clone();
+          ? feature.getStyle()[0].clone()
+          : feature.getStyle().clone();
     // Then we'll apply the cloned-style.
     duplicate.setStyle(style);
     // Finally we'll return the cloned feature.
@@ -2215,8 +2215,8 @@ class DrawModel {
     return Array.isArray(o)
       ? `rgba(${o[0]},${o[1]},${o[2]},${o[3]})`
       : typeof o === "object"
-      ? `rgba(${o.r},${o.g},${o.b},${o.a})`
-      : o;
+        ? `rgba(${o.r},${o.g},${o.b},${o.a})`
+        : o;
   };
 
   // Accepts a color-string (hex or rgba) and returns an object containing r-, g-, b-, and a-properties.

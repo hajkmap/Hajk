@@ -9,7 +9,7 @@ import CloseIcon from "@mui/icons-material/Close";
 
 import {
   customComponentsForReactMarkdown, // the object with all custom components
-} from "utils/customComponentsForReactMarkdown";
+} from "../../utils/customComponentsForReactMarkdown";
 
 /**
  * You should have something like this in your appConfig.json in

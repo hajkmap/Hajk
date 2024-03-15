@@ -67,8 +67,8 @@ class LayersSwitcherView extends React.PureComponent {
       activeTab: this.#renderRegularLayersView // Let's calculate which
         ? "regularLayers" // view should be visible on start, given
         : this.#renderBackgroundLayersView // that we must find out which
-        ? "backgroundLayers" // tabs are available.
-        : false,
+          ? "backgroundLayers" // tabs are available.
+          : false,
     };
 
     props.app.globalObserver.subscribe("informativeLoaded", (chapters) => {

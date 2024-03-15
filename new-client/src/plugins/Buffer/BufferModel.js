@@ -4,8 +4,8 @@ import { Vector as VectorLayer } from "ol/layer.js";
 
 import GeoJSON from "ol/format/GeoJSON.js";
 
-import HajkTransformer from "utils/HajkTransformer";
-import { hfetch } from "utils/FetchWrapper";
+import HajkTransformer from "../../utils/HajkTransformer";
+import { hfetch } from "../../utils/FetchWrapper";
 
 class BufferModel {
   #HT;

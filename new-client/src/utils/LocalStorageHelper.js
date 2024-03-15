@@ -5,7 +5,7 @@
  * once (in index.js), so you don't have to worry about the details.
  * Just get/set whatever you want.
  *
- * Please not however that THERE IS A TWIST HERE TO THE  USUAL LOCAL STORAGE
+ * Please note however that THERE IS A TWIST HERE TO THE  USUAL LOCAL STORAGE
  * behavior!
  *
  * A. This helper is map-specific. That means that ALL SETTINGS RELATED TO A
@@ -123,4 +123,5 @@ class LocalStorageHelper {
 }
 
 // Export singleton instance
+/* eslint import/no-anonymous-default-export: [2, {"allowNew": true}] */
 export default new LocalStorageHelper();

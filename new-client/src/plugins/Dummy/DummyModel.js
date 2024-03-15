@@ -1,4 +1,4 @@
-import LocalStorageHelper from "utils/LocalStorageHelper";
+import LocalStorageHelper from "../../utils/LocalStorageHelper";
 
 export default class DummyModel {
   #map;

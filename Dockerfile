@@ -1,44 +1,75 @@
-# Stage 1 - Building the backend
-FROM node:18-alpine as backendBuilder
-WORKDIR /usr/app
-COPY /new-backend/package*.json ./
+FROM node:18-alpine AS buildImage
+
+# --- BACKEND --- #
+# Start with Backend
+WORKDIR /tmp/build/new-backend
+COPY /new-backend ./
 RUN npm ci
-COPY ./new-backend .
 RUN npm run compile
 
-# Stage 2 - Building the client
-FROM node:18-alpine as clientBuilder
-WORKDIR /usr/app
-COPY /new-client/package*.json ./
-RUN npm ci --ignore-scripts
-COPY ./new-client .
+# Note: Before building Client, we will want to grab the current GIT
+# commit hash. So we must copy the .git directory first.
+WORKDIR /tmp/build
+COPY /.git .
+
+# --- BACKEND END --- #
+
+# --- CLIENT --- #
+# Next, Client UI
+WORKDIR /tmp/build/new-client
+COPY /new-client .
+
+# Install git, it's needed for the prebuild.js script
+RUN apk update
+RUN apk add git
+
+# Install packages
+RUN npm ci
+
+# Use a special appConfig for Docker
 RUN rm ./public/appConfig.json
 RUN mv ./public/appConfig.docker.json ./public/appConfig.json
-RUN npm run build --ignore-scripts
 
-# Stage 3 - Building the admin
-FROM node:18-alpine as adminBuilder
-WORKDIR /usr/app
-COPY /new-admin/package*.json ./
-RUN npm ci --ignore-scripts
-COPY ./new-admin .
+# Now let's build, including running the prebuild.js script. 
+# This ensure that some <meta> tags are added to index.html
+RUN npm run build
+RUN apk del git
+# --- CLIENT END --- #
+
+# --- ADMIN --- #
+# Next, go on with Admin UI
+WORKDIR /tmp/build/new-admin
+COPY /new-admin .
+RUN npm ci
 RUN rm ./public/config.json
 RUN mv ./public/config.docker.json ./public/config.json 
-RUN npm run build --ignore-scripts
+RUN npm run build
+# --- ADMIN --- #
 
-# Stage 4 - Combine everything and fire it up
+# --- FINAL ASSEMBLY --- #
+# Finally, let's assembly it all into another image
 FROM node:18-alpine
 WORKDIR /usr/app
+
+# Copy NPM package files from Backend
 COPY /new-backend/package*.json ./
 RUN npm ci --production
-COPY --from=backendBuilder /usr/app/dist ./
+
+# Move the built Backend into app's root at /usr/app
+COPY --from=buildImage /tmp/build/new-backend/dist ./
+
+# Copy some more necessary files. There's a great chance that 
+# they'll be mounted when running anyway, but if someone forgets
+# that, it's good to have them around so we get running with the defaults. 
 COPY /new-backend/.env .
 COPY /new-backend/App_Data ./App_Data
 COPY /new-backend/static ./static
-COPY --from=clientBuilder /usr/app/build ./static/client
-COPY --from=adminBuilder /usr/app/build ./static/admin
-VOLUME /usr/app/App_Data
-EXPOSE 3002
+
+# Move the built Client and Admin dirs into static
+COPY --from=buildImage /tmp/build/new-client/build ./static/client
+COPY --from=buildImage /tmp/build/new-admin/build ./static/admin
+# --- FINAL ASSEMBLY END --- #
+
+# Go!
 CMD node index.js
 
-# See HAJK Docker/README.md for example usage

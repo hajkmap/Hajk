@@ -1,0 +1,866 @@
+{
+  "mapConfig": {
+    "version": "1.0.0",
+    "projections": [
+      {
+        "code": "EPSG:3006",
+        "definition": "+proj=utm +zone=33 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs",
+        "extent": [181896.33, 6101648.07, 864416.0, 7689478.3],
+        "units": null
+      },
+      {
+        "code": "http://www.opengis.net/gml/srs/epsg.xml#3006",
+        "definition": "+proj=utm +zone=33 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs",
+        "extent": [181896.33, 6101648.07, 864416.0, 7689478.3],
+        "units": null
+      },
+      {
+        "code": "EPSG:3007",
+        "definition": "+proj=tmerc +lat_0=0 +lon_0=12 +k=1 +x_0=150000 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs",
+        "extent": [60436.5084, 6192389.565, 217643.4713, 6682784.4276],
+        "units": null
+      },
+      {
+        "code": "http://www.opengis.net/gml/srs/epsg.xml#3007",
+        "definition": "+proj=tmerc +lat_0=0 +lon_0=12 +k=1 +x_0=150000 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs",
+        "extent": [60436.5084, 6192389.565, 217643.4713, 6682784.4276],
+        "units": null
+      },
+      {
+        "code": "EPSG:3008",
+        "definition": "+proj=tmerc +lat_0=0 +lon_0=13.5 +k=1 +x_0=150000 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs ",
+        "extent": [60857.4994, 6120098.8505, 223225.0217, 6906693.7888],
+        "units": null
+      },
+      {
+        "code": "http://www.opengis.net/gml/srs/epsg.xml#3008",
+        "definition": "+proj=tmerc +lat_0=0 +lon_0=13.5 +k=1 +x_0=150000 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs ",
+        "extent": [60857.4994, 6120098.8505, 223225.0217, 6906693.7888],
+        "units": null
+      },
+      {
+        "code": "EPSG:3009",
+        "definition": "+proj=tmerc +lat_0=0 +lon_0=15 +k=1 +x_0=150000 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs",
+        "extent": [56294.0365, 6203542.5282, 218719.0581, 6835499.2391],
+        "units": null
+      },
+      {
+        "code": "http://www.opengis.net/gml/srs/epsg.xml#3009",
+        "definition": "+proj=tmerc +lat_0=0 +lon_0=15 +k=1 +x_0=150000 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs",
+        "extent": [56294.0365, 6203542.5282, 218719.0581, 6835499.2391],
+        "units": null
+      },
+      {
+        "code": "EPSG:3010",
+        "definition": "+proj=tmerc +lat_0=0 +lon_0=16.5 +k=1 +x_0=150000 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs",
+        "extent": [97213.6352, 6228930.1419, 225141.8681, 6916524.0785],
+        "units": null
+      },
+      {
+        "code": "http://www.opengis.net/gml/srs/epsg.xml#3010",
+        "definition": "+proj=tmerc +lat_0=0 +lon_0=16.5 +k=1 +x_0=150000 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs",
+        "extent": [97213.6352, 6228930.1419, 225141.8681, 6916524.0785],
+        "units": null
+      },
+      {
+        "code": "EPSG:3011",
+        "definition": "+proj=tmerc +lat_0=0 +lon_0=18 +k=1 +x_0=150000 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs",
+        "extent": [96664.5565, 6509617.2232, 220146.6914, 6727103.5879],
+        "units": null
+      },
+      {
+        "code": "http://www.opengis.net/gml/srs/epsg.xml#3011",
+        "definition": "+proj=tmerc +lat_0=0 +lon_0=18 +k=1 +x_0=150000 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs",
+        "extent": [96664.5565, 6509617.2232, 220146.6914, 6727103.5879],
+        "units": null
+      },
+      {
+        "code": "EPSG:3012",
+        "definition": "+proj=tmerc +lat_0=0 +lon_0=14.25 +k=1 +x_0=150000 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs",
+        "extent": [30462.5263, 6829647.9842, 216416.1584, 7154168.0208],
+        "units": null
+      },
+      {
+        "code": "http://www.opengis.net/gml/srs/epsg.xml#3012",
+        "definition": "+proj=tmerc +lat_0=0 +lon_0=14.25 +k=1 +x_0=150000 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs",
+        "extent": [30462.5263, 6829647.9842, 216416.1584, 7154168.0208],
+        "units": null
+      },
+      {
+        "code": "EPSG:3013",
+        "definition": "+proj=tmerc +lat_0=0 +lon_0=15.75 +k=1 +x_0=150000 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs ",
+        "extent": [34056.6264, 6710433.2884, 218692.0214, 7224144.732],
+        "units": null
+      },
+      {
+        "code": "http://www.opengis.net/gml/srs/epsg.xml#3013",
+        "definition": "+proj=tmerc +lat_0=0 +lon_0=15.75 +k=1 +x_0=150000 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs ",
+        "extent": [34056.6264, 6710433.2884, 218692.0214, 7224144.732],
+        "units": null
+      },
+      {
+        "code": "EPSG:3014",
+        "definition": "+proj=tmerc +lat_0=0 +lon_0=17.25 +k=1 +x_0=150000 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs",
+        "extent": [-1420.28, 6888655.5779, 212669.1333, 7459585.3378],
+        "units": null
+      },
+      {
+        "code": "http://www.opengis.net/gml/srs/epsg.xml#3014",
+        "definition": "+proj=tmerc +lat_0=0 +lon_0=17.25 +k=1 +x_0=150000 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs",
+        "extent": [-1420.28, 6888655.5779, 212669.1333, 7459585.3378],
+        "units": null
+      },
+      {
+        "code": "EPSG:3015",
+        "definition": "+proj=tmerc +lat_0=0 +lon_0=18.75 +k=1 +x_0=150000 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs",
+        "extent": [58479.4774, 6304213.2147, 241520.5226, 7276832.4419],
+        "units": null
+      },
+      {
+        "code": "http://www.opengis.net/gml/srs/epsg.xml#3015",
+        "definition": "+proj=tmerc +lat_0=0 +lon_0=18.75 +k=1 +x_0=150000 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs",
+        "extent": [58479.4774, 6304213.2147, 241520.5226, 7276832.4419],
+        "units": null
+      },
+      {
+        "code": "EPSG:3016",
+        "definition": "+proj=tmerc +lat_0=0 +lon_0=20.25 +k=1 +x_0=150000 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs",
+        "extent": [-93218.3385, 7034909.8738, 261434.6246, 7676279.8691],
+        "units": null
+      },
+      {
+        "code": "http://www.opengis.net/gml/srs/epsg.xml#3016",
+        "definition": "+proj=tmerc +lat_0=0 +lon_0=20.25 +k=1 +x_0=150000 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs",
+        "extent": [-93218.3385, 7034909.8738, 261434.6246, 7676279.8691],
+        "units": null
+      },
+      {
+        "code": "EPSG:3017",
+        "definition": "+proj=tmerc +lat_0=0 +lon_0=21.75 +k=1 +x_0=150000 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs",
+        "extent": [67451.0699, 7211342.8483, 145349.5699, 7254837.254],
+        "units": null
+      },
+      {
+        "code": "http://www.opengis.net/gml/srs/epsg.xml#3017",
+        "definition": "+proj=tmerc +lat_0=0 +lon_0=21.75 +k=1 +x_0=150000 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs",
+        "extent": [67451.0699, 7211342.8483, 145349.5699, 7254837.254],
+        "units": null
+      },
+      {
+        "code": "EPSG:3018",
+        "definition": "+proj=tmerc +lat_0=0 +lon_0=23.25 +k=1 +x_0=150000 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs",
+        "extent": [38920.7048, 7267405.2323, 193050.246, 7597992.2419],
+        "units": null
+      },
+      {
+        "code": "http://www.opengis.net/gml/srs/epsg.xml#3018",
+        "definition": "+proj=tmerc +lat_0=0 +lon_0=23.25 +k=1 +x_0=150000 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs",
+        "extent": [38920.7048, 7267405.2323, 193050.246, 7597992.2419],
+        "units": null
+      },
+      {
+        "code": "EPSG:3021",
+        "definition": "+proj=tmerc +lat_0=0 +lon_0=15.80827777777778 +k=1 +x_0=1500000 +y_0=0 +ellps=bessel +units=m +no_defs",
+        "extent": [1392811.0743, 6208496.7665, 1570600.8906, 7546077.6984],
+        "units": null
+      },
+      {
+        "code": "http://www.opengis.net/gml/srs/epsg.xml#3021",
+        "definition": "+proj=tmerc +lat_0=0 +lon_0=15.80827777777778 +k=1 +x_0=1500000 +y_0=0 +ellps=bessel +units=m +no_defs",
+        "extent": [1392811.0743, 6208496.7665, 1570600.8906, 7546077.6984],
+        "units": null
+      }
+    ],
+    "tools": [
+      {
+        "type": "layerswitcher",
+        "options": {
+          "baselayers": [
+            {
+              "id": "1",
+              "visibleAtStart": true,
+              "drawOrder": 0,
+              "visibleForGroups": null,
+              "infobox": null
+            },
+            {
+              "id": "2",
+              "visibleAtStart": false,
+              "drawOrder": 0,
+              "visibleForGroups": null,
+              "infobox": null
+            },
+            {
+              "id": "3",
+              "visibleAtStart": false,
+              "drawOrder": 0,
+              "visibleForGroups": null,
+              "infobox": null
+            }
+          ],
+          "groups": [
+            {
+              "id": "8838c969-590c-8683-435c-1ecaca271096",
+              "parent": "-1",
+              "name": "Länstyrelsen",
+              "toggled": true,
+              "expanded": false,
+              "layers": [
+                {
+                  "id": "7",
+                  "visibleAtStart": false,
+                  "drawOrder": 3,
+                  "visibleForGroups": null,
+                  "infobox": null
+                },
+                {
+                  "id": "8",
+                  "visibleAtStart": false,
+                  "drawOrder": 3,
+                  "visibleForGroups": null,
+                  "infobox": null
+                }
+              ]
+            },
+            {
+              "id": "9938c969-590c-8683-435c-1ecaca271096",
+              "parent": "-1",
+              "name": "Övrigt",
+              "toggled": true,
+              "expanded": false,
+              "layers": [
+                {
+                  "id": "1352",
+                  "visibleAtStart": true,
+                  "drawOrder": 4,
+                  "visibleForGroups": null,
+                  "infobox": null
+                }
+              ]
+            }
+          ],
+          "active": true,
+          "visibleAtStart": false,
+          "visibleAtStartMobile": false,
+          "backgroundSwitcherBlack": true,
+          "backgroundSwitcherWhite": true,
+          "enableOSM": true,
+          "showBreadcrumbs": true,
+          "target": "left",
+          "position": "left",
+          "width": 0,
+          "height": 0,
+          "title": "Lagerhanterare",
+          "description": "Välj vad du vill visa i kartan.",
+          "enableTransparencySlider": true,
+          "dropdownThemeMaps": true,
+          "themeMapHeaderCaption": "Standardkartan",
+          "instruction": "",
+          "visibleForGroups": []
+        },
+        "index": 1
+      },
+      {
+        "type": "infoclick",
+        "options": {
+          "target": "",
+          "displayPopup": false,
+          "markerImg": "/marker.png",
+          "anchor": [0.5, 1],
+          "imgSize": [32, 32],
+          "popupOffsetY": 0,
+          "visibleForGroups": []
+        },
+        "index": 2
+      },
+      {
+        "type": "sketch",
+        "options": {
+          "target": "left",
+          "position": "left",
+          "visibleForGroups": []
+        },
+        "index": 3
+      },
+      {
+        "type": "measurer",
+        "options": {
+          "target": "control",
+          "position": "right",
+          "instruction": "",
+          "icons": ""
+        },
+        "index": 4
+      },
+      {
+        "type": "streetview",
+        "options": {
+          "target": "control",
+          "position": "right",
+          "apiKey": "AIzaSyCb-bvLmybNb4QSERR43eGlvvQyUrBAQG4",
+          "instruction": "",
+          "visibleForGroups": []
+        },
+        "index": 5
+      },
+      {
+        "type": "anchor",
+        "options": {
+          "target": "left",
+          "position": "left",
+          "instruction": "",
+          "visibleForGroups": []
+        },
+        "index": 7
+      },
+      {
+        "type": "search",
+        "options": {
+          "layers": [
+            {
+              "id": "4",
+              "visibleForGroups": []
+            }
+          ],
+          "visibleForGroups": [],
+          "maxResultsPerDataset": 100,
+          "anchor": ["", ""],
+          "scale": "",
+          "markerImg": "",
+          "delayBeforeAutoSearch": 300,
+          "searchBarPlaceholder": "Sök i Hajk",
+          "autocompleteWildcardAtStart": false,
+          "enablePolygonSearch": true,
+          "enableRadiusSearch": true,
+          "enableSelectSearch": true,
+          "enableExtentSearch": true,
+          "enableResultsFiltering": true,
+          "enableResultsSorting": true,
+          "enableResultsSelectionClearing": true,
+          "enableResultsDownloading": true,
+          "enableFeaturePreview": true,
+          "enableLabelOnHighlight": true,
+          "enableSelectedFeaturesCollection": true,
+          "showResultFeaturesInMap": true,
+          "enableFeatureToggler": true,
+          "drawFillColor": "rgba(255,255,255,0.07)",
+          "drawStrokeColor": "rgba(74,74,74,0.5)",
+          "displayFillColor": "rgba(74,144,226,0.15)",
+          "displayStrokeColor": "rgba(74,144,226,0.4)",
+          "selectionTextStroke": "rgba(255,255,255,1)",
+          "selectionTextFill": "rgba(63,122,190,1)",
+          "selectionFillColor": "rgba(74,144,226,0.7)",
+          "selectionStrokeColor": "rgba(74,144,226,0.8)",
+          "highlightTextStroke": "rgba(255,255,255,1)",
+          "highlightTextFill": "rgba(214,143,28,1)",
+          "highlightFillColor": "rgba(245,166,35,0.7)",
+          "highlightStrokeColor": "rgba(245,166,35,0.8)"
+        },
+        "index": 11
+      },
+      {
+        "type": "routing",
+        "options": {
+          "target": "toolbar",
+          "apiKey": "AIzaSyCb-bvLmybNb4QSERR43eGlvvQyUrBAQG4",
+          "instruction": "",
+          "visibleForGroups": []
+        },
+        "index": 12
+      },
+      {
+        "type": "location",
+        "options": {
+          "target": "control",
+          "position": "right",
+          "visibleForGroups": []
+        },
+        "index": 13
+      },
+      {
+        "type": "preset",
+        "options": {
+          "presetList": [
+            {
+              "name": "Halmstad",
+              "presetUrl": "?m=simpleMapConfig&x=368494.9197547268&y=6282312.7413127115&z=6.7339618545565125&l=1&f=%7B%7D&clean=false"
+            },
+            {
+              "name": "Alingsås",
+              "presetUrl": "?m=simpleMapConfig&x=354049.24452326825&y=6424217.248216377&z=7.903686478656474&l=1&f=%7B%7D&clean=false"
+            },
+            {
+              "name": "Göteborg",
+              "presetUrl": "?m=simpleMapConfig&x=315850.5321760868&y=6398503.693206446&z=6.502756678859521&l=1&f=%7B%7D&clean=false"
+            },
+            {
+              "name": "Jönköping",
+              "presetUrl": "?m=simpleMapConfig&x=450214.34373580024&y=6403315.750951234&z=6.7931556775514546&l=1&f=%7B%7D&clean=false"
+            },
+            {
+              "name": "Karlstad",
+              "presetUrl": "?m=simpleMapConfig&x=416370.6129169631&y=6583095.470395488&z=6.221222447365537&l=1&f=%7B%7D&clean=false"
+            },
+            {
+              "name": "Stockholm",
+              "presetUrl": "?m=simpleMapConfig&x=671675.4989296548&y=6570377.474044046&z=4.9236065968776375&l=1&f=%7B%7D&clean=false"
+            },
+            {
+              "name": "Umeå",
+              "presetUrl": "?m=simpleMapConfig&x=758454.9972847599&y=7084504.860998487&z=6.739288215480473&l=1&f=%7B%7D&clean=false"
+            },
+            {
+              "name": "Varberg",
+              "presetUrl": "?m=simpleMapConfig&x=337544.0333333551&y=6331254.569479619&z=6.502756678859521&ss=ss&f=%7B%7D&clean=false"
+            }
+          ],
+          "visibleForGroups": []
+        },
+        "index": 14
+      },
+      {
+        "type": "coordinates",
+        "options": {
+          "target": "control",
+          "position": "right",
+          "instruction": "",
+          "transformations": [
+            {
+              "code": "EPSG:3006",
+              "default": true,
+              "hint": "Sweref99 TM",
+              "title": "Sweref99 TM",
+              "xtitle": "E",
+              "ytitle": "N",
+              "inverseAxis": false
+            }
+          ],
+          "visibleForGroups": []
+        },
+        "index": 15
+      },
+      {
+        "type": "bookmarks",
+        "options": {
+          "target": "toolbar",
+          "instruction": "",
+          "visibleForGroups": []
+        },
+        "index": 16
+      },
+      {
+        "type": "buffer",
+        "options": {
+          "target": "toolbar",
+          "instruction": "",
+          "varbergVer": false,
+          "geoserverUrl": "",
+          "notFeatureLayers": [],
+          "visibleForGroups": []
+        },
+        "index": 17
+      },
+      {
+        "type": "print",
+        "options": {
+          "target": "left",
+          "position": "left",
+          "scales": "200, 400, 1000, 2000, 5000, 10000, 25000, 50000, 100000, 200000, 400000, 800000, 1000000, 5000000, 10000000",
+          "logo": "/logoLight.png",
+          "northArrow": "/north_arrow.png",
+          "copyright": "© Hajkmap",
+          "disclaimer": "Observera att gränserna i kartan inte har någon rättsverkan.",
+          "mapTextColor": "#000000",
+          "includeNorthArrow": true,
+          "northArrowPlacement": "topLeft",
+          "includeScaleBar": true,
+          "scaleBarPlacement": "bottomLeft",
+          "includeLogo": true,
+          "logoPlacement": "topRight",
+          "date": "Utskriftsdatum: {date}",
+          "instruction": "",
+          "visibleAtStart": false,
+          "visibleForGroups": []
+        },
+        "index": 2
+      },
+      {
+        "type": "infodialog",
+        "index": 3,
+        "options": [
+          {
+            "target": "control",
+            "name": "help",
+            "icon": "helpcenter",
+            "headerText": "Example: InfoDialog with complex MarkDown",
+            "text": "# H1\n## H2\n### H3\n#### H4\n##### H5\n###### H6\n\nAlternatively, for H1 and H2, an underline-ish style:\n\nAlt-H1\n======\n\nAlt-H2\n------\n\nEmphasis, aka italics, with *asterisks* or _underscores_.\n\nStrong emphasis, aka bold, with **asterisks** or __underscores__.\n\nCombined emphasis with **asterisks and _underscores_**.\n\nStrikethrough uses two tildes. ~~Scratch this.~~\n\n# Lists\n\n1. First ordered list item\n2. Another item\n  * Unordered sub-list.\n1. Actual numbers don't matter, just that it's a number\n  1. Ordered sub-list\n4. And another item.\n\n    You can have properly indented paragraphs within list items. Notice the blank line above, and the leading spaces (at least one, but we'll use three here to also align the raw Markdown).\n\n    To have a line break without a paragraph, you will need to use two trailing spaces.\n    Note that this line is separate, but within the same paragraph.\n    (This is contrary to the typical GFM line break behaviour, where trailing spaces are not required.)\n\n* Unordered list can use asterisks\n- Or minuses\n+ Or pluses\n\n# Links\n[I'm an inline-style link](https://www.google.com)\n\n[I'm an inline-style link with title](https://www.google.com \"Google's Homepage\")\n\n[I'm a reference-style link][Arbitrary case-insensitive reference text]\n\n[I'm a relative reference to a repository file](../blob/master/LICENSE)\n\n[You can use numbers for reference-style link definitions][1]\n\nOr leave it empty and use the [link text itself].\n\nURLs and URLs in angle brackets will automatically get turned into links.\nhttp://www.example.com or <http://www.example.com> and sometimes\nexample.com (but not on Github, for example).\n\nSome text to show that the reference links can follow later.\n\n[arbitrary case-insensitive reference text]: https://www.mozilla.org\n[1]: http://slashdot.org\n[link text itself]: http://www.reddit.com\n\n# Images\nHere's our logo (hover to see the title text):\n\nInline-style:\n![alt text](https://github.com/adam-p/markdown-here/raw/master/src/common/images/icon48.png \"Logo Title Text 1\")\n\nReference-style:\n![alt text][logo]\n\n[logo]: https://github.com/adam-p/markdown-here/raw/master/src/common/images/icon48.png \"Logo Title Text 2\"\n\n# Code\nInline `code` has `back-ticks around` it.\n\nYou can have blocks of code too, just use ``` and ``` on new lines.\n\n\n# Tables\nColons can be used to align columns.\n\n| Tables        | Are           | Cool  |\n| ------------- |:-------------:| -----:|\n| col 3 is      | right-aligned | $1600 |\n| col 2 is      | centered      |   $12 |\n| zebra stripes | are neat      |    $1 |\n\nThere must be at least 3 dashes separating each header cell.\nThe outer pipes (|) are optional, and you don't need to make the\nraw Markdown line up prettily. You can also use inline Markdown.\n\nMarkdown | Less | Pretty\n--- | --- | ---\n*Still* | `renders` | **nicely**\n1 | 2 | 3\n\n# Quotes\n> Blockquotes are very handy in email to emulate reply text.\n> This line is part of the same quote.\n\nQuote break.\n\n> This is a very long line that will still be quoted properly when it wraps. Oh boy let's keep writing to make sure this is long enough to actually wrap for everyone. Oh, you can *put* **Markdown** into a blockquote.\n\n# Breakes\nThree or more...\n\n---\n\nHyphens\n\n***\n\nAsterisks\n\n___\n\nUnderscores",
+            "allowDangerousHtml": false,
+            "useLegacyNonMarkdownRenderer": false,
+            "buttonText": "Stäng",
+            "title": "Visa hjälp",
+            "visibleAtStart": false,
+            "showOnlyOnce": true,
+            "visibleForGroups": []
+          },
+          {
+            "target": "left",
+            "name": "announcements",
+            "headerText": "Nyheter i Hajk",
+            "icon": "announcement",
+            "text": "_[120 commits](https://github.com/hajkmap/Hajk/compare/v3.6.0...v3.7.0) since 3.6, here's Hajk 3.7! This release was brought to you by @Hallbergs  and @jacobwod . Please see the list of commits for all contributors._\n\n# Changelog\n\n## Major new features\n- Client: New plugin (Timeslider), allows for users to see how data changes over time (https://github.com/hajkmap/Hajk/wiki/Tidslinje)\n- Client: New plugin (VTsearch), allows for timetables searches (https://github.com/hajkmap/Hajk/wiki/Västtrafik)\n- Backend: Add a generic proxy to the backend (#824). This replaces the .NET proxy as it allows Hajk backend to proxy any service (exposed on any port), via a path on Hajk's API. Example usage includes solving CORS problems or proxying requests to underlying services running on different port (e.g. QGIS Server). \n- Client: **WMS layers** can be used as **search sources**, only minimal configuration is required to enabled search functionality for WMS (where a corresponding WFS service exists), (22d648e)\n- Client: Add support for WFS-T, including editing, from QGIS Server (#825)\n\n## New features\n- Search results labels in map can be turned off on a per-user basis, setting is stored locally in user's browser (#773)\n- WFS-T layers can be restricted to certain AD groups (#762)\n- **Min/max zoom** restrictions on layers are now visualized in client so that user knows that the layer is on, but outside current zoom (#788)\n- **New print** solution for the **DocumentHandler** plugin (#796)\n- Add support for **`dynamic` Window height** in Admin (#787)\n- Automatically **turn visibility on** for WMS search layers that got clicked (#816)\n- **More filters** in the feature-info dialog (#820)\n- Add **search phrase to Anchor link** (#830)\n- Updated the project's license to MIT to reflect recent policy change (799bcb5970f7e4b0febbd9ce4b48c96b3949605d)\n\n\n## Bug fixes\n- FeatureInfo: upgrade to ReactMarkdown 6.0 (#761)\n- Better infoclick (FeatureInfo) behavior (#771)\n- Unicode characters allowed in infoclick defintion placeholders (64bf6fa) \n- Breadcrumbs respect the chosen theme (light/dark) (#802)\n- Host Google Fonts locally (#809)\n- Map template updated to include all coordinate systems (RC1 only included EPSG:3006)\n- Minor bugfixes: #807, #812, #817, #822, #826, #831, #832, #836, #838, #839, #851, #852. \n\n---\n\n# Downloads\nThere are multiple ways to get the latest Hajk up and running. For the first time ever, we even provide a Docker container!\n\n## Pre-compiled releases\nThis time we have **three different** version of the pre-compiled solution (scroll down for download links):\n1. [Hajk 3.7.0 NodeJS edition](https://github.com/hajkmap/Hajk/releases/download/v3.7.0/hajk-v3.7.0-nodejs.zip)\n1. [Hajk 3.7.0 Simple edition](https://github.com/hajkmap/Hajk/releases/download/v3.7.0/hajk-v3.7.0-simple.zip)\n1. [Hajk 3.7.0 .NET edition](https://github.com/hajkmap/Hajk/releases/download/v3.7.0/hajk-v3.7.0-dotnet.zip)\n\n## Docker container\nThe container is available on Docker Hub: https://hub.docker.com/r/hallbergs/hajk\n\n# Installation\nRefer to our recently updated [installation guide](https://github.com/hajkmap/Hajk/wiki/Installation-guide-%28for-pre-packaged-releases%29).\n",
+            "allowDangerousHtml": true,
+            "useLegacyNonMarkdownRenderer": false,
+            "buttonText": "Ok, uppfattat!",
+            "title": "Visa nyheter",
+            "visibleAtStart": true,
+            "showOnlyOnce": true,
+            "visibleForGroups": []
+          }
+        ]
+      }
+    ],
+    "map": {
+      "target": "map",
+      "center": [576357, 6386049],
+      "title": "Hajk 3",
+      "projection": "EPSG:3006",
+      "zoom": 1.33,
+      "maxZoom": 8,
+      "minZoom": 0,
+      "resolutions": [2048, 1024, 512, 256, 128, 64, 32, 16, 8],
+      "extraPrintResolutions": [],
+      "origin": [0, 0],
+      "extent": [-1200000.0, 4700000.0, 2600000.0, 8500000.0],
+      "constrainOnlyCenter": false,
+      "constrainResolution": false,
+      "logo": "/logoLight.png",
+      "geoserverLegendOptions": "",
+      "mapselector": false,
+      "mapcleaner": false,
+      "drawerVisible": false,
+      "drawerPermanent": false,
+      "drawerVisibleMobile": false,
+      "activeDrawerOnStart": "plugins",
+      "showThemeToggler": true,
+      "colors": {
+        "primaryColor": "#333333",
+        "secondaryColor": "#ffa000",
+        "preferredColorScheme": "user"
+      },
+      "defaultCookieNoticeMessage": "Vi använder cookies för att följa upp användandet och ge en bra upplevelse av kartan. Du kan blockera cookies i webbläsaren men då visas detta meddelande igen.",
+      "defaultCookieNoticeUrl": "https://pts.se/sv/bransch/regler/lagar/lag-om-elektronisk-kommunikation/kakor-cookies/",
+      "showCookieNotice": false,
+      "cookieUse3dPart": false,
+      "crossOrigin": "anonymous",
+      "introductionEnabled": true,
+      "introductionShowControlButton": true,
+      "introductionSteps": [],
+      "showRecentlyUsedPlugins": false
+    }
+  },
+  "layersConfig": {
+    "wmtslayers": [
+      {
+        "id": "1",
+        "caption": "Topografiska webbkartan, öppna data",
+        "url": "https://api.lantmateriet.se/open/topowebb-ccby/v1/wmts/token/b84e03e0-c917-313e-9f7d-fb5303034148/",
+        "owner": null,
+        "date": "1582209573601",
+        "content": "Topowebbkartan i WMTS-format",
+        "legend": "",
+        "projection": "EPSG:3006",
+        "visibleAtStart": false,
+        "layer": "topowebb_nedtonad",
+        "style": "default",
+        "matrixSet": "3006",
+        "origin": ["-1200000", "8500000"],
+        "resolutions": [
+          "2048",
+          "1024",
+          "512",
+          "256",
+          "128",
+          "64",
+          "32",
+          "16",
+          "8"
+        ],
+        "matrixIds": ["1", "2", "3", "4", "5", "6", "7", "8", "9"],
+        "attribution": "Lantmäteriet",
+        "infoVisible": false,
+        "infoTitle": "Topowebbkartan i WMTS-format",
+        "infoText": "Bakgrundskarta från Lantmäteriet i WMTS-format.",
+        "infoUrl": "https://www.lantmateriet.se/globalassets/kartor-och-geografisk-information/geodatatjanster/tb_twkvisningv1.0.4.pdf",
+        "infoUrlText": "Information om tjänsten",
+        "infoOwner": "Lantmäteriet",
+        "zIndex": null
+      }
+    ],
+    "wmslayers": [
+      {
+        "id": "2",
+        "caption": "Nedtonad stadskarta, Göteborg",
+        "url": "https://opengeodata.goteborg.se/services/stadskarta/wms/v4",
+        "owner": "",
+        "date": "1580375228781",
+        "content": "",
+        "legend": "",
+        "projection": "EPSG:3006",
+        "layers": ["stadskarta_nedtonad"],
+        "layersInfo": [
+          {
+            "id": "stadskarta_nedtonad",
+            "caption": "",
+            "legend": "",
+            "infobox": "",
+            "style": "",
+            "queryable": false
+          }
+        ],
+        "searchFields": null,
+        "displayFields": null,
+        "visibleAtStart": false,
+        "customRatio": 1,
+        "tiled": true,
+        "opacity": 1.0,
+        "singleTile": true,
+        "imageFormat": "image/png",
+        "serverType": "geoserver",
+        "attribution": "",
+        "searchUrl": "",
+        "searchPropertyName": "",
+        "searchDisplayName": "",
+        "searchOutputFormat": "",
+        "searchGeometryField": "",
+        "infoVisible": false,
+        "infoTitle": "",
+        "infoText": "Sammansatt bakgrundskarta i gråton.",
+        "infoUrl": "",
+        "infoUrlText": "",
+        "infoOwner": "Stadsbyggnadskontoret Göteborg",
+        "version": "1.3.0",
+        "infoFormat": "application/json",
+        "zIndex": null
+      },
+      {
+        "id": "3",
+        "caption": "Ortofoto, Göteborg",
+        "url": "https://opengeodata.goteborg.se/services/ortofoto/wms/v1",
+        "owner": "",
+        "date": "1580738281023",
+        "content": "",
+        "legend": "",
+        "projection": "EPSG:3006",
+        "layers": ["orto"],
+        "layersInfo": [
+          {
+            "id": "orto",
+            "caption": "",
+            "legend": "",
+            "infobox": "",
+            "style": "",
+            "queryable": false
+          }
+        ],
+        "searchFields": null,
+        "displayFields": null,
+        "visibleAtStart": false,
+        "tiled": true,
+        "opacity": 1.0,
+        "singleTile": false,
+        "imageFormat": "image/jpeg",
+        "serverType": "geoserver",
+        "attribution": "",
+        "searchUrl": "",
+        "searchPropertyName": "",
+        "searchDisplayName": "",
+        "searchOutputFormat": "",
+        "searchGeometryField": "",
+        "infoVisible": false,
+        "infoTitle": "",
+        "infoText": "Ortofoto senaste årgång i färg (RGB) med upplösning 0.25 m/pixel.",
+        "infoUrl": "",
+        "infoUrlText": "",
+        "infoOwner": "",
+        "version": "1.3.0",
+        "infoFormat": "application/json",
+        "zIndex": null
+      },
+      {
+        "id": "7",
+        "caption": "Riksintresse Kulturmiljövård",
+        "url": "https://ext-geodata.lansstyrelsen.se/arcgis/services/WMS/LST_WMS_riksintressen_3_6_raa/mapserver/wmsserver?",
+        "owner": "",
+        "date": "1582210968096",
+        "content": "",
+        "legend": "",
+        "projection": "EPSG:3006",
+        "layers": ["RAA_Riksintresse_Kulturmiljovard_MB3kap6"],
+        "layersInfo": [
+          {
+            "id": "RAA_Riksintresse_Kulturmiljovard_MB3kap6",
+            "caption": "",
+            "legend": "",
+            "infobox": "<b>Namn:</b>\n{NAMN}\n<p>\n<b>Beskrivning:</b>\n{BESKRIVNIN}\n<p>\n<a href=\"{OBJEKTLANK}\" target=\"_blank\">Länk till mer information</a>",
+            "style": "",
+            "queryable": true
+          }
+        ],
+        "searchFields": null,
+        "displayFields": null,
+        "visibleAtStart": false,
+        "tiled": false,
+        "opacity": 1.0,
+        "singleTile": false,
+        "imageFormat": "image/png",
+        "serverType": "arcgis",
+        "attribution": "",
+        "searchUrl": "",
+        "searchPropertyName": "",
+        "searchDisplayName": "",
+        "searchOutputFormat": "",
+        "searchGeometryField": "",
+        "infoVisible": true,
+        "infoTitle": "Information",
+        "infoText": "Text om Kulturmiljövård kan finnas här.",
+        "infoUrl": "https://ext-geodatakatalog.lansstyrelsen.se/GeodataKatalogen/GetMetaDataById?id=378391e2-f11e-495c-930d-2ddbcbfebb23",
+        "infoUrlText": "Länk till metadata",
+        "infoOwner": "",
+        "version": "1.3.0",
+        "infoFormat": "application/geojson",
+        "zIndex": null
+      },
+      {
+        "id": "8",
+        "caption": "Riksintresse Natura2000",
+        "url": "https://ext-geodata.lansstyrelsen.se/arcgis/services/WMS/LST_WMS_riksintressen_4_nv/mapserver/wmsserver",
+        "owner": "",
+        "date": "1582210010534",
+        "content": "",
+        "legend": "",
+        "projection": "EPSG:3006",
+        "layers": [
+          "NV_VicNatur_Riksintresse_Ansprak_Natura_2000_Habitatdirektivet_SCI_MB4",
+          "NV_VicNatur_Riksintresse_Ansprak_Natura_2000_Fageldirektivet_SPA_MB4"
+        ],
+        "layersInfo": [
+          {
+            "id": "NV_VicNatur_Riksintresse_Ansprak_Natura_2000_Habitatdirektivet_SCI_MB4",
+            "caption": "Habitatdirektivet",
+            "legend": "",
+            "infobox": "",
+            "style": "",
+            "queryable": true
+          },
+          {
+            "id": "NV_VicNatur_Riksintresse_Ansprak_Natura_2000_Fageldirektivet_SPA_MB4",
+            "caption": "Fågeldirektivet",
+            "legend": "",
+            "infobox": "",
+            "style": "",
+            "queryable": true
+          }
+        ],
+        "searchFields": null,
+        "displayFields": null,
+        "visibleAtStart": false,
+        "tiled": false,
+        "opacity": 1.0,
+        "singleTile": false,
+        "imageFormat": "image/png",
+        "serverType": "arcgis",
+        "attribution": "",
+        "searchUrl": "",
+        "searchPropertyName": "",
+        "searchDisplayName": "",
+        "searchOutputFormat": "",
+        "searchGeometryField": "",
+        "infoVisible": true,
+        "infoTitle": "Information",
+        "infoText": "Text om Kulturmiljövård kan finnas här.",
+        "infoUrl": "https://ext-geodatakatalog.lansstyrelsen.se/GeodataKatalogen/GetMetaDataById?id=5f5fa2f8-1d43-4f98-9e4f-d5be4fdf83a7",
+        "infoUrlText": "Länk till metadata",
+        "infoOwner": "",
+        "version": "1.3.0",
+        "infoFormat": "application/geojson",
+        "zIndex": null
+      },
+      {
+        "id": "1352",
+        "caption": "Medlemmar HAJK-samverkan",
+        "url": "https://wms.varberg.se/geoserver/sbk_gi_v1/wms",
+        "owner": "",
+        "date": "1620825756633",
+        "content": "",
+        "legend": "",
+        "legendIcon": "",
+        "projection": "EPSG:3006",
+        "layers": ["hajk_medlem"],
+        "layersInfo": [
+          {
+            "id": "hajk_medlem",
+            "caption": "",
+            "legend": "",
+            "legendIcon": "",
+            "infobox": "<div><strong>{namn}</strong><br/><a href=\"{url}\" target=\"_blank\">{url}</a></div>",
+            "style": "",
+            "queryable": true
+          }
+        ],
+        "searchFields": null,
+        "displayFields": null,
+        "visibleAtStart": false,
+        "tiled": false,
+        "opacity": 1.0,
+        "maxZoom": -1,
+        "minZoom": -1,
+        "infoClickSortType": "string",
+        "infoClickSortDesc": true,
+        "infoClickSortProperty": "",
+        "singleTile": true,
+        "imageFormat": "image/png8",
+        "serverType": "geoserver",
+        "attribution": "",
+        "searchUrl": "",
+        "searchPropertyName": "",
+        "searchDisplayName": "",
+        "searchOutputFormat": "",
+        "searchGeometryField": "",
+        "infoVisible": true,
+        "infoTitle": "",
+        "infoText": "Visar alla aktiva medlemsorganisationer i HAJK-samverkan.",
+        "infoUrl": "https://hajkmap.github.io/Hajk/",
+        "infoUrlText": "Välkomstsida",
+        "infoOwner": "Källa: Stadsbyggnadskontoret Varberg",
+        "version": "1.1.1",
+        "infoFormat": "application/json",
+        "zIndex": null
+      }
+    ],
+    "wfslayers": [
+      {
+        "id": "4",
+        "caption": "Adresser Göteborg",
+        "url": "https://opengeodata.goteborg.se/services/adresser/wfs/v1",
+        "layers": ["adresser.wfs.v1:adresser"],
+        "searchFields": ["adress"],
+        "infobox": "**Adress:** {adress}  ",
+        "aliasDict": "",
+        "displayFields": ["adress"],
+        "geometryField": "geom",
+        "outputFormat": "GML2",
+        "infoVisible": false,
+        "infoTitle": null,
+        "infoText": null,
+        "infoUrl": null,
+        "infoUrlText": null,
+        "infoOwner": null,
+        "zIndex": null
+      }
+    ],
+    "vectorlayers": [],
+    "wfstlayers": [],
+    "arcgislayers": []
+  },
+  "userSpecificMaps": []
+}

@@ -22,7 +22,7 @@ import {
   or as orFilter,
   intersects as intersectsFilter,
 } from "ol/format/filter";
-import { hfetch } from "utils/FetchWrapper";
+import { hfetch } from "../../utils/FetchWrapper";
 
 const TypographyHeading = styled(Typography)(({ theme }) => ({
   fontWeight: 500,

@@ -14,7 +14,7 @@ import AppModel from "../models/AppModel.js";
 import {
   setConfig as setCookieConfig,
   functionalOk as functionalCookieOk,
-} from "models/Cookie";
+} from "../models/Cookie";
 
 import Window from "./Window.js";
 import CookieNotice from "./CookieNotice";
@@ -341,8 +341,8 @@ class App extends React.PureComponent {
         ? activeDrawerContentFromLocalStorage
         : this.props.config.mapConfig.map.activeDrawerOnStart
       : canRenderDefaultDrawer
-      ? "plugins"
-      : null;
+        ? "plugins"
+        : null;
 
     const drawerProps = {
       props,
