@@ -1,5 +1,5 @@
 // Make sure to only import the hooks you intend to use
-import React, { useCallback, useEffect, useState, useRef } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import * as Survey from "survey-react-ui";
 import { ComponentCollection } from "survey-core";
 import { Model } from "survey-core";
@@ -11,9 +11,6 @@ import ReactDOM from "react-dom/client";
 
 import EditView from "./EditView.js";
 import EditModel from "./EditModel.js";
-
-import { Box, Typography } from "@mui/material";
-import AppRegistrationIcon from "@mui/icons-material/AppRegistration";
 
 import { useSnackbar } from "notistack";
 
@@ -87,7 +84,7 @@ ComponentCollection.Instance.add({
 function CitizendialogueView(props) {
   // We're gonna need to use the event observers. Let's destruct them so that we can
   // get a hold of them easily. The observers can be accessed directly via the props:
-  const { globalObserver, localObserver } = props;
+  const { localObserver } = props;
 
   const { enqueueSnackbar } = useSnackbar();
 
@@ -110,7 +107,8 @@ function CitizendialogueView(props) {
   // since we want to use this function in a useEffect hook (more on that later) we want to make
   // sure that this function does not change on every render. (If it would, the useEffect would run
   // on every render, which we want to avoid).
-  const renderDrawerContent = useCallback(() => {
+
+  /*const renderDrawerContent = useCallback(() => {
     return (
       // The sx-prop gives us some shorthand commands, for example, the paddings below
       // will be set to theme.spacing(2), and not 2px! Make sure to read up on how the sx-prop
@@ -124,7 +122,7 @@ function CitizendialogueView(props) {
         </Typography>
       </Box>
     );
-  }, []); // <-- dependency array. (Here we can add inputs that would cause the callback to be re-calculated).
+  }, []); */ // <-- dependency array. (Here we can add inputs that would cause the callback to be re-calculated).
 
   // Another hook that is used a lot in functional components is the useEffect hook.
   // Mutations, subscriptions, timers, logging, and other side effects are not allowed inside the main body
@@ -142,7 +140,7 @@ function CitizendialogueView(props) {
 
   // Well, here we use a useEffect to publish a message on the global observer (after the initial render).
   // The message sent is used to render whatever 'renderDrawerContent' returns in Hajks drawer.
-  useEffect(() => {
+  /*useEffect(() => {
     globalObserver.publish("core.addDrawerToggleButton", {
       value: "Medborgardialog",
       ButtonIcon: AppRegistrationIcon,
@@ -151,7 +149,7 @@ function CitizendialogueView(props) {
       order: 100,
       renderDrawerContent: renderDrawerContent,
     });
-  }, [globalObserver, renderDrawerContent]);
+  }, [globalObserver, renderDrawerContent]);*/
 
   // <-- The dependency array. Since we reference the global observer and 'renderDrawerContent' we have to include these.
   // There is a lot more to say regarding the useEffect hook, but I'll leave that to you to read up on. Just a couple of tips:

@@ -1,5 +1,5 @@
 {
-  "title": "SnackaÖrebro",
+  "title": "Dialogkartan",
   "language": "sv",
   "logo": "https://www.orebro.se/images/18.242f1fb1556288bfbf1594c/1467796106738/Orebro_se-logo.png",
   "logoWidth": 60,
@@ -12,7 +12,7 @@
         {
           "title": "Startsida",
           "type": "html",
-          "html": "<p><strong>Välkommen till dialogen SnackaÖrebro!</strong></p>\n\n<p>Hur vill du att Ekeby-Almby ska utvecklas i framtiden? Var med och tyck till i ett tidigt skede av arbetet med den nya översiktsplanen. Det är nu du har störst möjlighet att påverka utvecklingen eftersom dina synpunkter samlas in innan förslaget till den nya översiktsplanen är klart.</p>\n<p>Dina svar är anonyma så tänk på att inte ange personuppgifter på dig eller någon annan när du svarar på enkäten.</p>\n\n<p>Enkäten är öppen <strong>22 april–5 maj</strong>.<br>\nÖversiktsplanen är en planering för hela Örebro kommuns utveckling de närmaste 25 åren. Det kommer därför ta lång tid innan du kan se några förändringar.</p>\n\n<p><strong>Har du andra synpunkter?</strong></p>\n<p>Vi har bara möjlighet att hantera svar inom ramen för arbetet med översiktsplanen, har du andra synpunkter är du alltid välkommen att lämna synpunkter till Örebro kommun via formuläret <a href=\"https://www.orebro.se/ovrigt/synpunkter.html\" target=\"_blank\">”Lämna en synpunkt”</a>. Vi har inte möjlighet att återkoppla eller svara på frågor du lämnar i enkäten eftersom du är anonym.</p>\n\n<p><strong>Information om behandling av personuppgifter</strong></p>\n<p>Markplanerings- och exploateringsnämnden behandlar dina personuppgifter i syfte att XX, med stöd av dataskyddsförordningen artikel 6.1e. <strong><a href=\"https://www.orebro.se/ovrigt/om-webbplatsen/behandling-av-personuppgifter.html\" target=\"_blank\">Mer information om Örebro kommuns behandling av personuppgifter</a></strong>.</p>\n\n<p>Har du funderingar kring enkäten eller bara vill ”Snacka Örebro” är du välkommen att kontakta oss via e-post: <a href=\"mailto:oversiktligplanering@orebro.se\">oversiktligplanering@orebro.se</a></p>\n"
+          "html": "<p><strong>Tyck till om utvecklingen i Hovsta!</strong></p>\n<p>Välkommen till Örebro kommuns dialogkarta. Det är nu du har störst möjlighet att påverka hur du vill att Hovsta ska utvecklas i framtiden. Dina synpunkter kommer användas som underlag när Örebro kommun tar fram ett förslaget till en ny översiktsplan. Översiktsplanen är en planering för hela Örebro kommuns utveckling de närmaste 25 åren. Det kommer därför ta lång tid innan du kan se några förändringar.</p>\n\n<p><strong>Hur fungerar dialogkartan?</strong></p>\n<p>I den här enkäten kan du lämna synpunkter på din favoritplats, en plats du tycker behöver utvecklas och en mindre bra plats i Hovsta. Markera en plats i kartan genom att klicka på knappen ”Markera plats” och klicka sedan på en plats i kartan. Svara därefter på frågorna om platsen som du markerat.</p>\n\n<p>Har du frågor om enkäten eller arbetet med översiktsplanen är du välkommen att kontakta oss via e-post: <a href=\"mailto:oversiktligplanering@orebro.se\">oversiktligplanering@orebro.se</a>.</p>\n\n<p><strong>Information om behandling av personuppgifter</strong></p>\n<p>Markplanerings- och exploateringsnämnden behandlar dina personuppgifter i syfte att samla in synpunkter i ett tidigt skede i framtagandet av en ny översiktsplan, med stöd av dataskyddsförordningen artikel 6.1e. <br><strong><a href=\"https://www.orebro.se/ovrigt/om-webbplatsen/behandling-av-personuppgifter.html\" target=\"_blank\">Mer information om Örebro kommuns behandling av personuppgifter</a></strong>.</p>\n"
         }
       ]
     },
@@ -92,6 +92,9 @@
             "Enfamiljshus",
             "Radhus/Parhus",
             "Fritidshus",
+            "Gruppbostäder",
+            "Servicebostäder",
+            "Vård- och omsorgsboende",
             "Vill ej uppge"
           ]
         },
@@ -100,7 +103,7 @@
           "type": "comment"
         },
         {
-          "title": "Varför är platsen lämplig för utveckling?",
+          "title": "Varför vill du att platsen ska utvecklas?",
           "type": "comment"
         }
       ]
@@ -163,7 +166,7 @@
           "title": "Var bor du?",
           "type": "radiogroup",
           "choices": [
-            "Ekeby-Almby",
+            "Hovsta",
             "Övriga Örebro kommun",
             "Utanför Örebro kommun",
             "Vill ej uppge"
