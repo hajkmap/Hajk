@@ -484,10 +484,6 @@ class App extends React.PureComponent {
       .addAnchorModel() // Anchor model must be added after the layers
       .loadPlugins(this.props.activeTools);
 
-    const layerSwitcherTool = this.props.config.mapConfig.tools.find(
-      (t) => t.type === "layerswitcher"
-    );
-
     Promise.all(promises).then(() => {
       // Track the page view
       this.globalObserver.publish("analytics.trackPageView");
