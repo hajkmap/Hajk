@@ -254,6 +254,7 @@ export default function FeatureStyleSelector(props) {
       <FeatureBufferAccordion
         title="Buffra"
         showBufferSlider
+        drawStyle={props.drawStyle}
         drawModel={props.drawModel}
         localObserver={props.localObserver}
         globalObserver={props.globalObserver}
@@ -261,7 +262,6 @@ export default function FeatureStyleSelector(props) {
         bufferState={props.bufferState}
         setBufferState={props.setBufferState}
         highlightLayer={props.highlightLayer}
-        bufferLayer={props.bufferLayer}
         toggleBufferBtn={props.toggleBufferBtn}
         setToggleBufferBtn={props.setToggleBufferBtn}
       />

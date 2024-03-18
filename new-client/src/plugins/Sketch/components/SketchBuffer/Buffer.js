@@ -7,17 +7,18 @@ import BufferModel from "./BufferModel";
 
 function Buffer(props) {
   const bufferModel = BufferModel({
+    drawModel: props.drawModel,
     localObserver: props.localObserver,
     pluginShown: props.pluginShown,
     toggleBufferBtn: props.toggleBufferBtn,
     bufferState: props.bufferState,
     setBufferState: props.setBufferState,
     highlightLayer: props.highlightLayer,
-    bufferLayer: props.bufferLayer,
+    drawStyle: props.drawStyle,
   });
-
   return (
     <BufferView
+      drawModel={props.drawModel}
       model={bufferModel}
       app={props.app}
       localObserver={props.localObserver}

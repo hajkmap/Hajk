@@ -24,6 +24,7 @@ const StyledToggleButton = styled(ToggleButton)(({ theme }) => ({
 // It almost contains the same logic as the BufferView.js for the Buffer plugin, with some minimal changes.
 const BufferView = (props) => {
   const {
+    drawModel,
     model,
     localObserver,
     setToggleBufferBtn,
@@ -128,7 +129,9 @@ const BufferView = (props) => {
   const renderClearButton = () => {
     return (
       (state.highlightSource.getFeatures().length !== 0 ||
-        state.bufferSource.getFeatures().length !== 0) && (
+        drawModel
+          ?.getAllDrawnFeatures()
+          ?.filter((f) => f?.get("bufferedFeature")).length !== 0) && (
         <Grid item xs={12}>
           <Button
             fullWidth
@@ -143,6 +146,7 @@ const BufferView = (props) => {
       )
     );
   };
+
   return (
     <>
       <Stepper
@@ -216,6 +220,7 @@ const BufferView = (props) => {
                   color="primary"
                   onClick={() => {
                     handleNext();
+                    model.highlightLayer.setZIndex(1000);
                     model.bufferFeatures(contextValue.state.distance);
                   }}
                 >
@@ -264,6 +269,7 @@ const BufferView = (props) => {
                       ...prevState,
                       isSelecting: false,
                     }));
+                    state.highlightSource.clear();
                   }}
                 >
                   Börja om

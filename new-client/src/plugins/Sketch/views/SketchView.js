@@ -264,55 +264,32 @@ const SketchView = (props) => {
   - isSelecting: boolean - true if the user is currently selecting objects to buffer.
   - distance: number - the distance to buffer the selected drawn object.
   - activeStep: number - the current step in the buffer stepper.
-  - isHighlightLayerAdded: boolean - checks if the highlight layer is added to the map.
-  - isBufferLayerAdded: boolean - checks if the buffer layer is added to the map.
   - Vector sources for the highlight and buffer layers.
+  - isBufferStyle: boolean - checks if the buffer style is added to the map.
   */
   const [bufferState, setBufferState] = React.useState({
     isSelecting: false,
     distance: 1000,
     activeStep: 0,
     highlightSource: new VectorSource(),
-    bufferSource: new VectorSource(),
-    isHighlightLayerAdded: false,
-    isBufferLayerAdded: false,
     isBufferStyle: false,
   });
   const [highlightLayer] = React.useState(
     new VectorLayer({
       source: bufferState.highlightSource,
       layerType: "system",
-      zIndex: 5000,
       name: "pluginBufferSelections",
       caption: "Buffer selection layers",
     })
   );
-  const [bufferLayer] = React.useState(
-    new VectorLayer({
-      source: bufferState.bufferSource,
-      layerType: "system",
-      zIndex: 5000,
-      name: "pluginBuffers",
-      caption: "Buffer layer",
-    })
-  );
+
   // This useEffect makes sure to clear the highlight-source when the user changes the activity.
   React.useEffect(() => {
     if (activityId !== "ADD" || !pluginShown) {
       localObserver.publish("resetViews");
       bufferState.highlightSource.clear();
-      setBufferState((prevState) => ({
-        ...prevState,
-        isHighlightLayerAdded: false,
-      }));
     }
-  }, [
-    bufferState.isHighlightLayerAdded,
-    activityId,
-    localObserver,
-    bufferState.highlightSource,
-    pluginShown,
-  ]);
+  }, [activityId, localObserver, bufferState.highlightSource, pluginShown]);
 
   const memoizedSetToggleBufferBtn = React.useCallback(
     (newToggleBufferBtn) => {
@@ -336,6 +313,7 @@ const SketchView = (props) => {
     if (activityId === "ADD") {
       setBufferState((prevState) => ({
         ...prevState,
+        activeStep: 0,
         isBufferStyle: false,
       }));
     }
@@ -363,7 +341,6 @@ const SketchView = (props) => {
             bufferState={bufferState}
             setBufferState={setBufferState}
             highlightLayer={highlightLayer}
-            bufferLayer={bufferLayer}
             toggleBufferBtn={toggleBufferBtn}
             setToggleBufferBtn={setToggleBufferBtn}
           />
@@ -389,7 +366,6 @@ const SketchView = (props) => {
             modifyEnabled={props.modifyEnabled}
             setModifyEnabled={props.setModifyEnabled}
             setBufferState={setBufferState}
-            bufferLayer={bufferLayer}
             bufferState={bufferState}
           />
         );

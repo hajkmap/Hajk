@@ -43,7 +43,6 @@ const AddView = (props) => {
         bufferState={props.bufferState}
         setBufferState={props.setBufferState}
         highlightLayer={props.highlightLayer}
-        bufferLayer={props.bufferLayer}
         toggleBufferBtn={props.toggleBufferBtn}
         setToggleBufferBtn={props.setToggleBufferBtn}
       />

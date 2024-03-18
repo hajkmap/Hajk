@@ -98,8 +98,6 @@ const EditView = (props) => {
                 feature={props.editFeature}
                 model={props.model}
                 drawModel={props.drawModel}
-                setBufferLayer={props.setBufferLayer}
-                bufferLayer={props.bufferLayer}
                 bufferState={props.bufferState}
                 setBufferState={props.setBufferState}
               />

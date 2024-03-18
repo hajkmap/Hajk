@@ -6,16 +6,14 @@ import { Circle, Stroke, Fill, Style } from "ol/style";
 
 // This is the model for the buffer sketch plugin.
 // It almost contains the same logic as the BufferModel.js for the Buffer plugin, with some slight changes.
-// The main difference is that we use isHighlightLayerAdded and isBufferLayerAdded to keep track of the layers added to the map.
-// It helps with the logic to add and remove the layers from the map and avoid making duplicates.
 const BufferModel = (props) => {
   const {
+    drawModel,
+    drawStyle,
     toggleBufferBtn,
     pluginShown,
     bufferState,
-    setBufferState,
     highlightLayer,
-    bufferLayer,
   } = props;
 
   const HT = new HajkTransformer({
@@ -27,7 +25,7 @@ const BufferModel = (props) => {
     () =>
       new Style({
         fill: new Fill({
-          color: "rgba(255, 168, 231, 0.47)",
+          color: "rgba(255, 168, 231, 0.7)",
         }),
         stroke: new Stroke({
           color: "rgba(255, 168, 231, 1)",
@@ -51,10 +49,16 @@ const BufferModel = (props) => {
     fill: new Fill({
       color: "rgba(255, 255, 255, 0.5)",
     }),
-    stroke: new Stroke({
-      color: "rgba(75, 100, 115, 1.5)",
-      width: 4,
-    }),
+    stroke:
+      drawStyle.strokeType === "none"
+        ? new Stroke({
+            color: "rgba(255, 168, 231, 0)",
+            width: 4,
+          })
+        : new Stroke({
+            color: "rgba(75, 100, 115, 2)",
+            width: 4,
+          }),
     image: new Circle({
       radius: 6,
       fill: new Fill({
@@ -65,6 +69,7 @@ const BufferModel = (props) => {
         width: 2,
       }),
     }),
+    zIndex: 5000,
   });
 
   const activateSelecting = (v) => {
@@ -76,20 +81,22 @@ const BufferModel = (props) => {
   };
 
   const bufferFeatures = (distance) => {
-    const arr = [];
-
     for (const f of bufferState.highlightSource.getFeatures()) {
       const bufferedFeature = HT.getBuffered(f, distance);
 
+      drawModel.addFeature(bufferedFeature);
       bufferedFeature.setStyle(bufferStyle);
-      arr.push(bufferedFeature);
+      bufferedFeature.set("USER_DRAWN", true);
+      bufferedFeature.set("bufferedFeature", true);
     }
-    bufferState.bufferSource.addFeatures(arr);
   };
 
   const clear = () => {
     bufferState.highlightSource.clear();
-    bufferState.bufferSource.clear();
+    drawModel
+      .getAllDrawnFeatures()
+      .filter((f) => f.get("bufferedFeature"))
+      .forEach((f) => drawModel.removeFeature(f));
   };
 
   useEffect(() => {
@@ -109,9 +116,12 @@ const BufferModel = (props) => {
             },
           })
           .forEach((f) => {
-            const clonedFeature = f.clone();
-            clonedFeature.setStyle(highlightStyle);
-            bufferState.highlightSource.addFeature(clonedFeature);
+            if (!f.get("bufferedFeature")) {
+              const clonedFeature = f.clone();
+              clonedFeature.setStyle(highlightStyle);
+              bufferState.highlightSource.addFeature(clonedFeature);
+              highlightLayer.setZIndex(5000);
+            }
           });
 
         const layers = toggleBufferBtn.map.getLayers();
@@ -173,40 +183,20 @@ const BufferModel = (props) => {
       if (!toggleBufferBtn.toggle) {
         setupClickEvent();
       }
-
-      if (
-        !bufferState.isHighlightLayerAdded &&
-        !toggleBufferBtn.map.getLayers().getArray().includes(highlightLayer)
-      ) {
-        toggleBufferBtn.map.addLayer(highlightLayer);
-      }
-
-      if (
-        !bufferState.isBufferLayerAdded &&
-        !toggleBufferBtn.map.getLayers().getArray().includes(bufferLayer)
-      ) {
-        toggleBufferBtn.map.addLayer(bufferLayer);
-        setBufferState({ ...bufferState, isBufferLayerAdded: true });
-      }
     }
 
+    toggleBufferBtn.map.addLayer(highlightLayer);
+    // Cleanup function
     return () => {
       removeClickEvent();
-      if (
-        bufferState.isHighlightLayerAdded &&
-        toggleBufferBtn.map.getLayers().getArray().includes(highlightLayer)
-      ) {
-        toggleBufferBtn.map.removeLayer(highlightLayer);
-        setBufferState({ ...bufferState, isHighlightLayerAdded: false });
-      }
+      // Remove the highlightLayer if it was added
+      toggleBufferBtn.map.removeLayer(highlightLayer);
     };
   }, [
     toggleBufferBtn.map,
     highlightLayer,
     bufferState,
-    bufferLayer,
     pluginShown,
-    setBufferState,
     toggleBufferBtn.toggle,
     highlightStyle,
   ]);
@@ -215,6 +205,7 @@ const BufferModel = (props) => {
     activateSelecting,
     bufferFeatures,
     clear,
+    highlightLayer,
   };
 };
 

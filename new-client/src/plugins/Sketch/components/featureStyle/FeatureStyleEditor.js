@@ -26,7 +26,6 @@ const FeatureStyleEditor = ({
   feature,
   model,
   drawModel,
-  bufferLayer,
   bufferState,
   setBufferState,
 }) => {
@@ -56,11 +55,9 @@ const FeatureStyleEditor = ({
   }, [featureStyle, feature, drawModel, model]);
 
   // Variable to check if the drawn object is a buffered-object
-  const isBufferFeature =
-    feature && bufferState.bufferSource.getFeatures().includes(feature);
-
+  const isBufferFeature = feature?.get("bufferedFeature");
   // Effect to set the isBufferStyle to true if the feature is a buffered-feature
-  // This is used to make sure that the change size accordion is disabled for the point draw type when editing.
+  // This is used to make sure that the change-size accordion is disabled for the draw type "Point" when editing a buffered object.
   React.useEffect(() => {
     if (isBufferFeature) {
       setBufferState((prevState) => ({
@@ -74,16 +71,6 @@ const FeatureStyleEditor = ({
       }));
     }
   }, [isBufferFeature, setBufferState]);
-
-  // Effect to set the bufferLayer style to the featureStyle when the featureStyle changes.
-  React.useEffect(() => {
-    if (isBufferFeature) {
-      bufferLayer.setStyle((feature) => {
-        const style = model.getFeatureStyle(feature);
-        return style;
-      });
-    }
-  }, [featureStyle, bufferLayer, model, isBufferFeature]);
 
   // Effect making sure the feature-text is set to the actual text of the feature.
   React.useEffect(() => {
