@@ -1315,8 +1315,9 @@ export default class PrintModel {
             qrCode.height
           );
         } catch (error) {
+          const imgLoadingError = { error: error, type: "QR-koden" };
           // The image loading may fail due to e.g. wrong URL, so let's catch the rejected Promise
-          this.localObserver.publish("error-loading-qr-image");
+          this.localObserver.publish("error-loading-image", imgLoadingError);
         }
       }
 
@@ -1346,8 +1347,9 @@ export default class PrintModel {
             logoHeight
           );
         } catch (error) {
+          const imgLoadingError = { error: error, type: "Logotypbilden" };
           // The image loading may fail due to e.g. wrong URL, so let's catch the rejected Promise
-          this.localObserver.publish("error-loading-logo-image");
+          this.localObserver.publish("error-loading-image", imgLoadingError);
         }
       }
 
@@ -1379,8 +1381,9 @@ export default class PrintModel {
             arrowHeight
           );
         } catch (error) {
+          const imgLoadingError = { error: error, type: "Norrpilen" };
           // The image loading may fail due to e.g. wrong URL, so let's catch the rejected Promise
-          this.localObserver.publish("error-loading-arrow-image");
+          this.localObserver.publish("error-loading-image", imgLoadingError);
         }
       }
 

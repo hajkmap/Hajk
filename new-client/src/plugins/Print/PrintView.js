@@ -106,22 +106,14 @@ class PrintView extends React.PureComponent {
       this.setState({ printInProgress: false });
     });
 
-    this.localObserver.subscribe("error-loading-qr-image", () => {
-      this.props.enqueueSnackbar("QR-bilden kunde inte laddas in.", {
-        variant: "warning",
-      });
-    });
-
-    this.localObserver.subscribe("error-loading-logo-image", () => {
-      this.props.enqueueSnackbar("Logotypbilden kunde inte laddas in.", {
-        variant: "warning",
-      });
-    });
-
-    this.localObserver.subscribe("error-loading-arrow-image", () => {
-      this.props.enqueueSnackbar("Norrpilen kunde inte laddas in.", {
-        variant: "warning",
-      });
+    this.localObserver.subscribe("error-loading-image", (imgLoadingError) => {
+      console.warn(imgLoadingError.error);
+      this.props.enqueueSnackbar(
+        `"${imgLoadingError.type} kunde inte laddas in."`,
+        {
+          variant: "warning",
+        }
+      );
     });
 
     props.localObserver.subscribe("showPrintPreview", () => {
