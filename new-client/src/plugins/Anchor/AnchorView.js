@@ -208,7 +208,6 @@ class AnchorView extends React.PureComponent {
                         <Switch
                           variant="contained"
                           color="primary"
-                          endIcon={<QrCodeIcon />}
                           onClick={this.toggleShowQr}
                         ></Switch>
                       </Tooltip>
