@@ -72,6 +72,7 @@
     "pdfjs-dist": "^3.11.174",
     "plausible-tracker": "^0.3.8",
     "proj4": "^2.10.0",
+    "qrcode": "^1.5.3",
     "react": "^18.2.0",
     "react-app-polyfill": "^3.0.0",
     "react-color": "^2.19.3",

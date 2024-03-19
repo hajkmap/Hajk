@@ -15,6 +15,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - Sketch: The user now has the option to reset to default styling and choose from a wider range of colors in the color picker; additionally, black and white options have been added [#1372](https://github.com/hajkmap/Hajk/issues/1372)
+- Print/Anchor: It's now possible to generate qr codes in Share and Print [#1482]
+  (https://github.com/hajkmap/Hajk/issues/1482)
 - Sketch: It's now possible to disable stroke for polygons and circles [#1177](https://github.com/hajkmap/Hajk/issues/1177)
 - Backend: The new .NET 6 backend. Issue: [#1210](https://github.com/hajkmap/Hajk/issues/1210). PR: [#1395](https://github.com/hajkmap/Hajk/pull/1395)
 - Core: Allow to specify map config by using `m` query parameter, even when no backend is active. [commit](https://github.com/hajkmap/Hajk/commit/eb5be276437994c86c2edd5abef3ea21cd6071b4)

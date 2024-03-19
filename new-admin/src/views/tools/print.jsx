@@ -38,6 +38,8 @@ var defaultState = {
   visibleAtStart: false,
   includeLogo: true,
   logoPlacement: "topRight",
+  includeQrCode: false,
+  qrCodePlacement: "topRight",
   includeScaleBar: true,
   scaleBarPlacement: "bottomLeft",
   includeNorthArrow: true,
@@ -101,6 +103,12 @@ class ToolOptions extends Component {
             ? tool.options.includeLogo
             : this.state.includeLogo,
         logoPlacement: tool.options.logoPlacement || this.state.logoPlacement,
+        includeQrCode:
+          tool.options.includeQrCode === "boolean"
+            ? tool.options.includeQrCode
+            : this.state.includeQrCode,
+        qrCodePlacement:
+          tool.options.qrCodePlacement || this.state.qrCodePlacement,
         includeScaleBar:
           tool.options.includeScaleBar === "boolean"
             ? tool.options.includeScaleBar
@@ -204,6 +212,8 @@ class ToolOptions extends Component {
         ),
         includeLogo: this.state.includeLogo,
         logoPlacement: this.state.logoPlacement,
+        includeQrCode: this.state.includeQrCode,
+        qrCodePlacement: this.state.qrCodePlacement,
         includeScaleBar: this.state.includeScaleBar,
         scaleBarPlacement: this.state.scaleBarPlacement,
         includeNorthArrow: this.state.includeNorthArrow,
@@ -756,6 +766,34 @@ class ToolOptions extends Component {
             {this.renderPlacementSelect(
               this.state.scaleBarPlacement,
               "scaleBarPlacement"
+            )}
+          </div>
+          <div>
+            <label htmlFor="includeQrCode">
+              Inkludera qr-kod{" "}
+              <i
+                className="fa fa-question-circle"
+                data-toggle="tooltip"
+                title="Inställning för om qr-kod skall inkluderas som standard. Användarna kan ändra detta själva."
+              />
+            </label>
+            {this.renderIncludeSelect(
+              this.state.includeQrCode,
+              "includeQrCode"
+            )}
+          </div>
+          <div>
+            <label htmlFor="qrCodePlacement">
+              Qr-kodsplacering{" "}
+              <i
+                className="fa fa-question-circle"
+                data-toggle="tooltip"
+                title="Inställning för qr-kodens standardplacering. Användarna kan ändra detta själva."
+              />
+            </label>
+            {this.renderPlacementSelect(
+              this.state.qrCodePlacement,
+              "qrCodePlacement"
             )}
           </div>
           <div>
