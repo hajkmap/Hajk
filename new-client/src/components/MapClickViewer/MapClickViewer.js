@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
 
-import Window from "components/Window";
-import FeaturePropsParsing from "components/FeatureInfo/FeaturePropsParsing";
+import Window from "../../components/Window";
+import FeaturePropsParsing from "../../components/FeatureInfo/FeaturePropsParsing";
 
 import MapClickViewerView from "./MapClickViewerView";
 import { MapClickViewerContext } from "./MapClickViewerContext";

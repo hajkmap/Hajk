@@ -14,7 +14,7 @@ import {
 import { useMediaQuery, useTheme } from "@mui/material";
 
 import LegacyNonMarkdownRenderer from "./LegacyNonMarkdownRenderer";
-import { customComponentsForReactMarkdown } from "utils/customComponentsForReactMarkdown";
+import { customComponentsForReactMarkdown } from "../../utils/customComponentsForReactMarkdown";
 
 export default function ResponsiveDialog(props) {
   const theme = useTheme();

@@ -7,7 +7,7 @@ import BugReportIcon from "@mui/icons-material/BugReport";
 
 import { useSnackbar } from "notistack";
 
-import useCookieStatus from "hooks/useCookieStatus";
+import useCookieStatus from "../../hooks/useCookieStatus";
 
 // Hajk components are primarily styled in two ways:
 // - Using the styled-utility, see: https://mui.com/system/styled/

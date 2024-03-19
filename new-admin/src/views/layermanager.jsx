@@ -240,6 +240,7 @@ class Manager extends Component {
           maxZoom: layer.maxZoom,
           infoClickSortProperty: layer.infoClickSortProperty || "",
           infoClickSortType: layer.infoClickSortType || "string",
+          rotateMap: layer.rotateMap || "n",
           infoClickSortDesc: layer.infoClickSortDesc ?? true,
           sldUrl: layer.sldUrl,
           sldText: layer.sldText,
@@ -305,6 +306,7 @@ class Manager extends Component {
           maxZoom: layer.maxZoom,
           infoClickSortProperty: layer.infoClickSortProperty || "",
           infoClickSortType: layer.infoClickSortType || "string",
+          rotateMap: layer.rotateMap || "n",
           infoClickSortDesc: layer.infoClickSortDesc ?? true,
           tiled: layer.tiled,
           singleTile: layer.singleTile,
@@ -543,6 +545,7 @@ class Manager extends Component {
                 : layer.caption}{" "}
               {displayType}
             </span>
+            <span style={{ fontSize: "x-small" }}>{layer.id}</span>
           </div>
           <div className="options-box">
             <i

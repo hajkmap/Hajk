@@ -118,19 +118,19 @@ export const StyledTypography = styled(Typography)(({ variant }) => {
   };
 });
 
-export const MarkdownHeaderComponent = ({ level, children }) => {
-  return <StyledTypography variant={`h${level}`}>{children}</StyledTypography>;
+export const MarkdownHeaderComponent = (props) => {
+  return (
+    <StyledTypography variant={props.node.tagName}>
+      {props.children}
+    </StyledTypography>
+  );
 };
 
-export const MarkdownTableCellComponent = ({
-  children,
-  style,
-  isHeader,
-  className,
-}) => {
+export const MarkdownTableCellComponent = (props) => {
+  const { children, className, node, style } = props;
   return (
     <TableCell
-      variant={isHeader ? "head" : "body"}
+      variant={node.tagName === "th" ? "head" : "body"}
       align={style?.textAlign || "inherit"}
       style={style}
       className={className}

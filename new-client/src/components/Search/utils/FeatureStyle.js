@@ -117,8 +117,8 @@ export default class FeatureStyle {
       ...(!type
         ? { zIndex: 990 } // "default" search result style on bottom
         : type === "selection"
-        ? { zIndex: 995 } // "selected" search result above the default
-        : { zIndex: 1000 }), // "highlighted" search result at the top
+          ? { zIndex: 995 } // "selected" search result above the default
+          : { zIndex: 1000 }), // "highlighted" search result at the top
       ...(this.#enableLabelOnHighlight && {
         text: new Text({
           textAlign: textAlign,

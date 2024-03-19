@@ -3,10 +3,10 @@ import { Vector as VectorSource } from "ol/source";
 import { IconMarker } from "./FirIcons";
 import { Style, Icon } from "ol/style";
 import Feature from "ol/Feature.js";
-import HajkTransformer from "utils/HajkTransformer";
+import HajkTransformer from "../../utils/HajkTransformer";
 import { Point } from "ol/geom.js";
 import FirStyles from "./FirStyles";
-import { hfetch } from "utils/FetchWrapper";
+import { hfetch } from "../../utils/FetchWrapper";
 import { GeoJSON } from "ol/format";
 
 class FirLayerController {

@@ -11,8 +11,8 @@ import {
   Tooltip,
 } from "@mui/material";
 
-import LocalStorageHelper from "utils/LocalStorageHelper";
-import useCookieStatus from "hooks/useCookieStatus";
+import LocalStorageHelper from "../../../utils/LocalStorageHelper";
+import useCookieStatus from "../../../hooks/useCookieStatus";
 
 import {
   STORAGE_KEY,

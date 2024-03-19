@@ -8,7 +8,7 @@ import Input from "@mui/material/Input";
 import Button from "@mui/material/Button";
 import Typography from "@mui/material/Typography";
 import { Vector as VectorLayer } from "ol/layer";
-import { hfetch } from "utils/FetchWrapper";
+import { hfetch } from "../../../utils/FetchWrapper";
 
 const StyledFormControl = styled(FormControl)(({ theme }) => ({
   margin: theme.spacing(1),

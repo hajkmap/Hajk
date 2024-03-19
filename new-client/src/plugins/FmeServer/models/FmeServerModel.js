@@ -350,34 +350,24 @@ class FmeServerModel {
 
   // Returns the url needed to fetch the product parameters from FME-server.
   #createGetParametersUrl = (product) => {
-    return `${this.#mapServiceBase}/fmeproxy/fmerest/v3/repositories/${
-      product.repository
-    }/items/${product.workspace}/parameters/`;
+    return `${this.#mapServiceBase}/fmeproxy/fmerest/v3/repositories/${product.repository}/items/${product.workspace}/parameters/`;
   };
 
   // Returns the url needed to post a request to start a workspace.
   #createSubmitProductRequestUrl = (product) => {
-    return `${
-      this.#mapServiceBase
-    }/fmeproxy/fmerest/v3/transformations/submit/${product.repository}/${
-      product.workspace
-    }/`;
+    return `${this.#mapServiceBase}/fmeproxy/fmerest/v3/transformations/submit/${product.repository}/${product.workspace}/`;
   };
 
   // Returns the base url used to post a request to submit a
   // data-download job.
   #createDataDownloadUrl = (product) => {
-    return `${this.#mapServiceBase}/fmeproxy/fmedatadownload/${
-      product.repository
-    }/${product.workspace}/`;
+    return `${this.#mapServiceBase}/fmeproxy/fmedatadownload/${product.repository}/${product.workspace}/`;
   };
 
   // Returns the url needed to fetch information about a submitted job.
   // The required parameter, jobId is a string returned when queuing a job.
   #createProductStatusUrl = (jobId) => {
-    return `${
-      this.#mapServiceBase
-    }/fmeproxy/fmerest/v3/transformations/jobs/id/${jobId}/`;
+    return `${this.#mapServiceBase}/fmeproxy/fmerest/v3/transformations/jobs/id/${jobId}/`;
   };
 }
 export default FmeServerModel;

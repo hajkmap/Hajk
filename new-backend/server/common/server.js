@@ -13,6 +13,8 @@ import * as OpenApiValidator from "express-openapi-validator";
 import log4js from "./utils/hajkLogger.js";
 import clfDate from "clf-date";
 
+import websockets from "./websockets/index.js";
+
 import { createProxyMiddleware } from "http-proxy-middleware";
 
 import detailedRequestLogger from "./middlewares/detailed.request.logger.js";
@@ -22,7 +24,7 @@ const app = new Express();
 
 const logger = log4js.getLogger("hajk");
 
-const ALLOWED_API_VERSIONS = [1, 2];
+const ALLOWED_API_VERSIONS = [2];
 
 export default class ExpressServer {
   constructor() {
@@ -141,6 +143,9 @@ export default class ExpressServer {
     app.use(
       helmet({
         contentSecurityPolicy: false, // If active, we get errors loading inline <script>
+        crossOriginResourcePolicy: {
+          policy: "cross-origin",
+        },
         frameguard: false, // If active, other pages can't embed our maps
       })
     );
@@ -489,8 +494,12 @@ built-it compression by setting the ENABLE_GZIP_COMPRESSION option to "true" in 
       process.on(signal, () => shutdown(signal, signals[signal]));
     });
 
-    // Finally, let's setup the server and start listening!
+    // Let's setup the server and start listening.
     const server = http.createServer(app).listen(port, welcome(port));
+
+    // For WS support we must also supply the server to the WebSocket component.
+    process.env.ENABLE_WEBSOCKETS?.toLowerCase() === "true" &&
+      websockets(server);
 
     return app;
   }

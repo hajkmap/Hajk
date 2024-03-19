@@ -1873,7 +1873,7 @@ class Menu extends Component {
               onClick={(e) => this.toggleLayerMenu()}
               startIcon={<LayersIcon />}
             >
-              Lagermeny
+              Lagerväljare
             </ColorButtonBlue>
             &nbsp;
             <ColorButtonBlue

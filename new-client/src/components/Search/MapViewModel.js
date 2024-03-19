@@ -9,7 +9,7 @@ import { fromExtent } from "ol/geom/Polygon";
 import TileLayer from "ol/layer/Tile";
 import ImageLayer from "ol/layer/Image";
 import { handleClick } from "../../models/Click";
-import { deepMerge } from "utils/DeepMerge";
+import { deepMerge } from "../../utils/DeepMerge";
 import { isValidLayerId } from "../../utils/Validator";
 
 class MapViewModel {

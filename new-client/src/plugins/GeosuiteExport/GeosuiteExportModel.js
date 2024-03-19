@@ -4,7 +4,7 @@ import { Fill, Stroke, Style } from "ol/style";
 import { Vector as VectorSource } from "ol/source";
 import { Vector as VectorLayer } from "ol/layer";
 import { intersects, within } from "ol/format/filter";
-import { hfetch } from "utils/FetchWrapper";
+import { hfetch } from "../../utils/FetchWrapper";
 import { WFS } from "ol/format";
 import { saveAs } from "file-saver";
 import JSZip from "jszip";
