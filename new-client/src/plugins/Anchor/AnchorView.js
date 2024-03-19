@@ -19,7 +19,6 @@ import {
 } from "@mui/material";
 
 import FileCopyIcon from "@mui/icons-material/FileCopy";
-import QrCodeIcon from "@mui/icons-material/QrCode";
 import OpenInNewIcon from "@mui/icons-material/OpenInNew";
 
 const StyledTextField = styled(TextField)(({ theme }) => ({
