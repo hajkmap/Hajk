@@ -54,12 +54,12 @@ export default function FeatureStyleSelector(props) {
     });
   };
 
-  // Reset the draw-style to the default values.
+  // Reset the draw-style to default values.
   const resetDrawStyle = () => {
     props.setDrawStyle(DEFAULT_DRAW_STYLE_SETTINGS);
   };
 
-  // Reset the text-style to the default values.
+  // Reset the text-style to default values.
   const resetTextStyle = () => {
     props.setTextStyle(DEFAULT_TEXT_STYLE_SETTINGS);
   };
@@ -300,6 +300,7 @@ export default function FeatureStyleSelector(props) {
     );
   };
 
+  // We want to display a reset-button for the user to reset the style to default values.
   const renderResetButton = () => {
     return (
       <Grid item xs={12} sx={{ marginBottom: 1 }}>
