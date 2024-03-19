@@ -300,46 +300,52 @@ export default function FeatureStyleSelector(props) {
     );
   };
 
+  const renderResetButton = () => {
+    return (
+      <Grid item xs={12} sx={{ marginBottom: 1 }}>
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+          }}
+        >
+          <Typography sx={{ flex: 1, textAlign: "center", ml: 5 }}>
+            Utseende
+          </Typography>
+
+          <ToolTip
+            disableInteractive
+            title="Återställ utseendet till standardinställningar"
+          >
+            <IconButton
+              sx={{ mr: 1 }}
+              size="small"
+              onClick={
+                props.activeDrawType === "Text"
+                  ? resetTextStyle
+                  : resetDrawStyle
+              }
+            >
+              <RestartAltIcon
+                sx={{
+                  transform: "rotate(-60deg)",
+                }}
+              />
+            </IconButton>
+          </ToolTip>
+        </Box>
+      </Grid>
+    );
+  };
+
   return (
     <Grid container>
       {props.activeDrawType === "LineString" && renderStrokeTypeSelector()}
       {props.activeDrawType === "Text" && renderTextSizeSelector()}
       {props.activeDrawType === "Circle" && renderCircleRadiusSelector()}
       <Grid item xs={12} style={{ marginTop: 16 }}>
-        <Grid item xs={12} style={{ marginBottom: 6 }}>
-          <Box
-            sx={{
-              display: "flex",
-              justifyContent: "center",
-              alignItems: "center",
-            }}
-          >
-            <Typography sx={{ flex: 1, textAlign: "center", ml: 5 }}>
-              Utseende
-            </Typography>
-
-            <ToolTip
-              disableInteractive
-              title="Återställ utseende till standardinställningar"
-            >
-              <IconButton
-                sx={{ mr: 1 }}
-                size="small"
-                onClick={
-                  props.activeDrawType === "Text"
-                    ? resetTextStyle
-                    : resetDrawStyle
-                }
-              >
-                <RestartAltIcon
-                  sx={{
-                    transform: "rotate(-60deg)",
-                  }}
-                />
-              </IconButton>
-            </ToolTip>
-          </Box>
-        </Grid>
+        {renderResetButton()}
         <Grid item xs={12}>
           {renderColorSelectors()}
           {props.activeDrawType === "Point" && renderPointStyleSettings()}
