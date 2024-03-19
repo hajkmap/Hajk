@@ -9,6 +9,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Print/Anchor: It's now possible to generate qr codes in Share and Print [#1482]
+(https://github.com/hajkmap/Hajk/issues/1482)
+
 - Sketch: It's now possible to disable stroke for polygons and circles [#1177](https://github.com/hajkmap/Hajk/issues/1177)
 
 ### Fixed
