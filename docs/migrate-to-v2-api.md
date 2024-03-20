@@ -4,7 +4,7 @@
 
 ### Removed keys
 
-The following keys are now obsolete, have no effect in Client UI and can be safely removed:
+As a result of [finalizing the migration to the consolidated loading approach in Client UI (first started in #682)](https://github.com/hajkmap/Hajk/commit/01123dd79aec6d66b0f7cd4f3ad767bef2f2c4f2), [the new error page in Client UI added in 3.13.6](https://github.com/hajkmap/Hajk/commit/f2201fc2c63988175172315313344a8992a17c4d) as well as [#1369](https://github.com/hajkmap/Hajk/issues/1369), the following keys are now obsolete, **have no effect in Client UI** and can be safely removed:
 
 - `appName`
 - `version`
