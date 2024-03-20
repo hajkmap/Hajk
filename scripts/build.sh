@@ -80,7 +80,7 @@ git pull
 # BACKEND
 echo "Part 1: Backend"
 echo "Installing backend dependencies..."
-cd $GIT_DIR/new-backend
+cd $GIT_DIR/apps/backend
 # Before we can compile, we need to install NPM deps. 
 # Make sure to get the latest by first removing the dir entirely. 
 rm -rf node_modules/
@@ -110,7 +110,7 @@ mkdir -p $DEST_DIR/static
 # CLIENT
 echo "Part 2: Client UI"
 echo "Preparing to install client dependencies..."
-cd $GIT_DIR/new-client
+cd $GIT_DIR/apps/client
 rm -rf node_modules/
 echo "Installing client dependencies..."
 npm ci
@@ -128,7 +128,7 @@ cp manifest.json $DEST_DIR/static/client
 # ADMIN
 echo "Part 3: Admin UI"
 echo "Preparing to install admin dependencies..."
-cd $GIT_DIR/new-admin
+cd $GIT_DIR/apps/admin
 rm -rf node_modules/
 echo "Installing admin dependencies..."
 npm ci
