@@ -286,12 +286,6 @@ class PrintWindow extends React.PureComponent {
 
   renderFrontPage = () => {
     this.frontPageElement = this.createPrintElement("frontPage");
-    const frontPage = this.state.frontPage;
-    const titles =
-      frontPage.titles.length > 3
-        ? frontPage.titles.slice(0, 3).join(", ") + "..."
-        : frontPage.titles.join(", ");
-    console.log(titles);
     return this.customRender(
       <Grid container direction="column" sx={{ pageBreakAfter: "always" }}>
         <Grid item textAlign="center" sx={{ paddingBottom: "60px" }}>
@@ -302,9 +296,9 @@ class PrintWindow extends React.PureComponent {
           >
             FÖRDJUPAD ÖVERSIKTSPLAN VÄRÖBACKA
           </Typography>
-          <Typography variant="h4" gutterBottom={true} component="div">
-            {titles}
-          </Typography>
+          {/* <Typography variant="h4" gutterBottom={true} component="div">
+            {frontPage.titles}
+          </Typography> */}
         </Grid>
         <Grid item textAlign="center">
           <img
@@ -718,6 +712,7 @@ class PrintWindow extends React.PureComponent {
   }
 
   toggleChosenForPrint = (documentId) => {
+    console.log(this.props.options);
     const current = { ...this.state.menuInformation };
     const shouldPrint = !current[documentId].chosenForPrint;
 
@@ -773,20 +768,19 @@ class PrintWindow extends React.PureComponent {
       const imgElement = tempElement.querySelector("img");
       const frontPageImg = imgElement ? imgElement.getAttribute("src") : null;
 
-      // // Get frontPageTitle from the first document header, handling the case where firstDocumentToPrint might be undefined
-      // const frontPageTitle = firstDocumentToPrint
-      //   ? firstDocumentToPrint.chapters[0].header
-      //   : null;
+      // // Find the first header and document to print
+      // const headerTitles = currentDocumentsToPrint
+      //   .filter(
+      //     (header) => header.chosenForPrint === true && header.level === 0
+      //   )
+      //   .map((header) => header.title);
 
-      // Find the first header and document to print
-      const frontPageHeaderTitles = currentDocumentsToPrint
-        .filter(
-          (header) => header.chosenForPrint === true && header.level === 0
-        )
-        .map((header) => header.title);
+      // const combinedHeaderTitles =
+      //   headerTitles.length > 3
+      //     ? headerTitles.slice(0, 3).join(", ") + "..."
+      //     : headerTitles.join(", ");
 
       return {
-        titles: frontPageHeaderTitles,
         img: frontPageImg,
         id: 1,
       };
