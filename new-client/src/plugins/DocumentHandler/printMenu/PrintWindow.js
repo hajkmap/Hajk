@@ -296,13 +296,10 @@ class PrintWindow extends React.PureComponent {
           >
             FÖRDJUPAD ÖVERSIKTSPLAN VÄRÖBACKA
           </Typography>
-          {/* <Typography variant="h4" gutterBottom={true} component="div">
-            {frontPage.titles}
-          </Typography> */}
         </Grid>
         <Grid item textAlign="center">
           <img
-            src={"https://html.com/wp-content/uploads/flamingo.jpg"}
+            src={this.state.frontPage.img}
             alt=""
             style={{ margin: "auto" }} // Add this style to center align the image
           />
@@ -318,9 +315,8 @@ class PrintWindow extends React.PureComponent {
   };
 
   areAllImagesLoaded = () => {
+    // loads the front page image
     const frontPageImgElement = this.frontPageElement.querySelector("img");
-
-    // Create a promise for the frontPageImgElement
     const frontPageImgPromise = this.loadImage(frontPageImgElement);
 
     // Get all img elements inside this.content and create promises for each
@@ -712,7 +708,6 @@ class PrintWindow extends React.PureComponent {
   }
 
   toggleChosenForPrint = (documentId) => {
-    console.log(this.props.options);
     const current = { ...this.state.menuInformation };
     const shouldPrint = !current[documentId].chosenForPrint;
 
@@ -753,34 +748,43 @@ class PrintWindow extends React.PureComponent {
   };
 
   createFrontPage = (documents) => {
+    // Gets the title of current project
+    const drawerTitle = this.props.options.drawerTitle;
+
     // Here we check if any documents are set to be printed
     const currentDocumentsToPrint = Object.values(documents).filter(
       (doc) => doc.chosenForPrint === true
     );
 
     if (currentDocumentsToPrint.length !== 0) {
-      // Gets frontPageImg from the the first image in the first doc, if an image exists
+      // We check for the first document that IS NOT a header...
+      // ... for example "Inledning, Utgångspunkter" etc., which are just "empty" headers.
+      // This is checked with level === 1. (headers have level === 0).
       const firstDocument = currentDocumentsToPrint.find(
-        (doc) => doc.chosenForPrint === true && doc.level === 1
+        (doc) => doc.level === 1
       );
+
+      // And we need to get the first Documents image, if an image exists.
       const tempElement = document.createElement("div");
       tempElement.innerHTML = firstDocument.chapters[0].html;
       const imgElement = tempElement.querySelector("img");
-      const frontPageImg = imgElement ? imgElement.getAttribute("src") : null;
 
-      // // Find the first header and document to print
-      // const headerTitles = currentDocumentsToPrint
-      //   .filter(
-      //     (header) => header.chosenForPrint === true && header.level === 0
-      //   )
-      //   .map((header) => header.title);
+      // We also need to get a default image if a document without an image is selected as first document to print
+      const defaultFirstDocument = Object.values(documents).find(
+        (doc) => doc.level === 1
+      ).chapters[0];
+      const defaultTempElement = document.createElement("div");
+      defaultTempElement.innerHTML = defaultFirstDocument.html;
+      const defaultImgElement = defaultTempElement.querySelector("img");
 
-      // const combinedHeaderTitles =
-      //   headerTitles.length > 3
-      //     ? headerTitles.slice(0, 3).join(", ") + "..."
-      //     : headerTitles.join(", ");
+      const frontPageImg = imgElement
+        ? imgElement.getAttribute("src")
+        : defaultImgElement;
+
+      console.log(frontPageImg);
 
       return {
+        title: drawerTitle,
         img: frontPageImg,
         id: 1,
       };
