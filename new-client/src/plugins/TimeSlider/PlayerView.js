@@ -40,14 +40,14 @@ export default function PlayerView(props) {
             props.markResolution === "years"
               ? 2
               : props.markResolution === "months"
-              ? 4
-              : 6,
+                ? 4
+                : 6,
           paddingRight:
             props.markResolution === "years"
               ? 2
               : props.markResolution === "months"
-              ? 4
-              : 6,
+                ? 4
+                : 6,
         }}
       >
         <Slider

@@ -68,8 +68,8 @@ export default function PrintView(props) {
           resolution
         )}.zip`
       : dates.length > 0
-      ? `${dates[0]}.zip`
-      : `missing-dates.zip`;
+        ? `${dates[0]}.zip`
+        : `missing-dates.zip`;
   };
 
   // Creates images based on the current range and resolution set by the user in the ui
@@ -145,8 +145,8 @@ export default function PrintView(props) {
     numImages > MAX_IMAGES_FOR_PRINT // More than max images= Highlight error...
       ? INFORMATION_PANEL_MODES.ERROR
       : numImages > 0.8 * MAX_IMAGES_FOR_PRINT // More than 80% of max images? Highlight warning....
-      ? INFORMATION_PANEL_MODES.WARNING
-      : INFORMATION_PANEL_MODES.OK; // Otherwise we're OK!
+        ? INFORMATION_PANEL_MODES.WARNING
+        : INFORMATION_PANEL_MODES.OK; // Otherwise we're OK!
 
   return (
     <Grid

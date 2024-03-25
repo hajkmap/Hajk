@@ -245,10 +245,10 @@ export default class PrintModel {
       this.includeImageBorder && !options.useMargin
         ? 1
         : options.useTextIconsInMargin && format === "a5"
-        ? this.margin * 8
-        : options.useTextIconsInMargin
-        ? this.margin * 6
-        : this.margin * 2;
+          ? this.margin * 8
+          : options.useTextIconsInMargin
+            ? this.margin * 6
+            : this.margin * 2;
 
     //We set the size of preview window based on the calculated heights and widths.
     const size = {

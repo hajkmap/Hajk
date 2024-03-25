@@ -10,14 +10,14 @@ const StyledPaper = styled(Paper)(({ mode, theme }) => ({
     mode === INFORMATION_PANEL_MODES.ERROR
       ? theme.palette.error.contrastText
       : mode === INFORMATION_PANEL_MODES.WARNING
-      ? theme.palette.warning.contrastText
-      : theme.palette.success.contrastText,
+        ? theme.palette.warning.contrastText
+        : theme.palette.success.contrastText,
   backgroundColor:
     mode === INFORMATION_PANEL_MODES.ERROR
       ? theme.palette.error[theme.palette.mode]
       : mode === INFORMATION_PANEL_MODES.WARNING
-      ? theme.palette.warning[theme.palette.mode]
-      : theme.palette.success[theme.palette.mode],
+        ? theme.palette.warning[theme.palette.mode]
+        : theme.palette.success[theme.palette.mode],
 }));
 
 export default function PrintInformationPanel({ message, mode }) {
