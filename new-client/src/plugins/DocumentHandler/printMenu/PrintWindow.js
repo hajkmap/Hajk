@@ -135,6 +135,7 @@ class PrintWindow extends React.PureComponent {
     selectedPdfIndex: null,
     isModalOpen: false,
     pdfLinks: this.checkPdfLinks(this.props.options.pdfLinks),
+    frontPage: null,
   };
 
   internalId = 0;
@@ -283,17 +284,63 @@ class PrintWindow extends React.PureComponent {
     );
   };
 
+  renderFrontPage = () => {
+    this.frontPageElement = this.createPrintElement("frontPage");
+    const frontPage = this.state.frontPage;
+    const titles =
+      frontPage.titles.length > 3
+        ? frontPage.titles.slice(0, 3).join(", ") + "..."
+        : frontPage.titles.join(", ");
+    console.log(titles);
+    return this.customRender(
+      <Grid container direction="column" sx={{ pageBreakAfter: "always" }}>
+        <Grid item textAlign="center" sx={{ paddingBottom: "60px" }}>
+          <Typography
+            variant="h1"
+            gutterBottom={true}
+            sx={{ fontSize: "46px" }}
+          >
+            FÖRDJUPAD ÖVERSIKTSPLAN VÄRÖBACKA
+          </Typography>
+          <Typography variant="h4" gutterBottom={true} component="div">
+            {titles}
+          </Typography>
+        </Grid>
+        <Grid item textAlign="center">
+          <img
+            src={"https://html.com/wp-content/uploads/flamingo.jpg"}
+            alt=""
+            style={{ margin: "auto" }} // Add this style to center align the image
+          />
+        </Grid>
+      </Grid>,
+      this.frontPageElement
+    );
+  };
+
   renderContent = () => {
     this.content = this.createPrintElement("content");
     return this.customRender(this.state.printContent, this.content);
   };
 
   areAllImagesLoaded = () => {
-    return Promise.allSettled(
-      [...this.content.getElementsByTagName("img")].map((img) => {
+    const frontPageImgElement = this.frontPageElement.querySelector("img");
+
+    // Create a promise for the frontPageImgElement
+    const frontPageImgPromise = this.loadImage(frontPageImgElement);
+
+    // Get all img elements inside this.content and create promises for each
+    const imgPromises = [...this.content.getElementsByTagName("img")].map(
+      (img) => {
         return this.loadImage(img);
-      })
+      }
     );
+
+    // Add frontPageImgPromise to the array of promises
+    imgPromises.push(frontPageImgPromise);
+
+    // Use Promise.allSettled to wait for all promises to resolve
+    return Promise.allSettled(imgPromises);
   };
 
   handleNewWindowBlocked = () => {
@@ -438,6 +485,7 @@ class PrintWindow extends React.PureComponent {
   printContents = () => {
     // We're gonna want to make sure everything is rendered...
     Promise.all([
+      this.state.frontPage !== null && this.renderFrontPage(),
       this.state.tocPrintMode !== "none" && this.renderToc(),
       this.renderContent(),
     ]).then(() => {
@@ -445,6 +493,9 @@ class PrintWindow extends React.PureComponent {
       this.areAllImagesLoaded().then(() => {
         // Then we can create an element that will hold our TOC and print-content...
         const printContent = document.createElement("div");
+        // Append frontPage
+        this.frontPageElement &&
+          printContent.appendChild(this.frontPageElement);
         // ...append the TOC to the element (only if applicable)...
         this.toc && printContent.appendChild(this.toc);
         // ...and append the actual content.
@@ -700,6 +751,46 @@ class PrintWindow extends React.PureComponent {
     this.setState({ menuInformation: updatedMenuState }, () => {
       this.setIsAnyDocumentSelected();
     });
+
+    this.setState({ frontPage: this.createFrontPage(current) }, () => {
+      console.log(this.state.frontPage);
+    });
+  };
+
+  createFrontPage = (documents) => {
+    // Here we check if any documents are set to be printed
+    const currentDocumentsToPrint = Object.values(documents).filter(
+      (doc) => doc.chosenForPrint === true
+    );
+
+    if (currentDocumentsToPrint.length !== 0) {
+      // Gets frontPageImg from the the first image in the first doc, if an image exists
+      const firstDocument = currentDocumentsToPrint.find(
+        (doc) => doc.chosenForPrint === true && doc.level === 1
+      );
+      const tempElement = document.createElement("div");
+      tempElement.innerHTML = firstDocument.chapters[0].html;
+      const imgElement = tempElement.querySelector("img");
+      const frontPageImg = imgElement ? imgElement.getAttribute("src") : null;
+
+      // // Get frontPageTitle from the first document header, handling the case where firstDocumentToPrint might be undefined
+      // const frontPageTitle = firstDocumentToPrint
+      //   ? firstDocumentToPrint.chapters[0].header
+      //   : null;
+
+      // Find the first header and document to print
+      const frontPageHeaderTitles = currentDocumentsToPrint
+        .filter(
+          (header) => header.chosenForPrint === true && header.level === 0
+        )
+        .map((header) => header.title);
+
+      return {
+        titles: frontPageHeaderTitles,
+        img: frontPageImg,
+        id: 1,
+      };
+    } else return null;
   };
 
   toggleAllDocuments = (toggled) => {
@@ -717,6 +808,10 @@ class PrintWindow extends React.PureComponent {
       allDocumentsToggled: toggled,
       menuInformation: menuState,
       isAnyDocumentSelected: toggled,
+    });
+
+    this.setState({ frontPage: this.createFrontPage(menuState) }, () => {
+      console.log(this.state.frontPage);
     });
   };
 
