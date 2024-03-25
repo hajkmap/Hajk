@@ -10,7 +10,7 @@ import { withSnackbar } from "notistack";
 import {
   LOCATION_DENIED_SNACK_OPTIONS,
   LOCATION_DENIED_SNACK_MESSAGE,
-} from "plugins/Location/constants/index.js";
+} from "../Location/constants";
 
 const StyledGridContainer = styled(Grid)(({ theme }) => ({
   padding: theme.spacing(2),

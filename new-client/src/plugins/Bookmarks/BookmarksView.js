@@ -15,8 +15,8 @@ import Typography from "@mui/material/Typography";
 import ConfirmationDialog from "../../components/ConfirmationDialog";
 
 // Hooks
-import useUpdateEffect from "hooks/useUpdateEffect";
-import useCookieStatus from "hooks/useCookieStatus";
+import useUpdateEffect from "../../hooks/useUpdateEffect";
+import useCookieStatus from "../../hooks/useCookieStatus";
 
 const List = styled("div")(() => ({
   display: "flex",
@@ -182,11 +182,9 @@ const BookmarksView = (props) => {
     }
   };
 
-  const handleRemoveConfirmation = (result) => {
+  const handleRemoveConfirmation = () => {
     setShowRemovalConfirmation(false);
-    if (result) {
-      props.model.deleteBookmark(bookmarkToDelete);
-    }
+    props.model.deleteBookmark(bookmarkToDelete);
     setBookmarkToDelete(null);
   };
 

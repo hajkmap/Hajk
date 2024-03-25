@@ -1,4 +1,4 @@
-import { hfetch } from "utils/FetchWrapper";
+import { hfetch } from "../../utils/FetchWrapper";
 
 class InformativeModel {
   constructor(settings) {

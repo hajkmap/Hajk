@@ -1,9 +1,12 @@
 import fs from "fs";
 import path from "path";
+import log4js from "log4js";
+import { XMLParser } from "fast-xml-parser";
+
 import ad from "./activedirectory.service.js";
 import asyncFilter from "../utils/asyncFilter.js";
-import log4js from "log4js";
 import getAnalyticsOptionsFromDotEnv from "../utils/getAnalyticsOptionsFromDotEnv.js";
+import { AccessError } from "../utils/AccessError.js";
 
 const logger = log4js.getLogger("service.config.v2");
 
@@ -19,6 +22,8 @@ class ConfigServiceV2 {
     // have a global bus (using EventEmitter?), so we can trigger
     // re-reads from FS into our in-memory store.
     logger.trace("Initiating ConfigService V2");
+    // Prepare the XML parser
+    this.xmlParser = new XMLParser();
   }
 
   /**
@@ -52,7 +57,7 @@ class ConfigServiceV2 {
 
       if (washContent === false) {
         logger.trace(
-          "[getMapConfig] invoked with 'washContent=false' for user %s. Returning the entire%s map config.",
+          "[getMapConfig] invoked with 'washContent=false' for user %s. Returning the entire %s map config.",
           user,
           map
         );
@@ -78,7 +83,7 @@ class ConfigServiceV2 {
 
       // First, ensure that we have a valid user name. This is necessary for AD lookups.
       if ((await ad.isUserValid(user)) !== true) {
-        const e = new Error(
+        const e = new AccessError(
           "[getMapConfig] AD authentication is active, but no valid user name was supplied. Access restricted."
         );
         logger.error(e.message);
@@ -116,7 +121,7 @@ class ConfigServiceV2 {
 
         // If we got this far, it looks as the current user isn't member in any
         // of the required groups - hence no access can be given to the map.
-        const e = new Error(
+        const e = new AccessError(
           `[getMapConfig] Access to map "${map}" not allowed for user "${user}"`
         );
 
@@ -418,6 +423,30 @@ class ConfigServiceV2 {
         ) // Call the predicate
     );
 
+    // Filter out nested visibleForGroups within tool options.
+    const userGroups = await ad.getGroupMembershipForUser(user);
+
+    for (const toolRef in mapConfig.tools) {
+      const options = mapConfig.tools[toolRef].options;
+      for (const optionRef in options) {
+        const groups =
+          options[optionRef] && typeof options[optionRef] === "object"
+            ? options[optionRef]?.visibleForGroups
+            : null;
+        if (groups && groups.length > 0) {
+          const accessGranted = groups.some((group) => {
+            if (userGroups.indexOf(group) > -1) {
+              return true;
+            }
+          });
+
+          if (!accessGranted) {
+            delete mapConfig.tools[toolRef].options[optionRef];
+          }
+        }
+      }
+    }
+
     // Part 2: Remove groups/layers/baselayers that user lacks access to
     const lsIndexInTools = mapConfig.tools.findIndex(
       (t) => t.type === "layerswitcher"
@@ -483,6 +512,7 @@ class ConfigServiceV2 {
             `WFST edit layer "${layer.id}"`
           )
       );
+
       mapConfig.tools[editIndexInTools].options.activeServices = activeServices;
     }
 

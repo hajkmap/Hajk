@@ -8,7 +8,7 @@ import CssBaseline from "@mui/material/CssBaseline";
 import App from "./App";
 
 import { deepMerge } from "../utils/DeepMerge";
-import { functionalOk as functionalCookieOk } from "models/Cookie";
+import { functionalOk as functionalCookieOk } from "../models/Cookie";
 
 /**
  * @summary Helper, used to determine if user's browser prefers dark mode.

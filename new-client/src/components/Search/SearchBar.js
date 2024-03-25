@@ -245,10 +245,10 @@ class SearchBar extends React.PureComponent {
     return searchActive === "selectSearch" || searchActive === "draw"
       ? `Söker med objekt${labelPostfix}`
       : searchActive === "extentSearch"
-      ? `Söker i området${labelPostfix}`
-      : options.searchBarPlaceholder
-      ? `${options.searchBarPlaceholder}${labelPostfix}`
-      : `Sök${labelPostfix}`;
+        ? `Söker i området${labelPostfix}`
+        : options.searchBarPlaceholder
+          ? `${options.searchBarPlaceholder}${labelPostfix}`
+          : `Sök${labelPostfix}`;
   };
 
   renderSearchResultList = () => {
@@ -398,6 +398,7 @@ class SearchBar extends React.PureComponent {
         label={<span style={visuallyHidden}>Sök i webbplatsens innehåll</span>}
         variant={isMobile ? "standard" : "outlined"}
         placeholder={placeholder}
+        autoFocus={this.props.options?.autofocusOnStart ?? false}
         onKeyPress={handleSearchBarKeyPress}
         InputLabelProps={{ shrink: true }}
         InputProps={{

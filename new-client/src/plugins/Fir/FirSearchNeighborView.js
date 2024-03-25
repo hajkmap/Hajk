@@ -14,7 +14,7 @@ import InputAdornment from "@mui/material/InputAdornment";
 import Collapse from "@mui/material/Collapse";
 import Button from "@mui/material/Button";
 import Feature from "ol/Feature.js";
-import HajkTransformer from "utils/HajkTransformer";
+import HajkTransformer from "../../utils/HajkTransformer";
 
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import HistoryIcon from "@mui/icons-material/History";

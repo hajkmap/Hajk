@@ -25,8 +25,14 @@ var documentEditor = Model.extend({
     }
   },
 
-  delete: function (documentName, callback) {
-    var url = this.get("config").url_delete + "/" + documentName;
+  delete: function (folder, documentName, callback) {
+    var url = "";
+    if (folder) {
+      url = this.get("config").url_delete + "/" + folder + "/" + documentName;
+    } else {
+      url = this.get("config").url_delete + "/" + documentName;
+    }
+
     hfetch(url, {
       method: "delete",
     }).then((response) => {
@@ -34,31 +40,37 @@ var documentEditor = Model.extend({
     });
   },
 
-  save: function (documentName, data, callback) {
-    var url = this.get("config").url_save + "/" + documentName;
+  save: function (folder, documentName, data, callback) {
+    let url = this.get("config").url_save;
+
+    if (folder) {
+      url += "/" + folder;
+    }
+    url += "/" + documentName;
+
     data.chapters.forEach((chapter) => {
       this.deleteParentChapter(chapter, data.chapters);
     });
 
-    data.chapters.map((chapter) => {
+    data.chapters.forEach((chapter) => {
       chapter.html = chapter.html
         .replaceAll("&lt;", "<")
         .replaceAll("&gt;", ">");
-      return false;
     });
 
     hfetch(url, {
       method: "post",
       body: JSON.stringify(data),
-    }).then((response) => {
-      response.text().then((text) => {
-        callback(text);
-      });
-    });
+    })
+      .then((response) => response.text())
+      .then(callback);
   },
 
-  loadDocuments: async function (callback) {
-    var url = this.get("config").url_document_list;
+  loadDocuments: async function (folder, callback) {
+    let url = this.get("config").url_document_list;
+    if (folder) {
+      url += "/" + folder;
+    }
     try {
       const response = await hfetch(url);
       const text = await response.text();
@@ -67,6 +79,21 @@ var documentEditor = Model.extend({
     } catch (err) {
       alert(
         "Kunde inte ladda mappen med dokument. Verifiera att uppsättningen är korrekt utförd."
+      );
+      console.error(err);
+    }
+  },
+
+  loadFolders: async function (callback) {
+    var url = this.get("config").url_folder_list;
+    try {
+      const response = await hfetch(url);
+      const text = await response.text();
+      const data = JSON.parse(text);
+      callback(data);
+    } catch (err) {
+      alert(
+        "Kunde inte ladda mappen med mappar. Verifiera att uppsättningen är korrekt utförd."
       );
       console.error(err);
     }
@@ -84,16 +111,36 @@ var documentEditor = Model.extend({
     });
   },
 
-  load: function (documentName, callback) {
-    var url = this.get("config").url_load + "/" + documentName;
+  createFolder(data, callback) {
+    let url = this.get("config").url_create_folder;
+    hfetch(url, {
+      method: "post",
+      body: JSON.stringify(data),
+    }).then((response) => {
+      response.text().then((text) => {
+        callback(text);
+        console.log(text);
+      });
+    });
+  },
+
+  load: function (folder, documentName, callback) {
+    let url = this.get("config").url_load;
+
+    if (folder) {
+      url += "/" + folder;
+    }
+    url += "/" + documentName;
+
     hfetch(url).then((response) => {
-      response.status === 200 &&
+      if (response.status === 200) {
         response.json().then((data) => {
           data.chapters.forEach((chapter) => {
             this.setParentChapter(chapter, data.chapters);
           });
           callback(data);
         });
+      }
     });
   },
 

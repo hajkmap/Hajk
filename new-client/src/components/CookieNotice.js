@@ -12,7 +12,7 @@ import {
   Slide,
 } from "@mui/material";
 import { styled } from "@mui/material/styles";
-import { setLevel, shouldShowNotice } from "models/Cookie";
+import { setLevel, shouldShowNotice } from "../models/Cookie";
 
 // Default settings for the cookie-notice text and url if none is supplied from the configuration.
 const DEFAULT_MESSAGE =

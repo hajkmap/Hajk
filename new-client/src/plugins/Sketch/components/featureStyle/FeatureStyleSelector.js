@@ -1,11 +1,34 @@
 import React from "react";
 import { Grid, Typography, TextField } from "@mui/material";
-import { STROKE_DASHES } from "plugins/Sketch/constants";
+import { STROKE_DASHES, DEFAULT_DRAW_STYLE_SETTINGS } from "../../constants";
 
 import FeatureStyleAccordion from "./FeatureStyleAccordion";
+import FeaturePointSizeAccordion from "./FeatureSizeAccordion";
 import StrokeTypeSelector from "./StrokeTypeSelector";
 
 export default function FeatureStyleSelector(props) {
+  const { activeDrawType, drawStyle, setDrawStyle } = props;
+  // Since the strokeType value "none" is only available for the activeDrawTypes "Circle" and "Polygon"
+  // we automatically want to set the strokeType to the default value "solid"
+  // if the activeDrawType is neither "Circle" or "Polygon" and if the strokeType is "none"
+  React.useEffect(() => {
+    if (
+      !["Circle", "Polygon"]?.includes(activeDrawType) &&
+      drawStyle.strokeType === "none"
+    ) {
+      // We want to update the drawStyle with the default values
+      setDrawStyle((prevDrawStyle) => ({
+        ...prevDrawStyle,
+        strokeType: DEFAULT_DRAW_STYLE_SETTINGS.strokeType,
+        lineDash: STROKE_DASHES.get(DEFAULT_DRAW_STYLE_SETTINGS.strokeType),
+        strokeColor: {
+          ...drawStyle.strokeColor,
+          a: DEFAULT_DRAW_STYLE_SETTINGS.strokeColor.a,
+        },
+      }));
+    }
+  }, [activeDrawType, drawStyle, setDrawStyle]);
+
   // We need a handler that can update the stroke-dash setting
   const handleStrokeTypeChange = (e) => {
     // We are storing both the stroke-type (e.g. "dashed", "dotted", or "solid") as well as
@@ -14,11 +37,14 @@ export default function FeatureStyleSelector(props) {
     const strokeType = e.target.value;
     // And corresponds to a line-dash from the constants
     const lineDash = STROKE_DASHES.get(strokeType);
+    // Check if strokeType is "none" and set alpha value accordingly
+    const alphaCheck = strokeType === "none" ? 0 : 1;
     // When everything we need is fetched, we update the draw-style.
     props.setDrawStyle({
       ...props.drawStyle,
       strokeType: strokeType,
       lineDash: lineDash,
+      strokeColor: { ...props.drawStyle.strokeColor, a: alphaCheck },
     });
   };
 
@@ -32,7 +58,10 @@ export default function FeatureStyleSelector(props) {
 
   // We need a handler that can update the stroke color
   const handleStrokeColorChange = (e) => {
-    props.setDrawStyle({ ...props.drawStyle, strokeColor: e.rgb });
+    props.setDrawStyle({
+      ...props.drawStyle,
+      strokeColor: { ...e.rgb, a: props.drawStyle.strokeColor.a }, // Retains the alpha value
+    });
   };
 
   // We need a handler that can update the fill color
@@ -56,6 +85,9 @@ export default function FeatureStyleSelector(props) {
     props.setDrawStyle({ ...props.drawStyle, strokeWidth: value });
   };
 
+  const handleRadiusChange = (event, value) => {
+    props.setDrawStyle({ ...props.drawStyle, radius: value });
+  };
   // We need a handler that can update the text-foreground-color change
   const handleForegroundColorChange = (e) => {
     props.setTextStyle({
@@ -135,12 +167,30 @@ export default function FeatureStyleSelector(props) {
             showStrokeTypeSelector
             handleStrokeTypeChange={handleStrokeTypeChange}
             strokeType={props.drawStyle.strokeType}
+            activeDrawType={props.activeDrawType}
+            setDrawStyle={props.setDrawStyle}
+            drawStyle={props.drawStyle}
           />
         </Grid>
       </Grid>
     );
   };
 
+  const renderPointStyleSettings = () => {
+    return (
+      <Grid container>
+        <Grid item xs={12}>
+          <FeaturePointSizeAccordion
+            title="Storlek"
+            showPointSizeSlider
+            drawModel={props.drawModel}
+            radius={props.drawStyle.radius}
+            handleRadiusChange={handleRadiusChange}
+          />
+        </Grid>
+      </Grid>
+    );
+  };
   // The style settings for text-drawings!
   const renderTextStyleSettings = () => {
     return (
@@ -245,6 +295,7 @@ export default function FeatureStyleSelector(props) {
         </Grid>
         <Grid item xs={12}>
           {renderColorSelectors()}
+          {props.activeDrawType === "Point" && renderPointStyleSettings()}
         </Grid>
       </Grid>
     </Grid>

@@ -79,6 +79,7 @@ class LayerItem extends React.PureComponent {
     const layerInfo = layer.get("layerInfo");
 
     this.isBackgroundLayer = layerInfo.layerType === "base";
+    this.rotateMap = layer.get("rotateMap");
     this.caption = layerInfo.caption;
     this.name = layer.get("name");
     this.legend = layerInfo.legend;
@@ -87,6 +88,7 @@ class LayerItem extends React.PureComponent {
     this.infoText = layerInfo.infoText;
     this.infoUrl = layerInfo.infoUrl;
     this.infoUrlText = layerInfo.infoUrlText;
+    this.infoOpenDataLink = layerInfo.infoOpenDataLink;
     this.infoOwner = layerInfo.infoOwner;
     this.localObserver = layer.localObserver;
     this.showAttributeTableButton = layerInfo.showAttributeTableButton || false;
@@ -123,18 +125,34 @@ class LayerItem extends React.PureComponent {
    * @instance
    */
   componentDidMount() {
+    // Setup some listeners triggered whenever the layer visibility changes:
     this.props.layer.on?.("change:visible", (e) => {
+      // Grab the new value…
       const visible = !e.oldValue;
+
+      // …and update the radio button state.
       this.setState({
         visible,
       });
 
       this.listenToZoomChange(visible);
+
+      // Also, check if we need to auto-rotate the map
+      if (visible === true && this.isBackgroundLayer) {
+        this.changeRotation();
+      }
     });
 
+    // Check if we should display a zoom warning at start
     if (this.state.visible) {
       this.triggerZoomCheck(null, this.state.visible);
     }
+
+    // Check if we should auto-rotate the map at start
+    if (this.state.visible === true && this.isBackgroundLayer === true) {
+      this.changeRotation();
+    }
+
     this.listenToZoomChange(this.state.visible);
 
     // Set load status by subscribing to a global event. Expect ID (int) of layer
@@ -152,6 +170,42 @@ class LayerItem extends React.PureComponent {
           });
       }
     );
+  }
+
+  changeRotation() {
+    // Retrieve the current rotation in a standardized manner
+    const newRotation = this.rotateMap?.toLowerCase();
+
+    // Determine rotation in radians
+    if (["n", "e", "s", "w"].includes(newRotation)) {
+      let radians = 0;
+      switch (newRotation) {
+        case "n":
+          radians = 0;
+          break;
+        case "e":
+          radians = -(Math.PI / 2);
+          break;
+        case "s":
+          radians = Math.PI;
+          break;
+        case "w":
+          radians = Math.PI / 2;
+          break;
+        default:
+          break;
+      }
+
+      // Grab the OL View
+      const View = this.props.app.map.getView();
+
+      // Rotate the map if current rotation differs from the new rotation
+      if (View.getRotation() !== radians) {
+        View.animate({
+          rotation: radians,
+        });
+      }
+    }
   }
 
   layerUsesMinMaxZoom() {
@@ -455,9 +509,29 @@ class LayerItem extends React.PureComponent {
     if (this.infoUrl) {
       return (
         <InfoTextContainer>
-          <Typography variant="body2" component="div">
+          <Typography variant="body2" component="div" sx={{ fontWeight: 500 }}>
             <a href={this.infoUrl} target="_blank" rel="noopener noreferrer">
               {this.infoUrlText || this.infoUrl}
+            </a>
+          </Typography>
+        </InfoTextContainer>
+      );
+    } else {
+      return null;
+    }
+  }
+
+  renderOpenDataLink() {
+    if (this.infoOpenDataLink) {
+      return (
+        <InfoTextContainer>
+          <Typography variant="body2" component="div" sx={{ fontWeight: 500 }}>
+            <a
+              href={this.infoOpenDataLink}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              Öppna data: {this.caption}
             </a>
           </Typography>
         </InfoTextContainer>
@@ -488,6 +562,7 @@ class LayerItem extends React.PureComponent {
         <div>
           {this.renderInfo()}
           {this.renderMetadataLink()}
+          {this.renderOpenDataLink()}
           {this.renderOwner()}
           <div>{this.renderChapterLinks(this.props.chapters || [])}</div>
         </div>
@@ -626,7 +701,11 @@ class LayerItem extends React.PureComponent {
           >
             <Grid item>{this.getLayerToggler()}</Grid>
             {this.legendIcon && this.renderLegendIcon()}
-            <Caption>{this.caption}</Caption>
+            <Caption
+              sx={{ fontWeight: this.state.visible ? "bold" : "normal" }}
+            >
+              {this.caption}
+            </Caption>
           </Grid>
           <LayerButtonsContainer>
             {layer.isFakeMapLayer ? null : (

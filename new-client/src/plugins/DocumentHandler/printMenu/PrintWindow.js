@@ -29,7 +29,7 @@ import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import OpenInNewIcon from "@mui/icons-material/OpenInNew";
 
-import { deepMerge } from "utils/DeepMerge";
+import { deepMerge } from "../../../utils/DeepMerge";
 
 import PrintList from "./PrintList";
 import TableOfContents from "./TableOfContents";
@@ -321,8 +321,8 @@ class PrintWindow extends React.PureComponent {
       "beforeend",
       ` <title>${document.title}</title>
         <base href="${document.location.protocol}//${
-        document.location.host
-      }/" />
+          document.location.host
+        }/" />
         ${
           this.props.options.dynamicImportUrls.customFont
             ? `<link
@@ -488,16 +488,15 @@ class PrintWindow extends React.PureComponent {
         // Add our recently-created DIV to the new window's document
         newWindow.document.body.appendChild(printContent);
 
-        // We force print to the next upcoming render. Let it render in peace.
-        setTimeout(() => {
-          // Invoke browser's print dialog - this will block the thread
-          // until user does something with it.
-          newWindow.print();
-          // Once the print dialog has disappeared, let's close the new window
-          newWindow.close();
-          // When the user closes the print-window we have to do some cleanup...
-          this.handlePrintCompleted();
-        }, 25);
+        // Invoke browser's print dialog - this will block the thread
+        // until user does something with it.
+        newWindow.print();
+
+        // Once the print dialog has disappeared, let's close the new window
+        newWindow.close();
+
+        // When the user closes the print-window we have to do some cleanup...
+        this.handlePrintCompleted();
       });
     });
   };
@@ -564,7 +563,6 @@ class PrintWindow extends React.PureComponent {
     */
     const { options } = this.props;
 
-    const modelDocuments = this.props.model.allDocuments;
     const newOptions = { ...options };
     const menuConfig = { ...newOptions }.menuConfig;
     const menuConfigClone = JSON.parse(JSON.stringify(menuConfig));
@@ -595,11 +593,9 @@ class PrintWindow extends React.PureComponent {
 
       //add the table of contents settings from the document json.
       if (document.document) {
-        let modelDoc = modelDocuments.find(
-          (modelDoc) => modelDoc.documentFileName === document.document
-        );
         document.tocChapterLevels =
-          modelDoc?.tableOfContents?.chapterLevelsToShow || 100;
+          this.props.options?.tableOfContents?.chapterLevelsToShowForPrint ??
+          100;
       }
       if (document.document) {
         document.chapters = [];

@@ -7,7 +7,7 @@ import { IconButton, Paper, Tooltip } from "@mui/material";
 import InfoIcon from "@mui/icons-material/Info";
 
 import Dialog from "../components/Dialog/Dialog";
-import { functionalOk as functionalCookieOk } from "models/Cookie";
+import { functionalOk as functionalCookieOk } from "../models/Cookie";
 
 const StyledPaper = styled(Paper)(({ theme }) => ({
   marginBottom: theme.spacing(1),

@@ -1,5 +1,5 @@
-import AppModel from "models/AppModel";
-import HajkTransformer from "utils/HajkTransformer";
+import AppModel from "../../models/AppModel";
+import HajkTransformer from "../../utils/HajkTransformer";
 
 class PropFilters {
   constructor() {
@@ -123,18 +123,25 @@ const filters = new PropFilters();
 /*
   roundToDecimals
   Example:
-  {'45.32465456'|roundToDecimals(2)}
+  {'45.32465456'|roundToDecimals(2,[1|0])}
   outputs: 45,32
 */
-filters.add("roundToDecimals", function (value, numDecimals) {
-  if (isNaN(value) || isNaN(numDecimals)) {
-    throw new Error("Arguments should be numbers");
+filters.add(
+  "roundToDecimals",
+  function (value, numDecimals, retOriginalValueIfParamsNotNumbers = 0) {
+    if (isNaN(value) || isNaN(numDecimals)) {
+      if (parseInt(retOriginalValueIfParamsNotNumbers) === 1) {
+        return value;
+      } else {
+        throw new Error("Arguments should be numbers");
+      }
+    }
+    // We need to double wrap for toLocaleString to work as toFixed returns a string.
+    return parseFloat(
+      parseFloat(value).toFixed(parseInt(numDecimals))
+    ).toLocaleString();
   }
-  // We need to double wrap for toLocaleString to work as toFixed returns a string.
-  return parseFloat(
-    parseFloat(value).toFixed(parseInt(numDecimals))
-  ).toLocaleString();
-});
+);
 
 /*
   replace
@@ -161,9 +168,9 @@ filters.addAlias("fallback", "default");
   lt - lessThan
   If lessValue or greaterValue is an empty string the original value will be returned
   Example:
-  {10.3|lt(11, 'LessThan', 'GreaterThan')}
+  {10.3|lt('11', 'LessThan', 'GreaterThan')}
   outputs: 'LessThan'
-  {10.3|lt(11, '', 'GreaterThan')}
+  {10.3|lt('11', '', 'GreaterThan')}
   outputs: 10.3
 */
 filters.add("lt", function (value, test, lessValue, greaterValue) {
@@ -174,13 +181,61 @@ filters.add("lt", function (value, test, lessValue, greaterValue) {
   const t = typeof test === "string" ? parseFloat(test) : test;
 
   if (val < t) {
-    return typeof lessValue === "string" && lessValue.length === 0
+    return (typeof lessValue === "string" && lessValue.length === 0) ||
+      !lessValue
       ? value
       : lessValue;
   } else {
-    return typeof greaterValue === "string" && greaterValue.length === 0
+    return (typeof greaterValue === "string" && greaterValue.length === 0) ||
+      !greaterValue
       ? value
       : greaterValue;
+  }
+});
+
+/*
+  gt - greaterThan
+  If lessValue or greaterValue is an empty string the original value will be returned
+  Example:
+  {10.3|gt('9.2', 'GreaterThan', 'LessThan')}
+  outputs: 'GreaterThan'
+  {10.3|gt('9.2', '', 'LessThan')}
+  outputs: 10.3
+*/
+filters.add("gt", function (value, test, greaterValue, lessValue) {
+  if (isNaN(value) || isNaN(test)) {
+    return value;
+  }
+  const val = typeof value === "string" ? parseFloat(value) : value;
+  const t = typeof test === "string" ? parseFloat(test) : test;
+
+  if (val > t) {
+    return (typeof greaterValue === "string" && greaterValue.length === 0) ||
+      !greaterValue
+      ? value
+      : greaterValue;
+  } else {
+    return (typeof lessValue === "string" && lessValue.length === 0) ||
+      !lessValue
+      ? value
+      : lessValue;
+  }
+});
+
+/*
+  naNToNum
+  If value is NaN or undef returns num as a number, otherwise returns value
+  Example:
+  {NaN|naNToNum('-1000')}
+  outputs: -1000
+  {10.3|naNToNum('-1000')}
+  outputs: 10.3
+*/
+filters.add("naNToNum", function (value, num) {
+  if (!value || isNaN(value)) {
+    return parseFloat(num);
+  } else {
+    return value;
   }
 });
 

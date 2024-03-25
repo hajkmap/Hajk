@@ -1,0 +1,16 @@
+# Build the client
+FROM registry.redhat.io/rhel9/nodejs-18 as clientBuilder
+COPY /new-client/package*.json ./
+USER root
+RUN npm install
+COPY ./new-client .
+RUN npm run build --ignore-scripts
+
+FROM registry.access.redhat.com/ubi8/nginx-122
+USER 0
+COPY --from=clientBuilder /opt/app-root/src/build /tmp/src
+RUN chown -R 1001:0 /tmp/src
+USER 1001
+
+RUN /usr/libexec/s2i/assemble
+CMD /usr/libexec/s2i/run
