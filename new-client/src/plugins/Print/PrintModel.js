@@ -1188,6 +1188,7 @@ export default class PrintModel {
         if (this.pdfCreationCancelled === true) {
           this.pdfCreationCancelled = false;
           resolve(null);
+          return false;
         }
 
         // This is needed to prevent some buggy output from some browsers
