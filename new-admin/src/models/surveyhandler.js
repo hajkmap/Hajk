@@ -16,8 +16,7 @@ var surveyHandler = Model.extend({
   },
 
   loadSurvey: function (surveyName, callback) {
-    const surveyLoadUrl =
-      this.get("config").url_surveys_load + "/" + surveyName;
+    const surveyLoadUrl = this.get("config").url_surveys_load + surveyName;
 
     hfetch(surveyLoadUrl)
       .then((response) => {

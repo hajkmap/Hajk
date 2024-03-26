@@ -141,7 +141,7 @@ function Citizendialogue(props) {
         icon: <AppRegistrationIcon />, // Custom icon for this plugin
         title: state.title, // By keeping title and color in Citizendialogue's state we can pass on
         color: state.color, // the changes to BaseWindowPlugin which will update internal state too.
-        description: "En kort beskrivning som visas i widgeten", // Shown on Widget button
+        description: "Enkätsystemet Medborgardialog", // Shown on Widget button
         // Do you want to add buttons to the plugin-header? That can be done as follows:
         customPanelHeaderButtons: [
           {
