@@ -74,6 +74,27 @@ export default class ConfigMapper {
       });
     }
 
+    /**
+     * Returns OpenLayers server type string, given Hajk server type as input.
+     * Certain Hajk server types are used only for admin interface and configuration switching,
+     * but being treated as a common OL server-type in the client.
+     * @param hajkServerType Hajk server type from config
+     * @returns OpenLayers server type as string
+     */
+    function getOpenLayersServerType(hajkServerType) {
+      if (!hajkServerType) {
+        return null;
+      }
+      switch (hajkServerType) {
+        case "geowebcache-standalone":
+          return "geoserver";
+        case "arcgis":
+          return "mapserver";
+        default:
+          return hajkServerType;
+      }
+    }
+
     function mapLayersInfo(layersInfo, infobox) {
       if (Array.isArray(layersInfo)) {
         return layersInfo.reduce((layersInfoObject, layerInfo) => {
@@ -150,10 +171,7 @@ export default class ConfigMapper {
         customDpiList: args.customDpiList,
         customRatio: args.customRatio,
         imageFormat: args.imageFormat || "image/png",
-        serverType:
-          args.serverType === "arcgis"
-            ? "mapserver"
-            : args.serverType || "geoserver",
+        serverType: getOpenLayersServerType(args.serverType),
         crossOrigin: properties.mapConfig.map.crossOrigin || "anonymous",
         attribution: args.attribution,
         showAttributeTableButton: args.showAttributeTableButton,
