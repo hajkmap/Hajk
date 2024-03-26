@@ -9,16 +9,23 @@ import UpdateIcon from "@mui/icons-material/Update";
 import RotateLeftOutlinedIcon from "@mui/icons-material/RotateLeftOutlined";
 import PlayArrowIcon from "@mui/icons-material/PlayArrow";
 import PauseIcon from "@mui/icons-material/Pause";
+import PrintIcon from "@mui/icons-material/Print";
+import PrintModel from "plugins/Print/PrintModel";
+
+import { DEFAULT_PRINT_OPTIONS } from "./constants";
 
 class TimeSlider extends React.PureComponent {
   state = {
     title: this.props.options.title || "Tidslinje",
+    windowHidden: false,
     color: null,
     playing: false,
+    printActive: false,
   };
 
   static propTypes = {
     map: PropTypes.object.isRequired,
+    app: PropTypes.object.isRequired,
     options: PropTypes.object.isRequired,
   };
 
@@ -29,6 +36,14 @@ class TimeSlider extends React.PureComponent {
     this.defaultResolution = props.options.defaultResolution || "years";
     this.originalTitle = this.props.options.title || "Tidslinje";
     this.bindSubscriptions();
+
+    // Since we want to allow the user to print the time series, we need to initiate a print model!
+    this.printModel = new PrintModel({
+      localObserver: this.localObserver,
+      map: props.map,
+      options: DEFAULT_PRINT_OPTIONS,
+      mapConfig: props.app.config.mapConfig.map,
+    });
   }
 
   bindSubscriptions = () => {
@@ -42,10 +57,12 @@ class TimeSlider extends React.PureComponent {
   };
 
   onWindowShow = () => {
+    this.setState({ windowHidden: false });
     this.localObserver.publish("initiateTimeSliderView");
   };
 
   onWindowHide = () => {
+    this.setState({ windowHidden: true });
     this.localObserver.publish("resetTimeSliderView");
   };
 
@@ -70,6 +87,12 @@ class TimeSlider extends React.PureComponent {
           description: "Visa information under olika tidsperioder", // Shown on Widget button
           customPanelHeaderButtons: [
             {
+              icon: <PrintIcon />,
+              onClickCallback: () => {
+                this.setState({ printActive: !this.state.printActive });
+              },
+            },
+            {
               icon: !this.state.playing ? <PlayArrowIcon /> : <PauseIcon />,
               onClickCallback: () => {
                 this.setState(
@@ -92,7 +115,7 @@ class TimeSlider extends React.PureComponent {
               },
             },
           ],
-          height: 200,
+          height: "dynamic",
           width: 650,
           onWindowShow: this.onWindowShow,
           onWindowHide: this.onWindowHide,
@@ -104,6 +127,9 @@ class TimeSlider extends React.PureComponent {
           layers={this.layers} //The layers to be used
           defaultResolution={this.defaultResolution} //"years", "months", or "days"
           visibleAtStart={this.props.options.visibleAtStart}
+          windowHidden={this.state.windowHidden}
+          printActive={this.state.printActive}
+          printModel={this.printModel}
         />
       </BaseWindowPlugin>
     );
