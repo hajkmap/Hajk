@@ -294,7 +294,7 @@ class PrintWindow extends React.PureComponent {
             gutterBottom={true}
             sx={{ fontSize: "46px" }}
           >
-            FÖRDJUPAD ÖVERSIKTSPLAN VÄRÖBACKA
+            {this.state.frontPage.title}
           </Typography>
         </Grid>
         <Grid item textAlign="center">
