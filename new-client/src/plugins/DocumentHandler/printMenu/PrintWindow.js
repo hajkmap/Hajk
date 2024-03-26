@@ -742,53 +742,44 @@ class PrintWindow extends React.PureComponent {
       this.setIsAnyDocumentSelected();
     });
 
-    this.setState({ frontPage: this.createFrontPage(current) }, () => {
-      console.log(this.state.frontPage);
-    });
+    this.setState({ frontPage: this.createFrontPage(current) });
+  };
+
+  getFirstDocumentImage = (firstDocument) => {
+    if (!firstDocument) {
+      return null;
+    }
+    const tempElement = document.createElement("div");
+    tempElement.innerHTML = firstDocument.chapters[0].html;
+    return tempElement.querySelector("img")?.getAttribute("src");
   };
 
   createFrontPage = (documents) => {
-    // Gets the title of current project
-    const drawerTitle = this.props.options.drawerTitle;
+    const { drawerTitle } = this.props.options;
 
-    // Here we check if any documents are set to be printed
     const currentDocumentsToPrint = Object.values(documents).filter(
       (doc) => doc.chosenForPrint === true
     );
 
-    if (currentDocumentsToPrint.length !== 0) {
-      // We check for the first document that IS NOT a header...
-      // ... for example "Inledning, Utgångspunkter" etc., which are just "empty" headers.
-      // This is checked with level === 1. (headers have level === 0).
-      const firstDocument = currentDocumentsToPrint.find(
-        (doc) => doc.level === 1
+    if (currentDocumentsToPrint.length === 0) {
+      return null;
+    }
+
+    const firstDocument = currentDocumentsToPrint.find(
+      (doc) => doc.level === 1
+    );
+
+    const firstDocumentImage =
+      this.getFirstDocumentImage(firstDocument) ||
+      this.getFirstDocumentImage(
+        Object.values(documents).find((doc) => doc.level === 1)
       );
 
-      // And we need to get the first Documents image, if an image exists.
-      const tempElement = document.createElement("div");
-      tempElement.innerHTML = firstDocument.chapters[0].html;
-      const imgElement = tempElement.querySelector("img");
-
-      // We also need to get a default image if a document without an image is selected as first document to print
-      const defaultFirstDocument = Object.values(documents).find(
-        (doc) => doc.level === 1
-      ).chapters[0];
-      const defaultTempElement = document.createElement("div");
-      defaultTempElement.innerHTML = defaultFirstDocument.html;
-      const defaultImgElement = defaultTempElement.querySelector("img");
-
-      const frontPageImg = imgElement
-        ? imgElement.getAttribute("src")
-        : defaultImgElement;
-
-      console.log(frontPageImg);
-
-      return {
-        title: drawerTitle,
-        img: frontPageImg,
-        id: 1,
-      };
-    } else return null;
+    return {
+      title: drawerTitle,
+      img: firstDocumentImage,
+      id: 1,
+    };
   };
 
   toggleAllDocuments = (toggled) => {
@@ -808,9 +799,7 @@ class PrintWindow extends React.PureComponent {
       isAnyDocumentSelected: toggled,
     });
 
-    this.setState({ frontPage: this.createFrontPage(menuState) }, () => {
-      console.log(this.state.frontPage);
-    });
+    this.setState({ frontPage: this.createFrontPage(menuState) });
   };
 
   removeTagsNotSelectedForPrint = (chapter) => {
