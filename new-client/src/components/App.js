@@ -57,6 +57,7 @@ import {
 import LockIcon from "@mui/icons-material/Lock";
 import LockOpenIcon from "@mui/icons-material/LockOpen";
 import MapIcon from "@mui/icons-material/Map";
+import MenuIcon from "@mui/icons-material/Menu";
 import ThemeToggler from "../controls/ThemeToggler";
 
 // A global that holds our windows, for use see components/Window.js
@@ -495,6 +496,19 @@ class App extends React.PureComponent {
         cleanMode: this.props.config.mapConfig.map.clean,
       });
 
+      // Determine the icon based on the config value
+      const drawerButtonIcon =
+        this.props.config.mapConfig.map?.drawerButtonIcon;
+
+      // Mapping object for icons
+      const iconMapping = {
+        MapIcon: MapIcon,
+        MenuIcon: MenuIcon,
+      };
+
+      // Return the mapped icon or a default one if not found
+      const ButtonIcon = iconMapping[drawerButtonIcon] || MapIcon;
+
       this.setState(
         {
           tools: this.appModel.getPlugins(),
@@ -505,9 +519,12 @@ class App extends React.PureComponent {
           this.appModel.getPluginsThatMightRenderInDrawer().length > 0 &&
             this.globalObserver.publish("core.addDrawerToggleButton", {
               value: "plugins",
-              ButtonIcon: MapIcon,
-              caption: "Kartverktyg",
-              drawerTitle: "Kartverktyg",
+              ButtonIcon: ButtonIcon,
+              caption:
+                this.props.config.mapConfig.map?.drawerButtonTitle ??
+                "Kartverktyg",
+              drawerTitle:
+                this.props.config.mapConfig.map?.drawerTitle ?? "Kartverktyg",
               order: 0,
               // If no plugins render **directly** in Drawer, but some **might**
               // render there occasionally, let's ensure to hide the Tools button on
