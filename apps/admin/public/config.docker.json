@@ -1,93 +1,128 @@
 {
   "layermanager": {
     "url_proxy": "",
-    "url_map_list": "/api/v1/mapconfig/list",
-    "url_map": "/api/v1/mapconfig",
-    "url_import": "/api/v1/import/image",
-    "url_layers": "/api/v1/mapconfig/layers",
-    "url_layer_settings": "/api/v1/settings/wmslayer",
-    "url_layer_settings_extended": "/api/v1/settings/extendedwmslayer",
-    "url_wmtslayer_settings": "/api/v1/settings/wmtslayer",
-    "url_arcgislayer_settings": "/api/v1/settings/arcgislayer",
-    "url_vectorlayer_settings": "/api/v1/settings/vectorlayer",
+    "url_map_list": "/api/v2/mapconfig/list",
+    "url_map": "/api/v2/mapconfig",
+    "url_import": "/api/v2/import/image",
+    "url_layers": "/api/v2/mapconfig/layers",
+    "url_layer_settings": "/api/v2/settings/wmslayer",
+    "url_layer_settings_extended": "/api/v2/settings/extendedwmslayer",
+    "url_wmtslayer_settings": "/api/v2/settings/wmtslayer",
+    "url_arcgislayer_settings": "/api/v2/settings/arcgislayer",
+    "url_vectorlayer_settings": "/api/v2/settings/vectorlayer",
     "url_default_server": "https://geoservertest.halmstad.se/geoserver/wms",
     "owner_options": [
-      { "value": "SBK", "title": "SBK" },
-      { "value": "Lantmäterienheten", "title": "Lantmäterienheten" }
+      {
+        "value": "SBK",
+        "title": "SBK"
+      },
+      {
+        "value": "Lantmäterienheten",
+        "title": "Lantmäterienheten"
+      }
     ]
   },
   "search": {
     "url_proxy": "",
-    "url_layers": "/api/v1/mapconfig/layers",
-    "url_layer_settings": "/api/v1/settings/wfslayer",
+    "url_layers": "/api/v2/mapconfig/layers",
+    "url_layer_settings": "/api/v2/settings/wfslayer",
     "url_default_server": "https://giscloud.se/geoserver/wfs"
   },
   "edit": {
     "url_proxy": "",
-    "url_layers": "/api/v1/mapconfig/layers",
-    "url_layer_settings": "/api/v1/settings/wfstlayer",
+    "url_layers": "/api/v2/mapconfig/layers",
+    "url_layer_settings": "/api/v2/settings/wfstlayer",
     "url_default_server": "https://giscloud.se/geoserver/wfs",
-    "projections": ["EPSG:3006", "EPSG:3007", "EPSG:3008"]
+    "projections": [
+      "EPSG:3006",
+      "EPSG:3007",
+      "EPSG:3008"
+    ]
   },
   "mapsettings": {
     "url_proxy": "",
-    "url_base": "/api/v1",
-    "url_map": "/api/v1/mapconfig",
-    "url_map_create": "/api/v1/mapconfig/create",
-    "url_map_delete": "/api/v1/mapconfig/delete",
-    "url_map_list": "/api/v1/mapconfig/list",
-    "url_layers": "/api/v1/mapconfig/layers",
-    "url_layermenu_settings": "/api/v1/settings/layermenu",
-    "url_map_settings": "/api/v1/settings/mapsettings",
-    "url_tool_settings": "/api/v1/settings/toolsettings",
-    "url_document_list": "/api/v1/informative/list",
+    "url_base": "/api/v2",
+    "url_map": "/api/v2/mapconfig",
+    "url_map_create": "/api/v2/mapconfig/create",
+    "url_map_delete": "/api/v2/mapconfig/delete",
+    "url_map_list": "/api/v2/mapconfig/list",
+    "url_layers": "/api/v2/mapconfig/layers",
+    "url_layermenu_settings": "/api/v2/settings/layermenu",
+    "url_map_settings": "/api/v2/settings/mapsettings",
+    "url_tool_settings": "/api/v2/settings/toolsettings",
+    "url_document_list": "/api/v2/informative/list",
     "authentication_active": false
   },
   "informative": {
     "url_proxy": "",
-    "url_map": "/api/v1/mapconfig",
-    "url_map_list": "/api/v1/mapconfig/list",
-    "url_layers": "/api/v1/mapconfig/layers",
-    "url_document_list": "/api/v1/informative/list",
-    "url_load": "/api/v1/informative/load",
-    "url_save": "/api/v1/informative/save",
-    "url_create": "/api/v1/informative/create",
-    "url_delete": "/api/v1/informative/delete",
-    "default_coordinate": [320564, 6471766],
+    "url_map": "/api/v2/mapconfig",
+    "url_map_list": "/api/v2/mapconfig/list",
+    "url_layers": "/api/v2/mapconfig/layers",
+    "url_document_list": "/api/v2/informative/list",
+    "url_load": "/api/v2/informative/load",
+    "url_save": "/api/v2/informative/save",
+    "url_create": "/api/v2/informative/create",
+    "url_delete": "/api/v2/informative/delete",
+    "default_coordinate": [
+      320564,
+      6471766
+    ],
     "wms_url": "http://giscloud.se/mapservice/lmproxy/wms/topowebb",
     "wms_layers": "topowebbkartan"
   },
   "menueditor": {
     "url_proxy": "",
-    "url_map": "/api/v1/mapconfig",
-    "url_map_list": "/api/v1/mapconfig/list",
-    "url_layers": "/api/v1/mapconfig/layers",
-    "url_tool_settings": "/api/v1/settings/toolsettings",
-    "url_document_list": "/api/v1/informative/list"
+    "url_map": "/api/v2/mapconfig",
+    "url_map_list": "/api/v2/mapconfig/list",
+    "url_layers": "/api/v2/mapconfig/layers",
+    "url_tool_settings": "/api/v2/settings/toolsettings",
+    "url_document_list": "/api/v2/informative/list"
   },
   "documenthandler": {
     "url_proxy": "",
-    "url_map": "/api/v1/mapconfig",
-    "url_map_list": "/api/v1/mapconfig/list",
-    "url_layers": "/api/v1/mapconfig/layers",
-    "url_document_list": "/api/v1/informative/list",
-    "url_load": "/api/v1/informative/load",
-    "url_save": "/api/v1/informative/save",
-    "url_create": "/api/v1/informative/create",
-    "url_delete": "/api/v1/informative/delete",
-    "default_coordinate": [320564, 6471766],
+    "url_map": "/api/v2/mapconfig",
+    "url_map_list": "/api/v2/mapconfig/list",
+    "url_layers": "/api/v2/mapconfig/layers",
+    "url_document_list": "/api/v2/informative/list",
+    "url_load": "/api/v2/informative/load",
+    "url_save": "/api/v2/informative/save",
+    "url_create": "/api/v2/informative/create",
+    "url_delete": "/api/v2/informative/delete",
+    "default_coordinate": [
+      320564,
+      6471766
+    ],
     "wms_url": "http://giscloud.se/mapservice/lmproxy/wms/topowebb",
     "wms_layers": "topowebbkartan",
-    "list_images": "/api/v1/mapconfig/listimage",
-    "list_videos": "/api/v1/mapconfig/listvideo",
-    "list_audio": "/api/v1/mapconfig/listaudio"
+    "list_images": "/api/v2/mapconfig/listimage",
+    "list_videos": "/api/v2/mapconfig/listvideo",
+    "list_audio": "/api/v2/mapconfig/listaudio"
   },
   "router": [
-    { "name": "layermanager", "title": "Lager", "default": true },
-    { "name": "search", "title": "Söktjänster" },
-    { "name": "edit", "title": "Redigeringstjänster" },
-    { "name": "mapsettings", "title": "Kartor" },
-    { "name": "informative", "title": "Dokumenthanterare" },
-    { "name": "documenthandler", "title": "Dokumenthanterare 2.0" }
+    {
+      "name": "layermanager",
+      "title": "Lager",
+      "default": true
+    },
+    {
+      "name": "search",
+      "title": "Söktjänster"
+    },
+    {
+      "name": "edit",
+      "title": "Redigeringstjänster"
+    },
+    {
+      "name": "mapsettings",
+      "title": "Kartor"
+    },
+    {
+      "name": "informative",
+      "title": "Dokumenthanterare"
+    },
+    {
+      "name": "documenthandler",
+      "title": "Dokumenthanterare 2.0"
+    }
   ]
 }
