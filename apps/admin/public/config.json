@@ -93,8 +93,6 @@
     "url_load": "http://localhost:3002/api/v2/informative/load",
     "url_save": "http://localhost:3002/api/v2/informative/save",
     "url_create": "http://localhost:3002/api/v2/informative/create",
-    "url_create_folder": "http://localhost:3002/api/v2/informative/createfolder",
-    "url_folder_list": "http://localhost:3002/api/v2/informative/folderlist",
     "url_delete": "http://localhost:3002/api/v2/informative/delete",
     "default_coordinate": [
       320564,
@@ -105,7 +103,9 @@
     "list_images": "http://localhost:3002/api/v2/mapconfig/listimage",
     "list_videos": "http://localhost:3002/api/v2/mapconfig/listvideo",
     "list_audios": "http://localhost:3002/api/v2/mapconfig/listaudio",
-    "use_document_folders": true
+    "use_document_folders": true,
+    "url_create_folder": "http://localhost:3002/api/v2/informative/createfolder",
+    "url_folder_list": "http://localhost:3002/api/v2/informative/folderlist"
   },
   "router": [
     {

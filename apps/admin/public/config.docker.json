@@ -97,7 +97,10 @@
     "wms_layers": "topowebbkartan",
     "list_images": "/api/v2/mapconfig/listimage",
     "list_videos": "/api/v2/mapconfig/listvideo",
-    "list_audio": "/api/v2/mapconfig/listaudio"
+    "list_audio": "/api/v2/mapconfig/listaudio",
+    "use_document_folders": true,
+    "url_create_folder": "/api/v2/informative/createfolder",
+    "url_folder_list": "/api/v2/informative/folderlist"
   },
   "router": [
     {
