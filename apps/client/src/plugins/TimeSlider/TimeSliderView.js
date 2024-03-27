@@ -1,19 +1,13 @@
 import React from "react";
 import { createPortal } from "react-dom";
 import PropTypes from "prop-types";
-
-import { Slider, Button, Badge, Grid, Tooltip } from "@mui/material";
 import { Vector as VectorLayer } from "ol/layer";
 
-import TimeSliderSettings from "./components/TimeSliderSettings.js";
 import Dialog from "../../components/Dialog/Dialog";
 
-import PlayArrowIcon from "@mui/icons-material/PlayArrow";
-import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
-import ArrowBackIcon from "@mui/icons-material/ArrowBack";
-import PauseIcon from "@mui/icons-material/Pause";
-import RotateLeftOutlinedIcon from "@mui/icons-material/RotateLeftOutlined";
-import SettingsOutlinedIcon from "@mui/icons-material/SettingsOutlined";
+import TimeSliderSettings from "./components/TimeSliderSettings.js";
+import PlayerView from "./PlayerView.js";
+import PrintView from "./PrintView.js";
 
 class TimeSliderView extends React.PureComponent {
   static propTypes = {
@@ -32,6 +26,7 @@ class TimeSliderView extends React.PureComponent {
       layerStatus: this.validateLayers(),
       settingsDialog: false,
       sliderSpeed: 1000,
+      unixTimeBeforePrint: null,
     };
 
     this.map = props.map;
@@ -273,28 +268,6 @@ class TimeSliderView extends React.PureComponent {
     }
   };
 
-  // Handles when the user wants to step one step forwards.
-  // Sets the current time to the current time plus one step size
-  // If we've reached the end, we start from the beginning...
-  stepOnesForward = () => {
-    let nextUnixTime = this.state.currentUnixTime + this.state.stepSize;
-    if (nextUnixTime >= this.endTime) {
-      nextUnixTime = this.startTime;
-    }
-    this.handleSliderChange(nextUnixTime);
-  };
-
-  // Handles when the user wants to step one step backwards.
-  // Sets the current time to the current time minus one step size
-  // If we've reached the start, we "jump" to the end...
-  stepOnesBackward = () => {
-    let nextUnixTime = this.state.currentUnixTime - this.state.stepSize;
-    if (nextUnixTime <= this.startTime) {
-      nextUnixTime = this.endTime;
-    }
-    this.handleSliderChange(nextUnixTime);
-  };
-
   setNextDate = (nextUnixTime) => {
     const { currentUnixTime, resolution } = this.state;
 
@@ -450,6 +423,35 @@ class TimeSliderView extends React.PureComponent {
     });
   };
 
+  setSettingsDialog = (sd) => {
+    this.setState({ settingsDialog: sd });
+  };
+
+  setUnixTimeBeforePrint = (unixTime) => {
+    this.setState({ unixTimeBeforePrint: unixTime });
+  };
+
+  // Updates the slider and renders the layers at the supplied time
+  updateSliderAndRenderLayersAtTime = (unixTime) => {
+    // We want to make sure not to resolve before the layers has rendered - otherwise we might
+    // get strange side-effects if the caller thinks that the map is ready right away...
+    return new Promise((resolve) => {
+      // If the supplied time is already set, we can resolve right away...
+      if (this.state.currentUnixTime === unixTime) {
+        resolve();
+      }
+      // Let's bind a listener that fires when the rendering is completed...
+      this.map.once("rendercomplete", () => {
+        // ... and resolve when that happens.
+        resolve();
+      });
+      // Update the slider time and refresh the layers
+      this.setState({ currentUnixTime: unixTime }, () => {
+        this.updateLayers();
+      });
+    });
+  };
+
   renderSettingsDialog = () => {
     const { settingsDialog, resolution, sliderSpeed, layerStatus } = this.state;
     if (settingsDialog) {
@@ -484,163 +486,53 @@ class TimeSliderView extends React.PureComponent {
     }
   };
 
-  renderSettingsButton = () => {
-    const { layerStatus } = this.state;
-    return (
-      <Badge
-        color="error"
-        invisible={!layerStatus.error}
-        badgeContent={`${
-          layerStatus.faultyLayers.length > 0
-            ? layerStatus.faultyLayers.length
-            : 1
-        }`}
-      >
-        <Button
-          variant="contained"
-          onClick={() => {
-            this.setState({ settingsDialog: !this.state.settingsDialog });
-          }}
-        >
-          <SettingsOutlinedIcon />
-        </Button>
-      </Badge>
-    );
-  };
-
   render() {
-    const { currentUnixTime, stepSize, playing } = this.state;
+    const {
+      currentUnixTime,
+      stepSize,
+      playing,
+      settingsDialog,
+      layerStatus,
+      resolution,
+    } = this.state;
+    const { printActive, printModel } = this.props;
 
-    if (currentUnixTime) {
-      return (
-        <Grid container sx={{ padding: 2 }}>
-          <>{this.renderSettingsDialog()}</>
-          <Grid
-            item
-            xs={12}
-            sx={{
-              paddingLeft:
-                this.markResolution === "years"
-                  ? 2
-                  : this.markResolution === "months"
-                    ? 4
-                    : 6,
-              paddingRight:
-                this.markResolution === "years"
-                  ? 2
-                  : this.markResolution === "months"
-                    ? 4
-                    : 6,
-            }}
-          >
-            <Slider
-              size="small"
-              value={currentUnixTime}
-              min={this.startTime}
-              max={this.endTime}
-              step={stepSize}
-              marks={this.marks}
-              onChange={(e, value) => {
-                if (value !== currentUnixTime) {
-                  this.handleSliderChange(value);
-                }
-              }}
-            />
-          </Grid>
-          <Grid
-            container
-            direction="row"
-            justifyContent="center"
-            alignItems="center"
-            spacing={2}
-          >
-            <Grid item align="center" xs={2}>
-              <Tooltip disableInteractive title="Återställ tidslinjen">
-                <Button variant="contained" onClick={this.resetTimeSlider}>
-                  <RotateLeftOutlinedIcon />
-                </Button>
-              </Tooltip>
-            </Grid>
-            <Grid item align="center" xs={2}>
-              <Tooltip
-                disableInteractive
-                title={
-                  playing
-                    ? "Du kan inte hoppa bakåt när spelaren är aktiv."
-                    : "Hoppa ett steg bakåt"
-                }
-              >
-                <span>
-                  <Button
-                    variant="contained"
-                    onClick={() => {
-                      this.stepOnesBackward();
-                    }}
-                    disabled={playing}
-                  >
-                    <ArrowBackIcon />
-                  </Button>
-                </span>
-              </Tooltip>
-            </Grid>
-            <Grid item align="center" xs={2}>
-              <Tooltip
-                disableInteractive
-                title={playing ? "Stoppa tidslinjen" : "Starta tidslinjen"}
-              >
-                <Button
-                  variant="contained"
-                  onClick={() => {
-                    this.toggleSlider(!playing);
-                  }}
-                >
-                  {playing ? <PauseIcon /> : <PlayArrowIcon />}
-                </Button>
-              </Tooltip>
-            </Grid>
-            <Grid item align="center" xs={2}>
-              <Tooltip
-                disableInteractive
-                title={
-                  playing
-                    ? "Du kan inte hoppa framåt när spelaren är aktiv."
-                    : "Hoppa ett steg framåt"
-                }
-              >
-                <span>
-                  <Button
-                    variant="contained"
-                    onClick={() => {
-                      this.stepOnesForward();
-                    }}
-                    disabled={playing}
-                  >
-                    <ArrowForwardIcon />
-                  </Button>
-                </span>
-              </Tooltip>
-            </Grid>
-            <Grid item align="center" xs={2}>
-              <Tooltip disableInteractive title="Inställningar">
-                {this.renderSettingsButton()}
-              </Tooltip>
-            </Grid>
-          </Grid>
-        </Grid>
-      );
-    } else {
-      return (
-        <Grid
-          container
-          alignItems="center"
-          justifyContent="center"
-          sx={{ width: "100%", height: "100%" }}
-        >
-          <>{this.renderSettingsDialog()}</>
-          <Grid item>{this.renderSettingsButton()}</Grid>
-        </Grid>
-      );
-    }
+    return printActive ? (
+      <PrintView
+        startTime={this.startTime}
+        endTime={this.endTime}
+        marks={this.marks}
+        resolution={resolution}
+        stepSize={stepSize}
+        printModel={printModel}
+        getStepSize={this.getStepSize}
+        getDateLabel={this.getDateLabel}
+        windowHidden={this.props.windowHidden}
+        setUnixTimeBeforePrint={this.setUnixTimeBeforePrint}
+        updateSliderAndRenderLayersAtTime={
+          this.updateSliderAndRenderLayersAtTime
+        }
+      />
+    ) : (
+      <>
+        <PlayerView
+          currentUnixTime={currentUnixTime}
+          layerStatus={layerStatus}
+          stepSize={stepSize}
+          playing={playing}
+          marks={this.marks}
+          startTime={this.startTime}
+          endTime={this.endTime}
+          settingsDialog={settingsDialog}
+          setSettingsDialog={this.setSettingsDialog}
+          markResolution={this.markResolution}
+          handleSliderChange={this.handleSliderChange}
+          resetTimeSlider={this.resetTimeSlider}
+          toggleSlider={this.toggleSlider}
+        />
+        {this.renderSettingsDialog()}
+      </>
+    );
   }
 }
 
