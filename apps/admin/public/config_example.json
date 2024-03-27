@@ -10,6 +10,7 @@
     "url_wmtslayer_settings": "https://YOUR_DOMAIN.COM/mapservice/settings/wmtslayer",
     "url_arcgislayer_settings": "https://YOUR_DOMAIN.COM/mapservice/settings/arcgislayer",
     "url_vectorlayer_settings": "https://YOUR_DOMAIN.COM/mapservice/settings/vectorlayer",
+    "default_server_type": "geoserver",
     "url_default_server": "https://YOUR_MAP_SERVER.COM/geoserver/wms",
     "owner_options": [
       { "value": "SBK", "title": "SBK" },
