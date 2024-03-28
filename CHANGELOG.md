@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Sketch: It is now possible to buffer from the Sketch plugin [#1310](https://github.com/hajkmap/Hajk/issues/1310)
 - Core, Admin: Added support for stand-alone GeoWebCache WMS Server. Issue: [#1469](https://github.com/hajkmap/Hajk/issues/1469). PR: [#1493](https://github.com/hajkmap/Hajk/pull/1493)
 - Print/Anchor: It's now possible to generate qr codes in Share and Print [#1482](https://github.com/hajkmap/Hajk/issues/1482)
 - Sketch: It's now possible to disable stroke for polygons and circles [#1177](https://github.com/hajkmap/Hajk/issues/1177)

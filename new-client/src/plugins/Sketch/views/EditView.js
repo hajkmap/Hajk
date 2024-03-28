@@ -98,6 +98,8 @@ const EditView = (props) => {
                 feature={props.editFeature}
                 model={props.model}
                 drawModel={props.drawModel}
+                bufferState={props.bufferState}
+                setBufferState={props.setBufferState}
               />
             </Grid>
           )}

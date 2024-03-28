@@ -22,7 +22,13 @@ const FeatureTextEditor = ({ text, onChange }) => {
 };
 
 // This is used to update the style on the supplied feature
-const FeatureStyleEditor = ({ feature, model, drawModel }) => {
+const FeatureStyleEditor = ({
+  feature,
+  model,
+  drawModel,
+  bufferState,
+  setBufferState,
+}) => {
   // We're gonna need to keep track of the feature-style
   const [featureStyle, setFeatureStyle] = React.useState(
     model.getFeatureStyle(feature)
@@ -47,6 +53,24 @@ const FeatureStyleEditor = ({ feature, model, drawModel }) => {
       drawModel.refreshDrawLayer();
     }
   }, [featureStyle, feature, drawModel, model]);
+
+  // Variable to check if the drawn object is a buffered-object
+  const isBufferFeature = feature?.get("bufferedFeature");
+  // Effect to set the isBufferStyle to true if the feature is a buffered-feature
+  // This is used to make sure that the change-size accordion is disabled for the draw type "Point" when editing a buffered object.
+  React.useEffect(() => {
+    if (isBufferFeature) {
+      setBufferState((prevState) => ({
+        ...prevState,
+        isBufferStyle: true,
+      }));
+    } else {
+      setBufferState((prevState) => ({
+        ...prevState,
+        isBufferStyle: false,
+      }));
+    }
+  }, [isBufferFeature, setBufferState]);
 
   // Effect making sure the feature-text is set to the actual text of the feature.
   React.useEffect(() => {
@@ -103,6 +127,8 @@ const FeatureStyleEditor = ({ feature, model, drawModel }) => {
         drawModel={drawModel}
         setDrawStyle={setFeatureStyle}
         setTextStyle={setTextStyle}
+        setBufferState={setBufferState}
+        bufferState={bufferState}
       />
     </Grid>
   );
