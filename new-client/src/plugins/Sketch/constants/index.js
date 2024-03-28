@@ -69,6 +69,8 @@ export const DRAW_COLORS = [
   "#F78DA7",
   "#9900EF",
   "#354FAD",
+  "#000000",
+  "#FFFFFF",
 ];
 
 export const DRAW_TYPES = [
