@@ -673,6 +673,7 @@ class Manager extends Component {
             layer={this.state.layer}
             parent={this}
             url={this.props.config.url_default_server}
+            serverType={this.props.config.default_server_type}
           />
         );
       case "WMTS":
@@ -683,6 +684,7 @@ class Manager extends Component {
             layer={this.state.layer}
             parent={this}
             url={this.props.config.url_default_server}
+            serverType={this.props.config.default_server_type}
           />
         );
       case "ArcGIS":
@@ -693,6 +695,7 @@ class Manager extends Component {
             layer={this.state.layer}
             parent={this}
             url={this.props.config.url_default_server}
+            serverType={this.props.config.default_server_type}
           />
         );
       case "Vector":
@@ -703,6 +706,7 @@ class Manager extends Component {
             layer={this.state.layer}
             parent={this}
             url={this.props.config.url_default_server}
+            serverType={this.props.config.default_server_type}
           />
         );
       default:
