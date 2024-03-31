@@ -20,7 +20,7 @@ function Citizendialogue(props) {
   // There is a more thorough explanation regarding state in ./CitizendialogueView.js
   // Here is an example where we keep track of a state object (kind of like class-based components).
   const [state, setState] = React.useState({
-    title: "Medborgardialog",
+    title: props.options.title,
     color: null,
   });
   // But we can also keep just one variable, allowing us to keep naming etc. clean. The pluginShown state
@@ -141,7 +141,7 @@ function Citizendialogue(props) {
         icon: <AppRegistrationIcon />, // Custom icon for this plugin
         title: state.title, // By keeping title and color in Citizendialogue's state we can pass on
         color: state.color, // the changes to BaseWindowPlugin which will update internal state too.
-        description: "Enkätsystemet Medborgardialog", // Shown on Widget button
+        description: props.options.description, // Shown on Widget button
         // Do you want to add buttons to the plugin-header? That can be done as follows:
         customPanelHeaderButtons: [
           {

@@ -4,9 +4,9 @@ import restrictAdmin from "../../middlewares/restrict.admin.js";
 
 export default express
   .Router()
-  .get("/list/", controller.surveylist)
-  .get("/:name", controller.getByNameSurvey)
-  .get("/answers/:name", controller.getByNameSurveyLoad)
   .put("/answers/:surveyId", controller.saveByNameSurveyAnswer)
-  .put("/:surveyId", controller.saveByNameSurvey)
-  .use(restrictAdmin); // All routes that follow are admin-only!
+  .get("/:name", controller.getByNameSurvey)
+  .use(restrictAdmin) // All routes that follow are admin-only!
+  .get("/list/", controller.surveylist)
+  .get("/answers/:name", controller.getByNameSurveyLoad)
+  .put("/:surveyId", controller.saveByNameSurvey);

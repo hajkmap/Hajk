@@ -71,6 +71,8 @@ class ToolOptions extends Component {
           position: tool.options.position,
           width: tool.options.width,
           height: tool.options.height,
+          description: tool.options.description,
+          title: tool.options.title,
           instruction: tool.options.instruction,
           activeServices: tool.options.activeServices || [],
           visibleAtStart: tool.options.visibleAtStart,
@@ -249,6 +251,8 @@ class ToolOptions extends Component {
         position: this.state.position,
         width: this.state.width,
         height: this.state.height,
+        description: this.state.description,
+        title: this.state.title,
         instruction: this.state.instruction,
         activeServices: this.state.activeServices,
         visibleAtStart: this.state.visibleAtStart,
@@ -520,6 +524,41 @@ class ToolOptions extends Component {
               }}
               value={this.state.height}
             />
+          </div>
+          <div>
+          <label htmlFor="title">
+                    Rubrik
+                    <br />
+                    (Widget Plugin)
+                  </label>
+                  <input
+                    value={this.state.title}
+                    type="text"
+                    name="title"
+                    onChange={(e) => {
+                      this.handleInputChange(e);
+                    }}
+                  />
+          </div>
+          <div>
+          <label htmlFor="description">
+                    Beskrivning
+                    <br />
+                    (Widget Plugin){" "}
+                    <i
+                      className="fa fa-question-circle"
+                      data-toggle="tooltip"
+                      title="Om verktyget visas som widget (inställningen 'Verktygsplacering' sätts till 'left' eller 'right) så kommer denna beskrivning att visas inne i widget-knappen."
+                    />
+                  </label>
+                  <input
+                    value={this.state.description}
+                    type="text"
+                    name="description"
+                    onChange={(e) => {
+                      this.handleInputChange(e);
+                    }}
+                  />
           </div>
           <div className="separator">Övriga inställningar</div>
           <div>
