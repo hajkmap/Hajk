@@ -28,7 +28,7 @@ Feel free to add more!
 There are a few steps that an admin must complete before the plugin will function:
 
 - Add a user to FME-server that can access and run workspaces in some repository.
-- Enter details about the FME-server instance and the user created above in the .env-file (located in /new-backend).
+- Enter details about the FME-server instance and the user created above in the `.env` file (located in `apps/backend`).
 - Enable the plugin in the admin-UI.
 - Add a couple of products (workspaces) in the admin-ui.
 - Make sure that everything works!

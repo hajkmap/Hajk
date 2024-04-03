@@ -1,6 +1,6 @@
 # Migration to V2 API
 
-## `new-client/public/appConfig.json`
+## `apps/client/public/appConfig.json`
 
 ### Removed keys
 
@@ -21,12 +21,12 @@ Due to the [new error page in Client UI added in 3.13.6](https://github.com/hajk
 - `loadErrorMessage`
 - `loadErrorReloadButtonText`
 
-## `new-admin/public/config.json`
+## `apps/admin/public/config.json`
 
 Simply replace `v1` with `v2` to ensure that all requests go to the current API, e.g.
 `http://localhost:3002/api/v1/mapconfig/list` -> `http://localhost:3002/api/v2/mapconfig/list`
 
-## `new-backend/.env`
+## `apps/backend/.env`
 
 If you previously specified a value for `API_VERSIONS`, bear in mind that `2` is the only allowed value at this moment.
 

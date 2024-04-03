@@ -355,17 +355,17 @@ Browse to the web service and add "/swagger" to the end of the URL.
 
 Now when Backend is up and running, it's time to start the Client (and optionally Admin) applications.
 
-1. You must tell the Client app the location of a running Backend. The configuration is made by editing new-client/public/appConfig.json. Make sure that mapserviceBase is a valid URL to a running instance of the Backend (if you're using the NodeJS application and your Backend is running on port 3002, you should set mapserviceBase to "http://localhost:3002".
-2. The client application resides inside new-client. Go there (cd new-client) and install the dependencies and start by typing: npm i && npm start.
+1. You must tell the Client app the location of a running Backend. The configuration is made by editing apps/client/public/appConfig.json. Make sure that mapserviceBase is a valid URL to a running instance of the Backend (if you're using the NodeJS application and your Backend is running on port 3002, you should set mapserviceBase to "http://localhost:3002".
+2. The client application resides inside apps/client. Go there (cd apps/client) and install the dependencies and start by typing: npm i && npm start.
 3. Verify that Client is running on http://localhost:3000.
 
 ### <a id="Admin"></a>Admin
 
 This optional process is similar to the Client app.
 
-1. Set the correct URL to Backend by editing new-admin/public/config.json.
-   Map operations have moved to mapconfig so "url_map", "url_map_list", "url_map_create", "url_map_delete" needs to point toward "http://localhost:3002/mapconfig...", the rest is the same as for new-client
-2. The admin application is located in new-admin. To get it running do cd new-admin && npm i && npm start.
+1. Set the correct URL to Backend by editing apps/admin/public/config.json.
+   Map operations have moved to mapconfig so "url_map", "url_map_list", "url_map_create", "url_map_delete" needs to point toward "http://localhost:3002/mapconfig...", the rest is the same as for client
+2. The admin application is located in apps/admin. To get it running do cd apps/admin && npm i && npm start.
 3. Verify that Admin is running on http://localhost:3001.
 
 ## Developer information
