@@ -108,9 +108,14 @@ class BufferModel {
       })
       // Take each of the returned features from any vector layer…
       .forEach((f) => {
-        const clonedFeature = f.clone(); // …clone it…
-        clonedFeature.setStyle(); // …and reset it's style (so it uses layer's default)…
-        this.highlightSource.addFeature(clonedFeature); //…and add it to the highlight source (so we collect them there).
+        const geometryType = f.getGeometry()?.getType();
+
+        // We can't buffer Circle features - let's exclude them.
+        if (geometryType !== "Circle") {
+          const clonedFeature = f.clone(); // …clone it…
+          clonedFeature.setStyle(); // …and reset it's style (so it uses layer's default)…
+          this.highlightSource.addFeature(clonedFeature); //…and add it to the highlight source (so we collect them there).
+        }
       });
 
     // We're done with vector sources' features (e.g from WFS layers or the Draw plugin).
