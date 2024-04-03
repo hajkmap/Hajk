@@ -11,6 +11,7 @@ import {
 import FeatureStyleAccordion from "./FeatureStyleAccordion";
 import FeaturePointSizeAccordion from "./FeatureSizeAccordion";
 import StrokeTypeSelector from "./StrokeTypeSelector";
+import FeatureBufferAccordion from "./FeatureBufferAccordion";
 
 export default function FeatureStyleSelector(props) {
   const { activeDrawType, drawStyle, setDrawStyle } = props;
@@ -193,6 +194,10 @@ export default function FeatureStyleSelector(props) {
   };
 
   const renderPointStyleSettings = () => {
+    // If the isBufferStyle is true, we don't want to show the point-size-slider on edit.
+    if (props.bufferState.isBufferStyle) {
+      return null;
+    }
     return (
       <Grid container>
         <Grid item xs={12}>
@@ -256,6 +261,25 @@ export default function FeatureStyleSelector(props) {
         handleColorChange={handleStrokeColorChange}
         handleStrokeWidthChange={handleStrokeWidthChange}
         drawModel={props.drawModel}
+      />
+    );
+  };
+
+  const renderBufferStyleSettings = () => {
+    return (
+      <FeatureBufferAccordion
+        title="Buffra"
+        showBufferSlider
+        drawStyle={props.drawStyle}
+        drawModel={props.drawModel}
+        localObserver={props.localObserver}
+        globalObserver={props.globalObserver}
+        pluginShown={props.pluginShown}
+        bufferState={props.bufferState}
+        setBufferState={props.setBufferState}
+        highlightLayer={props.highlightLayer}
+        toggleBufferBtn={props.toggleBufferBtn}
+        setToggleBufferBtn={props.setToggleBufferBtn}
       />
     );
   };
@@ -350,6 +374,9 @@ export default function FeatureStyleSelector(props) {
         <Grid item xs={12}>
           {renderColorSelectors()}
           {props.activeDrawType === "Point" && renderPointStyleSettings()}
+          {props.activityId === "ADD" &&
+            props.activeDrawType !== "Circle" &&
+            renderBufferStyleSettings()}
         </Grid>
       </Grid>
     </Grid>
