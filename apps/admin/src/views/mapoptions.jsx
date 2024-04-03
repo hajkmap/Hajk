@@ -77,6 +77,9 @@ class MapOptions extends Component {
         drawerVisibleMobile: config.drawerVisibleMobile,
         drawerPermanent: config.drawerPermanent,
         drawerStatic: config.drawerStatic,
+        drawerTitle: config.drawerTitle || "Kartverktyg",
+        drawerButtonTitle: config.drawerButtonTitle || "Kartverktyg",
+        drawerButtonIcon: config.drawerButtonIcon || "MapIcon",
         zoomDelta: config.zoomDelta || "",
         zoomDuration: config.zoomDuration || "",
         title: config.title ? config.title : "",
@@ -181,6 +184,9 @@ class MapOptions extends Component {
       drawerVisibleMobile: mapConfig.drawerVisibleMobile,
       drawerPermanent: mapConfig.drawerPermanent,
       drawerStatic: mapConfig.drawerStatic,
+      drawerTitle: mapConfig.drawerTitle || "Kartverktyg",
+      drawerButtonTitle: mapConfig.drawerButtonTitle || "Kartverktyg",
+      drawerButtonIcon: mapConfig.drawerButtonIcon || "MapIcon",
       activeDrawerOnStart: mapConfig.activeDrawerOnStart
         ? mapConfig.activeDrawerOnStart
         : "plugins",
@@ -372,6 +378,9 @@ class MapOptions extends Component {
       case "showRecentlyUsedPlugins":
       case "introductionEnabled":
       case "introductionShowControlButton":
+      case "drawerTitle":
+      case "drawerButtonTitle":
+      case "drawerButtonIcon":
       case "drawerStatic":
       case "drawerVisible":
       case "drawVisibleMobile":
@@ -453,6 +462,9 @@ class MapOptions extends Component {
         config.drawerVisibleMobile = this.getValue("drawerVisibleMobile");
         config.drawerPermanent = this.getValue("drawerPermanent");
         config.drawerStatic = this.getValue("drawerStatic");
+        config.drawerTitle = this.getValue("drawerTitle");
+        config.drawerButtonTitle = this.getValue("drawerButtonTitle");
+        config.drawerButtonIcon = this.getValue("drawerButtonIcon");
         config.activeDrawerOnStart = this.getValue("activeDrawerOnStart");
         config.geoserverLegendOptions = this.getValue("geoserverLegendOptions");
         config.defaultCookieNoticeMessage = this.getValue(
@@ -1563,6 +1575,81 @@ class MapOptions extends Component {
                   );
                 }}
               />
+            </div>
+            <div>
+              <label>
+                Titel sidopanel{" "}
+                <i
+                  className="fa fa-question-circle"
+                  data-toggle="tooltip"
+                  title="Titel på verktygets panel. Detta visas högst upp i panelen."
+                />
+              </label>
+              <input
+                type="text"
+                ref="input_drawerTitle"
+                value={this.state.drawerTitle}
+                className={this.getValidationClass("drawerTitle")}
+                onChange={(e) => {
+                  this.setState({ drawerTitle: e.target.value });
+                }}
+              />
+            </div>
+            <div>
+              <label>
+                Titel aktiveringsknapp{" "}
+                <i
+                  className="fa fa-question-circle"
+                  data-toggle="tooltip"
+                  title="Text på knapp som öppnar verktyget."
+                />
+              </label>
+              <input
+                type="text"
+                ref="input_drawerButtonTitle"
+                value={this.state.drawerButtonTitle}
+                className={this.getValidationClass("drawerButtonTitle")}
+                onChange={(e) => {
+                  this.setState({ drawerButtonTitle: e.target.value });
+                }}
+              />
+            </div>
+            <div>
+              <label>
+                Ikon aktiveringsknapp{" "}
+                <i
+                  className="fa fa-question-circle"
+                  data-toggle="tooltip"
+                  title="Ikon på knapp som öppnar verktyget. Välj ikon från de fördefinierade alternativen."
+                />
+              </label>
+              <input
+                id="input_drawerButtonIcon"
+                type="radio"
+                name="icon"
+                ref="input_drawerButtonIcon"
+                value={this.state.drawerButtonIcon}
+                onChange={(e) => {
+                  this.setState({ drawerButtonIcon: "MapIcon" });
+                }}
+                checked={this.state.drawerButtonIcon === "MapIcon"}
+              />
+              &nbsp;
+              <i className="fa fa-map" />
+              <input
+                id="input_drawerButtonIcon"
+                type="radio"
+                name="icon"
+                ref="input_drawerButtonIcon"
+                value={this.state.drawerButtonIcon}
+                onChange={(e) => {
+                  this.setState({ drawerButtonIcon: "MenuIcon" });
+                }}
+                checked={this.state.drawerButtonIcon === "MenuIcon"}
+                style={{ marginLeft: "10px" }}
+              />
+              &nbsp;
+              <i className="fa fa-bars" />
             </div>
             <div className="separator">Färginställningar för kartan</div>
             <div>

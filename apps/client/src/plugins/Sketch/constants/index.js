@@ -69,6 +69,8 @@ export const DRAW_COLORS = [
   "#F78DA7",
   "#9900EF",
   "#354FAD",
+  "#000000",
+  "#FFFFFF",
 ];
 
 export const DRAW_TYPES = [
@@ -150,6 +152,7 @@ export const STROKE_TYPES = [
 ];
 
 export const STROKE_DASHES = new Map([
+  ["none", [null, null]],
   ["solid", null],
   ["dotted", [2, 7]],
   ["dashed", [12, 7]],
