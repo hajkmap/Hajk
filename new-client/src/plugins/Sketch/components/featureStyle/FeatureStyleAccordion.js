@@ -166,6 +166,9 @@ const FeatureStyleAccordion = (props) => {
                       maxWidth: "100%",
                       background: "unset", // Hard-coded to white, we don't want that.
                     },
+                    swatch: {
+                      boxShadow: "0px 2px 6px rgba(0, 0, 0, 0.2)", // boxShadow to make sure the color is visible on white background
+                    },
                   },
                 }}
                 color={props.color}
