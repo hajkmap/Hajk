@@ -1,9 +1,9 @@
 # Build the client
-FROM registry.redhat.io/rhel9/nodejs-18 as clientBuilder
-COPY /new-client/package*.json ./
+FROM registry.redhat.io/rhel9/nodejs-20 as clientBuilder
+COPY /apps/client/package*.json ./
 USER root
 RUN npm install
-COPY ./new-client .
+COPY ./apps/client .
 RUN npm run build --ignore-scripts
 
 FROM registry.access.redhat.com/ubi8/nginx-122

@@ -116,7 +116,11 @@ const BufferModel = (props) => {
             },
           })
           .forEach((f) => {
-            if (!f.get("bufferedFeature")) {
+            const geometryType = f.getGeometry()?.getType();
+
+            // We can't buffer Circle features and we don't want to buffer
+            // around existing buffer features - let's exclude them.
+            if (!f.get("bufferedFeature") || geometryType !== "Circle") {
               const clonedFeature = f.clone();
               clonedFeature.setStyle(highlightStyle);
               bufferState.highlightSource.addFeature(clonedFeature);
