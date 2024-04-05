@@ -8,11 +8,11 @@ import {
   MenuItem,
   Select,
   Switch,
-  Tooltip,
 } from "@mui/material";
 
 import LocalStorageHelper from "../../../utils/LocalStorageHelper";
 import useCookieStatus from "../../../hooks/useCookieStatus";
+import HajkToolTip from "../../../components/HajkToolTip";
 
 import {
   STORAGE_KEY,
@@ -30,6 +30,7 @@ const SettingsView = (props) => {
   const [showHelperSnacks, setShowHelperSnacks] = React.useState(
     model.getShowHelperSnacks()
   );
+
   // An effect that makes sure to update the model with the user-choice regarding the helper-snacks.
   // The effect also makes sure to store the setting in the LS (if allowed).
   React.useEffect(() => {
@@ -49,8 +50,7 @@ const SettingsView = (props) => {
           <FormLabel focused={false} component="legend">
             Generella inställningar
           </FormLabel>
-          <Tooltip
-            disableInteractive
+          <HajkToolTip
             title={`Slå ${
               measurementSettings.showText ? "av" : "på"
             } om du vill ${
@@ -72,8 +72,8 @@ const SettingsView = (props) => {
                 />
               }
             />
-          </Tooltip>
-          <Tooltip
+          </HajkToolTip>
+          <HajkToolTip
             disableInteractive
             title={`Slå ${showHelperSnacks ? "av" : "på"} om du vill ${
               showHelperSnacks ? "dölja" : "visa"
@@ -89,7 +89,7 @@ const SettingsView = (props) => {
                 />
               }
             />
-          </Tooltip>
+          </HajkToolTip>
         </FormControl>
       </Grid>
       <Grid item xs={12}>
@@ -98,8 +98,7 @@ const SettingsView = (props) => {
             Mätinställningar
           </FormLabel>
 
-          <Tooltip
-            disableInteractive
+          <HajkToolTip
             title={
               !measurementSettings.showText
                 ? "Aktivera text på objekten om du vill visa objektens omkrets/radie."
@@ -126,9 +125,8 @@ const SettingsView = (props) => {
                 />
               }
             />
-          </Tooltip>
-          <Tooltip
-            disableInteractive
+          </HajkToolTip>
+          <HajkToolTip
             title={
               !measurementSettings.showText
                 ? "Aktivera text på objekten om du vill visa objektens längd"
@@ -155,8 +153,8 @@ const SettingsView = (props) => {
                 />
               }
             />
-          </Tooltip>
-          <Tooltip
+          </HajkToolTip>
+          <HajkToolTip
             disableInteractive
             title={
               !measurementSettings.showText
@@ -184,8 +182,8 @@ const SettingsView = (props) => {
                 />
               }
             />
-          </Tooltip>
-          <Tooltip title="Välj enhet för mätning av areal.">
+          </HajkToolTip>
+          <HajkToolTip title="Välj enhet för mätning av areal.">
             <FormControl size="small" style={{ marginTop: 8 }}>
               <InputLabel
                 variant="outlined"
@@ -215,8 +213,9 @@ const SettingsView = (props) => {
                 })}
               </Select>
             </FormControl>
-          </Tooltip>
-          <Tooltip title="Välj enhet för mätning av längd.">
+          </HajkToolTip>
+
+          <HajkToolTip title="Välj enhet för mätning av längd.">
             <FormControl size="small" style={{ marginTop: 16 }}>
               <InputLabel
                 variant="outlined"
@@ -246,8 +245,8 @@ const SettingsView = (props) => {
                 })}
               </Select>
             </FormControl>
-          </Tooltip>
-          <Tooltip title="Välj med vilken precision mätvärdena ska presenteras.">
+          </HajkToolTip>
+          <HajkToolTip title="Välj med vilken precision mätvärdena ska presenteras.">
             <FormControl size="small" style={{ marginTop: 16 }}>
               <InputLabel variant="outlined" id="sketch-select-precision-label">
                 Mätprecision
@@ -274,7 +273,7 @@ const SettingsView = (props) => {
                 })}
               </Select>
             </FormControl>
-          </Tooltip>
+          </HajkToolTip>
         </FormControl>
       </Grid>
     </Grid>
