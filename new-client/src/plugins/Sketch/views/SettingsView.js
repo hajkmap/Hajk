@@ -31,6 +31,19 @@ const SettingsView = (props) => {
     model.getShowHelperSnacks()
   );
 
+  const [showHajkToolTips, setShowHajkToolTips] = React.useState({
+    select1: true,
+    select2: true,
+    select3: true,
+    // Add more keys for additional Selects if needed
+  });
+
+  const handleFocus = (selectId, value) => {
+    setShowHajkToolTips((prevStates) => ({
+      ...prevStates,
+      [selectId]: value,
+    }));
+  };
   // An effect that makes sure to update the model with the user-choice regarding the helper-snacks.
   // The effect also makes sure to store the setting in the LS (if allowed).
   React.useEffect(() => {
@@ -183,7 +196,11 @@ const SettingsView = (props) => {
               }
             />
           </HajkToolTip>
-          <HajkToolTip title="Välj enhet för mätning av areal.">
+          <HajkToolTip
+            title={
+              showHajkToolTips.select1 ? "Välj enhet för mätning av areal." : ""
+            }
+          >
             <FormControl size="small" style={{ marginTop: 8 }}>
               <InputLabel
                 variant="outlined"
@@ -203,6 +220,8 @@ const SettingsView = (props) => {
                     areaUnit: e.target.value,
                   }));
                 }}
+                onFocus={() => handleFocus("select1", false)}
+                onBlur={() => handleFocus("select1", true)}
               >
                 {AREA_MEASUREMENT_UNITS.map((unit, index) => {
                   return (
@@ -215,7 +234,11 @@ const SettingsView = (props) => {
             </FormControl>
           </HajkToolTip>
 
-          <HajkToolTip title="Välj enhet för mätning av längd.">
+          <HajkToolTip
+            title={
+              showHajkToolTips.select2 ? "Välj enhet för mätning av längd." : ""
+            }
+          >
             <FormControl size="small" style={{ marginTop: 16 }}>
               <InputLabel
                 variant="outlined"
@@ -235,6 +258,8 @@ const SettingsView = (props) => {
                     lengthUnit: e.target.value,
                   }));
                 }}
+                onFocus={() => handleFocus("select2", false)}
+                onBlur={() => handleFocus("select2", true)}
               >
                 {LENGTH_MEASUREMENT_UNITS.map((unit, index) => {
                   return (
@@ -246,7 +271,13 @@ const SettingsView = (props) => {
               </Select>
             </FormControl>
           </HajkToolTip>
-          <HajkToolTip title="Välj med vilken precision mätvärdena ska presenteras.">
+          <HajkToolTip
+            title={
+              showHajkToolTips.select3
+                ? "Välj med vilken precision mätvärdena ska presenteras."
+                : ""
+            }
+          >
             <FormControl size="small" style={{ marginTop: 16 }}>
               <InputLabel variant="outlined" id="sketch-select-precision-label">
                 Mätprecision
@@ -263,6 +294,8 @@ const SettingsView = (props) => {
                     precision: parseInt(e.target.value),
                   }));
                 }}
+                onFocus={() => handleFocus("select3", false)}
+                onBlur={() => handleFocus("select3", true)}
               >
                 {MEASUREMENT_PRECISIONS.map((precision, index) => {
                   return (
