@@ -32,6 +32,27 @@ class SearchSettings extends React.PureComponent {
 
   render() {
     const { searchOptions, searchSources, searchModel } = this.props;
+
+    const enabledSearchOptions = Array.isArray(this.props.enabledSearchOptions)
+      ? this.props.enabledSearchOptions
+      : false;
+
+    const showSearchInVisibleLayers =
+      !enabledSearchOptions ||
+      enabledSearchOptions.includes("searchInVisibleLayers");
+    const showWildcardAtStart =
+      !enabledSearchOptions || enabledSearchOptions.includes("wildcardAtStart");
+    const showWildcardAtEnd =
+      !enabledSearchOptions || enabledSearchOptions.includes("wildcardAtEnd");
+    const showMatchCase =
+      !enabledSearchOptions || enabledSearchOptions.includes("matchCase");
+    const showActiveSpatialFilter =
+      !enabledSearchOptions ||
+      enabledSearchOptions.includes("activeSpatialFilter");
+    const showEnableLabelOnHighlight =
+      !enabledSearchOptions ||
+      enabledSearchOptions.includes("enableLabelOnHighlight");
+
     return (
       <Grid container spacing={2} direction="column">
         <Grid item xs>
@@ -103,25 +124,27 @@ class SearchSettings extends React.PureComponent {
                 </Grid>
               )}
             </FormGroup>
-            <FormGroup>
-              <Tooltip title="Om aktivt kommer sökningen att ske i lager som är inställda för sökning av systemadministratören och som är synliga.">
-                <FormControlLabel
-                  label="Sök endast i synliga lager"
-                  control={
-                    <Switch
-                      checked={searchOptions.searchInVisibleLayers}
-                      onChange={() => {
-                        this.localUpdateSearchOptions(
-                          "searchInVisibleLayers",
-                          !searchOptions.searchInVisibleLayers
-                        );
-                      }}
-                      color="primary"
-                    />
-                  }
-                />
-              </Tooltip>
-            </FormGroup>
+            {showSearchInVisibleLayers && (
+              <FormGroup>
+                <Tooltip title="Om aktivt kommer sökningen att ske i lager som är inställda för sökning av systemadministratören och som är synliga.">
+                  <FormControlLabel
+                    label="Sök endast i synliga lager"
+                    control={
+                      <Switch
+                        checked={searchOptions.searchInVisibleLayers}
+                        onChange={() => {
+                          this.localUpdateSearchOptions(
+                            "searchInVisibleLayers",
+                            !searchOptions.searchInVisibleLayers
+                          );
+                        }}
+                        color="primary"
+                      />
+                    }
+                  />
+                </Tooltip>
+              </FormGroup>
+            )}
           </FormControl>
         </Grid>
 
@@ -131,127 +154,139 @@ class SearchSettings extends React.PureComponent {
               Inställningar för textsökning
             </FormLabel>
             <FormGroup>
-              <Tooltip
-                disableInteractive
-                title="Om aktivt kommer en sökning på 'väg' även ge träffar på exempelvis 'storväg'."
-              >
-                <FormControlLabel
-                  label="Wildcard före"
-                  control={
-                    <Switch
-                      checked={searchOptions.wildcardAtStart}
-                      onChange={() =>
-                        this.localUpdateSearchOptions(
-                          "wildcardAtStart",
-                          !searchOptions.wildcardAtStart
-                        )
-                      }
-                      color="primary"
-                    />
-                  }
-                />
-              </Tooltip>
-              <Tooltip
-                disableInteractive
-                title="Om aktivt kommer en sökning på 'väg' även ge träffar på exempelvis 'vägen'."
-              >
-                <FormControlLabel
-                  label="Wildcard efter"
-                  control={
-                    <Switch
-                      checked={searchOptions.wildcardAtEnd}
-                      onChange={() =>
-                        this.localUpdateSearchOptions(
-                          "wildcardAtEnd",
-                          !searchOptions.wildcardAtEnd
-                        )
-                      }
-                      color="primary"
-                    />
-                  }
-                />
-              </Tooltip>
-              <Tooltip
-                disableInteractive
-                title="Om aktivt kommer en sökning på 'a' inte ge träffar på 'A'. Inaktivera för att söka oberoende av gemener/versaler."
-              >
-                <FormControlLabel
-                  label="Skiftlägeskänslighet"
-                  control={
-                    <Switch
-                      checked={searchOptions.matchCase}
-                      onChange={() =>
-                        this.localUpdateSearchOptions(
-                          "matchCase",
-                          !searchOptions.matchCase
-                        )
-                      }
-                      color="primary"
-                    />
-                  }
-                />
-              </Tooltip>
+              {showWildcardAtStart && (
+                <Tooltip
+                  disableInteractive
+                  title="Om aktivt kommer en sökning på 'väg' även ge träffar på exempelvis 'storväg'."
+                >
+                  <FormControlLabel
+                    label="Wildcard före"
+                    control={
+                      <Switch
+                        checked={searchOptions.wildcardAtStart}
+                        onChange={() =>
+                          this.localUpdateSearchOptions(
+                            "wildcardAtStart",
+                            !searchOptions.wildcardAtStart
+                          )
+                        }
+                        color="primary"
+                      />
+                    }
+                  />
+                </Tooltip>
+              )}
+              {showWildcardAtEnd && (
+                <Tooltip
+                  disableInteractive
+                  title="Om aktivt kommer en sökning på 'väg' även ge träffar på exempelvis 'vägen'."
+                >
+                  <FormControlLabel
+                    label="Wildcard efter"
+                    control={
+                      <Switch
+                        checked={searchOptions.wildcardAtEnd}
+                        onChange={() =>
+                          this.localUpdateSearchOptions(
+                            "wildcardAtEnd",
+                            !searchOptions.wildcardAtEnd
+                          )
+                        }
+                        color="primary"
+                      />
+                    }
+                  />
+                </Tooltip>
+              )}
+              {showMatchCase && (
+                <Tooltip
+                  disableInteractive
+                  title="Om aktivt kommer en sökning på 'a' inte ge träffar på 'A'. Inaktivera för att söka oberoende av gemener/versaler."
+                >
+                  <FormControlLabel
+                    label="Skiftlägeskänslighet"
+                    control={
+                      <Switch
+                        checked={searchOptions.matchCase}
+                        onChange={() =>
+                          this.localUpdateSearchOptions(
+                            "matchCase",
+                            !searchOptions.matchCase
+                          )
+                        }
+                        color="primary"
+                      />
+                    }
+                  />
+                </Tooltip>
+              )}
             </FormGroup>
           </FormControl>
         </Grid>
 
-        <Grid item xs>
-          <FormControl component="fieldset">
-            <FormLabel component="legend">Spatiala sökinställningar</FormLabel>
-            <FormGroup>
-              <Tooltip
-                disableInteractive
-                title="Om aktivt kommer hela objektet (exempelvis en fastigheten) behöva rymmas inom sökområdet för att komma med i resultatet. Om inaktivt räcker det att endast en liten del av objektet ryms inom, eller nuddar vid, sökområdet."
-              >
-                <FormControlLabel
-                  label="Kräv att hela objektet ryms inom sökområde"
-                  control={
-                    <Switch
-                      checked={searchOptions.activeSpatialFilter === "within"}
-                      onChange={() =>
-                        this.localUpdateSearchOptions(
-                          "activeSpatialFilter",
-                          searchOptions.activeSpatialFilter === "intersects"
-                            ? "within"
-                            : "intersects"
-                        )
-                      }
-                      color="primary"
-                    />
-                  }
-                />
-              </Tooltip>
-            </FormGroup>
-          </FormControl>
-        </Grid>
+        {showActiveSpatialFilter && (
+          <Grid item xs>
+            <FormControl component="fieldset">
+              <FormLabel component="legend">
+                Spatiala sökinställningar
+              </FormLabel>
+              <FormGroup>
+                <Tooltip
+                  disableInteractive
+                  title="Om aktivt kommer hela objektet (exempelvis en fastigheten) behöva rymmas inom sökområdet för att komma med i resultatet. Om inaktivt räcker det att endast en liten del av objektet ryms inom, eller nuddar vid, sökområdet."
+                >
+                  <FormControlLabel
+                    label="Kräv att hela objektet ryms inom sökområde"
+                    control={
+                      <Switch
+                        checked={searchOptions.activeSpatialFilter === "within"}
+                        onChange={() =>
+                          this.localUpdateSearchOptions(
+                            "activeSpatialFilter",
+                            searchOptions.activeSpatialFilter === "intersects"
+                              ? "within"
+                              : "intersects"
+                          )
+                        }
+                        color="primary"
+                      />
+                    }
+                  />
+                </Tooltip>
+              </FormGroup>
+            </FormControl>
+          </Grid>
+        )}
 
-        <Grid item xs>
-          <FormControl component="fieldset">
-            <FormLabel component="legend">Visning av resultat</FormLabel>
-            <FormGroup>
-              <Tooltip
-                disableInteractive
-                title="Om aktivt kommer en etikett att visas i kartan intill det markerade sökresultatet"
-              >
-                <FormControlLabel
-                  label="Visa textetikett i kartan"
-                  control={
-                    <Switch
-                      checked={searchOptions.enableLabelOnHighlight}
-                      onChange={() =>
-                        this.localUpdateSearchOptions(
-                          "enableLabelOnHighlight",
-                          !searchOptions.enableLabelOnHighlight
-                        )
-                      }
-                      color="primary"
-                    />
-                  }
-                />
-              </Tooltip>
-            </FormGroup>
-          </FormControl>
-        </Grid>
+        {showEnableLabelOnHighlight && (
+          <Grid item xs>
+            <FormControl component="fieldset">
+              <FormLabel component="legend">Visning av resultat</FormLabel>
+              <FormGroup>
+                <Tooltip
+                  disableInteractive
+                  title="Om aktivt kommer en etikett att visas i kartan intill det markerade sökresultatet"
+                >
+                  <FormControlLabel
+                    label="Visa textetikett i kartan"
+                    control={
+                      <Switch
+                        checked={searchOptions.enableLabelOnHighlight}
+                        onChange={() =>
+                          this.localUpdateSearchOptions(
+                            "enableLabelOnHighlight",
+                            !searchOptions.enableLabelOnHighlight
+                          )
+                        }
+                        color="primary"
+                      />
+                    }
+                  />
+                </Tooltip>
+              </FormGroup>
+            </FormControl>
+          </Grid>
+        )}
       </Grid>
     );
   }

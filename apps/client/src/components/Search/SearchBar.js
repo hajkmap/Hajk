@@ -373,6 +373,7 @@ class SearchBar extends React.PureComponent {
       searchOptions,
       searchSources,
       updateSearchOptions,
+      enabledSearchOptions,
       searchModel,
       handleOnClickOrKeyboardSearch,
       setSearchSources,
@@ -482,6 +483,7 @@ class SearchBar extends React.PureComponent {
                   searchTools={this.props.searchTools}
                   searchModel={searchModel}
                   updateSearchOptions={updateSearchOptions}
+                  enabledSearchOptions={enabledSearchOptions}
                 />
               )}
             </>

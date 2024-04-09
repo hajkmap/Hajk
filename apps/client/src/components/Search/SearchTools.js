@@ -49,6 +49,7 @@ class SearchTools extends React.PureComponent {
       updateSearchOptions,
       searchModel,
       setSearchSources,
+      enabledSearchOptions,
     } = this.props;
     if (settingsDialog) {
       return createPortal(
@@ -61,6 +62,7 @@ class SearchTools extends React.PureComponent {
                 updateSearchOptions={updateSearchOptions}
                 setSearchSources={setSearchSources}
                 searchModel={searchModel}
+                enabledSearchOptions={enabledSearchOptions}
               />
             ),
             headerText: "Sökinställningar",
