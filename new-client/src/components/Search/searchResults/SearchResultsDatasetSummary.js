@@ -1,6 +1,7 @@
 import React from "react";
-import { Typography, Chip, Tooltip, Grid } from "@mui/material";
+import { Typography, Chip, Grid } from "@mui/material";
 import { styled } from "@mui/material/styles";
+import HajkToolTip from "../../../components/HajkToolTip";
 
 const SummaryContainer = styled(Grid)(({ theme }) => ({
   minHeight: 42,
@@ -72,7 +73,7 @@ class SearchResultsDatasetSummary extends React.PureComponent {
             </StyledTypography>
           </Grid>
           <Grid container item justifyContent="flex-end" xs={2}>
-            <Tooltip disableInteractive title={toolTipTitle}>
+            <HajkToolTip title={toolTipTitle}>
               {displayWarning ? (
                 <WarningChip
                   size="small"
@@ -90,7 +91,7 @@ class SearchResultsDatasetSummary extends React.PureComponent {
                   }`}
                 />
               )}
-            </Tooltip>
+            </HajkToolTip>
           </Grid>
         </SummaryContainer>
       </>

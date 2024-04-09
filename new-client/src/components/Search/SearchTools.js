@@ -2,18 +2,12 @@ import React from "react";
 import { createPortal } from "react-dom";
 import IconButton from "@mui/material/IconButton";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
-import {
-  ListItemIcon,
-  Menu,
-  MenuItem,
-  Paper,
-  Tooltip,
-  Typography,
-} from "@mui/material";
+import { ListItemIcon, Menu, MenuItem, Paper, Typography } from "@mui/material";
 import { visuallyHidden } from "@mui/utils";
 
 import Dialog from "../Dialog/Dialog";
 import SearchSettings from "./SearchSettings";
+import HajkToolTip from "../../components/HajkToolTip";
 
 class SearchTools extends React.PureComponent {
   state = {
@@ -87,7 +81,10 @@ class SearchTools extends React.PureComponent {
     return (
       <>
         {this.renderSettingsDialog()}
-        <Tooltip disableInteractive title="Fler sökverktyg och inställningar">
+        <HajkToolTip
+          disableInteractive
+          title="Fler sökverktyg och inställningar"
+        >
           <IconButton
             aria-haspopup="true"
             aria-controls="lock-menu"
@@ -104,7 +101,7 @@ class SearchTools extends React.PureComponent {
             </span>
             <MoreVertIcon />
           </IconButton>
-        </Tooltip>
+        </HajkToolTip>
         <Paper>
           <Menu
             id="lock-menu"
@@ -121,7 +118,7 @@ class SearchTools extends React.PureComponent {
             }
           >
             {enabledTools.map((option, index) => (
-              <Tooltip
+              <HajkToolTip
                 disableInteractive
                 key={index}
                 title={option.toolTipTitle ?? ""}
@@ -139,7 +136,7 @@ class SearchTools extends React.PureComponent {
                     {option.name}
                   </Typography>
                 </MenuItem>
-              </Tooltip>
+              </HajkToolTip>
             ))}
           </Menu>
         </Paper>

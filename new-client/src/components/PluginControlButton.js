@@ -1,6 +1,7 @@
 import React from "react";
-import { IconButton, Paper, Tooltip } from "@mui/material";
+import { IconButton, Paper } from "@mui/material";
 import { styled } from "@mui/material/styles";
+import HajkToolTip from "../components/HajkToolTip";
 
 const StyledPaper = styled(Paper)(({ theme }) => ({
   marginBottom: theme.spacing(1),
@@ -17,12 +18,12 @@ export default function PluginControlButton({
   abstract,
 }) {
   return (
-    <Tooltip disableInteractive title={`${title}: ${abstract}`}>
+    <HajkToolTip title={`${title}: ${abstract}`}>
       <StyledPaper>
         <StyledButton aria-label={title} onClick={onClick}>
           {icon}
         </StyledButton>
       </StyledPaper>
-    </Tooltip>
+    </HajkToolTip>
   );
 }

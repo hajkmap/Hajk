@@ -5,7 +5,6 @@ import {
   Paper,
   Menu,
   MenuItem,
-  Tooltip,
   Typography,
   Switch,
   ListItemIcon,
@@ -19,6 +18,7 @@ import {
   ArrowDropUp,
   ContentCopy,
 } from "@mui/icons-material/";
+import HajkToolTip from "../../../components/HajkToolTip";
 
 import Information from "../components/Information";
 import FeatureTitleEditor from "../components/FeatureTitleEditor";
@@ -29,7 +29,7 @@ const ModifyNodeToggler = ({ modifyEnabled, setModifyEnabled }) => {
     <Paper style={{ padding: 8, marginTop: 8 }}>
       <Grid container justifyContent="space-between" alignItems="center">
         <Typography variant="body2">Tillåt redigering av noder</Typography>
-        <Tooltip
+        <HajkToolTip
           disableInteractive
           title={
             modifyEnabled
@@ -43,7 +43,7 @@ const ModifyNodeToggler = ({ modifyEnabled, setModifyEnabled }) => {
             size="small"
             color="primary"
           />
-        </Tooltip>
+        </HajkToolTip>
       </Grid>
     </Paper>
   );
@@ -108,7 +108,7 @@ const EditView = (props) => {
       {props.editFeature && (
         <Grid container style={{ marginTop: 8 }} spacing={2}>
           <Grid item xs={7}>
-            <Tooltip
+            <HajkToolTip
               disableInteractive
               title="Klicka för att duplicera det markerade objektet."
             >
@@ -124,7 +124,7 @@ const EditView = (props) => {
               >
                 Duplicera
               </Button>
-            </Tooltip>
+            </HajkToolTip>
           </Grid>
           <Grid item xs={5}>
             <Button

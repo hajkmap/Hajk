@@ -3,11 +3,12 @@ import { createPortal } from "react-dom";
 import { styled } from "@mui/material/styles";
 import propTypes from "prop-types";
 
-import { IconButton, Paper, Tooltip } from "@mui/material";
+import { IconButton, Paper } from "@mui/material";
 import InfoIcon from "@mui/icons-material/Info";
 
 import Dialog from "../components/Dialog/Dialog";
 import { functionalOk as functionalCookieOk } from "../models/Cookie";
+import HajkToolTip from "../components/HajkToolTip";
 
 const StyledPaper = styled(Paper)(({ theme }) => ({
   marginBottom: theme.spacing(1),
@@ -92,7 +93,7 @@ class Information extends React.PureComponent {
     return (
       <>
         {this.renderDialog()}
-        <Tooltip disableInteractive title={this.title}>
+        <HajkToolTip title={this.title}>
           <StyledPaper>
             <StyledIconButton
               aria-label={this.title}
@@ -101,7 +102,7 @@ class Information extends React.PureComponent {
               <InfoIcon />
             </StyledIconButton>
           </StyledPaper>
-        </Tooltip>
+        </HajkToolTip>
       </>
     );
   }

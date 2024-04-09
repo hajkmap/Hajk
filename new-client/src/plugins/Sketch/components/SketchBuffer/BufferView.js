@@ -8,9 +8,9 @@ import TextField from "@mui/material/TextField";
 import Button from "@mui/material/Button";
 import Box from "@mui/material/Box";
 import ToggleButton from "@mui/material/ToggleButton";
-import Tooltip from "@mui/material/Tooltip";
 import { Step, StepContent, StepLabel, Stepper } from "@mui/material";
 import { withSnackbar, useSnackbar } from "notistack";
+import HajkToolTip from "../../../../components/HajkToolTip";
 
 const StyledToggleButton = styled(ToggleButton)(({ theme }) => ({
   width: "100%",
@@ -159,7 +159,7 @@ const BufferView = (props) => {
             <Grid container spacing={2} direction="row">
               {renderClearButton()}
               <Grid item xs={12}>
-                <Tooltip
+                <HajkToolTip
                   title={
                     !toggleBufferBtn.toggle
                       ? "Klicka här för att rita objekt"
@@ -183,7 +183,7 @@ const BufferView = (props) => {
                       </>
                     )}
                   </StyledToggleButton>
-                </Tooltip>
+                </HajkToolTip>
               </Grid>
               {renderPrevButton()}
               <Grid item xs={6}>

@@ -1,8 +1,9 @@
 import React, { useEffect, useRef, useState } from "react";
 import { easeOut } from "ol/easing";
-import { IconButton, Paper, Tooltip } from "@mui/material";
+import { IconButton, Paper } from "@mui/material";
 import NavigationIcon from "@mui/icons-material/Navigation";
 import { styled } from "@mui/material/styles";
+import HajkToolTip from "../components/HajkToolTip";
 
 const StyledPaper = styled(Paper)(({ theme }) => ({
   marginBottom: theme.spacing(1),
@@ -63,7 +64,7 @@ const RotateControl = React.memo((props) => {
 
   return (
     (props.map && rotation !== 0 && (
-      <Tooltip disableInteractive title="Återställ rotation">
+      <HajkToolTip title="Återställ rotation">
         <StyledPaper>
           <StyledIconButton
             aria-label="Återställ rotation"
@@ -72,7 +73,7 @@ const RotateControl = React.memo((props) => {
             <NavigationIcon style={{ transform: `rotate(${rotation}rad)` }} />
           </StyledIconButton>
         </StyledPaper>
-      </Tooltip>
+      </HajkToolTip>
     )) ||
     null
   );

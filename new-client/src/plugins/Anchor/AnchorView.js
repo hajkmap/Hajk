@@ -3,6 +3,7 @@ import PropTypes from "prop-types";
 import { styled } from "@mui/material/styles";
 import { withSnackbar } from "notistack";
 import QRCode from "qrcode";
+import HajkToolTip from "../../components/HajkToolTip";
 
 import {
   Box,
@@ -12,7 +13,6 @@ import {
   Radio,
   RadioGroup,
   TextField,
-  Tooltip,
   Typography,
   Paper,
   Switch,
@@ -152,7 +152,7 @@ class AnchorView extends React.PureComponent {
           <Box sx={{ ml: { xs: 0, sm: 7 }, mr: { xs: 0, sm: 7 } }}>
             <Grid container spacing={2} columns={12}>
               <Grid item xs={6}>
-                <Tooltip title="Kopiera länk till urklipp">
+                <HajkToolTip title="Kopiera länk till urklipp">
                   <Button
                     fullWidth
                     variant="contained"
@@ -163,10 +163,10 @@ class AnchorView extends React.PureComponent {
                   >
                     Kopiera länk
                   </Button>
-                </Tooltip>
+                </HajkToolTip>
               </Grid>
               <Grid item xs={6}>
-                <Tooltip title="Öppna länk i nytt fönster">
+                <HajkToolTip title="Öppna länk i nytt fönster">
                   <Button
                     fullWidth
                     variant="contained"
@@ -177,7 +177,7 @@ class AnchorView extends React.PureComponent {
                   >
                     Öppna länk
                   </Button>
-                </Tooltip>
+                </HajkToolTip>
               </Grid>
             </Grid>
           </Box>
@@ -203,13 +203,13 @@ class AnchorView extends React.PureComponent {
                       Slå på QR-kod
                     </Grid>
                     <Grid item xs={6} textAlign="end">
-                      <Tooltip title="Slå på QR-kod">
+                      <HajkToolTip title="Slå på QR-kod">
                         <Switch
                           variant="contained"
                           color="primary"
                           onClick={this.toggleShowQr}
                         ></Switch>
-                      </Tooltip>
+                      </HajkToolTip>
                     </Grid>
                     {this.state.showQr && (
                       <Grid item xs={12}>

@@ -1,9 +1,10 @@
 import React from "react";
-import { IconButton, Tooltip, Menu, MenuItem, Grid } from "@mui/material";
+import { IconButton, Menu, MenuItem, Grid } from "@mui/material";
 import GetAppIcon from "@mui/icons-material/GetApp";
 import DescriptionIcon from "@mui/icons-material/Description";
 import PublicIcon from "@mui/icons-material/Public";
 import { styled } from "@mui/material/styles";
+import HajkToolTip from "../../../components/HajkToolTip";
 
 const MenuTogglerButton = styled(IconButton)(() => ({
   minWidth: 30,
@@ -56,7 +57,7 @@ class SearchResultsDownloadMenu extends React.PureComponent {
 
   renderMenuTogglerButton = () => {
     return (
-      <Tooltip disableInteractive title="Ladda ner objekten">
+      <HajkToolTip title="Ladda ner objekten">
         <MenuTogglerButton
           onClick={(e) =>
             this.setState({
@@ -66,7 +67,7 @@ class SearchResultsDownloadMenu extends React.PureComponent {
         >
           <GetAppIcon />
         </MenuTogglerButton>
-      </Tooltip>
+      </HajkToolTip>
     );
   };
 
@@ -100,7 +101,7 @@ class SearchResultsDownloadMenu extends React.PureComponent {
   render() {
     return (
       <>
-        <Tooltip disableInteractive title="Ladda ner objekten">
+        <HajkToolTip title="Ladda ner objekten">
           <MenuTogglerButton
             onClick={(e) =>
               this.setState({
@@ -110,7 +111,7 @@ class SearchResultsDownloadMenu extends React.PureComponent {
           >
             <GetAppIcon />
           </MenuTogglerButton>
-        </Tooltip>
+        </HajkToolTip>
         {this.renderDownloadMenu()}
       </>
     );

@@ -1,6 +1,6 @@
 import React from "react";
 import { styled } from "@mui/material";
-import { Button, Grid, Tooltip, Typography } from "@mui/material";
+import { Button, Grid, Typography } from "@mui/material";
 import { IconButton, Zoom, Paper } from "@mui/material";
 
 import FolderOpenIcon from "@mui/icons-material/FolderOpen";
@@ -13,6 +13,7 @@ import TextIncreaseIcon from "@mui/icons-material/TextIncrease";
 
 import Information from "../components/Information";
 import UploadDialog from "../components/UploadDialog";
+import HajkToolTip from "../../../components/HajkToolTip";
 
 const StyledPaper = styled(Paper)(({ theme }) => ({
   width: "100%",
@@ -26,7 +27,7 @@ const ButtonPanel = ({ kmlModel, setDialogOpen }) => {
   return (
     <Grid container spacing={1}>
       <Grid item xs={12}>
-        <Tooltip
+        <HajkToolTip
           disableInteractive
           title="Klicka för att öppna en dialog där du kan välja en .kml-fil från din dator."
         >
@@ -38,10 +39,10 @@ const ButtonPanel = ({ kmlModel, setDialogOpen }) => {
           >
             Importera ritobjekt
           </Button>
-        </Tooltip>
+        </HajkToolTip>
       </Grid>
       <Grid item xs={12}>
-        <Tooltip
+        <HajkToolTip
           disableInteractive
           title="Klicka för att exportera alla ritobjekt till en .kml-fil."
         >
@@ -53,7 +54,7 @@ const ButtonPanel = ({ kmlModel, setDialogOpen }) => {
           >
             Exportera ritobjekt
           </Button>
-        </Tooltip>
+        </HajkToolTip>
       </Grid>
     </Grid>
   );
@@ -69,17 +70,17 @@ const UploadedFile = (props) => {
           </Grid>
           <Grid container item xs={8} justifyContent="flex-end" spacing={1}>
             <Grid item>
-              <Tooltip
+              <HajkToolTip
                 disableInteractive
                 title="Klicka för att ta bort de importerade objekten."
               >
                 <IconButton size="small" onClick={props.onRemoveClick}>
                   <DeleteIcon />
                 </IconButton>
-              </Tooltip>
+              </HajkToolTip>
             </Grid>
             <Grid item>
-              <Tooltip
+              <HajkToolTip
                 disableInteractive
                 title={`Klicka för att ${
                   props.hidden ? "visa" : "dölja"
@@ -91,10 +92,10 @@ const UploadedFile = (props) => {
                 >
                   {props.hidden ? <VisibilityIcon /> : <VisibilityOffIcon />}
                 </IconButton>
-              </Tooltip>
+              </HajkToolTip>
             </Grid>
             <Grid item>
-              <Tooltip
+              <HajkToolTip
                 disableInteractive
                 title={`Klicka här för att ${
                   props.textShown ? "dölja" : "visa"
@@ -107,7 +108,7 @@ const UploadedFile = (props) => {
                     <TextIncreaseIcon />
                   )}
                 </IconButton>
-              </Tooltip>
+              </HajkToolTip>
             </Grid>
           </Grid>
         </Grid>

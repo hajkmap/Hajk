@@ -8,7 +8,6 @@ import {
   Stepper,
   IconButton,
   InputAdornment,
-  Tooltip,
 } from "@mui/material";
 import HelpIcon from "@mui/icons-material/Help";
 
@@ -21,6 +20,7 @@ import OrderPanel from "./components/OrderPanel";
 import ProductParameters from "./components/ProductParameters";
 import useProductParameters from "./hooks/useProductParameters";
 import useInterval from "./hooks/useInterval";
+import HajkToolTip from "../../components/HajkToolTip";
 
 // We're gonna be checking the job status against arrays of FME-status
 // messages (all of witch means that the job has completed in some way).
@@ -680,7 +680,7 @@ const FmeServerView = (props) => {
                   infoUrl.length > 0
                     ? {
                         startAdornment: (
-                          <Tooltip title="Öppna länk till produktinformation.">
+                          <HajkToolTip title="Öppna länk till produktinformation.">
                             <InputAdornment position="start">
                               <IconButton
                                 aria-label="Open information page"
@@ -691,7 +691,7 @@ const FmeServerView = (props) => {
                                 <HelpIcon />
                               </IconButton>
                             </InputAdornment>
-                          </Tooltip>
+                          </HajkToolTip>
                         ),
                       }
                     : null

@@ -1,6 +1,7 @@
 import React from "react";
-import { TextField, MenuItem, Tooltip } from "@mui/material";
+import { TextField, MenuItem } from "@mui/material";
 import { DRAW_TYPES } from "../constants";
+import HajkToolTip from "../../../components/HajkToolTip";
 
 const DrawTypeSelector = (props) => {
   return (
@@ -16,9 +17,9 @@ const DrawTypeSelector = (props) => {
       {DRAW_TYPES.map((option) => (
         <MenuItem key={option.type} value={option.type}>
           {
-            <Tooltip disableInteractive title={option.tooltip}>
+            <HajkToolTip title={option.tooltip}>
               <span style={{ width: "100%" }}>{option.label}</span>
-            </Tooltip>
+            </HajkToolTip>
           }
         </MenuItem>
       ))}

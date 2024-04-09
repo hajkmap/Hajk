@@ -1,10 +1,11 @@
 import React from "react";
 import { styled } from "@mui/material/styles";
 
-import { Grid, Typography, Tooltip } from "@mui/material";
+import { Grid, Typography } from "@mui/material";
 import { Paper, Slider } from "@mui/material";
 
 import { Accordion, AccordionDetails, AccordionSummary } from "@mui/material";
+import HajkToolTip from "../../../../components/HajkToolTip";
 
 const StyledAccordionSummary = styled(AccordionSummary)(() => ({
   minHeight: 35,
@@ -69,7 +70,7 @@ const AccordionSummaryContents = (props) => {
 const FeaturePointSizeAccordion = (props) => {
   return (
     <Accordion size="small" style={{ marginBottom: 8 }}>
-      <Tooltip
+      <HajkToolTip
         disableInteractive
         title={`Klicka här för att ändra ${props.title.toLowerCase()}.`}
       >
@@ -80,7 +81,7 @@ const FeaturePointSizeAccordion = (props) => {
             drawModel={props.drawModel}
           />
         </StyledAccordionSummary>
-      </Tooltip>
+      </HajkToolTip>
       <AccordionDetails style={{ maxWidth: "100%" }}>
         <Grid container>
           {props.showPointSizeSlider && (

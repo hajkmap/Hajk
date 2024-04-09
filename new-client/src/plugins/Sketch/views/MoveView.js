@@ -6,10 +6,10 @@ import {
   Paper,
   TextField,
   OutlinedInput,
-  Tooltip,
   Typography,
   Switch,
 } from "@mui/material";
+import HajkToolTip from "../../../components/HajkToolTip";
 
 import RotateRightIcon from "@mui/icons-material/RotateRight";
 import RotateLeftIcon from "@mui/icons-material/RotateLeft";
@@ -20,7 +20,7 @@ const TranslateToggler = ({ translateEnabled, setTranslateEnabled }) => {
     <Paper sx={{ p: 1, mt: 1 }}>
       <Grid container justifyContent="space-between" alignItems="center">
         <Typography variant="body2">Tillåt fri förflyttning</Typography>
-        <Tooltip
+        <HajkToolTip
           disableInteractive
           title={
             translateEnabled
@@ -34,7 +34,7 @@ const TranslateToggler = ({ translateEnabled, setTranslateEnabled }) => {
             size="small"
             color="primary"
           />
-        </Tooltip>
+        </HajkToolTip>
       </Grid>
     </Paper>
   );
@@ -92,7 +92,7 @@ const FeatureMoveSelector = (props) => {
           </Typography>
         </Grid>
         <Grid item xs={12} sx={{ mb: 2 }}>
-          <Tooltip
+          <HajkToolTip
             disableInteractive
             title="Ange hur många meter du vill flytta objekten."
           >
@@ -105,10 +105,10 @@ const FeatureMoveSelector = (props) => {
               value={props.movementLength}
               onChange={handleMovementLengthChange}
             />
-          </Tooltip>
+          </HajkToolTip>
         </Grid>
         <Grid item xs={12}>
-          <Tooltip
+          <HajkToolTip
             disableInteractive
             title="Ange i vilken riktning du vill flytta objekten. 0 grader är rakt norrut, 90 grader är rakt åt öster, osv."
           >
@@ -121,7 +121,7 @@ const FeatureMoveSelector = (props) => {
               value={props.movementAngle}
               onChange={handleMovementAngleChange}
             />
-          </Tooltip>
+          </HajkToolTip>
         </Grid>
         <Grid container spacing={1} sx={{ mt: 1 }}>
           <Grid item xs={6}>
@@ -201,7 +201,7 @@ const FeatureRotateSelector = (props) => {
         </Grid>
 
         <Grid item xs={6} sx={{ pr: 1 }}>
-          <Tooltip
+          <HajkToolTip
             disableInteractive
             title="Ange hur många grader du ska rotera objekten."
           >
@@ -214,7 +214,7 @@ const FeatureRotateSelector = (props) => {
               value={props.rotationDegrees}
               onChange={handleRotationChange}
             />
-          </Tooltip>
+          </HajkToolTip>
         </Grid>
         <Grid item xs={3} sx={{ pr: 1 / 4 }}>
           <Button

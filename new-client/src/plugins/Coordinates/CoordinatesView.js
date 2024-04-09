@@ -3,9 +3,10 @@ import Button from "@mui/material/Button";
 import { styled } from "@mui/material/styles";
 import Grid from "@mui/material/Grid";
 import CoordinatesTransformRow from "./CoordinatesTransformRow.js";
-import { Divider, Tooltip } from "@mui/material";
+import { Divider } from "@mui/material";
 
 import { withSnackbar } from "notistack";
+import HajkToolTip from "../../components/HajkToolTip";
 
 import {
   LOCATION_DENIED_SNACK_OPTIONS,
@@ -105,7 +106,7 @@ class CoordinatesView extends React.PureComponent {
         sx={{ mb: { xs: 6, sm: 0, md: 0 } }}
       >
         <Grid item xs={12} md={6}>
-          <Tooltip title="Rensa fält">
+          <HajkToolTip title="Rensa fält">
             <Button
               fullWidth={true}
               variant="contained"
@@ -116,10 +117,10 @@ class CoordinatesView extends React.PureComponent {
             >
               Rensa
             </Button>
-          </Tooltip>
+          </HajkToolTip>
         </Grid>
         <Grid item xs={12} md={6}>
-          <Tooltip title="Min position">
+          <HajkToolTip title="Min position">
             <Button
               fullWidth={true}
               variant="contained"
@@ -130,10 +131,10 @@ class CoordinatesView extends React.PureComponent {
             >
               Min position
             </Button>
-          </Tooltip>
+          </HajkToolTip>
         </Grid>
         <Grid item xs={12} sm={6} md={6}>
-          <Tooltip title="Panorera till markering">
+          <HajkToolTip title="Panorera till markering">
             <Button
               fullWidth={true}
               variant="contained"
@@ -144,10 +145,10 @@ class CoordinatesView extends React.PureComponent {
             >
               Panorera
             </Button>
-          </Tooltip>
+          </HajkToolTip>
         </Grid>
         <Grid item xs={12} sm={6} md={6}>
-          <Tooltip title="Zooma in till markering">
+          <HajkToolTip title="Zooma in till markering">
             <Button
               fullWidth={true}
               variant="contained"
@@ -158,7 +159,7 @@ class CoordinatesView extends React.PureComponent {
             >
               Zooma
             </Button>
-          </Tooltip>
+          </HajkToolTip>
         </Grid>
       </Grid>
     );

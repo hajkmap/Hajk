@@ -7,9 +7,9 @@ import ClearIcon from "@mui/icons-material/LayersClear";
 import TextField from "@mui/material/TextField";
 import Button from "@mui/material/Button";
 import ToggleButton from "@mui/material/ToggleButton";
-import Tooltip from "@mui/material/Tooltip";
 import { Step, StepContent, StepLabel, Stepper } from "@mui/material";
 import { withSnackbar } from "notistack";
+import HajkToolTip from "../../components/HajkToolTip";
 
 const StyledToggleButton = styled(ToggleButton)(({ theme }) => ({
   width: "100%",
@@ -140,7 +140,7 @@ class BufferView extends React.PureComponent {
               <Grid container spacing={2} direction="row">
                 {this.renderClearButton()}
                 <Grid item xs={12}>
-                  <Tooltip disableInteractive title="Markera flera objekt">
+                  <HajkToolTip title="Markera flera objekt">
                     <StyledToggleButton
                       onChange={this.setSelecting}
                       selected={this.state.isSelecting}
@@ -149,7 +149,7 @@ class BufferView extends React.PureComponent {
                       <AddIcon />
                       Välj objekt
                     </StyledToggleButton>
-                  </Tooltip>
+                  </HajkToolTip>
                 </Grid>
                 {this.renderPrevButton()}
                 <Grid item xs={6}>

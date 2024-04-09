@@ -10,10 +10,10 @@ import {
   IconButton,
   Switch,
   TextField,
-  Tooltip,
 } from "@mui/material";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import IconWarning from "@mui/icons-material/Warning";
+import HajkToolTip from "../../../../components/HajkToolTip";
 
 const ExpandMore = styled((props) => {
   const { expand, ...other } = props;
@@ -151,7 +151,7 @@ const FeatureItem = (props) => {
         avatar={
           <>
             {loadStatus === "loaderror" ? (
-              <Tooltip
+              <HajkToolTip
                 disableInteractive
                 title="Lagret kunde inte laddas in. Kartservern svarar inte."
               >
@@ -163,7 +163,7 @@ const FeatureItem = (props) => {
                 >
                   <IconWarning />
                 </IconButton>
-              </Tooltip>
+              </HajkToolTip>
             ) : (
               <Switch
                 edge="start"

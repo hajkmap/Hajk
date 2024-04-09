@@ -50,7 +50,6 @@ import {
   Hidden,
   IconButton,
   Link,
-  Tooltip,
   Typography,
 } from "@mui/material";
 
@@ -59,6 +58,7 @@ import LockOpenIcon from "@mui/icons-material/LockOpen";
 import MapIcon from "@mui/icons-material/Map";
 import MenuIcon from "@mui/icons-material/Menu";
 import ThemeToggler from "../controls/ThemeToggler";
+import HajkToolTip from "../components/HajkToolTip";
 
 // A global that holds our windows, for use see components/Window.js
 document.windows = [];
@@ -993,7 +993,7 @@ class App extends React.PureComponent {
           {!this.state.drawerStatic && (
             <Grid item>
               <Hidden mdDown>
-                <Tooltip
+                <HajkToolTip
                   disableInteractive
                   title={
                     (this.state.drawerPermanent ? "Lås upp" : "Lås fast") +
@@ -1019,7 +1019,7 @@ class App extends React.PureComponent {
                       <LockOpenIcon />
                     )}
                   </IconButton>
-                </Tooltip>
+                </HajkToolTip>
               </Hidden>
             </Grid>
           )}

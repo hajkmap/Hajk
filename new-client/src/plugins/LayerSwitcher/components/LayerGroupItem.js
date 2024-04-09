@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import PropTypes from "prop-types";
-import { Button, Tooltip, Typography, Grid, Box } from "@mui/material";
+import { Button, Typography, Grid, Box } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import { withSnackbar } from "notistack";
 import IconWarning from "@mui/icons-material/Warning";
@@ -15,6 +15,7 @@ import LayerSettings from "./LayerSettings.js";
 import DownloadLink from "./DownloadLink";
 import KeyboardArrowRightIcon from "@mui/icons-material/KeyboardArrowRight";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
+import HajkToolTip from "../../../components/HajkToolTip";
 
 const ExpandButtonWrapper = styled("div")(() => ({
   display: "flex",
@@ -296,14 +297,14 @@ class LayerGroupItem extends Component {
   renderStatus() {
     return (
       this.state.status === "loaderror" && (
-        <Tooltip
+        <HajkToolTip
           disableInteractive
           title="Lagret kunde inte laddas in. Kartservern svarar inte."
         >
           <SummaryButtonWrapper>
             <IconWarning />
           </SummaryButtonWrapper>
-        </Tooltip>
+        </HajkToolTip>
       )
     );
   }

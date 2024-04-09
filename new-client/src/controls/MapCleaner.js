@@ -1,8 +1,9 @@
 import React from "react";
-import { IconButton, Paper, Tooltip } from "@mui/material";
+import { IconButton, Paper } from "@mui/material";
 import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
 
 import { styled } from "@mui/material/styles";
+import HajkToolTip from "../components/HajkToolTip";
 
 const StyledPaper = styled(Paper)(({ theme }) => ({
   marginBottom: theme.spacing(1),
@@ -21,7 +22,7 @@ const StyledIconButton = styled(IconButton)(({ theme }) => ({
 const MapCleaner = React.memo((props) => {
   return (
     props.appModel.config.mapConfig.map.mapcleaner && (
-      <Tooltip disableInteractive title="Dölj alla aktiva lager">
+      <HajkToolTip title="Dölj alla aktiva lager">
         <StyledPaper>
           <StyledIconButton
             aria-label="Rensa kartan"
@@ -32,7 +33,7 @@ const MapCleaner = React.memo((props) => {
             <VisibilityOffIcon />
           </StyledIconButton>
         </StyledPaper>
-      </Tooltip>
+      </HajkToolTip>
     )
   );
 });
