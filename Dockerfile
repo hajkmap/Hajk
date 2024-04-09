@@ -10,7 +10,7 @@ RUN npm run compile
 # Note: Before building Client, we will want to grab the current GIT
 # commit hash. So we must copy the .git directory first.
 WORKDIR /tmp/build
-COPY /.git .
+COPY /.git/ .
 
 # --- BACKEND END --- #
 
