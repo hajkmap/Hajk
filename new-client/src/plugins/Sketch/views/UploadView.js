@@ -13,7 +13,7 @@ import TextIncreaseIcon from "@mui/icons-material/TextIncrease";
 
 import Information from "../components/Information";
 import UploadDialog from "../components/UploadDialog";
-import HajkToolTip from "../../../components/HajkToolTip";
+import HajkToolTip from "components/HajkToolTip";
 
 const StyledPaper = styled(Paper)(({ theme }) => ({
   width: "100%",

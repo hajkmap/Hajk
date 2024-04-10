@@ -30,7 +30,7 @@ import ClearIcon from "@mui/icons-material/Clear";
 import SearchResultsList from "./SearchResultsList";
 import SearchResultsDownloadMenu from "./SearchResultsDownloadMenu";
 import ArrowBack from "@mui/icons-material/ArrowBack";
-import HajkToolTip from "../../../components/HajkToolTip";
+import HajkToolTip from "components/HajkToolTip";
 
 const StyledPaper = styled(Paper)(({ theme }) => ({
   maxHeight: "80vh",

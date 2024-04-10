@@ -3,7 +3,7 @@ import PropTypes from "prop-types";
 import { styled } from "@mui/material/styles";
 import { withSnackbar } from "notistack";
 import QRCode from "qrcode";
-import HajkToolTip from "../../components/HajkToolTip";
+import HajkToolTip from "components/HajkToolTip";
 
 import {
   Box,

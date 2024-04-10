@@ -6,7 +6,7 @@ import Crop54Icon from "@mui/icons-material/Crop54";
 import RadioButtonUncheckedIcon from "@mui/icons-material/RadioButtonUnchecked";
 import TouchAppIcon from "@mui/icons-material/TouchApp";
 import RotateLeftIcon from "@mui/icons-material/RotateLeft";
-import HajkToolTip from "../../../components/HajkToolTip";
+import HajkToolTip from "components/HajkToolTip";
 
 const DrawToolbox = (props) => {
   const drawButtons = [

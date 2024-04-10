@@ -12,7 +12,7 @@ import {
   Input,
 } from "@mui/material";
 import { styled } from "@mui/material/styles";
-import HajkToolTip from "../../components/HajkToolTip";
+import HajkToolTip from "components/HajkToolTip";
 
 const ChipsWrapper = styled("div")(({ theme }) => ({
   display: "flex",

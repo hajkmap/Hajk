@@ -1,7 +1,7 @@
 import React from "react";
 import { Grid, Paper } from "@mui/material";
 import ToggleButton from "@mui/material/ToggleButton";
-import HajkToolTip from "../../../components/HajkToolTip";
+import HajkToolTip from "components/HajkToolTip";
 
 import { ACTIVITIES } from "../constants";
 

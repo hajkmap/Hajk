@@ -58,7 +58,7 @@ import LockOpenIcon from "@mui/icons-material/LockOpen";
 import MapIcon from "@mui/icons-material/Map";
 import MenuIcon from "@mui/icons-material/Menu";
 import ThemeToggler from "../controls/ThemeToggler";
-import HajkToolTip from "../components/HajkToolTip";
+import HajkToolTip from "components/HajkToolTip";
 
 // A global that holds our windows, for use see components/Window.js
 document.windows = [];

@@ -13,7 +13,7 @@ import {
   LOCATION_DENIED_SNACK_MESSAGE,
   LOCATION_DENIED_SNACK_OPTIONS,
 } from "./constants";
-import HajkToolTip from "../../components/HajkToolTip";
+import HajkToolTip from "components/HajkToolTip";
 
 const StyledPaper = styled(Paper)(({ theme }) => ({
   marginBottom: theme.spacing(1),

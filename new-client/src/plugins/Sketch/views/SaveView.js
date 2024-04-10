@@ -10,7 +10,7 @@ import { useSnackbar } from "notistack";
 import { MAX_SKETCHES } from "../constants";
 import Information from "../components/Information";
 import ConfirmationDialog from "../../../components/ConfirmationDialog";
-import HajkToolTip from "../../../components/HajkToolTip";
+import HajkToolTip from "components/HajkToolTip";
 
 const StyledPaper = styled(Paper)(({ theme }) => ({
   width: "100%",

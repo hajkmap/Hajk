@@ -2,7 +2,7 @@ import React from "react";
 import { IconButton, Paper } from "@mui/material";
 import Brightness4Icon from "@mui/icons-material/Brightness4";
 import { styled } from "@mui/material/styles";
-import HajkToolTip from "../components/HajkToolTip";
+import HajkToolTip from "components/HajkToolTip";
 
 const StyledPaper = styled(Paper)(({ theme }) => ({
   marginBottom: theme.spacing(1),

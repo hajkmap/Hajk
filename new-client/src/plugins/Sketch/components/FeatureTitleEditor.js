@@ -1,6 +1,6 @@
 import React from "react";
 import { Grid, TextField, Typography } from "@mui/material";
-import HajkToolTip from "../../../components/HajkToolTip";
+import HajkToolTip from "components/HajkToolTip";
 
 const FeatureTitleEditor = ({ feature, model, drawModel }) => {
   const [title, setTitle] = React.useState("");

@@ -3,7 +3,7 @@ import { Checkbox, Typography, Grid } from "@mui/material";
 import StarIcon from "@mui/icons-material/Star";
 import StarBorderIcon from "@mui/icons-material/StarBorder";
 import { styled } from "@mui/material/styles";
-import HajkToolTip from "../../../components/HajkToolTip";
+import HajkToolTip from "components/HajkToolTip";
 
 const IconWrapper = styled("div")(({ theme }) => ({
   display: "flex",

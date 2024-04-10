@@ -4,7 +4,7 @@ import propTypes from "prop-types";
 import { IconButton, Paper, Menu, MenuItem } from "@mui/material";
 import LaunchIcon from "@mui/icons-material/Launch";
 import HajkTransformer from "../utils/HajkTransformer";
-import HajkToolTip from "../components/HajkToolTip";
+import HajkToolTip from "components/HajkToolTip";
 
 const StyledPaper = styled(Paper)(({ theme }) => ({
   marginBottom: theme.spacing(1),

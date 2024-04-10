@@ -7,7 +7,7 @@ import { visuallyHidden } from "@mui/utils";
 
 import Dialog from "../Dialog/Dialog";
 import SearchSettings from "./SearchSettings";
-import HajkToolTip from "../../components/HajkToolTip";
+import HajkToolTip from "components/HajkToolTip";
 
 class SearchTools extends React.PureComponent {
   state = {

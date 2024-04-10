@@ -2,7 +2,7 @@ import React from "react";
 
 import { Button, Grid } from "@mui/material";
 import { PRINT_DISABLED_TOOLTIP, PRINT_ENABLED_TOOLTIP } from "../constants";
-import HajkToolTip from "../../../components/HajkToolTip";
+import HajkToolTip from "components/HajkToolTip";
 
 export default function PrintButton({ disabled, onClick }) {
   return (

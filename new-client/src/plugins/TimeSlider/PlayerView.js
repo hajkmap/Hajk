@@ -6,7 +6,7 @@ import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import PauseIcon from "@mui/icons-material/Pause";
 import RotateLeftOutlinedIcon from "@mui/icons-material/RotateLeftOutlined";
 import SettingsButton from "./components/SettingsButton";
-import HajkToolTip from "../../components/HajkToolTip";
+import HajkToolTip from "components/HajkToolTip";
 
 export default function PlayerView(props) {
   // Handles when the user wants to step one step forwards.

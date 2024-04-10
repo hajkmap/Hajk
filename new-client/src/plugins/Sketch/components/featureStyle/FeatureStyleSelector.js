@@ -11,7 +11,7 @@ import FeatureStyleAccordion from "./FeatureStyleAccordion";
 import FeaturePointSizeAccordion from "./FeatureSizeAccordion";
 import StrokeTypeSelector from "./StrokeTypeSelector";
 import FeatureBufferAccordion from "./FeatureBufferAccordion";
-import HajkToolTip from "../../../../components/HajkToolTip";
+import HajkToolTip from "components/HajkToolTip";
 
 export default function FeatureStyleSelector(props) {
   const { activeDrawType, drawStyle, setDrawStyle } = props;

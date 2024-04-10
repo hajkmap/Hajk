@@ -3,7 +3,7 @@ import { IconButton, Menu, MenuItem, Paper } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import SwitchCameraIcon from "@mui/icons-material/SwitchCamera";
 import { hfetch } from "../utils/FetchWrapper";
-import HajkToolTip from "../components/HajkToolTip";
+import HajkToolTip from "components/HajkToolTip";
 
 const StyledPaper = styled(Paper)(({ theme }) => ({
   marginBottom: theme.spacing(1),

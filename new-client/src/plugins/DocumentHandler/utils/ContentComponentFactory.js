@@ -20,7 +20,7 @@ import {
   ListItem,
   Grid,
 } from "@mui/material";
-import HajkToolTip from "../../../components/HajkToolTip";
+import HajkToolTip from "components/HajkToolTip";
 
 const StyledAccordion = styled(Accordion)(
   ({ backgroundcolor, dividercolor }) => ({

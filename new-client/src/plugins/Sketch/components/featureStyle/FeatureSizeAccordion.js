@@ -5,7 +5,7 @@ import { Grid, Typography } from "@mui/material";
 import { Paper, Slider } from "@mui/material";
 
 import { Accordion, AccordionDetails, AccordionSummary } from "@mui/material";
-import HajkToolTip from "../../../../components/HajkToolTip";
+import HajkToolTip from "components/HajkToolTip";
 
 const StyledAccordionSummary = styled(AccordionSummary)(() => ({
   minHeight: 35,

@@ -1,7 +1,7 @@
 import React from "react";
 import { Typography, Chip, Grid } from "@mui/material";
 import { styled } from "@mui/material/styles";
-import HajkToolTip from "../../../components/HajkToolTip";
+import HajkToolTip from "components/HajkToolTip";
 
 const SummaryContainer = styled(Grid)(({ theme }) => ({
   minHeight: 42,

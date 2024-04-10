@@ -4,7 +4,7 @@ import { Button, IconButton, Zoom } from "@mui/material";
 import { Grid, Typography, Paper } from "@mui/material";
 import SettingsBackupRestoreIcon from "@mui/icons-material/SettingsBackupRestore";
 import DeleteIcon from "@mui/icons-material/Delete";
-import HajkToolTip from "../../../components/HajkToolTip";
+import HajkToolTip from "components/HajkToolTip";
 
 import Information from "../components/Information";
 

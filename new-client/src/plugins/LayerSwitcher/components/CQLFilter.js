@@ -6,7 +6,7 @@ import {
   InputAdornment,
 } from "@mui/material";
 import RefreshIcon from "@mui/icons-material/Refresh";
-import HajkToolTip from "../../../components/HajkToolTip";
+import HajkToolTip from "components/HajkToolTip";
 
 const CQLFilter = ({ layer }) => {
   const source = layer.getSource();

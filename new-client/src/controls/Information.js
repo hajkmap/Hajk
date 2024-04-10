@@ -8,7 +8,7 @@ import InfoIcon from "@mui/icons-material/Info";
 
 import Dialog from "../components/Dialog/Dialog";
 import { functionalOk as functionalCookieOk } from "../models/Cookie";
-import HajkToolTip from "../components/HajkToolTip";
+import HajkToolTip from "components/HajkToolTip";
 
 const StyledPaper = styled(Paper)(({ theme }) => ({
   marginBottom: theme.spacing(1),

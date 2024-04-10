@@ -13,7 +13,7 @@ import {
   Input,
 } from "@mui/material";
 import FormatListNumberedIcon from "@mui/icons-material/FormatListNumbered";
-import HajkToolTip from "../../components/HajkToolTip";
+import HajkToolTip from "components/HajkToolTip";
 
 const Root = styled(Grid)(() => ({
   display: "flex",

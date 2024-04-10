@@ -2,7 +2,7 @@ import React from "react";
 import { Grid, MenuItem, Paper } from "@mui/material";
 import { TextField, Typography } from "@mui/material";
 import { STROKE_TYPES } from "../../constants";
-import HajkToolTip from "../../../../components/HajkToolTip";
+import HajkToolTip from "components/HajkToolTip";
 
 const StrokeTypeSelector = (props) => {
   // This filter is used to remove the "none" strokeType from the select when the activeDrawType is anything but "Circle" or "Polygon"

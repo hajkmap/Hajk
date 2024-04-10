@@ -6,7 +6,7 @@ import CoordinatesTransformRow from "./CoordinatesTransformRow.js";
 import { Divider } from "@mui/material";
 
 import { withSnackbar } from "notistack";
-import HajkToolTip from "../../components/HajkToolTip";
+import HajkToolTip from "components/HajkToolTip";
 
 import {
   LOCATION_DENIED_SNACK_OPTIONS,

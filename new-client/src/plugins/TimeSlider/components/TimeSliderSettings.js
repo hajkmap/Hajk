@@ -10,7 +10,7 @@ import {
 } from "@mui/material";
 
 import WarningIcon from "@mui/icons-material/Warning";
-import HajkToolTip from "../../../components/HajkToolTip";
+import HajkToolTip from "components/HajkToolTip";
 
 class TimeSliderSettings extends React.PureComponent {
   constructor(props) {

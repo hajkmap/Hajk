@@ -2,7 +2,7 @@ import React from "react";
 import { styled } from "@mui/material/styles";
 import { ScaleLine } from "ol/control";
 import { Paper } from "@mui/material";
-import HajkToolTip from "../components/HajkToolTip";
+import HajkToolTip from "components/HajkToolTip";
 
 const Root = styled("div")(({ theme }) => ({
   "& .ol-scale-line": {

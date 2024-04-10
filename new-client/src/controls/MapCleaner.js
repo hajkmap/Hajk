@@ -3,7 +3,7 @@ import { IconButton, Paper } from "@mui/material";
 import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
 
 import { styled } from "@mui/material/styles";
-import HajkToolTip from "../components/HajkToolTip";
+import HajkToolTip from "components/HajkToolTip";
 
 const StyledPaper = styled(Paper)(({ theme }) => ({
   marginBottom: theme.spacing(1),

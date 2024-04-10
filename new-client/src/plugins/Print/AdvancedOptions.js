@@ -16,7 +16,7 @@ import {
 } from "@mui/material";
 import PaletteIcon from "@mui/icons-material/Palette";
 import { TwitterPicker as ColorPicker } from "react-color";
-import HajkToolTip from "../../components/HajkToolTip";
+import HajkToolTip from "components/HajkToolTip";
 
 const Root = styled(Grid)(() => ({
   display: "flex",

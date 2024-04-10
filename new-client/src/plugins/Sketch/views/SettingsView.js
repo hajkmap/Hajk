@@ -12,7 +12,7 @@ import {
 
 import LocalStorageHelper from "../../../utils/LocalStorageHelper";
 import useCookieStatus from "../../../hooks/useCookieStatus";
-import HajkToolTip from "../../../components/HajkToolTip";
+import HajkToolTip from "components/HajkToolTip";
 
 import {
   STORAGE_KEY,

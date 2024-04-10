@@ -20,7 +20,7 @@ import OrderPanel from "./components/OrderPanel";
 import ProductParameters from "./components/ProductParameters";
 import useProductParameters from "./hooks/useProductParameters";
 import useInterval from "./hooks/useInterval";
-import HajkToolTip from "../../components/HajkToolTip";
+import HajkToolTip from "components/HajkToolTip";
 
 // We're gonna be checking the job status against arrays of FME-status
 // messages (all of witch means that the job has completed in some way).

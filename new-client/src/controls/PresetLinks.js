@@ -8,7 +8,7 @@ import { IconButton, Paper, Menu, MenuItem } from "@mui/material";
 import FolderSpecial from "@mui/icons-material/FolderSpecial";
 
 import Dialog from "../components/Dialog/Dialog";
-import HajkToolTip from "../components/HajkToolTip";
+import HajkToolTip from "components/HajkToolTip";
 
 const StyledPaper = styled(Paper)(({ theme }) => ({
   marginBottom: theme.spacing(1),

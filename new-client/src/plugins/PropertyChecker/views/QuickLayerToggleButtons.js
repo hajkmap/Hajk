@@ -7,7 +7,7 @@ import LocationCityIcon from "@mui/icons-material/LocationCity";
 import BorderInnerIcon from "@mui/icons-material/BorderInner";
 import TravelExploreIcon from "@mui/icons-material/TravelExplore";
 import { Box } from "@mui/system";
-import HajkToolTip from "../../../components/HajkToolTip";
+import HajkToolTip from "components/HajkToolTip";
 
 const StyledBox = styled(Box)(({ theme }) => ({
   display: "flex",

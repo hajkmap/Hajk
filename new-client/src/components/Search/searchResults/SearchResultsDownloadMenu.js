@@ -4,7 +4,7 @@ import GetAppIcon from "@mui/icons-material/GetApp";
 import DescriptionIcon from "@mui/icons-material/Description";
 import PublicIcon from "@mui/icons-material/Public";
 import { styled } from "@mui/material/styles";
-import HajkToolTip from "../../../components/HajkToolTip";
+import HajkToolTip from "components/HajkToolTip";
 
 const MenuTogglerButton = styled(IconButton)(() => ({
   minWidth: 30,

@@ -3,7 +3,7 @@ import { easeOut } from "ol/easing";
 import { IconButton, Paper } from "@mui/material";
 import NavigationIcon from "@mui/icons-material/Navigation";
 import { styled } from "@mui/material/styles";
-import HajkToolTip from "../components/HajkToolTip";
+import HajkToolTip from "components/HajkToolTip";
 
 const StyledPaper = styled(Paper)(({ theme }) => ({
   marginBottom: theme.spacing(1),

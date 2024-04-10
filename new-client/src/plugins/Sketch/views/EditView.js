@@ -18,7 +18,7 @@ import {
   ArrowDropUp,
   ContentCopy,
 } from "@mui/icons-material/";
-import HajkToolTip from "../../../components/HajkToolTip";
+import HajkToolTip from "components/HajkToolTip";
 
 import Information from "../components/Information";
 import FeatureTitleEditor from "../components/FeatureTitleEditor";

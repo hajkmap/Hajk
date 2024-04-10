@@ -1,7 +1,7 @@
 import React from "react";
 import { TextField, MenuItem } from "@mui/material";
 import { DRAW_TYPES } from "../constants";
-import HajkToolTip from "../../../components/HajkToolTip";
+import HajkToolTip from "components/HajkToolTip";
 
 const DrawTypeSelector = (props) => {
   return (

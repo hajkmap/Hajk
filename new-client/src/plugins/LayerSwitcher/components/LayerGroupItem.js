@@ -15,7 +15,7 @@ import LayerSettings from "./LayerSettings.js";
 import DownloadLink from "./DownloadLink";
 import KeyboardArrowRightIcon from "@mui/icons-material/KeyboardArrowRight";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
-import HajkToolTip from "../../../components/HajkToolTip";
+import HajkToolTip from "components/HajkToolTip";
 
 const ExpandButtonWrapper = styled("div")(() => ({
   display: "flex",

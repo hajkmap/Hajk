@@ -13,7 +13,7 @@ import {
 import ArrowLeftIcon from "@mui/icons-material/ArrowLeft";
 import ArrowRightIcon from "@mui/icons-material/ArrowRight";
 import { styled } from "@mui/material/styles";
-import HajkToolTip from "../../../components/HajkToolTip";
+import HajkToolTip from "components/HajkToolTip";
 
 const StyledTableCell = styled(TableCell)(() => ({
   paddingLeft: 0,

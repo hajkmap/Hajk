@@ -18,7 +18,7 @@ import TableViewIcon from "@mui/icons-material/TableView";
 import LayerGroupItem from "./LayerGroupItem.js";
 import LayerSettings from "./LayerSettings.js";
 import DownloadLink from "./DownloadLink.js";
-import HajkToolTip from "../../../components/HajkToolTip";
+import HajkToolTip from "components/HajkToolTip";
 
 const LayerItemContainer = styled("div")(({ theme }) => ({
   paddingLeft: "0",
