@@ -230,13 +230,19 @@ class FeatureInfoContainer extends React.PureComponent {
     const { features } = this.props;
     const featureInfoLoaded = this.isReadyToShowInfo();
     return (
-      <InfoContainer alignContent="flex-start" container spacing={1}>
+      <InfoContainer
+        className="hajk-featureinfo-body"
+        alignContent="flex-start"
+        container
+        spacing={1}
+      >
         {features.length > 1 && (
-          <Grid xs={12} item>
+          <Grid className="hajk-featureinfo-navigation" xs={12} item>
             {this.getToggler()}
           </Grid>
         )}
         <Grid
+          className="hajk-featureinfo-content"
           justifyContent="center"
           alignContent={featureInfoLoaded ? "flex-start" : "center"}
           sx={{ flex: "auto" }}

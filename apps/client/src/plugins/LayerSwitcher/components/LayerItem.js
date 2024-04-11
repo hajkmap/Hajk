@@ -402,14 +402,6 @@ class LayerItem extends React.PureComponent {
     );
   };
 
-  renderLegendImage() {
-    const src =
-      this.legend && this.legend[0] && this.legend[0].url
-        ? this.legend[0].url
-        : "";
-    return src ? <img width="30" alt="legend" src={src} /> : null;
-  }
-
   isInfoEmpty() {
     let chaptersWithLayer = this.findChapters(this.name, this.props.chapters);
     return !(
@@ -606,7 +598,11 @@ class LayerItem extends React.PureComponent {
     ) : (
       <CheckBoxOutlineBlankIcon />
     );
-    return <LayerTogglerButtonWrapper>{icon}</LayerTogglerButtonWrapper>;
+    return (
+      <LayerTogglerButtonWrapper className="hajk-layerswitcher-layer-toggle">
+        {icon}
+      </LayerTogglerButtonWrapper>
+    );
   };
 
   #showAttributeTable = async () => {
@@ -707,7 +703,7 @@ class LayerItem extends React.PureComponent {
               {this.caption}
             </Caption>
           </Grid>
-          <LayerButtonsContainer>
+          <LayerButtonsContainer className="hajk-layerswitcher-layer-buttons">
             {layer.isFakeMapLayer ? null : (
               <DownloadLink
                 layer={this.props.layer}

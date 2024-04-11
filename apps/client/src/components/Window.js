@@ -480,6 +480,7 @@ class Window extends React.PureComponent {
     this.bringToFront();
     return (
       <StyledRnd
+        className="hajk-window"
         onMouseDown={(e) => {
           this.bringToFront();
         }}

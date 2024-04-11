@@ -308,14 +308,6 @@ class LayerGroupItem extends Component {
     );
   }
 
-  renderLegendImage() {
-    const src =
-      this.state.legend[0] && this.state.legend[0].url
-        ? this.state.legend[0].url
-        : "";
-    return src ? <img width="60" alt="legend" src={src} /> : null;
-  }
-
   openInformative = (chapter) => (e) => {
     this.props.onOpenChapter(chapter);
   };
@@ -684,8 +676,9 @@ class LayerGroupItem extends Component {
             alignItems="center"
             wrap="nowrap"
             onClick={this.toggleLayerVisible(subLayer)}
+            className="hajk-layerswitcher-sublayer-grid"
           >
-            <CheckBoxWrapper>
+            <CheckBoxWrapper className="hajk-layerswitcher-layer-toggle">
               {!visible ? (
                 <CheckBoxOutlineBlankIcon />
               ) : (
@@ -704,7 +697,7 @@ class LayerGroupItem extends Component {
               {layer.layersInfo[subLayer].caption}
             </Caption>
           </Grid>
-          <SummaryButtonsContainer>
+          <SummaryButtonsContainer className="hajk-layerswitcher-summary-buttons">
             <SummaryButtonWrapper>
               <DownloadLink
                 index={index}
@@ -953,7 +946,7 @@ class LayerGroupItem extends Component {
     const { layer } = this.props;
     const { visible, visibleSubLayers } = this.state;
     return (
-      <CheckBoxWrapper>
+      <CheckBoxWrapper className="hajk-layerswitcher-layer-toggle">
         {!visible ? (
           <CheckBoxOutlineBlankIcon />
         ) : visibleSubLayers.length !== layer.subLayers.length ? (
