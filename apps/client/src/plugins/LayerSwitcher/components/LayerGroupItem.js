@@ -993,7 +993,7 @@ class LayerGroupItem extends Component {
                   {layer.get("caption")}
                 </Caption>
               </Grid>
-              <SummaryButtonsContainer>
+              <SummaryButtonsContainer className="hajk-layerswitcher-layer-buttons">
                 {this.renderStatus()}
                 {this.renderInfoToggler()}
                 <SummaryButtonWrapper>
