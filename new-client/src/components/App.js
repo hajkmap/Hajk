@@ -994,7 +994,6 @@ class App extends React.PureComponent {
             <Grid item>
               <Hidden mdDown>
                 <HajkToolTip
-                  disableInteractive
                   title={
                     (this.state.drawerPermanent ? "Lås upp" : "Lås fast") +
                     " verktygspanelen"

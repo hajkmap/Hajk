@@ -81,10 +81,7 @@ class SearchTools extends React.PureComponent {
     return (
       <>
         {this.renderSettingsDialog()}
-        <HajkToolTip
-          disableInteractive
-          title="Fler sökverktyg och inställningar"
-        >
+        <HajkToolTip title="Fler sökverktyg och inställningar">
           <IconButton
             aria-haspopup="true"
             aria-controls="lock-menu"
@@ -118,11 +115,7 @@ class SearchTools extends React.PureComponent {
             }
           >
             {enabledTools.map((option, index) => (
-              <HajkToolTip
-                disableInteractive
-                key={index}
-                title={option.toolTipTitle ?? ""}
-              >
+              <HajkToolTip key={index} title={option.toolTipTitle ?? ""}>
                 <MenuItem
                   onClick={(event) =>
                     this.handleMenuItemClick(event, index, option)

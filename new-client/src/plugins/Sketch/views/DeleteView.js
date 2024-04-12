@@ -52,10 +52,7 @@ const RemovedFeatureItem = ({ onRestoreClick, title }) => {
       <StyledPaper>
         <Grid container justifyContent="space-between" alignItems="center">
           <Typography variant="button">{title}</Typography>
-          <HajkToolTip
-            disableInteractive
-            title="Klicka för att återställa ritobjektet."
-          >
+          <HajkToolTip title="Klicka för att återställa ritobjektet.">
             <IconButton size="small" onClick={onRestoreClick}>
               <SettingsBackupRestoreIcon />
             </IconButton>

@@ -27,10 +27,7 @@ const ButtonPanel = ({ kmlModel, setDialogOpen }) => {
   return (
     <Grid container spacing={1}>
       <Grid item xs={12}>
-        <HajkToolTip
-          disableInteractive
-          title="Klicka för att öppna en dialog där du kan välja en .kml-fil från din dator."
-        >
+        <HajkToolTip title="Klicka för att öppna en dialog där du kan välja en .kml-fil från din dator.">
           <Button
             fullWidth
             variant="contained"
@@ -42,10 +39,7 @@ const ButtonPanel = ({ kmlModel, setDialogOpen }) => {
         </HajkToolTip>
       </Grid>
       <Grid item xs={12}>
-        <HajkToolTip
-          disableInteractive
-          title="Klicka för att exportera alla ritobjekt till en .kml-fil."
-        >
+        <HajkToolTip title="Klicka för att exportera alla ritobjekt till en .kml-fil.">
           <Button
             fullWidth
             variant="contained"
@@ -70,10 +64,7 @@ const UploadedFile = (props) => {
           </Grid>
           <Grid container item xs={8} justifyContent="flex-end" spacing={1}>
             <Grid item>
-              <HajkToolTip
-                disableInteractive
-                title="Klicka för att ta bort de importerade objekten."
-              >
+              <HajkToolTip title="Klicka för att ta bort de importerade objekten.">
                 <IconButton size="small" onClick={props.onRemoveClick}>
                   <DeleteIcon />
                 </IconButton>
@@ -81,7 +72,6 @@ const UploadedFile = (props) => {
             </Grid>
             <Grid item>
               <HajkToolTip
-                disableInteractive
                 title={`Klicka för att ${
                   props.hidden ? "visa" : "dölja"
                 } objekten ${props.hidden ? "i" : "från"} kartan.`}
@@ -96,7 +86,6 @@ const UploadedFile = (props) => {
             </Grid>
             <Grid item>
               <HajkToolTip
-                disableInteractive
                 title={`Klicka här för att ${
                   props.textShown ? "dölja" : "visa"
                 } objektens etiketter.`}

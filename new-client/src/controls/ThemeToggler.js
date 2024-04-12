@@ -21,10 +21,7 @@ const StyledIconButton = styled(IconButton)(({ theme }) => ({
 const ThemeToggler = React.memo((props) => {
   return (
     (props.showThemeToggler && (
-      <HajkToolTip
-        disableInteractive
-        title="Växla mellan mörkt och ljust färgtema"
-      >
+      <HajkToolTip title="Växla mellan mörkt och ljust färgtema">
         <StyledPaper>
           <StyledIconButton
             aria-label="Växla färgtema"

@@ -297,10 +297,7 @@ class LayerGroupItem extends Component {
   renderStatus() {
     return (
       this.state.status === "loaderror" && (
-        <HajkToolTip
-          disableInteractive
-          title="Lagret kunde inte laddas in. Kartservern svarar inte."
-        >
+        <HajkToolTip title="Lagret kunde inte laddas in. Kartservern svarar inte.">
           <SummaryButtonWrapper>
             <IconWarning />
           </SummaryButtonWrapper>

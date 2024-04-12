@@ -151,10 +151,7 @@ const FeatureItem = (props) => {
         avatar={
           <>
             {loadStatus === "loaderror" ? (
-              <HajkToolTip
-                disableInteractive
-                title="Lagret kunde inte laddas in. Kartservern svarar inte."
-              >
+              <HajkToolTip title="Lagret kunde inte laddas in. Kartservern svarar inte.">
                 <IconButton
                   disableFocusRipple
                   disableRipple

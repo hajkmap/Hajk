@@ -87,7 +87,6 @@ const SettingsView = (props) => {
             />
           </HajkToolTip>
           <HajkToolTip
-            disableInteractive
             title={`Slå ${showHelperSnacks ? "av" : "på"} om du vill ${
               showHelperSnacks ? "dölja" : "visa"
             } hjälptexter.`}
@@ -168,7 +167,6 @@ const SettingsView = (props) => {
             />
           </HajkToolTip>
           <HajkToolTip
-            disableInteractive
             title={
               !measurementSettings.showText
                 ? "Aktivera text på objekten om du vill visa objektens omkrets/radie."

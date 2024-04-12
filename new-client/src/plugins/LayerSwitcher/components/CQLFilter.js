@@ -36,10 +36,7 @@ const CQLFilter = ({ layer }) => {
         onChange={(e) => setCqlFilter(e.target.value)}
         endAdornment={
           <InputAdornment position="end">
-            <HajkToolTip
-              disableInteractive
-              title="Tryck för att ladda om lagret med angivet filter"
-            >
+            <HajkToolTip title="Tryck för att ladda om lagret med angivet filter">
               <IconButton edge="end" onClick={updateFilter} size="large">
                 <RefreshIcon />
               </IconButton>

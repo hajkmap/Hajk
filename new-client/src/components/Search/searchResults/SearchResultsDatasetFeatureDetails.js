@@ -172,7 +172,6 @@ class SearchResultsDatasetFeatureDetails extends React.PureComponent {
       <Grid container item alignItems="center" justifyContent="space-between">
         <Grid item>
           <HajkToolTip
-            disableInteractive
             title={
               !buttonLeftDisabled
                 ? "Visa föregående objekt i resultatlistan"
@@ -200,7 +199,6 @@ class SearchResultsDatasetFeatureDetails extends React.PureComponent {
         </Grid>
         <Grid item>
           <HajkToolTip
-            disableInteractive
             title={
               !buttonRightDisabled ? "Visa nästa objekt i resultatlistan" : ""
             }

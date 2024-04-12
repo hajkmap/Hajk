@@ -339,10 +339,7 @@ export default function FeatureStyleSelector(props) {
             Utseende
           </Typography>
 
-          <HajkToolTip
-            disableInteractive
-            title="Återställ utseendet till standardinställningar"
-          >
+          <HajkToolTip title="Återställ utseendet till standardinställningar">
             <IconButton
               sx={{ mr: 1 }}
               size="small"

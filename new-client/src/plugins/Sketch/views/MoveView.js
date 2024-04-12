@@ -21,7 +21,6 @@ const TranslateToggler = ({ translateEnabled, setTranslateEnabled }) => {
       <Grid container justifyContent="space-between" alignItems="center">
         <Typography variant="body2">Tillåt fri förflyttning</Typography>
         <HajkToolTip
-          disableInteractive
           title={
             translateEnabled
               ? "Avaktivera för att inte tillåta förflyttning av objekten i kartan."
@@ -92,10 +91,7 @@ const FeatureMoveSelector = (props) => {
           </Typography>
         </Grid>
         <Grid item xs={12} sx={{ mb: 2 }}>
-          <HajkToolTip
-            disableInteractive
-            title="Ange hur många meter du vill flytta objekten."
-          >
+          <HajkToolTip title="Ange hur många meter du vill flytta objekten.">
             <TextField
               label="Förflyttningsavstånd (meter)"
               variant="outlined"
@@ -108,10 +104,7 @@ const FeatureMoveSelector = (props) => {
           </HajkToolTip>
         </Grid>
         <Grid item xs={12}>
-          <HajkToolTip
-            disableInteractive
-            title="Ange i vilken riktning du vill flytta objekten. 0 grader är rakt norrut, 90 grader är rakt åt öster, osv."
-          >
+          <HajkToolTip title="Ange i vilken riktning du vill flytta objekten. 0 grader är rakt norrut, 90 grader är rakt åt öster, osv.">
             <TextField
               label="Förflyttningsriktning (grader)"
               variant="outlined"
@@ -201,10 +194,7 @@ const FeatureRotateSelector = (props) => {
         </Grid>
 
         <Grid item xs={6} sx={{ pr: 1 }}>
-          <HajkToolTip
-            disableInteractive
-            title="Ange hur många grader du ska rotera objekten."
-          >
+          <HajkToolTip title="Ange hur många grader du ska rotera objekten.">
             <OutlinedInput
               variant="outlined"
               fullWidth

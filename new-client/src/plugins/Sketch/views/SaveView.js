@@ -178,10 +178,7 @@ const SketchSaver = (props) => {
     <Paper style={{ padding: 8 }}>
       <Grid container alignItems="center" justifyContent="space-between">
         <Grid item xs={8}>
-          <HajkToolTip
-            disableInteractive
-            title="Ange att namn så att arbetsytan kan identifieras senare."
-          >
+          <HajkToolTip title="Ange att namn så att arbetsytan kan identifieras senare.">
             <TextField
               size="small"
               variant="outlined"
@@ -239,7 +236,6 @@ const SavedSketch = ({
             </HajkToolTip>
             <Grid item xs={12}>
               <HajkToolTip
-                disableInteractive
                 title={`Arbetsytan uppdaterades senast ${sketchInfo.date}`}
               >
                 <Typography variant="caption">
@@ -250,18 +246,12 @@ const SavedSketch = ({
           </Grid>
 
           <Grid container item xs={4} justifyContent="flex-end">
-            <HajkToolTip
-              disableInteractive
-              title="Klicka för att radera arbetsytan."
-            >
+            <HajkToolTip title="Klicka för att radera arbetsytan.">
               <IconButton size="small" onClick={handleRemoveClick}>
                 <DeleteIcon />
               </IconButton>
             </HajkToolTip>
-            <HajkToolTip
-              disableInteractive
-              title="Klicka för att läsa in objekten."
-            >
+            <HajkToolTip title="Klicka för att läsa in objekten.">
               <IconButton size="small" onClick={handleAddToMapClick}>
                 <AddIcon />
               </IconButton>

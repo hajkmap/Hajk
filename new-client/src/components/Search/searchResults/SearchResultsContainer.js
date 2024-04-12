@@ -639,7 +639,6 @@ class SearchResultsContainer extends React.PureComponent {
           </Grow>
           <Grid item>
             <HajkToolTip
-              disableInteractive
               title={`${this.state.showTools ? "Dölj" : "Visa"} verktyg`}
             >
               <IconButton
@@ -915,10 +914,7 @@ class SearchResultsContainer extends React.PureComponent {
           </Button>
           <Divider />
           <Breadcrumbs aria-label="breadcrumb" separator="/">
-            <HajkToolTip
-              disableInteractive
-              title="Tillbaka till alla sökresultat"
-            >
+            <HajkToolTip title="Tillbaka till alla sökresultat">
               <Link
                 tabIndex={0}
                 underline="hover"
@@ -1002,7 +998,6 @@ class SearchResultsContainer extends React.PureComponent {
           xs={this.state.showTools ? 5 : 11}
         >
           <HajkToolTip
-            disableInteractive
             title={
               activeFeatureCollection ? featureCollectionTitle : "Sökresultat"
             }

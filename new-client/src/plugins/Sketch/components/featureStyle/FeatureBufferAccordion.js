@@ -25,7 +25,6 @@ const FeatureBufferAccordion = (props) => {
   return (
     <Accordion size="small" style={{ marginBottom: 8 }}>
       <HajkToolTip
-        disableInteractive
         title={`Klicka här för att ändra ${props.title.toLowerCase()}.`}
       >
         <StyledAccordionSummary>

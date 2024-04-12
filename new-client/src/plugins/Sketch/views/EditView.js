@@ -30,7 +30,6 @@ const ModifyNodeToggler = ({ modifyEnabled, setModifyEnabled }) => {
       <Grid container justifyContent="space-between" alignItems="center">
         <Typography variant="body2">Tillåt redigering av noder</Typography>
         <HajkToolTip
-          disableInteractive
           title={
             modifyEnabled
               ? "Avaktivera redigering av noder för att enklare kunna selektera objekt i kartan för redigering av färg etc."
@@ -108,10 +107,7 @@ const EditView = (props) => {
       {props.editFeature && (
         <Grid container style={{ marginTop: 8 }} spacing={2}>
           <Grid item xs={7}>
-            <HajkToolTip
-              disableInteractive
-              title="Klicka för att duplicera det markerade objektet."
-            >
+            <HajkToolTip title="Klicka för att duplicera det markerade objektet.">
               <Button
                 variant="contained"
                 fullWidth

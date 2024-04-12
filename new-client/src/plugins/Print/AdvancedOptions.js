@@ -205,10 +205,7 @@ class AdvancedOptions extends React.PureComponent {
                         badgeContent=" "
                         variant="dot"
                       >
-                        <HajkToolTip
-                          disableInteractive
-                          title="Titelfärg påverkar inte kartans etiketter utan styr endast färgen för kringliggande texter, så som titel, copyrighttext, etc."
-                        >
+                        <HajkToolTip title="Titelfärg påverkar inte kartans etiketter utan styr endast färgen för kringliggande texter, så som titel, copyrighttext, etc.">
                           <IconButton
                             id="mapTextColor"
                             onClick={this.toggleColorPicker}

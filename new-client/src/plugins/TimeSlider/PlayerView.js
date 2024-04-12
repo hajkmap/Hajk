@@ -81,7 +81,6 @@ export default function PlayerView(props) {
         </Grid>
         <Grid item align="center" xs={2}>
           <HajkToolTip
-            disableInteractive
             title={
               props.playing
                 ? "Du kan inte hoppa bakåt när spelaren är aktiv."
@@ -103,7 +102,6 @@ export default function PlayerView(props) {
         </Grid>
         <Grid item align="center" xs={2}>
           <HajkToolTip
-            disableInteractive
             title={props.playing ? "Stoppa tidslinjen" : "Starta tidslinjen"}
           >
             <Button
@@ -118,7 +116,6 @@ export default function PlayerView(props) {
         </Grid>
         <Grid item align="center" xs={2}>
           <HajkToolTip
-            disableInteractive
             title={
               props.playing
                 ? "Du kan inte hoppa framåt när spelaren är aktiv."

@@ -440,10 +440,7 @@ class SearchBar extends React.PureComponent {
                       )}
                     </IconButton>
                   </HajkToolTip>
-                  <HajkToolTip
-                    disableInteractive
-                    title={toggleResultsLayerVisibilityMessage}
-                  >
+                  <HajkToolTip title={toggleResultsLayerVisibilityMessage}>
                     <IconButton
                       onClick={(e) => {
                         e.stopPropagation();

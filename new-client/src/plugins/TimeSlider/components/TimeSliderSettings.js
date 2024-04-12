@@ -51,7 +51,6 @@ class TimeSliderSettings extends React.PureComponent {
             >
               {error && (
                 <HajkToolTip
-                  disableInteractive
                   key={`tt_${index}`}
                   title={`${
                     error
@@ -70,10 +69,7 @@ class TimeSliderSettings extends React.PureComponent {
               <ListItemText primary={layer.get("caption")} />
 
               <ListItemSecondaryAction>
-                <HajkToolTip
-                  disableInteractive
-                  title={visible ? "Dölj lager" : "Visa lager"}
-                >
+                <HajkToolTip title={visible ? "Dölj lager" : "Visa lager"}>
                   <Switch
                     checked={visible}
                     onChange={() => {
