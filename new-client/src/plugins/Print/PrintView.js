@@ -3,14 +3,14 @@ import PropTypes from "prop-types";
 import { styled } from "@mui/material/styles";
 import { withSnackbar } from "notistack";
 import PrintDialog from "./PrintDialog";
-import { AppBar, Tab, Tabs, Tooltip } from "@mui/material";
+import { AppBar, Tab, Tabs } from "@mui/material";
 import PrintIcon from "@mui/icons-material/Print";
 import SettingsIcon from "@mui/icons-material/Settings";
 import { Button } from "@mui/material";
 
 import GeneralOptions from "./GeneralOptions";
 import AdvancedOptions from "./AdvancedOptions";
-import HajkToolTip from "../../components/HajkToolTip";
+import HajkToolTip from "components/HajkToolTip";
 
 const Root = styled("div")(() => ({
   margin: -10,
@@ -327,8 +327,6 @@ class PrintView extends React.PureComponent {
       useTextIconsInMargin: useTextIconsInMargin,
     });
 
-    console.log(activeTab);
-
     return (
       <>
         <Root>
@@ -342,12 +340,22 @@ class PrintView extends React.PureComponent {
               variant="fullWidth"
               textColor="inherit"
             >
-              <HajkToolTip title="Generella inställningar">
-                <Tab icon={<PrintIcon />} {...this.a11yProps(0)} />
-              </HajkToolTip>
-              <HajkToolTip title="Avancerade inställningar">
-                <Tab icon={<SettingsIcon />} {...this.a11yProps(1)} />
-              </HajkToolTip>
+              <Tab
+                sx={{ minHeight: "42px" }}
+                icon={<PrintIcon />}
+                {...this.a11yProps(0)}
+                label={
+                  <HajkToolTip title="Generella inställningar"></HajkToolTip>
+                }
+              />
+              <Tab
+                sx={{ minHeight: "42px" }}
+                icon={<SettingsIcon />}
+                {...this.a11yProps(1)}
+                label={
+                  <HajkToolTip title="Avancerade inställningar"></HajkToolTip>
+                }
+              />
             </Tabs>
           </StyledAppBar>
           <TabContent>
