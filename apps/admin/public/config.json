@@ -45,6 +45,7 @@
     "url_base": "http://localhost:3002/api/v2",
     "url_map": "http://localhost:3002/api/v2/mapconfig",
     "url_map_create": "http://localhost:3002/api/v2/mapconfig",
+    "url_map_duplicate": "http://localhost:3002/api/v2/mapconfig/duplicate",
     "url_map_delete": "http://localhost:3002/api/v2/mapconfig",
     "url_map_list": "http://localhost:3002/api/v2/mapconfig/list",
     "url_layers": "http://localhost:3002/api/v2/mapconfig/layers",

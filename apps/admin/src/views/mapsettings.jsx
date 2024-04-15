@@ -9,6 +9,7 @@ import ListProperties from "../views/listproperties.jsx";
 import Divider from "@material-ui/core/Divider";
 import DeleteIcon from "@material-ui/icons/DeleteForever";
 import AddIcon from "@material-ui/icons/Add";
+import ControlPointDuplicate from "@material-ui/icons/ControlPointDuplicate";
 import SaveIcon from "@material-ui/icons/SaveSharp";
 import CreateNewFolderIcon from "@material-ui/icons/CreateNewFolder";
 import OpenInNewIcon from "@material-ui/icons/OpenInNew";
@@ -1762,6 +1763,34 @@ class Menu extends Component {
     });
   }
 
+  duplicateMap() {
+    const oldName = this.props.model.attributes.mapFile;
+    const newName = this.refs.mapName.value;
+    if (!/[^0-9a-zA-Z_]/.test(newName) && newName.trim().length > 0) {
+      this.props.model.duplicateMap(oldName, newName, (d, s) => {
+        if (s === "success") {
+          this.setState({
+            content: "mapsettings",
+            alert: true,
+            alertMessage: `En ny karta, ${newName}, skapades genom att duplicera karta ${oldName}.`,
+          });
+          this.load("maps");
+        } else {
+          this.setState({
+            alert: true,
+            alertMessage: "Karta kunde INTE skapas.",
+          });
+          console.error(d);
+        }
+      });
+    } else {
+      this.setState({
+        alert: true,
+        alertMessage:
+          "Felaktigt namn på kartan \nInga eller ogiltiga tecken har angivits. \n\nGiltiga tecken: 0-9 a-z A-Z _",
+      });
+    }
+  }
   createMap() {
     var name = this.refs.mapName.value;
     if (!/[^0-9a-zA-Z_]/.test(name) && name.trim().length > 0) {
@@ -1859,6 +1888,14 @@ class Menu extends Component {
                 >
                   Skapa ny karta
                 </ColorButtonGreen>
+                <ColorButtonBlue
+                  variant="contained"
+                  className="btn"
+                  onClick={(e) => this.duplicateMap()}
+                  startIcon={<ControlPointDuplicate />}
+                >
+                  Duplicera karta
+                </ColorButtonBlue>
               </form>
             </div>
           </div>

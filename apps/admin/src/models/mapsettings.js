@@ -51,6 +51,20 @@ var menu = Model.extend({
     });
   },
 
+  duplicateMap: function (oldName, newName, callback) {
+    $.ajax({
+      url: `${this.get("config").url_map_duplicate}/${oldName}/${newName}`,
+      method: "PUT",
+      contentType: "application/json",
+      success: (data, s) => {
+        callback(data, s);
+      },
+      error: (message) => {
+        callback(message);
+      },
+    });
+  },
+
   deleteMap: function (callback) {
     $.ajax({
       url: this.get("config").url_map_delete + "/" + this.get("mapFile"),

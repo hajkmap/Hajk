@@ -45,6 +45,7 @@
     "url_base": "/api/v2",
     "url_map": "/api/v2/mapconfig",
     "url_map_create": "/api/v2/mapconfig",
+    "url_map_duplicate": "/api/v2/mapconfig/duplicate",
     "url_map_delete": "/api/v2/mapconfig",
     "url_map_list": "/api/v2/mapconfig/list",
     "url_layers": "/api/v2/mapconfig/layers",
