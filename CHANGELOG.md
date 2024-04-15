@@ -1,3 +1,5 @@
+<!-- markdownlint-disable MD024 - because we want to duplicate headings, such as Added or Fixed.-->
+
 # Changelog
 
 All notable changes to this project will be documented in this file.
