@@ -33,8 +33,8 @@
   "mapsettings": {
     "url_proxy": "https://YOUR_DOMAIN.COM/util/proxy/geturl/",
     "url_map": "https://YOUR_DOMAIN.COM/mapservice/config",
-    "url_map_create": "https://YOUR_DOMAIN.COM/mapservice/config/create",
-    "url_map_delete": "https://YOUR_DOMAIN.COM/mapservice/config/delete",
+    "url_map_create": "https://YOUR_DOMAIN.COM/mapservice/config",
+    "url_map_delete": "https://YOUR_DOMAIN.COM/mapservice/config",
     "url_map_list": "https://YOUR_DOMAIN.COM/mapservice/config/list",
     "url_layers": "https://YOUR_DOMAIN.COM/mapservice/config/layers",
     "url_layermenu_settings": "https://YOUR_DOMAIN.COM/mapservice/settings/layermenu",

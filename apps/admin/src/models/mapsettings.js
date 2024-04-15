@@ -40,7 +40,7 @@ var menu = Model.extend({
   createMap: function (name, callback) {
     $.ajax({
       url: this.get("config").url_map_create + "/" + name,
-      method: "GET",
+      method: "PUT",
       contentType: "application/json",
       success: (data, s) => {
         callback(data, s);
@@ -54,7 +54,7 @@ var menu = Model.extend({
   deleteMap: function (callback) {
     $.ajax({
       url: this.get("config").url_map_delete + "/" + this.get("mapFile"),
-      method: "GET",
+      method: "DELETE",
       contentType: "application/json",
       success: () => {
         callback();
