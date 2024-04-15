@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### BREAKING
 
-- This release marks the removal of the legacy V1 API (`/api/v1`) in both the NodeJS backend and the old .NET 4.5 backend (refer to the _Removed_ section below). Client UI is now V2-compatible only, as it requires the consolidated loading method. This means that you may need to update your configuration. Refer to `docs/migrate-to-v2-api.md` for details.
+- This release marks the removal of the legacy V1 API (`/api/v1`) in both the NodeJS backend and the old .NET 4.5 backend (refer to the _Removed_ section below). Client UI is now V2-compatible only, as it requires the consolidated loading method. This means that you need to review and update your configuration, both regarding Client and Admin. Please refer to `docs/migrate-to-v2-api.md` for details.
 - This release marks deprecation of some plugins that either became replaced by a new solution or transformed into a community plugin. Refer to `docs/deprecated-plugins.md` for details.
 - Although not exactly a _breaking_ change, but it fits well here: **the repo has been restructured**. All apps can now be found in the `apps/` directory. The `new-` prefix has been removed from apps' names. Some shell scripts now live in `scripts/` while the majority of Docker-related files, except for the official Dockerfile, have been moved into the `Docker/` directory. PR: [#1488](https://github.com/hajkmap/Hajk/pull/1488)
 
@@ -24,12 +24,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Core: Allow to specify map config by using `m` query parameter, even when no backend is active. [commit](https://github.com/hajkmap/Hajk/commit/eb5be276437994c86c2edd5abef3ea21cd6071b4)
 - Deployment: Added Dockerfile making it possible to deploy "Hajk-simple" on OpenShift using S2I. PR: [#1487](https://github.com/hajkmap/Hajk/pull/1487)
 - TimeSlider: It's now possible to print images of the content generated in the TimeSlider plugin. PR: [#1492](https://github.com/hajkmap/Hajk/pull/1492)
+- Core: CSS classes added for certain elements, allows for more granular custom styling. See also this [discussion](https://github.com/hajkmap/Hajk/discussions/1481). PR: [#1497](https://github.com/hajkmap/Hajk/pull/1497)
+- Coordinates: in addition to changing the icon's name (URL), it is now also possible to set icon's scale and anchor values. PR: [#1499](https://github.com/hajkmap/Hajk/pull/1499)
 
 ### Fixed
 
 - Add conditional rendering for Control button [commit](https://github.com/hajkmap/Hajk/commit/b34def3249b368de336a5c4eadd86318103e78fb)
 - Restore cross-platform build for NodeJS backend [#1484](https://github.com/hajkmap/Hajk/pull/1484)
 - Bug fix associated to #1468 [#1485](https://github.com/hajkmap/Hajk/pull/1485)
+- Admin UI is now compatible with the correct HTTP verbs (`DELETE` and `PUT`) [#1501](https://github.com/hajkmap/Hajk/pull/1501)
 
 ### Security
 
