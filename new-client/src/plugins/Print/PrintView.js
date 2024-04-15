@@ -340,22 +340,12 @@ class PrintView extends React.PureComponent {
               variant="fullWidth"
               textColor="inherit"
             >
-              <Tab
-                sx={{ minHeight: "42px" }}
-                icon={<PrintIcon />}
-                {...this.a11yProps(0)}
-                label={
-                  <HajkToolTip title="Generella inställningar"></HajkToolTip>
-                }
-              />
-              <Tab
-                sx={{ minHeight: "42px" }}
-                icon={<SettingsIcon />}
-                {...this.a11yProps(1)}
-                label={
-                  <HajkToolTip title="Avancerade inställningar"></HajkToolTip>
-                }
-              />
+              <HajkToolTip title="Generella inställningar">
+                <Tab icon={<PrintIcon />} {...this.a11yProps(0)} />
+              </HajkToolTip>
+              <HajkToolTip title="Avancerade inställningar">
+                <Tab icon={<SettingsIcon />} {...this.a11yProps(1)} />
+              </HajkToolTip>
             </Tabs>
           </StyledAppBar>
           <TabContent>
