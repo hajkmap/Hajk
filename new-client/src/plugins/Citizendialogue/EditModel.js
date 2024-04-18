@@ -470,6 +470,11 @@ class EditModel {
   };
 
   loadData(source, extent, done) {
+    if (source.id === "simulated") {
+      this.loadDataSuccess("simulated data");
+      return done("data-load-success");
+    }
+
     // Prepare the URL for retrieving WFS data. We will want to set
     // some search params later on, but we want to avoid any duplicates.
     // The values we will set below should override any existing, if
@@ -572,7 +577,7 @@ class EditModel {
         id: "simulated",
         caption: "Simulerad Medborgardialog",
         internalLayerName: "Simulerad Medborgardialog",
-        url: "http://localhost:3000/simulated",
+        url: "http://localhost:3002/simulated",
         uri: "http://www.opengis.net/wfs",
         projection: this.map.getView().getProjection().getCode(),
         type: "edit",
