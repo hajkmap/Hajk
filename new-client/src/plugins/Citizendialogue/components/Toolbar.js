@@ -78,7 +78,7 @@ class Toolbar extends Component {
     const isMobile = window.innerWidth <= 768;
     if (isMobile) {
       const targetPlugin = this.props.app.windows.find(
-        (window) => window.title === "Medborgardialog"
+        (window) => window.title === this.props.model.options.title
       );
       if (targetPlugin) {
         targetPlugin.closeWindow();
@@ -97,7 +97,7 @@ class Toolbar extends Component {
     const isMobile = window.innerWidth <= 768;
     if (isMobile) {
       const targetPlugin = this.props.app.windows.find(
-        (window) => window.title === "Medborgardialog"
+        (window) => window.title === this.props.model.options.title
       );
       if (targetPlugin) {
         targetPlugin.closeWindow();
@@ -116,7 +116,7 @@ class Toolbar extends Component {
     const isMobile = window.innerWidth <= 768;
     if (isMobile) {
       const targetPlugin = this.props.app.windows.find(
-        (window) => window.title === "Medborgardialog"
+        (window) => window.title === this.props.model.options.title
       );
       if (targetPlugin) {
         targetPlugin.closeWindow();
@@ -131,7 +131,7 @@ class Toolbar extends Component {
     const isMobile = window.innerWidth <= 768;
     if (isMobile) {
       const targetPlugin = this.props.app.windows.find(
-        (window) => window.title === "Medborgardialog"
+        (window) => window.title === this.props.model.options.title
       );
       if (targetPlugin) {
         targetPlugin.closeWindow();

@@ -735,7 +735,7 @@ class EditModel {
       const isMobile = window.innerWidth <= 768;
       if (isMobile) {
         const targetPlugin = this.app.windows.find(
-          (window) => window.title === "Medborgardialog"
+          (window) => window.title === this.options.title
         );
         if (targetPlugin) {
           setTimeout(() => {
@@ -793,7 +793,7 @@ class EditModel {
         const isMobile = window.innerWidth <= 768;
         if (isMobile) {
           const targetPlugin = this.app.windows.find(
-            (window) => window.title === "Medborgardialog"
+            (window) => window.title === this.options.title
           );
           if (targetPlugin) {
             targetPlugin.showWindow();
