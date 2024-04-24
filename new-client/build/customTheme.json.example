@@ -1,0 +1,40 @@
+// NOTICE THAT COMMENTS ARE NOT ALLOWED IN JSON FILES
+// HENCE THIS EXAMPLE.
+
+// The recommended way to create a custom theme is to use this tool
+// (https://react-theming.github.io/create-mui-theme/) and paste the 
+// resulting JSON into customTheme.json.
+// Open that tool and follow the instructions (on HOW TO USE THIS link)
+// to create your own JSON theme.
+
+{
+  // PLEASE NOTE THAT CHANGING PALETTE'S PRIMARY OR SECONDARY COLOR 
+  // IN THIS FILE WILL OVERRIDE THE COLOR SETTINGS FROM MAPSERVICE!
+
+  // Theme-specific values can be customized *GLOBALLY* here.
+  // Refer to this URL to see what values can be found for theme:
+  // https://material-ui.com/customization/default-theme/#default-theme
+  "palette": {
+    "primary": { "main": "#fa3033" },
+    "secondary": {
+      "dark": "#a51848",
+      "light": "#eceded",
+      "main": "#ffcc00",
+      "mainLight": "#ffeeaa",
+      "complement": "#79ac54"
+    }
+  },
+  "typography": {
+    "fontFamily": "'Times New Roman', sans-serif"
+  },
+  // Overrides of *SPECIFIC MUI COMPONENTS* can be done as you see below.
+  // In this case we override the default look of https://material-ui.com/api/list-item-icon/
+  // by making the icon red.
+  "overrides": {
+    "MuiListItemIcon": {
+      "root": {
+        "color": "red"
+      }
+    }
+  }
+}
