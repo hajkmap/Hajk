@@ -1,23 +1,23 @@
-FROM node:18-alpine AS buildImage
+FROM node:20-alpine AS buildImage
 
 # --- BACKEND --- #
 # Start with Backend
-WORKDIR /tmp/build/new-backend
-COPY /new-backend ./
+WORKDIR /tmp/build/backend
+COPY /apps/backend ./
 RUN npm ci
 RUN npm run compile
 
 # Note: Before building Client, we will want to grab the current GIT
 # commit hash. So we must copy the .git directory first.
 WORKDIR /tmp/build
-COPY /.git .
+COPY /.git/ .
 
 # --- BACKEND END --- #
 
 # --- CLIENT --- #
 # Next, Client UI
-WORKDIR /tmp/build/new-client
-COPY /new-client .
+WORKDIR /tmp/build/client
+COPY /apps/client .
 
 # Install git, it's needed for the prebuild.js script
 RUN apk update
@@ -38,8 +38,8 @@ RUN apk del git
 
 # --- ADMIN --- #
 # Next, go on with Admin UI
-WORKDIR /tmp/build/new-admin
-COPY /new-admin .
+WORKDIR /tmp/build/admin
+COPY /apps/admin .
 RUN npm ci
 RUN rm ./public/config.json
 RUN mv ./public/config.docker.json ./public/config.json 
@@ -48,26 +48,26 @@ RUN npm run build
 
 # --- FINAL ASSEMBLY --- #
 # Finally, let's assembly it all into another image
-FROM node:18-alpine
+FROM node:20-alpine
 WORKDIR /usr/app
 
 # Copy NPM package files from Backend
-COPY /new-backend/package*.json ./
+COPY /apps/backend/package*.json ./
 RUN npm ci --production
 
 # Move the built Backend into app's root at /usr/app
-COPY --from=buildImage /tmp/build/new-backend/dist ./
+COPY --from=buildImage /tmp/build/backend/dist ./
 
 # Copy some more necessary files. There's a great chance that 
 # they'll be mounted when running anyway, but if someone forgets
 # that, it's good to have them around so we get running with the defaults. 
-COPY /new-backend/.env .
-COPY /new-backend/App_Data ./App_Data
-COPY /new-backend/static ./static
+COPY /apps/backend/.env .
+COPY /apps/backend/App_Data ./App_Data
+COPY /apps/backend/static ./static
 
 # Move the built Client and Admin dirs into static
-COPY --from=buildImage /tmp/build/new-client/build ./static/client
-COPY --from=buildImage /tmp/build/new-admin/build ./static/admin
+COPY --from=buildImage /tmp/build/client/build ./static/client
+COPY --from=buildImage /tmp/build/admin/build ./static/admin
 # --- FINAL ASSEMBLY END --- #
 
 # Go!

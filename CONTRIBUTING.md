@@ -12,7 +12,7 @@
 - Latest Git
 - Visual Studio (only for the optional .NET backend)
 
-The Client UI (`new-client`), Admin UI (`new-admin`) and NodeJS backend (`new-backend`) applications can be built and deployed on any OS supported by recent Git and Node versions (tested on macOS, Windows and Linux).
+All apps reside inside the `apps/` directory. The Client UI (`client`), Admin UI (`admin`) and NodeJS backend (`backend`) applications can be built and deployed on any OS supported by recent Git and Node versions (tested on macOS, Windows and Linux).
 
 The .NET backend (`backend-dotnet`) component, requires Visual Studio for Windows.
 
@@ -54,6 +54,6 @@ Hajk uses **ESLint** and **Prettier** to enforce code formatting across the proj
 
 🔥 **Code that gets checked in must follow those rules.** 🔥
 
-The `new-client` and `new-backend` directories contains all necessary configuration files. The recommended way is to use an editor that has extensions for ESLint and Prettier installed. It is also highly recommended to make the editor run Prettier on each file save (i.e. in VSCode it can be controlled by the `formatOnSave: true` flag).
+The `client` and `backend` directories contain all necessary configuration files. The recommended way is to use an editor that has extensions for ESLint and Prettier installed. It is also highly recommended to make the editor run Prettier on each file save (i.e. in VSCode it can be controlled by the `formatOnSave: true` flag).
 
 **For a simple guide on setting up VSCode with ESLint, Prettier and some , see [this presentation](dokumentation/VSCodeSetup.pdf)**. (Swedish only)
