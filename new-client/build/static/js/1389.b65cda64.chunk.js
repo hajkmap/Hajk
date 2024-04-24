@@ -1,2 +1,0 @@
-"use strict";(self.webpackChunkhajk_client=self.webpackChunkhajk_client||[]).push([[1389],{91389:function(e,s,t){t.r(s);var n=t(43144),a=t(15671),c=(0,n.Z)((function e(s){(0,a.Z)(this,e),this.message=s}));s.default=c}}]);
-//# sourceMappingURL=1389.b65cda64.chunk.js.map

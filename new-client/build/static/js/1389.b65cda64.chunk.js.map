@@ -1,1 +1,0 @@
-{"version":3,"file":"static/js/1389.b65cda64.chunk.js","mappings":"kJAAMA,GAAAA,EAAAA,EAAAA,IACJ,WAAYC,IAAU,eACpBC,KAAKD,QAAUA,CAChB,IAGH,W","sources":["models/Error.js"],"sourcesContent":["class Error {\n  constructor(message) {\n    this.message = message;\n  }\n}\n\nexport default Error;\n"],"names":["Error","message","this"],"sourceRoot":""}
