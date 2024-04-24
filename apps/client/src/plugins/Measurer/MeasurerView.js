@@ -26,6 +26,12 @@ const StyledToggleButton = styled(ToggleButton)(({ theme }) => ({
   img: {
     filter: theme.palette.mode === "dark" ? "invert(1)" : "",
   },
+  "&.Mui-selected, &.Mui-selected:hover": {
+    "img, svg": {
+      marginBottom: "-3px",
+    },
+    borderBottom: `3px solid ${theme.palette.primary.main}`,
+  },
 }));
 
 const StyledToggleButtonGroup = styled(ToggleButtonGroup)(({ theme }) => ({
