@@ -1,7 +1,7 @@
 import React from "react";
 import { withSnackbar } from "notistack";
 import { styled } from "@mui/material/styles";
-import { Button, Tooltip, Typography, Grid } from "@mui/material";
+import { Button, Tooltip, Typography, Grid, Link } from "@mui/material";
 
 import IconWarning from "@mui/icons-material/Warning";
 import CallMadeIcon from "@mui/icons-material/CallMade";
@@ -502,9 +502,9 @@ class LayerItem extends React.PureComponent {
       return (
         <InfoTextContainer>
           <Typography variant="body2" component="div" sx={{ fontWeight: 500 }}>
-            <a href={this.infoUrl} target="_blank" rel="noopener noreferrer">
+            <Link href={this.infoUrl} target="_blank" rel="noopener noreferrer">
               {this.infoUrlText || this.infoUrl}
-            </a>
+            </Link>
           </Typography>
         </InfoTextContainer>
       );
@@ -518,13 +518,13 @@ class LayerItem extends React.PureComponent {
       return (
         <InfoTextContainer>
           <Typography variant="body2" component="div" sx={{ fontWeight: 500 }}>
-            <a
+            <Link
               href={this.infoOpenDataLink}
               target="_blank"
               rel="noopener noreferrer"
             >
               Öppna data: {this.caption}
-            </a>
+            </Link>
           </Typography>
         </InfoTextContainer>
       );
