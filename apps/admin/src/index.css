@@ -353,9 +353,7 @@ body.dragging * {
   width: auto;
   margin: 4px;
 }
-.info-group-labelStyle {
-  margin-top: 15px;
-}
+
 .info-group {
   display: flex;
   margin-left: 13px;

@@ -310,8 +310,8 @@ $.fn.editable = function (component) {
       checkbox5.attr("checked", true);
       infogroupcontainer.css({
         display: "block",
-        borderLeft: "1px solid #ccc",
-        paddingLeft: "5px",
+        borderLeft: "1px groove #6b6969",
+        marginLeft: "13px",
         marginTop: "10px",
       });
     } else {
@@ -325,8 +325,8 @@ $.fn.editable = function (component) {
       if ($(this).is(":checked")) {
         infogroupcontainer.css({
           display: "block",
-          borderLeft: "1px solid #ccc",
-          paddingLeft: "5px",
+          borderLeft: "1px groove #6b6969",
+          marginLeft: "13px",
           marginTop: "10px",
         });
       } else {
