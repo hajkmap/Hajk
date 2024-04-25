@@ -176,7 +176,7 @@ class CoordinatesTransformRow extends React.PureComponent {
 
     if (this.model.showFieldsOnStart || this.state.wasModified) {
       return (
-        <Grid container item spacing={2} rowSpacing={1}>
+        <Grid container item rowSpacing={0} columnSpacing={2}>
           <Grid item xs={10} md={8} alignSelf={"end"}>
             <Typography variant="body2" style={{ fontWeight: 600 }}>
               {this.transformation
@@ -195,11 +195,20 @@ class CoordinatesTransformRow extends React.PureComponent {
             justifyContent={"end"}
             height={"35px"}
           >
-            <IconButton sx={{ justifyContent: "end", padding: "4px" }}>
+            <IconButton
+              sx={{
+                justifyContent: "end",
+                padding: "4px",
+                "& svg": {
+                  fontSize: 20, // Adjust the icon size here
+                },
+                marginBottom: "-15px",
+              }}
+            >
               <ContentCopyIcon></ContentCopyIcon>
             </IconButton>
           </Grid>
-          <Grid item xs={12} md={6}>
+          <Grid item xs={12} md={6} sx={{ pt: 0 }}>
             <NumericFormat
               label={this.props.transformation.xtitle}
               margin="dense"
