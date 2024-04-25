@@ -4,7 +4,8 @@ import TextField from "@mui/material/TextField";
 import { NumericFormat } from "react-number-format";
 import { transform } from "ol/proj";
 import { withSnackbar } from "notistack";
-import Grid from "@mui/material/Grid";
+import { Grid, IconButton } from "@mui/material";
+import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 
 class CoordinatesTransformRow extends React.PureComponent {
   state = {
@@ -176,7 +177,7 @@ class CoordinatesTransformRow extends React.PureComponent {
     if (this.model.showFieldsOnStart || this.state.wasModified) {
       return (
         <Grid container item spacing={2} rowSpacing={1}>
-          <Grid item xs={12}>
+          <Grid item xs={10} md={8} alignSelf={"end"}>
             <Typography variant="body2" style={{ fontWeight: 600 }}>
               {this.transformation
                 ? this.transformation.title +
@@ -185,6 +186,18 @@ class CoordinatesTransformRow extends React.PureComponent {
                   ")"
                 : ""}
             </Typography>
+          </Grid>
+          <Grid
+            container
+            item
+            xs={2}
+            md={4}
+            justifyContent={"end"}
+            height={"35px"}
+          >
+            <IconButton sx={{ justifyContent: "end", padding: "4px" }}>
+              <ContentCopyIcon></ContentCopyIcon>
+            </IconButton>
           </Grid>
           <Grid item xs={12} md={6}>
             <NumericFormat
