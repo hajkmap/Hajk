@@ -6,6 +6,17 @@ import { transform } from "ol/proj";
 import { withSnackbar } from "notistack";
 import { Grid, IconButton } from "@mui/material";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
+import { styled } from "@mui/material/styles";
+
+const StyledIconButton = styled(IconButton)(({}) => ({
+  justifyContent: "flex-end",
+  padding: "8px",
+  "& svg": {
+    fontSize: 20, // Adjust the icon size here
+  },
+  marginBottom: "-8px",
+  marginRight: "-6px",
+}));
 
 class CoordinatesTransformRow extends React.PureComponent {
   state = {
@@ -195,18 +206,9 @@ class CoordinatesTransformRow extends React.PureComponent {
             </Typography>
           </Grid>
           <Grid container item xs={2} md={4} justifyContent={"end"}>
-            <IconButton
-              sx={{
-                justifyContent: "end",
-                padding: "8px",
-                "& svg": {
-                  fontSize: 20, // Adjust the icon size here
-                },
-                marginBottom: "-8px",
-              }}
-            >
+            <StyledIconButton>
               <ContentCopyIcon></ContentCopyIcon>
-            </IconButton>
+            </StyledIconButton>
           </Grid>
           <Grid item xs={12} md={6}>
             <NumericFormat
