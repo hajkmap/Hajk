@@ -178,11 +178,11 @@ class CoordinatesTransformRow extends React.PureComponent {
       return (
         <Grid
           container
-          rowSpacing={0}
+          rowSpacing={0.5}
           columnSpacing={2}
-          padding={1}
-          marginLeft={"-10px"}
-          paddingBottom={0}
+          padding={0}
+          marginLeft={"-7px"}
+          paddingTop={1}
         >
           <Grid item xs={10} md={8} alignSelf={"end"}>
             <Typography variant="body2" style={{ fontWeight: 600 }}>
