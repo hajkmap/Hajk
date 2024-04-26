@@ -79,23 +79,32 @@ class CoordinatesTransformRow extends React.PureComponent {
     });
   }
 
-  handleCopyCoordinates(coordinateFormatTitle) {
-    //We get the correct input fields values using the title of the coordinate system
+  getCoordinates(coordinateFormatTitle) {
     let inputX, inputY;
     if (coordinateFormatTitle === "SWEREF 99 12 00") {
-      inputX = document.getElementsByName("numberformatX")[0];
-      inputY = document.getElementsByName("numberformatY")[0];
+      inputX = document.getElementsByName("numberformatX")[0].value;
+      inputY = document.getElementsByName("numberformatY")[0].value;
     } else if (coordinateFormatTitle === "SWEREF 99 TM") {
-      inputX = document.getElementsByName("numberformatX")[1];
-      inputY = document.getElementsByName("numberformatY")[1];
+      inputX = document.getElementsByName("numberformatX")[1].value;
+      inputY = document.getElementsByName("numberformatY")[1].value;
     } else {
-      inputX = document.getElementsByName("numberformatX")[2];
-      inputY = document.getElementsByName("numberformatY")[2];
+      inputX = document.getElementsByName("numberformatX")[2].value;
+      inputY = document.getElementsByName("numberformatY")[2].value;
     }
+
+    inputX = inputX.replace(/\s/g, "");
+    inputY = inputY.replace(/\s/g, "");
+
+    return { inputX, inputY };
+  }
+
+  handleCopyToClipBoard(coordinateFormatTitle) {
+    //We get the correct input fields values using the title of the coordinate system
+    const { inputX, inputY } = this.getCoordinates(coordinateFormatTitle);
 
     // We check if the values have any numbers, and if not exit the function early...
     // and give an alert to the user
-    if (inputX.value.trim() === "" || inputY.value.trim() === "") {
+    if (inputX === "" || inputY === "") {
       // Display a message if any of the fields are empty
       this.props.enqueueSnackbar("Kopiering misslyckades, fälten är tomma", {
         variant: "error",
@@ -104,7 +113,7 @@ class CoordinatesTransformRow extends React.PureComponent {
     }
 
     // Set the string to be copied from the two X and Y values
-    const coordinatesString = `${inputX.value},${inputY.value}`;
+    const coordinatesString = `${inputX},${inputY}`;
 
     // We create a temporary element to store the and copy the coordinateString
     const input = document.createElement("input");
@@ -258,7 +267,7 @@ class CoordinatesTransformRow extends React.PureComponent {
           <Grid container item xs={2} md={4} justifyContent={"end"}>
             <StyledIconButton
               onClick={() => {
-                this.handleCopyCoordinates(this.props.transformation.title);
+                this.handleCopyToClipBoard(this.props.transformation.title);
               }}
             >
               <ContentCopyIcon></ContentCopyIcon>
