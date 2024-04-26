@@ -1,7 +1,7 @@
 import React from "react";
 import { withSnackbar } from "notistack";
 import { styled } from "@mui/material/styles";
-import { Button, Tooltip, Typography, Grid } from "@mui/material";
+import { Button, Typography, Grid } from "@mui/material";
 
 import IconWarning from "@mui/icons-material/Warning";
 import CallMadeIcon from "@mui/icons-material/CallMade";
@@ -18,6 +18,7 @@ import TableViewIcon from "@mui/icons-material/TableView";
 import LayerGroupItem from "./LayerGroupItem.js";
 import LayerSettings from "./LayerSettings.js";
 import DownloadLink from "./DownloadLink.js";
+import HajkToolTip from "components/HajkToolTip";
 
 const LayerItemContainer = styled("div")(({ theme }) => ({
   paddingLeft: "0",
@@ -354,21 +355,18 @@ class LayerItem extends React.PureComponent {
   renderStatusButton() {
     return (
       this.state.status === "loaderror" && (
-        <Tooltip
-          disableInteractive
-          title="Lagret kunde inte laddas in. Kartservern svarar inte."
-        >
+        <HajkToolTip title="Lagret kunde inte laddas in. Kartservern svarar inte.">
           <LayerButtonWrapper>
             <IconWarning />
           </LayerButtonWrapper>
-        </Tooltip>
+        </HajkToolTip>
       )
     );
   }
 
   renderInfoButton = () => {
     return this.isInfoEmpty() ? null : (
-      <Tooltip title="Mer information om lagret">
+      <HajkToolTip title="Mer information om lagret">
         <LayerButtonWrapper>
           {this.state.infoVisible ? (
             <RemoveCircleIcon onClick={this.toggleInfo} />
@@ -384,13 +382,13 @@ class LayerItem extends React.PureComponent {
             />
           )}
         </LayerButtonWrapper>
-      </Tooltip>
+      </HajkToolTip>
     );
   };
 
   renderMoreButton = () => {
     return (
-      <Tooltip title="Fler inställningar">
+      <HajkToolTip title="Fler inställningar">
         <LayerButtonWrapper>
           {this.state.toggleSettings ? (
             <CloseIcon onClick={this.toggleSettings} />
@@ -398,7 +396,7 @@ class LayerItem extends React.PureComponent {
             <MoreHorizIcon onClick={this.toggleSettings} />
           )}
         </LayerButtonWrapper>
-      </Tooltip>
+      </HajkToolTip>
     );
   };
 
@@ -716,11 +714,11 @@ class LayerItem extends React.PureComponent {
             {this.renderInfoButton()}
 
             {this.showAttributeTableButton && (
-              <Tooltip title="Visa lagrets attributtabell">
+              <HajkToolTip title="Visa lagrets attributtabell">
                 <LayerButtonWrapper>
                   <TableViewIcon onClick={this.#showAttributeTable} />
                 </LayerButtonWrapper>
-              </Tooltip>
+              </HajkToolTip>
             )}
             {this.renderMoreButton()}
           </LayerButtonsContainer>

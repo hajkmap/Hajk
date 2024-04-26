@@ -15,6 +15,7 @@ import { IconPolygon, IconPoint, IconLine, IconCircle } from "./MeasurerIcons";
 import DeleteIcon from "@mui/icons-material/Delete";
 import ConfirmationDialog from "../../components/ConfirmationDialog";
 import { useEffect, useState } from "react";
+import HajkToolTip from "components/HajkToolTip";
 
 const SvgImg = styled("img")(({ theme }) => ({
   height: "24px",
@@ -128,34 +129,45 @@ function MeasurerView(props) {
             variant="contained"
             aria-label="outlined button group"
           >
-            <StyledToggleButton value="Point" title="Punkt (Visar koordinat)">
-              <SvgImg src={IconPoint()} />
-            </StyledToggleButton>
-            <StyledToggleButton value="LineString" title="Sträcka">
-              <SvgImg src={IconLine()} />
-            </StyledToggleButton>
-            <StyledToggleButton value="Polygon" title="Areal">
-              <SvgImg src={IconPolygon()} />
-            </StyledToggleButton>
-            <StyledToggleButton value="Circle" title="Cirkel">
-              <SvgImg src={IconCircle()} />
-            </StyledToggleButton>
-            <StyledToggleButton value="Delete" title="Ta bort enskild mätning">
-              <DeleteIcon />
-            </StyledToggleButton>
+            <HajkToolTip title="Punkt (Visar koordinat)">
+              <StyledToggleButton value="Point">
+                <SvgImg src={IconPoint()} />
+              </StyledToggleButton>
+            </HajkToolTip>
+            <HajkToolTip title="Sträcka">
+              <StyledToggleButton value="LineString">
+                <SvgImg src={IconLine()} />
+              </StyledToggleButton>
+            </HajkToolTip>
+            <HajkToolTip title="Areal">
+              <StyledToggleButton value="Polygon">
+                <SvgImg src={IconPolygon()} />
+              </StyledToggleButton>
+            </HajkToolTip>
+            <HajkToolTip title="Cirkel">
+              <StyledToggleButton value="Circle">
+                <SvgImg src={IconCircle()} />
+              </StyledToggleButton>
+            </HajkToolTip>
+            <HajkToolTip title="Ta bort enskild mätning">
+              <StyledToggleButton value="Delete">
+                <DeleteIcon />
+              </StyledToggleButton>
+            </HajkToolTip>
           </StyledToggleButtonGroup>
         </Grid>
         <Grid item xs={3}>
-          <Button
-            variant="contained"
-            fullWidth
-            onClick={() => {
-              setShowDeleteConfirmation(true);
-            }}
-            title="Rensa bort alla mätningar"
-          >
-            Rensa
-          </Button>
+          <HajkToolTip title="Rensa bort alla mätningar">
+            <Button
+              variant="contained"
+              fullWidth
+              onClick={() => {
+                setShowDeleteConfirmation(true);
+              }}
+            >
+              Rensa
+            </Button>
+          </HajkToolTip>
         </Grid>
       </Grid>
       <ConfirmationDialog

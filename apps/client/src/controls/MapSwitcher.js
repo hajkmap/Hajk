@@ -1,8 +1,9 @@
 import React from "react";
-import { IconButton, Menu, MenuItem, Paper, Tooltip } from "@mui/material";
+import { IconButton, Menu, MenuItem, Paper } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import SwitchCameraIcon from "@mui/icons-material/SwitchCamera";
 import { hfetch } from "../utils/FetchWrapper";
+import HajkToolTip from "components/HajkToolTip";
 
 const StyledPaper = styled(Paper)(({ theme }) => ({
   marginBottom: theme.spacing(1),
@@ -143,7 +144,7 @@ class MapSwitcher extends React.PureComponent {
       // Render only if config says so
       this.props.appModel.config.mapConfig.map.mapselector && (
         <>
-          <Tooltip disableInteractive title={`Nuvarande karta: ${title}`}>
+          <HajkToolTip title={`Nuvarande karta: ${title}`}>
             <StyledPaper>
               <StyledIconButton
                 aria-label="Byt karta"
@@ -154,7 +155,7 @@ class MapSwitcher extends React.PureComponent {
                 <SwitchCameraIcon />
               </StyledIconButton>
             </StyledPaper>
-          </Tooltip>
+          </HajkToolTip>
           <Menu
             id="render-props-menu"
             anchorEl={anchorEl}

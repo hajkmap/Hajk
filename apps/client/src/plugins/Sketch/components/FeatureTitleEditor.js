@@ -1,5 +1,6 @@
 import React from "react";
-import { Grid, TextField, Tooltip, Typography } from "@mui/material";
+import { Grid, TextField, Typography } from "@mui/material";
+import HajkToolTip from "components/HajkToolTip";
 
 const FeatureTitleEditor = ({ feature, model, drawModel }) => {
   const [title, setTitle] = React.useState("");
@@ -20,7 +21,7 @@ const FeatureTitleEditor = ({ feature, model, drawModel }) => {
         <Typography align="center">Titel</Typography>
       </Grid>
       <Grid item xs={12}>
-        <Tooltip title="Angle en titel som kan användas för att identifiera objektet.">
+        <HajkToolTip title="Angle en titel som kan användas för att identifiera objektet.">
           <TextField
             fullWidth
             value={title}
@@ -28,7 +29,7 @@ const FeatureTitleEditor = ({ feature, model, drawModel }) => {
             variant="outlined"
             size="small"
           />
-        </Tooltip>
+        </HajkToolTip>
       </Grid>
     </Grid>
   ) : null;

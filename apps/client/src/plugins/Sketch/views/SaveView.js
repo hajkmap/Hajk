@@ -1,7 +1,7 @@
 import React from "react";
 import { styled, Typography } from "@mui/material";
 import { Button, IconButton, Zoom } from "@mui/material";
-import { Grid, Paper, TextField, Tooltip } from "@mui/material";
+import { Grid, Paper, TextField } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import DeleteIcon from "@mui/icons-material/Delete";
 
@@ -10,6 +10,7 @@ import { useSnackbar } from "notistack";
 import { MAX_SKETCHES } from "../constants";
 import Information from "../components/Information";
 import ConfirmationDialog from "../../../components/ConfirmationDialog";
+import HajkToolTip from "components/HajkToolTip";
 
 const StyledPaper = styled(Paper)(({ theme }) => ({
   width: "100%",
@@ -177,10 +178,7 @@ const SketchSaver = (props) => {
     <Paper style={{ padding: 8 }}>
       <Grid container alignItems="center" justifyContent="space-between">
         <Grid item xs={8}>
-          <Tooltip
-            disableInteractive
-            title="Ange att namn så att arbetsytan kan identifieras senare."
-          >
+          <HajkToolTip title="Ange att namn så att arbetsytan kan identifieras senare.">
             <TextField
               size="small"
               variant="outlined"
@@ -190,10 +188,10 @@ const SketchSaver = (props) => {
               onKeyDown={handleKeyDown}
               value={props.sketchName}
             />
-          </Tooltip>
+          </HajkToolTip>
         </Grid>
         <Grid container item xs={3} justifyContent="flex-end">
-          <Tooltip disableInteractive title={saveButtonStateTest.message}>
+          <HajkToolTip title={saveButtonStateTest.message}>
             <span>
               <Button
                 size="small"
@@ -204,7 +202,7 @@ const SketchSaver = (props) => {
                 {replaceWarning.show ? "Ersätt" : "Spara"}
               </Button>
             </span>
-          </Tooltip>
+          </HajkToolTip>
         </Grid>
       </Grid>
       <StyledTextWarning>{replaceWarning.text}</StyledTextWarning>
@@ -225,7 +223,7 @@ const SavedSketch = ({
       <StyledPaper>
         <Grid container justifyContent="space-between" alignItems="center">
           <Grid item xs={8}>
-            <Tooltip disableInteractive title={sketchInfo.title}>
+            <HajkToolTip title={sketchInfo.title}>
               <Grid
                 item
                 xs={12}
@@ -235,36 +233,29 @@ const SavedSketch = ({
                   {sketchInfo.title}
                 </Typography>
               </Grid>
-            </Tooltip>
+            </HajkToolTip>
             <Grid item xs={12}>
-              <Tooltip
-                disableInteractive
+              <HajkToolTip
                 title={`Arbetsytan uppdaterades senast ${sketchInfo.date}`}
               >
                 <Typography variant="caption">
                   {`Uppdaterad: ${sketchInfo.date?.split(" ")[0]}`}
                 </Typography>
-              </Tooltip>
+              </HajkToolTip>
             </Grid>
           </Grid>
 
           <Grid container item xs={4} justifyContent="flex-end">
-            <Tooltip
-              disableInteractive
-              title="Klicka för att radera arbetsytan."
-            >
+            <HajkToolTip title="Klicka för att radera arbetsytan.">
               <IconButton size="small" onClick={handleRemoveClick}>
                 <DeleteIcon />
               </IconButton>
-            </Tooltip>
-            <Tooltip
-              disableInteractive
-              title="Klicka för att läsa in objekten."
-            >
+            </HajkToolTip>
+            <HajkToolTip title="Klicka för att läsa in objekten.">
               <IconButton size="small" onClick={handleAddToMapClick}>
                 <AddIcon />
               </IconButton>
-            </Tooltip>
+            </HajkToolTip>
           </Grid>
         </Grid>
       </StyledPaper>

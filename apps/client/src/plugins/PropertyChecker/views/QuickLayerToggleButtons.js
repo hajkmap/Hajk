@@ -1,17 +1,13 @@
 import React, { useCallback, useEffect, useMemo } from "react";
 import { styled } from "@mui/material/styles";
 
-import {
-  ToggleButton,
-  ToggleButtonGroup,
-  Tooltip,
-  Typography,
-} from "@mui/material";
+import { ToggleButton, ToggleButtonGroup, Typography } from "@mui/material";
 
 import LocationCityIcon from "@mui/icons-material/LocationCity";
 import BorderInnerIcon from "@mui/icons-material/BorderInner";
 import TravelExploreIcon from "@mui/icons-material/TravelExplore";
 import { Box } from "@mui/system";
+import HajkToolTip from "components/HajkToolTip";
 
 const StyledBox = styled(Box)(({ theme }) => ({
   display: "flex",
@@ -105,28 +101,28 @@ function QuickLayerTogglerButtons({ map, options }) {
       fullWidth
     >
       <ToggleButton value="buildings" size="small">
-        <Tooltip title="Visa/dölj byggnader">
+        <HajkToolTip title="Visa/dölj byggnader">
           <StyledBox>
             <LocationCityIcon />
             <Typography variant="button">Byggnader</Typography>
           </StyledBox>
-        </Tooltip>
+        </HajkToolTip>
       </ToggleButton>
       <ToggleButton value="borders" size="small">
-        <Tooltip title="Visa/dölj fastigheter">
+        <HajkToolTip title="Visa/dölj fastigheter">
           <StyledBox>
             <BorderInnerIcon />
             <Typography variant="button">Fastigheter</Typography>
           </StyledBox>
-        </Tooltip>
+        </HajkToolTip>
       </ToggleButton>
       <ToggleButton value="plans" size="small">
-        <Tooltip title="Visa/dölj planer">
+        <HajkToolTip title="Visa/dölj planer">
           <StyledBox>
             <TravelExploreIcon />
             <Typography variant="button">Planer</Typography>
           </StyledBox>
-        </Tooltip>
+        </HajkToolTip>
       </ToggleButton>
     </ToggleButtonGroup>
   );

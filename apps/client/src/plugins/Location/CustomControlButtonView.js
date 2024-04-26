@@ -1,7 +1,7 @@
 import React, { useEffect, useCallback } from "react";
 import { useSnackbar } from "notistack";
 
-import { Paper, Tooltip } from "@mui/material";
+import { Paper } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import ToggleButton from "@mui/material/ToggleButton";
 import CircularProgress from "@mui/material/CircularProgress";
@@ -13,6 +13,7 @@ import {
   LOCATION_DENIED_SNACK_MESSAGE,
   LOCATION_DENIED_SNACK_OPTIONS,
 } from "./constants";
+import HajkToolTip from "components/HajkToolTip";
 
 const StyledPaper = styled(Paper)(({ theme }) => ({
   marginBottom: theme.spacing(1),
@@ -174,7 +175,7 @@ const CustomControlButtonView = React.memo(
     ]);
 
     return (
-      <Tooltip disableInteractive title={tooltip}>
+      <HajkToolTip title={tooltip}>
         <StyledPaper>
           <StyledToggleButton
             aria-label={defaultTooltip}
@@ -189,7 +190,7 @@ const CustomControlButtonView = React.memo(
             {currentIcon}
           </StyledToggleButton>
         </StyledPaper>
-      </Tooltip>
+      </HajkToolTip>
     );
   }
 );

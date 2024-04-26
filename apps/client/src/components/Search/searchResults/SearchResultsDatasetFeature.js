@@ -1,8 +1,9 @@
 import React from "react";
-import { Checkbox, Typography, Tooltip, Grid } from "@mui/material";
+import { Checkbox, Typography, Grid } from "@mui/material";
 import StarIcon from "@mui/icons-material/Star";
 import StarBorderIcon from "@mui/icons-material/StarBorder";
 import { styled } from "@mui/material/styles";
+import HajkToolTip from "components/HajkToolTip";
 
 const IconWrapper = styled("div")(({ theme }) => ({
   display: "flex",
@@ -30,7 +31,7 @@ class SearchResultsDatasetFeature extends React.PureComponent {
     const helpText = !visibleInMap ? "Lägg till i urval" : "Ta bort från urval";
 
     return (
-      <Tooltip disableInteractive title={helpText}>
+      <HajkToolTip title={helpText}>
         <Checkbox
           color="default"
           checked={visibleInMap}
@@ -39,7 +40,7 @@ class SearchResultsDatasetFeature extends React.PureComponent {
           icon={<StarBorderIcon />}
           checkedIcon={<StarIcon />}
         />
-      </Tooltip>
+      </HajkToolTip>
     );
   };
 

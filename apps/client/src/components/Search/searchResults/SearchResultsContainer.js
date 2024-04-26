@@ -17,7 +17,6 @@ import {
   MenuItem,
   Paper,
   TextField,
-  Tooltip,
   Typography,
 } from "@mui/material";
 
@@ -31,6 +30,7 @@ import ClearIcon from "@mui/icons-material/Clear";
 import SearchResultsList from "./SearchResultsList";
 import SearchResultsDownloadMenu from "./SearchResultsDownloadMenu";
 import ArrowBack from "@mui/icons-material/ArrowBack";
+import HajkToolTip from "components/HajkToolTip";
 
 const StyledPaper = styled(Paper)(({ theme }) => ({
   maxHeight: "80vh",
@@ -364,12 +364,12 @@ class SearchResultsContainer extends React.PureComponent {
           label="Filtrera sökresultaten"
           InputProps={{
             endAdornment: showClearFilterButton && (
-              <Tooltip disableInteractive title="Rensa filtret">
+              <HajkToolTip title="Rensa filtret">
                 <IconButton onClick={this.clearViewFilters} size="small">
                   <span style={visuallyHidden}>Rensa filtret</span>
                   <ClearIcon />
                 </IconButton>
-              </Tooltip>
+              </HajkToolTip>
             ),
           }}
         ></TextField>
@@ -504,7 +504,7 @@ class SearchResultsContainer extends React.PureComponent {
       ? "Filtret är aktivt"
       : "Filtrera resultatet";
     return (
-      <Tooltip disableInteractive title={filterHelpText}>
+      <HajkToolTip title={filterHelpText}>
         <IconButton
           sx={{ minWidth: 30 }}
           onClick={() =>
@@ -522,7 +522,7 @@ class SearchResultsContainer extends React.PureComponent {
             <FilterListIcon />
           </Badge>
         </IconButton>
-      </Tooltip>
+      </HajkToolTip>
     );
   };
 
@@ -549,7 +549,7 @@ class SearchResultsContainer extends React.PureComponent {
     }`;
 
     return (
-      <Tooltip disableInteractive title={sortHelpText}>
+      <HajkToolTip title={sortHelpText}>
         <IconButton
           sx={{ minWidth: 30 }}
           onClick={(e) =>
@@ -558,20 +558,20 @@ class SearchResultsContainer extends React.PureComponent {
         >
           <SortIcon />
         </IconButton>
-      </Tooltip>
+      </HajkToolTip>
     );
   };
 
   renderClearTool = () => {
     return (
-      <Tooltip disableInteractive title="Rensa alla selekterade objekt">
+      <HajkToolTip title="Rensa alla selekterade objekt">
         <IconButton
           sx={{ minWidth: 30 }}
           onClick={this.clearAllSelectedFeaturesInView}
         >
           <DeleteIcon />
         </IconButton>
-      </Tooltip>
+      </HajkToolTip>
     );
   };
 
@@ -638,8 +638,7 @@ class SearchResultsContainer extends React.PureComponent {
             </Grid>
           </Grow>
           <Grid item>
-            <Tooltip
-              disableInteractive
+            <HajkToolTip
               title={`${this.state.showTools ? "Dölj" : "Visa"} verktyg`}
             >
               <IconButton
@@ -653,7 +652,7 @@ class SearchResultsContainer extends React.PureComponent {
               >
                 {this.state.showTools ? <CloseIcon /> : <MoreVertIcon />}
               </IconButton>
-            </Tooltip>
+            </HajkToolTip>
           </Grid>
         </Grid>
       );
@@ -915,7 +914,7 @@ class SearchResultsContainer extends React.PureComponent {
           </Button>
           <Divider />
           <Breadcrumbs aria-label="breadcrumb" separator="/">
-            <Tooltip disableInteractive title="Tillbaka till alla sökresultat">
+            <HajkToolTip title="Tillbaka till alla sökresultat">
               <Link
                 tabIndex={0}
                 underline="hover"
@@ -936,8 +935,8 @@ class SearchResultsContainer extends React.PureComponent {
               >
                 Sökresultat
               </Link>
-            </Tooltip>
-            <Tooltip disableInteractive title={featureCollectionTitle}>
+            </HajkToolTip>
+            <HajkToolTip title={featureCollectionTitle}>
               <Link
                 tabIndex={0}
                 underline="hover"
@@ -957,9 +956,9 @@ class SearchResultsContainer extends React.PureComponent {
               >
                 {featureCollectionTitle}
               </Link>
-            </Tooltip>
+            </HajkToolTip>
             {shouldRenderFeatureDetails && (
-              <Tooltip disableInteractive title={featureTitle}>
+              <HajkToolTip title={featureTitle}>
                 <Link
                   tabIndex={0}
                   underline="hover"
@@ -969,7 +968,7 @@ class SearchResultsContainer extends React.PureComponent {
                 >
                   {featureTitle}
                 </Link>
-              </Tooltip>
+              </HajkToolTip>
             )}
           </Breadcrumbs>
           <Divider />
@@ -998,8 +997,7 @@ class SearchResultsContainer extends React.PureComponent {
           alignItems="center"
           xs={this.state.showTools ? 5 : 11}
         >
-          <Tooltip
-            disableInteractive
+          <HajkToolTip
             title={
               activeFeatureCollection ? featureCollectionTitle : "Sökresultat"
             }
@@ -1014,7 +1012,7 @@ class SearchResultsContainer extends React.PureComponent {
                 activeFeatureCollection ? featureCollectionTitle : "Sökresultat"
               }`}
             </Typography>
-          </Tooltip>
+          </HajkToolTip>
         </Grid>
         <Grid
           container

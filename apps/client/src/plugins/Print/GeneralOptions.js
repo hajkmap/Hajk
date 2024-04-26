@@ -11,9 +11,9 @@ import {
   MenuItem,
   Select,
   Input,
-  Tooltip,
 } from "@mui/material";
 import FormatListNumberedIcon from "@mui/icons-material/FormatListNumbered";
+import HajkToolTip from "components/HajkToolTip";
 
 const Root = styled(Grid)(() => ({
   display: "flex",
@@ -199,14 +199,14 @@ class GeneralOptions extends React.PureComponent {
         startAdornment={<InputAdornment position="start">1:</InputAdornment>}
         endAdornment={
           <InputAdornment position="end">
-            <Tooltip title="Visa fördefinerade val">
+            <HajkToolTip title="Visa fördefinerade val">
               <IconButton
                 aria-label="toggle custom scale selector"
                 onClick={this.handleDisableCustomScaleInput}
               >
                 <FormatListNumberedIcon />
               </IconButton>
-            </Tooltip>
+            </HajkToolTip>
           </InputAdornment>
         }
         inputProps={{
