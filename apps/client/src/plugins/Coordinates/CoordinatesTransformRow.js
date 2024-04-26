@@ -79,6 +79,56 @@ class CoordinatesTransformRow extends React.PureComponent {
     });
   }
 
+  handleCopyCoordinates(coordinateFormatTitle) {
+    //We get the correct input fields values using the title of the coordinate system
+    let inputX, inputY;
+    if (coordinateFormatTitle === "SWEREF 99 12 00") {
+      inputX = document.getElementsByName("numberformatX")[0];
+      inputY = document.getElementsByName("numberformatY")[0];
+    } else if (coordinateFormatTitle === "SWEREF 99 TM") {
+      inputX = document.getElementsByName("numberformatX")[1];
+      inputY = document.getElementsByName("numberformatY")[1];
+    } else {
+      inputX = document.getElementsByName("numberformatX")[2];
+      inputY = document.getElementsByName("numberformatY")[2];
+    }
+
+    // We check if the values have any numbers, and if not exit the function early...
+    // and give an alert to the user
+    if (inputX.value.trim() === "" || inputY.value.trim() === "") {
+      // Display a message if any of the fields are empty
+      this.props.enqueueSnackbar("Kopiering misslyckades, fälten är tomma", {
+        variant: "error",
+      });
+      return;
+    }
+
+    // Set the string to be copied from the two X and Y values
+    const coordinatesString = `${inputX.value},${inputY.value}`;
+
+    // We create a temporary element to store the and copy the coordinateString
+    const input = document.createElement("input");
+    input.value = coordinatesString;
+
+    // Make the element noninteractive and hide it
+    input.setAttribute("readonly", "");
+    input.style.position = "absolute";
+    input.style.left = "-9999px";
+
+    // We copy the string from the element, alert the user of successful copying...
+    document.body.appendChild(input);
+    input.select();
+    document.execCommand("copy") &&
+      this.props.enqueueSnackbar(
+        `Kopiering till urklipp lyckades!${coordinatesString}`,
+        {
+          variant: "info",
+        }
+      );
+    // and then remove the element
+    document.body.removeChild(input);
+  }
+
   handleInputX(event) {
     if (
       (!this.props.inverseAxis && event.value === this.state.coordinateX) ||
@@ -206,7 +256,11 @@ class CoordinatesTransformRow extends React.PureComponent {
             </Typography>
           </Grid>
           <Grid container item xs={2} md={4} justifyContent={"end"}>
-            <StyledIconButton>
+            <StyledIconButton
+              onClick={() => {
+                this.handleCopyCoordinates(this.props.transformation.title);
+              }}
+            >
               <ContentCopyIcon></ContentCopyIcon>
             </StyledIconButton>
           </Grid>
