@@ -1,11 +1,12 @@
 import React from "react";
-import { Button, Grid, Slider, Tooltip } from "@mui/material";
+import { Button, Grid, Slider } from "@mui/material";
 import PlayArrowIcon from "@mui/icons-material/PlayArrow";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import PauseIcon from "@mui/icons-material/Pause";
 import RotateLeftOutlinedIcon from "@mui/icons-material/RotateLeftOutlined";
 import SettingsButton from "./components/SettingsButton";
+import HajkToolTip from "components/HajkToolTip";
 
 export default function PlayerView(props) {
   // Handles when the user wants to step one step forwards.
@@ -72,15 +73,14 @@ export default function PlayerView(props) {
         spacing={2}
       >
         <Grid item align="center" xs={2}>
-          <Tooltip disableInteractive title="Återställ tidslinjen">
+          <HajkToolTip title="Återställ tidslinjen">
             <Button variant="contained" onClick={props.resetTimeSlider}>
               <RotateLeftOutlinedIcon />
             </Button>
-          </Tooltip>
+          </HajkToolTip>
         </Grid>
         <Grid item align="center" xs={2}>
-          <Tooltip
-            disableInteractive
+          <HajkToolTip
             title={
               props.playing
                 ? "Du kan inte hoppa bakåt när spelaren är aktiv."
@@ -98,11 +98,10 @@ export default function PlayerView(props) {
                 <ArrowBackIcon />
               </Button>
             </span>
-          </Tooltip>
+          </HajkToolTip>
         </Grid>
         <Grid item align="center" xs={2}>
-          <Tooltip
-            disableInteractive
+          <HajkToolTip
             title={props.playing ? "Stoppa tidslinjen" : "Starta tidslinjen"}
           >
             <Button
@@ -113,11 +112,10 @@ export default function PlayerView(props) {
             >
               {props.playing ? <PauseIcon /> : <PlayArrowIcon />}
             </Button>
-          </Tooltip>
+          </HajkToolTip>
         </Grid>
         <Grid item align="center" xs={2}>
-          <Tooltip
-            disableInteractive
+          <HajkToolTip
             title={
               props.playing
                 ? "Du kan inte hoppa framåt när spelaren är aktiv."
@@ -135,7 +133,7 @@ export default function PlayerView(props) {
                 <ArrowForwardIcon />
               </Button>
             </span>
-          </Tooltip>
+          </HajkToolTip>
         </Grid>
         <Grid item align="center" xs={2}>
           <SettingsButton

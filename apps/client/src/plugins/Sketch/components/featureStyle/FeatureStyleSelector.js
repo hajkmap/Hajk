@@ -1,6 +1,5 @@
 import React from "react";
 import { Grid, Typography, TextField, IconButton, Box } from "@mui/material";
-import ToolTip from "@mui/material/Tooltip";
 import RestartAltIcon from "@mui/icons-material/RestartAlt";
 import {
   STROKE_DASHES,
@@ -12,6 +11,7 @@ import FeatureStyleAccordion from "./FeatureStyleAccordion";
 import FeaturePointSizeAccordion from "./FeatureSizeAccordion";
 import StrokeTypeSelector from "./StrokeTypeSelector";
 import FeatureBufferAccordion from "./FeatureBufferAccordion";
+import HajkToolTip from "components/HajkToolTip";
 
 export default function FeatureStyleSelector(props) {
   const { activeDrawType, drawStyle, setDrawStyle } = props;
@@ -339,10 +339,7 @@ export default function FeatureStyleSelector(props) {
             Utseende
           </Typography>
 
-          <ToolTip
-            disableInteractive
-            title="Återställ utseendet till standardinställningar"
-          >
+          <HajkToolTip title="Återställ utseendet till standardinställningar">
             <IconButton
               sx={{ mr: 1 }}
               size="small"
@@ -358,7 +355,7 @@ export default function FeatureStyleSelector(props) {
                 }}
               />
             </IconButton>
-          </ToolTip>
+          </HajkToolTip>
         </Box>
       </Grid>
     );

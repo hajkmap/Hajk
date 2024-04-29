@@ -11,12 +11,12 @@ import {
   Select,
   TextField,
   Popover,
-  Tooltip,
   IconButton,
   InputAdornment,
 } from "@mui/material";
 import PaletteIcon from "@mui/icons-material/Palette";
 import { TwitterPicker as ColorPicker } from "react-color";
+import HajkToolTip from "components/HajkToolTip";
 
 const Root = styled(Grid)(() => ({
   display: "flex",
@@ -205,10 +205,7 @@ class AdvancedOptions extends React.PureComponent {
                         badgeContent=" "
                         variant="dot"
                       >
-                        <Tooltip
-                          disableInteractive
-                          title="Titelfärg påverkar inte kartans etiketter utan styr endast färgen för kringliggande texter, så som titel, copyrighttext, etc."
-                        >
+                        <HajkToolTip title="Titelfärg påverkar inte kartans etiketter utan styr endast färgen för kringliggande texter, så som titel, copyrighttext, etc.">
                           <IconButton
                             id="mapTextColor"
                             onClick={this.toggleColorPicker}
@@ -218,7 +215,7 @@ class AdvancedOptions extends React.PureComponent {
                           >
                             <PaletteIcon />
                           </IconButton>
-                        </Tooltip>
+                        </HajkToolTip>
                       </Badge>
                     </InputAdornment>
                   ),

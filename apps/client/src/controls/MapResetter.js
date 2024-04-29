@@ -1,8 +1,9 @@
 import React from "react";
-import { IconButton, Paper, Tooltip } from "@mui/material";
+import { IconButton, Paper } from "@mui/material";
 import HomeIcon from "@mui/icons-material/Home";
 
 import { styled } from "@mui/material/styles";
+import HajkToolTip from "components/HajkToolTip";
 
 const StyledPaper = styled(Paper)(({ theme }) => ({
   marginBottom: theme.spacing(1),
@@ -31,7 +32,7 @@ class MapResetter extends React.PureComponent {
 
   render() {
     return (
-      <Tooltip disableInteractive title="Återställ kartan till startläget">
+      <HajkToolTip title="Återställ kartan till startläget">
         <StyledPaper>
           <StyledIconButton
             aria-label="Återställ kartan till startläget"
@@ -40,7 +41,7 @@ class MapResetter extends React.PureComponent {
             <HomeIcon />
           </StyledIconButton>
         </StyledPaper>
-      </Tooltip>
+      </HajkToolTip>
     );
   }
 }

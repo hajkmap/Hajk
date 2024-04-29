@@ -1,9 +1,10 @@
 import React from "react";
 import { styled } from "@mui/material/styles";
 import propTypes from "prop-types";
-import { IconButton, Paper, Tooltip, Menu, MenuItem } from "@mui/material";
+import { IconButton, Paper, Menu, MenuItem } from "@mui/material";
 import LaunchIcon from "@mui/icons-material/Launch";
 import HajkTransformer from "../utils/HajkTransformer";
+import HajkToolTip from "components/HajkToolTip";
 
 const StyledPaper = styled(Paper)(({ theme }) => ({
   marginBottom: theme.spacing(1),
@@ -141,7 +142,7 @@ class ExternalLinks extends React.PureComponent {
       const open = Boolean(anchorEl);
       return (
         <>
-          <Tooltip disableInteractive title={this.title}>
+          <HajkToolTip title={this.title}>
             <StyledPaper>
               <StyledIconButton
                 aria-label={this.title}
@@ -150,7 +151,7 @@ class ExternalLinks extends React.PureComponent {
                 <LaunchIcon />
               </StyledIconButton>
             </StyledPaper>
-          </Tooltip>
+          </HajkToolTip>
           <Menu
             id="externalLinksMenu"
             anchorEl={anchorEl}

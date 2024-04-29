@@ -1,9 +1,10 @@
 import React from "react";
 import { styled } from "@mui/material";
 import { Button, IconButton, Zoom } from "@mui/material";
-import { Grid, Typography, Tooltip, Paper } from "@mui/material";
+import { Grid, Typography, Paper } from "@mui/material";
 import SettingsBackupRestoreIcon from "@mui/icons-material/SettingsBackupRestore";
 import DeleteIcon from "@mui/icons-material/Delete";
+import HajkToolTip from "components/HajkToolTip";
 
 import Information from "../components/Information";
 
@@ -51,14 +52,11 @@ const RemovedFeatureItem = ({ onRestoreClick, title }) => {
       <StyledPaper>
         <Grid container justifyContent="space-between" alignItems="center">
           <Typography variant="button">{title}</Typography>
-          <Tooltip
-            disableInteractive
-            title="Klicka för att återställa ritobjektet."
-          >
+          <HajkToolTip title="Klicka för att återställa ritobjektet.">
             <IconButton size="small" onClick={onRestoreClick}>
               <SettingsBackupRestoreIcon />
             </IconButton>
-          </Tooltip>
+          </HajkToolTip>
         </Grid>
       </StyledPaper>
     </Zoom>

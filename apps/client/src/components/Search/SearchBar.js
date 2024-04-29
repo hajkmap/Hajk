@@ -22,11 +22,11 @@ import {
   FormHelperText,
   useMediaQuery,
   Popper,
-  Tooltip,
 } from "@mui/material";
 import { visuallyHidden } from "@mui/utils";
 import { styled } from "@mui/material/styles";
 import { Visibility, VisibilityOff } from "@mui/icons-material";
+import HajkToolTip from "components/HajkToolTip";
 
 // A HOC that pipes isMobile to the children. See this as a proposed
 // solution. It is not pretty, but if we move this to a separate file
@@ -350,11 +350,11 @@ class SearchBar extends React.PureComponent {
 
   renderFailedWFSFetchWarning = (errorMessage) => {
     return (
-      <Tooltip disableInteractive title={errorMessage}>
+      <HajkToolTip title={errorMessage}>
         <WarningIcon color="error">
           <span style={visuallyHidden}>{errorMessage}</span>
         </WarningIcon>
-      </Tooltip>
+      </HajkToolTip>
     );
   };
 
@@ -413,7 +413,7 @@ class SearchBar extends React.PureComponent {
               {showFailedWFSMessage &&
                 this.renderFailedWFSFetchWarning(failedWFSFetchMessage)}
               {!showSearchResults ? (
-                <Tooltip disableInteractive title="Utför sökning">
+                <HajkToolTip title="Utför sökning">
                   <IconButton
                     size="small"
                     onClick={handleOnClickOrKeyboardSearch}
@@ -421,10 +421,10 @@ class SearchBar extends React.PureComponent {
                     <span style={visuallyHidden}>Utför sökning</span>
                     <SearchIcon />
                   </IconButton>
-                </Tooltip>
+                </HajkToolTip>
               ) : (
                 <>
-                  <Tooltip disableInteractive title={expandMessage}>
+                  <HajkToolTip title={expandMessage}>
                     <IconButton
                       onClick={(e) => {
                         e.stopPropagation();
@@ -439,11 +439,8 @@ class SearchBar extends React.PureComponent {
                         <ExpandLessIcon />
                       )}
                     </IconButton>
-                  </Tooltip>
-                  <Tooltip
-                    disableInteractive
-                    title={toggleResultsLayerVisibilityMessage}
-                  >
+                  </HajkToolTip>
+                  <HajkToolTip title={toggleResultsLayerVisibilityMessage}>
                     <IconButton
                       onClick={(e) => {
                         e.stopPropagation();
@@ -460,18 +457,18 @@ class SearchBar extends React.PureComponent {
                         <Visibility />
                       )}
                     </IconButton>
-                  </Tooltip>
+                  </HajkToolTip>
                 </>
               )}
               {searchString.length > 0 ||
               showSearchResults ||
               searchActive !== "" ? (
-                <Tooltip disableInteractive title="Rensa sökning">
+                <HajkToolTip title="Rensa sökning">
                   <IconButton onClick={handleOnClear} size="small">
                     <span style={visuallyHidden}>Rensa sökning</span>
                     <ClearIcon />
                   </IconButton>
-                </Tooltip>
+                </HajkToolTip>
               ) : (
                 <SearchTools
                   map={map}

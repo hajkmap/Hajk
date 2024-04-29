@@ -1,5 +1,5 @@
 import React from "react";
-import { Grid, Typography, Tooltip, Switch } from "@mui/material";
+import { Grid, Typography, Switch } from "@mui/material";
 import { FormControl, FormHelperText, MenuItem, Select } from "@mui/material";
 import {
   List,
@@ -10,6 +10,7 @@ import {
 } from "@mui/material";
 
 import WarningIcon from "@mui/icons-material/Warning";
+import HajkToolTip from "components/HajkToolTip";
 
 class TimeSliderSettings extends React.PureComponent {
   constructor(props) {
@@ -49,8 +50,7 @@ class TimeSliderSettings extends React.PureComponent {
               disabled={!visible}
             >
               {error && (
-                <Tooltip
-                  disableInteractive
+                <HajkToolTip
                   key={`tt_${index}`}
                   title={`${
                     error
@@ -63,16 +63,13 @@ class TimeSliderSettings extends React.PureComponent {
                   <ListItemIcon>
                     <WarningIcon />
                   </ListItemIcon>
-                </Tooltip>
+                </HajkToolTip>
               )}
 
               <ListItemText primary={layer.get("caption")} />
 
               <ListItemSecondaryAction>
-                <Tooltip
-                  disableInteractive
-                  title={visible ? "Dölj lager" : "Visa lager"}
-                >
+                <HajkToolTip title={visible ? "Dölj lager" : "Visa lager"}>
                   <Switch
                     checked={visible}
                     onChange={() => {
@@ -82,7 +79,7 @@ class TimeSliderSettings extends React.PureComponent {
                     name="checkedA"
                     inputProps={{ "aria-label": "secondary checkbox" }}
                   />
-                </Tooltip>
+                </HajkToolTip>
               </ListItemSecondaryAction>
             </ListItem>
           );
