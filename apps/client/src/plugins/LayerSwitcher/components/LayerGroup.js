@@ -3,20 +3,14 @@ import propTypes from "prop-types";
 import LayerItem from "./LayerItem.js";
 import { styled } from "@mui/material/styles";
 import { Accordion, AccordionDetails, AccordionSummary } from "@mui/material";
-import {
-  Box,
-  Typography,
-  Divider,
-  Tooltip,
-  IconButton,
-  Link,
-} from "@mui/material";
+import { Box, Typography, Divider, IconButton, Link } from "@mui/material";
 import CheckBoxIcon from "@mui/icons-material/CheckBox";
 import CheckBoxOutlineBlankIcon from "@mui/icons-material/CheckBoxOutlineBlank";
 import InfoIcon from "@mui/icons-material/Info";
 import RemoveCircleIcon from "@mui/icons-material/RemoveCircle";
 import KeyboardArrowRightIcon from "@mui/icons-material/KeyboardArrowRight";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
+import HajkToolTip from "components/HajkToolTip.js";
 
 const StyledAccordion = styled(Accordion)(() => ({
   borderRadius: 0,
@@ -385,7 +379,7 @@ class LayerGroup extends React.PureComponent {
         infogroupurltext ||
         infogroupopendatalink ||
         infogroupowner) && (
-        <Tooltip title="Mer information om gruppen">
+        <HajkToolTip title="Mer information om gruppen">
           {infoVisible ? (
             <IconButton
               sx={{
@@ -420,7 +414,7 @@ class LayerGroup extends React.PureComponent {
               />
             </IconButton>
           )}
-        </Tooltip>
+        </HajkToolTip>
       )
     );
   };
