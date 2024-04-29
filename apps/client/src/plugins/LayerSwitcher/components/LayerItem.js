@@ -2,7 +2,6 @@ import React from "react";
 import { withSnackbar } from "notistack";
 import { styled } from "@mui/material/styles";
 import { Button, Tooltip, Typography, Grid, Link } from "@mui/material";
-
 import IconWarning from "@mui/icons-material/Warning";
 import CallMadeIcon from "@mui/icons-material/CallMade";
 import InfoIcon from "@mui/icons-material/Info";
@@ -14,7 +13,6 @@ import CheckBoxOutlineBlankIcon from "@mui/icons-material/CheckBoxOutlineBlank";
 import MoreHorizIcon from "@mui/icons-material/MoreHoriz";
 import CloseIcon from "@mui/icons-material/Close";
 import TableViewIcon from "@mui/icons-material/TableView";
-
 import LayerGroupItem from "./LayerGroupItem.js";
 import LayerSettings from "./LayerSettings.js";
 import DownloadLink from "./DownloadLink.js";
