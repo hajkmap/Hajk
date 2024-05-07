@@ -28,6 +28,7 @@ class CoordinatesTransformRow extends React.PureComponent {
     coordinateYFloat: 0,
     wasLastChanged: false,
     wasModified: false,
+    wasPasted: false,
   };
 
   constructor(props) {
@@ -119,7 +120,7 @@ class CoordinatesTransformRow extends React.PureComponent {
     const input = document.createElement("input");
     input.value = coordinatesString;
 
-    // Make the element noninteractive and hide it
+    // Make the element non-interactive and hide it
     input.setAttribute("readonly", "");
     input.style.position = "absolute";
     input.style.left = "-9999px";
@@ -138,6 +139,48 @@ class CoordinatesTransformRow extends React.PureComponent {
     document.body.removeChild(input);
   }
 
+  handlePasteFromClipBoard(event) {
+    const clipboardData = event.clipboardData || window.clipboardData;
+    const pastedText = clipboardData.getData("text");
+
+    if (!pastedText.includes(",")) {
+      console.log("noComma");
+      return;
+    }
+
+    const [xValue, yValue] = pastedText.split(",");
+
+    const formatValue = (value) => {
+      const floatValue = parseFloat(value.replace(/ /g, "").replace(",", "."));
+      return {
+        formattedValue: new Intl.NumberFormat().format(floatValue),
+        value: value.replace(/ /g, ""),
+        floatValue,
+      };
+    };
+
+    const xObject = this.props.inverseAxis
+      ? formatValue(yValue)
+      : formatValue(xValue);
+    const yObject = this.props.inverseAxis
+      ? formatValue(xValue)
+      : formatValue(yValue);
+
+    this.setState({
+      coordinateX: xObject.value,
+      coordinateXFloat: xObject.floatValue,
+      coordinateY: yObject.value,
+      coordinateYFloat: yObject.floatValue,
+      wasModified: true,
+    });
+
+    this.localObserver.publish("newCoordinates", {
+      coordinates: [xObject.floatValue, yObject.floatValue],
+      proj: this.props.transformation.code,
+      force: false,
+    });
+  }
+
   handleInputX(event) {
     if (
       (!this.props.inverseAxis && event.value === this.state.coordinateX) ||
@@ -148,6 +191,7 @@ class CoordinatesTransformRow extends React.PureComponent {
       // infinite loops
       return;
     }
+
     if (!this.props.inverseAxis) {
       // Validate that the changed data is a finite number
       this.setState({
@@ -291,6 +335,10 @@ class CoordinatesTransformRow extends React.PureComponent {
               thousandSeparator={this.model.thousandSeparator ? " " : false}
               customInput={TextField}
               fullWidth={true}
+              onPaste={(values) => {
+                values.preventDefault();
+                this.handlePasteFromClipBoard(values);
+              }}
             />
           </Grid>
           <Grid item xs={12} md={6}>
@@ -311,6 +359,10 @@ class CoordinatesTransformRow extends React.PureComponent {
               thousandSeparator={this.model.thousandSeparator ? " " : false}
               customInput={TextField}
               fullWidth={true}
+              onPaste={(values) => {
+                values.preventDefault();
+                this.handlePasteFromClipBoard(values);
+              }}
             />
           </Grid>
         </Grid>
