@@ -144,9 +144,10 @@ class CoordinatesTransformRow extends React.PureComponent {
     const pastedText = clipboardData.getData("text");
 
     if (!pastedText.includes(",")) {
-      console.log("noComma");
       return;
     }
+
+    event.preventDefault();
 
     const [xValue, yValue] = pastedText.split(",");
 
@@ -336,7 +337,6 @@ class CoordinatesTransformRow extends React.PureComponent {
               customInput={TextField}
               fullWidth={true}
               onPaste={(values) => {
-                values.preventDefault();
                 this.handlePasteFromClipBoard(values);
               }}
             />
@@ -360,7 +360,6 @@ class CoordinatesTransformRow extends React.PureComponent {
               customInput={TextField}
               fullWidth={true}
               onPaste={(values) => {
-                values.preventDefault();
                 this.handlePasteFromClipBoard(values);
               }}
             />
