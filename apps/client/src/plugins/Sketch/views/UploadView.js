@@ -1,6 +1,6 @@
 import React from "react";
 import { styled } from "@mui/material";
-import { Button, Grid, Tooltip, Typography } from "@mui/material";
+import { Button, Grid, Typography } from "@mui/material";
 import { IconButton, Zoom, Paper } from "@mui/material";
 
 import FolderOpenIcon from "@mui/icons-material/FolderOpen";
@@ -13,6 +13,7 @@ import TextIncreaseIcon from "@mui/icons-material/TextIncrease";
 
 import Information from "../components/Information";
 import UploadDialog from "../components/UploadDialog";
+import HajkToolTip from "components/HajkToolTip";
 
 const StyledPaper = styled(Paper)(({ theme }) => ({
   width: "100%",
@@ -26,10 +27,7 @@ const ButtonPanel = ({ kmlModel, setDialogOpen }) => {
   return (
     <Grid container spacing={1}>
       <Grid item xs={12}>
-        <Tooltip
-          disableInteractive
-          title="Klicka för att öppna en dialog där du kan välja en .kml-fil från din dator."
-        >
+        <HajkToolTip title="Klicka för att öppna en dialog där du kan välja en .kml-fil från din dator.">
           <Button
             fullWidth
             variant="contained"
@@ -38,13 +36,10 @@ const ButtonPanel = ({ kmlModel, setDialogOpen }) => {
           >
             Importera ritobjekt
           </Button>
-        </Tooltip>
+        </HajkToolTip>
       </Grid>
       <Grid item xs={12}>
-        <Tooltip
-          disableInteractive
-          title="Klicka för att exportera alla ritobjekt till en .kml-fil."
-        >
+        <HajkToolTip title="Klicka för att exportera alla ritobjekt till en .kml-fil.">
           <Button
             fullWidth
             variant="contained"
@@ -53,7 +48,7 @@ const ButtonPanel = ({ kmlModel, setDialogOpen }) => {
           >
             Exportera ritobjekt
           </Button>
-        </Tooltip>
+        </HajkToolTip>
       </Grid>
     </Grid>
   );
@@ -69,18 +64,14 @@ const UploadedFile = (props) => {
           </Grid>
           <Grid container item xs={8} justifyContent="flex-end" spacing={1}>
             <Grid item>
-              <Tooltip
-                disableInteractive
-                title="Klicka för att ta bort de importerade objekten."
-              >
+              <HajkToolTip title="Klicka för att ta bort de importerade objekten.">
                 <IconButton size="small" onClick={props.onRemoveClick}>
                   <DeleteIcon />
                 </IconButton>
-              </Tooltip>
+              </HajkToolTip>
             </Grid>
             <Grid item>
-              <Tooltip
-                disableInteractive
+              <HajkToolTip
                 title={`Klicka för att ${
                   props.hidden ? "visa" : "dölja"
                 } objekten ${props.hidden ? "i" : "från"} kartan.`}
@@ -91,11 +82,10 @@ const UploadedFile = (props) => {
                 >
                   {props.hidden ? <VisibilityIcon /> : <VisibilityOffIcon />}
                 </IconButton>
-              </Tooltip>
+              </HajkToolTip>
             </Grid>
             <Grid item>
-              <Tooltip
-                disableInteractive
+              <HajkToolTip
                 title={`Klicka här för att ${
                   props.textShown ? "dölja" : "visa"
                 } objektens etiketter.`}
@@ -107,7 +97,7 @@ const UploadedFile = (props) => {
                     <TextIncreaseIcon />
                   )}
                 </IconButton>
-              </Tooltip>
+              </HajkToolTip>
             </Grid>
           </Grid>
         </Grid>
