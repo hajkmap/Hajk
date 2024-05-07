@@ -7,8 +7,9 @@ import { withSnackbar } from "notistack";
 import { Grid, IconButton } from "@mui/material";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import { styled } from "@mui/material/styles";
+import HajkToolTip from "components/HajkToolTip";
 
-const StyledIconButton = styled(IconButton)(({}) => ({
+const StyledIconButton = styled(IconButton)(({ theme }) => ({
   justifyContent: "flex-end",
   padding: "8px",
   "& svg": {
@@ -129,12 +130,9 @@ class CoordinatesTransformRow extends React.PureComponent {
     document.body.appendChild(input);
     input.select();
     document.execCommand("copy") &&
-      this.props.enqueueSnackbar(
-        `Kopiering till urklipp lyckades!${coordinatesString}`,
-        {
-          variant: "info",
-        }
-      );
+      this.props.enqueueSnackbar("Kopiering till urklipp lyckades!", {
+        variant: "info",
+      });
     // and then remove the element
     document.body.removeChild(input);
   }
@@ -310,13 +308,15 @@ class CoordinatesTransformRow extends React.PureComponent {
             </Typography>
           </Grid>
           <Grid container item xs={2} md={4} justifyContent={"end"}>
-            <StyledIconButton
-              onClick={() => {
-                this.handleCopyToClipBoard(this.props.transformation.title);
-              }}
-            >
-              <ContentCopyIcon></ContentCopyIcon>
-            </StyledIconButton>
+            <HajkToolTip title="Kopiera till urklipp">
+              <StyledIconButton
+                onClick={() => {
+                  this.handleCopyToClipBoard(this.props.transformation.title);
+                }}
+              >
+                <ContentCopyIcon></ContentCopyIcon>
+              </StyledIconButton>
+            </HajkToolTip>
           </Grid>
           <Grid item xs={12} md={6}>
             <NumericFormat
