@@ -141,14 +141,18 @@ class CoordinatesTransformRow extends React.PureComponent {
     const clipboardData = event.clipboardData || window.clipboardData;
     const pastedText = clipboardData.getData("text");
 
+    // If pasted text does not have a comma, we don't need to handle double inputs
+    // we therefore exit the function is that is the case.
     if (!pastedText.includes(",")) {
       return;
     }
 
+    // We don't want to paste twice
     event.preventDefault();
 
+    // Here we set the X and Y coordinate object depending on the inverse axis...
+    // inverse axis is true for the first two numeric inputs and false for the third
     const [xValue, yValue] = pastedText.split(",");
-
     const formatValue = (value) => {
       const floatValue = parseFloat(value.replace(/ /g, "").replace(",", "."));
       return {
@@ -157,7 +161,6 @@ class CoordinatesTransformRow extends React.PureComponent {
         floatValue,
       };
     };
-
     const xObject = this.props.inverseAxis
       ? formatValue(yValue)
       : formatValue(xValue);
@@ -165,6 +168,7 @@ class CoordinatesTransformRow extends React.PureComponent {
       ? formatValue(xValue)
       : formatValue(yValue);
 
+    // We update  the state
     this.setState({
       coordinateX: xObject.value,
       coordinateXFloat: xObject.floatValue,
@@ -173,6 +177,7 @@ class CoordinatesTransformRow extends React.PureComponent {
       wasModified: true,
     });
 
+    // And the local observer
     this.localObserver.publish("newCoordinates", {
       coordinates: [xObject.floatValue, yObject.floatValue],
       proj: this.props.transformation.code,
