@@ -81,19 +81,12 @@ class CoordinatesTransformRow extends React.PureComponent {
     });
   }
 
-  getCoordinates(coordinateFormatTitle) {
+  getCoordinates(title) {
     let inputX, inputY;
-    if (coordinateFormatTitle === "SWEREF 99 12 00") {
-      inputX = document.getElementsByName("numberformatX")[0].value;
-      inputY = document.getElementsByName("numberformatY")[0].value;
-    } else if (coordinateFormatTitle === "SWEREF 99 TM") {
-      inputX = document.getElementsByName("numberformatX")[1].value;
-      inputY = document.getElementsByName("numberformatY")[1].value;
-    } else {
-      inputX = document.getElementsByName("numberformatX")[2].value;
-      inputY = document.getElementsByName("numberformatY")[2].value;
-    }
-
+    // We find the specified numericFormat X and Y value
+    inputX = document.getElementsByName(`${title}numberformatX`)[0].value;
+    inputY = document.getElementsByName(`${title}numberformatY`)[0].value;
+    // And remove all blank spaces
     inputX = inputX.replace(/\s/g, "");
     inputY = inputY.replace(/\s/g, "");
 
@@ -130,7 +123,7 @@ class CoordinatesTransformRow extends React.PureComponent {
     document.body.appendChild(input);
     input.select();
     document.execCommand("copy") &&
-      this.props.enqueueSnackbar("Kopiering till urklipp lyckades!", {
+      this.props.enqueueSnackbar("Koordinaten kopierades till urklipp", {
         variant: "info",
       });
     // and then remove the element
@@ -330,7 +323,7 @@ class CoordinatesTransformRow extends React.PureComponent {
               variant="outlined"
               size="small"
               value={xCoord}
-              name="numberformatX"
+              name={`${this.props.transformation.title}numberformatX`}
               type="text"
               onValueChange={(values) => {
                 this.handleInputX(values);
@@ -353,7 +346,7 @@ class CoordinatesTransformRow extends React.PureComponent {
               size="small"
               variant="outlined"
               value={yCoord}
-              name="numberformatY"
+              name={`${this.props.transformation.title}numberformatY`}
               type="text"
               onValueChange={(values) => {
                 this.handleInputY(values);
