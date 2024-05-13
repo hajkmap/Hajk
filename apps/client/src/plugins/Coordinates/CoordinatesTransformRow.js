@@ -29,7 +29,6 @@ class CoordinatesTransformRow extends React.PureComponent {
     coordinateYFloat: 0,
     wasLastChanged: false,
     wasModified: false,
-    wasPasted: false,
   };
 
   constructor(props) {
