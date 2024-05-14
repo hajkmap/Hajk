@@ -104,10 +104,14 @@ function CookieNotice({ globalObserver, appModel }) {
     // IF the user accepts all they are at least accepting required- and
     // functional-cookies. (Cookie-level 3).
     let cookieLevel = 3;
+    // Set functional checked in case of revisit to cookie notice.
+    setFunctionalChecked(true);
     // If we are showing the option for third-part-cookies, they are obviously
     // accepting that as well.
     if (showThirdPartCheckbox) {
       cookieLevel = cookieLevel | 4;
+      // Set thirdPartChecked in case of revisit to cookie notice.
+      setThirdPartChecked(true);
     }
     // Then we'll set the cookie-level in the manager.
     setLevel(cookieLevel);
