@@ -27,6 +27,7 @@ import MapClickViewer from "./MapClickViewer/MapClickViewer";
 
 import Search from "./Search/Search.js";
 
+import CookieBannerButton from "../controls/CookieBannerButton";
 import Zoom from "../controls/Zoom";
 import User from "../controls/User";
 import Rotate from "../controls/Rotate";
@@ -228,7 +229,7 @@ class App extends React.PureComponent {
       return (
         typeof activeDrawerContentFromLocalStorage === "string" &&
         tool.type.toLowerCase() ===
-          activeDrawerContentFromLocalStorage.toLowerCase()
+        activeDrawerContentFromLocalStorage.toLowerCase()
       );
     });
 
@@ -548,7 +549,7 @@ class App extends React.PureComponent {
     this.bindHandlers();
   }
 
-  componentDidCatch(error) {}
+  componentDidCatch(error) { }
 
   bindHandlers() {
     // Extend the hajkPublicApi with a couple of things that are available now
@@ -673,8 +674,7 @@ class App extends React.PureComponent {
           // the Search component listens to.
           // TODO: Also handle sources change, the s parameter
           if (
-            mergedParams.get("q") !==
-              this.appModel.searchModel.lastSearchPhrase &&
+            mergedParams.get("q") !== this.appModel.searchModel.lastSearchPhrase &&
             mergedParams.get("q") !== null
           ) {
             this.globalObserver.publish(
@@ -1196,9 +1196,12 @@ class App extends React.PureComponent {
                   map={this.appModel.getMap()}
                   mapConfig={this.appModel.config.mapConfig.map}
                 />
+                {clean === false && (
+                  <CookieBannerButton appModel={this.appModel} />
+                )}
                 {clean === false &&
                   this.appModel.config.mapConfig.map.showUserAvatar ===
-                    true && (
+                  true && (
                     <User userDetails={this.appModel.config.userDetails} />
                   )}
                 <div id="plugin-control-buttons"></div>
@@ -1306,28 +1309,28 @@ class App extends React.PureComponent {
               {
                 // See #1336
                 config.mapConfig.map.linkInDrawer &&
-                  typeof config.mapConfig.map.linkInDrawer?.text === "string" &&
-                  typeof config.mapConfig.map.linkInDrawer?.href ===
-                    "string" && (
-                    <>
-                      <Divider />
-                      <Link
-                        align="center"
-                        variant="button"
-                        href={config.mapConfig.map.linkInDrawer.href}
-                        target={
-                          config.mapConfig.map.linkInDrawer.newWindow === true
-                            ? "_blank"
-                            : "_self"
-                        }
-                        sx={{
-                          p: 1,
-                        }}
-                      >
-                        {config.mapConfig.map.linkInDrawer.text}
-                      </Link>
-                    </>
-                  )
+                typeof config.mapConfig.map.linkInDrawer?.text === "string" &&
+                typeof config.mapConfig.map.linkInDrawer?.href ===
+                "string" && (
+                  <>
+                    <Divider />
+                    <Link
+                      align="center"
+                      variant="button"
+                      href={config.mapConfig.map.linkInDrawer.href}
+                      target={
+                        config.mapConfig.map.linkInDrawer.newWindow === true
+                          ? "_blank"
+                          : "_self"
+                      }
+                      sx={{
+                        p: 1,
+                      }}
+                    >
+                      {config.mapConfig.map.linkInDrawer.text}
+                    </Link>
+                  </>
+                )
               }
             </Drawer>
           )}
