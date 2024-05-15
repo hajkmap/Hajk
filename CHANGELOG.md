@@ -17,7 +17,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- Layerswitcher(client)/Groups(admin): It's now possible to add and show information about a layer group. [#400](https://github.com/hajkmap/Hajk/issues/400)
 - Cookie: It's now possible to revisit the cookie notice and change your preference [#1125](https://github.com/hajkmap/Hajk/issue/1125)
 - Sketch: It is now possible to buffer from the Sketch plugin. [#1310](https://github.com/hajkmap/Hajk/issues/1310)
 - Sketch: The user now has the option to reset to default styling and choose from a wider range of colors in the color picker; additionally, black and white options have been added. [#1372](https://github.com/hajkmap/Hajk/issues/1372)
@@ -32,6 +31,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Coordinates: in addition to changing the icon's name (URL), it is now also possible to set icon's scale and anchor values. PR: [#1499](https://github.com/hajkmap/Hajk/pull/1499).
 - Admin UI: It is now possible to easily duplicate map configurations using the UI. [#1502](https://github.com/hajkmap/Hajk/issues/1502).
 - Coordinates: It's now possible to copy and paste coordinates from/to both coordinate inputs (N & E, longitude & latitude). PR: [#1506](https://github.com/hajkmap/Hajk/pull/1506).
+- Layerswitcher(client)/Groups(admin): It's now possible to add and show information about a layer group. [#400](https://github.com/hajkmap/Hajk/issues/400).
 
 ### Fixed
 
