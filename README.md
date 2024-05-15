@@ -54,10 +54,10 @@ Note: There are currently two available backends for Hajk - you need to pick onl
 
 #### Alternative 1: NodeJS backend
 
-1. In `hajk` repo dir, go to `new-backend` and install dependencies:
+1. In `hajk` repo dir, go to `apps/backend` and install dependencies:
 
 ```
-cd new-backend
+cd apps/backend
 npm install
 ```
 
@@ -85,19 +85,19 @@ See Docker [README](Docker/README.md) for more information.
 
 Now when Backend is up and running, it's time to start the Client UI (and optionally Admin UI).
 
-1. You must tell the Client app the location of the running Backend. The configuration is made by editing `new-client/public/appConfig.json`. Make sure that `mapserviceBase` is a valid URL to a running instance of the Backend (if you're using the NodeJS application and your Backend is running on port 3002, you should set `mapserviceBase` to `"http://localhost:3002/api/v2"`.
-1. The client application resides inside `new-client`. Go there (`cd new-client`) and install the dependencies and start by typing: `npm i && npm start`.
+1. You must tell the Client app the location of the running Backend. The configuration is made by editing `apps/client/public/appConfig.json`. Make sure that `mapserviceBase` is a valid URL to a running instance of the Backend (if you're using the NodeJS application and your Backend is running on port 3002, you should set `mapserviceBase` to `"http://localhost:3002/api/v2"`.
+1. The client application resides inside `apps/client`. Go there (`apps/client`) and install the dependencies and start by typing: `npm i && npm start`.
 1. Verify that Client is running on `http://localhost:3000`.
 
 ### Launch the (optional) Admin app
 
 This process is similar to the Client app.
 
-1. Set the correct URL to Backend by editing `new-admin/public/config.json`.  
-   _Map operations have moved to mapconfig so `"url_map", "url_map_list", "url_map_create", "url_map_delete"` needs to point toward `"http://localhost:3002/api/v2/mapconfig..."`, the rest is the same as for `new-client`_
-2. The admin application is located in `new-admin`. To get it running do `cd new-admin && npm i && npm start`.
+1. Set the correct URL to Backend by editing `apps/admin/public/config.json`.  
+   _Map operations have moved to mapconfig so `"url_map", "url_map_list", "url_map_create", "url_map_delete"` needs to point toward `"http://localhost:3002/api/v2/mapconfig..."`, the rest is the same as for `client/`_
+2. The admin application is located in `apps/admin`. To get it running do `cd apps/admin && npm i && npm start`.
 3. Verify that Admin is running on `http://localhost:3001`.
 
 ## Deploying
 
-The provided NodeJS backend comes with a built-in, optional static files server that allows you to deploy the Client and Admin applications through the Hajk's backend application (hence leverage the optional Active Directory connection to restrict access to e.g. the Admin UI app). For details, see [this section in Backend's README](https://github.com/hajkmap/Hajk/tree/master/new-backend#deploy).
+The provided NodeJS backend comes with a built-in, optional static files server that allows you to deploy the Client and Admin applications through the Hajk's backend application (hence leverage the optional Active Directory connection to restrict access to e.g. the Admin UI app). For details, see [this section in Backend's README](https://github.com/hajkmap/Hajk/tree/master/apps/backend#deploy).

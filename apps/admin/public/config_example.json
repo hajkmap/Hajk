@@ -1,0 +1,96 @@
+{
+  "layermanager": {
+    "url_proxy": "https://YOUR_DOMAIN.COM/util/proxy/geturl/",
+    "url_map_list": "https://YOUR_DOMAIN.COM/mapservice/config/list",
+    "url_map": "https://YOUR_DOMAIN.COM/mapservice/config",
+    "url_import": "https://YOUR_DOMAIN.COM/mapservice/import/image",
+    "url_layers": "https://YOUR_DOMAIN.COM/mapservice/config/layers",
+    "url_layer_settings": "https://YOUR_DOMAIN.COM/mapservice/settings/wmslayer",
+    "url_layer_settings_extended": "https://YOUR_DOMAIN.COM/mapservice/settings/extendedwmslayer",
+    "url_wmtslayer_settings": "https://YOUR_DOMAIN.COM/mapservice/settings/wmtslayer",
+    "url_arcgislayer_settings": "https://YOUR_DOMAIN.COM/mapservice/settings/arcgislayer",
+    "url_vectorlayer_settings": "https://YOUR_DOMAIN.COM/mapservice/settings/vectorlayer",
+    "default_server_type": "geoserver",
+    "url_default_server": "https://YOUR_MAP_SERVER.COM/geoserver/wms",
+    "owner_options": [
+      {
+        "value": "SBK",
+        "title": "SBK"
+      },
+      {
+        "value": "Lantmäterienheten",
+        "title": "Lantmäterienheten"
+      }
+    ]
+  },
+  "search": {
+    "url_proxy": "https://YOUR_DOMAIN.COM/util/proxy/geturl/",
+    "url_layers": "https://YOUR_DOMAIN.COM/mapservice/config/layers",
+    "url_layer_settings": "https://YOUR_DOMAIN.COM/mapservice/settings/wfslayer",
+    "url_default_server": "https://YOUR_MAP_SERVER.COM/geoserver/wfs"
+  },
+  "edit": {
+    "url_proxy": "https://YOUR_DOMAIN.COM/util/proxy/geturl/",
+    "url_layers": "https://YOUR_DOMAIN.COM/mapservice/config/layers",
+    "url_layer_settings": "https://YOUR_DOMAIN.COM/mapservice/settings/wfstlayer",
+    "url_default_server": "https://YOUR_MAP_SERVER.COM/geoserver/wfs",
+    "projections": [
+      "EPSG:3006",
+      "EPSG:3007",
+      "EPSG:3008"
+    ]
+  },
+  "mapsettings": {
+    "url_proxy": "https://YOUR_DOMAIN.COM/util/proxy/geturl/",
+    "url_map": "https://YOUR_DOMAIN.COM/mapservice/config",
+    "url_map_create": "https://YOUR_DOMAIN.COM/mapservice/config",
+    "url_map_duplicate": "http://YOUR_DOMAIN.COM/mapconfig/duplicate",
+    "url_map_delete": "https://YOUR_DOMAIN.COM/mapservice/config",
+    "url_map_list": "https://YOUR_DOMAIN.COM/mapservice/config/list",
+    "url_layers": "https://YOUR_DOMAIN.COM/mapservice/config/layers",
+    "url_layermenu_settings": "https://YOUR_DOMAIN.COM/mapservice/settings/layermenu",
+    "url_map_settings": "https://YOUR_DOMAIN.COM/mapservice/settings/mapsettings",
+    "url_tool_settings": "https://YOUR_DOMAIN.COM/mapservice/settings/toolsettings",
+    "url_document_list": "https://YOUR_DOMAIN.COM/mapservice/informative/list",
+    "authentication_active": false
+  },
+  "informative": {
+    "url_proxy": "https://YOUR_DOMAIN.COM/util/proxy/geturl/",
+    "url_map": "https://YOUR_DOMAIN.COM/mapservice/config",
+    "url_map_list": "https://YOUR_DOMAIN.COM/mapservice/config/list",
+    "url_layers": "https://YOUR_DOMAIN.COM/mapservice/config/layers",
+    "url_document_list": "https://YOUR_DOMAIN.COM/mapservice/informative/list",
+    "url_load": "https://YOUR_DOMAIN.COM/mapservice/informative/load",
+    "url_save": "https://YOUR_DOMAIN.COM/mapservice/informative/save",
+    "url_create": "https://YOUR_DOMAIN.COM/mapservice/informative/create",
+    "url_delete": "https://YOUR_DOMAIN.COM/mapservice/informative/delete",
+    "default_coordinate": [
+      320564,
+      6471766
+    ],
+    "wmtsUrl": "http://giscloud.se/mapservice/lmproxy/wmts"
+  },
+  "router": [
+    {
+      "name": "layermanager",
+      "title": "Lager",
+      "default": true
+    },
+    {
+      "name": "search",
+      "title": "Söktjänster"
+    },
+    {
+      "name": "edit",
+      "title": "Redigeringstjänster"
+    },
+    {
+      "name": "mapsettings",
+      "title": "Kartor"
+    },
+    {
+      "name": "informative",
+      "title": "Dokumenthanterare"
+    }
+  ]
+}

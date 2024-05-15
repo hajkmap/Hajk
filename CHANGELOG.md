@@ -1,3 +1,5 @@
+<!-- markdownlint-disable MD024 - because we want to duplicate headings, such as Added or Fixed.-->
+
 # Changelog
 
 All notable changes to this project will be documented in this file.
@@ -9,53 +11,61 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### BREAKING
 
-- This release marks the removal of the legacy V1 API (`/api/v1`) in both the NodeJS backend and the old .NET 4.5 backend (refer to the _Removed_ section below). Client UI is now V2-compatible only, as it requires the consolidated loading method. This means that you may need to update your configuration. Refer to `docs/migrate-to-v2-api.md` for details.
+- This release marks the removal of the legacy V1 API (`/api/v1`) in both the NodeJS backend and the old .NET 4.5 backend (refer to the _Removed_ section below). Client UI is now V2-compatible only, as it requires the consolidated loading method. This means that you need to review and update your configuration, both regarding Client and Admin. Please refer to `docs/migrate-to-v2-api.md` for details.
 - This release marks deprecation of some plugins that either became replaced by a new solution or transformed into a community plugin. Refer to `docs/deprecated-plugins.md` for details.
+- Although not exactly a _breaking_ change, but it fits well here: **the repo has been restructured**. All apps can now be found in the `apps/` directory. The `new-` prefix has been removed from apps' names. Some shell scripts now live in `scripts/` while the majority of Docker-related files, except for the official Dockerfile, have been moved into the `Docker/` directory. PR: [#1488](https://github.com/hajkmap/Hajk/pull/1488)
 
 ### Added
 
-- Print/Anchor: It's now possible to generate qr codes in Share and Print [#1482]
-(https://github.com/hajkmap/Hajk/issues/1482)
-
+- Sketch: It is now possible to buffer from the Sketch plugin. [#1310](https://github.com/hajkmap/Hajk/issues/1310)
+- Sketch: The user now has the option to reset to default styling and choose from a wider range of colors in the color picker; additionally, black and white options have been added. [#1372](https://github.com/hajkmap/Hajk/issues/1372)
+- Core, Admin: Added support for stand-alone GeoWebCache WMS Server. Issue: [#1469](https://github.com/hajkmap/Hajk/issues/1469), PR: [#1493](https://github.com/hajkmap/Hajk/pull/1493).
+- Print/Anchor: It's now possible to generate qr codes in Share and Print. [#1482](https://github.com/hajkmap/Hajk/issues/1482)
 - Sketch: It's now possible to disable stroke for polygons and circles [#1177](https://github.com/hajkmap/Hajk/issues/1177)
-- Backend: The new .NET 6 backend. Issue: [#1210](https://github.com/hajkmap/Hajk/issues/1210). PR: [#1395](https://github.com/hajkmap/Hajk/pull/1395)
+- Backend: The new .NET 6 backend. Issue: [#1210](https://github.com/hajkmap/Hajk/issues/1210). PR: [#1395](https://github.com/hajkmap/Hajk/pull/1395).
 - Core: Allow to specify map config by using `m` query parameter, even when no backend is active. [commit](https://github.com/hajkmap/Hajk/commit/eb5be276437994c86c2edd5abef3ea21cd6071b4)
-- Deployment: Added Dockerfile making it possible to deploy "Hajk-simple" on OpenShift using S2I. PR: [#1487](https://github.com/hajkmap/Hajk/pull/1487)
+- Deployment: Added Dockerfile making it possible to deploy "Hajk-simple" on OpenShift using S2I. PR: [#1487](https://github.com/hajkmap/Hajk/pull/1487).
+- TimeSlider: It's now possible to print images of the content generated in the TimeSlider plugin. PR: [#1492](https://github.com/hajkmap/Hajk/pull/1492).
+- Core: CSS classes added for certain elements, allows for more granular custom styling. See also this [discussion](https://github.com/hajkmap/Hajk/discussions/1481). PR: [#1497](https://github.com/hajkmap/Hajk/pull/1497).
+- Coordinates: in addition to changing the icon's name (URL), it is now also possible to set icon's scale and anchor values. PR: [#1499](https://github.com/hajkmap/Hajk/pull/1499).
+- Admin UI: It is now possible to easily duplicate map configurations using the UI. [#1502](https://github.com/hajkmap/Hajk/issues/1502)
 
 ### Fixed
 
-- Add conditional rendering for Control button [commit](https://github.com/hajkmap/Hajk/commit/b34def3249b368de336a5c4eadd86318103e78fb)
-- Restore cross-platform build for NodeJS backend [#1484](https://github.com/hajkmap/Hajk/pull/1484)
-- Bug fix associated to #1468 [#1485](https://github.com/hajkmap/Hajk/pull/1485)
+- Add conditional rendering for Control button. [Commit.](https://github.com/hajkmap/Hajk/commit/b34def3249b368de336a5c4eadd86318103e78fb)
+- Restore cross-platform build for NodeJS backend. [#1484](https://github.com/hajkmap/Hajk/pull/1484)
+- Bug fix associated to #1468. [#1485](https://github.com/hajkmap/Hajk/pull/1485)
+- Admin UI is now compatible with the correct HTTP verbs (`DELETE` and `PUT`). [#1501](https://github.com/hajkmap/Hajk/pull/1501)
 
 ### Security
 
 - Bumped dependencies in Client.
+- The official Dockerfile build on an image based on current Node LTS (v20).
 
 ### Removed
 
-- The legacy .NET 4.5 backend. For reference, check out the https://github.com/hajkmap/Hajk/tree/legacy-dotnet-4.5-backend branch.
-- V1 API in NodeJS Backend.
+- The legacy .NET 4.5 backend. For reference, check out the [legacy-dotnet-4.5-backend branch](https://github.com/hajkmap/Hajk/tree/legacy-dotnet-4.5-backend).
+- V1 API from NodeJS Backend.
 
 ## [3.13.25] - 2024-02-13
 
 ### Added
 
-- Sketch: Rotate drawn objects [#1455](https://github.com/hajkmap/Hajk/issues/1455)
-- Sketch: Allow changing point size [#1373](https://github.com/hajkmap/Hajk/issues/1373)
-- FIR: Allow comma separated search and multiline search [#1461](https://github.com/hajkmap/Hajk/issues/1461)
+- Sketch: Rotate drawn objects. [#1455](https://github.com/hajkmap/Hajk/issues/1455)
+- Sketch: Allow changing point size. [#1373](https://github.com/hajkmap/Hajk/issues/1373)
+- FIR: Allow comma-separated search and multiline search. [#1461](https://github.com/hajkmap/Hajk/issues/1461)
 - Infoclick: Highlight in collection view. [#1472](https://github.com/hajkmap/Hajk/issues/1472)
 
 ### Fixed
 
-- Sketch: Save error with arrow object [#1450](https://github.com/hajkmap/Hajk/issues/1450)
-- Document Handler: Blockquote and Accordion issues in dark mode [#1457](https://github.com/hajkmap/Hajk/issues/1457)
-- KIR: Now checks if export is allowed [#1441](https://github.com/hajkmap/Hajk/issues/1441)
-- Infoclick: Resize breaks scroll [#1428](https://github.com/hajkmap/Hajk/issues/1428)
+- Sketch: Solved save error with arrow object. [#1450](https://github.com/hajkmap/Hajk/issues/1450)
+- DocumentHandler: Fixed Blockquote and Accordion issues in dark mode. [#1457](https://github.com/hajkmap/Hajk/issues/1457)
+- KIR: Now checks if export is allowed. [#1441](https://github.com/hajkmap/Hajk/issues/1441)
+- Infoclick: Resize breaks scroll. [#1428](https://github.com/hajkmap/Hajk/issues/1428)
 
 ### Changed
 
-- Infoclick: Enhance `roundToDecimals` filter [#1445](https://github.com/hajkmap/Hajk/issues/1445)
+- Infoclick: Enhance `roundToDecimals` filter. [#1445](https://github.com/hajkmap/Hajk/issues/1445)
 
 ## [3.13.24] - 2024-01-17
 
@@ -73,7 +83,7 @@ _A quick follow-up to 3.13.22, that had some issues with certain map configurati
 
 ### Added
 
-- FeatureInfo: New filters, [#1443](https://github.com/hajkmap/Hajk/issues/1443)
+- FeatureInfo: New filters. [#1443](https://github.com/hajkmap/Hajk/issues/1443)
 
 ### Changed
 
@@ -85,7 +95,7 @@ _A quick follow-up to 3.13.22, that had some issues with certain map configurati
 
 - DocumentHandler - possible to save documents inside subfolders. [#1402](https://github.com/hajkmap/Hajk/pull/1402)
 - Backend: Another method of gaining AD groups has been added. It's possible to circumvent the current solution (where Backend talks to the LDAP server) if one's setup allows for getting the AD groups elsewhere (i.e. from a proxy if setup on IIS). [#1439](https://github.com/hajkmap/Hajk/issues/1439)
-- Backend: Respect nested `visibleForGroups` within tool options[#1438](https://github.com/hajkmap/Hajk/issues/1438)
+- Backend: Respect nested `visibleForGroups` within tool options. [#1438](https://github.com/hajkmap/Hajk/issues/1438)
 - Backend: show 403 Forbidden rather than 500 if access was not allowed. [90b1725](https://github.com/hajkmap/Hajk/commit/90b172595c16078053c2d03130971e89091511aa)
 - Edit: Allow setting a `geometryField` for edit layers with no features. [#1447](https://github.com/hajkmap/Hajk/issues/1447)
 - PropertyChecker: Expanded the plugin to also utilize _Digital Plans_ by adding a second tab with an own list as well as another report.
