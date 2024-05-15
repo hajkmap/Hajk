@@ -129,6 +129,15 @@ class CoordinatesTransformRow extends React.PureComponent {
     document.body.removeChild(input);
   }
 
+  formatValue(value) {
+    const floatValue = parseFloat(value.replace(/ /g, "").replace(",", "."));
+    return {
+      formattedValue: new Intl.NumberFormat().format(floatValue),
+      value: value.replace(/ /g, ""),
+      floatValue,
+    };
+  }
+
   handlePasteFromClipBoard(event) {
     const clipboardData = event.clipboardData || window.clipboardData;
     const pastedText = clipboardData.getData("text");
@@ -145,20 +154,12 @@ class CoordinatesTransformRow extends React.PureComponent {
     // Here we set the X and Y coordinate object depending on the inverse axis...
     // inverse axis is true for the first two numeric inputs and false for the third
     const [xValue, yValue] = pastedText.split(",");
-    const formatValue = (value) => {
-      const floatValue = parseFloat(value.replace(/ /g, "").replace(",", "."));
-      return {
-        formattedValue: new Intl.NumberFormat().format(floatValue),
-        value: value.replace(/ /g, ""),
-        floatValue,
-      };
-    };
     const xObject = this.props.inverseAxis
-      ? formatValue(yValue)
-      : formatValue(xValue);
+      ? this.formatValue(yValue)
+      : this.formatValue(xValue);
     const yObject = this.props.inverseAxis
-      ? formatValue(xValue)
-      : formatValue(yValue);
+      ? this.formatValue(xValue)
+      : this.formatValue(yValue);
 
     // We update  the state
     this.setState({
