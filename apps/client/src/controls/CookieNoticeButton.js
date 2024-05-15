@@ -14,7 +14,7 @@ const StyledIconButton = styled(IconButton)(({ theme }) => ({
 }));
 
 /**
- * @summary Hides all visible layers
+ * @summary Displays the cookie notice dialog
  *
  * @param {object} props
  * @returns {object} React
