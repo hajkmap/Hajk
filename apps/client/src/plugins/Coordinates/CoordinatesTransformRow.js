@@ -100,33 +100,31 @@ class CoordinatesTransformRow extends React.PureComponent {
     // and give an alert to the user
     if (inputX === "" || inputY === "") {
       // Display a message if any of the fields are empty
-      this.props.enqueueSnackbar("Kopiering misslyckades, fälten är tomma", {
-        variant: "error",
-      });
+      this.props.enqueueSnackbar(
+        "Kopiering misslyckades, båda fälten måste vara ifyllda",
+        {
+          variant: "error",
+        }
+      );
       return;
     }
 
     // Set the string to be copied from the two X and Y values
     const coordinatesString = `${inputX},${inputY}`;
 
-    // We create a temporary element to store the and copy the coordinateString
-    const input = document.createElement("input");
-    input.value = coordinatesString;
-
-    // Make the element non-interactive and hide it
-    input.setAttribute("readonly", "");
-    input.style.position = "absolute";
-    input.style.left = "-9999px";
-
-    // We copy the string from the element, alert the user of successful copying...
-    document.body.appendChild(input);
-    input.select();
-    document.execCommand("copy") &&
-      this.props.enqueueSnackbar("Koordinaten kopierades till urklipp", {
-        variant: "info",
+    // We copy the coordinateString to clipboard
+    navigator.clipboard
+      .writeText(coordinatesString)
+      .then(() => {
+        this.props.enqueueSnackbar("Koordinaten kopierades till urklipp", {
+          variant: "info",
+        });
+      })
+      .catch((error) => {
+        this.props.enqueueSnackbar("Kopiering misslyckades", {
+          variant: "error",
+        });
       });
-    // and then remove the element
-    document.body.removeChild(input);
   }
 
   formatValue(value) {
