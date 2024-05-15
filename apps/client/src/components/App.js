@@ -27,6 +27,7 @@ import MapClickViewer from "./MapClickViewer/MapClickViewer";
 
 import Search from "./Search/Search.js";
 
+import CookieNoticeButton from "../controls/CookieNoticeButton";
 import Zoom from "../controls/Zoom";
 import User from "../controls/User";
 import Rotate from "../controls/Rotate";
@@ -1196,6 +1197,9 @@ class App extends React.PureComponent {
                   map={this.appModel.getMap()}
                   mapConfig={this.appModel.config.mapConfig.map}
                 />
+                {clean === false && (
+                  <CookieNoticeButton appModel={this.appModel} />
+                )}
                 {clean === false &&
                   this.appModel.config.mapConfig.map.showUserAvatar ===
                     true && (

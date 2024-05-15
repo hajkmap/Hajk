@@ -93,6 +93,10 @@ class MapOptions extends Component {
           config.showCookieNotice !== undefined
             ? config.showCookieNotice
             : true,
+        showCookieNoticeButton:
+          config.showCookieNoticeButton !== undefined
+            ? config.showCookieNoticeButton
+            : true,
         cookieUse3dPart:
           config.cookieUse3dPart !== undefined ? config.cookieUse3dPart : false,
       });
@@ -202,6 +206,10 @@ class MapOptions extends Component {
         mapConfig.showCookieNotice !== undefined
           ? mapConfig.showCookieNotice
           : true,
+      showCookieNoticeButton:
+        mapConfig.showCookieNoticeButton !== undefined
+            ? mapConfig.showCookieNoticeButton
+            : true,
       cookieUse3dPart:
         mapConfig.cookieUse3dPart !== undefined
           ? mapConfig.cookieUse3dPart
@@ -473,6 +481,7 @@ class MapOptions extends Component {
         config.defaultCookieNoticeUrl = this.getValue("defaultCookieNoticeUrl");
         config.crossOrigin = this.getValue("crossOrigin");
         config.showCookieNotice = this.getValue("showCookieNotice");
+        config.showCookieNoticeButton = this.getValue("showCookieNoticeButton");
         config.cookieUse3dPart = this.getValue("cookieUse3dPart");
         this.props.model.updateMapConfig(config, (success) => {
           var msg = success
@@ -1185,6 +1194,26 @@ class MapOptions extends Component {
                   className="fa fa-question-circle"
                   data-toggle="tooltip"
                   title="Om aktiv kommer en checkbox angående 3:e part cookies visas för nya användare."
+                />
+              </label>
+            </div>
+            <div>
+              <input
+                id="input_showCookieNoticeButton"
+                type="checkbox"
+                ref="input_showCookieNoticeButton"
+                onChange={(e) => {
+                  this.setState({ showCookieNoticeButton: e.target.checked });
+                }}
+                checked={this.state.showCookieNoticeButton}
+              />
+              &nbsp;
+              <label className="long-label" htmlFor="input_showCookieNoticeButton">
+                Visa knapp för cookies-meddelande{" "}
+                <i
+                  className="fa fa-question-circle"
+                  data-toggle="tooltip"
+                  title="Om aktiv kommer en knapp som visar cookies-meddelande visas under zoom-knapparna."
                 />
               </label>
             </div>
