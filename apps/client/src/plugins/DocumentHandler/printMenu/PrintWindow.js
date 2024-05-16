@@ -136,6 +136,7 @@ class PrintWindow extends React.PureComponent {
     isModalOpen: false,
     pdfLinks: this.checkPdfLinks(this.props.options.pdfLinks),
     frontPage: null,
+    includeFrontPage: false,
   };
 
   internalId = 0;
@@ -315,10 +316,6 @@ class PrintWindow extends React.PureComponent {
   };
 
   areAllImagesLoaded = () => {
-    // loads the front page image
-    const frontPageImgElement = this.frontPageElement.querySelector("img");
-    const frontPageImgPromise = this.loadImage(frontPageImgElement);
-
     // Get all img elements inside this.content and create promises for each
     const imgPromises = [...this.content.getElementsByTagName("img")].map(
       (img) => {
@@ -327,7 +324,12 @@ class PrintWindow extends React.PureComponent {
     );
 
     // Add frontPageImgPromise to the array of promises
-    imgPromises.push(frontPageImgPromise);
+    // And loads the front page image
+    if (this.state.includeFrontPage) {
+      const frontPageImgElement = this.frontPageElement.querySelector("img");
+      const frontPageImgPromise = this.loadImage(frontPageImgElement);
+      imgPromises.push(frontPageImgPromise);
+    }
 
     // Use Promise.allSettled to wait for all promises to resolve
     return Promise.allSettled(imgPromises);
@@ -475,7 +477,7 @@ class PrintWindow extends React.PureComponent {
   printContents = () => {
     // We're gonna want to make sure everything is rendered...
     Promise.all([
-      this.state.frontPage !== null && this.renderFrontPage(),
+      this.state.includeFrontPage === true && this.renderFrontPage(),
       this.state.tocPrintMode !== "none" && this.renderToc(),
       this.renderContent(),
     ]).then(() => {
@@ -483,8 +485,9 @@ class PrintWindow extends React.PureComponent {
       this.areAllImagesLoaded().then(() => {
         // Then we can create an element that will hold our TOC and print-content...
         const printContent = document.createElement("div");
-        // Append frontPage
-        this.frontPageElement &&
+        // Append frontPage only if its included
+        this.state.includeFrontPage &&
+          this.frontPageElement &&
           printContent.appendChild(this.frontPageElement);
         // ...append the TOC to the element (only if applicable)...
         this.toc && printContent.appendChild(this.toc);
@@ -742,38 +745,29 @@ class PrintWindow extends React.PureComponent {
       this.setIsAnyDocumentSelected();
     });
 
-    this.setState({ frontPage: this.createFrontPage(current) });
-  };
-
-  getFirstDocumentImage = (firstDocument) => {
-    if (!firstDocument) {
-      return null;
+    if (this.state.includeFrontPage) {
+      this.setState({ frontPage: this.createFrontPage(current) });
     }
-    const tempElement = document.createElement("div");
-    tempElement.innerHTML = firstDocument.chapters[0].html;
-    return tempElement.querySelector("img")?.getAttribute("src");
   };
 
   createFrontPage = (documents) => {
+    //We get drawer Title from options
     const { drawerTitle } = this.props.options;
+    // And img html from the first document
+    const firstDocumentHtml = Object.values(documents).find(
+      (doc) => doc.level === 1
+    )?.chapters[0]?.html;
 
-    const currentDocumentsToPrint = Object.values(documents).filter(
-      (doc) => doc.chosenForPrint === true
-    );
-
-    if (currentDocumentsToPrint.length === 0) {
+    // Exit if firstDocument is undefined
+    if (!firstDocumentHtml) {
       return null;
     }
-
-    const firstDocument = currentDocumentsToPrint.find(
-      (doc) => doc.level === 1
-    );
-
-    const firstDocumentImage =
-      this.getFirstDocumentImage(firstDocument) ||
-      this.getFirstDocumentImage(
-        Object.values(documents).find((doc) => doc.level === 1)
-      );
+    // We create an temporary element and set the img html
+    const tempElement = document.createElement("div");
+    tempElement.innerHTML = firstDocumentHtml;
+    const firstDocumentImage = tempElement
+      .querySelector("img")
+      ?.getAttribute("src");
 
     return {
       title: drawerTitle,
@@ -799,7 +793,9 @@ class PrintWindow extends React.PureComponent {
       isAnyDocumentSelected: toggled,
     });
 
-    this.setState({ frontPage: this.createFrontPage(menuState) });
+    if (this.state.includeFrontPage) {
+      this.setState({ frontPage: this.createFrontPage(menuState) });
+    }
   };
 
   removeTagsNotSelectedForPrint = (chapter) => {
@@ -996,6 +992,12 @@ class PrintWindow extends React.PureComponent {
     }));
   };
 
+  toggleIncludeFrontPage = () => {
+    this.setState((prevState) => ({
+      includeFrontPage: !prevState.includeFrontPage,
+    }));
+  };
+
   renderPrintDocuments = () => {
     const { localObserver, documentWindowMaximized } = this.props;
     const { menuInformation } = this.state;
@@ -1006,7 +1008,6 @@ class PrintWindow extends React.PureComponent {
         </Typography>
         <GridSettingsContainer container item>
           <Typography variant="h6">Inställningar</Typography>
-
           <Grid xs={12} item>
             <FormControlLabel
               value="Välj alla dokument"
@@ -1023,10 +1024,21 @@ class PrintWindow extends React.PureComponent {
               labelPlacement="end"
             />
           </Grid>
+          <Grid xs={12} item>
+            <FormControlLabel
+              value="Inkludera framsida"
+              control={
+                <Checkbox
+                  color="primary"
+                  onChange={() => this.toggleIncludeFrontPage()}
+                />
+              }
+              label="Inkludera framsida"
+              labelPlacement="end"
+            />
+          </Grid>
         </GridSettingsContainer>
-
         <Typography variant="h6">Valt innehåll</Typography>
-
         <GridMiddleContainer item container>
           <PrintList
             localObserver={localObserver}
@@ -1035,7 +1047,6 @@ class PrintWindow extends React.PureComponent {
             handleTogglePrint={this.toggleChosenForPrint}
           />
         </GridMiddleContainer>
-
         {documentWindowMaximized && this.renderCreatePDFButton()}
         {this.renderLoadingDialog()}
       </>
