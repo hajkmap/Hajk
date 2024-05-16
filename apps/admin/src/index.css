@@ -354,16 +354,6 @@ body.dragging * {
   margin: 4px;
 }
 
-.info-group {
-  display: flex;
-  margin-left: 13px;
-  gap: 10px;
-}
-
-.info-group:last-child {
-  margin-bottom: 10px;
-}
-
 .edit-fields-table {
   display: inline-block;
   max-width: 820px;

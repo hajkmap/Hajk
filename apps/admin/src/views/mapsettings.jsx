@@ -60,6 +60,24 @@ const ColorButtonBlue = withStyles((theme) => ({
   },
 }))(Button);
 
+const infoGroupLabelStyle = {
+  marginTop: "15px",
+};
+
+const infoGroupStyle = {
+  display: "flex",
+  marginLeft: "13px",
+  gap: "10px",
+};
+
+const groupCheckboxLabelStyle = {
+  marginLeft: "5px",
+};
+
+const infoGroupInputStyle = {
+  marginTop: "10px",
+};
+
 $.fn.editable = function (component) {
   function edit(node, e) {
     function reset() {
@@ -153,36 +171,36 @@ $.fn.editable = function (component) {
       layerTools = $("<div></div>"),
       abort = $('<span class="btn btn-default">Avbryt</span>'),
       abort2 = $('<span class="btn btn-default">Avbryt</span>'),
-      label = $(
-        `<label style="margin-left: 5px;" for="${id}">Expanderad vid start&nbsp;</label>`
+      label = $(`<label for="${id}">Expanderad vid start&nbsp;</label>`).css(
+        groupCheckboxLabelStyle
       ),
-      label2 = $(
-        `<label style="margin-left: 5px;" for="${id2}">Toggla alla-knapp&nbsp;</label>`
+      label2 = $(`<label for="${id2}">Toggla alla-knapp&nbsp;</label>`).css(
+        groupCheckboxLabelStyle
       ),
       label3 = $(`<label for="${id3}">Synlig vid start&nbsp;</label><br />`),
       label4 = $(`<label for="${id4}">Redigera snabbval&nbsp;</label><br />`),
       label5 = $(`<br /><label for="${id6}">Tillträde</label><br />`),
       label6 = $(`<label for="${id7}">Infobox</label><br />`),
-      label7 = $(
-        `<label style="margin-left: 5px;" for="${id8}">Infodokument&nbsp;</label>`
+      label7 = $(`<label for="${id8}">Infodokument&nbsp;</label>`).css(
+        groupCheckboxLabelStyle
       ),
-      label8 = $(
-        `<label style="margin-top: 15px;" for="${id9}">Rubrik&nbsp;</label>`
+      label8 = $(`<label for="${id9}">Rubrik&nbsp;</label>`).css(
+        infoGroupLabelStyle
       ),
-      label9 = $(
-        `<label style="margin-top: 15px;" for="${id10}">Text&nbsp;</label>`
+      label9 = $(`<label for="${id10}">Text&nbsp;</label>`).css(
+        infoGroupLabelStyle
       ),
-      label10 = $(
-        `<label style="margin-top: 15px;" for="${id11}">Länk&nbsp;</label>`
+      label10 = $(`<label for="${id11}">Länk&nbsp;</label>`).css(
+        infoGroupLabelStyle
       ),
-      label11 = $(
-        `<label style="margin-top: 15px;" for="${id12}">Länktext&nbsp;</label>`
+      label11 = $(`<label for="${id12}">Länktext&nbsp;</label>`).css(
+        infoGroupLabelStyle
       ),
       label12 = $(
-        `<label style="margin-top: 15px;" for="${id13}">Länk till öppna data&nbsp;</label>`
-      ),
-      label13 = $(
-        `<label style="margin-top: 15px;" for="${id14}">Ägare&nbsp;</label>`
+        `<label for="${id13}">Länk till öppna data&nbsp;</label>`
+      ).css(infoGroupLabelStyle),
+      label13 = $(`<label for="${id14}">Ägare&nbsp;</label>`).css(
+        infoGroupLabelStyle
       ),
       checkbox = $(`<input id="${id}" type="checkbox"/>`),
       checkbox2 = $(`<input id="${id2}" type="checkbox"/>`),
@@ -194,32 +212,26 @@ $.fn.editable = function (component) {
       input2 = $(`<input id="${id5}" type="text" placeholder="Ny länk"/>`),
       input3 = $(`<input id="${id6}" type="text" />`),
       input4 = $(`<textarea id="${id7}" type="text"></textarea>`),
-      input5 = $(`<input style="margin-top: 15px;" id="${id9}" type="text"/>`),
-      input6 = $(
-        `<textarea style="margin-top: 10px;" id="${id10}" style="display: none;" type="text"></textarea>`
+      input5 = $(`<input id="${id9}" type="text"/>`).css(infoGroupLabelStyle),
+      input6 = $(`<textarea id="${id10}" type="text"></textarea>`).css(
+        infoGroupInputStyle
       ),
-      input7 = $(
-        `<input style="margin-top: 10px;" id="${id11}" style="display: none;" type="text"/>`
-      ),
-      input8 = $(
-        `<input style="margin-top: 10px;" id="${id12}" style="display: none;" type="text"/>`
-      ),
-      input9 = $(
-        `<input style="margin-top: 10px;" id="${id13}" style="display: none;" type="text"/>`
-      ),
-      input10 = $(
-        `<input style="margin-top: 10px;" id="${id14}" style="display: none;" type="text"/>`
-      ),
+      input7 = $(`<input id="${id11}" type="text"/>`).css(infoGroupInputStyle),
+      input8 = $(`<input id="${id12}" type="text"/>`).css(infoGroupInputStyle),
+      input9 = $(`<input id="${id13}" type="text"/>`).css(infoGroupInputStyle),
+      input10 = $(`<input id="${id14}" type="text"/>`).css(infoGroupInputStyle),
       expanded = $('<div class="expanded-at-start"></div>'),
       toggled = $('<div class="expanded-at-start"></div>'),
       infogroupvisible = $('<div class="expanded-at-start"></div>'),
       infogroupcontainer = $('<div class="info-groupContainer"></div>'),
-      infogrouptitle = $('<div class="info-group"></div>'),
-      infogrouptext = $('<div class="info-group"></div>'),
-      infogroupurl = $('<div class="info-group"></div>'),
-      infogroupurltext = $('<div class="info-group"></div>'),
-      infogroupopendatalink = $('<div class="info-group"></div>'),
-      infogroupowner = $('<div class="info-group"></div>'),
+      infogrouptitle = $("<div></div>").css(infoGroupStyle),
+      infogrouptext = $("<div></div>").css(infoGroupStyle),
+      infogroupurl = $("<div></div>").css(infoGroupStyle),
+      infogroupurltext = $("<div></div>").css(infoGroupStyle),
+      infogroupopendatalink = $("<div></div>").css(infoGroupStyle),
+      infogroupowner = $('<div style="margin-bottom: 10px;"></div>').css(
+        infoGroupStyle
+      ),
       visible = $('<div class=""></div>'),
       editPreset = $('<div class=""></div>'),
       elem = node.get(0) || {};
