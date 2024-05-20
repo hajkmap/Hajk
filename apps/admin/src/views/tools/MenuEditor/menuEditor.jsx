@@ -86,6 +86,7 @@ class ToolOptions extends Component {
     draggingEnabled: false,
     searchImplemented: true,
     enablePrint: true,
+    enableFrontPage: false,
     pdfLinks: [{ name: "", link: "" }],
     closePanelOnMapLinkOpen: false,
     displayLoadingOnMapLinkOpen: false,
@@ -113,19 +114,22 @@ class ToolOptions extends Component {
     this.type = "documenthandler";
     this.mapSettingsModel = props.model;
     this.menuEditorModel = this.getMenuEditorModel();
-    this.menuEditorModel.listAllAvailableDocuments(this.state.folder).then((list) => {
-      this.setState({
-        availableDocuments: list,
-      })
-    });
-    
-    this.useDocumentFolders = this.menuEditorModel.config.use_document_folders ?? false;
+    this.menuEditorModel
+      .listAllAvailableDocuments(this.state.folder)
+      .then((list) => {
+        this.setState({
+          availableDocuments: list,
+        });
+      });
+
+    this.useDocumentFolders =
+      this.menuEditorModel.config.use_document_folders ?? false;
 
     if (this.useDocumentFolders) {
       this.menuEditorModel.loadFolders().then((list) => {
         this.setState({
           folders: list,
-        })
+        });
       });
     }
   }
@@ -195,6 +199,7 @@ class ToolOptions extends Component {
         draggingEnabled: tool.options.draggingEnabled || false,
         searchImplemented: tool.options.searchImplemented,
         enablePrint: tool.options.enablePrint,
+        enableFrontPage: tool.options.enableFrontPage,
         pdfLinks: tool.options.pdfLinks || [{ name: "", link: "" }],
         closePanelOnMapLinkOpen: tool.options.closePanelOnMapLinkOpen,
         displayLoadingOnMapLinkOpen:
@@ -290,6 +295,7 @@ class ToolOptions extends Component {
         height: this.state.height,
         searchImplemented: this.state.searchImplemented,
         enablePrint: this.state.enablePrint,
+        enablePrint: this.state.enableFrontPage,
         pdfLinks: this.state.pdfLinks,
         closePanelOnMapLinkOpen: this.state.closePanelOnMapLinkOpen,
         displayLoadingOnMapLinkOpen: this.state.displayLoadingOnMapLinkOpen,
@@ -908,6 +914,21 @@ class ToolOptions extends Component {
             />
             &nbsp;
             <label htmlFor="enablePrint">Utskrift aktiverad</label>
+          </div>
+          <div>
+            <input
+              id="enableFrontPage"
+              name="enableFrontPage"
+              type="checkbox"
+              onChange={(e) => {
+                this.handleInputChange(e);
+              }}
+              checked={this.state.enableFrontPage}
+            />
+            &nbsp;
+            <label htmlFor="enableFrontPage">
+              Framsida till utskrift aktiverad
+            </label>
           </div>
           <div>
             {this.state.pdfLinks &&
