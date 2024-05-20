@@ -43,7 +43,7 @@ const GridGridContainer = styled(Grid)(({ theme }) => ({
 }));
 
 const GridMiddleContainer = styled(Grid)(({ theme }) => ({
-  marginTop: theme.spacing(2),
+  alignContent: "start",
   overflowX: "auto",
   "&::-webkit-scrollbar": {
     width: "0.4em",
@@ -1008,7 +1008,27 @@ class PrintWindow extends React.PureComponent {
         </Typography>
         <GridSettingsContainer container item>
           <Typography variant="h6">Inställningar</Typography>
+
           <Grid xs={12} item>
+            <FormControlLabel
+              value="Inkludera framsida"
+              control={
+                <Checkbox
+                  color="primary"
+                  onChange={() => this.toggleIncludeFrontPage()}
+                />
+              }
+              label="Inkludera framsida"
+              labelPlacement="end"
+            />
+          </Grid>
+          {/* <Grid xs={12} item>
+
+          </Grid> */}
+        </GridSettingsContainer>
+        <Typography variant="h6">Valt innehåll</Typography>
+        <GridMiddleContainer item container>
+          <Grid xs={12} item sx={{ marginBottom: "10px" }}>
             <FormControlLabel
               value="Välj alla dokument"
               control={
@@ -1025,27 +1045,13 @@ class PrintWindow extends React.PureComponent {
             />
           </Grid>
           <Grid xs={12} item>
-            <FormControlLabel
-              value="Inkludera framsida"
-              control={
-                <Checkbox
-                  color="primary"
-                  onChange={() => this.toggleIncludeFrontPage()}
-                />
-              }
-              label="Inkludera framsida"
-              labelPlacement="end"
+            <PrintList
+              localObserver={localObserver}
+              documentMenu={menuInformation}
+              level={0}
+              handleTogglePrint={this.toggleChosenForPrint}
             />
           </Grid>
-        </GridSettingsContainer>
-        <Typography variant="h6">Valt innehåll</Typography>
-        <GridMiddleContainer item container>
-          <PrintList
-            localObserver={localObserver}
-            documentMenu={menuInformation}
-            level={0}
-            handleTogglePrint={this.toggleChosenForPrint}
-          />
         </GridMiddleContainer>
         {documentWindowMaximized && this.renderCreatePDFButton()}
         {this.renderLoadingDialog()}
