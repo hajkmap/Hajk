@@ -135,8 +135,9 @@ class PrintWindow extends React.PureComponent {
     selectedPdfIndex: null,
     isModalOpen: false,
     pdfLinks: this.checkPdfLinks(this.props.options.pdfLinks),
+    includeFrontPageSelect: this.props.options.enableFrontPage,
     frontPage: null,
-    includeFrontPage: false,
+    frontPageSelected: false,
   };
 
   internalId = 0;
@@ -325,7 +326,7 @@ class PrintWindow extends React.PureComponent {
 
     // Add frontPageImgPromise to the array of promises
     // And loads the front page image
-    if (this.state.includeFrontPage) {
+    if (this.state.frontPageSelected) {
       const frontPageImgElement = this.frontPageElement.querySelector("img");
       const frontPageImgPromise = this.loadImage(frontPageImgElement);
       imgPromises.push(frontPageImgPromise);
@@ -477,7 +478,7 @@ class PrintWindow extends React.PureComponent {
   printContents = () => {
     // We're gonna want to make sure everything is rendered...
     Promise.all([
-      this.state.includeFrontPage === true && this.renderFrontPage(),
+      this.state.frontPageSelected === true && this.renderFrontPage(),
       this.state.tocPrintMode !== "none" && this.renderToc(),
       this.renderContent(),
     ]).then(() => {
@@ -486,7 +487,7 @@ class PrintWindow extends React.PureComponent {
         // Then we can create an element that will hold our TOC and print-content...
         const printContent = document.createElement("div");
         // Append frontPage only if its included
-        this.state.includeFrontPage &&
+        this.state.frontPageSelected &&
           this.frontPageElement &&
           printContent.appendChild(this.frontPageElement);
         // ...append the TOC to the element (only if applicable)...
@@ -745,7 +746,7 @@ class PrintWindow extends React.PureComponent {
       this.setIsAnyDocumentSelected();
     });
 
-    if (this.state.includeFrontPage) {
+    if (this.state.frontPageSelected) {
       this.setState({ frontPage: this.createFrontPage(current) });
     }
   };
@@ -793,7 +794,7 @@ class PrintWindow extends React.PureComponent {
       isAnyDocumentSelected: toggled,
     });
 
-    if (this.state.includeFrontPage) {
+    if (this.state.frontPageSelected) {
       this.setState({ frontPage: this.createFrontPage(menuState) });
     }
   };
@@ -992,40 +993,39 @@ class PrintWindow extends React.PureComponent {
     }));
   };
 
-  toggleIncludeFrontPage = () => {
+  toggleSelectFrontPage = () => {
     this.setState((prevState) => ({
-      includeFrontPage: !prevState.includeFrontPage,
+      frontPageSelected: !prevState.frontPageSelected,
     }));
   };
 
   renderPrintDocuments = () => {
     const { localObserver, documentWindowMaximized } = this.props;
-    const { menuInformation } = this.state;
+    const { menuInformation, includeFrontPageSelect } = this.state;
     return (
       <>
         <Typography align="center" variant="h6">
           Skapa PDF
         </Typography>
-        <GridSettingsContainer container item>
-          <Typography variant="h6">Inställningar</Typography>
+        {includeFrontPageSelect && (
+          <GridSettingsContainer container item>
+            <Typography variant="h6">Inställningar</Typography>
 
-          <Grid xs={12} item>
-            <FormControlLabel
-              value="Inkludera framsida"
-              control={
-                <Checkbox
-                  color="primary"
-                  onChange={() => this.toggleIncludeFrontPage()}
-                />
-              }
-              label="Inkludera framsida"
-              labelPlacement="end"
-            />
-          </Grid>
-          {/* <Grid xs={12} item>
-
-          </Grid> */}
-        </GridSettingsContainer>
+            <Grid xs={12} item>
+              <FormControlLabel
+                value="Inkludera framsida"
+                control={
+                  <Checkbox
+                    color="primary"
+                    onChange={() => this.toggleSelectFrontPage()}
+                  />
+                }
+                label="Inkludera framsida"
+                labelPlacement="end"
+              />
+            </Grid>
+          </GridSettingsContainer>
+        )}
         <Typography variant="h6">Valt innehåll</Typography>
         <GridMiddleContainer item container>
           <Grid xs={12} item sx={{ marginBottom: "10px" }}>
