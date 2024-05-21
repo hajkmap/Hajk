@@ -43,7 +43,6 @@ const GridGridContainer = styled(Grid)(({ theme }) => ({
 }));
 
 const GridMiddleContainer = styled(Grid)(({ theme }) => ({
-  alignContent: "start",
   overflowX: "auto",
   "&::-webkit-scrollbar": {
     width: "0.4em",
@@ -1010,7 +1009,6 @@ class PrintWindow extends React.PureComponent {
         {includeFrontPageSelect && (
           <GridSettingsContainer container item>
             <Typography variant="h6">Inställningar</Typography>
-
             <Grid xs={12} item>
               <FormControlLabel
                 value="Inkludera framsida"
@@ -1027,7 +1025,7 @@ class PrintWindow extends React.PureComponent {
           </GridSettingsContainer>
         )}
         <Typography variant="h6">Valt innehåll</Typography>
-        <GridMiddleContainer item container>
+        <GridSettingsContainer>
           <Grid xs={12} item sx={{ marginBottom: "10px" }}>
             <FormControlLabel
               value="Välj alla dokument"
@@ -1044,6 +1042,8 @@ class PrintWindow extends React.PureComponent {
               labelPlacement="end"
             />
           </Grid>
+        </GridSettingsContainer>
+        <GridMiddleContainer item container>
           <Grid xs={12} item>
             <PrintList
               localObserver={localObserver}

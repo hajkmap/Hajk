@@ -927,7 +927,7 @@ class ToolOptions extends Component {
             />
             &nbsp;
             <label htmlFor="enableFrontPage">
-              Framsida till utskrift aktiverad
+              Tillåt val av framsida till utskrift
             </label>
           </div>
           <div>
