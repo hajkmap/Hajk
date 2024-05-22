@@ -1026,7 +1026,7 @@ class PrintWindow extends React.PureComponent {
         )}
         <Typography variant="h6">Valt innehåll</Typography>
         <GridSettingsContainer>
-          <Grid xs={12} item sx={{ marginBottom: "10px" }}>
+          <Grid xs={12} item>
             <FormControlLabel
               value="Välj alla dokument"
               control={
