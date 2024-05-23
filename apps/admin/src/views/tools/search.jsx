@@ -672,6 +672,21 @@ class ToolOptions extends Component {
     this.setState({ [target]: RGBA.toString(color.rgb) });
   };
 
+  handleOnChange = (searchOption) => (e) => {
+    const { checked } = e.target;
+    this.setState((prevState) => {
+      const enabledSearchOptions = new Set(prevState.enabledSearchOptions);
+      if (checked) {
+        enabledSearchOptions.add(searchOption);
+      } else {
+        enabledSearchOptions.delete(searchOption);
+      }
+      return {
+        enabledSearchOptions: Array.from(enabledSearchOptions),
+      };
+    });
+  };
+
   /**
    *
    */
@@ -986,22 +1001,7 @@ class ToolOptions extends Component {
               id="searchInVisibleLayersEnabled"
               name="searchInVisibleLayersEnabled"
               type="checkbox"
-              onChange={(e) => {
-                const { checked } = e.target;
-                this.setState((prevState) => {
-                  const enabledSearchOptions = new Set(
-                    prevState.enabledSearchOptions
-                  );
-                  if (checked) {
-                    enabledSearchOptions.add("searchInVisibleLayers");
-                  } else {
-                    enabledSearchOptions.delete("searchInVisibleLayers");
-                  }
-                  return {
-                    enabledSearchOptions: Array.from(enabledSearchOptions),
-                  };
-                });
-              }}
+              onChange={this.handleOnChange("searchInVisibleLayers")}
               checked={this.state.enabledSearchOptions.includes(
                 "searchInVisibleLayers"
               )}
@@ -1041,22 +1041,7 @@ class ToolOptions extends Component {
               id="wildcardAtStartEnabled"
               name="wildcardAtStartEnabled"
               type="checkbox"
-              onChange={(e) => {
-                const { checked } = e.target;
-                this.setState((prevState) => {
-                  const enabledSearchOptions = new Set(
-                    prevState.enabledSearchOptions
-                  );
-                  if (checked) {
-                    enabledSearchOptions.add("wildcardAtStart");
-                  } else {
-                    enabledSearchOptions.delete("wildcardAtStart");
-                  }
-                  return {
-                    enabledSearchOptions: Array.from(enabledSearchOptions),
-                  };
-                });
-              }}
+              onChange={this.handleOnChange("wildcardAtStart")}
               checked={this.state.enabledSearchOptions.includes(
                 "wildcardAtStart"
               )}
@@ -1091,22 +1076,7 @@ class ToolOptions extends Component {
               id="wildcardAtEndEnabled"
               name="wildcardAtEndEnabled"
               type="checkbox"
-              onChange={(e) => {
-                const { checked } = e.target;
-                this.setState((prevState) => {
-                  const enabledSearchOptions = new Set(
-                    prevState.enabledSearchOptions
-                  );
-                  if (checked) {
-                    enabledSearchOptions.add("wildcardAtEnd");
-                  } else {
-                    enabledSearchOptions.delete("wildcardAtEnd");
-                  }
-                  return {
-                    enabledSearchOptions: Array.from(enabledSearchOptions),
-                  };
-                });
-              }}
+              onChange={this.handleOnChange("wildcardAtEnd")}
               checked={this.state.enabledSearchOptions.includes(
                 "wildcardAtEnd"
               )}
@@ -1141,22 +1111,7 @@ class ToolOptions extends Component {
               id="matchCaseEnabled"
               name="matchCaseEnabled"
               type="checkbox"
-              onChange={(e) => {
-                const { checked } = e.target;
-                this.setState((prevState) => {
-                  const enabledSearchOptions = new Set(
-                    prevState.enabledSearchOptions
-                  );
-                  if (checked) {
-                    enabledSearchOptions.add("matchCase");
-                  } else {
-                    enabledSearchOptions.delete("matchCase");
-                  }
-                  return {
-                    enabledSearchOptions: Array.from(enabledSearchOptions),
-                  };
-                });
-              }}
+              onChange={this.handleOnChange("matchCase")}
               checked={this.state.enabledSearchOptions.includes("matchCase")}
             />
             &nbsp;
@@ -1187,22 +1142,7 @@ class ToolOptions extends Component {
               id="activeSpatialFilterEnabled"
               name="activeSpatialFilterEnabled"
               type="checkbox"
-              onChange={(e) => {
-                const { checked } = e.target;
-                this.setState((prevState) => {
-                  const enabledSearchOptions = new Set(
-                    prevState.enabledSearchOptions
-                  );
-                  if (checked) {
-                    enabledSearchOptions.add("activeSpatialFilter");
-                  } else {
-                    enabledSearchOptions.delete("activeSpatialFilter");
-                  }
-                  return {
-                    enabledSearchOptions: Array.from(enabledSearchOptions),
-                  };
-                });
-              }}
+              onChange={this.handleOnChange("activeSpatialFilter")}
               checked={this.state.enabledSearchOptions.includes(
                 "activeSpatialFilter"
               )}
@@ -1237,22 +1177,7 @@ class ToolOptions extends Component {
               id="enableLabelOnHighlightEnabled"
               name="enableLabelOnHighlightEnabled"
               type="checkbox"
-              onChange={(e) => {
-                const { checked } = e.target;
-                this.setState((prevState) => {
-                  const enabledSearchOptions = new Set(
-                    prevState.enabledSearchOptions
-                  );
-                  if (checked) {
-                    enabledSearchOptions.add("enableLabelOnHighlight");
-                  } else {
-                    enabledSearchOptions.delete("enableLabelOnHighlight");
-                  }
-                  return {
-                    enabledSearchOptions: Array.from(enabledSearchOptions),
-                  };
-                });
-              }}
+              onChange={this.handleOnChange("enableLabelOnHighlight")}
               checked={this.state.enabledSearchOptions.includes(
                 "enableLabelOnHighlight"
               )}
