@@ -12,7 +12,12 @@ import {
   Slide,
 } from "@mui/material";
 import { styled } from "@mui/material/styles";
-import { setLevel, shouldShowNotice } from "../models/Cookie";
+import {
+  functionalOk,
+  setLevel,
+  shouldShowNotice,
+  thirdPartyOk,
+} from "../models/Cookie";
 
 // Default settings for the cookie-notice text and url if none is supplied from the configuration.
 const DEFAULT_MESSAGE =
@@ -55,8 +60,9 @@ function CookieNotice({ globalObserver, appModel }) {
 
   // We should initialize the dialog:s open-state to whatever the manager states.
   const [open, setOpen] = React.useState(shouldShowNotice());
-  const [functionalChecked, setFunctionalChecked] = React.useState(false);
-  const [thirdPartChecked, setThirdPartChecked] = React.useState(false);
+  const [functionalChecked, setFunctionalChecked] =
+    React.useState(functionalOk);
+  const [thirdPartChecked, setThirdPartChecked] = React.useState(thirdPartyOk);
 
   const defaultCookieNoticeMessage =
     config?.mapConfig?.map?.defaultCookieNoticeMessage || DEFAULT_MESSAGE;
@@ -104,10 +110,14 @@ function CookieNotice({ globalObserver, appModel }) {
     // IF the user accepts all they are at least accepting required- and
     // functional-cookies. (Cookie-level 3).
     let cookieLevel = 3;
+    // Set functional checked in case of revisit to cookie notice.
+    setFunctionalChecked(true);
     // If we are showing the option for third-part-cookies, they are obviously
     // accepting that as well.
     if (showThirdPartCheckbox) {
       cookieLevel = cookieLevel | 4;
+      // Set thirdPartChecked in case of revisit to cookie notice.
+      setThirdPartChecked(true);
     }
     // Then we'll set the cookie-level in the manager.
     setLevel(cookieLevel);

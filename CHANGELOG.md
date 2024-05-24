@@ -17,6 +17,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Cookie: It's now possible to revisit the cookie notice and change your preference [#1125](https://github.com/hajkmap/Hajk/issue/1125)
 - Sketch: It is now possible to buffer from the Sketch plugin. [#1310](https://github.com/hajkmap/Hajk/issues/1310)
 - Sketch: The user now has the option to reset to default styling and choose from a wider range of colors in the color picker; additionally, black and white options have been added. [#1372](https://github.com/hajkmap/Hajk/issues/1372)
 - Core, Admin: Added support for stand-alone GeoWebCache WMS Server. Issue: [#1469](https://github.com/hajkmap/Hajk/issues/1469), PR: [#1493](https://github.com/hajkmap/Hajk/pull/1493).
@@ -28,7 +29,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - TimeSlider: It's now possible to print images of the content generated in the TimeSlider plugin. PR: [#1492](https://github.com/hajkmap/Hajk/pull/1492).
 - Core: CSS classes added for certain elements, allows for more granular custom styling. See also this [discussion](https://github.com/hajkmap/Hajk/discussions/1481). PR: [#1497](https://github.com/hajkmap/Hajk/pull/1497).
 - Coordinates: in addition to changing the icon's name (URL), it is now also possible to set icon's scale and anchor values. PR: [#1499](https://github.com/hajkmap/Hajk/pull/1499).
-- Admin UI: It is now possible to easily duplicate map configurations using the UI. [#1502](https://github.com/hajkmap/Hajk/issues/1502)
+- Admin UI: It is now possible to easily duplicate map configurations using the UI. [#1502](https://github.com/hajkmap/Hajk/issues/1502).
+- Coordinates: It's now possible to copy and paste coordinates from/to both coordinate inputs (N & E, longitude & latitude). PR: [#1506](https://github.com/hajkmap/Hajk/pull/1506).
 
 ### Fixed
 
@@ -36,6 +38,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Restore cross-platform build for NodeJS backend. [#1484](https://github.com/hajkmap/Hajk/pull/1484)
 - Bug fix associated to #1468. [#1485](https://github.com/hajkmap/Hajk/pull/1485)
 - Admin UI is now compatible with the correct HTTP verbs (`DELETE` and `PUT`). [#1501](https://github.com/hajkmap/Hajk/pull/1501)
+- Cookie: Cookie Notice updated after browser refresh. Fix to PR: [#1509](https://github.com/hajkmap/Hajk/pull/1509)
 
 ### Security
 
