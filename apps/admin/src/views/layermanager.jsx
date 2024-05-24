@@ -309,6 +309,7 @@ class Manager extends Component {
           rotateMap: layer.rotateMap || "n",
           infoClickSortDesc: layer.infoClickSortDesc ?? true,
           tiled: layer.tiled,
+          showAttributeTableButton: layer.showAttributeTableButton || false,
           singleTile: layer.singleTile,
           hidpi: layer.hidpi,
           customRatio: layer.customRatio,
