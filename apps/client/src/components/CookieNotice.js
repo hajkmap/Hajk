@@ -18,7 +18,6 @@ import {
   shouldShowNotice,
   thirdPartyOk,
 } from "../models/Cookie";
-import zIndex from "@mui/material/styles/zIndex";
 
 // Default settings for the cookie-notice text and url if none is supplied from the configuration.
 const DEFAULT_MESSAGE =
