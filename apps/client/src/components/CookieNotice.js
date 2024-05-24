@@ -18,6 +18,7 @@ import {
   shouldShowNotice,
   thirdPartyOk,
 } from "../models/Cookie";
+import zIndex from "@mui/material/styles/zIndex";
 
 // Default settings for the cookie-notice text and url if none is supplied from the configuration.
 const DEFAULT_MESSAGE =
@@ -133,6 +134,7 @@ function CookieNotice({ globalObserver, appModel }) {
       TransitionComponent={Transition}
       keepMounted
       aria-describedby="cookie-dialog-content-text"
+      sx={{ zIndex: "9999" }}
     >
       <DialogContent>
         <DialogContentText
