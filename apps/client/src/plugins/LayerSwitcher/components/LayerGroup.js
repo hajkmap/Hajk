@@ -3,11 +3,14 @@ import propTypes from "prop-types";
 import LayerItem from "./LayerItem.js";
 import { styled } from "@mui/material/styles";
 import { Accordion, AccordionDetails, AccordionSummary } from "@mui/material";
-import { Box, Typography } from "@mui/material";
+import { Box, Typography, Divider, IconButton, Link } from "@mui/material";
 import CheckBoxIcon from "@mui/icons-material/CheckBox";
 import CheckBoxOutlineBlankIcon from "@mui/icons-material/CheckBoxOutlineBlank";
+import InfoIcon from "@mui/icons-material/Info";
+import RemoveCircleIcon from "@mui/icons-material/RemoveCircle";
 import KeyboardArrowRightIcon from "@mui/icons-material/KeyboardArrowRight";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
+import HajkToolTip from "components/HajkToolTip.js";
 
 const StyledAccordion = styled(Accordion)(() => ({
   borderRadius: 0,
@@ -70,6 +73,13 @@ class LayerGroup extends React.PureComponent {
     parent: "-1",
     toggled: false,
     chapters: [],
+    infogrouptitle: "",
+    infogrouptext: "",
+    infogroupurl: "",
+    infogroupurltext: "",
+    infogroupopendatalink: "",
+    infogroupowner: "",
+    infoVisible: false,
   };
 
   static defaultProps = {
@@ -304,6 +314,132 @@ class LayerGroup extends React.PureComponent {
     return <CheckBoxOutlineBlankIcon sx={checkBoxIconStyle} />;
   };
 
+  toggleInfo = () => {
+    this.setState({
+      infoVisible: !this.state.infoVisible,
+    });
+  };
+
+  renderGroupInfo() {
+    const {
+      infogrouptitle,
+      infogrouptext,
+      infogroupurl,
+      infogroupurltext,
+      infogroupopendatalink,
+      infogroupowner,
+      name,
+    } = this.state;
+
+    return (
+      <>
+        {infogrouptitle && (
+          <Typography variant="subtitle2">{infogrouptitle}</Typography>
+        )}
+        {infogrouptext && (
+          <Typography variant="body2">{infogrouptext}</Typography>
+        )}
+        {infogroupurl && (
+          <Typography variant="body2" sx={{ fontWeight: 500, mt: 1, mb: 1 }}>
+            <Link href={infogroupurl} target="_blank" rel="noreferrer">
+              {infogroupurltext}
+            </Link>
+          </Typography>
+        )}
+        {infogroupopendatalink && (
+          <Typography variant="body2" sx={{ fontWeight: 500, mt: 1, mb: 1 }}>
+            <Link href={infogroupopendatalink} target="_blank" rel="noreferrer">
+              Öppna data: {name}
+            </Link>
+          </Typography>
+        )}
+        {infogroupowner && (
+          <Typography variant="body2">{infogroupowner}</Typography>
+        )}
+      </>
+    );
+  }
+
+  renderGroupInfoToggler = () => {
+    const {
+      infogrouptitle,
+      infogrouptext,
+      infogroupurl,
+      infogroupurltext,
+      infogroupopendatalink,
+      infogroupowner,
+      infoVisible,
+    } = this.state;
+
+    // Render icons only if one of the states above has a value
+    return (
+      (infogrouptitle ||
+        infogrouptext ||
+        infogroupurl ||
+        infogroupurltext ||
+        infogroupopendatalink ||
+        infogroupowner) && (
+        <HajkToolTip title="Mer information om gruppen">
+          {infoVisible ? (
+            <IconButton
+              sx={{
+                padding: "0px",
+                "& .MuiTouchRipple-root": { display: "none" },
+              }}
+              onClick={(e) => {
+                e.stopPropagation();
+                this.toggleInfo();
+              }}
+            >
+              <RemoveCircleIcon />
+            </IconButton>
+          ) : (
+            <IconButton
+              sx={{
+                padding: "0px",
+                "& .MuiTouchRipple-root": { display: "none" },
+              }}
+              onClick={(e) => {
+                e.stopPropagation();
+                this.toggleInfo();
+              }}
+            >
+              <InfoIcon
+                style={{
+                  boxShadow: infoVisible
+                    ? "rgb(204, 204, 204) 2px 3px 1px"
+                    : "inherit",
+                  borderRadius: "100%",
+                }}
+              />
+            </IconButton>
+          )}
+        </HajkToolTip>
+      )
+    );
+  };
+
+  renderGroupInfoDetails() {
+    const { infoVisible } = this.state;
+
+    if (infoVisible) {
+      return (
+        <Box
+          sx={{
+            ml: 6,
+            p: 2,
+          }}
+          component="div"
+        >
+          {this.renderGroupInfo()}
+          <Divider sx={{ mt: 1 }} />
+        </Box>
+      );
+    } else {
+      return null;
+    }
+  }
+
   /**
    * If Group has "toggleable" property enabled, render the toggle all checkbox.
    *
@@ -337,6 +473,7 @@ class LayerGroup extends React.PureComponent {
           >
             {this.state.name}
           </HeadingTypography>
+          {this.renderGroupInfoToggler()}
         </SummaryContainer>
       );
     } else {
@@ -350,6 +487,7 @@ class LayerGroup extends React.PureComponent {
           >
             {this.state.name}
           </HeadingTypography>
+          {this.renderGroupInfoToggler()}
         </SummaryContainer>
       );
     }
@@ -372,16 +510,24 @@ class LayerGroup extends React.PureComponent {
             });
           }}
         >
-          <StyledAccordionSummary>
-            <ExpandButtonWrapper>
-              {expanded ? (
-                <KeyboardArrowDownIcon onClick={() => this.toggleExpanded()} />
-              ) : (
-                <KeyboardArrowRightIcon onClick={() => this.toggleExpanded()} />
-              )}
-            </ExpandButtonWrapper>
-            {this.renderToggleAll()}
-          </StyledAccordionSummary>
+          <Box>
+            <StyledAccordionSummary>
+              <ExpandButtonWrapper>
+                {expanded ? (
+                  <KeyboardArrowDownIcon
+                    onClick={() => this.toggleExpanded()}
+                  />
+                ) : (
+                  <KeyboardArrowRightIcon
+                    onClick={() => this.toggleExpanded()}
+                  />
+                )}
+              </ExpandButtonWrapper>
+              {this.renderToggleAll()}
+            </StyledAccordionSummary>
+            {this.renderGroupInfoDetails()}
+          </Box>
+
           <StyledAccordionDetails>
             <div>
               {this.state.layers.map((layer, i) => {
