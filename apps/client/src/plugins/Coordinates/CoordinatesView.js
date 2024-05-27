@@ -1,11 +1,10 @@
-import React from "react";
+import React, { useEffect, useRef } from "react";
 import Button from "@mui/material/Button";
 import { styled } from "@mui/material/styles";
 import Grid from "@mui/material/Grid";
-import CoordinatesTransformRow from "./CoordinatesTransformRow.js";
+import CoordinatesTransformRow from "./CoordinatesTransformRow";
 import { Divider } from "@mui/material";
-
-import { withSnackbar } from "notistack";
+import { useSnackbar } from "notistack";
 import HajkToolTip from "components/HajkToolTip";
 
 import {
@@ -17,23 +16,13 @@ const StyledGridContainer = styled(Grid)(({ theme }) => ({
   padding: theme.spacing(2),
 }));
 
-class CoordinatesView extends React.PureComponent {
-  state = {};
+const CoordinatesView = ({ model, localObserver }) => {
+  const { enqueueSnackbar, closeSnackbar } = useSnackbar();
+  const snackbarKeyRef = useRef(null);
 
-  constructor(props) {
-    super(props);
-    this.model = this.props.model;
-    this.snackbarKey = null;
-    this.localObserver = this.props.localObserver;
-
-    /**
-     * Setup listeners that will show/hide snackbar. The Model will publish
-     * the following events in order to show/hide Snackbar.
-     * Snackbar will show up to inform user to click in the map. When user has
-     * clicked, or changed to another tool, the snackbar will close.
-     */
-    this.localObserver.subscribe("showSnackbar", () => {
-      this.snackbarKey = this.props.enqueueSnackbar(
+  useEffect(() => {
+    const showSnackbar = () => {
+      snackbarKeyRef.current = enqueueSnackbar(
         "Klicka i kartan för att välja position.",
         {
           variant: "info",
@@ -43,8 +32,6 @@ class CoordinatesView extends React.PureComponent {
             horizontal: "center",
           },
           sx: {
-            // Custom styling to follow Material Design guidelines for Snackbar.
-            // Placing the close button to the right of the text.
             ".SnackbarItem-contentRoot": {
               flexWrap: "inherit !important",
             },
@@ -55,7 +42,7 @@ class CoordinatesView extends React.PureComponent {
               color="inherit"
               id={key}
               onClick={() => {
-                this.props.model.closeSnackbar();
+                model.closeSnackbar();
               }}
             >
               Stäng
@@ -63,123 +50,130 @@ class CoordinatesView extends React.PureComponent {
           ),
         }
       );
-    });
+    };
 
-    this.localObserver.subscribe("hideSnackbar", () => {
-      this.props.closeSnackbar(this.snackbarKey);
-    });
+    const hideSnackbar = () => {
+      closeSnackbar(snackbarKeyRef.current);
+    };
 
-    this.localObserver.subscribe("location-permissions-denied", () => {
-      this.props.enqueueSnackbar(
+    const locationPermissionsDenied = () => {
+      enqueueSnackbar(
         LOCATION_DENIED_SNACK_MESSAGE,
         LOCATION_DENIED_SNACK_OPTIONS
       );
-    });
-  }
+    };
 
-  componentWillUnmount() {
-    this.model.deactivate();
-  }
-
-  renderProjections() {
-    return (
-      <>
-        {this.props.model.transformations.map((transformation, index) => (
-          <CoordinatesTransformRow
-            key={`${transformation.code}${index}-element`}
-            model={this.model}
-            transformation={transformation}
-            inverseAxis={transformation.inverseAxis}
-          />
-        ))}
-      </>
+    localObserver.subscribe("showSnackbar", showSnackbar);
+    localObserver.subscribe("hideSnackbar", hideSnackbar);
+    localObserver.subscribe(
+      "location-permissions-denied",
+      locationPermissionsDenied
     );
-  }
 
-  renderButtons() {
-    return (
-      <Grid
-        container
-        item
-        spacing={2}
-        rowSpacing={1}
-        sx={{ mb: { xs: 6, sm: 0, md: 0 } }}
-      >
-        <Grid item xs={12} md={6}>
-          <HajkToolTip title="Rensa fält">
-            <Button
-              fullWidth={true}
-              variant="contained"
-              color="primary"
-              onClick={() => {
-                this.props.model.resetCoords();
-              }}
-            >
-              Rensa
-            </Button>
-          </HajkToolTip>
-        </Grid>
-        <Grid item xs={12} md={6}>
-          <HajkToolTip title="Min position">
-            <Button
-              fullWidth={true}
-              variant="contained"
-              color="primary"
-              onClick={() => {
-                this.props.model.goToUserLocation();
-              }}
-            >
-              Min position
-            </Button>
-          </HajkToolTip>
-        </Grid>
-        <Grid item xs={12} sm={6} md={6}>
-          <HajkToolTip title="Panorera till markering">
-            <Button
-              fullWidth={true}
-              variant="contained"
-              color="primary"
-              onClick={() => {
-                this.props.model.centerOnMarker();
-              }}
-            >
-              Panorera
-            </Button>
-          </HajkToolTip>
-        </Grid>
-        <Grid item xs={12} sm={6} md={6}>
-          <HajkToolTip title="Zooma in till markering">
-            <Button
-              fullWidth={true}
-              variant="contained"
-              color="primary"
-              onClick={() => {
-                this.props.model.zoomOnMarker();
-              }}
-            >
-              Zooma
-            </Button>
-          </HajkToolTip>
-        </Grid>
+    return () => {
+      model.deactivate();
+      localObserver.unsubscribe("showSnackbar", showSnackbar);
+      localObserver.unsubscribe("hideSnackbar", hideSnackbar);
+      localObserver.unsubscribe(
+        "location-permissions-denied",
+        locationPermissionsDenied
+      );
+    };
+  }, [enqueueSnackbar, closeSnackbar, localObserver, model]);
+
+  const renderProjections = () => (
+    <>
+      {model.transformations.map((transformation, index) => (
+        <CoordinatesTransformRow
+          key={`${transformation.code}${index}-element`}
+          model={model}
+          transformation={transformation}
+          inverseAxis={transformation.inverseAxis}
+        />
+      ))}
+    </>
+  );
+
+  const renderButtons = () => (
+    <Grid
+      container
+      item
+      spacing={2}
+      rowSpacing={1}
+      sx={{ mb: { xs: 6, sm: 0, md: 0 } }}
+    >
+      <Grid item xs={12} md={6}>
+        <HajkToolTip title="Rensa fält">
+          <Button
+            fullWidth
+            variant="contained"
+            color="primary"
+            onClick={() => {
+              model.resetCoords();
+            }}
+          >
+            Rensa
+          </Button>
+        </HajkToolTip>
       </Grid>
-    );
-  }
-
-  render() {
-    return (
-      <Grid container>
-        <StyledGridContainer container rowSpacing={2} columnSpacing={1}>
-          {this.renderProjections()}
-        </StyledGridContainer>
-        <Grid item xs={12}>
-          <Divider />
-        </Grid>
-        <StyledGridContainer container rowSpacing={2} columnSpacing={1}>
-          {this.renderButtons()}
-        </StyledGridContainer>
+      <Grid item xs={12} md={6}>
+        <HajkToolTip title="Min position">
+          <Button
+            fullWidth
+            variant="contained"
+            color="primary"
+            onClick={() => {
+              model.goToUserLocation();
+            }}
+          >
+            Min position
+          </Button>
+        </HajkToolTip>
       </Grid>
-    );
-  }
-}
+      <Grid item xs={12} sm={6} md={6}>
+        <HajkToolTip title="Panorera till markering">
+          <Button
+            fullWidth
+            variant="contained"
+            color="primary"
+            onClick={() => {
+              model.centerOnMarker();
+            }}
+          >
+            Panorera
+          </Button>
+        </HajkToolTip>
+      </Grid>
+      <Grid item xs={12} sm={6} md={6}>
+        <HajkToolTip title="Zooma in till markering">
+          <Button
+            fullWidth
+            variant="contained"
+            color="primary"
+            onClick={() => {
+              model.zoomOnMarker();
+            }}
+          >
+            Zooma
+          </Button>
+        </HajkToolTip>
+      </Grid>
+    </Grid>
+  );
 
-export default withSnackbar(CoordinatesView);
+  return (
+    <Grid container>
+      <StyledGridContainer container rowSpacing={2} columnSpacing={1}>
+        {renderProjections()}
+      </StyledGridContainer>
+      <Grid item xs={12}>
+        <Divider />
+      </Grid>
+      <StyledGridContainer container rowSpacing={2} columnSpacing={1}>
+        {renderButtons()}
+      </StyledGridContainer>
+    </Grid>
+  );
+};
+
+export default CoordinatesView;
