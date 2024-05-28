@@ -1,9 +1,9 @@
-import React from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import Typography from "@mui/material/Typography";
 import TextField from "@mui/material/TextField";
 import { NumericFormat } from "react-number-format";
 import { transform } from "ol/proj";
-import { withSnackbar } from "notistack";
+import { useSnackbar } from "notistack";
 import { Grid, IconButton } from "@mui/material";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import { styled } from "@mui/material/styles";
@@ -13,359 +13,278 @@ const StyledIconButton = styled(IconButton)(({ theme }) => ({
   justifyContent: "flex-end",
   padding: "8px",
   "& svg": {
-    fontSize: 20, // Adjust the icon size here
+    fontSize: 20,
   },
   marginBottom: "-8px",
   marginRight: "-6px",
 }));
 
-class CoordinatesTransformRow extends React.PureComponent {
-  state = {
-    errorX: "",
-    errorY: "",
-    coordinateX: "",
-    coordinateY: "",
-    coordinateXFloat: 0,
-    coordinateYFloat: 0,
-    wasLastChanged: false,
-    wasModified: false,
-  };
+const CoordinatesTransformRow = (props) => {
+  const [errorX, setErrorX] = useState("");
+  const [errorY, setErrorY] = useState("");
+  const [coordinateX, setCoordinateX] = useState("");
+  const [coordinateY, setCoordinateY] = useState("");
+  const [coordinateXFloat, setCoordinateXFloat] = useState(0);
+  const [coordinateYFloat, setCoordinateYFloat] = useState(0);
+  const [wasLastChanged, setWasLastChanged] = useState(false);
+  const [wasModified, setWasModified] = useState(false);
 
-  constructor(props) {
-    super(props);
-    this.model = this.props.model;
-    this.transformation = this.props.transformation;
-    this.localObserver = this.props.model.localObserver;
+  const { enqueueSnackbar } = useSnackbar();
+  const { model, transformation, inverseAxis } = props;
+  const localObserver = model.localObserver;
 
-    this.localObserver.subscribe("newCoordinates", (incomingCoords) => {
-      // Force a change if the new coords from map click or user location since
-      // there might be a transformation with the same code as on the map
+  const subscribeToLocalObserver = useCallback(() => {
+    const newCoordinatesHandler = (incomingCoords) => {
       if (
-        incomingCoords["proj"] !== this.transformation.code ||
+        incomingCoords["proj"] !== transformation.code ||
         incomingCoords["force"]
       ) {
         const transformedCoords = transform(
           incomingCoords["coordinates"],
           incomingCoords["proj"],
-          this.props.transformation.code
+          transformation.code
         );
-        this.setState({
-          errorX: "",
-          errorY: "",
-          wasModified: true,
-          coordinateX: transformedCoords[0].toFixed(
-            this.transformation.precision
-          ),
-          coordinateY: transformedCoords[1].toFixed(
-            this.transformation.precision
-          ),
-          coordinateXFloat: transformedCoords[0],
-          coordinateYFloat: transformedCoords[1],
-          wasLastChanged: false,
-        });
+        setCoordinateX(transformedCoords[0].toFixed(transformation.precision));
+        setCoordinateY(transformedCoords[1].toFixed(transformation.precision));
+        setCoordinateXFloat(transformedCoords[0]);
+        setCoordinateYFloat(transformedCoords[1]);
+        setErrorX("");
+        setErrorY("");
+        setWasLastChanged(false);
+        setWasModified(true);
       } else {
-        this.setState({ wasLastChanged: true, wasModified: true });
+        setWasLastChanged(true);
+        setWasModified(true);
       }
-    });
+    };
 
-    this.localObserver.subscribe("resetCoordinates", () => {
-      this.setState({
-        errorX: "",
-        errorY: "",
-        coordinateX: "",
-        coordinateY: "",
-        coordinateXFloat: 0,
-        coordinateYFloat: 0,
-      });
-    });
-  }
+    const resetCoordinatesHandler = () => {
+      setCoordinateX("");
+      setCoordinateY("");
+      setCoordinateXFloat(0);
+      setCoordinateYFloat(0);
+      setErrorX("");
+      setErrorY("");
+    };
 
-  getCoordinates(title) {
-    let inputX, inputY;
-    // We find the specified numericFormat X and Y value
-    inputX = document.getElementsByName(`${title}numberformatX`)[0].value;
-    inputY = document.getElementsByName(`${title}numberformatY`)[0].value;
-    // And remove all blank spaces
+    localObserver.subscribe("newCoordinates", newCoordinatesHandler);
+    localObserver.subscribe("resetCoordinates", resetCoordinatesHandler);
+
+    return () => {
+      localObserver.unsubscribe("newCoordinates", newCoordinatesHandler);
+      localObserver.unsubscribe("resetCoordinates", resetCoordinatesHandler);
+    };
+  }, [localObserver, transformation.code, transformation.precision]);
+
+  useEffect(() => {
+    subscribeToLocalObserver();
+  }, [subscribeToLocalObserver]);
+
+  const getCoordinates = (title) => {
+    let inputX = document.getElementsByName(`${title}numberformatX`)[0].value;
+    let inputY = document.getElementsByName(`${title}numberformatY`)[0].value;
     inputX = inputX.replace(/\s/g, "");
     inputY = inputY.replace(/\s/g, "");
-
     return { inputX, inputY };
-  }
+  };
 
-  handleCopyToClipBoard(coordinateFormatTitle) {
-    //We get the correct input fields values using the title of the coordinate system
-    const { inputX, inputY } = this.getCoordinates(coordinateFormatTitle);
-
-    // We check if the values have any numbers, and if not exit the function early...
-    // and give an alert to the user
+  const handleCopyToClipBoard = (coordinateFormatTitle) => {
+    const { inputX, inputY } = getCoordinates(coordinateFormatTitle);
     if (inputX === "" || inputY === "") {
-      // Display a message if any of the fields are empty
-      this.props.enqueueSnackbar(
+      enqueueSnackbar(
         "Kopiering misslyckades, båda fälten måste vara ifyllda",
-        {
-          variant: "error",
-        }
+        { variant: "error" }
       );
       return;
     }
-
-    // Set the string to be copied from the two X and Y values
     const coordinatesString = `${inputX},${inputY}`;
-
-    // We copy the coordinateString to clipboard
     navigator.clipboard
       .writeText(coordinatesString)
       .then(() => {
-        this.props.enqueueSnackbar("Koordinaten kopierades till urklipp", {
+        enqueueSnackbar("Koordinaten kopierades till urklipp", {
           variant: "info",
         });
       })
-      .catch((error) => {
-        this.props.enqueueSnackbar("Kopiering misslyckades", {
-          variant: "error",
-        });
+      .catch(() => {
+        enqueueSnackbar("Kopiering misslyckades", { variant: "error" });
       });
-  }
+  };
 
-  formatValue(value) {
+  const formatValue = (value) => {
     const floatValue = parseFloat(value.replace(/ /g, "").replace(",", "."));
     return {
       formattedValue: new Intl.NumberFormat().format(floatValue),
       value: value.replace(/ /g, ""),
       floatValue,
     };
-  }
+  };
 
-  handlePasteFromClipBoard(event) {
+  const handlePasteFromClipBoard = (event) => {
     const clipboardData = event.clipboardData || window.clipboardData;
     const pastedText = clipboardData.getData("text");
-
-    // If pasted text does not have a comma, we don't need to handle double inputs
-    // we therefore exit the function is that is the case.
-    if (!pastedText.includes(",")) {
-      return;
-    }
-
-    // We don't want to paste twice
+    if (!pastedText.includes(",")) return;
     event.preventDefault();
-
-    // Here we set the X and Y coordinate object depending on the inverse axis...
-    // inverse axis is true for the first two numeric inputs and false for the third
     const [xValue, yValue] = pastedText.split(",");
-    const xObject = this.props.inverseAxis
-      ? this.formatValue(yValue)
-      : this.formatValue(xValue);
-    const yObject = this.props.inverseAxis
-      ? this.formatValue(xValue)
-      : this.formatValue(yValue);
-
-    // We update  the state
-    this.setState({
-      coordinateX: xObject.value,
-      coordinateXFloat: xObject.floatValue,
-      coordinateY: yObject.value,
-      coordinateYFloat: yObject.floatValue,
-      wasModified: true,
-    });
-
-    // And the local observer
-    this.localObserver.publish("newCoordinates", {
+    const xObject = inverseAxis ? formatValue(yValue) : formatValue(xValue);
+    const yObject = inverseAxis ? formatValue(xValue) : formatValue(yValue);
+    setCoordinateX(xObject.value);
+    setCoordinateXFloat(xObject.floatValue);
+    setCoordinateY(yObject.value);
+    setCoordinateYFloat(yObject.floatValue);
+    setWasModified(true);
+    localObserver.publish("newCoordinates", {
       coordinates: [xObject.floatValue, yObject.floatValue],
-      proj: this.props.transformation.code,
+      proj: transformation.code,
       force: false,
     });
-  }
+  };
 
-  handleInputX(event) {
+  const handleInputX = (event) => {
     if (
-      (!this.props.inverseAxis && event.value === this.state.coordinateX) ||
-      (this.props.inverseAxis && event.value === this.state.coordinateY)
-    ) {
-      // Nothing was changed so do nothing, this happens since the value is
-      // changed multiple times during formatting and we do not want to create
-      // infinite loops
+      (!inverseAxis && event.value === coordinateX) ||
+      (inverseAxis && event.value === coordinateY)
+    )
       return;
-    }
 
-    if (!this.props.inverseAxis) {
-      // Validate that the changed data is a finite number
-      this.setState({
-        coordinateX: event.value,
-        coordinateXFloat: event.floatValue,
-        wasModified: true,
-      });
+    const newCoordinateX = !inverseAxis ? event.value : coordinateY;
+    const newCoordinateXFloat = !inverseAxis
+      ? event.floatValue
+      : coordinateYFloat;
+    const newCoordinateY = !inverseAxis ? coordinateY : event.value;
+    const newCoordinateYFloat = !inverseAxis
+      ? coordinateYFloat
+      : event.floatValue;
+
+    if (!inverseAxis) {
+      setCoordinateX(newCoordinateX);
+      setCoordinateXFloat(newCoordinateXFloat);
     } else {
-      this.setState({
-        coordinateY: event.value,
-        coordinateYFloat: event.floatValue,
-        wasModified: true,
-      });
+      setCoordinateY(newCoordinateY);
+      setCoordinateYFloat(newCoordinateYFloat);
     }
+    setWasModified(true);
+
     if (isNaN(event.floatValue) || !isFinite(event.floatValue)) {
-      this.setState({ errorX: "Ange ett decimaltal" });
+      setErrorX("Ange ett decimaltal");
     } else {
-      this.setState({ errorX: "" });
-      const updatedValue = event.floatValue;
-
-      if (!this.props.inverseAxis) {
-        // publish the new value so all other transformations and the marker is updated
-        this.localObserver.publish("newCoordinates", {
-          coordinates: [updatedValue, this.state.coordinateYFloat],
-          proj: this.props.transformation.code,
-          force: false,
-        });
-      } else {
-        // publish the new value so all other transformations and the marker is updated
-        this.localObserver.publish("newCoordinates", {
-          coordinates: [this.state.coordinateXFloat, updatedValue],
-          proj: this.props.transformation.code,
-          force: false,
-        });
-      }
+      setErrorX("");
+      localObserver.publish("newCoordinates", {
+        coordinates: [newCoordinateXFloat, newCoordinateYFloat],
+        proj: transformation.code,
+        force: false,
+      });
     }
-  }
+  };
 
-  handleInputY(event) {
+  const handleInputY = (event) => {
     if (
-      (!this.props.inverseAxis && event.value === this.state.coordinateY) ||
-      (this.props.inverseAxis && event.value === this.state.coordinateX)
-    ) {
-      // Nothing was changed so do nothing, this happens since the value is
-      // changed multiple times during formatting and we do not want to create
-      // infinite loops
+      (!inverseAxis && event.value === coordinateY) ||
+      (inverseAxis && event.value === coordinateX)
+    )
       return;
-    }
-    if (!this.props.inverseAxis) {
-      // Validate that the changed data is a finite number
-      this.setState({
-        coordinateY: event.value,
-        coordinateYFloat: event.floatValue,
-        wasModified: true,
-      });
+
+    const newCoordinateY = !inverseAxis ? event.value : coordinateX;
+    const newCoordinateYFloat = !inverseAxis
+      ? event.floatValue
+      : coordinateXFloat;
+    const newCoordinateX = !inverseAxis ? coordinateX : event.value;
+    const newCoordinateXFloat = !inverseAxis
+      ? coordinateXFloat
+      : event.floatValue;
+
+    if (!inverseAxis) {
+      setCoordinateY(newCoordinateY);
+      setCoordinateYFloat(newCoordinateYFloat);
     } else {
-      this.setState({
-        coordinateX: event.value,
-        coordinateXFloat: event.floatValue,
-        wasModified: true,
-      });
+      setCoordinateX(newCoordinateX);
+      setCoordinateXFloat(newCoordinateXFloat);
     }
+    setWasModified(true);
+
     if (isNaN(event.floatValue) || !isFinite(event.floatValue)) {
-      this.setState({ errorY: "Ange ett decimaltal" });
+      setErrorY("Ange ett decimaltal");
     } else {
-      this.setState({ errorY: "" });
-      const updatedValue = event.floatValue;
-
-      if (!this.props.inverseAxis) {
-        // publish the new value so all other transformations and the marker is updated
-        this.localObserver.publish("newCoordinates", {
-          coordinates: [this.state.coordinateXFloat, updatedValue],
-          proj: this.props.transformation.code,
-          force: false,
-        });
-      } else {
-        // publish the new value so all other transformations and the marker is updated
-        this.localObserver.publish("newCoordinates", {
-          coordinates: [updatedValue, this.state.coordinateYFloat],
-          proj: this.props.transformation.code,
-          force: false,
-        });
-      }
+      setErrorY("");
+      localObserver.publish("newCoordinates", {
+        coordinates: [newCoordinateXFloat, newCoordinateYFloat],
+        proj: transformation.code,
+        force: false,
+      });
     }
-  }
+  };
 
-  componentWillUnmount() {}
+  let xCoord = inverseAxis ? coordinateY : coordinateX;
+  let yCoord = inverseAxis ? coordinateX : coordinateY;
 
-  render() {
-    let xCoord = this.props.inverseAxis
-      ? this.state.coordinateY
-      : this.state.coordinateX;
-    let yCoord = this.props.inverseAxis
-      ? this.state.coordinateX
-      : this.state.coordinateY;
-
-    if (this.model.showFieldsOnStart || this.state.wasModified) {
-      return (
-        <Grid
-          container
-          rowSpacing={0.5}
-          columnSpacing={2}
-          padding={0}
-          marginLeft={"-7px"}
-          paddingTop={1}
-        >
-          <Grid item xs={10} md={8} alignSelf={"end"}>
-            <Typography variant="body2" style={{ fontWeight: 600 }}>
-              {this.transformation
-                ? this.transformation.title +
-                  " (" +
-                  this.transformation.code +
-                  ")"
-                : ""}
-            </Typography>
-          </Grid>
-          <Grid container item xs={2} md={4} justifyContent={"end"}>
-            <HajkToolTip title="Kopiera till urklipp">
-              <StyledIconButton
-                onClick={() => {
-                  this.handleCopyToClipBoard(this.props.transformation.title);
-                }}
-              >
-                <ContentCopyIcon></ContentCopyIcon>
-              </StyledIconButton>
-            </HajkToolTip>
-          </Grid>
-          <Grid item xs={12} md={6}>
-            <NumericFormat
-              label={this.props.transformation.xtitle}
-              margin="dense"
-              variant="outlined"
-              size="small"
-              value={xCoord}
-              name={`${this.props.transformation.title}numberformatX`}
-              type="text"
-              onValueChange={(values) => {
-                this.handleInputX(values);
-              }}
-              axis={this.props.transformation.inverseAxis ? "X" : "Y"}
-              error={this.state.errorX !== ""}
-              helperText={this.state.errorX}
-              thousandSeparator={this.model.thousandSeparator ? " " : false}
-              customInput={TextField}
-              fullWidth={true}
-              onPaste={(values) => {
-                this.handlePasteFromClipBoard(values);
-              }}
-            />
-          </Grid>
-          <Grid item xs={12} md={6}>
-            <NumericFormat
-              label={this.props.transformation.ytitle}
-              margin="dense"
-              size="small"
-              variant="outlined"
-              value={yCoord}
-              name={`${this.props.transformation.title}numberformatY`}
-              type="text"
-              onValueChange={(values) => {
-                this.handleInputY(values);
-              }}
-              axis={this.props.transformation.inverseAxis ? "Y" : "X"}
-              error={this.state.errorY !== ""}
-              helperText={this.state.errorY}
-              thousandSeparator={this.model.thousandSeparator ? " " : false}
-              customInput={TextField}
-              fullWidth={true}
-              onPaste={(values) => {
-                this.handlePasteFromClipBoard(values);
-              }}
-            />
-          </Grid>
+  if (model.showFieldsOnStart || wasModified) {
+    return (
+      <Grid
+        container
+        rowSpacing={0.5}
+        columnSpacing={2}
+        padding={0}
+        marginLeft={"-7px"}
+        paddingTop={1}
+      >
+        <Grid item xs={10} md={8} alignSelf={"end"}>
+          <Typography variant="body2" style={{ fontWeight: 600 }}>
+            {transformation
+              ? `${transformation.title} (${transformation.code})`
+              : ""}
+          </Typography>
         </Grid>
-      );
-    } else {
-      return <></>;
-    }
+        <Grid container item xs={2} md={4} justifyContent={"end"}>
+          <HajkToolTip title="Kopiera till urklipp">
+            <StyledIconButton
+              onClick={() => handleCopyToClipBoard(transformation.title)}
+            >
+              <ContentCopyIcon />
+            </StyledIconButton>
+          </HajkToolTip>
+        </Grid>
+        <Grid item xs={12} md={6}>
+          <NumericFormat
+            label={transformation.xtitle}
+            margin="dense"
+            variant="outlined"
+            size="small"
+            value={xCoord}
+            name={`${transformation.title}numberformatX`}
+            type="text"
+            onValueChange={(values) => handleInputX(values)}
+            axis={transformation.inverseAxis ? "X" : "Y"}
+            error={errorX !== ""}
+            helperText={errorX}
+            thousandSeparator={model.thousandSeparator ? " " : false}
+            customInput={TextField}
+            fullWidth={true}
+            onPaste={(values) => handlePasteFromClipBoard(values)}
+          />
+        </Grid>
+        <Grid item xs={12} md={6}>
+          <NumericFormat
+            label={transformation.ytitle}
+            margin="dense"
+            size="small"
+            variant="outlined"
+            value={yCoord}
+            name={`${transformation.title}numberformatY`}
+            type="text"
+            onValueChange={(values) => handleInputY(values)}
+            axis={transformation.inverseAxis ? "Y" : "X"}
+            error={errorY !== ""}
+            helperText={errorY}
+            thousandSeparator={model.thousandSeparator ? " " : false}
+            customInput={TextField}
+            fullWidth={true}
+            onPaste={(values) => handlePasteFromClipBoard(values)}
+          />
+        </Grid>
+      </Grid>
+    );
+  } else {
+    return <></>;
   }
-}
+};
 
-export default withSnackbar(CoordinatesTransformRow);
+export default CoordinatesTransformRow;
