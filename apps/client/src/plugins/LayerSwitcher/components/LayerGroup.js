@@ -337,7 +337,10 @@ class LayerGroup extends React.PureComponent {
           <Typography variant="subtitle2">{infogrouptitle}</Typography>
         )}
         {infogrouptext && (
-          <Typography variant="body2">{infogrouptext}</Typography>
+          <Typography
+            variant="body2"
+            dangerouslySetInnerHTML={{ __html: infogrouptext }}
+          ></Typography>
         )}
         {infogroupurl && (
           <Typography variant="body2" sx={{ fontWeight: 500, mt: 1, mb: 1 }}>
@@ -354,7 +357,10 @@ class LayerGroup extends React.PureComponent {
           </Typography>
         )}
         {infogroupowner && (
-          <Typography variant="body2">{infogroupowner}</Typography>
+          <Typography
+            variant="body2"
+            dangerouslySetInnerHTML={{ __html: infogroupowner }}
+          ></Typography>
         )}
       </>
     );
