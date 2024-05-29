@@ -133,6 +133,7 @@ function CookieNotice({ globalObserver, appModel }) {
       TransitionComponent={Transition}
       keepMounted
       aria-describedby="cookie-dialog-content-text"
+      sx={{ zIndex: "9999" }}
     >
       <DialogContent>
         <DialogContentText
