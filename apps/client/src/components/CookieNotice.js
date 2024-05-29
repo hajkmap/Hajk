@@ -127,6 +127,7 @@ function CookieNotice({ globalObserver, appModel }) {
 
   return (
     <StyledDialog
+      sx={{ zIndex: "9999" }}
       fullWidth={true}
       maxWidth={"md"}
       open={open}

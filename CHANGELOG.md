@@ -41,6 +41,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Bug fix associated to #1468. [#1485](https://github.com/hajkmap/Hajk/pull/1485)
 - Admin UI is now compatible with the correct HTTP verbs (`DELETE` and `PUT`). [#1501](https://github.com/hajkmap/Hajk/pull/1501)
 - Cookie: Cookie Notice updated after browser refresh. Fix to PR: [#1509](https://github.com/hajkmap/Hajk/pull/1509)
+- FIR plugin - Pagination now remembers page after delete. [#1514](https://github.com/hajkmap/Hajk/pull/1514)
+- Fix collapsed InfoClick in Iframe [#1508](https://github.com/hajkmap/Hajk/pull/1508)
 
 ### Security
 
