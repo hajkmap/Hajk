@@ -32,6 +32,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Admin UI: It is now possible to easily duplicate map configurations using the UI. [#1502](https://github.com/hajkmap/Hajk/issues/1502).
 - Coordinates: It's now possible to copy and paste coordinates from/to both coordinate inputs (N & E, longitude & latitude). PR: [#1506](https://github.com/hajkmap/Hajk/pull/1506).
 - Layerswitcher(client)/Groups(admin): It's now possible to add and show information about a layer group. [#400](https://github.com/hajkmap/Hajk/issues/400).
+- LayerSwitcher: Some text field inputs for layer groups now allows html code. [#1518](https://github.com/hajkmap/Hajk/pull/1518).
 
 ### Fixed
 
