@@ -226,15 +226,12 @@ function CitizendialogueView(props) {
       setShowEditView({ show: false });
 
       const resultData = [];
-      for (const key in survey.data) {
-        const question = survey.getQuestionByName(key);
-        if (!!question) {
+      for (const [key, question] of Object.entries(survey.data)) {
+        const surveyQuestion = survey.getQuestionByName(key);
+        if (!!surveyQuestion) {
           const item = {
-            //name: key,
-            title: question.title,
-            value: question.value,
-            //title: question.title,
-            //displayValue: question.displayValue,
+            title: surveyQuestion.title,
+            value: question,
           };
           resultData.push(item);
         }
@@ -242,8 +239,7 @@ function CitizendialogueView(props) {
 
       const combinedData = {
         ...props.surveyJsData,
-        //...survey.data,
-        ...resultData,
+        surveyResults: resultData,
         featureData,
       };
       props.model.handleOnComplete(combinedData);
