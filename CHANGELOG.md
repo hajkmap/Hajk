@@ -21,7 +21,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Sketch: It is now possible to buffer from the Sketch plugin. [#1310](https://github.com/hajkmap/Hajk/issues/1310)
 - Sketch: The user now has the option to reset to default styling and choose from a wider range of colors in the color picker; additionally, black and white options have been added. [#1372](https://github.com/hajkmap/Hajk/issues/1372)
 - Core, Admin: Added support for stand-alone GeoWebCache WMS Server. Issue: [#1469](https://github.com/hajkmap/Hajk/issues/1469), PR: [#1493](https://github.com/hajkmap/Hajk/pull/1493).
-- Print/Anchor: It's now possible to generate qr codes in Share and Print. [#1482](https://github.com/hajkmap/Hajk/issues/1482)
+- Print/Anchor: It's now possible to generate QR codes in Share and Print. [#1482](https://github.com/hajkmap/Hajk/issues/1482)
 - Sketch: It's now possible to disable stroke for polygons and circles [#1177](https://github.com/hajkmap/Hajk/issues/1177)
 - Backend: The new .NET 6 backend. Issue: [#1210](https://github.com/hajkmap/Hajk/issues/1210). PR: [#1395](https://github.com/hajkmap/Hajk/pull/1395).
 - Core: Allow to specify map config by using `m` query parameter, even when no backend is active. [commit](https://github.com/hajkmap/Hajk/commit/eb5be276437994c86c2edd5abef3ea21cd6071b4)
@@ -31,10 +31,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Coordinates: in addition to changing the icon's name (URL), it is now also possible to set icon's scale and anchor values. PR: [#1499](https://github.com/hajkmap/Hajk/pull/1499).
 - Admin UI: It is now possible to easily duplicate map configurations using the UI. [#1502](https://github.com/hajkmap/Hajk/issues/1502).
 - Coordinates: It's now possible to copy and paste coordinates from/to both coordinate inputs (N & E, longitude & latitude). PR: [#1506](https://github.com/hajkmap/Hajk/pull/1506).
-- Layerswitcher(client)/Groups(admin): It's now possible to add and show information about a layer group. [#400](https://github.com/hajkmap/Hajk/issues/400).
-- LayerSwitcher: Some text field inputs for layer groups now allows html code. [#1518](https://github.com/hajkmap/Hajk/pull/1518).
+- LayerSwitcher(Client)/Groups(Admin): It's now possible to add and show information about a layer group. [#400](https://github.com/hajkmap/Hajk/issues/400).
+- LayerSwitcher: Some text field inputs for layer groups now allows HTML code. [#1518](https://github.com/hajkmap/Hajk/pull/1518).
 - CookieNotice: The cookie notice dialog now appears at the top of other dialogs and pop up windows. PR: [#1521](https://github.com/hajkmap/Hajk/pull/1521).
-  
+
 ### Fixed
 
 - Add conditional rendering for Control button. [Commit.](https://github.com/hajkmap/Hajk/commit/b34def3249b368de336a5c4eadd86318103e78fb)
