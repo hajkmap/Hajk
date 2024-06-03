@@ -1,6 +1,5 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { styled } from "@mui/material/styles";
-
 import Grid from "@mui/material/Grid";
 import AddIcon from "@mui/icons-material/AddBox";
 import ClearIcon from "@mui/icons-material/LayersClear";
@@ -19,207 +18,185 @@ const StyledToggleButton = styled(ToggleButton)(({ theme }) => ({
   backgroundColor: theme.palette.primary,
 }));
 
-class BufferView extends React.PureComponent {
-  state = {
-    name: "",
-    isSelecting: false,
-    distance: 1000,
-    activeStep: 0,
-  };
+const BufferView = (props) => {
+  const [name, setName] = useState("");
+  const [isSelecting, setIsSelecting] = useState(false);
+  const [distance, setDistance] = useState(1000);
+  const [activeStep, setActiveStep] = useState(0);
 
-  constructor(props) {
-    super(props);
+  const model = props.model;
+  const app = props.app;
+  const globalObserver = props.app.globalObserver;
 
-    this.model = this.props.model;
-    this.app = this.props.app;
-    this.globalObserver = this.props.app.globalObserver;
-    this.props.localObserver.subscribe("resetView", () => {
-      this.setState({ activeStep: 0, isSelecting: false });
+  useEffect(() => {
+    const resetViewHandler = () => {
+      setActiveStep(0);
+      setIsSelecting(false);
+    };
+
+    props.localObserver.subscribe("resetView", resetViewHandler);
+
+    // Cleanup subscription on unmount
+    return () => {
+      props.localObserver.unsubscribe("resetView", resetViewHandler);
+    };
+  }, [props.localObserver]);
+
+  const handleToggleSelecting = () => {
+    setIsSelecting((prevIsSelecting) => {
+      const newIsSelecting = !prevIsSelecting;
+      model.activateSelecting(newIsSelecting);
+      return newIsSelecting;
     });
-  }
-
-  setSelecting = () => {
-    this.setState({ isSelecting: !this.state.isSelecting }, () => {
-      this.props.model.activateSelecting(this.state.isSelecting);
-    });
   };
 
-  setDistance = (e) => {
-    this.setState({ distance: e.target.value });
+  const handleDistanceChange = (e) => {
+    setDistance(e.target.value);
   };
 
-  handleNext = () => {
-    // Some special handling for going from step 1 to 2:
-    //  - prevent action if no features have been selected
-    //  - if there are selected features, abort feature selection if user forgot to
-    let isSelecting = null;
-    if (this.state.activeStep === 0) {
-      if (this.props.model.highlightSource.getFeatures().length === 0) {
-        this.props.enqueueSnackbar(
+  const handleNext = () => {
+    if (activeStep === 0) {
+      if (model.highlightSource.getFeatures().length === 0) {
+        props.enqueueSnackbar(
           "Du måste markera minst ett objekt i kartan för att kunna buffra",
-          {
-            variant: "error",
-          }
+          { variant: "error" }
         );
         return;
       }
-      this.props.model.activateSelecting(false);
-      isSelecting = false; // Prepare the state variable for setting later
+      model.activateSelecting(false);
+      setIsSelecting(false);
     }
-
-    const activeStep = this.state.activeStep + 1;
-    this.setState({
-      activeStep, // Always set active step to current (new) value
-      ...(isSelecting !== null && { isSelecting }), // Set isSelecting only if it isn't null
-    });
+    setActiveStep((prevStep) => prevStep + 1);
   };
 
-  handlePrev = () => {
-    const activeStep = this.state.activeStep - 1;
-    this.setState({ activeStep });
+  const handlePrev = () => {
+    setActiveStep((prevStep) => prevStep - 1);
   };
 
-  getNextButtonLabel = () => {
-    let l = null;
-    switch (this.state.activeStep) {
+  const getNextButtonLabel = () => {
+    switch (activeStep) {
       case 1:
-        l = "Buffra";
-        break;
+        return "Buffra";
       case 2:
-        l = "Börja om";
-        break;
+        return "Börja om";
       default:
-        l = "Nästa";
-        break;
+        return "Nästa";
     }
-    return l;
   };
 
-  renderPrevButton = () => {
-    return (
-      <Grid item xs={6}>
+  const renderPrevButton = () => (
+    <Grid item xs={6}>
+      <Button fullWidth disabled={activeStep === 0} onClick={handlePrev}>
+        Föregående
+      </Button>
+    </Grid>
+  );
+
+  const renderClearButton = () =>
+    (model.highlightSource.getFeatures().length !== 0 ||
+      model.bufferSource.getFeatures().length !== 0) && (
+      <Grid item xs={12}>
         <Button
           fullWidth
-          disabled={this.state.activeStep === 0}
-          onClick={this.handlePrev}
+          onClick={() => {
+            model.clear();
+            // Force update
+            setName(name + " ");
+          }}
         >
-          Föregående
+          <ClearIcon /> Rensa
         </Button>
       </Grid>
     );
-  };
 
-  renderClearButton = () => {
-    return (
-      (this.model.highlightSource.getFeatures().length !== 0 ||
-        this.model.bufferSource.getFeatures().length !== 0) && (
-        <Grid item xs={12}>
-          <Button
-            fullWidth
-            onClick={() => {
-              this.model.clear();
-              // The clear() above didn't cause any changes to this components
-              // state, hence we must force update… sorry! :/
-              this.forceUpdate();
-            }}
-          >
-            <ClearIcon /> Rensa
-          </Button>
-        </Grid>
-      )
-    );
-  };
-
-  render() {
-    return (
-      <>
-        <Stepper activeStep={this.state.activeStep} orientation="vertical">
-          <Step key="1">
-            <StepLabel>Välj objekt att buffra</StepLabel>
-            <StepContent>
-              <Grid container spacing={2} direction="row">
-                {this.renderClearButton()}
-                <Grid item xs={12}>
-                  <HajkToolTip title="Markera flera objekt">
-                    <StyledToggleButton
-                      onChange={this.setSelecting}
-                      selected={this.state.isSelecting}
-                      value="isSelecting"
-                    >
-                      <AddIcon />
-                      Välj objekt
-                    </StyledToggleButton>
-                  </HajkToolTip>
-                </Grid>
-                {this.renderPrevButton()}
-                <Grid item xs={6}>
-                  <Button
-                    fullWidth
-                    variant="contained"
-                    color="primary"
-                    onClick={this.handleNext}
+  return (
+    <>
+      <Stepper activeStep={activeStep} orientation="vertical">
+        <Step key="1">
+          <StepLabel>Välj objekt att buffra</StepLabel>
+          <StepContent>
+            <Grid container spacing={2} direction="row">
+              {renderClearButton()}
+              <Grid item xs={12}>
+                <HajkToolTip title="Markera flera objekt">
+                  <StyledToggleButton
+                    onChange={handleToggleSelecting}
+                    selected={isSelecting}
+                    value="isSelecting"
                   >
-                    Nästa
-                  </Button>
-                </Grid>
+                    <AddIcon />
+                    Välj objekt
+                  </StyledToggleButton>
+                </HajkToolTip>
               </Grid>
-            </StepContent>
-          </Step>
-          <Step key="2">
-            <StepLabel>Ange bufferavstånd</StepLabel>
-            <StepContent>
-              <Grid container spacing={2} direction="row">
-                <Grid item xs={12}>
-                  <TextField
-                    variant="outlined"
-                    fullWidth
-                    value={this.state.distance}
-                    onChange={this.setDistance}
-                    label="Bufferavstånd (i meter)"
-                  />
-                </Grid>
-                {this.renderPrevButton()}
-                <Grid item xs={6}>
-                  <Button
-                    fullWidth
-                    variant="contained"
-                    color="primary"
-                    onClick={() => {
-                      this.handleNext();
-                      this.props.model.bufferFeatures(this.state.distance);
-                    }}
-                  >
-                    Buffra
-                  </Button>
-                </Grid>
+              {renderPrevButton()}
+              <Grid item xs={6}>
+                <Button
+                  fullWidth
+                  variant="contained"
+                  color="primary"
+                  onClick={handleNext}
+                >
+                  Nästa
+                </Button>
               </Grid>
-            </StepContent>
-          </Step>
-          <Step key="3">
-            <StepLabel>Klart</StepLabel>
-            <StepContent>
-              <Grid container spacing={2} direction="row">
-                {this.renderPrevButton()}
-                <Grid item xs={6}>
-                  <Button
-                    fullWidth
-                    variant="contained"
-                    color="primary"
-                    onClick={() => {
-                      this.props.model.clear();
-                      this.setState({ activeStep: 0 });
-                    }}
-                  >
-                    Rensa
-                  </Button>
-                </Grid>
+            </Grid>
+          </StepContent>
+        </Step>
+        <Step key="2">
+          <StepLabel>Ange bufferavstånd</StepLabel>
+          <StepContent>
+            <Grid container spacing={2} direction="row">
+              <Grid item xs={12}>
+                <TextField
+                  variant="outlined"
+                  fullWidth
+                  value={distance}
+                  onChange={handleDistanceChange}
+                  label="Bufferavstånd (i meter)"
+                />
               </Grid>
-            </StepContent>
-          </Step>
-        </Stepper>
-      </>
-    );
-  }
-}
+              {renderPrevButton()}
+              <Grid item xs={6}>
+                <Button
+                  fullWidth
+                  variant="contained"
+                  color="primary"
+                  onClick={() => {
+                    handleNext();
+                    model.bufferFeatures(distance);
+                  }}
+                >
+                  Buffra
+                </Button>
+              </Grid>
+            </Grid>
+          </StepContent>
+        </Step>
+        <Step key="3">
+          <StepLabel>Klart</StepLabel>
+          <StepContent>
+            <Grid container spacing={2} direction="row">
+              {renderPrevButton()}
+              <Grid item xs={6}>
+                <Button
+                  fullWidth
+                  variant="contained"
+                  color="primary"
+                  onClick={() => {
+                    model.clear();
+                    setActiveStep(0);
+                  }}
+                >
+                  Rensa
+                </Button>
+              </Grid>
+            </Grid>
+          </StepContent>
+        </Step>
+      </Stepper>
+    </>
+  );
+};
 
 export default withSnackbar(BufferView);
