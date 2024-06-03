@@ -44,6 +44,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Cookie: Cookie Notice updated after browser refresh. Fix to PR: [#1509](https://github.com/hajkmap/Hajk/pull/1509)
 - FIR plugin - Pagination now remembers page after delete. [#1514](https://github.com/hajkmap/Hajk/pull/1514)
 - Fix collapsed InfoClick in Iframe [#1508](https://github.com/hajkmap/Hajk/pull/1508)
+- Prevent multiple animations in Location plugin [#1525](https://github.com/hajkmap/Hajk/pull/1525)
 
 ### Security
 
