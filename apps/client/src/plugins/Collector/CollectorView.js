@@ -1,32 +1,20 @@
-import React, { Component } from "react";
+import React from "react";
 import CollectorForm from "./components/CollectorForm.js";
 import "./style.css";
 
-class CollectorView extends Component {
-  constructor(props) {
-    super(props);
-    this.state = {};
-    this.model = props.model;
-  }
+const CollectorView = (props) => {
+  const { model, onClose, localObserver, form, serviceConfig, options } = props;
 
-  componentDidMount() {}
-
-  onClose = () => {
-    this.props.onClose();
-  };
-
-  render() {
-    return (
-      <CollectorForm
-        localObserver={this.props.localObserver}
-        model={this.model}
-        onClose={this.onClose}
-        form={this.props.form}
-        serviceConfig={this.props.serviceConfig}
-        options={this.props.options}
-      />
-    );
-  }
-}
+  return (
+    <CollectorForm
+      localObserver={localObserver}
+      model={model}
+      onClose={onClose}
+      form={form}
+      serviceConfig={serviceConfig}
+      options={options}
+    />
+  );
+};
 
 export default CollectorView;

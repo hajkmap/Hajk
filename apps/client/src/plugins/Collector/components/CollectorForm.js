@@ -1,4 +1,4 @@
-import React, { Component } from "react";
+import React, { useState, useEffect } from "react";
 import { styled } from "@mui/material/styles";
 import Page from "./Page.js";
 import Typography from "@mui/material/Typography";
@@ -16,115 +16,86 @@ const ErrorTypography = styled(Typography)(({ theme }) => ({
 }));
 
 const saveErrorText = "Fel - din kommentar gick inte att spara.";
-//const validationErrorText = " - detta fält krävs";
-class CollectorForm extends Component {
-  state = {
-    comment: "",
-    saveError: "",
-    validationError: "",
-    form: [],
-    displayPlace: false,
-    activePage: 0,
-    direction: "right",
-  };
 
-  constructor(props) {
-    super(props);
+const CollectorForm = (props) => {
+  const [comment, setComment] = useState("");
+  const [saveError, setSaveError] = useState("");
+  const [validationError, setValidationError] = useState("");
+  const [form, setForm] = useState(props.form);
+  const [displayPlace, setDisplayPlace] = useState(false);
+  const [activePage, setActivePage] = useState(0);
+  const [direction, setDirection] = useState("right");
+  const [configurationError, setConfigurationError] = useState(false);
 
-    this.state = {
-      ...this.state,
-      form: props.form,
+  useEffect(() => {
+    props.model.observer.subscribe("abort", abort);
+    props.model.observer.subscribe("reset", resetForm);
+
+    return () => {
+      props.model.observer.unsubscribe("abort", abort);
+      props.model.observer.unsubscribe("reset", resetForm);
     };
+  }, []);
 
-    props.model.observer.subscribe("abort", () => {
-      this.abort();
-    });
-
-    props.model.observer.subscribe("reset", () => {
-      // Set the page indicator to -1. This will reset the form properly.
-      // Then set the page indicator to 0 to display the first page.
-      // Just setting the flag to 0 will not reset the form if there is only one page.
-      this.setState(
-        {
-          activePage: -1,
-        },
-        () => {
-          this.setState({
-            activePage: 0,
-          });
-        }
-      );
-    });
-  }
-
-  componentDidMount() {
-    if (!this.props.model.serviceConfig) {
-      this.setState({
-        configurationError: true,
-      });
+  useEffect(() => {
+    if (!props.model.serviceConfig) {
+      setConfigurationError(true);
     }
-  }
+  }, [props.model.serviceConfig]);
 
-  saveError = (text) => {
-    this.setState({
-      saveError: text || saveErrorText,
-    });
+  const abort = () => {
+    props.onClose();
   };
 
-  renderSaveError() {
-    return this.state.saveError ? (
-      <SaveErrorTextWrapper>{this.state.saveError}</SaveErrorTextWrapper>
+  const resetForm = () => {
+    setActivePage(-1);
+    setTimeout(() => {
+      setActivePage(0);
+    }, 0);
+  };
+
+  const renderSaveError = () => {
+    return saveError ? (
+      <SaveErrorTextWrapper>{saveError}</SaveErrorTextWrapper>
     ) : null;
-  }
-
-  abort = () => {
-    this.props.onClose();
   };
 
-  render() {
-    const { activePage, direction } = this.state;
-    const { form, serviceConfig } = this.props;
-    if (this.state.configurationError) {
-      return (
-        <ErrorTypography>
-          Nödvändig konfiguration saknas. Verktyget kan inte användas för
-          tillfället.
-        </ErrorTypography>
-      );
-    } else {
-      return form
-        .sort((p1, p2) =>
-          p1.order === p2.order ? 0 : p1.order > p2.order ? 1 : -1
-        )
-        .map(
-          (page, i) =>
-            activePage === page.order && (
-              <Page
-                key={i}
-                serviceConfig={serviceConfig}
-                model={this.props.model}
-                active={activePage === page.order}
-                numPages={form.length}
-                page={page}
-                direction={direction}
-                options={this.props.options}
-                onNextPage={() => {
-                  this.setState({
-                    activePage: activePage + 1,
-                    direction: "left",
-                  });
-                }}
-                onPrevPage={() => {
-                  this.setState({
-                    activePage: activePage - 1,
-                    direction: "right",
-                  });
-                }}
-              ></Page>
-            )
-        );
-    }
+  if (configurationError) {
+    return (
+      <ErrorTypography>
+        Nödvändig konfiguration saknas. Verktyget kan inte användas för
+        tillfället.
+      </ErrorTypography>
+    );
   }
-}
+
+  return form
+    .sort((p1, p2) =>
+      p1.order === p2.order ? 0 : p1.order > p2.order ? 1 : -1
+    )
+    .map(
+      (page, i) =>
+        activePage === page.order && (
+          <Page
+            key={i}
+            serviceConfig={props.serviceConfig}
+            model={props.model}
+            active={activePage === page.order}
+            numPages={form.length}
+            page={page}
+            direction={direction}
+            options={props.options}
+            onNextPage={() => {
+              setActivePage(activePage + 1);
+              setDirection("left");
+            }}
+            onPrevPage={() => {
+              setActivePage(activePage - 1);
+              setDirection("right");
+            }}
+          />
+        )
+    );
+};
 
 export default CollectorForm;

@@ -1,4 +1,4 @@
-import React, { Component } from "react";
+import React, { useState, useEffect } from "react";
 import { styled } from "@mui/material/styles";
 import Button from "@mui/material/Button";
 import ScatterPlotIcon from "@mui/icons-material/ScatterPlot";
@@ -16,52 +16,42 @@ const ToolbarDiv = styled("div")(({ theme }) => ({
   margin: "5px",
 }));
 
-class Toolbar extends Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      activeTool: undefined,
-    };
-    this.props.model.observer.subscribe("abortInteraction", () => {
-      this.setState({
-        activeTool: undefined,
-      });
-    });
+const Toolbar = (props) => {
+  const [activeTool, setActiveTool] = useState(undefined);
 
-    // Clear layer and attempt to read saved values
-    if (this.props.model.wkt) {
-      this.props.model.vectorSource.clear();
+  useEffect(() => {
+    const abortInteraction = () => setActiveTool(undefined);
 
+    props.model.observer.subscribe("abortInteraction", abortInteraction);
+
+    if (props.model.wkt) {
+      props.model.vectorSource.clear();
       const format = new WKT();
-      const WKTString = this.props.model.formValues[this.props.field];
+      const WKTString = props.model.formValues[props.field];
       if (WKTString && WKTString.length > 0) {
-        let features = format.readFeatures(WKTString);
+        const features = format.readFeatures(WKTString);
         features.forEach((feature) => {
-          this.props.model.vectorSource.addFeature(feature);
+          props.model.vectorSource.addFeature(feature);
         });
       }
     }
-  }
 
-  componentWillUnmount() {
-    this.props.model.observer.unsubscribe("abortInteraction");
-    this.props.model.deactivateInteraction();
-  }
+    return () => {
+      props.model.observer.unsubscribe("abortInteraction", abortInteraction);
+      props.model.deactivateInteraction();
+    };
+  }, [props.model, props.field]);
 
-  changeTool(type, geometryType) {
-    const { model } = this.props;
-    this.props.onChangeTool();
-    if (geometryType && this.state.activeTool === geometryType.toLowerCase()) {
+  const changeTool = (type, geometryType) => {
+    const { model } = props;
+    props.onChangeTool();
+    if (geometryType && activeTool === geometryType.toLowerCase()) {
       model.deactivateInteraction();
-      return this.setState({
-        activeTool: undefined,
-      });
+      return setActiveTool(undefined);
     }
-    if (this.state.activeTool === type) {
+    if (activeTool === type) {
       model.deactivateInteraction();
-      return this.setState({
-        activeTool: undefined,
-      });
+      return setActiveTool(undefined);
     }
     model.deactivateInteraction();
 
@@ -81,24 +71,24 @@ class Toolbar extends Component {
       default:
         break;
     }
-  }
+  };
 
-  onAddPointClicked() {
-    this.setState({ activeTool: "point" });
-    this.changeTool("add", "Point");
-  }
+  const onAddPointClicked = () => {
+    setActiveTool("point");
+    changeTool("add", "Point");
+  };
 
-  onAddLineClicked() {
-    this.setState({ activeTool: "linestring" });
-    this.changeTool("add", "LineString");
-  }
+  const onAddLineClicked = () => {
+    setActiveTool("linestring");
+    changeTool("add", "LineString");
+  };
 
-  onAddPolygonClicked() {
-    this.setState({ activeTool: "polygon" });
-    this.changeTool("add", "Polygon");
-  }
+  const onAddPolygonClicked = () => {
+    setActiveTool("polygon");
+    changeTool("add", "Polygon");
+  };
 
-  getStatusMessage(data) {
+  const getStatusMessage = (data) => {
     if (!data) {
       return (
         <Typography>
@@ -142,132 +132,109 @@ class Toolbar extends Component {
         </Typography>
       );
     }
-  }
+  };
 
-  onSaveClicked() {
-    if (!this.props.model.editSource) {
+  const onSaveClicked = () => {
+    if (!props.model.editSource) {
       return;
     }
-    this.props.model.save((response) => {
-      this.props.model.filty = false;
-      this.props.model.refreshEditingLayer();
-      this.props.app.globalObserver.publish(
+    props.model.save((response) => {
+      props.model.filty = false;
+      props.model.refreshEditingLayer();
+      props.app.globalObserver.publish(
         "core.alert",
-        this.getStatusMessage(response)
+        getStatusMessage(response)
       );
     });
-  }
+  };
 
-  onCancelClicked() {
-    this.props.model.deactivate();
-    this.props.panel.setState({
+  const onCancelClicked = () => {
+    props.model.deactivate();
+    props.panel.setState({
       checked: false,
       enabled: false,
       selectedSource: false,
     });
-    this.setState({
-      activeTool: undefined,
-    });
-  }
+    setActiveTool(undefined);
+  };
 
-  getSelectedStyle(type) {
-    var style = {};
-    if (type === this.state.activeTool) {
-      style.backgroundColor = "#ccc";
-    }
-    return style;
-  }
+  const getSelectedStyle = (type) => {
+    return type === activeTool ? { backgroundColor: "#ccc" } : {};
+  };
 
-  storeValues() {
-    // Stores any potential features found on the map as WKT before taking the next or previous step.
-    //These are later pushed to the server on submission.
-    //They are also put on the map again if the user comes back to this step.
-    if (!this.props.model.wkt) {
+  const storeValues = () => {
+    if (!props.model.wkt) {
       return;
     }
     const format = new WKT();
     let wkt = "";
 
-    if (this.props.model.vectorSource.getFeatures().length > 0) {
-      wkt = format.writeFeatures(this.props.model.vectorSource.getFeatures());
+    if (props.model.vectorSource.getFeatures().length > 0) {
+      wkt = format.writeFeatures(props.model.vectorSource.getFeatures());
     }
 
-    // Store the converted features in the model
-    let formValues = Object.assign({}, this.props.model.formValues);
-    formValues[this.props.field] = wkt;
-    this.props.model.formValues = formValues;
-    // Clear layer
-    this.props.model.vectorSource.clear();
+    const formValues = { ...props.model.formValues, [props.field]: wkt };
+    props.model.formValues = formValues;
+    props.model.vectorSource.clear();
+  };
+
+  const source = props.serviceConfig;
+  const disabled = !props.enabled;
+  let editPoint = false,
+    editPolygon = false,
+    editLine = false;
+
+  if (props.model.wkt) {
+    editPoint = props.geotype.includes("point");
+    editPolygon = props.geotype.includes("polygon");
+    editLine = props.geotype.includes("line");
+  } else if (source) {
+    editPoint = source.editPoint;
+    editLine = source.editLine;
+    editPolygon = source.editPolygon;
   }
 
-  render() {
-    const source = this.props.serviceConfig;
-    var disabled = !this.props.enabled,
-      editPoint = false,
-      editPolygon = false,
-      editLine = false;
-
-    if (this.props.model.wkt) {
-      // WKT gets the information from the tag since there is support for multiple toolbars
-      // Different toolbars can therefore support different types of geometries
-      editPoint = this.props.geotype.indexOf("point") !== -1;
-      editPolygon = this.props.geotype.indexOf("polygon") !== -1;
-      editLine = this.props.geotype.indexOf("line") !== -1;
-    } else if (source) {
-      // Non-WKT only supports insertion of one geometry so it can be retrieved from the source
-      editPoint = source.editPoint;
-      editLine = source.editLine;
-      editPolygon = source.editPolygon;
-    }
-
-    return (
-      <div>
-        <ToolbarDiv>
-          <div>
-            <StyledButton
-              variant="contained"
-              disabled={disabled === false ? !editPoint : disabled}
-              onClick={() => {
-                this.onAddPointClicked();
-              }}
-              type="button"
-              title="Lägg till plats"
-              style={this.getSelectedStyle("point")}
-            >
-              Plats
-              <ScatterPlotIcon sx={{ marginLeft: 1 }} />
-            </StyledButton>
-            <StyledButton
-              variant="contained"
-              disabled={disabled === false ? !editLine : disabled}
-              onClick={() => {
-                this.onAddLineClicked();
-              }}
-              type="button"
-              title="Lägg till sträcka"
-              style={this.getSelectedStyle("linestring")}
-            >
-              Sträcka
-              <LinearScaleIcon sx={{ marginLeft: 1 }} />
-            </StyledButton>
-            <StyledButton
-              variant="contained"
-              disabled={disabled === false ? !editPolygon : disabled}
-              onClick={() => {
-                this.onAddPolygonClicked();
-              }}
-              type="button"
-              title="Lägg till område"
-              style={this.getSelectedStyle("polygon")}
-            >
-              Område
-              <BorderStyleIcon sx={{ marginLeft: 1 }} />
-            </StyledButton>
-          </div>
-        </ToolbarDiv>
-      </div>
-    );
-  }
-}
+  return (
+    <div>
+      <ToolbarDiv>
+        <div>
+          <StyledButton
+            variant="contained"
+            disabled={disabled ? !editPoint : disabled}
+            onClick={onAddPointClicked}
+            type="button"
+            title="Lägg till plats"
+            style={getSelectedStyle("point")}
+          >
+            Plats
+            <ScatterPlotIcon sx={{ marginLeft: 1 }} />
+          </StyledButton>
+          <StyledButton
+            variant="contained"
+            disabled={disabled ? !editLine : disabled}
+            onClick={onAddLineClicked}
+            type="button"
+            title="Lägg till sträcka"
+            style={getSelectedStyle("linestring")}
+          >
+            Sträcka
+            <LinearScaleIcon sx={{ marginLeft: 1 }} />
+          </StyledButton>
+          <StyledButton
+            variant="contained"
+            disabled={disabled ? !editPolygon : disabled}
+            onClick={onAddPolygonClicked}
+            type="button"
+            title="Lägg till område"
+            style={getSelectedStyle("polygon")}
+          >
+            Område
+            <BorderStyleIcon sx={{ marginLeft: 1 }} />
+          </StyledButton>
+        </div>
+      </ToolbarDiv>
+    </div>
+  );
+};
 
 export default Toolbar;
