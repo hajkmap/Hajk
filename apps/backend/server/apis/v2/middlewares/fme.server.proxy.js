@@ -32,7 +32,7 @@ export default function fmeServerProxy(err, req, res, next) {
       // We have to add an authorization header to the request
       // There are 2 possibilities: with TOKEN or with USER/PASS.
       const value = process.env.FME_SERVER_TOKEN
-        ? `Authorization: fmetoken token=${process.env.FME_SERVER_TOKEN}`
+        ? `fmetoken token=${process.env.FME_SERVER_TOKEN}`
         : `Basic ${Buffer.from(
             `${process.env.FME_SERVER_USER}:${process.env.FME_SERVER_PASSWORD}`
           ).toString("base64")}`;
