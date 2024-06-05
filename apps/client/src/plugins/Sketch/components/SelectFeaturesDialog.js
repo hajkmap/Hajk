@@ -81,14 +81,16 @@ export default function SelectFeaturesDialog({
     // Let's get the clicked feature we're currently hoovering.
     const hoveredFeature = state.clickedFeatures[index];
     // Then we can create a corresponding highlight-feature.
-    const highlightFeature = model.createHighlightFeature(hoveredFeature);
-    // We'll add the highlight-feature to the draw-layer...
-    drawModel.addFeature(highlightFeature, { silent: true });
-    // ...and update the state so that we can keep track of what we are highlighting.
-    setState({
-      ...state,
-      highlightedFeature: highlightFeature,
-    });
+    if (model) {
+      const highlightFeature = model.createHighlightFeature(hoveredFeature);
+      // We'll add the highlight-feature to the draw-layer...
+      drawModel.addFeature(highlightFeature, { silent: true });
+      // ...and update the state so that we can keep track of what we are highlighting.
+      setState({
+        ...state,
+        highlightedFeature: highlightFeature,
+      });
+    }
   };
 
   // Handler for mouse-leave on the list of clicked features. Removes the currently
@@ -105,8 +107,16 @@ export default function SelectFeaturesDialog({
   // (If there's zero or one, the drawModel will take care of it).
   React.useEffect(() => {
     localObserver.subscribe("drawModel.select.click", handleDrawSelectClick);
+    localObserver.subscribe(
+      "measure.drawModel.select.click",
+      handleDrawSelectClick
+    );
     return () => {
       localObserver.unsubscribe("drawModel.select.click");
+      localObserver.unsubscribe(
+        "measure.drawModel.select.click",
+        handleDrawSelectClick
+      );
     };
   }, [localObserver, handleDrawSelectClick]);
 
