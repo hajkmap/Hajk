@@ -13,7 +13,7 @@ import {
 
 import { IconPolygon, IconPoint, IconLine, IconCircle } from "./MeasurerIcons";
 import DeleteIcon from "@mui/icons-material/Delete";
-import BackHandIcon from "@mui/icons-material/BackHand";
+import TouchAppIcon from "@mui/icons-material/TouchApp";
 import ConfirmationDialog from "../../components/ConfirmationDialog";
 import { useEffect, useState } from "react";
 import HajkToolTip from "components/HajkToolTip";
@@ -153,7 +153,7 @@ function MeasurerView(props) {
             </HajkToolTip>
             <HajkToolTip title="Välj på kartan">
               <StyledToggleButton value="Select">
-                <BackHandIcon />
+                <TouchAppIcon />
               </StyledToggleButton>
             </HajkToolTip>
             <HajkToolTip title="Ta bort enskild mätning">
