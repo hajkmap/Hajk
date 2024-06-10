@@ -17,7 +17,7 @@ import TouchAppIcon from "@mui/icons-material/TouchApp";
 import ConfirmationDialog from "../../components/ConfirmationDialog";
 import { useEffect, useState } from "react";
 import HajkToolTip from "components/HajkToolTip";
-import SelectFeaturesDialog from "../Sketch/components/SelectFeaturesDialog";
+import SelectFeaturesDialog from "utils/SelectFeaturesDialog";
 
 const SvgImg = styled("img")(({ theme }) => ({
   height: "24px",
