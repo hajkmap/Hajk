@@ -30,12 +30,13 @@ export default function fmeServerProxy(err, req, res, next) {
     secure: process.env.FME_SERVER_SECURE === "true", // should SSL certs be verified?
     onProxyReq: (proxyReq, req, res) => {
       // We have to add an authorization header to the request
-      proxyReq.setHeader(
-        "Authorization",
-        `Basic ${Buffer.from(
-          `${process.env.FME_SERVER_USER}:${process.env.FME_SERVER_PASSWORD}`
-        ).toString("base64")}`
-      );
+      // There are 2 possibilities: with TOKEN or with USER/PASS.
+      const value = process.env.FME_SERVER_TOKEN
+        ? `fmetoken token=${process.env.FME_SERVER_TOKEN}`
+        : `Basic ${Buffer.from(
+            `${process.env.FME_SERVER_USER}:${process.env.FME_SERVER_PASSWORD}`
+          ).toString("base64")}`;
+      proxyReq.setHeader("Authorization", value);
     },
     pathRewrite: (originalPath, req) => {
       // Lets split on the proxy path so that we can remove that when forwarding
