@@ -14,11 +14,7 @@ import {
   ListItemText,
 } from "@mui/material";
 
-export default function SelectFeaturesDialog({
-  localObserver,
-  drawModel,
-  model,
-}) {
+export default function SelectFeaturesDialog({ localObserver, drawModel }) {
   // Let's keep everything in one state here since all properties are
   // changing at the same time (almost).
   const [state, setState] = React.useState({
@@ -81,16 +77,14 @@ export default function SelectFeaturesDialog({
     // Let's get the clicked feature we're currently hoovering.
     const hoveredFeature = state.clickedFeatures[index];
     // Then we can create a corresponding highlight-feature.
-    if (model) {
-      const highlightFeature = model.createHighlightFeature(hoveredFeature);
-      // We'll add the highlight-feature to the draw-layer...
-      drawModel.addFeature(highlightFeature, { silent: true });
-      // ...and update the state so that we can keep track of what we are highlighting.
-      setState({
-        ...state,
-        highlightedFeature: highlightFeature,
-      });
-    }
+    const highlightFeature = drawModel.createHighlightFeature(hoveredFeature);
+    // We'll add the highlight-feature to the draw-layer...
+    drawModel.addFeature(highlightFeature, { silent: true });
+    // ...and update the state so that we can keep track of what we are highlighting.
+    setState({
+      ...state,
+      highlightedFeature: highlightFeature,
+    });
   };
 
   // Handler for mouse-leave on the list of clicked features. Removes the currently

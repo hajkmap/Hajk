@@ -218,18 +218,6 @@ class SketchModel {
     });
   };
 
-  #createHighlightStyle = () => {
-    return new Style({
-      stroke: new Stroke({
-        color: "rgba(255, 0, 0, 1)",
-        width: 3,
-      }),
-      fill: new Fill({
-        color: "rgba(255, 0, 0, 0.1)",
-      }),
-    });
-  };
-
   // Accepts a feature with a Circle-geometry and updates the feature-geometry
   // to a Point-geometry along with an additional property ("CIRCLE_RADIUS") that can
   // be used to construct a "real" Circle-geometry when the feature is to be added to
@@ -482,23 +470,6 @@ class SketchModel {
     }
     // Otherwise we'll return the result of a lowercase-compare.
     return s1.toLowerCase() === s2.toLowerCase();
-  };
-
-  // Creates a new feature with the same geometry as the supplied one. The new
-  // feature can be used an an highlight, to show where the supplied feature is.
-  createHighlightFeature = (feature) => {
-    // If no feature (or a feature with no get-geometry) is supplied, we abort.
-    if (feature && feature.getGeometry()) {
-      // Otherwise we create a new feature...
-      const highlightFeature = new Feature({
-        geometry: feature.getGeometry().clone(),
-      });
-      // ...set an id and a highlight-style...
-      highlightFeature.setId(this.generateRandomString());
-      highlightFeature.setStyle(this.#createHighlightStyle());
-      // Finally we return the feature so that we can add it to the map etc.
-      return highlightFeature;
-    }
   };
 
   // Returns wether helper-snacks should be shown or not
