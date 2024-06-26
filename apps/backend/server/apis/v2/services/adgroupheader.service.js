@@ -135,7 +135,7 @@ class AdGroupHeaderService extends AdBaseService {
     return {
       user: userName,
       groups: this.getUserGroups(userName),
-      email: this.getUserEmail(userName),
+      mail: this.getUserEmail(userName),
     };
   }
 
