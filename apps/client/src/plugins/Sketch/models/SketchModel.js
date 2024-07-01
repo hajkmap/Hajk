@@ -1,6 +1,6 @@
 import { ACTIVITIES, MAX_REMOVED_FEATURES } from "../constants";
 import LocalStorageHelper from "../../../utils/LocalStorageHelper";
-import { Circle, Fill, Stroke, Style } from "ol/style";
+import { Circle, Fill, Stroke } from "ol/style";
 import GeoJSON from "ol/format/GeoJSON";
 import { Circle as CircleGeometry, Point } from "ol/geom";
 import { Feature } from "ol";
