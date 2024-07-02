@@ -9,6 +9,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Measurer: The measurer now allows for selecting objects by clicking them to get measurement information (area and circumference). PR: [#1532](https://github.com/hajkmap/Hajk/pull/1532).
+- Backend (Node): Added (very) limited userDetails to response when using the AD Header approach (for example NodeHoster). [#1534](https://github.com/hajkmap/Hajk/pull/1534)
+
+## [3.14.0] - 2024-09-01
+
 ### BREAKING
 
 - This release marks the removal of the legacy V1 API (`/api/v1`) in both the NodeJS backend and the old .NET 4.5 backend (refer to the _Removed_ section below). Client UI is now V2-compatible only, as it requires the consolidated loading method. This means that you need to review and update your configuration, both regarding Client and Admin. Please refer to `docs/migrate-to-v2-api.md` for details.
@@ -35,8 +42,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - LayerSwitcher: Some text field inputs for layer groups now allows HTML code. [#1518](https://github.com/hajkmap/Hajk/pull/1518).
 - CookieNotice: The cookie notice dialog now appears at the top of other dialogs and pop up windows. PR: [#1521](https://github.com/hajkmap/Hajk/pull/1521).
 - Backend (Node): Added possibility to use Authorization token in FME Server proxy. [#1530](https://github.com/hajkmap/Hajk/pull/1530).
-- Measurer: The measurer now allows for selecting objects by clicking them to get measurement information (area and circumference). PR: [#1532](https://github.com/hajkmap/Hajk/pull/1532).
-- Backend (Node): Added (very) limited userDetails to response when using the AD Header approach (for example NodeHoster). [#1534](https://github.com/hajkmap/Hajk/pull/1534)
 
 ### Fixed
 
@@ -298,7 +303,8 @@ _A quick follow-up to 3.13.22, that had some issues with certain map configurati
 
 ## [3.12.0-rc.2] - 2023-06-19
 
-[unreleased]: https://github.com/hajkmap/Hajk/compare/v3.13.24...hstd-main
+[unreleased]: https://github.com/hajkmap/Hajk/compare/v3.14.0...develop
+[3.14.0]: https://github.com/hajkmap/Hajk/compare/v3.13.25...v3.14.0
 [3.13.25]: https://github.com/hajkmap/Hajk/compare/v3.13.24...v3.13.25
 [3.13.24]: https://github.com/hajkmap/Hajk/compare/v3.13.23...v3.13.24
 [3.13.23]: https://github.com/hajkmap/Hajk/compare/v3.13.22...v3.13.23
