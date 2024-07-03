@@ -16,7 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
-- Bug fix associated to #1460. [#1536](https://github.com/hajkmap/Hajk/pull/1536)
+- Bug fix associated to the issue #1310 and PR #1460. [#1536](https://github.com/hajkmap/Hajk/pull/1536)
 
 ### Changed
 
