@@ -14,6 +14,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Measurer: The measurer now allows for selecting objects by clicking them to get measurement information (area and circumference). PR: [#1532](https://github.com/hajkmap/Hajk/pull/1532).
 - Backend (Node): Added (very) limited userDetails to response when using the AD Header approach (for example NodeHoster). [#1534](https://github.com/hajkmap/Hajk/pull/1534)
 
+### Fixed
+
+- Bug fix associated to #1460. [#1536](https://github.com/hajkmap/Hajk/pull/1536)
+
 ### Changed
 
 - Replaced the module used by the Plausible tracker in order to support some new features and fix bugs with the official tracker. See discussion in [#1535](https://github.com/hajkmap/Hajk/issues/1535).
