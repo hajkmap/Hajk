@@ -11,14 +11,14 @@ class SearchService {
     this.pool = PostgresService.pool;
   }
 
-  #getCTEFromSources = (queryString, sources, limitPerSource = 10) => {
+  #getCTEFromSources = (escapedQueryString, sources, limitPerSource = 10) => {
     return sources.map((source) => {
       return `${source.column}_matches AS (
         SELECT DISTINCT ${source.column} AS hit,
-                similarity(${source.column}, '${queryString}') AS similarity_score,
+                similarity(${source.column}, ${escapedQueryString}) AS similarity_score,
                 '${source.column}' AS match_column
         FROM ${source.table}
-        WHERE ${source.column} % '${queryString}'
+        WHERE ${source.column} % ${escapedQueryString}
         ORDER BY similarity_score DESC
         LIMIT ${limitPerSource}
       )`;
@@ -48,12 +48,19 @@ class SearchService {
         limitPerSource,
         totalLimit,
       } = json;
-      logger.trace(`Running autocomplete for query string: '${queryString}'.`);
-      logger.trace("Will match these sources:", sources);
+
+      // Keep in mind that this comes from user input and can contain an
+      // attempted SQL injection. Let's escape using the provided method.
+      const escapedQueryString = PostgresService.escapeLiteral(queryString);
+
+      logger.debug(
+        `Running autocomplete for query string: ${escapedQueryString}.`
+      );
+      logger.debug("Will match these sources:", sources);
 
       const sql = `
         SET pg_trgm.similarity_threshold = ${pgTrgmSimilarityThreshold};
-        WITH ${this.#getCTEFromSources(queryString, sources, limitPerSource).join(", ")}
+        WITH ${this.#getCTEFromSources(escapedQueryString, sources, limitPerSource).join(", ")}
         SELECT hit,
               similarity_score,
               match_column
@@ -64,6 +71,8 @@ class SearchService {
         LIMIT ${totalLimit};
         RESET pg_trgm.similarity_threshold;
         `;
+
+      logger.trace(sql);
       const res = await this.pool.query(sql);
 
       return res[1].rows;

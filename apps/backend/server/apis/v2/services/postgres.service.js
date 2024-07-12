@@ -5,6 +5,7 @@ const logger = log4js.getLogger("service.postgres.v2");
 
 class PostgresService {
   pool;
+  escapeLiteral;
 
   constructor() {
     logger.trace("Initiating PostgresService V2");
@@ -16,6 +17,7 @@ class PostgresService {
       // as idleTimeoutMillis, connectionTimeoutMillis, etc. Let's review
       // what's needed for our use case and expose in .env
     });
+    this.escapeLiteral = pg.escapeLiteral;
 
     this.checkConnection();
   }
