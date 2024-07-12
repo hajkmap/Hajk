@@ -36,6 +36,7 @@
     "helmet": "^7.1.0",
     "http-proxy-middleware": "^2.0.6",
     "log4js": "^6.9.1",
+    "pg": "^8.12.0",
     "query-string": "^8.2.0",
     "write-excel-file": "^1.4.29",
     "ws": "^8.16.0"
