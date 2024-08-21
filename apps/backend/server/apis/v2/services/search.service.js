@@ -49,6 +49,16 @@ class SearchService {
         totalLimit,
       } = json;
 
+      if (
+        !queryString ||
+        !sources ||
+        !pgTrgmSimilarityThreshold ||
+        !totalLimit ||
+        !limitPerSource
+      ) {
+        throw new Error("Request body did not contain all required fields.");
+      }
+
       // Keep in mind that this comes from user input and can contain an
       // attempted SQL injection. Let's escape using the provided method.
       const escapedQueryString = PostgresService.escapeLiteral(queryString);
@@ -77,7 +87,8 @@ class SearchService {
 
       return res[1].rows;
     } catch (error) {
-      logger.warn(`Error while doing autocomplete search.`);
+      logger.error(`Error while doing autocomplete search: ${error.message}`);
+      logger.trace("Request body:", json);
       return { error };
     }
   }
