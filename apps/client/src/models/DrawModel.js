@@ -1726,7 +1726,13 @@ class DrawModel {
       featureCopy.setId(Math.random().toString(36).substring(2, 15));
       // Then we'll set some draw-properties from the original feature.
       featureCopy.set("USER_DRAWN", true);
-      featureCopy.set("DRAW_METHOD", feature.get("DRAW_METHOD"));
+      // Here we'll add DRAW_METHOD. DRAW_METHOD can be missing from the original feature.
+      // This can and will happen if you click on an existing feature witch hasn't been drawn.
+      // So let's set it to the geometry type of the original feature if it's missing.
+      featureCopy.set(
+        "DRAW_METHOD",
+        feature.get("DRAW_METHOD") || feature.getGeometry().getType()
+      );
       featureCopy.set("TEXT_SETTINGS", feature.get("TEXT_SETTINGS"));
       // We're gonna need to set some styling on the feature as-well. Let's use the same
       // styling as on the supplied feature.
