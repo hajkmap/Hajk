@@ -58,7 +58,7 @@ const CustomControlButtonView = React.memo(
       // Prepare an output array that contains end-user text
       const output = [
         ...(formattedData.accuracy
-          ? [`Nogranhet: ${formattedData.accuracy} m\n`]
+          ? [`Noggranhet: ${formattedData.accuracy} m\n`]
           : []),
         ...(formattedData.altitude && formattedData.altitudeAccuracy
           ? [

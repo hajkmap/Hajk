@@ -13,9 +13,11 @@ import {
 
 import { IconPolygon, IconPoint, IconLine, IconCircle } from "./MeasurerIcons";
 import DeleteIcon from "@mui/icons-material/Delete";
+import TouchAppIcon from "@mui/icons-material/TouchApp";
 import ConfirmationDialog from "../../components/ConfirmationDialog";
 import { useEffect, useState } from "react";
 import HajkToolTip from "components/HajkToolTip";
+import SelectFeaturesDialog from "utils/SelectFeaturesDialog";
 
 const SvgImg = styled("img")(({ theme }) => ({
   height: "24px",
@@ -149,6 +151,11 @@ function MeasurerView(props) {
                 <SvgImg src={IconCircle()} />
               </StyledToggleButton>
             </HajkToolTip>
+            <HajkToolTip title="Välj på kartan">
+              <StyledToggleButton value="Select">
+                <TouchAppIcon />
+              </StyledToggleButton>
+            </HajkToolTip>
             <HajkToolTip title="Ta bort enskild mätning">
               <StyledToggleButton value="Delete">
                 <DeleteIcon />
@@ -184,6 +191,10 @@ function MeasurerView(props) {
         }}
       />
       <HelpDialog open={showHelp} setShowHelp={setShowHelp} />
+      <SelectFeaturesDialog
+        localObserver={props.localObserver}
+        drawModel={drawModel}
+      />
     </>
   );
 }

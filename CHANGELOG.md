@@ -9,6 +9,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Measurer: The measurer now allows for selecting objects by clicking them to get measurement information (area and circumference). PR: [#1532](https://github.com/hajkmap/Hajk/pull/1532).
+- Backend (Node): Added (very) limited userDetails to response when using the AD Header approach (for example NodeHoster). [#1534](https://github.com/hajkmap/Hajk/pull/1534)
+
+### Fixed
+
+- Bug fix associated to the issue #1310 and PR #1460. [#1536](https://github.com/hajkmap/Hajk/pull/1536)
+
+### Changed
+
+- Replaced the module used by the Plausible tracker in order to support some new features and fix bugs with the official tracker. See discussion in [#1535](https://github.com/hajkmap/Hajk/issues/1535).
+
+## [3.14.0] - 2024-09-01
+
 ### BREAKING
 
 - This release marks the removal of the legacy V1 API (`/api/v1`) in both the NodeJS backend and the old .NET 4.5 backend (refer to the _Removed_ section below). Client UI is now V2-compatible only, as it requires the consolidated loading method. This means that you need to review and update your configuration, both regarding Client and Admin. Please refer to `docs/migrate-to-v2-api.md` for details.
@@ -17,10 +32,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Cookie: It's now possible to revisit the cookie notice and change your preference [#1125](https://github.com/hajkmap/Hajk/issue/1125)
 - Sketch: It is now possible to buffer from the Sketch plugin. [#1310](https://github.com/hajkmap/Hajk/issues/1310)
 - Sketch: The user now has the option to reset to default styling and choose from a wider range of colors in the color picker; additionally, black and white options have been added. [#1372](https://github.com/hajkmap/Hajk/issues/1372)
 - Core, Admin: Added support for stand-alone GeoWebCache WMS Server. Issue: [#1469](https://github.com/hajkmap/Hajk/issues/1469), PR: [#1493](https://github.com/hajkmap/Hajk/pull/1493).
-- Print/Anchor: It's now possible to generate qr codes in Share and Print. [#1482](https://github.com/hajkmap/Hajk/issues/1482)
+- Print/Anchor: It's now possible to generate QR codes in Share and Print. [#1482](https://github.com/hajkmap/Hajk/issues/1482)
 - Sketch: It's now possible to disable stroke for polygons and circles [#1177](https://github.com/hajkmap/Hajk/issues/1177)
 - Backend: The new .NET 6 backend. Issue: [#1210](https://github.com/hajkmap/Hajk/issues/1210). PR: [#1395](https://github.com/hajkmap/Hajk/pull/1395).
 - Core: Allow to specify map config by using `m` query parameter, even when no backend is active. [commit](https://github.com/hajkmap/Hajk/commit/eb5be276437994c86c2edd5abef3ea21cd6071b4)
@@ -28,7 +44,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - TimeSlider: It's now possible to print images of the content generated in the TimeSlider plugin. PR: [#1492](https://github.com/hajkmap/Hajk/pull/1492).
 - Core: CSS classes added for certain elements, allows for more granular custom styling. See also this [discussion](https://github.com/hajkmap/Hajk/discussions/1481). PR: [#1497](https://github.com/hajkmap/Hajk/pull/1497).
 - Coordinates: in addition to changing the icon's name (URL), it is now also possible to set icon's scale and anchor values. PR: [#1499](https://github.com/hajkmap/Hajk/pull/1499).
-- Admin UI: It is now possible to easily duplicate map configurations using the UI. [#1502](https://github.com/hajkmap/Hajk/issues/1502)
+- Admin UI: It is now possible to easily duplicate map configurations using the UI. [#1502](https://github.com/hajkmap/Hajk/issues/1502).
+- Coordinates: It's now possible to copy and paste coordinates from/to both coordinate inputs (N & E, longitude & latitude). PR: [#1506](https://github.com/hajkmap/Hajk/pull/1506).
+- LayerSwitcher(Client)/Groups(Admin): It's now possible to add and show information about a layer group. [#400](https://github.com/hajkmap/Hajk/issues/400).
+- LayerSwitcher: Some text field inputs for layer groups now allows HTML code. [#1518](https://github.com/hajkmap/Hajk/pull/1518).
+- CookieNotice: The cookie notice dialog now appears at the top of other dialogs and pop up windows. PR: [#1521](https://github.com/hajkmap/Hajk/pull/1521).
+- Backend (Node): Added possibility to use Authorization token in FME Server proxy. [#1530](https://github.com/hajkmap/Hajk/pull/1530).
 
 ### Fixed
 
@@ -36,6 +57,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Restore cross-platform build for NodeJS backend. [#1484](https://github.com/hajkmap/Hajk/pull/1484)
 - Bug fix associated to #1468. [#1485](https://github.com/hajkmap/Hajk/pull/1485)
 - Admin UI is now compatible with the correct HTTP verbs (`DELETE` and `PUT`). [#1501](https://github.com/hajkmap/Hajk/pull/1501)
+- Cookie: Cookie Notice updated after browser refresh. Fix to PR: [#1509](https://github.com/hajkmap/Hajk/pull/1509)
+- FIR plugin - Pagination now remembers page after delete. [#1514](https://github.com/hajkmap/Hajk/pull/1514)
+- Fix collapsed InfoClick in Iframe [#1508](https://github.com/hajkmap/Hajk/pull/1508)
+- Prevent multiple animations in Location plugin [#1525](https://github.com/hajkmap/Hajk/pull/1525)
 
 ### Security
 
@@ -286,7 +311,8 @@ _A quick follow-up to 3.13.22, that had some issues with certain map configurati
 
 ## [3.12.0-rc.2] - 2023-06-19
 
-[unreleased]: https://github.com/hajkmap/Hajk/compare/v3.13.24...hstd-main
+[unreleased]: https://github.com/hajkmap/Hajk/compare/v3.14.0...develop
+[3.14.0]: https://github.com/hajkmap/Hajk/compare/v3.13.25...v3.14.0
 [3.13.25]: https://github.com/hajkmap/Hajk/compare/v3.13.24...v3.13.25
 [3.13.24]: https://github.com/hajkmap/Hajk/compare/v3.13.23...v3.13.24
 [3.13.23]: https://github.com/hajkmap/Hajk/compare/v3.13.22...v3.13.23

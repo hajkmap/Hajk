@@ -117,7 +117,7 @@ class CookieManager {
     }
     // Otherwise we do a bitwise-comparison between the current cookie-level and a third-party-
     // cookie-level. Remember that if both functional- and third-party-cookies are allowed (level 7)
-    // this will return true, since 0111 & 0101 => 0101.
+    // this will return true, since 0111 & 0100 => 0100.
     return (
       (this.#cookieLevel & this.#thirdPartyCookie) === this.#thirdPartyCookie
     );

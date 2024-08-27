@@ -182,7 +182,7 @@ class FirSearchResultsView extends React.PureComponent {
     );
     this.localObserver.subscribe("fir.results.filtered", (list) => {
       this.setState({ results: { list: list } });
-      this.setPage(1);
+      this.setPage(this.state.currentPage);
       this.forceUpdate();
     });
   };
@@ -323,7 +323,7 @@ class FirSearchResultsView extends React.PureComponent {
       let uid = list[index].ol_uid;
       this.highlight(null, false);
       list.splice(index, 1);
-      this.updateResultList(list);
+      this.updateResultList(list, this.state.currentPage);
       this.localObserver.publish("fir.search.results.delete", uid);
     }
   };
@@ -338,11 +338,6 @@ class FirSearchResultsView extends React.PureComponent {
       pageNum = this.state.currentPage;
     }
 
-    this.setState({ currentPage: pageNum });
-    this.setState({
-      pageCount: Math.ceil(this.state.results.list.length / this.itemsPerPage),
-    });
-
     let start = (pageNum - 1) * this.itemsPerPage;
     let end = pageNum * this.itemsPerPage;
 
@@ -356,7 +351,13 @@ class FirSearchResultsView extends React.PureComponent {
     if (list.length === 0 && pageNum > 1) {
       this.setPage(pageNum - 1);
     } else {
-      this.setState({ paginatedResults: { list: list } });
+      this.setState({
+        currentPage: pageNum,
+        paginatedResults: { list: list },
+        pageCount: Math.ceil(
+          this.state.results.list.length / this.itemsPerPage
+        ),
+      });
     }
   }
 

@@ -112,6 +112,8 @@ class LocationModel {
 
     // If deactivating, cleanup
     if (active === false) {
+      // Lets cleanup the flash animating, so we don't get multiple animations.
+      clearInterval(this.flashInterval);
       // Remove features from map if tracking has been switched off
       this.layer.getSource().clear();
       // Make sure that we zoom to location next time tracking is activated
@@ -124,13 +126,13 @@ class LocationModel {
       this.layer.getSource().addFeature(this.positionFeature);
 
       // Finally, start flashing the position feature
-      setInterval(() => {
+      this.flashInterval = setInterval(() => {
         this.flash(this.positionFeature);
       }, 3000);
     }
   };
 
-  // Flash handler: sets up the animation and creats a handler for the postrender
+  // Flash handler: sets up the animation and creates a handler for the postrender
   flash = (feature) => {
     // Helper: takes care of the actual animation.
     const animate = (event) => {
@@ -176,6 +178,8 @@ class LocationModel {
     const flashGeom = feature.getGeometry().clone();
     // Save the listener key so we can unsubscribe when animation is done
     const listenerKey = this.layer.on("postrender", animate);
+    // We need to force render, otherwise postrender won't run the first time.
+    this.map.render();
   };
 
   enable() {
