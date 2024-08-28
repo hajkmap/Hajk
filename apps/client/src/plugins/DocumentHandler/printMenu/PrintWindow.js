@@ -532,15 +532,11 @@ class PrintWindow extends React.PureComponent {
         // Add our recently-created DIV to the new window's document
         newWindow.document.body.appendChild(printContent);
 
-        // Invoke browser's print dialog - this will block the thread
-        // until user does something with it.
-        newWindow.print();
-
-        // Once the print dialog has disappeared, let's close the new window
-        newWindow.close();
-
-        // When the user closes the print-window we have to do some cleanup...
-        this.handlePrintCompleted();
+        setTimeout(() => {
+          newWindow.print();
+          newWindow.close();
+          this.handlePrintCompleted();
+        }, 25);
       });
     });
   };
@@ -753,7 +749,7 @@ class PrintWindow extends React.PureComponent {
   createFrontPage = (documents) => {
     //We get drawer Title from options
     const { drawerTitle } = this.props.options;
-    // And img html from the first document
+    // And html from the first document
     const firstDocumentHtml = Object.values(documents).find(
       (doc) => doc.level === 1
     )?.chapters[0]?.html;
