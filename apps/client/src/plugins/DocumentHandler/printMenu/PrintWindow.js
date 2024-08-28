@@ -302,7 +302,7 @@ class PrintWindow extends React.PureComponent {
           <img
             src={this.state.frontPage.img}
             alt=""
-            style={{ margin: "auto" }} // Add this style to center align the image
+            style={{ margin: "auto", maxWidth: "100%" }} // Add this style to center align the image
           />
         </Grid>
       </Grid>,
@@ -765,9 +765,11 @@ class PrintWindow extends React.PureComponent {
       .querySelector("img")
       ?.getAttribute("src");
 
+    console.log("firstDocumentImage", firstDocumentImage);
+
     return {
       title: drawerTitle,
-      img: firstDocumentImage,
+      img: "https://letsenhance.io/static/8f5e523ee6b2479e26ecc91b9c25261e/1015f/MainAfter.jpg",
       id: 1,
     };
   };
