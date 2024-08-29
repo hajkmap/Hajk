@@ -431,7 +431,7 @@ class Search extends React.PureComponent {
               // with doSearch(), otherwise we'll fetch some autoComplete-objects.
               this.disableAutocomplete
                 ? this.doSearch()
-                : this.updateAutocompleteList(this.state.searchString);
+                : this.getAutocompleteListFromDatabase(this.state.searchString); //this.updateAutocompleteList(this.state.searchString);
             } else {
               // If the search-string is not long enough, we'll reset the autoComplete.
               this.setState({
@@ -879,6 +879,56 @@ class Search extends React.PureComponent {
       numResults += fc.value.features.length;
     });
     return numResults;
+  };
+
+  getAutocompleteListFromDatabase = async (str) => {
+    const jsonBody = {
+      queryString: str,
+      pgTrgmSimilarityThreshold: 0.2,
+      limitPerSource: 5,
+      totalLimit: 20,
+      sources: [
+        {
+          table: "adresspunkter",
+          column: "fastighet",
+        },
+        {
+          table: "adresspunkter",
+          column: "kommundel",
+        },
+        {
+          table: "adresspunkter",
+          column: "beladress",
+        },
+      ],
+    };
+
+    const response = await fetch(
+      "http://localhost:3002/api/v2/search/autocomplete",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(jsonBody),
+      }
+    );
+
+    const results = await response.json();
+    console.log("results: ", results);
+
+    const acl = results.map((result) => {
+      return {
+        dataset: result.match_column,
+        autocompleteEntry: result.hit,
+        origin: "Database",
+      };
+    });
+
+    this.setState({
+      autocompleteList: acl,
+      loading: false,
+    });
   };
 
   updateAutocompleteList = async () => {
