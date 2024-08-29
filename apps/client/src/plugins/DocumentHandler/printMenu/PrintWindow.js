@@ -488,15 +488,18 @@ class PrintWindow extends React.PureComponent {
         // Add our recently-created DIV to the new window's document
         newWindow.document.body.appendChild(printContent);
 
-        // Invoke browser's print dialog - this will block the thread
-        // until user does something with it.
-        newWindow.print();
+        // We force print to the next upcoming render. Let it render in peace.
+        setTimeout(() => {
+          // Invoke browser's print dialog - this will block the thread
+          // until user does something with it.
+          newWindow.print();
 
-        // Once the print dialog has disappeared, let's close the new window
-        newWindow.close();
+          // Once the print dialog has disappeared, let's close the new window
+          newWindow.close();
 
-        // When the user closes the print-window we have to do some cleanup...
-        this.handlePrintCompleted();
+          // When the user closes the print-window we have to do some cleanup...
+          this.handlePrintCompleted();
+        }, 25);
       });
     });
   };

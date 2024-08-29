@@ -14,6 +14,7 @@ import HajkToolTip from "components/HajkToolTip";
 import RotateRightIcon from "@mui/icons-material/RotateRight";
 import RotateLeftIcon from "@mui/icons-material/RotateLeft";
 import Information from "../components/Information";
+import { ROTATABLE_DRAW_TYPES } from "plugins/Sketch/constants";
 
 const TranslateToggler = ({ translateEnabled, setTranslateEnabled }) => {
   return (
@@ -185,7 +186,14 @@ const FeatureRotateSelector = (props) => {
   };
 
   return (
-    <Paper sx={{ p: 1, mt: 1 }}>
+    <Paper
+      sx={{
+        p: 1,
+        mt: 1,
+        opacity: props.disabled ? 0.3 : 1.0,
+        pointerEvents: props.disabled ? "none" : "auto",
+      }}
+    >
       <Grid container item justifyContent="center" alignItems="center">
         <Grid item xs={12} sx={{ mb: 1 }}>
           <Typography variant="body2" align="center">
@@ -208,6 +216,7 @@ const FeatureRotateSelector = (props) => {
         </Grid>
         <Grid item xs={3} sx={{ pr: 1 / 4 }}>
           <Button
+            disabled={props.disabled}
             variant="contained"
             fullWidth
             size="small"
@@ -224,6 +233,7 @@ const FeatureRotateSelector = (props) => {
         </Grid>
         <Grid item xs={3} sx={{ pl: 1 / 4 }}>
           <Button
+            disabled={props.disabled}
             variant="contained"
             fullWidth
             size="small"
@@ -264,6 +274,18 @@ const MoveView = (props) => {
     setLastMoves([]);
   }, [moveFeatures]);
 
+  const rotationIsDisabled = () => {
+    // Rotation is only allowed for specific draw methods.
+
+    let drawMethod = moveFeatures[0].get("DRAW_METHOD");
+
+    if (drawMethod) {
+      return ROTATABLE_DRAW_TYPES.indexOf(drawMethod) === -1;
+    }
+
+    return false;
+  };
+
   // We have to get some information about the current activity (view)
   const activity = props.model.getActivityFromId(props.id);
   return (
@@ -288,6 +310,7 @@ const MoveView = (props) => {
               setMovementAngle={setMovementAngle}
             />
             <FeatureRotateSelector
+              disabled={rotationIsDisabled()}
               drawModel={drawModel}
               rotationDegrees={rotationDegrees}
               setRotationDegrees={setRotationDegrees}
