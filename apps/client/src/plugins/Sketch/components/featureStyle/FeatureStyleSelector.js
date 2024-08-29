@@ -373,6 +373,8 @@ export default function FeatureStyleSelector(props) {
           {props.activeDrawType === "Point" && renderPointStyleSettings()}
           {props.activityId === "ADD" &&
             props.activeDrawType !== "Circle" &&
+            props.activeDrawType !== "Text" &&
+            props.activeDrawType !== "Arrow" &&
             renderBufferStyleSettings()}
         </Grid>
       </Grid>
