@@ -273,7 +273,7 @@ function Measurer(props) {
         title: state.title || "Mät",
         description: "Mät längder och ytor",
         height: "dynamic",
-        width: 360,
+        width: 400,
         customPanelHeaderButtons: customHeaderButtons,
 
         onWindowHide: onWindowHide,

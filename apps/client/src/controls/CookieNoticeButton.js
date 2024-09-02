@@ -1,6 +1,6 @@
 import React from "react";
 import { IconButton, Paper } from "@mui/material";
-import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
+import CookieIcon from "@mui/icons-material/Cookie";
 
 import { styled } from "@mui/material/styles";
 import HajkToolTip from "components/HajkToolTip";
@@ -14,23 +14,23 @@ const StyledIconButton = styled(IconButton)(({ theme }) => ({
 }));
 
 /**
- * @summary Hides all visible layers
+ * @summary Displays the cookie notice dialog
  *
  * @param {object} props
  * @returns {object} React
  */
-const MapCleaner = React.memo((props) => {
+const CookieNoticeButton = React.memo((props) => {
   return (
-    props.appModel.config.mapConfig.map.mapcleaner && (
-      <HajkToolTip title="Dölj alla aktiva lager">
+    props.appModel.config.mapConfig.map.showCookieNoticeButton && (
+      <HajkToolTip title="Visa cookie meddelande">
         <StyledPaper>
           <StyledIconButton
-            aria-label="Rensa kartan"
+            aria-label="CookieNoticeButton"
             onClick={(e) => {
-              props.appModel.clear();
+              props.appModel.globalObserver.publish("core.showCookieBanner");
             }}
           >
-            <VisibilityOffIcon />
+            <CookieIcon />
           </StyledIconButton>
         </StyledPaper>
       </HajkToolTip>
@@ -38,4 +38,4 @@ const MapCleaner = React.memo((props) => {
   );
 });
 
-export default MapCleaner;
+export default CookieNoticeButton;

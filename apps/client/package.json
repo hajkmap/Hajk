@@ -1,6 +1,6 @@
 {
   "name": "hajk-client",
-  "version": "3.13.25",
+  "version": "3.14.0",
   "description": "Hajk Client UI",
   "homepage": ".",
   "repository": {
@@ -43,6 +43,7 @@
     "webpack": "^5.90.3"
   },
   "dependencies": {
+    "@barbapapazes/plausible-tracker": "^0.5.0",
     "@emotion/react": "^11.11.4",
     "@emotion/styled": "^11.11.0",
     "@fontsource/material-icons": "^5.0.14",
@@ -70,7 +71,6 @@
     "notistack": "^2.0.8",
     "ol": "^9.1.0",
     "pdfjs-dist": "^3.11.174",
-    "plausible-tracker": "^0.3.8",
     "proj4": "^2.10.0",
     "qrcode": "^1.5.3",
     "react": "^18.2.0",

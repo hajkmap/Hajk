@@ -1,8 +1,9 @@
 import React from "react";
 import { styled } from "@mui/material/styles";
-import { Grid, Typography, Tooltip } from "@mui/material";
+import { Grid, Typography } from "@mui/material";
 import { Accordion, AccordionDetails, AccordionSummary } from "@mui/material";
 import Buffer from "plugins/Sketch/components/SketchBuffer/Buffer";
+import HajkToolTip from "components/HajkToolTip";
 
 const StyledAccordionSummary = styled(AccordionSummary)(() => ({
   minHeight: 35,
@@ -23,8 +24,7 @@ const StyledAccordionSummary = styled(AccordionSummary)(() => ({
 const FeatureBufferAccordion = (props) => {
   return (
     <Accordion size="small" style={{ marginBottom: 8 }}>
-      <Tooltip
-        disableInteractive
+      <HajkToolTip
         title={`Klicka här för att ändra ${props.title.toLowerCase()}.`}
       >
         <StyledAccordionSummary>
@@ -32,7 +32,7 @@ const FeatureBufferAccordion = (props) => {
             <Typography variant="button">{props.title}</Typography>
           </Grid>
         </StyledAccordionSummary>
-      </Tooltip>
+      </HajkToolTip>
       <AccordionDetails style={{ maxWidth: "100%" }}>
         <Grid container>
           {props.showBufferSlider && (

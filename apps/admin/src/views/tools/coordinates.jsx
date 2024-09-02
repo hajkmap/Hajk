@@ -47,6 +47,10 @@ var defaultState = {
   visibleAtStart: false,
   thousandSeparator: false,
   showFieldsOnStart: false,
+  src: "marker.png",
+  scale: 0.15,
+  anchorX: 0.5,
+  anchorY: 1,
   visibleForGroups: [],
 };
 
@@ -78,6 +82,10 @@ class ToolOptions extends Component {
         visibleAtStart: tool.options.visibleAtStart,
         thousandSeparator: tool.options.thousandSeparator,
         showFieldsOnStart: tool.options.showFieldsOnStart,
+        src: tool.options.src || this.state.src,
+        scale: tool.options.scale || this.state.scale,
+        anchorX: tool.options.anchor ? tool.options.anchor[0] : this.state.anchorX,
+        anchorY: tool.options.anchor ? tool.options.anchor[1] : this.state.anchorY,
         visibleForGroups: tool.options.visibleForGroups
           ? tool.options.visibleForGroups
           : [],
@@ -151,6 +159,9 @@ class ToolOptions extends Component {
         visibleAtStart: this.state.visibleAtStart,
         thousandSeparator: this.state.thousandSeparator,
         showFieldsOnStart: this.state.showFieldsOnStart,
+        src: this.state.src,
+        scale: this.state.scale,
+        anchor: [this.state.anchorX, this.state.anchorY],
         visibleForGroups: this.state.visibleForGroups.map(
           Function.prototype.call,
           String.prototype.trim
@@ -432,6 +443,60 @@ class ToolOptions extends Component {
               value={this.state.height}
             />
           </div>
+          <div className="separator">Ikon</div>
+          <div>
+            <label htmlFor="src">URL till bild</label>
+            <input
+              value={this.state.src}
+              type="text"
+              name="src"
+              onChange={e => {
+                this.handleInputChange(e);
+              }}
+            />
+          </div>
+          <div>
+            <label htmlFor="anchorX">Ikonförskjutning X</label>
+            <input
+              value={this.state.anchorX}
+              type="number"
+              min="0"
+              max="100"
+              step="0.1"
+              name="anchorX"
+              onChange={e => {
+                this.handleInputChange(e);
+              }}
+            />
+          </div>
+          <div>
+            <label htmlFor="anchorY">Ikonförskjutning Y</label>
+            <input
+              value={this.state.anchorY}
+              type="number"
+              min="0"
+              max="100"
+              step="0.1"
+              name="anchorY"
+              onChange={e => {
+                this.handleInputChange(e);
+              }}
+            />
+          </div>
+          <div>
+            <label htmlFor="scale">Skala för ikon</label>
+            <input
+              value={this.state.scale}
+              type="number"
+              step="0.01"
+              min="0.01"
+              max="10"
+              name="scale"
+              onChange={e => {
+                this.handleInputChange(e);
+              }}
+            />
+          </div>
           <div className="separator">Övriga inställningar</div>
           <div>
             <input
@@ -458,7 +523,7 @@ class ToolOptions extends Component {
             />
             &nbsp;
             <label htmlFor="thousandSeparator">
-              Formattera nummer (1000 -> 1 000)
+              Formattera nummer (1000 -&gt; 1 000)
             </label>
           </div>
           <div>

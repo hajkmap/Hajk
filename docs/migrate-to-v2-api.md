@@ -23,8 +23,10 @@ Due to the [new error page in Client UI added in 3.13.6](https://github.com/hajk
 
 ## `apps/admin/public/config.json`
 
-Simply replace `v1` with `v2` to ensure that all requests go to the current API, e.g.
-`http://localhost:3002/api/v1/mapconfig/list` -> `http://localhost:3002/api/v2/mapconfig/list`
+1. Replace `v1` with `v2` to ensure that all requests go to the current API, e.g. `http://localhost:3002/api/v1/mapconfig/list` -> `http://localhost:3002/api/v2/mapconfig/list`
+1. Adjust map administration endpoints to comply with new REST paths
+    1. `url_map_create` - remove trailing `/create`
+    1. `url_map_delete` - remove trailing `/delete`
 
 ## `apps/backend/.env`
 

@@ -1,6 +1,7 @@
 import React from "react";
-import { Grid, Paper, Tooltip } from "@mui/material";
+import { Grid, Paper } from "@mui/material";
 import ToggleButton from "@mui/material/ToggleButton";
+import HajkToolTip from "components/HajkToolTip";
 
 import { ACTIVITIES } from "../constants";
 
@@ -16,7 +17,7 @@ const ActivityMenu = (props) => {
         {ACTIVITIES.map((activity, index) => {
           return (
             <div key={index} style={{ padding: 8 }}>
-              <Tooltip disableInteractive title={activity.tooltip}>
+              <HajkToolTip title={activity.tooltip}>
                 <ToggleButton
                   sx={{ color: "text.primary" }}
                   value={activity.id}
@@ -27,7 +28,7 @@ const ActivityMenu = (props) => {
                 >
                   {activity.icon}
                 </ToggleButton>
-              </Tooltip>
+              </HajkToolTip>
             </div>
           );
         })}

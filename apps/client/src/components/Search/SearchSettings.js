@@ -1,6 +1,5 @@
 import React from "react";
 import {
-  Tooltip,
   Grid,
   Switch,
   FormGroup,
@@ -13,6 +12,7 @@ import {
   Input,
 } from "@mui/material";
 import { styled } from "@mui/material/styles";
+import HajkToolTip from "components/HajkToolTip";
 
 const ChipsWrapper = styled("div")(({ theme }) => ({
   display: "flex",
@@ -59,10 +59,7 @@ class SearchSettings extends React.PureComponent {
           <FormControl component="fieldset">
             <FormLabel component="legend">Generella sökinställningar</FormLabel>
             <FormGroup>
-              <Tooltip
-                disableInteractive
-                title="Slå på för att välja vilka datakällor som sökningen kommer göras i. Om reglaget är i off-läget kommer sökningen att ske i alla tillgänliga sökkällor."
-              >
+              <HajkToolTip title="Slå på för att välja vilka datakällor som sökningen kommer göras i. Om reglaget är i off-läget kommer sökningen att ske i alla tillgänliga sökkällor.">
                 <FormControlLabel
                   label="Begränsa sökkällor"
                   control={
@@ -86,7 +83,7 @@ class SearchSettings extends React.PureComponent {
                     />
                   }
                 />
-              </Tooltip>
+              </HajkToolTip>
               {this.state.showSearchSourcesFilter && (
                 <Grid container spacing={2}>
                   <Grid item xs>
@@ -126,7 +123,7 @@ class SearchSettings extends React.PureComponent {
             </FormGroup>
             {showSearchInVisibleLayers && (
               <FormGroup>
-                <Tooltip title="Om aktivt kommer sökningen att ske i lager som är inställda för sökning av systemadministratören och som är synliga.">
+                <HajkToolTip title="Om aktivt kommer sökningen att ske i lager som är inställda för sökning av systemadministratören och som är synliga.">
                   <FormControlLabel
                     label="Sök endast i synliga lager"
                     control={
@@ -142,7 +139,7 @@ class SearchSettings extends React.PureComponent {
                       />
                     }
                   />
-                </Tooltip>
+                </HajkToolTip>
               </FormGroup>
             )}
           </FormControl>
@@ -155,7 +152,7 @@ class SearchSettings extends React.PureComponent {
             </FormLabel>
             <FormGroup>
               {showWildcardAtStart && (
-                <Tooltip
+                <HajkToolTip
                   disableInteractive
                   title="Om aktivt kommer en sökning på 'väg' även ge träffar på exempelvis 'storväg'."
                 >
@@ -174,10 +171,10 @@ class SearchSettings extends React.PureComponent {
                       />
                     }
                   />
-                </Tooltip>
+                </HajkToolTip>
               )}
               {showWildcardAtEnd && (
-                <Tooltip
+                <HajkToolTip
                   disableInteractive
                   title="Om aktivt kommer en sökning på 'väg' även ge träffar på exempelvis 'vägen'."
                 >
@@ -196,10 +193,10 @@ class SearchSettings extends React.PureComponent {
                       />
                     }
                   />
-                </Tooltip>
+                </HajkToolTip>
               )}
               {showMatchCase && (
-                <Tooltip
+                <HajkToolTip
                   disableInteractive
                   title="Om aktivt kommer en sökning på 'a' inte ge träffar på 'A'. Inaktivera för att söka oberoende av gemener/versaler."
                 >
@@ -218,75 +215,78 @@ class SearchSettings extends React.PureComponent {
                       />
                     }
                   />
-                </Tooltip>
+                </HajkToolTip>
+              )}
+              {showActiveSpatialFilter && (
+                <Grid item xs>
+                  <FormControl component="fieldset">
+                    <FormLabel component="legend">
+                      Spatiala sökinställningar
+                    </FormLabel>
+                    <FormGroup>
+                      <HajkToolTip
+                        disableInteractive
+                        title="Om aktivt kommer hela objektet (exempelvis en fastigheten) behöva rymmas inom sökområdet för att komma med i resultatet. Om inaktivt räcker det att endast en liten del av objektet ryms inom, eller nuddar vid, sökområdet."
+                      >
+                        <FormControlLabel
+                          label="Kräv att hela objektet ryms inom sökområde"
+                          control={
+                            <Switch
+                              checked={
+                                searchOptions.activeSpatialFilter === "within"
+                              }
+                              onChange={() =>
+                                this.localUpdateSearchOptions(
+                                  "activeSpatialFilter",
+                                  searchOptions.activeSpatialFilter ===
+                                    "intersects"
+                                    ? "within"
+                                    : "intersects"
+                                )
+                              }
+                              color="primary"
+                            />
+                          }
+                        />
+                      </HajkToolTip>
+                    </FormGroup>
+                  </FormControl>
+                </Grid>
+              )}
+              {showEnableLabelOnHighlight && (
+                <Grid item xs>
+                  <FormControl component="fieldset">
+                    <FormLabel component="legend">
+                      Visning av resultat
+                    </FormLabel>
+                    <FormGroup>
+                      <HajkToolTip
+                        disableInteractive
+                        title="Om aktivt kommer en etikett att visas i kartan intill det markerade sökresultatet"
+                      >
+                        <FormControlLabel
+                          label="Visa textetikett i kartan"
+                          control={
+                            <Switch
+                              checked={searchOptions.enableLabelOnHighlight}
+                              onChange={() =>
+                                this.localUpdateSearchOptions(
+                                  "enableLabelOnHighlight",
+                                  !searchOptions.enableLabelOnHighlight
+                                )
+                              }
+                              color="primary"
+                            />
+                          }
+                        />
+                      </HajkToolTip>
+                    </FormGroup>
+                  </FormControl>
+                </Grid>
               )}
             </FormGroup>
           </FormControl>
         </Grid>
-
-        {showActiveSpatialFilter && (
-          <Grid item xs>
-            <FormControl component="fieldset">
-              <FormLabel component="legend">
-                Spatiala sökinställningar
-              </FormLabel>
-              <FormGroup>
-                <Tooltip
-                  disableInteractive
-                  title="Om aktivt kommer hela objektet (exempelvis en fastigheten) behöva rymmas inom sökområdet för att komma med i resultatet. Om inaktivt räcker det att endast en liten del av objektet ryms inom, eller nuddar vid, sökområdet."
-                >
-                  <FormControlLabel
-                    label="Kräv att hela objektet ryms inom sökområde"
-                    control={
-                      <Switch
-                        checked={searchOptions.activeSpatialFilter === "within"}
-                        onChange={() =>
-                          this.localUpdateSearchOptions(
-                            "activeSpatialFilter",
-                            searchOptions.activeSpatialFilter === "intersects"
-                              ? "within"
-                              : "intersects"
-                          )
-                        }
-                        color="primary"
-                      />
-                    }
-                  />
-                </Tooltip>
-              </FormGroup>
-            </FormControl>
-          </Grid>
-        )}
-
-        {showEnableLabelOnHighlight && (
-          <Grid item xs>
-            <FormControl component="fieldset">
-              <FormLabel component="legend">Visning av resultat</FormLabel>
-              <FormGroup>
-                <Tooltip
-                  disableInteractive
-                  title="Om aktivt kommer en etikett att visas i kartan intill det markerade sökresultatet"
-                >
-                  <FormControlLabel
-                    label="Visa textetikett i kartan"
-                    control={
-                      <Switch
-                        checked={searchOptions.enableLabelOnHighlight}
-                        onChange={() =>
-                          this.localUpdateSearchOptions(
-                            "enableLabelOnHighlight",
-                            !searchOptions.enableLabelOnHighlight
-                          )
-                        }
-                        color="primary"
-                      />
-                    }
-                  />
-                </Tooltip>
-              </FormGroup>
-            </FormControl>
-          </Grid>
-        )}
       </Grid>
     );
   }

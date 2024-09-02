@@ -27,6 +27,7 @@ import MapClickViewer from "./MapClickViewer/MapClickViewer";
 
 import Search from "./Search/Search.js";
 
+import CookieNoticeButton from "../controls/CookieNoticeButton";
 import Zoom from "../controls/Zoom";
 import User from "../controls/User";
 import Rotate from "../controls/Rotate";
@@ -50,7 +51,6 @@ import {
   Hidden,
   IconButton,
   Link,
-  Tooltip,
   Typography,
 } from "@mui/material";
 
@@ -59,6 +59,7 @@ import LockOpenIcon from "@mui/icons-material/LockOpen";
 import MapIcon from "@mui/icons-material/Map";
 import MenuIcon from "@mui/icons-material/Menu";
 import ThemeToggler from "../controls/ThemeToggler";
+import HajkToolTip from "components/HajkToolTip";
 
 // A global that holds our windows, for use see components/Window.js
 document.windows = [];
@@ -993,8 +994,7 @@ class App extends React.PureComponent {
           {!this.state.drawerStatic && (
             <Grid item>
               <Hidden mdDown>
-                <Tooltip
-                  disableInteractive
+                <HajkToolTip
                   title={
                     (this.state.drawerPermanent ? "Lås upp" : "Lås fast") +
                     " verktygspanelen"
@@ -1019,7 +1019,7 @@ class App extends React.PureComponent {
                       <LockOpenIcon />
                     )}
                   </IconButton>
-                </Tooltip>
+                </HajkToolTip>
               </Hidden>
             </Grid>
           )}
@@ -1197,6 +1197,9 @@ class App extends React.PureComponent {
                   map={this.appModel.getMap()}
                   mapConfig={this.appModel.config.mapConfig.map}
                 />
+                {clean === false && (
+                  <CookieNoticeButton appModel={this.appModel} />
+                )}
                 {clean === false &&
                   this.appModel.config.mapConfig.map.showUserAvatar ===
                     true && (

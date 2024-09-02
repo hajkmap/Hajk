@@ -4,7 +4,20 @@ import TextField from "@mui/material/TextField";
 import { NumericFormat } from "react-number-format";
 import { transform } from "ol/proj";
 import { withSnackbar } from "notistack";
-import Grid from "@mui/material/Grid";
+import { Grid, IconButton } from "@mui/material";
+import ContentCopyIcon from "@mui/icons-material/ContentCopy";
+import { styled } from "@mui/material/styles";
+import HajkToolTip from "components/HajkToolTip";
+
+const StyledIconButton = styled(IconButton)(({ theme }) => ({
+  justifyContent: "flex-end",
+  padding: "8px",
+  "& svg": {
+    fontSize: 20, // Adjust the icon size here
+  },
+  marginBottom: "-8px",
+  marginRight: "-6px",
+}));
 
 class CoordinatesTransformRow extends React.PureComponent {
   state = {
@@ -67,6 +80,102 @@ class CoordinatesTransformRow extends React.PureComponent {
     });
   }
 
+  getCoordinates(title) {
+    let inputX, inputY;
+    // We find the specified numericFormat X and Y value
+    inputX = document.getElementsByName(`${title}numberformatX`)[0].value;
+    inputY = document.getElementsByName(`${title}numberformatY`)[0].value;
+    // And remove all blank spaces
+    inputX = inputX.replace(/\s/g, "");
+    inputY = inputY.replace(/\s/g, "");
+
+    return { inputX, inputY };
+  }
+
+  handleCopyToClipBoard(coordinateFormatTitle) {
+    //We get the correct input fields values using the title of the coordinate system
+    const { inputX, inputY } = this.getCoordinates(coordinateFormatTitle);
+
+    // We check if the values have any numbers, and if not exit the function early...
+    // and give an alert to the user
+    if (inputX === "" || inputY === "") {
+      // Display a message if any of the fields are empty
+      this.props.enqueueSnackbar(
+        "Kopiering misslyckades, båda fälten måste vara ifyllda",
+        {
+          variant: "error",
+        }
+      );
+      return;
+    }
+
+    // Set the string to be copied from the two X and Y values
+    const coordinatesString = `${inputX},${inputY}`;
+
+    // We copy the coordinateString to clipboard
+    navigator.clipboard
+      .writeText(coordinatesString)
+      .then(() => {
+        this.props.enqueueSnackbar("Koordinaten kopierades till urklipp", {
+          variant: "info",
+        });
+      })
+      .catch((error) => {
+        this.props.enqueueSnackbar("Kopiering misslyckades", {
+          variant: "error",
+        });
+      });
+  }
+
+  formatValue(value) {
+    const floatValue = parseFloat(value.replace(/ /g, "").replace(",", "."));
+    return {
+      formattedValue: new Intl.NumberFormat().format(floatValue),
+      value: value.replace(/ /g, ""),
+      floatValue,
+    };
+  }
+
+  handlePasteFromClipBoard(event) {
+    const clipboardData = event.clipboardData || window.clipboardData;
+    const pastedText = clipboardData.getData("text");
+
+    // If pasted text does not have a comma, we don't need to handle double inputs
+    // we therefore exit the function is that is the case.
+    if (!pastedText.includes(",")) {
+      return;
+    }
+
+    // We don't want to paste twice
+    event.preventDefault();
+
+    // Here we set the X and Y coordinate object depending on the inverse axis...
+    // inverse axis is true for the first two numeric inputs and false for the third
+    const [xValue, yValue] = pastedText.split(",");
+    const xObject = this.props.inverseAxis
+      ? this.formatValue(yValue)
+      : this.formatValue(xValue);
+    const yObject = this.props.inverseAxis
+      ? this.formatValue(xValue)
+      : this.formatValue(yValue);
+
+    // We update  the state
+    this.setState({
+      coordinateX: xObject.value,
+      coordinateXFloat: xObject.floatValue,
+      coordinateY: yObject.value,
+      coordinateYFloat: yObject.floatValue,
+      wasModified: true,
+    });
+
+    // And the local observer
+    this.localObserver.publish("newCoordinates", {
+      coordinates: [xObject.floatValue, yObject.floatValue],
+      proj: this.props.transformation.code,
+      force: false,
+    });
+  }
+
   handleInputX(event) {
     if (
       (!this.props.inverseAxis && event.value === this.state.coordinateX) ||
@@ -77,6 +186,7 @@ class CoordinatesTransformRow extends React.PureComponent {
       // infinite loops
       return;
     }
+
     if (!this.props.inverseAxis) {
       // Validate that the changed data is a finite number
       this.setState({
@@ -175,8 +285,15 @@ class CoordinatesTransformRow extends React.PureComponent {
 
     if (this.model.showFieldsOnStart || this.state.wasModified) {
       return (
-        <Grid container item spacing={2} rowSpacing={1}>
-          <Grid item xs={12}>
+        <Grid
+          container
+          rowSpacing={0.5}
+          columnSpacing={2}
+          padding={0}
+          marginLeft={"-7px"}
+          paddingTop={1}
+        >
+          <Grid item xs={10} md={8} alignSelf={"end"}>
             <Typography variant="body2" style={{ fontWeight: 600 }}>
               {this.transformation
                 ? this.transformation.title +
@@ -186,6 +303,17 @@ class CoordinatesTransformRow extends React.PureComponent {
                 : ""}
             </Typography>
           </Grid>
+          <Grid container item xs={2} md={4} justifyContent={"end"}>
+            <HajkToolTip title="Kopiera till urklipp">
+              <StyledIconButton
+                onClick={() => {
+                  this.handleCopyToClipBoard(this.props.transformation.title);
+                }}
+              >
+                <ContentCopyIcon></ContentCopyIcon>
+              </StyledIconButton>
+            </HajkToolTip>
+          </Grid>
           <Grid item xs={12} md={6}>
             <NumericFormat
               label={this.props.transformation.xtitle}
@@ -193,7 +321,7 @@ class CoordinatesTransformRow extends React.PureComponent {
               variant="outlined"
               size="small"
               value={xCoord}
-              name="numberformatX"
+              name={`${this.props.transformation.title}numberformatX`}
               type="text"
               onValueChange={(values) => {
                 this.handleInputX(values);
@@ -204,6 +332,9 @@ class CoordinatesTransformRow extends React.PureComponent {
               thousandSeparator={this.model.thousandSeparator ? " " : false}
               customInput={TextField}
               fullWidth={true}
+              onPaste={(values) => {
+                this.handlePasteFromClipBoard(values);
+              }}
             />
           </Grid>
           <Grid item xs={12} md={6}>
@@ -213,7 +344,7 @@ class CoordinatesTransformRow extends React.PureComponent {
               size="small"
               variant="outlined"
               value={yCoord}
-              name="numberformatY"
+              name={`${this.props.transformation.title}numberformatY`}
               type="text"
               onValueChange={(values) => {
                 this.handleInputY(values);
@@ -224,6 +355,9 @@ class CoordinatesTransformRow extends React.PureComponent {
               thousandSeparator={this.model.thousandSeparator ? " " : false}
               customInput={TextField}
               fullWidth={true}
+              onPaste={(values) => {
+                this.handlePasteFromClipBoard(values);
+              }}
             />
           </Grid>
         </Grid>

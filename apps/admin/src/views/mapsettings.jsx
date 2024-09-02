@@ -9,6 +9,7 @@ import ListProperties from "../views/listproperties.jsx";
 import Divider from "@material-ui/core/Divider";
 import DeleteIcon from "@material-ui/icons/DeleteForever";
 import AddIcon from "@material-ui/icons/Add";
+import ControlPointDuplicate from "@material-ui/icons/ControlPointDuplicate";
 import SaveIcon from "@material-ui/icons/SaveSharp";
 import CreateNewFolderIcon from "@material-ui/icons/CreateNewFolder";
 import OpenInNewIcon from "@material-ui/icons/OpenInNew";
@@ -59,6 +60,24 @@ const ColorButtonBlue = withStyles((theme) => ({
   },
 }))(Button);
 
+const infoGroupLabelStyle = {
+  marginTop: "15px",
+};
+
+const infoGroupStyle = {
+  display: "flex",
+  marginLeft: "13px",
+  gap: "10px",
+};
+
+const groupCheckboxLabelStyle = {
+  marginLeft: "5px",
+};
+
+const infoGroupInputStyle = {
+  marginTop: "10px",
+};
+
 $.fn.editable = function (component) {
   function edit(node, e) {
     function reset() {
@@ -67,6 +86,14 @@ $.fn.editable = function (component) {
       remove.remove();
       toggled.remove();
       expanded.remove();
+      infogroupcontainer.remove();
+      infogroupvisible.remove();
+      infogrouptitle.remove();
+      infogrouptext.remove();
+      infogroupurl.remove();
+      infogroupurltext.remove();
+      infogroupopendatalink.remove();
+      infogroupowner.remove();
       tools.remove();
       layerTools.remove();
       presetTools.remove();
@@ -77,10 +104,26 @@ $.fn.editable = function (component) {
       let name = input.val();
       let toggled = checkbox2.is(":checked");
       let expanded = checkbox.is(":checked");
+      let infogroupvisible = checkbox5.is(":checked");
+      let infogrouptitle = infogroupvisible ? input5.val() : "";
+      let infogrouptext = infogroupvisible ? input6.val() : "";
+      let infogroupurl = infogroupvisible ? input7.val() : "";
+      let infogroupurltext = infogroupvisible ? input8.val() : "";
+      let infogroupopendatalink = infogroupvisible ? input9.val() : "";
+      let infogroupowner = infogroupvisible ? input10.val() : "";
+
       node.html(name);
       node.parent().attr("data-name", name);
       node.parent().attr("data-toggled", toggled);
       node.parent().attr("data-expanded", expanded);
+      node.parent().attr("data-infogroupvisible", infogroupvisible);
+      node.parent().attr("data-infogrouptitle", infogrouptitle);
+      node.parent().attr("data-infogrouptext", infogrouptext);
+      node.parent().attr("data-infogroupurl", infogroupurl);
+      node.parent().attr("data-infogroupurltext", infogroupurltext);
+      node.parent().attr("data-infogroupopendatalink", infogroupopendatalink);
+      node.parent().attr("data-infogroupowner", infogroupowner);
+
       reset();
     }
 
@@ -113,6 +156,13 @@ $.fn.editable = function (component) {
       id5 = Math.floor(Math.random() * 1e5),
       id6 = Math.floor(Math.random() * 1e5),
       id7 = Math.floor(Math.random() * 1e5),
+      id8 = Math.floor(Math.random() * 1e5),
+      id9 = Math.floor(Math.random() * 1e5),
+      id10 = Math.floor(Math.random() * 1e5),
+      id11 = Math.floor(Math.random() * 1e5),
+      id12 = Math.floor(Math.random() * 1e5),
+      id13 = Math.floor(Math.random() * 1e5),
+      id14 = Math.floor(Math.random() * 1e5),
       ok = $('<span class="btn btn-success">OK</span>'),
       layerOk = $('<span class="btn btn-success">OK</span>'),
       layerOk2 = $('<span class="btn btn-success">OK</span>'),
@@ -121,25 +171,67 @@ $.fn.editable = function (component) {
       layerTools = $("<div></div>"),
       abort = $('<span class="btn btn-default">Avbryt</span>'),
       abort2 = $('<span class="btn btn-default">Avbryt</span>'),
-      label = $(`<label for="${id}">Expanderad vid start&nbsp;</label>`),
-      label2 = $(`<label for="${id2}">Toggla alla-knapp&nbsp;</label>`),
+      label = $(`<label for="${id}">Expanderad vid start&nbsp;</label>`).css(
+        groupCheckboxLabelStyle
+      ),
+      label2 = $(`<label for="${id2}">Toggla alla-knapp&nbsp;</label>`).css(
+        groupCheckboxLabelStyle
+      ),
       label3 = $(`<label for="${id3}">Synlig vid start&nbsp;</label><br />`),
       label4 = $(`<label for="${id4}">Redigera snabbval&nbsp;</label><br />`),
       label5 = $(`<br /><label for="${id6}">Tillträde</label><br />`),
       label6 = $(`<label for="${id7}">Infobox</label><br />`),
+      label7 = $(`<label for="${id8}">Infodokument&nbsp;</label>`).css(
+        groupCheckboxLabelStyle
+      ),
+      label8 = $(`<label for="${id9}">Rubrik&nbsp;</label>`).css(
+        infoGroupLabelStyle
+      ),
+      label9 = $(`<label for="${id10}">Text&nbsp;</label>`).css(
+        infoGroupLabelStyle
+      ),
+      label10 = $(`<label for="${id11}">Länk&nbsp;</label>`).css(
+        infoGroupLabelStyle
+      ),
+      label11 = $(`<label for="${id12}">Länktext&nbsp;</label>`).css(
+        infoGroupLabelStyle
+      ),
+      label12 = $(
+        `<label for="${id13}">Länk till öppna data&nbsp;</label>`
+      ).css(infoGroupLabelStyle),
+      label13 = $(`<label for="${id14}">Ägare&nbsp;</label>`).css(
+        infoGroupLabelStyle
+      ),
       checkbox = $(`<input id="${id}" type="checkbox"/>`),
       checkbox2 = $(`<input id="${id2}" type="checkbox"/>`),
       checkbox3 = $(`<input id="${id3}" type="checkbox"/>`),
       checkbox4 = $(`<input id="${id4}" type="text" value="Nytt namn"/><br />`),
+      checkbox5 = $(`<input id="${id8}" type="checkbox"/>`),
       remove = $('<span class="fa fa-minus-circle"></span>'),
       input = $("<input />"),
-      input2 = $(
-        `<input id="${id5}" type="text" placeholder="Ny länk"/><br />`
-      ),
-      input3 = $(`<input id="${id6}" type="text" /><br />`),
+      input2 = $(`<input id="${id5}" type="text" placeholder="Ny länk"/>`),
+      input3 = $(`<input id="${id6}" type="text" />`),
       input4 = $(`<textarea id="${id7}" type="text"></textarea>`),
+      input5 = $(`<input id="${id9}" type="text"/>`).css(infoGroupLabelStyle),
+      input6 = $(`<textarea id="${id10}" type="text"></textarea>`).css(
+        infoGroupInputStyle
+      ),
+      input7 = $(`<input id="${id11}" type="text"/>`).css(infoGroupInputStyle),
+      input8 = $(`<input id="${id12}" type="text"/>`).css(infoGroupInputStyle),
+      input9 = $(`<input id="${id13}" type="text"/>`).css(infoGroupInputStyle),
+      input10 = $(`<input id="${id14}" type="text"/>`).css(infoGroupInputStyle),
       expanded = $('<div class="expanded-at-start"></div>'),
       toggled = $('<div class="expanded-at-start"></div>'),
+      infogroupvisible = $('<div class="expanded-at-start"></div>'),
+      infogroupcontainer = $('<div class="info-groupContainer"></div>'),
+      infogrouptitle = $("<div></div>").css(infoGroupStyle),
+      infogrouptext = $("<div></div>").css(infoGroupStyle),
+      infogroupurl = $("<div></div>").css(infoGroupStyle),
+      infogroupurltext = $("<div></div>").css(infoGroupStyle),
+      infogroupopendatalink = $("<div></div>").css(infoGroupStyle),
+      infogroupowner = $('<div style="margin-bottom: 10px;"></div>').css(
+        infoGroupStyle
+      ),
       visible = $('<div class=""></div>'),
       editPreset = $('<div class=""></div>'),
       elem = node.get(0) || {};
@@ -166,6 +258,14 @@ $.fn.editable = function (component) {
     if (node.parent().attr("data-toggled")) {
       checkbox2.attr("checked", JSON.parse(node.parent().attr("data-toggled")));
     }
+
+    if (node.parent().attr("data-infogroupvisible")) {
+      checkbox5.attr(
+        "checked",
+        JSON.parse(node.parent().attr("data-infogroupvisible"))
+      );
+    }
+
     if (node.parent().attr("data-visibleatstart")) {
       checkbox3.attr(
         "checked",
@@ -179,13 +279,75 @@ $.fn.editable = function (component) {
       input4.val(node.parent().attr("data-infobox"));
     }
 
+    if (node.parent().attr("data-infogrouptitle")) {
+      input5.val(node.parent().attr("data-infogrouptitle"));
+    }
+
+    if (node.parent().attr("data-infogrouptext")) {
+      input6.val(node.parent().attr("data-infogrouptext"));
+    }
+
+    if (node.parent().attr("data-infogroupurl")) {
+      input7.val(node.parent().attr("data-infogroupurl"));
+    }
+
+    if (node.parent().attr("data-infogroupurltext")) {
+      input8.val(node.parent().attr("data-infogroupurltext"));
+    }
+
+    if (node.parent().attr("data-infogroupopendatalink")) {
+      input9.val(node.parent().attr("data-infogroupopendatalink"));
+    }
+
+    if (node.parent().attr("data-infogroupowner")) {
+      input10.val(node.parent().attr("data-infogroupowner"));
+    }
+
     if (
       node.parent().attr("data-expanded") !== undefined &&
       node.parent().attr("data-toggled") !== undefined
     ) {
       expanded.append(checkbox, label);
       toggled.append(checkbox2, label2);
+      infogroupvisible.append(checkbox5, label7);
+      infogrouptitle.append(label8, input5);
+      infogrouptext.append(label9, input6);
+      infogroupurl.append(label10, input7);
+      infogroupurltext.append(label11, input8);
+      infogroupopendatalink.append(label12, input9);
+      infogroupowner.append(label13, input10);
     }
+
+    if (node.parent().attr("data-infogroupvisible") === "true") {
+      checkbox5.attr("checked", true);
+      infogroupcontainer.css({
+        display: "block",
+        borderLeft: "1px groove #6b6969",
+        marginLeft: "13px",
+        marginTop: "10px",
+      });
+    } else {
+      checkbox5.attr("checked", false);
+      infogroupcontainer.css({
+        display: "none",
+      });
+    }
+
+    checkbox5.on("change", function () {
+      if ($(this).is(":checked")) {
+        infogroupcontainer.css({
+          display: "block",
+          borderLeft: "1px groove #6b6969",
+          marginLeft: "13px",
+          marginTop: "10px",
+        });
+      } else {
+        infogroupcontainer.css({
+          display: "none",
+        });
+      }
+    });
+
     visible.append(checkbox3, label3);
 
     if (component.state.authActive) {
@@ -229,12 +391,23 @@ $.fn.editable = function (component) {
       marginTop: "7px",
     });
 
-    tools.append(ok, abort, toggled, expanded);
+    tools.append(ok, abort, toggled, expanded, infogroupvisible);
+
+    infogroupcontainer.append(
+      infogrouptitle,
+      infogrouptext,
+      infogroupurl,
+      infogroupurltext,
+      infogroupopendatalink,
+      infogroupowner
+    );
+
     layerTools.append(visible, layerOk, abort);
     presetTools.append(editPreset, layerOk2, abort2);
 
     if (node.hasClass("group-name")) {
       node.html(input).after(tools).before(remove);
+      infogroupcontainer.insertAfter(tools);
     }
 
     if (node.hasClass("layer-name") && !elem.editing) {
@@ -497,6 +670,7 @@ class Menu extends Component {
           (data) => {
             this.props.model.set("projectionConfig", data.projection);
             this.props.model.set("toolConfig", data.tools);
+            this.props.model.set("infoContainerConfig", data.infocontainer);
             this.props.model.set("mapConfig", data.map);
             this.props.model.set(
               "layerMenuConfig",
@@ -652,6 +826,13 @@ class Menu extends Component {
         name: node.dataset.name,
         toggled: checkIfTrue(node.dataset.toggled),
         expanded: checkIfTrue(node.dataset.expanded),
+        infogroupvisible: checkIfTrue(node.dataset.infogroupvisible),
+        infogrouptitle: node.dataset.infogrouptitle,
+        infogrouptext: node.dataset.infogrouptext,
+        infogroupurl: node.dataset.infogroupurl,
+        infogroupurltext: node.dataset.infogroupurltext,
+        infogroupopendatalink: node.dataset.infogroupopendatalink,
+        infogroupowner: node.dataset.infogroupowner,
         parent: getParent(node),
         layers: layers(node),
         groups: groups(node),
@@ -811,7 +992,18 @@ class Menu extends Component {
   /**
    *
    */
-  createGroup(name, expanded, toggled) {
+  createGroup(
+    name,
+    expanded,
+    toggled,
+    infogroupvisible,
+    infogrouptitle,
+    infogrouptext,
+    infogroupurl,
+    infogroupurltext,
+    infogroupopendatalink,
+    infogroupowner
+  ) {
     var id = this.createGuid();
     var group = $(`
       <li
@@ -820,6 +1012,13 @@ class Menu extends Component {
         data-type="group"
         data-toggled="${toggled}"
         data-expanded="${expanded}"
+        data-infogroupvisible="${infogroupvisible}"
+        data-infogrouptitle="${infogrouptitle}"
+        data-infogrouptext="${infogrouptext}"
+        data-infogroupurl="${infogroupurl}"
+        data-infogroupurltext="${infogroupurltext}"
+        data-infogroupopendatalink="${infogroupopendatalink}"
+        data-infogroupowner="${infogroupowner}"
         data-name="${name}">
         <span class="group-name">${name}</span>
         <ul></ul>
@@ -1024,6 +1223,13 @@ class Menu extends Component {
               data-type="group"
               data-expanded={group.expanded}
               data-toggled={group.toggled}
+              data-infogroupvisible={group.infogroupvisible}
+              data-infogrouptitle={group.infogrouptitle}
+              data-infogrouptext={group.infogrouptext}
+              data-infogroupurl={group.infogroupurl}
+              data-infogroupurltext={group.infogroupurltext}
+              data-infogroupopendatalink={group.infogroupopendatalink}
+              data-infogroupowner={group.infogroupowner}
               data-name={group.name}
             >
               <span className="group-name">{group.name}</span>
@@ -1682,7 +1888,20 @@ class Menu extends Component {
                 <ColorButtonGreen
                   variant="contained"
                   className="btn"
-                  onClick={(e) => this.createGroup("Ny grupp", false, false)}
+                  onClick={(e) =>
+                    this.createGroup(
+                      "Ny grupp",
+                      false,
+                      false,
+                      false,
+                      "",
+                      "",
+                      "",
+                      "",
+                      "",
+                      ""
+                    )
+                  }
                   startIcon={<CreateNewFolderIcon />}
                 >
                   Ny grupp
@@ -1762,6 +1981,34 @@ class Menu extends Component {
     });
   }
 
+  duplicateMap() {
+    const oldName = this.props.model.attributes.mapFile;
+    const newName = this.refs.mapName.value;
+    if (!/[^0-9a-zA-Z_]/.test(newName) && newName.trim().length > 0) {
+      this.props.model.duplicateMap(oldName, newName, (d, s) => {
+        if (s === "success") {
+          this.setState({
+            content: "mapsettings",
+            alert: true,
+            alertMessage: `En ny karta, ${newName}, skapades genom att duplicera karta ${oldName}.`,
+          });
+          this.load("maps");
+        } else {
+          this.setState({
+            alert: true,
+            alertMessage: "Karta kunde INTE skapas.",
+          });
+          console.error(d);
+        }
+      });
+    } else {
+      this.setState({
+        alert: true,
+        alertMessage:
+          "Felaktigt namn på kartan \nInga eller ogiltiga tecken har angivits. \n\nGiltiga tecken: 0-9 a-z A-Z _",
+      });
+    }
+  }
   createMap() {
     var name = this.refs.mapName.value;
     if (!/[^0-9a-zA-Z_]/.test(name) && name.trim().length > 0) {
@@ -1859,6 +2106,14 @@ class Menu extends Component {
                 >
                   Skapa ny karta
                 </ColorButtonGreen>
+                <ColorButtonBlue
+                  variant="contained"
+                  className="btn"
+                  onClick={(e) => this.duplicateMap()}
+                  startIcon={<ControlPointDuplicate />}
+                >
+                  Duplicera karta
+                </ColorButtonBlue>
               </form>
             </div>
           </div>

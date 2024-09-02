@@ -9,11 +9,11 @@ import {
   Typography,
   Grid,
   Button,
-  Tooltip,
 } from "@mui/material";
 import ArrowLeftIcon from "@mui/icons-material/ArrowLeft";
 import ArrowRightIcon from "@mui/icons-material/ArrowRight";
 import { styled } from "@mui/material/styles";
+import HajkToolTip from "components/HajkToolTip";
 
 const StyledTableCell = styled(TableCell)(() => ({
   paddingLeft: 0,
@@ -171,8 +171,7 @@ class SearchResultsDatasetFeatureDetails extends React.PureComponent {
     return (
       <Grid container item alignItems="center" justifyContent="space-between">
         <Grid item>
-          <Tooltip
-            disableInteractive
+          <HajkToolTip
             title={
               !buttonLeftDisabled
                 ? "Visa föregående objekt i resultatlistan"
@@ -196,11 +195,10 @@ class SearchResultsDatasetFeatureDetails extends React.PureComponent {
                 />
               </TogglerButton>
             </span>
-          </Tooltip>
+          </HajkToolTip>
         </Grid>
         <Grid item>
-          <Tooltip
-            disableInteractive
+          <HajkToolTip
             title={
               !buttonRightDisabled ? "Visa nästa objekt i resultatlistan" : ""
             }
@@ -222,7 +220,7 @@ class SearchResultsDatasetFeatureDetails extends React.PureComponent {
                 />
               </TogglerButton>
             </span>
-          </Tooltip>
+          </HajkToolTip>
         </Grid>
       </Grid>
     );

@@ -1,12 +1,12 @@
 import React from "react";
 import { Grid, Paper } from "@mui/material";
-import { Tooltip } from "@mui/material";
 import ToggleButton from "@mui/material/ToggleButton";
 import EditIcon from "@mui/icons-material/Edit";
 import Crop54Icon from "@mui/icons-material/Crop54";
 import RadioButtonUncheckedIcon from "@mui/icons-material/RadioButtonUnchecked";
 import TouchAppIcon from "@mui/icons-material/TouchApp";
 import RotateLeftIcon from "@mui/icons-material/RotateLeft";
+import HajkToolTip from "components/HajkToolTip";
 
 const DrawToolbox = (props) => {
   const drawButtons = [
@@ -41,7 +41,7 @@ const DrawToolbox = (props) => {
   function renderToggleButton(button, index) {
     const { activeDrawButton, handleDrawButtonClick } = props;
     return (
-      <Tooltip key={index} title={button.tooltip}>
+      <HajkToolTip key={index} title={button.tooltip}>
         <ToggleButton
           selected={button.type === activeDrawButton}
           onChange={() => handleDrawButtonClick(button.type)}
@@ -51,7 +51,7 @@ const DrawToolbox = (props) => {
         >
           {button.icon}
         </ToggleButton>
-      </Tooltip>
+      </HajkToolTip>
     );
   }
 

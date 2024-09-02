@@ -6,22 +6,22 @@ import {
   Paper,
   TextField,
   OutlinedInput,
-  Tooltip,
   Typography,
   Switch,
 } from "@mui/material";
+import HajkToolTip from "components/HajkToolTip";
 
 import RotateRightIcon from "@mui/icons-material/RotateRight";
 import RotateLeftIcon from "@mui/icons-material/RotateLeft";
 import Information from "../components/Information";
+import { ROTATABLE_DRAW_TYPES } from "plugins/Sketch/constants";
 
 const TranslateToggler = ({ translateEnabled, setTranslateEnabled }) => {
   return (
     <Paper sx={{ p: 1, mt: 1 }}>
       <Grid container justifyContent="space-between" alignItems="center">
         <Typography variant="body2">Tillåt fri förflyttning</Typography>
-        <Tooltip
-          disableInteractive
+        <HajkToolTip
           title={
             translateEnabled
               ? "Avaktivera för att inte tillåta förflyttning av objekten i kartan."
@@ -34,7 +34,7 @@ const TranslateToggler = ({ translateEnabled, setTranslateEnabled }) => {
             size="small"
             color="primary"
           />
-        </Tooltip>
+        </HajkToolTip>
       </Grid>
     </Paper>
   );
@@ -92,10 +92,7 @@ const FeatureMoveSelector = (props) => {
           </Typography>
         </Grid>
         <Grid item xs={12} sx={{ mb: 2 }}>
-          <Tooltip
-            disableInteractive
-            title="Ange hur många meter du vill flytta objekten."
-          >
+          <HajkToolTip title="Ange hur många meter du vill flytta objekten.">
             <TextField
               label="Förflyttningsavstånd (meter)"
               variant="outlined"
@@ -105,13 +102,10 @@ const FeatureMoveSelector = (props) => {
               value={props.movementLength}
               onChange={handleMovementLengthChange}
             />
-          </Tooltip>
+          </HajkToolTip>
         </Grid>
         <Grid item xs={12}>
-          <Tooltip
-            disableInteractive
-            title="Ange i vilken riktning du vill flytta objekten. 0 grader är rakt norrut, 90 grader är rakt åt öster, osv."
-          >
+          <HajkToolTip title="Ange i vilken riktning du vill flytta objekten. 0 grader är rakt norrut, 90 grader är rakt åt öster, osv.">
             <TextField
               label="Förflyttningsriktning (grader)"
               variant="outlined"
@@ -121,7 +115,7 @@ const FeatureMoveSelector = (props) => {
               value={props.movementAngle}
               onChange={handleMovementAngleChange}
             />
-          </Tooltip>
+          </HajkToolTip>
         </Grid>
         <Grid container spacing={1} sx={{ mt: 1 }}>
           <Grid item xs={6}>
@@ -192,7 +186,14 @@ const FeatureRotateSelector = (props) => {
   };
 
   return (
-    <Paper sx={{ p: 1, mt: 1 }}>
+    <Paper
+      sx={{
+        p: 1,
+        mt: 1,
+        opacity: props.disabled ? 0.3 : 1.0,
+        pointerEvents: props.disabled ? "none" : "auto",
+      }}
+    >
       <Grid container item justifyContent="center" alignItems="center">
         <Grid item xs={12} sx={{ mb: 1 }}>
           <Typography variant="body2" align="center">
@@ -201,10 +202,7 @@ const FeatureRotateSelector = (props) => {
         </Grid>
 
         <Grid item xs={6} sx={{ pr: 1 }}>
-          <Tooltip
-            disableInteractive
-            title="Ange hur många grader du ska rotera objekten."
-          >
+          <HajkToolTip title="Ange hur många grader du ska rotera objekten.">
             <OutlinedInput
               variant="outlined"
               fullWidth
@@ -214,10 +212,11 @@ const FeatureRotateSelector = (props) => {
               value={props.rotationDegrees}
               onChange={handleRotationChange}
             />
-          </Tooltip>
+          </HajkToolTip>
         </Grid>
         <Grid item xs={3} sx={{ pr: 1 / 4 }}>
           <Button
+            disabled={props.disabled}
             variant="contained"
             fullWidth
             size="small"
@@ -234,6 +233,7 @@ const FeatureRotateSelector = (props) => {
         </Grid>
         <Grid item xs={3} sx={{ pl: 1 / 4 }}>
           <Button
+            disabled={props.disabled}
             variant="contained"
             fullWidth
             size="small"
@@ -274,6 +274,18 @@ const MoveView = (props) => {
     setLastMoves([]);
   }, [moveFeatures]);
 
+  const rotationIsDisabled = () => {
+    // Rotation is only allowed for specific draw methods.
+
+    let drawMethod = moveFeatures[0].get("DRAW_METHOD");
+
+    if (drawMethod) {
+      return ROTATABLE_DRAW_TYPES.indexOf(drawMethod) === -1;
+    }
+
+    return false;
+  };
+
   // We have to get some information about the current activity (view)
   const activity = props.model.getActivityFromId(props.id);
   return (
@@ -298,6 +310,7 @@ const MoveView = (props) => {
               setMovementAngle={setMovementAngle}
             />
             <FeatureRotateSelector
+              disabled={rotationIsDisabled()}
               drawModel={drawModel}
               rotationDegrees={rotationDegrees}
               setRotationDegrees={setRotationDegrees}

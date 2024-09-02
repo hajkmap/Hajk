@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import PropTypes from "prop-types";
-import { Button, Tooltip, Typography, Grid, Box } from "@mui/material";
+import { Button, Typography, Grid, Box } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import { withSnackbar } from "notistack";
 import IconWarning from "@mui/icons-material/Warning";
@@ -15,6 +15,7 @@ import LayerSettings from "./LayerSettings.js";
 import DownloadLink from "./DownloadLink";
 import KeyboardArrowRightIcon from "@mui/icons-material/KeyboardArrowRight";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
+import HajkToolTip from "components/HajkToolTip";
 
 const ExpandButtonWrapper = styled("div")(() => ({
   display: "flex",
@@ -296,24 +297,13 @@ class LayerGroupItem extends Component {
   renderStatus() {
     return (
       this.state.status === "loaderror" && (
-        <Tooltip
-          disableInteractive
-          title="Lagret kunde inte laddas in. Kartservern svarar inte."
-        >
+        <HajkToolTip title="Lagret kunde inte laddas in. Kartservern svarar inte.">
           <SummaryButtonWrapper>
             <IconWarning />
           </SummaryButtonWrapper>
-        </Tooltip>
+        </HajkToolTip>
       )
     );
-  }
-
-  renderLegendImage() {
-    const src =
-      this.state.legend[0] && this.state.legend[0].url
-        ? this.state.legend[0].url
-        : "";
-    return src ? <img width="60" alt="legend" src={src} /> : null;
   }
 
   openInformative = (chapter) => (e) => {
@@ -684,8 +674,9 @@ class LayerGroupItem extends Component {
             alignItems="center"
             wrap="nowrap"
             onClick={this.toggleLayerVisible(subLayer)}
+            className="hajk-layerswitcher-sublayer-grid"
           >
-            <CheckBoxWrapper>
+            <CheckBoxWrapper className="hajk-layerswitcher-layer-toggle">
               {!visible ? (
                 <CheckBoxOutlineBlankIcon />
               ) : (
@@ -704,7 +695,7 @@ class LayerGroupItem extends Component {
               {layer.layersInfo[subLayer].caption}
             </Caption>
           </Grid>
-          <SummaryButtonsContainer>
+          <SummaryButtonsContainer className="hajk-layerswitcher-summary-buttons">
             <SummaryButtonWrapper>
               <DownloadLink
                 index={index}
@@ -953,7 +944,7 @@ class LayerGroupItem extends Component {
     const { layer } = this.props;
     const { visible, visibleSubLayers } = this.state;
     return (
-      <CheckBoxWrapper>
+      <CheckBoxWrapper className="hajk-layerswitcher-layer-toggle">
         {!visible ? (
           <CheckBoxOutlineBlankIcon />
         ) : visibleSubLayers.length !== layer.subLayers.length ? (
@@ -1000,7 +991,7 @@ class LayerGroupItem extends Component {
                   {layer.get("caption")}
                 </Caption>
               </Grid>
-              <SummaryButtonsContainer>
+              <SummaryButtonsContainer className="hajk-layerswitcher-layer-buttons">
                 {this.renderStatus()}
                 {this.renderInfoToggler()}
                 <SummaryButtonWrapper>

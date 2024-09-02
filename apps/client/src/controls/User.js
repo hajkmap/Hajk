@@ -1,6 +1,7 @@
 import React from "react";
-import { Avatar, IconButton, Paper, Tooltip } from "@mui/material";
+import { Avatar, IconButton, Paper } from "@mui/material";
 import { styled } from "@mui/material/styles";
+import HajkToolTip from "components/HajkToolTip";
 
 const StyledPaper = styled(Paper)(({ theme }) => ({
   marginBottom: theme.spacing(1),
@@ -53,8 +54,8 @@ const getTooltipString = (userDetails) => {
  */
 const User = React.memo(({ userDetails }) => {
   return (
-    (userDetails && (
-      <Tooltip title={getTooltipString(userDetails)}>
+    (userDetails?.displayName && (
+      <HajkToolTip title={getTooltipString(userDetails)}>
         <StyledPaper>
           <StyledIconButton aria-label={userDetails.displayName}>
             <StyledAvatar alt={userDetails.displayName}>
@@ -62,7 +63,7 @@ const User = React.memo(({ userDetails }) => {
             </StyledAvatar>
           </StyledIconButton>
         </StyledPaper>
-      </Tooltip>
+      </HajkToolTip>
     )) ||
     null
   );

@@ -19,8 +19,8 @@ import {
   List,
   ListItem,
   Grid,
-  Tooltip,
 } from "@mui/material";
+import HajkToolTip from "components/HajkToolTip";
 
 const StyledAccordion = styled(Accordion)(
   ({ backgroundcolor, dividercolor }) => ({
@@ -741,7 +741,7 @@ export const CustomLink = ({ aTag, localObserver, bottomMargin }) => {
 
   const getHoverLink = (hoverLink, tagText) => {
     return (
-      <Tooltip title={hoverLink}>
+      <HajkToolTip title={hoverLink}>
         <abbr
           style={{
             cursor: "text",
@@ -750,7 +750,7 @@ export const CustomLink = ({ aTag, localObserver, bottomMargin }) => {
         >
           {tagText}
         </abbr>
-      </Tooltip>
+      </HajkToolTip>
     );
   };
 

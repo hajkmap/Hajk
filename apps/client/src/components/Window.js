@@ -480,6 +480,7 @@ class Window extends React.PureComponent {
     this.bringToFront();
     return (
       <StyledRnd
+        className="hajk-window"
         onMouseDown={(e) => {
           this.bringToFront();
         }}
@@ -527,13 +528,13 @@ class Window extends React.PureComponent {
         minHeight={this.state.mode === "minimized" ? 42 : 100}
         size={{
           width: width,
-          height: height,
+          height: height === "dynamic" ? "auto" : height, // 1507 - Quick fix, make sure Rnd component doesn't get "dynamic" as input
         }}
         default={{
           x: left,
           y: top,
           width: width,
-          height: height,
+          height: height === "dynamic" ? "auto" : height, // 1507 - Quick fix, make sure Rnd component doesn't get "dynamic" as input
         }}
       >
         <PanelContent

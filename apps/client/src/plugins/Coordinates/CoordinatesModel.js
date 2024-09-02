@@ -13,6 +13,9 @@ class CoordinatesModel {
     this.localObserver = settings.localObserver;
     this.thousandSeparator = settings.options.thousandSeparator ?? false;
     this.showFieldsOnStart = settings.options.showFieldsOnStart ?? false;
+    this.anchor = settings.options.anchor ?? [0.5, 1];
+    this.scale = settings.options.scale ?? 0.15;
+    this.src = settings.options.src ?? "marker.png";
 
     this.coordinates = undefined;
     this.transformations = settings.options.transformations;
@@ -99,9 +102,9 @@ class CoordinatesModel {
     // Style it with a nice icon
     const styleMarker = new Style({
       image: new Icon({
-        anchor: [0.5, 1],
-        scale: 0.15,
-        src: "marker.png",
+        anchor: this.anchor,
+        scale: this.scale,
+        src: this.src,
       }),
     });
     feature.setStyle(styleMarker);

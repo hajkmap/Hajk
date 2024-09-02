@@ -4,10 +4,11 @@ import { styled } from "@mui/material/styles";
 import propTypes from "prop-types";
 import { withSnackbar } from "notistack";
 
-import { IconButton, Paper, Tooltip, Menu, MenuItem } from "@mui/material";
+import { IconButton, Paper, Menu, MenuItem } from "@mui/material";
 import FolderSpecial from "@mui/icons-material/FolderSpecial";
 
 import Dialog from "../components/Dialog/Dialog";
+import HajkToolTip from "components/HajkToolTip";
 
 const StyledPaper = styled(Paper)(({ theme }) => ({
   marginBottom: theme.spacing(1),
@@ -226,7 +227,7 @@ class Preset extends React.PureComponent {
       const open = Boolean(anchorEl);
       return (
         <>
-          <Tooltip disableInteractive title={this.title}>
+          <HajkToolTip title={this.title}>
             <StyledPaper>
               <StyledIconButton
                 aria-label={this.title}
@@ -235,7 +236,7 @@ class Preset extends React.PureComponent {
                 <FolderSpecial />
               </StyledIconButton>
             </StyledPaper>
-          </Tooltip>
+          </HajkToolTip>
           <Menu
             id="render-props-menu"
             anchorEl={anchorEl}

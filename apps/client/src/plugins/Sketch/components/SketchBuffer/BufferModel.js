@@ -25,7 +25,7 @@ const BufferModel = (props) => {
     () =>
       new Style({
         fill: new Fill({
-          color: "rgba(255, 168, 231, 0.7)",
+          color: "rgba(255, 168, 231, 0.47)",
         }),
         stroke: new Stroke({
           color: "rgba(255, 168, 231, 1)",
@@ -47,7 +47,7 @@ const BufferModel = (props) => {
   // The default style for a buffered feature.
   const bufferStyle = new Style({
     fill: new Fill({
-      color: "rgba(255, 255, 255, 0.5)",
+      color: "rgba(255, 255, 255, 0.6)",
     }),
     stroke:
       drawStyle.strokeType === "none"
@@ -56,7 +56,7 @@ const BufferModel = (props) => {
             width: 4,
           })
         : new Stroke({
-            color: "rgba(75, 100, 115, 2)",
+            color: "rgba(75, 100, 115, 1.5)",
             width: 4,
           }),
     image: new Circle({
@@ -120,7 +120,7 @@ const BufferModel = (props) => {
 
             // We can't buffer Circle features and we don't want to buffer
             // around existing buffer features - let's exclude them.
-            if (!f.get("bufferedFeature") || geometryType !== "Circle") {
+            if (!f.get("bufferedFeature") && geometryType !== "Circle") {
               const clonedFeature = f.clone();
               clonedFeature.setStyle(highlightStyle);
               bufferState.highlightSource.addFeature(clonedFeature);
