@@ -12,7 +12,7 @@
 - Latest Git
 - Visual Studio (only for the optional .NET backend)
 
-The Client UI (`new-client`), Admin UI (`new-admin`) and NodeJS backend (`new-backend`) applications can be built and deployed on any OS supported by recent Git and Node versions (tested on macOS, Windows and Linux).
+All apps reside inside the `apps/` directory. The Client UI (`client`), Admin UI (`admin`) and NodeJS backend (`backend`) applications can be built and deployed on any OS supported by recent Git and Node versions (tested on macOS, Windows and Linux).
 
 The .NET backend (`backend-dotnet`) component, requires Visual Studio for Windows.
 
@@ -45,6 +45,11 @@ In short, developing a new feature, would look something like:
 1. Regularly commit changes to your branch with `git commit -S -m "A good comment, can be multiline."`. (Note, the `-S` flag [signs your commit](https://help.github.com/en/articles/signing-commits), and signing commits is something you really should be doing.)
 1. Regularly push your changes upstream (to GitHub) with `git push`
 1. **Regularly merge changes that other developers might be doing, from `develop` into your branch.** That means that you will incorporate recent changes and your local branch will stay up-to-date with the latest developments. **Please don't overlook it. This is a really important part.** You can do it like this: `git stash && git checkout develop && git fetch && git merge && git checkout feature/1234-blue-button && git merge develop && git stash apply`. (If you feel comfortable enough with Git, there are of course shorter way of doing this, such as directly merging the upstream remote branch.)
+1. Describe your change with a log entry in the CHANGELOG.md. Select the subsection below the **Unreleased** section based on the type of issue: **Added** for feature, **Fixed** for any bug fixes, **Changed** for changes in existing functionality, **Security** in case of vulnerabilities. See further at the very end of CHANGELOG.md. \
+   Format your new row like: \
+    \- `area`: Short explanation of what the change resolves/adds. [#`issue-number`]\(https://github.com/hajkmap/Hajk/issues/`issue-number`)
+   - area: could be a specific feature in Hajk like Sketch, Print or Cookie or an app like Admin, Backend or Client or more generic like Core, Bug, Fix.
+   - issue-number: The number of your Hajk issue.
 1. When you're done coding, go to GitHub and create a new pull request. Make sure that you want to merge your branch into `develop`.
 1. Hajk maintainers will get notified when you create the PR. They will review your PR and either accept and merge your branch (as well as delete it from the remote, as it's no longer needed) or (if the code isn't considered ready) request changes. After a successful merge you will still have a copy of your feature branch locally, but it can be safely removed by running `git branch -d feature/1234-blue-button`.
 
@@ -54,6 +59,6 @@ Hajk uses **ESLint** and **Prettier** to enforce code formatting across the proj
 
 🔥 **Code that gets checked in must follow those rules.** 🔥
 
-The `new-client` and `new-backend` directories contains all necessary configuration files. The recommended way is to use an editor that has extensions for ESLint and Prettier installed. It is also highly recommended to make the editor run Prettier on each file save (i.e. in VSCode it can be controlled by the `formatOnSave: true` flag).
+The `client` and `backend` directories contain all necessary configuration files. The recommended way is to use an editor that has extensions for ESLint and Prettier installed. It is also highly recommended to make the editor run Prettier on each file save (i.e. in VSCode it can be controlled by the `formatOnSave: true` flag).
 
 **For a simple guide on setting up VSCode with ESLint, Prettier and some , see [this presentation](dokumentation/VSCodeSetup.pdf)**. (Swedish only)

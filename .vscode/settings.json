@@ -1,4 +1,8 @@
 {
   "editor.formatOnSave": true,
-  "eslint.workingDirectories": ["./new-admin", "./new-client"]
+  "eslint.workingDirectories": [
+    "./apps/admin",
+    "./apps/client",
+    "./apps/backend"
+  ]
 }

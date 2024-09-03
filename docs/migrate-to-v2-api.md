@@ -1,10 +1,10 @@
 # Migration to V2 API
 
-## `new-client/public/appConfig.json`
+## `apps/client/public/appConfig.json`
 
 ### Removed keys
 
-The following keys are now obsolete, have no effect in Client UI and can be safely removed:
+As a result of [finalizing the migration to the consolidated loading approach in Client UI (first started in #682)](https://github.com/hajkmap/Hajk/commit/01123dd79aec6d66b0f7cd4f3ad767bef2f2c4f2), [the new error page in Client UI added in 3.13.6](https://github.com/hajkmap/Hajk/commit/f2201fc2c63988175172315313344a8992a17c4d) as well as [#1369](https://github.com/hajkmap/Hajk/issues/1369), the following keys are now obsolete, **have no effect in Client UI** and can be safely removed:
 
 - `appName`
 - `version`
@@ -21,12 +21,14 @@ Due to the [new error page in Client UI added in 3.13.6](https://github.com/hajk
 - `loadErrorMessage`
 - `loadErrorReloadButtonText`
 
-## `new-admin/public/config.json`
+## `apps/admin/public/config.json`
 
-Simply replace `v1` with `v2` to ensure that all requests go to the current API, e.g.
-`http://localhost:3002/api/v1/mapconfig/list` -> `http://localhost:3002/api/v2/mapconfig/list`
+1. Replace `v1` with `v2` to ensure that all requests go to the current API, e.g. `http://localhost:3002/api/v1/mapconfig/list` -> `http://localhost:3002/api/v2/mapconfig/list`
+1. Adjust map administration endpoints to comply with new REST paths
+    1. `url_map_create` - remove trailing `/create`
+    1. `url_map_delete` - remove trailing `/delete`
 
-## `new-backend/.env`
+## `apps/backend/.env`
 
 If you previously specified a value for `API_VERSIONS`, bear in mind that `2` is the only allowed value at this moment.
 
