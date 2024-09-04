@@ -100,7 +100,10 @@ Rnd.prototype.onDragStart = function (e, data) {
   }
   const boundaryRect = boundary.getBoundingClientRect();
   const boundaryLeft = boundaryRect.left;
-  const boundaryTop = boundaryRect.top;
+  const boundaryTop =
+    boundaryRect.top +
+    document.getElementById("header").getBoundingClientRect().top +
+    document.getElementById("header").getBoundingClientRect().height;
   const parentRect = parent.getBoundingClientRect();
   const parentLeft = parentRect.left;
   const parentTop = parentRect.top;
