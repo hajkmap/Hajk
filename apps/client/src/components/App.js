@@ -68,8 +68,8 @@ const DRAWER_WIDTH = 250;
 
 // A bunch of styled components to get the Hajk feel! Remember that some
 // components are styled with the sx-prop instead/as well.
-const StyledHeader = styled("header")(({ theme }) => ({
-  zIndex: theme.zIndex.appBar,
+const StyledHeader = styled("header")(({ theme, headerHasFocus }) => ({
+  zIndex: headerHasFocus ? theme.zIndex.appBar : theme.zIndex.appBar - 100,
   maxHeight: theme.spacing(8),
   display: "flex",
   justifyContent: "space-between",
@@ -375,6 +375,7 @@ class App extends React.PureComponent {
       drawerStatic: drawerStatic,
       activeDrawerContent: activeDrawerContentState,
       drawerMouseOverLock: false,
+      headerHasFocus: false,
     };
 
     // If the drawer is set to be visible at start - ensure the activeDrawerContent
@@ -919,7 +920,9 @@ class App extends React.PureComponent {
         <Search
           map={this.appModel.getMap()}
           app={this}
-          options={this.appModel.plugins.search.options} // FIXME: We should get config from somewhere else now when Search is part of Core
+          options={this.appModel.plugins.search.options}
+          headerHasFocus={this.state.headerHasFocus}
+          // FIXME: We should get config from somewhere else now when Search is part of Core
         />
       );
     } else {
@@ -1080,6 +1083,16 @@ class App extends React.PureComponent {
     return this.state.drawerStatic && isOnlyOneButtonVisible ? false : true;
   }
 
+  handleFocus = () => {
+    // set headerHasFocus to true
+    this.setState({ headerHasFocus: true });
+  };
+
+  handleBlur = () => {
+    // set headerHasFocus to false
+    this.setState({ headerHasFocus: false });
+  };
+
   render() {
     const { config } = this.props;
 
@@ -1146,6 +1159,9 @@ class App extends React.PureComponent {
                   pointerEvents: "auto",
                 },
               }}
+              headerHasFocus={this.state.headerHasFocus}
+              onFocus={this.handleFocus}
+              onBlur={this.handleBlur}
             >
               {clean === false && this.showDrawerButtons() && (
                 <DrawerToggleButtons

@@ -55,7 +55,13 @@ const IconWrapper = styled("div")(({ theme }) => ({
 const CustomPopper = (props) => {
   const theme = useTheme();
   const smallScreen = useMediaQuery(theme.breakpoints.down("sm"));
-  const style = smallScreen ? { width: "100%" } : { width: 400 };
+
+  // Use props.headerHasFocus instead of this.props.headerHasFocus
+
+  const style = smallScreen
+    ? { width: "100%", zIndex: props.headerHasFocus ? 1300 : 1000 }
+    : { width: 400, zIndex: props.headerHasFocus ? 1300 : 1000 };
+
   return (
     <Popper
       {...props}
@@ -292,7 +298,12 @@ class SearchBar extends React.PureComponent {
         id="searchInputField"
         freeSolo
         size={"small"}
-        PopperComponent={CustomPopper}
+        PopperComponent={(popperProps) => (
+          <CustomPopper
+            {...popperProps}
+            headerHasFocus={this.props.headerHasFocus}
+          />
+        )}
         PaperComponent={CustomPaper}
         clearOnEscape
         disabled={

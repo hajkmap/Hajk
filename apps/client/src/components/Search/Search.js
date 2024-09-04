@@ -1087,6 +1087,7 @@ class Search extends React.PureComponent {
           getArrayWithSearchWords={this.getArrayWithSearchWords}
           failedWFSFetchMessage={failedWFSFetchMessage}
           mapViewModel={this.mapViewModel}
+          headerHasFocus={this.state.headerHasFocus}
           {...this.props}
         />
       )
