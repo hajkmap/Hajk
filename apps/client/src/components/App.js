@@ -921,7 +921,8 @@ class App extends React.PureComponent {
           map={this.appModel.getMap()}
           app={this}
           options={this.appModel.plugins.search.options}
-          headerHasFocus={this.state.headerHasFocus}
+          handleFocus={this.handleFocus}
+          handleBlur={this.handleBlur}
           // FIXME: We should get config from somewhere else now when Search is part of Core
         />
       );
@@ -1084,11 +1085,13 @@ class App extends React.PureComponent {
   }
 
   handleFocus = () => {
+    console.log("handleFocus");
     // set headerHasFocus to true
     this.setState({ headerHasFocus: true });
   };
 
   handleBlur = () => {
+    console.log("handleBlur");
     // set headerHasFocus to false
     this.setState({ headerHasFocus: false });
   };
@@ -1161,7 +1164,6 @@ class App extends React.PureComponent {
               }}
               headerHasFocus={this.state.headerHasFocus}
               onFocus={this.handleFocus}
-              onBlur={this.handleBlur}
             >
               {clean === false && this.showDrawerButtons() && (
                 <DrawerToggleButtons
@@ -1282,6 +1284,7 @@ class App extends React.PureComponent {
                 pointerEvents: "auto",
               },
             }}
+            onClick={this.handleBlur}
           >
             {useNewInfoclick === false && this.renderInfoclickWindow()}
             {useNewInfoclick && (

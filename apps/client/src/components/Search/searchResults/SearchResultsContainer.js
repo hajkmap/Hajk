@@ -31,6 +31,7 @@ import SearchResultsList from "./SearchResultsList";
 import SearchResultsDownloadMenu from "./SearchResultsDownloadMenu";
 import ArrowBack from "@mui/icons-material/ArrowBack";
 import HajkToolTip from "components/HajkToolTip";
+import { red } from "@mui/material/colors";
 
 const StyledPaper = styled(Paper)(({ theme }) => ({
   maxHeight: "80vh",
@@ -1063,8 +1064,15 @@ class SearchResultsContainer extends React.PureComponent {
   };
 
   render() {
-    const { app, getOriginBasedIcon, localObserver, panelCollapsed, options } =
-      this.props;
+    const {
+      app,
+      getOriginBasedIcon,
+      localObserver,
+      panelCollapsed,
+      options,
+      handleFocus,
+      handleBlur,
+    } = this.props;
     const {
       sumOfResults,
       activeFeatureCollection,
@@ -1098,11 +1106,11 @@ class SearchResultsContainer extends React.PureComponent {
     return (
       <Collapse in={!panelCollapsed}>
         {sumOfResults === null ? null : sumOfResults === 0 ? (
-          <StyledPaper>
+          <StyledPaper onMouseDown={handleFocus}>
             <Alert severity="warning">Sökningen gav inget resultat.</Alert>
           </StyledPaper>
         ) : (
-          <StyledPaper>
+          <StyledPaper onMouseDown={handleFocus}>
             <ResultListWrapper container>
               {this.renderSearchResultsHeader()}
               {filterInputFieldOpen && this.renderFilterInputField()}

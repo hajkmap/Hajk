@@ -56,8 +56,6 @@ const CustomPopper = (props) => {
   const theme = useTheme();
   const smallScreen = useMediaQuery(theme.breakpoints.down("sm"));
 
-  // Use props.headerHasFocus instead of this.props.headerHasFocus
-
   const style = smallScreen
     ? { width: "100%", zIndex: props.headerHasFocus ? 1300 : 1000 }
     : { width: 400, zIndex: props.headerHasFocus ? 1300 : 1000 };
@@ -266,6 +264,8 @@ class SearchBar extends React.PureComponent {
       resultPanelCollapsed,
       toggleCollapseSearchResults,
       options,
+      headerHasFocus,
+      handleFocus,
     } = this.props;
 
     return (
@@ -279,6 +279,8 @@ class SearchBar extends React.PureComponent {
         panelCollapsed={resultPanelCollapsed}
         toggleCollapseSearchResults={toggleCollapseSearchResults}
         options={options}
+        headerHasFocus={headerHasFocus}
+        handleFocus={handleFocus}
       />
     );
   };
