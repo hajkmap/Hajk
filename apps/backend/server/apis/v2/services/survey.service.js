@@ -139,6 +139,7 @@ class SurveyService {
         let subject = "";
         let bodyHtml = "<html><body>";
         bodyHtml += "<h1>Svar från undersökningen</h1>";
+
         for (const key in body) {
           const item = body[key];
 
@@ -152,6 +153,15 @@ class SurveyService {
           ) {
             let valueDisplay = Array.isArray(item) ? item.join(", ") : item;
             bodyHtml += `<br><b>${key}</b>: ${valueDisplay}`;
+          } else if (key === "surveyResults" && Array.isArray(item)) {
+            for (const result of item) {
+              if (result.title && result.value) {
+                let valueDisplay = Array.isArray(result.value)
+                  ? result.value.join(", ")
+                  : result.value;
+                bodyHtml += `<br><b>${result.title}</b>: ${valueDisplay}`;
+              }
+            }
           } else if (item.title && item.value) {
             let valueDisplay = Array.isArray(item.value)
               ? item.value.join(", ")
@@ -159,6 +169,7 @@ class SurveyService {
             bodyHtml += `<br><b>${item.title}</b>: ${valueDisplay}`;
           }
         }
+
         bodyHtml += "</body></html>";
 
         let emailAddress = body.email;
