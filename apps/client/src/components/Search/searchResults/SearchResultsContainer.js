@@ -31,7 +31,6 @@ import SearchResultsList from "./SearchResultsList";
 import SearchResultsDownloadMenu from "./SearchResultsDownloadMenu";
 import ArrowBack from "@mui/icons-material/ArrowBack";
 import HajkToolTip from "components/HajkToolTip";
-import { red } from "@mui/material/colors";
 
 const StyledPaper = styled(Paper)(({ theme }) => ({
   maxHeight: "80vh",
@@ -1071,7 +1070,6 @@ class SearchResultsContainer extends React.PureComponent {
       panelCollapsed,
       options,
       handleFocus,
-      handleBlur,
     } = this.props;
     const {
       sumOfResults,
@@ -1117,6 +1115,7 @@ class SearchResultsContainer extends React.PureComponent {
               {this.renderSortingMenu()}
               <Grid item xs={12}>
                 <SearchResultsList
+                  onClick={handleFocus}
                   localObserver={localObserver}
                   getOriginBasedIcon={getOriginBasedIcon}
                   featureCollections={collectionsToRender}

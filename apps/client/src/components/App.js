@@ -921,8 +921,8 @@ class App extends React.PureComponent {
           map={this.appModel.getMap()}
           app={this}
           options={this.appModel.plugins.search.options}
+          headerHasFocus={this.state.headerHasFocus}
           handleFocus={this.handleFocus}
-          handleBlur={this.handleBlur}
           // FIXME: We should get config from somewhere else now when Search is part of Core
         />
       );
