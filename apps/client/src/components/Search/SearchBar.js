@@ -294,6 +294,7 @@ class SearchBar extends React.PureComponent {
       loading,
       handleOnAutocompleteInputChange,
       handleSearchInput,
+      handleFocus,
     } = this.props;
     return (
       <StyledAutocomplete
@@ -330,7 +331,20 @@ class SearchBar extends React.PureComponent {
               // Important: the `key` prop must be set last, so we override the
               // one that gets there when we spread props (there is already a key
               // there, which can become duplicated under some circumstances).
-              <Grid container alignItems="center" {...props} key={props.id}>
+              <Grid
+                container
+                alignItems="center"
+                {...props}
+                key={props.id}
+                onClick={(e) => {
+                  if (handleFocus) {
+                    handleFocus();
+                  }
+                  if (props.onClick) {
+                    props.onClick(e);
+                  }
+                }}
+              >
                 <Grid item xs={1}>
                   {this.getOriginBasedIcon(option.origin)}
                 </Grid>
