@@ -494,6 +494,9 @@ class Window extends React.PureComponent {
         style={{
           display: open ? "block" : "none",
         }}
+        onDragStart={(e, d) => {
+          this.props.globalObserver.publish("handleBlur");
+        }}
         onDragStop={(e, d) => {
           const rect = this.rnd.getSelfElement().getClientRects()[0];
           if (rect) {

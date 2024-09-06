@@ -487,6 +487,9 @@ class App extends React.PureComponent {
       .loadPlugins(this.props.activeTools);
 
     Promise.all(promises).then(() => {
+      this.globalObserver.subscribe("handleBlur", () => {
+        this.setState({ headerHasFocus: false });
+      });
       // Track the page view
       this.globalObserver.publish("analytics.trackPageView");
 
@@ -698,6 +701,7 @@ class App extends React.PureComponent {
 
     // Register various global listeners.
     this.globalObserver.subscribe("infoClick.mapClick", (results) => {
+      console.log(results);
       this.setState({
         mapClickDataResult: results,
       });
