@@ -15,7 +15,7 @@
   "exports": null,
   "scripts": {
     "start": "node --experimental-transform-types dist/index.js",
-    "compile": "shx rm -rf dist && shx cp -r server dist",
+    "build": "shx rm -rf dist && shx cp -r server dist",
     "dev": "node --watch-path=./server --experimental-transform-types server/index.js",
     "dev:debug": "node --inspect --watch-path=./server --experimental-transform-types server/index.js"
   },
