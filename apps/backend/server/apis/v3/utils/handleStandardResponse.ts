@@ -10,7 +10,7 @@ import type { Response } from "express";
  */
 export default function handleStandardResponse(
   res: Response,
-  data: any,
+  data: StandardResponseData,
   successStatus = 200
 ) {
   // If we encountered a error…

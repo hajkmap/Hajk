@@ -1,5 +1,5 @@
 import * as express from "express";
 
-import testRouter from "./controllers/test/router.ts";
+import configRouter from "./controllers/config/router.ts";
 
-export default express.Router().use("/test", testRouter);
+export default express.Router().use("/config", configRouter);
