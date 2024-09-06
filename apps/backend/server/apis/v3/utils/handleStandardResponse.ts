@@ -1,3 +1,5 @@
+import { Response } from "express";
+
 /**
  * @summary Helper for handling "normal" responses from the APIs various services
  * @description We expect our service functions, which are Promises, to either resolve
@@ -6,7 +8,11 @@
  * together with the error message. Else, we simply send the data as JSON-encoded body of the response.
  * @export
  */
-export default function handleStandardResponse(res, data, successStatus = 200) {
+export default function handleStandardResponse(
+  res: Response,
+  data: any,
+  successStatus = 200
+) {
   // If we encountered a error…
   if (data.error) {
     // Check if it's AccessError. If so, send a 403 Forbidden.
