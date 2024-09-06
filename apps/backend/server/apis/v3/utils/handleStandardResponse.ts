@@ -1,4 +1,4 @@
-import { Response } from "express";
+import type { Response } from "express";
 
 /**
  * @summary Helper for handling "normal" responses from the APIs various services
