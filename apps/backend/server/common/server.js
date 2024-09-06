@@ -24,7 +24,7 @@ const app = new Express();
 
 const logger = log4js.getLogger("hajk");
 
-const ALLOWED_API_VERSIONS = [2];
+const ALLOWED_API_VERSIONS = [2, 3];
 
 export default class ExpressServer {
   constructor() {
