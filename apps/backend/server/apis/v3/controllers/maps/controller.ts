@@ -1,5 +1,5 @@
-import MapService from "../../services/map.service.js";
-import handleStandardResponse from "../../utils/handleStandardResponse.js";
+import MapService from "../../services/map.service.ts";
+import handleStandardResponse from "../../utils/handleStandardResponse.ts";
 
 export class Controller {
   getMaps(req, res) {

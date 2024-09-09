@@ -1,5 +1,5 @@
-import ToolService from "../../services/tool.service.js";
-import handleStandardResponse from "../../utils/handleStandardResponse.js";
+import ToolService from "../../services/tool.service.ts";
+import handleStandardResponse from "../../utils/handleStandardResponse.ts";
 
 export class Controller {
   getTools(req, res) {

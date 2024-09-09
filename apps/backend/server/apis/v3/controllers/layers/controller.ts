@@ -1,24 +1,25 @@
-import LayerService from "../../services/layer.service.js";
-import handleStandardResponse from "../../utils/handleStandardResponse.js";
+import type { Request, Response } from "express";
+import LayerService from "../../services/layer.service.ts";
+import handleStandardResponse from "../../utils/handleStandardResponse.ts";
 
 export class Controller {
-  getLayers(req, res) {
+  getLayers(req: Request, res: Response) {
     LayerService.getLayers().then((data) => handleStandardResponse(res, data));
   }
 
-  getLayerById(req, res) {
+  getLayerById(req: Request, res: Response) {
     LayerService.getLayerById(req.params.id).then((data) =>
       handleStandardResponse(res, data)
     );
   }
 
-  getLayerTypes(req, res) {
+  getLayerTypes(req: Request, res: Response) {
     LayerService.getLayerTypes().then((data) =>
       handleStandardResponse(res, data)
     );
   }
 
-  getLayersByType(req, res) {
+  getLayersByType(req: Request, res: Response) {
     LayerService.getLayersByType(req.params.type).then((data) =>
       handleStandardResponse(res, data)
     );
