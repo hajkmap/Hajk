@@ -25,6 +25,7 @@
     "seed": "node prisma/seed.js"
   },
   "dependencies": {
+    "@prisma/client": "^5.19.1",
     "@types/express": "^4.17.21",
     "@types/node": "^22.5.4",
     "activedirectory2": "^2.2.0",

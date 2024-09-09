@@ -9,12 +9,10 @@ export default async function routes(app) {
   for (const v of app.get("apiVersions")) {
     let routerModule; // Will hold the actual imported module
     try {
-      console.log("Importing JS for ", v);
       // Let's try grabbing the JS file
       const { default: router } = await import(`./apis/v${v}/router.js`);
       routerModule = router;
     } catch {
-      console.log("Importing TS for ", v);
       // If it fails, let's attempt to get the TS file
       const { default: router } = await import(`./apis/v${v}/router.ts`);
       routerModule = router;
