@@ -1,7 +1,7 @@
 import { PrismaClient } from "@prisma/client";
 import fs from "fs";
 import path from "path";
-import cuid from "cuid";
+import { randomUUID } from "crypto";
 
 const prisma = new PrismaClient();
 
@@ -226,11 +226,11 @@ async function populateMapLayerStructure(mapName) {
     });
 
     // Create a unique ID for this specific relation
-    const newCuid = cuid();
+    const newUUID = randomUUID();
 
     // This object will be used to describe this group's relations
     const groupsOnMapObject = {
-      id: newCuid, // This specific group-map relations ID
+      id: newUUID, // This specific group-map relations ID
       groupId, // Refers to ID in Group model
       parentGroupId: parentId,
       mapName,
@@ -243,7 +243,7 @@ async function populateMapLayerStructure(mapName) {
     groupsOnMap.push(groupsOnMapObject);
 
     // Finally, recursively call on any other groups that might be in this group
-    group.groups?.forEach((g) => extractGroup(g, newCuid));
+    group.groups?.forEach((g) => extractGroup(g, newUUID));
   };
 
   // Helper: called by extractGroup. Grabs all layers
