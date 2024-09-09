@@ -17,7 +17,12 @@
     "start": "node --env-file=.env --experimental-transform-types dist/index.js",
     "build": "shx rm -rf dist && shx cp -r server dist",
     "dev": "node --env-file=.env --watch-path=./server --experimental-transform-types server/index.js",
-    "dev:debug": "node --env-file=.env --inspect --watch-path=./server --experimental-transform-types server/index.js"
+    "dev:unwatch": "node --env-file=.env --experimental-transform-types server/index.js",
+    "dev:debug": "node --env-file=.env --inspect --watch-path=./server --experimental-transform-types server/index.js",
+    "reset:db": "prisma db push --force-reset && prisma db seed"
+  },
+  "prisma": {
+    "seed": "node prisma/seed.js"
   },
   "dependencies": {
     "@types/express": "^4.17.21",
@@ -43,6 +48,7 @@
     "eslint": "^9.9.1",
     "globals": "^15.9.0",
     "prettier": "^3.3.3",
+    "prisma": "^5.19.1",
     "shx": "^0.3.4",
     "typescript": "^5.5.4",
     "typescript-eslint": "^8.4.0"

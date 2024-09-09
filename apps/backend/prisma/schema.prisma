@@ -1,0 +1,117 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Map {
+  id          Int            @id @default(autoincrement())
+  name        String         @unique
+  options     Json           @default("{}")
+  projections Projection[]
+  tools       ToolsOnMaps[]
+  layers      LayersOnMaps[]
+  groups      GroupsOnMaps[]
+}
+
+model Tool {
+  id      Int           @id @default(autoincrement())
+  type    String
+  options Json          @default("{}")
+  maps    ToolsOnMaps[]
+}
+
+model ToolsOnMaps {
+  mapName String
+  toolId  Int
+  /// Determines the sort between tools
+  index   Int    @default(0)
+  /// Allows overridding default tool options (set in Tool) on a per-map basis
+  options Json   @default("{}")
+  map     Map    @relation(fields: [mapName], references: [name])
+  tool    Tool   @relation(fields: [toolId], references: [id])
+
+  @@id([mapName, toolId])
+}
+
+model Projection {
+  id         Int       @id @default(autoincrement())
+  code       String    @unique
+  definition String
+  extent     Decimal[]
+  units      String?
+  maps       Map[]
+}
+
+model Group {
+  id     String           @id @default(cuid())
+  name   String
+  layers LayersOnGroups[]
+  maps   GroupsOnMaps[]
+}
+
+model Layer {
+  id      String           @id @default(cuid())
+  type    LayerType
+  options Json             @default("{}")
+  maps    LayersOnMaps[]
+  groups  LayersOnGroups[]
+}
+
+model LayersOnGroups {
+  id               Int      @id @default(autoincrement())
+  groupId          String
+  layerId          String
+  group            Group    @relation(fields: [groupId], references: [id])
+  layer            Layer    @relation(fields: [layerId], references: [id])
+  infobox          String
+  drawOrder        Int
+  visibleAtStart   Boolean
+  visibleForGroups String[]
+}
+
+model LayersOnMaps {
+  id               Int      @id @default(autoincrement())
+  mapName          String
+  layerId          String
+  map              Map      @relation(fields: [mapName], references: [name])
+  layer            Layer    @relation(fields: [layerId], references: [id])
+  usage            UseType
+  infobox          String
+  drawOrder        Int
+  visibleAtStart   Boolean
+  visibleForGroups String[]
+}
+
+model GroupsOnMaps {
+  id            String         @id @default(cuid())
+  mapName       String // It relates to a map via its name
+  groupId       String // It relates to a group via its ID
+  map           Map            @relation(fields: [mapName], references: [name])
+  group         Group          @relation(fields: [groupId], references: [id])
+  parentGroupId String? // This particular GroupOnMap can have a parent GroupOnMap
+  parent        GroupsOnMaps?  @relation("GroupOnGroups", fields: [parentGroupId], references: [id]) // The optional parent record
+  groups        GroupsOnMaps[] @relation("GroupOnGroups") // The optional list of children records
+
+  usage    UseType // It may be used as a background or a foreground group
+  name     String // It has a title, shown to the user
+  toggled  Boolean
+  expanded Boolean
+}
+
+enum LayerType {
+  ARCGIS
+  VECTOR
+  WFS
+  WFST
+  WMS
+  WMTS
+}
+
+enum UseType {
+  BACKGROUND
+  FOREGROUND
+}
