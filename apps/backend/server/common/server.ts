@@ -31,7 +31,7 @@ export default class ExpressServer {
     // Check engine version and display notice if applicable. The current recommendation
     // is based on the fact that `verifyLayers` uses `fetch`, which isn't available prior v18.
     // See also https://nodejs.org/dist/latest-v18.x/docs/api/globals.html#fetch
-    const recommendedMajorVersion = 18;
+    const recommendedMajorVersion = 22;
     if (process.versions.node.split(".")[0] < recommendedMajorVersion) {
       logger.warn(
         `The current NodeJS runtime version (${process.version}) is lower than the recommended one (v${recommendedMajorVersion}.0.0). Some features will not be available. Consider upgrading to the recommended version in order to make use of all the latest features.`
@@ -245,7 +245,7 @@ built-it compression by setting the ENABLE_GZIP_COMPRESSION option to "true" in 
         process.env.FB_SERVICE_BASE_URL !== undefined
       ) {
         const { default: sokigoFBProxy } = await import(
-          `../apis/v${v}/middlewares/sokigo.fb.proxy.js`
+          `../apis/v${v}/middlewares/sokigo.fb.proxy.${parseInt(v) < 3 ? "js" : "ts"}`
         );
         app.use(`/api/v${v}/fbproxy`, sokigoFBProxy());
         logger.info(
@@ -271,7 +271,7 @@ built-it compression by setting the ENABLE_GZIP_COMPRESSION option to "true" in 
         process.env.FME_SERVER_BASE_URL !== undefined
       ) {
         const { default: fmeServerProxy } = await import(
-          `../apis/v${v}/middlewares/fme.server.proxy.js`
+          `../apis/v${v}/middlewares/fme.server.proxy.${parseInt(v) < 3 ? "js" : "ts"}`
         );
 
         app.use(`/api/v${v}/fmeproxy`, fmeServerProxy());
@@ -382,7 +382,7 @@ built-it compression by setting the ENABLE_GZIP_COMPRESSION option to "true" in 
     try {
       // Dynamically import the required version of Static Restrictor
       const { default: restrictStatic } = await import(
-        `../apis/v${apiVersion}/middlewares/restrict.static.js`
+        `../apis/v${apiVersion}/middlewares/restrict.static.${apiVersion < 3 ? "js" : "ts"}`
       );
 
       const dir = path.join(process.cwd(), "static");
