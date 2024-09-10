@@ -16,7 +16,6 @@ import log4js from "./utils/hajkLogger.js";
 import { initRoutes } from "./routes.ts";
 import websockets from "./websockets/index.js";
 import detailedRequestLogger from "./middlewares/detailed.request.logger.js";
-import errorHandler from "./middlewares/error.handler.js";
 
 const logger = log4js.getLogger("hajk");
 
@@ -120,8 +119,13 @@ class Server {
     // Setup Log4JS for HTTP access logging
     this.setupLogging();
 
-    // Helmet, CORS, GZIP etc
+    // Helmet, CORS, GZIP etc middlewares must be set up early,
+    // **before** any routes and parsers are setup.
     this.setupMiddlewares();
+
+    // Body parsers, for JSON, URL encoded bodies, etc. must be
+    // setup **before** any routes, so that they can be parsed properly.
+    this.setupParsers();
 
     // Hajk's own proxies that can be configured in .env. Await, because
     // we must dynamically load the corresponding modules.
@@ -130,7 +134,7 @@ class Server {
     // Figure out if Hajks client app should be exposed under root (/)
     this.exposeHajksClientApplication();
 
-    // Optionally, other directories /placed in "static/") can be exposed.
+    // Optionally, other directories (placed in "static/") can be exposed.
     // Await, because we must dynamically load the corresponding modules.
     await this.setupStaticDirs();
 
@@ -138,17 +142,12 @@ class Server {
     // Await, because we must dynamically load the corresponding modules.
     await initRoutes(this.app);
 
-    // Setup a generic error handler
-    this.app.use(errorHandler);
-
-    // Once all endpoints are setup, let's initiate the parsers
-    // middlewares.
-    this.setupParsers();
-
     // Finally, expose the OpenAPI specifications on /api/vN/spec and
     // enabled the API validator middleware for all enabled
     // API versions.
     this.exposeOpenAPISpecifications();
+
+    this.setupErrorHandlers();
   }
 
   private setExpressTrustProxy() {
@@ -231,6 +230,18 @@ you should make sure that you implement a reverse proxy that enables content com
 built-it compression by setting the ENABLE_GZIP_COMPRESSION option to "true" in .env.`
       );
     }
+  }
+
+  private setupParsers() {
+    this.app.use(express.json({ limit: process.env.REQUEST_LIMIT || "100kb" }));
+    this.app.use(
+      express.urlencoded({
+        extended: true,
+        limit: process.env.REQUEST_LIMIT || "100kb",
+      })
+    );
+    this.app.use(express.text({ limit: process.env.REQUEST_LIMIT || "100kb" }));
+    this.app.use(cookieParser(process.env.SESSION_SECRET));
   }
 
   private async setupProxies() {
@@ -355,20 +366,6 @@ built-it compression by setting the ENABLE_GZIP_COMPRESSION option to "true" in 
     }
   }
 
-  private setupParsers() {
-    // It's important that these middlewares get called after all
-    // endpoints have been setup (such as those )
-    this.app.use(express.json({ limit: process.env.REQUEST_LIMIT || "100kb" }));
-    this.app.use(
-      express.urlencoded({
-        extended: true,
-        limit: process.env.REQUEST_LIMIT || "100kb",
-      })
-    );
-    this.app.use(express.text({ limit: process.env.REQUEST_LIMIT || "100kb" }));
-    this.app.use(cookieParser(process.env.SESSION_SECRET));
-  }
-
   private exposeOpenAPISpecifications() {
     // Check the setting in .env to see if validation is wanted
     const validateResponses = !!(
@@ -412,6 +409,29 @@ built-it compression by setting the ENABLE_GZIP_COMPRESSION option to "true" in 
         })
       );
     });
+  }
+
+  private setupErrorHandlers() {
+    this.app.use((req: express.Request, res: express.Response) => {
+      res
+        .status(404)
+        .json({ errors: [{ path: req.path, message: "not found" }] });
+    });
+
+    this.app.use(
+      (
+        err: Error | { errors: Error[] },
+        req: express.Request,
+        res: express.Response,
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        next: express.NextFunction
+      ) => {
+        const errors =
+          "errors" in err ? err.errors : [{ message: err.message }];
+        const statusCode = "status" in err ? (err.status as number) : 500;
+        res.status(statusCode).json({ errors });
+      }
+    );
   }
 
   private async setupSokigoProxy() {

@@ -1,36 +1,38 @@
 import MapService from "../../services/map.service.ts";
 import handleStandardResponse from "../../utils/handleStandardResponse.ts";
 
+import type { Request, Response } from "express";
+
 export class Controller {
-  getMaps(req, res) {
+  getMaps(req: Request, res: Response) {
     MapService.getMaps().then((data) => handleStandardResponse(res, data));
   }
 
-  getMapByName(req, res) {
+  getMapByName(req: Request, res: Response) {
     MapService.getMapByName(req.params.mapName).then((data) =>
       handleStandardResponse(res, data)
     );
   }
 
-  getGroupsForMap(req, res) {
+  getGroupsForMap(req: Request, res: Response) {
     MapService.getGroupsForMap(req.params.mapName).then((data) =>
       handleStandardResponse(res, data)
     );
   }
 
-  getLayersForMap(req, res) {
+  getLayersForMap(req: Request, res: Response) {
     MapService.getLayersForMap(req.params.mapName).then((data) =>
       handleStandardResponse(res, data)
     );
   }
 
-  getProjectionsForMap(req, res) {
+  getProjectionsForMap(req: Request, res: Response) {
     MapService.getProjectionsForMap(req.params.mapName).then((data) =>
       handleStandardResponse(res, data)
     );
   }
 
-  getToolsForMap(req, res) {
+  getToolsForMap(req: Request, res: Response) {
     MapService.getToolsForMap(req.params.mapName).then((data) =>
       handleStandardResponse(res, data)
     );

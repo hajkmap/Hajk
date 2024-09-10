@@ -16,9 +16,9 @@ export default function handleStandardResponse(
   if (data.error) {
     // Check if it's AccessError. If so, send a 403 Forbidden.
     // Otherwise, send a generic status 500.
-    res
-      .status(data.error.name === "AccessError" ? 403 : 500)
-      .send(data.error.toString());
+    res.status(data.error.name === "AccessError" ? 403 : 500).json({
+      errors: [{ message: data.error.toString() }],
+    });
   }
   // If there's no error, send the response
   else {

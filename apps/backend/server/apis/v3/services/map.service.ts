@@ -20,7 +20,7 @@ class MapService {
     }
   }
 
-  async getMapByName(mapName) {
+  async getMapByName(mapName: string) {
     try {
       const map = await prisma.map.findUnique({
         where: { name: mapName },
@@ -32,6 +32,10 @@ class MapService {
         },
       });
 
+      if (map === null) {
+        throw new Error(`Map ${mapName} not found`);
+      }
+
       return {
         version: "0.0.1",
         ...map,
@@ -41,7 +45,7 @@ class MapService {
     }
   }
 
-  async getGroupsForMap(mapName) {
+  async getGroupsForMap(mapName: string) {
     try {
       return await prisma.group.findMany({
         where: { maps: { some: { name: mapName } } },
@@ -51,7 +55,7 @@ class MapService {
     }
   }
 
-  async getLayersForMap(mapName) {
+  async getLayersForMap(mapName: string) {
     try {
       return await prisma.layer.findMany({
         where: {
@@ -66,7 +70,7 @@ class MapService {
     }
   }
 
-  async getProjectionsForMap(mapName) {
+  async getProjectionsForMap(mapName: string) {
     try {
       return await prisma.projection.findMany({
         where: { maps: { some: { name: mapName } } },
@@ -76,7 +80,7 @@ class MapService {
     }
   }
 
-  async getToolsForMap(mapName) {
+  async getToolsForMap(mapName: string) {
     try {
       return await prisma.tool.findMany({
         where: {
