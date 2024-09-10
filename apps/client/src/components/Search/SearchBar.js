@@ -405,6 +405,7 @@ class SearchBar extends React.PureComponent {
       setSearchSources,
       failedWFSFetchMessage,
       isMobile,
+      handleFocus,
     } = this.props;
     const disableUnderline = isMobile ? { disableUnderline: true } : null;
     const showFailedWFSMessage =
@@ -456,6 +457,9 @@ class SearchBar extends React.PureComponent {
                       onClick={(e) => {
                         e.stopPropagation();
                         toggleCollapseSearchResults();
+                        if (handleFocus) {
+                          handleFocus();
+                        }
                       }}
                       size="small"
                     >
@@ -472,6 +476,9 @@ class SearchBar extends React.PureComponent {
                       onClick={(e) => {
                         e.stopPropagation();
                         this.toggleResultsLayerVisibility();
+                        if (handleFocus) {
+                          handleFocus();
+                        }
                       }}
                       size="small"
                     >

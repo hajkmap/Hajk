@@ -701,7 +701,6 @@ class App extends React.PureComponent {
 
     // Register various global listeners.
     this.globalObserver.subscribe("infoClick.mapClick", (results) => {
-      console.log(results);
       this.setState({
         mapClickDataResult: results,
       });
@@ -1089,14 +1088,10 @@ class App extends React.PureComponent {
   }
 
   handleFocus = () => {
-    console.log("handleFocus");
-    // set headerHasFocus to true
     this.setState({ headerHasFocus: true });
   };
 
   handleBlur = () => {
-    console.log("handleBlur");
-    // set headerHasFocus to false
     this.setState({ headerHasFocus: false });
   };
 
