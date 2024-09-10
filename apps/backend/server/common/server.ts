@@ -1,6 +1,6 @@
-import Express from "express";
+import express from "express";
+
 import * as path from "path";
-import * as http from "http";
 import fs from "fs";
 import { fileURLToPath } from "url";
 
@@ -8,49 +8,69 @@ import helmet from "helmet";
 import cors from "cors";
 import compression from "compression";
 import cookieParser from "cookie-parser";
+import { createProxyMiddleware } from "http-proxy-middleware";
 import * as OpenApiValidator from "express-openapi-validator";
 
+import { getCLFDate } from "./utils/getClfDate.ts";
 import log4js from "./utils/hajkLogger.js";
-import clfDate from "clf-date";
-
+import { initRoutes } from "./routes.ts";
 import websockets from "./websockets/index.js";
-
-import { createProxyMiddleware } from "http-proxy-middleware";
-
 import detailedRequestLogger from "./middlewares/detailed.request.logger.js";
 import errorHandler from "./middlewares/error.handler.js";
 
-const app = new Express();
-
 const logger = log4js.getLogger("hajk");
 
+// The source of truth regarding which API versions are allowed.
 const ALLOWED_API_VERSIONS = [2, 3];
 
-export default class ExpressServer {
+class Server {
+  public app: express.Application;
+  private apiVersions: number[];
+
   constructor() {
-    // Check engine version and display notice if applicable. The current recommendation
-    // is based on the fact that `verifyLayers` uses `fetch`, which isn't available prior v18.
-    // See also https://nodejs.org/dist/latest-v18.x/docs/api/globals.html#fetch
+    logger.debug("Process's current working directory: ", process.cwd());
+
+    // First things first...
+    this.app = express();
+
+    // Ensure that runtime requirements are met
+    this.checkRuntimeVersion();
+
+    // Figure out which API versions are valid and store results for later use (e.g. in router setup)
+    this.apiVersions = this.setValidApiVersions();
+
+    // Go on with the rest of the initialization. The reason why it's done in a separate
+    // method, rather than directly in the constructor, is that we want to use async/await
+    // during some parts of the initialization, while having an async constructor is not allowed.
+    this.asyncInit();
+  }
+
+  private checkRuntimeVersion() {
+    // Check engine version and display notice if applicable. We currently require
+    // NodeJS v22.0.0 or higher, due to the use of experimental TS features.
     const recommendedMajorVersion = 22;
-    if (process.versions.node.split(".")[0] < recommendedMajorVersion) {
+    if (
+      Number.parseFloat(process.versions.node.split(".")[0]) <
+      recommendedMajorVersion
+    ) {
       logger.warn(
         `The current NodeJS runtime version (${process.version}) is lower than the recommended one (v${recommendedMajorVersion}.0.0). Some features will not be available. Consider upgrading to the recommended version in order to make use of all the latest features.`
       );
     }
+  }
 
-    logger.debug("Process's current working directory: ", process.cwd());
-
+  private setValidApiVersions() {
     // Check which API versions should be enabled. We must do some work to ensure
     // that the value from .env is valid. But we have an early fallback, in case
     // no value is provided.
-    let _apiVersions =
-      process.env.API_VERSIONS?.trim?.() || ALLOWED_API_VERSIONS.join(",");
+    const _apiVersionsFromConfig =
+      process.env.API_VERSIONS?.trim?.().split(",").map(Number) ||
+      ALLOWED_API_VERSIONS;
 
     // By now we'll always have a string, although it can be empty, or
     // contain invalid characters. Let's remove those faulty entries.
-    _apiVersions = _apiVersions.split(",").filter((iv) => {
+    const _apiVersions = _apiVersionsFromConfig.filter((v) => {
       // Attempt to parse as integer
-      const v = Number.parseInt(iv);
 
       // If not valid, ignore
       if (Number.isInteger(v) === false) {
@@ -77,23 +97,61 @@ export default class ExpressServer {
     });
 
     // One last check is needed: we could end up here with _apiVersions=[] (if the filtering above resulted
-    // in none valid entiries). Take care of it by checking that the array isn't empty, fallback to defaults
+    // in none valid entires). Take care of it by checking that the array isn't empty, fallback to defaults
     const apiVersions =
       _apiVersions.length === 0 ? ALLOWED_API_VERSIONS : _apiVersions;
 
-    // Also, store as an app variable for later use across the app
-    app.set("apiVersions", apiVersions);
     logger.info(
       "[API] Starting with the following API versions enabled:",
       apiVersions
     );
 
-    // Check the setting in .env to see if validation is wanted
-    const validateResponses = !!(
-      process.env.OPENAPI_ENABLE_RESPONSE_VALIDATION &&
-      process.env.OPENAPI_ENABLE_RESPONSE_VALIDATION.toLowerCase() === "true"
-    );
+    // Finally, store as an app variable for later use across the app...
+    this.app.set("apiVersions", apiVersions);
 
+    // ...and return it, so the private field can be set in the constructor.
+    return apiVersions;
+  }
+
+  private async asyncInit() {
+    // Configure the "trust proxy" parameter of Express, https://expressjs.com/en/guide/behind-proxies.html
+    this.setExpressTrustProxy();
+
+    // Setup Log4JS for HTTP access logging
+    this.setupLogging();
+
+    // Helmet, CORS, GZIP etc
+    this.setupMiddlewares();
+
+    // Hajk's own proxies that can be configured in .env. Await, because
+    // we must dynamically load the corresponding modules.
+    await this.setupProxies();
+
+    // Figure out if Hajks client app should be exposed under root (/)
+    this.exposeHajksClientApplication();
+
+    // Optionally, other directories /placed in "static/") can be exposed.
+    // Await, because we must dynamically load the corresponding modules.
+    await this.setupStaticDirs();
+
+    // Setup the main application router (for "/api/vN" endpoints).
+    // Await, because we must dynamically load the corresponding modules.
+    await initRoutes(this.app);
+
+    // Setup a generic error handler
+    this.app.use(errorHandler);
+
+    // Once all endpoints are setup, let's initiate the parsers
+    // middlewares.
+    this.setupParsers();
+
+    // Finally, expose the OpenAPI specifications on /api/vN/spec and
+    // enabled the API validator middleware for all enabled
+    // API versions.
+    this.exposeOpenAPISpecifications();
+  }
+
+  private setExpressTrustProxy() {
     // If EXPRESS_TRUST_PROXY is set in .env, pass on the value to Express.
     // See https://expressjs.com/en/guide/behind-proxies.html.
     if (process.env.EXPRESS_TRUST_PROXY) {
@@ -118,18 +176,20 @@ export default class ExpressServer {
         trustProxy
       );
 
-      app.set("trust proxy", trustProxy);
+      this.app.set("trust proxy", trustProxy);
     }
+  }
 
+  private setupLogging() {
     // Configure the HTTP access logger. We want it to log in the Combined Log Format, which requires some custom configuration below.
-    app.use(
+    this.app.use(
       log4js.connectLogger(log4js.getLogger("http"), {
-        format: (req, res, format) =>
+        format: (req: express.Request, res: express.Response, format) =>
           format(
             ":remote-addr - " + // Host name or IP of accesser. RFC 1413 identity (unreliable, hence always a dash)
               (req.get(process.env.AD_TRUSTED_HEADER || "X-Control-Header") ||
                 "-") + // Value of X-Control-Header (or whatever header specified in .env)
-              ` [${clfDate()}]` + // Timestamp string surrounded by square brackets, e.g. [12/Dec/2012:12:12:12 -0500]
+              ` [${getCLFDate()}]` + // Timestamp string surrounded by square brackets, e.g. [12/Dec/2012:12:12:12 -0500]
               ' ":method :url HTTP/:http-version"' + // HTTP request surrounded by double quotes, e.g., "GET /stuff.html HTTP/1.1"
               ' :status :content-length ":referrer"' + // HTTP status code, content length in bytes and referer (where request came from to your site)
               ' ":user-agent"' // User agent string, e.g. name of the browser
@@ -137,10 +197,13 @@ export default class ExpressServer {
       })
     );
 
+    // eslint-disable-next-line
     process.env.LOG_DETAILED_REQUEST_LOGGER === "true" &&
-      app.use(detailedRequestLogger);
+      this.app.use(detailedRequestLogger);
+  }
 
-    app.use(
+  private setupMiddlewares() {
+    this.app.use(
       helmet({
         contentSecurityPolicy: false, // If active, we get errors loading inline <script>
         crossOriginResourcePolicy: {
@@ -150,7 +213,7 @@ export default class ExpressServer {
       })
     );
 
-    app.use(
+    this.app.use(
       cors({
         origin: "*",
         optionsSuccessStatus: 200, // some legacy browsers (IE11, various SmartTVs) choke on 204
@@ -160,7 +223,7 @@ export default class ExpressServer {
     // Enable compression early so that responses that follow will get gziped
     if (process.env.ENABLE_GZIP_COMPRESSION !== "false") {
       logger.trace("[HTTP] Enabling Hajk's built-in GZIP compression");
-      app.use(compression());
+      this.app.use(compression());
     } else {
       logger.warn(
         `[HTTP] Not enabling GZIP compression. If this is a production environment 
@@ -168,209 +231,41 @@ you should make sure that you implement a reverse proxy that enables content com
 built-it compression by setting the ENABLE_GZIP_COMPRESSION option to "true" in .env.`
       );
     }
-
-    // We have to make sure to add the json-parsers etc. after the proxies has been initiated.
-    // If they are added before, eventual payload trough the proxies will not be handled correctly.
-    this.setupProxies().then(() => {
-      app.use(Express.json({ limit: process.env.REQUEST_LIMIT || "100kb" }));
-      app.use(
-        Express.urlencoded({
-          extended: true,
-          limit: process.env.REQUEST_LIMIT || "100kb",
-        })
-      );
-      app.use(Express.text({ limit: process.env.REQUEST_LIMIT || "100kb" }));
-      app.use(cookieParser(process.env.SESSION_SECRET));
-    });
-
-    // Optionally, expose the Hajk client app directly under root (/)
-    process.env.EXPOSE_CLIENT === "true" &&
-      app.use(
-        "/",
-        Express.static(path.join(process.cwd(), "static", "client"))
-      );
-
-    // Optionally, other directories placed in "static" can be exposed.
-    this.setupStaticDirs();
-
-    // Expose the OpenAPI specifications on /api/vN/spec and
-    // enabled the API validator middleware for all enabled
-    // API versions
-    apiVersions.forEach((v) => {
-      // Grab paths to our OpenAPI specifications by…
-      // …grabbing the current file's full URL and making it a file path…
-      const __filename = fileURLToPath(import.meta.url);
-      // …and extracting the dir name from file's path.
-      const __dirname = path.dirname(__filename);
-      // Finally, put it together with the filename of the YAML file
-      // that holds the specification.
-      const openApiSpecification = path.join(__dirname, `api.v${v}.yml`);
-
-      // Expose the API specification as a simple static route…
-      logger.trace(
-        `[API] Exposing ${openApiSpecification} on route /api/v${v}/spec`
-      );
-      app.use(`/api/v${v}/spec`, Express.static(openApiSpecification));
-
-      // …and apply the Validator middleware. We do it inside a timeout,
-      // which isn't optimal. The reasoning behind is that we must "wait
-      // a second or two" before we setup this middleware, to allow the
-      // async imports (which are initiated earlier) to finish so that those
-      // routes are set up when OAV runs its middleware. If we were to apply
-      // the middleware directly, any non-existing routes (such as those being
-      // created in async parts of the code) would render a 404 in the middleware.
-      // Related to #1309. Discovered during PR in #1332.
-      setTimeout(() => {
-        logger.trace(`[VALIDATOR] Setting up OpenApiValidator for /api/v${v}`);
-        app.use(
-          OpenApiValidator.middleware({
-            apiSpec: openApiSpecification,
-            validateResponses,
-            validateRequests: {
-              allowUnknownQueryParameters: true,
-            },
-            ignorePaths: /.*\/spec(\/|$)/,
-          })
-        );
-      }, 2000);
-    });
   }
 
-  async setupSokigoProxy() {
-    // Each API version has its own Sokigo proxy middleware. Let's iterate them.
-    for await (const v of app.get("apiVersions")) {
-      // Don't enable FB Proxy if necessary env variable isn't sat
-      if (
-        process.env.FB_SERVICE_ACTIVE === "true" &&
-        process.env.FB_SERVICE_BASE_URL !== undefined
-      ) {
-        const { default: sokigoFBProxy } = await import(
-          `../apis/v${v}/middlewares/sokigo.fb.proxy.${parseInt(v) < 3 ? "js" : "ts"}`
-        );
-        app.use(`/api/v${v}/fbproxy`, sokigoFBProxy());
-        logger.info(
-          "FB_SERVICE_ACTIVE is set to %o in .env. Enabling Sokigo FB Proxy for API V%s",
-          process.env.FB_SERVICE_ACTIVE,
-          v
-        );
-      } else
-        logger.info(
-          "FB_SERVICE_ACTIVE is set to %o in .env. Not enabling Sokigo FB Proxy for API V%s",
-          process.env.FB_SERVICE_ACTIVE,
-          v
-        );
-    }
-  }
-
-  async setupFmeProxy() {
-    // Each API version has its own FME proxy middleware. Let's iterate them.
-    for await (const v of app.get("apiVersions")) {
-      // Don't enable FME-server Proxy if necessary env variable isn't sat
-      if (
-        process.env.FME_SERVER_ACTIVE === "true" &&
-        process.env.FME_SERVER_BASE_URL !== undefined
-      ) {
-        const { default: fmeServerProxy } = await import(
-          `../apis/v${v}/middlewares/fme.server.proxy.${parseInt(v) < 3 ? "js" : "ts"}`
-        );
-
-        app.use(`/api/v${v}/fmeproxy`, fmeServerProxy());
-        logger.info(
-          "FME_SERVER_ACTIVE is set to %o in .env. Enabling FME-server proxy for API V%s",
-          process.env.FME_SERVER_ACTIVE,
-          v
-        );
-      } else
-        logger.info(
-          "FME_SERVER_ACTIVE is set to %o in .env. Not enabling FME-server proxy for API V%s",
-          process.env.FME_SERVER_ACTIVE,
-          v
-        );
-    }
-  }
-
-  /**
-   * @summary Create proxies for endpoints specified in DOTENV as "PROXY_*".
-   * @description A proxy will be created for each of the active API versions.
-   * @example If admin configures a key named PROXY_GEOSERVER and enables
-   * version 1 and 2 of the API, the following endpoints will be made available:
-   * - /api/v1/proxy/geoserver
-   * - /api/v2/proxy/geoserver
-   * @issue https://github.com/hajkmap/Hajk/issues/824
-   * @issue https://github.com/hajkmap/Hajk/issues/1309
-   * @returns
-   * @memberof ExpressServer
-   */
-  setupGenericProxy() {
-    // Prepare a logger
-    const l = log4js.getLogger("hajk.proxy");
-    try {
-      // Convert the settings from DOTENV to a nice Array of Objects.
-      const proxyMap = Object.entries(process.env)
-        .filter(([k]) => k.startsWith("PROXY_"))
-        .map(([k, v]) => {
-          // Get rid of the leading "PROXY_" and convert to lower case
-          k = k.replace("PROXY_", "").toLowerCase();
-          return { context: k, target: v };
-        });
-
-      // Iterate enabled API versions and expose one proxy endpoint
-      // for each version.
-      for (const apiVersion of app.get("apiVersions")) {
-        proxyMap.forEach((v) => {
-          // Grab context and target from current element
-          const context = v.context;
-          const target = v.target;
-          l.trace(
-            `Setting up proxy: /api/v${apiVersion}/proxy/${context} -> ${target}`
-          );
-
-          // Create the proxy itself
-          app.use(
-            `/api/v${apiVersion}/proxy/${context}`,
-            createProxyMiddleware({
-              logLevel: "silent",
-              target: target,
-              changeOrigin: true,
-              pathRewrite: {
-                [`^/api/v${apiVersion}/proxy/${context}`]: "", // remove base path
-              },
-            })
-          );
-        });
-      }
-    } catch (error) {
-      l.error(error);
-      return { error };
-    }
-  }
-
-  // Since we have to await the setup of the proxies (so that the JSON-parser etc. initiates after the proxies),
-  // we'll gather the all the setups here so they are easy to call.
-  async setupProxies() {
+  private async setupProxies() {
+    // Await the setup of the proxies. They must complete before we
+    // can continue and set up the parsers.
     await this.setupSokigoProxy();
     await this.setupFmeProxy();
     this.setupGenericProxy();
   }
 
-  async setupStaticDirs() {
+  private exposeHajksClientApplication() {
+    // Optionally, expose the Hajk client this.app directly under root (/)
+    // eslint-disable-next-line
+    process.env.EXPOSE_CLIENT === "true" &&
+      this.app.use(
+        "/",
+        express.static(path.join(process.cwd(), "static", "client"))
+      );
+  }
+
+  private async setupStaticDirs() {
     const l = log4js.getLogger("hajk.static");
 
     // Try to convert the value from config to an Int
     let normalizedStaticExposerVersion = Number.parseInt(
-      process.env.STATIC_EXPOSER_VERSION?.trim?.()
+      process.env.STATIC_EXPOSER_VERSION?.trim?.() || ""
     );
-
-    // Grab active API versions
-    const apiVersions = app.set("apiVersions");
 
     // If NaN, or if version required is not any of the active API versions,
     // let's fall back to the highest active version
     if (
       Number.isNaN(normalizedStaticExposerVersion) ||
-      !apiVersions.includes(normalizedStaticExposerVersion)
+      !this.apiVersions.includes(normalizedStaticExposerVersion)
     ) {
-      normalizedStaticExposerVersion = Math.max(...apiVersions);
+      normalizedStaticExposerVersion = Math.max(...this.apiVersions);
     }
 
     const apiVersion = normalizedStaticExposerVersion;
@@ -428,9 +323,9 @@ built-it compression by setting the ENABLE_GZIP_COMPRESSION option to "true" in 
           // If the key is set (which is indicated with the value of an empty string),
           // it means that access to dir is unrestricted.
           l.info(`Exposing '%s' as unrestricted static directory.`, dir);
-          app.use(
+          this.app.use(
             `/${dir}`,
-            Express.static(path.join(process.cwd(), "static", dir))
+            express.static(path.join(process.cwd(), "static", dir))
           );
         } else if (
           typeof restrictedToGroups === "string" &&
@@ -443,9 +338,9 @@ built-it compression by setting the ENABLE_GZIP_COMPRESSION option to "true" in 
           );
           // If there are restrictions, run a middleware that will enforce the restrictions,
           // if okay, expose - else return 403.
-          app.use(`/${dir}`, [
+          this.app.use(`/${dir}`, [
             restrictStatic,
-            Express.static(path.join(process.cwd(), "static", dir)),
+            express.static(path.join(process.cwd(), "static", dir)),
           ]);
         } else {
           l.warn(
@@ -460,21 +355,186 @@ built-it compression by setting the ENABLE_GZIP_COMPRESSION option to "true" in 
     }
   }
 
-  router(routes) {
-    routes(app);
-    app.use(errorHandler);
-    return this;
+  private setupParsers() {
+    // It's important that these middlewares get called after all
+    // endpoints have been setup (such as those )
+    this.app.use(express.json({ limit: process.env.REQUEST_LIMIT || "100kb" }));
+    this.app.use(
+      express.urlencoded({
+        extended: true,
+        limit: process.env.REQUEST_LIMIT || "100kb",
+      })
+    );
+    this.app.use(express.text({ limit: process.env.REQUEST_LIMIT || "100kb" }));
+    this.app.use(cookieParser(process.env.SESSION_SECRET));
   }
 
-  listen(port = process.env.PORT) {
+  private exposeOpenAPISpecifications() {
+    // Check the setting in .env to see if validation is wanted
+    const validateResponses = !!(
+      process.env.OPENAPI_ENABLE_RESPONSE_VALIDATION &&
+      process.env.OPENAPI_ENABLE_RESPONSE_VALIDATION.toLowerCase() === "true"
+    );
+
+    this.apiVersions.forEach((v) => {
+      // Grab paths to our OpenAPI specifications by…
+      // …grabbing the current file's full URL and making it a file path…
+      const __filename = fileURLToPath(import.meta.url);
+      // …and extracting the dir name from file's path.
+      const __dirname = path.dirname(__filename);
+      // Finally, put it together with the filename of the YAML file
+      // that holds the specification.
+      const openApiSpecification = path.join(__dirname, `api.v${v}.yml`);
+
+      // Expose the API specification as a simple static route…
+      logger.trace(
+        `[API] Exposing ${openApiSpecification} on route /api/v${v}/spec`
+      );
+      this.app.use(`/api/v${v}/spec`, express.static(openApiSpecification));
+
+      // …and apply the Validator middleware. We do it inside a timeout,
+      // which isn't optimal. The reasoning behind is that we must "wait
+      // a second or two" before we setup this middleware, to allow the
+      // async imports (which are initiated earlier) to finish so that those
+      // routes are set up when OAV runs its middleware. If we were to apply
+      // the middleware directly, any non-existing routes (such as those being
+      // created in async parts of the code) would render a 404 in the middleware.
+      // Related to #1309. Discovered during PR in #1332.
+      logger.trace(`[VALIDATOR] Setting up OpenApiValidator for /api/v${v}`);
+      this.app.use(
+        OpenApiValidator.middleware({
+          apiSpec: openApiSpecification,
+          validateResponses,
+          validateRequests: {
+            allowUnknownQueryParameters: true,
+          },
+          ignorePaths: /.*\/spec(\/|$)/,
+        })
+      );
+    });
+  }
+
+  private async setupSokigoProxy() {
+    // Each API version has its own Sokigo proxy middleware. Let's iterate them.
+    for await (const v of this.apiVersions) {
+      // Don't enable FB Proxy if necessary env variable isn't sat
+      if (
+        process.env.FB_SERVICE_ACTIVE === "true" &&
+        process.env.FB_SERVICE_BASE_URL !== undefined
+      ) {
+        const { default: sokigoFBProxy } = await import(
+          `../apis/v${v}/middlewares/sokigo.fb.proxy.${v < 3 ? "js" : "ts"}`
+        );
+        this.app.use(`/api/v${v}/fbproxy`, sokigoFBProxy());
+        logger.info(
+          "FB_SERVICE_ACTIVE is set to %o in .env. Enabling Sokigo FB Proxy for API V%s",
+          process.env.FB_SERVICE_ACTIVE,
+          v
+        );
+      } else
+        logger.info(
+          "FB_SERVICE_ACTIVE is set to %o in .env. Not enabling Sokigo FB Proxy for API V%s",
+          process.env.FB_SERVICE_ACTIVE,
+          v
+        );
+    }
+  }
+
+  private async setupFmeProxy() {
+    // Each API version has its own FME proxy middleware. Let's iterate them.
+    for await (const v of this.apiVersions) {
+      // Don't enable FME-server Proxy if necessary env variable isn't sat
+      if (
+        process.env.FME_SERVER_ACTIVE === "true" &&
+        process.env.FME_SERVER_BASE_URL !== undefined
+      ) {
+        const { default: fmeServerProxy } = await import(
+          `../apis/v${v}/middlewares/fme.server.proxy.${v < 3 ? "js" : "ts"}`
+        );
+
+        this.app.use(`/api/v${v}/fmeproxy`, fmeServerProxy());
+        logger.info(
+          "FME_SERVER_ACTIVE is set to %o in .env. Enabling FME-server proxy for API V%s",
+          process.env.FME_SERVER_ACTIVE,
+          v
+        );
+      } else
+        logger.info(
+          "FME_SERVER_ACTIVE is set to %o in .env. Not enabling FME-server proxy for API V%s",
+          process.env.FME_SERVER_ACTIVE,
+          v
+        );
+    }
+  }
+
+  /**
+   * Creates proxies for endpoints specified in DOTENV as "PROXY_*".
+   *
+   * A proxy will be created for each of the active API versions.
+   *
+   * @example If admin configures a key named `PROXY_GEOSERVER` and enables
+   * versions 1 and 2 of the API, the following endpoints will be made available:
+   *
+   * - `/api/v1/proxy/geoserver`
+   * - `/api/v2/proxy/geoserver`
+   *
+   * @see https://github.com/hajkmap/Hajk/issues/824
+   * @see https://github.com/hajkmap/Hajk/issues/1309
+   */
+  private setupGenericProxy() {
+    // Prepare a logger
+    const l = log4js.getLogger("hajk.proxy");
+    try {
+      // Convert the settings from DOTENV to a nice Array of Objects.
+      const proxyMap = Object.entries(process.env)
+        .filter(([k]) => k.startsWith("PROXY_"))
+        .map(([k, v]) => {
+          // Get rid of the leading "PROXY_" and convert to lower case
+          k = k.replace("PROXY_", "").toLowerCase();
+          return { context: k, target: v };
+        });
+
+      // Iterate enabled API versions and expose one proxy endpoint
+      // for each version.
+      for (const apiVersion of this.apiVersions) {
+        proxyMap.forEach((v) => {
+          // Grab context and target from current element
+          const context = v.context;
+          const target = v.target;
+          l.trace(
+            `Setting up proxy: /api/v${apiVersion}/proxy/${context} -> ${target}`
+          );
+
+          // Create the proxy itself
+          this.app.use(
+            `/api/v${apiVersion}/proxy/${context}`,
+            createProxyMiddleware({
+              logLevel: "silent",
+              target: target,
+              changeOrigin: true,
+              pathRewrite: {
+                [`^/api/v${apiVersion}/proxy/${context}`]: "", // remove base path
+              },
+            })
+          );
+        });
+      }
+    } catch (error) {
+      l.error(error);
+      return { error };
+    }
+  }
+
+  public listen() {
+    const port: number = Number.parseInt(process.env.PORT || "3000");
     // Startup handler
-    const welcome = (p) => () =>
+    const welcome = (p: number) => () =>
       logger.info(
         `Server startup completed. Some services may still be initiating. Launched on port ${p}. (http://localhost:${p})`
       );
 
     // Shutdown handler
-    const shutdown = (signal, value) => {
+    const shutdown = (signal: string, value: number) => {
       logger.info("Shutdown requested…");
       server.close(() => {
         logger.info(`Server stopped by ${signal} with value ${value}.`);
@@ -483,7 +543,7 @@ built-it compression by setting the ENABLE_GZIP_COMPRESSION option to "true" in 
 
     // Take care of graceful shutdown by defining signals that we want to handle.
     // Please note that SIGKILL signal (9) cannot be intercepted, so it's omitted.
-    const signals = {
+    const signals: Record<string, number> = {
       SIGHUP: 1,
       SIGINT: 2,
       SIGTERM: 15,
@@ -495,12 +555,14 @@ built-it compression by setting the ENABLE_GZIP_COMPRESSION option to "true" in 
     });
 
     // Let's setup the server and start listening.
-    const server = http.createServer(app).listen(port, welcome(port));
+    // const server = http.createServer(this.app).listen(port, welcome(port));
+    const server = this.app.listen(port, welcome(port));
 
     // For WS support we must also supply the server to the WebSocket component.
+    // eslint-disable-next-line
     process.env.ENABLE_WEBSOCKETS?.toLowerCase() === "true" &&
       websockets(server);
-
-    return app;
   }
 }
+
+export default new Server();
