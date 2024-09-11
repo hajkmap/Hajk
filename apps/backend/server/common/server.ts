@@ -367,6 +367,7 @@ built-it compression by setting the ENABLE_GZIP_COMPRESSION option to "true" in 
         }
       });
     } catch (error) {
+      l.error(error);
       return { error };
     }
   }
