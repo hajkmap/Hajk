@@ -20,7 +20,7 @@ class PrismaService {
     }
   }
 
-  async getMapByName(mapName) {
+  async getMapByName(mapName: string) {
     try {
       const map = await prisma.map.findUnique({
         where: { name: mapName },
@@ -41,7 +41,7 @@ class PrismaService {
     }
   }
 
-  async getGroupsForMap(mapName) {
+  async getGroupsForMap(mapName: string) {
     try {
       return await prisma.group.findMany({
         where: { maps: { some: { name: mapName } } },
@@ -51,7 +51,7 @@ class PrismaService {
     }
   }
 
-  async getLayersForMap(mapName) {
+  async getLayersForMap(mapName: string) {
     try {
       return await prisma.layer.findMany({
         where: {
@@ -66,7 +66,7 @@ class PrismaService {
     }
   }
 
-  async getProjectionsForMap(mapName) {
+  async getProjectionsForMap(mapName: string) {
     try {
       return await prisma.projection.findMany({
         where: { maps: { some: { name: mapName } } },
@@ -76,7 +76,7 @@ class PrismaService {
     }
   }
 
-  async getToolsForMap(mapName) {
+  async getToolsForMap(mapName: string) {
     try {
       return await this.#getToolsForMap(mapName);
     } catch (error) {
@@ -92,7 +92,7 @@ class PrismaService {
     }
   }
 
-  async getMapsWithTool(toolName) {
+  async getMapsWithTool(toolName: string) {
     try {
       const maps = await prisma.map.findMany({
         select: { name: true },
@@ -113,7 +113,7 @@ class PrismaService {
   }
 
   // This method is abstracted away as we use it in (at least) two places
-  async #getToolsForMap(mapName) {
+  async #getToolsForMap(mapName: string) {
     return await prisma.tool.findMany({
       where: {
         maps: {

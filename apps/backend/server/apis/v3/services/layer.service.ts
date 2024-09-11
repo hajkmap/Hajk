@@ -19,7 +19,7 @@ class LayerService {
     }
   }
 
-  async getLayerById(id) {
+  async getLayerById(id: string) {
     try {
       const layer = await prisma.layer.findUnique({
         where: { id },
@@ -41,9 +41,9 @@ class LayerService {
     }
   }
 
-  async getLayersByType(type) {
+  async getLayersByType(type: LayerType) {
     try {
-      if (!Object.values(LayerType).includes(type.toUpperCase())) {
+      if (!Object.values(LayerType).includes(type)) {
         throw new Error(
           `Unsupported layer type provided. Supported types are: ${Object.values(
             LayerType
@@ -51,7 +51,7 @@ class LayerService {
         );
       }
       return await prisma.layer.findMany({
-        where: { type: type.toUpperCase() },
+        where: { type: type },
       });
     } catch (error) {
       return { error };

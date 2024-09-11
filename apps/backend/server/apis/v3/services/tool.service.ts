@@ -18,7 +18,7 @@ class ToolService {
     }
   }
 
-  async getMapsWithTool(toolName) {
+  async getMapsWithTool(toolName: string) {
     try {
       const maps = await prisma.map.findMany({
         select: { name: true },
