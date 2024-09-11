@@ -1,8 +1,15 @@
 import log4js from "log4js";
 
+import { type Request } from "express";
+
 const ErrorNotImplemented = "The method '{name}' is not implemented!";
 
 class AdBaseService {
+  logger: log4js.Logger;
+  overrideUser: string | null = null;
+  overrideUserGroups: string | null | string[] = null;
+  postRequestHandler?: (request: Request, user: string | undefined) => void;
+
   constructor() {
     this.logger = log4js.getLogger("service.auth.v3");
     this.initEnvOverrides();
@@ -46,8 +53,8 @@ class AdBaseService {
     throw new Error(ErrorNotImplemented.replace("{name}", "init"));
   }
 
-  // eslint-disable-next-line no-unused-vars
-  async isUserMemberOf(sAMAccountName, groupCN) {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  async isUserMemberOf(sAMAccountName: string, groupCN: string) {
     throw new Error(ErrorNotImplemented.replace("{name}", "isUserMemberOf"));
   }
 
@@ -55,8 +62,8 @@ class AdBaseService {
     throw new Error(ErrorNotImplemented.replace("{name}", "isUserValid"));
   }
 
-  // eslint-disable-next-line no-unused-vars
-  async findUser(sAMAccountName) {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  async findUser(sAMAccountName: string) {
     throw new Error(ErrorNotImplemented.replace("{name}", "findUser"));
   }
 
@@ -77,30 +84,30 @@ class AdBaseService {
     return [];
   }
 
-  // eslint-disable-next-line no-unused-vars
-  async findCommonADGroupsForUsers(users) {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  async findCommonADGroupsForUsers(users: string) {
     this.logger.warn(
       ErrorNotImplemented.replace("{name}", "findCommonADGroupsForUsers")
     );
     return [];
   }
 
-  // eslint-disable-next-line no-unused-vars
-  async getGroupMembershipForUser(sAMAccountName) {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  async getGroupMembershipForUser(sAMAccountName: string) {
     this.logger.warn(
       ErrorNotImplemented.replace("{name}", "findCommonADGroupsForUsers")
     );
     return [];
   }
 
-  getEnv(env) {
+  getEnv(env: string | undefined) {
     if (env !== undefined && ("" + env).trim().length > 0) {
       return env;
     }
     return null;
   }
 
-  getUserFromRequestHeader(req) {
+  getUserFromRequestHeader(req: Request) {
     if (process.env.AD_LOOKUP_ACTIVE !== "true") {
       // If AD_LOOKUP_ACTIVE is anything else than "true", we don't care
       // about doing any username checks. Just return undefined as username.

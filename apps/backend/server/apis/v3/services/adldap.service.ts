@@ -4,6 +4,27 @@ import log4js from "log4js";
 import fs from "fs";
 import AdBaseService from "./base/adbase.service.ts";
 
+interface ADConfig {
+  logging: log4js.Logger;
+  url: string;
+  baseDN: string;
+  username: string;
+  password: string;
+  reconnect: boolean;
+  connectTimeout: number;
+  idleTimeout: number;
+  timeout: number;
+  tlsOptions: tlsOptions;
+}
+
+interface tlsOptions {
+  key: string | null;
+  cert: string | null;
+  ca: string[];
+  passphrase: string;
+  requestCert: boolean;
+  rejectUnauthorized: boolean;
+}
 /**
  * @description Proposed setup:
  *                  /-> MapService
@@ -24,7 +45,9 @@ import AdBaseService from "./base/adbase.service.ts";
  * @class ActiveDirectoryService
  */
 class AdLdapService extends AdBaseService {
-  #config; // Will hold AD connection parameters
+  #config: ADConfig | null = null; // Will hold AD connection parameters
+  tlsOptions: tlsOptions | null = null;
+  internalADLogger: log4js.Logger;
 
   constructor() {
     super();
