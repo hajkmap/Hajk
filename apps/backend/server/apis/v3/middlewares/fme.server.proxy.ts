@@ -39,9 +39,9 @@ export default function fmeServerProxy(err, req, res, next) {
     },
     pathRewrite: (originalPath, req) => {
       // Lets split on the proxy path so that we can remove that when forwarding
-      const segments = originalPath.split("/api/v2/fmeproxy");
+      const segments = originalPath.split("/api/v3/fmeproxy");
 
-      // We want to forward everything that is after /api/v2/fmeproxy
+      // We want to forward everything that is after /api/v3/fmeproxy
       const path = segments[1];
 
       logger.debug(`${req.method} ${originalPath} ~> ${path}`);
