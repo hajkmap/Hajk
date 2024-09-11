@@ -1,4 +1,9 @@
-import express from "express";
+import express, {
+  type Application,
+  type NextFunction,
+  type Request,
+  type Response,
+} from "express";
 
 import * as path from "path";
 import fs from "fs";
@@ -23,7 +28,7 @@ const logger = log4js.getLogger("hajk");
 const ALLOWED_API_VERSIONS = [2, 3];
 
 class Server {
-  public app: express.Application;
+  public app: Application;
   private apiVersions: number[];
 
   constructor() {
@@ -183,7 +188,7 @@ class Server {
     // Configure the HTTP access logger. We want it to log in the Combined Log Format, which requires some custom configuration below.
     this.app.use(
       log4js.connectLogger(log4js.getLogger("http"), {
-        format: (req: express.Request, res: express.Response, format) =>
+        format: (req: Request, res: Response, format) =>
           format(
             ":remote-addr - " + // Host name or IP of accesser. RFC 1413 identity (unreliable, hence always a dash)
               (req.get(process.env.AD_TRUSTED_HEADER || "X-Control-Header") ||
@@ -412,7 +417,7 @@ built-it compression by setting the ENABLE_GZIP_COMPRESSION option to "true" in 
   }
 
   private setupErrorHandlers() {
-    this.app.use((req: express.Request, res: express.Response) => {
+    this.app.use((req: Request, res: Response) => {
       res
         .status(404)
         .json({ errors: [{ path: req.path, message: "not found" }] });
@@ -421,10 +426,10 @@ built-it compression by setting the ENABLE_GZIP_COMPRESSION option to "true" in 
     this.app.use(
       (
         err: Error | { errors: Error[] },
-        req: express.Request,
-        res: express.Response,
+        req: Request,
+        res: Response,
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        next: express.NextFunction
+        next: NextFunction
       ) => {
         const errors =
           "errors" in err ? err.errors : [{ message: err.message }];

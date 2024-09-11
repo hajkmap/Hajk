@@ -1,4 +1,4 @@
-import express from "express";
+import type { Application } from "express";
 import log4js from "../common/utils/hajkLogger.js";
 
 const logger = log4js.getLogger("hajk");
@@ -10,7 +10,7 @@ const logger = log4js.getLogger("hajk");
  * By looking into the `apiVersions` app global, we can determine at runtime
  * which API versions are enabled and load the corresponding routes dynamically.
  */
-export async function initRoutes(app: express.Application): Promise<void> {
+export async function initRoutes(app: Application): Promise<void> {
   const apiVersions: number[] = app.get("apiVersions");
 
   for (const v of apiVersions) {
