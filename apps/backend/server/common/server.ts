@@ -13,7 +13,7 @@ import helmet from "helmet";
 import cors from "cors";
 import compression from "compression";
 import cookieParser from "cookie-parser";
-import { createProxyMiddleware } from "http-proxy-middleware";
+import { legacyCreateProxyMiddleware as createProxyMiddleware } from "http-proxy-middleware";
 import * as OpenApiValidator from "express-openapi-validator";
 
 import { getCLFDate } from "./utils/getClfDate.ts";

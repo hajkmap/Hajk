@@ -1,5 +1,5 @@
 import { type Request, type Response, type NextFunction } from "express";
-import { createProxyMiddleware } from "http-proxy-middleware";
+import { legacyCreateProxyMiddleware as createProxyMiddleware } from "http-proxy-middleware";
 import log4js from "log4js";
 
 // Grab a logger

@@ -1,4 +1,4 @@
-import { createProxyMiddleware } from "http-proxy-middleware";
+import { legacyCreateProxyMiddleware as createProxyMiddleware } from "http-proxy-middleware";
 import log4js from "log4js";
 
 // Value of process.env.LOG_LEVEL will be one of the allowed

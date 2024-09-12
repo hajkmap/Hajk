@@ -34,10 +34,10 @@
     "express-openapi-validator": "^5.3.5",
     "fast-xml-parser": "^4.5.0",
     "helmet": "^7.1.0",
-    "http-proxy-middleware": "^2.0.6",
+    "http-proxy-middleware": "^3.0.2",
     "log4js": "^6.9.1",
-    "query-string": "^8.2.0",
-    "write-excel-file": "^1.4.29",
+    "query-string": "^9.1.0",
+    "write-excel-file": "^2.0.9",
     "ws": "^8.18.0"
   },
   "devDependencies": {
