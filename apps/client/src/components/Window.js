@@ -175,6 +175,7 @@ class Window extends React.PureComponent {
 
   componentDidUpdate = (prevProps, prevState) => {
     if (prevProps.open === false && this.props.open === true) {
+      this.bringToFront();
       //This is ugly but there is a timing problem further down somewhere (i suppose?).
       //componentDidUpdate is run before the render is actually fully completed and the DOM is ready
       setTimeout(() => {
@@ -403,6 +404,21 @@ class Window extends React.PureComponent {
   };
 
   bringToFront() {
+    this.props.globalObserver.publish("handleBlur");
+
+    const headerElement = document.getElementById("header");
+
+    if (headerElement) {
+      // Add header element to document.windows if it's not already there
+      if (!document.windows.some((w) => w.id === "header")) {
+        document.windows.push({
+          id: "header",
+          element: headerElement,
+          getSelfElement: () => headerElement,
+        });
+      }
+    }
+
     document.windows
       .sort((a, b) => (a === this ? 1 : b === this ? -1 : 0))
       .forEach((w, i) => {
@@ -480,7 +496,6 @@ class Window extends React.PureComponent {
       }
     }
 
-    this.bringToFront();
     return (
       <StyledRnd
         className="hajk-window"

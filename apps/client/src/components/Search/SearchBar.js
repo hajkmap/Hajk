@@ -406,6 +406,7 @@ class SearchBar extends React.PureComponent {
       failedWFSFetchMessage,
       isMobile,
       handleFocus,
+      handleBlur,
     } = this.props;
     const disableUnderline = isMobile ? { disableUnderline: true } : null;
     const showFailedWFSMessage =
@@ -422,6 +423,7 @@ class SearchBar extends React.PureComponent {
     const placeholder = this.getPlaceholder();
     return (
       <TextField
+        onBlur={handleBlur}
         {...params}
         label={<span style={visuallyHidden}>Sök i webbplatsens innehåll</span>}
         variant={isMobile ? "standard" : "outlined"}
