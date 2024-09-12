@@ -5,14 +5,15 @@ import express, {
   type Response,
 } from "express";
 
-import * as path from "path";
+import { randomUUID } from "crypto";
 import fs from "fs";
+import * as path from "path";
 import { fileURLToPath } from "url";
 
-import helmet from "helmet";
-import cors from "cors";
 import compression from "compression";
 import cookieParser from "cookie-parser";
+import cors from "cors";
+import helmet from "helmet";
 import { legacyCreateProxyMiddleware as createProxyMiddleware } from "http-proxy-middleware";
 import * as OpenApiValidator from "express-openapi-validator";
 
@@ -21,6 +22,8 @@ import log4js from "./utils/hajkLogger.js";
 import { initRoutes } from "./routes.ts";
 import websockets from "./websockets/index.js";
 import detailedRequestLogger from "./middlewares/detailed.request.logger.js";
+import HttpStatusCodes from "./HttpStatusCodes.ts";
+import { RouteError } from "./classes.ts";
 
 const logger = log4js.getLogger("hajk");
 
@@ -152,6 +155,7 @@ class Server {
     // API versions.
     this.exposeOpenAPISpecifications();
 
+    // Add error handler
     this.setupErrorHandlers();
   }
 
@@ -418,24 +422,39 @@ built-it compression by setting the ENABLE_GZIP_COMPRESSION option to "true" in 
   }
 
   private setupErrorHandlers() {
-    this.app.use((req: Request, res: Response) => {
-      res
-        .status(404)
-        .json({ errors: [{ path: req.path, message: "not found" }] });
-    });
-
     this.app.use(
       (
-        err: Error | { errors: Error[] },
-        req: Request,
+        err: Error,
+        _: Request,
         res: Response,
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
         next: NextFunction
       ) => {
-        const errors =
-          "errors" in err ? err.errors : [{ message: err.message }];
-        const statusCode = "status" in err ? (err.status as number) : 500;
-        res.status(statusCode).json({ errors });
+        // Let's generate a unique error ID. This will allow system administrators
+        // to search for the error in the logs, while not exposing any sensitive
+        // data in the response.
+        const errorId = randomUUID();
+
+        if (process.env.NODE_ENV !== "test") {
+          // Log to the default active logger, unless we're in test mode.
+          // Include the error ID for retrieval in the logs.
+          logger.error(`[ERROR HANDLER] ID: ${errorId}\n${err}`);
+        }
+        let status = HttpStatusCodes.BAD_REQUEST;
+        let message = err.message;
+
+        if (err instanceof RouteError) {
+          status = err.status;
+        } else if (err.constructor.name.includes("Prisma")) {
+          // Try to handle Prisma errors separately. It's however difficult to
+          // check instanceof, as there are many different Prisma-related errors
+          // that can occur. Hence, this solution:
+          status = HttpStatusCodes.INTERNAL_SERVER_ERROR;
+          message = "Internal Server Error";
+        }
+
+        // Send error response, include the error ID for reference
+        return res.status(status).json({ error: message, errorId });
       }
     );
   }

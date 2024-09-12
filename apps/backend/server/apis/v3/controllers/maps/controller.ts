@@ -1,41 +1,39 @@
+import HttpStatusCodes from "../../../../common/HttpStatusCodes.ts";
 import MapService from "../../services/map.service.ts";
-import handleStandardResponse from "../../utils/handleStandardResponse.ts";
 
 import type { Request, Response } from "express";
 
 export class Controller {
-  getMaps(req: Request, res: Response) {
-    MapService.getMaps().then((data) => handleStandardResponse(res, data));
+  async getMaps(req: Request, res: Response) {
+    const maps = await MapService.getMaps();
+    return res.status(HttpStatusCodes.OK).json(maps);
   }
 
-  getMapByName(req: Request, res: Response) {
-    MapService.getMapByName(req.params.mapName).then((data) =>
-      handleStandardResponse(res, data)
-    );
+  async getMapByName(req: Request, res: Response) {
+    const mapConfig = await MapService.getMapByName(req.params.mapName);
+    return res.status(HttpStatusCodes.OK).json(mapConfig);
   }
 
-  getGroupsForMap(req: Request, res: Response) {
-    MapService.getGroupsForMap(req.params.mapName).then((data) =>
-      handleStandardResponse(res, data)
-    );
+  async getGroupsForMap(req: Request, res: Response) {
+    const groups = await MapService.getGroupsForMap(req.params.mapName);
+    return res.status(HttpStatusCodes.OK).json(groups);
   }
 
-  getLayersForMap(req: Request, res: Response) {
-    MapService.getLayersForMap(req.params.mapName).then((data) =>
-      handleStandardResponse(res, data)
-    );
+  async getLayersForMap(req: Request, res: Response) {
+    const layers = await MapService.getLayersForMap(req.params.mapName);
+    return res.status(HttpStatusCodes.OK).json(layers);
   }
 
-  getProjectionsForMap(req: Request, res: Response) {
-    MapService.getProjectionsForMap(req.params.mapName).then((data) =>
-      handleStandardResponse(res, data)
+  async getProjectionsForMap(req: Request, res: Response) {
+    const projections = await MapService.getProjectionsForMap(
+      req.params.mapName
     );
+    return res.status(HttpStatusCodes.OK).json(projections);
   }
 
-  getToolsForMap(req: Request, res: Response) {
-    MapService.getToolsForMap(req.params.mapName).then((data) =>
-      handleStandardResponse(res, data)
-    );
+  async getToolsForMap(req: Request, res: Response) {
+    const tools = await MapService.getToolsForMap(req.params.mapName);
+    return res.status(HttpStatusCodes.OK).json(tools);
   }
 }
 export default new Controller();
