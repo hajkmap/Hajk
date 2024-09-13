@@ -22,8 +22,10 @@ import log4js from "./utils/hajkLogger.js";
 import { initRoutes } from "./routes.ts";
 import websockets from "./websockets/index.js";
 import detailedRequestLogger from "./middlewares/detailed.request.logger.js";
+
 import HttpStatusCodes from "./HttpStatusCodes.ts";
 import { RouteError } from "./classes.ts";
+import { HttpError } from "express-openapi-validator/dist/framework/types.js";
 
 const logger = log4js.getLogger("hajk");
 
@@ -156,7 +158,7 @@ class Server {
     this.exposeOpenAPISpecifications();
 
     // Add error handler
-    this.setupErrorHandlers();
+    this.setupErrorHandler();
   }
 
   private setExpressTrustProxy() {
@@ -421,7 +423,12 @@ built-it compression by setting the ENABLE_GZIP_COMPRESSION option to "true" in 
     });
   }
 
-  private setupErrorHandlers() {
+  /**
+   * Sets up the error handler, logs output to the console or file log, depending
+   * on the configuration in .env. Also, ensures that user gets a correct response
+   * with a suitable status code.
+   */
+  private setupErrorHandler() {
     this.app.use(
       (
         err: Error,
@@ -430,29 +437,44 @@ built-it compression by setting the ENABLE_GZIP_COMPRESSION option to "true" in 
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
         next: NextFunction
       ) => {
-        // Let's generate a unique error ID. This will allow system administrators
+        // First, let's generate an unique error ID. This will allow system administrators
         // to search for the error in the logs, while not exposing any sensitive
         // data in the response.
         const errorId = randomUUID();
 
+        // Log to the default active logger, unless we're in test mode.
         if (process.env.NODE_ENV !== "test") {
-          // Log to the default active logger, unless we're in test mode.
           // Include the error ID for retrieval in the logs.
           if (err.stack) {
-            logger.error(`[ERROR HANDLER ${errorId}] STACK:\n${err.stack}`);
+            logger.error(`STACK FOR ${errorId}:\n${err.stack}`);
           } else {
-            logger.error(`[ERROR HANDLER ${errorId}] MESSAGE:\n${err}`);
+            logger.error(`MESSAGE FOR ${errorId}:\n${err}`);
           }
         }
+
+        // Set some default values for the response.
         let status = HttpStatusCodes.BAD_REQUEST;
         let message = err.message;
 
-        if (err instanceof RouteError) {
+        // Now, let's see if the error has some specific status code or
+        // other parameters that would lead us to override the default
+        // response values from the lines above.
+
+        // Let's use the fact that our own RouteError class, as well as all
+        // errors that inherit from HttpError (which is part of OpenApiValidator)
+        // come with a status property. That status is a valid HTTP status code
+        // and we should use it in our response.
+        if (err instanceof RouteError || err instanceof HttpError) {
           status = err.status;
-        } else if (err.constructor.name.includes("Prisma")) {
-          // Try to handle Prisma errors separately. It's however difficult to
-          // check instanceof, as there are many different Prisma-related errors
-          // that can occur. Hence, this solution:
+        }
+        // Prisma errors unfortunately don't extend a common ancestor, so it's
+        // a bit hacky to determine if an error comes from Prisma. But here it goes:
+        else if (err.constructor.name.includes("Prisma")) {
+          // Prisma's error messages are way to detailed for public consumption,
+          // so we just set a generic message in that case. Please note that
+          // the real error message has already got written to the error log,
+          // so the system administrators can retrieve it based on the error ID
+          // sent in the response.
           status = HttpStatusCodes.INTERNAL_SERVER_ERROR;
           message = "Internal Database Server Error";
         }
