@@ -438,7 +438,11 @@ built-it compression by setting the ENABLE_GZIP_COMPRESSION option to "true" in 
         if (process.env.NODE_ENV !== "test") {
           // Log to the default active logger, unless we're in test mode.
           // Include the error ID for retrieval in the logs.
-          logger.error(`[ERROR HANDLER] ID: ${errorId}\n${err}`);
+          if (err.stack) {
+            logger.error(`[ERROR HANDLER ${errorId}] STACK:\n${err.stack}`);
+          } else {
+            logger.error(`[ERROR HANDLER ${errorId}] MESSAGE:\n${err}`);
+          }
         }
         let status = HttpStatusCodes.BAD_REQUEST;
         let message = err.message;
@@ -450,7 +454,7 @@ built-it compression by setting the ENABLE_GZIP_COMPRESSION option to "true" in 
           // check instanceof, as there are many different Prisma-related errors
           // that can occur. Hence, this solution:
           status = HttpStatusCodes.INTERNAL_SERVER_ERROR;
-          message = "Internal Server Error";
+          message = "Internal Database Server Error";
         }
 
         // Send error response, include the error ID for reference

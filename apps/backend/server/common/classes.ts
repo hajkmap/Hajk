@@ -13,16 +13,14 @@ export class RouteError extends Error {
 }
 
 /**
- * If route validation fails.
+ * Validation error due to user input
  */
-export class ValidationErr extends RouteError {
-  public static MSG = 'The follow parameter were missing or invalid "';
-
+export class ValidationError extends RouteError {
   public constructor(paramName: string) {
-    super(HttpStatusCodes.BAD_REQUEST, ValidationErr.GetMsg(paramName));
+    super(HttpStatusCodes.BAD_REQUEST, ValidationError.getMessage(paramName));
   }
 
-  public static GetMsg(param: string) {
-    return ValidationErr.MSG + param + '".';
+  public static getMessage(param: string) {
+    return param;
   }
 }
