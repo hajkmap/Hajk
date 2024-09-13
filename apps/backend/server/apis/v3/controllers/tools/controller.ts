@@ -1,15 +1,22 @@
-import ToolService from "../../services/tool.service.ts";
-import handleStandardResponse from "../../utils/handleStandardResponse.ts";
+import type { Request, Response } from "express";
 
-export class Controller {
-  getTools(req, res) {
-    ToolService.getTools().then((data) => handleStandardResponse(res, data));
+import HttpStatusCodes from "../../../../common/HttpStatusCodes.ts";
+import ToolService from "../../services/tool.service.ts";
+
+class ToolsController {
+  async getTools(_: Request, res: Response) {
+    const tools = await ToolService.getTools();
+    return res.status(HttpStatusCodes.OK).json({ tools });
   }
 
-  getMapsWithTool(req, res) {
-    ToolService.getMapsWithTool(req.params.toolName).then((data) =>
-      handleStandardResponse(res, data)
-    );
+  async getMapsWithTool(req: Request, res: Response) {
+    // This will throw if the tool type is not valid.
+    await ToolService.isToolTypeValid(req.params.toolName);
+
+    // If we got this far, let's see which maps use this tool.
+    const mapsWithTool = await ToolService.getMapsWithTool(req.params.toolName);
+
+    return res.status(HttpStatusCodes.OK).json({ mapsWithTools: mapsWithTool });
   }
 }
-export default new Controller();
+export default new ToolsController();

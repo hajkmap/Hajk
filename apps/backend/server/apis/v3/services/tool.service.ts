@@ -11,31 +11,29 @@ class ToolService {
   }
 
   async getTools() {
-    try {
-      return await prisma.tool.findMany();
-    } catch (error) {
-      return { error };
-    }
+    return await prisma.tool.findMany();
+  }
+
+  async isToolTypeValid(toolType: string) {
+    return await prisma.tool.findFirstOrThrow({ where: { type: toolType } });
   }
 
   async getMapsWithTool(toolName: string) {
-    try {
-      const maps = await prisma.map.findMany({
-        select: { name: true },
-        where: {
-          tools: {
-            some: {
-              tool: {
-                type: toolName,
-              },
+    const maps = await prisma.map.findMany({
+      select: { name: true },
+      where: {
+        tools: {
+          some: {
+            tool: {
+              type: toolName,
             },
           },
         },
-      });
-      return maps.map((m) => m.name);
-    } catch (error) {
-      return { error };
-    }
+      },
+    });
+
+    // Transform the [{name: "map1"}, {name: "map2"}] to ["map1", "map2"]
+    return maps.map((m) => m.name);
   }
 }
 
