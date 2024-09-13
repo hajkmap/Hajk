@@ -16,11 +16,27 @@ export class RouteError extends Error {
  * Validation error due to user input
  */
 export class ValidationError extends RouteError {
-  public constructor(paramName: string) {
-    super(HttpStatusCodes.BAD_REQUEST, ValidationError.getMessage(paramName));
+  public constructor(message: string) {
+    super(HttpStatusCodes.BAD_REQUEST, ValidationError.getMessage(message));
   }
 
   public static getMessage(param: string) {
     return param;
+  }
+}
+
+/**
+ * Validation error due to user input
+ */
+export class HajkError extends RouteError {
+  public hajkCode: string;
+
+  public constructor(
+    status: HttpStatusCodes,
+    message: string,
+    hajkCode: string
+  ) {
+    super(status, message);
+    this.hajkCode = hajkCode;
   }
 }

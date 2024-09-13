@@ -3,7 +3,8 @@ import { LayerType } from "@prisma/client";
 
 import LayerService from "../../services/layer.service.ts";
 import HttpStatusCodes from "../../../../common/HttpStatusCodes.ts";
-import { RouteError, ValidationError } from "../../../../common/classes.ts";
+import { HajkError } from "../../../../common/classes.ts";
+import HajkStatusCodes from "../../../../common/HajkStatusCodes.ts";
 
 class LayersController {
   async getLayers(_: Request, res: Response) {
@@ -14,9 +15,10 @@ class LayersController {
   async getLayerById(req: Request, res: Response) {
     const layer = await LayerService.getLayerById(req.params.id);
     if (layer === null) {
-      throw new RouteError(
+      throw new HajkError(
         HttpStatusCodes.NOT_FOUND,
-        `No layer with id: ${req.params.id} could be found.`
+        `No layer with id: ${req.params.id} could be found.`,
+        HajkStatusCodes.UNKNOWN_LAYER_ID
       );
     }
 
@@ -32,10 +34,12 @@ class LayersController {
   async getLayersByType(req: Request, res: Response) {
     // Let's ensure that the provided layer type is valid.
     if (!Object.values(LayerType).toString().includes(req.params.type)) {
-      throw new ValidationError(
+      throw new HajkError(
+        HttpStatusCodes.NOT_FOUND,
         `Unsupported layer type provided. Supported types are: ${Object.values(
           LayerType
-        )}.`
+        )}.`,
+        HajkStatusCodes.UNKNOWN_LAYER_TYPE
       );
     }
 

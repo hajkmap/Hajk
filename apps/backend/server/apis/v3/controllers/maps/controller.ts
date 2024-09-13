@@ -1,4 +1,5 @@
-import { RouteError } from "../../../../common/classes.ts";
+import { HajkError } from "../../../../common/classes.ts";
+import HajkStatusCodes from "../../../../common/HajkStatusCodes.ts";
 import HttpStatusCodes from "../../../../common/HttpStatusCodes.ts";
 import MapService from "../../services/map.service.ts";
 
@@ -16,9 +17,10 @@ class MapsController {
     // If map is null, it's because the supplied map name doesn't exist.
     // Let's throw an error.
     if (mapConfig === null) {
-      throw new RouteError(
+      throw new HajkError(
         HttpStatusCodes.NOT_FOUND,
-        `"${req.params.mapName}" is not a valid map`
+        `"${req.params.mapName}" is not a valid map`,
+        HajkStatusCodes.UNKNOWN_MAP_NAME
       );
     }
 

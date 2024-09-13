@@ -24,7 +24,7 @@ import websockets from "./websockets/index.js";
 import detailedRequestLogger from "./middlewares/detailed.request.logger.js";
 
 import HttpStatusCodes from "./HttpStatusCodes.ts";
-import { RouteError } from "./classes.ts";
+import { HajkError, RouteError } from "./classes.ts";
 import { HttpError } from "express-openapi-validator/dist/framework/types.js";
 import { isInstanceOfPrismaError } from "./utils/isInstanceOfPrismaError.ts";
 
@@ -451,6 +451,7 @@ built-it compression by setting the ENABLE_GZIP_COMPRESSION option to "true" in 
         // Set some default values for the response.
         let status = HttpStatusCodes.BAD_REQUEST;
         let message = err.message;
+        let hajkCode: string | null = null;
 
         // Now, let's see if the error has some specific status code or
         // other parameters that would lead us to override the default
@@ -467,6 +468,12 @@ built-it compression by setting the ENABLE_GZIP_COMPRESSION option to "true" in 
           status = HttpStatusCodes.INTERNAL_SERVER_ERROR;
           message = "Internal Database Server Error";
         }
+        // Hajk errors come with a special property: hajkCode. Let's assign it so it
+        // can be sent in the response later on.
+        else if (err instanceof HajkError) {
+          hajkCode = err.hajkCode;
+          status = err.status;
+        }
         // Let's use the fact that our own RouteError class, as well as all
         // errors that inherit from HttpError (which is part of OpenApiValidator)
         // come with a status property. That status is a valid HTTP status code
@@ -476,7 +483,11 @@ built-it compression by setting the ENABLE_GZIP_COMPRESSION option to "true" in 
         }
 
         // Send error response, include the error ID for reference
-        return res.status(status).json({ error: message, errorId });
+        return res.status(status).json({
+          errorId,
+          error: message,
+          ...(hajkCode && { hajkCode }),
+        });
       }
     );
   }
