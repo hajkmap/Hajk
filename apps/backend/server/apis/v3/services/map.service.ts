@@ -1,8 +1,6 @@
 import { PrismaClient } from "@prisma/client";
 
 import log4js from "log4js";
-import { RouteError } from "../../../common/classes.ts";
-import HttpStatusCodes from "../../../common/HttpStatusCodes.ts";
 
 const logger = log4js.getLogger("service.v3.map");
 const prisma = new PrismaClient();
@@ -12,10 +10,11 @@ class MapService {
     logger.debug("Initiating Map Service");
   }
 
-  async getMaps() {
+  async getMapNames() {
     const maps = await prisma.map.findMany({ select: { name: true } });
+
     // Transform the [{name: "map1"}, {name: "map2"}] to ["map1", "map2"]
-    return { maps: maps.map((m) => m.name) };
+    return maps.map((m) => m.name);
   }
 
   async getMapByName(mapName: string) {
@@ -29,16 +28,6 @@ class MapService {
       },
     });
 
-    // If map is null, it's because the supplied map name doesn't exist.
-    // Let's throw an error.
-    if (map === null) {
-      throw new RouteError(
-        HttpStatusCodes.BAD_REQUEST,
-        `"${mapName}" is not a valid map`
-      );
-    }
-
-    // If we got this far, let's return the map's configuration
     return map;
   }
 
@@ -47,7 +36,7 @@ class MapService {
       where: { maps: { some: { name: mapName } } },
     });
 
-    return { groups };
+    return groups;
   }
 
   async getLayersForMap(mapName: string) {
@@ -60,7 +49,7 @@ class MapService {
       },
     });
 
-    return { layers };
+    return layers;
   }
 
   async getProjectionsForMap(mapName: string) {
@@ -68,7 +57,7 @@ class MapService {
       where: { maps: { some: { name: mapName } } },
     });
 
-    return { projections };
+    return projections;
   }
 
   async getToolsForMap(mapName: string) {
@@ -84,7 +73,7 @@ class MapService {
       },
     });
 
-    return { tools };
+    return tools;
   }
 }
 

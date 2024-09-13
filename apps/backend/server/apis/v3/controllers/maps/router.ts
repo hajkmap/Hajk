@@ -1,11 +1,11 @@
 import * as express from "express";
-import controller from "./controller.ts";
+import MapsController from "./controller.ts";
 
 export default express
   .Router()
-  .get("/", controller.getMaps)
-  .get("/:mapName", controller.getMapByName)
-  .get("/:mapName/groups", controller.getGroupsForMap)
-  .get("/:mapName/layers", controller.getLayersForMap)
-  .get("/:mapName/projections", controller.getProjectionsForMap)
-  .get("/:mapName/tools", controller.getToolsForMap);
+  .get("/", MapsController.getMaps)
+  .get("/:mapName", MapsController.getMapByName)
+  .get("/:mapName/groups", MapsController.getGroupsForMap)
+  .get("/:mapName/layers", MapsController.getLayersForMap)
+  .get("/:mapName/projections", MapsController.getProjectionsForMap)
+  .get("/:mapName/tools", MapsController.getToolsForMap);
