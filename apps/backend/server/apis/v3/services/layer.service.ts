@@ -1,5 +1,5 @@
-import { PrismaClient } from "@prisma/client";
 import { LayerType } from "@prisma/client";
+import { PrismaClient } from "@prisma/client";
 
 import log4js from "log4js";
 
@@ -12,50 +12,25 @@ class LayerService {
   }
 
   async getLayers() {
-    try {
-      return await prisma.layer.findMany();
-    } catch (error) {
-      return { error };
-    }
+    return await prisma.layer.findMany();
   }
 
   async getLayerById(id: string) {
-    try {
-      const layer = await prisma.layer.findUnique({
-        where: { id },
-      });
-      if (!layer) {
-        throw new Error(`No layer with id: ${id} could be found.`);
-      }
-      return layer;
-    } catch (error) {
-      return { error };
-    }
+    const layer = await prisma.layer.findUnique({
+      where: { id },
+    });
+
+    return layer;
   }
 
   async getLayerTypes() {
-    try {
-      return Object.values(LayerType);
-    } catch (error) {
-      return { error };
-    }
+    return Object.values(LayerType);
   }
 
   async getLayersByType(type: LayerType) {
-    try {
-      if (!Object.values(LayerType).includes(type)) {
-        throw new Error(
-          `Unsupported layer type provided. Supported types are: ${Object.values(
-            LayerType
-          )}`
-        );
-      }
-      return await prisma.layer.findMany({
-        where: { type: type },
-      });
-    } catch (error) {
-      return { error };
-    }
+    return await prisma.layer.findMany({
+      where: { type: type },
+    });
   }
 }
 
