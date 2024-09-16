@@ -25,5 +25,5 @@ paths:
       responses:
         200:
           description: Return the map config
-        5XX:
-          description: Example not found
+        404:
+          description: Requested map was not found
