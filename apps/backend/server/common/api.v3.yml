@@ -27,3 +27,72 @@ paths:
           description: Return the map config
         404:
           description: Requested map was not found
+  /search/autocomplete:
+    post:
+      tags:
+        - Client-accessible
+      description: todo
+      responses:
+        200:
+          description: TODO
+          content: {}
+      parameters:
+        - in: header
+          name: X-Control-Header
+          description: User name that will be supplied to AD
+          schema:
+            type: string
+          required: false
+      requestBody:
+        description: Json with table data
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SearchAutocompleteBody"
+components:
+  schemas:
+    SearchAutocompleteBody:
+      type: object
+      properties:
+        queryString:
+          type: string
+          description: "The string to search for"
+          example: "stoora"
+        pgTrgmSimilarityThreshold:
+          type: number
+          format: float
+          description: "Threshold for pg_trgm similarity"
+          example: 0.2
+        limitPerSource:
+          type: integer
+          description: "Limit per source"
+          example: 5
+        totalLimit:
+          type: integer
+          description: "Total limit"
+          example: 20
+        sources:
+          type: array
+          items:
+            type: object
+            properties:
+              table:
+                type: string
+                description: "Table name"
+                example: "adresspunkter"
+              column:
+                type: string
+                description: "Column name"
+                example: "fastighet"
+          example:
+            - table: "adresspunkter"
+              column: "fastighet"
+            - table: "adresspunkter"
+              column: "kommundel"
+            - table: "adresspunkter"
+              column: "beladress"
+      required:
+        - pgTrgmSimilarityThreshold
+        - limitPerSource
+        - totalLimit
+        - sources

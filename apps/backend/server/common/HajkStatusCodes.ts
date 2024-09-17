@@ -28,6 +28,13 @@ enum HajkStatusCodes {
    * types are defined by the enum LayerType.
    */
   UNKNOWN_LAYER_TYPE = "CF001",
+
+  SEARCH_SERVICE_NOT_AVAILABLE = "CF002",
+
+  /**
+   * The request body is invalid, e.g. lacks some required fields.
+   */
+  INVALID_REQUEST_BODY = "RQ001",
 }
 
 export default HajkStatusCodes;
