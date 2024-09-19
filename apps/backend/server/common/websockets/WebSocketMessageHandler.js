@@ -1,3 +1,8 @@
+// This shouldn't probably be handled here, but these imports
+// are just for the sake of the example.
+import layerService from "../../apis/v3/services/layer.service.ts";
+import mapService from "../../apis/v3/services/map.service.ts";
+
 class WebSocketMessageHandler {
   // This Map holds valid message type values, i.e. those
   // message types that we can handle, and the corresponding
@@ -28,14 +33,14 @@ class WebSocketMessageHandler {
   // And here are our message handlers that actually get the job done.
   // This could be further restructured, logic can be lifted and implemented
   // in classes outside this file, etc. This is just a stub.
-  // eslint-disable-next-line no-unused-vars
-  #handleGetMaps(ws, m) {
-    ws.send("Here are some nice maps…");
+  async #handleGetMaps(ws, m) {
+    const maps = await mapService.getMapNames();
+    ws.send(JSON.stringify(maps));
   }
 
-  // eslint-disable-next-line no-unused-vars
-  #handleGetLayers(ws, m) {
-    ws.send("Here are some good looking layers…");
+  async #handleGetLayers(ws, m) {
+    const l = await layerService.getLayers();
+    ws.send(JSON.stringify(l));
   }
 }
 

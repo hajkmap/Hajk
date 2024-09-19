@@ -1,5 +1,5 @@
 import crypto from "crypto";
-import WebSocket from "ws";
+import { WebSocketServer } from "ws";
 import queryString from "query-string";
 import log4js from "../utils/hajkLogger.js";
 import WebSocketMessageHandler from "./WebSocketMessageHandler.js";
@@ -20,25 +20,25 @@ export default async (expressServer) => {
 
   logger.trace("Initiating WebSockets");
 
-  const websocketServer = new WebSocket.Server({
+  const wss = new WebSocketServer({
     noServer: true, // we don't want the WebSocket constructor to create an additional HTTP - we're already in Express!
-    path: "/api/v2/websockets", // Path that we'll listen on for upgrade requests
+    path: "/api/v3/websockets", // Path that we'll listen on for upgrade requests
   });
 
   // Upgrade request event handler
   expressServer.on("upgrade", (request, socket, head) => {
     logger.trace(`Upgrade to WebSockets initiated by call to "${request.url}"`);
-    websocketServer.handleUpgrade(request, socket, head, (websocket) => {
-      websocketServer.emit("connection", websocket, request);
+    wss.handleUpgrade(request, socket, head, (websocket) => {
+      wss.emit("connection", websocket, request);
     });
   });
 
   // Let's setup a broadcast channel, just for fun. Any and all
   // connected clients will get the same message at the same time.
-  broadcastToClients(websocketServer.clients);
+  broadcastToClients(wss.clients);
 
   // Handler for established socket connection
-  websocketServer.on(
+  wss.on(
     "connection",
     function connection(websocketConnection, connectionRequest) {
       // When the connection is successfully upgraded we end up here.
@@ -121,5 +121,5 @@ export default async (expressServer) => {
     }
   );
 
-  return websocketServer;
+  return wss;
 };

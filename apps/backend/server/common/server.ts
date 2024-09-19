@@ -5,9 +5,12 @@ import express, {
   type Response,
 } from "express";
 
+import { type WebSocketServer } from "ws";
+
 import { randomUUID } from "crypto";
 import fs from "fs";
 import * as path from "path";
+import { createServer, type Server as NodeServerType } from "http";
 import { fileURLToPath } from "url";
 
 import compression from "compression";
@@ -34,7 +37,9 @@ const logger = log4js.getLogger("hajk");
 const ALLOWED_API_VERSIONS = [2, 3];
 
 class Server {
-  public app: Application;
+  private app: Application;
+  private server: NodeServerType;
+  private wss: WebSocketServer | null = null;
   private apiVersions: number[];
 
   constructor() {
@@ -42,6 +47,7 @@ class Server {
 
     // First things first...
     this.app = express();
+    this.server = createServer(this.app);
 
     // Ensure that runtime requirements are met
     this.checkRuntimeVersion();
@@ -603,20 +609,33 @@ built-it compression by setting the ENABLE_GZIP_COMPRESSION option to "true" in 
     }
   }
 
-  public listen() {
-    const port: number = Number.parseInt(process.env.PORT || "3000");
-    // Startup handler
-    const welcome = (p: number) => () =>
-      logger.info(
-        `Server startup completed. Some services may still be initiating. Launched on port ${p}. (http://localhost:${p})`
-      );
-
-    // Shutdown handler
+  private setupGracefulShutdownHandler() {
     const shutdown = (signal: string, value: number) => {
+      const shutdownExpressServer = () => {
+        this.server.close(() => {
+          logger.info(`Server stopped by ${signal} with value ${value}.`);
+
+          // Finally, ensure that NodeJS process exists
+          process.exit(0);
+        });
+      };
       logger.info("Shutdown requested…");
-      server.close(() => {
-        logger.info(`Server stopped by ${signal} with value ${value}.`);
-      });
+
+      // If we have set up a WebSocketServer...
+      if (this.wss !== null) {
+        // ...let's close it first, so that we don't accept any
+        // incoming upgrade connections during the shutdown phase.
+        this.wss.close(() => {
+          logger.info(`Websockets closed by ${signal} with value ${value}.`);
+
+          // Once WSS is down, let's close the HTTP server
+          shutdownExpressServer();
+        });
+      }
+      // Else, if we didn't activate WSS, let's close the HTTP server directly
+      else {
+        shutdownExpressServer();
+      }
     };
 
     // Take care of graceful shutdown by defining signals that we want to handle.
@@ -631,15 +650,26 @@ built-it compression by setting the ENABLE_GZIP_COMPRESSION option to "true" in 
     Object.keys(signals).forEach((signal) => {
       process.on(signal, () => shutdown(signal, signals[signal]));
     });
+  }
 
-    // Let's setup the server and start listening.
-    // const server = http.createServer(this.app).listen(port, welcome(port));
-    const server = this.app.listen(port, welcome(port));
+  public async listen() {
+    // First start the WSS, if configured to do so
+    if (process.env.ENABLE_WEBSOCKETS?.toLowerCase() === "true") {
+      this.wss = await websockets(this.server);
+    }
 
-    // For WS support we must also supply the server to the WebSocket component.
-    // eslint-disable-next-line
-    process.env.ENABLE_WEBSOCKETS?.toLowerCase() === "true" &&
-      websockets(server);
+    // Figure out which port the server should listen on
+    const port: number = Number.parseInt(process.env.PORT || "3000");
+
+    // Graceful shutdown handler
+    this.setupGracefulShutdownHandler();
+
+    // Let's start listening
+    this.server.listen(port, () =>
+      logger.info(
+        `Server launched on port ${port}. Some services may still be initiating. (http://localhost:${port})`
+      )
+    );
   }
 }
 
