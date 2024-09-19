@@ -1,21 +1,30 @@
+import { type Server } from "http";
 import crypto from "crypto";
-import { WebSocketServer } from "ws";
+import { type WebSocket, WebSocketServer } from "ws";
 import queryString from "query-string";
 import log4js from "../utils/hajkLogger.js";
-import WebSocketMessageHandler from "./WebSocketMessageHandler.js";
+import WebSocketMessageHandler from "./WebSocketMessageHandler.ts";
+
+export interface CustomWebSocket extends WebSocket {
+  uuid: string;
+}
+
+export interface HajkSocketMessage {
+  type: string;
+}
 
 // Just a small example of how we can handle sending synchronized
 // messages to all connected clients.
-function broadcastToClients(clients) {
+function broadcastToClients(clients: Set<WebSocket>) {
   let broadcastId = 0;
   setInterval(() => {
-    for (let c of clients.values()) {
+    for (const c of clients.values()) {
       c.send(`Broadcast message number ${++broadcastId}`);
     }
   }, 3000);
 }
 
-export default async (expressServer) => {
+export default async (expressServer: Server) => {
   const logger = log4js.getLogger("websockets");
 
   logger.trace("Initiating WebSockets");
@@ -40,7 +49,10 @@ export default async (expressServer) => {
   // Handler for established socket connection
   wss.on(
     "connection",
-    function connection(websocketConnection, connectionRequest) {
+    function connection(
+      websocketConnection: CustomWebSocket,
+      connectionRequest
+    ) {
       // When the connection is successfully upgraded we end up here.
       // This is our chance to setup listeners (e.g. "what should we do
       // when a message is received?") and optionally send messages back
@@ -55,7 +67,7 @@ export default async (expressServer) => {
 
       // We can use 'connectionRequest' to read additional options, such
       // as query parameters and request path:
-      const [path, params] = connectionRequest?.url?.split("?") || undefined;
+      const [path, params] = connectionRequest?.url?.split("?") || [];
       const connectionParams = queryString.parse(params);
 
       logger.trace(
@@ -83,19 +95,21 @@ export default async (expressServer) => {
       // To handle them, we need this listener:
       websocketConnection.on("message", (message) => {
         try {
-          const parsedMessage = JSON.parse(message);
-          logger.trace(
-            `Got message from ${websocketConnection.uuid}: "${parsedMessage}"`
+          const parsedMessage: HajkSocketMessage = JSON.parse(
+            message.toString()
           );
+          logger.trace(`Incoming message from ${websocketConnection.uuid}. `);
 
           // First let's see if there's a 'type' property on the message…
           if (!parsedMessage.type) {
             // … and abort if there isn't.
-            websocketConnection.send("'type' not provided. Aborting.");
+            const msg = `Message lacks the "type" property. Will not process further. `;
+            logger.trace(msg);
+            websocketConnection.send(msg);
             return;
           }
 
-          // If we got here, it looks like we have a 'type' property.
+          // If we got here, it looks like we have a "type" property.
           // Let's dispatch an event, providing our webSocketConnection, so
           // that the handler can send a response.
           // The WebSocketMessageHandler will take care of the details!
@@ -105,7 +119,7 @@ export default async (expressServer) => {
           );
         } catch (error) {
           websocketConnection.send(
-            `Couldn't parse message. Error: ${error.message}`
+            `Couldn't parse message. Error: ${(error as Error).message}`
           );
 
           return;

@@ -23,7 +23,7 @@ import * as OpenApiValidator from "express-openapi-validator";
 import { getCLFDate } from "./utils/getClfDate.ts";
 import log4js from "./utils/hajkLogger.js";
 import { initRoutes } from "./routes.ts";
-import websockets from "./websockets/index.js";
+import websockets from "./websockets/index.ts";
 import detailedRequestLogger from "./middlewares/detailed.request.logger.js";
 
 import HttpStatusCodes from "./HttpStatusCodes.ts";
