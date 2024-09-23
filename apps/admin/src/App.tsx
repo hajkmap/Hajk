@@ -14,7 +14,15 @@ function App() {
       <div>
         <Button
           onClick={() => setCount((count) => count + 1)}
-          sx={{ backgroundColor: (theme) => theme.palette.primary.main }}
+          color="primary"
+          variant="contained"
+        >
+          count is {count}
+        </Button>
+        <Button
+          onClick={() => setCount((count) => count + 1)}
+          color="secondary"
+          variant="contained"
         >
           count is {count}
         </Button>
