@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 
 import "./App.css";
 import "./i18n";
+import { Button } from "@mui/material";
 
 function App() {
   const [count, setCount] = useState(0);
@@ -11,9 +12,12 @@ function App() {
   return (
     <>
       <div>
-        <button onClick={() => setCount((count) => count + 1)}>
+        <Button
+          onClick={() => setCount((count) => count + 1)}
+          sx={{ backgroundColor: (theme) => theme.palette.primary.main }}
+        >
           count is {count}
-        </button>
+        </Button>
         <p>{t("common.hello")}</p>
       </div>
     </>
