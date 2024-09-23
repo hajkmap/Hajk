@@ -9,12 +9,17 @@ const resources = {
   sv: sv,
 };
 
-i18n.use(initReactI18next).init({
-  resources,
-  lng: "sv",
-  interpolation: {
-    escapeValue: false,
-  },
-});
+i18n
+  .use(initReactI18next)
+  .init({
+    resources,
+    lng: "sv",
+    interpolation: {
+      escapeValue: false,
+    },
+  })
+  .catch((error) => {
+    console.error(error);
+  });
 
 export default i18n;
