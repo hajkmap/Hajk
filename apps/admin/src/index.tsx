@@ -1,8 +1,10 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 
 import ThemeRegistry from "./style/theme-registry.tsx";
+import { queryConfig } from "./lib/react-query.ts";
 
 import "./style/index.css";
 import "./i18n/i18n.ts";
@@ -14,6 +16,10 @@ import ErrorPage from "./pages/error/index.tsx";
 import LayersPage from "./pages/layers/index.tsx";
 import MapsPage from "./pages/maps/index.tsx";
 import ToolsPage from "./pages/tools/index.tsx";
+
+const queryClient = new QueryClient({
+  defaultOptions: queryConfig,
+});
 
 const router = createBrowserRouter([
   {
@@ -44,7 +50,9 @@ const router = createBrowserRouter([
 createRoot(document.getElementById("root")!).render(
   <ThemeRegistry>
     <StrictMode>
-      <RouterProvider router={router} />
+      <QueryClientProvider client={queryClient}>
+        <RouterProvider router={router} />
+      </QueryClientProvider>
     </StrictMode>
   </ThemeRegistry>
 );
