@@ -13,12 +13,17 @@ export default function Header(props: Props) {
   const { t } = useTranslation();
 
   return (
-    <Grid container size={12} alignItems="center" sx={{ width: "100%", p: 2 }}>
+    <Grid
+      container
+      size={12}
+      alignItems="center"
+      sx={{ width: "100%", pl: 1, pr: 3 }}
+    >
       <Grid size={9}>
         <Link to="/">
           <img
-            style={{ height: "auto" }}
-            src="/beautiful-logo.png"
+            style={{ height: "auto", width: "150px" }}
+            src="/logo.png"
             alt={t("common.clickableLogo")}
           />
         </Link>
