@@ -19,7 +19,8 @@
     "dev": "node --env-file=.env --watch-path=./server --experimental-transform-types server/index.ts",
     "dev:unwatch": "node --env-file=.env --experimental-transform-types server/index.ts",
     "dev:debug": "node --env-file=.env --inspect --watch-path=./server --experimental-transform-types server/index.ts",
-    "reset:db": "prisma db push --force-reset && prisma db seed"
+    "reset:db": "prisma db push --force-reset && prisma db seed",
+    "lint": "eslint ./server"
   },
   "prisma": {
     "seed": "node prisma/seed.js"
@@ -50,6 +51,7 @@
     "@types/node": "^22.5.5",
     "@types/ws": "^8.5.12",
     "eslint": "^9.10.0",
+    "eslint-plugin-check-file": "^2.8.0",
     "globals": "^15.9.0",
     "prettier": "^3.3.3",
     "prisma": "^5.19.1",
