@@ -1,0 +1,11 @@
+{
+  "translation": {
+    "common.hello": "Hello",
+    "common.goodbye": "Goodbye",
+    "common.home": "Home",
+    "common.layers": "Layers",
+    "common.maps": "Maps",
+    "common.tools": "Tools",
+    "common.clickableLogo": "Clickable Logo"
+  }
+}

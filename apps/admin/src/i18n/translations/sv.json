@@ -1,0 +1,11 @@
+{
+  "translation": {
+    "common.hello": "Hej",
+    "common.goodbye": "Hej då",
+    "common.home": "Hem",
+    "common.layers": "Lager",
+    "common.maps": "Kartor",
+    "common.tools": "Verktyg",
+    "common.clickableLogo": "Klickbar logga"
+  }
+}
