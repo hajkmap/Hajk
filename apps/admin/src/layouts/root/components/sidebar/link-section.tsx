@@ -1,28 +1,45 @@
 import Grid from "@mui/material/Grid2";
 import { Box, List, Typography } from "@mui/material";
+import HomeIcon from "@mui/icons-material/Home";
+import MapIcon from "@mui/icons-material/Map";
+import LayersIcon from "@mui/icons-material/Layers";
+import HandymanIcon from "@mui/icons-material/Handyman";
 import { NavLink } from "react-router-dom";
 import { useTranslation } from "react-i18next";
+import { ReactNode } from "react";
 
 const LINKS = [
   {
     to: "/",
     title: "common.home",
+    icon: <HomeIcon />,
   },
   {
     to: "/maps",
     title: "common.maps",
+    icon: <MapIcon />,
   },
   {
     to: "/layers",
     title: "common.layers",
+    icon: <LayersIcon />,
   },
   {
     to: "/tools",
     title: "common.tools",
+    icon: <HandymanIcon />,
   },
 ];
 
-const CustomLink = ({ active, label }: { active: boolean; label: string }) => {
+const CustomLink = ({
+  active,
+  label,
+  icon,
+}: {
+  active: boolean;
+  label: string;
+  icon: ReactNode;
+}) => {
   const { t } = useTranslation();
 
   return (
@@ -47,6 +64,7 @@ const CustomLink = ({ active, label }: { active: boolean; label: string }) => {
         }}
       >
         <Grid container size={11} alignContent="center">
+          {icon}
           <Typography sx={{ pl: 1, textDecoration: "none", color: "inherit" }}>
             {t(label)}
           </Typography>
@@ -71,7 +89,11 @@ export default function LinkSection() {
             style={{ textDecoration: "none", color: "inherit" }}
           >
             {({ isActive }) => (
-              <CustomLink active={isActive} label={link.title} />
+              <CustomLink
+                active={isActive}
+                label={link.title}
+                icon={link.icon}
+              />
             )}
           </NavLink>
         );
