@@ -406,19 +406,6 @@ class Window extends React.PureComponent {
   bringToFront() {
     this.props.globalObserver.publish("handleBlur");
 
-    const headerElement = document.getElementById("header");
-
-    if (headerElement) {
-      // Add header element to document.windows if it's not already there
-      if (!document.windows.some((w) => w.id === "header")) {
-        document.windows.push({
-          id: "header",
-          element: headerElement,
-          getSelfElement: () => headerElement,
-        });
-      }
-    }
-
     document.windows
       .sort((a, b) => (a === this ? 1 : b === this ? -1 : 0))
       .forEach((w, i) => {
@@ -508,9 +495,6 @@ class Window extends React.PureComponent {
         }}
         style={{
           display: open ? "block" : "none",
-        }}
-        onDragStart={(e, d) => {
-          this.props.globalObserver.publish("handleBlur");
         }}
         onDragStop={(e, d) => {
           const rect = this.rnd.getSelfElement().getClientRects()[0];
