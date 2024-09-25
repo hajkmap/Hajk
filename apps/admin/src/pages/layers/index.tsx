@@ -2,10 +2,16 @@ import Grid from "@mui/material/Grid2";
 import { List, ListItem, Paper, Typography } from "@mui/material";
 import { useTranslation } from "react-i18next";
 import { useLayers } from "../../api/layers";
+import { useConfig } from "../../hooks/use-config";
 
 export default function LayersPage() {
   const { t } = useTranslation();
   const { data: layers } = useLayers();
+
+  const { config, loading, loadError } = useConfig();
+  console.log(
+    `apiBaseUrl: ${config?.apiBaseUrl}, config loading: ${loading}, config load error: ${loadError}`
+  );
 
   return (
     <Grid size={12}>
