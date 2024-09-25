@@ -4,13 +4,13 @@ import log4js from "log4js";
 // Grab a logger
 const logger = log4js.getLogger("proxy.fmeServer.v3");
 
-export default function fmeServerProxy(err, req, res, next) {
+export default function fmeServerProxy() {
   return createProxyMiddleware({
     target: process.env.FME_SERVER_BASE_URL,
     logLevel: "silent", // We don't care about logLevels[process.env.LOG_LEVEL] in this case as we log success and errors ourselves
     changeOrigin: true,
     secure: process.env.FME_SERVER_SECURE === "true", // should SSL certs be verified?
-    onProxyReq: (proxyReq, req, res) => {
+    onProxyReq: (proxyReq) => {
       // We have to add an authorization header to the request
       proxyReq.setHeader(
         "Authorization",
@@ -29,7 +29,7 @@ export default function fmeServerProxy(err, req, res, next) {
       logger.debug(`${req.method} ${originalPath} ~> ${path}`);
       return path;
     },
-    onError: (err, req, res) => {
+    onError: (err, _req, res) => {
       if (err) {
         logger.error(err);
         res.status(500).send("Request failed while proxying to FME-server.");

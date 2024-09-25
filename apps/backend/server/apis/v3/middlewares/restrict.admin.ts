@@ -1,9 +1,15 @@
 import log4js from "log4js";
 import ad from "../services/activedirectory.service.ts";
+import type { NextFunction } from "http-proxy-middleware/dist/types.js";
+import type { Request, Response } from "express";
 
 const logger = log4js.getLogger("router.v3");
 
-export default async function restrictAdmin(req, res, next) {
+export default async function restrictAdmin(
+  req: Request,
+  res: Response,
+  next: NextFunction
+) {
   logger.trace("Attempt to access admin API methods");
 
   // If AD lookup isn't active, there's no way for us to find
@@ -18,7 +24,7 @@ export default async function restrictAdmin(req, res, next) {
   // Looks like AD auth is active. But before we can see if current user
   // is authorized to do admin stuff, we must see which group is
   // specified as admin group - if none is set, we cannot continue!
-  let adminGroups = process.env.RESTRICT_ADMIN_ACCESS_TO_AD_GROUPS;
+  const adminGroups = process.env.RESTRICT_ADMIN_ACCESS_TO_AD_GROUPS;
   if (adminGroups === undefined || adminGroups.trim().length === 0) {
     logger.error(
       "Cannot verify admin access because no admin group is specified in config. Make sure that RESTRICT_ADMIN_ACCESS_TO_AD_GROUPS is set in .env."
@@ -38,11 +44,8 @@ export default async function restrictAdmin(req, res, next) {
     user
   );
 
-  // Convert comma-separated list of allowed groups to an array
-  adminGroups = adminGroups.split(",");
-
   // Check if user is a member in at least one of the specified admins AD groups
-  for await (let group of adminGroups) {
+  for await (const group of adminGroups.split(",")) {
     const allowed = await ad.isUserMemberOf(user, group);
     if (allowed === true) {
       logger.trace(

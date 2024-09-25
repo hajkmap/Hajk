@@ -1,24 +1,32 @@
 import log4js from "log4js";
 import ad from "../services/activedirectory.service.ts";
+import type { NextFunction, Request, Response } from "express";
 
 const logger = log4js.getLogger("hajk.static.restrict.v3");
+
 /**
- * @summary Determine if current user is member in any of the required groups in order to access a given path.
+ * Middleware to restrict access to static content based on user's AD group membership.
  *
- * @description Given the req.baseUrl, see if there's a corresponding setting in .env.
+ * @param {Request} req - The Express request object.
+ * @param {Response} res - The Express response object.
+ * @param {NextFunction} next - The Express next middleware function.
+ * @returns {Promise<void>} A promise that resolves when the middleware completes.
+ *
+ * @description
+ * This middleware checks if the current user is a member of any of the required groups
+ * to access a given path. It uses the req.baseUrl to find a corresponding setting in .env.
  * The setting for baseUrl "/foo-bar" should be named "EXPOSE_AND_RESTRICT_STATIC_FOO_BAR".
- * Split the value of that key to an array and check if the current user is member
- * in any of those groups. As soon as a match is found, grant access and quit the loop. If the loop
- * is done and no match could be found, it means that user isn't member in any
- * of the required groups and lacks permission to the requested path.
+ * It splits the value of that key to an array and checks if the current user is a member
+ * of any of those groups. Access is granted as soon as a match is found. If no match is found,
+ * it means the user isn't a member of any required groups and lacks permission to access the requested path.
  *
- * @export
- * @param {*} req
- * @param {*} res
- * @param {*} next
- * @returns
+ * @throws {403} Forbidden - If the user is not a member of any required groups.
  */
-export default async function restrictStatic(req, res, next) {
+export default async function restrictStatic(
+  req: Request,
+  res: Response,
+  next: NextFunction
+) {
   // If AD lookup isn't active, there's no way for us to find
   // out if access should be granted.
   if (process.env.AD_LOOKUP_ACTIVE !== "true") {
@@ -50,19 +58,21 @@ export default async function restrictStatic(req, res, next) {
     res.locals.authUser
   );
 
-  for await (let group of restrictedToGroups) {
-    // Check if current user is member of the admins AD group
-    const allowed = await ad.isUserMemberOf(user, group);
-    if (allowed === true) {
-      logger.trace(
-        "'%s' is member of '%s' which gives access to '%s'",
-        user,
-        group,
-        req.baseUrl
-      );
+  if (restrictedToGroups) {
+    for await (const group of restrictedToGroups) {
+      // Check if current user is member of the admins AD group
+      const allowed = await ad.isUserMemberOf(user, group);
+      if (allowed === true) {
+        logger.trace(
+          "'%s' is member of '%s' which gives access to '%s'",
+          user,
+          group,
+          req.baseUrl
+        );
 
-      // If access is granted there's no reason to continue the loop - just return.
-      return next();
+        // If access is granted there's no reason to continue the loop - just return.
+        return next();
+      }
     }
   }
 
