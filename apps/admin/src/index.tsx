@@ -16,6 +16,7 @@ import ErrorPage from "./pages/error/index.tsx";
 import LayersPage from "./pages/layers/index.tsx";
 import MapsPage from "./pages/maps/index.tsx";
 import ToolsPage from "./pages/tools/index.tsx";
+import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 
 const queryClient = new QueryClient({
   defaultOptions: queryConfig,
@@ -51,6 +52,7 @@ createRoot(document.getElementById("root")!).render(
   <ThemeRegistry>
     <StrictMode>
       <QueryClientProvider client={queryClient}>
+        <ReactQueryDevtools />
         <RouterProvider router={router} />
       </QueryClientProvider>
     </StrictMode>
