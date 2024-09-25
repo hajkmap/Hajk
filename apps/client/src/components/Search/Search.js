@@ -119,6 +119,8 @@ class Search extends React.PureComponent {
     this.initMapViewModel();
     this.initExportHandlers();
     this.bindSubscriptions();
+    this.headerHasFocus = props.headerHasFocus;
+    this.handleHeaderFocus = props.handleHeaderFocus;
   }
 
   initMapViewModel = () => {
@@ -1087,6 +1089,8 @@ class Search extends React.PureComponent {
           getArrayWithSearchWords={this.getArrayWithSearchWords}
           failedWFSFetchMessage={failedWFSFetchMessage}
           mapViewModel={this.mapViewModel}
+          headerHasFocus={this.headerHasFocus}
+          handleHeaderFocus={this.handleHeaderFocus}
           {...this.props}
         />
       )
