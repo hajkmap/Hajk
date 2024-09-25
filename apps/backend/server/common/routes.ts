@@ -1,5 +1,5 @@
 import type { Application } from "express";
-import log4js from "../common/utils/hajkLogger.js";
+import log4js from "./utils/hajk-logger.js";
 
 const logger = log4js.getLogger("hajk");
 

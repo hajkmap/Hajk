@@ -2,9 +2,9 @@ import type { Request, Response } from "express";
 import { LayerType } from "@prisma/client";
 
 import LayerService from "../../services/layer.service.ts";
-import HttpStatusCodes from "../../../../common/HttpStatusCodes.ts";
+import HttpStatusCodes from "../../../../common/http-status-codes.ts";
 import { HajkError } from "../../../../common/classes.ts";
-import HajkStatusCodes from "../../../../common/HajkStatusCodes.ts";
+import HajkStatusCodes from "../../../../common/hajk-status-codes.ts";
 
 class LayersController {
   async getLayers(_: Request, res: Response) {

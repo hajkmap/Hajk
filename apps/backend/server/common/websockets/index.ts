@@ -2,8 +2,8 @@ import { type Server } from "http";
 import crypto from "crypto";
 import { type WebSocket, WebSocketServer } from "ws";
 import queryString from "query-string";
-import log4js from "../utils/hajkLogger.js";
-import WebSocketMessageHandler from "./WebSocketMessageHandler.ts";
+import log4js from "../utils/hajk-logger.js";
+import WebSocketMessageHandler from "./web-socket-message-handler.ts";
 
 export interface CustomWebSocket extends WebSocket {
   uuid: string;

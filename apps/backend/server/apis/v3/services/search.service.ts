@@ -3,8 +3,8 @@ import { PrismaClient } from "@prisma/client";
 import log4js from "log4js";
 
 import { HajkError } from "../../../common/classes.ts";
-import HttpStatusCodes from "../../../common/HttpStatusCodes.ts";
-import HajkStatusCodes from "../../../common/HajkStatusCodes.ts";
+import HttpStatusCodes from "../../../common/http-status-codes.ts";
+import HajkStatusCodes from "../../../common/hajk-status-codes.ts";
 
 interface SearchSource {
   table: string;

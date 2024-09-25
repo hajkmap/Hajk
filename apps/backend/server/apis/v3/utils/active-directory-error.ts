@@ -7,7 +7,5 @@
  * @extends {Error}
  */
 export default class ActiveDirectoryError extends Error {
-  get name() {
-    return "ActiveDirectoryError";
-  }
+  readonly name = "ActiveDirectoryError";
 }

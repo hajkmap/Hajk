@@ -1,6 +1,6 @@
 import type { Request, Response } from "express";
 
-import HttpStatusCodes from "../../../../common/HttpStatusCodes.ts";
+import HttpStatusCodes from "../../../../common/http-status-codes.ts";
 import SearchService from "../../services/search.service.ts";
 
 class SearchController {

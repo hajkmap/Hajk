@@ -1,4 +1,4 @@
-import HttpStatusCodes from "./HttpStatusCodes.ts";
+import HttpStatusCodes from "./http-status-codes.ts";
 
 /**
  * Error with status code and message.

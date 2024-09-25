@@ -1,4 +1,4 @@
-import log4js from "../utils/hajkLogger.js";
+import log4js from "../utils/hajk-logger.js";
 import { type CustomWebSocket, type HajkSocketMessage } from "./index.ts";
 
 // These shouldn't probably be handled here, but these imports

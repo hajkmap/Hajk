@@ -20,16 +20,16 @@ import helmet from "helmet";
 import { legacyCreateProxyMiddleware as createProxyMiddleware } from "http-proxy-middleware";
 import * as OpenApiValidator from "express-openapi-validator";
 
-import { getCLFDate } from "./utils/getClfDate.ts";
-import log4js from "./utils/hajkLogger.js";
+import { getCLFDate } from "./utils/get-clf-date.ts";
+import log4js from "./utils/hajk-logger.js";
 import { initRoutes } from "./routes.ts";
 import websockets from "./websockets/index.ts";
 import detailedRequestLogger from "./middlewares/detailed.request.logger.js";
 
-import HttpStatusCodes from "./HttpStatusCodes.ts";
+import HttpStatusCodes from "./http-status-codes.ts";
 import { HajkError, RouteError } from "./classes.ts";
 import { HttpError } from "express-openapi-validator/dist/framework/types.js";
-import { isInstanceOfPrismaError } from "./utils/isInstanceOfPrismaError.ts";
+import { isInstanceOfPrismaError } from "./utils/is-instance-of-prisma-error.ts";
 
 const logger = log4js.getLogger("hajk");
 

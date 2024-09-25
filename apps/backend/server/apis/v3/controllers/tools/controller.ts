@@ -1,8 +1,8 @@
 import type { Request, Response } from "express";
 import ToolService from "../../services/tool.service.ts";
-import HttpStatusCodes from "../../../../common/HttpStatusCodes.ts";
+import HttpStatusCodes from "../../../../common/http-status-codes.ts";
 import { HajkError } from "../../../../common/classes.ts";
-import HajkStatusCodes from "../../../../common/HajkStatusCodes.ts";
+import HajkStatusCodes from "../../../../common/hajk-status-codes.ts";
 
 class ToolsController {
   async getTools(_: Request, res: Response) {

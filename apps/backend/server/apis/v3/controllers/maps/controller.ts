@@ -1,6 +1,6 @@
 import { HajkError } from "../../../../common/classes.ts";
-import HajkStatusCodes from "../../../../common/HajkStatusCodes.ts";
-import HttpStatusCodes from "../../../../common/HttpStatusCodes.ts";
+import HajkStatusCodes from "../../../../common/hajk-status-codes.ts";
+import HttpStatusCodes from "../../../../common/http-status-codes.ts";
 import MapService from "../../services/map.service.ts";
 
 import type { Request, Response } from "express";

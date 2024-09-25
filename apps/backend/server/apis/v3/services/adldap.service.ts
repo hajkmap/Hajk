@@ -1,5 +1,5 @@
 import ActiveDirectory from "activedirectory2";
-import ActiveDirectoryError from "../utils/ActiveDirectoryError.ts";
+import ActiveDirectoryError from "../utils/active-directory-error.ts";
 import log4js from "log4js";
 import fs from "fs";
 import AdBaseService from "./base/adbase.service.ts";
@@ -166,7 +166,6 @@ class AdLdapService extends AdBaseService {
     this.logger.trace(
       `Setting up AD connection to using the following options (\`logging\`, \`password\` and \`tlsOptions\` are obfuscated from this log message):`
     );
-    // eslint-disable-next-line no-unused-vars
     const { password, tlsOptions, logging, ...obfuscatedConfig } = this.#config;
     this.logger.trace("%o", obfuscatedConfig);
 
