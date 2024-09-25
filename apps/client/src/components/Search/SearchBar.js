@@ -56,9 +56,11 @@ const CustomPopper = (props) => {
   const theme = useTheme();
   const smallScreen = useMediaQuery(theme.breakpoints.down("sm"));
 
+  const headerHasFocusZIndex = props.headerhasfocus === "true" ? 1300 : 1000;
+
   const style = smallScreen
-    ? { width: "100%", zIndex: props.headerHasFocus ? 1300 : 1000 }
-    : { width: 400, zIndex: props.headerHasFocus ? 1300 : 1000 };
+    ? { width: "100%", zIndex: headerHasFocusZIndex }
+    : { width: 400, zIndex: headerHasFocusZIndex };
 
   return (
     <Popper
@@ -265,7 +267,7 @@ class SearchBar extends React.PureComponent {
       toggleCollapseSearchResults,
       options,
       headerHasFocus,
-      handleFocus,
+      handleHeaderFocus,
     } = this.props;
 
     return (
@@ -280,7 +282,7 @@ class SearchBar extends React.PureComponent {
         toggleCollapseSearchResults={toggleCollapseSearchResults}
         options={options}
         headerHasFocus={headerHasFocus}
-        handleFocus={handleFocus}
+        handleHeaderFocus={handleHeaderFocus}
       />
     );
   };
@@ -294,7 +296,7 @@ class SearchBar extends React.PureComponent {
       loading,
       handleOnAutocompleteInputChange,
       handleSearchInput,
-      handleFocus,
+      handleHeaderFocus,
     } = this.props;
     return (
       <StyledAutocomplete
@@ -304,7 +306,7 @@ class SearchBar extends React.PureComponent {
         PopperComponent={(popperProps) => (
           <CustomPopper
             {...popperProps}
-            headerHasFocus={this.props.headerHasFocus}
+            headerhasfocus={this.props.headerHasFocus.toString()}
           />
         )}
         PaperComponent={CustomPaper}
@@ -337,8 +339,8 @@ class SearchBar extends React.PureComponent {
                 {...props}
                 key={props.id}
                 onClick={(e) => {
-                  if (handleFocus) {
-                    handleFocus();
+                  if (handleHeaderFocus) {
+                    handleHeaderFocus();
                   }
                   if (props.onClick) {
                     props.onClick(e);
@@ -405,8 +407,8 @@ class SearchBar extends React.PureComponent {
       setSearchSources,
       failedWFSFetchMessage,
       isMobile,
-      handleFocus,
-      handleBlur,
+      handleHeaderFocus,
+      handleHeaderBlur,
     } = this.props;
     const disableUnderline = isMobile ? { disableUnderline: true } : null;
     const showFailedWFSMessage =
@@ -423,7 +425,7 @@ class SearchBar extends React.PureComponent {
     const placeholder = this.getPlaceholder();
     return (
       <TextField
-        onBlur={handleBlur}
+        onBlur={handleHeaderBlur}
         {...params}
         label={<span style={visuallyHidden}>Sök i webbplatsens innehåll</span>}
         variant={isMobile ? "standard" : "outlined"}
@@ -459,8 +461,8 @@ class SearchBar extends React.PureComponent {
                       onClick={(e) => {
                         e.stopPropagation();
                         toggleCollapseSearchResults();
-                        if (handleFocus) {
-                          handleFocus();
+                        if (handleHeaderFocus) {
+                          handleHeaderFocus();
                         }
                       }}
                       size="small"
@@ -478,8 +480,8 @@ class SearchBar extends React.PureComponent {
                       onClick={(e) => {
                         e.stopPropagation();
                         this.toggleResultsLayerVisibility();
-                        if (handleFocus) {
-                          handleFocus();
+                        if (handleHeaderFocus) {
+                          handleHeaderFocus();
                         }
                       }}
                       size="small"

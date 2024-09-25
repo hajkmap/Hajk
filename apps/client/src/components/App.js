@@ -487,7 +487,7 @@ class App extends React.PureComponent {
       .loadPlugins(this.props.activeTools);
 
     Promise.all(promises).then(() => {
-      this.globalObserver.subscribe("handleBlur", () => {
+      this.globalObserver.subscribe("core.handleHeaderBlur", () => {
         this.setState({ headerHasFocus: false });
       });
       // Track the page view
@@ -925,7 +925,7 @@ class App extends React.PureComponent {
           app={this}
           options={this.appModel.plugins.search.options}
           headerHasFocus={this.state.headerHasFocus}
-          handleFocus={this.handleFocus}
+          handleHeaderFocus={this.handleHeaderFocus}
           // FIXME: We should get config from somewhere else now when Search is part of Core
         />
       );
@@ -1087,11 +1087,11 @@ class App extends React.PureComponent {
     return this.state.drawerStatic && isOnlyOneButtonVisible ? false : true;
   }
 
-  handleFocus = () => {
+  handleHeaderFocus = () => {
     this.setState({ headerHasFocus: true });
   };
 
-  handleBlur = () => {
+  handleHeaderBlur = () => {
     this.setState({ headerHasFocus: false });
   };
 
@@ -1162,7 +1162,7 @@ class App extends React.PureComponent {
                 },
               }}
               headerHasFocus={this.state.headerHasFocus}
-              onFocus={this.handleFocus}
+              onFocus={this.handleHeaderFocus}
             >
               {clean === false && this.showDrawerButtons() && (
                 <DrawerToggleButtons
@@ -1283,7 +1283,7 @@ class App extends React.PureComponent {
                 pointerEvents: "auto",
               },
             }}
-            onClick={this.handleBlur}
+            onClick={this.handleHeaderBlur}
           >
             {useNewInfoclick === false && this.renderInfoclickWindow()}
             {useNewInfoclick && (
