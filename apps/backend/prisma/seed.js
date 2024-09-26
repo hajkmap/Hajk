@@ -105,44 +105,87 @@ async function readMapConfigAndPopulateMap(file) {
   console.log(`END MAP CONFIG "${file}"\n\n`);
 }
 
+const extractServiceTypeFromKey = (key) => {
+  switch (key) {
+    case "wmtslayers":
+      return "WMTS";
+    case "wmslayers":
+      return "WMS";
+    case "wfslayers":
+      return "WFS";
+    case "vectorlayers":
+      return "VECTOR";
+    case "wfstlayers":
+      return "WFST";
+    case "arcgislayers":
+      return "ARCGIS";
+  }
+};
+
 async function readAndPopulateLayers() {
   try {
     const pathToFile = path.join(process.cwd(), "App_Data", `layers.json`);
     const text = await fs.promises.readFile(pathToFile, "utf-8");
-    const layers = await JSON.parse(text);
-    for (const [key, value] of Object.entries(layers)) {
-      let type = null;
-      switch (key) {
-        case "wmtslayers":
-          type = "WMTS";
-          break;
-        case "wmslayers":
-          type = "WMS";
-          break;
-        case "wfslayers":
-          type = "WFS";
-          break;
-        case "vectorlayers":
-          type = "VECTOR";
-          break;
-        case "wfstlayers":
-          type = "WFST";
-          break;
-        case "arcgislayers":
-          type = "ARCGIS";
-          break;
-      }
+    const layersCollection = await JSON.parse(text);
+
+    const servicesCollection = [];
+
+    for (const [key, layers] of Object.entries(layersCollection)) {
+      const type = extractServiceTypeFromKey(key);
+
+      // Extract unique `url` values from the layers
+      const services = [
+        ...layers.map((layer) => {
+          return {
+            type,
+            serverType:
+              layer.serverType === "qgis" ? "QGIS_SERVER" : "GEOSERVER",
+            url: layer.url,
+          };
+        }),
+      ];
+
+      // Modify services array, keep only those objects that have
+      // a unique url property.
+      const uniqueServices = [
+        ...new Map(services.map((item) => [item.url, item])).values(),
+      ];
+
+      servicesCollection.push(...uniqueServices);
+    }
+
+    const servicesInDB = await prisma.service.createMany({
+      data: servicesCollection,
+    });
+
+    console.log(`Created ${servicesInDB.count} services`);
+
+    // Loop through each layer and create them in the database
+    for (const [key, layers] of Object.entries(layersCollection)) {
+      // We'll need the layer's type, to select the correct service from the database
+      const type = extractServiceTypeFromKey(key);
 
       const data = [];
 
-      value.forEach((l) => {
-        const { id, ...rest } = l;
+      // Loop through layers, but do it asynchronously as we'll
+      // need to await for each layer's service to be inserted into the database
+
+      for (const layer of layers) {
+        const { id, url, ...rest } = layer;
+        const service = await prisma.service.findFirst({
+          where: { url, type },
+        });
+
+        console.log(
+          `Layer ${id} has service ${service.id} and URL ${service.url}`
+        );
+
         data.push({
           id,
-          type,
+          serviceId: service.id,
           options: { ...rest },
         });
-      });
+      }
 
       // Look out for duplicates!
       const dupes = data
@@ -156,10 +199,13 @@ async function readAndPopulateLayers() {
         );
       }
 
-      const layer = await prisma.layer.createMany({
+      console.log("Creating layers from data: ", data);
+
+      const layersInDB = await prisma.layer.createMany({
         data,
       });
-      console.log(`Created ${layer.count} ${type} layers`);
+
+      console.log(`Created ${layersInDB.count} ${type} layers`);
     }
   } catch (error) {
     console.error(error);
@@ -325,7 +371,6 @@ async function main() {
   await readAndPopulateLayers();
   // Get all available map-config files...
   const mapConfigs = await getAvailableMaps();
-  console.log("Got mapConfigs: ", mapConfigs);
   // ... and add the map configurations to the database.
   for (const mapConfig of mapConfigs) {
     await readMapConfigAndPopulateMap(mapConfig);
