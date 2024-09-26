@@ -52,7 +52,7 @@ createRoot(document.getElementById("root")!).render(
   <ThemeRegistry>
     <StrictMode>
       <QueryClientProvider client={queryClient}>
-        <ReactQueryDevtools />
+        {import.meta.env.DEV && <ReactQueryDevtools />}
         <RouterProvider router={router} />
       </QueryClientProvider>
     </StrictMode>
