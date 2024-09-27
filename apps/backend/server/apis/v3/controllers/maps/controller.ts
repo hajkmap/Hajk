@@ -8,7 +8,7 @@ import type { Request, Response } from "express";
 class MapsController {
   async getMaps(_: Request, res: Response) {
     const maps = await MapService.getMapNames();
-    return res.status(HttpStatusCodes.OK).json({ maps });
+    return res.status(HttpStatusCodes.OK).json({ count: maps.length, maps });
   }
 
   async getMapByName(req: Request, res: Response) {
@@ -29,24 +29,30 @@ class MapsController {
 
   async getGroupsForMap(req: Request, res: Response) {
     const groups = await MapService.getGroupsForMap(req.params.mapName);
-    return res.status(HttpStatusCodes.OK).json({ groups });
+    return res
+      .status(HttpStatusCodes.OK)
+      .json({ count: groups.length, groups });
   }
 
   async getLayersForMap(req: Request, res: Response) {
     const layers = await MapService.getLayersForMap(req.params.mapName);
-    return res.status(HttpStatusCodes.OK).json({ layers });
+    return res
+      .status(HttpStatusCodes.OK)
+      .json({ count: layers.length, layers });
   }
 
   async getProjectionsForMap(req: Request, res: Response) {
     const projections = await MapService.getProjectionsForMap(
       req.params.mapName
     );
-    return res.status(HttpStatusCodes.OK).json({ projections });
+    return res
+      .status(HttpStatusCodes.OK)
+      .json({ count: projections.length, projections });
   }
 
   async getToolsForMap(req: Request, res: Response) {
     const tools = await MapService.getToolsForMap(req.params.mapName);
-    return res.status(HttpStatusCodes.OK).json({ tools });
+    return res.status(HttpStatusCodes.OK).json({ count: tools.length, tools });
   }
 }
 export default new MapsController();

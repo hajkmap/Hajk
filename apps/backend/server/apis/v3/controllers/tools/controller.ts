@@ -7,7 +7,7 @@ import HajkStatusCodes from "../../../../common/hajk-status-codes.ts";
 class ToolsController {
   async getTools(_: Request, res: Response) {
     const tools = await ToolService.getTools();
-    return res.status(HttpStatusCodes.OK).json({ tools });
+    return res.status(HttpStatusCodes.OK).json({ count: tools.length, tools });
   }
 
   async getMapsWithTool(req: Request, res: Response) {
@@ -27,7 +27,9 @@ class ToolsController {
     // If we got this far, let's see which maps use this tool.
     const mapsWithTool = await ToolService.getMapsWithTool(req.params.toolName);
 
-    return res.status(HttpStatusCodes.OK).json({ mapsWithTools: mapsWithTool });
+    return res
+      .status(HttpStatusCodes.OK)
+      .json({ count: mapsWithTool.length, mapsWithTool });
   }
 }
 export default new ToolsController();
