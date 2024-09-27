@@ -29,6 +29,11 @@ enum HajkStatusCodes {
   UNKNOWN_SERVICE_ID = "DB004",
 
   /**
+   * The requested group ID does not exist in the database.
+   */
+  UNKNOWN_GROUP_ID = "DB005",
+
+  /**
    * The requested layer type is not one of the valid ones. Valid layer
    * types are defined by the enum LayerType.
    */
