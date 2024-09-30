@@ -9,6 +9,7 @@ datasource db {
 
 model Map {
   id          Int            @id @default(autoincrement())
+  locked      Boolean        @default(false)
   name        String         @unique
   options     Json           @default("{}")
   projections Projection[]
@@ -19,6 +20,7 @@ model Map {
 
 model Tool {
   id      Int           @id @default(autoincrement())
+  locked  Boolean       @default(false)
   type    String
   options Json          @default("{}")
   maps    ToolsOnMaps[]
@@ -39,6 +41,7 @@ model ToolsOnMaps {
 
 model Projection {
   id         Int       @id @default(autoincrement())
+  locked     Boolean   @default(false)
   code       String    @unique
   definition String
   extent     Decimal[]
@@ -48,6 +51,7 @@ model Projection {
 
 model Group {
   id     String           @id @default(cuid())
+  locked Boolean          @default(false)
   name   String
   layers LayersOnGroups[]
   maps   GroupsOnMaps[]
@@ -55,6 +59,7 @@ model Group {
 
 model Service {
   id         String      @id @default(cuid())
+  locked     Boolean     @default(false)
   url        String
   type       ServiceType
   serverType ServerType
@@ -66,6 +71,7 @@ model Service {
 
 model Layer {
   id        String           @id @default(cuid())
+  locked    Boolean          @default(false)
   service   Service          @relation(fields: [serviceId], references: [id])
   serviceId String
   options   Json             @default("{}")

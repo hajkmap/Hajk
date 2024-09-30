@@ -5,4 +5,5 @@ export default express
   .Router()
   .get("/", controller.getServices)
   .get("/:id", controller.getServiceById)
-  .get("/:id/layers", controller.getLayersByServiceId);
+  .get("/:id/layers", controller.getLayersByServiceId)
+  .get("/:id/maps", controller.getMapsByServiceId);

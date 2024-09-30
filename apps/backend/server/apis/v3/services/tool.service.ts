@@ -20,7 +20,7 @@ class ToolService {
 
   async getMapsWithTool(toolName: string) {
     const maps = await prisma.map.findMany({
-      select: { name: true },
+      select: { name: true, id: true },
       where: {
         tools: {
           some: {
@@ -32,8 +32,7 @@ class ToolService {
       },
     });
 
-    // Transform the [{name: "map1"}, {name: "map2"}] to ["map1", "map2"]
-    return maps.map((m) => m.name);
+    return maps;
   }
 }
 

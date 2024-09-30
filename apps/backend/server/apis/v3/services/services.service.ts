@@ -11,7 +11,20 @@ class ServicesService {
   }
 
   async getServices() {
-    return await prisma.service.findMany();
+    // Get all services and the sum of layers
+    // per each service
+    const services = await prisma.service.findMany({
+      include: {
+        // select all columns in the service table
+        _count: {
+          select: {
+            layers: true,
+          },
+        },
+      },
+    });
+
+    return services;
   }
 
   async getServiceById(id: string) {
@@ -28,6 +41,47 @@ class ServicesService {
     });
 
     return layers;
+  }
+
+  // Get all maps that use a layer or a group that uses a layer
+  // that belongs to the service
+  async getMapsByServiceId(id: string) {
+    const maps = await prisma.map.findMany({
+      select: {
+        id: true,
+        name: true,
+      },
+      where: {
+        OR: [
+          {
+            layers: {
+              some: {
+                layer: {
+                  serviceId: id,
+                },
+              },
+            },
+          },
+          {
+            groups: {
+              some: {
+                group: {
+                  layers: {
+                    some: {
+                      layer: {
+                        serviceId: id,
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        ],
+      },
+    });
+
+    return maps;
   }
 }
 

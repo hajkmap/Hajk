@@ -32,6 +32,10 @@ class GroupsService {
 
   async getMapsByGroupId(id: string) {
     const maps = await prisma.map.findMany({
+      select: {
+        id: true,
+        name: true,
+      },
       where: { groups: { some: { groupId: id } } },
     });
 

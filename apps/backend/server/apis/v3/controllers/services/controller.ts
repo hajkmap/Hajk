@@ -32,5 +32,10 @@ class ServicesController {
       .status(HttpStatusCodes.OK)
       .json({ count: layers.length, layers });
   }
+
+  async getMapsByServiceId(req: Request, res: Response) {
+    const maps = await ServicesService.getMapsByServiceId(req.params.id);
+    return res.status(HttpStatusCodes.OK).json({ count: maps.length, maps });
+  }
 }
 export default new ServicesController();
