@@ -7,16 +7,21 @@ import useAppStateStore from "../../store/use-app-state-store";
 
 export default function LayersPage() {
   const { t } = useTranslation();
-  const { data: layers } = useLayers();
+  const { data, isLoading } = useLayers();
+  const { layers, count } = data ?? {};
 
   const themeMode = useAppStateStore((state) => state.themeMode);
   const setThemeMode = useAppStateStore((state) => state.setThemeMode);
 
-  return (
+  return isLoading ? (
+    <div>Loading...</div>
+  ) : (
     <Grid size={12}>
       <Typography variant="h2" textAlign="center">
         {t("common.layers")}
+        {count && ` (${count})`}
       </Typography>
+
       <List>
         {layers?.map((layer) => (
           <ListItem key={layer.id}>
