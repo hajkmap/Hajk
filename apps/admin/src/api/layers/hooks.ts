@@ -7,7 +7,7 @@ import {
   getLayersByType,
 } from "./requests";
 
-export const useLayers = (): UseQueryResult<LayersApiResponse> => {
+export const useLayers = (): UseQueryResult<Layer[]> => {
   return useQuery({
     queryKey: ["layers"],
     queryFn: getLayers,

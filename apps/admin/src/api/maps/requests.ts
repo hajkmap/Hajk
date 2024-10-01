@@ -9,14 +9,14 @@ import { LayersApiResponse } from "../layers/types";
 import { ToolsApiResponse } from "../tools/types";
 import { getApiClient } from "../../lib/internal-api-client";
 
-export const getMaps = async (): Promise<MapsApiResponse> => {
+export const getMaps = async (): Promise<string[]> => {
   const internalApiClient = getApiClient();
   try {
     const response = await internalApiClient.get<MapsApiResponse>("/maps");
     if (!response.data) {
       throw new Error("No maps data found");
     }
-    return response.data;
+    return response.data.maps;
   } catch (error) {
     const axiosError = error as AxiosError<{ errorId: string }>;
 

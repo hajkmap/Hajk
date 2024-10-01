@@ -3,7 +3,7 @@ import { getApiClient } from "../../lib/internal-api-client";
 import { AxiosError } from "axios";
 
 // Fetch layers
-export const getLayers = async (): Promise<LayersApiResponse> => {
+export const getLayers = async (): Promise<Layer[]> => {
   const internalApiClient = getApiClient();
   try {
     const response = await internalApiClient.get<LayersApiResponse>("/layers");
@@ -12,7 +12,7 @@ export const getLayers = async (): Promise<LayersApiResponse> => {
       throw new Error("No layers data found");
     }
 
-    return response.data;
+    return response.data.layers;
   } catch (error) {
     const axiosError = error as AxiosError<{ errorId: string }>;
 
@@ -49,18 +49,16 @@ export const getLayerById = async (id: string): Promise<Layer> => {
 };
 
 // Fetch layers by their type
-export const getLayersByType = async (
-  type: string
-): Promise<LayersApiResponse[]> => {
+export const getLayersByType = async (type: string): Promise<Layer[]> => {
   const internalApiClient = getApiClient();
   try {
-    const response = await internalApiClient.get<LayersApiResponse[]>(
+    const response = await internalApiClient.get<LayersApiResponse>(
       `/layers/types/${type}`
     );
     if (!response.data) {
       throw new Error("No layers found for this type");
     }
-    return response.data;
+    return response.data.layers;
   } catch (error) {
     const axiosError = error as AxiosError<{ errorId: string }>;
 
@@ -75,17 +73,17 @@ export const getLayersByType = async (
 };
 
 // Fetch all available layer types
-export const getLayerTypes = async (): Promise<LayerTypesApiResponse[]> => {
+export const getLayerTypes = async (): Promise<string[]> => {
   const internalApiClient = getApiClient();
   try {
-    const response = await internalApiClient.get<LayerTypesApiResponse[]>(
+    const response = await internalApiClient.get<LayerTypesApiResponse>(
       "/layers/types"
     );
 
     if (!response.data) {
       throw new Error("No layer types found");
     }
-    return response.data;
+    return response.data.layerTypes;
   } catch (error) {
     const axiosError = error as AxiosError<{ errorId: string }>;
 

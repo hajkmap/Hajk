@@ -7,17 +7,12 @@ import {
   getProjectionsByMapName,
   getToolsByMapName,
 } from "./requests";
-import {
-  Map,
-  MapsApiResponse,
-  ProjectionsApiResponse,
-  GroupApiResponse,
-} from "./types";
+import { Map, ProjectionsApiResponse, GroupApiResponse } from "./types";
 import { LayersApiResponse } from "../layers/types";
 import { ToolsApiResponse } from "../tools/types";
 
 // React Query hook to fetch maps
-export const useMaps = (): UseQueryResult<MapsApiResponse> => {
+export const useMaps = (): UseQueryResult<string[]> => {
   return useQuery({
     queryKey: ["maps"],
     queryFn: getMaps,
