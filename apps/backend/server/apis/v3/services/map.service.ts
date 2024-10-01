@@ -31,12 +31,20 @@ class MapService {
     return map;
   }
 
+  /**
+   * Get all groups for a map, including nested groups. Note that the
+   * tree structure is flattened into a single list of groups.
+   * @param mapName - The name of the map.
+   * @returns - A flat list of groups connected to the map.
+   */
   async getGroupsForMap(mapName: string) {
-    const groups = await prisma.group.findMany({
-      where: { maps: { some: { name: mapName } } },
+    const allGroups = await prisma.groupsOnMaps.findMany({
+      where: {
+        mapName: mapName,
+      },
     });
 
-    return groups;
+    return allGroups;
   }
 
   async getLayersForMap(mapName: string) {
