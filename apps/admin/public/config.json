@@ -1,3 +1,4 @@
 {
-  "apiBaseUrl": "http://localhost:3002/api/v3"
+  "apiBaseUrl": "http://localhost:3002/api/v3",
+  "headers": {}
 }
