@@ -1,14 +1,15 @@
+import { AxiosResponse } from "axios";
 import { Layer, LayersApiResponse } from "./types";
+import { getApiClient } from "../../lib/internal-api-client";
 
 export const getLayers = async (): Promise<Layer[]> => {
-  const response = await fetch("http://localhost:3002/api/v3/layers");
-
-  if (!response.ok) {
-    const data = (await response.json()) as LayersApiResponse;
-    throw new Error(`Failed to fetch layers. ErrorId: ${data.errorId}`);
+  const internalApiClient = getApiClient();
+  try {
+    const response: AxiosResponse<LayersApiResponse> =
+      await internalApiClient.get<LayersApiResponse>("/layers");
+    return response.data.layers;
+  } catch (error) {
+    console.error("Error fetching layers");
+    throw error;
   }
-
-  const data = (await response.json()) as LayersApiResponse;
-
-  return data.layers;
 };

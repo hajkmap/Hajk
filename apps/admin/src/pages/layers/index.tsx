@@ -1,17 +1,16 @@
 import Grid from "@mui/material/Grid2";
-import { List, ListItem, Paper, Typography } from "@mui/material";
+import { Button, List, ListItem, Paper, Typography } from "@mui/material";
 import { useTranslation } from "react-i18next";
+
 import { useLayers } from "../../api/layers";
-import { useConfig } from "../../hooks/use-config";
+import useAppStateStore from "../../store/use-app-state-store";
 
 export default function LayersPage() {
   const { t } = useTranslation();
   const { data: layers } = useLayers();
 
-  const { config, loading, loadError } = useConfig();
-  console.log(
-    `apiBaseUrl: ${config?.apiBaseUrl}, config loading: ${loading}, config load error: ${loadError}`
-  );
+  const themeMode = useAppStateStore((state) => state.themeMode);
+  const setThemeMode = useAppStateStore((state) => state.setThemeMode);
 
   return (
     <Grid size={12}>
@@ -27,6 +26,15 @@ export default function LayersPage() {
           </ListItem>
         ))}
       </List>
+      <Paper sx={{ p: 2, m: 2 }} elevation={4}>
+        <Typography>{`Current theme: ${themeMode}`}</Typography>
+        <Button
+          onClick={() => setThemeMode(themeMode === "light" ? "dark" : "light")}
+          variant="contained"
+        >
+          Toggle theme
+        </Button>
+      </Paper>
     </Grid>
   );
 }
