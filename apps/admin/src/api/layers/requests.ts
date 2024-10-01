@@ -1,6 +1,5 @@
 import { Layer, LayersApiResponse, LayerTypesApiResponse } from "./types";
-import { getApiClient } from "../../lib/internal-api-client";
-import { AxiosError } from "axios";
+import { getApiClient, InternalApiError } from "../../lib/internal-api-client";
 
 // Fetch layers
 export const getLayers = async (): Promise<Layer[]> => {
@@ -14,7 +13,7 @@ export const getLayers = async (): Promise<Layer[]> => {
 
     return response.data.layers;
   } catch (error) {
-    const axiosError = error as AxiosError<{ errorId: string }>;
+    const axiosError = error as InternalApiError;
 
     if (axiosError.response) {
       throw new Error(
@@ -36,7 +35,7 @@ export const getLayerById = async (id: string): Promise<Layer> => {
     }
     return response.data;
   } catch (error) {
-    const axiosError = error as AxiosError<{ errorId: string }>;
+    const axiosError = error as InternalApiError;
 
     if (axiosError.response) {
       throw new Error(
@@ -60,7 +59,7 @@ export const getLayersByType = async (type: string): Promise<Layer[]> => {
     }
     return response.data.layers;
   } catch (error) {
-    const axiosError = error as AxiosError<{ errorId: string }>;
+    const axiosError = error as InternalApiError;
 
     if (axiosError.response) {
       throw new Error(
@@ -85,7 +84,7 @@ export const getLayerTypes = async (): Promise<string[]> => {
     }
     return response.data.layerTypes;
   } catch (error) {
-    const axiosError = error as AxiosError<{ errorId: string }>;
+    const axiosError = error as InternalApiError;
 
     if (axiosError.response) {
       throw new Error(

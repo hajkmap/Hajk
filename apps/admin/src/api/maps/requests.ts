@@ -1,4 +1,3 @@
-import { AxiosError } from "axios";
 import {
   Map,
   MapsApiResponse,
@@ -7,7 +6,7 @@ import {
 } from "./types";
 import { LayersApiResponse } from "../layers/types";
 import { ToolsApiResponse } from "../tools/types";
-import { getApiClient } from "../../lib/internal-api-client";
+import { getApiClient, InternalApiError } from "../../lib/internal-api-client";
 
 export const getMaps = async (): Promise<string[]> => {
   const internalApiClient = getApiClient();
@@ -18,7 +17,7 @@ export const getMaps = async (): Promise<string[]> => {
     }
     return response.data.maps;
   } catch (error) {
-    const axiosError = error as AxiosError<{ errorId: string }>;
+    const axiosError = error as InternalApiError;
 
     if (axiosError.response) {
       throw new Error(
@@ -39,7 +38,7 @@ export const getMapByName = async (mapName: string): Promise<Map> => {
     }
     return response.data;
   } catch (error) {
-    const axiosError = error as AxiosError<{ errorId: string }>;
+    const axiosError = error as InternalApiError;
 
     if (axiosError.response) {
       throw new Error(
@@ -64,7 +63,7 @@ export const getGroupsByMapName = async (
     }
     return response.data;
   } catch (error) {
-    const axiosError = error as AxiosError<{ errorId: string }>;
+    const axiosError = error as InternalApiError;
 
     if (axiosError.response) {
       throw new Error(
@@ -89,7 +88,7 @@ export const getLayersByMapName = async (
     }
     return response.data;
   } catch (error) {
-    const axiosError = error as AxiosError<{ errorId: string }>;
+    const axiosError = error as InternalApiError;
 
     if (axiosError.response) {
       throw new Error(
@@ -114,7 +113,7 @@ export const getProjectionsByMapName = async (
     }
     return response.data;
   } catch (error) {
-    const axiosError = error as AxiosError<{ errorId: string }>;
+    const axiosError = error as InternalApiError;
 
     if (axiosError.response) {
       throw new Error(
@@ -139,7 +138,7 @@ export const getToolsByMapName = async (
     }
     return response.data;
   } catch (error) {
-    const axiosError = error as AxiosError<{ errorId: string }>;
+    const axiosError = error as InternalApiError;
 
     if (axiosError.response) {
       throw new Error(

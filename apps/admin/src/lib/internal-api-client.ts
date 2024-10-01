@@ -1,6 +1,8 @@
 import axios, { AxiosError, AxiosInstance } from "axios";
 import useAppStateStore from "../store/use-app-state-store";
 
+export type InternalApiError = AxiosError<{ errorId: string }>;
+
 const createApiClient = (): AxiosInstance => {
   const { apiBaseUrl } = useAppStateStore.getState();
 
@@ -17,35 +19,41 @@ const createApiClient = (): AxiosInstance => {
       return response;
     },
     (error) => {
-      const axiosError = error as AxiosError;
+      const apiError = error as InternalApiError;
 
-      if (axiosError.response) {
-        switch (axiosError.response.status) {
+      if (apiError.response) {
+        switch (apiError.response.status) {
           case 400:
-            console.error("Bad request");
+            console.error(
+              `Bad request, errorId: ${apiError.response.data.errorId}`
+            );
             break;
           case 401:
             console.error("Unauthorized");
             break;
           case 403:
-            console.error("Forbidden");
+            console.error(
+              `Forbidden, errorId: ${apiError.response.data.errorId}`
+            );
             break;
           case 404:
             console.error("Page not found");
             break;
           case 500:
-            console.error("Internal server error");
+            console.error(
+              `Internal server error, errorId: ${apiError.response.data.errorId}`
+            );
             break;
           default:
             console.error("An unexpected error occurred");
         }
-      } else if (axiosError.request) {
+      } else if (apiError.request) {
         console.error("Network error");
       } else {
         console.error("An unexpected error occurred");
       }
 
-      return Promise.reject(axiosError);
+      return Promise.reject(apiError);
     }
   );
 
