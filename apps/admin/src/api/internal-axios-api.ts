@@ -4,12 +4,6 @@ const config = await response.json();
 
 export const axiosInstance = axios.create({
   baseURL: config.apiBaseUrl,
-  // Use headers from config.json if they exist and are not empty
-  // Fallback to default if no headers in config.json
-  headers:
-    config.headers && Object.keys(config.headers).length > 0
-      ? config.headers
-      : { "Content-Type": "application/json" },
 });
 
 axiosInstance.interceptors.response.use(
