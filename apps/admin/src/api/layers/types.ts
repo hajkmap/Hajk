@@ -6,6 +6,14 @@ export interface Layer {
 
 export interface LayersApiResponse {
   layers: Layer[];
+  count?: number;
+  error: string;
+  errorId: string;
+}
+
+export interface LayerTypesApiResponse {
+  layerTypes: string[];
+  count?: number;
   error: string;
   errorId: string;
 }

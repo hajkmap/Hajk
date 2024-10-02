@@ -1,5 +1,4 @@
-import { LayerType } from "@prisma/client";
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient, ServiceType } from "@prisma/client";
 
 import log4js from "log4js";
 
@@ -24,12 +23,12 @@ class LayerService {
   }
 
   async getLayerTypes() {
-    return Object.values(LayerType);
+    return Object.values(ServiceType);
   }
 
-  async getLayersByType(type: LayerType) {
+  async getLayersByType(type: ServiceType) {
     return await prisma.layer.findMany({
-      where: { type: type },
+      where: { service: { type } },
     });
   }
 }

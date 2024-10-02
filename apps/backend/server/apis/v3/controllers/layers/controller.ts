@@ -1,5 +1,5 @@
 import type { Request, Response } from "express";
-import { LayerType } from "@prisma/client";
+import { ServiceType } from "@prisma/client";
 
 import LayerService from "../../services/layer.service.ts";
 import HttpStatusCodes from "../../../../common/http-status-codes.ts";
@@ -9,7 +9,9 @@ import HajkStatusCodes from "../../../../common/hajk-status-codes.ts";
 class LayersController {
   async getLayers(_: Request, res: Response) {
     const layers = await LayerService.getLayers();
-    return res.status(HttpStatusCodes.OK).json({ layers });
+    return res
+      .status(HttpStatusCodes.OK)
+      .json({ count: layers.length, layers });
   }
 
   async getLayerById(req: Request, res: Response) {
@@ -28,16 +30,18 @@ class LayersController {
   async getLayerTypes(_: Request, res: Response) {
     const layerTypes = await LayerService.getLayerTypes();
 
-    return res.status(HttpStatusCodes.OK).json({ layerTypes });
+    return res
+      .status(HttpStatusCodes.OK)
+      .json({ count: layerTypes.length, layerTypes });
   }
 
   async getLayersByType(req: Request, res: Response) {
     // Let's ensure that the provided layer type is valid.
-    if (!Object.values(LayerType).toString().includes(req.params.type)) {
+    if (!Object.values(ServiceType).toString().includes(req.params.type)) {
       throw new HajkError(
         HttpStatusCodes.NOT_FOUND,
         `Unsupported layer type provided. Supported types are: ${Object.values(
-          LayerType
+          ServiceType
         )}.`,
         HajkStatusCodes.UNKNOWN_LAYER_TYPE
       );
@@ -45,10 +49,12 @@ class LayersController {
 
     // If we've got this far, let's talk to the database.
     const layers = await LayerService.getLayersByType(
-      req.params.type as LayerType
+      req.params.type as ServiceType
     );
 
-    return res.status(HttpStatusCodes.OK).json({ layers });
+    return res
+      .status(HttpStatusCodes.OK)
+      .json({ count: layers.length, layers });
   }
 }
 export default new LayersController();
