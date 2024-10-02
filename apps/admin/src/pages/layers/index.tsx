@@ -6,16 +6,18 @@ import {
   GridRowHeightParams,
   GridToolbarContainer,
   GridToolbarDensitySelector,
+  GridToolbarFilterButton,
+  GridToolbarColumnsButton,
 } from "@mui/x-data-grid";
-import { Typography, TextField, Box } from "@mui/material";
+import { Typography, TextField, Box, Tooltip } from "@mui/material";
 import { useTranslation } from "react-i18next";
 import { useLayers } from "../../api/layers";
-import LanguageSwitcher from "../../components/language-switcher";
-import ThemeSwitcher from "../../components/theme-switcher";
+import { useConfig } from "../../hooks/use-config";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
 import Button from "@mui/material/Button";
 import { grey } from "@mui/material/colors";
 import Grid from "@mui/material/Grid2";
+import WarningAmberIcon from "@mui/icons-material/WarningAmber";
 
 export default function LayersPage() {
   const { t } = useTranslation();
@@ -39,7 +41,34 @@ export default function LayersPage() {
     return <Typography>Error loading data</Typography>;
   }
 
-  const localizedTextsMap = {
+  interface LocalizedTextsMap {
+    columnMenuUnsort: string;
+    columnMenuSortAsc: string;
+    columnMenuSortDesc: string;
+    columnMenuFilter: string;
+    columnMenuHideColumn: string;
+    columnMenuShowColumns: string;
+    columnMenuHandleColumn: string;
+    columnHeaderService: string;
+    columnHeaderName: string;
+    columnHeaderURL: string;
+    columnHeaderUsedBy: string;
+    columnHeaderIsBroken: string;
+    columnHeaderActions: string;
+    toolbarColumns: string;
+    toolbarColumnsLabel: string;
+    toolbarDensity: string;
+    toolbarDensityLabel: string;
+    toolbarDensityCompact: string;
+    toolbarDensityStandard: string;
+    toolbarDensityComfortable: string;
+    toolbarFilters: string;
+    toolbarFiltersLabel: string;
+    toolbarFiltersTooltipShow: string;
+    brokenLayerWarning: string;
+  }
+
+  const localizedTextsMap: LocalizedTextsMap = {
     columnMenuUnsort: "Ingen sortering",
     columnMenuSortAsc: "Sortera på ordning stigande",
     columnMenuSortDesc: "Sortera på ordning fallande",
@@ -51,13 +80,25 @@ export default function LayersPage() {
     columnHeaderName: "Internt namn",
     columnHeaderURL: "URL",
     columnHeaderUsedBy: "Används i kartor",
+    columnHeaderIsBroken: "Trasigt lager",
     columnHeaderActions: "Åtgärder",
+    toolbarDensity: "Densitet",
+    toolbarDensityLabel: "Densitet",
+    toolbarDensityCompact: "Kompakt",
+    toolbarDensityStandard: "Standard",
+    toolbarDensityComfortable: "Komfortabel",
+    toolbarFilters: "Filter",
+    toolbarFiltersLabel: "Visa filter",
+    toolbarFiltersTooltipShow: "Visa filter",
+    toolbarColumns: "Kolumner",
+    toolbarColumnsLabel: "Välj kolumner",
+    brokenLayerWarning: "Lagret är fucking trasigt bror, fixa",
   };
 
   const columns: GridColDef[] = [
     {
       field: "serviceType",
-      minWidth: 100,
+      minWidth: 120,
       flex: 0.1,
       editable: false,
       renderHeader: () => (
@@ -102,10 +143,33 @@ export default function LayersPage() {
       ),
     },
     {
+      field: "isBroken",
+      minWidth: 150,
+      flex: 0.1,
+      editable: false,
+      renderHeader: () => (
+        <strong>{localizedTextsMap.columnHeaderIsBroken}</strong>
+      ),
+      renderCell: (params) =>
+        params.value !== 1 ? (
+          <div style={{ userSelect: "none" }}>
+            <Tooltip title={localizedTextsMap.brokenLayerWarning}>
+              <WarningAmberIcon
+                sx={{ color: "black", maxWidth: "fit-content" }}
+              />
+            </Tooltip>
+          </div>
+        ) : (
+          <div style={{ userSelect: "none" }}></div>
+        ),
+    },
+    {
       field: "actions",
       minWidth: 150,
       flex: 0.2,
       editable: false,
+      sortable: false,
+      filterable: false,
       renderHeader: () => (
         <strong>{localizedTextsMap.columnHeaderActions}</strong>
       ),
@@ -115,12 +179,12 @@ export default function LayersPage() {
           size="small"
           sx={{
             backgroundColor: grey[300],
-            height: "35px",
+            maxHeight: "fit-content",
             width: "30px",
             minWidth: "10px",
           }}
         >
-          <MoreVertIcon sx={{ color: "black", maxWidth: "auto" }} />
+          <MoreVertIcon sx={{ color: "black", maxWidth: "fit-content" }} />
         </Button>
       ),
     },
@@ -132,6 +196,7 @@ export default function LayersPage() {
     name: layer.options.name,
     url: layer.options.url,
     usedBy: layer.options.opacity,
+    isBroken: layer.options.opacity,
     actions: "",
   }));
 
@@ -144,6 +209,8 @@ export default function LayersPage() {
   function CustomToolbar() {
     return (
       <GridToolbarContainer>
+        <GridToolbarColumnsButton />
+        <GridToolbarFilterButton />
         <GridToolbarDensitySelector />
       </GridToolbarContainer>
     );
@@ -200,22 +267,22 @@ export default function LayersPage() {
         getRowHeight={({ densityFactor }: GridRowHeightParams) => {
           return 50 * densityFactor;
         }}
-        getRowSpacing={(params) => ({
-          top: params.isFirstVisible ? 0 : 5,
-          bottom: params.isLastVisible ? 0 : 5,
+        getRowSpacing={() => ({
+          // top: params.isFirstVisible ? 0 : 5,
+          // bottom: params.isLastVisible ? 0 : 5,
         })}
         slots={{
           toolbar: CustomToolbar,
         }}
         sx={{
-          border: "none",
-          "& .MuiDataGrid-cell": {
-            marginRight: "20px",
-          },
-          "& .MuiDataGrid-columnHeader": {
-            marginRight: "20px",
-            border: "none !important",
-          },
+          // border: "none",
+          // "& .MuiDataGrid-cell": {
+          //   marginRight: "20px",
+          // },
+          // "& .MuiDataGrid-columnHeader": {
+          //   marginRight: "20px",
+          //   border: "none !important",
+          // },
           [`& .${gridClasses.cell}:focus, & .${gridClasses.cell}:focus-within`]:
             {
               outline: "none",
@@ -224,16 +291,16 @@ export default function LayersPage() {
             {
               outline: "none",
             },
-          "& .MuiDataGrid-row:hover": {
-            backgroundColor: "rgba(0, 0, 0, 0.1)",
-          },
-          "& .MuiDataGrid-columnSeparator": {
-            display: "none",
-          },
-          [`& .${gridClasses.row}`]: {
-            // bgcolor:theme=>theme.palette.mode === 'light' ? grey[200] : grey[900],
-          },
-          "&, [class^=MuiDataGrid]": { border: "none" },
+          // "& .MuiDataGrid-row:hover": {
+          //   backgroundColor: "rgba(0, 0, 0, 0.1)",
+          // },
+          // "& .MuiDataGrid-columnSeparator": {
+          //   display: "none",
+          // },
+          // [`& .${gridClasses.row}`]: {
+          //   // bgcolor:theme=>theme.palette.mode === 'light' ? grey[200] : grey[900],
+          // },
+          // "&, [class^=MuiDataGrid]": { border: "none" },
         }}
       ></DataGrid>
     </Box>
