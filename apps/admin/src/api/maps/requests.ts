@@ -8,6 +8,20 @@ import { LayersApiResponse } from "../layers/types";
 import { ToolsApiResponse } from "../tools/types";
 import { getApiClient, InternalApiError } from "../../lib/internal-api-client";
 
+/**
+ * This module provides API request functions to interact with the backend
+ * services for fetching data related to maps.
+ *
+ * - The `getMaps` function retrieves a list of all maps.
+ * - The `getMapByName` function fetches details of a specific map by its name.
+ * - The `getLayersByMapName` function retrieves all layers linked to a given map name.
+ * - The `getToolsByMapName` function fetches all tools linked to a given map name.
+ *
+ * These functions utilize a custom Axios instance and throw appropriate error messages for failures.
+ *
+ * All functions return a Promise with the expected data format or throw an error in case of failure.
+ *
+ */
 export const getMaps = async (): Promise<string[]> => {
   const internalApiClient = getApiClient();
   try {

@@ -20,7 +20,7 @@ i18n
   .use(initReactI18next)
   .init({
     resources,
-    lng: "sv",
+    lng: localStorage.getItem("language") ?? "sv",
     interpolation: {
       escapeValue: false,
     },

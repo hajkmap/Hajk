@@ -2,6 +2,8 @@ import Grid from "@mui/material/Grid2";
 import { List, ListItem, Paper, Typography } from "@mui/material";
 import { useTranslation } from "react-i18next";
 import { useMaps } from "../../api/maps";
+import LanguageSwitcher from "../../components/language-switcher";
+import ThemeSwitcher from "../../components/theme-switcher";
 
 export default function MapsPage() {
   const { t } = useTranslation();
@@ -25,6 +27,10 @@ export default function MapsPage() {
           </ListItem>
         ))}
       </List>
+      <Grid container gap={2} size={12}>
+        <ThemeSwitcher />
+        <LanguageSwitcher />
+      </Grid>
     </Grid>
   );
 }

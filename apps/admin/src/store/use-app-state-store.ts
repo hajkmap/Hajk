@@ -24,7 +24,7 @@ const getDefaultThemeMode = () => {
 };
 
 const useAppStateStore = create<AppState>((set) => ({
-  language: localStorage.getItem("language") ?? "en",
+  language: localStorage.getItem("language") ?? "sv",
   themeMode: getDefaultThemeMode(),
   apiBaseUrl: "",
   loading: true,

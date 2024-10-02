@@ -1,15 +1,13 @@
 import Grid from "@mui/material/Grid2";
-import { Button, List, ListItem, Paper, Typography } from "@mui/material";
+import { List, ListItem, Paper, Typography } from "@mui/material";
 import { useTranslation } from "react-i18next";
 import { useTools } from "../../api/tools";
-import useAppStateStore from "../../store/use-app-state-store";
+import LanguageSwitcher from "../../components/language-switcher";
+import ThemeSwitcher from "../../components/theme-switcher";
 
 export default function ToolsPage() {
   const { t } = useTranslation();
   const { data: tools, isLoading } = useTools();
-
-  const themeMode = useAppStateStore((state) => state.themeMode);
-  const setThemeMode = useAppStateStore((state) => state.setThemeMode);
 
   return isLoading ? (
     <div>Loading...</div>
@@ -29,15 +27,10 @@ export default function ToolsPage() {
           </ListItem>
         ))}
       </List>
-      <Paper sx={{ p: 2, m: 2 }} elevation={4}>
-        <Typography>{`Current theme: ${themeMode}`}</Typography>
-        <Button
-          onClick={() => setThemeMode(themeMode === "light" ? "dark" : "light")}
-          variant="contained"
-        >
-          Toggle theme
-        </Button>
-      </Paper>
+      <Grid container gap={2} size={12}>
+        <ThemeSwitcher />
+        <LanguageSwitcher />
+      </Grid>
     </Grid>
   );
 }

@@ -1,7 +1,7 @@
 export interface Map {
   id: string;
   name: string;
-  options: Record<string, string>;
+  options?: Record<string, string>;
 }
 
 export interface Group {
