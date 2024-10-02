@@ -12,7 +12,7 @@ import {
 import { Typography, TextField, Box, Tooltip } from "@mui/material";
 import { useTranslation } from "react-i18next";
 import { useLayers } from "../../api/layers";
-import { useConfig } from "../../hooks/use-config";
+import useAppStateStore from "../../store/use-app-state-store";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
 import Button from "@mui/material/Button";
 import { grey } from "@mui/material/colors";
@@ -26,18 +26,21 @@ export default function LayersPage() {
     isLoading: layersLoading,
     error: layersError,
   } = useLayers();
-  const { loading: configLoading, loadError: configLoadError } = useConfig();
+
+  const themeMode = useAppStateStore((state) => state.themeMode);
+  const setThemeMode = useAppStateStore((state) => state.setThemeMode);
+  const configLoading = useAppStateStore((state) => state.loadConfig);
 
   const [searchQuery, setSearchQuery] = useState("");
   const [dynamicLabel, setDynamicLabel] = useState(
     "Skriv namn eller ID här för att hitta ett lager..."
   );
 
-  if (configLoading || layersLoading) {
+  if (layersLoading) {
     return <Typography>Loading...</Typography>;
   }
 
-  if (configLoadError || layersError) {
+  if (layersError) {
     return <Typography>Error loading data</Typography>;
   }
 
@@ -152,7 +155,15 @@ export default function LayersPage() {
       ),
       renderCell: (params) =>
         params.value !== 1 ? (
-          <div style={{ userSelect: "none" }}>
+          <div
+            style={{
+              userSelect: "none",
+              height: "100%",
+              display: "flex",
+              justifyContent: "start",
+              alignItems: "center",
+            }}
+          >
             <Tooltip title={localizedTextsMap.brokenLayerWarning}>
               <WarningAmberIcon
                 sx={{ color: "black", maxWidth: "fit-content" }}
@@ -165,7 +176,7 @@ export default function LayersPage() {
     },
     {
       field: "actions",
-      minWidth: 150,
+      minWidth: 100,
       flex: 0.2,
       editable: false,
       sortable: false,
@@ -174,27 +185,36 @@ export default function LayersPage() {
         <strong>{localizedTextsMap.columnHeaderActions}</strong>
       ),
       renderCell: () => (
-        <Button
-          variant="contained"
-          size="small"
-          sx={{
-            backgroundColor: grey[300],
-            maxHeight: "fit-content",
-            width: "30px",
-            minWidth: "10px",
+        <div
+          style={{
+            height: "100%",
+            display: "flex",
+            justifyContent: "start",
+            alignItems: "center",
           }}
         >
-          <MoreVertIcon sx={{ color: "black", maxWidth: "fit-content" }} />
-        </Button>
+          <Button
+            variant="contained"
+            size="small"
+            sx={{
+              backgroundColor: grey[300],
+              width: "24px",
+              minWidth: "10px",
+              height: "28px",
+            }}
+          >
+            <MoreVertIcon sx={{ color: "black", maxWidth: "fit-content" }} />
+          </Button>
+        </div>
       ),
     },
   ];
 
   const rows = layers?.map((layer) => ({
     id: layer.id,
-    serviceType: layer.type,
-    name: layer.options.name,
-    url: layer.options.url,
+    serviceType: layer.serviceId,
+    name: layer.options.caption,
+    url: layer.options.infoUrl,
     usedBy: layer.options.opacity,
     isBroken: layer.options.opacity,
     actions: "",
@@ -202,8 +222,9 @@ export default function LayersPage() {
 
   const filteredRows = rows?.filter(
     (row) =>
-      row.id.toString().toLowerCase().includes(searchQuery.toLowerCase()) ||
-      row.serviceType.toLowerCase().includes(searchQuery.toLowerCase())
+      row.name.toString().toLowerCase().includes(searchQuery.toLowerCase()) ||
+      row.serviceType.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      row.url.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   function CustomToolbar() {
