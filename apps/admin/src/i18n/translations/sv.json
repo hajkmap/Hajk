@@ -1,11 +1,16 @@
 {
   "translation": {
+    "light": "Ljust",
+    "dark": "Mörkt",
     "common.hello": "Hej",
     "common.goodbye": "Hej då",
     "common.home": "Hem",
     "common.layers": "Lager",
     "common.maps": "Kartor",
     "common.tools": "Verktyg",
-    "common.clickableLogo": "Klickbar logga"
+    "common.clickableLogo": "Klickbar logga",
+    "common.language": "Språk",
+    "common.english": "Engelska",
+    "common.swedish": "Svenska"
   }
 }

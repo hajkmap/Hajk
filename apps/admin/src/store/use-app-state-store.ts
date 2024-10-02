@@ -1,12 +1,13 @@
 import { PaletteMode } from "@mui/material";
 import { create } from "zustand";
+import i18n, { Language } from "../i18n/i18n";
 
 interface AppState {
   language: string;
   themeMode: PaletteMode;
   apiBaseUrl: string;
   loading: boolean;
-  setLanguage: (lang: string) => void;
+  setLanguage: (lang: Language) => void;
   setThemeMode: (theme: PaletteMode) => void;
   loadConfig: () => Promise<void>;
 }
@@ -30,6 +31,7 @@ const useAppStateStore = create<AppState>((set) => ({
 
   setLanguage: (lang: string) => {
     localStorage.setItem("language", lang);
+    void i18n.changeLanguage(lang);
     set({ language: lang });
   },
 

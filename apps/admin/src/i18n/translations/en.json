@@ -1,11 +1,16 @@
 {
   "translation": {
+    "light": "Light",
+    "dark": "Dark",
     "common.hello": "Hello",
     "common.goodbye": "Goodbye",
     "common.home": "Home",
     "common.layers": "Layers",
     "common.maps": "Maps",
     "common.tools": "Tools",
-    "common.clickableLogo": "Clickable Logo"
+    "common.clickableLogo": "Clickable Logo",
+    "common.language": "Language",
+    "common.english": "English",
+    "common.swedish": "Swedish"
   }
 }
