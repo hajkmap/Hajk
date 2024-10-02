@@ -54,5 +54,20 @@ class MapsController {
     const tools = await MapService.getToolsForMap(req.params.mapName);
     return res.status(HttpStatusCodes.OK).json({ count: tools.length, tools });
   }
+
+  async createMap(req: Request, res: Response) {
+    const map = await MapService.createMap(req.body);
+    return res.status(HttpStatusCodes.CREATED).json(map);
+  }
+
+  async updateMap(req: Request, res: Response) {
+    const map = await MapService.updateMap(req.params.mapName, req.body);
+    return res.status(HttpStatusCodes.OK).json(map);
+  }
+
+  async deleteMap(req: Request, res: Response) {
+    await MapService.deleteMap(req.params.mapName);
+    return res.status(HttpStatusCodes.NO_CONTENT).send();
+  }
 }
 export default new MapsController();
