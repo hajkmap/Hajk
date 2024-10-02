@@ -93,7 +93,7 @@ export const getMapsByServiceId = async (serviceId: string): Promise<Map[]> => {
       `/services/${serviceId}/maps`
     );
 
-    if (!response.data || !response.data.maps) {
+    if (!response.data) {
       throw new Error("No maps data found");
     }
 

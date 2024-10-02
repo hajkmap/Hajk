@@ -42,11 +42,11 @@ export const getMapsByToolName = async (toolName: string): Promise<Map[]> => {
       `/tools/${toolName}/maps`
     );
 
-    if (!response.data || !response.data.mapsWithTool) {
+    if (!response.data) {
       throw new Error("No maps data found");
     }
 
-    return response.data.mapsWithTool;
+    return response.data.maps;
   } catch (error) {
     const axiosError = error as InternalApiError;
     if (axiosError.response) {

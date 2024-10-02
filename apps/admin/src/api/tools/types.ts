@@ -1,5 +1,3 @@
-import { Map } from "../maps";
-
 export interface Tool {
   id: string;
   type: string;
@@ -8,15 +6,14 @@ export interface Tool {
 
 export interface ToolsApiResponse {
   tools: Tool[];
-  count?: number;
+  count: number;
   error: string;
   errorId: string;
 }
 
 export interface GlobalMapsApiResponse {
-  maps?: Map[];
-  mapsWithTool?: Map[];
-  count?: number;
+  maps: { name: string; id: string }[];
+  count: number;
   error: string;
   errorId: string;
 }

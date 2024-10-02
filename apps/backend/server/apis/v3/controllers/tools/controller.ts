@@ -29,7 +29,7 @@ class ToolsController {
 
     return res
       .status(HttpStatusCodes.OK)
-      .json({ count: mapsWithTool.length, mapsWithTool });
+      .json({ count: mapsWithTool.length, maps: mapsWithTool });
   }
 }
 export default new ToolsController();

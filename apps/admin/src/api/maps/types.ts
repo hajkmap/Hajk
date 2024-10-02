@@ -17,21 +17,21 @@ export interface Projection {
 }
 export interface MapsApiResponse {
   maps: string[];
-  count?: number;
+  count: number;
   error: string;
   errorId: string;
 }
 
 export interface GroupApiResponse {
   groups: string[];
-  count?: number;
+  count: number;
   error: string;
   errorId: string;
 }
 
 export interface ProjectionsApiResponse {
   projections: Projection[];
-  count?: number;
+  count: number;
   error: string;
   errorId: string;
 }

@@ -7,7 +7,7 @@ export interface Service {
 
 export interface ServicesApiResponse {
   services: Service[];
-  count?: number;
+  count: number;
   error: string;
   errorId: string;
 }
