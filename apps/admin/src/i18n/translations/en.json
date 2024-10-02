@@ -1,16 +1,16 @@
 {
   "translation": {
-    "light": "Light",
-    "dark": "Dark",
-    "common.hello": "Hello",
+    "common.clickableLogo": "Clickable Logo",
+    "common.english": "English",
     "common.goodbye": "Goodbye",
+    "common.hello": "Hello",
     "common.home": "Home",
+    "common.language": "Language",
     "common.layers": "Layers",
     "common.maps": "Maps",
+    "common.swedish": "Swedish",
     "common.tools": "Tools",
-    "common.clickableLogo": "Clickable Logo",
-    "common.language": "Language",
-    "common.english": "English",
-    "common.swedish": "Swedish"
+    "dark": "Dark",
+    "light": "Light"
   }
 }

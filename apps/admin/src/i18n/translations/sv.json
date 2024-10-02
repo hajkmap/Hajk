@@ -1,16 +1,16 @@
 {
   "translation": {
-    "light": "Ljust",
-    "dark": "Mörkt",
-    "common.hello": "Hej",
+    "common.clickableLogo": "Klickbar logga",
+    "common.english": "Engelska",
     "common.goodbye": "Hej då",
+    "common.hello": "Hej",
     "common.home": "Hem",
+    "common.language": "Språk",
     "common.layers": "Lager",
     "common.maps": "Kartor",
+    "common.swedish": "Svenska",
     "common.tools": "Verktyg",
-    "common.clickableLogo": "Klickbar logga",
-    "common.language": "Språk",
-    "common.english": "Engelska",
-    "common.swedish": "Svenska"
+    "dark": "Mörkt",
+    "light": "Ljust"
   }
 }
