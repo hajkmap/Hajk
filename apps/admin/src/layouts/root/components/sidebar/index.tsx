@@ -1,58 +1,77 @@
-import { Divider, Drawer } from "@mui/material";
-import Grid from "@mui/material/Grid2";
-import Header from "./header";
-import LinkSection from "./link-section";
+import { Paper, useTheme } from "@mui/material";
+import MenuIcon from "@mui/icons-material/Menu";
+import PermanentButton from "./permanent-button";
+import {
+  HEADER_HEIGHT,
+  SIDEBAR_MINI_WIDTH,
+  SIDEBAR_WIDTH,
+  SIDEBAR_ZINDEX,
+} from "../../constants";
+import SquareIconButton from "./square-icon-button";
+import NavList from "./nav-list";
 
 interface Props {
-  width: number;
   open: boolean;
+  setOpen: (open: boolean) => void;
   permanent: boolean;
-  close: (event: React.KeyboardEvent | React.MouseEvent) => void;
   togglePermanent: () => void;
 }
 
-export default function Sidebar(props: Props) {
+const Sidebar = (props: Props) => {
+  const { palette } = useTheme();
   return (
-    <Drawer
-      anchor="left"
-      open={props.open}
-      onClose={props.close}
-      variant={props.permanent ? "permanent" : "temporary"}
-      ModalProps={{
-        hideBackdrop: props.permanent,
-        disableEnforceFocus: true,
-        keepMounted: true,
-        onClose: props.close,
-        style: {
-          position: props.permanent ? "initial" : "fixed",
-        },
-      }}
+    <Paper
+      component="aside"
+      elevation={1}
       sx={{
-        "& .MuiPaper-root": {
-          backgroundColor: (theme) => theme.palette.background.default,
-          backgroundImage: "unset", // To match the "new" (darker) black theme.
-        },
+        position: "fixed",
+        top: `${HEADER_HEIGHT}px`,
+        left: props.open ? 0 : `-${SIDEBAR_WIDTH}px`,
+        width: `${SIDEBAR_WIDTH}px`,
+        backgroundColor:
+          palette.mode === "light" ? palette.background.default : "",
+        minHeight: `calc(100vh - ${HEADER_HEIGHT}px)`,
+        zIndex: SIDEBAR_ZINDEX,
+        transition: "left 250ms ease",
       }}
+      square
     >
-      <Grid
-        onClick={(e) => e.stopPropagation()}
-        container
-        justifyContent="space-between"
-        wrap="nowrap"
-        alignContent="center"
-        direction="column"
-        width={props.width}
-        sx={{ height: "100%", maxHeight: "100%" }}
+      {/* Collapsed sidebar */}
+      <Paper
+        sx={{
+          position: "absolute",
+          top: "0px",
+          right: props.open ? 0 : `-${SIDEBAR_MINI_WIDTH}px`,
+          opacity: props.open ? 0.001 : 1.0,
+          borderLeft: "0px solid transparent",
+          minHeight: `calc(100vh - ${HEADER_HEIGHT}px)`,
+          backgroundColor:
+            palette.mode === "light" ? palette.background.default : "",
+          transition: "right 250ms ease, opacity 200ms ease",
+        }}
+        square
       >
-        <Grid>
-          <Header
-            sidebarPermanent={props.permanent}
-            toggleSidebarPermanent={props.togglePermanent}
-          />
-          <Divider sx={{ width: "100%" }} />
-          <LinkSection />
-        </Grid>
-      </Grid>
-    </Drawer>
+        <SquareIconButton onClick={() => props.setOpen(!props.open)}>
+          <MenuIcon fontSize="large" />
+        </SquareIconButton>
+        <PermanentButton
+          togglePermanent={props.togglePermanent}
+          permanent={props.permanent}
+          sx={{
+            position: "absolute",
+            bottom: "0px",
+            right: "0px",
+          }}
+        />
+      </Paper>
+      {/* Full size sidebar */}
+      <NavList
+        setSidebarOpen={props.setOpen}
+        permanent={props.permanent}
+        togglePermanent={props.togglePermanent}
+      />
+    </Paper>
   );
-}
+};
+
+export default Sidebar;

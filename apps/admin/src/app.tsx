@@ -14,6 +14,7 @@ import MapsPage from "./pages/maps/index.tsx";
 import ToolsPage from "./pages/tools/index.tsx";
 
 import useAppStateStore from "./store/use-app-state-store.ts";
+import SettingsPage from "./pages/settings/index.tsx";
 
 const queryClient = new QueryClient({
   defaultOptions: queryConfig,
@@ -40,6 +41,10 @@ const router = createBrowserRouter([
       {
         path: "tools",
         element: <ToolsPage />,
+      },
+      {
+        path: "settings",
+        element: <SettingsPage />,
       },
     ],
   },

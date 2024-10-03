@@ -1,54 +1,50 @@
-"use client";
-
-import { Box, IconButton, Tooltip } from "@mui/material";
+import SquareIconButton from "./square-icon-button";
 import LockIcon from "@mui/icons-material/Lock";
 import LockOpenIcon from "@mui/icons-material/LockOpen";
 import { useState } from "react";
 
 interface Props {
-  drawerPermanent: boolean;
-  toggleDrawerPermanent: () => void;
+  permanent: boolean;
+  togglePermanent: () => void;
+  sx?: object;
 }
-
-export default function PermanentButton(props: Props) {
-  const [drawerMouseOverLock, setDrawerMouseOverLock] = useState(false);
+const PermanentButton = (props: Props) => {
+  const [mouseIsOver, setMouseIsOver] = useState(false);
 
   const handleMouseEnter = () => {
-    setDrawerMouseOverLock(true);
+    setMouseIsOver(true);
   };
 
   const handleMouseLeave = () => {
-    setDrawerMouseOverLock(false);
+    setMouseIsOver(false);
+  };
+
+  const getIcon = () => {
+    if (props.permanent) {
+      return mouseIsOver ? (
+        <LockOpenIcon fontSize="medium" />
+      ) : (
+        <LockIcon fontSize="medium" />
+      );
+    } else {
+      return mouseIsOver ? (
+        <LockIcon fontSize="medium" />
+      ) : (
+        <LockOpenIcon fontSize="medium" />
+      );
+    }
   };
 
   return (
-    <Box sx={{ l: "block", md: "none" }}>
-      <Tooltip
-        disableInteractive
-        title={
-          (props.drawerPermanent ? "Lås upp" : "Lås fast") + " sidopanelen"
-        }
-      >
-        <IconButton
-          sx={{ margin: "-12px", color: (theme) => theme.palette.text.primary }} // Ugh... However, it tightens everything up
-          onClick={props.toggleDrawerPermanent}
-          onMouseEnter={handleMouseEnter}
-          onMouseLeave={handleMouseLeave}
-          size="large"
-        >
-          {props.drawerPermanent ? (
-            drawerMouseOverLock ? (
-              <LockOpenIcon />
-            ) : (
-              <LockIcon />
-            )
-          ) : drawerMouseOverLock ? (
-            <LockIcon />
-          ) : (
-            <LockOpenIcon />
-          )}
-        </IconButton>
-      </Tooltip>
-    </Box>
+    <SquareIconButton
+      onClick={props.togglePermanent}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
+      sx={{ ...props.sx }}
+    >
+      {getIcon()}
+    </SquareIconButton>
   );
-}
+};
+
+export default PermanentButton;
