@@ -4,11 +4,11 @@ import LockOpenIcon from "@mui/icons-material/LockOpen";
 import { useState } from "react";
 
 interface Props {
-  permanent: boolean;
-  togglePermanent: () => void;
+  locked: boolean;
+  toggleLocked: () => void;
   sx?: object;
 }
-const PermanentButton = (props: Props) => {
+const LockButton = (props: Props) => {
   const [mouseIsOver, setMouseIsOver] = useState(false);
 
   const handleMouseEnter = () => {
@@ -20,7 +20,7 @@ const PermanentButton = (props: Props) => {
   };
 
   const getIcon = () => {
-    if (props.permanent) {
+    if (props.locked) {
       return mouseIsOver ? (
         <LockOpenIcon fontSize="medium" />
       ) : (
@@ -37,7 +37,7 @@ const PermanentButton = (props: Props) => {
 
   return (
     <SquareIconButton
-      onClick={props.togglePermanent}
+      onClick={props.toggleLocked}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
       sx={{ ...props.sx }}
@@ -47,4 +47,4 @@ const PermanentButton = (props: Props) => {
   );
 };
 
-export default PermanentButton;
+export default LockButton;

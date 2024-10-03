@@ -2,6 +2,7 @@ import { VerticalAlignTop as ScrollToTopIcon } from "@mui/icons-material";
 import { Box, Typography, IconButton, useTheme } from "@mui/material";
 import React, { useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
+import { useLocation } from "react-router-dom";
 
 interface Props {
   children: React.ReactNode;
@@ -13,8 +14,14 @@ const Page = (props: Props) => {
   const [hasVerticalScroll, setHasVerticalScroll] = React.useState(false);
   const scrollTimeout = useRef<unknown>(null);
 
-  const scrollToTop = () => {
-    window.scrollTo({ top: 0, behavior: "smooth" });
+  const { pathname } = useLocation();
+
+  useEffect(() => {
+    scrollToTop("instant");
+  }, [pathname]);
+
+  const scrollToTop = (behavior: ScrollBehavior) => {
+    window.scrollTo({ top: 0, behavior: behavior });
   };
 
   const onScroll = () => {
@@ -71,7 +78,9 @@ const Page = (props: Props) => {
         }}
       >
         <IconButton
-          onClick={scrollToTop}
+          onClick={() => {
+            scrollToTop("smooth");
+          }}
           aria-label={t("common.scrolltotop")}
           disabled={!hasVerticalScroll}
           title={t("common.scrolltotop")}

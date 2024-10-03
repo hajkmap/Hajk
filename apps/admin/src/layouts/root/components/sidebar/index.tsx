@@ -1,6 +1,6 @@
 import { Paper, useTheme } from "@mui/material";
 import MenuIcon from "@mui/icons-material/Menu";
-import PermanentButton from "./permanent-button";
+import LockButton from "./lock-button";
 import {
   HEADER_HEIGHT,
   SIDEBAR_MINI_WIDTH,
@@ -13,8 +13,8 @@ import NavList from "./nav-list";
 interface Props {
   open: boolean;
   setOpen: (open: boolean) => void;
-  permanent: boolean;
-  togglePermanent: () => void;
+  locked: boolean;
+  toggleLocked: () => void;
 }
 
 const Sidebar = (props: Props) => {
@@ -54,9 +54,9 @@ const Sidebar = (props: Props) => {
         <SquareIconButton onClick={() => props.setOpen(!props.open)}>
           <MenuIcon fontSize="large" />
         </SquareIconButton>
-        <PermanentButton
-          togglePermanent={props.togglePermanent}
-          permanent={props.permanent}
+        <LockButton
+          toggleLocked={props.toggleLocked}
+          locked={props.locked}
           sx={{
             position: "absolute",
             bottom: "0px",
@@ -67,8 +67,8 @@ const Sidebar = (props: Props) => {
       {/* Full size sidebar */}
       <NavList
         setSidebarOpen={props.setOpen}
-        permanent={props.permanent}
-        togglePermanent={props.togglePermanent}
+        locked={props.locked}
+        toggleLocked={props.toggleLocked}
       />
     </Paper>
   );

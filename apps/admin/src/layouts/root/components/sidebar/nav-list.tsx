@@ -1,6 +1,6 @@
 import { Box, useTheme } from "@mui/material";
 import { SIDEBAR_MENU, SIDEBAR_MINI_WIDTH } from "../../constants";
-import PermanentButton from "./permanent-button";
+import LockButton from "./lock-button";
 import NavItem from "./nav-item";
 import SquareIconButton from "./square-icon-button";
 import SettingsIcon from "@mui/icons-material/Settings";
@@ -8,15 +8,15 @@ import { useNavigate } from "react-router-dom";
 
 interface Props {
   setSidebarOpen: (open: boolean) => void;
-  permanent: boolean;
-  togglePermanent: () => void;
+  locked: boolean;
+  toggleLocked: () => void;
 }
 const NavList = (props: Props) => {
   const theme = useTheme();
   const navigate = useNavigate();
 
   const closeSidebarIfNeeded = () => {
-    if (!props.permanent) {
+    if (!props.locked) {
       props.setSidebarOpen(false);
     }
   };
@@ -61,9 +61,9 @@ const NavList = (props: Props) => {
       >
         <SettingsIcon fontSize="medium" />
       </SquareIconButton>
-      <PermanentButton
-        togglePermanent={props.togglePermanent}
-        permanent={props.permanent}
+      <LockButton
+        toggleLocked={props.toggleLocked}
+        locked={props.locked}
         sx={{
           position: "absolute",
           bottom: `${SIDEBAR_MINI_WIDTH}px`,
