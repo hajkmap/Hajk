@@ -9,19 +9,21 @@ import {
   SIDEBAR_WIDTH,
   SIDEBAR_ZINDEX,
 } from "./constants";
+import useAppStateStore from "../../store/use-app-state-store";
 
 export default function RootLayout() {
-  const [sidebarOpen, setSidebarOpen] = React.useState(false);
-  const [sidebarPermanent, setSidebarPermanent] = React.useState(false);
+  const sidebarLocked = useAppStateStore((state) => state.sidebarLocked);
+  const setSidebarLocked = useAppStateStore((state) => state.setSidebarLocked);
+  const [sidebarOpen, setSidebarOpen] = React.useState(sidebarLocked);
   const theme = useTheme();
 
-  const toggleSidebarPermanent = () => {
-    setSidebarOpen(!sidebarPermanent);
-    setSidebarPermanent(!sidebarPermanent);
+  const toggleSidebarLocked = () => {
+    setSidebarOpen(!sidebarLocked);
+    setSidebarLocked(!sidebarLocked);
   };
 
   const showOverlay = () => {
-    return sidebarOpen && !sidebarPermanent;
+    return sidebarOpen && !sidebarLocked;
   };
 
   return (
@@ -38,8 +40,8 @@ export default function RootLayout() {
       <Sidebar
         open={sidebarOpen}
         setOpen={setSidebarOpen}
-        permanent={sidebarPermanent}
-        togglePermanent={toggleSidebarPermanent}
+        locked={sidebarLocked}
+        toggleLocked={toggleSidebarLocked}
       />
       <Box
         component="main"
@@ -47,7 +49,7 @@ export default function RootLayout() {
         sx={{
           paddingTop: `${HEADER_HEIGHT}px`,
           marginLeft:
-            sidebarOpen && sidebarPermanent
+            sidebarOpen && sidebarLocked
               ? `${SIDEBAR_WIDTH}px`
               : `${SIDEBAR_MINI_WIDTH}px`,
           minHeight: "100vh",
@@ -58,7 +60,7 @@ export default function RootLayout() {
       >
         <Box
           onClick={(e) => {
-            if (sidebarOpen && !sidebarPermanent) {
+            if (sidebarOpen && !sidebarLocked) {
               setSidebarOpen(false);
               e.preventDefault();
             }

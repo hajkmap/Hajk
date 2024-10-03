@@ -5,10 +5,12 @@ import i18n, { Language } from "../i18n/i18n";
 interface AppState {
   language: string;
   themeMode: PaletteMode;
+  sidebarLocked: boolean;
   apiBaseUrl: string;
   loading: boolean;
   setLanguage: (lang: Language) => void;
   setThemeMode: (theme: PaletteMode) => void;
+  setSidebarLocked : (locked: boolean) => void;
   loadConfig: () => Promise<void>;
 }
 
@@ -23,9 +25,21 @@ const getDefaultThemeMode = () => {
   return defaultThemeMode;
 };
 
+const getDefaultSidebarLocked = () => {
+  
+  const value = localStorage.getItem("sidebarLocked");
+
+  if(!value) {
+    // Locked as default
+    return true;
+  }
+  return value === "true" ? true : false;
+}
+
 const useAppStateStore = create<AppState>((set) => ({
   language: localStorage.getItem("language") ?? "sv",
   themeMode: getDefaultThemeMode(),
+  sidebarLocked: getDefaultSidebarLocked(),
   apiBaseUrl: "",
   loading: true,
 
@@ -38,6 +52,11 @@ const useAppStateStore = create<AppState>((set) => ({
   setThemeMode: (mode: PaletteMode) => {
     localStorage.setItem("userPreferredTheme", mode);
     set({ themeMode: mode });
+  },
+
+  setSidebarLocked: (locked: boolean) => {
+    localStorage.setItem("sidebarLocked", locked.toString());
+    set({ sidebarLocked: locked });
   },
 
   loadConfig: async () => {
