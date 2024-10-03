@@ -17,6 +17,11 @@ import { getApiClient, InternalApiError } from "../../lib/internal-api-client";
  * - The `getMapByName` function fetches details of a specific map by its name.
  * - The `getLayersByMapName` function retrieves all layers linked to a given map name.
  * - The `getToolsByMapName` function fetches all tools linked to a given map name.
+ * - The `getGroupsByMapName` function fetches all groups linked to a given map name.
+ * - The `getProjectionsByMapName` function fetches the projections linked to a given map name.
+ * - The `createMap` function creates a new map.
+ * - The `updateMap` function updates a map.
+ * - The `deleteMap` function deletes a map.
  *
  * These functions utilize a custom Axios instance and throw appropriate error messages for failures.
  *
@@ -185,12 +190,12 @@ export const createMap = async (newMap: MapMutation): Promise<MapMutation> => {
   }
 };
 
+// CURRENTLY NOT BEING USED
 export const updateMap = async (
   mapName: string,
   data: Partial<MapMutation>
 ): Promise<void> => {
   const internalApiClient = getApiClient();
-
   try {
     await internalApiClient.patch(`/maps/${mapName}`, data);
   } catch (error) {
@@ -202,6 +207,23 @@ export const updateMap = async (
       );
     } else {
       throw new Error(`Failed to update map.`);
+    }
+  }
+};
+
+export const deleteMap = async (mapName: string): Promise<void> => {
+  const internalApiClient = getApiClient();
+  try {
+    await internalApiClient.delete(`/maps/${mapName}`);
+  } catch (error) {
+    const axiosError = error as InternalApiError;
+
+    if (axiosError.response) {
+      throw new Error(
+        `Failed to delete map. ErrorId: ${axiosError.response.data.errorId}.`
+      );
+    } else {
+      throw new Error(`Failed to delete map.`);
     }
   }
 };

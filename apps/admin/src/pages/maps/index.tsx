@@ -9,12 +9,15 @@ import {
   TextField,
   FormControlLabel,
   Checkbox,
+  IconButton,
+  Box,
 } from "@mui/material";
 import { useTranslation } from "react-i18next";
-import { useMaps, useCreateMap } from "../../api/maps";
+import { useMaps, useCreateMap, useDeleteMap } from "../../api/maps";
 import Page from "../../layouts/root/components/page";
 import LanguageSwitcher from "../../components/language-switcher";
 import ThemeSwitcher from "../../components/theme-switcher";
+import DeleteIcon from "@mui/icons-material/Delete";
 
 export default function MapsPage() {
   const [id, setId] = useState<number>(0);
@@ -23,6 +26,11 @@ export default function MapsPage() {
   const [options, setOptions] = useState<Record<string, string>>({});
 
   const createMapMutation = useCreateMap();
+  const deleteMapMutation = useDeleteMap();
+
+  const handleDeleteMap = (mapName: string) => {
+    deleteMapMutation.mutate(mapName);
+  };
 
   const handleOptionChange = (key: string, value: string) => {
     setOptions((prevOptions) => ({
@@ -74,7 +82,22 @@ export default function MapsPage() {
               {maps?.map((map) => (
                 <ListItem key={map} sx={{ padding: "10px 10px 10px 0" }}>
                   <Paper sx={{ width: "100%", p: 2 }} elevation={4}>
-                    <Typography>{map}</Typography>
+                    <Box
+                      sx={{
+                        display: "flex",
+                        justifyContent: "space-between",
+                        alignItems: "center",
+                      }}
+                    >
+                      <Typography>{map}</Typography>
+                      <IconButton
+                        edge="end"
+                        aria-label="delete"
+                        onClick={() => handleDeleteMap(map)}
+                      >
+                        <DeleteIcon />
+                      </IconButton>
+                    </Box>
                   </Paper>
                 </ListItem>
               ))}

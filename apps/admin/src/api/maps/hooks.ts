@@ -12,6 +12,7 @@ import {
   getProjectionsByMapName,
   getToolsByMapName,
   createMap,
+  deleteMap,
 } from "./requests";
 import { Map, ProjectionsApiResponse, GroupApiResponse } from "./types";
 import { LayersApiResponse } from "../layers/types";
@@ -87,6 +88,21 @@ export const useCreateMap = () => {
     mutationFn: createMap,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["maps"] });
+    },
+  });
+};
+
+// React mutation to delete a map
+// This hook uses the `deleteMap` function from the `requests` module
+export const useDeleteMap = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (mapName: string) => deleteMap(mapName),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["maps"] });
+    },
+    onError: (error) => {
+      console.error(error);
     },
   });
 };
