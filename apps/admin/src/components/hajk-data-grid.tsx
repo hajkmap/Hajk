@@ -11,6 +11,7 @@ import {
   GridLocaleText,
 } from "@mui/x-data-grid";
 import { TextField, Box } from "@mui/material";
+import { grey } from "@mui/material/colors";
 
 interface HajkDataGridProps {
   rows: object[];
@@ -82,6 +83,9 @@ export default function HajkDataGrid({
         }}
         sx={{
           boxShadow: 2,
+          "& .MuiDataGrid-columnSeparator": {
+            color: grey[600],
+          },
           [`& .${gridClasses.cell}:focus, & .${gridClasses.cell}:focus-within`]:
             {
               outline: "none",

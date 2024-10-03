@@ -1,10 +1,13 @@
-import { Typography, Button, Box, Tooltip } from "@mui/material";
+import { Typography, Button, Tooltip } from "@mui/material";
+import Grid from "@mui/material/Grid2";
 import { useLayers } from "../../api/layers";
 import { useTranslation } from "react-i18next";
 import HajkDataGrid from "../../components/hajk-data-grid";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
 import WarningAmberIcon from "@mui/icons-material/WarningAmber";
 import { grey } from "@mui/material/colors";
+import LanguageSwitcher from "../../components/language-switcher";
+import ThemeSwitcher from "../../components/theme-switcher";
 
 export default function LayersPage() {
   const { t } = useTranslation();
@@ -62,7 +65,7 @@ export default function LayersPage() {
     {
       field: "isBroken",
       headerName: GRID_SWEDISH_LOCALE_TEXT.columnHeaderIsBroken,
-      minWidth: 150,
+      minWidth: 110,
       flex: 0.1,
       renderCell: () => (
         <Tooltip title={GRID_SWEDISH_LOCALE_TEXT.brokenLayerWarning}>
@@ -102,16 +105,37 @@ export default function LayersPage() {
     })) ?? [];
 
   return (
-    <Box sx={{ m: 3 }}>
-      <Typography variant="h3" textAlign="left">
-        {t("common.layers")}
-      </Typography>
+    <Grid size={12} sx={{ m: 3 }}>
+      <Grid size={12} container justifyContent={"space-between"}>
+        <Grid size={6}>
+          <Typography variant="h3" textAlign="left">
+            {t("common.layers")}
+          </Typography>
+        </Grid>
+        <Grid
+          size={6}
+          display={"flex"}
+          justifyContent={"flex-end"}
+          alignItems={"end"}
+        >
+          <Button
+            variant="contained"
+            sx={{ backgroundColor: "black", height: "35px", width: "180px" }}
+          >
+            Lägg till {t("common.layers")}
+          </Button>
+        </Grid>
+      </Grid>
       <HajkDataGrid
         rows={rows}
         columns={columns}
         localeText={GRID_SWEDISH_LOCALE_TEXT}
-        searchPlaceholder="Search for layers..."
+        searchPlaceholder="Sök på lager..."
       />
-    </Box>
+      <Grid container gap={2} size={12} sx={{ mt: 2 }}>
+        <ThemeSwitcher />
+        <LanguageSwitcher />
+      </Grid>
+    </Grid>
   );
 }
