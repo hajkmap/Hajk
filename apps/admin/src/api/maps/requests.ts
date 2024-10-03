@@ -3,6 +3,7 @@ import {
   MapsApiResponse,
   ProjectionsApiResponse,
   GroupApiResponse,
+  MapMutation,
 } from "./types";
 import { LayersApiResponse } from "../layers/types";
 import { ToolsApiResponse } from "../tools/types";
@@ -160,6 +161,47 @@ export const getToolsByMapName = async (
       );
     } else {
       throw new Error(`Failed to fetch tools.`);
+    }
+  }
+};
+
+export const createMap = async (newMap: MapMutation): Promise<MapMutation> => {
+  const internalApiClient = getApiClient();
+  try {
+    const response = await internalApiClient.post<MapMutation>("/maps", newMap);
+    if (!response.data) {
+      throw new Error("No map data found");
+    }
+    return response.data;
+  } catch (error) {
+    const axiosError = error as InternalApiError;
+    if (axiosError.response) {
+      throw new Error(
+        `Failed to create map. ErrorId: ${axiosError.response.data.errorId}.`
+      );
+    } else {
+      throw new Error(`Failed to create map.`);
+    }
+  }
+};
+
+export const updateMap = async (
+  mapName: string,
+  data: Partial<MapMutation>
+): Promise<void> => {
+  const internalApiClient = getApiClient();
+
+  try {
+    await internalApiClient.patch(`/maps/${mapName}`, data);
+  } catch (error) {
+    const axiosError = error as InternalApiError;
+
+    if (axiosError.response) {
+      throw new Error(
+        `Failed to update map. ErrorId: ${axiosError.response.data.errorId}.`
+      );
+    } else {
+      throw new Error(`Failed to update map.`);
     }
   }
 };

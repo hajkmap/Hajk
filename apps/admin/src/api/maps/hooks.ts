@@ -1,4 +1,9 @@
-import { useQuery, UseQueryResult } from "@tanstack/react-query";
+import {
+  useQuery,
+  UseQueryResult,
+  useMutation,
+  useQueryClient,
+} from "@tanstack/react-query";
 import {
   getMaps,
   getMapByName,
@@ -6,6 +11,7 @@ import {
   getLayersByMapName,
   getProjectionsByMapName,
   getToolsByMapName,
+  createMap,
 } from "./requests";
 import { Map, ProjectionsApiResponse, GroupApiResponse } from "./types";
 import { LayersApiResponse } from "../layers/types";
@@ -70,5 +76,17 @@ export const useToolsByMapName = (
   return useQuery({
     queryKey: ["toolsByMap", mapName],
     queryFn: () => getToolsByMapName(mapName),
+  });
+};
+
+// React mutation to create a new map
+// This hook uses the `createMap` function from the `requests` module
+export const useCreateMap = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: createMap,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["maps"] });
+    },
   });
 };
