@@ -115,12 +115,21 @@ export default function LayersPage() {
     },
     {
       field: "name",
-      minWidth: 180,
+      minWidth: 150,
       flex: 0.2,
       editable: false,
       renderHeader: () => <strong>{localizedTextsMap.columnHeaderName}</strong>,
       renderCell: (params) => (
-        <div style={{ userSelect: "none" }}>{params.value}</div>
+        <div
+          style={{
+            userSelect: "none",
+            whiteSpace: "nowrap",
+            overflow: "hidden",
+            textOverflow: "ellipsis",
+          }}
+        >
+          {params.value}
+        </div>
       ),
     },
     {
@@ -130,7 +139,16 @@ export default function LayersPage() {
       editable: false,
       renderHeader: () => <strong>{localizedTextsMap.columnHeaderURL}</strong>,
       renderCell: (params) => (
-        <div style={{ userSelect: "none" }}>{params.value}</div>
+        <div
+          style={{
+            userSelect: "none",
+            whiteSpace: "nowrap",
+            overflow: "hidden",
+            textOverflow: "ellipsis",
+          }}
+        >
+          {params.value}
+        </div>
       ),
     },
     {
