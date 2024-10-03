@@ -17,13 +17,10 @@ const Page = (props: Props) => {
   const { pathname } = useLocation();
 
   useEffect(() => {
-    document.documentElement.style.scrollBehavior = "auto"; // Disable smooth scrolling
-    window.scrollTo({ top: 0 });
-    document.documentElement.style.scrollBehavior = ""; // Reset to default
-    console.log("pathname", pathname);
+    scrollToTop("instant");
   }, [pathname]);
 
-  const scrollToTop = (behavior: "auto" | "smooth" = "smooth") => {
+  const scrollToTop = (behavior: ScrollBehavior) => {
     window.scrollTo({ top: 0, behavior: behavior });
   };
 
@@ -81,7 +78,9 @@ const Page = (props: Props) => {
         }}
       >
         <IconButton
-          onClick={scrollToTop}
+          onClick={() => {
+            scrollToTop("smooth");
+          }}
           aria-label={t("common.scrolltotop")}
           disabled={!hasVerticalScroll}
           title={t("common.scrolltotop")}
