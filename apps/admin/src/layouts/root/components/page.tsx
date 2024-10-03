@@ -63,11 +63,6 @@ const Page = (props: Props) => {
 
       {props.children}
 
-      <br />
-      {/* Keeping this comment below for a while so I can easily test the scroll-to-top button */}
-      {Array.from({ length: 250 }, (_, index) => (
-        <div key={index}>{index + 1}</div>
-      ))}
       <Box
         sx={{
           position: "fixed",
