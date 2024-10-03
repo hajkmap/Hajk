@@ -8,6 +8,7 @@ import {
   GridToolbarDensitySelector,
   GridToolbarFilterButton,
   GridToolbarColumnsButton,
+  GridLocaleText,
 } from "@mui/x-data-grid";
 import { Typography, TextField, Box, Tooltip } from "@mui/material";
 import { useTranslation } from "react-i18next";
@@ -27,9 +28,44 @@ export default function LayersPage() {
     error: layersError,
   } = useLayers();
 
-  const themeMode = useAppStateStore((state) => state.themeMode);
-  const setThemeMode = useAppStateStore((state) => state.setThemeMode);
   const configLoading = useAppStateStore((state) => state.loadConfig);
+  console.log(configLoading);
+
+  interface CustomGridLocaleText extends GridLocaleText {
+    columnHeaderService?: string;
+    columnHeaderName?: string;
+    columnHeaderURL?: string;
+    columnHeaderUsedBy?: string;
+    columnHeaderIsBroken?: string;
+    columnHeaderActions?: string;
+    brokenLayerWarning?: string;
+  }
+
+  const GRID_SWEDISH_LOCALE_TEXT: Partial<CustomGridLocaleText> = {
+    columnMenuUnsort: "Ingen sortering",
+    columnMenuSortAsc: "Sortera på ordning stigande",
+    columnMenuSortDesc: "Sortera på ordning fallande",
+    columnMenuFilter: "Filtrera",
+    columnMenuHideColumn: "Göm kolumner",
+    columnMenuShowColumns: "Visa kolumner",
+    columnHeaderService: "Tjänstetyp",
+    columnHeaderName: "Internt namn",
+    columnHeaderURL: "URL",
+    columnHeaderUsedBy: "Används i kartor",
+    columnHeaderIsBroken: "Trasigt lager",
+    columnHeaderActions: "Åtgärder",
+    brokenLayerWarning: "Lagret är fucking trasigt bror, fixa",
+    toolbarDensity: "Densitet",
+    toolbarDensityLabel: "Densitet",
+    toolbarDensityCompact: "Kompakt",
+    toolbarDensityStandard: "Standard",
+    toolbarDensityComfortable: "Komfortabel",
+    toolbarFilters: "Filter",
+    toolbarFiltersLabel: "Visa filter",
+    toolbarFiltersTooltipShow: "Visa filter",
+    toolbarColumns: "Kolumner",
+    toolbarColumnsLabel: "Välj kolumner",
+  };
 
   const [searchQuery, setSearchQuery] = useState("");
   const [dynamicLabel, setDynamicLabel] = useState(
@@ -44,60 +80,6 @@ export default function LayersPage() {
     return <Typography>Error loading data</Typography>;
   }
 
-  interface LocalizedTextsMap {
-    columnMenuUnsort: string;
-    columnMenuSortAsc: string;
-    columnMenuSortDesc: string;
-    columnMenuFilter: string;
-    columnMenuHideColumn: string;
-    columnMenuShowColumns: string;
-    columnMenuHandleColumn: string;
-    columnHeaderService: string;
-    columnHeaderName: string;
-    columnHeaderURL: string;
-    columnHeaderUsedBy: string;
-    columnHeaderIsBroken: string;
-    columnHeaderActions: string;
-    toolbarColumns: string;
-    toolbarColumnsLabel: string;
-    toolbarDensity: string;
-    toolbarDensityLabel: string;
-    toolbarDensityCompact: string;
-    toolbarDensityStandard: string;
-    toolbarDensityComfortable: string;
-    toolbarFilters: string;
-    toolbarFiltersLabel: string;
-    toolbarFiltersTooltipShow: string;
-    brokenLayerWarning: string;
-  }
-
-  const localizedTextsMap: LocalizedTextsMap = {
-    columnMenuUnsort: "Ingen sortering",
-    columnMenuSortAsc: "Sortera på ordning stigande",
-    columnMenuSortDesc: "Sortera på ordning fallande",
-    columnMenuFilter: "Filtrera",
-    columnMenuHideColumn: "Göm kolumner",
-    columnMenuShowColumns: "Visa kolumner",
-    columnMenuHandleColumn: "Hantera kolumner",
-    columnHeaderService: "Tjänstetyp",
-    columnHeaderName: "Internt namn",
-    columnHeaderURL: "URL",
-    columnHeaderUsedBy: "Används i kartor",
-    columnHeaderIsBroken: "Trasigt lager",
-    columnHeaderActions: "Åtgärder",
-    toolbarDensity: "Densitet",
-    toolbarDensityLabel: "Densitet",
-    toolbarDensityCompact: "Kompakt",
-    toolbarDensityStandard: "Standard",
-    toolbarDensityComfortable: "Komfortabel",
-    toolbarFilters: "Filter",
-    toolbarFiltersLabel: "Visa filter",
-    toolbarFiltersTooltipShow: "Visa filter",
-    toolbarColumns: "Kolumner",
-    toolbarColumnsLabel: "Välj kolumner",
-    brokenLayerWarning: "Lagret är fucking trasigt bror, fixa",
-  };
-
   const columns: GridColDef[] = [
     {
       field: "serviceType",
@@ -105,7 +87,7 @@ export default function LayersPage() {
       flex: 0.1,
       editable: false,
       renderHeader: () => (
-        <strong>{localizedTextsMap.columnHeaderService}</strong>
+        <strong>{GRID_SWEDISH_LOCALE_TEXT.columnHeaderService}</strong>
       ),
       renderCell: (params) => (
         <div style={{ userSelect: "none" }}>{params.value}</div>
@@ -118,7 +100,9 @@ export default function LayersPage() {
       minWidth: 150,
       flex: 0.2,
       editable: false,
-      renderHeader: () => <strong>{localizedTextsMap.columnHeaderName}</strong>,
+      renderHeader: () => (
+        <strong>{GRID_SWEDISH_LOCALE_TEXT.columnHeaderName}</strong>
+      ),
       renderCell: (params) => (
         <div
           style={{
@@ -137,7 +121,9 @@ export default function LayersPage() {
       minWidth: 300,
       flex: 0.4,
       editable: false,
-      renderHeader: () => <strong>{localizedTextsMap.columnHeaderURL}</strong>,
+      renderHeader: () => (
+        <strong>{GRID_SWEDISH_LOCALE_TEXT.columnHeaderURL}</strong>
+      ),
       renderCell: (params) => (
         <div
           style={{
@@ -157,7 +143,7 @@ export default function LayersPage() {
       flex: 0.1,
       editable: false,
       renderHeader: () => (
-        <strong>{localizedTextsMap.columnHeaderUsedBy}</strong>
+        <strong>{GRID_SWEDISH_LOCALE_TEXT.columnHeaderUsedBy}</strong>
       ),
       renderCell: (params) => (
         <div style={{ userSelect: "none" }}>{params.value}</div>
@@ -169,7 +155,7 @@ export default function LayersPage() {
       flex: 0.1,
       editable: false,
       renderHeader: () => (
-        <strong>{localizedTextsMap.columnHeaderIsBroken}</strong>
+        <strong>{GRID_SWEDISH_LOCALE_TEXT.columnHeaderIsBroken}</strong>
       ),
       renderCell: (params) =>
         params.value !== 1 ? (
@@ -182,7 +168,7 @@ export default function LayersPage() {
               alignItems: "center",
             }}
           >
-            <Tooltip title={localizedTextsMap.brokenLayerWarning}>
+            <Tooltip title={GRID_SWEDISH_LOCALE_TEXT.brokenLayerWarning}>
               <WarningAmberIcon
                 sx={{ color: "black", maxWidth: "fit-content" }}
               />
@@ -200,7 +186,7 @@ export default function LayersPage() {
       sortable: false,
       filterable: false,
       renderHeader: () => (
-        <strong>{localizedTextsMap.columnHeaderActions}</strong>
+        <strong>{GRID_SWEDISH_LOCALE_TEXT.columnHeaderActions}</strong>
       ),
       renderCell: () => (
         <div
@@ -299,7 +285,7 @@ export default function LayersPage() {
       <DataGrid
         autoHeight
         disableRowSelectionOnClick
-        localeText={localizedTextsMap}
+        localeText={GRID_SWEDISH_LOCALE_TEXT}
         rows={filteredRows ?? []}
         columns={columns}
         pageSizeOptions={[5, 10, 100]}
@@ -314,14 +300,7 @@ export default function LayersPage() {
           toolbar: CustomToolbar,
         }}
         sx={{
-          // border: "none",
-          // "& .MuiDataGrid-cell": {
-          //   marginRight: "20px",
-          // },
-          // "& .MuiDataGrid-columnHeader": {
-          //   marginRight: "20px",
-          //   border: "none !important",
-          // },
+          boxShadow: 2,
           [`& .${gridClasses.cell}:focus, & .${gridClasses.cell}:focus-within`]:
             {
               outline: "none",
@@ -330,16 +309,6 @@ export default function LayersPage() {
             {
               outline: "none",
             },
-          // "& .MuiDataGrid-row:hover": {
-          //   backgroundColor: "rgba(0, 0, 0, 0.1)",
-          // },
-          // "& .MuiDataGrid-columnSeparator": {
-          //   display: "none",
-          // },
-          // [`& .${gridClasses.row}`]: {
-          //   // bgcolor:theme=>theme.palette.mode === 'light' ? grey[200] : grey[900],
-          // },
-          // "&, [class^=MuiDataGrid]": { border: "none" },
         }}
       ></DataGrid>
     </Box>
