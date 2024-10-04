@@ -53,6 +53,49 @@ class BookmarksModel {
       });
   }
 
+  getVisibleSubLayers() {
+    const partlyToggledGroupLayers = {};
+
+    // Loop through the layers in the map
+    this.map
+      .getLayers()
+      .getArray()
+      .filter((layer) => {
+        return (
+          layer.getVisible() &&
+          layer.getProperties().name &&
+          isValidLayerId(layer.getProperties().name) &&
+          layer.getProperties().layerType === "group" &&
+          layer.subLayers?.length !==
+            layer.getSource().getParams?.().LAYERS?.split(",").length
+        );
+      })
+      .forEach((layer) => {
+        partlyToggledGroupLayers[layer.getProperties().name] = layer
+          .getSource()
+          .getParams().LAYERS;
+      });
+
+    return partlyToggledGroupLayers;
+  }
+
+  setVisibleSubLayers(visibleSubLayers) {
+    this.map
+      .getLayers()
+      .getArray()
+      .forEach((layer) => {
+        const layerName = layer.getProperties().name;
+
+        if (visibleSubLayers[layerName]) {
+          const subLayers = visibleSubLayers[layerName];
+
+          layer.getSource().updateParams({
+            LAYERS: subLayers,
+          });
+        }
+      });
+  }
+
   getMapState() {
     const view = this.map.getView();
     const viewCenter = view.getCenter();
@@ -62,11 +105,14 @@ class BookmarksModel {
       z: view.getZoom(),
     };
 
-    return {
+    const state = {
       m: this.app.config.activeMap,
       l: this.getVisibleLayers(),
+      gl: this.getVisibleSubLayers(),
       ...pos,
     };
+
+    return state;
   }
 
   setMapState(bookmark) {
@@ -75,6 +121,8 @@ class BookmarksModel {
     }
     bookmark = this.getDecodedBookmark(bookmark);
     this.setVisibleLayers(bookmark.settings.l);
+    this.setVisibleSubLayers(bookmark.settings.gl);
+
     let view = this.map.getView();
     view.setCenter([bookmark.settings.x, bookmark.settings.y]);
     view.setZoom(bookmark.settings.z);
