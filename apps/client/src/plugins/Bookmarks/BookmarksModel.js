@@ -119,13 +119,21 @@ class BookmarksModel {
     if (!bookmark) {
       return;
     }
-    bookmark = this.getDecodedBookmark(bookmark);
-    this.setVisibleLayers(bookmark.settings.l);
-    this.setVisibleSubLayers(bookmark.settings.gl);
 
+    bookmark = this.getDecodedBookmark(bookmark);
+
+    this.setVisibleLayers(bookmark.settings.l);
+
+    // Check if the 'gl' parameter exists in the bookmark, if so, apply it, otherwise skip
+    if (bookmark.settings.gl) {
+      this.setVisibleSubLayers(bookmark.settings.gl);
+    }
+
+    // Set map view
     let view = this.map.getView();
     view.setCenter([bookmark.settings.x, bookmark.settings.y]);
     view.setZoom(bookmark.settings.z);
+
     bookmark = null;
   }
 
