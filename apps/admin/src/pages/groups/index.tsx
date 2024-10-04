@@ -9,8 +9,6 @@ export default function GroupsPage() {
   const { t } = useTranslation();
   const { data: groups, isLoading } = useGroups();
 
-  console.log("groups", groups);
-
   return (
     <Page title={t("common.groups")}>
       {isLoading ? (

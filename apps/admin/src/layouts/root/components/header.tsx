@@ -116,7 +116,11 @@ export default function Header() {
           <AvatarGroup max={4} sx={{ display: { xs: "none", sm: "flex" } }}>
             {userList.map((user) => {
               return (
-                <HajkTooltip key={user.id} title={user.name}>
+                <HajkTooltip
+                  key={user.id}
+                  title={user.name}
+                  placement="bottom-end"
+                >
                   <Avatar
                     key={user.id + "avatar"}
                     alt={user.name}
@@ -143,6 +147,7 @@ export default function Header() {
             <HajkTooltip
               key={activeUser.id}
               title={activeUser.name + ` (${t("common.you")})`}
+              placement="bottom-end"
             >
               <Avatar
                 onClick={(e) => {
