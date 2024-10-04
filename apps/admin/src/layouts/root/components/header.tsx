@@ -15,6 +15,7 @@ import {
 import SettingsIcon from "@mui/icons-material/Settings";
 import { useEffect, useState } from "react";
 import { HEADER_HEIGHT, HEADER_ZINDEX } from "../constants";
+import HajkTooltip from "../../../components/hajk-tooltip";
 
 class DummyUser {
   public id: string;
@@ -115,45 +116,59 @@ export default function Header() {
           <AvatarGroup max={4} sx={{ display: { xs: "none", sm: "flex" } }}>
             {userList.map((user) => {
               return (
-                <Avatar
-                  key={user.id}
-                  alt={user.name}
-                  sx={{
-                    width: "30px",
-                    height: "30px",
-                    fontSize: "0.9rem",
-                  }}
-                >
-                  {getUserInitials(user)}
-                </Avatar>
+                <HajkTooltip key={user.id} title={user.name}>
+                  <Avatar
+                    key={user.id + "avatar"}
+                    alt={user.name}
+                    sx={{
+                      width: "30px",
+                      height: "30px",
+                      fontSize: "0.9rem",
+                      transition:
+                        "transform 200ms ease, background-color 200ms ease",
+                      "&:hover": {
+                        backgroundColor: palette.primary.light,
+                        transform:
+                          "scale3d(1.12,1.12,1.12) translateX(3px) translateZ(0)",
+                      },
+                    }}
+                  >
+                    {getUserInitials(user)}
+                  </Avatar>
+                </HajkTooltip>
               );
             })}
           </AvatarGroup>
           {activeUser && (
-            <Avatar
-              onClick={(e) => {
-                setAnchorEl(anchorEl ? null : e.currentTarget);
-              }}
+            <HajkTooltip
               key={activeUser.id}
-              sx={{
-                backgroundColor: palette.primary.main,
-                width: "36px",
-                height: "36px",
-                marginLeft: "14px",
-                marginRight: "14px",
-                borderWidth: "2px",
-                borderStyle: "solid",
-                borderColor: palette.primary.light,
-                cursor: "pointer",
-                transition: "transform 200ms ease",
-                transform: "scale3d(1.0,1.0,1.0) translateZ(0)",
-                "&:hover": {
-                  transform: "scale3d(1.12,1.12,1.12) translateZ(0)",
-                },
-              }}
+              title={activeUser.name + ` (${t("common.you")})`}
             >
-              {getUserInitials(activeUser)}
-            </Avatar>
+              <Avatar
+                onClick={(e) => {
+                  setAnchorEl(anchorEl ? null : e.currentTarget);
+                }}
+                key={activeUser.id}
+                sx={{
+                  backgroundColor: palette.primary.main,
+                  width: "36px",
+                  height: "36px",
+                  marginLeft: "14px",
+                  marginRight: "14px",
+                  borderWidth: "2px",
+                  borderStyle: "solid",
+                  borderColor: palette.primary.light,
+                  cursor: "pointer",
+                  transition: "transform 200ms ease",
+                  transform: "scale3d(1.0,1.0,1.0) translateZ(0)",
+                  "&:hover": {
+                    transform: "scale3d(1.12,1.12,1.12) translateZ(0)",
+                  },
+                }}
+              >
+                {getUserInitials(activeUser)}
+              </Avatar>
+            </HajkTooltip>
           )}
 
           <Popover
