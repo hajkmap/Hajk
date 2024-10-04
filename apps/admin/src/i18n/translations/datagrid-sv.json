@@ -1,0 +1,35 @@
+{
+  "translation": {
+    "columnMenuUnsort": "Ingen sortering",
+    "columnMenuSortAsc": "Sortera på ordning stigande",
+    "columnMenuSortDesc": "Sortera på ordning fallande",
+    "columnMenuFilter": "Filtrera",
+    "columnMenuHideColumn": "Göm kolumner",
+    "columnMenuShowColumns": "Visa kolumner",
+    "toolbarDensity": "Densitet",
+    "toolbarDensityLabel": "Densitet",
+    "toolbarDensityCompact": "Kompakt",
+    "toolbarDensityStandard": "Standard",
+    "toolbarDensityComfortable": "Komfortabel",
+    "toolbarFilters": "Filter",
+    "toolbarFiltersLabel": "Visa filter",
+    "toolbarColumns": "Kolumner",
+    "mapsColumnHeaderName": "Visningsnamn",
+    "mapsColumnHeaderDescription": "Beskrivning",
+    "mapsColumnHeaderMapId": "Id",
+    "mapsColumnHeaderActions": "Åtgärder",
+    "layersColumnHeaderService": "Tjänstetyp",
+    "layersColumnHeaderName": "Internt namn",
+    "layersColumnHeaderURL": "URL",
+    "layersColumnHeaderUsedBy": "Används i kartor",
+    "layersColumnHeaderIsBroken": "Trasigt lager",
+    "layersColumnHeaderActions": "Åtgärder",
+    "layersColumnBrokenLayerWarning": "Lagret är fucking trasigt bror, fixa",
+    "toolsColumnHeaderName": "Titel",
+    "toolsColumnHeaderDescription": "Beskrivning",
+    "toolsColumnHeaderUsedBy": "Används i HAJK",
+    "toolsColumnHeaderIsBroken": "Trasigt lager",
+    "toolsColumnHeaderActions": "Åtgärder"
+  }
+  
+}

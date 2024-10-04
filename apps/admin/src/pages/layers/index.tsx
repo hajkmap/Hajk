@@ -8,6 +8,7 @@ import WarningAmberIcon from "@mui/icons-material/WarningAmber";
 import { grey } from "@mui/material/colors";
 import LanguageSwitcher from "../../components/language-switcher";
 import ThemeSwitcher from "../../components/theme-switcher";
+import dataGridLocaleText from "../../i18n/translations/datagrid-sv.json";
 
 export default function LayersPage() {
   const { t } = useTranslation();
@@ -21,61 +22,63 @@ export default function LayersPage() {
     return <Typography>Error loading data</Typography>;
   }
 
-  const GRID_SWEDISH_LOCALE_TEXT = {
-    columnMenuUnsort: "Ingen sortering",
-    columnMenuSortAsc: "Sortera på ordning stigande",
-    columnMenuSortDesc: "Sortera på ordning fallande",
-    columnMenuFilter: "Filtrera",
-    columnMenuHideColumn: "Göm kolumner",
-    columnMenuShowColumns: "Visa kolumner",
-    columnHeaderService: "Tjänstetyp",
-    columnHeaderName: "Internt namn",
-    columnHeaderURL: "URL",
-    columnHeaderUsedBy: "Används i kartor",
-    columnHeaderIsBroken: "Trasigt lager",
-    columnHeaderActions: "Åtgärder",
-    brokenLayerWarning: "Lagret är fucking trasigt bror, fixa",
-  };
-
   const columns = [
     {
       field: "serviceType",
-      headerName: GRID_SWEDISH_LOCALE_TEXT.columnHeaderService,
+      headerName:
+        (dataGridLocaleText?.translation
+          ?.layersColumnHeaderService as string) ?? "",
       minWidth: 120,
       flex: 0.1,
     },
     {
       field: "name",
-      headerName: GRID_SWEDISH_LOCALE_TEXT.columnHeaderName,
+      headerName:
+        (dataGridLocaleText?.translation?.layersColumnHeaderName as string) ??
+        "",
       minWidth: 150,
       flex: 0.2,
     },
     {
       field: "url",
-      headerName: GRID_SWEDISH_LOCALE_TEXT.columnHeaderURL,
+      headerName:
+        (dataGridLocaleText?.translation?.layersColumnHeaderURL as string) ??
+        "",
       minWidth: 300,
       flex: 0.4,
     },
     {
       field: "usedBy",
-      headerName: GRID_SWEDISH_LOCALE_TEXT.columnHeaderUsedBy,
+      headerName:
+        (dataGridLocaleText?.translation?.layersColumnHeaderUsedBy as string) ??
+        "",
       minWidth: 150,
       flex: 0.1,
     },
     {
       field: "isBroken",
-      headerName: GRID_SWEDISH_LOCALE_TEXT.columnHeaderIsBroken,
+      headerName:
+        (dataGridLocaleText?.translation
+          ?.layersColumnHeaderIsBroken as string) ?? "",
       minWidth: 110,
       flex: 0.1,
+
       renderCell: () => (
-        <Tooltip title={GRID_SWEDISH_LOCALE_TEXT.brokenLayerWarning}>
+        <Tooltip
+          title={
+            (dataGridLocaleText?.translation
+              ?.layersColumnBrokenLayerWarning as string) ?? ""
+          }
+        >
           <WarningAmberIcon sx={{ color: "black", maxWidth: "fit-content" }} />
         </Tooltip>
       ),
     },
     {
       field: "actions",
-      headerName: GRID_SWEDISH_LOCALE_TEXT.columnHeaderActions,
+      headerName:
+        (dataGridLocaleText?.translation
+          ?.layersColumnHeaderActions as string) ?? "",
       renderCell: () => (
         <Button
           variant="contained"
@@ -129,7 +132,7 @@ export default function LayersPage() {
       <HajkDataGrid
         rows={rows}
         columns={columns}
-        localeText={GRID_SWEDISH_LOCALE_TEXT}
+        localeText={dataGridLocaleText.translation}
         searchPlaceholder="Sök på lager..."
       />
       <Grid container gap={2} size={12} sx={{ mt: 2 }}>

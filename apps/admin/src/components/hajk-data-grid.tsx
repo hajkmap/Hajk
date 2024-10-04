@@ -12,14 +12,21 @@ import {
 } from "@mui/x-data-grid";
 import { TextField, Box } from "@mui/material";
 import { grey } from "@mui/material/colors";
+import dataGridLocaleText from "../i18n/translations/datagrid-sv.json";
 
 interface HajkDataGridProps {
-  rows: object[];
+  rows: Row[];
   columns: GridColDef[];
   localeText: Partial<GridLocaleText>;
   searchPlaceholder?: string;
   onSearch?: (query: string) => void;
   toolbar?: ReactNode;
+}
+
+interface Row {
+  name: string;
+  serviceType: string;
+  url: string;
 }
 
 export default function HajkDataGrid({
@@ -30,6 +37,11 @@ export default function HajkDataGrid({
   onSearch,
 }: HajkDataGridProps) {
   const [searchQuery, setSearchQuery] = useState("");
+
+  const GRID_SWEDISH_LOCALE_TEXT = {
+    ...dataGridLocaleText.translation,
+    ...localeText,
+  };
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(e.target.value);
@@ -71,7 +83,7 @@ export default function HajkDataGrid({
       <DataGrid
         autoHeight
         disableRowSelectionOnClick
-        localeText={localeText}
+        localeText={GRID_SWEDISH_LOCALE_TEXT}
         rows={filteredRows}
         columns={columns}
         pageSizeOptions={[5, 10, 100]}

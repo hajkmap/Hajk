@@ -1,5 +1,5 @@
 import Grid from "@mui/material/Grid2";
-import { Typography, Button, Tooltip } from "@mui/material";
+import { Typography, Button } from "@mui/material";
 import { useTranslation } from "react-i18next";
 import { useTools } from "../../api/tools";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
@@ -21,12 +21,6 @@ export default function ToolsPage() {
   }
 
   const GRID_SWEDISH_LOCALE_TEXT = {
-    columnMenuUnsort: "Ingen sortering",
-    columnMenuSortAsc: "Sortera på ordning stigande",
-    columnMenuSortDesc: "Sortera på ordning fallande",
-    columnMenuFilter: "Filtrera",
-    columnMenuHideColumn: "Göm kolumner",
-    columnMenuShowColumns: "Visa kolumner",
     columnHeaderName: "Titel",
     columnHeaderDescription: "Beskrivning",
     columnHeaderUsedBy: "Används i HAJK",

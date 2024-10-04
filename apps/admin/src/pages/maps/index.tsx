@@ -21,12 +21,6 @@ export default function MapsPage() {
   }
 
   const GRID_SWEDISH_LOCALE_TEXT = {
-    columnMenuUnsort: "Ingen sortering",
-    columnMenuSortAsc: "Sortera på ordning stigande",
-    columnMenuSortDesc: "Sortera på ordning fallande",
-    columnMenuFilter: "Filtrera",
-    columnMenuHideColumn: "Göm kolumner",
-    columnMenuShowColumns: "Visa kolumner",
     columnHeaderName: "Visningsnamn",
     columnHeaderDescription: "Beskrivning",
     columnHeaderMapId: "Id",
