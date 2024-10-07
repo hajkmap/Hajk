@@ -93,7 +93,7 @@ export const useCreateMap = () => {
   return useMutation({
     mutationFn: createMap,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["maps"] });
+      void queryClient.invalidateQueries({ queryKey: ["maps"] });
     },
     onError: (error) => {
       console.error(error);
@@ -114,7 +114,7 @@ export const useUpdateMap = () => {
       data: Partial<MapMutation>;
     }) => updateMap(mapName, data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["maps"] });
+      void queryClient.invalidateQueries({ queryKey: ["maps"] });
     },
     onError: (error) => {
       console.error(error);
@@ -129,7 +129,7 @@ export const useDeleteMap = () => {
   return useMutation({
     mutationFn: (mapName: string) => deleteMap(mapName),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["maps"] });
+      void queryClient.invalidateQueries({ queryKey: ["maps"] });
     },
     onError: (error) => {
       console.error(error);
