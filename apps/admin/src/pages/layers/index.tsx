@@ -2,15 +2,16 @@ import { Typography, Button, Tooltip } from "@mui/material";
 import Grid from "@mui/material/Grid2";
 import { useLayers } from "../../api/layers";
 import { useTranslation } from "react-i18next";
+import Page from "../../layouts/root/components/page";
 import HajkDataGrid from "../../components/hajk-data-grid";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
 import WarningAmberIcon from "@mui/icons-material/WarningAmber";
 import { grey } from "@mui/material/colors";
-import LanguageSwitcher from "../../components/language-switcher";
-import ThemeSwitcher from "../../components/theme-switcher";
 import dataGridLocaleTextSV from "../../i18n/translations/datagrid-sv.json";
 import dataGridLocaleTextEN from "../../i18n/translations/datagrid-en.json";
 import useAppStateStore from "../../store/use-app-state-store";
+import ThemeSwitcher from "../../components/theme-switcher";
+import LanguageSwitcher from "../../components/language-switcher";
 
 export default function LayersPage() {
   const { t } = useTranslation();
@@ -110,37 +111,39 @@ export default function LayersPage() {
     })) ?? [];
 
   return (
-    <Grid size={12} sx={{ m: 3 }}>
-      <Grid size={12} container justifyContent={"space-between"}>
-        <Grid size={6}>
-          <Typography variant="h3" textAlign="left">
-            {t("common.layers")}
-          </Typography>
-        </Grid>
-        <Grid
-          size={6}
-          display={"flex"}
-          justifyContent={"flex-end"}
-          alignItems={"end"}
-        >
-          <Button
-            variant="contained"
-            sx={{ backgroundColor: "black", height: "35px", width: "180px" }}
+    <Page title={t("common.layers")}>
+      <Grid size={12} sx={{ m: 3 }}>
+        <Grid size={12} container justifyContent={"space-between"}>
+          <Grid size={6}>
+            <Typography variant="h3" textAlign="left">
+              {t("common.layers")}
+            </Typography>
+          </Grid>
+          <Grid
+            size={6}
+            display={"flex"}
+            justifyContent={"flex-end"}
+            alignItems={"end"}
           >
-            {t("common.layers")}
-          </Button>
+            <Button
+              variant="contained"
+              sx={{ backgroundColor: "black", height: "35px", width: "180px" }}
+            >
+              {t("common.layers")}
+            </Button>
+          </Grid>
+        </Grid>
+        <HajkDataGrid
+          rows={rows}
+          columns={columns}
+          localeText={GRID_LOCALE_TEXT}
+          searchFields={searchFields}
+        />
+        <Grid container gap={2} size={12} sx={{ mt: 2 }}>
+          <ThemeSwitcher />
+          <LanguageSwitcher />
         </Grid>
       </Grid>
-      <HajkDataGrid
-        rows={rows}
-        columns={columns}
-        localeText={GRID_LOCALE_TEXT}
-        searchFields={searchFields}
-      />
-      <Grid container gap={2} size={12} sx={{ mt: 2 }}>
-        <ThemeSwitcher />
-        <LanguageSwitcher />
-      </Grid>
-    </Grid>
+    </Page>
   );
 }

@@ -1,4 +1,5 @@
 import { useRouteError, isRouteErrorResponse } from "react-router-dom";
+import Page from "../../layouts/root/components/page";
 
 export default function ErrorPage() {
   const error = useRouteError();
@@ -12,12 +13,11 @@ export default function ErrorPage() {
   }
 
   return (
-    <div id="error-page">
-      <h1>Oops!</h1>
+    <Page title="Oops!">
       <p>Sorry, an unexpected error has occurred.</p>
       <p>
         <i>{errorMessage}</i>
       </p>
-    </div>
+    </Page>
   );
 }

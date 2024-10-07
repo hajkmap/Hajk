@@ -5,10 +5,13 @@ import i18n, { Language } from "../i18n/i18n";
 interface AppState {
   language: string;
   themeMode: PaletteMode;
+  sidebarLocked: boolean;
   apiBaseUrl: string;
+  axiosConfigOverrides: Record<string, unknown>;
   loading: boolean;
   setLanguage: (lang: Language) => void;
   setThemeMode: (theme: PaletteMode) => void;
+  setSidebarLocked: (locked: boolean) => void;
   loadConfig: () => Promise<void>;
 }
 
@@ -23,10 +26,22 @@ const getDefaultThemeMode = () => {
   return defaultThemeMode;
 };
 
+const getDefaultSidebarLocked = () => {
+  const value = localStorage.getItem("sidebarLocked");
+
+  if (!value) {
+    // Locked as default
+    return true;
+  }
+  return value === "true" ? true : false;
+};
+
 const useAppStateStore = create<AppState>((set) => ({
   language: localStorage.getItem("language") ?? "sv",
   themeMode: getDefaultThemeMode(),
+  sidebarLocked: getDefaultSidebarLocked(),
   apiBaseUrl: "",
+  axiosConfigOverrides: {},
   loading: true,
 
   setLanguage: (lang: string) => {
@@ -40,14 +55,26 @@ const useAppStateStore = create<AppState>((set) => ({
     set({ themeMode: mode });
   },
 
+  setSidebarLocked: (locked: boolean) => {
+    localStorage.setItem("sidebarLocked", locked.toString());
+    set({ sidebarLocked: locked });
+  },
+
   loadConfig: async () => {
     try {
       const response = await fetch("/config.json");
       const config = (await response.json()) as Record<string, unknown>;
+
       set({
         apiBaseUrl:
           typeof config.apiBaseUrl === "string" ? config.apiBaseUrl : "",
         loading: false,
+      });
+
+      set({
+        axiosConfigOverrides: config.axiosConfigOverrides as
+          | Record<string, unknown>
+          | undefined,
       });
     } catch (error) {
       console.error("Failed to load config:", error);

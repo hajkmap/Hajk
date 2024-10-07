@@ -1,69 +1,85 @@
 import React from "react";
-import { Paper, styled } from "@mui/material";
+import { Box, Paper, useTheme } from "@mui/material";
 import { Outlet } from "react-router-dom";
+import Header from "./components/header";
 import Sidebar from "./components/sidebar";
-import Navbar from "./components/navbar";
-
-const SIDEBAR_WIDTH = 250;
-
-const Main = styled("main")(({ theme }) => ({
-  transition: theme.transitions.create("margin", {
-    easing: theme.transitions.easing.sharp,
-    duration: theme.transitions.duration.leavingScreen,
-  }),
-}));
+import {
+  HEADER_HEIGHT,
+  SIDEBAR_MINI_WIDTH,
+  SIDEBAR_WIDTH,
+  SIDEBAR_ZINDEX,
+} from "./constants";
+import useAppStateStore from "../../store/use-app-state-store";
 
 export default function RootLayout() {
-  const [sidebarOpen, setSidebarOpen] = React.useState(false);
-  const [sidebarPermanent, setSidebarPermanent] = React.useState(false);
+  const sidebarLocked = useAppStateStore((state) => state.sidebarLocked);
+  const setSidebarLocked = useAppStateStore((state) => state.setSidebarLocked);
+  const [sidebarOpen, setSidebarOpen] = React.useState(sidebarLocked);
+  const theme = useTheme();
 
-  const toggleSidebar =
-    (open: boolean) => (event: React.KeyboardEvent | React.MouseEvent) => {
-      if (sidebarPermanent) {
-        return;
-      }
-      if (
-        event.type === "keydown" &&
-        ((event as React.KeyboardEvent).key === "Tab" ||
-          (event as React.KeyboardEvent).key === "Shift")
-      ) {
-        return;
-      }
-      setSidebarOpen(open);
-    };
+  const toggleSidebarLocked = () => {
+    setSidebarOpen(!sidebarLocked);
+    setSidebarLocked(!sidebarLocked);
+  };
 
-  const toggleSidebarPermanent = () => {
-    if (!sidebarPermanent) {
-      setSidebarOpen(false);
-    }
-    setSidebarPermanent((p) => !p);
+  const showOverlay = () => {
+    return sidebarOpen && !sidebarLocked;
   };
 
   return (
     <Paper
       sx={{
         width: "100%",
-        backgroundColor: (theme) => theme.palette.background.default,
+        backgroundColor: theme.palette.background.default,
         backgroundImage: "unset",
         minHeight: "100vh",
       }}
       square
     >
-      <Navbar openSidebar={toggleSidebar(true)} />
+      <Header />
       <Sidebar
-        width={SIDEBAR_WIDTH}
-        permanent={sidebarPermanent}
         open={sidebarOpen}
-        close={toggleSidebar(false)}
-        togglePermanent={toggleSidebarPermanent}
+        setOpen={setSidebarOpen}
+        locked={sidebarLocked}
+        toggleLocked={toggleSidebarLocked}
       />
-      <Main
+      <Box
+        component="main"
+        id="main"
         sx={{
-          ml: sidebarPermanent ? `${SIDEBAR_WIDTH}px` : 0,
+          paddingTop: `${HEADER_HEIGHT}px`,
+          marginLeft:
+            sidebarOpen && sidebarLocked
+              ? `${SIDEBAR_WIDTH}px`
+              : `${SIDEBAR_MINI_WIDTH}px`,
+          minHeight: "100vh",
+          overflowY: "auto",
+          overflowX: "hidden",
+          transition: "margin-left 250ms ease",
         }}
       >
+        <Box
+          onClick={(e) => {
+            if (sidebarOpen && !sidebarLocked) {
+              setSidebarOpen(false);
+              e.preventDefault();
+            }
+          }}
+          sx={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            width: "100%",
+            height: "100%",
+            backgroundColor: "rgba(0, 0, 0, 0.5)",
+            opacity: showOverlay() ? 1.0 : 0.0,
+            pointerEvents: showOverlay() ? "all" : "none",
+            transition: "opacity 250ms ease",
+            zIndex: SIDEBAR_ZINDEX - 1,
+          }}
+        ></Box>
         <Outlet />
-      </Main>
+      </Box>
     </Paper>
   );
 }
