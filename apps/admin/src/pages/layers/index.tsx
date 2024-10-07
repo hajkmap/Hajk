@@ -113,25 +113,13 @@ export default function LayersPage() {
   return (
     <Page title={t("common.layers")}>
       <Grid size={12} sx={{ m: 3 }}>
-        <Grid size={12} container justifyContent={"space-between"}>
-          <Grid size={6}>
-            <Typography variant="h3" textAlign="left">
-              {t("common.layers")}
-            </Typography>
-          </Grid>
-          <Grid
-            size={6}
-            display={"flex"}
-            justifyContent={"flex-end"}
-            alignItems={"end"}
+        <Grid size={12} container justifyContent={"end"}>
+          <Button
+            variant="contained"
+            sx={{ backgroundColor: "black", height: "35px", width: "180px" }}
           >
-            <Button
-              variant="contained"
-              sx={{ backgroundColor: "black", height: "35px", width: "180px" }}
-            >
-              {t("common.layers")}
-            </Button>
-          </Grid>
+            {t("common.layers")}
+          </Button>
         </Grid>
         <HajkDataGrid
           rows={rows}
