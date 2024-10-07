@@ -15,6 +15,8 @@ import ToolsPage from "./pages/tools/index.tsx";
 
 import useAppStateStore from "./store/use-app-state-store.ts";
 import SettingsPage from "./pages/settings/index.tsx";
+import ServicesPage from "./pages/services/index.tsx";
+import GroupsPage from "./pages/groups/index.tsx";
 
 const queryClient = new QueryClient({
   defaultOptions: queryConfig,
@@ -41,6 +43,14 @@ const router = createBrowserRouter([
       {
         path: "tools",
         element: <ToolsPage />,
+      },
+      {
+        path: "services",
+        element: <ServicesPage />,
+      },
+      {
+        path: "groups",
+        element: <GroupsPage />,
       },
       {
         path: "settings",

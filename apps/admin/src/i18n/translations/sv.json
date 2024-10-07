@@ -12,8 +12,11 @@
     "common.scrolltotop": "Till toppen",
     "common.services": "Tjänster",
     "common.settings": "Inställningar",
+    "common.sidebar.lock": "Lås sidopanel",
+    "common.sidebar.unlock": "Lås upp sidopanel",
     "common.swedish": "Svenska",
     "common.tools": "Verktyg",
+    "common.you": "Du",
     "dark": "Mörkt",
     "light": "Ljust"
   }

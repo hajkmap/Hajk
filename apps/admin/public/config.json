@@ -1,3 +1,14 @@
 {
-  "apiBaseUrl": "http://localhost:3002/api/v3"
+  "apiBaseUrl": "http://localhost:3002/api/v3",
+  "axiosConfigOverrides": {
+    "https://x1.varberg.se/util/geoserver/*": {
+      "withCredentials": true
+    },
+    "https://x2.varberg.se/util/geoserver/*": {
+      "withCredentials": true
+    },
+    "https://x3.varberg.se/util/geoserver/*": {
+      "withCredentials": true
+    }
+  }
 }

@@ -1,4 +1,5 @@
 import { IconButton, useTheme } from "@mui/material";
+import { forwardRef } from "react";
 import { SIDEBAR_MINI_WIDTH } from "../../constants";
 
 interface Props {
@@ -9,28 +10,35 @@ interface Props {
   children: React.ReactNode;
 }
 
-const SquareIconButton = (props: Props) => {
-  const { palette } = useTheme();
-  return (
-    <IconButton
-      onClick={props.onClick}
-      onMouseEnter={props.onMouseEnter}
-      onMouseLeave={props.onMouseLeave}
-      size="large"
-      disableRipple={false}
-      focusRipple={false}
-      sx={{
-        color: palette.text.primary,
-        width: `${SIDEBAR_MINI_WIDTH}px`,
-        height: `${SIDEBAR_MINI_WIDTH}px`,
-        padding: "6px",
-        borderRadius: 0,
-        ...props.sx,
-      }}
-    >
-      {props.children}
-    </IconButton>
-  );
-};
+const SquareIconButton = forwardRef<HTMLButtonElement, Props>(
+  ({ sx, onClick, onMouseEnter, onMouseLeave, children, ...rest }, ref) => {
+    const { palette } = useTheme();
+
+    return (
+      <IconButton
+        ref={ref}
+        onClick={onClick}
+        onMouseEnter={onMouseEnter}
+        onMouseLeave={onMouseLeave}
+        size="large"
+        disableRipple={false}
+        focusRipple={false}
+        sx={{
+          color: palette.text.primary,
+          width: `${SIDEBAR_MINI_WIDTH}px`,
+          height: `${SIDEBAR_MINI_WIDTH}px`,
+          padding: "6px",
+          borderRadius: 0,
+          ...sx,
+        }}
+        {...rest}
+      >
+        {children}
+      </IconButton>
+    );
+  }
+);
+
+SquareIconButton.displayName = "SquareIconButton";
 
 export default SquareIconButton;

@@ -2,6 +2,8 @@ import SquareIconButton from "./square-icon-button";
 import LockIcon from "@mui/icons-material/Lock";
 import LockOpenIcon from "@mui/icons-material/LockOpen";
 import { useState } from "react";
+import HajkTooltip from "../../../../components/hajk-tooltip";
+import { useTranslation } from "react-i18next";
 
 interface Props {
   locked: boolean;
@@ -10,6 +12,7 @@ interface Props {
 }
 const LockButton = (props: Props) => {
   const [mouseIsOver, setMouseIsOver] = useState(false);
+  const { t } = useTranslation();
 
   const handleMouseEnter = () => {
     setMouseIsOver(true);
@@ -36,14 +39,20 @@ const LockButton = (props: Props) => {
   };
 
   return (
-    <SquareIconButton
-      onClick={props.toggleLocked}
-      onMouseEnter={handleMouseEnter}
-      onMouseLeave={handleMouseLeave}
-      sx={{ ...props.sx }}
+    <HajkTooltip
+      title={
+        props.locked ? t("common.sidebar.unlock") : t("common.sidebar.lock")
+      }
     >
-      {getIcon()}
-    </SquareIconButton>
+      <SquareIconButton
+        onClick={props.toggleLocked}
+        onMouseEnter={handleMouseEnter}
+        onMouseLeave={handleMouseLeave}
+        sx={{ ...props.sx }}
+      >
+        {getIcon()}
+      </SquareIconButton>
+    </HajkTooltip>
   );
 };
 

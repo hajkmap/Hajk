@@ -5,6 +5,8 @@ import NavItem from "./nav-item";
 import SquareIconButton from "./square-icon-button";
 import SettingsIcon from "@mui/icons-material/Settings";
 import { useNavigate } from "react-router-dom";
+import HajkTooltip from "../../../../components/hajk-tooltip";
+import { useTranslation } from "react-i18next";
 
 interface Props {
   setSidebarOpen: (open: boolean) => void;
@@ -14,6 +16,7 @@ interface Props {
 const NavList = (props: Props) => {
   const theme = useTheme();
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   const closeSidebarIfNeeded = () => {
     if (!props.locked) {
@@ -47,30 +50,38 @@ const NavList = (props: Props) => {
         );
       })}
 
-      <SquareIconButton
+      <Box
         sx={{
           position: "absolute",
-          bottom: `${SIDEBAR_MINI_WIDTH}px`,
           left: "0px",
-          borderTopRightRadius: "50%",
-        }}
-        onClick={() => {
-          navigate("/settings");
-          closeSidebarIfNeeded();
+          bottom: `${SIDEBAR_MINI_WIDTH}px`,
+          width: "100%",
+          display: "flex",
         }}
       >
-        <SettingsIcon fontSize="medium" />
-      </SquareIconButton>
-      <LockButton
-        toggleLocked={props.toggleLocked}
-        locked={props.locked}
-        sx={{
-          position: "absolute",
-          bottom: `${SIDEBAR_MINI_WIDTH}px`,
-          right: "0",
-          borderTopLeftRadius: "50%",
-        }}
-      />
+        <HajkTooltip title={t("common.settings")}>
+          <SquareIconButton
+            sx={{
+              borderTopRightRadius: "50%",
+              alignSelf: "flex-start",
+            }}
+            onClick={() => {
+              navigate("/settings");
+              closeSidebarIfNeeded();
+            }}
+          >
+            <SettingsIcon fontSize="medium" />
+          </SquareIconButton>
+        </HajkTooltip>
+        <LockButton
+          toggleLocked={props.toggleLocked}
+          locked={props.locked}
+          sx={{
+            marginLeft: "auto",
+            borderTopLeftRadius: "50%",
+          }}
+        />
+      </Box>
     </Box>
   );
 };
