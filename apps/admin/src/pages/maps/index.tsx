@@ -11,21 +11,41 @@ import {
   Checkbox,
   IconButton,
   Box,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Accordion,
+  AccordionSummary,
+  AccordionDetails,
 } from "@mui/material";
+import DeleteIcon from "@mui/icons-material/Delete";
+import UpdateIcon from "@mui/icons-material/Update";
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import { useTranslation } from "react-i18next";
-import { useMaps, useCreateMap, useDeleteMap } from "../../api/maps";
+import {
+  useMaps,
+  useCreateMap,
+  useDeleteMap,
+  useUpdateMap,
+} from "../../api/maps";
 import Page from "../../layouts/root/components/page";
 import LanguageSwitcher from "../../components/language-switcher";
 import ThemeSwitcher from "../../components/theme-switcher";
-import DeleteIcon from "@mui/icons-material/Delete";
 
 export default function MapsPage() {
+  const { t } = useTranslation();
+  const { data: maps, isLoading } = useMaps();
+
   const [id, setId] = useState<number>(0);
   const [locked, setLocked] = useState<boolean>(false);
   const [name, setName] = useState<string>("");
   const [options, setOptions] = useState<Record<string, string>>({});
 
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [currentMapName, setCurrentMapName] = useState<string | null>(null);
   const createMapMutation = useCreateMap();
+  const updateMapMutation = useUpdateMap();
   const deleteMapMutation = useDeleteMap();
 
   const handleDeleteMap = (mapName: string) => {
@@ -55,16 +75,46 @@ export default function MapsPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    createMapMutation.mutate({
-      id,
-      locked,
-      name,
-      options,
-    });
+    if (currentMapName) {
+      // Update existing map
+      updateMapMutation.mutate({
+        mapName: currentMapName,
+        data: {
+          id,
+          locked,
+          name,
+          options,
+        },
+      });
+    } else {
+      createMapMutation.mutate({
+        id,
+        locked,
+        name,
+        options,
+      });
+    }
   };
 
-  const { t } = useTranslation();
-  const { data: maps, isLoading } = useMaps();
+  const handleOpenDialog = (mapName: string | null = null) => {
+    if (mapName) {
+      const mapToEdit = maps?.find((map: any) => map === mapName);
+      if (mapToEdit) {
+        setCurrentMapName(mapToEdit);
+      }
+    } else {
+      setCurrentMapName(null);
+      setId(0);
+      setLocked(false);
+      setName("");
+      setOptions({});
+    }
+    setIsDialogOpen(true);
+  };
+
+  const handleCloseDialog = () => {
+    setIsDialogOpen(false);
+  };
 
   return (
     <Page title={t("common.maps")}>
@@ -91,6 +141,13 @@ export default function MapsPage() {
                     >
                       <Typography>{map}</Typography>
                       <IconButton
+                        sx={{ marginLeft: "auto" }}
+                        aria-label="update"
+                        onClick={() => handleOpenDialog(map)} // Open dialog for updating
+                      >
+                        <UpdateIcon />
+                      </IconButton>
+                      <IconButton
                         edge="end"
                         aria-label="delete"
                         onClick={() => handleDeleteMap(map)}
@@ -107,23 +164,167 @@ export default function MapsPage() {
               <LanguageSwitcher />
             </Grid>
           </Grid>
-          <Grid size={12}>
-            <Paper
-              elevation={3}
-              style={{
-                padding: "20px",
-                marginTop: "20px",
-                maxWidth: "600px",
-              }}
-            >
+          <Accordion sx={{ mt: 2 }}>
+            <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+              <Typography>Skapa Karta</Typography>
+            </AccordionSummary>
+            <AccordionDetails>
+              <Grid size={12}>
+                <Paper
+                  elevation={3}
+                  style={{
+                    padding: "20px",
+                    marginTop: "20px",
+                    maxWidth: "600px",
+                  }}
+                >
+                  <form onSubmit={handleSubmit}>
+                    <Grid container spacing={2}>
+                      <Grid size={12}>
+                        <Typography variant="h5" gutterBottom>
+                          Skapa Karta
+                        </Typography>
+                      </Grid>
+
+                      <Grid size={12}>
+                        <TextField
+                          fullWidth
+                          type="number"
+                          label="ID"
+                          value={id}
+                          onChange={(e) => setId(Number(e.target.value))}
+                          variant="outlined"
+                        />
+                      </Grid>
+
+                      <Grid size={12}>
+                        <FormControlLabel
+                          control={
+                            <Checkbox
+                              checked={locked}
+                              onChange={(e) => setLocked(e.target.checked)}
+                            />
+                          }
+                          label="Locked"
+                        />
+                      </Grid>
+
+                      <Grid size={12}>
+                        <TextField
+                          fullWidth
+                          label="Name"
+                          value={name}
+                          onChange={(e) => setName(e.target.value)}
+                          variant="outlined"
+                        />
+                      </Grid>
+
+                      <Grid size={12}>
+                        <Typography variant="h6">
+                          Options (Key-Value Pairs):
+                        </Typography>
+                        {Object.entries(options).map(([key, value], index) => (
+                          <Grid
+                            container
+                            spacing={2}
+                            key={index}
+                            alignItems="center"
+                          >
+                            <Grid size={5}>
+                              <TextField
+                                fullWidth
+                                label={`Key ${index + 1}`}
+                                value={key}
+                                onChange={(e) => {
+                                  const newKey = e.target.value;
+
+                                  const { [key]: oldValue, ...restOptions } =
+                                    options;
+                                  setOptions({
+                                    ...restOptions,
+                                    [newKey]: oldValue,
+                                  });
+                                }}
+                                variant="outlined"
+                                sx={{ marginTop: "1.5rem" }}
+                              />
+                            </Grid>
+                            <Grid size={5}>
+                              <TextField
+                                fullWidth
+                                label={`Value ${index + 1}`}
+                                value={value}
+                                onChange={(e) =>
+                                  handleOptionChange(key, e.target.value)
+                                }
+                                variant="outlined"
+                                sx={{ marginTop: "1.5rem" }}
+                              />
+                            </Grid>
+                            <Grid size={2}>
+                              <Button
+                                variant="outlined"
+                                color="secondary"
+                                onClick={() => handleRemoveOption(key)}
+                              >
+                                Remove
+                              </Button>
+                            </Grid>
+                          </Grid>
+                        ))}
+
+                        <Button
+                          variant="outlined"
+                          onClick={handleAddOption}
+                          style={{ marginTop: "1rem" }}
+                        >
+                          Add Option
+                        </Button>
+                      </Grid>
+
+                      <Grid size={12}>
+                        <Button
+                          type="submit"
+                          variant="contained"
+                          color="primary"
+                          fullWidth
+                        >
+                          Create
+                        </Button>
+                      </Grid>
+
+                      {createMapMutation.status === "pending" && (
+                        <Grid size={12}>
+                          <Typography>Creating map...</Typography>
+                        </Grid>
+                      )}
+                      {createMapMutation.isError && (
+                        <Grid size={12}>
+                          <Typography color="error">
+                            Error: {(createMapMutation.error as any)?.message}
+                          </Typography>
+                        </Grid>
+                      )}
+                      {createMapMutation.isSuccess && (
+                        <Grid size={12}>
+                          <Typography color="primary">
+                            Map created successfully!
+                          </Typography>
+                        </Grid>
+                      )}
+                    </Grid>
+                  </form>
+                </Paper>
+              </Grid>
+            </AccordionDetails>
+          </Accordion>
+
+          {/* Dialog for updating maps */}
+          <Dialog open={isDialogOpen} onClose={handleCloseDialog}>
+            <DialogTitle>Uppdatera Karta</DialogTitle>
+            <DialogContent>
               <form onSubmit={handleSubmit}>
                 <Grid container spacing={2}>
-                  <Grid size={12}>
-                    <Typography variant="h5" gutterBottom>
-                      Skapa Karta
-                    </Typography>
-                  </Grid>
-
                   <Grid size={12}>
                     <TextField
                       fullWidth
@@ -134,7 +335,6 @@ export default function MapsPage() {
                       variant="outlined"
                     />
                   </Grid>
-
                   <Grid size={12}>
                     <FormControlLabel
                       control={
@@ -146,7 +346,6 @@ export default function MapsPage() {
                       label="Locked"
                     />
                   </Grid>
-
                   <Grid size={12}>
                     <TextField
                       fullWidth
@@ -156,7 +355,6 @@ export default function MapsPage() {
                       variant="outlined"
                     />
                   </Grid>
-
                   <Grid size={12}>
                     <Typography variant="h6">
                       Options (Key-Value Pairs):
@@ -219,41 +417,16 @@ export default function MapsPage() {
                       Add Option
                     </Button>
                   </Grid>
-
-                  <Grid size={12}>
-                    <Button
-                      type="submit"
-                      variant="contained"
-                      color="primary"
-                      fullWidth
-                    >
-                      Skapa ny karta
-                    </Button>
-                  </Grid>
-
-                  {createMapMutation.status === "pending" && (
-                    <Grid size={12}>
-                      <Typography>Creating map...</Typography>
-                    </Grid>
-                  )}
-                  {createMapMutation.isError && (
-                    <Grid size={12}>
-                      <Typography color="error">
-                        Error: {(createMapMutation.error as any)?.message}
-                      </Typography>
-                    </Grid>
-                  )}
-                  {createMapMutation.isSuccess && (
-                    <Grid size={12}>
-                      <Typography color="primary">
-                        Map created successfully!
-                      </Typography>
-                    </Grid>
-                  )}
                 </Grid>
               </form>
-            </Paper>
-          </Grid>
+            </DialogContent>
+            <DialogActions>
+              <Button onClick={handleCloseDialog}>Cancel</Button>
+              <Button type="submit" onClick={handleSubmit} color="primary">
+                Update
+              </Button>
+            </DialogActions>
+          </Dialog>
         </>
       )}
     </Page>

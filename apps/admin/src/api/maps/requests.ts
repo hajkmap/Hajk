@@ -190,7 +190,6 @@ export const createMap = async (newMap: MapMutation): Promise<MapMutation> => {
   }
 };
 
-// CURRENTLY NOT BEING USED
 export const updateMap = async (
   mapName: string,
   data: Partial<MapMutation>

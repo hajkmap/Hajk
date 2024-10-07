@@ -13,8 +13,14 @@ import {
   getToolsByMapName,
   createMap,
   deleteMap,
+  updateMap,
 } from "./requests";
-import { Map, ProjectionsApiResponse, GroupApiResponse } from "./types";
+import {
+  Map,
+  ProjectionsApiResponse,
+  GroupApiResponse,
+  MapMutation,
+} from "./types";
 import { LayersApiResponse } from "../layers/types";
 import { ToolsApiResponse } from "../tools/types";
 
@@ -88,6 +94,30 @@ export const useCreateMap = () => {
     mutationFn: createMap,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["maps"] });
+    },
+    onError: (error) => {
+      console.error(error);
+    },
+  });
+};
+
+// React mutation to update a map
+// This hook uses the `updateMap` function from the `requests` module
+export const useUpdateMap = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({
+      mapName,
+      data,
+    }: {
+      mapName: string;
+      data: Partial<MapMutation>;
+    }) => updateMap(mapName, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["maps"] });
+    },
+    onError: (error) => {
+      console.error(error);
     },
   });
 };
