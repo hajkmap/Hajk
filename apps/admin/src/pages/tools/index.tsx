@@ -7,10 +7,14 @@ import { grey } from "@mui/material/colors";
 import HajkDataGrid from "../../components/hajk-data-grid";
 import LanguageSwitcher from "../../components/language-switcher";
 import ThemeSwitcher from "../../components/theme-switcher";
+import dataGridLocaleTextSV from "../../i18n/translations/datagrid-sv.json";
+import dataGridLocaleTextEN from "../../i18n/translations/datagrid-en.json";
+import useAppStateStore from "../../store/use-app-state-store";
 
 export default function ToolsPage() {
   const { t } = useTranslation();
   const { data: tools, isLoading, error } = useTools();
+  const language = useAppStateStore((state) => state.language);
 
   if (isLoading) {
     return <Typography>Loading...</Typography>;
@@ -20,36 +24,38 @@ export default function ToolsPage() {
     return <Typography>Error loading data</Typography>;
   }
 
-  const GRID_SWEDISH_LOCALE_TEXT = {
-    columnHeaderName: "Titel",
-    columnHeaderDescription: "Beskrivning",
-    columnHeaderUsedBy: "Används i HAJK",
-    columnHeaderIsBroken: "Trasigt lager",
-    columnHeaderActions: "Åtgärder",
-  };
+  let currentTranslation;
+  if (language === "sv") {
+    currentTranslation = dataGridLocaleTextSV.translation;
+  } else if (language === "en") {
+    currentTranslation = dataGridLocaleTextEN.translation;
+  }
+  const GRID_LOCALE_TEXT = currentTranslation;
 
   const columns = [
     {
       field: "title",
-      headerName: GRID_SWEDISH_LOCALE_TEXT.columnHeaderName,
+      headerName: GRID_LOCALE_TEXT!.toolsColumnHeaderName,
       minWidth: 120,
       flex: 0.1,
+      searchable: true,
     },
     {
       field: "description",
-      headerName: GRID_SWEDISH_LOCALE_TEXT.columnHeaderDescription,
+      headerName: GRID_LOCALE_TEXT!.toolsColumnHeaderDescription,
       minWidth: 150,
       flex: 0.3,
+      searchable: true,
     },
     {
       field: "usedInHajk",
-      headerName: GRID_SWEDISH_LOCALE_TEXT.columnHeaderUsedBy,
+      headerName: GRID_LOCALE_TEXT!.toolsColumnHeaderUsedBy,
       minWidth: 300,
       flex: 0.2,
     },
     {
       field: "actions",
-      headerName: GRID_SWEDISH_LOCALE_TEXT.columnHeaderActions,
+      headerName: GRID_LOCALE_TEXT!.toolsColumnHeaderActions,
       renderCell: () => (
         <Button
           variant="contained"
@@ -67,12 +73,16 @@ export default function ToolsPage() {
     },
   ];
 
+  const searchFields = columns
+    .filter((column) => column.searchable)
+    .map((column) => column.field);
+
   const rows =
     tools?.map((tool) => ({
       id: tool.id,
       title: tool.options.title || tool.type,
-      description: tool.options.description || "Beskrivning saknas",
-      usedInHajk: tool.options.visibleForGroups || "Ingen",
+      description: tool.options.description,
+      usedInHajk: tool.options.visibleForGroups,
       actions: "",
     })) ?? [];
 
@@ -94,15 +104,15 @@ export default function ToolsPage() {
             variant="contained"
             sx={{ backgroundColor: "black", height: "35px", width: "180px" }}
           >
-            Lägg till {t("common.tools")}
+            {t("common.tools")}
           </Button>
         </Grid>
       </Grid>
       <HajkDataGrid
         rows={rows}
         columns={columns}
-        localeText={GRID_SWEDISH_LOCALE_TEXT}
-        searchPlaceholder="Sök på verktyg..."
+        localeText={GRID_LOCALE_TEXT}
+        searchFields={searchFields}
       />
       <Grid container gap={2} size={12} sx={{ mt: 2 }}>
         <ThemeSwitcher />

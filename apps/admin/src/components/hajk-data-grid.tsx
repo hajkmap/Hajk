@@ -8,40 +8,29 @@ import {
   GridToolbarDensitySelector,
   GridToolbarFilterButton,
   GridToolbarColumnsButton,
-  GridLocaleText,
 } from "@mui/x-data-grid";
 import { TextField, Box } from "@mui/material";
 import { grey } from "@mui/material/colors";
-import dataGridLocaleText from "../i18n/translations/datagrid-sv.json";
 
 interface HajkDataGridProps {
-  rows: Row[];
+  rows: Record<string, unknown>[];
   columns: GridColDef[];
-  localeText: Partial<GridLocaleText>;
   searchPlaceholder?: string;
   onSearch?: (query: string) => void;
+  searchFields?: string[];
   toolbar?: ReactNode;
-}
-
-interface Row {
-  name: string;
-  serviceType: string;
-  url: string;
+  localeText?: string[]; // Add this line
 }
 
 export default function HajkDataGrid({
   rows,
   columns,
-  localeText,
-  searchPlaceholder = "Search here...",
+  searchPlaceholder,
   onSearch,
+  searchFields,
+  localeText,
 }: HajkDataGridProps) {
   const [searchQuery, setSearchQuery] = useState("");
-
-  const GRID_SWEDISH_LOCALE_TEXT = {
-    ...dataGridLocaleText.translation,
-    ...localeText,
-  };
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(e.target.value);
@@ -50,21 +39,17 @@ export default function HajkDataGrid({
     }
   };
 
-  const filteredRows = rows?.filter(
-    (row) =>
-      (row.name ?? "")
-        .toString()
-        .toLowerCase()
-        .includes(searchQuery.toLowerCase()) ||
-      (row.serviceType ?? "")
-        .toString()
-        .toLowerCase()
-        .includes(searchQuery.toLowerCase()) ||
-      (row.url ?? "")
-        .toString()
-        .toLowerCase()
-        .includes(searchQuery.toLowerCase())
-  );
+  let filteredRows = rows;
+
+  if (searchQuery.length > 2) {
+    const lowerSearchQuery = searchQuery.toLowerCase(); // Calculate this once
+    filteredRows = rows?.filter((row) =>
+      searchFields?.some((field) => {
+        const fieldValue = row[field]?.toString().toLowerCase() ?? "";
+        return fieldValue.includes(lowerSearchQuery);
+      })
+    );
+  }
 
   return (
     <Box>
@@ -83,10 +68,15 @@ export default function HajkDataGrid({
       <DataGrid
         autoHeight
         disableRowSelectionOnClick
-        localeText={GRID_SWEDISH_LOCALE_TEXT}
+        localeText={localeText}
         rows={filteredRows}
         columns={columns}
         pageSizeOptions={[5, 10, 100]}
+        initialState={{
+          pagination: {
+            paginationModel: { pageSize: 10, page: 0 },
+          },
+        }}
         getRowHeight={({ densityFactor }: GridRowHeightParams) => {
           return 50 * densityFactor;
         }}

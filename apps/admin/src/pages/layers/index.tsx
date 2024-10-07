@@ -8,11 +8,16 @@ import WarningAmberIcon from "@mui/icons-material/WarningAmber";
 import { grey } from "@mui/material/colors";
 import LanguageSwitcher from "../../components/language-switcher";
 import ThemeSwitcher from "../../components/theme-switcher";
-import dataGridLocaleText from "../../i18n/translations/datagrid-sv.json";
+import dataGridLocaleTextSV from "../../i18n/translations/datagrid-sv.json";
+import dataGridLocaleTextEN from "../../i18n/translations/datagrid-en.json";
+import useAppStateStore from "../../store/use-app-state-store";
 
 export default function LayersPage() {
   const { t } = useTranslation();
   const { data: layers, isLoading, error } = useLayers();
+  const language = useAppStateStore((state) => state.language);
+
+  type GRID_LOCALE_TEXT = Record<string, string>;
 
   if (isLoading) {
     return <Typography>Loading...</Typography>;
@@ -22,63 +27,56 @@ export default function LayersPage() {
     return <Typography>Error loading data</Typography>;
   }
 
+  let currentTranslation;
+  if (language === "sv") {
+    currentTranslation = dataGridLocaleTextSV.translation;
+  } else if (language === "en") {
+    currentTranslation = dataGridLocaleTextEN.translation;
+  }
+  const GRID_LOCALE_TEXT = currentTranslation;
+
   const columns = [
     {
       field: "serviceType",
-      headerName:
-        (dataGridLocaleText?.translation
-          ?.layersColumnHeaderService as string) ?? "",
+      headerName: GRID_LOCALE_TEXT!.layersColumnHeaderService,
       minWidth: 120,
       flex: 0.1,
+      searchable: true,
     },
     {
       field: "name",
-      headerName:
-        (dataGridLocaleText?.translation?.layersColumnHeaderName as string) ??
-        "",
+      headerName: GRID_LOCALE_TEXT!.layersColumnHeaderName,
       minWidth: 150,
       flex: 0.2,
+      searchable: true,
     },
     {
       field: "url",
-      headerName:
-        (dataGridLocaleText?.translation?.layersColumnHeaderURL as string) ??
-        "",
+      headerName: GRID_LOCALE_TEXT!.layersColumnHeaderURL,
       minWidth: 300,
       flex: 0.4,
+      searchable: true,
     },
     {
       field: "usedBy",
-      headerName:
-        (dataGridLocaleText?.translation?.layersColumnHeaderUsedBy as string) ??
-        "",
+      headerName: GRID_LOCALE_TEXT!.layersColumnHeaderUsedBy,
       minWidth: 150,
       flex: 0.1,
     },
     {
       field: "isBroken",
-      headerName:
-        (dataGridLocaleText?.translation
-          ?.layersColumnHeaderIsBroken as string) ?? "",
+      headerName: GRID_LOCALE_TEXT!.layersColumnHeaderIsBroken,
       minWidth: 110,
       flex: 0.1,
-
       renderCell: () => (
-        <Tooltip
-          title={
-            (dataGridLocaleText?.translation
-              ?.layersColumnBrokenLayerWarning as string) ?? ""
-          }
-        >
+        <Tooltip title={GRID_LOCALE_TEXT!.layersColumnBrokenLayerWarning}>
           <WarningAmberIcon sx={{ color: "black", maxWidth: "fit-content" }} />
         </Tooltip>
       ),
     },
     {
       field: "actions",
-      headerName:
-        (dataGridLocaleText?.translation
-          ?.layersColumnHeaderActions as string) ?? "",
+      headerName: GRID_LOCALE_TEXT!.layersColumnHeaderActions,
       renderCell: () => (
         <Button
           variant="contained"
@@ -95,6 +93,10 @@ export default function LayersPage() {
       ),
     },
   ];
+
+  const searchFields = columns
+    .filter((column) => column.searchable)
+    .map((column) => column.field);
 
   const rows =
     layers?.map((layer) => ({
@@ -125,15 +127,15 @@ export default function LayersPage() {
             variant="contained"
             sx={{ backgroundColor: "black", height: "35px", width: "180px" }}
           >
-            Lägg till {t("common.layers")}
+            {t("common.layers")}
           </Button>
         </Grid>
       </Grid>
       <HajkDataGrid
         rows={rows}
         columns={columns}
-        localeText={dataGridLocaleText.translation}
-        searchPlaceholder="Sök på lager..."
+        localeText={GRID_LOCALE_TEXT}
+        searchFields={searchFields}
       />
       <Grid container gap={2} size={12} sx={{ mt: 2 }}>
         <ThemeSwitcher />

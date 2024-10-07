@@ -7,10 +7,13 @@ import { grey } from "@mui/material/colors";
 import HajkDataGrid from "../../components/hajk-data-grid";
 import LanguageSwitcher from "../../components/language-switcher";
 import ThemeSwitcher from "../../components/theme-switcher";
-
+import dataGridLocaleTextSV from "../../i18n/translations/datagrid-sv.json";
+import dataGridLocaleTextEN from "../../i18n/translations/datagrid-en.json";
+import useAppStateStore from "../../store/use-app-state-store";
 export default function MapsPage() {
   const { t } = useTranslation();
   const { data: maps, isLoading, error } = useMaps();
+  const language = useAppStateStore((state) => state.language);
 
   if (isLoading) {
     return <Typography>Loading...</Typography>;
@@ -20,35 +23,38 @@ export default function MapsPage() {
     return <Typography>Error loading data</Typography>;
   }
 
-  const GRID_SWEDISH_LOCALE_TEXT = {
-    columnHeaderName: "Visningsnamn",
-    columnHeaderDescription: "Beskrivning",
-    columnHeaderMapId: "Id",
-    columnHeaderActions: "Åtgärder",
-  };
+  let currentTranslation;
+  if (language === "sv") {
+    currentTranslation = dataGridLocaleTextSV.translation;
+  } else if (language === "en") {
+    currentTranslation = dataGridLocaleTextEN.translation;
+  }
+  const GRID_LOCALE_TEXT = currentTranslation;
 
   const columns = [
     {
       field: "name",
-      headerName: GRID_SWEDISH_LOCALE_TEXT.columnHeaderName,
+      headerName: GRID_LOCALE_TEXT!.mapsColumnHeaderName,
       minWidth: 120,
       flex: 0.1,
+      searchable: true,
     },
     {
       field: "description",
-      headerName: GRID_SWEDISH_LOCALE_TEXT.columnHeaderDescription,
+      headerName: GRID_LOCALE_TEXT!.mapsColumnHeaderDescription,
       minWidth: 150,
       flex: 0.2,
+      searchable: true,
     },
     {
       field: "mapId",
-      headerName: GRID_SWEDISH_LOCALE_TEXT.columnHeaderMapId,
+      headerName: GRID_LOCALE_TEXT!.mapsColumnHeaderMapId,
       minWidth: 300,
       flex: 0.4,
     },
     {
       field: "actions",
-      headerName: GRID_SWEDISH_LOCALE_TEXT.columnHeaderActions,
+      headerName: GRID_LOCALE_TEXT!.mapsColumnHeaderActions,
       renderCell: () => (
         <Button
           variant="contained"
@@ -65,6 +71,10 @@ export default function MapsPage() {
       ),
     },
   ];
+
+  const searchFields = columns
+    .filter((column) => column.searchable)
+    .map((column) => column.field);
 
   const rows =
     maps?.map((map) => ({
@@ -93,15 +103,15 @@ export default function MapsPage() {
             variant="contained"
             sx={{ backgroundColor: "black", height: "35px", width: "180px" }}
           >
-            Lägg till {t("common.maps")}
+            {t("common.maps")}
           </Button>
         </Grid>
       </Grid>
       <HajkDataGrid
         rows={rows}
         columns={columns}
-        localeText={GRID_SWEDISH_LOCALE_TEXT}
-        searchPlaceholder="Sök på kartor..."
+        localeText={GRID_LOCALE_TEXT}
+        searchFields={searchFields}
       />
       <Grid container gap={2} size={12} sx={{ mt: 2 }}>
         <ThemeSwitcher />
