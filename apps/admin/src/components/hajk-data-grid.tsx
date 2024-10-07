@@ -8,6 +8,7 @@ import {
   GridToolbarDensitySelector,
   GridToolbarFilterButton,
   GridToolbarColumnsButton,
+  useGridApiRef,
 } from "@mui/x-data-grid";
 import { TextField, Box } from "@mui/material";
 import { grey } from "@mui/material/colors";
@@ -31,6 +32,7 @@ export default function HajkDataGrid({
   localeText,
 }: HajkDataGridProps) {
   const [searchQuery, setSearchQuery] = useState("");
+  const apiRef = useGridApiRef();
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(e.target.value);
@@ -66,6 +68,7 @@ export default function HajkDataGrid({
       </Box>
 
       <DataGrid
+        apiRef={apiRef}
         autoHeight
         disableRowSelectionOnClick
         localeText={localeText}
