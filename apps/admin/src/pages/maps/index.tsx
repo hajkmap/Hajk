@@ -68,11 +68,13 @@ export default function MapsPage() {
   };
 
   const handleRemoveOption = (keyToRemove: string) => {
-    const { [keyToRemove]: _, ...updatedOptions } = options;
+    const updatedOptions = Object.fromEntries(
+      Object.entries(options).filter(([key]) => key !== keyToRemove)
+    );
     setOptions(updatedOptions);
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
     if (currentMapName) {
@@ -98,7 +100,7 @@ export default function MapsPage() {
 
   const handleOpenDialog = (mapName: string | null = null) => {
     if (mapName) {
-      const mapToEdit = maps?.find((map: any) => map === mapName);
+      const mapToEdit = maps?.find((map: string) => map === mapName);
       if (mapToEdit) {
         setCurrentMapName(mapToEdit);
       }
@@ -301,7 +303,10 @@ export default function MapsPage() {
                       {createMapMutation.isError && (
                         <Grid size={12}>
                           <Typography color="error">
-                            Error: {(createMapMutation.error as any)?.message}
+                            Error:{" "}
+                            {createMapMutation.error instanceof Error
+                              ? createMapMutation.error.message
+                              : "An unexpected error occurred"}
                           </Typography>
                         </Grid>
                       )}

@@ -89,7 +89,7 @@ export const getMapsByGroupId = async (groupId: string): Promise<Map[]> => {
       `/groups/${groupId}/maps`
     );
 
-    if (!response.data || !response.data.maps) {
+    if (!response.data) {
       throw new Error("No maps data found");
     }
 
