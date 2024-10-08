@@ -20,15 +20,15 @@ interface HajkDataGridProps {
   onSearch?: (query: string) => void;
   searchFields?: string[];
   toolbar?: ReactNode;
-  localeText?: string[]; // Add this line
+  localeText?: string[];
 }
 
 export default function HajkDataGrid({
   rows,
   columns,
+  searchFields,
   searchPlaceholder,
   onSearch,
-  searchFields,
   localeText,
 }: HajkDataGridProps) {
   const [searchQuery, setSearchQuery] = useState("");
@@ -42,7 +42,6 @@ export default function HajkDataGrid({
   };
 
   let filteredRows = rows;
-
   if (searchQuery.length > 2) {
     const lowerSearchQuery = searchQuery.toLowerCase(); // Calculate this once
     filteredRows = rows?.filter((row) =>
