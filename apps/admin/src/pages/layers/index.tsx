@@ -17,8 +17,6 @@ export default function LayersPage() {
   const { data: layers, isLoading, error } = useLayers();
   const language = useAppStateStore((state) => state.language);
 
-  // type GRID_LOCALE_TEXT = Record<string, string>;
-
   if (isLoading) {
     return <Typography>Loading...</Typography>;
   }
@@ -31,6 +29,7 @@ export default function LayersPage() {
     language === "sv"
       ? dataGridLocaleTextSV.translation
       : dataGridLocaleTextEN.translation;
+
   const columns = getLayerColumns(currentTranslation);
   const rows = layers ? mapLayerRows(layers) : [];
   const searchFields = columns

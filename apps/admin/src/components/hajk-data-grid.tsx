@@ -9,6 +9,7 @@ import {
   GridToolbarFilterButton,
   GridToolbarColumnsButton,
   useGridApiRef,
+  GridLocaleText,
 } from "@mui/x-data-grid";
 import { TextField, Box } from "@mui/material";
 import { grey } from "@mui/material/colors";
@@ -20,7 +21,7 @@ interface HajkDataGridProps {
   onSearch?: (query: string) => void;
   searchFields?: string[];
   toolbar?: ReactNode;
-  localeText?: string[];
+  localeText?: Partial<GridLocaleText>;
 }
 
 export default function HajkDataGrid({
