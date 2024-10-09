@@ -9,6 +9,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### BREAKING
+
+- PropertyChecker: The configuration field `digitalPlanItemDescriptionAttribute` has been renamed to `digitalPlanItemDescriptionAttributes` and holds now an array of objects rather than a string. For details, refer to [example configuration in the plugin's README](https://github.com/hajkmap/Hajk/blob/master/apps/client/src/plugins/PropertyChecker/readme.md#example-configuration).
+
 ### Added
 
 - Backend (Node): Added (very) limited userDetails to response when using the AD Header approach (for example NodeHoster). [#1534](https://github.com/hajkmap/Hajk/pull/1534)
