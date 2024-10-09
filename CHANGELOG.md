@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [3.14.1] - 2024-10-09
+
 ### BREAKING
 
 - PropertyChecker: The configuration field `digitalPlanItemDescriptionAttribute` has been renamed to `digitalPlanItemDescriptionAttributes` and holds now an array of objects rather than a string. For details, refer to [example configuration in the plugin's README](https://github.com/hajkmap/Hajk/blob/master/apps/client/src/plugins/PropertyChecker/readme.md#example-configuration).
@@ -316,7 +318,8 @@ _A quick follow-up to 3.13.22, that had some issues with certain map configurati
 
 ## [3.12.0-rc.2] - 2023-06-19
 
-[unreleased]: https://github.com/hajkmap/Hajk/compare/v3.14.0...develop
+[unreleased]: https://github.com/hajkmap/Hajk/compare/v3.14.1...develop
+[3.14.1]: https://github.com/hajkmap/Hajk/compare/v3.14.0...v3.14.1
 [3.14.0]: https://github.com/hajkmap/Hajk/compare/v3.13.25...v3.14.0
 [3.13.25]: https://github.com/hajkmap/Hajk/compare/v3.13.24...v3.13.25
 [3.13.24]: https://github.com/hajkmap/Hajk/compare/v3.13.23...v3.13.24
