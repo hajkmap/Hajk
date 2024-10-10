@@ -3,7 +3,7 @@
     "common.clickableLogo": "Klickbar logga",
     "common.english": "Engelska",
     "common.goodbye": "Hej då",
-    "common.groups": "Grupper",     
+    "common.groups": "Grupper",
     "common.hello": "Hej",
     "common.home": "Hem",
     "common.language": "Språk",
@@ -17,6 +17,7 @@
     "common.swedish": "Svenska",
     "common.tools": "Verktyg",
     "common.you": "Du",
+    "common.services.selectTitle": "Server typ",
     "dark": "Mörkt",
     "light": "Ljust"
   }
