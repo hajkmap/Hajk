@@ -17,6 +17,7 @@ export interface Input {
   options?: { label: string; value: string | number; key?: string }[];
   showToolTip?: boolean;
   toolTipDescription?: string;
+  isUrl?: boolean;
 }
 
 export interface InputFieldProps {

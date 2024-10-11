@@ -16,7 +16,7 @@ export default function AccordionFormContainer({
   setValues,
 }: AccordionProps) {
   return (
-    <Accordion>
+    <Accordion sx={{ mt: 1 }}>
       <AccordionSummary expandIcon={<ExpandMoreIcon />}>
         <Typography>{title}</Typography>
       </AccordionSummary>

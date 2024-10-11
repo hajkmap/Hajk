@@ -18,6 +18,7 @@
     "common.tools": "Tools",
     "common.you": "You",
     "common.services.selectTitle": "Server type",
+    "common.inputField.url": "Change URL",
     "dark": "Dark",
     "light": "Light"
   }

@@ -1,4 +1,7 @@
+import { useState } from "react";
 import { InputFieldProps } from "./type";
+import { useTranslation } from "react-i18next";
+import useAppStateStore from "../../store/use-app-state-store";
 import {
   TextField,
   Slider,
@@ -16,6 +19,11 @@ import {
   FormControlLabel,
   RadioGroup,
   Radio,
+  Button,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
 } from "@mui/material";
 import HelpOutlineOutlinedIcon from "@mui/icons-material/HelpOutlineOutlined";
 
@@ -24,10 +32,37 @@ export default function InputField({
   value,
   onChange,
 }: InputFieldProps) {
-  const handleTextChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    onChange(input.key, e.target.value);
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [tempUrl, setTempUrl] = useState<string>(value as string);
+  const { t } = useTranslation();
+  const themeMode = useAppStateStore((state) => state.themeMode);
+
+  const handleDialogOpen = () => {
+    setDialogOpen(true);
   };
 
+  const handleDialogClose = () => {
+    setDialogOpen(false);
+  };
+
+  const handleUrlChange = () => {
+    onChange(input.key, tempUrl);
+    handleDialogClose();
+  };
+
+  const handleTextChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    let inputValue: string | number = e.target.value;
+
+    if (input.type === "NUMBER") {
+      inputValue = Number(inputValue);
+
+      if (isNaN(inputValue)) {
+        inputValue = 0;
+      }
+    }
+
+    onChange(input.key, inputValue);
+  };
   const handleCheckboxChange = (optionKey: string, isChecked: boolean) => {
     const updatedCheckboxValues = {
       ...(value as Record<string, boolean>),
@@ -54,7 +89,7 @@ export default function InputField({
     if (input.showToolTip) {
       return (
         <Tooltip sx={{ ml: 1 }} title={input.toolTipDescription} arrow>
-          <HelpOutlineOutlinedIcon fontSize="small" />
+          <HelpOutlineOutlinedIcon fontSize="medium" />
         </Tooltip>
       );
     }
@@ -67,7 +102,7 @@ export default function InputField({
         display: "flex",
         alignItems: "center",
         justifyContent: "space-between",
-        width: "100%",
+        width: "80%",
       }}
     >
       <Box sx={{ flexGrow: 1 }}>
@@ -77,19 +112,80 @@ export default function InputField({
             case "NUMBER":
             case "DATE":
               return (
-                <TextField
-                  label={input.title}
-                  type={input.type.toLowerCase()}
-                  value={value}
-                  onChange={handleTextChange}
-                  fullWidth
-                  margin="normal"
-                  slotProps={
-                    input.type === "DATE"
-                      ? { inputLabel: { shrink: true } }
-                      : undefined
-                  }
-                />
+                <>
+                  <TextField
+                    label={input.title}
+                    type={input.type.toLowerCase()}
+                    value={
+                      input.type === "NUMBER" && typeof value === "number"
+                        ? value
+                        : value || ""
+                    }
+                    onChange={handleTextChange}
+                    fullWidth
+                    sx={{
+                      "& input::-webkit-calendar-picker-indicator": {
+                        filter:
+                          themeMode === "light" ? "invert(0)" : "invert(1)",
+                      },
+                    }}
+                    margin="normal"
+                    slotProps={{
+                      input: {
+                        endAdornment: input.isUrl && (
+                          <Button
+                            sx={{
+                              color: "mediumpurple",
+                              width: "100%",
+                              maxWidth: "100px",
+                            }}
+                            onClick={handleDialogOpen}
+                            size="small"
+                          >
+                            {t("common.inputField.url")}
+                          </Button>
+                        ),
+                      },
+                      inputLabel:
+                        input.type === "DATE" ? { shrink: true } : undefined,
+                    }}
+                  />
+                  {input.isUrl && (
+                    <Dialog
+                      PaperProps={{ sx: { width: "100%" } }}
+                      open={dialogOpen}
+                      onClose={handleDialogClose}
+                      sx={{ textAlign: "center" }}
+                    >
+                      <DialogTitle>Change URL</DialogTitle>
+                      <DialogContent>
+                        <TextField
+                          label="New URL"
+                          value={tempUrl}
+                          onChange={(e) => setTempUrl(e.target.value)}
+                          margin="normal"
+                          fullWidth
+                        />
+                      </DialogContent>
+                      <DialogActions>
+                        <Button
+                          color="error"
+                          variant="outlined"
+                          onClick={handleDialogClose}
+                        >
+                          Cancel
+                        </Button>
+                        <Button
+                          variant="outlined"
+                          onClick={handleUrlChange}
+                          color="success"
+                        >
+                          Save
+                        </Button>
+                      </DialogActions>
+                    </Dialog>
+                  )}
+                </>
               );
 
             case "CHECKBOX":
@@ -163,7 +259,7 @@ export default function InputField({
 
             case "SLIDER":
               return (
-                <Paper elevation={4} sx={{ p: 2 }}>
+                <Paper elevation={4} sx={{ p: 2, borderRadius: 2, mt: 1 }}>
                   <Typography gutterBottom>{input.title}</Typography>
                   <Slider
                     sx={{ width: "100%" }}

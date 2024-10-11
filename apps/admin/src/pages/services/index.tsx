@@ -1,10 +1,12 @@
 import { useState } from "react";
 import Grid from "@mui/material/Grid2";
-import { List, ListItem, Paper, Typography } from "@mui/material";
+import { List, ListItem, Paper, Typography, Box, Button } from "@mui/material";
 import { useTranslation } from "react-i18next";
 import Page from "../../layouts/root/components/page";
 import { useServices } from "../../api/services";
 import AccordionFormContainer from "../../components/collapsible-form-container";
+import ExpandLessIcon from "@mui/icons-material/ExpandLess";
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 
 export default function ServicesPage() {
   const { t } = useTranslation();
@@ -12,7 +14,8 @@ export default function ServicesPage() {
   const [values, setValues] = useState<
     Record<string, string | number | boolean | Record<string, boolean>>
   >({});
-
+  const [isAllOpen, setIsAllOpen] = useState(false);
+  console.log("values", values);
   const handleChange = (
     key: string,
     value: string | number | boolean | Record<string, boolean>
@@ -21,6 +24,10 @@ export default function ServicesPage() {
       ...prevValues,
       [key]: value,
     }));
+  };
+
+  const handleToggleAll = () => {
+    setIsAllOpen(!isAllOpen);
   };
 
   return (
@@ -42,6 +49,16 @@ export default function ServicesPage() {
           </List>
         </Grid>
       )}
+      <Box sx={{ display: "flex", justifyContent: "flex-end", mt: 2 }}>
+        <Button
+          sx={{ color: "mediumpurple", borderColor: "mediumpurple" }}
+          variant="outlined"
+          onClick={handleToggleAll}
+        >
+          {isAllOpen ? <ExpandLessIcon /> : <ExpandMoreIcon />}{" "}
+          {isAllOpen ? "Close All" : "Open All"}
+        </Button>
+      </Box>
       <AccordionFormContainer
         title="Anslutning"
         inputs={[
@@ -62,6 +79,7 @@ export default function ServicesPage() {
             key: "serverUrl",
             title: "URL to Service",
             showToolTip: true,
+            isUrl: true,
           },
           {
             type: "NUMBER",
@@ -103,6 +121,38 @@ export default function ServicesPage() {
               { label: "Blue", value: "blue" },
               { label: "Green", value: "green" },
             ],
+          },
+        ]}
+        values={values}
+        setValues={handleChange}
+      />
+      <AccordionFormContainer
+        title="Test"
+        inputs={[
+          {
+            type: "SELECT",
+            key: "testType",
+            title: t("common.services.selectTitle"),
+            showToolTip: true,
+            toolTipDescription: "test",
+            options: services?.map((service) => ({
+              key: service.id,
+              label: service.type,
+              value: service.type,
+            })),
+          },
+          {
+            type: "TEXT",
+            key: "testUrl",
+            title: "URL to Service",
+            showToolTip: true,
+            isUrl: true,
+          },
+          {
+            type: "NUMBER",
+            key: "testNumber",
+            title: "test Number",
+            showToolTip: true,
           },
         ]}
         values={values}

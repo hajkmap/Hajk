@@ -18,6 +18,7 @@
     "common.tools": "Verktyg",
     "common.you": "Du",
     "common.services.selectTitle": "Server typ",
+    "common.inputField.url": "Ändra URL",
     "dark": "Mörkt",
     "light": "Ljust"
   }
