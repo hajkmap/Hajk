@@ -146,6 +146,8 @@ class LayerGroupItem extends Component {
    */
   componentDidMount() {
     const { model } = this.props;
+
+    // Subscribe to layer visibility changes
     model.globalObserver.subscribe("layerswitcher.hideLayer", this.setHidden);
     model.globalObserver.subscribe("layerswitcher.showLayer", this.setVisible);
     model.observer.subscribe("hideLayer", this.setHidden);
@@ -153,9 +155,9 @@ class LayerGroupItem extends Component {
     model.observer.subscribe("toggleGroup", this.toggleGroupVisible);
 
     // Listen for changes in the layer's visibility.
-    this.props.layer.on?.("change:visible", (e) => {
+    this.props.layer.on?.("change:visible", () => {
       // Update the 'visible' state based on the layer's new visibility.
-      const visible = !e.oldValue;
+      const visible = this.props.layer.getVisible();
       this.setState({
         visible,
       });
@@ -173,13 +175,84 @@ class LayerGroupItem extends Component {
     // the tiles might be "ok", but if only one of the tiles has "loaderror", we
     // consider that the layer has failed loading and want to inform the user.
     model.globalObserver.subscribe("layerswitcher.wmsLayerLoadStatus", (d) => {
-      this.state.status !== "loaderror" &&
-        this.state.name === d.id &&
+      if (this.state.status !== "loaderror" && this.state.name === d.id) {
         this.setState({
           status: d.status,
         });
+      }
     });
+
+    // Initialize visibleSubLayers and zoomVisible based on the current source parameters
+    this.updateVisibleSubLayersFromSource();
+
+    // Listen for changes in the source's parameters
+    const source = this.props.layer.getSource();
+    source.on("change", this.updateVisibleSubLayersFromSource);
+
+    // To prevent updating state after component is unmounted
+    this.unmounted = false;
   }
+
+  componentWillUnmount() {
+    const source = this.props.layer.getSource();
+    source.un("change", this.updateVisibleSubLayersFromSource);
+
+    // Unsubscribe from global observers
+    const { model } = this.props;
+    model.globalObserver.unsubscribe("layerswitcher.hideLayer", this.setHidden);
+    model.globalObserver.unsubscribe(
+      "layerswitcher.showLayer",
+      this.setVisible
+    );
+    model.observer.unsubscribe("hideLayer", this.setHidden);
+    model.observer.unsubscribe("showLayer", this.setVisible);
+    model.observer.unsubscribe("toggleGroup", this.toggleGroupVisible);
+
+    // Mark component as unmounted
+    this.unmounted = true;
+  }
+
+  updateVisibleSubLayersFromSource = () => {
+    if (this.unmounted) return; // Prevent state updates after unmount
+
+    const source = this.props.layer.getSource();
+    const params = source.getParams();
+    const layersParam = params.LAYERS;
+    let visibleSubLayers = [];
+    if (layersParam) {
+      visibleSubLayers = layersParam.split(",");
+    }
+
+    const zoom = this.props.model.olMap.getView().getZoom();
+    const lprops = this.props.layer.getProperties();
+
+    // Get minZoom and maxZoom, treating -1 as no limit.
+    let minZoom = lprops.minZoom;
+    let maxZoom = lprops.maxZoom;
+
+    if (minZoom === undefined || minZoom === -1) {
+      minZoom = 0;
+    }
+
+    if (maxZoom === undefined || maxZoom === -1) {
+      maxZoom = Infinity;
+    }
+
+    // Check if the current zoom level is within the allowed range
+    const layerIsZoomVisible = zoom >= minZoom && zoom <= maxZoom;
+
+    // Update state if visibleSubLayers or zoomVisible has changed
+    if (
+      visibleSubLayers.sort().toString() !==
+        this.state.visibleSubLayers.sort().toString() ||
+      this.state.zoomVisible !== layerIsZoomVisible
+    ) {
+      this.setState({
+        visibleSubLayers,
+        zoomVisible: layerIsZoomVisible,
+      });
+    }
+  };
 
   /**
    * Determines if the layer has minimum and maximum zoom level restrictions.
@@ -197,13 +270,22 @@ class LayerGroupItem extends Component {
     // Retrieve the layer properties from the layer object.
     const lprops = this.props.layer.getProperties();
 
-    // Get the maxZoom and minZoom properties if they exist, otherwise set them to 0.
-    const maxZ = lprops.maxZoom ?? 0;
-    const minZ = lprops.minZoom ?? 0;
+    // Get the maxZoom and minZoom properties.
+    let maxZ = lprops.maxZoom;
+    let minZ = lprops.minZoom;
 
-    // Check if either minZoom or maxZoom is within a valid range (0 < value < Infinity).
-    // Return true if any of them are within the valid range, otherwise return false.
-    return (maxZ > 0 && maxZ < Infinity) || (minZ > 0 && minZ < Infinity);
+    // If minZoom or maxZoom are -1 or undefined, treat them as no limit.
+    if (minZ === undefined || minZ === -1) {
+      minZ = 0;
+    }
+
+    if (maxZ === undefined || maxZ === -1) {
+      maxZ = Infinity;
+    }
+
+    // Check if either minZoom or maxZoom is set to limit the zoom range
+    // Return true if minZoom > 0 or maxZoom < Infinity
+    return minZ > 0 || maxZ < Infinity;
   }
 
   /**
@@ -221,10 +303,24 @@ class LayerGroupItem extends Component {
   zoomEndHandler = (e) => {
     // Get the current map zoom level.
     const zoom = this.props.model.olMap.getView().getZoom();
+
     // Retrieve the layer properties.
     const lprops = this.props.layer.getProperties();
+
+    // Get minZoom and maxZoom, treating -1 as no limit.
+    let minZoom = lprops.minZoom;
+    let maxZoom = lprops.maxZoom;
+
+    if (minZoom === undefined || minZoom === -1) {
+      minZoom = 0;
+    }
+
+    if (maxZoom === undefined || maxZoom === -1) {
+      maxZoom = Infinity;
+    }
+
     // Check if the current zoom level is within the allowed range of minZoom and maxZoom.
-    const layerIsZoomVisible = zoom > lprops.minZoom && zoom <= lprops.maxZoom;
+    const layerIsZoomVisible = zoom >= minZoom && zoom <= maxZoom;
 
     let showSnack = false;
 
@@ -450,6 +546,8 @@ class LayerGroupItem extends Component {
       // Show the OL layer
       this.props.layer.setVisible(true);
 
+      const layersInfo = this.props.layer.layersInfo || {};
+
       // Set LAYERS and STYLES so that the exact sublayers that are needed
       // will be visible
       this.props.layer.getSource().updateParams({
@@ -459,19 +557,12 @@ class LayerGroupItem extends Component {
         // Extract .style property from each sub layer.
         // Join them into a string that will be used to
         // reset STYLES param for the GET request.
-        STYLES: Object.entries(this.props.layer.layersInfo)
-          .filter((k) => subLayersToShow.indexOf(k[0]) !== -1)
-          .map((l) => l[1].style)
+        STYLES: subLayersToShow
+          .map((subLayer) => (layersInfo[subLayer] || {}).style || "")
           .join(","),
       });
 
-      const { layer } = this.props;
-
-      let visibleLayers = [...subLayersToShow];
-      if (layer.get("layers") && layer.get("layers").length > 0) {
-        visibleLayers.push(layer.get("layers")[0]);
-      }
-
+      // Update component state
       this.setState({
         visible: true,
         visibleSubLayers: subLayersToShow,
@@ -509,8 +600,20 @@ class LayerGroupItem extends Component {
       // Get the current zoom level.
       const zoom = this.props.model.olMap.getView().getZoom();
       const lprops = this.props.layer.getProperties();
-      const layerIsZoomVisible =
-        zoom > lprops.minZoom && zoom <= lprops.maxZoom;
+
+      // Adjust minZoom and maxZoom
+      let minZoom = lprops.minZoom;
+      let maxZoom = lprops.maxZoom;
+
+      if (minZoom === undefined || minZoom === -1) {
+        minZoom = 0;
+      }
+
+      if (maxZoom === undefined || maxZoom === -1) {
+        maxZoom = Infinity;
+      }
+
+      const layerIsZoomVisible = zoom >= minZoom && zoom <= maxZoom;
 
       let showSnack = false;
 
@@ -543,6 +646,7 @@ class LayerGroupItem extends Component {
       this.setState({
         zoomVisible: layerIsZoomVisible,
         visibleSubLayers: subLayers,
+        visible: true,
       });
     } else {
       // If the layer is becoming hidden, call setHidden() to set the layer as hidden.
@@ -551,33 +655,28 @@ class LayerGroupItem extends Component {
   };
 
   toggleLayerVisible = (subLayer) => (e) => {
-    var visibleSubLayers = [...this.state.visibleSubLayers],
-      isVisible = visibleSubLayers.some(
-        (visibleSubLayer) => visibleSubLayer === subLayer
-      ),
-      layerVisibility;
-
-    const { visible } = this.state;
-    layerVisibility = visible;
-
+    let visibleSubLayers = [...this.state.visibleSubLayers];
+    const isVisible = visibleSubLayers.includes(subLayer);
+    let layerVisibility = this.state.visible;
     let isNewSubLayer = false;
 
     if (isVisible) {
+      // Remove subLayer from visibleSubLayers
       visibleSubLayers = visibleSubLayers.filter(
         (visibleSubLayer) => visibleSubLayer !== subLayer
       );
     } else {
+      // Add subLayer to visibleSubLayers
       visibleSubLayers.push(subLayer);
       // Restore order to its former glory. Sort using original sublayer array.
-      visibleSubLayers.sort((a, b) => {
-        return (
+      visibleSubLayers.sort(
+        (a, b) =>
           this.state.subLayers.indexOf(a) - this.state.subLayers.indexOf(b)
-        );
-      });
+      );
       isNewSubLayer = true;
     }
 
-    if (!visible && visibleSubLayers.length > 0) {
+    if (!this.state.visible && visibleSubLayers.length > 0) {
       layerVisibility = true;
       // FIXME: `subLayer` below doesn't do anything since
       // setVisible only makes use of its first parameter
@@ -587,16 +686,19 @@ class LayerGroupItem extends Component {
 
     if (visibleSubLayers.length === 0) {
       layerVisibility = false;
+      // Hide the layer if no sublayers are visible
       this.setHidden(this.props.layer);
     }
 
     if (visibleSubLayers.length >= 1) {
-      // Create an Array to be used as STYLES param, it should only contain selected sublayers' styles
+      // Create an array for STYLES param, containing styles for visible sublayers
       let visibleSubLayersStyles = [];
       visibleSubLayers.forEach((subLayer) => {
-        visibleSubLayersStyles.push(
-          this.props.layer.layersInfo[subLayer].style
-        );
+        const layersInfo = this.props.layer.layersInfo || {};
+        const subLayerInfo = layersInfo[subLayer] || {};
+        if (subLayerInfo.style) {
+          visibleSubLayersStyles.push(subLayerInfo.style);
+        }
       });
 
       this.props.layer.getSource().updateParams({
@@ -611,17 +713,26 @@ class LayerGroupItem extends Component {
           .join(","),
         CQL_FILTER: null,
       });
+
+      // Set layer visibility
       this.props.layer.setVisible(layerVisibility);
-      this.setState({
-        visible: layerVisibility,
-        visibleSubLayers: visibleSubLayers,
-      });
 
       // Display a Snackbar message if the layer is not visible at the current zoom level.
       const zoom = this.props.model.olMap.getView().getZoom();
       const lprops = this.props.layer.getProperties();
-      const layerIsZoomVisible =
-        zoom > lprops.minZoom && zoom <= lprops.maxZoom;
+
+      let minZoom = lprops.minZoom;
+      let maxZoom = lprops.maxZoom;
+
+      if (minZoom === undefined || minZoom === -1) {
+        minZoom = 0;
+      }
+
+      if (maxZoom === undefined || maxZoom === -1) {
+        maxZoom = Infinity;
+      }
+
+      const layerIsZoomVisible = zoom >= minZoom && zoom <= maxZoom;
 
       let showSnack = false;
 
@@ -646,7 +757,10 @@ class LayerGroupItem extends Component {
         this.showZoomSnack(subLayer, false);
       }
 
+      // Update component state
       this.setState({
+        visible: layerVisibility,
+        visibleSubLayers,
         zoomVisible: layerIsZoomVisible,
       });
     } else {
@@ -659,12 +773,14 @@ class LayerGroupItem extends Component {
   }
 
   renderSubLayer(layer, subLayer, index) {
-    const { visibleSubLayers } = this.state;
-    const visible = visibleSubLayers.some(
-      (visibleSubLayer) => visibleSubLayer === subLayer
-    );
+    const layersInfo = layer.layersInfo || {};
+    const subLayerInfo = layersInfo[subLayer] || {};
+    const caption = subLayerInfo.caption || subLayer;
+    const legendIcon = subLayerInfo.legendIcon;
+
+    const { visibleSubLayers, zoomVisible, visible } = this.state;
+    const isSubLayerVisible = visibleSubLayers.includes(subLayer);
     const toggleSettings = this.toggleSubLayerSettings.bind(this, index);
-    const legendIcon = layer.layersInfo[subLayer].legendIcon;
 
     return (
       <LayerInfo key={index}>
@@ -677,22 +793,20 @@ class LayerGroupItem extends Component {
             className="hajk-layerswitcher-sublayer-grid"
           >
             <CheckBoxWrapper className="hajk-layerswitcher-layer-toggle">
-              {!visible ? (
+              {!isSubLayerVisible ? (
                 <CheckBoxOutlineBlankIcon />
               ) : (
                 <CheckBoxIcon
                   sx={{
                     fill: (theme) =>
-                      !this.state.zoomVisible && this.state.visible
-                        ? theme.palette.warning.dark
-                        : "",
+                      !zoomVisible && visible ? theme.palette.warning.dark : "",
                   }}
                 />
               )}
             </CheckBoxWrapper>
             {legendIcon && this.renderLegendIcon(legendIcon)}
-            <Caption sx={{ fontWeight: visible ? "bold" : "normal" }}>
-              {layer.layersInfo[subLayer].caption}
+            <Caption sx={{ fontWeight: isSubLayerVisible ? "bold" : "normal" }}>
+              {caption}
             </Caption>
           </Grid>
           <SummaryButtonsContainer className="hajk-layerswitcher-summary-buttons">
@@ -714,10 +828,7 @@ class LayerGroupItem extends Component {
         </LayerSummaryContainer>
         {this.state.toggleSubLayerSettings[index] ? (
           <Grid item xs={12}>
-            <LegendImage
-              alt="Teckenförklaring"
-              src={this.props.layer.layersInfo[subLayer].legend}
-            />
+            <LegendImage alt="Teckenförklaring" src={subLayerInfo.legend} />
           </Grid>
         ) : null}
       </LayerInfo>
@@ -900,18 +1011,16 @@ class LayerGroupItem extends Component {
      */
     const addSubLayerCaptions = (subLayer) => {
       if (subLayer) {
-        const layerCaption = layersInfo[subLayer]?.caption;
-        if (layerCaption) {
-          const message = `Lagret "${layerCaption}" är inte synligt vid aktuell zoomnivå.`;
+        const layerCaption = (layersInfo[subLayer] || {}).caption || subLayer;
+        const message = `Lagret "${layerCaption}" är inte synligt vid aktuell zoomnivå.`;
 
-          this.zoomWarningSnack = this.props.enqueueSnackbar(message, {
-            variant: "warning",
-            preventDuplicate: false,
-            onClose: () => {
-              this.zoomWarningSnack = null;
-            },
-          });
-        }
+        this.zoomWarningSnack = this.props.enqueueSnackbar(message, {
+          variant: "warning",
+          preventDuplicate: false,
+          onClose: () => {
+            this.zoomWarningSnack = null;
+          },
+        });
       }
     };
 
