@@ -218,8 +218,9 @@ function CitizendialogueView(props) {
             (feature) => feature.surveyAnswerId === specificSurveyAnswerId
           )
           .map((feature) => ({
-            surveyQuestion: feature.surveyQuestion,
-            wktGeometry: feature.wktGeometry,
+            title: feature.surveyQuestion,
+            value: feature.wktGeometry,
+            name: feature.surveyQuestionName,
           }));
       }
 
@@ -232,15 +233,17 @@ function CitizendialogueView(props) {
           const item = {
             title: surveyQuestion.title,
             value: question,
+            name: surveyQuestion.name,
           };
           resultData.push(item);
         }
       }
 
+      const mergedResults = [...resultData, ...featureData];
+
       const combinedData = {
         ...props.surveyJsData,
-        surveyResults: resultData,
-        featureData,
+        surveyResults: mergedResults,
       };
       props.model.handleOnComplete(combinedData);
     },
@@ -248,26 +251,32 @@ function CitizendialogueView(props) {
     [props.surveyJsData, props.model]
   );
 
-  // Sets currentQuestionName after rendering question
+  // Sets currentQuestionName and title after rendering question
+  const [currentQuestionTitle, setCurrentQuestionTitle] = useState(null);
   const [currentQuestionName, setCurrentQuestionName] = useState(null);
+
   const handleAfterRenderQuestion = (sender, options) => {
     const currentQuestion = options.question;
     // If type is custom question geometry, it shows EditView with the prop toolbarOption set.
     // The Toolbar is filtered to show different sets of tools.
     if (currentQuestion.jsonObj.type === "geometry") {
-      setCurrentQuestionName(currentQuestion.title);
+      setCurrentQuestionTitle(currentQuestion.title);
+      setCurrentQuestionName(currentQuestion.name);
       setShowEditView({ show: true, toolbarOptions: "all" });
     }
     if (currentQuestion.jsonObj.type === "geometrypoint") {
-      setCurrentQuestionName(currentQuestion.title);
+      setCurrentQuestionTitle(currentQuestion.title);
+      setCurrentQuestionName(currentQuestion.name);
       setShowEditView({ show: true, toolbarOptions: "point" });
     }
     if (currentQuestion.jsonObj.type === "geometrylinestring") {
-      setCurrentQuestionName(currentQuestion.title);
+      setCurrentQuestionTitle(currentQuestion.title);
+      setCurrentQuestionName(currentQuestion.name);
       setShowEditView({ show: true, toolbarOptions: "linestring" });
     }
     if (currentQuestion.jsonObj.type === "geometrypolygon") {
-      setCurrentQuestionName(currentQuestion.title);
+      setCurrentQuestionTitle(currentQuestion.title);
+      setCurrentQuestionName(currentQuestion.name);
       setShowEditView({ show: true, toolbarOptions: "polygon" });
     }
   };
@@ -291,6 +300,7 @@ function CitizendialogueView(props) {
   );
 
   editModel.currentQuestionName = currentQuestionName;
+  editModel.currentQuestionTitle = currentQuestionTitle;
 
   const rootMap = useRef(new Map());
   React.useEffect(() => {
@@ -313,6 +323,7 @@ function CitizendialogueView(props) {
             observer={props.localObserver}
             surveyJsData={props.surveyJsData}
             resetView={resetEditView}
+            currentQuestionTitle={currentQuestionTitle}
             currentQuestionName={currentQuestionName}
             onSaveCallback={handleOnComplete}
             ref={editViewRef}

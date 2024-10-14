@@ -152,52 +152,51 @@ function SurveyHandler(props) {
   const addQuestion = (pageIndex, type = "text") => {
     let newQuestion = { title: "", type, isRequired: false };
     if (type === "checkbox" || type === "radiogroup") {
-      newQuestion.choices = [];
+        newQuestion.choices = [];
     } else if (type === "html") {
-      newQuestion.html = "";
+        newQuestion.html = "";
     }
     const newPages = survey.pages.map((page, index) => {
-      if (index === pageIndex) {
-        return { ...page, questions: [...page.questions, newQuestion] };
-      }
-      return page;
+        if (index === pageIndex) {
+            return { ...page, questions: [...page.questions, newQuestion] };
+        }
+        return page;
     });
     const newQuestionIndex = newPages[pageIndex].questions.length - 1;
     setSelectedQuestion({ pageIndex, questionIndex: newQuestionIndex });
     setSurvey({ ...survey, pages: newPages });
-  };
+};
 
-  const updateQuestion = (pageIndex, questionIndex, field, value) => {
-    const newPages = survey.pages.map((page, pIndex) => {
+const updateQuestion = (pageIndex, questionIndex, field, value) => {
+  const newPages = survey.pages.map((page, pIndex) => {
       if (pIndex === pageIndex) {
-        const newQuestions = page.questions.map((question, qIndex) => {
-          if (qIndex === questionIndex) {
-            let updatedQuestion = { ...question, [field]: value };
-              if (field === "type") {
-                if (value === "email") {
-                  updatedQuestion = {
-                  ...updatedQuestion,
-                  type: "text",
-                  inputType: "email",
-                  name: "email",
-                  placeholder: "namn@exempel.se"
-                  };
-                } else {
-                  delete updatedQuestion.inputType;
-                  delete updatedQuestion.name;
-                }
+          const newQuestions = page.questions.map((question, qIndex) => {
+              if (qIndex === questionIndex) {
+                  let updatedQuestion = { ...question, [field]: value };
+                  if (field === "type") {
+                      if (value === "email") {
+                          updatedQuestion = {
+                              ...updatedQuestion,
+                              type: "text",
+                              inputType: "email",
+                              placeholder: "namn@exempel.se"
+                          };
+                      } else {
+                          delete updatedQuestion.inputType;
+                          delete updatedQuestion.placeholder;
+                      }
+                  }
+                  return updatedQuestion;
               }
-
-              return updatedQuestion;
-          }
-        return question;
-      });
-      return { ...page, questions: newQuestions };
+              return question;
+          });
+          return { ...page, questions: newQuestions };
       }
       return page;
-    });
-    setSurvey({ ...survey, pages: newPages });
-  };
+  });
+  setSurvey({ ...survey, pages: newPages });
+};
+
 
   const addChoice = (pageIndex, questionIndex) => {
     const newPages = survey.pages.map((page, pIndex) => {
@@ -271,26 +270,48 @@ function SurveyHandler(props) {
   const [filename, setFilename] = useState("");
 
   const saveSurvey = () => {
-    const surveyJson = JSON.stringify(survey);
-    
-    if (!validateNewSurveyName(filename)) {
-      alert('Fel filnamn. Endast siffror och bokstäver.');
-      return;
-  }
+    // Create a copy of the survey to avoid direct mutation
+    let newSurvey = { ...survey };
 
-    props.model.saveSurvey(filename, surveyJson, (response) => {
-      if (typeof response === 'object' && response !== null) {
-        let responseString = '';
-        for (const [key, value] of Object.entries(response)) {
-            responseString += `${key}: ${value}\n`;
-        }
-        alert(responseString);
-    } else {
-        alert(response);
-    }
+    // Initialize a question counter
+    let questionCounter = 0;
+
+    // Iterate over each page and its questions
+    newSurvey.pages = newSurvey.pages.map((page) => {
+        let newQuestions = page.questions.map((question) => {
+            if (question.inputType === "email") {
+                // Keep the name as "email" for email questions
+                return { ...question, name: "email" };
+            } else {
+                // Assign a unique name based on the counter
+                return { ...question, name: `qid${questionCounter++}` };
+            }
+        });
+        return { ...page, questions: newQuestions };
     });
-  };
 
+    // Serialize the survey to JSON
+    const surveyJson = JSON.stringify(newSurvey);
+
+    // Validate the filename
+    if (!validateNewSurveyName(filename)) {
+        alert('Invalid filename. Only letters and numbers are allowed.');
+        return;
+    }
+
+    // Save the survey
+    props.model.saveSurvey(filename, surveyJson, (response) => {
+        if (typeof response === 'object' && response !== null) {
+            let responseString = '';
+            for (const [key, value] of Object.entries(response)) {
+                responseString += `${key}: ${value}\n`;
+            }
+            alert(responseString);
+        } else {
+            alert(response);
+        }
+    });
+};
 
   const handleSurveySelection = (e) => {
     const selectedSurveyId = e.target.value;

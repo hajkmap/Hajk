@@ -174,7 +174,8 @@ class EditView extends React.PureComponent {
       SURVEYID: this.props.surveyJsData.surveyId,
       SURVEYANSWERID: this.props.surveyJsData.surveyAnswerId,
       SURVEYANSWERDATE: this.props.surveyJsData.surveyAnswerDate,
-      SURVEYQUESTION: this.props.currentQuestionName,
+      SURVEYQUESTION: this.props.currentQuestionTitle,
+      SURVEYQUESTIONNAME: this.props.currentQuestionName,
     };
 
     model.save(editValues, (response) => {

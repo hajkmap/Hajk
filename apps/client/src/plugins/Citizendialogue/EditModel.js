@@ -20,6 +20,7 @@ class EditModel {
     this.surveyJsData = settings.surveyJsData;
     this.onCoordinatesChange = settings.onCoordinatesChange;
     this.currentQuestionName = settings.currentQuestionName;
+    this.currentQuestionTitle = settings.currentQuestionTitle;
 
     this.activeServices = this.options.activeServices;
     this.sources = this.options.sources;
@@ -198,6 +199,7 @@ class EditModel {
       allFeatures.forEach((feature) => {
         const featureData = {
           surveyQuestion: feature.get("SURVEYQUESTION"),
+          surveyQuestionName: feature.get("SURVEYQUESTIONNAME"),
           surveyAnswerId: feature.get("SURVEYANSWERID"),
           wktGeometry: wktFormatter.writeGeometry(feature.getGeometry()),
         };
@@ -403,7 +405,7 @@ class EditModel {
       const filteredFeatures = this.newMapData.filter(
         (feature) =>
           feature.surveyAnswerId === this.surveyJsData.surveyAnswerId &&
-          feature.surveyQuestion === this.currentQuestionName
+          feature.surveyQuestion === this.currentQuestionTitle
       );
 
       const features = filteredFeatures.map((savedFeature) => {
@@ -439,7 +441,7 @@ class EditModel {
         const surveyQuestion = String(feature.get("SURVEYQUESTION") || "");
         return (
           surveyAnswerId.trim() === this.surveyJsData.surveyAnswerId.trim() &&
-          surveyQuestion.trim() === this.currentQuestionName.trim()
+          surveyQuestion.trim() === this.currentQuestionTitle.trim()
         );
       });
 
