@@ -9,10 +9,18 @@ interface AppState {
   apiBaseUrl: string;
   axiosConfigOverrides: Record<string, unknown>;
   loading: boolean;
+  panels: Record<string, Record<string, boolean>>;
   setLanguage: (lang: Language) => void;
   setThemeMode: (theme: PaletteMode) => void;
   setSidebarLocked: (locked: boolean) => void;
   loadConfig: () => Promise<void>;
+  setPanelExpanded: (
+    componentKey: string,
+    panelId: string,
+    expanded: boolean
+  ) => void;
+  collapseAllPanels: (componentKey: string) => void;
+  registerPanel: (componentKey: string, panelId: string) => void;
 }
 
 const getDefaultThemeMode = () => {
@@ -43,6 +51,7 @@ const useAppStateStore = create<AppState>((set) => ({
   apiBaseUrl: "",
   axiosConfigOverrides: {},
   loading: true,
+  panels: {},
 
   setLanguage: (lang: string) => {
     localStorage.setItem("language", lang);
@@ -80,6 +89,43 @@ const useAppStateStore = create<AppState>((set) => ({
       console.error("Failed to load config:", error);
       set({ loading: false });
     }
+  },
+  setPanelExpanded: (componentKey, panelId, expanded) => {
+    set((state) => ({
+      panels: {
+        ...state.panels,
+        [componentKey]: {
+          ...state.panels[componentKey],
+          [panelId]: expanded,
+        },
+      },
+    }));
+  },
+
+  collapseAllPanels: (componentKey) => {
+    set((state) => ({
+      panels: {
+        ...state.panels,
+        [componentKey]: Object.keys(state.panels[componentKey] || {}).reduce(
+          (acc, panelId) => {
+            acc[panelId] = false;
+            return acc;
+          },
+          {} as Record<string, boolean>
+        ),
+      },
+    }));
+  },
+  registerPanel: (componentKey, panelId) => {
+    set((state) => ({
+      panels: {
+        ...state.panels,
+        [componentKey]: {
+          ...state.panels[componentKey],
+          [panelId]: state.panels[componentKey]?.[panelId] ?? false,
+        },
+      },
+    }));
   },
 }));
 

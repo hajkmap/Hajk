@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import {
   Accordion,
   AccordionSummary,
@@ -7,6 +8,7 @@ import {
 import { AccordionProps } from "./type";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import InputField from "./input-field";
+import useAppStateStore from "../../store/use-app-state-store";
 
 export default function AccordionFormContainer({
   title,
@@ -14,9 +16,25 @@ export default function AccordionFormContainer({
   inputs,
   values,
   setValues,
+  panelId,
+  componentKey,
 }: AccordionProps) {
+  const { panels, setPanelExpanded, registerPanel } = useAppStateStore();
+
+  useEffect(() => {
+    if (registerPanel) {
+      registerPanel(componentKey, panelId);
+    }
+  }, [panelId, registerPanel, componentKey]);
+
+  const handleChange = () => {
+    setPanelExpanded(componentKey, panelId, !isExpanded);
+  };
+
+  const isExpanded = panels[componentKey]?.[panelId] || false;
+
   return (
-    <Accordion sx={{ mt: 1 }}>
+    <Accordion expanded={isExpanded} onChange={handleChange} sx={{ mt: 1 }}>
       <AccordionSummary expandIcon={<ExpandMoreIcon />}>
         <Typography>{title}</Typography>
       </AccordionSummary>

@@ -17,9 +17,10 @@
     "common.swedish": "Svenska",
     "common.tools": "Verktyg",
     "common.you": "Du",
+    "dark": "Mörkt",
+    "light": "Ljust",
     "common.services.selectTitle": "Server typ",
     "common.inputField.url": "Ändra URL",
-    "dark": "Mörkt",
-    "light": "Ljust"
+    "common.accordionBtn.collapse": "Fäll ihop allt"
   }
 }

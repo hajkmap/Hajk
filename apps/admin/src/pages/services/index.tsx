@@ -6,16 +6,15 @@ import Page from "../../layouts/root/components/page";
 import { useServices } from "../../api/services";
 import AccordionFormContainer from "../../components/collapsible-form-container";
 import ExpandLessIcon from "@mui/icons-material/ExpandLess";
-import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import useAppStateStore from "../../store/use-app-state-store";
 
 export default function ServicesPage() {
   const { t } = useTranslation();
+  const { collapseAllPanels } = useAppStateStore();
   const { data: services, isLoading } = useServices();
   const [values, setValues] = useState<
     Record<string, string | number | boolean | Record<string, boolean>>
   >({});
-  const [isAllOpen, setIsAllOpen] = useState(false);
-  console.log("values", values);
   const handleChange = (
     key: string,
     value: string | number | boolean | Record<string, boolean>
@@ -24,10 +23,6 @@ export default function ServicesPage() {
       ...prevValues,
       [key]: value,
     }));
-  };
-
-  const handleToggleAll = () => {
-    setIsAllOpen(!isAllOpen);
   };
 
   return (
@@ -53,13 +48,15 @@ export default function ServicesPage() {
         <Button
           sx={{ color: "mediumpurple", borderColor: "mediumpurple" }}
           variant="outlined"
-          onClick={handleToggleAll}
+          onClick={() => collapseAllPanels("test")}
+          startIcon={<ExpandLessIcon />}
         >
-          {isAllOpen ? <ExpandLessIcon /> : <ExpandMoreIcon />}{" "}
-          {isAllOpen ? "Close All" : "Open All"}
+          {t("common.accordionBtn.collapse")}
         </Button>
       </Box>
       <AccordionFormContainer
+        componentKey="test"
+        panelId="server"
         title="Anslutning"
         inputs={[
           {
@@ -93,45 +90,18 @@ export default function ServicesPage() {
             title: "Service Date",
             showToolTip: true,
           },
-          {
-            type: "SLIDER",
-            key: "serverSlider",
-            title: "Server slider",
-            min: 1,
-            max: 10,
-            step: 1,
-            showToolTip: true,
-          },
-          {
-            type: "CHECKBOX",
-            key: "serverCheckbox",
-            title: "Select Features",
-            options: [
-              { label: "Red", value: "red" },
-              { label: "Blue", value: "blue" },
-              { label: "Green", value: "green" },
-            ],
-          },
-          {
-            type: "RADIO",
-            key: "color",
-            title: "Choose a Color",
-            options: [
-              { label: "Red", value: "red" },
-              { label: "Blue", value: "blue" },
-              { label: "Green", value: "green" },
-            ],
-          },
         ]}
         values={values}
         setValues={handleChange}
       />
       <AccordionFormContainer
-        title="Test"
+        componentKey="test"
+        panelId="reqsettings"
+        title="Inställningar för request"
         inputs={[
           {
             type: "SELECT",
-            key: "testType",
+            key: "reqType",
             title: t("common.services.selectTitle"),
             showToolTip: true,
             toolTipDescription: "test",
@@ -143,15 +113,15 @@ export default function ServicesPage() {
           },
           {
             type: "TEXT",
-            key: "testUrl",
+            key: "requestSettings",
             title: "URL to Service",
             showToolTip: true,
             isUrl: true,
           },
           {
             type: "NUMBER",
-            key: "testNumber",
-            title: "test Number",
+            key: "reqnumber",
+            title: "req Number",
             showToolTip: true,
           },
         ]}

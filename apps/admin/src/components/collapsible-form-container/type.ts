@@ -38,4 +38,6 @@ export interface AccordionProps {
     key: string,
     value: string | number | boolean | Record<string, boolean>
   ) => void;
+  panelId: string;
+  componentKey: string;
 }

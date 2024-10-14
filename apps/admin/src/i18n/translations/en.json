@@ -17,9 +17,10 @@
     "common.swedish": "Swedish",
     "common.tools": "Tools",
     "common.you": "You",
+    "dark": "Dark",
+    "light": "Light",
     "common.services.selectTitle": "Server type",
     "common.inputField.url": "Change URL",
-    "dark": "Dark",
-    "light": "Light"
+    "common.accordionBtn.collapse": "Collapse all"
   }
 }
