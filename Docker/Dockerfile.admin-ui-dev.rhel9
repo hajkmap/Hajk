@@ -1,0 +1,34 @@
+FROM quay.io/sclorg/nodejs-22-c9s as backendBuilder
+COPY ./apps/backend .
+USER root
+RUN npm install
+
+# TODO: Remove!
+RUN npm run reset:db
+
+RUN npm run build
+
+FROM quay.io/sclorg/nodejs-22-c9s as adminBuilder
+COPY ./apps/admin .
+USER root
+RUN npm install
+
+RUN rm ./public/config.json
+RUN mv ./public/config.docker.json ./public/config.json
+
+RUN npm run build
+
+FROM quay.io/sclorg/nodejs-22-c9s
+COPY /apps/backend/package*.json ./
+USER root
+RUN npm install --production
+USER 1001
+COPY --from=backendBuilder /opt/app-root/src/dist ./
+COPY /apps/backend/.env .
+COPY /apps/backend/static ./static
+COPY --from=adminBuilder /opt/app-root/src/dist ./static/admin
+USER root
+EXPOSE 3002
+USER 1001
+CMD npm start
+
