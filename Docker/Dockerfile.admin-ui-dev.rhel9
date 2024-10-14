@@ -1,4 +1,4 @@
-FROM quay.io/sclorg/nodejs-22-c9s as backendBuilder
+FROM node:22.7.0-alpine as backendBuilder
 COPY ./apps/backend .
 USER root
 RUN npm install
@@ -18,7 +18,7 @@ RUN mv ./public/config.docker.json ./public/config.json
 
 RUN npm run build
 
-FROM quay.io/sclorg/nodejs-22-c9s
+FROM node:22.7.0-alpine
 COPY /apps/backend/package*.json ./
 USER root
 RUN npm install --production
