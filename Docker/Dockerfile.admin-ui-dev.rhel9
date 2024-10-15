@@ -1,21 +1,18 @@
 FROM node:22.9.0 as backendBuilder
-COPY ./apps/backend .
+COPY /apps/backend/package*.json ./
 USER root
 RUN npm install
-
-# TODO: Remove!
 RUN npm run reset:db
-
+COPY ./apps/backend .
 RUN npm run build
 
 FROM node:22.9.0 as adminBuilder
-COPY ./apps/admin .
+COPY /apps/admin/package*.json ./
 USER root
 RUN npm install
-
+COPY ./apps/admin .
 RUN rm ./public/config.json
 RUN mv ./public/config.docker.json ./public/config.json
-
 RUN npm run build
 
 FROM node:22.9.0
