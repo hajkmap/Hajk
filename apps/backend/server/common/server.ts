@@ -348,29 +348,89 @@ built-it compression by setting the ENABLE_GZIP_COMPRESSION option to "true" in 
           .replace(/-/g, "_")}`;
         const restrictedToGroups = process.env[dotEnvKeyName];
 
+        // Sometimes, we may want to expose a static application that handles its routing
+        // internally. In those cases, we want a catch-all middleware that sends the
+        // requests to a specific file within the static dir. That file's name (typically, index.html)
+        // can be configured in .env. If this key exists, we won't use the regular static middleware,
+        // but will instead send the request to that file.
+        const dotEnvKeyNameForCatchAll = `EXPOSE_AND_RESTRICT_STATIC_${dir
+          .toUpperCase()
+          .replace(/-/g, "_")}_CATCH_ALL_FILENAME`;
+        const catchAllHandlerFileName = process.env[dotEnvKeyNameForCatchAll];
+
         if (restrictedToGroups === "") {
           // If the key is set (which is indicated with the value of an empty string),
           // it means that access to dir is unrestricted.
-          l.info(`Exposing '%s' as unrestricted static directory.`, dir);
-          this.app.use(
-            `/${dir}`,
-            express.static(path.join(process.cwd(), "static", dir))
-          );
+
+          // If there's a catch-all file, we'll use that one
+          if (
+            typeof catchAllHandlerFileName === "string" &&
+            catchAllHandlerFileName.length > 0
+          ) {
+            const rx = new RegExp("/" + dir + "/(.*)");
+            l.info(
+              `Exposing '%s' as unrestricted static directory using catch-all route, forcing all request to ${catchAllHandlerFileName}.`,
+              dir
+            );
+
+            // Use the RegEx rather than a string to match route
+            this.app.use(rx, (_req, res) =>
+              // Use send file rather than Express' static middleware to force all requests to that file
+              res.sendFile(
+                path.join(process.cwd(), "static", dir, catchAllHandlerFileName)
+              )
+            );
+          } else {
+            l.info(`Exposing '%s' as unrestricted static directory.`, dir);
+            this.app.use(
+              `/${dir}`,
+              express.static(path.join(process.cwd(), "static", dir))
+            );
+          }
         } else if (
           typeof restrictedToGroups === "string" &&
           restrictedToGroups.length > 0
         ) {
-          l.info(
-            `Exposing '%s' as a restricted directory. Allowed groups: %s`,
-            dir,
-            restrictedToGroups
-          );
           // If there are restrictions, run a middleware that will enforce the restrictions,
           // if okay, expose - else return 403.
-          this.app.use(`/${dir}`, [
-            restrictStatic,
-            express.static(path.join(process.cwd(), "static", dir)),
-          ]);
+
+          // If there's a catch-all file, we'll use that one
+          if (
+            typeof catchAllHandlerFileName === "string" &&
+            catchAllHandlerFileName.length > 0
+          ) {
+            l.info(
+              `Exposing '%s' as a restricted static directory using catch-all route, forcing all request to ${catchAllHandlerFileName}. Allowed groups: %s`,
+              dir,
+              restrictedToGroups
+            );
+
+            const rx = new RegExp("/" + dir + "/(.*)");
+            // Use the RegEx rather than a string to match route
+            this.app.use(rx, [
+              restrictStatic,
+              (_req: Request, res: Response) =>
+                // Use send file rather than Express' static middleware to force all requests to that file
+                res.sendFile(
+                  path.join(
+                    process.cwd(),
+                    "static",
+                    dir,
+                    catchAllHandlerFileName
+                  )
+                ),
+            ]);
+          } else {
+            l.info(
+              `Exposing '%s' as a restricted directory. Allowed groups: %s`,
+              dir,
+              restrictedToGroups
+            );
+            this.app.use(`/${dir}`, [
+              restrictStatic,
+              express.static(path.join(process.cwd(), "static", dir)),
+            ]);
+          }
         } else {
           l.warn(
             "The directory '%s' was found in static, but no setting could be found in .env. The directory will NOT be exposed. If you wish to expose it, add the key '%s' to your .env.",
