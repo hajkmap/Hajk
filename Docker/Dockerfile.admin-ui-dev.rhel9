@@ -1,32 +1,60 @@
-FROM node:22.9.0 as backendBuilder
-COPY /apps/backend/package*.json ./
+FROM registry.access.redhat.com/ubi9/ubi-minimal as backendBuilder
 USER root
+RUN microdnf install -y \
+    gcc-c++ \
+    make \
+    curl
+
+RUN curl -sL https://rpm.nodesource.com/setup_current | bash - && \
+    microdnf install -y nodejs
+
+WORKDIR /opt/app-root/src
+
+COPY /apps/backend/package*.json ./
 RUN npm install
-COPY ./apps/backend .
-RUN cat package.json
+
+COPY ./apps/backend ./
+
 RUN npm run reset:db
 RUN npm run build
 
-FROM node:22.9.0 as adminBuilder
-COPY /apps/admin/package*.json ./
+FROM registry.access.redhat.com/ubi9/ubi-minimal as adminBuilder
 USER root
+RUN curl -sL https://rpm.nodesource.com/setup_current | bash - && \
+    microdnf install -y nodejs
+
+WORKDIR /opt/app-root/src
+
+COPY /apps/admin/package*.json ./
 RUN npm install
-COPY ./apps/admin .
+COPY ./apps/admin ./
 RUN rm ./public/config.json
 RUN mv ./public/config.docker.json ./public/config.json
 RUN npm run build
 
-FROM node:22.9.0
+FROM registry.access.redhat.com/ubi9/ubi-minimal
+RUN curl -sL https://rpm.nodesource.com/setup_current | bash - && \
+    microdnf install -y nodejs
+
+WORKDIR /opt/app-root/src
 COPY /apps/backend/package*.json ./
 USER root
 RUN npm install --production
+
+RUN chown -R 1001:0 /opt/app-root/src/
+
 USER 1001
+
 COPY --from=backendBuilder /opt/app-root/src/dist ./
 COPY /apps/backend/.env .
 COPY /apps/backend/static ./static
-COPY --from=adminBuilder /opt/app-root/src/dist ./static/admin
-USER root
-EXPOSE 3002
-USER 1001
-CMD npm start
 
+COPY --from=adminBuilder /opt/app-root/src/dist ./static/admin
+
+EXPOSE 3002
+
+ENV TZ "Europe/Stockholm"
+ENV PORT 3002
+ENV HOSTNAME "0.0.0.0"
+
+CMD ["npm", "start"]
