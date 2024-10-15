@@ -2,8 +2,9 @@ FROM node:22.9.0 as backendBuilder
 COPY /apps/backend/package*.json ./
 USER root
 RUN npm install
-RUN npm run reset:db
 COPY ./apps/backend .
+RUN cat package.json
+RUN npm run reset:db
 RUN npm run build
 
 FROM node:22.9.0 as adminBuilder
