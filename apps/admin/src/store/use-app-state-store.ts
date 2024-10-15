@@ -62,7 +62,7 @@ const useAppStateStore = create<AppState>((set) => ({
 
   loadConfig: async () => {
     try {
-      const response = await fetch("/config.json");
+      const response = await fetch("config.json");
       const config = (await response.json()) as Record<string, unknown>;
 
       set({

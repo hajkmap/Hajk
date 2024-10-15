@@ -95,7 +95,7 @@ export default function Header() {
             }}
           >
             <img
-              src="/hajk-admin-logo.svg"
+              src="hajk-admin-logo.svg"
               alt={t("common.clickableLogo")}
               style={{
                 height: "32px",
