@@ -68,6 +68,22 @@ class Toolbar extends Component {
     }
   }
 
+  onAddCoordinatesClicked() {
+    this.props.model.layer.dragLocked = true;
+    this.props.model.getCoordinates();
+
+    const isMobile = window.innerWidth <= 768;
+    if (isMobile) {
+      const targetPlugin = this.props.app.windows.find(
+        (window) => window.title === this.props.model.options.title
+      );
+      if (targetPlugin) {
+        targetPlugin.closeWindow();
+        this.props.toggleActiveTool("");
+      }
+    }
+  }
+
   onAddPointClicked() {
     this.props.model.layer.dragLocked = true;
     this.props.toggleActiveTool("point");
@@ -179,6 +195,24 @@ class Toolbar extends Component {
               >
                 Markera en plats
                 <ScatterPlotIcon sx={{ marginLeft: 1 }} />
+              </StyledButton>
+            </Grid>
+          )}
+
+          {(this.toolbarOptions === "all" ||
+            this.toolbarOptions === "position") && (
+            <Grid item xs={4}>
+              <StyledButton
+                variant="contained"
+                fullWidth
+                disabled={!editSource.editPoint && !editSource.editMultiPoint}
+                onClick={() => {
+                  this.onAddCoordinatesClicked();
+                }}
+                type="button"
+                title="Hämta min position"
+              >
+                Min position
               </StyledButton>
             </Grid>
           )}

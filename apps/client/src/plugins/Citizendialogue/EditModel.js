@@ -10,6 +10,8 @@ import X2JS from "x2js";
 import { hfetch } from "utils/FetchWrapper";
 import WKT from "ol/format/WKT";
 import Feature from "ol/Feature";
+import proj4 from "proj4";
+import Point from "ol/geom/Point";
 
 class EditModel {
   constructor(settings) {
@@ -39,6 +41,12 @@ class EditModel {
     this.instruction = "";
     this.filty = false;
     this.removalToolMode = "off";
+    this.coordinates = {
+      latitude: null,
+      longitude: null,
+    };
+    this.pointString = null;
+    this.error = null;
 
     // Normalize the sources that come from options.
     if (this.options.sources && Array.isArray(this.options.sources)) {
@@ -62,6 +70,80 @@ class EditModel {
       console.warn("this.options.sources is either undefined or not an array");
     }
   }
+
+  getCoordinates = () => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const { latitude, longitude } = position.coords;
+
+          this.coordinates = { latitude, longitude };
+
+          if (latitude && longitude) {
+            this.vectorSource.getFeatures().forEach((feature) => {
+              feature.modification = "removed";
+              feature.setStyle(this.getHiddenStyle());
+            });
+
+            const wgs84 = "EPSG:4326";
+            const sweref99tm = this.map.getView().getProjection().getCode();
+
+            proj4.defs(
+              sweref99tm,
+              "+proj=utm +zone=33 +ellps=GRS80 +units=m +no_defs"
+            );
+
+            const [x, y] = proj4(wgs84, sweref99tm, [longitude, latitude]);
+
+            const pointGeometry = new Point([x, y]);
+
+            const feature = new Feature({
+              geometry: pointGeometry,
+              SURVEYID: this.surveyJsData.surveyId,
+              SURVEYANSWERID: this.surveyJsData.surveyAnswerId,
+              SURVEYANSWERDATE: this.surveyJsData.surveyAnswerDate,
+              SURVEYQUESTION: this.currentQuestionTitle,
+              SURVEYQUESTIONNAME: this.currentQuestionName,
+            });
+
+            feature.modification = "added";
+
+            this.vectorSource.addFeature(feature);
+
+            this.pointString = `POINT(${x} ${y})`;
+
+            this.observer.publish("deactivateEditInteraction");
+            this.observer.publish("showSnackbar", "Geometri tillagd");
+
+            const isMobile = window.innerWidth <= 768;
+            if (isMobile) {
+              const targetPlugin = this.app.windows.find(
+                (window) => window.title === this.options.title
+              );
+              if (targetPlugin) {
+                setTimeout(() => {
+                  targetPlugin.showWindow();
+                }, 2000);
+              }
+            }
+          }
+        },
+        (err) => {
+          this.error = err.message;
+        }
+      );
+    } else {
+      this.error = "Geolocation is not supported by this browser.";
+    }
+  };
+
+  getPointString = () => {
+    return this.pointString;
+  };
+
+  getError = () => {
+    return this.error;
+  };
 
   write(features) {
     var format = new WFS(),
@@ -170,7 +252,11 @@ class EditModel {
     const find = (mode) =>
       this.vectorSource
         .getFeatures()
-        .filter((feature) => feature.modification === mode);
+        .filter(
+          (feature) =>
+            feature.modification === mode ||
+            feature.get("modification") === mode
+        );
 
     const features = {
       updates: find("updated").map((feature) => {
@@ -204,7 +290,7 @@ class EditModel {
           wktGeometry: wktFormatter.writeGeometry(feature.getGeometry()),
         };
 
-        switch (feature.modification) {
+        switch (feature.modification || feature.get("modification")) {
           case "added":
             // Inserts
             this.newMapData.push(featureData);
