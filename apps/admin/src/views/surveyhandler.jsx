@@ -78,6 +78,7 @@ function SurveyHandler(props) {
         <MenuItem value="geometrypoint">Geometriverktyget punkt</MenuItem>
         <MenuItem value="geometrylinestring">Geometriverktyget linje</MenuItem>
         <MenuItem value="geometrypolygon">Geometriverktyget yta</MenuItem>
+        <MenuItem value="geometryposition">Geometriverktyget min position</MenuItem>
         </Select>
         <div>
         <label>
