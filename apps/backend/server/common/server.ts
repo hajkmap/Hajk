@@ -357,6 +357,7 @@ built-it compression by setting the ENABLE_GZIP_COMPRESSION option to "true" in 
           .toUpperCase()
           .replace(/-/g, "_")}_CATCH_ALL_FILENAME`;
         const catchAllHandlerFileName = process.env[dotEnvKeyNameForCatchAll];
+        const staticDirPath = path.join(process.cwd(), "static", dir);
 
         if (restrictedToGroups === "") {
           // If the key is set (which is indicated with the value of an empty string),
@@ -373,13 +374,24 @@ built-it compression by setting the ENABLE_GZIP_COMPRESSION option to "true" in 
               dir
             );
 
+            // The catch-all route still has to handle requests for static files that exist on the server.
+            this.app.use(`/${dir}`, express.static(staticDirPath));
+
             // Use the RegEx rather than a string to match route
-            this.app.use(rx, (_req, res) =>
-              // Use send file rather than Express' static middleware to force all requests to that file
-              res.sendFile(
-                path.join(process.cwd(), "static", dir, catchAllHandlerFileName)
-              )
-            );
+            this.app.use(rx, (_req, res, next) => {
+              // Check if the requested path is an existing file or directory
+              fs.stat(path.join(staticDirPath, _req.baseUrl), (err, stats) => {
+                if (!err && (stats.isFile() || stats.isDirectory())) {
+                  // If it is, it will be handled by the static middleware
+                  next();
+                } else {
+                  // Otherwise, we'll let the SPA handle it
+                  res.sendFile(
+                    path.join(staticDirPath, catchAllHandlerFileName)
+                  );
+                }
+              });
+            });
           } else {
             l.info(`Exposing '%s' as unrestricted static directory.`, dir);
             this.app.use(
@@ -405,20 +417,33 @@ built-it compression by setting the ENABLE_GZIP_COMPRESSION option to "true" in 
               restrictedToGroups
             );
 
+            // The catch-all route still has to handle requests for static files that exist on the server.
+            this.app.use(`/${dir}`, [
+              restrictStatic,
+              express.static(staticDirPath),
+            ]);
+
             const rx = new RegExp("/" + dir + "/(.*)");
             // Use the RegEx rather than a string to match route
             this.app.use(rx, [
               restrictStatic,
-              (_req: Request, res: Response) =>
-                // Use send file rather than Express' static middleware to force all requests to that file
-                res.sendFile(
-                  path.join(
-                    process.cwd(),
-                    "static",
-                    dir,
-                    catchAllHandlerFileName
-                  )
-                ),
+              (_req: Request, res: Response, next: NextFunction) => {
+                // Check if the requested path is an existing file or directory
+                fs.stat(
+                  path.join(staticDirPath, _req.baseUrl),
+                  (err, stats) => {
+                    if (!err && (stats.isFile() || stats.isDirectory())) {
+                      // If it is, it will be handled by the static middleware
+                      next();
+                    } else {
+                      // Otherwise, we'll let the SPA handle it
+                      res.sendFile(
+                        path.join(staticDirPath, catchAllHandlerFileName)
+                      );
+                    }
+                  }
+                );
+              },
             ]);
           } else {
             l.info(
