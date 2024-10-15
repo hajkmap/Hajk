@@ -341,6 +341,34 @@ const updateQuestion = (pageIndex, questionIndex, field, value) => {
     setSurvey(emptySurvey);
   }
 
+  const GeometryWarning = ({ survey }) => {
+    const [warningPages, setWarningPages] = useState([]);
+
+    useEffect(() => {
+      const pagesWithMultipleGeometry = survey.pages.reduce((acc, page, pageIndex) => {
+        const geometryQuestions = page.questions.filter((question) =>
+          question.type.startsWith('geometry')
+        );
+        if (geometryQuestions.length > 1) {
+          acc.push(pageIndex + 1); // add pagenumber
+        }
+        return acc;
+      }, []);
+
+      setWarningPages(pagesWithMultipleGeometry);
+    }, [survey]);
+
+    if (warningPages.length === 0) {
+      return null; // No warning needed
+    }
+
+    return (
+      <div style={{ backgroundColor: 'yellow', padding: '10px', marginBottom: '10px' }}>
+        <strong>Varning:</strong> Följande sidor innehåller mer än en geometri-fråga: sida {warningPages.join(', ')}
+      </div>
+    );
+  };
+
   return (
     <div>
       <h1>Enkäthanterare</h1>
@@ -407,6 +435,7 @@ const updateQuestion = (pageIndex, questionIndex, field, value) => {
       <div style={{ marginBottom: '10px' }}>
         <Button variant="contained" color="primary" onClick={addPage}>Lägg till Sida</Button>
         <Button variant="contained" style={{ backgroundColor: 'green', color: 'white',  marginLeft: '20px' }} onClick={saveSurvey}>Spara Enkät</Button>
+        <GeometryWarning survey={survey} />
       </div>
       <Grid container spacing={2} style={{ marginBottom: '50px' }}>
       <Grid item xs={12} sm={6}>
@@ -453,7 +482,6 @@ const updateQuestion = (pageIndex, questionIndex, field, value) => {
     </div>
   </Grid>
 </Grid>
-
     </div>
     
   );
