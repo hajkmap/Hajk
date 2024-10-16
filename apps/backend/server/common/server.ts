@@ -378,19 +378,8 @@ built-it compression by setting the ENABLE_GZIP_COMPRESSION option to "true" in 
             this.app.use(`/${dir}`, express.static(staticDirPath));
 
             // Use the RegEx rather than a string to match route
-            this.app.use(rx, (_req, res, next) => {
-              // Check if the requested path is an existing file or directory
-              fs.stat(path.join(staticDirPath, _req.baseUrl), (err, stats) => {
-                if (!err && (stats.isFile() || stats.isDirectory())) {
-                  // If it is, it will be handled by the static middleware
-                  next();
-                } else {
-                  // Otherwise, we'll let the SPA handle it
-                  res.sendFile(
-                    path.join(staticDirPath, catchAllHandlerFileName)
-                  );
-                }
-              });
+            this.app.use(rx, (_req, res) => {
+              res.sendFile(path.join(staticDirPath, catchAllHandlerFileName));
             });
           } else {
             l.info(`Exposing '%s' as unrestricted static directory.`, dir);
@@ -427,22 +416,8 @@ built-it compression by setting the ENABLE_GZIP_COMPRESSION option to "true" in 
             // Use the RegEx rather than a string to match route
             this.app.use(rx, [
               restrictStatic,
-              (_req: Request, res: Response, next: NextFunction) => {
-                // Check if the requested path is an existing file or directory
-                fs.stat(
-                  path.join(staticDirPath, _req.baseUrl),
-                  (err, stats) => {
-                    if (!err && (stats.isFile() || stats.isDirectory())) {
-                      // If it is, it will be handled by the static middleware
-                      next();
-                    } else {
-                      // Otherwise, we'll let the SPA handle it
-                      res.sendFile(
-                        path.join(staticDirPath, catchAllHandlerFileName)
-                      );
-                    }
-                  }
-                );
+              (_req: Request, res: Response) => {
+                res.sendFile(path.join(staticDirPath, catchAllHandlerFileName));
               },
             ]);
           } else {
