@@ -1,7 +1,6 @@
 FROM quay.io/centos/centos:stream9 as backendBuilder
 USER root
-
-RUN yum install -y curl && \
+RUN command -v curl || yum install -y curl && \
     curl -sL https://rpm.nodesource.com/setup_22.x | bash - && \
     yum install -y nodejs && \
     yum clean all
@@ -18,10 +17,10 @@ COPY ./apps/backend ./
 RUN npm run reset:db
 RUN npm run build
 
+
 FROM quay.io/centos/centos:stream9 as adminBuilder
 USER root
-
-RUN yum install -y curl && \
+RUN command -v curl || yum install -y curl && \
     curl -sL https://rpm.nodesource.com/setup_22.x | bash - && \
     yum install -y nodejs && \
     yum clean all
@@ -40,8 +39,7 @@ RUN npm run build
 
 
 FROM quay.io/centos/centos:stream9
-
-RUN yum install -y curl && \
+RUN command -v curl || yum install -y curl && \
     curl -sL https://rpm.nodesource.com/setup_22.x | bash - && \
     yum install -y nodejs && \
     yum clean all
