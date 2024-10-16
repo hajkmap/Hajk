@@ -91,6 +91,22 @@ export default function FormFactoryPage() {
 
   formContainer.addContainer(nestedContainer2);
 
+  const nestedContainer3 = new DynamicFormContainer<FieldValues>(
+    "Information",
+    CONTAINER_TYPE.ACCORDION,
+    { triggerExpanded: false }
+  );
+
+  nestedContainer3.addInput({
+    type: INPUT_TYPE.TEXTAREA,
+    gridColumns: 12,
+    name: "textareaTest",
+    title: "Textarea",
+    defaultValue: "",
+  });
+
+  formContainer.addContainer(nestedContainer3);
+
   formContainer.addInput({
     type: INPUT_TYPE.SELECT,
     gridColumns: 6,

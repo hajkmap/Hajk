@@ -10,6 +10,7 @@ import STATIC_TYPE from "../types/static-type";
 import renderHeader from "./header";
 import renderDivider from "./divider";
 import renderSpacer from "./spacer";
+import renderTextArea from "./text-area";
 
 // When a new renderer is added, add it here
 // and add the correct type in
@@ -22,6 +23,7 @@ const renderFunctions = {
   [INPUT_TYPE.CHECKBOX]: renderCheckbox,
   [INPUT_TYPE.SWITCH]: renderSwitch,
   [INPUT_TYPE.NUMBER]: renderNumberField,
+  [INPUT_TYPE.TEXTAREA]: renderTextArea,
   [STATIC_TYPE.HEADER]: renderHeader,
   [STATIC_TYPE.SPACER]: renderSpacer,
   [STATIC_TYPE.DIVIDER]: renderDivider,
