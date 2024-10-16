@@ -6,8 +6,8 @@ import CollectionsIcon from "@mui/icons-material/Collections";
 import NetworkPingIcon from "@mui/icons-material/NetworkPing";
 
 export const HEADER_HEIGHT = 64;
-export const HEADER_ZINDEX = 1001;
-export const SIDEBAR_ZINDEX = 1000;
+export const HEADER_Z_INDEX = 1001;
+export const SIDEBAR_Z_INDEX = 1000;
 export const SIDEBAR_WIDTH = 250;
 export const SIDEBAR_MINI_WIDTH = 58;
 
