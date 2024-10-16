@@ -1,5 +1,13 @@
-FROM ubi8/nodejs-22 as backendBuilder
+FROM quay.io/centos/centos:stream9 as backendBuilder
 USER root
+
+RUN yum install -y curl && \
+    curl -sL https://rpm.nodesource.com/setup_22.x | bash - && \
+    yum install -y nodejs && \
+    yum clean all
+
+RUN node -v
+
 WORKDIR /opt/app-root/src
 
 COPY /apps/backend/package*.json ./
@@ -10,8 +18,14 @@ COPY ./apps/backend ./
 RUN npm run reset:db
 RUN npm run build
 
-FROM ubi8/nodejs-22 as adminBuilder
+FROM quay.io/centos/centos:stream9 as adminBuilder
 USER root
+
+RUN yum install -y curl && \
+    curl -sL https://rpm.nodesource.com/setup_22.x | bash - && \
+    yum install -y nodejs && \
+    yum clean all
+
 WORKDIR /opt/app-root/src
 
 COPY /apps/admin/package*.json ./
@@ -24,7 +38,14 @@ RUN mv ./public/config.docker.json ./public/config.json
 
 RUN npm run build
 
-FROM ubi8/nodejs-22
+
+FROM quay.io/centos/centos:stream9
+
+RUN yum install -y curl && \
+    curl -sL https://rpm.nodesource.com/setup_22.x | bash - && \
+    yum install -y nodejs && \
+    yum clean all
+
 WORKDIR /opt/app-root/src
 COPY /apps/backend/package*.json ./
 USER root
