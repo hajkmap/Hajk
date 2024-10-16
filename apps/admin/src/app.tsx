@@ -22,43 +22,46 @@ const queryClient = new QueryClient({
   defaultOptions: queryConfig,
 });
 
-const router = createBrowserRouter([
-  {
-    path: "/",
-    element: <RootLayout />,
-    errorElement: <ErrorPage />,
-    children: [
-      {
-        index: true,
-        element: <IndexPage />,
-      },
-      {
-        path: "layers",
-        element: <LayersPage />,
-      },
-      {
-        path: "maps",
-        element: <MapsPage />,
-      },
-      {
-        path: "tools",
-        element: <ToolsPage />,
-      },
-      {
-        path: "services",
-        element: <ServicesPage />,
-      },
-      {
-        path: "groups",
-        element: <GroupsPage />,
-      },
-      {
-        path: "settings",
-        element: <SettingsPage />,
-      },
-    ],
-  },
-]);
+const router = createBrowserRouter(
+  [
+    {
+      path: "/",
+      element: <RootLayout />,
+      errorElement: <ErrorPage />,
+      children: [
+        {
+          index: true,
+          element: <IndexPage />,
+        },
+        {
+          path: "layers",
+          element: <LayersPage />,
+        },
+        {
+          path: "maps",
+          element: <MapsPage />,
+        },
+        {
+          path: "tools",
+          element: <ToolsPage />,
+        },
+        {
+          path: "services",
+          element: <ServicesPage />,
+        },
+        {
+          path: "groups",
+          element: <GroupsPage />,
+        },
+        {
+          path: "settings",
+          element: <SettingsPage />,
+        },
+      ],
+    },
+  ],
+  { basename: import.meta.env.BASE_URL }
+);
 
 export default function App() {
   const { loadConfig, loading } = useAppStateStore();

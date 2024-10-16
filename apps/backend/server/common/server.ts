@@ -304,7 +304,7 @@ built-it compression by setting the ENABLE_GZIP_COMPRESSION option to "true" in 
     );
 
     try {
-      // Dynamically import the required version of Static Restrictor
+      // Dynamically import the required version of Static Restrictor middleware
       const { default: restrictStatic } = await import(
         `../apis/v${apiVersion}/middlewares/restrict.static.${apiVersion < 3 ? "js" : "ts"}`
       );
@@ -343,40 +343,85 @@ built-it compression by setting the ENABLE_GZIP_COMPRESSION option to "true" in 
       staticDirs.forEach((dir) => {
         // See if there's a corresponding key for current dir in .env,
         // the following notation is assumed: foo-bar -> EXPOSE_AND_RESTRICT_STATIC_FOO_BAR, hence replace below.
+        // Note that we don't really do anything about other special characters in the key name, so it's best
+        // to keep the directory names inside /static/ limited to a-z, A-Z, 0-9, dashes and underscores.
         const dotEnvKeyName = `EXPOSE_AND_RESTRICT_STATIC_${dir
           .toUpperCase()
           .replace(/-/g, "_")}`;
         const restrictedToGroups = process.env[dotEnvKeyName];
 
-        if (restrictedToGroups === "") {
-          // If the key is set (which is indicated with the value of an empty string),
-          // it means that access to dir is unrestricted.
-          l.info(`Exposing '%s' as unrestricted static directory.`, dir);
-          this.app.use(
-            `/${dir}`,
-            express.static(path.join(process.cwd(), "static", dir))
-          );
-        } else if (
-          typeof restrictedToGroups === "string" &&
-          restrictedToGroups.length > 0
-        ) {
-          l.info(
-            `Exposing '%s' as a restricted directory. Allowed groups: %s`,
-            dir,
-            restrictedToGroups
-          );
-          // If there are restrictions, run a middleware that will enforce the restrictions,
-          // if okay, expose - else return 403.
-          this.app.use(`/${dir}`, [
-            restrictStatic,
-            express.static(path.join(process.cwd(), "static", dir)),
-          ]);
-        } else {
+        // Early check to see if the found directory should be exposed at all.
+        if (restrictedToGroups === undefined) {
           l.warn(
             "The directory '%s' was found in static, but no setting could be found in .env. The directory will NOT be exposed. If you wish to expose it, add the key '%s' to your .env.",
             dir,
             dotEnvKeyName
           );
+
+          // Nothing more to do for this iteration, let's skip the rest of it
+          return;
+        }
+
+        // Sometimes, we may want to expose a static application that handles its routing
+        // internally. In those cases, we want a catch-all middleware that sends the
+        // requests to a specific file within the static dir. That file's name (typically, index.html)
+        // can be configured in .env. If this key exists, we won't use the regular static middleware,
+        // but will instead send the request to that file.
+        const dotEnvKeyNameForCatchAll = `${dotEnvKeyName}_CATCH_ALL_FILENAME`; // replace all dashes and spaces with underscores
+        const catchAllHandlerFileName = process.env[dotEnvKeyNameForCatchAll];
+
+        // Save for later use
+        const staticDirPath = path.join(process.cwd(), "static", dir);
+
+        // Prepare the middlewares for the handler. We use arrays, as later on
+        // we may want to insert an element into the beginning of the array (using unshift),
+        // if the directory should to be restricted to certain AD groups.
+        const staticMiddlewareHandlers = [express.static(staticDirPath)];
+        const regexMiddlewareHandlers = [
+          (_req: Request, res: Response) => {
+            res.sendFile(
+              path.join(staticDirPath, catchAllHandlerFileName || "")
+            );
+          },
+        ];
+
+        l.info("Exposing '%s' as static directory", dir);
+
+        // Check if there are groups to restrict to, if so add the restrictStatic middleware
+        // to the beginning of the array (will be used as a handler).
+        if (
+          typeof restrictedToGroups === "string" &&
+          restrictedToGroups.length > 0
+        ) {
+          l.info(
+            "Restricting access to '%s' to groups: %s",
+            dir,
+            restrictedToGroups
+          );
+
+          // Add the restriction middleware to the beginning of the array
+          regexMiddlewareHandlers.unshift(restrictStatic);
+          staticMiddlewareHandlers.unshift(restrictStatic);
+        }
+
+        // Expose the directory using the static middleware (it may or may not be restricted, see above).
+        this.app.use(`/${dir}`, staticMiddlewareHandlers);
+
+        // If a catch-all filename was specified for the directory, add a regex matcher and force all
+        // request that don't match anything from the default static middleware to the catch-all handler.
+        if (
+          typeof catchAllHandlerFileName === "string" &&
+          catchAllHandlerFileName.length > 0
+        ) {
+          // Create the RegEx that matches anything in the directory, e.g. /admin/foo/bar/baz.html
+          const rx = new RegExp("/" + dir + "/(.*)");
+          l.info(
+            `Adding a catch-all route for '${dir}'. Any requests that don't match real files in '${dir}' will be forced to ${catchAllHandlerFileName}.`
+          );
+
+          // Use the RegEx (rather than a string) to match route, register a special handler that
+          // forces those requests the specified file.
+          this.app.use(rx, regexMiddlewareHandlers);
         }
       });
     } catch (error) {
