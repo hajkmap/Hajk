@@ -1,8 +1,8 @@
 import { TextField } from "@mui/material";
-import { RendererFunction } from "../types/renderer-props";
+import { RenderFunction } from "../types/renderer-props";
 import { FieldValues } from "react-hook-form";
 
-const renderTextField: RendererFunction<FieldValues> = ({
+const renderTextField: RenderFunction<FieldValues> = ({
   field,
   inputProps,
   errorMessage,

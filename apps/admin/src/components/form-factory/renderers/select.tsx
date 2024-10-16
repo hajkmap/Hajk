@@ -1,7 +1,7 @@
 import { Select, MenuItem, FormControl, InputLabel } from "@mui/material";
-import { RendererFunction } from "../types/renderer-props";
+import { RenderFunction } from "../types/renderer-props";
 import { FieldValues } from "react-hook-form";
-const renderSelect: RendererFunction<FieldValues> = ({
+const renderSelect: RenderFunction<FieldValues> = ({
   field,
   inputProps,
   errorMessage,

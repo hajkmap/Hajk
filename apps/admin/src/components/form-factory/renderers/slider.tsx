@@ -1,8 +1,8 @@
 import { Slider, Box, FormControl, FormLabel } from "@mui/material";
-import { RendererFunction } from "../types/renderer-props";
+import { RenderFunction } from "../types/renderer-props";
 import { FieldValues } from "react-hook-form";
 
-const renderSlider: RendererFunction<FieldValues> = ({
+const renderSlider: RenderFunction<FieldValues> = ({
   field,
   inputProps,
   title,

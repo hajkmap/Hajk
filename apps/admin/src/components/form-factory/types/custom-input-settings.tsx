@@ -1,14 +1,14 @@
 import DynamicInputSettings from "./dynamic-input-settings";
-import { RendererFunction } from "./renderer-props";
+import { RenderFunction } from "./renderer-props";
 import { FieldValues } from "react-hook-form";
 
 class CustomInputSettings<
   TFieldValues extends FieldValues
 > extends DynamicInputSettings<TFieldValues> {
-  public renderer: RendererFunction<TFieldValues>;
+  public renderer: RenderFunction<TFieldValues>;
 
   constructor(
-    renderer: RendererFunction<TFieldValues>,
+    renderer: RenderFunction<TFieldValues>,
     settings: Partial<DynamicInputSettings<TFieldValues>> = {}
   ) {
     super();

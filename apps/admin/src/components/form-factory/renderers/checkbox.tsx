@@ -1,8 +1,8 @@
 import { Checkbox, FormControlLabel } from "@mui/material";
-import { RendererFunction } from "../types/renderer-props";
+import { RenderFunction } from "../types/renderer-props";
 import { FieldValues } from "react-hook-form";
 
-const renderCheckbox: RendererFunction<FieldValues> = ({
+const renderCheckbox: RenderFunction<FieldValues> = ({
   field,
   inputProps,
   title,
