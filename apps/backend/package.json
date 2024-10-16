@@ -15,7 +15,7 @@
   "exports": null,
   "scripts": {
     "start": "node --env-file=.env --experimental-transform-types dist/index.ts",
-    "start:prod": "node --env-file=.env --experimental-transform-types index.ts",
+    "start:prod": "npx prisma generate && node --env-file=.env --experimental-transform-types index.ts",
     "build": "shx rm -rf dist && shx cp -r server dist",
     "dev": "node --env-file=.env --watch-path=./server --experimental-transform-types server/index.ts",
     "dev:unwatch": "node --env-file=.env --experimental-transform-types server/index.ts",
