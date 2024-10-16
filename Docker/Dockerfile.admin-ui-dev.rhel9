@@ -49,14 +49,13 @@ COPY /apps/backend/package*.json ./
 USER root
 RUN npm install --production
 
-RUN chown -R 1001:0 /opt/app-root/src/
-
-USER 1001
-
 COPY --from=backendBuilder /opt/app-root/src/dist ./
 COPY /apps/backend/.env .
 COPY /apps/backend/prisma ./prisma
 COPY /apps/backend/static ./static
+
+RUN chown -R 1001:0 /opt/app-root/src/
+USER 1001
 
 COPY --from=adminBuilder /opt/app-root/src/dist ./static/admin
 
