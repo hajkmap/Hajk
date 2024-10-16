@@ -1,11 +1,8 @@
 import { Divider } from "@mui/material";
-import { ReactElement } from "react";
-import { RendererProps } from "../types/renderer-props";
+import { RendererFunction } from "../types/renderer-props";
 import { FieldValues } from "react-hook-form";
 
-const renderDivider = <TFieldValues extends FieldValues>({
-  title,
-}: RendererProps<TFieldValues>): ReactElement | null => {
+const renderDivider: RendererFunction<FieldValues> = ({ title }) => {
   return <Divider>{title}</Divider>;
 };
 

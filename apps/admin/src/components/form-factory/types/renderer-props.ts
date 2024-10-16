@@ -1,5 +1,9 @@
 import { ControllerRenderProps, Path, FieldValues } from "react-hook-form";
-import React from "react";
+import React, { ReactElement } from "react";
+
+export type RendererFunction<TFieldValues extends FieldValues> = (
+  props: RendererProps<TFieldValues>
+) => ReactElement | null;
 
 export interface RendererProps<TFieldValues extends FieldValues> {
   field?: ControllerRenderProps<TFieldValues, Path<TFieldValues>>;

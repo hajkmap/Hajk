@@ -1,14 +1,13 @@
-import { ReactElement } from "react";
 import { FieldValues } from "react-hook-form";
-import { RendererProps } from "../types/renderer-props";
+import { RendererFunction } from "../types/renderer-props";
 import { TextField } from "@mui/material";
 
-const renderTextArea = <TFieldValues extends FieldValues>({
+const renderTextArea: RendererFunction<FieldValues> = ({
   field,
   inputProps,
   errorMessage,
   title,
-}: RendererProps<TFieldValues>): ReactElement | null => {
+}) => {
   const { rows = 4, ...restInputProps } = inputProps ?? {};
 
   return (
@@ -22,7 +21,7 @@ const renderTextArea = <TFieldValues extends FieldValues>({
       inputRef={field?.ref}
       error={!!errorMessage}
       helperText={errorMessage}
-      value={field?.value ?? ""}
+      value={(field?.value as string) ?? ""}
       slotProps={{
         htmlInput: {
           ...inputProps,

@@ -1,16 +1,14 @@
 import { Select, MenuItem, FormControl, InputLabel } from "@mui/material";
-import { RendererProps } from "../types/renderer-props";
+import { RendererFunction } from "../types/renderer-props";
 import { FieldValues } from "react-hook-form";
-import { ReactElement } from "react";
-
-const renderSelect = <TFieldValues extends FieldValues>({
+const renderSelect: RendererFunction<FieldValues> = ({
   field,
   inputProps,
   errorMessage,
   optionList,
   title,
   name,
-}: RendererProps<TFieldValues>): ReactElement | null => {
+}) => {
   return (
     <FormControl fullWidth error={!!errorMessage}>
       {title && <InputLabel id={name}>{title}</InputLabel>}
@@ -21,7 +19,7 @@ const renderSelect = <TFieldValues extends FieldValues>({
         label={title}
         inputRef={field?.ref}
         displayEmpty
-        value={field?.value ?? ""}
+        value={(field?.value as string) ?? ""}
       >
         {optionList?.map((option, index) => (
           <MenuItem key={index} value={String(option.value)}>

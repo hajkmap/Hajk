@@ -1,13 +1,12 @@
 import { Switch, FormControlLabel } from "@mui/material";
-import { RendererProps } from "../types/renderer-props";
-import { ReactElement } from "react";
+import { RendererFunction } from "../types/renderer-props";
 import { FieldValues } from "react-hook-form";
 
-const renderSwitch = <TFieldValues extends FieldValues>({
+const renderSwitch: RendererFunction<FieldValues> = ({
   field,
   inputProps,
   title,
-}: RendererProps<TFieldValues>): ReactElement | null => {
+}) => {
   return (
     <FormControlLabel
       control={

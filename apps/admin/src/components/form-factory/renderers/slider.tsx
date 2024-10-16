@@ -1,13 +1,12 @@
 import { Slider, Box, FormControl, FormLabel } from "@mui/material";
-import { RendererProps } from "../types/renderer-props";
+import { RendererFunction } from "../types/renderer-props";
 import { FieldValues } from "react-hook-form";
-import { ReactElement } from "react";
 
-const renderSlider = <TFieldValues extends FieldValues>({
+const renderSlider: RendererFunction<FieldValues> = ({
   field,
   inputProps,
   title,
-}: RendererProps<TFieldValues>): ReactElement | null => {
+}) => {
   return (
     <FormControl fullWidth>
       {title && <FormLabel id={`${field?.name}-label`}>{title}</FormLabel>}

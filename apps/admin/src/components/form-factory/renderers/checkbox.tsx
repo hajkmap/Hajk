@@ -1,13 +1,12 @@
 import { Checkbox, FormControlLabel } from "@mui/material";
-import { RendererProps } from "../types/renderer-props";
+import { RendererFunction } from "../types/renderer-props";
 import { FieldValues } from "react-hook-form";
-import { ReactElement } from "react";
 
-const renderCheckbox = <TFieldValues extends FieldValues>({
+const renderCheckbox: RendererFunction<FieldValues> = ({
   field,
   inputProps,
   title,
-}: RendererProps<TFieldValues>): ReactElement | null => {
+}) => {
   return (
     <FormControlLabel
       control={
