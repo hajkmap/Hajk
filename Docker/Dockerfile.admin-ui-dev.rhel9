@@ -55,6 +55,7 @@ USER 1001
 
 COPY --from=backendBuilder /opt/app-root/src/dist ./
 COPY /apps/backend/.env .
+COPY /apps/backend/prisma ./prisma
 COPY /apps/backend/static ./static
 
 COPY --from=adminBuilder /opt/app-root/src/dist ./static/admin
