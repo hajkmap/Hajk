@@ -182,6 +182,14 @@ class LayerGroupItem extends Component {
       }
     });
 
+    // Clear the source's LAYERS parameter if the layer is not visible
+    if (!this.props.layer.getVisible()) {
+      this.props.layer.getSource().updateParams({
+        LAYERS: "",
+        CQL_FILTER: null,
+      });
+    }
+
     // Initialize visibleSubLayers and zoomVisible based on the current source parameters
     this.updateVisibleSubLayersFromSource();
 
@@ -212,21 +220,36 @@ class LayerGroupItem extends Component {
     this.unmounted = true;
   }
 
+  /**
+   * Updates the visible sublayers and zoom visibility state based on the current source parameters.
+   *
+   * This method checks if the group layer is visible. If it is, it retrieves the current LAYERS
+   * parameter from the WMS source to determine which sublayers should be visible. It also calculates
+   * whether the layer is visible at the current zoom level and updates the component's state accordingly.
+   * If the group layer is not visible, it ensures that the visible sublayers list is empty.
+   */
   updateVisibleSubLayersFromSource = () => {
     if (this.unmounted) return; // Prevent state updates after unmount
 
-    const source = this.props.layer.getSource();
-    const params = source.getParams();
-    const layersParam = params.LAYERS;
+    // Check if the group layer is visible
+    const layerVisible = this.props.layer.getVisible();
+
     let visibleSubLayers = [];
-    if (layersParam) {
-      visibleSubLayers = layersParam.split(",");
+    if (layerVisible) {
+      // If the layer is visible, get the current LAYERS parameter from the source
+      const source = this.props.layer.getSource();
+      const params = source.getParams();
+      const layersParam = params.LAYERS;
+      if (layersParam) {
+        visibleSubLayers = layersParam.split(",");
+      }
     }
 
+    // Get the current zoom level
     const zoom = this.props.model.olMap.getView().getZoom();
     const lprops = this.props.layer.getProperties();
 
-    // Get minZoom and maxZoom, treating -1 as no limit.
+    // Get minZoom and maxZoom, treating -1 as no limit
     let minZoom = lprops.minZoom;
     let maxZoom = lprops.maxZoom;
 
@@ -238,18 +261,20 @@ class LayerGroupItem extends Component {
       maxZoom = Infinity;
     }
 
-    // Check if the current zoom level is within the allowed range
+    // Check if the layer is visible at the current zoom level
     const layerIsZoomVisible = zoom >= minZoom && zoom <= maxZoom;
 
-    // Update state if visibleSubLayers or zoomVisible has changed
+    // Update state if visibleSubLayers, zoomVisible, or visible has changed
     if (
       visibleSubLayers.sort().toString() !==
         this.state.visibleSubLayers.sort().toString() ||
-      this.state.zoomVisible !== layerIsZoomVisible
+      this.state.zoomVisible !== layerIsZoomVisible ||
+      this.state.visible !== layerVisible
     ) {
       this.setState({
         visibleSubLayers,
         zoomVisible: layerIsZoomVisible,
+        visible: layerVisible,
       });
     }
   };
