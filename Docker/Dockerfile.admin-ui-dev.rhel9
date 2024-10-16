@@ -65,4 +65,4 @@ ENV TZ "Europe/Stockholm"
 ENV PORT 3002
 ENV HOSTNAME "0.0.0.0"
 
-CMD ["npm", "start:prod"]
+CMD ["npm", "run", "start:prod"]
