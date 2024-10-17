@@ -1,4 +1,9 @@
-import { useQuery, UseQueryResult } from "@tanstack/react-query";
+import {
+  useQuery,
+  UseQueryResult,
+  useMutation,
+  useQueryClient,
+} from "@tanstack/react-query";
 import {
   getMaps,
   getMapByName,
@@ -6,8 +11,16 @@ import {
   getLayersByMapName,
   getProjectionsByMapName,
   getToolsByMapName,
+  createMap,
+  deleteMap,
+  updateMap,
 } from "./requests";
-import { Map, ProjectionsApiResponse, GroupApiResponse } from "./types";
+import {
+  Map,
+  ProjectionsApiResponse,
+  GroupApiResponse,
+  MapMutation,
+} from "./types";
 import { LayersApiResponse } from "../layers/types";
 import { ToolsApiResponse } from "../tools/types";
 
@@ -70,5 +83,56 @@ export const useToolsByMapName = (
   return useQuery({
     queryKey: ["toolsByMap", mapName],
     queryFn: () => getToolsByMapName(mapName),
+  });
+};
+
+// React mutation to create a new map
+// This hook uses the `createMap` function from the `requests` module
+export const useCreateMap = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: createMap,
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ["maps"] });
+    },
+    onError: (error) => {
+      console.error(error);
+    },
+  });
+};
+
+// React mutation to update a map
+// This hook uses the `updateMap` function from the `requests` module
+export const useUpdateMap = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({
+      mapName,
+      data,
+    }: {
+      mapName: string;
+      data: Partial<MapMutation>;
+    }) => updateMap(mapName, data),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ["maps"] });
+    },
+    onError: (error) => {
+      console.error(error);
+    },
+  });
+};
+
+// React mutation to delete a map
+// This hook uses the `deleteMap` function from the `requests` module
+export const useDeleteMap = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (mapName: string) => deleteMap(mapName),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ["maps"] });
+    },
+    onError: (error) => {
+      console.error(error);
+    },
   });
 };

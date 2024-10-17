@@ -1,0 +1,4 @@
+{
+  "apiBaseUrl": "/api/v3",
+  "axiosConfigOverrides": {}
+}

@@ -35,3 +35,10 @@ export interface ProjectionsApiResponse {
   error: string;
   errorId: string;
 }
+
+export interface MapMutation {
+  id: number;
+  locked: boolean;
+  name: string;
+  options?: Record<string, string>;
+}

@@ -5,7 +5,7 @@ import {
   HEADER_HEIGHT,
   SIDEBAR_MINI_WIDTH,
   SIDEBAR_WIDTH,
-  SIDEBAR_ZINDEX,
+  SIDEBAR_Z_INDEX,
 } from "../../constants";
 import SquareIconButton from "./square-icon-button";
 import NavList from "./nav-list";
@@ -31,7 +31,7 @@ const Sidebar = (props: Props) => {
         backgroundColor:
           palette.mode === "light" ? palette.background.default : "",
         minHeight: `calc(100vh - ${HEADER_HEIGHT}px)`,
-        zIndex: SIDEBAR_ZINDEX,
+        zIndex: SIDEBAR_Z_INDEX,
         transition: "left 250ms ease",
       }}
       square
