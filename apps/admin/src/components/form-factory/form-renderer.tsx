@@ -14,7 +14,7 @@ import ControlledAccordion from "./components/controlled-accordion";
 import CONTAINER_TYPE from "./types/container-types";
 import STATIC_TYPE from "./types/static-type";
 
-interface FormRendererProps<TFieldValues extends FieldValues> {
+interface FormRenderProps<TFieldValues extends FieldValues> {
   data: DynamicFormContainer<TFieldValues>;
   register: UseFormRegister<TFieldValues>;
   control: Control<TFieldValues>;
@@ -26,7 +26,7 @@ const FormRenderer = <TFieldValues extends FieldValues>({
   register,
   control,
   errors,
-}: FormRendererProps<TFieldValues>) => {
+}: FormRenderProps<TFieldValues>) => {
   let c = 0;
 
   const getKey = (index: number) => {
@@ -64,7 +64,10 @@ const FormRenderer = <TFieldValues extends FieldValues>({
   ) => {
     if (item.kind === "DynamicFormContainer") {
       return renderContainer(item as DynamicFormContainer<TFieldValues>, index);
-    } else if (item.kind === "DynamicInputSettings") {
+    } else if (
+      item.kind === "DynamicInputSettings" ||
+      item.kind === "CustomInputSettings"
+    ) {
       return wrapInGrid(item, index, {}, renderDynamicInputComponent);
     } else if (item.kind === "StaticElement") {
       return renderStaticElement(item as StaticElement, index);

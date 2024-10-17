@@ -1,5 +1,5 @@
 import { FieldValues } from "react-hook-form";
-import { RenderFunction } from "../types/renderer-props";
+import { RenderFunction } from "../types/render";
 import { TextField } from "@mui/material";
 
 const renderTextArea: RenderFunction<FieldValues> = ({

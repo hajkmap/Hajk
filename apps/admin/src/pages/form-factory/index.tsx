@@ -8,6 +8,9 @@ import FormRenderer from "../../components/form-factory/form-renderer";
 import STATIC_TYPE from "../../components/form-factory/types/static-type";
 import CONTAINER_TYPE from "../../components/form-factory/types/container-types";
 import { DefaultUseForm } from "../../components/form-factory/default-use-form";
+import { RenderProps } from "../../components/form-factory/types/render";
+import { InputAdornment, TextField } from "@mui/material";
+import { AccountCircle } from "@mui/icons-material";
 
 export default function FormFactoryPage() {
   const [formContainerData, setFormContainerData] = React.useState<
@@ -207,6 +210,46 @@ export default function FormFactoryPage() {
       min: 0,
       max: 10,
       step: 1,
+    },
+  });
+
+  // A custom input needs CustomInputSettings with a renderer attached.
+  formContainer.addCustomInput({
+    type: INPUT_TYPE.CUSTOM,
+    kind: "CustomInputSettings",
+    name: "customInput",
+    title: "Custom Input",
+    gridColumns: 6,
+    defaultValue: "",
+    registerOptions: {
+      required: "This field is required.",
+      minLength: {
+        value: 2,
+        message: "Minimum length is 2 characters.",
+      },
+    },
+    renderer: (props: RenderProps<FieldValues>) => {
+      return (
+        <div>
+          <TextField
+            fullWidth
+            variant="filled"
+            label={props.title + " - " + props.field?.value}
+            {...props.field} // For react-hook-form to work, needed for inputs.
+            error={!!props.errorMessage}
+            helperText={props.errorMessage}
+            slotProps={{
+              input: {
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <AccountCircle />
+                  </InputAdornment>
+                ),
+              },
+            }}
+          />
+        </div>
+      );
     },
   });
 

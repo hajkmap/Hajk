@@ -9,6 +9,7 @@ enum INPUT_TYPE {
   SWITCH = "switch",
   NUMBER = "number",
   TEXTAREA = "textarea",
+  CUSTOM = "custom",
 }
 
 

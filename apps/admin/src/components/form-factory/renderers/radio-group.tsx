@@ -1,5 +1,5 @@
 import { RadioGroup, FormControlLabel, Radio } from "@mui/material";
-import { RenderFunction } from "../types/renderer-props";
+import { RenderFunction } from "../types/render";
 import { FieldValues } from "react-hook-form";
 
 const renderRadioGroup: RenderFunction<FieldValues> = ({

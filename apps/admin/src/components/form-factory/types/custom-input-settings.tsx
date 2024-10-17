@@ -1,5 +1,5 @@
 import DynamicInputSettings from "./dynamic-input-settings";
-import { RenderFunction } from "./renderer-props";
+import { RenderFunction } from "./render";
 import { FieldValues } from "react-hook-form";
 
 class CustomInputSettings<
