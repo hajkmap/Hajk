@@ -9,7 +9,7 @@ class CustomInputSettings<
 
   constructor(
     renderer: RenderFunction<TFieldValues>,
-    settings: Partial<DynamicInputSettings<TFieldValues>> = {}
+    settings: DynamicInputSettings<TFieldValues>
   ) {
     super();
     this.renderer = renderer;
