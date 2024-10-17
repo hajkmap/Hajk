@@ -23,6 +23,20 @@ class EditView extends React.PureComponent {
     const { sources } = this.state;
     if (sources && sources.length > 0) {
       this.setLayer(sources[0].id);
+
+      const fieldNames = [
+        "surveyId",
+        "surveyAnswerId",
+        "surveyAnswerDate",
+        "surveyQuestion",
+        "surveyQuestionName",
+      ];
+
+      fieldNames.forEach((fieldName) => {
+        this[fieldName] = this.state.sources[0].editableFields.find(
+          (field) => field.name.toLowerCase() === fieldName.toLowerCase()
+        )?.name;
+      });
     } else {
       this.setLayer("");
       this.simulated = true;
@@ -182,13 +196,11 @@ class EditView extends React.PureComponent {
       };
     } else {
       editValues = {
-        [this.props.options.surveyId]: this.props.surveyJsData.surveyId,
-        [this.props.options.surveyAnswerId]:
-          this.props.surveyJsData.surveyAnswerId,
-        [this.props.options.surveyAnswerDate]:
-          this.props.surveyJsData.surveyAnswerDate,
-        [this.props.options.surveyQuestion]: this.props.currentQuestionTitle,
-        [this.props.options.surveyQuestionName]: this.props.currentQuestionName,
+        [this.surveyId]: this.props.surveyJsData.surveyId,
+        [this.surveyAnswerId]: this.props.surveyJsData.surveyAnswerId,
+        [this.surveyAnswerDate]: this.props.surveyJsData.surveyAnswerDate,
+        [this.surveyQuestion]: this.props.currentQuestionTitle,
+        [this.surveyQuestionName]: this.props.currentQuestionName,
       };
     }
 

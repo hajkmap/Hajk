@@ -48,6 +48,15 @@ class EditModel {
     this.pointString = null;
     this.error = null;
 
+    this.normalizeSources();
+
+    // Get filednames if source exists
+    if (this.sources && this.sources.length > 0) {
+      this.extractFieldNames();
+    }
+  }
+
+  normalizeSources = () => {
     // Normalize the sources that come from options.
     if (this.options.sources && Array.isArray(this.options.sources)) {
       this.options.sources = this.options.sources.map((s) => {
@@ -55,7 +64,6 @@ class EditModel {
         if (s.uri.trim().length === 0) {
           s.uri = "http://www.opengis.net/wfs";
         }
-
         // Get rid of the SERVICE=WFS attribute if existing: we will add it on the following requests
         // while QGIS Server's WFS endpoint requires the SERVICE parameter to be preset. We'd
         // end up with duplicate parameters, so the safest way around is to remove it, in a controlled
@@ -69,7 +77,23 @@ class EditModel {
     } else {
       console.warn("this.options.sources is either undefined or not an array");
     }
-  }
+  };
+
+  extractFieldNames = () => {
+    const fieldNames = [
+      "surveyId",
+      "surveyAnswerId",
+      "surveyAnswerDate",
+      "surveyQuestion",
+      "surveyQuestionName",
+    ];
+
+    fieldNames.forEach((fieldName) => {
+      this[fieldName] = this.sources[0].editableFields.find(
+        (field) => field.name.toLowerCase() === fieldName.toLowerCase()
+      )?.name;
+    });
+  };
 
   getCoordinates = () => {
     if (navigator.geolocation) {
@@ -110,12 +134,11 @@ class EditModel {
             } else {
               feature = new Feature({
                 geometry: pointGeometry,
-                [this.options.surveyId]: this.surveyJsData.surveyId,
-                [this.options.surveyAnswerId]: this.surveyJsData.surveyAnswerId,
-                [this.options.surveyAnswerDate]:
-                  this.surveyJsData.surveyAnswerDate,
-                [this.options.surveyQuestion]: this.currentQuestionTitle,
-                [this.options.surveyQuestionName]: this.currentQuestionName,
+                [this.surveyId]: this.surveyJsData.surveyId,
+                [this.surveyAnswerId]: this.surveyJsData.surveyAnswerId,
+                [this.surveyAnswerDate]: this.surveyJsData.surveyAnswerDate,
+                [this.surveyQuestion]: this.currentQuestionTitle,
+                [this.surveyQuestionName]: this.currentQuestionName,
               });
             }
 
@@ -536,12 +559,8 @@ class EditModel {
 
       // Features filtered by SURVEYANSWERID to show in map
       const filteredFeatures = features.filter((feature) => {
-        const surveyAnswerId = String(
-          feature.get(this.options.surveyAnswerId) || ""
-        );
-        const surveyQuestion = String(
-          feature.get(this.options.surveyQuestion) || ""
-        );
+        const surveyAnswerId = String(feature.get(this.surveyAnswerId) || "");
+        const surveyQuestion = String(feature.get(this.surveyQuestion) || "");
         return (
           surveyAnswerId.trim() === this.surveyJsData.surveyAnswerId.trim() &&
           surveyQuestion.trim() === this.currentQuestionTitle.trim()

@@ -1004,12 +1004,12 @@ class AppModel {
             editTool.options.activeServices = as;
           }
 
-          let wfstlayers = this.overrideGlobalEditConfig(
+          let editWfstLayers = this.overrideGlobalEditConfig(
             editTool,
             layers.wfstlayers
           );
-          editTool.options.sources = wfstlayers;
-          layers.wfstlayers = wfstlayers;
+          editTool.options.sources = editWfstLayers;
+          //layers.wfstlayers = wfstlayers;
         } else {
           editTool.options.sources = [];
         }
@@ -1046,12 +1046,12 @@ class AppModel {
             citizendialogueTool.options.activeServices = as;
           }
 
-          let wfstlayers = this.overrideGlobalEditConfigCitizen(
+          let citizenWfstLayers = this.overrideGlobalEditConfigCitizen(
             citizendialogueTool,
             layers.wfstlayers
           );
-          citizendialogueTool.options.sources = wfstlayers;
-          layers.wfstlayers = wfstlayers;
+          citizendialogueTool.options.sources = citizenWfstLayers;
+          //layers.wfstlayers = wfstlayers;
         } else {
           citizendialogueTool.options.sources = [];
         }
