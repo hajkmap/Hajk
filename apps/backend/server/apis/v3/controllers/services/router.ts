@@ -6,4 +6,7 @@ export default express
   .get("/", controller.getServices)
   .get("/:id", controller.getServiceById)
   .get("/:id/layers", controller.getLayersByServiceId)
-  .get("/:id/maps", controller.getMapsByServiceId);
+  .get("/:id/maps", controller.getMapsByServiceId)
+  .post("/", controller.createService)
+  .patch("/:id", controller.updateService)
+  .delete("/:id", controller.deleteService);

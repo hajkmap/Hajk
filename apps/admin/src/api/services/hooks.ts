@@ -1,9 +1,17 @@
-import { useQuery, UseQueryResult } from "@tanstack/react-query";
+import {
+  useQuery,
+  UseQueryResult,
+  useMutation,
+  useQueryClient,
+} from "@tanstack/react-query";
 import {
   getServices,
   getServiceById,
   getLayersByServiceId,
   getMapsByServiceId,
+  createService,
+  updateService,
+  deleteService,
 } from "./requests";
 import { Service } from "./types";
 import { Layer } from "../layers";
@@ -46,5 +54,56 @@ export const useMapsByServiceId = (
   return useQuery({
     queryKey: ["mapsByServiceId", serviceId],
     queryFn: () => getMapsByServiceId(serviceId),
+  });
+};
+
+// React mutation hook to create a service
+// This hook uses the `createService` function from the services `requests` module
+export const useCreateService = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: createService,
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ["services"] });
+    },
+    onError: (error) => {
+      console.error(error);
+    },
+  });
+};
+
+// React mutation hook to update a service
+// This hook uses the `updateService` function from the services `requests` module
+export const useUpdateService = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({
+      serviceId,
+      data,
+    }: {
+      serviceId: string;
+      data: Partial<Service>;
+    }) => updateService(serviceId, data),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ["services"] });
+    },
+    onError: (error) => {
+      console.error(error);
+    },
+  });
+};
+
+// React mutation hook to delete a service
+// This hook uses the `deleteService` function from the services `requests` module
+export const useDeleteService = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (serviceId: string) => deleteService(serviceId),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ["services"] });
+    },
+    onError: (error) => {
+      console.error(error);
+    },
   });
 };
