@@ -9,6 +9,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Search: Added possibility to set default search options via admin UI. PR: [#1496](https://github.com/hajkmap/Hajk/pull/1496)
+
 ## [3.14.1] - 2024-10-09
 
 ### BREAKING
