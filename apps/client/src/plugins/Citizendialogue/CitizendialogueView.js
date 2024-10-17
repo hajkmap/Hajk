@@ -269,6 +269,7 @@ function CitizendialogueView(props) {
             onSaveCallback={handleOnComplete}
             ref={editViewRef}
             toolbarOptions={showEditView.toolbarOptions}
+            options={props.options}
           />
         );
       });

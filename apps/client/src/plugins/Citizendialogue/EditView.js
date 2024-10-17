@@ -25,6 +25,7 @@ class EditView extends React.PureComponent {
       this.setLayer(sources[0].id);
     } else {
       this.setLayer("");
+      this.simulated = true;
     }
     this.setState({ activeStep: 0 });
   }
@@ -170,13 +171,26 @@ class EditView extends React.PureComponent {
 
   onSaveClicked = () => {
     const { model, app } = this.props;
-    const editValues = {
-      SURVEYID: this.props.surveyJsData.surveyId,
-      SURVEYANSWERID: this.props.surveyJsData.surveyAnswerId,
-      SURVEYANSWERDATE: this.props.surveyJsData.surveyAnswerDate,
-      SURVEYQUESTION: this.props.currentQuestionTitle,
-      SURVEYQUESTIONNAME: this.props.currentQuestionName,
-    };
+    let editValues;
+    if (this.simulated === true) {
+      editValues = {
+        SURVEYID: this.props.surveyJsData.surveyId,
+        SURVEYANSWERID: this.props.surveyJsData.surveyAnswerId,
+        SURVEYANSWERDATE: this.props.surveyJsData.surveyAnswerDate,
+        SURVEYQUESTION: this.props.currentQuestionTitle,
+        SURVEYQUESTIONNAME: this.props.currentQuestionName,
+      };
+    } else {
+      editValues = {
+        [this.props.options.surveyId]: this.props.surveyJsData.surveyId,
+        [this.props.options.surveyAnswerId]:
+          this.props.surveyJsData.surveyAnswerId,
+        [this.props.options.surveyAnswerDate]:
+          this.props.surveyJsData.surveyAnswerDate,
+        [this.props.options.surveyQuestion]: this.props.currentQuestionTitle,
+        [this.props.options.surveyQuestionName]: this.props.currentQuestionName,
+      };
+    }
 
     model.save(editValues, (response) => {
       if (

@@ -31,6 +31,11 @@ const defaultState = {
   editableLayers: {},
   selectedSurvey: "",
   tree: "",
+  surveyId: "",
+  surveyAnswerId: "",
+  surveyAnswerDate: "",
+  surveyQuestion: "",
+  surveyQuestionName: "",
 };
 
 class ToolOptions extends Component {
@@ -78,6 +83,11 @@ class ToolOptions extends Component {
           visibleAtStart: tool.options.visibleAtStart,
           visibleAtStartMobile: tool.options.visibleAtStartMobile,
           selectedSurvey: tool.options.selectedSurvey,
+          surveyId:tool.options.surveyId,
+          surveyAnswerId:tool.options.surveyAnswerId,
+          surveyAnswerDate:tool.options.surveyAnswerDate,
+          surveyQuestion:tool.options.surveyQuestion,
+          surveyQuestionName:tool.options.surveyQuestionName,
           visibleForGroups:
             tool.options.visibleForGroups || this.state.visibleForGroups,
         },
@@ -258,6 +268,11 @@ class ToolOptions extends Component {
         visibleAtStart: this.state.visibleAtStart,
         visibleAtStartMobile: this.state.visibleAtStartMobile,
         selectedSurvey: this.state.selectedSurvey,
+        surveyId: this.state.surveyId,
+        surveyAnswerId: this.state.surveyAnswerId,
+        surveyAnswerDate: this.state.surveyAnswerDate,
+        surveyQuestion: this.state.surveyQuestion,
+        surveyQuestionName: this.state.surveyQuestionName,
         visibleForGroups: this.state.visibleForGroups.map(
           Function.prototype.call,
           String.prototype.trim
@@ -585,7 +600,7 @@ class ToolOptions extends Component {
               checked={this.state.visibleAtStartMobile}
             />
             &nbsp;
-            <label htmlFor="visibleAtStart">Synlig vid start (mobil)</label>
+            <label htmlFor="visibleAtStart">Synlig vid start(mobil)</label>
           </div>
           <div>
         <label>Välj enkät:</label>
@@ -627,6 +642,70 @@ class ToolOptions extends Component {
           <div>{this.renderVisibleForGroups()}</div>
           <div>
             <div className="separator">Redigeringstjänster</div>
+            <div>Ange databasens fältnamn för... (OBS!! obligatoriskt för redigeringstjänsten, skiftlägeskänslig)</div>
+            <div>
+  <label htmlFor="surveyId">surveyId:</label>
+  <input
+    id="surveyId"
+    name="surveyId"
+    type="text"
+    className="control-fixed-width"
+    onChange={(e) => {
+      this.handleInputChange(e);
+    }}
+    value={this.state.surveyId || ""}
+  />
+</div>
+<div>
+  <label htmlFor="surveyAnswerId">surveyAnswerId:</label>
+  <input
+    id="surveyAnswerId"
+    name="surveyAnswerId"
+    type="text"
+    className="control-fixed-width"
+    onChange={(e) => {
+      this.handleInputChange(e);
+    }}
+    value={this.state.surveyAnswerId || ""}
+  />
+</div><div>
+  <label htmlFor="surveyAnswerDate">surveyAnswerDate:</label>
+  <input
+    id="surveyAnswerDate"
+    name="surveyAnswerDate"
+    type="text"
+    className="control-fixed-width"
+    onChange={(e) => {
+      this.handleInputChange(e);
+    }}
+    value={this.state.surveyAnswerDate || ""}
+  />
+</div><div>
+  <label htmlFor="surveyQuestion">surveyQuestion:</label>
+  <input
+    id="surveyQuestion"
+    name="surveyQuestion"
+    type="text"
+    className="control-fixed-width"
+    onChange={(e) => {
+      this.handleInputChange(e);
+    }}
+    value={this.state.surveyQuestion || ""}
+  />
+</div><div>
+  <label htmlFor="surveyQuestionName">surveyQuestionName:</label>
+  <input
+    id="surveyQuestionName"
+    name="surveyQuestionName"
+    type="text"
+    className="control-fixed-width"
+    onChange={(e) => {
+      this.handleInputChange(e);
+    }}
+    value={this.state.surveyQuestionName || ""}
+  />
+</div>
+
 
             {this.state.tree}
           </div>

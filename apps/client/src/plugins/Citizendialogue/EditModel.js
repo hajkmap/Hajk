@@ -97,14 +97,27 @@ class EditModel {
 
             const pointGeometry = new Point([x, y]);
 
-            const feature = new Feature({
-              geometry: pointGeometry,
-              SURVEYID: this.surveyJsData.surveyId,
-              SURVEYANSWERID: this.surveyJsData.surveyAnswerId,
-              SURVEYANSWERDATE: this.surveyJsData.surveyAnswerDate,
-              SURVEYQUESTION: this.currentQuestionTitle,
-              SURVEYQUESTIONNAME: this.currentQuestionName,
-            });
+            let feature;
+            if (this.source.id === "simulated") {
+              feature = new Feature({
+                geometry: pointGeometry,
+                SURVEYID: this.surveyJsData.surveyId,
+                SURVEYANSWERID: this.surveyJsData.surveyAnswerId,
+                SURVEYANSWERDATE: this.surveyJsData.surveyAnswerDate,
+                SURVEYQUESTION: this.currentQuestionTitle,
+                SURVEYQUESTIONNAME: this.currentQuestionName,
+              });
+            } else {
+              feature = new Feature({
+                geometry: pointGeometry,
+                [this.options.surveyId]: this.surveyJsData.surveyId,
+                [this.options.surveyAnswerId]: this.surveyJsData.surveyAnswerId,
+                [this.options.surveyAnswerDate]:
+                  this.surveyJsData.surveyAnswerDate,
+                [this.options.surveyQuestion]: this.currentQuestionTitle,
+                [this.options.surveyQuestionName]: this.currentQuestionName,
+              });
+            }
 
             feature.modification = "added";
 
@@ -523,8 +536,12 @@ class EditModel {
 
       // Features filtered by SURVEYANSWERID to show in map
       const filteredFeatures = features.filter((feature) => {
-        const surveyAnswerId = String(feature.get("SURVEYANSWERID") || "");
-        const surveyQuestion = String(feature.get("SURVEYQUESTION") || "");
+        const surveyAnswerId = String(
+          feature.get(this.options.surveyAnswerId) || ""
+        );
+        const surveyQuestion = String(
+          feature.get(this.options.surveyQuestion) || ""
+        );
         return (
           surveyAnswerId.trim() === this.surveyJsData.surveyAnswerId.trim() &&
           surveyQuestion.trim() === this.currentQuestionTitle.trim()
@@ -694,6 +711,12 @@ class EditModel {
             index: 4,
             name: "SURVEYQUESTION",
             alias: "SURVEYQUESTION",
+            dataType: "string",
+          },
+          {
+            index: 5,
+            name: "SURVEYQUESTIONNAME",
+            alias: "SURVEYQUESTIONNAME",
             dataType: "string",
           },
         ],
