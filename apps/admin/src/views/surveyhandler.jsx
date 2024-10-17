@@ -268,9 +268,9 @@ const updateQuestion = (pageIndex, questionIndex, field, value) => {
     return valid;
 };
 
-  const [filename, setFilename] = useState("");
+const [filename, setFilename] = useState("");
 
-  const saveSurvey = () => {
+const saveSurvey = () => {
     // Create a copy of the survey to avoid direct mutation
     let newSurvey = { ...survey };
 
@@ -296,11 +296,27 @@ const updateQuestion = (pageIndex, questionIndex, field, value) => {
 
     // Validate the filename
     if (!validateNewSurveyName(filename)) {
-        alert('Invalid filename. Only letters and numbers are allowed.');
+        alert('Ogiltigt filnamn. Endast bokstäver och siffror är tillåtna.');
         return;
     }
 
-    // Save the survey
+    // Check if the filename already exists
+    if (availableSurveys.includes(filename)) {
+        if (window.confirm(`Enkät "${filename}" finns redan. Vill du skriva över den?`)) {
+            // User confirmed overwrite, proceed to save
+            saveSurveyToFile(filename, surveyJson);
+        } else {
+            // User cancelled overwrite, do nothing
+            return;
+        }
+    } else {
+        // Filename is new, proceed to save
+        saveSurveyToFile(filename, surveyJson);
+    }
+};
+
+// Helper function to save the survey
+const saveSurveyToFile = (filename, surveyJson) => {
     props.model.saveSurvey(filename, surveyJson, (response) => {
         if (typeof response === 'object' && response !== null) {
             let responseString = '';
@@ -399,7 +415,7 @@ const updateQuestion = (pageIndex, questionIndex, field, value) => {
       <Grid container spacing={2} style={{ marginBottom: '50px' }}>
         <Grid item>
           <TextField
-            label="Enkätens Titel/filnamn"
+            label="Enkätens Titel"
             value={survey.title}
             onChange={(e) => setSurvey({ ...survey, title: e.target.value })}
             style={{ marginRight: '10px' }}
