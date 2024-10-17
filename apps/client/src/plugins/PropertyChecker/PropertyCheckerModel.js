@@ -113,8 +113,6 @@ export default class PropertyCheckerModel {
       // In that case, we'd miss any successfully parsed responses, and we don't want that.
       // So we just go on, silently.
       console.error("Couldn't parse GetFeatureInfo.", response.reason);
-      // Always return an array to prevent crash further on when we do .map()
-      return [];
     }
   };
 

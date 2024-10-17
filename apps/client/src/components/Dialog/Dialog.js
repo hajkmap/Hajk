@@ -24,7 +24,6 @@ export default function ResponsiveDialog(props) {
     children,
     onAbort,
     onClose,
-    onVisibilityChanged,
     open,
     options: {
       abortText,
@@ -51,11 +50,6 @@ export default function ResponsiveDialog(props) {
   const handleClose = () => {
     onClose(promptText);
   };
-
-  // This mechanism allows us to propagate the current
-  // visibility state of the dialog and send back, using a callback
-  // function, to parent component.
-  typeof onVisibilityChanged === "function" && onVisibilityChanged(open);
 
   return (
     <Dialog

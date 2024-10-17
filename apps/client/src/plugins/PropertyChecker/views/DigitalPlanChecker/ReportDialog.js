@@ -50,7 +50,7 @@ export default function ReportDialog(props) {
                   // to look like a list, so let's start with an indentation and a dash.
 
                   ` - ${r.regulationName}` +
-                    `\n   ${r.regulationCaptionAsArray.join("\n   ")}` +
+                    `\n   ${r.regulationCaption}` +
                     (getLayerNotesAsArray(r.id).length > 0
                       ? `\n   Notering: ${getLayerNotesAsArray(r.id)?.join(
                           " "
@@ -96,7 +96,7 @@ export default function ReportDialog(props) {
                   "<li>" +
                     r.regulationName +
                     "<br>" +
-                    r.regulationCaptionAsArray.join("<br>") +
+                    r.regulationCaption +
                     "<br>" +
                     (getLayerNotesAsArray(r.id).length > 0
                       ? `Notering: ${getLayerNotesAsArray(r.id)
@@ -216,7 +216,7 @@ export default function ReportDialog(props) {
                                     {l.regulationName}
                                   </Typography>
                                   <Typography variant="body2" element="div">
-                                    {l.regulationCaptionAsElement}
+                                    {l.regulationCaption}
                                   </Typography>
                                 </Box>
                               }

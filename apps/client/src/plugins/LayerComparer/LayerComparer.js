@@ -1,16 +1,15 @@
 import React, { useEffect, useRef, useState } from "react";
-import BaseLayer from "ol/layer/Base";
 import { Alert, Button, Stack } from "@mui/material";
+import DialogWindowPlugin from "../../plugins/DialogWindowPlugin";
 import CompareIcon from "@mui/icons-material/Compare";
 import { useSnackbar } from "notistack";
 
-import DialogWindowPlugin from "../../plugins/DialogWindowPlugin";
 import SelectDropdown from "./SelectDropdown.js";
 import SDSControl from "./CustomOLControl.js";
 
 const LayerComparer = (props) => {
-  const [layerId1, setLayerId1] = useState("");
-  const [layerId2, setLayerId2] = useState("");
+  const [layer1, setLayer1] = useState("");
+  const [layer2, setLayer2] = useState("");
 
   const [layers, setLayers] = useState([]);
   const [baseLayers, setBaseLayers] = useState([]);
@@ -18,19 +17,14 @@ const LayerComparer = (props) => {
   // Prepare a ref that will hold our map control
   const sds = useRef();
 
-  // Two more refs that will hold the OL layer objects
-  const l1 = useRef();
-  const l2 = useRef();
-
-  // Prepare a ref that will hold the original OL background
-  // layer object. This makes it possible to restore
+  // Prepare a ref that will hold the ID of the original
+  // background layer. This makes it possible to restore
   // to the same background when user closes the comparer.
   const oldBackgroundLayer = useRef();
 
   // When compare mode is active, we want to show a snackbar that
   // allows user to simply disable the comparer.
   const { closeSnackbar, enqueueSnackbar } = useSnackbar();
-
   // We don't want to prompt the user with more than one snack, so lets track the current one,
   // so that we can close it when another one is about to open.
   const helperSnack = React.useRef(null);
@@ -78,111 +72,67 @@ const LayerComparer = (props) => {
   // If both compare layers are empty, we do the contrary and remove the control
   // and restore the original background layer.
   useEffect(() => {
-    // If layer1 or layer2 changed, it means that the Dialog is visible
-    // and we never want to show the snackbar simultaneously. Let's close it.
-    closeSnackbar(helperSnack.current);
+    if (layer1 === "" || layer2 === "") {
+      // Show previous background
+      oldBackgroundLayer.current?.setVisible(true);
 
-    if (layerId1 === "" || layerId2 === "") {
-      // If any of the layer dropdowns is empty, we can't compare.
-      resetSdsAndOl();
+      // Remove the slider as soon as one of the compare layers is not selected
+      sds.current.remove();
+
+      // Close the snackbar
+      closeSnackbar(helperSnack.current);
     } else {
-      // If both IDs are set, we can attempt to grab the layers from the map
-      // and start comparing.
-      l1.current = props.map.getAllLayers().find((l) => l.ol_uid === layerId1);
-      l2.current = props.map.getAllLayers().find((l) => l.ol_uid === layerId2);
+      const l1 = props.map.getAllLayers().find((l) => l.ol_uid === layer1);
+      const l2 = props.map.getAllLayers().find((l) => l.ol_uid === layer2);
 
-      // Let's save the original background layer, so we can restore it later
+      // Hide old background layers
       oldBackgroundLayer.current = props.map
         .getAllLayers()
         .find((l) => l.getVisible() === true && l.get("layerType") === "base");
-      // Also, let's hide it for now
       oldBackgroundLayer.current?.setVisible(false);
 
-      // Activate the compare OL control
       sds.current.open();
-      sds.current.setCompareLayers(l1.current, l2.current);
-    }
-  }, [layerId1, layerId2, props.map, closeSnackbar]);
+      sds.current.setCompareLayers(l1, l2);
 
-  const resetSdsAndOl = () => {
-    // Remove the ref to our OL control
-    sds.current.remove();
-
-    // Let's hide compare layers in Map
-    l1.current?.setVisible(false);
-    l2.current?.setVisible(false);
-
-    // Show original background layer
-    oldBackgroundLayer.current?.setVisible(true);
-  };
-
-  const onVisibilityChanged = (visible) => {
-    // If the Dialog becomes visible, but there already is a snackbar,
-    // we must close it in order to avoid duplicate snackbars.
-    if (visible === true && helperSnack.current !== null) {
-      // This ugly hack is needed to avoid warnings due to a race condition
-      // in React's render.
-      setTimeout(() => {
-        closeSnackbar(helperSnack.current);
-      });
-    }
-  };
-
-  const onAbort = () => {
-    // Unsetting these state variables will cleanup the UI
-    // as well as trigger the useEffect above to run and
-    // take rest of remaining cleanups (once both variables
-    // are empty strings).
-    setLayerId1("");
-    setLayerId2("");
-  };
-
-  // onClose is actually the callback that runs when user
-  // clicks the primary action button in the Dialog, i.e. "Compare".
-  const onClose = () => {
-    // Ensure that there are real layers to compare
-    if (l1.current instanceof BaseLayer && l2.current instanceof BaseLayer) {
-      helperSnack.current = enqueueSnackbar(null, {
-        variant: "default",
-        persist: true,
-        anchorOrigin: { vertical: "bottom", horizontal: "center" },
-        sx: {
-          // Custom styling to follow Material Design guidelines for Snackbar.
-          // Placing the close button to the right of the text.
-          ".SnackbarItem-contentRoot": {
-            flexWrap: "inherit !important",
+      // Show the snackbar, but ensure that only one snackbar exists
+      closeSnackbar(helperSnack.current);
+      helperSnack.current = enqueueSnackbar(
+        "Avsluta jämföringsläget genom att trycka på knappen",
+        {
+          variant: "default",
+          persist: true,
+          anchorOrigin: { vertical: "bottom", horizontal: "center" },
+          sx: {
+            // Custom styling to follow Material Design guidelines for Snackbar.
+            // Placing the close button to the right of the text.
+            ".SnackbarItem-contentRoot": {
+              flexWrap: "inherit !important",
+            },
           },
-          // Since we don't have any text in the snackbar anymore, but the
-          // container is there, we want to remove padding from the actions container.
-          ".SnackbarItem-action": {
-            paddingLeft: 0,
-          },
-        },
-        action: (key) => (
-          <>
-            <Button
-              variant="contained"
-              color="primary"
-              sx={{ mr: 1 }}
-              onClick={() => {
-                props.app.globalObserver.publish("layercomparer.showWindow");
-              }}
-            >
-              Välj andra lager
-            </Button>
+          action: (key) => (
             <Button
               variant="contained"
               color="error"
               onClick={() => {
                 onAbort();
+                closeSnackbar(key);
               }}
             >
               Sluta jämföra
             </Button>
-          </>
-        ),
-      });
+          ),
+        }
+      );
     }
+  }, [layer1, layer2, props.map, closeSnackbar, enqueueSnackbar]);
+
+  // User can at any time abort the comparer, here's a handler
+  // that resets the UI.
+  const onAbort = () => {
+    sds.current.remove();
+    oldBackgroundLayer.current?.setVisible(true);
+    setLayer1("");
+    setLayer2("");
   };
 
   return (
@@ -200,9 +150,7 @@ const LayerComparer = (props) => {
         buttonText: "Jämför",
         primaryButtonVariant: "contained",
         abortText: "Nollställ & stäng",
-        onAbort: onAbort, // Called when user presses the Reset & Close button
-        onClose: onClose, // Called when user presses the main primary button
-        onVisibilityChanged: onVisibilityChanged, // Called when the dialog is shown or hidden
+        onAbort: onAbort,
       }}
     >
       <Stack spacing={2}>
@@ -211,17 +159,17 @@ const LayerComparer = (props) => {
         </Alert>
 
         <SelectDropdown
-          setter={setLayerId1}
-          value={layerId1}
-          counterValue={layerId2}
+          setter={setLayer1}
+          value={layer1}
+          counterValue={layer2}
           baseLayers={baseLayers}
           layers={layers}
           label="Vänster sida"
         />
         <SelectDropdown
-          setter={setLayerId2}
-          value={layerId2}
-          counterValue={layerId1}
+          setter={setLayer2}
+          value={layer2}
+          counterValue={layer1}
           baseLayers={baseLayers}
           layers={layers}
           label="Höger sida"
