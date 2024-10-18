@@ -879,6 +879,9 @@ class AppModel {
 
     let layers = {};
 
+    let editWfstLayers = [];
+    let citizenWfstLayers = [];
+
     if (layerSwitcherTool) {
       layers.wmslayers = this.config.layersConfig.wmslayers || [];
       layers.wfslayers = this.config.layersConfig.wfslayers || [];
@@ -889,15 +892,25 @@ class AppModel {
 
       layers.wmslayers.forEach((l) => (l.type = "wms"));
       layers.wmtslayers.forEach((l) => (l.type = "wmts"));
-      layers.wfstlayers.forEach((l) => (l.type = "edit"));
+      //layers.wfstlayers.forEach((l) => (l.type = "edit"));
       layers.vectorlayers.forEach((l) => (l.type = "vector"));
       layers.arcgislayers.forEach((l) => (l.type = "arcgis"));
+
+      editWfstLayers = layers.wfstlayers.map((l) => ({
+        ...l,
+        type: "edit",
+      }));
+      citizenWfstLayers = layers.wfstlayers.map((l) => ({
+        ...l,
+        type: "citizendialogue",
+      }));
 
       let allLayers = [
         ...layers.wmslayers,
         ...layers.wmtslayers,
         ...layers.vectorlayers,
-        ...layers.wfstlayers,
+        ...editWfstLayers,
+        ...citizenWfstLayers,
         ...layers.arcgislayers,
       ];
 
@@ -1004,11 +1017,11 @@ class AppModel {
             editTool.options.activeServices = as;
           }
 
-          let editWfstLayers = this.overrideGlobalEditConfig(
+          const filteredEditWfstLayers = this.overrideGlobalEditConfig(
             editTool,
-            layers.wfstlayers
+            editWfstLayers
           );
-          editTool.options.sources = editWfstLayers;
+          editTool.options.sources = filteredEditWfstLayers;
           //layers.wfstlayers = wfstlayers;
         } else {
           editTool.options.sources = [];
@@ -1046,11 +1059,12 @@ class AppModel {
             citizendialogueTool.options.activeServices = as;
           }
 
-          let citizenWfstLayers = this.overrideGlobalEditConfigCitizen(
-            citizendialogueTool,
-            layers.wfstlayers
-          );
-          citizendialogueTool.options.sources = citizenWfstLayers;
+          const filteredCitizenWfstLayers =
+            this.overrideGlobalEditConfigCitizen(
+              citizendialogueTool,
+              citizenWfstLayers
+            );
+          citizendialogueTool.options.sources = filteredCitizenWfstLayers;
           //layers.wfstlayers = wfstlayers;
         } else {
           citizendialogueTool.options.sources = [];
