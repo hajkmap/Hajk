@@ -1,6 +1,6 @@
 import Page from "../../layouts/root/components/page";
-import { FieldErrors, FieldValues } from "react-hook-form";
-import { FormEventHandler, useEffect } from "react";
+import { FieldValues } from "react-hook-form";
+import { useEffect } from "react";
 import INPUT_TYPE from "../../components/form-factory/types/input-type";
 import React from "react";
 import DynamicFormContainer from "../../components/form-factory/dynamic-form-container";
@@ -17,6 +17,7 @@ import {
 } from "@mui/material";
 import { AccountCircle } from "@mui/icons-material";
 import FormInspector from "../../components/form-factory/components/form-inspector";
+import { createOnSubmitHandler } from "../../components/form-factory/form-utils";
 
 export default function FormFactoryPage() {
   const [formContainerData, setFormContainerData] = React.useState<
@@ -261,7 +262,7 @@ export default function FormFactoryPage() {
 
   useEffect(() => {
     setFormContainerData(formContainer);
-  }, [formContainer]);
+  }, []);
 
   const defaultValues = formContainer.getDefaultValues();
 
@@ -273,33 +274,24 @@ export default function FormFactoryPage() {
     watch,
   } = DefaultUseForm(defaultValues);
 
-  const onSubmitHandler: FormEventHandler = (e) => {
-    e.preventDefault();
-    void handleSubmit(
-      (data: FieldValues) => {
-        const dirtyFieldsData = Object.keys(dirtyFields).reduce(
-          (acc: Record<string, unknown>, key) => {
-            if (dirtyFields[key]) {
-              acc[key] = data[key];
-            }
-            return acc;
-          },
-          {}
-        );
-        console.log("allData", data);
-        console.log("dirtyData", dirtyFieldsData);
-      },
-      (errors: FieldErrors<FieldValues>) => {
-        console.log("Errors: ", errors);
-      }
-    )();
-  };
+  const onSubmit = createOnSubmitHandler(
+    handleSubmit, // Pass handleSubmit from react-hook-form
+    dirtyFields, // Pass dirtyFields from formState
+    (data, dirtyData) => {
+      console.log("All Data: ", data);
+      console.log("Dirty Data: ", dirtyData);
+      console.log("Lets send some data to the server!!");
+    },
+    (errors) => {
+      console.log("Errors: ", errors);
+    }
+  );
 
   const formFields = watch();
 
   return (
     <Page title={"Form factory"}>
-      <form onSubmit={onSubmitHandler}>
+      <form onSubmit={onSubmit}>
         <FormRenderer
           data={formContainerData}
           register={register}
