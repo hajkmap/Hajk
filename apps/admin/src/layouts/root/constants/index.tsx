@@ -4,6 +4,7 @@ import LayersIcon from "@mui/icons-material/Layers";
 import HandymanIcon from "@mui/icons-material/Handyman";
 import CollectionsIcon from "@mui/icons-material/Collections";
 import NetworkPingIcon from "@mui/icons-material/NetworkPing";
+import DynamicFormIcon from "@mui/icons-material/DynamicForm";
 
 export const HEADER_HEIGHT = 64;
 export const HEADER_Z_INDEX = 1001;
@@ -41,5 +42,10 @@ export const SIDEBAR_MENU = [
     to: "/tools",
     titleKey: "common.tools",
     icon: <HandymanIcon />,
+  },
+  {
+    to: "/form-factory",
+    titleKey: "Form factory",
+    icon: <DynamicFormIcon />,
   },
 ];

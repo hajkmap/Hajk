@@ -49,7 +49,7 @@ const Page = (props: Props) => {
       sx={{
         position: "relative",
         paddingTop: theme.spacing(2),
-        paddingBottom: theme.spacing(3),
+        paddingBottom: theme.spacing(6),
         paddingLeft: theme.spacing(4),
         paddingRight: theme.spacing(4),
         maxWidth: "1024px",
