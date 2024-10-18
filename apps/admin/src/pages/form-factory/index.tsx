@@ -1,6 +1,6 @@
 import Page from "../../layouts/root/components/page";
 import { FieldValues } from "react-hook-form";
-import { FormEventHandler, useEffect } from "react";
+import { useEffect } from "react";
 import INPUT_TYPE from "../../components/form-factory/types/input-type";
 import React from "react";
 import DynamicFormContainer from "../../components/form-factory/dynamic-form-container";
@@ -9,8 +9,15 @@ import STATIC_TYPE from "../../components/form-factory/types/static-type";
 import CONTAINER_TYPE from "../../components/form-factory/types/container-types";
 import { DefaultUseForm } from "../../components/form-factory/default-use-form";
 import { RenderProps } from "../../components/form-factory/types/render";
-import { InputAdornment, TextField } from "@mui/material";
+import {
+  Button,
+  Grid2 as Grid,
+  InputAdornment,
+  TextField,
+} from "@mui/material";
 import { AccountCircle } from "@mui/icons-material";
+import FormInspector from "../../components/form-factory/components/form-inspector";
+import { createOnSubmitHandler } from "../../components/form-factory/form-utils";
 
 export default function FormFactoryPage() {
   const [formContainerData, setFormContainerData] = React.useState<
@@ -263,34 +270,44 @@ export default function FormFactoryPage() {
     register,
     handleSubmit,
     control,
-    formState: { errors, dirtyFields /*, isDirty, dirtyFields*/ },
-    // watch,
+    formState: { errors, dirtyFields, isDirty },
+    watch,
   } = DefaultUseForm(defaultValues);
 
-  const onSubmit = (data: FieldValues) => {
-    console.log(data);
-  };
+  const onSubmit = createOnSubmitHandler({
+    handleSubmit, // Pass handleSubmit from react-hook-form
+    dirtyFields, // Pass dirtyFields from formState
+    onValid: (data, dirtyData) => {
+      console.log("All Data: ", data);
+      console.log("Dirty Data: ", dirtyData);
+      console.log("Let's send some data to the server!!");
+    },
+    onInvalid: (errors) => {
+      console.log("Errors: ", errors);
+    },
+  });
 
-  const onSubmitHandler: FormEventHandler = (e) => {
-    e.preventDefault();
-    void handleSubmit(onSubmit)();
-  };
-
-  // const formData = watch();
+  const formFields = watch();
 
   return (
     <Page title={"Form factory"}>
-      <form onSubmit={onSubmitHandler}>
+      <form onSubmit={onSubmit}>
         <FormRenderer
           data={formContainerData}
           register={register}
           control={control}
           errors={errors}
         />
-        <p>Will add form button soon</p>
 
-        <p>dirtyFields:</p>
-        <pre>{JSON.stringify(dirtyFields ?? {}, null, 2)}</pre>
+        <Grid container>
+          <Grid sx={{ ml: "auto" }}>
+            <Button type="submit" variant="contained" disabled={!isDirty}>
+              Submit
+            </Button>
+          </Grid>
+        </Grid>
+
+        <FormInspector formFields={formFields} dirtyFields={dirtyFields} />
       </form>
     </Page>
   );

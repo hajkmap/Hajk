@@ -1,7 +1,7 @@
 import { FieldValues } from "react-hook-form";
 import DynamicInputSettings from "./types/dynamic-input-settings";
 import StaticElement from "./static-element";
-import CustomInputSettings from "./types/custom-input-settings"; // Import CustomInputSettings
+import CustomInputSettings from "./types/custom-input-settings"; 
 import CONTAINER_TYPE from "./types/container-types";
 
 // Union type combining DynamicInputSettings, StaticElement, and nested DynamicFormContainer
@@ -9,14 +9,14 @@ export type FormElement<TFieldValues extends FieldValues> =
   | DynamicInputSettings<TFieldValues>
   | StaticElement
   | DynamicFormContainer<TFieldValues>
-  | CustomInputSettings<TFieldValues>; // Include CustomInputSettings in the union
+  | CustomInputSettings<TFieldValues>; 
 
 // Define the kinds for all form elements
 type FormElementKind =
   | "DynamicInputSettings"
   | "StaticElement"
   | "DynamicFormContainer"
-  | "CustomInputSettings"; // Add CustomInputSettings kind
+  | "CustomInputSettings"; 
 
 class DynamicFormContainer<TFieldValues extends FieldValues> {
   kind: FormElementKind;
@@ -58,10 +58,9 @@ class DynamicFormContainer<TFieldValues extends FieldValues> {
     this.formItems.push(element);
   }
 
-  // Method to add CustomInputSettings
   addCustomInput(input: CustomInputSettings<TFieldValues>): void {
-    input.kind = "CustomInputSettings"; // Set the kind to CustomInputSettings
-    this.formItems.push(input); // Add the custom input to formItems
+    input.kind = "CustomInputSettings"; 
+    this.formItems.push(input); 
   }
 
   getElements(): FormElement<TFieldValues>[] {
