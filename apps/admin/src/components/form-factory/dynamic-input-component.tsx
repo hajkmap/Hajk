@@ -7,7 +7,7 @@ import {
   UseFormRegister,
 } from "react-hook-form";
 import DynamicInputSettings from "./types/dynamic-input-settings";
-import CustomInputSettings from "./types/custom-input-settings"; // Import CustomInputSettings
+import CustomInputSettings from "./types/custom-input-settings";
 import { getRenderer } from "./renderers";
 
 // Accept both DynamicInputSettings and CustomInputSettings

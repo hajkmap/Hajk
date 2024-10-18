@@ -274,18 +274,18 @@ export default function FormFactoryPage() {
     watch,
   } = DefaultUseForm(defaultValues);
 
-  const onSubmit = createOnSubmitHandler(
+  const onSubmit = createOnSubmitHandler({
     handleSubmit, // Pass handleSubmit from react-hook-form
     dirtyFields, // Pass dirtyFields from formState
-    (data, dirtyData) => {
+    onValid: (data, dirtyData) => {
       console.log("All Data: ", data);
       console.log("Dirty Data: ", dirtyData);
-      console.log("Lets send some data to the server!!");
+      console.log("Let's send some data to the server!!");
     },
-    (errors) => {
+    onInvalid: (errors) => {
       console.log("Errors: ", errors);
-    }
-  );
+    },
+  });
 
   const formFields = watch();
 
