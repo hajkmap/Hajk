@@ -11,6 +11,7 @@ import { DefaultUseForm } from "../../components/form-factory/default-use-form";
 import { RenderProps } from "../../components/form-factory/types/render";
 import { InputAdornment, TextField } from "@mui/material";
 import { AccountCircle } from "@mui/icons-material";
+import FormInspector from "../../components/form-factory/components/form-inspector";
 
 export default function FormFactoryPage() {
   const [formContainerData, setFormContainerData] = React.useState<
@@ -264,7 +265,7 @@ export default function FormFactoryPage() {
     handleSubmit,
     control,
     formState: { errors, dirtyFields /*, isDirty, dirtyFields*/ },
-    // watch,
+    watch,
   } = DefaultUseForm(defaultValues);
 
   const onSubmit = (data: FieldValues) => {
@@ -276,7 +277,7 @@ export default function FormFactoryPage() {
     void handleSubmit(onSubmit)();
   };
 
-  // const formData = watch();
+  const formFields = watch();
 
   return (
     <Page title={"Form factory"}>
@@ -289,8 +290,7 @@ export default function FormFactoryPage() {
         />
         <p>Will add form button soon</p>
 
-        <p>dirtyFields:</p>
-        <pre>{JSON.stringify(dirtyFields ?? {}, null, 2)}</pre>
+        <FormInspector formFields={formFields} dirtyFields={dirtyFields} />
       </form>
     </Page>
   );
