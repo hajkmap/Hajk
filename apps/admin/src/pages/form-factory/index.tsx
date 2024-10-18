@@ -1,5 +1,5 @@
 import Page from "../../layouts/root/components/page";
-import { FieldValues } from "react-hook-form";
+import { FieldErrors, FieldValues } from "react-hook-form";
 import { FormEventHandler, useEffect } from "react";
 import INPUT_TYPE from "../../components/form-factory/types/input-type";
 import React from "react";
@@ -9,7 +9,12 @@ import STATIC_TYPE from "../../components/form-factory/types/static-type";
 import CONTAINER_TYPE from "../../components/form-factory/types/container-types";
 import { DefaultUseForm } from "../../components/form-factory/default-use-form";
 import { RenderProps } from "../../components/form-factory/types/render";
-import { InputAdornment, TextField } from "@mui/material";
+import {
+  Button,
+  Grid2 as Grid,
+  InputAdornment,
+  TextField,
+} from "@mui/material";
 import { AccountCircle } from "@mui/icons-material";
 import FormInspector from "../../components/form-factory/components/form-inspector";
 
@@ -256,7 +261,7 @@ export default function FormFactoryPage() {
 
   useEffect(() => {
     setFormContainerData(formContainer);
-  }, []);
+  }, [formContainer]);
 
   const defaultValues = formContainer.getDefaultValues();
 
@@ -264,17 +269,30 @@ export default function FormFactoryPage() {
     register,
     handleSubmit,
     control,
-    formState: { errors, dirtyFields /*, isDirty, dirtyFields*/ },
+    formState: { errors, dirtyFields, isDirty },
     watch,
   } = DefaultUseForm(defaultValues);
 
-  const onSubmit = (data: FieldValues) => {
-    console.log(data);
-  };
-
   const onSubmitHandler: FormEventHandler = (e) => {
     e.preventDefault();
-    void handleSubmit(onSubmit)();
+    void handleSubmit(
+      (data: FieldValues) => {
+        const dirtyFieldsData = Object.keys(dirtyFields).reduce(
+          (acc: Record<string, unknown>, key) => {
+            if (dirtyFields[key]) {
+              acc[key] = data[key];
+            }
+            return acc;
+          },
+          {}
+        );
+        console.log("allData", data);
+        console.log("dirtyData", dirtyFieldsData);
+      },
+      (errors: FieldErrors<FieldValues>) => {
+        console.log("Errors: ", errors);
+      }
+    )();
   };
 
   const formFields = watch();
@@ -288,7 +306,14 @@ export default function FormFactoryPage() {
           control={control}
           errors={errors}
         />
-        <p>Will add form button soon</p>
+
+        <Grid container>
+          <Grid sx={{ ml: "auto" }}>
+            <Button type="submit" variant="contained" disabled={!isDirty}>
+              Submit
+            </Button>
+          </Grid>
+        </Grid>
 
         <FormInspector formFields={formFields} dirtyFields={dirtyFields} />
       </form>
