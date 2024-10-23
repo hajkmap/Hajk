@@ -1,7 +1,7 @@
 import { FieldValues } from "react-hook-form";
 import DynamicInputSettings from "./types/dynamic-input-settings";
 import StaticElement from "./static-element";
-import CustomInputSettings from "./types/custom-input-settings"; 
+import CustomInputSettings from "./types/custom-input-settings";
 import CONTAINER_TYPE from "./types/container-types";
 
 // Union type combining DynamicInputSettings, StaticElement, and nested DynamicFormContainer
@@ -9,14 +9,14 @@ export type FormElement<TFieldValues extends FieldValues> =
   | DynamicInputSettings<TFieldValues>
   | StaticElement
   | DynamicFormContainer<TFieldValues>
-  | CustomInputSettings<TFieldValues>; 
+  | CustomInputSettings<TFieldValues>;
 
 // Define the kinds for all form elements
 type FormElementKind =
   | "DynamicInputSettings"
   | "StaticElement"
   | "DynamicFormContainer"
-  | "CustomInputSettings"; 
+  | "CustomInputSettings";
 
 class DynamicFormContainer<TFieldValues extends FieldValues> {
   kind: FormElementKind;
@@ -38,29 +38,34 @@ class DynamicFormContainer<TFieldValues extends FieldValues> {
     this.props = props;
   }
 
-  addContainer(container: DynamicFormContainer<TFieldValues>): void {
+  addContainer(container: DynamicFormContainer<TFieldValues>): this {
     container.kind = "DynamicFormContainer";
     this.formItems.push(container);
+    return this;
   }
 
-  addInput(input: DynamicInputSettings<TFieldValues>): void {
+  addInput(input: DynamicInputSettings<TFieldValues>): this {
     input.kind = "DynamicInputSettings";
     this.formItems.push(input);
+    return this;
   }
 
-  addInputs(inputs: DynamicInputSettings<TFieldValues>[]): void {
+  addInputs(inputs: DynamicInputSettings<TFieldValues>[]): this {
     inputs.forEach((input) => (input.kind = "DynamicInputSettings"));
     this.formItems.push(...inputs);
+    return this;
   }
 
-  addStaticElement(element: StaticElement): void {
+  addStaticElement(element: StaticElement): this {
     element.kind = "StaticElement";
     this.formItems.push(element);
+    return this;
   }
 
-  addCustomInput(input: CustomInputSettings<TFieldValues>): void {
-    input.kind = "CustomInputSettings"; 
-    this.formItems.push(input); 
+  addCustomInput(input: CustomInputSettings<TFieldValues>): this {
+    input.kind = "CustomInputSettings";
+    this.formItems.push(input);
+    return this;
   }
 
   getElements(): FormElement<TFieldValues>[] {
