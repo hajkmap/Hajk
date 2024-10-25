@@ -1,9 +1,9 @@
-import { PrismaClient, ServiceType } from "@prisma/client";
-
+import { ServiceType } from "@prisma/client";
 import log4js from "log4js";
 
+import prisma from "../../../common/prisma.ts";
+
 const logger = log4js.getLogger("service.v3.layer");
-const prisma = new PrismaClient();
 
 class LayerService {
   constructor() {
