@@ -35,7 +35,7 @@
     "express": "^5.0.0",
     "express-openapi-validator": "^5.3.7",
     "fast-xml-parser": "^4.5.0",
-    "helmet": "^7.1.0",
+    "helmet": "^8.0.0",
     "http-proxy-middleware": "^3.0.3",
     "log4js": "^6.9.1",
     "query-string": "^9.1.1",
