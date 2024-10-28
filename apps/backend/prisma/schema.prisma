@@ -4,6 +4,7 @@ generator client {
 
 generator zod {
   provider = "zod-prisma-types"
+  output   = "../server/generated/zod"
 }
 
 datasource db {

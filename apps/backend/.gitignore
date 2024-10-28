@@ -5,4 +5,4 @@ logs/
 .DS_Store
 .vscode
 .env
-prisma/generated/zod/index.ts
+/server/generated/zod/index.ts
