@@ -134,17 +134,14 @@ class InformativeService {
         file
       );
 
-      // Simple way to verify we've got valid JSON: try parsing it.
-      const json = JSON.parse(body); // Ensure body is valid JSON
-
-      // If parsing was successful, convert back to string with indentation
-      const jsonString = JSON.stringify(json, null, 2);
+      // Since body is already a JavaScript object, we just need to stringify it
+      const jsonString = JSON.stringify(body, null, 2);
 
       // Write to file
       await fs.promises.writeFile(pathToFile, jsonString);
 
-      // Return the JSON string
-      return jsonString;
+      // Return an object indicating the file was saved successfully
+      return { success: true };
     } catch (error) {
       logger.error(`Error saving file "${file}": ${error.message}`);
       return { error };
