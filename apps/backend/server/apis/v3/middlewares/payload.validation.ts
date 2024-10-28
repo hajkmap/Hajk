@@ -22,6 +22,8 @@ export const validatePayload = (
           ...error,
         });
       }
+
+      next(error);
     }
   };
 };
