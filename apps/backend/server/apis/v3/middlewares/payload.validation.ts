@@ -19,14 +19,9 @@ export const validatePayload = (
     } catch (error) {
       if (error instanceof ZodError) {
         return res.status(HttpStatusCodes.BAD_REQUEST).json({
-          message: "Invalid payload",
-          errors: error.errors.map((err) => ({
-            field: err.path.join("."),
-            message: err.message,
-          })),
+          ...error,
         });
       }
-      next(error);
     }
   };
 };
