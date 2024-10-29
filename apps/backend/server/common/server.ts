@@ -30,6 +30,7 @@ import HttpStatusCodes from "./http-status-codes.ts";
 import { HajkError, RouteError } from "./classes.ts";
 import { HttpError } from "express-openapi-validator/dist/framework/types.js";
 import { isInstanceOfPrismaError } from "./utils/is-instance-of-prisma-error.ts";
+import { ZodError } from "zod";
 
 const logger = log4js.getLogger("hajk");
 
@@ -501,7 +502,7 @@ built-it compression by setting the ENABLE_GZIP_COMPRESSION option to "true" in 
 
         // Set some default values for the response.
         let status = HttpStatusCodes.BAD_REQUEST;
-        let message = err.message;
+        let message: string | ZodError = err.message;
         let hajkCode: string | null = null;
 
         // Now, let's see if the error has some specific status code or
@@ -531,6 +532,12 @@ built-it compression by setting the ENABLE_GZIP_COMPRESSION option to "true" in 
         // and we should use it in our response.
         else if (err instanceof RouteError || err instanceof HttpError) {
           status = err.status;
+        }
+
+        // Zod validation errors
+        else if (err instanceof ZodError) {
+          status = HttpStatusCodes.BAD_REQUEST;
+          message = err;
         }
 
         // Send error response, include the error ID for reference
