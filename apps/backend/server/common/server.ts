@@ -14,11 +14,14 @@ import { createServer, type Server as NodeServerType } from "http";
 import { fileURLToPath } from "url";
 
 import compression from "compression";
-import cookieParser from "cookie-parser";
 import cors from "cors";
 import helmet from "helmet";
 import { legacyCreateProxyMiddleware as createProxyMiddleware } from "http-proxy-middleware";
 import * as OpenApiValidator from "express-openapi-validator";
+
+import expressSession from "express-session";
+import { PrismaSessionStore } from "@quixo3/prisma-session-store";
+import { PrismaClient } from "@prisma/client";
 
 import { getCLFDate } from "./utils/get-clf-date.ts";
 import log4js from "./utils/hajk-logger.js";
@@ -144,6 +147,9 @@ class Server {
     // setup **before** any routes, so that they can be parsed properly.
     this.setupParsers();
 
+    // Setup express-session. We use the PrismaSessionStore for session storage.
+    this.setupSession();
+
     // Hajk's own proxies that can be configured in .env. Await, because
     // we must dynamically load the corresponding modules.
     await this.setupProxies();
@@ -259,7 +265,25 @@ built-it compression by setting the ENABLE_GZIP_COMPRESSION option to "true" in 
       })
     );
     this.app.use(express.text({ limit: process.env.REQUEST_LIMIT || "100kb" }));
-    this.app.use(cookieParser(process.env.SESSION_SECRET));
+  }
+
+  private setupSession() {
+    this.app.use(
+      expressSession({
+        cookie: {
+          maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days, in ms. Consider shortening.
+        },
+        secret:
+          process.env.SESSION_SECRET || "fallbackIfNoSecretProvidedInDotEnv",
+        resave: false, // See documentation for `resave`. Our store implements the `touch()` method, so we can likely go with `false` here.
+        saveUninitialized: true,
+        store: new PrismaSessionStore(new PrismaClient(), {
+          checkPeriod: 2 * 60 * 1000, //ms
+          dbRecordIdIsSessionId: true,
+          dbRecordIdFunction: undefined,
+        }),
+      })
+    );
   }
 
   private async setupProxies() {

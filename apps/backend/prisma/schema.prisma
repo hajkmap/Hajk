@@ -12,6 +12,13 @@ datasource db {
   url      = env("PG_CONNECTION_STRING")
 }
 
+model Session {
+  id        String   @id
+  sid       String   @unique
+  data      String
+  expiresAt DateTime
+}
+
 model Map {
   id          Int            @id @default(autoincrement())
   locked      Boolean        @default(false)
