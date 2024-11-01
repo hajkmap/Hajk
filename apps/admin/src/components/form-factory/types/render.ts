@@ -8,6 +8,9 @@ export type RenderFunction<TFieldValues extends FieldValues> = (
 export interface RenderProps<TFieldValues extends FieldValues> {
   field?: ControllerRenderProps<TFieldValues, Path<TFieldValues>>;
   inputProps?: Record<string, unknown>;
+  slotProps?: {
+    input?: { style?: React.CSSProperties };
+  };
   errorMessage?: string | null;
   optionList?: { title: string; value: unknown }[];
   title?: string;

@@ -16,6 +16,7 @@ import ToolsPage from "./pages/tools/index.tsx";
 import useAppStateStore from "./store/use-app-state-store.ts";
 import SettingsPage from "./pages/settings/index.tsx";
 import ServicesPage from "./pages/services/index.tsx";
+import ServiceSettings from "./pages/services/settings.tsx";
 import GroupsPage from "./pages/groups/index.tsx";
 import FormFactoryPage from "./pages/form-factory/index.tsx";
 
@@ -51,6 +52,10 @@ const router = createBrowserRouter(
           element: <ServicesPage />,
         },
         {
+          path: "services/servicesettings/:id",
+          element: <ServiceSettings />,
+        },
+        {
           path: "groups",
           element: <GroupsPage />,
         },
@@ -58,6 +63,7 @@ const router = createBrowserRouter(
           path: "settings",
           element: <SettingsPage />,
         },
+
         {
           path: "form-factory",
           element: <FormFactoryPage />,

@@ -3,7 +3,7 @@
     "common.clickableLogo": "Klickbar logga",
     "common.english": "Engelska",
     "common.goodbye": "Hej då",
-    "common.groups": "Grupper",     
+    "common.groups": "Grupper",
     "common.hello": "Hej",
     "common.home": "Hem",
     "common.language": "Språk",
@@ -18,6 +18,11 @@
     "common.tools": "Verktyg",
     "common.you": "Du",
     "dark": "Mörkt",
-    "light": "Ljust"
+    "light": "Ljust",
+    "services.dialog.title": "Ny tjänst",
+    "services.dialog.addBtn": "Lägg till ny tjänst",
+    "services.dialog.closeBtn": "Stäng",
+    "Services": "Tjänster",
+    "Servicesettings": "Inställningar"
   }
 }

@@ -3,14 +3,14 @@
     "common.clickableLogo": "Clickable Logo",
     "common.english": "English",
     "common.goodbye": "Goodbye",
-    "common.groups": "Groups",        
+    "common.groups": "Groups",
     "common.hello": "Hello",
     "common.home": "Home",
     "common.language": "Language",
     "common.layers": "Layers",
     "common.maps": "Maps",
     "common.scrolltotop": "Scroll to top",
-    "common.services": "Services",    
+    "common.services": "Services",
     "common.settings": "Settings",
     "common.sidebar.lock": "Lock sidebar",
     "common.sidebar.unlock": "Unlock sidebar",
@@ -18,6 +18,11 @@
     "common.tools": "Tools",
     "common.you": "You",
     "dark": "Dark",
-    "light": "Light"
+    "light": "Light",
+    "services.dialog.title": "New service",
+    "services.dialog.addBtn": "Add a new service",
+    "services.dialog.closeBtn": "Close",
+    "Services": "Services",
+    "Servicesettings": "Settings"
   }
 }

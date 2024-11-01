@@ -1,5 +1,5 @@
 import Grid from "@mui/material/Grid2";
-import { Link } from "react-router-dom";
+import { Link, useLocation, useParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import {
   Avatar,
@@ -42,6 +42,10 @@ export default function Header() {
   const [userList, setUserList] = useState<DummyUser[]>([]);
   const [activeUser, setActiveUser] = useState<DummyUser>();
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+  const { serviceId } = useParams();
+
+  const location = useLocation();
+  const pathParts = location.pathname.split("/").filter(Boolean);
 
   useEffect(() => {
     const testActiveUser: DummyUser = new DummyUser(
@@ -64,6 +68,61 @@ export default function Header() {
     );
   }, [setActiveUser, setUserList]);
 
+  const breadcrumbLinks =
+    pathParts.length > 0
+      ? [
+          <Box
+            sx={{ color: palette.text.secondary }}
+            mr={1}
+            component="span"
+            key="home"
+          >
+            <Link to="/">Start</Link>
+            {pathParts.length > 0 && " / "}
+          </Box>,
+          ...pathParts.map((part, index) => {
+            const path = `/${pathParts.slice(0, index + 1).join("/")}`;
+            const isCurrentPath = path === location.pathname;
+
+            const displayName =
+              part === serviceId
+                ? serviceId
+                : t(part.charAt(0).toUpperCase() + part.slice(1));
+
+            return (
+              <Box
+                sx={{ color: palette.text.secondary }}
+                mr={1}
+                component="span"
+                key={path}
+              >
+                {index === 1 ? (
+                  <Box
+                    component="span"
+                    sx={{ color: isCurrentPath ? palette.text.primary : "" }}
+                  >
+                    {displayName}
+                  </Box>
+                ) : (
+                  <Link
+                    style={{
+                      color: isCurrentPath ? palette.text.primary : "",
+                    }}
+                    to={path}
+                  >
+                    {displayName}
+                  </Link>
+                )}
+
+                {index < pathParts.length - 1 && (
+                  <Box component="span"> / </Box>
+                )}
+              </Box>
+            );
+          }),
+        ]
+      : [];
+
   return (
     <Paper
       component="header"
@@ -84,7 +143,7 @@ export default function Header() {
         direction={"row"}
         sx={{ width: "100%", height: `${HEADER_HEIGHT}px` }}
       >
-        <Grid size={{ xs: 8, sm: 4 }} sx={{ fontSize: "0" }}>
+        <Grid size={{ xs: 4, sm: 4 }} sx={{ fontSize: "0" }}>
           <Link
             to="/"
             style={{
@@ -107,7 +166,17 @@ export default function Header() {
         </Grid>
         <Grid
           container
-          size={{ xs: 4, sm: 8 }}
+          size={{ xs: 4, sm: 4 }}
+          alignItems="center"
+          justifyContent="center"
+          sx={{ fontSize: "0.8rem", fontWeight: 700 }}
+        >
+          {breadcrumbLinks}
+        </Grid>
+
+        <Grid
+          container
+          size={{ xs: 4, sm: 4 }}
           justifyContent="flex-end"
           alignSelf="center"
           alignItems="center"

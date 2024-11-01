@@ -13,3 +13,11 @@ export interface ServicesApiResponse {
   error: string;
   errorId: string;
 }
+
+export interface ServiceFormData {
+  url: string;
+  locked: boolean;
+  type: string;
+  serverType: string;
+  comment?: string;
+}

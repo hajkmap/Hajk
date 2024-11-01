@@ -104,6 +104,7 @@ const FormRenderer = <TFieldValues extends FieldValues>({
         title={container.title}
         key={key + "-accordion"}
         triggerExpanded={!!container.props?.triggerExpanded}
+        backgroundColor={container.props?.backgroundColor as string}
       >
         <Grid container>
           {container
@@ -122,7 +123,7 @@ const FormRenderer = <TFieldValues extends FieldValues>({
       <Paper
         key={getKey(index)}
         sx={{
-          backgroundColor: "none",
+          backgroundColor: container.props?.backgroundColor ?? "none",
           width: "100%",
           p: 2,
           pb: 0,

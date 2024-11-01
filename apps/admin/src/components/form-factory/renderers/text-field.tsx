@@ -7,11 +7,15 @@ const renderTextField: RenderFunction<FieldValues> = ({
   inputProps,
   errorMessage,
   title,
+  slotProps,
 }) => {
+  const inputSlotProps = slotProps?.input ?? {};
+
   return (
     <TextField
       {...field}
       {...inputProps}
+      {...inputSlotProps}
       fullWidth
       label={title}
       inputRef={field?.ref}
