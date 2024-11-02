@@ -180,7 +180,8 @@ class Toolbar extends Component {
         </Grid>
         <Grid container spacing={2}>
           {(this.toolbarOptions === "all" ||
-            this.toolbarOptions === "point") && (
+            this.toolbarOptions === "point" ||
+            this.toolbarOptions === "position") && (
             <Grid item xs={4}>
               <StyledButton
                 variant="contained"

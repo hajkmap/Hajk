@@ -69,9 +69,9 @@ ComponentCollection.Instance.add({
 //Register new "geometryposition" component
 ComponentCollection.Instance.add({
   //Unique component name. It becomes a new question type. Please note, it should be written in lowercase.
-  name: "geometryposition",
+  name: "geometrypointposition",
   //The text that shows on toolbox
-  title: "geometryPosition",
+  title: "geometryPointPosition",
   //The actual question that will do the job
   questionJSON: {
     type: "html",
@@ -200,7 +200,7 @@ function CitizendialogueView(props) {
       setCurrentQuestionName(currentQuestion.name);
       setShowEditView({ show: true, toolbarOptions: "all" });
     }
-    if (currentQuestion.jsonObj.type === "geometryposition") {
+    if (currentQuestion.jsonObj.type === "geometrypointposition") {
       setCurrentQuestionTitle(currentQuestion.title);
       setCurrentQuestionName(currentQuestion.name);
       setShowEditView({ show: true, toolbarOptions: "position" });
