@@ -22,6 +22,6 @@
     "services.dialog.title": "New service",
     "services.dialog.addBtn": "Add a new service",
     "services.dialog.closeBtn": "Close",
-    "common.servicesettings": "Inställningar"
+    "common.servicesettings": "Settings"
   }
 }

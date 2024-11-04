@@ -69,6 +69,7 @@ export default function Header() {
   }, [setActiveUser, setUserList]);
 
   // Maybe the links just needs to be visible for the user and not clickable?
+  // Do we want to display the id?
   const breadcrumbLinks =
     pathParts.length > 0
       ? [
