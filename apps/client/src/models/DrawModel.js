@@ -2241,6 +2241,25 @@ class DrawModel {
         payLoad: feature,
       });
     }
+
+    // Check if we have used Segments.
+    // If the feature has the MEASUREMENT_ID, find and remove the referenced segment measure points too.
+    const userDrawnFeatures = this.#drawSource
+      .getFeatures()
+      .filter((f) => f.get("USER_DRAWN"));
+    if (feature.get("MEASUREMENT_ID")) {
+      const parentId = feature.get("MEASUREMENT_ID");
+      const referencedFeatures = userDrawnFeatures.filter((f) => {
+        const fId = f.get("MEASUREMENT_ID");
+        // We remove the segment points if they contain the parent id, but the parent should not be removed here.
+        if (fId) {
+          if (fId.includes(parentId) && !f.get("MEASUREMENT_PARENT")) {
+            return f;
+          }
+        }
+      });
+      referencedFeatures.forEach((f) => this.#drawSource.removeFeature(f));
+    }
   };
 
   // Accepts an RGBA-object containing r-, g-, b-, and a-properties, or an array
