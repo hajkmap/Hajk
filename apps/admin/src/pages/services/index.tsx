@@ -40,8 +40,6 @@ export default function ServicesPage() {
   const { data: services, isLoading } = useServices();
   const createServiceMutation = useCreateService();
 
-  console.log("services: ", services);
-
   const [open, setOpen] = useState<boolean>(false);
   const [catchError, setCatchError] = useState<string>();
   const [serviceUrl, setServiceUrl] = useState<
@@ -87,6 +85,8 @@ export default function ServicesPage() {
     reset,
   } = DefaultUseForm(defaultValues);
 
+  // There is probably another way to get the service type based on the provided URL
+  // This is just a quick and dirty test
   const fetchCapabilities = async (url: string): Promise<ServiceType> => {
     if (url.includes("/wfs")) {
       return ServiceType.WFS;

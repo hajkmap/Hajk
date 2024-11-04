@@ -68,6 +68,7 @@ export default function Header() {
     );
   }, [setActiveUser, setUserList]);
 
+  // Maybe the links just needs to be visible for the user and not clickable?
   const breadcrumbLinks =
     pathParts.length > 0
       ? [
@@ -84,10 +85,20 @@ export default function Header() {
             const path = `/${pathParts.slice(0, index + 1).join("/")}`;
             const isCurrentPath = path === location.pathname;
 
-            const displayName =
-              part === serviceId
-                ? serviceId
-                : t(part.charAt(0).toUpperCase() + part.slice(1));
+            let displayName;
+
+            // Should the id be visible in the breadcrumb?
+            // Add other statements here
+            if (part === serviceId) {
+              displayName = serviceId;
+            } else {
+              const translationKey = `common.${part.toLowerCase()}`;
+
+              displayName = t(
+                translationKey,
+                part.charAt(0).toUpperCase() + part.slice(1)
+              );
+            }
 
             return (
               <Box
