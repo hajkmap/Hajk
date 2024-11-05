@@ -23,9 +23,6 @@ import expressSession from "express-session";
 import { PrismaSessionStore } from "@quixo3/prisma-session-store";
 import { PrismaClient } from "@prisma/client";
 
-import passport from "passport";
-import { Strategy as LocalStrategy } from "passport-local";
-
 import { getCLFDate } from "./utils/get-clf-date.ts";
 import log4js from "./utils/hajk-logger.js";
 import { initRoutes } from "./routes.ts";
@@ -36,6 +33,7 @@ import HttpStatusCodes from "./http-status-codes.ts";
 import { HajkError, RouteError } from "./classes.ts";
 import { HttpError } from "express-openapi-validator/dist/framework/types.js";
 import { isInstanceOfPrismaError } from "./utils/is-instance-of-prisma-error.ts";
+import { setupPassport } from "./auth/passport.middleware.ts";
 
 const logger = log4js.getLogger("hajk");
 
@@ -153,7 +151,8 @@ class Server {
     // Setup express-session. We use the PrismaSessionStore for session storage.
     this.setupSession();
 
-    this.setupPassport();
+    // Initiate PassportJS with all its strategies.
+    setupPassport(this.app);
 
     // Hajk's own proxies that can be configured in .env. Await, because
     // we must dynamically load the corresponding modules.
@@ -289,66 +288,6 @@ built-it compression by setting the ENABLE_GZIP_COMPRESSION option to "true" in 
         }),
       })
     );
-  }
-
-  private setupPassport() {
-    interface IUser {
-      email: string;
-      password: string;
-    }
-    // Init
-    this.app.use(passport.initialize());
-    this.app.use(passport.authenticate("session"));
-
-    // Strategies
-    passport.use(
-      "local",
-      new LocalStrategy(
-        { usernameField: "email" },
-        async (email, password, done) => {
-          try {
-            // Early check
-            if (!email) {
-              done(null, false);
-            }
-
-            // In reality this should be done in the database:
-            //const user = await this.users.findUnique({ where: { email } });
-
-            // But for now, let's fake a user for testing purposes
-            const user = {
-              email: "tester@example.com",
-              password: "123456",
-            };
-
-            // In reality the passwords should be hashed and salted,
-            // so the compare would look more like: `await bcrypt.compare(password, (user.password).toString())`
-            if (user.email === email && user.password === password) {
-              return done(null, user);
-            } else {
-              return done(null, false, {
-                message: "Username or password incorrect.",
-              });
-            }
-          } catch (error) {
-            return done(error);
-          }
-        }
-      )
-    );
-
-    passport.serializeUser((_req: Request, user, done) => {
-      done(null, user);
-    });
-
-    passport.deserializeUser((user: IUser, done) => {
-      // const u = usersDB.findUser(user.email);
-      const u = {
-        email: "tester@example.com",
-        password: "123456",
-      };
-      done(null, u);
-    });
   }
 
   private async setupProxies() {
