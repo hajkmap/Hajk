@@ -19,6 +19,15 @@ model Session {
   expiresAt DateTime
 }
 
+model LocalAccount {
+  id        String    @id @default(cuid())
+  email     String
+  password  String
+  firstName String
+  lastName  String
+  expires   DateTime?
+}
+
 model Map {
   id          Int            @id @default(autoincrement())
   locked      Boolean        @default(false)
