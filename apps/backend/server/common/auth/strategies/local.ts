@@ -1,3 +1,5 @@
+import prisma from "../../prisma.ts";
+
 import passport from "passport";
 import { Strategy as LocalStrategy } from "passport-local";
 
@@ -8,26 +10,31 @@ passport.use(
     async (email, password, done) => {
       try {
         // Early check
-        if (!email) {
-          done(null, false);
+        if (!email || !password) {
+          done(null, false, {
+            message: "Email is required",
+          });
         }
 
-        // In reality this should be done in the database:
-        //const user = await this.localAccount.findUnique({ where: { email } });
+        // Let's try to grab user from the DB
+        const user = await prisma.localAccount.findFirst({
+          where: { email },
+        });
 
-        // But for now, let's fake a user for testing purposes
-        const user = {
-          email: "tester@example.com",
-          password: "123456",
-        };
+        if (!user) {
+          return done(null, false, {
+            message: "User not found",
+          });
+        }
 
         // In reality the passwords should be hashed and salted,
         // so the compare would look more like: `await bcrypt.compare(password, (user.password).toString())`
         if (user.email === email && user.password === password) {
+          user.strategy = "LOCAL";
           return done(null, user);
         } else {
           return done(null, false, {
-            message: "Username or password incorrect.",
+            message: "Password incorrect",
           });
         }
       } catch (error) {

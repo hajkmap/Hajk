@@ -20,12 +20,18 @@ model Session {
 }
 
 model LocalAccount {
-  id        String    @id @default(cuid())
-  email     String
-  password  String
-  firstName String
-  lastName  String
-  expires   DateTime?
+  id       String    @id @default(cuid())
+  email    String
+  password String
+  fullName String
+  expires  DateTime?
+}
+
+model User {
+  id       String       @id @default(cuid())
+  email    String       @unique
+  fullName String
+  strategy AuthStrategy
 }
 
 model Map {
@@ -158,4 +164,10 @@ enum ServerType {
 enum UseType {
   BACKGROUND
   FOREGROUND
+}
+
+enum AuthStrategy {
+  LOCAL
+  AZURE_AD
+  GITHUB
 }

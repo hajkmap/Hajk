@@ -7,4 +7,5 @@ import { isAuthenticated } from "../../../../common/auth/is-authenticated.middle
 export default express
   .Router()
   .use("/login/local", passport.authenticate("local"), controller.login)
-  .use("/user", isAuthenticated, controller.getUserInformation);
+  .use("/user", isAuthenticated, controller.getUserInformation)
+  .use("/logout", controller.logout);

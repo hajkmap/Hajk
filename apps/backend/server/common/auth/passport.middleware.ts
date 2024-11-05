@@ -1,32 +1,40 @@
 import type { Application, Request } from "express";
-// import prisma from "../../common/prisma.ts";
+import prisma from "../../common/prisma.ts";
+
 import passport from "passport";
-
 import "./strategies/local.ts";
-
-interface IUser {
-  email: string;
-  password: string;
-}
 
 export function setupPassport(app: Application) {
   // Init
   app.use(passport.initialize());
   app.use(passport.authenticate("session"));
 
-  passport.serializeUser((_req: Request, user, done) => {
-    done(null, user);
+  passport.serializeUser(async (_req: Request, user, done) => {
+    const dbUser = await prisma.user.upsert({
+      create: {
+        email: user.email,
+        strategy: user.strategy,
+        fullName: "Foo Bar",
+      },
+      update: {
+        strategy: user.strategy,
+        fullName: "Foo Bar",
+      },
+      where: {
+        email: user.email,
+      },
+    });
+
+    console.log("Serialize user: ", dbUser);
+    done(null, dbUser);
   });
 
-  passport.deserializeUser((user: IUser, done) => {
-    // In reality we'd do something like this to grab user from prisma
-    // const u = prisma.localAccount.findFirstOrThrow({
-    //   where: { email: user.email },
-    // });
-    const u = {
-      email: "tester@example.com",
-      password: "123456",
-    };
-    done(null, u);
+  passport.deserializeUser((obj, done) => {
+    console.log("Deserialize user: ", obj);
+    try {
+      done(null, obj);
+    } catch (error) {
+      done(error, false);
+    }
   });
 }
