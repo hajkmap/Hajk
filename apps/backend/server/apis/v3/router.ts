@@ -15,9 +15,8 @@ export default Router()
   .use("/auth", authRouter)
   .use("/public", publicRouter)
   // All other endpoints require authentication
-  .use(isAuthenticated)
-  .use("/groups", groupsRouter)
-  .use("/layers", layersRouter)
-  .use("/maps", mapsRouter)
-  .use("/services", servicesRouter)
-  .use("/tools", toolsRouter);
+  .use("/groups", isAuthenticated, groupsRouter)
+  .use("/layers", isAuthenticated, layersRouter)
+  .use("/maps", isAuthenticated, mapsRouter)
+  .use("/services", isAuthenticated, servicesRouter)
+  .use("/tools", isAuthenticated, toolsRouter);
