@@ -156,6 +156,8 @@ function SurveyHandler(props) {
         newQuestion.choices = [];
     } else if (type === "html") {
         newQuestion.html = "";
+    } else if (type === "rating") {
+        newQuestion.displayMode = "buttons"; // Sätt displayMode till "buttons" som standard
     }
     const newPages = survey.pages.map((page, index) => {
         if (index === pageIndex) {
@@ -174,6 +176,9 @@ const updateQuestion = (pageIndex, questionIndex, field, value) => {
           const newQuestions = page.questions.map((question, qIndex) => {
               if (qIndex === questionIndex) {
                   let updatedQuestion = { ...question, [field]: value };
+                  if (question.type === "rating" && !updatedQuestion.displayMode) {
+                    updatedQuestion.displayMode = "buttons";
+                  }
                   if (field === "type") {
                       if (value === "email") {
                           updatedQuestion = {
