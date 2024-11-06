@@ -2254,9 +2254,11 @@ class DrawModel {
         // We remove the segment points if they contain the parent id, but the parent should not be removed here.
         if (fId) {
           if (fId.includes(parentId) && !f.get("MEASUREMENT_PARENT")) {
+            // Return matching feature, in this case labels for this segment.
             return f;
           }
         }
+        return null;
       });
       referencedFeatures.forEach((f) => this.#drawSource.removeFeature(f));
     }

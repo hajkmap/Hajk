@@ -14,7 +14,7 @@ export default class Segment {
   #currentPoint;
 
   constructor(drawModel, map, enabled) {
-    this.#enabled = enabled | false;
+    this.#enabled = enabled ?? false;
     this.#drawModel = drawModel;
     this.#currentSegmentLength = null;
     this.#polygonFirstAndLast = [];

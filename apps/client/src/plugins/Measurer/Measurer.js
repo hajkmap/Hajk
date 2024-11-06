@@ -266,13 +266,11 @@ function Measurer(props) {
     restoreHoveredFeature();
     angleSnapping.setActive(false);
     angleSnapping.clearSnapGuides();
-    // segments.setEnabled(false);
     setPluginShown(false);
   };
 
   const onWindowShow = () => {
     angleSnapping.setActive(true);
-    // segments.setEnabled(true);
     setPluginShown(true);
   };
 
