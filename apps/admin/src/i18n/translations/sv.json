@@ -1,14 +1,19 @@
 {
   "translation": {
     "common.clickableLogo": "Klickbar logga",
+    "common.email": "Epost",
     "common.english": "Engelska",
     "common.goodbye": "Hej då",
-    "common.groups": "Grupper",     
+    "common.groups": "Grupper",
     "common.hello": "Hej",
     "common.home": "Hem",
     "common.language": "Språk",
     "common.layers": "Lager",
+    "common.login": "Logga in",
+    "common.loginFailed": "Inloggning misslyckades. Fel användarnamn eller lösenord.",
+    "common.loginToContinue": "Du måste logga in för att komma vidare",
     "common.maps": "Kartor",
+    "common.password": "Lösenord",
     "common.scrolltotop": "Till toppen",
     "common.services": "Tjänster",
     "common.settings": "Inställningar",
@@ -16,6 +21,7 @@
     "common.sidebar.unlock": "Lås upp sidopanel",
     "common.swedish": "Svenska",
     "common.tools": "Verktyg",
+    "common.welcome": "Välkommen!",
     "common.you": "Du",
     "dark": "Mörkt",
     "light": "Ljust"

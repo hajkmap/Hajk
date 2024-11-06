@@ -18,6 +18,7 @@ import SettingsPage from "./pages/settings/index.tsx";
 import ServicesPage from "./pages/services/index.tsx";
 import GroupsPage from "./pages/groups/index.tsx";
 import FormFactoryPage from "./pages/form-factory/index.tsx";
+import LoginPage from "./pages/login/index.tsx";
 
 const queryClient = new QueryClient({
   defaultOptions: queryConfig,
@@ -63,6 +64,10 @@ const router = createBrowserRouter(
           element: <FormFactoryPage />,
         },
       ],
+    },
+    {
+      path: "login",
+      element: <LoginPage />,
     },
   ],
   { basename: import.meta.env.BASE_URL }

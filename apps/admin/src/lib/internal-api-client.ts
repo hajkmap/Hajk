@@ -13,6 +13,7 @@ const createApiClient = (): AxiosInstance => {
 
   const apiClient = axios.create({
     baseURL: apiBaseUrl,
+    withCredentials: true,
   });
 
   const matchesUrlPart = (url: string, ruleWithWildCard: string) => {
@@ -59,6 +60,7 @@ const createApiClient = (): AxiosInstance => {
             break;
           case 401:
             console.error("Unauthorized");
+            window.location.href = "/login";
             break;
           case 403:
             console.error(
