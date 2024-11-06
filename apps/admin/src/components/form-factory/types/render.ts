@@ -9,11 +9,13 @@ export interface RenderProps<TFieldValues extends FieldValues> {
   field?: ControllerRenderProps<TFieldValues, Path<TFieldValues>>;
   inputProps?: Record<string, unknown>;
   slotProps?: {
-    input?: { style?: React.CSSProperties };
+    input?: { endAdornment?: React.ReactNode; style?: React.CSSProperties };
+    inputLabel?: { style?: React.CSSProperties };
   };
   errorMessage?: string | null;
   optionList?: { title: string; value: unknown }[];
   title?: string;
   element?: React.ReactNode;
   name?: string;
+  disabled?: boolean;
 }

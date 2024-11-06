@@ -54,6 +54,7 @@ export const DynamicInputComponent = <TFieldValues extends FieldValues>({
             optionList: settings.optionList,
             title: settings.title,
             name: settings.name,
+            disabled: settings.disabled,
           }) ?? <div />
         );
       }}

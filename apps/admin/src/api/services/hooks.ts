@@ -13,7 +13,7 @@ import {
   updateService,
   deleteService,
 } from "./requests";
-import { Service } from "./types";
+import { Service, ServiceUpdateFormData } from "./types";
 import { Layer } from "../layers";
 import { Map } from "../maps";
 
@@ -30,7 +30,7 @@ export const useServices = (): UseQueryResult<Service[]> => {
 // This hook uses the `getServiceById` function from the services `requests` module
 export const useServiceById = (serviceId: string): UseQueryResult<Service> => {
   return useQuery({
-    queryKey: ["service", serviceId],
+    queryKey: ["services", serviceId],
     queryFn: () => getServiceById(serviceId),
   });
 };
@@ -82,7 +82,7 @@ export const useUpdateService = () => {
       data,
     }: {
       serviceId: string;
-      data: Partial<Service>;
+      data: ServiceUpdateFormData;
     }) => updateService(serviceId, data),
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ["services"] });

@@ -22,7 +22,7 @@ import FormRenderer from "../../components/form-factory/form-renderer";
 import { DefaultUseForm } from "../../components/form-factory/default-use-form";
 import { createOnSubmitHandler } from "../../components/form-factory/form-utils";
 import { useServices, useCreateService } from "../../api/services";
-import { ServiceFormData } from "../../api/services/types";
+import { ServiceCreateFormData } from "../../api/services/types";
 
 enum ServiceType {
   ARCGIS = "ARCGIS",
@@ -143,7 +143,7 @@ export default function ServicesPage() {
     }
   };
 
-  const handleServiceSubmit = async (serviceData: ServiceFormData) => {
+  const handleServiceSubmit = async (serviceData: ServiceCreateFormData) => {
     try {
       const serviceType = await fetchCapabilities(serviceData.url);
 
@@ -169,7 +169,7 @@ export default function ServicesPage() {
     handleSubmit,
     dirtyFields,
     onValid: (data: FieldValues) => {
-      const serviceData = data as ServiceFormData;
+      const serviceData = data as ServiceCreateFormData;
 
       void handleServiceSubmit(serviceData);
     },
@@ -210,7 +210,7 @@ export default function ServicesPage() {
                   {t("services.dialog.closeBtn")}
                 </Button>
                 <Button type="submit" color="primary" variant="contained">
-                  {t("services.dialog.addBtn")}
+                  {t("services.dialog.saveBtn")}
                 </Button>
               </DialogActions>
             </form>

@@ -20,8 +20,11 @@
     "dark": "Dark",
     "light": "Light",
     "services.dialog.title": "New service",
+    "services.settings.dialog.title": "Edit url",
     "services.dialog.addBtn": "Add a new service",
+    "services.dialog.saveBtn": "Save",
     "services.dialog.closeBtn": "Close",
+    "services.url.btnLabel": "Change url",
     "common.servicesettings": "Settings"
   }
 }

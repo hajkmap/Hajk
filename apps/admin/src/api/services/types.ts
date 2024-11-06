@@ -14,10 +14,18 @@ export interface ServicesApiResponse {
   errorId: string;
 }
 
-export interface ServiceFormData {
+export interface ServiceCreateFormData {
   url: string;
   locked: boolean;
   type: string;
   serverType: string;
+  comment?: string;
+}
+
+export interface ServiceUpdateFormData {
+  url?: string;
+  locked?: boolean;
+  type?: string;
+  serverType?: string;
   comment?: string;
 }

@@ -8,21 +8,34 @@ const renderTextField: RenderFunction<FieldValues> = ({
   errorMessage,
   title,
   slotProps,
+  disabled,
 }) => {
-  const inputSlotProps = slotProps?.input ?? {};
+  const { endAdornment, style } = slotProps?.input ?? {};
+  const { style: labelStyle } = slotProps?.inputLabel ?? {};
 
   return (
-    <TextField
-      {...field}
-      {...inputProps}
-      {...inputSlotProps}
-      fullWidth
-      label={title}
-      inputRef={field?.ref}
-      error={!!errorMessage}
-      helperText={errorMessage}
-      value={(field?.value as string) ?? ""}
-    />
+    <>
+      <TextField
+        {...field}
+        {...inputProps}
+        fullWidth
+        label={title}
+        disabled={disabled ?? false}
+        inputRef={field?.ref}
+        error={!!errorMessage}
+        helperText={errorMessage}
+        value={(field?.value as string) ?? ""}
+        slotProps={{
+          inputLabel: {
+            style: labelStyle,
+          },
+          input: {
+            endAdornment: endAdornment,
+            style: style,
+          },
+        }}
+      />
+    </>
   );
 };
 

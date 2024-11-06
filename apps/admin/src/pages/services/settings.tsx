@@ -1,12 +1,10 @@
 import { useParams } from "react-router-dom";
 import { useState, useEffect } from "react";
-
 import { useTranslation } from "react-i18next";
 import Page from "../../layouts/root/components/page";
 import { FieldValues } from "react-hook-form";
 import {
   Box,
-  TextField,
   Table,
   TableBody,
   TableHead,
@@ -16,16 +14,22 @@ import {
   Paper,
   IconButton,
   useTheme,
+  Button,
+  TextField,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
 } from "@mui/material";
-import { useServiceById } from "../../api/services/hooks";
+import { useServiceById, useUpdateService } from "../../api/services/hooks";
 import DynamicFormContainer from "../../components/form-factory/dynamic-form-container";
 import CONTAINER_TYPE from "../../components/form-factory/types/container-types";
 import INPUT_TYPE from "../../components/form-factory/types/input-type";
 import FormRenderer from "../../components/form-factory/form-renderer";
 import { DefaultUseForm } from "../../components/form-factory/default-use-form";
 import { createOnSubmitHandler } from "../../components/form-factory/form-utils";
-import { RenderProps } from "../../components/form-factory/types/render";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
+import { ServiceUpdateFormData } from "../../api/services";
 
 function createData(layerName: string, infoClick: boolean, publish: string) {
   return { layerName, infoClick, publish };
@@ -41,41 +45,57 @@ export default function ServiceSettings() {
   const { t } = useTranslation();
   const { id: serviceId } = useParams<{ id: string }>();
   const { data: service, isLoading, isError } = useServiceById(serviceId ?? "");
-
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [dialogUrl, setDialogUrl] = useState(service?.url ?? "");
+  const updateMutation = useUpdateService();
   const [formServiceData, setFormServiceData] = useState<
     DynamicFormContainer<FieldValues>
   >(new DynamicFormContainer<FieldValues>());
 
-  const formServiceSettingsContainer = new DynamicFormContainer<FieldValues>();
-  const serviceNestedContainer = new DynamicFormContainer<FieldValues>(
+  const handleDialogOpen = () => {
+    setIsDialogOpen(true);
+    setDialogUrl(getValues("url") as string);
+  };
+
+  const handleDialogClose = () => {
+    setIsDialogOpen(false);
+  };
+
+  const handleSaveUrl = () => {
+    setValue("url", dialogUrl);
+    handleDialogClose();
+  };
+
+  const serviceSettingsFormContainer = new DynamicFormContainer<FieldValues>();
+  const panelNestedContainer = new DynamicFormContainer<FieldValues>(
     "",
     CONTAINER_TYPE.PANEL,
     {
       backgroundColor: "rgba(237,231,246,1)",
     }
   );
-  const serviceNestedContainer3 = new DynamicFormContainer<FieldValues>(
+  const accordionNestedContainer = new DynamicFormContainer<FieldValues>(
     "Anslutning",
     CONTAINER_TYPE.ACCORDION,
     {
       backgroundColor: palette.grey[200],
     }
   );
-  const serviceNestedContainer4 = new DynamicFormContainer<FieldValues>(
+  const accordionNestedContainer2 = new DynamicFormContainer<FieldValues>(
     "Inställningar för request",
     CONTAINER_TYPE.ACCORDION,
     {
       backgroundColor: palette.grey[200],
     }
   );
-  const serviceNestedContainer5 = new DynamicFormContainer<FieldValues>(
+  const accordionNestedContainer3 = new DynamicFormContainer<FieldValues>(
     "Tillgängliga lager i tjänsten",
     CONTAINER_TYPE.ACCORDION,
     {
       backgroundColor: palette.grey[200],
     }
   );
-  const serviceNestedContainer6 = new DynamicFormContainer<FieldValues>(
+  const accordionNestedContainer4 = new DynamicFormContainer<FieldValues>(
     "Infoknapp",
     CONTAINER_TYPE.ACCORDION,
     {
@@ -83,19 +103,12 @@ export default function ServiceSettings() {
     }
   );
 
-  serviceNestedContainer.addInput({
+  panelNestedContainer.addInput({
     type: INPUT_TYPE.TEXTFIELD,
     gridColumns: 8,
     name: "name",
     title: "Namn",
     defaultValue: "",
-    registerOptions: {
-      required: "This field is required.",
-      minLength: {
-        value: 5,
-        message: "Minimum length is 5 characters.",
-      },
-    },
     slotProps: {
       input: {
         style: {
@@ -105,33 +118,22 @@ export default function ServiceSettings() {
     },
   });
 
-  serviceNestedContainer.addCustomInput({
-    type: INPUT_TYPE.CUSTOM,
-    kind: "CustomInputSettings",
+  panelNestedContainer.addInput({
+    type: INPUT_TYPE.TEXTFIELD,
     name: "serviceType",
-    title: `${service?.type}`,
+    title: "Tjänstetyp",
+    defaultValue: `${service?.type}`,
+    disabled: true,
     gridColumns: 8,
-    defaultValue: "",
-
-    renderer: (props: RenderProps<FieldValues>) => {
-      return (
-        <>
-          <TextField
-            fullWidth
-            variant="filled"
-            disabled={true}
-            label={props.title}
-            error={!!props.errorMessage}
-            helperText={props.errorMessage}
-            slotProps={{
-              input: { style: { backgroundColor: palette.common.white } },
-            }}
-          />
-        </>
-      );
+    slotProps: {
+      input: {
+        style: {
+          backgroundColor: palette.common.white,
+        },
+      },
     },
   });
-  serviceNestedContainer.addInput({
+  panelNestedContainer.addInput({
     type: INPUT_TYPE.TEXTAREA,
     gridColumns: 10,
     name: "description",
@@ -145,7 +147,7 @@ export default function ServiceSettings() {
     },
   });
 
-  serviceNestedContainer3.addInput({
+  accordionNestedContainer.addInput({
     type: INPUT_TYPE.SELECT,
     gridColumns: 8,
     name: "serverType",
@@ -163,20 +165,46 @@ export default function ServiceSettings() {
       },
     },
   });
-  serviceNestedContainer3.addInput({
+  accordionNestedContainer.addInput({
     type: INPUT_TYPE.TEXTFIELD,
     gridColumns: 8,
     name: "url",
-    title: `${service?.url}`,
+    disabled: true,
+    title: "Url",
+    defaultValue: `${service?.url}`,
     slotProps: {
+      inputLabel: {
+        style: {
+          whiteSpace: "nowrap",
+          overflow: "hidden",
+          textOverflow: "ellipsis",
+          maxWidth: "calc(100% - 120px)",
+        },
+      },
       input: {
+        endAdornment: (
+          <>
+            <Button
+              sx={{
+                color: palette.secondary.dark,
+                width: "100%",
+                maxWidth: "120px",
+                fontWeight: "600",
+              }}
+              size="small"
+              onClick={handleDialogOpen}
+            >
+              {t("services.url.btnLabel")}
+            </Button>
+          </>
+        ),
         style: {
           backgroundColor: palette.common.white,
         },
       },
     },
   });
-  serviceNestedContainer3.addInput({
+  accordionNestedContainer.addInput({
     type: INPUT_TYPE.SELECT,
     gridColumns: 8,
     name: "workSpace",
@@ -194,7 +222,7 @@ export default function ServiceSettings() {
       },
     },
   });
-  serviceNestedContainer4.addInput({
+  accordionNestedContainer2.addInput({
     type: INPUT_TYPE.TEXTFIELD,
     gridColumns: 8,
     name: "getMapUrl",
@@ -207,7 +235,7 @@ export default function ServiceSettings() {
       },
     },
   });
-  serviceNestedContainer4.addInput({
+  accordionNestedContainer2.addInput({
     type: INPUT_TYPE.SELECT,
     gridColumns: 8,
     name: "version",
@@ -226,7 +254,7 @@ export default function ServiceSettings() {
     },
   });
 
-  serviceNestedContainer4.addInput({
+  accordionNestedContainer2.addInput({
     type: INPUT_TYPE.SELECT,
     gridColumns: 8,
     name: "coordinateSystem",
@@ -246,7 +274,7 @@ export default function ServiceSettings() {
     },
   });
 
-  serviceNestedContainer5.addCustomInput({
+  accordionNestedContainer3.addCustomInput({
     type: INPUT_TYPE.CUSTOM,
     kind: "CustomInputSettings",
     name: "customInput",
@@ -295,7 +323,7 @@ export default function ServiceSettings() {
     },
   });
 
-  serviceNestedContainer6.addInput({
+  accordionNestedContainer4.addInput({
     type: INPUT_TYPE.TEXTFIELD,
     gridColumns: 8,
     name: "owner",
@@ -308,7 +336,7 @@ export default function ServiceSettings() {
       },
     },
   });
-  serviceNestedContainer6.addInput({
+  accordionNestedContainer4.addInput({
     type: INPUT_TYPE.TEXTAREA,
     gridColumns: 8,
     name: "layerDescription",
@@ -322,31 +350,52 @@ export default function ServiceSettings() {
     },
   });
 
-  formServiceSettingsContainer.addContainer([
-    serviceNestedContainer,
-    serviceNestedContainer3,
-    serviceNestedContainer4,
-    serviceNestedContainer5,
-    serviceNestedContainer6,
+  serviceSettingsFormContainer.addContainer([
+    panelNestedContainer,
+    accordionNestedContainer,
+    accordionNestedContainer2,
+    accordionNestedContainer3,
+    accordionNestedContainer4,
   ]);
 
   useEffect(() => {
-    setFormServiceData(formServiceSettingsContainer);
+    if (!service) return;
+    setFormServiceData(serviceSettingsFormContainer);
+    setDialogUrl(service.url);
   }, [service]);
-  const defaultValues = formServiceSettingsContainer.getDefaultValues();
 
+  const defaultValues = formServiceData.getDefaultValues();
   const {
     register,
     handleSubmit,
     control,
+    setValue,
+    getValues,
     formState: { errors, dirtyFields },
   } = DefaultUseForm(defaultValues);
 
+  const handleUpdateService = async (serviceData: ServiceUpdateFormData) => {
+    try {
+      const payload = {
+        url: serviceData.url,
+      };
+      console.log(" Sending payload", payload);
+      await updateMutation.mutateAsync({
+        serviceId: service?.id ?? "",
+        data: payload,
+      });
+      console.log("Service updated successfully");
+      setIsDialogOpen(false);
+    } catch (error) {
+      console.error("Failed to update service:", error);
+    }
+  };
   const onSubmit = createOnSubmitHandler({
     handleSubmit,
     dirtyFields,
-    onValid: (data) => {
-      console.log(" ", data);
+    onValid: (data: FieldValues) => {
+      const serviceData = data as ServiceUpdateFormData;
+      void handleUpdateService(serviceData);
     },
   });
 
@@ -367,7 +416,43 @@ export default function ServiceSettings() {
             errors={errors}
           />
         </Box>
+        <Button type="submit" color="primary" variant="contained">
+          {t("services.dialog.saveBtn")}
+        </Button>
       </form>
+      {/*Maybe a custom dialog component here*/}
+      <Dialog
+        PaperProps={{ sx: { width: "100%" } }}
+        open={isDialogOpen}
+        onClose={handleDialogClose}
+      >
+        <DialogTitle> {t("services.settings.dialog.title")}</DialogTitle>
+        <DialogContent>
+          <TextField
+            label="Url"
+            value={dialogUrl}
+            fullWidth
+            variant="outlined"
+            onChange={(e) => setDialogUrl(e.target.value)}
+            error={!!errors.url}
+            margin="normal"
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleDialogClose}>
+            {t("services.dialog.closeBtn")}
+          </Button>
+          <Button
+            onClick={() => {
+              handleSaveUrl();
+            }}
+            color="primary"
+            variant="contained"
+          >
+            {t("services.dialog.saveBtn")}
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Page>
   );
 }

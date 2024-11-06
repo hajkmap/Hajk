@@ -9,12 +9,14 @@ class DynamicInputSettings<TFieldValues extends FieldValues> {
   public registerOptions?: RegisterOptions<TFieldValues>;
   public props?: Record<string, unknown>;
   public slotProps?: {
-    input?: { style?: React.CSSProperties };
+    input?: { endAdornment?: React.ReactNode; style?: React.CSSProperties };
+    inputLabel?: { style?: React.CSSProperties };
   };
   public inputProps?: Record<string, unknown>;
   public defaultValue?: TFieldValues[Path<TFieldValues>];
   public optionList?: { title: string; value: unknown }[];
   public kind? = "DynamicInputSettings";
+  public disabled? = false;
 }
 
 new DynamicInputSettings();
