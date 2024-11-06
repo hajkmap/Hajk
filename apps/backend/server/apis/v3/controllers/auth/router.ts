@@ -6,6 +6,9 @@ import { isAuthenticated } from "../../../../common/auth/is-authenticated.middle
 
 export default express
   .Router()
+  // Login and logout endpoints are public
   .post("/login/local", passport.authenticate("local"), controller.login)
-  .use("/user", isAuthenticated, controller.getUserInformation)
-  .use("/logout", controller.logout);
+  .post("/logout", controller.logout)
+  // The remaining endpoints should only be accessible to authenticated users
+  .use(isAuthenticated)
+  .get("/user", controller.getUserInformation);
