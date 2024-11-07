@@ -276,7 +276,7 @@ built-it compression by setting the ENABLE_GZIP_COMPRESSION option to "true" in 
     this.app.use(
       expressSession({
         cookie: {
-          maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days, in ms. Consider shortening.
+          maxAge: 2 * 24 * 60 * 60 * 1000, // 2 days, in ms. Consider shortening.
         },
         secret:
           process.env.SESSION_SECRET || "fallbackIfNoSecretProvidedInDotEnv",
@@ -287,6 +287,7 @@ built-it compression by setting the ENABLE_GZIP_COMPRESSION option to "true" in 
           dbRecordIdIsSessionId: true,
           dbRecordIdFunction: undefined,
         }),
+        rolling: true, // Refresh session expiry on each request
       })
     );
   }
