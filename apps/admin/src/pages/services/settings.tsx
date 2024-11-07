@@ -1,4 +1,4 @@
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { useState, useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import Page from "../../layouts/root/components/page";
@@ -17,6 +17,7 @@ import {
   Button,
   TextField,
   Typography,
+  CircularProgress,
 } from "@mui/material";
 import { useServiceById, useUpdateService } from "../../api/services/hooks";
 import DynamicFormContainer from "../../components/form-factory/dynamic-form-container";
@@ -41,12 +42,14 @@ const rows = [
 export default function ServiceSettings() {
   const formRef = useRef<HTMLFormElement | null>(null);
   const { palette } = useTheme();
+  const navigate = useNavigate();
   const { t } = useTranslation();
   const { id: serviceId } = useParams<{ id: string }>();
-  const { data: service, isLoading, isError } = useServiceById(serviceId ?? "");
+  const { data: service, isError, isLoading } = useServiceById(serviceId ?? "");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [dialogUrl, setDialogUrl] = useState(service?.url ?? "");
-  const updateMutation = useUpdateService();
+  const { mutateAsync: updateService, status } = useUpdateService();
+
   const [formServiceData, setFormServiceData] = useState<
     DynamicFormContainer<FieldValues>
   >(new DynamicFormContainer<FieldValues>());
@@ -385,12 +388,14 @@ export default function ServiceSettings() {
         url: serviceData.url,
       };
       console.log(" Sending payload", payload);
-      await updateMutation.mutateAsync({
+      await updateService({
         serviceId: service?.id ?? "",
         data: payload,
       });
       console.log("Service updated successfully");
       setIsDialogOpen(false);
+
+      navigate("/services");
     } catch (error) {
       console.error("Failed to update service:", error);
     }
@@ -432,8 +437,13 @@ export default function ServiceSettings() {
           onClick={handleExternalSubmit}
           sx={{ backgroundColor: palette.secondary.dark }}
           variant="contained"
+          disabled={status === "pending"}
         >
-          {t("services.dialog.saveBtn")}
+          {status === "pending" ? (
+            <CircularProgress color="secondary" size={30} />
+          ) : (
+            t("services.dialog.saveBtn")
+          )}
         </Button>
         <Button sx={{ color: palette.secondary.dark }} variant="text">
           {t("services.dialog.deleteBtn")}

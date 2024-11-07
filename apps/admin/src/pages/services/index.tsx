@@ -1,7 +1,15 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Grid from "@mui/material/Grid2";
-import { List, ListItem, Paper, Typography, Button, Box } from "@mui/material";
+import {
+  List,
+  ListItem,
+  Paper,
+  Typography,
+  Button,
+  Box,
+  useTheme,
+} from "@mui/material";
 import { useTranslation } from "react-i18next";
 import Page from "../../layouts/root/components/page";
 import DynamicFormContainer from "../../components/form-factory/dynamic-form-container";
@@ -25,10 +33,10 @@ enum ServiceType {
 
 export default function ServicesPage() {
   const navigate = useNavigate();
-
+  const { palette } = useTheme();
   const { t } = useTranslation();
   const { data: services, isLoading } = useServices();
-  const createServiceMutation = useCreateService();
+  const { mutateAsync: createService } = useCreateService();
 
   const [open, setOpen] = useState<boolean>(false);
   const [catchError, setCatchError] = useState<string>();
@@ -145,7 +153,7 @@ export default function ServicesPage() {
         comment: "Test comment",
       };
 
-      await createServiceMutation.mutateAsync(payload);
+      await createService(payload);
       reset({ url: "" });
       handleClose();
       setCatchError(undefined);
@@ -177,7 +185,12 @@ export default function ServicesPage() {
           <Button
             onClick={handleClickOpen}
             variant="contained"
-            sx={{ float: "right", mr: 2, mb: 1 }}
+            sx={{
+              float: "right",
+              mr: 2,
+              mb: 1,
+              backgroundColor: palette.secondary.dark,
+            }}
           >
             {t("services.dialog.addBtn")}
           </Button>

@@ -149,6 +149,9 @@ export const updateService = async (
 ): Promise<ServiceUpdateFormData> => {
   const internalApiClient = getApiClient();
   try {
+    // just to test the loading spinner in the UI
+    await new Promise((resolve) => setTimeout(resolve, 3000));
+
     const response = await internalApiClient.patch<ServiceUpdateFormData>(
       `/services/${serviceId}`,
       data
