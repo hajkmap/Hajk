@@ -10,6 +10,7 @@
     "common.language": "Language",
     "common.layers": "Layers",
     "common.login": "Log in",
+    "common.logout": "Log out",
     "common.loginFailed": "Log in failed. Wrong email or password.",
     "common.loginToContinue": "You have to login",
     "common.maps": "Maps",

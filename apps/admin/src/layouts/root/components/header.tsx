@@ -12,11 +12,13 @@ import {
   Typography,
   useTheme,
 } from "@mui/material";
+import LogoutIcon from "@mui/icons-material/Logout";
 import SettingsIcon from "@mui/icons-material/Settings";
 import { useEffect, useState } from "react";
 import { HEADER_HEIGHT, HEADER_Z_INDEX } from "../constants";
 import HajkTooltip from "../../../components/hajk-tooltip";
 import useUserStore, { User } from "../../../store/use-user-store";
+import useAuth from "../../../hooks/use-auth";
 
 const getUserInitials = (user: User): string => {
   const words: string[] = user.fullName.split(" ");
@@ -31,6 +33,7 @@ export default function Header() {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
 
   const { user } = useUserStore.getState();
+  const { logout } = useAuth();
 
   useEffect(() => {
     setActiveUser(user);
@@ -182,7 +185,14 @@ export default function Header() {
                 <Box>{activeUser?.email}</Box>
                 <Divider sx={{ mb: 1, mt: 1 }} />
               </Grid>
-              <Grid size={12} sx={{ textAlign: "right" }}>
+              <Grid container size={12} justifyContent="space-between">
+                <Button
+                  startIcon={<LogoutIcon />}
+                  color="error"
+                  onClick={() => void logout()}
+                >
+                  {t("common.logout")}
+                </Button>
                 <Button startIcon={<SettingsIcon />}>
                   {t("common.settings")}
                 </Button>

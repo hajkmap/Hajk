@@ -10,6 +10,7 @@
     "common.language": "Språk",
     "common.layers": "Lager",
     "common.login": "Logga in",
+    "common.logout": "Logga ut",
     "common.loginFailed": "Inloggning misslyckades. Fel användarnamn eller lösenord.",
     "common.loginToContinue": "Du måste logga in för att komma vidare",
     "common.maps": "Kartor",
