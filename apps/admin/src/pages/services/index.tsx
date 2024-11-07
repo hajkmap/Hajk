@@ -1,18 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Grid from "@mui/material/Grid2";
-import {
-  List,
-  ListItem,
-  Paper,
-  Typography,
-  Button,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  Box,
-} from "@mui/material";
+import { List, ListItem, Paper, Typography, Button, Box } from "@mui/material";
 import { useTranslation } from "react-i18next";
 import Page from "../../layouts/root/components/page";
 import DynamicFormContainer from "../../components/form-factory/dynamic-form-container";
@@ -23,6 +12,7 @@ import { DefaultUseForm } from "../../components/form-factory/default-use-form";
 import { createOnSubmitHandler } from "../../components/form-factory/form-utils";
 import { useServices, useCreateService } from "../../api/services";
 import { ServiceCreateFormData } from "../../api/services/types";
+import DialogWrapper from "../../components/flexible-dialog";
 
 enum ServiceType {
   ARCGIS = "ARCGIS",
@@ -191,30 +181,33 @@ export default function ServicesPage() {
           >
             {t("services.dialog.addBtn")}
           </Button>
-          <Dialog fullWidth open={open} onClose={handleClose}>
-            <DialogTitle>{t("services.dialog.title")}</DialogTitle>
-            <form onSubmit={onSubmit}>
-              <DialogContent>
-                <FormRenderer
-                  data={serviceUrl}
-                  register={register}
-                  control={control}
-                  errors={errors}
-                />
-                {catchError && (
-                  <Typography style={{ color: "red" }}>{catchError}</Typography>
-                )}
-              </DialogContent>
-              <DialogActions sx={{ mb: 2, mr: 2 }}>
+          <DialogWrapper
+            fullWidth
+            open={open}
+            title={t("services.dialog.title")}
+            onClose={handleClose}
+            onSubmit={onSubmit}
+            actions={
+              <>
                 <Button onClick={handleClose} color="primary">
                   {t("services.dialog.closeBtn")}
                 </Button>
                 <Button type="submit" color="primary" variant="contained">
                   {t("services.dialog.saveBtn")}
                 </Button>
-              </DialogActions>
-            </form>
-          </Dialog>
+              </>
+            }
+          >
+            <FormRenderer
+              data={serviceUrl}
+              register={register}
+              control={control}
+              errors={errors}
+            />
+            {catchError && (
+              <Typography style={{ color: "red" }}>{catchError}</Typography>
+            )}
+          </DialogWrapper>
           <Grid size={12}>
             <Box component="p">
               services.length = {services && ` (${services.length})`}

@@ -16,10 +16,6 @@ import {
   useTheme,
   Button,
   TextField,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
 } from "@mui/material";
 import { useServiceById, useUpdateService } from "../../api/services/hooks";
 import DynamicFormContainer from "../../components/form-factory/dynamic-form-container";
@@ -30,6 +26,7 @@ import { DefaultUseForm } from "../../components/form-factory/default-use-form";
 import { createOnSubmitHandler } from "../../components/form-factory/form-utils";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
 import { ServiceUpdateFormData } from "../../api/services";
+import DialogWrapper from "../../components/flexible-dialog";
 
 function createData(layerName: string, infoClick: boolean, publish: string) {
   return { layerName, infoClick, publish };
@@ -420,39 +417,33 @@ export default function ServiceSettings() {
           {t("services.dialog.saveBtn")}
         </Button>
       </form>
-      {/*Maybe a custom dialog component here*/}
-      <Dialog
-        PaperProps={{ sx: { width: "100%" } }}
+
+      <DialogWrapper
+        fullWidth
         open={isDialogOpen}
+        title={t("services.settings.dialog.title")}
         onClose={handleDialogClose}
+        actions={
+          <>
+            <Button onClick={handleDialogClose} color="primary">
+              {t("services.dialog.closeBtn")}
+            </Button>
+            <Button onClick={handleSaveUrl} color="primary" variant="contained">
+              {t("services.dialog.saveBtn")}
+            </Button>
+          </>
+        }
       >
-        <DialogTitle> {t("services.settings.dialog.title")}</DialogTitle>
-        <DialogContent>
-          <TextField
-            label="Url"
-            value={dialogUrl}
-            fullWidth
-            variant="outlined"
-            onChange={(e) => setDialogUrl(e.target.value)}
-            error={!!errors.url}
-            margin="normal"
-          />
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={handleDialogClose}>
-            {t("services.dialog.closeBtn")}
-          </Button>
-          <Button
-            onClick={() => {
-              handleSaveUrl();
-            }}
-            color="primary"
-            variant="contained"
-          >
-            {t("services.dialog.saveBtn")}
-          </Button>
-        </DialogActions>
-      </Dialog>
+        <TextField
+          label="Url"
+          value={dialogUrl}
+          fullWidth
+          variant="outlined"
+          onChange={(e) => setDialogUrl(e.target.value)}
+          error={!!errors.url}
+          margin="normal"
+        />
+      </DialogWrapper>
     </Page>
   );
 }
