@@ -30,6 +30,7 @@
     "@prisma/client": "^5.21.1",
     "@quixo3/prisma-session-store": "^3.1.13",
     "activedirectory2": "^2.2.0",
+    "bcrypt": "^5.1.1",
     "compression": "^1.7.4",
     "cors": "^2.8.5",
     "express": "^5.0.0",
@@ -50,6 +51,7 @@
   "devDependencies": {
     "@eslint/js": "^9.13.0",
     "@types/activedirectory2": "^1.2.6",
+    "@types/bcrypt": "^5.0.2",
     "@types/compression": "^1.7.5",
     "@types/cookie-parser": "^1.4.7",
     "@types/cors": "^2.8.17",

@@ -1,4 +1,6 @@
+import type { User } from "@prisma/client";
 import prisma from "../../prisma.ts";
+import bcrypt from "bcrypt";
 
 import passport from "passport";
 import { Strategy as LocalStrategy } from "passport-local";
@@ -27,16 +29,22 @@ passport.use(
           });
         }
 
-        // In reality the passwords should be hashed and salted,
-        // so the compare would look more like: `await bcrypt.compare(password, (user.password).toString())`
-        if (dbUser.email === email && dbUser.password === password) {
-          const user = { ...dbUser, strategy: "LOCAL" };
-          return done(null, user);
-        } else {
+        if (!dbUser?.password) {
+          return done(null, false, {
+            message: "Account not yet verified",
+          });
+        }
+
+        const isMatch = await bcrypt.compare(password, dbUser.password);
+
+        if (!isMatch) {
           return done(null, false, {
             message: "Password incorrect",
           });
         }
+
+        const user = { ...dbUser, strategy: "LOCAL" } as User;
+        return done(null, user);
       } catch (error) {
         return done(error);
       }
