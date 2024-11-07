@@ -4,6 +4,8 @@ import HandymanIcon from "@mui/icons-material/Handyman";
 import CollectionsIcon from "@mui/icons-material/Collections";
 import NetworkPingIcon from "@mui/icons-material/NetworkPing";
 import DynamicFormIcon from "@mui/icons-material/DynamicForm";
+import GroupIcon from "@mui/icons-material/Group";
+import Diversity2Icon from "@mui/icons-material/Diversity2";
 
 export const HEADER_HEIGHT = 64;
 export const HEADER_Z_INDEX = 1001;
@@ -54,12 +56,12 @@ export const SIDEBAR_MENU = [
       {
         to: "/users",
         titleKey: "common.users",
-        icon: <DynamicFormIcon />,
+        icon: <GroupIcon />,
       },
       {
         to: "/user-roles",
         titleKey: "common.userRoles",
-        icon: <DynamicFormIcon />,
+        icon: <Diversity2Icon />,
       },
     ],
   },
