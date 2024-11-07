@@ -401,6 +401,14 @@ async function createLocalDummyAccounts() {
     await prisma.localAccount.create({
       data: { ...user, password: hashedPassword },
     });
+    // The dummy users should be seen as a user even before they have logged in... Right?
+    await prisma.user.create({
+      data: {
+        email: user.email,
+        fullName: user.fullName,
+        strategy: "LOCAL",
+      },
+    });
   }
 }
 

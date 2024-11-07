@@ -7,6 +7,7 @@ import mapsRouter from "./controllers/maps/router.ts";
 import publicRouter from "./controllers/public/router.ts";
 import servicesRouter from "./controllers/services/router.ts";
 import toolsRouter from "./controllers/tools/router.ts";
+import usersRouter from "./controllers/users/router.ts";
 
 import { isAuthenticated } from "../../common/auth/is-authenticated.middleware.ts";
 
@@ -19,4 +20,5 @@ export default Router()
   .use("/layers", isAuthenticated, layersRouter)
   .use("/maps", isAuthenticated, mapsRouter)
   .use("/services", isAuthenticated, servicesRouter)
-  .use("/tools", isAuthenticated, toolsRouter);
+  .use("/tools", isAuthenticated, toolsRouter)
+  .use("/users", isAuthenticated, usersRouter);
