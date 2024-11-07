@@ -10,15 +10,12 @@ import {
   SIDEBAR_Z_INDEX,
 } from "./constants";
 import useAppStateStore from "../../store/use-app-state-store";
-import useAuth from "../../hooks/use-auth";
 
 export default function RootLayout() {
   const sidebarLocked = useAppStateStore((state) => state.sidebarLocked);
   const setSidebarLocked = useAppStateStore((state) => state.setSidebarLocked);
   const [sidebarOpen, setSidebarOpen] = React.useState(sidebarLocked);
   const theme = useTheme();
-  // Running the use-auth hook makes sure to redirect unauthenticated users to the login page and initialize the user store
-  useAuth();
 
   const toggleSidebarLocked = () => {
     setSidebarOpen(!sidebarLocked);

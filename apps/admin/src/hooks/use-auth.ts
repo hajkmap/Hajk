@@ -5,14 +5,17 @@ import useUserStore, { User } from "../store/use-user-store";
 import useAppStateStore from "../store/use-app-state-store";
 
 const useAuth = () => {
-  const user = useUserStore((state) => state.user);
   const { apiBaseUrl } = useAppStateStore.getState();
-  const setUser = useUserStore((state) => state.setUser);
-  const clearUser = useUserStore((state) => state.clearUser);
+  const userStore = useUserStore();
   const navigate = useNavigate();
 
   useEffect(() => {
+    if (userStore.userLoading) {
+      return;
+    }
+
     const fetchUser = async () => {
+      userStore.setUserLoading(true);
       try {
         const response = await axios.get(`${apiBaseUrl}/auth/user`, {
           withCredentials: true,
@@ -23,18 +26,20 @@ const useAuth = () => {
         };
 
         if (response.status === 200) {
-          setUser(data.user);
+          userStore.setUser(data.user);
         }
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
       } catch (error) {
         navigate("/login");
+      } finally {
+        userStore.setUserLoading(false);
       }
     };
 
-    if (!user) {
+    if (!userStore.user) {
       void fetchUser();
     }
-  }, [user, setUser, navigate, apiBaseUrl]);
+  }, [apiBaseUrl, userStore, navigate]);
 
   const logout = async () => {
     try {
@@ -43,7 +48,7 @@ const useAuth = () => {
         {},
         { withCredentials: true }
       );
-      clearUser();
+      userStore.clearUser();
     } catch (error) {
       console.error("Failed to log out. Error: ", error);
     }
