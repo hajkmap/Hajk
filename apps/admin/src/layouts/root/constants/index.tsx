@@ -1,4 +1,3 @@
-import HomeIcon from "@mui/icons-material/Home";
 import MapIcon from "@mui/icons-material/Map";
 import LayersIcon from "@mui/icons-material/Layers";
 import HandymanIcon from "@mui/icons-material/Handyman";
@@ -14,38 +13,67 @@ export const SIDEBAR_MINI_WIDTH = 58;
 
 export const SIDEBAR_MENU = [
   {
-    to: "/",
-    titleKey: "common.home",
-    icon: <HomeIcon />,
-  },
-  {
-    to: "/maps",
-    titleKey: "common.maps",
+    to: "",
+    titleKey: "common.mapSettings",
+    collapsible: true,
     icon: <MapIcon />,
+    subItems: [
+      {
+        to: "/maps",
+        titleKey: "common.maps",
+        icon: <MapIcon />,
+      },
+      {
+        to: "/tools",
+        titleKey: "common.tools",
+        icon: <HandymanIcon />,
+      },
+      {
+        to: "/services",
+        titleKey: "common.services",
+        icon: <NetworkPingIcon />,
+      },
+      {
+        to: "/layers",
+        titleKey: "common.layers",
+        icon: <LayersIcon />,
+      },
+      {
+        to: "/groups",
+        titleKey: "common.layerGroups",
+        icon: <CollectionsIcon />,
+      },
+    ],
   },
   {
-    to: "/layers",
-    titleKey: "common.layers",
-    icon: <LayersIcon />,
+    to: "",
+    titleKey: "common.userSettings",
+    collapsible: true,
+    icon: <MapIcon />,
+    subItems: [
+      {
+        to: "/users",
+        titleKey: "common.users",
+        icon: <DynamicFormIcon />,
+      },
+      {
+        to: "/users",
+        titleKey: "common.userRoles",
+        icon: <DynamicFormIcon />,
+      },
+    ],
   },
   {
-    to: "/groups",
-    titleKey: "common.groups",
-    icon: <CollectionsIcon />,
-  },
-  {
-    to: "/services",
-    titleKey: "common.services",
-    icon: <NetworkPingIcon />,
-  },
-  {
-    to: "/tools",
-    titleKey: "common.tools",
-    icon: <HandymanIcon />,
-  },
-  {
-    to: "/form-factory",
-    titleKey: "Form factory",
-    icon: <DynamicFormIcon />,
+    to: "",
+    titleKey: "common.other",
+    collapsible: true,
+    icon: <MapIcon />,
+    subItems: [
+      {
+        to: "/form-factory",
+        titleKey: "Form factory",
+        icon: <DynamicFormIcon />,
+      },
+    ],
   },
 ];
