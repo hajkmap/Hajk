@@ -1,38 +1,36 @@
-import type { Application, Request } from "express";
+import type { Application } from "express";
 import prisma from "../../common/prisma.ts";
 
 import passport from "passport";
 import "./strategies/local.ts";
+import type { User } from "@prisma/client";
 
 export function setupPassport(app: Application) {
-  // Init
   app.use(passport.initialize());
   app.use(passport.authenticate("session"));
 
-  passport.serializeUser(async (_req: Request, user, done) => {
+  passport.serializeUser(async (user: Express.User, done) => {
     const dbUser = await prisma.user.upsert({
       create: {
+        id: user.id,
+        fullName: user.fullName,
         email: user.email,
         strategy: user.strategy,
-        fullName: "Foo Bar",
       },
       update: {
         strategy: user.strategy,
-        fullName: "Foo Bar",
+        fullName: user.fullName,
       },
       where: {
         email: user.email,
       },
     });
-
-    console.log("Serialize user: ", dbUser);
     done(null, dbUser);
   });
 
-  passport.deserializeUser((obj, done) => {
-    console.log("Deserialize user: ", obj);
+  passport.deserializeUser((user: User, done) => {
     try {
-      done(null, obj);
+      done(null, user);
     } catch (error) {
       done(error, false);
     }

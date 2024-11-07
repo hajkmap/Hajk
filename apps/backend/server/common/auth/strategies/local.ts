@@ -17,11 +17,11 @@ passport.use(
         }
 
         // Let's try to grab user from the DB
-        const user = await prisma.localAccount.findFirst({
+        const dbUser = await prisma.localAccount.findFirst({
           where: { email },
         });
 
-        if (!user) {
+        if (!dbUser) {
           return done(null, false, {
             message: "User not found",
           });
@@ -29,8 +29,8 @@ passport.use(
 
         // In reality the passwords should be hashed and salted,
         // so the compare would look more like: `await bcrypt.compare(password, (user.password).toString())`
-        if (user.email === email && user.password === password) {
-          user.strategy = "LOCAL";
+        if (dbUser.email === email && dbUser.password === password) {
+          const user = { ...dbUser, strategy: "LOCAL" };
           return done(null, user);
         } else {
           return done(null, false, {
