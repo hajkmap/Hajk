@@ -1,5 +1,5 @@
 import { useParams } from "react-router-dom";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import Page from "../../layouts/root/components/page";
 import { FieldValues } from "react-hook-form";
@@ -16,6 +16,7 @@ import {
   useTheme,
   Button,
   TextField,
+  Typography,
 } from "@mui/material";
 import { useServiceById, useUpdateService } from "../../api/services/hooks";
 import DynamicFormContainer from "../../components/form-factory/dynamic-form-container";
@@ -38,6 +39,7 @@ const rows = [
 ];
 
 export default function ServiceSettings() {
+  const formRef = useRef<HTMLFormElement | null>(null);
   const { palette } = useTheme();
   const { t } = useTranslation();
   const { id: serviceId } = useParams<{ id: string }>();
@@ -61,6 +63,12 @@ export default function ServiceSettings() {
   const handleSaveUrl = () => {
     setValue("url", dialogUrl);
     handleDialogClose();
+  };
+
+  const handleExternalSubmit = () => {
+    if (formRef.current) {
+      formRef.current.requestSubmit();
+    }
   };
 
   const serviceSettingsFormContainer = new DynamicFormContainer<FieldValues>();
@@ -102,7 +110,7 @@ export default function ServiceSettings() {
 
   panelNestedContainer.addInput({
     type: INPUT_TYPE.TEXTFIELD,
-    gridColumns: 8,
+    gridColumns: 10,
     name: "name",
     title: "Namn",
     defaultValue: "",
@@ -132,7 +140,7 @@ export default function ServiceSettings() {
   });
   panelNestedContainer.addInput({
     type: INPUT_TYPE.TEXTAREA,
-    gridColumns: 10,
+    gridColumns: 8,
     name: "description",
     title: "Intern adminbeskrivning av tjänst",
     slotProps: {
@@ -403,47 +411,83 @@ export default function ServiceSettings() {
   if (!service) return <div>Service not found.</div>;
 
   return (
-    <Page title={t("common.settings")}>
-      <form onSubmit={onSubmit}>
-        <Box>
-          <FormRenderer
-            data={formServiceData}
-            register={register}
-            control={control}
-            errors={errors}
-          />
-        </Box>
-        <Button type="submit" color="primary" variant="contained">
+    <>
+      <Box
+        sx={{
+          float: "right",
+          display: "flex",
+          flexDirection: "column",
+          gap: 2,
+          mt: 10,
+          mr: 8,
+          p: 2,
+          border: "1px solid",
+          borderColor: "grey.400",
+          borderRadius: 3,
+          maxWidth: "260px",
+          textAlign: "center",
+        }}
+      >
+        <Button
+          onClick={handleExternalSubmit}
+          sx={{ backgroundColor: palette.secondary.dark }}
+          variant="contained"
+        >
           {t("services.dialog.saveBtn")}
         </Button>
-      </form>
+        <Button sx={{ color: palette.secondary.dark }} variant="text">
+          {t("services.dialog.deleteBtn")}
+        </Button>
 
-      <DialogWrapper
-        fullWidth
-        open={isDialogOpen}
-        title={t("services.settings.dialog.title")}
-        onClose={handleDialogClose}
-        actions={
-          <>
-            <Button onClick={handleDialogClose} color="primary">
-              {t("services.dialog.closeBtn")}
-            </Button>
-            <Button onClick={handleSaveUrl} color="primary" variant="contained">
-              {t("services.dialog.saveBtn")}
-            </Button>
-          </>
-        }
-      >
-        <TextField
-          label="Url"
-          value={dialogUrl}
+        <Typography variant="body1">
+          Senast sparad av
+          {/* {user} */} Albin den
+          {/* {service.updatedAt} */} 2023-04-11 13:37
+        </Typography>
+      </Box>
+      <Page title={t("common.settings")}>
+        <form ref={formRef} onSubmit={onSubmit}>
+          <Box>
+            <FormRenderer
+              data={formServiceData}
+              register={register}
+              control={control}
+              errors={errors}
+            />
+          </Box>
+        </form>
+
+        <DialogWrapper
           fullWidth
-          variant="outlined"
-          onChange={(e) => setDialogUrl(e.target.value)}
-          error={!!errors.url}
-          margin="normal"
-        />
-      </DialogWrapper>
-    </Page>
+          open={isDialogOpen}
+          title={t("services.settings.dialog.title")}
+          onClose={handleDialogClose}
+          actions={
+            <>
+              <Button onClick={handleDialogClose} color="primary">
+                {t("services.dialog.closeBtn")}
+              </Button>
+              <Button
+                onClick={handleSaveUrl}
+                color="primary"
+                variant="contained"
+              >
+                {t("services.dialog.saveBtn")}
+              </Button>
+            </>
+          }
+        >
+          <TextField
+            label="Url"
+            value={dialogUrl}
+            fullWidth
+            variant="outlined"
+            onChange={(e) => setDialogUrl(e.target.value)}
+            error={!!errors.url}
+            margin="normal"
+          />
+        </DialogWrapper>
+      </Page>
+    </>
   );
 }

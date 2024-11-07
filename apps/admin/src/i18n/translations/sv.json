@@ -23,6 +23,7 @@
     "services.settings.dialog.title": "Redigera url",
     "services.dialog.addBtn": "Lägg till ny tjänst",
     "services.dialog.saveBtn": "Spara",
+    "services.dialog.deleteBtn": "Ta bort",
     "services.dialog.closeBtn": "Stäng",
     "services.url.btnLabel": "Ändra url",
     "common.servicesettings": "Inställningar"
