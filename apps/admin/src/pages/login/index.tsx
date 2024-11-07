@@ -12,6 +12,15 @@ export default function LoginPage() {
   const [loginFailed, setLoginFailed] = useState(false);
   const [loading, setLoading] = useState(false);
 
+  const submitButtonDisabled =
+    credentials.email.length < 5 || credentials.password.length < 5 || loading;
+
+  const handleKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
+    if (event.key === "Enter" && !submitButtonDisabled) {
+      void handleSubmit();
+    }
+  };
+
   const handleChange = (key: string, value: string) => {
     setLoginFailed(false);
     setCredentials({
@@ -89,6 +98,7 @@ export default function LoginPage() {
           variant="outlined"
           value={credentials.password}
           onChange={(e) => handleChange("password", e.target.value)}
+          onKeyDown={handleKeyDown}
           error={loginFailed}
           fullWidth
         />
@@ -103,7 +113,7 @@ export default function LoginPage() {
           color="primary"
           size="large"
           onClick={() => void handleSubmit()}
-          disabled={loading}
+          disabled={submitButtonDisabled}
           fullWidth
           sx={{ mt: 2 }}
         >
