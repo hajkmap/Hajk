@@ -19,6 +19,8 @@ import ServicesPage from "./pages/services/index.tsx";
 import GroupsPage from "./pages/groups/index.tsx";
 import FormFactoryPage from "./pages/form-factory/index.tsx";
 import LoginPage from "./pages/login/index.tsx";
+import UsersPage from "./pages/users/index.tsx";
+import UserRolesPage from "./pages/user-roles/index.tsx";
 
 const queryClient = new QueryClient({
   defaultOptions: queryConfig,
@@ -58,6 +60,14 @@ const router = createBrowserRouter(
         {
           path: "settings",
           element: <SettingsPage />,
+        },
+        {
+          path: "users",
+          element: <UsersPage />,
+        },
+        {
+          path: "user-roles",
+          element: <UserRolesPage />,
         },
         {
           path: "form-factory",

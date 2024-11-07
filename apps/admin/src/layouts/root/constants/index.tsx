@@ -57,7 +57,7 @@ export const SIDEBAR_MENU = [
         icon: <DynamicFormIcon />,
       },
       {
-        to: "/users",
+        to: "/user-roles",
         titleKey: "common.userRoles",
         icon: <DynamicFormIcon />,
       },
