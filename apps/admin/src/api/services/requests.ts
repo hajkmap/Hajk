@@ -175,6 +175,8 @@ export const updateService = async (
 export const deleteService = async (serviceId: string): Promise<void> => {
   const internalApiClient = getApiClient();
   try {
+    await new Promise((resolve) => setTimeout(resolve, 3000));
+
     await internalApiClient.delete(`/services/${serviceId}`);
   } catch (error) {
     const axiosError = error as InternalApiError;

@@ -19,7 +19,11 @@ import {
   Typography,
   CircularProgress,
 } from "@mui/material";
-import { useServiceById, useUpdateService } from "../../api/services/hooks";
+import {
+  useServiceById,
+  useUpdateService,
+  useDeleteService,
+} from "../../api/services/hooks";
 import DynamicFormContainer from "../../components/form-factory/dynamic-form-container";
 import CONTAINER_TYPE from "../../components/form-factory/types/container-types";
 import INPUT_TYPE from "../../components/form-factory/types/input-type";
@@ -48,7 +52,10 @@ export default function ServiceSettings() {
   const { data: service, isError, isLoading } = useServiceById(serviceId ?? "");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [dialogUrl, setDialogUrl] = useState(service?.url ?? "");
-  const { mutateAsync: updateService, status } = useUpdateService();
+  const { mutateAsync: updateService, status: updateStatus } =
+    useUpdateService();
+  const { mutateAsync: deleteService, status: deleteStatus } =
+    useDeleteService();
 
   const [formServiceData, setFormServiceData] = useState<
     DynamicFormContainer<FieldValues>
@@ -71,6 +78,38 @@ export default function ServiceSettings() {
   const handleExternalSubmit = () => {
     if (formRef.current) {
       formRef.current.requestSubmit();
+    }
+  };
+  const handleUpdateService = async (serviceData: ServiceUpdateFormData) => {
+    try {
+      const payload = {
+        url: serviceData.url,
+      };
+      console.log(" Sending payload", payload);
+      await updateService({
+        serviceId: service?.id ?? "",
+        data: payload,
+      });
+      console.log("Service updated successfully");
+      setIsDialogOpen(false);
+
+      navigate("/services");
+    } catch (error) {
+      console.error("Failed to update service:", error);
+    }
+  };
+
+  const handleDeleteService = async () => {
+    if (!isLoading && service?.id) {
+      try {
+        await deleteService(service.id);
+
+        navigate("/services");
+      } catch (error) {
+        console.error("Deletion failed:", error);
+      }
+    } else {
+      console.error("Service data is still loading or unavailable.");
     }
   };
 
@@ -382,24 +421,6 @@ export default function ServiceSettings() {
     formState: { errors, dirtyFields },
   } = DefaultUseForm(defaultValues);
 
-  const handleUpdateService = async (serviceData: ServiceUpdateFormData) => {
-    try {
-      const payload = {
-        url: serviceData.url,
-      };
-      console.log(" Sending payload", payload);
-      await updateService({
-        serviceId: service?.id ?? "",
-        data: payload,
-      });
-      console.log("Service updated successfully");
-      setIsDialogOpen(false);
-
-      navigate("/services");
-    } catch (error) {
-      console.error("Failed to update service:", error);
-    }
-  };
   const onSubmit = createOnSubmitHandler({
     handleSubmit,
     dirtyFields,
@@ -437,15 +458,23 @@ export default function ServiceSettings() {
           onClick={handleExternalSubmit}
           sx={{ backgroundColor: palette.secondary.dark }}
           variant="contained"
-          disabled={status === "pending"}
+          disabled={updateStatus === "pending"}
         >
-          {status === "pending" ? (
+          {updateStatus === "pending" ? (
             <CircularProgress color="secondary" size={30} />
           ) : (
             t("services.dialog.saveBtn")
           )}
         </Button>
-        <Button sx={{ color: palette.secondary.dark }} variant="text">
+
+        <Button
+          onClick={() => {
+            void handleDeleteService();
+          }}
+          disabled={deleteStatus === "pending" || updateStatus === "pending"}
+          sx={{ color: palette.secondary.dark }}
+          variant="text"
+        >
           {t("services.dialog.deleteBtn")}
         </Button>
 
