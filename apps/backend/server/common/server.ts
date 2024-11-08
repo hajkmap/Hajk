@@ -273,21 +273,37 @@ built-it compression by setting the ENABLE_GZIP_COMPRESSION option to "true" in 
   }
 
   private setupSession() {
+    const sessionSecret = process.env.EXPRESS_SESSION_SECRET?.includes(",")
+      ? process.env.EXPRESS_SESSION_SECRET?.split(",")
+      : (process.env.EXPRESS_SESSION_SECRET ??
+        "fallbackIfNoSecretProvidedInDotEnv");
     this.app.use(
       expressSession({
-        cookie: {
-          maxAge: 2 * 24 * 60 * 60 * 1000, // 2 days, in ms. Consider shortening.
-        },
-        secret:
-          process.env.SESSION_SECRET || "fallbackIfNoSecretProvidedInDotEnv",
-        resave: false, // See documentation for `resave`. Our store implements the `touch()` method, so we can likely go with `false` here.
-        saveUninitialized: true,
+        secret: sessionSecret,
+        name: process.env.EXPRESS_SESSION_NAME || "hajk.sid",
         store: new PrismaSessionStore(new PrismaClient(), {
           checkPeriod: 2 * 60 * 1000, //ms
           dbRecordIdIsSessionId: true,
           dbRecordIdFunction: undefined,
         }),
-        rolling: true, // Refresh session expiry on each request
+        cookie: {
+          maxAge: 2 * 24 * 60 * 60 * 1000, // 2 days, in ms. Consider shortening.
+        },
+        rolling: process.env.EXPRESS_SESSION_ROLLING === "true" || false, // Refresh session expiry on each request
+        resave: false, // See documentation for `resave`. Our store implements the `touch()` method, so we can likely go with `false` here.
+        /**
+         * Forces a session that is "uninitialized" to be saved to the store. A session is uninitialized when it is new but not modified.
+         * Choosing `false` is useful for implementing login sessions, reducing server storage usage, or complying with laws that require permission before setting a cookie.
+         * Choosing `false` will also help with race conditions where a client makes multiple parallel requests without a session.
+         *
+         * The default value is `true`, but using the default has been deprecated, as the default will change in the future.
+         * Please research into this setting and choose what is appropriate to your use-case.
+         *
+         * **If you are using `express-session` in conjunction with PassportJS:**
+         * Passport will add an empty Passport object to the session for use after a user is authenticated, which will be treated as a modification to the session, causing it to be saved.
+         * This has been fixed in PassportJS 0.3.0.
+         */
+        saveUninitialized: false, // TODO: Was true previously, let's see how it works out.
       })
     );
   }
