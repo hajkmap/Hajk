@@ -47,10 +47,11 @@ const CollapsibleNavItem = (props: Props) => {
             borderRadius: 0,
             justifyContent: "space-between",
             color: palette.text.primary,
-            paddingTop: !collapsed ? 1 : 2,
-            paddingBottom: !collapsed ? 1 : 2,
+            paddingTop: 2,
+            paddingBottom: 2,
             paddingLeft: 2,
             transition: "border 200ms ease",
+            background: palette.action.hover,
           }}
         >
           <Box sx={{ display: "flex", alignItems: "center" }}>
