@@ -9,6 +9,7 @@ import {
   DialogContent,
   DialogContentText,
   DialogTitle,
+  Zoom,
 } from "@mui/material";
 
 import {
@@ -123,11 +124,20 @@ function MeasurerView(props) {
   } = props;
   const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
   const [showHelp, setShowHelp] = useState(false);
+  const [showSegmentButton, setShowSegmentButton] = useState(true);
 
   const deleteAll = () => {
     setShowDeleteConfirmation(false);
     drawModel.removeDrawnFeatures();
   };
+
+  useEffect(() => {
+    if (drawType === "LineString" || drawType === "Polygon") {
+      setShowSegmentButton(true);
+    } else {
+      setShowSegmentButton(false);
+    }
+  }, [drawType]);
 
   useEffect(() => {
     props.localObserver.subscribe("show-help", () => {
@@ -188,13 +198,15 @@ function MeasurerView(props) {
         </Grid>
         <Grid item xs={2}>
           <HajkToolTip title="Rita del-längder av mätningar">
-            <StyledSingleToggleButton
-              value="Segments"
-              selected={segmentsEnabled}
-              onClick={() => handleSegmentsToggle()}
-            >
-              <SvgImg src={IconSegment()} />
-            </StyledSingleToggleButton>
+            <Zoom in={showSegmentButton}>
+              <StyledSingleToggleButton
+                value="Segments"
+                selected={segmentsEnabled}
+                onClick={() => handleSegmentsToggle()}
+              >
+                <SvgImg src={IconSegment()} />
+              </StyledSingleToggleButton>
+            </Zoom>
           </HajkToolTip>
         </Grid>
         <Grid item xs={3}>
