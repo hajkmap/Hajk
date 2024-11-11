@@ -1,4 +1,10 @@
-import { Role, User, UserRolesApiResponse, UsersApiResponse } from "./types";
+import {
+  LocalUserPayload,
+  Role,
+  User,
+  UserRolesApiResponse,
+  UsersApiResponse,
+} from "./types";
 import { getApiClient, InternalApiError } from "../../lib/internal-api-client";
 
 /**
@@ -105,6 +111,28 @@ export const getRolesByUserId = async (id: string): Promise<Role[]> => {
       );
     } else {
       throw new Error(`Failed to fetch roles by user id`);
+    }
+  }
+};
+
+export const createLocalUser = async (
+  localUser: LocalUserPayload
+): Promise<User> => {
+  const internalApiClient = getApiClient();
+  try {
+    const response = await internalApiClient.post<User>("/users", localUser);
+    if (!response.data) {
+      throw new Error("Could not create new user.");
+    }
+    return response.data;
+  } catch (error) {
+    const axiosError = error as InternalApiError;
+    if (axiosError.response) {
+      throw new Error(
+        `Failed to create user. ErrorId: ${axiosError.response.data.errorId}.`
+      );
+    } else {
+      throw new Error("Failed to create user");
     }
   }
 };

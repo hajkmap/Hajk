@@ -4,6 +4,12 @@ export interface User {
   email: string;
 }
 
+export interface LocalUserPayload {
+  fullName: string;
+  email: string;
+  password: string;
+}
+
 export interface Role {
   id: string;
   code: string;

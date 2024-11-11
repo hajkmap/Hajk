@@ -16,6 +16,7 @@
     "common.logout": "Logga ut",
     "common.maps": "Kartor",
     "common.mapSettings": "Kartinställningar",
+    "common.name": "Namn",
     "common.other": "Övrigt",
     "common.password": "Lösenord",
     "common.scrolltotop": "Till toppen",
@@ -31,6 +32,17 @@
     "common.welcome": "Välkommen!",
     "common.you": "Du",
     "dark": "Mörkt",
-    "light": "Ljust"
+    "light": "Ljust",
+    "user.confirmPassword": "Bekräfta lösenord",
+    "user.createUser": "Skapa användare",
+    "user.createUserFailed": "Misslyckades att skapa användare. Kontakta systemadministratören.",
+    "user.createUserSuccess": "Användare skapad!",
+    "user.emailRequired": "E-post är obligatoriskt",
+    "user.enterValidEmail": "Vänligen ange en giltig e-postadress",
+    "user.nameRequired": "Namn är obligatoriskt",
+    "user.passwordAtLeast6Chars": "Lösenordet måste vara minst 6 tecken",
+    "user.passwordMismatch": "Lösenorden matchar inte",
+    "user.passwordRequired": "Lösenord är obligatoriskt",
+    "user.pleaseConfirmPassword": "Vänligen bekräfta lösenord"
   }
 }

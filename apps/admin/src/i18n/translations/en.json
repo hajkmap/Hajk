@@ -16,6 +16,7 @@
     "common.logout": "Log out",
     "common.maps": "Maps",
     "common.mapSettings": "Map Settings",
+    "common.name": "Name",
     "common.other": "Other",
     "common.password": "Password",
     "common.scrolltotop": "Scroll to top",
@@ -31,6 +32,17 @@
     "common.welcome": "Welcome!",
     "common.you": "You",
     "dark": "Dark",
-    "light": "Light"
+    "light": "Light",
+    "user.confirmPassword": "Confirm password",
+    "user.createUser": "Create user",
+    "user.createUserFailed": "Failed to create user. Contact the system administrator.",
+    "user.createUserSuccess": "User created successfully",
+    "user.emailRequired": "Email is required",
+    "user.enterValidEmail": "Please enter a valid email",
+    "user.nameRequired": "Name is required",
+    "user.passwordAtLeast6Chars": "Password must be at least 6 characters",
+    "user.passwordMismatch": "Passwords do not match",
+    "user.passwordRequired": "Password is required",
+    "user.pleaseConfirmPassword": "Please confirm password"
   }
 }

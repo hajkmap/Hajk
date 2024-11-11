@@ -36,7 +36,7 @@ model User {
 }
 
 model Role {
-  id                  Int                   @id @default(autoincrement())
+  id                  String                @id @default(cuid())
   code                String                @unique
   title               String?
   description         String?
@@ -50,7 +50,7 @@ model Role {
 
 model RoleOnUser {
   userId String
-  roleId Int
+  roleId String
   user   User   @relation(fields: [userId], references: [id])
   role   Role   @relation(fields: [roleId], references: [id])
 
@@ -59,16 +59,16 @@ model RoleOnUser {
 
 model RoleOnMap {
   mapId  Int
-  roleId Int
-  map    Map  @relation(fields: [mapId], references: [id])
-  role   Role @relation(fields: [roleId], references: [id])
+  roleId String
+  map    Map    @relation(fields: [mapId], references: [id])
+  role   Role   @relation(fields: [roleId], references: [id])
 
   @@id([mapId, roleId])
 }
 
 model RoleOnLayer {
   layerId String
-  roleId  Int
+  roleId  String
   layer   Layer  @relation(fields: [layerId], references: [id])
   role    Role   @relation(fields: [roleId], references: [id])
 
@@ -77,7 +77,7 @@ model RoleOnLayer {
 
 model RoleOnLayerInstance {
   layerInstanceId String
-  roleId          Int
+  roleId          String
   role            Role          @relation(fields: [roleId], references: [id])
   layerInstance   LayerInstance @relation(fields: [layerInstanceId], references: [id])
 
@@ -86,16 +86,16 @@ model RoleOnLayerInstance {
 
 model RoleOnTool {
   toolId Int
-  roleId Int
-  tool   Tool @relation(fields: [toolId], references: [id])
-  role   Role @relation(fields: [roleId], references: [id])
+  roleId String
+  tool   Tool   @relation(fields: [toolId], references: [id])
+  role   Role   @relation(fields: [roleId], references: [id])
 
   @@id([toolId, roleId])
 }
 
 model RoleOnGroup {
   groupId String
-  roleId  Int
+  roleId  String
   group   Group  @relation(fields: [groupId], references: [id])
   role    Role   @relation(fields: [roleId], references: [id])
 

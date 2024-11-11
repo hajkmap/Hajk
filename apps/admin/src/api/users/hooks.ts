@@ -1,6 +1,17 @@
-import { useQuery, UseQueryResult } from "@tanstack/react-query";
+import {
+  useMutation,
+  useQuery,
+  useQueryClient,
+  UseQueryResult,
+} from "@tanstack/react-query";
 import { Role, User } from "./types";
-import { getRoles, getRolesByUserId, getUserById, getUsers } from "./requests";
+import {
+  createLocalUser,
+  getRoles,
+  getRolesByUserId,
+  getUserById,
+  getUsers,
+} from "./requests";
 
 // A React Query hook to fetch all users
 // This hook uses the `getUsers` function from the users `requests` module
@@ -29,5 +40,18 @@ export const useRolesByUserId = (id: string): UseQueryResult<Role[]> => {
   return useQuery({
     queryKey: ["user/id/roles"],
     queryFn: () => getRolesByUserId(id),
+  });
+};
+
+export const useCreateLocalUser = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: createLocalUser,
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ["users"] });
+    },
+    onError: (error) => {
+      console.error(error);
+    },
   });
 };
