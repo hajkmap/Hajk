@@ -1,4 +1,4 @@
-import { User, UsersApiResponse } from "./types";
+import { Role, User, UserRolesApiResponse, UsersApiResponse } from "./types";
 import { getApiClient, InternalApiError } from "../../lib/internal-api-client";
 
 /**
@@ -32,6 +32,79 @@ export const getUsers = async (): Promise<User[]> => {
       );
     } else {
       throw new Error(`Failed to fetch users`);
+    }
+  }
+};
+
+export const getUserById = async (id: string): Promise<User> => {
+  const internalApiClient = getApiClient();
+  try {
+    const response = await internalApiClient.get<User>(`/users/${id}`);
+
+    if (!response.data) {
+      throw new Error("No users data found");
+    }
+
+    return response.data;
+  } catch (error) {
+    const axiosError = error as InternalApiError;
+
+    if (axiosError.response) {
+      throw new Error(
+        `Failed to fetch user. ErrorId: ${axiosError.response.data.errorId}.`
+      );
+    } else {
+      throw new Error(`Failed to fetch user`);
+    }
+  }
+};
+
+export const getRoles = async (): Promise<Role[]> => {
+  const internalApiClient = getApiClient();
+  try {
+    const response = await internalApiClient.get<UserRolesApiResponse>(
+      `/users/roles`
+    );
+
+    if (!response.data) {
+      throw new Error("No roles data found");
+    }
+
+    return response.data.roles;
+  } catch (error) {
+    const axiosError = error as InternalApiError;
+
+    if (axiosError.response) {
+      throw new Error(
+        `Failed to fetch roles. ErrorId: ${axiosError.response.data.errorId}.`
+      );
+    } else {
+      throw new Error(`Failed to fetch roles`);
+    }
+  }
+};
+
+export const getRolesByUserId = async (id: string): Promise<Role[]> => {
+  const internalApiClient = getApiClient();
+  try {
+    const response = await internalApiClient.get<UserRolesApiResponse>(
+      `/users/${id}`
+    );
+
+    if (!response.data) {
+      throw new Error("No roles data found");
+    }
+
+    return response.data.roles;
+  } catch (error) {
+    const axiosError = error as InternalApiError;
+
+    if (axiosError.response) {
+      throw new Error(
+        `Failed to fetch roles by user id. ErrorId: ${axiosError.response.data.errorId}.`
+      );
+    } else {
+      throw new Error(`Failed to fetch roles by user id`);
     }
   }
 };
