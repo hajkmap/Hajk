@@ -136,3 +136,20 @@ export const createLocalUser = async (
     }
   }
 };
+
+export const deleteUser = async (id: string): Promise<void> => {
+  const internalApiClient = getApiClient();
+  try {
+    await internalApiClient.delete(`/users/${id}`);
+  } catch (error) {
+    const axiosError = error as InternalApiError;
+
+    if (axiosError.response) {
+      throw new Error(
+        `Failed to delete user. ErrorId: ${axiosError.response.data.errorId}.`
+      );
+    } else {
+      throw new Error(`Failed to delete user.`);
+    }
+  }
+};

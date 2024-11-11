@@ -29,14 +29,23 @@ class UserService {
 
   async createUserAndLocalAccount(data: Prisma.LocalAccountCreateInput) {
     const p = await bcrypt.hash(data.password, 10);
-    await prisma.localAccount.create({
-      data: { email: data.email, fullName: data.fullName, password: p },
-    });
-    const user = await prisma.user.create({
-      data: { email: data.email, fullName: data.fullName, strategy: "LOCAL" },
+    const localAccount = await prisma.localAccount.create({
+      data: {
+        email: data.email,
+        fullName: data.fullName,
+        password: p,
+        user: {
+          create: {
+            fullName: data.fullName,
+            email: data.email,
+            strategy: "LOCAL",
+          },
+        },
+      },
+      include: { user: true },
     });
 
-    return user;
+    return localAccount.user;
   }
 
   async createRole(data: Prisma.RoleCreateInput) {
@@ -78,6 +87,19 @@ class UserService {
       data: { ...data, id: undefined },
     });
     return role;
+  }
+
+  async deleteUser(id: string) {
+    const user = await prisma.user.findFirstOrThrow({
+      where: { id },
+      select: { id: true, localAccount: { select: { id: true } } },
+    });
+
+    if (user.localAccount) {
+      await prisma.localAccount.delete({ where: { id: user.localAccount.id } });
+    }
+
+    await prisma.user.delete({ where: { id: id } });
   }
 }
 

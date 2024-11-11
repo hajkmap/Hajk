@@ -3,6 +3,11 @@ import {
   Box,
   Button,
   CircularProgress,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
   List,
   ListItem,
   Paper,
@@ -14,9 +19,14 @@ import { toast } from "react-toastify";
 import { useTranslation } from "react-i18next";
 
 import Page from "../../layouts/root/components/page";
-import { useCreateLocalUser, useUsers } from "../../api/users/hooks";
+import {
+  useCreateLocalUser,
+  useDeleteUser,
+  useUsers,
+} from "../../api/users/hooks";
 import useUserStore from "../../store/use-user-store";
 import { Controller, SubmitHandler, useForm } from "react-hook-form";
+import { useState } from "react";
 
 interface CreateUserInput {
   email: string;
@@ -31,7 +41,13 @@ export default function UsersPage() {
   const activeUser = useUserStore((state) => state.user);
   const { data: users, isLoading: usersLoading } = useUsers();
 
-  const userMutation = useCreateLocalUser();
+  const [userToDelete, setUserToDelete] = useState<{
+    id: string;
+    fullName: string;
+  } | null>(null);
+
+  const createUserMutation = useCreateLocalUser();
+  const deleteUserMutation = useDeleteUser();
 
   const {
     handleSubmit,
@@ -42,11 +58,12 @@ export default function UsersPage() {
   } = useForm<CreateUserInput>();
 
   const onSubmit: SubmitHandler<CreateUserInput> = (data) => {
-    userMutation.mutate(
+    createUserMutation.mutate(
       {
         email: data.email,
         fullName: data.fullName,
         password: data.password,
+        user: {},
       },
       {
         onError: () =>
@@ -80,9 +97,23 @@ export default function UsersPage() {
                 {users?.map((user) => (
                   <ListItem key={user.id} sx={{ p: 0, pt: 1, pb: 1 }}>
                     <Paper sx={{ width: "100%", p: 2 }} elevation={4}>
-                      <Typography>{`${user.fullName}, ${user.email}${
-                        user.email === activeUser?.email ? " (du)" : ""
-                      }`}</Typography>
+                      <Grid container justifyContent="space-between">
+                        <Typography>{`${user.fullName}, ${user.email}${
+                          user.email === activeUser?.email ? " (du)" : ""
+                        }`}</Typography>
+                        <Button
+                          variant="contained"
+                          color="error"
+                          onClick={() =>
+                            setUserToDelete({
+                              id: user.id,
+                              fullName: user.fullName,
+                            })
+                          }
+                        >
+                          {t("common.delete")}
+                        </Button>
+                      </Grid>
                     </Paper>
                   </ListItem>
                 ))}
@@ -187,19 +218,52 @@ export default function UsersPage() {
               type="submit"
               variant="contained"
               color="primary"
-              disabled={userMutation.isPending}
+              disabled={createUserMutation.isPending}
               startIcon={
-                userMutation.isPending ? (
+                createUserMutation.isPending ? (
                   <CircularProgress color="inherit" size={20} />
                 ) : null
               }
               sx={{ mt: 1, mb: 1 }}
             >
-              {userMutation.isPending ? null : t("user.createUser")}
+              {createUserMutation.isPending ? null : t("user.createUser")}
             </Button>
           </Box>
         </Paper>
       </Grid>
+      <Dialog
+        open={userToDelete !== null}
+        onClose={() => setUserToDelete(null)}
+        aria-labelledby="delete-user-dialog-title"
+        aria-describedby="delete-user-dialog-description"
+      >
+        <DialogTitle id="delete-user-dialog-title">
+          {`${t("common.delete")} ${userToDelete?.fullName ?? ""}s ${t(
+            "common.account"
+          ).toLowerCase()}?`}
+        </DialogTitle>
+        <DialogContent>
+          <DialogContentText id="delete-user-dialog-description">
+            {t("user.deleteConfirmation")}
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setUserToDelete(null)} variant="contained">
+            {t("common.cancel")}
+          </Button>
+          <Button
+            onClick={() => {
+              deleteUserMutation.mutate(userToDelete?.id ?? "");
+              setUserToDelete(null);
+            }}
+            autoFocus
+            variant="contained"
+            color="error"
+          >
+            {t("common.delete")}
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Page>
   );
 }

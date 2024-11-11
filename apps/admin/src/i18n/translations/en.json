@@ -1,6 +1,9 @@
 {
   "translation": {
+    "common.account": "Account",
+    "common.cancel": "Cancel",
     "common.clickableLogo": "Clickable Logo",
+    "common.delete": "Delete",
     "common.email": "Email",
     "common.english": "English",
     "common.goodbye": "Goodbye",
@@ -37,6 +40,7 @@
     "user.createUser": "Create user",
     "user.createUserFailed": "Failed to create user. Contact the system administrator.",
     "user.createUserSuccess": "User created successfully",
+    "user.deleteConfirmation": "You are about to delete a user. This action cannot be undone. Are you sure you want to continue?",
     "user.emailRequired": "Email is required",
     "user.enterValidEmail": "Please enter a valid email",
     "user.nameRequired": "Name is required",

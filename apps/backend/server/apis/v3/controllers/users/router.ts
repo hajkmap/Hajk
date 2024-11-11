@@ -13,6 +13,12 @@ export default express
   .get("/", controller.getUsers)
   .get("/roles", controller.getRoles)
   .get("/:id", controller.getUserById)
+  .patch(
+    "/:id",
+    validatePayload(LocalAccountUpdateInputSchema),
+    controller.updateUserAndLocalAccount
+  )
+  .delete("/:id", controller.deleteUser)
   .get("/:id/roles", controller.getRolesByUserId)
   .post(
     "/",
@@ -20,11 +26,6 @@ export default express
     controller.createUserAndLocalAccount
   )
   .post("/roles", validatePayload(RoleCreateInputSchema), controller.createRole)
-  .patch(
-    "/:id",
-    validatePayload(LocalAccountUpdateInputSchema),
-    controller.updateUserAndLocalAccount
-  )
   .patch(
     "/roles/:id",
     validatePayload(RoleUpdateInputSchema),

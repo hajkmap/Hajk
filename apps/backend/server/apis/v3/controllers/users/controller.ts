@@ -46,5 +46,10 @@ class UsersController {
     const role = await UsersService.updateRole(req.params.id, req.body);
     return res.status(HttpStatusCodes.OK).json(role);
   }
+
+  async deleteUser(req: Request, res: Response) {
+    await UsersService.deleteUser(req.params.id);
+    return res.status(HttpStatusCodes.NO_CONTENT).send();
+  }
 }
 export default new UsersController();

@@ -21,18 +21,21 @@ model Session {
 
 model LocalAccount {
   id       String    @id @default(cuid())
-  email    String
+  userId   String    @unique
+  email    String    @unique
   password String
   fullName String
   expires  DateTime?
+  user     User      @relation(fields: [userId], references: [id])
 }
 
 model User {
-  id       String       @id @default(cuid())
-  email    String       @unique
-  fullName String
-  strategy AuthStrategy
-  roles    RoleOnUser[]
+  id           String        @id @default(cuid())
+  email        String        @unique
+  fullName     String
+  strategy     AuthStrategy
+  localAccount LocalAccount?
+  roles        RoleOnUser[]
 }
 
 model Role {

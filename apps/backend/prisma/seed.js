@@ -445,14 +445,16 @@ async function createLocalDummyAccounts() {
   for await (const user of dummyUsers) {
     const hashedPassword = await bcrypt.hash(user.password, 10);
     await prisma.localAccount.create({
-      data: { ...user, password: hashedPassword },
-    });
-    // The dummy users should be seen as a user even before they have logged in... Right?
-    await prisma.user.create({
       data: {
-        email: user.email,
-        fullName: user.fullName,
-        strategy: "LOCAL",
+        ...user,
+        password: hashedPassword,
+        user: {
+          create: {
+            email: user.email,
+            fullName: user.fullName,
+            strategy: "LOCAL",
+          },
+        },
       },
     });
   }

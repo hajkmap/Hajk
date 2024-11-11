@@ -7,6 +7,7 @@ import {
 import { Role, User } from "./types";
 import {
   createLocalUser,
+  deleteUser,
   getRoles,
   getRolesByUserId,
   getUserById,
@@ -47,6 +48,19 @@ export const useCreateLocalUser = () => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: createLocalUser,
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ["users"] });
+    },
+    onError: (error) => {
+      console.error(error);
+    },
+  });
+};
+
+export const useDeleteUser = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => deleteUser(id),
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ["users"] });
     },

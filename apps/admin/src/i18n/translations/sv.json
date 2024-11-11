@@ -1,6 +1,9 @@
 {
   "translation": {
+    "common.account": "Konto",
+    "common.cancel": "Avbryt",
     "common.clickableLogo": "Klickbar logga",
+    "common.delete": "Radera",
     "common.email": "Epost",
     "common.english": "Engelska",
     "common.goodbye": "Hej då",
@@ -37,6 +40,7 @@
     "user.createUser": "Skapa användare",
     "user.createUserFailed": "Misslyckades att skapa användare. Kontakta systemadministratören.",
     "user.createUserSuccess": "Användare skapad!",
+    "user.deleteConfirmation": "Du håller på att ta bort en användare. Denna åtgärd kan inte ångras. Är du säker på att du vill fortsätta?",
     "user.emailRequired": "E-post är obligatoriskt",
     "user.enterValidEmail": "Vänligen ange en giltig e-postadress",
     "user.nameRequired": "Namn är obligatoriskt",

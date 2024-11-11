@@ -8,6 +8,7 @@ export interface LocalUserPayload {
   fullName: string;
   email: string;
   password: string;
+  user: object;
 }
 
 export interface Role {
