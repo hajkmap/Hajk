@@ -3,12 +3,19 @@ import propTypes from "prop-types";
 import LayerItem from "./LayerItem";
 import GroupLayer from "./GroupLayer";
 import LayerGroupAccordion from "./LayerGroupAccordion.js";
-import { styled } from "@mui/material/styles";
-import { Accordion, AccordionDetails, AccordionSummary } from "@mui/material";
-import { Box, Typography, Divider, IconButton, Link } from "@mui/material";
+import {
+  Box,
+  Typography,
+  Divider,
+  IconButton,
+  ListItemText,
+  Link,
+} from "@mui/material";
 import CheckBoxIcon from "@mui/icons-material/CheckBox";
 import CheckBoxOutlineBlankIcon from "@mui/icons-material/CheckBoxOutlineBlank";
-import { IconButton, ListItemText } from "@mui/material";
+import RemoveCircleIcon from "@mui/icons-material/RemoveCircle";
+import InfoIcon from "@mui/icons-material/Info";
+import HajkToolTip from "components/HajkToolTip";
 
 class LayerGroup extends React.PureComponent {
   state = {
@@ -428,7 +435,7 @@ class LayerGroup extends React.PureComponent {
   }
 
   renderChildren() {
-    const { expanded } = this.state;
+    // const { expanded } = this.state;
     return (
       <div>
         {this.props.group.layers.map((layer, i) => {

@@ -31,8 +31,8 @@ export default function GroupLayer({
       ? quickAccessLayer || draggable
         ? layer.get("subLayers")
         : layer.visibleAtStartSubLayers?.length > 0
-        ? layer.visibleAtStartSubLayers
-        : layer.subLayers
+          ? layer.visibleAtStartSubLayers
+          : layer.subLayers
       : []
   );
   const [zoomVisible, setZoomVisible] = useState(true);

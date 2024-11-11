@@ -10,6 +10,7 @@ import {
   Tooltip,
   useTheme,
 } from "@mui/material";
+import HajkToolTip from "components/HajkToolTip";
 
 import DragIndicatorOutlinedIcon from "@mui/icons-material/DragIndicatorOutlined";
 import PublicOutlinedIcon from "@mui/icons-material/PublicOutlined";
@@ -441,8 +442,8 @@ export default function LayerItem({
             drawOrderItem() && showSublayers
               ? "none"
               : drawOrderItem() && !legendIsActive
-              ? `${theme.spacing(0.2)} solid ${theme.palette.divider}`
-              : "none",
+                ? `${theme.spacing(0.2)} solid ${theme.palette.divider}`
+                : "none",
           display: "flex",
           "&:hover .dragInidcatorIcon": {
             opacity: draggable ? 1 : 0,
