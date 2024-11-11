@@ -29,3 +29,5 @@ export interface ServiceUpdateFormData {
   serverType?: string;
   comment?: string;
 }
+
+export const ServiceType = ["ARCGIS", "VECTOR", "WFS", "WFST", "WMS", "WMTS"];

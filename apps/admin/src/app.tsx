@@ -52,7 +52,7 @@ const router = createBrowserRouter(
           element: <ServicesPage />,
         },
         {
-          path: "services/servicesettings/:id",
+          path: "services/:id",
           element: <ServiceSettings />,
         },
         {

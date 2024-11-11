@@ -108,23 +108,14 @@ export default function Header() {
                 component="span"
                 key={path}
               >
-                {index === 1 ? (
-                  <Box
-                    component="span"
-                    sx={{ color: isCurrentPath ? palette.text.primary : "" }}
-                  >
-                    {displayName}
-                  </Box>
-                ) : (
-                  <Link
-                    style={{
-                      color: isCurrentPath ? palette.text.primary : "",
-                    }}
-                    to={path}
-                  >
-                    {displayName}
-                  </Link>
-                )}
+                <Link
+                  style={{
+                    color: isCurrentPath ? palette.text.primary : "",
+                  }}
+                  to={path}
+                >
+                  {displayName}
+                </Link>
 
                 {index < pathParts.length - 1 && (
                   <Box component="span"> / </Box>
@@ -165,7 +156,7 @@ export default function Header() {
             }}
           >
             <img
-              src="hajk-admin-logo.svg"
+              src="/hajk-admin-logo.svg"
               alt={t("common.clickableLogo")}
               style={{
                 height: "32px",

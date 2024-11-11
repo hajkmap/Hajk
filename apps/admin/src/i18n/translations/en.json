@@ -26,6 +26,13 @@
     "services.dialog.deleteBtn": "Delete",
     "services.dialog.closeBtn": "Close",
     "services.url.btnLabel": "Change url",
-    "common.servicesettings": "Settings"
+    "services.description": "Internal description of service",
+    "services.workspace": "Workspace (optional)",
+    "services.coordinateSystem": "Coordinate system",
+    "services.owner": "Owner",
+    "services.layerDescription": "Description of the displayed layer",
+    "common.serviceType": "Service type",
+    "common.name": "Name",
+    "common.serverType": "Server type"
   }
 }

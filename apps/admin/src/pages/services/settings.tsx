@@ -116,101 +116,58 @@ export default function ServiceSettings() {
   const serviceSettingsFormContainer = new DynamicFormContainer<FieldValues>();
   const panelNestedContainer = new DynamicFormContainer<FieldValues>(
     "",
-    CONTAINER_TYPE.PANEL,
-    {
-      backgroundColor: "rgba(237,231,246,1)",
-    }
+    CONTAINER_TYPE.PANEL
   );
   const accordionNestedContainer = new DynamicFormContainer<FieldValues>(
     "Anslutning",
-    CONTAINER_TYPE.ACCORDION,
-    {
-      backgroundColor: palette.grey[200],
-    }
+    CONTAINER_TYPE.ACCORDION
   );
   const accordionNestedContainer2 = new DynamicFormContainer<FieldValues>(
     "Inställningar för request",
-    CONTAINER_TYPE.ACCORDION,
-    {
-      backgroundColor: palette.grey[200],
-    }
+    CONTAINER_TYPE.ACCORDION
   );
   const accordionNestedContainer3 = new DynamicFormContainer<FieldValues>(
     "Tillgängliga lager i tjänsten",
-    CONTAINER_TYPE.ACCORDION,
-    {
-      backgroundColor: palette.grey[200],
-    }
+    CONTAINER_TYPE.ACCORDION
   );
   const accordionNestedContainer4 = new DynamicFormContainer<FieldValues>(
     "Infoknapp",
-    CONTAINER_TYPE.ACCORDION,
-    {
-      backgroundColor: palette.grey[200],
-    }
+    CONTAINER_TYPE.ACCORDION
   );
 
   panelNestedContainer.addInput({
     type: INPUT_TYPE.TEXTFIELD,
     gridColumns: 10,
     name: "name",
-    title: "Namn",
+    title: `${t("common.serviceType")}`,
     defaultValue: "",
-    slotProps: {
-      input: {
-        style: {
-          backgroundColor: palette.common.white,
-        },
-      },
-    },
   });
 
   panelNestedContainer.addInput({
     type: INPUT_TYPE.TEXTFIELD,
     name: "serviceType",
-    title: "Tjänstetyp",
+    title: `${t("common.serviceType")}`,
     defaultValue: `${service?.type}`,
     disabled: true,
     gridColumns: 8,
-    slotProps: {
-      input: {
-        style: {
-          backgroundColor: palette.common.white,
-        },
-      },
-    },
   });
   panelNestedContainer.addInput({
     type: INPUT_TYPE.TEXTAREA,
     gridColumns: 8,
     name: "description",
-    title: "Intern adminbeskrivning av tjänst",
-    slotProps: {
-      input: {
-        style: {
-          backgroundColor: palette.common.white,
-        },
-      },
-    },
+    title: `${t("services.description")}`,
   });
 
   accordionNestedContainer.addInput({
     type: INPUT_TYPE.SELECT,
     gridColumns: 8,
     name: "serverType",
-    title: "Servertyp",
+    title: `${t("common.serverType")}`,
     defaultValue: "GEOSERVER",
     optionList: [
       { title: "Geoserver", value: "GEOSERVER" },
       { title: "QGIS Server", value: "QGIS_SERVER" },
     ],
-    slotProps: {
-      input: {
-        style: {
-          backgroundColor: palette.common.white,
-        },
-      },
-    },
   });
   accordionNestedContainer.addInput({
     type: INPUT_TYPE.TEXTFIELD,
@@ -245,9 +202,6 @@ export default function ServiceSettings() {
             </Button>
           </>
         ),
-        style: {
-          backgroundColor: palette.common.white,
-        },
       },
     },
   });
@@ -255,32 +209,18 @@ export default function ServiceSettings() {
     type: INPUT_TYPE.SELECT,
     gridColumns: 8,
     name: "workSpace",
-    title: "Workspace",
+    title: `${t("services.workspace")}`,
     defaultValue: "WORKSPACE_1",
     optionList: [
       { title: "Workspace 1", value: "WORKSPACE_1" },
       { title: "Workspace 2", value: "WORKSPACE_2" },
     ],
-    slotProps: {
-      input: {
-        style: {
-          backgroundColor: palette.common.white,
-        },
-      },
-    },
   });
   accordionNestedContainer2.addInput({
     type: INPUT_TYPE.TEXTFIELD,
     gridColumns: 8,
     name: "getMapUrl",
     title: `GetMap-url`,
-    slotProps: {
-      input: {
-        style: {
-          backgroundColor: palette.common.white,
-        },
-      },
-    },
   });
   accordionNestedContainer2.addInput({
     type: INPUT_TYPE.SELECT,
@@ -292,33 +232,19 @@ export default function ServiceSettings() {
       { title: "1.1.1", value: "1.1.1" },
       { title: "1.3.0", value: "1.3.0" },
     ],
-    slotProps: {
-      input: {
-        style: {
-          backgroundColor: palette.common.white,
-        },
-      },
-    },
   });
 
   accordionNestedContainer2.addInput({
     type: INPUT_TYPE.SELECT,
     gridColumns: 8,
     name: "coordinateSystem",
-    title: "Koordinatsystem",
+    title: `${t("services.coordinateSystem")}`,
     defaultValue: "EPSG:3006",
     optionList: [
       { title: "EPSG:3006", value: "EPSG:3006" },
       { title: "EPSG:3007", value: "EPSG:3007" },
       { title: "EPSG:4326", value: "EPSG:4326" },
     ],
-    slotProps: {
-      input: {
-        style: {
-          backgroundColor: palette.common.white,
-        },
-      },
-    },
   });
 
   accordionNestedContainer3.addCustomInput({
@@ -374,27 +300,13 @@ export default function ServiceSettings() {
     type: INPUT_TYPE.TEXTFIELD,
     gridColumns: 8,
     name: "owner",
-    title: "Ägare",
-    slotProps: {
-      input: {
-        style: {
-          backgroundColor: palette.common.white,
-        },
-      },
-    },
+    title: `${t("services.owner")}`,
   });
   accordionNestedContainer4.addInput({
     type: INPUT_TYPE.TEXTAREA,
     gridColumns: 8,
     name: "layerDescription",
-    title: "Visningsbeskrivning av lager",
-    slotProps: {
-      input: {
-        style: {
-          backgroundColor: palette.common.white,
-        },
-      },
-    },
+    title: `${t("services.layerDescription")}`,
   });
 
   serviceSettingsFormContainer.addContainer([
@@ -458,7 +370,7 @@ export default function ServiceSettings() {
           onClick={handleExternalSubmit}
           sx={{ backgroundColor: palette.secondary.dark }}
           variant="contained"
-          disabled={updateStatus === "pending"}
+          disabled={updateStatus === "pending" || deleteStatus === "pending"}
         >
           {updateStatus === "pending" ? (
             <CircularProgress color="secondary" size={30} />
@@ -503,10 +415,16 @@ export default function ServiceSettings() {
           onClose={handleDialogClose}
           actions={
             <>
-              <Button onClick={handleDialogClose} color="primary">
+              <Button
+                sx={{ color: palette.secondary.dark }}
+                variant="text"
+                onClick={handleDialogClose}
+                color="primary"
+              >
                 {t("services.dialog.closeBtn")}
               </Button>
               <Button
+                sx={{ backgroundColor: palette.secondary.dark }}
                 onClick={handleSaveUrl}
                 color="primary"
                 variant="contained"

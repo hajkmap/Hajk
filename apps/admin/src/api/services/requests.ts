@@ -149,9 +149,6 @@ export const updateService = async (
 ): Promise<ServiceUpdateFormData> => {
   const internalApiClient = getApiClient();
   try {
-    // just to test the loading spinner in the UI
-    await new Promise((resolve) => setTimeout(resolve, 3000));
-
     const response = await internalApiClient.patch<ServiceUpdateFormData>(
       `/services/${serviceId}`,
       data
@@ -175,8 +172,6 @@ export const updateService = async (
 export const deleteService = async (serviceId: string): Promise<void> => {
   const internalApiClient = getApiClient();
   try {
-    await new Promise((resolve) => setTimeout(resolve, 3000));
-
     await internalApiClient.delete(`/services/${serviceId}`);
   } catch (error) {
     const axiosError = error as InternalApiError;

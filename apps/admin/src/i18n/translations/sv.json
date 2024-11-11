@@ -26,6 +26,13 @@
     "services.dialog.deleteBtn": "Ta bort",
     "services.dialog.closeBtn": "Stäng",
     "services.url.btnLabel": "Ändra url",
-    "common.servicesettings": "Inställningar"
+    "services.description": "Intern adminbeskrivning av tjänst",
+    "services.workspace": "Arbetsområde (valfri)",
+    "services.coordinateSystem": "Koordinatsystem",
+    "services.owner": "Ägare",
+    "services.layerDescription": "Visningsbeskrivning av lager",
+    "common.serviceType": "Tjänsttyp",
+    "common.name": "Namn",
+    "common.serverType": "Servertyp"
   }
 }

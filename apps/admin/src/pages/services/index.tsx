@@ -19,17 +19,8 @@ import FormRenderer from "../../components/form-factory/form-renderer";
 import { DefaultUseForm } from "../../components/form-factory/default-use-form";
 import { createOnSubmitHandler } from "../../components/form-factory/form-utils";
 import { useServices, useCreateService } from "../../api/services";
-import { ServiceCreateFormData } from "../../api/services/types";
+import { ServiceCreateFormData, ServiceType } from "../../api/services/types";
 import DialogWrapper from "../../components/flexible-dialog";
-
-enum ServiceType {
-  ARCGIS = "ARCGIS",
-  VECTOR = "VECTOR",
-  WFS = "WFS",
-  WFST = "WFST",
-  WMS = "WMS",
-  WMTS = "WMTS",
-}
 
 export default function ServicesPage() {
   const navigate = useNavigate();
@@ -37,16 +28,14 @@ export default function ServicesPage() {
   const { t } = useTranslation();
   const { data: services, isLoading } = useServices();
   const { mutateAsync: createService } = useCreateService();
-
   const [open, setOpen] = useState<boolean>(false);
-  const [catchError, setCatchError] = useState<string>();
-  const [serviceUrl, setServiceUrl] = useState<
-    DynamicFormContainer<FieldValues>
-  >(new DynamicFormContainer<FieldValues>());
+  const [service, setService] = useState<DynamicFormContainer<FieldValues>>(
+    new DynamicFormContainer<FieldValues>()
+  );
 
-  const serviceUrlContainer = new DynamicFormContainer<FieldValues>();
+  const serviceContainer = new DynamicFormContainer<FieldValues>();
 
-  serviceUrlContainer.addInput({
+  serviceContainer.addInput({
     type: INPUT_TYPE.TEXTFIELD,
     gridColumns: 12,
     name: "url",
@@ -61,18 +50,29 @@ export default function ServicesPage() {
     },
   });
 
+  serviceContainer.addInput({
+    type: INPUT_TYPE.SELECT,
+    gridColumns: 8,
+    name: "type",
+    title: `${t("common.serviceType")}`,
+    defaultValue: ServiceType[4],
+    optionList: ServiceType.map((type) => ({
+      title: type,
+      value: type,
+    })),
+  });
+
   useEffect(() => {
-    setServiceUrl(serviceUrlContainer);
+    setService(serviceContainer);
   }, []);
 
-  const defaultValues = serviceUrl.getDefaultValues();
+  const defaultValues = service.getDefaultValues();
 
   const handleClickOpen = () => {
     setOpen(true);
   };
   const handleClose = () => {
     setOpen(false);
-    setCatchError(undefined);
   };
 
   const {
@@ -83,92 +83,32 @@ export default function ServicesPage() {
     reset,
   } = DefaultUseForm(defaultValues);
 
-  // There is probably another way to get the service type based on the provided URL
-  // This is just a quick and dirty test
-  const fetchCapabilities = async (url: string): Promise<ServiceType> => {
-    if (url.includes("/wfs")) {
-      return ServiceType.WFS;
-    } else if (url.includes("/wms")) {
-      return ServiceType.WMS;
-    } else if (url.includes("/wmts")) {
-      return ServiceType.WMTS;
-    } else if (url.includes("/wfst/")) {
-      return ServiceType.WFST;
-    } else if (url.includes("/arcgis/") || url.includes("/services/")) {
-      return ServiceType.ARCGIS;
-    } else if (url.includes("/vector/")) {
-      return ServiceType.VECTOR;
-    }
-
-    try {
-      const capabilitiesUrl = `${url}?service=WFS&request=GetCapabilities`;
-      const response = await fetch(capabilitiesUrl);
-
-      if (!response.ok) {
-        throw new Error(`Error fetching capabilities: ${response.statusText}`);
-      }
-
-      const text = await response.text();
-      const parser = new DOMParser();
-      const xmlDoc = parser.parseFromString(text, "text/xml");
-
-      const serviceName = xmlDoc
-        .getElementsByTagName("Service")[0]
-        ?.getElementsByTagName("Name")[0]?.textContent;
-
-      if (serviceName) {
-        if (serviceName.includes("WFS")) {
-          return ServiceType.WFS;
-        } else if (serviceName.includes("WMS")) {
-          return ServiceType.WMS;
-        } else if (serviceName.includes("WMTS")) {
-          return ServiceType.WMTS;
-        } else if (serviceName.includes("ARCGIS")) {
-          return ServiceType.ARCGIS;
-        } else if (serviceName.includes("VECTOR")) {
-          return ServiceType.VECTOR;
-        } else if (serviceName.includes("WFST")) {
-          return ServiceType.WFST;
-        }
-      }
-
-      throw new Error(
-        "Could not determine service type from capabilities response."
-      );
-    } catch (error) {
-      console.error("Failed to fetch capabilities:", error);
-      throw error;
-    }
-  };
-
   const handleServiceSubmit = async (serviceData: ServiceCreateFormData) => {
     try {
-      const serviceType = await fetchCapabilities(serviceData.url);
-
       const payload = {
         locked: true,
-        type: serviceType,
+        type: serviceData.type,
         url: serviceData.url,
         serverType: "QGIS_SERVER",
         comment: "Test comment",
       };
 
+      console.log("payload", payload);
+
       await createService(payload);
       reset({ url: "" });
       handleClose();
-      setCatchError(undefined);
     } catch (error) {
       console.error("Failed to submit service:", error);
-      setCatchError((error as Error).message);
     }
   };
 
   const onSubmit = createOnSubmitHandler({
     handleSubmit,
     dirtyFields,
+
     onValid: (data: FieldValues) => {
       const serviceData = data as ServiceCreateFormData;
-
       void handleServiceSubmit(serviceData);
     },
     onInvalid: (errors) => {
@@ -202,24 +142,31 @@ export default function ServicesPage() {
             onSubmit={onSubmit}
             actions={
               <>
-                <Button onClick={handleClose} color="primary">
+                <Button
+                  sx={{ color: palette.secondary.dark }}
+                  variant="text"
+                  onClick={handleClose}
+                  color="primary"
+                >
                   {t("services.dialog.closeBtn")}
                 </Button>
-                <Button type="submit" color="primary" variant="contained">
+                <Button
+                  sx={{ backgroundColor: palette.secondary.dark }}
+                  type="submit"
+                  color="primary"
+                  variant="contained"
+                >
                   {t("services.dialog.saveBtn")}
                 </Button>
               </>
             }
           >
             <FormRenderer
-              data={serviceUrl}
+              data={service}
               register={register}
               control={control}
               errors={errors}
             />
-            {catchError && (
-              <Typography style={{ color: "red" }}>{catchError}</Typography>
-            )}
           </DialogWrapper>
           <Grid size={12}>
             <Box component="p">
@@ -230,9 +177,7 @@ export default function ServicesPage() {
               {services?.map((service) => (
                 <ListItem
                   key={service.id}
-                  onClick={() =>
-                    navigate(`/services/servicesettings/${service.id}`)
-                  }
+                  onClick={() => navigate(`/services/${service.id}`)}
                 >
                   <Paper sx={{ width: "100%", p: 2 }} elevation={4}>
                     <Typography sx={{ cursor: "pointer" }}>
