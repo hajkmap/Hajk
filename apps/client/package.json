@@ -79,8 +79,6 @@
     "react-dom": "^18.2.0",
     "react-event-observer": "^0.5.11",
     "react-horizontal-scrolling-menu": "^0.7.8",
-    "react-virtualized": "^9.22.3",
-    "recharts": "^2.1.16",
     "react-markdown": "^9.0.1",
     "react-number-format": "^5.3.3",
     "react-rnd": "^10.4.1",
