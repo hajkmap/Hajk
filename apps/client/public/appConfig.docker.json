@@ -1,0 +1,10 @@
+{
+  "mapserviceBase": "/api/v2",
+  "defaultMap": "map_1",
+  "showExperimentalLanguageSwitcher": false,
+  "lang": "en",
+  "loadErrorTitle": "Ett fel har inträffat",
+  "loadErrorMessage": "Fel när applikationen skulle läsas in. Du kan försöka att återställa applikationen genom att trycka på knappen nedan. Om felet kvarstår kan du kontakta systemansvarig.",
+  "loadErrorReloadButtonText": "Återställ applikationen",
+  "announcements": []
+}

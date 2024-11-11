@@ -1,0 +1,661 @@
+openapi: 3.0.3
+info:
+  title: Hajk Backend API
+  description: The Hajk backend API specification is  the authoritative specification for the API to which all Hajk backend implementations must conform.
+  version: 2.0.0
+servers:
+  - url: /api/v2
+tags:
+  - name: Client-accessible
+    description: Resources necessary to load a working map in client
+  - name: Admin - Maps and layers
+    description: Perform CRUD operations on layers and maps configurations
+  - name: Admin - Informative/DocumentHandler
+    description: Resources for working with the "Documents API", used mainly by the Informative plugin
+  - name: Admin - ActiveDirectory
+    description: Resources for working with ActiveDirectory
+  - name: Sokigo FB Proxy
+    description: Proxy specified in working with Sokigo's FB API
+  - name: FME-server Proxy
+    description: Proxy for tunneling authenticated requests against FME server
+  - name: Specification
+    description: The OpenAPI specification
+paths:
+  /informative/load/{document}:
+    get:
+      tags:
+        - Client-accessible
+      parameters:
+        - name: document
+          in: path
+          description: Name of the document to be fetched
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: Return the JSON file
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DocumentBody"
+        5XX:
+          description: Example not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /informative/create:
+    put:
+      tags:
+        - Admin - Informative/DocumentHandler
+      requestBody:
+        description: Settings for given map's LayerSwitcher component
+        content:
+          application/json:
+            schema:
+              type: string
+      responses:
+        200:
+          description: Create a document connected to a specified map
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InformativeDocumentCreateBody"
+        5XX:
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /informative/list:
+    get:
+      tags:
+        - Admin - Informative/DocumentHandler
+      responses:
+        200:
+          description: Return all available documents
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DocumentsList"
+        5XX:
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /informative/list/{name}:
+    get:
+      tags:
+        - Admin - Informative/DocumentHandler
+      parameters:
+        - name: name
+          in: path
+          description: Name of the map for which connected documents will be returned
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: Return available documents for the specified map
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DocumentsList"
+        5XX:
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /informative/save/{name}:
+    put:
+      tags:
+        - Admin - Informative/DocumentHandler
+      parameters:
+        - name: name
+          in: path
+          description: Document to be saved
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: Return the saved document's body
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DocumentsList"
+        5XX:
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /informative/delete/{name}:
+    delete:
+      tags:
+        - Admin - Informative/DocumentHandler
+      parameters:
+        - name: name
+          in: path
+          description: Document to deleted
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: Delete the specified document
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DocumentsList"
+        5XX:
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /mapconfig/layers:
+    get:
+      tags:
+        - Admin - Maps and layers
+      description: List available layers, do not apply any visibility restrictions (required for Admin UI).
+      responses:
+        200:
+          description: All layers were fetched successfully
+          content: {}
+  /mapconfig/layers/verify:
+    get:
+      tags:
+        - Admin - Maps and layers
+      description: Verify that all layers used in layers repository are reachable
+      responses:
+        200:
+          description: Object that contains missing layers, grouped per OGC service.
+          content: {}
+  /mapconfig/list:
+    get:
+      tags:
+        - Admin - Maps and layers
+      description: List available map configurations
+      responses:
+        200:
+          description: Available maps were fetched successfully
+          content: {}
+  /mapconfig/listimage:
+    get:
+      tags:
+        - Admin - Maps and layers
+      description: List available images in the upload folder
+      responses:
+        200:
+          description: Available images were fetched successfully
+          content: {}
+  /mapconfig/listvideo:
+    get:
+      tags:
+        - Admin - Maps and layers
+      description: List available videos in the upload folder
+      responses:
+        200:
+          description: Available videos were fetched successfully
+          content: {}
+  /mapconfig/listaudio:
+    get:
+      tags:
+        - Admin - Maps and layers
+      description: List available audio files in the upload folder
+      responses:
+        200:
+          description: Available audio files were fetched successfully
+          content: {}
+  /mapconfig/{map}:
+    get:
+      tags:
+        - Admin - Maps and layers
+      parameters:
+        - name: map
+          in: path
+          description: Name of the map to fetch
+          required: true
+          schema:
+            type: string
+        - in: header
+          name: X-Control-Header
+          description: User name that will be supplied to AD
+          schema:
+            type: string
+          required: false
+      description: Fetch contents of a map configuration
+      responses:
+        200:
+          description: Success
+          content: {}
+    put:
+      tags:
+        - Admin - Maps and layers
+      parameters:
+        - name: map
+          in: path
+          description: File name of the new map config
+          required: true
+          schema:
+            type: string
+      description: Create a new map configuration
+      responses:
+        200:
+          description: Success
+          content: {}
+    delete:
+      tags:
+        - Admin - Maps and layers
+      parameters:
+        - name: map
+          in: path
+          description: Name of the map to be deleted
+          required: true
+          schema:
+            type: string
+      description: Delete an existing map configuration
+      responses:
+        200:
+          description: Success
+          content: {}
+  /config/{map}:
+    get:
+      tags:
+        - Client-accessible
+      parameters:
+        - name: map
+          in: path
+          description: Name of the map to fetch
+          required: true
+          schema:
+            type: string
+        - in: header
+          name: X-Control-Header
+          description: User name that will be supplied to AD
+          schema:
+            type: string
+          required: false
+      description: Fetch contents of a map configuration
+      responses:
+        200:
+          description: Success
+          content: {}
+  /mapconfig/export/{map}/{format}:
+    get:
+      tags:
+        - Admin - Maps and layers
+      parameters:
+        - name: map
+          in: path
+          description: Name of the map to fetch
+          required: true
+          schema:
+            type: string
+        - name: format
+          in: path
+          description: Name of the map to fetch
+          required: true
+          schema:
+            type: string
+      description: Exports the map's layers in a human-readable format
+      responses:
+        200:
+          description: Success
+          content: {}
+  /mapconfig/duplicate/{nameFrom}/{nameTo}:
+    put:
+      tags:
+        - Admin - Maps and layers
+      parameters:
+        - name: nameFrom
+          in: path
+          description: Name of the map to be duplicated
+          required: true
+          schema:
+            type: string
+        - name: nameTo
+          in: path
+          description: Name of the new map (the duplicate)
+          required: true
+          schema:
+            type: string
+      description: Create a new map configuration by duplicating an existing one
+      responses:
+        200:
+          description: Success
+          content: {}
+  /ad/availableadgroups:
+    get:
+      tags:
+        - Admin - ActiveDirectory
+      description: Get a list of all available AD groups to make it easier for admins to set map and layer permissions
+      responses:
+        200:
+          description: Success
+          content: {}
+  /ad/findcommonadgroupsforusers:
+    get:
+      tags:
+        - Admin - ActiveDirectory
+      description: Find out which AD group membership is shared between specified users
+      parameters:
+        - in: query
+          name: users
+          schema:
+            type: array
+            items:
+              type: string
+          style: form
+          explode: false
+          allowReserved: true
+      responses:
+        200:
+          description: Success
+          content: {}
+  /ad/users:
+    get:
+      tags:
+        - Admin - ActiveDirectory
+      description: Get the current content of local AD Users store
+      responses:
+        200:
+          description: Success
+          content: {}
+  /ad/groups:
+    get:
+      tags:
+        - Admin - ActiveDirectory
+      description: Get the current content of local AD Groups store
+      responses:
+        200:
+          description: Success
+          content: {}
+  /ad/groupsPerUser:
+    get:
+      tags:
+        - Admin - ActiveDirectory
+      description: Get the current content of local AD Groups Per User store
+      responses:
+        200:
+          description: Success
+          content: {}
+  /ad/flushStores:
+    put:
+      tags:
+        - Admin - ActiveDirectory
+      description: Flush the contents of all local AD stores (removes the cached objects)
+      responses:
+        200:
+          description: Success
+          content: {}
+  /fbproxy/{query}:
+    get:
+      tags:
+        - Sokigo FB Proxy
+      parameters:
+        - name: query
+          in: path
+          description: The query to be proxied
+          required: true
+          schema:
+            type: string
+      description: Proxy the specified query to Sokigo's FB API
+      responses:
+        200:
+          description: Result will vary depending on response from the API
+          content: {}
+  /fmeproxy/{query}:
+    get:
+      tags:
+        - FME-server Proxy
+      parameters:
+        - name: query
+          in: path
+          description: Path corresponding to an endpoint on the FME-server REST API.
+          required: true
+          schema:
+            type: string
+      description: Proxy the specified query to FME-server REST API. For information on available endpoints, checkout the [FME-server API documentation](https://docs.safe.com/fme/html/FME_REST/apidoc/v3/#). The proxy will forward all HTTP-methods, not only GET.
+      responses:
+        200:
+          description: Result will vary depending on response from the API.
+          content: {}
+  /spec:
+    get:
+      tags:
+        - Specification
+      responses:
+        200:
+          description: Return the API specification
+          content: {}
+  /settings/layermenu:
+    put:
+      tags:
+        - Admin - Maps and layers
+      requestBody:
+        description: Settings for given map's LayerSwitcher component
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LayerSwitcherBody"
+        required: true
+      parameters:
+        - name: mapFile
+          in: query
+          description: Name of the map who's LayerSwitcher config should be written
+          required: true
+          schema:
+            type: string
+      responses:
+        204:
+          description: All good
+          content: {}
+  /settings/mapsettings:
+    put:
+      tags:
+        - Admin - Maps and layers
+      requestBody:
+        description: Settings for given map's LayerSwitcher component
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LayerSwitcherBody"
+        required: true
+      parameters:
+        - name: mapFile
+          in: query
+          description: Name of the map who's LayerSwitcher config should be written
+          required: true
+          schema:
+            type: string
+      responses:
+        204:
+          description: All good
+          content: {}
+  /settings/toolsettings:
+    put:
+      tags:
+        - Admin - Maps and layers
+      requestBody:
+        description: Settings for given map's LayerSwitcher component
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LayerSwitcherBody"
+        required: true
+      parameters:
+        - name: mapFile
+          in: query
+          description: Name of the map who's LayerSwitcher config should be written
+          required: true
+          schema:
+            type: string
+      responses:
+        204:
+          description: All good
+          content: {}
+  /settings/update/{map}/{tool}:
+    put:
+      tags:
+        - Admin - Maps and layers
+      requestBody:
+        description: Settings for given map's specific tool
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LayerSwitcherBody"
+        required: true
+      parameters:
+        - name: map
+          in: path
+          description: Name of the map
+          required: true
+          schema:
+            type: string
+        - name: tool
+          in: path
+          description: Name of the tool to be edited
+          required: true
+          schema:
+            type: string
+      responses:
+        201:
+          description: Created
+          content: {}
+        204:
+          description: Updated
+          content: {}
+  /settings/{layerType}:
+    post:
+      tags:
+        - Admin - Maps and layers
+      description: Add a new layer of specified type
+      requestBody:
+        description: Content of the layer to be added
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ExampleBody"
+        required: true
+      parameters:
+        - name: layerType
+          in: path
+          description: The type of layer that will be added
+          required: true
+          schema:
+            type: string
+      responses:
+        204:
+          description: All good
+          content: {}
+    put:
+      tags:
+        - Admin - Maps and layers
+      description: Replace a specific layer with supplied content
+      requestBody:
+        description: Layer to be added or updated
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ExampleBody"
+        required: true
+      parameters:
+        - name: layerType
+          in: path
+          description: The type of layer that will be updated
+          required: true
+          schema:
+            type: string
+      responses:
+        204:
+          description: All good
+          content: {}
+  /settings/{type}/{layerId}:
+    delete:
+      tags:
+        - Admin - Maps and layers
+      parameters:
+        - name: type
+          in: path
+          description: The kind of layer to delete
+          required: true
+          schema:
+            type: string
+        - name: layerId
+          in: path
+          description: The ID of layer to delete
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: Layer deleted successfully
+          content: {}
+components:
+  schemas:
+    Example:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 3
+        name:
+          type: string
+          example: example 3
+    Error:
+      type: object
+      properties:
+        errno:
+          type: integer
+          example: -2
+        code:
+          type: string
+          example: ENOENT
+    DocumentBody:
+      type: object
+      properties:
+        chapters:
+          type: array
+          items:
+            type: object
+            properties:
+              header:
+                type: string
+              html:
+                type: string
+              expanded:
+                type: boolean
+              mapSettings:
+                type: object
+              chapters:
+                type: array
+                items:
+                  type: object
+    DocumentsList:
+      type: array
+      items:
+        type: string
+      example: ["doc_1", "doc_2", "doc_3"]
+    InformativeDocumentCreateBody:
+      type: object
+      properties:
+        documentName:
+          type: string
+        documentMap:
+          type: string
+    ExampleBody:
+      title: example
+      # required:
+      #   - name
+      type: object
+      properties:
+        name:
+          type: string
+          example: no_stress
+    LayerSwitcherBody:
+      title: LayerSwitcher body
