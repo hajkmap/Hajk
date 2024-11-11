@@ -36,15 +36,16 @@ model User {
 }
 
 model Role {
-  id          Int           @id @default(autoincrement())
-  code        String        @unique
-  title       String?
-  description String?
-  users       RoleOnUser[]
-  RoleOnMap   RoleOnMap[]
-  RoleOnLayer RoleOnLayer[]
-  RoleOnTool  RoleOnTool[]
-  RoleOnGroup RoleOnGroup[]
+  id                  Int                   @id @default(autoincrement())
+  code                String                @unique
+  title               String?
+  description         String?
+  users               RoleOnUser[]
+  RoleOnMap           RoleOnMap[]
+  RoleOnLayer         RoleOnLayer[]
+  RoleOnLayerInstance RoleOnLayerInstance[]
+  RoleOnTool          RoleOnTool[]
+  RoleOnGroup         RoleOnGroup[]
 }
 
 model RoleOnUser {
@@ -74,6 +75,15 @@ model RoleOnLayer {
   @@id([layerId, roleId])
 }
 
+model RoleOnLayerInstance {
+  layerInstanceId String
+  roleId          Int
+  role            Role          @relation(fields: [roleId], references: [id])
+  layerInstance   LayerInstance @relation(fields: [layerInstanceId], references: [id])
+
+  @@id([layerInstanceId, roleId])
+}
+
 model RoleOnTool {
   toolId Int
   roleId Int
@@ -93,13 +103,13 @@ model RoleOnGroup {
 }
 
 model Map {
-  id              Int            @id @default(autoincrement())
-  locked          Boolean        @default(false)
-  name            String         @unique
-  options         Json           @default("{}")
+  id              Int             @id @default(autoincrement())
+  locked          Boolean         @default(false)
+  name            String          @unique
+  options         Json            @default("{}")
   projections     Projection[]
   tools           ToolsOnMaps[]
-  layers          LayersOnMaps[]
+  layers          LayerInstance[]
   groups          GroupsOnMaps[]
   visibleForRoles RoleOnMap[]
 }
@@ -137,10 +147,10 @@ model Projection {
 }
 
 model Group {
-  id              String           @id @default(cuid())
-  locked          Boolean          @default(false)
+  id              String          @id @default(cuid())
+  locked          Boolean         @default(false)
   name            String
-  layers          LayersOnGroups[]
+  layers          LayerInstance[]
   maps            GroupsOnMaps[]
   visibleForRoles RoleOnGroup[]
 }
@@ -158,39 +168,26 @@ model Service {
 }
 
 model Layer {
-  id              String           @id @default(cuid())
-  locked          Boolean          @default(false)
-  service         Service          @relation(fields: [serviceId], references: [id])
+  id              String          @id @default(cuid())
+  locked          Boolean         @default(false)
+  service         Service         @relation(fields: [serviceId], references: [id])
   serviceId       String
-  options         Json             @default("{}")
-  maps            LayersOnMaps[]
-  groups          LayersOnGroups[]
+  options         Json            @default("{}")
   visibleForRoles RoleOnLayer[]
+  instances       LayerInstance[]
 }
 
-model LayersOnGroups {
-  id               Int      @id @default(autoincrement())
-  groupId          String
-  layerId          String
-  group            Group    @relation(fields: [groupId], references: [id])
-  layer            Layer    @relation(fields: [layerId], references: [id])
-  infobox          String
-  drawOrder        Int
-  visibleAtStart   Boolean
-  visibleForGroups String[]
-}
-
-model LayersOnMaps {
-  id               Int      @id @default(autoincrement())
-  mapName          String
-  layerId          String
-  map              Map      @relation(fields: [mapName], references: [name])
-  layer            Layer    @relation(fields: [layerId], references: [id])
-  usage            UseType
-  infobox          String
-  drawOrder        Int
-  visibleAtStart   Boolean
-  visibleForGroups String[]
+model LayerInstance {
+  id              String                @id @default(cuid())
+  layerId         String
+  mapId           Int?
+  groupId         String?
+  layer           Layer                 @relation(fields: [layerId], references: [id])
+  map             Map?                  @relation(fields: [mapId], references: [id])
+  group           Group?                @relation(fields: [groupId], references: [id])
+  usage           UseType
+  visibleForRoles RoleOnLayerInstance[]
+  options         Json                  @default("{}")
 }
 
 model GroupsOnMaps {

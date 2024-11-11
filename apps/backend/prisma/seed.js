@@ -240,11 +240,12 @@ async function readAndPopulateLayers() {
 
 // Populates the database with the layer structure for the map corresponding to mapName
 async function populateMapLayerStructure(mapName) {
-  const t = await prisma.map.findUnique({
+  const map = await prisma.map.findUnique({
     where: {
       name: mapName,
     },
     select: {
+      id: true,
       tools: {
         where: {
           tool: {
@@ -254,7 +255,7 @@ async function populateMapLayerStructure(mapName) {
       },
     },
   });
-  const { baselayers, groups } = t.tools[0].options;
+  const { baselayers, groups } = map.tools[0].options;
 
   // Imagine this is our "groups.json"…
   const groupsToInsert = [];
@@ -271,14 +272,10 @@ async function populateMapLayerStructure(mapName) {
   baselayers.forEach((bl) => {
     const { id: layerId, ...rest } = bl;
     layersOnMaps.push({
-      layerId,
-      mapName,
+      layerId: layerId,
+      mapId: map.id,
       usage: "BACKGROUND",
-      ...rest,
-      visibleForGroups: !Array.isArray(bl.visibleForGroups)
-        ? []
-        : bl.visibleForGroups,
-      infobox: typeof bl.infobox !== "string" ? "" : bl.infobox,
+      options: rest,
     });
   });
 
@@ -328,13 +325,10 @@ async function populateMapLayerStructure(mapName) {
 
       // Prepare object to insert into layersOnGroups
       layersOnGroups.push({
-        layerId,
+        layerId: layerId,
         groupId: group.id,
-        ...rest,
-        visibleForGroups: !Array.isArray(group.visibleForGroups)
-          ? []
-          : group.visibleForGroups,
-        infobox: typeof group.infobox !== "string" ? "" : group.infobox,
+        usage: "FOREGROUND",
+        options: rest,
       });
 
       layerIds.push(layerId);
@@ -368,6 +362,8 @@ async function populateMapLayerStructure(mapName) {
   const validLayersOnMaps = layersOnMaps.filter(removeUnknownLayers);
   const validLayersOnGroups = layersOnGroups.filter(removeUnknownLayers);
 
+  const validLayers = [...validLayersOnMaps, ...validLayersOnGroups];
+
   // Populates the Group model (the imaginative "groups.json")
   await prisma.group.createMany({
     data: groupsToInsert.map((g) => ({ id: g.id, name: g.name })),
@@ -375,10 +371,26 @@ async function populateMapLayerStructure(mapName) {
   });
   // Connect each of the inserted groups to map (and another group, where applicable)
   await prisma.groupsOnMaps.createMany({ data: groupsOnMap });
-  // Connect valid layers to maps (i.e. those layers that are not part of any group but part of a map)
-  await prisma.layersOnMaps.createMany({ data: validLayersOnMaps });
-  // Connect valid layers to groups
-  await prisma.layersOnGroups.createMany({ data: validLayersOnGroups });
+  // Connect valid layer instances (i.e. those layers that are used in maps (background) or groups (foreground))
+  for await (const layer of validLayers) {
+    const layerInstance = await prisma.layerInstance.create({
+      data: {
+        layerId: layer.layerId,
+        mapId: layer.mapId || undefined,
+        groupId: layer.groupId || undefined,
+        usage: layer.usage,
+        options: layer.options,
+      },
+    });
+
+    const visibleForGroups = layer.options.visibleForGroups || [];
+
+    await updateRolesFromVisibleForGroups(
+      visibleForGroups,
+      layerInstance.id,
+      "layerInstance"
+    );
+  }
   // Finally, we'll add the roles...
   for await (const group of groupsToInsert) {
     await updateRolesFromVisibleForGroups(
@@ -475,10 +487,10 @@ async function updateRolesFromVisibleForGroups(
           },
         });
         break;
-      case "layer":
-        await prisma.roleOnLayer.create({
+      case "layerInstance":
+        await prisma.roleOnLayerInstance.create({
           data: {
-            layer: { connect: { id: entityId } },
+            layerInstance: { connect: { id: entityId } },
             role: { connect: { id: role.id } },
           },
         });
