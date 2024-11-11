@@ -32,25 +32,85 @@ model User {
   email    String       @unique
   fullName String
   strategy AuthStrategy
+  roles    RoleOnUser[]
+}
+
+model Role {
+  id          Int           @id @default(autoincrement())
+  code        String        @unique
+  title       String?
+  description String?
+  users       RoleOnUser[]
+  RoleOnMap   RoleOnMap[]
+  RoleOnLayer RoleOnLayer[]
+  RoleOnTool  RoleOnTool[]
+  RoleOnGroup RoleOnGroup[]
+}
+
+model RoleOnUser {
+  userId String
+  roleId Int
+  user   User   @relation(fields: [userId], references: [id])
+  role   Role   @relation(fields: [roleId], references: [id])
+
+  @@id([userId, roleId])
+}
+
+model RoleOnMap {
+  mapId  Int
+  roleId Int
+  map    Map  @relation(fields: [mapId], references: [id])
+  role   Role @relation(fields: [roleId], references: [id])
+
+  @@id([mapId, roleId])
+}
+
+model RoleOnLayer {
+  layerId String
+  roleId  Int
+  layer   Layer  @relation(fields: [layerId], references: [id])
+  role    Role   @relation(fields: [roleId], references: [id])
+
+  @@id([layerId, roleId])
+}
+
+model RoleOnTool {
+  toolId Int
+  roleId Int
+  tool   Tool @relation(fields: [toolId], references: [id])
+  role   Role @relation(fields: [roleId], references: [id])
+
+  @@id([toolId, roleId])
+}
+
+model RoleOnGroup {
+  groupId String
+  roleId  Int
+  group   Group  @relation(fields: [groupId], references: [id])
+  role    Role   @relation(fields: [roleId], references: [id])
+
+  @@id([groupId, roleId])
 }
 
 model Map {
-  id          Int            @id @default(autoincrement())
-  locked      Boolean        @default(false)
-  name        String         @unique
-  options     Json           @default("{}")
-  projections Projection[]
-  tools       ToolsOnMaps[]
-  layers      LayersOnMaps[]
-  groups      GroupsOnMaps[]
+  id              Int            @id @default(autoincrement())
+  locked          Boolean        @default(false)
+  name            String         @unique
+  options         Json           @default("{}")
+  projections     Projection[]
+  tools           ToolsOnMaps[]
+  layers          LayersOnMaps[]
+  groups          GroupsOnMaps[]
+  visibleForRoles RoleOnMap[]
 }
 
 model Tool {
-  id      Int           @id @default(autoincrement())
-  locked  Boolean       @default(false)
-  type    String
-  options Json          @default("{}")
-  maps    ToolsOnMaps[]
+  id              Int           @id @default(autoincrement())
+  locked          Boolean       @default(false)
+  type            String
+  options         Json          @default("{}")
+  maps            ToolsOnMaps[]
+  visibleForRoles RoleOnTool[]
 }
 
 model ToolsOnMaps {
@@ -77,11 +137,12 @@ model Projection {
 }
 
 model Group {
-  id     String           @id @default(cuid())
-  locked Boolean          @default(false)
-  name   String
-  layers LayersOnGroups[]
-  maps   GroupsOnMaps[]
+  id              String           @id @default(cuid())
+  locked          Boolean          @default(false)
+  name            String
+  layers          LayersOnGroups[]
+  maps            GroupsOnMaps[]
+  visibleForRoles RoleOnGroup[]
 }
 
 model Service {
@@ -97,13 +158,14 @@ model Service {
 }
 
 model Layer {
-  id        String           @id @default(cuid())
-  locked    Boolean          @default(false)
-  service   Service          @relation(fields: [serviceId], references: [id])
-  serviceId String
-  options   Json             @default("{}")
-  maps      LayersOnMaps[]
-  groups    LayersOnGroups[]
+  id              String           @id @default(cuid())
+  locked          Boolean          @default(false)
+  service         Service          @relation(fields: [serviceId], references: [id])
+  serviceId       String
+  options         Json             @default("{}")
+  maps            LayersOnMaps[]
+  groups          LayersOnGroups[]
+  visibleForRoles RoleOnLayer[]
 }
 
 model LayersOnGroups {

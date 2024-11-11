@@ -68,6 +68,14 @@ async function readMapConfigAndPopulateMap(file) {
     const tool = await prisma.tool.create({
       data: { type: t.type, options: t.options },
     });
+
+    // Add potential roles
+    await updateRolesFromVisibleForGroups(
+      t.options.visibleForGroups || [],
+      tool.id,
+      "tool"
+    );
+
     // While inserting each of the tools, we prepare an object
     // that will be used later, to connect the recently-inserted tool
     // with the map that it belongs to.
@@ -81,7 +89,7 @@ async function readMapConfigAndPopulateMap(file) {
 
   // Finally we can create the map
   console.log("Creating map…");
-  await prisma.map.create({
+  const createdMap = await prisma.map.create({
     data: {
       name: file, // We use the file name as our unique map identifier
       options: mapConfig.map, // Put all map options as-is, as JSON
@@ -96,6 +104,15 @@ async function readMapConfigAndPopulateMap(file) {
       // directly.
     },
   });
+
+  // Now that the map is created, we can create and connect roles that should have access to the map.
+  // The "roles" (defined as groups in the .json-files) are set on the layerSwitcher...
+  const visibleForGroups =
+    mapConfig.tools.find((t) => t.type === "layerswitcher").options
+      ?.visibleForGroups || [];
+
+  // Let's create and add the roles
+  await updateRolesFromVisibleForGroups(visibleForGroups, createdMap.id, "map");
 
   // Once the map is created, we can connect it with its tools
   const connectedTools = await prisma.toolsOnMaps.createMany({
@@ -202,6 +219,14 @@ async function readAndPopulateLayers() {
 
       console.log("Creating layers from data: ", data);
 
+      for await (const layer of data) {
+        await updateRolesFromVisibleForGroups(
+          layer.options.visibleForGroups || [],
+          layer.id,
+          "layer"
+        );
+      }
+
       const layersInDB = await prisma.layer.createMany({
         data,
       });
@@ -264,12 +289,13 @@ async function populateMapLayerStructure(mapName) {
     extractLayersFromGroup(group);
 
     // Next, let's handle the group itself
-    const { id: groupId, name, toggled, expanded } = group;
+    const { id: groupId, name, toggled, expanded, visibleForGroups } = group;
 
     // This is a plain, flat group object - similar to layers.json
     groupsToInsert.push({
       id: groupId,
       name: name,
+      visibleForGroups: visibleForGroups || [],
     });
 
     // Create a unique ID for this specific relation
@@ -344,7 +370,7 @@ async function populateMapLayerStructure(mapName) {
 
   // Populates the Group model (the imaginative "groups.json")
   await prisma.group.createMany({
-    data: groupsToInsert,
+    data: groupsToInsert.map((g) => ({ id: g.id, name: g.name })),
     skipDuplicates: true, // We assume - for now! - that same ID means same group, so there's no need to watch out for conflicts
   });
   // Connect each of the inserted groups to map (and another group, where applicable)
@@ -353,6 +379,14 @@ async function populateMapLayerStructure(mapName) {
   await prisma.layersOnMaps.createMany({ data: validLayersOnMaps });
   // Connect valid layers to groups
   await prisma.layersOnGroups.createMany({ data: validLayersOnGroups });
+  // Finally, we'll add the roles...
+  for await (const group of groupsToInsert) {
+    await updateRolesFromVisibleForGroups(
+      group.visibleForGroups || [],
+      group.id,
+      "group"
+    );
+  }
 }
 
 // Populates the database with the layer structure for all available maps currently in the database
@@ -409,6 +443,58 @@ async function createLocalDummyAccounts() {
         strategy: "LOCAL",
       },
     });
+  }
+}
+
+async function updateRolesFromVisibleForGroups(
+  visibleForGroups,
+  entityId,
+  entityType
+) {
+  for await (const group of visibleForGroups) {
+    const role = await prisma.role.upsert({
+      where: { code: group },
+      update: {},
+      create: { code: group, title: group, description: group },
+    });
+
+    switch (entityType) {
+      case "map":
+        await prisma.roleOnMap.create({
+          data: {
+            map: { connect: { id: entityId } },
+            role: { connect: { id: role.id } },
+          },
+        });
+        break;
+      case "tool":
+        await prisma.roleOnTool.create({
+          data: {
+            tool: { connect: { id: entityId } },
+            role: { connect: { id: role.id } },
+          },
+        });
+        break;
+      case "layer":
+        await prisma.roleOnLayer.create({
+          data: {
+            layer: { connect: { id: entityId } },
+            role: { connect: { id: role.id } },
+          },
+        });
+        break;
+      case "group":
+        await prisma.roleOnGroup.create({
+          data: {
+            group: { connect: { id: entityId } },
+            role: { connect: { id: role.id } },
+          },
+        });
+        break;
+
+      default:
+        break;
+    }
   }
 }
 
