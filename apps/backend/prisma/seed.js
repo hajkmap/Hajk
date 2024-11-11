@@ -219,6 +219,12 @@ async function readAndPopulateLayers() {
 
       console.log("Creating layers from data: ", data);
 
+      const layersInDB = await prisma.layer.createMany({
+        data,
+      });
+
+      console.log(`Created ${layersInDB.count} ${type} layers`);
+
       for await (const layer of data) {
         await updateRolesFromVisibleForGroups(
           layer.options.visibleForGroups || [],
@@ -226,12 +232,6 @@ async function readAndPopulateLayers() {
           "layer"
         );
       }
-
-      const layersInDB = await prisma.layer.createMany({
-        data,
-      });
-
-      console.log(`Created ${layersInDB.count} ${type} layers`);
     }
   } catch (error) {
     console.error(error);
@@ -483,6 +483,14 @@ async function updateRolesFromVisibleForGroups(
         await prisma.roleOnTool.create({
           data: {
             tool: { connect: { id: entityId } },
+            role: { connect: { id: role.id } },
+          },
+        });
+        break;
+      case "layer":
+        await prisma.roleOnLayer.create({
+          data: {
+            layer: { connect: { id: entityId } },
             role: { connect: { id: role.id } },
           },
         });
