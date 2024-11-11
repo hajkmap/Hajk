@@ -15,6 +15,7 @@ import {
   Typography,
   useTheme,
 } from "@mui/material";
+import DeleteIcon from "@mui/icons-material/Delete";
 import { toast } from "react-toastify";
 import { useTranslation } from "react-i18next";
 
@@ -24,7 +25,6 @@ import {
   useDeleteUser,
   useUsers,
 } from "../../api/users/hooks";
-import useUserStore from "../../store/use-user-store";
 import { Controller, SubmitHandler, useForm } from "react-hook-form";
 import { useState } from "react";
 
@@ -38,7 +38,6 @@ interface CreateUserInput {
 export default function UsersPage() {
   const { t } = useTranslation();
   const { palette } = useTheme();
-  const activeUser = useUserStore((state) => state.user);
   const { data: users, isLoading: usersLoading } = useUsers();
 
   const [userToDelete, setUserToDelete] = useState<{
@@ -98,12 +97,15 @@ export default function UsersPage() {
                   <ListItem key={user.id} sx={{ p: 0, pt: 1, pb: 1 }}>
                     <Paper sx={{ width: "100%", p: 2 }} elevation={4}>
                       <Grid container justifyContent="space-between">
-                        <Typography>{`${user.fullName}, ${user.email}${
-                          user.email === activeUser?.email ? " (du)" : ""
-                        }`}</Typography>
+                        <Grid>
+                          <Typography>{user.fullName}</Typography>
+                          <Typography variant="caption">
+                            {user.email}
+                          </Typography>
+                        </Grid>
                         <Button
-                          variant="contained"
                           color="error"
+                          size="small"
                           onClick={() =>
                             setUserToDelete({
                               id: user.id,
@@ -111,7 +113,7 @@ export default function UsersPage() {
                             })
                           }
                         >
-                          {t("common.delete")}
+                          <DeleteIcon />
                         </Button>
                       </Grid>
                     </Paper>
