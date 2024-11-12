@@ -146,7 +146,15 @@ export default function Header() {
         direction={"row"}
         sx={{ width: "100%", height: `${HEADER_HEIGHT}px` }}
       >
-        <Grid size={{ xs: 4, sm: 4 }} sx={{ fontSize: "0" }}>
+        <Grid
+          size={{ xs: 8, sm: 8 }}
+          container
+          alignItems="center"
+          sx={{
+            display: "flex",
+            alignItems: "center",
+          }}
+        >
           <Link
             to="/"
             style={{
@@ -166,15 +174,17 @@ export default function Header() {
               }}
             />
           </Link>
-        </Grid>
-        <Grid
-          container
-          size={{ xs: 4, sm: 4 }}
-          alignItems="center"
-          justifyContent="center"
-          sx={{ fontSize: "0.8rem", fontWeight: 700 }}
-        >
-          {breadcrumbLinks}
+
+          <Box
+            sx={{
+              display: "inline-flex",
+              fontSize: "0.8rem",
+              fontWeight: 700,
+              ml: 8,
+            }}
+          >
+            {breadcrumbLinks}
+          </Box>
         </Grid>
 
         <Grid

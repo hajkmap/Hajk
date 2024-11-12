@@ -139,7 +139,7 @@ export default function ServiceSettings() {
     type: INPUT_TYPE.TEXTFIELD,
     gridColumns: 10,
     name: "name",
-    title: `${t("common.serviceType")}`,
+    title: `${t("common.name")}`,
     defaultValue: "",
   });
 

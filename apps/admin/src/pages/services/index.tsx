@@ -52,7 +52,7 @@ export default function ServicesPage() {
 
   serviceContainer.addInput({
     type: INPUT_TYPE.SELECT,
-    gridColumns: 8,
+    gridColumns: 4,
     name: "type",
     title: `${t("common.serviceType")}`,
     defaultValue: ServiceType[4],
