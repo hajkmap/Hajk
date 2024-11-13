@@ -55,8 +55,8 @@ model Role {
 model RoleOnUser {
   userId String
   roleId String
-  user   User   @relation(fields: [userId], references: [id])
-  role   Role   @relation(fields: [roleId], references: [id])
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role   Role   @relation(fields: [roleId], references: [id], onDelete: Cascade)
 
   @@id([userId, roleId])
 }
@@ -64,8 +64,8 @@ model RoleOnUser {
 model RoleOnMap {
   mapId  Int
   roleId String
-  map    Map    @relation(fields: [mapId], references: [id])
-  role   Role   @relation(fields: [roleId], references: [id])
+  map    Map    @relation(fields: [mapId], references: [id], onDelete: Cascade)
+  role   Role   @relation(fields: [roleId], references: [id], onDelete: Cascade)
 
   @@id([mapId, roleId])
 }
@@ -73,8 +73,8 @@ model RoleOnMap {
 model RoleOnLayer {
   layerId String
   roleId  String
-  layer   Layer  @relation(fields: [layerId], references: [id])
-  role    Role   @relation(fields: [roleId], references: [id])
+  layer   Layer  @relation(fields: [layerId], references: [id], onDelete: Cascade)
+  role    Role   @relation(fields: [roleId], references: [id], onDelete: Cascade)
 
   @@id([layerId, roleId])
 }
@@ -82,8 +82,8 @@ model RoleOnLayer {
 model RoleOnLayerInstance {
   layerInstanceId String
   roleId          String
-  role            Role          @relation(fields: [roleId], references: [id])
-  layerInstance   LayerInstance @relation(fields: [layerInstanceId], references: [id])
+  role            Role          @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  layerInstance   LayerInstance @relation(fields: [layerInstanceId], references: [id], onDelete: Cascade)
 
   @@id([layerInstanceId, roleId])
 }
@@ -91,8 +91,8 @@ model RoleOnLayerInstance {
 model RoleOnTool {
   toolId Int
   roleId String
-  tool   Tool   @relation(fields: [toolId], references: [id])
-  role   Role   @relation(fields: [roleId], references: [id])
+  tool   Tool   @relation(fields: [toolId], references: [id], onDelete: Cascade)
+  role   Role   @relation(fields: [roleId], references: [id], onDelete: Cascade)
 
   @@id([toolId, roleId])
 }
@@ -100,8 +100,8 @@ model RoleOnTool {
 model RoleOnGroup {
   groupId String
   roleId  String
-  group   Group  @relation(fields: [groupId], references: [id])
-  role    Role   @relation(fields: [roleId], references: [id])
+  group   Group  @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  role    Role   @relation(fields: [roleId], references: [id], onDelete: Cascade)
 
   @@id([groupId, roleId])
 }
