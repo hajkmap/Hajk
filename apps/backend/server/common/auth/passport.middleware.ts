@@ -24,6 +24,12 @@ export function setupPassport(app: Application) {
       where: {
         email: user.email,
       },
+      select: {
+        id: true,
+        fullName: true,
+        email: true,
+        strategy: true,
+      },
     });
     done(null, dbUser);
   });
