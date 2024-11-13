@@ -156,6 +156,7 @@ export default class ConfigMapper {
         zIndex: args.drawOrder || 0,
         maxZoom: args.maxZoom,
         minZoom: args.minZoom,
+        minMaxZoomAlertOnToggleOnly: args.minMaxZoomAlertOnToggleOnly,
         infoClickSortType: args.infoClickSortType,
         infoClickSortDesc: args.infoClickSortDesc,
         infoClickSortProperty: args.infoClickSortProperty,
