@@ -38,6 +38,27 @@ const StyledAppBar = styled(AppBar)(() => ({
   top: -10,
 }));
 
+/**
+ * BreadCrumbs are a feature used to "link" content between LayerSwitcher
+ * and Informative plugins. They get rendered directly to #map, as they
+ * are not part of LayerSwitcher plugin, at least not visually. To achieve
+ * that we use createPortal().
+ *
+ * @returns
+ * @memberof LayersSwitcherView
+ */
+const BreadCrumbsContainer = ({ map, model, app }) => {
+  return createPortal(
+    // We must wrap the component in a div, on which we can catch
+    // events. This is done to prevent event bubbling to the
+    // layerSwitcher component.
+    <div onMouseDown={(e) => e.stopPropagation()}>
+      <BreadCrumbs map={map} model={model} app={app} />
+    </div>,
+    document.getElementById("breadcrumbs-container")
+  );
+};
+
 class LayersSwitcherView extends React.PureComponent {
   static propTypes = {
     app: propTypes.object.isRequired,
@@ -629,34 +650,6 @@ class LayersSwitcherView extends React.PureComponent {
     );
   };
 
-  /**
-   * BreadCrumbs are a feature used to "link" content between LayerSwitcher
-   * and Informative plugins. They get rendered directly to #map, as they
-   * are not part of LayerSwitcher plugin, at least not visually. To achieve
-   * that we use createPortal().
-   *
-   * @returns
-   * @memberof LayersSwitcherView
-   */
-  renderBreadCrumbs = () => {
-    return (
-      this.options.showBreadcrumbs &&
-      createPortal(
-        // We must wrap the component in a div, on which we can catch
-        // events. This is done to prevent event bubbling to the
-        // layerSwitcher component.
-        <div onMouseDown={(e) => e.stopPropagation()}>
-          <BreadCrumbs
-            map={this.props.map}
-            model={this.props.model}
-            app={this.props.app}
-          />
-        </div>,
-        document.getElementById("breadcrumbs-container")
-      )
-    );
-  };
-
   render() {
     const { windowVisible } = this.props;
     return (
@@ -746,7 +739,13 @@ class LayersSwitcherView extends React.PureComponent {
               onLayerChange={this.handleLayerChange}
             ></DrawOrder>
           )}
-          {this.renderBreadCrumbs()}
+          {this.options.showBreadcrumbs && (
+            <BreadCrumbsContainer
+              map={this.props.map}
+              model={this.props.model}
+              app={this.props.app}
+            />
+          )}
           <ConfirmationDialog
             open={this.state.showDeleteConfirmation === true}
             titleName={"Rensa allt"}
