@@ -130,6 +130,10 @@ class LayersSwitcherView extends React.PureComponent {
       if (item.layers) {
         item.layers.forEach((layer) => {
           const mapLayer = this.props.model.layerMap[layer.id];
+          if (!mapLayer) {
+            console.warn(`Maplayer with id ${layer.id} not found`);
+            return;
+          }
           layer.name = mapLayer.get("caption");
           layer.isFiltered = true;
           item.changeIndicator = new Date();
