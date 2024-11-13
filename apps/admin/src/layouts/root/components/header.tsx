@@ -22,7 +22,7 @@ import useAuth from "../../../hooks/use-auth";
 
 const getUserInitials = (user: User): string => {
   const words: string[] = user.fullName.split(" ");
-  return (words[0].charAt(0) + words[1].charAt(0)).toUpperCase();
+  return (words[0].charAt(0) + words[1]?.charAt(0)).toUpperCase() || "";
 };
 
 export default function Header() {
