@@ -2,6 +2,7 @@ export interface User {
   id: string;
   fullName: string;
   email: string;
+  roles: Role[];
 }
 
 export interface LocalUserPayload {
@@ -16,6 +17,7 @@ export interface Role {
   code: string;
   title: string;
   description: string;
+  systemCriticalRole: boolean;
 }
 
 export interface UsersApiResponse {

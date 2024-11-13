@@ -12,11 +12,28 @@ class UserService {
   }
 
   async getUsers() {
-    return await prisma.user.findMany();
+    const users = await prisma.user.findMany({
+      include: { roles: { select: { role: true } } },
+    });
+
+    return users.map((user) => ({
+      ...user,
+      roles: user.roles.map((role) => role.role),
+    }));
   }
 
   async getUserById(id: string) {
-    return await prisma.user.findUnique({ where: { id } });
+    const user = await prisma.user.findUnique({
+      where: { id },
+      include: { roles: { select: { role: true } } },
+    });
+
+    return user
+      ? {
+          ...user,
+          roles: user.roles.map((role) => role.role),
+        }
+      : null;
   }
 
   async getRoles() {

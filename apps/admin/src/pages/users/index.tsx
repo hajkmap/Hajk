@@ -1,15 +1,15 @@
+import { DataGrid, GridRenderCellParams } from "@mui/x-data-grid";
 import Grid from "@mui/material/Grid2";
 import {
   Box,
   Button,
+  Chip,
   CircularProgress,
   Dialog,
   DialogActions,
   DialogContent,
   DialogContentText,
   DialogTitle,
-  List,
-  ListItem,
   Paper,
   TextField,
   Typography,
@@ -27,6 +27,7 @@ import {
 } from "../../api/users/hooks";
 import { Controller, SubmitHandler, useForm } from "react-hook-form";
 import { useState } from "react";
+import { Role, User } from "../../api/users";
 
 interface CreateUserInput {
   email: string;
@@ -47,6 +48,43 @@ export default function UsersPage() {
 
   const createUserMutation = useCreateLocalUser();
   const deleteUserMutation = useDeleteUser();
+
+  const columns = [
+    { field: "fullName", flex: 1, headerName: "Name" },
+    { field: "email", flex: 1, headerName: "Email" },
+    {
+      field: "roles",
+      headerName: "Roles",
+      flex: 1,
+      valueGetter: (value: Role[]) => value.join(", "),
+      renderCell: (params: GridRenderCellParams<User, string>) => (
+        <>
+          {params.row.roles.map((role) => (
+            <Chip key={role.id} label={role.title} size="small" />
+          ))}
+        </>
+      ),
+    },
+    {
+      field: "delete",
+      headerName: "Delete",
+      flex: 0.2,
+      renderCell: (params: GridRenderCellParams<User, string>) => (
+        <Button
+          color="error"
+          size="small"
+          onClick={() =>
+            setUserToDelete({
+              id: params.row.id,
+              fullName: params.row.fullName,
+            })
+          }
+        >
+          <DeleteIcon />
+        </Button>
+      ),
+    },
+  ];
 
   const {
     handleSubmit,
@@ -88,41 +126,13 @@ export default function UsersPage() {
   return (
     <Page title={t("common.users")}>
       <Grid container direction="column" gap={2}>
-        {usersLoading ? null : (
-          <Paper sx={{ p: 2 }}>
-            <Typography variant="h5">{t("common.users")}</Typography>
-            <Grid size={12}>
-              <List>
-                {users?.map((user) => (
-                  <ListItem key={user.id} sx={{ p: 0, pt: 1, pb: 1 }}>
-                    <Paper sx={{ width: "100%", p: 2 }} elevation={4}>
-                      <Grid container justifyContent="space-between">
-                        <Grid>
-                          <Typography>{user.fullName}</Typography>
-                          <Typography variant="caption">
-                            {user.email}
-                          </Typography>
-                        </Grid>
-                        <Button
-                          color="error"
-                          size="small"
-                          onClick={() =>
-                            setUserToDelete({
-                              id: user.id,
-                              fullName: user.fullName,
-                            })
-                          }
-                        >
-                          <DeleteIcon />
-                        </Button>
-                      </Grid>
-                    </Paper>
-                  </ListItem>
-                ))}
-              </List>
-            </Grid>
-          </Paper>
-        )}
+        <DataGrid
+          rows={users ?? []}
+          columns={columns}
+          loading={usersLoading}
+          disableRowSelectionOnClick
+          sx={{ maxWidth: "100%" }}
+        />
 
         <Paper sx={{ p: 2 }}>
           <Box
