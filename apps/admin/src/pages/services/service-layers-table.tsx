@@ -63,7 +63,7 @@ function ServicesTable({
       : filteredLayers;
 
   return (
-    <SimpleBar style={{ maxHeight: "400px" }}>
+    <SimpleBar style={{ maxHeight: "500px" }}>
       <Box sx={{ overflowY: "auto" }}>
         <TextField
           sx={{ mb: 2, mt: 1, width: "50%" }}

@@ -92,8 +92,6 @@ export default function ServiceSettings() {
     if (!isLoading && service?.id) {
       try {
         await deleteService(service.id);
-
-        navigate("/services");
       } catch (error) {
         console.error("Deletion failed:", error);
       }
@@ -316,6 +314,8 @@ export default function ServiceSettings() {
           flexDirection: "column",
           gap: 2,
           p: 2,
+          mt: 2,
+          mr: 2,
           border: "1px solid",
           borderColor: "grey.400",
           borderRadius: 3,
@@ -340,6 +340,7 @@ export default function ServiceSettings() {
         <Button
           onClick={() => {
             void handleDeleteService();
+            navigate("/services");
           }}
           disabled={deleteStatus === "pending" || updateStatus === "pending"}
           sx={{ color: palette.secondary.dark }}

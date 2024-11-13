@@ -29,6 +29,7 @@ export default function ServicesPage() {
   const { data: services, isLoading } = useServices();
   const { mutateAsync: createService } = useCreateService();
   const [open, setOpen] = useState<boolean>(false);
+
   const [service, setService] = useState<DynamicFormContainer<FieldValues>>(
     new DynamicFormContainer<FieldValues>()
   );
@@ -64,7 +65,7 @@ export default function ServicesPage() {
 
   useEffect(() => {
     setService(serviceContainer);
-  }, []);
+  }, [services]);
 
   const defaultValues = service.getDefaultValues();
 
@@ -92,8 +93,6 @@ export default function ServicesPage() {
         serverType: "QGIS_SERVER",
         comment: "Test comment",
       };
-
-      console.log("payload", payload);
 
       await createService(payload);
       reset({ url: "" });
