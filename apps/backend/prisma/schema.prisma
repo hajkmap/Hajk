@@ -43,6 +43,7 @@ model Role {
   code                String                @unique
   title               String?
   description         String?
+  systemCriticalRole  Boolean               @default(false)
   users               RoleOnUser[]
   RoleOnMap           RoleOnMap[]
   RoleOnLayer         RoleOnLayer[]

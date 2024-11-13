@@ -415,6 +415,25 @@ async function populateLayerStructure() {
   return { ro };
 }
 
+async function createBaseRoles() {
+  const baseRoles = [
+    {
+      code: "ADMIN",
+      title: "roles.adminTitle",
+      description: "roles.adminDescription",
+      systemCriticalRole: true,
+    },
+  ];
+
+  for await (const role of baseRoles) {
+    await prisma.role.create({
+      data: {
+        ...role,
+      },
+    });
+  }
+}
+
 async function createLocalDummyAccounts() {
   const dummyUsers = [
     {
@@ -475,6 +494,17 @@ async function createLocalDummyAccounts() {
             email: user.email,
             fullName: user.fullName,
             strategy: "LOCAL",
+            roles: {
+              create: [
+                {
+                  role: {
+                    connect: {
+                      code: "ADMIN",
+                    },
+                  },
+                },
+              ],
+            },
           },
         },
       },
@@ -554,6 +584,9 @@ async function main() {
   // Finally we extract the layer switcher config from all maps and add all groups etc. with their connections to the database.
   // We're gonna want to keep crucial information such as the map layer structure separated from specific plugins such as the layer switcher.
   await populateLayerStructure();
+
+  // Some base roles are required. For example, the role containing users that are allowed to use the admin endpoints etc.
+  await createBaseRoles();
 
   await createLocalDummyAccounts();
 }
