@@ -69,7 +69,7 @@ async function readMapConfigAndPopulateMap(file) {
       data: { type: t.type, options: t.options },
     });
 
-    // Add potential roles
+    // Add potential role restrictions on the tool
     await updateRolesFromVisibleForGroups(
       t.options.visibleForGroups || [],
       tool.id,
@@ -111,7 +111,7 @@ async function readMapConfigAndPopulateMap(file) {
     mapConfig.tools.find((t) => t.type === "layerswitcher").options
       ?.visibleForGroups || [];
 
-  // Let's create and add the roles
+  // Add potential role restrictions on the map
   await updateRolesFromVisibleForGroups(visibleForGroups, createdMap.id, "map");
 
   // Once the map is created, we can connect it with its tools
@@ -225,6 +225,7 @@ async function readAndPopulateLayers() {
 
       console.log(`Created ${layersInDB.count} ${type} layers`);
 
+      // Add potential role restrictions on the layers
       for await (const layer of data) {
         await updateRolesFromVisibleForGroups(
           layer.options.visibleForGroups || [],
@@ -385,13 +386,14 @@ async function populateMapLayerStructure(mapName) {
 
     const visibleForGroups = layer.options.visibleForGroups || [];
 
+    // Add potential role restrictions on the layer instances
     await updateRolesFromVisibleForGroups(
       visibleForGroups,
       layerInstance.id,
       "layerInstance"
     );
   }
-  // Finally, we'll add the roles...
+  // Add potential role restrictions on the layer groups
   for await (const group of groupsToInsert) {
     await updateRolesFromVisibleForGroups(
       group.visibleForGroups || [],

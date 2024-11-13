@@ -106,24 +106,24 @@ model RoleOnGroup {
 }
 
 model Map {
-  id              Int             @id @default(autoincrement())
-  locked          Boolean         @default(false)
-  name            String          @unique
-  options         Json            @default("{}")
-  projections     Projection[]
-  tools           ToolsOnMaps[]
-  layers          LayerInstance[]
-  groups          GroupsOnMaps[]
-  visibleForRoles RoleOnMap[]
+  id                Int             @id @default(autoincrement())
+  locked            Boolean         @default(false)
+  name              String          @unique
+  options           Json            @default("{}")
+  projections       Projection[]
+  tools             ToolsOnMaps[]
+  layers            LayerInstance[]
+  groups            GroupsOnMaps[]
+  restrictedToRoles RoleOnMap[]
 }
 
 model Tool {
-  id              Int           @id @default(autoincrement())
-  locked          Boolean       @default(false)
-  type            String
-  options         Json          @default("{}")
-  maps            ToolsOnMaps[]
-  visibleForRoles RoleOnTool[]
+  id                Int           @id @default(autoincrement())
+  locked            Boolean       @default(false)
+  type              String
+  options           Json          @default("{}")
+  maps              ToolsOnMaps[]
+  restrictedToRoles RoleOnTool[]
 }
 
 model ToolsOnMaps {
@@ -150,12 +150,12 @@ model Projection {
 }
 
 model Group {
-  id              String          @id @default(cuid())
-  locked          Boolean         @default(false)
-  name            String
-  layers          LayerInstance[]
-  maps            GroupsOnMaps[]
-  visibleForRoles RoleOnGroup[]
+  id                String          @id @default(cuid())
+  locked            Boolean         @default(false)
+  name              String
+  layers            LayerInstance[]
+  maps              GroupsOnMaps[]
+  restrictedToRoles RoleOnGroup[]
 }
 
 model Service {
@@ -171,26 +171,26 @@ model Service {
 }
 
 model Layer {
-  id              String          @id @default(cuid())
-  locked          Boolean         @default(false)
-  service         Service         @relation(fields: [serviceId], references: [id])
-  serviceId       String
-  options         Json            @default("{}")
-  visibleForRoles RoleOnLayer[]
-  instances       LayerInstance[]
+  id                String          @id @default(cuid())
+  locked            Boolean         @default(false)
+  service           Service         @relation(fields: [serviceId], references: [id])
+  serviceId         String
+  options           Json            @default("{}")
+  restrictedToRoles RoleOnLayer[]
+  instances         LayerInstance[]
 }
 
 model LayerInstance {
-  id              String                @id @default(cuid())
-  layerId         String
-  mapId           Int?
-  groupId         String?
-  layer           Layer                 @relation(fields: [layerId], references: [id])
-  map             Map?                  @relation(fields: [mapId], references: [id])
-  group           Group?                @relation(fields: [groupId], references: [id])
-  usage           UseType
-  visibleForRoles RoleOnLayerInstance[]
-  options         Json                  @default("{}")
+  id                String                @id @default(cuid())
+  layerId           String
+  mapId             Int?
+  groupId           String?
+  layer             Layer                 @relation(fields: [layerId], references: [id])
+  map               Map?                  @relation(fields: [mapId], references: [id])
+  group             Group?                @relation(fields: [groupId], references: [id])
+  usage             UseType
+  restrictedToRoles RoleOnLayerInstance[]
+  options           Json                  @default("{}")
 }
 
 model GroupsOnMaps {
