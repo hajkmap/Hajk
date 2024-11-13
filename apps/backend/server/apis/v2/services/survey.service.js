@@ -171,13 +171,15 @@ class SurveyService {
         }
 
         bodyHtml += "</body></html>";
-
-        let emailAddress = body.email;
+        const email = body.surveyResults.find(
+          (item) => item.name === "email"
+        )?.value;
+        let emailAddress = email;
         if (!(await this.isValidEmail(emailAddress))) {
           console.error("Ogiltig e-postadress: ", emailAddress);
           emailAddress = "";
         } else {
-          emailAddress = body.email;
+          emailAddress = email;
         }
 
         await this.mailNodemailer(emailAddress, bodyHtml, subject);
