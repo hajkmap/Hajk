@@ -10,15 +10,17 @@ import toolsRouter from "./controllers/tools/router.ts";
 import usersRouter from "./controllers/users/router.ts";
 
 import { isAuthenticated } from "../../common/auth/is-authenticated.middleware.ts";
+import { isAdmin } from "../../common/auth/is-admin.ts";
 
 export default Router()
-  // The /auth and /public endpoints should always be accessible
+  // The /auth endpoint should always be accessible
   .use("/auth", authRouter)
-  .use("/public", publicRouter)
   // All other endpoints require authentication
-  .use("/groups", isAuthenticated, groupsRouter)
-  .use("/layers", isAuthenticated, layersRouter)
-  .use("/maps", isAuthenticated, mapsRouter)
-  .use("/services", isAuthenticated, servicesRouter)
-  .use("/tools", isAuthenticated, toolsRouter)
-  .use("/users", isAuthenticated, usersRouter);
+  .use("/public", isAuthenticated, publicRouter)
+  // The admin endpoints require that the user is authenticated and has the admin role
+  .use("/groups", isAdmin, groupsRouter)
+  .use("/layers", isAdmin, layersRouter)
+  .use("/maps", isAdmin, mapsRouter)
+  .use("/services", isAdmin, servicesRouter)
+  .use("/tools", isAdmin, toolsRouter)
+  .use("/users", isAdmin, usersRouter);
