@@ -442,6 +442,26 @@ async function createLocalDummyAccounts() {
       fullName: "Jesper Adeborn",
       password: "Jesper",
     },
+    {
+      email: "niklas@eriksson.se",
+      fullName: "Niklas Eriksson",
+      password: "Niklas",
+    },
+    {
+      email: "elizabeth@barlow.se",
+      fullName: "Elizabeth Barlow",
+      password: "Elizabeth",
+    },
+    {
+      email: "ingvar@petersson.se",
+      fullName: "Ingvar Petersson",
+      password: "Ingvar",
+    },
+    {
+      email: "lars@samuelsson.se",
+      fullName: "Lars Samuelsson",
+      password: "Lars",
+    },
   ];
 
   for await (const user of dummyUsers) {
