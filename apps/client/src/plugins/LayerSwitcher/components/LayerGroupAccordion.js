@@ -79,7 +79,7 @@ export default function LayerGroupAccordion({
           )}
         </Box>
       </ListItemButton>
-      <Collapse in={state.expanded}>
+      <Collapse in={state.expanded} unmountOnExit>
         <Box sx={{ marginLeft: quickAccess ? "31px" : "26px" }}>{children}</Box>
       </Collapse>
     </div>

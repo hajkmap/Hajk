@@ -296,7 +296,7 @@ export default function GroupLayer({
         )
       }
       subLayersSection={
-        <Collapse in={showSublayers}>
+        <Collapse in={showSublayers} unmountOnExit>
           <Box sx={{ marginLeft: 3 }}>
             {layer.subLayers.map((subLayer, index) => (
               <SubLayerItem
