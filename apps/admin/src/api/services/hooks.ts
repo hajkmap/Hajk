@@ -13,9 +13,14 @@ import {
   updateService,
   deleteService,
 } from "./requests";
-import { Service, ServiceUpdateFormData } from "./types";
+import {
+  Service,
+  ServiceUpdateFormData,
+  UseServiceCapabilitiesProps,
+} from "./types";
 import { Layer } from "../layers";
 import { Map } from "../maps";
+import { fetchCapabilities } from "./requests";
 
 // React Query hook to fetch all services
 // This hook uses the `getServices` function from the services `requests` module
@@ -106,4 +111,21 @@ export const useDeleteService = () => {
       console.error(error);
     },
   });
+};
+
+export const useServiceCapabilities = ({
+  baseUrl,
+}: UseServiceCapabilitiesProps) => {
+  const urlWithParams = `${baseUrl}?request=getCapabilities`;
+
+  const { data, isError, isLoading } = useQuery({
+    queryKey: ["serviceCapabilities", urlWithParams],
+    queryFn: () => fetchCapabilities(urlWithParams),
+  });
+
+  return {
+    affectedLayers: data?.layers ?? [],
+    isError,
+    isLoading,
+  };
 };

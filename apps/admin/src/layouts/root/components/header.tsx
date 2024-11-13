@@ -68,8 +68,7 @@ export default function Header() {
     );
   }, [setActiveUser, setUserList]);
 
-  // Maybe the links just needs to be visible for the user and not clickable?
-  // Do we want to display the id?
+  // Do we want to display the id? Maybe name instead
   const breadcrumbLinks =
     pathParts.length > 0
       ? [
@@ -88,8 +87,6 @@ export default function Header() {
 
             let displayName;
 
-            // Should the id be visible in the breadcrumb?
-            // Add other statements here
             if (part === serviceId) {
               displayName = serviceId;
             } else {

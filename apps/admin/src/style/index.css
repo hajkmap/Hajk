@@ -1,5 +1,5 @@
 /* move tanstack devtools a bit to make room for scrolltop button */
-body div.tsqd-open-btn-container{
+body div.tsqd-open-btn-container {
   right: 64px;
 }
 
@@ -68,4 +68,9 @@ svg {
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
   }
+}
+
+.simplebar-scrollbar::before {
+  background-color: rgb(134, 137, 139) !important;
+  opacity: 0.7;
 }

@@ -31,3 +31,11 @@ export interface ServiceUpdateFormData {
 }
 
 export const ServiceType = ["ARCGIS", "VECTOR", "WFS", "WFST", "WMS", "WMTS"];
+
+export interface ServiceCapabilities {
+  layers: string[];
+}
+
+export interface UseServiceCapabilitiesProps {
+  baseUrl: string;
+}

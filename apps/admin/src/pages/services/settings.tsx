@@ -5,14 +5,6 @@ import Page from "../../layouts/root/components/page";
 import { FieldValues } from "react-hook-form";
 import {
   Box,
-  Table,
-  TableBody,
-  TableHead,
-  TableRow,
-  TableCell,
-  TableContainer,
-  Paper,
-  IconButton,
   useTheme,
   Button,
   TextField,
@@ -30,18 +22,10 @@ import INPUT_TYPE from "../../components/form-factory/types/input-type";
 import FormRenderer from "../../components/form-factory/form-renderer";
 import { DefaultUseForm } from "../../components/form-factory/default-use-form";
 import { createOnSubmitHandler } from "../../components/form-factory/form-utils";
-import MoreVertIcon from "@mui/icons-material/MoreVert";
 import { ServiceUpdateFormData } from "../../api/services";
 import DialogWrapper from "../../components/flexible-dialog";
-
-function createData(layerName: string, infoClick: boolean, publish: string) {
-  return { layerName, infoClick, publish };
-}
-
-const rows = [
-  createData("Strandskydd", false, "Publicera"),
-  createData("Bygglov", true, "Publicera igen (3)"),
-];
+import { useServiceCapabilities } from "../../api/services/";
+import ServicesTable from "./service-layers-table";
 
 export default function ServiceSettings() {
   const formRef = useRef<HTMLFormElement | null>(null);
@@ -56,6 +40,11 @@ export default function ServiceSettings() {
     useUpdateService();
   const { mutateAsync: deleteService, status: deleteStatus } =
     useDeleteService();
+  const {
+    affectedLayers: layers,
+    isError: layersError,
+    isLoading: layersLoading,
+  } = useServiceCapabilities({ baseUrl: service?.url ?? "" });
 
   const [formServiceData, setFormServiceData] = useState<
     DynamicFormContainer<FieldValues>
@@ -252,46 +241,16 @@ export default function ServiceSettings() {
     kind: "CustomInputSettings",
     name: "customInput",
     title: `${service?.type}`,
-    gridColumns: 8,
+    gridColumns: 12,
     defaultValue: "",
 
     renderer: () => {
       return (
-        <>
-          <TableContainer component={Paper}>
-            <Table sx={{ width: "100%" }} aria-label="simple table">
-              <TableHead>
-                <TableRow>
-                  <TableCell>Lagernamn</TableCell>
-                  <TableCell align="right">Infoklick</TableCell>
-                  <TableCell align="right">Publiceringar</TableCell>
-                  <TableCell align="right">Åtgärder</TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {rows.map((row) => (
-                  <TableRow
-                    key={row.layerName}
-                    sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
-                  >
-                    <TableCell component="th" scope="row">
-                      {row.layerName}
-                    </TableCell>
-                    <TableCell align="right">
-                      {row.infoClick ? "Ja" : "Nej"}
-                    </TableCell>
-                    <TableCell align="right">{row.publish}</TableCell>
-                    <TableCell align="right">
-                      <IconButton>
-                        <MoreVertIcon />
-                      </IconButton>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </TableContainer>
-        </>
+        <ServicesTable
+          layers={layers}
+          layersError={layersError}
+          layersLoading={layersLoading}
+        />
       );
     },
   });
@@ -321,7 +280,7 @@ export default function ServiceSettings() {
     if (!service) return;
     setFormServiceData(serviceSettingsFormContainer);
     setDialogUrl(service.url);
-  }, [service]);
+  }, [service, layersLoading, layersError]);
 
   const defaultValues = formServiceData.getDefaultValues();
   const {
@@ -356,14 +315,13 @@ export default function ServiceSettings() {
           display: "flex",
           flexDirection: "column",
           gap: 2,
-          mt: 10,
-          mr: 8,
           p: 2,
           border: "1px solid",
           borderColor: "grey.400",
           borderRadius: 3,
           maxWidth: "260px",
           textAlign: "center",
+          alignItems: "center",
         }}
       >
         <Button
