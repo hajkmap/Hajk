@@ -86,14 +86,7 @@ function ServicesTable({
               </TableRow>
             </TableHead>
             <TableBody>
-              {layersLoading ? (
-                <TableRow>
-                  <TableCell colSpan={4} align="center">
-                    <CircularProgress size={24} />
-                    <Typography variant="body2">Loading layers...</Typography>
-                  </TableCell>
-                </TableRow>
-              ) : layersError ? (
+              {layersError ? (
                 <TableRow>
                   <TableCell
                     colSpan={4}
@@ -107,6 +100,13 @@ function ServicesTable({
                 <TableRow>
                   <TableCell colSpan={4} align="center">
                     No layers available.
+                  </TableCell>
+                </TableRow>
+              ) : layersLoading ? (
+                <TableRow>
+                  <TableCell colSpan={4} align="center">
+                    <CircularProgress size={24} />
+                    <Typography variant="body2">Loading layers...</Typography>
                   </TableCell>
                 </TableRow>
               ) : (

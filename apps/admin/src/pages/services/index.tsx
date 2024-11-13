@@ -65,7 +65,7 @@ export default function ServicesPage() {
 
   useEffect(() => {
     setService(serviceContainer);
-  }, [services]);
+  }, []);
 
   const defaultValues = service.getDefaultValues();
 
