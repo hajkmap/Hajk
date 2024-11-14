@@ -229,6 +229,17 @@ class Server {
       this.app.use(detailedRequestLogger);
   }
 
+  private getCorsAllowedOriginsFromEnv() {
+    if (
+      !process.env.CORS_ALLOWED_ORIGINS ||
+      process.env.CORS_ALLOWED_ORIGINS === "*"
+    ) {
+      return ["*"];
+    }
+
+    return process.env.CORS_ALLOWED_ORIGINS.split(",");
+  }
+
   private setupMiddlewares() {
     this.app.use(
       helmet({
@@ -240,9 +251,19 @@ class Server {
       })
     );
 
+    const corsAllowedOrigins = this.getCorsAllowedOriginsFromEnv();
+
     this.app.use(
       cors({
-        origin: "http://localhost:3001", // TODO: Handle in environment!
+        origin: (origin, callback) => {
+          if (!origin || corsAllowedOrigins.includes("*")) {
+            return callback(null, "*");
+          }
+          if (corsAllowedOrigins.includes(origin)) {
+            return callback(null, origin || true);
+          }
+          return callback(new Error("CORS error"));
+        },
         optionsSuccessStatus: 200, // some legacy browsers (IE11, various SmartTVs) choke on 204
         credentials: true,
       })
