@@ -46,12 +46,16 @@
     "user.deleteConfirmation": "You are about to delete a user. This action cannot be undone. Are you sure you want to continue?",
     "user.deleteUserFailed": "Failed to delete user. Contact the system administrator.",
     "user.deleteUserSuccess": "User deleted successfully",
+    "user.email": "Email",
     "user.emailRequired": "Email is required",
     "user.enterValidEmail": "Please enter a valid email",
+    "user.name": "Name",
     "user.nameRequired": "Name is required",
     "user.passwordAtLeast6Chars": "Password must be at least 6 characters",
     "user.passwordMismatch": "Passwords do not match",
     "user.passwordRequired": "Password is required",
-    "user.pleaseConfirmPassword": "Please confirm password"
+    "user.pleaseConfirmPassword": "Please confirm password",
+    "user.roles": "Roles",
+    "user.searchTitle": "Search users"
   }
 }
