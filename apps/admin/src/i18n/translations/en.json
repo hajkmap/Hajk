@@ -43,6 +43,8 @@
     "user.createUserFailed": "Failed to create user. Contact the system administrator.",
     "user.createUserSuccess": "User created successfully",
     "user.deleteConfirmation": "You are about to delete a user. This action cannot be undone. Are you sure you want to continue?",
+    "user.deleteUserFailed": "Failed to delete user. Contact the system administrator.",
+    "user.deleteUserSuccess": "User deleted successfully",
     "user.emailRequired": "Email is required",
     "user.enterValidEmail": "Please enter a valid email",
     "user.nameRequired": "Name is required",

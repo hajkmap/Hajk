@@ -43,6 +43,8 @@
     "user.createUserFailed": "Misslyckades att skapa användare. Kontakta systemadministratören.",
     "user.createUserSuccess": "Användare skapad!",
     "user.deleteConfirmation": "Du håller på att ta bort en användare. Denna åtgärd kan inte ångras. Är du säker på att du vill fortsätta?",
+    "user.deleteUserFailed": "Misslyckades att ta bort användaren. Kontakta systemadministratören.",
+    "user.deleteUserSuccess": "Användare borttagen!",
     "user.emailRequired": "E-post är obligatoriskt",
     "user.enterValidEmail": "Vänligen ange en giltig e-postadress",
     "user.nameRequired": "Namn är obligatoriskt",
