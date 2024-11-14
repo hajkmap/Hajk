@@ -10,9 +10,13 @@ export default function UsersPage() {
 
   return (
     <Page title={t("common.users")}>
-      <Grid container direction="column" gap={2}>
-        <UserTable />
-        <CreateUserForm />
+      <Grid container spacing={2}>
+        <Grid size={12}>
+          <UserTable />
+        </Grid>
+        <Grid size={12}>
+          <CreateUserForm />
+        </Grid>
       </Grid>
     </Page>
   );

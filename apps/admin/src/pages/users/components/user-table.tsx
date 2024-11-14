@@ -1,8 +1,7 @@
 import { useState } from "react";
 import { DataGrid, GridRenderCellParams } from "@mui/x-data-grid";
-import Grid from "@mui/material/Grid2";
-import DeleteIcon from "@mui/icons-material/Delete";
 import {
+  Box,
   Button,
   Chip,
   Dialog,
@@ -12,14 +11,18 @@ import {
   DialogTitle,
   useTheme,
 } from "@mui/material";
+import DeleteIcon from "@mui/icons-material/Delete";
+
 import { toast } from "react-toastify";
 import { useTranslation } from "react-i18next";
 
 import { Role, User } from "../../../api/users";
-
 import { useDeleteUser, useUsers } from "../../../api/users/hooks";
+import useAppStateStore from "../../../store/use-app-state-store";
+import { GRID_SWEDISH_LOCALE_TEXT } from "../../../i18n/translations/datagrid/sv";
 
 export default function UserTable() {
+  const language = useAppStateStore((state) => state.language);
   const { t } = useTranslation();
   const { palette } = useTheme();
   const { data: users, isLoading: usersLoading } = useUsers();
@@ -51,7 +54,7 @@ export default function UserTable() {
     },
     {
       field: "delete",
-      headerName: "Delete",
+      headerName: "",
       flex: 0.2,
       renderCell: (params: GridRenderCellParams<User, string>) => (
         <Button
@@ -91,15 +94,25 @@ export default function UserTable() {
 
   return (
     <>
-      <Grid container direction="column" gap={2}>
-        <DataGrid<User>
-          rows={users ?? []}
-          columns={columns}
-          loading={usersLoading}
-          disableRowSelectionOnClick
-          sx={{ maxWidth: "100%" }}
-        />
-      </Grid>
+      <DataGrid<User>
+        rows={users ?? []}
+        columns={columns}
+        loading={usersLoading}
+        localeText={language === "sv" ? GRID_SWEDISH_LOCALE_TEXT : undefined}
+        disableRowSelectionOnClick
+        sx={{ maxWidth: "100%" }}
+        initialState={{
+          pagination: { paginationModel: { pageSize: 5 } },
+        }}
+        pageSizeOptions={[5, 10, 25, 50, 100]}
+        autoHeight={true}
+        slotProps={{
+          pagination: {
+            showFirstButton: true,
+            showLastButton: true,
+          },
+        }}
+      />
       <Dialog
         open={userToDelete !== null}
         onClose={() => setUserToDelete(null)}

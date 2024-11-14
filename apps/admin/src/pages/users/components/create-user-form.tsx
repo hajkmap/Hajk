@@ -1,3 +1,4 @@
+import Grid from "@mui/material/Grid2";
 import {
   Box,
   Button,
@@ -64,7 +65,7 @@ export default function CreateUserForm() {
   const password = watch("password");
 
   return (
-    <Paper sx={{ p: 2 }}>
+    <Paper sx={{ p: 2, maxWidth: 500 }} elevation={4}>
       <Box
         component="form"
         onSubmit={(e) => {
@@ -73,7 +74,7 @@ export default function CreateUserForm() {
         }}
         sx={{ display: "flex", flexDirection: "column", gap: 1 }}
       >
-        <Typography variant="h5">{t("user.createUser")}</Typography>
+        <Typography variant="h6">{t("user.createUser")}</Typography>
         <Controller
           name="email"
           control={control}
@@ -93,6 +94,7 @@ export default function CreateUserForm() {
               error={!!errors.email}
               helperText={errors.email ? errors.email.message : ""}
               fullWidth
+              size="small"
             />
           )}
         />
@@ -108,6 +110,7 @@ export default function CreateUserForm() {
               error={!!errors.fullName}
               helperText={errors.fullName ? errors.fullName.message : ""}
               fullWidth
+              size="small"
             />
           )}
         />
@@ -130,6 +133,7 @@ export default function CreateUserForm() {
               error={!!errors.password}
               helperText={errors.password ? errors.password.message : ""}
               fullWidth
+              size="small"
             />
           )}
         />
@@ -152,24 +156,26 @@ export default function CreateUserForm() {
                 errors.confirmPassword ? errors.confirmPassword.message : ""
               }
               fullWidth
+              size="small"
             />
           )}
         />
-
-        <Button
-          type="submit"
-          variant="contained"
-          color="primary"
-          disabled={createUserMutation.isPending}
-          startIcon={
-            createUserMutation.isPending ? (
-              <CircularProgress color="inherit" size={20} />
-            ) : null
-          }
-          sx={{ mt: 1, mb: 1 }}
-        >
-          {createUserMutation.isPending ? null : t("user.createUser")}
-        </Button>
+        <Grid container justifyContent="center">
+          <Button
+            type="submit"
+            variant="contained"
+            color="primary"
+            disabled={createUserMutation.isPending}
+            startIcon={
+              createUserMutation.isPending ? (
+                <CircularProgress color="inherit" size={20} />
+              ) : null
+            }
+            sx={{ m: 1, maxWidth: 200 }}
+          >
+            {createUserMutation.isPending ? null : t("user.createUser")}
+          </Button>
+        </Grid>
       </Box>
     </Paper>
   );
