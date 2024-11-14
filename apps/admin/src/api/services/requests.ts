@@ -151,6 +151,7 @@ export const updateService = async (
 ): Promise<ServiceUpdateFormData> => {
   const internalApiClient = getApiClient();
   try {
+    await new Promise((resolve) => setTimeout(resolve, 3000));
     const response = await internalApiClient.patch<ServiceUpdateFormData>(
       `/services/${serviceId}`,
       data
@@ -187,7 +188,7 @@ export const deleteService = async (serviceId: string): Promise<void> => {
   }
 };
 
-const parseAffectedLayersFromXML = (xmlString: string): string[] => {
+const parseLayersFromXML = (xmlString: string): string[] => {
   const parser = new DOMParser();
   const xmlDoc = parser.parseFromString(xmlString, "application/xml");
 
@@ -209,6 +210,6 @@ export const fetchCapabilities = async (
 ): Promise<ServiceCapabilities> => {
   const response = await axios.get(url, { responseType: "text" });
   const xmlData: string = response.data as string;
-  const layers = parseAffectedLayersFromXML(xmlData);
+  const layers = parseLayersFromXML(xmlData);
   return { layers };
 };

@@ -8,7 +8,7 @@ const ProgressCircular: React.FC<CircularProgressProps> = ({
   typographyText = "",
 }) => {
   return (
-    <Box component="div">
+    <Box component="div" sx={{ textAlign: "center" }}>
       <CircularProgress color={color} size={size} thickness={5} />
       {typographyText && <Typography>{typographyText}</Typography>}
     </Box>

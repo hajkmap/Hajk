@@ -17,8 +17,8 @@ import { DefaultUseForm } from "../../components/form-factory/default-use-form";
 import { createOnSubmitHandler } from "../../components/form-factory/form-utils";
 import { ServiceUpdateFormData } from "../../api/services";
 import DialogWrapper from "../../components/flexible-dialog";
-import ServicesTable from "./service-layers-table";
-import CircularProgress from "../../layouts/root/components/progress/circular-progress";
+import ServicesGrid from "./service-layers-grid";
+import CircularProgress from "../../components/progress/circular-progress";
 
 export default function ServiceSettings() {
   const formRef = useRef<HTMLFormElement | null>(null);
@@ -232,10 +232,7 @@ export default function ServiceSettings() {
 
     renderer: () => {
       return (
-        <ServicesTable
-          baseUrl={service?.url ?? ""}
-          type={service?.type ?? ""}
-        />
+        <ServicesGrid baseUrl={service?.url ?? ""} type={service?.type ?? ""} />
       );
     },
   });
@@ -313,12 +310,11 @@ export default function ServiceSettings() {
       >
         <Button
           onClick={handleExternalSubmit}
-          sx={{ backgroundColor: palette.secondary.dark }}
           variant="contained"
           disabled={updateStatus === "pending" || deleteStatus === "pending"}
         >
           {updateStatus === "pending" ? (
-            <CircularProgress color="secondary" size={30} />
+            <CircularProgress color="primary" size={30} />
           ) : (
             t("services.dialog.saveBtn")
           )}
@@ -330,7 +326,6 @@ export default function ServiceSettings() {
             navigate("/services");
           }}
           disabled={deleteStatus === "pending" || updateStatus === "pending"}
-          sx={{ color: palette.secondary.dark }}
           variant="text"
         >
           {t("services.dialog.deleteBtn")}
@@ -362,7 +357,6 @@ export default function ServiceSettings() {
           actions={
             <>
               <Button
-                sx={{ color: palette.secondary.dark }}
                 variant="text"
                 onClick={handleDialogClose}
                 color="primary"
@@ -370,7 +364,6 @@ export default function ServiceSettings() {
                 {t("services.dialog.closeBtn")}
               </Button>
               <Button
-                sx={{ backgroundColor: palette.secondary.dark }}
                 onClick={handleSaveUrl}
                 color="primary"
                 variant="contained"

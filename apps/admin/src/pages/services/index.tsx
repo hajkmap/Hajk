@@ -1,15 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Grid from "@mui/material/Grid2";
-import {
-  List,
-  ListItem,
-  Paper,
-  Typography,
-  Button,
-  Box,
-  useTheme,
-} from "@mui/material";
+import { List, ListItem, Paper, Typography, Button, Box } from "@mui/material";
 import { useTranslation } from "react-i18next";
 import Page from "../../layouts/root/components/page";
 import DynamicFormContainer from "../../components/form-factory/dynamic-form-container";
@@ -24,7 +16,6 @@ import DialogWrapper from "../../components/flexible-dialog";
 
 export default function ServicesPage() {
   const navigate = useNavigate();
-  const { palette } = useTheme();
   const { t } = useTranslation();
   const { data: services, isLoading } = useServices();
   const { mutateAsync: createService } = useCreateService();
@@ -129,7 +120,6 @@ export default function ServicesPage() {
                 float: "right",
                 mr: 2,
                 mb: 1,
-                backgroundColor: palette.secondary.dark,
               }}
             >
               {t("services.dialog.addBtn")}
@@ -143,20 +133,10 @@ export default function ServicesPage() {
             onSubmit={onSubmit}
             actions={
               <>
-                <Button
-                  sx={{ color: palette.secondary.dark }}
-                  variant="text"
-                  onClick={handleClose}
-                  color="primary"
-                >
+                <Button variant="text" onClick={handleClose} color="primary">
                   {t("services.dialog.closeBtn")}
                 </Button>
-                <Button
-                  sx={{ backgroundColor: palette.secondary.dark }}
-                  type="submit"
-                  color="primary"
-                  variant="contained"
-                >
+                <Button type="submit" color="primary" variant="contained">
                   {t("services.dialog.saveBtn")}
                 </Button>
               </>
