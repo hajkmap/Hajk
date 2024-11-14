@@ -94,19 +94,19 @@ export default function ServiceSettings() {
     CONTAINER_TYPE.PANEL
   );
   const accordionNestedContainer = new DynamicFormContainer<FieldValues>(
-    "Anslutning",
+    t("common.connection"),
     CONTAINER_TYPE.ACCORDION
   );
   const accordionNestedContainer2 = new DynamicFormContainer<FieldValues>(
-    "Inställningar för request",
+    t("common.accordionTitle1"),
     CONTAINER_TYPE.ACCORDION
   );
   const accordionNestedContainer3 = new DynamicFormContainer<FieldValues>(
-    "Tillgängliga lager i tjänsten",
+    t("common.accordionTitle2"),
     CONTAINER_TYPE.ACCORDION
   );
   const accordionNestedContainer4 = new DynamicFormContainer<FieldValues>(
-    "Infoknapp",
+    t("common.infobutton"),
     CONTAINER_TYPE.ACCORDION
   );
 

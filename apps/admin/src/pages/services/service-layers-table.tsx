@@ -130,7 +130,7 @@ function ServicesTable({ baseUrl: url, type }: UseServiceCapabilitiesProps) {
                 paginatedLayers.map((layer, index) => (
                   <TableRow key={index}>
                     <TableCell>
-                      {layer || t("servies.error.unnamed.layer")}
+                      {layer || t("services.error.unnamed.layer")}
                     </TableCell>
                     <TableCell align="right"></TableCell>
                     <TableCell align="right"></TableCell>
@@ -151,6 +151,13 @@ function ServicesTable({ baseUrl: url, type }: UseServiceCapabilitiesProps) {
           { label: t("common.all"), value: -1 },
         ]}
         labelRowsPerPage={t("common.rowsPerPage")}
+        labelDisplayedRows={({ from, to, count }) => {
+          return (
+            <>
+              {from} - {to} {t("common.of")} {count !== -1 ? count : to}
+            </>
+          );
+        }}
         component="div"
         count={filteredLayers.length}
         rowsPerPage={rowsPerPage}
