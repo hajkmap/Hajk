@@ -36,6 +36,8 @@
     "common.you": "You",
     "dark": "Dark",
     "light": "Light",
+    "roles.adminDescription": "Users that are allowed to use Hajks admin interface",
+    "roles.adminTitle": "Administrators",
     "user.confirmPassword": "Confirm password",
     "user.createUser": "Create user",
     "user.createUserFailed": "Failed to create user. Contact the system administrator.",

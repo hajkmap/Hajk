@@ -36,6 +36,8 @@
     "common.you": "Du",
     "dark": "Mörkt",
     "light": "Ljust",
+    "roles.adminDescription": "Användare som är tillåtna att använda Hajk-admin.",
+    "roles.adminTitle": "Administratörer",
     "user.confirmPassword": "Bekräfta lösenord",
     "user.createUser": "Skapa användare",
     "user.createUserFailed": "Misslyckades att skapa användare. Kontakta systemadministratören.",
