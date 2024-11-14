@@ -56,14 +56,16 @@ export default function UsersPage() {
       field: "roles",
       headerName: "Roles",
       flex: 1,
-      valueGetter: (value: Role[]) => value.join(", "),
-      renderCell: (params: GridRenderCellParams<User, string>) => (
-        <>
-          {params.row.roles.map((role) => (
-            <Chip key={role.id} label={role.title} size="small" />
-          ))}
-        </>
-      ),
+      valueGetter: (value: Role[]) => value.map((v) => t(v.title)).join(", "),
+      renderCell: (params: GridRenderCellParams<User, string>) => {
+        return (
+          <>
+            {params.row.roles.map((role) => (
+              <Chip key={role.id} label={t(role.title)} size="small" />
+            ))}
+          </>
+        );
+      },
     },
     {
       field: "delete",
@@ -126,7 +128,7 @@ export default function UsersPage() {
   return (
     <Page title={t("common.users")}>
       <Grid container direction="column" gap={2}>
-        <DataGrid
+        <DataGrid<User>
           rows={users ?? []}
           columns={columns}
           loading={usersLoading}
