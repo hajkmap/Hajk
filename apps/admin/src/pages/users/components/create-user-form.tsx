@@ -3,6 +3,7 @@ import {
   Box,
   Button,
   CircularProgress,
+  Divider,
   Paper,
   TextField,
   Typography,
@@ -74,7 +75,8 @@ export default function CreateUserForm() {
         }}
         sx={{ display: "flex", flexDirection: "column", gap: 1 }}
       >
-        <Typography variant="h6">{t("user.createUser")}</Typography>
+        <Typography variant="h5">{t("user.createLocalUser")}</Typography>
+        <Typography>{t("user.createUserDescription")}</Typography>
         <Controller
           name="email"
           control={control}
@@ -114,6 +116,9 @@ export default function CreateUserForm() {
             />
           )}
         />
+        <Grid container justifyContent="center" sx={{ mt: 1, mb: 1 }}>
+          <Divider sx={{ width: "30%" }} />
+        </Grid>
         <Controller
           name="password"
           control={control}
@@ -173,7 +178,7 @@ export default function CreateUserForm() {
             }
             sx={{ m: 1, maxWidth: 200 }}
           >
-            {createUserMutation.isPending ? null : t("user.createUser")}
+            {createUserMutation.isPending ? null : t("user.createLocalUser")}
           </Button>
         </Grid>
       </Box>
