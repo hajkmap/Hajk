@@ -46,12 +46,16 @@
     "user.deleteConfirmation": "Du håller på att ta bort en användare. Denna åtgärd kan inte ångras. Är du säker på att du vill fortsätta?",
     "user.deleteUserFailed": "Misslyckades att ta bort användaren. Kontakta systemadministratören.",
     "user.deleteUserSuccess": "Användare borttagen!",
+    "user.email": "Epost",
     "user.emailRequired": "E-post är obligatoriskt",
     "user.enterValidEmail": "Vänligen ange en giltig e-postadress",
+    "user.name": "Namn",
     "user.nameRequired": "Namn är obligatoriskt",
     "user.passwordAtLeast6Chars": "Lösenordet måste vara minst 6 tecken",
     "user.passwordMismatch": "Lösenorden matchar inte",
     "user.passwordRequired": "Lösenord är obligatoriskt",
-    "user.pleaseConfirmPassword": "Vänligen bekräfta lösenord"
+    "user.pleaseConfirmPassword": "Vänligen bekräfta lösenord",
+    "user.roles": "Roller",
+    "user.searchTitle": "Sök användare"
   }
 }

@@ -1,6 +1,7 @@
 import Grid from "@mui/material/Grid2";
 import { IconButton, InputAdornment, TextField } from "@mui/material";
 import ClearIcon from "@mui/icons-material/Clear";
+import { useTranslation } from "react-i18next";
 
 interface Props {
   searchString: string;
@@ -8,13 +9,15 @@ interface Props {
 }
 
 export default function UserListFilterPanel(props: Props) {
+  const { t } = useTranslation();
+
   return (
     <Grid container sx={{ mb: 2 }}>
       <TextField
         sx={{ width: "100%" }}
         id="user-search"
         value={props.searchString}
-        label="Sök användare"
+        label={t("user.searchTitle")}
         onChange={(e) => {
           props.setSearchString(e.target.value);
         }}

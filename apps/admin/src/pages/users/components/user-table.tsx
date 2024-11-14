@@ -41,11 +41,11 @@ export default function UserTable() {
   const deleteUserMutation = useDeleteUser();
 
   const columns = [
-    { field: "fullName", flex: 1, headerName: "Name" },
-    { field: "email", flex: 1, headerName: "Email" },
+    { field: "fullName", flex: 1, headerName: t("user.name") },
+    { field: "email", flex: 1, headerName: t("user.email") },
     {
       field: "roles",
-      headerName: "Roles",
+      headerName: t("user.roles"),
       flex: 1,
       valueGetter: (value: Role[]) => value.map((v) => t(v.title)).join(", "),
       renderCell: (params: GridRenderCellParams<User, string>) => {
