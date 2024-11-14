@@ -1,4 +1,4 @@
-import axios, { AxiosError } from "axios";
+import axios from "axios";
 import { getApiClient, InternalApiError } from "../../lib/internal-api-client";
 import {
   Service,
@@ -207,19 +207,8 @@ const parseAffectedLayersFromXML = (xmlString: string): string[] => {
 export const fetchCapabilities = async (
   url: string
 ): Promise<ServiceCapabilities> => {
-  try {
-    const response = await axios.get(url, { responseType: "text" });
-    const xmlData: string = response.data as string;
-    const layers = parseAffectedLayersFromXML(xmlData);
-    return { layers };
-  } catch (error) {
-    const axiosError = error as AxiosError;
-    if (axiosError.response) {
-      throw new Error(
-        `Failed to fetch capabilities. ErrorId: ${axiosError.message}.`
-      );
-    }
-
-    return { layers: [] };
-  }
+  const response = await axios.get(url, { responseType: "text" });
+  const xmlData: string = response.data as string;
+  const layers = parseAffectedLayersFromXML(xmlData);
+  return { layers };
 };

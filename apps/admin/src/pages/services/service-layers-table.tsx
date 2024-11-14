@@ -6,30 +6,32 @@ import {
   TableContainer,
   TableHead,
   TableRow,
-  CircularProgress,
-  Typography,
   Box,
   TablePagination,
   TextField,
+  useTheme,
 } from "@mui/material";
+import { useTranslation } from "react-i18next";
+import { useServiceCapabilities } from "../../api/services/";
+import { UseServiceCapabilitiesProps } from "../../api/services/types";
 import SearchIcon from "@mui/icons-material/Search";
-import SimpleBar from "simplebar-react";
-import "simplebar-react/dist/simplebar.min.css";
+import Scrollbar from "../../layouts/root/components/scrollbar";
+import CircularProgress from "../../layouts/root/components/progress/circular-progress";
 
-interface ServicesTableProps {
-  layers: string[];
-  layersLoading: boolean;
-  layersError: boolean;
-}
-
-function ServicesTable({
-  layers,
-  layersLoading,
-  layersError,
-}: ServicesTableProps) {
+function ServicesTable({ baseUrl: url, type }: UseServiceCapabilitiesProps) {
+  const { palette } = useTheme();
+  const { t } = useTranslation();
   const [page, setPage] = useState(0);
-  const [rowsPerPage, setRowsPerPage] = useState(5);
+  const [rowsPerPage, setRowsPerPage] = useState(10);
   const [searchTerm, setSearchTerm] = useState("");
+  const {
+    layers,
+    isError: layersError,
+    isLoading: layersLoading,
+  } = useServiceCapabilities({
+    baseUrl: url,
+    type: type,
+  });
 
   const handleChangePage = (
     _event: React.MouseEvent<HTMLButtonElement> | null,
@@ -63,26 +65,38 @@ function ServicesTable({
       : filteredLayers;
 
   return (
-    <SimpleBar style={{ maxHeight: "500px" }}>
-      <Box sx={{ overflowY: "auto" }}>
-        <TextField
-          sx={{ mb: 2, mt: 1, width: "50%" }}
-          label="Search Layer(s)"
-          variant="outlined"
-          value={searchTerm}
-          onChange={handleSearchChange}
-          slotProps={{
-            input: { endAdornment: <SearchIcon /> },
-          }}
-        />
+    <Box>
+      <TextField
+        sx={{
+          mb: 2,
+          mt: 1,
+          width: "100%",
+          maxWidth: "400px",
+        }}
+        label={t("common.searchLayer")}
+        variant="outlined"
+        value={searchTerm}
+        onChange={handleSearchChange}
+        slotProps={{
+          input: { endAdornment: <SearchIcon /> },
+        }}
+      />
+      <Scrollbar sx={{ maxHeight: "400px" }}>
         <TableContainer>
-          <Table stickyHeader>
+          <Table>
             <TableHead>
-              <TableRow>
-                <TableCell>Lagernamn</TableCell>
-                <TableCell align="right">Infoklick</TableCell>
-                <TableCell align="right">Publiceringar</TableCell>
-                <TableCell align="right">Åtgärder</TableCell>
+              <TableRow
+                sx={{
+                  "& > *": {
+                    fontWeight: "bold !important",
+                    fontSize: "1rem !important",
+                  },
+                }}
+              >
+                <TableCell>{t("common.layerName")}</TableCell>
+                <TableCell align="right">{t("common.infoclick")}</TableCell>
+                <TableCell align="right">{t("common.publications")}</TableCell>
+                <TableCell align="right">{t("common.actions")}</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
@@ -91,28 +105,33 @@ function ServicesTable({
                   <TableCell
                     colSpan={4}
                     align="center"
-                    style={{ color: "red" }}
+                    style={{ color: palette.error.main }}
                   >
-                    Error loading layers. The provided url is not valid.
-                  </TableCell>
-                </TableRow>
-              ) : paginatedLayers.length === 0 ? (
-                <TableRow>
-                  <TableCell colSpan={4} align="center">
-                    No layers available.
+                    {t("services.error.url")}
                   </TableCell>
                 </TableRow>
               ) : layersLoading ? (
                 <TableRow>
                   <TableCell colSpan={4} align="center">
-                    <CircularProgress size={24} />
-                    <Typography variant="body2">Loading layers...</Typography>
+                    <CircularProgress
+                      color="secondary"
+                      size={30}
+                      typographyText={t("circularProgress.loadingLayers")}
+                    />
+                  </TableCell>
+                </TableRow>
+              ) : layers.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={4} align="center">
+                    {t("services.error.layers")}
                   </TableCell>
                 </TableRow>
               ) : (
                 paginatedLayers.map((layer, index) => (
                   <TableRow key={index}>
-                    <TableCell>{layer || "Unnamed Layer"}</TableCell>
+                    <TableCell>
+                      {layer || t("servies.error.unnamed.layer")}
+                    </TableCell>
                     <TableCell align="right"></TableCell>
                     <TableCell align="right"></TableCell>
                     <TableCell align="right"></TableCell>
@@ -122,17 +141,24 @@ function ServicesTable({
             </TableBody>
           </Table>
         </TableContainer>
-        <TablePagination
-          rowsPerPageOptions={[5, 10, 25, { label: "All", value: -1 }]}
-          component="div"
-          count={filteredLayers.length}
-          rowsPerPage={rowsPerPage}
-          page={page}
-          onPageChange={handleChangePage}
-          onRowsPerPageChange={handleChangeRowsPerPage}
-        />
-      </Box>
-    </SimpleBar>
+      </Scrollbar>
+      <TablePagination
+        rowsPerPageOptions={[
+          10,
+          25,
+          50,
+          100,
+          { label: t("common.all"), value: -1 },
+        ]}
+        labelRowsPerPage={t("common.rowsPerPage")}
+        component="div"
+        count={filteredLayers.length}
+        rowsPerPage={rowsPerPage}
+        page={page}
+        onPageChange={handleChangePage}
+        onRowsPerPageChange={handleChangeRowsPerPage}
+      />
+    </Box>
   );
 }
 

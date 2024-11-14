@@ -69,8 +69,3 @@ svg {
     scroll-behavior: auto !important;
   }
 }
-
-.simplebar-scrollbar::before {
-  background-color: rgb(134, 137, 139) !important;
-  opacity: 0.7;
-}

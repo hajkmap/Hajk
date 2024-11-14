@@ -121,18 +121,20 @@ export default function ServicesPage() {
         <Box component="div">Loading...</Box>
       ) : (
         <>
-          <Button
-            onClick={handleClickOpen}
-            variant="contained"
-            sx={{
-              float: "right",
-              mr: 2,
-              mb: 1,
-              backgroundColor: palette.secondary.dark,
-            }}
-          >
-            {t("services.dialog.addBtn")}
-          </Button>
+          {!!services && (
+            <Button
+              onClick={handleClickOpen}
+              variant="contained"
+              sx={{
+                float: "right",
+                mr: 2,
+                mb: 1,
+                backgroundColor: palette.secondary.dark,
+              }}
+            >
+              {t("services.dialog.addBtn")}
+            </Button>
+          )}
           <DialogWrapper
             fullWidth
             open={open}

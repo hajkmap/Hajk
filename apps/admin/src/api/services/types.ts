@@ -38,4 +38,5 @@ export interface ServiceCapabilities {
 
 export interface UseServiceCapabilitiesProps {
   baseUrl: string;
+  type: string;
 }

@@ -3,14 +3,7 @@ import { useState, useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import Page from "../../layouts/root/components/page";
 import { FieldValues } from "react-hook-form";
-import {
-  Box,
-  useTheme,
-  Button,
-  TextField,
-  Typography,
-  CircularProgress,
-} from "@mui/material";
+import { Box, useTheme, Button, TextField, Typography } from "@mui/material";
 import {
   useServiceById,
   useUpdateService,
@@ -24,8 +17,8 @@ import { DefaultUseForm } from "../../components/form-factory/default-use-form";
 import { createOnSubmitHandler } from "../../components/form-factory/form-utils";
 import { ServiceUpdateFormData } from "../../api/services";
 import DialogWrapper from "../../components/flexible-dialog";
-import { useServiceCapabilities } from "../../api/services/";
 import ServicesTable from "./service-layers-table";
+import CircularProgress from "../../layouts/root/components/progress/circular-progress";
 
 export default function ServiceSettings() {
   const formRef = useRef<HTMLFormElement | null>(null);
@@ -40,11 +33,6 @@ export default function ServiceSettings() {
     useUpdateService();
   const { mutateAsync: deleteService, status: deleteStatus } =
     useDeleteService();
-  const {
-    affectedLayers: layers,
-    isError: layersError,
-    isLoading: layersLoading,
-  } = useServiceCapabilities({ baseUrl: service?.url ?? "" });
 
   const [formServiceData, setFormServiceData] = useState<
     DynamicFormContainer<FieldValues>
@@ -245,9 +233,8 @@ export default function ServiceSettings() {
     renderer: () => {
       return (
         <ServicesTable
-          layers={layers}
-          layersError={layersError}
-          layersLoading={layersLoading}
+          baseUrl={service?.url ?? ""}
+          type={service?.type ?? ""}
         />
       );
     },
@@ -278,7 +265,7 @@ export default function ServiceSettings() {
     if (!service) return;
     setFormServiceData(serviceSettingsFormContainer);
     setDialogUrl(service.url);
-  }, [service, layersLoading, layersError]);
+  }, [service]);
 
   const defaultValues = formServiceData.getDefaultValues();
   const {
@@ -314,7 +301,7 @@ export default function ServiceSettings() {
           flexDirection: "column",
           gap: 2,
           p: 2,
-          mt: 2,
+          mt: 10,
           mr: 2,
           border: "1px solid",
           borderColor: "grey.400",

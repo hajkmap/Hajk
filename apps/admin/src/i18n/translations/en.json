@@ -31,8 +31,19 @@
     "services.coordinateSystem": "Coordinate system",
     "services.owner": "Owner",
     "services.layerDescription": "Description of the displayed layer",
+    "services.error.url": " Error loading layers. The provided url is not valid.",
+    "services.error.layers": "No layers found.",
+    "servies.error.unnamed.layer": "Unnamed layer",
     "common.serviceType": "Service type",
     "common.name": "Name",
-    "common.serverType": "Server type"
+    "common.serverType": "Server type",
+    "common.searchLayer": "Search layer(s)",
+    "common.layerName": "Layername",
+    "common.infoclick": "Infoclick",
+    "common.publications": "Publications",
+    "common.actions": "Actions",
+    "common.all": "All",
+    "common.rowsPerPage": "Rows per page",
+    "circularProgress.loadingLayers": "Loading layers..."
   }
 }

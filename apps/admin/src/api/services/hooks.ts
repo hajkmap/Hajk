@@ -115,8 +115,9 @@ export const useDeleteService = () => {
 
 export const useServiceCapabilities = ({
   baseUrl,
+  type,
 }: UseServiceCapabilitiesProps) => {
-  const urlWithParams = `${baseUrl}?request=getCapabilities`;
+  const urlWithParams = `${baseUrl}?service=${type}&request=GetCapabilities`;
 
   const { data, isError, isLoading } = useQuery({
     queryKey: ["serviceCapabilities", urlWithParams],
@@ -124,7 +125,7 @@ export const useServiceCapabilities = ({
   });
 
   return {
-    affectedLayers: data?.layers ?? [],
+    layers: data?.layers ?? [],
     isError,
     isLoading,
   };
