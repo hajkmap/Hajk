@@ -45,6 +45,16 @@ enum HajkStatusCodes {
    * The request body is invalid, e.g. lacks some required fields.
    */
   INVALID_REQUEST_BODY = "RQ001",
+
+  /**
+   * The user is not authenticated.
+   */
+  USER_NOT_AUTHENTICATED = "RQ002",
+
+  /**
+   * The user is not authenticated.
+   */
+  USER_NOT_AUTHORIZED = "RQ003",
 }
 
 export default HajkStatusCodes;

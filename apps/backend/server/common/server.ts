@@ -33,6 +33,8 @@ import HttpStatusCodes from "./http-status-codes.ts";
 import { HajkError, RouteError } from "./classes.ts";
 import { HttpError } from "express-openapi-validator/dist/framework/types.js";
 import { isInstanceOfPrismaError } from "./utils/is-instance-of-prisma-error.ts";
+
+import { isAuthActive } from "./auth/is-auth-active.ts";
 import { setupPassport } from "./auth/passport.middleware.ts";
 
 const logger = log4js.getLogger("hajk");
@@ -151,8 +153,11 @@ class Server {
     // Setup express-session. We use the PrismaSessionStore for session storage.
     this.setupSession();
 
-    // Initiate PassportJS with all its strategies.
-    setupPassport(this.app);
+    // If .env tells that we should use authentication, let's
+    // initiate PassportJS with all its strategies.
+    if (isAuthActive) {
+      setupPassport(this.app);
+    }
 
     // Hajk's own proxies that can be configured in .env. Await, because
     // we must dynamically load the corresponding modules.

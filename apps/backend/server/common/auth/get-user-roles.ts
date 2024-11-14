@@ -12,7 +12,7 @@ export async function getUserRoles(
       id: user.id,
     },
     select: {
-      roles: { select: { role: { select: { code: true } } } },
+      roles: { select: { role: { select: { id: true } } } },
     },
   });
 
@@ -20,7 +20,7 @@ export async function getUserRoles(
     .map((role) => {
       return { ...role.role };
     })
-    .map((r) => r.code);
+    .map((r) => r.id);
 
   return roles;
 }
