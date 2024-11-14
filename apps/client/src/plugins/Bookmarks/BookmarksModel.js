@@ -56,25 +56,25 @@ class BookmarksModel {
   getVisibleSubLayers() {
     const partlyToggledGroupLayers = {};
 
-    // Loop through the layers in the map
-    this.map
-      .getLayers()
-      .getArray()
-      .filter((layer) => {
-        return (
-          layer.getVisible() &&
-          layer.getProperties().name &&
-          isValidLayerId(layer.getProperties().name) &&
-          layer.getProperties().layerType === "group" &&
-          layer.subLayers?.length !==
-            layer.getSource().getParams?.().LAYERS?.split(",").length
-        );
-      })
-      .forEach((layer) => {
-        partlyToggledGroupLayers[layer.getProperties().name] = layer
-          .getSource()
-          .getParams().LAYERS;
-      });
+    // Get all layers from map
+    const layers = this.map.getLayers().getArray();
+
+    // Filter and process group layers
+    layers.forEach((layer) => {
+      const props = layer.getProperties();
+
+      // Check if it's a visible group layer
+      if (
+        layer.getVisible() &&
+        props.layerType === "group" &&
+        layer.getSource()?.getParams
+      ) {
+        const params = layer.getSource().getParams();
+        if (params?.LAYERS) {
+          partlyToggledGroupLayers[props.name] = params.LAYERS;
+        }
+      }
+    });
 
     return partlyToggledGroupLayers;
   }
@@ -84,14 +84,25 @@ class BookmarksModel {
       .getLayers()
       .getArray()
       .forEach((layer) => {
-        const layerName = layer.getProperties().name;
+        const props = layer.getProperties();
+        const layerName = props.name;
 
-        if (visibleSubLayers[layerName]) {
-          const subLayers = visibleSubLayers[layerName];
+        // Only process group layers
+        if (props.layerType === "group" && layer.getSource()?.updateParams) {
+          if (visibleSubLayers[layerName]) {
+            const subLayers = visibleSubLayers[layerName];
 
-          layer.getSource().updateParams({
-            LAYERS: subLayers,
-          });
+            // Ensure the layer is visible
+            layer.setVisible(true);
+
+            // Update the LAYERS parameter
+            layer.getSource().updateParams({
+              LAYERS: subLayers,
+            });
+
+            // Force a refresh of the source
+            layer.getSource().refresh();
+          }
         }
       });
   }
@@ -99,6 +110,9 @@ class BookmarksModel {
   getMapState() {
     const view = this.map.getView();
     const viewCenter = view.getCenter();
+    const visibleLayers = this.getVisibleLayers();
+    const visibleSubLayers = this.getVisibleSubLayers();
+
     const pos = {
       x: viewCenter[0],
       y: viewCenter[1],
@@ -107,8 +121,8 @@ class BookmarksModel {
 
     const state = {
       m: this.app.config.activeMap,
-      l: this.getVisibleLayers(),
-      gl: this.getVisibleSubLayers(),
+      l: visibleLayers,
+      gl: visibleSubLayers,
       ...pos,
     };
 
@@ -133,8 +147,6 @@ class BookmarksModel {
     let view = this.map.getView();
     view.setCenter([bookmark.settings.x, bookmark.settings.y]);
     view.setZoom(bookmark.settings.z);
-
-    bookmark = null;
   }
 
   readFromStorage() {
