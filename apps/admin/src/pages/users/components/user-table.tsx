@@ -22,6 +22,8 @@ import useAppStateStore from "../../../store/use-app-state-store";
 import { GRID_SWEDISH_LOCALE_TEXT } from "../../../i18n/translations/datagrid/sv";
 import UserListFilterPanel from "./user-list-filter-panel";
 
+const PAGE_SIZE = 5;
+
 export default function UserTable() {
   const language = useAppStateStore((state) => state.language);
   const { t } = useTranslation();
@@ -137,11 +139,11 @@ export default function UserTable() {
         disableRowSelectionOnClick
         sx={{ maxWidth: "100%" }}
         initialState={{
-          pagination: { paginationModel: { pageSize: 5 } },
+          pagination: { paginationModel: { pageSize: PAGE_SIZE } },
         }}
         pageSizeOptions={[5, 10, 25, 50, 100]}
         autoHeight={true}
-        hideFooterPagination={filteredUsers.length < 5}
+        hideFooterPagination={users && users.length <= PAGE_SIZE}
         slotProps={{
           pagination: {
             showFirstButton: true,
