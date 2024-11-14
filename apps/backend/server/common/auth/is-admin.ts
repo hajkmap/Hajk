@@ -8,8 +8,9 @@ export async function isAdmin(req: Request, res: Response, next: NextFunction) {
   }
 
   const userRoles = await getUserRoles(req.user);
+  const userRoleCodes = userRoles.map((role) => role.code);
 
-  if (userRoles.includes("ADMIN")) {
+  if (userRoleCodes.includes("ADMIN")) {
     return next();
   } else {
     return res

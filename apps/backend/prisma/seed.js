@@ -418,6 +418,7 @@ async function populateLayerStructure() {
 async function createBaseRoles() {
   const baseRoles = [
     {
+      id: "0001",
       code: "ADMIN",
       title: "roles.adminTitle",
       description: "roles.adminDescription",

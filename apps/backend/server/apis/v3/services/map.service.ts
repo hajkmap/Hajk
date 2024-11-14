@@ -26,6 +26,8 @@ class MapService {
     logger.debug(`[getMapByName] Retrieving map "${mapName}"`);
 
     const roles = await getUserRoles(user);
+    const roleCodes = roles.map((r) => r.code);
+    const roleIds = roles.map((r) => r.id);
 
     // Some logging that only should take place if auth is activated.
     if (isAuthActive) {
@@ -40,7 +42,7 @@ class MapService {
         }
 
         // Log user's roles
-        logger.debug("User's roles:", roles);
+        logger.debug("User's roles:", roleCodes);
       } else {
         logger.debug("Current user: anonymous");
       }
@@ -79,7 +81,11 @@ class MapService {
           ? {
               OR: [
                 { restrictedToRoles: { none: {} } },
-                { restrictedToRoles: { some: { roleId: { in: roles } } } },
+                {
+                  restrictedToRoles: {
+                    some: { roleId: { in: roleIds } },
+                  },
+                },
               ],
             }
           : {}),

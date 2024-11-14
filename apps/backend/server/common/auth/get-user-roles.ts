@@ -2,7 +2,7 @@ import prisma from "../../common/prisma.ts";
 
 export async function getUserRoles(
   user: Express.User | undefined
-): Promise<string[]> {
+): Promise<{ id: string; code: string }[]> {
   if (!user) {
     return [];
   }
@@ -12,7 +12,7 @@ export async function getUserRoles(
       id: user.id,
     },
     select: {
-      roles: { select: { role: { select: { id: true } } } },
+      roles: { select: { role: { select: { id: true, code: true } } } },
     },
   });
 
@@ -20,7 +20,7 @@ export async function getUserRoles(
     .map((role) => {
       return { ...role.role };
     })
-    .map((r) => r.id);
+    .map((r) => ({ id: r.id, code: r.code }));
 
   return roles;
 }
