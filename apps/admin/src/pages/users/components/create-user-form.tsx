@@ -96,7 +96,6 @@ export default function CreateUserForm() {
               error={!!errors.email}
               helperText={errors.email ? errors.email.message : ""}
               fullWidth
-              size="small"
             />
           )}
         />
@@ -112,7 +111,6 @@ export default function CreateUserForm() {
               error={!!errors.fullName}
               helperText={errors.fullName ? errors.fullName.message : ""}
               fullWidth
-              size="small"
             />
           )}
         />
@@ -138,7 +136,6 @@ export default function CreateUserForm() {
               error={!!errors.password}
               helperText={errors.password ? errors.password.message : ""}
               fullWidth
-              size="small"
             />
           )}
         />
@@ -161,7 +158,6 @@ export default function CreateUserForm() {
                 errors.confirmPassword ? errors.confirmPassword.message : ""
               }
               fullWidth
-              size="small"
             />
           )}
         />
@@ -176,7 +172,7 @@ export default function CreateUserForm() {
                 <CircularProgress color="inherit" size={20} />
               ) : null
             }
-            sx={{ m: 1, maxWidth: 200 }}
+            sx={{ m: 1, maxWidth: 250 }}
           >
             {createUserMutation.isPending ? null : t("user.createLocalUser")}
           </Button>

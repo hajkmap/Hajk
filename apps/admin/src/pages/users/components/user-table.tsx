@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { DataGrid, GridRenderCellParams } from "@mui/x-data-grid";
 import {
   Button,
@@ -14,17 +14,22 @@ import DeleteIcon from "@mui/icons-material/Delete";
 
 import { toast } from "react-toastify";
 import { useTranslation } from "react-i18next";
+import { useDebounce } from "use-debounce";
 
 import { Role, User } from "../../../api/users";
 import { useDeleteUser, useUsers } from "../../../api/users/hooks";
 import useAppStateStore from "../../../store/use-app-state-store";
 import { GRID_SWEDISH_LOCALE_TEXT } from "../../../i18n/translations/datagrid/sv";
+import UserListFilterPanel from "./user-list-filter-panel";
 
 export default function UserTable() {
   const language = useAppStateStore((state) => state.language);
   const { t } = useTranslation();
   const { palette } = useTheme();
   const { data: users, isLoading: usersLoading } = useUsers();
+
+  const [searchString, setSearchString] = useState("");
+  const [debouncedSearchString] = useDebounce(searchString, 200);
 
   const [userToDelete, setUserToDelete] = useState<{
     id: string;
@@ -91,10 +96,41 @@ export default function UserTable() {
     setUserToDelete(null);
   };
 
+  const filteredUsers = useMemo(() => {
+    return !users
+      ? []
+      : users.filter((user) => {
+          return (
+            debouncedSearchString === "" ||
+            Object.values(user).some((value) => {
+              return (
+                (typeof value === "string" &&
+                  value
+                    .toLowerCase()
+                    .includes(debouncedSearchString.toLowerCase())) ||
+                (value &&
+                  typeof value === "object" &&
+                  Object.values(user).some(
+                    (v) =>
+                      typeof v === "string" &&
+                      v
+                        .toLowerCase()
+                        .includes(debouncedSearchString.toLowerCase())
+                  ))
+              );
+            })
+          );
+        });
+  }, [users, debouncedSearchString]);
+
   return (
     <>
+      <UserListFilterPanel
+        searchString={searchString}
+        setSearchString={setSearchString}
+      />
       <DataGrid<User>
-        rows={users ?? []}
+        rows={filteredUsers}
         columns={columns}
         loading={usersLoading}
         localeText={language === "sv" ? GRID_SWEDISH_LOCALE_TEXT : undefined}
@@ -105,6 +141,7 @@ export default function UserTable() {
         }}
         pageSizeOptions={[5, 10, 25, 50, 100]}
         autoHeight={true}
+        hideFooterPagination={filteredUsers.length < 5}
         slotProps={{
           pagination: {
             showFirstButton: true,
