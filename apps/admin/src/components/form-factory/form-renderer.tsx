@@ -1,4 +1,4 @@
-import { Grid2 as Grid, Paper, Typography } from "@mui/material";
+import { Box, Grid2 as Grid, Paper, Typography } from "@mui/material";
 import {
   FieldValues,
   UseFormRegister,
@@ -13,6 +13,8 @@ import { getRenderer } from "./renderers";
 import ControlledAccordion from "./components/controlled-accordion";
 import CONTAINER_TYPE from "./types/container-types";
 import STATIC_TYPE from "./types/static-type";
+import HelpIcon from "@mui/icons-material/Help";
+import HajkTooltip from "../hajk-tooltip";
 
 interface FormRenderProps<TFieldValues extends FieldValues> {
   data: DynamicFormContainer<TFieldValues>;
@@ -82,14 +84,46 @@ const FormRenderer = <TFieldValues extends FieldValues>({
   ) => {
     const castedSettings = item as DynamicInputSettings<TFieldValues>;
 
+    if (
+      castedSettings.registerOptions?.required &&
+      !castedSettings.title?.includes("*") // Prevents doubles in DEV env.
+    ) {
+      castedSettings.title = `${castedSettings.title} *`;
+    }
+
     return (
-      <DynamicInputComponent
-        key={`${index}`}
-        register={register}
-        control={control}
-        settings={castedSettings}
-        errorMessage={errors[castedSettings.name]?.message?.toString() ?? null}
-      />
+      // Using Box here as there seem to be issues when nesting too many Grids
+      <Box sx={{ display: "flex" }}>
+        <Box sx={{ flex: "1 1 auto" }}>
+          <DynamicInputComponent
+            key={`${index}`}
+            register={register}
+            control={control}
+            settings={castedSettings}
+            errorMessage={
+              errors[castedSettings.name]?.message?.toString() ?? null
+            }
+          />
+        </Box>
+        {castedSettings.helpText && (
+          <Box>
+            <HajkTooltip title={castedSettings.helpText}>
+              <Box
+                sx={{
+                  width: "2rem",
+                  height: "2rem",
+                  textAlign: "center",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
+                <HelpIcon fontSize="small" />
+              </Box>
+            </HajkTooltip>
+          </Box>
+        )}
+      </Box>
     );
   };
 
@@ -158,6 +192,21 @@ const FormRenderer = <TFieldValues extends FieldValues>({
     if (type === CONTAINER_TYPE.PANEL) {
       return renderContainerPanel(container, index);
     } else if (type === CONTAINER_TYPE.ACCORDION) {
+      const containsRequiredFields =
+        container.getElements().filter((item) => {
+          if (item.kind === "DynamicInputSettings") {
+            const castedSettings = item as DynamicInputSettings<TFieldValues>;
+            if (castedSettings.registerOptions?.required) {
+              return true;
+            }
+          }
+        }).length > 0;
+
+      if (containsRequiredFields) {
+        if (!container.title?.includes("*") /* Prevents doubles in DEV env.*/) {
+          container.title = `${container.title} *`;
+        }
+      }
       return renderContainerAccordion(container, index);
     }
   };
