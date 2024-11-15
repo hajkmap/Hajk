@@ -41,7 +41,7 @@ const useAuth = () => {
     if (!userStore.user) {
       void fetchUser();
     }
-  }, [apiBaseUrl, userStore, navigate]);
+  }, [apiBaseUrl, userStore, navigate, loginPath]);
 
   const logout = async () => {
     try {
