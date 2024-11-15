@@ -120,9 +120,9 @@ function SurveyHandler(props) {
         <div>
           <input
             type="number"
-            placeholder="Rate Count"
+            placeholder="Rate Min"
             value={question.rateCount || ''}
-            onChange={(e) => updateQuestion(selectedQuestion.pageIndex, selectedQuestion.questionIndex, 'rateCount', e.target.value)}
+            onChange={(e) => updateQuestion(selectedQuestion.pageIndex, selectedQuestion.questionIndex, 'rateMin', e.target.value)}
           />
           <input
             type="number"
@@ -157,7 +157,7 @@ function SurveyHandler(props) {
     } else if (type === "html") {
         newQuestion.html = "";
     } else if (type === "rating") {
-        newQuestion.displayMode = "buttons"; // Sätt displayMode till "buttons" som standard
+        newQuestion.displayMode = "buttons";
     }
     const newPages = survey.pages.map((page, index) => {
         if (index === pageIndex) {
