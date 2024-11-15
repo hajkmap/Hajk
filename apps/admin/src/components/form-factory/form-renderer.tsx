@@ -182,7 +182,19 @@ const FormRenderer = <TFieldValues extends FieldValues>({
   };
 
   return (
-    <Grid container sx={{ ml: -2 }}>
+    <Grid
+      container
+      sx={{
+        ml: -2,
+        "& .MuiInputBase-root": {
+          backgroundColor: "background.default",
+        },
+        "& .MuiRadio-root > span:first-of-type": {
+          backgroundColor: "background.default",
+          borderRadius: "50%",
+        },
+      }}
+    >
       {data?.getElements().map((item, index) => renderFormElement(item, index))}
     </Grid>
   );
