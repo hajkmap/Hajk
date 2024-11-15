@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useHref } from "react-router-dom";
 import axios from "axios";
 import Grid from "@mui/material/Grid2";
 import { Box, Button, TextField, Typography } from "@mui/material";
@@ -7,6 +8,7 @@ import useAppStateStore from "../../store/use-app-state-store";
 
 export default function LoginPage() {
   const { t } = useTranslation();
+  const basename = useHref("/");
   const { apiBaseUrl } = useAppStateStore.getState();
   const [credentials, setCredentials] = useState({ email: "", password: "" });
   const [loginFailed, setLoginFailed] = useState(false);
@@ -41,7 +43,7 @@ export default function LoginPage() {
         },
         { withCredentials: true }
       );
-      window.location.href = "/";
+      window.location.href = basename;
     } catch (error) {
       console.error(error);
       setLoginFailed(true);

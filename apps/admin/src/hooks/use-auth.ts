@@ -1,5 +1,6 @@
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { useHref } from "react-router-dom";
 import axios from "axios";
 import useUserStore, { User } from "../store/use-user-store";
 import useAppStateStore from "../store/use-app-state-store";
@@ -8,6 +9,7 @@ const useAuth = () => {
   const { apiBaseUrl } = useAppStateStore.getState();
   const userStore = useUserStore();
   const navigate = useNavigate();
+  const loginPath = useHref("/login");
 
   useEffect(() => {
     if (userStore.userLoading) {
@@ -30,7 +32,7 @@ const useAuth = () => {
         }
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
       } catch (error) {
-        navigate("/login");
+        navigate(loginPath);
       } finally {
         userStore.setUserLoading(false);
       }

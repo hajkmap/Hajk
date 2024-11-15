@@ -60,7 +60,7 @@ const createApiClient = (): AxiosInstance => {
             break;
           case 401:
             console.error("Unauthorized");
-            window.location.href = "/login";
+            window.location.href = `${import.meta.env.BASE_URL || ""}/login`;
             break;
           case 403:
             console.error(
