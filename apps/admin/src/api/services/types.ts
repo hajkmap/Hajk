@@ -30,7 +30,7 @@ export interface ServiceUpdateFormData {
   comment?: string;
 }
 
-export const ServiceType = ["ARCGIS", "VECTOR", "WFS", "WFST", "WMS", "WMTS"];
+export const serviceTypes = ["ARCGIS", "VECTOR", "WFS", "WFST", "WMS", "WMTS"];
 
 export interface ServiceCapabilities {
   layers: string[];

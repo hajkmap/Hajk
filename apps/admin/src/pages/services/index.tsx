@@ -11,7 +11,7 @@ import FormRenderer from "../../components/form-factory/form-renderer";
 import { DefaultUseForm } from "../../components/form-factory/default-use-form";
 import { createOnSubmitHandler } from "../../components/form-factory/form-utils";
 import { useServices, useCreateService } from "../../api/services";
-import { ServiceCreateFormData, ServiceType } from "../../api/services/types";
+import { ServiceCreateFormData, serviceTypes } from "../../api/services/types";
 import DialogWrapper from "../../components/flexible-dialog";
 
 export default function ServicesPage() {
@@ -47,8 +47,8 @@ export default function ServicesPage() {
     gridColumns: 4,
     name: "type",
     title: `${t("common.serviceType")}`,
-    defaultValue: ServiceType[4],
-    optionList: ServiceType.map((type) => ({
+    defaultValue: serviceTypes[4],
+    optionList: serviceTypes.map((type) => ({
       title: type,
       value: type,
     })),

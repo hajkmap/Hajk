@@ -3,7 +3,17 @@ import { useState, useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import Page from "../../layouts/root/components/page";
 import { FieldValues } from "react-hook-form";
-import { Box, useTheme, Button, TextField, Typography } from "@mui/material";
+import {
+  Box,
+  useTheme,
+  Button,
+  TextField,
+  Typography,
+  Select,
+  MenuItem,
+  InputLabel,
+  FormControl,
+} from "@mui/material";
 import {
   useServiceById,
   useUpdateService,
@@ -15,7 +25,7 @@ import INPUT_TYPE from "../../components/form-factory/types/input-type";
 import FormRenderer from "../../components/form-factory/form-renderer";
 import { DefaultUseForm } from "../../components/form-factory/default-use-form";
 import { createOnSubmitHandler } from "../../components/form-factory/form-utils";
-import { ServiceUpdateFormData } from "../../api/services";
+import { ServiceUpdateFormData, serviceTypes } from "../../api/services";
 import DialogWrapper from "../../components/flexible-dialog";
 import ServicesGrid from "./service-layers-grid";
 import CircularProgress from "../../components/progress/circular-progress";
@@ -29,6 +39,9 @@ export default function ServiceSettings() {
   const { data: service, isError, isLoading } = useServiceById(serviceId ?? "");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [dialogUrl, setDialogUrl] = useState(service?.url ?? "");
+  const [dialogServiceType, setDialogServiceType] = useState(
+    service?.type ?? ""
+  );
   const { mutateAsync: updateService, status: updateStatus } =
     useUpdateService();
   const { mutateAsync: deleteService, status: deleteStatus } =
@@ -41,6 +54,7 @@ export default function ServiceSettings() {
   const handleDialogOpen = () => {
     setIsDialogOpen(true);
     setDialogUrl(getValues("url") as string);
+    setDialogServiceType(getValues("type") as string);
   };
 
   const handleDialogClose = () => {
@@ -49,6 +63,7 @@ export default function ServiceSettings() {
 
   const handleSaveUrl = () => {
     setValue("url", dialogUrl);
+    setValue("type", dialogServiceType);
     handleDialogClose();
   };
 
@@ -61,6 +76,7 @@ export default function ServiceSettings() {
     try {
       const payload = {
         url: serviceData.url,
+        type: serviceData.type,
       };
       console.log(" Sending payload", payload);
       await updateService({
@@ -120,7 +136,7 @@ export default function ServiceSettings() {
 
   panelNestedContainer.addInput({
     type: INPUT_TYPE.TEXTFIELD,
-    name: "serviceType",
+    name: "type",
     title: `${t("common.serviceType")}`,
     defaultValue: `${service?.type}`,
     disabled: true,
@@ -382,6 +398,25 @@ export default function ServiceSettings() {
             error={!!errors.url}
             margin="normal"
           />
+          <FormControl
+            sx={{ mt: 2, width: "100%", maxWidth: "150px" }}
+            fullWidth
+            error={!!errors.type}
+          >
+            <InputLabel id="type">{t("common.serviceType")}</InputLabel>
+            <Select
+              label={t("common.serviceType")}
+              value={dialogServiceType}
+              variant="outlined"
+              onChange={(e) => setDialogServiceType(e.target.value)}
+            >
+              {serviceTypes.map((type) => (
+                <MenuItem key={type} value={type}>
+                  {type}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
         </DialogWrapper>
       </Page>
     </>
