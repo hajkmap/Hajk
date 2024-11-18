@@ -572,7 +572,7 @@ class LayersSwitcherView extends React.PureComponent {
                   primaryTypographyProps={{
                     fontWeight: this.hasVisibleLayers() ? "bold" : "inherit",
                   }}
-                  primary={"Snabbåtkomst"}
+                  primary="Snabbåtkomst"
                 />
               }
               quickAccess={
