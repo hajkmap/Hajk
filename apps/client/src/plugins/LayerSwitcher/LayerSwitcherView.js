@@ -492,7 +492,6 @@ class LayersSwitcherView extends React.PureComponent {
     return (
       <Box
         sx={{
-          mb: "48px",
           display:
             shouldRender === true && this.state.displayContentOverlay === null
               ? "block"
