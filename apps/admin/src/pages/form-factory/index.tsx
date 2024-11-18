@@ -36,6 +36,7 @@ export default function FormFactoryPage() {
     gridColumns: 6,
     name: "text1",
     title: "First name",
+    helpText: "This is a help text for the first name.",
     defaultValue: "",
     registerOptions: {
       required: "This field is required.",
@@ -51,6 +52,7 @@ export default function FormFactoryPage() {
     gridColumns: 6,
     name: "text2",
     title: "Last name",
+    helpText: "This is a help text for the last name.",
     defaultValue: "",
     registerOptions: {
       required: "This field is required.",

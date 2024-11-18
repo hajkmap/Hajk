@@ -5,6 +5,7 @@ class DynamicInputSettings<TFieldValues extends FieldValues> {
   public type!: INPUT_TYPE;
   public name!: Path<TFieldValues>;
   public title!: string;
+  public helpText?: string;
   public gridColumns? = 12;
   public registerOptions?: RegisterOptions<TFieldValues>;
   public props?: Record<string, unknown>;
