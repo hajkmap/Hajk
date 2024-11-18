@@ -175,7 +175,7 @@ function LayerItemDetails({
         <Box
           sx={{
             display: display ? "block" : "none",
-            position: "absolute",
+            minHeight: "15em",
             top: 0,
             left: 0,
             right: 0,
