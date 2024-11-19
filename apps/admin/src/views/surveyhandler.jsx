@@ -151,58 +151,79 @@ function SurveyHandler(props) {
   };
 
   const addQuestion = (pageIndex, type = "text") => {
-    let newQuestion = { title: "", type, isRequired: false };
+    const questionIndex = survey.pages[pageIndex].questions.length;
+    const newQuestion = {
+      name: `qid${questionIndex}`,
+      title: "",
+      type,
+      isRequired: false,
+    };
+  
     if (type === "checkbox" || type === "radiogroup") {
-        newQuestion.choices = [];
+      newQuestion.choices = [];
     } else if (type === "html") {
-        newQuestion.html = "";
+      newQuestion.html = "";
     } else if (type === "rating") {
-        newQuestion.displayMode = "buttons";
+      newQuestion.displayMode = "buttons";
+    } else if (type === "email") {
+      newQuestion.inputType = "email";
+      newQuestion.placeholder = "namn@exempel.se";
     }
+  
     const newPages = survey.pages.map((page, index) => {
-        if (index === pageIndex) {
-            return { ...page, questions: [...page.questions, newQuestion] };
-        }
-        return page;
+      if (index === pageIndex) {
+        return { ...page, questions: [...page.questions, newQuestion] };
+      }
+      return page;
     });
-    const newQuestionIndex = newPages[pageIndex].questions.length - 1;
-    setSelectedQuestion({ pageIndex, questionIndex: newQuestionIndex });
+  
+    setSelectedQuestion({ pageIndex, questionIndex });
     setSurvey({ ...survey, pages: newPages });
-};
+  };  
 
 const updateQuestion = (pageIndex, questionIndex, field, value) => {
   const newPages = survey.pages.map((page, pIndex) => {
-      if (pIndex === pageIndex) {
-          const newQuestions = page.questions.map((question, qIndex) => {
-              if (qIndex === questionIndex) {
-                  let updatedQuestion = { ...question, [field]: value };
-                  if (question.type === "rating" && !updatedQuestion.displayMode) {
-                    updatedQuestion.displayMode = "buttons";
-                  }
-                  if (field === "type") {
-                      if (value === "email") {
-                          updatedQuestion = {
-                              ...updatedQuestion,
-                              type: "text",
-                              inputType: "email",
-                              placeholder: "namn@exempel.se"
-                          };
-                      } else {
-                          delete updatedQuestion.inputType;
-                          delete updatedQuestion.placeholder;
-                      }
-                  }
-                  return updatedQuestion;
-              }
-              return question;
-          });
-          return { ...page, questions: newQuestions };
-      }
-      return page;
+    if (pIndex === pageIndex) {
+      const newQuestions = page.questions.map((question, qIndex) => {
+        if (qIndex === questionIndex) {
+          if (field === "type") {
+            const newQuestion = {
+              name: question.name || `qid${questionIndex}`,
+              title: question.title,
+              type: value,
+              isRequired: question.isRequired || false,
+            };
+
+            if (value === "checkbox" || value === "radiogroup") {
+              newQuestion.choices = [];
+            } else if (value === "html") {
+              newQuestion.html = "";
+            } else if (value === "rating") {
+              newQuestion.displayMode = "buttons";
+            } else if (value === "email") {
+              newQuestion.inputType = "email";
+              newQuestion.placeholder = "namn@exempel.se";
+            }
+
+            return newQuestion;
+          } else {
+            let updatedQuestion = { ...question, [field]: value };
+
+            if (question.type === "rating" && !updatedQuestion.displayMode) {
+              updatedQuestion.displayMode = "buttons";
+            }
+
+            return updatedQuestion;
+          }
+        }
+        return question;
+      });
+      return { ...page, questions: newQuestions };
+    }
+    return page;
   });
   setSurvey({ ...survey, pages: newPages });
 };
-
 
   const addChoice = (pageIndex, questionIndex) => {
     const newPages = survey.pages.map((page, pIndex) => {
