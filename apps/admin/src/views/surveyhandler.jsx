@@ -8,6 +8,7 @@ import MenuItem from '@material-ui/core/MenuItem';
 function SurveyHandler(props) {
 
   const [availableSurveys, setAvailableSurveys] = useState([]);
+  const [selectedSurveyId, setSelectedSurveyId] = useState("");
 
   useEffect(() => {
     props.model.listAllAvailableSurveys((data) => {
@@ -353,11 +354,23 @@ const saveSurveyToFile = (filename, surveyJson) => {
         } else {
             alert(response);
         }
+
+        setSelectedSurveyId(survey.title);
+        
+        setAvailableSurveys((prevSurveys) => {
+          // Avoid duplicates
+          if (!prevSurveys.includes(filename)) {
+            return [...prevSurveys, filename];
+          }
+          return prevSurveys;
+        });
     });
 };
 
   const handleSurveySelection = (e) => {
+    newSurvey();
     const selectedSurveyId = e.target.value;
+    setSelectedSurveyId(selectedSurveyId);
     if (selectedSurveyId) {
         props.model.loadSurvey(selectedSurveyId, (surveyData) => {
             setSurvey(surveyData);
@@ -381,6 +394,7 @@ const saveSurveyToFile = (filename, surveyJson) => {
     setSelectedQuestion(null);
     setFilename("");
     setSurvey(emptySurvey);
+    setSelectedSurveyId("");
   }
 
   const GeometryWarning = ({ survey }) => {
@@ -418,17 +432,17 @@ const saveSurveyToFile = (filename, surveyJson) => {
       <Grid container spacing={2} style={{ marginBottom: '50px' }}>
       <Grid item>
       Välj en befintlig enkät: 
-        <select onChange={handleSurveySelection}>
-        <option></option>
-        {availableSurveys.map((survey, index) => (
+      <select value={selectedSurveyId} onChange={handleSurveySelection}>
+        <option value=""></option>
+          {availableSurveys.map((survey, index) => (
             <option key={index} value={survey.id}>
-                {survey}
-            </option>
-        ))}
-        
-    </select>
+          {survey}
+        </option>
+          ))}
+      </select>
+
         </Grid>
-        <Grid item><Button variant="contained" color="primary" onClick={newSurvey}>Ny enkät</Button></Grid>
+        <Grid item><Button variant="contained" color="primary" onClick={newSurvey}>Töm fält</Button></Grid>
         </Grid>
         <Grid container spacing={2} style={{ marginBottom: '50px' }}>
         <Grid item><TextField
