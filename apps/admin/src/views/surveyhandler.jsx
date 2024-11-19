@@ -354,8 +354,6 @@ const saveSurveyToFile = (filename, surveyJson) => {
         } else {
             alert(response);
         }
-
-        setSelectedSurveyId(survey.title);
         
         setAvailableSurveys((prevSurveys) => {
           // Avoid duplicates
@@ -364,6 +362,7 @@ const saveSurveyToFile = (filename, surveyJson) => {
           }
           return prevSurveys;
         });
+        setSelectedSurveyId(survey.title);
     });
 };
 
