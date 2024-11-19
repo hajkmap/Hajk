@@ -5,6 +5,7 @@ import restrictAdmin from "../../middlewares/restrict.admin.js";
 export default express
   .Router()
   .get("/list/", controller.surveylist)
+  .get("/mailtemplatelist/", controller.mailTemplateList)
   .put("/answers/:surveyId", controller.saveByNameSurveyAnswer)
   .get("/:name", controller.getByNameSurvey)
   .get("/answers/:name", controller.getByNameSurveyLoad)

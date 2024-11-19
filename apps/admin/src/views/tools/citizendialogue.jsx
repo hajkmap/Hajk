@@ -30,6 +30,7 @@ const defaultState = {
   activeServices: [],
   editableLayers: {},
   selectedSurvey: "",
+  selectedMailTemplate: "",
   tree: "",
 };
 
@@ -47,9 +48,16 @@ class ToolOptions extends Component {
     this.loadLayers = this.loadLayers.bind(this);
 
     this.availableSurveys = [];
+    this.availableMailTemplates = [];
 
     this.listAllAvailableSurveys((list) => {
       this.availableSurveys = list;
+    }, (error) => {
+      console.error("Error:", error);
+    });
+
+    this.listAllAvailableMailTemplates((list) => {
+      this.availableMailTemplates = list;
     }, (error) => {
       console.error("Error:", error);
     });
@@ -78,6 +86,7 @@ class ToolOptions extends Component {
           visibleAtStart: tool.options.visibleAtStart,
           visibleAtStartMobile: tool.options.visibleAtStartMobile,
           selectedSurvey: tool.options.selectedSurvey,
+          selectedMailTemplate: tool.options.selectedMailTemplate,
           visibleForGroups:
             tool.options.visibleForGroups || this.state.visibleForGroups,
         },
@@ -182,6 +191,18 @@ class ToolOptions extends Component {
       }
     );
   }
+
+  listAllAvailableMailTemplates(callback) {
+    this.props.model.getConfig(
+      this.props.model.get("config").url_surveys_mailtemplatelist,
+      (data) => {
+        callback(data);
+      },
+      (error) => {
+        console.error("Error fetching surveys:", error);
+      }
+    );
+  }
   
   loadEditableLayers() {
     this.props.model.getConfig(
@@ -258,6 +279,7 @@ class ToolOptions extends Component {
         visibleAtStart: this.state.visibleAtStart,
         visibleAtStartMobile: this.state.visibleAtStartMobile,
         selectedSurvey: this.state.selectedSurvey,
+        selectedMailTemplate: this.state.selectedMailTemplate,
         visibleForGroups: this.state.visibleForGroups.map(
           Function.prototype.call,
           String.prototype.trim
@@ -394,6 +416,12 @@ class ToolOptions extends Component {
   handleChange = (event) => {
     this.setState({
       selectedSurvey: event.target.value,
+    });
+  };
+
+  handleChangeMail = (event) => {
+    this.setState({
+      selectedMailTemplate: event.target.value,
     });
   };
 
@@ -601,6 +629,24 @@ class ToolOptions extends Component {
           {this.availableSurveys && this.availableSurveys.map((surveyName, index) => (
           <MenuItem key={index} value={surveyName}>
             {surveyName}
+          </MenuItem>
+          ))}
+        </Select>
+      </div>
+      <div>
+        <label>Välj mall för mail:</label>
+        <Select
+          labelId="select-mailtemplate"
+          id="simple-select-mailtemplate"
+          value={this.availableMailTemplates && this.availableMailTemplates.length > 0 ? this.state.selectedMailTemplate : ''}
+          onChange={this.handleChangeMail}
+        >
+          <MenuItem value="">
+            <em>Inget valt</em>
+          </MenuItem>
+          {this.availableMailTemplates && this.availableMailTemplates.map((mailTemplateName, index) => (
+          <MenuItem key={index} value={mailTemplateName}>
+            {mailTemplateName}
           </MenuItem>
           ))}
         </Select>

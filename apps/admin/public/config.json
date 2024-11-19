@@ -57,7 +57,9 @@
     "url_document_list": "http://localhost:3002/api/v2/informative/list",
     "url_client_ui": "http://localhost:3000/",
     "url_surveys_list": "http://localhost:3002/api/v2/surveys/list/",
+    "url_surveys_mailtemplatelist": "http://localhost:3002/api/v2/surveys/mailtemplatelist/",
     "url_surveys_load": "http://localhost:3002/api/v2/surveys/",
+    "url_surveys_save": "http://localhost:3002/api/v2/surveys/",
     "url_surveys_answers_save": "http://localhost:3002/api/v2/surveys/answers/",
     "url_surveys_answers_load": "http://localhost:3002/api/v2/surveys/answers/",
     "authentication_active": false,
@@ -115,6 +117,7 @@
   },
   "surveyhandler": {
     "url_surveys_list": "http://localhost:3002/api/v2/surveys/list/",
+    "url_surveys_mailtemplatelist": "http://localhost:3002/api/v2/surveys/mailtemplatelist/",
     "url_surveys_load": "http://localhost:3002/api/v2/surveys/",
     "url_surveys_save": "http://localhost:3002/api/v2/surveys/",
     "url_surveys_answers_save": "http://localhost:3002/api/v2/surveys/answers/",

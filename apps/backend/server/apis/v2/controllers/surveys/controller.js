@@ -12,6 +12,13 @@ export class Controller {
     });
   }
 
+  mailTemplateList(req, res) {
+    SurveyService.getAvailableMailTemplates().then((r) => {
+      if (r && !r.error) res.json(r);
+      else res.status(500).send(r.error.message);
+    });
+  }
+
   getByNameSurvey(req, res) {
     SurveyService.getByNameSurvey(req.params.name).then((r) => {
       if (r && !r.error) res.json(r);

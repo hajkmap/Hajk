@@ -63,7 +63,6 @@ export default class CitizendialogueModel {
     try {
       // Serialize surveyData to a JSON string
       const body = JSON.stringify(surveyData);
-
       // Make the PUT request to the server
       const response = await hfetch(
         `${this.mapServiceUrl}/surveys/answers/${surveyId}`,

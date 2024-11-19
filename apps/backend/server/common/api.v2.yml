@@ -337,6 +337,23 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Error"
+  /surveys/mailtemplatelist:
+    get:
+      tags:
+        - Admin - SurveyService/SurveyHandler
+      responses:
+        200:
+          description: Return all available mailtemplates
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MailTemplateList"
+        5XX:
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
   /surveys/{survey}:
     get:
       tags:
@@ -971,6 +988,11 @@ components:
         type: string
       example: ["doc_1", "doc_2", "doc_3"]
     SurveyList:
+      type: array
+      items:
+        type: string
+      example: ["doc_1", "doc_2", "doc_3"]
+    MailTemplateList:
       type: array
       items:
         type: string

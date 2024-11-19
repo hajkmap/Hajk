@@ -39,6 +39,40 @@ class SurveyService {
   }
 
   /**
+   * @summary Lists all available mailtemplates
+   *
+   * @returns {array} Names of files as array of strings
+   * @memberof SurveyService
+   */
+  async getAvailableMailTemplates() {
+    try {
+      const dir = path.join(
+        process.cwd(),
+        "App_Data",
+        "surveys",
+        "mailtemplate"
+      );
+      // List dir contents, the second parameter will ensure we get Dirent objects
+      const dirContents = await fs.promises.readdir(dir, {
+        withFileTypes: true,
+      });
+      const availableMailTemplates = dirContents
+        .filter(
+          (entry) =>
+            // Filter out only files (we're not interested in directories).
+            entry.isFile() &&
+            // Only HTML-files
+            entry.name.endsWith(".html")
+        )
+        // Create an array using name of each Dirent object, remove file extension
+        .map((entry) => entry.name.replace(".html", ""));
+      return availableMailTemplates;
+    } catch (error) {
+      return { error };
+    }
+  }
+
+  /**
    * @summary Lists contents of a survey as JSON
    *
    * @param {*} file
@@ -136,61 +170,113 @@ class SurveyService {
       await fs.promises.writeFile(pathToFile, jsonString);
 
       if (process.env.CITIZEN_DIALOGUE_MAIL_ENABLED === "true") {
-        let subject = "";
-        let bodyHtml = "<html><body>";
-        bodyHtml += "<h1>Svar från undersökningen</h1>";
-
-        for (const key in body) {
-          const item = body[key];
-
-          if (key === "surveyId") {
-            subject = item;
-            bodyHtml += `<br><b>${key}</b>: ${item}`;
-          } else if (
-            key === "surveyAnswerId" ||
-            key === "surveyAnswerDate" ||
-            key === "featureData"
-          ) {
-            let valueDisplay = Array.isArray(item) ? item.join(", ") : item;
-            bodyHtml += `<br><b>${key}</b>: ${valueDisplay}`;
-          } else if (key === "surveyResults" && Array.isArray(item)) {
-            for (const result of item) {
-              if (result.title && result.value) {
-                let valueDisplay = Array.isArray(result.value)
-                  ? result.value.join(", ")
-                  : result.value;
-                bodyHtml += `<br><b>${result.title}</b>: ${valueDisplay}`;
-              }
-            }
-          } else if (item.title && item.value) {
-            let valueDisplay = Array.isArray(item.value)
-              ? item.value.join(", ")
-              : item.value;
-            bodyHtml += `<br><b>${item.title}</b>: ${valueDisplay}`;
-          }
-        }
-
-        bodyHtml += "</body></html>";
-        const email = body.surveyResults.find(
-          (item) => item.name === "email"
-        )?.value;
-        let emailAddress = email;
-        if (!(await this.isValidEmail(emailAddress))) {
-          console.error("Ogiltig e-postadress: ", emailAddress);
-          emailAddress = "";
-        } else {
-          emailAddress = email;
-        }
-
-        await this.mailNodemailer(emailAddress, bodyHtml, subject);
+        await this.sendSurveyEmail(body);
       }
 
-      // Return a success message
       return { message: "Survey data added to file" };
     } catch (writeError) {
       console.error("Error in saveByNameSurvey:", writeError);
       return { error: writeError.message };
     }
+  }
+
+  /**
+   * @summary
+   * @returns
+   * @memberof SurveyService
+   */
+  async sendSurveyEmail(body) {
+    let subject = "";
+
+    // Get the mail template file name from 'body', if provided
+    let mailTemplateFile = body.mailTemplate + ".html";
+
+    let templateContent = "";
+
+    if (mailTemplateFile) {
+      // Validate the template file name to prevent path traversal attacks
+      mailTemplateFile = path.basename(mailTemplateFile);
+
+      // Build the path to the template file
+      const templatePath = path.join(
+        process.cwd(),
+        "App_Data",
+        "surveys",
+        "mailtemplate",
+        mailTemplateFile
+      );
+
+      try {
+        // Try to read the email template file
+        templateContent = await fs.promises.readFile(templatePath, "utf8");
+      } catch (error) {
+        console.error("Error reading the email template:", error);
+        // If there's an error, set templateContent to an empty string
+        templateContent = "";
+      }
+    }
+
+    // Initialize the dynamic content
+    let dynamicContent = "";
+
+    // Add the survey response heading
+    dynamicContent += "<h1>Svar från undersökningen</h1>";
+
+    // Build the email content from the survey response
+    for (const key in body) {
+      const item = body[key];
+
+      if (key === "surveyId") {
+        subject = item;
+        dynamicContent += `<br><b>${key}</b>: ${item}`;
+      } else if (
+        key === "surveyAnswerId" ||
+        key === "surveyAnswerDate" ||
+        key === "featureData"
+      ) {
+        let valueDisplay = Array.isArray(item) ? item.join(", ") : item;
+        dynamicContent += `<br><b>${key}</b>: ${valueDisplay}`;
+      } else if (key === "surveyResults" && Array.isArray(item)) {
+        for (const result of item) {
+          if (result.title && result.value) {
+            let valueDisplay = Array.isArray(result.value)
+              ? result.value.join(", ")
+              : result.value;
+            dynamicContent += `<br><b>${result.title}</b>: ${valueDisplay}`;
+          }
+        }
+      } else if (item.title && item.value) {
+        let valueDisplay = Array.isArray(item.value)
+          ? item.value.join(", ")
+          : item.value;
+        dynamicContent += `<br><b>${item.title}</b>: ${valueDisplay}`;
+      }
+    }
+
+    let bodyHtml = "";
+
+    if (templateContent) {
+      // If template content is available, replace the placeholder
+      bodyHtml = templateContent.replace("{{content}}", dynamicContent);
+    } else {
+      // If no template is used, wrap dynamic content in basic HTML structure
+      bodyHtml = `<html><body>${dynamicContent}</body></html>`;
+    }
+
+    // Extract the email address from the survey results
+    const email = body.surveyResults.find(
+      (item) => item.name === "email"
+    )?.value;
+    let emailAddress = email;
+
+    // Validate the email address
+    if (!(await this.isValidEmail(emailAddress))) {
+      console.error("Invalid email address: ", emailAddress);
+      emailAddress = "";
+    }
+
+    // Send the email using your mailing function
+    await this.mailNodemailer(emailAddress, bodyHtml, subject);
   }
 
   /**

@@ -189,6 +189,7 @@ function CitizendialogueView(props) {
       const combinedData = {
         ...props.surveyJsData,
         surveyResults: mergedResults,
+        mailTemplate: props.options.selectedMailTemplate,
       };
       props.model.handleOnComplete(combinedData);
       /* setIsCompleted(true); */
