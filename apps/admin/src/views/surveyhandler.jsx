@@ -121,7 +121,7 @@ function SurveyHandler(props) {
           <input
             type="number"
             placeholder="Rate Min"
-            value={question.rateCount || ''}
+            value={question.rateMin|| ''}
             onChange={(e) => updateQuestion(selectedQuestion.pageIndex, selectedQuestion.questionIndex, 'rateMin', e.target.value)}
           />
           <input
