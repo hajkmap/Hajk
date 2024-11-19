@@ -85,8 +85,21 @@ function CitizendialogueView(props) {
   const { localObserver } = props;
 
   const { enqueueSnackbar } = useSnackbar();
-
   const [surveyTheme, setSurveyTheme] = useState(null);
+  const [surveyJSON, setSurveyJSON] = useState(null);
+  const [showEditView, setShowEditView] = useState(false);
+  const [editViewKey, setEditViewKey] = useState(Date.now());
+  const [currentQuestionTitle, setCurrentQuestionTitle] = useState(null);
+  const [currentQuestionName, setCurrentQuestionName] = useState(null);
+  const [survey, setSurvey] = useState(null);
+  /*const [isCompleted, setIsCompleted] = useState(false);
+  const [surveyKey, setSurveyKey] = useState(0);
+
+  const restartSurvey = () => {
+    setSurveyKey((prevKey) => prevKey + 1);
+    setIsCompleted(false);
+  };*/
+
   useEffect(() => {
     // an asynchronous function that runs directly inside a useEffect
     (async () => {
@@ -98,7 +111,6 @@ function CitizendialogueView(props) {
   }, []);
 
   // Here we create and retrieve the JSON content for the survey, which is loaded when we create the surveyModel.
-  const [surveyJSON, setSurveyJSON] = useState(null);
   useEffect(() => {
     props.model
       .loadSurvey(props.options.selectedSurvey)
@@ -108,9 +120,6 @@ function CitizendialogueView(props) {
   }, []);
 
   // showEditView is used to render EditView in a editViewContainer-class
-  const [showEditView, setShowEditView] = useState(false);
-
-  const [editViewKey, setEditViewKey] = useState(Date.now());
   const resetEditView = () => {
     setEditViewKey(Date.now());
   };
@@ -182,15 +191,13 @@ function CitizendialogueView(props) {
         surveyResults: mergedResults,
       };
       props.model.handleOnComplete(combinedData);
+      /* setIsCompleted(true); */
     },
     // eslint-disable-next-line
     [props.surveyJsData, props.model]
   );
 
   // Sets currentQuestionName and title after rendering question
-  const [currentQuestionTitle, setCurrentQuestionTitle] = useState(null);
-  const [currentQuestionName, setCurrentQuestionName] = useState(null);
-
   const handleAfterRenderQuestion = (sender, options) => {
     const currentQuestion = options.question;
     // If type is custom question geometry, it shows EditView with the prop toolbarOption set.
@@ -282,18 +289,33 @@ function CitizendialogueView(props) {
     }
   });
 
-  const [survey, setSurvey] = useState(null);
   useEffect(() => {
     const newSurvey = new Model(surveyJSON);
     newSurvey.applyTheme(surveyTheme);
     setSurvey(newSurvey);
     return () => {};
-  }, [surveyJSON, surveyTheme]);
+  }, [surveyJSON, surveyTheme /*, surveyKey */]);
 
   Survey.surveyLocalization.defaultLocale = "sv";
 
   return (
     <>
+      {/*!isCompleted ? (
+        survey && (
+          <Survey.Survey
+            model={survey}
+            onComplete={handleOnComplete}
+            onCompleting={handleOnCompleting}
+            onAfterRenderQuestion={handleAfterRenderQuestion}
+            onCurrentPageChanged={handlePageChange}
+          />
+        )
+      ) : (
+        <div>
+          <p>Tack för att du fyllde i enkäten!</p>
+          <button onClick={restartSurvey}>Starta om från början</button>
+        </div>
+      )*/}
       {surveyJSON && (
         <Survey.Survey
           model={survey}
