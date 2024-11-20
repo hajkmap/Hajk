@@ -9,8 +9,7 @@ import dataGridLocaleTextEN from "../../i18n/translations/datagrid-en.json";
 import useAppStateStore from "../../store/use-app-state-store";
 import ThemeSwitcher from "../../components/theme-switcher";
 import LanguageSwitcher from "../../components/language-switcher";
-import getLayerColumns from "./columns";
-import { mapLayerRows } from "./columns";
+import getLayerColumns, { mapLayerRows } from "./grid-data";
 
 export default function LayersPage() {
   const { t } = useTranslation();
@@ -32,13 +31,13 @@ export default function LayersPage() {
 
   const columns = getLayerColumns(currentTranslation);
   const rows = layers ? mapLayerRows(layers) : [];
-  const searchFields = columns
-    .filter((column) => column.searchable)
-    .map((column) => column.field);
+  const onRowClick = () => {
+    console.log("onRowClick");
+  };
 
   return (
     <Page title={t("common.layers")}>
-      <Grid size={12} sx={{ m: 3 }}>
+      <Grid size={12}>
         <Grid size={12} container justifyContent={"end"}>
           <Button
             variant="contained"
@@ -50,8 +49,9 @@ export default function LayersPage() {
         <HajkDataGrid
           rows={rows}
           columns={columns}
-          searchFields={searchFields}
+          // searchFields={searchFields}
           localeText={currentTranslation}
+          onRowClick={onRowClick}
         />
         <Grid container gap={2} size={12} sx={{ mt: 2 }}>
           <ThemeSwitcher />

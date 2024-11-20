@@ -22,15 +22,16 @@ interface HajkDataGridProps {
   searchFields?: string[];
   toolbar?: ReactNode;
   localeText?: Partial<GridLocaleText>;
+  onRowClick?: () => void;
 }
 
 export default function HajkDataGrid({
   rows,
   columns,
-  searchFields,
   searchPlaceholder,
   onSearch,
   localeText,
+  onRowClick,
 }: HajkDataGridProps) {
   const [searchQuery, setSearchQuery] = useState("");
   const apiRef = useGridApiRef();
@@ -41,6 +42,10 @@ export default function HajkDataGrid({
       onSearch(e.target.value);
     }
   };
+
+  const searchFields = columns
+    .filter((column) => column.searchable)
+    .map((column) => column.field);
 
   let filteredRows = rows;
   if (searchQuery.length > 2) {
@@ -71,6 +76,7 @@ export default function HajkDataGrid({
         apiRef={apiRef}
         autoHeight
         disableRowSelectionOnClick
+        onRowClick={onRowClick}
         localeText={localeText}
         rows={filteredRows}
         columns={columns}
@@ -86,8 +92,13 @@ export default function HajkDataGrid({
         slots={{
           toolbar: CustomToolbar,
         }}
+        getRowClassName={(params) =>
+          params.indexRelativeToCurrentPage % 2 === 0 ? "even" : "odd"
+        }
         sx={{
-          boxShadow: 2,
+          "& .MuiDataGrid-virtualScroller": {
+            position: "inherit",
+          },
           "& .MuiDataGrid-columnSeparator": {
             color: grey[600],
           },

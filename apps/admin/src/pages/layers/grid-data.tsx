@@ -1,4 +1,4 @@
-import { Tooltip, Button } from "@mui/material";
+import { Tooltip, IconButton } from "@mui/material";
 import WarningAmberIcon from "@mui/icons-material/WarningAmber";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
 import { grey } from "@mui/material/colors";
@@ -23,8 +23,8 @@ export default function getLayerColumns(localeText: Record<string, string>) {
     {
       field: "url",
       headerName: localeText.layersColumnHeaderURL,
-      minWidth: 300,
-      flex: 0.4,
+      minWidth: 250,
+      flex: 0.3,
       searchable: true,
     },
     {
@@ -39,6 +39,7 @@ export default function getLayerColumns(localeText: Record<string, string>) {
       headerName: localeText.layersColumnHeaderIsBroken,
       minWidth: 110,
       flex: 0.1,
+      searchable: false,
       renderCell: () => (
         <Tooltip title={localeText.layersColumnBrokenLayerWarning}>
           <WarningAmberIcon sx={{ color: "black", maxWidth: "fit-content" }} />
@@ -50,19 +51,20 @@ export default function getLayerColumns(localeText: Record<string, string>) {
       headerName: localeText.layersColumnHeaderActions,
       minWidth: 110,
       flex: 0.1,
+      searchable: false,
+
       renderCell: () => (
-        <Button
-          variant="contained"
+        <IconButton
           size="small"
-          sx={{
-            backgroundColor: grey[300],
-            width: "24px",
-            minWidth: "10px",
-            height: "28px",
-          }}
+          // sx={{
+          //   backgroundColor: grey[300],
+          //   width: "24px",
+          //   minWidth: "10px",
+          //   height: "28px",
+          // }}
         >
           <MoreVertIcon sx={{ color: "black", maxWidth: "fit-content" }} />
-        </Button>
+        </IconButton>
       ),
     },
   ];
