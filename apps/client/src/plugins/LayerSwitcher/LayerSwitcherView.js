@@ -685,8 +685,6 @@ class LayersSwitcherView extends React.PureComponent {
       <div
         style={{
           display: windowVisible ? "block" : "none",
-          height: "100%",
-          paddingBottom: "48px",
         }}
       >
         <StyledAppBar

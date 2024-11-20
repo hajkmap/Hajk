@@ -38,7 +38,8 @@ export default class LayerSwitcher extends React.PureComponent {
           description: "Välj vad du vill se i kartan",
           height: "auto",
           width: 400,
-          scrollable: false,
+          scrollable: true,
+          disablePadding: true,
         }}
       >
         <LayerSwitcherView
