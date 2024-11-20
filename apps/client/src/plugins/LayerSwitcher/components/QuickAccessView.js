@@ -1,9 +1,10 @@
-import React from "react";
+import React, { useState } from "react";
 // import { createPortal } from "react-dom";
 
 // import { styled } from "@mui/material/styles";
 import { Box, IconButton, ListItemText, Tooltip } from "@mui/material";
 
+import ConfirmationDialog from "../../../components/ConfirmationDialog.js";
 import QuickAccessLayers from "./QuickAccessLayers.js";
 import QuickAccessOptions from "./QuickAccessOptions.js";
 import LayerGroupAccordion from "./LayerGroupAccordion.js";
@@ -26,7 +27,6 @@ const QuickAccessView = ({
   favoritesInfoText,
   handleQuickAccessSectionExpanded,
   handleAddLayersToQuickAccess,
-  handleClearQuickAccessLayers,
   treeData,
   filterValue,
 }) => {
@@ -36,6 +36,25 @@ const QuickAccessView = ({
       .getAllLayers()
       .filter((l) => l.get("quickAccess") === true && l.get("visible") === true)
       .length > 0;
+
+  const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
+
+  // Handles click on clear quickAccess menu item
+  const handleShowDeleteConfirmation = (e) => {
+    e.stopPropagation();
+    setShowDeleteConfirmation(true);
+    // this.setState({ showDeleteConfirmation: true });
+  };
+
+  // Handles click on confirm clear quickAccess button
+  const handleClearQuickAccessLayers = () => {
+    setShowDeleteConfirmation(false);
+    // this.setState({ showDeleteConfirmation: false });
+    this.props.map
+      .getAllLayers()
+      .filter((l) => l.get("quickAccess") === true)
+      .map((l) => l.set("quickAccess", false));
+  };
 
   return (
     <Box
@@ -91,7 +110,7 @@ const QuickAccessView = ({
             )}
             <QuickAccessOptions
               handleAddLayersToQuickAccess={handleAddLayersToQuickAccess}
-              handleClearQuickAccessLayers={handleClearQuickAccessLayers}
+              handleClearQuickAccessLayers={handleShowDeleteConfirmation}
             ></QuickAccessOptions>
           </>
         }
@@ -105,6 +124,18 @@ const QuickAccessView = ({
           ></QuickAccessLayers>
         }
       ></LayerGroupAccordion>
+
+      <ConfirmationDialog
+        open={showDeleteConfirmation === true}
+        titleName={"Rensa allt"}
+        contentDescription={"Alla lager i snabbåtkomst kommer nu att tas bort."}
+        cancel={"Avbryt"}
+        confirm={"Rensa"}
+        handleConfirm={handleClearQuickAccessLayers}
+        handleAbort={() => {
+          setShowDeleteConfirmation(false);
+        }}
+      />
     </Box>
   );
 };

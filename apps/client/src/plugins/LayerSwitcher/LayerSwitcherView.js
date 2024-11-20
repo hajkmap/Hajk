@@ -11,7 +11,6 @@ import LayerGroup from "./components/LayerGroup.js";
 import BreadCrumbs from "./components/BreadCrumbs.js";
 import DrawOrder from "./components/DrawOrder.js";
 import LayerPackage from "./components/LayerPackage";
-import ConfirmationDialog from "../../components/ConfirmationDialog.js";
 import QuickAccessView from "./components/QuickAccessView.js";
 import LayerItemDetails from "./components/LayerItemDetails.js";
 import LayerListFilter from "./components/LayerListFilter.js";
@@ -67,7 +66,6 @@ class LayersSwitcherView extends React.PureComponent {
       quickAccessSectionExpanded: false,
       filterValue: "",
       treeData: this.layerTree,
-      showDeleteConfirmation: false,
       scrollPositions: {
         tab0: 0,
         tab1: 0,
@@ -323,21 +321,6 @@ class LayersSwitcherView extends React.PureComponent {
     });
   };
 
-  // Handles click on clear quickAccess menu item
-  handleShowDeleteConfirmation = (e) => {
-    e.stopPropagation();
-    this.setState({ showDeleteConfirmation: true });
-  };
-
-  // Handles click on confirm clear quickAccess button
-  handleClearQuickAccessLayers = () => {
-    this.setState({ showDeleteConfirmation: false });
-    this.props.map
-      .getAllLayers()
-      .filter((l) => l.get("quickAccess") === true)
-      .map((l) => l.set("quickAccess", false));
-  };
-
   collapseAllGroups = () => {
     const collapseGroups = (groups) => {
       groups.forEach((group) => {
@@ -518,7 +501,6 @@ class LayersSwitcherView extends React.PureComponent {
               this.setState({ quickAccessSectionExpanded: true })
             }
             handleAddLayersToQuickAccess={this.handleAddLayersToQuickAccess}
-            handleClearQuickAccessLayers={this.handleShowDeleteConfirmation}
             treeData={this.state.treeData}
             filterValue={this.state.filterValue}
           />
@@ -633,19 +615,6 @@ class LayersSwitcherView extends React.PureComponent {
               app={this.props.app}
             />
           )}
-          <ConfirmationDialog
-            open={this.state.showDeleteConfirmation === true}
-            titleName={"Rensa allt"}
-            contentDescription={
-              "Alla lager i snabbåtkomst kommer nu att tas bort."
-            }
-            cancel={"Avbryt"}
-            confirm={"Rensa"}
-            handleConfirm={this.handleClearQuickAccessLayers}
-            handleAbort={() => {
-              this.setState({ showDeleteConfirmation: false });
-            }}
-          />
         </div>
       </div>
     );
