@@ -3,16 +3,24 @@ import { withSnackbar } from "notistack";
 // import { createPortal } from "react-dom";
 
 // import { styled } from "@mui/material/styles";
-import { Box, IconButton, ListItemText, Tooltip } from "@mui/material";
+import {
+  Box,
+  IconButton,
+  ListItemText,
+  ListItemButton,
+  ListItemSecondaryAction,
+  Tooltip,
+  Collapse,
+} from "@mui/material";
 
 import ConfirmationDialog from "../../../components/ConfirmationDialog.js";
 import QuickAccessLayers from "./QuickAccessLayers.js";
 import QuickAccessOptions from "./QuickAccessOptions.js";
-import LayerGroupAccordion from "./LayerGroupAccordion.js";
 import Favorites from "./Favorites/Favorites.js";
 
 import StarOutlineOutlinedIcon from "@mui/icons-material/StarOutlineOutlined";
 import TopicOutlinedIcon from "@mui/icons-material/TopicOutlined";
+import KeyboardArrowRightOutlinedIcon from "@mui/icons-material/KeyboardArrowRightOutlined";
 
 const QuickAccessView = ({
   map, // A OpenLayers map instance
@@ -86,28 +94,51 @@ const QuickAccessView = ({
           `${theme.spacing(0.2)} solid ${theme.palette.divider}`,
       }}
     >
-      <LayerGroupAccordion
-        display={"block"}
-        expanded={quickAccessSectionExpanded}
-        setExpandedCallback={(expanded) => {
-          console.warn({ expanded });
-          setQuickAccessSectionExpanded(expanded);
+      <ListItemButton
+        disableRipple
+        onClick={() =>
+          setQuickAccessSectionExpanded(!quickAccessSectionExpanded)
+        }
+        sx={{
+          p: 0,
         }}
-        layerGroupTitle={
+        dense
+      >
+        <IconButton
+          size="small"
+          sx={{ pl: "3px", pr: "4px", py: 0 }}
+          disableRipple
+        >
+          <KeyboardArrowRightOutlinedIcon
+            sx={{
+              transform: quickAccessSectionExpanded ? "rotate(90deg)" : "",
+              transition: "transform 300ms ease",
+            }}
+          ></KeyboardArrowRightOutlinedIcon>
+        </IconButton>
+        <Box
+          sx={{
+            display: "flex",
+            position: "relative",
+            width: "100%",
+            alignItems: "center",
+            py: 0.5,
+            pr: 1,
+            borderBottom: (theme) => `${theme.spacing(0.2)} solid transparent`,
+          }}
+        >
+          <IconButton sx={{ pl: 0 }} disableRipple size="small">
+            <StarOutlineOutlinedIcon />
+          </IconButton>
+
           <ListItemText
             primaryTypographyProps={{
               fontWeight: hasVisibleLayers ? "bold" : "inherit",
             }}
             primary="Snabbåtkomst"
           />
-        }
-        quickAccess={
-          <IconButton sx={{ pl: 0 }} disableRipple size="small">
-            <StarOutlineOutlinedIcon />
-          </IconButton>
-        }
-        layerGroupDetails={
-          <>
+
+          <ListItemSecondaryAction>
             {enableQuickAccessTopics && (
               <Tooltip title="Teman">
                 <IconButton onClick={handleLayerPackageToggle}>
@@ -132,9 +163,11 @@ const QuickAccessView = ({
               handleAddLayersToQuickAccess={handleAddLayersToQuickAccess}
               handleClearQuickAccessLayers={handleShowDeleteConfirmation}
             ></QuickAccessOptions>
-          </>
-        }
-        children={
+          </ListItemSecondaryAction>
+        </Box>
+      </ListItemButton>
+      <Collapse in={quickAccessSectionExpanded} unmountOnExit>
+        <Box sx={{ marginLeft: "31px" }}>
           <QuickAccessLayers
             treeData={treeData}
             filterValue={filterValue}
@@ -142,8 +175,8 @@ const QuickAccessView = ({
             map={map}
             app={app}
           ></QuickAccessLayers>
-        }
-      ></LayerGroupAccordion>
+        </Box>
+      </Collapse>
 
       <ConfirmationDialog
         open={showDeleteConfirmation === true}
