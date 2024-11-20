@@ -71,7 +71,6 @@ class LayersSwitcherView extends React.PureComponent {
     this.options = props.options;
     this.layerTree = this.addLayerNames(this.options.groups);
     // Create a ref to store a reference to the search layer input element
-    this.inputRef = createRef();
     this.state = {
       chapters: [],
       baseLayers: props.model.getBaseLayers(),
@@ -410,16 +409,7 @@ class LayersSwitcherView extends React.PureComponent {
 
     // Trigger re-render
     this.setState({ treeData: [...this.layerTree] });
-  }, 200);
-
-  // Reset input value
-  resetInput = () => {
-    // Access the input element using the ref and set its value to an empty string
-    if (this.inputRef.current) {
-      this.inputRef.current.value = "";
-      this.handleFilterValueChange("");
-    }
-  };
+  }, 100);
 
   /**
    * This method handles layerupdates from DrawOrder component,
@@ -523,11 +513,9 @@ class LayersSwitcherView extends React.PureComponent {
       >
         {this.props.options.showFilter && (
           <LayerListFilter
-            ref={this.inputRef}
             handleFilterValueChange={(value) =>
               this.handleFilterValueChange(value)
             }
-            resetInput={() => this.resetInput()}
           />
         )}
         {this.props.options.showQuickAccess && (
