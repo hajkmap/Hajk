@@ -12,6 +12,9 @@ import { GlobalMapsApiResponse } from "../tools";
  * - The `getServiceById` function fetches details of a specific service by its ID.
  * - The `getLayersByServiceId` function retrieves all layers linked to a given service ID.
  * - The `getMapsByServiceId` function fetches all maps linked to a given service ID.
+ * - The ´createService` function creates a new service.
+ * - The `updateService` function updates a service.
+ * - The `deleteService` function deletes a service.
  *
  * These functions utilize a custom Axios instance and throw appropriate error messages for failures.
  *
@@ -106,6 +109,71 @@ export const getMapsByServiceId = async (serviceId: string): Promise<Map[]> => {
       );
     } else {
       throw new Error("Failed to fetch maps");
+    }
+  }
+};
+
+export const createService = async (newService: Service): Promise<Service> => {
+  const internalApiClient = getApiClient();
+  try {
+    const response = await internalApiClient.post<Service>(
+      "/services",
+      newService
+    );
+    if (!response.data) {
+      throw new Error("No service data found");
+    }
+    return response.data;
+  } catch (error) {
+    const axiosError = error as InternalApiError;
+    if (axiosError.response) {
+      throw new Error(
+        `Failed to create service. ErrorId: ${axiosError.response.data.errorId}.`
+      );
+    } else {
+      throw new Error("Failed to create service");
+    }
+  }
+};
+
+export const updateService = async (
+  serviceId: string,
+  data: Partial<Service>
+): Promise<Service> => {
+  const internalApiClient = getApiClient();
+  try {
+    const response = await internalApiClient.patch<Service>(
+      `/services/${serviceId}`,
+      data
+    );
+    if (!response.data) {
+      throw new Error("No service data found");
+    }
+    return response.data;
+  } catch (error) {
+    const axiosError = error as InternalApiError;
+    if (axiosError.response) {
+      throw new Error(
+        `Failed to update service. ErrorId: ${axiosError.response.data.errorId}.`
+      );
+    } else {
+      throw new Error("Failed to update service");
+    }
+  }
+};
+
+export const deleteService = async (serviceId: string): Promise<void> => {
+  const internalApiClient = getApiClient();
+  try {
+    await internalApiClient.delete(`/services/${serviceId}`);
+  } catch (error) {
+    const axiosError = error as InternalApiError;
+    if (axiosError.response) {
+      throw new Error(
+        `Failed to delete service. ErrorId: ${axiosError.response.data.errorId}.`
+      );
+    } else {
+      throw new Error("Failed to delete service");
     }
   }
 };

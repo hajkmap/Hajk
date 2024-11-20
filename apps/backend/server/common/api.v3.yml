@@ -8,9 +8,51 @@ servers:
 tags:
   - name: Client-accessible
     description: Resources necessary to load a working map in client
+  - name: Admin only
+    description: Resources that modify the database content and required an authorized user
   - name: Specification
     description: The OpenAPI specification
 paths:
+  /maps:
+    get:
+      tags:
+        - Client-accessible
+      responses:
+        200:
+          description: Return the list of maps
+        500:
+          description: Internal server error
+    post:
+      tags:
+        - Admin only
+      requestBody:
+        description: Json with table data
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  description: Name of the map
+                  example: my_map
+                  required: true
+                options:
+                  $ref: "#/components/schemas/MapConfig"
+                locked:
+                  type: boolean
+                  description: Lock the map
+                  example: false
+                  required: false
+      responses:
+        200:
+          description: Return the list of maps
+        400:
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
   /maps/{mapName}:
     get:
       tags:
@@ -27,14 +69,149 @@ paths:
           description: Return the map config
         404:
           description: Requested map was not found
+    patch:
+      tags:
+        - Admin only
+      parameters:
+        - name: mapName
+          in: path
+          description: Name of the map to be fetched
+          required: true
+          schema:
+            type: string
+      requestBody:
+        description: Json with table data
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/MapConfig"
+      responses:
+        200:
+          description: Return the map config
+        400:
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+    delete:
+      tags:
+        - Admin only
+      parameters:
+        - name: mapName
+          in: path
+          description: Name of the map to be fetched
+          required: true
+          schema:
+            type: string
+      responses:
+        204:
+          description: Map deleted
+        400:
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /layers:
+    get:
+      tags:
+        - Client-accessible
+      responses:
+        200:
+          description: Return the list of layers
+        500:
+          description: Internal server error
+  /groups:
+    get:
+      tags:
+        - Client-accessible
+      responses:
+        200:
+          description: Return the list of groups
+        500:
+          description: Internal server error
+  /groups/{groupId}:
+    get:
+      tags:
+        - Client-accessible
+      parameters:
+        - name: groupId
+          in: path
+          description: ID of the group to be fetched
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: Return the group
+        404:
+          description: Requested group was not found
+  /groups/{groupId}/maps:
+    get:
+      tags:
+        - Client-accessible
+      parameters:
+        - name: groupId
+          in: path
+          description: ID of the group to be fetched
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: Return the maps that use the group
+        404:
+          description: Requested group was not found
+  /groups/{groupId}/layers:
+    get:
+      tags:
+        - Client-accessible
+      parameters:
+        - name: groupId
+          in: path
+          description: ID of the group to be fetched
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: Return the layers that belong to the group
+        404:
+          description: Requested group was not found
+  /tools:
+    get:
+      tags:
+        - Client-accessible
+      responses:
+        200:
+          description: Return the list of tools
+        500:
+          description: Internal server error
+  /tools/{toolName}/maps:
+    get:
+      tags:
+        - Client-accessible
+      parameters:
+        - name: toolName
+          in: path
+          description: Name of the tool to be fetched
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: Return the maps that use the tool
+        404:
+          description: Requested tool was not found
   /search/autocomplete:
     post:
       tags:
         - Client-accessible
-      description: todo
+      description: Fuzzy search (for autocomplete)
       responses:
         200:
-          description: TODO
+          description: List of results
           content: {}
       parameters:
         - in: header

@@ -17,48 +17,56 @@ import useAppStateStore from "./store/use-app-state-store.ts";
 import SettingsPage from "./pages/settings/index.tsx";
 import ServicesPage from "./pages/services/index.tsx";
 import GroupsPage from "./pages/groups/index.tsx";
+import FormFactoryPage from "./pages/form-factory/index.tsx";
 
 const queryClient = new QueryClient({
   defaultOptions: queryConfig,
 });
 
-const router = createBrowserRouter([
-  {
-    path: "/",
-    element: <RootLayout />,
-    errorElement: <ErrorPage />,
-    children: [
-      {
-        index: true,
-        element: <IndexPage />,
-      },
-      {
-        path: "layers",
-        element: <LayersPage />,
-      },
-      {
-        path: "maps",
-        element: <MapsPage />,
-      },
-      {
-        path: "tools",
-        element: <ToolsPage />,
-      },
-      {
-        path: "services",
-        element: <ServicesPage />,
-      },
-      {
-        path: "groups",
-        element: <GroupsPage />,
-      },
-      {
-        path: "settings",
-        element: <SettingsPage />,
-      },
-    ],
-  },
-]);
+const router = createBrowserRouter(
+  [
+    {
+      path: "/",
+      element: <RootLayout />,
+      errorElement: <ErrorPage />,
+      children: [
+        {
+          index: true,
+          element: <IndexPage />,
+        },
+        {
+          path: "layers",
+          element: <LayersPage />,
+        },
+        {
+          path: "maps",
+          element: <MapsPage />,
+        },
+        {
+          path: "tools",
+          element: <ToolsPage />,
+        },
+        {
+          path: "services",
+          element: <ServicesPage />,
+        },
+        {
+          path: "groups",
+          element: <GroupsPage />,
+        },
+        {
+          path: "settings",
+          element: <SettingsPage />,
+        },
+        {
+          path: "form-factory",
+          element: <FormFactoryPage />,
+        },
+      ],
+    },
+  ],
+  { basename: import.meta.env.BASE_URL }
+);
 
 export default function App() {
   const { loadConfig, loading } = useAppStateStore();

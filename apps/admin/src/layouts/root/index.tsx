@@ -7,7 +7,7 @@ import {
   HEADER_HEIGHT,
   SIDEBAR_MINI_WIDTH,
   SIDEBAR_WIDTH,
-  SIDEBAR_ZINDEX,
+  SIDEBAR_Z_INDEX,
 } from "./constants";
 import useAppStateStore from "../../store/use-app-state-store";
 
@@ -75,7 +75,7 @@ export default function RootLayout() {
             opacity: showOverlay() ? 1.0 : 0.0,
             pointerEvents: showOverlay() ? "all" : "none",
             transition: "opacity 250ms ease",
-            zIndex: SIDEBAR_ZINDEX - 1,
+            zIndex: SIDEBAR_Z_INDEX - 1,
           }}
         ></Box>
         <Outlet />

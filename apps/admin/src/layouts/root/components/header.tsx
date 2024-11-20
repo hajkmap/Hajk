@@ -14,7 +14,7 @@ import {
 } from "@mui/material";
 import SettingsIcon from "@mui/icons-material/Settings";
 import { useEffect, useState } from "react";
-import { HEADER_HEIGHT, HEADER_ZINDEX } from "../constants";
+import { HEADER_HEIGHT, HEADER_Z_INDEX } from "../constants";
 import HajkTooltip from "../../../components/hajk-tooltip";
 
 class DummyUser {
@@ -69,12 +69,11 @@ export default function Header() {
       component="header"
       elevation={2}
       sx={{
-        backgroundColor: palette.mode === "light" ? "#efefef" : "",
         position: "fixed",
         top: 0,
         left: 0,
         right: 0,
-        zIndex: HEADER_ZINDEX,
+        zIndex: HEADER_Z_INDEX,
       }}
       square
     >
@@ -95,7 +94,7 @@ export default function Header() {
             }}
           >
             <img
-              src="/hajk-admin-logo.svg"
+              src="hajk-admin-logo.svg"
               alt={t("common.clickableLogo")}
               style={{
                 height: "32px",

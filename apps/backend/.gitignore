@@ -5,3 +5,4 @@ logs/
 .DS_Store
 .vscode
 .env
+/server/generated/zod/index.ts

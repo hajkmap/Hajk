@@ -37,5 +37,23 @@ class ServicesController {
     const maps = await ServicesService.getMapsByServiceId(req.params.id);
     return res.status(HttpStatusCodes.OK).json({ count: maps.length, maps });
   }
+
+  async createService(req: Request, res: Response) {
+    const service = await ServicesService.createService(req.body);
+    return res.status(HttpStatusCodes.CREATED).json(service);
+  }
+
+  async updateService(req: Request, res: Response) {
+    const service = await ServicesService.updateService(
+      req.params.id,
+      req.body
+    );
+    return res.status(HttpStatusCodes.OK).json(service);
+  }
+
+  async deleteService(req: Request, res: Response) {
+    await ServicesService.deleteService(req.params.id);
+    return res.status(HttpStatusCodes.NO_CONTENT).send();
+  }
 }
 export default new ServicesController();

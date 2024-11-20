@@ -1,9 +1,9 @@
-import { PrismaClient } from "@prisma/client";
-
+import { Prisma } from "@prisma/client";
 import log4js from "log4js";
 
+import prisma from "../../../common/prisma.ts";
+
 const logger = log4js.getLogger("service.v3.layer");
-const prisma = new PrismaClient();
 
 class ServicesService {
   constructor() {
@@ -82,6 +82,23 @@ class ServicesService {
     });
 
     return maps;
+  }
+
+  async createService(data: Prisma.ServiceCreateInput) {
+    const newService = await prisma.service.create({ data });
+    return newService;
+  }
+
+  async updateService(id: string, data: Prisma.ServiceUpdateInput) {
+    const updatedService = await prisma.service.update({
+      where: { id },
+      data,
+    });
+    return updatedService;
+  }
+
+  async deleteService(id: string) {
+    await prisma.service.delete({ where: { id } });
   }
 }
 
