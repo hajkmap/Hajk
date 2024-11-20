@@ -114,11 +114,11 @@ export default function ServiceSettings() {
     CONTAINER_TYPE.ACCORDION
   );
   const accordionNestedContainer2 = new DynamicFormContainer<FieldValues>(
-    t("common.accordionTitle1"),
+    t("services.settings.accordionTitle1"),
     CONTAINER_TYPE.ACCORDION
   );
   const accordionNestedContainer3 = new DynamicFormContainer<FieldValues>(
-    t("common.accordionTitle2"),
+    t("services.settings.accordionTitle2"),
     CONTAINER_TYPE.ACCORDION
   );
   const accordionNestedContainer4 = new DynamicFormContainer<FieldValues>(
@@ -130,8 +130,12 @@ export default function ServiceSettings() {
     type: INPUT_TYPE.TEXTFIELD,
     gridColumns: 10,
     name: "name",
+    helpText: "test",
     title: `${t("common.name")}`,
     defaultValue: "",
+    registerOptions: {
+      required: `${t("common.required")}`,
+    },
   });
 
   panelNestedContainer.addInput({
@@ -155,6 +159,8 @@ export default function ServiceSettings() {
     name: "serverType",
     title: `${t("common.serverType")}`,
     defaultValue: "GEOSERVER",
+    registerOptions: { required: "This field is required" },
+
     optionList: [
       { title: "Geoserver", value: "GEOSERVER" },
       { title: "QGIS Server", value: "QGIS_SERVER" },
@@ -181,7 +187,7 @@ export default function ServiceSettings() {
           <>
             <Button
               sx={{
-                color: palette.secondary.dark,
+                color: palette.primary.main,
                 width: "100%",
                 maxWidth: "120px",
                 fontWeight: "600",
@@ -317,7 +323,7 @@ export default function ServiceSettings() {
           mt: 10,
           mr: 2,
           border: "1px solid",
-          borderColor: "grey.400",
+          borderColor: palette.grey[300],
           borderRadius: 3,
           maxWidth: "260px",
           textAlign: "center",
