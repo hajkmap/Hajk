@@ -28,13 +28,13 @@ const StyledAppBar = styled(AppBar)(() => ({
  * @returns
  * @memberof LayersSwitcherView
  */
-const BreadCrumbsContainer = ({ map, model, app }) => {
+const BreadCrumbsContainer = ({ map, app }) => {
   return createPortal(
     // We must wrap the component in a div, on which we can catch
     // events. This is done to prevent event bubbling to the
     // layerSwitcher component.
     <div onMouseDown={(e) => e.stopPropagation()}>
-      <BreadCrumbs map={map} model={model} app={app} />
+      <BreadCrumbs map={map} app={app} />
     </div>,
     document.getElementById("breadcrumbs-container")
   );
@@ -44,7 +44,8 @@ class LayersSwitcherView extends React.PureComponent {
   static propTypes = {
     app: propTypes.object.isRequired,
     map: propTypes.object.isRequired,
-    model: propTypes.object.isRequired,
+    localObserver: propTypes.object.isRequired,
+    globalObserver: propTypes.object.isRequired,
     observer: propTypes.object.isRequired,
     options: propTypes.object.isRequired,
   };
@@ -52,11 +53,22 @@ class LayersSwitcherView extends React.PureComponent {
   constructor(props) {
     super(props);
     this.options = props.options;
+    this.layerMap = props.map
+      .getLayers()
+      .getArray()
+      .reduce((a, b) => {
+        a[b.get("name")] = b;
+        return a;
+      }, {});
     this.layerTree = this.addLayerNames(this.options.groups);
     // Create a ref to store a reference to the search layer input element
     this.state = {
       chapters: [],
-      baseLayers: props.model.getBaseLayers(),
+      baseLayers: props.map
+        .getLayers()
+        .getArray()
+        .filter((l) => l.get("layerType") === "base")
+        .map((l) => l.getProperties()),
       activeTab: 0,
       activeLayersCount: 0,
       displayContentOverlay: null, // 'layerPackage' | 'favorites' | 'layerItemDetails'
@@ -69,6 +81,9 @@ class LayersSwitcherView extends React.PureComponent {
         tab2: 0,
       },
     };
+
+    this.localObserver = this.props.localObserver;
+    this.globalObserver = this.props.globalObserver;
 
     props.app.globalObserver.subscribe("informativeLoaded", (chapters) => {
       if (Array.isArray(chapters)) {
@@ -132,7 +147,7 @@ class LayersSwitcherView extends React.PureComponent {
       item.changeIndicator = new Date();
       if (item.layers) {
         item.layers.forEach((layer) => {
-          const mapLayer = this.props.model.layerMap[layer.id];
+          const mapLayer = this.layerMap[layer.id];
           if (!mapLayer) {
             console.warn(`Maplayer with id ${layer.id} not found`);
             return;
@@ -472,7 +487,8 @@ class LayersSwitcherView extends React.PureComponent {
               <QuickAccessView
                 map={this.props.map}
                 app={this.props.app}
-                model={this.props.model}
+                localObserver={this.localObserver}
+                globalObserver={this.globalObserver}
                 enableQuickAccessTopics={
                   this.props.options.enableQuickAccessTopics
                 }
@@ -498,7 +514,8 @@ class LayersSwitcherView extends React.PureComponent {
                 filterChangeIndicator={group.changeIndicator}
                 key={i}
                 group={group}
-                model={this.props.model}
+                localObserver={this.localObserver}
+                layerMap={this.layerMap}
                 app={this.props.app}
                 options={this.props.options}
               />
@@ -510,7 +527,7 @@ class LayersSwitcherView extends React.PureComponent {
               display={this.state.displayContentOverlay === "layerPackage"}
               backButtonCallback={this.handleLayerPackageToggle}
               map={this.props.map}
-              globalObserver={this.props.model.globalObserver}
+              globalObserver={this.globalObserver}
               layerPackageInfoText={this.options.quickAccessTopicsInfoText}
             ></LayerPackage>
           )}
@@ -528,7 +545,7 @@ class LayersSwitcherView extends React.PureComponent {
               this.state.displayContentOverlay === null
             }
             layers={this.state.baseLayers}
-            layerMap={this.props.model.layerMap}
+            layerMap={this.layerMap}
             backgroundSwitcherBlack={this.options.backgroundSwitcherBlack}
             backgroundSwitcherWhite={this.options.backgroundSwitcherWhite}
             enableOSM={this.options.enableOSM}
@@ -537,7 +554,7 @@ class LayersSwitcherView extends React.PureComponent {
           />
           {this.options.showDrawOrderView === true && (
             <DrawOrder
-              model={this.props.model}
+              localObserver={this.localObserver}
               display={
                 this.state.activeTab === 2 &&
                 this.state.displayContentOverlay === null
@@ -549,11 +566,7 @@ class LayersSwitcherView extends React.PureComponent {
             ></DrawOrder>
           )}
           {this.options.showBreadcrumbs && (
-            <BreadCrumbsContainer
-              map={this.props.map}
-              model={this.props.model}
-              app={this.props.app}
-            />
+            <BreadCrumbsContainer map={this.props.map} app={this.props.app} />
           )}
         </div>
       </div>

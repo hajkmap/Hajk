@@ -20,7 +20,14 @@ import GroupLayer from "./GroupLayer";
 
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 
-function DrawOrder({ display, app, map, onLayerChange, model, options }) {
+function DrawOrder({
+  display,
+  app,
+  map,
+  onLayerChange,
+  localObserver,
+  options,
+}) {
   // A Set that will hold type of OL layers that should be shown.
   // This is a user setting, changed by toggling a switch control.
   const [filterList, setFilterList] = useState(
@@ -299,7 +306,7 @@ function DrawOrder({ display, app, map, onLayerChange, model, options }) {
                       key={l.ol_uid}
                       layer={l}
                       app={app}
-                      observer={model.observer}
+                      observer={localObserver}
                       toggleable={false}
                       draggable={true}
                     />

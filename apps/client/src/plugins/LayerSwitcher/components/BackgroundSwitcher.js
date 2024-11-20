@@ -196,7 +196,6 @@ class BackgroundSwitcher extends React.PureComponent {
       <BackgroundLayer
         key={index}
         layer={mapLayer}
-        model={this.props.model}
         app={this.props.app}
         draggable={false}
         toggleable={true}

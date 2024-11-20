@@ -8,7 +8,7 @@ import { Box } from "@mui/material";
 export default function QuickAccessLayers({
   app,
   map,
-  model,
+  localObserver,
   filterValue,
   treeData,
 }) {
@@ -108,7 +108,7 @@ export default function QuickAccessLayers({
             key={l.ol_uid}
             layer={l}
             app={app}
-            observer={model.observer}
+            observer={localObserver}
             toggleable={true}
             draggable={false}
             groupLayer={findLayerById(treeData, l.get("name"))}

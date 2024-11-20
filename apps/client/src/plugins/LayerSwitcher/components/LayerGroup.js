@@ -47,12 +47,12 @@ class LayerGroup extends React.PureComponent {
     expanded: propTypes.bool.isRequired,
     group: propTypes.object.isRequired,
     handleChange: propTypes.func,
-    model: propTypes.object.isRequired,
+    localObserver: propTypes.object.isRequired,
+    layerMap: propTypes.object.isRequired,
   };
 
   constructor(props) {
     super(props);
-    this.model = this.props.model;
     this.bindVisibleChangeForLayersInGroup();
   }
 
@@ -132,7 +132,8 @@ class LayerGroup extends React.PureComponent {
           expanded={expanded === group.id}
           key={i}
           group={group}
-          model={this.props.model}
+          localObserver={this.localObserver}
+          layerMap={this.props.layerMap}
           handleChange={this.handleChange}
           app={this.props.app}
           child={true}
@@ -249,9 +250,9 @@ class LayerGroup extends React.PureComponent {
       .forEach((mapLayer) => {
         if (mapLayer.get("layerType") === "group") {
           if (visibility === true) {
-            this.model.observer.publish("showLayer", mapLayer);
+            this.props.localObserver.publish("showLayer", mapLayer);
           } else {
-            this.model.observer.publish("hideLayer", mapLayer);
+            this.props.localObserver.publish("hideLayer", mapLayer);
           }
         } else {
           mapLayer.setVisible(visibility);
@@ -439,7 +440,7 @@ class LayerGroup extends React.PureComponent {
     return (
       <div>
         {this.props.group.layers.map((layer, i) => {
-          const mapLayer = this.model.layerMap[layer.id];
+          const mapLayer = this.props.layerMap[layer.id];
           // If mapLayer doesn't exist, the layer shouldn't be displayed
           if (!mapLayer) {
             return null;
@@ -458,7 +459,7 @@ class LayerGroup extends React.PureComponent {
               draggable={false}
               toggleable={true}
               app={this.props.app}
-              observer={this.props.model.observer}
+              observer={this.props.localObserver}
               groupLayer={layer}
             />
           );

@@ -5,7 +5,6 @@ import BaseWindowPlugin from "../BaseWindowPlugin";
 import LayersIcon from "@mui/icons-material/Layers";
 
 import LayerSwitcherView from "./LayerSwitcherView.js";
-import LayerSwitcherModel from "./LayerSwitcherModel.js";
 import Observer from "react-event-observer";
 
 export default class LayerSwitcher extends React.PureComponent {
@@ -19,12 +18,6 @@ export default class LayerSwitcher extends React.PureComponent {
     super(props);
 
     this.localObserver = Observer();
-
-    this.layerSwitcherModel = new LayerSwitcherModel({
-      map: props.map,
-      app: props.app,
-      observer: this.localObserver,
-    });
   }
 
   render() {
@@ -45,7 +38,8 @@ export default class LayerSwitcher extends React.PureComponent {
         <LayerSwitcherView
           app={this.props.app}
           map={this.props.map}
-          model={this.layerSwitcherModel}
+          localObserver={this.localObserver}
+          globalObserver={this.props.app.globalObserver}
           observer={this.localObserver}
           options={this.props.options}
         />

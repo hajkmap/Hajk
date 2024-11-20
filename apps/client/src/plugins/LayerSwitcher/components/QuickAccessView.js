@@ -25,7 +25,8 @@ import KeyboardArrowRightOutlinedIcon from "@mui/icons-material/KeyboardArrowRig
 const QuickAccessView = ({
   map, // A OpenLayers map instance
   app,
-  model, // LayerSwitcherModel instance
+  localObserver,
+  globalObserver,
   enableQuickAccessTopics, // : boolean
   enableUserQuickAccessFavorites,
   handleLayerPackageToggle,
@@ -152,7 +153,7 @@ const QuickAccessView = ({
                 app={app}
                 map={map}
                 handleFavoritesViewToggle={handleFavoritesViewToggle}
-                globalObserver={model.globalObserver}
+                globalObserver={globalObserver}
                 favoritesInfoText={favoritesInfoText}
                 handleQuickAccessSectionExpanded={() => {
                   setQuickAccessSectionExpanded(true);
@@ -171,7 +172,7 @@ const QuickAccessView = ({
           <QuickAccessLayers
             treeData={treeData}
             filterValue={filterValue}
-            model={model}
+            localObserver={localObserver}
             map={map}
             app={app}
           ></QuickAccessLayers>
