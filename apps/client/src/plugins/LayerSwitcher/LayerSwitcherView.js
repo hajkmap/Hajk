@@ -4,32 +4,18 @@ import propTypes from "prop-types";
 
 import { styled } from "@mui/material/styles";
 import { withSnackbar } from "notistack";
-import {
-  AppBar,
-  Tab,
-  Tabs,
-  Box,
-  IconButton,
-  ListItemText,
-  Tooltip,
-} from "@mui/material";
+import { AppBar, Tab, Tabs, Box } from "@mui/material";
 
 import BackgroundSwitcher from "./components/BackgroundSwitcher.js";
 import LayerGroup from "./components/LayerGroup.js";
 import BreadCrumbs from "./components/BreadCrumbs.js";
 import DrawOrder from "./components/DrawOrder.js";
 import LayerPackage from "./components/LayerPackage";
-import LayerGroupAccordion from "./components/LayerGroupAccordion.js";
 import ConfirmationDialog from "../../components/ConfirmationDialog.js";
-import QuickAccessLayers from "./components/QuickAccessLayers.js";
-import QuickAccessOptions from "./components/QuickAccessOptions.js";
+import QuickAccessView from "./components/QuickAccessView.js";
 import LayerItemDetails from "./components/LayerItemDetails.js";
-import Favorites from "./components/Favorites/Favorites.js";
 import LayerListFilter from "./components/LayerListFilter.js";
 import { debounce } from "utils/debounce";
-
-import StarOutlineOutlinedIcon from "@mui/icons-material/StarOutlineOutlined";
-import TopicOutlinedIcon from "@mui/icons-material/TopicOutlined";
 
 const StyledAppBar = styled(AppBar)(() => ({
   top: -10,
@@ -352,17 +338,6 @@ class LayersSwitcherView extends React.PureComponent {
       .map((l) => l.set("quickAccess", false));
   };
 
-  // Checks if quickAccess section has visible layers
-  hasVisibleLayers = () => {
-    return (
-      this.props.map
-        .getAllLayers()
-        .filter(
-          (l) => l.get("quickAccess") === true && l.get("visible") === true
-        ).length > 0
-    );
-  };
-
   collapseAllGroups = () => {
     const collapseGroups = (groups) => {
       groups.forEach((group) => {
@@ -519,88 +494,34 @@ class LayersSwitcherView extends React.PureComponent {
           />
         )}
         {this.props.options.showQuickAccess && (
-          <Box
-            sx={{
-              borderBottom: (theme) =>
-                `${theme.spacing(0.2)} solid ${theme.palette.divider}`,
+          <QuickAccessView
+            quickAccessSectionExpanded={this.state.quickAccessSectionExpanded}
+            setQuickAccessExpandedCallback={(value) => {
+              this.setState({ quickAccessSectionExpanded: value });
             }}
-          >
-            <LayerGroupAccordion
-              display={"block"}
-              expanded={this.state.quickAccessSectionExpanded}
-              setExpandedCallback={(value) => {
-                this.setState({ quickAccessSectionExpanded: value });
-              }}
-              layerGroupTitle={
-                <ListItemText
-                  primaryTypographyProps={{
-                    fontWeight: this.hasVisibleLayers() ? "bold" : "inherit",
-                  }}
-                  primary="Snabbåtkomst"
-                />
-              }
-              quickAccess={
-                <IconButton sx={{ pl: 0 }} disableRipple size="small">
-                  <StarOutlineOutlinedIcon />
-                </IconButton>
-              }
-              layerGroupDetails={
-                <>
-                  {this.props.options.enableQuickAccessTopics ? (
-                    <Tooltip title="Teman">
-                      <IconButton
-                        onClick={(e) =>
-                          this.handleLayerPackageToggle({ event: e })
-                        }
-                      >
-                        <TopicOutlinedIcon fontSize="small"></TopicOutlinedIcon>
-                      </IconButton>
-                    </Tooltip>
-                  ) : (
-                    <div style={{ display: "none" }}>
-                      <IconButton>
-                        <TopicOutlinedIcon fontSize="small"></TopicOutlinedIcon>
-                      </IconButton>
-                    </div>
-                  )}
-                  {this.props.options.enableUserQuickAccessFavorites && (
-                    <Favorites
-                      favoriteViewDisplay={
-                        this.state.displayContentOverlay === "favorites"
-                      }
-                      app={this.props.app}
-                      map={this.props.map}
-                      handleFavoritesViewToggle={this.handleFavoritesViewToggle}
-                      globalObserver={this.props.model.globalObserver}
-                      favoritesInfoText={
-                        this.options.userQuickAccessFavoritesInfoText
-                      }
-                      handleQuickAccessSectionExpanded={() =>
-                        this.setState({ quickAccessSectionExpanded: true })
-                      }
-                    ></Favorites>
-                  )}
-                  <QuickAccessOptions
-                    handleAddLayersToQuickAccess={
-                      this.handleAddLayersToQuickAccess
-                    }
-                    handleClearQuickAccessLayers={
-                      this.handleShowDeleteConfirmation
-                    }
-                  ></QuickAccessOptions>
-                </>
-              }
-              children={
-                <QuickAccessLayers
-                  treeData={this.state.treeData}
-                  filterValue={this.state.filterValue}
-                  model={this.props.model}
-                  map={this.props.map}
-                  app={this.props.app}
-                ></QuickAccessLayers>
-              }
-            ></LayerGroupAccordion>
-          </Box>
+            map={this.props.map}
+            app={this.props.app}
+            model={this.props.model}
+            enableQuickAccessTopics={this.props.options.enableQuickAccessTopics}
+            enableUserQuickAccessFavorites={
+              this.props.options.enableUserQuickAccessFavorites
+            }
+            handleLayerPackageToggle={(e) =>
+              this.handleLayerPackageToggle({ event: e })
+            }
+            favoritesViewDisplay={
+              this.state.displayContentOverlay === "favorites"
+            }
+            handleFavoritesViewToggle={this.handleFavoritesViewToggle}
+            favoritesInfoText={this.options.userQuickAccessFavoritesInfoText}
+            handleQuickAccessSectionExpanded={() =>
+              this.setState({ quickAccessSectionExpanded: true })
+            }
+            handleAddLayersToQuickAccess={this.handleAddLayersToQuickAccess}
+            handleClearQuickAccessLayers={this.handleShowDeleteConfirmation}
+            treeData={this.state.treeData}
+            filterValue={this.state.filterValue}
+          />
         )}
         {this.state.treeData.map((group, i) => {
           return (
