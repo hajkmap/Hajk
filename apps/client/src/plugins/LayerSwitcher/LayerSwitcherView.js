@@ -119,6 +119,32 @@ class LayersSwitcherView extends React.PureComponent {
         });
       }
     });
+
+    // this.globalHideLayerSubscription = props.app.globalObserver.subscribe(
+    //   "layerswitcher.hideLayer",
+    //   (la) => console.log("LSV: globalHideLayer", la.get("caption"))
+    // );
+
+    // this.globalShowLayerSubscription = props.app.globalObserver.subscribe(
+    //   "layerswitcher.showLayer",
+    //   (la) => console.log("LSV: globalShowLayer", la.get("caption"))
+    // );
+    // TODO This is a work around for showing/hideing group layers which are
+    // collapsed. It's also the GroupLayer component that listens for this.
+    // That should be refactored.
+    // TODO Unsubscribe
+    this.localHideLayerSubscription = props.observer.subscribe(
+      "hideLayer",
+      (la) => {
+        la.setVisible(false);
+      }
+    );
+    this.localShowLayerSubscription = props.observer.subscribe(
+      "showLayer",
+      (la) => {
+        la.setVisible(true);
+      }
+    );
   }
 
   // Prepare tree data for filtering
