@@ -151,24 +151,28 @@ class SurveyService {
         const rawData = await fs.promises.readFile(pathToFile, "utf8");
         fileData = JSON.parse(rawData);
 
-        // If the file's content is not an array, initialize it as an empty array
+        // Initialize as an empty array if the content is not an array
         if (!Array.isArray(fileData)) {
           fileData = [];
         }
       } catch (readOrParseError) {
-        // If reading or parsing fails, assume the file does not exist or is not valid JSON
+        // If reading or parsing fails, start with an empty array
         fileData = [];
       }
 
-      // Add the new data to our array
-      fileData.push(body);
+      // Create a copy of 'body' without the 'mailTemplate' key
+      const { mailTemplate, ...bodyWithoutMailTemplate } = body;
 
-      // Stringify the updated array
+      // Add the new data to the array
+      fileData.push(bodyWithoutMailTemplate);
+
+      // Convert the array back to JSON
       const jsonString = JSON.stringify(fileData, null, 2);
 
       // Write the updated content back to the file
       await fs.promises.writeFile(pathToFile, jsonString);
 
+      // Check if email notifications are enabled
       if (process.env.CITIZEN_DIALOGUE_MAIL_ENABLED === "true") {
         await this.sendSurveyEmail(body);
       }
