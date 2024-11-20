@@ -10,9 +10,7 @@ import {
   Tabs,
   Box,
   IconButton,
-  InputAdornment,
   ListItemText,
-  TextField,
   Tooltip,
 } from "@mui/material";
 
@@ -27,12 +25,11 @@ import QuickAccessLayers from "./components/QuickAccessLayers.js";
 import QuickAccessOptions from "./components/QuickAccessOptions.js";
 import LayerItemDetails from "./components/LayerItemDetails.js";
 import Favorites from "./components/Favorites/Favorites.js";
+import LayerListFilter from "./components/LayerListFilter.js";
 import { debounce } from "utils/debounce";
 
 import StarOutlineOutlinedIcon from "@mui/icons-material/StarOutlineOutlined";
 import TopicOutlinedIcon from "@mui/icons-material/TopicOutlined";
-import SearchIcon from "@mui/icons-material/Search";
-import ClearIcon from "@mui/icons-material/Clear";
 
 const StyledAppBar = styled(AppBar)(() => ({
   top: -10,
@@ -525,59 +522,13 @@ class LayersSwitcherView extends React.PureComponent {
         }}
       >
         {this.props.options.showFilter && (
-          <Box
-            sx={{
-              p: 1,
-              backgroundColor: (theme) =>
-                theme.palette.mode === "dark"
-                  ? "#373737"
-                  : theme.palette.grey[100],
-              borderBottom: (theme) =>
-                `${theme.spacing(0.2)} solid ${theme.palette.divider}`,
-            }}
-          >
-            <Box
-              sx={{
-                width: 500,
-                maxWidth: "100%",
-                p: 1,
-              }}
-            >
-              <TextField
-                InputProps={{
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      <SearchIcon />
-                    </InputAdornment>
-                  ),
-                  endAdornment: (
-                    <InputAdornment position="end">
-                      {this.state.filterValue && (
-                        <IconButton
-                          onClick={() => this.resetInput()}
-                          size="small"
-                        >
-                          <ClearIcon />
-                        </IconButton>
-                      )}
-                    </InputAdornment>
-                  ),
-                }}
-                size="small"
-                onChange={(event) =>
-                  this.handleFilterValueChange(event.target.value)
-                }
-                fullWidth
-                placeholder="Sök lager och grupper"
-                inputRef={this.inputRef}
-                variant="outlined"
-                sx={{
-                  background: (theme) =>
-                    theme.palette.mode === "dark" ? "inherit" : "#fff",
-                }}
-              />
-            </Box>
-          </Box>
+          <LayerListFilter
+            ref={this.inputRef}
+            handleFilterValueChange={(value) =>
+              this.handleFilterValueChange(value)
+            }
+            resetInput={() => this.resetInput()}
+          />
         )}
         {this.props.options.showQuickAccess && (
           <Box
