@@ -82,18 +82,12 @@ const QuickAccessView = ({
         }
         layerGroupDetails={
           <>
-            {enableQuickAccessTopics ? (
+            {enableQuickAccessTopics && (
               <Tooltip title="Teman">
                 <IconButton onClick={handleLayerPackageToggle}>
                   <TopicOutlinedIcon fontSize="small"></TopicOutlinedIcon>
                 </IconButton>
               </Tooltip>
-            ) : (
-              <div style={{ display: "none" }}>
-                <IconButton>
-                  <TopicOutlinedIcon fontSize="small"></TopicOutlinedIcon>
-                </IconButton>
-              </div>
             )}
             {enableUserQuickAccessFavorites && (
               <Favorites
