@@ -410,67 +410,6 @@ class LayersSwitcherView extends React.PureComponent {
     }, 1);
   };
 
-  /**
-   * @summary Loops through map configuration and
-   * renders all groups. Visible only if @param shouldRender is true.
-   *
-   * @param {boolean} [shouldRender=true]
-   * @returns {<div>}
-   */
-  renderLayerGroups = (shouldRender = true) => {
-    return (
-      <Box
-        sx={{
-          display:
-            shouldRender === true && this.state.displayContentOverlay === null
-              ? "block"
-              : "none",
-        }}
-      >
-        {this.props.options.showFilter && (
-          <LayerListFilter
-            handleFilterValueChange={(value) =>
-              this.handleFilterValueChange(value)
-            }
-          />
-        )}
-        {this.props.options.showQuickAccess && (
-          <QuickAccessView
-            map={this.props.map}
-            app={this.props.app}
-            model={this.props.model}
-            enableQuickAccessTopics={this.props.options.enableQuickAccessTopics}
-            enableUserQuickAccessFavorites={
-              this.props.options.enableUserQuickAccessFavorites
-            }
-            handleLayerPackageToggle={(e) =>
-              this.handleLayerPackageToggle({ event: e })
-            }
-            favoritesViewDisplay={
-              this.state.displayContentOverlay === "favorites"
-            }
-            handleFavoritesViewToggle={this.handleFavoritesViewToggle}
-            favoritesInfoText={this.options.userQuickAccessFavoritesInfoText}
-            treeData={this.state.treeData}
-            filterValue={this.state.filterValue}
-          />
-        )}
-        {this.state.treeData.map((group, i) => {
-          return (
-            <LayerGroup
-              filterChangeIndicator={group.changeIndicator}
-              key={i}
-              group={group}
-              model={this.props.model}
-              app={this.props.app}
-              options={this.props.options}
-            />
-          );
-        })}
-      </Box>
-    );
-  };
-
   render() {
     const { windowVisible } = this.props;
     return (
@@ -513,7 +452,58 @@ class LayersSwitcherView extends React.PureComponent {
           id="scroll-container"
           style={{ position: "relative", height: "100%", overflowY: "auto" }}
         >
-          {this.renderLayerGroups(this.state.activeTab === 0)}
+          <Box
+            sx={{
+              display:
+                this.state.activeTab === 0 &&
+                this.state.displayContentOverlay === null
+                  ? "block"
+                  : "none",
+            }}
+          >
+            {this.props.options.showFilter && (
+              <LayerListFilter
+                handleFilterValueChange={(value) =>
+                  this.handleFilterValueChange(value)
+                }
+              />
+            )}
+            {this.props.options.showQuickAccess && (
+              <QuickAccessView
+                map={this.props.map}
+                app={this.props.app}
+                model={this.props.model}
+                enableQuickAccessTopics={
+                  this.props.options.enableQuickAccessTopics
+                }
+                enableUserQuickAccessFavorites={
+                  this.props.options.enableUserQuickAccessFavorites
+                }
+                handleLayerPackageToggle={(e) =>
+                  this.handleLayerPackageToggle({ event: e })
+                }
+                favoritesViewDisplay={
+                  this.state.displayContentOverlay === "favorites"
+                }
+                handleFavoritesViewToggle={this.handleFavoritesViewToggle}
+                favoritesInfoText={
+                  this.options.userQuickAccessFavoritesInfoText
+                }
+                treeData={this.state.treeData}
+                filterValue={this.state.filterValue}
+              />
+            )}
+            {this.state.treeData.map((group, i) => (
+              <LayerGroup
+                filterChangeIndicator={group.changeIndicator}
+                key={i}
+                group={group}
+                model={this.props.model}
+                app={this.props.app}
+                options={this.props.options}
+              />
+            ))}
+          </Box>
           {this.props.options.enableQuickAccessTopics && (
             <LayerPackage
               quickLayerPresets={this.options.quickLayersPresets}
