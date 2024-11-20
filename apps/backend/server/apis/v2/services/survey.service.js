@@ -52,20 +52,18 @@ class SurveyService {
         "surveys",
         "mailtemplate"
       );
-      // List dir contents, the second parameter will ensure we get Dirent objects
+      // List directory contents, get Dirent objects
       const dirContents = await fs.promises.readdir(dir, {
         withFileTypes: true,
       });
       const availableMailTemplates = dirContents
         .filter(
           (entry) =>
-            // Filter out only files (we're not interested in directories).
-            entry.isFile() &&
-            // Only HTML-files
-            entry.name.endsWith(".html")
+            entry.isFile() && entry.name.toLowerCase().endsWith(".html")
         )
-        // Create an array using name of each Dirent object, remove file extension
-        .map((entry) => entry.name.replace(".html", ""));
+        .map(
+          (entry) => entry.name.substring(0, entry.name.length - 5) // Remove last 5 characters ('.html')
+        );
       return availableMailTemplates;
     } catch (error) {
       return { error };
