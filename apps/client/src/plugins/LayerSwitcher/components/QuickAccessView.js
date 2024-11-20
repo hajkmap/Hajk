@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { withSnackbar } from "notistack";
 // import { createPortal } from "react-dom";
 
 // import { styled } from "@mui/material/styles";
@@ -14,8 +15,6 @@ import StarOutlineOutlinedIcon from "@mui/icons-material/StarOutlineOutlined";
 import TopicOutlinedIcon from "@mui/icons-material/TopicOutlined";
 
 const QuickAccessView = ({
-  quickAccessSectionExpanded,
-  setQuickAccessExpandedCallback,
   map, // A OpenLayers map instance
   app,
   model, // LayerSwitcherModel instance
@@ -25,10 +24,9 @@ const QuickAccessView = ({
   favoritesViewDisplay,
   handleFavoritesViewToggle,
   favoritesInfoText,
-  handleQuickAccessSectionExpanded,
-  handleAddLayersToQuickAccess,
   treeData,
   filterValue,
+  enqueueSnackbar,
 }) => {
   // TODO This iterates on all OL layers every render, that can be optimized
   const hasVisibleLayers =
@@ -37,23 +35,48 @@ const QuickAccessView = ({
       .filter((l) => l.get("quickAccess") === true && l.get("visible") === true)
       .length > 0;
 
+  const [quickAccessSectionExpanded, setQuickAccessSectionExpanded] =
+    useState(false);
+
   const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
 
   // Handles click on clear quickAccess menu item
   const handleShowDeleteConfirmation = (e) => {
     e.stopPropagation();
     setShowDeleteConfirmation(true);
-    // this.setState({ showDeleteConfirmation: true });
   };
 
   // Handles click on confirm clear quickAccess button
   const handleClearQuickAccessLayers = () => {
     setShowDeleteConfirmation(false);
-    // this.setState({ showDeleteConfirmation: false });
-    this.props.map
+    map
       .getAllLayers()
       .filter((l) => l.get("quickAccess") === true)
       .map((l) => l.set("quickAccess", false));
+  };
+
+  // Handles click on AddLayersToQuickAccess menu item
+  const handleAddLayersToQuickAccess = (e) => {
+    e.stopPropagation();
+    // Add visible layers to quickAccess section
+    map
+      .getAllLayers()
+      .filter(
+        (l) =>
+          l.get("visible") === true &&
+          l.get("layerType") !== "base" &&
+          l.get("layerType") !== "system"
+      )
+      .map((l) => l.set("quickAccess", true));
+
+    // Show snackbar
+    enqueueSnackbar &&
+      enqueueSnackbar(`Tända lager har nu lagts till i snabbåtkomst.`, {
+        variant: "success",
+        anchorOrigin: { vertical: "bottom", horizontal: "center" },
+      });
+    // Expand quickAccess section
+    setQuickAccessSectionExpanded(true);
   };
 
   return (
@@ -66,7 +89,10 @@ const QuickAccessView = ({
       <LayerGroupAccordion
         display={"block"}
         expanded={quickAccessSectionExpanded}
-        setExpandedCallback={setQuickAccessExpandedCallback}
+        setExpandedCallback={(expanded) => {
+          console.warn({ expanded });
+          setQuickAccessSectionExpanded(expanded);
+        }}
         layerGroupTitle={
           <ListItemText
             primaryTypographyProps={{
@@ -97,9 +123,9 @@ const QuickAccessView = ({
                 handleFavoritesViewToggle={handleFavoritesViewToggle}
                 globalObserver={model.globalObserver}
                 favoritesInfoText={favoritesInfoText}
-                handleQuickAccessSectionExpanded={
-                  handleQuickAccessSectionExpanded
-                }
+                handleQuickAccessSectionExpanded={() => {
+                  setQuickAccessSectionExpanded(true);
+                }}
               ></Favorites>
             )}
             <QuickAccessOptions
@@ -121,10 +147,10 @@ const QuickAccessView = ({
 
       <ConfirmationDialog
         open={showDeleteConfirmation === true}
-        titleName={"Rensa allt"}
-        contentDescription={"Alla lager i snabbåtkomst kommer nu att tas bort."}
-        cancel={"Avbryt"}
-        confirm={"Rensa"}
+        titleName="Rensa allt"
+        contentDescription="Alla lager i snabbåtkomst kommer nu att tas bort."
+        cancel="Avbryt"
+        confirm="Rensa"
         handleConfirm={handleClearQuickAccessLayers}
         handleAbort={() => {
           setShowDeleteConfirmation(false);
@@ -134,4 +160,4 @@ const QuickAccessView = ({
   );
 };
 
-export default QuickAccessView;
+export default withSnackbar(QuickAccessView);

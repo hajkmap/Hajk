@@ -3,7 +3,6 @@ import { createPortal } from "react-dom";
 import propTypes from "prop-types";
 
 import { styled } from "@mui/material/styles";
-import { withSnackbar } from "notistack";
 import { AppBar, Tab, Tabs, Box } from "@mui/material";
 
 import BackgroundSwitcher from "./components/BackgroundSwitcher.js";
@@ -48,7 +47,6 @@ class LayersSwitcherView extends React.PureComponent {
     model: propTypes.object.isRequired,
     observer: propTypes.object.isRequired,
     options: propTypes.object.isRequired,
-    enqueueSnackbar: propTypes.func.isRequired,
   };
 
   constructor(props) {
@@ -63,7 +61,6 @@ class LayersSwitcherView extends React.PureComponent {
       activeLayersCount: 0,
       displayContentOverlay: null, // 'layerPackage' | 'favorites' | 'layerItemDetails'
       layerItemDetails: null,
-      quickAccessSectionExpanded: false,
       filterValue: "",
       treeData: this.layerTree,
       scrollPositions: {
@@ -183,11 +180,6 @@ class LayersSwitcherView extends React.PureComponent {
         [`tab${prevState.activeTab}`]: currentScrollPosition,
       },
     }));
-    if (layerPackageState?.setQuickAccessSectionExpanded) {
-      this.setState({
-        quickAccessSectionExpanded: true,
-      });
-    }
   };
 
   // Filter tree data
@@ -285,40 +277,6 @@ class LayersSwitcherView extends React.PureComponent {
         [`tab${prevState.activeTab}`]: currentScrollPosition,
       },
     }));
-    if (layerPackageState?.setQuickAccessSectionExpanded) {
-      this.setState({
-        quickAccessSectionExpanded: true,
-      });
-    }
-  };
-
-  // Handles click on AddLayersToQuickAccess menu item
-  handleAddLayersToQuickAccess = (e) => {
-    e.stopPropagation();
-    // Add visible layers to quickAccess section
-    this.props.map
-      .getAllLayers()
-      .filter(
-        (l) =>
-          l.get("visible") === true &&
-          l.get("layerType") !== "base" &&
-          l.get("layerType") !== "system"
-      )
-      .map((l) => l.set("quickAccess", true));
-    // Force update
-    this.forceUpdate();
-    // Show snackbar
-    this.props.enqueueSnackbar(
-      `Tända lager har nu lagts till i snabbåtkomst.`,
-      {
-        variant: "success",
-        anchorOrigin: { vertical: "bottom", horizontal: "center" },
-      }
-    );
-    // Expand quickAccess section
-    this.setState({
-      quickAccessSectionExpanded: true,
-    });
   };
 
   collapseAllGroups = () => {
@@ -478,10 +436,6 @@ class LayersSwitcherView extends React.PureComponent {
         )}
         {this.props.options.showQuickAccess && (
           <QuickAccessView
-            quickAccessSectionExpanded={this.state.quickAccessSectionExpanded}
-            setQuickAccessExpandedCallback={(value) => {
-              this.setState({ quickAccessSectionExpanded: value });
-            }}
             map={this.props.map}
             app={this.props.app}
             model={this.props.model}
@@ -497,10 +451,6 @@ class LayersSwitcherView extends React.PureComponent {
             }
             handleFavoritesViewToggle={this.handleFavoritesViewToggle}
             favoritesInfoText={this.options.userQuickAccessFavoritesInfoText}
-            handleQuickAccessSectionExpanded={() =>
-              this.setState({ quickAccessSectionExpanded: true })
-            }
-            handleAddLayersToQuickAccess={this.handleAddLayersToQuickAccess}
             treeData={this.state.treeData}
             filterValue={this.state.filterValue}
           />
@@ -621,4 +571,4 @@ class LayersSwitcherView extends React.PureComponent {
   }
 }
 
-export default withSnackbar(LayersSwitcherView);
+export default LayersSwitcherView;
