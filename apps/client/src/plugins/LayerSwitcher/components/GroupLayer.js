@@ -168,8 +168,13 @@ export default function GroupLayer({
       hideLayerSubscription.unsubscribe();
       showLayerSubscription.unsubscribe();
     };
-  }, [app.globalObserver, localObserver
-, setGroupHidden, setGroupVisible, layer]);
+  }, [
+    app.globalObserver,
+    localObserver,
+    setGroupHidden,
+    setGroupVisible,
+    layer,
+  ]);
 
   // When visibleSubLayers state changes, update layer params
   useEffect(() => {

@@ -1,11 +1,5 @@
 import React from "react";
-import {
-  Collapse,
-  ListItemSecondaryAction,
-  Box,
-  IconButton,
-  ListItemButton,
-} from "@mui/material";
+import { Collapse, Box, IconButton, ListItemButton } from "@mui/material";
 import KeyboardArrowRightOutlinedIcon from "@mui/icons-material/KeyboardArrowRightOutlined";
 
 export default function LayerGroupAccordion({

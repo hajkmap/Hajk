@@ -46,7 +46,6 @@ class LayersSwitcherView extends React.PureComponent {
     map: propTypes.object.isRequired,
     localObserver: propTypes.object.isRequired,
     globalObserver: propTypes.object.isRequired,
-    observer: propTypes.object.isRequired,
     options: propTypes.object.isRequired,
   };
 
@@ -124,7 +123,7 @@ class LayersSwitcherView extends React.PureComponent {
     // collapsed. It's also the GroupLayer component that listens for this.
     // That should be refactored.
     // TODO Unsubscribe
-    this.localHideLayerSubscription = props.observer.subscribe(
+    this.localHideLayerSubscription = this.localObserver.subscribe(
       "hideLayer",
       (la) => {
         // TODO Make sure QuickAccess updates
@@ -133,7 +132,7 @@ class LayersSwitcherView extends React.PureComponent {
         // this.setState({ treeData: [...this.layerTree] });
       }
     );
-    this.localShowLayerSubscription = props.observer.subscribe(
+    this.localShowLayerSubscription = this.localObserver.subscribe(
       "showLayer",
       (la) => {
         la.setVisible(true);

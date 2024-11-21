@@ -40,7 +40,6 @@ export default class LayerSwitcher extends React.PureComponent {
           map={this.props.map}
           localObserver={this.localObserver}
           globalObserver={this.props.app.globalObserver}
-          observer={this.localObserver}
           options={this.props.options}
         />
       </BaseWindowPlugin>
