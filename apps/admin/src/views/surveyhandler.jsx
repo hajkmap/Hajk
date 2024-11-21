@@ -9,13 +9,13 @@ function SurveyHandler(props) {
 
   const [availableSurveys, setAvailableSurveys] = useState([]);
   const [selectedSurveyId, setSelectedSurveyId] = useState("");
-
-  useEffect(() => {
-    props.model.listAllAvailableSurveys((data) => {
-        setAvailableSurveys(data);
-    });
-    // eslint-disable-next-line
-}, []);
+  const [selectedQuestion, setSelectedQuestion] = useState(null);
+  const [selectedPageIndex, setSelectedPageIndex] = useState(0);
+  const [filename, setFilename] = useState("");
+  const initialCompletedHtmlButton = "<button type='button' onclick='window.location.reload()' style='display: block; margin: 0 auto;'>Gör enkäten igen!</button>";
+  const initialCompletedHtmlText = "<h4>Tack för att du svarade på våra frågor!</h4>";
+  const [completedHtmlButton, setCompletedHtmlButton] = useState(initialCompletedHtmlButton);
+  const [completedHtmlText, setCompletedHtmlText] = useState(initialCompletedHtmlText);
 
   const [survey, setSurvey] = useState({
     title: "",
@@ -25,17 +25,32 @@ function SurveyHandler(props) {
     logoHeight: 60,
     logoPosition: "left",
     showQuestionNumbers: "false",
+    completedHtml: "",
     pages: [{ questions: [] }]
   });
 
-  const [selectedQuestion, setSelectedQuestion] = useState(null);
+  const removeButtonHtml = (html) => {
+    return html ? html.replace(/<button[^>]*>.*?<\/button>/gi, '') : '';
+  };
+
+  const onlyButtonHtml = (html) => {
+    const match = html.match(/<button[^>]*>[\s\S]*?<\/button>/i);
+    return match ? match[0] : '';
+  };
+
+  useEffect(() => {
+    props.model.listAllAvailableSurveys((data) => {
+        setAvailableSurveys(data);
+    });
+    // eslint-disable-next-line
+  }, []);
 
   const handleQuestionClick = (pageIndex, questionIndex) => {
     setSelectedQuestion({ pageIndex, questionIndex });
     setSelectedPageIndex(pageIndex);
   };
 
-  const [selectedPageIndex, setSelectedPageIndex] = useState(0);
+
 
   const handlePageSelection = (pageIndex) => {
     setSelectedPageIndex(pageIndex);
@@ -295,7 +310,7 @@ const updateQuestion = (pageIndex, questionIndex, field, value) => {
     return valid;
 };
 
-const [filename, setFilename] = useState("");
+
 
 const saveSurvey = () => {
     // Create a copy of the survey to avoid direct mutation
@@ -303,6 +318,9 @@ const saveSurvey = () => {
 
     // Initialize a question counter
     let questionCounter = 0;
+
+    // Combine completedHtmlText and button
+    newSurvey.completedHtml = completedHtmlText + completedHtmlButton
 
     // Iterate over each page and its questions
     newSurvey.pages = newSurvey.pages.map((page) => {
@@ -374,6 +392,8 @@ const saveSurveyToFile = (filename, surveyJson) => {
         props.model.loadSurvey(selectedSurveyId, (surveyData) => {
             setSurvey(surveyData);
             setFilename(selectedSurveyId);
+            setCompletedHtmlText(removeButtonHtml(surveyData.completedHtml));
+            setCompletedHtmlButton(onlyButtonHtml(surveyData.completedHtml));
         });
     }
 };
@@ -386,6 +406,7 @@ const saveSurveyToFile = (filename, surveyJson) => {
     logoHeight: 60,
     logoPosition: "left",
     showQuestionNumbers: "false",
+    completedHtml: "",
     pages: [{ questions: [] }]
   };
 
@@ -394,6 +415,8 @@ const saveSurveyToFile = (filename, surveyJson) => {
     setFilename("");
     setSurvey(emptySurvey);
     setSelectedSurveyId("");
+    setCompletedHtmlButton(initialCompletedHtmlButton);
+    setCompletedHtmlText(initialCompletedHtmlText);
   }
 
   const GeometryWarning = ({ survey }) => {
@@ -428,7 +451,7 @@ const saveSurveyToFile = (filename, surveyJson) => {
     <div>
       <h1>Enkäthanterare</h1>
     
-      <Grid container spacing={2} style={{ marginBottom: '50px' }}>
+      <Grid container spacing={2} style={{ marginBottom: '20px' }}>
       <Grid item>
       Välj en befintlig enkät: 
       <select value={selectedSurveyId} onChange={handleSurveySelection}>
@@ -443,21 +466,41 @@ const saveSurveyToFile = (filename, surveyJson) => {
         </Grid>
         <Grid item><Button variant="contained" color="primary" onClick={newSurvey}>Töm fält</Button></Grid>
         </Grid>
-        <Grid container spacing={2} style={{ marginBottom: '50px' }}>
+        <Grid container spacing={2} style={{ marginBottom: '20px' }}>
         <Grid item><TextField
           label="Enkätens Filnamn"
           value={filename}
           onChange={(e) => setFilename(e.target.value)}
           style={{ marginRight: '10px' }}
+          InputProps={{
+            style: {
+              fontSize: 12,
+            },
+          }}
+          InputLabelProps={{
+            style: {
+              fontSize: 14,
+            },
+          }}
         /></Grid>
         </Grid>
-      <Grid container spacing={2} style={{ marginBottom: '50px' }}>
+      <Grid container spacing={2} style={{ marginBottom: '20px' }}>
         <Grid item>
           <TextField
             label="Enkätens Titel"
             value={survey.title}
             onChange={(e) => setSurvey({ ...survey, title: e.target.value })}
             style={{ marginRight: '10px' }}
+            InputProps={{
+              style: {
+                fontSize: 12,
+              },
+            }}
+            InputLabelProps={{
+              style: {
+                fontSize: 14,
+              },
+            }}
           />
         </Grid>
         <Grid item>
@@ -466,6 +509,16 @@ const saveSurveyToFile = (filename, surveyJson) => {
             value={survey.logo}
             onChange={(e) => setSurvey({ ...survey, logo: e.target.value })}
             style={{ marginRight: '10px' }}
+            InputProps={{
+              style: {
+                fontSize: 12,
+              },
+            }}
+            InputLabelProps={{
+              style: {
+                fontSize: 14,
+              },
+            }}
           />
         </Grid>
         <Grid item>
@@ -475,6 +528,16 @@ const saveSurveyToFile = (filename, surveyJson) => {
             value={survey.logoWidth}
             onChange={(e) => setSurvey({ ...survey, logoWidth: parseInt(e.target.value, 10) })}
             style={{ marginRight: '10px' }}
+            InputProps={{
+              style: {
+                fontSize: 12,
+              },
+            }}
+            InputLabelProps={{
+              style: {
+                fontSize: 14,
+              },
+            }}
           />
         </Grid>
         <Grid item>
@@ -483,6 +546,48 @@ const saveSurveyToFile = (filename, surveyJson) => {
             type="number"
             value={survey.logoHeight}
             onChange={(e) => setSurvey({ ...survey, logoHeight: parseInt(e.target.value, 10) })}
+            InputProps={{
+              style: {
+                fontSize: 12,
+              },
+            }}
+            InputLabelProps={{
+              style: {
+                fontSize: 14,
+              },
+            }}
+          />
+        </Grid>
+      </Grid>
+      <Grid container spacing={2} style={{ marginBottom: '20px' }}>
+        <Grid item xs={5}>
+          <TextField
+            label="Svar vid färdigställd enkät (html kan användas, ej <button>)"
+            value={completedHtmlText}
+            onChange={(e) => setCompletedHtmlText(e.target.value)}
+            style={{ marginRight: '10px' }}
+            fullWidth
+            InputLabelProps={{ shrink: true }}
+            InputProps={{
+              style: {
+                fontSize: 12,
+              },
+            }}
+          />
+        </Grid>
+        <Grid item xs={7}>
+          <TextField
+            label="Funktion för att starta om enkät (måste starta med <button> och sluta med </button>)"
+            value={completedHtmlButton}
+            onChange={(e) => setCompletedHtmlButton(e.target.value)}
+            style={{ marginRight: '10px' }}
+            fullWidth
+            InputLabelProps={{ shrink: true }}
+            InputProps={{
+              style: {
+                fontSize: 12,
+              },
+            }}
           />
         </Grid>
       </Grid>
