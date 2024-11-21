@@ -82,7 +82,16 @@ const router = createBrowserRouter(
       element: <LoginPage />,
     },
   ],
-  { basename: import.meta.env.BASE_URL }
+  {
+    basename: import.meta.env.BASE_URL,
+    future: {
+      v7_relativeSplatPath: true,
+      v7_fetcherPersist: true,
+      v7_normalizeFormMethod: true,
+      v7_partialHydration: true,
+      v7_skipActionErrorRevalidation: true,
+    },
+  }
 );
 
 export default function App() {
@@ -95,7 +104,7 @@ export default function App() {
   return !loading ? (
     <QueryClientProvider client={queryClient}>
       {import.meta.env.DEV && <ReactQueryDevtools />}
-      <RouterProvider router={router} />
+      <RouterProvider router={router} future={{ v7_startTransition: true }} />
       <ToastContainer />
     </QueryClientProvider>
   ) : (
