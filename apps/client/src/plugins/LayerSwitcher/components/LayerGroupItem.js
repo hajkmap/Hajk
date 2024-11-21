@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import PropTypes from "prop-types";
-import { Button, Typography, Grid, Box } from "@mui/material";
+import { Button, Typography, Grid, Box, IconButton } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import { withSnackbar } from "notistack";
 import IconWarning from "@mui/icons-material/Warning";
@@ -17,14 +17,38 @@ import KeyboardArrowRightIcon from "@mui/icons-material/KeyboardArrowRight";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import HajkToolTip from "components/HajkToolTip";
 
-const ExpandButtonWrapper = styled("div")(() => ({
+const ExpandButtonWrapper = styled("div")(({ theme }) => ({
   display: "flex",
   float: "left",
   cursor: "pointer",
+  outline: "none",
+  "&:focus": {
+    outline: "none",
+    backgroundColor: theme.palette.action.focus,
+  },
+  "&.fade-out": {
+    backgroundColor: "initial",
+    transition: "background-color 0.4s ease",
+  },
 }));
 
 const LayerInfo = styled("div")(({ theme }) => ({
   width: "100%",
+  display: "flex",
+  justifyContent: "space-between",
+  marginTop: "0",
+  borderBottom: `${theme.spacing(0.2)} solid ${theme.palette.divider}`,
+}));
+
+const LayerItemWrapper = styled("div")(({ theme }) => ({
+  display: "flex",
+  flex: 1,
+  justifyContent: "space-between",
+  marginTop: "0",
+}));
+
+const LayerItemContainer = styled("div")(({ theme }) => ({
+  paddingLeft: "0",
   borderBottom: `${theme.spacing(0.2)} solid ${theme.palette.divider}`,
 }));
 
@@ -46,6 +70,14 @@ const SummaryButtonsContainer = styled("div")(() => ({
 }));
 
 const SummaryButtonWrapper = styled("div")(() => ({
+  display: "flex",
+  alignItems: "center",
+  width: 35,
+  height: 35,
+  cursor: "pointer",
+}));
+
+const StyledIconButton = styled(IconButton)(() => ({
   display: "flex",
   alignItems: "center",
   width: 35,
@@ -85,6 +117,19 @@ const StyledList = styled("ul")(() => ({
   padding: 0,
   margin: 0,
   listStyle: "none",
+}));
+
+const LayerItemContent = styled(Grid)(({ theme }) => ({
+  display: "flex",
+  marginTop: "0",
+  "&:focus": {
+    outline: "none",
+    backgroundColor: theme.palette.action.focus,
+  },
+  "&.fade-out": {
+    backgroundColor: "initial",
+    transition: "background-color 0.4s ease",
+  },
 }));
 
 class LayerGroupItem extends Component {
@@ -130,6 +175,8 @@ class LayerGroupItem extends Component {
       opacityValue: 1,
       toggleSettings: false,
       toggleSubLayerSettings: {},
+      layerItemIsFocused: false,
+      expandArrowIsFocused: false,
     };
     this.toggleSubLayerSettings = this.toggleSubLayerSettings.bind(this);
     this.renderSubLayer = this.renderSubLayer.bind(this);
@@ -298,9 +345,9 @@ class LayerGroupItem extends Component {
     return (
       this.state.status === "loaderror" && (
         <HajkToolTip title="Lagret kunde inte laddas in. Kartservern svarar inte.">
-          <SummaryButtonWrapper>
+          <StyledIconButton>
             <IconWarning />
-          </SummaryButtonWrapper>
+          </StyledIconButton>
         </HajkToolTip>
       )
     );
@@ -372,6 +419,7 @@ class LayerGroupItem extends Component {
   toggle() {
     this.setState({
       open: !this.state.open,
+      expandArrowIsFocused: false,
     });
   }
 
@@ -497,7 +545,7 @@ class LayerGroupItem extends Component {
    */
   toggleGroupVisible = (layer) => (e) => {
     const visible = !this.state.visible;
-
+    this.setState({ layerItemIsFocused: false });
     // If the layer is becoming visible.
     if (visible) {
       // Set the layer as visible.
@@ -547,6 +595,14 @@ class LayerGroupItem extends Component {
     } else {
       // If the layer is becoming hidden, call setHidden() to set the layer as hidden.
       this.setHidden(layer);
+    }
+  };
+
+  #handleSubLayerKeyDown = (event, subLayer) => {
+    if (event.key === "Enter" || event.key === " ") {
+      event.preventDefault();
+      this.toggleLayerVisible(subLayer)(event);
+      this.setState({ layerItemIsFocused: true });
     }
   };
 
@@ -615,6 +671,7 @@ class LayerGroupItem extends Component {
       this.setState({
         visible: layerVisibility,
         visibleSubLayers: visibleSubLayers,
+        layerItemIsFocused: false,
       });
 
       // Display a Snackbar message if the layer is not visible at the current zoom level.
@@ -667,14 +724,22 @@ class LayerGroupItem extends Component {
     const legendIcon = layer.layersInfo[subLayer].legendIcon;
 
     return (
-      <LayerInfo key={index}>
-        <LayerSummaryContainer>
-          <Grid
+      <>
+        <LayerItemWrapper key={index}>
+          <LayerItemContent
             container
             alignItems="center"
             wrap="nowrap"
             onClick={this.toggleLayerVisible(subLayer)}
-            className="hajk-layerswitcher-sublayer-grid"
+            onKeyDown={(e) => this.#handleSubLayerKeyDown(e, subLayer)}
+            onFocus={this.#handleLayerItemFocus}
+            onBlur={this.#handleLayerItemBlur}
+            className={
+              this.state.layerItemIsFocused
+                ? "hajk-layerswitcher-sublayer-grid"
+                : "fade-out"
+            }
+            tabIndex={0}
           >
             <CheckBoxWrapper className="hajk-layerswitcher-layer-toggle">
               {!visible ? (
@@ -694,7 +759,7 @@ class LayerGroupItem extends Component {
             <Caption sx={{ fontWeight: visible ? "bold" : "normal" }}>
               {layer.layersInfo[subLayer].caption}
             </Caption>
-          </Grid>
+          </LayerItemContent>
           <SummaryButtonsContainer className="hajk-layerswitcher-summary-buttons">
             <SummaryButtonWrapper>
               <DownloadLink
@@ -703,24 +768,28 @@ class LayerGroupItem extends Component {
                 enableDownloadLink={this.props.mapConfig.map.enableDownloadLink}
               />
             </SummaryButtonWrapper>
-            <SummaryButtonWrapper>
-              {this.state.toggleSubLayerSettings[index] ? (
-                <CloseIcon onClick={() => toggleSettings()} />
-              ) : (
-                <MoreHorizIcon onClick={() => toggleSettings()} />
-              )}
-            </SummaryButtonWrapper>
+            <HajkToolTip title="Fler inställningar">
+              <StyledIconButton onClick={() => toggleSettings()}>
+                {this.state.toggleSubLayerSettings[index] ? (
+                  <CloseIcon />
+                ) : (
+                  <MoreHorizIcon />
+                )}
+              </StyledIconButton>
+            </HajkToolTip>
           </SummaryButtonsContainer>
-        </LayerSummaryContainer>
-        {this.state.toggleSubLayerSettings[index] ? (
-          <Grid item xs={12}>
-            <LegendImage
-              alt="Teckenförklaring"
-              src={this.props.layer.layersInfo[subLayer].legend}
-            />
-          </Grid>
-        ) : null}
-      </LayerInfo>
+        </LayerItemWrapper>
+        <div>
+          {this.state.toggleSubLayerSettings[index] ? (
+            <Grid item xs={12}>
+              <LegendImage
+                alt="Teckenförklaring"
+                src={this.props.layer.layersInfo[subLayer].legend}
+              />
+            </Grid>
+          ) : null}
+        </div>
+      </>
     );
   }
 
@@ -845,21 +914,22 @@ class LayerGroupItem extends Component {
   renderInfoToggler = () => {
     return (
       !this.isInfoEmpty() && (
-        <SummaryButtonWrapper>
-          {this.state.infoVisible ? (
-            <RemoveCircleIcon onClick={() => this.toggleInfo()} />
-          ) : (
-            <InfoIcon
-              onClick={() => this.toggleInfo()}
-              style={{
-                boxShadow: this.state.infoVisible
-                  ? "rgb(204, 204, 204) 2px 3px 1px"
-                  : "inherit",
-                borderRadius: "100%",
-              }}
-            />
-          )}
-        </SummaryButtonWrapper>
+        <HajkToolTip title="Mer information om lagret">
+          <StyledIconButton onClick={() => this.toggleInfo()}>
+            {this.state.infoVisible ? (
+              <RemoveCircleIcon />
+            ) : (
+              <InfoIcon
+                style={{
+                  boxShadow: this.state.infoVisible
+                    ? "rgb(204, 204, 204) 2px 3px 1px"
+                    : "inherit",
+                  borderRadius: "100%",
+                }}
+              />
+            )}
+          </StyledIconButton>
+        </HajkToolTip>
       )
     );
   };
@@ -956,20 +1026,56 @@ class LayerGroupItem extends Component {
     );
   }
 
+  #handleExpandLayerGroupKeyDown = (event) => {
+    if (event.key === "Enter" || event.key === " ") {
+      event.preventDefault();
+      this.toggle();
+      this.setState({ expandArrowIsFocused: true });
+    }
+  };
+
+  #handleLayerItemKeyDown = (event, layer) => {
+    if (event.key === "Enter" || event.key === " ") {
+      event.preventDefault();
+      this.toggleGroupVisible(layer)();
+      this.setState({ layerItemIsFocused: true });
+    }
+  };
+
+  #handleLayerItemFocus = () => {
+    this.setState({ layerItemIsFocused: true });
+  };
+
+  #handleLayerItemBlur = () => {
+    this.setState({ layerItemIsFocused: false });
+  };
+
+  #handleExpandLayerGroupFocus = () => {
+    this.setState({ expandArrowIsFocused: true });
+  };
+
+  #handleExpandLayerGroupBlur = () => {
+    this.setState({ expandArrowIsFocused: false });
+  };
+
   render() {
     const { cqlFilterVisible, layer } = this.props;
     const { open, toggleSettings, infoVisible, visible } = this.state;
 
     const legendIcon = layer.get("layerInfo").legendIcon;
     return (
-      <Grid
-        sx={{
-          marginLeft: this.hideExpandArrow ? "45px" : "21px",
-        }}
+      <LayerItemContainer
+        sx={{ marginLeft: this.hideExpandArrow ? "45px" : "21px" }}
       >
-        <Grid container alignItems="center" wrap="nowrap">
+        <Grid container alignItems="center" sx={{ width: "100%" }}>
           {this.hideExpandArrow === false && (
-            <ExpandButtonWrapper>
+            <ExpandButtonWrapper
+              tabIndex={0}
+              onKeyDown={this.#handleExpandLayerGroupKeyDown}
+              onFocus={this.#handleExpandLayerGroupFocus}
+              onBlur={this.#handleExpandLayerGroupBlur}
+              className={this.state.expandArrowIsFocused ? "" : "fade-out"}
+            >
               {open ? (
                 <KeyboardArrowDownIcon onClick={() => this.toggle()} />
               ) : (
@@ -977,37 +1083,40 @@ class LayerGroupItem extends Component {
               )}
             </ExpandButtonWrapper>
           )}
-          <LayerInfo>
-            <LayerSummaryContainer>
-              <Grid
-                container
-                alignItems="center"
-                wrap="nowrap"
-                onClick={this.toggleGroupVisible(layer)}
-              >
-                <Grid item>{this.getCheckBox()}</Grid>
-                {legendIcon && this.renderLegendIcon(legendIcon)}
-                <Caption sx={{ fontWeight: visible ? "bold" : "normal" }}>
-                  {layer.get("caption")}
-                </Caption>
-              </Grid>
-              <SummaryButtonsContainer className="hajk-layerswitcher-layer-buttons">
-                {this.renderStatus()}
-                {this.renderInfoToggler()}
-                <SummaryButtonWrapper>
-                  {toggleSettings ? (
-                    <CloseIcon onClick={() => this.toggleSettings()} />
-                  ) : (
-                    <MoreHorizIcon onClick={() => this.toggleSettings()} />
-                  )}
-                </SummaryButtonWrapper>
-              </SummaryButtonsContainer>
-            </LayerSummaryContainer>
-          </LayerInfo>
+
+          <LayerItemWrapper>
+            <LayerItemContent
+              wrap="nowrap"
+              alignItems="center"
+              alignContent="center"
+              container
+              onClick={this.toggleGroupVisible(layer)}
+              onKeyDown={(e) => this.#handleLayerItemKeyDown(e, layer)}
+              tabIndex={0}
+              onFocus={this.#handleLayerItemFocus}
+              onBlur={this.#handleLayerItemBlur}
+              className={this.state.layerItemIsFocused ? "" : "fade-out"}
+            >
+              <Grid item>{this.getCheckBox()}</Grid>
+              {legendIcon && this.renderLegendIcon(legendIcon)}
+              <Caption sx={{ fontWeight: visible ? "bold" : "normal" }}>
+                {layer.get("caption")}
+              </Caption>
+            </LayerItemContent>
+            <SummaryButtonsContainer className="hajk-layerswitcher-layer-buttons">
+              {this.renderStatus()}
+              {this.renderInfoToggler()}
+              <HajkToolTip title="Fler inställningar">
+                <StyledIconButton onClick={() => this.toggleSettings()}>
+                  {toggleSettings ? <CloseIcon /> : <MoreHorizIcon />}
+                </StyledIconButton>
+              </HajkToolTip>
+            </SummaryButtonsContainer>
+          </LayerItemWrapper>
         </Grid>
-        {this.renderDetails()}
-        {toggleSettings && infoVisible && !this.isInfoEmpty() ? <hr /> : null}
         <div>
+          {this.renderDetails()}
+          {toggleSettings && infoVisible && !this.isInfoEmpty() ? <hr /> : null}
           <LayerSettings
             options={this.props.options}
             layer={layer}
@@ -1019,7 +1128,7 @@ class LayerGroupItem extends Component {
           />
         </div>
         {this.renderSubLayers()}
-      </Grid>
+      </LayerItemContainer>
     );
   }
 }

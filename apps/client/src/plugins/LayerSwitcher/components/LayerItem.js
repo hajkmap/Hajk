@@ -1,7 +1,7 @@
 import React from "react";
 import { withSnackbar } from "notistack";
 import { styled } from "@mui/material/styles";
-import { Button, Typography, Grid, Link } from "@mui/material";
+import { Button, Typography, Grid, Link, IconButton } from "@mui/material";
 import IconWarning from "@mui/icons-material/Warning";
 import CallMadeIcon from "@mui/icons-material/CallMade";
 import InfoIcon from "@mui/icons-material/Info";
@@ -17,6 +17,28 @@ import LayerGroupItem from "./LayerGroupItem.js";
 import LayerSettings from "./LayerSettings.js";
 import DownloadLink from "./DownloadLink.js";
 import HajkToolTip from "components/HajkToolTip";
+
+const StyledIconButton = styled(IconButton)(() => ({
+  minWidth: "unset",
+  display: "flex",
+  alignItems: "center",
+  width: 35,
+  height: 35,
+  cursor: "pointer",
+}));
+
+const LayerItemContent = styled(Grid)(({ theme }) => ({
+  display: "flex",
+  marginTop: "0",
+  "&:focus": {
+    outline: "none",
+    backgroundColor: theme.palette.action.focus,
+  },
+  "&.fade-out": {
+    backgroundColor: "initial",
+    transition: "background-color 0.4s ease",
+  },
+}));
 
 const LayerItemContainer = styled("div")(({ theme }) => ({
   paddingLeft: "0",
@@ -57,14 +79,6 @@ const LayerButtonsContainer = styled("div")(() => ({
   alignItems: "center",
 }));
 
-const LayerButtonWrapper = styled("div")(() => ({
-  display: "flex",
-  alignItems: "center",
-  width: 35,
-  height: 35,
-  cursor: "pointer",
-}));
-
 const StyledList = styled("ul")(() => ({
   padding: 0,
   margin: 0,
@@ -101,6 +115,7 @@ class LayerItem extends React.PureComponent {
       open: false,
       toggleSettings: false,
       infoVisible: false,
+      layerItemIsFocused: false,
     };
 
     // Subscribe to events sent when another background layer is clicked and
@@ -317,6 +332,7 @@ class LayerItem extends React.PureComponent {
    */
   toggleVisible = (e) => {
     const layer = this.props.layer;
+    this.setState({ layerItemIsFocused: false });
     if (this.isBackgroundLayer) {
       document.getElementById("map").style.backgroundColor = "#FFF"; // sets the default background color to white
       if (layer.isFakeMapLayer) {
@@ -345,6 +361,22 @@ class LayerItem extends React.PureComponent {
     }
   };
 
+  #handleLayerItemKeyDown = (event) => {
+    if (event.key === "Enter" || event.key === " ") {
+      event.preventDefault();
+      this.toggleVisible(event);
+      this.setState({ layerItemIsFocused: true });
+    }
+  };
+
+  #handleLayerItemFocus = () => {
+    this.setState({ layerItemIsFocused: true });
+  };
+
+  #handleLayerItemBlur = () => {
+    this.setState({ layerItemIsFocused: false });
+  };
+
   /**
    * Render the load information component.
    * @instance
@@ -354,9 +386,9 @@ class LayerItem extends React.PureComponent {
     return (
       this.state.status === "loaderror" && (
         <HajkToolTip title="Lagret kunde inte laddas in. Kartservern svarar inte.">
-          <LayerButtonWrapper>
+          <StyledIconButton>
             <IconWarning />
-          </LayerButtonWrapper>
+          </StyledIconButton>
         </HajkToolTip>
       )
     );
@@ -365,21 +397,15 @@ class LayerItem extends React.PureComponent {
   renderInfoButton = () => {
     return this.isInfoEmpty() ? null : (
       <HajkToolTip title="Mer information om lagret">
-        <LayerButtonWrapper>
-          {this.state.infoVisible ? (
-            <RemoveCircleIcon onClick={this.toggleInfo} />
-          ) : (
-            <InfoIcon
-              onClick={this.toggleInfo}
-              sx={{
-                boxShadow: this.state.infoVisible
-                  ? "rgb(204, 204, 204) 2px 3px 1px"
-                  : "inherit",
-                borderRadius: "100%",
-              }}
-            />
-          )}
-        </LayerButtonWrapper>
+        {this.state.infoVisible ? (
+          <StyledIconButton onClick={this.toggleInfo}>
+            <RemoveCircleIcon />
+          </StyledIconButton>
+        ) : (
+          <StyledIconButton onClick={this.toggleInfo}>
+            <InfoIcon />
+          </StyledIconButton>
+        )}
       </HajkToolTip>
     );
   };
@@ -387,13 +413,9 @@ class LayerItem extends React.PureComponent {
   renderMoreButton = () => {
     return (
       <HajkToolTip title="Fler inställningar">
-        <LayerButtonWrapper>
-          {this.state.toggleSettings ? (
-            <CloseIcon onClick={this.toggleSettings} />
-          ) : (
-            <MoreHorizIcon onClick={this.toggleSettings} />
-          )}
-        </LayerButtonWrapper>
+        <StyledIconButton onClick={this.toggleSettings}>
+          {this.state.toggleSettings ? <CloseIcon /> : <MoreHorizIcon />}
+        </StyledIconButton>
       </HajkToolTip>
     );
   };
@@ -594,6 +616,7 @@ class LayerItem extends React.PureComponent {
     ) : (
       <CheckBoxOutlineBlankIcon />
     );
+
     return (
       <LayerTogglerButtonWrapper className="hajk-layerswitcher-layer-toggle">
         {icon}
@@ -684,12 +707,17 @@ class LayerItem extends React.PureComponent {
         sx={{ marginLeft: this.isBackgroundLayer ? "0px" : "45px" }}
       >
         <LayerItemWrapper>
-          <Grid
+          <LayerItemContent
             wrap="nowrap"
             alignItems="center"
             alignContent="center"
             container
             onClick={this.toggleVisible.bind(this)}
+            tabIndex={0}
+            onKeyDown={this.#handleLayerItemKeyDown}
+            onFocus={this.#handleLayerItemFocus}
+            onBlur={this.#handleLayerItemBlur}
+            className={this.state.layerItemIsFocused ? "" : "fade-out"}
           >
             <Grid item>{this.getLayerToggler()}</Grid>
             {this.legendIcon && this.renderLegendIcon()}
@@ -698,7 +726,7 @@ class LayerItem extends React.PureComponent {
             >
               {this.caption}
             </Caption>
-          </Grid>
+          </LayerItemContent>
           <LayerButtonsContainer className="hajk-layerswitcher-layer-buttons">
             {layer.isFakeMapLayer ? null : (
               <DownloadLink
@@ -708,14 +736,14 @@ class LayerItem extends React.PureComponent {
                 }
               />
             )}
-            {this.renderStatusButton()}
+            <Grid>{this.renderStatusButton()}</Grid>
             {this.renderInfoButton()}
 
             {this.showAttributeTableButton && (
               <HajkToolTip title="Visa lagrets attributtabell">
-                <LayerButtonWrapper>
-                  <TableViewIcon onClick={this.#showAttributeTable} />
-                </LayerButtonWrapper>
+                <StyledIconButton onClick={this.#showAttributeTable}>
+                  <TableViewIcon />
+                </StyledIconButton>
               </HajkToolTip>
             )}
             {this.renderMoreButton()}
