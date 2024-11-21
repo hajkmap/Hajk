@@ -12,7 +12,7 @@ function SurveyHandler(props) {
   const [selectedQuestion, setSelectedQuestion] = useState(null);
   const [selectedPageIndex, setSelectedPageIndex] = useState(0);
   const [filename, setFilename] = useState("");
-  const initialCompletedHtmlButton = "<button type='button' onclick='window.location.reload()' style='display: block; margin: 0 auto;'>Gör enkäten igen!</button>";
+  const initialCompletedHtmlButton = '<button type="button" onclick="window.location.reload()" style="display: block; margin: 0 auto;">Gör enkäten igen!</button>';
   const initialCompletedHtmlText = "<h4>Tack för att du svarade på våra frågor!</h4>";
   const [completedHtmlButton, setCompletedHtmlButton] = useState(initialCompletedHtmlButton);
   const [completedHtmlText, setCompletedHtmlText] = useState(initialCompletedHtmlText);
@@ -29,13 +29,20 @@ function SurveyHandler(props) {
     pages: [{ questions: [] }]
   });
 
-  const removeButtonHtml = (html) => {
-    return html ? html.replace(/<button[^>]*>.*?<\/button>/gi, '') : '';
+  const removeButtonHtml = (htmlString) => {
+    const tempDiv = document.createElement('div');
+    tempDiv.innerHTML = htmlString;
+    const buttons = tempDiv.querySelectorAll('button');
+    buttons.forEach(button => button.remove());
+    return tempDiv.innerHTML;
   };
 
-  const onlyButtonHtml = (html) => {
-    const match = html.match(/<button[^>]*>[\s\S]*?<\/button>/i);
-    return match ? match[0] : '';
+  const onlyButtonHtml = (htmlString) => {
+    const tempDiv = document.createElement('div');
+    tempDiv.innerHTML = htmlString;
+    const buttons = tempDiv.querySelectorAll('button');
+    const buttonHtml = Array.from(buttons).map(button => button.outerHTML).join('');
+    return buttonHtml;
   };
 
   useEffect(() => {
@@ -425,8 +432,16 @@ const saveSurveyToFile = (filename, surveyJson) => {
         props.model.loadSurvey(selectedSurveyId, (surveyData) => {
             setSurvey(surveyData);
             setFilename(selectedSurveyId);
-            setCompletedHtmlText(removeButtonHtml(surveyData.completedHtml));
-            setCompletedHtmlButton(onlyButtonHtml(surveyData.completedHtml));
+            if(surveyData.completedHtml === undefined || surveyData.completedHtml.trim() === "")
+            {
+              setCompletedHtmlText("");
+              setCompletedHtmlButton("");
+            }
+            else
+            {
+              setCompletedHtmlText(removeButtonHtml(surveyData.completedHtml));
+              setCompletedHtmlButton(onlyButtonHtml(surveyData.completedHtml));
+            }
         });
     }
 };
