@@ -506,6 +506,7 @@ export default function LayerItem({
                 pr: 5,
                 overflow: "hidden",
                 textOverflow: "ellipsis",
+                variant: "body1",
                 fontWeight:
                   layer.get("visible") && !draggable && !isBackgroundLayer
                     ? "bold"

@@ -134,6 +134,7 @@ const QuickAccessView = ({
 
           <ListItemText
             primaryTypographyProps={{
+              variant: "body1",
               fontWeight: hasVisibleLayers ? "bold" : "inherit",
             }}
             primary="Snabbåtkomst"

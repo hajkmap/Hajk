@@ -493,6 +493,7 @@ class LayerGroup extends React.PureComponent {
             primaryTypographyProps={{
               py: this.props.group.toggled ? 0 : "3px",
               pl: this.props.group.toggled ? 0 : "3px",
+              variant: "body1",
               fontWeight:
                 this.isToggled() || this.isSemiToggled() ? "bold" : "inherit",
             }}
