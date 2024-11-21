@@ -10,7 +10,7 @@ export async function isAdmin(req: Request, res: Response, next: NextFunction) {
   const userRoles = await getUserRoles(req.user);
   const userRoleCodes = userRoles.map((role) => role.code);
 
-  if (userRoleCodes.includes("ADMIN")) {
+  if (userRoleCodes.includes("SUPERUSER") || userRoleCodes.includes("ADMIN")) {
     return next();
   } else {
     return res

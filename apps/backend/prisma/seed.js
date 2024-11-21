@@ -419,6 +419,13 @@ async function createBaseRoles() {
   const baseRoles = [
     {
       id: "0001",
+      code: "SUPERUSER",
+      title: "roles.superuserTitle",
+      description: "roles.superuserDescription",
+      systemCriticalRole: true,
+    },
+    {
+      id: "0002",
       code: "ADMIN",
       title: "roles.adminTitle",
       description: "roles.adminDescription",
@@ -500,7 +507,7 @@ async function createLocalDummyAccounts() {
                 {
                   role: {
                     connect: {
-                      code: "ADMIN",
+                      code: "SUPERUSER",
                     },
                   },
                 },
