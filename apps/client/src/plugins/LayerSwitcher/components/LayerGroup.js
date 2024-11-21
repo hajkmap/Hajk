@@ -132,7 +132,7 @@ class LayerGroup extends React.PureComponent {
           expanded={expanded === group.id}
           key={i}
           group={group}
-          localObserver={this.localObserver}
+          localObserver={this.props.localObserver}
           layerMap={this.props.layerMap}
           handleChange={this.handleChange}
           app={this.props.app}
@@ -459,7 +459,7 @@ class LayerGroup extends React.PureComponent {
               draggable={false}
               toggleable={true}
               app={this.props.app}
-              observer={this.props.localObserver}
+              localObserver={this.props.localObserver}
               groupLayer={layer}
             />
           );

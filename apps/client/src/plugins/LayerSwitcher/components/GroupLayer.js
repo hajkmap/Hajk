@@ -15,12 +15,11 @@ import useSnackbar from "../../../hooks/useSnackbar";
 export default function GroupLayer({
   layer,
   app,
-  observer,
+  localObserver,
   toggleable,
   draggable,
   quickAccessLayer,
   display,
-  filterValue,
   groupLayer,
 }) {
   // Keep the subLayers area active in state
@@ -154,11 +153,11 @@ export default function GroupLayer({
       "layerswitcher.showLayer",
       setGroupVisible
     );
-    const hideLayerSubscription = observer.subscribe(
+    const hideLayerSubscription = localObserver.subscribe(
       "hideLayer",
       setGroupHidden
     );
-    const showLayerSubscription = observer.subscribe(
+    const showLayerSubscription = localObserver.subscribe(
       "showLayer",
       setGroupVisible
     );
@@ -169,7 +168,8 @@ export default function GroupLayer({
       hideLayerSubscription.unsubscribe();
       showLayerSubscription.unsubscribe();
     };
-  }, [app.globalObserver, observer, setGroupHidden, setGroupVisible, layer]);
+  }, [app.globalObserver, localObserver
+, setGroupHidden, setGroupVisible, layer]);
 
   // When visibleSubLayers state changes, update layer params
   useEffect(() => {

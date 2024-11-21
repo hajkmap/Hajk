@@ -275,7 +275,7 @@ function DrawOrder({ display, app, map, localObserver, options }) {
                       key={l.ol_uid}
                       layer={l}
                       app={app}
-                      observer={localObserver}
+                      localObserver={localObserver}
                       toggleable={false}
                       draggable={true}
                     />
