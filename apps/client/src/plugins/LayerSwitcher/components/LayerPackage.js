@@ -54,10 +54,12 @@ function LayerPackage({
   // TODO: Needs a better way to handle this
   const [tooltipOpen, setTooltipOpen] = useState(false);
 
+  const quickLayerPresetsArray = quickLayerPresets || [];
+  console.log({ quickLayerPresetsArray });
   // Filter state
   const [filter, setFilter] = useState({
     query: "",
-    list: quickLayerPresets || [],
+    list: quickLayerPresetsArray,
   });
 
   // Handles click on back button in header
@@ -82,7 +84,7 @@ function LayerPackage({
 
   // Handles filter functionality
   const handleFilterChange = (value) => {
-    const results = quickLayerPresets.filter((data) => {
+    const results = quickLayerPresetsArray.filter((data) => {
       if (value === "") return data;
       return (
         data.title.toLowerCase().includes(value.toLowerCase()) ||
@@ -516,7 +518,11 @@ function LayerPackage({
           <List dense sx={{ p: 0 }}>
             {!filter.list.length ? (
               <Typography sx={{ p: 2 }}>
-                Din filtrering gav inga resultat
+                {quickLayerPresetsArray.length === 0 ? (
+                  <span>Inga lagerpaket är konfigurerade</span>
+                ) : (
+                  <span>Din filtrering gav inga resultat</span>
+                )}
               </Typography>
             ) : (
               filter.list.map((l) => {
