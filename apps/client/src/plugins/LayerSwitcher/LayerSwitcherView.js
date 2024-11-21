@@ -70,7 +70,6 @@ class LayersSwitcherView extends React.PureComponent {
         .filter((l) => l.get("layerType") === "base")
         .map((l) => l.getProperties()),
       activeTab: 0,
-      activeLayersCount: 0,
       displayContentOverlay: null, // 'layerPackage' | 'favorites' | 'layerItemDetails'
       layerItemDetails: null,
       filterValue: "",
@@ -128,13 +127,19 @@ class LayersSwitcherView extends React.PureComponent {
     this.localHideLayerSubscription = props.observer.subscribe(
       "hideLayer",
       (la) => {
+        // TODO Make sure QuickAccess updates
+        // Send some event
         la.setVisible(false);
+        // this.setState({ treeData: [...this.layerTree] });
       }
     );
     this.localShowLayerSubscription = props.observer.subscribe(
       "showLayer",
       (la) => {
         la.setVisible(true);
+        // TODO Make sure QuickAccess updates
+        // Send some event
+        // this.setState({ treeData: [...this.layerTree] });
       }
     );
   }
@@ -343,18 +348,6 @@ class LayersSwitcherView extends React.PureComponent {
   }, 100);
 
   /**
-   * This method handles layerupdates from DrawOrder component,
-   * sets activeLayersCount state
-   *
-   * @memberof LayersSwitcherView
-   */
-  handleLayerChange = (activeLayers) => {
-    this.setState({
-      activeLayersCount: activeLayers,
-    });
-  };
-
-  /**
    * LayerSwitcher consists of two Tabs: one shows
    * "regular" layers (as checkboxes, multi select), and the
    * other shows background layers (as radio buttons, one-at-at-time).
@@ -450,16 +443,7 @@ class LayersSwitcherView extends React.PureComponent {
             <Tab label="Kartlager" />
             <Tab label="Bakgrund" />
             {this.options.showDrawOrderView === true && (
-              <Tab
-                label={
-                  // <Badge
-                  //   badgeContent={this.state.activeLayersCount}
-                  //   color="primary"
-                  // >
-                  "Ritordning"
-                  // </Badge>
-                }
-              />
+              <Tab label={"Ritordning"} />
             )}
           </Tabs>
         </StyledAppBar>
@@ -562,7 +546,6 @@ class LayersSwitcherView extends React.PureComponent {
               map={this.props.map}
               app={this.props.app}
               options={this.props.options}
-              onLayerChange={this.handleLayerChange}
             ></DrawOrder>
           )}
           {this.options.showBreadcrumbs && (
