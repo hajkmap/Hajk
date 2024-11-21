@@ -23,6 +23,7 @@ import TopicOutlinedIcon from "@mui/icons-material/TopicOutlined";
 import KeyboardArrowRightOutlinedIcon from "@mui/icons-material/KeyboardArrowRightOutlined";
 
 const QuickAccessView = ({
+  show,
   map, // A OpenLayers map instance
   app,
   localObserver,
@@ -91,6 +92,7 @@ const QuickAccessView = ({
   return (
     <Box
       sx={{
+        display: show ? "block" : "none",
         borderBottom: (theme) =>
           `${theme.spacing(0.2)} solid ${theme.palette.divider}`,
       }}
@@ -168,7 +170,7 @@ const QuickAccessView = ({
           </ListItemSecondaryAction>
         </Box>
       </ListItemButton>
-      <Collapse in={quickAccessSectionExpanded} unmountOnExit>
+      <Collapse in={quickAccessSectionExpanded}>
         <Box sx={{ marginLeft: "31px" }}>
           <QuickAccessLayers
             treeData={treeData}

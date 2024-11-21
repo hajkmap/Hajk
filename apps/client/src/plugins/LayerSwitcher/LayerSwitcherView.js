@@ -466,32 +466,29 @@ class LayersSwitcherView extends React.PureComponent {
                 }
               />
             )}
-            {this.props.options.showQuickAccess && (
-              <QuickAccessView
-                map={this.props.map}
-                app={this.props.app}
-                localObserver={this.localObserver}
-                globalObserver={this.globalObserver}
-                enableQuickAccessTopics={
-                  this.props.options.enableQuickAccessTopics
-                }
-                enableUserQuickAccessFavorites={
-                  this.props.options.enableUserQuickAccessFavorites
-                }
-                handleLayerPackageToggle={(e) =>
-                  this.handleLayerPackageToggle({ event: e })
-                }
-                favoritesViewDisplay={
-                  this.state.displayContentOverlay === "favorites"
-                }
-                handleFavoritesViewToggle={this.handleFavoritesViewToggle}
-                favoritesInfoText={
-                  this.options.userQuickAccessFavoritesInfoText
-                }
-                treeData={this.state.treeData}
-                filterValue={this.state.filterValue}
-              />
-            )}
+            <QuickAccessView
+              show={this.props.options.showQuickAccess}
+              map={this.props.map}
+              app={this.props.app}
+              localObserver={this.localObserver}
+              globalObserver={this.globalObserver}
+              enableQuickAccessTopics={
+                this.props.options.enableQuickAccessTopics
+              }
+              enableUserQuickAccessFavorites={
+                this.props.options.enableUserQuickAccessFavorites
+              }
+              handleLayerPackageToggle={(e) =>
+                this.handleLayerPackageToggle({ event: e })
+              }
+              favoritesViewDisplay={
+                this.state.displayContentOverlay === "favorites"
+              }
+              handleFavoritesViewToggle={this.handleFavoritesViewToggle}
+              favoritesInfoText={this.options.userQuickAccessFavoritesInfoText}
+              treeData={this.state.treeData}
+              filterValue={this.state.filterValue}
+            />
             {this.state.treeData.map((group, i) => (
               <LayerGroup
                 filterChangeIndicator={group.changeIndicator}
