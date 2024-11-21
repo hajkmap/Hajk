@@ -12,61 +12,46 @@ import {
   Typography,
   useTheme,
 } from "@mui/material";
+import LogoutIcon from "@mui/icons-material/Logout";
 import SettingsIcon from "@mui/icons-material/Settings";
 import { useEffect, useState } from "react";
 import { HEADER_HEIGHT, HEADER_Z_INDEX } from "../constants";
 import HajkTooltip from "../../../components/hajk-tooltip";
+import useUserStore, { User } from "../../../store/use-user-store";
+import useAuth from "../../../hooks/use-auth";
 
-class DummyUser {
-  public id: string;
-  public name: string;
-  public url: string;
-  public email: string;
-
-  constructor(id: string, name: string, url: string, email: string) {
-    this.id = id;
-    this.name = name;
-    this.url = url;
-    this.email = email;
-  }
-}
-
-const getUserInitials = (user: DummyUser): string => {
-  const words: string[] = user.name.split(" ");
-  return (words[0].charAt(0) + words[1].charAt(0)).toUpperCase();
+const getUserInitials = (user: User): string => {
+  const words: string[] = user.fullName.split(" ");
+  return (words[0].charAt(0) + words[1]?.charAt(0)).toUpperCase() || "";
 };
 
 export default function Header() {
   const { t } = useTranslation();
   const { palette } = useTheme();
-  const [userList, setUserList] = useState<DummyUser[]>([]);
-  const [activeUser, setActiveUser] = useState<DummyUser>();
+  const [userList, setUserList] = useState<User[]>([]);
+  const [activeUser, setActiveUser] = useState<User | null>();
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const { serviceId } = useParams();
 
   const location = useLocation();
   const pathParts = location.pathname.split("/").filter(Boolean);
 
+  const { user } = useUserStore.getState();
+  const { logout } = useAuth();
+
   useEffect(() => {
-    const testActiveUser: DummyUser = new DummyUser(
-      "u55555",
-      "Jesper Adddddd",
-      "",
-      "jesade-vbg@gmail.com"
-    );
+    setActiveUser(user);
 
-    setActiveUser(testActiveUser);
+    const dummyUserList = [
+      { id: "u11111", fullName: "Henrik Hallberg", email: "hh___@gmail.com" },
+      { id: "u22222", fullName: "Jacob Wodzynski", email: "jw___@gmail.com" },
+      { id: "u33333", fullName: "Olof Svahn", email: "os___@gmail.com" },
+      { id: "u44444", fullName: "Albin Ahmetaj", email: "aa___@gmail.com" },
+      { id: "u55555", fullName: "Jesper Adeborn", email: "ja___@gmail.com" },
+    ].filter((u) => u.fullName !== user?.fullName);
 
-    setUserList(
-      [
-        new DummyUser("u11111", "Henrik H", "", "hh___@gmail.com"),
-        new DummyUser("u22222", "Jacob W", "", "jw___@gmail.com"),
-        new DummyUser("u33333", "Olof S", "", "os___@gmail.com"),
-        new DummyUser("u44444", "Albin A", "", "aa___@gmail.com"),
-        testActiveUser,
-      ].filter((user) => user.id !== testActiveUser.id)
-    );
-  }, [setActiveUser, setUserList]);
+    setUserList(dummyUserList);
+  }, [setActiveUser, setUserList, user]);
 
   // Do we want to display the id? Maybe name instead
   const breadcrumbLinks =
@@ -123,7 +108,7 @@ export default function Header() {
         ]
       : [];
 
-  return (
+  return !user ? null : (
     <Paper
       component="header"
       elevation={2}
@@ -191,17 +176,17 @@ export default function Header() {
           alignSelf="center"
           alignItems="center"
         >
-          <AvatarGroup max={4} sx={{ display: { xs: "none", sm: "flex" } }}>
+          <AvatarGroup max={6} sx={{ display: { xs: "none", sm: "flex" } }}>
             {userList.map((user) => {
               return (
                 <HajkTooltip
                   key={user.id}
-                  title={user.name}
+                  title={user.fullName}
                   placement="bottom-end"
                 >
                   <Avatar
                     key={user.id + "avatar"}
-                    alt={user.name}
+                    alt={user.fullName}
                     sx={{
                       width: "30px",
                       height: "30px",
@@ -224,7 +209,7 @@ export default function Header() {
           {activeUser && (
             <HajkTooltip
               key={activeUser.id}
-              title={activeUser.name + ` (${t("common.you")})`}
+              title={activeUser.fullName + ` (${t("common.you")})`}
               placement="bottom-end"
             >
               <Avatar
@@ -273,13 +258,20 @@ export default function Header() {
               <Grid size={12}>
                 <Box>
                   <Typography sx={{ fontWeight: "bold" }}>
-                    {activeUser?.name}
+                    {activeUser?.fullName}
                   </Typography>
                 </Box>
                 <Box>{activeUser?.email}</Box>
                 <Divider sx={{ mb: 1, mt: 1 }} />
               </Grid>
-              <Grid size={12} sx={{ textAlign: "right" }}>
+              <Grid container size={12} justifyContent="space-between">
+                <Button
+                  startIcon={<LogoutIcon />}
+                  color="error"
+                  onClick={() => void logout()}
+                >
+                  {t("common.logout")}
+                </Button>
                 <Button startIcon={<SettingsIcon />}>
                   {t("common.settings")}
                 </Button>

@@ -2,26 +2,23 @@ import Grid from "@mui/material/Grid2";
 import { List, ListItem, Paper, Typography } from "@mui/material";
 import { useTranslation } from "react-i18next";
 import Page from "../../layouts/root/components/page";
+import { useRoles } from "../../api/users";
 
-import { useGroups } from "../../api/groups";
-
-export default function GroupsPage() {
+export default function UserRolesPage() {
   const { t } = useTranslation();
-  const { data: groups, isLoading } = useGroups();
+  const { data: roles, isLoading: rolesLoading } = useRoles();
 
   return (
-    <Page title={t("common.layerGroups")}>
-      {isLoading ? (
-        <div>Loading...</div>
+    <Page title={t("common.userRoles")}>
+      {rolesLoading ? (
+        <div>Roles loading...</div>
       ) : (
         <Grid size={12}>
-          <p>groups.length = {groups && ` (${groups.length})`}</p>
-
           <List>
-            {groups?.map((group) => (
-              <ListItem key={group.id}>
+            {roles?.map((role) => (
+              <ListItem key={role.id}>
                 <Paper sx={{ width: "100%", p: 2 }} elevation={4}>
-                  <Typography>{group.name}</Typography>
+                  <Typography>{`${role.title}`}</Typography>
                 </Paper>
               </ListItem>
             ))}

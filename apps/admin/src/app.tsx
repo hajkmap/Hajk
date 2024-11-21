@@ -2,6 +2,8 @@ import { useEffect } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 import { queryConfig } from "./lib/react-query.ts";
 
@@ -19,6 +21,9 @@ import ServicesPage from "./pages/services/index.tsx";
 import ServiceSettings from "./pages/services/settings.tsx";
 import GroupsPage from "./pages/groups/index.tsx";
 import FormFactoryPage from "./pages/form-factory/index.tsx";
+import LoginPage from "./pages/login/index.tsx";
+import UsersPage from "./pages/users/index.tsx";
+import UserRolesPage from "./pages/user-roles/index.tsx";
 
 const queryClient = new QueryClient({
   defaultOptions: queryConfig,
@@ -65,10 +70,22 @@ const router = createBrowserRouter(
         },
 
         {
+          path: "users",
+          element: <UsersPage />,
+        },
+        {
+          path: "user-roles",
+          element: <UserRolesPage />,
+        },
+        {
           path: "form-factory",
           element: <FormFactoryPage />,
         },
       ],
+    },
+    {
+      path: "login",
+      element: <LoginPage />,
     },
   ],
   { basename: import.meta.env.BASE_URL }
@@ -85,6 +102,7 @@ export default function App() {
     <QueryClientProvider client={queryClient}>
       {import.meta.env.DEV && <ReactQueryDevtools />}
       <RouterProvider router={router} />
+      <ToastContainer />
     </QueryClientProvider>
   ) : (
     <div>Loading...</div>
