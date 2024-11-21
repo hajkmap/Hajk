@@ -9,11 +9,11 @@ import {
   ListItemText,
   ListItemButton,
   ListItemSecondaryAction,
-  Tooltip,
   Collapse,
 } from "@mui/material";
 
 import ConfirmationDialog from "../../../components/ConfirmationDialog.js";
+import HajkTooltip from "../../../components/HajkToolTip.js";
 import QuickAccessLayers from "./QuickAccessLayers.js";
 import QuickAccessOptions from "./QuickAccessOptions.js";
 import Favorites from "./Favorites/Favorites.js";
@@ -141,11 +141,11 @@ const QuickAccessView = ({
 
           <ListItemSecondaryAction>
             {enableQuickAccessTopics && (
-              <Tooltip title="Teman">
+              <HajkTooltip title="Teman">
                 <IconButton onClick={handleLayerPackageToggle}>
                   <TopicOutlinedIcon fontSize="small"></TopicOutlinedIcon>
                 </IconButton>
-              </Tooltip>
+              </HajkTooltip>
             )}
             {enableUserQuickAccessFavorites && (
               <Favorites
