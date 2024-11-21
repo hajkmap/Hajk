@@ -107,20 +107,35 @@ function SurveyHandler(props) {
         </label>
         </div>
         {question.type === "checkbox" || question.type === "radiogroup" ? (
-        <div>
-          {question.choices && question.choices.map((choice, index) => (
-            <div key={index}>
-              <input
-                type="text"
-                value={choice}
-                placeholder="Val"
-                onChange={(e) => updateChoice(selectedQuestion.pageIndex, selectedQuestion.questionIndex, index, e.target.value)}
-              />
-            </div>
+      <div>
+        {question.choices && question.choices.map((choice, index) => (
+          <div key={index} style={{ display: 'flex', alignItems: 'center' }}>
+            <input
+              type="text"
+              value={choice}
+              placeholder="Val"
+              onChange={(e) => updateChoice(selectedQuestion.pageIndex, selectedQuestion.questionIndex, index, e.target.value)}
+            />
+            <Button
+              variant="contained"
+              color="secondary"
+              onClick={() => removeChoice(selectedQuestion.pageIndex, selectedQuestion.questionIndex, index)}
+              style={{ marginLeft: '10px' }}
+            >
+              Ta bort detta val
+            </Button>
+          </div>
           ))}
-          <Button variant="contained" color="primary" onClick={() => addChoice(selectedQuestion.pageIndex, selectedQuestion.questionIndex)}>Lägg till val</Button>
-        </div>
-      ): null}
+            <Button
+              variant="contained"
+              color="primary"
+              onClick={() => addChoice(selectedQuestion.pageIndex, selectedQuestion.questionIndex)}
+            >
+              Lägg till val
+            </Button>
+          </div>
+        ) : null}
+
 
       {question.type === "html" && (
         <div><textarea
@@ -258,6 +273,24 @@ const updateQuestion = (pageIndex, questionIndex, field, value) => {
 
     setSurvey({ ...survey, pages: newPages });
   };
+
+  const removeChoice = (pageIndex, questionIndex, choiceIndex) => {
+    const newPages = survey.pages.map((page, pIndex) => {
+      if (pIndex === pageIndex) {
+        const newQuestions = page.questions.map((question, qIndex) => {
+          if (qIndex === questionIndex) {
+            const newChoices = question.choices.filter((_, cIndex) => cIndex !== choiceIndex);
+            return { ...question, choices: newChoices };
+          }
+          return question;
+        });
+        return { ...page, questions: newQuestions };
+      }
+      return page;
+    });
+  
+    setSurvey({ ...survey, pages: newPages });
+  };  
 
   const updateChoice = (pageIndex, questionIndex, choiceIndex, value) => {
     const newPages = survey.pages.map((page, pIndex) => {
