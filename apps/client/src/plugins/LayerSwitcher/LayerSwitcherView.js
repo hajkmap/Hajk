@@ -40,6 +40,85 @@ const BreadCrumbsContainer = ({ map, app }) => {
   );
 };
 
+// ---------------------------------------------------------------------------
+// TODO
+// - DONE Break out filter to own component
+// - DONE Break out QuickAccess to own Component
+// - DONE Break out layer list to own Component - mayebe not
+// - DONE Remove LayerSwitcherModel and pass around `map`, `app`, `localObserver`
+// and `globalObserver` as needed.
+// - DONE remove quickaccess from LayerGroupAccordinon
+// - DONE Remove layerCount
+// - DONE Test the "Theme/layerPackage" functionality
+// - DONE Fix the bug sometimes click layer in the quick access don't update
+//
+// - Move `addLayerNames` to pure fn
+// - Update state managemetn and keeep in sync with OpenLayers
+//
+// - Refactor the observers to use a provider instead of prop-drilling
+// - The layer pagage dialogs should use ConfirmationDialog component
+// - Remove `show` prop from quickAccess layers
+//
+// - Clean upp render* methods in BackgroundSwitcher. Should make it faster as
+//   well.
+//
+// - Refactor LayerItem into 3 separate components for each tab
+//
+//
+// - Maybe reconsider the "window-management"
+//      Redo
+//      Maybe this isn't important right now. Would be nice to fix, but it work
+//      as it is. I could move it to a own component though.
+//
+//
+// FEATURES to add
+// - When applying a theme open the QuickAccess
+// - Don't show the arrow on empty QA
+// - Better dialogs
+// - Don't require confirm if quick access is empty?
+
+// Prepare tree data for filtering
+const addLayerNames = (data, layerMap) => {
+  const node = data.map((item) => {
+    item.isFiltered = true;
+    item.isExpanded = false;
+    item.changeIndicator = new Date();
+    if (item.layers) {
+      item.layers.forEach((layer) => {
+        const mapLayer = layerMap[layer.id];
+        if (!mapLayer) {
+          console.warn(`Maplayer with id ${layer.id} not found`);
+          return;
+        }
+        layer.name = mapLayer.get("caption");
+        layer.isFiltered = true;
+        item.changeIndicator = new Date();
+        // Check if layer is a group
+        if (mapLayer.get("layerType") === "group") {
+          layer.subLayers = [];
+          const subLayers = mapLayer.get("subLayers");
+          subLayers.forEach((subLayer) => {
+            const subLayerMapLayer = mapLayer.layersInfo[subLayer].caption;
+            layer.subLayers.push({
+              id: subLayer,
+              name: subLayerMapLayer,
+              isFiltered: true,
+              changeIndicator: new Date(),
+            });
+          });
+        }
+      });
+    }
+
+    if (item.groups) {
+      // Call recursevly for subgroups
+      item.groups = addLayerNames(item.groups, layerMap);
+    }
+    return item;
+  });
+  return node;
+};
+
 class LayersSwitcherView extends React.PureComponent {
   static propTypes = {
     app: propTypes.object.isRequired,
@@ -59,7 +138,7 @@ class LayersSwitcherView extends React.PureComponent {
         a[b.get("name")] = b;
         return a;
       }, {});
-    this.layerTree = this.addLayerNames(this.options.groups);
+    this.layerTree = addLayerNames(this.options.groups, this.layerMap);
     // Create a ref to store a reference to the search layer input element
     this.state = {
       chapters: [],
@@ -142,47 +221,6 @@ class LayersSwitcherView extends React.PureComponent {
       }
     );
   }
-
-  // Prepare tree data for filtering
-  addLayerNames = (data) => {
-    data.forEach((item) => {
-      item.isFiltered = true;
-      item.isExpanded = false;
-      item.changeIndicator = new Date();
-      if (item.layers) {
-        item.layers.forEach((layer) => {
-          const mapLayer = this.layerMap[layer.id];
-          if (!mapLayer) {
-            console.warn(`Maplayer with id ${layer.id} not found`);
-            return;
-          }
-          layer.name = mapLayer.get("caption");
-          layer.isFiltered = true;
-          item.changeIndicator = new Date();
-          // Check if layer is a group
-          if (mapLayer.get("layerType") === "group") {
-            layer.subLayers = [];
-            const subLayers = mapLayer.get("subLayers");
-            subLayers.forEach((subLayer) => {
-              const subLayerMapLayer = mapLayer.layersInfo[subLayer].caption;
-              layer.subLayers.push({
-                id: subLayer,
-                name: subLayerMapLayer,
-                isFiltered: true,
-                changeIndicator: new Date(),
-              });
-            });
-          }
-        });
-      }
-
-      if (item.groups) {
-        // Call recursevly for subgroups
-        this.addLayerNames(item.groups);
-      }
-    });
-    return data;
-  };
 
   // Handles click on Layerpackage button and backbutton
   handleLayerPackageToggle = (layerPackageState) => {
