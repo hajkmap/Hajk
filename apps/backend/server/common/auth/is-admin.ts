@@ -13,7 +13,7 @@ export async function isAdmin(req: Request, res: Response, next: NextFunction) {
   if (userRoleCodes.includes("SUPERUSER") || userRoleCodes.includes("ADMIN")) {
     return next();
   } else {
-    return res
+    res
       .status(HttpStatusCodes.FORBIDDEN)
       .json({ message: "Forbidden: Only accessible for admin users." });
   }

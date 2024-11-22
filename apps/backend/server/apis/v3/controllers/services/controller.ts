@@ -8,9 +8,7 @@ import HajkStatusCodes from "../../../../common/hajk-status-codes.ts";
 class ServicesController {
   async getServices(_: Request, res: Response) {
     const services = await ServicesService.getServices();
-    return res
-      .status(HttpStatusCodes.OK)
-      .json({ count: services.length, services });
+    res.status(HttpStatusCodes.OK).json({ count: services.length, services });
   }
 
   async getServiceById(req: Request, res: Response) {
@@ -23,24 +21,22 @@ class ServicesController {
       );
     }
 
-    return res.status(HttpStatusCodes.OK).json(service);
+    res.status(HttpStatusCodes.OK).json(service);
   }
 
   async getLayersByServiceId(req: Request, res: Response) {
     const layers = await ServicesService.getLayersByServiceId(req.params.id);
-    return res
-      .status(HttpStatusCodes.OK)
-      .json({ count: layers.length, layers });
+    res.status(HttpStatusCodes.OK).json({ count: layers.length, layers });
   }
 
   async getMapsByServiceId(req: Request, res: Response) {
     const maps = await ServicesService.getMapsByServiceId(req.params.id);
-    return res.status(HttpStatusCodes.OK).json({ count: maps.length, maps });
+    res.status(HttpStatusCodes.OK).json({ count: maps.length, maps });
   }
 
   async createService(req: Request, res: Response) {
     const service = await ServicesService.createService(req.body);
-    return res.status(HttpStatusCodes.CREATED).json(service);
+    res.status(HttpStatusCodes.CREATED).json(service);
   }
 
   async updateService(req: Request, res: Response) {
@@ -48,12 +44,12 @@ class ServicesController {
       req.params.id,
       req.body
     );
-    return res.status(HttpStatusCodes.OK).json(service);
+    res.status(HttpStatusCodes.OK).json(service);
   }
 
   async deleteService(req: Request, res: Response) {
     await ServicesService.deleteService(req.params.id);
-    return res.status(HttpStatusCodes.NO_CONTENT).send();
+    res.status(HttpStatusCodes.NO_CONTENT).send();
   }
 }
 export default new ServicesController();
