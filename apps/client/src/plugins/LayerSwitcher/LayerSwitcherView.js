@@ -77,47 +77,96 @@ const BreadCrumbsContainer = ({ map, app }) => {
 // - Better dialogs
 // - Don't require confirm if quick access is empty?
 
+// {
+//    id: string
+//    name: string
+//    isFiltered:
+//    isExpanded:
+//    expanded: boolean
+//    toggled: boolean
+//    type: "group" | "layer" | "subLayer" | "base"
+//    infogroupvisible: boolean
+//    subLayers: ???
+//    parent: string
+//    changeIndicator: Date
+// }
+//
 // Prepare tree data for filtering
 const addLayerNames = (data, layerMap) => {
   const node = data.map((item) => {
-    item.isFiltered = true;
-    item.isExpanded = false;
-    item.changeIndicator = new Date();
-    if (item.layers) {
-      item.layers.forEach((layer) => {
-        const mapLayer = layerMap[layer.id];
-        if (!mapLayer) {
-          console.warn(`Maplayer with id ${layer.id} not found`);
-          return;
-        }
-        layer.name = mapLayer.get("caption");
-        layer.isFiltered = true;
-        item.changeIndicator = new Date();
-        // Check if layer is a group
-        if (mapLayer.get("layerType") === "group") {
-          layer.subLayers = [];
-          const subLayers = mapLayer.get("subLayers");
-          subLayers.forEach((subLayer) => {
-            const subLayerMapLayer = mapLayer.layersInfo[subLayer].caption;
-            layer.subLayers.push({
-              id: subLayer,
-              name: subLayerMapLayer,
-              isFiltered: true,
-              changeIndicator: new Date(),
-            });
-          });
-        }
-      });
-    }
+    const layers = item.layers?.map((layer) => {
+      const mapLayer = layerMap[layer.id];
+      if (!mapLayer) {
+        console.warn(`Maplayer with id ${layer.id} not found`);
+        return undefined;
+      }
+      // Check if layer is a group
+      let subLayers;
+      if (mapLayer.get("layerType") === "group") {
+        const mapSubLayers = mapLayer.get("subLayers");
+        subLayers = mapSubLayers.map((subLayer) => {
+          const subLayerMapLayer = mapLayer.layersInfo[subLayer].caption;
+          return {
+            id: subLayer,
+            name: subLayerMapLayer,
+            isFiltered: true,
+            changeIndicator: new Date(),
+          };
+        });
+      }
 
-    if (item.groups) {
-      // Call recursevly for subgroups
-      item.groups = addLayerNames(item.groups, layerMap);
-    }
-    return item;
+      return {
+        drawOrder: layer.drawOrder,
+        infobox: layer.infobox,
+        layerType: layer.layerType,
+        visibleAtStart: layer.visibleAtStart,
+        visibleForGroups: layer.visibleForGroups,
+        id: layer.id,
+        name: mapLayer.get("caption"),
+        isFiltered: true,
+        subLayers: subLayers,
+      };
+    });
+
+    return {
+      id: item.id,
+      name: item.name,
+      expanded: item.expanded,
+      toggled: item.toggled,
+      type: item.type,
+      layers,
+      infogroupvisible: item.infogroupvisible,
+      subLayers: item.sublayers,
+      parent: item.parent,
+      isFiltered: true,
+      isExpanded: false,
+      changeIndicator: new Date(),
+      groups: item.groups ? addLayerNames(item.groups, layerMap) : undefined,
+    };
   });
   return node;
 };
+
+// this.layerTree = [
+//   { id: "1", children: null },
+//   { id: "2", children: [{ id: "3", children: null }] },
+// ];
+const buildLayerTree = (groups, layerMap) =>
+  groups?.map((group) => {
+    if (!group) {
+      return undefined;
+    }
+    const layers = buildLayerTree(group.layers, layerMap);
+    const subgroups = buildLayerTree(group.groups, layerMap);
+
+    const children = [...(layers ?? []), ...(subgroups ?? [])];
+
+    return {
+      id: group.id,
+      // name: layerMap[group.id]?.get("caption") ?? group.name,
+      children: children?.length === 0 ? undefined : children,
+    };
+  });
 
 class LayersSwitcherView extends React.PureComponent {
   static propTypes = {
@@ -139,14 +188,14 @@ class LayersSwitcherView extends React.PureComponent {
         return a;
       }, {});
     this.layerTree = addLayerNames(this.options.groups, this.layerMap);
-    // Create a ref to store a reference to the search layer input element
+    this.baseLayers = props.map
+      .getLayers()
+      .getArray()
+      .filter((l) => l.get("layerType") === "base")
+      .map((l) => l.getProperties());
+
     this.state = {
       chapters: [],
-      baseLayers: props.map
-        .getLayers()
-        .getArray()
-        .filter((l) => l.get("layerType") === "base")
-        .map((l) => l.getProperties()),
       activeTab: 0,
       displayContentOverlay: null, // 'layerPackage' | 'favorites' | 'layerItemDetails'
       layerItemDetails: null,
@@ -161,6 +210,9 @@ class LayersSwitcherView extends React.PureComponent {
 
     this.localObserver = this.props.localObserver;
     this.globalObserver = this.props.globalObserver;
+
+    this.layerTree = buildLayerTree(this.options.groups, this.layerMap);
+    console.log(this.layerTree);
 
     props.app.globalObserver.subscribe("informativeLoaded", (chapters) => {
       if (Array.isArray(chapters)) {
@@ -562,7 +614,7 @@ class LayersSwitcherView extends React.PureComponent {
               this.state.activeTab === 1 &&
               this.state.displayContentOverlay === null
             }
-            layers={this.state.baseLayers}
+            layers={this.baseLayers}
             layerMap={this.layerMap}
             backgroundSwitcherBlack={this.options.backgroundSwitcherBlack}
             backgroundSwitcherWhite={this.options.backgroundSwitcherWhite}

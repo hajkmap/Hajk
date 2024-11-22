@@ -55,7 +55,7 @@ function LayerPackage({
   const [tooltipOpen, setTooltipOpen] = useState(false);
 
   const quickLayerPresetsArray = quickLayerPresets || [];
-  console.log({ quickLayerPresetsArray });
+
   // Filter state
   const [filter, setFilter] = useState({
     query: "",
