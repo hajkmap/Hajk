@@ -12,7 +12,8 @@
         {
           "title": "Startsida",
           "type": "html",
-          "html": "<p><strong>Tyck till om utvecklingen i Hovsta!</strong></p>\n<p>Välkommen till Örebro kommuns dialogkarta. Det är nu du har störst möjlighet att påverka hur du vill att Hovsta ska utvecklas i framtiden. Dina synpunkter kommer användas som underlag när Örebro kommun tar fram ett förslaget till en ny översiktsplan. Översiktsplanen är en planering för hela Örebro kommuns utveckling de närmaste 25 åren. Det kommer därför ta lång tid innan du kan se några förändringar.</p>\n\n<p><strong>Hur fungerar dialogkartan?</strong></p>\n<p>I den här enkäten kan du lämna synpunkter på din favoritplats, en plats du tycker behöver utvecklas och en mindre bra plats i Hovsta. Markera en plats i kartan genom att klicka på knappen ”Markera plats” och klicka sedan på en plats i kartan. Svara därefter på frågorna om platsen som du markerat.</p>\n\n<p>Har du frågor om enkäten eller arbetet med översiktsplanen är du välkommen att kontakta oss via e-post: <a href=\"mailto:oversiktligplanering@orebro.se\">oversiktligplanering@orebro.se</a>.</p>\n\n<p><strong>Information om behandling av personuppgifter</strong></p>\n<p>Markplanerings- och exploateringsnämnden behandlar dina personuppgifter i syfte att samla in synpunkter i ett tidigt skede i framtagandet av en ny översiktsplan, med stöd av dataskyddsförordningen artikel 6.1e. <br><strong><a href=\"https://www.orebro.se/ovrigt/om-webbplatsen/behandling-av-personuppgifter.html\" target=\"_blank\">Mer information om Örebro kommuns behandling av personuppgifter</a></strong>.</p>\n"
+          "html": "<p><strong>Tyck till om utvecklingen i Hovsta!</strong></p>\n<p>Välkommen till Örebro kommuns dialogkarta. Det är nu du har störst möjlighet att påverka hur du vill att Hovsta ska utvecklas i framtiden. Dina synpunkter kommer användas som underlag när Örebro kommun tar fram ett förslaget till en ny översiktsplan. Översiktsplanen är en planering för hela Örebro kommuns utveckling de närmaste 25 åren. Det kommer därför ta lång tid innan du kan se några förändringar.</p>\n\n<p><strong>Hur fungerar dialogkartan?</strong></p>\n<p>I den här enkäten kan du lämna synpunkter på din favoritplats, en plats du tycker behöver utvecklas och en mindre bra plats i Hovsta. Markera en plats i kartan genom att klicka på knappen ”Markera plats” och klicka sedan på en plats i kartan. Svara därefter på frågorna om platsen som du markerat.</p>\n\n<p>Har du frågor om enkäten eller arbetet med översiktsplanen är du välkommen att kontakta oss via e-post: <a href=\"mailto:oversiktligplanering@orebro.se\">oversiktligplanering@orebro.se</a>.</p>\n\n<p><strong>Information om behandling av personuppgifter</strong></p>\n<p>Markplanerings- och exploateringsnämnden behandlar dina personuppgifter i syfte att samla in synpunkter i ett tidigt skede i framtagandet av en ny översiktsplan, med stöd av dataskyddsförordningen artikel 6.1e. <br><strong><a href=\"https://www.orebro.se/ovrigt/om-webbplatsen/behandling-av-personuppgifter.html\" target=\"_blank\">Mer information om Örebro kommuns behandling av personuppgifter</a></strong>.</p>\n",
+          "name": "qid0"
         }
       ]
     },
@@ -21,11 +22,13 @@
         {
           "title": "Startbild",
           "type": "html",
-          "html": "<img src=\"https://www.orebro.se/images/18.7b583e0e18d824c9b2b1ac5/1707816775578/Symboler_%C3%96Pkarta-hj%C3%A4rta.png\" style=\"width: 60px; height: auto; float: left;\"><span style=\"color: green; font-style: italic;\">Favoritplats eller plats att bevara</span>\n\n\n"
+          "html": "<img src=\"https://www.orebro.se/images/18.7b583e0e18d824c9b2b1ac5/1707816775578/Symboler_%C3%96Pkarta-hj%C3%A4rta.png\" style=\"width: 60px; height: auto; float: left;\"><span style=\"color: green; font-style: italic;\">Favoritplats eller plats att bevara</span>\n\n\n",
+          "name": "qid1"
         },
         {
           "title": "Lägg till din favoritplats i kartan.",
-          "type": "geometrypoint"
+          "type": "geometrypoint",
+          "name": "qid2"
         },
         {
           "title": "Vad gillar du med platsen?",
@@ -42,15 +45,18 @@
             "Lekplats",
             "Service",
             "Vill ej uppge"
-          ]
+          ],
+          "name": "qid3"
         },
         {
           "title": "Annat du gillar med platsen?",
-          "type": "comment"
+          "type": "comment",
+          "name": "qid4"
         },
         {
           "title": "Varför är platsen viktig för dig?",
-          "type": "comment"
+          "type": "comment",
+          "name": "qid5"
         }
       ]
     },
@@ -59,11 +65,13 @@
         {
           "title": "Sida3info",
           "type": "html",
-          "html": "<img src=\"https://www.orebro.se/images/18.7b583e0e18d824c9b2b1ac4/1707816775552/Symboler_%C3%96Pkarta_gl%C3%B6dlampa.png\" style=\"width: 60px; height: auto; float: left;\"><span style=\"color: orange; font-style: italic;\">Plats för utveckling</span>\n\n\n"
+          "html": "<img src=\"https://www.orebro.se/images/18.7b583e0e18d824c9b2b1ac4/1707816775552/Symboler_%C3%96Pkarta_gl%C3%B6dlampa.png\" style=\"width: 60px; height: auto; float: left;\"><span style=\"color: orange; font-style: italic;\">Plats för utveckling</span>\n\n\n",
+          "name": "qid6"
         },
         {
           "title": "Lägg till en plats att utveckla.",
-          "type": "geometrypoint"
+          "type": "geometrypoint",
+          "name": "qid7"
         },
         {
           "title": "På vilket sätt skulle du vilja att platsen utvecklas?",
@@ -79,7 +87,8 @@
             "Friluftsliv",
             "Park eller grönområde",
             "Vill ej uppge"
-          ]
+          ],
+          "name": "qid8"
         },
         {
           "title": "Har du valt bostäder, vilken typ av bostäder vill du se?",
@@ -96,15 +105,18 @@
             "Servicebostäder",
             "Vård- och omsorgsboende",
             "Vill ej uppge"
-          ]
+          ],
+          "name": "qid9"
         },
         {
           "title": "Annat du vill ska utvecklas på platsen?",
-          "type": "comment"
+          "type": "comment",
+          "name": "qid10"
         },
         {
           "title": "Varför vill du att platsen ska utvecklas?",
-          "type": "comment"
+          "type": "comment",
+          "name": "qid11"
         }
       ]
     },
@@ -113,15 +125,18 @@
         {
           "title": "Sida4info",
           "type": "html",
-          "html": "<img src=\"https://www.orebro.se/images/18.7b583e0e18d824c9b2b1ac6/1707816775598/Symboler_%C3%96Pkarta-sur%20gubbe.png\" style=\"width: 60px; height: auto; float: left;\"><span style=\"color: red; font-style: italic;\">Mindre bra plats</span>\n\n\n"
+          "html": "<img src=\"https://www.orebro.se/images/18.7b583e0e18d824c9b2b1ac6/1707816775598/Symboler_%C3%96Pkarta-sur%20gubbe.png\" style=\"width: 60px; height: auto; float: left;\"><span style=\"color: red; font-style: italic;\">Mindre bra plats</span>\n\n\n",
+          "name": "qid12"
         },
         {
           "title": "Lägg till en mindre bra plats i kartan.",
-          "type": "geometrypoint"
+          "type": "geometrypoint",
+          "name": "qid13"
         },
         {
           "title": "Varför är det en mindre bra plats?",
-          "type": "comment"
+          "type": "comment",
+          "name": "qid14"
         }
       ]
     },
@@ -130,7 +145,8 @@
         {
           "title": "Personliga frågor",
           "type": "html",
-          "html": "<h4>Personliga frågor</h4>\n<p>Sverige har i dagsläget två juridiska kön, men det utesluter inte att individer identifierar sig på annat sätt. Frågan ställs på grund av lagkrav om könsuppdelad statistik.</p>"
+          "html": "<h4>Personliga frågor</h4>\n<p>Sverige har i dagsläget två juridiska kön, men det utesluter inte att individer identifierar sig på annat sätt. Frågan ställs på grund av lagkrav om könsuppdelad statistik.</p>",
+          "name": "qid15"
         },
         {
           "title": "Kön",
@@ -142,7 +158,8 @@
             "Inget av alternativen passar mig",
             "Vill ej uppge"
           ],
-          "isRequired": true
+          "isRequired": true,
+          "name": "qid16"
         },
         {
           "title": "Ålder",
@@ -160,7 +177,8 @@
             "85 +",
             "Vill ej uppge"
           ],
-          "isRequired": true
+          "isRequired": true,
+          "name": "qid17"
         },
         {
           "title": "Var bor du?",
@@ -171,14 +189,17 @@
             "Utanför Örebro kommun",
             "Vill ej uppge"
           ],
-          "isRequired": true
+          "isRequired": true,
+          "name": "qid18"
         },
         {
           "title": "Har du ytterligare synpunkter inom ramen för arbetet med översiktsplanen?",
           "type": "comment",
-          "isRequired": false
+          "isRequired": false,
+          "name": "qid19"
         }
       ]
     }
-  ]
+  ],
+  "completedHtml": "<h4>Tack för att du svarade på våra frågor!</h4>"
 }
