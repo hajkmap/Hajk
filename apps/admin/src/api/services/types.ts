@@ -1,5 +1,6 @@
 export interface Service {
   id: string;
+  name: string;
   locked: boolean;
   url: string;
   type: string;
@@ -16,13 +17,14 @@ export interface ServicesApiResponse {
 
 export interface ServiceCreateFormData {
   url: string;
-  locked: boolean;
+  locked?: boolean;
   type: string;
-  serverType: string;
+  serverType?: string;
   comment?: string;
 }
 
 export interface ServiceUpdateFormData {
+  name?: string;
   url?: string;
   locked?: boolean;
   type?: string;

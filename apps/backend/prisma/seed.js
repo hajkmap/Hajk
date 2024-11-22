@@ -6,6 +6,37 @@ import bcrypt from "bcrypt";
 
 const prisma = new PrismaClient();
 
+const generateNames = () => {
+  const adjectives = [
+    "Buggy",
+    "Snappy",
+    "Binary",
+    "Async",
+    "Dynamic",
+    "Hacky",
+    "Recursive",
+    "Faulty",
+    "Refactored",
+    "Lazy",
+  ];
+  const nouns = [
+    "Compiler",
+    "Debugger",
+    "Function",
+    "Closure",
+    "Variable",
+    "Exception",
+    "Promise",
+    "Algorithm",
+    "Object",
+    "Framework",
+  ];
+
+  return `${adjectives[Math.floor(Math.random() * adjectives.length)]} ${
+    nouns[Math.floor(Math.random() * nouns.length)]
+  }`;
+};
+
 async function getAvailableMaps() {
   try {
     const dir = path.join(process.cwd(), "App_Data");
@@ -159,6 +190,7 @@ async function readAndPopulateLayers() {
             serverType:
               layer.serverType === "qgis" ? "QGIS_SERVER" : "GEOSERVER",
             url: layer.url,
+            name: generateNames(),
           };
         }),
       ];

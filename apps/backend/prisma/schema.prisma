@@ -161,10 +161,11 @@ model Group {
 
 model Service {
   id         String      @id @default(cuid())
+  name       String
   locked     Boolean     @default(false)
   url        String
   type       ServiceType
-  serverType ServerType
+  serverType ServerType?
   comment    String?
   layers     Layer[]
 

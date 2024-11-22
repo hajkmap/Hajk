@@ -35,7 +35,7 @@ export default function ServiceSettings() {
   const { palette } = useTheme();
   const navigate = useNavigate();
   const { t } = useTranslation();
-  const { id: serviceId } = useParams<{ id: string }>();
+  const { serviceId } = useParams<{ serviceId: string }>();
   const { data: service, isError, isLoading } = useServiceById(serviceId ?? "");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [dialogUrl, setDialogUrl] = useState(service?.url ?? "");
@@ -77,6 +77,7 @@ export default function ServiceSettings() {
       const payload = {
         url: serviceData.url,
         type: serviceData.type,
+        serverType: serviceData.serverType,
       };
       console.log(" Sending payload", payload);
       await updateService({
@@ -130,9 +131,8 @@ export default function ServiceSettings() {
     type: INPUT_TYPE.TEXTFIELD,
     gridColumns: 10,
     name: "name",
-    helpText: "test",
     title: `${t("common.name")}`,
-    defaultValue: "",
+    defaultValue: service?.name,
     registerOptions: {
       required: `${t("common.required")}`,
     },
@@ -142,7 +142,7 @@ export default function ServiceSettings() {
     type: INPUT_TYPE.TEXTFIELD,
     name: "type",
     title: `${t("common.serviceType")}`,
-    defaultValue: `${service?.type}`,
+    defaultValue: service?.type,
     disabled: true,
     gridColumns: 8,
   });
@@ -158,7 +158,7 @@ export default function ServiceSettings() {
     gridColumns: 8,
     name: "serverType",
     title: `${t("common.serverType")}`,
-    defaultValue: "GEOSERVER",
+    defaultValue: service?.serverType,
     registerOptions: { required: "This field is required" },
 
     optionList: [
@@ -172,7 +172,7 @@ export default function ServiceSettings() {
     name: "url",
     disabled: true,
     title: "Url",
-    defaultValue: `${service?.url}`,
+    defaultValue: service?.url,
     slotProps: {
       inputLabel: {
         style: {
@@ -313,53 +313,51 @@ export default function ServiceSettings() {
 
   return (
     <>
-      <Box
-        sx={{
-          float: "right",
-          display: "flex",
-          flexDirection: "column",
-          gap: 2,
-          p: 2,
-          mt: 10,
-          mr: 2,
-          border: "1px solid",
-          borderColor: palette.grey[300],
-          borderRadius: 3,
-          maxWidth: "260px",
-          textAlign: "center",
-          alignItems: "center",
-        }}
-      >
-        <Button
-          onClick={handleExternalSubmit}
-          variant="contained"
-          disabled={updateStatus === "pending" || deleteStatus === "pending"}
-        >
-          {updateStatus === "pending" ? (
-            <CircularProgress color="primary" size={30} />
-          ) : (
-            t("services.dialog.saveBtn")
-          )}
-        </Button>
-
-        <Button
-          onClick={() => {
-            void handleDeleteService();
-            navigate("/services");
-          }}
-          disabled={deleteStatus === "pending" || updateStatus === "pending"}
-          variant="text"
-        >
-          {t("services.dialog.deleteBtn")}
-        </Button>
-
-        <Typography variant="body1">
-          Senast sparad av
-          {/* {user} */} Albin den
-          {/* {service.updatedAt} */} 2023-04-11 13:37
-        </Typography>
-      </Box>
       <Page title={t("common.settings")}>
+        <Box
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            textAlign: "center",
+            float: "right",
+            gap: 2,
+            p: 2,
+            ml: 3,
+            border: "1px solid",
+            borderColor: palette.grey[300],
+            borderRadius: 3,
+            maxWidth: "260px",
+          }}
+        >
+          <Button
+            onClick={handleExternalSubmit}
+            variant="contained"
+            disabled={updateStatus === "pending" || deleteStatus === "pending"}
+          >
+            {updateStatus === "pending" ? (
+              <CircularProgress color="primary" size={30} />
+            ) : (
+              t("services.dialog.saveBtn")
+            )}
+          </Button>
+
+          <Button
+            onClick={() => {
+              void handleDeleteService();
+              navigate("/services");
+            }}
+            disabled={deleteStatus === "pending" || updateStatus === "pending"}
+            variant="text"
+          >
+            {t("services.dialog.deleteBtn")}
+          </Button>
+
+          <Typography variant="body1">
+            Senast sparad av
+            {/* {user} */} Albin den
+            {/* {service.updatedAt} */} 2023-04-11 13:37
+          </Typography>
+        </Box>
         <form ref={formRef} onSubmit={onSubmit}>
           <Box>
             <FormRenderer

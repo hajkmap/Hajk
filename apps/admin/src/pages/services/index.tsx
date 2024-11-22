@@ -78,11 +78,8 @@ export default function ServicesPage() {
   const handleServiceSubmit = async (serviceData: ServiceCreateFormData) => {
     try {
       const payload = {
-        locked: true,
         type: serviceData.type,
         url: serviceData.url,
-        serverType: "QGIS_SERVER",
-        comment: "Test comment",
       };
 
       await createService(payload);

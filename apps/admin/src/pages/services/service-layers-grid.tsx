@@ -83,9 +83,9 @@ function ServicesGrid({ baseUrl: url, type }: UseServiceCapabilitiesProps) {
           <Scrollbar sx={{ maxHeight: "400px" }}>
             <Box sx={{ mb: 2 }}>
               <DataGrid
+                sx={{ width: "100%" }}
                 rows={filteredLayers}
                 columns={columns}
-                sx={{ maxWidth: "100%" }}
                 initialState={{
                   pagination: {
                     paginationModel: {
