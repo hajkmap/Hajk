@@ -15,6 +15,82 @@ const SPECIAL_BACKGROUND_COLORS = {
   [BLACK_BACKROUND_LAYER_ID]: "#000",
 };
 
+/**
+ * @summary Returns a <div> that contains a {React.Component} consisting of one Radio button.
+ *
+ * @param {Object} config Base layer to be rendered
+ * @param {Number} index Unique key
+ * @returns {React.Component}
+ * @memberof BackgroundSwitcher
+ */
+const BaseLayerContainer = ({
+  config,
+  index,
+  selectedLayerId,
+  mapLayer,
+  osmLayer,
+  app,
+}) => {
+  // const checked = this.state.selectedLayerId === config.name;
+  const checked = selectedLayerId === config.name;
+
+  // mapLayer will be sent to the LayerItem component. It will contain
+  // the Hajk layer with all properties.
+  // let mapLayer = this.props.layerMap[config.name];
+
+  // There's a special case for the OpenStreetMap layer. It does not exist
+  // in Hajk's layers repository, but has been created here, as a property
+  // of 'this'. Let's set mapLayer accordingly.
+  if (config.name === OSM_BACKGROUND_LAYER_ID) {
+    mapLayer = osmLayer;
+    mapLayer.set("foo", "bar");
+    // mapLayer.set("layerInfo", { layerType: "base" });
+  }
+
+  // If we still don't have any mapLayer it means it's neither existing in
+  // Hajks layers repository, nor the OSM layer. (This will be the case for our
+  // black and white background colors.) In this case, let's prepare a fake
+  // 'mapLayer' that contains the necessary properties, so we can use the same
+  // logic further on.
+  if (!mapLayer) {
+    // Add some values so the code does not crash in LayerItem's constructor
+    mapLayer = {
+      isFakeMapLayer: true,
+      properties: {
+        name: config.name,
+        visible: checked,
+        caption: config.caption,
+        layerInfo: {
+          caption: config.caption,
+          name: config.name,
+          layerType: "base",
+        },
+        opacity: 1, // Only full opacity available for black/white backgrounds
+      },
+      get(key) {
+        return this.properties[key];
+      },
+      set(key, value) {
+        this.properties[key] = value;
+      },
+      getProperties() {
+        return Object.keys(this.properties);
+      },
+    };
+  }
+
+  // Finally, let's render the component
+  return (
+    <BackgroundLayer
+      key={index}
+      layer={mapLayer}
+      app={app}
+      draggable={false}
+      toggleable={true}
+    ></BackgroundLayer>
+  );
+};
+
 class BackgroundSwitcher extends React.PureComponent {
   state = {
     selectedLayerId: null,
@@ -135,150 +211,77 @@ class BackgroundSwitcher extends React.PureComponent {
     });
   };
 
-  /**
-   * @summary Returns a <div> that contains a {React.Component} consisting of one Radio button.
-   *
-   * @param {Object} config Base layer to be rendered
-   * @param {Number} index Unique key
-   * @returns {React.Component}
-   * @memberof BackgroundSwitcher
-   */
-  renderRadioButton(config, index) {
-    const checked = this.state.selectedLayerId === config.name;
-
-    // mapLayer will be sent to the LayerItem component. It will contain
-    // the Hajk layer with all properties.
-    let mapLayer = this.props.layerMap[config.name];
-
-    // There's a special case for the OpenStreetMap layer. It does not exist
-    // in Hajk's layers repository, but has been created here, as a property
-    // of 'this'. Let's set mapLayer accordingly.
-    if (config.name === OSM_BACKGROUND_LAYER_ID) {
-      mapLayer = this.osmLayer;
-      mapLayer.set("foo", "bar");
-      // mapLayer.set("layerInfo", { layerType: "base" });
-    }
-
-    // If we still don't have any mapLayer it means it's neither existing in
-    // Hajks layers repository, nor the OSM layer. (This will be the case for our
-    // black and white background colors.) In this case, let's prepare a fake
-    // 'mapLayer' that contains the necessary properties, so we can use the same
-    // logic further on.
-    if (!mapLayer) {
-      // Add some values so the code does not crash in LayerItem's constructor
-      mapLayer = {
-        isFakeMapLayer: true,
-        properties: {
-          name: config.name,
-          visible: checked,
-          caption: config.caption,
-          layerInfo: {
-            caption: config.caption,
-            name: config.name,
-            layerType: "base",
-          },
-          opacity: 1, // Only full opacity available for black/white backgrounds
-        },
-        get(key) {
-          return this.properties[key];
-        },
-        set(key, value) {
-          this.properties[key] = value;
-        },
-        getProperties() {
-          return Object.keys(this.properties);
-        },
-      };
-    }
-
-    // Finally, let's render the component
-    return (
-      <BackgroundLayer
-        key={index}
-        layer={mapLayer}
-        app={this.props.app}
-        draggable={false}
-        toggleable={true}
-      ></BackgroundLayer>
-    );
-  }
-
-  /**
-   * Prepares an array of radio buttons with the configured base layers.
-   *
-   * @returns {React.Component[]} radioButtons Array of ready to use DOM components of Radio buttons
-   * @memberof BackgroundSwitcher
-   */
-  renderBaseLayerComponents() {
+  render() {
     const { backgroundSwitcherWhite, backgroundSwitcherBlack, enableOSM } =
       this.props;
-    let radioButtons = [],
-      defaults = [];
 
-    /**
-     * If admin wants to display white/black options for background, let's
-     * call renderRadioButton() for those two special cases. The resulting
-     * Component will be pushed into an array called @param defaults.
-     */
-    if (backgroundSwitcherWhite) {
-      defaults.push(
-        this.renderRadioButton(
-          {
-            name: WHITE_BACKROUND_LAYER_ID,
-            caption: "Vit",
-          },
-          Number(WHITE_BACKROUND_LAYER_ID)
-        )
-      );
-    }
-    if (backgroundSwitcherBlack) {
-      defaults.push(
-        this.renderRadioButton(
-          {
-            name: BLACK_BACKROUND_LAYER_ID,
-            caption: "Svart",
-          },
-          Number(BLACK_BACKROUND_LAYER_ID)
-        )
-      );
-    }
-
-    enableOSM &&
-      defaults.push(
-        this.renderRadioButton(
-          { name: OSM_BACKGROUND_LAYER_ID, caption: "OpenStreetMap" },
-          Number(OSM_BACKGROUND_LAYER_ID)
-        )
-      );
-
-    /**
-     * Let's construct the final array of radio buttons. It will consists
-     * of the defaults from above, plus the result of calling renderRadioButton()
-     * for each base layer.
-     */
-    radioButtons = [
-      ...defaults,
-      ...this.props.layers
-        .filter((layer) => {
-          //Remove layers not having a valid id
-          const validLayerId = isValidLayerId(layer.name);
-          if (!validLayerId) {
-            console.warn(
-              `Backgroundlayer with id ${layer.name} has a non-valid id`
-            );
-          }
-          return validLayerId;
-        })
-        .map((layerConfig, i) => this.renderRadioButton(layerConfig, i)),
+    const radioButtons = [
+      ...this.props.layers.filter((layer) => {
+        //Remove layers not having a valid id
+        const validLayerId = isValidLayerId(layer.name);
+        if (!validLayerId) {
+          console.warn(
+            `Backgroundlayer with id ${layer.name} has a non-valid id`
+          );
+        }
+        return validLayerId;
+      }),
     ];
 
-    return radioButtons;
-  }
-
-  render() {
     return (
       <Box sx={{ display: this.props.display ? "block" : "none" }}>
-        {this.renderBaseLayerComponents()}
+        {backgroundSwitcherWhite && (
+          <BaseLayerContainer
+            config={{
+              name: WHITE_BACKROUND_LAYER_ID,
+              caption: "Vit",
+            }}
+            index={Number(WHITE_BACKROUND_LAYER_ID)}
+            key={Number(WHITE_BACKROUND_LAYER_ID)}
+            selectedLayerId={this.state.selectedLayerId}
+            mapLayer={undefined}
+            app={this.props.app}
+          />
+        )}
+
+        {backgroundSwitcherBlack && (
+          <BaseLayerContainer
+            config={{
+              name: BLACK_BACKROUND_LAYER_ID,
+              caption: "Svart",
+            }}
+            index={Number(BLACK_BACKROUND_LAYER_ID)}
+            key={Number(BLACK_BACKROUND_LAYER_ID)}
+            selectedLayerId={this.state.selectedLayerId}
+            mapLayer={undefined}
+            app={this.props.app}
+          />
+        )}
+
+        {enableOSM && (
+          <BaseLayerContainer
+            config={{
+              name: OSM_BACKGROUND_LAYER_ID,
+              caption: "OpenStreetMap",
+            }}
+            index={Number(OSM_BACKGROUND_LAYER_ID)}
+            key={Number(OSM_BACKGROUND_LAYER_ID)}
+            selectedLayerId={this.state.selectedLayerId}
+            mapLayer={undefined}
+            app={this.props.app}
+            osmLayer={this.osmLayer}
+          />
+        )}
+        {radioButtons.map((layerConfig, i) => (
+          <BaseLayerContainer
+            config={layerConfig}
+            index={i}
+            key={layerConfig.name}
+            selectedLayerId={this.state.selectedLayerId}
+            mapLayer={this.props.layerMap[layerConfig.name]}
+            app={this.props.app}
+          />
+        ))}
       </Box>
     );
   }
