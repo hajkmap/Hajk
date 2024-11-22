@@ -92,28 +92,25 @@ const BreadCrumbsContainer = ({ map, app }) => {
 // }
 //
 // Prepare tree data for filtering
-const addLayerNames = (data, layerMap) => {
+const addLayerNames = (data, olLayerMap) => {
   const node = data.map((item) => {
     const layers = item.layers?.map((layer) => {
-      const mapLayer = layerMap[layer.id];
+      const mapLayer = olLayerMap[layer.id];
       if (!mapLayer) {
         console.warn(`Maplayer with id ${layer.id} not found`);
         return undefined;
       }
-      // Check if layer is a group
-      let subLayers;
-      if (mapLayer.get("layerType") === "group") {
-        const mapSubLayers = mapLayer.get("subLayers");
-        subLayers = mapSubLayers.map((subLayer) => {
-          const subLayerMapLayer = mapLayer.layersInfo[subLayer].caption;
+
+      const subLayers =
+        mapLayer.get("layerType") === "group" &&
+        mapLayer.get("subLayers").map((subLayer) => {
           return {
             id: subLayer,
-            name: subLayerMapLayer,
+            name: mapLayer.layersInfo[subLayer].caption,
             isFiltered: true,
             changeIndicator: new Date(),
           };
         });
-      }
 
       return {
         drawOrder: layer.drawOrder,
@@ -141,29 +138,64 @@ const addLayerNames = (data, layerMap) => {
       isFiltered: true,
       isExpanded: false,
       changeIndicator: new Date(),
-      groups: item.groups ? addLayerNames(item.groups, layerMap) : undefined,
+      groups: item.groups ? addLayerNames(item.groups, olLayerMap) : undefined,
     };
   });
   return node;
 };
 
-// this.layerTree = [
-//   { id: "1", children: null },
-//   { id: "2", children: [{ id: "3", children: null }] },
-// ];
-const buildLayerTree = (groups, layerMap) =>
+const getLayerNodes = (groups, olLayerMap) =>
+  groups?.flatMap((node) => {
+    if (!node) {
+      return undefined;
+    }
+    const layers = getLayerNodes(node.layers, olLayerMap);
+    const subgroups = getLayerNodes(node.groups, olLayerMap);
+
+    const children = [...(layers ?? []), ...(subgroups ?? [])];
+
+    return [
+      {
+        id: node.id,
+        name: olLayerMap[node.id]?.get("caption") ?? node.name,
+        isFiltered: true,
+        isExpanded: false,
+        expanded: node.expanded,
+        toggled: node.toggled,
+        drawOrder: node.drawOrder,
+        infobox: node.infobox,
+        layerType: node.layerType,
+        visibleAtStart: node.visibleAtStart,
+        visibleForGroups: node.visibleForGroups,
+        changeIndicator: new Date(),
+      },
+      ...(children?.length === 0 ? [] : children),
+    ];
+  });
+
+const buildLayerMap = (groups, olLayerMap) => {
+  const nodes = getLayerNodes(groups, olLayerMap);
+
+  // console.log(nodes);
+  return nodes?.reduce((a, b) => {
+    a[b.id] = b;
+    return a;
+  }, {});
+};
+
+const buildLayerTree = (groups, olLayerMap) =>
   groups?.map((group) => {
     if (!group) {
       return undefined;
     }
-    const layers = buildLayerTree(group.layers, layerMap);
-    const subgroups = buildLayerTree(group.groups, layerMap);
+    const layers = buildLayerTree(group.layers, olLayerMap);
+    const subgroups = buildLayerTree(group.groups, olLayerMap);
 
     const children = [...(layers ?? []), ...(subgroups ?? [])];
 
     return {
       id: group.id,
-      // name: layerMap[group.id]?.get("caption") ?? group.name,
+      // name: olLayerMap[group.id]?.get("caption") ?? group.name,
       children: children?.length === 0 ? undefined : children,
     };
   });
@@ -180,14 +212,14 @@ class LayersSwitcherView extends React.PureComponent {
   constructor(props) {
     super(props);
     this.options = props.options;
-    this.layerMap = props.map
+    this.olLayerMap = props.map
       .getLayers()
       .getArray()
       .reduce((a, b) => {
         a[b.get("name")] = b;
         return a;
       }, {});
-    this.layerTree = addLayerNames(this.options.groups, this.layerMap);
+    this.layerTree = addLayerNames(this.options.groups, this.olLayerMap);
     this.baseLayers = props.map
       .getLayers()
       .getArray()
@@ -211,8 +243,9 @@ class LayersSwitcherView extends React.PureComponent {
     this.localObserver = this.props.localObserver;
     this.globalObserver = this.props.globalObserver;
 
-    this.layerTree = buildLayerTree(this.options.groups, this.layerMap);
-    console.log(this.layerTree);
+    this.layerTree = buildLayerTree(this.options.groups, this.olLayerMap);
+    this.layerMap = buildLayerMap(this.options.groups, this.olLayerMap);
+    console.log(this.layerMap);
 
     props.app.globalObserver.subscribe("informativeLoaded", (chapters) => {
       if (Array.isArray(chapters)) {
@@ -585,7 +618,7 @@ class LayersSwitcherView extends React.PureComponent {
                 key={i}
                 group={group}
                 localObserver={this.localObserver}
-                layerMap={this.layerMap}
+                layerMap={this.olLayerMap}
                 app={this.props.app}
                 options={this.props.options}
               />
@@ -615,7 +648,7 @@ class LayersSwitcherView extends React.PureComponent {
               this.state.displayContentOverlay === null
             }
             layers={this.baseLayers}
-            layerMap={this.layerMap}
+            layerMap={this.olLayerMap}
             backgroundSwitcherBlack={this.options.backgroundSwitcherBlack}
             backgroundSwitcherWhite={this.options.backgroundSwitcherWhite}
             enableOSM={this.options.enableOSM}
