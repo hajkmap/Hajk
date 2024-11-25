@@ -52,17 +52,19 @@ const BreadCrumbsContainer = ({ map, app }) => {
 // - DONE Test the "Theme/layerPackage" functionality
 // - DONE Fix the bug sometimes click layer in the quick access don't update
 //
-// - Move `addLayerNames` to pure fn
+// - DONE Move `addLayerNames` to pure fn
 // - Update state managemetn and keeep in sync with OpenLayers
 //
 // - Refactor the observers to use a provider instead of prop-drilling
 // - The layer pagage dialogs should use ConfirmationDialog component
 // - Remove `show` prop from quickAccess layers
 //
-// - Clean upp render* methods in BackgroundSwitcher. Should make it faster as
-//   well.
+// - DONE Clean upp render* methods in BackgroundSwitcher. Should make it faster as
+//   well. - Did not make it faster, but there is still more to do. More
+//   indirection to remove
 //
 // - Refactor LayerItem into 3 separate components for each tab
+//     At least 3. Clean it up and remove indirection
 //
 //
 // - Maybe reconsider the "window-management"
@@ -144,6 +146,31 @@ const addLayerNames = (data, olLayerMap) => {
   return node;
 };
 
+const getOlLayerInfo = (olLayer) => {
+  if (!olLayer) {
+    return null;
+  }
+  return {
+    id: olLayer.get("name"),
+    name: olLayer.get("caption"),
+    visible: olLayer.get("visible"),
+    opacity: olLayer.get("opacity"),
+    layerType: olLayer.get("layerType"),
+    quickAccess: olLayer.get("quickAccess"),
+    subLayers: olLayer.get("subLayers"),
+    layerInfo: olLayer.get("layerInfo"),
+    url: olLayer.get("url"),
+    zIndex: olLayer.get("zIndex"),
+    maxZoom: olLayer.get("maxZoom"),
+    minZoom: olLayer.get("minZoom"),
+    minMaxZoomAlertOnToggleOnly: olLayer.get("minMaxZoomAlertOnToggleOnly"),
+
+    // "filterAttribute"
+    // "filterComparer"
+    // "filterValue"
+  };
+};
+
 const getLayerNodes = (groups, olLayerMap) =>
   groups?.flatMap((node) => {
     if (!node) {
@@ -165,6 +192,8 @@ const getLayerNodes = (groups, olLayerMap) =>
         drawOrder: node.drawOrder,
         infobox: node.infobox,
         layerType: node.layerType,
+        visible: olLayerMap[node.id]?.get("visible"),
+        quickAccess: olLayerMap[node.id]?.get("quickAccess"),
         visibleAtStart: node.visibleAtStart,
         visibleForGroups: node.visibleForGroups,
         changeIndicator: new Date(),
@@ -243,9 +272,18 @@ class LayersSwitcherView extends React.PureComponent {
     this.localObserver = this.props.localObserver;
     this.globalObserver = this.props.globalObserver;
 
-    this.layerTree = buildLayerTree(this.options.groups, this.olLayerMap);
+    this.layerTreeData = buildLayerTree(this.options.groups, this.olLayerMap);
     this.layerMap = buildLayerMap(this.options.groups, this.olLayerMap);
-    console.log(this.layerMap);
+
+    props.map.getAllLayers().forEach((l) => {
+      l.on("propertychange", (e) =>
+        console.log(
+          "layer:change",
+          l.get("caption"),
+          e,
+          getOlLayerInfo(e.target))
+      );
+    });
 
     props.app.globalObserver.subscribe("informativeLoaded", (chapters) => {
       if (Array.isArray(chapters)) {
@@ -473,6 +511,7 @@ class LayersSwitcherView extends React.PureComponent {
    * LayerSwitcher consists of two Tabs: one shows
    * "regular" layers (as checkboxes, multi select), and the
    * other shows background layers (as radio buttons, one-at-at-time).
+   * And the DrawOrder tab
    *
    * This method controls which of the two Tabs is visible and hides LayerPackage view.
    *

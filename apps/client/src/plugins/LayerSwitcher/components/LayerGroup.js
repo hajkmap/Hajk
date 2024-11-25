@@ -46,7 +46,6 @@ class LayerGroup extends React.PureComponent {
     child: propTypes.bool.isRequired,
     expanded: propTypes.bool.isRequired,
     group: propTypes.object.isRequired,
-    handleChange: propTypes.func,
     localObserver: propTypes.object.isRequired,
     layerMap: propTypes.object.isRequired,
   };
@@ -118,33 +117,6 @@ class LayerGroup extends React.PureComponent {
       expanded: isExpanded ? panel : false,
       isExpanded: isExpanded,
     });
-  };
-
-  renderLayerGroups() {
-    let { expanded } = this.state;
-    if (this.state.groups.length === 1 && this.state.groups[0].expanded) {
-      expanded = this.state.groups[0].id;
-    }
-    return this.state.groups.map((group, i) => {
-      return (
-        <LayerGroup
-          filterChangeIndicator={group.changeIndicator}
-          expanded={expanded === group.id}
-          key={i}
-          group={group}
-          localObserver={this.props.localObserver}
-          layerMap={this.props.layerMap}
-          handleChange={this.handleChange}
-          app={this.props.app}
-          child={true}
-          options={this.props.options}
-        />
-      );
-    });
-  }
-
-  toggleExpanded = () => {
-    this.setState({ expanded: !this.state.expanded });
   };
 
   isToggled() {
@@ -435,40 +407,6 @@ class LayerGroup extends React.PureComponent {
     return;
   }
 
-  renderChildren() {
-    // const { expanded } = this.state;
-    return (
-      <div>
-        {this.props.group.layers.map((layer, i) => {
-          const mapLayer = this.props.layerMap[layer.id];
-          // If mapLayer doesn't exist, the layer shouldn't be displayed
-          if (!mapLayer) {
-            return null;
-          }
-
-          // Check if it's a group or a regular layer
-          const isGroup = mapLayer.get("layerType") === "group";
-          const Component = isGroup ? GroupLayer : LayerItem;
-
-          // Render the component with the appropriate attributes
-          return (
-            <Component
-              display={!layer.isFiltered ? "none" : "block"}
-              key={mapLayer.get("name")}
-              layer={mapLayer}
-              draggable={false}
-              toggleable={true}
-              app={this.props.app}
-              localObserver={this.props.localObserver}
-              groupLayer={layer}
-            />
-          );
-        })}
-        {this.renderLayerGroups()}
-      </div>
-    );
-  }
-
   static getDerivedStateFromProps(nextProps, prevState) {
     // Check if the isExpanded property has changed
     if (nextProps.group.isExpanded !== prevState.isExpanded) {
@@ -482,6 +420,10 @@ class LayerGroup extends React.PureComponent {
 
   render() {
     const { expanded } = this.state;
+    let groupsExpanded = expanded;
+    if (this.state.groups.length === 1 && this.state.groups[0].expanded) {
+      groupsExpanded = this.state.groups[0].id;
+    }
     return (
       <LayerGroupAccordion
         display={!this.props.group.isFiltered ? "none" : "block"}
@@ -500,8 +442,55 @@ class LayerGroup extends React.PureComponent {
             primary={this.state.name}
           />
         }
-        children={this.renderChildren()}
-      ></LayerGroupAccordion>
+      >
+        <div>
+          {this.props.group.layers.map((layer) => {
+            const mapLayer = this.props.layerMap[layer.id];
+            // If mapLayer doesn't exist, the layer shouldn't be displayed
+            if (!mapLayer) {
+              return null;
+            }
+
+            return mapLayer.get("layerType") === "group" ? (
+              <GroupLayer
+                display={!layer.isFiltered ? "none" : "block"}
+                key={mapLayer.get("name")}
+                layer={mapLayer}
+                draggable={false}
+                toggleable={true}
+                app={this.props.app}
+                localObserver={this.props.localObserver}
+                groupLayer={layer}
+              />
+            ) : (
+              <LayerItem
+                display={!layer.isFiltered ? "none" : "block"}
+                key={mapLayer.get("name")}
+                layer={mapLayer}
+                draggable={false}
+                toggleable={true}
+                app={this.props.app}
+                localObserver={this.props.localObserver}
+                groupLayer={layer}
+              />
+            );
+          })}
+          {this.state.groups.map((group, i) => (
+            <LayerGroup
+              filterChangeIndicator={group.changeIndicator}
+              expanded={groupsExpanded === group.id}
+              key={i}
+              group={group}
+              localObserver={this.props.localObserver}
+              layerMap={this.props.layerMap}
+              handleChange={this.handleChange}
+              app={this.props.app}
+              child={true}
+              options={this.props.options}
+            />
+          ))}
+        </div>
+      </LayerGroupAccordion>
     );
   }
 }

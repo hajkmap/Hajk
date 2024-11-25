@@ -11,7 +11,12 @@ export default function LegendImage({ layerItemDetails, open, subLayerIndex }) {
       : "";
 
   return src ? (
-    <Collapse sx={{ pt: open ? 1 : 0, ml: 4 }} in={open} timeout={50}>
+    <Collapse
+      sx={{ pt: open ? 1 : 0, ml: 4 }}
+      in={open}
+      timeout={50}
+      unmountOnExit
+    >
       <div>
         <img
           loading="lazy"
