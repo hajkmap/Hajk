@@ -362,7 +362,7 @@ const updateQuestion = (pageIndex, questionIndex, field, value) => {
   };
 
   const validateNewSurveyName = (value) => {
-    var valid = value === "" || /^[A-Za-z0-9]+$/.test(value);
+    var valid = value === "" || /^[A-Za-z0-9_]+$/.test(value);
     return valid;
 };
 
