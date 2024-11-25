@@ -45,6 +45,7 @@
     "user.createUserDescription": "Create a user who can log into Hajk. Remember to save the password in a secure place — you will never be able to view it here again.",
     "user.createUserFailed": "Failed to create user. Contact the system administrator.",
     "user.createUserSuccess": "User created successfully",
+    "user.deleteAccount": "Delete account for",
     "user.deleteConfirmation": "You are about to delete a user. This action cannot be undone. Are you sure you want to continue?",
     "user.deleteUserFailed": "Failed to delete user. Contact the system administrator.",
     "user.deleteUserSuccess": "User deleted successfully",
