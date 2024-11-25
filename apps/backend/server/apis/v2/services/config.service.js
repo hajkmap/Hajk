@@ -204,27 +204,27 @@ class ConfigServiceV2 {
     }
 
     // Grab layers from Citizendialogue
-    const editOptionsCitzendialogue = mapConfig.tools.find(
+    const editOptionsCitizendialogue = mapConfig.tools.find(
       (t) => t.type === "citizendialogue"
     )?.options;
     let editLayerIdsCitizendialogue = [];
 
-    if (editOptionsCitzendialogue !== undefined) {
+    if (editOptionsCitizendialogue !== undefined) {
       if (
-        editOptionsCitzendialogue.activeServices &&
-        editOptionsCitzendialogue.activeServices.length !== 0
+        editOptionsCitizendialogue.activeServices &&
+        editOptionsCitizendialogue.activeServices.length !== 0
       ) {
         if (
-          typeof editOptionsCitzendialogue.activeServices[0]
+          typeof editOptionsCitizendialogue.activeServices[0]
             .visibleForGroups === "undefined"
         ) {
           // if visibleForGroups is undefined the activeServices is an array of id's
           editLayerIdsCitizendialogue =
-            editOptionsCitzendialogue?.activeServices.map((as) => as) || [];
+            editOptionsCitizendialogue?.activeServices.map((as) => as) || [];
         } else {
           // else the activeServices is an array of objects with "id" and "visibleForGroups"
           editLayerIdsCitizendialogue =
-            editOptionsCitzendialogue?.activeServices.map((as) => as.id) || [];
+            editOptionsCitizendialogue?.activeServices.map((as) => as.id) || [];
         }
       }
     }
