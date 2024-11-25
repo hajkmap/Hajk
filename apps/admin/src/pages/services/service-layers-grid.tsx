@@ -33,9 +33,9 @@ function ServicesGrid({ baseUrl: url, type }: UseServiceCapabilitiesProps) {
 
   const columns = [
     { field: "layer", headerName: t("common.layerName"), flex: 1 },
-    { field: "infoClick", headerName: t("common.infoclick"), flex: 1 },
+    { field: "infoClick", headerName: t("common.infoclick"), flex: 0.3 },
     { field: "publications", headerName: t("common.publications"), flex: 1 },
-    { field: "actions", headerName: t("common.actions"), flex: 1 },
+    { field: "actions", headerName: t("common.actions"), flex: 0.3 },
   ];
 
   const filteredLayers = useMemo(() => {
@@ -100,6 +100,7 @@ function ServicesGrid({ baseUrl: url, type }: UseServiceCapabilitiesProps) {
                   },
                 },
               }}
+              hideFooterPagination={layers && layers.length < 10}
               pageSizeOptions={[10, 25, 50, 100]}
               pagination
               loading={layersLoading}

@@ -1,15 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Grid from "@mui/material/Grid2";
-import {
-  List,
-  ListItem,
-  Paper,
-  Typography,
-  Button,
-  Box,
-  useTheme,
-} from "@mui/material";
+import { Button, Box, useTheme } from "@mui/material";
 import { useTranslation } from "react-i18next";
 import Page from "../../layouts/root/components/page";
 import DynamicFormContainer from "../../components/form-factory/dynamic-form-container";
@@ -19,9 +11,16 @@ import FormRenderer from "../../components/form-factory/form-renderer";
 import { DefaultUseForm } from "../../components/form-factory/default-use-form";
 import { createOnSubmitHandler } from "../../components/form-factory/form-utils";
 import { useServices, useCreateService } from "../../api/services";
-import { ServiceCreateFormData, serviceTypes } from "../../api/services/types";
+import {
+  Service,
+  ServiceCreateFormData,
+  serviceTypes,
+} from "../../api/services/types";
 import DialogWrapper from "../../components/flexible-dialog";
 import { toast } from "react-toastify";
+import { DataGrid } from "@mui/x-data-grid";
+import { GRID_SWEDISH_LOCALE_TEXT } from "../../i18n/translations/datagrid/sv";
+import useAppStateStore from "../../store/use-app-state-store";
 
 export default function ServicesPage() {
   const navigate = useNavigate();
@@ -30,6 +29,7 @@ export default function ServicesPage() {
   const { mutateAsync: createService } = useCreateService();
   const [open, setOpen] = useState<boolean>(false);
   const { palette } = useTheme();
+  const language = useAppStateStore((state) => state.language);
 
   const [service, setService] = useState<DynamicFormContainer<FieldValues>>(
     new DynamicFormContainer<FieldValues>()
@@ -169,24 +169,44 @@ export default function ServicesPage() {
             />
           </DialogWrapper>
           <Grid size={12}>
-            <Box component="p">
-              services.length = {services && ` (${services.length})`}
-            </Box>
-
-            <List>
-              {services?.map((service) => (
-                <ListItem
-                  key={service.id}
-                  onClick={() => navigate(`/services/${service.id}`)}
-                >
-                  <Paper sx={{ width: "100%", p: 2 }} elevation={4}>
-                    <Typography sx={{ cursor: "pointer" }}>
-                      {service.url}
-                    </Typography>
-                  </Paper>
-                </ListItem>
-              ))}
-            </List>
+            <DataGrid
+              onCellClick={(params) => {
+                const id: string = (params.row as Service).id;
+                if (id) {
+                  navigate(`/services/${id}`);
+                }
+              }}
+              sx={{ maxWidth: "100%", mt: 8 }}
+              rows={services ?? []}
+              columns={[
+                {
+                  field: "type",
+                  flex: 0.3,
+                  headerName: t("common.serviceType"),
+                },
+                { field: "name", flex: 1, headerName: t("common.name") },
+                { field: "url", flex: 1, headerName: "Url" },
+                {
+                  field: "version",
+                  flex: 0.3,
+                  headerName: "Version",
+                },
+              ]}
+              localeText={
+                language === "sv" ? GRID_SWEDISH_LOCALE_TEXT : undefined
+              }
+              initialState={{
+                pagination: {
+                  paginationModel: {
+                    pageSize: 10,
+                  },
+                },
+              }}
+              getRowId={(row) => row.id}
+              hideFooterPagination={services && services.length < 10}
+              pageSizeOptions={[10, 25, 50, 100]}
+              disableRowSelectionOnClick
+            />
           </Grid>
         </>
       )}

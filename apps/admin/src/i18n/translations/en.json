@@ -71,7 +71,7 @@
     "services.settings.dialog.title": "Edit url",
     "services.url.btnLabel": "Change url",
     "services.workspace": "Workspace",
-    "services.createServiceSuccess": "Service created!",
+    "services.createServiceSuccess": "Service {{name}} created!",
     "services.createServiceFailed": "Failed to create service.",
     "services.updateServiceSuccess": "Service {{name}} updated!",
     "services.updateServiceFailed": "Failed to update service {{name}}.",
