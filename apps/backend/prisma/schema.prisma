@@ -164,6 +164,7 @@ model Service {
   name       String
   locked     Boolean     @default(false)
   url        String
+  version    String?
   type       ServiceType
   serverType ServerType?
   comment    String?

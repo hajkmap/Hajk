@@ -9,11 +9,14 @@ import {
   UseServiceCapabilitiesProps,
 } from "../../api/services";
 import SearchIcon from "@mui/icons-material/Search";
+import { GRID_SWEDISH_LOCALE_TEXT } from "../../i18n/translations/datagrid/sv";
+import useAppStateStore from "../../store/use-app-state-store";
 
 function ServicesGrid({ baseUrl: url, type }: UseServiceCapabilitiesProps) {
   const { palette } = useTheme();
   const { t } = useTranslation();
   const [searchTerm, setSearchTerm] = useState("");
+  const language = useAppStateStore((state) => state.language);
 
   const {
     layers,
@@ -61,7 +64,12 @@ function ServicesGrid({ baseUrl: url, type }: UseServiceCapabilitiesProps) {
           {t("services.error.url")}
         </Typography>
       ) : (
-        <Box>
+        <Box
+          sx={{
+            display: "flex",
+            gap: 2,
+          }}
+        >
           <TextField
             sx={{
               mb: 4,
@@ -81,24 +89,25 @@ function ServicesGrid({ baseUrl: url, type }: UseServiceCapabilitiesProps) {
           />
 
           <Scrollbar sx={{ maxHeight: "400px" }}>
-            <Box sx={{ mb: 2 }}>
-              <DataGrid
-                sx={{ width: "100%" }}
-                rows={filteredLayers}
-                columns={columns}
-                initialState={{
-                  pagination: {
-                    paginationModel: {
-                      pageSize: 10,
-                    },
+            <DataGrid
+              sx={{ maxWidth: "100%", mb: 2, mt: 1 }}
+              rows={filteredLayers}
+              columns={columns}
+              initialState={{
+                pagination: {
+                  paginationModel: {
+                    pageSize: 10,
                   },
-                }}
-                pageSizeOptions={[10, 25, 50, 100]}
-                pagination
-                loading={layersLoading}
-                autoHeight={true}
-              />
-            </Box>
+                },
+              }}
+              pageSizeOptions={[10, 25, 50, 100]}
+              pagination
+              loading={layersLoading}
+              localeText={
+                language === "sv" ? GRID_SWEDISH_LOCALE_TEXT : undefined
+              }
+              disableRowSelectionOnClick
+            />
           </Scrollbar>
         </Box>
       )}

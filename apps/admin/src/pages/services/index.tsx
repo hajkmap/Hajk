@@ -1,7 +1,15 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Grid from "@mui/material/Grid2";
-import { List, ListItem, Paper, Typography, Button, Box } from "@mui/material";
+import {
+  List,
+  ListItem,
+  Paper,
+  Typography,
+  Button,
+  Box,
+  useTheme,
+} from "@mui/material";
 import { useTranslation } from "react-i18next";
 import Page from "../../layouts/root/components/page";
 import DynamicFormContainer from "../../components/form-factory/dynamic-form-container";
@@ -13,6 +21,7 @@ import { createOnSubmitHandler } from "../../components/form-factory/form-utils"
 import { useServices, useCreateService } from "../../api/services";
 import { ServiceCreateFormData, serviceTypes } from "../../api/services/types";
 import DialogWrapper from "../../components/flexible-dialog";
+import { toast } from "react-toastify";
 
 export default function ServicesPage() {
   const navigate = useNavigate();
@@ -20,6 +29,7 @@ export default function ServicesPage() {
   const { data: services, isLoading } = useServices();
   const { mutateAsync: createService } = useCreateService();
   const [open, setOpen] = useState<boolean>(false);
+  const { palette } = useTheme();
 
   const [service, setService] = useState<DynamicFormContainer<FieldValues>>(
     new DynamicFormContainer<FieldValues>()
@@ -34,11 +44,7 @@ export default function ServicesPage() {
     title: "Url",
     defaultValue: "",
     registerOptions: {
-      required: "This field is required.",
-      minLength: {
-        value: 5,
-        message: "Minimum length is 5 characters.",
-      },
+      required: `${t("common.required")}`,
     },
   });
 
@@ -52,6 +58,9 @@ export default function ServicesPage() {
       title: type,
       value: type,
     })),
+    registerOptions: {
+      required: `${t("common.required")}`,
+    },
   });
 
   useEffect(() => {
@@ -82,11 +91,24 @@ export default function ServicesPage() {
         url: serviceData.url,
       };
 
-      await createService(payload);
+      const response = await createService(payload);
+      toast.success(
+        t("services.createServiceSuccess", { name: response?.name }),
+        {
+          position: "bottom-left",
+          theme: palette.mode,
+          hideProgressBar: true,
+        }
+      );
       reset({ url: "" });
       handleClose();
     } catch (error) {
       console.error("Failed to submit service:", error);
+      toast.error(t("services.createServiceFailed"), {
+        position: "bottom-left",
+        theme: palette.mode,
+        hideProgressBar: true,
+      });
     }
   };
 

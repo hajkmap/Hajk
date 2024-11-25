@@ -29,6 +29,7 @@ import { ServiceUpdateFormData, serviceTypes } from "../../api/services";
 import DialogWrapper from "../../components/flexible-dialog";
 import ServicesGrid from "./service-layers-grid";
 import CircularProgress from "../../components/progress/circular-progress";
+import { toast } from "react-toastify";
 
 export default function ServiceSettings() {
   const formRef = useRef<HTMLFormElement | null>(null);
@@ -78,18 +79,29 @@ export default function ServiceSettings() {
         url: serviceData.url,
         type: serviceData.type,
         serverType: serviceData.serverType,
+        version: serviceData.version,
       };
-      console.log(" Sending payload", payload);
       await updateService({
         serviceId: service?.id ?? "",
         data: payload,
       });
-      console.log("Service updated successfully");
+      toast.success(
+        t("services.updateServiceSuccess", { name: service?.name }),
+        {
+          position: "bottom-left",
+          theme: palette.mode,
+          hideProgressBar: true,
+        }
+      );
       setIsDialogOpen(false);
-
       navigate("/services");
     } catch (error) {
       console.error("Failed to update service:", error);
+      toast.error(t("services.updateServiceFailed", { name: service?.name }), {
+        position: "bottom-left",
+        theme: palette.mode,
+        hideProgressBar: true,
+      });
     }
   };
 
@@ -97,8 +109,21 @@ export default function ServiceSettings() {
     if (!isLoading && service?.id) {
       try {
         await deleteService(service.id);
+        toast.success(
+          t("services.deleteServiceSuccess", { name: service.name }),
+          {
+            position: "bottom-left",
+            theme: palette.mode,
+            hideProgressBar: true,
+          }
+        );
       } catch (error) {
         console.error("Deletion failed:", error);
+        toast.error(t("services.deleteServiceFailed", { name: service.name }), {
+          position: "bottom-left",
+          theme: palette.mode,
+          hideProgressBar: true,
+        });
       }
     } else {
       console.error("Service data is still loading or unavailable.");
@@ -129,7 +154,7 @@ export default function ServiceSettings() {
 
   panelNestedContainer.addInput({
     type: INPUT_TYPE.TEXTFIELD,
-    gridColumns: 10,
+    gridColumns: 12,
     name: "name",
     title: `${t("common.name")}`,
     defaultValue: service?.name,
@@ -144,11 +169,14 @@ export default function ServiceSettings() {
     title: `${t("common.serviceType")}`,
     defaultValue: service?.type,
     disabled: true,
-    gridColumns: 8,
+    gridColumns: 10,
+    registerOptions: {
+      required: `${t("common.required")}`,
+    },
   });
   panelNestedContainer.addInput({
     type: INPUT_TYPE.TEXTAREA,
-    gridColumns: 8,
+    gridColumns: 10,
     name: "description",
     title: `${t("services.description")}`,
   });
@@ -159,8 +187,7 @@ export default function ServiceSettings() {
     name: "serverType",
     title: `${t("common.serverType")}`,
     defaultValue: service?.serverType,
-    registerOptions: { required: "This field is required" },
-
+    registerOptions: { required: `${t("common.required")}` },
     optionList: [
       { title: "Geoserver", value: "GEOSERVER" },
       { title: "QGIS Server", value: "QGIS_SERVER" },
@@ -224,11 +251,14 @@ export default function ServiceSettings() {
     gridColumns: 8,
     name: "version",
     title: "Version",
-    defaultValue: "1.1.1",
+    defaultValue: service?.version,
     optionList: [
       { title: "1.1.1", value: "1.1.1" },
       { title: "1.3.0", value: "1.3.0" },
     ],
+    registerOptions: {
+      required: `${t("common.required")}`,
+    },
   });
 
   accordionNestedContainer2.addInput({
@@ -342,7 +372,8 @@ export default function ServiceSettings() {
           </Button>
 
           <Button
-            onClick={() => {
+            onClick={(e) => {
+              e.preventDefault();
               void handleDeleteService();
               navigate("/services");
             }}

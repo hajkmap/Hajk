@@ -190,6 +190,7 @@ async function readAndPopulateLayers() {
             serverType:
               layer.serverType === "qgis" ? "QGIS_SERVER" : "GEOSERVER",
             url: layer.url,
+            version: layer.version,
             name: generateNames(),
           };
         }),
