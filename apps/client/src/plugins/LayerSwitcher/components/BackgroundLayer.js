@@ -1,13 +1,8 @@
 import React, { useEffect, useState } from "react";
 
-import LayerItem from "./LayerItem";
+import BackgroundLayerItem from "./BackgroundLayerItem";
 
-import PublicOutlinedIcon from "@mui/icons-material/PublicOutlined";
-import WallpaperIcon from "@mui/icons-material/Wallpaper";
-import RadioButtonChecked from "@mui/icons-material/RadioButtonChecked";
-import RadioButtonUnchecked from "@mui/icons-material/RadioButtonUnchecked";
-
-export default function BackgroundLayer({ layer, app, toggleable, draggable }) {
+export default function BackgroundLayer({ layer, app }) {
   // Keep visible backgroundlayer in state
   const [backgroundVisible, setBackgroundVisible] = useState(
     layer.get("visible")
@@ -51,31 +46,13 @@ export default function BackgroundLayer({ layer, app, toggleable, draggable }) {
     app.globalObserver.publish("layerswitcher.backgroundLayerChanged", name);
   };
 
-  // Render method for backgroundlayer icon
-  const getLayerToggleIcon = () => {
-    if (toggleable) {
-      return !backgroundVisible ? (
-        <RadioButtonUnchecked sx={{ ml: 2 }} />
-      ) : (
-        <RadioButtonChecked sx={{ ml: 2 }} />
-      );
-    }
-    return layer.isFakeMapLayer ? (
-      <WallpaperIcon sx={{ mr: "5px" }} />
-    ) : (
-      <PublicOutlinedIcon sx={{ mr: "5px" }} />
-    );
-  };
-
   return (
-    <LayerItem
+    <BackgroundLayerItem
       layer={layer}
       app={app}
-      draggable={draggable}
-      isBackgroundLayer={true}
-      toggleable={toggleable}
       clickCallback={handleLayerItemClick}
-      toggleIcon={getLayerToggleIcon()}
-    ></LayerItem>
+      selected={backgroundVisible}
+      globalObserver={app.globalObserver}
+    ></BackgroundLayerItem>
   );
 }

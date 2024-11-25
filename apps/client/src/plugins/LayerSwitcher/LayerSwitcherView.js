@@ -281,7 +281,8 @@ class LayersSwitcherView extends React.PureComponent {
           "layer:change",
           l.get("caption"),
           e,
-          getOlLayerInfo(e.target))
+          getOlLayerInfo(e.target)
+        )
       );
     });
 
