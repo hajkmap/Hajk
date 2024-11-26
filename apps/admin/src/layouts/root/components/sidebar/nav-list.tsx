@@ -5,7 +5,7 @@ import NavItem from "./nav-item";
 import CollapsibleNavItem from "./collapsible-nav-item";
 import SquareIconButton from "./square-icon-button";
 import SettingsIcon from "@mui/icons-material/Settings";
-import { useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router";
 import HajkTooltip from "../../../../components/hajk-tooltip";
 import { useTranslation } from "react-i18next";
 
@@ -77,7 +77,7 @@ const NavList = (props: Props) => {
               alignSelf: "flex-start",
             }}
             onClick={() => {
-              navigate("/settings");
+              void navigate("/settings");
               closeSidebarIfNeeded();
             }}
           >

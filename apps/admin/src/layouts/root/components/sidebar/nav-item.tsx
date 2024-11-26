@@ -1,7 +1,7 @@
 import { Button, ListItem, Typography, useTheme } from "@mui/material";
 import { useTranslation } from "react-i18next";
 import { ReactNode } from "react";
-import { NavLink, useLocation } from "react-router-dom";
+import { NavLink, useLocation } from "react-router";
 
 interface Props {
   to: string;

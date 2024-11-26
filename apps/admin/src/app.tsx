@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { createBrowserRouter, RouterProvider } from "react-router-dom";
+import { createBrowserRouter } from "react-router";
+import { RouterProvider } from "react-router/dom";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -84,13 +85,6 @@ const router = createBrowserRouter(
   ],
   {
     basename: import.meta.env.BASE_URL,
-    future: {
-      v7_relativeSplatPath: true,
-      v7_fetcherPersist: true,
-      v7_normalizeFormMethod: true,
-      v7_partialHydration: true,
-      v7_skipActionErrorRevalidation: true,
-    },
   }
 );
 
@@ -104,7 +98,7 @@ export default function App() {
   return !loading ? (
     <QueryClientProvider client={queryClient}>
       {import.meta.env.DEV && <ReactQueryDevtools />}
-      <RouterProvider router={router} future={{ v7_startTransition: true }} />
+      <RouterProvider router={router} />
       <ToastContainer />
     </QueryClientProvider>
   ) : (

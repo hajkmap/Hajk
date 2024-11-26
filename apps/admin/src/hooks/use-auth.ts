@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router";
 import axios from "axios";
 import useUserStore, { User } from "../store/use-user-store";
 import useAppStateStore from "../store/use-app-state-store";
@@ -30,7 +30,7 @@ const useAuth = () => {
         }
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
       } catch (error) {
-        navigate("/login");
+        void navigate("/login");
       } finally {
         userStore.setUserLoading(false);
       }
